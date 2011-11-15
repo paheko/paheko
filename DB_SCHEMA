@@ -1,0 +1,146 @@
+
+-- Configuration de Garradin
+CREATE TABLE config (
+    cle TEXT PRIMARY KEY,
+    valeur TEXT
+);
+
+-- On stocke ici les ID de catégorie de compta correspondant aux types spéciaux
+-- compta_categorie_cotisations => id_categorie
+-- compta_categorie_dons => id_categorie
+
+-- Catégories de membres
+CREATE TABLE membres_categories (
+    id INTEGER PRIMARY KEY,
+    nom TEXT,
+    description TEXT,
+    montant_cotisation REAL,
+    duree_cotisation INTEGER DEFAULT 12 -- En mois
+);
+
+-- Droits affectés à chaque catégorie de membres
+CREATE TABLE membres_categories_droits (
+    id_categorie INTEGER,
+    droit INTEGER
+);
+
+INSERT INTO membres_categories VALUES (1, 'Membre simple', '', 20);
+INSERT INTO membres_categories VALUES (2, 'Membre tarif réduit', 'Chômeur / étudiant / RSA / etc.', 10);
+INSERT INTO membres_categories VALUES (3, 'Membre du CA', '', -1);
+INSERT INTO membres_categories VALUES (4, 'Membre du bureau', '', 0);
+
+INSERT INTO membres_categories_droits VALUES (1, 'connexion');
+INSERT INTO membres_categories_droits VALUES (1, 'wiki_lecture');
+
+INSERT INTO membres_categories_droits VALUES (2, 'connexion');
+INSERT INTO membres_categories_droits VALUES (2, 'wiki_lecture');
+
+INSERT INTO membres_categories_droits VALUES (3, 'connexion');
+INSERT INTO membres_categories_droits VALUES (3, 'wiki_lecture');
+INSERT INTO membres_categories_droits VALUES (3, 'wiki_ecriture');
+
+INSERT INTO membres_categories_droits VALUES (4, 'connexion');
+INSERT INTO membres_categories_droits VALUES (4, 'wiki_lecture');
+INSERT INTO membres_categories_droits VALUES (4, 'wiki_ecriture');
+INSERT INTO membres_categories_droits VALUES (4, 'comptabilite');
+INSERT INTO membres_categories_droits VALUES (4, 'gestion_membres');
+INSERT INTO membres_categories_droits VALUES (4, 'gestion_membres');
+
+-- Membres de l'asso
+CREATE TABLE membres (
+    id INTEGER PRIMARY KEY,
+    id_categorie INTEGER,
+
+    -- Connexion
+    pseudo TEXT,
+    passe TEXT,
+
+    -- Données personnelles
+    nom TEXT,
+    email TEXT,
+
+    adresse TEXT,
+    code_postal INTEGER,
+    ville TEXT,
+    pays TEXT,
+    telephone TEXT,
+    date_anniversaire TEXT,
+
+    -- Pour le bordel
+    details TEXT,
+
+    date_inscription TEXT,
+    date_connexion TEXT,
+
+    -- Dernière cotisation enregistrée
+    date_cotisation TEXT
+);
+
+--
+-- COMPTA
+--
+
+CREATE TABLE compta_categories (
+    id INTEGER PRIMARY KEY,
+    nom TEXT,
+    description TEXT,
+    type_recus INTEGER, -- reçu fiscal, reçu de don, reçu de cotisation, facture
+    type_operations INTEGER -- 0 = dépense, 1 = recette
+);
+
+CREATE TABLE compta_comptes (
+    id INTEGER PRIMARY KEY,
+    libelle TEXT,
+    description TEXT,
+
+    banque TEXT,
+    iban TEXT,
+    bic TEXT,
+
+    solde_initial REAL,
+    solde REAL
+);
+
+CREATE TABLE compta_operations (
+    id INTEGER PRIMARY KEY,
+    libelle TEXT,
+    montant REAL,
+    description TEXT,
+
+    id_compte INTEGER,
+    id_categorie INTEGER,
+    id_auteur INTEGER
+);
+
+--
+-- WIKI
+--
+
+CREATE TABLE wiki_pages (
+    id INTEGER PRIMARY KEY,
+    titre TEXT,
+    revision INTEGER,
+    acces INTEGER -- ID catégorie membre
+);
+
+CREATE TABLE wiki_revisions (
+    id_page INTEGER,
+    revision INTEGER,
+
+    id_auteur INTEGER,
+    suivi INTEGER, -- 0/1
+
+    contenu TEXT,
+    modification TEXT, -- Description des modifications effectuées
+
+    chiffrement INTEGER, -- 0/1
+
+    PRIMARY KEY(id_page, numero)
+);
+
+CREATE TABLE wiki_fichiers (
+    id INTEGER PRIMARY KEY,
+    id_page INTEGER,
+    nom TEXT,
+    hash TEXT
+);
