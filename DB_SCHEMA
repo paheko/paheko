@@ -52,7 +52,6 @@ CREATE TABLE membres (
     id_categorie INTEGER,
 
     -- Connexion
-    pseudo TEXT,
     passe TEXT,
 
     -- Données personnelles
