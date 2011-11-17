@@ -1,27 +1,121 @@
 <?php
 
-class Garradin_Config extends Garradin_DB
+class Garradin_Config
 {
-    const TYPE_CATEGORIE_COMPTA = 'categorie_compta';
-    const TYPE_CATEGORIE_MEMBRE = 'categorie_membre';
-    const TYPE_TEXTE = 'texte';
-    const TYPE_NUMERIQUE = 'numerique';
-    const TYPE_BOOL = 'bool';
-    const TYPE_CHOIX = 'choix';
+    protected $fields_types = null;
+    protected $config = null;
+    protected $modified = false;
 
-    protected function _initChamps()
+    static protected $_instance = null;
+
+    static public function getInstance()
     {
-        $this->_ajoutChamp('asso_nom', self::TYPE_TEXTE, 'Mon asso');
-        $this->_ajoutChamp('asso_adresse', self::TYPE_TEXTE, "42 rue des soupirs,\n21000 Dijon");
-        $this->_ajoutChamp('asso_email', self::TYPE_TEXTE, "invalid@invalid.invalid");
-        $this->_ajoutChamp('asso_site', self::TYPE_TEXTE, "http://example.tld/");
+        return self::$_instance ?: self::$_instance = new Garradin_Config;
+    }
 
-        $this->_ajoutChamp('email_expediteur', self::TYPE_TEXTE, "invalid@invalid.invalid");
+    private function __clone()
+    {
+    }
 
-        //$this->_ajoutChamp('membres_champs_obligatoires', self::TYPE_CHOIX_MULTIPLE, 'nom,
+    protected function __construct()
+    {
+        $string = '';
+        $int = 0;
+        $float = 0.0;
+        $array = array();
+        $bool = false;
 
-        $this->_ajoutChamp('compta_categorie_cotisations', self::TYPE_CATEGORIE_COMPTA, 1);
-        $this->_ajoutChamp('compta_categorie_dons', self::TYPE_CATEGORIE_COMPTA, 2);
+        $this->fields_types = array(
+            'nom_asso'              =>  $string,
+            'adresse_asso'          =>  $string,
+            'email_asso'            =>  $string,
+            'site_asso'             =>  $string,
+
+            'email_envoi_automatique'=> $string,
+
+            'champs_obligatoires'   =>  $array,
+
+            'categorie_dons'        =>  $int,
+            'categorie_cotisations' =>  $int,
+        );
+
+        $db = Garradin_DB::getInstance();
+
+        $this->config = $db->queryAssociativeFetch('SELECT cle, valeur FROM config ORDER BY cle;');
+
+        foreach ($this->config as $key=>&$value)
+        {
+            if (!array_key_exists($key, $this->fields_types))
+            {
+                throw new OutOfBoundsException('Le champ "'.$key.'" est inconnu.');
+            }
+
+            if (is_array($this->fields_types[$key]))
+            {
+                $value = json_decode($value, true);
+            }
+            else
+            {
+                settype($value, gettype($this->fields_types[$key]));
+            }
+        }
+    }
+
+    public function __destruct()
+    {
+    }
+
+    public function save()
+    {
+        $values = $config;
+        // serialization des valeurs (floatval, etc.) + SQL query
+    }
+
+    public function get($key)
+    {
+        if (!array_key_exists($key, $this->config))
+        {
+            throw new OutOfBoundsException('Ce champ est inconnu.');
+        }
+
+        return $this->config[$key];
+    }
+
+    public function set($key, $value)
+    {
+        if (!array_key_exists($key, $this->fields_types))
+        {
+            throw new OutOfBoundsException('Ce champ est inconnu.');
+        }
+
+        if (is_array($this->fields_types[$key]))
+        {
+            $value = (array) $value;
+        }
+        elseif (is_int($this->fields_types[$key]))
+        {
+            $value = (int) $value;
+        }
+        elseif (is_float($this->fields_types[$key]))
+        {
+            $value = (float) $value;
+        }
+        elseif (is_bool($this->fields_types[$key]))
+        {
+            $value = (bool) $value;
+        }
+        elseif (is_string($this->fields_types[$key]))
+        {
+            $value = (string) $value;
+        }
+
+        if ($value !== $this->config[$key])
+        {
+            $this->config[$key] = $value;
+            $this->modified = true;
+        }
+
+        return true;
     }
 }
 

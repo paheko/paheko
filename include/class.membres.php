@@ -38,9 +38,104 @@ class Garradin_Membres extends Garradin_DB
         return crypt($password, $stored_hash) == $stored_hash;
     }
 
-    public function connexion($pseudo, $passe)
+    protected function _sessionStart($force = false)
+    {
+        if (!isset($_SESSION) && ($force || isset($_COOKIE[session_name()])))
+            @session_start();
+
+        return true;
+    }
+
+    protected function _login($user)
+    {
+        $this->_sessionStart(true);
+        $_SESSION['logged_user'] = $user;
+        return true;
+    }
+
+    public function login($email, $passe)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+            return false;
+
+        $r = $this->db->querySingle('SELECT * FROM membres WHERE email=\''.$this->db->escapeString($email).'\' LIMIT 1;', true);
+
+        if (empty($r))
+            return false;
+
+        if (!$this->_checkPassword($passe, $r['passe']))
+            return false;
+
+        return $this->_login($r);
+    }
+
+    public function isLogged()
+    {
+        $this->_sessionStart();
+
+        return empty($_SESSION['logged_user']) ? false : true;
+    }
+
+    public function getLoggedUser()
+    {
+        if (!$this->isLogged())
+            return false;
+
+        return $_SESSION['logged_user'];
+    }
+
+    public function logout()
+    {
+        $_SESSION = array();
+        setcookie(session_name(), '', 0, '/');
+        return true;
+    }
+
+    public function _checkFields($data)
+    {
+        $mandatory = Config::getInstance()->get('champs_obligatoires');
+
+        foreach ($mandatory as $field)
+        {
+            if (!array_key_exists($field, $data) || !trim($data[$field]))
+            {
+                throw new UserException('Le champ \''.$field.'\' ne peut rester vide.');
+            }
+        }
+
+        if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL))
+        {
+            throw new UserException('Adresse e-mail \''.$field.'\' invalide.');
+        }
+
+        return true;
+    }
+
+    public function add($data = array())
+    {
+        $this->_checkFields($data);
+        // INSERT SQL
+    }
+
+    public function edit($id, $data = array())
+    {
+        $this->_checkFields($data);
+        // UPDATE SQL
+    }
+
+    public function remove($id)
     {
     }
+
+    public function search($query)
+    {
+    }
+
+    public function getList($page = 1)
+    {
+    }
+
+    public function
 }
 
 ?>
