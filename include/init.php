@@ -1,43 +1,6 @@
 <?php
 
 /*
- * Tests : vérification que les conditions pour s'exécuter sont remplies
- */
-
-$tests = array(
-    'Version de PHP installée inférieure à 5.3'
-        =>  version_compare(phpversion(), '5.3', '<'),
-    'Algorithme Blowfish de hashage de mot de passe non-présent'
-        =>  !defined('CRYPT_BLOWFISH') || !CRYPT_BLOWFISH,
-    'Module de bases de données SQLite3 n\'est pas installé'
-        =>  !class_exists('SQLite3'),
-    #'Dummy' => true,
-);
-
-$fail = false;
-
-if (PHP_SAPI != 'cli' && array_sum($tests) > 0)
-    echo '<pre>';
-
-foreach ($tests as $desc=>$fail)
-{
-    if ($fail)
-    {
-        echo $desc . "\n";
-    }
-}
-
-if ($fail)
-{
-    echo "Erreur fatale : Garradin a besoin que la condition mentionnée soit remplie pour s'exécuter.\n";
-
-    if (PHP_SAPI != 'cli')
-        echo '</pre>';
-
-    exit;
-}
-
-/*
  * Configuration globale
  */
 
@@ -91,8 +54,10 @@ function exception_handler($e)
 set_error_handler("exception_error_handler");
 set_exception_handler("exception_handler");
 
-require_once GARRADIN_ROOT . '/include/class.db.php';
-require_once GARRADIN_ROOT . '/include/class.config.php';
-
+if (!defined('GARRADIN_INSTALL_PROCESS'))
+{
+    require_once GARRADIN_ROOT . '/include/class.db.php';
+    require_once GARRADIN_ROOT . '/include/class.config.php';
+}
 
 ?>
