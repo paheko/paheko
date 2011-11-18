@@ -11,7 +11,7 @@ $tests = array(
         =>  !defined('CRYPT_BLOWFISH') || !CRYPT_BLOWFISH,
     'Module de bases de données SQLite3 n\'est pas installé'
         =>  !class_exists('SQLite3'),
-    'Dummy' => true,
+    #'Dummy' => true,
 );
 
 $fail = false;
@@ -42,7 +42,7 @@ if ($fail)
  */
 
 define('GARRADIN_ROOT', dirname(__DIR__));
-define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/garradin_asso.db');
+define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.db');
 define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
 
 // Automagic URL discover
@@ -55,7 +55,7 @@ define('LOCAL_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_
  * Gestion des erreurs et exceptions
  */
 
-class UserException extends Garradin_Exception {};
+class UserException extends LogicException {};
 
 error_reporting(E_ALL);
 
@@ -90,5 +90,9 @@ function exception_handler($e)
 
 set_error_handler("exception_error_handler");
 set_exception_handler("exception_handler");
+
+require_once GARRADIN_ROOT . '/include/class.db.php';
+require_once GARRADIN_ROOT . '/include/class.config.php';
+
 
 ?>

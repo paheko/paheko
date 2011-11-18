@@ -24,28 +24,6 @@ CREATE TABLE membres_categories_droits (
     droit INTEGER
 );
 
-INSERT INTO membres_categories VALUES (1, 'Membre simple', '', 20);
-INSERT INTO membres_categories VALUES (2, 'Membre tarif réduit', 'Chômeur / étudiant / RSA / etc.', 10);
-INSERT INTO membres_categories VALUES (3, 'Membre du CA', '', -1);
-INSERT INTO membres_categories VALUES (4, 'Membre du bureau', '', 0);
-
-INSERT INTO membres_categories_droits VALUES (1, 'connexion');
-INSERT INTO membres_categories_droits VALUES (1, 'wiki_lecture');
-
-INSERT INTO membres_categories_droits VALUES (2, 'connexion');
-INSERT INTO membres_categories_droits VALUES (2, 'wiki_lecture');
-
-INSERT INTO membres_categories_droits VALUES (3, 'connexion');
-INSERT INTO membres_categories_droits VALUES (3, 'wiki_lecture');
-INSERT INTO membres_categories_droits VALUES (3, 'wiki_ecriture');
-
-INSERT INTO membres_categories_droits VALUES (4, 'connexion');
-INSERT INTO membres_categories_droits VALUES (4, 'wiki_lecture');
-INSERT INTO membres_categories_droits VALUES (4, 'wiki_ecriture');
-INSERT INTO membres_categories_droits VALUES (4, 'comptabilite');
-INSERT INTO membres_categories_droits VALUES (4, 'gestion_membres');
-INSERT INTO membres_categories_droits VALUES (4, 'gestion_membres');
-
 -- Membres de l'asso
 CREATE TABLE membres (
     id INTEGER PRIMARY KEY,
@@ -74,6 +52,8 @@ CREATE TABLE membres (
     -- Dernière cotisation enregistrée
     date_cotisation TEXT
 );
+
+CREATE INDEX membres_id_categorie ON membres (id_categorie);
 
 --
 -- COMPTA
@@ -111,6 +91,11 @@ CREATE TABLE compta_operations (
     id_auteur INTEGER
 );
 
+
+CREATE INDEX compta_operations_id_compte ON compta_operations (id_compte);
+CREATE INDEX compta_operations_id_categorie ON compta_operations (id_categorie);
+CREATE INDEX compta_operations_id_auteur ON compta_operations (id_auteur);
+
 --
 -- WIKI
 --
@@ -134,8 +119,11 @@ CREATE TABLE wiki_revisions (
 
     chiffrement INTEGER, -- 0/1
 
-    PRIMARY KEY(id_page, numero)
+    PRIMARY KEY(id_page, revision)
 );
+
+CREATE INDEX wiki_revisions_id_page ON wiki_revisions (id_page);
+CREATE INDEX wiki_revisions_id_auteur ON wiki_revisions (id_auteur, suivi);
 
 CREATE TABLE wiki_fichiers (
     id INTEGER PRIMARY KEY,
@@ -143,3 +131,5 @@ CREATE TABLE wiki_fichiers (
     nom TEXT,
     hash TEXT
 );
+
+CREATE INDEX wiki_fichiers_id_page ON wiki_fichiers (id_page);
