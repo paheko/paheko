@@ -1,6 +1,6 @@
 <?php
 
-class Garradin_Membres extends Garradin_DB
+class Garradin_Membres
 {
     const DROIT_CONNEXION = 1;
     const DROIT_INSCRIPTION = 2;
@@ -93,7 +93,7 @@ class Garradin_Membres extends Garradin_DB
 
     public function _checkFields($data)
     {
-        $mandatory = Config::getInstance()->get('champs_obligatoires');
+        $mandatory = Garradin_Config::getInstance()->get('champs_obligatoires');
 
         foreach ($mandatory as $field)
         {
@@ -114,7 +114,26 @@ class Garradin_Membres extends Garradin_DB
     public function add($data = array())
     {
         $this->_checkFields($data);
-        // INSERT SQL
+
+        if (!trim($data['passe']))
+        {
+            $data['passe'] = $this->_hashPassword($data['passe']);
+        }
+
+        if (!isset($data['id_categorie']))
+        {
+            $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
+        }
+
+        $db = Garradin_DB::getInstance();
+
+        return $db->simpleExec('INSERT INTO membres
+            (id_categorie, passe, nom, email, adresse, code_postal, ville, pays, telephone,
+            date_anniversaire, details, date_inscription, date_connexion, date_cotisation)
+            VALUES
+            (:id_categorie, :passe, :nom, :email, :adresse, :code_postal, :ville, :pays, :telephone,
+            :date_anniversaire, :details, :date_inscription, :date_connexion, :date_cotisation);',
+            $data);
     }
 
     public function edit($id, $data = array())
@@ -135,7 +154,6 @@ class Garradin_Membres extends Garradin_DB
     {
     }
 
-    public function
 }
 
 ?>

@@ -34,6 +34,7 @@ class Garradin_Config
             'email_envoi_automatique'=> $string,
 
             'champs_obligatoires'   =>  $array,
+            'categorie_membres'     =>  $int,
 
             'categorie_dons'        =>  $int,
             'categorie_cotisations' =>  $int,
