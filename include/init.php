@@ -12,7 +12,7 @@ define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
 $path = substr(__DIR__ . '/www', strlen($_SERVER['DOCUMENT_ROOT']));
 $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
 $path = (substr($path, -1) != '/') ? $path . '/' : $path;
-define('LOCAL_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $path);
+define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $path);
 
 /*
  * Gestion des erreurs et exceptions
@@ -53,6 +53,8 @@ function exception_handler($e)
 
 set_error_handler("exception_error_handler");
 set_exception_handler("exception_handler");
+
+require_once GARRADIN_ROOT . '/include/lib.utils.php';
 
 if (!defined('GARRADIN_INSTALL_PROCESS'))
 {

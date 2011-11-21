@@ -21,7 +21,8 @@ CREATE TABLE membres_categories (
 -- Droits affectés à chaque catégorie de membres
 CREATE TABLE membres_categories_droits (
     id_categorie INTEGER,
-    droit INTEGER
+    droit INTEGER,
+    PRIMARY KEY (id_categorie, droit)
 );
 
 -- Membres de l'asso
@@ -133,3 +134,15 @@ CREATE TABLE wiki_fichiers (
 );
 
 CREATE INDEX wiki_fichiers_id_page ON wiki_fichiers (id_page);
+
+
+--
+-- générateur de paperasses
+--
+
+CREATE TABLE papiers (
+    id INTEGER PRIMARY KEY,
+    modele INTEGER,
+
+    donnees TEXT
+);
