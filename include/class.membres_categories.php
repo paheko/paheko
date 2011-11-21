@@ -18,13 +18,15 @@ class Garradin_Membres_Categories
 
         $db = Garradin_DB::getInstance();
 
-        return $db->simpleExec(
+        $db->simpleExec(
             'INSERT INTO membres_categories (nom, description, montant_cotisation, duree_cotisation) VALUES (?, ?, ?, ?);',
             $data['nom'],
             !empty($data['description']) ? trim($data['description']) : '',
             (float) $data['montant_cotisation'],
             12
         );
+
+        return $db->lastInsertRowID();
     }
 
     public function edit($id, $data)
@@ -69,6 +71,25 @@ class Garradin_Membres_Categories
         }
 
         return $db->simpleExec('DELETE FROM membres_categories WHERE id = ?;', (int) $id);
+    }
+
+    public function setAccess($cat)
+    {
+        for ($i = 1; $i <= func_num_args(); $i++)
+        {
+            $access = func_get_arg($i);
+            if (!is_int($access))
+            {
+                throw new UnexpectedValueException($access . ' is not a valid access right');
+            }
+
+            $db = Garradin_DB::getInstance();
+            $db->simpleExec('INSERT OR REPLACE INTO membres_categories_droits (id_categorie, droit) VALUES (?, ?);',
+                (int)$cat,
+                (int)$access);
+        }
+
+        return true;
     }
 }
 

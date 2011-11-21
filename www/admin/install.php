@@ -45,6 +45,59 @@ if ($fail)
 define('GARRADIN_INSTALL_PROCESS', true);
 
 require __DIR__ . '/../../include/init.php';
+require GARRADIN_ROOT . '/include/template.php';
 
+if (file_exists(GARRADIN_DB_FILE))
+{
+    $tpl->assign('disabled', true);
+}
+else
+{
+    $tpl->assign('disabled', false);
+    $error = false;
+
+    if (!empty($_POST['save']))
+    {
+        if (!utils::CSRF_check('install'))
+        {
+            $error = 'OTHER';
+        }
+        else
+        {
+            try {
+                require_once GARRADIN_ROOT . '/include/class.db.php';
+                require_once GARRADIN_ROOT . '/include/class.config.php';
+
+                $config = Garradin_Config::getInstance();
+                $config->set('nom_asso', $_POST['nom_asso']);
+                $config->set('adresse_asso', $_POST['nom_asso']);
+                $config->set('email_asso', $_POST['email_asso']);
+                $config->set('site_asso', $_POST['site_asso']);
+                $config->set('email_envoi_automatique', $_POST['email_asso']);
+                $config->set('champs_obligatoires', array('passe', 'email', 'nom'));
+
+                require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
+
+                $cats = new Garradin_Membres_Categories;
+                $id = $cats->add(array('nom' => 'Membres actifs', 'montant_cotisation' => 10));
+                $cats->setAccess($id, Membres::DROIT_CONNEXION, Membres::DROIT_WIKI_LIRE, Membres::DROIT_WIKI_ECRIRE);
+                $config->set('categorie_membres', $id);
+
+                $id = $membres_cats->add(array('nom' => 'Conseil d\'administration', 'montant_cotisation' => 0));
+                $cats->setAccess($id, Membres::DROIT_CONNEXION, Membres::DROIT_WIKI_ADMIN,
+                    Membres::DROIT_MEMBRES_ADMIN, Membres::DROIT_COMPTA_ADMIN);
+            }
+            catch (UserException $e)
+            {
+                @unlink(GARRADIN_DB_FILE);
+                $error = $e->getMessage();
+            }
+        }
+    }
+
+    $tpl->assign('error', $error);
+}
+
+$tpl->display('install.tpl');
 
 ?>

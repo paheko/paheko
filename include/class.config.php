@@ -4,7 +4,10 @@ class Garradin_Config
 {
     protected $fields_types = null;
     protected $config = null;
-    protected $modified = false;
+    protected $modified = array();
+
+    protected $allowed_mandatory_fields_membres = array('passe', 'nom', 'email', 'adresse', 'code_postal',
+        'ville', 'pays', 'telephone', 'date_anniversaire', 'details');
 
     static protected $_instance = null;
 
@@ -64,12 +67,31 @@ class Garradin_Config
 
     public function __destruct()
     {
+        if (!empty($this->modified))
+        {
+            $this->save();
+        }
     }
 
     public function save()
     {
-        $values = $config;
-        // serialization des valeurs (floatval, etc.) + SQL query
+        if (empty($this->modified))
+            return true;
+
+        $values = array();
+
+        $db = Garradin_DB::getInstance();
+        $db->exec('BEGIN;');
+
+        foreach ($this->modified as $key=>$modified)
+        {
+            $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+                $key, $this->config[$key]);
+        }
+
+        $db->exec('END;');
+
+        return true;
     }
 
     public function get($key)
@@ -110,10 +132,64 @@ class Garradin_Config
             $value = (string) $value;
         }
 
+        switch ($key)
+        {
+            case 'nom_asso':
+            case 'adresse_asso':
+            {
+                if (!trim($value))
+                {
+                    throw new UserException('Le champ '.$key.' ne peut reste vide !');
+                }
+                break;
+            }
+            case 'email_asso':
+            case 'email_envoi_automatique':
+            {
+                if (!filter_var($value, FILTER_VALIDATE_EMAIL))
+                {
+                    throw new UserException('Adresse e-mail '.$key.' invalide.');
+                }
+                break;
+            }
+            case 'champs_obligatoires':
+            {
+                foreach ($value as $name)
+                {
+                    if (!in_array($name, $this->allowed_mandatory_fields_membres))
+                    {
+                        throw new UserException('Le champ \''.$name.'\' ne peut pas être rendu obligatoire.');
+                    }
+                }
+                break;
+            }
+            case 'categorie_cotisations':
+            case 'categorie_dons':
+            {
+                $db = Garradin_DB::getInstance();
+                if (!$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, $value))
+                {
+                    throw new UserException('Champ '.$key.' : La catégorie comptable numéro \''.$value.'\' ne semble pas exister.');
+                }
+                break;
+            }
+            case 'categorie_membres':
+            {
+                $db = Garradin_DB::getInstance();
+                if (!$db->simpleQuerySingle('SELECT 1 FROM membres_categories WHERE id = ?;', false, $value))
+                {
+                    throw new UserException('La catégorie de membres par défaut numéro \''.$value.'\' ne semble pas exister.');
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
         if ($value !== $this->config[$key])
         {
             $this->config[$key] = $value;
-            $this->modified = true;
+            $this->modified[$key] = true;
         }
 
         return true;
