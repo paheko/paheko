@@ -17,7 +17,7 @@ class Garradin_DB extends SQLite3
     {
         $exists = file_exists(GARRADIN_DB_FILE) ? true : false;
 
-        parent::__construct(GARRADIN_DB_FILE);
+        parent::__construct(GARRADIN_DB_FILE, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
         if (!$exists)
         {
@@ -94,6 +94,19 @@ class Garradin_DB extends SQLite3
     public function simpleStatementFetch($query, $mode = SQLITE3_BOTH)
     {
         return $this->_fetchResult($this->simpleStatement($query), $mode);
+    }
+
+    public function simpleStatementFetchAssoc($query)
+    {
+        $result = $this->simpleStatement($query);
+        $out = array();
+
+        while ($row = $result->fetchArray(SQLITE3_NUM))
+        {
+            $out[$row[0]] = $row[1];
+        }
+
+        return $out;
     }
 
     public function escapeAuto($value, $name = '')
@@ -215,11 +228,6 @@ class Garradin_DB extends SQLite3
         unset($res, $row);
 
         return $out;
-    }
-
-    public function __destruct()
-    {
-        $this->close();
     }
 }
 

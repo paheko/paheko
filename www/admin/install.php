@@ -60,7 +60,11 @@ else
     {
         if (!utils::CSRF_check('install'))
         {
-            $error = 'OTHER';
+            $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        }
+        elseif (utils::post('passe_membre') != utils::post('repasse_membre'))
+        {
+            $error = 'La vérification ne correspond pas au mot de passe.';
         }
         else
         {
@@ -69,23 +73,50 @@ else
                 require_once GARRADIN_ROOT . '/include/class.config.php';
 
                 $config = Garradin_Config::getInstance();
-                $config->set('nom_asso', $_POST['nom_asso']);
-                $config->set('adresse_asso', $_POST['nom_asso']);
-                $config->set('email_asso', $_POST['email_asso']);
-                $config->set('site_asso', $_POST['site_asso']);
-                $config->set('email_envoi_automatique', $_POST['email_asso']);
+                $config->set('nom_asso', utils::post('nom_asso'));
+                $config->set('adresse_asso', utils::post('adresse_asso'));
+                $config->set('email_asso', utils::post('email_asso'));
+                $config->set('site_asso', utils::post('site_asso'));
+                $config->set('email_envoi_automatique', utils::post('email_asso'));
                 $config->set('champs_obligatoires', array('passe', 'email', 'nom'));
 
                 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 
                 $cats = new Garradin_Membres_Categories;
-                $id = $cats->add(array('nom' => 'Membres actifs', 'montant_cotisation' => 10));
-                $cats->setAccess($id, Membres::DROIT_CONNEXION, Membres::DROIT_WIKI_LIRE, Membres::DROIT_WIKI_ECRIRE);
+                $id = $cats->add(array(
+                    'nom' => 'Membres actifs',
+                    'montant_cotisation' => 10));
+                $cats->setAccess($id,
+                    Garradin_Membres::DROIT_CONNEXION,
+                    Garradin_Membres::DROIT_WIKI_LIRE,
+                    Garradin_Membres::DROIT_WIKI_ECRIRE);
                 $config->set('categorie_membres', $id);
 
-                $id = $membres_cats->add(array('nom' => 'Conseil d\'administration', 'montant_cotisation' => 0));
-                $cats->setAccess($id, Membres::DROIT_CONNEXION, Membres::DROIT_WIKI_ADMIN,
-                    Membres::DROIT_MEMBRES_ADMIN, Membres::DROIT_COMPTA_ADMIN);
+                $id = $cats->add(array(
+                    'nom' => ucfirst(utils::post('cat_membre')),
+                    'montant_cotisation' => 0));
+                $cats->setAccess($id,
+                    Garradin_Membres::DROIT_CONNEXION,
+                    Garradin_Membres::DROIT_WIKI_ADMIN,
+                    Garradin_Membres::DROIT_MEMBRE_ADMIN,
+                    Garradin_Membres::DROIT_COMPTA_ADMIN);
+
+                $membres = new Garradin_Membres;
+                $membres->add(array(
+                    'id_categorie'  =>  $id,
+                    'nom'           =>  utils::post('nom_membre'),
+                    'email'         =>  utils::post('email_membre'),
+                    'passe'         =>  utils::post('passe_membre'),
+                    'telephone'     =>  '',
+                    'code_postal'   =>  '',
+                    'adresse'       =>  '',
+                    'ville'         =>  '',
+                    'pays'          =>  '',
+                    'date_anniversaire' => '',
+                    'details'       =>  '',
+                ));
+
+                $config->save();
             }
             catch (UserException $e)
             {

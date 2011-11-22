@@ -9,7 +9,7 @@ define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.db');
 define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
 
 // Automagic URL discover
-$path = substr(__DIR__ . '/www', strlen($_SERVER['DOCUMENT_ROOT']));
+$path = substr(GARRADIN_ROOT . '/www', strlen($_SERVER['DOCUMENT_ROOT']));
 $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
 $path = (substr($path, -1) != '/') ? $path . '/' : $path;
 define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $path);
@@ -18,9 +18,11 @@ define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SE
  * Gestion des erreurs et exceptions
  */
 
-class UserException extends LogicException {};
+class UserException extends LogicException
+{
+}
 
-error_reporting(E_ALL);
+error_reporting(-1);
 
 function exception_error_handler($errno, $errstr, $errfile, $errline )
 {
