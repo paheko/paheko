@@ -1,0 +1,97 @@
+* { margin: 0; padding: 0; }
+
+body {
+    font-size: 100%;
+    padding: 1.5%;
+    background: #fff;
+    color: #000;
+    font-family: Sans-serif;
+}
+
+h1 {
+    text-align: center;
+    margin: -1% -1% 1% -1%;
+    padding: 0.5%;
+    background: #c85;
+    color: #fff;
+}
+
+p.error {
+    border: 1px solid #c00;
+    background: #fcc;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+p.confirm {
+    border: 1px solid #0c0;
+    background: #cfc;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+p.alert {
+    border: 1px solid #cc0;
+    background: #ffc;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+p.intro {
+    margin: 1em;
+}
+
+/* Formulaires */
+fieldset {
+    border: 1px solid #ccc;
+    padding: 0.8em;
+    margin-bottom: 1em;
+}
+
+fieldset legend {
+    padding: 0 0.5em;
+    font-weight: bold;
+}
+
+label:hover {
+    cursor: pointer;
+    border-bottom: 1px dotted #900;
+}
+
+dl dt label {
+    font-weight: bold;
+}
+
+fieldset dl dt b {
+    color: #900;
+    font-size: 0.7em;
+    font-weight: normal;
+    vertical-align: super;
+}
+
+fieldset dl dd.tip {
+    color: #666;
+}
+
+fieldset dl dd {
+    padding: 0.2em 0.5em 0.2em 1em;
+}
+
+input[type=text],textarea,input[type=password],input[type=number],input[type=email],input[type=url] {
+    padding: 0.2em 0.4em;
+    font-family: Sans-serif;
+    min-width: 20em;
+}
+
+input[type=submit], input[type=button] {
+    padding: 0.3em;
+    cursor: pointer;
+}
+
+p.submit {
+    margin: 1em;
+}
+
+.submit input[type=submit] {
+    font-size: 1.2em;
+}

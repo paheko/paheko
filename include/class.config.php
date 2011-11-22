@@ -45,7 +45,7 @@ class Garradin_Config
 
         $db = Garradin_DB::getInstance();
 
-        $this->config = $db->queryAssociativeFetch('SELECT cle, valeur FROM config ORDER BY cle;');
+        $this->config = $db->simpleStatementFetchAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
 
         foreach ($this->config as $key=>&$value)
         {
@@ -56,7 +56,7 @@ class Garradin_Config
 
             if (is_array($this->fields_types[$key]))
             {
-                $value = json_decode($value, true);
+                $value = explode(',', $value);
             }
             else
             {
@@ -69,7 +69,7 @@ class Garradin_Config
     {
         if (!empty($this->modified))
         {
-            $this->save();
+            //echo '<div style="color: red; background: #fff;">Il y a des champs modifiés non sauvés dans '.__CLASS__.' !</div>';
         }
     }
 
@@ -85,11 +85,20 @@ class Garradin_Config
 
         foreach ($this->modified as $key=>$modified)
         {
+            $value = $this->config[$key];
+
+            if (is_array($value))
+            {
+                $value = implode(',', $value);
+            }
+
             $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                $key, $this->config[$key]);
+                $key, $value);
         }
 
         $db->exec('END;');
+
+        $this->modified = array();
 
         return true;
     }
@@ -135,11 +144,10 @@ class Garradin_Config
         switch ($key)
         {
             case 'nom_asso':
-            case 'adresse_asso':
             {
                 if (!trim($value))
                 {
-                    throw new UserException('Le champ '.$key.' ne peut reste vide !');
+                    throw new UserException('Le nom de l\'association ne peut rester vide.');
                 }
                 break;
             }
@@ -148,7 +156,7 @@ class Garradin_Config
             {
                 if (!filter_var($value, FILTER_VALIDATE_EMAIL))
                 {
-                    throw new UserException('Adresse e-mail '.$key.' invalide.');
+                    throw new UserException('Adresse e-mail invalide.');
                 }
                 break;
             }
@@ -186,7 +194,7 @@ class Garradin_Config
                 break;
         }
 
-        if ($value !== $this->config[$key])
+        if (!isset($this->config[$key]) || $value !== $this->config[$key])
         {
             $this->config[$key] = $value;
             $this->modified[$key] = true;

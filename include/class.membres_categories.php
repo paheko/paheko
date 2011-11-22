@@ -8,7 +8,7 @@ class Garradin_Membres_Categories
     {
         if (!isset($data['nom']) || !trim($data['nom']))
         {
-            throw new UserException('Le nom ne peut rester vide.');
+            throw new UserException('Le nom de catégorie ne peut rester vide.');
         }
 
         if (!isset($data['montant_cotisation']) || !is_numeric($data['montant_cotisation']))
@@ -75,7 +75,7 @@ class Garradin_Membres_Categories
 
     public function setAccess($cat)
     {
-        for ($i = 1; $i <= func_num_args(); $i++)
+        for ($i = 1; $i < func_num_args(); $i++)
         {
             $access = func_get_arg($i);
             if (!is_int($access))

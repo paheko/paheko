@@ -2,6 +2,8 @@
 
 class utils
 {
+    static public $random_hash = 'abcd';
+
     static protected $country_list = null;
 
     static private $french_date_names = array(
@@ -146,6 +148,8 @@ class utils
         if ($_SESSION['csrf'][$key] != $hash)
             return false;
 
+        unset($_SESSION['csrf'][$key]);
+
         return true;
     }
 
@@ -163,6 +167,11 @@ class utils
             $string .= $chars{$pos};
         }
         return $string;
+    }
+
+    static public function post($key)
+    {
+        return isset($_POST[$key]) ? $_POST[$key] : '';
     }
 
     static public function getIP()
@@ -265,5 +274,7 @@ class utils
         return $out;
     }
 }
+
+utils::$random_hash = uniqid();
 
 ?>

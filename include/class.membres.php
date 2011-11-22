@@ -20,9 +20,12 @@ class Garradin_Membres
 
     protected function _getSalt($length)
     {
+        $str = str_split('./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+        shuffle($str);
+
         return implode('',
             array_rand(
-                shuffle(str_split('./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')),
+                $str,
                 $length)
         );
     }
@@ -115,7 +118,7 @@ class Garradin_Membres
     {
         $this->_checkFields($data);
 
-        if (!trim($data['passe']))
+        if (!empty($data['passe']) && trim($data['passe']))
         {
             $data['passe'] = $this->_hashPassword($data['passe']);
         }
@@ -132,7 +135,7 @@ class Garradin_Membres
             date_anniversaire, details, date_inscription, date_connexion, date_cotisation)
             VALUES
             (:id_categorie, :passe, :nom, :email, :adresse, :code_postal, :ville, :pays, :telephone,
-            :date_anniversaire, :details, :date_inscription, :date_connexion, :date_cotisation);',
+            :date_anniversaire, :details, date(\'now\'), NULL, NULL);',
             $data);
     }
 
