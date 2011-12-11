@@ -51,6 +51,7 @@
             <dt><label for="f_email_membre">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="email" name="email_membre" id="f_email_membre" value="{if !empty($tpl.post.email_membre)}{$tpl.post.email_membre|escape}{/if}" /></dd>
             <dt><label for="f_passe_membre">Mot de passe</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="help">Pas d'idée ? Voici une suggestion choisie au hasard : <tt>{$passphrase|escape}</tt></dd>
             <dd><input type="password" name="passe_membre" id="f_passe_membre" value="{if !empty($tpl.post.passe_membre)}{$tpl.post.passe_membre|escape}{/if}" /></dd>
             <dt><label for="f_repasse_membre">Encore le mot de passe</label> (vérification) <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="password" name="repasse_membre" id="f_repasse_membre" value="{if !empty($tpl.post.repasse_membre)}{$tpl.post.repasse_membre|escape}{/if}" /></dd>

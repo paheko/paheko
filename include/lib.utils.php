@@ -158,13 +158,13 @@ class utils
         return 'gecko/'.base64_encode(sha1($key, true));
     }
 
-    static public function generatePassword($length, $chars='abcdefghijklmnopqrstuvwxyz1234567890')
+    static public function generatePassword($length, $chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
     {
         $string = '';
         for ($i = 0; $i < $length; $i++)
         {
             $pos = rand(0, strlen($chars)-1);
-            $string .= $chars{$pos};
+            $string .= $chars[$pos];
         }
         return $string;
     }
@@ -272,6 +272,17 @@ class utils
         }
 
         return $out;
+    }
+
+    static public function transliterateToAscii($str, $charset='utf-8')
+    {
+        $str = htmlentities($str, ENT_NOQUOTES, $charset);
+
+        $str = preg_replace('#&([A-za-z])(?:acute|cedil|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str);
+        $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str); // pour les ligatures e.g. '&oelig;'
+        $str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
+
+        return $str;
     }
 }
 

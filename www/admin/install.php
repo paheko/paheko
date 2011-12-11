@@ -44,8 +44,9 @@ if ($fail)
 
 define('GARRADIN_INSTALL_PROCESS', true);
 
-require __DIR__ . '/../../include/init.php';
-require GARRADIN_ROOT . '/include/template.php';
+require_once __DIR__ . '/../../include/init.php';
+require_once GARRADIN_ROOT . '/include/template.php';
+require_once GARRADIN_ROOT . '/include/lib.passphrase.french.php';
 
 if (file_exists(GARRADIN_DB_FILE))
 {
@@ -128,6 +129,8 @@ else
 
     $tpl->assign('error', $error);
 }
+
+$tpl->assign('passphrase', Passphrase::generate());
 
 $tpl->display('install.tpl');
 
