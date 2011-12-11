@@ -1,18 +1,43 @@
 <?php
 
+if (!defined(__DIR__))
+{
+    die("Garradin requiert PHP 5.3 ou supérieur !\n");
+}
+
 /*
  * Configuration globale
  */
 
-define('GARRADIN_ROOT', dirname(__DIR__));
-define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.db');
-define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
+// Configuration externalisée, pour projets futurs (fermes de garradins ?)
+if (file_exists(__DIR__ . '/../config.local.php'))
+{
+    require __DIR__ . '/../config.local.php';
+}
 
-// Automagic URL discover
-$path = substr(GARRADIN_ROOT . '/www', strlen($_SERVER['DOCUMENT_ROOT']));
-$path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
-$path = (substr($path, -1) != '/') ? $path . '/' : $path;
-define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $path);
+if (!defined('GARRADIN_ROOT'))
+{
+    define('GARRADIN_ROOT', dirname(__DIR__));
+}
+
+if (!defined('GARRADIN_DB_FILE'))
+{
+    define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.db');
+}
+
+if (!defined('GARRADIN_DB_SCHEMA'))
+{
+    define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
+}
+
+if (!defined('WWW_URL'))
+{
+    // Automagic URL discover
+    $path = substr(GARRADIN_ROOT . '/www', strlen($_SERVER['DOCUMENT_ROOT']));
+    $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
+    $path = (substr($path, -1) != '/') ? $path . '/' : $path;
+    define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $path);
+}
 
 /*
  * Gestion des erreurs et exceptions
@@ -55,6 +80,10 @@ function exception_handler($e)
 
 set_error_handler("exception_error_handler");
 set_exception_handler("exception_handler");
+
+/*
+ * Inclusion des fichiers de base
+ */
 
 require_once GARRADIN_ROOT . '/include/lib.utils.php';
 
