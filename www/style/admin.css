@@ -95,3 +95,12 @@ p.submit {
 .submit input[type=submit] {
     font-size: 1.2em;
 }
+
+dd.help {
+    color: #666;
+}
+
+dd.help tt {
+    background: #ddd;
+    padding: 0.2em;
+}
