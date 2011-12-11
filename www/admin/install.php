@@ -118,6 +118,8 @@ else
                 ));
 
                 $config->save();
+
+                utils::redirect('/admin/login.php');
             }
             catch (UserException $e)
             {
@@ -132,6 +134,6 @@ else
 
 $tpl->assign('passphrase', Passphrase::generate());
 
-$tpl->display('install.tpl');
+$tpl->display('admin/install.tpl');
 
 ?>
