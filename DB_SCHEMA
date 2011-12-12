@@ -23,12 +23,6 @@ CREATE TABLE membres_categories (
     droit_connexion INT DEFAULT 1
 );
 
--- Droits affectés à chaque catégorie de membres
-CREATE TABLE membres_categories_droits (
-    id_categorie INTEGER,
-    droit INTEGER,
-    PRIMARY KEY (id_categorie, droit)
-);
 
 -- Membres de l'asso
 CREATE TABLE membres (
@@ -40,7 +34,6 @@ CREATE TABLE membres (
 
     -- Données personnelles
     nom TEXT,
-    pseudo TEXT,
     email TEXT,
 
     adresse TEXT,
@@ -48,10 +41,10 @@ CREATE TABLE membres (
     ville TEXT,
     pays TEXT,
     telephone TEXT,
-    date_anniversaire TEXT,
+    date_naissance TEXT,
 
     -- Pour le bordel
-    details TEXT,
+    notes TEXT,
 
     date_inscription TEXT,
     date_connexion TEXT,

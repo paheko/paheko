@@ -87,6 +87,12 @@ class Garradin_Membres_Categories
 
         return $db->simpleExec('DELETE FROM membres_categories WHERE id = ?;', (int) $id);
     }
+
+    public function listSimple()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;');
+    }
 }
 
 ?>
