@@ -20,13 +20,28 @@ body {
 
 .header .menu {
     float: left;
-    max-width: 167px;
-    margin-left: 2em;
+    width: 168px;
+    list-style-type: none;
 }
 
 .header .menu a {
     color: #fff;
     font-weight: bold;
+    padding: 0.2em 0.4em;
+    display: block;
+    background: rgba(156, 79, 21, 0.7);
+    margin-bottom: 0.2em;
+    text-decoration: underline;
+}
+
+.header .menu a:hover {
+    text-decoration: none;
+    background: rgba(156, 79, 21, 0.5);
+}
+
+.header .menu li li a {
+    padding-left: 1.5em;
+    font-size: 0.8em;
 }
 
 .page {

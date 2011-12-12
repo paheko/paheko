@@ -15,7 +15,12 @@ CREATE TABLE membres_categories (
     nom TEXT,
     description TEXT,
     montant_cotisation REAL,
-    duree_cotisation INTEGER DEFAULT 12 -- En mois
+    duree_cotisation INTEGER DEFAULT 12, -- En mois
+    droit_wiki INT DEFAULT 1,
+    droit_membres INT DEFAULT 1,
+    droit_compta INT DEFAULT 1,
+    droit_inscription INT DEFAULT 0,
+    droit_connexion INT DEFAULT 1
 );
 
 -- Droits affectés à chaque catégorie de membres

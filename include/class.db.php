@@ -173,6 +173,13 @@ class Garradin_DB extends SQLite3
         return $query;
     }
 
+    public function simpleInsert($table, $fields)
+    {
+        $fields_names = array_keys($fields);
+        return $this->simpleExec('INSERT INTO '.$table.' ('.implode(', ', $fields_names).')
+            VALUES (:'.implode(', :', $fields_names).');', $fields);
+    }
+
     /**
      * Formats and escapes a statement and then returns the result of exec()
      */

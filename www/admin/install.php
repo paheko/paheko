@@ -87,20 +87,16 @@ else
                 $id = $cats->add(array(
                     'nom' => 'Membres actifs',
                     'montant_cotisation' => 10));
-                $cats->setAccess($id,
-                    Garradin_Membres::DROIT_CONNEXION,
-                    Garradin_Membres::DROIT_WIKI_LIRE,
-                    Garradin_Membres::DROIT_WIKI_ECRIRE);
                 $config->set('categorie_membres', $id);
 
                 $id = $cats->add(array(
                     'nom' => ucfirst(utils::post('cat_membre')),
-                    'montant_cotisation' => 0));
-                $cats->setAccess($id,
-                    Garradin_Membres::DROIT_CONNEXION,
-                    Garradin_Membres::DROIT_WIKI_ADMIN,
-                    Garradin_Membres::DROIT_MEMBRE_ADMIN,
-                    Garradin_Membres::DROIT_COMPTA_ADMIN);
+                    'montant_cotisation' => 0,
+                    'droit_inscription' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_wiki' => Garradin_Membres::DROIT_ADMIN,
+                    'droit_membres' => Garradin_Membres::DROIT_ADMIN,
+                    'droit_compta' => Garradin_Membres::DROIT_ADMIN,
+                    ));
 
                 $membres = new Garradin_Membres;
                 $membres->add(array(

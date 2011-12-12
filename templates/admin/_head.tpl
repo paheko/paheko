@@ -15,15 +15,35 @@
     {if $is_logged}
     <ul class="menu">
         <li class="home{if $self_page == ''} current{/if}"><a href="{$www_url}admin/">Accueil</a></li>
-        {if has_right('MEMBRE_GESTION', $user.rights)}
-            <li class="add_member{if $self_page == 'membres/ajouter.php'} current{/if}"><a href="{$www_url}admin/membres/ajouter.php">Ajouter un membre</a></li>
+        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+            <li class="list_members{if $self_page == 'membres/'} current{/if}"><a href="{$www_url}admin/membres/">Membres</a>
+            {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
+            <ul>
+                <li class="add_member{if $self_page == 'membres/ajouter.php'} current{/if}"><a href="{$www_url}admin/membres/ajouter.php">Ajouter</a></li>
+                <li class="member_cats{if $self_page == 'membres/categories.php'} current{/if}"><a href="{$www_url}admin/membres/categories.php">Catégories</a></li>
+            </ul>
+            {/if}
+            </li>
         {/if}
-        {if has_right('MEMBRE_GESTION', $user.rights) || has_right('MEMBRE_ADMIN', $user.rights) || has_right('MEMBRE_LISTER', $user.rights)}
-            <li class="list_members{if $self_page == 'membres/'} current{/if}"><a href="{$www_url}admin/membres/liste.php">Liste</a></li>
+        {if $user.droits.compta >= Garradin_Membres::DROIT_ACCES}
+            <li class="compta{if $self_page == 'compta/'} current{/if}"><a href="{$www_url}compta/">Comptabilité</a>
+            {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+            <ul>
+                <li class="compta_gestion{if $self_page == 'compta/gestion/'} current{/if}"><a href="{$www_url}admin/compta/operations.php">Opérations</a></li>
+                <li class="compta_cats{if $self_page == 'compta/categories.php'} current{/if}"><a href="{$www_url}admin/compta/categories.php">Catégories</a></li>
+                <li class="compta_comptes{if $self_page == 'compta/comptes.php'} current{/if}"><a href="{$www_url}admin/compta/comptes.php">Comptes</a></li>
+            </ul>
+            {/if}
+            </li>
         {/if}
-        {if has_right('MEMBRE_ADMIN', $user.rights)}
-            <li class="member_cats{if $self_page == 'membres/categories.php'} current{/if}"><a href="{$www_url}admin/membres/categories.php">Gérer les catégories de membres</a></li>
+        {if $user.droits.wiki >= Garradin_Membres::DROIT_ACCES}
+            <li class="wiki{if $self_page == 'wiki/'} current{/if}"><a href="{$www_url}wiki/">Wiki</a>
+            <ul>
+                <li class="wiki_my{if $self_page == 'wiki/suivi/'} current{/if}"><a href="{$www_url}wiki/suivi/">Mes pages suivies</a>
+            </ul>
+            </li>
         {/if}
+        <li class="wiki{if $self_page == 'wiki/'} current{/if}"><a href="{$www_url}wiki/">Wiki</a>
         <li class="logout"><a href="{$www_url}admin/logout.php">Déconnexion</a></li>
     </ul>
     {/if}
