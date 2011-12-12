@@ -1,6 +1,4 @@
-{include file="admin/_head.tpl" title="Garradin - Installation"}
-
-<h1>Connexion</h1>
+{include file="admin/_head.tpl" title="Connexion"}
 
 {if $error}
     <p class="error">

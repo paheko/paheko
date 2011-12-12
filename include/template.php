@@ -18,6 +18,8 @@ $tpl->assign('self_url', utils::getSelfUrl());
 
 $tpl->assign('is_logged', false);
 
+$tpl->assign('config', Garradin_Config::getInstance()->getConfig());
+
 function tpl_csrf_field($params)
 {
     $name = utils::CSRF_field_name($params['key']);
@@ -38,6 +40,12 @@ function tpl_form_field($params)
         $value = '';
 
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
+function has_right($right, $check)
+{
+    $right = constant('Garradin_Membres::DROIT_'.strtoupper($right));
+    return array_key_exists($right, $check);
 }
 
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
