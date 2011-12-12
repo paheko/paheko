@@ -61,7 +61,8 @@ class Garradin_Membres
         if (!filter_var($email, FILTER_VALIDATE_EMAIL))
             return false;
 
-        $r = $this->db->querySingle('SELECT * FROM membres WHERE email=\''.$this->db->escapeString($email).'\' LIMIT 1;', true);
+        $db = Garradin_DB::getInstance();
+        $r = $db->querySingle('SELECT * FROM membres WHERE email=\''.$db->escapeString($email).'\' LIMIT 1;', true);
 
         if (empty($r))
             return false;
@@ -131,10 +132,10 @@ class Garradin_Membres
         $db = Garradin_DB::getInstance();
 
         return $db->simpleExec('INSERT INTO membres
-            (id_categorie, passe, nom, email, adresse, code_postal, ville, pays, telephone,
+            (id_categorie, passe, nom, pseudo, email, adresse, code_postal, ville, pays, telephone,
             date_anniversaire, details, date_inscription, date_connexion, date_cotisation)
             VALUES
-            (:id_categorie, :passe, :nom, :email, :adresse, :code_postal, :ville, :pays, :telephone,
+            (:id_categorie, :passe, :nom, NULL, :email, :adresse, :code_postal, :ville, :pays, :telephone,
             :date_anniversaire, :details, date(\'now\'), NULL, NULL);',
             $data);
     }
