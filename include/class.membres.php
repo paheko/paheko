@@ -40,7 +40,6 @@ class Garradin_Membres
     protected function _login($user)
     {
         $this->_sessionStart(true);
-        $db = Garradin_DB::getInstance();
 
         $_SESSION['logged_user'] = $user;
 
@@ -61,9 +60,7 @@ class Garradin_Membres
         if (!$this->_checkPassword($passe, $r['passe']))
             return false;
 
-        $droits = $db->simpleQuerySingle(
-            'SELECT * FROM membres_categories WHERE id = ?;',
-            true, (int)$r['id_categorie']);
+        $droits = $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;', true, (int)$r['id_categorie']);
 
         foreach ($droits as $key=>$value)
         {
@@ -80,6 +77,8 @@ class Garradin_Membres
             return false;
 
         $r['droits'] = $droits;
+
+        $db->simpleExec('UPDATE membres SET date_connexion = datetime(\'now\') WHERE id = ?;', $r['id']);
 
         return $this->_login($r);
     }
@@ -106,6 +105,8 @@ class Garradin_Membres
         return true;
     }
 
+    // Gestion des données ///////////////////////////////////////////////////////
+
     public function _checkFields($data)
     {
         $mandatory = Garradin_Config::getInstance()->get('champs_obligatoires');
@@ -118,9 +119,19 @@ class Garradin_Membres
             }
         }
 
-        if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL))
+        if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL))
         {
-            throw new UserException('Adresse e-mail \''.$field.'\' invalide.');
+            throw new UserException('Adresse e-mail invalide.');
+        }
+
+        if (!empty($data['code_postal']) && !preg_match('!^\d{5}$!', $data['code_postal']))
+        {
+            throw new UserException('Code postal invalide.');
+        }
+
+        if (!empty($data['passe']) && strlen($data['passe']) < 5)
+        {
+            throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
         }
 
         return true;
@@ -142,13 +153,15 @@ class Garradin_Membres
 
         $db = Garradin_DB::getInstance();
 
-        return $db->simpleExec('INSERT INTO membres
-            (id_categorie, passe, nom, pseudo, email, adresse, code_postal, ville, pays, telephone,
-            date_anniversaire, details, date_inscription, date_connexion, date_cotisation)
+        $db->simpleExec('INSERT INTO membres
+            (id_categorie, passe, nom, email, adresse, code_postal, ville, pays, telephone,
+            date_naissance, notes, date_inscription, date_connexion, date_cotisation)
             VALUES
-            (:id_categorie, :passe, :nom, NULL, :email, :adresse, :code_postal, :ville, :pays, :telephone,
-            :date_anniversaire, :details, date(\'now\'), NULL, NULL);',
+            (:id_categorie, :passe, :nom, :email, :adresse, :code_postal, :ville, :pays, :telephone,
+            :date_naissance, :notes, date(\'now\'), NULL, NULL);',
             $data);
+
+        return $db->lastInsertRowId();
     }
 
     public function edit($id, $data = array())

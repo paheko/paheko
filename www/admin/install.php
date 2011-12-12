@@ -108,9 +108,9 @@ else
                     'code_postal'   =>  '',
                     'adresse'       =>  '',
                     'ville'         =>  '',
-                    'pays'          =>  '',
+                    'pays'          =>  'FR',
                     'date_anniversaire' => '',
-                    'details'       =>  '',
+                    'notes'         =>  '',
                 ));
 
                 $config->save();

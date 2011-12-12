@@ -92,6 +92,7 @@ if (!defined('GARRADIN_INSTALL_PROCESS'))
 
     require_once GARRADIN_ROOT . '/include/class.db.php';
     require_once GARRADIN_ROOT . '/include/class.config.php';
+    $config = Garradin_Config::getInstance();
 }
 
 ?>

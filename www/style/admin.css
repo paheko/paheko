@@ -1,11 +1,12 @@
 * { margin: 0; padding: 0; }
 
+html { width: 100%; height: 100%; }
 body {
     font-size: 100%;
     color: #000;
     font-family: "Trebuchet MS", Helvetica, Sans-serif;
     background: #fff;
-    background: url("../img/bg01.png") no-repeat top left, url("../img/bg00.png") repeat-y top left, #fff;
+    background: url("../img/bg01.png") no-repeat left -100px, url("../img/bg00.png") repeat-y left bottom, #fff;
 }
 
 .header {
@@ -21,31 +22,33 @@ body {
 .header .menu {
     float: left;
     width: 168px;
+    margin-top: 100px;
+}
+
+.header .menu li {
     list-style-type: none;
 }
 
 .header .menu a {
     color: #fff;
     font-weight: bold;
-    padding: 0.2em 0.4em;
+    padding: 0.4em 0.4em 0.4em 1em;
     display: block;
-    background: rgba(156, 79, 21, 0.7);
-    margin-bottom: 0.2em;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 .header .menu a:hover {
-    text-decoration: none;
-    background: rgba(156, 79, 21, 0.5);
+    text-decoration: underline;
+    background: rgba(217, 134, 40, 0.5);
 }
 
 .header .menu li li a {
-    padding-left: 1.5em;
     font-size: 0.8em;
+    padding-left: 2em;
 }
 
 .page {
-    margin-left: 180px;
+    margin: 1em 1em 1em 180px;
 }
 
 p.error {
@@ -109,10 +112,17 @@ fieldset dl dd {
     padding: 0.2em 0.5em 0.2em 1em;
 }
 
-input[type=text],textarea,input[type=password],input[type=number],input[type=email],input[type=url] {
+input[type=text], textarea, input[type=password], input[type=email],
+input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
     min-width: 20em;
+}
+
+input[type=number] {
+    padding: 0.2em 0.4em;
+    font-family: Sans-serif;
+    min-width: 8em;
 }
 
 input[type=submit], input[type=button] {
@@ -135,4 +145,5 @@ dd.help {
 dd.help tt {
     background: #ddd;
     padding: 0.2em;
+    cursor: pointer;
 }

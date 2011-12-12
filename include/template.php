@@ -41,8 +41,10 @@ function tpl_form_field($params)
 
     if (isset($_POST[$name]))
         $value = $_POST[$name];
-    elseif (isset($params['default']) && isset($params['default'][$name]))
-        $value = $params['default'][$name];
+    elseif (isset($params['data']) && isset($params['data'][$name]))
+        $value = $params['data'][$name];
+    elseif (isset($params['default']))
+        $value = $params['default'];
     else
         $value = '';
 
