@@ -4,7 +4,7 @@ require_once GARRADIN_ROOT . '/include/class.membres.php';
 
 class Garradin_Membres_Categories
 {
-    public function add($data)
+    protected function _checkData(&$data)
     {
         if (!isset($data['nom']) || !trim($data['nom']))
         {
@@ -16,31 +16,46 @@ class Garradin_Membres_Categories
             throw new UserException('Le montant de cotisation doit être un chiffre.');
         }
 
-        $db = Garradin_DB::getInstance();
+        if (!isset($data['duree_cotisation']) || !is_numeric($data['duree_cotisation']))
+        {
+            $data['duree_cotisation'] = 12;
+        }
 
-        $db->simpleExec(
-            'INSERT INTO membres_categories (nom, description, montant_cotisation, duree_cotisation) VALUES (?, ?, ?, ?);',
-            $data['nom'],
-            !empty($data['description']) ? trim($data['description']) : '',
-            (float) $data['montant_cotisation'],
-            12
+        if (!isset($data['description']))
+        {
+            $data['description'] = '';
+        }
+
+        $droits = array(
+            'wiki'      =>  Garradin_Membres::DROIT_ACCES,
+            'membres'   =>  Garradin_Membres::DROIT_ACCES,
+            'compta'    =>  Garradin_Membres::DROIT_ACCES,
+            'inscription'=> Garradin_Membres::DROIT_ACCES,
+            'connexion' =>  Garradin_Membres::DROIT_ACCES,
         );
+
+        foreach ($droits as $key=>$value)
+        {
+            if (!isset($data['droit_'.$key]))
+                $data['droit_'.$key] = $value;
+            else
+                $data['droit_'.$key] = (int)$data['droit_'.$key];
+        }
+    }
+
+    public function add($data)
+    {
+        $this->_checkData($data);
+
+        $db = Garradin_DB::getInstance();
+        $db->simpleInsert('membres_categories', $data);
 
         return $db->lastInsertRowID();
     }
 
     public function edit($id, $data)
     {
-        if (!isset($data['nom']) || !trim($data['nom']))
-        {
-            throw new UserException('Le nom ne peut rester vide.');
-        }
-
-        if (!isset($data['montant_cotisation']) || !is_numeric($data['montant_cotisation']))
-        {
-            throw new UserException('Le montant de cotisation doit être un chiffre.');
-        }
-
+        $this->_checkData($data);
         $db = Garradin_DB::getInstance();
 
         return $db->simpleExec(
@@ -71,25 +86,6 @@ class Garradin_Membres_Categories
         }
 
         return $db->simpleExec('DELETE FROM membres_categories WHERE id = ?;', (int) $id);
-    }
-
-    public function setAccess($cat)
-    {
-        for ($i = 1; $i < func_num_args(); $i++)
-        {
-            $access = func_get_arg($i);
-            if (!is_int($access))
-            {
-                throw new UnexpectedValueException($access . ' is not a valid access right');
-            }
-
-            $db = Garradin_DB::getInstance();
-            $db->simpleExec('INSERT OR REPLACE INTO membres_categories_droits (id_categorie, droit) VALUES (?, ?);',
-                (int)$cat,
-                (int)$access);
-        }
-
-        return true;
     }
 }
 

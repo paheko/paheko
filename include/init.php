@@ -69,6 +69,7 @@ function exception_handler($e)
     $error .= $e->getTraceAsString();
     //$error .= print_r($_SERVER, true);
 
+    echo '<pre>';
     echo $error;
     exit;
 }

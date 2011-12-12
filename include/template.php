@@ -18,7 +18,14 @@ $tpl->assign('self_url', utils::getSelfUrl());
 
 $tpl->assign('is_logged', false);
 
-$tpl->assign('config', Garradin_Config::getInstance()->getConfig());
+if (class_exists('Garradin_Config'))
+{
+    $tpl->assign('config', Garradin_Config::getInstance()->getConfig());
+}
+else
+{
+    $tpl->assign('config', false);
+}
 
 function tpl_csrf_field($params)
 {
@@ -32,20 +39,14 @@ function tpl_form_field($params)
 {
     $name = $params['name'];
 
-    if (!empty($_POST[$name]))
+    if (isset($_POST[$name]))
         $value = $_POST[$name];
-    elseif (!empty($params['default']) && !empty($params['default'][$name]))
+    elseif (isset($params['default']) && isset($params['default'][$name]))
         $value = $params['default'][$name];
     else
         $value = '';
 
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-}
-
-function has_right($right, $check)
-{
-    $right = constant('Garradin_Membres::DROIT_'.strtoupper($right));
-    return array_key_exists($right, $check);
 }
 
 $tpl->register_function('csrf_field', 'tpl_csrf_field');

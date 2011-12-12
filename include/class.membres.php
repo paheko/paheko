@@ -2,20 +2,9 @@
 
 class Garradin_Membres
 {
-    const DROIT_CONNEXION = 1;
-    const DROIT_INSCRIPTION = 2;
-
-    const DROIT_WIKI_LIRE = 10;
-    const DROIT_WIKI_ECRIRE = 11;
-    const DROIT_WIKI_FICHIERS = 12;
-    const DROIT_WIKI_ADMIN = 13;
-
-    const DROIT_MEMBRE_LISTER = 20;
-    const DROIT_MEMBRE_GESTION = 21;
-    const DROIT_MEMBRE_ADMIN = 22;
-
-    const DROIT_COMPTA_GESTION = 30;
-    const DROIT_COMPTA_ADMIN = 31;
+    const DROIT_AUCUN = 0;
+    const DROIT_ACCES = 1;
+    const DROIT_ADMIN = 9;
 
     protected function _getSalt($length)
     {
@@ -54,8 +43,6 @@ class Garradin_Membres
         $db = Garradin_DB::getInstance();
 
         $_SESSION['logged_user'] = $user;
-        $_SESSION['logged_user']['rights'] = $db->queryFetchAssoc('SELECT droit, droit FROM membres_categories_droits
-            WHERE id_categorie = '.(int)$user['id_categorie'].';', SQLITE3_ASSOC);
 
         return true;
     }
@@ -73,6 +60,26 @@ class Garradin_Membres
 
         if (!$this->_checkPassword($passe, $r['passe']))
             return false;
+
+        $droits = $db->simpleQuerySingle(
+            'SELECT * FROM membres_categories WHERE id = ?;',
+            true, (int)$r['id_categorie']);
+
+        foreach ($droits as $key=>$value)
+        {
+            unset($droits[$key]);
+            $key = str_replace('droit_', '', $key, $found);
+
+            if ($found)
+            {
+                $droits[$key] = (int) $value;
+            }
+        }
+
+        if ($droits['connexion'] == self::DROIT_AUCUN)
+            return false;
+
+        $r['droits'] = $droits;
 
         return $this->_login($r);
     }
