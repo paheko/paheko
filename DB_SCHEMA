@@ -35,6 +35,7 @@ CREATE TABLE membres (
 
     -- Données personnelles
     nom TEXT,
+    pseudo TEXT,
     email TEXT,
 
     adresse TEXT,

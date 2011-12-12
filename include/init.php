@@ -1,10 +1,5 @@
 <?php
 
-if (!defined(__DIR__))
-{
-    die("Garradin requiert PHP 5.3 ou supérieur !\n");
-}
-
 /*
  * Configuration globale
  */
@@ -89,6 +84,11 @@ require_once GARRADIN_ROOT . '/include/lib.utils.php';
 
 if (!defined('GARRADIN_INSTALL_PROCESS'))
 {
+    if (!file_exists(GARRADIN_DB_FILE))
+    {
+        utils::redirect('/admin/install.php');
+    }
+
     require_once GARRADIN_ROOT . '/include/class.db.php';
     require_once GARRADIN_ROOT . '/include/class.config.php';
 }

@@ -26,6 +26,21 @@ function tpl_csrf_field($params)
     return '<input type="hidden" name="'.$name.'" value="'.$value.'" />';
 }
 
+function tpl_form_field($params)
+{
+    $name = $params['name'];
+
+    if (!empty($_POST[$name]))
+        $value = $_POST[$name];
+    elseif (!empty($params['default']) && !empty($params['default'][$name]))
+        $value = $params['default'][$name];
+    else
+        $value = '';
+
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
+$tpl->register_function('form_field', 'tpl_form_field');
 
 ?>
