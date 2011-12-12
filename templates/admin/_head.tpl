@@ -8,3 +8,25 @@
 </head>
 
 <body>
+
+<div class="header">
+    <h1>{$title|escape}</h1>
+
+    {if $is_logged}
+    <ul class="menu">
+        <li class="home{if $self_page == ''} current{/if}"><a href="{$www_url}admin/">Accueil</a></li>
+        {if has_right('MEMBRE_GESTION', $user.rights)}
+            <li class="add_member{if $self_page == 'membres/ajouter.php'} current{/if}"><a href="{$www_url}admin/membres/ajouter.php">Ajouter un membre</a></li>
+        {/if}
+        {if has_right('MEMBRE_GESTION', $user.rights) || has_right('MEMBRE_ADMIN', $user.rights) || has_right('MEMBRE_LISTER', $user.rights)}
+            <li class="list_members{if $self_page == 'membres/'} current{/if}"><a href="{$www_url}admin/membres/liste.php">Liste</a></li>
+        {/if}
+        {if has_right('MEMBRE_ADMIN', $user.rights)}
+            <li class="member_cats{if $self_page == 'membres/categories.php'} current{/if}"><a href="{$www_url}admin/membres/categories.php">Gérer les catégories de membres</a></li>
+        {/if}
+        <li class="logout"><a href="{$www_url}admin/logout.php">Déconnexion</a></li>
+    </ul>
+    {/if}
+</div>
+
+<div class="page">

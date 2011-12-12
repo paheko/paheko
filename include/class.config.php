@@ -202,6 +202,11 @@ class Garradin_Config
 
         return true;
     }
+
+    public function getConfig()
+    {
+        return $this->config;
+    }
 }
 
 ?>

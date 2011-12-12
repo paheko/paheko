@@ -2,18 +2,35 @@
 
 body {
     font-size: 100%;
-    padding: 1.5%;
-    background: #fff;
     color: #000;
-    font-family: Sans-serif;
+    font-family: "Trebuchet MS", Helvetica, Sans-serif;
+    background: #fff;
+    background: url("../img/bg01.png") no-repeat top left, url("../img/bg00.png") repeat-y top left, #fff;
 }
 
-h1 {
-    text-align: center;
-    margin: -1% -1% 1% -1%;
-    padding: 0.5%;
-    background: #c85;
+.header {
     color: #fff;
+}
+
+.header h1 {
+    color: #9c4f15;
+    margin-left: 180px;
+    margin-bottom: 0.4em;
+}
+
+.header .menu {
+    float: left;
+    max-width: 167px;
+    margin-left: 2em;
+}
+
+.header .menu a {
+    color: #fff;
+    font-weight: bold;
+}
+
+.page {
+    margin-left: 180px;
 }
 
 p.error {

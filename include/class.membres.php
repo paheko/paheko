@@ -10,10 +10,9 @@ class Garradin_Membres
     const DROIT_WIKI_FICHIERS = 12;
     const DROIT_WIKI_ADMIN = 13;
 
-    const DROIT_MEMBRE_AJOUTER = 20;
-    const DROIT_MEMBRE_MODIFIER = 21;
-    const DROIT_MEMBRE_LISTER = 22;
-    const DROIT_MEMBRE_ADMIN = 23;
+    const DROIT_MEMBRE_LISTER = 20;
+    const DROIT_MEMBRE_GESTION = 21;
+    const DROIT_MEMBRE_ADMIN = 22;
 
     const DROIT_COMPTA_GESTION = 30;
     const DROIT_COMPTA_ADMIN = 31;
@@ -52,7 +51,12 @@ class Garradin_Membres
     protected function _login($user)
     {
         $this->_sessionStart(true);
+        $db = Garradin_DB::getInstance();
+
         $_SESSION['logged_user'] = $user;
+        $_SESSION['logged_user']['rights'] = $db->queryFetchAssoc('SELECT droit, droit FROM membres_categories_droits
+            WHERE id_categorie = '.(int)$user['id_categorie'].';', SQLITE3_ASSOC);
+
         return true;
     }
 

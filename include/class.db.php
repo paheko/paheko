@@ -209,8 +209,8 @@ class Garradin_DB extends SQLite3
             $out[] = $row;
         }
 
-        $res->finalize();
-        unset($res, $row);
+        $result->finalize();
+        unset($result, $row);
 
         return $out;
     }
@@ -224,8 +224,8 @@ class Garradin_DB extends SQLite3
             $out[$row[0]] = $row[1];
         }
 
-        $res->finalize();
-        unset($res, $row);
+        $result->finalize();
+        unset($result, $row);
 
         return $out;
     }
