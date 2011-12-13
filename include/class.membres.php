@@ -109,15 +109,18 @@ class Garradin_Membres
 
     // Gestion des données ///////////////////////////////////////////////////////
 
-    public function _checkFields($data)
+    public function _checkFields($data, $check_mandatory = true)
     {
-        $mandatory = Garradin_Config::getInstance()->get('champs_obligatoires');
-
-        foreach ($mandatory as $field)
+        if ($check_mandatory)
         {
-            if (!array_key_exists($field, $data) || !trim($data[$field]))
+            $mandatory = Garradin_Config::getInstance()->get('champs_obligatoires');
+
+            foreach ($mandatory as $field)
             {
-                throw new UserException('Le champ \''.$field.'\' ne peut rester vide.');
+                if (!array_key_exists($field, $data) || !trim($data[$field]))
+                {
+                    throw new UserException('Le champ \''.$field.'\' ne peut rester vide.');
+                }
             }
         }
 
@@ -148,7 +151,7 @@ class Garradin_Membres
             $data['passe'] = $this->_hashPassword($data['passe']);
         }
 
-        if (!isset($data['id_categorie']))
+        if (empty($data['id_categorie']))
         {
             $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
         }
@@ -166,10 +169,32 @@ class Garradin_Membres
         return $db->lastInsertRowId();
     }
 
-    public function edit($id, $data = array())
+    public function edit($id, $data = array(), $check_mandatory = true)
     {
-        $this->_checkFields($data);
-        // UPDATE SQL
+        $this->_checkFields($data, $check_mandatory);
+
+        if (!empty($data['passe']) && trim($data['passe']))
+        {
+            $data['passe'] = $this->_hashPassword($data['passe']);
+        }
+        else
+        {
+            unset($data['passe']);
+        }
+
+        if (empty($data['id_categorie']))
+        {
+            $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
+        }
+
+        $db = Garradin_DB::getInstance();
+        $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
+    }
+
+    public function get($id)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
     public function remove($id)
