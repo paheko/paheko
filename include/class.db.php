@@ -53,18 +53,19 @@ class Garradin_DB extends SQLite3
             throw new InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
     }
 
-    public function simpleStatement($query)
+    public function simpleStatement($query, $args = array())
     {
         $statement = $this->prepare($query);
+        $nb = $statement->paramCount();
 
-        if (func_num_args() == 2 && is_array(func_get_arg(1)))
+        if (count($args) == 1 && is_array($args[0]))
         {
-            if (count(func_get_arg(1)) != $statement->paramCount())
+            if (count($args[0]) != $nb)
             {
-                throw new LengthException('Only '.(func_num_args() - 1).' arguments in array, but '.$statement->paramCount().' are required by query.');
+                throw new LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
             }
 
-            foreach (func_get_arg(1) as $key=>$value)
+            foreach ($args[0] as $key=>$value)
             {
                 if (is_int($key))
                 {
@@ -76,14 +77,14 @@ class Garradin_DB extends SQLite3
         }
         else
         {
-            if (func_num_args() - 1 != $statement->paramCount())
+            if (count($args) != $nb)
             {
-                throw new LengthException('Only '.(func_num_args() - 1).' arguments, but '.$statement->paramCount().' are required by query.');
+                throw new LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
             }
 
-            for ($i = 1; $i < func_num_args(); $i++)
+            for ($i = 1; $i <= count($args); $i++)
             {
-                $arg = func_get_arg($i);
+                $arg = $args[$i - 1];
                 $statement->bindValue($i, $arg, $this->_getArgType($arg, $i));
             }
         }
@@ -93,12 +94,19 @@ class Garradin_DB extends SQLite3
 
     public function simpleStatementFetch($query, $mode = SQLITE3_BOTH)
     {
-        return $this->_fetchResult($this->simpleStatement($query), $mode);
+        if ($mode != SQLITE3_BOTH && $mode != SQLITE3_ASSOC && $mode != SQLITE3_NUM)
+        {
+            throw new InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
+        }
+
+        $args = array_slice(func_get_args(), 2);
+        return $this->_fetchResult($this->simpleStatement($query, $args), $mode);
     }
 
     public function simpleStatementFetchAssoc($query)
     {
-        $result = $this->simpleStatement($query);
+        $args = array_slice(func_get_args(), 1);
+        $result = $this->simpleStatement($query, $args);
         $out = array();
 
         while ($row = $result->fetchArray(SQLITE3_NUM))
