@@ -181,11 +181,28 @@ class Garradin_DB extends SQLite3
         return $query;
     }
 
+    /**
+     * Simple INSERT query
+     */
     public function simpleInsert($table, $fields)
     {
         $fields_names = array_keys($fields);
         return $this->simpleExec('INSERT INTO '.$table.' ('.implode(', ', $fields_names).')
             VALUES (:'.implode(', :', $fields_names).');', $fields);
+    }
+
+    public function simpleUpdate($table, $fields, $where)
+    {
+        $query = 'UPDATE '.$table.' SET ';
+
+        foreach ($fields as $key=>$value)
+        {
+            $query .= $key . ' = :'.$key.', ';
+        }
+
+        $query = substr($query, 0, -2);
+        $query .= ' WHERE '.$where.';';
+        return $this->simpleExec($query, $fields);
     }
 
     /**
