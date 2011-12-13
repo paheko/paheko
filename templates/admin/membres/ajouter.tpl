@@ -59,10 +59,6 @@
                 {/foreach}
                 </select>
             </dd>
-            <dt>
-                <input type="checkbox" name="cotisation" value="1" id="f_cotisation" />
-                <label for="f_cotisation">À jour de cotisation</label>
-            </dt>
         </dl>
     </fieldset>
 

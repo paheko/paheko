@@ -174,6 +174,11 @@ class utils
         return isset($_POST[$key]) ? $_POST[$key] : '';
     }
 
+    static public function get($key)
+    {
+        return isset($_GET[$key]) ? $_GET[$key] : '';
+    }
+
     static public function getIP()
     {
         if (!empty($_SERVER['REMOTE_ADDR']))

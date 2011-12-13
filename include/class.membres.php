@@ -6,6 +6,8 @@ class Garradin_Membres
     const DROIT_ACCES = 1;
     const DROIT_ADMIN = 9;
 
+    const ITEMS_PER_PAGE = 50;
+
     protected function _getSalt($length)
     {
         $str = str_split('./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
@@ -178,10 +180,22 @@ class Garradin_Membres
     {
     }
 
-    public function getList($page = 1)
+    public function getList($cat = 0, $page = 1)
     {
-    }
+        $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
+        $db = Garradin_DB::getInstance();
+
+        $where = $cat ? 'WHERE id_categorie = '.(int)$cat : '';
+
+        return $db->simpleStatementFetch(
+            'SELECT id, id_categorie, nom, email, code_postal, ville, date_cotisation FROM membres '.$where.'
+                ORDER BY nom LIMIT ?, ?;',
+            SQLITE3_ASSOC,
+            $begin,
+            self::ITEMS_PER_PAGE
+        );
+    }
 }
 
 ?>

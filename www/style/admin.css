@@ -147,3 +147,38 @@ dd.help tt {
     padding: 0.2em;
     cursor: pointer;
 }
+
+table.list {
+    border-collapse: collapse;
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+table.list th {
+    text-align: left;
+    font-weight: bold;
+}
+
+table.list thead {
+    background: rgba(217, 134, 40, 0.5);
+}
+
+table.list th, table.list td {
+    padding: 0.2em 0.5em;
+}
+
+table.list tr {
+    border: 1px solid rgba(217, 134, 40, 0.5);
+}
+
+table.list tr:nth-child(even) {
+    background: rgba(217, 134, 40, 0.2);
+}
+
+table.list .alert {
+    color: red;
+}
+
+table.list .actions {
+    text-align: right;
+}
