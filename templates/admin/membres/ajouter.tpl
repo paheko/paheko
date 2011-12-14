@@ -11,7 +11,7 @@
     <fieldset>
         <legend>Informations personnelles</legend>
         <dl>
-            <dt><label for="f_nom">Prénom et nom</label>{if in_array('nom', $obligatoires)} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
+            <dt><label for="f_nom">Prénom et nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom" id="f_nom" value="{form_field name=nom}" /></dd>
             <dt><label for="f_email">Adresse E-Mail</label>{if in_array('email', $obligatoires)} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
             <dd><input type="email" name="email" id="f_email" value="{form_field name=email}" /></dd>

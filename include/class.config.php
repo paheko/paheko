@@ -7,7 +7,7 @@ class Garradin_Config
     protected $modified = array();
 
     protected $allowed_fields_membres = array('passe', 'nom', 'email', 'adresse', 'code_postal',
-        'ville', 'pays', 'telephone', 'date_anniversaire', 'details');
+        'ville', 'pays', 'telephone', 'date_naissance', 'notes');
 
     static protected $_instance = null;
 

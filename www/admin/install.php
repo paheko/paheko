@@ -79,7 +79,9 @@ else
                 $config->set('email_asso', utils::post('email_asso'));
                 $config->set('site_asso', utils::post('site_asso'));
                 $config->set('email_envoi_automatique', utils::post('email_asso'));
-                $config->set('champs_obligatoires', array('passe', 'email', 'nom'));
+                $config->set('champs_obligatoires', array('passe', 'email'));
+                $config->set('champs_modifiables_membre', array('passe', 'email', 'adresse',
+                    'code_postal', 'ville', 'pays', 'telephone', 'date_naissance'));
 
                 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 

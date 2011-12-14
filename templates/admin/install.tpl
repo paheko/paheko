@@ -1,7 +1,5 @@
 {include file="admin/_head.tpl" title="Garradin - Installation"}
 
-<h1>Installation de Garradin</h1>
-
 {if $disabled}
     <p class="error">Garradin est déjà installé.</p>
 {else}
