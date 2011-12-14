@@ -45,12 +45,16 @@ class Garradin_Membres
             return false;
 
         $db = Garradin_DB::getInstance();
-        $r = $db->querySingle('SELECT * FROM membres WHERE email=\''.$db->escapeString($email).'\' LIMIT 1;', true);
+        $r = $db->simpleQuerySingle('SELECT *,
+            strftime(\'%s\', date_connexion) AS date_connexion,
+            strftime(\'%s\', date_inscription) AS date_inscription,
+            strftime(\'%s\', date_cotisation) AS date_cotisation
+            FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
 
         if (empty($r))
             return false;
 
-        if (!$this->_checkPassword($passe, $r['passe']))
+        if (!$this->_checkPassword(trim($passe), $r['passe']))
             return false;
 
         $droits = $this->getDroits($r['id_categorie']);

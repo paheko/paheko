@@ -58,7 +58,7 @@ body {
 }
 
 .page {
-    margin: 1em 1em 1em 180px;
+    padding: 0px 1em 1em 180px;
 }
 
 p.error {

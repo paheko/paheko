@@ -12,7 +12,7 @@
         <legend>Informations personnelles</legend>
         <dl>
         {if in_array('nom', $config.champs_modifiables_membre)}
-            <dt><label for="f_nom">Prénom et bom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dt><label for="f_nom">Prénom et nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom" id="f_nom" value="{form_field data=$membre name=nom}" /></dd>
         {else}
             <dt>Prénom et nom <b>(non modifiable)</b></dt>
@@ -63,7 +63,7 @@
                 </select>
             </dd>
         {else}
-            <dt>Pays<b>(non modifiable)</b></dt>
+            <dt>Pays <b>(non modifiable)</b></dt>
             <dd>{if $membre.pays}{$membre.pays|get_country_name}{else}(vide){/if}</dd>
         {/if}
         </dl>

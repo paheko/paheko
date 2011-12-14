@@ -46,7 +46,7 @@
         {/if}
         *}
         {if $user.droits.config >= Garradin_Membres::DROIT_ADMIN}
-            <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}admin/config/">Configuration</a>
+            <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}admin/config.php">Configuration</a>
         {/if}
         {if count($config.champs_modifiables_membre) > 0}
             <li class="mes_infos{if $current == 'mes_infos'} current{/if}"><a href="{$www_url}admin/mes_infos.php">Mes infos</a>
