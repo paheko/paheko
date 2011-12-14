@@ -4,6 +4,20 @@ require_once GARRADIN_ROOT . '/include/class.membres.php';
 
 class Garradin_Membres_Categories
 {
+    protected $droits = array(
+        'inscription'=> Garradin_Membres::DROIT_AUCUN,
+        'connexion' =>  Garradin_Membres::DROIT_ACCES,
+        'membres'   =>  Garradin_Membres::DROIT_ACCES,
+        'compta'    =>  Garradin_Membres::DROIT_ACCES,
+        'wiki'      =>  Garradin_Membres::DROIT_ACCES,
+        'config'    =>  Garradin_Membres::DROIT_AUCUN,
+    );
+
+    static public function getDroitsDefaut()
+    {
+        return $this->droits;
+    }
+
     protected function _checkData(&$data)
     {
         if (!isset($data['nom']) || !trim($data['nom']))
@@ -15,6 +29,11 @@ class Garradin_Membres_Categories
         {
             throw new UserException('Le montant de cotisation doit être un chiffre.');
         }
+    }
+
+    public function add($data)
+    {
+        $this->_checkData($data);
 
         if (!isset($data['duree_cotisation']) || !is_numeric($data['duree_cotisation']))
         {
@@ -26,26 +45,13 @@ class Garradin_Membres_Categories
             $data['description'] = '';
         }
 
-        $droits = array(
-            'wiki'      =>  Garradin_Membres::DROIT_ACCES,
-            'membres'   =>  Garradin_Membres::DROIT_ACCES,
-            'compta'    =>  Garradin_Membres::DROIT_ACCES,
-            'inscription'=> Garradin_Membres::DROIT_ACCES,
-            'connexion' =>  Garradin_Membres::DROIT_ACCES,
-        );
-
-        foreach ($droits as $key=>$value)
+        foreach ($this->droits as $key=>$value)
         {
             if (!isset($data['droit_'.$key]))
                 $data['droit_'.$key] = $value;
             else
                 $data['droit_'.$key] = (int)$data['droit_'.$key];
         }
-    }
-
-    public function add($data)
-    {
-        $this->_checkData($data);
 
         $db = Garradin_DB::getInstance();
         $db->simpleInsert('membres_categories', $data);
@@ -56,16 +62,15 @@ class Garradin_Membres_Categories
     public function edit($id, $data)
     {
         $this->_checkData($data);
-        $db = Garradin_DB::getInstance();
 
-        return $db->simpleExec(
-            'UPDATE membres_categories SET nom = ?, description = ?, montant_cotisation = ?, duree_cotisation = ?) WHERE id = ?',
-            $data['nom'],
-            !empty($data['description']) ? trim($data['description']) : '',
-            (float) $data['montant_cotisation'],
-            12,
-            (int) $id
-        );
+        foreach ($this->droits as $key=>$value)
+        {
+            if (isset($data['droit_'.$key]))
+                $data['droit_'.$key] = (int)$data['droit_'.$key];
+        }
+
+        $db = Garradin_DB::getInstance();
+        return $db->simpleUpdate('membres_categories', $data, 'id = '.(int)$id);
     }
 
     public function get($id)
