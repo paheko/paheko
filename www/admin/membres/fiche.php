@@ -33,6 +33,12 @@ if (!empty($_POST['cotisation']))
     {
         try {
             $membres->updateCotisation($id, utils::post('date'));
+
+            if ($id == $user['id'])
+            {
+                $membres->updateSessionData();
+            }
+
             utils::redirect('/admin/membres/fiche.php?id='.$id);
         }
         catch (UserException $e)

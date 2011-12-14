@@ -39,15 +39,6 @@ class Garradin_Membres
         return true;
     }
 
-    protected function _login($user)
-    {
-        $this->_sessionStart(true);
-
-        $_SESSION['logged_user'] = $user;
-
-        return true;
-    }
-
     public function login($email, $passe)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL))
@@ -62,27 +53,32 @@ class Garradin_Membres
         if (!$this->_checkPassword($passe, $r['passe']))
             return false;
 
-        $droits = $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;', true, (int)$r['id_categorie']);
-
-        foreach ($droits as $key=>$value)
-        {
-            unset($droits[$key]);
-            $key = str_replace('droit_', '', $key, $found);
-
-            if ($found)
-            {
-                $droits[$key] = (int) $value;
-            }
-        }
+        $droits = $this->getDroits($r['id_categorie']);
 
         if ($droits['connexion'] == self::DROIT_AUCUN)
             return false;
 
-        $r['droits'] = $droits;
-
+        $this->_sessionStart(true);
         $db->simpleExec('UPDATE membres SET date_connexion = datetime(\'now\') WHERE id = ?;', $r['id']);
 
-        return $this->_login($r);
+        return $this->updateSessionData($r, $droits);
+    }
+
+    public function updateSessionData($membre = null, $droits = null)
+    {
+        if (is_null($membre))
+        {
+            $membre = $this->get($_SESSION['logged_user']['id']);
+        }
+
+        if (is_null($droits))
+        {
+            $droits = $this->getDroits($membre['id_categorie']);
+        }
+
+        $membre['droits'] = $droits;
+        $_SESSION['logged_user'] = $membre;
+        return true;
     }
 
     public function isLogged()
@@ -111,13 +107,18 @@ class Garradin_Membres
 
     public function _checkFields($data, $check_mandatory = true)
     {
+        if (isset($data['nom']) && !trim($data['nom']))
+        {
+            throw new UserException('Le champ prénom et nom ne peut rester vide.');
+        }
+
         if ($check_mandatory)
         {
             $mandatory = Garradin_Config::getInstance()->get('champs_obligatoires');
 
             foreach ($mandatory as $field)
             {
-                if (!array_key_exists($field, $data) || !trim($data[$field]))
+                if (array_key_exists($field, $data) && !trim($data[$field]))
                 {
                     throw new UserException('Le champ \''.$field.'\' ne peut rester vide.');
                 }
@@ -191,7 +192,7 @@ class Garradin_Membres
             unset($data['passe']);
         }
 
-        if (empty($data['id_categorie']))
+        if (isset($data['id_categorie']) && empty($data['id_categorie']))
         {
             $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
         }
@@ -207,6 +208,25 @@ class Garradin_Membres
             strftime(\'%s\', date_inscription) AS date_inscription,
             strftime(\'%s\', date_cotisation) AS date_cotisation
             FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
+    }
+
+    public function getDroits($id)
+    {
+        $db = Garradin_DB::getInstance();
+        $droits = $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;', true, (int)$id);
+
+        foreach ($droits as $key=>$value)
+        {
+            unset($droits[$key]);
+            $key = str_replace('droit_', '', $key, $found);
+
+            if ($found)
+            {
+                $droits[$key] = (int) $value;
+            }
+        }
+
+        return $droits;
     }
 
     public function remove($id)

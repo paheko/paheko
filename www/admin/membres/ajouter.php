@@ -41,7 +41,7 @@ if (!empty($_POST['save']))
                 'notes'         =>  '',
             ));
 
-            utils::redirect('/admin/membres/');
+            utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
         catch (UserException $e)
         {

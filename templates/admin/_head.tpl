@@ -38,17 +38,19 @@
             </li>
         {/if}
         {if $user.droits.wiki >= Garradin_Membres::DROIT_ACCES}
-            <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$www_url}wiki/">Wiki</a>
+            <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$www_url}admin/wiki/">Wiki</a>
             <ul>
-                <li class="wiki_my{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}wiki/suivi/">Mes pages suivies</a>
+                <li class="wiki_my{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}admin/wiki/suivi/">Mes pages suivies</a>
             </ul>
             </li>
         {/if}
         *}
         {if $user.droits.config >= Garradin_Membres::DROIT_ADMIN}
-            <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}config/">Configuration</a>
+            <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}admin/config/">Configuration</a>
         {/if}
-        <li class="mes_infos{if $current == 'mes_infos'} current{/if}"><a href="{$www_url}moi/">Mes infos</a>
+        {if count($config.champs_modifiables_membre) > 0}
+            <li class="mes_infos{if $current == 'mes_infos'} current{/if}"><a href="{$www_url}admin/mes_infos.php">Mes infos</a>
+        {/if}
         <li class="logout"><a href="{$www_url}admin/logout.php">Déconnexion</a></li>
     </ul>
     {/if}

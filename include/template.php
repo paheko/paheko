@@ -51,11 +51,6 @@ function tpl_form_field($params)
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
-function tpl_get_country_name($cc)
-{
-    return utils::getCountryName($cc);
-}
-
 function tpl_format_tel($n)
 {
     $n = preg_replace('![^\d\+]!', '', $n);
@@ -76,7 +71,7 @@ function tpl_date_fr($ts, $format)
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
 
-$tpl->register_modifier('get_country_name', 'tpl_get_country_name');
+$tpl->register_modifier('get_country_name', array('utils', 'getCountryName'));
 $tpl->register_modifier('format_tel', 'tpl_format_tel');
 
 $tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
