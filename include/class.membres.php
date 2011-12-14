@@ -4,6 +4,7 @@ class Garradin_Membres
 {
     const DROIT_AUCUN = 0;
     const DROIT_ACCES = 1;
+    const DROIT_ECRITURE = 2;
     const DROIT_ADMIN = 9;
 
     const ITEMS_PER_PAGE = 50;

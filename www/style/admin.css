@@ -89,7 +89,7 @@ p.intro {
 /* Formulaires */
 fieldset {
     border: 1px solid #ccc;
-    padding: 0.8em;
+    padding: 0.8em 1em 0 1em;
     margin-bottom: 1em;
 }
 
@@ -105,6 +105,10 @@ label:hover {
 
 dl dt label {
     font-weight: bold;
+}
+
+fieldset dl {
+    margin-bottom: 0.8em;
 }
 
 fieldset dl dt b {
@@ -204,10 +208,10 @@ table.list .actions {
 }
 
 .droits b {
-    border: 2px solid #9c9;
+    border: 2px solid #999;
     border-radius: 1em;
-    color: #060;
-    background: #efe;
+    color: #000;
+    background: #ccc;
     width: 16px;
     display: inline-block;
     text-align: center;
@@ -222,6 +226,18 @@ table.list .actions {
     border-color: #ccc;
     background: #eee;
     color: #999;
+}
+
+.droits b.acces {
+    border-color: #cc9;
+    color: #660;
+    background: #ffe;
+}
+
+.droits b.ecriture {
+    border-color: #9c9;
+    color: #060;
+    background: #efe;
 }
 
 .droits b.aucun:before {

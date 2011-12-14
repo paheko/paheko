@@ -41,7 +41,7 @@
                 </td>
                 {if empty($membre.date_cotisation)}
                     <td class="error">jamais réglée</td>
-                {elseif $membre.date_cotisation > strtotime('a year ago')}
+                {elseif $membre.date_cotisation > strtotime('12 months ago')} {* FIXME durée de cotisation variable *}
                     <td class="confirm">à jour</td>
                 {else}
                     <td class="alert">en retard</td>

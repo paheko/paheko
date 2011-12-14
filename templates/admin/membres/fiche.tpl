@@ -36,6 +36,8 @@
 <div class="infos">
     <h3>Informations générales</h3>
     <dl>
+        <dt>Droits</dt>
+        <dd class="droits">{format_droits droits=$categorie}</dd>
         <dt>Inscription</dt>
         <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
         <dt>Dernière connexion</dt>
