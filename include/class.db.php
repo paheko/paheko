@@ -224,7 +224,7 @@ class Garradin_DB extends SQLite3
 
     public function queryFetch($query, $mode = SQLITE3_BOTH)
     {
-        return $this->_fetchResult($this->query($query));
+        return $this->_fetchResult($this->query($query), $mode);
     }
 
     public function queryFetchAssoc($query)

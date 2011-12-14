@@ -203,6 +203,45 @@ table.list .actions {
     text-align: right;
 }
 
+.droits b {
+    border: 2px solid #9c9;
+    border-radius: 1em;
+    color: #060;
+    background: #efe;
+    width: 16px;
+    display: inline-block;
+    text-align: center;
+    font-size: 0.8em;
+    cursor: help;
+    vertical-align: middle;
+    position: relative;
+    z-index: 10;
+}
+
+.droits b.aucun {
+    border-color: #ccc;
+    background: #eee;
+    color: #999;
+}
+
+.droits b.aucun:before {
+    content: "X";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -3px;
+    color: #ccc;
+    z-index: -1;
+    font-size: 1.5em;
+    overflow: hidden;
+}
+
+.droits b.admin {
+    color: #900;
+    border-color: #c99;
+    background: #fee;
+}
+
 .infos {
     margin-bottom: 1em;
 }
