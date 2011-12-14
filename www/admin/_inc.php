@@ -17,7 +17,7 @@ if (!defined('GARRADIN_LOGIN_PROCESS'))
     $tpl->assign('user', $membres->getLoggedUser());
     $user = $membres->getLoggedUser();
 
-    $tpl->assign('self_page', str_replace(WWW_URL . 'admin/', '', utils::getSelfUrl()));
+    $tpl->assign('current', '');
 }
 
 ?>

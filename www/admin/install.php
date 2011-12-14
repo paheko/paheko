@@ -96,6 +96,7 @@ else
                     'droit_wiki' => Garradin_Membres::DROIT_ADMIN,
                     'droit_membres' => Garradin_Membres::DROIT_ADMIN,
                     'droit_compta' => Garradin_Membres::DROIT_ADMIN,
+                    'droit_config' => Garradin_Membres::DROIT_ADMIN,
                     ));
 
                 $membres = new Garradin_Membres;
@@ -104,13 +105,7 @@ else
                     'nom'           =>  utils::post('nom_membre'),
                     'email'         =>  utils::post('email_membre'),
                     'passe'         =>  utils::post('passe_membre'),
-                    'telephone'     =>  '',
-                    'code_postal'   =>  '',
-                    'adresse'       =>  '',
-                    'ville'         =>  '',
                     'pays'          =>  'FR',
-                    'date_anniversaire' => '',
-                    'notes'         =>  '',
                 ));
 
                 $config->save();

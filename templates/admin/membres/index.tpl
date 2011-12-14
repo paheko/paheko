@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Liste des membres"}
+{include file="admin/_head.tpl" title="Liste des membres" current="membres"}
 
 <form method="get" action="{$self_url|escape}">
     <fieldset>
@@ -34,18 +34,21 @@
         {foreach from=$liste item="membre"}
             <tr>
                 <th>{$membre.nom|escape}</th>
-                <td><a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">{$membre.email|escape}</a></td>
+                <td>{if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">{$membre.email|escape}</a>{/if}</td>
                 <td>
                     {$membre.ville|truncate:60|escape}
                     {if !empty($membre.code_postal)}<small>({$membre.code_postal|escape})</small>{/if}
                 </td>
                 {if empty($membre.date_cotisation)}
-                    <td class="alert">jamais réglée</td>
+                    <td class="error">jamais réglée</td>
+                {elseif $membre.date_cotisation > strtotime('a year ago')}
+                    <td class="confirm">à jour</td>
                 {else}
-                    <td>{$membre.date_cotisation|escape}</td>
+                    <td class="alert">en retard</td>
                 {/if}
                 <td class="actions">
-                    <a href="modifier.php?id={$membre.id|escape}">Modifier</a>
+                    <a href="fiche.php?id={$membre.id|escape}">Fiche</a>
+                    | <a href="modifier.php?id={$membre.id|escape}">Modifier</a>
                 </td>
             </tr>
         {/foreach}
@@ -62,7 +65,7 @@
             <tr>
                 <th>{$membre.nom|escape}</th>
                 <td class="actions">
-                    <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
+                    {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
                 </td>
             </tr>
         {/foreach}

@@ -41,7 +41,7 @@ class Garradin_DB extends SQLite3
     {
         if (is_float($arg))
             return SQLITE3_FLOAT;
-        elseif (is_numeric($arg))
+        elseif (is_int($arg))
             return SQLITE3_INTEGER;
         elseif (is_bool($arg))
             return SQLITE3_INTEGER;

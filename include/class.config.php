@@ -6,7 +6,7 @@ class Garradin_Config
     protected $config = null;
     protected $modified = array();
 
-    protected $allowed_mandatory_fields_membres = array('passe', 'nom', 'email', 'adresse', 'code_postal',
+    protected $allowed_fields_membres = array('passe', 'nom', 'email', 'adresse', 'code_postal',
         'ville', 'pays', 'telephone', 'date_anniversaire', 'details');
 
     static protected $_instance = null;
@@ -41,6 +41,8 @@ class Garradin_Config
 
             'categorie_dons'        =>  $int,
             'categorie_cotisations' =>  $int,
+
+            'champs_modifiables_membre' =>  $array,
         );
 
         $db = Garradin_DB::getInstance();
@@ -164,9 +166,20 @@ class Garradin_Config
             {
                 foreach ($value as $name)
                 {
-                    if (!in_array($name, $this->allowed_mandatory_fields_membres))
+                    if (!in_array($name, $this->allowed_fields_membres))
                     {
                         throw new UserException('Le champ \''.$name.'\' ne peut pas être rendu obligatoire.');
+                    }
+                }
+                break;
+            }
+            case 'champs_modifiables_membre':
+            {
+                foreach ($value as $name)
+                {
+                    if (!in_array($name, $this->allowed_fields_membres))
+                    {
+                        throw new UserException('Le champ \''.$name.'\' ne peut pas être rendu modifiable par le membre.');
                     }
                 }
                 break;
