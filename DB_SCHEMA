@@ -20,7 +20,8 @@ CREATE TABLE membres_categories (
     droit_membres INT DEFAULT 1,
     droit_compta INT DEFAULT 1,
     droit_inscription INT DEFAULT 0,
-    droit_connexion INT DEFAULT 1
+    droit_connexion INT DEFAULT 1,
+    droit_config INT DEFAULT 0
 );
 
 
@@ -46,7 +47,7 @@ CREATE TABLE membres (
     -- Pour le bordel
     notes TEXT,
 
-    date_inscription TEXT,
+    date_inscription TEXT DEFAULT CURRENT_DATE,
     date_connexion TEXT,
 
     -- Dernière cotisation enregistrée
@@ -116,6 +117,7 @@ CREATE TABLE wiki_revisions (
 
     contenu TEXT,
     modification TEXT, -- Description des modifications effectuées
+    date TEXT DEFAULT CURRENT_TIMESTAMP,
 
     chiffrement INTEGER, -- 0/1
 

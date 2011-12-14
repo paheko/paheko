@@ -145,33 +145,13 @@ class Garradin_Membres
     public function add($data = array())
     {
         $this->_checkFields($data);
-
-        if (!empty($data['passe']) && trim($data['passe']))
-        {
-            $data['passe'] = $this->_hashPassword($data['passe']);
-        }
-
-        if (empty($data['id_categorie']))
-        {
-            $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
-        }
-
         $db = Garradin_DB::getInstance();
 
-        $db->simpleExec('INSERT INTO membres
-            (id_categorie, passe, nom, email, adresse, code_postal, ville, pays, telephone,
-            date_naissance, notes, date_inscription, date_connexion, date_cotisation)
-            VALUES
-            (:id_categorie, :passe, :nom, :email, :adresse, :code_postal, :ville, :pays, :telephone,
-            :date_naissance, :notes, date(\'now\'), NULL, NULL);',
-            $data);
-
-        return $db->lastInsertRowId();
-    }
-
-    public function edit($id, $data = array(), $check_mandatory = true)
-    {
-        $this->_checkFields($data, $check_mandatory);
+        if (!empty($data['email'])
+            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? LIMIT 1;', false, $data['email']))
+        {
+            throw new UserException('Cette adresse e-mail est déjà utilisée par un autre membre, il faut en choisir une autre.');
+        }
 
         if (!empty($data['passe']) && trim($data['passe']))
         {
@@ -187,14 +167,46 @@ class Garradin_Membres
             $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
         }
 
+        $db->simpleInsert('membres', $data);
+        return $db->lastInsertRowId();
+    }
+
+    public function edit($id, $data = array(), $check_mandatory = true)
+    {
         $db = Garradin_DB::getInstance();
+        $this->_checkFields($data, $check_mandatory);
+
+        if (!empty($data['email'])
+            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? AND id != ? LIMIT 1;', false, $data['email'], (int)$id))
+        {
+            throw new UserException('Cette adresse e-mail est déjà utilisée par un autre membre, il faut en choisir une autre.');
+        }
+
+        if (!empty($data['passe']) && trim($data['passe']))
+        {
+            $data['passe'] = $this->_hashPassword($data['passe']);
+        }
+        else
+        {
+            unset($data['passe']);
+        }
+
+        if (empty($data['id_categorie']))
+        {
+            $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
+        }
+
         $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
     }
 
     public function get($id)
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
+        return $db->simpleQuerySingle('SELECT *,
+            strftime(\'%s\', date_connexion) AS date_connexion,
+            strftime(\'%s\', date_inscription) AS date_inscription,
+            strftime(\'%s\', date_cotisation) AS date_cotisation
+            FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
     public function remove($id)
@@ -214,11 +226,45 @@ class Garradin_Membres
         $where = $cat ? 'WHERE id_categorie = '.(int)$cat : '';
 
         return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, nom, email, code_postal, ville, date_cotisation FROM membres '.$where.'
+            'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
                 ORDER BY nom LIMIT ?, ?;',
             SQLITE3_ASSOC,
             $begin,
             self::ITEMS_PER_PAGE
+        );
+    }
+
+    static public function checkCotisation($date_membre, $duree_cotisation, $date_verif = null)
+    {
+        if (is_null($date_verif))
+            $date_verif = time();
+
+        if (!$date_membre)
+            return false;
+
+        $echeance = new DateTime('@'.$date_membre);
+        $echeance->setTime(0, 0);
+        $echeance->modify('+'.$duree_cotisation.' months');
+
+        if ($echeance->getTimestamp() < $date_verif)
+            return round(($date_verif - $echeance->getTimestamp()) / 3600 / 24);
+
+        return true;
+    }
+
+    static public function updateCotisation($id, $date)
+    {
+        if (preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
+            $date = DateTime::createFromFormat('d/m/Y', $date);
+        elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $date))
+            $date = DateTime::createFromFormat('Y-m-d', $date);
+        else
+            throw new UserException('Format de date invalide : '.$date);
+
+        $db = Garradin_DB::getInstance();
+        return $db->simpleUpdate('membres',
+            array('date_cotisation' => $date->format('Y-m-d H:i:s')),
+            'id = '.(int)$id
         );
     }
 }

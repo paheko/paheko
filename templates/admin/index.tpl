@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$config.nom_asso}
+{include file="admin/_head.tpl" title=$config.nom_asso current="home"}
 
 <p>Bla</p>
 

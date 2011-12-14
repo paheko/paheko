@@ -51,7 +51,37 @@ function tpl_form_field($params)
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
+function tpl_get_country_name($cc)
+{
+    return utils::getCountryName($cc);
+}
+
+function tpl_format_tel($n)
+{
+    $n = preg_replace('![^\d\+]!', '', $n);
+    $n = preg_replace('!(\+?\d{2})!', '\\1 ', $n);
+    return $n;
+}
+
+function tpl_strftime_fr($ts, $format)
+{
+    return utils::strftime_fr($format, $ts);
+}
+
+function tpl_date_fr($ts, $format)
+{
+    return utils::date_fr($format, $ts);
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
+
+$tpl->register_modifier('get_country_name', 'tpl_get_country_name');
+$tpl->register_modifier('format_tel', 'tpl_format_tel');
+
+$tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
+
+$tpl->register_modifier('strftime_fr', 'tpl_strftime_fr');
+$tpl->register_modifier('date_fr', 'tpl_date_fr');
 
 ?>

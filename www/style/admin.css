@@ -185,10 +185,40 @@ table.list tr:nth-child(even) {
     background: rgba(217, 134, 40, 0.2);
 }
 
-table.list .alert {
+table.list .error {
     color: red;
+    font-weight: bold;
+}
+
+table.list .alert {
+    color: darkred;
+    font-weight: bold;
+}
+
+table.list .confirm {
+    color: darkgreen;
 }
 
 table.list .actions {
     text-align: right;
+}
+
+.infos {
+    margin-bottom: 1em;
+}
+
+.infos h3 {
+    margin-bottom: 0.5em;
+}
+
+.infos p {
+    margin-bottom: 0.8em;
+}
+
+.infos dl {
+    margin-bottom: 0.8em;
+}
+
+.infos dl dd {
+    margin: 0.2em 1em;
 }
