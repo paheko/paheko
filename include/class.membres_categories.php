@@ -93,6 +93,12 @@ class Garradin_Membres_Categories
         $db = Garradin_DB::getInstance();
         return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;');
     }
+
+    public function listComplete()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->queryFetch('SELECT * FROM membres_categories ORDER BY nom;');
+    }
 }
 
 ?>
