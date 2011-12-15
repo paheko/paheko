@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Mise en place/à jour des dépendances
+
 # Template Lite
 svn export https://svn.kd2.org/svn/misc/libs/template_lite/ include/template_lite/
 
