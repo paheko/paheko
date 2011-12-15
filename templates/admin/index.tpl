@@ -18,7 +18,6 @@
     {/if}
 
     <h3>Bienvenue, {$user.nom|escape} !</h3>
-</div>
 {if empty($user.date_cotisation)}
     <p class="error">Vous n'avez jamais réglé votre cotisation.</p>
 {elseif $verif_cotisation === true}
@@ -26,6 +25,10 @@
 {else}
     <p class="alert">Cotisation en retard ! (dernier règlement le {$user.date_cotisation|date_fr:'d/m/Y'})</p>
 {/if}
+</div>
 
+<div class="infos">
+    <p>(Garradin version {$garradin_version|escape})</p>
+</div>
 
 {include file="admin/_foot.tpl"}
