@@ -17,7 +17,6 @@ tar cjvf "${MY_DIR}-${VERSION}-${MANIFEST_VERSION}-${DATE}.tar.bz2" --wildcards-
     --exclude '_FOSSIL_' \
     --exclude 'association.db' \
     --exclude '*.sh' \
-    --exclude 'manifest*' \
     ${MY_DIR}
 
 cd ${MY_PATH}

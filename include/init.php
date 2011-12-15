@@ -1,6 +1,39 @@
 <?php
 
 /*
+ * Version de Garradin
+ */
+
+function garradin_version()
+{
+    if (defined('GARRADIN_VERSION'))
+    {
+        return GARRADIN_VERSION;
+    }
+
+    $file = __DIR__ . '/../VERSION';
+
+    if (file_exists($file))
+    {
+        $version = trim(file_get_contents($file));
+    }
+    else
+    {
+        $version = 'unknown';
+    }
+
+    $file = __DIR__ . '/../manifest.uuid';
+
+    if (file_exists($file))
+    {
+        $version .= '.' . substr(trim(file_get_contents($file)), 0, 10);
+    }
+
+    define('GARRADIN_VERSION', $version);
+    return $version;
+}
+
+/*
  * Configuration globale
  */
 
