@@ -152,6 +152,19 @@ p.submit {
     font-size: 1.2em;
 }
 
+form .checkUncheck {
+    float: left;
+}
+
+form .actions {
+    float: right;
+}
+
+h3.warning {
+    margin: 1em;
+    color: red;
+}
+
 dd.help {
     color: #666;
 }

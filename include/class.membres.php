@@ -234,10 +234,6 @@ class Garradin_Membres
         return $droits;
     }
 
-    public function remove($id)
-    {
-    }
-
     public function search($query)
     {
     }
@@ -291,6 +287,31 @@ class Garradin_Membres
             array('date_cotisation' => $date->format('Y-m-d H:i:s')),
             'id = '.(int)$id
         );
+    }
+
+    static public function changeCategorie($id_cat, $membres)
+    {
+        foreach ($membres as &$id)
+        {
+            $id = (int) $id;
+        }
+
+        $db = Garradin_DB::getInstance();
+        return $db->simpleUpdate('membres',
+            array('id_categorie' => (int)$id_cat),
+            'id IN ('.implode(',', $membres).')'
+        );
+    }
+
+    static public function deleteMembres($membres)
+    {
+        foreach ($membres as &$id)
+        {
+            $id = (int) $id;
+        }
+
+        $db = Garradin_DB::getInstance();
+        return $db->exec('DELETE FROM membres WHERE id IN ('.implode(',', $membres).');');
     }
 }
 
