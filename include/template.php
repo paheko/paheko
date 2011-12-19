@@ -2,21 +2,40 @@
 
 require_once GARRADIN_ROOT . '/include/template_lite/class.template.php';
 
-$tpl = new Template_Lite;
+class Garradin_TPL extends Template_Lite
+{
+    static protected $_instance = null;
 
-$tpl->cache = false;
+    static public function getInstance()
+    {
+        return self::$_instance ?: self::$_instance = new Garradin_TPL;
+    }
 
-$tpl->compile_dir = GARRADIN_ROOT . '/cache/compiled';
-$tpl->template_dir = GARRADIN_ROOT . '/templates';
+    private function __clone()
+    {
+    }
 
-$tpl->compile_check = true;
+    public function __construct()
+    {
+        parent::__construct();
 
-$tpl->reserved_template_varname = 'tpl';
+        $this->cache = false;
 
-$tpl->assign('www_url', WWW_URL);
-$tpl->assign('self_url', utils::getSelfUrl());
+        $this->compile_dir = GARRADIN_ROOT . '/cache/compiled';
+        $this->template_dir = GARRADIN_ROOT . '/templates';
 
-$tpl->assign('is_logged', false);
+        $this->compile_check = true;
+
+        $this->reserved_template_varname = 'tpl';
+
+        $this->assign('www_url', WWW_URL);
+        $this->assign('self_url', utils::getSelfUrl());
+
+        $this->assign('is_logged', false);
+    }
+}
+
+$tpl = Garradin_TPL::getInstance();
 
 if (class_exists('Garradin_Config'))
 {
@@ -97,7 +116,7 @@ function tpl_format_droits($params)
                 if ($droit == Garradin_Membres::DROIT_AUCUN)
                     $desc = 'N\'a pas le droit de se connecter';
                 else
-                    $desc = 'Peut le droit de se connecter';
+                    $desc = 'A le droit de se connecter';
             }
             elseif ($cle == 'inscription')
             {

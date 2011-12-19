@@ -88,8 +88,17 @@ function exception_handler($e)
 {
     if ($e instanceOf UserException)
     {
-        echo '<h3>'.$e->getMessage().'</h3>';
-        exit;
+        try {
+            require_once GARRADIN_ROOT . '/include/template.php';
+            $tpl = Garradin_TPL::getInstance();
+
+            $tpl->assign('error', $e->getMessage());
+            $tpl->display('error.tpl');
+            exit;
+        }
+        catch (Exception $e)
+        {
+        }
     }
 
     $error = "Error happened !\n\n".

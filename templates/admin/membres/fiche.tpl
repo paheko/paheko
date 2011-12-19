@@ -36,6 +36,8 @@
 <div class="infos">
     <h3>Informations générales</h3>
     <dl>
+        <dt>Numéro d'adhérent</dt>
+        <dd>{$membre.id|escape}</dd>
         <dt>Droits</dt>
         <dd class="droits">{format_droits droits=$categorie}</dd>
         <dt>Inscription</dt>
