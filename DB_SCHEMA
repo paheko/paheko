@@ -56,24 +56,39 @@ CREATE TABLE membres (
 
 CREATE INDEX membres_id_categorie ON membres (id_categorie);
 
+/*
 --
 -- COMPTA
 --
 
-CREATE TABLE compta_categories (
+CREATE TABLE compta_exercices
+-- Exercices
+(
     id INTEGER PRIMARY KEY,
-    nom TEXT,
-    description TEXT,
-    type_recus INTEGER, -- reçu fiscal, reçu de don, reçu de cotisation, facture
-    type_operations INTEGER -- 0 = dépense, 1 = recette
+
+    debut TEXT DEFAULT CURRENT_DATE,
+    fin TEXT DEFAULT CURRENT_DATE
 );
 
-CREATE TABLE compta_comptes (
-    id INTEGER PRIMARY KEY,
-    libelle TEXT,
+
+CREATE TABLE compta_plan
+-- Plan comptable
+(
+    id INT PRIMARY KEY,
+    nom TEXT,
+    parent INT,
     description TEXT,
+    perso_type TEXT DEFAULT NULL, -- Si NULL, alors l'entrée provient du plan comptable
+    perso_valeur INT DEFAULT NULL
+);
+
+CREATE TABLE compta_comptes
+-- Comptes bancaires
+(
+    id INTEGER PRIMARY KEY,
 
     banque TEXT,
+
     iban TEXT,
     bic TEXT,
 
@@ -81,20 +96,43 @@ CREATE TABLE compta_comptes (
     solde REAL
 );
 
-CREATE TABLE compta_operations (
+CREATE TABLE compta_operations
+-- Opérations comptables
+(
     id INTEGER PRIMARY KEY,
-    libelle TEXT,
-    montant REAL,
-    description TEXT,
 
-    id_compte INTEGER,
-    id_categorie INTEGER,
+    libelle TEXT,
+    remarques TEXT,
+    reference TEXT, -- Référence diverse, par exemple numéro de chèque
+
+    debit REAL,
+    credit REAL,
+
+    date TEXT DEFAULT CURRENT_DATE,
+    moyen_paiement INT DEFAULT NULL,
+    double INT, -- Pour compta partie double, ID de l'opération inverse associée
+
+    id_exercice INTEGER DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent
+    id_plan INTEGER,
     id_auteur INTEGER
 );
 
+CREATE TABLE compta_moyens
+-- Moyens de paiement
+(
+    id INTEGER PRIMARY KEY,
+    nom TEXT
+);
 
-CREATE INDEX compta_operations_id_compte ON compta_operations (id_compte);
-CREATE INDEX compta_operations_id_categorie ON compta_operations (id_categorie);
+INSERT INTO compta_moyens (nom) VALUES ('Espèces');
+INSERT INTO compta_moyens (nom) VALUES ('Carte bleue');
+INSERT INTO compta_moyens (nom) VALUES ('Chèque');
+INSERT INTO compta_moyens (nom) VALUES ('Virement');
+INSERT INTO compta_moyens (nom) VALUES ('Prélèvement');
+INSERT INTO compta_moyens (nom) VALUES ('TIP');
+
+CREATE INDEX compta_operations_id_compte ON compta_operations (id_exercice);
+CREATE INDEX compta_operations_id_categorie ON compta_operations (id_plan);
 CREATE INDEX compta_operations_id_auteur ON compta_operations (id_auteur);
 
 --
@@ -147,3 +185,4 @@ CREATE TABLE papiers (
 
     donnees TEXT
 );
+*/
