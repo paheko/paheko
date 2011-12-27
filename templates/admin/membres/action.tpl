@@ -41,13 +41,19 @@
             Êtes-vous sûr de vouloir supprimer les {$nb_selected|escape} membres sélectionnés ?
         </h3>
         <p class="alert">
-            Attention : cette action est irréversible.
+            <strong>Attention</strong> : cette action est irréversible et effacera toutes les
+            données personnelles et l'historique de ces membres.
+        </p>
+        <p class="help">
+            Alternativement, il est aussi possible de déplacer les membres qui ne font plus
+            partie de l'association dans une catégorie «&nbsp;Anciens membres&nbsp;», plutôt
+            que de les effacer complètement.
         </p>
     </fieldset>
 
     <p class="submit">
         {csrf_field key="membres_action"}
-        <input type="submit" name="delete_ok" value="Oui, je suis sûr de chez sûr &rarr;" />
+        <input type="submit" name="delete_ok" value="Oui, supprimer ces membres &rarr;" />
     </p>
     {/if}
 
