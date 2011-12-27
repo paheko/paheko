@@ -93,6 +93,17 @@ else
                 $config->set('categorie_membres', $id);
 
                 $id = $cats->add(array(
+                    'nom' => 'Anciens membres',
+                    'montant_cotisation' => 0,
+                    'droit_inscription' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_wiki' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_membres' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_compta' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_config' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_connexion' => Garradin_Membres::DROIT_AUCUN,
+                    ));
+
+                $id = $cats->add(array(
                     'nom' => ucfirst(utils::post('cat_membre')),
                     'montant_cotisation' => 0,
                     'droit_inscription' => Garradin_Membres::DROIT_AUCUN,

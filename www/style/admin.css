@@ -82,6 +82,11 @@ p.alert {
     margin-bottom: 1em;
 }
 
+p.help {
+    margin: 1em;
+    color: #666;
+}
+
 p.intro {
     margin: 1em;
 }
