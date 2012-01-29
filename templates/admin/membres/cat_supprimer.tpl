@@ -9,9 +9,9 @@
 <form method="post" action="{$self_url|escape}">
 
     <fieldset>
-        <legend>Supprimer la catégorie de membres sélectionnée ?</legend>
+        <legend>Supprimer la catégorie de membres ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer cette catégorie de membres ?
+            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.nom|escape}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, la catégorie ne doit plus contenir de membres pour pouvoir
