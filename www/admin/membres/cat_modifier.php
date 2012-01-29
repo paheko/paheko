@@ -12,7 +12,7 @@ $cats = new Garradin_Membres_Categories;
 
 if (empty($_GET['id']) || !is_numeric($_GET['id']))
 {
-    throw new UserException("Argument du numéro de membre manquant.");
+    throw new UserException("Argument du numéro de catégorie manquant.");
 }
 
 $id = (int) $_GET['id'];

@@ -25,7 +25,7 @@ body {
 }
 
 .header .menu {
-    float: left;
+    position: absolute;
     width: 168px;
     margin-top: 100px;
 }
@@ -58,7 +58,8 @@ body {
 }
 
 .page {
-    padding: 0px 1em 1em 180px;
+    margin: 0px 1em 1em 180px;
+    position: relative;
 }
 
 p.error {
@@ -294,4 +295,25 @@ table.list .actions {
 
 .infos dl dd {
     margin: 0.2em 1em;
+}
+
+.filterCategory {
+    width: 49%;
+    float: right;
+    font-size: 80%;
+}
+
+.searchMember {
+    width: 49%;
+    float: left;
+    font-size: 80%;
+}
+
+.searchMember p.submit, .filterCategory p.submit {
+    margin-top: -2em;
+    float: right;
+}
+
+.memberList {
+    clear: both;
 }

@@ -19,6 +19,7 @@
                 </td>
                 <td class="actions">
                     <a href="cat_modifier.php?id={$cat.id|escape}">Modifier</a>
+                    | <a href="cat_supprimer.php?id={$cat.id|escape}">Supprimer</a>
                 </td>
             </tr>
         {/foreach}

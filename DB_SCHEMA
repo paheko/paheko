@@ -9,8 +9,9 @@ CREATE TABLE config (
 -- compta_categorie_cotisations => id_categorie
 -- compta_categorie_dons => id_categorie
 
+CREATE TABLE membres_categories
 -- Catégories de membres
-CREATE TABLE membres_categories (
+(
     id INTEGER PRIMARY KEY,
     nom TEXT,
     description TEXT,
@@ -28,7 +29,7 @@ CREATE TABLE membres_categories (
 -- Membres de l'asso
 CREATE TABLE membres (
     id INTEGER PRIMARY KEY,
-    id_categorie INTEGER,
+    id_categorie INTEGER NOT NULL,
 
     -- Connexion
     passe TEXT,
@@ -51,10 +52,75 @@ CREATE TABLE membres (
     date_connexion TEXT,
 
     -- Dernière cotisation enregistrée
-    date_cotisation TEXT
+    date_cotisation TEXT,
+
+    FOREIGN KEY (id_categorie) REFERENCES membres_categories (id)
 );
 
 CREATE INDEX membres_id_categorie ON membres (id_categorie);
+
+--
+-- WIKI
+--
+
+CREATE TABLE wiki_pages
+-- Pages du wiki
+(
+    id INTEGER PRIMARY KEY,
+    uri TEXT, -- URI unique (équivalent NomPageWiki)
+    titre TEXT,
+    date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+    date_modification TEXT DEFAULT CURRENT_TIMESTAMP,
+    parent INTEGER, -- ID de la page parent
+    revision INTEGER, -- Numéro de révision (commence à 0 si pas de texte, +1 à chaque changement du texte)
+    droit_lecture INTEGER, -- Accès en lecture
+    droit_ecriture INTEGER -- Accès en écriture
+);
+
+CREATE UNIQUE INDEX wiki_uri ON wiki_pages (uri);
+
+CREATE VIRTUAL TABLE wiki_recherche USING fts4
+-- Table dupliquée pour chercher une page
+(
+    id INTEGER PRIMARY KEY NOT NULL, -- Clé externe obligatoire
+    title TEXT,
+    contenu TEXT, -- Contenu de la dernière révision
+    FOREIGN KEY (id) REFERENCES wiki_pages(id)
+);
+
+CREATE TABLE wiki_revisions
+-- Révisions du contenu des pages
+(
+    id_page INTEGER NOT NULL,
+    revision INTEGER,
+
+    id_auteur INTEGER,
+    suivi INTEGER, -- Si l'auteur de id_auteur veut suivre les changements de cette page
+
+    contenu TEXT,
+    modification TEXT, -- Description des modifications effectuées
+    date TEXT DEFAULT CURRENT_TIMESTAMP,
+
+    chiffrement INTEGER DEFAULT 0, -- 1 si le contenu est chiffré, 0 sinon
+
+    PRIMARY KEY(id_page, revision),
+    FOREIGN KEY (id_page) REFERENCES wiki_pages (id), -- Clé externe obligatoire
+    FOREIGN KEY (id_auteur) REFERENCES membres (id)  -- Clé externe non-obligatoire
+);
+
+CREATE INDEX wiki_revisions_id_page ON wiki_revisions (id_page);
+CREATE INDEX wiki_revisions_id_auteur ON wiki_revisions (id_auteur, suivi);
+
+CREATE TABLE wiki_fichiers (
+    id INTEGER PRIMARY KEY,
+    id_page INTEGER NOT NULL,
+    nom TEXT,
+    hash TEXT,
+
+    FOREIGN KEY (id_page) REFERENCES wiki_pages (id) -- Clé externe obligatoire
+);
+
+CREATE INDEX wiki_fichiers_id_page ON wiki_fichiers (id_page);
 
 /*
 --
@@ -134,45 +200,6 @@ INSERT INTO compta_moyens (nom) VALUES ('TIP');
 CREATE INDEX compta_operations_id_compte ON compta_operations (id_exercice);
 CREATE INDEX compta_operations_id_categorie ON compta_operations (id_plan);
 CREATE INDEX compta_operations_id_auteur ON compta_operations (id_auteur);
-
---
--- WIKI
---
-
-CREATE TABLE wiki_pages (
-    id INTEGER PRIMARY KEY,
-    titre TEXT,
-    revision INTEGER,
-    acces INTEGER -- ID catégorie membre
-);
-
-CREATE TABLE wiki_revisions (
-    id_page INTEGER,
-    revision INTEGER,
-
-    id_auteur INTEGER,
-    suivi INTEGER, -- 0/1
-
-    contenu TEXT,
-    modification TEXT, -- Description des modifications effectuées
-    date TEXT DEFAULT CURRENT_TIMESTAMP,
-
-    chiffrement INTEGER, -- 0/1
-
-    PRIMARY KEY(id_page, revision)
-);
-
-CREATE INDEX wiki_revisions_id_page ON wiki_revisions (id_page);
-CREATE INDEX wiki_revisions_id_auteur ON wiki_revisions (id_auteur, suivi);
-
-CREATE TABLE wiki_fichiers (
-    id INTEGER PRIMARY KEY,
-    id_page INTEGER,
-    nom TEXT,
-    hash TEXT
-);
-
-CREATE INDEX wiki_fichiers_id_page ON wiki_fichiers (id_page);
 
 
 --
