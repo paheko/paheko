@@ -234,8 +234,22 @@ class Garradin_Membres
         return $droits;
     }
 
-    public function search($query)
+    public function search($field = null, $query)
     {
+        $db = Garradin_DB::getInstance();
+
+        if (is_null($field) || !in_array($field, array('nom', 'email', 'code_postal', 'ville', 'adresse', 'telephone')))
+        {
+            $field = 'nom';
+        }
+
+        $where = 'WHERE '.$field.' LIKE \'%'.$db->escapeString($query).'%\'';
+
+        return $db->simpleStatementFetch(
+            'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
+                ORDER BY nom LIMIT 100;',
+            SQLITE3_ASSOC
+        );
     }
 
     public function getList($cat = 0, $page = 1)

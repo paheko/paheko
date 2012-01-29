@@ -1,8 +1,8 @@
 {include file="admin/_head.tpl" title="Liste des membres" current="membres"}
 
-<form method="get" action="{$self_url|escape}">
+<form method="get" action="{$self_url|escape}" class="filterCategory">
     <fieldset>
-        <legend>Filtre</legend>
+        <legend>Filtrer</legend>
         <dl>
             <dt><label for="f_cat">Catégorie</label></dt>
             <dd>
@@ -22,8 +22,36 @@
 </form>
 
 {if $user.droits >= Garradin_Membres::DROIT_ADMIN}
-    <form method="post" action="action.php">
+    {if $page == 1}
+    <form method="get" action="{$self_url|escape}" class="searchMember">
+        <fieldset>
+            <legend>Rechercher un membre</legend>
+            <dl>
+                <dt><label for="f_field">Dont le champ</label></dt>
+                <dd>
+                    <select name="search_field" id="f_field">
+                        <option value="nom" {if $search_field == "nom"} selected="selected"{/if}>Nom et prénom</option>
+                        <option value="email" {if $search_field == "email"} selected="selected"{/if}>Adresse E-Mail</option>
+                        <option value="ville" {if $search_field == "ville"} selected="selected"{/if}>Ville</option>
+                        <option value="code_postal" {if $search_field == "code_postal"} selected="selected"{/if}>Code postal</option>
+                        <option value="adresse" {if $search_field == "adresse"} selected="selected"{/if}>Adresse postale</option>
+                        <option value="telephone" {if $search_field == "telephone"} selected="selected"{/if}>Numéro de téléphone</option>
+                    </select>
+                </dd>
+                <dt><label for="f_query">Contient</label></dt>
+                <dd><input type="text" name="search_query" id="f_query" value="{$search_query|escape}" /></dd>
+            </dl>
+        </fieldset>
 
+        <p class="submit">
+            <input type="submit" value="Chercher &rarr;" />
+        </p>
+    </form>
+    {/if}
+
+    <form method="post" action="action.php" class="memberList">
+
+    {if !empty($liste)}
     <table class="list">
         <thead>
             <td></td>
@@ -58,7 +86,6 @@
             {/foreach}
         </tbody>
     </table>
-
     <p class="checkUncheck">
         <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
     </p>
@@ -68,6 +95,12 @@
         <input type="submit" name="delete" value="Supprimer" />
         {csrf_field key="membres_action"}
     </p>
+    {else}
+    <p class="alert">
+        Aucune membre trouvé.
+    </p>
+    {/if}
+
     </form>
 
     <script type="text/javascript">
@@ -100,22 +133,28 @@
     {/literal}
     </script>
 {else}
-<table class="list">
-    <thead>
-        <th>Nom</th>
-        <td></td>
-    </thead>
-    <tbody>
-        {foreach from=$liste item="membre"}
-            <tr>
-                <th>{$membre.nom|escape}</th>
-                <td class="actions">
-                    {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
-                </td>
-            </tr>
-        {/foreach}
-    </tbody>
-</table>
+    {if !empty($list)}
+    <table class="list">
+        <thead>
+            <th>Nom</th>
+            <td></td>
+        </thead>
+        <tbody>
+            {foreach from=$liste item="membre"}
+                <tr>
+                    <th>{$membre.nom|escape}</th>
+                    <td class="actions">
+                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
+                    </td>
+                </tr>
+            {/foreach}
+        </tbody>
+    </table>
+    {else}
+    <p class="info">
+        Aucune membre trouvé.
+    </p>
+    {/if}
 {/if}
 
 {include file="admin/_foot.tpl"}

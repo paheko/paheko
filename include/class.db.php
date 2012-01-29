@@ -19,6 +19,9 @@ class Garradin_DB extends SQLite3
 
         parent::__construct(GARRADIN_DB_FILE, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
+        // Activer les contraintes des foreign keys
+        $this->exec('PRAGMA foreign_keys = ON;');
+
         if (!$exists)
         {
             $this->exec('BEGIN;');
