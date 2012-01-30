@@ -77,6 +77,15 @@
         </dl>
     </fieldset>
 
+    <fieldset>
+        <legend>Wiki</legend>
+        <dl>
+            <dt><label for="f_accueil_wiki">Page d'accueil</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd>Indiquer ici l'adresse unique de la page qui sera utilisée comme page d'accueil du wiki.</dd>
+            <dd><input type="text" name="accueil_wiki" id="f_accueil_wiki" value="{form_field data=$config name=accueil_wiki}" /></dd>
+        </dl>
+    </fieldset>
+
     <p class="submit">
         {csrf_field key="config"}
         <input type="submit" name="save" value="Enregistrer &rarr;" />

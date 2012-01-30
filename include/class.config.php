@@ -43,6 +43,8 @@ class Garradin_Config
             'categorie_cotisations' =>  $int,
 
             'champs_modifiables_membre' =>  $array,
+
+            'accueil_wiki'          =>  $string,
         );
 
         $db = Garradin_DB::getInstance();
@@ -150,6 +152,14 @@ class Garradin_Config
                 if (!trim($value))
                 {
                     throw new UserException('Le nom de l\'association ne peut rester vide.');
+                }
+                break;
+            }
+            case 'accueil_wiki':
+            {
+                if (!trim($value))
+                {
+                    throw new UserException('Le nom de la page d\'accueil du wiki ne peut rester vide.');
                 }
                 break;
             }
