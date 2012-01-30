@@ -164,6 +164,14 @@ function tpl_format_droits($params)
     return implode(' ', $out);
 }
 
+function tpl_format_wiki($str)
+{
+    $str = utils::htmlLinksOnUrls($str);
+    $str = utils::htmlSpip($str);
+    $str = utils::htmlGarbage2xhtml($str);
+    return $str;
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
 
@@ -171,6 +179,7 @@ $tpl->register_function('format_droits', 'tpl_format_droits');
 
 $tpl->register_modifier('get_country_name', array('utils', 'getCountryName'));
 $tpl->register_modifier('format_tel', 'tpl_format_tel');
+$tpl->register_modifier('format_wiki', 'tpl_format_wiki');
 
 $tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
 

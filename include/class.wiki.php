@@ -4,24 +4,19 @@ class Garradin_Wiki
 {
     const LECTURE_PUBLIC = -1;
     const LECTURE_NORMAL = 0;
-    const LECTURE_GROUPE = 1;
+    const LECTURE_CATEGORIE = 1;
 
     const ECRITURE_NORMAL = 0;
-    const ECRITURE_GROUPE = 1;
+    const ECRITURE_CATEGORIE = 1;
 
     protected $restriction_categorie = null;
     protected $restriction_droit = null;
 
     static public function transformTitleToURI($str)
     {
-        $str = htmlentities($str, ENT_NOQUOTES, 'UTF-8');
-
-        $str = preg_replace('#&([A-za-z])(?:acute|cedil|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str);
-        $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str); // pour les ligatures e.g. '&oelig;'
-        $str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
+        $str = utils::transliterateToAscii($str);
 
         $str = preg_replace('!\s+!', ' ', $str);
-
         $str = preg_replace('![^a-z0-9_-]!i', '', $str);
 
         return $str;
@@ -210,7 +205,7 @@ class Garradin_Wiki
         }
 
         if ($this->restriction_droit == Garradin_Membres::DROIT_ADMIN)
-            return '';
+            return '1';
 
         return '(droit_lecture = '.self::LECTURE_NORMAL.' OR droit_lecture = '.self::LECTURE_PUBLIC.'
             OR droit_lecture = '.(int)$this->restriction_categorie.')';
@@ -274,10 +269,56 @@ class Garradin_Wiki
 
     public function getById($id)
     {
+        $db = Garradin_DB::getInstance();
+        $page = $db->simpleQuerySingle('SELECT *,
+                strftime(\'%s\', date_creation) AS date_creation,
+                strftime(\'%s\', date_modification) AS date_modification
+                FROM wiki_pages
+                WHERE id = ? AND '.$this->_getLectureClause().';', true, (int)$id);
+
+        if (!$page)
+        {
+            return false;
+        }
+
+        if ($page['revision'] > 0)
+        {
+            $page['contenu'] = $db->simpleQuerySingle('SELECT * FROM wiki_revisions
+                WHERE id_page = ? AND revision = ?;', true, (int)$page['id'], (int)$page['revision']);
+        }
+        else
+        {
+            $page['contenu'] = false;
+        }
+
+        return $page;
     }
 
     public function getByURI($uri)
     {
+        $db = Garradin_DB::getInstance();
+        $page = $db->simpleQuerySingle('SELECT *,
+                strftime(\'%s\', date_creation) AS date_creation,
+                strftime(\'%s\', date_modification) AS date_modification
+                FROM wiki_pages
+                WHERE uri = ? AND '.$this->_getLectureClause().';', true, trim($uri));
+
+        if (!$page)
+        {
+            return false;
+        }
+
+        if ($page['revision'] > 0)
+        {
+            $page['contenu'] = $db->simpleQuerySingle('SELECT * FROM wiki_revisions
+                WHERE id_page = ? AND revision = ?;', true, (int)$page['id'], (int)$page['revision']);
+        }
+        else
+        {
+            $page['contenu'] = false;
+        }
+
+        return $page;
     }
 }
 

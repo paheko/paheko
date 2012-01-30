@@ -317,3 +317,8 @@ table.list .actions {
 .memberList {
     clear: both;
 }
+
+.wikiContent p, .wikiContent h3, .wikiContent h4, .wikiContent h5, .wikiContent h6,
+.wikiContent ul, .wikiContent ol, .wikiContent table, .wikiContent blockquote {
+    margin-bottom: 8pt;
+}

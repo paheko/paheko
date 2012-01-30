@@ -93,15 +93,4 @@
 
 </form>
 
-<script type="text/javascript">
-{literal}
-function fillPassword(elm)
-{
-    var pw = elm.textContent || elm.innerText;
-    document.getElementById('f_passe').value = pw;
-    document.getElementById('f_repasse').value = pw;
-}
-{/literal}
-</script>
-
 {include file="admin/_foot.tpl"}

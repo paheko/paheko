@@ -2,9 +2,9 @@
 
 class utils
 {
-    static public $random_hash = 'abcd';
-
     static protected $country_list = null;
+
+    static protected $g2x = null;
 
     static private $french_date_names = array(
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
@@ -124,7 +124,7 @@ class utils
             $_SESSION['csrf'] = array();
         }
 
-        $_SESSION['csrf'][$key] = sha1($key . self::$random_hash . time());
+        $_SESSION['csrf'][$key] = sha1($key . uniqid($key, true) . time());
         return $_SESSION['csrf'][$key];
     }
 
@@ -289,8 +289,54 @@ class utils
 
         return $str;
     }
-}
 
-utils::$random_hash = uniqid();
+    static public function htmlLinksOnUrls($str)
+    {
+        preg_match_all('!(^|[\s>])((ftp|http|https)://([^\s<]+))!u', $str, $match, PREG_SET_ORDER);
+
+        foreach ($match as &$m)
+        {
+            $text = ($m[3] == 'http') ? $m[4] : $m[2];
+            $text = isset($text[51]) ? substr($text, 0, 50) . '...' : $text;
+            $str = str_replace($m[0], $m[1].'<a href="'.$m[2].'" onclick="window.open(this.href); return false;">'.$text.'</a>', $str);
+        }
+
+        return $str;
+    }
+
+    static public function htmlGarbage2xhtml($str)
+    {
+        if (!self::$g2x)
+        {
+            require_once GARRADIN_ROOT . '/include/lib.garbage2xhtml.php';
+            self::$g2x = new garbage2xhtml;
+            self::$g2x->core_attributes = array('class', 'id', 'title');
+        }
+
+        return self::$g2x->process($str);
+    }
+
+    static public function htmlSpip($str)
+    {
+        // Intertitres
+        $str = preg_replace('!(^|[^\\\\])\{{3}(\V*)\}{3}!', '$1<h3>$2</h3>', $str);
+
+        // Gras
+        $str = preg_replace('!(^|[^\\\\])\{{2}(\V*)\}{2}!', '$1<strong>$2</strong>', $str);
+
+        // Italique
+        $str = preg_replace('!(^|[^\\\\])\{(\V*)\}!', '$1<em>$2</em>', $str);
+
+        // Espaces typograhiques
+        $str = preg_replace('/\h*([?!;:»])(\s+|$)/u', '&nbsp;$1$2', $str);
+        $str = preg_replace('/(^|\s+)([«])\h*/u', '$1$2&nbsp;', $str);
+
+        // Liens
+        $str = preg_replace('!(^|[^\\\\])\[([^-]+)->([^\]]+)\]!', '$1<a href="$3">$2</a>', $str);
+        $str = preg_replace('!(^|[^\\\\])\[([^\]]+)\]!', '$1<a href="$2">$2</a>', $str);
+
+        return $str;
+    }
+}
 
 ?>
