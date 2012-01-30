@@ -252,7 +252,16 @@ class Garradin_DB extends SQLite3
     {
         $args = array_slice(func_get_args(), 2);
         $query = $this->_getSimpleQuery($query, $args);
-        return $this->querySingle($query, $all_row);
+
+        try {
+            return $this->querySingle($query, $all_row);
+        }
+        catch (ErrorException $e)
+        {
+            echo $query;
+            echo "\n\n";
+            throw $e;
+        }
     }
 
     public function queryFetch($query, $mode = SQLITE3_BOTH)
