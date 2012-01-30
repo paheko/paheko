@@ -74,6 +74,7 @@ else
                 require_once GARRADIN_ROOT . '/include/class.db.php';
                 require_once GARRADIN_ROOT . '/include/class.config.php';
 
+                // Configuration de base
                 $config = Garradin_Config::getInstance();
                 $config->set('nom_asso', utils::post('nom_asso'));
                 $config->set('adresse_asso', utils::post('adresse_asso'));
@@ -84,6 +85,7 @@ else
                 $config->set('champs_modifiables_membre', array('passe', 'email', 'adresse',
                     'code_postal', 'ville', 'pays', 'telephone', 'date_naissance'));
 
+                // Création catégories
                 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 
                 $cats = new Garradin_Membres_Categories;
@@ -113,13 +115,29 @@ else
                     'droit_config' => Garradin_Membres::DROIT_ADMIN,
                     ));
 
+                // Création premier membre
                 $membres = new Garradin_Membres;
-                $membres->add(array(
+                $id_membre = $membres->add(array(
                     'id_categorie'  =>  $id,
                     'nom'           =>  utils::post('nom_membre'),
                     'email'         =>  utils::post('email_membre'),
                     'passe'         =>  utils::post('passe_membre'),
                     'pays'          =>  'FR',
+                ));
+
+                // Création wiki
+                require_once GARRADIN_ROOT . '/include/class.wiki.php';
+                $page = Garradin_Wiki::transformTitleToURI(utils::post('nom_asso'));
+                $config->set('accueil_wiki', $page);
+                $wiki = new Garradin_Wiki;
+                $id_page = $wiki->create(array(
+                    'titre' =>  utils::post('nom_asso'),
+                    'uri'   =>  $page,
+                ));
+
+                $wiki->editRevision($id_page, 0, array(
+                    'id_auteur' =>  $id_membre,
+                    'contenu'   =>  "Bienvenue dans Garradin !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
                 ));
 
                 $config->save();

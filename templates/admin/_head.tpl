@@ -36,15 +36,16 @@
             </ul>
             {/if}
             </li>
-        {/if}
+        *}
         {if $user.droits.wiki >= Garradin_Membres::DROIT_ACCES}
             <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$www_url}admin/wiki/">Wiki</a>
             <ul>
-                <li class="wiki_my{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}admin/wiki/suivi/">Mes pages suivies</a>
+                <li class="wiki_recent{if $current == 'wiki/recent'} current{/if}"><a href="{$www_url}admin/wiki/recentes.php">Dernières modifications</a>
+                <li class="wiki_suivi{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}admin/wiki/suivi/">Mes pages suivies</a>
+                <li class="wiki_contribution{if $current == 'wiki/contribution'} current{/if}"><a href="{$www_url}admin/wiki/contributions/">Mes contributions</a>
             </ul>
             </li>
         {/if}
-        *}
         {if $user.droits.config >= Garradin_Membres::DROIT_ADMIN}
             <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}admin/config.php">Configuration</a>
         {/if}

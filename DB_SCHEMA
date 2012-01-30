@@ -71,10 +71,10 @@ CREATE TABLE wiki_pages
     titre TEXT,
     date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
     date_modification TEXT DEFAULT CURRENT_TIMESTAMP,
-    parent INTEGER, -- ID de la page parent
-    revision INTEGER, -- Numéro de révision (commence à 0 si pas de texte, +1 à chaque changement du texte)
-    droit_lecture INTEGER, -- Accès en lecture
-    droit_ecriture INTEGER -- Accès en écriture
+    parent INTEGER DEFAULT 0, -- ID de la page parent
+    revision INTEGER DEFAULT 0, -- Numéro de révision (commence à 0 si pas de texte, +1 à chaque changement du texte)
+    droit_lecture INTEGER DEFAULT 0, -- Accès en lecture (-1 = public [site web], 0 = tous ceux qui ont accès en lecture au wiki, 1+ = ID de groupe)
+    droit_ecriture INTEGER DEFAULT 0 -- Accès en écriture (0 = tous ceux qui ont droit d'écriture sur le wiki, 1+ = ID de groupe)
 );
 
 CREATE UNIQUE INDEX wiki_uri ON wiki_pages (uri);
@@ -83,7 +83,7 @@ CREATE VIRTUAL TABLE wiki_recherche USING fts4
 -- Table dupliquée pour chercher une page
 (
     id INTEGER PRIMARY KEY NOT NULL, -- Clé externe obligatoire
-    title TEXT,
+    titre TEXT,
     contenu TEXT, -- Contenu de la dernière révision
     FOREIGN KEY (id) REFERENCES wiki_pages(id)
 );
@@ -95,21 +95,47 @@ CREATE TABLE wiki_revisions
     revision INTEGER,
 
     id_auteur INTEGER,
-    suivi INTEGER, -- Si l'auteur de id_auteur veut suivre les changements de cette page
 
     contenu TEXT,
     modification TEXT, -- Description des modifications effectuées
-    date TEXT DEFAULT CURRENT_TIMESTAMP,
-
     chiffrement INTEGER DEFAULT 0, -- 1 si le contenu est chiffré, 0 sinon
+    date TEXT DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY(id_page, revision),
     FOREIGN KEY (id_page) REFERENCES wiki_pages (id), -- Clé externe obligatoire
-    FOREIGN KEY (id_auteur) REFERENCES membres (id)  -- Clé externe non-obligatoire
+    FOREIGN KEY (id_auteur) REFERENCES membres (id)  -- Clé externe non-obligatoire (peut être supprimée après en cas de suppression de membre)
 );
 
 CREATE INDEX wiki_revisions_id_page ON wiki_revisions (id_page);
-CREATE INDEX wiki_revisions_id_auteur ON wiki_revisions (id_auteur, suivi);
+CREATE INDEX wiki_revisions_id_auteur ON wiki_revisions (id_auteur);
+
+-- Triggers pour synchro avec table wiki_pages
+CREATE TRIGGER wiki_recherche_insert AFTER INSERT ON wiki_pages
+    BEGIN
+        INSERT INTO wiki_recherche (id, titre) VALUES (new.id, new.titre);
+    END;
+
+CREATE TRIGGER wiki_recherche_delete AFTER DELETE ON wiki_pages
+    BEGIN
+        DELETE FROM wiki_recherche WHERE id = old.id;
+    END;
+
+CREATE TRIGGER wiki_recherche_update AFTER UPDATE OF id, titre ON wiki_pages
+    BEGIN
+        UPDATE wiki_recherche SET id = new.id, titre = new.titre WHERE id = old.id;
+    END;
+
+-- Trigger pour mettre à jour le contenu de la table de recherche lors d'une nouvelle révision
+CREATE TRIGGER wiki_recherche_contenu_insert AFTER INSERT ON wiki_revisions WHEN new.chiffrement != 1
+    BEGIN
+        UPDATE wiki_recherche SET contenu = new.contenu WHERE id = new.id_page;
+    END;
+
+-- Si le contenu est chiffré, la recherche n'affiche pas de contenu
+CREATE TRIGGER wiki_recherche_contenu_chiffre AFTER INSERT ON wiki_revisions WHEN new.chiffrement = 1
+    BEGIN
+        UPDATE wiki_recherche SET contenu = '' WHERE id = new.id_page;
+    END;
 
 CREATE TABLE wiki_fichiers (
     id INTEGER PRIMARY KEY,
@@ -121,6 +147,18 @@ CREATE TABLE wiki_fichiers (
 );
 
 CREATE INDEX wiki_fichiers_id_page ON wiki_fichiers (id_page);
+
+CREATE TABLE wiki_suivi
+-- Suivi des pages
+(
+    id_membre INTEGER NOT NULL,
+    id_page INTEGER NOT NULL,
+
+    PRIMARY KEY (id_membre, id_page),
+
+    FOREIGN KEY (id_page) REFERENCES wiki_pages (id), -- Clé externe obligatoire
+    FOREIGN KEY (id_membre) REFERENCES membres (id) -- Clé externe obligatoire
+);
 
 /*
 --

@@ -324,8 +324,12 @@ class Garradin_Membres
             $id = (int) $id;
         }
 
+        $membres = implode(',', $membres);
+
         $db = Garradin_DB::getInstance();
-        return $db->exec('DELETE FROM membres WHERE id IN ('.implode(',', $membres).');');
+        $db->exec('UPDATE wiki_revisions SET id_auteur = 0 WHERE id_auteur IN ('.$membres.');');
+        $db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
+        return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
 }
 
