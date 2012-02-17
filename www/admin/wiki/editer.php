@@ -26,10 +26,6 @@ if (!empty($_POST['save']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    elseif (!trim(utils::post('contenu')))
-    {
-        $error = 'Le contenu ne peut rester vide';
-    }
     elseif ($page['date_modification'] > (int) utils::post('debut_edition'))
     {
         $error = 'La page a été modifiée par quelqu\'un d\'autre depuis que vous avez commencé l\'édition.';
@@ -51,7 +47,9 @@ if (!empty($_POST['save']))
                 'id_auteur'     =>  $user['id'],
             ));
 
-            utils::redirect('/admin/wiki/?'.utils::post('uri'));
+            $page = $wiki->getById($page['id']);
+
+            utils::redirect('/admin/wiki/?'.$page['uri']);
         }
         catch (UserException $e)
         {

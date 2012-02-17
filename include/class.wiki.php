@@ -16,7 +16,7 @@ class Garradin_Wiki
     {
         $str = utils::transliterateToAscii($str);
 
-        $str = preg_replace('!\s+!', ' ', $str);
+        $str = preg_replace('!\s+!', '-', $str);
         $str = preg_replace('![^a-z0-9_-]!i', '', $str);
 
         return $str;
@@ -226,7 +226,7 @@ class Garradin_Wiki
             throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
-        if ($this->restriction_droit < Garradin_Membres::DROIT_LECTURE)
+        if ($this->restriction_droit < Garradin_Membres::DROIT_ACCES)
         {
             return false;
         }
