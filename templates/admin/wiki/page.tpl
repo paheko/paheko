@@ -1,13 +1,25 @@
-{if $page}
+{if !empty($page.titre) && $can_read}
     {include file="admin/_head.tpl" title=$page.titre current="wiki"}
 {else}
     {include file="admin/_head.tpl" title="Wiki" current="wiki"}
 {/if}
 
-{if !$page}
+{if !$can_read}
+    <p class="alert">Vous n'avez pas le droit de lire cette page.</p>
+{elseif !$page}
     <p class="error">
         Cette page n'existe pas.
     </p>
+
+    {if $can_edit}
+    <form method="post" action="{$www_url}admin/wiki/creer.php">
+        <p class="submit">
+            {csrf_field key="wiki_create"}
+            <input type="hidden" name="titre" value="{$uri|escape}" />
+            <input type="submit" name="create" value="Créer cette page" />
+        </p>
+    </form>
+    {/if}
 {else}
     {if !$page.contenu}
         <p class="alert">Cette page est vide, cliquez sur « Éditer » pour la modifier.</p>

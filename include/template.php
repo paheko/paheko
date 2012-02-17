@@ -67,6 +67,14 @@ function tpl_form_field($params)
     else
         $value = '';
 
+    if (isset($params['checked']))
+    {
+        if ($value == $params['checked'])
+            return ' checked="checked" ';
+
+        return '';
+    }
+
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
