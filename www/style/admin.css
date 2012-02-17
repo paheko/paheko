@@ -318,6 +318,35 @@ table.list .actions {
     clear: both;
 }
 
+fieldset.wikiText {
+    clear: both;
+    border: none;
+    padding: 0.5em;
+}
+
+fieldset.wikiText textarea {
+    width: 100%;
+}
+
+fieldset.wikiMain {
+    float: left;
+    width: 47%;
+    margin-right: 2%;
+}
+
+fieldset.wikiMain #f_titre {
+    width: 90%;
+    font-size: 14pt;
+}
+
+fieldset.wikiMain #f_uri {
+    width: 90%;
+}
+
+fieldset.wikiRights dl {
+    font-size: 10pt;
+}
+
 .wikiContent p, .wikiContent h3, .wikiContent h4, .wikiContent h5, .wikiContent h6,
 .wikiContent ul, .wikiContent ol, .wikiContent table, .wikiContent blockquote {
     margin-bottom: 8pt;

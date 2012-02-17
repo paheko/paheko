@@ -172,6 +172,11 @@ function tpl_format_wiki($str)
     return $str;
 }
 
+function liens_wiki($str, $prefix)
+{
+    return preg_replace('!<a href="([a-z0-9_-]+)">!', '<a href="'.$prefix.'$1">', $str);
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
 

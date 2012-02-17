@@ -8,7 +8,7 @@
 
 <form method="post" action="{$self_url|escape}">
 
-    <fieldset>
+    <fieldset class="wikiMain">
         <legend>Informations générales</legend>
         <dl>
             <dt><label for="f_titre">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
@@ -25,6 +25,12 @@
                     <option value="0">- la racine du site</option>
                 </select>
             </dd>
+        </dl>
+    </fieldset>
+
+    <fieldset class="wikiRights">
+        <legend>Droits d'accès</legend>
+        <dl>
             <dt><label for="f_droit_lecture_public">Cette page est visible :</label></dt>
             <dd>
                 <input type="radio" name="droit_lecture" id="f_droit_lecture_public" value="{Garradin_Wiki::LECTURE_PUBLIC}" />
@@ -53,7 +59,8 @@
         </dl>
     </fieldset>
 
-    <fieldset>
+
+    <fieldset class="wikiText">
         <p>
             <textarea name="contenu" cols="70" rows="30">{form_field data=$page name=contenu}</textarea>
         </p>
@@ -61,6 +68,8 @@
 
     <p class="submit">
         {csrf_field key="wiki_edit_`$page.id`"}
+        <input type="hidden" name="revision_edition" value="{form_field name=revision_edition default=$page.revision}" />
+        <input type="hidden" name="debut_edition" value="{form_field name=debut_edition default=$time}" />
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 
