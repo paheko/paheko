@@ -74,10 +74,14 @@ class Garradin_Wiki
         $this->_checkFields($data);
         $db = Garradin_DB::getInstance();
 
-        if (!empty($data['uri'])
-            && $db->simpleQuerySingle('SELECT 1 FROM wiki_pages WHERE uri = ? LIMIT 1;', false, $data['uri']))
+        if (!empty($data['uri']))
         {
-            throw new UserException('Cette adresse de page est déjà utilisée pour une autre page, il faut en choisir une autre.');
+            $data['uri'] = self::transformTitleToURI($data['uri']);
+
+            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_pages WHERE uri = ? LIMIT 1;', false, $data['uri']))
+            {
+                throw new UserException('Cette adresse de page est déjà utilisée pour une autre page, il faut en choisir une autre.');
+            }
         }
         else
         {
@@ -98,10 +102,14 @@ class Garradin_Wiki
         $db = Garradin_DB::getInstance();
         $this->_checkFields($data);
 
-        if (!empty($data['uri'])
-            && $db->simpleQuerySingle('SELECT 1 FROM wiki_pages WHERE uri = ? AND id != ? LIMIT 1;', false, $data['uri'], (int)$id))
+        if (isset($data['uri']))
         {
-            throw new UserException('Cette adresse de page est déjà utilisée pour une autre page, il faut en choisir une autre.');
+            $data['uri'] = self::transformTitleToURI($data['uri']);
+
+            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_pages WHERE uri = ? AND id != ? LIMIT 1;', false, $data['uri'], (int)$id))
+            {
+                throw new UserException('Cette adresse de page est déjà utilisée pour une autre page, il faut en choisir une autre.');
+            }
         }
 
         $data['date_modification'] = new SQLite3_Instruction('CURRENT_TIMESTAMP');

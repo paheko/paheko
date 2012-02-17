@@ -37,6 +37,16 @@ class Garradin_Membres
         if (!isset($_SESSION) && ($force || isset($_COOKIE[session_name()])))
             @session_start();
 
+        // Fix bug with register_globals ($test is a reference to $_SESSION['test'])
+        if (ini_get('register_globals'))
+        {
+            foreach ($_SESSION as $key=>$value)
+            {
+                if (isset($GLOBALS[$key]))
+                    unset($GLOBALS[$key]);
+            }
+        }
+
         return true;
     }
 

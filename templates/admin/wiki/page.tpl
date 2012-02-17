@@ -23,7 +23,7 @@
             </div>
         {else}
             <div class="wikiContent">
-                {$page.contenu.contenu|format_wiki}
+                {$page.contenu.contenu|format_wiki|liens_wiki:'?'}
             </div>
         {/if}
 
