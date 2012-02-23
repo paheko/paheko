@@ -248,12 +248,15 @@ class Garradin_Membres
     {
         $db = Garradin_DB::getInstance();
 
-        if (is_null($field) || !in_array($field, array('nom', 'email', 'code_postal', 'ville', 'adresse', 'telephone')))
+        if (is_null($field) || !in_array($field, array('id', 'nom', 'email', 'code_postal', 'ville', 'adresse', 'telephone')))
         {
             $field = 'nom';
         }
 
-        $where = 'WHERE '.$field.' LIKE \'%'.$db->escapeString($query).'%\'';
+        if ($field == 'id' || $field == 'code_postal')
+            $where = 'WHERE '.$field.' = \''.$db->escapeString($query).'\'';
+        else
+            $where = 'WHERE '.$field.' LIKE \'%'.$db->escapeString($query).'%\'';
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
@@ -262,7 +265,7 @@ class Garradin_Membres
         );
     }
 
-    public function getList($cat = 0, $page = 1)
+    public function listByCategory($cat = 0, $page = 1)
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
@@ -277,6 +280,15 @@ class Garradin_Membres
             $begin,
             self::ITEMS_PER_PAGE
         );
+    }
+
+    public function countByCategory($cat = 0)
+    {
+        $db = Garradin_DB::getInstance();
+
+        $where = $cat ? 'WHERE id_categorie = '.(int)$cat : '';
+
+        return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres '.$where.';');
     }
 
     static public function checkCotisation($date_membre, $duree_cotisation, $date_verif = null)

@@ -22,7 +22,6 @@
 </form>
 
 {if $user.droits >= Garradin_Membres::DROIT_ADMIN}
-    {if $page == 1}
     <form method="get" action="{$self_url|escape}" class="searchMember">
         <fieldset>
             <legend>Rechercher un membre</legend>
@@ -30,6 +29,7 @@
                 <dt><label for="f_field">Dont le champ</label></dt>
                 <dd>
                     <select name="search_field" id="f_field">
+                        <option value="id" {if $search_field == "id"} selected="selected"{/if}>Numéro</option>
                         <option value="nom" {if $search_field == "nom"} selected="selected"{/if}>Nom et prénom</option>
                         <option value="email" {if $search_field == "email"} selected="selected"{/if}>Adresse E-Mail</option>
                         <option value="ville" {if $search_field == "ville"} selected="selected"{/if}>Ville</option>
@@ -47,7 +47,6 @@
             <input type="submit" value="Chercher &rarr;" />
         </p>
     </form>
-    {/if}
 
     <form method="post" action="action.php" class="memberList">
 
@@ -95,6 +94,8 @@
         <input type="submit" name="delete" value="Supprimer" />
         {csrf_field key="membres_action"}
     </p>
+
+    {pagination url="?p=[ID]" page=$page bypage=$bypage total=$total}
     {else}
     <p class="alert">
         Aucune membre trouvé.
