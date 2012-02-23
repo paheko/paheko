@@ -58,13 +58,18 @@ if (!defined('GARRADIN_DB_SCHEMA'))
     define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
 }
 
-if (!defined('WWW_URL'))
+if (!defined('WWW_URI'))
 {
     // Automagic URL discover
     $path = substr(GARRADIN_ROOT . '/www', strlen($_SERVER['DOCUMENT_ROOT']));
     $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
     $path = (substr($path, -1) != '/') ? $path . '/' : $path;
-    define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $path);
+    define('WWW_URI', $path);
+}
+
+if (!defined('WWW_URL'))
+{
+    define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . WWW_URI);
 }
 
 /*
