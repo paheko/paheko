@@ -41,8 +41,8 @@
             <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$www_url}admin/wiki/">Wiki</a>
             <ul>
                 <li class="wiki_recent{if $current == 'wiki/recent'} current{/if}"><a href="{$www_url}admin/wiki/recent.php">Dernières modifications</a>
-                <li class="wiki_suivi{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}admin/wiki/suivi.php">Mes pages suivies</a>
-                <li class="wiki_contribution{if $current == 'wiki/contribution'} current{/if}"><a href="{$www_url}admin/wiki/contributions.php">Mes contributions</a>
+                {*<li class="wiki_suivi{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}admin/wiki/suivi.php">Mes pages suivies</a>*}
+                {*<li class="wiki_contribution{if $current == 'wiki/contribution'} current{/if}"><a href="{$www_url}admin/wiki/contributions.php">Mes contributions</a>*}
             </ul>
             </li>
         {/if}

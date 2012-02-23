@@ -347,7 +347,31 @@ fieldset.wikiRights dl {
     font-size: 10pt;
 }
 
+fieldset.wikiRevision #f_modification {
+    width: 100%;
+}
+
 .wikiContent p, .wikiContent h3, .wikiContent h4, .wikiContent h5, .wikiContent h6,
 .wikiContent ul, .wikiContent ol, .wikiContent table, .wikiContent blockquote {
     margin-bottom: 8pt;
+}
+
+.pagination {
+    clear: both;
+    list-style-type: none;
+    padding: 0.4em 0;
+    text-align: center;
+}
+
+.pagination li {
+    display: inline-block;
+    margin: 0 0.3em;
+}
+
+.pagination li.current {
+    font-size: 1.3em;
+}
+
+.pagination li a {
+    color: #000;
 }

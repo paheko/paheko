@@ -9,6 +9,8 @@ class Garradin_Wiki
     const ECRITURE_NORMAL = 0;
     const ECRITURE_CATEGORIE = 1;
 
+    const ITEMS_PER_PAGE = 25;
+
     protected $restriction_categorie = null;
     protected $restriction_droit = null;
 
@@ -191,6 +193,7 @@ class Garradin_Wiki
     public function search($query)
     {
         $db = Garradin_DB::getInstance();
+        // FIXME
     }
 
     public function setRestrictionCategorie($id, $droit_wiki)
@@ -327,6 +330,26 @@ class Garradin_Wiki
         }
 
         return $page;
+    }
+
+    public function listRecentModifications($page = 1)
+    {
+        $begin = ($page - 1) * self::ITEMS_PER_PAGE;
+
+        $db = Garradin_DB::getInstance();
+
+        return $db->simpleStatementFetch('SELECT *,
+                strftime(\'%s\', date_creation) AS date_creation,
+                strftime(\'%s\', date_modification) AS date_modification
+                FROM wiki_pages
+                WHERE '.$this->_getLectureClause().'
+                ORDER BY date_modification DESC;', SQLITE3_ASSOC);
+    }
+
+    public function countRecentModifications()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
     }
 }
 
