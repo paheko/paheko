@@ -56,7 +56,13 @@ class utils
     static public function getSelfURL()
     {
         $uri = self::getRequestUri();
-        return WWW_URL . ($uri ? substr($uri, 1) : '');
+
+        if (strpos($uri, WWW_URI) === 0)
+        {
+            $uri = substr($uri, strlen(WWW_URI));
+        }
+
+        return WWW_URL . $uri;
     }
 
     static public function disableHttpCaching()
