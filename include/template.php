@@ -180,9 +180,49 @@ function tpl_format_wiki($str)
     return $str;
 }
 
-function liens_wiki($str, $prefix)
+function tpl_liens_wiki($str, $prefix)
 {
     return preg_replace('!<a href="([a-z0-9_-]+)">!', '<a href="'.$prefix.'$1">', $str);
+}
+
+function tpl_pagination($params)
+{
+    if (!isset($params['url']) || !isset($params['page']) || !isset($params['bypage']) || !isset($params['total']))
+        throw new BadFunctionCallException("Paramètre manquant pour pagination");
+
+    if ($params['total'] == -1)
+        return '';
+
+    $pagination = utils::getGenericPagination($params['page'], $params['total'], $params['bypage']);
+
+    if (empty($pagination))
+        return '';
+
+    $out = '<ul class="pagination">';
+
+    foreach ($pagination as &$page)
+    {
+        $attributes = '';
+
+        if (!empty($page['class']))
+            $attributes .= ' class="' . htmlspecialchars($page['class']) . '" ';
+
+        $out .= '<li'.$attributes.'>';
+
+        $attributes = '';
+
+        if (!empty($page['accesskey']))
+            $attributes .= ' accesskey="' . htmlspecialchars($page['accesskey']) . '" ';
+
+        $out .= '<a' . $attributes . ' href="' . str_replace('[ID]', htmlspecialchars($page['id']), $params['url']) . '">';
+        $out .= htmlspecialchars($page['label']);
+        $out .= '</a>';
+        $out .= '</li>' . "\n";
+    }
+
+    $out .= '</ul>';
+
+    return $out;
 }
 
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
@@ -190,9 +230,12 @@ $tpl->register_function('form_field', 'tpl_form_field');
 
 $tpl->register_function('format_droits', 'tpl_format_droits');
 
+$tpl->register_function('pagination', 'tpl_pagination');
+
 $tpl->register_modifier('get_country_name', array('utils', 'getCountryName'));
 $tpl->register_modifier('format_tel', 'tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'tpl_format_wiki');
+$tpl->register_modifier('liens_wiki', 'tpl_liens_wiki');
 
 $tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
 
