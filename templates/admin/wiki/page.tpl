@@ -40,8 +40,8 @@
         {/if}
 
         <p class="wikiFooter">
-            Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'} par AUTEUR.
-            | <a href="revisions.php?id={$page.id|escape}">Liste des modifications</a>
+            Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}.
+            {*| <a href="revisions.php?id={$page.id|escape}">Liste des modifications</a>*}
         </p>
     {/if}
 

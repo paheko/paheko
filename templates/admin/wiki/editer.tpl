@@ -43,7 +43,7 @@
                 &mdash; seuls les membres ayant accès au wiki pourront la voir
             </dd>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {if $page['droit_lecture'] >= Garradin_Wiki::LECTURE_GROUPE}checked="checked"{/if} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {*if $page['droit_lecture'] >= Garradin_Wiki::LECTURE_GROUPE}checked="checked"{/if*} />
                 <label for="f_droit_lecture_categorie"><strong>Aux membres de ma catégorie</strong></label>
                 &mdash; seuls les membres de la même catégorie que moi pourront voir cette page
             </dd>
@@ -53,7 +53,7 @@
                 <label for="f_droit_ecriture_normal">Les membres qui ont accès au wiki</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page['droit_ecriture'] >= Garradin_Wiki::ECRITURE_GROUPE}checked="checked"{/if} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {*if $page['droit_ecriture'] >= Garradin_Wiki::ECRITURE_GROUPE}checked="checked"{/if*} />
                 <label for="f_droit_ecriture_categorie">Les membres de ma catégorie</label>
             </dd>
         </dl>
@@ -64,6 +64,19 @@
         <p>
             <textarea name="contenu" cols="70" rows="30">{form_field data=$page name=contenu}</textarea>
         </p>
+    </fieldset>
+
+    <fieldset class="wikiRevision">
+        <dl>
+            <dt><label for="f_modification">Résumé des modifications</label>  <i>(facultatif)</i></dt>
+            <dd><input type="text" name="modification" id="f_modification" value="{form_field data=$page name=modification}" /></dd>
+            {* FIXME
+            <dt>
+                <input type="checkbox" name="suivi" value="1" id="f_suivi" />
+                <label for="f_suivi">Suivre les modifications de cette page</label>
+            </dt>
+            *}
+        </dl>
     </fieldset>
 
     <p class="submit">
