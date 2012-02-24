@@ -87,11 +87,26 @@ class Garradin_Membres_Categories
     public function remove($id)
     {
         $db = Garradin_DB::getInstance();
+        $config = Garradin_Config::getInstance();
+
+        if ($id == $config->get('categorie_membres'))
+        {
+            throw new UserException('Il est interdit de supprimer la catégorie définie par défaut dans la configuration.');
+        }
 
         if ($db->simpleQuerySingle('SELECT 1 FROM membres WHERE id_categorie = ?;', false, (int)$id))
         {
             throw new UserException('La catégorie contient encore des membres, il n\'est pas possible de la supprimer.');
         }
+
+        $db->simpleUpdate(
+            'wiki_pages',
+            array(
+                'droit_lecture'     =>  Garradin_Wiki::LECTURE_NORMAL,
+                'droit_ecriture'    =>  Garradin_Wiki::ECRITURE_NORMAL,
+            ),
+            'droit_lecture = '.(int)$id.' OR droit_ecriture = '.(int)$id
+        );
 
         return $db->simpleExec('DELETE FROM membres_categories WHERE id = ?;', (int) $id);
     }
