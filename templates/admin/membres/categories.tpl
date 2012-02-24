@@ -3,7 +3,6 @@
 <table class="list">
     <thead>
         <th>Nom</th>
-        <td>Description</td>
         <td>Cotisation</td>
         <td>Droits</td>
         <td></td>
@@ -12,8 +11,7 @@
         {foreach from=$liste item="cat"}
             <tr>
                 <th>{$cat.nom|escape}</th>
-                <td>{$cat.description|truncate:60|escape}</td>
-                <td>{$cat.montant_cotisation|escape} € pour {$cat.duree_cotisation|escape} mois</td>
+                <td><strong>{$cat.montant_cotisation|escape} €</strong> pour {$cat.duree_cotisation|escape} mois</td>
                 <td class="droits">
                     {format_droits droits=$cat}
                 </td>
