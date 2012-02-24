@@ -133,6 +133,7 @@ CREATE TRIGGER wiki_recherche_contenu_chiffre AFTER INSERT ON wiki_revisions WHE
         UPDATE wiki_recherche SET contenu = '' WHERE id = new.id_page;
     END;
 
+/*
 CREATE TABLE wiki_fichiers (
     id INTEGER PRIMARY KEY,
     id_page INTEGER NOT NULL,
@@ -156,7 +157,6 @@ CREATE TABLE wiki_suivi
     FOREIGN KEY (id_membre) REFERENCES membres (id) -- Clé externe obligatoire
 );
 
-/*
 --
 -- COMPTA
 --

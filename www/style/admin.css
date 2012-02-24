@@ -383,3 +383,9 @@ fieldset.memberMessage {
 fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     width: 95%;
 }
+
+.wikiFooter {
+    font-size: 0.8em;
+    color: #666;
+    border-top: 0.1em solid #ccc;
+}
