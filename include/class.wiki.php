@@ -114,6 +114,11 @@ class Garradin_Wiki
             }
         }
 
+        if (isset($data['droit_lecture']) && $data['droit_lecture'] >= self::LECTURE_CATEGORIE)
+        {
+            $data['droit_ecriture'] = $data['droit_lecture'];
+        }
+
         $data['date_modification'] = new SQLite3_Instruction('CURRENT_TIMESTAMP');
 
         $db->simpleUpdate('wiki_pages', $data, 'id = '.(int)$id);
@@ -285,7 +290,7 @@ class Garradin_Wiki
                 strftime(\'%s\', date_creation) AS date_creation,
                 strftime(\'%s\', date_modification) AS date_modification
                 FROM wiki_pages
-                WHERE id = ? AND '.$this->_getLectureClause().';', true, (int)$id);
+                WHERE id = ?;', true, (int)$id);
 
         if (!$page)
         {
@@ -312,7 +317,7 @@ class Garradin_Wiki
                 strftime(\'%s\', date_creation) AS date_creation,
                 strftime(\'%s\', date_modification) AS date_modification
                 FROM wiki_pages
-                WHERE uri = ? AND '.$this->_getLectureClause().';', true, trim($uri));
+                WHERE uri = ?;', true, trim($uri));
 
         if (!$page)
         {
