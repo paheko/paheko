@@ -7,6 +7,11 @@ if ($user['droits']['membres'] < Garradin_Membres::DROIT_ACCES)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
+if (empty($user['email']))
+{
+    throw new UserException("Vous devez renseigner l'adresse e-mail dans vos informations pour pouvoir contacter les autres membres.");
+}
+
 if (empty($_GET['id']) || !is_numeric($_GET['id']))
 {
     throw new UserException("Argument du numéro de membre manquant.");
@@ -22,6 +27,35 @@ if (!$membre)
 }
 
 $error = false;
+
+if (!empty($_POST['save']))
+{
+    if (!utils::CSRF_check('send_message_'.$id))
+    {
+        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    }
+    elseif (!utils::post('sujet'))
+    {
+        $error = 'Le sujet ne peut rester vide.';
+    }
+    elseif (!utils::post('message'))
+    {
+        $error = 'Le message ne peut rester vide.';
+    }
+    else
+    {
+        try {
+            $membres->sendMessage($membre['email'], utils::post('sujet'),
+                utils::post('message'), (bool) utils::post('copie'));
+
+            utils::redirect('/admin/membres/?sent');
+        }
+        catch (UserException $e)
+        {
+            $error = $e->getMessage();
+        }
+    }
+}
 
 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 

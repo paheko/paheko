@@ -375,3 +375,11 @@ fieldset.wikiRevision #f_modification {
 .pagination li a {
     color: #000;
 }
+
+fieldset.memberMessage {
+    max-width: 30em;
+}
+
+fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
+    width: 95%;
+}

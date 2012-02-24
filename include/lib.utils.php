@@ -343,6 +343,37 @@ class utils
 
         return $str;
     }
+
+    static public function mail($to, $subject, $content, $additional_headers = array())
+    {
+        // Création du contenu du message
+        $content = wordwrap($content);
+        $content = trim($content);
+
+        $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
+
+        // Construction des entêtes
+        $headers = '';
+
+        if (empty($addititional_headers['From']))
+        {
+            $config = Garradin_Config::getInstance();
+            $addititional_headers['From'] = '"NE PAS REPONDRE" <'.$config->get('email_envoi_automatique').'>';
+        }
+
+        $additional_headers['MIME-Version'] = '1.0';
+        $additional_headers['Content-type'] = 'text/plain; charset=UTF-8';
+        $additional_headers['Return-Path'] = $config->get('email_envoi_automatique');
+
+        foreach ($additional_headers as $name=>$value)
+        {
+            $headers .= $name . ': '.$value."\r\n";
+        }
+
+        $headers = preg_replace("#(?<!\r)\n#si", "\r\n", $headers);
+
+        return mail($to, '=?UTF-8?B?'.base64_encode($subject).'?=', $content, $headers);
+    }
 }
 
 ?>

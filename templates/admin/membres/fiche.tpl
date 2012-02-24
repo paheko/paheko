@@ -31,6 +31,11 @@
         <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
     </p>
     {/if}
+    {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
+    <p>
+        <a href="{$www_url}admin/membres/modifier.php?id={$membre.id|escape}">Modifier les informations de ce membre</a>
+    </p>
+    {/if}
 </div>
 
 <div class="infos">
