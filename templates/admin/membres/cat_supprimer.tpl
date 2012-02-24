@@ -17,6 +17,11 @@
             Attention, la catégorie ne doit plus contenir de membres pour pouvoir
             être supprimée.
         </p>
+        <p class="help">
+            Notez que si des pages du wiki étaient restreintes à la lecture ou à l'écriture
+            aux seuls membres de ce groupe, elles redeviendront lisibles et modifiables
+            par tous les membres ayant accès au wiki !
+        </p>
     </fieldset>
 
     <p class="submit">
