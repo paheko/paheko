@@ -410,6 +410,31 @@ class Garradin_Membres
         $db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
         return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
+
+    public function sendMessageToCategory($dest, $sujet, $message)
+    {
+        $config = Garradin_Config::getInstance();
+
+        $headers = array(
+            'From'  =>  '"'.$config->get('nom_asso').'" <'.$config->get('email_asso').'>',
+        );
+        $message .= "\n\n--\n".$config->get('nom_asso')."\n".$config->get('site_asso');
+
+        if ($dest == 0)
+            $where = 'id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)';
+        else
+            $where = 'id_categorie = '.(int)$dest;
+
+        $db = Garradin_DB::getInstance();
+        $res = $db->query('SELECT email FROM membres WHERE '.$where.' ORDER BY id;');
+
+        while ($row = $res->fetchArray(SQLITE3_ASSOC))
+        {
+            utils::mail($row['email'], $sujet, $message, $headers);
+        }
+
+        return true;
+    }
 }
 
 ?>

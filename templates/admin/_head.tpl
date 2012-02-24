@@ -22,6 +22,7 @@
                 <li class="add_member{if $current == 'membres/ajouter'} current{/if}"><a href="{$www_url}admin/membres/ajouter.php">Ajouter</a></li>
                 {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
                 <li class="member_cats{if $current == 'membres/categories'} current{/if}"><a href="{$www_url}admin/membres/categories.php">Catégories</a></li>
+                <li class="members_mail{if $current == 'membres/message_collectif'} current{/if}"><a href="{$www_url}admin/membres/message_collectif.php">Message collectif</a></li>
                 {/if}
             </ul>
             {/if}

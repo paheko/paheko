@@ -113,6 +113,12 @@ class Garradin_Membres_Categories
         $db = Garradin_DB::getInstance();
         return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 1;');
     }
+
+    public function listNotHidden()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 0;');
+    }
 }
 
 ?>

@@ -372,7 +372,19 @@ class utils
 
         $headers = preg_replace("#(?<!\r)\n#si", "\r\n", $headers);
 
-        return mail($to, '=?UTF-8?B?'.base64_encode($subject).'?=', $content, $headers);
+        $subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
+
+        if (is_array($to))
+        {
+            foreach ($to as $t)
+            {
+                return mail($t, $suject, $content, $headers);
+            }
+        }
+        else
+        {
+            return mail($to, $subject, $content, $headers);
+        }
     }
 }
 
