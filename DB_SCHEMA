@@ -83,7 +83,7 @@ CREATE UNIQUE INDEX wiki_uri ON wiki_pages (uri);
 CREATE VIRTUAL TABLE wiki_recherche USING fts4
 -- Table dupliquée pour chercher une page
 (
-    id INTEGER PRIMARY KEY NOT NULL, -- Clé externe obligatoire
+    id INT PRIMARY KEY NOT NULL, -- Clé externe obligatoire
     titre TEXT,
     contenu TEXT, -- Contenu de la dernière révision
     FOREIGN KEY (id) REFERENCES wiki_pages(id)
@@ -111,11 +111,6 @@ CREATE INDEX wiki_revisions_id_page ON wiki_revisions (id_page);
 CREATE INDEX wiki_revisions_id_auteur ON wiki_revisions (id_auteur);
 
 -- Triggers pour synchro avec table wiki_pages
-CREATE TRIGGER wiki_recherche_insert AFTER INSERT ON wiki_pages
-    BEGIN
-        INSERT INTO wiki_recherche (id, titre) VALUES (new.id, new.titre);
-    END;
-
 CREATE TRIGGER wiki_recherche_delete AFTER DELETE ON wiki_pages
     BEGIN
         DELETE FROM wiki_recherche WHERE id = old.id;

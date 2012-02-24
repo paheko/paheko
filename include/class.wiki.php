@@ -96,7 +96,14 @@ class Garradin_Wiki
         }
 
         $db->simpleInsert('wiki_pages', $data);
-        return $db->lastInsertRowId();
+        $id = $db->lastInsertRowId();
+
+        // On ne peut utiliser un trigger pour insérer dans la recherche
+        // car les tables virtuelles font des opérations qui modifient
+        // last_insert_rowid() et donc résultat incohérent
+        $db->simpleInsert('wiki_recherche', array('id' => $id, 'titre' => $data['titre']));
+
+        return $id;
     }
 
     public function edit($id, $data = array())
