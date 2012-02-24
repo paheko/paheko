@@ -118,6 +118,29 @@ class Garradin_Membres
         return true;
     }
 
+    public function sendMessage($dest, $sujet, $message, $copie = false)
+    {
+        if (!$this->isLogged())
+        {
+            throw new LogicException('Cette fonction ne peut être appelée que par un utilisateur connecté.');
+        }
+
+        $from = $this->getLoggedUser();
+        $from = $from['email'];
+
+        $config = Garradin_Config::getInstance();
+
+        $message .= "\n\n--\nCe message a été envoyé par un membre de ".$config->get('nom_asso');
+        $message .= ", merci de contacter ".$config->get('email_asso')." en cas d'abus.";
+
+        if ($copie)
+        {
+            utils::mail($from, $sujet, $message);
+        }
+
+        return utils::mail($dest, $sujet, $message, array('From' => $from));
+    }
+
     // Gestion des données ///////////////////////////////////////////////////////
 
     public function _checkFields($data, $check_mandatory = true)

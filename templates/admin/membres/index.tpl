@@ -1,5 +1,9 @@
 {include file="admin/_head.tpl" title="Liste des membres" current="membres"}
 
+{if isset($tpl.get.sent)}
+    <p class="confirm">Votre message a été envoyé.</p>
+{/if}
+
 <form method="get" action="{$self_url|escape}" class="filterCategory">
     <fieldset>
         <legend>Filtrer</legend>
