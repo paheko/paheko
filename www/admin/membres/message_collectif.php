@@ -7,8 +7,6 @@ if ($user['droits']['membres'] < Garradin_Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Garradin_Membres_Categories;
-
 $error = false;
 
 if (!empty($_POST['save']))
@@ -39,7 +37,6 @@ if (!empty($_POST['save']))
 }
 
 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
-
 $cats = new Garradin_Membres_Categories;
 
 $tpl->assign('cats_liste', $cats->listSimple());
