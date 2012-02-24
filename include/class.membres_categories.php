@@ -99,6 +99,9 @@ class Garradin_Membres_Categories
             throw new UserException('La catégorie contient encore des membres, il n\'est pas possible de la supprimer.');
         }
 
+        // Remise à zéro des droits sur les pages du wiki
+        require_once GARRADIN_ROOT . '/include/class.wiki.php';
+
         $db->simpleUpdate(
             'wiki_pages',
             array(
