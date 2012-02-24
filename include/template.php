@@ -182,7 +182,7 @@ function tpl_format_wiki($str)
 
 function tpl_liens_wiki($str, $prefix)
 {
-    return preg_replace('!<a href="([a-z0-9_-]+)">!', '<a href="'.$prefix.'$1">', $str);
+    return preg_replace('!<a href="([^/.]+)">!ie', '"<a href=\"".$prefix.Garradin_Wiki::transformTitleToURI("$1")."\">"', $str);
 }
 
 function tpl_pagination($params)

@@ -43,17 +43,17 @@
                 &mdash; seuls les membres ayant accès au wiki pourront la voir
             </dd>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {*if $page['droit_lecture'] >= Garradin_Wiki::LECTURE_GROUPE}checked="checked"{/if*} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}checked="checked"{/if} />
                 <label for="f_droit_lecture_categorie"><strong>Aux membres de ma catégorie</strong></label>
                 &mdash; seuls les membres de la même catégorie que moi pourront voir cette page
             </dd>
             <dt><label for="f_droit_ecriture_normal">Cette page peut être modifiée par :</label></dt>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{Garradin_Wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=Garradin_Wiki::ECRITURE_NORMAL} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{Garradin_Wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=Garradin_Wiki::ECRITURE_NORMAL} {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
                 <label for="f_droit_ecriture_normal">Les membres qui ont accès au wiki</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {*if $page['droit_ecriture'] >= Garradin_Wiki::ECRITURE_GROUPE}checked="checked"{/if*} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page.droit_ecriture >= Garradin_Wiki::ECRITURE_CATEGORIE || $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}checked="checked"{/if} {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
                 <label for="f_droit_ecriture_categorie">Les membres de ma catégorie</label>
             </dd>
         </dl>
@@ -88,5 +88,29 @@
 
 </form>
 
+{literal}
+<script type="text/javascript">
+(function() {
+    document.getElementById('f_droit_lecture_categorie').onchange = function()
+    {
+        document.getElementById('f_droit_ecriture_normal').checked = false;
+        document.getElementById('f_droit_ecriture_normal').disabled = true;
+
+        document.getElementById('f_droit_ecriture_categorie').checked = true;
+        document.getElementById('f_droit_ecriture_categorie').disabled = true;
+    };
+
+    document.getElementById('f_droit_lecture_normal').onchange = function() {
+        document.getElementById('f_droit_ecriture_normal').disabled = false;
+        document.getElementById('f_droit_ecriture_categorie').disabled = false;
+    };
+
+    document.getElementById('f_droit_lecture_public').onchange = function() {
+        document.getElementById('f_droit_ecriture_normal').disabled = false;
+        document.getElementById('f_droit_ecriture_categorie').disabled = false;
+    };
+}());
+</script>
+{/literal}
 
 {include file="admin/_foot.tpl"}
