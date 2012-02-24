@@ -48,6 +48,7 @@
         </dl>
     </fieldset>
 
+    {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
     <fieldset>
         <legend>Général</legend>
         <dl>
@@ -61,7 +62,7 @@
             </dd>
         </dl>
     </fieldset>
-
+    {/if}
 
     <p class="submit">
         {csrf_field key="new_member"}

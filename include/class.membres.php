@@ -190,12 +190,36 @@ class Garradin_Membres
     public function edit($id, $data = array(), $check_mandatory = true)
     {
         $db = Garradin_DB::getInstance();
+
+        if (isset($data['id']) && ($data['id'] == $id || empty($data['id'])))
+        {
+            unset($data['id']);
+        }
+
         $this->_checkFields($data, $check_mandatory);
 
         if (!empty($data['email'])
             && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? AND id != ? LIMIT 1;', false, $data['email'], (int)$id))
         {
             throw new UserException('Cette adresse e-mail est déjà utilisée par un autre membre, il faut en choisir une autre.');
+        }
+
+        if (!empty($data['id']))
+        {
+            if ($db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int)$data['id']))
+            {
+                throw new UserException('Ce numéro est déjà attribué à un autre membre.');
+            }
+
+            // Si on ne vérifie pas toutes les tables qui sont liées ici à un ID de membre
+            // la requête de modification provoquera une erreur de contrainte de foreign key
+            // ce qui est normal. Donc : il n'est pas possible de changer l'ID d'un membre qui
+            // a participé au wiki, à la compta, etc.
+            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
+            {
+                throw new UserException('Le numéro n\'est pas modifiable pour ce membre, en effet des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
+            }
         }
 
         if (!empty($data['passe']) && trim($data['passe']))

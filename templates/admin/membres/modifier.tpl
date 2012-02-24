@@ -11,6 +11,10 @@
     <fieldset>
         <legend>Informations personnelles</legend>
         <dl>
+        {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
+            <dt><label for="f_id">Numéro de membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd><input type="text" name="id" id="f_id" value="{form_field data=$membre name=id}" /></dd>
+        {/if}
             <dt><label for="f_nom">Prénom et nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom" id="f_nom" value="{form_field data=$membre name=nom}" /></dd>
             <dt><label for="f_email">Adresse E-Mail</label>{if in_array('email', $obligatoires)} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
@@ -53,6 +57,7 @@
         </dl>
     </fieldset>
 
+    {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
     <fieldset>
         <legend>Général</legend>
         <dl>
@@ -66,7 +71,7 @@
             </dd>
         </dl>
     </fieldset>
-
+    {/if}
 
     <p class="submit">
         {csrf_field key="edit_member_"|cat:$membre.id}
