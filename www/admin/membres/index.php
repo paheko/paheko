@@ -10,6 +10,8 @@ if ($user['droits']['membres'] < Garradin_Membres::DROIT_ACCES)
 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 
 $cats = new Garradin_Membres_Categories;
+$membres_cats = $cats->listSimple();
+$membres_cats_cachees = $cats->listHidden();
 
 $cat = (int) utils::get('cat') ?: 0;
 $page = (int) utils::get('p') ?: 1;
@@ -24,11 +26,21 @@ if ($search_field && $search_query)
 }
 else
 {
-    $tpl->assign('liste', $membres->listByCategory($cat, $page));
-    $tpl->assign('total', $membres->countByCategory($cat));
+    if (!$cat)
+    {
+        $cat_id = array_diff(array_keys($membres_cats), array_keys($membres_cats_cachees));
+    }
+    else
+    {
+        $cat_id = (int) $cat;
+    }
+
+    $tpl->assign('liste', $membres->listByCategory($cat_id, $page));
+    $tpl->assign('total', $membres->countByCategory($cat_id));
 }
 
-$tpl->assign('membres_cats', $cats->listSimple());
+$tpl->assign('membres_cats', $membres_cats);
+$tpl->assign('membres_cats_cachees', $membres_cats_cachees);
 $tpl->assign('current_cat', $cat);
 
 $tpl->assign('page', $page);

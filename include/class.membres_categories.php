@@ -69,6 +69,9 @@ class Garradin_Membres_Categories
                 $data['droit_'.$key] = (int)$data['droit_'.$key];
         }
 
+        if (!isset($data['cacher']) || $data['cacher'] != 1)
+            $data['cacher'] = 0;
+
         $db = Garradin_DB::getInstance();
         return $db->simpleUpdate('membres_categories', $data, 'id = '.(int)$id);
     }
@@ -103,6 +106,12 @@ class Garradin_Membres_Categories
     {
         $db = Garradin_DB::getInstance();
         return $db->queryFetch('SELECT * FROM membres_categories ORDER BY nom;');
+    }
+
+    public function listHidden()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 1;');
     }
 }
 

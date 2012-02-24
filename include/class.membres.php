@@ -295,7 +295,12 @@ class Garradin_Membres
 
         $db = Garradin_DB::getInstance();
 
-        $where = $cat ? 'WHERE id_categorie = '.(int)$cat : '';
+        if (is_int($cat) && $cat)
+            $where = 'WHERE id_categorie = '.(int)$cat;
+        elseif (is_array($cat))
+            $where = 'WHERE id_categorie IN ('.implode(',', $cat).')';
+        else
+            $where = '';
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
@@ -310,7 +315,12 @@ class Garradin_Membres
     {
         $db = Garradin_DB::getInstance();
 
-        $where = $cat ? 'WHERE id_categorie = '.(int)$cat : '';
+        if (is_int($cat) && $cat)
+            $where = 'WHERE id_categorie = '.(int)$cat;
+        elseif (is_array($cat))
+            $where = 'WHERE id_categorie IN ('.implode(',', $cat).')';
+        else
+            $where = '';
 
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres '.$where.';');
     }
