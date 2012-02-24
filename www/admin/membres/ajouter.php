@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Garradin_Membres::DROIT_ADMIN)
+if ($user['droits']['membres'] < Garradin_Membres::DROIT_ECRITURE)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
@@ -26,9 +26,19 @@ if (!empty($_POST['save']))
     }
     else
     {
-        try {
+        try
+        {
+            if ($user['droits']['membres'] == Garradin_Membres::DROIT_ADMIN)
+            {
+                $id_categorie = utils::post('id_categorie');
+            }
+            else
+            {
+                $id_categorie = $config->get('categorie_membres');
+            }
+
             $id = $membres->add(array(
-                'id_categorie'  =>  utils::post('id_categorie'),
+                'id_categorie'  =>  $id_categorie,
                 'nom'           =>  utils::post('nom'),
                 'email'         =>  utils::post('email'),
                 'passe'         =>  utils::post('passe'),

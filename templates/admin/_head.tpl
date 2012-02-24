@@ -17,10 +17,12 @@
         <li class="home{if $current == 'home'} current{/if}"><a href="{$www_url}admin/">Accueil</a></li>
         {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
             <li class="list_members{if $current == 'membres'} current{/if}"><a href="{$www_url}admin/membres/">Membres</a>
-            {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
+            {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
             <ul>
                 <li class="add_member{if $current == 'membres/ajouter'} current{/if}"><a href="{$www_url}admin/membres/ajouter.php">Ajouter</a></li>
+                {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
                 <li class="member_cats{if $current == 'membres/categories'} current{/if}"><a href="{$www_url}admin/membres/categories.php">Catégories</a></li>
+                {/if}
             </ul>
             {/if}
             </li>

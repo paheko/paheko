@@ -21,7 +21,7 @@
     </p>
 </form>
 
-{if $user.droits >= Garradin_Membres::DROIT_ADMIN}
+{if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
     <form method="get" action="{$self_url|escape}" class="searchMember">
         <fieldset>
             <legend>Rechercher un membre</legend>
@@ -63,7 +63,7 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <td><input type="checkbox" name="selected[]" value="{$membre.id|escape}" /></td>
+                    <td>{if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
                     <th>{$membre.nom|escape}</th>
                     <td>{if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">{$membre.email|escape}</a>{/if}</td>
                     <td>
@@ -85,6 +85,8 @@
             {/foreach}
         </tbody>
     </table>
+
+    {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
     <p class="checkUncheck">
         <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
     </p>
@@ -94,6 +96,7 @@
         <input type="submit" name="delete" value="Supprimer" />
         {csrf_field key="membres_action"}
     </p>
+    {/if}
 
     {pagination url="?p=[ID]" page=$page bypage=$bypage total=$total}
     {else}
@@ -134,7 +137,7 @@
     {/literal}
     </script>
 {else}
-    {if !empty($list)}
+    {if !empty($liste)}
     <table class="list">
         <thead>
             <th>Nom</th>
