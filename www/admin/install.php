@@ -103,6 +103,7 @@ else
                     'droit_compta' => Garradin_Membres::DROIT_AUCUN,
                     'droit_config' => Garradin_Membres::DROIT_AUCUN,
                     'droit_connexion' => Garradin_Membres::DROIT_AUCUN,
+                    'cacher' => 1,
                     ));
 
                 $id = $cats->add(array(

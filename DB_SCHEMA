@@ -22,7 +22,8 @@ CREATE TABLE membres_categories
     droit_compta INT DEFAULT 1,
     droit_inscription INT DEFAULT 0,
     droit_connexion INT DEFAULT 1,
-    droit_config INT DEFAULT 0
+    droit_config INT DEFAULT 0,
+    cacher INT DEFAULT 0
 );
 
 

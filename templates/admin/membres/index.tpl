@@ -9,7 +9,10 @@
                 <select name="cat" id="f_cat">
                     <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
                 {foreach from=$membres_cats key="id" item="nom"}
+                    {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE
+                        || !array_key_exists($id, $membres_cats_cachees)}
                     <option value="{$id|escape}"{if $current_cat == $id} selected="selected"{/if}>{$nom|escape}</option>
+                    {/if}
                 {/foreach}
                 </select>
             </dd>

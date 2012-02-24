@@ -46,6 +46,7 @@ if (!empty($_POST['save']))
                 'droit_membres' =>  (int) utils::post('droit_membres'),
                 'droit_connexion' => (int) utils::post('droit_connexion'),
                 'droit_inscription' => (int) utils::post('droit_inscription'),
+                'cacher'        =>  (int) utils::post('cacher'),
             ));
 
             utils::redirect('/admin/membres/categories.php');
