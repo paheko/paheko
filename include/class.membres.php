@@ -238,8 +238,8 @@ class Garradin_Membres
             // la requête de modification provoquera une erreur de contrainte de foreign key
             // ce qui est normal. Donc : il n'est pas possible de changer l'ID d'un membre qui
             // a participé au wiki, à la compta, etc.
-            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
+            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id))
+            #|| $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
             {
                 throw new UserException('Le numéro n\'est pas modifiable pour ce membre, en effet des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
             }
