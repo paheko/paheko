@@ -60,7 +60,8 @@
     {if !empty($liste)}
     <table class="list">
         <thead>
-            <td></td>
+            <td><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>
+            <td class="num" title="Numéro de membre">#</td>
             <th>Nom</th>
             <td>E-Mail</td>
             <td>Ville</td>
@@ -71,6 +72,7 @@
             {foreach from=$liste item="membre"}
                 <tr>
                     <td>{if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
+                    <td class="num">{$membre.id|escape}</td>
                     <th>{$membre.nom|escape}</th>
                     <td>{if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">{$membre.email|escape}</a>{/if}</td>
                     <td>
@@ -128,7 +130,7 @@
             {
                 var elm = elements[i];
 
-                if (elm.type == 'checkbox' && elm.name == 'selected[]')
+                if (elm.type == 'checkbox')
                 {
                     if (checked)
                         elm.checked = false;
