@@ -222,6 +222,10 @@ table.list .confirm {
     color: darkgreen;
 }
 
+table.list .num {
+    text-align: center;
+}}
+
 table.list .actions {
     text-align: right;
 }
