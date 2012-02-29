@@ -1,5 +1,17 @@
 <?php
 
+function str_replace_first ($search, $replace, $subject)
+{
+    $pos = strpos($subject, $search);
+
+    if ($pos !== false)
+    {
+        $subject = substr_replace($subject, $replace, $pos, strlen($search));
+    }
+
+    return $subject;
+}
+
 define('SQLITE3_INSTRUCTION', 42);
 
 class SQLite3_Instruction
@@ -180,7 +192,7 @@ class Garradin_DB extends SQLite3
                     throw new InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
                 }
 
-                $query = str_replace(':'.$key, $this->escapeAuto($value, $key), $query);
+                $query = str_replace_first(':'.$key, $this->escapeAuto($value, $key), $query);
             }
         }
         else
