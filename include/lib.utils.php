@@ -285,13 +285,23 @@ class utils
         return $out;
     }
 
-    static public function transliterateToAscii($str, $charset='utf-8')
+    static public function transliterateToAscii($str, $charset='UTF-8')
     {
+        // Don't process empty strings
+        if (!trim($str))
+            return $str;
+
+        // We only process non-ascii strings
+        if (preg_match('!^[[:ascii:]]+$!', $str))
+            return $str;
+
         $str = htmlentities($str, ENT_NOQUOTES, $charset);
 
         $str = preg_replace('#&([A-za-z])(?:acute|cedil|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str);
         $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str); // pour les ligatures e.g. '&oelig;'
+
         $str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
+        $str = preg_replace('![^[:ascii:]]+!', '', $str);
 
         return $str;
     }
