@@ -307,7 +307,7 @@ class Garradin_Membres
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
-                ORDER BY nom LIMIT 100;',
+                ORDER BY transliterate_to_ascii(nom) LIMIT 100;',
             SQLITE3_ASSOC
         );
     }
@@ -327,7 +327,7 @@ class Garradin_Membres
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
-                ORDER BY nom LIMIT ?, ?;',
+                ORDER BY transliterate_to_ascii(nom) LIMIT ?, ?;',
             SQLITE3_ASSOC,
             $begin,
             self::ITEMS_PER_PAGE
@@ -407,7 +407,7 @@ class Garradin_Membres
 
         $db = Garradin_DB::getInstance();
         $db->exec('UPDATE wiki_revisions SET id_auteur = 0 WHERE id_auteur IN ('.$membres.');');
-        $db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
+        //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
         return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
 

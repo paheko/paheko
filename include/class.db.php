@@ -57,6 +57,8 @@ class Garradin_DB extends SQLite3
             $this->exec(file_get_contents(GARRADIN_DB_SCHEMA));
             $this->exec('END;');
         }
+
+        $this->createFunction('transliterate_to_ascii', array('utils', 'transliterateToAscii'));
     }
 
     public function escape($str)
