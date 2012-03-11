@@ -126,7 +126,7 @@ class Garradin_Config
 
         if (is_array($this->fields_types[$key]))
         {
-            $value = (array) $value;
+            $value = !empty($value) ? (array) $value : array();
         }
         elseif (is_int($this->fields_types[$key]))
         {
