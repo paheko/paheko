@@ -308,16 +308,12 @@ class utils
 
     static public function htmlLinksOnUrls($str)
     {
-        preg_match_all('!(^|[\s>])((ftp|http|https)://([^\s<]+))!u', $str, $match, PREG_SET_ORDER);
-
-        foreach ($match as &$m)
-        {
-            $text = ($m[3] == 'http') ? $m[4] : $m[2];
-            $text = isset($text[51]) ? substr($text, 0, 50) . '...' : $text;
-            $str = str_replace($m[0], $m[1].'<a href="'.$m[2].'" onclick="window.open(this.href); return false;">'.$text.'</a>', $str);
-        }
-
-        return $str;
+        return preg_replace_callback('!(?<=\s)((?:(ftp|https?|file|ed2k|ircs?)://|(magnet|mailto|data|tel|fax|geo|sips?|xmpp):)([^\s<]+))!',
+            function ($match) {
+                $proto = $match[2] ?: $match[3];
+                $text = ($proto == 'http' || $proto == 'mailto') ? $match[4] : $match[1];
+                return '<a class="'.$proto.'" href="'.htmlspecialchars($match[1], ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($text, ENT_QUOTES, 'UTF-8').'</a>';
+            }, $str);
     }
 
     static public function htmlGarbage2xhtml($str)
@@ -335,21 +331,21 @@ class utils
     static public function htmlSpip($str)
     {
         // Intertitres
-        $str = preg_replace('!(^|[^\\\\])\{{3}(\V*)\}{3}!', '$1<h3>$2</h3>', $str);
+        $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '<h3>$1</h3>', $str);
 
         // Gras
-        $str = preg_replace('!(^|[^\\\\])\{{2}(\V*)\}{2}!', '$1<strong>$2</strong>', $str);
+        $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '<strong>$1</strong>', $str);
 
         // Italique
-        $str = preg_replace('!(^|[^\\\\])\{(\V*)\}!', '$1<em>$2</em>', $str);
+        $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '<em>$1</em>', $str);
 
         // Espaces typograhiques
         $str = preg_replace('/\h*([?!;:»])(\s+|$)/u', '&nbsp;$1$2', $str);
         $str = preg_replace('/(^|\s+)([«])\h*/u', '$1$2&nbsp;', $str);
 
         // Liens
-        $str = preg_replace('!(^|[^\\\\])\[([^-]+)->([^\]]+)\]!', '$1<a href="$3">$2</a>', $str);
-        $str = preg_replace('!(^|[^\\\\])\[([^\]]+)\]!', '$1<a href="$2">$2</a>', $str);
+        $str = preg_replace('/(?<!\\\\)\[([^-]+)->([^\]]+)\]/', '<a href="$2">$1</a>', $str);
+        $str = preg_replace('/(?<!\\\\)\[([^\]]+)\]/', '<a href="$2">$1</a>', $str);
 
         return $str;
     }
