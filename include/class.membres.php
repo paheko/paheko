@@ -50,6 +50,11 @@ class Garradin_Membres
         return true;
     }
 
+    public function keepSessionAlive()
+    {
+        $this->_sessionStart(true);
+    }
+
     public function login($email, $passe)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL))
