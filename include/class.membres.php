@@ -127,6 +127,8 @@ class Garradin_Membres
 
         $from = $this->getLoggedUser();
         $from = $from['email'];
+        // Uniquement adresse email pour le moment car faudrait trouver comment
+        // indiquer le nom mais qu'il soit correctement échappé FIXME
 
         $config = Garradin_Config::getInstance();
 
