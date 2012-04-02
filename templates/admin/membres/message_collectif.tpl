@@ -17,7 +17,7 @@
                 <select name="dest">
                     <option value="0">Toutes les catégories qui ne sont pas cachées</option>
                 {foreach from=$cats_liste key="id" item="nom"}
-                    <option value="{$id|escape}">{$nom|escape} {if array_key_exists($id, $cats_cachees)}(cachée){/if}</option>
+                    <option value="{$id|escape}">{$nom|escape} {if array_key_exists($id, $cats_cachees)}[cachée]{/if}</option>
                 {/foreach}
                 </select>
             </dd>

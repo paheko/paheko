@@ -64,7 +64,6 @@
             <td class="num" title="Numéro de membre">#</td>
             <th>Nom</th>
             <td>E-Mail</td>
-            <td>Ville</td>
             <td>Cotisation</td>
             <td></td>
         </thead>
@@ -75,10 +74,6 @@
                     <td class="num">{$membre.id|escape}</td>
                     <th>{$membre.nom|escape}</th>
                     <td>{if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">{$membre.email|escape}</a>{/if}</td>
-                    <td>
-                        {$membre.ville|truncate:60|escape}
-                        {if !empty($membre.code_postal)}<small>({$membre.code_postal|escape})</small>{/if}
-                    </td>
                     {if empty($membre.date_cotisation)}
                         <td class="error">jamais réglée</td>
                     {elseif $membre.date_cotisation > strtotime('12 months ago')} {* FIXME durée de cotisation variable *}

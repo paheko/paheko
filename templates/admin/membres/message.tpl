@@ -11,7 +11,7 @@
         <legend>Message</legend>
         <dl>
             <dt>Expéditeur</dt>
-            <dd>{$membre.nom|escape} &lt;{$membre.email|escape}&gt;</dd>
+            <dd>{$user.nom|escape} &lt;{$user.email|escape}&gt;</dd>
             <dd class="help">
                 Votre adresse E-Mail apparaîtra dans le champ "expéditeur" du message reçu par le destinataire.
             </dd>
