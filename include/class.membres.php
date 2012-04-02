@@ -314,7 +314,7 @@ class Garradin_Membres
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
-                ORDER BY transliterate_to_ascii(nom) LIMIT 100;',
+                ORDER BY transliterate_to_ascii(nom) COLLATE NOCASE LIMIT 100;',
             SQLITE3_ASSOC
         );
     }
@@ -334,7 +334,7 @@ class Garradin_Membres
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
-                ORDER BY transliterate_to_ascii(nom) LIMIT ?, ?;',
+                ORDER BY transliterate_to_ascii(nom) COLLATE NOCASE LIMIT ?, ?;',
             SQLITE3_ASSOC,
             $begin,
             self::ITEMS_PER_PAGE
