@@ -24,7 +24,7 @@
             <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" /></dd>
             <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><textarea name="message" id="f_message" cols="70" rows="25">{form_field name=message}</textarea></dd>
+            <dd><textarea name="message" id="f_message" cols="72" rows="25">{form_field name=message}</textarea></dd>
         </dl>
     </fieldset>
 
