@@ -308,7 +308,7 @@ class utils
 
     static public function htmlLinksOnUrls($str)
     {
-        return preg_replace_callback('!(?<=\s)((?:(ftp|https?|file|ed2k|ircs?)://|(magnet|mailto|data|tel|fax|geo|sips?|xmpp):)([^\s<]+))!',
+        return preg_replace_callback('!(?<=\s|^)((?:(ftp|https?|file|ed2k|ircs?)://|(magnet|mailto|data|tel|fax|geo|sips?|xmpp):)([^\s<]+))!',
             function ($match) {
                 $proto = $match[2] ?: $match[3];
                 $text = ($proto == 'http' || $proto == 'mailto') ? $match[4] : $match[1];
@@ -345,7 +345,7 @@ class utils
 
         // Liens
         $str = preg_replace('/(?<!\\\\)\[([^-]+)->([^\]]+)\]/', '<a href="$2">$1</a>', $str);
-        $str = preg_replace('/(?<!\\\\)\[([^\]]+)\]/', '<a href="$2">$1</a>', $str);
+        $str = preg_replace('/(?<!\\\\)\[([^\]]+)\]/', '<a href="$1">$1</a>', $str);
 
         return $str;
     }
