@@ -16,11 +16,12 @@ $membres_cats_cachees = $cats->listHidden();
 $cat = (int) utils::get('cat') ?: 0;
 $page = (int) utils::get('p') ?: 1;
 
-$search_field = utils::get('search_field') ?: '';
+$search_field = utils::get('search_field') ?: $membres->sessionGet('membre_search_field');
 $search_query = utils::get('search_query') ?: '';
 
 if ($search_field && $search_query)
 {
+    $membres->sessionStore('membre_search_field', $search_field);
     $tpl->assign('liste', $membres->search($search_field, $search_query));
     $tpl->assign('total', -1);
 }
