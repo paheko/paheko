@@ -123,6 +123,25 @@ class Garradin_Membres
         return true;
     }
 
+    public function sessionStore($key, $value)
+    {
+        if (!isset($_SESSION['storage']))
+        {
+            $_SESSION['storage'] = array();
+        }
+
+        $_SESSION['storage'][$key] = $value;
+        return true;
+    }
+
+    public function sessionGet($key)
+    {
+        if (!isset($_SESSION['storage'][$key]))
+            return null;
+
+        return $_SESSION['storage'][$key];
+    }
+
     public function sendMessage($dest, $sujet, $message, $copie = false)
     {
         if (!$this->isLogged())
