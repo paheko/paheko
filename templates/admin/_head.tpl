@@ -9,6 +9,7 @@
 
 <body>
 
+{if empty($is_popup)}
 <div class="header">
     <h1>{$title|escape}</h1>
 
@@ -59,5 +60,6 @@
     </ul>
     {/if}
 </div>
+{/if}
 
 <div class="page">
