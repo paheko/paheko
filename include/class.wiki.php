@@ -141,6 +141,12 @@ class Garradin_Wiki
             FROM wiki_pages WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
+    public function getTitle($id)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleQuerySingle('SELECT titre FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
+    }
+
     public function editRevision($id, $revision_edition = 0, $data)
     {
         $db = Garradin_DB::getInstance();
@@ -362,6 +368,65 @@ class Garradin_Wiki
     {
         $db = Garradin_DB::getInstance();
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
+    }
+
+    public function listBackParentTree($parent)
+    {
+        $db = Garradin_DB::getInstance();
+        $flat = array((int)$parent);
+
+        if ($parent != 0)
+        {
+            do
+            {
+                $parent = $db->simpleQuerySingle('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$parent);
+                $flat[] = (int)$parent;
+            }
+            while ($parent != 0);
+        }
+
+        foreach ($flat as &$id)
+        {
+            $id = array(
+                'id'        =>  (int)$id,
+                'children'  =>  $db->simpleStatementFetch('SELECT id, titre
+                    FROM wiki_pages WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;', SQLITE3_ASSOC, (int)$id),
+            );
+        }
+
+        $tree = array_reverse($flat);
+        $tree = $this->_buildBackParentTree($tree);
+
+        var_dump($tree);
+        exit;
+
+        return $tree;
+    }
+
+    protected function _buildBackParentTree(&$tree, &$parent = null)
+    {
+        foreach ($tree as &$elm)
+        {
+            if (empty($elm['id']))
+            {
+                $elm['titre'] = 'Racine du site';
+            }
+            elseif (!empty($parent['children']))
+            {
+                foreach ($parent['children'] as $c)
+                {
+                    if ($c['id'] == $elm['id'])
+                        $elm['titre'] = $c['titre'];
+                }
+            }
+
+            if (!empty($elm['children']))
+            {
+                $this->_buildBackParentTree($elm['children'], $elm);
+            }
+        }
+
+        return $tree;
     }
 }
 

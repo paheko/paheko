@@ -393,3 +393,8 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     color: #666;
     border-top: 0.1em solid #ccc;
 }
+
+.wikiMain samp {
+    background: #eee;
+    padding: 0.2em 0.3em;
+}

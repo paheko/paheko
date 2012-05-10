@@ -19,11 +19,15 @@
                 Cette adresse ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas.
             </dd>
             <dd><input type="text" name="uri" id="f_uri" value="{form_field data=$page name=uri}" /></dd>
-            <dt><label for="f_parent">Cette page est une sous-rubrique de...</label></dt>
+            <dt><label for="f_browse_parent">Cette page est une sous-rubrique de...</label></dt>
             <dd>
-                <select name="parent" id="f_parent">
-                    <option value="0">- la racine du site</option>
-                </select>
+                <input type="hidden" name="parent" id="f_parent" value="{form_field data=$page name=parent}" />
+                {if $parent == 0}
+                    <samp id="current_parent_name">la racine du site</samp>
+                {else}
+                    <samp id="current_parent_name">{$parent|escape}</samp>
+                {/if}
+                <input type="button" id="f_browse_parent" onclick="browseWikiForParent();" value="Changer" />
             </dd>
         </dl>
     </fieldset>
@@ -108,6 +112,18 @@
     document.getElementById('f_droit_lecture_public').onchange = function() {
         document.getElementById('f_droit_ecriture_normal').disabled = false;
         document.getElementById('f_droit_ecriture_categorie').disabled = false;
+    };
+
+    window.changeParent = function(parent, title)
+    {
+        document.getElementById('f_parent').value = parent;
+        document.getElementById('current_parent_name').innerHTML = title;
+        return true;
+    };
+
+    window.browseWikiForParent = function()
+    {
+        window.open('_chercher_parent.php?current=' + document.getElementById('f_parent').value);
     };
 }());
 </script>
