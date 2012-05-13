@@ -12,3 +12,5 @@ svn export https://svn.kd2.org/svn/misc/libs/i18n/countries/countries_fr.php inc
 svn export https://svn.kd2.org/svn/misc/libs/i18n/passphrase/lib.passphrase.french.php include/lib.passphrase.french.php
 
 svn export https://svn.kd2.org/svn/misc/libs/garbage2xhtml/lib.garbage2xhtml.php include/lib.garbage2xhtml.php
+
+svn export https://svn.kd2.org/svn/misc/libs/miniskel/class.miniskel.php include/lib.miniskel.php

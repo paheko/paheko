@@ -4,6 +4,9 @@
     {foreach from=$list item="rub"}
     <li>
         <h3><a href="?current={$rub.id|escape}">{$rub.titre|escape}</a></h3>
+        <ul>
+
+        </ul>
     </li>
     {/foreach}
 </ul>
