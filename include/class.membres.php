@@ -374,6 +374,12 @@ class Garradin_Membres
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres '.$where.';');
     }
 
+    public function countAllButHidden()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
+    }
+
     static public function checkCotisation($date_membre, $duree_cotisation, $date_verif = null)
     {
         if (is_null($date_verif))
