@@ -18,6 +18,11 @@ if (!defined('GARRADIN_LOGIN_PROCESS'))
     $user = $membres->getLoggedUser();
 
     $tpl->assign('current', '');
+
+    if ($user['droits']['membres'] >= Garradin_Membres::DROIT_ACCES)
+    {
+        $tpl->assign('nb_membres', $membres->countAllButHidden());
+    }
 }
 
 ?>

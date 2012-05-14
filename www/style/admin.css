@@ -57,6 +57,14 @@ body {
     color: rgb(156, 79, 21);
 }
 
+.header .menu .list_members small {
+    font-weight: normal;
+    opacity: 0.5;
+    float: right;
+    font-size: .7em;
+    padding-top: .3em;
+}
+
 .page {
     margin: 0px 1em 1em 180px;
     position: relative;
