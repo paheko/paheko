@@ -126,6 +126,13 @@ class Garradin_Membres_Categories
         return $db->queryFetch('SELECT * FROM membres_categories ORDER BY nom;');
     }
 
+    public function listCompleteWithStats()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->queryFetch('SELECT *, (SELECT COUNT(*) FROM membres WHERE id_categorie = membres_categories.id) AS nombre FROM membres_categories ORDER BY nom;');
+    }
+
+
     public function listHidden()
     {
         $db = Garradin_DB::getInstance();
