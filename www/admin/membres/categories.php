@@ -37,7 +37,7 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
-$tpl->assign('liste', $cats->listComplete());
+$tpl->assign('liste', $cats->listCompleteWithStats());
 
 $tpl->display('admin/membres/categories.tpl');
 
