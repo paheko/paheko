@@ -166,6 +166,37 @@ form .actions {
     float: right;
 }
 
+ul.actions {
+    list-style-type: none;
+    margin: 1em 0;
+    border-bottom: .1em solid #9c4f15;
+    padding: 0 1em;
+}
+
+ul.actions li {
+    display: inline-block;
+    margin: 0 0.2em;
+}
+
+ul.actions li a {
+    display: inline-block;
+    background: rgba(217, 134, 40, .5);
+    border-radius: .5em .5em 0 0;
+    padding: .1em .5em;
+    color: #000;
+    text-decoration: none;
+}
+
+ul.actions li.current a {
+    background: #9c4f15;
+    color: #fff;
+}
+
+ul.actions li a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
 h3.warning {
     margin: 1em;
     color: red;
