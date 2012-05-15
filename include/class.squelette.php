@@ -132,8 +132,6 @@ class Squelette extends miniSkel
         $query = $where = $order = '';
         $limit = $begin = 0;
 
-        $allowed_fields = array('id', 'uri', 'titre', 'date_creation', 'date_modification', 'parent', 'rubrique', 'revision');
-
         if (trim($loopContent))
         {
             $query = 'SELECT w.*, r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
@@ -154,13 +152,14 @@ class Squelette extends miniSkel
             $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
         }
 
-        $allowed_fields = array('id', 'uri', 'titre', 'date_creation', 'date_modification', 'parent', 'rubrique', 'revision');
+        $allowed_fields = array('id', 'uri', 'titre', 'date_creation', 'date_modification', 'parent', 'rubrique', 'revision', 'points', 'recherche');
+        $search = $search_rank = false;
 
         foreach ($loopCriterias as $criteria)
         {
             if (isset($criteria['field']) && !in_array($criteria['field'], $allowed_fields))
             {
-                throw new miniSkelMarkupException("Critere '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
+                throw new miniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
             }
 
             if (isset($criteria['field']) && $criteria['field'] == 'rubrique')
@@ -168,13 +167,23 @@ class Squelette extends miniSkel
                 $criteria['field'] = 'parent';
             }
 
+            if (isset($criteria['field']) && $criteria['field'] == 'points')
+            {
+                if ($criteria['action'] != miniSkel::ACTION_ORDER_BY)
+                {
+                    throw new miniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
+                }
+
+                $search_rank = true;
+            }
+
             switch ($criteria['action'])
             {
                 case miniSkel::ACTION_ORDER_BY:
                     if (!$order)
-                        $order = 'ORDER BY w.'.$criteria['field'].'';
+                        $order = 'ORDER BY '.$criteria['field'].'';
                     else
-                        $order .= ', w.'.$criteria['field'].'';
+                        $order .= ', '.$criteria['field'].'';
                     break;
                 case miniSkel::ACTION_ORDER_DESC:
                     if ($order)
@@ -185,14 +194,30 @@ class Squelette extends miniSkel
                     $limit = $criteria['number'];
                     break;
                 case miniSkel::ACTION_MATCH_FIELD_BY_VALUE:
-                    $where .= ' AND w.'.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
+                    $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
                     break;
                 case miniSkel::ACTION_MATCH_FIELD:
-                    $where .= ' AND w.'.$criteria['field'].' = \\\'\'.$db->escapeString($this->variables[\''.$criteria['field'].'\']).\'\\\'';
+                {
+                    if ($criteria['field'] == 'recherche')
+                    {
+                        $query = 'SELECT w.*, r.contenu AS texte, rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points FROM wiki_pages AS w INNER JOIN wiki_recherche AS r ON (w.id = r.id) ';
+                        $where .= ' AND wiki_recherche MATCH \\\'\'.$db->escapeString($this->getVariable(\''.$criteria['field'].'\')).\'\\\'';
+                        $search = true;
+                    }
+                    else
+                    {
+                        $where .= ' AND '.$criteria['field'].' = \\\'\'.$db->escapeString($this->getVariable(\''.$criteria['field'].'\')).\'\\\'';
+                    }
                     break;
+                }
                 default:
                     break;
             }
+        }
+
+        if ($search_rank && !$search)
+        {
+            throw new miniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
         }
 
         if (trim($loopContent))
@@ -212,7 +237,21 @@ class Squelette extends miniSkel
 
         $hash = sha1(uniqid(mt_rand(), true));
         $out .= "<?php\n";
-        $out .= '$this->parent =& $this->_vars[$parent_hash]; $result_'.$hash.' = $db->query(\''.$query.'\'); $nb_rows = $result_'.$hash.'->numColumns();';
+        $out .= '$this->parent =& $this->_vars[$parent_hash]; ';
+
+        if ($search)
+        {
+            $out .= 'if (trim($this->getVariable(\'recherche\'))) { ';
+        }
+
+        $out .= '$result_'.$hash.' = $db->query(\''.$query.'\'); ';
+        $out .= '$nb_rows = $result_'.$hash.'->numColumns(); ';
+
+        if ($search)
+        {
+            $out .= '} else { $result_'.$hash.' = false; $nb_rows = 0; }';
+        }
+
         $out .= "\n";
         $out .= '$this->_vars[\''.$hash.'\'] = array(\'_self_hash\' => \''.$hash.'\', \'_parent_hash\' => $parent_hash, \'total_boucle\' => $nb_rows, \'compteur_boucle\' => 0);';
         $out .= "\n";
@@ -335,6 +374,16 @@ class Squelette extends miniSkel
             unlink($path);
 
         return true;
+    }
+
+    protected function getVariable($var)
+    {
+        if (isset($this->variables[$var]))
+            return $this->variables[$var];
+        elseif (isset($_REQUEST[$var]))
+            return $_REQUEST[$var];
+        else
+            return null;
     }
 }
 
