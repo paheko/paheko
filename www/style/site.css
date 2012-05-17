@@ -1,0 +1,29 @@
+body {
+    font-size: 100%;
+    color: #000;
+    font-family: "Trebuchet MS", Helvetica, Sans-serif;
+    background: #fff;
+    padding: 1em;
+    margin: 0;
+}
+
+#header h1 { color: #9c4f15; margin-bottom: 0.1em; padding: 0; }
+#header h4 { color: #666; margin: 0; padding: 0; }
+#header { margin-bottom: 1em; }
+
+#menu {
+    background: rgba(217, 134, 40, 0.5);
+}
+
+#footer {
+    color: #999;
+    font-size: .9em;
+    margin-top: 1em;
+}
+
+.error {
+    border: 1px solid #c00;
+    background: #fcc;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}

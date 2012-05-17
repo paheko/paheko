@@ -1,0 +1,18 @@
+<INCLURE{entete.html}>
+
+<B_article>
+<div class="article">
+    <BOUCLE_article(ARTICLES){uri}>
+    <h1>#TITRE</h1>
+    <div class="corps">
+        [(#TEXTE*|formatter_texte)]
+    </div>
+    </BOUCLE_article>
+</div>
+</B_article>
+<p class="error">
+    Cette page n'existe pas.
+</p>
+<//B_article>
+
+<INCLURE{pied.html}>

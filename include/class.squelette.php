@@ -39,7 +39,11 @@ class Squelette extends miniSkel
         $this->assign('adresse_asso', $config->get('adresse_asso'));
         $this->assign('email_asso', $config->get('email_asso'));
         $this->assign('site_asso', $config->get('site_asso'));
-        $this->assign('url_rss', WWW_URL . 'feed/');
+
+        $this->assign('url_racine', WWW_URL);
+        $this->assign('url_atom', WWW_URL . 'feed/atom/');
+        $this->assign('url_css', WWW_URL . 'style/');
+        $this->assign('url_admin', WWW_URL . 'admin/');
 
         $this->template_path = GARRADIN_ROOT . '/squelettes/';
     }
@@ -122,7 +126,7 @@ class Squelette extends miniSkel
 
     protected function processLoop($loopName, $loopType, $loopCriterias, $loopContent, $preContent, $postContent, $altContent)
     {
-        if ($loopType != 'articles' && $loopType != 'rubriques')
+        if ($loopType != 'articles' && $loopType != 'rubriques' && $loopType != 'pages')
         {
             throw new miniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
         }
@@ -132,13 +136,11 @@ class Squelette extends miniSkel
         $query = $where = $order = '';
         $limit = $begin = 0;
 
+        $query = 'SELECT w.*, strftime(\\\'%s\\\', w.date_creation) AS date_creation, strftime(\\\'%s\\\', w.date_modification) AS date_modification';
+
         if (trim($loopContent))
         {
-            $query = 'SELECT w.*, r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
-        }
-        else
-        {
-            $query = 'SELECT w.* FROM wiki_pages AS w ';
+            $query .= ', r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
         }
 
         $where = 'WHERE w.droit_lecture = -1 ';
@@ -147,34 +149,40 @@ class Squelette extends miniSkel
         {
             $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) = 0 ';
         }
-        else
+        elseif ($loopType == 'rubriques')
         {
             $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
         }
 
-        $allowed_fields = array('id', 'uri', 'titre', 'date_creation', 'date_modification', 'parent', 'rubrique', 'revision', 'points', 'recherche');
+        $allowed_fields = array('id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
+            'parent', 'rubrique', 'revision', 'points', 'recherche');
         $search = $search_rank = false;
 
         foreach ($loopCriterias as $criteria)
         {
-            if (isset($criteria['field']) && !in_array($criteria['field'], $allowed_fields))
+            if (isset($criteria['field']))
             {
-                throw new miniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
-            }
-
-            if (isset($criteria['field']) && $criteria['field'] == 'rubrique')
-            {
-                $criteria['field'] = 'parent';
-            }
-
-            if (isset($criteria['field']) && $criteria['field'] == 'points')
-            {
-                if ($criteria['action'] != miniSkel::ACTION_ORDER_BY)
+                if (!in_array($criteria['field'], $allowed_fields))
                 {
-                    throw new miniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
+                    throw new miniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
                 }
+                elseif ($criteria['field'] == 'rubrique')
+                {
+                    $criteria['field'] = 'parent';
+                }
+                elseif ($criteria['field'] == 'date')
+                {
+                    $criteria['field'] = 'date_creation';
+                }
+                elseif ($criteria['field'] == 'points')
+                {
+                    if ($criteria['action'] != miniSkel::ACTION_ORDER_BY)
+                    {
+                        throw new miniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
+                    }
 
-                $search_rank = true;
+                    $search_rank = true;
+                }
             }
 
             switch ($criteria['action'])
@@ -245,7 +253,7 @@ class Squelette extends miniSkel
         }
 
         $out .= '$result_'.$hash.' = $db->query(\''.$query.'\'); ';
-        $out .= '$nb_rows = $result_'.$hash.'->numColumns(); ';
+        $out .= '$nb_rows = $db->countRows($result_'.$hash.'); ';
 
         if ($search)
         {
@@ -328,6 +336,40 @@ class Squelette extends miniSkel
         }
 
         return null;
+    }
+
+    public function dispatchURI()
+    {
+        $uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+
+        header('HTTP/1.1 200 OK', 200, true);
+
+        if ($pos = strpos($uri, '?'))
+        {
+            $uri = substr($uri, 0, $pos);
+        }
+
+        if ($uri == '/')
+        {
+            $skel = 'sommaire.html';
+        }
+        elseif ($uri == '/feed/atom/')
+        {
+            header('Content-Type: application/atom+xml');
+            $skel = 'atom.xml';
+        }
+        elseif (substr($uri, -1) == '/')
+        {
+            $skel = 'rubrique.html';
+            $_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1, -1);
+        }
+        else
+        {
+            $skel = 'article.html';
+            $_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
+        }
+
+        $this->display($skel);
     }
 
     static private function compile_get_path($path)

@@ -371,6 +371,16 @@ class Garradin_DB extends SQLite3
 
         return $out;
     }
+
+    public function countRows($result)
+    {
+        $i = 0;
+
+        while ($result->fetchArray(SQLITE3_NUM))
+            $i++;
+
+        return $i;
+    }
 }
 
 ?>
