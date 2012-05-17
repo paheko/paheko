@@ -91,7 +91,7 @@ function exception_error_handler($errno, $errstr, $errfile, $errline )
 
 function exception_handler($e)
 {
-    if ($e instanceOf UserException)
+    if ($e instanceOf UserException || $e instanceOf miniSkelMarkupException)
     {
         try {
             require_once GARRADIN_ROOT . '/include/template.php';

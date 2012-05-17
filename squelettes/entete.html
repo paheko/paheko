@@ -2,11 +2,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>#TITRE</title>
+    <title>[(#TITRE) - ]#NOM_ASSO</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
-    <link rel="stylesheet" type="text/css" href="#CHEMIN_CSS/style.css" media="screen,projection,handheld" />
+    <link rel="stylesheet" type="text/css" href="[(#URL_CSS)]site.css" media="screen,projection,handheld" />
+    <link rel="alternate" type="application/atom+xml" title="Actualité de #NOM_ASSO" href="#URL_ATOM" />
 </head>
 
 <body>
 
-<h1>#NOM_ASSO</h1>
+<div id="header">
+    <h1>#NOM_ASSO</h1>
+    [<h4>(#ADRESSE_ASSO)</h4>]
+</div>
+
+<B_menu>
+<ul id="menu">
+<BOUCLE_menu(RUBRIQUES){parent=0}{par titre}>
+    <li><a href="#URL/">#TITRE</a></li>
+</BOUCLE_menu>
+</ul>
+</B_menu>
+
+<div id="page">
