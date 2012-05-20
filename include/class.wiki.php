@@ -370,6 +370,31 @@ class Garradin_Wiki
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
     }
 
+    public function listBackBreadCrumbs($id)
+    {
+        if ($id == 0)
+            return array();
+
+        $db = Garradin_DB::getInstance();
+        $flat = array();
+
+        while ($id > 0)
+        {
+            $res = $db->simpleQuerySingle('SELECT parent, titre, uri
+                FROM wiki_pages WHERE id = ? LIMIT 1;', true, (int)$id);
+
+            $flat[] = array(
+                'id'        =>  $id,
+                'titre'     =>  $res['titre'],
+                'uri'       =>  $res['uri'],
+            );
+
+            $id = (int)$res['parent'];
+        }
+
+        return array_reverse($flat);
+    }
+
     public function listBackParentTree($id)
     {
         $db = Garradin_DB::getInstance();
