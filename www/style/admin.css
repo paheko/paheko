@@ -448,11 +448,12 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
 }
 
 .wikiChildren {
-    margin: 1em;
+    margin: 1em 0 1em 1em;
     border: .1em solid rgba(217, 134, 40, .5);
     padding: 1em;
     background: rgba(255, 255, 255, 0.5);
     float: right;
+    clear: right;
     width: 25%;
 }
 
@@ -495,7 +496,9 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
 }
 
 .breadCrumbs {
-    margin-bottom: 1em;
+    margin-bottom: .8em;
+    font-size: .9em;
+    color: #999;
 }
 
 .breadCrumbs ul, .breadCrumbs li {
@@ -504,9 +507,30 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
 }
 
 .breadCrumbs li:before {
-    content: "» ";
+    content: "> ";
 }
 
 .breadCrumbs li a {
-    color: #666;
+    color: #333;
+}
+
+.wikiSearch {
+}
+
+.wikiSearch fieldset {
+    padding: .3em;
+}
+
+.wikiSearch input[type=text] {
+    padding: .3em;
+}
+
+.wikiResults h3 {
+    font-weight: normal;
+    margin-bottom: .3em;
+}
+
+.wikiResults p {
+    margin-bottom: .8em;
+    font-size: .9em;
 }

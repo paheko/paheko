@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title=$page.titre current="wiki"}
+{include file="admin/_head.tpl" title="Éditer une page" current="wiki"}
 
 {if $error}
     <p class="error">
@@ -92,8 +92,9 @@
 
 </form>
 
-{literal}
 <script type="text/javascript">
+var page_id = '{$page.id|escape}';
+{literal}
 (function() {
     document.getElementById('f_droit_lecture_categorie').onchange = function()
     {
@@ -116,6 +117,11 @@
 
     window.changeParent = function(parent, title)
     {
+        if (parent == page_id)
+        {
+            return false;
+        }
+
         document.getElementById('f_parent').value = parent;
         document.getElementById('current_parent_name').innerHTML = title;
         return true;
