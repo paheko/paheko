@@ -1,6 +1,6 @@
 <?php
 
-require_once GARRADIN_ROOT . '/include/template_lite/class.template.php';
+require_once GARRADIN_ROOT . '/include/libs/template_lite/class.template.php';
 
 class Garradin_TPL extends Template_Lite
 {

@@ -196,7 +196,7 @@ class utils
     {
         if (is_null(self::$country_list))
         {
-            require_once GARRADIN_ROOT . '/include/countries_fr.php';
+            require_once GARRADIN_ROOT . '/include/libs/countries/countries_fr.php';
             self::$country_list = $countries;
         }
 
@@ -320,7 +320,7 @@ class utils
     {
         if (!self::$g2x)
         {
-            require_once GARRADIN_ROOT . '/include/lib.garbage2xhtml.php';
+            require_once GARRADIN_ROOT . '/include/libs/garbage2xhtml/lib.garbage2xhtml.php';
             self::$g2x = new garbage2xhtml;
             self::$g2x->core_attributes = array('class', 'id', 'title');
         }
