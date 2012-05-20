@@ -24,6 +24,15 @@
     {if !$page.contenu}
         <p class="alert">Cette page est vide, cliquez sur « Éditer » pour la modifier.</p>
     {else}
+        <div class="breadCrumbs">
+            <ul>
+                <li><a href="./">Wiki</a></li>
+                {foreach from=$breadcrumbs item="crumb"}
+                <li><a href="?{$crumb.uri|escape}">{$crumb.titre|escape}</a></li>
+                {/foreach}
+            </ul>
+        </div>
+
         {if !empty($children)}
         <div class="wikiChildren">
             <h4>Dans cette rubrique</h4>

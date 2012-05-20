@@ -493,3 +493,20 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     text-align: center;
     margin-bottom: 1em;
 }
+
+.breadCrumbs {
+    margin-bottom: 1em;
+}
+
+.breadCrumbs ul, .breadCrumbs li {
+    list-style-type: none;
+    display: inline;
+}
+
+.breadCrumbs li:before {
+    content: "» ";
+}
+
+.breadCrumbs li a {
+    color: #666;
+}
