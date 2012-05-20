@@ -24,6 +24,17 @@
     {if !$page.contenu}
         <p class="alert">Cette page est vide, cliquez sur « Éditer » pour la modifier.</p>
     {else}
+        {if !empty($children)}
+        <div class="wikiChildren">
+            <h4>Dans cette rubrique</h4>
+            <ul>
+            {foreach from=$children item="child"}
+                <li><a href="?{$child.uri|escape}">{$child.titre|escape}</a></li>
+            {/foreach}
+            </ul>
+        </div>
+        {/if}
+
         {if $page.contenu.chiffrement}
             <noscript>
                 <div class="error">
