@@ -1,6 +1,6 @@
 <?php
 
-require_once GARRADIN_ROOT . '/include/lib.miniskel.php';
+require_once GARRADIN_ROOT . '/include/libs/miniskel/class.miniskel.php';
 require_once GARRADIN_ROOT . '/include/lib.squelette.filtres.php';
 
 class Squelette extends miniSkel
