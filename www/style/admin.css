@@ -549,3 +549,29 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     font-style: normal;
     color: gray;
 }
+
+.wikiRevision {
+    width: 48%;
+    margin: 1em 1%;
+    text-align: center;
+    float: left;
+}
+
+.wikiRevision h3 {
+    font-size: 1em;
+}
+
+.wikiRevision h4 {
+    font-weight: normal;
+    font-size: .9em;
+}
+
+.diff .ins { background: #cfc; width: 45%; }
+.diff .del { background: #fcc; width: 45%; }
+.diff .line { width: 2%; padding: 0.2em; text-align: right; }
+.diff .leftChange, .diff .rightChange { padding: 0.2em; text-align: center; }
+.diff ins { background: #9f9; }
+.diff del { background: #f99; }
+.diff hr { background: none; border: none; border-top: 2px dotted #000; color: #fff; }
+.diff { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+.diff tr { border: 1px solid #ccc; vertical-align: top; }

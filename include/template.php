@@ -225,12 +225,99 @@ function tpl_pagination($params)
     return $out;
 }
 
+function tpl_diff($params)
+{
+    if (!isset($params['old']) || !isset($params['new']))
+    {
+        throw new Template_Exception('Paramètres old et new requis.');
+    }
+
+    $old = $params['old'];
+    $new = $params['new'];
+
+    require_once GARRADIN_ROOT . '/include/libs/diff/class.simplediff.php';
+    $diff = simpleDiff::diff_to_array(false, $old, $new, true);
+
+    $out = '<table class="diff">';
+    $prev = key($diff);
+
+    foreach ($diff as $i=>$line)
+    {
+        if ($i > $prev + 1)
+        {
+            $out .= '<tr><td colspan="5" class="separator"><hr /></td></tr>';
+        }
+
+        list($type, $old, $new) = $line;
+
+        $class1 = $class2 = '';
+        $t1 = $t2 = '';
+
+        if ($type == simpleDiff::INS)
+        {
+            $class2 = 'ins';
+            $t2 = '+';
+            $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
+            $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
+        }
+        elseif ($type == simpleDiff::DEL)
+        {
+            $class1 = 'del';
+            $t1 = '-';
+            $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
+            $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
+        }
+        elseif ($type == simpleDiff::CHANGED)
+        {
+            $class1 = 'del';
+            $class2 = 'ins';
+            $t1 = '-';
+            $t2 = '+';
+
+            $lineDiff = simpleDiff::wdiff($old, $new);
+            $lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');
+
+            // Don't show new things in deleted line
+            $old = preg_replace('!\{\+(?:.*)\+\}!U', '', $lineDiff);
+            $old = str_replace('  ', ' ', $old);
+            $old = str_replace('-] [-', ' ', $old);
+            $old = preg_replace('!\[-(.*)-\]!U', '<del>\\1</del>', $old);
+
+            // Don't show old things in added line
+            $new = preg_replace('!\[-(?:.*)-\]!U', '', $lineDiff);
+            $new = str_replace('  ', ' ', $new);
+            $new = str_replace('+} {+', ' ', $new);
+            $new = preg_replace('!\{\+(.*)\+\}!U', '<ins>\\1</ins>', $new);
+        }
+        else
+        {
+            $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
+            $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
+        }
+
+        $out .= '<tr>';
+        $out .= '<td class="line">'.($i+1).'</td>';
+        $out .= '<td class="leftChange">'.$t1.'</td>';
+        $out .= '<td class="leftText '.$class1.'">'.$old.'</td>';
+        $out .= '<td class="rightChange">'.$t2.'</td>';
+        $out .= '<td class="rightText '.$class2.'">'.$new.'</td>';
+        $out .= '</tr>';
+
+        $prev = $i;
+    }
+
+    $out .= '</table>';
+    return $out;
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
 
 $tpl->register_function('format_droits', 'tpl_format_droits');
 
 $tpl->register_function('pagination', 'tpl_pagination');
+
+$tpl->register_function('diff', 'tpl_diff');
 
 $tpl->register_modifier('get_country_name', array('utils', 'getCountryName'));
 $tpl->register_modifier('format_tel', 'tpl_format_tel');

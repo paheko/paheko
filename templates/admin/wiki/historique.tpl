@@ -23,7 +23,7 @@
                 {if $rev.revision == 1}
                     diff
                 {else}
-                    <a href="?id={$page.id|escape}&amp;diff={math equation="x+1" x=$rev.revision}.{$rev.revision|escape}">diff</a>
+                    <a href="?id={$page.id|escape}&amp;diff={math equation="x-1" x=$rev.revision}.{$rev.revision|escape}">diff</a>
                 {/if}
             </td>
             <th>{$rev.date|date_fr:'d/m/Y à H:i'}</th>
@@ -45,16 +45,36 @@
                 {/if}
             </td>
             <td>
+            {if $rev.modification}
                 <em>{$rev.modification|escape}</em>
+            {/if}
             </td>
         </tr>
     {/foreach}
     </table>
 {elseif !empty($diff)}
-
+    <div class="wikiRevision revisionLeft">
+        <h3>Version du {$rev1.date|date_fr:'d/m/Y à H:i'}</h3>
+        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+            <h4>De <a href="{$www_url}admin/membres/fiche.php?id={$rev1.id_auteur|escape}">{$rev1.nom_auteur|escape}</a></h4>
+        {/if}
+        {if $rev1.modification}
+            <p><em>{$rev1.modification|escape}</em></p>
+        {/if}
+    </div>
+    <div class="wikiRevision revisionRight">
+        <h3>Version {if $rev2.revision == $page.revision}actuelle en date{/if} du {$rev2.date|date_fr:'d/m/Y à H:i'}</h3>
+        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+            <h4>De <a href="{$www_url}admin/membres/fiche.php?id={$rev2.id_auteur|escape}">{$rev2.nom_auteur|escape}</a></h4>
+        {/if}
+        {if $rev2.modification}
+            <p><em>{$rev2.modification|escape}</em></p>
+        {/if}
+    </div>
+    {diff old=$rev1.contenu new=$rev2.contenu}
 {else}
     <p class="alert">
-        Cette page n\'a pas d\'historique.
+        Cette page n'a pas d'historique.
     </p>
 {/if}
 

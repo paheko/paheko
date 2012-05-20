@@ -28,11 +28,11 @@ if (utils::get('diff'))
         throw new UserException("Erreur de paramètre.");
     }
 
-    $rev1 = $wiki->getRevision($page['id'], (int)$rev[0])
-    $rev2 = $wiki->getRevision($page['id'], (int)$rev[1])
+    $rev1 = $wiki->getRevision($page['id'], (int)$revs[0]);
+    $rev2 = $wiki->getRevision($page['id'], (int)$revs[1]);
     $tpl->assign('rev1', $rev1);
     $tpl->assign('rev2', $rev2);
-    //$tpl->assign('diff',
+    $tpl->assign('diff', true);
 }
 else
 {
