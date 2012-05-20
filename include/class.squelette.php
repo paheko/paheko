@@ -63,7 +63,7 @@ class Squelette extends miniSkel
         if (empty($file) || !preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $file))
             throw new miniSkelMarkupException("INCLURE: le nom de fichier ne peut contenir que des caractères alphanumériques.");
 
-        return '<?php $this->fetch("'.$file.'"); ?>';
+        return '<?php $this->fetch("'.$file.'", false, $current); ?>';
     }
 
     protected function processVariable($name, $value, $applyDefault, $modifiers, $pre, $post, $context)
@@ -301,7 +301,7 @@ class Squelette extends miniSkel
         return $out;
     }
 
-    public function fetch($template, $no_display = false, $included = false)
+    public function fetch($template, $no_display = false, $current = null)
     {
         $this->currentTemplate = $template;
 
