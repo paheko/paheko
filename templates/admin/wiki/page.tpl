@@ -11,7 +11,7 @@
         <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id|escape}">Éditer</a></li>
     {/if}
     {if $can_read && $page && $page.contenu}
-        <li><a href="{$www_url}wiki/revisions.php?id={$page.id|escape}">Historique</a>
+        <li><a href="{$www_url}admin/wiki/historique.php?id={$page.id|escape}">Historique</a>
         {if $page.droit_lecture == Garradin_Wiki::LECTURE_PUBLIC}
             <li><a href="{$www_url}{$page.uri|escape}">Voir sur le site</a>
         {/if}
@@ -79,7 +79,7 @@
 
             <p class="wikiFooter">
                 Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
-                {if $user.droits.wiki == Garradin_Membres::DROIT_ADMIN}
+                {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
                 par <a href="{$www_url}admin/membres/fiche.php?id={$page.contenu.id_auteur|escape}">{$auteur|escape}</a>
                 {/if}
             </p>
