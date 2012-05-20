@@ -14,6 +14,10 @@ body {
     background: url("../img/bg01.png") no-repeat left -100px, url("../img/bg00.png") repeat-y left bottom, #fff;
 }
 
+body#popup {
+    background: url("../img/bg01.png") no-repeat -140px -100px, url("../img/bg00.png") repeat-y -140px bottom, #fff;
+}
+
 .header {
     color: #fff;
 }
@@ -68,6 +72,10 @@ body {
 .page {
     margin: 0px 1em 1em 180px;
     position: relative;
+}
+
+body#popup .page {
+    margin: 1em 1em 1em 2.5em;
 }
 
 p.error {
@@ -431,9 +439,57 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     font-size: 0.8em;
     color: #666;
     border-top: 0.1em solid #ccc;
+    clear: both;
 }
 
 .wikiMain samp {
     background: #eee;
     padding: 0.2em 0.3em;
+}
+
+.wikiChildren {
+    margin: 1em;
+    border: .1em solid rgba(217, 134, 40, .5);
+    padding: 1em;
+    background: rgba(255, 255, 255, 0.5);
+    float: right;
+    width: 25%;
+}
+
+.wikiChildren ul {
+    color: #ccc;
+    list-style-type: square;
+    margin-left: 1em;
+}
+
+.wikiTree ul {
+    margin-left: 1em;
+    list-style-type: none;
+}
+
+.wikiTree ul ul {
+    margin-left: 2em;
+}
+
+.wikiTree a {
+    color: #666;
+}
+
+.wikiTree li {
+    margin: 0.2em 0;
+}
+
+.wikiTree h3 {
+    font-size: 1em;
+    font-weight: normal;
+}
+
+.wikiTree .current > h3 a {
+    font-weight: bold;
+    color: #000;
+}
+
+.wikiTree .choice {
+    text-align: center;
+    margin-bottom: 1em;
 }

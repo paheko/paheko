@@ -1,24 +1,29 @@
 {include file="admin/_head.tpl" title="Choisir la page parent" current="wiki" is_popup=true}
 
-<ul>
-    {foreach from=$list item="rub"}
-    <li>
-        <h3><a href="?current={$rub.id|escape}">{$rub.titre|escape}</a></h3>
-        <ul>
+<div class="wikiTree">
+    <p class="choice">
+        <input type="button" onclick="chooseParent();" value="Choisir la page sélectionnée" />
+    </p>
 
-        </ul>
-    </li>
-    {/foreach}
-</ul>
+    {display_tree tree=$list}
+
+</div>
 
 {literal}
 <script type="text/javascript">
 (function() {
-    window.chooseParent = function(parent, title)
+    window.chooseParent = function()
     {
-        window.opener.changeParent(id, title);
-        self.close();
-        return false;
+        var elm = document.getElementsByClassName("current")[0].getElementsByTagName("a")[0];
+
+        if (match = elm.href.match(/=(\d+)$/))
+        {
+            var id = parseInt(match[1], 10);
+            var titre = (id == 0 ? 'la racine du site' : elm.innerHTML);
+            window.opener.changeParent(id, titre);
+            self.close();
+            return false;
+        }
     };
 }());
 </script>

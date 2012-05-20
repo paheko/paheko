@@ -196,15 +196,13 @@ class Garradin_DB extends SQLite3
     public function simpleStatementFetchAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
-        $result = $this->simpleStatement($query, $args);
-        $out = array();
+        return $this->_fetchResultAssoc($this->simpleStatement($query, $args));
+    }
 
-        while ($row = $result->fetchArray(SQLITE3_NUM))
-        {
-            $out[$row[0]] = $row[1];
-        }
-
-        return $out;
+    public function simpleStatementFetchAssocKey($query, $mode = SQLITE3_BOTH)
+    {
+        $args = array_slice(func_get_args(), 2);
+        return $this->_fetchResultAssocKey($this->simpleStatement($query, $args), $mode);
     }
 
     public function escapeAuto($value, $name = '')
@@ -316,13 +314,13 @@ class Garradin_DB extends SQLite3
         }
     }
 
-    public function simpleQuerySingle($query, $all_row = false)
+    public function simpleQuerySingle($query, $all_columns = false)
     {
         $args = array_slice(func_get_args(), 2);
         $query = $this->_getSimpleQuery($query, $args);
 
         try {
-            return $this->querySingle($query, $all_row);
+            return $this->querySingle($query, $all_columns);
         }
         catch (ErrorException $e)
         {
@@ -340,6 +338,11 @@ class Garradin_DB extends SQLite3
     public function queryFetchAssoc($query)
     {
         return $this->_fetchResultAssoc($this->query($query));
+    }
+
+    public function queryFetchAssocKey($query)
+    {
+        return $this->_fetchResultAssocKey($this->query($query));
     }
 
     protected function _fetchResult($result, $mode)
@@ -364,6 +367,22 @@ class Garradin_DB extends SQLite3
         while ($row = $result->fetchArray(SQLITE3_NUM))
         {
             $out[$row[0]] = $row[1];
+        }
+
+        $result->finalize();
+        unset($result, $row);
+
+        return $out;
+    }
+
+    protected function _fetchResultAssocKey($result, $mode)
+    {
+        $out = array();
+
+        while ($row = $result->fetchArray($mode))
+        {
+            $key = current($row);
+            $out[$key] = $row;
         }
 
         $result->finalize();

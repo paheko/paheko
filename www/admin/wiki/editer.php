@@ -58,7 +58,7 @@ if (!empty($_POST['save']))
     }
 }
 
-$parent = (int) utils::get('parent') ?: (int) $page['parent'];
+$parent = (int) utils::post('parent') ?: (int) $page['parent'];
 $tpl->assign('parent', $parent ? $wiki->getTitle($parent) : 0);
 
 $tpl->assign('error', $error);

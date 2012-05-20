@@ -290,7 +290,7 @@ class Garradin_Wiki
                 strftime(\'%s\', date_modification) AS date_modification
                 FROM wiki_pages
                 WHERE parent = ? AND '.$this->_getLectureClause().'
-                ORDER BY titre LIMIT 500;',
+                ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE  LIMIT 500;',
             SQLITE3_ASSOC,
             (int) $parent
         );
@@ -370,59 +370,52 @@ class Garradin_Wiki
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
     }
 
-    public function listBackParentTree($parent)
+    public function listBackParentTree($id)
     {
         $db = Garradin_DB::getInstance();
-        $flat = array((int)$parent);
+        $flat = array(
+            array(
+                'id' => 0,
+                'parent' => null,
+                'titre' => 'Racine',
+                'children' => $db->simpleStatementFetchAssocKey('SELECT id, parent, titre FROM wiki_pages
+                    WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;',
+                    SQLITE3_ASSOC, 0)
+            )
+        );
 
-        if ($parent != 0)
+        do
         {
-            do
-            {
-                $parent = $db->simpleQuerySingle('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$parent);
-                $flat[] = (int)$parent;
-            }
-            while ($parent != 0);
-        }
+            $parent = $db->simpleQuerySingle('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
 
-        foreach ($flat as &$id)
-        {
-            $id = array(
-                'id'        =>  (int)$id,
-                'children'  =>  $db->simpleStatementFetch('SELECT id, titre
-                    FROM wiki_pages WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;', SQLITE3_ASSOC, (int)$id),
+            $flat[$id] = array(
+                'id'        =>  $id,
+                'parent'    =>  $id ? (int)$parent : null,
+                'titre'     =>  $id ? (string)$db->simpleQuerySingle('SELECT titre FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id) : 'Racine',
+                'children'  =>  $db->simpleStatementFetchAssocKey('SELECT id, parent, titre FROM wiki_pages
+                    WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;',
+                    SQLITE3_ASSOC, (int)$id)
             );
+
+            $id = (int)$parent;
         }
+        while ($id != 0);
 
-        $tree = array_reverse($flat);
-        $tree = $this->_buildBackParentTree($tree);
-
-        var_dump($tree);
-        exit;
-
-        return $tree;
-    }
-
-    protected function _buildBackParentTree(&$tree, &$parent = null)
-    {
-        foreach ($tree as &$elm)
+        $tree = array();
+        foreach ($flat as $id=>&$node)
         {
-            if (empty($elm['id']))
+            if (is_null($node['parent']))
             {
-                $elm['titre'] = 'Racine du site';
+                $tree[$id] = &$node;
             }
-            elseif (!empty($parent['children']))
+            else
             {
-                foreach ($parent['children'] as $c)
+                if (!isset($flat[$node['parent']]['children']))
                 {
-                    if ($c['id'] == $elm['id'])
-                        $elm['titre'] = $c['titre'];
+                    $flat[$node['parent']]['children'] = array();
                 }
-            }
 
-            if (!empty($elm['children']))
-            {
-                $this->_buildBackParentTree($elm['children'], $elm);
+                $flat[$node['parent']]['children'][$id] = &$node;
             }
         }
 

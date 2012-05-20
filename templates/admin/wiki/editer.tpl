@@ -22,7 +22,7 @@
             <dt><label for="f_browse_parent">Cette page est une sous-rubrique de...</label></dt>
             <dd>
                 <input type="hidden" name="parent" id="f_parent" value="{form_field data=$page name=parent}" />
-                {if $parent == 0}
+                {if $page.parent == 0}
                     <samp id="current_parent_name">la racine du site</samp>
                 {else}
                     <samp id="current_parent_name">{$parent|escape}</samp>
@@ -123,7 +123,8 @@
 
     window.browseWikiForParent = function()
     {
-        window.open('_chercher_parent.php?current=' + document.getElementById('f_parent').value);
+        window.open('_chercher_parent.php?parent=' + document.getElementById('f_parent').value, 'browseParent',
+            'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
     };
 }());
 </script>

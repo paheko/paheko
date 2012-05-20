@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{$www_url}style/admin.css" media="screen,projection,handheld" />
 </head>
 
-<body>
+<body{if !empty($is_popup)} id="popup"{/if}>
 
 {if empty($is_popup)}
 <div class="header">

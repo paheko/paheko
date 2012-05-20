@@ -21,9 +21,11 @@ else
 {
     $tpl->assign('can_read', $wiki->canReadPage($page['droit_lecture']));
     $tpl->assign('can_edit', $wiki->canWritePage($page['droit_ecriture']));
+    $tpl->assign('children', $wiki->getList($page['uri'] == $config->get('accueil_wiki') ? 0 : $page['id']));
 }
 
 $tpl->assign('page', $page);
+
 
 $tpl->display('admin/wiki/page.tpl');
 
