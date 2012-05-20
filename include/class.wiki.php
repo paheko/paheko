@@ -126,6 +126,11 @@ class Garradin_Wiki
             $data['droit_ecriture'] = $data['droit_lecture'];
         }
 
+        if (isset($data['parent']) && (int)$data['parent'] == (int)$id)
+        {
+            $data['parent'] = 0;
+        }
+
         $data['date_modification'] = new SQLite3_Instruction('CURRENT_TIMESTAMP');
 
         $db->simpleUpdate('wiki_pages', $data, 'id = '.(int)$id);
@@ -211,7 +216,12 @@ class Garradin_Wiki
     public function search($query)
     {
         $db = Garradin_DB::getInstance();
-        // FIXME
+        return $db->simpleStatementFetch('SELECT
+            p.uri, r.*, snippet(wiki_recherche, "<b>", "</b>", "...", -1, -50) AS snippet,
+            rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points
+            FROM wiki_recherche AS r INNER JOIN wiki_pages AS p ON p.id = r.id
+            WHERE '.$this->_getLectureClause('p.').' AND wiki_recherche MATCH \''.$db->escapeString($query).'\'
+            ORDER BY points DESC LIMIT 0,50;');
     }
 
     public function setRestrictionCategorie($id, $droit_wiki)
@@ -221,7 +231,7 @@ class Garradin_Wiki
         return true;
     }
 
-    protected function _getLectureClause()
+    protected function _getLectureClause($prefix = '')
     {
         if (is_null($this->restriction_categorie))
         {
@@ -236,8 +246,8 @@ class Garradin_Wiki
         if ($this->restriction_droit == Garradin_Membres::DROIT_ADMIN)
             return '1';
 
-        return '(droit_lecture = '.self::LECTURE_NORMAL.' OR droit_lecture = '.self::LECTURE_PUBLIC.'
-            OR droit_lecture = '.(int)$this->restriction_categorie.')';
+        return '('.$prefix.'droit_lecture = '.self::LECTURE_NORMAL.' OR '.$prefix.'droit_lecture = '.self::LECTURE_PUBLIC.'
+            OR '.$prefix.'droit_lecture = '.(int)$this->restriction_categorie.')';
     }
 
     public function canReadPage($lecture)

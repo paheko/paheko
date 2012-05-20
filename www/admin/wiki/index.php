@@ -23,6 +23,7 @@ else
     $tpl->assign('can_edit', $wiki->canWritePage($page['droit_ecriture']));
     $tpl->assign('children', $wiki->getList($page['uri'] == $config->get('accueil_wiki') ? 0 : $page['id']));
     $tpl->assign('breadcrumbs', $wiki->listBackBreadCrumbs($page['id']));
+    $tpl->assign('auteur', $membres->getNom($page['contenu']['id_auteur']));
 }
 
 $tpl->assign('page', $page);

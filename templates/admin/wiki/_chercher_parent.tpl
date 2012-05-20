@@ -20,8 +20,16 @@
         {
             var id = parseInt(match[1], 10);
             var titre = (id == 0 ? 'la racine du site' : elm.innerHTML);
-            window.opener.changeParent(id, titre);
-            self.close();
+
+            if (window.opener.changeParent(id, titre))
+            {
+                self.close();
+            }
+            else
+            {
+                alert("Impossible de choisir la page comme parent d'elle-même !");
+            }
+
             return false;
         }
     };

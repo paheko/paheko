@@ -363,6 +363,10 @@ class Squelette extends miniSkel
             $skel = 'rubrique.html';
             $_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1, -1);
         }
+        elseif (preg_match('!^/admin/!', $uri))
+        {
+            throw new UserException('Cette page n\'existe pas.');
+        }
         else
         {
             $skel = 'article.html';

@@ -298,6 +298,12 @@ class Garradin_Membres
             FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
+    public function getNom($id)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleQuerySingle('SELECT nom FROM membres WHERE id = ? LIMIT 1;', false, (int)$id);
+    }
+
     public function getDroits($id)
     {
         $db = Garradin_DB::getInstance();
