@@ -534,3 +534,18 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     margin-bottom: .8em;
     font-size: .9em;
 }
+
+.wikiRevisions .length ins {
+    text-decoration: none;
+    color: green;
+}
+
+.wikiRevisions .length del {
+    text-decoration: none;
+    color: red;
+}
+
+.wikiRevisions .length i {
+    font-style: normal;
+    color: gray;
+}

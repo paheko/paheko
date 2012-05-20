@@ -22,7 +22,7 @@
     </p>
 {else}
     <p class="alert">
-        {$nb_resultats|escape} pages trouvées pour «&nbsp;{$recherche|escape}&nbsp;»
+        <strong>{$nb_resultats|escape}</strong> pages trouvées pour «&nbsp;{$recherche|escape}&nbsp;»
     </p>
 
     <div class="wikiResults">

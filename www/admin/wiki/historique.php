@@ -1,0 +1,47 @@
+<?php
+
+require_once __DIR__ . '/_inc.php';
+
+if (!trim(utils::get('id')))
+{
+    throw new UserException("Page inconnue.");
+}
+
+$page = $wiki->getByID(utils::get('id'));
+
+if (!$page)
+{
+    throw new UserException("Cette page n'existe pas.");
+}
+
+if (!$wiki->canReadPage($page['droit_lecture']))
+{
+    throw new UserException("Vous n'avez pas le droit de voir cette page.");
+}
+
+if (utils::get('diff'))
+{
+    $revs = explode('.', utils::get('diff'));
+
+    if (count($revs) != 2)
+    {
+        throw new UserException("Erreur de paramètre.");
+    }
+
+    $rev1 = $wiki->getRevision($page['id'], (int)$rev[0])
+    $rev2 = $wiki->getRevision($page['id'], (int)$rev[1])
+    $tpl->assign('rev1', $rev1);
+    $tpl->assign('rev2', $rev2);
+    //$tpl->assign('diff',
+}
+else
+{
+    $tpl->assign('revisions', $wiki->listRevisions($page['id']));
+}
+
+$tpl->assign('can_edit', $wiki->canWritePage($page['droit_ecriture']));
+$tpl->assign('page', $page);
+
+$tpl->display('admin/wiki/historique.tpl');
+
+?>

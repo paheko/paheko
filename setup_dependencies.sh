@@ -2,15 +2,22 @@
 
 # Mise en place/à jour des dépendances
 
+KEYWORD="checkout"
+
 # Template Lite
-svn export --force https://svn.kd2.org/svn/misc/libs/template_lite/ include/template_lite/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ include/libs/template_lite/
 
 # Liste des pays
-svn export https://svn.kd2.org/svn/misc/libs/i18n/countries/countries_fr.php include/countries_fr.php
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/countries/ include/libs/countries/
 
 # Passphrase
-svn export https://svn.kd2.org/svn/misc/libs/i18n/passphrase/lib.passphrase.french.php include/lib.passphrase.french.php
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/passphrase/ include/libs/passphrase/
 
-svn export https://svn.kd2.org/svn/misc/libs/garbage2xhtml/lib.garbage2xhtml.php include/lib.garbage2xhtml.php
+# Garbage2xhtml
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/garbage2xhtml/ include/libs/garbage2xhtml/
 
-svn export https://svn.kd2.org/svn/misc/libs/miniskel/class.miniskel.php include/lib.miniskel.php
+# MiniSkel
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/miniskel/ include/libs/miniskel/
+
+# Diff
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/diff/ include/libs/diff/

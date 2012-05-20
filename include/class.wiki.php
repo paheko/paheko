@@ -152,6 +152,28 @@ class Garradin_Wiki
         return $db->simpleQuerySingle('SELECT titre FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
     }
 
+    public function getRevision($id, $rev)
+    {
+        $db = Garradin_DB::getInstance();
+        // FIXME pagination au lieu de bloquer à 1000
+        return $db->simpleQuerySingle('SELECT r.revision, r.modification, r.id_auteur, r.contenu,
+            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur
+            FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
+            WHERE r.id_page = ? AND revision = ? LIMIT 1;', true, (int) $id, (int) $rev);
+    }
+
+    public function listRevisions($id)
+    {
+        $db = Garradin_DB::getInstance();
+        // FIXME pagination au lieu de bloquer à 1000
+        return $db->simpleStatementFetch('SELECT r.revision, r.modification, r.id_auteur,
+            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
+            LENGTH(r.contenu) - (SELECT LENGTH(contenu) FROM wiki_revisions WHERE id_page = r.id_page AND revision < r.revision ORDER BY revision DESC LIMIT 1)
+            AS diff_taille
+            FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
+            WHERE r.id_page = ? ORDER BY r.revision DESC LIMIT 1000;', SQLITE3_ASSOC, (int) $id);
+    }
+
     public function editRevision($id, $revision_edition = 0, $data)
     {
         $db = Garradin_DB::getInstance();
