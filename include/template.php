@@ -237,7 +237,7 @@ $tpl->register_modifier('format_tel', 'tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'tpl_format_wiki');
 $tpl->register_modifier('liens_wiki', 'tpl_liens_wiki');
 
-$tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
+//$tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
 
 $tpl->register_modifier('strftime_fr', 'tpl_strftime_fr');
 $tpl->register_modifier('date_fr', 'tpl_date_fr');

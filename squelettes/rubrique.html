@@ -1,0 +1,22 @@
+<BOUCLE_rubrique(RUBRIQUES){uri}>
+
+<INCLURE{entete.html}>
+
+<div class="rubrique">
+    <h1>#TITRE</h1>
+    <div class="corps">
+        [(#TEXTE*|formatter_texte)]
+    </div>
+</div>
+<INCLURE{pied.html}>
+
+</BOUCLE_rubrique>
+
+<INCLURE{entete.html}>
+<p class="error">
+    Cette page n'existe pas.
+</p>
+
+<INCLURE{pied.html}>
+
+<//B_rubrique>
