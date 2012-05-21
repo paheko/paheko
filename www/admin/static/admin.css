@@ -113,6 +113,7 @@ fieldset {
     border: 1px solid #ccc;
     padding: 0.8em 1em 0 1em;
     margin-bottom: 1em;
+    padding: 0.5em;
 }
 
 fieldset legend {
@@ -127,10 +128,6 @@ label:hover {
 
 dl dt label {
     font-weight: bold;
-}
-
-fieldset dl {
-    margin-bottom: 0.8em;
 }
 
 fieldset dl dt b {
@@ -375,7 +372,7 @@ fieldset.wikiText {
     padding: 0.5em;
 }
 
-fieldset.wikiText textarea {
+fieldset.wikiText textarea, fieldset.skelEdit textarea {
     width: 100%;
 }
 
@@ -575,3 +572,7 @@ div.wikiRevision h4 {
 .diff hr { background: none; border: none; border-top: 2px dotted #000; color: #fff; }
 .diff { border-collapse: collapse; width: 100%; font-size: 0.9em; }
 .diff tr { border: 1px solid #ccc; vertical-align: top; }
+
+.templatesList ul {
+    margin: 1em 2em;
+}

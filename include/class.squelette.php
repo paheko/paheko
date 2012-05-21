@@ -430,6 +430,75 @@ class Squelette extends miniSkel
         else
             return null;
     }
+
+    static public function getSource($template)
+    {
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
+            return false;
+
+        $path = file_exists(GARRADIN_ROOT . '/squelettes/' . $template)
+            ? GARRADIN_ROOT . '/squelettes/' . $template
+            : GARRADIN_ROOT . '/squelettes-dist/' . $template;
+
+        if (!file_exists($path))
+            return false;
+
+        return file_get_contents($path);
+    }
+
+    static public function editSource($template, $content)
+    {
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
+            return false;
+
+        $path = GARRADIN_ROOT . '/squelettes/' . $template;
+
+        return file_put_contents($path, $content);
+    }
+
+    static public function resetSource($template)
+    {
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
+            return false;
+
+        if (file_exists(GARRADIN_ROOT . '/squelettes/' . $template))
+        {
+            unlink(GARRADIN_ROOT . '/squelettes/' . $template);
+        }
+
+        return true;
+    }
+
+    static public function listSources()
+    {
+        $sources = array();
+
+        $dir = dir(GARRADIN_ROOT . '/squelettes-dist');
+
+        while ($file = $dir->read())
+        {
+            if ($file[0] != '.')
+                $sources[] = $file;
+        }
+
+        $dir->close();
+
+        $dir = dir(GARRADIN_ROOT . '/squelettes');
+
+        while ($file = $dir->read())
+        {
+            if ($file[0] != '.')
+                $sources[] = $file;
+        }
+
+        $dir->close();
+
+        $sources = array_unique($sources);
+        sort($sources);
+
+        return $sources;
+    }
+
 }
 
 ?>
