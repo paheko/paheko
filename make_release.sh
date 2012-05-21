@@ -10,6 +10,8 @@ DATE=`date +'%Y%m%d'`
 
 cd `dirname ${MY_PATH}`
 
+# FIXME TODO exclure des libs ce qui n'est pas utilisé par l'appli (démos, README, etc.)
+
 tar cjvf "${MY_DIR}-${VERSION}-${MANIFEST_VERSION}-${DATE}.tar.bz2" --wildcards-match-slash \
     --exclude-vcs \
     --exclude '*/compiled/*' \

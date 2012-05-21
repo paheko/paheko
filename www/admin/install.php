@@ -12,7 +12,7 @@ $tests = array(
     'Le module de bases de données SQLite3 n\'est pas installé !'
         =>  !class_exists('SQLite3'),
     'La librairie Template_Lite ne semble pas disponible !'
-        =>  !file_exists(__DIR__ . '/../../include/template_lite/class.template.php'),
+        =>  !file_exists(__DIR__ . '/../../include/libs/template_lite/class.template.php'),
     #'Dummy' => true,
 );
 
@@ -47,7 +47,7 @@ define('GARRADIN_INSTALL_PROCESS', true);
 require_once __DIR__ . '/../../include/init.php';
 require_once GARRADIN_ROOT . '/include/class.membres.php';
 require_once GARRADIN_ROOT . '/include/template.php';
-require_once GARRADIN_ROOT . '/include/lib.passphrase.french.php';
+require_once GARRADIN_ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
 
 if (file_exists(GARRADIN_DB_FILE))
 {
