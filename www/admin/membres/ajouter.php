@@ -49,6 +49,7 @@ if (!empty($_POST['save']))
                 'pays'          =>  utils::post('pays'),
                 'date_naissance'=>  utils::post('date_naissance'),
                 'notes'         =>  '',
+                'lettre_infos'  =>  utils::post('lettre_infos'),
             ));
 
             utils::redirect('/admin/membres/fiche.php?id='.(int)$id);

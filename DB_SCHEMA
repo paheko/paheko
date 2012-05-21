@@ -49,6 +49,8 @@ CREATE TABLE membres (
     -- Pour le bordel
     notes TEXT,
 
+    lettre_infos INTEGER DEFAULT 0,
+
     date_inscription TEXT DEFAULT CURRENT_DATE,
     date_connexion TEXT,
 

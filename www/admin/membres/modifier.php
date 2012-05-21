@@ -60,6 +60,7 @@ if (!empty($_POST['save']))
                 'pays'          =>  utils::post('pays'),
                 'date_naissance'=>  utils::post('date_naissance'),
                 'notes'         =>  utils::post('notes'),
+                'lettre_infos'  =>  utils::post('lettre_infos'),
             );
 
             if ($user['droits']['membres'] == Garradin_Membres::DROIT_ADMIN)
