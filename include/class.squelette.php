@@ -44,13 +44,6 @@ class Squelette extends miniSkel
         $this->assign('url_atom', WWW_URL . 'feed/atom/');
         $this->assign('url_css', WWW_URL . 'style/');
         $this->assign('url_admin', WWW_URL . 'admin/');
-
-        $this->template_path = GARRADIN_ROOT . '/squelettes/';
-    }
-
-    private function _getTemplatePath($file)
-    {
-        return $this->template_path . '/' . $file;
     }
 
     protected function processInclude($args)
@@ -305,34 +298,40 @@ class Squelette extends miniSkel
     {
         $this->currentTemplate = $template;
 
-        if (!self::compile_check($template, $this->template_path . $template))
+        $path = file_exists(GARRADIN_ROOT . '/squelettes/' . $template)
+            ? GARRADIN_ROOT . '/squelettes/' . $template
+            : GARRADIN_ROOT . '/squelettes-dist/' . $template;
+
+        $tpl_id = basename(dirname($path)) . '/' . $template;
+
+        if (!self::compile_check($tpl_id, $path))
         {
-            if (!file_exists($this->template_path . $template))
+            if (!file_exists($path))
             {
-                throw new miniSkelMarkupException('Le squelette "'.$template.'" n\'existe pas.');
+                throw new miniSkelMarkupException('Le squelette "'.$tpl_id.'" n\'existe pas.');
             }
 
-            $content = file_get_contents($this->template_path . $template);
+            $content = file_get_contents($path);
             $content = strtr($content, array('<?php' => '&lt;?php', '<?' => '<?php echo \'<?\'; ?>'));
             $content = $this->parse($content);
-            $content = '<?php /* '.$template.' */ '.
+            $content = '<?php /* '.$tpl_id.' */ '.
                 '$db = Garradin_DB::getInstance(); '.
                 'if ($this->parent && !isset($parent_hash)) $parent_hash = $this->parent[\'_self_hash\']; '. // For included files
                 'elseif (!$this->parent) $parent_hash = false; ?>' . $content;
 
             if (!$no_display)
             {
-                self::compile_store($template, $content);
+                self::compile_store($tpl_id, $content);
             }
         }
 
         if (!$no_display)
         {
-            require self::compile_get_path($template);
+            require self::compile_get_path($tpl_id);
         }
         else
         {
-            eval($template);
+            eval($tpl_id);
         }
 
         return null;
