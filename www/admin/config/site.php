@@ -7,6 +7,8 @@ if ($user['droits']['config'] < Garradin_Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
+require_once GARRADIN_ROOT . '/include/class.squelette.php';
+
 $error = false;
 
 if (isset($_GET['ok']))
@@ -35,6 +37,44 @@ if (!empty($_POST['save']))
             $error = $e->getMessage();
         }
     }
+}
+
+if (utils::get('edit'))
+{
+    $source = Squelette::getSource(utils::get('edit'));
+
+    if (!$source)
+    {
+        throw new UserException("Ce squelette n'existe pas.");
+    }
+
+    $csrf_key = 'edit_skel_'.md5(utils::get('edit'));
+
+    if (utils::post('save'))
+    {
+        if (!utils::CSRF_check($csrf_key))
+        {
+            $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        }
+        else
+        {
+            if (Squelette::editSource(utils::get('edit'), utils::post('content')))
+            {
+                utils::redirect('/admin/config/site.php?edit='.rawurlencode(utils::get('edit')).'&ok');
+            }
+            else
+            {
+                $error = "Impossible d'enregistrer le squelette.";
+            }
+        }
+    }
+
+    $tpl->assign('edit', array('file' => trim(utils::get('edit')), 'content' => $source));
+    $tpl->assign('csrf_key', $csrf_key);
+}
+else
+{
+    $tpl->assign('sources', Squelette::listSources());
 }
 
 $tpl->assign('error', $error);
