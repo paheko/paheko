@@ -19,6 +19,9 @@
     {if $user.droits.wiki >= Garradin_Membres::DROIT_ADMIN}
         <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id|escape}">Supprimer</a></li>
     {/if}
+    {if $user.droits.wiki >= Garradin_Membres::DROIT_ECRITURE}
+        <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id|escape}{/if}">Créer une nouvelle page</a></li>
+    {/if}
 </ul>
 
 {if !$can_read}

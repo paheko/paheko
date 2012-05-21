@@ -28,6 +28,8 @@ class Garradin_Wiki
 
     public function _checkFields(&$data)
     {
+        $db = Garradin_DB::getInstance();
+
         if (isset($data['titre']) && !trim($data['titre']))
         {
             throw new UserException('Le titre ne peut rester vide.');
@@ -63,6 +65,11 @@ class Garradin_Wiki
             $data['parent'] = (int) $data['parent'];
 
             if ($data['parent'] < 0)
+            {
+                $data['parent'] = 0;
+            }
+
+            if (!$db->simpleQuerySingle('SELECT 1 FROM wiki_pages WHERE id = ?;', false, $data['parent']))
             {
                 $data['parent'] = 0;
             }

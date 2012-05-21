@@ -3,6 +3,7 @@
 require_once __DIR__ . '/_inc.php';
 
 $error = false;
+$parent = (int) utils::get('parent') ?: 0;
 
 if (!empty($_POST['create']))
 {
@@ -15,7 +16,7 @@ if (!empty($_POST['create']))
         try {
             $id = $wiki->create(array(
                 'titre'         =>  utils::post('titre'),
-                'parent'        =>  0,
+                'parent'        =>  $parent,
             ));
 
             utils::redirect('/admin/wiki/editer.php?id='.$id);
