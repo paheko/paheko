@@ -17,10 +17,12 @@ tar cjvf "${MY_DIR}-${VERSION}-${MANIFEST_VERSION}-${DATE}.tar.bz2" --wildcards-
     --exclude '*/compiled/*' \
     --exclude '*.fossil' \
     --exclude '_FOSSIL_' \
-    --exclude 'association.db' \
+    --exclude '*.db' \
     --exclude 'doc' \
     --exclude 'test*' \
     --exclude '*.sh' \
+    --exclude 'squelettes/*' \
+    --exclude 'www/elements/*' \
     ${MY_DIR}
 
 cd ${MY_PATH}
