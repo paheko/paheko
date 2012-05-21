@@ -86,6 +86,16 @@
     </fieldset>
     {/if}
 
+    <fieldset>
+        <legend>Général</legend>
+        <dl>
+            <dt>
+                <input type="checkbox" id="f_lettre" name="lettre_infos" value="1" {form_field name="lettre_infos" data=$membre checked="1"} />
+                <label for="f_lettre">Inscription à la lettre d'information</label>
+            </dt>
+        </dl>
+    </fieldset>
+
     <p class="submit">
         {csrf_field key="edit_me"}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
