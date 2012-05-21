@@ -5,8 +5,9 @@
 {/if}
 
 <ul class="actions">
-    <li><a href="{$www_url}admin/wiki/"><strong>Wiki</strong></a></li>
-    <li><a href="{$www_url}admin/wiki/chercher.php">Rechercher</a></li>
+    {if $user.droits.wiki >= Garradin_Membres::DROIT_ECRITURE}
+        <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id|escape}{/if}"><strong>Créer une nouvelle page</strong></a></li>
+    {/if}
     {if $can_edit}
         <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id|escape}">Éditer</a></li>
     {/if}
@@ -18,9 +19,6 @@
     {/if}
     {if $user.droits.wiki >= Garradin_Membres::DROIT_ADMIN}
         <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id|escape}">Supprimer</a></li>
-    {/if}
-    {if $user.droits.wiki >= Garradin_Membres::DROIT_ECRITURE}
-        <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id|escape}{/if}">Créer une nouvelle page</a></li>
     {/if}
 </ul>
 

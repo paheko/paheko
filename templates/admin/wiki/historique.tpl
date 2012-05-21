@@ -1,12 +1,7 @@
 {include file="admin/_head.tpl" title="Historique : `$page.titre`" current="wiki"}
 
 <ul class="actions">
-    <li><a href="{$www_url}admin/wiki/"><strong>Wiki</strong></a></li>
-    <li><a href="{$www_url}admin/wiki/chercher.php">Rechercher</a></li>
     <li><a href="{$www_url}admin/wiki/?{$page.uri|escape}">Voir la page</a></li>
-    {if $can_edit}
-        <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id|escape}">Éditer</a></li>
-    {/if}
 </ul>
 
 {if !empty($revisions)}
