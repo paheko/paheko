@@ -1,9 +1,4 @@
-{include file="admin/_head.tpl" title="Recherche" current="wiki"}
-
-<ul class="actions">
-    <li><a href="{$www_url}admin/wiki/"><strong>Wiki</strong></a></li>
-    <li class="current"><a href="{$www_url}admin/wiki/chercher.php">Rechercher</a></li>
-</ul>
+{include file="admin/_head.tpl" title="Recherche" current="wiki/chercher"}
 
 <form method="get" action="{$www_url}admin/wiki/chercher.php" class="wikiSearch">
     <fieldset>
