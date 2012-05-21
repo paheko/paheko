@@ -130,7 +130,7 @@ set_exception_handler("exception_handler");
 
 require_once GARRADIN_ROOT . '/include/lib.utils.php';
 
-if (!defined('GARRADIN_INSTALL_PROCESS'))
+if (!defined('GARRADIN_INSTALL_PROCESS') && !defined('GARRADIN_UPGRADE_PROCESS'))
 {
     if (!file_exists(GARRADIN_DB_FILE))
     {
@@ -140,6 +140,11 @@ if (!defined('GARRADIN_INSTALL_PROCESS'))
     require_once GARRADIN_ROOT . '/include/class.db.php';
     require_once GARRADIN_ROOT . '/include/class.config.php';
     $config = Garradin_Config::getInstance();
+
+    if (version_compare($config->getVersion(), garradin_version(), '<'))
+    {
+        utils::redirect('/admin/upgrade.php');
+    }
 }
 
 ?>

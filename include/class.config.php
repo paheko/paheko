@@ -45,6 +45,8 @@ class Garradin_Config
             'champs_modifiables_membre' =>  $array,
 
             'accueil_wiki'          =>  $string,
+
+            'version'               =>  $string,
         );
 
         $db = Garradin_DB::getInstance();
@@ -115,6 +117,27 @@ class Garradin_Config
         }
 
         return $this->config[$key];
+    }
+
+    public function getVersion()
+    {
+        if (!array_key_exists('version', $this->config))
+        {
+            return '0';
+        }
+
+        return $this->config['version'];
+    }
+
+    public function setVersion($version)
+    {
+        $this->config['version'] = $version;
+
+        $db = Garradin_DB::getInstance();
+        $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+                'version', $version);
+
+        return true;
     }
 
     public function set($key, $value)
