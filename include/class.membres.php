@@ -169,7 +169,7 @@ class Garradin_Membres
 
     // Gestion des données ///////////////////////////////////////////////////////
 
-    public function _checkFields($data, $check_mandatory = true)
+    public function _checkFields(&$data, $check_mandatory = true)
     {
         if (isset($data['nom']) && !trim($data['nom']))
         {
@@ -202,6 +202,11 @@ class Garradin_Membres
         if (!empty($data['passe']) && strlen($data['passe']) < 5)
         {
             throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
+        }
+
+        if (!empty($data['telephone']))
+        {
+            $data['telephone'] = preg_replace('![^\d\+]!', '', $data['telephone']);
         }
 
         return true;
