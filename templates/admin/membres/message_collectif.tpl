@@ -21,7 +21,12 @@
                 {/foreach}
                 </select>
             </dd>
+            <dd>
+                <input type="checkbox" id="f_subscribed" name="subscribed" value="1" {form_field name="subscribed" default="1" checked="1"} />
+                <label for="f_subscribed">Seulement les membres inscrits à la lettre d'information</label>
+            </dd>
             <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="help">Sera automatiquement précédé de la mention [{$config.nom_asso|escape}]</dd>
             <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" /></dd>
             <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><textarea name="message" id="f_message" cols="72" rows="25">{form_field name=message}</textarea></dd>

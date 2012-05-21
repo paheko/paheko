@@ -209,6 +209,11 @@ class Garradin_Membres
             $data['telephone'] = preg_replace('![^\d\+]!', '', $data['telephone']);
         }
 
+        if (isset($data['lettre_infos']))
+        {
+            $data['lettre_infos'] = (int) (bool) $data['lettre_infos'];
+        }
+
         return true;
     }
 
@@ -454,7 +459,7 @@ class Garradin_Membres
         return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
 
-    public function sendMessageToCategory($dest, $sujet, $message)
+    public function sendMessageToCategory($dest, $sujet, $message, $subscribed_only = false)
     {
         $config = Garradin_Config::getInstance();
 
@@ -468,8 +473,15 @@ class Garradin_Membres
         else
             $where = 'id_categorie = '.(int)$dest;
 
+        if ($subscribed_only)
+        {
+            $where .= ' AND lettre_infos = 1';
+        }
+
         $db = Garradin_DB::getInstance();
         $res = $db->query('SELECT email FROM membres WHERE '.$where.' ORDER BY id;');
+
+        $sujet = '['.$config->get('nom_asso').'] '.$sujet;
 
         while ($row = $res->fetchArray(SQLITE3_ASSOC))
         {
