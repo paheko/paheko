@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>{$title|escape}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="{$www_url}style/admin.css" media="screen,projection,handheld" />
+    <link rel="stylesheet" type="text/css" href="{$www_url}admin/static/admin.css" media="screen,projection,handheld" />
 </head>
 
 <body{if !empty($is_popup)} id="popup"{/if}>

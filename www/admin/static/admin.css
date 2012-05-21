@@ -11,11 +11,11 @@ body {
     color: #000;
     font-family: "Trebuchet MS", Helvetica, Sans-serif;
     background: #fff;
-    background: url("../img/bg01.png") no-repeat left -100px, url("../img/bg00.png") repeat-y left bottom, #fff;
+    background: url("bg01.png") no-repeat left -100px, url("bg00.png") repeat-y left bottom, #fff;
 }
 
 body#popup {
-    background: url("../img/bg01.png") no-repeat -140px -100px, url("../img/bg00.png") repeat-y -140px bottom, #fff;
+    background: url("bg01.png") no-repeat -140px -100px, url("bg00.png") repeat-y -140px bottom, #fff;
 }
 
 .header {
