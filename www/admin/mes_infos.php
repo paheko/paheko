@@ -43,6 +43,8 @@ if (!empty($_POST['save']))
                 unset($data['passe']);
             }
 
+            $data['lettre_infos'] = utils::post('lettre_infos');
+
             $membres->edit($membre['id'], $data);
             $membres->updateSessionData();
 
