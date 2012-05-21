@@ -16,6 +16,9 @@
             <li><a href="{$www_url}{$page.uri|escape}">Voir sur le site</a>
         {/if}
     {/if}
+    {if $user.droits.wiki >= Garradin_Membres::DROIT_ADMIN}
+        <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id|escape}">Supprimer</a></li>
+    {/if}
 </ul>
 
 {if !$can_read}

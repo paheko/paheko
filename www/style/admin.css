@@ -550,18 +550,18 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     color: gray;
 }
 
-.wikiRevision {
+div.wikiRevision {
     width: 48%;
     margin: 1em 1%;
     text-align: center;
     float: left;
 }
 
-.wikiRevision h3 {
+div.wikiRevision h3 {
     font-size: 1em;
 }
 
-.wikiRevision h4 {
+div.wikiRevision h4 {
     font-weight: normal;
     font-size: .9em;
 }

@@ -137,6 +137,22 @@ class Garradin_Wiki
         return true;
     }
 
+    public function delete($id)
+    {
+        $db = Garradin_DB::getInstance();
+
+        if ($db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE parent = ?;', false, (int)$id))
+        {
+            return false;
+        }
+
+        $db->simpleExec('DELETE FROM wiki_revisions WHERE id_page = ?;', (int)$id);
+        //$db->simpleExec('DELETE FROM wiki_suivi WHERE id_page = ?;', (int)$id); FIXME
+        $db->simpleExec('DELETE FROM wiki_recherche WHERE id = ?;', (int)$id);
+        $db->simpleExec('DELETE FROM wiki_pages WHERE id = ?;', (int)$id);
+        return true;
+    }
+
     public function get($id)
     {
         $db = Garradin_DB::getInstance();
