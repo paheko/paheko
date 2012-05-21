@@ -479,7 +479,7 @@ class Garradin_Membres
         }
 
         $db = Garradin_DB::getInstance();
-        $res = $db->query('SELECT email FROM membres WHERE '.$where.' ORDER BY id;');
+        $res = $db->query('SELECT email FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
 
         $sujet = '['.$config->get('nom_asso').'] '.$sujet;
 
