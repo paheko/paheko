@@ -41,8 +41,9 @@ class Squelette extends miniSkel
         $this->assign('site_asso', $config->get('site_asso'));
 
         $this->assign('url_racine', WWW_URL);
+        $this->assign('url_site', WWW_URL);
         $this->assign('url_atom', WWW_URL . 'feed/atom/');
-        $this->assign('url_css', WWW_URL . 'style/');
+        $this->assign('url_elements', WWW_URL . 'elements/');
         $this->assign('url_admin', WWW_URL . 'admin/');
     }
 
