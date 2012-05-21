@@ -28,7 +28,11 @@
     {/if}
     {if !empty($membre.email)}
     <p>
+        E-Mail : {$membre.email|escape} -
         <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
+        {if $membre.lettre_infos}
+            (inscrit-e à la lettre d'informations)
+        {/if}
     </p>
     {/if}
     {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
@@ -43,12 +47,15 @@
     <dl>
         <dt>Numéro d'adhérent</dt>
         <dd>{$membre.id|escape}</dd>
-        <dt>Droits</dt>
+        <dt>Catégorie</dt>
+        <dd>{$categorie.nom|escape}</dd>
         <dd class="droits">{format_droits droits=$categorie}</dd>
         <dt>Inscription</dt>
         <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
         <dt>Dernière connexion</dt>
         <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
+        <dt>Mot de passe</dt>
+        <dd>{if empty($membre.passe)}Non{else}Oui{/if}</dd>
     </dl>
 </div>
 
