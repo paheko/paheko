@@ -439,7 +439,8 @@ class Squelette extends miniSkel
 
         $hash = sha1(uniqid(mt_rand(), true));
         $out = new Squelette_Snippet();
-        $out->append(1, 'if ($parent_hash) $this->parent =& $this->_vars[$parent_hash]; ');
+        $out->append(1, '$parent_hash = $this->current[\'_self_hash\'];');
+        $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$parent_hash] : null;');
 
         if ($search)
         {
@@ -456,7 +457,6 @@ class Squelette extends miniSkel
 
         $out->append(1, '$this->_vars[\''.$hash.'\'] = array(\'_self_hash\' => \''.$hash.'\', \'_parent_hash\' => $parent_hash, \'total_boucle\' => $nb_rows, \'compteur_boucle\' => 0);');
         $out->append(1, '$this->current =& $this->_vars[\''.$hash.'\']; ');
-        $out->append(1, '$parent_hash = "'.$hash.'"; ');
         $out->append(1, 'if ($nb_rows > 0):');
 
         if ($preContent)
@@ -488,7 +488,8 @@ class Squelette extends miniSkel
         $out->append(1, 'endif; ');
         $out->append(1, '$parent_hash = $this->_vars[\''.$hash.'\'][\'_parent_hash\']; ');
         $out->append(1, 'unset($result_'.$hash.', $nb_rows, $this->_vars[\''.$hash.'\']); ');
-        $out->append(1, 'if ($parent_hash) { $this->current = $this->_vars[$parent_hash]; $parent_hash = $this->current[\'_parent_hash\']; } ');
+        $out->append(1, 'if ($parent_hash) { $this->current =& $this->_vars[$parent_hash]; $parent_hash = $this->current[\'_parent_hash\']; } ');
+        $out->append(1, 'else { $this->current = null; }');
         $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$_parent_hash] : null;');
 
         return $out;
@@ -517,8 +518,8 @@ class Squelette extends miniSkel
             $out = new Squelette_Snippet(2, $this->parse($content));
             $out->prepend(1, '/* '.$tpl_id.' */ '.
                 '$db = Garradin_DB::getInstance(); '.
-                'if ($this->parent && !isset($parent_hash)) $parent_hash = $this->parent[\'_self_hash\']; '. // For included files
-                'elseif (!$this->parent) $parent_hash = false;');
+                'if ($this->parent) $parent_hash = $this->parent[\'_self_hash\']; '. // For included files
+                'else $parent_hash = false;');
 
             if (!$no_display)
             {
