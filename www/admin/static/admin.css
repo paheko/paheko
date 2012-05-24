@@ -404,6 +404,10 @@ fieldset.wikiRevision #f_modification {
     margin-bottom: 8pt;
 }
 
+.wikiContent ul, .wikiContent ol, .wikiContent dd {
+    margin-left: 2em;
+}
+
 .pagination {
     clear: both;
     list-style-type: none;
