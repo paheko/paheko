@@ -10,8 +10,6 @@ $categorie = $cats->get($user['id_categorie']);
 $tpl->assign('categorie', $categorie);
 $tpl->assign('verif_cotisation', Garradin_Membres::checkCotisation($user['date_cotisation'], $categorie['duree_cotisation']));
 
-$tpl->assign('garradin_version', garradin_version());
-
 $tpl->display('admin/index.tpl');
 
 ?>

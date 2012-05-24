@@ -43,6 +43,8 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
+$tpl->assign('garradin_version', garradin_version() . ' [' . garradin_manifest() . ']');
+
 $tpl->display('admin/config/index.tpl');
 
 ?>

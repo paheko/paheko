@@ -27,8 +27,4 @@
 {/if}
 </div>
 
-<div class="infos">
-    <p>(Garradin version {$garradin_version|escape})</p>
-</div>
-
 {include file="admin/_foot.tpl"}

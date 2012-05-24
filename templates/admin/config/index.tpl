@@ -21,6 +21,14 @@
 <form method="post" action="{$self_url|escape}">
 
     <fieldset>
+        <legend>Garradin</legend>
+        <dl>
+            <dt>Version installée</dt>
+            <dd class="help">{$garradin_version|escape} <a href="http://dev.kd2.org/garradin/">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+        </dl>
+    </fieldset>
+
+    <fieldset>
         <legend>Informations sur l'association</legend>
         <dl>
             <dt><label for="f_nom_asso">Nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>

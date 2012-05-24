@@ -13,23 +13,30 @@ require_once GARRADIN_ROOT . '/include/class.db.php';
 require_once GARRADIN_ROOT . '/include/class.config.php';
 $config = Garradin_Config::getInstance();
 
-if (version_compare($config->getVersion(), garradin_version(), '>='))
+$v = $config->getVersion();
+
+if (version_compare($v, garradin_version(), '>='))
 {
     throw new UserException("Pas de mise à jour à faire.");
 }
 
 $db = Garradin_DB::getInstance();
 
-switch ($config->getVersion())
+echo '<!DOCTYPE html>
+<meta charset="utf-8" />
+<h3>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h3>';
+
+flush();
+
+// versions pré-0.3.0
+if (!$v)
 {
-    case 0:
-        $db->exec('ALTER TABLE membres ADD COLUMN lettre_infos INTEGER DEFAULT 0;');
-        $config->setVersion(garradin_version());
-        break;
-    default:
-        throw new UserException("Version inconnue.");
+    $db->exec('ALTER TABLE membres ADD COLUMN lettre_infos INTEGER DEFAULT 0;');
 }
 
-utils::redirect('/admin/');
+$config->setVersion(garradin_version());
+
+echo '<h4>Mise à jour terminée.</h4>
+<p><a href="./">Retour</a></p>';
 
 ?>
