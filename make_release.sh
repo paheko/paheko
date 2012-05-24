@@ -17,6 +17,7 @@ tar cjvf "${MY_DIR}-${VERSION}-${MANIFEST_VERSION}-${DATE}.tar.bz2" --wildcards-
     --exclude '*/compiled/*' \
     --exclude '*.fossil' \
     --exclude '_FOSSIL_' \
+    --exclude 'manifest' \
     --exclude '*.db' \
     --exclude 'doc' \
     --exclude 'test*' \

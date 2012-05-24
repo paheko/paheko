@@ -439,7 +439,7 @@ class Squelette extends miniSkel
 
         $hash = sha1(uniqid(mt_rand(), true));
         $out = new Squelette_Snippet();
-        $out->append(1, '$this->parent =& $this->_vars[$parent_hash]; ');
+        $out->append(1, 'if ($parent_hash) $this->parent =& $this->_vars[$parent_hash]; ');
 
         if ($search)
         {
@@ -488,8 +488,7 @@ class Squelette extends miniSkel
         $out->append(1, 'endif; ');
         $out->append(1, '$parent_hash = $this->_vars[\''.$hash.'\'][\'_parent_hash\']; ');
         $out->append(1, 'unset($result_'.$hash.', $nb_rows, $this->_vars[\''.$hash.'\']); ');
-        $out->append(1, '$this->current =& $this->_vars[$parent_hash]; ');
-        $out->append(1, '$parent_hash = $this->current[\'_parent_hash\']; ');
+        $out->append(1, 'if ($parent_hash) { $this->current = $this->_vars[$parent_hash]; $parent_hash = $this->current[\'_parent_hash\']; } ');
         $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$_parent_hash] : null;');
 
         return $out;
