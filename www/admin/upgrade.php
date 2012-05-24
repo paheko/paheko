@@ -34,6 +34,8 @@ if (!$v)
     $db->exec('ALTER TABLE membres ADD COLUMN lettre_infos INTEGER DEFAULT 0;');
 }
 
+utils::clearCaches();
+
 $config->setVersion(garradin_version());
 
 echo '<h4>Mise à jour terminée.</h4>
