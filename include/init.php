@@ -22,15 +22,20 @@ function garradin_version()
         $version = 'unknown';
     }
 
+    define('GARRADIN_VERSION', $version);
+    return $version;
+}
+
+function garradin_manifest()
+{
     $file = __DIR__ . '/../manifest.uuid';
 
     if (file_exists($file))
     {
-        $version .= '.' . substr(trim(file_get_contents($file)), 0, 10);
+        return substr(trim(file_get_contents($file)), 0, 10);
     }
 
-    define('GARRADIN_VERSION', $version);
-    return $version;
+    return false;
 }
 
 /*
