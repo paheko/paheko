@@ -3,9 +3,175 @@
 require_once GARRADIN_ROOT . '/include/libs/miniskel/class.miniskel.php';
 require_once GARRADIN_ROOT . '/include/lib.squelette.filtres.php';
 
+class Squelette_Snippet
+{
+    const TEXT = 0;
+    const PHP = 1;
+    const GUESS = 2;
+    const OBJ = 3;
+
+    protected $_content = array();
+
+    protected function _getType($type, $value)
+    {
+        if ($type == self::GUESS)
+        {
+            if ($value instanceof Squelette_Snippet)
+                return self::OBJ;
+            else
+                return self::TEXT;
+        }
+
+        return $type;
+    }
+
+    public function __construct($type = self::TEXT, $value = '')
+    {
+        $type = $this->_getType($type, $value);
+
+        if ($type == self::OBJ)
+        {
+            $this->_content = $value->get();
+        }
+        else
+        {
+            $this->_content[] = (string) (int) $type . $value;
+        }
+
+        unset($value);
+    }
+
+    public function prepend($type = self::TEXT, $value, $pos = false)
+    {
+        $type = $this->_getType($type, $value);
+
+        if ($type == self::OBJ)
+        {
+            if ($pos)
+            {
+                array_splice($this->_content, $pos, 0, $value->get());
+            }
+            else
+            {
+                $this->_content = array_merge($value->get(), $this->_content);
+            }
+        }
+        else
+        {
+            $value = (string) (int) $type . $value;
+
+            if ($pos)
+            {
+                array_splice($this->_content, $pos, 0, $value);
+            }
+            else
+            {
+                array_unshift($this->_content, $value);
+            }
+        }
+
+        unset($value);
+    }
+
+    public function append($type = self::TEXT, $value, $pos = false)
+    {
+        $type = $this->_getType($type, $value);
+
+        if ($type == self::OBJ)
+        {
+            if ($pos)
+            {
+                array_splice($this->_content, $pos + 1, 0, $value->get());
+            }
+            else
+            {
+                $this->_content = array_merge($this->_content, $value->get());
+            }
+        }
+        else
+        {
+            $value = (string) (int) $type . $value;
+
+            if ($pos)
+            {
+                array_splice($this->_content, $pos + 1, 0, $value);
+            }
+            else
+            {
+                array_push($this->_content, $value);
+            }
+        }
+
+        unset($value);
+    }
+
+    public function output($in_php = false)
+    {
+        $out = '';
+        $php = $in_php ?: false;
+
+        foreach ($this->_content as $line)
+        {
+            if ($line[0] == self::PHP && !$php)
+            {
+                $php = true;
+                $out .= '<?php ';
+            }
+            elseif ($line[0] == self::TEXT && $php)
+            {
+                $php = false;
+                $out .= ' ?>';
+            }
+
+            $out .= substr($line, 1);
+
+            if ($line[0] == self::PHP)
+            {
+                $out .= "\n";
+            }
+        }
+
+        if ($php && !$in_php)
+        {
+            $out .= ' ?>';
+        }
+
+        $this->_content = array();
+
+        return $out;
+    }
+
+    public function __toString()
+    {
+        return $this->output(false);
+    }
+
+    public function get()
+    {
+        return $this->_content;
+    }
+
+    public function replace($key, $type = self::TEXT, $value)
+    {
+        $type = $this->_getType($type, $value);
+
+        if ($type == self::OBJ)
+        {
+            array_splice($this->_content, $key, 1, $value->get());
+        }
+        else
+        {
+            $this->_content[$key] = (string) (int) $type . $value;
+        }
+
+        unset($value);
+    }
+}
+
 class Squelette extends miniSkel
 {
     private $parent = null;
+    private $current = null;
     private $_vars = array();
 
     private function _registerDefaultModifiers()
@@ -57,26 +223,29 @@ class Squelette extends miniSkel
         if (empty($file) || !preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $file))
             throw new miniSkelMarkupException("INCLURE: le nom de fichier ne peut contenir que des caractères alphanumériques.");
 
-        return '<?php $this->fetch("'.$file.'", false, $current); ?>';
+        return new Squelette_Snippet(1, '$this->fetch("'.$file.'", false);');
     }
 
     protected function processVariable($name, $value, $applyDefault, $modifiers, $pre, $post, $context)
     {
-        $out = '<?php ';
-        $out.= 'if (isset($current[\''.$name.'\'])) $value = $current[\''.$name.'\'];';
-        $out.= "\n";
-        $out.= 'elseif (isset($this->parent[\''.$name.'\'])) $value = $this->parent[\''.$name.'\'];';
-        $out.= "\n";
-        $out.= 'elseif (isset($this->variables[\''.$name.'\'])) $value = $this->variables[\''.$name.'\'];';
-        $out.= "\n";
-        $out.= 'else $value = "";';
-        $out.= "\n";
-
-        if ($applyDefault)
+        if ($context == self::CONTEXT_IN_ARG)
         {
-            $out.= 'if (is_string($value) && trim($value)) $value = htmlspecialchars($value, ENT_QUOTES, \'UTF-8\', false);';
-            $out.= "\n";
+            $out = new Squelette_Snippet(1, '$this->getVariable(\''.$name.'\')');
+
+            if ($pre)
+            {
+                $out->prepend(2, $pre);
+            }
+
+            if ($post)
+            {
+                $out->append(2, $post);
+            }
+
+            return $out;
         }
+
+        $out = new Squelette_Snippet(1, '$value = $this->getVariable(\''.$name.'\');');
 
         // We process modifiers
         foreach ($modifiers as &$modifier)
@@ -86,34 +255,57 @@ class Squelette extends miniSkel
                 throw new miniSkelMarkupException('Filtre '.$modifier['name'].' inconnu !');
             }
 
-            $args = 'array($value, ';
+            $out->append(1, '$value = call_user_func_array('.var_export($this->modifiers[$modifier['name']], true).', array($value, ');
+
             foreach ($modifier['arguments'] as $arg)
             {
                 if ($arg == 'debut_liste')
-                    $args .= '$this->variables[\'debut_liste\'], ';
+                {
+                    $out->append(1, '$this->getVariable(\'debut_liste\')');
+                }
+                elseif ($arg instanceOf Squelette_Snippet)
+                {
+                    $out->append(3, $arg);
+                }
                 else
-                    $args .= '"'.str_replace('"', '\\"', $arg).'", ';
+                {
+                    //if (preg_match('!getVariable!', $arg)) throw new Exception("lol");
+                    $out->append(1, '"'.str_replace('"', '\\"', $arg).'"');
+                }
+
+                $out->append(1, ', ');
             }
 
-            $args.= ')';
+            $out->append(1, '));');
 
-            $out.= '$value = call_user_func_array('.var_export($this->modifiers[$modifier['name']], true).', '.$args.');';
-            $out.= "\n";
+            if (in_array($modifier['name'], Squelette_Filtres::$desactiver_defaut))
+            {
+                $applyDefault = false;
+            }
         }
 
-        $out.= 'if ($value === true || trim($value) !== \'\'): ?>';
+        if ($applyDefault)
+        {
+            $out->append(1, 'if (is_string($value) && trim($value)) $value = htmlspecialchars($value, ENT_QUOTES, \'UTF-8\', false);');
+        }
+
+        $out->append(1, 'if ($value === true || trim($value) !== \'\'):');
 
         // Getting pre-content
         if ($pre)
-            $out .= $this->parseVariables($pre, false, $context);
+        {
+            $out->append(2, $pre);
+        }
 
-        $out .= '<?php echo is_bool($value) ? "" : $value; ?>';
+        $out->append(1, 'echo is_bool($value) ? "" : $value;');
 
         // Getting post-content
         if ($post)
-            $out .= $this->parseVariables($post, false, $context);
+        {
+            $out->append(2, $post);
+        }
 
-        $out .= '<?php endif; ?>';
+        $out->append(1, 'endif;');
 
         return $out;
     }
@@ -125,7 +317,6 @@ class Squelette extends miniSkel
             throw new miniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
         }
 
-        $out = '';
         $loopStart = '';
         $query = $where = $order = '';
         $limit = $begin = 0;
@@ -135,6 +326,10 @@ class Squelette extends miniSkel
         if (trim($loopContent))
         {
             $query .= ', r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
+        }
+        else
+        {
+            $query .= '\'\' AS texte ';
         }
 
         $where = 'WHERE w.droit_lecture = -1 ';
@@ -149,7 +344,7 @@ class Squelette extends miniSkel
         }
 
         $allowed_fields = array('id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
-            'parent', 'rubrique', 'revision', 'points', 'recherche');
+            'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte');
         $search = $search_rank = false;
 
         foreach ($loopCriterias as $criteria)
@@ -208,7 +403,12 @@ class Squelette extends miniSkel
                     }
                     else
                     {
-                        $where .= ' AND '.$criteria['field'].' = \\\'\'.$db->escapeString($this->getVariable(\''.$criteria['field'].'\')).\'\\\'';
+                        if ($criteria['field'] == 'parent')
+                            $field = 'id';
+                        else
+                            $field = $criteria['field'];
+
+                        $where .= ' AND '.$criteria['field'].' = \\\'\'.$db->escapeString($this->getVariable(\''.$field.'\')).\'\\\'';
                     }
                     break;
                 }
@@ -238,64 +438,64 @@ class Squelette extends miniSkel
         }
 
         $hash = sha1(uniqid(mt_rand(), true));
-        $out .= "<?php\n";
-        $out .= '$this->parent =& $this->_vars[$parent_hash]; ';
+        $out = new Squelette_Snippet();
+        $out->append(1, '$this->parent =& $this->_vars[$parent_hash]; ');
 
         if ($search)
         {
-            $out .= 'if (trim($this->getVariable(\'recherche\'))) { ';
+            $out->append(1, 'if (trim($this->getVariable(\'recherche\'))) { ');
         }
 
-        $out .= '$result_'.$hash.' = $db->query(\''.$query.'\'); ';
-        $out .= '$nb_rows = $db->countRows($result_'.$hash.'); ';
+        $out->append(1, '$result_'.$hash.' = $db->query(\''.$query.'\'); ');
+        $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
 
         if ($search)
         {
-            $out .= '} else { $result_'.$hash.' = false; $nb_rows = 0; }';
+            $out->append(1, '} else { $result_'.$hash.' = false; $nb_rows = 0; }');
         }
 
-        $out .= "\n";
-        $out .= '$this->_vars[\''.$hash.'\'] = array(\'_self_hash\' => \''.$hash.'\', \'_parent_hash\' => $parent_hash, \'total_boucle\' => $nb_rows, \'compteur_boucle\' => 0);';
-        $out .= "\n";
-        $out .= '$current =& $this->_vars[\''.$hash.'\']; $parent_hash = "'.$hash.'";';
-        $out .= "\n";
-        $out .= 'if ($nb_rows > 0): ?>';
+        $out->append(1, '$this->_vars[\''.$hash.'\'] = array(\'_self_hash\' => \''.$hash.'\', \'_parent_hash\' => $parent_hash, \'total_boucle\' => $nb_rows, \'compteur_boucle\' => 0);');
+        $out->append(1, '$this->current =& $this->_vars[\''.$hash.'\']; ');
+        $out->append(1, '$parent_hash = "'.$hash.'"; ');
+        $out->append(1, 'if ($nb_rows > 0):');
 
         if ($preContent)
         {
-            $out .= $this->parse($preContent, $loopName, self::PRE_CONTENT);
+            $out->append(2, $this->parse($preContent, $loopName, self::PRE_CONTENT));
         }
 
-        $out .= '<?php while ($row = $result_'.$hash.'->fetchArray(SQLITE3_ASSOC)):';
-        $out .= "\n";
-        $out .= '$this->_vars[\''.$hash.'\'][\'compteur_boucle\'] += 1; ';
-        $out .= "\n";
-        $out .= $loopStart;
-        $out .= "\n";
-        $out .= '$this->_vars[\''.$hash.'\'] = array_merge($this->_vars[\''.$hash.'\'], $row); ?>';
+        $out->append(1, 'while ($row = $result_'.$hash.'->fetchArray(SQLITE3_ASSOC)): ');
+        $out->append(1, '$this->_vars[\''.$hash.'\'][\'compteur_boucle\'] += 1; ');
+        $out->append(1, $loopStart);
+        $out->append(1, '$this->_vars[\''.$hash.'\'] = array_merge($this->_vars[\''.$hash.'\'], $row); ');
 
-        $out .= $this->parseVariables($loopContent);
+        $out->append(2, $this->parseVariables($loopContent));
 
-        $out .= '<?php endwhile; ?>';
+        $out->append(1, 'endwhile;');
 
         // we put the post-content after the loop content
         if ($postContent)
         {
-            $out .= $this->parse($postContent, $loopName, self::POST_CONTENT);
+            $out->append(2, $this->parse($postContent, $loopName, self::POST_CONTENT));
         }
 
         if ($altContent)
         {
-            $out .= '<?php else: ?>';
-            $out .= $this->parse($altContent, $loopName, self::ALT_CONTENT);
+            $out->append(1, 'else:');
+            $out->append(2, $this->parse($altContent, $loopName, self::ALT_CONTENT));
         }
 
-        $out .= '<?php endif; $parent_hash = $this->_vars[\''.$hash.'\'][\'_parent_hash\']; unset($result_'.$hash.', $nb_rows, $this->_vars[\''.$hash.'\']); $this->parent =& $this->_vars[$parent_hash]; ?>';
+        $out->append(1, 'endif; ');
+        $out->append(1, '$parent_hash = $this->_vars[\''.$hash.'\'][\'_parent_hash\']; ');
+        $out->append(1, 'unset($result_'.$hash.', $nb_rows, $this->_vars[\''.$hash.'\']); ');
+        $out->append(1, '$this->current =& $this->_vars[$parent_hash]; ');
+        $out->append(1, '$parent_hash = $this->current[\'_parent_hash\']; ');
+        $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$_parent_hash] : null;');
 
         return $out;
     }
 
-    public function fetch($template, $no_display = false, $current = null)
+    public function fetch($template, $no_display = false)
     {
         $this->currentTemplate = $template;
 
@@ -314,15 +514,16 @@ class Squelette extends miniSkel
 
             $content = file_get_contents($path);
             $content = strtr($content, array('<?php' => '&lt;?php', '<?' => '<?php echo \'<?\'; ?>'));
-            $content = $this->parse($content);
-            $content = '<?php /* '.$tpl_id.' */ '.
+
+            $out = new Squelette_Snippet(2, $this->parse($content));
+            $out->prepend(1, '/* '.$tpl_id.' */ '.
                 '$db = Garradin_DB::getInstance(); '.
                 'if ($this->parent && !isset($parent_hash)) $parent_hash = $this->parent[\'_self_hash\']; '. // For included files
-                'elseif (!$this->parent) $parent_hash = false; ?>' . $content;
+                'elseif (!$this->parent) $parent_hash = false;');
 
             if (!$no_display)
             {
-                self::compile_store($tpl_id, $content);
+                self::compile_store($tpl_id, $out);
             }
         }
 
@@ -369,8 +570,17 @@ class Squelette extends miniSkel
         }
         else
         {
-            $skel = 'article.html';
             $_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
+
+            if (preg_match('!^[\w\d_-]+$!i', $_GET['uri'])
+                && file_exists(GARRADIN_ROOT . '/squelettes/' . strtolower($_GET['uri']) . '.html'))
+            {
+                $skel = strtolower($_GET['uri']) . '.html';
+            }
+            else
+            {
+                $skel = 'article.html';
+            }
         }
 
         $this->display($skel);
@@ -424,12 +634,26 @@ class Squelette extends miniSkel
 
     protected function getVariable($var)
     {
-        if (isset($this->variables[$var]))
+        if (isset($this->current[$var]))
+        {
+            return $this->current[$var];
+        }
+        elseif (isset($this->parent[$var]))
+        {
+            return $this->parent[$var];
+        }
+        elseif (isset($this->variables[$var]))
+        {
             return $this->variables[$var];
+        }
         elseif (isset($_REQUEST[$var]))
+        {
             return $_REQUEST[$var];
+        }
         else
+        {
             return null;
+        }
     }
 
     static public function getSource($template)
