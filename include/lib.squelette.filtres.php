@@ -47,6 +47,13 @@ class Squelette_Filtres
         'xor'   =>  'xou',
     );
 
+    static public $desactiver_defaut = array(
+        'formatter_texte',
+        'entites_html',
+        'proteger_contact',
+        'echapper_xml',
+    );
+
     static public function date_en_francais($date)
     {
         return ucfirst(strtolower(utils::strftime_fr('%A %e %B %Y', $date)));
@@ -110,7 +117,7 @@ class Squelette_Filtres
 
     static public function entites_html($texte)
     {
-        return htmlspecialchars($texte, ENT_COMPAT, 'UTF-8');
+        return htmlspecialchars($texte, ENT_QUOTES, 'UTF-8');
     }
 
     static public function echapper_xml($texte)
@@ -213,6 +220,13 @@ class Squelette_Filtres
     static public function supprimer_tags($value, $replace = '')
     {
         return preg_replace('!<[^>]*>!', $replace, $value);
+    }
+
+    static public function supprimer_spip($value)
+    {
+        $value = preg_replace('!\[([^\]]+)(?:->[^\]]*)?\]!U', '$1', $value);
+        $value = preg_replace('!\{+([^\}]*)\}+!', '$1', $value);
+        return $value;
     }
 
     static public function couper($texte, $taille, $etc = ' (...)')

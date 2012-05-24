@@ -18,8 +18,8 @@ class Garradin_Wiki
     {
         $str = utils::transliterateToAscii($str);
 
-        $str = preg_replace('!\s+!', '-', $str);
-        $str = preg_replace('![^a-z0-9_-]!i', '', $str);
+        $str = preg_replace('![^\w\d_-]!i', '-', $str);
+        $str = preg_replace('!-{2,}!', '-', $str);
 
         return $str;
     }
