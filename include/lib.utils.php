@@ -392,6 +392,24 @@ class utils
             return mail($to, $subject, $content, $headers);
         }
     }
+
+    static public function clearCaches()
+    {
+        $path = GARRADIN_ROOT . '/cache/compiled';
+        $dir = dir($path);
+
+        while ($file = $dir->read())
+        {
+            if ($file[0] != '.')
+            {
+                unlink($path . '/' . $file);
+                echo "delete $path/$file<br>";
+            }
+        }
+
+        $dir->close();
+        return true;
+    }
 }
 
 ?>
