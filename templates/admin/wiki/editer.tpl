@@ -54,7 +54,7 @@
             <dt><label for="f_droit_ecriture_normal">Cette page peut être modifiée par :</label></dt>
             <dd>
                 <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{Garradin_Wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=Garradin_Wiki::ECRITURE_NORMAL} {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
-                <label for="f_droit_ecriture_normal">Les membres qui ont accès au wiki</label>
+                <label for="f_droit_ecriture_normal">Les membres qui ont accès au wiki en écriture</label>
             </dd>
             <dd>
                 <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page.droit_ecriture >= Garradin_Wiki::ECRITURE_CATEGORIE || $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}checked="checked"{/if} {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
