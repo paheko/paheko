@@ -27,6 +27,10 @@
         <input type="submit" name="login" value="Se connecter &rarr;" />
     </p>
 
+    <p class="help">
+        <a href="{$www_url}admin/password.php">Pas de mot de passe ou mot de passe perdu ?</a>
+    </p>
+
 </form>
 
 {include file="admin/_foot.tpl"}

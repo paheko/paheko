@@ -84,6 +84,66 @@ class Garradin_Membres
         return $this->updateSessionData($r, $droits);
     }
 
+    public function recoverPasswordCheck($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+            return false;
+
+        $db = Garradin_DB::getInstance();
+
+        $id = $db->simpleQuerySingle('SELECT id FROM membres WHERE email = ? LIMIT 1;', false, trim($email));
+
+        if (!$id)
+        {
+            return false;
+        }
+
+        $config = Garradin_Config::getInstance();
+
+        $dest = trim($email);
+
+        $this->_sessionStart(true);
+        $hash = sha1($dest . $id . 'recover' . GARRADIN_ROOT . time());
+        $_SESSION['recover_password'] = array('id' => (int) $id, 'email' => $dest, 'hash' => $hash);
+
+        $message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
+        $message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
+        $message.= WWW_URL . 'admin/password.php?c=' . substr($hash, -10);
+        $message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
+
+        return utils::mail($dest, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
+    }
+
+    public function recoverPasswordConfirm($hash)
+    {
+        $this->_sessionStart();
+
+        if (empty($_SESSION['recover_password']['hash']))
+            return false;
+
+        if (substr($_SESSION['recover_password']['hash'], -10) != $hash)
+            return false;
+
+        $config = Garradin_Config::getInstance();
+        $db = Garradin_DB::getInstance();
+
+        $password = utils::suggestPassword();
+
+        $dest = $_SESSION['recover_password']['email'];
+        $id = (int)$_SESSION['recover_password']['id'];
+
+        $message = "Bonjour,\n\nVous avez demandé un nouveau mot de passe pour votre compte.\n\n";
+        $message.= "Votre adresse email : ".$dest."\n";
+        $message.= "Votre nouveau mot de passe : ".$password."\n\n";
+        $message.= "Si vous n'avez pas demandé à recevoir ce message, merci de nous le signaler.";
+
+        $password = $this->_hashPassword($password);
+
+        $db->simpleUpdate('membres', array('passe' => $password), 'id = '.(int)$id);
+
+        return utils::mail($dest, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
+    }
+
     public function updateSessionData($membre = null, $droits = null)
     {
         if (is_null($membre))

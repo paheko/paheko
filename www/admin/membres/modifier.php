@@ -21,7 +21,6 @@ if (!$membre)
     throw new UserException("Ce membre n'existe pas.");
 }
 
-require_once GARRADIN_ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 
 $cats = new Garradin_Membres_Categories;
@@ -81,7 +80,7 @@ if (!empty($_POST['save']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('passphrase', Passphrase::generate());
+$tpl->assign('passphrase', utils::suggestPassword());
 $tpl->assign('obligatoires', $config->get('champs_obligatoires'));
 
 $tpl->assign('membres_cats', $cats->listSimple());
