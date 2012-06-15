@@ -83,6 +83,7 @@ else
                 $config->set('champs_obligatoires', array('passe', 'email'));
                 $config->set('champs_modifiables_membre', array('passe', 'email', 'adresse',
                     'code_postal', 'ville', 'pays', 'telephone', 'date_naissance'));
+                $config->setVersion(garradin_version());
 
                 // Création catégories
                 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
