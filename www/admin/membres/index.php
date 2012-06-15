@@ -36,7 +36,19 @@ else
         $cat_id = (int) $cat;
     }
 
-    $tpl->assign('liste', $membres->listByCategory($cat_id, $page));
+    $order = 'nom';
+    $desc = false;
+
+    if (utils::get('o'))
+        $order = utils::get('o');
+
+    if (isset($_GET['d']))
+        $desc = true;
+
+    $tpl->assign('order', $order);
+    $tpl->assign('desc', $desc);
+
+    $tpl->assign('liste', $membres->listByCategory($cat_id, $page, $order, $desc));
     $tpl->assign('total', $membres->countByCategory($cat_id));
 }
 

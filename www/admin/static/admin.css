@@ -268,10 +268,54 @@ table.list .confirm {
 
 table.list .num {
     text-align: center;
-}}
+}
+
+table.list .check {
+    width: 1%;
+}
+
+
+table.list thead .cur {
+    background: rgb(217, 134, 40);
+    color: #fff;
+}
+
+table.list thead th a, table.list thead td a {
+    color: #000;
+    text-decoration: none;
+    font-size: 8pt;
+    font-weight: normal;
+    background: #ccc;
+    border: 1px outset #999;
+    margin: 1px;
+}
+
+table.list thead .cur.desc a:nth-child(2), table.list thead .cur.asc a:nth-child(1) {
+    font-weight: bold;
+    background: #999;
+    color: #fff;
+}
+
 
 table.list .actions {
     text-align: right;
+}
+
+.actions .icn {
+    text-decoration: none;
+    border-radius: 1em;
+    width: 16px;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    padding: .1em;
+}
+
+.actions .icn:hover {
+    color: darkred;
+    background: #ff9;
 }
 
 .droits b {

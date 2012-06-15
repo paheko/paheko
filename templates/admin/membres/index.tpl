@@ -60,20 +60,28 @@
     {if !empty($liste)}
     <table class="list">
         <thead>
-            <td><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>
-            <td class="num" title="Numéro de membre">#</td>
-            <th>Nom</th>
-            <td>E-Mail</td>
-            <td>Cotisation</td>
+            <td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>
+            {if !empty($order)}
+                <td class="num{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro de membre"># <a href="?o=id&amp;a">&darr;</a><a href="?o=id&amp;d">&uarr;</a></td>
+                <th class="{if $order == 'nom'}cur {if $desc}desc{else}asc{/if}{/if}">Nom <a href="?o=nom&amp;a">&darr;</a><a href="?o=nom&amp;d">&uarr;</a></th>
+                <td class="{if $order == 'date_cotisation'}cur {if $desc}desc{else}asc{/if}{/if}">Cotisation <a href="?o=date_cotisation&amp;a">&darr;</a><a href="?o=date_cotisation&amp;d">&uarr;</a></td>
+                <td class="{if $order == 'date_inscription'}cur {if $desc}desc{else}asc{/if}{/if}">Inscription <a href="?o=date_inscription&amp;a">&darr;</a><a href="?o=date_inscription&amp;d">&uarr;</a></td>
+                <td class="{if $order == 'ville'}cur {if $desc}desc{else}asc{/if}{/if}">Ville <a href="?o=ville&amp;a">&darr;</a><a href="?o=ville&amp;d">&uarr;</a></td>
+            {else}
+                <td title="Numéro de membre">#</td>
+                <th>Nom</th>
+                <td>Cotisation</td>
+                <td>Inscription</td>
+                <td>Ville</td>
+            {/if}
             <td></td>
         </thead>
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <td>{if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
-                    <td class="num">{$membre.id|escape}</td>
+                    <td class="check">{if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
+                    <td class="num"><a title="Fiche membre" href="{$www_url}admin/membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></td>
                     <th>{$membre.nom|escape}</th>
-                    <td>{if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">{$membre.email|escape}</a>{/if}</td>
                     {if empty($membre.date_cotisation)}
                         <td class="error">jamais réglée</td>
                     {elseif $membre.date_cotisation > strtotime('12 months ago')} {* FIXME durée de cotisation variable *}
@@ -81,9 +89,11 @@
                     {else}
                         <td class="alert">en retard</td>
                     {/if}
+                    <td>{$membre.date_inscription|date_fr:'d/m/Y'}</td>
+                    <td>{$membre.ville|escape}</td>
                     <td class="actions">
-                        <a href="fiche.php?id={$membre.id|escape}">Fiche</a>
-                        | <a href="modifier.php?id={$membre.id|escape}">Modifier</a>
+                        {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id|escape}" title="Envoyer un message">✉</a> {/if}
+                        <a class="icn" href="modifier.php?id={$membre.id|escape}">✎</a>
                     </td>
                 </tr>
             {/foreach}
