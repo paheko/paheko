@@ -403,18 +403,27 @@ class Garradin_Membres
         }
 
         if ($field == 'id' || $field == 'code_postal')
+        {
             $where = 'WHERE '.$field.' = \''.$db->escapeString($query).'\'';
+            $order = $field;
+        }
         else
-            $where = 'WHERE '.$field.' LIKE \'%'.$db->escapeString($query).'%\'';
+        {
+            $where = 'WHERE transliterate_to_ascii('.$field.') LIKE transliterate_to_ascii(\'%'.$db->escapeString($query).'%\')';
+            $order = 'transliterate_to_ascii('.$field.') COLLATE NOCASE';
+        }
 
         return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
-                ORDER BY transliterate_to_ascii(nom) COLLATE NOCASE LIMIT 100;',
+            'SELECT id, id_categorie, nom, email, code_postal, ville,
+                strftime(\'%s\', date_cotisation) AS date_cotisation,
+                strftime(\'%s\', date_inscription) AS date_inscription
+                FROM membres '.$where.'
+                ORDER BY '.$order.' LIMIT 100;',
             SQLITE3_ASSOC
         );
     }
 
-    public function listByCategory($cat = 0, $page = 1)
+    public function listByCategory($cat = 0, $page = 1, $order = 'nom', $desc = false)
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
@@ -427,9 +436,25 @@ class Garradin_Membres
         else
             $where = '';
 
+        if (!in_array($order, array('nom', 'id', 'ville', 'date_cotisation', 'date_inscription')))
+            $order = 'nom';
+
+        if ($order == 'nom' || $order == 'ville')
+        {
+            $order = 'transliterate_to_ascii('.$order.') COLLATE NOCASE';
+        }
+
+        if ($desc)
+        {
+            $order .= ' DESC';
+        }
+
         return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, nom, email, code_postal, ville, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres '.$where.'
-                ORDER BY transliterate_to_ascii(nom) COLLATE NOCASE LIMIT ?, ?;',
+            'SELECT id, id_categorie, nom, email, code_postal, ville,
+                strftime(\'%s\', date_cotisation) AS date_cotisation,
+                strftime(\'%s\', date_inscription) AS date_inscription
+                FROM membres '.$where.'
+                ORDER BY '.$order.' LIMIT ?, ?;',
             SQLITE3_ASSOC,
             $begin,
             self::ITEMS_PER_PAGE
