@@ -403,13 +403,19 @@ class utils
             if ($file[0] != '.')
             {
                 unlink($path . '/' . $file);
-                echo "delete $path/$file<br>";
             }
         }
 
         $dir->close();
         return true;
     }
+
+    static public function suggestPassword()
+    {
+        require_once GARRADIN_ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
+        return Passphrase::generate();
+    }
+
 }
 
 ?>

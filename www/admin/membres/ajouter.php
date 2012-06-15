@@ -7,7 +7,6 @@ if ($user['droits']['membres'] < Garradin_Membres::DROIT_ECRITURE)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-require_once GARRADIN_ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
 require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
 
 $cats = new Garradin_Membres_Categories;
@@ -62,7 +61,7 @@ if (!empty($_POST['save']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('passphrase', Passphrase::generate());
+$tpl->assign('passphrase', utils::suggestPassword());
 $tpl->assign('obligatoires', $config->get('champs_obligatoires'));
 
 $tpl->assign('membres_cats', $cats->listSimple());
