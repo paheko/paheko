@@ -56,7 +56,7 @@ if (!empty($_POST['save']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('passphrase', utils::suggestPassword);
+$tpl->assign('passphrase', utils::suggestPassword());
 $tpl->assign('obligatoires', $config->get('champs_obligatoires'));
 
 $tpl->assign('pays', utils::getCountryList());
