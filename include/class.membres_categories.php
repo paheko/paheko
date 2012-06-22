@@ -29,6 +29,9 @@ class Garradin_Membres_Categories
         {
             throw new UserException('Le montant de cotisation doit être un chiffre.');
         }
+
+        $data['montant_cotisation'] = (float)$data['montant_cotisation'];
+        $data['duree_cotisation'] = (int)$data['duree_cotisation'];
     }
 
     public function add($data)
