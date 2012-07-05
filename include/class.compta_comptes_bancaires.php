@@ -4,9 +4,11 @@ require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
 
 class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 {
+    const NUMERO_PARENT_COMPTES = 512;
+
     public function add($data)
     {
-        $data['parent'] = 512;
+        $data['parent'] = self::NUMERO_PARENT_COMPTES;
 
         $new_id = parent::add($data);
 
@@ -43,7 +45,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             'rib'       =>  $data['rib'],
             'iban'      =>  $data['iban'],
             'bic'       =>  $data['bic'],
-        ), 'id = \''.trim($id).'\'');
+        ), 'id = \''.$db->escapeString(trim($id)).'\'');
 
         return true;
     }
@@ -55,6 +57,39 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             INNER JOIN compta_comptes_bancaires AS cc
             ON c.id = cc.id
             WHERE c.id = ?;', true, $id);
+    }
+
+    public function list()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleStatementFetch('SELECT * FROM compta_comptes AS c
+            INNER JOIN compta_comptes_bancaires AS cc ON c.id = cc.id
+            WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');
+    }
+
+    protected function _checkFields(&$data)
+    {
+        parent::_checkFields($data);
+
+        if (empty($data['banque']) || !trim($data['banque']))
+        {
+            throw new UserException('Le libellé ne peut rester vide.');
+        }
+
+        foreach (array('iban', 'bic', 'rib') as $champ)
+        {
+            if (!array_key_exists($champ, $data))
+                $data[$champ] = '';
+            else
+            {
+                $data[$champ] = trim($data[$champ]);
+                $data[$champ] = preg_replace('![^\d]!', ' ', $data[$champ]);
+                $data[$champ] = preg_replace('!\s{2,}!', ' ', $data[$champ]);
+                $data[$champ] = trim($data[$champ]);
+            }
+        }
+
+        return true;
     }
 }
 

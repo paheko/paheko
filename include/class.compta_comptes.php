@@ -27,7 +27,7 @@ class Garradin_Compta_Comptes
 
     public function add($data)
     {
-        $this->_checkFields($data);
+        $this->_checkFields($data, true);
 
         $db = Garradin_DB::getInstance();
 
@@ -65,7 +65,7 @@ class Garradin_Compta_Comptes
         $this->_checkFields($data);
 
         $db->simpleUpdate('compta_comptes', array('libelle' => trim($data['libelle'])),
-            'id = \''.trim($id).'\'');
+            'id = \''.$db->escapeString(trim($id)).'\'');
 
         return true;
     }
@@ -92,7 +92,19 @@ class Garradin_Compta_Comptes
         return $db->simpleQuerySingle('SELECT * FROM compta_comptes WHERE id = ?;', true, $id);
     }
 
-    protected function _checkFields(&$data)
+    public function list($parent = 0)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleStatementFetch('SELECT * FROM compta_comptes WHERE parent = ? ORDER BY id;', $parent);
+    }
+
+    public function listTree($parent = 0)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleStatementFetch('SELECT * FROM compta_comptes WHERE parent LIKE \''.$db->escapeString($parent).'%\' ORDER BY id;');
+    }
+
+    protected function _checkFields(&$data, $force_parent_check = false)
     {
         $db = Garradin_DB::getInstance();
 
@@ -101,9 +113,11 @@ class Garradin_Compta_Comptes
             throw new UserException('Le libellé ne peut rester vide.');
         }
 
-        if (isset($data['parent']))
+        $data['libelle'] = trim($data['libelle']);
+
+        if (isset($data['parent']) || $force_parent_check)
         {
-            if (!trim($data['parent']))
+            if (empty($data['parent']) && !trim($data['parent']))
             {
                 throw new UserException('Le compte ne peut pas ne pas avoir de compte parent.');
             }
