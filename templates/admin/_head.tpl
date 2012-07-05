@@ -29,18 +29,20 @@
             {/if}
             </li>
         {/if}
-        {*
         {if $user.droits.compta >= Garradin_Membres::DROIT_ACCES}
             <li class="compta{if $current == 'compta'} current{/if}"><a href="{$www_url}compta/">Comptabilité</a>
-            {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+            {if $user.droits.compta >= Garradin_Membres::DROIT_ECRITURE}
             <ul>
+                <li class="compta_ajout{if $current == 'compta/ajout'} current{/if}"><a href="{$www_url}admin/compta/ajout.php">Ajout opération</a></li>
+                {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
                 <li class="compta_gestion{if $current == 'compta/gestion'} current{/if}"><a href="{$www_url}admin/compta/operations.php">Opérations</a></li>
                 <li class="compta_cats{if $current == 'compta/categories'} current{/if}"><a href="{$www_url}admin/compta/categories.php">Catégories</a></li>
                 <li class="compta_comptes{if $current == 'compta/comptes'} current{/if}"><a href="{$www_url}admin/compta/comptes.php">Comptes</a></li>
+                {/if}
             </ul>
             {/if}
             </li>
-        *}
+        {/if}
         {if $user.droits.wiki >= Garradin_Membres::DROIT_ACCES}
             <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$www_url}admin/wiki/">Wiki</a>
             <ul>
