@@ -48,7 +48,7 @@ class Garradin_Compta_Journal
         $db = Garradin_DB::getInstance();
 
         // Vérification que l'on peut éditer cette opération
-        if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id))
+        if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
         {
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clos.');
         }

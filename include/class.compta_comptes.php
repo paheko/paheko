@@ -92,7 +92,7 @@ class Garradin_Compta_Comptes
         return $db->simpleQuerySingle('SELECT * FROM compta_comptes WHERE id = ?;', true, $id);
     }
 
-    public function list($parent = 0)
+    public function getList($parent = 0)
     {
         $db = Garradin_DB::getInstance();
         return $db->simpleStatementFetch('SELECT * FROM compta_comptes WHERE parent = ? ORDER BY id;', $parent);
