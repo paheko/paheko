@@ -158,6 +158,7 @@ CREATE TABLE wiki_suivi
     FOREIGN KEY (id_page) REFERENCES wiki_pages (id), -- Clé externe obligatoire
     FOREIGN KEY (id_membre) REFERENCES membres (id) -- Clé externe obligatoire
 );
+*/
 
 --
 -- COMPTA
@@ -168,76 +169,94 @@ CREATE TABLE compta_exercices
 (
     id INTEGER PRIMARY KEY,
 
-    debut TEXT DEFAULT CURRENT_DATE,
-    fin TEXT DEFAULT CURRENT_DATE
+    libelle TEXT DEFAULT NOT NULL,
+
+    debut TEXT NOT NULL DEFAULT CURRENT_DATE,
+    fin TEXT NULL DEFAULT NULL,
+
+    clos INTEGER NOT NULL DEFAULT 0
 );
 
-
-CREATE TABLE compta_plan
--- Plan comptable
-(
-    id INT PRIMARY KEY,
-    nom TEXT,
-    parent INT,
-    description TEXT,
-    perso_type TEXT DEFAULT NULL, -- Si NULL, alors l'entrée provient du plan comptable
-    perso_valeur INT DEFAULT NULL
-);
 
 CREATE TABLE compta_comptes
+-- Plan comptable
+(
+    id TEXT PRIMARY KEY,
+    parent TEXT NOT NULL DEFAULT 0,
+
+    libelle TEXT NOT NULL,
+
+    plan_comptable INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable, 0 = a été ajouté par l'utilisateur
+);
+
+CREATE INDEX compta_comptes_parent ON compta_comptes (parent);
+
+CREATE TABLE compta_comptes_bancaires
 -- Comptes bancaires
 (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
 
-    banque TEXT,
+    banque TEXT NOT NULL,
 
+    rib TEXT,
     iban TEXT,
     bic TEXT,
 
-    solde_initial REAL,
-    solde REAL
+    solde REAL NOT NULL DEFAULT 0.0,
+
+    FOREIGN KEY(id) REFERENCES compta_comptes(id)
 );
 
-CREATE TABLE compta_operations
--- Opérations comptables
+CREATE TABLE compta_journal
+-- Journal des opérations comptables
 (
     id INTEGER PRIMARY KEY,
 
-    libelle TEXT,
-    remarques TEXT,
-    reference TEXT, -- Référence diverse, par exemple numéro de chèque
+    type INTEGER DEFAULT 1, -- 1 = recette, -1 = dépense, 0 = autre (utilisé uniquement pour l'interface)
 
-    debit REAL,
-    credit REAL,
+    libelle TEXT NOT NULL,
+    remarques TEXT,
+    numero_piece TEXT, -- N° de pièce comptable
+
+    montant REAL,
 
     date TEXT DEFAULT CURRENT_DATE,
-    moyen_paiement INT DEFAULT NULL,
-    double INT, -- Pour compta partie double, ID de l'opération inverse associée
+    moyen_paiement TEXT DEFAULT NULL,
+    numero_cheque TEXT DEFAULT NULL,
 
-    id_exercice INTEGER DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent
-    id_plan INTEGER,
-    id_auteur INTEGER
+    compte_debit INTEGER, -- N° du compte dans le plan
+    compte_credit INTEGER, -- N° du compte dans le plan
+
+    id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
+    id_auteur INTEGER NOT NULL,
+
+    FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
+    FOREIGN KEY(compte_debit) REFERENCES compta_comptes(id),
+    FOREIGN KEY(compte_credit) REFERENCES compta_comptes(id),
+    FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
+    FOREIGN KEY(id_auteur) REFERENCES membres(id)
 );
 
-CREATE TABLE compta_moyens
+CREATE INDEX compta_operations_exercice ON compta_operations (id_exercice);
+CREATE INDEX compta_operations_date ON compta_operations (date);
+CREATE INDEX compta_operations_comptes ON compta_operations (compte_debit, compte_credit);
+CREATE INDEX compta_operations_auteur ON compta_operations (id_auteur);
+
+CREATE TABLE compta_moyens_paiement
 -- Moyens de paiement
 (
-    id INTEGER PRIMARY KEY,
+    code TEXT PRIMARY KEY,
     nom TEXT
 );
 
-INSERT INTO compta_moyens (nom) VALUES ('Espèces');
-INSERT INTO compta_moyens (nom) VALUES ('Carte bleue');
-INSERT INTO compta_moyens (nom) VALUES ('Chèque');
-INSERT INTO compta_moyens (nom) VALUES ('Virement');
-INSERT INTO compta_moyens (nom) VALUES ('Prélèvement');
-INSERT INTO compta_moyens (nom) VALUES ('TIP');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('CB', 'Carte bleue');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('CH', 'Chèque');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('ES', 'Espèces');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('PR', 'Prélèvement');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('TI', 'TIP');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('VI', 'Virement');
 
-CREATE INDEX compta_operations_id_compte ON compta_operations (id_exercice);
-CREATE INDEX compta_operations_id_categorie ON compta_operations (id_plan);
-CREATE INDEX compta_operations_id_auteur ON compta_operations (id_auteur);
-
-
+/*
 --
 -- générateur de paperasses
 --
