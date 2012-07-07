@@ -310,8 +310,43 @@ function tpl_diff($params)
     return $out;
 }
 
+function tpl_select_compte($params)
+{
+    $name = $params['name'];
+    $comptes = $params['comptes'];
+
+    $out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
+
+    foreach ($comptes as $compte)
+    {
+        if (!isset($compte['id'][1]))
+        {
+            $out.= '<optgroup label="'.htmlspecialchars($compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
+        }
+        elseif (!isset($compte['id'][2]))
+        {
+            if ($compte['id'] > 10)
+                $out.= '</optgroup>';
+
+            $out.= '<optgroup label="'.htmlspecialchars($compte['id'] . ' - ' . $compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_2">';
+        }
+        else
+        {
+            $out .= '<option value="'.htmlspecialchars($compte['id'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_'.strlen($compte['id']).'">';
+            $out .= htmlspecialchars($compte['id'] . ' - ' . $compte['libelle'], ENT_QUOTES, 'UTF-8', false);
+            $out .= '</option>';
+        }
+    }
+
+    $out .= '</optgroup>';
+    $out .= '</select>';
+
+    return $out;
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
+$tpl->register_function('select_compte', 'tpl_select_compte');
 
 $tpl->register_function('format_droits', 'tpl_format_droits');
 
