@@ -1,3086 +1,1622 @@
 {
-	"1":
+	"1": 
 	{
 		"code": 1,
-		"nom": "CLASSE 1. Comptes de capitaux",
+		"nom": "Classe 1 — Comptes de capitaux (Fonds propres, emprunts et dettes assimilés)",
 		"parent": 0
 	},
-	"10":
+	"10": 
 	{
 		"code": 10,
-		"nom": "FONDS ASSOCIATIF ET RESERVES (pour les fondations : \"fonds propres et réserves\")",
+		"nom": "FONDS ASSOCIATIFS ET RESERVES",
 		"parent": 1
 	},
-	"102":
+	"102": 
 	{
 		"code": 102,
-		"nom": "Fonds associatif sans droit de reprise",
+		"nom": "Fonds associatif (sans droit de reprise)",
 		"parent": 10
 	},
-	"1021":
+	"1021": 
 	{
 		"code": 1021,
 		"nom": "Valeur du patrimoine intégré",
 		"parent": 102
 	},
-	"1022":
+	"1022": 
 	{
 		"code": 1022,
-		"nom": "Fonds statutaire (à éclater en fonction des statuts)",
+		"nom": "Fonds statutaire",
 		"parent": 102
 	},
-	"1023":
-	{
-		"code": 1023,
-		"nom": "Subventions d'investissement non renouvelables",
-		"parent": 102
-	},
-	"1024":
+	"1024": 
 	{
 		"code": 1024,
 		"nom": "Apports sans droit de reprise",
 		"parent": 102
 	},
-	"1025":
-	{
-		"code": 1025,
-		"nom": "Legs et donations avec contrepartie d'actifs immobilisés",
-		"parent": 102
-	},
-	"1026":
-	{
-		"code": 1026,
-		"nom": "Subventions d'investissement affectées à des biens renouvelables",
-		"parent": 102
-	},
-	"103":
+	"103": 
 	{
 		"code": 103,
-		"nom": "Fonds associatif avec droit de reprise",
+		"nom": "Fonds associatif (avec droit de reprise)",
 		"parent": 10
 	},
-	"1031":
-	{
-		"code": 1031,
-		"nom": "Valeur des biens affectés repris à la fin du contrat d'apport",
-		"parent": 103
-	},
-	"1032":
-	{
-		"code": 1032,
-		"nom": "Valeur des biens affectés repris à la dissolution de l'association",
-		"parent": 103
-	},
-	"1033":
-	{
-		"code": 1033,
-		"nom": "Valeur des biens non affectés repris à la fin du contrat d'apport",
-		"parent": 103
-	},
-	"1034":
-	{
-		"code": 1034,
-		"nom": "Apports avec droit de reprise",
-		"parent": 103
-	},
-	"1035":
-	{
-		"code": 1035,
-		"nom": "Legs et donations avec contrepartie d'actifs immobilisés assortis d'une obligation ou d'une condition",
-		"parent": 103
-	},
-	"1036":
-	{
-		"code": 1036,
-		"nom": "Subventions d'investissement affectées à des biens renouvelables",
-		"parent": 103
-	},
-	"1039":
-	{
-		"code": 1039,
-		"nom": "Fonds associatif avec doit de reprise inscrit au compte de résultat",
-		"parent": 103
-	},
-	"105":
+	"105": 
 	{
 		"code": 105,
 		"nom": "Ecarts de réévaluation",
 		"parent": 10
 	},
-	"1051":
-	{
-		"code": 1051,
-		"nom": "Ecarts de réévaluation sur des biens sans droit de reprise",
-		"parent": 105
-	},
-	"1052":
-	{
-		"code": 1052,
-		"nom": "Ecarts de réévaluation (immobilisations non grevées d'un droit de reprise)",
-		"parent": 105
-	},
-	"1053":
-	{
-		"code": 1053,
-		"nom": "Ecarts de réévaluation (immobilisations grevées d'un droit de reprise)",
-		"parent": 105
-	},
-	"10531":
-	{
-		"code": 10531,
-		"nom": "Ecarts de réévaluation (immobilisations grevées d'un droit de reprise avant dissolution de l'association)",
-		"parent": 1053
-	},
-	"10532":
-	{
-		"code": 10532,
-		"nom": "Ecarts de réévaluation (immobilisations grevées d'un droit de reprise à la dissolution de l'association)",
-		"parent": 1053
-	},
-	"106":
+	"106": 
 	{
 		"code": 106,
 		"nom": "Réserves",
 		"parent": 10
 	},
-	"1062":
-	{
-		"code": 1062,
-		"nom": "Réserves indisponibles",
-		"parent": 106
-	},
-	"1063":
+	"1063": 
 	{
 		"code": 1063,
 		"nom": "Réserves statutaires ou contractuelles",
 		"parent": 106
 	},
-	"1064":
+	"1064": 
 	{
 		"code": 1064,
 		"nom": "Réserves réglementées",
 		"parent": 106
 	},
-	"1068":
+	"1068": 
 	{
 		"code": 1068,
 		"nom": "Autres réserves (dont réserves pour projet associatif)",
 		"parent": 106
 	},
-	"10682":
-	{
-		"code": 10682,
-		"nom": "Réserves pour investissements",
-		"parent": 1068
-	},
-	"10683":
-	{
-		"code": 10683,
-		"nom": "Réserves de trésorerie (provenant du résultat)",
-		"parent": 1068
-	},
-	"10688":
-	{
-		"code": 10688,
-		"nom": "Réserves diverses",
-		"parent": 1068
-	},
-	"11":
+	"11": 
 	{
 		"code": 11,
-		"nom": "ELEMENTS EN INSTANCE D'AFFECTATION",
+		"nom": "REPORT A NOUVEAU",
 		"parent": 1
 	},
-	"110":
+	"110": 
 	{
 		"code": 110,
-		"nom": "Report à nouveau (solde créditeur)",
+		"nom": "Report à nouveau (Solde créditeur)",
 		"parent": 11
 	},
-	"115":
-	{
-		"code": 115,
-		"nom": "Résultats sous contrôle de tiers financeurs",
-		"parent": 11
-	},
-	"119":
+	"119": 
 	{
 		"code": 119,
-		"nom": "Report à nouveau (solde débiteur)",
+		"nom": "Report à nouveau (Solde débiteur)",
 		"parent": 11
 	},
-	"12":
+	"12": 
 	{
 		"code": 12,
 		"nom": "RESULTAT NET DE L'EXERCICE",
 		"parent": 1
 	},
-	"120":
+	"120": 
 	{
 		"code": 120,
 		"nom": "Résultat de l'exercice (excédent)",
 		"parent": 12
 	},
-	"129":
+	"129": 
 	{
 		"code": 129,
 		"nom": "Résultat de l'exercice (déficit)",
 		"parent": 12
 	},
-	"13":
+	"13": 
 	{
 		"code": 13,
-		"nom": "SUBVENTIONS D'INVESTISSEMENT (affectés à des biens renouvelables)",
+		"nom": "SUBVENTIONS D'INVESTISSEMENT AFFECTES A DES BIENS NON RENOUVELABLES",
 		"parent": 1
 	},
-	"131":
+	"131": 
 	{
 		"code": 131,
 		"nom": "Subventions d'investissement (renouvelables)",
 		"parent": 13
 	},
-	"139":
+	"139": 
 	{
 		"code": 139,
 		"nom": "Subventions d'investissement inscrites au compte de résultat",
 		"parent": 13
 	},
-	"15":
+	"14": 
 	{
-		"code": 15,
-		"nom": "PROVISIONS POUR RISQUES ET CHARGES",
+		"code": 14,
+		"nom": "PROVISIONS REGLEMENTEES",
 		"parent": 1
 	},
-	"151":
+	"15": 
+	{
+		"code": 15,
+		"nom": "PROVISIONS",
+		"parent": 1
+	},
+	"151": 
 	{
 		"code": 151,
 		"nom": "Provisions pour risques",
 		"parent": 15
 	},
-	"1516":
-	{
-		"code": 1516,
-		"nom": "Provisions pour risques d'emploi",
-		"parent": 151
-	},
-	"1518":
-	{
-		"code": 1518,
-		"nom": "Autres provisions pour risques",
-		"parent": 151
-	},
-	"157":
+	"157": 
 	{
 		"code": 157,
 		"nom": "Provisions pour charges à répartir sur plusieurs exercices",
 		"parent": 15
 	},
-	"1572":
+	"158": 
 	{
-		"code": 1572,
-		"nom": "Provisions pour grosses réparations",
-		"parent": 157
+		"code": 158,
+		"nom": "Autres provisions pour charges",
+		"parent": 15
 	},
-	"16":
+	"16": 
 	{
 		"code": 16,
-		"nom": "EMPRUNTS ET DETTES ASSIMILEES",
+		"nom": "EMPRUNTS",
 		"parent": 1
 	},
-	"164":
+	"164": 
 	{
 		"code": 164,
-		"nom": "Emprunts auprès des établissements de crédit",
+		"nom": "Emprunts auprès des établissements de crédits",
 		"parent": 16
 	},
-	"1641":
+	"165": 
 	{
-		"code": 1641,
-		"nom": "Emprunts (à détailler)",
-		"parent": 164
+		"code": 165,
+		"nom": "Dépôts et cautionnements reçus",
+		"parent": 16
 	},
-	"167":
+	"167": 
 	{
 		"code": 167,
 		"nom": "Emprunts et dettes assorties de conditions particulières",
 		"parent": 16
 	},
-	"1672":
-	{
-		"code": 1672,
-		"nom": "Titres associatifs",
-		"parent": 167
-	},
-	"168":
+	"168": 
 	{
 		"code": 168,
-		"nom": "Autres emprunts et dettes assimilées",
+		"nom": "Autres emprunts et dettes assimilés",
 		"parent": 16
 	},
-	"1681":
-	{
-		"code": 1681,
-		"nom": "Autres emprunts (à détailler)",
-		"parent": 168
-	},
-	"1685":
-	{
-		"code": 1685,
-		"nom": "Rentes viagères capitalisées",
-		"parent": 168
-	},
-	"1687":
-	{
-		"code": 1687,
-		"nom": "Autres dettes (à détailler)",
-		"parent": 168
-	},
-	"1688":
-	{
-		"code": 1688,
-		"nom": "Intérêts courus (à détailler)",
-		"parent": 168
-	},
-	"18":
+	"18": 
 	{
 		"code": 18,
 		"nom": "COMPTES DE LIAISON DES ETABLISSEMENTS",
 		"parent": 1
 	},
-	"181":
+	"181": 
 	{
 		"code": 181,
 		"nom": "Apports permanents entre siège social et établissements",
 		"parent": 18
 	},
-	"185":
+	"185": 
 	{
 		"code": 185,
 		"nom": "Biens et prestations de services échangés entre établissements et siège social",
 		"parent": 18
 	},
-	"186":
+	"186": 
 	{
 		"code": 186,
 		"nom": "Biens et prestations de services échangés entre établissements (charges)",
 		"parent": 18
 	},
-	"187":
+	"187": 
 	{
 		"code": 187,
 		"nom": "Biens et prestations de services échangés entre établissements (produits)",
 		"parent": 18
 	},
-	"19":
+	"19": 
 	{
 		"code": 19,
 		"nom": "FONDS DEDIES",
 		"parent": 1
 	},
-	"194":
+	"194": 
 	{
 		"code": 194,
 		"nom": "Fonds dédiés sur subventions de fonctionnement",
 		"parent": 19
 	},
-	"195":
+	"195": 
 	{
 		"code": 195,
 		"nom": "Fonds dédiés sur dons manuels affectés",
 		"parent": 19
 	},
-	"197":
+	"197": 
 	{
 		"code": 197,
 		"nom": "Fonds dédiés sur legs et donations affectés",
 		"parent": 19
 	},
-	"198":
+	"198": 
 	{
 		"code": 198,
 		"nom": "Excédent disponible après affectation au projet associatif",
 		"parent": 19
 	},
-	"199":
+	"199": 
 	{
 		"code": 199,
 		"nom": "Reprise des fonds affectés au projet associatif",
 		"parent": 19
 	},
-	"2":
+	"2": 
 	{
 		"code": 2,
-		"nom": "CLASSE 2. Comptes d'immobilisations",
+		"nom": "Classe 2 — Comptes d'immobilisations",
 		"parent": 0
 	},
-	"20":
+	"20": 
 	{
 		"code": 20,
 		"nom": "IMMOBILISATIONS INCORPORELLES",
 		"parent": 2
 	},
-	"201":
+	"200": 
 	{
-		"code": 201,
-		"nom": "Frais d'établissement",
+		"code": 200,
+		"nom": "Immobilisations incorporelles",
 		"parent": 20
 	},
-	"2012":
-	{
-		"code": 2012,
-		"nom": "Frais de premier établissement",
-		"parent": 201
-	},
-	"206":
-	{
-		"code": 206,
-		"nom": "Droit au bail",
-		"parent": 20
-	},
-	"208":
-	{
-		"code": 208,
-		"nom": "Autres immobilisations incorporelles",
-		"parent": 20
-	},
-	"21":
+	"21": 
 	{
 		"code": 21,
 		"nom": "IMMOBILISATIONS CORPORELLES",
 		"parent": 2
 	},
-	"211":
+	"210": 
 	{
-		"code": 211,
-		"nom": "Terrains",
+		"code": 210,
+		"nom": "Investissements",
 		"parent": 21
 	},
-	"212":
+	"22": 
 	{
-		"code": 212,
-		"nom": "Agencements et aménagements des constructions",
-		"parent": 21
+		"code": 22,
+		"nom": "IMMOBILISATIONS GREVEES DE DROITS",
+		"parent": 2
 	},
-	"213":
-	{
-		"code": 213,
-		"nom": "Constructions",
-		"parent": 21
-	},
-	"2131":
-	{
-		"code": 2131,
-		"nom": "Bâtiments",
-		"parent": 213
-	},
-	"2135":
-	{
-		"code": 2135,
-		"nom": "Installations générales, agencements, aménagements des constructions",
-		"parent": 213
-	},
-	"214":
-	{
-		"code": 214,
-		"nom": "Constructions sur sol d'autrui",
-		"parent": 21
-	},
-	"215":
-	{
-		"code": 215,
-		"nom": "Installations techniques, matériel et outillage industriels",
-		"parent": 21
-	},
-	"2151":
-	{
-		"code": 2151,
-		"nom": "Installations complexes spécialisées",
-		"parent": 215
-	},
-	"2154":
-	{
-		"code": 2154,
-		"nom": "Matériel industriel",
-		"parent": 215
-	},
-	"2155":
-	{
-		"code": 2155,
-		"nom": "Outillage industriel",
-		"parent": 215
-	},
-	"218":
-	{
-		"code": 218,
-		"nom": "Autres immobilisations corporelles",
-		"parent": 21
-	},
-	"2181":
-	{
-		"code": 2181,
-		"nom": "Installations générales, agencements, aménagements divers",
-		"parent": 218
-	},
-	"2182":
-	{
-		"code": 2182,
-		"nom": "Matériel de transport",
-		"parent": 218
-	},
-	"2183":
-	{
-		"code": 2183,
-		"nom": "Matériel de bureau et matériel informatique",
-		"parent": 218
-	},
-	"2184":
-	{
-		"code": 2184,
-		"nom": "Mobilier",
-		"parent": 218
-	},
-	"2185":
-	{
-		"code": 2185,
-		"nom": "Cheptel",
-		"parent": 218
-	},
-	"228":
+	"228": 
 	{
 		"code": 228,
 		"nom": "Immobilisations grevées de droits",
-		"parent": 2
+		"parent": 22
 	},
-	"229":
+	"229": 
 	{
 		"code": 229,
 		"nom": "Droits des propriétaires",
-		"parent": 2
+		"parent": 22
 	},
-	"23":
-	{
-		"code": 23,
-		"nom": "IMMOBILISATIONS EN COURS",
-		"parent": 2
-	},
-	"231":
-	{
-		"code": 231,
-		"nom": "Immobilisations corporelles en cours",
-		"parent": 23
-	},
-	"2313":
-	{
-		"code": 2313,
-		"nom": "Constructions",
-		"parent": 231
-	},
-	"2315":
-	{
-		"code": 2315,
-		"nom": "Installations techniques, matériel et outillage industriels",
-		"parent": 231
-	},
-	"2318":
-	{
-		"code": 2318,
-		"nom": "Autres immobilisations corporelles",
-		"parent": 231
-	},
-	"238":
-	{
-		"code": 238,
-		"nom": "Avances et acomptes versés sur commande d'immobilisations corporelles",
-		"parent": 23
-	},
-	"26":
+	"26": 
 	{
 		"code": 26,
 		"nom": "PARTICIPATIONS ET CREANCES RATTACHEES A DES PARTICIPATIONS",
 		"parent": 2
 	},
-	"261":
+	"261": 
 	{
 		"code": 261,
 		"nom": "Titres de participation",
 		"parent": 26
 	},
-	"266":
-	{
-		"code": 266,
-		"nom": "Autres formes de participation",
-		"parent": 26
-	},
-	"267":
-	{
-		"code": 267,
-		"nom": "Créances rattachées à des participations",
-		"parent": 26
-	},
-	"269":
-	{
-		"code": 269,
-		"nom": "Versements restant à effectuer sur titres de participation non libérés",
-		"parent": 26
-	},
-	"27":
+	"27": 
 	{
 		"code": 27,
 		"nom": "AUTRES IMMOBILISATIONS FINANCIERES",
 		"parent": 2
 	},
-	"271":
+	"270": 
 	{
-		"code": 271,
-		"nom": "Titres immobilisés (droit de propriété)",
+		"code": 270,
+		"nom": "Participations financières",
 		"parent": 27
 	},
-	"2711":
-	{
-		"code": 2711,
-		"nom": "Actions",
-		"parent": 271
-	},
-	"272":
-	{
-		"code": 272,
-		"nom": "Titres immobilisés (droit de créance)",
-		"parent": 27
-	},
-	"2721":
-	{
-		"code": 2721,
-		"nom": "Obligations",
-		"parent": 272
-	},
-	"2722":
-	{
-		"code": 2722,
-		"nom": "Bons",
-		"parent": 272
-	},
-	"2728":
-	{
-		"code": 2728,
-		"nom": "Autres",
-		"parent": 272
-	},
-	"274":
-	{
-		"code": 274,
-		"nom": "Prêts",
-		"parent": 27
-	},
-	"2743":
-	{
-		"code": 2743,
-		"nom": "Prêts au personnel",
-		"parent": 274
-	},
-	"2748":
-	{
-		"code": 2748,
-		"nom": "Autres prêts",
-		"parent": 274
-	},
-	"275":
+	"275": 
 	{
 		"code": 275,
 		"nom": "Dépôts et cautionnements versés",
 		"parent": 27
 	},
-	"2751":
-	{
-		"code": 2751,
-		"nom": "Dépôts",
-		"parent": 275
-	},
-	"2755":
-	{
-		"code": 2755,
-		"nom": "Cautionnements",
-		"parent": 275
-	},
-	"276":
-	{
-		"code": 276,
-		"nom": "Autres créances immobilisées",
-		"parent": 27
-	},
-	"2761":
-	{
-		"code": 2761,
-		"nom": "Créances diverses",
-		"parent": 276
-	},
-	"2768":
-	{
-		"code": 2768,
-		"nom": "Intérêts courus (à détailler)",
-		"parent": 276
-	},
-	"279":
-	{
-		"code": 279,
-		"nom": "Versement restant à effectuer sur titres immobilisés non libérés",
-		"parent": 27
-	},
-	"28":
+	"28": 
 	{
 		"code": 28,
 		"nom": "AMORTISSEMENTS DES IMMOBILISATIONS",
 		"parent": 2
 	},
-	"280":
+	"280": 
 	{
 		"code": 280,
 		"nom": "Amortissements des immobilisations incorporelles",
 		"parent": 28
 	},
-	"2801":
-	{
-		"code": 2801,
-		"nom": "Frais d'établissement (même ventilation que celle du compte 201)",
-		"parent": 280
-	},
-	"2808":
-	{
-		"code": 2808,
-		"nom": "Autres immobilisations incorporelles",
-		"parent": 280
-	},
-	"281":
+	"281": 
 	{
 		"code": 281,
 		"nom": "Amortissements des immobilisations corporelles",
 		"parent": 28
 	},
-	"2812":
-	{
-		"code": 2812,
-		"nom": "Agencements, aménagements de terrains (même ventilation que celle du compte 212)",
-		"parent": 281
-	},
-	"2813":
-	{
-		"code": 2813,
-		"nom": "Constructions (même ventilation que celle du compte 213)",
-		"parent": 281
-	},
-	"2814":
-	{
-		"code": 2814,
-		"nom": "Constructions sur sol d'autrui (même ventilation que celle du compte 214)",
-		"parent": 281
-	},
-	"2815":
-	{
-		"code": 2815,
-		"nom": "Installations techniques, matériel et outillage industriels (même ventilation que celle du compte 215)",
-		"parent": 281
-	},
-	"2818":
-	{
-		"code": 2818,
-		"nom": "Autres immobilisations corporelles (même ventilation que celle du compte 218)",
-		"parent": 281
-	},
-	"29":
+	"29": 
 	{
 		"code": 29,
-		"nom": "PROVISIONS POUR DEPRECIATION DES IMMOBILISATIONS",
+		"nom": "DEPRECIATION DES IMMOBILISATIONS",
 		"parent": 2
 	},
-	"290":
+	"290": 
 	{
 		"code": 290,
-		"nom": "Provisions pour dépréciation des immobilisations incorporelles",
+		"nom": "Dépréciation des immobilisations incorporelles",
 		"parent": 29
 	},
-	"2906":
-	{
-		"code": 2906,
-		"nom": "Droit au bail",
-		"parent": 290
-	},
-	"2908":
-	{
-		"code": 2908,
-		"nom": "Autres immobilisations incorporelles",
-		"parent": 290
-	},
-	"291":
+	"291": 
 	{
 		"code": 291,
-		"nom": "Provisions pour dépréciation des autres immobilisations corporelles",
+		"nom": "Dépréciation des immobilisations corporelles",
 		"parent": 29
 	},
-	"2911":
-	{
-		"code": 2911,
-		"nom": "Terrains",
-		"parent": 291
-	},
-	"296":
-	{
-		"code": 296,
-		"nom": "Provisions pour dépréciation des participations et créances rattachées à des participations",
-		"parent": 29
-	},
-	"2961":
-	{
-		"code": 2961,
-		"nom": "Titres de participation",
-		"parent": 296
-	},
-	"2966":
-	{
-		"code": 2966,
-		"nom": "Autres formes de participation",
-		"parent": 296
-	},
-	"2967":
-	{
-		"code": 2967,
-		"nom": "Créances rattachées à des participations (même ventilation que celle du compte 267)",
-		"parent": 296
-	},
-	"297":
-	{
-		"code": 297,
-		"nom": "Provisions pour dépréciation des autres immobilisations financières",
-		"parent": 29
-	},
-	"2971":
-	{
-		"code": 2971,
-		"nom": "Titres immobilisés (droit de propriété) (même ventilation que celle du compte 271)",
-		"parent": 297
-	},
-	"2972":
-	{
-		"code": 2972,
-		"nom": "Titres immobilisés (droit de créance) (même ventilation que celle du compte 272)",
-		"parent": 297
-	},
-	"2974":
-	{
-		"code": 2974,
-		"nom": "Prêts (même ventilation que celle du compte 274)",
-		"parent": 297
-	},
-	"2975":
-	{
-		"code": 2975,
-		"nom": "Dépôts et cautionnements versés (même ventilation que celle du compte 275)",
-		"parent": 297
-	},
-	"2976":
-	{
-		"code": 2976,
-		"nom": "Autres créances immobilisées (même ventilation que celle du compte 276)",
-		"parent": 297
-	},
-	"3":
+	"3": 
 	{
 		"code": 3,
-		"nom": "CLASSE 3. Comptes de stocks et en-cours",
+		"nom": "Classe 3 — Comptes de stocks",
 		"parent": 0
 	},
-	"31":
+	"31": 
 	{
 		"code": 31,
 		"nom": "MATIERES PREMIERES ET FOURNITURES",
 		"parent": 3
 	},
-	"32":
+	"311": 
+	{
+		"code": 311,
+		"nom": "Matières",
+		"parent": 31
+	},
+	"317": 
+	{
+		"code": 317,
+		"nom": "Fournitures",
+		"parent": 31
+	},
+	"32": 
 	{
 		"code": 32,
 		"nom": "AUTRES APPROVISIONNEMENTS",
 		"parent": 3
 	},
-	"33":
+	"321": 
+	{
+		"code": 321,
+		"nom": "Matières consommables",
+		"parent": 32
+	},
+	"322": 
+	{
+		"code": 322,
+		"nom": "Fournitures consommables",
+		"parent": 32
+	},
+	"33": 
 	{
 		"code": 33,
 		"nom": "EN-COURS DE PRODUCTION DE BIENS",
 		"parent": 3
 	},
-	"34":
+	"331": 
 	{
-		"code": 34,
-		"nom": "EN-COURS DE PRODUCTION DE SERVICES",
-		"parent": 3
+		"code": 331,
+		"nom": "Produits en cours",
+		"parent": 33
 	},
-	"35":
+	"335": 
+	{
+		"code": 335,
+		"nom": "Travaux en cours",
+		"parent": 33
+	},
+	"35": 
 	{
 		"code": 35,
 		"nom": "STOCKS DE PRODUITS",
 		"parent": 3
 	},
-	"37":
+	"351": 
+	{
+		"code": 351,
+		"nom": "Produits intermédiaires",
+		"parent": 35
+	},
+	"355": 
+	{
+		"code": 355,
+		"nom": "Produits finis",
+		"parent": 35
+	},
+	"358": 
+	{
+		"code": 358,
+		"nom": "Produits résiduels",
+		"parent": 35
+	},
+	"3581": 
+	{
+		"code": 3581,
+		"nom": "Déchets",
+		"parent": 358
+	},
+	"3585": 
+	{
+		"code": 3585,
+		"nom": "Rebuts",
+		"parent": 358
+	},
+	"3586": 
+	{
+		"code": 3586,
+		"nom": "Matière de récupération",
+		"parent": 358
+	},
+	"37": 
 	{
 		"code": 37,
 		"nom": "STOCKS DE MARCHANDISES",
 		"parent": 3
 	},
-	"39":
+	"370": 
+	{
+		"code": 370,
+		"nom": "Autres stocks de marchandises",
+		"parent": 37
+	},
+	"39": 
 	{
 		"code": 39,
 		"nom": "PROVISIONS POUR DEPRECIATION DES STOCKS ET EN-COURS",
 		"parent": 3
 	},
-	"391":
+	"391": 
 	{
 		"code": 391,
 		"nom": "Provisions pour dépréciation des matières premières et fournitures",
 		"parent": 39
 	},
-	"392":
-	{
-		"code": 392,
-		"nom": "Provisions pour dépréciation des autres approvisionnements",
-		"parent": 39
-	},
-	"393":
-	{
-		"code": 393,
-		"nom": "Provisions pour dépréciation des en-cours de production de biens",
-		"parent": 39
-	},
-	"394":
-	{
-		"code": 394,
-		"nom": "Provisions pour dépréciation des en-cours de production de services",
-		"parent": 39
-	},
-	"395":
-	{
-		"code": 395,
-		"nom": "Provisions pour dépréciation des stocks de produits",
-		"parent": 39
-	},
-	"397":
-	{
-		"code": 397,
-		"nom": "Provisions pour dépréciation des stocks de marchandises",
-		"parent": 39
-	},
-	"4":
+	"4": 
 	{
 		"code": 4,
-		"nom": "CLASSE 4. Comptes de tiers",
+		"nom": "Classe 4 — Comptes de tiers",
 		"parent": 0
 	},
-	"40":
+	"40": 
 	{
 		"code": 40,
-		"nom": "FOURNISSEURS ET COMPTES RATTACHES",
+		"nom": "FOURNISSEURS ET COMPTES RATTACHÉS",
 		"parent": 4
 	},
-	"401":
+	"401": 
 	{
 		"code": 401,
 		"nom": "Fournisseurs",
 		"parent": 40
 	},
-	"4011":
+	"4010": 
 	{
-		"code": 4011,
-		"nom": "Fournisseurs - Achats de biens ou de prestations de services",
+		"code": 4010,
+		"nom": "Autres fournisseurs",
 		"parent": 401
 	},
-	"404":
-	{
-		"code": 404,
-		"nom": "Fournisseurs d'immobilisations",
-		"parent": 40
-	},
-	"4041":
-	{
-		"code": 4041,
-		"nom": "Fournisseurs - achats d'immobilisations",
-		"parent": 404
-	},
-	"4047":
-	{
-		"code": 4047,
-		"nom": "Fournisseurs d'immobilisations - Retenues de garantie",
-		"parent": 404
-	},
-	"408":
+	"408": 
 	{
 		"code": 408,
 		"nom": "Fournisseurs - Factures non parvenues",
 		"parent": 40
 	},
-	"4081":
-	{
-		"code": 4081,
-		"nom": "Fournisseurs - Achats de biens ou de prestations de services",
-		"parent": 408
-	},
-	"4084":
-	{
-		"code": 4084,
-		"nom": "Fournisseurs - achats d'immobilisations",
-		"parent": 408
-	},
-	"409":
+	"409": 
 	{
 		"code": 409,
-		"nom": "Fournisseurs débiteurs",
+		"nom": "Avances aux fournisseurs",
 		"parent": 40
 	},
-	"4091":
-	{
-		"code": 4091,
-		"nom": "Fournisseurs - Avances et acomptes versés sur commandes",
-		"parent": 409
-	},
-	"4096":
-	{
-		"code": 4096,
-		"nom": "Fournisseurs - Créances pour emballage et matériel à rendre",
-		"parent": 409
-	},
-	"41":
+	"41": 
 	{
 		"code": 41,
-		"nom": "USAGERS ET COMPTES RATTACHES",
+		"nom": "USAGERS ET COMPTES RATTACHÉS",
 		"parent": 4
 	},
-	"411":
+	"411": 
 	{
 		"code": 411,
-		"nom": "Usagers (et organismes de prise en charge)",
+		"nom": "Usagers",
 		"parent": 41
 	},
-	"416":
+	"4110": 
 	{
-		"code": 416,
-		"nom": "Créances douteuses ou litigieuses",
-		"parent": 41
+		"code": 4110,
+		"nom": "Autres usagers",
+		"parent": 411
 	},
-	"418":
-	{
-		"code": 418,
-		"nom": "Usagers - Produits non encore facturés",
-		"parent": 41
-	},
-	"419":
+	"419": 
 	{
 		"code": 419,
-		"nom": "Usagers créditeurs",
+		"nom": "Avances aux usagers",
 		"parent": 41
 	},
-	"42":
+	"42": 
 	{
 		"code": 42,
-		"nom": "PERSONNEL ET COMPTES RATTACHES",
+		"nom": "PERSONNEL ET COMPTES RATTACHÉS",
 		"parent": 4
 	},
-	"421":
+	"421": 
 	{
 		"code": 421,
 		"nom": "Personnel - Rémunérations dues",
 		"parent": 42
 	},
-	"422":
+	"4210": 
 	{
-		"code": 422,
-		"nom": "Comités d'entreprises, d'établissement...",
-		"parent": 42
+		"code": 4210,
+		"nom": "Autres membres du personnel",
+		"parent": 421
 	},
-	"425":
+	"425": 
 	{
 		"code": 425,
 		"nom": "Personnel - Avances et acomptes",
 		"parent": 42
 	},
-	"427":
-	{
-		"code": 427,
-		"nom": "Personnel - Oppositions",
-		"parent": 42
-	},
-	"428":
-	{
-		"code": 428,
-		"nom": "Personnel - Charges à payer et produits à recevoir",
-		"parent": 42
-	},
-	"4282":
-	{
-		"code": 4282,
-		"nom": "Dettes provisionnées pour congés à payer",
-		"parent": 428
-	},
-	"4286":
-	{
-		"code": 4286,
-		"nom": "Autres charges à payer",
-		"parent": 428
-	},
-	"4287":
-	{
-		"code": 4287,
-		"nom": "Produits à recevoir",
-		"parent": 428
-	},
-	"43":
+	"43": 
 	{
 		"code": 43,
-		"nom": "SECURITE SOCIALE ET AUTRES ORGANISMES SOCIAUX",
+		"nom": "SÉCURITÉ SOCIALE ET AUTRES ORGANISMES SOCIAUX",
 		"parent": 4
 	},
-	"431":
+	"430": 
+	{
+		"code": 430,
+		"nom": "Dettes et crédits envers les organismes sociaux",
+		"parent": 43
+	},
+	"431": 
 	{
 		"code": 431,
 		"nom": "Sécurité sociale",
 		"parent": 43
 	},
-	"437":
+	"437": 
 	{
 		"code": 437,
 		"nom": "Autres organismes sociaux",
 		"parent": 43
 	},
-	"4372":
+	"4372": 
 	{
 		"code": 4372,
 		"nom": "Mutuelles",
 		"parent": 437
 	},
-	"4373":
+	"4373": 
 	{
 		"code": 4373,
-		"nom": "Caisses de retraites et de prévoyance",
+		"nom": "Caisse de retraite et de prévoyance",
 		"parent": 437
 	},
-	"4374":
+	"4374": 
 	{
 		"code": 4374,
-		"nom": "Caisses d'allocations de chômage - ASSEDIC",
+		"nom": "Caisse d'allocations de chômage - Pôle emploi",
 		"parent": 437
 	},
-	"4378":
+	"4375": 
+	{
+		"code": 4375,
+		"nom": "AGESSA",
+		"parent": 437
+	},
+	"4378": 
 	{
 		"code": 4378,
-		"nom": "Autres organismes sociaux - divers",
+		"nom": "Autres organismes sociaux - Divers",
 		"parent": 437
 	},
-	"438":
+	"438": 
 	{
 		"code": 438,
 		"nom": "Organismes sociaux - Charges à payer et produits à recevoir",
 		"parent": 43
 	},
-	"4382":
+	"4382": 
 	{
 		"code": 4382,
 		"nom": "Charges sociales sur congés à payer",
 		"parent": 438
 	},
-	"4386":
+	"4386": 
 	{
 		"code": 4386,
 		"nom": "Autres charges à payer",
 		"parent": 438
 	},
-	"4387":
+	"4387": 
 	{
 		"code": 4387,
 		"nom": "Produits à recevoir",
 		"parent": 438
 	},
-	"44":
+	"439": 
+	{
+		"code": 439,
+		"nom": "Avances auprès des organismes sociaux",
+		"parent": 43
+	},
+	"44": 
 	{
 		"code": 44,
-		"nom": "ETAT ET AUTRES COLLECTIVITES PUBLIQUES",
+		"nom": "ÉTAT ET AUTRES COLLECTIVITÉS PUBLIQUES",
 		"parent": 4
 	},
-	"441":
+	"441": 
 	{
 		"code": 441,
-		"nom": "Etat - Subventions à recevoir",
+		"nom": "État - Subventions à recevoir",
 		"parent": 44
 	},
-	"4411":
+	"4411": 
 	{
 		"code": 4411,
 		"nom": "Subventions d'investissement",
 		"parent": 441
 	},
-	"4417":
+	"4417": 
 	{
 		"code": 4417,
 		"nom": "Subventions d'exploitation",
 		"parent": 441
 	},
-	"4419":
+	"4418": 
+	{
+		"code": 4418,
+		"nom": "Subventions d'équilibre",
+		"parent": 441
+	},
+	"4419": 
 	{
 		"code": 4419,
 		"nom": "Avances sur subventions",
 		"parent": 441
 	},
-	"444":
+	"442": 
+	{
+		"code": 442,
+		"nom": "État - Impôts et taxes recouvrables sur des tiers",
+		"parent": 44
+	},
+	"444": 
 	{
 		"code": 444,
-		"nom": "Etat - Impôts sur les bénéfices",
+		"nom": "État - Impôts sur les bénéfices",
 		"parent": 44
 	},
-	"4445":
-	{
-		"code": 4445,
-		"nom": "Etat - Impôt sur les société (organismes sans but lucratif)",
-		"parent": 444
-	},
-	"445":
+	"445": 
 	{
 		"code": 445,
-		"nom": "Etat - Taxes sur le chiffre d'affaires",
+		"nom": "État - Taxes sur le chiffre d'affaires",
 		"parent": 44
 	},
-	"447":
+	"4455": 
+	{
+		"code": 4455,
+		"nom": "Taxes sur le chiffre d'affaires à décaisser",
+		"parent": 445
+	},
+	"44551": 
+	{
+		"code": 44551,
+		"nom": "TVA à décaisser",
+		"parent": 4455
+	},
+	"44558": 
+	{
+		"code": 44558,
+		"nom": "Taxes assimilées à la TVA",
+		"parent": 4455
+	},
+	"4456": 
+	{
+		"code": 4456,
+		"nom": "Taxes sur le chiffre d'affaires déductibles",
+		"parent": 445
+	},
+	"44562": 
+	{
+		"code": 44562,
+		"nom": "TVA sur immobilisations",
+		"parent": 4456
+	},
+	"44566": 
+	{
+		"code": 44566,
+		"nom": "TVA sur autres biens et services",
+		"parent": 4456
+	},
+	"4457": 
+	{
+		"code": 4457,
+		"nom": "Taxes sur le chiffre d'affaires collectées par l'association",
+		"parent": 445
+	},
+	"4458": 
+	{
+		"code": 4458,
+		"nom": "Taxes sur le chiffre d'affaires à régulariser ou en attente",
+		"parent": 445
+	},
+	"44581": 
+	{
+		"code": 44581,
+		"nom": "Acomptes - Régime simplifié d'imposition",
+		"parent": 4458
+	},
+	"44582": 
+	{
+		"code": 44582,
+		"nom": "Acomptes - Régime du forfait",
+		"parent": 4458
+	},
+	"44583": 
+	{
+		"code": 44583,
+		"nom": "Remboursement de taxes sur le chiffre d'affaires demandé",
+		"parent": 4458
+	},
+	"44584": 
+	{
+		"code": 44584,
+		"nom": "TVA récupérée d'avance",
+		"parent": 4458
+	},
+	"44586": 
+	{
+		"code": 44586,
+		"nom": "Taxes sur le chiffre d'affaires sur factures non parvenues",
+		"parent": 4458
+	},
+	"44587": 
+	{
+		"code": 44587,
+		"nom": "Taxes sur le chiffre d'affaires sur factures à établir",
+		"parent": 4458
+	},
+	"447": 
 	{
 		"code": 447,
 		"nom": "Autres impôts, taxes et versements assimilés",
 		"parent": 44
 	},
-	"4471":
+	"4471": 
 	{
 		"code": 4471,
-		"nom": "Impôts, taxes et versements assimilés sur rémunérations (administration des impôts)",
+		"nom": "Autres impôts, taxes et versements assimilés sur rémunérations (Administration des impôts)",
 		"parent": 447
 	},
-	"44711":
+	"44711": 
 	{
 		"code": 44711,
 		"nom": "Taxe sur les salaires",
 		"parent": 4471
 	},
-	"44713":
+	"44713": 
 	{
 		"code": 44713,
 		"nom": "Participation des employeurs à la formation professionnelle continue",
 		"parent": 4471
 	},
-	"44714":
+	"44714": 
 	{
 		"code": 44714,
-		"nom": "Cotisation pour défaut d'investissement obligatoire dans la construction",
+		"nom": "Cotisation par défaut d'investissement obligatoire dans la construction",
 		"parent": 4471
 	},
-	"44718":
+	"44718": 
 	{
 		"code": 44718,
 		"nom": "Autres impôts, taxes et versements assimilés",
 		"parent": 4471
 	},
-	"4473":
+	"4473": 
 	{
 		"code": 4473,
-		"nom": "Impôts, taxes et versements assimilés sur rémunérations (autres organismes)",
+		"nom": "Autres impôts, taxes et versements assimilés sur rémunérations (Autres organismes)",
 		"parent": 447
 	},
-	"44733":
+	"44733": 
 	{
 		"code": 44733,
 		"nom": "Participation des employeurs à la formation professionnelle continue",
 		"parent": 4473
 	},
-	"44734":
+	"44734": 
 	{
 		"code": 44734,
 		"nom": "Participation des employeurs à l'effort de construction (versements à fonds perdus)",
 		"parent": 4473
 	},
-	"4475":
+	"4475": 
 	{
 		"code": 4475,
-		"nom": "Autres impôts, taxes et versements assimilés (administration des impôts)",
+		"nom": "Autres impôts, taxes et versements assimilés (Administration des impôts)",
 		"parent": 447
 	},
-	"4477":
+	"4477": 
 	{
 		"code": 4477,
-		"nom": "Autres impôts, taxes et versements assimilés (autres organismes)",
+		"nom": "Autres impôts, taxes et versements assimilés (Autres organismes)",
 		"parent": 447
 	},
-	"448":
+	"448": 
 	{
 		"code": 448,
-		"nom": "Etat - Charges à payer et produits à recevoir",
+		"nom": "État - Charges à payer et produits à recevoir",
 		"parent": 44
 	},
-	"4482":
+	"4482": 
 	{
 		"code": 4482,
 		"nom": "Charges fiscales sur congés à payer",
 		"parent": 448
 	},
-	"4486":
+	"4486": 
 	{
 		"code": 4486,
 		"nom": "Autres charges à payer",
 		"parent": 448
 	},
-	"4487":
+	"4487": 
 	{
 		"code": 4487,
 		"nom": "Produits à recevoir",
 		"parent": 448
 	},
-	"45":
+	"449": 
+	{
+		"code": 449,
+		"nom": "Avances auprès de l'état et des collectivités publiques",
+		"parent": 44
+	},
+	"45": 
 	{
 		"code": 45,
-		"nom": "CONFEDERATION, FEDERATION, UNION, ASSOCIATIONS AFFILIEES ET SOCIETAIRES",
+		"nom": "CONFEDERATION, FEDERATION, ASSOCIATIONS AFFILIEES ET SOCIETAIRES",
 		"parent": 4
 	},
-	"451":
+	"451": 
 	{
 		"code": 451,
-		"nom": "Confédération, fédération, union et associations affiliées - Compte courant",
+		"nom": "Confédération, fédération et associations affiliées - Compte courant",
 		"parent": 45
 	},
-	"455":
+	"455": 
 	{
 		"code": 455,
 		"nom": "Sociétaires - Comptes courants",
 		"parent": 45
 	},
-	"46":
+	"46": 
 	{
 		"code": 46,
-		"nom": "DEBITEURS DIVERS ET CREDITEURS DIVERS",
+		"nom": "DÉBITEURS DIVERS ET CRÉDITEURS DIVERS",
 		"parent": 4
 	},
-	"467":
+	"467": 
 	{
 		"code": 467,
-		"nom": "Autres comptes débiteurs ou créditeurs",
+		"nom": "Autres comptes débiteurs et créditeurs",
 		"parent": 46
 	},
-	"468":
+	"468": 
 	{
 		"code": 468,
 		"nom": "Divers - Charges à payer et produits à recevoir",
 		"parent": 46
 	},
-	"4686":
+	"4686": 
 	{
 		"code": 4686,
 		"nom": "Charges à payer",
 		"parent": 468
 	},
-	"4687":
+	"4687": 
 	{
 		"code": 4687,
 		"nom": "Produits à recevoir",
 		"parent": 468
 	},
-	"47":
+	"47": 
 	{
 		"code": 47,
-		"nom": "COMPTES D'ATTENTE",
+		"nom": "COMPTES TRANSITOIRES OU D'ATTENTE",
 		"parent": 4
 	},
-	"471":
+	"471": 
 	{
 		"code": 471,
 		"nom": "Recettes à classer",
 		"parent": 47
 	},
-	"472":
+	"472": 
 	{
 		"code": 472,
 		"nom": "Dépenses à classer et à régulariser",
 		"parent": 47
 	},
-	"475":
-	{
-		"code": 475,
-		"nom": "Legs et donations en cours de réalisation",
-		"parent": 47
-	},
-	"48":
+	"48": 
 	{
 		"code": 48,
-		"nom": "COMPTE DE REGULARISATION",
+		"nom": "COMPTES DE RÉGULARISATION",
 		"parent": 4
 	},
-	"481":
+	"481": 
 	{
 		"code": 481,
 		"nom": "Charges à répartir sur plusieurs exercices",
 		"parent": 48
 	},
-	"4812":
-	{
-		"code": 4812,
-		"nom": "Frais d'acquisition des immobilisations",
-		"parent": 481
-	},
-	"4818":
-	{
-		"code": 4818,
-		"nom": "Charges à étaler",
-		"parent": 481
-	},
-	"486":
+	"486": 
 	{
 		"code": 486,
 		"nom": "Charges constatées d'avance",
 		"parent": 48
 	},
-	"487":
+	"487": 
 	{
 		"code": 487,
 		"nom": "Produits constatés d'avance",
 		"parent": 48
 	},
-	"49":
+	"49": 
 	{
 		"code": 49,
-		"nom": "PROVISIONS POUR DEPRECIATION DES COMPTES DE TIERS",
+		"nom": "DEPRECIATION DES COMPTES DE TIERS",
 		"parent": 4
 	},
-	"491":
+	"491": 
 	{
 		"code": 491,
-		"nom": "Provisions pour dépréciation des comptes d'usagers (et organismes de prise en charge)",
+		"nom": "Dépréciation des comptes clients",
 		"parent": 49
 	},
-	"496":
+	"496": 
 	{
 		"code": 496,
-		"nom": "Provisions pour dépréciation des comptes de débiteurs divers",
+		"nom": "Dépréciation des comptes débiteurs divers",
 		"parent": 49
 	},
-	"5":
+	"5": 
 	{
 		"code": 5,
-		"nom": "CLASSE 5. Comptes financiers",
+		"nom": "Classe 5 — Comptes financiers",
 		"parent": 0
 	},
-	"50":
-	{
-		"code": 50,
-		"nom": "VALEURS MOBILIERES DE PLACEMENT",
-		"parent": 5
-	},
-	"503":
-	{
-		"code": 503,
-		"nom": "Actions",
-		"parent": 50
-	},
-	"5031":
-	{
-		"code": 5031,
-		"nom": "Titres cotés",
-		"parent": 503
-	},
-	"5035":
-	{
-		"code": 5035,
-		"nom": "Titres non cotés",
-		"parent": 503
-	},
-	"506":
-	{
-		"code": 506,
-		"nom": "Obligations",
-		"parent": 50
-	},
-	"5061":
-	{
-		"code": 5061,
-		"nom": "Titres cotés",
-		"parent": 506
-	},
-	"5065":
-	{
-		"code": 5065,
-		"nom": "Titres non cotés",
-		"parent": 506
-	},
-	"507":
-	{
-		"code": 507,
-		"nom": "Bons du Trésor et bons de caisse à court terme",
-		"parent": 50
-	},
-	"508":
-	{
-		"code": 508,
-		"nom": "Autres valeurs mobilières et créances assimilées",
-		"parent": 50
-	},
-	"5081":
-	{
-		"code": 5081,
-		"nom": "Autres valeurs mobilières",
-		"parent": 508
-	},
-	"5088":
-	{
-		"code": 5088,
-		"nom": "Intérêts courus sur obligations, bons et valeurs assimilées",
-		"parent": 508
-	},
-	"51":
+	"51": 
 	{
 		"code": 51,
-		"nom": "BANQUES, ETABLISSEMENTS FINANCIERS ET ASSIMILES",
+		"nom": "BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",
 		"parent": 5
 	},
-	"512":
-	{
-		"code": 512,
-		"nom": "Banques",
-		"parent": 51
-	},
-	"514":
-	{
-		"code": 514,
-		"nom": "Chèques postaux",
-		"parent": 51
-	},
-	"515":
-	{
-		"code": 515,
-		"nom": "Caisses",
-		"parent": 51
-	},
-	"517":
-	{
-		"code": 517,
-		"nom": "Autres organismes financiers",
-		"parent": 51
-	},
-	"5171":
-	{
-		"code": 5171,
-		"nom": "Caisse d'épargne",
-		"parent": 517
-	},
-	"518":
-	{
-		"code": 518,
-		"nom": "Intérêts courus",
-		"parent": 51
-	},
-	"5186":
-	{
-		"code": 5186,
-		"nom": "Intérêts courus à payer",
-		"parent": 518
-	},
-	"5187":
-	{
-		"code": 5187,
-		"nom": "Intérêts courus à recevoir",
-		"parent": 518
-	},
-	"53":
+	"53": 
 	{
 		"code": 53,
 		"nom": "CAISSE",
 		"parent": 5
 	},
-	"531":
+	"530": 
 	{
-		"code": 531,
-		"nom": "Caisse du siège",
+		"code": 530,
+		"nom": "Caisse",
 		"parent": 53
 	},
-	"532":
-	{
-		"code": 532,
-		"nom": "Caisses des lieux d'activités",
-		"parent": 53
-	},
-	"54":
-	{
-		"code": 54,
-		"nom": "REGIES D'AVANCES ET ACCREDITIFS",
-		"parent": 5
-	},
-	"541":
-	{
-		"code": 541,
-		"nom": "Régies d'avances",
-		"parent": 54
-	},
-	"542":
-	{
-		"code": 542,
-		"nom": "Accréditifs",
-		"parent": 54
-	},
-	"58":
-	{
-		"code": 58,
-		"nom": "VIREMENTS INTERNES",
-		"parent": 5
-	},
-	"581":
-	{
-		"code": 581,
-		"nom": "Virements de fonds",
-		"parent": 58
-	},
-	"59":
-	{
-		"code": 59,
-		"nom": "PROVISIONS POUR DEPRECIATION DES COMPTES FINANCIERS",
-		"parent": 5
-	},
-	"590":
-	{
-		"code": 590,
-		"nom": "Provisions pour dépréciation des valeurs mobilières de placement",
-		"parent": 59
-	},
-	"6":
+	"6": 
 	{
 		"code": 6,
-		"nom": "CLASSE 6. Comptes de charges",
+		"nom": "Classe 6 — Comptes de charges",
 		"parent": 0
 	},
-	"60":
+	"60": 
 	{
 		"code": 60,
-		"nom": "ACHATS (sauf 603)",
+		"nom": "ACHATS",
 		"parent": 6
 	},
-	"601":
+	"601": 
 	{
 		"code": 601,
-		"nom": "Achats stockés - Matières premières et fournitures (*1 Structure laissée libre en vue de répondre à la diversité des actions entreprises par le secteur associatif)",
+		"nom": "Achats stockés - Matières premières et fournitures",
 		"parent": 60
 	},
-	"602":
+	"602": 
 	{
 		"code": 602,
-		"nom": "Achats stockés - Autres approvisionnements (*1 Structure laissée libre en vue de répondre à la diversité des actions entreprises par le secteur associatif)",
+		"nom": "Achats stockés - Autres approvisionnements",
 		"parent": 60
 	},
-	"604":
+	"604": 
 	{
 		"code": 604,
-		"nom": "Achats d'études et prestations de services (*2 Incorporés directement aux produits et prestations de services)",
+		"nom": "Achat d'études et prestations de services",
 		"parent": 60
 	},
-	"606":
+	"606": 
 	{
 		"code": 606,
-		"nom": "Achats non stockés de matières et fournitures (*1 Structure laissée libre en vue de répondre à la diversité des actions entreprises par le secteur associatif)",
+		"nom": "Achats non stockés de matières et fournitures",
 		"parent": 60
 	},
-	"6061":
+	"6061": 
 	{
 		"code": 6061,
 		"nom": "Fournitures non stockables (eau, énergie...)",
 		"parent": 606
 	},
-	"6063":
+	"6063": 
 	{
 		"code": 6063,
 		"nom": "Fournitures d'entretien et de petit équipement",
 		"parent": 606
 	},
-	"6064":
+	"6064": 
 	{
 		"code": 6064,
 		"nom": "Fournitures administratives",
 		"parent": 606
 	},
-	"6068":
+	"6068": 
 	{
 		"code": 6068,
 		"nom": "Autres matières et fournitures",
 		"parent": 606
 	},
-	"607":
+	"607": 
 	{
 		"code": 607,
 		"nom": "Achats de marchandises",
 		"parent": 60
 	},
-	"6071":
-	{
-		"code": 6071,
-		"nom": "Marchandise A",
-		"parent": 607
-	},
-	"6072":
-	{
-		"code": 6072,
-		"nom": "Marchandise B",
-		"parent": 607
-	},
-	"609":
-	{
-		"code": 609,
-		"nom": "Rabais, remises et ristournes obtenues sur achats",
-		"parent": 60
-	},
-	"603":
-	{
-		"code": 603,
-		"nom": "Variation des stocks (approvisionnements et marchandises)",
-		"parent": 6
-	},
-	"6031":
-	{
-		"code": 6031,
-		"nom": "Variation des stocks de matières premières et fournitures",
-		"parent": 6
-	},
-	"6032":
-	{
-		"code": 6032,
-		"nom": "Variation des stocks des autres approvisionnements",
-		"parent": 6
-	},
-	"6037":
-	{
-		"code": 6037,
-		"nom": "Variation des stocks de marchandises",
-		"parent": 6
-	},
-	"61":
+	"61": 
 	{
 		"code": 61,
-		"nom": "AUTRES CHARGES EXTERNES - Services extérieurs",
+		"nom": "SERVICES EXTERIEURS",
 		"parent": 6
 	},
-	"611":
+	"611": 
 	{
 		"code": 611,
 		"nom": "Sous-traitance générale",
 		"parent": 61
 	},
-	"612":
+	"612": 
 	{
 		"code": 612,
 		"nom": "Redevances de crédit-bail",
 		"parent": 61
 	},
-	"6122":
-	{
-		"code": 6122,
-		"nom": "Crédit-bail mobilier",
-		"parent": 612
-	},
-	"613":
+	"613": 
 	{
 		"code": 613,
 		"nom": "Locations",
 		"parent": 61
 	},
-	"6132":
-	{
-		"code": 6132,
-		"nom": "Locations immobilières",
-		"parent": 613
-	},
-	"6135":
-	{
-		"code": 6135,
-		"nom": "Locations mobilières",
-		"parent": 613
-	},
-	"614":
+	"614": 
 	{
 		"code": 614,
 		"nom": "Charges locatives et de co-propriété",
 		"parent": 61
 	},
-	"615":
+	"615": 
 	{
 		"code": 615,
-		"nom": "Entretien et réparations",
+		"nom": "Entretiens et réparations",
 		"parent": 61
 	},
-	"6152":
-	{
-		"code": 6152,
-		"nom": "... sur biens immobiliers",
-		"parent": 615
-	},
-	"6155":
-	{
-		"code": 6155,
-		"nom": "... sur biens mobiliers",
-		"parent": 615
-	},
-	"6156":
-	{
-		"code": 6156,
-		"nom": "Maintenance",
-		"parent": 615
-	},
-	"616":
+	"616": 
 	{
 		"code": 616,
-		"nom": "Primes d'assurances",
+		"nom": "Primes d'assurance",
 		"parent": 61
 	},
-	"6161":
-	{
-		"code": 6161,
-		"nom": "Multirisques",
-		"parent": 616
-	},
-	"6162":
-	{
-		"code": 6162,
-		"nom": "Assurance obligatoire dommage-construction",
-		"parent": 616
-	},
-	"6168":
-	{
-		"code": 6168,
-		"nom": "Autres assurances",
-		"parent": 616
-	},
-	"617":
-	{
-		"code": 617,
-		"nom": "Etudes et recherches",
-		"parent": 61
-	},
-	"618":
+	"618": 
 	{
 		"code": 618,
 		"nom": "Divers",
 		"parent": 61
 	},
-	"6181":
-	{
-		"code": 6181,
-		"nom": "Documentation générale",
-		"parent": 618
-	},
-	"6183":
-	{
-		"code": 6183,
-		"nom": "Documentation technique",
-		"parent": 618
-	},
-	"6185":
-	{
-		"code": 6185,
-		"nom": "Frais de colloques, séminaires, conférences",
-		"parent": 618
-	},
-	"619":
-	{
-		"code": 619,
-		"nom": "Rabais, remises et ristournes obtenues sur services extérieurs",
-		"parent": 61
-	},
-	"62":
+	"62": 
 	{
 		"code": 62,
-		"nom": "AUTRES CHARGES EXTERNES - AUTRES SERVICES EXTERIEURS",
+		"nom": "AUTRES SERVICES EXTERIEURS",
 		"parent": 6
 	},
-	"621":
+	"621": 
 	{
 		"code": 621,
 		"nom": "Personnel extérieur à l'association",
 		"parent": 62
 	},
-	"622":
+	"622": 
 	{
 		"code": 622,
 		"nom": "Rémunérations d'intermédiaires et honoraires",
 		"parent": 62
 	},
-	"6226":
+	"6226": 
 	{
 		"code": 6226,
 		"nom": "Honoraires",
 		"parent": 622
 	},
-	"6227":
+	"6227": 
 	{
 		"code": 6227,
 		"nom": "Frais d'actes et de contentieux",
 		"parent": 622
 	},
-	"623":
+	"6228": 
+	{
+		"code": 6228,
+		"nom": "Divers",
+		"parent": 622
+	},
+	"623": 
 	{
 		"code": 623,
 		"nom": "Publicité, publications, relations publiques",
 		"parent": 62
 	},
-	"6231":
-	{
-		"code": 6231,
-		"nom": "Annonces et insertions",
-		"parent": 623
-	},
-	"6233":
-	{
-		"code": 6233,
-		"nom": "Foires et expositions",
-		"parent": 623
-	},
-	"6236":
-	{
-		"code": 6236,
-		"nom": "Catalogues et imprimés",
-		"parent": 623
-	},
-	"6237":
-	{
-		"code": 6237,
-		"nom": "Publications",
-		"parent": 623
-	},
-	"6238":
-	{
-		"code": 6238,
-		"nom": "Divers (pourboires, dons courants...)",
-		"parent": 623
-	},
-	"624":
+	"624": 
 	{
 		"code": 624,
 		"nom": "Transports de biens et transports collectifs du personnel",
 		"parent": 62
 	},
-	"6241":
-	{
-		"code": 6241,
-		"nom": "Transports sur achats",
-		"parent": 624
-	},
-	"6243":
-	{
-		"code": 6243,
-		"nom": "Transports entre établissements",
-		"parent": 624
-	},
-	"6247":
-	{
-		"code": 6247,
-		"nom": "Transports collectifs du personnel",
-		"parent": 624
-	},
-	"6248":
-	{
-		"code": 6248,
-		"nom": "Divers",
-		"parent": 624
-	},
-	"625":
+	"625": 
 	{
 		"code": 625,
 		"nom": "Déplacements, missions et réceptions",
 		"parent": 62
 	},
-	"6251":
-	{
-		"code": 6251,
-		"nom": "Voyages et déplacements",
-		"parent": 625
-	},
-	"6256":
-	{
-		"code": 6256,
-		"nom": "Missions",
-		"parent": 625
-	},
-	"6257":
-	{
-		"code": 6257,
-		"nom": "Réceptions",
-		"parent": 625
-	},
-	"626":
+	"626": 
 	{
 		"code": 626,
-		"nom": "Frais postaux et frais de télécommunications",
+		"nom": "Frais postaux et de télécommunications",
 		"parent": 62
 	},
-	"627":
+	"627": 
 	{
 		"code": 627,
 		"nom": "Services bancaires et assimilés",
 		"parent": 62
 	},
-	"628":
+	"628": 
 	{
 		"code": 628,
 		"nom": "Divers",
 		"parent": 62
 	},
-	"6281":
-	{
-		"code": 6281,
-		"nom": "Cotisations (liées à l'activité économique)",
-		"parent": 628
-	},
-	"6284":
-	{
-		"code": 6284,
-		"nom": "Frais de recrutement du personnel",
-		"parent": 628
-	},
-	"629":
-	{
-		"code": 629,
-		"nom": "Rabais, remises et ristournes obtenus sur autres services extérieurs",
-		"parent": 62
-	},
-	"63":
+	"63": 
 	{
 		"code": 63,
-		"nom": "IMPOTS, TAXES ET VERSEMENTS ASSIMILES",
+		"nom": "IMPOTS, TAXES ET VERSEMENTS ASSIMILÉS",
 		"parent": 6
 	},
-	"631":
+	"631": 
 	{
 		"code": 631,
-		"nom": "Impôts, taxes et versements assimilés sur rémunérations (administration des impôts)",
+		"nom": "Impôts, taxes et versements assimilés sur rémunérations (Administration des impôts)",
 		"parent": 63
 	},
-	"6311":
+	"6311": 
 	{
 		"code": 6311,
-		"nom": "Taxe sur les salaires",
+		"nom": "Taxes sur les salaires",
 		"parent": 631
 	},
-	"6313":
+	"6313": 
 	{
 		"code": 6313,
-		"nom": "Participation des employeurs à la formation professionnelle continue",
+		"nom": "Participations des employeurs à la formation professionnelle continue",
 		"parent": 631
 	},
-	"6314":
-	{
-		"code": 6314,
-		"nom": "Cotisation pour défaut d'investissement obligatoire dans la construction",
-		"parent": 631
-	},
-	"633":
-	{
-		"code": 633,
-		"nom": "Impôts, taxes et versements assimilés sur rémunérations (autres organismes)",
-		"parent": 63
-	},
-	"6331":
-	{
-		"code": 6331,
-		"nom": "Versement de transport",
-		"parent": 633
-	},
-	"6333":
-	{
-		"code": 6333,
-		"nom": "Participation des employeurs à la formation professionnelle continue",
-		"parent": 633
-	},
-	"6334":
-	{
-		"code": 6334,
-		"nom": "Participation des employeurs à l'effort de construction (versements à fonds perdus)",
-		"parent": 633
-	},
-	"635":
+	"635": 
 	{
 		"code": 635,
-		"nom": "Autres impôts, taxes et versements assimilés (administration des impôts)",
+		"nom": "Autres impôts, taxes et versements assimilés (Administration des impôts)",
 		"parent": 63
 	},
-	"6351":
+	"6351": 
 	{
 		"code": 6351,
-		"nom": "Impôts directs",
+		"nom": "Impôts directs (sauf impôts sur les bénéfices)",
 		"parent": 635
 	},
-	"63512":
-	{
-		"code": 63512,
-		"nom": "Taxes foncières",
-		"parent": 6351
-	},
-	"63513":
-	{
-		"code": 63513,
-		"nom": "Autres impôts locaux",
-		"parent": 6351
-	},
-	"63518":
-	{
-		"code": 63518,
-		"nom": "Autres impôts directs",
-		"parent": 6351
-	},
-	"6353":
+	"6353": 
 	{
 		"code": 6353,
 		"nom": "Impôts indirects",
 		"parent": 635
 	},
-	"6354":
-	{
-		"code": 6354,
-		"nom": "Droits d'enregistrement et de timbre",
-		"parent": 635
-	},
-	"6358":
-	{
-		"code": 6358,
-		"nom": "Autres droits",
-		"parent": 635
-	},
-	"637":
+	"637": 
 	{
 		"code": 637,
-		"nom": "Autres impôts, taxes et versements assimilés (autres organismes)",
+		"nom": "Autres impôts, taxes et versements assimilés (Autres organismes)",
 		"parent": 63
 	},
-	"64":
+	"64": 
 	{
 		"code": 64,
 		"nom": "CHARGES DE PERSONNEL",
 		"parent": 6
 	},
-	"641":
+	"641": 
 	{
 		"code": 641,
 		"nom": "Rémunérations du personnel",
 		"parent": 64
 	},
-	"6411":
+	"643": 
 	{
-		"code": 6411,
-		"nom": "Salaires, appointements",
-		"parent": 641
+		"code": 643,
+		"nom": "Rémunérations du personnel artistique et assimilés",
+		"parent": 64
 	},
-	"6412":
-	{
-		"code": 6412,
-		"nom": "Congés payés",
-		"parent": 641
-	},
-	"6413":
-	{
-		"code": 6413,
-		"nom": "Primes et gratifications",
-		"parent": 641
-	},
-	"6414":
-	{
-		"code": 6414,
-		"nom": "Indemnités et avantages divers",
-		"parent": 641
-	},
-	"6415":
-	{
-		"code": 6415,
-		"nom": "Supplément familial",
-		"parent": 641
-	},
-	"645":
+	"645": 
 	{
 		"code": 645,
 		"nom": "Charges de sécurité sociale et de prévoyance",
 		"parent": 64
 	},
-	"6451":
-	{
-		"code": 6451,
-		"nom": "Cotisations à l'URSSAF",
-		"parent": 645
-	},
-	"6452":
-	{
-		"code": 6452,
-		"nom": "Cotisations aux mutuelles",
-		"parent": 645
-	},
-	"6453":
-	{
-		"code": 6453,
-		"nom": "Cotisations aux caisses de retraites et de prévoyance",
-		"parent": 645
-	},
-	"6454":
-	{
-		"code": 6454,
-		"nom": "Cotisations aux ASSEDIC",
-		"parent": 645
-	},
-	"6458":
-	{
-		"code": 6458,
-		"nom": "Cotisations aux autres organismes sociaux",
-		"parent": 645
-	},
-	"647":
+	"647": 
 	{
 		"code": 647,
 		"nom": "Autres charges sociales",
 		"parent": 64
 	},
-	"6472":
-	{
-		"code": 6472,
-		"nom": "Versements aux comités d'entreprise et d'établissement",
-		"parent": 647
-	},
-	"6475":
-	{
-		"code": 6475,
-		"nom": "Médecine du travail, pharmacie",
-		"parent": 647
-	},
-	"648":
+	"648": 
 	{
 		"code": 648,
 		"nom": "Autres charges de personnel",
 		"parent": 64
 	},
-	"65":
+	"65": 
 	{
 		"code": 65,
 		"nom": "AUTRES CHARGES DE GESTION COURANTE",
 		"parent": 6
 	},
-	"651":
-	{
-		"code": 651,
-		"nom": "Redevances pour concessions, brevets, licences, marques, procédés, droits et valeurs similaires",
-		"parent": 65
-	},
-	"6511":
-	{
-		"code": 6511,
-		"nom": "Redevances pour concessions, brevets, licences, marques, procédés",
-		"parent": 651
-	},
-	"6516":
-	{
-		"code": 6516,
-		"nom": "Droits d'auteur et de reproduction (SACEM)",
-		"parent": 651
-	},
-	"6518":
-	{
-		"code": 6518,
-		"nom": "Autres droits et valeurs similaires",
-		"parent": 651
-	},
-	"654":
-	{
-		"code": 654,
-		"nom": "Pertes sur créances irrécouvrables",
-		"parent": 65
-	},
-	"6541":
-	{
-		"code": 6541,
-		"nom": "Créances de l'exercice",
-		"parent": 654
-	},
-	"6544":
-	{
-		"code": 6544,
-		"nom": "Créances des exercices antérieurs",
-		"parent": 654
-	},
-	"657":
-	{
-		"code": 657,
-		"nom": "Subventions versées par l'association",
-		"parent": 65
-	},
-	"6571":
-	{
-		"code": 6571,
-		"nom": "Bourses accordées aux usagers",
-		"parent": 657
-	},
-	"658":
+	"658": 
 	{
 		"code": 658,
 		"nom": "Charges diverses de gestion courante",
 		"parent": 65
 	},
-	"6586":
-	{
-		"code": 6586,
-		"nom": "Cotisations (liées à la vie statutaire)",
-		"parent": 658
-	},
-	"66":
+	"66": 
 	{
 		"code": 66,
 		"nom": "CHARGES FINANCIERES",
 		"parent": 6
 	},
-	"661":
+	"661": 
 	{
 		"code": 661,
 		"nom": "Charges d'intérêts",
 		"parent": 66
 	},
-	"6611":
-	{
-		"code": 6611,
-		"nom": "Intérêts des emprunts et dettes",
-		"parent": 661
-	},
-	"6616":
-	{
-		"code": 6616,
-		"nom": "Intérêts bancaires",
-		"parent": 661
-	},
-	"6618":
-	{
-		"code": 6618,
-		"nom": "Intérêts des autres dettes",
-		"parent": 661
-	},
-	"666":
-	{
-		"code": 666,
-		"nom": "Pertes de change",
-		"parent": 66
-	},
-	"667":
-	{
-		"code": 667,
-		"nom": "Charges nettes sur cessions de valeurs mobilières de placement",
-		"parent": 66
-	},
-	"67":
+	"67": 
 	{
 		"code": 67,
 		"nom": "CHARGES EXCEPTIONNELLES",
 		"parent": 6
 	},
-	"671":
+	"671": 
 	{
 		"code": 671,
 		"nom": "Charges exceptionnelles sur opérations de gestion",
 		"parent": 67
 	},
-	"6712":
-	{
-		"code": 6712,
-		"nom": "Pénalités et amendes fiscales ou pénales",
-		"parent": 671
-	},
-	"6713":
+	"6713": 
 	{
 		"code": 6713,
 		"nom": "Dons, libéralités",
 		"parent": 671
 	},
-	"6714":
-	{
-		"code": 6714,
-		"nom": "Créances devenues irrécouvrables dans l'exercice",
-		"parent": 671
-	},
-	"6717":
-	{
-		"code": 6717,
-		"nom": "Rappels d'impôts (autres qu'impôts sur les bénéfices)",
-		"parent": 671
-	},
-	"6718":
-	{
-		"code": 6718,
-		"nom": "Autres charges exceptionnelles sur opérations de gestion",
-		"parent": 671
-	},
-	"672":
-	{
-		"code": 672,
-		"nom": "Charges sur exercices antérieurs (à reclasser)",
-		"parent": 67
-	},
-	"675":
-	{
-		"code": 675,
-		"nom": "Valeurs comptables des éléments d'actif cédés",
-		"parent": 67
-	},
-	"6751":
-	{
-		"code": 6751,
-		"nom": "Immobilisations incorporelles",
-		"parent": 675
-	},
-	"6752":
-	{
-		"code": 6752,
-		"nom": "Immobilisations corporelles",
-		"parent": 675
-	},
-	"6756":
-	{
-		"code": 6756,
-		"nom": "Immobilisations financières",
-		"parent": 675
-	},
-	"678":
+	"678": 
 	{
 		"code": 678,
 		"nom": "Autres charges exceptionnelles",
 		"parent": 67
 	},
-	"68":
+	"6788": 
+	{
+		"code": 6788,
+		"nom": "Charges exceptionnelles diverses",
+		"parent": 678
+	},
+	"68": 
 	{
 		"code": 68,
-		"nom": "DOTATIONS AUX AMORTISSEMENTS, PROVISIONS ET ENGAGEMENTS",
+		"nom": "DOTATIONS AUX AMORTISSEMENTS, DEPRECIATIONS, PROVISIONS ET ENGAGEMENTS",
 		"parent": 6
 	},
-	"681":
+	"681": 
 	{
 		"code": 681,
-		"nom": "Dotations aux amortissements, provisions et engagements",
+		"nom": "Dotations aux amortissements, dépréciations et provisions - Charges d'exploitation",
 		"parent": 68
 	},
-	"6811":
+	"6811": 
 	{
 		"code": 6811,
 		"nom": "Dotations aux amortissements des immobilisations incorporelles et corporelles",
 		"parent": 681
 	},
-	"68111":
+	"68111": 
 	{
 		"code": 68111,
-		"nom": "Dotations aux amortissements des immobilisations incorporelles",
+		"nom": "Immobilisations incorporelles",
 		"parent": 6811
 	},
-	"68112":
+	"68112": 
 	{
 		"code": 68112,
-		"nom": "Dotations aux amortissements des immobilisations corporelles",
+		"nom": "Immobilisations corporelles",
 		"parent": 6811
 	},
-	"6812":
-	{
-		"code": 6812,
-		"nom": "Dotations aux amortissements des charges d'exploitation à répartir",
-		"parent": 681
-	},
-	"6815":
-	{
-		"code": 6815,
-		"nom": "Dotations aux provisions pour risques et charges d'exploitation",
-		"parent": 681
-	},
-	"6816":
-	{
-		"code": 6816,
-		"nom": "Dotations aux provisions pour dépréciation des immobilisations incorporelles et corporelles",
-		"parent": 681
-	},
-	"6817":
-	{
-		"code": 6817,
-		"nom": "Dotations aux provisions pour dépréciation des actifs circulants (autres que les valeurs mobilières de placement)",
-		"parent": 681
-	},
-	"686":
+	"686": 
 	{
 		"code": 686,
-		"nom": "Dotations aux amortissements et aux provisions - Charges financières",
+		"nom": "Dotations aux amortissements, dépréciations et provisions - Charges financières",
 		"parent": 68
 	},
-	"6866":
-	{
-		"code": 6866,
-		"nom": "Dotations aux provisions pour dépréciation des éléments financiers",
-		"parent": 686
-	},
-	"68662":
-	{
-		"code": 68662,
-		"nom": "Dotations aux provisions financières",
-		"parent": 6866
-	},
-	"68665":
-	{
-		"code": 68665,
-		"nom": "Valeurs mobilières de placement",
-		"parent": 6866
-	},
-	"687":
-	{
-		"code": 687,
-		"nom": "Dotations aux amortissements et aux provisions - Charges exceptionnelles",
-		"parent": 68
-	},
-	"6871":
-	{
-		"code": 6871,
-		"nom": "Dotations aux amortissements exceptionnels des immobilisations",
-		"parent": 687
-	},
-	"6876":
-	{
-		"code": 6876,
-		"nom": "Dotations aux provisions pour dépréciations exceptionnelles",
-		"parent": 687
-	},
-	"689":
-	{
-		"code": 689,
-		"nom": "Engagements à réaliser sur ressources affectées",
-		"parent": 68
-	},
-	"6894":
-	{
-		"code": 6894,
-		"nom": "Engagements à réaliser sur subventions attribuées",
-		"parent": 689
-	},
-	"6895":
-	{
-		"code": 6895,
-		"nom": "Engagements à réaliser sur dons manuels affectés",
-		"parent": 689
-	},
-	"6897":
-	{
-		"code": 6897,
-		"nom": "Engagements à réaliser sur legs et donations affectés",
-		"parent": 689
-	},
-	"69":
+	"69": 
 	{
 		"code": 69,
-		"nom": "IMPOTS SUR LES BENEFICES",
+		"nom": "IMPÔTS SUR LES BENEFICES",
 		"parent": 6
 	},
-	"695":
+	"695": 
 	{
 		"code": 695,
-		"nom": "Impôts sur les sociétés",
+		"nom": "Impôts sur les sociétés (y compris impôts sur les sociétés des personnes morales non lucratives)",
 		"parent": 69
 	},
-	"7":
+	"7": 
 	{
 		"code": 7,
-		"nom": "CLASSE 7. Comptes de produits",
+		"nom": "Classe 7 — Comptes de produits",
 		"parent": 0
 	},
-	"70":
+	"70": 
 	{
 		"code": 70,
 		"nom": "VENTES DE PRODUITS FINIS, PRESTATIONS DE SERVICES, MARCHANDISES",
 		"parent": 7
 	},
-	"701":
+	"701": 
 	{
 		"code": 701,
 		"nom": "Ventes de produits finis",
 		"parent": 70
 	},
-	"706":
+	"706": 
 	{
 		"code": 706,
 		"nom": "Prestations de services",
 		"parent": 70
 	},
-	"707":
+	"707": 
 	{
 		"code": 707,
 		"nom": "Ventes de marchandises",
 		"parent": 70
 	},
-	"708":
+	"708": 
 	{
 		"code": 708,
 		"nom": "Produits des activités annexes",
 		"parent": 70
 	},
-	"7081":
-	{
-		"code": 7081,
-		"nom": "Produits des prestations fournies au personnel",
-		"parent": 708
-	},
-	"7083":
-	{
-		"code": 7083,
-		"nom": "Locations diverses",
-		"parent": 708
-	},
-	"7084":
-	{
-		"code": 7084,
-		"nom": "Mise à disposition de personnel facturée",
-		"parent": 708
-	},
-	"7088":
-	{
-		"code": 7088,
-		"nom": "Autres produits d'activités annexes",
-		"parent": 708
-	},
-	"709":
-	{
-		"code": 709,
-		"nom": "Rabais, remises et ristournes accordés par l'association",
-		"parent": 70
-	},
-	"71":
-	{
-		"code": 71,
-		"nom": "PRODUCTION STOCKEE (OU DESTOCKAGE)",
-		"parent": 7
-	},
-	"713":
-	{
-		"code": 713,
-		"nom": "Variation des stocks (en-cours de production, produits)",
-		"parent": 71
-	},
-	"7133":
-	{
-		"code": 7133,
-		"nom": "Variation des en-cours de production de biens",
-		"parent": 713
-	},
-	"7134":
-	{
-		"code": 7134,
-		"nom": "Variation des en-cours de production de services",
-		"parent": 713
-	},
-	"7135":
-	{
-		"code": 7135,
-		"nom": "Variation des stocks de produits",
-		"parent": 713
-	},
-	"72":
-	{
-		"code": 72,
-		"nom": "PRODUCTION IMMOBILISEE",
-		"parent": 7
-	},
-	"74":
+	"74": 
 	{
 		"code": 74,
 		"nom": "SUBVENTIONS D'EXPLOITATION",
 		"parent": 7
 	},
-	"75":
+	"740": 
+	{
+		"code": 740,
+		"nom": "Subventions reçues",
+		"parent": 74
+	},
+	"75": 
 	{
 		"code": 75,
 		"nom": "AUTRES PRODUITS DE GESTION COURANTE",
 		"parent": 7
 	},
-	"751":
-	{
-		"code": 751,
-		"nom": "Redevances pour concessions, brevets, licences, marques, procédés, droits et valeurs similaires",
-		"parent": 75
-	},
-	"754":
+	"754": 
 	{
 		"code": 754,
 		"nom": "Collectes",
 		"parent": 75
 	},
-	"756":
+	"756": 
 	{
 		"code": 756,
 		"nom": "Cotisations",
 		"parent": 75
 	},
-	"757":
-	{
-		"code": 757,
-		"nom": "Quote-part d'éléments du fonds associatif virée au compte de résultat",
-		"parent": 75
-	},
-	"7571":
-	{
-		"code": 7571,
-		"nom": "Quote-part de subventions d'investissement (renouvelables) virée au compte de résultat",
-		"parent": 757
-	},
-	"7573":
-	{
-		"code": 7573,
-		"nom": "Quote-part des apports virée au compte de résultat",
-		"parent": 757
-	},
-	"758":
+	"758": 
 	{
 		"code": 758,
 		"nom": "Produits divers de gestion courante",
 		"parent": 75
 	},
-	"7585":
-	{
-		"code": 7585,
-		"nom": "Contributions volontaires",
-		"parent": 758
-	},
-	"7586":
-	{
-		"code": 7586,
-		"nom": "Contributions volontaires",
-		"parent": 758
-	},
-	"7587":
+	"7587": 
 	{
 		"code": 7587,
-		"nom": "Contributions volontaires",
+		"nom": "Ventes de dons en nature",
 		"parent": 758
 	},
-	"7588":
+	"7588": 
 	{
 		"code": 7588,
-		"nom": "Contributions volontaires",
+		"nom": "Autres produits de la générosité du public",
 		"parent": 758
 	},
-	"76":
+	"76": 
 	{
 		"code": 76,
 		"nom": "PRODUITS FINANCIERS",
 		"parent": 7
 	},
-	"761":
+	"760": 
 	{
-		"code": 761,
-		"nom": "Produits des participations",
+		"code": 760,
+		"nom": "Produits financiers",
 		"parent": 76
 	},
-	"762":
-	{
-		"code": 762,
-		"nom": "Produits des autres immobilisations financières",
-		"parent": 76
-	},
-	"7621":
-	{
-		"code": 7621,
-		"nom": "Revenus des titres immobilisés",
-		"parent": 762
-	},
-	"7624":
-	{
-		"code": 7624,
-		"nom": "Revenus des prêts",
-		"parent": 762
-	},
-	"764":
-	{
-		"code": 764,
-		"nom": "Revenus des valeurs mobilières de placement",
-		"parent": 76
-	},
-	"765":
-	{
-		"code": 765,
-		"nom": "Escomptes obtenus",
-		"parent": 76
-	},
-	"766":
-	{
-		"code": 766,
-		"nom": "Gains de change",
-		"parent": 76
-	},
-	"767":
-	{
-		"code": 767,
-		"nom": "Produits nets sur cessions de valeurs mobilières de placement",
-		"parent": 76
-	},
-	"768":
-	{
-		"code": 768,
-		"nom": "Autres produits financiers",
-		"parent": 76
-	},
-	"7681":
-	{
-		"code": 7681,
-		"nom": "Intérêts des comptes financiers débiteurs",
-		"parent": 768
-	},
-	"77":
+	"77": 
 	{
 		"code": 77,
 		"nom": "PRODUITS EXCEPTIONNELS",
 		"parent": 7
 	},
-	"771":
+	"771": 
 	{
 		"code": 771,
 		"nom": "Produits exceptionnels sur opérations de gestion",
 		"parent": 77
 	},
-	"7713":
+	"7713": 
 	{
 		"code": 7713,
-		"nom": "Libéralités perçues",
+		"nom": "Libéralités reçues",
 		"parent": 771
 	},
-	"7714":
-	{
-		"code": 7714,
-		"nom": "Rentrées sur créances amorties",
-		"parent": 771
-	},
-	"7715":
+	"7715": 
 	{
 		"code": 7715,
-		"nom": "Subvention d'équilibre",
+		"nom": "Subventions d'équilibre",
 		"parent": 771
 	},
-	"7717":
-	{
-		"code": 7717,
-		"nom": "Dégrèvements d'impôts (autres qu'impôts sur les bénéfices)",
-		"parent": 771
-	},
-	"7718":
-	{
-		"code": 7718,
-		"nom": "Autres produits exceptionnels sur opérations de gestion",
-		"parent": 771
-	},
-	"772":
-	{
-		"code": 772,
-		"nom": "Produits sur exercices antérieurs (à reclasser)",
-		"parent": 77
-	},
-	"775":
+	"775": 
 	{
 		"code": 775,
-		"nom": "Produits des cessions d'éléments d'actif",
+		"nom": "Produits des cessions d'éléments d'actifs",
 		"parent": 77
 	},
-	"7751":
-	{
-		"code": 7751,
-		"nom": "Immobilisations incorporelles",
-		"parent": 775
-	},
-	"7752":
-	{
-		"code": 7752,
-		"nom": "Immobilisations corporelles",
-		"parent": 775
-	},
-	"7756":
-	{
-		"code": 7756,
-		"nom": "Immobilisations financières",
-		"parent": 775
-	},
-	"777":
-	{
-		"code": 777,
-		"nom": "Quote-part des subventions d'investissement virée au résultat de l'exercice",
-		"parent": 77
-	},
-	"778":
+	"778": 
 	{
 		"code": 778,
 		"nom": "Autres produits exceptionnels",
 		"parent": 77
 	},
-	"78":
+	"7780": 
 	{
-		"code": 78,
-		"nom": "REPRISES SUR AMORTISSEMENTS ET PROVISIONS",
-		"parent": 7
+		"code": 7780,
+		"nom": "Manifestations diverses",
+		"parent": 778
 	},
-	"781":
+	"7788": 
 	{
-		"code": 781,
-		"nom": "Reprises sur amortissements et provisions (à inscrire dans les produits d'exploitation)",
-		"parent": 78
+		"code": 7788,
+		"nom": "Produits exceptionnels divers",
+		"parent": 778
 	},
-	"7811":
-	{
-		"code": 7811,
-		"nom": "Reprises sur amortissements des immobilisations incorporelles et corporelles",
-		"parent": 781
-	},
-	"7815":
-	{
-		"code": 7815,
-		"nom": "Reprises sur provisions pour risques et charges d'exploitation",
-		"parent": 781
-	},
-	"7816":
-	{
-		"code": 7816,
-		"nom": "Reprises sur provisions pour dépréciation des immobilisations incorporelles et corporelles",
-		"parent": 781
-	},
-	"7817":
-	{
-		"code": 7817,
-		"nom": "Reprises sur provisions pour dépréciation des actifs circulants (autres que les valeurs mobilières de placement)",
-		"parent": 781
-	},
-	"786":
-	{
-		"code": 786,
-		"nom": "Reprises sur provisions (à inscrire dans les produits financiers)",
-		"parent": 78
-	},
-	"7866":
-	{
-		"code": 7866,
-		"nom": "Reprises sur provisions pour dépréciation des éléments financiers",
-		"parent": 786
-	},
-	"78662":
-	{
-		"code": 78662,
-		"nom": "Immobilisations financières",
-		"parent": 7866
-	},
-	"78665":
-	{
-		"code": 78665,
-		"nom": "Valeurs mobilières de placement",
-		"parent": 7866
-	},
-	"787":
-	{
-		"code": 787,
-		"nom": "Reprises sur provisions (à inscrire dans les produits exceptionnels)",
-		"parent": 78
-	},
-	"7876":
-	{
-		"code": 7876,
-		"nom": "Reprise sur provisions pour dépréciations exceptionnelles",
-		"parent": 787
-	},
-	"789":
-	{
-		"code": 789,
-		"nom": "Report des ressources non utilisées des exercices antérieurs",
-		"parent": 78
-	},
-	"79":
+	"79": 
 	{
 		"code": 79,
-		"nom": "TRANSFERTS DE CHARGES",
+		"nom": "TRANSFERT DE CHARGES",
 		"parent": 7
 	},
-	"791":
+	"791": 
 	{
 		"code": 791,
 		"nom": "Transferts de charges d'exploitation",
 		"parent": 79
 	},
-	"796":
+	"796": 
 	{
 		"code": 796,
 		"nom": "Transferts de charges financières",
 		"parent": 79
 	},
-	"797":
+	"797": 
 	{
 		"code": 797,
-		"nom": "Transferts de charges exceptionnelles",
+		"nom": "Transferts de charges exceptionnels",
 		"parent": 79
 	},
-	"8":
+	"8": 
 	{
 		"code": 8,
-		"nom": "CLASSE 8. CONTRIBUTIONS VOLONTAIRES",
+		"nom": "Classe 8 ­— Contributions bénévoles en nature",
 		"parent": 0
 	},
-	"86":
+	"86": 
 	{
 		"code": 86,
-		"nom": "EMPLOIS DES CONTRIBUTIONS VOLONTAIRES EN NATURE - Répartition par nature de charges",
+		"nom": "RÉPARTITION PAR NATURE DE RESSOURCES",
 		"parent": 8
 	},
-	"860":
-	{
-		"code": 860,
-		"nom": "Secours en nature, alimentaires, vestimentaires, ...",
-		"parent": 86
-	},
-	"861":
+	"861": 
 	{
 		"code": 861,
-		"nom": "Mise à disposition gratuite de biens",
+		"nom": "Mise à dispositions gratuites de biens",
 		"parent": 86
 	},
-	"8611":
-	{
-		"code": 8611,
-		"nom": "Mise à disposition gratuite de locaux",
-		"parent": 861
-	},
-	"8612":
-	{
-		"code": 8612,
-		"nom": "Mise à disposition gratuite de matériels",
-		"parent": 861
-	},
-	"862":
+	"862": 
 	{
 		"code": 862,
 		"nom": "Prestations",
 		"parent": 86
 	},
-	"864":
+	"864": 
 	{
 		"code": 864,
 		"nom": "Personnel bénévole",
 		"parent": 86
 	},
-	"87":
-	{
-		"code": 87,
-		"nom": "CONTRIBUTIONS VOLONTAIRES EN NATURE - Répartition par nature de ressources",
-		"parent": 8
-	},
-	"870":
+	"870": 
 	{
 		"code": 870,
 		"nom": "Bénévolat",
 		"parent": 87
 	},
-	"871":
+	"871": 
 	{
 		"code": 871,
 		"nom": "Prestations en nature",
 		"parent": 87
 	},
-	"875":
+	"875": 
 	{
 		"code": 875,
 		"nom": "Dons en nature",
 		"parent": 87
 	},
-	"9":
+	"9": 
 	{
 		"code": 9,
-		"nom": "CLASSE 9. Comptes analytiques",
+		"nom": "Classe 9 — Comptes analytiques",
 		"parent": 0
 	}
 }
