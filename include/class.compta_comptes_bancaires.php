@@ -59,7 +59,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             WHERE c.id = ?;', true, $id);
     }
 
-    public function list()
+    public function getList()
     {
         $db = Garradin_DB::getInstance();
         return $db->simpleStatementFetch('SELECT * FROM compta_comptes AS c

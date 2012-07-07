@@ -146,7 +146,7 @@ fieldset dl dd {
 }
 
 input[type=text], textarea, input[type=password], input[type=email],
-input[type=url], input[type=tel], select {
+input[type=url], input[type=tel], input[type=date], select {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
     min-width: 20em;
