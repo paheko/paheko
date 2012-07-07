@@ -49,6 +49,8 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
+$tpl->assign('comptes', $comptes->listTree());
+
 $tpl->display('admin/compta/saisie.tpl');
 
 ?>

@@ -146,22 +146,50 @@ fieldset dl dd {
 }
 
 input[type=text], textarea, input[type=password], input[type=email],
-input[type=url], input[type=tel], input[type=date], select {
+input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
     min-width: 20em;
 }
 
-input[type=number] {
+input[type=number], input[type=date] {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
-    min-width: 8em;
+    min-width: 2em;
 }
 
 input[type=submit], input[type=button] {
     padding: 0.3em;
     cursor: pointer;
 }
+
+select.large {
+    width: 95%;
+}
+
+select.large optgroup.niveau_1 {
+    background: #333;
+    color: #fff;
+    font-style: normal;
+    font-size: 1.2em;
+}
+
+select.large optgroup.niveau_2 {
+    background: #666;
+    color: #fff;
+    font-style: normal;
+    padding-left: 1em;
+}
+
+select.large option {
+    background: #fff;
+    color: #000;
+}
+
+select.large .niveau_3 { padding-left: 1em; font-weight: bold; }
+select.large .niveau_4 { padding-left: 2em; }
+select.large .niveau_5 { padding-left: 3em; }
+select.large .niveau_6 { padding-left: 4em; }
 
 p.submit {
     margin: 1em;

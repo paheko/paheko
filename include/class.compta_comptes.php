@@ -4,7 +4,7 @@ class Garradin_Compta_Comptes
 {
     public function importPlan()
     {
-        $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/plan_comptable.json'));
+        $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/plan_comptable.json'), true);
 
         $db = Garradin_DB::getInstance();
         $db->exec('BEGIN;');
@@ -101,7 +101,8 @@ class Garradin_Compta_Comptes
     public function listTree($parent = 0)
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleStatementFetch('SELECT * FROM compta_comptes WHERE parent LIKE \''.$db->escapeString($parent).'%\' ORDER BY id;');
+        $parent = $parent ? 'WHERE parent LIKE \''.$db->escapeString($parent).'%\' ' : '';
+        return $db->simpleStatementFetch('SELECT * FROM compta_comptes '.$parent.' ORDER BY id;');
     }
 
     protected function _checkFields(&$data, $force_parent_check = false)

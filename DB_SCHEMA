@@ -237,10 +237,10 @@ CREATE TABLE compta_journal
     FOREIGN KEY(id_categorie) REFERENCES compta_categories(id)
 );
 
-CREATE INDEX compta_operations_exercice ON compta_operations (id_exercice);
-CREATE INDEX compta_operations_date ON compta_operations (date);
-CREATE INDEX compta_operations_comptes ON compta_operations (compte_debit, compte_credit);
-CREATE INDEX compta_operations_auteur ON compta_operations (id_auteur);
+CREATE INDEX compta_operations_exercice ON compta_journal (id_exercice);
+CREATE INDEX compta_operations_date ON compta_journal (date);
+CREATE INDEX compta_operations_comptes ON compta_journal (compte_debit, compte_credit);
+CREATE INDEX compta_operations_auteur ON compta_journal (id_auteur);
 
 CREATE TABLE compta_moyens_paiement
 -- Moyens de paiement
