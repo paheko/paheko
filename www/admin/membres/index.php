@@ -24,6 +24,7 @@ if ($search_field && $search_query)
     $membres->sessionStore('membre_search_field', $search_field);
     $tpl->assign('liste', $membres->search($search_field, $search_query));
     $tpl->assign('total', -1);
+    $tpl->assign('pagination_url', utils::getSelfUrl() . '?p=[ID]');
 }
 else
 {
@@ -50,6 +51,8 @@ else
 
     $tpl->assign('liste', $membres->listByCategory($cat_id, $page, $order, $desc));
     $tpl->assign('total', $membres->countByCategory($cat_id));
+
+    $tpl->assign('pagination_url', utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : ''));
 }
 
 $tpl->assign('membres_cats', $membres_cats);

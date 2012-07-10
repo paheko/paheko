@@ -53,13 +53,18 @@ class utils
             return false;
     }
 
-    static public function getSelfURL()
+    static public function getSelfURL($no_qs = false)
     {
         $uri = self::getRequestUri();
 
         if (strpos($uri, WWW_URI) === 0)
         {
             $uri = substr($uri, strlen(WWW_URI));
+        }
+
+        if ($no_qs && (strpos($uri, '?') !== false))
+        {
+            $uri = substr($uri, 0, strpos($uri, '?'));
         }
 
         return WWW_URL . $uri;
