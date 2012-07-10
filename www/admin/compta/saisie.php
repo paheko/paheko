@@ -24,18 +24,14 @@ if (!empty($_POST['save']))
         try
         {
             $id = $journal->add(array(
-                'id_categorie'  =>  $id_categorie,
-                'nom'           =>  utils::post('nom'),
-                'email'         =>  utils::post('email'),
-                'passe'         =>  utils::post('passe'),
-                'telephone'     =>  utils::post('telephone'),
-                'code_postal'   =>  utils::post('code_postal'),
-                'adresse'       =>  utils::post('adresse'),
-                'ville'         =>  utils::post('ville'),
-                'pays'          =>  utils::post('pays'),
-                'date_naissance'=>  utils::post('date_naissance'),
-                'notes'         =>  '',
-                'lettre_infos'  =>  utils::post('lettre_infos'),
+                'libelle'       =>  utils::post('libelle'),
+                'montant'       =>  utils::post('montant'),
+                'date'          =>  utils::post('date'),
+                'compte_credit' =>  utils::post('compte_credit'),
+                'compte_debit'  =>  utils::post('compte_debit'),
+                'numero_piece'  =>  utils::post('numero_piece'),
+                'remarques'     =>  utils::post('remarques'),
+                'id_auteur'     =>  $user['id'],
             ));
 
             utils::redirect('/admin/compta/operation.php?id='.(int)$id);
