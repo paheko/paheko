@@ -112,7 +112,7 @@
     </p>
     {/if}
 
-    {pagination url="?p=[ID]" page=$page bypage=$bypage total=$total}
+    {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
     {else}
     <p class="alert">
         Aucune membre trouvé.
