@@ -10,7 +10,7 @@
     <li><a href="?recettes">Recettes</a></li>
     <li><a href="?depenses">Dépenses</a></li>
     <li><a href="?autres">Autres</a></li>
-    <li class="current"><a href="?avancé">Saisie avancée</a></li>
+    <li class="current"><a href="?avance">Saisie avancée</a></li>
 </ul>
 
 <form method="post" action="{$self_url|escape}">

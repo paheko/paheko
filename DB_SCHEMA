@@ -169,7 +169,7 @@ CREATE TABLE compta_exercices
 (
     id INTEGER PRIMARY KEY,
 
-    libelle TEXT DEFAULT NOT NULL,
+    libelle TEXT NOT NULL,
 
     debut TEXT NOT NULL DEFAULT CURRENT_DATE,
     fin TEXT NULL DEFAULT NULL,

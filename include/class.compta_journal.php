@@ -29,6 +29,22 @@ class Garradin_Compta_Journal
         return false;
     }
 
+    public function getSolde($compte)
+    {
+        $db = Garradin_DB::getInstance();
+        $exercice = $this->_getCurrentExercice();
+        $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
+        $compte = '\'' . $db->escapeString(trim($compte)) . '%\'';
+
+        $query = 'SELECT
+            (SELECT SUM(montant) FROM compta_journal
+                WHERE compte_credit LIKE '.$compte.' AND id_exercice '.$exercice.')
+            - (SELECT SUM(montant) FROM compta_journal
+                WHERE compte_debit LIKE '.$compte.' AND id_exercice '.$exercice.');';
+
+        return $db->querySingle($query);
+    }
+
     public function add($data)
     {
         $this->_checkFields($data);
@@ -87,13 +103,26 @@ class Garradin_Compta_Journal
 
         $data['libelle'] = trim($data['libelle']);
 
-        if (empty($data['moyen_paiement'])
-            || !$db->simpleQuerySingle('SELECT 1 FROM compta_moyens_paiement WHERE code = ?;', false, $data['moyen_paiement']))
+        if (!empty($data['moyen_paiement'])
+            && !$db->simpleQuerySingle('SELECT 1 FROM compta_moyens_paiement WHERE code = ?;', false, $data['moyen_paiement']))
         {
             throw new UserException('Moyen de paiement invalide.');
         }
 
-        $data['moyen_paiement'] = strtoupper($data['moyen_paiement']);
+        if (empty($data['moyen_paiement']))
+        {
+            $data['moyen_paiement'] = null;
+            $data['numero_cheque'] = null;
+        }
+        else
+        {
+            $data['moyen_paiement'] = strtoupper($data['moyen_paiement']);
+
+            if ($data['moyen_paiement'] != 'CH')
+            {
+                $data['numero_cheque'] = null;
+            }
+        }
 
         $data['montant'] = (float)$data['montant'];
 
@@ -112,11 +141,6 @@ class Garradin_Compta_Journal
             {
                 $data[$champ] = trim($data[$champ]);
             }
-        }
-
-        if ($data['moyen_paiement'] != 'CH')
-        {
-            $data['numero_cheque'] = NULL;
         }
 
         if (empty($data['compte_debit']) ||
