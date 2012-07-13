@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Éditer une page" current="wiki"}
+{include file="admin/_head.tpl" title="Éditer une page" current="wiki" custom_js="wikitoolbar.js"}
 
 {if $error}
     <p class="error">
@@ -66,7 +66,7 @@
 
     <fieldset class="wikiText">
         <p>
-            <textarea name="contenu" cols="70" rows="30">{form_field data=$page name=contenu}</textarea>
+            <textarea name="contenu" id="f_contenu" cols="70" rows="30">{form_field data=$page name=contenu}</textarea>
         </p>
     </fieldset>
 
