@@ -12,6 +12,25 @@ class Garradin_Compta_Categories
 
         $db = Garradin_DB::getInstance();
 
+        if (empty($data['compte']) || !trim($data['compte']))
+        {
+            throw new UserException('Le compte associé ne peut rester vide.');
+        }
+
+        $data['compte'] = trim($data['compte']);
+
+        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte']))
+        {
+            throw new UserException('Le compte associé n\'existe pas.');
+        }
+
+        if (!isset($data['type']) ||
+            ($data['type'] != self::DEPENSES && $data['type'] != self::RECETTES
+            && $data['type'] != self::AUTRES))
+        {
+            throw new UserException('Type de catégorie inconnu.');
+        }
+
         $db->simpleInsert('compta_categories', array(
             'intitule'  =>  $data['intitule'],
             'description'=> $data['description'],
@@ -32,8 +51,6 @@ class Garradin_Compta_Categories
             array(
                 'intitule'  =>  $data['intitule'],
                 'description'=> $data['description'],
-                'compte'    =>  $data['compte'],
-                'type'      =>  (int)$data['type'],
             ),
             'id = \''.$db->escapeString(trim($id)).'\'');
 
@@ -74,8 +91,6 @@ class Garradin_Compta_Categories
 
     protected function _checkFields(&$data)
     {
-        $db = Garradin_DB::getInstance();
-
         if (empty($data['intitule']) || !trim($data['intitule']))
         {
             throw new UserException('L\'intitulé ne peut rester vide.');
@@ -83,27 +98,6 @@ class Garradin_Compta_Categories
 
         $data['intitule'] = trim($data['intitule']);
         $data['description'] = isset($data['description']) ? trim($data['description']) : '';
-
-        if (empty($data['compte']) || !trim($data['compte']))
-        {
-            throw new UserException('Le compte associé ne peut rester vide.');
-        }
-
-        $data['compte'] = trim($data['compte']);
-
-        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte']))
-        {
-            throw new UserException('Le compte associé n\'existe pas.');
-        }
-
-        if (!isset($data['type']) ||
-            ($data['type'] != self::DEPENSES && $data['type'] != self::RECETTES
-            && $data['type'] != self::AUTRES))
-        {
-            throw new UserException('Type de catégorie inconnu.');
-        }
-
-        $data['type'] = (int)$data['type'];
 
         return true;
     }
