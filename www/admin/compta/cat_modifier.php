@@ -39,12 +39,12 @@ if (!empty($_POST['save']))
 
             if ($cat['type'] == Garradin_Compta_Categories::DEPENSES)
                 $type = 'depenses';
-            if ($cat['type'] == Garradin_Compta_Categories::AUTRES)
+            elseif ($cat['type'] == Garradin_Compta_Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
 
-            utils::redirect('/admin/compta/categories.php?type='.$type);
+            utils::redirect('/admin/compta/categories.php?'.$type);
         }
         catch (UserException $e)
         {
