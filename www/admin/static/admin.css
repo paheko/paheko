@@ -671,3 +671,17 @@ div.wikiRevision h4 {
 .catList dd.actions {
     margin: .2em 0 1em 2em;
 }
+
+.accountList {
+    list-style-type: square;
+    margin-left: 2em;
+}
+
+.accountList > li > h4 {
+    font-weight: normal;
+    font-size: 1.2em;
+}
+
+.accountList > li {
+    margin-bottom: .8em;
+}

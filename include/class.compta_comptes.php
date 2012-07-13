@@ -97,10 +97,19 @@ class Garradin_Compta_Comptes
         return $db->simpleStatementFetch('SELECT * FROM compta_comptes WHERE parent = ? ORDER BY id;', $parent);
     }
 
-    public function listTree($parent = 0)
+    public function listTree($parent = 0, $include_children = true)
     {
         $db = Garradin_DB::getInstance();
-        $parent = $parent ? 'WHERE parent LIKE \''.$db->escapeString($parent).'%\' ' : '';
+
+        if ($include_children)
+        {
+            $parent = $parent ? 'WHERE parent LIKE \''.$db->escapeString($parent).'%\' ' : '';
+        }
+        else
+        {
+            $parent = $parent ? 'WHERE parent = \''.$db->escapeString($parent).'\' ' : 'WHERE parent = 0';
+        }
+
         return $db->simpleStatementFetch('SELECT * FROM compta_comptes '.$parent.' ORDER BY id;');
     }
 
