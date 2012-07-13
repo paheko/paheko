@@ -50,6 +50,16 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
         return true;
     }
 
+    public function delete($id)
+    {
+        $return = parent::delete($id);
+
+        $db = Garradin_DB::getInstance();
+        $db->simpleExec('DELETE FROM compta_comptes_bancaires WHERE id = ?;', trim($id));
+
+        return $return;
+    }
+
     public function get($id)
     {
         $db = Garradin_DB::getInstance();

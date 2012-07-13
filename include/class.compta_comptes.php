@@ -80,8 +80,7 @@ class Garradin_Compta_Comptes
             throw new UserException('Ce compte ne peut être supprimé car des opérations comptables y sont liées.');
         }
 
-        $db->simpleExec('DELETE FROM compta_comptes WHERE id = ?;', $id);
-        $db->simpleExec('DELETE FROM compta_comptes_bancaires WHERE id = ?;', $id);
+        $db->simpleExec('DELETE FROM compta_comptes WHERE id = ?;', trim($id));
 
         return true;
     }
@@ -89,7 +88,7 @@ class Garradin_Compta_Comptes
     public function get($id)
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM compta_comptes WHERE id = ?;', true, $id);
+        return $db->simpleQuerySingle('SELECT * FROM compta_comptes WHERE id = ?;', true, trim($id));
     }
 
     public function getList($parent = 0)
