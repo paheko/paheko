@@ -11,11 +11,19 @@ require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
 
 $cats = new Garradin_Compta_Categories;
 
+$id = (int)utils::get('id');
+$cat = $cats->get($id);
+
+if (!$cat)
+{
+    throw new UserException('Cette catégorie n\'existe pas.');
+}
+
 $error = false;
 
-if (!empty($_POST['add']))
+if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('compta_ajout_cat'))
+    if (!utils::CSRF_check('compta_edit_cat_'.$cat['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -23,16 +31,15 @@ if (!empty($_POST['add']))
     {
         try
         {
-            $id = $cats->add(array(
+            $id = $cats->edit($id,
+                array(
                 'intitule'      =>  utils::post('intitule'),
                 'description'   =>  utils::post('description'),
-                'compte'        =>  utils::post('compte'),
-                'type'          =>  utils::post('type'),
             ));
 
-            if (utils::post('type') == Garradin_Compta_Categories::DEPENSES)
+            if ($cat['type'] == Garradin_Compta_Categories::DEPENSES)
                 $type = 'depenses';
-            if (utils::post('type') == Garradin_Compta_Categories::AUTRES)
+            if ($cat['type'] == Garradin_Compta_Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
@@ -47,10 +54,8 @@ if (!empty($_POST['add']))
 }
 
 $tpl->assign('error', $error);
+$tpl->assign('cat', $cat);
 
-$tpl->assign('type', isset($_POST['type']) ? utils::post('type') : Garradin_Compta_Categories::RECETTES);
-$tpl->assign('comptes', $comptes->listTree());
-
-$tpl->display('admin/compta/cat_ajouter.tpl');
+$tpl->display('admin/compta/cat_modifier.tpl');
 
 ?>
