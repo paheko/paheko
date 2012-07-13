@@ -115,7 +115,7 @@
     {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
     {else}
     <p class="alert">
-        Aucune membre trouvé.
+        Aucun membre trouvé.
     </p>
     {/if}
 

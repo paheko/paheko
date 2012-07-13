@@ -652,3 +652,22 @@ div.wikiRevision h4 {
 .templatesList ul {
     margin: 1em 2em;
 }
+
+.catList dt {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.catList dd.desc {
+    color: #666;
+    margin: .2em 0 .2em 2em;
+}
+
+.catList dd.compte {
+    color: #9c4f15;
+    margin: .2em 0 .2em 2em;
+}
+
+.catList dd.actions {
+    margin: .2em 0 1em 2em;
+}
