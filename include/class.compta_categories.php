@@ -86,7 +86,7 @@ class Garradin_Compta_Categories
             SELECT cat.*, cc.libelle AS compte_libelle
             FROM compta_categories AS cat INNER JOIN compta_comptes AS cc
                 ON cc.id = cat.compte
-            WHERE '.$type.' ORDER BY cat.intitule;', SQLITE3_ASSOC);
+            WHERE '.$type.' ORDER BY cat.compte;', SQLITE3_ASSOC);
     }
 
     protected function _checkFields(&$data)
