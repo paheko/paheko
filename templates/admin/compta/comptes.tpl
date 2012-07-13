@@ -19,11 +19,11 @@
     </p>
 
     {if !empty($liste)}
-        <table class="list">
+        <table class="list accountList">
         {foreach from=$liste item="compte"}
-            <tr>
+            <tr class="niveau_{$compte.id|strlen}">
                 <th>{$compte.id|escape}</th>
-                <td>{if strlen($compte.id) == 2}<strong>{$compte.libelle|escape}</strong>{else}{$compte.libelle|escape}{/if}</td>
+                <td class="libelle">{$compte.libelle|escape}</td>
                 <td class="actions">
                     {if !$compte.plan_comptable}
                         <a href="{$www_url}admin/compta/compte_modifier.php?id={$compte.id|escape}">Modifier</a>
