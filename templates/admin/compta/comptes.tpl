@@ -10,7 +10,7 @@
 
     <ul class="actions">
         <li><a href="{$www_url}admin/compta/comptes.php">Liste des classes</a></li>
-        <li><a href="{$www_url}admin/compta/compte_ajouter.php">Ajouter un compte dans cette classe</a></li>
+        <li><a href="{$www_url}admin/compta/compte_ajouter.php?classe={$classe|escape}">Ajouter un compte dans cette classe</a></li>
     </ul>
 
     <p class="help">

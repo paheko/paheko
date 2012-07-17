@@ -1,4 +1,5 @@
 (function () {
+	// Source: http://stackoverflow.com/questions/401593/textarea-selection
 	var selection =
 	{
 		get: function (e)
