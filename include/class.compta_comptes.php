@@ -32,7 +32,7 @@ class Garradin_Compta_Comptes
         $db = Garradin_DB::getInstance();
 
         $new_id = $data['parent'];
-        $nb_sous_comptes = $db->simpleQuerySingle('SELECT COUNT(*) FROM compta_comptes WHERE parent = ?;');
+        $nb_sous_comptes = $db->simpleQuerySingle('SELECT COUNT(*) FROM compta_comptes WHERE parent = ?;', false, $new_id);
 
         // Pas plus de 26 sous-comptes par compte, parce que l'alphabet s'arrête à 26 lettres
         if ($nb_sous_comptes >= 26)
