@@ -338,8 +338,9 @@ function datepickr(targetElement, userConfig) {
 
 		for (i = 0; i < inputs.length; i++)
 		{
-			if (inputs[i].getAttribute('type') == 'date' && inputs[i].type == 'text')
+			if (inputs[i].getAttribute('type') == 'date' && (inputs[i].type == 'text' || window.webkitConvertPointFromNodeToPage))
 			{
+				inputs[i].setAttribute('type', 'text');
 				new datepickr(inputs[i], config_fr);
 				inputs[i].setAttribute('readonly', 'readonly');
 				enabled = true;
