@@ -89,6 +89,12 @@ class Garradin_Compta_Categories
             WHERE '.$type.' ORDER BY cat.compte;', SQLITE3_ASSOC);
     }
 
+    public function listMoyensPaiement()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleStatementFetch('SELECT * FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
+    }
+
     protected function _checkFields(&$data)
     {
         if (empty($data['intitule']) || !trim($data['intitule']))
