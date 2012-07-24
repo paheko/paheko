@@ -421,6 +421,30 @@ class utils
         return Passphrase::generate();
     }
 
+    static public function checkIBAN($iban)
+    {
+        $iban = substr($iban, 4) . substr($iban, 0, 4);
+        $iban = str_replace(range('A', 'Z'), range(10, 35), $iban);
+        return (bcmod($iban, 97) == 1);
+    }
+
+    static public function IBAN_RIB($iban)
+    {
+        if (substr($iban, 0, 2) != 'FR')
+        {
+            return '';
+        }
+
+        return substr($iban, 4, 5) // Code banque
+            . ' ' . substr($iban, 4+5, 5) // Code guichet
+            . ' ' . substr($iban, 4+5+5, -2) // Numéro de compte
+            . ' ' . substr($iban, -2); // Clé RIB
+    }
+
+    static public function checkBIC($bic)
+    {
+        return preg_match('!^[A-Z]{4}[A-Z]{2}[1-9A-Z]{2}(?:[A-Z\d]{3})?$!', $bic);
+    }
 }
 
 ?>
