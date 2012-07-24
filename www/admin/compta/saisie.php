@@ -16,14 +16,14 @@ $cats = new Garradin_Compta_Categories;
 require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
 $banques = new Garradin_Compta_Comptes_Bancaires;
 
-if (isset($_GET['recette']))
-    $type = Garradin_Compta_Categories::RECETTES;
-elseif (isset($_GET['depense']))
+if (isset($_GET['depense']))
     $type = Garradin_Compta_Categories::DEPENSES;
 elseif (isset($_GET['autre']))
     $type = Garradin_Compta_Categories::AUTRES;
-else
+elseif (isset($_GET['avance']))
     $type = null;
+else
+    $type = Garradin_Compta_Categories::RECETTES;
 
 $error = false;
 
