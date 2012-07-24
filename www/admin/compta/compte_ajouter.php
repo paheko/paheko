@@ -27,6 +27,7 @@ if (!empty($_POST['add']))
         try
         {
             $id = $comptes->add(array(
+                'id'            =>  utils::post('numero'),
                 'libelle'       =>  utils::post('libelle'),
                 'parent'        =>  utils::post('parent'),
             ));

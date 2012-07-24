@@ -186,6 +186,7 @@ select.large option {
     color: #000;
 }
 
+select.large .niveau_2 { font-style: italic; background: #eee; }
 select.large .niveau_3 { padding-left: 1em; font-weight: bold; }
 select.large .niveau_4 { padding-left: 2em; }
 select.large .niveau_5 { padding-left: 3em; }

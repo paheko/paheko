@@ -31,16 +31,23 @@ class Garradin_Compta_Comptes
 
         $db = Garradin_DB::getInstance();
 
-        $new_id = $data['parent'];
-        $nb_sous_comptes = $db->simpleQuerySingle('SELECT COUNT(*) FROM compta_comptes WHERE parent = ?;', false, $new_id);
-
-        // Pas plus de 26 sous-comptes par compte, parce que l'alphabet s'arrête à 26 lettres
-        if ($nb_sous_comptes >= 26)
+        if (empty($data['id']))
         {
-            throw new UserException('Nombre de sous-comptes maximal atteint pour ce compte parent-ci.');
-        }
+            $new_id = $data['parent'];
+            $nb_sous_comptes = $db->simpleQuerySingle('SELECT COUNT(*) FROM compta_comptes WHERE parent = ?;', false, $new_id);
 
-        $new_id .= chr(65+(int)$nb_sous_comptes);
+            // Pas plus de 26 sous-comptes par compte, parce que l'alphabet s'arrête à 26 lettres
+            if ($nb_sous_comptes >= 26)
+            {
+                throw new UserException('Nombre de sous-comptes maximal atteint pour ce compte parent-ci.');
+            }
+
+            $new_id .= chr(65+(int)$nb_sous_comptes);
+        }
+        else
+        {
+            $new_id = $data['id'];
+        }
 
         $db->simpleInsert('compta_comptes', array(
             'id'        =>  $new_id,
@@ -124,6 +131,17 @@ class Garradin_Compta_Comptes
 
         $data['libelle'] = trim($data['libelle']);
 
+        if (isset($data['id']))
+        {
+            $force_parent_check = true;
+            $data['id'] = trim($data['id']);
+
+            if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['id']))
+            {
+                throw new UserException('Le compte numéro '.$data['id'].' existe déjà.');
+            }
+        }
+
         if (isset($data['parent']) || $force_parent_check)
         {
             if (empty($data['parent']) && !trim($data['parent']))
@@ -131,12 +149,20 @@ class Garradin_Compta_Comptes
                 throw new UserException('Le compte ne peut pas ne pas avoir de compte parent.');
             }
 
-            if (!($id = $db->simpleQuerySingle('SELECT id FROM compta_comptes WHERE id = ? AND plan_comptable = 1;', false, $data['parent'])))
+            if (!($id = $db->simpleQuerySingle('SELECT id FROM compta_comptes WHERE id = ?;', false, $data['parent'])))
             {
                 throw new UserException('Le compte parent indiqué n\'existe pas.');
             }
 
-            $data['parent'] = $id;
+            $data['parent'] = trim($id);
+        }
+
+        if (isset($data['id']))
+        {
+            if (strncmp($data['id'], $data['parent'], strlen($data['parent'])) !== 0)
+            {
+                throw new UserException('Le compte '.$data['id'].' n\'est pas un sous-compte de '.$data['parent'].'.');
+            }
         }
 
         return true;

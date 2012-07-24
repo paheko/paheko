@@ -8,13 +8,13 @@
 	"10": 
 	{
 		"code": 10,
-		"nom": "FONDS ASSOCIATIFS ET RESERVES",
+		"nom": "FONDS ASSOCIATIFS ET RÉSERVES",
 		"parent": 1
 	},
 	"102": 
 	{
 		"code": 102,
-		"nom": "Fonds associatif (sans droit de reprise)",
+		"nom": "Fonds associatif sans droit de reprise",
 		"parent": 10
 	},
 	"1021": 
@@ -38,13 +38,19 @@
 	"103": 
 	{
 		"code": 103,
-		"nom": "Fonds associatif (avec droit de reprise)",
+		"nom": "Fonds associatif avec droit de reprise",
 		"parent": 10
+	},
+	"1034": 
+	{
+		"code": 1034,
+		"nom": "Apports avec droit de reprise",
+		"parent": 103
 	},
 	"105": 
 	{
 		"code": 105,
-		"nom": "Ecarts de réévaluation",
+		"nom": "Écarts de réévaluation",
 		"parent": 10
 	},
 	"106": 
@@ -74,7 +80,7 @@
 	"11": 
 	{
 		"code": 11,
-		"nom": "REPORT A NOUVEAU",
+		"nom": "REPORT À NOUVEAU",
 		"parent": 1
 	},
 	"110": 
@@ -92,7 +98,7 @@
 	"12": 
 	{
 		"code": 12,
-		"nom": "RESULTAT NET DE L'EXERCICE",
+		"nom": "RÉSULTAT NET DE L'EXERCICE",
 		"parent": 1
 	},
 	"120": 
@@ -110,7 +116,7 @@
 	"13": 
 	{
 		"code": 13,
-		"nom": "SUBVENTIONS D'INVESTISSEMENT AFFECTES A DES BIENS NON RENOUVELABLES",
+		"nom": "SUBVENTIONS D'INVESTISSEMENT AFFECTÉES A DES BIENS NON RENOUVELABLES",
 		"parent": 1
 	},
 	"131": 
@@ -128,7 +134,7 @@
 	"14": 
 	{
 		"code": 14,
-		"nom": "PROVISIONS REGLEMENTEES",
+		"nom": "PROVISIONS REGLEMENTÉES",
 		"parent": 1
 	},
 	"15": 
@@ -158,7 +164,7 @@
 	"16": 
 	{
 		"code": 16,
-		"nom": "EMPRUNTS",
+		"nom": "EMPRUNTS ET DETTES ASSIMILÉES",
 		"parent": 1
 	},
 	"164": 
@@ -185,10 +191,16 @@
 		"nom": "Autres emprunts et dettes assimilés",
 		"parent": 16
 	},
+	"17": 
+	{
+		"code": 17,
+		"nom": "DETTES RATTACHÉES À DES PARTICIPATIONS",
+		"parent": 1
+	},
 	"18": 
 	{
 		"code": 18,
-		"nom": "COMPTES DE LIAISON DES ETABLISSEMENTS",
+		"nom": "COMPTES DE LIAISON DES ÉTABLISSEMENTS",
 		"parent": 1
 	},
 	"181": 
@@ -218,7 +230,7 @@
 	"19": 
 	{
 		"code": 19,
-		"nom": "FONDS DEDIES",
+		"nom": "FONDS DÉDIÉS",
 		"parent": 1
 	},
 	"194": 
@@ -284,7 +296,7 @@
 	"22": 
 	{
 		"code": 22,
-		"nom": "IMMOBILISATIONS GREVEES DE DROITS",
+		"nom": "IMMOBILISATIONS GREVÉES DE DROITS",
 		"parent": 2
 	},
 	"228": 
@@ -302,7 +314,7 @@
 	"26": 
 	{
 		"code": 26,
-		"nom": "PARTICIPATIONS ET CREANCES RATTACHEES A DES PARTICIPATIONS",
+		"nom": "PARTICIPATIONS ET CRÉANCES RATTACHÉES A DES PARTICIPATIONS",
 		"parent": 2
 	},
 	"261": 
@@ -314,7 +326,7 @@
 	"27": 
 	{
 		"code": 27,
-		"nom": "AUTRES IMMOBILISATIONS FINANCIERES",
+		"nom": "AUTRES IMMOBILISATIONS FINANCIÈRES",
 		"parent": 2
 	},
 	"270": 
@@ -350,7 +362,7 @@
 	"29": 
 	{
 		"code": 29,
-		"nom": "DEPRECIATION DES IMMOBILISATIONS",
+		"nom": "DÉPRÉCIATION DES IMMOBILISATIONS",
 		"parent": 2
 	},
 	"290": 
@@ -424,6 +436,12 @@
 		"code": 335,
 		"nom": "Travaux en cours",
 		"parent": 33
+	},
+	"34": 
+	{
+		"code": 34,
+		"nom": "EN-COURS DE PRODUCTION DE SERVICES",
+		"parent": 3
 	},
 	"35": 
 	{
@@ -573,6 +591,12 @@
 	{
 		"code": 425,
 		"nom": "Personnel - Avances et acomptes",
+		"parent": 42
+	},
+	"428": 
+	{
+		"code": 428,
+		"nom": "Personnel - Charges à payer et produits à recevoir",
 		"parent": 42
 	},
 	"43": 
@@ -896,7 +920,7 @@
 	"45": 
 	{
 		"code": 45,
-		"nom": "CONFEDERATION, FEDERATION, ASSOCIATIONS AFFILIEES ET SOCIETAIRES",
+		"nom": "CONFÉDÉRATION, FÉDÉRATION, UNIONS ET ASSOCIATIONS AFFILIÉES",
 		"parent": 4
 	},
 	"451": 
@@ -1013,6 +1037,12 @@
 		"nom": "BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",
 		"parent": 5
 	},
+	"512": 
+	{
+		"code": 512,
+		"nom": "Banques",
+		"parent": 51
+	},
 	"53": 
 	{
 		"code": 53,
@@ -1024,6 +1054,12 @@
 		"code": 530,
 		"nom": "Caisse",
 		"parent": 53
+	},
+	"58": 
+	{
+		"code": 58,
+		"nom": "VIREMENTS INTERNES",
+		"parent": 5
 	},
 	"6": 
 	{
@@ -1094,7 +1130,7 @@
 	"61": 
 	{
 		"code": 61,
-		"nom": "SERVICES EXTERIEURS",
+		"nom": "SERVICES EXTÉRIEURS",
 		"parent": 6
 	},
 	"611": 
@@ -1142,7 +1178,7 @@
 	"62": 
 	{
 		"code": 62,
-		"nom": "AUTRES SERVICES EXTERIEURS",
+		"nom": "AUTRES SERVICES EXTÉRIEURS",
 		"parent": 6
 	},
 	"621": 
@@ -1214,7 +1250,7 @@
 	"63": 
 	{
 		"code": 63,
-		"nom": "IMPOTS, TAXES ET VERSEMENTS ASSIMILÉS",
+		"nom": "IMPÔTS, TAXES ET VERSEMENTS ASSIMILÉS",
 		"parent": 6
 	},
 	"631": 
@@ -1310,7 +1346,7 @@
 	"66": 
 	{
 		"code": 66,
-		"nom": "CHARGES FINANCIERES",
+		"nom": "CHARGES FINANCIÈRES",
 		"parent": 6
 	},
 	"661": 
@@ -1352,7 +1388,7 @@
 	"68": 
 	{
 		"code": 68,
-		"nom": "DOTATIONS AUX AMORTISSEMENTS, DEPRECIATIONS, PROVISIONS ET ENGAGEMENTS",
+		"nom": "DOTATIONS AUX AMORTISSEMENTS, DÉPRÉCIATIONS, PROVISIONS ET ENGAGEMENTS",
 		"parent": 6
 	},
 	"681": 
@@ -1388,7 +1424,7 @@
 	"69": 
 	{
 		"code": 69,
-		"nom": "IMPÔTS SUR LES BENEFICES",
+		"nom": "PARTICIPATION DES SALARIÉS - IMPÔTS SUR LES BÉNÉFICES ET ASSIMILÉS",
 		"parent": 6
 	},
 	"695": 

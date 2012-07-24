@@ -1,5 +1,5 @@
 {if empty($classe)}
-    {include file="admin/_head.tpl" title="Comptes" current="compta/comptes"}
+    {include file="admin/_head.tpl" title="Comptes" current="compta/categories"}
     <ul class="accountList">
     {foreach from=$classes item="_classe"}
         <li><h4><a href="?classe={$_classe.id|escape}">{$_classe.libelle|escape}</a></h4></li>
