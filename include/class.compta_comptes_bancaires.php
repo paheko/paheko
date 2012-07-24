@@ -73,7 +73,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
     public function getList($parent = false)
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleStatementFetch('SELECT * FROM compta_comptes AS c
+        return $db->simpleStatementFetchAssocKey('SELECT c.id AS id, * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc ON c.id = cc.id
             WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');
     }

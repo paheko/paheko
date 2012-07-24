@@ -58,7 +58,15 @@
                 </select>
             </dd>
             <dt class="cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
-            <dd class="cheque"><input type="text" name="numero_piece" id="f_numero_piece" value="{form_field name=numero_piece}" /></dd>
+            <dd class="cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque}" /></dd>
+            <dt class="banque"><label for="f_banque">Compte bancaire</label></dt>
+            <dd class="banque">
+                <select name="banque" id="f_banque">
+                {foreach from=$comptes_bancaires item="compte"}
+                    <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                {/foreach}
+                </select>
+            </dd>
             <dt><label for="f_numero_piece">Numéro de pièce comptable</label></dt>
             <dd><input type="text" name="numero_piece" id="f_numero_piece" value="{form_field name=numero_piece}" /></dd>
             <dt><label for="f_remarques">Remarques</label></dt>
@@ -71,7 +79,7 @@
         <dl class="catList">
         {foreach from=$categories item="cat"}
             <dt>
-                <input type="radio" name="categorie" value="{$cat.id|escape}" id="f_cat_{$cat.id|escape}" />
+                <input type="radio" name="categorie" value="{$cat.id|escape}" id="f_cat_{$cat.id|escape}" {form_field name="categorie" checked=$cat.id} />
                 <label for="f_cat_{$cat.id|escape}">{$cat.intitule|escape}</label>
             </dt>
             {if !empty($cat.description)}
@@ -93,6 +101,14 @@
             for (i = 0; i < cheque_l; i++)
             {
                 cheque[i].style.display = elm.value == 'CH' ? 'block' : 'none';
+            }
+
+            var banque = document.getElementsByClassName('banque');
+            var banque_l = banque.length;
+
+            for (i = 0; i < banque_l; i++)
+            {
+                banque[i].style.display = (elm.value != 'CH' && elm.value != 'ES') ? 'block' : 'none';
             }
         };
 
