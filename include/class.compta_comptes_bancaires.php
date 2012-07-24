@@ -11,7 +11,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
         $db = Garradin_DB::getInstance();
 
         $data['parent'] = self::NUMERO_PARENT_COMPTES;
-        $data['id'] = false;
+        $data['id'] = null;
 
         $new_id = parent::add($data);
 
@@ -19,7 +19,6 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
         $db->simpleInsert('compta_comptes_bancaires', array(
             'id'        =>  $new_id,
             'banque'    =>  $data['banque'],
-            'rib'       =>  $data['rib'],
             'iban'      =>  $data['iban'],
             'bic'       =>  $data['bic'],
         ));
@@ -45,7 +44,6 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
         $db->simpleUpdate('compta_comptes_bancaires', array(
             'banque'    =>  $data['banque'],
-            'rib'       =>  $data['rib'],
             'iban'      =>  $data['iban'],
             'bic'       =>  $data['bic'],
         ), 'id = \''.$db->escapeString(trim($id)).'\'');
@@ -72,7 +70,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             WHERE c.id = ?;', true, $id);
     }
 
-    public function getList()
+    public function getList($parent = false)
     {
         $db = Garradin_DB::getInstance();
         return $db->simpleStatementFetch('SELECT * FROM compta_comptes AS c
@@ -80,25 +78,42 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');
     }
 
-    protected function _checkFields(&$data)
+    protected function _checkFields(&$data, $ignored = null)
     {
         parent::_checkFields($data);
 
         if (empty($data['banque']) || !trim($data['banque']))
         {
-            throw new UserException('Le libellé ne peut rester vide.');
+            throw new UserException('Le nom de la banque ne peut rester vide.');
         }
 
-        foreach (array('iban', 'bic', 'rib') as $champ)
+        if (empty($data['bic']))
         {
-            if (!array_key_exists($champ, $data))
-                $data[$champ] = '';
-            else
+            $data['bic'] = '';
+        }
+        else
+        {
+            $data['bic'] = trim(strtoupper($data['bic']));
+            $data['bic'] = preg_replace('![^\dA-Z]!', '', $data['bic']);
+
+            if (!utils::checkBIC($data['bic']))
             {
-                $data[$champ] = trim($data[$champ]);
-                $data[$champ] = preg_replace('![^\d]!', ' ', $data[$champ]);
-                $data[$champ] = preg_replace('!\s{2,}!', ' ', $data[$champ]);
-                $data[$champ] = trim($data[$champ]);
+                throw new UserException('Code BIC/SWIFT invalide.');
+            }
+        }
+
+        if (empty($data['iban']))
+        {
+            $data['iban'] = '';
+        }
+        else
+        {
+            $data['iban'] = trim(strtoupper($data['iban']));
+            $data['iban'] = preg_replace('![^\dA-Z]!', '', $data['iban']);
+
+            if (!utils::checkIBAN($data['iban']))
+            {
+                throw new UserException('Code IBAN invalide.');
             }
         }
 
