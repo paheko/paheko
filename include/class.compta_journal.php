@@ -109,6 +109,11 @@ class Garradin_Compta_Journal
             throw new UserException('Moyen de paiement invalide.');
         }
 
+        if (empty($data['date']) || !checkdate(substr($data['date'], 5, 2), substr($data['date'], 8, 2), substr($data['date'], 0, 4)))
+        {
+            throw new UserException('Date vide ou invalide.');
+        }
+
         if (empty($data['moyen_paiement']))
         {
             $data['moyen_paiement'] = null;

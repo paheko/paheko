@@ -2,6 +2,8 @@
 
 class Garradin_Compta_Comptes
 {
+    const CAISSE = 530;
+
     public function importPlan()
     {
         $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/plan_comptable.json'), true);

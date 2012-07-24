@@ -92,7 +92,7 @@ class Garradin_Compta_Categories
     public function listMoyensPaiement()
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleStatementFetch('SELECT * FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
+        return $db->simpleStatementFetchAssocKey('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
     }
 
     protected function _checkFields(&$data)

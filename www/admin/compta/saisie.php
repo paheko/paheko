@@ -13,6 +13,9 @@ $journal = new Garradin_Compta_Journal;
 require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
 $cats = new Garradin_Compta_Categories;
 
+require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
+$banques = new Garradin_Compta_Comptes_Bancaires;
+
 if (isset($_GET['recette']))
     $type = Garradin_Compta_Categories::RECETTES;
 elseif (isset($_GET['depense']))
@@ -47,6 +50,52 @@ if (!empty($_POST['save']))
                     'id_auteur'     =>  $user['id'],
                 ));
             }
+            else
+            {
+                $cat = $cats->get(utils::post('categorie'));
+
+                if (!$cat)
+                {
+                    throw new UserException('Il faut choisir une catégorie.');
+                }
+
+                if (!array_key_exists(utils::post('moyen_paiement'), $cats->listMoyensPaiement()))
+                {
+                    throw new UserException('Moyen de paiement invalide.');
+                }
+
+                if (utils::post('moyen_paiement') == 'ES')
+                {
+                    $debit = Garradin_Compta_Comptes::CAISSE;
+                    $credit = $cat['compte'];
+                }
+                else
+                {
+                    if (!trim(utils::post('banque')))
+                    {
+                        throw new UserException('Le compte bancaire choisi est invalide.');
+                    }
+
+                    if (!array_key_exists(utils::post('banque'), $banques->getList()))
+                    {
+                        throw new UserException('Le compte bancaire choisi n\'existe pas.');
+                    }
+                }
+
+                $id = $journal->add(array(
+                    'libelle'       =>  utils::post('libelle'),
+                    'montant'       =>  utils::post('montant'),
+                    'date'          =>  utils::post('date'),
+                    'moyen_paiement'=>  utils::post('moyen_paiement'),
+                    'numero_cheque' =>  utils::post('numero_cheque'),
+                    'compte_credit' =>  $credit,
+                    'compte_debit'  =>  $debit,
+                    'numero_piece'  =>  utils::post('numero_piece'),
+                    'remarques'     =>  utils::post('remarques'),
+                    'id_categorie'  =>  (int)$cat['id'],
+                    'id_auteur'     =>  $user['id'],
+                ));
+            }
 
             utils::redirect('/admin/compta/operation.php?id='.(int)$id);
         }
@@ -70,6 +119,8 @@ else
     $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
     $tpl->assign('moyen_paiement', utils::post('moyen_paiement'));
     $tpl->assign('categories', $cats->getList($type));
+    $tpl->assign('comptes_bancaires', $banques->getList());
+    $tpl->assign('banque', utils::post('banque'));
 }
 
 $tpl->display('admin/compta/saisie.tpl');
