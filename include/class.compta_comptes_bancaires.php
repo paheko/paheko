@@ -8,7 +8,10 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
     public function add($data)
     {
+        $db = Garradin_DB::getInstance();
+
         $data['parent'] = self::NUMERO_PARENT_COMPTES;
+        $data['id'] = false;
 
         $new_id = parent::add($data);
 

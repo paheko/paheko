@@ -39,8 +39,8 @@
                 <li class="compta_saisie{if $current == 'compta/saisie'} current{/if}"><a href="{$www_url}admin/compta/saisie.php">Saisie</a></li>
                 {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
                 <li class="compta_gestion{if $current == 'compta/gestion'} current{/if}"><a href="{$www_url}admin/compta/gestion.php">Suivi des opérations</a></li>
-                <li class="compta_comptes{if $current == 'compta/comptes'} current{/if}"><a href="{$www_url}admin/compta/comptes.php">Comptes</a></li>
-                <li class="compta_cats{if $current == 'compta/categories'} current{/if}"><a href="{$www_url}admin/compta/categories.php">Catégories</a></li>
+                <li class="compta_banque{if $current == 'compta/banque'} current{/if}"><a href="{$www_url}admin/compta/banque.php">Banques &amp; caisse</a></li>
+                <li class="compta_cats{if $current == 'compta/categories'} current{/if}"><a href="{$www_url}admin/compta/categories.php">Catégories &amp; comptes</a></li>
                 {/if}
             </ul>
             {/if}

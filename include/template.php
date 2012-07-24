@@ -324,7 +324,7 @@ function tpl_select_compte($params)
         {
             $out.= '<optgroup label="'.htmlspecialchars($compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
         }
-        elseif (!isset($compte['id'][2]))
+        elseif (!isset($compte['id'][2]) && empty($params['create']))
         {
             if ($compte['id'] > 10)
                 $out.= '</optgroup>';
