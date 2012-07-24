@@ -3,7 +3,7 @@
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/compta/banques.php">Comptes bancaires</a></li>
     <li><a href="{$www_url}admin/compta/caisse.php">Caisse</a></li>
-    <li><strong><a href="{$www_url}admin/compta/banque_ajouter.php">Ajouter un compte bancaires</a></strong></li>
+    <li><strong><a href="{$www_url}admin/compta/banque_ajouter.php">Ajouter un compte bancaire</a></strong></li>
 </ul>
 
     {if !empty($liste)}
