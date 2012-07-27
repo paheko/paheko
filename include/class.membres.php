@@ -254,7 +254,7 @@ class Garradin_Membres
             throw new UserException('Adresse e-mail invalide.');
         }
 
-        if (!empty($data['code_postal']) && !preg_match('!^\d{5}$!', $data['code_postal']))
+        if (!empty($data['code_postal']) && !preg_match('!^\d+$!', $data['code_postal']))
         {
             throw new UserException('Code postal invalide.');
         }
