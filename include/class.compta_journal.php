@@ -29,20 +29,38 @@ class Garradin_Compta_Journal
         return false;
     }
 
-    public function getSolde($compte)
+    public function getSolde($compte, $inclure_sous_comptes = false)
     {
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
         $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
-        $compte = '\'' . $db->escapeString(trim($compte)) . '%\'';
+        $compte = $inclure_sous_comptes
+            ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
+            : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
         $query = 'SELECT
-            (SELECT SUM(montant) FROM compta_journal
-                WHERE compte_debit LIKE '.$compte.' AND id_exercice '.$exercice.')
-            - (SELECT SUM(montant) FROM compta_journal
-                WHERE compte_credit LIKE '.$compte.' AND id_exercice '.$exercice.');';
+            COALESCE((SELECT SUM(montant) FROM compta_journal
+                WHERE compte_debit '.$compte.' AND id_exercice '.$exercice.'), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal
+                WHERE compte_credit '.$compte.' AND id_exercice '.$exercice.'), 0);';
 
         return $db->querySingle($query);
+    }
+
+    public function getJournalCompte($compte, $inclure_sous_comptes = false)
+    {
+        $db = Garradin_DB::getInstance();
+        $exercice = $this->_getCurrentExercice();
+        $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
+        $compte = $inclure_sous_comptes
+            ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
+            : '= \'' . $db->escapeString(trim($compte)) . '\'';
+
+        $query = 'SELECT * FROM compta_journal WHERE
+                    (compte_debit '.$compte.' OR compte_debit '.$compte.') AND id_exercice '.$exercice.'
+                    ORDER BY date;';
+
+        return $db->simpleStatementFetch($query);
     }
 
     public function add($data)
