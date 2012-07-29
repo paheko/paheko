@@ -12,6 +12,7 @@ body {
     font-family: "Trebuchet MS", Helvetica, Sans-serif;
     background: #fff;
     background: url("bg01.png") no-repeat left -100px, url("bg00.png") repeat-y left bottom, #fff;
+    padding-bottom: 1em;
 }
 
 body#popup {

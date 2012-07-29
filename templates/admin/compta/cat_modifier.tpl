@@ -14,7 +14,7 @@
             <dt><label for="f_intitule">Intitulé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="intitule" id="f_intitule" value="{form_field name=intitule data=$cat}" /></dd>
             <dt><label for="f_description">Description</label></dt>
-            <dd><textarea name="description" id="f_description" rows="4" cols="30">{form_field name=description data=$cat}</textarea></dd>
+            <dd><textarea name="description" id="f_description" rows="4" cols="70">{form_field name=description data=$cat}</textarea></dd>
         </dl>
     </fieldset>
 
