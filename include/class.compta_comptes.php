@@ -4,6 +4,11 @@ class Garradin_Compta_Comptes
 {
     const CAISSE = 530;
 
+    const PASSIF = 0x01;
+    const ACTIF = 0x02;
+    const PRODUIT = 0x04;
+    const CHARGE = 0x08;
+
     public function importPlan()
     {
         $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/plan_comptable.json'), true);
@@ -51,11 +56,65 @@ class Garradin_Compta_Comptes
             $new_id = $data['id'];
         }
 
+        if (isset($data['position']))
+        {
+            $position = (int) $data['position'];
+        }
+        else
+        {
+            $classe = $new_id[0];
+
+            if ($classe == 1)
+            {
+                if ($new_id == 11 || $new_id == 12)
+                    $position = self::PASSIF | self::ACTIF;
+                elseif ($new_id == 119 || $new_id == 129 || $new_id == 139)
+                    $position = self::ACTIF;
+                else
+                    $position = self::PASSIF;
+            }
+            elseif ($classe == 2 || $classe == 3 || $classe == 5)
+            {
+                $position = self::ACTIF;
+            }
+            elseif ($classe == 4)
+            {
+                if (strlen($new_id) == 2)
+                {
+                    $position = self::PASSIF | self::ACTIF;
+                }
+                elseif (strlen($new_id) > 2)
+                {
+                    $prefixe = substr($new_id, 0, 3)
+
+                    if ($prefixe == 401 || $prefixe == 411 || $prefixe == 421 || $prefixe == 430 || $prefixe == 440)
+                    {
+                    }
+                }
+            }
+            elseif ($classe == 6)
+            {
+                $position = self::CHARGE;
+            }
+            elseif ($classe == 7)
+            {
+                $position = self::PRODUIT;
+            }
+            elseif ($classe == 8)
+            {
+                if (substr($new_id, 0, 2) == 86)
+                    $position = self::CHARGE;
+                elseif (substr($new_id, 0, 2) == 87)
+                    $position = self::PRODUIT;
+            }
+        }
+
         $db->simpleInsert('compta_comptes', array(
             'id'        =>  $new_id,
             'libelle'   =>  trim($data['libelle']),
             'parent'    =>  $data['parent'],
             'plan_comptable' => 0,
+            'position'  =>  $position,
         ));
 
         return $new_id;
