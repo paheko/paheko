@@ -31,8 +31,7 @@ if (!empty($_POST['delete']))
     {
         try
         {
-            $id = $cats->delete($id);
-
+            $cats->delete($id);
             utils::redirect('/admin/compta/categories.php');
         }
         catch (UserException $e)
