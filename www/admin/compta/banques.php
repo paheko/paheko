@@ -8,9 +8,19 @@ if ($user['droits']['compta'] < Garradin_Membres::DROIT_ADMIN)
 }
 
 require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
-$banque = new Garradin_Compta_Comptes_Bancaires;
+$banques = new Garradin_Compta_Comptes_Bancaires;
 
-$tpl->assign('liste', $banque->getList());
+require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
+$journal = new Garradin_Compta_Journal;
+
+$liste = $banques->getList();
+
+foreach ($liste as $banque)
+{
+    $banque['solde'] = $journal->getSolde($banque['id']);
+}
+
+$tpl->assign('liste', $liste);
 
 $tpl->display('admin/compta/banques.tpl');
 

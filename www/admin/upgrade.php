@@ -33,6 +33,12 @@ if (!$v)
 {
     $db->exec('ALTER TABLE membres ADD COLUMN lettre_infos INTEGER DEFAULT 0;');
 }
+elseif (version_compare($v, '0.4.0', '<'))
+{
+    $config->set('monnaie', '€');
+    $config->set('pays', 'FR');
+    $config->save();
+}
 
 utils::clearCaches();
 

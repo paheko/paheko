@@ -43,6 +43,22 @@
     </fieldset>
 
     <fieldset>
+        <legend>Localisation</legend>
+        <dl>
+            <dt><label for="f_monnaie">Monnaie</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd><input type="text" name="monnaie" id="f_monnaie" value="{form_field name=monnaie data=$config}" size="5" /></dd>
+            <dt><label for="f_pays">Pays</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd>
+                <select name="pays" id="f_pays">
+                {foreach from=$pays key="cc" item="nom"}
+                    <option value="{$cc|escape}"{if $cc == $config.pays} selected="selected"{/if}>{$nom|escape}</option>
+                {/foreach}
+                </select>
+            </dd>
+        </dl>
+    </fieldset>
+
+    <fieldset>
         <legend>Envois par E-Mail</legend>
         <dl>
             <dt><label for="f_email_envoi_automatique">Adresse E-Mail expéditeur des messages automatiques</label></dt>

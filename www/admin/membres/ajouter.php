@@ -68,7 +68,7 @@ $tpl->assign('membres_cats', $cats->listSimple());
 $tpl->assign('current_cat', utils::post('id_categorie') ?: $config->get('categorie_membres'));
 
 $tpl->assign('pays', utils::getCountryList());
-$tpl->assign('current_cc', utils::post('pays') ?: 'FR');
+$tpl->assign('current_cc', utils::post('pays') ?: $config->get('pays'));
 
 $tpl->display('admin/membres/ajouter.tpl');
 

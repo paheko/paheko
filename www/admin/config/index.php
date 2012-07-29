@@ -30,6 +30,9 @@ if (!empty($_POST['save']))
             $config->set('email_envoi_automatique', utils::post('email_envoi_automatique'));
             $config->set('accueil_wiki', utils::post('accueil_wiki'));
 
+            $config->set('pays', utils::post('pays'));
+            $config->set('monnaie', utils::post('monnaie'));
+
             $config->save();
 
             utils::redirect('/admin/config/?ok');
@@ -44,6 +47,7 @@ if (!empty($_POST['save']))
 $tpl->assign('error', $error);
 
 $tpl->assign('garradin_version', garradin_version() . ' [' . garradin_manifest() . ']');
+$tpl->assign('pays', utils::getCountryList());
 
 $tpl->display('admin/config/index.tpl');
 

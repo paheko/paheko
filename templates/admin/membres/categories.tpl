@@ -13,7 +13,7 @@
             <tr>
                 <th>{$cat.nom|escape}</th>
                 <td class="num">{$cat.nombre|escape}</td>
-                <td><strong>{$cat.montant_cotisation|escape} €</strong> pour {$cat.duree_cotisation|escape} mois</td>
+                <td><strong>{$cat.montant_cotisation|escape} {$config.monnaie|escape}</strong> pour {$cat.duree_cotisation|escape} mois</td>
                 <td class="droits">
                     {format_droits droits=$cat}
                 </td>
