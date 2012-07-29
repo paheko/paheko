@@ -7,8 +7,10 @@ if ($user['droits']['compta'] < Garradin_Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$id = utils::get('id');
-$compte = $comptes->get($id);
+require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
+$banque = new Garradin_Compta_Comptes_Bancaires;
+
+$compte = $banque->get(utils::get('id'));
 
 if (!$compte)
 {
@@ -19,7 +21,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('compta_delete_compte_'.$compte['id']))
+    if (!utils::CSRF_check('compta_delete_banque_'.$compte['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -27,8 +29,8 @@ if (!empty($_POST['delete']))
     {
         try
         {
-            $comptes->delete($compte['id']);
-            utils::redirect('/admin/compta/comptes.php?classe='.substr($compte['id'], 0, 1));
+            $banque->delete($compte['id']);
+            utils::redirect('/admin/compta/banques.php');
         }
         catch (UserException $e)
         {
@@ -41,6 +43,6 @@ $tpl->assign('error', $error);
 
 $tpl->assign('compte', $compte);
 
-$tpl->display('admin/compta/compte_supprimer.tpl');
+$tpl->display('admin/compta/banque_supprimer.tpl');
 
 ?>
