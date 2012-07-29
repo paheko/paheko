@@ -24,7 +24,7 @@
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" /></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" /> €</dd>
+            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" /> {$config.monnaie|escape}</dd>
             <dt><label for="f_compte_debit">Compte débité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 {select_compte comptes=$comptes name="compte_debit"}
@@ -48,7 +48,7 @@
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" /></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" /> €</dd>
+            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" /> {$config.monnaie|escape}</dd>
             <dt><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="moyen_paiement" id="f_moyen_paiement" onchange="return changeMoyenPaiement(this);">

@@ -10,6 +10,7 @@
         <dl class="catList">
         {foreach from=$liste item="compte"}
             <dt>{$compte.libelle|escape}</dt>
+            <dd class="desc">Solde : {$compte.solde|escape} {$config.monnaie|escape}</dd>
             <dd class="actions">
                 <a href="{$www_url}admin/compta/banque_modifier.php?id={$compte.id|escape}">Modifier</a>
                 | <a href="{$www_url}admin/compta/banque_supprimer.php?id={$compte.id|escape}">Supprimer</a>

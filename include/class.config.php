@@ -34,6 +34,9 @@ class Garradin_Config
             'email_asso'            =>  $string,
             'site_asso'             =>  $string,
 
+            'monnaie'               =>  $string,
+            'pays'                  =>  $string,
+
             'email_envoi_automatique'=> $string,
 
             'champs_obligatoires'   =>  $array,
@@ -235,6 +238,24 @@ class Garradin_Config
                 {
                     throw new UserException('La catégorie de membres par défaut numéro \''.$value.'\' ne semble pas exister.');
                 }
+                break;
+            }
+            case 'monnaie':
+            {
+                if (!trim($value))
+                {
+                    throw new UserException('La monnaie doit être renseignée.');
+                }
+
+                break;
+            }
+            case 'pays':
+            {
+                if (!trim($value) || !utils::getCountryName($value))
+                {
+                    throw new UserException('Le pays renseigné est invalide.');
+                }
+
                 break;
             }
             default:

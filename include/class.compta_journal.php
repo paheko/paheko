@@ -38,9 +38,9 @@ class Garradin_Compta_Journal
 
         $query = 'SELECT
             (SELECT SUM(montant) FROM compta_journal
-                WHERE compte_credit LIKE '.$compte.' AND id_exercice '.$exercice.')
+                WHERE compte_debit LIKE '.$compte.' AND id_exercice '.$exercice.')
             - (SELECT SUM(montant) FROM compta_journal
-                WHERE compte_debit LIKE '.$compte.' AND id_exercice '.$exercice.');';
+                WHERE compte_credit LIKE '.$compte.' AND id_exercice '.$exercice.');';
 
         return $db->querySingle($query);
     }
