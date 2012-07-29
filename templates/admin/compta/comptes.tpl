@@ -6,7 +6,7 @@
     {/foreach}
     </ul>
 {else}
-    {include file="admin/_head.tpl" title=$classe_compte.libelle current="compta/comptes"}
+    {include file="admin/_head.tpl" title=$classe_compte.libelle current="compta/categories"}
 
     <ul class="actions">
         <li><a href="{$www_url}admin/compta/comptes.php">Liste des classes</a></li>
