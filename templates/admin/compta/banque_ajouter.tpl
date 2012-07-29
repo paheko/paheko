@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Ajouter un compte" current="compta/categories"}
+{include file="admin/_head.tpl" title="Ajouter un compte" current="compta/banques"}
 
 {if $error}
     <p class="error">

@@ -30,7 +30,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
     {
         $db = Garradin_DB::getInstance();
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', false, $id))
+        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', false, $id))
         {
             throw new UserException('Ce compte n\'est pas un compte bancaire.');
         }
