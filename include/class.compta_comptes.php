@@ -15,17 +15,34 @@ class Garradin_Compta_Comptes
 
         $db = Garradin_DB::getInstance();
         $db->exec('BEGIN;');
-        $db->exec('DELETE FROM compta_comptes WHERE plan_comptable = 1;'); // Nettoyage avant insertion
+        $ids = array();
 
         foreach ($plan as $id=>$compte)
         {
-            $db->simpleInsert('compta_comptes', array(
-                'id'        =>  $id,
-                'parent'    =>  $compte['parent'],
-                'libelle'   =>  $compte['nom'],
-                'plan_comptable' => 1,
-            ));
+            $ids[] = $id;
+
+            if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $id))
+            {
+                $db->simpleUpdate('compta_comptes', array(
+                    'parent'    =>  $compte['parent'],
+                    'libelle'   =>  $compte['nom'],
+                    'position'  =>  $compte['position'],
+                    'plan_comptable' => 1,
+                ), 'id = \''.$db->escapeString($id).'\'');
+            }
+            else
+            {
+                $db->simpleInsert('compta_comptes', array(
+                    'id'        =>  $id,
+                    'parent'    =>  $compte['parent'],
+                    'libelle'   =>  $compte['nom'],
+                    'position'  =>  $compte['position'],
+                    'plan_comptable' => 1,
+                ));
+            }
         }
+
+        $db->exec('DELETE FROM compta_comptes WHERE id NOT IN(\''.implode('\', \'', $ids).'\');');
 
         $db->exec('END;');
 
@@ -62,51 +79,7 @@ class Garradin_Compta_Comptes
         }
         else
         {
-            $classe = $new_id[0];
-
-            if ($classe == 1)
-            {
-                if ($new_id == 11 || $new_id == 12)
-                    $position = self::PASSIF | self::ACTIF;
-                elseif ($new_id == 119 || $new_id == 129 || $new_id == 139)
-                    $position = self::ACTIF;
-                else
-                    $position = self::PASSIF;
-            }
-            elseif ($classe == 2 || $classe == 3 || $classe == 5)
-            {
-                $position = self::ACTIF;
-            }
-            elseif ($classe == 4)
-            {
-                if (strlen($new_id) == 2)
-                {
-                    $position = self::PASSIF | self::ACTIF;
-                }
-                elseif (strlen($new_id) > 2)
-                {
-                    $prefixe = substr($new_id, 0, 3)
-
-                    if ($prefixe == 401 || $prefixe == 411 || $prefixe == 421 || $prefixe == 430 || $prefixe == 440)
-                    {
-                    }
-                }
-            }
-            elseif ($classe == 6)
-            {
-                $position = self::CHARGE;
-            }
-            elseif ($classe == 7)
-            {
-                $position = self::PRODUIT;
-            }
-            elseif ($classe == 8)
-            {
-                if (substr($new_id, 0, 2) == 86)
-                    $position = self::CHARGE;
-                elseif (substr($new_id, 0, 2) == 87)
-                    $position = self::PRODUIT;
-            }
+            $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $data['parent']);
         }
 
         $db->simpleInsert('compta_comptes', array(
@@ -114,7 +87,7 @@ class Garradin_Compta_Comptes
             'libelle'   =>  trim($data['libelle']),
             'parent'    =>  $data['parent'],
             'plan_comptable' => 0,
-            'position'  =>  $position,
+            'position'  =>  (int)$position,
         ));
 
         return $new_id;
@@ -130,10 +103,17 @@ class Garradin_Compta_Comptes
             throw new UserException('Ce compte fait partie du plan comptable et n\'est pas modifiable.');
         }
 
+        if (empty($data['position']))
+        {
+            throw new UserException('Aucune position du compte n\'a été indiquée.');
+        }
+
         $this->_checkFields($data);
 
-        $db->simpleUpdate('compta_comptes', array('libelle' => trim($data['libelle'])),
-            'id = \''.$db->escapeString(trim($id)).'\'');
+        $db->simpleUpdate('compta_comptes', array(
+            'libelle'   =>  trim($data['libelle']),
+            'position'  =>  (int) trim($data['position'])
+        ), 'id = \''.$db->escapeString(trim($id)).'\'');
 
         return true;
     }
@@ -227,6 +207,18 @@ class Garradin_Compta_Comptes
         }
 
         return true;
+    }
+
+    public function getPositions()
+    {
+        return array(
+            self::ACTIF     =>  'Actif',
+            self::PASSIF    =>  'Passif',
+            self::ACTIF | self::PASSIF      =>  'Actif et passif',
+            self::CHARGE    =>  'Charge',
+            self::PRODUIT   =>  'Produit',
+            self::CHARGE | self::PRODUIT    =>  'Charge et produit',
+        );
     }
 }
 

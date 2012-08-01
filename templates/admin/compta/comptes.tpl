@@ -25,8 +25,9 @@
                 <th>{$compte.id|escape}</th>
                 <td class="libelle">{$compte.libelle|escape}</td>
                 <td class="actions">
+                    {$compte.position|get_position}
                     {if !$compte.plan_comptable}
-                        <a href="{$www_url}admin/compta/compte_modifier.php?id={$compte.id|escape}">Modifier</a>
+                        | <a href="{$www_url}admin/compta/compte_modifier.php?id={$compte.id|escape}">Modifier</a>
                         | <a href="{$www_url}admin/compta/compte_supprimer.php?id={$compte.id|escape}">Supprimer</a>
                     {else}
                         <em>*</em>

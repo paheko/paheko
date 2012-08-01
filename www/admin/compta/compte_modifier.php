@@ -29,6 +29,7 @@ if (!empty($_POST['save']))
         {
             $id = $comptes->edit($compte['id'], array(
                 'libelle'       =>  utils::post('libelle'),
+                'position'      =>  utils::post('position'),
             ));
 
             utils::redirect('/admin/compta/comptes.php?classe='.substr($compte['id'], 0, 1));
@@ -42,6 +43,8 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
+$tpl->assign('positions', $comptes->getPositions());
+$tpl->assign('position', utils::post('position') ?: $compte['position']);
 $tpl->assign('compte', $compte);
 
 $tpl->display('admin/compta/compte_modifier.tpl');

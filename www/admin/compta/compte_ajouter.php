@@ -30,6 +30,7 @@ if (!empty($_POST['add']))
                 'id'            =>  utils::post('numero'),
                 'libelle'       =>  utils::post('libelle'),
                 'parent'        =>  utils::post('parent'),
+                'position'      =>  utils::post('position'),
             ));
 
             utils::redirect('/admin/compta/comptes.php?classe='.$classe);
@@ -43,6 +44,10 @@ if (!empty($_POST['add']))
 
 $tpl->assign('error', $error);
 
+$parent = $comptes->get(utils::post('parent') ?: $classe);
+
+$tpl->assign('positions', $comptes->getPositions());
+$tpl->assign('position', utils::post('position') ?: $parent['position']);
 $tpl->assign('comptes', $comptes->listTree($classe));
 
 $tpl->display('admin/compta/compte_ajouter.tpl');
