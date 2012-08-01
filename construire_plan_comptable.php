@@ -465,7 +465,7 @@ Classe 8 ­— Contributions bénévoles en nature
     862 Prestations
     864 Personnel bénévole
 
-86 RÉPARTITION PAR NATURE DE RESSOURCES
+87 RÉPARTITION PAR NATURE DE RESSOURCES
 
     870 Bénévolat
     871 Prestations en nature
