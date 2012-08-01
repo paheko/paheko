@@ -17,6 +17,15 @@ if (!$classe)
 }
 else
 {
+    $positions = $comptes->getPositions();
+    function tpl_get_position($pos)
+    {
+        global $positions;
+        return $positions[$pos];
+    }
+
+    $tpl->register_modifier('get_position', 'tpl_get_position');
+
     $tpl->assign('classe_compte', $comptes->get($classe));
     $tpl->assign('liste', $comptes->listTree($classe));
 }

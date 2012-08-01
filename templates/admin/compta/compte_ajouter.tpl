@@ -19,6 +19,13 @@
             <dd><input type="text" size="10" name="numero" id="f_numero" value="{form_field name=numero}" /></dd>
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" /></dd>
+            <dt><label for="f_position_1">Position</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            {foreach from=$positions item="pos" key="id"}
+            <dd>
+                <input type="radio" name="position" id="f_position_{$id|escape}" value="{$id|escape}" {if $position == $id}checked="checked"{/if} />
+                <label for="f_position_{$id|escape}">{$pos|escape}</label>
+            </dd>
+            {/foreach}
         </dl>
     </fieldset>
 
