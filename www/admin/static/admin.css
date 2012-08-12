@@ -697,3 +697,5 @@ table.accountList .niveau_4 .libelle { padding-left: 2em; }
 table.accountList .niveau_5 .libelle { padding-left: 3em; }
 table.accountList .niveau_6 .libelle { padding-left: 4em; }
 
+table.rib { display: inline-table; vertical-align: middle; font-size: .9em; text-align: center; border-collapse: collapse; }
+table.rib th, table.rib td { padding: .1em .3em; border: 1px solid #ccc; }

@@ -3,7 +3,7 @@
 <table class="list">
 {foreach from=$journal item="ligne"}
     <tr>
-        <td>{$ligne.date|escape}</td>
+        <td>{$ligne.date|strtotime|date_fr:'d/m/Y'|escape}</td>
         <th>{$ligne.libelle|escape}</th>
         <td>{if $ligne.compte_credit == $compte.id}-{$ligne.montant|escape}{else}+{$ligne.montant|escape}{/if}</td>
     </tr>

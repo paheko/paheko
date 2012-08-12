@@ -13,6 +13,8 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
         $data['parent'] = self::NUMERO_PARENT_COMPTES;
         $data['id'] = null;
 
+        $this->_checkBankFields($data);
+
         $new_id = parent::add($data);
 
         $db = Garradin_DB::getInstance();
@@ -35,6 +37,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             throw new UserException('Ce compte n\'est pas un compte bancaire.');
         }
 
+        $this->_checkBankFields($data);
         $result = parent::edit($id, $data);
 
         if (!$result)
@@ -82,10 +85,8 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
             WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');
     }
 
-    protected function _checkFields(&$data, $ignored = null)
+    protected function _checkBankFields(&$data)
     {
-        parent::_checkFields($data);
-
         if (empty($data['banque']) || !trim($data['banque']))
         {
             throw new UserException('Le nom de la banque ne peut rester vide.');
