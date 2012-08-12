@@ -25,9 +25,9 @@ class Garradin_Compta_Categories
         }
 
         if (!isset($data['type']) ||
-            ($data['type'] != self::DEPENSES && $data['type'] != self::RECETTES
-            && $data['type'] != self::AUTRES))
+            ($data['type'] != self::DEPENSES && $data['type'] != self::RECETTES))
         {
+            // Catégories "autres" pas possibles pour le moment
             throw new UserException('Type de catégorie inconnu.');
         }
 

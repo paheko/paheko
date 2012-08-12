@@ -3,7 +3,6 @@
 <ul class="actions">
     <li{if $type == Garradin_Compta_Categories::RECETTES} class="current"{/if}><a href="?recettes">Recettes</a></li>
     <li{if $type == Garradin_Compta_Categories::DEPENSES} class="current"{/if}><a href="?depenses">Dépenses</a></li>
-    <li{if $type == Garradin_Compta_Categories::AUTRES} class="current"{/if}><a href="?autres">Autres</a></li>
     <li><strong><a href="{$www_url}admin/compta/cat_ajouter.php">Ajouter une catégorie</a></strong></li>
     <li><em><a href="{$www_url}admin/compta/comptes.php">Plan comptable</a></em></li>
 </ul>
