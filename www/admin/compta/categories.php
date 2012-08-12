@@ -13,8 +13,6 @@ $cats = new Garradin_Compta_Categories;
 
 if (isset($_GET['depenses']))
     $type = Garradin_Compta_Categories::DEPENSES;
-elseif (isset($_GET['autres']))
-    $type = Garradin_Compta_Categories::AUTRES;
 else
     $type = Garradin_Compta_Categories::RECETTES;
 

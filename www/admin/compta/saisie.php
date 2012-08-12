@@ -18,8 +18,8 @@ $banques = new Garradin_Compta_Comptes_Bancaires;
 
 if (isset($_GET['depense']))
     $type = Garradin_Compta_Categories::DEPENSES;
-elseif (isset($_GET['autre']))
-    $type = Garradin_Compta_Categories::AUTRES;
+elseif (isset($_GET['virement']))
+    $type = 'virement';
 elseif (isset($_GET['avance']))
     $type = null;
 else
@@ -45,6 +45,19 @@ if (!empty($_POST['save']))
                     'date'          =>  utils::post('date'),
                     'compte_credit' =>  utils::post('compte_credit'),
                     'compte_debit'  =>  utils::post('compte_debit'),
+                    'numero_piece'  =>  utils::post('numero_piece'),
+                    'remarques'     =>  utils::post('remarques'),
+                    'id_auteur'     =>  $user['id'],
+                ));
+            }
+            elseif ($type === 'virement')
+            {
+                $id = $journal->add(array(
+                    'libelle'       =>  utils::post('libelle'),
+                    'montant'       =>  utils::post('montant'),
+                    'date'          =>  utils::post('date'),
+                    'compte_credit' =>  utils::post('compte1'),
+                    'compte_debit'  =>  utils::post('compte2'),
                     'numero_piece'  =>  utils::post('numero_piece'),
                     'remarques'     =>  utils::post('remarques'),
                     'id_auteur'     =>  $user['id'],
@@ -90,7 +103,7 @@ if (!empty($_POST['save']))
                     $debit = $b;
                     $credit = $a;
                 }
-                else
+                elseif ($type == Garradin_Compta_Categories::RECETTES)
                 {
                     $debit = $a;
                     $credit = $b;
