@@ -103,17 +103,23 @@ class Garradin_Compta_Comptes
             throw new UserException('Ce compte fait partie du plan comptable et n\'est pas modifiable.');
         }
 
-        if (empty($data['position']))
+        if (isset($data['position']) && empty($data['position']))
         {
             throw new UserException('Aucune position du compte n\'a été indiquée.');
         }
 
         $this->_checkFields($data);
 
-        $db->simpleUpdate('compta_comptes', array(
+        $update = array(
             'libelle'   =>  trim($data['libelle']),
-            'position'  =>  (int) trim($data['position'])
-        ), 'id = \''.$db->escapeString(trim($id)).'\'');
+        );
+
+        if (isset($data['position']))
+        {
+            $update['position'] = (int) trim($data['position']);
+        }
+
+        $db->simpleUpdate('compta_comptes', $update, 'id = \''.$db->escapeString(trim($id)).'\'');
 
         return true;
     }

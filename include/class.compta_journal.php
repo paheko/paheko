@@ -57,7 +57,7 @@ class Garradin_Compta_Journal
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
         $query = 'SELECT * FROM compta_journal WHERE
-                    (compte_debit '.$compte.' OR compte_debit '.$compte.') AND id_exercice '.$exercice.'
+                    (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice '.$exercice.'
                     ORDER BY date;';
 
         return $db->simpleStatementFetch($query);

@@ -10,6 +10,11 @@
         <dl class="catList">
         {foreach from=$liste item="compte"}
             <dt>{$compte.libelle|escape}</dt>
+            <dd class="desc">
+                IBAN : {$compte.iban|escape|format_iban}<br />
+                BIC : {$compte.bic|escape}<br />
+                RIB : {$compte.iban|escape|format_rib}
+            </dd>
             <dd class="desc">Solde : {$compte.solde|escape} {$config.monnaie|escape}</dd>
             <dd class="actions">
                 <a href="{$www_url}admin/compta/compte_journal.php?id={$compte.id|escape}">Journal</a>

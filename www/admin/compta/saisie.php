@@ -66,8 +66,8 @@ if (!empty($_POST['save']))
 
                 if (utils::post('moyen_paiement') == 'ES')
                 {
-                    $debit = Garradin_Compta_Comptes::CAISSE;
-                    $credit = $cat['compte'];
+                    $a = Garradin_Compta_Comptes::CAISSE;
+                    $b = $cat['compte'];
                 }
                 else
                 {
@@ -80,6 +80,20 @@ if (!empty($_POST['save']))
                     {
                         throw new UserException('Le compte bancaire choisi n\'existe pas.');
                     }
+
+                    $a = utils::post('banque');
+                    $b = $cat['compte'];
+                }
+
+                if ($type == Garradin_Compta_Categories::DEPENSES)
+                {
+                    $debit = $b;
+                    $credit = $a;
+                }
+                else
+                {
+                    $debit = $a;
+                    $credit = $b;
                 }
 
                 $id = $journal->add(array(
