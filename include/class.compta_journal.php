@@ -199,6 +199,35 @@ class Garradin_Compta_Journal
 
         return true;
     }
+
+    public function getStatsRecettes()
+    {
+        $db = Garradin_DB::getInstance();
+
+        $start = strtotime('1 month ago');
+
+        $data = $db->simpleStatementFetchAssoc('SELECT date, SUM(compte_debit) FROM compta_journal
+            WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = -1)
+            AND date > ?
+            GROUP BY date ORDER BY date;', date('Y-m-d', $start));
+
+        $now = $start;
+        $today = time();
+
+        while ($now < $today)
+        {
+            $day = date('Y-m-d', $now);
+
+            if (!array_key_exists($day, $data))
+            {
+                $data[$day] = 0;
+            }
+
+            $now = strtotime('+1 day', $now);
+        }
+
+        return $data;
+    }
 }
 
 ?>

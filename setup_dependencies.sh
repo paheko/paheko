@@ -21,3 +21,6 @@ svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/miniskel/ include/libs/miniskel
 
 # Diff
 svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/diff/ include/libs/diff/
+
+# SVGPlot
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/svgplot/ include/libs/svgplot
