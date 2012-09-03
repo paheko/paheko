@@ -13,7 +13,7 @@
             <dd class="desc">
                 IBAN : {$compte.iban|escape|format_iban}<br />
                 BIC : {$compte.bic|escape}<br />
-                RIB : {$compte.iban|escape|format_rib}
+                {$compte.iban|escape|format_rib}
             </dd>
             <dd class="desc">Solde : {$compte.solde|escape} {$config.monnaie|escape}</dd>
             <dd class="actions">

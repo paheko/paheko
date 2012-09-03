@@ -29,6 +29,9 @@ function tpl_format_iban($iban)
 
 function tpl_format_rib($iban)
 {
+    if (substr($iban, 0, 2) != 'FR')
+        return '';
+
     $rib = utils::IBAN_RIB($iban);
     $rib = explode(' ', $rib);
 
