@@ -49,6 +49,11 @@ if (!empty($_POST['save']))
                 'cacher'        =>  (int) utils::post('cacher'),
             ));
 
+            if ($id == $user['id_categorie'])
+            {
+                $membres->updateSessionData();
+            }
+
             utils::redirect('/admin/membres/categories.php');
         }
         catch (UserException $e)
