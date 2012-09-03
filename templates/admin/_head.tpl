@@ -8,6 +8,9 @@
     {if isset($custom_js)}
         <script type="text/javascript" src="{$www_url}admin/static/{$custom_js|escape}"></script>
     {/if}
+    {if isset($custom_js2)}
+        <script type="text/javascript" src="{$www_url}admin/static/{$custom_js2|escape}"></script>
+    {/if}
 </head>
 
 <body{if !empty($is_popup)} id="popup"{/if}>

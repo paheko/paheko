@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Éditer une page" current="wiki" custom_js="wikitoolbar.js"}
+{include file="admin/_head.tpl" title="Éditer une page" current="wiki" custom_js="wikitoolbar.js" custom_js2="datepickr.js"}
 
 {if $error}
     <p class="error">
@@ -15,8 +15,7 @@
             <dd><input type="text" name="titre" id="f_titre" value="{form_field data=$page name=titre}" /></dd>
             <dt><label for="f_uri">Adresse unique</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">
-                Chaque page doit comporter une adresse unique qui permet de l'identifier.
-                Cette adresse ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas.
+                Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas.
             </dd>
             <dd><input type="text" name="uri" id="f_uri" value="{form_field data=$page name=uri}" /></dd>
             <dt><label for="f_browse_parent">Cette page est une sous-rubrique de...</label></dt>
@@ -28,6 +27,12 @@
                     <samp id="current_parent_name">{$parent|escape}</samp>
                 {/if}
                 <input type="button" id="f_browse_parent" onclick="browseWikiForParent();" value="Changer" />
+            </dd>
+            <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd>
+                <input type="date" size="10" name="date" id="f_date" value="{$date|date_fr:'Y-m-d'|escape}" />
+                <input type="text" class="time" size="2" name="date_h" value="{$date|date_fr:'H'|escape}" /> h
+                <input type="text" class="time" size="2" name="date_min" value="{$date|date_fr:'i'|escape}" />
             </dd>
         </dl>
     </fieldset>
