@@ -150,7 +150,7 @@ input[type=text], textarea, input[type=password], input[type=email],
 input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
-    min-width: 20em;
+    min-width: 10em;
 }
 
 input[type=number], input[type=date] {
@@ -440,20 +440,21 @@ table.list .actions {
     clear: both;
 }
 
+/* WIKI */
+
 fieldset.wikiText {
-    clear: both;
     border: none;
-    padding: 0.5em;
 }
 
 fieldset.wikiText textarea, fieldset.skelEdit textarea {
     width: 100%;
 }
 
-fieldset.wikiMain {
-    float: left;
-    width: 47%;
-    margin-right: 2%;
+fieldset.wikiMain, fieldset.wikiRights {
+    float: right;
+    width: 30%;
+    margin-left: 3%;
+    clear: right;
 }
 
 fieldset.wikiMain #f_titre {
@@ -469,8 +470,12 @@ fieldset.wikiRights dl {
     font-size: 10pt;
 }
 
+fieldset.wikiRevision  {
+    clear: both;
+}
+
 fieldset.wikiRevision #f_modification {
-    width: 100%;
+    width: 90%;
 }
 
 .wikiContent p, .wikiContent h3, .wikiContent h4, .wikiContent h5, .wikiContent h6,
@@ -482,33 +487,29 @@ fieldset.wikiRevision #f_modification {
     margin-left: 2em;
 }
 
-.pagination {
-    clear: both;
-    list-style-type: none;
-    padding: 0.4em 0;
-    text-align: center;
-}
-
-.pagination li {
-    display: inline-block;
-    margin: 0 0.3em;
-}
-
-.pagination li.current {
-    font-size: 1.3em;
-}
-
-.pagination li a {
+.toolbar input {
+    padding: .1em .2em;
+    border: 1px solid #ccc;
     color: #000;
+    background: #fff;
+    cursor: pointer;
+    margin: 0 .5em .5em .5em;
+    border-bottom: 2px solid #9c4f15;
+    border-radius: .2em;
 }
 
-fieldset.memberMessage {
-    max-width: 30em;
+.toolbar input:hover {
+    color: #fff;
+    background: #d98628;
+    border-color: transparent;
 }
 
-fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
-    width: 95%;
-}
+.toolbar .title { font-size: 1.2em; }
+.toolbar .bold { font-weight: bold; }
+.toolbar .italic { font-style: italic; }
+.toolbar .code { font-family: Courier New, Courier, mono; }
+.toolbar .strike { text-decoration: line-through; }
+.toolbar .link { color: blue; text-decoration: underline; }
 
 .wikiFooter {
     font-size: 0.8em;
@@ -549,6 +550,12 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
 
 .wikiTree a {
     color: #666;
+}
+
+.wikiTree h3:before {
+    content: "▸";
+    display: inline;
+    margin-right: .5em;
 }
 
 .wikiTree li {
@@ -650,6 +657,34 @@ div.wikiRevision h4 {
 .diff hr { background: none; border: none; border-top: 2px dotted #000; color: #fff; }
 .diff { border-collapse: collapse; width: 100%; font-size: 0.9em; }
 .diff tr { border: 1px solid #ccc; vertical-align: top; }
+
+.pagination {
+    clear: both;
+    list-style-type: none;
+    padding: 0.4em 0;
+    text-align: center;
+}
+
+.pagination li {
+    display: inline-block;
+    margin: 0 0.3em;
+}
+
+.pagination li.current {
+    font-size: 1.3em;
+}
+
+.pagination li a {
+    color: #000;
+}
+
+fieldset.memberMessage {
+    max-width: 30em;
+}
+
+fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
+    width: 95%;
+}
 
 .templatesList ul {
     margin: 1em 2em;

@@ -66,7 +66,7 @@
 
     <fieldset class="wikiText">
         <p>
-            <textarea name="contenu" id="f_contenu" cols="70" rows="30">{form_field data=$page name=contenu}</textarea>
+            <textarea name="contenu" id="f_contenu" cols="70" rows="32">{form_field data=$page name=contenu}</textarea>
         </p>
     </fieldset>
 
