@@ -153,6 +153,15 @@ input[type=url], input[type=tel], select {
     min-width: 10em;
 }
 
+input[size] {
+    min-width: 0;
+}
+
+input.time {
+    text-align: center;
+    padding: .2em 0;
+}
+
 input[type=number], input[type=date] {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;

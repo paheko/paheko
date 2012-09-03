@@ -118,5 +118,4 @@
 	{
 		document.attachEvent("onDOMContentLoaded", launchToolbar);
 	}
-
 } () );

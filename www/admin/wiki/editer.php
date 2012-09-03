@@ -20,6 +20,15 @@ if (!empty($page['contenu']))
     $page['contenu'] = $page['contenu']['contenu'];
 }
 
+if (utils::post('date'))
+{
+    $date = strtotime(utils::post('date') . ' ' . utils::post('date_h') . ':' . utils::post('date_min'));
+}
+else
+{
+    $date = false;
+}
+
 if (!empty($_POST['save']))
 {
     if (!utils::CSRF_check('wiki_edit_'.$page['id']))
@@ -39,6 +48,7 @@ if (!empty($_POST['save']))
                 'parent'        =>  utils::post('parent'),
                 'droit_lecture' =>  utils::post('droit_lecture'),
                 'droit_ecriture'=>  utils::post('droit_ecriture'),
+                'date_creation' =>  $date,
             ));
 
             $wiki->editRevision($page['id'], (int) utils::post('revision_edition'), array(
@@ -65,6 +75,7 @@ $tpl->assign('error', $error);
 $tpl->assign('page', $page);
 
 $tpl->assign('time', time());
+$tpl->assign('date', $date ? $date : $page['date_creation']);
 
 $tpl->display('admin/wiki/editer.tpl');
 

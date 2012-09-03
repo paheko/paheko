@@ -140,6 +140,15 @@ class Garradin_Wiki
 
         $data['date_modification'] = new SQLite3_Instruction('CURRENT_TIMESTAMP');
 
+        if (isset($data['date_creation']) && !($data['date_creation'] > 0))
+        {
+            unset($data['date_creation']);
+        }
+        else
+        {
+            $data['date_creation'] = new SQLite3_Instruction('datetime('.(int)$data['date_creation'].', \'unixepoch\')');
+        }
+
         $db->simpleUpdate('wiki_pages', $data, 'id = '.(int)$id);
         return true;
     }

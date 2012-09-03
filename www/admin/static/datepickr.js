@@ -185,7 +185,8 @@ function datepickr(targetElement, userConfig) {
 
 		for(i = 0, x = days.length; i < x; i++) {
 			days[i].onclick = function() {
-				element.value = formatDate(new Date(currentYearView, currentMonthView, this.innerHTML).getTime());
+				currentDate = new Date(currentYearView, currentMonthView, this.innerHTML);
+				element.value = formatDate(currentDate.getTime());
 				close();
 				return false;
 			}
@@ -242,7 +243,7 @@ function datepickr(targetElement, userConfig) {
 	}
 
 	function open() {
-		document.onclick = function(e) {
+		document.onmousedown = function(e) {
 			e = e || window.event;
 			var target = e.target || e.srcElement;
 
@@ -256,14 +257,16 @@ function datepickr(targetElement, userConfig) {
 					}
 				}
 			}
+
+			e.preventDefault();
 		}
 
-		bindDayLinks();
+		handleMonthClick();
 		container.style.display = 'block';
 	}
 
 	function close() {
-		document.onclick = null;
+		document.onmousedown = null;
 		container.style.display = 'none';
 	}
 
@@ -274,6 +277,14 @@ function datepickr(targetElement, userConfig) {
 					config[key] = userConfig[key];
 				}
 			}
+		}
+
+		if (element.value)
+		{
+			var d = element.value.split('-');
+			currentDate = new Date(parseInt(d[0], 10), parseInt(d[1], 10) - 1, parseInt(d[2], 10), 0, 0, 0, 0);
+			currentYearView = get.current.year();
+			currentMonthView = get.current.month.integer();
 		}
 
 		var inputLeft = inputTop = 0,
@@ -309,6 +320,7 @@ function datepickr(targetElement, userConfig) {
 		bindMonthLinks();
 
 		element.onfocus = open;
+		element.onblur = close;
 	}
 
 	return (function() {
