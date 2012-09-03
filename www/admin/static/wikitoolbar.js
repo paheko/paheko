@@ -96,8 +96,16 @@
 		toolbar.className = "toolbar";
 
 		addBtn('title', 'Titre', function () { selection.wrap(txt, '{{{', "}}}\n"); } );
-		addBtn('bold', 'Gras', function () { selection.wrap(txt, '{{', '}}'); } );
 		addBtn('italic', 'Italique', function () { selection.wrap(txt, '{', '}'); } );
+		addBtn('bold', 'Gras', function () { selection.wrap(txt, '{{', '}}'); } );
+		addBtn('strike', 'Barré', function () { selection.wrap(txt, '<del>', '</del>'); } );
+		addBtn('code', 'Chasse fixe', function () { selection.wrap(txt, '<pre>', '</pre>'); } );
+		addBtn('link', 'Lien', function () {
+				if (url = window.prompt('Adresse du lien ?'))
+				{
+						selection.wrap(txt, '[', '->' + url + ']');
+				}
+			} );
 
 		parent.insertBefore(toolbar, txt.parentNode);
 	}
