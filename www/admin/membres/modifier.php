@@ -70,7 +70,7 @@ if (!empty($_POST['save']))
 
             $membres->edit($id, $data, false);
 
-            utils::redirect('/admin/membres/');
+            utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
         catch (UserException $e)
         {
