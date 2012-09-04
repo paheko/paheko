@@ -148,7 +148,13 @@ class Garradin_Compta_Comptes
     public function getList($parent = 0)
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleStatementFetch('SELECT * FROM compta_comptes WHERE parent = ? ORDER BY id;', $parent);
+        return $db->simpleStatementFetchAssocKey('SELECT id, * FROM compta_comptes WHERE parent = ? ORDER BY id;', SQLITE3_ASSOC, $parent);
+    }
+
+    public function getListAll($parent = 0)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->queryFetchAssoc('SELECT id, libelle FROM compta_comptes ORDER BY id;');
     }
 
     public function listTree($parent = 0, $include_children = true)

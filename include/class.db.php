@@ -201,6 +201,11 @@ class Garradin_DB extends SQLite3
 
     public function simpleStatementFetchAssocKey($query, $mode = SQLITE3_BOTH)
     {
+        if ($mode != SQLITE3_BOTH && $mode != SQLITE3_ASSOC && $mode != SQLITE3_NUM)
+        {
+            throw new InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
+        }
+
         $args = array_slice(func_get_args(), 2);
         return $this->_fetchResultAssocKey($this->simpleStatement($query, $args), $mode);
     }
@@ -340,9 +345,9 @@ class Garradin_DB extends SQLite3
         return $this->_fetchResultAssoc($this->query($query));
     }
 
-    public function queryFetchAssocKey($query)
+    public function queryFetchAssocKey($query, $mode = SQLITE3_BOTH)
     {
-        return $this->_fetchResultAssocKey($this->query($query));
+        return $this->_fetchResultAssocKey($this->query($query), $mode);
     }
 
     protected function _fetchResult($result, $mode)
