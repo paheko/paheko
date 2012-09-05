@@ -26,7 +26,7 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $membres->sendMessageToCategory(utils::post('dest'), utils::post('sujet'), utils::post('message'), utils::post('subscribed'));
+            $membres->sendMessageToCategory(utils::post('dest'), utils::post('sujet'), utils::post('message'), (bool) utils::post('subscribed'));
             utils::redirect('/admin/membres/?sent');
         }
         catch (UserException $e)
