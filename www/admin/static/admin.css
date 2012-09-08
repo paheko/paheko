@@ -751,3 +751,19 @@ table.accountList .niveau_6 .libelle { padding-left: 4em; }
 
 table.rib { display: inline-table; vertical-align: middle; font-size: .9em; text-align: center; border-collapse: collapse; }
 table.rib th, table.rib td { padding: .1em .3em; border: 1px solid #ccc; }
+
+dl.operation {
+    margin-bottom: 1em;
+}
+
+dl.operation dt {
+    font-weight: bold;
+    width: 15em;
+    float: left;
+    clear: left;
+    margin-bottom: .5em;
+}
+
+dl.operation dd {
+    margin-bottom: .5em;
+}
