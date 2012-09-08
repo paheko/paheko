@@ -56,7 +56,7 @@ class Garradin_Compta_Journal
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
-        $query = 'SELECT * FROM compta_journal WHERE
+        $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE
                     (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice '.$exercice.'
                     ORDER BY date;';
 
