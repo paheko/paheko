@@ -143,7 +143,7 @@
 
             for (i = 0; i < banque_l; i++)
             {
-                banque[i].style.display = (elm.value != 'CH' && elm.value != 'ES') ? 'block' : 'none';
+                banque[i].style.display = (elm.value != 'ES') ? 'block' : 'none';
             }
         };
 

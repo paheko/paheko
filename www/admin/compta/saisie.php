@@ -144,7 +144,7 @@ if ($type === null)
 else
 {
     $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
-    $tpl->assign('moyen_paiement', utils::post('moyen_paiement'));
+    $tpl->assign('moyen_paiement', utils::post('moyen_paiement') ?: 'ES');
     $tpl->assign('categories', $cats->getList($type));
     $tpl->assign('comptes_bancaires', $banques->getList());
     $tpl->assign('banque', utils::post('banque'));

@@ -205,7 +205,7 @@ class Garradin_Compta_Journal
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
         $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
-        $query = 'SELECT * FROM compta_journal WHERE id_exercice '.$exercice.' ORDER BY date;';
+        $query = 'SELECT * FROM compta_journal WHERE id_exercice '.$exercice.' ORDER BY date, id;';
         return $db->simpleStatementFetch($query);
     }
 }

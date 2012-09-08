@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Grand livre" current="compta"}
+{include file="admin/_head.tpl" title="Journal général" current="compta/gestion"}
 
 <ul class="actions">
     <li class="journal current"><a href="{$www_url}admin/compta/journal.php">Journal général</a></li>
