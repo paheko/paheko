@@ -107,7 +107,7 @@ class Garradin_Compta_Journal
     public function get($id)
     {
         $db = Garradin_DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM compta_journal WHERE id = ?;', true, $id);
+        return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id = ?;', true, $id);
     }
 
     protected function _checkFields(&$data)
@@ -205,7 +205,7 @@ class Garradin_Compta_Journal
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
         $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
-        $query = 'SELECT * FROM compta_journal WHERE id_exercice '.$exercice.' ORDER BY date, id;';
+        $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id_exercice '.$exercice.' ORDER BY date, id;';
         return $db->simpleStatementFetch($query);
     }
 }
