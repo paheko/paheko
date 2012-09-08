@@ -143,6 +143,17 @@ else
                     'contenu'   =>  "Bienvenue dans Garradin !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
                 ));
 
+                // Mise en place compta
+                require GARRADIN_ROOT . '/include/class.compta_comptes.php';
+
+                $comptes = new Garradin_Compta_Comptes;
+                $comptes->importPlan();
+
+                require GARRADIN_ROOT . '/include/class.compta_categories.php';
+
+                $comptes = new Garradin_Compta_Categories;
+                $comptes->importCategories();
+
                 $config->save();
 
                 utils::redirect('/admin/login.php');

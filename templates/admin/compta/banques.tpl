@@ -9,7 +9,7 @@
     {if !empty($liste)}
         <dl class="catList">
         {foreach from=$liste item="compte"}
-            <dt>{$compte.libelle|escape}</dt>
+            <dt>{$compte.libelle|escape} {if !empty($compte.banque)}({$compte.banque|escape}){/if}</dt>
             <dd class="desc">
                 IBAN : {$compte.iban|escape|format_iban}<br />
                 BIC : {$compte.bic|escape}<br />

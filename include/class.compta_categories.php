@@ -6,6 +6,12 @@ class Garradin_Compta_Categories
     const RECETTES = 1;
     const AUTRES = 0;
 
+    public function importCategories()
+    {
+        $db = Garradin_DB::getInstance();
+        $db->exec(file_get_contents(GARRADIN_ROOT . '/include/categories_comptables.sql'));
+    }
+
     public function add($data)
     {
         $this->_checkFields($data);
