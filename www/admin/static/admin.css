@@ -150,7 +150,7 @@ input[type=text], textarea, input[type=password], input[type=email],
 input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
-    min-width: 10em;
+    min-width: 20em;
 }
 
 input[size] {
@@ -469,9 +469,13 @@ fieldset.wikiText textarea, fieldset.skelEdit textarea {
 
 fieldset.wikiMain, fieldset.wikiRights {
     float: right;
-    width: 30%;
+    width: 35%;
     margin-left: 3%;
     clear: right;
+}
+
+fieldset.wikiMain input[type=text] {
+    min-width: 0;
 }
 
 fieldset.wikiMain #f_titre {

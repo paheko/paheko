@@ -4,6 +4,8 @@ require_once __DIR__ . '/../../include/init.php';
 require_once GARRADIN_ROOT . '/include/template.php';
 require_once GARRADIN_ROOT . '/include/class.membres.php';
 
+$tpl->assign('admin_url', WWW_URL . 'admin/');
+
 $membres = new Garradin_Membres;
 
 if (!defined('GARRADIN_LOGIN_PROCESS'))

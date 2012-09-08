@@ -101,6 +101,12 @@ class Garradin_Compta_Categories
         return $db->simpleStatementFetchAssocKey('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
     }
 
+    public function getMoyenPaiement($code)
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->simpleQuerySingle('SELECT nom FROM compta_moyens_paiement WHERE code = ?;', false, $code);
+    }
+
     protected function _checkFields(&$data)
     {
         if (empty($data['intitule']) || !trim($data['intitule']))

@@ -41,6 +41,8 @@ if ($operation['id_categorie'])
     {
         $tpl->assign('compte', $credit['libelle']);
     }
+
+    $tpl->assign('moyen_paiement', $cats->getMoyenPaiement($operation['moyen_paiement']));
 }
 
 $auteur = $membres->get($operation['id_auteur']);

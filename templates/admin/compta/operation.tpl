@@ -1,5 +1,10 @@
 {include file="admin/_head.tpl" title="Opération n°`$operation.id`" current="compta/gestion"}
 
+<ul class="actions">
+    <li class="edit"><a href="{$admin_url}compta/operation_modifier.php?id={$operation.id|escape}">Modifier cette opération</a></li>
+    <li class="delete"><a href="{$admin_url}compta/operation_supprimer.php?id={$operation.id|escape}">Supprimer cette opération</a></li>
+</ul>
+
 <dl class="operation">
     <dt>Date</dt>
     <dd>{$operation.date|date_fr:'l j F Y (d/m/Y)'}</dd>
@@ -13,7 +18,7 @@
     {if $operation.id_categorie}
 
         <dt>Moyen de paiement</dt>
-        <dd>{if trim($operation.moyen_paiement)}{$operation.moyen_paiement|escape}{else}Non renseigné{/if}</dd>
+        <dd>{if trim($operation.moyen_paiement)}{$moyen_paiement|escape}{else}Non renseigné{/if}</dd>
 
         {if $operation.moyen_paiement == 'CH'}
             <dt>Numéro de chèque</dt>
@@ -43,19 +48,21 @@
 <table class="list multi">
     <thead>
         <tr>
-            <th>Comptes</th>
+            <th colspan="2">Comptes</th>
             <td>Débit</td>
             <td>Crédit</td>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td>{$operation.compte_debit|escape} - {$nom_compte_debit}</td>
+            <td><a href="{$admin_url}compta/compte_journal.php?id={$operation.compte_debit|escape}">{$operation.compte_debit|escape}</a></td>
+            <td>{$nom_compte_debit}</td>
             <td>{$operation.montant|escape}&nbsp;{$config.monnaie|escape}</td>
             <td></td>
         </tr>
         <tr>
-            <td>{$operation.compte_credit|escape} - {$nom_compte_credit}</td>
+            <td><a href="{$admin_url}compta/compte_journal.php?id={$operation.compte_credit|escape}">{$operation.compte_credit|escape}</a></td>
+            <td>{$nom_compte_credit}</td>
             <td></td>
             <td>{$operation.montant|escape}&nbsp;{$config.monnaie|escape}</td>
         </tr>
