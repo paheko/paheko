@@ -73,8 +73,14 @@
                         Vous dever activer javascript pour pouvoir déchiffrer cette page.
                     </div>
                 </noscript>
-                <div class="wikiContent" id="wikiEncrypted">
-                    <p>Cette page est chiffrée.</p>
+                <script type="text/javascript" src="{$admin_url}static/wiki-encryption.js"></script>
+                <div id="wikiEncryptedMessage">
+                    <p class="alert">Cette page est chiffrée.
+                        <input type="button" onclick="return wikiDecrypt(false);" value="Entrer le mot de passe" />
+                    </p>
+                </div>
+                <div class="wikiContent" style="display: none;" id="wikiEncryptedContent">
+                    {$page.contenu.contenu|escape}
                 </div>
             {else}
                 <div class="wikiContent">

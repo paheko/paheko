@@ -17,6 +17,7 @@ if (!$page)
 
 if (!empty($page['contenu']))
 {
+    $page['chiffrement'] = $page['contenu']['chiffrement'];
     $page['contenu'] = $page['contenu']['contenu'];
 }
 
@@ -55,6 +56,7 @@ if (!empty($_POST['save']))
                 'contenu'       =>  utils::post('contenu'),
                 'modification'  =>  utils::post('modification'),
                 'id_auteur'     =>  $user['id'],
+                'chiffrement'   =>  utils::post('chiffrement'),
             ));
 
             $page = $wiki->getById($page['id']);
@@ -76,6 +78,8 @@ $tpl->assign('page', $page);
 
 $tpl->assign('time', time());
 $tpl->assign('date', $date ? $date : $page['date_creation']);
+
+$tpl->assign('custom_js', array('wikitoolbar.js', 'datepickr.js', 'wiki-encryption.js'));
 
 $tpl->display('admin/wiki/editer.tpl');
 

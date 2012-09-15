@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Éditer une page" current="wiki" custom_js="wikitoolbar.js" custom_js2="datepickr.js"}
+{include file="admin/_head.tpl" title="Éditer une page" current="wiki"}
 
 {if $error}
     <p class="error">
@@ -6,7 +6,7 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url|escape}" id="f_form">
 
     <fieldset class="wikiMain">
         <legend>Informations générales</legend>
@@ -68,10 +68,25 @@
         </dl>
     </fieldset>
 
+    <fieldset class="wikiEncrypt">
+        <dl>
+            <dt>
+                <input type="checkbox" name="chiffrement" id="f_chiffrement" {form_field name=chiffrement data=$page default=0 checked=1} value="1" onchange="checkEncryption(this);" />
+                <label for="f_chiffrement">Chiffrer le contenu</label> <i>(facultatif)</i>
+            </dt>
+            <noscript>
+            <dd>Nécessite JavaScript activé pour fonctionner !</dd>
+            </noscript>
+            <dd>Mot de passe : <i id="encryptPasswordDisplay" title="Chiffrement désactivé">désactivé</i></dd>
+            <dd class="help">Le mot de passe n'est ni transmis ni enregistré, vous seul le connaissez,
+                il n'est pas possible de retrouver le contenu si vous l'oubliez.</dd>
+        </dl>
+    </fieldset>
+
 
     <fieldset class="wikiText">
         <p>
-            <textarea name="contenu" id="f_contenu" cols="70" rows="32">{form_field data=$page name=contenu}</textarea>
+            <textarea name="contenu" id="f_contenu" cols="70" rows="35">{form_field data=$page name=contenu}</textarea>
         </p>
     </fieldset>
 
@@ -137,6 +152,11 @@ var page_id = '{$page.id|escape}';
         window.open('_chercher_parent.php?parent=' + document.getElementById('f_parent').value, 'browseParent',
             'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
     };
+
+    if (document.getElementById('f_chiffrement').checked)
+    {
+        wikiDecrypt(true);
+    }
 }());
 </script>
 {/literal}

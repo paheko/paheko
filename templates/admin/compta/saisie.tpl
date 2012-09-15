@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Saisie d'une opération" current="compta/saisie" custom_js="datepickr.js"}
+{include file="admin/_head.tpl" title="Saisie d'une opération" current="compta/saisie"}
 
 {if $error}
     <p class="error">

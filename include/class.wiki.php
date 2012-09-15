@@ -189,7 +189,8 @@ class Garradin_Wiki
         $db = Garradin_DB::getInstance();
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleQuerySingle('SELECT r.revision, r.modification, r.id_auteur, r.contenu,
-            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur
+            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
+            r.chiffrement
             FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
             WHERE r.id_page = ? AND revision = ? LIMIT 1;', true, (int) $id, (int) $rev);
     }
@@ -201,7 +202,7 @@ class Garradin_Wiki
         return $db->simpleStatementFetch('SELECT r.revision, r.modification, r.id_auteur,
             strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
             LENGTH(r.contenu) - (SELECT LENGTH(contenu) FROM wiki_revisions WHERE id_page = r.id_page AND revision < r.revision ORDER BY revision DESC LIMIT 1)
-            AS diff_taille
+            AS diff_taille, r.chiffrement
             FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
             WHERE r.id_page = ? ORDER BY r.revision DESC LIMIT 1000;', SQLITE3_ASSOC, (int) $id);
     }
