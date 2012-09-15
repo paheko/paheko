@@ -6,10 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="{$www_url}admin/static/admin.css" media="screen,projection,handheld" />
     {if isset($custom_js)}
-        <script type="text/javascript" src="{$www_url}admin/static/{$custom_js|escape}"></script>
-    {/if}
-    {if isset($custom_js2)}
-        <script type="text/javascript" src="{$www_url}admin/static/{$custom_js2|escape}"></script>
+        {foreach from=$custom_js item="js"}
+            <script type="text/javascript" src="{$www_url}admin/static/{$js|escape}"></script>
+        {/foreach}
     {/if}
 </head>
 

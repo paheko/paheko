@@ -150,6 +150,8 @@ else
     $tpl->assign('banque', utils::post('banque'));
 }
 
+$tpl->assign('custom_js', array('datepickr.js'));
+
 $tpl->display('admin/compta/saisie.tpl');
 
 ?>

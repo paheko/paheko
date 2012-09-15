@@ -30,6 +30,17 @@ if (utils::get('diff'))
 
     $rev1 = $wiki->getRevision($page['id'], (int)$revs[0]);
     $rev2 = $wiki->getRevision($page['id'], (int)$revs[1]);
+
+    if ($rev1['chiffrement'])
+    {
+        $rev1['contenu'] = 'Contenu chiffré';
+    }
+
+    if ($rev2['chiffrement'])
+    {
+        $rev2['contenu'] = 'Contenu chiffré';
+    }
+
     $tpl->assign('rev1', $rev1);
     $tpl->assign('rev2', $rev2);
     $tpl->assign('diff', true);

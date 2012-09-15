@@ -467,7 +467,7 @@ fieldset.wikiText textarea, fieldset.skelEdit textarea {
     width: 100%;
 }
 
-fieldset.wikiMain, fieldset.wikiRights {
+fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
     float: right;
     width: 35%;
     margin-left: 3%;
@@ -476,6 +476,15 @@ fieldset.wikiMain, fieldset.wikiRights {
 
 fieldset.wikiMain input[type=text] {
     min-width: 0;
+}
+
+#encryptPasswordDisplay {
+    cursor: help;
+    background: #ddd;
+}
+
+fieldset.wikiEncrypt .help {
+    font-size: .9em;
 }
 
 fieldset.wikiMain #f_titre {
