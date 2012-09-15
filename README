@@ -1,0 +1,33 @@
+Garradin - Gestionnaire d'association libre
+===========================================
+
+Inclus les bibliothèques suivantes :
+
+- Gibberish AES
+  https://github.com/mdp/gibberish-aes
+  Copyright : Mark Percival 2008 - http://markpercival.us
+  Licence : MIT
+
+- Countries - Liste des pays ISO 3166-1
+  Copyright : BohwaZ
+  Licence : Domaine public
+
+- Simple Diff PHP library
+  Copyright : BohwaZ 2009
+  Licence : GNU GPL v3
+
+- Garbage2xhtml - HTML cleaner
+  Copyright : BohwaZ 2006-2011
+  Licence : GNU AGPL v3
+
+- miniSkel - SPIP-like templates
+  Copyright : BohwaZ 2007-2012
+  Licence : GNU GPL v3
+
+- Passphrase - a PHP library to generate passphrases
+  Copyright : BohwaZ 2011-2012
+  Licence : WTFPL
+
+- Template_Lite
+  Copyright : 2003,2004,2005 by Paul Lockaby, 2005,2006 Mark Dickenson, 2005-2012 BohwaZ
+  Licence : GNU GPL v2.1
