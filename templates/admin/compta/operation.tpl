@@ -30,6 +30,11 @@
             <dd>{$compte|escape}</dd>
         {/if}
 
+        <dt>Catégorie</dt>
+        <dd>
+            <a href="{$www_url}admin/compta/gestion.php?{if $categorie.type == Garradin_Compta_Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin_Compta_Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
+            <a href="{$www_url}admin/compta/gestion.php?cat={$operation.id_categorie|escape}">{$categorie.intitule|escape}</a>
+        </dd>
     {/if}
 
     <dt>Opération créée par</dt>

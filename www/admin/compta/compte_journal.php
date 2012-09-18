@@ -2,11 +2,6 @@
 
 require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['compta'] < Garradin_Membres::DROIT_ACCES)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
-
 $compte = $comptes->get(utils::get('id'));
 
 if (!$compte)

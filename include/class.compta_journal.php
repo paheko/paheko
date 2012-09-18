@@ -208,6 +208,42 @@ class Garradin_Compta_Journal
         $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id_exercice '.$exercice.' ORDER BY date, id;';
         return $db->simpleStatementFetch($query);
     }
+
+    public function getListForCategory($type = null, $cat = null)
+    {
+        $db = Garradin_DB::getInstance();
+        $exercice = $this->_getCurrentExercice();
+
+        $query = 'SELECT compta_journal.*, strftime(\'%s\', compta_journal.date) AS date ';
+
+        if (is_null($cat))
+        {
+            $query.= ', compta_categories.intitule AS categorie
+                FROM compta_journal LEFT JOIN compta_categories
+                ON compta_journal.id_categorie = compta_categories.id ';
+        }
+        else
+        {
+            $query.= ' FROM compta_journal ';
+        }
+
+        $query .= ' WHERE ';
+
+        if (!is_null($cat))
+        {
+            $query .= 'id_categorie = ' . (int)$cat;
+        }
+        else
+        {
+            $query.= 'id_categorie IN (SELECT id FROM compta_categories WHERE type = '.(int)$type.')';
+        }
+
+        $query .= ' AND id_exercice ';
+        $query .= is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
+        $query .= ' ORDER BY date;';
+
+        return $db->simpleStatementFetch($query);
+    }
 }
 
 ?>
