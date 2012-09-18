@@ -314,7 +314,7 @@ function tpl_select_compte($params)
 {
     $name = $params['name'];
     $comptes = $params['comptes'];
-    $selected = utils::post($name);
+    $selected = isset($params['data'][$params['name']]) ? $params['data'][$params['name']] : utils::post($name);
 
     $out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
 

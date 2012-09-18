@@ -195,7 +195,10 @@ class Garradin_Compta_Journal
             $data['id_categorie'] = NULL;
         }
 
-        $data['id_auteur'] = (int)$data['id_auteur'];
+        if (isset($data['id_auteur']))
+        {
+            $data['id_auteur'] = (int)$data['id_auteur'];
+        }
 
         return true;
     }
