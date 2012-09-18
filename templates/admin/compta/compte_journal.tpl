@@ -8,18 +8,18 @@
         <col width="10%" />
         <col />
     </colgroup>
-{foreach from=$journal item="ligne"}
-    <tr>
-        <td><a href="{$admin_url}compta/operation.php?id={$ligne.id|escape}">{$ligne.id|escape}</a></td>
-        <td class="actions">
-            <a class="icn" href="{$admin_url}compta/operation_modifier.php?id={$ligne.id|escape}">✎</a>
-        </td>
-        <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
-        <td>{if $ligne.compte_credit == $compte.id}-{$ligne.montant|escape}{else}+{$ligne.montant|escape}{/if}</td>
-        <th>{$ligne.libelle|escape}</th>
-    </tr>
-{/foreach}
     <tbody>
+    {foreach from=$journal item="ligne"}
+        <tr>
+            <td><a href="{$admin_url}compta/operation.php?id={$ligne.id|escape}">{$ligne.id|escape}</a></td>
+            <td class="actions">
+                <a class="icn" href="{$admin_url}compta/operation_modifier.php?id={$ligne.id|escape}">✎</a>
+            </td>
+            <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
+            <td>{if $ligne.compte_credit == $compte.id}-{$ligne.montant|escape}{else}+{$ligne.montant|escape}{/if}</td>
+            <th>{$ligne.libelle|escape}</th>
+        </tr>
+    {/foreach}
         <tr>
             <td></td>
             <td></td>

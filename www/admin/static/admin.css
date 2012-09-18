@@ -62,7 +62,7 @@ body#popup {
     color: rgb(156, 79, 21);
 }
 
-.header .menu .list_members small {
+.header .menu a small {
     font-weight: normal;
     opacity: 0.5;
     float: right;

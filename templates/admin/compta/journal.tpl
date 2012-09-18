@@ -1,9 +1,5 @@
 {include file="admin/_head.tpl" title="Journal général" current="compta/gestion"}
 
-<ul class="actions">
-    <li class="journal current"><a href="{$www_url}admin/compta/journal.php">Journal général</a></li>
-</ul>
-
 <table class="list multi">
     <thead>
         <tr>
