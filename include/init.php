@@ -60,7 +60,7 @@ if (!defined('GARRADIN_DB_FILE'))
 
 if (!defined('GARRADIN_DB_SCHEMA'))
 {
-    define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/DB_SCHEMA');
+    define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/include/data/schema.sql');
 }
 
 if (!defined('WWW_URI'))

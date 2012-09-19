@@ -38,6 +38,19 @@ elseif (version_compare($v, '0.4.0', '<'))
     $config->set('monnaie', '€');
     $config->set('pays', 'FR');
     $config->save();
+
+    $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.0.sql'));
+
+    // Mise en place compta
+    require GARRADIN_ROOT . '/include/class.compta_comptes.php';
+
+    $comptes = new Garradin_Compta_Comptes;
+    $comptes->importPlan();
+
+    require GARRADIN_ROOT . '/include/class.compta_categories.php';
+
+    $comptes = new Garradin_Compta_Categories;
+    $comptes->importCategories();
 }
 
 utils::clearCaches();

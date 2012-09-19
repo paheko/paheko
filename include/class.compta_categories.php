@@ -9,7 +9,7 @@ class Garradin_Compta_Categories
     public function importCategories()
     {
         $db = Garradin_DB::getInstance();
-        $db->exec(file_get_contents(GARRADIN_ROOT . '/include/categories_comptables.sql'));
+        $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/categories_comptables.sql'));
     }
 
     public function add($data)
