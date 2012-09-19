@@ -366,9 +366,10 @@ class utils
         // Construction des entêtes
         $headers = '';
 
+        $config = Garradin_Config::getInstance();
+
         if (empty($additional_headers['From']))
         {
-            $config = Garradin_Config::getInstance();
             $additional_headers['From'] = '"NE PAS REPONDRE" <'.$config->get('email_envoi_automatique').'>';
         }
 
