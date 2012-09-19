@@ -11,7 +11,7 @@ class Garradin_Compta_Comptes
 
     public function importPlan()
     {
-        $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/plan_comptable.json'), true);
+        $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/data/plan_comptable.json'), true);
 
         $db = Garradin_DB::getInstance();
         $db->exec('BEGIN;');
