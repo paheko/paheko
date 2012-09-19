@@ -99,7 +99,13 @@ class Garradin_Compta_Journal
     {
         $db = Garradin_DB::getInstance();
 
-        // FIXME
+        // Vérification que l'on peut éditer cette opération
+        if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
+        {
+            throw new UserException('Cette opération fait partie d\'un exercice qui a été clos.');
+        }
+
+        $db->simpleExec('DELETE FROM compta_journal WHERE id = ?;', (int)$id);
 
         return true;
     }
@@ -219,7 +225,7 @@ class Garradin_Compta_Journal
 
         $query = 'SELECT compta_journal.*, strftime(\'%s\', compta_journal.date) AS date ';
 
-        if (is_null($cat))
+        if (is_null($cat) && !is_null($type))
         {
             $query.= ', compta_categories.intitule AS categorie
                 FROM compta_journal LEFT JOIN compta_categories
@@ -235,6 +241,10 @@ class Garradin_Compta_Journal
         if (!is_null($cat))
         {
             $query .= 'id_categorie = ' . (int)$cat;
+        }
+        elseif (is_null($type) && is_null($cat))
+        {
+            $query .= 'id_categorie IS NULL';
         }
         else
         {

@@ -20,20 +20,27 @@ if (utils::get('cat'))
 }
 else
 {
-	$type = isset($_GET['depenses'])
-		? Garradin_Compta_Categories::DEPENSES
-		: Garradin_Compta_Categories::RECETTES;
+	if (isset($_GET['autres']))
+		$type = Garradin_Compta_Categories::AUTRES;
+	elseif (isset($_GET['depenses']))
+		$type = Garradin_Compta_Categories::DEPENSES;
+	else
+		$type = Garradin_Compta_Categories::RECETTES;
 }
 
 require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
 $journal = new Garradin_Compta_Journal;
 
-$list = $journal->getListForCategory($type, $cat ? $cat['id'] : null);
+$list = $journal->getListForCategory($type === Garradin_Compta_Categories::AUTRES ? null : $type, $cat ? $cat['id'] : null);
 
 $tpl->assign('categorie', $cat);
 $tpl->assign('journal', $list);
 $tpl->assign('type', $type);
-$tpl->assign('liste_cats', $cats->getList($type));
+
+if ($type !== Garradin_Compta_Categories::AUTRES)
+{
+	$tpl->assign('liste_cats', $cats->getList($type));
+}
 
 $total = 0.0;
 
