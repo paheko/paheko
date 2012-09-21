@@ -46,18 +46,45 @@ if (preg_match('/^apache/', PHP_SAPI))
 		{
 			unlink(__DIR__ . '/.htaccess');
 		}
-
-		header('Location: '.WWW_URL);
+		else
+		{
+			header('Location: '.WWW_URL);
+			exit;
+		}
 	}
 	else
 	{
 		file_put_contents(GARRADIN_ROOT . '/config.local.php', '<?php define(\'WWW_URI\', \''.$uri.'\'); ?>');
 		header('Location: '.$url);
+		exit;
 	}
 }
-else
+
+// Si serveur non Apache, ou ni RewriteRule ni RedirectMatch ne fonctionnent,
+// on empêche quand même de lister les répertoires
+$dir = dir(GARRADIN_ROOT);
+
+while ($file = $dir->read())
 {
-	header('Location: '.WWW_URL);
+	if ($file[0] == '.')
+	{
+		continue;
+	}
+
+	if (!is_dir(GARRADIN_ROOT . '/' . $file))
+	{
+		continue;
+	}
+
+	file_put_contents(GARRADIN_ROOT . '/' . $file . '/index.html',
+		'<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">' .
+		'<html><head><title>404 Not Found</title></head><body>' .
+		'<h1>Not Found</h1><p>The requested URL was not found on this server.</p>' .
+		'</body></html>');
 }
+
+$dir->close();
+
+header('Location: '.WWW_URL);
 
 ?>
