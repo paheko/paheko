@@ -8,7 +8,7 @@ if (!version_compare(phpversion(), '5.3.0', '>='))
 define('GARRADIN_INSTALL_PROCESS', true);
 require __DIR__ . '/include/init.php';
 
-if (!defined('PHP_SAPI'))
+if (!defined('PHP_SAPI') || file_exists(GARRADIN_ROOT . '/.garradinRootProcessed'))
 {
 	header('Location: '.WWW_URL);
 	exit;
@@ -48,12 +48,14 @@ if (preg_match('/^apache/', PHP_SAPI))
 		}
 		else
 		{
+			touch(GARRADIN_ROOT . '/.garradinRootProcessed');
 			header('Location: '.WWW_URL);
 			exit;
 		}
 	}
 	else
 	{
+		touch(GARRADIN_ROOT . '/.garradinRootProcessed');
 		file_put_contents(GARRADIN_ROOT . '/config.local.php', '<?php define(\'WWW_URI\', \''.$uri.'\'); ?>');
 		header('Location: '.$url);
 		exit;
@@ -85,6 +87,7 @@ while ($file = $dir->read())
 
 $dir->close();
 
+touch(GARRADIN_ROOT . '/.garradinRootProcessed');
 header('Location: '.WWW_URL);
 
 ?>
