@@ -71,7 +71,7 @@ while ($file = $dir->read())
 		continue;
 	}
 
-	if (!is_dir(GARRADIN_ROOT . '/' . $file))
+	if (!is_dir(GARRADIN_ROOT . '/' . $file) || $file == 'www')
 	{
 		continue;
 	}
