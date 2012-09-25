@@ -1,7 +1,8 @@
 /*
 	datepickr - pick your date not your nose
-	Copyright (c) 2010 josh.salverda - Apache License 2.0
+	Copyright (c) 2010 josh.salverda - 2012 bohwaz Apache License 2.0
 	https://code.google.com/p/datepickr/
+	http://dev.kd2.org/garradin/
 */
 
 function datepickr(targetElement, userConfig) {
@@ -16,6 +17,8 @@ function datepickr(targetElement, userConfig) {
 		defaultSuffix: 'th'
 	},
 	currentDate = new Date(),
+	currentPosition = new Array(0,0),
+	currentMaxRows = 4,
 	// shortcuts to get date info
 	get = {
 		current: {
@@ -209,12 +212,13 @@ function datepickr(targetElement, userConfig) {
 		numDays = get.month.numDays(),
 		// declare our day counter
 		dayCount = 0,
+		weekCount = 0,
 		html = document.createDocumentFragment(),
 		row = build('tr');
 
 		// print out previous month's "days"
 		for(i = 1; i <= firstOfMonth; i++) {
-			row.appendChild(build('td', {}, '&nbsp;'));
+			row.appendChild(build('td', {}, ''));
 			dayCount++;
 		}
 
@@ -224,20 +228,28 @@ function datepickr(targetElement, userConfig) {
 				html.appendChild(row);
 				row = build('tr');
 				dayCount = 0;
+				weekCount++;
 			}
 
 			// output the text that goes inside each td
 			// if the day is the current day, add a class of "today"
-			row.appendChild(build('td', { className: (i == get.current.day() && currentMonthView == get.current.month.integer() && currentYearView == get.current.year()) ? 'today' : '' }, build('a', { href: 'javascript:void(0)' }, i)));
+			var today = (i == get.current.day() && currentMonthView == get.current.month.integer() && currentYearView == get.current.year());
+			if (today)
+			{
+				currentPosition = [weekCount+1, dayCount];
+			}
+			row.appendChild(build('td', { className: today ? 'today' : '' }, build('a', { href: 'javascript:void(0)' }, i)));
 			dayCount++;
 		}
 
 		// if we haven't finished at the end of the week, start writing out the "days" for the next month
 		for(i = 1; i <= (7 - dayCount); i++) {
-			row.appendChild(build('td', {}, '&nbsp;'));
+			row.appendChild(build('td', {}, ''));
 		}
 
 		html.appendChild(row);
+
+		currentMaxRows = weekCount+1;
 
 		return html;
 	}
@@ -259,6 +271,62 @@ function datepickr(targetElement, userConfig) {
 			}
 
 			e.preventDefault();
+		}
+
+		document.onkeypress = function(e) {
+			var k = e.keyCode || e.which;
+
+			if (k == 33) // PgUp
+			{
+				e.preventDefault();
+				currentMonthView--;
+				return handleMonthClick();
+			}
+			else if (k == 34) // PgDn
+			{
+				e.preventDefault();
+				currentMonthView++;
+				return handleMonthClick();
+			}
+			else if (k >= 37 && k <= 40) // Arrows
+			{
+				e.preventDefault();
+				var pos = currentPosition.slice();
+				if (k == 37) { // left
+					if (pos[1] == 0) return;
+					pos[1]--;
+				}
+				else if (k == 38) { // up
+					if (pos[0] <= 1) return;
+					pos[0]--;
+				}
+				else if (k == 39) { // right
+					if (pos[1] == 6) return;
+					pos[1]++;
+				}
+				else { // down
+					if (pos[0] == currentMaxRows) return;
+					pos[0]++;
+				}
+
+				var table = container.getElementsByTagName('table')[0];
+				var row = table.getElementsByTagName('td')[pos[0]*7+pos[1]-7];
+
+				if (row.innerHTML == "") return;
+
+				table.getElementsByTagName('td')[currentPosition[0]*7+currentPosition[1]-7].className = '';
+				row.className = 'today';
+
+				currentPosition = pos;
+				currentDate = new Date(currentYearView, currentMonthView, row.firstChild.innerHTML);
+			}
+			else if (k == 13 || k == 32)
+			{
+				element.value = formatDate(currentDate.getTime());
+				close();
+				e.preventDefault();
+				return false;
+			}
 		}
 
 		handleMonthClick();
@@ -382,4 +450,3 @@ function datepickr(targetElement, userConfig) {
 		document.attachEvent("onDOMContentLoaded", dateInputFallback);
 	}
 } () );
-
