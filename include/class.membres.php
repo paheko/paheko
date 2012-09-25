@@ -505,9 +505,9 @@ class Garradin_Membres
     static public function updateCotisation($id, $date)
     {
         if (preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
-            $date = DateTime::createFromFormat('d/m/Y', $date);
+            $date = DateTime::createFromFormat('d/m/Y', $date, new DateTimeZone('UTC'));
         elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $date))
-            $date = DateTime::createFromFormat('Y-m-d', $date);
+            $date = DateTime::createFromFormat('Y-m-d', $date, new DateTimeZone('UTC'));
         else
             throw new UserException('Format de date invalide : '.$date);
 

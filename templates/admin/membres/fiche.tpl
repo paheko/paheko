@@ -1,87 +1,91 @@
 {include file="admin/_head.tpl" title="`$membre.nom` (`$categorie.nom`)" current="membres"}
 
+{if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
+<ul class="actions">
+    <li><a href="{$www_url}admin/membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
+</ul>
+{/if}
+
 {if $error}
     <p class="error">
         {$error|escape}
     </p>
 {/if}
 
-<div class="infos">
-    <h3>Informations personnelles</h3>
-    <p>
-        <strong>{$membre.nom|escape}</strong><br />
-        {if !empty($membre.adresse)}
-            {$membre.adresse|escape|nl2br}<br />
+<dl class="describe">
+    <dt>Numéro d'adhérent</dt>
+    <dd>{$membre.id|escape}</dd>
+    <dt>Nom et prénom</dt>
+    <dd><strong>{$membre.nom|escape}</strong></dd>
+    <dt>Adresse</dt>
+    <dd>
+        {if !empty($membre.adresse) || !empty($membre.code_postal) || !empty($membre.ville) || !empty($membre.pays)}
+            {if !empty($membre.adresse)}
+                {$membre.adresse|escape|nl2br}<br />
+            {/if}
+            {if !empty($membre.code_postal)}
+                {$membre.code_postal|escape}
+            {/if}
+            {if !empty($membre.ville)}
+                {$membre.ville|escape}<br />
+            {/if}
+            ({$membre.pays|get_country_name|escape})
+        {else}
+            <em>(Non renseignée)</em>
         {/if}
-        {if !empty($membre.code_postal)}
-            {$membre.code_postal|escape}
+    </dd>
+    <dt>Téléphone</dt>
+    <dd>
+        {if !empty($membre.telephone)}
+            <a href="tel:{$membre.telephone|escape}">{$membre.telephone|escape|format_tel}</a>
+        {else}
+            <em>(Non renseigné)</em>
         {/if}
-        {if !empty($membre.ville)}
-            {$membre.ville|escape}<br />
+    <dt>Adresse E-Mail</dt>
+    <dd>
+        {if !empty($membre.email)}
+            <a href="mailto:{$membre.email|escape}">{$membre.email|escape}</a>
+            | <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
+            {if $membre.lettre_infos}
+                <em>(inscrit-e à la lettre d'informations)</em>
+            {/if}
+        {else}
+            <em>(Non renseignée)</em>
         {/if}
-        ({$membre.pays|get_country_name|escape})
-    </p>
-    {if !empty($membre.telephone)}
-    <p>
-        Téléphone : <strong>{$membre.telephone|escape|format_tel}</strong>
-    </p>
-    {/if}
-    {if !empty($membre.email)}
-    <p>
-        E-Mail : {$membre.email|escape} -
-        <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
-        {if $membre.lettre_infos}
-            (inscrit-e à la lettre d'informations)
-        {/if}
-    </p>
-    {/if}
-    {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
-    <p>
-        <a href="{$www_url}admin/membres/modifier.php?id={$membre.id|escape}">Modifier les informations de ce membre</a>
-    </p>
-    {/if}
-</div>
-
-<div class="infos">
-    <h3>Informations générales</h3>
-    <dl>
-        <dt>Numéro d'adhérent</dt>
-        <dd>{$membre.id|escape}</dd>
-        <dt>Catégorie</dt>
-        <dd>{$categorie.nom|escape}</dd>
-        <dd class="droits">{format_droits droits=$categorie}</dd>
-        <dt>Inscription</dt>
-        <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
-        <dt>Dernière connexion</dt>
-        <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
-        <dt>Mot de passe</dt>
-        <dd>{if empty($membre.passe)}Non{else}Oui{/if}</dd>
-    </dl>
-</div>
-
-<div class="cotisation">
-    <h3>Cotisation</h3>
+    </dd>
+    <dt>Catégorie</dt>
+    <dd>{$categorie.nom|escape} <span class="droits">{format_droits droits=$categorie}</span></dd>
+    <dt>Inscription</dt>
+    <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
+    <dt>Dernière connexion</dt>
+    <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
+    <dt>Mot de passe</dt>
+    <dd>{if empty($membre.passe)}Non{else}Oui{/if}</dd>
+    <dt>Cotisation</dt>
+    <dd>
     {if empty($membre.date_cotisation)}
-        <p class="error">Jamais réglée</p>
+        <span class="error">Jamais réglée</span>
     {elseif $verif_cotisation === true}
-        <p class="confirm">Réglée le {$membre.date_cotisation|date_fr:'d/m/Y'}</p>
+        <span class="confirm">Réglée le {$membre.date_cotisation|date_fr:'d/m/Y'}</span>
     {else}
-        <p class="alert">En retard de {$verif_cotisation|escape} jours</p>
+        <span class="alert">En retard de {$verif_cotisation|escape} jours</span>
     {/if}
-
-    <form method="post" action="{$self_url}">
-        <fieldset>
-            <legend>Mettre à jour la cotisation</legend>
-            <dl>
-                <dt><label for="f_date">L'adhésion commence le...</label> (format JJ/MM/AAAA)</dt>
-                <dd>
-                    <input type="text" name="date" value="{form_field name=nom default=$date_cotisation_defaut}" id="f_date" />
-                    {csrf_field key="cotisation_"|cat:$membre.id}
-                    <input type="submit" name="cotisation" value="Enregistrer &rarr;" />
-                </dd>
-            </dl>
-        </fieldset>
-    </form>
-</div>
+    </dd>
+    <dd>
+        <form method="post" action="{$self_url}">
+            <fieldset>
+                <legend>Mettre à jour la cotisation</legend>
+                <dl>
+                    <dt><label for="f_date">L'adhésion commence le...</label></dt>
+                    <dd>
+                        <input type="date" name="date" value="{form_field name=nom default=$date_cotisation_defaut}" id="f_date" />
+                        {csrf_field key="cotisation_"|cat:$membre.id}
+                        <input type="submit" name="cotisation" value="Enregistrer &rarr;" />
+                    </dd>
+                </dl>
+            </fieldset>
+        </form>
+    </dd>
+</dl>
 
 {include file="admin/_foot.tpl"}
