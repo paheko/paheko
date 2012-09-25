@@ -351,6 +351,11 @@ function tpl_select_compte($params)
     return $out;
 }
 
+function escape_money($number)
+{
+    return number_format((float)$number, 2, ',', ' ');
+}
+
 $tpl->register_function('csrf_field', 'tpl_csrf_field');
 $tpl->register_function('form_field', 'tpl_form_field');
 $tpl->register_function('select_compte', 'tpl_select_compte');
@@ -365,6 +370,8 @@ $tpl->register_modifier('get_country_name', array('utils', 'getCountryName'));
 $tpl->register_modifier('format_tel', 'tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'tpl_format_wiki');
 $tpl->register_modifier('liens_wiki', 'tpl_liens_wiki');
+$tpl->register_modifier('escape_money', 'escape_money');
+$tpl->register_modifier('abs', 'abs');
 
 //$tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
 
