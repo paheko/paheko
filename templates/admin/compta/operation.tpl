@@ -5,7 +5,7 @@
     <li class="delete"><a href="{$admin_url}compta/operation_supprimer.php?id={$operation.id|escape}">Supprimer cette opération</a></li>
 </ul>
 
-<dl class="operation">
+<dl class="describe">
     <dt>Date</dt>
     <dd>{$operation.date|date_fr:'l j F Y (d/m/Y)'}</dd>
     <dt>Libellé</dt>

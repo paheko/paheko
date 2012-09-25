@@ -67,9 +67,10 @@ else
 {
     $prochaine_cotisation = time();
 }
-$tpl->assign('date_cotisation_defaut', date('d/m/Y', $prochaine_cotisation));
+$tpl->assign('date_cotisation_defaut', date('Y-m-d', $prochaine_cotisation));
 
 $tpl->assign('error', $error);
+$tpl->assign('custom_js', array('datepickr.js'));
 
 $tpl->display('admin/membres/fiche.tpl');
 

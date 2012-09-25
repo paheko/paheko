@@ -79,6 +79,18 @@ body#popup .page {
     margin: 1em 1em 1em 2.5em;
 }
 
+span.error {
+    color: #900;
+}
+
+span.confirm {
+    color: #090;
+}
+
+span.alert {
+    color: #990;
+}
+
 p.error {
     border: 1px solid #c00;
     background: #fcc;
@@ -775,11 +787,11 @@ table.accountList .niveau_6 .libelle { padding-left: 4em; }
 table.rib { display: inline-table; vertical-align: middle; font-size: .9em; text-align: center; border-collapse: collapse; }
 table.rib th, table.rib td { padding: .1em .3em; border: 1px solid #ccc; }
 
-dl.operation {
+dl.describe {
     margin-bottom: 1em;
 }
 
-dl.operation dt {
+dl.describe > dt {
     font-weight: bold;
     width: 15em;
     float: left;
@@ -787,6 +799,7 @@ dl.operation dt {
     margin-bottom: .5em;
 }
 
-dl.operation dd {
+dl.describe > dd {
     margin-bottom: .5em;
+    margin-left: 15em;
 }
