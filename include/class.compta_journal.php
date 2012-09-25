@@ -218,6 +218,60 @@ class Garradin_Compta_Journal
         return $db->simpleStatementFetch($query);
     }
 
+    public function getGrandLivre()
+    {
+        $db = Garradin_DB::getInstance();
+        $exercice = $this->_getCurrentExercice();
+        $exercice = 'id_exercice ' . (is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice);
+        $livre = array();
+
+        $res = $db->prepare('SELECT compte FROM
+            (SELECT compte_debit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
+                UNION
+                SELECT compte_credit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_credit)
+            ORDER BY base64(compte) COLLATE BINARY ASC;'
+            )->execute();
+
+        while ($row = $res->fetchArray(SQLITE3_NUM))
+        {
+            $compte = $row[0];
+            $classe = substr($compte, 0, 1);
+            $parent = substr($compte, 0, 2);
+
+            if (!array_key_exists($classe, $livre))
+            {
+                $livre[$classe] = array();
+            }
+
+            if (!array_key_exists($parent, $livre[$classe]))
+            {
+                $livre[$classe][$parent] = array(
+                    'total'         =>  0.0,
+                    'comptes'       =>  array()
+                );
+            }
+
+            $livre[$classe][$parent]['comptes'][$compte] = $db->simpleStatementFetch(
+                'SELECT *, strftime(\'%s\', date) AS date FROM (
+                    SELECT * FROM compta_journal WHERE compte_debit = :compte AND '.$exercice.'
+                    UNION
+                    SELECT * FROM compta_journal WHERE compte_credit = :compte AND '.$exercice.'
+                    )
+                ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, array('compte' => $compte));
+
+            $livre[$classe][$parent]['total'] += $db->simpleQuerySingle(
+                'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND '.$exercice.';',
+                false, $compte);
+            $livre[$classe][$parent]['total'] -= $db->simpleQuerySingle(
+                'SELECT SUM(montant) FROM compta_journal WHERE compte_credit = ? AND '.$exercice.';',
+                false, $compte);
+        }
+
+        $res->finalize();
+
+        return $livre;
+    }
+
     public function getListForCategory($type = null, $cat = null)
     {
         $db = Garradin_DB::getInstance();

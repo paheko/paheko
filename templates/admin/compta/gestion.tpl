@@ -5,6 +5,7 @@
     <li class="depenses{if $type == Garradin_Compta_Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/gestion.php?depenses">Dépenses</a></li>
     <li class="autres{if $type == Garradin_Compta_Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/gestion.php?autres">Autres</a></li>
     <li class="journal"><a href="{$www_url}admin/compta/journal.php">Journal général</a></li>
+    <li class="grand_livre"><a href="{$www_url}admin/compta/grand_livre.php">Grand livre</a></li>
 </ul>
 
 {if $type != Garradin_Compta_Categories::AUTRES}
@@ -41,7 +42,7 @@
                 <a class="icn" href="{$admin_url}compta/operation_modifier.php?id={$ligne.id|escape}">✎</a>
             </td>
             <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
-            <td>{$ligne.montant|escape} {$config.monnaie|escape}</td>
+            <td>{$ligne.montant|escape_money} {$config.monnaie|escape}</td>
             <th>{$ligne.libelle|escape}</th>
             {if !$categorie && $type}
             <td>{$ligne.categorie|escape}</td>
@@ -56,15 +57,17 @@
             {if !$categorie && $type}<td></td>{/if}
         </tr>
     {/foreach}
+    </tbody>
+    <tfoot>
         <tr>
             <td></td>
             <td></td>
             <th>Total</th>
-            <td>{$total|escape} {$config.monnaie|escape}</td>
+            <td>{$total|escape_money} {$config.monnaie|escape}</td>
             <td></td>
             {if !$categorie && $type}<td></td>{/if}
         </tr>
-    </tbody>
+    </tfoot>
 </table>
 
 {include file="admin/_foot.tpl"}
