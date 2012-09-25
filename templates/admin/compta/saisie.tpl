@@ -10,6 +10,7 @@
     <li{if $type == Garradin_Compta_Categories::RECETTES} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?recette">Recette</a></li>
     <li{if $type == Garradin_Compta_Categories::DEPENSES} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?depense">Dépense</a></li>
     <li{if $type === 'virement'} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?virement">Virement interne</a></li>
+    <li{if $type === 'dette'} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?dette">Dette</a></li>
     <li{if is_null($type)} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?avance">Saisie avancée</a></li>
 </ul>
 
@@ -53,6 +54,16 @@
                 {/foreach}
                 </select>
             </dd>
+{elseif $type === 'dette'}
+            <dt><label for="f_compte_usager">Type de dette</label></dt>
+            <dd>
+                <input type="radio" name="compte" id="f_compte_usager" value="4110" {form_field name=compte checked=4110 default=4110} />
+                <label for="f_compte_usager">Dette envers un membre ou usager</label>
+            </dd>
+            <dd>
+                <input type="radio" name="compte" id="f_compte_fournisseur" value="4010" {form_field name=compte checked=4010} />
+                <label for="f_compte_fournisseur">Dette envers un fournisseur</label>
+            </dd>
 {else}
             <dt><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
@@ -80,7 +91,7 @@
         </dl>
     </fieldset>
 
-{if $type == Garradin_Compta_Categories::DEPENSES || $type == Garradin_Compta_Categories::RECETTES}
+{if $type == Garradin_Compta_Categories::DEPENSES || $type == Garradin_Compta_Categories::RECETTES || $type == 'dette'}
     <fieldset>
         <legend>Catégorie</legend>
         <dl class="catList">
