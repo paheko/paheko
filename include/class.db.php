@@ -59,6 +59,7 @@ class Garradin_DB extends SQLite3
         }
 
         $this->createFunction('transliterate_to_ascii', array('utils', 'transliterateToAscii'));
+        $this->createFunction('base64', 'base64_encode');
         $this->createFunction('rank', array($this, 'sql_rank'));
     }
 
