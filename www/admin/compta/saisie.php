@@ -137,7 +137,7 @@ if (!empty($_POST['save']))
                     'compte_debit'  =>  $debit,
                     'numero_piece'  =>  utils::post('numero_piece'),
                     'remarques'     =>  utils::post('remarques'),
-                    'id_categorie'  =>  (int)$cat['id'],
+                    'id_categorie'  =>  ($type === 'dette') ? null : (int)$cat['id'],
                     'id_auteur'     =>  $user['id'],
                 ));
             }
