@@ -20,6 +20,8 @@ if (isset($_GET['depense']))
     $type = Garradin_Compta_Categories::DEPENSES;
 elseif (isset($_GET['virement']))
     $type = 'virement';
+elseif (isset($_GET['dette']))
+    $type = 'dette';
 elseif (isset($_GET['avance']))
     $type = null;
 else
@@ -72,49 +74,65 @@ if (!empty($_POST['save']))
                     throw new UserException('Il faut choisir une catégorie.');
                 }
 
-                if (!array_key_exists(utils::post('moyen_paiement'), $cats->listMoyensPaiement()))
+                if ($type == 'dette')
                 {
-                    throw new UserException('Moyen de paiement invalide.');
-                }
-
-                if (utils::post('moyen_paiement') == 'ES')
-                {
-                    $a = Garradin_Compta_Comptes::CAISSE;
-                    $b = $cat['compte'];
+                    if (!trim(utils::post('compte')) ||
+                        (utils::post('compte') != 4010 && utils::post('compte') != 4110))
+                    {
+                        throw new UserException('Type de dette invalide.');
+                    }
                 }
                 else
                 {
-                    if (!trim(utils::post('banque')))
+                    if (!array_key_exists(utils::post('moyen_paiement'), $cats->listMoyensPaiement()))
                     {
-                        throw new UserException('Le compte bancaire choisi est invalide.');
+                        throw new UserException('Moyen de paiement invalide.');
                     }
 
-                    if (!array_key_exists(utils::post('banque'), $banques->getList()))
+                    if (utils::post('moyen_paiement') == 'ES')
                     {
-                        throw new UserException('Le compte bancaire choisi n\'existe pas.');
+                        $a = Garradin_Compta_Comptes::CAISSE;
+                        $b = $cat['compte'];
                     }
+                    else
+                    {
+                        if (!trim(utils::post('banque')))
+                        {
+                            throw new UserException('Le compte bancaire choisi est invalide.');
+                        }
 
-                    $a = utils::post('banque');
-                    $b = $cat['compte'];
+                        if (!array_key_exists(utils::post('banque'), $banques->getList()))
+                        {
+                            throw new UserException('Le compte bancaire choisi n\'existe pas.');
+                        }
+
+                        $a = utils::post('banque');
+                        $b = $cat['compte'];
+                    }
                 }
 
-                if ($type == Garradin_Compta_Categories::DEPENSES)
+                if ($type === Garradin_Compta_Categories::DEPENSES)
                 {
                     $debit = $b;
                     $credit = $a;
                 }
-                elseif ($type == Garradin_Compta_Categories::RECETTES)
+                elseif ($type === Garradin_Compta_Categories::RECETTES)
                 {
                     $debit = $a;
                     $credit = $b;
+                }
+                elseif ($type === 'dette')
+                {
+                    $debit = $cat['compte'];
+                    $credit = utils::post('compte');
                 }
 
                 $id = $journal->add(array(
                     'libelle'       =>  utils::post('libelle'),
                     'montant'       =>  utils::post('montant'),
                     'date'          =>  utils::post('date'),
-                    'moyen_paiement'=>  utils::post('moyen_paiement'),
-                    'numero_cheque' =>  utils::post('numero_cheque'),
+                    'moyen_paiement'=>  ($type === 'dette') ? null : utils::post('moyen_paiement'),
+                    'numero_cheque' =>  ($type === 'dette') ? null : utils::post('numero_cheque'),
                     'compte_credit' =>  $credit,
                     'compte_debit'  =>  $debit,
                     'numero_piece'  =>  utils::post('numero_piece'),
@@ -145,7 +163,7 @@ else
 {
     $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
     $tpl->assign('moyen_paiement', utils::post('moyen_paiement') ?: 'ES');
-    $tpl->assign('categories', $cats->getList($type));
+    $tpl->assign('categories', $cats->getList($type === 'dette' ? Garradin_Compta_Categories::DEPENSES : $type));
     $tpl->assign('comptes_bancaires', $banques->getList());
     $tpl->assign('banque', utils::post('banque'));
 }
