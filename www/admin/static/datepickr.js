@@ -335,6 +335,7 @@ function datepickr(targetElement, userConfig) {
 
 	function close() {
 		document.onmousedown = null;
+		document.onkeypress = null;
 		container.style.display = 'none';
 	}
 
