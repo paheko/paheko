@@ -1,6 +1,7 @@
 {include file="admin/_head.tpl" title="Grand livre" current="compta/gestion"}
 
 <div id="gdlivre">
+    <h2>En date du {$now|date_fr:'d/m/Y'}</h2>
     {foreach from=$livre.classes key="classe" item="comptes"}
     <h3>{$classe|get_nom_compte|escape}</h3>
 
