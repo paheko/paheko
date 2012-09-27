@@ -16,7 +16,7 @@
                 <a class="icn" href="{$admin_url}compta/operation_modifier.php?id={$ligne.id|escape}">✎</a>
             </td>
             <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
-            <td>{if $ligne.compte_credit == $compte.id}-{$ligne.montant|escape}{else}+{$ligne.montant|escape}{/if}</td>
+            <td>{if $ligne.compte_credit == $compte.id}-{else}+{/if}{$ligne.montant|escape_money}</td>
             <th>{$ligne.libelle|escape}</th>
         </tr>
     {/foreach}
@@ -24,7 +24,7 @@
             <td></td>
             <td></td>
             <th>Solde</th>
-            <td>{$solde|escape} {$config.monnaie|escape}</td>
+            <td>{$solde|escape_money} {$config.monnaie|escape}</td>
             <td></td>
         </tr>
     </tbody>

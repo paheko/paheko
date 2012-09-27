@@ -11,7 +11,7 @@
     <dt>Libellé</dt>
     <dd>{$operation.libelle|escape}</dd>
     <dt>Montant</dt>
-    <dd>{$operation.montant|escape}&nbsp;{$config.monnaie|escape}</dd>
+    <dd>{$operation.montant|escape_money}&nbsp;{$config.monnaie|escape}</dd>
     <dt>Numéro pièce comptable</dt>
     <dd>{if trim($operation.numero_piece)}{$operation.numero_piece|escape}{else}Non renseigné{/if}</dd>
 
@@ -62,14 +62,14 @@
         <tr>
             <td><a href="{$admin_url}compta/compte_journal.php?id={$operation.compte_debit|escape}">{$operation.compte_debit|escape}</a></td>
             <td>{$nom_compte_debit}</td>
-            <td>{$operation.montant|escape}&nbsp;{$config.monnaie|escape}</td>
+            <td>{$operation.montant|escape_money}&nbsp;{$config.monnaie|escape}</td>
             <td></td>
         </tr>
         <tr>
             <td><a href="{$admin_url}compta/compte_journal.php?id={$operation.compte_credit|escape}">{$operation.compte_credit|escape}</a></td>
             <td>{$nom_compte_credit}</td>
             <td></td>
-            <td>{$operation.montant|escape}&nbsp;{$config.monnaie|escape}</td>
+            <td>{$operation.montant|escape_money}&nbsp;{$config.monnaie|escape}</td>
         </tr>
     </tbody>
 </table>
