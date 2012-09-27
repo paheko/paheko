@@ -224,7 +224,7 @@ class Garradin_Compta_Journal
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
         $exercice = 'id_exercice ' . (is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice);
-        $livre = array();
+        $livre = array('classes' => array(), 'debit' => 0.0, 'credit' => 0.0);
 
         $res = $db->prepare('SELECT compte FROM
             (SELECT compte_debit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
@@ -239,20 +239,22 @@ class Garradin_Compta_Journal
             $classe = substr($compte, 0, 1);
             $parent = substr($compte, 0, 2);
 
-            if (!array_key_exists($classe, $livre))
+            if (!array_key_exists($classe, $livre['classes']))
             {
-                $livre[$classe] = array();
+                $livre['classes'][$classe] = array();
             }
 
-            if (!array_key_exists($parent, $livre[$classe]))
+            if (!array_key_exists($parent, $livre['classes'][$classe]))
             {
-                $livre[$classe][$parent] = array(
+                $livre['classes'][$classe][$parent] = array(
                     'total'         =>  0.0,
-                    'comptes'       =>  array()
+                    'comptes'       =>  array(),
                 );
             }
 
-            $livre[$classe][$parent]['comptes'][$compte] = $db->simpleStatementFetch(
+            $livre['classes'][$classe][$parent]['comptes'][$compte] = array('debit' => 0.0, 'credit' => 0.0, 'journal' => array());
+
+            $livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] = $db->simpleStatementFetch(
                 'SELECT *, strftime(\'%s\', date) AS date FROM (
                     SELECT * FROM compta_journal WHERE compte_debit = :compte AND '.$exercice.'
                     UNION
@@ -260,12 +262,22 @@ class Garradin_Compta_Journal
                     )
                 ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, array('compte' => $compte));
 
-            $livre[$classe][$parent]['total'] += $db->simpleQuerySingle(
+            $debit = (float) $db->simpleQuerySingle(
                 'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND '.$exercice.';',
                 false, $compte);
-            $livre[$classe][$parent]['total'] -= $db->simpleQuerySingle(
+
+            $credit = (float) $db->simpleQuerySingle(
                 'SELECT SUM(montant) FROM compta_journal WHERE compte_credit = ? AND '.$exercice.';',
                 false, $compte);
+
+            $livre['classes'][$classe][$parent]['comptes'][$compte]['debit'] = $debit;
+            $livre['classes'][$classe][$parent]['comptes'][$compte]['credit'] = $credit;
+
+            $livre['classes'][$classe][$parent]['total'] += $debit;
+            $livre['classes'][$classe][$parent]['total'] -= $credit;
+
+            $livre['debit'] += $debit;
+            $livre['credit'] += $credit;
         }
 
         $res->finalize();
