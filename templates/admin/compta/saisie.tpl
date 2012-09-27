@@ -20,7 +20,7 @@
         <legend>Informations sur l'opération</legend>
         <dl>
             <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="date" name="date" id="f_date" value="{form_field name=date}" size="10" /></dd>
+            <dd><input type="date" name="date" id="f_date" value="{form_field name=date default=$date}" size="10" /></dd>
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" /></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
