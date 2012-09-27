@@ -142,6 +142,8 @@ if (!empty($_POST['save']))
                 ));
             }
 
+            $membres->sessionStore('compta_date', utils::post('date'));
+
             utils::redirect('/admin/compta/operation.php?id='.(int)$id);
         }
         catch (UserException $e)
@@ -169,6 +171,7 @@ else
 }
 
 $tpl->assign('custom_js', array('datepickr.js'));
+$tpl->assign('date', $membres->sessionGet('compta_date') ?: false);
 
 $tpl->display('admin/compta/saisie.tpl');
 
