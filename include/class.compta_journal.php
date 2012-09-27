@@ -153,6 +153,7 @@ class Garradin_Compta_Journal
             }
         }
 
+        $data['montant'] = str_replace(',', '.', $data['montant']);
         $data['montant'] = (float)$data['montant'];
 
         if ($data['montant'] <= 0)
