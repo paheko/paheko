@@ -14,12 +14,12 @@
                     <table>
                         <caption><h3>Charges</h3></caption>
                         <tbody>
-                        {foreach from=$compte_resultat.charges.comptes key="parent" item="comptes"}
+                        {foreach from=$compte_resultat.charges.comptes key="parent_code" item="parent"}
                             <tr class="parent">
-                                <th>{$parent|get_nom_compte|escape}</th>
-                                <td></td>
+                                <th>{$parent_code|get_nom_compte|escape}</th>
+                                <td>{$parent.solde|escape_money}</td>
                             </tr>
-                            {foreach from=$comptes item="solde" key="compte"}
+                            {foreach from=$parent.comptes item="solde" key="compte"}
                             <tr class="compte">
                                 <th>{$compte|get_nom_compte|escape}</th>
                                 <td>{$solde|escape_money}</td>
@@ -33,12 +33,12 @@
                     <table>
                         <caption><h3>Produits</h3></caption>
                         <tbody>
-                        {foreach from=$compte_resultat.produits.comptes key="parent" item="comptes"}
+                        {foreach from=$compte_resultat.produits.comptes key="parent_code" item="parent"}
                             <tr class="parent">
-                                <th>{$parent|get_nom_compte|escape}</th>
-                                <td></td>
+                                <th>{$parent_code|get_nom_compte|escape}</th>
+                                <td>{$parent.solde|escape_money}</td>
                             </tr>
-                            {foreach from=$comptes item="solde" key="compte"}
+                            {foreach from=$parent.omptes item="solde" key="compte"}
                             <tr>
                                 <td>{$compte|get_nom_compte|escape}</td>
                                 <td>{$solde|escape_money}</td>

@@ -323,13 +323,25 @@ class Garradin_Compta_Journal
 
             if ($classe == 6)
             {
-                $charges['comptes'][$parent][$compte] = $solde;
+                if (!isset($charges['comptes'][$parent]))
+                {
+                    $charges['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                }
+
+                $charges['comptes'][$parent]['comptes'][$compte] = $solde;
                 $charges['total'] += $solde;
+                $charges['comptes'][$parent]['solde'] += $solde;
             }
             elseif ($classe == 7)
             {
-                $produits['comptes'][$parent][$compte] = $solde;
+                if (!isset($produits['comptes'][$parent]))
+                {
+                    $produits['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                }
+
+                $produits['comptes'][$parent]['comptes'][$compte] = $solde;
                 $produits['total'] += $solde;
+                $produits['comptes'][$parent]['solde'] += $solde;
             }
         }
 
