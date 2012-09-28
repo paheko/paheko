@@ -38,9 +38,9 @@
                                 <th>{$parent_code|get_nom_compte|escape}</th>
                                 <td>{$parent.solde|escape_money}</td>
                             </tr>
-                            {foreach from=$parent.omptes item="solde" key="compte"}
-                            <tr>
-                                <td>{$compte|get_nom_compte|escape}</td>
+                            {foreach from=$parent.comptes item="solde" key="compte"}
+                            <tr class="compte">
+                                <th>{$compte|get_nom_compte|escape}</th>
                                 <td>{$solde|escape_money}</td>
                             </tr>
                             {/foreach}

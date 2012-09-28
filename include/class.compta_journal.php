@@ -302,22 +302,18 @@ class Garradin_Compta_Journal
         $produits   = array('comptes' => array(), 'total' => 0.0);
         $resultat   = 0.0;
 
-        $res = $db->prepare('SELECT compte,
-            (COALESCE((SELECT SUM(montant) FROM compta_journal
-                WHERE compte_debit = compte AND '.$exercice.'), 0)
-            - COALESCE((SELECT SUM(montant) FROM compta_journal
-                WHERE compte_credit = compte AND '.$exercice.'), 0)) AS solde
+        $res = $db->prepare('SELECT compte, debit, credit
             FROM
-                (SELECT compte_debit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
+                (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
                 UNION
-                SELECT compte_credit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_credit)
+                SELECT compte_credit AS compte, 0 AS debit, SUM(montant) AS credit FROM compta_journal WHERE '.$exercice.' GROUP BY compte_credit)
             WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
             ORDER BY base64(compte) COLLATE BINARY ASC;'
             )->execute();
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
         {
-            list($compte, $solde) = $row;
+            list($compte, $debit, $credit) = $row;
             $classe = substr($compte, 0, 1);
             $parent = substr($compte, 0, 2);
 
@@ -327,6 +323,8 @@ class Garradin_Compta_Journal
                 {
                     $charges['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
                 }
+
+                $solde = $debit - $credit;
 
                 $charges['comptes'][$parent]['comptes'][$compte] = $solde;
                 $charges['total'] += $solde;
@@ -338,6 +336,8 @@ class Garradin_Compta_Journal
                 {
                     $produits['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
                 }
+
+                $solde = $credit - $debit;
 
                 $produits['comptes'][$parent]['comptes'][$compte] = $solde;
                 $produits['total'] += $solde;
