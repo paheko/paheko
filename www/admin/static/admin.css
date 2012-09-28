@@ -370,6 +370,42 @@ table.list .actions {
     margin-bottom: .8em;
 }
 
+#compteResultat table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#compteResultat tr {
+    vertical-align: top;
+}
+
+#compteResultat table table {
+    border: 1px solid rgba(217, 134, 40, 0.5);
+}
+
+#compteResultat table table tr th {
+    width: 80%;
+}
+
+#compteResultat td, #compteResultat th {
+    padding: 0.2em 0.5em;
+    text-align: left;
+}
+
+#compteResultat .compte th {
+    font-weight: normal;
+}
+
+#compteResultat .parent {
+    font-weight: bold;
+    background: rgba(217, 134, 40, 0.2);
+}
+
+#compteResultat table table tfoot tr {
+    background: rgba(217, 134, 40, 0.1);
+    color: rgb(156, 79, 21);
+}
+
 .actions .icn {
     text-decoration: none;
     border-radius: 1em;
