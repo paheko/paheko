@@ -292,6 +292,54 @@ class Garradin_Compta_Journal
         return $livre;
     }
 
+    public function getCompteResultat()
+    {
+        $db = Garradin_DB::getInstance();
+        $exercice = $this->_getCurrentExercice();
+        $exercice = 'id_exercice ' . (is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice);
+
+        $charges    = array('comptes' => array(), 'total' => 0.0);
+        $produits   = array('comptes' => array(), 'total' => 0.0);
+        $resultat   = 0.0;
+
+        $res = $db->prepare('SELECT compte,
+            (COALESCE((SELECT SUM(montant) FROM compta_journal
+                WHERE compte_debit = compte AND '.$exercice.'), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal
+                WHERE compte_credit = compte AND '.$exercice.'), 0)) AS solde
+            FROM
+                (SELECT compte_debit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
+                UNION
+                SELECT compte_credit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_credit)
+            WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
+            ORDER BY base64(compte) COLLATE BINARY ASC;'
+            )->execute();
+
+        while ($row = $res->fetchArray(SQLITE3_NUM))
+        {
+            list($compte, $solde) = $row;
+            $classe = substr($compte, 0, 1);
+            $parent = substr($compte, 0, 2);
+
+            if ($classe == 6)
+            {
+                $charges['comptes'][$parent][$compte] = $solde;
+                $charges['total'] += $solde;
+            }
+            elseif ($classe == 7)
+            {
+                $produits['comptes'][$parent][$compte] = $solde;
+                $produits['total'] += $solde;
+            }
+        }
+
+        $res->finalize();
+
+        $resultat = $produits['total'] - $charges['total'];
+
+        return array('charges' => $charges, 'produits' => $produits, 'resultat' => $resultat);
+    }
+
     public function getListForCategory($type = null, $cat = null)
     {
         $db = Garradin_DB::getInstance();

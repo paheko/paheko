@@ -6,6 +6,7 @@
     <li class="autres{if $type == Garradin_Compta_Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/gestion.php?autres">Autres</a></li>
     <li class="journal"><a href="{$www_url}admin/compta/journal.php">Journal général</a></li>
     <li class="grand_livre"><a href="{$www_url}admin/compta/grand_livre.php">Grand livre</a></li>
+    <li class="compte_resultat"><a href="{$www_url}admin/compta/compte_resultat.php">Compte de résultat</a></li>
 </ul>
 
 {if $type != Garradin_Compta_Categories::AUTRES}
