@@ -396,6 +396,10 @@ table.list .actions {
     font-weight: normal;
 }
 
+#compteResultat table table td {
+    text-align: right;
+}
+
 #compteResultat .parent {
     font-weight: bold;
     background: rgba(217, 134, 40, 0.2);
