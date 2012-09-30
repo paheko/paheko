@@ -352,6 +352,8 @@ class utils
         $str = preg_replace('/(?<!\\\\)\[([^-]+)->([^\]]+)\]/', '<a href="$2">$1</a>', $str);
         $str = preg_replace('/(?<!\\\\)\[([^\]]+)\]/', '<a href="$1">$1</a>', $str);
 
+        $str = preg_replace('/<a href="((?!http).*@.*)">/iU', '<a href="mailto:$1">', $str);
+
         return $str;
     }
 
