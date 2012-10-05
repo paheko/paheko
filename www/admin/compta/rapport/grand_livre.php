@@ -14,11 +14,11 @@ function get_nom_compte($compte)
 }
 
 $tpl->register_modifier('get_nom_compte', 'get_nom_compte');
-$tpl->assign('compte_resultat', $journal->getCompteResultat());
+$tpl->assign('livre', $journal->getGrandLivre());
 
 $tpl->assign('now', time());
 $tpl->assign('exercice', $journal->getCurrentExercice());
 
-$tpl->display('admin/compta/compte_resultat.tpl');
+$tpl->display('admin/compta/rapport/grand_livre.tpl');
 
 ?>
