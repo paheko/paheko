@@ -4,9 +4,7 @@
     <li class="recettes{if $type == Garradin_Compta_Categories::RECETTES} current{/if}"><a href="{$www_url}admin/compta/gestion.php?recettes">Recettes</a></li>
     <li class="depenses{if $type == Garradin_Compta_Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/gestion.php?depenses">Dépenses</a></li>
     <li class="autres{if $type == Garradin_Compta_Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/gestion.php?autres">Autres</a></li>
-    <li class="journal"><a href="{$www_url}admin/compta/journal.php">Journal général</a></li>
-    <li class="grand_livre"><a href="{$www_url}admin/compta/grand_livre.php">Grand livre</a></li>
-    <li class="compte_resultat"><a href="{$www_url}admin/compta/compte_resultat.php">Compte de résultat</a></li>
+    <li><a href="{$www_url}admin/compta/compte_journal.php?id={Garradin_Compta_Comptes::CAISSE}">Journal de caisse</a></li>
 </ul>
 
 {if $type != Garradin_Compta_Categories::AUTRES}

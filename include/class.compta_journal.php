@@ -45,6 +45,7 @@ class Garradin_Compta_Journal
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
+        // FIXME utiliser compta_comptes.position pour déterminer le sens !
         $query = 'SELECT
             COALESCE((SELECT SUM(montant) FROM compta_journal
                 WHERE compte_debit '.$compte.' AND id_exercice '.$exercice.'), 0)

@@ -14,8 +14,11 @@ function get_nom_compte($compte)
 }
 
 $tpl->register_modifier('get_nom_compte', 'get_nom_compte');
-$tpl->assign('journal', $journal->getJournal());
+$tpl->assign('compte_resultat', $journal->getCompteResultat());
 
-$tpl->display('admin/compta/journal.tpl');
+$tpl->assign('now', time());
+$tpl->assign('exercice', $journal->getCurrentExercice());
+
+$tpl->display('admin/compta/rapport/compte_resultat.tpl');
 
 ?>
