@@ -19,9 +19,9 @@ if (!$exercice)
 
 $error = false;
 
-if (!empty($_POST['edit']))
+if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('compta_modif_exercice_'.$exercice['id']))
+    if (!utils::CSRF_check('compta_supprimer_exercice_'.$exercice['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -29,11 +29,7 @@ if (!empty($_POST['edit']))
     {
         try
         {
-            $id = $e->edit($exercice['id'], array(
-                'libelle'   =>  utils::post('libelle'),
-                'debut'     =>  utils::post('debut'),
-                'fin'       =>  utils::post('fin'),
-            ));
+            $id = $e->delete($exercice['id']);
 
             utils::redirect('/admin/compta/exercices.php');
         }
@@ -46,8 +42,7 @@ if (!empty($_POST['edit']))
 
 $tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
-$tpl->assign('custom_js', array('datepickr.js'));
 
-$tpl->display('admin/compta/exercice_modifier.tpl');
+$tpl->display('admin/compta/exercice_supprimer.tpl');
 
 ?>

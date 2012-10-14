@@ -21,8 +21,8 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_ajout_exercice"}
-        <input type="submit" name="add" value="Enregistrer &rarr;" />
+        {csrf_field key="compta_modif_exercice_`$exercice.id`"}
+        <input type="submit" name="edit" value="Enregistrer &rarr;" />
     </p>
 
 </form>
