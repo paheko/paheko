@@ -1,9 +1,11 @@
 {include file="admin/_head.tpl" title="Opération n°`$operation.id`" current="compta/gestion"}
 
+{if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
 <ul class="actions">
     <li class="edit"><a href="{$admin_url}compta/operation_modifier.php?id={$operation.id|escape}">Modifier cette opération</a></li>
     <li class="delete"><a href="{$admin_url}compta/operation_supprimer.php?id={$operation.id|escape}">Supprimer cette opération</a></li>
 </ul>
+{/if}
 
 <dl class="describe">
     <dt>Date</dt>
@@ -13,16 +15,16 @@
     <dt>Montant</dt>
     <dd>{$operation.montant|escape_money}&nbsp;{$config.monnaie|escape}</dd>
     <dt>Numéro pièce comptable</dt>
-    <dd>{if trim($operation.numero_piece)}{$operation.numero_piece|escape}{else}Non renseigné{/if}</dd>
+    <dd>{if trim($operation.numero_piece)}{$operation.numero_piece|escape}{else}<em>Non renseigné</em>{/if}</dd>
 
     {if $operation.id_categorie}
 
         <dt>Moyen de paiement</dt>
-        <dd>{if trim($operation.moyen_paiement)}{$moyen_paiement|escape}{else}Non renseigné{/if}</dd>
+        <dd>{if trim($operation.moyen_paiement)}{$moyen_paiement|escape}{else}<em>Non renseigné</em>{/if}</dd>
 
         {if $operation.moyen_paiement == 'CH'}
             <dt>Numéro de chèque</dt>
-            <dd>{if trim($operation.numero_cheque)}{$operation.numero_cheque|escape}{else}Non renseigné{/if}</dd>
+            <dd>{if trim($operation.numero_cheque)}{$operation.numero_cheque|escape}{else}<em>Non renseigné</em>{/if}</dd>
         {/if}
 
         {if $operation.moyen_paiement && $operation.moyen_paiement != 'ES'}
