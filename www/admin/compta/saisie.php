@@ -144,7 +144,14 @@ if (!empty($_POST['save']))
 
             $membres->sessionStore('compta_date', utils::post('date'));
 
-            utils::redirect('/admin/compta/operation.php?id='.(int)$id);
+            if ($type == Garradin_Compta_Categories::DEPENSES)
+                $type = 'depense';
+            elseif (is_null($type))
+                $type = 'avance';
+            elseif ($type == Garradin_Compta_Categories::RECETTES)
+                $type = 'recette';
+
+            utils::redirect('/admin/compta/saisie.php?'.$type.'&ok='.(int)$id);
         }
         catch (UserException $e)
         {
@@ -172,6 +179,7 @@ else
 
 $tpl->assign('custom_js', array('datepickr.js'));
 $tpl->assign('date', $membres->sessionGet('compta_date') ?: false);
+$tpl->assign('ok', (int) utils::get('ok'));
 
 $tpl->display('admin/compta/saisie.tpl');
 

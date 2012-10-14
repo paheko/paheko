@@ -6,19 +6,14 @@ class Garradin_Compta_Journal
     {
         $db = Garradin_DB::getInstance();
         $id = $db->querySingle('SELECT id FROM compta_exercices
-            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND clos = 0 LIMIT 1;');
+            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND cloture = 0 LIMIT 1;');
 
         if (!$id)
-            return null;
+        {
+            throw new UserException('Aucun exercice en cours.');
+        }
 
         return $id;
-    }
-
-    public function getCurrentExercice()
-    {
-        $db = Garradin_DB::getInstance();
-        return $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) FROM compta_exercices
-            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND clos = 0 LIMIT 1;', true);
     }
 
     protected function _checkOpenExercice($id)
@@ -28,7 +23,8 @@ class Garradin_Compta_Journal
 
         $db = Garradin_DB::getInstance();
         $id = $db->querySingle('SELECT id FROM compta_exercices
-            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND clos = 0 LIMIT 1;');
+            WHERE debut <= date(\'now\') AND fin >= date(\'now\')
+            AND cloture = 0 AND id = ? LIMIT 1;', false, (int)$id);
 
         if ($id)
             return true;
@@ -92,7 +88,7 @@ class Garradin_Compta_Journal
         // Vérification que l'on peut éditer cette opération
         if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
         {
-            throw new UserException('Cette opération fait partie d\'un exercice qui a été clos.');
+            throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
 
         $this->_checkFields($data);
@@ -110,7 +106,7 @@ class Garradin_Compta_Journal
         // Vérification que l'on peut éditer cette opération
         if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
         {
-            throw new UserException('Cette opération fait partie d\'un exercice qui a été clos.');
+            throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
 
         $db->simpleExec('DELETE FROM compta_journal WHERE id = ?;', (int)$id);
@@ -216,141 +212,6 @@ class Garradin_Compta_Journal
         }
 
         return true;
-    }
-
-    public function getJournal()
-    {
-        $db = Garradin_DB::getInstance();
-        $exercice = $this->_getCurrentExercice();
-        $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
-        $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id_exercice '.$exercice.' ORDER BY date, id;';
-        return $db->simpleStatementFetch($query);
-    }
-
-    public function getGrandLivre()
-    {
-        $db = Garradin_DB::getInstance();
-        $exercice = $this->_getCurrentExercice();
-        $exercice = 'id_exercice ' . (is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice);
-        $livre = array('classes' => array(), 'debit' => 0.0, 'credit' => 0.0);
-
-        $res = $db->prepare('SELECT compte FROM
-            (SELECT compte_debit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
-                UNION
-                SELECT compte_credit AS compte FROM compta_journal WHERE '.$exercice.' GROUP BY compte_credit)
-            ORDER BY base64(compte) COLLATE BINARY ASC;'
-            )->execute();
-
-        while ($row = $res->fetchArray(SQLITE3_NUM))
-        {
-            $compte = $row[0];
-            $classe = substr($compte, 0, 1);
-            $parent = substr($compte, 0, 2);
-
-            if (!array_key_exists($classe, $livre['classes']))
-            {
-                $livre['classes'][$classe] = array();
-            }
-
-            if (!array_key_exists($parent, $livre['classes'][$classe]))
-            {
-                $livre['classes'][$classe][$parent] = array(
-                    'total'         =>  0.0,
-                    'comptes'       =>  array(),
-                );
-            }
-
-            $livre['classes'][$classe][$parent]['comptes'][$compte] = array('debit' => 0.0, 'credit' => 0.0, 'journal' => array());
-
-            $livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] = $db->simpleStatementFetch(
-                'SELECT *, strftime(\'%s\', date) AS date FROM (
-                    SELECT * FROM compta_journal WHERE compte_debit = :compte AND '.$exercice.'
-                    UNION
-                    SELECT * FROM compta_journal WHERE compte_credit = :compte AND '.$exercice.'
-                    )
-                ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, array('compte' => $compte));
-
-            $debit = (float) $db->simpleQuerySingle(
-                'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND '.$exercice.';',
-                false, $compte);
-
-            $credit = (float) $db->simpleQuerySingle(
-                'SELECT SUM(montant) FROM compta_journal WHERE compte_credit = ? AND '.$exercice.';',
-                false, $compte);
-
-            $livre['classes'][$classe][$parent]['comptes'][$compte]['debit'] = $debit;
-            $livre['classes'][$classe][$parent]['comptes'][$compte]['credit'] = $credit;
-
-            $livre['classes'][$classe][$parent]['total'] += $debit;
-            $livre['classes'][$classe][$parent]['total'] -= $credit;
-
-            $livre['debit'] += $debit;
-            $livre['credit'] += $credit;
-        }
-
-        $res->finalize();
-
-        return $livre;
-    }
-
-    public function getCompteResultat()
-    {
-        $db = Garradin_DB::getInstance();
-        $exercice = $this->_getCurrentExercice();
-        $exercice = 'id_exercice ' . (is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice);
-
-        $charges    = array('comptes' => array(), 'total' => 0.0);
-        $produits   = array('comptes' => array(), 'total' => 0.0);
-        $resultat   = 0.0;
-
-        $res = $db->prepare('SELECT compte, debit, credit
-            FROM
-                (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit FROM compta_journal WHERE '.$exercice.' GROUP BY compte_debit
-                UNION
-                SELECT compte_credit AS compte, 0 AS debit, SUM(montant) AS credit FROM compta_journal WHERE '.$exercice.' GROUP BY compte_credit)
-            WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
-            ORDER BY base64(compte) COLLATE BINARY ASC;'
-            )->execute();
-
-        while ($row = $res->fetchArray(SQLITE3_NUM))
-        {
-            list($compte, $debit, $credit) = $row;
-            $classe = substr($compte, 0, 1);
-            $parent = substr($compte, 0, 2);
-
-            if ($classe == 6)
-            {
-                if (!isset($charges['comptes'][$parent]))
-                {
-                    $charges['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
-                }
-
-                $solde = $debit - $credit;
-
-                $charges['comptes'][$parent]['comptes'][$compte] = $solde;
-                $charges['total'] += $solde;
-                $charges['comptes'][$parent]['solde'] += $solde;
-            }
-            elseif ($classe == 7)
-            {
-                if (!isset($produits['comptes'][$parent]))
-                {
-                    $produits['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
-                }
-
-                $solde = $credit - $debit;
-
-                $produits['comptes'][$parent]['comptes'][$compte] = $solde;
-                $produits['total'] += $solde;
-                $produits['comptes'][$parent]['solde'] += $solde;
-            }
-        }
-
-        $res->finalize();
-
-        $resultat = $produits['total'] - $charges['total'];
-
-        return array('charges' => $charges, 'produits' => $produits, 'resultat' => $resultat);
     }
 
     public function getListForCategory($type = null, $cat = null)

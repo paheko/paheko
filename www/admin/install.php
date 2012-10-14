@@ -154,6 +154,11 @@ else
                 $comptes = new Garradin_Compta_Categories;
                 $comptes->importCategories();
 
+                require GARRADIN_ROOT . '/include/class.compta_exercices.php';
+
+                $ex = new Garradin_Compta_Exercices;
+                $ex->add(array('libelle' => 'Premier exercice', 'debut' => date('Y-01-01'), 'fin' => date('Y-12-31')));
+
                 $config->save();
 
                 utils::redirect('/admin/login.php');
