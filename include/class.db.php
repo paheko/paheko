@@ -238,9 +238,10 @@ class Garradin_DB extends SQLite3
     {
         if (count($args) == 1 && is_array($args[0]))
         {
-            $nb = preg_match_all('/:[a-z]+/', $query, $_matches);
+            preg_match_all('/:[a-z]+/', $query, $matches);
+            $nb = count(array_unique($matches[0]));
 
-            if (count($args[0]) != $nb)
+            if (count($args[0]) < $nb)
             {
                 throw new LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
             }

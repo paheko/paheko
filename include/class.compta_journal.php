@@ -6,7 +6,7 @@ class Garradin_Compta_Journal
     {
         $db = Garradin_DB::getInstance();
         $id = $db->querySingle('SELECT id FROM compta_exercices
-            WHERE debut >= date(\'now\') AND fin <= date(\'now\') AND clos = 0 LIMIT 1;');
+            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND clos = 0 LIMIT 1;');
 
         if (!$id)
             return null;
@@ -18,7 +18,7 @@ class Garradin_Compta_Journal
     {
         $db = Garradin_DB::getInstance();
         return $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) FROM compta_exercices
-            WHERE debut >= date(\'now\') AND fin <= date(\'now\') AND clos = 0 LIMIT 1;', true);
+            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND clos = 0 LIMIT 1;', true);
     }
 
     protected function _checkOpenExercice($id)
@@ -28,7 +28,7 @@ class Garradin_Compta_Journal
 
         $db = Garradin_DB::getInstance();
         $id = $db->querySingle('SELECT id FROM compta_exercices
-            WHERE debut >= date(\'now\') AND fin <= date(\'now\') AND clos = 0 LIMIT 1;');
+            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND clos = 0 LIMIT 1;');
 
         if ($id)
             return true;
