@@ -35,6 +35,7 @@ class Garradin_Compta_Exercices
 
         $this->_checkFields($data);
 
+        // Evitons que les exercices se croisent
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE id != :id AND
             ((debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin));', false,
             array('debut' => $data['debut'], 'fin' => $data['fin'], 'id' => (int) $id)))
@@ -42,7 +43,20 @@ class Garradin_Compta_Exercices
             throw new UserException('La date de début ou de fin se recoupe avec un autre exercice.');
         }
 
-        $db->simpleUpdate('compta_comptes', array(
+        // On vérifie qu'on ne va pas mettre des opérations en dehors de tout exercice
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_exercice = ?
+            AND date < ? LIMIT 1;', false, (int)$id, $data['debut']))
+        {
+            throw new UserException('Des opérations de cet exercice ont une date antérieure à la date de début de l\'exercice.');
+        }
+
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_exercice = ?
+            AND date > ? LIMIT 1;', false, (int)$id, $data['fin']))
+        {
+            throw new UserException('Des opérations de cet exercice ont une date postérieure à la date de fin de l\'exercice.');
+        }
+
+        $db->simpleUpdate('compta_exercices', array(
             'libelle'   =>  trim($data['libelle']),
             'debut'     =>  $data['debut'],
             'fin'       =>  $data['fin'],
