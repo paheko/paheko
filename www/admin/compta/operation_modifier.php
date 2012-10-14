@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['compta'] < Garradin_Membres::DROIT_ECRITURE)
+if ($user['droits']['compta'] < Garradin_Membres::DROIT_ADMIN)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }

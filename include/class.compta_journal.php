@@ -22,7 +22,7 @@ class Garradin_Compta_Journal
             return true;
 
         $db = Garradin_DB::getInstance();
-        $id = $db->querySingle('SELECT id FROM compta_exercices
+        $id = $db->simpleQuerySingle('SELECT id FROM compta_exercices
             WHERE debut <= date(\'now\') AND fin >= date(\'now\')
             AND cloture = 0 AND id = ? LIMIT 1;', false, (int)$id);
 

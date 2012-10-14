@@ -13,7 +13,9 @@
         <tr>
             <td><a href="{$admin_url}compta/operation.php?id={$ligne.id|escape}">{$ligne.id|escape}</a></td>
             <td class="actions">
+            {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
                 <a class="icn" href="{$admin_url}compta/operation_modifier.php?id={$ligne.id|escape}">✎</a>
+            {/if}
             </td>
             <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
             <td>{if $ligne.compte_credit == $compte.id}-{else}+{/if}{$ligne.montant|escape_money}</td>
