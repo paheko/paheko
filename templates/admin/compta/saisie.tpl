@@ -6,6 +6,13 @@
     </p>
 {/if}
 
+{if $ok}
+    <p class="confirm">
+        L'opération numéro <a href="{$www_url}admin/compta/operation.php?id={$ok|escape}">{$ok|escape}</a> a été ajoutée.
+        (<a href="{$www_url}admin/compta/operation.php?id={$ok|escape}">Voir l'opération</a>)
+    </p>
+{/if}
+
 <ul class="actions">
     <li{if $type == Garradin_Compta_Categories::RECETTES} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?recette">Recette</a></li>
     <li{if $type == Garradin_Compta_Categories::DEPENSES} class="current"{/if}><a href="{$www_url}admin/compta/saisie.php?depense">Dépense</a></li>
