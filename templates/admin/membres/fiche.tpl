@@ -3,6 +3,9 @@
 {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
 <ul class="actions">
     <li><a href="{$www_url}admin/membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
+    {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
+        <li><a href="{$www_url}admin/membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
+    {/if}
 </ul>
 {/if}
 

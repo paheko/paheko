@@ -50,7 +50,7 @@ elseif (!empty($_POST['delete_ok']))
     }
     else
     {
-        $membres->deleteMembres($_POST['selected']);
+        $membres->delete($_POST['selected']);
 
         utils::redirect('/admin/membres/');
     }

@@ -54,25 +54,7 @@ elseif (version_compare($v, '0.4.0', '<'))
 }
 elseif (version_compare($v, '0.4.3', '<'))
 {
-    $db->exec('DROP TABLE compta_exercices;');
-    $db->exec('
-        CREATE TABLE compta_exercices
-        -- Exercices
-        (
-            id INTEGER PRIMARY KEY,
-
-            libelle TEXT NOT NULL,
-
-            debut TEXT NOT NULL DEFAULT CURRENT_DATE,
-            fin TEXT NULL DEFAULT NULL,
-
-            cloture INTEGER NOT NULL DEFAULT 0
-        );');
-
-    require GARRADIN_ROOT . '/include/class.compta_exercices.php';
-
-    $ex = new Garradin_Compta_Exercices;
-    $ex->add(array('libelle' => 'Premier exercice', 'debut' => date('Y-01-01'), 'fin' => date('Y-12-31')));
+    $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.3.sql'));
 }
 
 utils::clearCaches();

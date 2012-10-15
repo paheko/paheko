@@ -10,6 +10,8 @@ if ($user['droits']['compta'] < Garradin_Membres::DROIT_ECRITURE)
 require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
 $journal = new Garradin_Compta_Journal;
 
+$journal->checkExercice();
+
 require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
 $cats = new Garradin_Compta_Categories;
 

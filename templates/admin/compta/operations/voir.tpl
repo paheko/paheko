@@ -39,12 +39,23 @@
         </dd>
     {/if}
 
+    <dt>Exercice</dt>
+    <dd>
+        <a href="{$www_url}admin/compta/exercices/">{$exercice.libelle|escape}</a>
+        | Du {$exercice.debut|date_fr:'d/m/Y'} au {$exercice.fin|date_fr:'d/m/Y'}
+        | <strong>{if $exercice.cloture}Clôturé{else}En cours{/if}</strong>
+    </dd>
+
     <dt>Opération créée par</dt>
     <dd>
-        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
-            <a href="{$www_url}admin/membres/fiche.php?id={$operation.id_auteur|escape}">{$nom_auteur|escape}</a>
+        {if $operation.id_auteur}
+            {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+                <a href="{$www_url}admin/membres/fiche.php?id={$operation.id_auteur|escape}">{$nom_auteur|escape}</a>
+            {else}
+                {$nom_auteur|escape}
+            {/if}
         {else}
-            {$nom_auteur|escape}
+            <em>membre supprimé</em>
         {/if}
     </dd>
 

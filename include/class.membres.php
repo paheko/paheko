@@ -371,6 +371,29 @@ class Garradin_Membres
             FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
+    public function delete($ids)
+    {
+        if (!is_array($ids))
+        {
+            $ids = array((int)$ids);
+        }
+
+        if ($this->isLogged())
+        {
+            $user = $this->getLoggedUser();
+
+            foreach ($ids as $id)
+            {
+                if ($user['id'] == $id)
+                {
+                    throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
+                }
+            }
+        }
+
+        return self::_deleteMembres($ids);
+    }
+
     public function getNom($id)
     {
         $db = Garradin_DB::getInstance();
@@ -532,7 +555,7 @@ class Garradin_Membres
         );
     }
 
-    static public function deleteMembres($membres)
+    static protected function _deleteMembres($membres)
     {
         foreach ($membres as &$id)
         {
@@ -542,7 +565,8 @@ class Garradin_Membres
         $membres = implode(',', $membres);
 
         $db = Garradin_DB::getInstance();
-        $db->exec('UPDATE wiki_revisions SET id_auteur = 0 WHERE id_auteur IN ('.$membres.');');
+        $db->exec('UPDATE wiki_revisions SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
+        $db->exec('UPDATE compta_operations SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
         //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
         return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
