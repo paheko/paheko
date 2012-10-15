@@ -35,10 +35,12 @@ class Garradin_Membres
     protected function _sessionStart($force = false)
     {
         if (!isset($_SESSION) && ($force || isset($_COOKIE[session_name()])))
-            @session_start();
+        {
+            session_start();
+        }
 
         // Fix bug with register_globals ($test is a reference to $_SESSION['test'])
-        if (ini_get('register_globals'))
+        if (ini_get('register_globals') && isset($_SESSION))
         {
             foreach ($_SESSION as $key=>$value)
             {
