@@ -70,10 +70,12 @@
 
 		wrap: function (e, left_str, right_str, sel_offset, sel_length)
 		{
+			var scroll = e.scrollTop;
 			var the_sel_text = this.get(e).text;
 			var selection =  this.replace(e, left_str + the_sel_text + right_str );
 			if(sel_offset !== undefined && sel_length !== undefined) selection = this.set(e, selection.start +  sel_offset, selection.start +  sel_offset + sel_length);
 			else if(the_sel_text == '') selection = this.set(e, selection.start + left_str.length, selection.start + left_str.length);
+			e.scrollTop = scroll;
 			return selection;
 		}
 	};
