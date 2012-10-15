@@ -12,7 +12,7 @@ $liste = $banques->getList();
 
 foreach ($liste as &$banque)
 {
-    $banque['solde'] = -($journal->getSolde($banque['id']));
+    $banque['solde'] = $journal->getSolde($banque['id']);
 }
 
 $tpl->assign('liste', $liste);
