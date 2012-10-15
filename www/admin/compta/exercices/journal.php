@@ -23,7 +23,7 @@ function get_nom_compte($compte)
 $tpl->register_modifier('get_nom_compte', 'get_nom_compte');
 $tpl->assign('journal', $exercices->getJournal($exercice['id']));
 
-$tpl->assign('now', time());
+$tpl->assign('cloture', $exercice['cloture'] ? $exercice['fin'] : time());
 $tpl->assign('exercice', $exercice);
 
 $tpl->display('admin/compta/exercices/journal.tpl');
