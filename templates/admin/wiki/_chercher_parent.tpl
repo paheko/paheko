@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Choisir la page parent" current="wiki" is_popup=true}
+{include file="admin/_head.tpl" title="Choisir la page parent" current="wiki" body_id="popup" is_popup=true}
 
 <div class="wikiTree">
     <p class="choice">

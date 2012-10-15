@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Compte de résultat" current="compta/exercices" body_id="rapport"}
+{include file="admin/_head.tpl" title="Bilan" current="compta/exercices" body_id="rapport"}
 
 <div class="exercice">
     <h2>{$config.nom_asso|escape}</h2>
@@ -15,9 +15,9 @@
         <tr>
             <td>
                 <table>
-                    <caption><h3>Charges</h3></caption>
+                    <caption><h3>Actif</h3></caption>
                     <tbody>
-                    {foreach from=$compte_resultat.charges.comptes key="parent_code" item="parent"}
+                    {foreach from=$bilan.actif.comptes key="parent_code" item="parent"}
                         <tr class="parent">
                             <th>{$parent_code|get_nom_compte|escape}</th>
                             <td>{$parent.solde|escape_money}</td>
@@ -34,9 +34,9 @@
             </td>
             <td>
                 <table>
-                    <caption><h3>Produits</h3></caption>
+                    <caption><h3>Passif</h3></caption>
                     <tbody>
-                    {foreach from=$compte_resultat.produits.comptes key="parent_code" item="parent"}
+                    {foreach from=$bilan.passif.comptes key="parent_code" item="parent"}
                         <tr class="parent">
                             <th>{$parent_code|get_nom_compte|escape}</th>
                             <td>{$parent.solde|escape_money}</td>
@@ -59,8 +59,8 @@
                 <table>
                     <tfoot>
                         <tr>
-                            <th>Total charges</th>
-                            <td>{$compte_resultat.charges.total|escape_money}</td>
+                            <th>Total actif</th>
+                            <td>{$bilan.actif.total|escape_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -69,22 +69,8 @@
                 <table>
                     <tfoot>
                         <tr>
-                            <th>Total produits</th>
-                            <td>{$compte_resultat.produits.total|escape_money}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-            </td>
-            <td>
-                <table>
-                    <tfoot>
-                        <tr>
-                            <th>Résultat</th>
-                            <td>{$compte_resultat.resultat|escape_money}</td>
+                            <th>Total passif</th>
+                            <td>{$bilan.passif.total|escape_money}</td>
                         </tr>
                     </tfoot>
                 </table>

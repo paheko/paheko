@@ -12,6 +12,7 @@ if (!$operation)
     throw new UserException("L'opération demandée n'existe pas.");
 }
 
+require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
 require_once GARRADIN_ROOT . '/include/class.compta_exercices.php';
 $exercices = new Garradin_Compta_Exercices;
 
@@ -27,7 +28,6 @@ $tpl->assign('exercice', $exercices->get($operation['id_exercice']));
 
 if ($operation['id_categorie'])
 {
-    require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
     $cats = new Garradin_Compta_Categories;
 
     $categorie = $cats->get($operation['id_categorie']);

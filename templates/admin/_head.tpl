@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>{$title|escape}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="{$www_url}admin/static/admin.css" media="screen,projection,handheld" />
+    <link rel="stylesheet" type="text/css" href="{$www_url}admin/static/admin.css" media="screen,projection,handheld,print" />
     {if isset($custom_js)}
         {foreach from=$custom_js item="js"}
             <script type="text/javascript" src="{$www_url}admin/static/{$js|escape}"></script>
@@ -12,7 +12,7 @@
     {/if}
 </head>
 
-<body{if !empty($is_popup)} id="popup"{/if}>
+<body{if !empty($body_id)} id="{$body_id|escape}"{/if}>
 
 {if empty($is_popup)}
 <div class="header">

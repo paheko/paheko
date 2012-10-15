@@ -272,6 +272,100 @@ class Garradin_Compta_Exercices
 
         return array('charges' => $charges, 'produits' => $produits, 'resultat' => $resultat);
     }
+
+    public function getBilan($exercice)
+    {
+        $db = Garradin_DB::getInstance();
+
+        require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
+        $include = array(Garradin_Compta_Comptes::ACTIF, Garradin_Compta_Comptes::PASSIF,
+            Garradin_Compta_Comptes::PASSIF | Garradin_Compta_Comptes::ACTIF);
+
+        $actif      = array('comptes' => array(), 'total' => 0.0);
+        $passif     = array('comptes' => array(), 'total' => 0.0);
+
+        $resultat = $this->getCompteResultat($exercice);
+
+        if ($resultat['resultat'] > 0)
+        {
+            $passif['comptes']['12'] = array(
+                'comptes'   =>  array('120' => $resultat['resultat']),
+                'solde'     =>  $resultat['resultat']
+            );
+
+            $passif['total'] = $resultat['resultat'];
+        }
+        else
+        {
+            $passif['comptes']['12'] = array(
+                'comptes'   =>  array('121' => $resultat['resultat']),
+                'solde'     =>  $resultat['resultat']
+            );
+
+            $passif['total'] = $resultat['resultat'];
+        }
+
+        // Y'a sûrement moyen d'améliorer tout ça pour que le maximum de travail
+        // soit fait au niveau du SQL, mais pour le moment ça marche
+        $res = $db->prepare('SELECT compte, debit, credit, (SELECT position FROM compta_comptes WHERE id = compte) AS position
+            FROM
+                (SELECT compte_debit AS compte, SUM(montant) AS debit, NULL AS credit
+                    FROM compta_journal WHERE id_exercice = 1 GROUP BY compte_debit
+                UNION
+                SELECT compte_credit AS compte, NULL AS debit, SUM(montant) AS credit
+                    FROM compta_journal WHERE id_exercice = 1 GROUP BY compte_credit)
+            WHERE compte IN (SELECT id FROM compta_comptes WHERE position IN ('.implode(', ', $include).'))
+            ORDER BY base64(compte) COLLATE BINARY ASC;'
+            )->execute();
+
+        while ($row = $res->fetchArray(SQLITE3_NUM))
+        {
+            list($compte, $debit, $credit, $position) = $row;
+            $parent = substr($compte, 0, 2);
+
+            if ($position & Garradin_Compta_Comptes::ACTIF)
+            {
+                if (!isset($actif['comptes'][$parent]))
+                {
+                    $actif['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                }
+
+                $solde = $debit - $credit;
+
+                if (!isset($actif['comptes'][$parent]['comptes'][$compte]))
+                {
+                    $actif['comptes'][$parent]['comptes'][$compte] = 0.0;
+                }
+
+                $actif['comptes'][$parent]['comptes'][$compte] += $solde;
+                $actif['total'] += $solde;
+                $actif['comptes'][$parent]['solde'] += $solde;
+            }
+
+            if ($position & Garradin_Compta_Comptes::PASSIF)
+            {
+                if (!isset($passif['comptes'][$parent]))
+                {
+                    $passif['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                }
+
+                $solde = $credit - $debit;
+
+                if (!isset($passif['comptes'][$parent]['comptes'][$compte]))
+                {
+                    $passif['comptes'][$parent]['comptes'][$compte] = 0.0;
+                }
+
+                $passif['comptes'][$parent]['comptes'][$compte] += $solde;
+                $passif['total'] += $solde;
+                $passif['comptes'][$parent]['solde'] += $solde;
+            }
+        }
+
+        $res->finalize();
+
+        return array('actif' => $actif, 'passif' => $passif);
+    }
 }
 
 ?>

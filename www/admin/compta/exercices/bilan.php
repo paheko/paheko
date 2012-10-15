@@ -21,11 +21,11 @@ function get_nom_compte($compte)
 }
 
 $tpl->register_modifier('get_nom_compte', 'get_nom_compte');
-$tpl->assign('compte_resultat', $exercices->getCompteResultat($exercice['id']));
+$tpl->assign('bilan', $exercices->getBilan($exercice['id']));
 
 $tpl->assign('cloture', $exercice['cloture'] ? $exercice['fin'] : time());
 $tpl->assign('exercice', $exercice);
 
-$tpl->display('admin/compta/exercices/compte_resultat.tpl');
+$tpl->display('admin/compta/exercices/bilan.tpl');
 
 ?>
