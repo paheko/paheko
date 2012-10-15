@@ -179,6 +179,22 @@ else
     $tpl->assign('banque', utils::post('banque'));
 }
 
+if (!$membres->sessionGet('compta_date'))
+{
+    require_once GARRADIN_ROOT . '/include/class.compta_exercices.php';
+    $exercices = new Garradin_Compta_Exercices;
+    $exercice = $exercices->getCurrent();
+
+    if ($exercice['debut'] > time() || $exercice['fin'] < time())
+    {
+        $membres->sessionStore('compta_date', date('Y-m-d', $exercice['debut']));
+    }
+    else
+    {
+        $membres->sessionStore('compta_date', date('Y-m-d'));
+    }
+}
+
 $tpl->assign('custom_js', array('datepickr.js'));
 $tpl->assign('date', $membres->sessionGet('compta_date') ?: false);
 $tpl->assign('ok', (int) utils::get('ok'));

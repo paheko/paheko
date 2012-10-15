@@ -65,6 +65,17 @@ class Garradin_Compta_Exercices
         return true;
     }
 
+    public function close($id)
+    {
+        $db = Garradin_DB::getInstance();
+
+        $db->simpleUpdate('compta_exercices', array(
+            'cloture'   =>  1,
+        ), 'id = \''.(int)$id.'\'');
+
+        return true;
+    }
+
     public function delete($id)
     {
         $db = Garradin_DB::getInstance();

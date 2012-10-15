@@ -16,7 +16,8 @@
             {/if}
             <dd class="compte"><strong>{$cat.compte|escape}</strong> - {$cat.compte_libelle|escape}</dd>
             <dd class="actions">
-                <a href="{$www_url}admin/compta/categories/modifier.php?id={$cat.id|escape}">Modifier</a>
+                <a href="{$www_url}admin/compta/operations/?cat={$cat.id|escape}">Voir</a>
+                | <a href="{$www_url}admin/compta/categories/modifier.php?id={$cat.id|escape}">Modifier</a>
                 | <a href="{$www_url}admin/compta/categories/supprimer.php?id={$cat.id|escape}">Supprimer</a>
             </dd>
         {/foreach}

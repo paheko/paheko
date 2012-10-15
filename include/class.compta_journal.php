@@ -5,8 +5,7 @@ class Garradin_Compta_Journal
     protected function _getCurrentExercice()
     {
         $db = Garradin_DB::getInstance();
-        $id = $db->querySingle('SELECT id FROM compta_exercices
-            WHERE debut <= date(\'now\') AND fin >= date(\'now\') AND cloture = 0 LIMIT 1;');
+        $id = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
 
         if (!$id)
         {
@@ -28,8 +27,7 @@ class Garradin_Compta_Journal
 
         $db = Garradin_DB::getInstance();
         $id = $db->simpleQuerySingle('SELECT id FROM compta_exercices
-            WHERE debut <= date(\'now\') AND fin >= date(\'now\')
-            AND cloture = 0 AND id = ? LIMIT 1;', false, (int)$id);
+            WHERE cloture = 0 AND id = ? LIMIT 1;', false, (int)$id);
 
         if ($id)
             return true;
@@ -143,6 +141,12 @@ class Garradin_Compta_Journal
         if (empty($data['date']) || !checkdate(substr($data['date'], 5, 2), substr($data['date'], 8, 2), substr($data['date'], 0, 4)))
         {
             throw new UserException('Date vide ou invalide.');
+        }
+
+        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE cloture = 0
+            AND debut <= :date AND fin >= :date;', false, array('date' => $data['date'])))
+        {
+            throw new UserException('La date ne correspond pas à l\'exercice en cours.');
         }
 
         if (empty($data['moyen_paiement']))
