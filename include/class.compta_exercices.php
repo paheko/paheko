@@ -298,7 +298,7 @@ class Garradin_Compta_Exercices
         else
         {
             $passif['comptes']['12'] = array(
-                'comptes'   =>  array('121' => $resultat['resultat']),
+                'comptes'   =>  array('129' => $resultat['resultat']),
                 'solde'     =>  $resultat['resultat']
             );
 
