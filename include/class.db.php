@@ -33,6 +33,8 @@ class Garradin_DB extends SQLite3
 {
     static protected $_instance = null;
 
+    protected $_running_sum = 0.0;
+
     static public function getInstance()
     {
         return self::$_instance ?: self::$_instance = new Garradin_DB;
@@ -61,6 +63,26 @@ class Garradin_DB extends SQLite3
         $this->createFunction('transliterate_to_ascii', array('utils', 'transliterateToAscii'));
         $this->createFunction('base64', 'base64_encode');
         $this->createFunction('rank', array($this, 'sql_rank'));
+        $this->createFunction('running_sum', array($this, 'sql_running_sum'));
+    }
+
+    public function sql_running_sum($data)
+    {
+        // Why is this function called two times for the first row?!
+        // Dunno but here is a workaround
+        if (is_null($this->_running_sum))
+        {
+            $this->_running_sum = 0.0;
+            return $this->_running_sum;
+        }
+
+        $this->_running_sum += $data;
+        return $this->_running_sum;
+    }
+
+    public function resetRunningSum()
+    {
+        $this->_running_sum = null;
     }
 
     public function sql_rank($aMatchInfo)

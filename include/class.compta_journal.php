@@ -74,23 +74,29 @@ class Garradin_Compta_Journal
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
-        $debit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit '.$compte.' AND id_exercice = '.(int)$exercice.' AND id <= cj.id), 0)';
-        $credit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.' AND id <= cj.id), 0)';
-
         // L'actif et les charges augmentent au débit, le passif et les produits au crédit
         if (($position & Garradin_Compta_Comptes::ACTIF) || ($position & Garradin_Compta_Comptes::CHARGE))
         {
-            $subquery = $debit . ' - ' . $credit;
+            $d = '';
+            $c = '-';
         }
         else
         {
-            $subquery = $credit . ' - ' . $debit;
+            $d = '-';
+            $c = '';
         }
 
-        $query = 'SELECT *, strftime(\'%s\', date) AS date, ('.$subquery.') AS solde FROM compta_journal AS cj WHERE
-                    (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice = '.(int)$exercice.'
-                    ORDER BY date;';
+        $query = 'SELECT *, strftime(\'%s\', date) AS date,
+            running_sum(CASE WHEN compte_debit '.$compte.' THEN '.$d.'montant ELSE '.$c.'montant END) AS solde
+            FROM compta_journal WHERE (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice = '.(int)$exercice.'
+            ORDER BY date ASC;';
 
+        // Obligatoire pour bien taper dans l'index de la date
+        // sinon running_sum est appelé 2 fois et ça marche pas du coup
+        // FIXME mettre ça ailleurs pour que ça soit appelé moins souvent
+        $db->exec('ANALYZE compta_journal;');
+
+        $db->resetRunningSum();
         return $db->simpleStatementFetch($query);
     }
 
