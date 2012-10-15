@@ -36,10 +36,10 @@
     <tbody>
     {foreach from=$journal item="ligne"}
         <tr>
-            <td><a href="{$admin_url}compta/operation.php?id={$ligne.id|escape}">{$ligne.id|escape}</a></td>
+            <td><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id|escape}">{$ligne.id|escape}</a></td>
             <td class="actions">
             {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
-                <a class="icn" href="{$admin_url}compta/operation_modifier.php?id={$ligne.id|escape}">✎</a>
+                <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id|escape}">✎</a>
             {/if}
             </td>
             <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>

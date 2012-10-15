@@ -16,6 +16,11 @@ class Garradin_Compta_Journal
         return $id;
     }
 
+    public function checkExercice()
+    {
+        return $this->_getCurrentExercice();
+    }
+
     protected function _checkOpenExercice($id)
     {
         if (is_null($id))
@@ -36,7 +41,6 @@ class Garradin_Compta_Journal
     {
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
-        $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
@@ -44,9 +48,9 @@ class Garradin_Compta_Journal
         // FIXME utiliser compta_comptes.position pour déterminer le sens !
         $query = 'SELECT
             COALESCE((SELECT SUM(montant) FROM compta_journal
-                WHERE compte_debit '.$compte.' AND id_exercice '.$exercice.'), 0)
+                WHERE compte_debit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)
             - COALESCE((SELECT SUM(montant) FROM compta_journal
-                WHERE compte_credit '.$compte.' AND id_exercice '.$exercice.'), 0);';
+                WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0);';
 
         return $db->querySingle($query);
     }
@@ -55,13 +59,12 @@ class Garradin_Compta_Journal
     {
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
-        $exercice = is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
         $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE
-                    (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice '.$exercice.'
+                    (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice = '.(int)$exercice.'
                     ORDER BY date;';
 
         return $db->simpleStatementFetch($query);
@@ -247,8 +250,7 @@ class Garradin_Compta_Journal
             $query.= 'id_categorie IN (SELECT id FROM compta_categories WHERE type = '.(int)$type.')';
         }
 
-        $query .= ' AND id_exercice ';
-        $query .= is_null($exercice) ? 'IS NULL' : '= ' . (int)$exercice;
+        $query .= ' AND id_exercice = ' . (int)$exercice;
         $query .= ' ORDER BY date;';
 
         return $db->simpleStatementFetch($query);

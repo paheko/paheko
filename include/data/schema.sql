@@ -224,7 +224,7 @@ CREATE TABLE compta_journal
     compte_credit INTEGER, -- N° du compte dans le plan
 
     id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
-    id_auteur INTEGER NOT NULL,
+    id_auteur INTEGER NULL,
     id_categorie INTEGER NULL, -- Numéro de catégorie (en mode simple)
 
     FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
