@@ -27,9 +27,9 @@
         <dd class="actions">
             {if !$exercice.cloture}
             <a href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id|escape}">Modifier</a>
-            | <a href="{$www_url}admin/compta/exercices/cloturer.php?id={$exercice.id|escape}">Clôturer</a> |
+            | <a href="{$www_url}admin/compta/exercices/cloturer.php?id={$exercice.id|escape}">Clôturer</a>
+            | <a href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id|escape}">Supprimer</a>
             {/if}
-            <a href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id|escape}">Supprimer</a>
         </dd>
         {/if}
     {/foreach}

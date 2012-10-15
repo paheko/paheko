@@ -17,6 +17,11 @@ if (!$exercice)
 	throw new UserException('Exercice inconnu.');
 }
 
+if ($exercice['cloture'])
+{
+    throw new UserException('Impossible de modifier un exercice clôturé.');
+}
+
 $error = false;
 
 if (!empty($_POST['edit']))
