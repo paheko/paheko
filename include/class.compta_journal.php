@@ -35,28 +35,28 @@ class Garradin_Compta_Journal
         return false;
     }
 
-    public function getSolde($compte, $inclure_sous_comptes = false)
+    public function getSolde($id_compte, $inclure_sous_comptes = false)
     {
         $db = Garradin_DB::getInstance();
         $exercice = $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
-            ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
-            : '= \'' . $db->escapeString(trim($compte)) . '\'';
+            ? 'LIKE \'' . $db->escapeString(trim($id_compte)) . '%\''
+            : '= \'' . $db->escapeString(trim($id_compte)) . '\'';
 
         $debit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)';
         $credit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)';
 
         // L'actif augmente au débit, le passif au crédit
         require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
-        $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $compte);
+        $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $id_compte);
 
         if (($position & Garradin_Compta_Comptes::ACTIF) || ($position & Garradin_Compta_Comptes::CHARGE))
         {
-            $query = $credit . ' - ' . $debit;
+            $query = $debit . ' - ' . $credit;
         }
         else
         {
-            $query = $debit . ' - ' . $credit;
+            $query = $credit . ' - ' . $debit;
         }
 
         return $db->querySingle('SELECT ' . $query . ';');
@@ -65,12 +65,29 @@ class Garradin_Compta_Journal
     public function getJournalCompte($compte, $inclure_sous_comptes = false)
     {
         $db = Garradin_DB::getInstance();
+
+        require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
+        $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $compte);
+
         $exercice = $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
-        $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE
+        $debit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit '.$compte.' AND id_exercice = '.(int)$exercice.' AND id <= cj.id), 0)';
+        $credit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.' AND id <= cj.id), 0)';
+
+        // L'actif et les charges augmentent au débit, le passif et les produits au crédit
+        if (($position & Garradin_Compta_Comptes::ACTIF) || ($position & Garradin_Compta_Comptes::CHARGE))
+        {
+            $subquery = $debit . ' - ' . $credit;
+        }
+        else
+        {
+            $subquery = $credit . ' - ' . $debit;
+        }
+
+        $query = 'SELECT *, strftime(\'%s\', date) AS date, ('.$subquery.') AS solde FROM compta_journal AS cj WHERE
                     (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice = '.(int)$exercice.'
                     ORDER BY date;';
 
