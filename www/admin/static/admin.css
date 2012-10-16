@@ -751,15 +751,69 @@ div.wikiRevision h4 {
     font-size: .9em;
 }
 
-.diff .ins { background: #cfc; width: 45%; }
-.diff .del { background: #fcc; width: 45%; }
-.diff .line { width: 2%; padding: 0.2em; text-align: right; }
-.diff .leftChange, .diff .rightChange { padding: 0.2em; text-align: center; }
+.diff .ins {
+    background: #cfc;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fcc;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-family: Mono;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    padding: 0.2em;
+    text-align: center;
+}
+
 .diff ins { background: #9f9; }
 .diff del { background: #f99; }
-.diff hr { background: none; border: none; border-top: 2px dotted #000; color: #fff; }
-.diff { border-collapse: collapse; width: 100%; font-size: 0.9em; }
-.diff tr { border: 1px solid #ccc; vertical-align: top; }
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #fff;
+    color: #fff;
+    margin: .2em .4em;
+}
+
+.diff .separator {
+    background: #ccc;
+}
+
+.diff {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .leftChange b, .diff .rightChange b {
+    border-radius: 1em;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    text-align: center;
+    font-size: 20px;
+    line-height: 16px;
+    vertical-align: middle;
+    padding: .1em;
+    background: #666;
+    color: #fff;
+}
 
 .pagination {
     clear: both;
