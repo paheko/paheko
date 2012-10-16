@@ -36,7 +36,7 @@ if (preg_match('/^apache/', PHP_SAPI))
 
 	$url = 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $uri;
 
-	$headers = get_headers($url . 'admin/login.php');
+	$headers = get_headers($url . 'admin/install.php');
 
 	// On regarde si ça redirige bien
 	if (!preg_match('!^HTTP/[0-9.]+ 200!', $headers[0]))
@@ -45,7 +45,7 @@ if (preg_match('/^apache/', PHP_SAPI))
 		file_put_contents(__DIR__ . '/.htaccess',
 			"RedirectMatch ".dirname(WWW_URI)."/((?!www).*) ".WWW_URI."$1\n");
 
-		$headers = get_headers($url . 'admin/login.php');
+		$headers = get_headers($url . 'admin/install.php');
 
 		// Si ça ne marche toujours pas tant pis
 		if (!preg_match('!^HTTP/[0-9.]+ 302!', $headers[0]))
@@ -56,7 +56,7 @@ if (preg_match('/^apache/', PHP_SAPI))
 		{
 			// On vérifie quand même que ça ne part pas en redirection infinie
 			// normalement c'est impossible mais on sait jamais
-			$headers = get_headers($url . 'www/admin/login.php');
+			$headers = get_headers($url . 'www/admin/install.php');
 
 			// Redirection infinie ou erreur 500 sur /www/ -> abandon
 			if (!preg_match('!^HTTP/[0-9.]+ 404!', $headers[0]))
