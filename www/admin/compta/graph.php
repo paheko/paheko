@@ -11,26 +11,32 @@ $plot = new SVGPlot(400, 300);
 
 if (utils::get('g') == 'recettes_depenses')
 {
-	$data = array(
-		$stats->recettes(),
-		$stats->depenses(),
-	);
-}
-elseif (utils::get('g') == 'actif_passif')
-{
-	$data = array(
-		$stats->actif(),
-		$stats->passif()
-	);
+	$r = new SVGPlot_Data($stats->recettes());
+	$r->title = 'Recettes';
+
+	$d = new SVGPlot_Data($stats->depenses());
+	$d->title = 'Dépenses';
+
+	$data = array($r, $d);
+
+	$plot->setTitle('Recettes et dépenses de l\'exercice courant');
+
+	$labels = array();
+
+	foreach ($r->get() as $k=>$v)
+	{
+		$labels[] = utils::date_fr('M y', strtotime(substr($k, 0, 4) . '-' . substr($k, 4, 2) .'-01'));
+	}
+
+	$plot->setLabels($labels);
 }
 
 $i = 0;
 
 foreach ($data as $line)
 {
-	$line = new SVGPlot_Data($line);
-	$line->color = ($i++ % 2) ? '#d98628' : '#9c4f15';
-	$line->width = 5;
+	$line->color = ($i++ % 2) ? '#fa4' : '#9c4f15';
+	$line->width = 2;
 	$plot->add($line);
 }
 
