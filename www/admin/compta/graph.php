@@ -31,13 +31,16 @@ if (utils::get('g') == 'recettes_depenses')
 	$plot->setLabels($labels);
 }
 
-$i = 0;
-
-foreach ($data as $line)
+if (!empty($data))
 {
-	$line->color = ($i++ % 2) ? '#fa4' : '#9c4f15';
-	$line->width = 2;
-	$plot->add($line);
+	$i = 0;
+
+	foreach ($data as $line)
+	{
+		$line->color = ($i++ % 2) ? '#fa4' : '#9c4f15';
+		$line->width = 2;
+		$plot->add($line);
+	}
 }
 
 $plot->display();
