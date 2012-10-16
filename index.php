@@ -16,6 +16,9 @@ if (!defined('PHP_SAPI') || file_exists(GARRADIN_ROOT . '/.garradinRootProcessed
 
 if (preg_match('/^apache/', PHP_SAPI))
 {
+	// On tente de faire un .htaccess qui redirige la racine vers /www/
+	// de manière transparente si Garradin n'est pas configuré
+	// pour que la racine soit déjà dans www/
 	if (!file_exists(__DIR__ . '/.htaccess'))
 	{
 		file_put_contents(__DIR__ . '/.htaccess',
@@ -35,26 +38,43 @@ if (preg_match('/^apache/', PHP_SAPI))
 
 	$headers = get_headers($url . 'admin/login.php');
 
+	// On regarde si ça redirige bien
 	if (!preg_match('!^HTTP/[0-9.]+ 200!', $headers[0]))
 	{
+		// Sinon on tente de faire une simple redirection
 		file_put_contents(__DIR__ . '/.htaccess',
 			"RedirectMatch ".dirname(WWW_URI)."/((?!www).*) ".WWW_URI."$1\n");
 
-		$headers = get_headers(WWW_URL);
+		$headers = get_headers($url . 'admin/login.php');
 
+		// Si ça ne marche toujours pas tant pis
 		if (!preg_match('!^HTTP/[0-9.]+ 302!', $headers[0]))
 		{
 			unlink(__DIR__ . '/.htaccess');
 		}
 		else
 		{
-			touch(GARRADIN_ROOT . '/.garradinRootProcessed');
-			header('Location: '.WWW_URL);
-			exit;
+			// On vérifie quand même que ça ne part pas en redirection infinie
+			// normalement c'est impossible mais on sait jamais
+			$headers = get_headers($url . 'www/admin/login.php');
+
+			// Redirection infinie ou erreur 500 sur /www/ -> abandon
+			if (!preg_match('!^HTTP/[0-9.]+ 404!', $headers[0]))
+			{
+				unlink(__DIR__ . '/.htaccess');
+			}
+			else
+			{
+				// C'est bon pour la redir !
+				touch(GARRADIN_ROOT . '/.garradinRootProcessed');
+				header('Location: '.WWW_URL);
+				exit;
+			}
 		}
 	}
 	else
 	{
+		// C'est bon pour le rewrite !
 		touch(GARRADIN_ROOT . '/.garradinRootProcessed');
 		file_put_contents(GARRADIN_ROOT . '/config.local.php', '<?php define(\'WWW_URI\', \''.$uri.'\'); ?>');
 		header('Location: '.$url);
@@ -63,7 +83,7 @@ if (preg_match('/^apache/', PHP_SAPI))
 }
 
 // Si serveur non Apache, ou ni RewriteRule ni RedirectMatch ne fonctionnent,
-// on empêche quand même de lister les répertoires
+// on empêche quand même de lister les répertoires qui ne sont pas censés être publics
 $dir = dir(GARRADIN_ROOT);
 
 while ($file = $dir->read())
