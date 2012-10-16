@@ -275,7 +275,7 @@ class Garradin_DB extends SQLite3
                     throw new InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
                 }
 
-                $query = preg_replace('/:'.$key.'(?![a-z])/', $this->escapeAuto($value, $key), $query);
+                $query = preg_replace('/:'.$key.'(?![a-z])/', preg_quote($this->escapeAuto($value, $key)), $query);
             }
         }
         else
