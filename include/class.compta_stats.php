@@ -4,62 +4,58 @@ require_once __DIR__ . '/class.compta_comptes.php';
 
 class Garradin_Compta_Stats
 {
+	protected function _byType($type)
+	{
+		return $this->getStats('SELECT strftime(\'%Y%m\', date) AS date,
+			SUM(montant) FROM compta_journal
+			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = '.$type.')
+			AND id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0)
+			GROUP BY strftime(\'%Y-%m\', date) ORDER BY date;');
+	}
+
 	public function recettes()
 	{
-		return $this->getStats('SELECT date, SUM(montant) FROM compta_journal
-			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = -1)
-			AND date > ?
-			GROUP BY date ORDER BY date;');
+		return $this->_byType(-1);
 	}
 
 	public function depenses()
 	{
-		return $this->getStats('SELECT date, SUM(montant) FROM compta_journal
-			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = 1)
-			AND date > ?
-			GROUP BY date ORDER BY date;');
-	}
-
-	public function actif()
-	{
-		return $this->getStats('SELECT date, (SELECT SUM(sub.montant) FROM compta_journal AS sub WHERE sub.date <= date)
-			FROM compta_journal WHERE compte_credit IN (SELECT id FROM compta_comptes
-				WHERE position = '.(int)Garradin_Compta_Comptes::ACTIF.')
-			AND date > ?
-			GROUP BY date ORDER BY date;');
-	}
-
-	public function passif()
-	{
-		return $this->getStats('SELECT date, (SELECT SUM(sub.compte_debit) FROM compta_journal AS sub WHERE sub.date <= date)
-			FROM compta_journal WHERE compte_debit IN (SELECT id FROM compta_comptes
-				WHERE position = '.(int)Garradin_Compta_Comptes::PASSIF.')
-			AND date > ?
-			GROUP BY date ORDER BY date;');
+		return $this->_byType(1);
 	}
 
 	public function getStats($query)
 	{
 		$db = Garradin_DB::getInstance();
 
-		$start = strtotime('1 month ago');
+		$data = $db->simpleStatementFetchAssoc($query);
 
-		$data = $db->simpleStatementFetchAssoc($query, date('Y-m-d', $start));
+		$e = $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut,
+			strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE cloture = 0;', true);
 
-		$now = $start;
-		$today = time();
+		$y = date('Y', $e['debut']);
+		$m = date('m', $e['debut']);
+		$max = date('Ym', $e['fin']);
 
-		while ($now < $today)
+		while ($y . $m <= $max)
 		{
-			$day = date('Y-m-d', $now);
-
-			if (!array_key_exists($day, $data))
+			if (!isset($data[$y . $m]))
 			{
-				$data[$day] = 0;
+				$data[$y . $m] = 0;
 			}
 
-			$now = strtotime('+1 day', $now);
+			if ($m == 12)
+			{
+				$m = '01';
+				$y++;
+			}
+			else
+			{
+				$m++;
+				$m = str_pad((int)$m, 2, '0', STR_PAD_LEFT);
+			}
 		}
+
+		ksort($data);
 
 		return $data;
 	}
