@@ -236,7 +236,7 @@ function tpl_diff($params)
     $new = $params['new'];
 
     require_once GARRADIN_ROOT . '/include/libs/diff/class.simplediff.php';
-    $diff = simpleDiff::diff_to_array(false, $old, $new, true);
+    $diff = simpleDiff::diff_to_array(false, $old, $new, 3);
 
     $out = '<table class="diff">';
     $prev = key($diff);
@@ -256,14 +256,14 @@ function tpl_diff($params)
         if ($type == simpleDiff::INS)
         {
             $class2 = 'ins';
-            $t2 = '+';
+            $t2 = '<b>+</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
         elseif ($type == simpleDiff::DEL)
         {
             $class1 = 'del';
-            $t1 = '-';
+            $t1 = '<b>-</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
@@ -271,8 +271,8 @@ function tpl_diff($params)
         {
             $class1 = 'del';
             $class2 = 'ins';
-            $t1 = '-';
-            $t2 = '+';
+            $t1 = '<b>-</b>';
+            $t2 = '<b>+</b>';
 
             $lineDiff = simpleDiff::wdiff($old, $new);
             $lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');
