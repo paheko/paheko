@@ -105,6 +105,12 @@ class Garradin_Compta_Exercices
             WHERE cloture = 0 LIMIT 1;', true);
     }
 
+    public function getCurrentId()
+    {
+        $db = Garradin_DB::getInstance();
+        return $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
+    }
+
     public function getList()
     {
         $db = Garradin_DB::getInstance();
