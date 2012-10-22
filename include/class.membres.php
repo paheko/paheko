@@ -568,7 +568,7 @@ class Garradin_Membres
 
         $db = Garradin_DB::getInstance();
         $db->exec('UPDATE wiki_revisions SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
-        $db->exec('UPDATE compta_operations SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
+        $db->exec('UPDATE compta_journal SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
         //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
         return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
