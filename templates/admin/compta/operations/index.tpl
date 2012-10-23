@@ -5,6 +5,7 @@
     <li class="depenses{if $type == Garradin_Compta_Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/operations/?depenses">Dépenses</a></li>
     <li class="autres{if $type == Garradin_Compta_Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/operations/?autres">Autres</a></li>
     <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin_Compta_Comptes::CAISSE}">Journal de caisse</a></li>
+    {*<li><a href="{$www_url}admin/compta/operations/recherche.php">Recherche d'opération</a></li>*}
 </ul>
 
 {if $type != Garradin_Compta_Categories::AUTRES}
