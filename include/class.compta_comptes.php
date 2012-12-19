@@ -42,7 +42,7 @@ class Garradin_Compta_Comptes
             }
         }
 
-        $db->exec('DELETE FROM compta_comptes WHERE id NOT IN(\''.implode('\', \'', $ids).'\');');
+        $db->exec('DELETE FROM compta_comptes WHERE id NOT IN(\''.implode('\', \'', $ids).'\') AND plan_comptable = 1;');
 
         $db->exec('END;');
 
