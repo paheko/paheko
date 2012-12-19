@@ -1,6 +1,4 @@
 <?php
-namespace Garradin;
-
 /*
  * Tests : vérification que les conditions pour s'exécuter sont remplies
  */
@@ -42,6 +40,8 @@ if ($fail)
 
     exit;
 }
+
+namespace Garradin;
 
 define('GARRADIN_INSTALL_PROCESS', true);
 
