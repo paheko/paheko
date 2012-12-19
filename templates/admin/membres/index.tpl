@@ -13,7 +13,7 @@
                 <select name="cat" id="f_cat">
                     <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
                 {foreach from=$membres_cats key="id" item="nom"}
-                    {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE
+                    {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE
                         || !array_key_exists($id, $membres_cats_cachees)}
                     <option value="{$id|escape}"{if $current_cat == $id} selected="selected"{/if}>{$nom|escape}</option>
                     {/if}
@@ -28,7 +28,7 @@
     </p>
 </form>
 
-{if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
+{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
     <form method="get" action="{$self_url|escape}" class="searchMember">
         <fieldset>
             <legend>Rechercher un membre</legend>
@@ -79,7 +79,7 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <td class="check">{if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
+                    <td class="check">{if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
                     <td class="num"><a title="Fiche membre" href="{$www_url}admin/membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></td>
                     <th>{$membre.nom|escape}</th>
                     {if empty($membre.date_cotisation)}
@@ -100,7 +100,7 @@
         </tbody>
     </table>
 
-    {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
+    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
     <p class="checkUncheck">
         <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
     </p>

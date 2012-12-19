@@ -1,14 +1,16 @@
 <?php
 
+namespace Garradin;
+
 require_once GARRADIN_ROOT . '/include/libs/template_lite/class.template.php';
 
-class Garradin_TPL extends Template_Lite
+class Template extends \Template_Lite
 {
     static protected $_instance = null;
 
     static public function getInstance()
     {
-        return self::$_instance ?: self::$_instance = new Garradin_TPL;
+        return self::$_instance ?: self::$_instance = new Template;
     }
 
     private function __clone()
@@ -35,16 +37,9 @@ class Garradin_TPL extends Template_Lite
     }
 }
 
-$tpl = Garradin_TPL::getInstance();
+$tpl = Template::getInstance();
 
-if (class_exists('Garradin_Config'))
-{
-    $tpl->assign('config', Garradin_Config::getInstance()->getConfig());
-}
-else
-{
-    $tpl->assign('config', false);
-}
+$tpl->assign('config', Config::getInstance()->getConfig());
 
 function tpl_csrf_field($params)
 {
@@ -102,10 +97,10 @@ function tpl_format_droits($params)
     $out = array('connexion' => '', 'inscription' => '', 'membres' => '', 'compta' => '',
         'wiki' => '', 'config' => '');
     $classes = array(
-        Garradin_Membres::DROIT_AUCUN   =>  'aucun',
-        Garradin_Membres::DROIT_ACCES   =>  'acces',
-        Garradin_Membres::DROIT_ECRITURE=>  'ecriture',
-        Garradin_Membres::DROIT_ADMIN   =>  'admin',
+        Membres::DROIT_AUCUN   =>  'aucun',
+        Membres::DROIT_ACCES   =>  'acces',
+        Membres::DROIT_ECRITURE=>  'ecriture',
+        Membres::DROIT_ADMIN   =>  'admin',
     );
 
     foreach ($droits as $cle=>$droit)
@@ -121,14 +116,14 @@ function tpl_format_droits($params)
 
             if ($cle == 'connexion')
             {
-                if ($droit == Garradin_Membres::DROIT_AUCUN)
+                if ($droit == Membres::DROIT_AUCUN)
                     $desc = 'N\'a pas le droit de se connecter';
                 else
                     $desc = 'A le droit de se connecter';
             }
             elseif ($cle == 'inscription')
             {
-                if ($droit == Garradin_Membres::DROIT_AUCUN)
+                if ($droit == Membres::DROIT_AUCUN)
                     $desc = 'N\'a pas le droit de s\'inscrire seul';
                 else
                     $desc = 'A le droit de s\'inscrire seul';
@@ -137,7 +132,7 @@ function tpl_format_droits($params)
             {
                 $s = '&#x2611;';
 
-                if ($droit == Garradin_Membres::DROIT_AUCUN)
+                if ($droit == Membres::DROIT_AUCUN)
                     $desc = 'Ne peut modifier la configuration';
                 else
                     $desc = 'Peut modifier la configuration';
@@ -154,11 +149,11 @@ function tpl_format_droits($params)
             {
                 $desc = ucfirst($cle). ' : ';
 
-                if ($droit == Garradin_Membres::DROIT_AUCUN)
+                if ($droit == Membres::DROIT_AUCUN)
                     $desc .= 'Pas accès';
-                elseif ($droit == Garradin_Membres::DROIT_ACCES)
+                elseif ($droit == Membres::DROIT_ACCES)
                     $desc .= 'Lecture uniquement';
-                elseif ($droit == Garradin_Membres::DROIT_ECRITURE)
+                elseif ($droit == Membres::DROIT_ECRITURE)
                     $desc .= 'Lecture & écriture';
                 else
                     $desc .= 'Administration';
@@ -182,7 +177,9 @@ function tpl_format_wiki($str)
 
 function tpl_liens_wiki($str, $prefix)
 {
-    return preg_replace('!<a href="([^/.]+)">!ie', '"<a href=\"".$prefix.Garradin_Wiki::transformTitleToURI("$1")."\">"', $str);
+    return preg_replace_callback('!<a href="([^/.]+)">!i', function ($matches) use ($prefix) {
+        return '<a href="' . $prefix . Wiki::transformTitleToURI($matches[1]) . '">';
+    }, $str);
 }
 
 function tpl_pagination($params)
@@ -356,26 +353,26 @@ function escape_money($number)
     return number_format((float)$number, 2, ',', ' ');
 }
 
-$tpl->register_function('csrf_field', 'tpl_csrf_field');
-$tpl->register_function('form_field', 'tpl_form_field');
-$tpl->register_function('select_compte', 'tpl_select_compte');
+$tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
+$tpl->register_function('form_field', 'Garradin\tpl_form_field');
+$tpl->register_function('select_compte', 'Garradin\tpl_select_compte');
 
-$tpl->register_function('format_droits', 'tpl_format_droits');
+$tpl->register_function('format_droits', 'Garradin\tpl_format_droits');
 
-$tpl->register_function('pagination', 'tpl_pagination');
+$tpl->register_function('pagination', 'Garradin\tpl_pagination');
 
-$tpl->register_function('diff', 'tpl_diff');
+$tpl->register_function('diff', 'Garradin\tpl_diff');
 
-$tpl->register_modifier('get_country_name', array('utils', 'getCountryName'));
-$tpl->register_modifier('format_tel', 'tpl_format_tel');
-$tpl->register_modifier('format_wiki', 'tpl_format_wiki');
-$tpl->register_modifier('liens_wiki', 'tpl_liens_wiki');
-$tpl->register_modifier('escape_money', 'escape_money');
+$tpl->register_modifier('get_country_name', array('Garradin\utils', 'getCountryName'));
+$tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');
+$tpl->register_modifier('format_wiki', 'Garradin\tpl_format_wiki');
+$tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
+$tpl->register_modifier('escape_money', 'Garradin\escape_money');
 $tpl->register_modifier('abs', 'abs');
 
-//$tpl->register_modifier('retard_cotisation', array('Garradin_Membres', 'checkCotisation'));
+//$tpl->register_modifier('retard_cotisation', array('Membres', 'checkCotisation'));
 
-$tpl->register_modifier('strftime_fr', 'tpl_strftime_fr');
-$tpl->register_modifier('date_fr', 'tpl_date_fr');
+$tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
+$tpl->register_modifier('date_fr', 'Garradin\tpl_date_fr');
 
 ?>

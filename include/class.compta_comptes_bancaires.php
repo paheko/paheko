@@ -1,14 +1,14 @@
 <?php
 
-require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
+namespace Garradin;
 
-class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
+class Compta_Comptes_Bancaires extends Compta_Comptes
 {
     const NUMERO_PARENT_COMPTES = 512;
 
     public function add($data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $data['parent'] = self::NUMERO_PARENT_COMPTES;
         $data['id'] = null;
@@ -17,7 +17,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
         $new_id = parent::add($data);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->simpleInsert('compta_comptes_bancaires', array(
             'id'        =>  $new_id,
             'banque'    =>  $data['banque'],
@@ -30,7 +30,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
     public function edit($id, $data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', false, $id))
         {
@@ -56,7 +56,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
     public function delete($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', false, trim($id)))
         {
             throw new UserException('Ce compte n\'est pas un compte bancaire.');
@@ -70,7 +70,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc
             ON c.id = cc.id
@@ -79,7 +79,7 @@ class Garradin_Compta_Comptes_Bancaires extends Garradin_Compta_Comptes
 
     public function getList($parent = false)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleStatementFetchAssocKey('SELECT c.id AS id, * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc ON c.id = cc.id
             WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');

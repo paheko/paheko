@@ -11,7 +11,7 @@
     <fieldset>
         <legend>Informations personnelles</legend>
         <dl>
-        {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
+        {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
             <dt><label for="f_id">Numéro de membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="id" id="f_id" value="{form_field data=$membre name=id}" /></dd>
         {/if}
@@ -57,7 +57,7 @@
         </dl>
     </fieldset>
 
-    {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
+    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
     <fieldset>
         <legend>Général</legend>
         <dl>

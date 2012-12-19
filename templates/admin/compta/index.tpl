@@ -9,7 +9,7 @@
     de votre retour sur le site de <a href="http://dev.kd2.org/garradin/">Garradin</a>.
 </p>
 
-{if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+{if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
 <ul class="actions">
     <li><a href="{$www_url}admin/compta/import.php">Import / export</a></li>
 </ul>

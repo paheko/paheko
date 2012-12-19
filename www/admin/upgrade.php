@@ -1,4 +1,5 @@
 <?php
+namespace Garradin;
 
 define('GARRADIN_UPGRADE_PROCESS', true);
 
@@ -9,9 +10,7 @@ if (!file_exists(GARRADIN_DB_FILE))
     utils::redirect('/admin/install.php');
 }
 
-require_once GARRADIN_ROOT . '/include/class.db.php';
-require_once GARRADIN_ROOT . '/include/class.config.php';
-$config = Garradin_Config::getInstance();
+$config = Config::getInstance();
 
 $v = $config->getVersion();
 
@@ -20,7 +19,7 @@ if (version_compare($v, garradin_version(), '>='))
     throw new UserException("Pas de mise à jour à faire.");
 }
 
-$db = Garradin_DB::getInstance();
+$db = DB::getInstance();
 
 echo '<!DOCTYPE html>
 <meta charset="utf-8" />
@@ -44,14 +43,10 @@ if (version_compare($v, '0.4.0', '<'))
     $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.0.sql'));
 
     // Mise en place compta
-    require GARRADIN_ROOT . '/include/class.compta_comptes.php';
-
-    $comptes = new Garradin_Compta_Comptes;
+    $comptes = new Compta_Comptes;
     $comptes->importPlan();
 
-    require GARRADIN_ROOT . '/include/class.compta_categories.php';
-
-    $comptes = new Garradin_Compta_Categories;
+    $comptes = new Compta_Categories;
     $comptes->importCategories();
 }
 

@@ -1,20 +1,16 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Garradin_Membres::DROIT_ADMIN)
+if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
-$journal = new Garradin_Compta_Journal;
-
-require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
-$cats = new Garradin_Compta_Categories;
-
-require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
-$banques = new Garradin_Compta_Comptes_Bancaires;
+$journal = new Compta_Journal;
+$cats = new Compta_Categories;
+$banques = new Compta_Comptes_Bancaires;
 
 $operation = $journal->get(utils::get('id'));
 
@@ -32,7 +28,7 @@ else
     $categorie = false;
 }
 
-if ($categorie && $categorie['type'] != Garradin_Compta_Categories::AUTRES)
+if ($categorie && $categorie['type'] != Compta_Categories::AUTRES)
 {
     $type = $categorie['type'];
 }
@@ -81,7 +77,7 @@ if (!empty($_POST['save']))
 
                 if (utils::post('moyen_paiement') == 'ES')
                 {
-                    $a = Garradin_Compta_Comptes::CAISSE;
+                    $a = Compta_Comptes::CAISSE;
                     $b = $cat['compte'];
                 }
                 else
@@ -100,12 +96,12 @@ if (!empty($_POST['save']))
                     $b = $cat['compte'];
                 }
 
-                if ($type == Garradin_Compta_Categories::DEPENSES)
+                if ($type == Compta_Categories::DEPENSES)
                 {
                     $debit = $b;
                     $credit = $a;
                 }
-                elseif ($type == Garradin_Compta_Categories::RECETTES)
+                elseif ($type == Compta_Categories::RECETTES)
                 {
                     $debit = $a;
                     $credit = $b;

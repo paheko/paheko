@@ -1,15 +1,14 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Garradin_Membres::DROIT_ECRITURE)
+if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
-
-$cats = new Garradin_Membres_Categories;
+$cats = new Membres_Categories;
 
 $error = false;
 
@@ -27,7 +26,7 @@ if (!empty($_POST['save']))
     {
         try
         {
-            if ($user['droits']['membres'] == Garradin_Membres::DROIT_ADMIN)
+            if ($user['droits']['membres'] == Membres::DROIT_ADMIN)
             {
                 $id_categorie = utils::post('id_categorie');
             }

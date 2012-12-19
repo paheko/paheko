@@ -1,6 +1,8 @@
 <?php
 
-class Garradin_Wiki
+namespace Garradin;
+
+class Wiki
 {
     const LECTURE_PUBLIC = -1;
     const LECTURE_NORMAL = 0;
@@ -28,7 +30,7 @@ class Garradin_Wiki
 
     public function _checkFields(&$data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (isset($data['titre']) && !trim($data['titre']))
         {
@@ -81,7 +83,7 @@ class Garradin_Wiki
     public function create($data = array())
     {
         $this->_checkFields($data);
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (!empty($data['uri']))
         {
@@ -115,7 +117,7 @@ class Garradin_Wiki
 
     public function edit($id, $data = array())
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $this->_checkFields($data);
 
         if (isset($data['uri']))
@@ -155,7 +157,7 @@ class Garradin_Wiki
 
     public function delete($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if ($db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE parent = ?;', false, (int)$id))
         {
@@ -171,7 +173,7 @@ class Garradin_Wiki
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT *,
             strftime(\'%s\', date_creation) AS date_creation,
             strftime(\'%s\', date_modification) AS date_modification
@@ -180,13 +182,13 @@ class Garradin_Wiki
 
     public function getTitle($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT titre FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
     }
 
     public function getRevision($id, $rev)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleQuerySingle('SELECT r.revision, r.modification, r.id_auteur, r.contenu,
             strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
@@ -197,7 +199,7 @@ class Garradin_Wiki
 
     public function listRevisions($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleStatementFetch('SELECT r.revision, r.modification, r.id_auteur,
             strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
@@ -209,7 +211,7 @@ class Garradin_Wiki
 
     public function editRevision($id, $revision_edition = 0, $data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $revision = $db->simpleQuerySingle('SELECT revision FROM wiki_pages WHERE id = ?;', false, (int)$id);
 
@@ -270,7 +272,7 @@ class Garradin_Wiki
 
     public function search($query)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleStatementFetch('SELECT
             p.uri, r.*, snippet(wiki_recherche, "<b>", "</b>", "...", -1, -50) AS snippet,
             rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points
@@ -293,12 +295,12 @@ class Garradin_Wiki
             throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
-        if ($this->restriction_droit == Garradin_Membres::DROIT_AUCUN)
+        if ($this->restriction_droit == Membres::DROIT_AUCUN)
         {
             throw new UserException('Vous n\'avez pas accès au wiki.');
         }
 
-        if ($this->restriction_droit == Garradin_Membres::DROIT_ADMIN)
+        if ($this->restriction_droit == Membres::DROIT_ADMIN)
             return '1';
 
         return '('.$prefix.'droit_lecture = '.self::LECTURE_NORMAL.' OR '.$prefix.'droit_lecture = '.self::LECTURE_PUBLIC.'
@@ -312,12 +314,12 @@ class Garradin_Wiki
             throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
-        if ($this->restriction_droit < Garradin_Membres::DROIT_ACCES)
+        if ($this->restriction_droit < Membres::DROIT_ACCES)
         {
             return false;
         }
 
-        if ($this->restriction_droit == Garradin_Membres::DROIT_ADMIN
+        if ($this->restriction_droit == Membres::DROIT_ADMIN
             || $lecture == self::LECTURE_NORMAL || $lecture == self::LECTURE_PUBLIC
             || $lecture == $this->restriction_categorie)
             return true;
@@ -332,12 +334,12 @@ class Garradin_Wiki
             throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
-        if ($this->restriction_droit < Garradin_Membres::DROIT_ECRITURE)
+        if ($this->restriction_droit < Membres::DROIT_ECRITURE)
         {
             return false;
         }
 
-        if ($this->restriction_droit == Garradin_Membres::DROIT_ADMIN
+        if ($this->restriction_droit == Membres::DROIT_ADMIN
             || $ecriture == self::ECRITURE_NORMAL
             || $ecriture == $this->restriction_categorie)
             return true;
@@ -347,7 +349,7 @@ class Garradin_Wiki
 
     public function getList($parent = 0)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         return $db->simpleStatementFetch(
             'SELECT id, revision, uri, titre,
@@ -363,7 +365,7 @@ class Garradin_Wiki
 
     public function getById($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $page = $db->simpleQuerySingle('SELECT *,
                 strftime(\'%s\', date_creation) AS date_creation,
                 strftime(\'%s\', date_modification) AS date_modification
@@ -390,7 +392,7 @@ class Garradin_Wiki
 
     public function getByURI($uri)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $page = $db->simpleQuerySingle('SELECT *,
                 strftime(\'%s\', date_creation) AS date_creation,
                 strftime(\'%s\', date_modification) AS date_modification
@@ -419,7 +421,7 @@ class Garradin_Wiki
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         return $db->simpleStatementFetch('SELECT *,
                 strftime(\'%s\', date_creation) AS date_creation,
@@ -431,7 +433,7 @@ class Garradin_Wiki
 
     public function countRecentModifications()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
     }
 
@@ -440,7 +442,7 @@ class Garradin_Wiki
         if ($id == 0)
             return array();
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $flat = array();
 
         while ($id > 0)
@@ -462,7 +464,7 @@ class Garradin_Wiki
 
     public function listBackParentTree($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $flat = array(
             array(
                 'id' => 0,

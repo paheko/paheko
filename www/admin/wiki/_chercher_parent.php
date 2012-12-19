@@ -1,4 +1,5 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -38,7 +39,7 @@ function tpl_display_tree($params)
     return $out;
 }
 
-$tpl->register_function('display_tree', 'tpl_display_tree');
+$tpl->register_function('display_tree', 'Garradin\tpl_display_tree');
 
 $tpl->display('admin/wiki/_chercher_parent.tpl');
 

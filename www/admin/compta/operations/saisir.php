@@ -1,25 +1,22 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Garradin_Membres::DROIT_ECRITURE)
+if ($user['droits']['compta'] < Membres::DROIT_ECRITURE)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
-$journal = new Garradin_Compta_Journal;
+$journal = new Compta_Journal;
 
 $journal->checkExercice();
 
-require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
-$cats = new Garradin_Compta_Categories;
-
-require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
-$banques = new Garradin_Compta_Comptes_Bancaires;
+$cats = new Compta_Categories;
+$banques = new Compta_Comptes_Bancaires;
 
 if (isset($_GET['depense']))
-    $type = Garradin_Compta_Categories::DEPENSES;
+    $type = Compta_Categories::DEPENSES;
 elseif (isset($_GET['virement']))
     $type = 'virement';
 elseif (isset($_GET['dette']))
@@ -27,7 +24,7 @@ elseif (isset($_GET['dette']))
 elseif (isset($_GET['avance']))
     $type = null;
 else
-    $type = Garradin_Compta_Categories::RECETTES;
+    $type = Compta_Categories::RECETTES;
 
 $error = false;
 
@@ -93,7 +90,7 @@ if (!empty($_POST['save']))
 
                     if (utils::post('moyen_paiement') == 'ES')
                     {
-                        $a = Garradin_Compta_Comptes::CAISSE;
+                        $a = Compta_Comptes::CAISSE;
                         $b = $cat['compte'];
                     }
                     else
@@ -113,12 +110,12 @@ if (!empty($_POST['save']))
                     }
                 }
 
-                if ($type === Garradin_Compta_Categories::DEPENSES)
+                if ($type === Compta_Categories::DEPENSES)
                 {
                     $debit = $b;
                     $credit = $a;
                 }
-                elseif ($type === Garradin_Compta_Categories::RECETTES)
+                elseif ($type === Compta_Categories::RECETTES)
                 {
                     $debit = $a;
                     $credit = $b;
@@ -146,11 +143,11 @@ if (!empty($_POST['save']))
 
             $membres->sessionStore('compta_date', utils::post('date'));
 
-            if ($type == Garradin_Compta_Categories::DEPENSES)
+            if ($type == Compta_Categories::DEPENSES)
                 $type = 'depense';
             elseif (is_null($type))
                 $type = 'avance';
-            elseif ($type == Garradin_Compta_Categories::RECETTES)
+            elseif ($type == Compta_Categories::RECETTES)
                 $type = 'recette';
 
             utils::redirect('/admin/compta/operations/saisir.php?'.$type.'&ok='.(int)$id);
@@ -174,15 +171,14 @@ else
 {
     $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
     $tpl->assign('moyen_paiement', utils::post('moyen_paiement') ?: 'ES');
-    $tpl->assign('categories', $cats->getList($type === 'dette' ? Garradin_Compta_Categories::DEPENSES : $type));
+    $tpl->assign('categories', $cats->getList($type === 'dette' ? Compta_Categories::DEPENSES : $type));
     $tpl->assign('comptes_bancaires', $banques->getList());
     $tpl->assign('banque', utils::post('banque'));
 }
 
 if (!$membres->sessionGet('compta_date'))
 {
-    require_once GARRADIN_ROOT . '/include/class.compta_exercices.php';
-    $exercices = new Garradin_Compta_Exercices;
+    $exercices = new Compta_Exercices;
     $exercice = $exercices->getCurrent();
 
     if ($exercice['debut'] > time() || $exercice['fin'] < time())

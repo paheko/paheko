@@ -1,6 +1,8 @@
 <?php
 
-class Garradin_Compta_Categories
+namespace Garradin;
+
+class Compta_Categories
 {
     const DEPENSES = -1;
     const RECETTES = 1;
@@ -8,7 +10,7 @@ class Garradin_Compta_Categories
 
     public function importCategories()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/categories_comptables.sql'));
     }
 
@@ -16,7 +18,7 @@ class Garradin_Compta_Categories
     {
         $this->_checkFields($data);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (empty($data['compte']) || !trim($data['compte']))
         {
@@ -51,7 +53,7 @@ class Garradin_Compta_Categories
     {
         $this->_checkFields($data);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $db->simpleUpdate('compta_categories',
             array(
@@ -65,7 +67,7 @@ class Garradin_Compta_Categories
 
     public function delete($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         // Ne pas supprimer une catégorie qui est utilisée !
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_categorie = ? LIMIT 1;', false, $id))
@@ -80,13 +82,13 @@ class Garradin_Compta_Categories
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT * FROM compta_categories WHERE id = ?;', true, (int)$id);
     }
 
     public function getList($type = null)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $type = is_null($type) ? '' : 'cat.type = '.(int)$type;
         return $db->simpleStatementFetch('
             SELECT cat.*, cc.libelle AS compte_libelle
@@ -97,13 +99,13 @@ class Garradin_Compta_Categories
 
     public function listMoyensPaiement()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleStatementFetchAssocKey('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
     }
 
     public function getMoyenPaiement($code)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT nom FROM compta_moyens_paiement WHERE code = ?;', false, $code);
     }
 

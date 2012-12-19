@@ -1,6 +1,8 @@
 <?php
 
-class Garradin_Compta_Comptes
+namespace Garradin;
+
+class Compta_Comptes
 {
     const CAISSE = 530;
 
@@ -13,7 +15,7 @@ class Garradin_Compta_Comptes
     {
         $plan = json_decode(file_get_contents(GARRADIN_ROOT . '/include/data/plan_comptable.json'), true);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->exec('BEGIN;');
         $ids = array();
 
@@ -53,7 +55,7 @@ class Garradin_Compta_Comptes
     {
         $this->_checkFields($data, true);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (empty($data['id']))
         {
@@ -95,7 +97,7 @@ class Garradin_Compta_Comptes
 
     public function edit($id, $data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         // Vérification que l'on peut éditer ce compte
         if ($db->simpleQuerySingle('SELECT plan_comptable FROM compta_comptes WHERE id = ?;', false, $id))
@@ -126,7 +128,7 @@ class Garradin_Compta_Comptes
 
     public function delete($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         // Ne pas supprimer un compte qui est utilisé !
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', false, $id, $id))
@@ -141,25 +143,25 @@ class Garradin_Compta_Comptes
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT * FROM compta_comptes WHERE id = ?;', true, trim($id));
     }
 
     public function getList($parent = 0)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleStatementFetchAssocKey('SELECT id, * FROM compta_comptes WHERE parent = ? ORDER BY id;', SQLITE3_ASSOC, $parent);
     }
 
     public function getListAll($parent = 0)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->queryFetchAssoc('SELECT id, libelle FROM compta_comptes ORDER BY id;');
     }
 
     public function listTree($parent = 0, $include_children = true)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if ($include_children)
         {
@@ -175,7 +177,7 @@ class Garradin_Compta_Comptes
 
     protected function _checkFields(&$data, $force_parent_check = false)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (empty($data['libelle']) || !trim($data['libelle']))
         {

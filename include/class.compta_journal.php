@@ -1,10 +1,12 @@
 <?php
 
-class Garradin_Compta_Journal
+namespace Garradin;
+
+class Compta_Journal
 {
     protected function _getCurrentExercice()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $id = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
 
         if (!$id)
@@ -25,7 +27,7 @@ class Garradin_Compta_Journal
         if (is_null($id))
             return true;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $id = $db->simpleQuerySingle('SELECT id FROM compta_exercices
             WHERE cloture = 0 AND id = ? LIMIT 1;', false, (int)$id);
 
@@ -37,7 +39,7 @@ class Garradin_Compta_Journal
 
     public function getSolde($id_compte, $inclure_sous_comptes = false)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $exercice = $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($id_compte)) . '%\''
@@ -47,10 +49,9 @@ class Garradin_Compta_Journal
         $credit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)';
 
         // L'actif augmente au débit, le passif au crédit
-        require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
         $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $id_compte);
 
-        if (($position & Garradin_Compta_Comptes::ACTIF) || ($position & Garradin_Compta_Comptes::CHARGE))
+        if (($position & Compta_Comptes::ACTIF) || ($position & Compta_Comptes::CHARGE))
         {
             $query = $debit . ' - ' . $credit;
         }
@@ -64,9 +65,8 @@ class Garradin_Compta_Journal
 
     public function getJournalCompte($compte, $inclure_sous_comptes = false)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
-        require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
         $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $compte);
 
         $exercice = $this->_getCurrentExercice();
@@ -75,7 +75,7 @@ class Garradin_Compta_Journal
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
         // L'actif et les charges augmentent au débit, le passif et les produits au crédit
-        if (($position & Garradin_Compta_Comptes::ACTIF) || ($position & Garradin_Compta_Comptes::CHARGE))
+        if (($position & Compta_Comptes::ACTIF) || ($position & Compta_Comptes::CHARGE))
         {
             $d = '';
             $c = '-';
@@ -104,7 +104,7 @@ class Garradin_Compta_Journal
     {
         $this->_checkFields($data);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $data['id_exercice'] = $this->_getCurrentExercice();
 
@@ -116,7 +116,7 @@ class Garradin_Compta_Journal
 
     public function edit($id, $data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         // Vérification que l'on peut éditer cette opération
         if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
@@ -134,7 +134,7 @@ class Garradin_Compta_Journal
 
     public function delete($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         // Vérification que l'on peut éditer cette opération
         if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
@@ -149,13 +149,13 @@ class Garradin_Compta_Journal
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id = ?;', true, $id);
     }
 
     protected function _checkFields(&$data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (empty($data['libelle']) || !trim($data['libelle']))
         {
@@ -255,7 +255,7 @@ class Garradin_Compta_Journal
 
     public function getListForCategory($type = null, $cat = null)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $exercice = $this->_getCurrentExercice();
 
         $query = 'SELECT compta_journal.*, strftime(\'%s\', compta_journal.date) AS date ';

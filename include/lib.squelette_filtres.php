@@ -1,5 +1,7 @@
 <?php
 
+namespace Garradin;
+
 class Squelette_Filtres
 {
     static private $g2x = null;

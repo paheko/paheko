@@ -1,9 +1,9 @@
 {include file="admin/_head.tpl" title="`$membre.nom` (`$categorie.nom`)" current="membres"}
 
-{if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
+{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
 <ul class="actions">
     <li><a href="{$www_url}admin/membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
-    {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
+    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$www_url}admin/membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
     {/if}
 </ul>

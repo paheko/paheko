@@ -1,9 +1,9 @@
 <?php
 
+namespace Garradin;
 require_once __DIR__ . '/../_inc.php';
 
-require_once GARRADIN_ROOT . '/include/class.compta_exercices.php';
-$exercices = new Garradin_Compta_Exercices;
+$exercices = new Compta_Exercices;
 
 $exercice = $exercices->get((int)utils::get('id'));
 
@@ -20,7 +20,7 @@ function get_nom_compte($compte)
 	return $liste_comptes[$compte];
 }
 
-$tpl->register_modifier('get_nom_compte', 'get_nom_compte');
+$tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
 $tpl->assign('bilan', $exercices->getBilan($exercice['id']));
 
 $tpl->assign('cloture', $exercice['cloture'] ? $exercice['fin'] : time());

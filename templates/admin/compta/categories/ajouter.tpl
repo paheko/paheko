@@ -14,8 +14,8 @@
             <dt><label for="f_type">Type</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="type" id="f_type">
-                    <option value="{Garradin_Compta_Categories::RECETTES}"{if $type == Garradin_Compta_Categories::RECETTES} selected="selected"{/if}>Recette</option>
-                    <option value="{Garradin_Compta_Categories::DEPENSES}"{if $type == Garradin_Compta_Categories::DEPENSES} selected="selected"{/if}>Dépense</option>
+                    <option value="{Garradin\Compta_Categories::RECETTES}"{if $type == Garradin\Compta_Categories::RECETTES} selected="selected"{/if}>Recette</option>
+                    <option value="{Garradin\Compta_Categories::DEPENSES}"{if $type == Garradin\Compta_Categories::DEPENSES} selected="selected"{/if}>Dépense</option>
                 </select>
             </dd>
             <dt><label for="f_intitule">Intitulé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>

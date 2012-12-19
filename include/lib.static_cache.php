@@ -1,5 +1,7 @@
 <?php
 
+namespace Garradin;
+
 class Static_Cache
 {
 	const EXPIRE = 3600; // 1h

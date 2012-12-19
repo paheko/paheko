@@ -1,5 +1,6 @@
 <?php
 
+namespace Garradin;
 require_once __DIR__ . '/_inc.php';
 
 if (!empty($_SERVER['QUERY_STRING']))
@@ -14,7 +15,7 @@ else
 if (!$page)
 {
     $tpl->assign('uri', $_SERVER['QUERY_STRING']);
-    $tpl->assign('can_edit', $wiki->canWritePage(Garradin_Wiki::ECRITURE_NORMAL));
+    $tpl->assign('can_edit', $wiki->canWritePage(Wiki::ECRITURE_NORMAL));
     $tpl->assign('can_read', true);
 }
 else

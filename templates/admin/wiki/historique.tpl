@@ -27,7 +27,7 @@
             </td>
             <th>{$rev.date|date_fr:'d/m/Y à H:i'}</th>
             <td>
-                {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+                {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
                 <a href="{$www_url}admin/membres/fiche.php?id={$rev.id_auteur|escape}">{$rev.nom_auteur|escape}</a>
                 {/if}
             </td>
@@ -54,7 +54,7 @@
 {elseif !empty($diff)}
     <div class="wikiRevision revisionLeft">
         <h3>Version du {$rev1.date|date_fr:'d/m/Y à H:i'}</h3>
-        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+        {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
             <h4>De <a href="{$www_url}admin/membres/fiche.php?id={$rev1.id_auteur|escape}">{$rev1.nom_auteur|escape}</a></h4>
         {/if}
         {if $rev1.modification}
@@ -63,7 +63,7 @@
     </div>
     <div class="wikiRevision revisionRight">
         <h3>Version {if $rev2.revision == $page.revision}actuelle en date{/if} du {$rev2.date|date_fr:'d/m/Y à H:i'}</h3>
-        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+        {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
             <h4>De <a href="{$www_url}admin/membres/fiche.php?id={$rev2.id_auteur|escape}">{$rev2.nom_auteur|escape}</a></h4>
         {/if}
         {if $rev2.modification}

@@ -42,27 +42,27 @@
         <dl>
             <dt><label for="f_droit_lecture_public">Cette page est visible :</label></dt>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_public" value="{Garradin_Wiki::LECTURE_PUBLIC}" {form_field data=$page name="droit_lecture" checked=Garradin_Wiki::LECTURE_PUBLIC} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_public" value="{Garradin\Wiki::LECTURE_PUBLIC}" {form_field data=$page name="droit_lecture" checked=Garradin\Wiki::LECTURE_PUBLIC} />
                 <label for="f_droit_lecture_public"><strong>Sur le site de l'association</strong></label>
                 &mdash; cette page apparaîtra sur le site public de l'association, accessible à tous les visiteurs
             </dd>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_normal" value="{Garradin_Wiki::LECTURE_NORMAL}"  {form_field data=$page name="droit_lecture" checked=Garradin_Wiki::LECTURE_NORMAL} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_normal" value="{Garradin\Wiki::LECTURE_NORMAL}"  {form_field data=$page name="droit_lecture" checked=Garradin\Wiki::LECTURE_NORMAL} />
                 <label for="f_droit_lecture_normal"><strong>Sur le wiki uniquement</strong></label>
                 &mdash; seuls les membres ayant accès au wiki pourront la voir
             </dd>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}checked="checked"{/if} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {if $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}checked="checked"{/if} />
                 <label for="f_droit_lecture_categorie"><strong>Aux membres de ma catégorie</strong></label>
                 &mdash; seuls les membres de la même catégorie que moi pourront voir cette page
             </dd>
             <dt><label for="f_droit_ecriture_normal">Cette page peut être modifiée par :</label></dt>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{Garradin_Wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=Garradin_Wiki::ECRITURE_NORMAL} {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{Garradin\Wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=Garradin\Wiki::ECRITURE_NORMAL} {if $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
                 <label for="f_droit_ecriture_normal">Les membres qui ont accès au wiki en écriture</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page.droit_ecriture >= Garradin_Wiki::ECRITURE_CATEGORIE || $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}checked="checked"{/if} {if $page.droit_lecture >= Garradin_Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page.droit_ecriture >= Garradin\Wiki::ECRITURE_CATEGORIE || $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}checked="checked"{/if} {if $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
                 <label for="f_droit_ecriture_categorie">Les membres de ma catégorie</label>
             </dd>
         </dl>

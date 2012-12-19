@@ -1,10 +1,12 @@
 <?php
 
-class Garradin_Compta_Import
+namespace Garradin;
+
+class Compta_Import
 {
 	public function toCSV($exercice)
 	{
-		$db = Garradin_DB::getInstance();
+		$db = DB::getInstance();
 
 		$header = array(
 			'Numéro mouvement',
@@ -75,17 +77,12 @@ class Garradin_Compta_Import
 			return false;
 		}
 
-		require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
-		require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
-		require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
-		require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
-
-		$db = Garradin_DB::getInstance();
+		$db = DB::getInstance();
 		$db->exec('BEGIN;');
-		$comptes = new Garradin_Compta_Comptes;
-		$banques = new Garradin_Compta_Comptes_Bancaires;
-		$cats = new Garradin_Compta_Categories;
-		$journal = new Garradin_Compta_Journal;
+		$comptes = new Compta_Comptes;
+		$banques = new Compta_Comptes_Bancaires;
+		$cats = new Compta_Categories;
+		$journal = new Compta_Journal;
 
 		$columns = array();
 		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');

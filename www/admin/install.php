@@ -1,4 +1,5 @@
 <?php
+namespace Garradin;
 
 /*
  * Tests : vérification que les conditions pour s'exécuter sont remplies
@@ -45,7 +46,6 @@ if ($fail)
 define('GARRADIN_INSTALL_PROCESS', true);
 
 require_once __DIR__ . '/../../include/init.php';
-require_once GARRADIN_ROOT . '/include/class.membres.php';
 require_once GARRADIN_ROOT . '/include/template.php';
 
 if (file_exists(GARRADIN_DB_FILE))
@@ -70,11 +70,8 @@ else
         else
         {
             try {
-                require_once GARRADIN_ROOT . '/include/class.db.php';
-                require_once GARRADIN_ROOT . '/include/class.config.php';
-
                 // Configuration de base
-                $config = Garradin_Config::getInstance();
+                $config = Config::getInstance();
                 $config->set('nom_asso', utils::post('nom_asso'));
                 $config->set('adresse_asso', utils::post('adresse_asso'));
                 $config->set('email_asso', utils::post('email_asso'));
@@ -88,9 +85,7 @@ else
                 $config->setVersion(garradin_version());
 
                 // Création catégories
-                require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
-
-                $cats = new Garradin_Membres_Categories;
+                $cats = new Membres_Categories;
                 $id = $cats->add(array(
                     'nom' => 'Membres actifs',
                     'montant_cotisation' => 10));
@@ -99,27 +94,27 @@ else
                 $id = $cats->add(array(
                     'nom' => 'Anciens membres',
                     'montant_cotisation' => 0,
-                    'droit_inscription' => Garradin_Membres::DROIT_AUCUN,
-                    'droit_wiki' => Garradin_Membres::DROIT_AUCUN,
-                    'droit_membres' => Garradin_Membres::DROIT_AUCUN,
-                    'droit_compta' => Garradin_Membres::DROIT_AUCUN,
-                    'droit_config' => Garradin_Membres::DROIT_AUCUN,
-                    'droit_connexion' => Garradin_Membres::DROIT_AUCUN,
+                    'droit_inscription' => Membres::DROIT_AUCUN,
+                    'droit_wiki' => Membres::DROIT_AUCUN,
+                    'droit_membres' => Membres::DROIT_AUCUN,
+                    'droit_compta' => Membres::DROIT_AUCUN,
+                    'droit_config' => Membres::DROIT_AUCUN,
+                    'droit_connexion' => Membres::DROIT_AUCUN,
                     'cacher' => 1,
                     ));
 
                 $id = $cats->add(array(
                     'nom' => ucfirst(utils::post('cat_membre')),
                     'montant_cotisation' => 0,
-                    'droit_inscription' => Garradin_Membres::DROIT_AUCUN,
-                    'droit_wiki' => Garradin_Membres::DROIT_ADMIN,
-                    'droit_membres' => Garradin_Membres::DROIT_ADMIN,
-                    'droit_compta' => Garradin_Membres::DROIT_ADMIN,
-                    'droit_config' => Garradin_Membres::DROIT_ADMIN,
+                    'droit_inscription' => Membres::DROIT_AUCUN,
+                    'droit_wiki' => Membres::DROIT_ADMIN,
+                    'droit_membres' => Membres::DROIT_ADMIN,
+                    'droit_compta' => Membres::DROIT_ADMIN,
+                    'droit_config' => Membres::DROIT_ADMIN,
                     ));
 
                 // Création premier membre
-                $membres = new Garradin_Membres;
+                $membres = new Membres;
                 $id_membre = $membres->add(array(
                     'id_categorie'  =>  $id,
                     'nom'           =>  utils::post('nom_membre'),
@@ -129,10 +124,9 @@ else
                 ));
 
                 // Création wiki
-                require_once GARRADIN_ROOT . '/include/class.wiki.php';
-                $page = Garradin_Wiki::transformTitleToURI(utils::post('nom_asso'));
+                $page = Wiki::transformTitleToURI(utils::post('nom_asso'));
                 $config->set('accueil_wiki', $page);
-                $wiki = new Garradin_Wiki;
+                $wiki = new Wiki;
                 $id_page = $wiki->create(array(
                     'titre' =>  utils::post('nom_asso'),
                     'uri'   =>  $page,
@@ -144,19 +138,13 @@ else
                 ));
 
                 // Mise en place compta
-                require GARRADIN_ROOT . '/include/class.compta_comptes.php';
-
-                $comptes = new Garradin_Compta_Comptes;
+                $comptes = new Compta_Comptes;
                 $comptes->importPlan();
 
-                require GARRADIN_ROOT . '/include/class.compta_categories.php';
-
-                $comptes = new Garradin_Compta_Categories;
+                $comptes = new Compta_Categories;
                 $comptes->importCategories();
 
-                require GARRADIN_ROOT . '/include/class.compta_exercices.php';
-
-                $ex = new Garradin_Compta_Exercices;
+                $ex = new Compta_Exercices;
                 $ex->add(array('libelle' => 'Premier exercice', 'debut' => date('Y-01-01'), 'fin' => date('Y-12-31')));
 
                 $config->save();
