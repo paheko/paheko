@@ -24,7 +24,7 @@
         <tr>
             <td><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id|escape}">{$ligne.id|escape}</a></td>
             <td class="actions">
-            {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+            {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
                 <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id|escape}">✎</a>
             {/if}
             </td>

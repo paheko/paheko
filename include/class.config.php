@@ -1,6 +1,8 @@
 <?php
 
-class Garradin_Config
+namespace Garradin;
+
+class Config
 {
     protected $fields_types = null;
     protected $config = null;
@@ -13,7 +15,7 @@ class Garradin_Config
 
     static public function getInstance()
     {
-        return self::$_instance ?: self::$_instance = new Garradin_Config;
+        return self::$_instance ?: self::$_instance = new Config;
     }
 
     private function __clone()
@@ -52,7 +54,7 @@ class Garradin_Config
             'version'               =>  $string,
         );
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $this->config = $db->simpleStatementFetchAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
 
@@ -89,7 +91,7 @@ class Garradin_Config
 
         $values = array();
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->exec('BEGIN;');
 
         foreach ($this->modified as $key=>$modified)
@@ -136,7 +138,7 @@ class Garradin_Config
     {
         $this->config['version'] = $version;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
                 'version', $version);
 
@@ -224,7 +226,7 @@ class Garradin_Config
             case 'categorie_dons':
             {
                 return false;
-                $db = Garradin_DB::getInstance();
+                $db = DB::getInstance();
                 if (!$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, $value))
                 {
                     throw new UserException('Champ '.$key.' : La catégorie comptable numéro \''.$value.'\' ne semble pas exister.');
@@ -233,7 +235,7 @@ class Garradin_Config
             }
             case 'categorie_membres':
             {
-                $db = Garradin_DB::getInstance();
+                $db = DB::getInstance();
                 if (!$db->simpleQuerySingle('SELECT 1 FROM membres_categories WHERE id = ?;', false, $value))
                 {
                     throw new UserException('La catégorie de membres par défaut numéro \''.$value.'\' ne semble pas exister.');

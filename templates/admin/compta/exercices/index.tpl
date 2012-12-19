@@ -23,7 +23,7 @@
             | <a href="{$www_url}admin/compta/exercices/compte_resultat.php?id={$exercice.id|escape}">Compte de résultat</a>
             | <a href="{$www_url}admin/compta/exercices/bilan.php?id={$exercice.id|escape}">Bilan</a>
         </dd>
-        {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+        {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
         <dd class="actions">
             {if !$exercice.cloture}
             <a href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id|escape}">Modifier</a>

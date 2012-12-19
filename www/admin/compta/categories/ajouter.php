@@ -1,15 +1,14 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Garradin_Membres::DROIT_ADMIN)
+if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
-
-$cats = new Garradin_Compta_Categories;
+$cats = new Compta_Categories;
 
 $error = false;
 
@@ -30,9 +29,9 @@ if (!empty($_POST['add']))
                 'type'          =>  utils::post('type'),
             ));
 
-            if (utils::post('type') == Garradin_Compta_Categories::DEPENSES)
+            if (utils::post('type') == Compta_Categories::DEPENSES)
                 $type = 'depenses';
-            elseif (utils::post('type') == Garradin_Compta_Categories::AUTRES)
+            elseif (utils::post('type') == Compta_Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
@@ -48,7 +47,7 @@ if (!empty($_POST['add']))
 
 $tpl->assign('error', $error);
 
-$tpl->assign('type', isset($_POST['type']) ? utils::post('type') : Garradin_Compta_Categories::RECETTES);
+$tpl->assign('type', isset($_POST['type']) ? utils::post('type') : Compta_Categories::RECETTES);
 $tpl->assign('comptes', $comptes->listTree());
 
 $tpl->display('admin/compta/categories/ajouter.tpl');

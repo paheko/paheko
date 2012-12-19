@@ -1,12 +1,14 @@
 <?php
 
-class Garradin_Compta_Exercices
+namespace Garradin;
+
+class Compta_Exercices
 {
     public function add($data)
     {
         $this->_checkFields($data);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE
             (debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin);', false,
@@ -31,7 +33,7 @@ class Garradin_Compta_Exercices
 
     public function edit($id, $data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $this->_checkFields($data);
 
@@ -67,7 +69,7 @@ class Garradin_Compta_Exercices
 
     public function close($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $db->simpleUpdate('compta_exercices', array(
             'cloture'   =>  1,
@@ -78,7 +80,7 @@ class Garradin_Compta_Exercices
 
     public function delete($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         // Ne pas supprimer un compte qui est utilisé !
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_exercice = ? LIMIT 1;', false, $id))
@@ -93,27 +95,27 @@ class Garradin_Compta_Exercices
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', debut) AS debut,
             strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE id = ?;', true, (int)$id);
     }
 
     public function getCurrent()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) FROM compta_exercices
             WHERE cloture = 0 LIMIT 1;', true);
     }
 
     public function getCurrentId()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
     }
 
     public function getList()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleStatementFetchAssocKey('SELECT id, *, strftime(\'%s\', debut) AS debut,
             strftime(\'%s\', fin) AS fin,
             (SELECT COUNT(*) FROM compta_journal WHERE id_exercice = compta_exercices.id) AS nb_operations
@@ -122,7 +124,7 @@ class Garradin_Compta_Exercices
 
     protected function _checkFields(&$data)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (empty($data['libelle']) || !trim($data['libelle']))
         {
@@ -147,7 +149,7 @@ class Garradin_Compta_Exercices
 
     public function getJournal($exercice)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal
             WHERE id_exercice = '.(int)$exercice.' ORDER BY date, id;';
         return $db->simpleStatementFetch($query);
@@ -155,7 +157,7 @@ class Garradin_Compta_Exercices
 
     public function getGrandLivre($exercice)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $livre = array('classes' => array(), 'debit' => 0.0, 'credit' => 0.0);
 
         $res = $db->prepare('SELECT compte FROM
@@ -221,7 +223,7 @@ class Garradin_Compta_Exercices
 
     public function getCompteResultat($exercice)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $charges    = array('comptes' => array(), 'total' => 0.0);
         $produits   = array('comptes' => array(), 'total' => 0.0);
@@ -281,11 +283,10 @@ class Garradin_Compta_Exercices
 
     public function getBilan($exercice)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
-        require_once GARRADIN_ROOT . '/include/class.compta_comptes.php';
-        $include = array(Garradin_Compta_Comptes::ACTIF, Garradin_Compta_Comptes::PASSIF,
-            Garradin_Compta_Comptes::PASSIF | Garradin_Compta_Comptes::ACTIF);
+        $include = array(Compta_Comptes::ACTIF, Compta_Comptes::PASSIF,
+            Compta_Comptes::PASSIF | Compta_Comptes::ACTIF);
 
         $actif      = array('comptes' => array(), 'total' => 0.0);
         $passif     = array('comptes' => array(), 'total' => 0.0);
@@ -329,7 +330,7 @@ class Garradin_Compta_Exercices
             list($compte, $debit, $credit, $position) = $row;
             $parent = substr($compte, 0, 2);
 
-            if ($position & Garradin_Compta_Comptes::ACTIF)
+            if ($position & Compta_Comptes::ACTIF)
             {
                 if (!isset($actif['comptes'][$parent]))
                 {
@@ -348,7 +349,7 @@ class Garradin_Compta_Exercices
                 $actif['comptes'][$parent]['solde'] += $solde;
             }
 
-            if ($position & Garradin_Compta_Comptes::PASSIF)
+            if ($position & Compta_Comptes::PASSIF)
             {
                 if (!isset($passif['comptes'][$parent]))
                 {

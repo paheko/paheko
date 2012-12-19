@@ -21,12 +21,12 @@
     {if $is_logged}
     <ul class="menu">
         <li class="home{if $current == 'home'} current{/if}"><a href="{$www_url}admin/">Accueil</a></li>
-        {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+        {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
             <li class="list_members{if $current == 'membres'} current{/if}"><a href="{$www_url}admin/membres/">Membres <small>({$nb_membres|escape})</small></a>
-            {if $user.droits.membres >= Garradin_Membres::DROIT_ECRITURE}
+            {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
             <ul>
                 <li class="add_member{if $current == 'membres/ajouter'} current{/if}"><a href="{$www_url}admin/membres/ajouter.php">Ajouter</a></li>
-                {if $user.droits.membres >= Garradin_Membres::DROIT_ADMIN}
+                {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
                 <li class="member_cats{if $current == 'membres/categories'} current{/if}"><a href="{$www_url}admin/membres/categories.php">Catégories</a></li>
                 <li class="members_mail{if $current == 'membres/message_collectif'} current{/if}"><a href="{$www_url}admin/membres/message_collectif.php">Message collectif</a></li>
                 {/if}
@@ -34,34 +34,34 @@
             {/if}
             </li>
         {/if}
-        {if $user.droits.compta >= Garradin_Membres::DROIT_ACCES}
+        {if $user.droits.compta >= Garradin\Membres::DROIT_ACCES}
             <li class="compta{if $current == 'compta'} current{/if}"><a href="{$www_url}admin/compta/">Comptabilité <small>[beta]</small></a>
             <ul>
-            {if $user.droits.compta >= Garradin_Membres::DROIT_ECRITURE}
+            {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
                 <li class="compta_saisie{if $current == 'compta/saisie'} current{/if}"><a href="{$www_url}admin/compta/operations/saisir.php">Saisie</a></li>
             {/if}
                 <li class="compta_gestion{if $current == 'compta/gestion'} current{/if}"><a href="{$www_url}admin/compta/operations/">Suivi des opérations</a></li>
                 <li class="compta_banques{if $current == 'compta/banques'} current{/if}"><a href="{$www_url}admin/compta/banques/">Banques &amp; caisse</a></li>
-            {if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+            {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
                 <li class="compta_cats{if $current == 'compta/categories'} current{/if}"><a href="{$www_url}admin/compta/categories/">Catégories &amp; comptes</a></li>
             {/if}
                 <li class="compta_exercices{if $current == 'compta/exercices'} current{/if}"><a href="{$www_url}admin/compta/exercices/">Exercices</a></li>
             </ul>
             </li>
         {/if}
-        {if $user.droits.wiki >= Garradin_Membres::DROIT_ACCES}
+        {if $user.droits.wiki >= Garradin\Membres::DROIT_ACCES}
             <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$www_url}admin/wiki/">Wiki</a>
             <ul>
                 <li class="wiki_recent{if $current == 'wiki/recent'} current{/if}"><a href="{$www_url}admin/wiki/recent.php">Dernières modifications</a>
                 <li class="wiki_chercher{if $current == 'wiki/chercher'} current{/if}"><a href="{$www_url}admin/wiki/chercher.php">Recherche</a>
-                {if $user.droits.wiki >= Garradin_Membres::DROIT_ECRITURE}
+                {if $user.droits.wiki >= Garradin\Membres::DROIT_ECRITURE}
                 {/if}
                 {*<li class="wiki_suivi{if $current == 'wiki/suivi'} current{/if}"><a href="{$www_url}admin/wiki/suivi.php">Mes pages suivies</a>*}
                 {*<li class="wiki_contribution{if $current == 'wiki/contribution'} current{/if}"><a href="{$www_url}admin/wiki/contributions.php">Mes contributions</a>*}
             </ul>
             </li>
         {/if}
-        {if $user.droits.config >= Garradin_Membres::DROIT_ADMIN}
+        {if $user.droits.config >= Garradin\Membres::DROIT_ADMIN}
             <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}admin/config/">Configuration</a>
         {/if}
         {if count($config.champs_modifiables_membre) > 0}

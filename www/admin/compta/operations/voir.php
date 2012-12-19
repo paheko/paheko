@@ -1,9 +1,9 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
-$journal = new Garradin_Compta_Journal;
+$journal = new Compta_Journal;
 
 $operation = $journal->get(utils::get('id'));
 
@@ -11,10 +11,7 @@ if (!$operation)
 {
     throw new UserException("L'opération demandée n'existe pas.");
 }
-
-require_once GARRADIN_ROOT . '/include/class.compta_categories.php';
-require_once GARRADIN_ROOT . '/include/class.compta_exercices.php';
-$exercices = new Garradin_Compta_Exercices;
+$exercices = new Compta_Exercices;
 
 $tpl->assign('operation', $operation);
 
@@ -28,12 +25,12 @@ $tpl->assign('exercice', $exercices->get($operation['id_exercice']));
 
 if ($operation['id_categorie'])
 {
-    $cats = new Garradin_Compta_Categories;
+    $cats = new Compta_Categories;
 
     $categorie = $cats->get($operation['id_categorie']);
     $tpl->assign('categorie', $categorie);
 
-    if ($categorie['type'] == Garradin_Compta_Categories::RECETTES)
+    if ($categorie['type'] == Compta_Categories::RECETTES)
     {
         $tpl->assign('compte', $debit['libelle']);
     }

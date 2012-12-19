@@ -48,7 +48,7 @@
         </dl>
     </fieldset>
 
-    {if $user.droits.membres == Garradin_Membres::DROIT_ADMIN}
+    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
     <fieldset>
         <legend>Général</legend>
         <dl>

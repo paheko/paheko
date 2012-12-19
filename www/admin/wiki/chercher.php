@@ -1,4 +1,5 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -18,7 +19,7 @@ function tpl_clean_snippet($str)
     return preg_replace('!&lt;(/?b)&gt;!', '<$1>', $str);
 }
 
-$tpl->register_modifier('clean_snippet', 'tpl_clean_snippet');
+$tpl->register_modifier('clean_snippet', 'Garradin\tpl_clean_snippet');
 
 $tpl->display('admin/wiki/chercher.tpl');
 

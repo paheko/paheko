@@ -1,16 +1,16 @@
 <?php
 
-require_once GARRADIN_ROOT . '/include/class.membres.php';
+namespace Garradin;
 
-class Garradin_Membres_Categories
+class Membres_Categories
 {
     protected $droits = array(
-        'inscription'=> Garradin_Membres::DROIT_AUCUN,
-        'connexion' =>  Garradin_Membres::DROIT_ACCES,
-        'membres'   =>  Garradin_Membres::DROIT_ACCES,
-        'compta'    =>  Garradin_Membres::DROIT_ACCES,
-        'wiki'      =>  Garradin_Membres::DROIT_ACCES,
-        'config'    =>  Garradin_Membres::DROIT_AUCUN,
+        'inscription'=> Membres::DROIT_AUCUN,
+        'connexion' =>  Membres::DROIT_ACCES,
+        'membres'   =>  Membres::DROIT_ACCES,
+        'compta'    =>  Membres::DROIT_ACCES,
+        'wiki'      =>  Membres::DROIT_ACCES,
+        'config'    =>  Membres::DROIT_AUCUN,
     );
 
     static public function getDroitsDefaut()
@@ -71,7 +71,7 @@ class Garradin_Membres_Categories
                 $data['droit_'.$key] = (int)$data['droit_'.$key];
         }
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->simpleInsert('membres_categories', $data);
 
         return $db->lastInsertRowID();
@@ -90,13 +90,13 @@ class Garradin_Membres_Categories
         if (!isset($data['cacher']) || $data['cacher'] != 1)
             $data['cacher'] = 0;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleUpdate('membres_categories', $data, 'id = '.(int)$id);
     }
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         return $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;',
             true, (int) $id);
@@ -104,8 +104,8 @@ class Garradin_Membres_Categories
 
     public function remove($id)
     {
-        $db = Garradin_DB::getInstance();
-        $config = Garradin_Config::getInstance();
+        $db = DB::getInstance();
+        $config = Config::getInstance();
 
         if ($id == $config->get('categorie_membres'))
         {
@@ -117,14 +117,11 @@ class Garradin_Membres_Categories
             throw new UserException('La catégorie contient encore des membres, il n\'est pas possible de la supprimer.');
         }
 
-        // Remise à zéro des droits sur les pages du wiki
-        require_once GARRADIN_ROOT . '/include/class.wiki.php';
-
         $db->simpleUpdate(
             'wiki_pages',
             array(
-                'droit_lecture'     =>  Garradin_Wiki::LECTURE_NORMAL,
-                'droit_ecriture'    =>  Garradin_Wiki::ECRITURE_NORMAL,
+                'droit_lecture'     =>  Wiki::LECTURE_NORMAL,
+                'droit_ecriture'    =>  Wiki::ECRITURE_NORMAL,
             ),
             'droit_lecture = '.(int)$id.' OR droit_ecriture = '.(int)$id
         );
@@ -134,32 +131,32 @@ class Garradin_Membres_Categories
 
     public function listSimple()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;');
     }
 
     public function listComplete()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->queryFetch('SELECT * FROM membres_categories ORDER BY nom;');
     }
 
     public function listCompleteWithStats()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->queryFetch('SELECT *, (SELECT COUNT(*) FROM membres WHERE id_categorie = membres_categories.id) AS nombre FROM membres_categories ORDER BY nom;');
     }
 
 
     public function listHidden()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 1;');
     }
 
     public function listNotHidden()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 0;');
     }
 }

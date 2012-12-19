@@ -1,12 +1,10 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
-$banques = new Garradin_Compta_Comptes_Bancaires;
-
-require_once GARRADIN_ROOT . '/include/class.compta_journal.php';
-$journal = new Garradin_Compta_Journal;
+$banques = new Compta_Comptes_Bancaires;
+$journal = new Compta_Journal;
 
 $liste = $banques->getList();
 
@@ -35,8 +33,8 @@ function tpl_format_rib($iban)
     return $out;
 }
 
-$tpl->register_modifier('format_iban', 'tpl_format_iban');
-$tpl->register_modifier('format_rib', 'tpl_format_rib');
+$tpl->register_modifier('format_iban', 'Garradin\tpl_format_iban');
+$tpl->register_modifier('format_rib', 'Garradin\tpl_format_rib');
 
 $tpl->display('admin/compta/banques/index.tpl');
 

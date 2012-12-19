@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/class.compta_comptes.php';
+namespace Garradin;
 
-class Garradin_Compta_Stats
+class Compta_Stats
 {
 	protected function _byType($type)
 	{
@@ -25,7 +25,7 @@ class Garradin_Compta_Stats
 
 	public function soldeCompte($compte, $augmente = 'debit', $diminue = 'credit')
 	{
-		$db = Garradin_DB::getInstance();
+		$db = DB::getInstance();
 
 		if (strpos($compte, '%') !== false)
 		{
@@ -63,7 +63,7 @@ class Garradin_Compta_Stats
 
 	public function getStats($query)
 	{
-		$db = Garradin_DB::getInstance();
+		$db = DB::getInstance();
 
 		$data = $db->simpleStatementFetchAssoc($query);
 

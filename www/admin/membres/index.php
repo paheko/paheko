@@ -1,15 +1,14 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Garradin_Membres::DROIT_ACCES)
+if ($user['droits']['membres'] < Membres::DROIT_ACCES)
 {
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-require_once GARRADIN_ROOT . '/include/class.membres_categories.php';
-
-$cats = new Garradin_Membres_Categories;
+$cats = new Membres_Categories;
 $membres_cats = $cats->listSimple();
 $membres_cats_cachees = $cats->listHidden();
 
@@ -60,7 +59,7 @@ $tpl->assign('membres_cats_cachees', $membres_cats_cachees);
 $tpl->assign('current_cat', $cat);
 
 $tpl->assign('page', $page);
-$tpl->assign('bypage', Garradin_Membres::ITEMS_PER_PAGE);
+$tpl->assign('bypage', Membres::ITEMS_PER_PAGE);
 
 $tpl->assign('search_field', $search_field);
 $tpl->assign('search_query', $search_query);

@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Opération n°`$operation.id`" current="compta/gestion"}
 
-{if $user.droits.compta >= Garradin_Membres::DROIT_ADMIN}
+{if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
 <ul class="actions">
     <li class="edit"><a href="{$admin_url}compta/operations/modifier.php?id={$operation.id|escape}">Modifier cette opération</a></li>
     <li class="delete"><a href="{$admin_url}compta/operations/supprimer.php?id={$operation.id|escape}">Supprimer cette opération</a></li>
@@ -34,7 +34,7 @@
 
         <dt>Catégorie</dt>
         <dd>
-            <a href="{$www_url}admin/compta/operations/?{if $categorie.type == Garradin_Compta_Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin_Compta_Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
+            <a href="{$www_url}admin/compta/operations/?{if $categorie.type == Garradin\Compta_Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin\Compta_Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
             <a href="{$www_url}admin/compta/operations/?cat={$operation.id_categorie|escape}">{$categorie.intitule|escape}</a>
         </dd>
     {/if}
@@ -49,7 +49,7 @@
     <dt>Opération créée par</dt>
     <dd>
         {if $operation.id_auteur}
-            {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+            {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
                 <a href="{$www_url}admin/membres/fiche.php?id={$operation.id_auteur|escape}">{$nom_auteur|escape}</a>
             {else}
                 {$nom_auteur|escape}

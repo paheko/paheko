@@ -1,12 +1,13 @@
 <?php
 
+namespace Garradin;
+
 require_once __DIR__ . '/../../include/init.php';
 require_once GARRADIN_ROOT . '/include/template.php';
-require_once GARRADIN_ROOT . '/include/class.membres.php';
 
 $tpl->assign('admin_url', WWW_URL . 'admin/');
 
-$membres = new Garradin_Membres;
+$membres = new Membres;
 
 if (!defined('GARRADIN_LOGIN_PROCESS'))
 {
@@ -21,7 +22,7 @@ if (!defined('GARRADIN_LOGIN_PROCESS'))
 
     $tpl->assign('current', '');
 
-    if ($user['droits']['membres'] >= Garradin_Membres::DROIT_ACCES)
+    if ($user['droits']['membres'] >= Membres::DROIT_ACCES)
     {
         $tpl->assign('nb_membres', $membres->countAllButHidden());
     }

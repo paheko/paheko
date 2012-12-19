@@ -42,7 +42,7 @@
             <dd class="banque">
                 <select name="banque" id="f_banque">
                 {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id|escape}"{if ($type == Garradin_Compta_Categories::DEPENSES && $compte.id == $operation.compte_credit) || $compte.id == $operation.compte_debit} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                    <option value="{$compte.id|escape}"{if ($type == Garradin\Compta_Categories::DEPENSES && $compte.id == $operation.compte_credit) || $compte.id == $operation.compte_debit} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
                 {/foreach}
                 </select>
             </dd>

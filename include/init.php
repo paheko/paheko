@@ -1,5 +1,7 @@
 <?php
 
+namespace Garradin;
+
 /*
  * Version de Garradin
  */
@@ -82,7 +84,7 @@ if (!defined('WWW_URL'))
  * Gestion des erreurs et exceptions
  */
 
-class UserException extends LogicException
+class UserException extends \LogicException
 {
 }
 
@@ -92,7 +94,7 @@ function exception_error_handler($errno, $errstr, $errfile, $errline )
 {
     // For @ ignored errors
     if (error_reporting() === 0) return;
-    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
 function exception_handler($e)
@@ -100,8 +102,7 @@ function exception_handler($e)
     if ($e instanceOf UserException || $e instanceOf miniSkelMarkupException)
     {
         try {
-            require_once GARRADIN_ROOT . '/include/template.php';
-            $tpl = Garradin_TPL::getInstance();
+            $tpl = Template::getInstance();
 
             $tpl->assign('error', $e->getMessage());
             $tpl->display('error.tpl');
@@ -127,8 +128,8 @@ function exception_handler($e)
     exit;
 }
 
-set_error_handler("exception_error_handler");
-set_exception_handler("exception_handler");
+set_error_handler("Garradin\exception_error_handler");
+set_exception_handler("Garradin\exception_handler");
 
 // Nettoyage des variables GPC pour ceux qui n'auraient
 // toujours pas désactivé les magic quotes
@@ -152,11 +153,77 @@ if (get_magic_quotes_gpc())
     strip_slashes_from_user_data($_COOKIE);
 }
 
+/**
+ * Auto-load classes and libs
+ */
+class Loader
+{
+    /**
+     * Already loaded filenames
+     * @var array
+     */
+    static protected $loaded = array();
+
+    static protected $libs = array(
+        'utils',
+        'squelette_filtres',
+        'static_cache',
+        );
+
+    /**
+     * Loads a class from the $name
+     * @param  stringg $classname
+     * @return bool true
+     */
+    static public function load($classname)
+    {
+        $classname = ltrim($classname, '\\');
+        $filename  = '';
+        $namespace = '';
+
+        if ($lastnspos = strripos($classname, '\\')) 
+        {
+            $namespace = substr($classname, 0, $lastnspos);
+            $classname = substr($classname, $lastnspos + 1);
+
+            if ($namespace != 'Garradin')
+            {
+                $filename  = str_replace('\\', '/', $namespace) . '/';
+            }
+        }
+
+        $classname = strtolower($classname);
+
+        if (in_array($classname, self::$libs)) {
+            $filename = 'lib.' . $classname . '.php';
+        } else {
+            $filename .= 'class.' . $classname . '.php';
+        }
+
+        $filename = GARRADIN_ROOT . '/include/' . $filename;
+
+        if (array_key_exists($filename, self::$loaded))
+        {
+            return true;
+        }
+
+        if (!file_exists($filename)) {
+            throw new \Exception('File '.$filename.' doesn\'t exists');
+        }
+
+        self::$loaded[$filename] = true;
+
+        require $filename;
+    }
+}
+
+\spl_autoload_register(array('Garradin\Loader', 'load'), true);
+
+$n = new Membres;
+
 /*
  * Inclusion des fichiers de base
  */
-
-require_once GARRADIN_ROOT . '/include/lib.utils.php';
 
 if (!defined('GARRADIN_INSTALL_PROCESS') && !defined('GARRADIN_UPGRADE_PROCESS'))
 {
@@ -165,9 +232,7 @@ if (!defined('GARRADIN_INSTALL_PROCESS') && !defined('GARRADIN_UPGRADE_PROCESS')
         utils::redirect('/admin/install.php');
     }
 
-    require_once GARRADIN_ROOT . '/include/class.db.php';
-    require_once GARRADIN_ROOT . '/include/class.config.php';
-    $config = Garradin_Config::getInstance();
+    $config = Config::getInstance();
 
     if (version_compare($config->getVersion(), garradin_version(), '<'))
     {

@@ -1,7 +1,8 @@
 <?php
 
+namespace Garradin;
+
 require_once GARRADIN_ROOT . '/include/libs/miniskel/class.miniskel.php';
-require_once GARRADIN_ROOT . '/include/lib.squelette.filtres.php';
 
 class Squelette_Snippet
 {
@@ -168,7 +169,7 @@ class Squelette_Snippet
     }
 }
 
-class Squelette extends miniSkel
+class Squelette extends \miniSkel
 {
     private $parent = null;
     private $current = null;
@@ -184,14 +185,14 @@ class Squelette extends miniSkel
                 $this->register_modifier($name, $name);
         }
 
-        foreach (get_class_methods('Squelette_Filtres') as $name)
+        foreach (get_class_methods('Garradin\Squelette_Filtres') as $name)
         {
-            $this->register_modifier($name, array('Squelette_Filtres', $name));
+            $this->register_modifier($name, array('Garradin\Squelette_Filtres', $name));
         }
 
         foreach (Squelette_Filtres::$filtres_alias as $name=>$func)
         {
-            $this->register_modifier($name, array('Squelette_Filtres', $func));
+            $this->register_modifier($name, array('Garradin\Squelette_Filtres', $func));
         }
     }
 
@@ -199,7 +200,7 @@ class Squelette extends miniSkel
     {
         $this->_registerDefaultModifiers();
 
-        $config = Garradin_Config::getInstance();
+        $config = Config::getInstance();
 
         $this->assign('nom_asso', $config->get('nom_asso'));
         $this->assign('adresse_asso', $config->get('adresse_asso'));
@@ -216,12 +217,12 @@ class Squelette extends miniSkel
     protected function processInclude($args)
     {
         if (empty($args))
-            throw new miniSkelMarkupException("Le tag INCLURE demande à préciser le fichier à inclure.");
+            throw new \miniSkelMarkupException("Le tag INCLURE demande à préciser le fichier à inclure.");
 
         $file = key($args);
 
         if (empty($file) || !preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $file))
-            throw new miniSkelMarkupException("INCLURE: le nom de fichier ne peut contenir que des caractères alphanumériques.");
+            throw new \miniSkelMarkupException("INCLURE: le nom de fichier ne peut contenir que des caractères alphanumériques.");
 
         return new Squelette_Snippet(1, '$this->fetch("'.$file.'", false);');
     }
@@ -252,7 +253,7 @@ class Squelette extends miniSkel
         {
             if (!isset($this->modifiers[$modifier['name']]))
             {
-                throw new miniSkelMarkupException('Filtre '.$modifier['name'].' inconnu !');
+                throw new \miniSkelMarkupException('Filtre '.$modifier['name'].' inconnu !');
             }
 
             $out->append(1, '$value = call_user_func_array('.var_export($this->modifiers[$modifier['name']], true).', array($value, ');
@@ -314,7 +315,7 @@ class Squelette extends miniSkel
     {
         if ($loopType != 'articles' && $loopType != 'rubriques' && $loopType != 'pages')
         {
-            throw new miniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
+            throw new \miniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
         }
 
         $loopStart = '';
@@ -353,7 +354,7 @@ class Squelette extends miniSkel
             {
                 if (!in_array($criteria['field'], $allowed_fields))
                 {
-                    throw new miniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
+                    throw new \miniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
                 }
                 elseif ($criteria['field'] == 'rubrique')
                 {
@@ -365,9 +366,9 @@ class Squelette extends miniSkel
                 }
                 elseif ($criteria['field'] == 'points')
                 {
-                    if ($criteria['action'] != miniSkel::ACTION_ORDER_BY)
+                    if ($criteria['action'] != \miniSkel::ACTION_ORDER_BY)
                     {
-                        throw new miniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
+                        throw new \miniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
                     }
 
                     $search_rank = true;
@@ -376,24 +377,24 @@ class Squelette extends miniSkel
 
             switch ($criteria['action'])
             {
-                case miniSkel::ACTION_ORDER_BY:
+                case \miniSkel::ACTION_ORDER_BY:
                     if (!$order)
                         $order = 'ORDER BY '.$criteria['field'].'';
                     else
                         $order .= ', '.$criteria['field'].'';
                     break;
-                case miniSkel::ACTION_ORDER_DESC:
+                case \miniSkel::ACTION_ORDER_DESC:
                     if ($order)
                         $order .= ' DESC';
                     break;
-                case miniSkel::ACTION_LIMIT:
+                case \miniSkel::ACTION_LIMIT:
                     $begin = $criteria['begin'];
                     $limit = $criteria['number'];
                     break;
-                case miniSkel::ACTION_MATCH_FIELD_BY_VALUE:
+                case \miniSkel::ACTION_MATCH_FIELD_BY_VALUE:
                     $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
                     break;
-                case miniSkel::ACTION_MATCH_FIELD:
+                case \miniSkel::ACTION_MATCH_FIELD:
                 {
                     if ($criteria['field'] == 'recherche')
                     {
@@ -419,7 +420,7 @@ class Squelette extends miniSkel
 
         if ($search_rank && !$search)
         {
-            throw new miniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
+            throw new \miniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
         }
 
         if (trim($loopContent))
@@ -509,7 +510,7 @@ class Squelette extends miniSkel
         {
             if (!file_exists($path))
             {
-                throw new miniSkelMarkupException('Le squelette "'.$tpl_id.'" n\'existe pas.');
+                throw new \miniSkelMarkupException('Le squelette "'.$tpl_id.'" n\'existe pas.');
             }
 
             $content = file_get_contents($path);
@@ -517,7 +518,7 @@ class Squelette extends miniSkel
 
             $out = new Squelette_Snippet(2, $this->parse($content));
             $out->prepend(1, '/* '.$tpl_id.' */ '.
-                '$db = Garradin_DB::getInstance(); '.
+                'namespace Garradin; $db = DB::getInstance(); '.
                 'if ($this->parent) $parent_hash = $this->parent[\'_self_hash\']; '. // For included files
                 'else $parent_hash = false;');
 

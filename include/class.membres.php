@@ -1,6 +1,8 @@
 <?php
 
-class Garradin_Membres
+namespace Garradin;
+
+class Membres
 {
     const DROIT_AUCUN = 0;
     const DROIT_ACCES = 1;
@@ -62,7 +64,7 @@ class Garradin_Membres
         if (!filter_var($email, FILTER_VALIDATE_EMAIL))
             return false;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $r = $db->simpleQuerySingle('SELECT *,
             strftime(\'%s\', date_connexion) AS date_connexion,
             strftime(\'%s\', date_inscription) AS date_inscription,
@@ -91,7 +93,7 @@ class Garradin_Membres
         if (!filter_var($email, FILTER_VALIDATE_EMAIL))
             return false;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         $id = $db->simpleQuerySingle('SELECT id FROM membres WHERE email = ? LIMIT 1;', false, trim($email));
 
@@ -100,7 +102,7 @@ class Garradin_Membres
             return false;
         }
 
-        $config = Garradin_Config::getInstance();
+        $config = Config::getInstance();
 
         $dest = trim($email);
 
@@ -126,8 +128,8 @@ class Garradin_Membres
         if (substr($_SESSION['recover_password']['hash'], -10) != $hash)
             return false;
 
-        $config = Garradin_Config::getInstance();
-        $db = Garradin_DB::getInstance();
+        $config = Config::getInstance();
+        $db = DB::getInstance();
 
         $password = utils::suggestPassword();
 
@@ -216,7 +218,7 @@ class Garradin_Membres
         // Uniquement adresse email pour le moment car faudrait trouver comment
         // indiquer le nom mais qu'il soit correctement échappé FIXME
 
-        $config = Garradin_Config::getInstance();
+        $config = Config::getInstance();
 
         $message .= "\n\n--\nCe message a été envoyé par un membre de ".$config->get('nom_asso');
         $message .= ", merci de contacter ".$config->get('email_asso')." en cas d'abus.";
@@ -240,7 +242,7 @@ class Garradin_Membres
 
         if ($check_mandatory)
         {
-            $mandatory = Garradin_Config::getInstance()->get('champs_obligatoires');
+            $mandatory = Config::getInstance()->get('champs_obligatoires');
 
             foreach ($mandatory as $field)
             {
@@ -285,7 +287,7 @@ class Garradin_Membres
     public function add($data = array())
     {
         $this->_checkFields($data);
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (!empty($data['email'])
             && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? LIMIT 1;', false, $data['email']))
@@ -304,7 +306,7 @@ class Garradin_Membres
 
         if (empty($data['id_categorie']))
         {
-            $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
+            $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
         }
 
         $db->simpleInsert('membres', $data);
@@ -313,7 +315,7 @@ class Garradin_Membres
 
     public function edit($id, $data = array(), $check_mandatory = true)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (isset($data['id']) && ($data['id'] == $id || empty($data['id'])))
         {
@@ -357,7 +359,7 @@ class Garradin_Membres
 
         if (isset($data['id_categorie']) && empty($data['id_categorie']))
         {
-            $data['id_categorie'] = Garradin_Config::getInstance()->get('categorie_membres');
+            $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
         }
 
         $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
@@ -365,7 +367,7 @@ class Garradin_Membres
 
     public function get($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT *,
             strftime(\'%s\', date_connexion) AS date_connexion,
             strftime(\'%s\', date_inscription) AS date_inscription,
@@ -398,13 +400,13 @@ class Garradin_Membres
 
     public function getNom($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT nom FROM membres WHERE id = ? LIMIT 1;', false, (int)$id);
     }
 
     public function getDroits($id)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $droits = $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;', true, (int)$id);
 
         foreach ($droits as $key=>$value)
@@ -423,7 +425,7 @@ class Garradin_Membres
 
     public function search($field = null, $query)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (is_null($field) || !in_array($field, array('id', 'nom', 'email', 'code_postal', 'ville', 'adresse', 'telephone')))
         {
@@ -455,7 +457,7 @@ class Garradin_Membres
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (is_int($cat) && $cat)
             $where = 'WHERE id_categorie = '.(int)$cat;
@@ -491,7 +493,7 @@ class Garradin_Membres
 
     public function countByCategory($cat = 0)
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
 
         if (is_int($cat) && $cat)
             $where = 'WHERE id_categorie = '.(int)$cat;
@@ -505,7 +507,7 @@ class Garradin_Membres
 
     public function countAllButHidden()
     {
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
     }
 
@@ -517,7 +519,7 @@ class Garradin_Membres
         if (!$date_membre)
             return false;
 
-        $echeance = new DateTime('@'.$date_membre);
+        $echeance = new \DateTime('@'.$date_membre);
         $echeance->setTime(0, 0);
         $echeance->modify('+'.$duree_cotisation.' months');
 
@@ -530,13 +532,13 @@ class Garradin_Membres
     static public function updateCotisation($id, $date)
     {
         if (preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
-            $date = DateTime::createFromFormat('d/m/Y', $date, new DateTimeZone('UTC'));
+            $date = \DateTime::createFromFormat('d/m/Y', $date, new DateTimeZone('UTC'));
         elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $date))
-            $date = DateTime::createFromFormat('Y-m-d', $date, new DateTimeZone('UTC'));
+            $date = \DateTime::createFromFormat('Y-m-d', $date, new DateTimeZone('UTC'));
         else
             throw new UserException('Format de date invalide : '.$date);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleUpdate('membres',
             array('date_cotisation' => $date->format('Y-m-d H:i:s')),
             'id = '.(int)$id
@@ -550,7 +552,7 @@ class Garradin_Membres
             $id = (int) $id;
         }
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         return $db->simpleUpdate('membres',
             array('id_categorie' => (int)$id_cat),
             'id IN ('.implode(',', $membres).')'
@@ -566,7 +568,7 @@ class Garradin_Membres
 
         $membres = implode(',', $membres);
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $db->exec('UPDATE wiki_revisions SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
         $db->exec('UPDATE compta_journal SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
         //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
@@ -575,7 +577,7 @@ class Garradin_Membres
 
     public function sendMessageToCategory($dest, $sujet, $message, $subscribed_only = false)
     {
-        $config = Garradin_Config::getInstance();
+        $config = Config::getInstance();
 
         $headers = array(
             'From'  =>  '"'.$config->get('nom_asso').'" <'.$config->get('email_asso').'>',
@@ -592,7 +594,7 @@ class Garradin_Membres
             $where .= ' AND lettre_infos = 1';
         }
 
-        $db = Garradin_DB::getInstance();
+        $db = DB::getInstance();
         $res = $db->query('SELECT email FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
 
         $sujet = '['.$config->get('nom_asso').'] '.$sujet;

@@ -1,4 +1,5 @@
 <?php
+namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -16,24 +17,22 @@ if (!file_exists(GRAPH_CACHE_DIR))
 	mkdir(GRAPH_CACHE_DIR);
 }
 
-require_once GARRADIN_ROOT . '/include/lib.static_cache.php';
 Static_Cache::setCacheDir(GRAPH_CACHE_DIR);
 
 if (Static_Cache::expired('graph_' . $graph))
 {
-	require_once GARRADIN_ROOT . '/include/class.compta_stats.php';
-	$stats = new Garradin_Compta_Stats;
+	$stats = new Compta_Stats;
 
 	require_once GARRADIN_ROOT . '/include/libs/svgplot/lib.svgplot.php';
 
-	$plot = new SVGPlot(400, 300);
+	$plot = new \SVGPlot(400, 300);
 
 	if ($graph == 'recettes_depenses')
 	{
-		$r = new SVGPlot_Data($stats->recettes());
+		$r = new \SVGPlot_Data($stats->recettes());
 		$r->title = 'Recettes';
 
-		$d = new SVGPlot_Data($stats->depenses());
+		$d = new \SVGPlot_Data($stats->depenses());
 		$d->title = 'Dépenses';
 
 		$data = array($r, $d);
@@ -51,19 +50,18 @@ if (Static_Cache::expired('graph_' . $graph))
 	}
 	elseif ($graph == 'banques_caisses')
 	{
-		require_once GARRADIN_ROOT . '/include/class.compta_comptes_bancaires.php';
-		$banques = new Garradin_Compta_Comptes_Bancaires;
+		$banques = new Compta_Comptes_Bancaires;
 
 		$data = array();
 
-		$r = new SVGPlot_Data($stats->soldeCompte(Garradin_Compta_Comptes::CAISSE));
+		$r = new \SVGPlot_Data($stats->soldeCompte(Compta_Comptes::CAISSE));
 		$r->title = 'Caisse';
 
 		$data[] = $r;
 
 		foreach ($banques->getList() as $banque)
 		{
-			$r = new SVGPlot_Data($stats->soldeCompte($banque['id']));
+			$r = new \SVGPlot_Data($stats->soldeCompte($banque['id']));
 			$r->title = $banque['libelle'];
 			$data[] = $r;
 		}
@@ -74,11 +72,11 @@ if (Static_Cache::expired('graph_' . $graph))
 	{
 		$data = array();
 
-		$r = new SVGPlot_Data($stats->soldeCompte('401%', 'credit', 'debit'));
+		$r = new \SVGPlot_Data($stats->soldeCompte('401%', 'credit', 'debit'));
 		$r->title = 'Dettes fournisseurs';
 		$data[] = $r;
 
-		$r = new SVGPlot_Data($stats->soldeCompte('411%', 'credit', 'debit'));
+		$r = new \SVGPlot_Data($stats->soldeCompte('411%', 'credit', 'debit'));
 		$r->title = 'Dettes usagers';
 		$data[] = $r;
 

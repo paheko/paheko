@@ -1,5 +1,7 @@
 <?php
 
+namespace Garradin;
+
 function str_replace_first ($search, $replace, $subject)
 {
     $pos = strpos($subject, $search);
@@ -29,7 +31,7 @@ class SQLite3_Instruction
     }
 }
 
-class Garradin_DB extends SQLite3
+class DB extends \SQLite3
 {
     static protected $_instance = null;
 
@@ -37,7 +39,7 @@ class Garradin_DB extends SQLite3
 
     static public function getInstance()
     {
-        return self::$_instance ?: self::$_instance = new Garradin_DB;
+        return self::$_instance ?: self::$_instance = new DB;
     }
 
     private function __clone()
@@ -60,7 +62,7 @@ class Garradin_DB extends SQLite3
             $this->exec('END;');
         }
 
-        $this->createFunction('transliterate_to_ascii', array('utils', 'transliterateToAscii'));
+        $this->createFunction('transliterate_to_ascii', array('Garradin\utils', 'transliterateToAscii'));
         $this->createFunction('base64', 'base64_encode');
         $this->createFunction('rank', array($this, 'sql_rank'));
         $this->createFunction('running_sum', array($this, 'sql_running_sum'));

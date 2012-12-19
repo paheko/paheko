@@ -5,7 +5,7 @@
 {/if}
 
 <ul class="actions">
-    {if $user.droits.wiki >= Garradin_Membres::DROIT_ECRITURE}
+    {if $user.droits.wiki >= Garradin\Membres::DROIT_ECRITURE}
         <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id|escape}{/if}"><strong>Créer une nouvelle page</strong></a></li>
     {/if}
     {if $can_edit}
@@ -13,11 +13,11 @@
     {/if}
     {if $can_read && $page && $page.contenu}
         <li><a href="{$www_url}admin/wiki/historique.php?id={$page.id|escape}">Historique</a>
-        {if $page.droit_lecture == Garradin_Wiki::LECTURE_PUBLIC}
+        {if $page.droit_lecture == Garradin\Wiki::LECTURE_PUBLIC}
             <li><a href="{$www_url}{$page.uri|escape}">Voir sur le site</a>
         {/if}
     {/if}
-    {if $user.droits.wiki >= Garradin_Membres::DROIT_ADMIN}
+    {if $user.droits.wiki >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id|escape}">Supprimer</a></li>
     {/if}
 </ul>
@@ -90,7 +90,7 @@
 
             <p class="wikiFooter">
                 Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
-                {if $user.droits.membres >= Garradin_Membres::DROIT_ACCES}
+                {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
                 par <a href="{$www_url}admin/membres/fiche.php?id={$page.contenu.id_auteur|escape}">{$auteur|escape}</a>
                 {/if}
             </p>
