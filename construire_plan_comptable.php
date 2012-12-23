@@ -1,5 +1,7 @@
 <?php
 
+namespace Garradin;
+
 require __DIR__ . '/include/class.compta_comptes.php';
 require __DIR__ . '/include/lib.utils.php';
 
@@ -504,20 +506,20 @@ foreach ($src as $line)
     {
         if ($code == 11 || $code == 12)
         {
-            $position = Garradin_Compta_Comptes::PASSIF | Garradin_Compta_Comptes::ACTIF;
+            $position = Compta_Comptes::PASSIF | Compta_Comptes::ACTIF;
         }
         elseif ($code == 119 || $code == 129 || $code == 139)
         {
-            $position = Garradin_Compta_Comptes::ACTIF;
+            $position = Compta_Comptes::ACTIF;
         }
         else
         {
-            $position = Garradin_Compta_Comptes::PASSIF;
+            $position = Compta_Comptes::PASSIF;
         }
     }
     elseif ($classe == 2 || $classe == 3 || $classe == 5)
     {
-        $position = Garradin_Compta_Comptes::ACTIF;
+        $position = Compta_Comptes::ACTIF;
     }
     // Comptes de classe 4, c'est compliqué là
     elseif ($classe == 4)
@@ -529,40 +531,40 @@ foreach ($src as $line)
             if ($prefixe == 401 || $prefixe == 411 || $prefixe == 421 || $prefixe == 430 || $prefixe == 440
                 || $prefixe == 468 || $code == 4686 || $prefixe == 472 || $prefixe == 487)
             {
-                $position = Garradin_Compta_Comptes::PASSIF;
+                $position = Compta_Comptes::PASSIF;
             }
             else
             {
-                $position = Garradin_Compta_Comptes::ACTIF;
+                $position = Compta_Comptes::ACTIF;
             }
         }
         else
         {
-            $position = Garradin_Compta_Comptes::PASSIF | Garradin_Compta_Comptes::ACTIF;
+            $position = Compta_Comptes::PASSIF | Compta_Comptes::ACTIF;
         }
     }
     elseif ($classe == 6)
     {
-        $position = Garradin_Compta_Comptes::CHARGE;
+        $position = Compta_Comptes::CHARGE;
     }
     elseif ($classe == 7)
     {
-        $position = Garradin_Compta_Comptes::PRODUIT;
+        $position = Compta_Comptes::PRODUIT;
     }
     elseif ($classe == 8)
     {
         if (substr($code, 0, 2) == 86)
         {
-            $position = Garradin_Compta_Comptes::CHARGE;
+            $position = Compta_Comptes::CHARGE;
         }
         elseif (substr($code, 0, 2) == 87)
         {
-            $position = Garradin_Compta_Comptes::PRODUIT;
+            $position = Compta_Comptes::PRODUIT;
         }
     }
     elseif ($classe == 9)
     {
-        $position = Garradin_Compta_Comptes::CHARGE | Garradin_Compta_Comptes::PRODUIT;
+        $position = Compta_Comptes::CHARGE | Compta_Comptes::PRODUIT;
     }
 
     $plan[$code] = array(
