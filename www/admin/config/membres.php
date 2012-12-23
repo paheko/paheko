@@ -9,6 +9,12 @@ if ($user['droits']['config'] < Membres::DROIT_ADMIN)
 }
 
 $error = false;
+
+// Il est nécessaire de créer une nouvelle instance ici, sinon
+// l'enregistrement des modifs ne marchera pas car les deux instances seront identiques.
+// Càd si on utilise directement l'instance de $config, elle sera modifiée directement
+// du coup quand on essaiera de comparer si ça a changé ça comparera deux fois la même chose
+// donc ça n'aura pas changé forcément.
 $champs = new Champs_Membres($config->get('champs_membres'));
 
 if (isset($_GET['ok']))

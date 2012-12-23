@@ -79,10 +79,12 @@ else
                 $config->set('monnaie', '€');
                 $config->set('pays', 'FR');
                 $config->set('email_envoi_automatique', utils::post('email_asso'));
-                $config->set('champs_obligatoires', array('passe', 'email'));
-                $config->set('champs_modifiables_membre', array('passe', 'email', 'adresse',
-                    'code_postal', 'ville', 'pays', 'telephone', 'date_naissance'));
                 $config->setVersion(garradin_version());
+
+                $champs = Champs_Membres::import();
+                $champs->save(false); // Pas de copie car pas de table membres existante
+
+                $config->set('champs_membres', $champs);
 
                 // Création catégories
                 $cats = new Membres_Categories;

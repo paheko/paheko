@@ -93,7 +93,24 @@ if (version_compare($v, '0.5.0', '<'))
     $champs_obligatoires = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
     $champs_obligatoires = explode($champs_obligatoires);
 
-    // Application à la nouvelle config (TODO)
+    // Import des champs membres par défaut
+    $champs = Champs_Membres::import();
+
+    // Application de l'ancienne config aux nouveaux champs membres
+    foreach ($champs_obligatoires as $name)
+    {
+        $champs->set($name, 'mandatory', true);
+    }
+
+    foreach ($champs_modifiables_membre as $name)
+    {
+        $champs->set($name, 'editable', true);
+    }
+
+    $champs->save();
+
+    $config->set('champs_membres', $champs);
+    $config->save();
 
     // Suppression de l'ancienne config
     $db->exec('DELETE FROM config WHERE cle IN ("champs_obligatoires", "champs_modifiables_membre");');
