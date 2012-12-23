@@ -58,7 +58,7 @@ $tpl->assign('verif_cotisation', Membres::checkCotisation($membre['date_cotisati
 
 if (!empty($membre['date_cotisation']))
 {
-    $prochaine_cotisation = new DateTime('@'.$membre['date_cotisation']);
+    $prochaine_cotisation = new \DateTime('@'.$membre['date_cotisation']);
     $prochaine_cotisation->modify('+1 year');
     $prochaine_cotisation = $prochaine_cotisation->getTimestamp();
 }
