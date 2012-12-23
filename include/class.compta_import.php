@@ -67,7 +67,7 @@ class Compta_Import
 	{
 		if (!file_exists($path) || !is_readable($path))
 		{
-			throw new RuntimeException('Fichier inconnu : '.$path);
+			throw new \RuntimeException('Fichier inconnu : '.$path);
 		}
 
 		$fp = fopen($path, 'r');

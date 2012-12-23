@@ -12,7 +12,7 @@ class Static_Cache
 	{
 		if (is_null(self::$cache_dir))
 		{
-			throw new RuntimeException('Cache dir not set.');
+			throw new \RuntimeException('Cache dir not set.');
 		}
 
 		return self::$cache_dir;
@@ -33,7 +33,7 @@ class Static_Cache
 
 		if (!is_readable($dir) || !is_writable($dir))
 		{
-			throw new RuntimeException('Cache dir is not readable or writeable.');
+			throw new \RuntimeException('Cache dir is not readable or writeable.');
 		}
 
 		self::$cache_dir = $dir;

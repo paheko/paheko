@@ -218,7 +218,7 @@ class Wiki
         // ?! L'ID fournit ne correspond à rien ?
         if ($revision === false)
         {
-            throw new RuntimeException('La page demandée n\'existe pas.');
+            throw new \RuntimeException('La page demandée n\'existe pas.');
         }
 
         // Pas de révision
@@ -230,7 +230,7 @@ class Wiki
         // Il faut obligatoirement fournir un ID d'auteur
         if (empty($data['id_auteur']))
         {
-            throw new BadMethodCallException('Aucun ID auteur de fourni.');
+            throw new \BadMethodCallException('Aucun ID auteur de fourni.');
         }
 
         $contenu = $db->simpleQuerySingle('SELECT contenu FROM wiki_revisions WHERE revision = ? AND id_page = ?;', false, (int)$revision, (int)$id);
@@ -292,7 +292,7 @@ class Wiki
     {
         if (is_null($this->restriction_categorie))
         {
-            throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
+            throw new \UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
         if ($this->restriction_droit == Membres::DROIT_AUCUN)
@@ -311,7 +311,7 @@ class Wiki
     {
         if (is_null($this->restriction_categorie))
         {
-            throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
+            throw new \UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
         if ($this->restriction_droit < Membres::DROIT_ACCES)
@@ -331,7 +331,7 @@ class Wiki
     {
         if (is_null($this->restriction_categorie))
         {
-            throw new UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
+            throw new \UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
         if ($this->restriction_droit < Membres::DROIT_ECRITURE)

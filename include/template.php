@@ -185,7 +185,7 @@ function tpl_liens_wiki($str, $prefix)
 function tpl_pagination($params)
 {
     if (!isset($params['url']) || !isset($params['page']) || !isset($params['bypage']) || !isset($params['total']))
-        throw new BadFunctionCallException("Paramètre manquant pour pagination");
+        throw new \BadFunctionCallException("Paramètre manquant pour pagination");
 
     if ($params['total'] == -1)
         return '';

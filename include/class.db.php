@@ -105,7 +105,7 @@ class DB extends \SQLite3
 
         if (func_num_args() > (1 + $nCol))
         {
-            throw new Exception("Invalid number of arguments : ".$nCol);
+            throw new \Exception("Invalid number of arguments : ".$nCol);
         }
 
         // Iterate through each phrase in the users query. //
@@ -165,7 +165,7 @@ class DB extends \SQLite3
         elseif (is_object($arg) && $arg instanceof SQLite3_instruction)
             return SQLITE3_INSTRUCTION;
         else
-            throw new InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
+            throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
     }
 
     public function simpleStatement($query, $args = array())
@@ -177,14 +177,14 @@ class DB extends \SQLite3
         {
             if (count($args[0]) != $nb)
             {
-                throw new LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
+                throw new \LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
             }
 
             foreach ($args[0] as $key=>$value)
             {
                 if (is_int($key))
                 {
-                    throw new InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
+                    throw new \InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
                 }
 
                 $statement->bindValue(':'.$key, $value, $this->_getArgType($value, $key));
@@ -194,7 +194,7 @@ class DB extends \SQLite3
         {
             if (count($args) != $nb)
             {
-                throw new LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
+                throw new \LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
             }
 
             for ($i = 1; $i <= count($args); $i++)
@@ -211,7 +211,7 @@ class DB extends \SQLite3
     {
         if ($mode != SQLITE3_BOTH && $mode != SQLITE3_ASSOC && $mode != SQLITE3_NUM)
         {
-            throw new InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
+            throw new \InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
         }
 
         $args = array_slice(func_get_args(), 2);
@@ -228,7 +228,7 @@ class DB extends \SQLite3
     {
         if ($mode != SQLITE3_BOTH && $mode != SQLITE3_ASSOC && $mode != SQLITE3_NUM)
         {
-            throw new InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
+            throw new \InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
         }
 
         $args = array_slice(func_get_args(), 2);
@@ -267,14 +267,14 @@ class DB extends \SQLite3
 
             if (count($args[0]) < $nb)
             {
-                throw new LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
+                throw new \LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
             }
 
             foreach ($args[0] as $key=>$value)
             {
                 if (is_int($key))
                 {
-                    throw new InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
+                    throw new \InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
                 }
 
                 $value = preg_replace('#(?<!\\\\)(\\$|\\\\)#', '\\\\$1', $this->escapeAuto($value, $key));
@@ -287,7 +287,7 @@ class DB extends \SQLite3
 
             if (count($args) != $nb)
             {
-                throw new LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
+                throw new \LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
             }
 
             for ($i = 1; $i <= count($args); $i++)

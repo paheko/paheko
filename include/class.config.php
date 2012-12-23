@@ -50,6 +50,7 @@ class Config
             'champs_modifiables_membre' =>  $array,
 
             'accueil_wiki'          =>  $string,
+            'accueil_connexion'     =>  $string,
 
             'version'               =>  $string,
         );
@@ -62,7 +63,7 @@ class Config
         {
             if (!array_key_exists($key, $this->fields_types))
             {
-                throw new OutOfBoundsException('Le champ "'.$key.'" est inconnu.');
+                throw new \OutOfBoundsException('Le champ "'.$key.'" est inconnu.');
             }
 
             if (is_array($this->fields_types[$key]))
@@ -118,7 +119,7 @@ class Config
     {
         if (!array_key_exists($key, $this->config))
         {
-            throw new OutOfBoundsException('Ce champ est inconnu.');
+            throw new \OutOfBoundsException('Ce champ est inconnu.');
         }
 
         return $this->config[$key];
@@ -149,7 +150,7 @@ class Config
     {
         if (!array_key_exists($key, $this->fields_types))
         {
-            throw new OutOfBoundsException('Ce champ est inconnu.');
+            throw new \OutOfBoundsException('Ce champ est inconnu.');
         }
 
         if (is_array($this->fields_types[$key]))
@@ -184,10 +185,12 @@ class Config
                 break;
             }
             case 'accueil_wiki':
+            case 'accueil_connexion':
             {
                 if (!trim($value))
                 {
-                    throw new UserException('Le nom de la page d\'accueil du wiki ne peut rester vide.');
+                    $key = str_replace('accueil_', '', $key);
+                    throw new UserException('Le nom de la page d\'accueil ' . $key . ' ne peut rester vide.');
                 }
                 break;
             }
