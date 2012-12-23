@@ -1,59 +1,45 @@
 {include file="admin/_head.tpl" title="Liste des membres" current="membres"}
 
+<ul class="actions">
+    <li class="current"><a href="{$admin_url}membres/">Liste des membres</a></li>
+    {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
+        <li><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
+    {/if}
+    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+        <li><a href="{$admin_url}membres/export.php">Export de la liste en CSV</a></li>
+    {/if}
+
+</ul>
+
 {if isset($tpl.get.sent)}
     <p class="confirm">Votre message a été envoyé.</p>
 {/if}
 
 <form method="get" action="{$self_url|escape}" class="filterCategory">
     <fieldset>
-        <legend>Filtrer</legend>
-        <dl>
-            <dt><label for="f_cat">Catégorie</label></dt>
-            <dd>
-                <select name="cat" id="f_cat">
-                    <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
-                {foreach from=$membres_cats key="id" item="nom"}
-                    {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE
-                        || !array_key_exists($id, $membres_cats_cachees)}
-                    <option value="{$id|escape}"{if $current_cat == $id} selected="selected"{/if}>{$nom|escape}</option>
-                    {/if}
-                {/foreach}
-                </select>
-            </dd>
-        </dl>
-    </fieldset>
-
-    <p class="submit">
+        <legend>Filtrer par catégorie</legend>
+        <select name="cat" id="f_cat">
+            <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
+        {foreach from=$membres_cats key="id" item="nom"}
+            {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE
+                || !array_key_exists($id, $membres_cats_cachees)}
+            <option value="{$id|escape}"{if $current_cat == $id} selected="selected"{/if}>{$nom|escape}</option>
+            {/if}
+        {/foreach}
+        </select>
         <input type="submit" value="Filtrer &rarr;" />
-    </p>
+    </fieldset>
+</form>
+
+<form method="get" action="{$self_url|escape}" class="searchMember">
+    <fieldset>
+        <legend>Rechercher un membre</legend>
+        <input type="text" name="search_query" value="{$search_query|escape}" />
+        <input type="submit" value="Chercher &rarr;" />
+    </fieldset>
 </form>
 
 {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
-    <form method="get" action="{$self_url|escape}" class="searchMember">
-        <fieldset>
-            <legend>Rechercher un membre</legend>
-            <dl>
-                <dt><label for="f_field">Dont le champ</label></dt>
-                <dd>
-                    <select name="search_field" id="f_field">
-                        <option value="id" {if $search_field == "id"} selected="selected"{/if}>Numéro</option>
-                        <option value="nom" {if $search_field == "nom"} selected="selected"{/if}>Nom et prénom</option>
-                        <option value="email" {if $search_field == "email"} selected="selected"{/if}>Adresse E-Mail</option>
-                        <option value="ville" {if $search_field == "ville"} selected="selected"{/if}>Ville</option>
-                        <option value="code_postal" {if $search_field == "code_postal"} selected="selected"{/if}>Code postal</option>
-                        <option value="adresse" {if $search_field == "adresse"} selected="selected"{/if}>Adresse postale</option>
-                        <option value="telephone" {if $search_field == "telephone"} selected="selected"{/if}>Numéro de téléphone</option>
-                    </select>
-                </dd>
-                <dt><label for="f_query">Contient</label></dt>
-                <dd><input type="text" name="search_query" id="f_query" value="{$search_query|escape}" /></dd>
-            </dl>
-        </fieldset>
-
-        <p class="submit">
-            <input type="submit" value="Chercher &rarr;" />
-        </p>
-    </form>
 
     <form method="post" action="action.php" class="memberList">
 

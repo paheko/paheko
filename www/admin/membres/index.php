@@ -15,12 +15,20 @@ $membres_cats_cachees = $cats->listHidden();
 $cat = (int) utils::get('cat') ?: 0;
 $page = (int) utils::get('p') ?: 1;
 
-$search_field = utils::get('search_field') ?: ($membres->sessionGet('membre_search_field') ?: 'nom');
 $search_query = trim(utils::get('search_query')) ?: '';
 
-if ($search_field && $search_query)
+if ($search_query)
 {
-    $membres->sessionStore('membre_search_field', $search_field);
+    if (is_numeric(trim($search_query))) {
+        $search_field = 'id';
+    }
+    elseif (strpos($search_query, '@') !== false) {
+        $search_field = 'email';
+    }
+    else {
+        $search_field = 'nom';
+    }
+
     $tpl->assign('liste', $membres->search($search_field, $search_query));
     $tpl->assign('total', -1);
     $tpl->assign('pagination_url', utils::getSelfUrl() . '?p=[ID]');
@@ -61,7 +69,6 @@ $tpl->assign('current_cat', $cat);
 $tpl->assign('page', $page);
 $tpl->assign('bypage', Membres::ITEMS_PER_PAGE);
 
-$tpl->assign('search_field', $search_field);
 $tpl->assign('search_query', $search_query);
 
 $tpl->display('admin/membres/index.tpl');

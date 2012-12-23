@@ -521,7 +521,7 @@ table.list .actions {
     font-size: 80%;
 }
 
-.searchMember p.submit, .filterCategory p.submit {
+.filterCategory p.submit {
     margin-top: -2em;
     float: right;
 }
