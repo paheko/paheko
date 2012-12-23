@@ -31,6 +31,7 @@ if (!empty($_POST['save']))
             $config->set('email_envoi_automatique', utils::post('email_envoi_automatique'));
             $config->set('accueil_wiki', utils::post('accueil_wiki'));
             $config->set('accueil_connexion', utils::post('accueil_connexion'));
+            $config->set('categorie_membres', utils::post('categorie_membres'));
 
             $config->set('pays', utils::post('pays'));
             $config->set('monnaie', utils::post('monnaie'));
@@ -50,6 +51,9 @@ $tpl->assign('error', $error);
 
 $tpl->assign('garradin_version', garradin_version() . ' [' . garradin_manifest() . ']');
 $tpl->assign('pays', utils::getCountryList());
+
+$cats = new Membres_Categories;
+$tpl->assign('membres_cats', $cats->listSimple());
 
 $tpl->display('admin/config/index.tpl');
 

@@ -424,13 +424,13 @@ table.list .actions {
 .actions .icn {
     text-decoration: none;
     border-radius: 1em;
-    width: 16px;
+    width: 1.2em;
     display: inline-block;
     text-align: center;
     font-size: 1.2em;
     line-height: .8em;
     vertical-align: middle;
-    padding: .1em;
+    padding: .2em;
 }
 
 .actions .icn:hover {
@@ -916,6 +916,31 @@ dl.describe > dd {
     border: .1em solid #ccc;
     background: #eee;
     padding: .5em;
+}
+
+#orderFields fieldset {
+    position: relative;
+    min-height: 2em;
+}
+
+#orderFields fieldset .actions {
+    display: block;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+
+#orderFields fieldset:nth-child(1) .actions .up, #orderFields fieldset:nth-last-child(1) .actions .down {
+    display: none;
+}
+
+#orderFields fieldset .actions .icn {
+    cursor: pointer;
+}
+
+#orderFields fieldset .interactive:hover {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 @media print {
