@@ -9,6 +9,10 @@ $categorie = $cats->get($user['id_categorie']);
 $tpl->assign('categorie', $categorie);
 $tpl->assign('verif_cotisation', Membres::checkCotisation($user['date_cotisation'], $categorie['duree_cotisation']));
 
+$wiki = new Wiki;
+$page = $wiki->getByURI($config->get('accueil_connexion'));
+$tpl->assign('page', $page);
+
 $tpl->display('admin/index.tpl');
 
 ?>

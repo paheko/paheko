@@ -909,6 +909,15 @@ dl.describe > dd {
     margin-left: 15em;
 }
 
+.infos_asso {
+    width: 20%;
+    float: right;
+    margin: .5em;
+    border: .1em solid #ccc;
+    background: #eee;
+    padding: .5em;
+}
+
 @media print {
     body {
         background: #fff;

@@ -55,11 +55,44 @@ if (version_compare($v, '0.4.3', '<'))
     $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.3.sql'));
 }
 
+if (version_compare($v, '0.5.0', '<'))
+{
+    // Mise à jour plan comptable
+    $comptes = new Compta_Comptes;
+    $comptes->importPlan();
+
+    // Création page wiki connexion
+    $wiki = new Wiki;
+    $page = Wiki::transformTitleToURI('Bienvenue');
+    $config->set('accueil_connexion', $page);
+
+    if (!$wiki->getByUri($page))
+    {
+        $id_page = $wiki->create(array(
+            'titre' =>  'Bienvenue',
+            'uri'   =>  $page,
+        ));
+
+        $wiki->editRevision($id_page, 0, array(
+            'contenu'   =>  "Bienvenue dans l'administration de ".$config->get('nom_asso')." !\n\n"
+                .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
+        ));
+    }
+
+    $config->set('accueil_connexion', $page);
+    $config->save();
+}
+
 utils::clearCaches();
 
 $config->setVersion(garradin_version());
 
 echo '<h4>Mise à jour terminée.</h4>
-<p><a href="./">Retour</a></p>';
+<p><a href="'.WWW_URL.'admin/">Retour</a></p>
+<script type="text/javascript">
+window.setTimeout(function () { 
+    window.location.href = "'.WWW_URL.'admin/"; 
+}, 1000);
+</script>';
 
 ?>

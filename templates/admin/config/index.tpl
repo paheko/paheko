@@ -69,9 +69,14 @@
     <fieldset>
         <legend>Wiki</legend>
         <dl>
-            <dt><label for="f_accueil_wiki">Page d'accueil</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dt><label for="f_accueil_wiki">Page d'accueil du wiki</label> 
+                <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>Indiquer ici l'adresse unique de la page qui sera utilisée comme page d'accueil du wiki.</dd>
             <dd><input type="text" name="accueil_wiki" id="f_accueil_wiki" value="{form_field data=$config name=accueil_wiki}" /></dd>
+            <dt><label for="f_accueil_connexion">Page d'accueil à la connexion</label> 
+                <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd>Indiquer ici l'adresse unique de la page qui sera affichée à la connexion d'un membre.</dd>
+            <dd><input type="text" name="accueil_connexion" id="f_accueil_connexion" value="{form_field data=$config name=accueil_connexion}" /></dd>
         </dl>
     </fieldset>
 
