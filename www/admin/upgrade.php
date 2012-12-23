@@ -55,7 +55,7 @@ if (version_compare($v, '0.4.3', '<'))
     $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.3.sql'));
 }
 
-if (version_compare($v, '0.5.0', '<'))
+if (version_compare($v, '0.4.5', '<'))
 {
     // Mise à jour plan comptable
     $comptes = new Compta_Comptes;
