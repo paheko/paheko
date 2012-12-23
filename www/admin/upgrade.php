@@ -20,6 +20,7 @@ if (version_compare($v, garradin_version(), '>='))
 }
 
 $db = DB::getInstance();
+$redirect = true;
 
 echo '<!DOCTYPE html>
 <meta charset="utf-8" />
@@ -83,16 +84,36 @@ if (version_compare($v, '0.4.5', '<'))
     $config->save();
 }
 
+if (version_compare($v, '0.5.0', '<'))
+{
+    // Récupération de l'ancienne config
+    $champs_modifiables_membre = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
+    $champs_modifiables_membre = explode($champs_modifiables_membre);
+
+    $champs_obligatoires = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
+    $champs_obligatoires = explode($champs_obligatoires);
+
+    // Application à la nouvelle config (TODO)
+
+    // Suppression de l'ancienne config
+    $db->exec('DELETE FROM config WHERE cle IN ("champs_obligatoires", "champs_modifiables_membre");');
+}
+
 utils::clearCaches();
 
 $config->setVersion(garradin_version());
 
 echo '<h4>Mise à jour terminée.</h4>
-<p><a href="'.WWW_URL.'admin/">Retour</a></p>
-<script type="text/javascript">
-window.setTimeout(function () { 
-    window.location.href = "'.WWW_URL.'admin/"; 
-}, 1000);
-</script>';
+<p><a href="'.WWW_URL.'admin/">Retour</a></p>';
+
+if ($redirect)
+{
+    echo '
+    <script type="text/javascript">
+    window.setTimeout(function () { 
+        window.location.href = "'.WWW_URL.'admin/"; 
+    }, 1000);
+    </script>';
+}
 
 ?>

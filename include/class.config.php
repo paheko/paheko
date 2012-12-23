@@ -8,9 +8,6 @@ class Config
     protected $config = null;
     protected $modified = array();
 
-    protected $allowed_fields_membres = array('nom', 'passe', 'email', 'adresse', 'code_postal',
-        'ville', 'pays', 'telephone', 'date_naissance', 'notes');
-
     static protected $_instance = null;
 
     static public function getInstance()
@@ -29,6 +26,7 @@ class Config
         $float = 0.0;
         $array = array();
         $bool = false;
+        $object = new \stdClass;
 
         $this->fields_types = array(
             'nom_asso'              =>  $string,
@@ -39,15 +37,14 @@ class Config
             'monnaie'               =>  $string,
             'pays'                  =>  $string,
 
+            'champs_membres'        =>  $object,
+
             'email_envoi_automatique'=> $string,
 
-            'champs_obligatoires'   =>  $array,
             'categorie_membres'     =>  $int,
 
             'categorie_dons'        =>  $int,
             'categorie_cotisations' =>  $int,
-
-            'champs_modifiables_membre' =>  $array,
 
             'accueil_wiki'          =>  $string,
             'accueil_connexion'     =>  $string,
@@ -63,12 +60,17 @@ class Config
         {
             if (!array_key_exists($key, $this->fields_types))
             {
-                throw new \OutOfBoundsException('Le champ "'.$key.'" est inconnu.');
+                // Ancienne clé de config qui n'est plus utilisée
+                continue;
             }
 
             if (is_array($this->fields_types[$key]))
             {
                 $value = explode(',', $value);
+            }
+            elseif ($key == 'champs_membres')
+            {
+                $value = new Champs_Membres((string)$value);
             }
             else
             {
@@ -102,6 +104,10 @@ class Config
             if (is_array($value))
             {
                 $value = implode(',', $value);
+            }
+            elseif (is_object($value))
+            {
+                $value = (string) $value;
             }
 
             $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
@@ -203,25 +209,11 @@ class Config
                 }
                 break;
             }
-            case 'champs_obligatoires':
+            case 'champs_membres':
             {
-                foreach ($value as $name)
+                if (!($value instanceOf Champs_Membres))
                 {
-                    if (!in_array($name, $this->allowed_fields_membres))
-                    {
-                        throw new UserException('Le champ \''.$name.'\' ne peut pas être rendu obligatoire.');
-                    }
-                }
-                break;
-            }
-            case 'champs_modifiables_membre':
-            {
-                foreach ($value as $name)
-                {
-                    if (!in_array($name, $this->allowed_fields_membres))
-                    {
-                        throw new UserException('Le champ \''.$name.'\' ne peut pas être rendu modifiable par le membre.');
-                    }
+                    throw new \UnexpectedValueException('$value doit être de type Champs_Membres');
                 }
                 break;
             }
@@ -284,40 +276,6 @@ class Config
     public function getConfig()
     {
         return $this->config;
-    }
-
-    public function getChampsMembres()
-    {
-        $out = $this->allowed_fields_membres;
-        $out = array_flip($out);
-
-        foreach ($out as $key=>&$value)
-        {
-            if ($key == 'passe')
-                $value = 'Mot de passe';
-            elseif ($key == 'email')
-                $value = 'Adresse E-Mail';
-            elseif ($key == 'adresse')
-                $value = 'Adresse postale';
-            elseif ($key == 'code_postal')
-                $value = 'Code postal';
-            elseif ($key == 'ville')
-                $value = 'Ville';
-            elseif ($key == 'pays')
-                $value = 'Pays';
-            elseif ($key == 'telephone')
-                $value = 'Numéro de téléphone';
-            elseif ($key == 'date_naissance')
-                $value = 'Date de naissance';
-            elseif ($key == 'notes')
-                $value = 'Notes';
-            elseif ($key == 'nom')
-                $value = 'Prénom et nom';
-            else
-                $value = key;
-        }
-
-        return $out;
     }
 }
 

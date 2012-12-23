@@ -14,7 +14,7 @@
 
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/config/">Général</a></li>
-    <li><a href="{$www_url}admin/config/membres.php">Membres</a></li>
+    <li><a href="{$www_url}admin/config/membres.php">Fiche membres</a></li>
     <li><a href="{$www_url}admin/config/site.php">Site public</a></li>
 </ul>
 
@@ -77,6 +77,20 @@
                 <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>Indiquer ici l'adresse unique de la page qui sera affichée à la connexion d'un membre.</dd>
             <dd><input type="text" name="accueil_connexion" id="f_accueil_connexion" value="{form_field data=$config name=accueil_connexion}" /></dd>
+        </dl>
+    </fieldset>
+
+    <fieldset>
+        <legend>Catégories par défaut</legend>
+        <dl>
+            <dt><label for="f_categorie_membres">Catégorie par défaut des nouveaux membres</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd>
+                <select name="categorie_membres" id="f_categorie_membres">
+                {foreach from=$membres_cats key="id" item="nom"}
+                    <option value="{$id|escape}"{if $config.categorie_membres == $id} selected="selected"{/if}>{$nom|escape}</option>
+                {/foreach}
+                </select>
+            </dd>
         </dl>
     </fieldset>
 

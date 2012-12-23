@@ -9,6 +9,7 @@ if ($user['droits']['config'] < Membres::DROIT_ADMIN)
 }
 
 $error = false;
+$champs = new Champs_Membres($config->get('champs_membres'));
 
 if (isset($_GET['ok']))
 {
@@ -24,10 +25,8 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $config->set('champs_obligatoires', utils::post('champs_obligatoires'));
-            $config->set('champs_modifiables_membre', utils::post('champs_modifiables_membre'));
-            $config->set('categorie_membres', utils::post('categorie_membres'));
-            $config->save();
+            $champs->setAll(utils::post('champs'));
+            $champs->save();
 
             utils::redirect('/admin/config/membres.php?ok');
         }
@@ -38,12 +37,21 @@ if (!empty($_POST['save']))
     }
 }
 
-$cats = new Membres_Categories;
-$tpl->assign('membres_cats', $cats->listSimple());
+function tpl_get_type($type)
+{
+    global $types;
+    return $types[$type];
+}
 
-$tpl->assign('champs_membres', $config->getChampsMembres());
 $tpl->assign('error', $error);
 
+$types = $champs->getTypes();
+
+$tpl->assign('champs', utils::post('champs') ?: $config->get('champs_membres')->getAll());
+$tpl->assign('types', $types);
+$tpl->assign('new', utils::post('new'));
+
+$tpl->register_modifier('get_type', 'Garradin\tpl_get_type');
 $tpl->display('admin/config/membres.tpl');
 
 ?>

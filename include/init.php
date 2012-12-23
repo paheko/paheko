@@ -77,7 +77,10 @@ if (!defined('WWW_URI'))
 
 if (!defined('WWW_URL'))
 {
-    define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . WWW_URI);
+    $host = isset($_SERVER['HTTP_HOST']) 
+        ? $_SERVER['HTTP_HOST'] 
+        : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
+    define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
 }
 
 /*
