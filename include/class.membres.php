@@ -210,7 +210,7 @@ class Membres
     {
         if (!$this->isLogged())
         {
-            throw new LogicException('Cette fonction ne peut être appelée que par un utilisateur connecté.');
+            throw new \LogicException('Cette fonction ne peut être appelée que par un utilisateur connecté.');
         }
 
         $from = $this->getLoggedUser();
