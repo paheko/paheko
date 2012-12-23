@@ -134,8 +134,22 @@ else
 
                 $wiki->editRevision($id_page, 0, array(
                     'id_auteur' =>  $id_membre,
-                    'contenu'   =>  "Bienvenue dans Garradin !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
+                    'contenu'   =>  "Bienvenue dans le wiki de ".utils::post('nom_asso')." !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
                 ));
+
+                // Création page wiki connexion
+                $page = Wiki::transformTitleToURI('Bienvenue');
+                $config->set('accueil_connexion', $page);
+                $id_page = $wiki->create(array(
+                    'titre' =>  'Bienvenue',
+                    'uri'   =>  $page,
+                ));
+
+                $wiki->editRevision($id_page, 0, array(
+                    'id_auteur' =>  $id_membre,
+                    'contenu'   =>  "Bienvenue dans l'administration de ".utils::post('nom_asso')." !\n\n"
+                        .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
+                ));                
 
                 // Mise en place compta
                 $comptes = new Compta_Comptes;

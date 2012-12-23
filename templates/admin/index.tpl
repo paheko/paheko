@@ -1,6 +1,7 @@
-{include file="admin/_head.tpl" title=$config.nom_asso current="home"}
+{include file="admin/_head.tpl" title="Bonjour `$user.nom` !" current="home"}
 
-<div class="infos">
+<div class="infos_asso">
+    <h3>{$config.nom_asso|escape}</h3>
     {if !empty($config.adresse_asso)}
     <p>
         {$config.adresse_asso|escape|nl2br}
@@ -8,23 +9,27 @@
     {/if}
     {if !empty($config.email_asso)}
     <p>
-        Nous contacter : {mailto address=$config.email_asso}
+        E-Mail : {mailto address=$config.email_asso}
     </p>
     {/if}
     {if !empty($config.site_asso)}
     <p>
-        Notre site : <a href="{$config.site_asso|escape}">{$config.site_asso|escape}</a>
+        Web : <a href="{$config.site_asso|escape}">{$config.site_asso|escape}</a>
     </p>
     {/if}
+</div>
 
-    <h3>Bienvenue, {$user.nom|escape} !</h3>
-{if empty($user.date_cotisation)}
-    <p class="error">Vous n'avez jamais réglé votre cotisation.</p>
-{elseif $verif_cotisation === true}
-    <p class="confirm">Cotisation réglée le {$user.date_cotisation|date_fr:'d/m/Y'} :-)</p>
-{else}
-    <p class="alert">Cotisation en retard ! (dernier règlement le {$user.date_cotisation|date_fr:'d/m/Y'})</p>
-{/if}
+<ul class="actions">
+    <li><a href="{$admin_url}mes_infos.php">Modifier mes informations personnelles</a></li>
+    <li>Cotisation : 
+        {if empty($user.date_cotisation)}<b class="error">jamais réglée</b>
+        {elseif $verif_cotisation === true}<b class="confirm">À jour :-)</b>
+        {else}<b class="alert">En retard !</b>{/if}
+    </li>
+</ul>
+
+<div class="wikiContent">
+    {$page.contenu.contenu|format_wiki|liens_wiki:'?'}
 </div>
 
 {include file="admin/_foot.tpl"}

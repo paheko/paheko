@@ -30,6 +30,7 @@ if (!empty($_POST['save']))
             $config->set('site_asso', utils::post('site_asso'));
             $config->set('email_envoi_automatique', utils::post('email_envoi_automatique'));
             $config->set('accueil_wiki', utils::post('accueil_wiki'));
+            $config->set('accueil_connexion', utils::post('accueil_connexion'));
 
             $config->set('pays', utils::post('pays'));
             $config->set('monnaie', utils::post('monnaie'));
