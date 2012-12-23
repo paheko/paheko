@@ -31,11 +31,7 @@ class Champs_Membres
 	{
 		$json = file_get_contents(GARRADIN_ROOT . '/include/data/champs_membres.json');
 		$json = preg_replace('!/[*].*?[*]/!s', '', $json);
-		$champs = new Champs_Membres($json);
-
-		$config = Config::getInstance();
-		$config->set('champs_membres', $champs);
-		$config->save();
+		return new Champs_Membres($json);
 	}
 
 	public function __construct($champs)
@@ -63,6 +59,12 @@ class Champs_Membres
 	public function getAll()
 	{
 		return $this->champs;
+	}
+
+	public function set($champ, $key, $value)
+	{
+		$this->champs[$champs][$key] = $value;
+		return true;
 	}
 
     public function setAll($champs)
@@ -99,7 +101,7 @@ class Champs_Membres
     	//$config
     }
 
-    public function save()
+    public function save($copy = true)
     {
     	$db = DB::getInstance();
     	$config = Config::getInstance();
@@ -145,11 +147,18 @@ class Champs_Membres
     	$create = 'CREATE TABLE membres_tmp (' . "\n\t" . implode("\n\t", $create) . "\n);";
     	$copy = 'INSERT INTO membres_tmp (' . implode(', ', $copy) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
 
-    	$db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+    	$db->exec('PRAGMA foreign_keys = OFF;');
+    	$db->exec('BEGIN;');
     	$db->exec($create);
-    	$db->exec($copy);
-    	$db->exec('DROP TABLE membres; ALTER TABLE membres_tmp RENAME TO membres;');
-    	$db->exec('END; PRAGMA foreign_keys = ON;');
+    	
+    	if ($copy) {
+    		$db->exec($copy);
+    	}
+    	
+    	$db->exec('DROP TABLE membres;');
+    	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
+    	$db->exec('END;');
+    	$db->exec('PRAGMA foreign_keys = ON;');
 
     	$config->set('champs_membres', $this);
     	$config->save();
