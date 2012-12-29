@@ -29,7 +29,6 @@
 	{
 		"type": "text",
 		"title": "Nom & prénom",
-		"enabled": true,
 		"editable": true,
 		"mandatory": true
 	},
@@ -37,7 +36,6 @@
 	{
 		"type": "email",
 		"title": "Adresse E-Mail",
-		"enabled": true,
 		"editable": true,
 		"mandatory": true
 	},
@@ -45,7 +43,6 @@
 	{
 		"type": "textarea",
 		"title": "Adresse postale (rue, numéro, immeuble, etc.)",
-		"enabled": true,
 		"editable": true,
 		"mandatory": false
 	},
@@ -53,7 +50,6 @@
 	{
 		"type": "text",
 		"title": "Code postal",
-		"enabled": true,
 		"editable": true,
 		"mandatory": false
 	},
@@ -61,7 +57,6 @@
 	{
 		"type": "text",
 		"title": "Ville",
-		"enabled": true,
 		"editable": true,
 		"mandatory": false
 	},
@@ -69,7 +64,6 @@
 	{
 		"type": "country",
 		"title": "Pays",
-		"enabled": true,
 		"editable": true,
 		"mandatory": true
 	},
@@ -77,7 +71,6 @@
 	{
 		"type": "tel",
 		"title": "Numéro de téléphone",
-		"enabled": true,
 		"editable": true,
 		"mandatory": false
 	},
@@ -85,7 +78,6 @@
 	{
 		"type": "checkbox",
 		"title": "Inscription à la lettre d'informations",
-		"enabled": true,
 		"editable": true,
 		"mandatory": false
 	}

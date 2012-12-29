@@ -1,9 +1,19 @@
 {include file="admin/_head.tpl" title="Configuration — Fiche membres" current="config"}
 
+<ul class="actions">
+    <li><a href="{$www_url}admin/config/">Général</a></li>
+    <li class="current"><a href="{$www_url}admin/config/membres.php">Fiche membres</a></li>
+    <li><a href="{$www_url}admin/config/site.php">Site public</a></li>
+</ul>
+
 {if $error}
     {if $error == 'OK'}
     <p class="confirm">
         La configuration a bien été enregistrée.
+    </p>
+    {elseif $error == 'ADD_OK'}
+    <p class="confirm">
+        Le champ a été ajouté à la fin de la liste.
     </p>
     {else}
     <p class="error">
@@ -12,12 +22,34 @@
     {/if}
 {/if}
 
-<ul class="actions">
-    <li><a href="{$www_url}admin/config/">Général</a></li>
-    <li class="current"><a href="{$www_url}admin/config/membres.php">Fiche membres</a></li>
-    <li><a href="{$www_url}admin/config/site.php">Site public</a></li>
-</ul>
+{if $review}
+    <fieldset>
+        <legend>Fiche membre exemple</legend>
+        <dl>
+            {foreach from=$champs item="champ" key="nom"}
+                {html_champ_membre config=$champ name=$nom disabled=true}
+                {if empty($champ.editable) || !empty($champ.private)}
+                <dd>
+                    {if !empty($champ.private)}
+                        (Champ privé)
+                    {elseif empty($champ.editable)}
+                        (Non-modifiable par les membres)
+                    {/if}
+                </dd>
+                {/if}
+            {/foreach}
+        </dl>
+    </fieldset>
 
+    <form method="post" action="{$admin_url}config/membres.php">
+        <p class="submit">
+            {csrf_field key="config_membres"}
+            <input type="submit" name="back" value="&larr; Retour à l'édition" class="minor" />
+            <input type="submit" name="reset" value="Annuler les changements" class="minor" />
+            <input type="submit" name="save" value="Enregistrer &rarr;" />
+        </p>
+    </form>
+{else}
 <form method="post" action="{$self_url|escape}">
 
     <p class="help">
@@ -35,40 +67,40 @@
             <dd>Identifie la catégorie du membre.</dd>
             <dt>Mot de passe</dt>
             <dd>Le mot de passe permet de se connecter à l'administration de Garradin.</dd>
+            <dt>Date de dernière connexion</dt>
+            <dd>Enregistre la date de dernière connexion à l'administration de Garradin.</dd>
         </dl>
     </fieldset>
 
+    {if !empty($presets)}
     <fieldset>
         <legend>Ajouter un champ pré-défini</legend>
+        <p>
+            <select name="preset">
+                {foreach from=$presets key="name" item="preset"}
+                <option value="{$name|escape}">{$name|escape} &mdash; {$preset.title|escape}</option>
+                {/foreach}
+            </select>
+            <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+        </p>
     </fieldset>
+    {/if}
 
     <fieldset>
         <legend>Ajouter un champ personnalisé</legend>
         <dl>
-            <dt><label for="f_type">Type</label></dt>
-            <dd>
-                <select name="new[type]" id="f_type">
-                    {foreach from=$types key="type" value="name"}
-                    <option value="{$type|escape}"{if (!empty($new.type) && $new.type == $type) || (empty($new.type) && $type == 'text')} selected="selected"{/if}>{$name|escape}</option>
-                    {/foreach}
-                </select>
-            </dd>
+            <dt><label for="f_name">Nom unique</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="help">Ne peut comporter que des lettres minuscules et des tirets bas.</dd>
+            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" size="30" /></dd>
             <dt><label for="f_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="new[title]" id="f_title" value="{form_field data=$new name=title}" size="60" /></dd>
-            <dt><label for="f_help">Aide</label></dt>
-            <dd><input type="text" name="new[help]" id="f_help" value="{form_field data=$new name=help}" size="100" /></dd>
-            <dt><label><input type="checkbox" name="new[editable]" value="1" {form_field data=$new name=editable checked="1"} /> Modifiable par les membres</label></dt>
-            <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-            <dt><label><input type="checkbox" name="new[mandatory]" value="1" {form_field data=$new name=mandatory checked="1"} /> Champ obligatoire</label></dt>
-            <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
-            <dt><label><input type="checkbox" name="new[private]" value="1" {form_field data=$new name=private checked="1"} /> Champ privé</label></dt>
-            <dd class="help">Si coché, ce champ ne sera visible et modifiable que par les personnes pouvant gérer les membres, mais pas les membres eux-même.</dd>
+            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" size="60" /></dd>
         </dl>
+        <p><input type="submit" name="add" value="Ajouter ce champ à la fiche membre" /></p>
     </fieldset>
 
     <div id="orderFields">
         {foreach from=$champs item="champ" key="nom"}
-        <fieldset>
+        <fieldset id="f_{$nom|escape}">
             <legend>{$nom|escape}</legend>
             <dl>
                 <dt><label for="f_{$nom|escape}_type">Type</label></dt>
@@ -101,7 +133,8 @@
 
     <p class="submit">
         {csrf_field key="config_membres"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        <input type="submit" name="reset" value="Annuler les changements" class="minor" />
+        <input type="submit" name="review" value="Enregistrer &rarr;" />
         (un récapitulatif sera présenté et une confirmation sera demandée)
     </p>
 
@@ -175,21 +208,24 @@
         };
         actions.appendChild(down);
 
-        var rem = document.createElement('span');
-        rem.className = 'icn remove';
-        rem.innerHTML = '&#10005;';
-        rem.title = 'Enlever ce champ de la fiche';
-        rem.onclick = function (e) {
-            if (!window.confirm('Êtes-vous sûr de supprimer ce champ des fiches de membre ?'))
-            {
-                return false;
-            }
+        if (field.id != 'f_email')
+        {
+            var rem = document.createElement('span');
+            rem.className = 'icn remove';
+            rem.innerHTML = '&#10005;';
+            rem.title = 'Enlever ce champ de la fiche';
+            rem.onclick = function (e) {
+                if (!window.confirm('Êtes-vous sûr de supprimer ce champ des fiches de membre ?'))
+                {
+                    return false;
+                }
 
-            var field = this.parentNode.parentNode;
-            field.parentNode.removeChild(field);
-            return false;
-        };
-        actions.appendChild(rem);
+                var field = this.parentNode.parentNode;
+                field.parentNode.removeChild(field);
+                return false;
+            };
+            actions.appendChild(rem);
+        }
 
         var edit = document.createElement('span');
         edit.className = 'icn edit';
@@ -208,5 +244,6 @@
 }());
 {/literal}
 </script>
+{/if}
 
 {include file="admin/_foot.tpl"}

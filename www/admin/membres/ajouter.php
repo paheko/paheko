@@ -61,13 +61,10 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 $tpl->assign('passphrase', utils::suggestPassword());
-$tpl->assign('obligatoires', $config->get('champs_obligatoires'));
+$tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
 $tpl->assign('current_cat', utils::post('id_categorie') ?: $config->get('categorie_membres'));
-
-$tpl->assign('pays', utils::getCountryList());
-$tpl->assign('current_cc', utils::post('pays') ?: $config->get('pays'));
 
 $tpl->display('admin/membres/ajouter.tpl');
 

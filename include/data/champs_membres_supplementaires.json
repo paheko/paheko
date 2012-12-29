@@ -26,5 +26,13 @@
 		"editable": false,
 		"mandatory": false,
 		"private": true
+	},
+	"date_inscription":
+	{
+		"type": "date",
+		"title": "Date d'inscription",
+		"editable": false,
+		"mandatory": true,
+		"private": true
 	}
 }

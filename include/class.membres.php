@@ -65,11 +65,7 @@ class Membres
             return false;
 
         $db = DB::getInstance();
-        $r = $db->simpleQuerySingle('SELECT *,
-            strftime(\'%s\', date_connexion) AS date_connexion,
-            strftime(\'%s\', date_inscription) AS date_inscription,
-            strftime(\'%s\', date_cotisation) AS date_cotisation
-            FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
+        $r = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
 
         if (empty($r))
             return false;
@@ -194,14 +190,24 @@ class Membres
             $_SESSION['storage'] = array();
         }
 
-        $_SESSION['storage'][$key] = $value;
+        if ($value === null)
+        {
+            unset($_SESSION['storage'][$key]);
+        }
+        else
+        {
+            $_SESSION['storage'][$key] = $value;
+        }
+
         return true;
     }
 
     public function sessionGet($key)
     {
         if (!isset($_SESSION['storage'][$key]))
+        {
             return null;
+        }
 
         return $_SESSION['storage'][$key];
     }
@@ -368,11 +374,7 @@ class Membres
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT *,
-            strftime(\'%s\', date_connexion) AS date_connexion,
-            strftime(\'%s\', date_inscription) AS date_inscription,
-            strftime(\'%s\', date_cotisation) AS date_cotisation
-            FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
+        return $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
     public function delete($ids)
