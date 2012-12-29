@@ -116,7 +116,7 @@ function exception_handler($e)
         }
     }
 
-    $error = "Error happened !\n\n".
+    $error = "Exception of type ".get_class($e)." happened !\n\n".
         $e->getCode()." - ".$e->getMessage()."\n\nIn: ".
         $e->getFile() . ":" . $e->getLine()."\n\n";
 
