@@ -18,4 +18,5 @@ INSERT INTO "compta_categories" VALUES(NULL,1,'Revente de marchandises','','707'
 INSERT INTO "compta_categories" VALUES(NULL,1,'Manifestations diverses','Revenus provenant de manifestations au profit de l''association : droit d''entrée, location d''emplacement en vide grenier, ventes, etc.','7780');
 INSERT INTO "compta_categories" VALUES(NULL,1,'Cotisations','','756');
 INSERT INTO "compta_categories" VALUES(NULL,1,'Dons et collectes','','754');
+INSERT INTO "compta_categories" VALUES(NULL,1,'Subventions','','740');
 INSERT INTO "compta_categories" VALUES(NULL,1,'Divers','','758');
