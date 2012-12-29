@@ -70,7 +70,7 @@ function tpl_form_field($params)
         return '';
     }
 
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
 function tpl_format_tel($n)
@@ -353,6 +353,109 @@ function escape_money($number)
     return number_format((float)$number, 2, ',', ' ');
 }
 
+function tpl_html_champ_membre($params)
+{
+    if (empty($params['config']) || empty($params['name']))
+        throw new \BadFunctionCallException('Paramètres type et name obligatoires.');
+
+    $config = $params['config'];
+    $type = $config['type'];
+
+    if ($type == 'select')
+    {
+        if (empty($params['values']))
+            throw new \BadFunctionCallException('Paramètre values obligatoire pour champ select.');
+    }
+    elseif ($type == 'country')
+    {
+        $type = 'select';
+        $params['values'] = utils::getCountryList();
+        $params['default'] = Config::getInstance()->get('pays');
+    }
+    elseif ($type == 'multiple')
+    {
+        if (empty($params['values']))
+            throw new \BadFunctionCallException('Paramètre values obligatoire pour champ select.');
+    }
+
+    $field = '';
+    $value = tpl_form_field($params);
+    $attributes = 'name="' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
+    $attributes .= 'id="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
+
+    if (!empty($params['disabled']))
+    {
+        $attributes .= 'disabled="disabled" ';
+    }
+
+    if ($type == 'select')
+    {
+        $field .= '<select '.$attributes.'>';
+        foreach ($params['values'] as $k=>$v)
+        {
+            if (is_int($k))
+                $k = $v;
+
+            $field .= '<option value="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '"';
+
+            if ($value == $k)
+                $field .= ' selected="selected"';
+
+            $field .= '>' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+        $field .= '</select>';
+    }
+    elseif ($type == 'multiple')
+    {
+
+    }
+    elseif ($type == 'textarea')
+    {
+        $field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . $value . '</textarea>';
+    }
+    else
+    {
+        if ($type == 'checkbox' && !empty($value))
+        {
+            $attributes .= 'checked="checked" ';
+        }
+
+        $field .= '<input type="' . $type . '" ' . $attributes . ' value="' . $value . '" />';
+    }
+
+    $out = '
+    <dt>';
+
+    if ($type == 'checkbox')
+    {
+        $out .= $field . ' ';
+    }
+
+    $out .= '<label for="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '">'
+        . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</label>';
+
+    if (!empty($config['mandatory']))
+    {
+        $out .= ' <b title="(Champ obligatoire)">obligatoire</b>';
+    }
+
+    $out .= '</dt>';
+
+    if (!empty($config['help']))
+    {
+        $out .= '
+    <dd class="help">' . htmlspecialchars($config['help'], ENT_QUOTES, 'UTF-8') . '</dd>';
+    }
+
+    if ($type != 'checkbox')
+    {
+        $out .= '
+    <dd>' . $field . '</dd>';
+    }
+
+    return $out;
+}
+
 $tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
 $tpl->register_function('form_field', 'Garradin\tpl_form_field');
 $tpl->register_function('select_compte', 'Garradin\tpl_select_compte');
@@ -362,6 +465,7 @@ $tpl->register_function('format_droits', 'Garradin\tpl_format_droits');
 $tpl->register_function('pagination', 'Garradin\tpl_pagination');
 
 $tpl->register_function('diff', 'Garradin\tpl_diff');
+$tpl->register_function('html_champ_membre', 'Garradin\tpl_html_champ_membre');
 
 $tpl->register_modifier('get_country_name', array('Garradin\utils', 'getCountryName'));
 $tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');

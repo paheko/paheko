@@ -222,6 +222,10 @@ p.submit {
     font-size: 1.2em;
 }
 
+.submit input.minor {
+    font-size: .9em;
+}
+
 form .checkUncheck {
     float: left;
 }
