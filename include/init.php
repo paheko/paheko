@@ -57,7 +57,7 @@ if (!defined('GARRADIN_ROOT'))
 
 if (!defined('GARRADIN_DB_FILE'))
 {
-    define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.db');
+    define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.sqlite');
 }
 
 if (!defined('GARRADIN_DB_SCHEMA'))

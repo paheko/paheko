@@ -1,4 +1,6 @@
 <?php
+namespace Garradin;
+
 /*
  * Tests : vérification que les conditions pour s'exécuter sont remplies
  */
@@ -41,11 +43,10 @@ if ($fail)
     exit;
 }
 
-namespace Garradin;
-
 define('GARRADIN_INSTALL_PROCESS', true);
 
 require_once __DIR__ . '/../../include/init.php';
+$tpl = Template::getInstance();
 
 if (file_exists(GARRADIN_DB_FILE))
 {
