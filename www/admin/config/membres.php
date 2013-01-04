@@ -46,7 +46,14 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
         elseif (!empty($_POST['review']))
         {
             try {
-                $champs->setAll(utils::post('champs'));
+                $nouveau_champs = utils::post('champs');
+
+                foreach ($nouveau_champs as $key=>&$cfg)
+                {
+                    $cfg['type'] = $champs->get($key, 'type');
+                }
+                
+                $champs->setAll($nouveau_champs);
                 $membres->sessionStore('champs_membres', (string)$champs);
 
                 utils::redirect('/admin/config/membres.php?review');

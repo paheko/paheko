@@ -14,6 +14,7 @@ class Champs_Membres
 		'date'		=>	'Date',
 		'datetime'	=>	'Date et heure',
 		'file'		=>	'Fichier',
+        'password'  =>  'Mot de passe',
 		'number'	=>	'Numéro',
 		'tel'		=>	'Numéro de téléphone',
 		'select'	=>	'Sélecteur de choix',
@@ -29,36 +30,33 @@ class Champs_Membres
         'editable',
         'mandatory',
         'private',
-        'values'
+        'options'
     );
 
     static protected $presets = null;
 
 	public function __toString()
 	{
-		return json_encode($this->champs);
+		return utils::write_ini_string($this->champs);
 	}
 
-	static public function import()
+    public function toString()
+    {
+        return utils::write_ini_string($this->champs);
+    }
+
+	static public function importInstall()
 	{
-		$json = file_get_contents(GARRADIN_ROOT . '/include/data/champs_membres.json');
-		$json = preg_replace('!/[*].*?[*]/!s', '', $json);
-		return new Champs_Membres($json);
+		$champs = parse_ini_file(GARRADIN_ROOT . '/include/data/champs_membres.ini', true);
+        $champs = array_filter($champs, function ($row) { return !empty($row['install']); });
+        return new Champs_Membres($champs);
 	}
 
     static public function importPresets()
     {
         if (is_null(self::$presets))
         {
-            $json = file_get_contents(GARRADIN_ROOT . '/include/data/champs_membres.json');
-            $json = preg_replace('!/[*].*?[*]/!s', '', $json);
-            $champs = json_decode($json, true);
-
-            $json = file_get_contents(GARRADIN_ROOT . '/include/data/champs_membres_supplementaires.json');
-            $json = preg_replace('!/[*].*?[*]/!s', '', $json);
-            $champs_supplementaires = json_decode($json, true);
-
-            self::$presets = array_merge($champs, $champs_supplementaires);
+            self::$presets = parse_ini_file(GARRADIN_ROOT . '/include/data/champs_membres.ini', true);
         }
 
         return self::$presets;
@@ -75,9 +73,25 @@ class Champs_Membres
 		{
 			$this->champs = $champs->getAll();
 		}
+        elseif (is_array($champs))
+        {
+            foreach ($champs as $key=>&$config)
+            {
+                $this->_checkField($key, $config);
+            }
+
+            $this->champs = $champs;
+        }
 		else
 		{
-			$this->champs = json_decode((string)$champs, true);
+			$champs = parse_ini_string((string)$champs, true);
+
+            foreach ($champs as $key=>&$config)
+            {
+                $this->_checkField($key, $config);
+            }
+
+            $this->champs = $champs;
 		}
 	}
 
@@ -86,9 +100,20 @@ class Champs_Membres
 		return $this->types;
 	}
 
-	public function get($key)
+	public function get($champ, $key = null)
 	{
-		return $this->champs[$key];
+        if (!array_key_exists($champ, $this->champs))
+            return null;
+
+        if ($key !== null)
+        {
+            if (array_key_exists($key, $this->champs[$champ]))
+                return $this->champs[$champ][$key];
+            else
+                return null;
+        }
+
+		return $this->champs[$champ];
 	}
 
 	public function getAll()
@@ -109,8 +134,15 @@ class Champs_Membres
             throw new UserException('Le nom du champ est invalide.');
         }
 
-         foreach ($config as $key=>&$value)
+        foreach ($config as $key=>&$value)
         {
+            // Champ install non pris en compte
+            if ($key == 'install')
+            {
+                unset($config[$key]);
+                continue;
+            }
+
             if (!in_array($key, $this->config_fields))
             {
                 throw new \BadMethodCallException('Champ '.$key.' non valide.');
@@ -124,21 +156,45 @@ class Champs_Membres
             {
                 $value = trim((string) $value);
             }
+            elseif ($key == 'options')
+            {
+                $value = (array) $value;
+            }
         }
 
         if (empty($config['title']))
         {
-            throw new UserException('Le titre est obligatoire.');
+            throw new UserException('Champ "'.$name.'" : Le titre est obligatoire.');
         }
 
         if (empty($config['type']) || !array_key_exists($config['type'], $this->types))
         {
-            throw new UserException('Le type est vide ou non valide.');
+            throw new UserException('Champ "'.$name.'" : Le type est vide ou non valide.');
         }
 
         if ($name == 'email' && $config['type'] != 'email')
         {
             throw new UserException('Le champ email ne peut être d\'un type différent de email.');
+        }
+
+        if ($name == 'passe' && $config['type'] != 'password')
+        {
+            throw new UserException('Le champ mot de passe ne peut être d\'un type différent de email.');
+        }
+
+        if (!array_key_exists('editable', $config))
+        {
+            $config['editable'] = false;
+        }
+
+        if (!array_key_exists('mandatory', $config))
+        {
+            $config['mandatory'] = false;
+        }
+
+        if (!array_key_exists('private', $config))
+        {
+            $config['private'] = false;
         }
 
         return true;
@@ -168,7 +224,17 @@ class Champs_Membres
      */
 	public function set($champ, $key, $value)
 	{
-		$this->champs[$champs][$key] = $value;
+        if (!isset($this->champs[$champ]))
+        {
+            throw new \LogicException('Champ "'.$champ.'" inconnu.');
+        }
+
+        // Vérification
+        $config = $this->champs[$champ];
+        $config[$key] = $value;
+        $this->_checkField($champ, $config);
+
+		$this->champs[$champ] = $config;
 		return true;
 	}
 
@@ -184,7 +250,12 @@ class Champs_Membres
             throw new UserException('Le champ E-Mail ne peut être supprimé des fiches membres.');
         }
 
-        foreach ($champs as $name=>$config)
+        if (!array_key_exists('passe', $champs))
+        {
+            throw new UserException('Le champ Mot de passe ne peut être supprimé des fiches membres.');
+        }
+
+        foreach ($champs as $name=>&$config)
         {
             $this->_checkField($name, $config);
         }
@@ -214,7 +285,6 @@ class Champs_Membres
     	$create = array(
     		'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
-    		'passe TEXT NULL, -- Mot de passe',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
     	);
 
@@ -222,11 +292,11 @@ class Champs_Membres
     	$copy = array(
     		'id',
     		'id_categorie',
-    		'passe',
             'date_connexion'
     	);
 
-    	$anciens_champs = $config->get('champs_membres')->getAll();
+        $anciens_champs = $config->get('champs_membres');
+    	$anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
 
     	foreach ($this->champs as $key=>$cfg)
     	{

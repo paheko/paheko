@@ -363,19 +363,19 @@ function tpl_html_champ_membre($params)
 
     if ($type == 'select')
     {
-        if (empty($params['values']))
-            throw new \BadFunctionCallException('Paramètre values obligatoire pour champ select.');
+        if (empty($params['options']))
+            throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type select.');
     }
     elseif ($type == 'country')
     {
         $type = 'select';
-        $params['values'] = utils::getCountryList();
+        $params['options'] = utils::getCountryList();
         $params['default'] = Config::getInstance()->get('pays');
     }
     elseif ($type == 'multiple')
     {
-        if (empty($params['values']))
-            throw new \BadFunctionCallException('Paramètre values obligatoire pour champ select.');
+        if (empty($params['options']))
+            throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type multiple.');
     }
 
     $field = '';
@@ -391,7 +391,7 @@ function tpl_html_champ_membre($params)
     if ($type == 'select')
     {
         $field .= '<select '.$attributes.'>';
-        foreach ($params['values'] as $k=>$v)
+        foreach ($params['options'] as $k=>$v)
         {
             if (is_int($k))
                 $k = $v;
@@ -407,7 +407,14 @@ function tpl_html_champ_membre($params)
     }
     elseif ($type == 'multiple')
     {
-
+        foreach ($params['options'] as $k=>$v)
+        {
+            $b = 0x01 << (int)$k;
+            $field .= '<label><input type="checkbox" name="' 
+                . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '[' . (int)$k . ']" value="1" '
+                . (($value & $b) ? 'checked="checked"' : '') . ' /> ' 
+                . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</label><br />';
+        }
     }
     elseif ($type == 'textarea')
     {

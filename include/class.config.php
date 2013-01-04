@@ -21,6 +21,7 @@ class Config
 
     protected function __construct()
     {
+        // Définition des types de données stockées
         $string = '';
         $int = 0;
         $float = 0.0;
@@ -123,11 +124,16 @@ class Config
 
     public function get($key)
     {
-        if (!array_key_exists($key, $this->config))
+        if (!array_key_exists($key, $this->fields_types))
         {
             throw new \OutOfBoundsException('Ce champ est inconnu.');
         }
 
+        if (!array_key_exists($key, $this->config))
+        {
+            return null;
+        }
+        
         return $this->config[$key];
     }
 

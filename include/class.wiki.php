@@ -228,7 +228,7 @@ class Wiki
         }
 
         // Il faut obligatoirement fournir un ID d'auteur
-        if (empty($data['id_auteur']))
+        if (empty($data['id_auteur']) && $data['id_auteur'] !== null)
         {
             throw new \BadMethodCallException('Aucun ID auteur de fourni.');
         }
