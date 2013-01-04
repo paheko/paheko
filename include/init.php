@@ -171,6 +171,7 @@ class Loader
         'utils',
         'squelette_filtres',
         'static_cache',
+        'template'
         );
 
     /**

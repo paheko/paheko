@@ -520,6 +520,57 @@ class utils
         return $out;
     }
 
+    static public function write_ini_string($in)
+    {
+        $out = '';
+        $get_ini_line = function ($key, $value) use (&$get_ini_line)
+        {
+            if (is_bool($value))
+            {
+                return $key . ' = ' . ($value ? 'true' : 'false');
+            }
+            elseif (is_numeric($value))
+            {
+                return $key . ' = ' . $value;
+            }
+            elseif (is_array($value))
+            {
+                $out = '';
+                foreach ($value as $row)
+                {
+                    $out .= $get_ini_line($key . '[]', $row) . "\n";
+                }
+
+                return substr($out, 0, -1);
+            }
+            else
+            {
+                return $key . ' = "' . str_replace('"', '\\"', $value) . '"';
+            }
+        };
+
+        foreach ($in as $key=>$value)
+        {
+            if (is_array($value) && is_string($key))
+            {
+                $out .= '[' . $key . "]\n";
+
+                foreach ($value as $row_key=>$row_value)
+                {
+                    $out .= $get_ini_line($row_key, $row_value) . "\n";
+                }
+
+                $out .= "\n";
+            }
+            else
+            {
+                $out .= $get_ini_line($key, $value) . "\n";
+            }
+        }
+
+        return $out;
+    }
+
 }
 
 ?>

@@ -46,7 +46,6 @@ namespace Garradin;
 define('GARRADIN_INSTALL_PROCESS', true);
 
 require_once __DIR__ . '/../../include/init.php';
-require_once GARRADIN_ROOT . '/include/template.php';
 
 if (file_exists(GARRADIN_DB_FILE))
 {

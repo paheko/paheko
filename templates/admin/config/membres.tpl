@@ -65,8 +65,6 @@
                 Il est incrémenté à chaque nouveau membre ajouté.</dd>
             <dt>Catégorie</dt>
             <dd>Identifie la catégorie du membre.</dd>
-            <dt>Mot de passe</dt>
-            <dd>Le mot de passe permet de se connecter à l'administration de Garradin.</dd>
             <dt>Date de dernière connexion</dt>
             <dd>Enregistre la date de dernière connexion à l'administration de Garradin.</dd>
         </dl>
@@ -94,6 +92,14 @@
             <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" size="30" /></dd>
             <dt><label for="f_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" size="60" /></dd>
+            <dt><label for="f_type">Type de champ</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd>
+                <select name="new_type" id="f_type">
+                    {foreach from=$types key="type" item="nom"}
+                    <option value="{$type|escape}" {form_field name=new_type selected=$type}>{$nom|escape}</option>
+                    {/foreach}
+                </select>
+            </dd>
         </dl>
         <p><input type="submit" name="add" value="Ajouter ce champ à la fiche membre" /></p>
     </fieldset>
@@ -103,19 +109,8 @@
         <fieldset id="f_{$nom|escape}">
             <legend>{$nom|escape}</legend>
             <dl>
-                <dt><label for="f_{$nom|escape}_type">Type</label></dt>
-                <dd>
-                    {if $nom == 'email'}
-                        <input type="hidden" name="champs[{$nom|escape}][type]" value="{$champ.type|escape}" />
-                        Adresse E-Mail (non modifiable)
-                    {else}
-                        <select name="champs[{$nom|escape}][type]" id="f_{$nom|escape}_type">
-                            {foreach from=$types key="type" value="name"}
-                            <option value="{$type|escape}"{if (!empty($champ.type) && $champ.type == $type)} selected="selected"{/if}>{$name|escape}</option>
-                            {/foreach}
-                        </select>
-                    {/if}
-                </dd>
+                <dt><label>Type</label></dt>
+                <dd>{$champ.type|get_type}</dd>
                 <dt><label for="f_{$nom|escape}_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
                 <dd><input type="text" name="champs[{$nom|escape}][title]" id="f_{$nom|escape}_title" value="{form_field data=$champs[$nom] name=title}" size="60" /></dd>
                 <dt><label for="f_{$nom|escape}_help">Aide</label></dt>
@@ -126,6 +121,22 @@
                 <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
                 <dt><label><input type="checkbox" name="champs[{$nom|escape}][private]" value="1" {form_field data=$champs[$nom] name=private checked="1"} /> Champ privé</label></dt>
                 <dd class="help">Si coché, ce champ ne sera visible et modifiable que par les personnes pouvant gérer les membres, mais pas les membres eux-même.</dd>
+                {if $champ.type == 'select' || $champ.type == 'multiple'}
+                    <dt><label>Options disponibles</label></dt>
+                    {if $champ.type == 'multiple'}
+                        <dd class="help">Attention changer l'ordre des options peut avoir des effets indésirables.</dd>
+                    {else}
+                        <dd class="help">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà
+                            été enregistré dans les fiches des membres.</dd>
+                    {/if}
+                    {foreach from=$champ.options key="key" item="opt"}
+                        <dd>{if $champ.type == 'multiple'}{math a=$key equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$key|escape}]" value="{$opt|escape}" size="50" /></dd>
+                    {/foreach}
+                    {assign var="more" value=$champ.options|@count}
+                    {if $champ.type == 'select' || $more < 32}
+                        <dd>{if $champ.type == 'multiple'}{math a=$more equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$more|escape}]" value="" size="50" /></dd>
+                    {/if}
+                {/if}
             </dl>
         </fieldset>
         {/foreach}
@@ -208,7 +219,7 @@
         };
         actions.appendChild(down);
 
-        if (field.id != 'f_email')
+        if (field.id != 'f_email' && field.id != 'f_passe')
         {
             var rem = document.createElement('span');
             rem.className = 'icn remove';

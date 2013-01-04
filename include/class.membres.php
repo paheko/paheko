@@ -521,7 +521,7 @@ class Membres
         if (!$date_membre)
             return false;
 
-        $echeance = new \DateTime('@'.$date_membre);
+        $echeance = new \DateTime($date_membre);
         $echeance->setTime(0, 0);
         $echeance->modify('+'.$duree_cotisation.' months');
 

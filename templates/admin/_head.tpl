@@ -64,9 +64,7 @@
         {if $user.droits.config >= Garradin\Membres::DROIT_ADMIN}
             <li class="config{if $current == 'config'} current{/if}"><a href="{$www_url}admin/config/">Configuration</a>
         {/if}
-        {if count($config.champs_modifiables_membre) > 0}
-            <li class="mes_infos{if $current == 'mes_infos'} current{/if}"><a href="{$www_url}admin/mes_infos.php">Mes infos</a>
-        {/if}
+        <li class="mes_infos{if $current == 'mes_infos'} current{/if}"><a href="{$www_url}admin/mes_infos.php">Mes infos</a>
         <li class="logout"><a href="{$www_url}admin/logout.php">Déconnexion</a></li>
     </ul>
     {/if}

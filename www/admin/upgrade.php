@@ -75,6 +75,7 @@ if (version_compare($v, '0.4.5', '<'))
         ));
 
         $wiki->editRevision($id_page, 0, array(
+            'id_auteur' =>  null,
             'contenu'   =>  "Bienvenue dans l'administration de ".$config->get('nom_asso')." !\n\n"
                 .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
         ));
@@ -88,23 +89,25 @@ if (version_compare($v, '0.5.0', '<'))
 {
     // Récupération de l'ancienne config
     $champs_modifiables_membre = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
-    $champs_modifiables_membre = explode($champs_modifiables_membre);
+    $champs_modifiables_membre = !empty($champs_modifiables_membre) ? explode(',', $champs_modifiables_membre) : array();
 
     $champs_obligatoires = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
-    $champs_obligatoires = explode($champs_obligatoires);
+    $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : array();
 
     // Import des champs membres par défaut
-    $champs = Champs_Membres::import();
+    $champs = Champs_Membres::importInstall();
 
     // Application de l'ancienne config aux nouveaux champs membres
     foreach ($champs_obligatoires as $name)
     {
-        $champs->set($name, 'mandatory', true);
+        if ($champs->get($name) !== null)
+            $champs->set($name, 'mandatory', true);
     }
 
     foreach ($champs_modifiables_membre as $name)
     {
-        $champs->set($name, 'editable', true);
+        if ($champs->get($name) !== null)
+            $champs->set($name, 'editable', true);
     }
 
     $champs->save();
