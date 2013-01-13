@@ -363,18 +363,18 @@ function tpl_html_champ_membre($params)
 
     if ($type == 'select')
     {
-        if (empty($params['options']))
+        if (empty($config['options']))
             throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type select.');
     }
     elseif ($type == 'country')
     {
         $type = 'select';
-        $params['options'] = utils::getCountryList();
+        $config['options'] = utils::getCountryList();
         $params['default'] = Config::getInstance()->get('pays');
     }
     elseif ($type == 'multiple')
     {
-        if (empty($params['options']))
+        if (empty($config['options']))
             throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type multiple.');
     }
 
@@ -391,14 +391,14 @@ function tpl_html_champ_membre($params)
     if ($type == 'select')
     {
         $field .= '<select '.$attributes.'>';
-        foreach ($params['options'] as $k=>$v)
+        foreach ($config['options'] as $k=>$v)
         {
             if (is_int($k))
                 $k = $v;
 
             $field .= '<option value="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '"';
 
-            if ($value == $k)
+            if ($value == $k || empty($value) && !empty($params['default']))
                 $field .= ' selected="selected"';
 
             $field .= '>' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</option>';
@@ -407,7 +407,7 @@ function tpl_html_champ_membre($params)
     }
     elseif ($type == 'multiple')
     {
-        foreach ($params['options'] as $k=>$v)
+        foreach ($config['options'] as $k=>$v)
         {
             $b = 0x01 << (int)$k;
             $field .= '<label><input type="checkbox" name="' 

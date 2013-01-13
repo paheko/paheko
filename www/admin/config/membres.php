@@ -81,14 +81,16 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                     $presets = Champs_Membres::importPresets();
                     $new = utils::post('new');
 
-                    if (array_key_exists($new['name'], $presets))
+                    if (array_key_exists($new, $presets))
                     {
-                        throw new UserException('Le champ ajouté a le même nom qu\'un champ pré-défini.');
+                        throw new UserException('Le champ personnalisé ne peut avoir le même nom qu\'un champ pré-défini.');
                     }
 
                     $config = array(
-                        'type'  =>  'text',
+                        'type'  =>  utils::post('new_type'),
                         'title' =>  utils::post('new_title'),
+                        'editable'  =>  true,
+                        'mandatory' =>  false,
                     );
 
                     $champs->add($new, $config);
