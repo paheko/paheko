@@ -10,14 +10,14 @@ class Champs_Membres
 		'email'		=>	'Adresse E-Mail',
 		'url'		=>	'Adresse URL',
 		'checkbox'	=>	'Case à cocher',
-		'multiple'	=>	'Combinaison de cases à cocher',
 		'date'		=>	'Date',
 		'datetime'	=>	'Date et heure',
 		'file'		=>	'Fichier',
         'password'  =>  'Mot de passe',
 		'number'	=>	'Numéro',
 		'tel'		=>	'Numéro de téléphone',
-		'select'	=>	'Sélecteur de choix',
+		'select'	=>	'Sélecteur à choix unique',
+        'multiple'  =>  'Sélecteur à choix multiple',
 		'country'	=>	'Sélecteur de pays',
 		'text'		=>	'Texte',
 		'textarea'	=>	'Texte multi-lignes',
@@ -121,6 +121,13 @@ class Champs_Membres
 		return $this->champs;
 	}
 
+    public function getPublic()
+    {
+        return array_filter($this->champs, function ($row) {
+            return empty($row['private']) ? true : false;
+        });
+    }
+
     /**
      * Vérifie la cohérence et la présence des bons éléments pour un champ
      * @param  string $name     Nom du champ
@@ -159,6 +166,14 @@ class Champs_Membres
             elseif ($key == 'options')
             {
                 $value = (array) $value;
+
+                foreach ($value as $option_key=>$option_value)
+                {
+                    if (!trim($option_value))
+                    {
+                        unset($value[$option_key]);
+                    }
+                }
             }
         }
 

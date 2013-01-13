@@ -62,6 +62,37 @@ CREATE TABLE membres (
 
 CREATE INDEX membres_id_categorie ON membres (id_categorie);
 
+-- Paiements possibles
+CREATE TABLE types_transactions
+(
+    id INTEGER PRIMARY KEY,
+    id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
+
+    titre TEXT NOT NULL,
+    description TEXT NOT NULL,
+    montant REAL NOT NULL,
+    duree INTEGER NULL,
+    debut TEXT NULL,
+    fin TEXT NULL,
+
+    FOREIGN KEY (id_categorie_compta) REFERENCES compta_categories (id)
+);
+
+-- Paiements enregistrés
+CREATE TABLE membres_transactions
+(
+    id_membre INTEGER NOT NULL,
+    id_transaction INTEGER NOT NULL,
+    id_operation INTEGER NULL,
+
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    montant REAL NOT NULL,
+
+    FOREIGN KEY (id_membre) REFERENCES membres (id),
+    FOREIGN KEY (id_transaction) REFERENCES transactions (id),
+    FOREIGN KEY (id_operation) REFERENCES compta_journal (id)
+);
+
 --
 -- WIKI
 --

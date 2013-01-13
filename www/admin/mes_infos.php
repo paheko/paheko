@@ -3,11 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (count($config->get('champs_modifiables_membre')) == 0)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
-
 $membre = $membres->getLoggedUser();
 
 if (!$membre)
@@ -58,10 +53,7 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 $tpl->assign('passphrase', utils::suggestPassword());
-$tpl->assign('obligatoires', $config->get('champs_obligatoires'));
-
-$tpl->assign('pays', utils::getCountryList());
-$tpl->assign('current_cc', utils::post('pays') ?: $membre['pays']);
+$tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membre', $membre);
 

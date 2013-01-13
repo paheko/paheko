@@ -2,7 +2,7 @@
 
 <ul class="actions">
     <li><a href="{$www_url}admin/config/">Général</a></li>
-    <li class="current"><a href="{$www_url}admin/config/membres.php">Fiche membres</a></li>
+    <li class="current"><a href="{$www_url}admin/config/membres.php">Fiche des membres</a></li>
     <li><a href="{$www_url}admin/config/site.php">Site public</a></li>
 </ul>
 
@@ -129,10 +129,14 @@
                         <dd class="help">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà
                             été enregistré dans les fiches des membres.</dd>
                     {/if}
-                    {foreach from=$champ.options key="key" item="opt"}
-                        <dd>{if $champ.type == 'multiple'}{math a=$key equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$key|escape}]" value="{$opt|escape}" size="50" /></dd>
-                    {/foreach}
-                    {assign var="more" value=$champ.options|@count}
+                    {if !empty($champ.options)}
+                        {foreach from=$champ.options key="key" item="opt"}
+                            <dd>{if $champ.type == 'multiple'}{math a=$key equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$key|escape}]" value="{$opt|escape}" size="50" /></dd>
+                        {/foreach}
+                        {assign var="more" value=$champ.options|@count}
+                    {else}
+                        {assign var="more" value=0}
+                    {/if}
                     {if $champ.type == 'select' || $more < 32}
                         <dd>{if $champ.type == 'multiple'}{math a=$more equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$more|escape}]" value="" size="50" /></dd>
                     {/if}

@@ -14,7 +14,7 @@
 
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/config/">Général</a></li>
-    <li><a href="{$www_url}admin/config/membres.php">Fiche membres</a></li>
+    <li><a href="{$www_url}admin/config/membres.php">Fiche des membres</a></li>
     <li><a href="{$www_url}admin/config/site.php">Site public</a></li>
 </ul>
 
