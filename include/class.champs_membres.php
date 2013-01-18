@@ -177,7 +177,7 @@ class Champs_Membres
             }
         }
 
-        if (empty($config['title']))
+        if (empty($config['title']) && $name != 'passe')
         {
             throw new UserException('Champ "'.$name.'" : Le titre est obligatoire.');
         }
@@ -301,13 +301,23 @@ class Champs_Membres
     		'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
+            'date_inscription TEXT NULL, -- Date d\'inscription',
+            'date_cotisation TEXT NULL, -- Date de cotisation',
+            //'exemption_transaction INTEGER NOT NULL DEFAULT 0, -- Exempté de transaction obligatoire',
     	);
+
+        $create_keys = array(
+            'FOREIGN KEY (id_categorie) REFERENCES membres_categories (id)'
+        );
 
     	// Champs à recopier
     	$copy = array(
     		'id',
     		'id_categorie',
-            'date_connexion'
+            'date_connexion',
+            'date_inscription',
+            'date_cotisation',
+            //'exemption_transaction',
     	);
 
         $anciens_champs = $config->get('champs_membres');
@@ -324,7 +334,14 @@ class Champs_Membres
     		else
     			$type = 'TEXT';
 
-    		$create[] = $key . ' ' . $type . ' ' . ', -- ' . str_replace(array("\n", "\r"), '', $cfg['title']);
+    		$line = $key . ' ' . $type . ' ' . ',';
+
+            if (!empty($cfg['title']))
+            {
+                $line .= '-- ' . str_replace(array("\n", "\r"), '', $cfg['title']);
+            }
+
+            $create[] = $line;
 
     		if (array_key_exists($key, $anciens_champs))
     		{
@@ -332,8 +349,7 @@ class Champs_Membres
     		}
     	}
 
-    	$last = count($create) - 1;
-    	$create[$last] = str_replace(',', '', $create[$last]);
+    	$create = array_merge($create, $create_keys);
 
     	$create = 'CREATE TABLE membres_tmp (' . "\n\t" . implode("\n\t", $create) . "\n);";
     	$copy = 'INSERT INTO membres_tmp (' . implode(', ', $copy) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
@@ -348,6 +364,7 @@ class Champs_Membres
     	
     	$db->exec('DROP TABLE membres;');
     	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
+        $db->exec('CREATE INDEX membres_id_categorie ON membres (id_categorie);'); // Index
     	$db->exec('END;');
     	$db->exec('PRAGMA foreign_keys = ON;');
 

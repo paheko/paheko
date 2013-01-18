@@ -20,10 +20,9 @@
         </dl>
     </fieldset>
 
-    {if array_key_exists('passe', $champs)}
     <fieldset>
         <legend>Changer mon mot de passe</legend>
-        {if empty($champs.passe.editable)}
+        {if $user.droits.membres < Garradin\Membres::DROIT_ADMIN && (!empty($champs.passe.private) || empty($champs.passe.editable))}
             <p class="help">Vous devez contacter un administrateur pour changer votre mot de passe.</p>
         {else}
             <dl>
@@ -39,7 +38,6 @@
             </dl>
         {/if}
     </fieldset>
-    {/if}
 
     <p class="submit">
         {csrf_field key="edit_me"}
