@@ -513,9 +513,8 @@ class Membres
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
     }
 
-    static public function checkCotisation($id)
+    static public function checkCotisation($date_membre, $duree_cotisation, $date_verif = null)
     {
-        return true;
         if (is_null($date_verif))
             $date_verif = time();
 
