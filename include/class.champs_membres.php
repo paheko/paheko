@@ -121,13 +121,6 @@ class Champs_Membres
 		return $this->champs;
 	}
 
-    public function getPublic()
-    {
-        return array_filter($this->champs, function ($row) {
-            return empty($row['private']) ? true : false;
-        });
-    }
-
     /**
      * Vérifie la cohérence et la présence des bons éléments pour un champ
      * @param  string $name     Nom du champ

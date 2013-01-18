@@ -14,7 +14,7 @@
         <dl>
             {foreach from=$champs item="champ" key="nom"}
             {if empty($champ.private) && $nom != 'passe'}
-                {html_champ_membre config=$champ name=$nom data=$membre}
+                {html_champ_membre config=$champ name=$nom data=$membre user_mode=true}
             {/if}
             {/foreach}
         </dl>
