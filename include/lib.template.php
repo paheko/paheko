@@ -463,6 +463,9 @@ function tpl_html_champ_membre($params)
     return $out;
 }
 
+$tpl->register_compiler('continue', function() { return 'continue;'; });
+//$tpl->register_modifier('va_', function() { return 'continue;'; });
+
 $tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
 $tpl->register_function('form_field', 'Garradin\tpl_form_field');
 $tpl->register_function('select_compte', 'Garradin\tpl_select_compte');

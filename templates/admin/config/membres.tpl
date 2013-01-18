@@ -27,6 +27,7 @@
         <legend>Fiche membre exemple</legend>
         <dl>
             {foreach from=$champs item="champ" key="nom"}
+                {if $nom == 'passe'}{continue}{/if}
                 {html_champ_membre config=$champ name=$nom disabled=true}
                 {if empty($champ.editable) || !empty($champ.private)}
                 <dd>
@@ -38,6 +39,23 @@
                 </dd>
                 {/if}
             {/foreach}
+        </dl>
+    </fieldset>
+
+    <fieldset id="f_passe">
+        <legend>Mot de passe</legend>
+        <dl>
+            <dt><label for="f_passe">Mot de passe</label>{if !empty($champs.passe.mandatory)} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
+            <dd><input type="password" id="f_passe" disabled="disabled" /></dd>
+            {if empty($champs.passe.editable) || !empty($champs.passe.private)}
+            <dd>
+                {if !empty($champs.passe.private)}
+                    (Champ privé)
+                {elseif empty($champs.passe.editable)}
+                    (Non-modifiable par les membres)
+                {/if}
+            </dd>
+            {/if}
         </dl>
     </fieldset>
 
@@ -106,6 +124,7 @@
 
     <div id="orderFields">
         {foreach from=$champs item="champ" key="nom"}
+        {if $nom == 'passe'}{continue}{/if}
         <fieldset id="f_{$nom|escape}">
             <legend>{$nom|escape}</legend>
             <dl>
@@ -145,6 +164,18 @@
         </fieldset>
         {/foreach}
     </div>
+
+    <fieldset id="f_passe">
+        <legend>Mot de passe</legend>
+        <dl>
+            <dt><label><input type="checkbox" name="champs[passe][editable]" value="1" {form_field data=$champs.passe name=editable checked="1"} /> Modifiable par les membres</label></dt>
+            <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
+            <dt><label><input type="checkbox" name="champs[passe][mandatory]" value="1" {form_field data=$champs.passe name=mandatory checked="1"} /> Champ obligatoire</label></dt>
+            <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
+            <dt><label><input type="checkbox" name="champs[passe][private]" value="1" {form_field data=$champs.passe name=private checked="1"} /> Champ privé</label></dt>
+            <dd class="help">Si coché, ce champ ne sera visible et modifiable que par les personnes pouvant gérer les membres, mais pas les membres eux-même.</dd>
+        </dl>
+    </fieldset>
 
     <p class="submit">
         {csrf_field key="config_membres"}
