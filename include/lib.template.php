@@ -361,6 +361,11 @@ function tpl_html_champ_membre($params)
     $config = $params['config'];
     $type = $config['type'];
 
+    if ($params['name'] == 'passe' || (!empty($params['user_mode']) && !empty($config['private'])))
+    {
+        return '';
+    }
+
     if ($type == 'select')
     {
         if (empty($config['options']))
@@ -386,6 +391,13 @@ function tpl_html_champ_membre($params)
     if (!empty($params['disabled']))
     {
         $attributes .= 'disabled="disabled" ';
+    }
+
+    if (!empty($params['user_mode']) && empty($config['editable']))
+    {
+        $out = '<dt>' . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</dt>';
+        $out .= '<dd>' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</dd>';
+        return $out;
     }
 
     if ($type == 'select')
@@ -464,7 +476,6 @@ function tpl_html_champ_membre($params)
 }
 
 $tpl->register_compiler('continue', function() { return 'continue;'; });
-//$tpl->register_modifier('va_', function() { return 'continue;'; });
 
 $tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
 $tpl->register_function('form_field', 'Garradin\tpl_form_field');

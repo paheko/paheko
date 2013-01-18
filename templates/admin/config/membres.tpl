@@ -43,7 +43,7 @@
     </fieldset>
 
     <fieldset id="f_passe">
-        <legend>Mot de passe</legend>
+        <legend>Connexion</legend>
         <dl>
             <dt><label for="f_passe">Mot de passe</label>{if !empty($champs.passe.mandatory)} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
             <dd><input type="password" id="f_passe" disabled="disabled" /></dd>
