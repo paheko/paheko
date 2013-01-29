@@ -9,7 +9,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
 }
 
 header('Content-type: application/csv');
-header('Content-Disposition: attachment; filename="Export comptabilité - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.csv"');
+header('Content-Disposition: attachment; filename="Export membres - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.csv"');
 $membres->toCSV();
 exit;
 
