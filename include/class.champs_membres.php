@@ -23,11 +23,22 @@ class Champs_Membres
 		'textarea'	=>	'Texte multi-lignes',
 	);
 
+    protected $text_types = array(
+        'email',
+        'text',
+        'select',
+        'textarea',
+        'url',
+        'password',
+        'country'
+    );
+
     protected $config_fields = array(
         'type',
         'title',
         'help',
         'editable',
+        'list_row',
         'mandatory',
         'private',
         'options'
@@ -116,10 +127,52 @@ class Champs_Membres
 		return $this->champs[$champ];
 	}
 
+    public function isText($champ)
+    {
+        if (!array_key_exists($champ, $this->champs))
+            return null;
+
+        if (in_array($this->champs[$champ]['type'], $this->text_types))
+            return true;
+        else
+            return false;
+    }
+
 	public function getAll()
 	{
 		return $this->champs;
 	}
+
+    public function getList()
+    {
+        $champs = $this->champs;
+        unset($champs['passe']);
+        return $champs;
+    }
+
+    public function getFirst()
+    {
+        reset($this->champs);
+        return key($this->champs);
+    }
+
+    public function getListedFields()
+    {
+        $champs = $this->champs;
+
+        $champs = array_filter($champs, function ($a) {
+            return empty($a['list_row']) ? false : true;
+        });
+
+        uasort($champs, function ($a, $b) {
+            if ($a['list_row'] == $b['list_row'])
+                return 0;
+
+            return ($a['list_row'] > $b['list_row']) ? 1 : -1;
+        });
+
+        return $champs;
+    }
 
     /**
      * Vérifie la cohérence et la présence des bons éléments pour un champ
@@ -151,6 +204,10 @@ class Champs_Membres
             if ($key == 'editable' || $key == 'private' || $key == 'mandatory')
             {
                 $value = (bool) (int) $value;
+            }
+            elseif ($key == 'list_row')
+            {
+                $value = (int) $value;
             }
             elseif ($key == 'help' || $key == 'title')
             {
@@ -327,11 +384,11 @@ class Champs_Membres
     		else
     			$type = 'TEXT';
 
-    		$line = $key . ' ' . $type . ' ' . ',';
+    		$line = $key . ' ' . $type . ',';
 
             if (!empty($cfg['title']))
             {
-                $line .= '-- ' . str_replace(array("\n", "\r"), '', $cfg['title']);
+                $line .= ' -- ' . str_replace(array("\n", "\r"), '', $cfg['title']);
             }
 
             $create[] = $line;
