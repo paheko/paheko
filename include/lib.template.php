@@ -69,6 +69,13 @@ function tpl_form_field($params)
 
         return '';
     }
+    elseif (isset($params['selected']))
+    {
+        if ($value == $params['selected'])
+            return ' selected="selected" ';
+
+        return '';
+    }
 
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
