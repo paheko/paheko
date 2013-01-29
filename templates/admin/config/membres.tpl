@@ -160,6 +160,9 @@
                         <dd>{if $champ.type == 'multiple'}{math a=$more equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$more|escape}]" value="" size="50" /></dd>
                     {/if}
                 {/if}
+                <dt><label for="f_list_row">Numéro de colonne dans la liste des membres</label></dt>
+                <dd class="help">Laisser vide ou indiquer le chiffre zéro pour que ce champ n'apparaisse pas dans la liste des membres. Inscrire un chiffre entre 1 et 10 pour indiquer l'ordre d'affichage du champ dans le tableau de la liste des membres.</dd>
+                <dd><input type="number" id="f_list_row" name="champs[{$nom|escape}][list_row]" min="0" max="10" value="{form_field data=$champs[$nom] name=list_row}" /></dd>
             </dl>
         </fieldset>
         {/foreach}

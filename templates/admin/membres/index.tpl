@@ -31,10 +31,10 @@
     </fieldset>
 </form>
 
-<form method="get" action="{$self_url|escape}" class="searchMember">
+<form method="get" action="{$admin_url}membres/recherche.php" class="searchMember">
     <fieldset>
         <legend>Rechercher un membre</legend>
-        <input type="text" name="search_query" value="{$search_query|escape}" />
+        <input type="text" name="r" value="" />
         <input type="submit" value="Chercher &rarr;" />
     </fieldset>
 </form>
@@ -46,28 +46,22 @@
     {if !empty($liste)}
     <table class="list">
         <thead>
-            <td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>
-            {if !empty($order)}
-                <td class="num{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro de membre"># <a href="?o=id&amp;a">&darr;</a><a href="?o=id&amp;d">&uarr;</a></td>
-                <th class="{if $order == 'nom'}cur {if $desc}desc{else}asc{/if}{/if}">Nom <a href="?o=nom&amp;a">&darr;</a><a href="?o=nom&amp;d">&uarr;</a></th>
-                <td class="{if $order == 'date_cotisation'}cur {if $desc}desc{else}asc{/if}{/if}">Cotisation <a href="?o=date_cotisation&amp;a">&darr;</a><a href="?o=date_cotisation&amp;d">&uarr;</a></td>
-                <td class="{if $order == 'date_inscription'}cur {if $desc}desc{else}asc{/if}{/if}">Inscription <a href="?o=date_inscription&amp;a">&darr;</a><a href="?o=date_inscription&amp;d">&uarr;</a></td>
-                <td class="{if $order == 'ville'}cur {if $desc}desc{else}asc{/if}{/if}">Ville <a href="?o=ville&amp;a">&darr;</a><a href="?o=ville&amp;d">&uarr;</a></td>
-            {else}
-                <td title="Numéro de membre">#</td>
-                <th>Nom</th>
-                <td>Cotisation</td>
-                <td>Inscription</td>
-                <td>Ville</td>
-            {/if}
+            {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
+            <td class="{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro unique"><a href="?o=id&amp;a">&darr;</a><a href="?o=id&amp;d">&uarr;</a></td>
+            {foreach from=$champs key="c" item="champ"}
+                <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title|escape} <a href="?o={$c|escape}&amp;a">&darr;</a><a href="?o={$c|escape}&amp;d">&uarr;</a></td>
+            {/foreach}
+            <td>Cotisation</td>
             <td></td>
         </thead>
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <td class="check">{if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<input type="checkbox" name="selected[]" value="{$membre.id|escape}" />{/if}</td>
-                    <td class="num"><a title="Fiche membre" href="{$www_url}admin/membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></td>
-                    <th>{$membre.nom|escape}</th>
+                    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id|escape}" /></td>{/if}
+                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></th>
+                    {foreach from=$champs key="c" item="champ"}
+                        <td>{$membre[$c]|escape}</td>
+                    {/foreach}
                     {if empty($membre.date_cotisation)}
                         <td class="error">jamais réglée</td>
                     {elseif $membre.date_cotisation > strtotime('12 months ago')} {* FIXME durée de cotisation variable *}
@@ -75,8 +69,6 @@
                     {else}
                         <td class="alert">en retard</td>
                     {/if}
-                    <td>{$membre.date_inscription|date_fr:'d/m/Y'}</td>
-                    <td>{$membre.ville|escape}</td>
                     <td class="actions">
                         {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id|escape}" title="Envoyer un message">✉</a> {/if}
                         <a class="icn" href="modifier.php?id={$membre.id|escape}">✎</a>

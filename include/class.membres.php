@@ -425,16 +425,17 @@ class Membres
         return $droits;
     }
 
-    public function search($field = null, $query)
+    public function search($field, $query)
     {
         $db = DB::getInstance();
+        $champs = Config::getInstance()->get('champs_membres');
 
-        if (is_null($field) || !in_array($field, array('id', 'nom', 'email', 'code_postal', 'ville', 'adresse', 'telephone')))
+        if (!$champs->get($field))
         {
-            $field = 'nom';
+            throw new \UnexpectedValue($field . ' is not a valid field');
         }
 
-        if ($field == 'id' || $field == 'code_postal')
+        if (!$champs->isText($field))
         {
             $where = 'WHERE '.$field.' = \''.$db->escapeString($query).'\'';
             $order = $field;
@@ -455,11 +456,12 @@ class Membres
         );
     }
 
-    public function listByCategory($cat = 0, $page = 1, $order = 'nom', $desc = false)
+    public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
         $db = DB::getInstance();
+        $champs = Config::getInstance()->get('champs_membres');
 
         if (is_int($cat) && $cat)
             $where = 'WHERE id_categorie = '.(int)$cat;
@@ -468,10 +470,10 @@ class Membres
         else
             $where = '';
 
-        if (!in_array($order, array('nom', 'id', 'ville', 'date_cotisation', 'date_inscription')))
-            $order = 'nom';
+        if (is_null($order) || !$champs->get($order))
+            $order = 'id';
 
-        if ($order == 'nom' || $order == 'ville')
+        if (!empty($fields) && $order != 'id' && $champs->isText($order))
         {
             $order = 'transliterate_to_ascii('.$order.') COLLATE NOCASE';
         }
@@ -481,8 +483,15 @@ class Membres
             $order .= ' DESC';
         }
 
+        if (!in_array('email', $fields))
+        {
+            $fields []= 'email';
+        }
+
+        $fields = implode(', ', $fields);
+
         return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, nom, email, code_postal, ville,
+            'SELECT id, id_categorie, '.$fields.',
                 strftime(\'%s\', date_cotisation) AS date_cotisation,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres '.$where.'
