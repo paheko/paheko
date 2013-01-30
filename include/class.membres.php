@@ -474,7 +474,14 @@ class Membres
             throw new \UnexpectedValueException($field . ' is not a valid field');
         }
 
-        if (!$champs->isText($field))
+        $champ = $champs->get($field);
+
+        if ($champ['type'] == 'multiple')
+        {
+            $where = 'WHERE '.$field.' & (1 << '.(int)$query.')';
+            $order = false;
+        }
+        elseif (!$champs->isText($field))
         {
             $where = 'WHERE '.$field.' = \''.$db->escapeString($query).'\'';
             $order = $field;
@@ -496,8 +503,8 @@ class Membres
             'SELECT id, id_categorie, ' . implode(', ', $fields) . ',
                 strftime(\'%s\', date_cotisation) AS date_cotisation,
                 strftime(\'%s\', date_inscription) AS date_inscription
-                FROM membres '.$where.'
-                ORDER BY '.$order.' LIMIT 100;',
+                FROM membres ' . $where . ($order ? ' ORDER BY ' . $order : '') . '
+                LIMIT 100;',
             SQLITE3_ASSOC
         );
     }

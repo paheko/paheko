@@ -51,6 +51,9 @@ function tpl_csrf_field($params)
 
 function tpl_form_field($params)
 {
+    if (!isset($params['name']))
+        throw new \BadFunctionCallException('name argument is mandatory');
+
     $name = $params['name'];
 
     if (isset($_POST[$name]))
