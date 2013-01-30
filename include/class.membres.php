@@ -245,9 +245,12 @@ class Membres
 
         foreach ($champs->getAll() as $key=>$config)
         {
-            if (!empty($config['mandatory']) && $check_mandatory && (!isset($data[$key]) || !trim($data[$key])))
+            if (!empty($config['mandatory']) && (!isset($data[$key]) || !trim($data[$key])))
             {
-                throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
+                if ($check_mandatory)
+                    throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
+                else
+                    continue;
             }
 
             if ($config['type'] == 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
@@ -549,7 +552,7 @@ class Membres
         if (!$date_membre)
             return false;
 
-        $echeance = new \DateTime($date_membre);
+        $echeance = new \DateTime('@' . $date_membre);
         $echeance->setTime(0, 0);
         $echeance->modify('+'.$duree_cotisation.' months');
 

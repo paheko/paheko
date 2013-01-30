@@ -13,6 +13,7 @@ $champ = trim(utils::get('c'));
 
 $champs = $config->get('champs_membres');
 
+// On détermine magiquement quel champ on recherche
 if (!$champ)
 {
     if (is_numeric(trim($recherche))) {

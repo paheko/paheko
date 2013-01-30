@@ -23,6 +23,7 @@ if (!$membre)
 }
 
 $cats = new Membres_Categories;
+$champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
 $membre_cat = $cats->get($membre['id_categorie']);
@@ -47,19 +48,12 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $data = array(
-                'nom'           =>  utils::post('nom'),
-                'email'         =>  utils::post('email'),
-                'passe'         =>  utils::post('passe'),
-                'telephone'     =>  utils::post('telephone'),
-                'code_postal'   =>  utils::post('code_postal'),
-                'adresse'       =>  utils::post('adresse'),
-                'ville'         =>  utils::post('ville'),
-                'pays'          =>  utils::post('pays'),
-                'date_naissance'=>  utils::post('date_naissance'),
-                'notes'         =>  utils::post('notes'),
-                'lettre_infos'  =>  utils::post('lettre_infos'),
-            );
+            $data = array();
+
+            foreach ($champs->getAll() as $key=>$config)
+            {
+                $data[$key] = utils::post($key);
+            }
 
             if ($user['droits']['membres'] == Membres::DROIT_ADMIN)
             {
@@ -67,7 +61,7 @@ if (!empty($_POST['save']))
                 $data['id'] = utils::post('id');
             }
 
-            $membres->edit($id, $data, false);
+            $membres->edit($id, $data, ($user['droits']['membres'] == Membres::DROIT_ADMIN) ? false : true);
 
             utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
@@ -80,13 +74,10 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 $tpl->assign('passphrase', utils::suggestPassword());
-$tpl->assign('obligatoires', $config->get('champs_obligatoires'));
+$tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
 $tpl->assign('current_cat', utils::post('id_categorie') ?: $membre['id_categorie']);
-
-$tpl->assign('pays', utils::getCountryList());
-$tpl->assign('current_cc', utils::post('pays') ?: $membre['pays']);
 
 $tpl->assign('can_change_id', $user['droits']['membres'] == Membres::DROIT_ADMIN);
 
