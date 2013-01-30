@@ -283,6 +283,30 @@ class Membres
                 if (!is_numeric($data[$key]))
                     throw new UserException('Le champ "' . $config['title'] . '" doit contenir un chiffre.');
             }
+            elseif ($config['type'] == 'select' && !in_array($data[$key], $config['options']))
+            {
+                throw new UserException('Le champ "' . $config['title'] . '" ne correspond pas à un des choix proposés.');
+            }
+            elseif ($config['type'] == 'multiple')
+            {
+                if (empty($data[$key]) || !is_array($data[$key]))
+                {
+                    $data[$key] = 0;
+                    continue;
+                }
+
+                $binary = 0;
+
+                foreach ($data[$key] as $k => $v)
+                {
+                    if (array_key_exists($k, $config['options']) && !empty($v))
+                    {
+                        $binary |= 0x01 << $k;
+                    }
+                }
+
+                $data[$key] = $binary;
+            }
         }
 
         if (!empty($data['code_postal']))
@@ -303,7 +327,7 @@ class Membres
 
     public function add($data = array(), $check_mandatory = true)
     {
-        $this->_checkFields($data);
+        $this->_checkFields($data, $check_mandatory);
         $db = DB::getInstance();
 
         if (!empty($data['email'])

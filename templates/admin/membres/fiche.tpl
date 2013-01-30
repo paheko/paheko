@@ -18,52 +18,45 @@
 <dl class="describe">
     <dt>Numéro d'adhérent</dt>
     <dd>{$membre.id|escape}</dd>
-    <dt>Nom et prénom</dt>
-    <dd><strong>{$membre.nom|escape}</strong></dd>
-    <dt>Adresse</dt>
+    {foreach from=$champs key="c" item="config"}
+    <dt>{$config.title|escape}</dt>
     <dd>
-        {if !empty($membre.adresse) || !empty($membre.code_postal) || !empty($membre.ville) || !empty($membre.pays)}
-            {if !empty($membre.adresse)}
-                {$membre.adresse|escape|nl2br}<br />
-            {/if}
-            {if !empty($membre.code_postal)}
-                {$membre.code_postal|escape}
-            {/if}
-            {if !empty($membre.ville)}
-                {$membre.ville|escape}<br />
-            {/if}
-            ({$membre.pays|get_country_name|escape})
-        {else}
-            <em>(Non renseignée)</em>
-        {/if}
-    </dd>
-    <dt>Téléphone</dt>
-    <dd>
-        {if !empty($membre.telephone)}
-            <a href="tel:{$membre.telephone|escape}">{$membre.telephone|escape|format_tel}</a>
-        {else}
+        {if $config.type == 'checkbox'}
+            {if $membre[$c]}Oui{else}Non{/if}
+        {elseif empty($membre[$c])}
             <em>(Non renseigné)</em>
-        {/if}
-    <dt>Adresse E-Mail</dt>
-    <dd>
-        {if !empty($membre.email)}
-            <a href="mailto:{$membre.email|escape}">{$membre.email|escape}</a>
+        {elseif $c == 'nom'}
+            <strong>{$membre[$c]|escape}</strong>
+        {elseif $c == 'email'}
+            <a href="mailto:{$membre[$c]|escape}">{$membre[$c]|escape}</a>
             | <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
-            {if $membre.lettre_infos}
-                <em>(inscrit-e à la lettre d'informations)</em>
-            {/if}
+        {elseif $config.type == 'email'}
+            <a href="mailto:{$membre[$c]|escape}">{$membre[$c]|escape}</a>
+        {elseif $config.type == 'tel'}
+            <a href="tel:{$membre[$c]|escape}">{$membre[$c]|escape|format_tel}</a>
+        {elseif $config.type == 'country'}
+            {$membre[$c]|get_country_name|escape}
+        {elseif $config.type == 'date' || $config.type == 'datetime'}
+            {$membre[$c]|format_sqlite_date_to_french}
+        {elseif $config.type == 'multiple'}
+            <ul>
+            {foreach from=$config.options key="b" item="name"}
+                {if $membre[$c] & (0x01 << $b)}
+                    <li>{$name|escape}</li>
+                {/if}
+            {/foreach}
+            </ul>
         {else}
-            <em>(Non renseignée)</em>
+            {$membre[$c]|escape|rtrim|nl2br}
         {/if}
     </dd>
+    {/foreach}
     <dt>Catégorie</dt>
     <dd>{$categorie.nom|escape} <span class="droits">{format_droits droits=$categorie}</span></dd>
     <dt>Inscription</dt>
     <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
     <dt>Dernière connexion</dt>
     <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
-    <dt>Mot de passe</dt>
-    <dd>{if empty($membre.passe)}Non{else}Oui{/if}</dd>
     <dt>Cotisation</dt>
     <dd>
     {if empty($membre.date_cotisation)}
@@ -73,8 +66,7 @@
     {else}
         <span class="alert">En retard de {$verif_cotisation|escape} jours</span>
     {/if}
-    </dd>
-    <dd>
+        <br />
         <form method="post" action="{$self_url}">
             <fieldset>
                 <legend>Mettre à jour la cotisation</legend>

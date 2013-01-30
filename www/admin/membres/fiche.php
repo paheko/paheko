@@ -22,6 +22,7 @@ if (!$membre)
     throw new UserException("Ce membre n'existe pas.");
 }
 
+$champs = $config->get('champs_membres');
 $error = false;
 
 if (!empty($_POST['cotisation']))
@@ -67,6 +68,8 @@ else
     $prochaine_cotisation = time();
 }
 $tpl->assign('date_cotisation_defaut', date('Y-m-d', $prochaine_cotisation));
+
+$tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('error', $error);
 $tpl->assign('custom_js', array('datepickr.js'));

@@ -83,6 +83,8 @@ $tpl->assign('can_change_id', $user['droits']['membres'] == Membres::DROIT_ADMIN
 
 $tpl->assign('membre', $membre);
 
+$tpl->assign('custom_js', array('datepickr.js'));
+
 $tpl->display('admin/membres/modifier.tpl');
 
 ?>

@@ -140,6 +140,7 @@ class Champs_Membres
 
 	public function getAll()
 	{
+        $this->champs['passe']['title'] = 'Mot de passe';
 		return $this->champs;
 	}
 

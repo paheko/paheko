@@ -502,6 +502,13 @@ $tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
 $tpl->register_modifier('escape_money', 'Garradin\escape_money');
 $tpl->register_modifier('abs', 'abs');
 
+$tpl->register_modifier('format_sqlite_date_to_french', function ($d) {
+    if (strlen($d) == 10)
+        return \DateTime::createFromFormat('Y-m-d', $d)->format('d/m/Y');
+    else
+        return \DateTime::createFromFormat('Y-m-d H:i:s', $d)->format('d/m/Y H:i');
+});
+
 //$tpl->register_modifier('retard_cotisation', array('Membres', 'checkCotisation'));
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
