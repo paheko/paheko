@@ -505,6 +505,33 @@ $tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
 $tpl->register_modifier('escape_money', 'Garradin\escape_money');
 $tpl->register_modifier('abs', 'abs');
 
+$tpl->register_modifier('display_champ_membre', function ($v, $config) {
+    if ($config['type'] == 'checkbox') {
+        return $v ? 'Oui' : 'Non';
+    } elseif ($config['type'] == 'email') {
+        return '<a href="mailto:' . $v . '">' . $v . '</a>';
+    } elseif ($config['type'] == 'tel') {
+        return '<a href="tel:' . $v . '">' . $v . '</a>';
+    } elseif ($config['type'] == 'url') {
+        return '<a href="' . $v . '">' . $v . '</a>';
+    } elseif ($config['type'] == 'country') {
+        return utils::getCountryName($v);
+    } elseif ($config['type'] == 'multiple') {
+        $out = array();
+
+        foreach ($config['options'] as $b => $name)
+        {
+            if ($v & (0x01 << $b))
+                $out[] = $name;
+        }
+
+        return implode(', ', $out);
+    } else {
+        return $v;
+    }
+
+});
+
 $tpl->register_modifier('format_sqlite_date_to_french', function ($d) {
     if (strlen($d) == 10)
         return \DateTime::createFromFormat('Y-m-d', $d)->format('d/m/Y');
