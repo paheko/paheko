@@ -9,6 +9,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ACCES)
 }
 
 $cats = new Membres_Categories;
+$champs = $config->get('champs_membres');
 
 $membres_cats = $cats->listSimple();
 $membres_cats_cachees = $cats->listHidden();
@@ -25,7 +26,7 @@ else
     $cat_id = (int) $cat;
 }
 
-$order = 'nom';
+$order = $champs->getFirst();
 $desc = false;
 
 if (utils::get('o'))
@@ -37,7 +38,7 @@ if (isset($_GET['d']))
 $tpl->assign('order', $order);
 $tpl->assign('desc', $desc);
 
-$fields = $config->get('champs_membres')->getListedFields();
+$fields = $champs->getListedFields();
 
 $tpl->assign('champs', $fields);
 

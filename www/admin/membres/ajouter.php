@@ -43,7 +43,7 @@ if (!empty($_POST['save']))
                 $data[$key] = utils::post($key);
             }
 
-            $id = $membres->add($data);
+            $id = $membres->add($data, ($user['droits']['membres'] == Membres::DROIT_ADMIN) ? false : true);
 
             utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
