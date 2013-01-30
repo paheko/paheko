@@ -40,7 +40,7 @@ else
 $champs_liste = $champs->getList();
 
 $champs_liste = array_merge(
-    array('id' => array('title' => 'Numéro unique')),
+    array('id' => array('title' => 'Numéro unique', 'type' => 'number')),
     $champs_liste
 );
 

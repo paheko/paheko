@@ -13,7 +13,33 @@
                 </select>
             </dd>
             <dt><label for="f_texte">Recherche</label></dt>
-            <dd><input id="f_texte" type="text" name="r" value="{$recherche|escape}" /></dd>
+            <dd id="f_free"><input id="f_texte" type="text" name="r" value="{$recherche|escape}" /></dd>
+            {foreach from=$champs_liste key="k" item="v"}
+                {if $v.type == 'select'}
+                    <dd class="special" id="f_{$k|escape}">
+                        <select name="r" disabled="disabled">
+                            {foreach from=$v.options item="opt"}
+                            <option value="{$opt|escape}"{form_field name="r" default=$recherche selected=$opt}>{$opt|escape}</option>
+                            {/foreach}
+                        </select>
+                    </dd>
+                {elseif $v.type == 'multiple'}
+                    <dd class="special" id="f_{$k|escape}">
+                        <select name="r" disabled="disabled">
+                            {foreach from=$v.options key="opt_k" item="opt"}
+                            <option value="{$opt_k|escape}"{form_field name="r" default=$recherche selected=$opt_k}>{$opt|escape}</option>
+                            {/foreach}
+                        </select>
+                    </dd>
+                {elseif $v.type == 'checkbox'}
+                    <dd class="special" id="f_{$k|escape}">
+                        <select name="r" disabled="disabled">
+                            <option value="1"{form_field name="r" default=$recherche selected=1}>Oui</option>
+                            <option value="0"{form_field name="r" default=$recherche selected=0}>Non</option>
+                        </select>
+                    </dd>
+                {/if}
+            {/foreach}
         </dl>
         <p class="submit">
             <input type="submit" value="Chercher &rarr;" />
@@ -137,9 +163,46 @@
     </table>
     {else}
     <p class="info">
-        Aucune membre trouvé.
+        Aucun membre trouvé.
     </p>
     {/if}
 {/if}
+
+<script type="text/javascript">
+{literal}
+(function() {
+    var current = false;
+
+    var selectField = function(elm)
+    {
+        if (current)
+        {
+            document.getElementById('f_' + current).style.display = 'none';
+            document.getElementById('f_' + current).querySelector('select').disabled = true;
+            current = false;
+        }
+        
+        if (document.getElementById('f_' + elm.value))
+        {
+            document.getElementById('f_' + elm.value).style.display = 'block';
+            document.getElementById('f_' + elm.value).querySelector('select').disabled = false;
+            document.getElementById('f_free').style.display = 'none';
+            document.getElementById('f_texte').disabled = true;
+            current = elm.value;
+        }
+        else
+        {
+            document.getElementById('f_texte').disabled = false;
+            document.getElementById('f_free').style.display = 'block';
+        }
+
+        return true;
+    }
+
+    document.getElementById('f_champ').onchange = function() { selectField(this); };
+    window.onload = selectField(document.getElementById('f_champ'));
+}())
+{/literal}
+</script>
 
 {include file="admin/_foot.tpl"}

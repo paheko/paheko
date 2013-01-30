@@ -529,6 +529,10 @@ table.list .actions {
     font-size: 80%;
 }
 
+.searchMember .special {
+    display: none;
+}
+
 .filterCategory p.submit {
     margin-top: -2em;
     float: right;
