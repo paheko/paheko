@@ -9,6 +9,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
 }
 
 $cats = new Membres_Categories;
+$champs = $config->get('champs_membres');
 
 $error = false;
 
@@ -35,20 +36,14 @@ if (!empty($_POST['save']))
                 $id_categorie = $config->get('categorie_membres');
             }
 
-            $id = $membres->add(array(
-                'id_categorie'  =>  $id_categorie,
-                'nom'           =>  utils::post('nom'),
-                'email'         =>  utils::post('email'),
-                'passe'         =>  utils::post('passe'),
-                'telephone'     =>  utils::post('telephone'),
-                'code_postal'   =>  utils::post('code_postal'),
-                'adresse'       =>  utils::post('adresse'),
-                'ville'         =>  utils::post('ville'),
-                'pays'          =>  utils::post('pays'),
-                'date_naissance'=>  utils::post('date_naissance'),
-                'notes'         =>  '',
-                'lettre_infos'  =>  utils::post('lettre_infos'),
-            ));
+            $data = array('id_categorie' => $id_categorie);
+
+            foreach ($champs->getAll() as $key=>$config)
+            {
+                $data[$key] = utils::post($key);
+            }
+
+            $id = $membres->add($data);
 
             utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
@@ -61,7 +56,7 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 $tpl->assign('passphrase', utils::suggestPassword());
-$tpl->assign('champs', $config->get('champs_membres')->getAll());
+$tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
 $tpl->assign('current_cat', utils::post('id_categorie') ?: $config->get('categorie_membres'));

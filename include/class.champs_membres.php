@@ -12,7 +12,7 @@ class Champs_Membres
 		'checkbox'	=>	'Case à cocher',
 		'date'		=>	'Date',
 		'datetime'	=>	'Date et heure',
-		'file'		=>	'Fichier',
+		//'file'		=>	'Fichier',
         'password'  =>  'Mot de passe',
 		'number'	=>	'Numéro',
 		'tel'		=>	'Numéro de téléphone',
@@ -351,7 +351,7 @@ class Champs_Membres
     		'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
-            'date_inscription TEXT NULL, -- Date d\'inscription',
+            'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d\'inscription',
             'date_cotisation TEXT NULL, -- Date de cotisation',
             //'exemption_transaction INTEGER NOT NULL DEFAULT 0, -- Exempté de transaction obligatoire',
     	);

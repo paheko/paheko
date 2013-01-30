@@ -241,27 +241,45 @@ class Membres
 
     public function _checkFields(&$data, $check_mandatory = true)
     {
-        if (isset($data['nom']) && !trim($data['nom']))
-        {
-            throw new UserException('Le champ prénom et nom ne peut rester vide.');
-        }
+        $champs = Config::getInstance()->get('champs_membres');
 
-        if ($check_mandatory)
+        foreach ($champs->getAll() as $key=>$config)
         {
-            $mandatory = Config::getInstance()->get('champs_obligatoires');
-
-            foreach ($mandatory as $field)
+            if (!empty($config['mandatory']) && $check_mandatory && (!isset($data[$key]) || !trim($data[$key])))
             {
-                if (array_key_exists($field, $data) && !trim($data[$field]))
-                {
-                    throw new UserException('Le champ \''.$field.'\' ne peut rester vide.');
-                }
+                throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
             }
-        }
 
-        if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL))
-        {
-            throw new UserException('Adresse e-mail invalide.');
+            if ($config['type'] == 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
+            {
+                throw new UserException('Adresse e-mail invalide dans le champ "' . $config['title'] . '".');
+            }
+            elseif ($config['type'] == 'url' && !filter_var($data[$key], FILTER_VALIDATE_URL))
+            {
+                throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
+            }
+            elseif ($config['type'] == 'tel')
+            {
+                $data[$key] = preg_replace('![^\d\+]!', '', $data[$key]);
+            }
+            elseif ($config['type'] == 'country')
+            {
+                $data[$key] = strtoupper(substr($data[$key], 0, 2));
+            }
+            elseif ($config['type'] == 'checkbox')
+            {
+                $data[$key] = empty($data[$key]) ? 0 : 1;
+            }
+            elseif ($config['type'] == 'number')
+            {
+                if (empty($data[$key]))
+                {
+                    $data[$key] = 0;
+                }
+
+                if (!is_numeric($data[$key]))
+                    throw new UserException('Le champ "' . $config['title'] . '" doit contenir un chiffre.');
+            }
         }
 
         if (!empty($data['code_postal']))
@@ -277,20 +295,10 @@ class Membres
             throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
         }
 
-        if (!empty($data['telephone']))
-        {
-            $data['telephone'] = preg_replace('![^\d\+]!', '', $data['telephone']);
-        }
-
-        if (isset($data['lettre_infos']))
-        {
-            $data['lettre_infos'] = (int) (bool) $data['lettre_infos'];
-        }
-
         return true;
     }
 
-    public function add($data = array())
+    public function add($data = array(), $check_mandatory = true)
     {
         $this->_checkFields($data);
         $db = DB::getInstance();
@@ -347,10 +355,11 @@ class Membres
             // la requête de modification provoquera une erreur de contrainte de foreign key
             // ce qui est normal. Donc : il n'est pas possible de changer l'ID d'un membre qui
             // a participé au wiki, à la compta, etc.
-            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id))
+            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', false, (int)$id))
             #|| $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
             {
-                throw new UserException('Le numéro n\'est pas modifiable pour ce membre, en effet des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
+                throw new UserException('Le numéro n\'est pas modifiable pour ce membre car des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
             }
         }
 
@@ -374,7 +383,10 @@ class Membres
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
+        return $db->simpleQuerySingle('SELECT *,
+            strftime(\'%s\', date_cotisation) AS date_cotisation,
+            strftime(\'%s\', date_inscription) AS date_inscription
+            FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 
     public function delete($ids)
