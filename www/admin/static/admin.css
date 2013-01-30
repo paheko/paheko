@@ -914,7 +914,11 @@ dl.describe > dt {
 
 dl.describe > dd {
     margin-bottom: .5em;
-    margin-left: 15em;
+    float: left;
+}
+
+dl.describe ul {
+    margin-left: 1em;
 }
 
 .infos_asso {

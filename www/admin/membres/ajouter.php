@@ -61,6 +61,8 @@ $tpl->assign('champs', $champs->getAll());
 $tpl->assign('membres_cats', $cats->listSimple());
 $tpl->assign('current_cat', utils::post('id_categorie') ?: $config->get('categorie_membres'));
 
+$tpl->assign('custom_js', array('datepickr.js'));
+
 $tpl->display('admin/membres/ajouter.tpl');
 
 ?>
