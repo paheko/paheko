@@ -73,7 +73,7 @@
                     <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></th>
                     {foreach from=$champs_entete key="c" item="cfg"}
                         {if $champ == $c}
-                            <th><strong>{$membre[$c]|escape}</strong></th>
+                            <th><strong>{$membre[$c]|escape|display_champ_membre:$cfg}</strong></th>
                         {else}
                             <td>{$membre[$c]|escape}</td>
                         {/if}

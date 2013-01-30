@@ -59,8 +59,8 @@
                 <tr>
                     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id|escape}" /></td>{/if}
                     <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></th>
-                    {foreach from=$champs key="c" item="champ"}
-                        <td>{$membre[$c]|escape}</td>
+                    {foreach from=$champs key="c" item="cfg"}
+                        <td>{$membre[$c]|escape|display_champ_membre:$cfg}</td>
                     {/foreach}
                     {if empty($membre.date_cotisation)}
                         <td class="error">jamais réglée</td>

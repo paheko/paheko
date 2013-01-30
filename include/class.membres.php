@@ -504,7 +504,7 @@ class Membres
                 strftime(\'%s\', date_cotisation) AS date_cotisation,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres ' . $where . ($order ? ' ORDER BY ' . $order : '') . '
-                LIMIT 100;',
+                LIMIT 1000;',
             SQLITE3_ASSOC
         );
     }
