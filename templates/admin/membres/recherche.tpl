@@ -7,7 +7,7 @@
             <dt><label for="f_champ">Champ</label></dt>
             <dd>
                 <select name="c" id="f_champ">
-                    {foreach from=$champs key="k" item="v"}
+                    {foreach from=$champs_liste key="k" item="v"}
                     <option value="{$k|escape}"{form_field name="c" default=$champ selected=$k}>{$v.title|escape}</option>
                     {/foreach}
                 </select>
@@ -26,11 +26,17 @@
     <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
     {if !empty($liste)}
-    <table class="list">
+    <table class="list search">
         <thead>
             {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
             <td></td>
-            <td>{$titre_champ|escape}</td>
+            {foreach from=$champs_entete key="c" item="cfg"}
+                {if $champ == $c}
+                    <th><strong>{$cfg.title|escape}</strong></th>
+                {else}
+                    <td>{$cfg.title|escape}</td>
+                {/if}
+            {/foreach}
             <td>Cotisation</td>
             <td></td>
         </thead>
@@ -39,7 +45,13 @@
                 <tr>
                     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id|escape}" /></td>{/if}
                     <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></th>
-                    <td>{$membre[$champ]|escape}</td>
+                    {foreach from=$champs_entete key="c" item="cfg"}
+                        {if $champ == $c}
+                            <th><strong>{$membre[$c]|escape}</strong></th>
+                        {else}
+                            <td>{$membre[$c]|escape}</td>
+                        {/if}
+                    {/foreach}
                     {if empty($membre.date_cotisation)}
                         <td class="error">jamais réglée</td>
                     {elseif $membre.date_cotisation > strtotime('12 months ago')}

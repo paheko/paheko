@@ -343,6 +343,9 @@ table.list .check {
     width: 1%;
 }
 
+table.search th {
+    background: rgba(217, 134, 40, 0.5);
+}
 
 table.list thead .cur {
     background: rgb(217, 134, 40);

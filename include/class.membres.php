@@ -430,9 +430,9 @@ class Membres
         $db = DB::getInstance();
         $champs = Config::getInstance()->get('champs_membres');
 
-        if (!$champs->get($field))
+        if ($field != 'id' && !$champs->get($field))
         {
-            throw new \UnexpectedValue($field . ' is not a valid field');
+            throw new \UnexpectedValueException($field . ' is not a valid field');
         }
 
         if (!$champs->isText($field))
@@ -446,8 +446,15 @@ class Membres
             $order = 'transliterate_to_ascii('.$field.') COLLATE NOCASE';
         }
 
+        $fields = array_keys($champs->getListedFields());
+
+        if (!in_array($field, $fields))
+        {
+            $fields[] = $field;
+        }
+
         return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, nom, email, code_postal, ville,
+            'SELECT id, id_categorie, ' . implode(', ', $fields) . ',
                 strftime(\'%s\', date_cotisation) AS date_cotisation,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres '.$where.'
