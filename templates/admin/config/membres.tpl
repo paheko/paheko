@@ -93,6 +93,7 @@
         <legend>Ajouter un champ pré-défini</legend>
         <p>
             <select name="preset">
+                <option></option>
                 {foreach from=$presets key="name" item="preset"}
                 <option value="{$name|escape}">{$name|escape} &mdash; {$preset.title|escape}</option>
                 {/foreach}
@@ -148,17 +149,17 @@
                         <dd class="help">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà
                             été enregistré dans les fiches des membres.</dd>
                     {/if}
-                    {if !empty($champ.options)}
-                        {foreach from=$champ.options key="key" item="opt"}
-                            <dd>{if $champ.type == 'multiple'}{math a=$key equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$key|escape}]" value="{$opt|escape}" size="50" /></dd>
-                        {/foreach}
-                        {assign var="more" value=$champ.options|@count}
-                    {else}
-                        {assign var="more" value=0}
-                    {/if}
-                    {if $champ.type == 'select' || $more < 32}
-                        <dd>{if $champ.type == 'multiple'}{math a=$more equation="a+1"}. {/if}<input type="text" name="champs[{$nom|escape}][options][{$more|escape}]" value="" size="50" /></dd>
-                    {/if}
+                    <dd>
+                        <{if $champ.type == 'multiple'}ol{else}ul{/if} class="options">
+                        {if !empty($champ.options)}
+                            {foreach from=$champ.options key="key" item="opt"}
+                                <li><input type="text" name="champs[{$nom|escape}][options][]" value="{$opt|escape}" size="50" /></li>
+                            {/foreach}
+                        {/if}
+                        {if $champ.type == 'select' || empty($champ.options) || count($champ.options) < 32}
+                            <li><input type="text" name="champs[{$nom|escape}][options][]" value="" size="50" /></li>
+                        {/if}
+                    </dd>
                 {/if}
                 <dt><label for="f_list_row">Numéro de colonne dans la liste des membres</label></dt>
                 <dd class="help">Laisser vide ou indiquer le chiffre zéro pour que ce champ n'apparaisse pas dans la liste des membres. Inscrire un chiffre entre 1 et 10 pour indiquer l'ordre d'affichage du champ dans le tableau de la liste des membres.</dd>
@@ -289,6 +290,57 @@
             return false;
         };
         actions.appendChild(edit);
+
+        if (field.querySelector('.options'))
+        {
+            var options = field.querySelectorAll('.options li');
+            var options_nb = options.length;
+
+            if (options[0].parentNode.tagName.toLowerCase() == 'ul')
+            {
+                // champ select
+                for (j = 0; j < options_nb; j++)
+                {
+                    var remove = document.createElement('input');
+                    remove.type = 'button';
+                    remove.className = 'icn';
+                    remove.value = '-';
+                    remove.title = 'Enlever cette option';
+                    remove.onclick = function (e) {
+                        var p = this.parentNode;
+                        p.parentNode.removeChild(p);
+                    };
+                    options[j].appendChild(remove);
+                }
+            }
+
+            var add = document.createElement('input');
+            add.type = 'button';
+            add.className = 'icn add';
+            add.value = '+';
+            add.title = 'Ajouter une option';
+            add.onclick = function (e) {
+                var p = this.parentNode.parentNode;
+                var options = p.querySelectorAll('li');
+                var new_option = this.parentNode.cloneNode(true);
+                var btn = new_option.querySelector('input.add');
+                new_option.getElementsByTagName('input')[0].value = '';
+
+                if (options.length >= 30)
+                {
+                    new_option.removeChild(btn);
+                }
+                else
+                {
+                    btn.onclick = this.onclick;
+                }
+
+                p.appendChild(new_option);
+                this.parentNode.removeChild(this);
+            };
+
+            options[options_nb - 1].appendChild(add);
+        }
     }
 }());
 {/literal}

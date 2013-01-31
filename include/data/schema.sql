@@ -15,59 +15,21 @@ CREATE TABLE membres_categories
     id INTEGER PRIMARY KEY,
     nom TEXT,
     description TEXT,
-
+    montant_cotisation REAL,
+    duree_cotisation INTEGER DEFAULT 12, -- En mois
     droit_wiki INT DEFAULT 1,
     droit_membres INT DEFAULT 1,
     droit_compta INT DEFAULT 1,
     droit_inscription INT DEFAULT 0,
     droit_connexion INT DEFAULT 1,
     droit_config INT DEFAULT 0,
-    cacher INT DEFAULT 0,
-
-    id_transaction_obligatoire INTEGER NULL,
-
-    FOREIGN KEY (id_transaction_obligatoire) REFERENCES transactions (id)
+    cacher INT DEFAULT 0
 );
 
 
 -- Membres de l'asso
--- Voir class.champs_membres.php
-
--- Paiements possibles
-CREATE TABLE transactions
-(
-    id INTEGER PRIMARY KEY,
-    id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
-
-    intitule TEXT NOT NULL,
-    description TEXT NOT NULL,
-    montant REAL NOT NULL,
-
-    duree INTEGER NULL,
-    debut TEXT NULL,
-    fin TEXT NULL,
-
-    rappel_expiration INTEGER NULL DEFAULT 0, -- 1 si envoi de rappel avant expiration
-
-    FOREIGN KEY (id_categorie_compta) REFERENCES compta_categories (id)
-);
-
--- Paiements enregistrés
-CREATE TABLE membres_transactions
-(
-    id_membre INTEGER NOT NULL,
-    id_transaction INTEGER NOT NULL,
-    id_operation INTEGER NULL,
-
-    libelle TEXT NULL,
-
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    montant REAL NOT NULL,
-
-    FOREIGN KEY (id_membre) REFERENCES membres (id),
-    FOREIGN KEY (id_transaction) REFERENCES transactions (id),
-    FOREIGN KEY (id_operation) REFERENCES compta_journal (id)
-);
+-- Table dynamique générée par l'application
+-- voir class.champs_membres.php
 
 --
 -- WIKI

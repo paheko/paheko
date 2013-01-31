@@ -39,8 +39,6 @@ class Template extends \Template_Lite
 
 $tpl = Template::getInstance();
 
-$tpl->assign('config', Config::getInstance()->getConfig());
-
 function tpl_csrf_field($params)
 {
     $name = utils::CSRF_field_name($params['key']);
@@ -434,7 +432,7 @@ function tpl_html_champ_membre($params)
             $b = 0x01 << (int)$k;
             $field .= '<label><input type="checkbox" name="' 
                 . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '[' . (int)$k . ']" value="1" '
-                . (($value & $b) ? 'checked="checked"' : '') . ' /> ' 
+                . (($value & $b) ? 'checked="checked"' : '') . ' ' . $attributes . '/> ' 
                 . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</label><br />';
         }
     }

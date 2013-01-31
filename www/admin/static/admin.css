@@ -158,6 +158,10 @@ fieldset dl dd {
     padding: 0.2em 0.5em 0.2em 1em;
 }
 
+fieldset dl dd ol, fieldset dl dd ul {
+    margin-left: 1.5em;
+}
+
 input[type=text], textarea, input[type=password], input[type=email],
 input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
@@ -183,6 +187,13 @@ input[type=number], input[type=date] {
 input[type=submit], input[type=button] {
     padding: 0.3em;
     cursor: pointer;
+}
+
+input[type=button].icn {
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 0 0.3em;
+    font-family: "Courier New", Courier, monospace;
 }
 
 select.large {

@@ -93,6 +93,11 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                         'mandatory' =>  false,
                     );
 
+                    if ($config['type'] == 'select' || $config['type'] == 'multiple')
+                    {
+                        $config['options'] = array('Première option');
+                    }
+
                     $champs->add($new, $config);
                 }
 
