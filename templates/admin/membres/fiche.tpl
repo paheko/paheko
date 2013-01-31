@@ -38,6 +38,10 @@
             {$membre[$c]|get_country_name|escape}
         {elseif $config.type == 'date' || $config.type == 'datetime'}
             {$membre[$c]|format_sqlite_date_to_french}
+        {elseif $c == 'passe'}
+            Oui
+        {elseif $config.type == 'password'}
+            *******
         {elseif $config.type == 'multiple'}
             <ul>
             {foreach from=$config.options key="b" item="name"}

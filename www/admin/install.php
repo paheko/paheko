@@ -70,6 +70,13 @@ else
         else
         {
             try {
+                $db = DB::getInstance(true);
+
+                // Création de la base de données
+                $db->exec('BEGIN;');
+                $db->exec(file_get_contents(GARRADIN_DB_SCHEMA));
+                $db->exec('END;');
+
                 // Configuration de base
                 $config = Config::getInstance();
                 $config->set('nom_asso', utils::post('nom_asso'));
@@ -81,10 +88,8 @@ else
                 $config->set('email_envoi_automatique', utils::post('email_asso'));
                 $config->setVersion(garradin_version());
 
-                $champs = Champs_Membres::import();
+                $champs = Champs_Membres::importInstall();
                 $champs->save(false); // Pas de copie car pas de table membres existante
-
-                $config->set('champs_membres', $champs);
 
                 // Création catégories
                 $cats = new Membres_Categories;

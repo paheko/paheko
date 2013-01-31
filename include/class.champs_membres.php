@@ -245,7 +245,12 @@ class Champs_Membres
 
         if ($name == 'passe' && $config['type'] != 'password')
         {
-            throw new UserException('Le champ mot de passe ne peut être d\'un type différent de email.');
+            throw new UserException('Le champ mot de passe ne peut être d\'un type différent de mot de passe.');
+        }
+
+        if (($config['type'] == 'multiple' || $config['type'] == 'select') && empty($config['options']))
+        {
+            throw new UserException('Le champ "'.$name.'" nécessite de comporter au moins une option possible.');
         }
 
         if (!array_key_exists('editable', $config))
@@ -339,10 +344,10 @@ class Champs_Membres
 
     /**
      * Enregistre les changements de champs en base de données
-     * @param  boolean $copy Recopier les anciennes champs dans les nouveaux ?
+     * @param  boolean $enable_copy Recopier les anciennes champs dans les nouveaux ?
      * @return boolean true
      */
-    public function save($copy = true)
+    public function save($enable_copy = true)
     {
     	$db = DB::getInstance();
     	$config = Config::getInstance();
@@ -409,11 +414,11 @@ class Champs_Membres
     	$db->exec('BEGIN;');
     	$db->exec($create);
     	
-    	if ($copy) {
+    	if ($enable_copy) {
     		$db->exec($copy);
     	}
     	
-    	$db->exec('DROP TABLE membres;');
+        $db->exec('DROP TABLE IF EXISTS membres;');
     	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
         $db->exec('CREATE INDEX membres_id_categorie ON membres (id_categorie);'); // Index
     	$db->exec('END;');

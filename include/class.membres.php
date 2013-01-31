@@ -65,7 +65,7 @@ class Membres
             return false;
 
         $db = DB::getInstance();
-        $r = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
+        $r = $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
 
         if (empty($r))
             return false;
@@ -245,67 +245,74 @@ class Membres
 
         foreach ($champs->getAll() as $key=>$config)
         {
-            if (!empty($config['mandatory']) && (!isset($data[$key]) || !trim($data[$key])))
+            if (!isset($data[$key]) || empty($data[$key]) || (!is_array($data[$key]) && !trim($data[$key])))
             {
-                if ($check_mandatory)
+                if (!empty($config['mandatory']) && $check_mandatory)
+                {
                     throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
-                else
-                    continue;
-            }
-
-            if ($config['type'] == 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
-            {
-                throw new UserException('Adresse e-mail invalide dans le champ "' . $config['title'] . '".');
-            }
-            elseif ($config['type'] == 'url' && !filter_var($data[$key], FILTER_VALIDATE_URL))
-            {
-                throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
-            }
-            elseif ($config['type'] == 'tel')
-            {
-                $data[$key] = preg_replace('![^\d\+]!', '', $data[$key]);
-            }
-            elseif ($config['type'] == 'country')
-            {
-                $data[$key] = strtoupper(substr($data[$key], 0, 2));
-            }
-            elseif ($config['type'] == 'checkbox')
-            {
-                $data[$key] = empty($data[$key]) ? 0 : 1;
-            }
-            elseif ($config['type'] == 'number')
-            {
-                if (empty($data[$key]))
-                {
-                    $data[$key] = 0;
                 }
-
-                if (!is_numeric($data[$key]))
-                    throw new UserException('Le champ "' . $config['title'] . '" doit contenir un chiffre.');
-            }
-            elseif ($config['type'] == 'select' && !in_array($data[$key], $config['options']))
-            {
-                throw new UserException('Le champ "' . $config['title'] . '" ne correspond pas à un des choix proposés.');
-            }
-            elseif ($config['type'] == 'multiple')
-            {
-                if (empty($data[$key]) || !is_array($data[$key]))
+                elseif (!empty($config['mandatory']))
                 {
-                    $data[$key] = 0;
                     continue;
                 }
+            }
 
-                $binary = 0;
-
-                foreach ($data[$key] as $k => $v)
+            if (isset($data[$key]))
+            {
+                if ($config['type'] == 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
                 {
-                    if (array_key_exists($k, $config['options']) && !empty($v))
+                    throw new UserException('Adresse e-mail invalide dans le champ "' . $config['title'] . '".');
+                }
+                elseif ($config['type'] == 'url' && !filter_var($data[$key], FILTER_VALIDATE_URL))
+                {
+                    throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
+                }
+                elseif ($config['type'] == 'tel')
+                {
+                    $data[$key] = preg_replace('![^\d\+]!', '', $data[$key]);
+                }
+                elseif ($config['type'] == 'country')
+                {
+                    $data[$key] = strtoupper(substr($data[$key], 0, 2));
+                }
+                elseif ($config['type'] == 'checkbox')
+                {
+                    $data[$key] = empty($data[$key]) ? 0 : 1;
+                }
+                elseif ($config['type'] == 'number')
+                {
+                    if (empty($data[$key]))
                     {
-                        $binary |= 0x01 << $k;
+                        $data[$key] = 0;
                     }
-                }
 
-                $data[$key] = $binary;
+                    if (!is_numeric($data[$key]))
+                        throw new UserException('Le champ "' . $config['title'] . '" doit contenir un chiffre.');
+                }
+                elseif ($config['type'] == 'select' && !in_array($data[$key], $config['options']))
+                {
+                    throw new UserException('Le champ "' . $config['title'] . '" ne correspond pas à un des choix proposés.');
+                }
+                elseif ($config['type'] == 'multiple')
+                {
+                    if (empty($data[$key]) || !is_array($data[$key]))
+                    {
+                        $data[$key] = 0;
+                        continue;
+                    }
+
+                    $binary = 0;
+
+                    foreach ($data[$key] as $k => $v)
+                    {
+                        if (array_key_exists($k, $config['options']) && !empty($v))
+                        {
+                            $binary |= 0x01 << $k;
+                        }
+                    }
+
+                    $data[$key] = $binary;
+                }
             }
         }
 
@@ -412,7 +419,8 @@ class Membres
         $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT *,
             strftime(\'%s\', date_cotisation) AS date_cotisation,
-            strftime(\'%s\', date_inscription) AS date_inscription
+            strftime(\'%s\', date_inscription) AS date_inscription,
+            strftime(\'%s\', date_connexion) AS date_connexion
             FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
     }
 

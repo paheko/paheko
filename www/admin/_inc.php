@@ -16,6 +16,7 @@ if (!defined('GARRADIN_LOGIN_PROCESS'))
         utils::redirect('/admin/login.php');
     }
 
+    $tpl->assign('config', Config::getInstance()->getConfig());
     $tpl->assign('is_logged', true);
     $tpl->assign('user', $membres->getLoggedUser());
     $user = $membres->getLoggedUser();

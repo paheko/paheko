@@ -37,30 +37,28 @@ class DB extends \SQLite3
 
     protected $_running_sum = 0.0;
 
-    static public function getInstance()
+    static public function getInstance($create = false)
     {
-        return self::$_instance ?: self::$_instance = new DB;
+        return self::$_instance ?: self::$_instance = new DB($create);
     }
 
     private function __clone()
     {
     }
 
-    public function __construct()
+    public function __construct($create = false)
     {
-        $exists = file_exists(GARRADIN_DB_FILE) ? true : false;
+        $flags = SQLITE3_OPEN_READWRITE;
 
-        parent::__construct(GARRADIN_DB_FILE, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
+        if ($create)
+        {
+            $flags |= SQLITE3_OPEN_CREATE;
+        }
+
+        parent::__construct(GARRADIN_DB_FILE, $flags);
 
         // Activer les contraintes des foreign keys
         $this->exec('PRAGMA foreign_keys = ON;');
-
-        if (!$exists)
-        {
-            $this->exec('BEGIN;');
-            $this->exec(file_get_contents(GARRADIN_DB_SCHEMA));
-            $this->exec('END;');
-        }
 
         $this->createFunction('transliterate_to_ascii', array('Garradin\utils', 'transliterateToAscii'));
         $this->createFunction('base64', 'base64_encode');
