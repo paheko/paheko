@@ -57,7 +57,11 @@ if (!array_key_exists($champ, $champs_entete))
 $tpl->assign('champs_entete', $champs_entete);
 $tpl->assign('champs_liste', $champs_liste);
 $tpl->assign('champ', $champ);
-$tpl->assign('liste', $membres->search($champ, $recherche));
+
+if ($recherche != '')
+{
+    $tpl->assign('liste', $membres->search($champ, $recherche));
+}
 
 $tpl->assign('recherche', $recherche);
 

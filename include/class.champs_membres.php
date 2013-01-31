@@ -220,7 +220,7 @@ class Champs_Membres
 
                 foreach ($value as $option_key=>$option_value)
                 {
-                    if (!trim($option_value))
+                    if (trim($option_value) == '')
                     {
                         unset($value[$option_key]);
                     }
