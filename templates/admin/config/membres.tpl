@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Configuration — Fiche membres" current="config"}
 
-<ul class="actions">
-    <li><a href="{$www_url}admin/config/">Général</a></li>
-    <li class="current"><a href="{$www_url}admin/config/membres.php">Fiche des membres</a></li>
-    <li><a href="{$www_url}admin/config/site.php">Site public</a></li>
-</ul>
+{include file="admin/config/_menu.tpl" current="membres"}
 
 {if $error}
     {if $error == 'OK'}

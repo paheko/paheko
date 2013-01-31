@@ -1,12 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
-
-if ($user['droits']['config'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+require_once __DIR__ . '/_inc.php';
 
 $error = false;
 
@@ -125,12 +120,6 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
     }
 }
 
-function tpl_get_type($type)
-{
-    global $types;
-    return $types[$type];
-}
-
 $tpl->assign('error', $error);
 $tpl->assign('review', isset($_GET['review']) ? true : false);
 
@@ -141,7 +130,9 @@ $tpl->assign('types', $types);
 $tpl->assign('presets', Champs_Membres::listUnusedPresets($champs));
 $tpl->assign('new', utils::post('new'));
 
-$tpl->register_modifier('get_type', 'Garradin\tpl_get_type');
+$tpl->register_modifier('get_type', function ($type) use ($types) {
+    return $types[$type];
+});
 $tpl->display('admin/config/membres.tpl');
 
 ?>

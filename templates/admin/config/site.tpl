@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration" current="config"}
+{include file="admin/_head.tpl" title="Configuration — Site public" current="config"}
 
 {if $error && $error != 'OK'}
     <p class="error">
@@ -6,11 +6,7 @@
     </p>
 {/if}
 
-<ul class="actions">
-    <li><a href="{$www_url}admin/config/">Général</a></li>
-    <li><a href="{$www_url}admin/config/membres.php">Membres</a></li>
-    <li class="current"><a href="{$www_url}admin/config/site.php">Site public</a></li>
-</ul>
+{include file="admin/config/_menu.tpl" current="site"}
 
 {if isset($edit)}
     <form method="post" action="{$self_url|escape}">
