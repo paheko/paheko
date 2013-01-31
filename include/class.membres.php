@@ -245,7 +245,7 @@ class Membres
 
         foreach ($champs->getAll() as $key=>$config)
         {
-            if (!isset($data[$key]) || empty($data[$key]) || (!is_array($data[$key]) && !trim($data[$key])))
+            if (!isset($data[$key]) || empty($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) == ''))
             {
                 if (!empty($config['mandatory']) && $check_mandatory)
                 {
@@ -343,7 +343,7 @@ class Membres
             throw new UserException('Cette adresse e-mail est déjà utilisée par un autre membre, il faut en choisir une autre.');
         }
 
-        if (!empty($data['passe']) && trim($data['passe']))
+        if (isset($data['passe']) && trim($data['passe']) != '')
         {
             $data['passe'] = $this->_hashPassword($data['passe']);
         }

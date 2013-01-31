@@ -75,7 +75,7 @@
                         {if $champ == $c}
                             <th><strong>{$membre[$c]|escape|display_champ_membre:$cfg}</strong></th>
                         {else}
-                            <td>{$membre[$c]|escape}</td>
+                            <td>{$membre[$c]|escape|display_champ_membre:$cfg}</td>
                         {/if}
                     {/foreach}
                     {if empty($membre.date_cotisation)}
@@ -106,7 +106,7 @@
     </p>
     {/if}
 
-    {else}
+    {elseif $recherche != ''}
     <p class="alert">
         Aucun membre trouvé.
     </p>
