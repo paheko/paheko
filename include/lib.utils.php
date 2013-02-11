@@ -571,6 +571,26 @@ class utils
         return $out;
     }
 
+    static public function getMaxUploadSize()
+    {
+        return min(array(
+            self::return_bytes(ini_get('upload_max_filesize')),
+            self::return_bytes(ini_get('post_max_size')),
+            self::return_bytes(ini_get('memory_limit'))
+        ));
+    }
+
+
+    static public function return_bytes ($size_str)
+    {
+        switch (substr($size_str, -1))
+        {
+            case 'G': case 'g': return (int)$size_str * pow(1024, 3);
+            case 'M': case 'm': return (int)$size_str * pow(1024, 2);
+            case 'K': case 'k': return (int)$size_str * 1024;
+            default: return $size_str;
+        }
+    }
 }
 
 ?>

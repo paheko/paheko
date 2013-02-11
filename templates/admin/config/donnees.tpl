@@ -106,7 +106,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url|escape}" enctype="multipart/form-data">
 
 <fieldset>
     <legend><label for="f_file">Restaurer depuis un fichier</label></legend>
@@ -120,8 +120,10 @@
     </p>
     <p>
         {csrf_field key="backup_restore"}
+        <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size|escape}" />
         <input type="file" name="file" id="f_file" />
-        <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné" />
+        (maximum {$max_file_size|format_bytes})
+        <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />
     </p>
 </fieldset>
 

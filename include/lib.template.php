@@ -537,6 +537,15 @@ $tpl->register_modifier('format_sqlite_date_to_french', function ($d) {
         return \DateTime::createFromFormat('Y-m-d H:i:s', $d)->format('d/m/Y H:i');
 });
 
+$tpl->register_modifier('format_bytes', function ($size) {
+    if ($size > (1024 * 1024))
+        return round($size / 1024 / 1024, 2) . ' Mo';
+    elseif ($size > 1024)
+        return round($size / 1024, 2) . ' Ko';
+    else
+        return $size . ' ob_get_contents(oid)';
+});
+
 //$tpl->register_modifier('retard_cotisation', array('Membres', 'checkCotisation'));
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
