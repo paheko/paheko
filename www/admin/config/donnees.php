@@ -14,11 +14,15 @@ if (utils::post('config'))
     }
     else
     {
-        $config->set('frequence_sauvegardes', utils::post('frequence_sauvegardes'));
-        $config->set('nombre_sauvegardes', utils::post('nombre_sauvegardes'));
-        $config->save();
+        try {
+            $config->set('frequence_sauvegardes', utils::post('frequence_sauvegardes'));
+            $config->set('nombre_sauvegardes', utils::post('nombre_sauvegardes'));
+            $config->save();
 
-        utils::redirect('/admin/config/donnees.php?ok=config');
+            utils::redirect('/admin/config/donnees.php?ok=config');
+        } catch (UserException $e) {
+            $error = $e->getMessage();
+        }
     }
 }
 elseif (utils::post('create'))
@@ -29,8 +33,12 @@ elseif (utils::post('create'))
     }
     else
     {
-        $s->create();
-        utils::redirect('/admin/config/donnees.php?ok=create');
+        try {
+            $s->create();
+            utils::redirect('/admin/config/donnees.php?ok=create');
+        } catch (UserException $e) {
+            $error = $e->getMessage();
+        }
     }
 }
 elseif (utils::post('download'))
@@ -56,8 +64,12 @@ elseif (utils::post('restore'))
     }
     else
     {
-        $s->restoreFromLocal(utils::post('file'));
-        utils::redirect('/admin/config/donnees.php?ok=restore');
+        try {
+            $s->restoreFromLocal(utils::post('file'));
+            utils::redirect('/admin/config/donnees.php?ok=restore');
+        } catch (UserException $e) {
+            $error = $e->getMessage();
+        }
     }
 }
 elseif (utils::post('remove'))
@@ -68,14 +80,35 @@ elseif (utils::post('remove'))
     }
     else
     {
-        $s->remove(utils::post('file'));
-        utils::redirect('/admin/config/donnees.php?ok=remove');
+        try {
+            $s->remove(utils::post('file'));
+            utils::redirect('/admin/config/donnees.php?ok=remove');
+        } catch (UserException $e) {
+            $error = $e->getMessage();
+        }
+    }
+}
+elseif (utils::post('restore_file'))
+{
+    if (!utils::CSRF_check('backup_restore'))
+    {
+        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    }
+    else
+    {
+        try {
+            $s->restoreFromUpload($_FILES['file']);
+            utils::redirect('/admin/config/donnees.php?ok=restore');
+        } catch (UserException $e) {
+            $error = $e->getMessage();
+        }
     }
 }
 
 $tpl->assign('error', $error);
 $tpl->assign('ok', utils::get('ok'));
 $tpl->assign('liste', $s->getList());
+$tpl->assign('max_file_size', utils::getMaxUploadSize());
 
 $tpl->display('admin/config/donnees.tpl');
 
