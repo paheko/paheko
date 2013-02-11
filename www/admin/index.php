@@ -15,4 +15,12 @@ $tpl->assign('page', $page);
 
 $tpl->display('admin/index.tpl');
 
+// On réalise la sauvegarde auto à cet endroit, c'est un peu inefficace mais bon
+
+if ($config->get('frequence_sauvegardes') && $config->get('nombre_sauvegardes'))
+{
+	$s = new Sauvegarde;
+	$s->auto();
+}
+
 ?>
