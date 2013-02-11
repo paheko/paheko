@@ -502,7 +502,7 @@ class Squelette extends \miniSkel
 
         $path = file_exists(GARRADIN_DATA_ROOT . '/squelettes/' . $template)
             ? GARRADIN_DATA_ROOT . '/squelettes/' . $template
-            : GARRADIN_DATA_ROOT . '/squelettes-dist/' . $template;
+            : GARRADIN_ROOT . '/squelettes-dist/' . $template;
 
         $tpl_id = basename(dirname($path)) . '/' . $template;
 
@@ -664,7 +664,7 @@ class Squelette extends \miniSkel
 
         $path = file_exists(GARRADIN_DATA_ROOT . '/squelettes/' . $template)
             ? GARRADIN_DATA_ROOT . '/squelettes/' . $template
-            : GARRADIN_DATA_ROOT . '/squelettes-dist/' . $template;
+            : GARRADIN_ROOT . '/squelettes-dist/' . $template;
 
         if (!file_exists($path))
             return false;
@@ -699,7 +699,7 @@ class Squelette extends \miniSkel
     {
         $sources = array();
 
-        $dir = dir(GARRADIN_DATA_ROOT . '/squelettes-dist');
+        $dir = dir(GARRADIN_ROOT . '/squelettes-dist');
 
         while ($file = $dir->read())
         {
