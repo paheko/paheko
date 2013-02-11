@@ -16,14 +16,14 @@ class Sauvegarde
 		$ext = $auto ? '\d+' . preg_quote('.auto.sqlite') : 'sqlite';
 
 		$out = array();
-		$dir = dir(GARRADIN_ROOT);
+		$dir = dir(GARRADIN_DATA_ROOT);
 
 		while ($file = $dir->read())
 		{
-			if ($file[0] != '.' && is_file(GARRADIN_ROOT . '/' . $file) 
+			if ($file[0] != '.' && is_file(GARRADIN_DATA_ROOT . '/' . $file) 
 				&& preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(GARRADIN_DB_FILE))
 			{
-				$out[$file] = filemtime(GARRADIN_ROOT . '/' . $file);
+				$out[$file] = filemtime(GARRADIN_DATA_ROOT . '/' . $file);
 			}
 		}
 
@@ -72,7 +72,7 @@ class Sauvegarde
 				return (int) $m[1] + 1;
 			}, $f);
 
-			rename(GARRADIN_ROOT . '/' . $f, GARRADIN_ROOT . '/' . $new);
+			rename(GARRADIN_DATA_ROOT . '/' . $f, GARRADIN_DATA_ROOT . '/' . $new);
 		}
 
 		return true;
@@ -132,7 +132,7 @@ class Sauvegarde
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		return unlink(GARRADIN_ROOT . '/' . $file);
+		return unlink(GARRADIN_DATA_ROOT . '/' . $file);
 	}
 
 	/**
@@ -166,12 +166,12 @@ class Sauvegarde
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		if (!file_exists(GARRADIN_ROOT . '/' . $file))
+		if (!file_exists(GARRADIN_DATA_ROOT . '/' . $file))
 		{
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(GARRADIN_ROOT . '/' . $file);
+		return $this->restoreDB(GARRADIN_DATA_ROOT . '/' . $file);
 	}
 
 	/**

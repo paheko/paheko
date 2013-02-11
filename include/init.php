@@ -55,9 +55,14 @@ if (!defined('GARRADIN_ROOT'))
     define('GARRADIN_ROOT', dirname(__DIR__));
 }
 
+if (!defined('GARRADIN_DATA_ROOT'))
+{
+    define('GARRADIN_DATA_ROOT', GARRADIN_ROOT);
+}
+
 if (!defined('GARRADIN_DB_FILE'))
 {
-    define('GARRADIN_DB_FILE', GARRADIN_ROOT . '/association.sqlite');
+    define('GARRADIN_DB_FILE', GARRADIN_DATA_ROOT . '/association.sqlite');
 }
 
 if (!defined('GARRADIN_DB_SCHEMA'))

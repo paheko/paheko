@@ -23,7 +23,7 @@ class Template extends \Template_Lite
 
         $this->cache = false;
 
-        $this->compile_dir = GARRADIN_ROOT . '/cache/compiled';
+        $this->compile_dir = GARRADIN_DATA_ROOT . '/cache/compiled';
         $this->template_dir = GARRADIN_ROOT . '/templates';
 
         $this->compile_check = true;
