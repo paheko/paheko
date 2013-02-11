@@ -6,42 +6,128 @@ class Sauvegarde
 {
 	const NEED_UPGRADE = 'nu';
 
-	public function getList()
+	/**
+	 * Renvoie la liste des fichiers SQLite sauvegardés
+	 * @param  boolean $auto Si true ne renvoie que la liste des sauvegardes automatiques
+	 * @return array 		 Liste des fichiers
+	 */	
+	public function getList($auto = false)
 	{
+		$ext = $auto ? '\d+' . preg_quote('.auto.sqlite') : 'sqlite';
+
 		$out = array();
 		$dir = dir(GARRADIN_ROOT);
 
 		while ($file = $dir->read())
 		{
-			if ($file[0] != '.' && is_file(GARRADIN_ROOT . '/' . $file) && preg_match('![\w\d._-]+\.sqlite$!i', $file))
+			if ($file[0] != '.' && is_file(GARRADIN_ROOT . '/' . $file) 
+				&& preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(GARRADIN_DB_FILE))
 			{
-				$out[] = $file;
+				$out[$file] = filemtime(GARRADIN_ROOT . '/' . $file);
 			}
 		}
 
 		$dir->close();
 
+		ksort($out);
+
 		return $out;
 	}
 
-	public function create()
+	/**
+	 * Crée une nouvelle sauvegarde
+	 * @param  boolean $auto Si true le nom de fichier sera celui de la sauvegarde automatique courante,
+	 * sinon le nom sera basé sur la date (sauvegarde manuelle)
+	 * @return string Le nom de fichier de la sauvegarde ainsi créée
+	 */
+	public function create($auto = false)
 	{
-		$this->syncDB();
-		$backup = str_replace('.sqlite', date('.Y-m-d-H-i') . '.sqlite', GARRADIN_DB_FILE);
+		$backup = str_replace('.sqlite', ($auto ? '.1.auto' : date('.Y-m-d-H-i')) . '.sqlite', GARRADIN_DB_FILE);
 		copy(GARRADIN_DB_FILE, $backup);
 		return basename($backup);
 	}
 
-	protected function syncDB()
+	/**
+	 * Effectue une rotation des sauvegardes automatiques
+	 * association.1.auto.sqlite deviendra association.2.auto.sqlite par exemple
+	 * @return boolean true
+	 */
+	public function rotate()
 	{
-		$db = DB::getInstance();
-		$db->exec('END;');
+		$config = Config::getInstance();
+		$nb = $config->get('nombre_sauvegardes');
+
+		$list = $this->getList(true);
+		krsort($list);
+
+		if (count($list) >= $nb)
+		{
+			$this->remove(key($list));
+			$list = array_shift($list);
+		}
+
+		foreach ($list as $f=>$d)
+		{
+			$new = preg_replace_callback('/\.(\d+)\.auto\.sqlite$!', function ($m) {
+				return (int) $m[1] + 1;
+			}, $f);
+
+			rename(GARRADIN_ROOT . '/' . $f, GARRADIN_ROOT . '/' . $new);
+		}
+
 		return true;
 	}
 
+	/**
+	 * Crée une sauvegarde automatique si besoin est
+	 * @return boolean true
+	 */
+	public function auto()
+	{
+		$config = Config::getInstance();
+
+		// Pas besoin d'aller plus loin si on ne fait pas de sauvegarde auto
+		if ($config->get('frequence_sauvegardes') == 0 || $config->get('nombre_sauvegardes') == 0)
+			return true;
+
+		$list = $this->getList(true);
+
+		if (count($list) > 0)
+		{
+			$last = current($list);
+		}
+		else
+		{
+			$last = false;
+		}
+
+		// Test de la date de création de la dernière sauvegarde
+		if ($last >= (time() - ($config->get('frequence_sauvegardes') * 3600 * 24)))
+		{
+			return true;
+		}
+
+		// Si pas de modif depuis la dernière sauvegarde, ça sert à rien d'en faire
+		if ($last >= filemtime(GARRADIN_DB_FILE))
+		{
+			return true;
+		}
+
+		$this->rotate();
+		$this->create(true);
+
+		return true;
+	}
+
+	/**
+	 * Efface une sauvegarde locale
+	 * @param  string $file Nom du fichier à supprimer
+	 * @return boolean		true si le fichier a bien été supprimé, false sinon
+	 */
 	public function remove($file)
 	{
-		if (preg_match('!\.\.+|/!', $file) || !preg_match('!^[\w\d._-]+$!i', $file))
+		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._-]+\.sqlite$!i', $file) 
+			|| $file == basename(GARRADIN_DB_FILE))
 		{
 			throw new UserException('Nom de fichier non valide.');
 		}
@@ -49,9 +135,12 @@ class Sauvegarde
 		return unlink(GARRADIN_ROOT . '/' . $file);
 	}
 
+	/**
+	 * Renvoie sur la sortie courante le contenu du fichier de base de données courant
+	 * @return boolean true
+	 */
 	public function dump()
 	{
-		$this->syncDB();
 		$in = fopen(GARRADIN_DB_FILE, 'r');
         $out = fopen('php://output', 'w');
 
@@ -65,16 +154,31 @@ class Sauvegarde
         return true;
 	}
 
+	/**
+	 * Restaure une sauvegarde locale
+	 * @param  string $file Le nom de fichier à utiliser comme point de restauration
+	 * @return boolean true si la restauration a fonctionné, false sinon
+	 */
 	public function restoreFromLocal($file)
 	{
-		if (preg_match('!\.\.+|/!', $file) || !preg_match('!^[\w\d._-]+$!i', $file))
+		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._-]+$!i', $file))
 		{
 			throw new UserException('Nom de fichier non valide.');
+		}
+
+		if (!file_exists(GARRADIN_ROOT . '/' . $file))
+		{
+			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
 		return $this->restoreDB(GARRADIN_ROOT . '/' . $file);
 	}
 
+	/**
+	 * Restaure une copie distante (fichier envoyé)
+	 * @param  array  $file Tableau provenant de $_FILES
+	 * @return boolean true
+	 */
 	public function restoreFromUpload($file)
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error']))
@@ -92,17 +196,25 @@ class Sauvegarde
 		return $r;
 	}
 
+	/**
+	 * Restauration de base de données, la fonction qui le fait vraiment
+	 * @param  string $file Chemin absolu vers la base de données à utiliser
+	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
+	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
+	 */
 	protected function restoreDB($file)
 	{
+		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
-			$db = new SQLite3($file, SQLITE3_OPEN_READONLY);
+			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
 				'Message d\'erreur de SQLite : ' . $e->getMessage());
 		}
 
+		// Regardons ensuite si la base de données n'est pas corrompue
 		$check = $db->querySingle('PRAGMA integrity_check;');
 
 		if (strtolower(trim($check)) != 'ok')
@@ -110,15 +222,18 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni est corrompu. SQLite a trouvé ' . $check . ' erreurs.');
 		}
 
-		// Une vérification de base quand même
-		$table = $db->querySingle('SELECT 1 FROM sqlite_master WHERE type=\'table\';');
+		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
+		// celle-ci pouvant changer d'une version à l'autre et on peut vouloir importer une base
+		// un peu vieille, mais on vérifie quand même que ça ressemble un minimum à une base garradin
+		$table = $db->querySingle('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';');
 
 		if (!$table)
 		{
 			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Garradin.');
 		}
 
-		$version = $db->querySingle('SELECT version FROM config;');
+		// On récupère la version pour plus tard
+		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
 
 		$db->close();
 
@@ -131,6 +246,7 @@ class Sauvegarde
 
 		if (!copy($file, GARRADIN_DB_FILE))
 		{
+			rename($backup, GARRADIN_DB_FILE);
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
 		}
 

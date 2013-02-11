@@ -50,6 +50,9 @@ class Config
             'accueil_wiki'          =>  $string,
             'accueil_connexion'     =>  $string,
 
+            'frequence_sauvegardes' =>  $int,
+            'nombre_sauvegardes'    =>  $int,
+
             'version'               =>  $string,
         );
 

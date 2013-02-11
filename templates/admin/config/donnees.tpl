@@ -2,6 +2,18 @@
 
 {include file="admin/config/_menu.tpl" current="donnees"}
 
+{if $error}
+    <p class="error">{$error|escape}</p>
+{elseif $ok}
+    <p class="confirm">
+        {if $ok == 'config'}La configuration a bien été enregistrée.
+        {elseif $ok == 'create'}Une nouvelle sauvegarde a été créée.
+        {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>pre-restore</em>, sinon vous pouvez l'effacer.
+        {elseif $ok == 'remove'}La sauvegarde a été supprimée.
+        {/if}
+    </p>
+{/if}
+
 <form method="post" action="{$self_url|escape}">
 
 <fieldset>
@@ -15,14 +27,14 @@
     <dl>
         <dt><label for="f_frequency">Intervalle de sauvegarde</label></dt>
         <dd>
-            <select name="frequency" id="f_frequency">
-                <option value="0">Aucun — les sauvegardes automatiques sont désactivées</option>
-                <option value="1">Quotidien</option>
-                <option value="7">Hebdomadaire</option>
-                <option value="15">Bi-hebdomadaire</option>
-                <option value="30">Mensuel</option>
-                <option value="90">Trimestriel</option>
-                <option value="365">Annuel</option>
+            <select name="frequence_sauvegardes" id="f_frequency">
+                <option value="0"{form_field name=frequence_sauvegardes data=$config selected=0}>Aucun — les sauvegardes automatiques sont désactivées</option>
+                <option value="1"{form_field name=frequence_sauvegardes data=$config selected=1}>Quotidien, tous les jours</option>
+                <option value="7"{form_field name=frequence_sauvegardes data=$config selected=7}>Hebdomadaire, tous les 7 jours</option>
+                <option value="15"{form_field name=frequence_sauvegardes data=$config selected=15}>Bimensuel, tous les 15 jours</option>
+                <option value="30"{form_field name=frequence_sauvegardes data=$config selected=30}>Mensuel</option>
+                <option value="90"{form_field name=frequence_sauvegardes data=$config selected=90}>Trimestriel</option>
+                <option value="365{form_field name=frequence_sauvegardes data=$config selected=365}">Annuel</option>
             </select>
         </dd>
         <dt><label for="f_max_backups">Nombre de sauvegardes conservées</label></dt>
@@ -34,10 +46,22 @@
             <strong>Attention :</strong> si vous choisissez un nombre important et un intervalle réduit,
             l'espace disque occupé par vos sauvegardes va rapidement augmenter.
         </dd>
-        <dd><input type="number" name="keep_max" if="f_max_backups" min="1" max="90" /></dd>
+        <dd><input type="number" name="nombre_sauvegardes" value="{form_field name=nombre_sauvegardes data=$config}" if="f_max_backups" min="1" max="90" /></dd>
     </dl>
     <p>
-        <input type="submit" name="backup" value="Créer une nouvelle sauvegarde des données" />
+        {csrf_field key="backup_config"}
+        <input type="submit" name="config" value="Enregistrer &rarr;" />
+    </p>
+</fieldset>
+
+</form>
+<form method="post" action="{$self_url|escape}">
+
+<fieldset>
+    <legend>Sauvegarde manuelle</legend>
+    <p>
+        {csrf_field key="backup_create"}
+        <input type="submit" name="create" value="Créer une nouvelle sauvegarde des données &rarr;" />
     </p>
 </fieldset>
 
@@ -50,16 +74,20 @@
         <p class="help">Aucune copie de sauvegarde disponible.</p>
     {else}
         <dl>
-        {foreach from=$liste item="f"}
+        {foreach from=$liste key="f" item="d"}
             <dd>
                 <label>
                     <input type="radio" name="file" value="{$f|escape}" />
-                    {$f|escape}
+                    {$f|escape} — {$d|date_fr:'d/m/Y à H:i'}
                 </label>
             </dd>
         {/foreach}
         </dl>
+        <p class="alert">
+            Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée.
+        </p>
         <p>
+            {csrf_field key="backup_manage"}
             <input type="submit" name="restore" value="Restaurer cette sauvegarde" />
             <input type="submit" name="remove" value="Supprimer cette sauvegarde" />
         </p>
@@ -70,24 +98,15 @@
 <form method="post" action="{$self_url|escape}">
 
 <fieldset>
-    <legend>Sauvegarde</legend>
-    <p>
-        <input type="submit" name="backup" value="Créer une nouvelle sauvegarde des données" />
-    </p>
-</fieldset>
-
-</form>
-<form method="post" action="{$self_url|escape}">
-
-<fieldset>
     <legend>Téléchargement</legend>
     <p>
+        {csrf_field key="backup_download"}
         <input type="submit" name="download" value="Télécharger une copie des données sur mon ordinateur" />
     </p>
 </fieldset>
 
-<form method="post" action="{$self_url|escape}">
 </form>
+<form method="post" action="{$self_url|escape}">
 
 <fieldset>
     <legend><label for="f_file">Restaurer depuis un fichier</label></legend>
@@ -100,6 +119,7 @@
         en cas de besoin d'annuler cette restauration.
     </p>
     <p>
+        {csrf_field key="backup_restore"}
         <input type="file" name="file" id="f_file" />
         <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné" />
     </p>
