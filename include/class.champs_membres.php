@@ -336,12 +336,6 @@ class Champs_Membres
         return true;
     }
 
-    public function diff()
-    {
-    	$db = DB::getInstance();
-    	//$config
-    }
-
     /**
      * Enregistre les changements de champs en base de données
      * @param  boolean $enable_copy Recopier les anciennes champs dans les nouveaux ?
