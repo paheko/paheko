@@ -550,6 +550,10 @@ class Squelette extends \miniSkel
         {
             $uri = substr($uri, 0, $pos);
         }
+        else
+        {
+            $uri = substr($uri, strlen(WWW_URI));
+        }
 
         if ($uri == '/')
         {
