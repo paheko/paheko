@@ -552,7 +552,8 @@ class Squelette extends \miniSkel
         }
         else
         {
-            $uri = substr($uri, strlen(WWW_URI));
+            // WWW_URI inclus toujours le slash final, mais on veut le conserver ici
+            $uri = substr($uri, strlen(WWW_URI) - 1);
         }
 
         if ($uri == '/')
