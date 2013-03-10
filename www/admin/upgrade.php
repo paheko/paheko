@@ -5,21 +5,6 @@ define('GARRADIN_UPGRADE_PROCESS', true);
 
 require_once __DIR__ . '/../../include/init.php';
 
-if (!file_exists(GARRADIN_DB_FILE))
-{
-    // Renommage du fichier sqlite à la version 0.5.0
-    $old_file = str_replace('.sqlite', '.db', GARRADIN_DB_FILE);
-
-    if (!file_exists($old_file))
-    {
-        utils::redirect('/admin/install.php');
-    }
-    else
-    {
-        rename($old_file, GARRADIN_DB_FILE);
-    }
-}
-
 $config = Config::getInstance();
 
 $v = $config->getVersion();
