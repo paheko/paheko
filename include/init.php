@@ -136,8 +136,8 @@ function exception_handler($e)
     exit;
 }
 
-set_error_handler("Garradin\exception_error_handler");
-set_exception_handler("Garradin\exception_handler");
+set_error_handler('Garradin\exception_error_handler');
+set_exception_handler('Garradin\exception_handler');
 
 // Nettoyage des variables GPC pour ceux qui n'auraient
 // toujours pas désactivé les magic quotes
