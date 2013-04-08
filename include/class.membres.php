@@ -239,7 +239,7 @@ class Membres
 
     // Gestion des données ///////////////////////////////////////////////////////
 
-    public function _checkFields(&$data, $check_mandatory = true)
+    public function _checkFields(&$data, $check_mandatory = true, $check_password = true)
     {
         $champs = Config::getInstance()->get('champs_membres');
 
@@ -247,7 +247,7 @@ class Membres
         {
             if (!isset($data[$key]) || empty($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) == ''))
             {
-                if (!empty($config['mandatory']) && $check_mandatory)
+                if (!empty($config['mandatory']) && $check_mandatory && ($check_password || $key != 'passe'))
                 {
                     throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
                 }
@@ -370,7 +370,7 @@ class Membres
             unset($data['id']);
         }
 
-        $this->_checkFields($data, $check_mandatory);
+        $this->_checkFields($data, $check_mandatory, false);
 
         if (!empty($data['email'])
             && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? AND id != ? LIMIT 1;', false, $data['email'], (int)$id))

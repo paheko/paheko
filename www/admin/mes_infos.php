@@ -27,17 +27,10 @@ if (!empty($_POST['save']))
         try {
             $data = array();
 
-            foreach ($config->get('champs_modifiables_membre') as $champ)
+            foreach ($config->get('champs_membres')->getAll() as $key=>$c)
             {
-                $data[$champ] = utils::post($champ);
+                $data[$key] = utils::post($key);
             }
-
-            if (utils::post('passe') == '')
-            {
-                unset($data['passe']);
-            }
-
-            $data['lettre_infos'] = utils::post('lettre_infos');
 
             $membres->edit($membre['id'], $data);
             $membres->updateSessionData();
