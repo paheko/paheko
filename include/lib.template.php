@@ -442,9 +442,14 @@ function tpl_html_champ_membre($params)
     }
     else
     {
-        if ($type == 'checkbox' && !empty($value))
+        if ($type == 'checkbox')
         {
-            $attributes .= 'checked="checked" ';
+            if (!empty($value))
+            {
+                $attributes .= 'checked="checked" ';
+            }
+
+            $value = '1';
         }
 
         $field .= '<input type="' . $type . '" ' . $attributes . ' value="' . $value . '" />';
