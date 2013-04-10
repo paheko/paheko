@@ -32,7 +32,7 @@
     <fieldset>
         <legend>Informations sur le premier membre</legend>
         <dl>
-            <dt><label for="f_nom_membre">Prénom et nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dt><label for="f_nom_membre">Nom et prénom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom_membre" id="f_nom_membre" value="{form_field name=nom_membre}" /></dd>
             <dt><label for="f_cat_membre">Catégorie du membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="tip">Par exemple : bureau, conseil d'administration, présidente, trésorier, etc.</dd>
