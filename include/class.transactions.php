@@ -78,7 +78,8 @@ class Transactions
 
 	/**
 	 * Ajouter une transaction
-	 * @param [type] $data [description]
+	 * @param array $data Tableau des champs à insérer
+	 * @return integer ID de la transaction créée
 	 */
 	public function add($data)
 	{
@@ -92,6 +93,12 @@ class Transactions
 		return $id;
 	}
 
+	/**
+	 * Modifier une transaction
+	 * @param  integer $id  ID de la transaction à modifier
+	 * @param  array $data Tableau des champs à modifier
+	 * @return bool true si succès
+	 */
 	public function edit($id, $data)
 	{
 		$db = DB::getInstance();
@@ -101,9 +108,20 @@ class Transactions
         return $db->simpleUpdate('transactions', $data, 'id = \''.(int) $id.'\'');
 	}
 
+	/**
+	 * Supprimer une transaction
+	 * @param  integer $id ID de la transaction à supprimer
+	 * @return integer true en cas de succès
+	 */
 	public function delete($id)
 	{
 		$db = DB::getInstance();
+
+		if ($db->simpleQuerySingle('SELECT 1 FROM membres_transactions WHERE id_transaction = ? LIMIT 1;', false, (int) $id))
+		{
+			throw new UserException('Il existe des transactions utilisant cette catégorie de transaction.')
+		}
+
 		return $db->simpleExec('DELETE FROM transactions WHERE id = ?;', (int) $id);
 	}
 
