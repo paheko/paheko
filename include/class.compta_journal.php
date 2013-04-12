@@ -170,7 +170,7 @@ class Compta_Journal
             throw new UserException('Moyen de paiement invalide.');
         }
 
-        if (empty($data['date']) || !checkdate(substr($data['date'], 5, 2), substr($data['date'], 8, 2), substr($data['date'], 0, 4)))
+        if (empty($data['date']) || !utils::checkDate($data['date']))
         {
             throw new UserException('Date vide ou invalide.');
         }

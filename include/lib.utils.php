@@ -47,6 +47,37 @@ class utils
         return mktime($d['h'], $d['min'], 0, $d['m'], $d['d'], $d['y']);
     }
 
+    static public function checkDate($str)
+    {
+        if (!preg_match('!^(\d{4})-(\d{2})-(\d{2})$!', $str, $match))
+            return false;
+
+        if (!checkdate($match[2], $match[3], $match[1]))
+            return false;
+
+        return true;
+    }
+
+    static public function checkDateTime($str)
+    {
+        if (!preg_match('!^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2})(?::(\d{2}))?$!', $str, $match))
+            return false;
+
+        if (!self::checkDate($match[1]))
+            return false;
+
+        if ((int) $match[2] < 0 || (int) $match[2] > 23)
+            return false;
+
+        if ((int) $match[3] < 0 || (int) $match[3] > 59)
+            return false;
+        
+        if (isset($match[4]) && ((int) $match[4] < 0 || (int) $match[4] > 59))
+            return false;
+
+        return true;
+    }
+
     static public function getRequestURI()
     {
         if (!empty($_SERVER['REQUEST_URI']))
