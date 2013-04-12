@@ -1,6 +1,5 @@
-
--- Configuration de Garradin
 CREATE TABLE config (
+-- Configuration de Garradin
     cle TEXT PRIMARY KEY,
     valeur TEXT
 );
@@ -15,21 +14,92 @@ CREATE TABLE membres_categories
     id INTEGER PRIMARY KEY,
     nom TEXT,
     description TEXT,
-    montant_cotisation REAL,
-    duree_cotisation INTEGER DEFAULT 12, -- En mois
+
     droit_wiki INT DEFAULT 1,
     droit_membres INT DEFAULT 1,
     droit_compta INT DEFAULT 1,
     droit_inscription INT DEFAULT 0,
     droit_connexion INT DEFAULT 1,
     droit_config INT DEFAULT 0,
-    cacher INT DEFAULT 0
-);
+    cacher INT DEFAULT 0,
 
+    id_transaction_obligatoire INTEGER NULL,
+
+    FOREIGN KEY (id_transaction_obligatoire) REFERENCES transactions (id)
+);
 
 -- Membres de l'asso
 -- Table dynamique générée par l'application
 -- voir class.champs_membres.php
+
+CREATE TABLE transactions
+-- Paiements possibles
+(
+    id INTEGER PRIMARY KEY,
+    id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
+
+    intitule TEXT NOT NULL,
+    description TEXT NOT NULL,
+    montant REAL NOT NULL,
+
+    duree INTEGER NULL, -- En jours
+    debut TEXT NULL, -- timestamp
+    fin TEXT NULL,
+
+    FOREIGN KEY (id_categorie_compta) REFERENCES compta_categories (id)
+);
+
+CREATE TABLE rappels
+-- Rappels de devoir renouveller une transaction
+(
+    id INTEGER PRIMARY KEY,
+    id_transaction INTEGER NULL,
+
+    delai INTEGER NOT NULL, -- Délai en jours pour envoyer le rappel
+
+    sujet TEXT NOT NULL,
+    texte TEXT NOT NULL,
+
+    FOREIGN KEY (id_transaction) REFERENCES transactions (id)
+);
+
+CREATE TABLE rappels_envoyes
+-- Enregistrement des rappels envoyés à qui et quand
+(
+    id_membre INTEGER NOT NULL,
+    id_rappel INTEGER NOT NULL,
+    date TEXT NOT NULL DEFAUT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (id_membre) REFERENCES membres (id),
+    FOREIGN KEY (id_rappel) REFERENCES rappels (id),
+
+    PRIMARY KEY(id_membre, id_rappel, date)
+);
+
+CREATE TABLE membres_transactions
+-- Paiements enregistrés
+(
+    id_membre INTEGER NOT NULL,
+    id_transaction INTEGER NULL, -- NULL si n'est pas relié à une transaction prévue
+
+    libelle TEXT NULL,
+
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    montant REAL NOT NULL,
+
+    FOREIGN KEY (id_membre) REFERENCES membres (id),
+    FOREIGN KEY (id_transaction) REFERENCES transactions (id)
+);
+
+CREATE TABLE membres_transactions_operations
+-- Liaison paiements enregistrés avec écritures comptables
+(
+    id_operation INTEGER NOT NULL,
+    id_membre_transaction INTEGER NOT NULL,
+
+    FOREIGN KEY (id_operation) REFERENCES compta_journal (id),
+    FOREIGN KEY (id_membre_transaction) REFERENCES membres_transactions (id)
+);
 
 --
 -- WIKI
@@ -195,13 +265,15 @@ CREATE TABLE compta_journal
     id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
     id_auteur INTEGER NULL,
     id_categorie INTEGER NULL, -- Numéro de catégorie (en mode simple)
+    id_transaction INTEGER NULL, -- Numéro de transaction
 
     FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
     FOREIGN KEY(compte_debit) REFERENCES compta_comptes(id),
     FOREIGN KEY(compte_credit) REFERENCES compta_comptes(id),
     FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
     FOREIGN KEY(id_auteur) REFERENCES membres(id),
-    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id)
+    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id),
+    FOREIGN KEY(id_transaction) REFERENCES membres_transactions(id)
 );
 
 CREATE INDEX compta_operations_exercice ON compta_journal (id_exercice);
