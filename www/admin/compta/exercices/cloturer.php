@@ -29,7 +29,12 @@ if (!empty($_POST['close']))
     {
         try
         {
-            $id = $e->close($exercice['id']);
+            $id = $e->close($exercice['id'], utils::post('fin'));
+
+            if ($id && utils::post('reports'))
+            {
+                $e->doReports($exercice['id'], utils::modifyDate(utils::post('fin'), '+1 day'));
+            }
 
             utils::redirect('/admin/compta/exercices/');
         }
@@ -42,6 +47,7 @@ if (!empty($_POST['close']))
 
 $tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
+$tpl->assign('custom_js', array('datepickr.js'));
 
 $tpl->display('admin/compta/exercices/cloturer.tpl');
 

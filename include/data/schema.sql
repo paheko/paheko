@@ -289,6 +289,7 @@ CREATE TABLE compta_moyens_paiement
     nom TEXT
 );
 
+--INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
 INSERT INTO compta_moyens_paiement (code, nom) VALUES ('CB', 'Carte bleue');
 INSERT INTO compta_moyens_paiement (code, nom) VALUES ('CH', 'Chèque');
 INSERT INTO compta_moyens_paiement (code, nom) VALUES ('ES', 'Espèces');

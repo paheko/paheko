@@ -67,13 +67,79 @@ class Compta_Exercices
         return true;
     }
 
-    public function close($id)
+    public function close($id, $end)
     {
         $db = DB::getInstance();
 
+        if (!utils::checkDate($end))
+        {
+            throw new UserException('Date de fin vide ou invalide.');
+        }
+
+        $db->exec('BEGIN;');
+
         $db->simpleUpdate('compta_exercices', array(
             'cloture'   =>  1,
+            'fin'       =>  $end,
         ), 'id = \''.(int)$id.'\'');
+
+        $new_begin = utils::modifyDate($end, '+1 day');
+        $last = $db->simpleQuerySingle('SELECT date FROM compta_journal WHERE id_exercice = ? AND date >= ? ORDER BY date DESC LIMIT 1;', false, $id, $new_begin);        
+        $new_end = $last ?: utils::modifyDate($new_begin, '+1 year');
+
+        $new_id = $this->add(array(
+            'debut'     =>  $new_begin,
+            'fin'       =>  $new_end,
+            'libelle'   =>  'Nouvel exercice'
+            )
+        );
+
+        if ($last)
+        {
+            $db->simpleExec('UPDATE compta_journal SET id_exercice = ? WHERE id_exercice = ? AND date >= ?;',
+                $new_id, $id, $new_begin);
+        }
+
+        $db->exec('END;');
+
+        return $new_id;
+    }
+
+    /**
+     * Créer les reports à nouveau issus de l'exercice $old_id dans le nouvel exercice courant
+     * @param  integer $old_id  ID de l'ancien exercice
+     * @param  string  $date    Date Y-m-d donnée aux opérations créées
+     * @return boolean          true si succès
+     */
+    public function doReports($old_id, $date)
+    {
+        $db = DB::getInstance();
+
+        $report_crediteur = 110;
+        $report_debiteur  = 119;
+
+        // Récupérer chacun des comptes de bilan et leurs soldes
+        $statement = $db->simpleStatement('SELECT id, 
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compte AND id_exercice = :id), 0) AS debit,
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compte AND id_exercice = :id), 0) AS credit,
+            CASE WHEN position & ' . Compta_Comptes::ACTIF . ' THEN debit - credit ELSE credit - debit END AS solde
+            FROM compta_comptes 
+            LEFT JOIN compta_journal ON compta_comptes.id = compta_journal.compte_debit 
+                OR compta_comptes.id = compta_journal.compte_credit
+            WHERE solde != 0 AND id NOT LIKE \'6%\' AND id NOT LIKE \'7%\';', array('id' => $old_id));
+
+        while ($row = $statement->fetchArray(SQLITE3_ASSOC))
+        {
+            // Chaque solde de compte est reporté dans le nouvel exercice
+            $journal->add(array(
+                'libelle'       =>  'Report à nouveau',
+                'date'          =>  $date,
+                'montant'       =>  abs($solde),
+                'compte_debit'  =>  ($solde < 0 ? $report_crediteur : $row['compte']), // FIXME
+                'compte_credit' =>  ($solde > 0 ? $report_debiteur : $row['compte']), // FIXME
+                'remarques'     =>  'Report à nouveau créé automatiquement à la clôture de l\'exercice précédent',
+            ));
+        }
 
         return true;
     }
