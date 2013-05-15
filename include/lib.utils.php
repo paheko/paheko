@@ -47,6 +47,13 @@ class utils
         return mktime($d['h'], $d['min'], 0, $d['m'], $d['d'], $d['y']);
     }
 
+    static public function modifyDate($str, $change)
+    {
+        $date = \DateTime::createFromFormat('Y-m-d', $str);
+        $date->modify($change);
+        return $date->format('Y-m-d');
+    }
+
     static public function checkDate($str)
     {
         if (!preg_match('!^(\d{4})-(\d{2})-(\d{2})$!', $str, $match))
