@@ -38,7 +38,7 @@ if (!empty($_POST['save']))
 
             $data = array('id_categorie' => $id_categorie);
 
-            foreach ($champs->getAll() as $key=>$config)
+            foreach ($champs->getAll() as $key=>$dismiss)
             {
                 $data[$key] = utils::post($key);
             }
