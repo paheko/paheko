@@ -451,7 +451,13 @@ class utils
         return preg_match('!^[A-Z]{4}[A-Z]{2}[1-9A-Z]{2}(?:[A-Z\d]{3})?$!', $bic);
     }
 
-    function json_readable_encode($in, $indent = 0, Closure $_escape = null)
+    static public function normalizePhoneNumber($n)
+    {
+        $n = preg_replace('![^\d\+]!', '', $n);
+        return $n;
+    }
+
+    static public function json_readable_encode($in, $indent = 0, Closure $_escape = null)
     {
         if (__CLASS__ && isset($this))
         {
