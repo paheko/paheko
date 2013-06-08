@@ -269,7 +269,7 @@ class Membres
                 }
                 elseif ($config['type'] == 'tel')
                 {
-                    $data[$key] = preg_replace('![^\d\+]!', '', $data[$key]);
+                    $data[$key] = utils::normalizePhoneNumber($data[$key]);
                 }
                 elseif ($config['type'] == 'country')
                 {
@@ -488,6 +488,19 @@ class Membres
         {
             $where = 'WHERE '.$field.' & (1 << '.(int)$query.')';
             $order = false;
+        }
+        elseif ($champ['type'] == 'tel')
+        {
+            $query = utils::normalizePhoneNumber($query);
+            $query = preg_replace('!^0+!', '', $query);
+
+            if ($query == '')
+            {
+                return false;
+            }
+
+            $where = 'WHERE '.$field.' LIKE \'%'.$db->escapeString($query).'\'';
+            $order = $field;
         }
         elseif (!$champs->isText($field))
         {
