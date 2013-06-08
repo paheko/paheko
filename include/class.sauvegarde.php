@@ -68,7 +68,7 @@ class Sauvegarde
 
 		foreach ($list as $f=>$d)
 		{
-			$new = preg_replace_callback('/\.(\d+)\.auto\.sqlite$!', function ($m) {
+			$new = preg_replace_callback('!\.(\d+)\.auto\.sqlite$!', function ($m) {
 				return (int) $m[1] + 1;
 			}, $f);
 
