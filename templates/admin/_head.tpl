@@ -28,7 +28,7 @@
                 <li class="add member{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
                 {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
                 <li class="member config{if $current == 'membres/categories'} current{/if}"><a href="{$admin_url}membres/categories.php">Catégories</a></li>
-                <li class="member_transactions{if $current == 'membres/transactions'} current{/if}"><a href="{$admin_url}membres/transactions.php">Transactions</a></li>
+                <li class="member_transactions{if $current == 'membres/transactions'} current{/if}"><a href="{$admin_url}membres/transactions/">Transactions</a></li>
                 <li class="members_mail{if $current == 'membres/message_collectif'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
                 {/if}
             </ul>
