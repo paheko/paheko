@@ -119,7 +119,7 @@ class Transactions
 
 		if ($db->simpleQuerySingle('SELECT 1 FROM membres_transactions WHERE id_transaction = ? LIMIT 1;', false, (int) $id))
 		{
-			throw new UserException('Il existe des transactions utilisant cette catégorie de transaction.')
+			throw new UserException('Il existe des transactions utilisant cette catégorie de transaction.');
 		}
 
 		return $db->simpleExec('DELETE FROM transactions WHERE id = ?;', (int) $id);
@@ -133,7 +133,8 @@ class Transactions
 
 	public function listByName()
 	{
-		return $db->simpleStatementFetch('SELECT * FROM transactions ORDER BY intitule;')
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT * FROM transactions ORDER BY intitule;');
 	}
 }
 
