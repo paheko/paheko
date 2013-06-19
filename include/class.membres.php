@@ -259,11 +259,11 @@ class Membres
 
             if (isset($data[$key]))
             {
-                if ($config['type'] == 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
+                if ($config['type'] == 'email' && trim($data[$key]) != '' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
                 {
                     throw new UserException('Adresse e-mail invalide dans le champ "' . $config['title'] . '".');
                 }
-                elseif ($config['type'] == 'url' && !filter_var($data[$key], FILTER_VALIDATE_URL))
+                elseif ($config['type'] == 'url' && trim($data[$key]) != '' && !filter_var($data[$key], FILTER_VALIDATE_URL))
                 {
                     throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
                 }
@@ -279,7 +279,7 @@ class Membres
                 {
                     $data[$key] = empty($data[$key]) ? 0 : 1;
                 }
-                elseif ($config['type'] == 'number')
+                elseif ($config['type'] == 'number' && trim($data[$key]) != '')
                 {
                     if (empty($data[$key]))
                     {
@@ -316,7 +316,7 @@ class Membres
             }
         }
 
-        if (!empty($data['code_postal']))
+        if (isset($data['code_postal']) && trim($data['code_postal']) != '')
         {
             if (!empty($data['pays']) && $data['pays'] == 'FR' && !preg_match('!^\d{5}$!', $data['code_postal']))
             {
