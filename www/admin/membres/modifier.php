@@ -52,6 +52,12 @@ if (!empty($_POST['save']))
 
             foreach ($champs->getAll() as $key=>$config)
             {
+                // do not edit private fields when you're not allowed to
+                if (!empty($config['private']) && $user['droits']['membres'] < Membres::DROIT_ADMIN)
+                {
+                    continue;
+                }
+                
                 $data[$key] = utils::post($key);
             }
 
