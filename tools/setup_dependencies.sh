@@ -2,6 +2,12 @@
 
 # Mise en place/à jour des dépendances
 
+if [ ! -f include/libs ]
+then
+	echo "Doit être invoqué à la racine du repository"
+	exit 0
+fi
+
 KEYWORD="checkout"
 
 # Template Lite
