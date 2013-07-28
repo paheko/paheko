@@ -41,16 +41,6 @@ class Membres
             session_start();
         }
 
-        // Fix bug with register_globals ($test is a reference to $_SESSION['test'])
-        if (ini_get('register_globals') && isset($_SESSION))
-        {
-            foreach ($_SESSION as $key=>$value)
-            {
-                if (isset($GLOBALS[$key]))
-                    unset($GLOBALS[$key]);
-            }
-        }
-
         return true;
     }
 
