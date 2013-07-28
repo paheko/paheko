@@ -1,0 +1,84 @@
+#!/usr/bin/php
+<?php
+
+# Fixme: utiliser un routeur (path du script routeur à passer en argument à PHP)
+# Fixme: implémenter --single, --user et le fichier de config
+# Fixme: faire en sorte qu'en mode UI le serveur web et le navigateur soient fermés tous les deux avec un Ctrl-C
+# Fixme: loguer la sortie du serveur web
+
+$config = [
+	'browser'	=>	'/usr/bin/x-www-browser',
+	'port'		=>	8000,
+	'root'		=>	__DIR__ . '/www',
+	'single'	=>	true,
+];
+
+if (isset($_SERVER['HOME']))
+{
+	$home = $_SERVER['HOME'];
+
+	if (file_exists($home . '/.config/garradin/config.ini'))
+	{
+		$config = array_merge($config, parse_ini_file($home . '/.config/garradin/config.ini'));
+	}
+}
+
+$command = isset($argv[1]) ? $argv[1] : false;
+
+switch ($command)
+{
+	case 'server':
+		system('php -S localhost:' . (int)$config['port'] . ' -t ' . escapeshellarg($config['root']));
+		break;
+	case 'ui':
+		system('php -S localhost:' . (int)$config['port'] . ' -t ' . escapeshellarg($config['root']) . ' > /dev/null &');
+		system($config['browser'] . ' ' . escapeshellarg('http://localhost:' . (int)$config['port']));
+		break;
+	default:
+		echo <<<EOF
+Usage : $argv[0] COMMANDE [PROJET]
+
+Où COMMANDE peut être :
+
+	server [-p|--port PORT] 
+		Démarre un serveur web Garradin sur le port spécifié
+		(ou sur le port 8000 par défaut)
+
+	ui [-p|--port PORT]
+		Idem que 'server' mais démarre ensuite le navigateur web par défaut
+		et connecte automatiquement avec le premier administrateur
+		de l'association.
+
+PROJET est le chemin menant à un projet Garradin précis 
+	(fichier *.garradin.sqlite). Si aucun projet n'est indiqué, le 
+	dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
+	ouvert un nouveau projet sera créé.
+
+Options :
+
+	-p|--port PORT
+		Spécifie le port pour le mode ui ou le mode serveur.
+
+	-s|--single
+		(Activé par défaut)
+		Mode utilisateur unique. L'utilisateur sera connecté en
+		permanence (pas possible de se déconnecter). Le premier
+		administrateur trouvé dans les membres sera utilisé, ou
+		l'adresse e-mail spécifiée dans les options locales du fichier,
+		ou l'adresse e-mail spécifiée par le paramètre -u.
+
+	-w|--web
+		Active le mode web, Garradin réagira comme s'il était installé
+		sur un serveur web classique.
+
+	-u|--user EMAIL|ID
+		Utilise l'adresse EMAIL précisée ou le numéro unique ID fourni
+		pour le mode --single.
+
+	-v|--verbose
+		Affiche les requêtes reçues sur le serveur web.
+
+Configuration dans ~/.config/garradin/config.ini
+EOF;
+		break;
+}
