@@ -139,28 +139,6 @@ function exception_handler($e)
 set_error_handler('Garradin\exception_error_handler');
 set_exception_handler('Garradin\exception_handler');
 
-// Nettoyage des variables GPC pour ceux qui n'auraient
-// toujours pas désactivé les magic quotes
-if (get_magic_quotes_gpc())
-{
-    function strip_slashes_from_user_data(&$array)
-    {
-        foreach($array as $k => $v)
-        {
-            if (is_array($v))
-            {
-                strip_slashes_from_user_data($array[$k]);
-                continue;
-            }
-            $array[$k] = stripslashes($v);
-        }
-    }
-
-    strip_slashes_from_user_data($_GET);
-    strip_slashes_from_user_data($_POST);
-    strip_slashes_from_user_data($_COOKIE);
-}
-
 /**
  * Auto-load classes and libs
  */
