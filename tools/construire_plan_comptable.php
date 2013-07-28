@@ -575,7 +575,7 @@ foreach ($src as $line)
     );
 }
 
-$json = utils::json_readable_encode($plan, 0);
+$json = json_encode($plan, JSON_PRETTY_PRINT);
 file_put_contents('include/plan_comptable.json', $json);
 
 die("OK\n");
