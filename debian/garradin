@@ -2,15 +2,16 @@
 <?php
 
 # Fixme: utiliser un routeur (path du script routeur à passer en argument à PHP)
-# Fixme: implémenter --single, --user et le fichier de config
+# Fixme: faire passer le fait qu'on est en mode CLI et l'user via la directive ini : -d cli_server.color="$USER"
+# Fixme: implémenter le fichier de config
 # Fixme: faire en sorte qu'en mode UI le serveur web et le navigateur soient fermés tous les deux avec un Ctrl-C
 # Fixme: loguer la sortie du serveur web
 
 $config = [
-	'browser'	=>	'/usr/bin/x-www-browser',
+	'browser'	=>	'/usr/bin/www-browser',
+	'x-browser'	=>	'/usr/bin/x-www-browser',
 	'port'		=>	8000,
-	'root'		=>	__DIR__ . '/www',
-	'single'	=>	true,
+	'root'		=>	'/usr/share/garradin/www',
 ];
 
 if (isset($_SERVER['HOME']))
@@ -23,20 +24,40 @@ if (isset($_SERVER['HOME']))
 	}
 }
 
+$options = getopt('p::v', ['port::', 'verbose']);
+
+// Remove options from $argv array
+foreach ($argv as $k=>$v)
+{
+	if (($v[0] == '-' && ($opt == substr($v, 1)) && array_key_exists($opt, $options))
+		|| (substr($v, 0, 2) == '--' && ($opt == substr($v, 2)) && array_key_exists($opt, $options)))
+	{
+		if ($options[$opt] !== false)
+		{
+			unset($argv[$k+1]);
+		}
+
+		unset($argv[$k])
+	}
+}
+
 $command = isset($argv[1]) ? $argv[1] : false;
+$verbose = isset($options['v']) || isset($options['verbose']);
+$port = isset($options['p']) ? (int) $options['p'] : (isset($options['port']) ? (int) $options['port'] : (int)$config['port']);
 
 switch ($command)
 {
 	case 'server':
-		system('php -S localhost:' . (int)$config['port'] . ' -t ' . escapeshellarg($config['root']));
+		system('php -S localhost:' . $port . ' -t ' . escapeshellarg($config['root']));
 		break;
 	case 'ui':
-		system('php -S localhost:' . (int)$config['port'] . ' -t ' . escapeshellarg($config['root']) . ' > /dev/null &');
-		system($config['browser'] . ' ' . escapeshellarg('http://localhost:' . (int)$config['port']));
+		$browser = !empty($_SERVER['DISPLAY']) ? $config['x-browser'] : $config['browser'];
+		system('php -S localhost:' . $port . ' -t ' . escapeshellarg($config['root']) . ' > /dev/null &');
+		system($browser . ' ' . escapeshellarg('http://localhost:' . $port));
 		break;
 	default:
 		echo <<<EOF
-Usage : $argv[0] COMMANDE [PROJET]
+Usage : $argv[0] [COMMANDE] [PROJET]
 
 Où COMMANDE peut être :
 
@@ -49,6 +70,8 @@ Où COMMANDE peut être :
 		et connecte automatiquement avec le premier administrateur
 		de l'association.
 
+Si aucune COMMANDE n'est donnée, Garradin utilisera 'ui' par défaut.
+
 PROJET est le chemin menant à un projet Garradin précis 
 	(fichier *.garradin.sqlite). Si aucun projet n'est indiqué, le 
 	dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
@@ -58,22 +81,6 @@ Options :
 
 	-p|--port PORT
 		Spécifie le port pour le mode ui ou le mode serveur.
-
-	-s|--single
-		(Activé par défaut)
-		Mode utilisateur unique. L'utilisateur sera connecté en
-		permanence (pas possible de se déconnecter). Le premier
-		administrateur trouvé dans les membres sera utilisé, ou
-		l'adresse e-mail spécifiée dans les options locales du fichier,
-		ou l'adresse e-mail spécifiée par le paramètre -u.
-
-	-w|--web
-		Active le mode web, Garradin réagira comme s'il était installé
-		sur un serveur web classique.
-
-	-u|--user EMAIL|ID
-		Utilise l'adresse EMAIL précisée ou le numéro unique ID fourni
-		pour le mode --single.
 
 	-v|--verbose
 		Affiche les requêtes reçues sur le serveur web.
