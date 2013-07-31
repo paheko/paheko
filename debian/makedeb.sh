@@ -72,8 +72,15 @@ EOF
 }
 
 # doc.
-cp ${SRCDIR}/README ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
-
+DOCDIR=${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
+true && {
+    echo "Generating doc..."
+    cp ${SRCDIR}/README ${DOCDIR}
+    a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt --destination-dir ${DOCDIR}
+} || {
+    echo "Fail."
+    exit 1
+}
 
 true && {
     CONTROL=DEBIAN/control

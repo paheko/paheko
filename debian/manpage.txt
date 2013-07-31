@@ -1,0 +1,64 @@
+GARRADIN(1)
+===========
+:doctype: manpage
+
+
+NAME
+----
+garradin - gestionnaire d'association à but non lucratif
+
+
+SYNOPSIS
+--------
+*garradin* ['OPTIONS'] ['COMMANDE']
+
+
+DESCRIPTION
+-----------
+Lancer garradin(1) sans argument lance le serveur web intégré sur
+l'adresse localhost:8088 et le navigateur web par défaut.
+
+OPTIONS
+-------
+*-p, --port*='PORT'::
+Défini le port utilisé par le serveur web.
+
+COMMANDES
+---------
+*server*::
+Lance le serveur web autonome de Garradin sans lancer de navigateur
+web.
+
+*ui*::
+Lance le serveur web autonome et le navigateur par défaut.
+
+EXIT STATUS
+-----------
+*0*::
+Succès
+
+*1*::
+Erreur
+
+
+BUGS
+----
+Voir http://dev.kd2.org/garradin/ pour un accès au bugtracker.
+
+
+AUTEUR
+------
+Garradin est développé par bohwaz et d'autres contributeurs.
+
+
+RESSOURCES
+----------
+
+Site principal : <http://garradin.kd2.org/>
+
+
+COPYING
+-------
+Copyright \(C) 2011-2013 BohwaZ. Free use of this software is
+granted under the terms of the GNU Affero General Public License v3
+(AGPL).
