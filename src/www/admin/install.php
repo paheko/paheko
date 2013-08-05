@@ -5,43 +5,71 @@ namespace Garradin;
  * Tests : vérification que les conditions pour s'exécuter sont remplies
  */
 
-$tests = array(
-    'La version de PHP installée est inférieure à 5.3 !'
-        =>  version_compare(phpversion(), '5.3', '<'),
-    'L\'algorithme Blowfish de hashage de mot de passe n\'est pas présent !'
-        =>  !defined('CRYPT_BLOWFISH') || !CRYPT_BLOWFISH,
-    'Le module de bases de données SQLite3 n\'est pas installé !'
-        =>  !class_exists('SQLite3'),
-    'La librairie Template_Lite ne semble pas disponible !'
-        =>  !file_exists(__DIR__ . '/../../include/libs/template_lite/class.template.php'),
-    #'Dummy' => true,
-);
-
-$fail = false;
-
-if (PHP_SAPI != 'cli' && array_sum($tests) > 0)
+function test_requis($condition, $message)
 {
-    header('Content-Type: text/html; charset=utf-8');
-    echo '<pre>';
-}
-
-foreach ($tests as $desc=>$fail)
-{
-    if ($fail)
+    if ($condition)
     {
-        echo $desc . "\n";
+        return true;
     }
-}
-
-if ($fail)
-{
-    echo "\n<b>Erreur fatale :</b> Garradin a besoin que la condition mentionnée soit remplie pour s'exécuter.\n";
 
     if (PHP_SAPI != 'cli')
-        echo '</pre>';
+    {
+        header('Content-Type: text/html; charset=utf-8');
+        echo "<!DOCTYPE html>\n<html>\n<head>\n<title>Erreur</title>\n<meta charset=\"utf-8\" />\n";
+        echo '<style type="text/css">body { font-family: sans-serif; } ';
+        echo '.error { color: darkred; padding: .5em; margin: 1em; border: 3px double red; background: yellow; }</style>';
+        echo "\n</head>\n<body>\n<h2>Erreur</h2>\n<h3>Le problème suivant empêche Garradin de fonctionner :</h3>\n";
+        echo '<p class="error">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>';
+        echo '<hr /><p>Pour plus d\'informations consulter ';
+        echo '<a href="http://dev.kd2.org/garradin/Probl%C3%A8mes%20fr%C3%A9quents">l\'aide sur les problèmes à l\'installation</a>.</p>';
+        echo "\n</body>\n</html>";
+    }
+    else
+    {
+        echo "[ERREUR] Le problème suivant empêche Garradin de fonctionner :\n";
+        echo $message . "\n";
+        echo "Pour plus d'informations consulter http://dev.kd2.org/garradin/Probl%C3%A8mes%20fr%C3%A9quents\n";
+    }
 
     exit;
 }
+
+test_requis(
+    version_compare(phpversion(), '5.4', '>='),
+    'PHP 5.4 ou supérieur requis. PHP version ' . phpversion() . ' installée.'
+);
+
+test_requis(
+    defined('CRYPT_BLOWFISH') && CRYPT_BLOWFISH,
+    'L\'algorithme de hashage de mot de passe Blowfish n\'est pas présent (pas installé ou pas compilé).'
+);
+
+test_requis(
+    class_exists('SQLite3'),
+    'Le module de base de données SQLite3 n\'est pas disponible.'
+);
+
+$v = \SQLite3::version();
+
+test_requis(
+    version_compare($v['versionString'], '3.7.4', '>='),
+    'SQLite3 version 3.7.4 ou supérieur requise. Version installée : ' . $v['versionString']
+);
+
+test_requis(
+    file_exists(__DIR__ . '/../../include/libs/template_lite/class.template.php'),
+    'Librairie Template_Lite non disponible.'
+);
+
+test_requis(
+    file_exists(__DIR__ . '/../../cache'),
+    'Le répertoire /cache n\'existe pas.'
+);
+
+test_requis(
+    is_writable(__DIR__ . '/../../cache') && is_readable(__DIR__ . '/../../cache'),
+    'Le répertoire /cache n\'est pas accessible en lecture/écriture.'
+);
 
 define('GARRADIN_INSTALL_PROCESS', true);
 
