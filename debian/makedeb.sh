@@ -73,10 +73,13 @@ EOF
 
 # doc.
 DOCDIR=${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
+
 true && {
     echo "Generating doc..."
     cp ${SRCDIR}/README ${DOCDIR}
-    a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt --destination-dir ${DOCDIR}
+    a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt
+    gzip -c ${THISDIR}/garradin.1 > /usr/share/man/man1/${PACKAGE_DEBNAME}.1.gz
+    rm -f ${THISDIR}/garradin.1
 } || {
     echo "Fail."
     exit 1
