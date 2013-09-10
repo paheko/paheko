@@ -35,18 +35,9 @@ if (Static_Cache::expired('graph_' . $graph))
 		$d = new \SVGPlot_Data($stats->depenses());
 		$d->title = 'Dépenses';
 
-		$data = array($r, $d);
+		$data = array($d, $r);
 
 		$plot->setTitle('Recettes et dépenses de l\'exercice courant');
-
-		$labels = array();
-
-		foreach ($r->get() as $k=>$v)
-		{
-			$labels[] = utils::date_fr('M y', strtotime(substr($k, 0, 4) . '-' . substr($k, 4, 2) .'-01'));
-		}
-
-		$plot->setLabels($labels);
 	}
 	elseif ($graph == 'banques_caisses')
 	{
@@ -114,7 +105,8 @@ if (Static_Cache::expired('graph_' . $graph))
 header('Content-Type: image/svg+xml');
 Static_Cache::display('graph_' . $graph);
 
-if (time() % 100)
+// Clean cache sometimes
+if ((time() % 100) == 0)
 {
 	Static_Cache::clean();
 }
