@@ -15,12 +15,12 @@ class Compta_Stats
 
 	public function recettes()
 	{
-		return $this->_byType(-1);
+		return $this->_byType(Compta_Categories::RECETTES);
 	}
 
 	public function depenses()
 	{
-		return $this->_byType(1);
+		return $this->_byType(Compta_Categories::DEPENSES);
 	}
 
 	public function soldeCompte($compte, $augmente = 'debit', $diminue = 'credit')

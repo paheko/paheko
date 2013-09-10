@@ -43,7 +43,7 @@ class Static_Cache
 	static public function store($id, $content)
 	{
 		$path = self::_getCachePath($id);
-		return file_put_contents($path, $content);
+		return (bool) file_put_contents($path, $content);
 	}
 
 	static public function expired($id, $expire = self::EXPIRE)
