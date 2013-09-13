@@ -241,7 +241,7 @@ function tpl_diff($params)
     $new = $params['new'];
 
     require_once GARRADIN_ROOT . '/include/libs/diff/class.simplediff.php';
-    $diff = simpleDiff::diff_to_array(false, $old, $new, 3);
+    $diff = \simpleDiff::diff_to_array(false, $old, $new, 3);
 
     $out = '<table class="diff">';
     $prev = key($diff);
@@ -258,28 +258,28 @@ function tpl_diff($params)
         $class1 = $class2 = '';
         $t1 = $t2 = '';
 
-        if ($type == simpleDiff::INS)
+        if ($type == \simpleDiff::INS)
         {
             $class2 = 'ins';
             $t2 = '<b>+</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
-        elseif ($type == simpleDiff::DEL)
+        elseif ($type == \simpleDiff::DEL)
         {
             $class1 = 'del';
             $t1 = '<b>-</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
-        elseif ($type == simpleDiff::CHANGED)
+        elseif ($type == \simpleDiff::CHANGED)
         {
             $class1 = 'del';
             $class2 = 'ins';
             $t1 = '<b>-</b>';
             $t2 = '<b>+</b>';
 
-            $lineDiff = simpleDiff::wdiff($old, $new);
+            $lineDiff = \simpleDiff::wdiff($old, $new);
             $lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');
 
             // Don't show new things in deleted line
@@ -358,7 +358,7 @@ function tpl_select_compte($params)
 
 function escape_money($number)
 {
-    return number_format((float)$number, 2, ',', ' ');
+    return number_format((float)$number, 2, ',', '&nbsp;');
 }
 
 function tpl_html_champ_membre($params)
