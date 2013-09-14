@@ -474,10 +474,10 @@ class Compta_Exercices
         $res = $db->prepare('SELECT compte, debit, credit, (SELECT position FROM compta_comptes WHERE id = compte) AS position
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, NULL AS credit
-                    FROM compta_journal WHERE id_exercice = 1 GROUP BY compte_debit
+                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_debit
                 UNION
                 SELECT compte_credit AS compte, NULL AS debit, SUM(montant) AS credit
-                    FROM compta_journal WHERE id_exercice = 1 GROUP BY compte_credit)
+                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
             WHERE compte IN (SELECT id FROM compta_comptes WHERE position IN ('.implode(', ', $include).'))
             ORDER BY base64(compte) COLLATE BINARY ASC;'
             )->execute();
