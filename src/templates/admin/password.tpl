@@ -4,7 +4,9 @@
     <p class="confirm">
         Un e-mail vous a été envoyé, cliquez sur le lien dans cet e-mail
         pour recevoir un nouveau mot de passe.
-        <strong>Ne fermez pas cette fenêtre tant que vous n'avez pas cliquez sur le lien.</strong>
+    </p>
+    <p class="alert">
+        <strong>Ne fermez pas cette fenêtre tant que vous n'avez pas cliqué sur le lien.</strong>
         Si le message n'apparaît pas dans les prochaines minutes, vérifiez le dossier Spam ou Indésirables.
     </p>
 {elseif !empty($new_sent)}
