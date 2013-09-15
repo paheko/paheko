@@ -377,7 +377,7 @@ class Compta_Exercices
         $produits   = array('comptes' => array(), 'total' => 0.0);
         $resultat   = 0.0;
 
-        $res = $db->prepare('SELECT compte, debit, credit
+        $res = $db->prepare('SELECT compte, SUM(debit), SUM(credit)
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit
                     FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_debit
@@ -385,6 +385,7 @@ class Compta_Exercices
                 SELECT compte_credit AS compte, 0 AS debit, SUM(montant) AS credit
                     FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
             WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
+            GROUP BY compte
             ORDER BY base64(compte) COLLATE BINARY ASC;'
             )->execute();
 
