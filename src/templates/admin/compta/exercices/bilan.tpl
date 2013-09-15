@@ -20,12 +20,12 @@
                     {foreach from=$bilan.actif.comptes key="parent_code" item="parent"}
                         <tr class="parent">
                             <th>{$parent_code|get_nom_compte|escape}</th>
-                            <td>{$parent.solde|escape_money}</td>
+                            <td>{$parent.solde|html_money}</td>
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
                             <th>{$compte|get_nom_compte|escape}</th>
-                            <td>{$solde|escape_money}</td>
+                            <td>{$solde|html_money}</td>
                         </tr>
                         {/foreach}
                     {/foreach}
@@ -39,12 +39,12 @@
                     {foreach from=$bilan.passif.comptes key="parent_code" item="parent"}
                         <tr class="parent">
                             <th>{$parent_code|get_nom_compte|escape}</th>
-                            <td>{$parent.solde|escape_money}</td>
+                            <td>{$parent.solde|html_money}</td>
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
                             <th>{$compte|get_nom_compte|escape}</th>
-                            <td>{$solde|escape_money}</td>
+                            <td>{$solde|html_money}</td>
                         </tr>
                         {/foreach}
                     {/foreach}
@@ -60,7 +60,7 @@
                     <tfoot>
                         <tr>
                             <th>Total actif</th>
-                            <td>{$bilan.actif.total|escape_money}</td>
+                            <td>{$bilan.actif.total|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -70,7 +70,7 @@
                     <tfoot>
                         <tr>
                             <th>Total passif</th>
-                            <td>{$bilan.passif.total|escape_money}</td>
+                            <td>{$bilan.passif.total|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>

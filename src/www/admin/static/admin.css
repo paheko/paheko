@@ -384,6 +384,11 @@ table.list .actions {
     text-align: right;
 }
 
+b.money {
+    font-weight: inherit;
+    white-space: pre;
+}
+
 #rapport h3 {
     text-align: center;
     margin-bottom: .5em;

@@ -11,7 +11,7 @@
         {foreach from=$liste item="tr"}
             <tr>
                 <th>{$tr.intitule|escape}</th>
-                <td class="num">{$tr.montant|escape_money} {$config.monnaie|escape}</td>
+                <td class="num">{$tr.montant|html_money} {$config.monnaie|escape}</td>
                 <td>
                     {if $tr.duree}
                         {$tr.duree|escape} jours

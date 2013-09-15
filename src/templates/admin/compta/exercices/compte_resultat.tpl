@@ -20,12 +20,12 @@
                     {foreach from=$compte_resultat.charges.comptes key="parent_code" item="parent"}
                         <tr class="parent">
                             <th>{$parent_code|get_nom_compte|escape}</th>
-                            <td>{$parent.solde|escape_money}</td>
+                            <td>{$parent.solde|html_money}</td>
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
                             <th>{$compte|get_nom_compte|escape}</th>
-                            <td>{$solde|escape_money}</td>
+                            <td>{$solde|html_money}</td>
                         </tr>
                         {/foreach}
                     {/foreach}
@@ -39,12 +39,12 @@
                     {foreach from=$compte_resultat.produits.comptes key="parent_code" item="parent"}
                         <tr class="parent">
                             <th>{$parent_code|get_nom_compte|escape}</th>
-                            <td>{$parent.solde|escape_money}</td>
+                            <td>{$parent.solde|html_money}</td>
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
                             <th>{$compte|get_nom_compte|escape}</th>
-                            <td>{$solde|escape_money}</td>
+                            <td>{$solde|html_money}</td>
                         </tr>
                         {/foreach}
                     {/foreach}
@@ -60,7 +60,7 @@
                     <tfoot>
                         <tr>
                             <th>Total charges</th>
-                            <td>{$compte_resultat.charges.total|escape_money}</td>
+                            <td>{$compte_resultat.charges.total|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -70,7 +70,7 @@
                     <tfoot>
                         <tr>
                             <th>Total produits</th>
-                            <td>{$compte_resultat.produits.total|escape_money}</td>
+                            <td>{$compte_resultat.produits.total|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -84,7 +84,7 @@
                     <tfoot>
                         <tr>
                             <th>Résultat</th>
-                            <td>{$compte_resultat.resultat|escape_money}</td>
+                            <td>{$compte_resultat.resultat|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>

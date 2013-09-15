@@ -44,7 +44,7 @@
             {/if}
             </td>
             <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
-            <td>{$ligne.montant|escape_money} {$config.monnaie|escape}</td>
+            <td>{$ligne.montant|html_money} {$config.monnaie|escape}</td>
             <th>{$ligne.libelle|escape}</th>
             {if !$categorie && $type}
             <td>{$ligne.categorie|escape}</td>
@@ -65,7 +65,7 @@
             <td></td>
             <td></td>
             <th>Total</th>
-            <td>{$total|escape_money} {$config.monnaie|escape}</td>
+            <td>{$total|html_money} {$config.monnaie|escape}</td>
             <td></td>
             {if !$categorie && $type}<td></td>{/if}
         </tr>

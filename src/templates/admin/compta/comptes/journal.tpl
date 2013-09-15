@@ -29,8 +29,8 @@
             {/if}
             </td>
             <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
-            <td>{if $ligne.compte_credit == $compte.id}{$credit}{else}{$debit}{/if}{$ligne.montant|escape_money}</td>
-            <td>{$ligne.solde|escape_money}</td>
+            <td>{if $ligne.compte_credit == $compte.id}{$credit}{else}{$debit}{/if}{$ligne.montant|html_money}</td>
+            <td>{$ligne.solde|html_money}</td>
             <th>{$ligne.libelle|escape}</th>
         </tr>
     {/foreach}
@@ -39,7 +39,7 @@
         <tr>
             <td colspan="3"></td>
             <th>Solde</th>
-            <td colspan="2">{$solde|escape_money} {$config.monnaie|escape}</td>
+            <td colspan="2">{$solde|html_money} {$config.monnaie|escape}</td>
         </tr>
     </tfoot>
 </table>
