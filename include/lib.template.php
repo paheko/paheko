@@ -358,7 +358,7 @@ function tpl_select_compte($params)
 
 function escape_money($number)
 {
-    return number_format((float)$number, 2, ',', '&nbsp;');
+    return number_format((float)$number, 2, ',', ' ');
 }
 
 function tpl_html_champ_membre($params)
