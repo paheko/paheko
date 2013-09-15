@@ -15,7 +15,7 @@
                 BIC : {$compte.bic|escape}<br />
                 {$compte.iban|escape|format_rib}
             </dd>
-            <dd class="desc">Solde : {$compte.solde|escape_money} {$config.monnaie|escape}</dd>
+            <dd class="desc">Solde : {$compte.solde|html_money} {$config.monnaie|escape}</dd>
             <dd class="actions">
                 <a href="{$www_url}admin/compta/comptes/journal.php?id={$compte.id|escape}">Journal</a>
             {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}

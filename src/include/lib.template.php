@@ -358,7 +358,12 @@ function tpl_select_compte($params)
 
 function escape_money($number)
 {
-    return number_format((float)$number, 2, ',', '&nbsp;');
+    return number_format((float)$number, 2, ',', ' ');
+}
+
+function tpl_html_money($number)
+{
+    return '<b class="money">' . escape_money($number) . '</b>';
 }
 
 function tpl_html_champ_membre($params)
@@ -506,6 +511,7 @@ $tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'Garradin\tpl_format_wiki');
 $tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
 $tpl->register_modifier('escape_money', 'Garradin\escape_money');
+$tpl->register_modifier('html_money', 'Garradin\tpl_html_money');
 $tpl->register_modifier('abs', 'abs');
 
 $tpl->register_modifier('display_champ_membre', function ($v, $config) {

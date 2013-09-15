@@ -32,8 +32,8 @@
             <tr>
                 <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
                 <th>{$ligne.libelle|escape}</th>
-                <td>{if $ligne.compte_debit == $souscode}{$ligne.montant|escape_money}{/if}</td>
-                <td>{if $ligne.compte_credit == $souscode}{$ligne.montant|escape_money}{/if}</td>
+                <td>{if $ligne.compte_debit == $souscode}{$ligne.montant|html_money}{/if}</td>
+                <td>{if $ligne.compte_credit == $souscode}{$ligne.montant|html_money}{/if}</td>
             </tr>
         {/foreach}
         </tbody>
@@ -41,8 +41,8 @@
             <tr>
                 <td></td>
                 <th>Solde final</th>
-                <td>{if $souscompte.debit > 0}{$souscompte.debit|escape_money}{/if}</td>
-                <td>{if $souscompte.credit > 0}{$souscompte.credit|escape_money}{/if}</td>
+                <td>{if $souscompte.debit > 0}{$souscompte.debit|html_money}{/if}</td>
+                <td>{if $souscompte.credit > 0}{$souscompte.credit|html_money}{/if}</td>
             </tr>
         </tfoot>
     </table>
@@ -59,8 +59,8 @@
             <tr>
                 <td>Total</td>
                 <th>{$code|get_nom_compte|escape}</th>
-                <td>{if $compte.total > 0}{$compte.total|abs|escape_money}{/if}</td>
-                <td>{if $compte.total < 0}{$compte.total|abs|escape_money}{/if}</td>
+                <td>{if $compte.total > 0}{$compte.total|abs|html_money}{/if}</td>
+                <td>{if $compte.total < 0}{$compte.total|abs|html_money}{/if}</td>
             </tr>
         </tfoot>
     </table>
@@ -78,8 +78,8 @@
         <tr>
             <td><strong>Total</strong></td>
             <th></th>
-            <td>{$livre.debit|escape_money}</td>
-            <td>{$livre.credit|escape_money}</td>
+            <td>{$livre.debit|html_money}</td>
+            <td>{$livre.credit|html_money}</td>
         </tr>
     </tfoot>
 </table>
