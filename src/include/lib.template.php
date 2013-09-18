@@ -409,7 +409,7 @@ function tpl_html_champ_membre($params)
     if (!empty($params['user_mode']) && empty($config['editable']))
     {
         $out = '<dt>' . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</dt>';
-        $out .= '<dd>' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</dd>';
+        $out .= '<dd>' . htmlspecialchars((trim($value) === '' ? 'Non renseigné' : ''), ENT_QUOTES, 'UTF-8') . '</dd>';
         return $out;
     }
 
