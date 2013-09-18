@@ -29,7 +29,10 @@ if (!empty($_POST['save']))
 
             foreach ($config->get('champs_membres')->getAll() as $key=>$c)
             {
-                $data[$key] = utils::post($key);
+                if ($c['editable'])
+                {
+                    $data[$key] = utils::post($key);
+                }
             }
 
             $membres->edit($membre['id'], $data);
