@@ -52,12 +52,6 @@ if (!empty($_POST['save']))
 
             foreach ($champs->getAll() as $key=>$config)
             {
-                // do not edit private fields when you're not allowed to
-                if (!empty($config['private']) && $user['droits']['membres'] < Membres::DROIT_ADMIN)
-                {
-                    continue;
-                }
-                
                 $data[$key] = utils::post($key);
             }
 
@@ -67,7 +61,7 @@ if (!empty($_POST['save']))
                 $data['id'] = utils::post('id');
             }
 
-            $membres->edit($id, $data, ($user['droits']['membres'] == Membres::DROIT_ADMIN) ? false : true);
+            $membres->edit($id, $data);
 
             utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
