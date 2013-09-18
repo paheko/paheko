@@ -29,13 +29,13 @@ if (!empty($_POST['save']))
 
             foreach ($config->get('champs_membres')->getAll() as $key=>$c)
             {
-                if ($c['editable'])
+                if (!empty($c['editable']))
                 {
                     $data[$key] = utils::post($key);
                 }
             }
 
-            $membres->edit($membre['id'], $data);
+            $membres->edit($membre['id'], $data, false);
             $membres->updateSessionData();
 
             utils::redirect('/admin/');
