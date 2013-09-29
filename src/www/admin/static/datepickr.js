@@ -423,7 +423,7 @@ function datepickr(targetElement, userConfig) {
 			{
 				inputs[i].setAttribute('type', 'text');
 				new datepickr(inputs[i], config_fr);
-				inputs[i].setAttribute('readonly', 'readonly');
+				inputs[i].setAttribute('pattern', '[0-9]{4}-[0-9]{2}-[0-9]{2}');
 				enabled = true;
 			}
 		}
