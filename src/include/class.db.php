@@ -184,8 +184,6 @@ class DB extends \SQLite3
             }
         }
 
-        var_dump($args);
-
         try {
             return $statement->execute();
         }
