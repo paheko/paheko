@@ -156,6 +156,11 @@ class DB extends \SQLite3
 
         if (!empty($args))
         {
+            if (count($args) == 1 && is_array($args[0]))
+            {
+                $args = $args[0];
+            }
+            
             if (count($args) != $nb)
             {
                 throw new \LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
