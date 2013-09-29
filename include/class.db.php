@@ -57,6 +57,8 @@ class DB extends \SQLite3
 
         parent::__construct(GARRADIN_DB_FILE, $flags);
 
+        $this->enableExceptions(true);
+
         // Activer les contraintes des foreign keys
         $this->exec('PRAGMA foreign_keys = ON;');
 
@@ -171,38 +173,43 @@ class DB extends \SQLite3
         $statement = $this->prepare($query);
         $nb = $statement->paramCount();
 
-        if (count($args) == 1 && is_array($args[0]))
-        {
-            if (count($args[0]) != $nb)
-            {
-                throw new \LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
-            }
-
-            foreach ($args[0] as $key=>$value)
-            {
-                if (is_int($key))
-                {
-                    throw new \InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
-                }
-
-                $statement->bindValue(':'.$key, $value, $this->_getArgType($value, $key));
-            }
-        }
-        else
+        if (!empty($args))
         {
             if (count($args) != $nb)
             {
                 throw new \LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
             }
 
-            for ($i = 1; $i <= count($args); $i++)
+            reset($args);
+
+            if (is_int(key($args)))
             {
-                $arg = $args[$i - 1];
-                $statement->bindValue($i, $arg, $this->_getArgType($arg, $i));
+                foreach ($args as $i=>$arg)
+                {
+                    $statement->bindValue((int)$i+1, $arg, $this->_getArgType($arg, $i+1));
+                }
+            }
+            else
+            {
+                foreach ($args as $key=>$value)
+                {
+                    if (is_int($key))
+                    {
+                        throw new \InvalidArgumentException(__FUNCTION__ . ' requires argument to be a named-associative array, but key '.$key.' is an integer.');
+                    }
+
+                    $statement->bindValue(':'.$key, $value, $this->_getArgType($value, $key));
+                }
             }
         }
 
-        return $statement->execute();
+        try {
+            return $statement->execute();
+        }
+        catch (\Exception $e)
+        {
+            throw new \Exception($e->getMessage() . "\n" . $query);
+        }
     }
 
     public function simpleStatementFetch($query, $mode = SQLITE3_BOTH)
@@ -253,61 +260,12 @@ class DB extends \SQLite3
     }
 
     /**
-     * Returns a correct, escaped query from a query statement and list of arguments,
-     * either as named array or as a list of indexed arguments.
-     */
-    protected function _getSimpleQuery($query, $args)
-    {
-        if (count($args) == 1 && is_array($args[0]))
-        {
-            preg_match_all('/:[a-z_]+/', $query, $matches);
-            $nb = count(array_unique($matches[0]));
-
-            if (count($args[0]) < $nb)
-            {
-                throw new \LengthException('Only '.count($args[0]).' arguments in array, but '.$nb.' are required by query.');
-            }
-
-            foreach ($args[0] as $key=>$value)
-            {
-                if (is_int($key))
-                {
-                    throw new \InvalidArgumentException(__FUNCTION__ . ' requires second argument to be a named-associative array, but key '.$key.' is an integer.');
-                }
-
-                $value = preg_replace('#(?<!\\\\)(\\$|\\\\)#', '\\\\$1', $this->escapeAuto($value, $key));
-                $query = preg_replace('/:'.$key.'(?![a-z])/', $value, $query);
-            }
-        }
-        else
-        {
-            $nb = substr_count($query, '?');
-
-            if (count($args) != $nb)
-            {
-                throw new \LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
-            }
-
-            for ($i = 1; $i <= count($args); $i++)
-            {
-                $arg = $args[$i - 1];
-                $arg = $this->escapeAuto($arg, $i);
-
-                $pos = strpos($query, '?');
-                $query = substr_replace($query, $arg, $pos, 1);
-            }
-        }
-
-        return $query;
-    }
-
-    /**
      * Simple INSERT query
      */
     public function simpleInsert($table, $fields)
     {
         $fields_names = array_keys($fields);
-        return $this->simpleExec('INSERT INTO '.$table.' ('.implode(', ', $fields_names).')
+        return $this->simpleStatement('INSERT INTO '.$table.' ('.implode(', ', $fields_names).')
             VALUES (:'.implode(', :', $fields_names).');', $fields);
     }
 
@@ -322,7 +280,7 @@ class DB extends \SQLite3
 
         $query = substr($query, 0, -2);
         $query .= ' WHERE '.$where.';';
-        return $this->simpleExec($query, $fields);
+        return $this->simpleStatement($query, $fields);
     }
 
     /**
@@ -330,33 +288,24 @@ class DB extends \SQLite3
      */
     public function simpleExec($query)
     {
-        $args = array_slice(func_get_args(), 1);
-        $query = $this->_getSimpleQuery($query, $args);
-
-        try {
-            return $this->exec($query);
-        }
-        catch (ErrorException $e)
-        {
-            echo $query;
-            echo "\n\n";
-            throw $e;
-        }
+        return $this->simpleStatement($query, array_slice(func_get_args(), 1));
     }
 
     public function simpleQuerySingle($query, $all_columns = false)
     {
-        $args = array_slice(func_get_args(), 2);
-        $query = $this->_getSimpleQuery($query, $args);
+        $res = $this->simpleStatement($query, array_slice(func_get_args(), 2));
 
-        try {
-            return $this->querySingle($query, $all_columns);
-        }
-        catch (ErrorException $e)
+        $row = $res->fetchArray($all_columns ? SQLITE3_ASSOC : SQLITE3_NUM);
+
+        if (!$all_columns)
         {
-            echo $query;
-            echo "\n\n";
-            throw $e;
+            if (isset($row[0]))
+                return $row[0];
+            return false;
+        }
+        else
+        {
+            return $row;
         }
     }
 
