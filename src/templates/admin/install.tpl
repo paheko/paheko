@@ -40,10 +40,17 @@
             <dt><label for="f_email_membre">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="email" name="email_membre" id="f_email_membre" value="{form_field name=email_membre}" /></dd>
             <dt><label for="f_passe_membre">Mot de passe</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd class="help">Pas d'idée ? Voici une suggestion choisie au hasard : <tt onclick="fillPassword(this);">{$passphrase|escape}</tt></dd>
-            <dd><input type="password" name="passe_membre" id="f_passe_membre" value="{form_field name=passe_membre}" /></dd>
+            <dd class="help">
+                Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr 
+                et plus simple à retenir qu'un mot de passe composé de 10 lettres et chiffres.
+            </dd>
+            <dd class="help">
+                Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
+                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase|escape}" />
+            </dd>
+            <dd><input type="password" name="passe_membre" id="f_passe_membre" value="{form_field name=passe_membre}" pattern=".{ldelim}5,{rdelim}" /></dd>
             <dt><label for="f_repasse_membre">Encore le mot de passe</label> (vérification) <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="password" name="repasse_membre" id="f_repasse_membre" value="{form_field name=repasse_membre}" /></dd>
+            <dd><input type="password" name="repasse_membre" id="f_repasse_membre" value="{form_field name=repasse_membre}" pattern=".{ldelim}5,{rdelim}" /></dd>
         </dl>
     </fieldset>
 
@@ -52,15 +59,9 @@
         <input type="submit" name="save" value="Terminer l'installation &rarr;" />
     </p>
 
+    <script type="text/javascript" src="{$admin_url}static/password.js"></script>
     <script type="text/javascript">
-    {literal}
-    function fillPassword(elm)
-    {
-        var pw = elm.textContent || elm.innerText;
-        document.getElementById('f_passe_membre').value = pw;
-        document.getElementById('f_repasse_membre').value = pw;
-    }
-    {/literal}
+    initPasswordField('password_suggest', 'f_passe_membre', 'f_repasse_membre');
     </script>
 
     </form>

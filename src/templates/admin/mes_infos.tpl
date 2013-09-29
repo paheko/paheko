@@ -26,15 +26,19 @@
             <p class="help">Vous devez contacter un administrateur pour changer votre mot de passe.</p>
         {else}
             <dl>
-                <dd>Vous avez déjà un mot de passe, ne remplissez pas les champs suivants si vous ne souhaitez pas les changer.</dd>
+                <dd>Vous avez déjà un mot de passe, ne remplissez les champs suivants que si vous souhaitez en changer.</dd>
                 <dt><label for="f_passe">Nouveau mot de passe</label></dt>
                 <dd class="help">
-                    Pas d'idée ? Voici une suggestion choisie au hasard :
-                    <tt title="Cliquer pour utiliser cette suggestion comme mot de passe" onclick="fillPassword(this);">{$passphrase|escape}</tt>
+                    Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr 
+                    et plus simple à retenir qu'un mot de passe composé de 10 lettres et chiffres.
                 </dd>
-                <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" /></dd>
+                <dd class="help">
+                    Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
+                    <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase|escape}" />
+                </dd>
+                <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}5,{rdelim}" /></dd>
                 <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-                <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" /></dd>
+                <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" pattern=".{ldelim}5,{rdelim}" /></dd>
             </dl>
         {/if}
     </fieldset>
@@ -46,15 +50,9 @@
 
 </form>
 
+<script type="text/javascript" src="{$admin_url}static/password.js"></script>
 <script type="text/javascript">
-{literal}
-function fillPassword(elm)
-{
-    var pw = elm.textContent || elm.innerText;
-    document.getElementById('f_passe').value = pw;
-    document.getElementById('f_repasse').value = pw;
-}
-{/literal}
+initPasswordField('password_suggest', 'f_passe', 'f_repasse');
 </script>
 
 {include file="admin/_foot.tpl"}
