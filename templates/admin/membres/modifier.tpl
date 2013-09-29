@@ -16,14 +16,13 @@
             <dd><input type="text" name="id" id="f_id" value="{form_field data=$membre name=id}" /></dd>
         {/if}
             {foreach from=$champs item="champ" key="nom"}
-            {if empty($champ.private) || $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+
                 {html_champ_membre config=$champ name=$nom data=$membre}
-            {/if}
+
             {/foreach}
         </dl>
     </fieldset>
 
-    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN || empty($champs.passe.private)}
     <fieldset>
         <legend>{if $membre.passe}Changer le mot de passe{else}Choisir un mot de passe{/if}</legend>
         <dl>
@@ -42,7 +41,6 @@
             <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" /></dd>
         </dl>
     </fieldset>
-    {/if}
 
     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
     <fieldset>

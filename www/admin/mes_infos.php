@@ -29,10 +29,13 @@ if (!empty($_POST['save']))
 
             foreach ($config->get('champs_membres')->getAll() as $key=>$c)
             {
-                $data[$key] = utils::post($key);
+                if (!empty($c['editable']))
+                {
+                    $data[$key] = utils::post($key);
+                }
             }
 
-            $membres->edit($membre['id'], $data);
+            $membres->edit($membre['id'], $data, false);
             $membres->updateSessionData();
 
             utils::redirect('/admin/');
@@ -49,6 +52,8 @@ $tpl->assign('passphrase', utils::suggestPassword());
 $tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membre', $membre);
+
+$tpl->assign('custom_js', array('datepickr.js'));
 
 $tpl->display('admin/mes_infos.tpl');
 

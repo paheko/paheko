@@ -12,28 +12,26 @@
         <legend>Informations personnelles</legend>
         <dl>
             {foreach from=$champs item="champ" key="nom"}
-            {if empty($champ.private) || $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+
                 {html_champ_membre config=$champ name=$nom}
-            {/if}
+
             {/foreach}
         </dl>
     </fieldset>
 
-    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN || empty($champs.passe.private)}
-        <fieldset>
-            <legend>Connexion</legend>
-            <dl>
-                <dt><label for="f_passe">Mot de passe</label>{if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
-                <dd class="help">
-                    Pas d'idée ? Voici une suggestion choisie au hasard :
-                    <tt title="Cliquer pour utiliser cette suggestion comme mot de passe" onclick="fillPassword(this);">{$passphrase|escape}</tt>
-                </dd>
-                <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" /></dd>
-                <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-                <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" /></dd>
-            </dl>
-        </fieldset>
-    {/if}
+    <fieldset>
+        <legend>Connexion</legend>
+        <dl>
+            <dt><label for="f_passe">Mot de passe</label>{if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
+            <dd class="help">
+                Pas d'idée ? Voici une suggestion choisie au hasard :
+                <tt title="Cliquer pour utiliser cette suggestion comme mot de passe" onclick="fillPassword(this);">{$passphrase|escape}</tt>
+            </dd>
+            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" /></dd>
+            <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
+            <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" /></dd>
+        </dl>
+    </fieldset>
 
     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
     <fieldset>

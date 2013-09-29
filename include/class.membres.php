@@ -41,16 +41,6 @@ class Membres
             session_start();
         }
 
-        // Fix bug with register_globals ($test is a reference to $_SESSION['test'])
-        if (ini_get('register_globals') && isset($_SESSION))
-        {
-            foreach ($_SESSION as $key=>$value)
-            {
-                if (isset($GLOBALS[$key]))
-                    unset($GLOBALS[$key]);
-            }
-        }
-
         return true;
     }
 
@@ -239,15 +229,22 @@ class Membres
 
     // Gestion des données ///////////////////////////////////////////////////////
 
-    public function _checkFields(&$data, $check_mandatory = true, $check_password = true)
+    public function _checkFields(&$data, $check_editable = true, $check_password = true)
     {
         $champs = Config::getInstance()->get('champs_membres');
 
         foreach ($champs->getAll() as $key=>$config)
         {
-            if (!isset($data[$key]) || empty($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) == ''))
+            if (!$check_editable && (!empty($config['private']) || empty($config['editable'])))
             {
-                if (!empty($config['mandatory']) && $check_mandatory && ($check_password || $key != 'passe'))
+                unset($data[$key]);
+                continue;
+            }
+
+            if (!isset($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) == '')
+                || (is_array($data[$key]) && empty($data[$key])))
+            {
+                if (!empty($config['mandatory']) && ($check_password || $key != 'passe'))
                 {
                     throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
                 }
@@ -332,9 +329,9 @@ class Membres
         return true;
     }
 
-    public function add($data = array(), $check_mandatory = true)
+    public function add($data = array())
     {
-        $this->_checkFields($data, $check_mandatory);
+        $this->_checkFields($data);
         $db = DB::getInstance();
 
         if (!empty($data['email'])
@@ -361,7 +358,7 @@ class Membres
         return $db->lastInsertRowId();
     }
 
-    public function edit($id, $data = array(), $check_mandatory = true)
+    public function edit($id, $data = array(), $check_editable = true)
     {
         $db = DB::getInstance();
 
@@ -370,7 +367,7 @@ class Membres
             unset($data['id']);
         }
 
-        $this->_checkFields($data, $check_mandatory, false);
+        $this->_checkFields($data, $check_editable, false);
 
         if (!empty($data['email'])
             && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? AND id != ? LIMIT 1;', false, $data['email'], (int)$id))
