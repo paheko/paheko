@@ -14,23 +14,6 @@ function str_replace_first ($search, $replace, $subject)
     return $subject;
 }
 
-define('SQLITE3_INSTRUCTION', 42);
-
-class SQLite3_Instruction
-{
-    protected $instruction = '';
-
-    public function __construct($instruction)
-    {
-        $this->instruction = $instruction;
-    }
-
-    public function __toString()
-    {
-        return $this->instruction;
-    }
-}
-
 class DB extends \SQLite3
 {
     static protected $_instance = null;
@@ -162,8 +145,6 @@ class DB extends \SQLite3
             return SQLITE3_NULL;
         elseif (is_string($arg))
             return SQLITE3_TEXT;
-        elseif (is_object($arg) && $arg instanceof SQLite3_instruction)
-            return SQLITE3_INSTRUCTION;
         else
             throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
     }
@@ -202,6 +183,8 @@ class DB extends \SQLite3
                 }
             }
         }
+
+        var_dump($args);
 
         try {
             return $statement->execute();
@@ -254,8 +237,6 @@ class DB extends \SQLite3
                 return 'NULL';
             case SQLITE3_TEXT:
                 return '\'' . $this->escapeString($value) . '\'';
-            case SQLITE3_INSTRUCTION:
-                return (string) $value;
         }
     }
 

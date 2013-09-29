@@ -140,7 +140,7 @@ class Wiki
             $data['parent'] = 0;
         }
 
-        $data['date_modification'] = new SQLite3_Instruction('CURRENT_TIMESTAMP');
+        $data['date_modification'] = date('Y-m-d H:i:s');
 
         if (isset($data['date_creation']) && !($data['date_creation'] > 0))
         {
@@ -148,7 +148,7 @@ class Wiki
         }
         else
         {
-            $data['date_creation'] = new SQLite3_Instruction('datetime('.(int)$data['date_creation'].', \'unixepoch\')');
+            $data['date_creation'] = time();
         }
 
         $db->simpleUpdate('wiki_pages', $data, 'id = '.(int)$id);
@@ -264,7 +264,7 @@ class Wiki
         $db->simpleInsert('wiki_revisions', $data);
         $db->simpleUpdate('wiki_pages', array(
             'revision'          =>  $revision,
-            'date_modification' =>  new SQLite3_Instruction('CURRENT_TIMESTAMP'),
+            'date_modification' =>  date('Y-m-d H:i:s'),
         ), 'id = '.(int)$id);
 
         return true;
