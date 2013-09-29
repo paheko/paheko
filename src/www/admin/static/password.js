@@ -40,7 +40,7 @@
 
 		pw_elm.form.addEventListener('submit', function (e) {
 			if (pw_elm.value == '') return true;
-			if (checkPasswordStrength() <= 30 && !window.confirm("Êtes-vous sûr de vouloir utiliser un mot de passe aussi mauvais que ça ?"))
+			if (scorePassword(pw_elm.value) <= 30 && !window.confirm("Êtes-vous sûr de vouloir utiliser un mot de passe aussi mauvais que ça ?"))
 			{
 				e = e || window.event;
 				if(e.preventDefault)
