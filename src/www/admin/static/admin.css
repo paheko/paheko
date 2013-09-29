@@ -241,6 +241,23 @@ form .checkUncheck {
     float: left;
 }
 
+form span.password_check {
+    margin-left: 1em;
+    padding: .1em .3em;
+    border-radius: .5em;
+}
+
+form span.password_check.fail { background-color: #f99; }
+form span.password_check.weak { background-color: #ff9; }
+form span.password_check.medium { background-color: #ccf; }
+form span.password_check.ok { background-color: #cfc; }
+
+dd.help input[type=text] {
+    cursor: pointer;
+    padding: 0;
+    font-family: monospace;
+}
+
 form .actions {
     float: right;
 }
@@ -283,12 +300,6 @@ h3.warning {
 
 dd.help {
     color: #666;
-}
-
-dd.help tt {
-    background: #ddd;
-    padding: 0.2em;
-    cursor: pointer;
 }
 
 table.list {
