@@ -279,6 +279,11 @@ class Champs_Membres
      */
     public function add($name, $config)
     {
+        if (!preg_match('!^[a-z0-9]+(_[a-z0-9]+)*$!', $name))
+        {
+            throw new UserException('Le nom du champ est invalide : ne sont acceptés que des lettres minuscules et chiffres.');
+        }
+        
         $this->_checkField($name, $config);
 
         $this->champs[$name] = $config;
