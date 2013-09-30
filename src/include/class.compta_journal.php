@@ -231,6 +231,11 @@ class Compta_Journal
         $data['compte_credit'] = strtoupper(trim($data['compte_credit']));
         $data['compte_debit'] = strtoupper(trim($data['compte_debit']));
 
+        if ($data['compte_credit'] == $data['compte_debit'])
+        {
+            throw new UserException('Compte crédité identique au compte débité.');
+        }
+
         if (isset($data['id_categorie']))
         {
             if (!$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, (int)$data['id_categorie']))
