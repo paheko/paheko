@@ -156,9 +156,9 @@ class DB extends \SQLite3
 
         if (!empty($args))
         {
-            if (count($args) == 1 && is_array($args[0]))
+            if (is_array($args) && count($args) == 1 && is_array(current($args)))
             {
-                $args = $args[0];
+                $args = current($args);
             }
             
             if (count($args) != $nb)
