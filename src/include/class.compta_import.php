@@ -4,26 +4,26 @@ namespace Garradin;
 
 class Compta_Import
 {
+	protected $csv_header = [
+		'Numéro mouvement',
+		'Date',
+		'Type de mouvement',
+		'Catégorie',
+		'Libellé',
+		'Montant',
+		'Compte de débit - numéro',
+		'Compte de débit - libellé',
+		'Compte de crédit - numéro',
+		'Compte de crédit - libellé',
+		'Moyen de paiement',
+		'Numéro de chèque',
+		'Numéro de pièce',
+		'Remarques'
+	];
+
 	public function toCSV($exercice)
 	{
 		$db = DB::getInstance();
-
-		$header = array(
-			'Numéro mouvement',
-			'Date',
-			'Type de mouvement',
-			'Catégorie',
-			'Libellé',
-			'Montant',
-			'Compte de débit - numéro',
-			'Compte de débit - libellé',
-			'Compte de crédit - numéro',
-			'Compte de crédit - libellé',
-			'Moyen de paiement',
-			'Numéro de chèque',
-			'Numéro de pièce',
-			'Remarques'
-		);
 
 		$res = $db->prepare('SELECT
 			journal.id,
@@ -51,7 +51,7 @@ class Compta_Import
 
 		$fp = fopen('php://output', 'w');
 
-		fputcsv($fp, $header);
+		fputcsv($fp, $this->csv_header);
 
 		while ($row = $res->fetchArray(SQLITE3_ASSOC))
 		{
@@ -60,6 +60,142 @@ class Compta_Import
 
 		fclose($fp);
 
+		return true;
+	}
+
+	public function fromCSV($path)
+	{
+		if (!file_exists($path) || !is_readable($path))
+		{
+			throw new \RuntimeException('Fichier inconnu : '.$path);
+		}
+
+		$fp = fopen($path, 'r');
+
+		if (!$fp)
+		{
+			return false;
+		}
+
+		$db = DB::getInstance();
+		$db->exec('BEGIN;');
+		$comptes = new Compta_Comptes;
+		$banques = new Compta_Comptes_Bancaires;
+		$cats = new Compta_Categories;
+		$journal = new Compta_Journal;
+
+		$columns = array_flip($this->csv_header);
+		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
+		$liste_cats = $db->simpleStatementFetchAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_moyens = $cats->listMoyensPaiement();
+
+		$col = function($column) use (&$row, &$columns)
+		{
+			if (!isset($columns[$column]))
+				return null;
+
+			if (!isset($row[$columns[$column]]))
+				return null;
+
+			return $row[$columns[$column]];
+		};
+
+		$line = 0;
+
+		while (!feof($fp))
+		{
+			$row = fgetcsv($fp, 4096);
+			$line++;
+
+			if (empty($row))
+			{
+				continue;
+			}
+
+			if (trim($row[0]) == 'Numéro mouvement')
+			{
+				continue;
+			}
+
+			if (count($row) != count($columns))
+			{
+				$db->exec('ROLLBACK;');
+				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
+			}
+
+			if (!empty($row[0]) && !is_numeric($row[0]))
+			{
+				print_r($row);
+				$db->exec('ROLLBACK;');
+				throw new UserException('Erreur sur la ligne ' . $line . ' : la première colonne doit être vide ou contenir le numéro unique d\'opération.');
+			}
+
+			$id = $col('Numéro mouvement');
+			$date = $col('Date');
+
+			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
+			{
+				$db->exec('ROLLBACK;');
+				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
+			}
+
+			$date = explode('/', $date);
+			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
+
+			// En dehors de l'exercice courant
+			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices
+				WHERE (? < debut OR ? > fin) AND cloture = 0;', false, $date, $date))
+			{
+				continue;
+			}
+
+			$debit = $col('Compte de débit - numéro');
+			$credit = $col('Compte de crédit - numéro');
+
+			$cat = $col('Catégorie');
+			$moyen = strtoupper(substr($col('Moyen de paiement'), 0, 2));
+
+			if (!$moyen || !array_key_exists($moyen, $liste_moyens))
+			{
+				$moyen = false;
+				$cat = false;
+			}
+
+			if ($cat && !array_key_exists($cat, $liste_cats))
+			{
+				$cat = $moyen = false;
+			}
+
+			$data = array(
+				'libelle'       =>  $col('Libellé'),
+				'montant'       =>  (float) $col('Montant'),
+				'date'          =>  $date,
+				'compte_credit' =>  $credit,
+				'compte_debit'  =>  $debit,
+				'numero_piece'  =>  $col('Numéro de pièce'),
+				'remarques'     =>  $col('Remarques'),
+			);
+
+			if ($cat)
+			{
+				$data['moyen_paiement']	=	$moyen;
+				$data['numero_cheque']	=	$col('Numéro de chèque');
+				$data['id_categorie']	=	$liste_cats[$cat];
+			}
+
+			if (empty($id))
+			{
+				$journal->add($data);
+			}
+			else
+			{
+				$journal->edit($id, $data);
+			}
+		}
+
+		$db->exec('END;');
+
+		fclose($fp);
 		return true;
 	}
 
@@ -130,9 +266,12 @@ class Compta_Import
 			return $row[$columns[$column]];
 		};
 
+		$line = 0;
+
 		while (!feof($fp))
 		{
 			$row = fgetcsv($fp, 4096, ';');
+			$line++;
 
 			if (empty($row))
 			{
@@ -146,20 +285,21 @@ class Compta_Import
 				continue;
 			}
 
-			$date = explode('/', $col('Date'));
+			$date = $col('Date');
+
+			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
+			{
+				$db->exec('ROLLBACK;');
+				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
+			}
+
+			$date = explode('/', $date);
 			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
 
 			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices
-				WHERE (? < debut || ? > fin) AND cloture = 0;', false, $date, $date))
+				WHERE (? < debut OR ? > fin) AND cloture = 0;', false, $date, $date))
 			{
-				$db->exec('ROLLBACK;');
-				throw new UserException('Impossible d\'importer dans cet exercice : une opération est datée au '.$col('Date').', en dehors de l\'exercice.');
-			}
-
-			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE ? < debut AND cloture = 0;', false, $date))
-			{
-				$db->exec('ROLLBACK;');
-				throw new UserException('Une opération est datée du '.$col('Date').', soit avant la date de début de l\'exercice.');
+				continue;
 			}
 
 			$debit = $get_compte($col('Compte débité - Numéro'), $col('Compte débité - Intitulé'));

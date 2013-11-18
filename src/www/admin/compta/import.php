@@ -23,7 +23,7 @@ $error = false;
 
 if (!empty($_POST['import']))
 {
-    if (!utils::CSRF_check('compta_import'))
+    if (false && !utils::CSRF_check('compta_import'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -39,12 +39,16 @@ if (!empty($_POST['import']))
             {
                 $import->fromCitizen($_FILES['upload']['tmp_name']);
             }
+            elseif (utils::post('type') == 'garradin')
+            {
+                $import->fromCSV($_FILES['upload']['tmp_name']);
+            }
             else
             {
                 throw new UserException('Import inconnu.');
             }
 
-            utils::redirect('/admin/compta/');
+            utils::redirect('/admin/compta/import.php?ok');
         }
         catch (UserException $e)
         {
@@ -54,6 +58,9 @@ if (!empty($_POST['import']))
 }
 
 $tpl->assign('error', $error);
+$tpl->assign('ok', isset($_GET['ok']) ? true : false);
+
+echo $a;
 
 $tpl->display('admin/compta/import.tpl');
 
