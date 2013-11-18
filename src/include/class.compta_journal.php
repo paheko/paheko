@@ -296,6 +296,45 @@ class Compta_Journal
 
         return $db->simpleStatementFetch($query);
     }
+
+    public function searchSQL($query)
+    {
+        $db = DB::getInstance();
+
+        if (!preg_match('/LIMIT\s+/', $query))
+        {
+            $query = preg_replace('/;?\s*$/', '', $query);
+            $query .= ' LIMIT 100';
+        }
+
+        $st = $db->prepare($query);
+
+        if (!$st->readOnly())
+        {
+            throw new UserException('Seules les requêtes en lecture sont autorisées.');
+        }
+
+        $res = $st->execute();
+        $out = [];
+
+        while ($row = $res->fetchArray(SQLITE3_ASSOC))
+        {
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    public function schemaSQL()
+    {
+        $db = DB::getInstance();
+
+        $tables = [
+            'journal'   =>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'compta_journal\';'),
+        ];
+
+        return $tables;
+    }
 }
 
 ?>
