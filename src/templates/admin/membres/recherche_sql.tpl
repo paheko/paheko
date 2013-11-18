@@ -25,6 +25,7 @@
 <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
 {if !empty($result)}
+<p class="alert">{$result|@count} résultats renvoyés.</p>
 <table class="list search">
     <thead>
         {if array_key_exists('id', $result[0])}
@@ -69,7 +70,7 @@
     {csrf_field key="membres_action"}
 </p>
 
-{elseif !is_null($result)}
+{elseif}
 <p class="alert">
     Aucun membre trouvé.
 </p>
