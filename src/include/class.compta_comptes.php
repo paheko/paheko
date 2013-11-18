@@ -136,6 +136,16 @@ class Compta_Comptes
             throw new UserException('Ce compte ne peut être supprimé car des opérations comptables y sont liées.');
         }
 
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE compte = ? LIMIT 1;', false, $id, $id))
+        {
+            throw new UserException('Ce compte ne peut être supprimé car il est lié à un compte bancaire.');
+        }
+
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id, $id))
+        {
+            throw new UserException('Ce compte ne peut être supprimé car des catégories y sont liées.');
+        }
+
         $db->simpleExec('DELETE FROM compta_comptes WHERE id = ?;', trim($id));
 
         return true;
