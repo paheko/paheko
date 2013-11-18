@@ -60,8 +60,6 @@ if (!empty($_POST['import']))
 $tpl->assign('error', $error);
 $tpl->assign('ok', isset($_GET['ok']) ? true : false);
 
-echo $a;
-
 $tpl->display('admin/compta/import.tpl');
 
 ?>
