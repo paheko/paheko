@@ -986,6 +986,14 @@ dl.describe ul {
     text-decoration: underline;
 }
 
+pre.sql_schema {
+    float: right;
+    color: #666;
+    font-size: .9em;
+    width: 30%;
+    overflow: auto;
+}
+
 @media print {
     body {
         background: #fff;

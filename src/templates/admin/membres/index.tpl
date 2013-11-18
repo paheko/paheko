@@ -7,6 +7,7 @@
     {/if}
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$admin_url}membres/export.php">Export de la liste en CSV</a></li>
+        <li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
     {/if}
 
 </ul>

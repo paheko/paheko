@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+error_reporting(-1);
+
 /*
  * Version de Garradin
  */
@@ -88,6 +90,10 @@ if (!defined('WWW_URL'))
     define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
 }
 
+ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
+ini_set('log_errors', true);
+ini_set('display_errors', defined('DEV') ? true : false);
+
 /*
  * Gestion des erreurs et exceptions
  */
@@ -95,8 +101,6 @@ if (!defined('WWW_URL'))
 class UserException extends \LogicException
 {
 }
-
-error_reporting(-1);
 
 function exception_error_handler($errno, $errstr, $errfile, $errline )
 {
