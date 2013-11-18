@@ -92,7 +92,17 @@ if (!defined('WWW_URL'))
 
 ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
 ini_set('log_errors', true);
-ini_set('display_errors', defined('DEV') ? true : false);
+ini_set('display_errors', true);
+ini_set('html_errors', false);
+ini_set('error_prepend_string', '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
+    pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
+    <pre> \__/<br /> (xx)<br />//||\\\\</pre>
+    <h1>Erreur fatale</h1>
+    <p>Une erreur fatale s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
+    merci d\'inclure le message ci-dessous :</p>
+    <h3>');
+ini_set('error_append_string', '</h3><hr />
+    <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>');
 
 /*
  * Gestion des erreurs et exceptions
@@ -125,18 +135,38 @@ function exception_handler($e)
         }
     }
 
+    $file = str_replace(GARRADIN_ROOT, '', $e->getFile());
+
     $error = "Exception of type ".get_class($e)." happened !\n\n".
         $e->getCode()." - ".$e->getMessage()."\n\nIn: ".
-        $e->getFile() . ":" . $e->getLine()."\n\n";
+        $file . ":" . $e->getLine()."\n\n";
 
-    if (!empty($_SERVER['HTTP_HOST']))
+    if (!empty($_SERVER['HTTP_HOST']) && !empty($_SERVER['REQUEST_URI']))
         $error .= 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."\n\n";
 
     $error .= $e->getTraceAsString();
-    //$error .= print_r($_SERVER, true);
+    $error .= "\n-------------\n";
+    $error .= 'Garradin version: ' . garradin_version() . "\n";
+    $error .= 'Garradin manifest: ' . garradin_manifest() . "\n";
+    $error .= 'PHP version: ' . phpversion() . "\n";
 
-    echo '<pre>';
-    echo $error;
+    foreach ($_SERVER as $key=>$value)
+    {
+        $error .= $key . ': ' . $value . "\n";
+    }
+    
+    $error = str_replace("\r", '', $error);
+    
+    echo '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
+    pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
+    <pre> \__/<br /> (xx)<br />//||\\\\</pre>
+    <h1>Erreur d\'exécution</h1>
+    <p>Une erreur s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
+    merci d\'inclure le message suivant :</p>
+    <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
+    <hr />
+    <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
+
     exit;
 }
 
