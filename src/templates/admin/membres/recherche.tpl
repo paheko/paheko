@@ -1,5 +1,14 @@
 {include file="admin/_head.tpl" title="Recherche de membre" current="membres"}
 
+{if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+<ul class="actions">
+    <li><a href="{$admin_url}membres/">Liste des membres</a></li>
+    <li class="current"><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
+    <li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
+</ul>
+{/if}
+
+
 <form method="get" action="{$admin_url}membres/recherche.php" class="searchMember">
     <fieldset>
         <legend>Rechercher un membre</legend>

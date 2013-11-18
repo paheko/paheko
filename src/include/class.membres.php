@@ -716,6 +716,51 @@ class Membres
 
         return true;
     }
+
+    public function searchSQL($query)
+    {
+        $db = DB::getInstance();
+
+        if (!preg_match('/LIMIT\s+/', $query))
+        {
+            $query = preg_replace('/;?\s*$/', '', $query);
+            $query .= ' LIMIT 100';
+        }
+
+        $st = $db->prepare($query);
+
+        if (!$st->readOnly())
+        {
+            throw new UserException('Seules les requêtes en lecture sont autorisées.');
+        }
+
+        $res = $st->execute();
+        $out = [];
+
+        while ($row = $res->fetchArray(SQLITE3_ASSOC))
+        {
+            if (array_key_exists('passe', $row))
+            {
+                unset($row['passe']);
+            }
+            
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    public function schemaSQL()
+    {
+        $db = DB::getInstance();
+
+        $tables = [
+            'membres'   =>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
+            'categories'=>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+        ];
+
+        return $tables;
+    }
 }
 
 ?>
