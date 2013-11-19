@@ -140,15 +140,20 @@ class Wiki
             $data['parent'] = 0;
         }
 
-        $data['date_modification'] = date('Y-m-d H:i:s');
+        $data['date_modification'] = gmdate('Y-m-d H:i:s');
 
-        if (isset($data['date_creation']) && !($data['date_creation'] > 0))
+        // Modification de la date de création
+        if (isset($data['date_creation']))
         {
-            unset($data['date_creation']);
-        }
-        else
-        {
-            $data['date_creation'] = time();
+            // Si la date n'est pas valide tant pis
+            if (!(strtotime($data['date_creation']) > 0))
+            {
+                unset($data['date_creation']);
+            }
+            else
+            {
+                $data['date_creation'] = gmdate('Y-m-d H:i:s', $data['date_creation']);
+            }
         }
 
         $db->simpleUpdate('wiki_pages', $data, 'id = '.(int)$id);
@@ -264,7 +269,7 @@ class Wiki
         $db->simpleInsert('wiki_revisions', $data);
         $db->simpleUpdate('wiki_pages', array(
             'revision'          =>  $revision,
-            'date_modification' =>  date('Y-m-d H:i:s'),
+            'date_modification' =>  gmdate('Y-m-d H:i:s'),
         ), 'id = '.(int)$id);
 
         return true;
