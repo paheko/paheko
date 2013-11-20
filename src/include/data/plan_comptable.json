@@ -99,7 +99,7 @@
         "code": 12,
         "nom": "R\u00c9SULTAT NET DE L'EXERCICE",
         "parent": 1,
-        "position": 3
+        "position": 1
     },
     "120": {
         "code": 120,
@@ -111,7 +111,7 @@
         "code": 129,
         "nom": "R\u00e9sultat de l'exercice (d\u00e9ficit)",
         "parent": 12,
-        "position": 2
+        "position": 1
     },
     "13": {
         "code": 13,
@@ -129,7 +129,7 @@
         "code": 139,
         "nom": "Subventions d'investissement inscrites au compte de r\u00e9sultat",
         "parent": 13,
-        "position": 2
+        "position": 1
     },
     "14": {
         "code": 14,
@@ -309,6 +309,24 @@
         "code": 229,
         "nom": "Droits des propri\u00e9taires",
         "parent": 22,
+        "position": 2
+    },
+    "23": {
+        "code": 23,
+        "nom": "IMMOBILISATIONS EN COURS",
+        "parent": 2,
+        "position": 2
+    },
+    "231": {
+        "code": 231,
+        "nom": "Immobilisations corporelles en cours",
+        "parent": 23,
+        "position": 2
+    },
+    "238": {
+        "code": 238,
+        "nom": "Avances et acomptes vers\u00e9s sur commande d'immobilisations corporelles",
+        "parent": 23,
         "position": 2
     },
     "26": {
@@ -1031,6 +1049,12 @@
         "parent": 0,
         "position": 2
     },
+    "50": {
+        "code": 50,
+        "nom": "VALEURS MOBILI\u00c8RES DE PLACEMENT",
+        "parent": 5,
+        "position": 2
+    },
     "51": {
         "code": 51,
         "nom": "BANQUES, \u00c9TABLISSEMENTS FINANCIERS ET ASSIMIL\u00c9S",
@@ -1055,9 +1079,21 @@
         "parent": 53,
         "position": 2
     },
+    "54": {
+        "code": 54,
+        "nom": "R\u00c9GIES D'AVANCES ET ACCR\u00c9DITIFS",
+        "parent": 5,
+        "position": 2
+    },
     "58": {
         "code": 58,
         "nom": "VIREMENTS INTERNES",
+        "parent": 5,
+        "position": 2
+    },
+    "59": {
+        "code": 59,
+        "nom": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES COMPTES FINANCIERS",
         "parent": 5,
         "position": 2
     },
@@ -1469,6 +1505,18 @@
         "parent": 70,
         "position": 4
     },
+    "71": {
+        "code": 71,
+        "nom": "PRODUCTION STOCK\u00c9E (OU D\u00c9STOCKAGE)",
+        "parent": 7,
+        "position": 4
+    },
+    "72": {
+        "code": 72,
+        "nom": "PRODUCTION IMMOBILIS\u00c9E",
+        "parent": 7,
+        "position": 4
+    },
     "74": {
         "code": 74,
         "nom": "SUBVENTIONS D'EXPLOITATION",
@@ -1575,6 +1623,12 @@
         "code": 7788,
         "nom": "Produits exceptionnels divers",
         "parent": 778,
+        "position": 4
+    },
+    "78": {
+        "code": 78,
+        "nom": "REPRISES SUR AMORTISSEMENTS ET PROVISIONS",
+        "parent": 7,
         "position": 4
     },
     "79": {
