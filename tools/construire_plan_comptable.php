@@ -2,8 +2,8 @@
 
 namespace Garradin;
 
-require __DIR__ . '/include/class.compta_comptes.php';
-require __DIR__ . '/include/lib.utils.php';
+require __DIR__ . '/../src/include/class.compta_comptes.php';
+require __DIR__ . '/../src/include/lib.utils.php';
 
 $plan = <<<EOF_PLAN
 Classe 1 — Comptes de capitaux (Fonds propres, emprunts et dettes assimilés)
@@ -95,6 +95,11 @@ Classe 2 — Comptes d'immobilisations
 
     228 Immobilisations grevées de droits
     229 Droits des propriétaires
+
+23 IMMOBILISATIONS EN COURS
+
+    231 Immobilisations corporelles en cours
+    238 Avances et acomptes versés sur commande d'immobilisations corporelles
 
 26 PARTICIPATIONS ET CRÉANCES RATTACHÉES A DES PARTICIPATIONS
 
@@ -288,6 +293,8 @@ Classe 4 — Comptes de tiers
 
 Classe 5 — Comptes financiers
 
+50 VALEURS MOBILIÈRES DE PLACEMENT
+
 51 BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS
 
 512 Banques
@@ -296,7 +303,11 @@ Classe 5 — Comptes financiers
 
     530 Caisse
 
+54 RÉGIES D'AVANCES ET ACCRÉDITIFS
+
 58 VIREMENTS INTERNES
+
+59 PROVISIONS POUR DÉPRÉCIATION DES COMPTES FINANCIERS
 
 Classe 6 — Comptes de charges
 
@@ -422,6 +433,10 @@ Classe 7 — Comptes de produits
     707 Ventes de marchandises
     708 Produits des activités annexes
 
+
+71 PRODUCTION STOCKÉE (OU DÉSTOCKAGE)
+72 PRODUCTION IMMOBILISÉE
+
 74 SUBVENTIONS D'EXPLOITATION
 
     740 Subventions reçues
@@ -452,6 +467,9 @@ Classe 7 — Comptes de produits
 
         7780 Manifestations diverses
         7788 Produits exceptionnels divers
+
+
+78 REPRISES SUR AMORTISSEMENTS ET PROVISIONS
 
 79 TRANSFERT DE CHARGES
 
@@ -504,18 +522,7 @@ foreach ($src as $line)
 
     if ($classe == 1)
     {
-        if ($code == 11 || $code == 12)
-        {
-            $position = Compta_Comptes::PASSIF | Compta_Comptes::ACTIF;
-        }
-        elseif ($code == 119 || $code == 129 || $code == 139)
-        {
-            $position = Compta_Comptes::ACTIF;
-        }
-        else
-        {
-            $position = Compta_Comptes::PASSIF;
-        }
+        $position = Compta_Comptes::PASSIF;
     }
     elseif ($classe == 2 || $classe == 3 || $classe == 5)
     {
@@ -576,7 +583,7 @@ foreach ($src as $line)
 }
 
 $json = json_encode($plan, JSON_PRETTY_PRINT);
-file_put_contents('include/plan_comptable.json', $json);
+file_put_contents('../src/include/data/plan_comptable.json', $json);
 
 die("OK\n");
 
