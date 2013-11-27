@@ -94,15 +94,19 @@ ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
 ini_set('log_errors', true);
 ini_set('display_errors', true);
 ini_set('html_errors', false);
-ini_set('error_prepend_string', '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
-    pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
-    <pre> \__/<br /> (xx)<br />//||\\\\</pre>
-    <h1>Erreur fatale</h1>
-    <p>Une erreur fatale s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
-    merci d\'inclure le message ci-dessous :</p>
-    <h3>');
-ini_set('error_append_string', '</h3><hr />
-    <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>');
+
+if (PHP_SAPI != 'cli')
+{
+    ini_set('error_prepend_string', '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
+        pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
+        <pre> \__/<br /> (xx)<br />//||\\\\</pre>
+        <h1>Erreur fatale</h1>
+        <p>Une erreur fatale s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
+        merci d\'inclure le message ci-dessous :</p>
+        <h3>');
+    ini_set('error_append_string', '</h3><hr />
+        <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>');
+}
 
 /*
  * Gestion des erreurs et exceptions
@@ -157,15 +161,22 @@ function exception_handler($e)
     
     $error = str_replace("\r", '', $error);
     
-    echo '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
-    pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
-    <pre> \__/<br /> (xx)<br />//||\\\\</pre>
-    <h1>Erreur d\'exécution</h1>
-    <p>Une erreur s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
-    merci d\'inclure le message suivant :</p>
-    <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
-    <hr />
-    <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
+    if (PHP_SAPI == 'cli')
+    {
+        echo $error;
+    }
+    else
+    {
+        echo '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
+        pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
+        <pre> \__/<br /> (xx)<br />//||\\\\</pre>
+        <h1>Erreur d\'exécution</h1>
+        <p>Une erreur s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
+        merci d\'inclure le message suivant :</p>
+        <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
+        <hr />
+        <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
+    }
 
     exit;
 }
