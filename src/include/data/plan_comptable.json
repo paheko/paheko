@@ -537,7 +537,7 @@
         "code": 40,
         "nom": "FOURNISSEURS ET COMPTES RATTACH\u00c9S",
         "parent": 4,
-        "position": 3
+        "position": 1
     },
     "401": {
         "code": 401,
@@ -555,7 +555,7 @@
         "code": 408,
         "nom": "Fournisseurs - Factures non parvenues",
         "parent": 40,
-        "position": 2
+        "position": 1
     },
     "409": {
         "code": 409,
@@ -567,19 +567,19 @@
         "code": 41,
         "nom": "USAGERS ET COMPTES RATTACH\u00c9S",
         "parent": 4,
-        "position": 3
+        "position": 2
     },
     "411": {
         "code": 411,
         "nom": "Usagers",
         "parent": 41,
-        "position": 1
+        "position": 2
     },
     "4110": {
         "code": 4110,
         "nom": "Autres usagers",
         "parent": 411,
-        "position": 1
+        "position": 2
     },
     "419": {
         "code": 419,
@@ -591,7 +591,7 @@
         "code": 42,
         "nom": "PERSONNEL ET COMPTES RATTACH\u00c9S",
         "parent": 4,
-        "position": 3
+        "position": 1
     },
     "421": {
         "code": 421,
@@ -615,13 +615,13 @@
         "code": 428,
         "nom": "Personnel - Charges \u00e0 payer et produits \u00e0 recevoir",
         "parent": 42,
-        "position": 2
+        "position": 1
     },
     "43": {
         "code": 43,
         "nom": "S\u00c9CURIT\u00c9 SOCIALE ET AUTRES ORGANISMES SOCIAUX",
         "parent": 4,
-        "position": 3
+        "position": 1
     },
     "430": {
         "code": 430,
@@ -633,61 +633,61 @@
         "code": 431,
         "nom": "S\u00e9curit\u00e9 sociale",
         "parent": 43,
-        "position": 2
+        "position": 1
     },
     "437": {
         "code": 437,
         "nom": "Autres organismes sociaux",
         "parent": 43,
-        "position": 2
+        "position": 1
     },
     "4372": {
         "code": 4372,
         "nom": "Mutuelles",
         "parent": 437,
-        "position": 2
+        "position": 1
     },
     "4373": {
         "code": 4373,
         "nom": "Caisse de retraite et de pr\u00e9voyance",
         "parent": 437,
-        "position": 2
+        "position": 1
     },
     "4374": {
         "code": 4374,
         "nom": "Caisse d'allocations de ch\u00f4mage - P\u00f4le emploi",
         "parent": 437,
-        "position": 2
+        "position": 1
     },
     "4375": {
         "code": 4375,
         "nom": "AGESSA",
         "parent": 437,
-        "position": 2
+        "position": 1
     },
     "4378": {
         "code": 4378,
         "nom": "Autres organismes sociaux - Divers",
         "parent": 437,
-        "position": 2
+        "position": 1
     },
     "438": {
         "code": 438,
         "nom": "Organismes sociaux - Charges \u00e0 payer et produits \u00e0 recevoir",
         "parent": 43,
-        "position": 2
+        "position": 1
     },
     "4382": {
         "code": 4382,
         "nom": "Charges sociales sur cong\u00e9s \u00e0 payer",
         "parent": 438,
-        "position": 2
+        "position": 1
     },
     "4386": {
         "code": 4386,
         "nom": "Autres charges \u00e0 payer",
         "parent": 438,
-        "position": 2
+        "position": 1
     },
     "4387": {
         "code": 4387,
@@ -699,13 +699,13 @@
         "code": 439,
         "nom": "Avances aupr\u00e8s des organismes sociaux",
         "parent": 43,
-        "position": 2
+        "position": 1
     },
     "44": {
         "code": 44,
         "nom": "\u00c9TAT ET AUTRES COLLECTIVIT\u00c9S PUBLIQUES",
         "parent": 4,
-        "position": 3
+        "position": 2
     },
     "441": {
         "code": 441,
@@ -741,7 +741,7 @@
         "code": 442,
         "nom": "\u00c9tat - Imp\u00f4ts et taxes recouvrables sur des tiers",
         "parent": 44,
-        "position": 2
+        "position": 1
     },
     "444": {
         "code": 444,
@@ -843,85 +843,85 @@
         "code": 447,
         "nom": "Autres imp\u00f4ts, taxes et versements assimil\u00e9s",
         "parent": 44,
-        "position": 2
+        "position": 1
     },
     "4471": {
         "code": 4471,
         "nom": "Autres imp\u00f4ts, taxes et versements assimil\u00e9s sur r\u00e9mun\u00e9rations (Administration des imp\u00f4ts)",
         "parent": 447,
-        "position": 2
+        "position": 1
     },
     "44711": {
         "code": 44711,
         "nom": "Taxe sur les salaires",
         "parent": 4471,
-        "position": 2
+        "position": 1
     },
     "44713": {
         "code": 44713,
         "nom": "Participation des employeurs \u00e0 la formation professionnelle continue",
         "parent": 4471,
-        "position": 2
+        "position": 1
     },
     "44714": {
         "code": 44714,
         "nom": "Cotisation par d\u00e9faut d'investissement obligatoire dans la construction",
         "parent": 4471,
-        "position": 2
+        "position": 1
     },
     "44718": {
         "code": 44718,
         "nom": "Autres imp\u00f4ts, taxes et versements assimil\u00e9s",
         "parent": 4471,
-        "position": 2
+        "position": 1
     },
     "4473": {
         "code": 4473,
         "nom": "Autres imp\u00f4ts, taxes et versements assimil\u00e9s sur r\u00e9mun\u00e9rations (Autres organismes)",
         "parent": 447,
-        "position": 2
+        "position": 1
     },
     "44733": {
         "code": 44733,
         "nom": "Participation des employeurs \u00e0 la formation professionnelle continue",
         "parent": 4473,
-        "position": 2
+        "position": 1
     },
     "44734": {
         "code": 44734,
         "nom": "Participation des employeurs \u00e0 l'effort de construction (versements \u00e0 fonds perdus)",
         "parent": 4473,
-        "position": 2
+        "position": 1
     },
     "4475": {
         "code": 4475,
         "nom": "Autres imp\u00f4ts, taxes et versements assimil\u00e9s (Administration des imp\u00f4ts)",
         "parent": 447,
-        "position": 2
+        "position": 1
     },
     "4477": {
         "code": 4477,
         "nom": "Autres imp\u00f4ts, taxes et versements assimil\u00e9s (Autres organismes)",
         "parent": 447,
-        "position": 2
+        "position": 1
     },
     "448": {
         "code": 448,
         "nom": "\u00c9tat - Charges \u00e0 payer et produits \u00e0 recevoir",
         "parent": 44,
-        "position": 2
+        "position": 1
     },
     "4482": {
         "code": 4482,
         "nom": "Charges fiscales sur cong\u00e9s \u00e0 payer",
         "parent": 448,
-        "position": 2
+        "position": 1
     },
     "4486": {
         "code": 4486,
         "nom": "Autres charges \u00e0 payer",
         "parent": 448,
-        "position": 2
+        "position": 1
     },
     "4487": {
         "code": 4487,
@@ -933,7 +933,7 @@
         "code": 449,
         "nom": "Avances aupr\u00e8s de l'\u00e9tat et des collectivit\u00e9s publiques",
         "parent": 44,
-        "position": 2
+        "position": 1
     },
     "45": {
         "code": 45,
@@ -945,13 +945,13 @@
         "code": 451,
         "nom": "Conf\u00e9d\u00e9ration, f\u00e9d\u00e9ration et associations affili\u00e9es - Compte courant",
         "parent": 45,
-        "position": 2
+        "position": 3
     },
     "455": {
         "code": 455,
         "nom": "Soci\u00e9taires - Comptes courants",
         "parent": 45,
-        "position": 2
+        "position": 3
     },
     "46": {
         "code": 46,
@@ -963,13 +963,13 @@
         "code": 467,
         "nom": "Autres comptes d\u00e9biteurs et cr\u00e9diteurs",
         "parent": 46,
-        "position": 2
+        "position": 3
     },
     "468": {
         "code": 468,
         "nom": "Divers - Charges \u00e0 payer et produits \u00e0 recevoir",
         "parent": 46,
-        "position": 1
+        "position": 3
     },
     "4686": {
         "code": 4686,
@@ -981,7 +981,7 @@
         "code": 4687,
         "nom": "Produits \u00e0 recevoir",
         "parent": 468,
-        "position": 1
+        "position": 2
     },
     "47": {
         "code": 47,
@@ -993,13 +993,13 @@
         "code": 471,
         "nom": "Recettes \u00e0 classer",
         "parent": 47,
-        "position": 2
+        "position": 1
     },
     "472": {
         "code": 472,
         "nom": "D\u00e9penses \u00e0 classer et \u00e0 r\u00e9gulariser",
         "parent": 47,
-        "position": 1
+        "position": 2
     },
     "48": {
         "code": 48,
@@ -1029,7 +1029,7 @@
         "code": 49,
         "nom": "DEPRECIATION DES COMPTES DE TIERS",
         "parent": 4,
-        "position": 3
+        "position": 2
     },
     "491": {
         "code": 491,
@@ -1659,7 +1659,7 @@
         "code": 8,
         "nom": "Classe 8 \u00ad\u2014 Contributions b\u00e9n\u00e9voles en nature",
         "parent": 0,
-        "position": 4
+        "position": 12
     },
     "86": {
         "code": 86,
