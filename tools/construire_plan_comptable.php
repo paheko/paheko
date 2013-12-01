@@ -159,108 +159,108 @@ Classe 3 — Comptes de stocks
 
 Classe 4 — Comptes de tiers
 
-40 FOURNISSEURS ET COMPTES RATTACHÉS
+40 FOURNISSEURS ET COMPTES RATTACHÉS [PASSIF]
 
-    401 Fournisseurs
+    401 Fournisseurs [PASSIF]
 
-        4010 Autres fournisseurs
+        4010 Autres fournisseurs [PASSIF]
 
-    408 Fournisseurs - Factures non parvenues
+    408 Fournisseurs - Factures non parvenues [PASSIF]
 
-    409 Avances aux fournisseurs
+    409 Avances aux fournisseurs [ACTIF]
 
-41 USAGERS ET COMPTES RATTACHÉS
+41 USAGERS ET COMPTES RATTACHÉS [ACTIF]
 
-    411 Usagers
+    411 Usagers [ACTIF]
 
-        4110 Autres usagers
+        4110 Autres usagers [ACTIF]
 
-    419 Avances aux usagers
+    419 Avances aux usagers [ACTIF]
 
-42 PERSONNEL ET COMPTES RATTACHÉS
+42 PERSONNEL ET COMPTES RATTACHÉS [PASSIF]
 
-    421 Personnel - Rémunérations dues
-        4210 Autres membres du personnel
-    425 Personnel - Avances et acomptes
-    428 Personnel - Charges à payer et produits à recevoir
+    421 Personnel - Rémunérations dues [PASSIF]
+        4210 Autres membres du personnel [PASSIF]
+    425 Personnel - Avances et acomptes [ACTIF]
+    428 Personnel - Charges à payer et produits à recevoir [PASSIF]
 
-43 SÉCURITÉ SOCIALE ET AUTRES ORGANISMES SOCIAUX
+43 SÉCURITÉ SOCIALE ET AUTRES ORGANISMES SOCIAUX [PASSIF]
 
-    430 Dettes et crédits envers les organismes sociaux
-    431 Sécurité sociale
-    437 Autres organismes sociaux
+    430 Dettes et crédits envers les organismes sociaux [PASSIF]
+    431 Sécurité sociale [PASSIF]
+    437 Autres organismes sociaux [PASSIF]
 
-        4372 Mutuelles
-        4373 Caisse de retraite et de prévoyance
-        4374 Caisse d'allocations de chômage - Pôle emploi
-        4375 AGESSA
-        4378 Autres organismes sociaux - Divers
+        4372 Mutuelles [PASSIF]
+        4373 Caisse de retraite et de prévoyance [PASSIF]
+        4374 Caisse d'allocations de chômage - Pôle emploi [PASSIF]
+        4375 AGESSA [PASSIF]
+        4378 Autres organismes sociaux - Divers [PASSIF]
 
-    438 Organismes sociaux - Charges à payer et produits à recevoir
+    438 Organismes sociaux - Charges à payer et produits à recevoir [PASSIF]
 
-        4382 Charges sociales sur congés à payer
-        4386 Autres charges à payer
-        4387 Produits à recevoir
+        4382 Charges sociales sur congés à payer [PASSIF]
+        4386 Autres charges à payer [PASSIF]
+        4387 Produits à recevoir [ACTIF]
 
-    439 Avances auprès des organismes sociaux
+    439 Avances auprès des organismes sociaux [PASSIF]
 
-44 ÉTAT ET AUTRES COLLECTIVITÉS PUBLIQUES
+44 ÉTAT ET AUTRES COLLECTIVITÉS PUBLIQUES [ACTIF]
 
-    441 État - Subventions à recevoir
+    441 État - Subventions à recevoir [ACTIF]
 
-        4411 Subventions d'investissement
-        4417 Subventions d'exploitation
-        4418 Subventions d'équilibre
-        4419 Avances sur subventions
+        4411 Subventions d'investissement [ACTIF]
+        4417 Subventions d'exploitation [ACTIF]
+        4418 Subventions d'équilibre [ACTIF]
+        4419 Avances sur subventions [ACTIF]
 
-    442 État - Impôts et taxes recouvrables sur des tiers
-    444 État - Impôts sur les bénéfices
-    445 État - Taxes sur le chiffre d'affaires
+    442 État - Impôts et taxes recouvrables sur des tiers [PASSIF]
+    444 État - Impôts sur les bénéfices [ACTIF]
+    445 État - Taxes sur le chiffre d'affaires [ACTIF]
 
-        4455 Taxes sur le chiffre d'affaires à décaisser
+        4455 Taxes sur le chiffre d'affaires à décaisser [ACTIF]
 
-            44551 TVA à décaisser
-            44558 Taxes assimilées à la TVA
+            44551 TVA à décaisser [ACTIF]
+            44558 Taxes assimilées à la TVA [ACTIF]
 
-        4456 Taxes sur le chiffre d'affaires déductibles
+        4456 Taxes sur le chiffre d'affaires déductibles [ACTIF]
 
-            44562 TVA sur immobilisations
-            44566 TVA sur autres biens et services
+            44562 TVA sur immobilisations [ACTIF]
+            44566 TVA sur autres biens et services [ACTIF]
 
-        4457 Taxes sur le chiffre d'affaires collectées par l'association
-        4458 Taxes sur le chiffre d'affaires à régulariser ou en attente
+        4457 Taxes sur le chiffre d'affaires collectées par l'association [ACTIF]
+        4458 Taxes sur le chiffre d'affaires à régulariser ou en attente [ACTIF]
 
-            44581 Acomptes - Régime simplifié d'imposition
-            44582 Acomptes - Régime du forfait
-            44583 Remboursement de taxes sur le chiffre d'affaires demandé
-            44584 TVA récupérée d'avance
-            44586 Taxes sur le chiffre d'affaires sur factures non parvenues
-            44587 Taxes sur le chiffre d'affaires sur factures à établir
+            44581 Acomptes - Régime simplifié d'imposition [ACTIF]
+            44582 Acomptes - Régime du forfait [ACTIF]
+            44583 Remboursement de taxes sur le chiffre d'affaires demandé [ACTIF]
+            44584 TVA récupérée d'avance [ACTIF]
+            44586 Taxes sur le chiffre d'affaires sur factures non parvenues [ACTIF]
+            44587 Taxes sur le chiffre d'affaires sur factures à établir [ACTIF]
 
-    447 Autres impôts, taxes et versements assimilés
+    447 Autres impôts, taxes et versements assimilés [PASSIF]
 
-        4471 Autres impôts, taxes et versements assimilés sur rémunérations (Administration des impôts)
+        4471 Autres impôts, taxes et versements assimilés sur rémunérations (Administration des impôts) [PASSIF]
 
-            44711 Taxe sur les salaires
-            44713 Participation des employeurs à la formation professionnelle continue
-            44714 Cotisation par défaut d'investissement obligatoire dans la construction
-            44718 Autres impôts, taxes et versements assimilés
+            44711 Taxe sur les salaires [PASSIF]
+            44713 Participation des employeurs à la formation professionnelle continue [PASSIF]
+            44714 Cotisation par défaut d'investissement obligatoire dans la construction [PASSIF]
+            44718 Autres impôts, taxes et versements assimilés [PASSIF]
 
-        4473 Autres impôts, taxes et versements assimilés sur rémunérations (Autres organismes)
+        4473 Autres impôts, taxes et versements assimilés sur rémunérations (Autres organismes) [PASSIF]
 
-            44733 Participation des employeurs à la formation professionnelle continue
-            44734 Participation des employeurs à l'effort de construction (versements à fonds perdus)
+            44733 Participation des employeurs à la formation professionnelle continue [PASSIF]
+            44734 Participation des employeurs à l'effort de construction (versements à fonds perdus) [PASSIF]
 
-        4475 Autres impôts, taxes et versements assimilés (Administration des impôts)
-        4477 Autres impôts, taxes et versements assimilés (Autres organismes)
+        4475 Autres impôts, taxes et versements assimilés (Administration des impôts) [PASSIF]
+        4477 Autres impôts, taxes et versements assimilés (Autres organismes) [PASSIF]
 
-    448 État - Charges à payer et produits à recevoir
+    448 État - Charges à payer et produits à recevoir [PASSIF]
 
-        4482 Charges fiscales sur congés à payer
-        4486 Autres charges à payer
-        4487 Produits à recevoir
+        4482 Charges fiscales sur congés à payer [PASSIF]
+        4486 Autres charges à payer [PASSIF]
+        4487 Produits à recevoir [ACTIF]
 
-    449 Avances auprès de l'état et des collectivités publiques
+    449 Avances auprès de l'état et des collectivités publiques [PASSIF]
 
 45 CONFÉDÉRATION, FÉDÉRATION, UNIONS ET ASSOCIATIONS AFFILIÉES
 
@@ -272,24 +272,24 @@ Classe 4 — Comptes de tiers
     467 Autres comptes débiteurs et créditeurs
     468 Divers - Charges à payer et produits à recevoir
 
-        4686 Charges à payer
-        4687 Produits à recevoir
+        4686 Charges à payer [PASSIF]
+        4687 Produits à recevoir [ACTIF]
 
 47 COMPTES TRANSITOIRES OU D'ATTENTE
 
-    471 Recettes à classer
-    472 Dépenses à classer et à régulariser
+    471 Recettes à classer [PASSIF]
+    472 Dépenses à classer et à régulariser [ACTIF]
 
 48 COMPTES DE RÉGULARISATION
 
-    481 Charges à répartir sur plusieurs exercices
-    486 Charges constatées d'avance
-    487 Produits constatés d'avance
+    481 Charges à répartir sur plusieurs exercices [ACTIF]
+    486 Charges constatées d'avance [ACTIF]
+    487 Produits constatés d'avance [PASSIF]
 
-49 DEPRECIATION DES COMPTES DE TIERS
+49 DEPRECIATION DES COMPTES DE TIERS [ACTIF]
 
-    491 Dépréciation des comptes clients
-    496 Dépréciation des comptes débiteurs divers
+    491 Dépréciation des comptes clients [ACTIF]
+    496 Dépréciation des comptes débiteurs divers [ACTIF]
 
 Classe 5 — Comptes financiers
 
@@ -495,6 +495,8 @@ Classe 9 — Comptes analytiques
 
 EOF_PLAN;
 
+$plan = preg_replace("/\r/", '', $plan);
+$plan = preg_replace("/\n{2,}/", "\n", $plan);
 $src = explode("\n", $plan);
 $plan = array();
 
@@ -513,9 +515,20 @@ foreach ($src as $line)
         $nom = trim($match[0]);
         $parent = 0;
     }
-    elseif ($line)
+    else
     {
         echo "$line\n";
+        continue;
+    }
+
+    if (preg_match('/^(.+?)\s+\[(ACTIF|PASSIF)\]\s*$/', $nom, $match))
+    {
+        $position = ($match[2] == 'PASSIF') ? Compta_Comptes::PASSIF : Compta_Comptes::ACTIF;
+        $nom = $match[1];
+    }
+    else
+    {
+        $position = false;
     }
 
     $classe = substr((string)$code, 0, 1);
@@ -531,21 +544,7 @@ foreach ($src as $line)
     // Comptes de classe 4, c'est compliqué là
     elseif ($classe == 4)
     {
-        if (strlen($code) > 2)
-        {
-            $prefixe = substr($code, 0, 3);
-
-            if ($prefixe == 401 || $prefixe == 411 || $prefixe == 421 || $prefixe == 430 || $prefixe == 440
-                || $prefixe == 468 || $code == 4686 || $prefixe == 472 || $prefixe == 487)
-            {
-                $position = Compta_Comptes::PASSIF;
-            }
-            else
-            {
-                $position = Compta_Comptes::ACTIF;
-            }
-        }
-        else
+        if ($position === false)
         {
             $position = Compta_Comptes::PASSIF | Compta_Comptes::ACTIF;
         }
@@ -568,6 +567,10 @@ foreach ($src as $line)
         {
             $position = Compta_Comptes::PRODUIT;
         }
+        else
+        {
+            $position = Compta_Comptes::CHARGE | Compta_Comptes::PRODUIT;
+        }
     }
     elseif ($classe == 9)
     {
@@ -583,7 +586,7 @@ foreach ($src as $line)
 }
 
 $json = json_encode($plan, JSON_PRETTY_PRINT);
-file_put_contents('../src/include/data/plan_comptable.json', $json);
+file_put_contents(__DIR__ . '/../src/include/data/plan_comptable.json', $json);
 
 die("OK\n");
 
