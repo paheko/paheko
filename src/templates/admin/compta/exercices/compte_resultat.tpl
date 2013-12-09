@@ -78,16 +78,28 @@
         </tr>
         <tr>
             <td>
-            </td>
-            <td>
+            {if ($compte_resultat.resultat >= 0)}
                 <table>
                     <tfoot>
                         <tr>
-                            <th>Résultat</th>
+                            <th>Résultat (excédent)</th>
                             <td>{$compte_resultat.resultat|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
+            {/if}
+            </td>
+            <td>
+            {if ($compte_resultat.resultat < 0)}
+                <table>
+                    <tfoot>
+                        <tr>
+                            <th>Résultat (déficit)</th>
+                            <td>{$compte_resultat.resultat|html_money}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            {/if}
             </td>
         </tr>
     </tfoot>
