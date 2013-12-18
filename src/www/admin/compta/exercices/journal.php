@@ -16,6 +16,9 @@ $liste_comptes = $comptes->getListAll();
 
 function get_nom_compte($compte)
 {
+	if (is_null($compte))
+		return '';
+
 	global $liste_comptes;
 	return $liste_comptes[$compte];
 }

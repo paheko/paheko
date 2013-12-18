@@ -216,20 +216,22 @@ class Compta_Journal
             }
         }
 
-        if (empty($data['compte_debit']) ||
-            !$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte_debit']))
+        if (!array_key_exists('compte_debit', $data) || 
+            (!is_null($data['compte_debit']) && 
+                !$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte_debit'])))
         {
             throw new UserException('Compte débité inconnu.');
         }
 
-        if (empty($data['compte_credit']) ||
-            !$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte_credit']))
+        if (!array_key_exists('compte_credit', $data) || 
+            (!is_null($data['compte_credit']) && 
+                !$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte_credit'])))
         {
             throw new UserException('Compte crédité inconnu.');
         }
 
-        $data['compte_credit'] = strtoupper(trim($data['compte_credit']));
-        $data['compte_debit'] = strtoupper(trim($data['compte_debit']));
+        $data['compte_credit'] = is_null($data['compte_credit']) ? null : strtoupper(trim($data['compte_credit']));
+        $data['compte_debit'] = is_null($data['compte_debit']) ? null : strtoupper(trim($data['compte_debit']));
 
         if ($data['compte_credit'] == $data['compte_debit'])
         {

@@ -22,8 +22,7 @@ function get_nom_compte($compte)
 
 $tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
 
-$get_resultat = $exercices->getCurrentId() == $exercice['id'] ? true : false;
-$tpl->assign('bilan', $exercices->getBilan($exercice['id'], $get_resultat));
+$tpl->assign('bilan', $exercices->getBilan($exercice['id']));
 
 $tpl->assign('cloture', $exercice['cloture'] ? $exercice['fin'] : time());
 $tpl->assign('exercice', $exercice);

@@ -124,6 +124,7 @@ class Compta_Exercices
     /**
      * Créer les reports à nouveau issus de l'exercice $old_id dans le nouvel exercice courant
      * @param  integer $old_id  ID de l'ancien exercice
+     * @param  integer $new_id  ID du nouvel exercice
      * @param  string  $date    Date Y-m-d donnée aux opérations créées
      * @return boolean          true si succès
      */
@@ -131,99 +132,78 @@ class Compta_Exercices
     {
         $db = DB::getInstance();
 
+        $db->exec('BEGIN;');
+
+        $this->solderResultat($old_id, $date);
+
         $report_crediteur = 110;
         $report_debiteur  = 119;
 
-        // Récupérer chacun des comptes de bilan et leurs soldes
-        $statement = $db->simpleStatement('SELECT id, 
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compte AND id_exercice = :id), 0) AS debit,
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compte AND id_exercice = :id), 0) AS credit,
-            CASE WHEN position & ' . Compta_Comptes::ACTIF . ' THEN debit - credit ELSE credit - debit END AS solde
+        // Récupérer chacun des comptes de bilan et leurs soldes (uniquement les classes 1 à 5)
+        $statement = $db->simpleStatement('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compta_comptes.id AND id_exercice = :id), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compta_comptes.id AND id_exercice = :id), 0) AS solde
             FROM compta_comptes 
-            LEFT JOIN compta_journal ON compta_comptes.id = compta_journal.compte_debit 
+            INNER JOIN compta_journal ON compta_comptes.id = compta_journal.compte_debit 
                 OR compta_comptes.id = compta_journal.compte_credit
-            WHERE id_exercice = :id AND solde != 0 AND substr(id, 0, 1) <= 5;', array('id' => $old_id));
+            WHERE id_exercice = :id AND solde != 0 AND CAST(substr(compta_comptes.id, 1, 1) AS INTEGER) <= 5
+            GROUP BY compta_comptes.id;', array('id' => $old_id));
+
+        $diff = 0;
+        $journal = new Compta_Journal;
 
         while ($row = $statement->fetchArray(SQLITE3_ASSOC))
         {
+            $solde = ($row['position'] & Compta_Comptes::ACTIF) ? $row['solde'] : -($row['solde']);
+
+            $diff += $solde;
+
             // Chaque solde de compte est reporté dans le nouvel exercice
             $journal->add(array(
                 'libelle'       =>  'Report à nouveau',
                 'date'          =>  $date,
                 'montant'       =>  abs($solde),
-                // FIXME : de quel compte viens l'argent?!
-                'compte_debit'  =>  ($solde < 0 ? $report_crediteur : $row['compte']),
-                'compte_credit' =>  ($solde > 0 ? $report_debiteur : $row['compte']),
-                'remarques'     =>  'Report à nouveau créé automatiquement à la clôture de l\'exercice précédent',
+                'compte_debit'  =>  ($solde < 0 ? NULL : $row['compte']),
+                'compte_credit' =>  ($solde > 0 ? NULL : $row['compte']),
+                'remarques'     =>  'Report de solde créé automatiquement à la clôture de l\'exercice précédent',
             ));
         }
-
-        // Solder tous les comptes de charges et de produits (production du résultat)
-        $this->solderResultat($id);
 
         $db->exec('END;');
 
-        return $new_id;
+        return true;
     }
 
     /**
-     * Solder les comptes de charge et de produits puis les inscrire au résultat du n
+     * Solder les comptes de charge et de produits de l'exercice N 
+     * et les inscrire au résultat de l'exercice N+1
      * @param  integer  $exercice   ID de l'exercice à solder
+     * @param  string   $date       Date de début de l'exercice Y-m-d
      * @return boolean              true en cas de succès
      */
-    public function solderResultat($exercice)
+    public function solderResultat($exercice, $date)
     {
         $db = DB::getInstance();
 
-        $resultat_crediteur = 120;
+        $resultat_excedent = 120;
         $resultat_debiteur = 129;
 
-        $res = $db->prepare('SELECT compte, debit, credit
-            FROM
-                (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit
-                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_debit
-                UNION
-                SELECT compte_credit AS compte, 0 AS debit, SUM(montant) AS credit
-                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
-            WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
-            ORDER BY base64(compte) COLLATE BINARY ASC;'
-            )->execute();
+        $resultat = $this->getCompteResultat($exercice);
+        $resultat = $resultat['resultat'];
 
-        while ($row = $res->fetchArray(SQLITE3_NUM))
+        if ($resultat != 0)
         {
-            list($compte, $debit, $credit) = $row;
-
-            if ($compte[0] == 6) // Charges
-            {
-                $solde = $debit - $credit;
-                $debit = $solde > 0 ? $resultat_crediteur : $resultat_debiteur;
-                $credit = $compte;
-            }
-            else // Produits
-            {
-                $solde = $credit - $debit;
-                $debit = $compte;
-                $credit = $solde > 0 ? $resultat_crediteur : $resultat_debiteur;
-            }
-
-            // Solde nul : rien à inscrire au résultat
-            if ($solde == 0)
-            {
-                continue;
-            }
-
-            // Enregistrement du résultat
             $journal = new Compta_Journal;
             $journal->add(array(
-                'libelle'   =>  'Résultat de l\'exercice',
-                'date'      =>  $end,
-                'montant'   =>  abs($solde),
-                'compte_debit'  =>  $debit,
-                'compte_credit' =>  $credit,
+                'libelle'   =>  'Résultat de l\'exercice précédent',
+                'date'      =>  $date,
+                'montant'   =>  $resultat,
+                'compte_debit'  =>  $resultat < 0 ? 129 : NULL,
+                'compte_credit' =>  $resultat > 0 ? 120 : NULL,
             ));
         }
 
-        $res->finalize();
+        return true;
     }
     
     public function delete($id)
@@ -320,6 +300,10 @@ class Compta_Exercices
         while ($row = $res->fetchArray(SQLITE3_NUM))
         {
             $compte = $row[0];
+
+            if (is_null($compte))
+                continue;
+
             $classe = substr($compte, 0, 1);
             $parent = substr($compte, 0, 2);
 
@@ -436,7 +420,7 @@ class Compta_Exercices
      * @param  boolean  $resultat   true s'il faut calculer le résultat de l'exercice (utile pour un exercice en cours)
      * @return array    Un tableau multi-dimensionnel avec deux clés : actif et passif
      */
-    public function getBilan($exercice, $resultat = true)
+    public function getBilan($exercice)
     {
         $db = DB::getInstance();
 
@@ -446,28 +430,25 @@ class Compta_Exercices
         $actif      = array('comptes' => array(), 'total' => 0.0);
         $passif     = array('comptes' => array(), 'total' => 0.0);
 
-        if ($resultat)
+        $resultat = $this->getCompteResultat($exercice);
+
+        if ($resultat['resultat'] >= 0)
         {
-            $resultat = $this->getCompteResultat($exercice);
+            $passif['comptes']['12'] = array(
+                'comptes'   =>  array('120' => $resultat['resultat']),
+                'solde'     =>  $resultat['resultat']
+            );
 
-            if ($resultat['resultat'] > 0)
-            {
-                $passif['comptes']['12'] = array(
-                    'comptes'   =>  array('120' => $resultat['resultat']),
-                    'solde'     =>  $resultat['resultat']
-                );
+            $passif['total'] = $resultat['resultat'];
+        }
+        else
+        {
+            $passif['comptes']['12'] = array(
+                'comptes'   =>  array('129' => $resultat['resultat']),
+                'solde'     =>  $resultat['resultat']
+            );
 
-                $passif['total'] = $resultat['resultat'];
-            }
-            else
-            {
-                $passif['comptes']['12'] = array(
-                    'comptes'   =>  array('129' => $resultat['resultat']),
-                    'solde'     =>  $resultat['resultat']
-                );
-
-                $passif['total'] = $resultat['resultat'];
-            }
+            $passif['total'] = $resultat['resultat'];
         }
 
         // Y'a sûrement moyen d'améliorer tout ça pour que le maximum de travail
@@ -487,44 +468,49 @@ class Compta_Exercices
         {
             list($compte, $debit, $credit, $position) = $row;
             $parent = substr($compte, 0, 2);
+            $classe = $compte[0];
 
-            if ($position & Compta_Comptes::ACTIF)
+            if (($position & Compta_Comptes::ACTIF) && ($position & Compta_Comptes::PASSIF))
             {
-                if (!isset($actif['comptes'][$parent]))
-                {
-                    $actif['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
-                }
-
                 $solde = $debit - $credit;
 
-                if (!isset($actif['comptes'][$parent]['comptes'][$compte]))
-                {
-                    $actif['comptes'][$parent]['comptes'][$compte] = 0.0;
-                }
+                if ($solde > 0)
+                    $position = 'actif';
+                elseif ($solde < 0)
+                    $position = 'passif';
+                else
+                    continue;
 
-                $actif['comptes'][$parent]['comptes'][$compte] += $solde;
-                $actif['total'] += $solde;
-                $actif['comptes'][$parent]['solde'] += $solde;
+                $solde = abs($solde);
             }
-
-            if ($position & Compta_Comptes::PASSIF)
+            else if ($position & Compta_Comptes::ACTIF)
             {
-                if (!isset($passif['comptes'][$parent]))
-                {
-                    $passif['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
-                }
-
-                $solde = $credit - $debit;
-
-                if (!isset($passif['comptes'][$parent]['comptes'][$compte]))
-                {
-                    $passif['comptes'][$parent]['comptes'][$compte] = 0.0;
-                }
-
-                $passif['comptes'][$parent]['comptes'][$compte] += $solde;
-                $passif['total'] += $solde;
-                $passif['comptes'][$parent]['solde'] += $solde;
+                $position = 'actif';
+                $solde = $debit - $credit;
             }
+            else if ($position & Compta_Comptes::PASSIF)
+            {
+                $position = 'passif';
+                $solde = $credit - $debit;
+            }
+            else
+            {
+                continue;
+            }
+
+            if (!isset(${$position}['comptes'][$parent]))
+            {
+                ${$position}['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+            }
+
+            if (!isset(${$position}['comptes'][$parent]['comptes'][$compte]))
+            {
+                ${$position}['comptes'][$parent]['comptes'][$compte] = 0.0;
+            }
+
+            ${$position}['comptes'][$parent]['comptes'][$compte] += $solde;
+            ${$position}['total'] += $solde;
+            ${$position}['comptes'][$parent]['solde'] += $solde;
         }
 
         $res->finalize();
