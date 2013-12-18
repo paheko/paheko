@@ -30,7 +30,7 @@ if (!empty($_POST['close']))
         try
         {
             $id = $e->close($exercice['id'], utils::post('fin'));
-
+        
             if ($id && utils::post('reports'))
             {
                 $e->doReports($exercice['id'], utils::modifyDate(utils::post('fin'), '+1 day'));
