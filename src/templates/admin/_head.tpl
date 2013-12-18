@@ -36,7 +36,7 @@
             </li>
         {/if}
         {if $user.droits.compta >= Garradin\Membres::DROIT_ACCES}
-            <li class="compta{if $current == 'compta'} current{/if}"><a href="{$admin_url}compta/">Comptabilité <small>[beta]</small></a>
+            <li class="compta{if $current == 'compta'} current{/if}"><a href="{$admin_url}compta/">Comptabilité</a>
             <ul>
             {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
                 <li class="compta_saisie{if $current == 'compta/saisie'} current{/if}"><a href="{$admin_url}compta/operations/saisir.php">Saisie</a></li>
