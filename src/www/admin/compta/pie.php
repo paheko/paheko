@@ -19,7 +19,7 @@ if (!file_exists(GRAPH_CACHE_DIR))
 
 Static_Cache::setCacheDir(GRAPH_CACHE_DIR);
 
-if (Static_Cache::expired('graph_' . $graph) || true)
+if (Static_Cache::expired('graph_' . $graph))
 {
 	$stats = new Compta_Stats;
 	$categories = new Compta_Categories;
