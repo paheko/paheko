@@ -4,7 +4,27 @@ namespace Garradin;
 
 class Compta_Stats
 {
-	protected function _byType($type)
+	protected function _parRepartitionCategorie($type)
+	{
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT COUNT(*) AS nb, id_categorie
+			FROM compta_journal
+			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = ?)
+			AND id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0)
+			GROUP BY id_categorie ORDER BY nb DESC;', SQLITE3_ASSOC, $type);
+	}
+
+	public function repartitionRecettes()
+	{
+		return $this->_parRepartitionCategorie(Compta_Categories::RECETTES);
+	}
+
+	public function repartitionDepenses()
+	{
+		return $this->_parRepartitionCategorie(Compta_Categories::DEPENSES);
+	}
+
+	protected function _parType($type)
 	{
 		return $this->getStats('SELECT strftime(\'%Y%m\', date) AS date,
 			SUM(montant) FROM compta_journal
@@ -15,12 +35,12 @@ class Compta_Stats
 
 	public function recettes()
 	{
-		return $this->_byType(Compta_Categories::RECETTES);
+		return $this->_parType(Compta_Categories::RECETTES);
 	}
 
 	public function depenses()
 	{
-		return $this->_byType(Compta_Categories::DEPENSES);
+		return $this->_parType(Compta_Categories::DEPENSES);
 	}
 
 	public function soldeCompte($compte, $augmente = 'debit', $diminue = 'credit')

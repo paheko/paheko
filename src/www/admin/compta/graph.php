@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(utils::get('g'), array('recettes_depenses', 'banques_caisses', 'dettes')))
+if (!in_array(utils::get('g'), array('recettes_depenses', 'banques_caisses')))
 {
 	throw new UserException('Graphique inconnu.');
 }
@@ -58,20 +58,6 @@ if (Static_Cache::expired('graph_' . $graph))
 		}
 
 		$plot->setTitle('Solde des comptes et caisses');
-	}
-	elseif ($graph == 'dettes')
-	{
-		$data = array();
-
-		$r = new \SVGPlot_Data($stats->soldeCompte('401%', 'credit', 'debit'));
-		$r->title = 'Dettes fournisseurs';
-		$data[] = $r;
-
-		$r = new \SVGPlot_Data($stats->soldeCompte('411%', 'credit', 'debit'));
-		$r->title = 'Dettes usagers';
-		$data[] = $r;
-
-		$plot->setTitle('Dettes');
 	}
 
 	if (!empty($data))
