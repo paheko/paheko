@@ -90,8 +90,8 @@ class Compta_Categories
     {
         $db = DB::getInstance();
         $type = is_null($type) ? '' : 'cat.type = '.(int)$type;
-        return $db->simpleStatementFetch('
-            SELECT cat.*, cc.libelle AS compte_libelle
+        return $db->simpleStatementFetchAssocKey('
+            SELECT cat.id, cat.*, cc.libelle AS compte_libelle
             FROM compta_categories AS cat INNER JOIN compta_comptes AS cc
                 ON cc.id = cat.compte
             WHERE '.$type.' ORDER BY cat.intitule;', SQLITE3_ASSOC);

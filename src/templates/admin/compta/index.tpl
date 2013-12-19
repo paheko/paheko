@@ -7,10 +7,15 @@
 </ul>
 {/if}
 
-<p>
-    <img src="{$www_url}admin/compta/graph.php?g=recettes_depenses" />
-    <img src="{$www_url}admin/compta/graph.php?g=banques_caisses" />
-    <img src="{$www_url}admin/compta/graph.php?g=dettes" />
-</p>
+<div class="infos">
+    <p>
+        <img src="{$www_url}admin/compta/graph.php?g=recettes_depenses" />
+        <img src="{$www_url}admin/compta/graph.php?g=banques_caisses" />
+    </p>
+    <p>
+        <img src="{$www_url}admin/compta/pie.php?g=recettes" />
+        <img src="{$www_url}admin/compta/pie.php?g=depenses" />
+    </p>
+</div>
 
 {include file="admin/_foot.tpl"}
