@@ -13,7 +13,7 @@ class Sauvegarde
 	 */	
 	public function getList($auto = false)
 	{
-		$ext = $auto ? '\d+' . preg_quote('.auto.sqlite') : 'sqlite';
+		$ext = $auto ? 'auto\.\d+\.sqlite' : 'sqlite';
 
 		$out = array();
 		$dir = dir(GARRADIN_DATA_ROOT);
@@ -42,14 +42,14 @@ class Sauvegarde
 	 */
 	public function create($auto = false)
 	{
-		$backup = str_replace('.sqlite', ($auto ? '.1.auto' : date('.Y-m-d-H-i')) . '.sqlite', GARRADIN_DB_FILE);
+		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-H-i')) . '.sqlite', GARRADIN_DB_FILE);
 		copy(GARRADIN_DB_FILE, $backup);
 		return basename($backup);
 	}
 
 	/**
 	 * Effectue une rotation des sauvegardes automatiques
-	 * association.1.auto.sqlite deviendra association.2.auto.sqlite par exemple
+	 * association.auto.1.sqlite deviendra association.auto.2.sqlite par exemple
 	 * @return boolean true
 	 */
 	public function rotate()
@@ -63,13 +63,13 @@ class Sauvegarde
 		if (count($list) >= $nb)
 		{
 			$this->remove(key($list));
-			$list = array_shift($list);
+			array_shift($list);
 		}
 
 		foreach ($list as $f=>$d)
 		{
-			$new = preg_replace_callback('!\.(\d+)\.auto\.sqlite$!', function ($m) {
-				return (int) $m[1] + 1;
+			$new = preg_replace_callback('!\.auto\.(\d+)\.sqlite$!', function ($m) {
+				return '.auto.' . ((int) $m[1] + 1) . '.sqlite';
 			}, $f);
 
 			rename(GARRADIN_DATA_ROOT . '/' . $f, GARRADIN_DATA_ROOT . '/' . $new);
