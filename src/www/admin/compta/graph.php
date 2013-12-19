@@ -72,7 +72,7 @@ if (Static_Cache::expired('graph_' . $graph))
 		$plot->setLabels($labels);
 
 		$i = 0;
-		$colors = array('#fa4', '#941', '#af4', '#4af', '#a4f');
+		$colors = array('#c71', '#941', '#fa4', '#fd9', '#ffc', '#cc9');
 
 		foreach ($data as $line)
 		{

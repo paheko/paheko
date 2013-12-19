@@ -42,13 +42,13 @@ if (Static_Cache::expired('graph_' . $graph) || true)
 	}
 
 	$others = 0;
-	$colors = array('#c71', '#941', '#fa4', '#af4', '#4af', '#a4f');
+	$colors = array('#c71', '#941', '#fa4', '#fd9', '#ffc', '#cc9');
 	$max = count($colors);
 	$i = 0;
 
 	foreach ($data as $row)
 	{
-		if ($i++ > $max)
+		if ($i++ >= $max)
 		{
 			$others += $row['nb'];
 		}
@@ -61,7 +61,7 @@ if (Static_Cache::expired('graph_' . $graph) || true)
 
 	if ($others > 0)
 	{
-		$pie->add(new SVGPie_Data($others, 'Autres', '#999'));
+		$pie->add(new \SVGPie_Data($others, 'Autres', '#ccc'));
 	}
 
 	Static_Cache::store('graph_' . $graph, $pie->output());
