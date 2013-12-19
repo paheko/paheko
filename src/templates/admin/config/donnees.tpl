@@ -84,7 +84,8 @@
         {/foreach}
         </dl>
         <p class="alert">
-            Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée.
+            Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée. Cependant, afin de prévenir toute erreur
+            une sauvegarde des données sera réalisée avant la restauration.
         </p>
         <p>
             {csrf_field key="backup_manage"}

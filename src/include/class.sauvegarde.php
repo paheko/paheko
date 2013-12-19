@@ -42,7 +42,7 @@ class Sauvegarde
 	 */
 	public function create($auto = false)
 	{
-		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-H-i')) . '.sqlite', GARRADIN_DB_FILE);
+		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-His')) . '.sqlite', GARRADIN_DB_FILE);
 		copy(GARRADIN_DB_FILE, $backup);
 		return basename($backup);
 	}
@@ -237,7 +237,7 @@ class Sauvegarde
 
 		$db->close();
 
-		$backup = str_replace('.sqlite', date('.Y-m-d-H-i') . '.pre-restore.sqlite', GARRADIN_DB_FILE);
+		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', GARRADIN_DB_FILE);
 		
 		if (!rename(GARRADIN_DB_FILE, $backup))
 		{
