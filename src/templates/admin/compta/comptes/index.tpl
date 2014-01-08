@@ -25,16 +25,16 @@
                 <th>{$compte.id|escape}</th>
                 <td class="libelle">{$compte.libelle|escape}</td>
                 <td class="actions">
-                    {$compte.position|get_position}
-                    {if !$compte.plan_comptable}
-                        {if !empty($compte.desactive)}
-                            | Désactivé
-                        {else}
+                    {if !empty($compte.desactive)}
+                        <em>Désactivé</em>
+                    {else}
+                        {$compte.position|get_position}
+                        {if !$compte.plan_comptable}
                             | <a href="{$www_url}admin/compta/comptes/modifier.php?id={$compte.id|escape}">Modifier</a>
                             | <a href="{$www_url}admin/compta/comptes/supprimer.php?id={$compte.id|escape}">Supprimer</a>
-                        {/if}    
-                    {else}
-                        <em>*</em>
+                        {else}
+                            <em>*</em>
+                        {/if}
                     {/if}
                 </td>
             </tr>

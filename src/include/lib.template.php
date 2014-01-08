@@ -325,6 +325,10 @@ function tpl_select_compte($params)
 
     foreach ($comptes as $compte)
     {
+        // Ne pas montrer les comptes désactivés
+        if (!empty($compte['desactive']))
+            continue;
+
         if (!isset($compte['id'][1]))
         {
             $out.= '<optgroup label="'.htmlspecialchars($compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
