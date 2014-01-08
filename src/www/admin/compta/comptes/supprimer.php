@@ -37,6 +37,28 @@ if (!empty($_POST['delete']))
         }
     }
 }
+elseif (!empty($_POST['disable']))
+{
+    if (!utils::CSRF_check('compta_disable_compte_'.$compte['id']))
+    {
+        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    }
+    else
+    {
+        try
+        {
+            $comptes->disable($compte['id']);
+            utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
+        }
+        catch (UserException $e)
+        {
+            $error = $e->getMessage();
+        }
+    }
+}
+
+$tpl->assign('can_delete', $comptes->canDelete($compte['id']));
+$tpl->assign('can_disable', $comptes->canDisable($compte['id']));
 
 $tpl->assign('error', $error);
 

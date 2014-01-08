@@ -54,6 +54,18 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
         return true;
     }
 
+    /**
+     * Supprime un compte bancaire
+     * La suppression sera refusée si le compte est utilisé dans l'exercice en cours
+     * ou dans une catégorie.
+     * Le compte bancaire sera supprimé et le compte au plan comptable seulement désactivé
+     * si le compte est utilisé dans un exercice précédent.
+     *
+     * La désactivation d'un compte fait qu'il n'est plus utilisable dans l'exercice courant
+     * ou les exercices suivants, mais il est possible de le réactiver.
+     * @param  string $id  Numéro du compte
+     * @return boolean     TRUE si la suppression ou désactivation a été effectuée, une exception ou FALSE sinon
+     */
     public function delete($id)
     {
         $db = DB::getInstance();
@@ -62,8 +74,32 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
             throw new UserException('Ce compte n\'est pas un compte bancaire.');
         }
 
+        // Ne pas supprimer/désactiver un compte qui est utilisé dans l'exercice courant
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
+                WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
+                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', false, $id, $id))
+        {
+            throw new UserException('Ce compte ne peut être supprimé car des écritures y sont liées sur l\'exercice courant. '
+                . 'Il faut supprimer ou ré-attribuer ces écritures avant de pouvoir supprimer le compte.');
+        }
+
+        // Il n'est pas possible de supprimer ou désactiver un compte qui est lié à des catégories
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        {
+            throw new UserException('Ce compte ne peut être supprimé car des catégories y sont liées. '
+                . 'Merci de supprimer ou modifier les catégories liées avant de le supprimer.');
+        }
+
         $db->simpleExec('DELETE FROM compta_comptes_bancaires WHERE id = ?;', trim($id));
-        $return = parent::delete($id);
+
+        try {
+            $return = parent::delete($id);
+        }
+        catch (UserException $e) {
+            // Impossible de supprimer car des opérations y sont encore liées
+            // sur les exercices précédents, alors on le désactive
+            parent::disable($id);
+        }
 
         return $return;
     }
