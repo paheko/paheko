@@ -163,7 +163,7 @@ class DB extends \SQLite3
             
             if (count($args) != $nb)
             {
-                throw new \LengthException('Only '.count($args).' arguments, but '.$nb.' are required by query.');
+                throw new \LengthException('Arguments error: '.count($args).' supplied, but '.$nb.' are required by query.');
             }
 
             reset($args);
