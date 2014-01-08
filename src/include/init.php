@@ -97,7 +97,7 @@ ini_set('html_errors', false);
 
 if (PHP_SAPI != 'cli')
 {
-    ini_set('error_prepend_string', '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
+    ini_set('error_prepend_string', '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
         pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
         <pre> \__/<br /> (xx)<br />//||\\\\</pre>
         <h1>Erreur fatale</h1>
@@ -167,7 +167,7 @@ function exception_handler($e)
     }
     else
     {
-        echo '<!DOCTYPE html><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
+        echo '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
         pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
         <pre> \__/<br /> (xx)<br />//||\\\\</pre>
         <h1>Erreur d\'exécution</h1>
