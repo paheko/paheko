@@ -110,3 +110,6 @@ ALTER TABLE membres_categories_tmp RENAME TO membres_categories;
 
 -- Ajout id transaction aux écritures comptables
 ALTER TABLE compta_operations ADD COLUMN id_transaction INTEGER NULL REFERENCES transactions (id);
+
+-- Ajout désactivation compte
+ALTER TABLE compta_comptes ADD COLUMN desactive INTEGER NOT NULL DEFAULT 0;

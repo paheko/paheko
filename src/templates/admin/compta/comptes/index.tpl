@@ -27,8 +27,12 @@
                 <td class="actions">
                     {$compte.position|get_position}
                     {if !$compte.plan_comptable}
-                        | <a href="{$www_url}admin/compta/comptes/modifier.php?id={$compte.id|escape}">Modifier</a>
-                        | <a href="{$www_url}admin/compta/comptes/supprimer.php?id={$compte.id|escape}">Supprimer</a>
+                        {if !empty($compte.desactive)}
+                            | Désactivé
+                        {else}
+                            | <a href="{$www_url}admin/compta/comptes/modifier.php?id={$compte.id|escape}">Modifier</a>
+                            | <a href="{$www_url}admin/compta/comptes/supprimer.php?id={$compte.id|escape}">Supprimer</a>
+                        {/if}    
                     {else}
                         <em>*</em>
                     {/if}

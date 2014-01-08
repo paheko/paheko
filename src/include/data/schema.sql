@@ -227,7 +227,8 @@ CREATE TABLE compta_comptes
     libelle TEXT NOT NULL,
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
-    plan_comptable INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable, 0 = a été ajouté par l'utilisateur
+    plan_comptable INTEGER NOT NULL DEFAULT 1, -- 1 = fait partie du plan comptable, 0 = a été ajouté par l'utilisateur
+    desactive INTEGER NOT NULL DEFAULT 0 -- 1 = compte historique désactivé
 );
 
 CREATE INDEX compta_comptes_parent ON compta_comptes (parent);

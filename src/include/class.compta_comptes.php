@@ -136,12 +136,12 @@ class Compta_Comptes
             throw new UserException('Ce compte ne peut être supprimé car des opérations comptables y sont liées.');
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE compte = ? LIMIT 1;', false, $id, $id))
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ? LIMIT 1;', false, $id))
         {
             throw new UserException('Ce compte ne peut être supprimé car il est lié à un compte bancaire.');
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id, $id))
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
         {
             throw new UserException('Ce compte ne peut être supprimé car des catégories y sont liées.');
         }
@@ -149,6 +149,80 @@ class Compta_Comptes
         $db->simpleExec('DELETE FROM compta_comptes WHERE id = ?;', trim($id));
 
         return true;
+    }
+
+    /**
+     * Peut-on supprimer ce compte ? (OUI s'il n'a pas d'écriture liée)
+     * @param  string $id Numéro du compte
+     * @return boolean TRUE si le compte n'a pas d'écriture liée
+     */
+    public function canDelete($id)
+    {
+        $db = DB::getInstance();
+
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
+                WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', false, $id, $id))
+        {
+            return false;
+        }
+
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Peut-on désactiver ce compte ? (OUI s'il n'a pas d'écriture liée dans l'exercice courant)
+     * @param  string $id Numéro du compte
+     * @return boolean TRUE si le compte n'a pas d'écriture liée dans l'exercice courant
+     */
+    public function canDisable($id)
+    {
+        $db = DB::getInstance();
+
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
+                WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
+                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', false, $id, $id))
+        {
+            return false;
+        }
+
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Désactiver un compte
+     * Le compte ne sera plus utilisable pour les écritures ou les catégories mais restera en base de données
+     * @param  string $id Numéro du compte
+     * @return boolean TRUE si la désactivation a fonctionné, une exception utilisateur si
+     * la désactivation n'est pas possible.
+     */
+    public function disable($id)
+    {
+        // Ne pas désactiver un compte utilisé dans l'exercice courant
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
+                WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
+                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', false, $id, $id))
+        {
+            throw new UserException('Ce compte ne peut être désactivé car des écritures y sont liées sur l\'exercice courant. '
+                . 'Il faut supprimer ou ré-attribuer ces écritures avant de pouvoir supprimer le compte.');
+        }
+
+        // Ne pas désactiver un compte utilisé pour une catégorie
+        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        {
+            throw new UserException('Ce compte ne peut être désactivé car des catégories y sont liées.');
+        }
+
+        return $db->simpleUpdate('compta_comptes', ['desactive' => 1], 'id = \''.$db->escapeString(trim($id)).'\'');
     }
 
     public function get($id)
@@ -238,7 +312,7 @@ class Compta_Comptes
         return array(
             self::ACTIF     =>  'Actif',
             self::PASSIF    =>  'Passif',
-            self::ACTIF | self::PASSIF      =>  'Actif et passif',
+            self::ACTIF | self::PASSIF      =>  'Actif ou passif (déterminé automatiquement au bilan selon le solde du compte)',
             self::CHARGE    =>  'Charge',
             self::PRODUIT   =>  'Produit',
             self::CHARGE | self::PRODUIT    =>  'Charge et produit',
