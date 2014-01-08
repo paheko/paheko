@@ -1,11 +1,10 @@
 <INCLURE{entete.html}>
 
-<B_derniers>
-<div class="articleList">
-    <BOUCLE_derniers(ARTICLES){par date}{inverse}{0,10}>
+<BOUCLE_derniers(ARTICLES){par date}{inverse}{0,10}>
+    <article>
     <h3><a href="#URL">#TITRE</a></h3>
-    </BOUCLE_derniers>
-</div>
-</B_derniers>
+    <p>[(#TEXTE|couper{600}|formatter_texte)]</p>
+	</article>
+</BOUCLE_derniers>
 
 <INCLURE{pied.html}>

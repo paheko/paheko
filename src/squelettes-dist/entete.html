@@ -1,26 +1,42 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8" />
     <title>[(#TITRE) - ]#NOM_ASSO</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
     <link rel="stylesheet" type="text/css" href="[(#URL_SITE)]default.css" media="screen,projection,handheld" />
     <link rel="alternate" type="application/atom+xml" title="Actualité de #NOM_ASSO" href="#URL_ATOM" />
+    <!--[if lte IE 8]>
+    <script type="text/javascript">
+  	'article aside footer header nav section time'.replace(/\w+/g,function(n){document.createElement(n)})
+	</script>
+    <![endif]-->
 </head>
 
 <body>
 
-<div id="header">
-    <h1>#NOM_ASSO</h1>
+<header class="nav">
+	<nav>
+		<ul>
+			<li class="current"><a href="#URL_RACINE">Accueil</a></li>
+			<li><a href="#URL_ADMIN">Administration</a></li>
+		</ul>
+	</nav>
+</header>
+
+<header class="main">
+    <h1><a href="#URL_RACINE">#NOM_ASSO</a></h1>
     [<h4>(#ADRESSE_ASSO)</h4>]
-</div>
 
-<B_menu>
-<ul id="menu">
-<BOUCLE_menu(RUBRIQUES){parent=0}{par titre}>
-    <li><a href="#URL/">#TITRE</a></li>
-</BOUCLE_menu>
-</ul>
-</B_menu>
+	<B_menu>
+	<nav>
+		<ul>
+		<BOUCLE_menu(RUBRIQUES){parent=0}{par titre}>
+		    <li><a href="#URL/">#TITRE</a></li>
+		</BOUCLE_menu>
+		</ul>
+	</nav>
+	</B_menu>
+</header>
 
-<div id="page">
+<section class="page">
