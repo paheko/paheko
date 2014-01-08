@@ -18,8 +18,15 @@
 <div class="header">
     <h1>{$title|escape}</h1>
 
-    {if $is_logged}
     <ul class="menu">
+    {if !$is_logged}
+        <li><a href="{$www_url}">&larr; Retour au site</a></li>
+        <li><a href="{$admin_url}">Connexion</a>
+            <ul>
+                <li><a href="{$admin_url}password.php">Mot de passe perdu</a>
+            </ul>
+        </li>
+    {else}
         <li class="home{if $current == 'home'} current{/if}"><a href="{$admin_url}">Accueil</a></li>
         {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
             <li class="list_members{if $current == 'membres'} current{/if}"><a href="{$admin_url}membres/">Membres <small>({$nb_membres|escape})</small></a>
@@ -67,8 +74,8 @@
         {/if}
         <li class="mes_infos{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php">Mes infos</a>
         <li class="logout"><a href="{$admin_url}logout.php">Déconnexion</a></li>
-    </ul>
     {/if}
+    </ul>
 </div>
 {/if}
 
