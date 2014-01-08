@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ROOT=/usr/share/garradin/www
-ROOT=~/fossil/garradin/src/www
+#ROOT=~/fossil/garradin/src/www
 ROUTER=${ROOT}/_route.php
 PORT=8088
 ADDRESS=localhost

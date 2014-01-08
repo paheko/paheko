@@ -23,6 +23,12 @@ OPTIONS
 *-p, --port*='PORT'::
 Défini le port utilisé par le serveur web.
 
+*-v, --verbose*::
+Affiche les messages du serveur web.
+
+*-h, --help*::
+Affiche un message d'aide sur l'utilisation de la commande.
+
 COMMANDES
 ---------
 *server*::
@@ -54,11 +60,11 @@ Garradin est développé par bohwaz et d'autres contributeurs.
 RESSOURCES
 ----------
 
-Site principal : <http://garradin.kd2.org/>
+Site principal : <http://dev.kd2.org/garradin/>
 
 
 COPYING
 -------
-Copyright \(C) 2011-2013 BohwaZ. Free use of this software is
+Copyright \(C) 2011-2014 BohwaZ. Free use of this software is
 granted under the terms of the GNU Affero General Public License v3
 (AGPL).
