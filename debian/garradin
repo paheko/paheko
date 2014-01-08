@@ -1,91 +1,100 @@
-#!/usr/bin/php
-<?php
+#!/bin/sh
 
-# Fixme: utiliser un routeur (path du script routeur à passer en argument à PHP)
-# Fixme: faire passer le fait qu'on est en mode CLI et l'user via la directive ini : -d cli_server.color="$USER"
-# Fixme: implémenter le fichier de config
-# Fixme: faire en sorte qu'en mode UI le serveur web et le navigateur soient fermés tous les deux avec un Ctrl-C
-# Fixme: loguer la sortie du serveur web
+ROOT=/usr/share/garradin/www
+ROOT=~/fossil/garradin/src/www
+ROUTER=${ROOT}/_route.php
+PORT=8088
+ADDRESS=localhost
+VERBOSE=0
 
-$config = [
-	'browser'	=>	'/usr/bin/www-browser',
-	'x-browser'	=>	'/usr/bin/x-www-browser',
-	'port'		=>	8000,
-	'root'		=>	'/usr/share/garradin/www',
-];
+# Execute getopt
+ARGS=`getopt -o "p:vh" -l "port:,verbose,help" -n "garradin" -- "$@"`
+ 
+# Bad arguments
+if [ $? -ne 0 ];
+then
+  exit 1
+fi
+ 
+# A little magic
+eval set -- "$ARGS"
+ 
+# Now go through all the options
+while true;
+do
+  case "$1" in
+    -p|--port)
+      PORT=$2
+      shift;;
 
-if (isset($_SERVER['HOME']))
-{
-	$home = $_SERVER['HOME'];
+    -v|--verbose)
+      VERBOSE=1
+      shift;;
 
-	if (file_exists($home . '/.config/garradin/config.ini'))
-	{
-		$config = array_merge($config, parse_ini_file($home . '/.config/garradin/config.ini'));
-	}
-}
-
-$options = getopt('p::v', ['port::', 'verbose']);
-
-// Remove options from $argv array
-foreach ($argv as $k=>$v)
-{
-	if (($v[0] == '-' && ($opt == substr($v, 1)) && array_key_exists($opt, $options))
-		|| (substr($v, 0, 2) == '--' && ($opt == substr($v, 2)) && array_key_exists($opt, $options)))
-	{
-		if ($options[$opt] !== false)
-		{
-			unset($argv[$k+1]);
-		}
-
-		unset($argv[$k])
-	}
-}
-
-$command = isset($argv[1]) ? $argv[1] : false;
-$verbose = isset($options['v']) || isset($options['verbose']);
-$port = isset($options['p']) ? (int) $options['p'] : (isset($options['port']) ? (int) $options['port'] : (int)$config['port']);
-
-switch ($command)
-{
-	case 'server':
-		system('php -S localhost:' . $port . ' -t ' . escapeshellarg($config['root']));
-		break;
-	case 'ui':
-		$browser = !empty($_SERVER['DISPLAY']) ? $config['x-browser'] : $config['browser'];
-		system('php -S localhost:' . $port . ' -t ' . escapeshellarg($config['root']) . ' > /dev/null &');
-		system($browser . ' ' . escapeshellarg('http://localhost:' . $port));
-		break;
-	default:
-		echo <<<EOF
-Usage : $argv[0] [COMMANDE] [PROJET]
+    -h|--help)
+      cat <<EOF
+Usage : $0 [COMMANDE] [PROJET]
 
 Où COMMANDE peut être :
 
-	server [-p|--port PORT] 
-		Démarre un serveur web Garradin sur le port spécifié
-		(ou sur le port 8000 par défaut)
+        server [-p|--port PORT] 
+                Démarre un serveur web Garradin sur le port spécifié
+                (ou sur le port 8000 par défaut)
 
-	ui [-p|--port PORT]
-		Idem que 'server' mais démarre ensuite le navigateur web par défaut
-		et connecte automatiquement avec le premier administrateur
-		de l'association.
+        ui [-p|--port PORT]
+                Idem que 'server' mais démarre ensuite le navigateur web par défaut
+                et connecte automatiquement avec le premier administrateur
+                de l'association.
 
 Si aucune COMMANDE n'est donnée, Garradin utilisera 'ui' par défaut.
 
 PROJET est le chemin menant à un projet Garradin précis 
-	(fichier *.garradin.sqlite). Si aucun projet n'est indiqué, le 
-	dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
-	ouvert un nouveau projet sera créé.
+        (fichier .garradin.sqlite). Si aucun projet n'est indiqué, le 
+        dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
+        ouvert un nouveau projet sera créé.
 
 Options :
 
-	-p|--port PORT
-		Spécifie le port pour le mode ui ou le mode serveur.
+        -p|--port PORT
+                Spécifie le port pour le mode ui ou le mode serveur.
 
-	-v|--verbose
-		Affiche les requêtes reçues sur le serveur web.
+        -v|--verbose
+                Affiche les requêtes reçues sur le serveur web.
 
-Configuration dans ~/.config/garradin/config.ini
-EOF;
-		break;
+        -h|--help
+                Affiche ce message.
+EOF
+      exit
+      shift;;
+ 
+    --)
+      shift
+      break;;
+  esac
+done
+
+CMD=$1
+
+[ $VERBOSE = 1 ] && {
+    php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} &
+} || {
+    php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} > /dev/null 2>&1 &
 }
+
+php_pid=$!
+sleep .5
+
+[ $CMD = "ui" ] && {
+    URL="http://${ADDRESS}:${PORT}/"
+    [ "$DISPLAY" != "" ] && {
+        x-www-browser ${URL} &
+    } || {
+        www-browser ${URL} &
+    }
+
+    wait $!
+    kill $php_pid
+} || {
+    wait $php_pid
+}
+
