@@ -4,6 +4,9 @@ namespace Garradin;
 
 error_reporting(-1);
 
+define('GARRADIN_WEBSITE', 'http://garradin.eu/');
+define('GARRADIN_PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
+
 /*
  * Version de Garradin
  */
