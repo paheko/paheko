@@ -93,6 +93,11 @@ if (!defined('WWW_URL'))
     define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
 }
 
+if (!defined('GARRADIN_PLUGINS_PATH'))
+{
+    define('GARRADIN_PLUGINS_PATH', GARRADIN_DATA_ROOT . '/plugins');
+}
+
 ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
 ini_set('log_errors', true);
 ini_set('display_errors', true);
