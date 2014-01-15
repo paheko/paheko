@@ -315,6 +315,7 @@ CREATE TABLE compta_categories
 CREATE TABLE plugins
 (
     id TEXT PRIMARY KEY,
+    officiel INTEGER NOT NULL DEFAULT 0,
     nom TEXT NOT NULL,
     description TEXT,
     auteur TEXT,
