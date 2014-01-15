@@ -6,38 +6,16 @@ class Static_Cache
 {
 	const EXPIRE = 3600; // 1h
 	const CLEAN_EXPIRE = 86400; // 1 day
-	protected static $cache_dir = null;
 
 	protected static function _getCacheDir()
 	{
-		if (is_null(self::$cache_dir))
-		{
-			throw new \RuntimeException('Cache dir not set.');
-		}
-
-		return self::$cache_dir;
+		return GARRADIN_DATA_ROOT . '/cache/static';
 	}
 
 	protected static function _getCachePath($id)
 	{
 		$id = 'cache_' . sha1($id);
 		return self::_getCacheDir() . '/' . $id;
-	}
-
-	public static function setCacheDir($dir)
-	{
-		if (substr($dir, -1) == '/')
-		{
-			$dir = substr($dir, 0, -1);
-		}
-
-		if (!is_readable($dir) || !is_writable($dir))
-		{
-			throw new \RuntimeException('Cache dir is not readable or writeable.');
-		}
-
-		self::$cache_dir = $dir;
-		return true;
 	}
 
 	static public function store($id, $content)

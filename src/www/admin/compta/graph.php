@@ -10,15 +10,6 @@ if (!in_array(utils::get('g'), array('recettes_depenses', 'banques_caisses')))
 
 $graph = utils::get('g');
 
-define('GRAPH_CACHE_DIR', GARRADIN_ROOT . '/cache/static');
-
-if (!file_exists(GRAPH_CACHE_DIR))
-{
-	mkdir(GRAPH_CACHE_DIR);
-}
-
-Static_Cache::setCacheDir(GRAPH_CACHE_DIR);
-
 if (Static_Cache::expired('graph_' . $graph))
 {
 	$stats = new Compta_Stats;

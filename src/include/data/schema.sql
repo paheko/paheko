@@ -312,15 +312,14 @@ CREATE TABLE compta_categories
     FOREIGN KEY(compte) REFERENCES compta_comptes(id)
 );
 
-/*
---
--- générateur de paperasses
---
-
-CREATE TABLE papiers (
-    id INTEGER PRIMARY KEY,
-    modele INTEGER,
-
-    donnees TEXT
+CREATE TABLE plugins
+(
+    id TEXT PRIMARY KEY,
+    nom TEXT NOT NULL,
+    description TEXT,
+    auteur TEXT,
+    url TEXT,
+    version TEXT NOT NULL,
+    menu INTEGER NOT NULL DEFAULT 0,
+    config TEXT
 );
-*/
