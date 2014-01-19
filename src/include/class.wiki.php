@@ -22,6 +22,7 @@ class Wiki
 
         $str = preg_replace('![^\w\d_-]!i', '-', $str);
         $str = preg_replace('!-{2,}!', '-', $str);
+        $str = trim($str, '-');
 
         return $str;
     }
