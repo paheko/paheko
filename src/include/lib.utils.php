@@ -373,7 +373,7 @@ class utils
         return self::$g2x->process($str);
     }
 
-    static public function htmlSpip($str)
+    static public function htmlSpip($str, $prefix = '')
     {
         // Intertitres
         $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '<h3>$1</h3>', $str);
@@ -389,9 +389,10 @@ class utils
         $str = preg_replace('/(^|\s+)([«])\h*/u', '$1$2&nbsp;', $str);
 
         // Liens
-        $str = preg_replace('/(?<!\\\\)\[([^-]+)->([^\]]+)\]/', '<a href="$2">$1</a>', $str);
-        $str = preg_replace('/(?<!\\\\)\[([^\]]+)\]/', '<a href="$1">$1</a>', $str);
+        $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '<a href="$2">$1</a>', $str);
+        $str = preg_replace('/(?<!\\\\)\[(.+?)\]/', '<a href="$1">$1</a>', $str);
 
+        // Adresses email
         $str = preg_replace('/<a href="((?!http).*@.*)">/iU', '<a href="mailto:$1">', $str);
 
         return $str;

@@ -29,7 +29,7 @@
 </ul>
 
 <div class="wikiContent">
-    {$page.contenu.contenu|format_wiki|liens_wiki:'?'}
+    {$page.contenu.contenu|format_wiki|liens_wiki:'wiki/?'}
 </div>
 
 {include file="admin/_foot.tpl"}
