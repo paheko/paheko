@@ -185,7 +185,7 @@ function tpl_format_wiki($str)
 
 function tpl_liens_wiki($str, $prefix)
 {
-    return preg_replace_callback('!<a href="([^/.]+)">!i', function ($matches) use ($prefix) {
+    return preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($prefix) {
         return '<a href="' . $prefix . Wiki::transformTitleToURI($matches[1]) . '">';
     }, $str);
 }
