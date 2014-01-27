@@ -39,6 +39,6 @@ $tpl->assign('error', $error);
 
 $tpl->assign('liste', $transactions->listByName());
 
-$tpl->display('admin/membres/transactions/index.tpl');
+$tpl->display('admin/membres/transactions/gestion.tpl');
 
 ?>

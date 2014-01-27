@@ -68,7 +68,7 @@ CREATE TABLE rappels_envoyes
 (
     id_membre INTEGER NOT NULL,
     id_rappel INTEGER NOT NULL,
-    date TEXT NOT NULL DEFAUT CURRENT_TIMESTAMP,
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
     
     FOREIGN KEY (id_membre) REFERENCES membres (id),

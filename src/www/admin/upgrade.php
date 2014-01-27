@@ -114,6 +114,11 @@ if (version_compare($v, '0.5.0', '<'))
     $db->exec('DELETE FROM config WHERE cle IN ("champs_obligatoires", "champs_modifiables_membre");');
 }
 
+if (version_compare($v, '0.6.0', '<'))
+{
+    $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.6.0.sql'));
+}
+
 utils::clearCaches();
 
 $config->setVersion(garradin_version());
