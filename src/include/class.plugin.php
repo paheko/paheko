@@ -154,6 +154,11 @@ class Plugin
 			throw new \LogicException($id . ' n\'est pas un plugin officiel (absent de la liste)');
 		}
 
+		if (file_exists(GARRADIN_PLUGINS_PATH . '/' . $id . '.phar'))
+		{
+			throw new UserException('Le plugin '.$id.' existe déjà.');
+		}
+
 		$url = parse_url(GARRADIN_PLUGINS_URL);
 
 		$context_options = [
