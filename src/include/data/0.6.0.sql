@@ -1,5 +1,7 @@
+PRAGMA foreign_keys = OFF;
+
 -- nouveau moyen de paiement
---INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
+INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
 
 CREATE TABLE transactions
 -- Paiements possibles
@@ -37,7 +39,7 @@ CREATE TABLE rappels_envoyes
 (
     id_membre INTEGER NOT NULL,
     id_rappel INTEGER NOT NULL,
-    date TEXT NOT NULL DEFAUT CURRENT_TIMESTAMP,
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
     
     FOREIGN KEY (id_membre) REFERENCES membres (id),
@@ -95,13 +97,13 @@ CREATE TABLE membres_categories_tmp
 
 -- Remise des anciennes infos
 INSERT INTO membres_categories_tmp SELECT id, nom, description, droit_wiki, droit_membres, 
-    droit_compta, droit_inscription, droit_connexion, droit_config, cacher FROM membres_categories;
+    droit_compta, droit_inscription, droit_connexion, droit_config, cacher, NULL FROM membres_categories;
 
 -- Conversion des cotisations de catégories en transactions
-INSERT INTO transactions (id_categorie_comptable, intitule, montant, duree) 
+INSERT INTO transactions (id_categorie_compta, intitule, montant, duree, description) 
     SELECT 
         (SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1), -- Numéro de catégorie comptable
-        nom, montant_cotisation, duree_cotisation
+        nom, montant_cotisation, round(duree_cotisation * 30.44), "Importé depuis les catégories de membres (version 0.5.x)"
     FROM membres_categories;
 
 -- Suppression de l'ancienne table et renommage de la nouvelle
@@ -109,7 +111,9 @@ DROP TABLE membres_categories;
 ALTER TABLE membres_categories_tmp RENAME TO membres_categories;
 
 -- Ajout id transaction aux écritures comptables
-ALTER TABLE compta_operations ADD COLUMN id_transaction INTEGER NULL REFERENCES transactions (id);
+ALTER TABLE compta_journal ADD COLUMN id_transaction INTEGER NULL REFERENCES transactions (id);
 
 -- Ajout désactivation compte
 ALTER TABLE compta_comptes ADD COLUMN desactive INTEGER NOT NULL DEFAULT 0;
+
+PRAGMA foreign_keys = ON;

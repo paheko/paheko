@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Transactions" current="membres/transactions"}
+{include file="admin/_head.tpl" title="Cotisations et activités" current="membres/transactions/admin"}
 
 <table class="list">
     <thead>
@@ -22,8 +22,8 @@
                     {/if}
                 </td>
                 <td class="actions">
-                    <a href="{$admin_url}membres/transactions/modifier.php?id={$cat.id|escape}">Modifier</a>
-                    | <a href="{$admin_url}membres/transactions/supprimer.php?id={$cat.id|escape}">Supprimer</a>
+                    <a href="{$admin_url}membres/transactions/gestion/modifier.php?id={$tr.id|escape}">Modifier</a>
+                    | <a href="{$admin_url}membres/transactions/gestion/supprimer.php?id={$tr.id|escape}">Supprimer</a>
                 </td>
             </tr>
         {/foreach}
