@@ -4,9 +4,6 @@ namespace Garradin;
 
 error_reporting(-1);
 
-define('GARRADIN_WEBSITE', 'http://garradin.eu/');
-define('GARRADIN_PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
-
 /*
  * Version de Garradin
  */
@@ -97,6 +94,9 @@ if (!defined('GARRADIN_PLUGINS_PATH'))
 {
     define('GARRADIN_PLUGINS_PATH', GARRADIN_DATA_ROOT . '/plugins');
 }
+
+define('GARRADIN_WEBSITE', 'http://garradin.eu/');
+define('GARRADIN_PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
 
 ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
 ini_set('log_errors', true);
