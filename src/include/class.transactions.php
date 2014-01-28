@@ -142,6 +142,12 @@ class Transactions
 		$db = DB::getInstance();
 		return $db->simpleStatementFetch('SELECT * FROM transactions ORDER BY intitule;');
 	}
+
+	public function listCurrent()
+	{
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT * FROM transactions WHERE fin >= date(\'now\') OR fin IS NULL ORDER BY intitule;');
+	}
 }
 
 ?>
