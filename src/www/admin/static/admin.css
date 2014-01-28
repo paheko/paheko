@@ -994,6 +994,10 @@ pre.sql_schema {
     overflow: auto;
 }
 
+.hidden {
+    display: none;
+}
+
 @media print {
     body {
         background: #fff;

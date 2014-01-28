@@ -423,31 +423,13 @@ function datepickr(targetElement, userConfig) {
 			{
 				inputs[i].setAttribute('type', 'text');
 				new datepickr(inputs[i], config_fr);
+				inputs[i].className += ' date';
+				inputs[i].size = 10;
+				inputs[i].maxlength = 10;
 				inputs[i].setAttribute('pattern', '[0-9]{4}-[0-9]{2}-[0-9]{2}');
-				enabled = true;
 			}
 		}
-
-		if (enabled)
-		{
-			var scripts = document.head.getElementsByTagName('script');
-			var www_url = scripts[scripts.length - 1].src.replace(/\/[^\/]+$/, '/');
-
-			var link = document.createElement('link');
-			link.type = 'text/css';
-			link.rel = 'stylesheet';
-			link.href = www_url + 'datepickr.css';
-
-			document.head.appendChild(link);
-		}
 	}
 
-	if (document.addEventListener)
-	{
-		document.addEventListener("DOMContentLoaded", dateInputFallback, false);
-	}
-	else
-	{
-		document.attachEvent("onDOMContentLoaded", dateInputFallback);
-	}
+	dateInputFallback();
 } () );
