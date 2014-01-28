@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/../../../_inc.php';
 
 if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
 {
@@ -9,6 +9,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
 }
 
 $transactions = new Transactions;
+$comptes = new Compta_Comptes;
 
 $error = false;
 
@@ -38,7 +39,8 @@ if (!empty($_POST['save']))
 $tpl->assign('error', $error);
 
 $tpl->assign('liste', $transactions->listByName());
+$tpl->assign('comptes', $comptes->listTree());
 
-$tpl->display('admin/membres/transactions/gestion.tpl');
+$tpl->display('admin/membres/transactions/gestion/index.tpl');
 
 ?>
