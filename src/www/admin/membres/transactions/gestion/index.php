@@ -9,7 +9,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
 }
 
 $transactions = new Transactions;
-$comptes = new Compta_Comptes;
+$cats = new Compta_Categories;
 
 $error = false;
 
@@ -22,12 +22,22 @@ if (!empty($_POST['save']))
     else
     {
         try {
+            $duree = utils::post('periodicite') == 'jours' ? (int) utils::post('duree') : null;
+            $debut = utils::post('periodicite') == 'date' ? utils::post('debut') : null;
+            $fin = utils::post('periodicite') == 'date' ? utils::post('fin') : null;
+            $id_cat = utils::post('categorie') ? (int) utils::post('id_categorie_compta') : null;
+
             $transactions->add(array(
                 'intitule'          =>  utils::post('intitule'),
+                'description'       =>  utils::post('description'),
                 'montant'           =>  (float) utils::post('montant'),
+                'duree'             =>  $duree,
+                'debut'             =>  $debut,
+                'fin'               =>  $fin,
+                'id_categorie_compta'=> $id_cat,
             ));
 
-            utils::redirect('/admin/membres/transactions/');
+            utils::redirect('/admin/membres/transactions/gestion/');
         }
         catch (UserException $e)
         {
@@ -39,7 +49,7 @@ if (!empty($_POST['save']))
 $tpl->assign('error', $error);
 
 $tpl->assign('liste', $transactions->listByName());
-$tpl->assign('comptes', $comptes->listTree());
+$tpl->assign('categories', $cats->getList(Compta_Categories::RECETTES));
 
 $tpl->display('admin/membres/transactions/gestion/index.tpl');
 
