@@ -45,6 +45,7 @@ if (!empty($_POST['save']))
                 'droit_connexion' => (int) utils::post('droit_connexion'),
                 'droit_inscription' => (int) utils::post('droit_inscription'),
                 'cacher'        =>  (int) utils::post('cacher'),
+                'id_transaction_obligatoire' => (int) utils::post('id_transaction_obligatoire'),
             ));
 
             if ($id == $user['id_categorie'])
@@ -63,6 +64,9 @@ if (!empty($_POST['save']))
 
 $tpl->assign('cat', $cat);
 $tpl->assign('error', $error);
+
+$transactions = new Transactions;
+$tpl->assign('transactions', $transactions->listCurrent());
 
 $tpl->display('admin/membres/cat_modifier.tpl');
 

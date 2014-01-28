@@ -20,7 +20,32 @@
                 <label for="f_cacher">Catégorie cachée</label>
             </dt>
             <dd class="help">
-                Cette catégorie ne sera visible qu'aux administrateurs.
+                Si coché cette catégorie ne sera visible qu'aux administrateurs et ne recevra pas
+                de messages collectifs ou de rappels.
+            </dd>
+        </dl>
+    </fieldset>
+
+    <fieldset>
+        <legend>Cotisation obligatoire</legend>
+        <dl>
+            <dt><label for="f_id_transaction_obligatoire">Cotisation obligatoire</label></dt>
+            <dd>
+                <select name="id_transaction_obligatoire" id="f_id_transaction_obligatoire">
+                    <option value="">-- Non</option>
+                    {foreach from=$transactions item="transaction"}
+                    <option value="{$transaction.id|escape}" {form_field name="id_transaction_obligatoire" selected=$transaction.id data=$cat}>
+                        {$transaction.intitule|escape} 
+                        — {$transaction.montant|html_money} {$config.monnaie|escape}
+                        — {if $transaction.duree}pour {$transaction.duree|escape} jours
+                        {elseif $transaction.debut}
+                            du {$transaction.debut|format_sqlite_date_to_french} au {$transaction.fin|format_sqlite_date_to_french}
+                        {else}
+                            ponctuelle
+                        {/if}
+                    </option>
+                    {/foreach}
+                </select>
             </dd>
         </dl>
     </fieldset>

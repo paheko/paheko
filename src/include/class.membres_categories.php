@@ -20,9 +20,23 @@ class Membres_Categories
 
     protected function _checkData(&$data)
     {
+        $db = DB::getInstance();
+
         if (!isset($data['nom']) || !trim($data['nom']))
         {
             throw new UserException('Le nom de catégorie ne peut rester vide.');
+        }
+
+        if (!empty($data['id_transaction_obligatoire']) 
+            && !$db->simpleQuerySingle('SELECT 1 FROM transactions WHERE id = ?;', 
+                false, (int)$data['id_transaction_obligatoire']))
+        {
+            throw new UserException('Numéro de transaction (cotisation) inconnu.');
+        }
+
+        if (isset($data['id_transaction_obligatoire']) && empty($data['id_transaction_obligatoire']))
+        {
+            $data['id_transaction_obligatoire'] = null;
         }
     }
 
