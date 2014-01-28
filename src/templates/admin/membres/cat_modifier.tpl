@@ -15,10 +15,6 @@
             <dd><input type="text" name="nom" id="f_nom" value="{form_field data=$cat name=nom}" /></dd>
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" rows="5" cols="50">{form_field data=$cat name=description}</textarea></dd>
-            <dt><label for="f_montant_cotisation">Montant cotisation</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" name="montant_cotisation" step="0.50" id="f_montant_cotisation" value="{form_field data=$cat name=montant_cotisation}" /></dd>
-            <dt><label for="f_duree_cotisation">Duréee cotisation</label> (en mois) <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" name="duree_cotisation" id="f_duree_cotisation" value="{form_field data=$cat name=duree_cotisation}" /></dd>
             <dt>
                 <input type="checkbox" name="cacher" value="1" id="f_cacher" {if $cat.cacher}checked="checked"{/if} />
                 <label for="f_cacher">Catégorie cachée</label>

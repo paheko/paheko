@@ -23,7 +23,6 @@ if (!empty($_POST['save']))
         try {
             $cats->add(array(
                 'nom'           =>  utils::post('nom'),
-                'montant_cotisation' => (float) utils::post('montant_cotisation'),
             ));
 
             utils::redirect('/admin/membres/categories.php');

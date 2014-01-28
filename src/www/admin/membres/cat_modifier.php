@@ -38,8 +38,6 @@ if (!empty($_POST['save']))
             $cats->edit($id, array(
                 'nom'           =>  utils::post('nom'),
                 'description'   =>  utils::post('description'),
-                'montant_cotisation' => (float) utils::post('montant_cotisation'),
-                'duree_cotisation' => (int) utils::post('duree_cotisation'),
                 'droit_wiki'    =>  (int) utils::post('droit_wiki'),
                 'droit_compta'  =>  (int) utils::post('droit_compta'),
                 'droit_config'  =>  (int) utils::post('droit_config'),
