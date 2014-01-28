@@ -4,7 +4,6 @@
     <thead>
         <th>Nom</th>
         <td>Membres</td>
-        <td>Cotisation</td>
         <td>Droits</td>
         <td></td>
     </thead>
@@ -13,7 +12,6 @@
             <tr>
                 <th>{$cat.nom|escape}</th>
                 <td class="num">{$cat.nombre|escape}</td>
-                <td><strong>{$cat.montant_cotisation|escape} {$config.monnaie|escape}</strong> pour {$cat.duree_cotisation|escape} mois</td>
                 <td class="droits">
                     {format_droits droits=$cat}
                 </td>
@@ -39,8 +37,6 @@
         <dl>
             <dt><label for="f_nom">Nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom" id="f_nom" value="{form_field name=nom}" /></dd>
-            <dt><label for="f_montant_cotisation">Montant cotisation</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" name="montant_cotisation" step="0.50" id="f_montant_cotisation" value="{form_field default=20 name=montant_cotisation}" /></dd>
         </dl>
     </fieldset>
 
