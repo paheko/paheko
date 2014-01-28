@@ -117,10 +117,16 @@ class Transactions
 	{
 		$db = DB::getInstance();
 
+		// On n'accepte pas de supprimer une transaction qui est utilisée
 		if ($db->simpleQuerySingle('SELECT 1 FROM membres_transactions WHERE id_transaction = ? LIMIT 1;', false, (int) $id))
 		{
-			throw new UserException('Il existe des transactions utilisant cette catégorie de transaction.');
+			throw new UserException('Il existe des paiements utilisant cette activité ou cotisation.');
 		}
+
+		// Remise à zéro des écritures faisant référence à cette transaction
+		// (s'il y en a encore)
+		$db->simpleExec('UPDATE compta_journal SET id_transaction = NULL 
+			WHERE id_transaction = ?;', (int) $id);
 
 		return $db->simpleExec('DELETE FROM transactions WHERE id = ?;', (int) $id);
 	}

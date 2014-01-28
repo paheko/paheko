@@ -1,5 +1,11 @@
 {include file="admin/_head.tpl" title="Cotisations et activités" current="membres/transactions/admin" js=1}
 
+<ul class="actions">
+    <li class="current"><a href="{$admin_url}membres/transactions/gestion/">Cotisations et activités</a></li>
+    <li><a href="{$admin_url}membres/transactions/gestion/rappels.php">Gestion des rappels</a></li>
+    <li><a href="{$admin_url}membres/transactions/rappels.php">État des rappels</a></li>
+</ul>
+
 <table class="list">
     <thead>
         <th>Intitulé</th>
