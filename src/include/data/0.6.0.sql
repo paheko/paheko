@@ -10,7 +10,7 @@ CREATE TABLE transactions
     id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
 
     intitule TEXT NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT NULL,
     montant REAL NOT NULL,
 
     duree INTEGER NULL, -- En jours
