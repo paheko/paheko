@@ -77,7 +77,7 @@
                 <dl>
                     <dt><label for="f_date">L'adhésion commence le...</label></dt>
                     <dd>
-                        <input type="date" name="date" value="{form_field name=nom default=$date_cotisation_defaut}" id="f_date" />
+                        <input type="date" name="date" value="{form_field name=date default=$date_cotisation_defaut}" id="f_date" />
                         {csrf_field key="cotisation_"|cat:$membre.id}
                         <input type="submit" name="cotisation" value="Enregistrer &rarr;" />
                     </dd>
