@@ -5,6 +5,9 @@
     <title>{$title|escape}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="screen,projection,handheld,print" />
+    {if isset($js)}
+        <script type="text/javascript" src="{$admin_url}static/global.js"></script>
+    {/if}
     {if isset($custom_js)}
         {foreach from=$custom_js item="js"}
             <script type="text/javascript" src="{$admin_url}static/{$js|escape}"></script>
@@ -12,7 +15,7 @@
     {/if}
 </head>
 
-<body{if !empty($body_id)} id="{$body_id|escape}"{/if}>
+<body{if !empty($body_id)} id="{$body_id|escape}"{/if} data-url="{$admin_url|escape}">
 
 {if empty($is_popup)}
 <div class="header">
