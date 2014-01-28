@@ -162,6 +162,10 @@ fieldset dl dd ol, fieldset dl dd ul {
     margin-left: 1.5em;
 }
 
+fieldset dl dl {
+    margin: .5em 0 .5em 1.2em;
+}
+
 input[type=text], textarea, input[type=password], input[type=email],
 input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
