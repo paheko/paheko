@@ -355,18 +355,8 @@ function datepickr(targetElement, userConfig) {
 			currentYearView = get.current.year();
 			currentMonthView = get.current.month.integer();
 		}
-
-		var inputLeft = inputTop = 0,
-		obj = element;
-		if(obj.offsetParent) {
-			do {
-				inputLeft += obj.offsetLeft;
-				inputTop += obj.offsetTop;
-			} while (obj = obj.offsetParent);
-		}
-
 		container = build('div', { className: 'calendar' });
-		container.style.cssText = 'display: none; position: absolute; top: ' + (inputTop + element.offsetHeight) + 'px; left: ' + inputLeft + 'px; z-index: 9999;';
+		container.style.cssText = 'display: none; position: absolute; z-index: 9999;';
 
 		var months = build('div', { className: 'months' });
 		prevMonth = build('span', { className: 'prev-month' }, build('a', { href: '#' }, '&lt;'));
@@ -385,7 +375,9 @@ function datepickr(targetElement, userConfig) {
 		container.appendChild(months);
 		container.appendChild(calendar);
 
-		document.body.appendChild(container);
+		element.parentNode.style.position = 'relative';
+		element.parentNode.appendChild(container);
+
 		bindMonthLinks();
 
 		element.onfocus = open;
@@ -422,11 +414,11 @@ function datepickr(targetElement, userConfig) {
 			if (inputs[i].getAttribute('type') == 'date' && (inputs[i].type == 'text' || window.webkitConvertPointFromNodeToPage))
 			{
 				inputs[i].setAttribute('type', 'text');
-				new datepickr(inputs[i], config_fr);
 				inputs[i].className += ' date';
 				inputs[i].size = 10;
 				inputs[i].maxlength = 10;
 				inputs[i].setAttribute('pattern', '[0-9]{4}-[0-9]{2}-[0-9]{2}');
+				new datepickr(inputs[i], config_fr);
 			}
 		}
 	}
