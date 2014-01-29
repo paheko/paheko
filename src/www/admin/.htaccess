@@ -1,0 +1,1 @@
+ErrorDocument 404 "<h1>Erreur 404</h1><h2>Page non trouv&eacute;e</h2><p><a href=../>Retour</a></p>"
