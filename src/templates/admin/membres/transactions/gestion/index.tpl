@@ -58,17 +58,17 @@
             <dd><input type="radio" name="periodicite" id="f_periodicite_ponctuel" value="ponctuel" {form_field checked="ponctuel" name=periodicite default="ponctuel"} /> <label for="f_periodicite_ponctuel">Pas de période (activité ou cotisation ponctuelle)</label></dd>
 
             <dd><input type="radio" name="periodicite" id="f_periodicite_jours" value="jours" {form_field checked="jours" name=periodicite} /> <label for="f_periodicite_jours">En nombre de jours</label>
-                <dl>
-                    <dt class="periode_jours"><label for="f_duree">Durée de validité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                    <dd class="periode_jours"><input type="number" step="1" size="5" min="1" name="duree" id="f_duree" value="{form_field name="duree"}" /></dd>
+                <dl class="periode_jours">
+                    <dt><label for="f_duree">Durée de validité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+                    <dd><input type="number" step="1" size="5" min="1" name="duree" id="f_duree" value="{form_field name="duree"}" /></dd>
                 </dl>
             </dd>
             <dd><input type="radio" name="periodicite" id="f_periodicite_dates" value="date" {form_field checked="date" name=periodicite} /> <label for="f_periodicite_dates">Période définie</label>
-                <dl>
-                    <dt class="periode_dates"><label for="f_date_debut">Date de début</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                    <dd class="periode_dates"><input type="date" name="debut" value="{form_field name=debut}" id="f_date_debut" /></dd>
-                    <dt class="periode_dates"><label for="f_date_fin">Date de fin</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                    <dd class="periode_dates"><input type="date" name="fin" value="{form_field name=fin}" id="f_date_fin" /></dd>
+                <dl class="periode_dates">
+                    <dt><label for="f_date_debut">Date de début</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+                    <dd><input type="date" name="debut" value="{form_field name=debut}" id="f_date_debut" /></dd>
+                    <dt><label for="f_date_fin">Date de fin</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+                    <dd><input type="date" name="fin" value="{form_field name=fin}" id="f_date_fin" /></dd>
                 </dl>
             </dd>
             <dt>

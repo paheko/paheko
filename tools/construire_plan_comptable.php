@@ -175,7 +175,7 @@ Classe 4 — Comptes de tiers
 
         4110 Autres usagers [ACTIF]
 
-    419 Avances aux usagers [ACTIF]
+    419 Avances aux usagers [PASSIF]
 
 42 PERSONNEL ET COMPTES RATTACHÉS [PASSIF]
 

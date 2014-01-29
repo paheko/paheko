@@ -116,7 +116,26 @@ if (version_compare($v, '0.5.0', '<'))
 
 if (version_compare($v, '0.6.0', '<'))
 {
+    // Mise à jour base de données
     $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.6.0.sql'));
+
+    // Déplacement des squelettes dans le répertoire public
+    if (!file_exists(GARRADIN_ROOT . '/www/squelettes'))
+    {
+        mkdir(GARRADIN_ROOT . '/www/squelettes');
+    }
+
+    $dir = dir(GARRADIN_ROOT . '/squelettes');
+
+    while ($file = $dir->read())
+    {
+        if ($file == '.' || $file == '..')
+            continue;
+
+        rename(GARRADIN_ROOT . '/squelettes/' . $file, GARRADIN_ROOT . '/www/squelettes/' . $file);
+    }
+
+    @rmdir(GARRADIN_ROOT . '/squelettes');
 }
 
 utils::clearCaches();
