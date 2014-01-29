@@ -21,7 +21,7 @@
         <fieldset class="skelEdit">
             <legend>{$edit.file|escape}</legend>
             <p>
-                <textarea name="content" cols="90" rows="50">{form_field name=content data=$edit}</textarea>
+                <textarea name="content" cols="90" rows="50" id="f_content">{form_field name=content data=$edit}</textarea>
             </p>
         </fieldset>
 
@@ -31,6 +31,14 @@
         </p>
 
     </form>
+
+    <script type="text/javascript" src="{$admin_url}static/code_editor.min.js"></script>
+    <script type="text/javascript">
+    var doc_url = "{$admin_url}doc/skel/";
+    var skel_list = {$sources_json};
+    var skel_current = "{$edit.file|escape}";
+    </script>
+    <script type="text/javascript" src="{$admin_url}static/skel_editor.js"></script>
 {else}
     <div class="templatesList">
         <h3>Squelettes du site</h3>
