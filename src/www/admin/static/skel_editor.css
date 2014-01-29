@@ -1,0 +1,137 @@
+.codeEditor {
+	width: 100%;
+	height: 600px;
+	border: 1px solid #999;
+	background: #eee;
+	position: relative;
+	display: block;
+}
+
+.codeEditor .sk_help {
+	background: #ccc;
+	border-top: 2px solid #999;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 15px;
+	padding: 5px 1em 0;
+	font-family: "Deja Vu Sans Mono", "Droid Sans Mono", "Courier New", Courier, monospace;
+	font-size: 12px;
+}
+
+.codeEditor .sk_toolbar {
+	background: #ccc;
+	border-bottom: 2px solid #999;
+	height: 32px;
+}
+
+.codeEditor .sk_toolbar select {
+	float: right;
+	border: none;
+	border-radius: .2em;
+	height: 24px;
+	padding-left: 24px;
+	margin: 4px .5em;
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEUAAACZm4leYFyOkX1RU09MTkp9f2+ys6KwsZrn5+KanIz///+6u6vGxryDhXtVV1Otpz1oAAAAA3RSTlMA+7omiqY6AAAAgklEQVQI12NI+f9fgQEEfO7e+QBm/BGU+P8fJPrd2LgLCD4AGSCBLCDD8Pfu3bu9QCK/Z86e/esDw4/Hv+/euf0ZyEj7PXPnbCDDI+33kZDQkE8M/11D1969e9eEwRNIlpe332f421Ne0dHRcYnh75k7Z8/cudPEoOIS4uriAlQMAwDpN0taA/g97gAAAABJRU5ErkJggg==") no-repeat 5px center;
+	cursor: pointer;
+}
+
+.codeEditor .sk_toolbar select:hover {
+	background-color: #fff;
+}
+
+.codeEditor .sk_toolbar p {
+	display: inline;
+	padding: .3em .5em;
+	border-radius: .5em;
+	font-size: .9em;
+	margin-left: 2em;
+}
+
+.codeEditor .sk_toolbar input {
+	margin: 4px .5em;
+	padding: 0;
+	width: 24px;
+	height: 24px;
+	border: none;
+	border-radius: .2em;
+	cursor: pointer;
+	text-indent: -70em;
+	overflow: hidden;
+	background: transparent no-repeat center center;
+}
+
+.codeEditor .sk_toolbar input:hover { background-color: #fff; }
+
+.codeEditor .sk_toolbar .save { margin-left: 2em; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEU6XIthfJfOXAD8rz6PpsDe3t7+/v6YrsZhe5NVV1Py8vL09PTMzc6+0upyn88gSod8oq0HAAAAAXRSTlOZyTXzhgAAAGxJREFUCNdj4P+kBAT6Hxj+XjYGAtv7DH+fbQOCfSBGKBDkgRi7gQAschQoAmbsXrVq1ToQIw0IQGregQGQ8bCjo6OvDsQ4czS04jmQ8eLMzJiDUMYZkMj3ilAIg/9h6PEjJ4AMhp8zgeD/BwBY4VdD5HZlvAAAAABJRU5ErkJggg=="); }
+.codeEditor .sk_toolbar .reset { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAABCklEQVR42p2TsUrDUBSGv4RM2qlLXXwBHdoncG3u5tpZx059gojgZAtC3bqqa7cQKH2FWiFZHUSIg5lChi7Xpak312Ma/eHA5Zzz/5fzHw5UMQZ0wxgDOCb5fnQ8Glxe0AR31zdcPW0mpoDOkoDPJKRI41rywdEpRRrTHeZ4drFIY15nh5w/f4jkea/D2aPafeJKTVuyI4Ut7G0NkVDmnbpxXMAHyJJgl1xPW+XT32emC0SA3z75FugO85Ic8Qf0jR33a/p0lgR6PW1pQJtbiPbNK8GzDLPhNBVAKVUphGGIJD7vdWQBi1SBuSGA/P1FFvgNb8vbH7nFaoO5Ja2Uki6Ommt8ME36t4lfRLtlZDAJ4ScAAAAASUVORK5CYII="); }
+.codeEditor .sk_toolbar .search { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAABGdBTUEAAK/INwWK6QAAADBQTFRF////epWwPGiTdYKPdHqB1tbWWW6Hp6enR2yQc6b/dqncME9tmcz/i5CX5e32w9PmM3gGSwAAAAd0Uk5TAAAAQoTswgXk1s4AAABySURBVAjXYxA0v+4syAAEIqXvQh1BDPN3J88Vgxj3/r07EwtmnDw58y2YcebMHLBI6p/358NADN/3Z75eFhQUZFC5/i4WqIaRwcjtdsrWa0AGEDByr2oAM5i4V82AMBh2nGmCMIBCEAbDrhVghpKS9jYA43soYFw0gPcAAAAASUVORK5CYII="); }
+.codeEditor .sk_toolbar .search_replace { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEUAAABnVEEAAACEhoVsaWX4liHmz2/8/Pzf398uNDawrKfn5+fOXADj4+P+/v6IioXFYmG9AAAAAnRSTlMAWv0tddIAAACKSURBVAjXY2Dg/w8EAgwMDP/evSuvWwhi7N69Y8UrATDjxurbC4CMn/P3rv9vwMDw3+/J31s9BxkYOl/vm3vjaCiEsSc0hoGhxe+J7dHUgwxckz0nAwUCGDotO3qPph4zYJg8q+P20Zg+AwbJ9rt3VE60f2BgML+76VgHiPH93bt3z8uBjP9g8AEArPJMCYP5JmIAAAAASUVORK5CYII="); }
+.codeEditor .sk_toolbar .gotoline { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEX///9BQUEVFRWysrREREQ4ODhVVVX7+/vu7u7q6uqcnJy+vr/m5ub19fXc3Nz///89lwBDAAAAB3RSTlMAAILOakNmMhUGwgAAAHtJREFUCNdjYIABQbE0EEhkEMx793r37tdmDILZu1fv3rVqEYNgfv3/u/X/vwEZu4/Xl5eXARnbd96trS1hcPNaWdd7924Jg+///7UdHR1XGIK01lSfnDmzhUFQY8W6N2fOABl+q/a8OXfmCYOg3jugwJlJDIJKEMCAAQCfIDck8YzyWAAAAABJRU5ErkJggg=="); }
+.codeEditor .sk_toolbar .fullscreen { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABMTFFOTlBOTlCQ1uMHAAAAA3RSTlMAOcKBmOr4AAAAQUlEQVQI12P4/4D7P8N/B0Yo8XsC23+GZw+4pzM4TmBzYsAGgBKODNcecM9m+D+B7T3DPwfG/Qz/G5iABlzg+g8ANzMax/3kkQoAAAAASUVORK5CYII="); }
+.codeEditor.fullscreen .sk_toolbar .fullscreen { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABNTVFOTlBOTlBLB/faAAAAA3RSTlMAOsPdsomtAAAAQElEQVQI12NIEWCRZNi5gTePIe8D/08G6Q/8Txj0P/B/YVj/gf8fAzawHyQhD1ICJvI/8O9k2FnAl8eQosAiCQCgixb13aKGIwAAAABJRU5ErkJggg=="); }
+
+.codeEditor .lineCount, .codeEditor textarea {
+	font-family: "Deja Vu Sans Mono", "Droid Sans Mono", "Courier New", Courier, monospace;
+	font-size: 11pt;
+	line-height: 11pt;
+}
+
+.codeEditor .lineCount {
+	position: absolute;
+	top: 34px;
+	left: 0;
+	bottom: 22px;
+	width: 46px;
+	text-align: right;
+	border-right: 2px solid #999;
+	overflow: hidden;
+}
+
+.codeEditor .lineCount i {
+	display: block;
+	padding-right: 2px;
+	font-weight: normal;
+}	
+
+.codeEditor .lineCount b {
+	display: block;
+	padding-right: 2px;
+	font-weight: normal;
+}
+
+.codeEditor .lineCount b.current {
+	background: #ccc;
+}
+
+.codeEditor .container {
+	position: absolute;
+	right: 4px;
+	top: 34px;
+	bottom: 22px;
+	left: 50px;
+	margin: 0;
+	padding: 0;
+}
+
+.codeEditor textarea {
+	height: 100%;
+	width: 100%;
+	padding: 0 0 0 2px;
+	margin: 0;
+	background: transparent;
+	border: none;
+	overflow: auto;
+	resize: none;
+}
+
+.codeEditor.fullscreen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+}
