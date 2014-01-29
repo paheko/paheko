@@ -110,6 +110,16 @@ class Membres_Transactions
 				WHERE id_membre_transaction = ?);', \SQLITE3_ASSOC, (int)$id);
 	}
 
+	/**
+	 * Ajouter une écriture comptable pour un paiemement membre
+	 * @param int $id Numéro de la transaction
+	 * @param array $data Données
+	 */
+	public function addOperationCompta($id, $data)
+	{
+
+	}
+
 	public function get($id)
 	{
 		$db = DB::getInstance();

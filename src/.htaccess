@@ -1,0 +1,7 @@
+<IfModule mod_alias.c>
+    RedirectMatch 403 /include
+    RedirectMatch 403 /cache
+    RedirectMatch 403 /plugins
+    RedirectMatch 403 /templates
+    RedirectMatch 403 /*.sqlite
+</IfModule>
