@@ -32,7 +32,7 @@ function garradin_version()
 
 function garradin_manifest()
 {
-    $file = __DIR__ . '/../manifest.uuid';
+    $file = __DIR__ . '/../../manifest.uuid';
 
     if (file_exists($file))
     {
