@@ -44,7 +44,12 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
-$tpl->assign('garradin_version', garradin_version() . ' [' . garradin_manifest() . ']');
+$tpl->assign('garradin_version', garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']');
+$tpl->assign('php_version', phpversion());
+
+$v = \SQLite3::version();
+$tpl->assign('sqlite_version', $v['versionString']);
+
 $tpl->assign('pays', utils::getCountryList());
 
 $cats = new Membres_Categories;
