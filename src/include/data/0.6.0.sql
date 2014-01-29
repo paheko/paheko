@@ -51,6 +51,8 @@ CREATE TABLE rappels_envoyes
 CREATE TABLE membres_transactions
 -- Paiements enregistrés
 (
+    id INTEGER PRIMARY KEY,
+    
     id_membre INTEGER NOT NULL,
     id_transaction INTEGER NULL, -- NULL si n'est pas relié à une transaction prévue
 
