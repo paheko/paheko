@@ -20,9 +20,9 @@ class Membres_Transactions
 
 		$data['libelle'] = trim($data['libelle']);
 
-		if (empty($data['montant']) || !is_numeric($data['montant']))
+		if (!isset($data['montant']) || !is_numeric($data['montant']) || (float)$data['montant'] < 0)
 		{
-			throw new UserException('Le montant doit être un nombre valide.');
+			throw new UserException('Le montant doit être un nombre positif et valide.');
 		}
 
 		$data['montant'] = (float) $data['montant'];
@@ -137,31 +137,43 @@ class Membres_Transactions
 	{
 		$db = DB::getInstance();
 
+		$where = '';
+		$expires = 'NULL';
+
 		if (!empty($transaction['duree']))
 		{
-			$where = 'AND date(\'now\') <= date(date, \'+' . (int)$transaction['duree'] . ' days\')';
+			// On récupère les paiement dans les X jours précédant aujourd'hui
+			$where = 'AND date >= date(\'now\', \'-' . (int)$transaction['duree'] . ' days\')';
+			$expires = 'date(date, \'+' . (int)$transaction['duree'] . ' days\')';
 		}
 		elseif (!empty($transaction['debut']))
 		{
-			$where = 'AND date >= \'' . $transaction['debut'] . '\' AND date <= \'' . $transaction['fin'] . '\'';
+			$expires = '\'' . $transaction['fin'] . '\'';
 		}
 
-		$res = $db->simpleQuerySingle('SELECT SUM(montant) FROM membres_transactions
-			WHERE id_transaction = ? AND id_membre = ? ' . $where . '
+		$res = $db->simpleQuerySingle('SELECT ' . $expires . ' AS expiration, SUM(montant) AS total
+			FROM membres_transactions
+			WHERE id_transaction = ? AND id_membre = ? ' . $where . ' 
+			GROUP BY id_transaction
 			ORDER BY date DESC LIMIT 1;',
-			false, (int)$transaction['id'], (int)$id);
+			true, (int)$transaction['id'], (int)$id);
 
-		if (empty($res))
+		// Pas de paiement trouvé : cotisation renouvelable expirée, ou pas de paiement fait
+		// donc cotisation pas à jour
+		if ($res === false)
 		{
 			return false;
 		}
 
-		if ($res < $transaction['montant'])
+		// Pas assez payé !
+		if ($res['total'] < $transaction['montant'])
 		{
 			return -1;
 		}
 
-		return true;
+		// Paiement suffisant, on renvoie la date d'expiration
+		// enfin sauf si cotisation ponctuelle, auquel cas on renvoie juste true
+		return $res['expiration'] ?: true;
 	}
 
 	public function countForMember($id)
