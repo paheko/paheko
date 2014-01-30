@@ -25,9 +25,9 @@ class Transactions
 			$data['description'] = trim($data['description']);
 		}
 
-		if (empty($data['montant']) || !is_numeric($data['montant']))
+		if (!isset($data['montant']) || !is_numeric($data['montant']) || (float)$data['montant'] < 0)
 		{
-			throw new UserException('Le montant doit être un nombre valide.');
+			throw new UserException('Le montant doit être un nombre positif et valide.');
 		}
 
 		$data['montant'] = (float) $data['montant'];
