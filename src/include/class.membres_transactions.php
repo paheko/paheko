@@ -133,4 +133,41 @@ class Membres_Transactions
 			WHERE id_membre = ? ORDER BY date DESC;', \SQLITE3_ASSOC, (int)$id);
 	}
 
+	public function isMemberUpToDate($id, $transaction)
+	{
+		$db = DB::getInstance();
+
+		if (!empty($transaction['duree']))
+		{
+			$where = 'AND date(\'now\') <= date(date, \'+' . (int)$transaction['duree'] . ' days\')';
+		}
+		elseif (!empty($transaction['debut']))
+		{
+			$where = 'AND date >= \'' . $transaction['debut'] . '\' AND date <= \'' . $transaction['fin'] . '\'';
+		}
+
+		$res = $db->simpleQuerySingle('SELECT SUM(montant) FROM membres_transactions
+			WHERE id_transaction = ? AND id_membre = ? ' . $where . '
+			ORDER BY date DESC LIMIT 1;',
+			false, (int)$transaction['id'], (int)$id);
+
+		if (empty($res))
+		{
+			return false;
+		}
+
+		if ($res < $transaction['montant'])
+		{
+			return -1;
+		}
+
+		return true;
+	}
+
+	public function countForMember($id)
+	{
+		$db = DB::getInstance();
+		return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres_transactions 
+			WHERE id_membre = ?;', false, (int)$id);
+	}
 }

@@ -956,6 +956,21 @@ dl.describe ul {
     margin-left: 1em;
 }
 
+dl.cotisation {
+    background: rgba(217, 134, 40, 0.2);
+    padding: .5em;
+    border-radius: .5em;
+    margin: 1em;
+}
+
+dl.cotisation dt {
+    font-weight: bold;
+}
+
+dl.cotisation dd {
+    margin: .2em 0 .4em 1em;
+}
+
 .infos_asso {
     width: 20%;
     float: right;
