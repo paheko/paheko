@@ -1,5 +1,3 @@
-PRAGMA foreign_keys = OFF;
-
 -- nouveau moyen de paiement
 INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
 
@@ -52,7 +50,7 @@ CREATE TABLE membres_transactions
 -- Paiements enregistrés
 (
     id INTEGER PRIMARY KEY,
-    
+
     id_membre INTEGER NOT NULL,
     id_transaction INTEGER NULL, -- NULL si n'est pas relié à une transaction prévue
 
@@ -100,13 +98,6 @@ CREATE TABLE membres_categories_tmp
 -- Remise des anciennes infos
 INSERT INTO membres_categories_tmp SELECT id, nom, description, droit_wiki, droit_membres, 
     droit_compta, droit_inscription, droit_connexion, droit_config, cacher, NULL FROM membres_categories;
-
--- Conversion des cotisations de catégories en transactions
-INSERT INTO transactions (id_categorie_compta, intitule, montant, duree, description) 
-    SELECT 
-        (SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1), -- Numéro de catégorie comptable
-        nom, montant_cotisation, round(duree_cotisation * 30.44), "Importé depuis les catégories de membres (version 0.5.x)"
-    FROM membres_categories;
 
 -- Suppression de l'ancienne table et renommage de la nouvelle
 DROP TABLE membres_categories;

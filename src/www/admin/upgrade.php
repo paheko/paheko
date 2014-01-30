@@ -116,8 +116,43 @@ if (version_compare($v, '0.5.0', '<'))
 
 if (version_compare($v, '0.6.0', '<'))
 {
+    $categories = new Membres_Categories;
+    $list = $categories->listComplete();
+
+    $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+
     // Mise à jour base de données
     $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.6.0.sql'));
+
+    $id_cat_cotisation = $db->querySingle('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
+
+    // Conversion des cotisations de catégories en transactions
+    foreach ($list as $cat)
+    {
+        $db->simpleInsert('transactions', [
+            'id_categorie_compta'   =>  null,
+            'intitule'              =>  $cat['nom'],
+            'montant'               =>  (float) $cat['montant_cotisation'],
+            // Convertir un nombre de mois en nombre de jours
+            'duree'                 =>  round($cat['duree_cotisation'] * 30.44),
+            'description'           =>  'Créé automatiquement depuis les catégories de membres (version 0.5.x)',
+        ]);
+
+        $args = [
+            'id_transaction'=>  (int)$db->lastInsertRowId(),
+            'montant'       =>  (float) $cat['montant_cotisation'],
+            'id_categorie'  =>  (int)$cat['id'],
+        ];
+
+        // import des dates de cotisation existantes comme paiements
+        $db->simpleExec('INSERT INTO membres_transactions 
+            (id_membre, id_transaction, libelle, date, montant)
+            SELECT id, :id_transaction, "Créé automatiquement depuis la date de cotisation enregistrée (version 0.5.x)",
+            date_cotisation, :montant FROM membres WHERE id_categorie = :id_categorie;',
+            $args);
+
+        // Mais on ne crée pas d'écriture comptable, car elles existent probablement déjà
+    }
 
     // Déplacement des squelettes dans le répertoire public
     if (!file_exists(GARRADIN_ROOT . '/www/squelettes'))
@@ -125,17 +160,24 @@ if (version_compare($v, '0.6.0', '<'))
         mkdir(GARRADIN_ROOT . '/www/squelettes');
     }
 
-    $dir = dir(GARRADIN_ROOT . '/squelettes');
-
-    while ($file = $dir->read())
+    if (file_exists(GARRADIN_ROOT . '/squelettes'))
     {
-        if ($file == '.' || $file == '..')
-            continue;
+        $dir = dir(GARRADIN_ROOT . '/squelettes');
 
-        rename(GARRADIN_ROOT . '/squelettes/' . $file, GARRADIN_ROOT . '/www/squelettes/' . $file);
+        while ($file = $dir->read())
+        {
+            if ($file == '.' || $file == '..')
+                continue;
+
+            rename(GARRADIN_ROOT . '/squelettes/' . $file, GARRADIN_ROOT . '/www/squelettes/' . $file);
+        }
+
+        $dir->close();
+
+        @rmdir(GARRADIN_ROOT . '/squelettes');
     }
 
-    @rmdir(GARRADIN_ROOT . '/squelettes');
+    $db->exec('END; PRAGMA foreign_keys = ON;');
 }
 
 utils::clearCaches();

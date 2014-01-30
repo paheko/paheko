@@ -52,7 +52,6 @@
             {foreach from=$champs key="c" item="champ"}
                 <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title|escape} <a href="?o={$c|escape}&amp;a">&darr;</a><a href="?o={$c|escape}&amp;d">&uarr;</a></td>
             {/foreach}
-            <td>Cotisation</td>
             <td></td>
         </thead>
         <tbody>
@@ -63,13 +62,6 @@
                     {foreach from=$champs key="c" item="cfg"}
                         <td>{$membre[$c]|escape|display_champ_membre:$cfg}</td>
                     {/foreach}
-                    {if empty($membre.date_cotisation)}
-                        <td class="error">jamais réglée</td>
-                    {elseif $membre.date_cotisation > strtotime('12 months ago')} {* FIXME durée de cotisation variable *}
-                        <td class="confirm">à jour</td>
-                    {else}
-                        <td class="alert">en retard</td>
-                    {/if}
                     <td class="actions">
                         {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id|escape}" title="Envoyer un message">✉</a> {/if}
                         <a class="icn" href="modifier.php?id={$membre.id|escape}">✎</a>

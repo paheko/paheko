@@ -55,7 +55,7 @@ class Membres
             return false;
 
         $db = DB::getInstance();
-        $r = $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date_cotisation) AS date_cotisation FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
+        $r = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
 
         if (empty($r))
             return false;
@@ -415,7 +415,6 @@ class Membres
     {
         $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT *,
-            strftime(\'%s\', date_cotisation) AS date_cotisation,
             strftime(\'%s\', date_inscription) AS date_inscription,
             strftime(\'%s\', date_connexion) AS date_connexion
             FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
@@ -519,7 +518,6 @@ class Membres
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, ' . implode(', ', $fields) . ',
-                strftime(\'%s\', date_cotisation) AS date_cotisation,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres ' . $where . ($order ? ' ORDER BY ' . $order : '') . '
                 LIMIT 1000;',
@@ -563,7 +561,6 @@ class Membres
 
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, '.$fields.',
-                strftime(\'%s\', date_cotisation) AS date_cotisation,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres '.$where.'
                 ORDER BY '.$order.' LIMIT ?, ?;',
@@ -591,40 +588,6 @@ class Membres
     {
         $db = DB::getInstance();
         return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
-    }
-
-    static public function checkCotisation($date_membre, $duree_cotisation, $date_verif = null)
-    {
-        if (is_null($date_verif))
-            $date_verif = time();
-
-        if (!$date_membre)
-            return false;
-
-        $echeance = new \DateTime('@' . $date_membre);
-        $echeance->setTime(0, 0);
-        $echeance->modify('+'.$duree_cotisation.' months');
-
-        if ($echeance->getTimestamp() < $date_verif)
-            return round(($date_verif - $echeance->getTimestamp()) / 3600 / 24);
-
-        return true;
-    }
-
-    static public function updateCotisation($id, $date)
-    {
-        if (preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
-            $date = \DateTime::createFromFormat('d/m/Y', $date, new \DateTimeZone('UTC'));
-        elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $date))
-            $date = \DateTime::createFromFormat('Y-m-d', $date, new \DateTimeZone('UTC'));
-        else
-            throw new UserException('Format de date invalide : '.$date);
-
-        $db = DB::getInstance();
-        return $db->simpleUpdate('membres',
-            array('date_cotisation' => $date->format('Y-m-d H:i:s')),
-            'id = '.(int)$id
-        );
     }
 
     static public function changeCategorie($id_cat, $membres)

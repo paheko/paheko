@@ -21,11 +21,6 @@
 
 <ul class="actions">
     <li><a href="{$admin_url}mes_infos.php">Modifier mes informations personnelles</a></li>
-    <li>Cotisation : 
-        {if empty($user.date_cotisation)}<b class="error">jamais réglée</b>
-        {elseif $verif_cotisation === true}<b class="confirm">À jour :-)</b>
-        {else}<b class="alert">En retard !</b>{/if}
-    </li>
 </ul>
 
 <div class="wikiContent">

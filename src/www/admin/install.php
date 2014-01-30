@@ -134,14 +134,13 @@ else
 
                 // Création catégories
                 $cats = new Membres_Categories;
-                $id = $cats->add(array(
+                $id = $cats->add([
                     'nom' => 'Membres actifs',
-                    'montant_cotisation' => 10));
+                ]);
                 $config->set('categorie_membres', $id);
 
                 $id = $cats->add(array(
                     'nom' => 'Anciens membres',
-                    'montant_cotisation' => 0,
                     'droit_inscription' => Membres::DROIT_AUCUN,
                     'droit_wiki' => Membres::DROIT_AUCUN,
                     'droit_membres' => Membres::DROIT_AUCUN,
@@ -153,7 +152,6 @@ else
 
                 $id = $cats->add(array(
                     'nom' => ucfirst(utils::post('cat_membre')),
-                    'montant_cotisation' => 0,
                     'droit_inscription' => Membres::DROIT_AUCUN,
                     'droit_wiki' => Membres::DROIT_ADMIN,
                     'droit_membres' => Membres::DROIT_ADMIN,

@@ -9,12 +9,6 @@
 </ul>
 {/if}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
-
 <dl class="describe">
     <dt>Numéro d'adhérent</dt>
     <dd>{$membre.id|escape}</dd>
@@ -61,30 +55,6 @@
     <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
     <dt>Dernière connexion</dt>
     <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
-    <dt>Cotisation</dt>
-    <dd>
-    {if empty($membre.date_cotisation)}
-        <span class="error">Jamais réglée</span>
-    {elseif $verif_cotisation === true}
-        <span class="confirm">Réglée le {$membre.date_cotisation|date_fr:'d/m/Y'}</span>
-    {else}
-        <span class="alert">En retard de {$verif_cotisation|escape} jours</span>
-    {/if}
-        <br />
-        <form method="post" action="{$self_url}">
-            <fieldset>
-                <legend>Mettre à jour la cotisation</legend>
-                <dl>
-                    <dt><label for="f_date">L'adhésion commence le...</label></dt>
-                    <dd>
-                        <input type="date" name="date" value="{form_field name=date default=$date_cotisation_defaut}" id="f_date" />
-                        {csrf_field key="cotisation_"|cat:$membre.id}
-                        <input type="submit" name="cotisation" value="Enregistrer &rarr;" />
-                    </dd>
-                </dl>
-            </fieldset>
-        </form>
-    </dd>
 </dl>
 
 {include file="admin/_foot.tpl"}

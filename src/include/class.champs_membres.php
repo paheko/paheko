@@ -357,7 +357,6 @@ class Champs_Membres
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
             'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d\'inscription',
-            'date_cotisation TEXT NULL, -- Date de cotisation',
             //'exemption_transaction INTEGER NOT NULL DEFAULT 0, -- Exempté de transaction obligatoire',
     	);
 
@@ -371,7 +370,6 @@ class Champs_Membres
     		'id_categorie',
             'date_connexion',
             'date_inscription',
-            'date_cotisation',
             //'exemption_transaction',
     	);
 
