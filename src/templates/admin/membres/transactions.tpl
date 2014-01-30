@@ -64,7 +64,7 @@
                 <td class="num">{$p.montant|html_money} {$config.monnaie|escape}</td>
                 <td>
                     {if $p.id_transaction}
-                        FiXME
+                        FIXME
                     {else}
                         <em>Aucune</em>
                     {/if}

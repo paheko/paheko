@@ -56,7 +56,7 @@ CREATE TABLE membres_transactions
 
     libelle TEXT NULL,
 
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date TEXT NOT NULL DEFAULT CURRENT_DATE,
     montant REAL NOT NULL,
 
     FOREIGN KEY (id_membre) REFERENCES membres (id),

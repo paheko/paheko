@@ -27,6 +27,11 @@ class Membres_Transactions
 
 		$data['montant'] = (float) $data['montant'];
 
+        if (empty($data['date']) || !utils::checkDate($data['date']))
+        {
+            throw new UserException('Date vide ou invalide.');
+        }
+
 		if (isset($data['id_transaction']))
 		{
 			if ($data['id_transaction'] != 0 && !$db->simpleQuerySingle('SELECT 1 FROM transactions WHERE id = ?;', false, (int) $data['id_transaction']))
@@ -34,7 +39,7 @@ class Membres_Transactions
 				throw new UserException('Type de transaction inconnu.');
 			}
 
-			$data['id_transaction'] = (int) $data['id_transaction'];
+			$data['id_transaction'] = $data['id_transaction'] ? (int) $data['id_transaction'] : null;
 		}
 
 		if (empty($data['id_membre']) 
