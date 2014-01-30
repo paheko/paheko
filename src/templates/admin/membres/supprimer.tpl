@@ -6,7 +6,7 @@
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
         <li class="current"><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
     {/if}
-    <li><a href="{$admin_url}membres/transactions/membre.php?id={$membre.id|escape}">Suivi des paiements</a></li>
+    <li><a href="{$admin_url}membres/transactions.php?id={$membre.id|escape}">Suivi des paiements</a></li>
     <li><a href="{$admin_url}membres/transactions/ajout.php?id={$membre.id|escape}">Enregistrer un paiement</a></li>
 </ul>
 
