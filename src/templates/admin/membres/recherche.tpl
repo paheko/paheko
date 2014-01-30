@@ -72,7 +72,6 @@
                     <td>{$cfg.title|escape}</td>
                 {/if}
             {/foreach}
-            <td>Cotisation</td>
             <td></td>
         </thead>
         <tbody>
@@ -87,13 +86,6 @@
                             <td>{$membre[$c]|escape|display_champ_membre:$cfg}</td>
                         {/if}
                     {/foreach}
-                    {if empty($membre.date_cotisation)}
-                        <td class="error">jamais réglée</td>
-                    {elseif $membre.date_cotisation > strtotime('12 months ago')}
-                        <td class="confirm">à jour</td>
-                    {else}
-                        <td class="alert">en retard</td>
-                    {/if}
                     <td class="actions">
                         {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id|escape}" title="Envoyer un message">✉</a> {/if}
                         <a class="icn" href="modifier.php?id={$membre.id|escape}">✎</a>
