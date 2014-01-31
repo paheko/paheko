@@ -51,7 +51,7 @@
 <table class="list">
     <thead>
         <th>Date</th>
-        <td width="30%">Intitulé</td>
+        <td width="40%">Intitulé</td>
         <td>Montant</td>
         <td>Activité ou cotisation liée</td>
         <td class="actions"></td>
@@ -64,7 +64,14 @@
                 <td class="num">{$p.montant|html_money} {$config.monnaie|escape}</td>
                 <td>
                     {if $p.id_transaction}
-                        FIXME
+                        {$p.intitule|escape} — 
+                        {if $p.duree}
+                            {$p.duree|escape} jours
+                        {elseif $p.debut}
+                            du {$p.debut|format_sqlite_date_to_french} au {$p.fin|format_sqlite_date_to_french}
+                        {else}
+                            ponctuelle
+                        {/if}
                     {else}
                         <em>Aucune</em>
                     {/if}
