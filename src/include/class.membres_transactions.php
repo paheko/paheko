@@ -134,8 +134,11 @@ class Membres_Transactions
 	public function listForMember($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT * FROM membres_transactions 
-			WHERE id_membre = ? ORDER BY date DESC;', \SQLITE3_ASSOC, (int)$id);
+		return $db->simpleStatementFetch('SELECT mtr.*, 
+				tr.intitule, tr.duree, tr.debut, tr.fin
+			FROM membres_transactions AS mtr 
+				LEFT JOIN transactions AS tr ON tr.id = mtr.id_transaction
+			WHERE mtr.id_membre = ? ORDER BY mtr.date DESC;', \SQLITE3_ASSOC, (int)$id);
 	}
 
 	public function isMemberUpToDate($id, $transaction)
