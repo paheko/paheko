@@ -50,8 +50,8 @@
                 {if array_key_exists('id', $result[0])}
                 <td class="actions">
                     {if !empty($row.id)}
-                    <a class="icn" href="fiche.php?id={$row.id|escape}" title="Fiche membre">❓</a>
-                    <a class="icn" href="modifier.php?id={$row.id|escape}" title="Modifier ce membre">✎</a>
+                    <a class="icn" href="{$admin_url}membres/fiche.php?id={$row.id|escape}" title="Fiche membre">❓</a>
+                    <a class="icn" href="{$admin_url}membres/modifier.php?id={$row.id|escape}" title="Modifier ce membre">✎</a>
                     {/if}
                 </td>
                 {/if}

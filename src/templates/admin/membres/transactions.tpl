@@ -77,8 +77,8 @@
                     {/if}
                 </td>
                 <td class="actions">
-                    <a href="{$admin_url}membres/transactions/modifier.php?id={$p.id|escape}">Modifier</a>
-                    | <a href="{$admin_url}membres/transactions/supprimer.php?id={$p.id|escape}">Supprimer</a>
+                    <a class="icn" href="{$admin_url}membres/transactions/modifier.php?id={$p.id|escape}" title="Modifier">✎</a>
+                    <a class="icn" href="{$admin_url}membres/transactions/supprimer.php?id={$p.id|escape}" title="Supprimer">✘</a>
                 </td>
             </tr>
         {/foreach}
