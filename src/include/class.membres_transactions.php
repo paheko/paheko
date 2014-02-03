@@ -42,14 +42,15 @@ class Membres_Transactions
 			$data['id_transaction'] = $data['id_transaction'] ? (int) $data['id_transaction'] : null;
 		}
 
-		if (empty($data['id_membre']) 
-			|| !$db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', 
-				false, (int) $data['id_membre']))
+		if (isset($data['id_membre']))
 		{
-			throw new UserException('Membre inconnu ou invalide.');
-		}
+			if (!$db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int) $data['id_membre']))
+			{
+				throw new UserException('Membre inconnu ou invalide.');
+			}
 
-		$data['id_membre'] = (int) $data['id_membre'];
+			$data['id_membre'] = (int) $data['id_membre'];
+		}
 	}
 
 	/**
@@ -62,6 +63,11 @@ class Membres_Transactions
 		$db = DB::getInstance();
 
 		$this->_checkFields($data);
+
+		if (empty($data['id_membre']))
+		{
+			throw new UserException('Membre inconnu ou invalide.');
+		}
 
 		$db->simpleInsert('membres_transactions', $data);
 		$id = $db->lastInsertRowId();
@@ -156,7 +162,7 @@ class Membres_Transactions
 				OR (tr.fin IS NULL AND tr.duree IS NULL)
 			)
 			GROUP BY mtr.id_transaction
-			ORDER BY mtr.date DESC;', \SQLITE3_ASSOC, (int)$id);
+			ORDER BY tr.intitule;', \SQLITE3_ASSOC, (int)$id);
 	}
 
 	public function isMemberUpToDate($id, $id_transaction)
