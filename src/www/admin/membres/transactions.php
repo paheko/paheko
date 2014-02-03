@@ -44,6 +44,7 @@ else
 
 $tpl->assign('nb_paiements', $m_transactions->countForMember($membre['id']));
 $tpl->assign('paiements', $m_transactions->listForMember($membre['id']));
+$tpl->assign('activites', $m_transactions->listCurrentSubscriptionsForMember($membre['id']));
 
 $tpl->assign('membre', $membre);
 

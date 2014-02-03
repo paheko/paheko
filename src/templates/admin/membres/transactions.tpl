@@ -46,6 +46,20 @@
         {/if} 
     </dd>
     <dd><form method="get" action="{$admin_url}membres/transactions/ajout.php"><input type="submit" value="Enregistrer un paiement &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dd>
+{if !empty($activites)}
+    <dt>Activités ou cotisations en cours</dt>
+    {foreach from=$activites item="activite"}
+    <dd>{$activite.intitule|escape} — 
+        {if $activite.total == $activite.montant}<span class="confirm">Réglé</span>
+        {else}
+            <span class="alert">{$activite.total|escape_money} {$config.monnaie|escape} 
+                réglés sur un total de {$activite.montant|escape_money} {$config.monnaie|escape}</span>
+            <span class="error">(reste {$activite.a_payer|escape_money} {$config.monnaie|escape} à payer)</span>
+        {/if}
+        {if $activite.expiration}— Valide jusqu'au {$activite.expiration|format_sqlite_date_to_french}{/if}
+    </dd>
+    {/foreach}
+{/if}
 </dl>
 
 <table class="list">

@@ -141,6 +141,24 @@ class Membres_Transactions
 			WHERE mtr.id_membre = ? ORDER BY mtr.date DESC;', \SQLITE3_ASSOC, (int)$id);
 	}
 
+	public function listCurrentSubscriptionsForMember($id)
+	{
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT SUM(mtr.montant) AS total, tr.montant,
+				tr.montant - SUM(mtr.montant) AS a_payer, tr.intitule, tr.duree, tr.debut, tr.fin,
+				CASE WHEN tr.duree IS NOT NULL THEN date(mtr.date, \'+\'||tr.duree||\' days\')
+				WHEN tr.fin IS NOT NULL THEN tr.fin ELSE NULL END AS expiration
+			FROM membres_transactions AS mtr 
+				INNER JOIN transactions AS tr ON tr.id = mtr.id_transaction
+			WHERE mtr.id_membre = ? AND (
+				(tr.duree IS NOT NULL AND mtr.date >= date(\'now\', \'-\'||tr.duree||\' days\'))
+				OR (tr.fin IS NOT NULL AND tr.fin >= date(\'now\'))
+				OR (tr.fin IS NULL AND tr.duree IS NULL)
+			)
+			GROUP BY mtr.id_transaction
+			ORDER BY mtr.date DESC;', \SQLITE3_ASSOC, (int)$id);
+	}
+
 	public function isMemberUpToDate($id, $transaction)
 	{
 		$db = DB::getInstance();
