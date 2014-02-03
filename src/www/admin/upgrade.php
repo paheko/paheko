@@ -148,7 +148,7 @@ if (version_compare($v, '0.6.0', '<'))
         $db->simpleExec('INSERT INTO membres_transactions 
             (id_membre, id_transaction, libelle, date, montant)
             SELECT id, :id_transaction, "Créé automatiquement depuis la date de cotisation enregistrée (version 0.5.x)",
-            date_cotisation, :montant FROM membres WHERE id_categorie = :id_categorie;',
+            date(date_cotisation), :montant FROM membres WHERE id_categorie = :id_categorie;',
             $args);
 
         // Mais on ne crée pas d'écriture comptable, car elles existent probablement déjà

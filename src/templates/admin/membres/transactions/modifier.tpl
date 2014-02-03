@@ -8,14 +8,14 @@
             <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
         {/if}
         <li><a href="{$admin_url}membres/transactions.php?id={$membre.id|escape}">Suivi des paiements</a></li>
-        <li class="current"><a href="{$admin_url}membres/transactions/ajout.php?id={$membre.id|escape}">Enregistrer un paiement</a></li>
+        <li><a href="{$admin_url}membres/transactions/ajout.php?id={$membre.id|escape}">Enregistrer un paiement</a></li>
     </ul>
 {else}
     {include file="admin/_head.tpl" title="Modifier un paiement" current="membres/transactions" js=1}
 
     <ul class="actions">
         <li><a href="{$admin_url}membres/transactions/">Suivi des paiements</a></li>
-        <li class="current"><a href="{$admin_url}membres/transactions/ajout.php">Saisie d'un paiement</a></li>
+        <li><a href="{$admin_url}membres/transactions/ajout.php">Saisie d'un paiement</a></li>
         <li><a href="{$admin_url}membres/transactions/rappels.php">État des rappels</a></li>
     </ul>
 {/if}
