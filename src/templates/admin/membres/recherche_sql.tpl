@@ -70,7 +70,7 @@
     {csrf_field key="membres_action"}
 </p>
 
-{elseif}
+{else}
 <p class="alert">
     Aucun membre trouvé.
 </p>

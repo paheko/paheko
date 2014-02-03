@@ -684,18 +684,30 @@ class Membres
     {
         $db = DB::getInstance();
 
-        if (!preg_match('/LIMIT\s+/', $query))
-        {
-            $query = preg_replace('/;?\s*$/', '', $query);
-            $query .= ' LIMIT 100';
-        }
-
         $st = $db->prepare($query);
 
         if (!$st->readOnly())
         {
             throw new UserException('Seules les requêtes en lecture sont autorisées.');
         }
+
+        if (!preg_match('/LIMIT\s+/', $query))
+        {
+            $query = preg_replace('/;?\s*$/', '', $query);
+            $query .= ' LIMIT 100';
+        }
+
+        if (!preg_match('/FROM\s+membres(?:\s+|$|;)/i', $query))
+        {
+            throw new UserException('Seules les requêtes sur la table membres sont autorisées.');
+        }
+
+        if (preg_match('/;\s*(.+?)$/', $query))
+        {
+            throw new UserException('Une seule requête peut être envoyée en même temps.');
+        }
+
+        $st = $db->prepare($query);
 
         $res = $st->execute();
         $out = [];
