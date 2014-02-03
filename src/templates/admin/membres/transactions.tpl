@@ -25,13 +25,13 @@
     </dd>
     <dt>À jour de cotisation ?</dt>
     <dd>
-        {if $statut_cotisation === false}
+        {if $cotisation.total === null}
             <span class="error"><b>Non</b>, cotisation non payée ou expirée</span>
-        {elseif $statut_cotisation === -1}
+        {elseif $cotisation.a_payer > 0}
             <span class="alert"><b>Non</b>, cotisation payée partiellement</span>
         {else}
             <span class="confirm"><b>Oui</b>, cotisation à jour</span>
-            {if $statut_cotisation !== true}(expire le {$statut_cotisation|format_sqlite_date_to_french}){/if}
+            {if $cotisation.expiration}(expire le {$cotisation.expiration|format_sqlite_date_to_french}){/if}
         {/if}
     </dd>
 {/if}
@@ -50,7 +50,7 @@
     <dt>Activités ou cotisations en cours</dt>
     {foreach from=$activites item="activite"}
     <dd>{$activite.intitule|escape} — 
-        {if $activite.total == $activite.montant}<span class="confirm">Réglé</span>
+        {if $activite.total >= $activite.montant}<span class="confirm">Réglé</span>
         {else}
             <span class="alert">{$activite.total|escape_money} {$config.monnaie|escape} 
                 réglés sur un total de {$activite.montant|escape_money} {$config.monnaie|escape}</span>

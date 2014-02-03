@@ -34,11 +34,7 @@ $m_transactions = new Membres_Transactions;
 
 if (!empty($categorie['id_transaction_obligatoire']))
 {
-	$transactions = new Transactions;
-	$tr = $transactions->get($categorie['id_transaction_obligatoire']);
-
-	$tpl->assign('cotisation', $tr);
-	$tpl->assign('statut_cotisation', $m_transactions->isMemberUpToDate($membre['id'], $tr));
+	$tpl->assign('cotisation', $m_transactions->isMemberUpToDate($membre['id'], $categorie['id_transaction_obligatoire']));
 }
 else
 {

@@ -25,13 +25,13 @@
     </dd>
     <dt>À jour de cotisation ?</dt>
     <dd>
-        {if $statut_cotisation === false}
+        {if $cotisation.total === null}
             <span class="error"><b>Non</b>, cotisation non payée ou expirée</span>
-        {elseif $statut_cotisation === -1}
+        {elseif $cotisation.a_payer > 0}
             <span class="alert"><b>Non</b>, cotisation payée partiellement</span>
         {else}
             <span class="confirm"><b>Oui</b>, cotisation à jour</span>
-            {if $statut_cotisation !== true}(expire le {$statut_cotisation|format_sqlite_date_to_french}){/if}
+            {if $cotisation.expiration}(expire le {$cotisation.expiration|format_sqlite_date_to_french}){/if}
         {/if}
     </dd>
 {/if}

@@ -159,47 +159,23 @@ class Membres_Transactions
 			ORDER BY mtr.date DESC;', \SQLITE3_ASSOC, (int)$id);
 	}
 
-	public function isMemberUpToDate($id, $transaction)
+	public function isMemberUpToDate($id, $id_transaction)
 	{
 		$db = DB::getInstance();
-
-		$where = '';
-		$expires = 'NULL';
-
-		if (!empty($transaction['duree']))
-		{
-			// On récupère les paiement dans les X jours précédant aujourd'hui
-			$where = 'AND date >= date(\'now\', \'-' . (int)$transaction['duree'] . ' days\')';
-			$expires = 'date(date, \'+' . (int)$transaction['duree'] . ' days\')';
-		}
-		elseif (!empty($transaction['debut']))
-		{
-			$expires = '\'' . $transaction['fin'] . '\'';
-		}
-
-		$res = $db->simpleQuerySingle('SELECT ' . $expires . ' AS expiration, SUM(montant) AS total
-			FROM membres_transactions
-			WHERE id_transaction = ? AND id_membre = ? ' . $where . ' 
-			GROUP BY id_transaction
-			ORDER BY date DESC LIMIT 1;',
-			true, (int)$transaction['id'], (int)$id);
-
-		// Pas de paiement trouvé : cotisation renouvelable expirée, ou pas de paiement fait
-		// donc cotisation pas à jour
-		if ($res === false)
-		{
-			return false;
-		}
-
-		// Pas assez payé !
-		if ($res['total'] < $transaction['montant'])
-		{
-			return -1;
-		}
-
-		// Paiement suffisant, on renvoie la date d'expiration
-		// enfin sauf si cotisation ponctuelle, auquel cas on renvoie juste true
-		return $res['expiration'] ?: true;
+		return $db->simpleQuerySingle('
+			SELECT
+				SUM(mtr.montant) AS total, tr.montant,
+				tr.montant - SUM(mtr.montant) AS a_payer, tr.intitule, tr.duree, tr.debut, tr.fin,
+				CASE WHEN tr.duree IS NOT NULL THEN date(mtr.date, \'+\'||tr.duree||\' days\')
+				WHEN tr.fin IS NOT NULL THEN tr.fin ELSE NULL END AS expiration
+			FROM transactions AS tr
+				LEFT JOIN membres_transactions AS mtr
+				ON (tr.id = mtr.id_transaction AND id_membre = ? 
+					AND ((tr.duree IS NOT NULL AND mtr.date >= date(\'now\', \'-\'||tr.duree||\' days\')) OR tr.duree IS NULL))
+			WHERE tr.id = ? AND ((tr.fin IS NOT NULL AND tr.fin >= date(\'now\')) OR (tr.fin IS NULL))
+			GROUP BY tr.id
+			ORDER BY mtr.date DESC LIMIT 1;',
+			true, (int)$id, (int)$id_transaction);
 	}
 
 	public function countForMember($id)
