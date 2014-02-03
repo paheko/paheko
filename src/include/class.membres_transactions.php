@@ -105,7 +105,7 @@ class Membres_Transactions
 		$db->simpleExec('DELETE FROM membres_transactions_operations WHERE id_membre_transaction = ?;',
 			(int)$id);
 
-		return $db->simpleExec('DELETE FROM transactions WHERE id = ?;', (int) $id);
+		return $db->simpleExec('DELETE FROM membres_transactions WHERE id = ?;', (int) $id);
 	}
 
 	/**

@@ -20,7 +20,7 @@
             Êtes-vous sûr de vouloir supprimer l'activité «&nbsp;{$transaction.intitule|escape}&nbsp;» ?
         </h3>
         <p class="help">
-            Attention, l'activité ne doit plus être liée à des paiements existantspour pouvoir
+            Attention, l'activité ne doit plus être liée à des paiements existants pour pouvoir
             être supprimée.
         </p>
     </fieldset>
