@@ -62,6 +62,7 @@
 {/if}
 </dl>
 
+{if !empty($paiements)}
 <table class="list">
     <thead>
         <th>Date</th>
@@ -98,5 +99,6 @@
         {/foreach}
     </tbody>
 </table>
+{/if}
 
 {include file="admin/_foot.tpl"}
