@@ -69,10 +69,74 @@ class Membres_Transactions
 			throw new UserException('Membre inconnu ou invalide.');
 		}
 
-		$db->simpleInsert('membres_transactions', $data);
+		$db->exec('BEGIN;');
+
+		$db->simpleInsert('membres_transactions', [
+			'date'				=>	$data['date'],
+			'id_transaction'	=>	$data['id_transaction'],
+			'montant'			=>	$data['montant'],
+			'libelle'			=>	$data['libelle'],
+			'id_membre'			=>	$data['id_membre'],
+			]);
+		
 		$id = $db->lastInsertRowId();
 
-		// FIXME création écriture comptable
+		$id_cat = $db->simpleQuerySingle('SELECT id_categorie_compta FROM transactions WHERE id = ?;', 
+			false, (int)$data['id_transaction']);
+
+		if ($id_cat)
+		{
+			$journal = new Compta_Journal;
+
+			try {
+              	if ($data['moyen_paiement'] != 'ES')
+                {
+                    if (trim($data['banque']) == '')
+                    {
+                        throw new UserException('Le compte bancaire choisi est invalide.');
+                    }
+
+                    if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;',
+                    	false, $data['banque']))
+                    {
+                        throw new UserException('Le compte bancaire choisi n\'existe pas.');
+                    }
+
+                    $debit = $data['banque'];
+                }
+                else
+                {
+                	$debit = Compta_Comptes::CAISSE;
+                }
+
+                $credit = $db->simpleQuerySingle('SELECT compte FROM compta_categories WHERE id = ?;', 
+                	false, $id_cat);
+
+	            $id_operation = $journal->add([
+	                'libelle'       =>  $data['libelle'],
+	                'montant'       =>  $data['montant'],
+	                'date'          =>  $data['date'],
+	                'moyen_paiement'=>  $data['moyen_paiement'],
+	                'numero_cheque' =>  $data['numero_cheque'],
+	                'compte_debit'  =>  $debit,
+	                'compte_credit' =>  $credit,
+	                'id_categorie'  =>  (int)$id_cat,
+	                'id_auteur'     =>  $data['id_auteur'],
+	            ]);
+
+	            $db->simpleInsert('membres_transactions_operations', [
+	            	'id_operation' => $id_operation,
+	            	'id_membre_transaction' => $id,
+	            ]);
+	        }
+	        catch (\Exception $e)
+	        {
+	        	$db->exec('ROLLBACK;');
+	        	throw $e;
+	        }
+		}
+
+		$db->exec('END;');
 
 		return $id;
 	}
