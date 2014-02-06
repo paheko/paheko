@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Commencer un exercice" current="compta/exercices"}
+{include file="admin/_head.tpl" title="Commencer un exercice" current="compta/exercices" js=1}
 
 {if $error}
     <p class="error">

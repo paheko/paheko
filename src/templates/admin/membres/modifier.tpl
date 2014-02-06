@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un membre" current="membres"}
+{include file="admin/_head.tpl" title="Modifier un membre" current="membres" js=1}
 
 <ul class="actions">
     <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">Membre n°{$membre.id|escape}</a></li>

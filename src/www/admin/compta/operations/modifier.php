@@ -145,8 +145,6 @@ else
     $tpl->assign('comptes_bancaires', $banques->getList());
 }
 
-$tpl->assign('custom_js', array('datepickr.js'));
-
 $tpl->assign('operation', $operation);
 
 $tpl->display('admin/compta/operations/modifier.tpl');

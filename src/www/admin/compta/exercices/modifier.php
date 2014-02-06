@@ -51,7 +51,6 @@ if (!empty($_POST['edit']))
 
 $tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
-$tpl->assign('custom_js', array('datepickr.js'));
 
 $tpl->display('admin/compta/exercices/modifier.tpl');
 

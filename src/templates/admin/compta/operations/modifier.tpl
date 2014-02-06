@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modification de l'opération n°`$operation.id`" current="compta/saisie"}
+{include file="admin/_head.tpl" title="Modification de l'opération n°`$operation.id`" current="compta/saisie" js=1}
 
 {if $error}
     <p class="error">
@@ -30,16 +30,16 @@
 {else}
             <dt><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="moyen_paiement" id="f_moyen_paiement" onchange="return changeMoyenPaiement(this);">
+                <select name="moyen_paiement" id="f_moyen_paiement">
                 {foreach from=$moyens_paiement item="moyen"}
                     <option value="{$moyen.code|escape}"{if $moyen.code == $operation.moyen_paiement} selected="selected"{/if}>{$moyen.nom|escape}</option>
                 {/foreach}
                 </select>
             </dd>
-            <dt class="cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
-            <dd class="cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque data=$operation}" /></dd>
-            <dt class="banque"><label for="f_banque">Compte bancaire</label></dt>
-            <dd class="banque">
+            <dt class="f_cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
+            <dd class="f_cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque data=$operation}" /></dd>
+            <dt class="f_banque"><label for="f_banque">Compte bancaire</label></dt>
+            <dd class="f_banque">
                 <select name="banque" id="f_banque">
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id|escape}"{if ($type == Garradin\Compta_Categories::DEPENSES && $compte.id == $operation.compte_credit) || $compte.id == $operation.compte_debit} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
@@ -75,26 +75,16 @@
     {literal}
     (function () {
 
-        window.changeMoyenPaiement = function(elm)
+        window.changeMoyenPaiement = function()
         {
-            var cheque = document.getElementsByClassName('cheque');
-            var cheque_l = cheque.length;
-
-            for (i = 0; i < cheque_l; i++)
-            {
-                cheque[i].style.display = elm.value == 'CH' ? 'block' : 'none';
-            }
-
-            var banque = document.getElementsByClassName('banque');
-            var banque_l = banque.length;
-
-            for (i = 0; i < banque_l; i++)
-            {
-                banque[i].style.display = (elm.value != 'ES') ? 'block' : 'none';
-            }
+            var elm = $('#f_moyen_paiement');
+            toggleElementVisibility('.f_cheque', elm.value == 'CH');
+            toggleElementVisibility('.f_banque', elm.value != 'ES');
         };
 
-        changeMoyenPaiement(document.getElementById('f_moyen_paiement'));
+        changeMoyenPaiement();
+
+        $('#f_moyen_paiement').onchange = changeMoyenPaiement;
     } ());
     {/literal}
     </script>

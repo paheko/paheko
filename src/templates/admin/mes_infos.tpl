@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos"}
+{include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos" js=1}
 
 {if $error}
     <p class="error">

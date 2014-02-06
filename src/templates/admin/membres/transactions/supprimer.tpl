@@ -1,5 +1,5 @@
 {if $membre}
-    {include file="admin/_head.tpl" title="Supprimer un paiement pour le membre n°`$membre.id`" current="membres/transactions" js=1}
+    {include file="admin/_head.tpl" title="Supprimer un paiement pour le membre n°`$membre.id`" current="membres/transactions"}
 
     <ul class="actions">
         <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">Membre n°{$membre.id|escape}</a></li>
@@ -11,7 +11,7 @@
         <li><a href="{$admin_url}membres/transactions/ajout.php?id={$membre.id|escape}">Enregistrer un paiement</a></li>
     </ul>
 {else}
-    {include file="admin/_head.tpl" title="Supprimer un paiement" current="membres/transactions" js=1}
+    {include file="admin/_head.tpl" title="Supprimer un paiement" current="membres/transactions"}
 
     <ul class="actions">
         <li><a href="{$admin_url}membres/transactions/">Suivi des paiements</a></li>
