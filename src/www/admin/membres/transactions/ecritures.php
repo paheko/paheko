@@ -18,14 +18,6 @@ $id = (int) $_GET['id'];
 $transactions = new Transactions;
 $m_transactions = new Membres_Transactions;
 
-
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de transaction manquant.");
-}
-
-$id = (int) $_GET['id'];
-
 $tr = $m_transactions->get($id);
 
 if (!$tr)

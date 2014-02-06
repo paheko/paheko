@@ -167,6 +167,13 @@ class Compta_Journal
             FROM compta_journal WHERE id_auteur = ?;', false, (int)$id);
     }
 
+    public function listForMember($id, $exercice)
+    {
+        $db = DB::getInstance();
+        return $db->simpleStatementFetch('SELECT * FROM compta_journal
+            WHERE id_auteur = ? AND id_exercice = ?;', \SQLITE3_ASSOC, (int)$id, (int)$exercice);
+    }
+
     protected function _checkFields(&$data)
     {
         $db = DB::getInstance();
