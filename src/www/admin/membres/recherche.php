@@ -13,9 +13,13 @@ $champ = trim(utils::get('c'));
 
 $champs = $config->get('champs_membres');
 
+$auto = false;
+
 // On détermine magiquement quel champ on recherche
 if (!$champ)
 {
+    $auto = true;
+
     if (is_numeric(trim($recherche))) {
         $champ = 'id';
     }
@@ -34,6 +38,16 @@ else
     if ($champ != 'id' && !$champs->get($champ))
     {
         throw new UserException('Le champ demandé n\'existe pas.');
+    }
+}
+
+if ($recherche != '')
+{
+    $result = $membres->search($champ, $recherche);
+
+    if (count($result) == 1 && $auto)
+    {
+        utils::redirect('/admin/membres/fiche.php?id=' . (int)$result[0]['id']);
     }
 }
 
@@ -60,7 +74,7 @@ $tpl->assign('champ', $champ);
 
 if ($recherche != '')
 {
-    $tpl->assign('liste', $membres->search($champ, $recherche));
+    $tpl->assign('liste', $result);
 }
 
 $tpl->assign('recherche', $recherche);
