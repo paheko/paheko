@@ -78,7 +78,7 @@ class Membres_Transactions
 			'libelle'			=>	$data['libelle'],
 			'id_membre'			=>	$data['id_membre'],
 			]);
-		
+
 		$id = $db->lastInsertRowId();
 
 		$id_cat = $db->simpleQuerySingle('SELECT id_categorie_compta FROM transactions WHERE id = ?;', 
@@ -86,48 +86,19 @@ class Membres_Transactions
 
 		if ($id_cat)
 		{
-			$journal = new Compta_Journal;
-
 			try {
-              	if ($data['moyen_paiement'] != 'ES')
-                {
-                    if (trim($data['banque']) == '')
-                    {
-                        throw new UserException('Le compte bancaire choisi est invalide.');
-                    }
-
-                    if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;',
-                    	false, $data['banque']))
-                    {
-                        throw new UserException('Le compte bancaire choisi n\'existe pas.');
-                    }
-
-                    $debit = $data['banque'];
-                }
-                else
-                {
-                	$debit = Compta_Comptes::CAISSE;
-                }
-
-                $credit = $db->simpleQuerySingle('SELECT compte FROM compta_categories WHERE id = ?;', 
-                	false, $id_cat);
-
-	            $id_operation = $journal->add([
-	                'libelle'       =>  $data['libelle'],
-	                'montant'       =>  $data['montant'],
-	                'date'          =>  $data['date'],
-	                'moyen_paiement'=>  $data['moyen_paiement'],
-	                'numero_cheque' =>  $data['numero_cheque'],
-	                'compte_debit'  =>  $debit,
-	                'compte_credit' =>  $credit,
-	                'id_categorie'  =>  (int)$id_cat,
-	                'id_auteur'     =>  $data['id_auteur'],
-	            ]);
-
-	            $db->simpleInsert('membres_transactions_operations', [
-	            	'id_operation' => $id_operation,
-	            	'id_membre_transaction' => $id,
-	            ]);
+		        $this->addOperationCompta($id, [
+		        	'id_categorie'	=>	$id_cat,
+		            'libelle'       =>  $data['libelle'],
+		            'montant'       =>  $data['montant'],
+		            'date'          =>  $data['date'],
+		            'moyen_paiement'=>  $data['moyen_paiement'],
+		            'numero_cheque' =>  $data['numero_cheque'],
+		            'id_auteur'     =>  $data['id_auteur'],
+		            'moyen_paiement'=>	$data['moyen_paiement'],
+		            'numero_cheque'	=>	$data['numero_cheque'],
+		            'banque'		=>	$data['banque'],
+		        ]);
 	        }
 	        catch (\Exception $e)
 	        {
@@ -192,9 +163,81 @@ class Membres_Transactions
 	 */
 	public function addOperationCompta($id, $data)
 	{
+		$journal = new Compta_Journal;
+		$db = DB::getInstance();
 
+		if (!isset($data['libelle']) || trim($data['libelle']) == '')
+		{
+			throw new UserException('Le libellé ne peut rester vide.');
+		}
+
+		$data['libelle'] = trim($data['libelle']);
+
+		if (!isset($data['montant']) || !is_numeric($data['montant']) || (float)$data['montant'] < 0)
+		{
+			throw new UserException('Le montant doit être un nombre positif et valide.');
+		}
+
+		$data['montant'] = (float) $data['montant'];
+
+        if (empty($data['date']) || !utils::checkDate($data['date']))
+        {
+            throw new UserException('Date vide ou invalide.');
+        }
+
+        if (!isset($data['moyen_paiement']) || trim($data['moyen_paiement']) === '')
+        {
+        	throw new UserException('Moyen de paiement inconnu ou invalide.');
+        }
+
+		if ($data['moyen_paiement'] != 'ES')
+        {
+            if (trim($data['banque']) == '')
+            {
+                throw new UserException('Le compte bancaire choisi est invalide.');
+            }
+
+            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;',
+            	false, $data['banque']))
+            {
+                throw new UserException('Le compte bancaire choisi n\'existe pas.');
+            }
+
+            $debit = $data['banque'];
+        }
+        else
+        {
+        	$debit = Compta_Comptes::CAISSE;
+        }
+
+        $credit = $db->simpleQuerySingle('SELECT compte FROM compta_categories WHERE id = ?;', 
+        	false, $data['id_categorie']);
+
+        $id_operation = $journal->add([
+            'libelle'       =>  $data['libelle'],
+            'montant'       =>  $data['montant'],
+            'date'          =>  $data['date'],
+            'moyen_paiement'=>  $data['moyen_paiement'],
+            'numero_cheque' =>  isset($data['numero_cheque']) ? $data['numero_cheque'] : null,
+            'compte_debit'  =>  $debit,
+            'compte_credit' =>  $credit,
+            'id_categorie'  =>  (int)$data['id_categorie'],
+            'id_auteur'     =>  (int)$data['id_auteur'],
+        ]);
+
+        $db->simpleInsert('membres_transactions_operations', [
+        	'id_operation' => $id_operation,
+        	'id_membre_transaction' => $id,
+        ]);
+
+        return $id_operation;
 	}
 
+	/**
+	 * Renvoie un paiement membre
+	 * @param  integer $id Numéro du paiement
+	 * @return array Données du paiement
+	 */
 	public function get($id)
 	{
 		$db = DB::getInstance();
@@ -204,8 +247,8 @@ class Membres_Transactions
 	public function listForMember($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT mtr.*, 
-				tr.intitule, tr.duree, tr.debut, tr.fin
+		return $db->simpleStatementFetch('SELECT mtr.*, tr.intitule, tr.duree, tr.debut, tr.fin,
+				(SELECT COUNT(*) FROM membres_transactions_operations WHERE id_membre_transaction = mtr.id) AS nb_operations
 			FROM membres_transactions AS mtr 
 				LEFT JOIN transactions AS tr ON tr.id = mtr.id_transaction
 			WHERE mtr.id_membre = ? ORDER BY mtr.date DESC;', \SQLITE3_ASSOC, (int)$id);
@@ -232,8 +275,7 @@ class Membres_Transactions
 	public function isMemberUpToDate($id, $id_transaction)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('
-			SELECT
+		return $db->simpleQuerySingle('SELECT
 				SUM(mtr.montant) AS total, tr.montant,
 				tr.montant - SUM(mtr.montant) AS a_payer, tr.intitule, tr.duree, tr.debut, tr.fin,
 				CASE WHEN tr.duree IS NOT NULL THEN date(mtr.date, \'+\'||tr.duree||\' days\')
