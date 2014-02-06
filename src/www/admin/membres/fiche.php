@@ -43,6 +43,12 @@ else
 
 $tpl->assign('nb_paiements', $m_transactions->countForMember($membre['id']));
 
+if ($user['droits']['compta'] >= Membres::DROIT_ACCES)
+{
+	$journal = new Compta_Journal;
+	$tpl->assign('nb_operations', $journal->countForMember($membre['id']));
+}
+
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/membres/fiche.tpl');

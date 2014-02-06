@@ -950,6 +950,7 @@ table.rib th, table.rib td { padding: .1em .3em; border: 1px solid #ccc; }
 
 dl.describe {
     margin-bottom: 1em;
+    clear: both;
 }
 
 dl.describe > dt {
