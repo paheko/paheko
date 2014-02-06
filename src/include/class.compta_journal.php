@@ -194,6 +194,12 @@ class Compta_Journal
             {
                 $data['numero_cheque'] = null;
             }
+
+            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_moyens_paiement WHERE code = ? LIMIT 1;',
+                false, $data['moyen_paiement']))
+            {
+                throw new UserException('Moyen de paiement invalide.');
+            }
         }
 
         $data['montant'] = str_replace(',', '.', $data['montant']);

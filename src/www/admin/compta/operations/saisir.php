@@ -83,11 +83,6 @@ if (!empty($_POST['save']))
                 }
                 else
                 {
-                    if (!array_key_exists(utils::post('moyen_paiement'), $cats->listMoyensPaiement()))
-                    {
-                        throw new UserException('Moyen de paiement invalide.');
-                    }
-
                     if (utils::post('moyen_paiement') == 'ES')
                     {
                         $a = Compta_Comptes::CAISSE;
