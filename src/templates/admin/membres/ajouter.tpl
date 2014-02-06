@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Ajouter un membre" current="membres/ajouter"}
+{include file="admin/_head.tpl" title="Ajouter un membre" current="membres/ajouter" js=1}
 
 {if $error}
     <p class="error">

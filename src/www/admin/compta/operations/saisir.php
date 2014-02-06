@@ -186,7 +186,6 @@ if (!$membres->sessionGet('compta_date'))
     }
 }
 
-$tpl->assign('custom_js', array('datepickr.js'));
 $tpl->assign('date', $membres->sessionGet('compta_date') ?: false);
 $tpl->assign('ok', (int) utils::get('ok'));
 

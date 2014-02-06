@@ -38,7 +38,6 @@ if (!empty($_POST['add']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('custom_js', array('datepickr.js'));
 
 $tpl->display('admin/compta/exercices/ajouter.tpl');
 

@@ -53,8 +53,6 @@ $tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membre', $membre);
 
-$tpl->assign('custom_js', array('datepickr.js'));
-
 $tpl->display('admin/mes_infos.tpl');
 
 ?>

@@ -47,7 +47,6 @@ if (!empty($_POST['close']))
 
 $tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
-$tpl->assign('custom_js', array('datepickr.js'));
 
 $tpl->display('admin/compta/exercices/cloturer.tpl');
 
