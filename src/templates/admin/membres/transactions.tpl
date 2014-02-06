@@ -66,9 +66,10 @@
 <table class="list">
     <thead>
         <th>Date</th>
-        <td width="40%">Intitulé</td>
+        <td>Intitulé</td>
         <td>Montant</td>
         <td>Activité ou cotisation liée</td>
+        <td>Écritures liées</td>
         <td class="actions"></td>
     </thead>
     <tbody>
@@ -89,6 +90,13 @@
                         {/if}
                     {else}
                         <em>Aucune</em>
+                    {/if}
+                </td>
+                <td class="num">
+                    {if $p.nb_operations > 0}
+                    <a href="{$admin_url}membres/transactions/ecritures.php?id={$p.id|escape}">{$p.nb_operations|escape}</a>
+                    {else}
+                    0
                     {/if}
                 </td>
                 <td class="actions">
