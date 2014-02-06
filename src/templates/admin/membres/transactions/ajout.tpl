@@ -32,7 +32,7 @@
     <fieldset>
         <legend>Enregistrer un paiement</legend>
         <dl>
-            <dt><label for="f_id_transaction">Cotisation ou activité liée</label></dt>
+            <dt><label for="f_id_transaction">Cotisation ou activité liée</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select id="f_id_transaction" name="id_transaction">
                     <option value="0" {form_field name="id_transaction" selected=0}>-- Aucune, paiement non lié</option>
@@ -72,14 +72,14 @@
                 {/foreach}
                 </select>
             </dd>
-            <dt><label for="f_montant">Montant</label></dt>
+            <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=$default_amount}" min="0.00" step="0.01" /> {$config.monnaie|escape}</dd>
-            <dt><label for="f_libelle">Libellé</label></dt>
+            <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" /></dd>
-            <dt><label for="f_date">Date</label></dt>
+            <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="date" name="date" id="f_date" value="{form_field name=date}" /></dd>
             {if !$membre}
-            <dt><label for="f_id_membre">Numéro de membre</label></dt>
+            <dt><label for="f_id_membre">Numéro de membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="number" name="id_membre" id="f_id_membre" value="{form_field name=id_membre}" step="1" min="1" /></dd>
             {/if}
         </dl>
