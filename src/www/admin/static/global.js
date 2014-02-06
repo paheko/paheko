@@ -48,19 +48,16 @@
 
 	function dateInputFallback()
 	{
-		var inputs = document.getElementsByTagName('input');
-		var length = inputs.length;
-		var enabled = false;
+		var input = document.createElement('input');
+		input.setAttribute('type', 'date');
+		input.value = ':-)';
+		input.style.position = 'absolute';
+		input.style.visibility = 'hidden';
+		document.body.appendChild(input);
 
-		for (i = 0; i < inputs.length; i++)
-		{
-			if (inputs[i].getAttribute('type') == 'date' && (inputs[i].type == 'text' || window.webkitConvertPointFromNodeToPage))
-			{
-				enabled = true;
-			}
-		}
-
-		if (enabled)
+		// If input type changed or value hasn't been sanitized then
+		// the input type date element is not supported
+		if (input.type === 'text' || input.value === ':-)')
 		{
 			var www_url = document.body.getAttribute('data-url') + 'static/';
 
@@ -75,6 +72,8 @@
 			link.href = www_url + 'datepickr.css';
 			document.head.appendChild(link);
 		}
+
+		document.body.removeChild(input);
 	}
 
 	if (document.addEventListener)
