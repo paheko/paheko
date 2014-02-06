@@ -160,6 +160,13 @@ class Compta_Journal
             FROM membres_transactions_operations WHERE id_operation = ?;', false, (int)$id);
     }
 
+    public function countForMember($id)
+    {
+        $db = DB::getInstance();
+        return $db->simpleQuerySingle('SELECT COUNT(*) 
+            FROM compta_journal WHERE id_auteur = ?;', false, (int)$id);
+    }
+
     protected function _checkFields(&$data)
     {
         $db = DB::getInstance();

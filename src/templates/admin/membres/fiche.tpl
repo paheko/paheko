@@ -47,11 +47,23 @@
         — <a href="{$admin_url}membres/transactions.php?id={$membre.id|escape}">Voir l'historique</a>
     </dd>
     <dd><form method="get" action="{$admin_url}membres/transactions/ajout.php"><input type="submit" value="Enregistrer un paiement &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dd>
+{if !empty($nb_operations)}
+    <dt>Écritures comptables</dt>
+    <dd>{$nb_operations|escape} écritures comptables
+        — <a href="{$admin_url}compta/operations/membre.php?id={$membre.id|escape}">Voir la liste des écritures ajoutées par ce membre</a>
+    </dd>
+ {/if}
 </dl>
 
 <dl class="describe">
     <dt>Numéro d'adhérent</dt>
     <dd>{$membre.id|escape}</dd>
+    <dt>Catégorie</dt>
+    <dd>{$categorie.nom|escape} <span class="droits">{format_droits droits=$categorie}</span></dd>
+    <dt>Inscription</dt>
+    <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
+    <dt>Dernière connexion</dt>
+    <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
     {foreach from=$champs key="c" item="config"}
     <dt>{$config.title|escape}</dt>
     <dd>
@@ -89,12 +101,6 @@
         {/if}
     </dd>
     {/foreach}
-    <dt>Catégorie</dt>
-    <dd>{$categorie.nom|escape} <span class="droits">{format_droits droits=$categorie}</span></dd>
-    <dt>Inscription</dt>
-    <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
-    <dt>Dernière connexion</dt>
-    <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
 </dl>
 
 {include file="admin/_foot.tpl"}
