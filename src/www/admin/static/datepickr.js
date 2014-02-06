@@ -411,7 +411,7 @@ function datepickr(targetElement, userConfig) {
 
 		for (i = 0; i < inputs.length; i++)
 		{
-			if (inputs[i].getAttribute('type') == 'date' && (inputs[i].type == 'text' || window.webkitConvertPointFromNodeToPage))
+			if (inputs[i].getAttribute('type') == 'date')
 			{
 				inputs[i].setAttribute('type', 'text');
 				inputs[i].className += ' date';
