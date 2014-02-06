@@ -153,6 +153,13 @@ class Compta_Journal
         return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id = ?;', true, $id);
     }
 
+    public function getLinkedTransaction($id)
+    {
+        $db = DB::getInstance();
+        return $db->simpleQuerySingle('SELECT id_membre_transaction 
+            FROM membres_transactions_operations WHERE id_operation = ?;', false, (int)$id);
+    }
+
     protected function _checkFields(&$data)
     {
         $db = DB::getInstance();

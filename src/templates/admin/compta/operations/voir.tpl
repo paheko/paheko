@@ -61,6 +61,15 @@
 
     <dt>Remarques</dt>
     <dd>{if trim($operation.remarques)}{$operation.remarques|escape}{else}Non renseigné{/if}</dd>
+
+    <dt>Paiement lié</dt>
+    <dd>
+        {if empty($id_transaction)}
+            Aucun
+        {else}
+            <a href="{$admin_url}membres/transactions/ecritures.php?id={$id_transaction|escape}">Paiement n°{$id_transaction|escape}</a>
+        {/if}
+    </dd>
 </dl>
 
 <table class="list multi">
