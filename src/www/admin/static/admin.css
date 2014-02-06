@@ -312,6 +312,10 @@ table.list {
     width: 100%;
 }
 
+table.list table {
+    margin: 0;
+}
+
 table.list th {
     text-align: left;
     font-weight: bold;

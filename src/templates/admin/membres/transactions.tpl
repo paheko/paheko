@@ -66,7 +66,7 @@
 <table class="list">
     <thead>
         <th>Date</th>
-        <td>Intitulé</td>
+        <td>Libellé</td>
         <td>Montant</td>
         <td>Activité ou cotisation liée</td>
         <td>Écritures liées</td>

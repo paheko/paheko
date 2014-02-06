@@ -148,10 +148,10 @@ class Membres_Transactions
 	 * @param  int $id Numéro de la transaction
 	 * @return array Liste des écritures
 	 */
-	public function listComptaOperations($id)
+	public function listOperationsCompta($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQueryFetch('SELECT * FROM compta_journal
+		return $db->simpleStatementFetch('SELECT * FROM compta_journal
 			WHERE id IN (SELECT id_operation FROM membres_transactions_operations 
 				WHERE id_membre_transaction = ?);', \SQLITE3_ASSOC, (int)$id);
 	}
@@ -241,7 +241,9 @@ class Membres_Transactions
 	public function get($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT * FROM membres_transactions WHERE id = ?;', true, (int) $id);
+		return $db->simpleQuerySingle('SELECT *,
+			(SELECT COUNT(*) FROM membres_transactions_operations WHERE id_membre_transaction = id) AS nb_operations
+			FROM membres_transactions WHERE id = ?;', true, (int) $id);
 	}
 
 	public function listForMember($id)
