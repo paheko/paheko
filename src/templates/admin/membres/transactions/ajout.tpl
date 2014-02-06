@@ -37,7 +37,7 @@
                 <select id="f_id_transaction" name="id_transaction">
                     <option value="0" {form_field name="id_transaction" selected=0}>-- Aucune, paiement non lié</option>
                     {foreach from=$transactions item="tr"}
-                    <option value="{$tr.id|escape}" {form_field name="id_transaction" selected=$tr.id default=$default_tr}>
+                    <option value="{$tr.id|escape}" {form_field name="id_transaction" selected=$tr.id default=$default_tr} data-compta="{$tr.id_categorie_compta|escape}">
                         {$tr.intitule|escape}
                         — {$tr.montant|html_money} {$config.monnaie|escape}
                         — {if $tr.duree}pour {$tr.duree|escape} jours
@@ -53,6 +53,24 @@
             <dd class="help">
                 Un paiement non relié à une activité ou cotisation peut être
                 par exemple un don ponctuel.
+            </dd>
+            <dt class="f_compta"><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="f_compta">
+                <select name="moyen_paiement" id="f_moyen_paiement">
+                {foreach from=$moyens_paiement item="moyen"}
+                    <option value="{$moyen.code|escape}"{if $moyen.code == $moyen_paiement} selected="selected"{/if}>{$moyen.nom|escape}</option>
+                {/foreach}
+                </select>
+            </dd>
+            <dt class="f_cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
+            <dd class="f_cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque}" /></dd>
+            <dt class="f_banque"><label for="f_banque">Compte bancaire</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="f_banque">
+                <select name="banque" id="f_banque">
+                {foreach from=$comptes_bancaires item="compte"}
+                    <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                {/foreach}
+                </select>
             </dd>
             <dt><label for="f_montant">Montant</label></dt>
             <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=$default_amount}" min="0.00" step="0.01" /> {$config.monnaie|escape}</dd>
@@ -74,5 +92,35 @@
     </p>
 </form>
 
+<script type="text/javascript">
+{literal}
+(function () {
+    window.changeMoyenPaiement = function()
+    {
+        var elm = $('#f_moyen_paiement');
+        toggleElementVisibility('.f_cheque', elm.value == 'CH');
+        toggleElementVisibility('.f_banque', elm.value != 'ES');
+    };
+
+    changeMoyenPaiement();
+    toggleElementVisibility('.f_compta', false);
+
+    $('#f_moyen_paiement').onchange = changeMoyenPaiement;
+
+    $('#f_id_transaction').onchange = function () {
+        if (this.options[this.selectedIndex].getAttribute('data-compta'))
+        {
+            toggleElementVisibility('.f_compta', true);
+            changeMoyenPaiement();
+        }
+        else
+        {
+            toggleElementVisibility('.f_compta', false);
+            changeMoyenPaiement();
+        }
+    };
+} ());
+{/literal}
+</script>
 
 {include file="admin/_foot.tpl"}
