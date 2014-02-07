@@ -80,7 +80,9 @@
             <dt>Catégorie</dt>
             <dd>Identifie la catégorie du membre.</dd>
             <dt>Date de dernière connexion</dt>
-            <dd>Enregistre la date de dernière connexion à l'administration de Garradin.</dd>
+            <dd>Mémorise la date de dernière connexion à l'administration de Garradin.</dd>
+            <dt>Date d'inscription</dt>
+            <dd>Enregistre la date de création de la fiche du membre.</dd>
         </dl>
     </fieldset>
 
