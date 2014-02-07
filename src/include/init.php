@@ -95,25 +95,52 @@ if (!defined('GARRADIN_PLUGINS_PATH'))
     define('GARRADIN_PLUGINS_PATH', GARRADIN_DATA_ROOT . '/plugins');
 }
 
+// Affichage des erreurs par défaut
+if (!defined('GARRADIN_SHOW_ERRORS'))
+{
+    define('GARRADIN_SHOW_ERRORS', true);
+}
+
 define('GARRADIN_WEBSITE', 'http://garradin.eu/');
 define('GARRADIN_PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
 
-ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
-ini_set('log_errors', true);
-ini_set('display_errors', true);
-ini_set('html_errors', false);
-
-if (PHP_SAPI != 'cli')
+// PHP devrait être assez intelligent pour chopper la TZ système mais nan
+// il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
+// éviter le message d'erreur à la con on définit une timezone par défaut
+// Pour utiliser une autre timezone, il suffit de définir date.timezone dans
+// un .htaccess ou dans config.local.php
+if (!ini_get('date.timezone'))
 {
-    ini_set('error_prepend_string', '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
-        pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
-        <pre> \__/<br /> (xx)<br />//||\\\\</pre>
-        <h1>Erreur fatale</h1>
-        <p>Une erreur fatale s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
-        merci d\'inclure le message ci-dessous :</p>
-        <h3>');
-    ini_set('error_append_string', '</h3><hr />
-        <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>');
+    if ($tz = @date_default_timezone_get())
+    {
+        ini_set('date.timezone', $tz);
+    }
+    else
+    {
+        ini_set('date.timezone', 'Europe/Paris');
+    }
+}
+
+if (GARRADIN_SHOW_ERRORS)
+{
+    // Gestion par défaut des erreurs
+    ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
+    ini_set('log_errors', true);
+    ini_set('display_errors', true);
+    ini_set('html_errors', false);
+
+    if (PHP_SAPI != 'cli')
+    {
+        ini_set('error_prepend_string', '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
+            pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
+            <pre> \__/<br /> (xx)<br />//||\\\\</pre>
+            <h1>Erreur fatale</h1>
+            <p>Une erreur fatale s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
+            merci d\'inclure le message ci-dessous :</p>
+            <h3>');
+        ini_set('error_append_string', '</h3><hr />
+            <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>');
+    }
 }
 
 /*
@@ -173,7 +200,7 @@ function exception_handler($e)
     {
         echo $error;
     }
-    else
+    elseif (GARRADIN_SHOW_ERRORS)
     {
         echo '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
         pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
