@@ -22,6 +22,9 @@
     </fieldset>
 </form>
 
+{if empty($journal)}
+    <p class="alert">Aucune écriture comptable n'est associée à ce membre pour l'exercice demandé.</p>
+{else}
 <table class="list">
     <colgroup>
         <col width="3%" />
@@ -59,5 +62,6 @@
     {/foreach}
     </tbody>
 </table>
+{/if}
 
 {include file="admin/_foot.tpl"}
