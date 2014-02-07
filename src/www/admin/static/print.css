@@ -1,0 +1,58 @@
+@page {
+    size: A4;
+    margin: 1cm;
+}
+
+body {
+    background: #fff;
+    padding: 0;
+}
+.header .menu {
+    display: none;
+}
+.page {
+    margin: 0;
+}
+.header h1 {
+    margin: 0;
+    text-align: center;
+}
+
+table.list thead {
+    background: #000;
+    color: #fff;
+}
+
+table.list tfoot tr {
+    background: #666;
+    color: #fff;
+}
+
+table.list tr {
+    border: 1px solid #666;
+}
+
+table.list tr:nth-child(even) {
+    background: #ddd;
+}
+
+table.list.multi tr:nth-child(even) {
+    background: inherit;
+}
+
+table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
+    background: #ddd;
+}
+
+#rapport table table {
+    border: 1px solid #666;
+}
+
+#rapport .parent {
+    background: #ccc;
+}
+
+#rapport table table tfoot tr {
+    background: #666;
+    color: #fff;
+}
