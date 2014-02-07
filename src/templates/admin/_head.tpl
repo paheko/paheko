@@ -3,9 +3,10 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>{$title|escape}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="all" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css" media="handheld,screen and (max-width:981px)" />
     {if isset($js)}
         <script type="text/javascript" src="{$admin_url}static/global.js"></script>
     {/if}
@@ -20,8 +21,6 @@
 
 {if empty($is_popup)}
 <div class="header">
-    <h1>{$title|escape}</h1>
-
     <ul class="menu">
     {if !$is_logged}
         <li><a href="{$www_url}">&larr; Retour au site</a></li>
@@ -85,6 +84,8 @@
         <li class="logout"><a href="{$admin_url}logout.php">Déconnexion</a></li>
     {/if}
     </ul>
+
+    <h1>{$title|escape}</h1>
 </div>
 {/if}
 

@@ -1,0 +1,96 @@
+body {
+	background: #fff;
+}
+
+.header h1 {
+	margin: 0;
+	text-align: center;
+	font-size: 1.5em;
+}
+
+.header .menu {
+	position: relative;
+	margin: 0;
+	width: 100%;
+    background: none;
+    font-size: .9em;
+}
+
+.header .menu > li {
+	background: #9c4f15;
+	margin: .1em 0;
+	padding: .2em;
+}
+
+.header .menu a {
+	font-weight: normal;
+	padding: 0;
+	display: inline;
+	padding: .2em;
+}
+
+.header .menu a small {
+	float: none;
+}
+
+.header .menu li li, .header .menu li ul {
+	display: inline;
+}
+
+.header .menu li li a {
+	padding: .2em;
+}
+
+.header .menu li.current > a {
+	background: white;
+	color: #000;
+}
+
+.page {
+	margin: 0;
+	padding: .1em;
+}
+
+ul.actions {
+	padding: 0;
+	border: none;
+	font-size: .8em;
+	text-align: center;
+}
+
+ul.actions li a {
+	margin: .1em;
+	border-radius: .5em;
+}
+
+.filterCategory, .searchMember {
+	width: auto;
+	float: none;
+}
+
+pre.sql_schema, .wikiChildren, fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
+	float: none;
+	width: auto;
+}
+
+dl.describe dt, dl.describe dd {
+	float: none;
+	width: auto;
+	text-align: center;
+}
+
+@media screen and (max-width:600px) {
+	table.list td, table.list th {
+		display: inline-block;
+		border-left: 1px solid #999;
+	}
+
+	table.list td:first-child, table.list th:first-child {
+		border-left: none;
+	}
+
+	.infos_asso {
+		float: none;
+		width: auto;
+	}
+}
