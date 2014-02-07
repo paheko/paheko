@@ -4,7 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>{$title|escape}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="screen,projection,handheld,print" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css" media="print" />
     {if isset($js)}
         <script type="text/javascript" src="{$admin_url}static/global.js"></script>
     {/if}
