@@ -46,10 +46,6 @@ body#popup {
     margin-top: 100px;
 }
 
-.header .menu li {
-    list-style-type: none;
-}
-
 .header .menu a {
     color: #fff;
     font-weight: bold;
@@ -79,11 +75,16 @@ body#popup {
     float: right;
     font-size: .7em;
     padding-top: .3em;
+    text-decoration: none;
 }
 
 .page {
     margin: 0px 1em 1em 180px;
     position: relative;
+}
+
+.page img {
+    max-width: 100%;
 }
 
 body#popup .page {
@@ -182,6 +183,7 @@ input[type=url], input[type=tel], select {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
     min-width: 20em;
+    max-width: 100%;
 }
 
 input[size] {
@@ -273,7 +275,7 @@ dd.help input[type=text] {
     font-family: monospace;
 }
 
-form .actions {
+form p.actions {
     float: right;
 }
 
