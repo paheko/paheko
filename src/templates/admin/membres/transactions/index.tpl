@@ -11,8 +11,8 @@
         <th>Activité ou cotisation</th>
         <td>Période</td>
         <td>Montant</td>
-        <td>Nombre de paiements</td>
-        <td>Nombre de membres inscrits</td>
+        <td>Paiements</td>
+        <td>Membres inscrits</td>
         <td></td>
     </thead>
     <tbody>
@@ -33,6 +33,7 @@
                 <td class="num">{$tr.nb_membres|escape}</td>
                 <td class="actions">
                     <a href="{$admin_url}membres/transactions/voir.php?id={$tr.id|escape}">Paiements</a>
+                    | <a href="{$admin_url}membres/transactions/membres.php?id={$tr.id|escape}">Membres</a>
                 </td>
             </tr>
         {/foreach}

@@ -277,11 +277,40 @@ class Membres_Transactions
 			false, (int)$id);
 	}
 
-	public function listMembersForTransaction($id)
+	/**
+	 * Nombre de membres pour une activité
+	 * @param  integer $id Numéro de l'activité/cotisation
+	 * @return integer     Nombre de paiements pour cette activité
+	 */
+	public function countMembersForTransaction($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT * FROM membres_transactions WHERE id_transaction = ? ORDER BY date DESC;',
-			\SQLITE3_ASSOC, (int)$id);
+		return $db->simpleQuerySingle('SELECT COUNT(DISTINCT id_membre) FROM membres_transactions 
+			WHERE id_transaction = ?;',
+			false, (int)$id);
+	}
+
+	/**
+	 * Liste des membres qui ont payé une activité
+	 * @param  integer $id Numéro de l'activité
+	 * @return array     Liste des membres ayant un paiement associé
+	 */
+	public function listMembersForTransaction($id, $page = 1)
+	{
+		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
+
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT SUM(mtr.montant) AS total, mtr.id_membre,
+			(SELECT nom FROM membres WHERE id = mtr.id_membre) AS nom, tr.montant,
+			tr.montant - SUM(mtr.montant) AS a_payer, 
+			CASE WHEN tr.duree IS NOT NULL THEN date(mtr.date, \'+\'||tr.duree||\' days\') >= date()
+			WHEN tr.fin IS NOT NULL THEN tr.fin <= date() ELSE 1 END AS a_jour
+			FROM membres_transactions AS mtr
+				INNER JOIN transactions AS tr ON tr.id = mtr.id_transaction
+			WHERE
+				mtr.id_transaction = ?
+			GROUP BY id_membre ORDER BY date DESC LIMIT ?,?;',
+			\SQLITE3_ASSOC, (int)$id, $begin, self::ITEMS_PER_PAGE);
 	}
 
 	public function listForMember($id)
