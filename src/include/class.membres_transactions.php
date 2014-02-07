@@ -4,6 +4,8 @@ namespace Garradin;
 
 class Membres_Transactions
 {
+	const ITEMS_PER_PAGE = 100;
+
 	/**
 	 * Vérification des champs fournis pour la modification de donnée
 	 * @param  array $data Tableau contenant les champs à ajouter/modifier
@@ -244,6 +246,42 @@ class Membres_Transactions
 		return $db->simpleQuerySingle('SELECT *,
 			(SELECT COUNT(*) FROM membres_transactions_operations WHERE id_membre_transaction = id) AS nb_operations
 			FROM membres_transactions WHERE id = ?;', true, (int) $id);
+	}
+
+	/**
+	 * Liste des paiements pour une activité/cotisation
+	 * @param  integer  $id   Numéro de transaction
+	 * @param  integer $page Numéro de page pour la pagination
+	 * @return array        Liste des activités
+	 */
+	public function listForTransaction($id, $page = 1)
+	{
+		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
+
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT * FROM membres_transactions 
+			WHERE id_transaction = ? ORDER BY date DESC LIMIT ?,?;',
+			\SQLITE3_ASSOC, (int)$id, $begin, self::ITEMS_PER_PAGE);
+	}
+
+	/**
+	 * Nombre de paiements pour une activité
+	 * @param  integer $id Numéro de l'activité/cotisation
+	 * @return integer     Nombre de paiements pour cette activité
+	 */
+	public function countForTransaction($id)
+	{
+		$db = DB::getInstance();
+		return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres_transactions 
+			WHERE id_transaction = ?;',
+			false, (int)$id);
+	}
+
+	public function listMembersForTransaction($id)
+	{
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT * FROM membres_transactions WHERE id_transaction = ? ORDER BY date DESC;',
+			\SQLITE3_ASSOC, (int)$id);
 	}
 
 	public function listForMember($id)

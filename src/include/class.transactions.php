@@ -134,7 +134,10 @@ class Transactions
 	public function get($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT * FROM transactions WHERE id = ?;', true, (int) $id);
+		return $db->simpleQuerySingle('SELECT *,
+			(SELECT COUNT(*) FROM membres_transactions WHERE id_transaction = :id) AS nb_paiements,
+			(SELECT COUNT(DISTINCT id_membre) FROM membres_transactions WHERE id_transaction = :id) AS nb_membres
+			FROM transactions WHERE id = :id;', true, ['id' => (int) $id]);
 	}
 
 	public function listByName()
@@ -147,6 +150,15 @@ class Transactions
 	{
 		$db = DB::getInstance();
 		return $db->simpleStatementFetch('SELECT * FROM transactions WHERE fin >= date(\'now\') OR fin IS NULL ORDER BY intitule;');
+	}
+
+	public function listCurrentWithStats()
+	{
+		$db = DB::getInstance();
+		return $db->simpleStatementFetch('SELECT *,
+			(SELECT COUNT(*) FROM membres_transactions WHERE id_transaction = transactions.id) AS nb_paiements,
+			(SELECT COUNT(DISTINCT id_membre) FROM membres_transactions WHERE id_transaction = transactions.id) AS nb_membres
+			FROM transactions WHERE fin >= date(\'now\') OR fin IS NULL ORDER BY intitule;');
 	}
 }
 
