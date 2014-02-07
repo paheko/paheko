@@ -2,14 +2,9 @@
 
 {if isset($tpl.get.suivi)}
 <ul class="actions">
-    <li class="recettes"><a href="{$www_url}admin/compta/operations/?recettes">Recettes</a></li>
-    <li class="depenses"><a href="{$www_url}admin/compta/operations/?depenses">Dépenses</a></li>
-    <li class="autres"><a href="{$www_url}admin/compta/operations/?autres">Autres</a></li>
-    <li class="current"><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta_Comptes::CAISSE}&amp;suivi">Journal de caisse</a></li>
-    {*<li><a href="{$www_url}admin/compta/operations/recherche.php">Recherche d'opération</a></li>*}
-    {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
-        <li><a href="{$www_url}admin/compta/operations/recherche_sql.php">Recherche par requête SQL</a></li>
-    {/if}
+    <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta_Comptes::CAISSE}">Journal de caisse</a></li>
+    {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}<li><strong><a href="{$www_url}admin/compta/banques/ajouter.php">Ajouter un compte bancaire</a></strong></li>{/if}
 </ul>
 {/if}
 
