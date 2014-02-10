@@ -89,6 +89,8 @@ if (!file_exists(GARRADIN_DB_FILE))
 
 $tpl = Template::getInstance();
 
+$tpl->assign('admin_url', WWW_URL . 'admin/');
+
 if (file_exists(GARRADIN_DB_FILE))
 {
     $tpl->assign('disabled', true);
