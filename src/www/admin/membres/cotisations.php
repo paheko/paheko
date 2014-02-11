@@ -40,7 +40,7 @@ else
 
 $tpl->assign('nb_activites', $cotisations->countForMember($membre['id']));
 $tpl->assign('cotisations', $cotisations->listForMember($membre['id']));
-$tpl->assign('en_cours', $cotisations->listCurrentSubscriptionsForMember($membre['id']));
+$tpl->assign('cotisations_membre', $cotisations->listSubscriptionsForMember($membre['id']));
 
 $tpl->assign('membre', $membre);
 
