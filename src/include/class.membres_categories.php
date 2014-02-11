@@ -27,16 +27,16 @@ class Membres_Categories
             throw new UserException('Le nom de catégorie ne peut rester vide.');
         }
 
-        if (!empty($data['id_transaction_obligatoire']) 
-            && !$db->simpleQuerySingle('SELECT 1 FROM transactions WHERE id = ?;', 
-                false, (int)$data['id_transaction_obligatoire']))
+        if (!empty($data['id_cotisation_obligatoire']) 
+            && !$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', 
+                false, (int)$data['id_cotisation_obligatoire']))
         {
-            throw new UserException('Numéro de transaction (cotisation) inconnu.');
+            throw new UserException('Numéro de cotisation inconnu.');
         }
 
-        if (isset($data['id_transaction_obligatoire']) && empty($data['id_transaction_obligatoire']))
+        if (isset($data['id_cotisation_obligatoire']) && empty($data['id_cotisation_obligatoire']))
         {
-            $data['id_transaction_obligatoire'] = null;
+            $data['id_cotisation_obligatoire'] = null;
         }
     }
 

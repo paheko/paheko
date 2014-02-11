@@ -18,10 +18,17 @@ if (!empty($_GET['id']) && is_numeric($_GET['id']))
     {
         throw new UserException("Ce membre n'existe pas.");
     }
+
+    $cats = new Membres_Categories;
+    $categorie = $cats->get($membre['id_categorie']);
+}
+else
+{
+    $categorie = ['id_cotisation_obligatoire' => false];
 }
 
-$transactions = new Transactions;
-$m_transactions = new Membres_Transactions;
+$cotisations = new Cotisations;
+$m_cotisations = new Cotisations_Membres;
 
 $cats = new Compta_Categories;
 $banques = new Compta_Comptes_Bancaires;
@@ -30,7 +37,7 @@ $error = false;
 
 if (!empty($_POST['add']))
 {
-    if (!utils::CSRF_check('add_transaction'))
+    if (!utils::CSRF_check('add_cotisation'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -38,14 +45,12 @@ if (!empty($_POST['add']))
     {
         try {
             $data = [
-                'libelle'           =>  utils::post('libelle'),
                 'date'              =>  utils::post('date'),
-                'id_transaction'    =>  utils::post('id_transaction'),
-                'montant'           =>  (float) utils::post('montant'),
+                'id_cotisation'     =>  utils::post('id_cotisation'),
                 'id_membre'         =>  utils::post('id_membre'),
             ];
 
-            if (!empty($data['id_transaction']))
+            if (!empty($categorie['id_cotisation_obligatoire']))
             {
                 $data['id_auteur'] = $user['id'];
                 $data['moyen_paiement'] = utils::post('moyen_paiement');
@@ -53,9 +58,9 @@ if (!empty($_POST['add']))
                 $data['banque'] = utils::post('banque');
             }
 
-            $m_transactions->add($data);
+            $m_cotisations->add($data);
 
-            utils::redirect('/admin/membres/transactions.php?id=' . (int)utils::post('id_membre'));
+            utils::redirect('/admin/membres/cotisations.php?id=' . (int)utils::post('id_membre'));
         }
         catch (UserException $e)
         {
@@ -67,9 +72,9 @@ if (!empty($_POST['add']))
 $tpl->assign('error', $error);
 $tpl->assign('membre', $membre);
 
-$tpl->assign('transactions', $transactions->listCurrent());
+$tpl->assign('cotisations', $cotisations->listCurrent());
 
-$tpl->assign('default_tr', null);
+$tpl->assign('default_co', null);
 $tpl->assign('default_amount', 0.00);
 
 $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
@@ -80,18 +85,15 @@ $tpl->assign('banque', utils::post('banque'));
 
 if ($membre)
 {
-    $cats = new Membres_Categories;
-    $categorie = $cats->get($membre['id_categorie']);
-
-    if (!empty($categorie['id_transaction_obligatoire']))
+    if (!empty($categorie['id_cotisation_obligatoire']))
     {
-        $tr = $transactions->get($categorie['id_transaction_obligatoire']);
+        $co = $cotisations->get($categorie['id_cotisation_obligatoire']);
 
-        $tpl->assign('default_tr', $tr['id']);
-        $tpl->assign('default_amount', $tr['montant']);
+        $tpl->assign('default_co', $co['id']);
+        $tpl->assign('default_amount', $co['montant']);
     }
 }
 
-$tpl->display('admin/membres/transactions/ajout.tpl');
+$tpl->display('admin/membres/cotisations/ajout.tpl');
 
 ?>

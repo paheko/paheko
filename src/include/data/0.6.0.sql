@@ -1,8 +1,8 @@
 -- nouveau moyen de paiement
 INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
 
-CREATE TABLE transactions
--- Paiements possibles
+CREATE TABLE cotisations
+-- Types de cotisations et activités
 (
     id INTEGER PRIMARY KEY,
     id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
@@ -18,59 +18,47 @@ CREATE TABLE transactions
     FOREIGN KEY (id_categorie_compta) REFERENCES compta_categories (id)
 );
 
+CREATE TABLE cotisations_membres
+-- Enregistrement des cotisations et activités
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_membre INTEGER NOT NULL REFERENCES membres (id),
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
+
+    date TEXT NOT NULL DEFAULT CURRENT_DATE
+);
+
+CREATE UNIQUE INDEX cm_unique ON cotisations_membres (id_membre, id_cotisation, date);
+
+CREATE TABLE membres_operations
+-- Liaision des enregistrement des paiements en compta
+(
+    id_membre INTEGER NOT NULL REFERENCES membres (id),
+    id_operation INTEGER NOT NULL REFERENCES compta_journal (id),
+    PRIMARY KEY (id_membre, id_operation)
+);
+
 CREATE TABLE rappels
--- Rappels de devoir renouveller une transaction
+-- Rappels de devoir renouveller une cotisation
 (
     id INTEGER PRIMARY KEY,
-    id_transaction INTEGER NULL,
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
 
     delai INTEGER NOT NULL, -- Délai en jours pour envoyer le rappel
 
     sujet TEXT NOT NULL,
-    texte TEXT NOT NULL,
-
-    FOREIGN KEY (id_transaction) REFERENCES transactions (id)
+    texte TEXT NOT NULL
 );
 
 CREATE TABLE rappels_envoyes
 -- Enregistrement des rappels envoyés à qui et quand
 (
-    id_membre INTEGER NOT NULL,
-    id_rappel INTEGER NOT NULL,
+    id_membre INTEGER NOT NULL REFERENCES membres (id),
+    id_rappel INTEGER NOT NULL REFERENCES rappels (id),
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
     
-    FOREIGN KEY (id_membre) REFERENCES membres (id),
-    FOREIGN KEY (id_rappel) REFERENCES rappels (id),
-
     PRIMARY KEY(id_membre, id_rappel, date)
-);
-
-CREATE TABLE membres_transactions
--- Paiements enregistrés
-(
-    id INTEGER PRIMARY KEY,
-
-    id_membre INTEGER NOT NULL,
-    id_transaction INTEGER NULL, -- NULL si n'est pas relié à une transaction prévue
-
-    libelle TEXT NULL,
-
-    date TEXT NOT NULL DEFAULT CURRENT_DATE,
-    montant REAL NOT NULL,
-
-    FOREIGN KEY (id_membre) REFERENCES membres (id),
-    FOREIGN KEY (id_transaction) REFERENCES transactions (id)
-);
-
-CREATE TABLE membres_transactions_operations
--- Liaison paiements enregistrés avec écritures comptables
-(
-    id_operation INTEGER NOT NULL,
-    id_membre_transaction INTEGER NOT NULL,
-
-    FOREIGN KEY (id_operation) REFERENCES compta_journal (id),
-    FOREIGN KEY (id_membre_transaction) REFERENCES membres_transactions (id)
 );
 
 -- Mise à jour des catégories
@@ -90,9 +78,7 @@ CREATE TABLE membres_categories_tmp
     droit_config INT DEFAULT 0,
     cacher INT DEFAULT 0,
 
-    id_transaction_obligatoire INTEGER NULL,
-
-    FOREIGN KEY (id_transaction_obligatoire) REFERENCES transactions (id)
+    id_cotisation_obligatoire INTEGER NULL REFERENCES cotisations (id)
 );
 
 -- Remise des anciennes infos
@@ -102,9 +88,6 @@ INSERT INTO membres_categories_tmp SELECT id, nom, description, droit_wiki, droi
 -- Suppression de l'ancienne table et renommage de la nouvelle
 DROP TABLE membres_categories;
 ALTER TABLE membres_categories_tmp RENAME TO membres_categories;
-
--- Ajout id transaction aux écritures comptables
-ALTER TABLE compta_journal ADD COLUMN id_transaction INTEGER NULL REFERENCES transactions (id);
 
 -- Ajout désactivation compte
 ALTER TABLE compta_comptes ADD COLUMN desactive INTEGER NOT NULL DEFAULT 0;

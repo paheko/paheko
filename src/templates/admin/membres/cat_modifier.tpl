@@ -29,17 +29,17 @@
     <fieldset>
         <legend>Cotisation obligatoire</legend>
         <dl>
-            <dt><label for="f_id_transaction_obligatoire">Cotisation obligatoire</label></dt>
+            <dt><label for="f_id_cotisation_obligatoire">Cotisation obligatoire</label></dt>
             <dd>
-                <select name="id_transaction_obligatoire" id="f_id_transaction_obligatoire">
+                <select name="id_cotisation_obligatoire" id="f_id_cotisation_obligatoire">
                     <option value="">-- Non</option>
-                    {foreach from=$transactions item="transaction"}
-                    <option value="{$transaction.id|escape}" {form_field name="id_transaction_obligatoire" selected=$transaction.id data=$cat}>
-                        {$transaction.intitule|escape} 
-                        — {$transaction.montant|html_money} {$config.monnaie|escape}
-                        — {if $transaction.duree}pour {$transaction.duree|escape} jours
-                        {elseif $transaction.debut}
-                            du {$transaction.debut|format_sqlite_date_to_french} au {$transaction.fin|format_sqlite_date_to_french}
+                    {foreach from=$cotisations item="cotisation"}
+                    <option value="{$cotisation.id|escape}" {form_field name="id_cotisation_obligatoire" selected=$cotisation.id data=$cat}>
+                        {$cotisation.intitule|escape} 
+                        — {$cotisation.montant|html_money} {$config.monnaie|escape}
+                        — {if $cotisation.duree}pour {$cotisation.duree|escape} jours
+                        {elseif $cotisation.debut}
+                            du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
                         {else}
                             ponctuelle
                         {/if}
