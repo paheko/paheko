@@ -575,14 +575,14 @@ b.money {
 }
 
 .filterCategory {
-    width: 49%;
+    width: 30em;
     float: right;
     font-size: 80%;
+    text-align: center;
+    margin-left: 1em;
 }
 
 .searchMember {
-    width: 49%;
-    float: left;
     font-size: 80%;
 }
 

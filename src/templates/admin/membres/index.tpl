@@ -19,7 +19,7 @@
 <form method="get" action="{$self_url|escape}" class="filterCategory">
     <fieldset>
         <legend>Filtrer par catégorie</legend>
-        <select name="cat" id="f_cat">
+        <select name="cat" id="f_cat" onchange="this.form.submit();">
             <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
         {foreach from=$membres_cats key="id" item="nom"}
             {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE
@@ -28,7 +28,7 @@
             {/if}
         {/foreach}
         </select>
-        <input type="submit" value="Filtrer &rarr;" />
+        <noscript><input type="submit" value="Filtrer &rarr;" /></noscript>
     </fieldset>
 </form>
 
