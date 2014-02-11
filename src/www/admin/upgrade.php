@@ -129,7 +129,7 @@ if (version_compare($v, '0.6.0', '<'))
     // Conversion des cotisations de catégories en transactions
     foreach ($list as $cat)
     {
-        $db->simpleInsert('transactions', [
+        $db->simpleInsert('cotisations', [
             'id_categorie_compta'   =>  null,
             'intitule'              =>  $cat['nom'],
             'montant'               =>  (float) $cat['montant_cotisation'],
@@ -139,16 +139,15 @@ if (version_compare($v, '0.6.0', '<'))
         ]);
 
         $args = [
-            'id_transaction'=>  (int)$db->lastInsertRowId(),
-            'montant'       =>  (float) $cat['montant_cotisation'],
+            'id_cotisation' =>  (int)$db->lastInsertRowId(),
             'id_categorie'  =>  (int)$cat['id'],
         ];
 
         // import des dates de cotisation existantes comme paiements
-        $db->simpleExec('INSERT INTO membres_transactions 
-            (id_membre, id_transaction, libelle, date, montant)
-            SELECT id, :id_transaction, "Créé automatiquement depuis la date de cotisation enregistrée (version 0.5.x)",
-            date(date_cotisation), :montant FROM membres WHERE id_categorie = :id_categorie;',
+        $db->simpleExec('INSERT INTO cotisations_membres 
+            (id_membre, id_cotisation, date)
+            SELECT id, :id_cotisation, date(date_cotisation) FROM membres
+            WHERE date_cotisation IS NOT NULL AND date_cotisation != \'\' AND id_categorie = :id_categorie;',
             $args);
 
         // Mais on ne crée pas d'écriture comptable, car elles existent probablement déjà

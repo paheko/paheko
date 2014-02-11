@@ -6,8 +6,7 @@
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
     {/if}
-    <li><a href="{$admin_url}membres/transactions.php?id={$membre.id|escape}">Suivi des paiements</a></li>
-    <li><a href="{$admin_url}membres/transactions/ajout.php?id={$membre.id|escape}">Enregistrer un paiement</a></li>
+    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Suivi des cotisations</a></li>
 </ul>
 
 <dl class="cotisation">
@@ -25,28 +24,28 @@
     </dd>
     <dt>À jour de cotisation ?</dt>
     <dd>
-        {if $cotisation.total === null}
-            <span class="error"><b>Non</b>, cotisation non payée ou expirée</span>
-        {elseif $cotisation.a_payer > 0}
-            <span class="alert"><b>Non</b>, cotisation payée partiellement</span>
+        {if !$cotisation.a_jour}
+            <span class="error"><b>Non</b>, cotisation non payée</span>
         {else}
-            <span class="confirm"><b>Oui</b>, cotisation à jour</span>
-            {if $cotisation.expiration}(expire le {$cotisation.expiration|format_sqlite_date_to_french}){/if}
+            <b class="confirm">&#10003; Oui</b>
+            {if $cotisation.expiration}
+                (expire le {$cotisation.expiration|format_sqlite_date_to_french})
+            {/if}
         {/if}
     </dd>
 {/if}
-    <dt>Paiements</dt>
+    <dt>Cotisations et activités</dt>
     <dd>
-        {if $nb_paiements == 1}
-            {$nb_paiements|escape} paiement enregistré
-        {elseif $nb_paiements}
-            {$nb_paiements|escape} paiements enregistrés
+        {if $nb_activites == 1}
+            {$nb_activites|escape} activité enregistrée
+        {elseif $nb_activites}
+            {$nb_activites|escape} activités enregistrées
         {else}
-            Aucun paiement enregistré
+            Aucune activité ou cotisation enregistrée
         {/if} 
-        — <a href="{$admin_url}membres/transactions.php?id={$membre.id|escape}">Voir l'historique</a>
+        — <a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Voir l'historique</a>
     </dd>
-    <dd><form method="get" action="{$admin_url}membres/transactions/ajout.php"><input type="submit" value="Enregistrer un paiement &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dd>
+    <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dd>
 {if !empty($nb_operations)}
     <dt>Écritures comptables</dt>
     <dd>{$nb_operations|escape} écritures comptables

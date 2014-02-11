@@ -91,15 +91,15 @@ body#popup .page {
     margin: 1em 1em 1em 2.5em;
 }
 
-span.error {
+span.error, b.error {
     color: #900;
 }
 
-span.confirm {
+span.confirm, b.confirm {
     color: #090;
 }
 
-span.alert {
+span.alert, b.alert {
     color: #990;
 }
 

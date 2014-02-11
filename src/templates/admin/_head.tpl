@@ -36,10 +36,9 @@
             {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
-                <li class="member transactions{if $current == 'membres/transactions'} current{/if}"><a href="{$admin_url}membres/transactions/">Paiements</a></li>
+                <li class="member cotisations{if $current == 'membres/transactions'} current{/if}"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
                 {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
                 <li class="member admin config{if $current == 'membres/categories'} current{/if}"><a href="{$admin_url}membres/categories.php">Catégories</a></li>
-                <li class="member admin transactions{if $current == 'membres/transactions/admin'} current{/if}"><a href="{$admin_url}membres/transactions/gestion/">Cotisations &amp; activités</a></li>
                 <li class="members admin mail{if $current == 'membres/message_collectif'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
                 {/if}
             </ul>
@@ -78,7 +77,7 @@
         {/if}
         <li class="my config{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php">Mes infos personnelles</a>
             <ul>
-                <li class="my transactions{if $current == 'mes_transactions'} current{/if}"><a href="{$admin_url}mes_transactions.php">Mes paiements</a></li>
+                <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>
             </ul>
         </li>
         <li class="logout"><a href="{$admin_url}logout.php">Déconnexion</a></li>

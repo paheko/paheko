@@ -30,18 +30,18 @@ $cats = new Membres_Categories;
 $categorie = $cats->get($membre['id_categorie']);
 $tpl->assign('categorie', $categorie);
 
-$m_transactions = new Membres_Transactions;
+$cotisations = new Cotisations_Membres;
 
-if (!empty($categorie['id_transaction_obligatoire']))
+if (!empty($categorie['id_cotisation_obligatoire']))
 {
-	$tpl->assign('cotisation', $m_transactions->isMemberUpToDate($membre['id'], $categorie['id_transaction_obligatoire']));
+	$tpl->assign('cotisation', $cotisations->isMemberUpToDate($membre['id'], $categorie['id_cotisation_obligatoire']));
 }
 else
 {
 	$tpl->assign('cotisation', false);
 }
 
-$tpl->assign('nb_paiements', $m_transactions->countForMember($membre['id']));
+$tpl->assign('nb_activites', $cotisations->countForMember($membre['id']));
 
 if ($user['droits']['compta'] >= Membres::DROIT_ACCES)
 {

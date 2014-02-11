@@ -27,23 +27,23 @@ $cats = new Membres_Categories;
 $categorie = $cats->get($membre['id_categorie']);
 $tpl->assign('categorie', $categorie);
 
-$m_transactions = new Membres_Transactions;
+$cotisations = new Cotisations_Membres;
 
-if (!empty($categorie['id_transaction_obligatoire']))
+if (!empty($categorie['id_cotisation_obligatoire']))
 {
-	$tpl->assign('cotisation', $m_transactions->isMemberUpToDate($membre['id'], $categorie['id_transaction_obligatoire']));
+	$tpl->assign('cotisation', $cotisations->isMemberUpToDate($membre['id'], $categorie['id_cotisation_obligatoire']));
 }
 else
 {
 	$tpl->assign('cotisation', false);
 }
 
-$tpl->assign('nb_paiements', $m_transactions->countForMember($membre['id']));
-$tpl->assign('paiements', $m_transactions->listForMember($membre['id']));
-$tpl->assign('activites', $m_transactions->listCurrentSubscriptionsForMember($membre['id']));
+$tpl->assign('nb_activites', $cotisations->countForMember($membre['id']));
+$tpl->assign('cotisations', $cotisations->listForMember($membre['id']));
+$tpl->assign('en_cours', $cotisations->listCurrentSubscriptionsForMember($membre['id']));
 
 $tpl->assign('membre', $membre);
 
-$tpl->display('admin/membres/transactions.tpl');
+$tpl->display('admin/membres/cotisations.tpl');
 
 ?>
