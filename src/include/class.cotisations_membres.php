@@ -252,19 +252,18 @@ class Cotisations_Membres
 	 * @param  integer $id Numéro de membre
 	 * @return array     Liste des cotisations en cours de validité
 	 */
-	public function listCurrentSubscriptionsForMember($id)
+	public function listSubscriptionsForMember($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT c.montant, c.intitule, c.duree, c.debut, c.fin,
-				CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
-				WHEN c.fin IS NOT NULL THEN c.fin ELSE NULL END AS expiration
+		return $db->simpleStatementFetch('SELECT c.*,
+			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
+			WHEN c.fin IS NOT NULL THEN c.fin >= date()
+			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
+			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
+			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
-			WHERE cm.id_membre = ? AND (
-				(c.duree IS NOT NULL AND cm.date >= date(\'now\', \'-\'||c.duree||\' days\'))
-				OR (c.fin IS NOT NULL AND c.fin >= date(\'now\'))
-				OR (c.fin IS NULL AND c.duree IS NULL)
-			)
+			WHERE cm.id_membre = ?
 			GROUP BY cm.id_cotisation
 			ORDER BY cm.date DESC;', \SQLITE3_ASSOC, (int)$id);
 	}

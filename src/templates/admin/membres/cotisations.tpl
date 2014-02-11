@@ -34,31 +34,27 @@
         {/if}
     </dd>
 {/if}
-    <dt>Cotisations et activités</dt>
-    <dd>
+    <dt>
         {if $nb_activites == 1}
-            {$nb_activites|escape} activité enregistrée
+            {$nb_activites|escape} cotisation enregistrée
         {elseif $nb_activites}
-            {$nb_activites|escape} activités enregistrées
+            {$nb_activites|escape} cotisations enregistrées
         {else}
-            Aucune activité ou cotisation enregistrée
-        {/if}
-    </dd>
-    <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dd>
-{if !empty($activites)}
-    <dt>Activités ou cotisations en cours</dt>
-    {foreach from=$activites item="activite"}
-    <dd>{$activite.intitule|escape} — 
-        {if $activite.total >= $activite.montant}<span class="confirm">Réglé</span>
+            Aucune cotisation enregistrée
+        {/if} 
+    </dt>
+{if !empty($cotisations_membre)}
+    {foreach from=$cotisations_membre item="co"}
+    <dd>{$co.intitule|escape} — 
+        {if $co.a_jour}
+            <span class="confirm">À jour</span>{if $co.expiration} — Expire le {$co.expiration|format_sqlite_date_to_french}{/if}
         {else}
-            <span class="alert">{$activite.total|escape_money} {$config.monnaie|escape} 
-                réglés sur un total de {$activite.montant|escape_money} {$config.monnaie|escape}</span>
-            <span class="error">(reste {$activite.a_payer|escape_money} {$config.monnaie|escape} à payer)</span>
+            <span class="error">En retard</span>
         {/if}
-        {if $activite.expiration}— Valide jusqu'au {$activite.expiration|format_sqlite_date_to_french}{/if}
     </dd>
     {/foreach}
 {/if}
+    <dt><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dt>
 </dl>
 
 {if !empty($cotisations)}

@@ -34,16 +34,17 @@
         {/if}
     </dd>
 {/if}
-    <dt>Cotisations et activités</dt>
-    <dd>
+    <dt>
         {if $nb_activites == 1}
-            {$nb_activites|escape} activité enregistrée
+            {$nb_activites|escape} cotisation enregistrée
         {elseif $nb_activites}
-            {$nb_activites|escape} activités enregistrées
+            {$nb_activites|escape} cotisations enregistrées
         {else}
-            Aucune activité ou cotisation enregistrée
+            Aucune cotisation enregistrée
         {/if} 
-        — <a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Voir l'historique</a>
+    </dt>
+    <dd>
+        <a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Voir l'historique</a>
     </dd>
     <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id|escape}" /></form></dd>
 {if !empty($nb_operations)}
