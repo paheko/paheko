@@ -1,6 +1,3 @@
--- nouveau moyen de paiement
-INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
-
 CREATE TABLE cotisations
 -- Types de cotisations et activités
 (
