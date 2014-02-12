@@ -58,7 +58,7 @@ class Champs_Membres
 
 	static public function importInstall()
 	{
-		$champs = parse_ini_file(GARRADIN_ROOT . '/include/data/champs_membres.ini', true);
+		$champs = parse_ini_file(ROOT . '/include/data/champs_membres.ini', true);
         $champs = array_filter($champs, function ($row) { return !empty($row['install']); });
         return new Champs_Membres($champs);
 	}
@@ -67,7 +67,7 @@ class Champs_Membres
     {
         if (is_null(self::$presets))
         {
-            self::$presets = parse_ini_file(GARRADIN_ROOT . '/include/data/champs_membres.ini', true);
+            self::$presets = parse_ini_file(ROOT . '/include/data/champs_membres.ini', true);
         }
 
         return self::$presets;

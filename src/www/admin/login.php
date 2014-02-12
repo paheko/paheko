@@ -1,8 +1,14 @@
 <?php
 namespace Garradin;
 
-define('GARRADIN_LOGIN_PROCESS', true);
+const LOGIN_PROCESS = true;
+
 require_once __DIR__ . '/_inc.php';
+
+if ($membres->isLogged())
+{
+    utils::redirect('/admin/');
+}
 
 // Relance session_start et renvoie une image de 1px transparente
 if (isset($_GET['keepSessionAlive']))

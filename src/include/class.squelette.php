@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-require_once GARRADIN_ROOT . '/include/libs/miniskel/class.miniskel.php';
+require_once ROOT . '/include/libs/miniskel/class.miniskel.php';
 
 class Squelette_Snippet
 {
@@ -500,9 +500,9 @@ class Squelette extends \miniSkel
     {
         $this->currentTemplate = $template;
 
-        $path = file_exists(GARRADIN_DATA_ROOT . '/www/squelettes/' . $template)
-            ? GARRADIN_DATA_ROOT . '/www/squelettes/' . $template
-            : GARRADIN_ROOT . '/www/squelettes-dist/' . $template;
+        $path = file_exists(DATA_ROOT . '/www/squelettes/' . $template)
+            ? DATA_ROOT . '/www/squelettes/' . $template
+            : ROOT . '/www/squelettes-dist/' . $template;
 
         $tpl_id = basename(dirname($path)) . '/' . $template;
 
@@ -579,7 +579,7 @@ class Squelette extends \miniSkel
             $_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
 
             if (preg_match('!^[\w\d_-]+$!i', $_GET['uri'])
-                && file_exists(GARRADIN_DATA_ROOT . '/www/squelettes/' . strtolower($_GET['uri']) . '.html'))
+                && file_exists(DATA_ROOT . '/www/squelettes/' . strtolower($_GET['uri']) . '.html'))
             {
                 $skel = strtolower($_GET['uri']) . '.html';
             }
@@ -595,7 +595,7 @@ class Squelette extends \miniSkel
     static private function compile_get_path($path)
     {
         $hash = sha1($path);
-        return GARRADIN_DATA_ROOT . '/cache/compiled/s_' . $hash . '.php';
+        return DATA_ROOT . '/cache/compiled/s_' . $hash . '.php';
     }
 
     static private function compile_check($tpl, $check)
@@ -667,9 +667,9 @@ class Squelette extends \miniSkel
         if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
             return false;
 
-        $path = file_exists(GARRADIN_DATA_ROOT . '/www/squelettes/' . $template)
-            ? GARRADIN_DATA_ROOT . '/www/squelettes/' . $template
-            : GARRADIN_ROOT . '/www/squelettes-dist/' . $template;
+        $path = file_exists(DATA_ROOT . '/www/squelettes/' . $template)
+            ? DATA_ROOT . '/www/squelettes/' . $template
+            : ROOT . '/www/squelettes-dist/' . $template;
 
         if (!file_exists($path))
             return false;
@@ -682,7 +682,7 @@ class Squelette extends \miniSkel
         if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
             return false;
 
-        $path = GARRADIN_DATA_ROOT . '/www/squelettes/' . $template;
+        $path = DATA_ROOT . '/www/squelettes/' . $template;
 
         return file_put_contents($path, $content);
     }
@@ -692,9 +692,9 @@ class Squelette extends \miniSkel
         if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
             return false;
 
-        if (file_exists(GARRADIN_DATA_ROOT . '/www/squelettes/' . $template))
+        if (file_exists(DATA_ROOT . '/www/squelettes/' . $template))
         {
-            unlink(GARRADIN_DATA_ROOT . '/www/squelettes/' . $template);
+            unlink(DATA_ROOT . '/www/squelettes/' . $template);
         }
 
         return true;
@@ -704,7 +704,7 @@ class Squelette extends \miniSkel
     {
         $sources = array();
 
-        $dir = dir(GARRADIN_ROOT . '/www/squelettes-dist');
+        $dir = dir(ROOT . '/www/squelettes-dist');
 
         while ($file = $dir->read())
         {
@@ -714,7 +714,7 @@ class Squelette extends \miniSkel
 
         $dir->close();
 
-        $dir = dir(GARRADIN_DATA_ROOT . '/www/squelettes');
+        $dir = dir(DATA_ROOT . '/www/squelettes');
 
         while ($file = $dir->read())
         {

@@ -11,7 +11,7 @@ class Compta_Categories
     public function importCategories()
     {
         $db = DB::getInstance();
-        $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/categories_comptables.sql'));
+        $db->exec(file_get_contents(ROOT . '/include/data/categories_comptables.sql'));
     }
 
     public function add($data)

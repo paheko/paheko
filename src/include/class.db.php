@@ -38,7 +38,7 @@ class DB extends \SQLite3
             $flags |= SQLITE3_OPEN_CREATE;
         }
 
-        parent::__construct(GARRADIN_DB_FILE, $flags);
+        parent::__construct(DB_FILE, $flags);
 
         $this->enableExceptions(true);
 

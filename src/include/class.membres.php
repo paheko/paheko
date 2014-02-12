@@ -93,7 +93,7 @@ class Membres
         $dest = trim($email);
 
         $this->_sessionStart(true);
-        $hash = sha1($dest . $id . 'recover' . GARRADIN_ROOT . time());
+        $hash = sha1($dest . $id . 'recover' . ROOT . time());
         $_SESSION['recover_password'] = array('id' => (int) $id, 'email' => $dest, 'hash' => $hash);
 
         $message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
@@ -151,11 +151,43 @@ class Membres
         return true;
     }
 
+    public function localLogin()
+    {
+        if (!defined('Garradin\LOCAL_LOGIN'))
+            return false;
+
+        if (trim(LOCAL_LOGIN) == '')
+            return false;
+
+        $db = DB::getInstance();
+        
+        if (is_int(LOCAL_LOGIN) && ($membre = $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, LOCAL_LOGIN)))
+        {
+            return $this->updateSessionData($membre);
+        }
+        elseif ($membre = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, LOCAL_LOGIN))
+        {
+            return $this->updateSessionData($membre);
+        }
+
+        throw new UserException('Le membre ' . LOCAL_LOGIN . ' n\'existe pas, merci de modifier la directive Garradin\LOCAL_LOGIN.');
+    }
+
     public function isLogged()
     {
         $this->_sessionStart();
 
-        return empty($_SESSION['logged_user']) ? false : true;
+        if (empty($_SESSION['logged_user']))
+        {
+            if (defined('Garradin\LOCAL_LOGIN'))
+            {
+                return $this->localLogin();
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     public function getLoggedUser()

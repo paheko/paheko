@@ -9,7 +9,7 @@ $tpl->assign('admin_url', WWW_URL . 'admin/');
 
 $membres = new Membres;
 
-if (!defined('GARRADIN_LOGIN_PROCESS'))
+if (!defined('Garradin\LOGIN_PROCESS'))
 {
     if (!$membres->isLogged())
     {

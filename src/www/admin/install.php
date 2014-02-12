@@ -71,18 +71,18 @@ test_requis(
     'Le répertoire /cache n\'est pas accessible en lecture/écriture.'
 );
 
-define('GARRADIN_INSTALL_PROCESS', true);
+const INSTALL_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
-if (!file_exists(GARRADIN_DB_FILE))
+if (!file_exists(DB_FILE))
 {
     // Renommage du fichier sqlite à la version 0.5.0
-    $old_file = str_replace('.sqlite', '.db', GARRADIN_DB_FILE);
+    $old_file = str_replace('.sqlite', '.db', DB_FILE);
 
     if (file_exists($old_file))
     {
-        rename($old_file, GARRADIN_DB_FILE);
+        rename($old_file, DB_FILE);
         utils::redirect('/admin/upgrade.php');
     }
 }
@@ -91,7 +91,7 @@ $tpl = Template::getInstance();
 
 $tpl->assign('admin_url', WWW_URL . 'admin/');
 
-if (file_exists(GARRADIN_DB_FILE))
+if (file_exists(DB_FILE))
 {
     $tpl->assign('disabled', true);
 }
@@ -117,7 +117,7 @@ else
 
                 // Création de la base de données
                 $db->exec('BEGIN;');
-                $db->exec(file_get_contents(GARRADIN_DB_SCHEMA));
+                $db->exec(file_get_contents(DB_SCHEMA));
                 $db->exec('END;');
 
                 // Configuration de base
@@ -215,7 +215,7 @@ else
             }
             catch (UserException $e)
             {
-                @unlink(GARRADIN_DB_FILE);
+                @unlink(DB_FILE);
                 $error = $e->getMessage();
             }
         }
