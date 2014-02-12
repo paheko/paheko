@@ -158,6 +158,11 @@ class Compta_Exercices
 
             $diff += $solde;
 
+            if ($solde == 0)
+            {
+                continue;
+            }
+
             // Chaque solde de compte est reporté dans le nouvel exercice
             $journal->add(array(
                 'libelle'       =>  'Report à nouveau',
@@ -500,20 +505,56 @@ class Compta_Exercices
 
             if (!isset(${$position}['comptes'][$parent]))
             {
-                ${$position}['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                ${$position}['comptes'][$parent] = array('comptes' => array(), 'solde' => 0);
             }
 
             if (!isset(${$position}['comptes'][$parent]['comptes'][$compte]))
             {
-                ${$position}['comptes'][$parent]['comptes'][$compte] = 0.0;
+                ${$position}['comptes'][$parent]['comptes'][$compte] = 0;
             }
 
+            $solde = round($solde, 2);
             ${$position}['comptes'][$parent]['comptes'][$compte] += $solde;
             ${$position}['total'] += $solde;
             ${$position}['comptes'][$parent]['solde'] += $solde;
         }
 
         $res->finalize();
+
+        // Suppression des soldes nuls
+        foreach ($passif['comptes'] as $parent=>$p)
+        {
+            if ($p['solde'] == 0)
+            {
+                unset($passif['comptes'][$parent]);
+                continue;
+            }
+
+            foreach ($p['comptes'] as $id=>$solde)
+            {
+                if ($solde == 0)
+                {
+                    unset($passif['comptes'][$parent]['comptes'][$id]);
+                }
+            }
+        }
+
+        foreach ($actif['comptes'] as $parent=>$p)
+        {
+            if (empty($p['solde']))
+            {
+                unset($actif['comptes'][$parent]);
+                continue;
+            }
+
+            foreach ($p['comptes'] as $id=>$solde)
+            {
+                if (empty($solde))
+                {
+                    unset($actif['comptes'][$parent]['comptes'][$id]);
+                }
+            }
+        }
 
         return array('actif' => $actif, 'passif' => $passif);
     }
