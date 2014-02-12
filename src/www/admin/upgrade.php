@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-define('GARRADIN_UPGRADE_PROCESS', true);
+const UPGRADE_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
@@ -36,7 +36,7 @@ if (version_compare($v, '0.4.0', '<'))
     $config->set('pays', 'FR');
     $config->save();
 
-    $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.0.sql'));
+    $db->exec(file_get_contents(ROOT . '/include/data/0.4.0.sql'));
 
     // Mise en place compta
     $comptes = new Compta_Comptes;
@@ -48,7 +48,7 @@ if (version_compare($v, '0.4.0', '<'))
 
 if (version_compare($v, '0.4.3', '<'))
 {
-    $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.4.3.sql'));
+    $db->exec(file_get_contents(ROOT . '/include/data/0.4.3.sql'));
 }
 
 if (version_compare($v, '0.4.5', '<'))
@@ -122,7 +122,7 @@ if (version_compare($v, '0.6.0', '<'))
     $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
 
     // Mise à jour base de données
-    $db->exec(file_get_contents(GARRADIN_ROOT . '/include/data/0.6.0.sql'));
+    $db->exec(file_get_contents(ROOT . '/include/data/0.6.0.sql'));
 
     $id_cat_cotisation = $db->querySingle('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
 
@@ -154,26 +154,26 @@ if (version_compare($v, '0.6.0', '<'))
     }
 
     // Déplacement des squelettes dans le répertoire public
-    if (!file_exists(GARRADIN_ROOT . '/www/squelettes'))
+    if (!file_exists(ROOT . '/www/squelettes'))
     {
-        mkdir(GARRADIN_ROOT . '/www/squelettes');
+        mkdir(ROOT . '/www/squelettes');
     }
 
-    if (file_exists(GARRADIN_ROOT . '/squelettes'))
+    if (file_exists(ROOT . '/squelettes'))
     {
-        $dir = dir(GARRADIN_ROOT . '/squelettes');
+        $dir = dir(ROOT . '/squelettes');
 
         while ($file = $dir->read())
         {
             if ($file == '.' || $file == '..')
                 continue;
 
-            rename(GARRADIN_ROOT . '/squelettes/' . $file, GARRADIN_ROOT . '/www/squelettes/' . $file);
+            rename(ROOT . '/squelettes/' . $file, ROOT . '/www/squelettes/' . $file);
         }
 
         $dir->close();
 
-        @rmdir(GARRADIN_ROOT . '/squelettes');
+        @rmdir(ROOT . '/squelettes');
     }
 
     $db->exec('END; PRAGMA foreign_keys = ON;');

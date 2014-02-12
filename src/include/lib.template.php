@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-require_once GARRADIN_ROOT . '/include/libs/template_lite/class.template.php';
+require_once ROOT . '/include/libs/template_lite/class.template.php';
 
 class Template extends \Template_Lite
 {
@@ -23,8 +23,8 @@ class Template extends \Template_Lite
 
         $this->cache = false;
 
-        $this->compile_dir = GARRADIN_DATA_ROOT . '/cache/compiled';
-        $this->template_dir = GARRADIN_ROOT . '/templates';
+        $this->compile_dir = DATA_ROOT . '/cache/compiled';
+        $this->template_dir = ROOT . '/templates';
 
         $this->compile_check = true;
 
@@ -240,7 +240,7 @@ function tpl_diff($params)
     $old = $params['old'];
     $new = $params['new'];
 
-    require_once GARRADIN_ROOT . '/include/libs/diff/class.simplediff.php';
+    require_once ROOT . '/include/libs/diff/class.simplediff.php';
     $diff = \simpleDiff::diff_to_array(false, $old, $new, 3);
 
     $out = '<table class="diff">';

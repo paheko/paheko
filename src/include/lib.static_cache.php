@@ -9,7 +9,7 @@ class Static_Cache
 
 	protected static function _getCacheDir()
 	{
-		return GARRADIN_DATA_ROOT . '/cache/static';
+		return DATA_ROOT . '/cache/static';
 	}
 
 	protected static function _getCachePath($id)

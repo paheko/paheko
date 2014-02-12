@@ -15,7 +15,7 @@ if (Static_Cache::expired('graph_' . $graph))
 	$stats = new Compta_Stats;
 	$categories = new Compta_Categories;
 
-	require_once GARRADIN_ROOT . '/include/libs/svgplot/lib.svgpie.php';
+	require_once ROOT . '/include/libs/svgplot/lib.svgpie.php';
 
 	$pie = new \SVGPie(400, 250);
 

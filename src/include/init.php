@@ -10,9 +10,9 @@ error_reporting(-1);
 
 function garradin_version()
 {
-    if (defined('GARRADIN_VERSION'))
+    if (defined('Garradin\VERSION'))
     {
-        return GARRADIN_VERSION;
+        return VERSION;
     }
 
     $file = __DIR__ . '/../VERSION';
@@ -26,7 +26,7 @@ function garradin_version()
         $version = 'unknown';
     }
 
-    define('GARRADIN_VERSION', $version);
+    define('Garradin\VERSION', $version);
     return $version;
 }
 
@@ -52,57 +52,57 @@ if (file_exists(__DIR__ . '/../config.local.php'))
     require __DIR__ . '/../config.local.php';
 }
 
-if (!defined('GARRADIN_ROOT'))
+if (!defined('Garradin\ROOT'))
 {
-    define('GARRADIN_ROOT', dirname(__DIR__));
+    define('Garradin\ROOT', dirname(__DIR__));
 }
 
-if (!defined('GARRADIN_DATA_ROOT'))
+if (!defined('Garradin\DATA_ROOT'))
 {
-    define('GARRADIN_DATA_ROOT', GARRADIN_ROOT);
+    define('Garradin\DATA_ROOT', ROOT);
 }
 
-if (!defined('GARRADIN_DB_FILE'))
+if (!defined('Garradin\DB_FILE'))
 {
-    define('GARRADIN_DB_FILE', GARRADIN_DATA_ROOT . '/association.sqlite');
+    define('Garradin\DB_FILE', DATA_ROOT . '/association.sqlite');
 }
 
-if (!defined('GARRADIN_DB_SCHEMA'))
+if (!defined('Garradin\DB_SCHEMA'))
 {
-    define('GARRADIN_DB_SCHEMA', GARRADIN_ROOT . '/include/data/schema.sql');
+    define('Garradin\DB_SCHEMA', ROOT . '/include/data/schema.sql');
 }
 
-if (!defined('WWW_URI'))
+if (!defined('Garradin\WWW_URI'))
 {
     // Automagic URL discover
-    $path = str_replace(GARRADIN_ROOT . '/www', '', getcwd());
+    $path = str_replace(ROOT . '/www', '', getcwd());
     $path = str_replace($path, '', dirname($_SERVER['SCRIPT_NAME']));
     $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
     $path = (substr($path, -1) != '/') ? $path . '/' : $path;
-    define('WWW_URI', $path);
+    define('Garradin\WWW_URI', $path);
 }
 
-if (!defined('WWW_URL'))
+if (!defined('Garradin\WWW_URL'))
 {
     $host = isset($_SERVER['HTTP_HOST']) 
         ? $_SERVER['HTTP_HOST'] 
         : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
-    define('WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
+    define('Garradin\WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
 }
 
-if (!defined('GARRADIN_PLUGINS_PATH'))
+if (!defined('Garradin\PLUGINS_PATH'))
 {
-    define('GARRADIN_PLUGINS_PATH', GARRADIN_DATA_ROOT . '/plugins');
+    define('Garradin\PLUGINS_PATH', DATA_ROOT . '/plugins');
 }
 
 // Affichage des erreurs par défaut
-if (!defined('GARRADIN_SHOW_ERRORS'))
+if (!defined('Garradin\SHOW_ERRORS'))
 {
-    define('GARRADIN_SHOW_ERRORS', true);
+    define('Garradin\SHOW_ERRORS', true);
 }
 
-define('GARRADIN_WEBSITE', 'http://garradin.eu/');
-define('GARRADIN_PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
+define('Garradin\WEBSITE', 'http://garradin.eu/');
+define('Garradin\PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
@@ -121,10 +121,10 @@ if (!ini_get('date.timezone'))
     }
 }
 
-if (GARRADIN_SHOW_ERRORS)
+if (SHOW_ERRORS)
 {
     // Gestion par défaut des erreurs
-    ini_set('error_log', GARRADIN_DATA_ROOT . '/error.log');
+    ini_set('error_log', DATA_ROOT . '/error.log');
     ini_set('log_errors', true);
     ini_set('display_errors', true);
     ini_set('html_errors', false);
@@ -174,7 +174,7 @@ function exception_handler($e)
         }
     }
 
-    $file = str_replace(GARRADIN_ROOT, '', $e->getFile());
+    $file = str_replace(ROOT, '', $e->getFile());
 
     $error = "Exception of type ".get_class($e)." happened !\n\n".
         $e->getCode()." - ".$e->getMessage()."\n\nIn: ".
@@ -200,7 +200,7 @@ function exception_handler($e)
     {
         echo $error;
     }
-    elseif (GARRADIN_SHOW_ERRORS)
+    elseif (SHOW_ERRORS)
     {
         echo '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
         pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
@@ -267,7 +267,7 @@ class Loader
             $filename .= 'class.' . $classname . '.php';
         }
 
-        $filename = GARRADIN_ROOT . '/include/' . $filename;
+        $filename = ROOT . '/include/' . $filename;
 
         if (array_key_exists($filename, self::$loaded))
         {
@@ -292,9 +292,9 @@ $n = new Membres;
  * Inclusion des fichiers de base
  */
 
-if (!defined('GARRADIN_INSTALL_PROCESS') && !defined('GARRADIN_UPGRADE_PROCESS'))
+if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS'))
 {
-    if (!file_exists(GARRADIN_DB_FILE))
+    if (!file_exists(DB_FILE))
     {
         utils::redirect('/admin/install.php');
     }

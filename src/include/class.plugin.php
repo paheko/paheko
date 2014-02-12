@@ -70,7 +70,7 @@ class Plugin
 		$installed = self::listInstalled();
 
 		$list = [];
-		$dir = dir(GARRADIN_PLUGINS_PATH);
+		$dir = dir(PLUGINS_PATH);
 
 		while ($file = $dir->read())
 		{
@@ -83,7 +83,7 @@ class Plugin
 			if (array_key_exists($match[1], $installed))
 				continue;
 
-			$list[$match[1]] = parse_ini_file('phar://' . GARRADIN_PLUGINS_PATH . '/' . $match[1] . '.phar/infos.ini', false);
+			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $match[1] . '.phar/infos.ini', false);
 		}
 
 		$dir->close();
@@ -95,12 +95,12 @@ class Plugin
 	{
 		if (Static_Cache::expired('plugins_list', 3600 * 24))
 		{
-			$url = parse_url(GARRADIN_PLUGINS_URL);
+			$url = parse_url(PLUGINS_URL);
 
 			$context_options = [
 				'ssl' => [
 					'verify_peer'   => TRUE,
-					'cafile'        => GARRADIN_ROOT . '/include/data/cacert.pem',
+					'cafile'        => ROOT . '/include/data/cacert.pem',
 					'verify_depth'  => 5,
 					'CN_match'      => $url['host'],
 				]
@@ -109,7 +109,7 @@ class Plugin
 			$context = stream_context_create($context_options);
 
 			try {
-				$result = file_get_contents(GARRADIN_PLUGINS_URL, NULL, $context);
+				$result = file_get_contents(PLUGINS_URL, NULL, $context);
 			}
 			catch (\Exception $e)
 			{
@@ -134,7 +134,7 @@ class Plugin
 		if (!array_key_exists($id, $list))
 			return null;
 
-		$hash = sha1_file(GARRADIN_PLUGINS_PATH . '/' . $id . '.phar');
+		$hash = sha1_file(PLUGINS_PATH . '/' . $id . '.phar');
 
 		return ($hash === $list[$id]['hash']);
 	}
@@ -154,17 +154,17 @@ class Plugin
 			throw new \LogicException($id . ' n\'est pas un plugin officiel (absent de la liste)');
 		}
 
-		if (file_exists(GARRADIN_PLUGINS_PATH . '/' . $id . '.phar'))
+		if (file_exists(PLUGINS_PATH . '/' . $id . '.phar'))
 		{
 			throw new UserException('Le plugin '.$id.' existe déjà.');
 		}
 
-		$url = parse_url(GARRADIN_PLUGINS_URL);
+		$url = parse_url(PLUGINS_URL);
 
 		$context_options = [
 			'ssl' => [
 				'verify_peer'   => TRUE,
-				'cafile'        => GARRADIN_ROOT . '/include/data/cacert.pem',
+				'cafile'        => ROOT . '/include/data/cacert.pem',
 				'verify_depth'  => 5,
 				'CN_match'      => $url['host'],
 			]
@@ -173,7 +173,7 @@ class Plugin
 		$context = stream_context_create($context_options);
 
 		try {
-			copy($list[$id]['phar'], GARRADIN_PLUGINS_PATH . '/' . $id . '.phar', $context);
+			copy($list[$id]['phar'], PLUGINS_PATH . '/' . $id . '.phar', $context);
 		}
 		catch (\Exception $e)
 		{
@@ -182,7 +182,7 @@ class Plugin
 
 		if (!self::checkHash($id))
 		{
-			unlink(GARRADIN_PLUGINS_PATH . '/' . $id . '.phar');
+			unlink(PLUGINS_PATH . '/' . $id . '.phar');
 			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
 		}
 
@@ -198,12 +198,12 @@ class Plugin
 			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
 		}
 
-		if (file_exists('phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/install.php'))
+		if (file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/install.php'))
 		{
-			include 'phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/install.php';
+			include 'phar://' . PLUGINS_PATH . '/' . $id . '.phar/install.php';
 		}
 
-		$infos = parse_ini_file('phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/infos.ini', false);
+		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $id . '.phar/infos.ini', false);
 
 		$db = DB::getInstance();
 		$db->simpleInsert('plugins', [
@@ -221,9 +221,9 @@ class Plugin
 	
 	static public function uninstall($id)
 	{
-		if (file_exists('phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/uninstall.php'))
+		if (file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/uninstall.php'))
 		{
-			include 'phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/uninstall.php';
+			include 'phar://' . PLUGINS_PATH . '/' . $id . '.phar/uninstall.php';
 		}
 		
 		$db = DB::getInstance();
@@ -232,7 +232,7 @@ class Plugin
 
 	static public function needUpgrade($id)
 	{
-		$infos = parse_ini_file('phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/infos.ini', false);
+		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $id . '.phar/infos.ini', false);
 		$version = $db->simpleQuerySingle('SELECT version FROM plugins WHERE id = ?;', false, $id);
 
 		if (version_compare($version, $infos['version'], '!='))
@@ -243,9 +243,9 @@ class Plugin
 
 	static public function upgrade($id)
 	{
-		if (file_exists('phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/upgrade.php'))
+		if (file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/upgrade.php'))
 		{
-			include 'phar://' . GARRADIN_PLUGINS_PATH . '/' . $id . '.phar/upgrade.php';
+			include 'phar://' . PLUGINS_PATH . '/' . $id . '.phar/upgrade.php';
 		}
 
 		$db = DB::getInstance();

@@ -16,14 +16,14 @@ class Sauvegarde
 		$ext = $auto ? 'auto\.\d+\.sqlite' : 'sqlite';
 
 		$out = array();
-		$dir = dir(GARRADIN_DATA_ROOT);
+		$dir = dir(DATA_ROOT);
 
 		while ($file = $dir->read())
 		{
-			if ($file[0] != '.' && is_file(GARRADIN_DATA_ROOT . '/' . $file) 
-				&& preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(GARRADIN_DB_FILE))
+			if ($file[0] != '.' && is_file(DATA_ROOT . '/' . $file) 
+				&& preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(DB_FILE))
 			{
-				$out[$file] = filemtime(GARRADIN_DATA_ROOT . '/' . $file);
+				$out[$file] = filemtime(DATA_ROOT . '/' . $file);
 			}
 		}
 
@@ -42,8 +42,8 @@ class Sauvegarde
 	 */
 	public function create($auto = false)
 	{
-		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-His')) . '.sqlite', GARRADIN_DB_FILE);
-		copy(GARRADIN_DB_FILE, $backup);
+		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-His')) . '.sqlite', DB_FILE);
+		copy(DB_FILE, $backup);
 		return basename($backup);
 	}
 
@@ -72,7 +72,7 @@ class Sauvegarde
 				return '.auto.' . ((int) $m[1] + 1) . '.sqlite';
 			}, $f);
 
-			rename(GARRADIN_DATA_ROOT . '/' . $f, GARRADIN_DATA_ROOT . '/' . $new);
+			rename(DATA_ROOT . '/' . $f, DATA_ROOT . '/' . $new);
 		}
 
 		return true;
@@ -108,7 +108,7 @@ class Sauvegarde
 		}
 
 		// Si pas de modif depuis la dernière sauvegarde, ça sert à rien d'en faire
-		if ($last >= filemtime(GARRADIN_DB_FILE))
+		if ($last >= filemtime(DB_FILE))
 		{
 			return true;
 		}
@@ -127,12 +127,12 @@ class Sauvegarde
 	public function remove($file)
 	{
 		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._-]+\.sqlite$!i', $file) 
-			|| $file == basename(GARRADIN_DB_FILE))
+			|| $file == basename(DB_FILE))
 		{
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		return unlink(GARRADIN_DATA_ROOT . '/' . $file);
+		return unlink(DATA_ROOT . '/' . $file);
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Sauvegarde
 	 */
 	public function dump()
 	{
-		$in = fopen(GARRADIN_DB_FILE, 'r');
+		$in = fopen(DB_FILE, 'r');
         $out = fopen('php://output', 'w');
 
         while (!feof($in))
@@ -166,12 +166,12 @@ class Sauvegarde
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		if (!file_exists(GARRADIN_DATA_ROOT . '/' . $file))
+		if (!file_exists(DATA_ROOT . '/' . $file))
 		{
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(GARRADIN_DATA_ROOT . '/' . $file);
+		return $this->restoreDB(DATA_ROOT . '/' . $file);
 	}
 
 	/**
@@ -237,16 +237,16 @@ class Sauvegarde
 
 		$db->close();
 
-		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', GARRADIN_DB_FILE);
+		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', DB_FILE);
 		
-		if (!rename(GARRADIN_DB_FILE, $backup))
+		if (!rename(DB_FILE, $backup))
 		{
 			throw new \RuntimeException('Unable to backup current DB file.');
 		}
 
-		if (!copy($file, GARRADIN_DB_FILE))
+		if (!copy($file, DB_FILE))
 		{
-			rename($backup, GARRADIN_DB_FILE);
+			rename($backup, DB_FILE);
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
 		}
 

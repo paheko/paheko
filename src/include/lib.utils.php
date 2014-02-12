@@ -241,7 +241,7 @@ class utils
     {
         if (is_null(self::$country_list))
         {
-            require_once GARRADIN_ROOT . '/include/libs/countries/countries_fr.php';
+            require_once ROOT . '/include/libs/countries/countries_fr.php';
             self::$country_list = $countries;
         }
 
@@ -365,7 +365,7 @@ class utils
     {
         if (!self::$g2x)
         {
-            require_once GARRADIN_ROOT . '/include/libs/garbage2xhtml/lib.garbage2xhtml.php';
+            require_once ROOT . '/include/libs/garbage2xhtml/lib.garbage2xhtml.php';
             self::$g2x = new \garbage2xhtml;
             self::$g2x->core_attributes = array('class', 'id', 'title');
         }
@@ -444,7 +444,7 @@ class utils
 
     static public function clearCaches()
     {
-        $path = GARRADIN_ROOT . '/cache/compiled';
+        $path = DATA_ROOT . '/cache/compiled';
         $dir = dir($path);
 
         while ($file = $dir->read())
@@ -461,7 +461,7 @@ class utils
 
     static public function suggestPassword()
     {
-        require_once GARRADIN_ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
+        require_once ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
         return \Passphrase::generate();
     }
 
