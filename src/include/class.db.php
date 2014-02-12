@@ -194,7 +194,7 @@ class DB extends \SQLite3
         }
         catch (\Exception $e)
         {
-            throw new \Exception($e->getMessage() . "\n" . $query);
+            throw new \Exception($e->getMessage() . "\n" . $query . "\n" . json_encode($args, true));
         }
     }
 
