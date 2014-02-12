@@ -154,7 +154,7 @@ class Compta_Exercices
 
         while ($row = $statement->fetchArray(SQLITE3_ASSOC))
         {
-            $solde = ($row['position'] & Compta_Comptes::ACTIF) ? $row['solde'] : -($row['solde']);
+            $solde = ($row['position'] & Compta_Comptes::ACTIF) ? abs($row['solde']) : -abs($row['solde']);
             $solde = round($solde, 2);
 
             $diff += $solde;
@@ -174,6 +174,8 @@ class Compta_Exercices
                 'remarques'     =>  'Report de solde créé automatiquement à la clôture de l\'exercice précédent',
             ));
         }
+        
+        // FIXME utiliser $diff pour équilibrer
 
         $db->exec('END;');
 
