@@ -394,7 +394,10 @@ class Compta_Exercices
                     $charges['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
                 }
 
-                $solde = $debit - $credit;
+                $solde = round($debit - $credit, 2);
+
+                if (empty($solde))
+                    continue;
 
                 $charges['comptes'][$parent]['comptes'][$compte] = $solde;
                 $charges['total'] += $solde;
@@ -407,7 +410,10 @@ class Compta_Exercices
                     $produits['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
                 }
 
-                $solde = $credit - $debit;
+                $solde = round($credit - $debit, 2);
+
+                if (empty($solde))
+                    continue;
 
                 $produits['comptes'][$parent]['comptes'][$compte] = $solde;
                 $produits['total'] += $solde;
