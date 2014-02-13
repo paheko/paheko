@@ -80,7 +80,9 @@
                 <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>
             </ul>
         </li>
+        {if !defined('Garradin\LOCAL_LOGIN')}
         <li class="logout"><a href="{$admin_url}logout.php">Déconnexion</a></li>
+        {/if}
     {/if}
     </ul>
 
