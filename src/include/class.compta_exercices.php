@@ -94,8 +94,8 @@ class Compta_Exercices
         // Date de début du nouvel exercice : lendemain de la clôture du précédent exercice
         $new_begin = utils::modifyDate($end, '+1 day');
 
-        // Date de fin du nouvel exercice : un an après l'ouverture
-        $new_end = utils::modifyDate($new_begin, '+1 year');
+        // Date de fin du nouvel exercice : un an moins un jour après l'ouverture
+        $new_end = utils::modifyDate($new_begin, '+1 year -1 day');
 
         // Enfin sauf s'il existe déjà des opérations après cette date, auquel cas la date de fin
         // est fixée à la date de la dernière opération, ceci pour ne pas avoir d'opération
