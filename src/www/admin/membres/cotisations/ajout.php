@@ -76,6 +76,7 @@ $tpl->assign('cotisations', $cotisations->listCurrent());
 
 $tpl->assign('default_co', null);
 $tpl->assign('default_amount', 0.00);
+$tpl->assign('default_date', date('Y-m-d'));
 
 $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
 $tpl->assign('moyen_paiement', utils::post('moyen_paiement') ?: 'ES');
@@ -83,7 +84,19 @@ $tpl->assign('comptes_bancaires', $banques->getList());
 $tpl->assign('banque', utils::post('banque'));
 
 
-if ($membre)
+if (utils::get('cotisation'))
+{
+    $co = $cotisations->get(utils::get('cotisation'));
+
+    if (!$co)
+    {
+        throw new UserException("La cotisation indiquée en paramètre n'existe pas.");
+    }
+
+    $tpl->assign('default_co', $co['id']);
+    $tpl->assign('default_amount', $co['montant']);
+}
+elseif ($membre)
 {
     if (!empty($categorie['id_cotisation_obligatoire']))
     {
@@ -93,6 +106,7 @@ if ($membre)
         $tpl->assign('default_amount', $co['montant']);
     }
 }
+
 
 $tpl->display('admin/membres/cotisations/ajout.tpl');
 

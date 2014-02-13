@@ -80,7 +80,8 @@
                     — {$c.montant|html_money} {$config.monnaie|escape}
                 </td>
                 <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id|escape}" title="Supprimer">✘</a>
+                    <a href="{$admin_url}membres/cotisations/voir.php?id={$c.id_cotisation|escape}">Voir les autres membres cotisants</a>
+                    | <a href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id|escape}">Supprimer</a>
                 </td>
             </tr>
         {/foreach}
