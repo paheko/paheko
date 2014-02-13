@@ -163,10 +163,12 @@ class Membres
         
         if (is_int(LOCAL_LOGIN) && ($membre = $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, LOCAL_LOGIN)))
         {
+            $this->_sessionStart(true);
             return $this->updateSessionData($membre);
         }
         elseif ($membre = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, LOCAL_LOGIN))
         {
+            $this->_sessionStart(true);
             return $this->updateSessionData($membre);
         }
 
