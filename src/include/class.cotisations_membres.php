@@ -106,6 +106,12 @@ class Cotisations_Membres
 		return $db->simpleExec('DELETE FROM cotisations_membres WHERE id = ?;', (int) $id);
 	}
 
+	public function get($id)
+	{
+		$db = DB::getInstance();
+		return $db->simpleQuerySingle('SELECT * FROM cotisations_membres WHERE id = ?;', true, (int)$id);
+	}
+
 	/**
 	 * Renvoie une liste des écritures comptables liées à un paiement
 	 * @param  int $id Numéro du paiement
