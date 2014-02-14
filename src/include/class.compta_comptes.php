@@ -207,6 +207,8 @@ class Compta_Comptes
      */
     public function disable($id)
     {
+        $db = DB::getInstance();
+        
         // Ne pas désactiver un compte utilisé dans l'exercice courant
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
                 WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 

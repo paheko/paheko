@@ -98,7 +98,7 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
         catch (UserException $e) {
             // Impossible de supprimer car des opérations y sont encore liées
             // sur les exercices précédents, alors on le désactive
-            parent::disable($id);
+            $return = parent::disable($id);
         }
 
         return $return;
