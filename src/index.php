@@ -40,7 +40,7 @@ while ($file = $dir->read())
 
 $dir->close();
 
-touch(GARRADIN_ROOT . '/.garradinRootProcessed');
+touch(__DIR__ . '/.garradinRootProcessed');
 header('Location: www/');
 
 ?>
