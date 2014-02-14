@@ -61,19 +61,32 @@ test_requis(
     'Librairie Template_Lite non disponible.'
 );
 
-test_requis(
-    file_exists(__DIR__ . '/../../cache'),
-    'Le répertoire /cache n\'existe pas.'
-);
-
-test_requis(
-    is_writable(__DIR__ . '/../../cache') && is_readable(__DIR__ . '/../../cache'),
-    'Le répertoire /cache n\'est pas accessible en lecture/écriture.'
-);
-
 const INSTALL_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
+
+// Vérifier que les répertoires vides existent, sinon les créer
+$paths = [DATA_ROOT . '/cache', DATA_ROOT . '/cache/static', DATA_ROOT . '/cache/compiled'];
+
+
+foreach ($paths as $path)
+{
+    if (!file_exists($path))
+        mkdir($path);
+
+    test_requis(
+        file_exists($path) && is_dir($path),
+        'Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.'
+    );
+
+    // On en profite pour vérifier qu'on peut y lire et écrire
+    test_requis(
+        is_writable($path) && is_readable($path),
+        'Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.'
+    );
+}
+
+
 
 if (!file_exists(DB_FILE))
 {
