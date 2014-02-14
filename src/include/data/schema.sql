@@ -23,17 +23,15 @@ CREATE TABLE membres_categories
     droit_config INT DEFAULT 0,
     cacher INT DEFAULT 0,
 
-    id_transaction_obligatoire INTEGER NULL,
-
-    FOREIGN KEY (id_transaction_obligatoire) REFERENCES transactions (id)
+    id_cotisation_obligatoire INTEGER NULL REFERENCES cotisations (id)
 );
 
 -- Membres de l'asso
 -- Table dynamique générée par l'application
 -- voir class.champs_membres.php
 
-CREATE TABLE transactions
--- Paiements possibles
+CREATE TABLE cotisations
+-- Types de cotisations et activités
 (
     id INTEGER PRIMARY KEY,
     id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
@@ -49,59 +47,47 @@ CREATE TABLE transactions
     FOREIGN KEY (id_categorie_compta) REFERENCES compta_categories (id)
 );
 
+CREATE TABLE cotisations_membres
+-- Enregistrement des cotisations et activités
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_membre INTEGER NOT NULL REFERENCES membres (id),
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
+
+    date TEXT NOT NULL DEFAULT CURRENT_DATE
+);
+
+CREATE UNIQUE INDEX cm_unique ON cotisations_membres (id_membre, id_cotisation, date);
+
+CREATE TABLE membres_operations
+-- Liaision des enregistrement des paiements en compta
+(
+    id_membre INTEGER NOT NULL REFERENCES membres (id),
+    id_operation INTEGER NOT NULL REFERENCES compta_journal (id),
+    PRIMARY KEY (id_membre, id_operation)
+);
+
 CREATE TABLE rappels
--- Rappels de devoir renouveller une transaction
+-- Rappels de devoir renouveller une cotisation
 (
     id INTEGER PRIMARY KEY,
-    id_transaction INTEGER NULL,
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
 
     delai INTEGER NOT NULL, -- Délai en jours pour envoyer le rappel
 
     sujet TEXT NOT NULL,
-    texte TEXT NOT NULL,
-
-    FOREIGN KEY (id_transaction) REFERENCES transactions (id)
+    texte TEXT NOT NULL
 );
 
 CREATE TABLE rappels_envoyes
 -- Enregistrement des rappels envoyés à qui et quand
 (
-    id_membre INTEGER NOT NULL,
-    id_rappel INTEGER NOT NULL,
+    id_membre INTEGER NOT NULL REFERENCES membres (id),
+    id_rappel INTEGER NOT NULL REFERENCES rappels (id),
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
     
-    FOREIGN KEY (id_membre) REFERENCES membres (id),
-    FOREIGN KEY (id_rappel) REFERENCES rappels (id),
-
     PRIMARY KEY(id_membre, id_rappel, date)
-);
-
-CREATE TABLE membres_transactions
--- Paiements enregistrés
-(
-    id INTEGER PRIMARY KEY,
-    
-    id_membre INTEGER NOT NULL,
-    id_transaction INTEGER NULL, -- NULL si n'est pas relié à une transaction prévue
-
-    libelle TEXT NULL,
-
-    date TEXT NOT NULL DEFAULT CURRENT_DATE,
-    montant REAL NOT NULL,
-
-    FOREIGN KEY (id_membre) REFERENCES membres (id),
-    FOREIGN KEY (id_transaction) REFERENCES transactions (id)
-);
-
-CREATE TABLE membres_transactions_operations
--- Liaison paiements enregistrés avec écritures comptables
-(
-    id_operation INTEGER NOT NULL,
-    id_membre_transaction INTEGER NOT NULL,
-
-    FOREIGN KEY (id_operation) REFERENCES compta_journal (id),
-    FOREIGN KEY (id_membre_transaction) REFERENCES membres_transactions (id)
 );
 
 --
@@ -269,15 +255,13 @@ CREATE TABLE compta_journal
     id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
     id_auteur INTEGER NULL,
     id_categorie INTEGER NULL, -- Numéro de catégorie (en mode simple)
-    id_transaction INTEGER NULL, -- Numéro de transaction
 
     FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
     FOREIGN KEY(compte_debit) REFERENCES compta_comptes(id),
     FOREIGN KEY(compte_credit) REFERENCES compta_comptes(id),
     FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
     FOREIGN KEY(id_auteur) REFERENCES membres(id),
-    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id),
-    FOREIGN KEY(id_transaction) REFERENCES membres_transactions(id)
+    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id)
 );
 
 CREATE INDEX compta_operations_exercice ON compta_journal (id_exercice);
