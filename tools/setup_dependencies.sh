@@ -2,31 +2,34 @@
 
 # Mise en place/à jour des dépendances
 
-if [ ! -d include/libs ]
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+if [ ! -d "$SCRIPTPATH/../src" ]
 then
-	echo "Doit être invoqué à la racine du repository"
+	echo "$SCRIPTPATH n'est pas le bon chemin, ou répertoire src/ manquant"
 	exit 0
 fi
 
 KEYWORD="checkout"
+SRCPATH="$SCRIPTPATH/../src/include/libs"
 
 # Template Lite
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ include/libs/template_lite/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ "$SRCPATH/template_lite/"
 
 # Liste des pays
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/countries/ include/libs/countries/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/countries/ "$SRCPATH/countries/"
 
 # Passphrase
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/passphrase/ include/libs/passphrase/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/passphrase/ "$SRCPATH/passphrase/"
 
 # Garbage2xhtml
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/garbage2xhtml/ include/libs/garbage2xhtml/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/garbage2xhtml/ "$SRCPATH/garbage2xhtml/"
 
 # MiniSkel
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/miniskel/ include/libs/miniskel/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/miniskel/ "$SRCPATH/miniskel/"
 
 # Diff
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/diff/ include/libs/diff/
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/diff/ "$SRCPATH/diff/"
 
 # SVGPlot
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/svgplot/ include/libs/svgplot
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/svgplot/ "$SRCPATH/svgplot"
