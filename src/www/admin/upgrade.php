@@ -126,7 +126,7 @@ if (version_compare($v, '0.6.0', '<'))
 
     $id_cat_cotisation = $db->querySingle('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
 
-    // Conversion des cotisations de catégories en transactions
+    // Conversion des cotisations de catégories en cotisations indépendantes
     foreach ($list as $cat)
     {
         $db->simpleInsert('cotisations', [

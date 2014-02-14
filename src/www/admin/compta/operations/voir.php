@@ -40,7 +40,6 @@ if ($operation['id_categorie'])
     }
 
     $tpl->assign('moyen_paiement', $cats->getMoyenPaiement($operation['moyen_paiement']));
-    $tpl->assign('id_transaction', $journal->getLinkedTransaction($operation['id']));
 }
 
 if ($operation['id_auteur'])
