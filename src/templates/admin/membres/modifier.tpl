@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Modifier un membre" current="membres" js=1}
 
 <ul class="actions">
-    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">Membre n°{$membre.id|escape}</a></li>
+    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}"><b>{$membre.identite|escape}</b></a></li>
     <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>

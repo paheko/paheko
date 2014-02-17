@@ -79,7 +79,7 @@
     </fieldset>
 
     <fieldset>
-        <legend>Catégories par défaut</legend>
+        <legend>Membres</legend>
         <dl>
             <dt><label for="f_categorie_membres">Catégorie par défaut des nouveaux membres</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
@@ -89,6 +89,25 @@
                 {/foreach}
                 </select>
             </dd>
+            <dt><label for="f_champ_identite">Champ utilisé pour définir l'identité des membres</label></dt>
+            <dd class="help">Ce champ des fiches membres sera utilisé comme identité du membre dans les emails, les fiches, les pages, etc.</dd>
+            <dd>
+                <select name="champ_identite" id="f_champ_identite">
+                    {foreach from=$champs key="c" value="champ"}
+                        <option value="{$c|escape}" {form_field selected=$c name="champ_identite" data=$config}>{$champ.title|escape}</option>
+                    {/foreach}
+                </select>
+            </dd>
+            <dt><label for="f_champ_identifiant">Champ utilisé comme identifiant de connexion</label></dt>
+            <dd class="help">Ce champ des fiches membres sera utilisé en guise d'identifiant pour se connecter à Garradin. Pour cela le champ doit être unique (pas de doublons).</dd>
+            <dd>
+                <select name="champ_identifiant" id="f_champ_identifiant">
+                    {foreach from=$champs key="c" value="champ"}
+                        <option value="{$c|escape}" {form_field selected=$c name="champ_identifiant" data=$config}>{$champ.title|escape}</option>
+                    {/foreach}
+                </select>
+            </dd>
+            
         </dl>
     </fieldset>
 

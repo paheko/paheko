@@ -195,9 +195,11 @@ class Wiki
     public function getRevision($id, $rev)
     {
         $db = DB::getInstance();
+        $champ_id = Config::getInstance()->get('champ_identifiant');
+
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleQuerySingle('SELECT r.revision, r.modification, r.id_auteur, r.contenu,
-            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
+            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.'.$champ_id.' AS nom_auteur,
             r.chiffrement
             FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
             WHERE r.id_page = ? AND revision = ? LIMIT 1;', true, (int) $id, (int) $rev);
@@ -206,9 +208,11 @@ class Wiki
     public function listRevisions($id)
     {
         $db = DB::getInstance();
+        $champ_id = Config::getInstance()->get('champ_identifiant');
+
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleStatementFetch('SELECT r.revision, r.modification, r.id_auteur,
-            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.nom AS nom_auteur,
+            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.'.$champ_id.' AS nom_auteur,
             LENGTH(r.contenu) - (SELECT LENGTH(contenu) FROM wiki_revisions WHERE id_page = r.id_page AND revision < r.revision ORDER BY revision DESC LIMIT 1)
             AS diff_taille, r.chiffrement
             FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur

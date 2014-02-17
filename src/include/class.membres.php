@@ -49,13 +49,12 @@ class Membres
         $this->_sessionStart(true);
     }
 
-    public function login($email, $passe)
+    public function login($id, $passe)
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-            return false;
-
         $db = DB::getInstance();
-        $r = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, trim($email));
+        $champ_id = Config::getInstance()->get('champ_identifiant');
+
+        $r = $db->simpleQuerySingle('SELECT id, passe, id_categorie FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, trim($id));
 
         if (empty($r))
             return false;
@@ -71,30 +70,26 @@ class Membres
         $this->_sessionStart(true);
         $db->simpleExec('UPDATE membres SET date_connexion = datetime(\'now\') WHERE id = ?;', $r['id']);
 
-        return $this->updateSessionData($r, $droits);
+        return $this->updateSessionData($r['id'], $droits);
     }
 
-    public function recoverPasswordCheck($email)
+    public function recoverPasswordCheck($id)
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-            return false;
-
         $db = DB::getInstance();
+        $config = Config::getInstance();
 
-        $id = $db->simpleQuerySingle('SELECT id FROM membres WHERE email = ? LIMIT 1;', false, trim($email));
+        $champ_id = $config->get('champ_identifiant');
 
-        if (!$id)
+        $membre = $db->simpleQuerySingle('SELECT id, email FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, trim($id));
+
+        if (!$membre || trim($membre['email']) == '')
         {
             return false;
         }
 
-        $config = Config::getInstance();
-
-        $dest = trim($email);
-
         $this->_sessionStart(true);
-        $hash = sha1($dest . $id . 'recover' . ROOT . time());
-        $_SESSION['recover_password'] = array('id' => (int) $id, 'email' => $dest, 'hash' => $hash);
+        $hash = sha1($membre['email'] . $membre['id'] . 'recover' . ROOT . time());
+        $_SESSION['recover_password'] = array('id' => (int) $membre['id'], 'email' => $membre['email'], 'hash' => $hash);
 
         $message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
         $message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
@@ -140,6 +135,10 @@ class Membres
         {
             $membre = $this->get($_SESSION['logged_user']['id']);
         }
+        elseif (is_int($membre))
+        {
+            $membre = $this->get($membre);
+        }
 
         if (is_null($droits))
         {
@@ -160,13 +159,15 @@ class Membres
             return false;
 
         $db = DB::getInstance();
+        $config = Config::getInstance();
+        $champ_id = $config->get('champ_identifiant');
         
-        if (is_int(LOCAL_LOGIN) && ($membre = $db->simpleQuerySingle('SELECT * FROM membres WHERE id = ? LIMIT 1;', true, LOCAL_LOGIN)))
+        if (is_int(LOCAL_LOGIN) && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ? LIMIT 1;', true, LOCAL_LOGIN))
         {
             $this->_sessionStart(true);
-            return $this->updateSessionData($membre);
+            return $this->updateSessionData(LOCAL_LOGIN);
         }
-        elseif ($membre = $db->simpleQuerySingle('SELECT * FROM membres WHERE email = ? LIMIT 1;', true, LOCAL_LOGIN))
+        elseif ($id = $db->simpleQuerySingle('SELECT id FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, LOCAL_LOGIN))
         {
             $this->_sessionStart(true);
             return $this->updateSessionData($membre);
@@ -367,11 +368,13 @@ class Membres
     {
         $this->_checkFields($data);
         $db = DB::getInstance();
+        $config = Config::getInstance();
+        $id = $config->get('champ_identifiant');
 
-        if (!empty($data['email'])
-            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? LIMIT 1;', false, $data['email']))
+        if (!empty($data[$id])
+            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE '.$id.' = ? LIMIT 1;', false, $data[$id]))
         {
-            throw new UserException('Cette adresse e-mail est déjà utilisée par un autre membre, il faut en choisir une autre.');
+            throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
 
         if (isset($data['passe']) && trim($data['passe']) != '')
@@ -395,6 +398,7 @@ class Membres
     public function edit($id, $data = array(), $check_editable = true)
     {
         $db = DB::getInstance();
+        $config = Config::getInstance();
 
         if (isset($data['id']) && ($data['id'] == $id || empty($data['id'])))
         {
@@ -402,11 +406,12 @@ class Membres
         }
 
         $this->_checkFields($data, $check_editable, false);
+        $champ_id = $config->get('champ_identifiant');
 
-        if (!empty($data['email'])
-            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE email = ? AND id != ? LIMIT 1;', false, $data['email'], (int)$id))
+        if (!empty($data[$champ_id])
+            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE '.$champ_id.' = ? AND id != ? LIMIT 1;', false, $data[$champ_id], (int)$id))
         {
-            throw new UserException('Cette adresse e-mail est déjà utilisée par un autre membre, il faut en choisir une autre.');
+            throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
 
         if (!empty($data['id']))
@@ -448,7 +453,10 @@ class Membres
     public function get($id)
     {
         $db = DB::getInstance();
+        $config = Config::getInstance();
+
         return $db->simpleQuerySingle('SELECT *,
+            '.$config->get('champ_identite').' AS identite,
             strftime(\'%s\', date_inscription) AS date_inscription,
             strftime(\'%s\', date_connexion) AS date_connexion
             FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
@@ -480,7 +488,9 @@ class Membres
     public function getNom($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT nom FROM membres WHERE id = ? LIMIT 1;', false, (int)$id);
+        $config = Config::getInstance();
+
+        return $db->simpleQuerySingle('SELECT '.$config->get('champ_identite').' FROM membres WHERE id = ? LIMIT 1;', false, (int)$id);
     }
 
     public function getDroits($id)
@@ -505,7 +515,9 @@ class Membres
     public function search($field, $query)
     {
         $db = DB::getInstance();
-        $champs = Config::getInstance()->get('champs_membres');
+        $config = Config::getInstance();
+
+        $champs = $config->get('champs_membres');
 
         if ($field != 'id' && !$champs->get($field))
         {
@@ -550,8 +562,14 @@ class Membres
             $fields[] = $field;
         }
 
+        if (!in_array('email', $fields))
+        {
+            $fields[] = 'email';
+        }
+
         return $db->simpleStatementFetch(
             'SELECT id, id_categorie, ' . implode(', ', $fields) . ',
+                '.$config->get('champ_identite').' AS identite,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres ' . $where . ($order ? ' ORDER BY ' . $order : '') . '
                 LIMIT 1000;',
@@ -564,7 +582,9 @@ class Membres
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
         $db = DB::getInstance();
-        $champs = Config::getInstance()->get('champs_membres');
+        $config = Config::getInstance();
+
+        $champs = $config->get('champs_membres');
 
         if (is_int($cat) && $cat)
             $where = 'WHERE id_categorie = '.(int)$cat;
@@ -594,7 +614,7 @@ class Membres
         $fields = implode(', ', $fields);
 
         return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, '.$fields.',
+            'SELECT id, id_categorie, '.$fields.', '.$config->get('champ_identite').' AS identite,
                 strftime(\'%s\', date_inscription) AS date_inscription
                 FROM membres '.$where.'
                 ORDER BY '.$order.' LIMIT ?, ?;',

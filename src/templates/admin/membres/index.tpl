@@ -1,21 +1,21 @@
 {include file="admin/_head.tpl" title="Liste des membres" current="membres"}
 
+{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/">Liste des membres</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
-        <li><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
-    {/if}
+    <li><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$admin_url}membres/export.php">Export de la liste en CSV</a></li>
         <li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
     {/if}
-
 </ul>
+{/if}
 
 {if isset($tpl.get.sent)}
     <p class="confirm">Votre message a été envoyé.</p>
 {/if}
 
+{if !empty($membres_cats)}
 <form method="get" action="{$self_url|escape}" class="filterCategory">
     <fieldset>
         <legend>Filtrer par catégorie</legend>
@@ -31,8 +31,9 @@
         <noscript><input type="submit" value="Filtrer &rarr;" /></noscript>
     </fieldset>
 </form>
+{/if}
 
-<form method="get" action="{$admin_url}membres/recherche.php" class="searchMember">
+<form method="get" action="{$admin_url}membres/{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}recherche.php{/if}" class="searchMember">
     <fieldset>
         <legend>Rechercher un membre</legend>
         <input type="text" name="r" value="" />
@@ -126,13 +127,13 @@
     {if !empty($liste)}
     <table class="list">
         <thead>
-            <th>Nom</th>
+            <th>Membre</th>
             <td></td>
         </thead>
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <th>{$membre.nom|escape}</th>
+                    <th>{$membre.identite|escape}</th>
                     <td class="actions">
                         {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
                     </td>
@@ -140,9 +141,14 @@
             {/foreach}
         </tbody>
     </table>
+
+    {if !empty($pagination_url)}
+        {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
+    {/if}
+
     {else}
-    <p class="info">
-        Aucune membre trouvé.
+    <p class="alert">
+        Aucun membre trouvé.
     </p>
     {/if}
 {/if}

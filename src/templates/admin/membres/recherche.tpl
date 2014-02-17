@@ -148,13 +148,13 @@
     {if !empty($liste)}
     <table class="list">
         <thead>
-            <th>Nom</th>
+            <th>Membre</th>
             <td></td>
         </thead>
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <th>{$membre.nom|escape}</th>
+                    <th>{$membre.identite|escape}</th>
                     <td class="actions">
                         {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
                     </td>

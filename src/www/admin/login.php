@@ -26,7 +26,7 @@ if (isset($_GET['keepSessionAlive']))
 
 $error = false;
 
-if (!empty($_POST['login']))
+if (utils::post('login'))
 {
     if (!utils::CSRF_check('login'))
     {
@@ -34,8 +34,8 @@ if (!empty($_POST['login']))
     }
     else
     {
-        if (!empty($_POST['email']) && !empty($_POST['passe'])
-            && $membres->login($_POST['email'], $_POST['passe']))
+        if (utils::post('id') && utils::post('passe')
+            && $membres->login(utils::post('id'), utils::post('passe')))
         {
             utils::redirect('/admin/');
         }
@@ -44,6 +44,11 @@ if (!empty($_POST['login']))
     }
 }
 
+$champs = $config->get('champs_membres');
+
+$champ = $champs->get($config->get('champ_identifiant'));
+
+$tpl->assign('champ', $champ);
 $tpl->assign('error', $error);
 
 $tpl->display('admin/login.tpl');

@@ -177,6 +177,11 @@ if (version_compare($v, '0.6.0', '<'))
     }
 
     $db->exec('END; PRAGMA foreign_keys = ON;');
+
+    // Possibilité de choisir l'identité et l'identifiant d'un membre
+    $config->set('champ_identite', 'nom');
+    $config->set('champ_identifiant', 'email');
+    $config->save();
 }
 
 utils::clearCaches();

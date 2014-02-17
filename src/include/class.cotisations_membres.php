@@ -227,8 +227,10 @@ class Cotisations_Membres
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
 		$db = DB::getInstance();
+		$champ_id = Config::getInstance()->get('champ_identite');
+
 		return $db->simpleStatementFetch('SELECT cm.id_membre, cm.date, cm.id,
-			(SELECT nom FROM membres WHERE id = cm.id_membre) AS nom, c.montant,
+			(SELECT '.$champ_id.' FROM membres WHERE id = cm.id_membre) AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN c.fin >= date() ELSE 1 END AS a_jour
 			FROM cotisations_membres AS cm

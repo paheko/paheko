@@ -45,7 +45,7 @@ if ($operation['id_categorie'])
 if ($operation['id_auteur'])
 {
     $auteur = $membres->get($operation['id_auteur']);
-    $tpl->assign('nom_auteur', $auteur['nom']);
+    $tpl->assign('nom_auteur', $auteur['identite']);
 }
 
 $tpl->display('admin/compta/operations/voir.tpl');

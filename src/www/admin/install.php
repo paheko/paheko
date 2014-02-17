@@ -86,8 +86,6 @@ foreach ($paths as $path)
     );
 }
 
-
-
 if (!file_exists(DB_FILE))
 {
     // Renommage du fichier sqlite à la version 0.5.0
@@ -146,6 +144,9 @@ else
 
                 $champs = Champs_Membres::importInstall();
                 $champs->save(false); // Pas de copie car pas de table membres existante
+
+                $config->set('champ_identifiant', 'email');
+                $config->set('champ_identite', 'nom');
 
                 // Création catégories
                 $cats = new Membres_Categories;

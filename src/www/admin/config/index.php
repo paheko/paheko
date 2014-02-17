@@ -27,6 +27,9 @@ if (!empty($_POST['save']))
             $config->set('accueil_wiki', utils::post('accueil_wiki'));
             $config->set('accueil_connexion', utils::post('accueil_connexion'));
             $config->set('categorie_membres', utils::post('categorie_membres'));
+            
+            $config->set('champ_identite', utils::post('champ_identite'));
+            $config->set('champ_identifiant', utils::post('champ_identifiant'));
 
             $config->set('pays', utils::post('pays'));
             $config->set('monnaie', utils::post('monnaie'));
@@ -54,6 +57,12 @@ $tpl->assign('pays', utils::getCountryList());
 
 $cats = new Membres_Categories;
 $tpl->assign('membres_cats', $cats->listSimple());
+
+$champs_liste = array_merge(
+    array('id' => array('title' => 'Numéro unique', 'type' => 'number')),
+    $config->get('champs_membres')->getList()
+);
+$tpl->assign('champs', $champs_liste);
 
 $tpl->display('admin/config/index.tpl');
 
