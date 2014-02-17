@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Bonjour `$user.nom` !" current="home"}
+{include file="admin/_head.tpl" title="Bonjour `$user.identite` !" current="home"}
 
 <div class="infos_asso">
     <h3>{$config.nom_asso|escape}</h3>

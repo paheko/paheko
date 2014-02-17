@@ -53,6 +53,9 @@ class Config
             'frequence_sauvegardes' =>  $int,
             'nombre_sauvegardes'    =>  $int,
 
+            'champ_identifiant'     =>  $string,
+            'champ_identite'        =>  $string,
+
             'version'               =>  $string,
         );
 
@@ -223,6 +226,27 @@ class Config
                 if (!($value instanceOf Champs_Membres))
                 {
                     throw new \UnexpectedValueException('$value doit être de type Champs_Membres');
+                }
+                break;
+            }
+            case 'champ_identite':
+            case 'champ_identifiant':
+            {
+                $champs = $this->get('champs_membres');
+                $db = DB::getInstance();
+
+                // Vérification que le champ existe bien
+                if (!$champs->get($value))
+                {
+                    throw new UserException('Le champ '.$value.' n\'existe pas pour la configuration de '.$key);
+                }
+
+                // Vérification que le champ est unique pour l'identifiant
+                if ($key == 'champ_identifiant' 
+                    && !$db->simpleQuerySingle('SELECT (COUNT(DISTINCT '.$value.') = COUNT(*)) 
+                        FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != "";'))
+                {
+                    throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
                 }
                 break;
             }

@@ -15,8 +15,8 @@
     <fieldset>
         <legend>Connexion</legend>
         <dl>
-            <dt><label for="f_email">Adresse E-Mail</label></dt>
-            <dd><input type="email" name="email" id="f_email" value="{form_field name=email}" /></dd>
+            <dt><label for="f_id">{$champ.title}</label></dt>
+            <dd><input type="text" name="id" id="f_id" value="{form_field name=id}" /></dd>
             <dt><label for="f_passe">Mot de passe</label></dt>
             <dd><input type="password" name="passe" id="f_passe" value="" /></dd>
         </dl>

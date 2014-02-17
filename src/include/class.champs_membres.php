@@ -113,6 +113,11 @@ class Champs_Membres
 
 	public function get($champ, $key = null)
 	{
+        if ($champ == 'id')
+        {
+            return ['title' => 'Numéro unique', 'type' => 'number'];
+        }
+
         if (!array_key_exists($champ, $this->champs))
             return null;
 
@@ -331,6 +336,20 @@ class Champs_Membres
             throw new UserException('Le champ Mot de passe ne peut être supprimé des fiches membres.');
         }
 
+        $config = Config::getInstance();
+
+        if (!array_key_exists($config->get('champ_identite'), $champs))
+        {
+            throw new UserException('Le champ '.$config->get('champ_identite')
+                .' est défini comme identité des membres et ne peut donc être supprimé des fiches membres.');
+        }
+
+        if (!array_key_exists($config->get('champ_identifiant'), $champs))
+        {
+            throw new UserException('Le champ '.$config->get('champ_identifiant')
+                .' est défini comme identifiant à la connexion et ne peut donc être supprimé des fiches membres.');
+        }
+
         foreach ($champs as $name=>&$config)
         {
             $this->_checkField($name, $config);
@@ -416,6 +435,7 @@ class Champs_Membres
         $db->exec('DROP TABLE IF EXISTS membres;');
     	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
         $db->exec('CREATE INDEX membres_id_categorie ON membres (id_categorie);'); // Index
+        $db->exec('CREATE UNIQUE INDEX membres_identite ON membres ('.$config->get('champ_identite').');');
     	$db->exec('END;');
     	$db->exec('PRAGMA foreign_keys = ON;');
 
