@@ -35,7 +35,6 @@
             <dt><label for="f_id_cotisation">Cotisation</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select id="f_id_cotisation" name="id_cotisation">
-                    <option value="0" {form_field name="id_cotisation" selected=0}>-- Aucune, paiement non lié</option>
                     {foreach from=$cotisations item="co"}
                     <option value="{$co.id|escape}" {form_field name="id_cotisation" selected=$co.id default=$default_co} data-compta="{$co.id_categorie_compta|escape}">
                         {$co.intitule|escape}
