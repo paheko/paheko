@@ -22,7 +22,7 @@
             {if $error == 'OTHER'}
                 Une erreur est survenue, merci de réessayer.
             {else}
-                Adresse e-mail inconnue ou invalide. Si vous êtes membre, contactez un responsable pour
+                Membre inconnu ou ne disposant pas d'adresse e-mail. Si vous êtes membre, contactez un responsable pour
                 obtenir un mot de passe.
             {/if}
         </p>
@@ -33,13 +33,13 @@
         <fieldset>
             <legend>Recevoir un e-mail avec un nouveau mot de passe</legend>
             <p class="help">
-                Inscrivez l'adresse e-mail que vous avez utilisé pour vous inscrire.
+                Inscrivez ici votre {$champ.title}.
                 Nous vous enverrons un message vous indiquant un lien permettant de recevoir un
                 nouveau mot de passe.
             </p>
             <dl>
-                <dt><label for="f_email">Entrez votre adresse e-mail</label></dt>
-                <dd><input type="email" name="email" id="f_email" value="{form_field name=email}" /></dd>
+                <dt><label for="f_id">{$champ.title}</label></dt>
+                <dd><input type="text" name="id" id="f_id" value="{form_field name=id}" /></dd>
             </dl>
         </fieldset>
 

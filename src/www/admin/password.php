@@ -24,7 +24,7 @@ elseif (!empty($_POST['recover']))
     }
     else
     {
-        if (trim(utils::post('email')) && $membres->recoverPasswordCheck(utils::post('email')))
+        if (trim(utils::post('id')) && $membres->recoverPasswordCheck(utils::post('id')))
         {
             utils::redirect('/admin/password.php?sent');
         }
@@ -42,6 +42,12 @@ elseif (!$error && isset($_GET['new_sent']))
     $tpl->assign('new_sent', true);
 }
 
+
+$champs = $config->get('champs_membres');
+
+$champ = $champs->get($config->get('champ_identifiant'));
+
+$tpl->assign('champ', $champ);
 
 $tpl->assign('error', $error);
 
