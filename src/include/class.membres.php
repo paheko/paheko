@@ -96,7 +96,7 @@ class Membres
         $message.= WWW_URL . 'admin/password.php?c=' . substr($hash, -10);
         $message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-        return utils::mail($dest, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
+        return utils::mail($membre['email'], '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
     }
 
     public function recoverPasswordConfirm($hash)
