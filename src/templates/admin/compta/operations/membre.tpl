@@ -1,4 +1,13 @@
-{include file="admin/_head.tpl" title="Écritures réalisées par le membre n°`$membre.id`" current="compta/gestion"}
+{include file="admin/_head.tpl" title="Écritures réalisées par le membre" current="compta/gestion"}
+
+<ul class="actions">
+    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}"><b>{$membre.identite|escape}</b></a></li>
+    <li><a href="{$admin_url}membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
+    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
+    {/if}
+    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Suivi des cotisations</a></li>
+</ul>
 
 <form method="get" action="{$self_url|escape}">
     <fieldset>
