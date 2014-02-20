@@ -1,6 +1,15 @@
 {include file="admin/_head.tpl" title="Mes cotisations" current="mes_cotisations"}
 
 <dl class="cotisation">
+    <dt>
+        {if $nb_activites == 1}
+            Vous avez {$nb_activites|escape} cotisation enregistrée.
+        {elseif $nb_activites}
+            Vous avez {$nb_activites|escape} cotisations enregistrées.
+        {else}
+            Vous n'avez aucune cotisation enregistrée.
+        {/if} 
+    </dt>
 {if $cotisation}
     <dt>Cotisation obligatoire</dt>
     <dd>{$cotisation.intitule|escape} — 
@@ -13,28 +22,19 @@
         {/if}
         — {$cotisation.montant|escape_money} {$config.monnaie|escape}
     </dd>
-    <dt>À jour de cotisation ?</dt>
     <dd>
         {if !$cotisation.a_jour}
-            <span class="error"><b>Non</b>, cotisation non payée</span>
+            <b class="error">Vous n'êtes pas à jour de cotisation</b>
         {else}
-            <b class="confirm">&#10003; Oui</b>
+            <b class="confirm">&#10003; À jour de cotisation</b>
             {if $cotisation.expiration}
                 (expire le {$cotisation.expiration|format_sqlite_date_to_french})
             {/if}
         {/if}
     </dd>
 {/if}
-    <dt>
-        {if $nb_activites == 1}
-            {$nb_activites|escape} cotisation enregistrée
-        {elseif $nb_activites}
-            {$nb_activites|escape} cotisations enregistrées
-        {else}
-            Aucune cotisation enregistrée
-        {/if} 
-    </dt>
 {if !empty($cotisations_membre)}
+    <dt>Cotisations en cours</dt>
     {foreach from=$cotisations_membre item="co"}
     <dd>{$co.intitule|escape} — 
         {if $co.a_jour}
@@ -48,6 +48,10 @@
 </dl>
 
 {if !empty($cotisations)}
+<div class="infos">
+    <h3>Historique des cotisations</h3>
+</div>
+
 <table class="list">
     <thead>
         <th>Date</th>

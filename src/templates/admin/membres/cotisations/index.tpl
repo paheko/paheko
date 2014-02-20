@@ -4,6 +4,7 @@
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
     <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
     <li><a href="{$admin_url}membres/cotisations/rappels.php">État des rappels</a></li>
+    <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels</a></li>
 </ul>
 
 <table class="list">
