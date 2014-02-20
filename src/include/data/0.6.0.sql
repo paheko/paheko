@@ -50,12 +50,12 @@ CREATE TABLE rappels
 CREATE TABLE rappels_envoyes
 -- Enregistrement des rappels envoyés à qui et quand
 (
+    id INTEGER NOT NULL PRIMARY KEY,
+
     id_membre INTEGER NOT NULL REFERENCES membres (id),
-    id_rappel INTEGER NOT NULL REFERENCES rappels (id),
+    id_rappel INTEGER NULL REFERENCES rappels (id),
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
-    
-    PRIMARY KEY(id_membre, id_rappel, date)
+    media INTEGER NOT NULL -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
 );
 
 -- Mise à jour des catégories

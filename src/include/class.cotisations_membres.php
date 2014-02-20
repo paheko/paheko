@@ -26,7 +26,7 @@ class Cotisations_Membres
 			throw new UserException('Cotisation inconnue.');
 		}
 
-		$data['id_cotisation'] = $data['id_cotisation'] ? (int) $data['id_cotisation'] : null;
+		$data['id_cotisation'] = (int) $data['id_cotisation'];
 
 		if (empty($data['id_membre']) 
 			|| !$db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int) $data['id_membre']))
@@ -47,11 +47,6 @@ class Cotisations_Membres
 		$db = DB::getInstance();
 
 		$this->_checkFields($data);
-
-		if (empty($data['id_membre']))
-		{
-			throw new UserException('Membre inconnu ou invalide.');
-		}
 
 		$db->exec('BEGIN;');
 
@@ -102,7 +97,6 @@ class Cotisations_Membres
 	public function delete($id)
 	{
 		$db = DB::getInstance();
-
 		return $db->simpleExec('DELETE FROM cotisations_membres WHERE id = ?;', (int) $id);
 	}
 
