@@ -112,20 +112,24 @@ class Compta_Import
 				continue;
 			}
 
-			if (trim($row[0]) == 'Numéro mouvement')
+			if ($line === 1)
 			{
+				if (trim($row[0]) != 'Numéro mouvement')
+				{
+					throw new UserException('Erreur sur la ligne ' . $line . ' : l\'entête des colonnes est absent ou incorrect.');
+				}
+				
 				continue;
 			}
-
+	
 			if (count($row) != count($columns))
 			{
 				$db->exec('ROLLBACK;');
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
-			if (!empty($row[0]) && !is_numeric($row[0]))
+			if (trim($row[0]) !== '' && !is_numeric($row[0]))
 			{
-				print_r($row);
 				$db->exec('ROLLBACK;');
 				throw new UserException('Erreur sur la ligne ' . $line . ' : la première colonne doit être vide ou contenir le numéro unique d\'opération.');
 			}
