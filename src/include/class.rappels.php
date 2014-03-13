@@ -21,7 +21,7 @@ class Rappels
 
 		$data['id_cotisation'] = (int) $data['id_cotisation'];
 
-		if (empty($data['delai']) || !is_numeric($data['delai']) || (int)$data['delai'] < 0)
+		if (empty($data['delai']) || !is_numeric($data['delai']))
 		{
 			throw new UserException('Délai avant rappel invalide : doit être indiqué en nombre de jours.');
 		}
@@ -108,8 +108,10 @@ class Rappels
 	 */
 	public function listByCotisation()
 	{
-		return DB::getInstance()->simpleStatementFetch('SELECT r.*, c.intitule FROM rappels AS r
-			INNER JOIN cotisations ON c.id = r.id_cotisation ORDER BY r.id_cotisation, r.delai, r.sujet;');
+		return DB::getInstance()->simpleStatementFetch('SELECT r.*,
+			c.intitule, c.montant, c.duree, c.debut, c.fin
+			FROM rappels AS r
+			INNER JOIN cotisations AS c ON c.id = r.id_cotisation ORDER BY r.id_cotisation, r.delai, r.sujet;');
 	}
 
 	/**
@@ -121,5 +123,36 @@ class Rappels
 	{
 		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels 
 			WHERE id_cotisation = ? ORDER BY delai, sujet;', \SQLITE3_ASSOC, (int)$id);
+	}
+
+	/**
+	 * Remplacer les tags dans le contenu/sujet du mail
+	 * @param  string $content Chaîne à traiter
+	 * @param  array  $data    Données supplémentaires à utiliser comme tags (tableau associatif)
+	 * @return string          $content dont les tags ont été remplacés par le contenu correct
+	 */
+	public function replaceTagsInContent($content, $data = null)
+	{
+		$config = Config::getInstance();
+		$tags = [
+			'#NOM_ASSO'		=>	$config->get('nom_asso'),
+			'#ADRESSE_ASSO'	=>	$config->get('adresse_asso'),
+			'#EMAIL_ASSO'	=>	$config->get('email_asso'),
+			'#SITE_ASSO'	=>	$config->get('site_asso'),
+			'#URL_RACINE'	=>	WWW_URL,
+			'#URL_SITE'		=>	WWW_URL,
+			'#URL_ADMIN'	=>	WWW_URL . 'admin/',
+		];
+
+		if (!empty($data) && is_array($data))
+		{
+			foreach ($data as $key=>$value)
+			{
+				$key = '#' . strtoupper($key);
+				$tags[$key] = $value;
+			}
+		}
+
+		return strtr($content, $tags);
 	}
 }
