@@ -8,6 +8,11 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
+if (!utils::get('id') || !is_numeric(utils::get('id')))
+{
+    throw new UserException("Argument du numéro de cotisation manquant.");
+}
+
 $cotisations = new Cotisations;
 
 $co = $cotisations->get(utils::get('id'));
