@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Gestion des rappels automatiques" current="membres/cotisations" js=1}
+{include file="admin/_head.tpl" title="Gestion des rappels automatiques" current="membres/cotisations"}
 
 <ul class="actions">
     <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
@@ -6,6 +6,11 @@
     <li><a href="{$admin_url}membres/cotisations/rappels.php">État des rappels</a></li>
     <li class="current"><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
 </ul>
+
+<p class="help">
+    Les rappels automatiques sont envoyés aux membres disposant d'une adresse e-mail
+    selon le délai défini. Il est possible de définir plusieurs rappels pour une même cotisation.
+</p>
 
 {if empty($liste)}
     <p class="alert">Aucun rappel automatique n'est enregistré.</p>
