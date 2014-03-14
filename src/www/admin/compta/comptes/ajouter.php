@@ -27,12 +27,12 @@ if (!empty($_POST['add']))
     {
         try
         {
-            $id = $comptes->add(array(
+            $id = $comptes->add([
                 'id'            =>  utils::post('numero'),
                 'libelle'       =>  utils::post('libelle'),
                 'parent'        =>  utils::post('parent'),
                 'position'      =>  utils::post('position'),
-            ));
+            ]);
 
             utils::redirect('/admin/compta/comptes/?classe='.$classe);
         }

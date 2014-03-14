@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(utils::get('g'), array('recettes_depenses', 'banques_caisses')))
+if (!in_array(utils::get('g'), ['recettes_depenses', 'banques_caisses']))
 {
 	throw new UserException('Graphique inconnu.');
 }
@@ -26,7 +26,7 @@ if (Static_Cache::expired('graph_' . $graph))
 		$d = new \SVGPlot_Data($stats->depenses());
 		$d->title = 'Dépenses';
 
-		$data = array($d, $r);
+		$data = [$d, $r];
 
 		$plot->setTitle('Recettes et dépenses de l\'exercice courant');
 	}
@@ -34,7 +34,7 @@ if (Static_Cache::expired('graph_' . $graph))
 	{
 		$banques = new Compta_Comptes_Bancaires;
 
-		$data = array();
+		$data = [];
 
 		$r = new \SVGPlot_Data($stats->soldeCompte(Compta_Comptes::CAISSE));
 		$r->title = 'Caisse';
@@ -53,7 +53,7 @@ if (Static_Cache::expired('graph_' . $graph))
 
 	if (!empty($data))
 	{
-		$labels = array();
+		$labels = [];
 
 		foreach ($data[0]->get() as $k=>$v)
 		{
@@ -63,7 +63,7 @@ if (Static_Cache::expired('graph_' . $graph))
 		$plot->setLabels($labels);
 
 		$i = 0;
-		$colors = array('#c71', '#941', '#fa4', '#fd9', '#ffc', '#cc9');
+		$colors = ['#c71', '#941', '#fa4', '#fd9', '#ffc', '#cc9'];
 
 		foreach ($data as $line)
 		{

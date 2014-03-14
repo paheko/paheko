@@ -40,7 +40,7 @@ if (!empty($_POST['save']))
         {
             if (is_null($type))
             {
-                $id = $journal->add(array(
+                $id = $journal->add([
                     'libelle'       =>  utils::post('libelle'),
                     'montant'       =>  utils::post('montant'),
                     'date'          =>  utils::post('date'),
@@ -49,11 +49,11 @@ if (!empty($_POST['save']))
                     'numero_piece'  =>  utils::post('numero_piece'),
                     'remarques'     =>  utils::post('remarques'),
                     'id_auteur'     =>  $user['id'],
-                ));
+                ]);
             }
             elseif ($type === 'virement')
             {
-                $id = $journal->add(array(
+                $id = $journal->add([
                     'libelle'       =>  utils::post('libelle'),
                     'montant'       =>  utils::post('montant'),
                     'date'          =>  utils::post('date'),
@@ -62,7 +62,7 @@ if (!empty($_POST['save']))
                     'numero_piece'  =>  utils::post('numero_piece'),
                     'remarques'     =>  utils::post('remarques'),
                     'id_auteur'     =>  $user['id'],
-                ));
+                ]);
             }
             else
             {
@@ -121,7 +121,7 @@ if (!empty($_POST['save']))
                     $credit = utils::post('compte');
                 }
 
-                $id = $journal->add(array(
+                $id = $journal->add([
                     'libelle'       =>  utils::post('libelle'),
                     'montant'       =>  utils::post('montant'),
                     'date'          =>  utils::post('date'),
@@ -133,7 +133,7 @@ if (!empty($_POST['save']))
                     'remarques'     =>  utils::post('remarques'),
                     'id_categorie'  =>  ($type === 'dette') ? null : (int)$cat['id'],
                     'id_auteur'     =>  $user['id'],
-                ));
+                ]);
             }
 
             $membres->sessionStore('compta_date', utils::post('date'));

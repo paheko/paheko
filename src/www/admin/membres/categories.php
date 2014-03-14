@@ -21,9 +21,9 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $cats->add(array(
+            $cats->add([
                 'nom'           =>  utils::post('nom'),
-            ));
+            ]);
 
             utils::redirect('/admin/membres/categories.php');
         }

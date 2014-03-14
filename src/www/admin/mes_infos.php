@@ -25,7 +25,7 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $data = array();
+            $data = [];
 
             foreach ($config->get('champs_membres')->getAll() as $key=>$c)
             {

@@ -64,16 +64,16 @@ if (version_compare($v, '0.4.5', '<'))
 
     if (!$wiki->getByUri($page))
     {
-        $id_page = $wiki->create(array(
+        $id_page = $wiki->create([
             'titre' =>  'Bienvenue',
             'uri'   =>  $page,
-        ));
+        ]);
 
-        $wiki->editRevision($id_page, 0, array(
+        $wiki->editRevision($id_page, 0, [
             'id_auteur' =>  null,
             'contenu'   =>  "Bienvenue dans l'administration de ".$config->get('nom_asso')." !\n\n"
                 .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
-        ));
+        ]);
     }
 
     $config->set('accueil_connexion', $page);
@@ -84,10 +84,10 @@ if (version_compare($v, '0.5.0', '<'))
 {
     // Récupération de l'ancienne config
     $champs_modifiables_membre = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
-    $champs_modifiables_membre = !empty($champs_modifiables_membre) ? explode(',', $champs_modifiables_membre) : array();
+    $champs_modifiables_membre = !empty($champs_modifiables_membre) ? explode(',', $champs_modifiables_membre) : [];
 
     $champs_obligatoires = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
-    $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : array();
+    $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : [];
 
     // Import des champs membres par défaut
     $champs = Champs_Membres::importInstall();

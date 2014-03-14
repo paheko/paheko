@@ -39,7 +39,7 @@ if (!empty($_POST['save']))
             $fin = utils::post('periodicite') == 'date' ? utils::post('fin') : null;
             $id_cat = utils::post('categorie') ? (int) utils::post('id_categorie_compta') : null;
 
-            $cotisations->edit($co['id'], array(
+            $cotisations->edit($co['id'], [
                 'intitule'          =>  utils::post('intitule'),
                 'description'       =>  utils::post('description'),
                 'montant'           =>  (float) utils::post('montant'),
@@ -47,7 +47,7 @@ if (!empty($_POST['save']))
                 'debut'             =>  $debut,
                 'fin'               =>  $fin,
                 'id_categorie_compta'=> $id_cat,
-            ));
+            ]);
 
             utils::redirect('/admin/membres/cotisations/');
         }

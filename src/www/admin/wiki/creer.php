@@ -15,10 +15,10 @@ if (!empty($_POST['create']))
     else
     {
         try {
-            $id = $wiki->create(array(
+            $id = $wiki->create([
                 'titre'         =>  utils::post('titre'),
                 'parent'        =>  $parent,
-            ));
+            ]);
 
             utils::redirect('/admin/wiki/editer.php?id='.$id);
         }

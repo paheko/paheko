@@ -34,11 +34,11 @@ if (!empty($_POST['edit']))
     {
         try
         {
-            $id = $e->edit($exercice['id'], array(
+            $id = $e->edit($exercice['id'], [
                 'libelle'   =>  utils::post('libelle'),
                 'debut'     =>  utils::post('debut'),
                 'fin'       =>  utils::post('fin'),
-            ));
+            ]);
 
             utils::redirect('/admin/compta/exercices/');
         }

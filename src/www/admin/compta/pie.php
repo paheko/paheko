@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(utils::get('g'), array('recettes', 'depenses')))
+if (!in_array(utils::get('g'), ['recettes', 'depenses']))
 {
 	throw new UserException('Graphique inconnu.');
 }
@@ -33,7 +33,7 @@ if (Static_Cache::expired('graph_' . $graph))
 	}
 
 	$others = 0;
-	$colors = array('#c71', '#941', '#fa4', '#fd9', '#ffc', '#cc9');
+	$colors = ['#c71', '#941', '#fa4', '#fd9', '#ffc', '#cc9'];
 	$max = count($colors);
 	$i = 0;
 
