@@ -12,7 +12,7 @@ class Compta_Exercices
 
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE
             (debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin);', false,
-            array('debut' => $data['debut'], 'fin' => $data['fin'])))
+            ['debut' => $data['debut'], 'fin' => $data['fin']]))
         {
             throw new UserException('La date de début ou de fin se recoupe avec un autre exercice.');
         }
@@ -22,11 +22,11 @@ class Compta_Exercices
             throw new UserException('Il n\'est pas possible de créer un nouvel exercice tant qu\'il existe un exercice non-clôturé.');
         }
 
-        $db->simpleInsert('compta_exercices', array(
+        $db->simpleInsert('compta_exercices', [
             'libelle'   =>  trim($data['libelle']),
             'debut'     =>  $data['debut'],
             'fin'       =>  $data['fin'],
-        ));
+        ]);
 
         return $db->lastInsertRowId();
     }
@@ -40,7 +40,7 @@ class Compta_Exercices
         // Evitons que les exercices se croisent
         if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE id != :id AND
             ((debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin));', false,
-            array('debut' => $data['debut'], 'fin' => $data['fin'], 'id' => (int) $id)))
+            ['debut' => $data['debut'], 'fin' => $data['fin'], 'id' => (int) $id]))
         {
             throw new UserException('La date de début ou de fin se recoupe avec un autre exercice.');
         }
@@ -58,11 +58,11 @@ class Compta_Exercices
             throw new UserException('Des opérations de cet exercice ont une date postérieure à la date de fin de l\'exercice.');
         }
 
-        $db->simpleUpdate('compta_exercices', array(
+        $db->simpleUpdate('compta_exercices', [
             'libelle'   =>  trim($data['libelle']),
             'debut'     =>  $data['debut'],
             'fin'       =>  $data['fin'],
-        ), 'id = \''.(int)$id.'\'');
+        ], 'id = \''.(int)$id.'\'');
 
         return true;
     }
@@ -86,10 +86,10 @@ class Compta_Exercices
         $db->exec('BEGIN;');
 
         // Clôture de l'exercice
-        $db->simpleUpdate('compta_exercices', array(
+        $db->simpleUpdate('compta_exercices', [
             'cloture'   =>  1,
             'fin'       =>  $end,
-        ), 'id = \''.(int)$id.'\'');
+        ], 'id = \''.(int)$id.'\'');
 
         // Date de début du nouvel exercice : lendemain de la clôture du précédent exercice
         $new_begin = utils::modifyDate($end, '+1 day');
@@ -104,12 +104,11 @@ class Compta_Exercices
         $new_end = $last ?: $new_end;
 
         // Création du nouvel exercice
-        $new_id = $this->add(array(
+        $new_id = $this->add([
             'debut'     =>  $new_begin,
             'fin'       =>  $new_end,
             'libelle'   =>  'Nouvel exercice'
-            )
-        );
+        ]);
 
         // Ré-attribution des opérations de l'exercice à clôturer qui ne sont pas dans son
         // intervale au nouvel exercice
@@ -147,7 +146,7 @@ class Compta_Exercices
             INNER JOIN compta_journal ON compta_comptes.id = compta_journal.compte_debit 
                 OR compta_comptes.id = compta_journal.compte_credit
             WHERE id_exercice = :id AND solde != 0 AND CAST(substr(compta_comptes.id, 1, 1) AS INTEGER) <= 5
-            GROUP BY compta_comptes.id;', array('id' => $old_id));
+            GROUP BY compta_comptes.id;', ['id' => $old_id]);
 
         $diff = 0;
         $journal = new Compta_Journal;
@@ -165,14 +164,14 @@ class Compta_Exercices
             }
 
             // Chaque solde de compte est reporté dans le nouvel exercice
-            $journal->add(array(
+            $journal->add([
                 'libelle'       =>  'Report à nouveau',
                 'date'          =>  $date,
                 'montant'       =>  abs($solde),
                 'compte_debit'  =>  ($solde < 0 ? NULL : $row['compte']),
                 'compte_credit' =>  ($solde > 0 ? NULL : $row['compte']),
                 'remarques'     =>  'Report de solde créé automatiquement à la clôture de l\'exercice précédent',
-            ));
+            ]);
         }
         
         // FIXME utiliser $diff pour équilibrer
@@ -202,13 +201,13 @@ class Compta_Exercices
         if ($resultat != 0)
         {
             $journal = new Compta_Journal;
-            $journal->add(array(
+            $journal->add([
                 'libelle'   =>  'Résultat de l\'exercice précédent',
                 'date'      =>  $date,
                 'montant'   =>  $resultat,
                 'compte_debit'  =>  $resultat < 0 ? 129 : NULL,
                 'compte_credit' =>  $resultat > 0 ? 120 : NULL,
-            ));
+            ]);
         }
 
         return true;
@@ -294,7 +293,7 @@ class Compta_Exercices
     public function getGrandLivre($exercice)
     {
         $db = DB::getInstance();
-        $livre = array('classes' => array(), 'debit' => 0.0, 'credit' => 0.0);
+        $livre = ['classes' => [], 'debit' => 0.0, 'credit' => 0.0];
 
         $res = $db->prepare('SELECT compte FROM
             (SELECT compte_debit AS compte FROM compta_journal
@@ -317,18 +316,18 @@ class Compta_Exercices
 
             if (!array_key_exists($classe, $livre['classes']))
             {
-                $livre['classes'][$classe] = array();
+                $livre['classes'][$classe] = [];
             }
 
             if (!array_key_exists($parent, $livre['classes'][$classe]))
             {
-                $livre['classes'][$classe][$parent] = array(
+                $livre['classes'][$classe][$parent] = [
                     'total'         =>  0.0,
-                    'comptes'       =>  array(),
-                );
+                    'comptes'       =>  [],
+                ];
             }
 
-            $livre['classes'][$classe][$parent]['comptes'][$compte] = array('debit' => 0.0, 'credit' => 0.0, 'journal' => array());
+            $livre['classes'][$classe][$parent]['comptes'][$compte] = ['debit' => 0.0, 'credit' => 0.0, 'journal' => []];
 
             $livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] = $db->simpleStatementFetch(
                 'SELECT *, strftime(\'%s\', date) AS date FROM (
@@ -336,7 +335,7 @@ class Compta_Exercices
                     UNION
                     SELECT * FROM compta_journal WHERE compte_credit = :compte AND id_exercice = '.(int)$exercice.'
                     )
-                ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, array('compte' => $compte));
+                ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, ['compte' => $compte]);
 
             $debit = (float) $db->simpleQuerySingle(
                 'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND id_exercice = '.(int)$exercice.';',
@@ -365,8 +364,8 @@ class Compta_Exercices
     {
         $db = DB::getInstance();
 
-        $charges    = array('comptes' => array(), 'total' => 0.0);
-        $produits   = array('comptes' => array(), 'total' => 0.0);
+        $charges    = ['comptes' => [], 'total' => 0.0];
+        $produits   = ['comptes' => [], 'total' => 0.0];
         $resultat   = 0.0;
 
         $res = $db->prepare('SELECT compte, SUM(debit), SUM(credit)
@@ -391,7 +390,7 @@ class Compta_Exercices
             {
                 if (!isset($charges['comptes'][$parent]))
                 {
-                    $charges['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                    $charges['comptes'][$parent] = ['comptes' => [], 'solde' => 0.0];
                 }
 
                 $solde = round($debit - $credit, 2);
@@ -407,7 +406,7 @@ class Compta_Exercices
             {
                 if (!isset($produits['comptes'][$parent]))
                 {
-                    $produits['comptes'][$parent] = array('comptes' => array(), 'solde' => 0.0);
+                    $produits['comptes'][$parent] = ['comptes' => [], 'solde' => 0.0];
                 }
 
                 $solde = round($credit - $debit, 2);
@@ -425,7 +424,7 @@ class Compta_Exercices
 
         $resultat = $produits['total'] - $charges['total'];
 
-        return array('charges' => $charges, 'produits' => $produits, 'resultat' => $resultat);
+        return ['charges' => $charges, 'produits' => $produits, 'resultat' => $resultat];
     }
 
     /**
@@ -438,29 +437,29 @@ class Compta_Exercices
     {
         $db = DB::getInstance();
 
-        $include = array(Compta_Comptes::ACTIF, Compta_Comptes::PASSIF,
-            Compta_Comptes::PASSIF | Compta_Comptes::ACTIF);
+        $include = [Compta_Comptes::ACTIF, Compta_Comptes::PASSIF,
+            Compta_Comptes::PASSIF | Compta_Comptes::ACTIF];
 
-        $actif      = array('comptes' => array(), 'total' => 0.0);
-        $passif     = array('comptes' => array(), 'total' => 0.0);
+        $actif      = ['comptes' => [], 'total' => 0.0];
+        $passif     = ['comptes' => [], 'total' => 0.0];
 
         $resultat = $this->getCompteResultat($exercice);
 
         if ($resultat['resultat'] >= 0)
         {
-            $passif['comptes']['12'] = array(
-                'comptes'   =>  array('120' => $resultat['resultat']),
+            $passif['comptes']['12'] = [
+                'comptes'   =>  ['120' => $resultat['resultat']],
                 'solde'     =>  $resultat['resultat']
-            );
+            ];
 
             $passif['total'] = $resultat['resultat'];
         }
         else
         {
-            $passif['comptes']['12'] = array(
-                'comptes'   =>  array('129' => $resultat['resultat']),
+            $passif['comptes']['12'] = [
+                'comptes'   =>  ['129' => $resultat['resultat']],
                 'solde'     =>  $resultat['resultat']
-            );
+            ];
 
             $passif['total'] = $resultat['resultat'];
         }
@@ -514,7 +513,7 @@ class Compta_Exercices
 
             if (!isset(${$position}['comptes'][$parent]))
             {
-                ${$position}['comptes'][$parent] = array('comptes' => array(), 'solde' => 0);
+                ${$position}['comptes'][$parent] = ['comptes' => [], 'solde' => 0];
             }
 
             if (!isset(${$position}['comptes'][$parent]['comptes'][$compte]))
@@ -565,7 +564,7 @@ class Compta_Exercices
             }
         }
 
-        return array('actif' => $actif, 'passif' => $passif);
+        return ['actif' => $actif, 'passif' => $passif];
     }
 }
 

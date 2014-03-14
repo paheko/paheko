@@ -39,12 +39,12 @@ class Compta_Categories
             throw new UserException('Type de catégorie inconnu.');
         }
 
-        $db->simpleInsert('compta_categories', array(
+        $db->simpleInsert('compta_categories', [
             'intitule'  =>  $data['intitule'],
             'description'=> $data['description'],
             'compte'    =>  $data['compte'],
             'type'      =>  (int)$data['type'],
-        ));
+        ]);
 
         return $db->lastInsertRowId();
     }
@@ -56,10 +56,10 @@ class Compta_Categories
         $db = DB::getInstance();
 
         $db->simpleUpdate('compta_categories',
-            array(
+            [
                 'intitule'  =>  $data['intitule'],
                 'description'=> $data['description'],
-            ),
+            ],
             'id = \''.$db->escapeString(trim($id)).'\'');
 
         return true;

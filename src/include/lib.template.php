@@ -102,14 +102,14 @@ function tpl_format_droits($params)
 {
     $droits = $params['droits'];
 
-    $out = array('connexion' => '', 'inscription' => '', 'membres' => '', 'compta' => '',
-        'wiki' => '', 'config' => '');
-    $classes = array(
+    $out = ['connexion' => '', 'inscription' => '', 'membres' => '', 'compta' => '',
+        'wiki' => '', 'config' => ''];
+    $classes = [
         Membres::DROIT_AUCUN   =>  'aucun',
         Membres::DROIT_ACCES   =>  'acces',
         Membres::DROIT_ECRITURE=>  'ecriture',
         Membres::DROIT_ADMIN   =>  'admin',
-    );
+    ];
 
     foreach ($droits as $cle=>$droit)
     {
@@ -510,7 +510,7 @@ $tpl->register_function('pagination', 'Garradin\tpl_pagination');
 $tpl->register_function('diff', 'Garradin\tpl_diff');
 $tpl->register_function('html_champ_membre', 'Garradin\tpl_html_champ_membre');
 
-$tpl->register_modifier('get_country_name', array('Garradin\utils', 'getCountryName'));
+$tpl->register_modifier('get_country_name', ['Garradin\utils', 'getCountryName']);
 $tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'Garradin\tpl_format_wiki');
 $tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
@@ -530,7 +530,7 @@ $tpl->register_modifier('display_champ_membre', function ($v, $config) {
     } elseif ($config['type'] == 'country') {
         return utils::getCountryName($v);
     } elseif ($config['type'] == 'multiple') {
-        $out = array();
+        $out = [];
 
         foreach ($config['options'] as $b => $name)
         {

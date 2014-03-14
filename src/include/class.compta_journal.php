@@ -190,7 +190,7 @@ class Compta_Journal
         }
 
         if (!$db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE cloture = 0
-            AND debut <= :date AND fin >= :date;', false, array('date' => $data['date'])))
+            AND debut <= :date AND fin >= :date;', false, ['date' => $data['date']]))
         {
             throw new UserException('La date ne correspond pas à l\'exercice en cours.');
         }
@@ -224,7 +224,7 @@ class Compta_Journal
             throw new UserException('Le montant ne peut être égal ou inférieur à zéro.');
         }
 
-        foreach (array('remarques', 'numero_piece', 'numero_cheque') as $champ)
+        foreach (['remarques', 'numero_piece', 'numero_cheque'] as $champ)
         {
             if (empty($data[$champ]) || !trim($data[$champ]))
             {

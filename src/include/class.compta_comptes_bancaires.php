@@ -18,12 +18,12 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
         $new_id = parent::add($data);
 
         $db = DB::getInstance();
-        $db->simpleInsert('compta_comptes_bancaires', array(
+        $db->simpleInsert('compta_comptes_bancaires', [
             'id'        =>  $new_id,
             'banque'    =>  $data['banque'],
             'iban'      =>  $data['iban'],
             'bic'       =>  $data['bic'],
-        ));
+        ]);
 
         return $new_id;
     }
@@ -45,11 +45,11 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
             return $result;
         }
 
-        $db->simpleUpdate('compta_comptes_bancaires', array(
+        $db->simpleUpdate('compta_comptes_bancaires', [
             'banque'    =>  $data['banque'],
             'iban'      =>  $data['iban'],
             'bic'       =>  $data['bic'],
-        ), 'id = \''.$db->escapeString(trim($id)).'\'');
+        ], 'id = \''.$db->escapeString(trim($id)).'\'');
 
         return true;
     }

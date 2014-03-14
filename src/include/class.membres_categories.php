@@ -4,14 +4,14 @@ namespace Garradin;
 
 class Membres_Categories
 {
-    protected $droits = array(
+    protected $droits = [
         'inscription'=> Membres::DROIT_AUCUN,
         'connexion' =>  Membres::DROIT_ACCES,
         'membres'   =>  Membres::DROIT_ACCES,
         'compta'    =>  Membres::DROIT_ACCES,
         'wiki'      =>  Membres::DROIT_ACCES,
         'config'    =>  Membres::DROIT_AUCUN,
-    );
+    ];
 
     static public function getDroitsDefaut()
     {
@@ -105,10 +105,10 @@ class Membres_Categories
 
         $db->simpleUpdate(
             'wiki_pages',
-            array(
+            [
                 'droit_lecture'     =>  Wiki::LECTURE_NORMAL,
                 'droit_ecriture'    =>  Wiki::ECRITURE_NORMAL,
-            ),
+            ],
             'droit_lecture = '.(int)$id.' OR droit_ecriture = '.(int)$id
         );
 

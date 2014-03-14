@@ -15,7 +15,7 @@ class Sauvegarde
 	{
 		$ext = $auto ? 'auto\.\d+\.sqlite' : 'sqlite';
 
-		$out = array();
+		$out = [];
 		$dir = dir(DATA_ROOT);
 
 		while ($file = $dir->read())

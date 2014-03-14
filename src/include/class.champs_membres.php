@@ -6,7 +6,7 @@ class Champs_Membres
 {
 	protected $champs = null;
 
-	protected $types = array(
+	protected $types = [
 		'email'		=>	'Adresse E-Mail',
 		'url'		=>	'Adresse URL',
 		'checkbox'	=>	'Case à cocher',
@@ -21,9 +21,9 @@ class Champs_Membres
 		'country'	=>	'Sélecteur de pays',
 		'text'		=>	'Texte',
 		'textarea'	=>	'Texte multi-lignes',
-	);
+	];
 
-    protected $text_types = array(
+    protected $text_types = [
         'email',
         'text',
         'select',
@@ -31,9 +31,9 @@ class Champs_Membres
         'url',
         'password',
         'country'
-    );
+    ];
 
-    protected $config_fields = array(
+    protected $config_fields = [
         'type',
         'title',
         'help',
@@ -42,7 +42,7 @@ class Champs_Membres
         'mandatory',
         'private',
         'options'
-    );
+    ];
 
     static protected $presets = null;
 
@@ -371,24 +371,24 @@ class Champs_Membres
     	$config = Config::getInstance();
 
     	// Champs à créer
-    	$create = array(
+    	$create = [
     		'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
             'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d\'inscription',
-    	);
+    	];
 
-        $create_keys = array(
+        $create_keys = [
             'FOREIGN KEY (id_categorie) REFERENCES membres_categories (id)'
-        );
+        ];
 
     	// Champs à recopier
-    	$copy = array(
+    	$copy = [
     		'id',
     		'id_categorie',
             'date_connexion',
             'date_inscription',
-    	);
+    	];
 
         $anciens_champs = $config->get('champs_membres');
     	$anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
@@ -408,7 +408,7 @@ class Champs_Membres
 
             if (!empty($cfg['title']))
             {
-                $line .= ' -- ' . str_replace(array("\n", "\r"), '', $cfg['title']);
+                $line .= ' -- ' . str_replace(["\n", "\r"], '', $cfg['title']);
             }
 
             $create[] = $line;

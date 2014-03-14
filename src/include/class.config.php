@@ -6,7 +6,7 @@ class Config
 {
     protected $fields_types = null;
     protected $config = null;
-    protected $modified = array();
+    protected $modified = [];
 
     static protected $_instance = null;
 
@@ -25,11 +25,11 @@ class Config
         $string = '';
         $int = 0;
         $float = 0.0;
-        $array = array();
+        $array = [];
         $bool = false;
         $object = new \stdClass;
 
-        $this->fields_types = array(
+        $this->fields_types = [
             'nom_asso'              =>  $string,
             'adresse_asso'          =>  $string,
             'email_asso'            =>  $string,
@@ -57,7 +57,7 @@ class Config
             'champ_identite'        =>  $string,
 
             'version'               =>  $string,
-        );
+        ];
 
         $db = DB::getInstance();
 
@@ -99,7 +99,7 @@ class Config
         if (empty($this->modified))
             return true;
 
-        $values = array();
+        $values = [];
 
         $db = DB::getInstance();
         $db->exec('BEGIN;');
@@ -123,7 +123,7 @@ class Config
 
         $db->exec('END;');
 
-        $this->modified = array();
+        $this->modified = [];
 
         return true;
     }
@@ -173,7 +173,7 @@ class Config
 
         if (is_array($this->fields_types[$key]))
         {
-            $value = !empty($value) ? (array) $value : array();
+            $value = !empty($value) ? (array) $value : [];
         }
         elseif (is_int($this->fields_types[$key]))
         {
