@@ -59,7 +59,7 @@ $cats = new Membres_Categories;
 $tpl->assign('membres_cats', $cats->listSimple());
 
 $champs_liste = array_merge(
-    array('id' => array('title' => 'Numéro unique', 'type' => 'number')),
+    ['id' => ['title' => 'Numéro unique', 'type' => 'number']],
     $config->get('champs_membres')->getList()
 );
 $tpl->assign('champs', $champs_liste);

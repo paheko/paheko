@@ -48,7 +48,7 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $data = array();
+            $data = [];
 
             foreach ($champs->getAll() as $key=>$config)
             {

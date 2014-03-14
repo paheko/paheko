@@ -30,7 +30,7 @@ if ($user['droits']['membres'] >= Membres::DROIT_ADMIN)
 	            $fin = utils::post('periodicite') == 'date' ? utils::post('fin') : null;
 	            $id_cat = utils::post('categorie') ? (int) utils::post('id_categorie_compta') : null;
 
-	            $cotisations->add(array(
+	            $cotisations->add([
 	                'intitule'          =>  utils::post('intitule'),
 	                'description'       =>  utils::post('description'),
 	                'montant'           =>  (float) utils::post('montant'),
@@ -38,7 +38,7 @@ if ($user['droits']['membres'] >= Membres::DROIT_ADMIN)
 	                'debut'             =>  $debut,
 	                'fin'               =>  $fin,
 	                'id_categorie_compta'=> $id_cat,
-	            ));
+	            ]);
 
 	            utils::redirect('/admin/membres/cotisations/');
 	        }

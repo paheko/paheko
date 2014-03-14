@@ -49,21 +49,21 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $wiki->edit($page['id'], array(
+            $wiki->edit($page['id'], [
                 'titre'         =>  utils::post('titre'),
                 'uri'           =>  utils::post('uri'),
                 'parent'        =>  utils::post('parent'),
                 'droit_lecture' =>  utils::post('droit_lecture'),
                 'droit_ecriture'=>  utils::post('droit_ecriture'),
                 'date_creation' =>  $date,
-            ));
+            ]);
 
-            $wiki->editRevision($page['id'], (int) utils::post('revision_edition'), array(
+            $wiki->editRevision($page['id'], (int) utils::post('revision_edition'), [
                 'contenu'       =>  utils::post('contenu'),
                 'modification'  =>  utils::post('modification'),
                 'id_auteur'     =>  $user['id'],
                 'chiffrement'   =>  utils::post('chiffrement'),
-            ));
+            ]);
 
             $page = $wiki->getById($page['id']);
 

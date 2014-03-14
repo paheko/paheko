@@ -51,7 +51,7 @@ if ($recherche != '')
 $champs_liste = $champs->getList();
 
 $champs_liste = array_merge(
-    array('id' => array('title' => 'Numéro unique', 'type' => 'number')),
+    ['id' => ['title' => 'Numéro unique', 'type' => 'number']],
     $champs_liste
 );
 
@@ -60,7 +60,7 @@ $champs_entete = $champs->getListedFields();
 if (!array_key_exists($champ, $champs_entete))
 {
     $champs_entete = array_merge(
-        array($champ => $champs_liste[$champ]),
+        [$champ => $champs_liste[$champ]],
         $champs_entete
     );
 }

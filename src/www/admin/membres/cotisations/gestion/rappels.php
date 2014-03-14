@@ -25,12 +25,12 @@ if (!empty($_POST['save']))
         	$delai = (int) utils::post('delai');
             $delai = utils::post('delai_pre') ? -$delai : $delai;
 
-            $rappels->add(array(
+            $rappels->add([
                 'sujet'		=>	utils::post('sujet'),
                 'texte'		=>	utils::post('texte'),
                 'delai'		=>	$delai,
                 'id_cotisation'	=>	utils::post('id_cotisation'),
-            ));
+            ]);
 
             utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
         }

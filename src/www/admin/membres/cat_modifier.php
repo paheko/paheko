@@ -35,7 +35,7 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $cats->edit($id, array(
+            $cats->edit($id, [
                 'nom'           =>  utils::post('nom'),
                 'description'   =>  utils::post('description'),
                 'droit_wiki'    =>  (int) utils::post('droit_wiki'),
@@ -46,7 +46,7 @@ if (!empty($_POST['save']))
                 'droit_inscription' => (int) utils::post('droit_inscription'),
                 'cacher'        =>  (int) utils::post('cacher'),
                 'id_cotisation_obligatoire' => (int) utils::post('id_cotisation_obligatoire'),
-            ));
+            ]);
 
             if ($id == $user['id_categorie'])
             {

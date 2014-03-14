@@ -51,7 +51,7 @@ if (!empty($_POST['save']))
         {
             if (is_null($type))
             {
-                $journal->edit($operation['id'], array(
+                $journal->edit($operation['id'], [
                     'libelle'       =>  utils::post('libelle'),
                     'montant'       =>  utils::post('montant'),
                     'date'          =>  utils::post('date'),
@@ -59,7 +59,7 @@ if (!empty($_POST['save']))
                     'compte_debit'  =>  utils::post('compte_debit'),
                     'numero_piece'  =>  utils::post('numero_piece'),
                     'remarques'     =>  utils::post('remarques'),
-                ));
+                ]);
             }
             else
             {
@@ -107,7 +107,7 @@ if (!empty($_POST['save']))
                     $credit = $b;
                 }
 
-                $journal->edit($operation['id'], array(
+                $journal->edit($operation['id'], [
                     'libelle'       =>  utils::post('libelle'),
                     'montant'       =>  utils::post('montant'),
                     'date'          =>  utils::post('date'),
@@ -118,7 +118,7 @@ if (!empty($_POST['save']))
                     'numero_piece'  =>  utils::post('numero_piece'),
                     'remarques'     =>  utils::post('remarques'),
                     'id_categorie'  =>  (int)$cat['id'],
-                ));
+                ]);
             }
 
             utils::redirect('/admin/compta/operations/voir.php?id='.(int)$operation['id']);

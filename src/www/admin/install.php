@@ -155,7 +155,7 @@ else
                 ]);
                 $config->set('categorie_membres', $id);
 
-                $id = $cats->add(array(
+                $id = $cats->add([
                     'nom' => 'Anciens membres',
                     'droit_inscription' => Membres::DROIT_AUCUN,
                     'droit_wiki' => Membres::DROIT_AUCUN,
@@ -164,54 +164,54 @@ else
                     'droit_config' => Membres::DROIT_AUCUN,
                     'droit_connexion' => Membres::DROIT_AUCUN,
                     'cacher' => 1,
-                    ));
+                ]);
 
-                $id = $cats->add(array(
+                $id = $cats->add([
                     'nom' => ucfirst(utils::post('cat_membre')),
                     'droit_inscription' => Membres::DROIT_AUCUN,
                     'droit_wiki' => Membres::DROIT_ADMIN,
                     'droit_membres' => Membres::DROIT_ADMIN,
                     'droit_compta' => Membres::DROIT_ADMIN,
                     'droit_config' => Membres::DROIT_ADMIN,
-                    ));
+                ]);
 
                 // Création premier membre
                 $membres = new Membres;
-                $id_membre = $membres->add(array(
+                $id_membre = $membres->add([
                     'id_categorie'  =>  $id,
                     'nom'           =>  utils::post('nom_membre'),
                     'email'         =>  utils::post('email_membre'),
                     'passe'         =>  utils::post('passe_membre'),
                     'pays'          =>  'FR',
-                ));
+                ]);
 
                 // Création wiki
                 $page = Wiki::transformTitleToURI(utils::post('nom_asso'));
                 $config->set('accueil_wiki', $page);
                 $wiki = new Wiki;
-                $id_page = $wiki->create(array(
+                $id_page = $wiki->create([
                     'titre' =>  utils::post('nom_asso'),
                     'uri'   =>  $page,
-                ));
+                ]);
 
-                $wiki->editRevision($id_page, 0, array(
+                $wiki->editRevision($id_page, 0, [
                     'id_auteur' =>  $id_membre,
                     'contenu'   =>  "Bienvenue dans le wiki de ".utils::post('nom_asso')." !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
-                ));
+                ]);
 
                 // Création page wiki connexion
                 $page = Wiki::transformTitleToURI('Bienvenue');
                 $config->set('accueil_connexion', $page);
-                $id_page = $wiki->create(array(
+                $id_page = $wiki->create([
                     'titre' =>  'Bienvenue',
                     'uri'   =>  $page,
-                ));
+                ]);
 
-                $wiki->editRevision($id_page, 0, array(
+                $wiki->editRevision($id_page, 0, [
                     'id_auteur' =>  $id_membre,
                     'contenu'   =>  "Bienvenue dans l'administration de ".utils::post('nom_asso')." !\n\n"
                         .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
-                ));                
+                ]);
 
                 // Mise en place compta
                 $comptes = new Compta_Comptes;
@@ -221,7 +221,11 @@ else
                 $comptes->importCategories();
 
                 $ex = new Compta_Exercices;
-                $ex->add(array('libelle' => 'Premier exercice', 'debut' => date('Y-01-01'), 'fin' => date('Y-12-31')));
+                $ex->add([
+                    'libelle'   =>  'Premier exercice',
+                    'debut'     =>  date('Y-01-01'),
+                    'fin'       =>  date('Y-12-31')
+                ]);
 
                 $config->save();
 

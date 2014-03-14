@@ -30,11 +30,10 @@ if (!empty($_POST['save']))
     {
         try
         {
-            $id = $cats->edit($id,
-                array(
+            $id = $cats->edit($id, [
                 'intitule'      =>  utils::post('intitule'),
                 'description'   =>  utils::post('description'),
-            ));
+            ]);
 
             if ($cat['type'] == Compta_Categories::DEPENSES)
                 $type = 'depenses';

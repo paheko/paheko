@@ -36,7 +36,7 @@ if (!empty($_POST['save']))
                 $id_categorie = $config->get('categorie_membres');
             }
 
-            $data = array('id_categorie' => $id_categorie);
+            $data = ['id_categorie' => $id_categorie];
 
             foreach ($champs->getAll() as $key=>$dismiss)
             {

@@ -22,12 +22,12 @@ if (!empty($_POST['add']))
     {
         try
         {
-            $id = $banque->add(array(
+            $id = $banque->add([
                 'libelle'       =>  utils::post('libelle'),
                 'banque'        =>  utils::post('banque'),
                 'iban'          =>  utils::post('iban'),
                 'bic'           =>  utils::post('bic'),
-            ));
+            ]);
 
             utils::redirect('/admin/compta/banques/');
         }

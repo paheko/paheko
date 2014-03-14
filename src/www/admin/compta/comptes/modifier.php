@@ -28,10 +28,10 @@ if (!empty($_POST['save']))
     {
         try
         {
-            $id = $comptes->edit($compte['id'], array(
+            $id = $comptes->edit($compte['id'], [
                 'libelle'       =>  utils::post('libelle'),
                 'position'      =>  utils::post('position'),
-            ));
+            ]);
 
             utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
         }

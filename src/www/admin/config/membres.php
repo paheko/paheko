@@ -81,16 +81,16 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                         throw new UserException('Le champ personnalisé ne peut avoir le même nom qu\'un champ pré-défini.');
                     }
 
-                    $config = array(
+                    $config = [
                         'type'  =>  utils::post('new_type'),
                         'title' =>  utils::post('new_title'),
                         'editable'  =>  true,
                         'mandatory' =>  false,
-                    );
+                    ];
 
                     if ($config['type'] == 'select' || $config['type'] == 'multiple')
                     {
-                        $config['options'] = array('Première option');
+                        $config['options'] = ['Première option'];
                     }
 
                     $champs->add($new, $config);

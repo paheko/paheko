@@ -29,12 +29,12 @@ if (!empty($_POST['save']))
     {
         try
         {
-            $id = $banque->edit($compte['id'], array(
+            $id = $banque->edit($compte['id'], [
                 'libelle'       =>  utils::post('libelle'),
                 'banque'        =>  utils::post('banque'),
                 'iban'          =>  utils::post('iban'),
                 'bic'           =>  utils::post('bic'),
-            ));
+            ]);
 
             utils::redirect('/admin/compta/banques/');
         }

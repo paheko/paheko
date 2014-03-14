@@ -22,12 +22,12 @@ if (!empty($_POST['add']))
     {
         try
         {
-            $id = $cats->add(array(
+            $id = $cats->add([
                 'intitule'      =>  utils::post('intitule'),
                 'description'   =>  utils::post('description'),
                 'compte'        =>  utils::post('compte'),
                 'type'          =>  utils::post('type'),
-            ));
+            ]);
 
             if (utils::post('type') == Compta_Categories::DEPENSES)
                 $type = 'depenses';

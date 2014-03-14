@@ -63,7 +63,7 @@ if (utils::get('edit'))
         }
     }
 
-    $tpl->assign('edit', array('file' => trim(utils::get('edit')), 'content' => $source));
+    $tpl->assign('edit', ['file' => trim(utils::get('edit')), 'content' => $source]);
     $tpl->assign('csrf_key', $csrf_key);
     $tpl->assign('sources_json', json_encode(Squelette::listSources()));
 }

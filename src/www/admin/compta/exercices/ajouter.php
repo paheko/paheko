@@ -22,11 +22,11 @@ if (!empty($_POST['add']))
     {
         try
         {
-            $id = $e->add(array(
+            $id = $e->add([
                 'libelle'   =>  utils::post('libelle'),
                 'debut'     =>  utils::post('debut'),
                 'fin'       =>  utils::post('fin'),
-            ));
+            ]);
 
             utils::redirect('/admin/compta/exercices/');
         }
