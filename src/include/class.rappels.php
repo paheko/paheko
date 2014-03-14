@@ -78,15 +78,25 @@ class Rappels
 	/**
 	 * Supprimer un rappel automatique
 	 * @param  integer $id Numéro du rappel
+	 * @param  boolean $delete_history Effacer aussi l'historique des rappels envoyés
 	 * @return boolean     TRUE en cas de succès
 	 */
-	public function delete($id)
+	public function delete($id, $delete_history = false)
 	{
 		$db = DB::getInstance();
 
 		$db->exec('BEGIN;');
+
+		if ($delete_history)
+		{
+			$db->simpleExec('DELETE FROM rappels_envoyes WHERE id_rappel = ?;', (int) $id);
+		}
+		else
+		{
+			$db->simpleExec('UPDATE rappels_envoyes SET id_rappel = NULL WHERE id_rappel = ?;', (int) $id);
+		}
+
 		$db->simpleExec('DELETE FROM rappels WHERE id = ?;', (int) $id);
-		$db->simpleExec('DELETE FROM rappels_envoyes WHERE id_rappel = ?;', (int) $id);
 		$db->exec('END;');
 
 		return true;
