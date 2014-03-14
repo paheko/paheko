@@ -8,13 +8,13 @@ class utils
 
     static protected $g2x = null;
 
-    static private $french_date_names = array(
+    static private $french_date_names = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
         'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
         'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
         'Thursday'=>'Jeudi','Friday'=>'Vendredi','Saturday'=>'Samedi','Sunday'=>'Dimanche',
         'Feb'=>'Fév','Apr'=>'Avr','May'=>'Mai','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
-        'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim');
+        'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
 
     static public function strftime_fr($format=null, $ts=null)
     {
@@ -172,7 +172,7 @@ class utils
 
         if (!isset($_SESSION['csrf']))
         {
-            $_SESSION['csrf'] = array();
+            $_SESSION['csrf'] = [];
         }
 
         $_SESSION['csrf'][$key] = sha1($key . uniqid($key, true) . time());
@@ -304,27 +304,27 @@ class utils
         if($begin == 2) {
             $begin = 1;
         }
-        $out = array();
+        $out = [];
 
         if ($current > 1) {
-            $out[] = array('id' => $current - 1, 'label' =>  '« ' . 'Page précédente', 'class' => 'prev', 'accesskey' => 'a');
+            $out[] = ['id' => $current - 1, 'label' =>  '« ' . 'Page précédente', 'class' => 'prev', 'accesskey' => 'a'];
         }
 
         if ($begin > 1) {
-            $out[] = array('id' => 1, 'label' => '1 ...', 'class' => 'first');
+            $out[] = ['id' => 1, 'label' => '1 ...', 'class' => 'first'];
         }
 
         for ($i = $begin; $i <= $end; $i++)
         {
-            $out[] = array('id' => $i, 'label' => $i, 'class' => ($i == $current) ? 'current' : '');
+            $out[] = ['id' => $i, 'label' => $i, 'class' => ($i == $current) ? 'current' : ''];
         }
 
         if ($showLast && $end < $total) {
-            $out[] = array('id' => $total, 'label' => '... ' . $total, 'class' => 'last');
+            $out[] = ['id' => $total, 'label' => '... ' . $total, 'class' => 'last'];
         }
 
         if ($current < $total) {
-            $out[] = array('id' => $current + 1, 'label' => 'Page suivante' . ' »', 'class' => 'next', 'accesskey' => 'z');
+            $out[] = ['id' => $current + 1, 'label' => 'Page suivante' . ' »', 'class' => 'next', 'accesskey' => 'z'];
         }
 
         return $out;
@@ -367,7 +367,7 @@ class utils
         {
             require_once ROOT . '/include/libs/garbage2xhtml/lib.garbage2xhtml.php';
             self::$g2x = new \garbage2xhtml;
-            self::$g2x->core_attributes = array('class', 'id', 'title');
+            self::$g2x->core_attributes = ['class', 'id', 'title'];
         }
 
         return self::$g2x->process($str);
@@ -398,7 +398,7 @@ class utils
         return $str;
     }
 
-    static public function mail($to, $subject, $content, $additional_headers = array())
+    static public function mail($to, $subject, $content, $additional_headers = [])
     {
         // Création du contenu du message
         $content = wordwrap($content);
@@ -549,11 +549,11 @@ class utils
 
     static public function getMaxUploadSize()
     {
-        return min(array(
+        return min([
             self::return_bytes(ini_get('upload_max_filesize')),
             self::return_bytes(ini_get('post_max_size')),
             self::return_bytes(ini_get('memory_limit'))
-        ));
+        ]);
     }
 
 

@@ -81,7 +81,7 @@ class Wiki
         return true;
     }
 
-    public function create($data = array())
+    public function create($data = [])
     {
         $this->_checkFields($data);
         $db = DB::getInstance();
@@ -111,12 +111,12 @@ class Wiki
         // On ne peut utiliser un trigger pour insérer dans la recherche
         // car les tables virtuelles font des opérations qui modifient
         // last_insert_rowid() et donc résultat incohérent
-        $db->simpleInsert('wiki_recherche', array('id' => $id, 'titre' => $data['titre']));
+        $db->simpleInsert('wiki_recherche', ['id' => $id, 'titre' => $data['titre']]);
 
         return $id;
     }
 
-    public function edit($id, $data = array())
+    public function edit($id, $data = [])
     {
         $db = DB::getInstance();
         $this->_checkFields($data);
@@ -272,10 +272,10 @@ class Wiki
         $data['revision'] = $revision;
 
         $db->simpleInsert('wiki_revisions', $data);
-        $db->simpleUpdate('wiki_pages', array(
+        $db->simpleUpdate('wiki_pages', [
             'revision'          =>  $revision,
             'date_modification' =>  gmdate('Y-m-d H:i:s'),
-        ), 'id = '.(int)$id);
+        ], 'id = '.(int)$id);
 
         return true;
     }
@@ -450,21 +450,21 @@ class Wiki
     public function listBackBreadCrumbs($id)
     {
         if ($id == 0)
-            return array();
+            return [];
 
         $db = DB::getInstance();
-        $flat = array();
+        $flat = [];
 
         while ($id > 0)
         {
             $res = $db->simpleQuerySingle('SELECT parent, titre, uri
                 FROM wiki_pages WHERE id = ? LIMIT 1;', true, (int)$id);
 
-            $flat[] = array(
+            $flat[] = [
                 'id'        =>  $id,
                 'titre'     =>  $res['titre'],
                 'uri'       =>  $res['uri'],
-            );
+            ];
 
             $id = (int)$res['parent'];
         }
@@ -475,35 +475,35 @@ class Wiki
     public function listBackParentTree($id)
     {
         $db = DB::getInstance();
-        $flat = array(
-            array(
+        $flat = [
+            [
                 'id' => 0,
                 'parent' => null,
                 'titre' => 'Racine',
                 'children' => $db->simpleStatementFetchAssocKey('SELECT id, parent, titre FROM wiki_pages
                     WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;',
                     SQLITE3_ASSOC, 0)
-            )
-        );
+            ]
+        ];
 
         do
         {
             $parent = $db->simpleQuerySingle('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
 
-            $flat[$id] = array(
+            $flat[$id] = [
                 'id'        =>  $id,
                 'parent'    =>  $id ? (int)$parent : null,
                 'titre'     =>  $id ? (string)$db->simpleQuerySingle('SELECT titre FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id) : 'Racine',
                 'children'  =>  $db->simpleStatementFetchAssocKey('SELECT id, parent, titre FROM wiki_pages
                     WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;',
                     SQLITE3_ASSOC, (int)$id)
-            );
+            ];
 
             $id = (int)$parent;
         }
         while ($id != 0);
 
-        $tree = array();
+        $tree = [];
         foreach ($flat as $id=>&$node)
         {
             if (is_null($node['parent']))
@@ -514,7 +514,7 @@ class Wiki
             {
                 if (!isset($flat[$node['parent']]['children']))
                 {
-                    $flat[$node['parent']]['children'] = array();
+                    $flat[$node['parent']]['children'] = [];
                 }
 
                 $flat[$node['parent']]['children'][$id] = &$node;

@@ -45,10 +45,10 @@ class DB extends \SQLite3
         // Activer les contraintes des foreign keys
         $this->exec('PRAGMA foreign_keys = ON;');
 
-        $this->createFunction('transliterate_to_ascii', array('Garradin\utils', 'transliterateToAscii'));
+        $this->createFunction('transliterate_to_ascii', ['Garradin\utils', 'transliterateToAscii']);
         $this->createFunction('base64', 'base64_encode');
-        $this->createFunction('rank', array($this, 'sql_rank'));
-        $this->createFunction('running_sum', array($this, 'sql_running_sum'));
+        $this->createFunction('rank', [$this, 'sql_rank']);
+        $this->createFunction('running_sum', [$this, 'sql_running_sum']);
     }
 
     public function sql_running_sum($data)
@@ -149,7 +149,7 @@ class DB extends \SQLite3
             throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
     }
 
-    public function simpleStatement($query, $args = array())
+    public function simpleStatement($query, $args = [])
     {
         $statement = $this->prepare($query);
         $nb = $statement->paramCount();
@@ -310,7 +310,7 @@ class DB extends \SQLite3
 
     protected function _fetchResult($result, $mode)
     {
-        $out = array();
+        $out = [];
 
         while ($row = $result->fetchArray($mode))
         {
@@ -325,7 +325,7 @@ class DB extends \SQLite3
 
     protected function _fetchResultAssoc($result)
     {
-        $out = array();
+        $out = [];
 
         while ($row = $result->fetchArray(SQLITE3_NUM))
         {
@@ -340,7 +340,7 @@ class DB extends \SQLite3
 
     protected function _fetchResultAssocKey($result, $mode)
     {
-        $out = array();
+        $out = [];
 
         while ($row = $result->fetchArray($mode))
         {

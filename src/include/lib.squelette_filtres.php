@@ -5,9 +5,9 @@ namespace Garradin;
 class Squelette_Filtres
 {
     static private $g2x = null;
-    static private $alt = array();
+    static private $alt = [];
 
-    static public $filtres_php = array(
+    static public $filtres_php = [
         'strtolower',
         'strtoupper',
         'ucfirst',
@@ -32,9 +32,9 @@ class Squelette_Filtres
         'wordwrap',
         'strip_tags' => 'supprimer_tags',
         'var_dump',
-    );
+    ];
 
-    static public $filtres_alias = array(
+    static public $filtres_alias = [
         '!='    =>  'different_de',
         '=='    =>  'egal_a',
         '?'     =>  'choixsivide',
@@ -47,14 +47,14 @@ class Squelette_Filtres
         'and'   =>  'et',
         'or'    =>  'ou',
         'xor'   =>  'xou',
-    );
+    ];
 
-    static public $desactiver_defaut = array(
+    static public $desactiver_defaut = [
         'formatter_texte',
         'entites_html',
         'proteger_contact',
         'echapper_xml',
-    );
+    ];
 
     static public function date_en_francais($date)
     {

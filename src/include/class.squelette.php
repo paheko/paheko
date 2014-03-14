@@ -11,7 +11,7 @@ class Squelette_Snippet
     const GUESS = 2;
     const OBJ = 3;
 
-    protected $_content = array();
+    protected $_content = [];
 
     protected function _getType($type, $value)
     {
@@ -137,7 +137,7 @@ class Squelette_Snippet
             $out .= ' ?>';
         }
 
-        $this->_content = array();
+        $this->_content = [];
 
         return $out;
     }
@@ -173,7 +173,7 @@ class Squelette extends \miniSkel
 {
     private $parent = null;
     private $current = null;
-    private $_vars = array();
+    private $_vars = [];
 
     private function _registerDefaultModifiers()
     {
@@ -187,12 +187,12 @@ class Squelette extends \miniSkel
 
         foreach (get_class_methods('Garradin\Squelette_Filtres') as $name)
         {
-            $this->register_modifier($name, array('Garradin\Squelette_Filtres', $name));
+            $this->register_modifier($name, ['Garradin\Squelette_Filtres', $name]);
         }
 
         foreach (Squelette_Filtres::$filtres_alias as $name=>$func)
         {
-            $this->register_modifier($name, array('Garradin\Squelette_Filtres', $func));
+            $this->register_modifier($name, ['Garradin\Squelette_Filtres', $func]);
         }
     }
 
@@ -256,7 +256,7 @@ class Squelette extends \miniSkel
                 throw new \miniSkelMarkupException('Filtre '.$modifier['name'].' inconnu !');
             }
 
-            $out->append(1, '$value = call_user_func_array('.var_export($this->modifiers[$modifier['name']], true).', array($value, ');
+            $out->append(1, '$value = call_user_func_array('.var_export($this->modifiers[$modifier['name']], true).', [$value, ');
 
             foreach ($modifier['arguments'] as $arg)
             {
@@ -277,7 +277,7 @@ class Squelette extends \miniSkel
                 $out->append(1, ', ');
             }
 
-            $out->append(1, '));');
+            $out->append(1, ']);');
 
             if (in_array($modifier['name'], Squelette_Filtres::$desactiver_defaut))
             {
@@ -344,8 +344,8 @@ class Squelette extends \miniSkel
             $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
         }
 
-        $allowed_fields = array('id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
-            'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte');
+        $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
+            'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte'];
         $search = $search_rank = false;
 
         foreach ($loopCriterias as $criteria)
@@ -456,7 +456,7 @@ class Squelette extends \miniSkel
             $out->append(1, '} else { $result_'.$hash.' = false; $nb_rows = 0; }');
         }
 
-        $out->append(1, '$this->_vars[\''.$hash.'\'] = array(\'_self_hash\' => \''.$hash.'\', \'_parent_hash\' => $parent_hash, \'total_boucle\' => $nb_rows, \'compteur_boucle\' => 0);');
+        $out->append(1, '$this->_vars[\''.$hash.'\'] = [\'_self_hash\' => \''.$hash.'\', \'_parent_hash\' => $parent_hash, \'total_boucle\' => $nb_rows, \'compteur_boucle\' => 0];');
         $out->append(1, '$this->current =& $this->_vars[\''.$hash.'\']; ');
         $out->append(1, 'if ($nb_rows > 0):');
 
@@ -514,7 +514,7 @@ class Squelette extends \miniSkel
             }
 
             $content = file_get_contents($path);
-            $content = strtr($content, array('<?php' => '&lt;?php', '<?' => '<?php echo \'<?\'; ?>'));
+            $content = strtr($content, ['<?php' => '&lt;?php', '<?' => '<?php echo \'<?\'; ?>']);
 
             $out = new Squelette_Snippet(2, $this->parse($content));
             $out->prepend(1, '/* '.$tpl_id.' */ '.
@@ -702,7 +702,7 @@ class Squelette extends \miniSkel
 
     static public function listSources()
     {
-        $sources = array();
+        $sources = [];
 
         $dir = dir(ROOT . '/www/squelettes-dist');
 

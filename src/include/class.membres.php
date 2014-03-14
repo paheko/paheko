@@ -89,7 +89,11 @@ class Membres
 
         $this->_sessionStart(true);
         $hash = sha1($membre['email'] . $membre['id'] . 'recover' . ROOT . time());
-        $_SESSION['recover_password'] = array('id' => (int) $membre['id'], 'email' => $membre['email'], 'hash' => $hash);
+        $_SESSION['recover_password'] = [
+            'id' => (int) $membre['id'],
+            'email' => $membre['email'],
+            'hash' => $hash
+        ];
 
         $message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
         $message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
@@ -124,7 +128,7 @@ class Membres
 
         $password = $this->_hashPassword($password);
 
-        $db->simpleUpdate('membres', array('passe' => $password), 'id = '.(int)$id);
+        $db->simpleUpdate('membres', ['passe' => $password], 'id = '.(int)$id);
 
         return utils::mail($dest, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
     }
@@ -203,7 +207,7 @@ class Membres
 
     public function logout()
     {
-        $_SESSION = array();
+        $_SESSION = [];
         setcookie(session_name(), '', 0, '/');
         return true;
     }
@@ -212,7 +216,7 @@ class Membres
     {
         if (!isset($_SESSION['storage']))
         {
-            $_SESSION['storage'] = array();
+            $_SESSION['storage'] = [];
         }
 
         if ($value === null)
@@ -259,7 +263,7 @@ class Membres
             utils::mail($from, $sujet, $message);
         }
 
-        return utils::mail($dest, $sujet, $message, array('From' => $from));
+        return utils::mail($dest, $sujet, $message, ['From' => $from]);
     }
 
     // Gestion des données ///////////////////////////////////////////////////////
@@ -364,7 +368,7 @@ class Membres
         return true;
     }
 
-    public function add($data = array())
+    public function add($data = [])
     {
         $this->_checkFields($data);
         $db = DB::getInstance();
@@ -395,7 +399,7 @@ class Membres
         return $db->lastInsertRowId();
     }
 
-    public function edit($id, $data = array(), $check_editable = true)
+    public function edit($id, $data = [], $check_editable = true)
     {
         $db = DB::getInstance();
         $config = Config::getInstance();
@@ -466,7 +470,7 @@ class Membres
     {
         if (!is_array($ids))
         {
-            $ids = array((int)$ids);
+            $ids = [(int)$ids];
         }
 
         if ($this->isLogged())
@@ -653,7 +657,7 @@ class Membres
 
         $db = DB::getInstance();
         return $db->simpleUpdate('membres',
-            array('id_categorie' => (int)$id_cat),
+            ['id_categorie' => (int)$id_cat],
             'id IN ('.implode(',', $membres).')'
         );
     }
@@ -678,9 +682,9 @@ class Membres
     {
         $config = Config::getInstance();
 
-        $headers = array(
+        $headers = [
             'From'  =>  '"'.$config->get('nom_asso').'" <'.$config->get('email_asso').'>',
-        );
+        ];
         $message .= "\n\n--\n".$config->get('nom_asso')."\n".$config->get('site_asso');
 
         if ($dest == 0)

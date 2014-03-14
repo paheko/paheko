@@ -179,7 +179,7 @@ class Compta_Import
 				$cat = $moyen = false;
 			}
 
-			$data = array(
+			$data = [
 				'libelle'       =>  $col('Libellé'),
 				'montant'       =>  (float) $col('Montant'),
 				'date'          =>  $date,
@@ -187,7 +187,7 @@ class Compta_Import
 				'compte_debit'  =>  $debit,
 				'numero_piece'  =>  $col('Numéro de pièce'),
 				'remarques'     =>  $col('Remarques'),
-			);
+			];
 
 			if ($cat)
 			{
@@ -233,7 +233,7 @@ class Compta_Import
 		$cats = new Compta_Categories;
 		$journal = new Compta_Journal;
 
-		$columns = array();
+		$columns = [];
 		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
 		$liste_cats = $db->simpleStatementFetchAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
@@ -250,18 +250,18 @@ class Compta_Import
 			{
 				if (substr($compte, 0, 3) == '512')
 				{
-					$liste_comptes[$compte] = $banques->add(array(
+					$liste_comptes[$compte] = $banques->add([
 						'libelle'	=>	$intitule,
 						'banque'	=>	'Inconnue',
-					));
+					]);
 				}
 				else
 				{
-					$liste_comptes[$compte] = $comptes->add(array(
+					$liste_comptes[$compte] = $comptes->add([
 						'id'		=>	$compte,
 						'libelle'	=>	$intitule,
 						'parent'	=>	substr($compte, 0, -1)
-					));
+					]);
 				}
 			}
 
@@ -347,15 +347,15 @@ class Compta_Import
 
 				if ($type != $cats::AUTRES)
 				{
-					$liste_cats[$cat] = $cats->add(array(
+					$liste_cats[$cat] = $cats->add([
 						'intitule'	=>	$cat,
 						'type'		=>	$type,
 						'compte'	=>	$compte
-					));
+					]);
 				}
 			}
 
-			$data = array(
+			$data = [
 				'libelle'       =>  $col('Libellé'),
 				'montant'       =>  $col('Montant'),
 				'date'          =>  $date,
@@ -363,7 +363,7 @@ class Compta_Import
 				'compte_debit'  =>  $debit,
 				'numero_piece'  =>  $col('Numéro de pièce'),
 				'remarques'     =>  $col('Remarques'),
-			);
+			];
 
 			if ($cat)
 			{

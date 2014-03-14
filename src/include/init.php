@@ -228,14 +228,14 @@ class Loader
      * Already loaded filenames
      * @var array
      */
-    static protected $loaded = array();
+    static protected $loaded = [];
 
-    static protected $libs = array(
+    static protected $libs = [
         'utils',
         'squelette_filtres',
         'static_cache',
         'template'
-        );
+    ];
 
     /**
      * Loads a class from the $name
@@ -284,7 +284,7 @@ class Loader
     }
 }
 
-\spl_autoload_register(array('Garradin\Loader', 'load'), true);
+\spl_autoload_register(['Garradin\Loader', 'load'], true);
 
 $n = new Membres;
 

@@ -17,7 +17,7 @@ class Compta_Comptes
 
         $db = DB::getInstance();
         $db->exec('BEGIN;');
-        $ids = array();
+        $ids = [];
 
         foreach ($plan as $id=>$compte)
         {
@@ -25,22 +25,22 @@ class Compta_Comptes
 
             if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $id))
             {
-                $db->simpleUpdate('compta_comptes', array(
+                $db->simpleUpdate('compta_comptes', [
                     'parent'    =>  $compte['parent'],
                     'libelle'   =>  $compte['nom'],
                     'position'  =>  $compte['position'],
                     'plan_comptable' => 1,
-                ), 'id = \''.$db->escapeString($id).'\'');
+                ], 'id = \''.$db->escapeString($id).'\'');
             }
             else
             {
-                $db->simpleInsert('compta_comptes', array(
+                $db->simpleInsert('compta_comptes', [
                     'id'        =>  $id,
                     'parent'    =>  $compte['parent'],
                     'libelle'   =>  $compte['nom'],
                     'position'  =>  $compte['position'],
                     'plan_comptable' => 1,
-                ));
+                ]);
             }
         }
 
@@ -84,13 +84,13 @@ class Compta_Comptes
             $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $data['parent']);
         }
 
-        $db->simpleInsert('compta_comptes', array(
+        $db->simpleInsert('compta_comptes', [
             'id'        =>  $new_id,
             'libelle'   =>  trim($data['libelle']),
             'parent'    =>  $data['parent'],
             'plan_comptable' => 0,
             'position'  =>  (int)$position,
-        ));
+        ]);
 
         return $new_id;
     }
@@ -112,9 +112,9 @@ class Compta_Comptes
 
         $this->_checkFields($data);
 
-        $update = array(
+        $update = [
             'libelle'   =>  trim($data['libelle']),
-        );
+        ];
 
         if (isset($data['position']))
         {
@@ -311,14 +311,14 @@ class Compta_Comptes
 
     public function getPositions()
     {
-        return array(
+        return [
             self::ACTIF     =>  'Actif',
             self::PASSIF    =>  'Passif',
             self::ACTIF | self::PASSIF      =>  'Actif ou passif (déterminé automatiquement au bilan selon le solde du compte)',
             self::CHARGE    =>  'Charge',
             self::PRODUIT   =>  'Produit',
             self::CHARGE | self::PRODUIT    =>  'Charge et produit',
-        );
+        ];
     }
 }
 
