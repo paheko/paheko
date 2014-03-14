@@ -4,10 +4,18 @@ namespace Garradin;
 
 class Rappels_Envoyes
 {
+	/**
+	 * Types de médias
+	 */
 	const MEDIA_EMAIL = 1;
 	const MEDIA_COURRIER = 2;
 	const MEDIA_TELEPHONE = 3;
 	const MEDIA_AUTRE = 4;
+
+	/**
+	 * Nombre d'items par page dans les listes
+	 */
+	const ITEMS_PER_PAGE = 50;
 
 	/**
 	 * Vérification des champs fournis pour la modification de donnée
@@ -104,12 +112,54 @@ class Rappels_Envoyes
 
 	/**
 	 * Liste des rappels pour une cotisation donnée
-	 * @param  integer $id Numéro du rappel
+	 * @param  integer $id Numéro de la cotisation
+	 * @param  integer $page Numéro de page de liste
 	 * @return array     Liste des rappels
 	 */
-	public function listForCotisation($id)
+	public function listForCotisation($id, $page = 1)
 	{
+		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
+
 		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels_envoyes
-			WHERE id_rappel = ? ORDER BY date DESC;', \SQLITE3_ASSOC, (int)$id);
+			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?)
+			ORDER BY date DESC;', \SQLITE3_ASSOC, (int)$id);
+	}
+
+	/**
+	 * Nombre de rappels pour une cotisation donnée
+	 * @param  integer $id Numéro de la cotisation
+	 * @return integer Nombre de rappels envoyés
+	 */
+	public function countForCotisation($id)
+	{
+		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels_envoyes
+			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?);',
+			false, (int)$id);
+	}
+
+	/**
+	 * Nombre de rappels envoyés pour un rappel automatique
+	 * @param  integer $id Numéro du rappel
+	 * @param  integer $page Numéro de page de liste
+	 * @return array Liste des rappels envoyés
+	 */
+	public function listForRappel($id, $page = 1)
+	{
+		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
+
+		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels_envoyes 
+			WHERE id_rappel = ? ORDER BY date DESC LIMIT ?,?;',
+			\SQLITE3_ASSOC, (int)$id, (int)$begin, self::ITEMS_PER_PAGE);
+	}
+
+	/**
+	 * Nombre de rappels envoyés pour un rappel automatique
+	 * @param  integer $id Numéro du rappel
+	 * @return integer Nombre de rappels envoyés pour ce rappel
+	 */
+	public function countForRappel($id)
+	{
+		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels_envoyes 
+			WHERE id_rappel = ?;', false, (int)$id);
 	}
 }

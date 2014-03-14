@@ -13,9 +13,12 @@
     {include file="admin/_head.tpl" title="Enregistrer une cotisation" current="membres/cotisations" js=1}
 
     <ul class="actions">
-        <li><a href="{$admin_url}membres/cotisations/">Suivi des cotisations</a></li>
-        <li class="current"><a href="{$admin_url}membres/cotisations/ajout.php">Enregistrer une cotisation</a></li>
+        <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
+        <li class="current"><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
         <li><a href="{$admin_url}membres/cotisations/rappels.php">État des rappels</a></li>
+        {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+            <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
+        {/if}
     </ul>
 {/if}
 
