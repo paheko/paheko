@@ -27,6 +27,8 @@ if (!defined('Garradin\LOGIN_PROCESS'))
     {
         $tpl->assign('nb_membres', $membres->countAllButHidden());
     }
+
+    $tpl->assign('plugins_menu', Plugin::listMenu());
 }
 
 ?>

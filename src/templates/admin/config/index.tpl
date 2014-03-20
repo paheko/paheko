@@ -20,7 +20,7 @@
         <legend>Garradin</legend>
         <dl>
             <dt>Version installée</dt>
-            <dd class="help">{$garradin_version|escape} <a href="http://dev.kd2.org/garradin/">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+            <dd class="help">{$garradin_version|escape} <a href="{Garradin\WEBSITE}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
             <dt>Informations système</dt>
             <dd class="help">PHP version {$php_version|escape} — SQLite version {$sqlite_version|escape}</dd>
         </dl>
