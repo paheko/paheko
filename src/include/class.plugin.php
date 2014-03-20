@@ -7,6 +7,28 @@ class Plugin
 	protected $id = null;
 	protected $plugin = null;
 
+	protected $mimes = [
+		'css' => 'text/css',
+		'gif' => 'image/gif',
+		'htm' => 'text/html',
+		'html' => 'text/html',
+		'ico' => 'image/x-ico',
+		'jpe' => 'image/jpeg',
+		'jpg' => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'js' => 'application/x-javascript',
+		'pdf' => 'application/pdf',
+		'png' => 'image/png',
+		'swf' => 'application/shockwave-flash',
+		'xml' => 'text/xml',
+		'svg' => 'image/svg+xml',
+	];
+
+	/**
+	 * Construire un objet Plugin pour un plugin
+	 * @param string $id Identifiant du plugin
+	 * @throws UserException Si le plugin n'est pas installé (n'existe pas en DB)
+	 */
 	public function __construct($id)
 	{
 		$db = DB::getInstance();
@@ -27,6 +49,12 @@ class Plugin
 		$this->id = $id;
 	}
 
+	/**
+	 * Renvoie une entrée de la configuration ou la configuration complète
+	 * @param  string $key Clé à rechercher, ou NULL si on désire toutes les entrées de la
+	 * @return mixed       L'entrée demandée (mixed), ou l'intégralité de la config (array),
+	 * ou NULL si l'entrée demandée n'existe pas.
+	 */
 	public function getConfig($key = null)
 	{
 		if (is_null($key))
@@ -42,6 +70,12 @@ class Plugin
 		return null;
 	}
 
+	/**
+	 * Enregistre une entrée dans la configuration du plugin
+	 * @param string $key   Clé à modifier
+	 * @param mixed  $value Valeur à enregistrer, choisir NULL pour effacer cette clé de la configuration
+	 * @return boolean 		TRUE si tout se passe bien
+	 */
 	public function setConfig($key, $value = null)
 	{
 		if (is_null($value))
@@ -61,6 +95,11 @@ class Plugin
 		return true;
 	}
 
+	/**
+	 * Renvoie une information ou toutes les informations sur le plugin
+	 * @param  string $key Clé de l'info à retourner, ou NULL pour recevoir toutes les infos
+	 * @return mixed       Info demandée ou tableau des infos.
+	 */
 	public function getInfos($key = null)
 	{
 		if (is_null($key))
@@ -76,13 +115,33 @@ class Plugin
 		return null;
 	}
 
+	/**
+	 * Renvoie l'identifiant du plugin
+	 * @return string Identifiant du plugin
+	 */
 	public function id()
 	{
 		return $this->id;
 	}
 
+	/**
+	 * Inclure un fichier depuis le plugin (dynamique ou statique)
+	 * @param  string $file Chemin du fichier à aller chercher : si c'est un .php il sera inclus,
+	 * sinon il sera juste affiché
+	 * @return void
+	 * @throws UserException Si le fichier n'existe pas ou fait partie des fichiers qui ne peuvent
+	 * être appelés que par des méthodes de Plugin.
+	 * @throws RuntimeException Si le chemin indiqué tente de sortir du contexte du PHAR
+	 */
 	public function call($file)
 	{
+		$file = preg_replace('!^[./]*!', '', $file);
+
+		if (preg_match('!(?:\.\.|[/\\]\.|\.[/\\])!', $file))
+		{
+			throw new \RuntimeException('Chemin de fichier incorrect.');
+		}
+
 		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php', 'signals.php'];
 
 		if (in_array($file, $forbidden))
@@ -98,9 +157,35 @@ class Plugin
 		$plugin = $this;
 		global $tpl, $config, $user, $membres;
 
-		include 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file;
+		if (substr($file, -4) === '.php')
+		{
+			include 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file;
+		}
+		else
+		{
+			// Récupération du type MIME à partir de l'extension
+			$ext = substr($file, strrpos($file, '.')+1);
+
+			if (isset($this->mimes[$ext]))
+			{
+				$mime = $this->mimes[$ext];
+			}
+			else
+			{
+				$mime = 'text/plain';
+			}
+
+			header('Content-Type: ' .$this->mimes[$ext]);
+			header('Content-Length: ' . filesize('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file));
+
+			readfile('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file);
+		}
 	}
 
+	/**
+	 * Désinstaller le plugin
+	 * @return boolean TRUE si la suppression a fonctionné
+	 */
 	public function uninstall()
 	{
 		if (file_exists('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/uninstall.php'))
@@ -114,6 +199,11 @@ class Plugin
 		return $db->simpleExec('DELETE FROM plugins WHERE id = ?;', $this->id);
 	}
 
+	/**
+	 * Renvoie TRUE si le plugin a besoin d'être mis à jour
+	 * (si la version notée dans la DB est différente de la version notée dans garradin_plugin.ini)
+	 * @return boolean TRUE si le plugin doit être mis à jour, FALSE sinon
+	 */
 	public function needUpgrade()
 	{
 		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/garradin_plugin.ini', false);
@@ -124,6 +214,11 @@ class Plugin
 		return false;
 	}
 
+	/**
+	 * Mettre à jour le plugin
+	 * Appelle le fichier upgrade.php dans l'archive si celui-ci existe.
+	 * @return boolean TRUE si tout a fonctionné
+	 */
 	public function upgrade()
 	{
 		if (file_exists('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/upgrade.php'))
@@ -137,18 +232,30 @@ class Plugin
 			['version' => $infos['version']]);
 	}
 
+	/**
+	 * Liste des plugins installés (en DB)
+	 * @return array Liste des plugins triés par nom
+	 */
 	static public function listInstalled()
 	{
 		$db = DB::getInstance();
 		return $db->simpleStatementFetchAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
 	}
 
+	/**
+	 * Liste les plugins qui doivent être affichés dans le menu
+	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
+	 */
 	static public function listMenu()
 	{
 		$db = DB::getInstance();
 		return $db->simpleStatementFetchAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
 	}
 
+	/**
+	 * Liste les plugins téléchargés mais non installés
+	 * @return array Liste des plugins téléchargés
+	 */
 	static public function listDownloaded()
 	{
 		$installed = self::listInstalled();
@@ -175,8 +282,13 @@ class Plugin
 		return $list;
 	}
 
+	/**
+	 * Liste des plugins officiels depuis le repository signé
+	 * @return array Liste des plugins
+	 */
 	static public function listOfficial()
 	{
+		// La liste est stockée en cache une heure pour ne pas tuer le serveur distant
 		if (Static_Cache::expired('plugins_list', 3600 * 24))
 		{
 			$url = parse_url(PLUGINS_URL);
@@ -184,6 +296,7 @@ class Plugin
 			$context_options = [
 				'ssl' => [
 					'verify_peer'   => TRUE,
+					// On vérifie en utilisant le certificat maître de CACert
 					'cafile'        => ROOT . '/include/data/cacert.pem',
 					'verify_depth'  => 5,
 					'CN_match'      => $url['host'],
@@ -211,6 +324,11 @@ class Plugin
 		return $list;
 	}
 
+	/**
+	 * Vérifier le hash du plugin $id pour voir s'il correspond au hash du fichier téléchargés
+	 * @param  string $id Identifiant du plugin
+	 * @return boolean    TRUE si le hash correspond (intégrité OK), sinon FALSE
+	 */
 	static public function checkHash($id)
 	{
 		$list = self::fetchOfficialList();
@@ -223,12 +341,25 @@ class Plugin
 		return ($hash === $list[$id]['hash']);
 	}
 
+	/**
+	 * Est-ce que le plugin est officiel ?
+	 * @param  string  $id Identifiant du plugin
+	 * @return boolean     TRUE si le plugin est officiel, FALSE sinon
+	 */
 	static public function isOfficial($id)
 	{
 		$list = self::fetchOfficialList();
 		return array_key_exists($id, $list);
 	}
 
+	/**
+	 * Télécharge un plugin depuis le repository officiel, et l'installe
+	 * @param  string $id Identifiant du plugin
+	 * @return boolean    TRUE si ça marche
+	 * @throws LogicException Si le plugin n'est pas dans la liste des plugins officiels
+	 * @throws UserException Si le plugin est déjà installé ou que le téléchargement a échoué
+	 * @throws RuntimeException Si l'archive téléchargée est corrompue (intégrité du hash ne correspond pas)
+	 */
 	static public function download($id)
 	{
 		$list = self::fetchOfficialList();
@@ -275,16 +406,17 @@ class Plugin
 		return true;
 	}
 
-	static public function install($id, $official = true)
+	/**
+	 * Installer un plugin
+	 * @param  string  $id       Identifiant du plugin
+	 * @param  boolean $official TRUE si le plugin est officiel
+	 * @return boolean           TRUE si tout a fonctionné
+	 */
+	static public function install($id, $official = false)
 	{
 		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar'))
 		{
 			throw new \RuntimeException('Le plugin ' . $id . ' ne semble pas exister et ne peut donc être installé.');
-		}
-
-		if ($official && !self::checkHash($id))
-		{
-			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
 		}
 
 		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/garradin_plugin.ini'))
