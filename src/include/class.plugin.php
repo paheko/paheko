@@ -83,7 +83,7 @@ class Plugin
 
 	public function call($file)
 	{
-		$forbidden = ['install.php', 'infos.ini', 'upgrade.php', 'uninstall.php', 'signals.php'];
+		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php', 'signals.php'];
 
 		if (in_array($file, $forbidden))
 		{
@@ -116,7 +116,7 @@ class Plugin
 
 	public function needUpgrade()
 	{
-		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/infos.ini', false);
+		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/garradin_plugin.ini', false);
 		
 		if (version_compare($this->plugin['version'], $infos['version'], '!='))
 			return true;
@@ -167,7 +167,7 @@ class Plugin
 			if (array_key_exists($match[1], $installed))
 				continue;
 
-			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $match[1] . '.phar/infos.ini', false);
+			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $match[1] . '.phar/garradin_plugin.ini', false);
 		}
 
 		$dir->close();
@@ -261,7 +261,7 @@ class Plugin
 		}
 		catch (\Exception $e)
 		{
-			throw new \RuntimeException('Le téléchargement du plugin '.$id.' a échoué : ' . $e->getMessage());
+			throw new UserException('Le téléchargement du plugin '.$id.' a échoué : ' . $e->getMessage());
 		}
 
 		if (!self::checkHash($id))
@@ -287,9 +287,9 @@ class Plugin
 			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
 		}
 
-		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/infos.ini'))
+		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/garradin_plugin.ini'))
 		{
-			throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier infos.ini : est-ce un plugin Garradin ?');
+			throw new UserException('L\'archive '.$id.'.phar n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.');
 		}
 
 		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/index.php'))
@@ -297,7 +297,19 @@ class Plugin
 			throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier index.php : est-ce un plugin Garradin ?');
 		}
 
-		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $id . '.phar/infos.ini', false);
+		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $id . '.phar/garradin_plugin.ini', false);
+
+		$required = ['nom', 'description', 'auteur', 'url', 'version', 'menu', 'config'];
+
+		foreach ($required as $key)
+		{
+			if (!array_key_exists($key, $infos))
+			{
+				throw new \RuntimeException('Le fichier garradin_plugin.ini ne contient pas d\'entrée "'.$key.'".');
+			}
+		}
+
+		$config = '';
 
 		if ((bool)$infos['config'])
 		{
@@ -312,6 +324,8 @@ class Plugin
 				throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier config.php 
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
+
+			$config = json_encode(file_get_contents('phar://' . PLUGINS_PATH . '/' . $id . '.phar/config.json'));
 		}
 
 		$db = DB::getInstance();
