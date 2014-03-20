@@ -567,6 +567,34 @@ class utils
             default: return $size_str;
         }
     }
-}
 
-?>
+    static public function deleteRecursive($path, $delete_target = false)
+    {
+        if (!file_exists($path))
+            return false;
+
+        $dir = dir($path);
+        if (!$dir) return false;
+
+        while ($file = $dir->read())
+        {
+            if ($file == '.' || $file == '..')
+                continue;
+
+            if (is_dir($path . '/' . $file))
+            {
+                if (!self::deleteRecursive($path . '/' . $file, true))
+                    return false;
+            }
+            else
+            {
+                unlink($path . '/' . $file);
+            }
+        }
+
+        $dir->close();
+        rmdir($path);
+
+        return true;
+    }
+}

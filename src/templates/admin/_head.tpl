@@ -75,6 +75,15 @@
         {if $user.droits.config >= Garradin\Membres::DROIT_ADMIN}
             <li class="main config{if $current == 'config'} current{/if}"><a href="{$admin_url}config/">Configuration</a>
         {/if}
+        {if !empty($plugins_menu)}
+            <li class="plugins">
+                <ul>
+                {foreach from=$plugins_menu key="id" item="name"}
+                    <li class="plugins {$id|escape}{if $current == 'plugin_`$id`'} current{/if}"><a href="{$admin_url}plugin.php?id={$id|escape}">{$name|escape}</a></li>
+                {/foreach}
+                </ul>
+            </li>
+        {/if}
         <li class="my config{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php">Mes infos personnelles</a>
             <ul>
                 <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>

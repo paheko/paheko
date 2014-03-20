@@ -58,6 +58,20 @@ CREATE TABLE rappels_envoyes
     media INTEGER NOT NULL -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
 );
 
+CREATE TABLE plugins
+-- Plugins / extensions
+(
+    id TEXT PRIMARY KEY,
+    officiel INTEGER NOT NULL DEFAULT 0,
+    nom TEXT NOT NULL,
+    description TEXT,
+    auteur TEXT,
+    url TEXT,
+    version TEXT NOT NULL,
+    menu INTEGER NOT NULL DEFAULT 0,
+    config TEXT
+);
+
 -- Mise à jour des catégories
 
 CREATE TABLE membres_categories_tmp
