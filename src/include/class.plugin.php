@@ -489,4 +489,14 @@ class Plugin
 
 		return true;
 	}
+
+	/**
+	 * Renvoie la version installée d'un plugin ou FALSE s'il n'est pas installé
+	 * @param  string $id Identifiant du plugin
+	 * @return mixed      Numéro de version du plugin ou FALSE
+	 */
+	static public function getInstalledVersion($id)
+	{
+		return DB::getInstance()->simpleQuerySingle('SELECT version FROM plugins WHERE id = ?;');
+	}
 }
