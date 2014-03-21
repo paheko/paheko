@@ -7,16 +7,16 @@ if (ini_get('phar.readonly'))
 
 if (empty($argv[1]) || empty($argv[2]))
 {
-    die("Usage : " . basename(__FILE__) . " plugin.phar /path/to/plugin\n");
+    die("Usage : " . basename(__FILE__) . " /path/to/plugin/source /path/to/plugin/archive\n");
 }
 
-$phar_file = $argv[1];
+$phar_file = $argv[2];
 $phar_name = basename($phar_file);
-$target = realpath($argv[2]);
+$target = realpath($argv[1]);
 
-if (!file_exists($target . '/index.php'))
+if (!file_exists($target . '/garradin_plugin.ini'))
 {
-	die("ERREUR : Le fichier garradin_plugin.ini est obligatoire.\n");
+	die("ERREUR : Le fichier $target/garradin_plugin.ini est introuvable.\n");
 }
 
 $infos = parse_ini_file($target . '/garradin_plugin.ini');
@@ -28,9 +28,9 @@ if (!empty($infos['config']))
 		die("ERREUR : Le fichier config.json est obligatoire si config=1 dans garradin_plugin.ini.\n");
 	}
 
-	if (!file_exists($target . '/config.php'))
+	if (!file_exists($target . '/www/admin/config.php'))
 	{
-		die("ERREUR : Le fichier config.php est obligatoire si config=1 dans garradin_plugin.ini.\n");
+		die("ERREUR : Le fichier www/admin/config.php est obligatoire si config=1 dans garradin_plugin.ini.\n");
 	}
 }
 
@@ -44,9 +44,9 @@ foreach ($required as $key)
 	}
 }
 
-if (!file_exists($target . '/index.php'))
+if (!empty($infos['menu']) && !file_exists($target . '/www/admin/index.php'))
 {
-	die("ERREUR : Le fichier index.php est obligatoire.\n");
+	die("ERREUR : Le fichier www/admin/index.php est obligatoire quand menu=1\n");
 }
 
 @unlink($phar_file);
@@ -59,4 +59,5 @@ $p->buildFromDirectory($target);
 
 $p->compress(Phar::GZ);
 
-rename($phar_file . '.gz', __DIR__ . '/../src/plugins/' . $phar_name);
+@unlink($phar_file);
+rename($phar_file . '.gz', $phar_file);

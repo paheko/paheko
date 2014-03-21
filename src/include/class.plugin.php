@@ -50,6 +50,15 @@ class Plugin
 	}
 
 	/**
+	 * Renvoie le chemin absolu vers l'archive du plugin
+	 * @return string Chemin PHAR vers l'archive
+	 */
+	public function path()
+	{
+		return 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar';
+	}
+
+	/**
 	 * Renvoie une entrée de la configuration ou la configuration complète
 	 * @param  string $key Clé à rechercher, ou NULL si on désire toutes les entrées de la
 	 * @return mixed       L'entrée demandée (mixed), ou l'intégralité de la config (array),
@@ -137,7 +146,7 @@ class Plugin
 	{
 		$file = preg_replace('!^[./]*!', '', $file);
 
-		if (preg_match('!(?:\.\.|[/\\]\.|\.[/\\])!', $file))
+		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file))
 		{
 			throw new \RuntimeException('Chemin de fichier incorrect.');
 		}
@@ -149,7 +158,7 @@ class Plugin
 			throw new UserException('Le fichier ' . $file . ' ne peut être appelé par cette méthode.');
 		}
 
-		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file))
+		if (!file_exists($this->path() . '/www/' . $file))
 		{
 			throw new UserException('Le fichier ' . $file . ' n\'existe pas dans le plugin ' . $this->id);
 		}
@@ -159,7 +168,7 @@ class Plugin
 
 		if (substr($file, -4) === '.php')
 		{
-			include 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file;
+			include $this->path() . '/www/' . $file;
 		}
 		else
 		{
@@ -176,9 +185,9 @@ class Plugin
 			}
 
 			header('Content-Type: ' .$this->mimes[$ext]);
-			header('Content-Length: ' . filesize('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file));
+			header('Content-Length: ' . filesize($this->path() . '/www/' . $file));
 
-			readfile('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/' . $file);
+			readfile($this->path() . '/www/' . $file);
 		}
 	}
 
@@ -188,9 +197,9 @@ class Plugin
 	 */
 	public function uninstall()
 	{
-		if (file_exists('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/uninstall.php'))
+		if (file_exists($this->path() . '/uninstall.php'))
 		{
-			include 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/uninstall.php';
+			include $this->path() . '/uninstall.php';
 		}
 		
 		unlink(PLUGINS_PATH . '/' . $this->id . '.phar');
@@ -206,7 +215,7 @@ class Plugin
 	 */
 	public function needUpgrade()
 	{
-		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/garradin_plugin.ini', false);
+		$infos = parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 		
 		if (version_compare($this->plugin['version'], $infos['version'], '!='))
 			return true;
@@ -221,9 +230,9 @@ class Plugin
 	 */
 	public function upgrade()
 	{
-		if (file_exists('phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/upgrade.php'))
+		if (file_exists($this->path() . '/upgrade.php'))
 		{
-			include 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar/upgrade.php';
+			include $this->path() . '/upgrade.php';
 		}
 
 		$db = DB::getInstance();
@@ -424,11 +433,6 @@ class Plugin
 			throw new UserException('L\'archive '.$id.'.phar n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.');
 		}
 
-		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/index.php'))
-		{
-			throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier index.php : est-ce un plugin Garradin ?');
-		}
-
 		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $id . '.phar/garradin_plugin.ini', false);
 
 		$required = ['nom', 'description', 'auteur', 'url', 'version', 'menu', 'config'];
@@ -441,6 +445,11 @@ class Plugin
 			}
 		}
 
+		if (!empty($infos['menu']) && !file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/www/admin/index.php'))
+		{
+			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
+		}
+
 		$config = '';
 
 		if ((bool)$infos['config'])
@@ -451,9 +460,9 @@ class Plugin
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/config.php'))
+			if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/www/admin/config.php'))
 			{
-				throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier config.php 
+				throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier www/admin/config.php 
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 

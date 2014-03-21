@@ -22,13 +22,12 @@ if (!defined('Garradin\LOGIN_PROCESS'))
     $user = $membres->getLoggedUser();
 
     $tpl->assign('current', '');
+    $tpl->assign('plugins_menu', Plugin::listMenu());
 
     if ($user['droits']['membres'] >= Membres::DROIT_ACCES)
     {
         $tpl->assign('nb_membres', $membres->countAllButHidden());
     }
-
-    $tpl->assign('plugins_menu', Plugin::listMenu());
 }
 
 ?>
