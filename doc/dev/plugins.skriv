@@ -1,0 +1,156 @@
+= Les plugins dans Garradin =
+
+Garradin permet d'étendre ses fonctionnalités avec des plugins (appelés extensions dans la partie privée/admin de Garradin).
+
+L'interface de Garradin est séparée en deux sections : la section publique correspond au site web de l'association, accessible à tout visiteur, et la section privée, aussi appelée administration de l'association. Les plugins peuvent étendre l'une ou l'autre partie, ou même les deux.
+
+Les plugins peuvent être installés de deux manières :
+# par le catalogue des extensions (extensions officielles)
+# simplement en copiant le fichier de l'extension dans le répertoire "plugins/" de Garradin (extensions non-officielles)
+
+
+== Bonnes pratiques ==
+
+Les plugins officiels sont relus et vérifiés avant publication et garantissent qu'ils ne devraient pas atteindre au bon fonctionnement de Garradin ou des autres plugins.
+
+Pour pouvoir être intégré au catalogue des plugins officiels il faut qu'il respecte un ensemble de règles édicté plus bas : [[règles du catalogue|#Règles du catalogue]].
+
+Les plugins non-officiels ne sont soumis à aucune règle mais il est quand même recommandé de suivre celles qui sont indiquées ici.
+
+=== Règles du catalogue ===
+
+Pour intégrer le catalogue des plugins officiels disponibles directement depuis Garradin le plugin doit :
+
+* être sous licence libre (compatible Debian et FOSS : GPL, AGPL, BSD, etc.) afin de pouvoir être maintenu dans le temps par la communauté ;
+* avoir un code lisible et clair (peu importe la convention de codage) ;
+* ne pas porter atteinte à l'intégrité et la stabilité de Garradin, cela implique :
+** NE PAS patcher, éditer, supprimer ou ajouter de fichiers au code de Garradin lui-même : le plugin doit être contenu dans son archive. Il est par contre possible de faire dépendre un plugin de code ou composants contenus dans un autre plugin.
+** NE PAS stocker de données en dehors de la base de données de Garradin.
+** NE PAS ajouter, modifier ou supprimer directement des données dans la base de données de Garradin (hormis dans sa propre table).
+** NE PAS enregistrer de documents sans utiliser les méthodes fournies par Garradin.
+* respecter la vie privée des utilisateurs et notamment :
+** NE PAS contacter un serveur distant (sauf besoin spécifique) ni transmettre des informations ou statistiques à un serveur tiers.
+
+== Détails techniques ==
+
+=== Format des plugins ===
+
+Les plugins sont des archives PHAR : tous les fichiers du plugin (code PHP, CSS, templates, images, etc.) sont stockés dans l'archive et y restent.
+
+Il est possible de créer soi-même l'archive PHAR de cette manière :
+
+[[[php
+// Répertoire contenant l'arborescence du plugin
+$source_dir = '/home/bohwaz/dev/plugins/test';
+
+// Fichier PHAR à créer
+$dest = '/home/bohwaz/dev/garradin/src/plugins/test.phar';
+
+$p = new Phar($dest);
+
+$p->buildFromDirectory($source_dir);
+
+$p->compress(Phar::GZ);
+
+@unlink($dest);
+rename($dest . '.gz', $dest);
+]]]
+
+Un script PHP (**make_plugin.php**) est fourni dans le répertoire **tools/** de la version de développement de Garradin afin de vérifier l'arborescence et de créer l'archive PHAR en ligne de commande. Son utilisation est très simple :
+
+ $ php -d phar.readonly=0 ~/dev/plugins/test ~/garradin/src/plugins/test.phar
+
+=== Informations sur le plugin (garradin_plugin.ini) ===
+
+Chaque plugin doit au moins fournir à la racine de son archive un fichier nommé ''garradin_plugin.ini''. Ce fichier fournit le nom, la description et quelques détails sur le plugin :
+
+ nom="Ma première extension Garradin"
+ description="Affiche un message trop cool"
+ auteur="Anne Onyme"
+ url="http://garradin.eu/"
+ version="1.0"
+ menu=1
+ config=1
+
+La directive ''nom'' indique le nom du plugin, qui sera utilisé dans les listes et menus. ''description'' fournit une description plus longue d'une phrase ou deux, ''auteur'' donne le nom de l'auteur du plugin, et ''url'' indique l'adresse du site web de l'auteur.
+
+''version'' est utilisée pour savoir quelle est la version du plugin fournie dans l'archive. Voir plus loin : [[Mise à jour|#Mise à jour]].
+
+''menu'' indique à Garradin s'il doit afficher une entrée dans le menu des extensions de la partie privée. Cette entrée sera visible par tous les membres qui peuvent se connecter, même si l'extension restreint ensuite son accès. L'entrée du menu appellera le fichier **www/admin/index.php** qui devra donc exister, à défaut l'installation de l'extension échouera.
+
+''config'' indique si l'extension possède une configuration modifiable par l'utilisateur. Si positionné à 1 (ou ''true'') alors la page de gestion des extensions proposera un lien pour configurer l'extension (appelant le fichier **www/admin/config.php**), et le fichier **config.json** sera importé comme configuration par défaut. Ces deux fichiers sont donc obligatoires si ''config'' est activé.
+
+Attention, si le fichier **garradin_plugin.ini** n'existe pas dans l'archive elle ne pourra pas être installée, n'étant pas considérée comme un plugin de Garradin.
+
+=== Configuration du plugin ===
+
+Si ''config'' est positionné à 1 ou true (ou même ''On'') dans garradin_plugin.ini la configuration au format JSON stockée dans **config.json** sera importée comme configuration par défaut du plugin.
+
+Attention les objets javascript sont transformés en tableaux à l'import, il n'est donc pas possible de stocker un objet dynamique dans la configuration.
+
+=== Scripts magiques ===
+
+Chaque archive peut comporter certains ''scripts magiques'' qui seront appelés automatiquement par Garradin lors de certains événements.
+
+* **install.php** est appelé quand le plugin a été téléchargé et qu'il est déjà noté comme installé (post-installation), utile notamment pour créer une table dans la base de données
+* **upgrade.php** : quand la version de l'archive (notée dans garradin_plugin.ini) ne correspond pas à la version enregistrée en base de donnée
+* **uninstall.php** : juste avant que le plugin ne soit supprimé, utile par exemple pour supprimer une table créée dans la base de données
+
+Ces scripts ne peuvent pas être appelés par une requête HTTP via l'interface privée ou publique.
+
+=== Objet Garradin\Plugin ==
+
+* __construct(string $id)
+* setConfig(string $key, string $value) : enregistre la configuration du plugin, si $value est null alors tte clé est effacée de la configuration
+* getConfig(string $key) : récupère la valeur de la clé $key pour la configuration du plugin
+* getInfos() : renvoie les informations enregistrées sur le plugin
+* upgrade() : mise à jour du plugin
+* needsUpgrade() : le plugin doit-il être mis à jour ?
+* uninstall() : désinstaller le plugin
+* id() : renvoie l'identifiant du plugin
+* path() : renvoie le chemin vers l'archive PHAR du plugin
+
+=== Base de données ===
+
+Tous les plugins ont un accès illimité à la base de données principale de Garradin. Cependant il est interdit d'ajouter, modifier ou supprimer des données directement dans les tables de cette BDD afin de ne pas compromettre l'intégrité des données. Pour modifier ces données il faut utiliser les méthodes de Garradin.
+
+Chaque plugin peut créer une ou plusieurs tables dans cette BDD, elles devront par contre être supprimées à la désinstallation. Dans ce cas un plugin peut modifier directement ses tables.
+
+=== Fichiers ===
+
+Les plugins ne doivent pas créer, modifier ou supprimer de fichiers dans l'arborescence de Garradin.
+
+Les seuls fichiers qu'un plugin devrait modifier sont :
+* du cache : utiliser de préférence l'objet Static_Cache de Garradin, ou faire attention aux collisions de noms ;
+* les squelettes dans le répertoire **www/squelettes/**
+
+Pour enregistrer et récupérer des documents il faut utiliser les méthodes de stockage de fichiers fournies par Garradin.
+
+=== Dans les templates ===
+
+Garradin fournit la lib Template_Lite, déjà chargée par défaut. C'est une version allégée de Smarty 2.
+
+Afficher un template contenu dans le plugin :
+<pre>
+    $tpl->display(PLUGIN_ROOT . '/templates/index.tpl');
+</pre>
+
+Inclure un template de Garradin depuis un template :
+<pre>
+    {include file="admin/_head.tpl"}
+</pre>
+
+Inclure un template du plugin depuis un autre template du plugin :
+<pre>
+    {include file="`$plugin_root`/templates/_nav.tpl"}
+</pre>
+
+Faire un lien vers une autre page du plugin :
+<verbatim>
+    <a href="{plugin_url file="liste.php"}">Liste des trucs</a>
+</verbatim>
+
+Inclure une feuille de style CSS supplémentaire sur les pages du plugin (chemin relatif à la racine du plugin) :
+<pre>
+    $tpl->assign('plugin_css', 'styles/bleu.css');
+</pre>
