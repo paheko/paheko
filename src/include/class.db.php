@@ -20,6 +20,10 @@ class DB extends \SQLite3
 
     protected $_running_sum = 0.0;
 
+    const NUM = \SQLITE3_NUM;
+    const ASSOC = \SQLITE3_ASSOC;
+    const BOTH = \SQLITE3_BOTH;
+
     static public function getInstance($create = false)
     {
         return self::$_instance ?: self::$_instance = new DB($create);
@@ -206,13 +210,13 @@ class DB extends \SQLite3
         }
 
         $args = array_slice(func_get_args(), 2);
-        return $this->_fetchResult($this->simpleStatement($query, $args), $mode);
+        return $this->fetchResult($this->simpleStatement($query, $args), $mode);
     }
 
     public function simpleStatementFetchAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->_fetchResultAssoc($this->simpleStatement($query, $args));
+        return $this->fetchResultAssoc($this->simpleStatement($query, $args));
     }
 
     public function simpleStatementFetchAssocKey($query, $mode = SQLITE3_BOTH)
@@ -223,7 +227,7 @@ class DB extends \SQLite3
         }
 
         $args = array_slice(func_get_args(), 2);
-        return $this->_fetchResultAssocKey($this->simpleStatement($query, $args), $mode);
+        return $this->fetchResultAssocKey($this->simpleStatement($query, $args), $mode);
     }
 
     public function escapeAuto($value, $name = '')
@@ -295,20 +299,20 @@ class DB extends \SQLite3
 
     public function queryFetch($query, $mode = SQLITE3_BOTH)
     {
-        return $this->_fetchResult($this->query($query), $mode);
+        return $this->fetchResult($this->query($query), $mode);
     }
 
     public function queryFetchAssoc($query)
     {
-        return $this->_fetchResultAssoc($this->query($query));
+        return $this->fetchResultAssoc($this->query($query));
     }
 
     public function queryFetchAssocKey($query, $mode = SQLITE3_BOTH)
     {
-        return $this->_fetchResultAssocKey($this->query($query), $mode);
+        return $this->fetchResultAssocKey($this->query($query), $mode);
     }
 
-    protected function _fetchResult($result, $mode)
+    public function fetchResult($result, $mode = \SQLITE3_BOTH)
     {
         $out = [];
 
@@ -323,7 +327,7 @@ class DB extends \SQLite3
         return $out;
     }
 
-    protected function _fetchResultAssoc($result)
+    protected function fetchResultAssoc($result)
     {
         $out = [];
 
@@ -338,7 +342,7 @@ class DB extends \SQLite3
         return $out;
     }
 
-    protected function _fetchResultAssocKey($result, $mode)
+    protected function fetchResultAssocKey($result, $mode = \SQLITE3_BOTH)
     {
         $out = [];
 
