@@ -510,6 +510,8 @@ $tpl->register_function('pagination', 'Garradin\tpl_pagination');
 $tpl->register_function('diff', 'Garradin\tpl_diff');
 $tpl->register_function('html_champ_membre', 'Garradin\tpl_html_champ_membre');
 
+$tpl->register_function('plugin_url', ['Garradin\utils', 'plugin_url']);
+
 $tpl->register_modifier('get_country_name', ['Garradin\utils', 'getCountryName']);
 $tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'Garradin\tpl_format_wiki');
@@ -545,9 +547,11 @@ $tpl->register_modifier('display_champ_membre', function ($v, $config) {
 
 });
 
-$tpl->register_modifier('format_sqlite_date_to_french', function ($d) {
-    if (strlen($d) == 10)
-        return \DateTime::createFromFormat('Y-m-d', $d)->format('d/m/Y');
+$tpl->register_modifier('format_sqlite_date_to_french', function ($d, $short = false) {
+    if (strlen($d) == 10 || $short)
+        return \DateTime::createFromFormat('Y-m-d', substr($d, 0, 10))->format('d/m/Y');
+    elseif (strlen($d) == 16)
+        return \DateTime::createFromFormat('Y-m-d H:i', $d)->format('d/m/Y H:i');
     else
         return \DateTime::createFromFormat('Y-m-d H:i:s', $d)->format('d/m/Y H:i');
 });
@@ -560,8 +564,6 @@ $tpl->register_modifier('format_bytes', function ($size) {
     else
         return $size . ' ob_get_contents(oid)';
 });
-
-//$tpl->register_modifier('retard_cotisation', array('Membres', 'checkCotisation'));
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
 $tpl->register_modifier('date_fr', 'Garradin\tpl_date_fr');
