@@ -15,6 +15,16 @@
             <script type="text/javascript" src="{$admin_url}static/{$js|escape}"></script>
         {/foreach}
     {/if}
+    {if isset($plugin_css)}
+        {foreach from=$plugin_css item="css"}
+            <link rel="stylesheet" type="text/css" href="{plugin_url file=$css}" />
+        {/foreach}
+    {/if}
+    {if isset($plugin_js)}
+        {foreach from=$plugin_js item="hs"}
+            <script type="text/javascript" src="{plugin_url file=$js}"></script>
+        {/foreach}
+    {/if}
 </head>
 
 <body{if !empty($body_id)} id="{$body_id|escape}"{/if} data-url="{$admin_url|escape}">
@@ -77,9 +87,10 @@
         {/if}
         {if !empty($plugins_menu)}
             <li class="plugins">
+                <a>Extensions</a>
                 <ul>
                 {foreach from=$plugins_menu key="id" item="name"}
-                    <li class="plugins {$id|escape}{if $current == 'plugin_`$id`'} current{/if}"><a href="{$admin_url}plugin.php?id={$id|escape}">{$name|escape}</a></li>
+                    <li class="plugins {$id|escape}{if $current == 'plugin_`$id`'} current{/if}"><a href="{plugin_url id=$id}">{$name|escape}</a></li>
                 {/foreach}
                 </ul>
             </li>

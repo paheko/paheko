@@ -54,7 +54,7 @@
                     <td class="actions">
                         <a href="{$admin_url}config/plugins.php?delete={$plugin.id|escape}">Désinstaller</a>
                         {if !empty($plugin.config)}
-                            | <a href="{$admin_url}plugin.php?id={$plugin.id|escape}&amp;page=config.php">Configurer</a>
+                            | <a href="{plugin_url id=$plugin.id file="config.php"}">Configurer</a>
                         {/if}
                     </td>
                 </tr>
