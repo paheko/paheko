@@ -597,4 +597,30 @@ class utils
 
         return true;
     }
+
+    static public function plugin_url($params)
+    {
+        if (!defined('Garradin\PLUGIN_URL'))
+        {
+            $url = WWW_URL . 'admin/plugin/' . $params['id'] . '/';
+        }
+        else
+        {
+            $url = PLUGIN_URL;
+        }
+
+        if (!empty($params['file']))
+            $url .= $params['file'];
+
+        if (!empty($params['query']))
+        {
+            $url .= '?';
+            
+            if (!(is_numeric($params['query']) && (int)$params['query'] === 1) && $params['query'] !== true)
+                $url .= $params['query'];
+        }
+
+        return $url;
+    }
+
 }
