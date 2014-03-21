@@ -25,16 +25,18 @@
 {if !empty($liste)}
     <table class="list">
         <thead>
-            <td></td>
-            <th>Membre</th>
-            <td>Statut</td>
-            <td>Date de cotisation</td>
-            <td></td>
+            <tr>
+                <td></td>
+                <th>Membre</th>
+                <td>Statut</td>
+                <td>Date de cotisation</td>
+                <td></td>
+            </tr>
         </thead>
         <tbody>
             {foreach from=$liste item="co"}
                 <tr>
-                    <td><a class="icn" href="{$admin_url}membres/fiche.php?id={$co.id_membre|escape}">{$co.id_membre|escape}</a></td>
+                    <td class="num"><a class="icn" href="{$admin_url}membres/fiche.php?id={$co.id_membre|escape}">{$co.id_membre|escape}</a></td>
                     <th>{$co.nom|escape}</th>
                     <td>{if $co.a_jour}<b class="confirm">À jour</b>{else}<b class="error">En retard</b>{/if}</td>
                     <td>{$co.date|format_sqlite_date_to_french}</td>

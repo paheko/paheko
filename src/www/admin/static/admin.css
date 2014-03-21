@@ -379,7 +379,6 @@ table.list .confirm {
 
 table.list .num {
     text-align: center;
-    font-size: .9em;
 }
 
 table.list .check {
@@ -397,12 +396,9 @@ table.list thead .cur {
 
 table.list thead th a, table.list thead td a {
     display: inline-block;
-    line-height: 10pt;
-    height: 10pt;
-    overflow: hidden;
     color: #000;
     text-decoration: none;
-    font-size: 16pt;
+    font-size: 10pt;
     font-weight: normal;
     background: #ccc;
     border: 1px outset #999;
@@ -410,8 +406,9 @@ table.list thead th a, table.list thead td a {
     padding: 0 .1em;
 }
 
-table.list thead a:nth-child(1) {
-    line-height: 2pt;
+table.list thead th a:hover, table.list thead td a:hover {
+    background: #999;
+    border-color: #333;
 }
 
 table.list thead .cur.desc a:nth-child(2), table.list thead .cur.asc a:nth-child(1) {
@@ -419,7 +416,6 @@ table.list thead .cur.desc a:nth-child(2), table.list thead .cur.asc a:nth-child
     background: #999;
     color: #fff;
 }
-
 
 table.list .actions {
     text-align: right;
@@ -498,10 +494,20 @@ b.money {
     padding: .2em;
 }
 
-.actions .icn:hover {
+.num a {
+    text-decoration: none;
+    border-radius: .5em;
+    display: inline-block;
+    text-align: center;
+    padding: 0 .2em;
+    background: rgba(217, 134, 40, 0.5);
+}
+
+.actions .icn:hover, .num a:hover {
     color: darkred;
     background: #ff9;
 }
+
 
 .droits b {
     border: 2px solid #999;
