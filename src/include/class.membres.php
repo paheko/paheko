@@ -280,7 +280,7 @@ class Membres
                 continue;
             }
 
-            if (!isset($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) == '')
+            if (!isset($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) === '')
                 || (is_array($data[$key]) && empty($data[$key])))
             {
                 if (!empty($config['mandatory']) && ($check_password || $key != 'passe'))
@@ -295,11 +295,11 @@ class Membres
 
             if (isset($data[$key]))
             {
-                if ($config['type'] == 'email' && trim($data[$key]) != '' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
+                if ($config['type'] == 'email' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
                 {
                     throw new UserException('Adresse e-mail invalide dans le champ "' . $config['title'] . '".');
                 }
-                elseif ($config['type'] == 'url' && trim($data[$key]) != '' && !filter_var($data[$key], FILTER_VALIDATE_URL))
+                elseif ($config['type'] == 'url' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_URL))
                 {
                     throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
                 }
@@ -315,7 +315,7 @@ class Membres
                 {
                     $data[$key] = empty($data[$key]) ? 0 : 1;
                 }
-                elseif ($config['type'] == 'number' && trim($data[$key]) != '')
+                elseif ($config['type'] == 'number' && trim($data[$key]) !== '')
                 {
                     if (empty($data[$key]))
                     {
@@ -348,6 +348,12 @@ class Membres
                     }
 
                     $data[$key] = $binary;
+                }
+
+                // Un champ texte vide c'est un champ NULL
+                if (is_string($data[$key]) && trim($data[$key]) === '')
+                {
+                    $data[$key] = null;
                 }
             }
         }
@@ -706,34 +712,6 @@ class Membres
         {
             utils::mail($row['email'], $sujet, $message, $headers);
         }
-
-        return true;
-    }
-
-    public function toCSV()
-    {
-        $db = DB::getInstance();
-
-        $res = $db->prepare('SELECT m.id, c.nom AS "categorie", m.* FROM membres AS m 
-            LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
-
-        $fp = fopen('php://output', 'w');
-        $header = false;
-
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
-        {
-            unset($row['passe']);
-
-            if (!$header)
-            {
-                fputcsv($fp, array_keys($row));
-                $header = true;
-            }
-
-            fputcsv($fp, $row);
-        }
-
-        fclose($fp);
 
         return true;
     }
