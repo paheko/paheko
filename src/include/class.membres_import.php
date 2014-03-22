@@ -88,10 +88,11 @@ class Membres_Import
 		};
 
 		$line = 0;
+		$delim = utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096, ';');
+			$row = fgetcsv($fp, 4096, $delim);
 			$line++;
 
 			if (empty($row))
@@ -136,6 +137,109 @@ class Membres_Import
 		return true;
 	}
 
+	/**
+	 * Importer un CSV de la liste des membres depuis un export Garradin
+	 * @param  string $path 	Chemin vers le CSV
+	 * @return boolean          TRUE en cas de succès
+	 */
+	public function fromCSV($path)
+	{
+		if (!file_exists($path) || !is_readable($path))
+		{
+			throw new \RuntimeException('Fichier inconnu : '.$path);
+		}
+
+		$fp = fopen($path, 'r');
+
+		if (!$fp)
+		{
+			return false;
+		}
+
+		$db = DB::getInstance();
+		$db->exec('BEGIN;');
+		$membres = new Membres;
+
+		// On récupère les champs qu'on peut importer
+		$champs = Config::getInstance()->get('champs_membres')->getAll();
+		$champs = array_keys($champs);
+		$champs[] = 'date_inscription';
+		$champs[] = 'date_connexion';
+		$champs[] = 'id';
+		$champs[] = 'id_categorie';
+
+		$line = 0;
+		$delim = utils::find_csv_delim($fp);
+
+		while (!feof($fp))
+		{
+			$row = fgetcsv($fp, 4096, $delim);
+
+			$line++;
+
+			if (empty($row))
+			{
+				continue;
+			}
+
+			if ($line == 1)
+			{
+				if (is_numeric($row[0]))
+				{
+					throw new UserException('Erreur sur la ligne 1 : devrait contenir l\'en-tête des colonnes.');
+				}
+
+				$columns = array_flip($row);
+				continue;
+			}
+
+			if (count($row) != count($columns))
+			{
+				$db->exec('ROLLBACK;');
+				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
+			}
+
+			$data = [];
+
+			foreach ($columns as $name=>$id)
+			{
+				// Champs qui n'existent pas dans le schéma actuel
+				if (!in_array($name, $champs))
+					continue;
+
+				if (trim($row[$id]) !== '')
+					$data[$name] = $row[$id];
+			}
+
+			if (!empty($data['id']))
+			{
+				$id = (int)$data['id'];
+				unset($data['id']);
+			}
+			else
+			{
+				$id = false;
+			}
+			
+			try {
+				if ($id)
+					$membres->edit($id, $data);
+				else
+					$membres->add($data);
+			}
+			catch (UserException $e)
+			{
+				$db->exec('ROLLBACK;');
+				throw new UserException('Erreur sur la ligne ' . $line . ' : ' . $e->getMessage());
+			}
+		}
+
+		$db->exec('END;');
+
+		fclose($fp);
+		return true;
+	}
+
     public function toCSV()
     {
         $db = DB::getInstance();
@@ -152,7 +256,7 @@ class Membres_Import
 
             if (!$header)
             {
-                fputcsv($fp, array_keys($row));
+                fputcsv($fp, array_keys($row), ';');
                 $header = true;
             }
 

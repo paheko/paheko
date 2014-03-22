@@ -623,4 +623,29 @@ class utils
         return $url;
     }
 
+    static public function find_csv_delim($fp)
+    {
+        $line = '';
+
+        while ($line === '' && !feof($fp))
+        {
+            $line = trim(fgets($fp, 4096));
+        }
+        
+        // Delete the columns content
+        $line = preg_replace('/".*?"/', '', $line);
+
+        $delims = [
+            ';' => substr_count($line, ';'),
+            ',' => substr_count($line, ','),
+            "\t"=> substr_count($line, "\t")
+        ];
+
+        arsort($delims);
+        reset($delims);
+
+        rewind($fp);
+        return key($delims);
+    }
+
 }
