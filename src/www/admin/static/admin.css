@@ -325,6 +325,10 @@ table.list {
     width: 100%;
 }
 
+table.list.auto {
+    width: auto;
+}
+
 table.list table {
     margin: 0;
 }
