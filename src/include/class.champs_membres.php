@@ -435,7 +435,13 @@ class Champs_Membres
         $db->exec('DROP TABLE IF EXISTS membres;');
     	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
         $db->exec('CREATE INDEX membres_id_categorie ON membres (id_categorie);'); // Index
-        $db->exec('CREATE UNIQUE INDEX membres_identite ON membres ('.$config->get('champ_identite').');');
+
+        // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
+        $db->exec('UPDATE membres SET '.$config->get('champ_identifiant').' = NULL 
+            WHERE '.$config->get('champ_identifiant').' = "";');
+
+        // Création de l'index unique
+        $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
     	$db->exec('END;');
     	$db->exec('PRAGMA foreign_keys = ON;');
 
