@@ -309,6 +309,9 @@ class Plugin
 					'cafile'        => ROOT . '/include/data/cacert.pem',
 					'verify_depth'  => 5,
 					'CN_match'      => $url['host'],
+					'SNI_enabled'	=> true,
+					'SNI_server_name'		=>	$url['host'],
+					'disable_compression'	=>	true,
 				]
 			];
 
@@ -391,6 +394,9 @@ class Plugin
 				'cafile'        => ROOT . '/include/data/cacert.pem',
 				'verify_depth'  => 5,
 				'CN_match'      => $url['host'],
+				'SNI_enabled'	=> true,
+				'SNI_server_name'		=>	$url['host'],
+				'disable_compression'	=>	true,
 			]
 		];
 
