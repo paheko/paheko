@@ -35,8 +35,12 @@ if (!empty($_POST['save']))
     else
     {
         try {
-        	$delai = (int) utils::post('delai');
-            $delai = utils::post('delai_pre') ? -$delai : $delai;
+            if (utils::post('delai_choix') == 0)
+               $delai = 0;
+            elseif (utils::post('delai_choix') > 0)
+                $delai = (int) utils::post('delai_post');
+            else
+                $delai = -(int) utils::post('delai_pre');
 
             $rappels->edit($rappel['id'], [
                 'sujet'		=>	utils::post('sujet'),
@@ -56,8 +60,8 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
-$rappel['delai_pre'] = $rappel['delai'] > 0 ? 0 : 1;
-$rappel['delai'] = abs($rappel['delai']);
+$rappel['delai_pre'] = $rappel['delai_post'] = abs($rappel['delai']) ?: 30;
+$rappel['delai_choix'] = $rappel['delai'] == 0 ? 0 : ($rappel['delai'] > 0 ? 1 : -1);
 
 $tpl->assign('rappel', $rappel);
 $tpl->assign('cotisations', $cotisations->listCurrent());

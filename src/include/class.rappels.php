@@ -21,7 +21,7 @@ class Rappels
 
 		$data['id_cotisation'] = (int) $data['id_cotisation'];
 
-		if (empty($data['delai']) || !is_numeric($data['delai']))
+		if ((trim($data['delai']) === '') || !is_numeric($data['delai']))
 		{
 			throw new UserException('Délai avant rappel invalide : doit être indiqué en nombre de jours.');
 		}
