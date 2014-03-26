@@ -36,7 +36,7 @@
         <legend>Ajouter une catégorie</legend>
         <dl>
             <dt><label for="f_nom">Nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="nom" id="f_nom" value="{form_field name=nom}" /></dd>
+            <dd><input type="text" name="nom" id="f_nom" value="{form_field name=nom}" required="required" /></dd>
         </dl>
     </fieldset>
 

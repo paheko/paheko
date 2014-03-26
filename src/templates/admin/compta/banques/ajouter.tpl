@@ -12,9 +12,9 @@
         <legend>Ajouter un compte bancaire</legend>
         <dl>
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" /></dd>
+            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" required="required" /></dd>
             <dt><label for="f_banque">Nom de la banque</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="banque" id="f_banque" value="{form_field name=banque}" /></dd>
+            <dd><input type="text" name="banque" id="f_banque" value="{form_field name=banque}" required="required" /></dd>
             <dt><label for="f_iban">Numéro IBAN</label></dt>
             <dd><input type="text" size="30" name="iban" id="f_iban" value="{form_field name=iban}" /></dd>
             <dt><label for="f_bic">Code BIC/SWIFT de la banque</label></dt>

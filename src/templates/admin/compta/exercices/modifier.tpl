@@ -12,11 +12,11 @@
         <legend>Modifier un exercice</legend>
         <dl>
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$exercice}" /></dd>
+            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$exercice}" required="required" /></dd>
             <dt><label for="f_debut">Début de l'exercice</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="date" name="debut" id="f_debut" value="{form_field name=debut default=$exercice.debut|date_fr:'Y-m-d'}" size="10" /></dd>
+            <dd><input type="date" name="debut" id="f_debut" value="{form_field name=debut default=$exercice.debut|date_fr:'Y-m-d'}" size="10" required="required" /></dd>
             <dt><label for="f_fin">Fin de l'exercice</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="date" name="fin" id="f_fin" value="{form_field name=fin default=$exercice.fin|date_fr:'Y-m-d'}" size="10" /></dd>
+            <dd><input type="date" name="fin" id="f_fin" value="{form_field name=fin default=$exercice.fin|date_fr:'Y-m-d'}" size="10" required="required" /></dd>
         </dl>
     </fieldset>
 

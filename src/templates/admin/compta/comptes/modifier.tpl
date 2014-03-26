@@ -12,7 +12,7 @@
         <legend>Modifier un compte</legend>
         <dl>
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$compte}" /></dd>
+            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$compte}" required="required" /></dd>
             <dt><label for="f_position_1">Position</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             {foreach from=$positions item="pos" key="id"}
             <dd>

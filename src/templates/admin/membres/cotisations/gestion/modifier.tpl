@@ -18,11 +18,11 @@
         <legend>Modifier une cotisation</legend>
         <dl>
             <dt><label for="f_intitule">Intitulé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="intitule" id="f_intitule" value="{form_field name=intitule data=$cotisation}" /></dd>
+            <dd><input type="text" name="intitule" id="f_intitule" value="{form_field name=intitule data=$cotisation}" required="required" /></dd>
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" cols="50" rows="3">{form_field name=description data=$cotisation}</textarea></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" name="montant" step="0.01" min="0.00" id="f_montant" value="{form_field default=20 name=montant default=0.00 data=$cotisation}" /></dd>
+            <dd><input type="number" name="montant" step="0.01" min="0.00" id="f_montant" value="{form_field default=20 name=montant default=0.00 data=$cotisation}" required="required" /></dd>
 
             <dt><label for="f_periodicite_jours">Période de validité</label></dt>
             <dd><input type="radio" name="periodicite" id="f_periodicite_ponctuel" value="ponctuel" {form_field checked="ponctuel" name=periodicite default="ponctuel" data=$cotisation} /> <label for="f_periodicite_ponctuel">Pas de période (activité ou cotisation ponctuelle)</label></dd>

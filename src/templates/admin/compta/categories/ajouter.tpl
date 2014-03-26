@@ -13,13 +13,13 @@
         <dl>
             <dt><label for="f_type">Type</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="type" id="f_type">
+                <select name="type" id="f_type" required="required">
                     <option value="{Garradin\Compta_Categories::RECETTES}"{if $type == Garradin\Compta_Categories::RECETTES} selected="selected"{/if}>Recette</option>
                     <option value="{Garradin\Compta_Categories::DEPENSES}"{if $type == Garradin\Compta_Categories::DEPENSES} selected="selected"{/if}>Dépense</option>
                 </select>
             </dd>
             <dt><label for="f_intitule">Intitulé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="intitule" id="f_intitule" value="{form_field name=intitule}" /></dd>
+            <dd><input type="text" name="intitule" id="f_intitule" value="{form_field name=intitule}" required="required" /></dd>
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" rows="4" cols="30">{form_field name=description}</textarea></dd>
             <dt><label for="f_compte">Compte affecté</label> <b title="(Champ obligatoire)">obligatoire</b></dt>

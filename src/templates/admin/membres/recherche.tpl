@@ -22,7 +22,7 @@
                 </select>
             </dd>
             <dt><label for="f_texte">Recherche</label></dt>
-            <dd id="f_free"><input id="f_texte" type="text" name="r" value="{$recherche|escape}" /></dd>
+            <dd id="f_free"><input id="f_texte" type="text" name="r" value="{$recherche|escape}" required="required" /></dd>
             {foreach from=$champs_liste key="k" item="v"}
                 {if $v.type == 'select'}
                     <dd class="special" id="f_{$k|escape}">

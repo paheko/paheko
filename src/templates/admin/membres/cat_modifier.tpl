@@ -12,7 +12,7 @@
         <legend>Informations générales</legend>
         <dl>
             <dt><label for="f_nom">Nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="nom" id="f_nom" value="{form_field data=$cat name=nom}" /></dd>
+            <dd><input type="text" name="nom" id="f_nom" value="{form_field data=$cat name=nom}" required="required" /></dd>
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" rows="5" cols="50">{form_field data=$cat name=description}</textarea></dd>
             <dt>

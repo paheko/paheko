@@ -21,7 +21,7 @@
         <legend>Importer depuis un fichier</legend>
         <dl>
             <dt><label for="f_file">Fichier à importer</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="file" name="upload" id="f_file" /></dd>
+            <dd><input type="file" name="upload" id="f_file" required="required" /></dd>
             <dt><label for="f_type">Type de fichier</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <input type="radio" name="type" id="f_type" value="garradin" {form_field name=type checked="garradin" default="garradin"} />

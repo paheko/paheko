@@ -12,11 +12,11 @@
         <legend>Informations sur l'opération</legend>
         <dl>
             <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="date" name="date" id="f_date" value="{form_field name=date default=$operation.date|date_fr:'Y-m-d'}" size="10" /></dd>
+            <dd><input type="date" name="date" id="f_date" value="{form_field name=date default=$operation.date|date_fr:'Y-m-d'}" size="10" required="required" /></dd>
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$operation}" /></dd>
+            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$operation}" required="required" /></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant data=$operation}" min="0.00" step="0.01" /> {$config.monnaie|escape}</dd>
+            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant data=$operation}" min="0.00" step="0.01" required="required" /> {$config.monnaie|escape}</dd>
 
 {if is_null($type)}
             <dt><label for="f_compte_debit">Compte débité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
