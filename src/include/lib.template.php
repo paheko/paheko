@@ -410,6 +410,11 @@ function tpl_html_champ_membre($params)
         $attributes .= 'disabled="disabled" ';
     }
 
+    if (!empty($config['mandatory']))
+    {
+        $attributes .= 'required="required" ';
+    }
+
     if (!empty($params['user_mode']) && empty($config['editable']))
     {
         $out = '<dt>' . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</dt>';

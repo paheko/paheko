@@ -259,6 +259,9 @@ class DB extends \SQLite3
 
     public function simpleUpdate($table, $fields, $where)
     {
+        if (empty($fields))
+            return false;
+        
         $query = 'UPDATE '.$table.' SET ';
 
         foreach ($fields as $key=>$value)
