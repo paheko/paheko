@@ -457,7 +457,12 @@ class Membres
             $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
         }
 
-        $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
+        if (empty($data))
+        {
+            return true;
+        }
+
+        return $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
     }
 
     public function get($id)
