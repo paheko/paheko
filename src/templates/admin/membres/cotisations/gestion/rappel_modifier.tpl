@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un rappel automatique" current="membres/cotisations"}
+{include file="admin/_head.tpl" title="Modifier un rappel automatique" current="membres/cotisations" js=1}
 
 <ul class="actions">
     <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>

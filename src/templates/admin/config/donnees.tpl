@@ -25,9 +25,9 @@
         ou que personne ne s'est connecté.
     </p>
     <dl>
-        <dt><label for="f_frequency">Intervalle de sauvegarde</label></dt>
+        <dt><label for="f_frequency">Intervalle de sauvegarde</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
         <dd>
-            <select name="frequence_sauvegardes" id="f_frequency">
+            <select name="frequence_sauvegardes" required="required" id="f_frequency">
                 <option value="0"{form_field name=frequence_sauvegardes data=$config selected=0}>Aucun — les sauvegardes automatiques sont désactivées</option>
                 <option value="1"{form_field name=frequence_sauvegardes data=$config selected=1}>Quotidien, tous les jours</option>
                 <option value="7"{form_field name=frequence_sauvegardes data=$config selected=7}>Hebdomadaire, tous les 7 jours</option>
@@ -37,7 +37,7 @@
                 <option value="365{form_field name=frequence_sauvegardes data=$config selected=365}">Annuel</option>
             </select>
         </dd>
-        <dt><label for="f_max_backups">Nombre de sauvegardes conservées</label></dt>
+        <dt><label for="f_max_backups">Nombre de sauvegardes conservées</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
         <dd class="help">
             Par exemple avec l'intervalle mensuel, en indiquant de conserver 12 sauvegardes,
             vous pourrez garder un an d'historique de sauvegardes.
@@ -46,7 +46,7 @@
             <strong>Attention :</strong> si vous choisissez un nombre important et un intervalle réduit,
             l'espace disque occupé par vos sauvegardes va rapidement augmenter.
         </dd>
-        <dd><input type="number" name="nombre_sauvegardes" value="{form_field name=nombre_sauvegardes data=$config}" if="f_max_backups" min="1" max="90" /></dd>
+        <dd><input type="number" name="nombre_sauvegardes" value="{form_field name=nombre_sauvegardes data=$config}" if="f_max_backups" min="1" max="90" required="required" /></dd>
     </dl>
     <p>
         {csrf_field key="backup_config"}
@@ -122,7 +122,7 @@
     <p>
         {csrf_field key="backup_restore"}
         <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size|escape}" />
-        <input type="file" name="file" id="f_file" />
+        <input type="file" name="file" id="f_file" required="required" />
         (maximum {$max_file_size|format_bytes})
         <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />
     </p>

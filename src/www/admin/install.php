@@ -136,7 +136,7 @@ else
                 $config->set('nom_asso', utils::post('nom_asso'));
                 $config->set('adresse_asso', utils::post('adresse_asso'));
                 $config->set('email_asso', utils::post('email_asso'));
-                $config->set('site_asso', utils::post('site_asso'));
+                $config->set('site_asso', WWW_URL);
                 $config->set('monnaie', '€');
                 $config->set('pays', 'FR');
                 $config->set('email_envoi_automatique', utils::post('email_asso'));
