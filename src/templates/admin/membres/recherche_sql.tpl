@@ -7,7 +7,7 @@
         <dl>
             <dt><label for="f_query">Requête SQL</label></dt>
             <dd class="help">Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée.</dd>
-            <dd><textarea name="query" id="f_query" cols="50" rows="7">{$query|escape}</textarea></dd>
+            <dd><textarea name="query" id="f_query" cols="50" rows="7" required="required">{$query|escape}</textarea></dd>
         </dl>
         <p class="submit">
             <input type="submit" value="Exécuter &rarr;" />

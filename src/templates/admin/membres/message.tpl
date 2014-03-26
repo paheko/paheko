@@ -18,9 +18,9 @@
             <dt>Destinataire</dt>
             <dd>{$membre.identite|escape} ({$categorie.nom|escape})</dd>
             <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" /></dd>
+            <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" required="required" /></dd>
             <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><textarea name="message" id="f_message" cols="72" rows="25">{form_field name=message}</textarea></dd>
+            <dd><textarea name="message" id="f_message" cols="72" rows="25" required="required">{form_field name=message}</textarea></dd>
             <dd>
                 <input type="checkbox" name="copie" id="f_copie" value="1" />
                 <label for="f_copie">Recevoir par e-mail une copie du message envoyé</label>

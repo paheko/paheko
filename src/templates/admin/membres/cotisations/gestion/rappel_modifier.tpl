@@ -42,12 +42,12 @@
             <dd><label><input type="radio" name="delai_choix" value="0" {form_field name="delai_choix" checked=0 default=0 data=$rappel} /> Le jour de l'expiration de la cotisation</label></dd>
             <dd>
                 <input type="radio" name="delai_choix" id="f_delai_pre" value="-1" {form_field name="delai_choix" checked=-1 data=$rappel} />
-                <input type="number" name="delai_pre" id="f_delai_pre_nb" step="1" min="1" max="900" size="4" id="f_delai" value="{form_field name=delai_pre data=$rappel default=30}" required="required" />
+                <input type="number" name="delai_pre" id="f_delai_pre_nb" step="1" min="1" max="900" size="4" id="f_delai" value="{form_field name=delai_pre data=$rappel default=30}" />
                 <label for="f_delai_pre">jours avant expiration</label>
             </dd>
             <dd>
                 <input type="radio" name="delai_choix" id="f_delai_post" value="1" {form_field name="delai_choix" checked=1 data=$rappel} /> 
-                <input type="number" name="delai_post" id="f_delai_post_nb" step="1" min="1" max="900" size="4" id="f_delai" value="{form_field name=delai_post default=30 data=$rappel}" required="required" />
+                <input type="number" name="delai_post" id="f_delai_post_nb" step="1" min="1" max="900" size="4" id="f_delai" value="{form_field name=delai_post default=30 data=$rappel}" />
                 <label for="f_delai_post">jours après expiration</label>
             </dd>
             <dt><label for="f_texte">Texte du mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
