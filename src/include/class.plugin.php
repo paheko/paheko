@@ -55,7 +55,7 @@ class Plugin
 	 */
 	public function path()
 	{
-		return 'phar://' . PLUGINS_PATH . '/' . $this->id . '.phar';
+		return 'phar://' . PLUGINS_ROOT . '/' . $this->id . '.phar';
 	}
 
 	/**
@@ -202,7 +202,7 @@ class Plugin
 			include $this->path() . '/uninstall.php';
 		}
 		
-		unlink(PLUGINS_PATH . '/' . $this->id . '.phar');
+		unlink(PLUGINS_ROOT . '/' . $this->id . '.phar');
 
 		$db = DB::getInstance();
 		return $db->simpleExec('DELETE FROM plugins WHERE id = ?;', $this->id);
@@ -270,7 +270,7 @@ class Plugin
 		$installed = self::listInstalled();
 
 		$list = [];
-		$dir = dir(PLUGINS_PATH);
+		$dir = dir(PLUGINS_ROOT);
 
 		while ($file = $dir->read())
 		{
@@ -283,7 +283,7 @@ class Plugin
 			if (array_key_exists($match[1], $installed))
 				continue;
 
-			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $match[1] . '.phar/garradin_plugin.ini', false);
+			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $match[1] . '.phar/garradin_plugin.ini', false);
 		}
 
 		$dir->close();
@@ -348,7 +348,7 @@ class Plugin
 		if (!array_key_exists($id, $list))
 			return null;
 
-		$hash = sha1_file(PLUGINS_PATH . '/' . $id . '.phar');
+		$hash = sha1_file(PLUGINS_ROOT . '/' . $id . '.phar');
 
 		return ($hash === $list[$id]['hash']);
 	}
@@ -381,7 +381,7 @@ class Plugin
 			throw new \LogicException($id . ' n\'est pas un plugin officiel (absent de la liste)');
 		}
 
-		if (file_exists(PLUGINS_PATH . '/' . $id . '.phar'))
+		if (file_exists(PLUGINS_ROOT . '/' . $id . '.phar'))
 		{
 			throw new UserException('Le plugin '.$id.' existe déjà.');
 		}
@@ -403,7 +403,7 @@ class Plugin
 		$context = stream_context_create($context_options);
 
 		try {
-			copy($list[$id]['phar'], PLUGINS_PATH . '/' . $id . '.phar', $context);
+			copy($list[$id]['phar'], PLUGINS_ROOT . '/' . $id . '.phar', $context);
 		}
 		catch (\Exception $e)
 		{
@@ -412,7 +412,7 @@ class Plugin
 
 		if (!self::checkHash($id))
 		{
-			unlink(PLUGINS_PATH . '/' . $id . '.phar');
+			unlink(PLUGINS_ROOT . '/' . $id . '.phar');
 			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
 		}
 
@@ -429,17 +429,17 @@ class Plugin
 	 */
 	static public function install($id, $official = false)
 	{
-		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar'))
+		if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.phar'))
 		{
 			throw new \RuntimeException('Le plugin ' . $id . ' ne semble pas exister et ne peut donc être installé.');
 		}
 
-		if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/garradin_plugin.ini'))
+		if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/garradin_plugin.ini'))
 		{
 			throw new UserException('L\'archive '.$id.'.phar n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.');
 		}
 
-		$infos = parse_ini_file('phar://' . PLUGINS_PATH . '/' . $id . '.phar/garradin_plugin.ini', false);
+		$infos = parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/garradin_plugin.ini', false);
 
 		$required = ['nom', 'description', 'auteur', 'url', 'version', 'menu', 'config'];
 
@@ -451,7 +451,7 @@ class Plugin
 			}
 		}
 
-		if (!empty($infos['menu']) && !file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/www/admin/index.php'))
+		if (!empty($infos['menu']) && !file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/www/admin/index.php'))
 		{
 			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
 		}
@@ -460,19 +460,19 @@ class Plugin
 
 		if ((bool)$infos['config'])
 		{
-			if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/config.json'))
+			if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/config.json'))
 			{
 				throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier config.json 
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			if (!file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/www/admin/config.php'))
+			if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/www/admin/config.php'))
 			{
 				throw new \RuntimeException('L\'archive '.$id.'.phar ne comporte pas de fichier www/admin/config.php 
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			$config = json_encode(file_get_contents('phar://' . PLUGINS_PATH . '/' . $id . '.phar/config.json'));
+			$config = json_encode(file_get_contents('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/config.json'));
 		}
 
 		$db = DB::getInstance();
@@ -488,9 +488,9 @@ class Plugin
 			'config'	=>	$config,
 		]);
 
-		if (file_exists('phar://' . PLUGINS_PATH . '/' . $id . '.phar/install.php'))
+		if (file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/install.php'))
 		{
-			include 'phar://' . PLUGINS_PATH . '/' . $id . '.phar/install.php';
+			include 'phar://' . PLUGINS_ROOT . '/' . $id . '.phar/install.php';
 		}
 
 		return true;

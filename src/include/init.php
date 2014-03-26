@@ -90,15 +90,21 @@ if (!defined('Garradin\WWW_URL'))
     define('Garradin\WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
 }
 
-if (!defined('Garradin\PLUGINS_PATH'))
+if (!defined('Garradin\PLUGINS_ROOT'))
 {
-    define('Garradin\PLUGINS_PATH', DATA_ROOT . '/plugins');
+    define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
 }
 
 // Affichage des erreurs par défaut
 if (!defined('Garradin\SHOW_ERRORS'))
 {
     define('Garradin\SHOW_ERRORS', true);
+}
+
+// Utilisation de cron pour les tâches automatiques
+if (!defined('Garradin\USE_CRON'))
+{
+    define('Garradin\USE_CRON', false);
 }
 
 define('Garradin\WEBSITE', 'http://garradin.eu/');
@@ -211,6 +217,10 @@ function exception_handler($e)
         <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
         <hr />
         <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
+    }
+    else
+    {
+
     }
 
     exit;

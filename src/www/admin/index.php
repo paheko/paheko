@@ -28,13 +28,13 @@ else
 }
 
 $tpl->display('admin/index.tpl');
+flush();
 
-// On réalise la sauvegarde auto à cet endroit, c'est un peu inefficace mais bon
-
-if ($config->get('frequence_sauvegardes') && $config->get('nombre_sauvegardes'))
+// Si pas de cron on réalise les tâches automatisées à ce moment-là
+// c'est pas idéal mais mieux que rien
+if (!USE_CRON)
 {
-	$s = new Sauvegarde;
-	$s->auto();
+	require_once ROOT . '/cron.php';
 }
 
 ?>
