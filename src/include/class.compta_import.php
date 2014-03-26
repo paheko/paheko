@@ -101,10 +101,11 @@ class Compta_Import
 		};
 
 		$line = 0;
+		$delim = utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096);
+			$row = fgetcsv($fp, 4096, $delim);
 			$line++;
 
 			if (empty($row))
@@ -280,10 +281,11 @@ class Compta_Import
 		};
 
 		$line = 0;
+		$delim = utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{
-			$row = fgetcsv($fp, 4096, ';');
+			$row = fgetcsv($fp, 4096, $delim);
 			$line++;
 
 			if (empty($row))
