@@ -133,6 +133,10 @@ $tpl->assign('new', utils::post('new'));
 $tpl->register_modifier('get_type', function ($type) use ($types) {
     return $types[$type];
 });
+
+$tpl->assign('csrf_name', utils::CSRF_field_name('config_membres'));
+$tpl->assign('csrf_value', utils::CSRF_create('config_membres'));
+
 $tpl->display('admin/config/membres.tpl');
 
 ?>

@@ -64,8 +64,6 @@
         </p>
     </form>
 {else}
-<form method="post" action="{$self_url|escape}">
-
     <p class="help">
         Cette page vous permet de personnaliser les fiches d'information des membres de l'association.<br />
         <strong>Attention :</strong> Les champs supprimés de la fiche seront effacés de toutes les fiches de tous les membres, et les données qu'ils contenaient seront perdues.
@@ -87,40 +85,49 @@
     </fieldset>
 
     {if !empty($presets)}
+    <form method="post" action="{$self_url|escape}">
     <fieldset>
         <legend>Ajouter un champ pré-défini</legend>
         <p>
-            <select name="preset">
+            <select name="preset" required="required">
                 <option></option>
                 {foreach from=$presets key="name" item="preset"}
                 <option value="{$name|escape}">{$name|escape} &mdash; {$preset.title|escape}</option>
                 {/foreach}
             </select>
+            <input type="hidden" name="{$csrf_name|escape}" value="{$csrf_value|escape}" />
             <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
         </p>
     </fieldset>
+    </form>
     {/if}
 
+<form method="post" action="{$self_url|escape}">
     <fieldset>
         <legend>Ajouter un champ personnalisé</legend>
         <dl>
             <dt><label for="f_name">Nom unique</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">Ne peut comporter que des lettres minuscules et des tirets bas.</dd>
-            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" size="30" /></dd>
+            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" size="30" required="required" /></dd>
             <dt><label for="f_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" size="60" /></dd>
+            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" size="60" required="required" /></dd>
             <dt><label for="f_type">Type de champ</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="new_type" id="f_type">
+                <select name="new_type" id="f_type" required="required">
                     {foreach from=$types key="type" item="nom"}
                     <option value="{$type|escape}" {form_field name=new_type selected=$type}>{$nom|escape}</option>
                     {/foreach}
                 </select>
             </dd>
         </dl>
-        <p><input type="submit" name="add" value="Ajouter ce champ à la fiche membre" /></p>
+        <p>
+            <input type="hidden" name="{$csrf_name|escape}" value="{$csrf_value|escape}" />
+            <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+        </p>
     </fieldset>
+</form>
 
+<form method="post" action="{$self_url|escape}">
     <div id="orderFields">
         {foreach from=$champs item="champ" key="nom"}
         {if $nom == 'passe'}{continue}{/if}
@@ -130,7 +137,7 @@
                 <dt><label>Type</label></dt>
                 <dd>{$champ.type|get_type}</dd>
                 <dt><label for="f_{$nom|escape}_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                <dd><input type="text" name="champs[{$nom|escape}][title]" id="f_{$nom|escape}_title" value="{form_field data=$champs[$nom] name=title}" size="60" /></dd>
+                <dd><input type="text" name="champs[{$nom|escape}][title]" id="f_{$nom|escape}_title" value="{form_field data=$champs[$nom] name=title}" size="60" required="required" /></dd>
                 <dt><label for="f_{$nom|escape}_help">Aide</label></dt>
                 <dd><input type="text" name="champs[{$nom|escape}][help]" id="f_{$nom|escape}_help" value="{form_field data=$champs[$nom] name=help}" size="100" /></dd>
                 <dt><label><input type="checkbox" name="champs[{$nom|escape}][editable]" value="1" {form_field data=$champs[$nom] name=editable checked="1"} /> Modifiable par les membres</label></dt>
@@ -144,8 +151,7 @@
                     {if $champ.type == 'multiple'}
                         <dd class="help">Attention changer l'ordre des options peut avoir des effets indésirables.</dd>
                     {else}
-                        <dd class="help">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà
-                            été enregistré dans les fiches des membres.</dd>
+                        <dd class="help">Attention renommer ou supprimer une option n'affecte pas ce qui a déjà été enregistré dans les fiches des membres.</dd>
                     {/if}
                     <dd>
                         <{if $champ.type == 'multiple'}ol{else}ul{/if} class="options">
@@ -180,12 +186,11 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="config_membres"}
+        <input type="hidden" name="{$csrf_name|escape}" value="{$csrf_value|escape}" />
         <input type="submit" name="reset" value="Annuler les changements" class="minor" />
         <input type="submit" name="review" value="Enregistrer &rarr;" />
         (un récapitulatif sera présenté et une confirmation sera demandée)
     </p>
-
 </form>
 
 <script type="text/javascript">
