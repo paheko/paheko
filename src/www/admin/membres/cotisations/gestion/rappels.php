@@ -22,8 +22,12 @@ if (!empty($_POST['save']))
     else
     {
         try {
-        	$delai = (int) utils::post('delai');
-            $delai = utils::post('delai_pre') ? -$delai : $delai;
+            if (utils::post('delai_choix') == 0)
+        	   $delai = 0;
+            elseif (utils::post('delai_choix') > 0)
+                $delai = (int) utils::post('delai_post');
+            else
+                $delai = -(int) utils::post('delai_pre');
 
             $rappels->add([
                 'sujet'		=>	utils::post('sujet'),
