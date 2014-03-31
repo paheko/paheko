@@ -44,7 +44,7 @@ class Rappels_Envoyes
 
 		$data['id_membre'] = (int) $data['id_membre'];
 
-		if (empty($data['media']) || !is_numeric($data['delai']) 
+		if (empty($data['media']) || !is_numeric($data['media']) 
 			|| !in_array((int)$data['media'], [self::MEDIA_EMAIL, self::MEDIA_COURRIER, self::MEDIA_TELEPHONE, self::MEDIA_AUTRE]))
 		{
 			throw new UserException('Média invalide.');
@@ -94,6 +94,71 @@ class Rappels_Envoyes
 	public function get($id)
 	{
 		return DB::getInstance()->simpleQuerySingle('SELECT * FROM rappels_envoyes WHERE id = ?;', true, (int)$id);
+	}
+
+	/**
+	 * Remplacer les tags dans le contenu/sujet du mail
+	 * @param  string $content Chaîne à traiter
+	 * @param  array  $data    Données supplémentaires à utiliser comme tags (tableau associatif)
+	 * @return string          $content dont les tags ont été remplacés par le contenu correct
+	 */
+	public function replaceTagsInContent($content, $data = null)
+	{
+		$config = Config::getInstance();
+		$tags = [
+			'#NOM_ASSO'		=>	$config->get('nom_asso'),
+			'#ADRESSE_ASSO'	=>	$config->get('adresse_asso'),
+			'#EMAIL_ASSO'	=>	$config->get('email_asso'),
+			'#SITE_ASSO'	=>	$config->get('site_asso'),
+			'#URL_RACINE'	=>	WWW_URL,
+			'#URL_SITE'		=>	WWW_URL,
+			'#URL_ADMIN'	=>	WWW_URL . 'admin/',
+		];
+
+		if (!empty($data) && is_array($data))
+		{
+			foreach ($data as $key=>$value)
+			{
+				$key = '#' . strtoupper($key);
+				$tags[$key] = $value;
+			}
+		}
+
+		return strtr($content, $tags);
+	}
+
+	/**
+	 * Envoi de mail pour rappel automatisé
+	 * @param  array $data Données du rappel automatisé
+	 * @return boolean     TRUE
+	 */
+	public function sendAuto($data)
+	{
+		$replace = $data;
+		$replace['date_rappel'] = utils::sqliteDateToFrench($replace['date_rappel']);
+		$replace['date_expiration'] = utils::sqliteDateToFrench($replace['expiration']);
+		$replace['nb_jours'] = abs($replace['nb_jours']);
+		$replace['delai'] = abs($replace['delai']);
+
+		$subject = $this->replaceTagsInContent($data['sujet'], $replace);
+		$text = $this->replaceTagsInContent($data['texte'], $replace);
+
+		// Envoi du mail
+		utils::mail($data['email'], $subject, $text);
+
+		// Enregistrement en DB
+		$this->add([
+			'id_cotisation'	=>	$data['id_cotisation'],
+			'id_membre'		=>	$data['id'],
+			'media'			=>	Rappels_Envoyes::MEDIA_EMAIL,
+			// On enregistre la date de mise en œuvre du rappel
+			// et non pas la date d'envoi effective du rappel
+			// car l'envoi du rappel peut ne pas être effectué
+			// le jour où il aurait dû être envoyé (la magie des cron)
+			'date'			=>	$data['date_rappel'],
+		]);
+
+		return true;
 	}
 
 	/**

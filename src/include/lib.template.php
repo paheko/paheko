@@ -552,14 +552,7 @@ $tpl->register_modifier('display_champ_membre', function ($v, $config) {
 
 });
 
-$tpl->register_modifier('format_sqlite_date_to_french', function ($d, $short = false) {
-    if (strlen($d) == 10 || $short)
-        return \DateTime::createFromFormat('Y-m-d', substr($d, 0, 10))->format('d/m/Y');
-    elseif (strlen($d) == 16)
-        return \DateTime::createFromFormat('Y-m-d H:i', $d)->format('d/m/Y H:i');
-    else
-        return \DateTime::createFromFormat('Y-m-d H:i:s', $d)->format('d/m/Y H:i');
-});
+$tpl->register_modifier('format_sqlite_date_to_french', ['Garradin\utils', 'sqliteDateToFrench']);
 
 $tpl->register_modifier('format_bytes', function ($size) {
     if ($size > (1024 * 1024))
