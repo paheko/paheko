@@ -64,6 +64,8 @@ CREATE TABLE membres_operations
 (
     id_membre INTEGER NOT NULL REFERENCES membres (id),
     id_operation INTEGER NOT NULL REFERENCES compta_journal (id),
+    id_cotisation INTEGER NULL REFERENCES cotisations_membres (id),
+    
     PRIMARY KEY (id_membre, id_operation)
 );
 

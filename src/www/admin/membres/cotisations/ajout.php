@@ -77,6 +77,7 @@ $tpl->assign('cotisations', $cotisations->listCurrent());
 $tpl->assign('default_co', null);
 $tpl->assign('default_amount', 0.00);
 $tpl->assign('default_date', date('Y-m-d'));
+$tpl->assign('default_compta', null);
 
 $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
 $tpl->assign('moyen_paiement', utils::post('moyen_paiement') ?: 'ES');
@@ -94,6 +95,7 @@ if (utils::get('cotisation'))
     }
 
     $tpl->assign('default_co', $co['id']);
+    $tpl->assign('default_compta', $co['id_categorie_compta']);
     $tpl->assign('default_amount', $co['montant']);
 }
 elseif ($membre)
