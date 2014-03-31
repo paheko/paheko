@@ -87,6 +87,7 @@
 </form>
 
 <script type="text/javascript">
+var show_compta = {if $default_compta}true{else}false{/if};
 {literal}
 (function () {
     window.changeMoyenPaiement = function()
@@ -97,7 +98,11 @@
     };
 
     changeMoyenPaiement();
-    toggleElementVisibility('.f_compta', false);
+    
+    if (!show_compta)
+    {
+        toggleElementVisibility('.f_compta', false);
+    }
 
     $('#f_moyen_paiement').onchange = changeMoyenPaiement;
 

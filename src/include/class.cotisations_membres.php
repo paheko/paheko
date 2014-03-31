@@ -58,23 +58,22 @@ class Cotisations_Membres
 
 		$id = $db->lastInsertRowId();
 
-		$id_cat = $db->simpleQuerySingle('SELECT id_categorie_compta FROM cotisations WHERE id = ?;', 
-			false, (int)$data['id_cotisation']);
+		$co = $db->simpleQuerySingle('SELECT * FROM cotisations WHERE id = ?;', 
+			true, (int)$data['id_cotisation']);
 
-		if ($id_cat)
+		if ($co['id_categorie_compta'])
 		{
 			try {
-		        $this->addOperationCompta($id, [
-		        	'id_categorie'	=>	$id_cat,
-		            'libelle'       =>  $data['libelle'],
-		            'montant'       =>  $data['montant'],
+		        $id_operation = $this->addOperationCompta($id, [
+		        	'id_categorie'	=>	$co['id_categorie_compta'],
+		            'libelle'       =>  'Cotisation (automatique)',
+		            'montant'       =>  $co['montant'],
 		            'date'          =>  $data['date'],
 		            'moyen_paiement'=>  $data['moyen_paiement'],
 		            'numero_cheque' =>  $data['numero_cheque'],
 		            'id_auteur'     =>  $data['id_auteur'],
-		            'moyen_paiement'=>	$data['moyen_paiement'],
-		            'numero_cheque'	=>	$data['numero_cheque'],
 		            'banque'		=>	$data['banque'],
+		            'id_membre'		=>	$data['id_membre'],
 		        ]);
 	        }
 	        catch (\Exception $e)
@@ -107,27 +106,25 @@ class Cotisations_Membres
 	}
 
 	/**
-	 * Renvoie une liste des écritures comptables liées à un paiement
-	 * @param  int $id Numéro du paiement
+	 * Renvoie une liste des écritures comptables liées à une cotisation
+	 * @param  int $id Numéro de la cotisation membre
 	 * @return array Liste des écritures
 	 */
 	public function listOperationsCompta($id)
 	{
-		// FIXME
 		$db = DB::getInstance();
 		return $db->simpleStatementFetch('SELECT * FROM compta_journal
-			WHERE id IN (SELECT id_operation FROM cotisations_paiements_compta
+			WHERE id IN (SELECT id_operation FROM membres_operations
 				WHERE id_cotisation = ?);', \SQLITE3_ASSOC, (int)$id);
 	}
 
 	/**
 	 * Ajouter une écriture comptable pour un paiemement membre
-	 * @param int $id Numéro du paiement
+	 * @param int $id Numéro de la cotisation membre
 	 * @param array $data Données
 	 */
 	public function addOperationCompta($id, $data)
 	{
-		// FIXME
 		$journal = new Compta_Journal;
 		$db = DB::getInstance();
 
@@ -190,9 +187,10 @@ class Cotisations_Membres
             'id_auteur'     =>  (int)$data['id_auteur'],
         ]);
 
-        $db->simpleInsert('cotisations_paiements_compta', [
+        $db->simpleInsert('membres_operations', [
         	'id_operation' => $id_operation,
-        	'id_paiement' => $id,
+        	'id_membre' => $data['id_membre'],
+        	'id_cotisation' => (int)$id,
         ]);
 
         return $id_operation;
@@ -243,7 +241,8 @@ class Cotisations_Membres
 	public function listForMember($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT cm.*, c.intitule, c.duree, c.debut, c.fin, c.montant
+		return $db->simpleStatementFetch('SELECT cm.*, c.intitule, c.duree, c.debut, c.fin, c.montant,
+			(SELECT COUNT(*) FROM membres_operations WHERE id_cotisation = cm.id) AS nb_operations
 			FROM cotisations_membres AS cm
 				LEFT JOIN cotisations AS c ON c.id = cm.id_cotisation
 			WHERE cm.id_membre = ? ORDER BY cm.date DESC;', \SQLITE3_ASSOC, (int)$id);

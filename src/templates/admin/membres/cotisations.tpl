@@ -62,6 +62,7 @@
     <thead>
         <th>Date</th>
         <td>Cotisation</td>
+        <td></td>
         <td class="actions"></td>
     </thead>
     <tbody>
@@ -79,9 +80,14 @@
                     {/if}
                     — {$c.montant|html_money} {$config.monnaie|escape}
                 </td>
+                <td>
+                    {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE && !empty($c.nb_operations)}
+                        {$c.nb_operations} écritures
+                    {/if}
+                </td>
                 <td class="actions">
-                    <a href="{$admin_url}membres/cotisations/voir.php?id={$c.id_cotisation|escape}">Voir les autres membres cotisants</a>
-                    | <a href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id|escape}">Supprimer</a>
+                    <a href="{$admin_url}membres/cotisations/voir.php?id={$c.id_cotisation|escape}">Autres cotisants</a>
+                    | <a class="icn" href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id|escape}">✘</a>
                 </td>
             </tr>
         {/foreach}
