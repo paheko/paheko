@@ -197,6 +197,9 @@ function exception_handler($e)
 
     foreach ($_SERVER as $key=>$value)
     {
+        if (is_array($value))
+            $value = json_encode($value);
+
         $error .= $key . ': ' . $value . "\n";
     }
     

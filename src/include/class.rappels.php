@@ -113,6 +113,15 @@ class Rappels
 	}
 
 	/**
+	 * Renvoie le nombre de rappels automatiques enregistrés
+	 * @return integer Nombre de rappels
+	 */
+	public function countAll()
+	{
+		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels;');
+	}
+
+	/**
 	 * Liste des rappels triés par cotisation
 	 * @return array Liste des rappels
 	 */
@@ -136,33 +145,59 @@ class Rappels
 	}
 
 	/**
-	 * Remplacer les tags dans le contenu/sujet du mail
-	 * @param  string $content Chaîne à traiter
-	 * @param  array  $data    Données supplémentaires à utiliser comme tags (tableau associatif)
-	 * @return string          $content dont les tags ont été remplacés par le contenu correct
+	 * Envoi des rappels automatiques par e-mail
+	 * @return boolean TRUE en cas de succès
 	 */
-	public function replaceTagsInContent($content, $data = null)
+	public function sendPending()
 	{
+		$db = DB::getInstance();
 		$config = Config::getInstance();
-		$tags = [
-			'#NOM_ASSO'		=>	$config->get('nom_asso'),
-			'#ADRESSE_ASSO'	=>	$config->get('adresse_asso'),
-			'#EMAIL_ASSO'	=>	$config->get('email_asso'),
-			'#SITE_ASSO'	=>	$config->get('site_asso'),
-			'#URL_RACINE'	=>	WWW_URL,
-			'#URL_SITE'		=>	WWW_URL,
-			'#URL_ADMIN'	=>	WWW_URL . 'admin/',
-		];
 
-		if (!empty($data) && is_array($data))
+		// Requête compliquée qui fait tout le boulot
+		// la logique est un JOIN des tables rappels, cotisations, cotisations_membres et membres
+		// pour récupérer la liste des membres qui doivent recevoir une cotisation
+		$query = '
+		SELECT 
+			*,
+			/* Nombre de jours avant ou après expiration */
+			(julianday(date()) - julianday(expiration)) AS nb_jours,
+			/* Date de mise en œuvre du rappel */
+			date(expiration, delai || \' days\') AS date_rappel
+		FROM (
+			SELECT m.*, r.delai, r.sujet, r.texte, r.id_cotisation,
+				m.'.$config->get('champ_identite').' AS identite,
+				CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
+				WHEN c.fin IS NOT NULL THEN c.fin ELSE 0 END AS expiration
+			FROM rappels AS r
+				INNER JOIN cotisations AS c ON c.id = r.id_cotisation
+				INNER JOIN cotisations_membres AS cm ON cm.id_cotisation = c.id
+				INNER JOIN membres AS m ON m.id = cm.id_membre
+			WHERE
+				/* Inutile de sélectionner les membres sans email */
+				m.email IS NOT NULL AND m.email != ""
+				/* Les cotisations ponctuelles ne comptent pas */
+				AND (c.fin IS NOT NULL OR c.duree IS NOT NULL)
+				/* Rien nest envoyé aux membres des catégories cachées, logique */
+				AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)
+			ORDER BY r.delai ASC
+		)
+		WHERE nb_jours >= delai 
+			/* Pour ne pas spammer on n\'envoie pas de rappel antérieur au dernier rappel déjà effectué */
+			AND id NOT IN (SELECT id_membre FROM rappels_envoyes AS re 
+				WHERE id_cotisation = re.id_cotisation AND id = re.id_membre 
+				AND re.date >= date(expiration, delai || \' days\')
+			)
+		/* Grouper par membre, pour n\'envoyer qu\'un seul rappel par membre/cotise */
+		GROUP BY id, id_cotisation
+		ORDER BY nb_jours DESC;';
+
+		$st = $db->prepare($query);
+		$res = $st->execute();
+		$re = new Rappels_Envoyes;
+
+		while ($row = $res->fetchArray(DB::ASSOC))
 		{
-			foreach ($data as $key=>$value)
-			{
-				$key = '#' . strtoupper($key);
-				$tags[$key] = $value;
-			}
+			$re->sendAuto($row);
 		}
-
-		return strtr($content, $tags);
 	}
 }

@@ -65,7 +65,7 @@ CREATE TABLE membres_operations
     id_membre INTEGER NOT NULL REFERENCES membres (id),
     id_operation INTEGER NOT NULL REFERENCES compta_journal (id),
     id_cotisation INTEGER NULL REFERENCES cotisations_membres (id),
-    
+
     PRIMARY KEY (id_membre, id_operation)
 );
 
@@ -85,11 +85,13 @@ CREATE TABLE rappels_envoyes
 -- Enregistrement des rappels envoyés à qui et quand
 (
     id_membre INTEGER NOT NULL REFERENCES membres (id),
-    id_rappel INTEGER NOT NULL REFERENCES rappels (id),
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
+
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
     
-    PRIMARY KEY(id_membre, id_rappel, date)
+    PRIMARY KEY(id_membre, id_cotisation, date)
 );
 
 --

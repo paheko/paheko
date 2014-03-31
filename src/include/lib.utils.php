@@ -42,6 +42,16 @@ class utils
         return $date;
     }
 
+    static public function sqliteDateToFrench($d, $short = false)
+    {
+        if (strlen($d) == 10 || $short)
+            return \DateTime::createFromFormat('Y-m-d', substr($d, 0, 10))->format('d/m/Y');
+        elseif (strlen($d) == 16)
+            return \DateTime::createFromFormat('Y-m-d H:i', $d)->format('d/m/Y H:i');
+        else
+            return \DateTime::createFromFormat('Y-m-d H:i:s', $d)->format('d/m/Y H:i');
+    }
+
     static public function makeTimestampFromForm($d)
     {
         return mktime($d['h'], $d['min'], 0, $d['m'], $d['d'], $d['y']);
