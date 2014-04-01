@@ -130,7 +130,8 @@ class Rappels
 		return DB::getInstance()->simpleStatementFetch('SELECT r.*,
 			c.intitule, c.montant, c.duree, c.debut, c.fin
 			FROM rappels AS r
-			INNER JOIN cotisations AS c ON c.id = r.id_cotisation ORDER BY r.id_cotisation, r.delai, r.sujet;');
+			INNER JOIN cotisations AS c ON c.id = r.id_cotisation
+			ORDER BY r.id_cotisation, r.delai, r.sujet;');
 	}
 
 	/**
@@ -191,6 +192,7 @@ class Rappels
 		GROUP BY id, id_cotisation
 		ORDER BY nb_jours DESC;';
 
+		$db->exec('BEGIN');
 		$st = $db->prepare($query);
 		$res = $st->execute();
 		$re = new Rappels_Envoyes;
@@ -199,5 +201,8 @@ class Rappels
 		{
 			$re->sendAuto($row);
 		}
+
+		$db->exec('END;');
+		return true;
 	}
 }

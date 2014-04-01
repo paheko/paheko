@@ -52,14 +52,14 @@ CREATE TABLE rappels
 CREATE TABLE rappels_envoyes
 -- Enregistrement des rappels envoyés à qui et quand
 (
+    id INTEGER PRIMARY KEY,
+
     id_membre INTEGER NOT NULL REFERENCES membres (id),
     id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
 
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    media INTEGER NOT NULL, -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
-    
-    PRIMARY KEY(id_membre, id_cotisation, date)
+    media INTEGER NOT NULL -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
 );
 
 CREATE TABLE plugins
