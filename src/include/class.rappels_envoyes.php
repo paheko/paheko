@@ -168,9 +168,10 @@ class Rappels_Envoyes
 	 */
 	public function listForMember($id)
 	{
-		return DB::getInstance()->simpleStatementFetch('SELECT re.*, r.id_cotisation, r.delai, c.intitule
-			FROM rappels_envoyes AS re INNER JOIN rappels AS r ON r.id = re.id_rappel
-			INNER JOIN cotisations ON c.id = r.id_cotisation 
+		return DB::getInstance()->simpleStatementFetch('SELECT
+			re.*, c.intitule, c.montant
+			FROM rappels_envoyes AS re 
+				INNER JOIN cotisations AS c ON c.id = re.id_cotisation 
 			WHERE re.id_membre = ?
 			ORDER BY re.date DESC;', \SQLITE3_ASSOC, (int)$id);
 	}
@@ -203,7 +204,7 @@ class Rappels_Envoyes
 	}
 
 	/**
-	 * Nombre de rappels envoyés pour un rappel automatique
+	 * Liste des rappels envoyés pour un rappel automatique
 	 * @param  integer $id Numéro du rappel
 	 * @param  integer $page Numéro de page de liste
 	 * @return array Liste des rappels envoyés

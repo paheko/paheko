@@ -33,7 +33,10 @@ $tpl->assign('total', $m_cotisations->countMembersForCotisation($co['id']));
 $tpl->assign('pagination_url', utils::getSelfUrl(true) . '?id=' . $co['id'] . '&amp;p=[ID]');
 
 $tpl->assign('cotisation', $co);
-$tpl->assign('liste', $m_cotisations->listMembersForCotisation($co['id'], $page));
+$tpl->assign('order', utils::get('o') ?: 'date');
+$tpl->assign('desc', !isset($_GET['a']));
+$tpl->assign('liste', $m_cotisations->listMembersForCotisation(
+	$co['id'], $page, utils::get('o'), isset($_GET['a']) ? false : true));
 
 $tpl->display('admin/membres/cotisations/voir.tpl');
 

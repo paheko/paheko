@@ -214,12 +214,30 @@ class Cotisations_Membres
 	 * @param  integer $id Numéro de la cotisation
 	 * @return array     Liste des membres
 	 */
-	public function listMembersForCotisation($id, $page = 1)
+	public function listMembersForCotisation($id, $page = 1, $order = null, $desc = true)
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
 		$db = DB::getInstance();
 		$champ_id = Config::getInstance()->get('champ_identite');
+
+		if (empty($order))
+			$order = 'date';
+
+		switch ($order)
+		{
+			case 'date':
+			case 'a_jour':
+				break;
+			case 'identite':
+				$order = 'transliterate_to_ascii('.$champ_id.') COLLATE NOCASE';
+				break;
+			default:
+				$order = 'cm.id_membre';
+				break;
+		}
+
+		$desc = $desc ? 'DESC' : 'ASC';
 
 		return $db->simpleStatementFetch('SELECT cm.id_membre, cm.date, cm.id,
 			(SELECT '.$champ_id.' FROM membres WHERE id = cm.id_membre) AS nom, c.montant,
@@ -229,7 +247,7 @@ class Cotisations_Membres
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 			WHERE
 				cm.id_cotisation = ?
-			GROUP BY cm.id_membre ORDER BY cm.date DESC LIMIT ?,?;',
+			GROUP BY cm.id_membre ORDER BY '.$order.' '.$desc.' LIMIT ?,?;',
 			\SQLITE3_ASSOC, (int)$id, $begin, self::ITEMS_PER_PAGE);
 	}
 
@@ -261,7 +279,9 @@ class Cotisations_Membres
 			WHEN c.fin IS NOT NULL THEN c.fin >= date()
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
-			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration
+			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration,
+			(julianday(date()) - julianday(CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
+			WHEN c.fin IS NOT NULL THEN c.fin END)) AS nb_jours
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 			WHERE cm.id_membre = ?
