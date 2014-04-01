@@ -44,6 +44,13 @@ const PLUGINS_ROOT = DATA_ROOT . '/plugins';
 // Défaut : true
 const SHOW_ERRORS = true;
 
+// Envoi des erreurs par e-mail
+// Si rempli, un email sera envoyé à l'adresse indiquée à chaque fois qu'une erreur
+// d'exécution sera rencontrée.
+// Si "false" alors aucun email ne sera envoyé
+// Note : les erreurs sont déjà toutes loguées dans error.log à la racine de DATA_ROOT
+const MAIL_ERRORS = false;
+
 // Utilisation de cron pour les tâches automatiques
 // Si "true" on s'attend à ce qu'une tâche automatisée appelle
 // le script cron.php à la racine toutes les 24 heures. Sinon Garradin
