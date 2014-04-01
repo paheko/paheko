@@ -1,0 +1,31 @@
+Les tests de Garradin sont écrits en Javascript à l'aide de CasperJS.
+
+CasperJS peut utiliser Phantom.js pour émuler un navigateur webkit ou SlimeJS pour un navigateur Gecko.
+
+=== Installer l'environnement de test ===
+
+1. Installer Phantom.js
+    - apt-get install phantomjs/unstable
+    - ou depuis http://phantomjs.org/download.html
+2. (si installation manuelle) mettre Phantom.js dans le $PATH
+3. Installer CasperJS:
+    $ git clone git://github.com/n1k0/casperjs.git
+4. Mettre CasperJS dans le $PATH
+
+=== Lancer un test ===
+
+1. Lancer un serveur php sur localhost:8080 qui pointe sur le www/ de Garradin
+2. Lancer le test avec par exemple :
+    $ phantomjs test 02-login.js
+
+=== Lancer tous les tests ===
+
+ $ ./run-all.sh
+
+Cela va :
+- télécharger le trunk de Garradin dans /tmp/garradin
+- télécharger les dépendances
+- lancer chacun des tests JS avec CasperJS dans l'ordre indiqué par le numéro
+
+Pour utiliser une version locale de Garradin plutôt que de laisser télécharger le trunk 
+il suffit de faire un lien symbolique de /tmp/garradin vers le code local.
