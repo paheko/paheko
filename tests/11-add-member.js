@@ -1,7 +1,7 @@
 /*jshint strict:false*/
 /*global CasperError, casper, console, phantom, require*/
 
-casper.test.begin('Login', 3, function suite(test) {
+casper.test.begin('Ajout membre', 3, function suite(test) {
     casper.start("http://localhost:8080/admin/membres/ajouter.php", function() {
         test.assertTitle("Ajouter un membre", "Page OK");
         test.assertExists('form', "Formulaire présent");
