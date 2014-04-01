@@ -608,7 +608,7 @@ class utils
         return true;
     }
 
-    static public function plugin_url($params)
+    static public function plugin_url($params = [])
     {
         if (!defined('Garradin\PLUGIN_URL'))
         {
