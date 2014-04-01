@@ -142,6 +142,7 @@ class Compta_Journal
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
 
+        $db->simpleExec('DELETE FROM membres_operations WHERE id_operation = ?;', (int)$id);
         $db->simpleExec('DELETE FROM compta_journal WHERE id = ?;', (int)$id);
 
         return true;

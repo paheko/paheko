@@ -20,6 +20,8 @@
             Êtes-vous sûr de vouloir supprimer la cotisation membre
             du {$cotisation.date|format_sqlite_date_to_french}&nbsp;?
         </h3>
+        <p class="alert">Attention si des écritures comptables sont liées à cette cotisation
+            elles ne seront pas supprimées.</p>
     </fieldset>
     </fieldset>
 

@@ -96,6 +96,7 @@ class Cotisations_Membres
 	public function delete($id)
 	{
 		$db = DB::getInstance();
+		$db->simpleExec('DELETE FROM membres_operations WHERE id_cotisation = ?;', (int)$id);
 		return $db->simpleExec('DELETE FROM cotisations_membres WHERE id = ?;', (int) $id);
 	}
 
