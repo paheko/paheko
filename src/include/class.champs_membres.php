@@ -429,10 +429,6 @@ class Champs_Membres
     	$db->exec($create);
     	
     	if ($enable_copy) {
-            // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-            $db->exec('UPDATE membres SET '.$config->get('champ_identifiant').' = NULL 
-                WHERE '.$config->get('champ_identifiant').' = "";');
-
     		$db->exec($copy);
     	}
     	
@@ -440,8 +436,16 @@ class Champs_Membres
     	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
         $db->exec('CREATE INDEX membres_id_categorie ON membres (id_categorie);'); // Index
 
-        // Création de l'index unique
-        $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
+        if ($config->get('champ_identifiant'))
+        {
+            // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
+            $db->exec('UPDATE membres SET '.$config->get('champ_identifiant').' = NULL 
+                WHERE '.$config->get('champ_identifiant').' = "";');
+
+            // Création de l'index unique
+            $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
+        }
+        
     	$db->exec('END;');
     	$db->exec('PRAGMA foreign_keys = ON;');
 
