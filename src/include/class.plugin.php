@@ -277,7 +277,7 @@ class Plugin
 			if (substr($file, 0, 1) == '.')
 				continue;
 
-			if (!preg_match('!^([a-z0-9_-]+)\.tar.gz$!', $file, $match))
+			if (!preg_match('!^([a-z0-9_.-]+)\.tar\.gz$!', $file, $match))
 				continue;
 			
 			if (array_key_exists($match[1], $installed))
