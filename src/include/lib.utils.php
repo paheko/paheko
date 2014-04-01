@@ -610,7 +610,7 @@ class utils
 
     static public function plugin_url($params = [])
     {
-        if (!defined('Garradin\PLUGIN_URL'))
+        if (isset($params['id']))
         {
             $url = WWW_URL . 'admin/plugin/' . $params['id'] . '/';
         }
