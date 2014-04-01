@@ -472,7 +472,14 @@ class Plugin
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			$config = json_encode(file_get_contents('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/config.json'));
+			$config = json_decode(file_get_contents('phar://' . PLUGINS_ROOT . '/' . $id . '.phar/config.json'), true);
+
+			if (is_null($config))
+			{
+				throw new \RuntimeException('config.json invalide. Code erreur JSON: ' . json_last_error());
+			}
+
+			$config = json_encode($config);
 		}
 
 		$db = DB::getInstance();
