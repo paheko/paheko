@@ -1,17 +1,13 @@
 <?php
 
-if (ini_get('phar.readonly'))
-{
-    die("La variable INI phar.readonly doit être positionnée à Off pour utiliser ce script.\n");
-}
-
 if (empty($argv[1]) || empty($argv[2]))
 {
     die("Usage : " . basename(__FILE__) . " /path/to/plugin/source /path/to/plugin/archive\n");
 }
 
-$phar_file = $argv[2];
-$phar_name = basename($phar_file);
+$plugin_file = $argv[2];
+$plugin_file = preg_replace('/\.(?:tar(?:\.gz)?|phar)?$/', '', $plugin_file);
+
 $target = realpath($argv[1]);
 
 if (!file_exists($target . '/garradin_plugin.ini'))
@@ -49,15 +45,14 @@ if (!empty($infos['menu']) && !file_exists($target . '/www/admin/index.php'))
 	die("ERREUR : Le fichier www/admin/index.php est obligatoire quand menu=1\n");
 }
 
-@unlink($phar_file);
-@unlink($phar_file . '.gz');
+@unlink($plugin_file . '.tar');
+@unlink($plugin_file . '.tar.gz');
 
-
-$p = new Phar($phar_file);
+$p = new PharData($plugin_file . '.tar');
 
 $p->buildFromDirectory($target);
 
 $p->compress(Phar::GZ);
 
-@unlink($phar_file);
-rename($phar_file . '.gz', $phar_file);
+@unlink($plugin_file . '.tar');
+

@@ -35,30 +35,15 @@ Pour intégrer le catalogue des plugins officiels disponibles directement depuis
 
 === Format des plugins ===
 
-Les plugins sont des archives PHAR : tous les fichiers du plugin (code PHP, CSS, templates, images, etc.) sont stockés dans l'archive et y restent.
+Les plugins sont des archives .tar.gz : tous les fichiers du plugin (code PHP, CSS, templates, images, etc.) sont stockés dans l'archive et y restent.
 
-Il est possible de créer soi-même l'archive PHAR de cette manière :
+Il est possible de créer soi-même l'archive .tar.gz de cette manière :
 
-[[[php
-// Répertoire contenant l'arborescence du plugin
-$source_dir = '/home/bohwaz/dev/plugins/test';
+   $ tar czvf src/plugins/test.tar.gz ~/dev/plugins/test
 
-// Fichier PHAR à créer
-$dest = '/home/bohwaz/dev/garradin/src/plugins/test.phar';
+Un script PHP (**make_plugin.php**) est fourni dans le répertoire **tools/** de la version de développement de Garradin afin de vérifier l'arborescence et de créer l'archive en ligne de commande. Son utilisation est très simple :
 
-$p = new Phar($dest);
-
-$p->buildFromDirectory($source_dir);
-
-$p->compress(Phar::GZ);
-
-@unlink($dest);
-rename($dest . '.gz', $dest);
-]]]
-
-Un script PHP (**make_plugin.php**) est fourni dans le répertoire **tools/** de la version de développement de Garradin afin de vérifier l'arborescence et de créer l'archive PHAR en ligne de commande. Son utilisation est très simple :
-
- $ php -d phar.readonly=0 ~/dev/plugins/test ~/garradin/src/plugins/test.phar
+ $ php ~/dev/plugins/test ~/garradin/src/plugins/test.tar.gz
 
 === Informations sur le plugin (garradin_plugin.ini) ===
 
@@ -108,7 +93,7 @@ Ces scripts ne peuvent pas être appelés par une requête HTTP via l'interface 
 * needsUpgrade() : le plugin doit-il être mis à jour ?
 * uninstall() : désinstaller le plugin
 * id() : renvoie l'identifiant du plugin
-* path() : renvoie le chemin vers l'archive PHAR du plugin
+* path() : renvoie le chemin vers l'archive du plugin
 
 === Base de données ===
 
