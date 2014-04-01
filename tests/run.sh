@@ -22,12 +22,20 @@ then
     cd $SCRIPTPATH
 fi
 
-rm -rf $TESTDIR/src/cache
-rm -rf $TESTDIR/src/*.sqlite
+if [ "$1" != "--no-install" ]
+then
+	rm -rf $TESTDIR/src/cache
+	rm -rf $TESTDIR/src/*.sqlite
+fi
 
 php -S localhost:8080 -t $TESTDIR/src/www &
 PHP_PID=$!
 
-$CASPERJS test *.js
+if [ "$1" != "--no-install" ]
+then
+	$CASPERJS test 0*.js
+fi
+
+$CASPERJS --cookies-file=$TESTDIR/cookies.txt test 1*.js
 
 kill $!
