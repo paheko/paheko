@@ -101,6 +101,11 @@ if (!defined('Garradin\SHOW_ERRORS'))
     define('Garradin\SHOW_ERRORS', true);
 }
 
+if (!defined('Garradin\MAIL_ERRORS'))
+{
+    define('Garradin\MAIL_ERRORS', false);
+}
+
 // Utilisation de cron pour les tâches automatiques
 if (!defined('Garradin\USE_CRON'))
 {
@@ -127,11 +132,12 @@ if (!ini_get('date.timezone'))
     }
 }
 
+ini_set('error_log', DATA_ROOT . '/error.log');
+ini_set('log_errors', true);
+
 if (SHOW_ERRORS)
 {
     // Gestion par défaut des erreurs
-    ini_set('error_log', DATA_ROOT . '/error.log');
-    ini_set('log_errors', true);
     ini_set('display_errors', true);
     ini_set('html_errors', false);
 
@@ -204,26 +210,37 @@ function exception_handler($e)
     }
     
     $error = str_replace("\r", '', $error);
+    error_log($error);
     
+    if (MAIL_ERRORS)
+    {
+        mail(MAIL_ERRORS, '[Garradin] Erreur d\'exécution', $error, 'From: "' . WWW_URL . '" <noreply@no.reply>');
+    }
+
     if (PHP_SAPI == 'cli')
     {
         echo $error;
     }
-    elseif (SHOW_ERRORS)
+    else
     {
         echo '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
         pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
         <pre> \__/<br /> (xx)<br />//||\\\\</pre>
-        <h1>Erreur d\'exécution</h1>
-        <p>Une erreur s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
-        merci d\'inclure le message suivant :</p>
-        <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
-        <hr />
-        <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
-    }
-    else
-    {
+        <h1>Erreur d\'exécution</h1>';
 
+        if (SHOW_ERRORS)
+        {
+            echo '<p>Une erreur s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
+            merci d\'inclure le message suivant :</p>
+            <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
+            <hr />
+            <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
+        }
+        else
+        {
+            echo '<p>Une erreur s\'est produite à l\'exécution de Garradin.</p>
+            <p>Le webmaster a été prévenu.</p>';
+        }
     }
 
     exit;
