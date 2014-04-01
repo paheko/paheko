@@ -141,12 +141,13 @@ else
                 $config->set('pays', 'FR');
                 $config->set('email_envoi_automatique', utils::post('email_asso'));
                 $config->setVersion(garradin_version());
-                $config->set('champ_identifiant', 'email');
-                $config->set('champ_identite', 'nom');
 
                 $champs = Champs_Membres::importInstall();
                 $champs->save(false); // Pas de copie car pas de table membres existante
 
+                $config->set('champ_identifiant', 'email');
+                $config->set('champ_identite', 'nom');
+                
                 // Création catégories
                 $cats = new Membres_Categories;
                 $id = $cats->add([
