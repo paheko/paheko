@@ -33,10 +33,10 @@ const WWW_URI = '/garradin/';
 
 // Adresse URL HTTP(S) de Garradin
 // Défaut : découverte à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
-const WWW_URL = 'http://garradin.net' . WWW_URI;
+define('Garradin\WWW_URL', 'http://garradin.net' . WWW_URI);
 
 // Emplacement de stockage des plugins
-const PLUGINS_ROOT = DATA_ROOT . '/plugins';
+define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
 
 // Affichage des erreurs
 // Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
