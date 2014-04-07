@@ -256,7 +256,7 @@ class Membres_Import
 
             if (!$header)
             {
-                fputcsv($fp, array_keys($row), ';');
+                fputcsv($fp, array_keys($row));
                 $header = true;
             }
 
