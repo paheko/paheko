@@ -11,7 +11,7 @@ class Cotisations_Membres
 	 * @param  array $data Tableau contenant les champs à ajouter/modifier
 	 * @return void
 	 */
-	protected function _checkFields(&$data)
+	protected function _checkFields(&$data, $compta = false)
 	{
 		$db = DB::getInstance();
 
@@ -35,6 +35,28 @@ class Cotisations_Membres
 		}
 
 		$data['id_membre'] = (int) $data['id_membre'];
+
+		if ($compta)
+		{
+	        if (!isset($data['moyen_paiement']) || trim($data['moyen_paiement']) === '')
+	        {
+	        	throw new UserException('Moyen de paiement inconnu ou invalide.');
+	        }
+
+			if ($data['moyen_paiement'] != 'ES')
+	        {
+	            if (trim($data['banque']) == '')
+	            {
+	                throw new UserException('Le compte bancaire choisi est invalide.');
+	            }
+
+	            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;',
+	            	false, $data['banque']))
+	            {
+	                throw new UserException('Le compte bancaire choisi n\'existe pas.');
+	            }
+	        }
+	    }
 	}
 
 	/**
@@ -46,7 +68,19 @@ class Cotisations_Membres
 	{
 		$db = DB::getInstance();
 
-		$this->_checkFields($data);
+		$co = $db->simpleQuerySingle('SELECT * FROM cotisations WHERE id = ?;', 
+			true, (int)$data['id_cotisation']);
+
+		$this->_checkFields($data, !empty($co['id_categorie_compta']));
+
+		$check = $db->simpleQuerySingle('SELECT 1 FROM cotisations_membres 
+			WHERE id_cotisation = ? AND id_membre = ? AND date = ?;', 
+			false, (int)$data['id_cotisation'], (int)$data['id_membre'], $data['date']);
+
+		if ($check)
+		{
+			throw new UserException('Cette cotisation a déjà été enregistrée pour ce jour-ci et ce membre-ci.');
+		}
 
 		$db->exec('BEGIN;');
 
@@ -58,10 +92,7 @@ class Cotisations_Membres
 
 		$id = $db->lastInsertRowId();
 
-		$co = $db->simpleQuerySingle('SELECT * FROM cotisations WHERE id = ?;', 
-			true, (int)$data['id_cotisation']);
-
-		if ($co['id_categorie_compta'])
+		if ($co['id_categorie_compta'] && $co['montant'] > 0)
 		{
 			try {
 		        $id_operation = $this->addOperationCompta($id, [
@@ -70,9 +101,9 @@ class Cotisations_Membres
 		            'montant'       =>  $co['montant'],
 		            'date'          =>  $data['date'],
 		            'moyen_paiement'=>  $data['moyen_paiement'],
-		            'numero_cheque' =>  $data['numero_cheque'],
+		            'numero_cheque' =>  isset($data['numero_cheque']) ? $data['numero_cheque'] : null,
 		            'id_auteur'     =>  $data['id_auteur'],
-		            'banque'		=>	$data['banque'],
+		            'banque'		=>	isset($data['banque']) ? $data['banque'] : null,
 		            'id_membre'		=>	$data['id_membre'],
 		        ]);
 	        }
@@ -143,29 +174,8 @@ class Cotisations_Membres
 
 		$data['montant'] = (float) $data['montant'];
 
-        if (empty($data['date']) || !utils::checkDate($data['date']))
-        {
-            throw new UserException('Date vide ou invalide.');
-        }
-
-        if (!isset($data['moyen_paiement']) || trim($data['moyen_paiement']) === '')
-        {
-        	throw new UserException('Moyen de paiement inconnu ou invalide.');
-        }
-
 		if ($data['moyen_paiement'] != 'ES')
-        {
-            if (trim($data['banque']) == '')
-            {
-                throw new UserException('Le compte bancaire choisi est invalide.');
-            }
-
-            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;',
-            	false, $data['banque']))
-            {
-                throw new UserException('Le compte bancaire choisi n\'existe pas.');
-            }
-
+		{
             $debit = $data['banque'];
         }
         else

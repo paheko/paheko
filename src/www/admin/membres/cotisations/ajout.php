@@ -48,15 +48,11 @@ if (!empty($_POST['add']))
                 'date'              =>  utils::post('date'),
                 'id_cotisation'     =>  utils::post('id_cotisation'),
                 'id_membre'         =>  utils::post('id_membre'),
+                'id_auteur'         =>  $user['id'],
+                'moyen_paiement'    =>  utils::post('moyen_paiement'),
+                'numero_cheque'     =>  utils::post('numero_cheque'),
+                'banque'            =>  utils::post('banque'),
             ];
-
-            if (!empty($categorie['id_cotisation_obligatoire']))
-            {
-                $data['id_auteur'] = $user['id'];
-                $data['moyen_paiement'] = utils::post('moyen_paiement');
-                $data['numero_cheque'] = utils::post('numero_cheque');
-                $data['banque'] = utils::post('banque');
-            }
 
             $m_cotisations->add($data);
 

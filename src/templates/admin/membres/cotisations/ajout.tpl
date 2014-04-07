@@ -86,7 +86,6 @@
 </form>
 
 <script type="text/javascript">
-var show_compta = {if $default_compta}true{else}false{/if};
 {literal}
 (function () {
     window.changeMoyenPaiement = function()
@@ -97,11 +96,6 @@ var show_compta = {if $default_compta}true{else}false{/if};
     };
 
     changeMoyenPaiement();
-    
-    if (!show_compta)
-    {
-        toggleElementVisibility('.f_compta', false);
-    }
 
     $('#f_moyen_paiement').onchange = changeMoyenPaiement;
 
@@ -117,6 +111,11 @@ var show_compta = {if $default_compta}true{else}false{/if};
             changeMoyenPaiement();
         }
     };
+
+    if (!$('#f_id_cotisation').options[$('#f_id_cotisation').selectedIndex].getAttribute('data-compta'))
+    {
+        toggleElementVisibility('.f_compta', false);
+    }
 } ());
 {/literal}
 </script>
