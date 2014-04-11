@@ -248,7 +248,15 @@ class Plugin
 	static public function listInstalled()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetchAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
+		$plugins = $db->simpleStatementFetchAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
+		$system = explode(',', PLUGINS_SYSTEM);
+
+		foreach ($plugins as &$row)
+		{
+			$row['system'] = in_array($row['id'], $system);
+		}
+
+		return $plugins;
 	}
 
 	/**
