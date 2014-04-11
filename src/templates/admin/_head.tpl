@@ -41,6 +41,15 @@
         </li>
     {else}
         <li class="home{if $current == 'home'} current{/if}"><a href="{$admin_url}">Accueil</a></li>
+        {if !empty($plugins_menu)}
+            <li class="plugins">
+                <ul>
+                {foreach from=$plugins_menu key="id" item="name"}
+                    <li class="plugins {$id|escape}{if $current == 'plugin_`$id`'} current{/if}"><a href="{plugin_url id=$id}">{$name|escape}</a></li>
+                {/foreach}
+                </ul>
+            </li>
+        {/if}
         {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
             <li class="member list{if $current == 'membres'} current{/if}"><a href="{$admin_url}membres/">Membres <small>({$nb_membres|escape})</small></a>
             {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
@@ -84,16 +93,6 @@
         {/if}
         {if $user.droits.config >= Garradin\Membres::DROIT_ADMIN}
             <li class="main config{if $current == 'config'} current{/if}"><a href="{$admin_url}config/">Configuration</a>
-        {/if}
-        {if !empty($plugins_menu)}
-            <li class="plugins">
-                <a>Extensions</a>
-                <ul>
-                {foreach from=$plugins_menu key="id" item="name"}
-                    <li class="plugins {$id|escape}{if $current == 'plugin_`$id`'} current{/if}"><a href="{plugin_url id=$id}">{$name|escape}</a></li>
-                {/foreach}
-                </ul>
-            </li>
         {/if}
         <li class="my config{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php">Mes infos personnelles</a>
             <ul>

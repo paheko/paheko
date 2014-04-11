@@ -190,6 +190,7 @@ function datepickr(targetElement, userConfig) {
 			days[i].onclick = function() {
 				currentDate = new Date(currentYearView, currentMonthView, this.innerHTML);
 				element.value = formatDate(currentDate.getTime());
+				element.onchange(element);
 				close();
 				return false;
 			}
@@ -270,8 +271,24 @@ function datepickr(targetElement, userConfig) {
 				}
 			}
 
+			if (target == element)
+			{
+				close();
+			}
+
 			e.preventDefault();
 		}
+
+		document.onkeyup = function(e) {
+			var k = e.keyCode || e.which;
+
+			if (k == 27)
+			{
+				close();
+				e.preventDefault();
+				return false;
+			}
+		};
 
 		document.onkeypress = function(e) {
 			var k = e.keyCode || e.which;
@@ -323,6 +340,7 @@ function datepickr(targetElement, userConfig) {
 			else if (k == 13 || k == 32)
 			{
 				element.value = formatDate(currentDate.getTime());
+				element.onchange(element);
 				close();
 				e.preventDefault();
 				return false;
@@ -350,7 +368,7 @@ function datepickr(targetElement, userConfig) {
 
 		if (element.value)
 		{
-			var d = element.value.split('-');
+			var d = element.value.split('/').reverse();
 			currentDate = new Date(parseInt(d[0], 10), parseInt(d[1], 10) - 1, parseInt(d[2], 10), 0, 0, 0, 0);
 			currentYearView = get.current.year();
 			currentMonthView = get.current.month.integer();
@@ -395,7 +413,7 @@ function datepickr(targetElement, userConfig) {
 (function() {
 	var config_fr = {
 		fullCurrentMonth: true,
-		dateFormat: 'Y-m-d',
+		dateFormat: 'd/m/Y',
 		firstDayOfWeek: 0,
 		weekdays: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
 		months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
@@ -413,12 +431,30 @@ function datepickr(targetElement, userConfig) {
 		{
 			if (inputs[i].getAttribute('type') == 'date')
 			{
-				inputs[i].setAttribute('type', 'text');
-				inputs[i].className += ' date';
-				inputs[i].size = 10;
-				inputs[i].maxlength = 10;
-				inputs[i].setAttribute('pattern', '[0-9]{4}-[0-9]{2}-[0-9]{2}');
-				new datepickr(inputs[i], config_fr);
+				var new_input = inputs[i].cloneNode(true);
+				inputs[i].type = 'hidden';
+				inputs[i].removeAttribute('pattern');
+				inputs[i].removeAttribute('id');
+				inputs[i].removeAttribute('required');
+				
+				new_input.removeAttribute('name');
+				new_input.setAttribute('type', 'text');
+				new_input.className += ' date';
+				new_input.size = 10;
+				new_input.maxlength = 10;
+				new_input.value = inputs[i].value.split('-').reverse().join('/');
+				new_input.setAttribute('pattern', '([012][0-9]|3[01])/(0[0-9]|1[0-2])/[12][0-9]{3}');
+				
+				new_input.onchange = function ()
+				{
+					if (this.value.match(/\d{2}\/\d{2}\/\d{4}/))
+						this.nextSibling.value = this.value.split('/').reverse().join('-');
+					else
+						this.nextSibling.value = this.value;
+				};
+
+				inputs[i].parentNode.insertBefore(new_input, inputs[i]);
+				new datepickr(new_input, config_fr);
 			}
 		}
 	}
