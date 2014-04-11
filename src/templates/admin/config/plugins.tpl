@@ -52,9 +52,12 @@
                         {$plugin.version|escape}
                     </td>
                     <td class="actions">
-                        <a href="{$admin_url}config/plugins.php?delete={$plugin.id|escape}">Désinstaller</a>
+                        {if empty($plugin.system)}
+                            <a href="{$admin_url}config/plugins.php?delete={$plugin.id|escape}">Désinstaller</a>
+                        {/if}
                         {if !empty($plugin.config)}
-                            | <a href="{plugin_url id=$plugin.id file="config.php"}">Configurer</a>
+                            {if empty($plugin.system)}|{/if}
+                            <a href="{plugin_url id=$plugin.id file="config.php"}">Configurer</a>
                         {/if}
                     </td>
                 </tr>
@@ -73,7 +76,7 @@
     <form method="post" action="{$self_url|escape}">
 
         <fieldset>
-            <legend>Extensions téléchargées</legend>
+            <legend>Extensions à installer</legend>
             <dl>
                 {foreach from=$liste_telecharges item="plugin" key="id"}
                 <dt>

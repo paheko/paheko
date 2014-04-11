@@ -38,6 +38,9 @@ define('Garradin\WWW_URL', 'http://garradin.net' . WWW_URI);
 // Emplacement de stockage des plugins
 define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
 
+// Plugins fixes qui ne peuvent être désinstallés (séparés par une virgule)
+const PLUGINS_SYSTEM = 'email,web';
+
 // Affichage des erreurs
 // Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
 // en cas d'erreur. Sinon rien ne sera affiché.
