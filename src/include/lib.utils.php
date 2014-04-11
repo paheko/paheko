@@ -45,11 +45,26 @@ class utils
     static public function sqliteDateToFrench($d, $short = false)
     {
         if (strlen($d) == 10 || $short)
-            return \DateTime::createFromFormat('Y-m-d', substr($d, 0, 10))->format('d/m/Y');
+        {
+            $d = substr($d, 0, 10);
+            $f = 'Y-m-d';
+            $f2 = 'd/m/Y';
+        }
         elseif (strlen($d) == 16)
-            return \DateTime::createFromFormat('Y-m-d H:i', $d)->format('d/m/Y H:i');
+        {
+            $f = 'Y-m-d H:i';
+            $f2 = 'd/m/Y H:i';
+        }
         else
-            return \DateTime::createFromFormat('Y-m-d H:i:s', $d)->format('d/m/Y H:i');
+        {
+            $f = 'Y-m-d H:i:s';
+            $f2 = 'd/m/Y H:i';
+        }
+        
+        if ($dt = \DateTime::createFromFormat($f, $d))
+            return $dt->format($f2);
+        else
+            return $d;
     }
 
     static public function makeTimestampFromForm($d)
@@ -77,7 +92,7 @@ class utils
 
     static public function checkDateTime($str)
     {
-        if (!preg_match('!^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2})(?::(\d{2}))?$!', $str, $match))
+        if (!preg_match('!^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})!', $str, $match))
             return false;
 
         if (!self::checkDate($match[1]))
