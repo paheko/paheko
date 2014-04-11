@@ -95,6 +95,11 @@ if (!defined('Garradin\PLUGINS_ROOT'))
     define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
 }
 
+if (!defined('Garradin\PLUGINS_SYSTEM'))
+{
+    define('Garradin\PLUGINS_SYSTEM', '');
+}
+
 // Affichage des erreurs par défaut
 if (!defined('Garradin\SHOW_ERRORS'))
 {
