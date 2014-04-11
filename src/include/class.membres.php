@@ -303,6 +303,19 @@ class Membres
                 {
                     throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
                 }
+                elseif ($config['type'] == 'date' && trim($data[$key]) !== '' && !utils::checkDate($data[$key]))
+                {
+                    throw new UserException('Date invalide "' . $config['title'] . '", format attendu : AAAA-MM-JJ.');
+                }
+                elseif ($config['type'] == 'datetime' && trim($data[$key]) !== '')
+                {
+                    if (!utils::checkDateTime($data[$key]) || !($dt = new DateTime($data[$key])))
+                    {
+                        throw new UserException('Date invalide "' . $config['title'] . '", format attendu : AAAA-MM-JJ HH:mm.');
+                    }
+
+                    $data[$key] = $dt->format('Y-m-d H:i');
+                }
                 elseif ($config['type'] == 'tel')
                 {
                     $data[$key] = utils::normalizePhoneNumber($data[$key]);
@@ -437,7 +450,7 @@ class Membres
             // a participé au wiki, à la compta, etc.
             if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
                 || $db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', false, (int)$id))
-            #|| $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
+            # FIXME || $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
             {
                 throw new UserException('Le numéro n\'est pas modifiable pour ce membre car des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
             }

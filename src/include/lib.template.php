@@ -394,6 +394,10 @@ function tpl_html_champ_membre($params)
         $config['options'] = utils::getCountryList();
         $params['default'] = Config::getInstance()->get('pays');
     }
+    elseif ($type == 'date')
+    {
+        $params['pattern'] = '\d{4}-\d{2}-\d{2}';
+    }
     elseif ($type == 'multiple')
     {
         if (empty($config['options']))
