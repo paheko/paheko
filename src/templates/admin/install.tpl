@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Garradin - Installation"}
+{include file="admin/_head.tpl" title="Garradin - Installation" js=1}
 
 {if $disabled}
     <p class="error">Garradin est déjà installé.</p>
@@ -54,12 +54,25 @@
 
     <p class="submit">
         {csrf_field key="install"}
-        <input type="submit" name="save" value="Terminer l'installation &rarr;" />
+        <input type="submit" id="f_submit" name="save" value="Terminer l'installation &rarr;" />
     </p>
 
     <script type="text/javascript" src="{$admin_url}static/password.js"></script>
+    <script type="text/javascript" src="{$admin_url}static/loader.js"></script>
     <script type="text/javascript">
+    {literal}
     initPasswordField('password_suggest', 'f_passe_membre', 'f_repasse_membre');
+    
+    var form = $('form')[0];
+    form.onsubmit = function () {
+        $('#f_submit').style.opacity = 0;
+        var loader = document.createElement('div');
+        loader.className = 'loader install';
+        loader.innerHTML = '<b>Garradin est en cours d\'installation…</b>';
+        $('#f_submit').parentNode.appendChild(loader);
+        animatedLoader(loader, 5);
+    };
+    {/literal}
     </script>
 
     </form>

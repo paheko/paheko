@@ -18,8 +18,21 @@ $db = DB::getInstance();
 $redirect = true;
 
 echo '<!DOCTYPE html>
-<meta charset="utf-8" />
-<h3>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h3>';
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
+    <link rel="stylesheet" type="text/css" href="static/admin.css" media="all" />
+    <script type="text/javascript" src="static/loader.js"></script>
+    <title>Mise à jour</title>
+</head>
+<body>
+<div class="header"><h1>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h1></div>
+<div class="page">
+<div id="loader" class="loader" style="margin: 2em 0; height: 50px;"></div>
+<script>
+animatedLoader(document.getElementById("loader"), 5);
+</script>';
 
 flush();
 
@@ -191,7 +204,7 @@ utils::clearCaches();
 
 $config->setVersion(garradin_version());
 
-echo '<h4>Mise à jour terminée.</h4>
+echo '<h2>Mise à jour terminée.</h2>
 <p><a href="'.WWW_URL.'admin/">Retour</a></p>';
 
 if ($redirect)
@@ -200,8 +213,12 @@ if ($redirect)
     <script type="text/javascript">
     window.setTimeout(function () { 
         window.location.href = "'.WWW_URL.'admin/"; 
+        stopAnimatedLoader();
     }, 1000);
     </script>';
 }
+
+echo '
+</body>';
 
 ?>
