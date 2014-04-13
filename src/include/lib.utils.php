@@ -517,6 +517,7 @@ class utils
 
     static public function normalizePhoneNumber($n)
     {
+        $n = preg_replace('!(\+\d+)\(0\)!', '\\1', $n);
         $n = preg_replace('![^\d\+]!', '', $n);
         return $n;
     }
