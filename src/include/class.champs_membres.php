@@ -443,6 +443,7 @@ class Champs_Membres
                 WHERE '.$config->get('champ_identifiant').' = "";');
 
             // Création de l'index unique
+            $db->exec('DROP INDEX IF EXISTS membres_identifiant;');
             $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
         }
         
