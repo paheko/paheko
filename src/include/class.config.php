@@ -121,6 +121,17 @@ class Config
                 $key, $value);
         }
 
+        if (!empty($this->modified['champ_identifiant']))
+        {
+            // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
+            $db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL 
+                WHERE '.$this->get('champ_identifiant').' = "";');
+
+            // Création de l'index unique
+            $db->exec('DROP INDEX IF EXISTS membres_identifiant;');
+            $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
+        }
+
         $db->exec('END;');
 
         $this->modified = [];
