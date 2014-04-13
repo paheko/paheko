@@ -203,6 +203,8 @@ class Membres_Import
 
 			foreach ($columns as $name=>$id)
 			{
+				$name = trim($name);
+				
 				// Champs qui n'existent pas dans le schéma actuel
 				if (!in_array($name, $champs))
 					continue;
