@@ -702,6 +702,11 @@ class Squelette extends \miniSkel
 
     static public function listSources()
     {
+        if (!file_exists(DATA_ROOT . '/www/squelettes'))
+        {
+            mkdir(DATA_ROOT . '/www/squelettes');
+        }
+
         $sources = [];
 
         $dir = dir(ROOT . '/www/squelettes-dist');
