@@ -38,7 +38,7 @@
             <dd>
                 <select id="f_id_cotisation" required="required" name="id_cotisation">
                     {foreach from=$cotisations item="co"}
-                    <option value="{$co.id|escape}" {form_field name="id_cotisation" selected=$co.id default=$default_co} data-compta="{$co.id_categorie_compta|escape}">
+                    <option value="{$co.id|escape}" {form_field name="id_cotisation" selected=$co.id default=$default_co} data-compta="{$co.id_categorie_compta|escape}" data-amount="{$co.montant|escape}">
                         {$co.intitule|escape}
                         — {$co.montant|html_money} {$config.monnaie|escape}
                         — {if $co.duree}pour {$co.duree|escape} jours
@@ -51,6 +51,8 @@
                     {/foreach}
                 </select>
             </dd>
+            <dt class="f_compta"><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="f_compta"><input type="number" name="montant" step="0.01" min="0.01" id="f_montant" value="{form_field name=montant default=$default_amount}" required="required" /></dd>
             <dt class="f_compta"><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="f_compta">
                 <select name="moyen_paiement" id="f_moyen_paiement">
@@ -102,6 +104,7 @@
     $('#f_id_cotisation').onchange = function () {
         if (this.options[this.selectedIndex].getAttribute('data-compta'))
         {
+            $('#f_montant').value = this.options[this.selectedIndex].getAttribute('data-amount'); 
             toggleElementVisibility('.f_compta', true);
             changeMoyenPaiement();
         }

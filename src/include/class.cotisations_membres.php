@@ -56,6 +56,11 @@ class Cotisations_Membres
 	                throw new UserException('Le compte bancaire choisi n\'existe pas.');
 	            }
 	        }
+
+	        if (empty($data['montant']) || !is_numeric($data['montant']))
+	        {
+	        	throw new UserException('Le montant indiqué n\'est pas un nombre valide.');
+	        }
 	    }
 	}
 
@@ -82,7 +87,7 @@ class Cotisations_Membres
 			throw new UserException('Cette cotisation a déjà été enregistrée pour ce jour-ci et ce membre-ci.');
 		}
 
-		$db->exec('BEGIN;');
+		$db->begin();
 
 		$db->simpleInsert('cotisations_membres', [
 			'date'				=>	$data['date'],
@@ -98,7 +103,7 @@ class Cotisations_Membres
 		        $id_operation = $this->addOperationCompta($id, [
 		        	'id_categorie'	=>	$co['id_categorie_compta'],
 		            'libelle'       =>  'Cotisation (automatique)',
-		            'montant'       =>  $co['montant'],
+		            'montant'       =>  $data['montant'],
 		            'date'          =>  $data['date'],
 		            'moyen_paiement'=>  $data['moyen_paiement'],
 		            'numero_cheque' =>  isset($data['numero_cheque']) ? $data['numero_cheque'] : null,
@@ -109,12 +114,12 @@ class Cotisations_Membres
 	        }
 	        catch (\Exception $e)
 	        {
-	        	$db->exec('ROLLBACK;');
+	        	$db->rollback();
 	        	throw $e;
 	        }
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		return $id;
 	}
