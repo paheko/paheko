@@ -20,6 +20,8 @@ class DB extends \SQLite3
 
     protected $_running_sum = 0.0;
 
+    protected $_transaction = 0;
+
     const NUM = \SQLITE3_NUM;
     const ASSOC = \SQLITE3_ASSOC;
     const BOTH = \SQLITE3_BOTH;
@@ -135,6 +137,40 @@ class DB extends \SQLite3
     public function e($str)
     {
         return $this->escapeString($str);
+    }
+
+    public function begin()
+    {
+        if (!$this->_transaction)
+        {
+            $this->exec('BEGIN;');
+        }
+
+        $this->_transaction++;
+
+        return $this->_transaction == 1 ? true : false;
+    }
+
+    public function commit()
+    {
+        if ($this->_transaction == 1)
+        {
+            $this->exec('END;');
+        }
+
+        if ($this->_transaction > 0)
+        {
+            $this->_transaction--;
+        }
+
+        return $this->_transaction ? false : true;
+    }
+
+    public function rollback()
+    {
+        $this->exec('ROLLBACK;');
+        $this->_transaction = 0;
+        return true;
     }
 
     protected function _getArgType($arg, $name = '')
