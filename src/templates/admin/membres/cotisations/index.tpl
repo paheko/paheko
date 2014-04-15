@@ -67,7 +67,7 @@
             <dd><input type="text" name="intitule" id="f_intitule" value="{form_field name=intitule}" required="required" /></dd>
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" cols="50" rows="3">{form_field name=description}</textarea></dd>
-            <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dt><label for="f_montant">Montant minimal</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="number" name="montant" step="0.01" min="0.00" id="f_montant" value="{form_field name=montant default=0.00}" required="required" /></dd>
 
             <dt><label for="f_periodicite_jours">Période de validité</label></dt>

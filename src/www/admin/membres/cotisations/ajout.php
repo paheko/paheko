@@ -49,6 +49,7 @@ if (!empty($_POST['add']))
                 'id_cotisation'     =>  utils::post('id_cotisation'),
                 'id_membre'         =>  utils::post('id_membre'),
                 'id_auteur'         =>  $user['id'],
+                'montant'           =>  utils::post('montant'),
                 'moyen_paiement'    =>  utils::post('moyen_paiement'),
                 'numero_cheque'     =>  utils::post('numero_cheque'),
                 'banque'            =>  utils::post('banque'),
