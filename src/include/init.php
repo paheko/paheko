@@ -180,10 +180,18 @@ function exception_handler($e)
     if ($e instanceOf UserException || $e instanceOf miniSkelMarkupException)
     {
         try {
-            $tpl = Template::getInstance();
+            if (PHP_SAPI == 'cli')
+            {
+                echo $e->getMessage();
+            }
+            else
+            {
+                $tpl = Template::getInstance();
 
-            $tpl->assign('error', $e->getMessage());
-            $tpl->display('error.tpl');
+                $tpl->assign('error', $e->getMessage());
+                $tpl->display('error.tpl');
+            }
+
             exit;
         }
         catch (Exception $e)
