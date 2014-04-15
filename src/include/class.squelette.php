@@ -713,8 +713,13 @@ class Squelette extends \miniSkel
 
         while ($file = $dir->read())
         {
-            if ($file[0] != '.')
-                $sources[] = $file;
+            if ($file[0] == '.')
+                continue;
+
+            if (!preg_match('/\.(?:css|x?html?|atom|rss|xml|svg|txt)$/i', $file))
+                continue;
+            
+            $sources[] = $file;
         }
 
         $dir->close();
@@ -723,8 +728,13 @@ class Squelette extends \miniSkel
 
         while ($file = $dir->read())
         {
-            if ($file[0] != '.')
-                $sources[] = $file;
+            if ($file[0] == '.')
+                continue;
+
+            if (!preg_match('/\.(?:css|x?html?|atom|rss|xml|svg|txt)$/i', $file))
+                continue;
+            
+            $sources[] = $file;
         }
 
         $dir->close();
