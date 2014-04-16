@@ -63,6 +63,11 @@ function tpl_form_field($params)
     else
         $value = '';
 
+    if (is_array($value))
+    {
+        return $value;
+    }
+
     if (isset($params['checked']))
     {
         if ($value == $params['checked'])
@@ -456,6 +461,21 @@ function tpl_html_champ_membre($params)
     }
     elseif ($type == 'multiple')
     {
+        if (is_array($value))
+        {
+            $binary = 0;
+
+            foreach ($value as $k => $v)
+            {
+                if (array_key_exists($k, $config['options']) && !empty($v))
+                {
+                    $binary |= 0x01 << $k;
+                }
+            }
+
+            $value = $binary;
+        }
+
         foreach ($config['options'] as $k=>$v)
         {
             $b = 0x01 << (int)$k;
