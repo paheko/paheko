@@ -87,8 +87,8 @@
                     {/if}
                 </td>
                 <td class="actions">
-                    <a href="{$admin_url}membres/cotisations/voir.php?id={$c.id_cotisation|escape}">Autres cotisants</a>
-                    | <a class="icn" href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id|escape}">✘</a>
+                    <a href="{$admin_url}membres/cotisations/voir.php?id={$c.id_cotisation|escape}" title="Liste des membres inscrits à cette cotisation">👪</a>
+                    <a class="icn" href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id|escape}" title="Supprimer cette cotisation pour ce membre">✘</a>
                 </td>
             </tr>
         {/foreach}

@@ -75,7 +75,7 @@
             <strong>{$membre[$c]|escape}</strong>
         {elseif $c == 'email'}
             <a href="mailto:{$membre[$c]|escape}">{$membre[$c]|escape}</a>
-            | <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>
+            | <a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}"><b class="icn action">✉</b> Envoyer un message</a>
         {elseif $config.type == 'email'}
             <a href="mailto:{$membre[$c]|escape}">{$membre[$c]|escape}</a>
         {elseif $config.type == 'tel'}
