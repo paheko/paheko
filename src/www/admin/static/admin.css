@@ -1,3 +1,16 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: 'gicon';
+    src: url('font/garradin.eot?36341436');
+    src: url('font/garradin.eot?36341436#iefix') format('embedded-opentype'),
+        url('font/garradin.woff?36341436') format('woff'),
+        url('font/garradin.ttf?36341436') format('truetype'),
+        url('font/garradin.svg?36341436#garradin') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
     margin: 0;
     padding: 0;
@@ -20,8 +33,8 @@ html { width: 100%; height: 100%; }
 body {
     font-size: 100%;
     color: #000;
-    font-family: "Trebuchet MS", Helvetica, Sans-serif;
-    background: #fff;
+    font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+    background: #fff url("bg00.png") repeat-y left bottom;
     background: url("bg01.png") no-repeat left -100px, url("bg00.png") repeat-y left bottom, #fff;
     padding-bottom: 1em;
 }
@@ -56,6 +69,7 @@ body#popup {
 
 .header .menu a:hover {
     text-decoration: underline;
+    background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
 }
 
@@ -69,12 +83,8 @@ body#popup {
     color: rgb(156, 79, 21);
 }
 
-.header .menu a small {
-    font-weight: normal;
-    opacity: 0.5;
+.header .menu a b {
     float: right;
-    font-size: .7em;
-    padding-top: .3em;
     text-decoration: none;
 }
 
@@ -144,6 +154,7 @@ fieldset {
 fieldset legend {
     padding: 0 0.5em;
     font-weight: bold;
+    color: #000;
 }
 
 label:hover {
@@ -220,6 +231,7 @@ input[type=submit], input[type=button] {
 
 .loader b {
     text-shadow: 2px 2px 5px #999;
+    background: rgb(255, 255, 255);
     background: rgba(255, 255, 255, 0.5);
     border-radius: .5em;
     font-size: 16px;
@@ -327,6 +339,7 @@ ul.actions li {
 
 ul.actions li a {
     display: inline-block;
+    background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, .5);
     border-radius: .5em .5em 0 0;
     padding: .1em .5em;
@@ -373,10 +386,12 @@ table.list th {
 }
 
 table.list thead {
+    background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
 }
 
 table.list tfoot tr {
+    background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.1);
     color: rgb(156, 79, 21);
 }
@@ -386,10 +401,12 @@ table.list th, table.list td {
 }
 
 table.list tr {
+    border: 1px solid rgb(217, 134, 40);
     border: 1px solid rgba(217, 134, 40, 0.5);
 }
 
 table.list tr:nth-child(even) {
+    background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
 }
 
@@ -398,6 +415,7 @@ table.list.multi tr:nth-child(even) {
 }
 
 table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
+    background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
 }
 
@@ -424,35 +442,41 @@ table.list .check {
 }
 
 table.search th {
+    background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
 }
 
-table.list thead .cur {
+.userOrder .cur {
     background: rgb(217, 134, 40);
     color: #fff;
 }
 
-table.list thead th a, table.list thead td a {
-    display: inline-block;
-    color: #000;
+.userOrder td, .userOrder th {
+    position: relative;
+}
+
+.userOrder .icn {
+    float: left;
+    clear: left;
+    color: #9c4f15;
     text-decoration: none;
-    font-size: 10pt;
+    font-size: 12pt;
+    line-height: 6pt;
+    width: 12pt;
+    height: 8pt;
+    vertical-align: middle;
     font-weight: normal;
-    background: #ccc;
-    border: 1px outset #999;
-    margin: 0 .1em;
-    padding: 0 .1em;
+    text-shadow: 0px 0px 1px #fff;
 }
 
-table.list thead th a:hover, table.list thead td a:hover {
-    background: #999;
-    border-color: #333;
+thead .icn:hover {
+    color: darkred;
+    text-shadow: none;
 }
 
-table.list thead .cur.desc a:nth-child(2), table.list thead .cur.asc a:nth-child(1) {
-    font-weight: bold;
-    background: #999;
+thead .cur.desc .icn.dn, thead .cur.asc .icn.up {
     color: #fff;
+    text-shadow: none;
 }
 
 table.list .actions {
@@ -479,7 +503,8 @@ b.money {
 }
 
 #rapport table table {
-    border: 1px solid rgba(217, 134, 40, 0.5);
+    border: 1px solid rgb(217, 134, 40);
+    border-color: rgba(217, 134, 40, 0.5);
 }
 
 #rapport table table tr th {
@@ -501,10 +526,12 @@ b.money {
 
 #rapport .parent {
     font-weight: bold;
+    background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.2);
 }
 
 #rapport table table tfoot tr {
+    background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.1);
     color: rgb(156, 79, 21);
 }
@@ -520,16 +547,27 @@ b.money {
     text-align: center;
 }
 
-.actions .icn {
+.icn {
+    font-family: "gicon", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    font-variant: normal;
+    text-transform: none;
+}
+
+.actions .icn, .icn.action {
     text-decoration: none;
     border-radius: 1em;
-    width: 1.2em;
     display: inline-block;
     text-align: center;
     font-size: 1.2em;
     line-height: .8em;
     vertical-align: middle;
     padding: .2em;
+    font-family: "gicon", sans-serif;
+    color: #9c4f15;
+    text-shadow: 1px 1px 1px #999;
 }
 
 .num a {
@@ -538,10 +576,11 @@ b.money {
     display: inline-block;
     text-align: center;
     padding: 0 .2em;
+    background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.5);
 }
 
-.actions .icn:hover, .num a:hover {
+.actions .icn:hover, .num a:hover, .icn.action:hover {
     color: darkred;
     background: #ff9;
 }
@@ -560,6 +599,7 @@ b.money {
     vertical-align: middle;
     position: relative;
     z-index: 10;
+    font-family: "gicon", "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 
 .droits b.aucun {
@@ -1036,6 +1076,7 @@ dl.describe ul {
 }
 
 dl.cotisation {
+    background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
     padding: .5em;
     border-radius: .5em;
@@ -1064,12 +1105,27 @@ dl.cotisation dd {
     min-height: 2em;
 }
 
+#orderFields fieldset legend {
+    font-size: 1.2em;
+    line-height: .8em;
+    color: #666;
+}
+
 #orderFields fieldset .actions {
     display: block;
     position: absolute;
     top: 1em;
     right: 1em;
 }
+
+#orderFields fieldset .actions .icn {
+    position: absolute;
+}
+
+#orderFields fieldset .actions .remove { right: 0em; }
+#orderFields fieldset .actions .edit { right: 1.5em; }
+#orderFields fieldset .actions .down { right: 3em; }
+#orderFields fieldset .actions .up { right: 4.5em; }
 
 #orderFields fieldset:nth-child(1) .actions .up, #orderFields fieldset:nth-last-child(1) .actions .down {
     display: none;

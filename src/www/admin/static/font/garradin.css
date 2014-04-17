@@ -1,0 +1,63 @@
+@charset "UTF-8";
+
+ @font-face {
+  font-family: 'garradin';
+  src: url('../font/garradin.eot?36341436');
+  src: url('../font/garradin.eot?36341436#iefix') format('embedded-opentype'),
+       url('../font/garradin.woff?36341436') format('woff'),
+       url('../font/garradin.ttf?36341436') format('truetype'),
+       url('../font/garradin.svg?36341436#garradin') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'garradin';
+    src: url('../font/garradin.svg?36341436#garradin') format('svg');
+  }
+}
+*/
+ 
+ [class^="icn-"]:before, [class*=" icn-"]:before {
+  font-family: "garradin";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+}
+ 
+.icn-search:before { content: '🔍'; } /* '\1f50d' */
+.icn-user:before { content: '👤'; } /* '\1f464' */
+.icn-users:before { content: '👪'; } /* '\1f46a' */
+.icn-delete:before { content: '\2718'; } /* '✘' */
+.icn-plus:before { content: '\2795'; } /* '➕' */
+.icn-minus:before { content: '\2796'; } /* '➖' */
+.icn-help:before { content: '\2753'; } /* '❓' */
+.icn-home:before { content: '\2302'; } /* '⌂' */
+.icn-attach:before { content: '📎'; } /* '\1f4ce' */
+.icn-lock:before { content: '🔒'; } /* '\1f512' */
+.icn-mail:before { content: '\2709'; } /* '✉' */
+.icn-download:before { content: '\21d3'; } /* '⇓' */
+.icn-edit:before { content: '\270e'; } /* '✎' */
+.icn-print:before { content: '\2399'; } /* '⎙' */
+.icn-alert:before { content: '\26a0'; } /* '⚠' */
+.icn-menu:before { content: '𝍢'; } /* '\1d362' */
+.icn-settings:before { content: '\2638'; } /* '☸' */
+.icn-down:before { content: '\2193'; } /* '↓' */
+.icn-up:before { content: '\2191'; } /* '↑' */
+.icn-logout:before { content: '\291d'; } /* '⤝' */
+.icn-check:before { content: '\2611'; } /* '☑' */
+.icn-unlock:before { content: '🔓'; } /* '\1f513' */

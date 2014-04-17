@@ -261,25 +261,6 @@
         };
         actions.appendChild(down);
 
-        if (field.id != 'f_email' && field.id != 'f_passe')
-        {
-            var rem = document.createElement('span');
-            rem.className = 'icn remove';
-            rem.innerHTML = '&#10005;';
-            rem.title = 'Enlever ce champ de la fiche';
-            rem.onclick = function (e) {
-                if (!window.confirm('Êtes-vous sûr de supprimer ce champ des fiches de membre ?'))
-                {
-                    return false;
-                }
-
-                var field = this.parentNode.parentNode;
-                field.parentNode.removeChild(field);
-                return false;
-            };
-            actions.appendChild(rem);
-        }
-
         var edit = document.createElement('span');
         edit.className = 'icn edit';
         edit.innerHTML = '&#x270e;';
@@ -293,6 +274,25 @@
             return false;
         };
         actions.appendChild(edit);
+
+        if (field.id != 'f_email' && field.id != 'f_passe')
+        {
+            var rem = document.createElement('span');
+            rem.className = 'icn remove';
+            rem.innerHTML = '✘';
+            rem.title = 'Enlever ce champ de la fiche';
+            rem.onclick = function (e) {
+                if (!window.confirm('Êtes-vous sûr de supprimer ce champ des fiches de membre ?'))
+                {
+                    return false;
+                }
+
+                var field = this.parentNode.parentNode;
+                field.parentNode.removeChild(field);
+                return false;
+            };
+            actions.appendChild(rem);
+        }
 
         if (field.querySelector('.options'))
         {

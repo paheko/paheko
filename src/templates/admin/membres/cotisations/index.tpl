@@ -34,7 +34,7 @@
                 <td class="num">{$co.nb_membres|escape}</td>
                 <td class="num">{$co.nb_a_jour|escape}</td>
                 <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id|escape}" title="Liste des membres cotisants">❓</a>
+                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id|escape}" title="Liste des membres cotisants">👪</a>
                     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
                         <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id|escape}" title="Modifier">✎</a>
                         <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id|escape}" title="Supprimer">✘</a>

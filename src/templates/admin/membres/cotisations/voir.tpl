@@ -26,19 +26,19 @@
 
 {if !empty($liste)}
     <table class="list">
-        <thead>
+        <thead class="userOrder">
             <tr>
-                <td class="{if $order == "id"} cur {if $desc}desc{else}asc{/if}{/if}"><a href="?id={$cotisation.id|escape}&amp;o=id&amp;a">&darr;</a><a href="?id={$cotisation.id|escape}&amp;o=id&amp;d">&uarr;</a></td>
-                <th class="{if $order == "identite"} cur {if $desc}desc{else}asc{/if}{/if}">Membre <a href="?id={$cotisation.id|escape}&amp;o=identite&amp;a">&darr;</a><a href="?id={$cotisation.id|escape}&amp;o=identite&amp;d">&uarr;</a></th>
-                <td class="{if $order == "a_jour"} cur {if $desc}desc{else}asc{/if}{/if}">Statut <a href="?id={$cotisation.id|escape}&amp;o=a_jour&amp;a">&darr;</a><a href="?id={$cotisation.id|escape}&amp;o=a_jour&amp;d">&uarr;</a></td>
-                <td class="{if $order == "date"} cur {if $desc}desc{else}asc{/if}{/if}">Date de cotisation <a href="?id={$cotisation.id|escape}&amp;o=date&amp;a">&darr;</a><a href="?id={$cotisation.id|escape}&amp;o=date&amp;d">&uarr;</a></td>
+                <td class="{if $order == "id"} cur {if $desc}desc{else}asc{/if}{/if}"><a href="?id={$cotisation.id|escape}&amp;o=id&amp;a" class="icn up">&uarr;</a><a href="?id={$cotisation.id|escape}&amp;o=id&amp;d" class="icn dn">&darr;</a></td>
+                <th class="{if $order == "identite"} cur {if $desc}desc{else}asc{/if}{/if}">Membre <a href="?id={$cotisation.id|escape}&amp;o=identite&amp;a" class="icn up">&uarr;</a><a href="?id={$cotisation.id|escape}&amp;o=identite&amp;d" class="icn dn">&darr;</a></th>
+                <td class="{if $order == "a_jour"} cur {if $desc}desc{else}asc{/if}{/if}">Statut <a href="?id={$cotisation.id|escape}&amp;o=a_jour&amp;a" class="icn up">&uarr;</a><a href="?id={$cotisation.id|escape}&amp;o=a_jour&amp;d" class="icn dn">&darr;</a></td>
+                <td class="{if $order == "date"} cur {if $desc}desc{else}asc{/if}{/if}">Date de cotisation <a href="?id={$cotisation.id|escape}&amp;o=date&amp;a" class="icn up">&uarr;</a><a href="?id={$cotisation.id|escape}&amp;o=date&amp;d" class="icn dn">&darr;</a></td>
                 <td></td>
             </tr>
         </thead>
         <tbody>
             {foreach from=$liste item="co"}
                 <tr>
-                    <td class="num"><a class="icn" href="{$admin_url}membres/fiche.php?id={$co.id_membre|escape}">{$co.id_membre|escape}</a></td>
+                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$co.id_membre|escape}">{$co.id_membre|escape}</a></td>
                     <th>{$co.nom|escape}</th>
                     <td>{if $co.a_jour}<b class="confirm">À jour</b>{else}<b class="error">En retard</b>{/if}</td>
                     <td>{$co.date|format_sqlite_date_to_french}</td>
