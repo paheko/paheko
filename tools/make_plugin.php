@@ -45,14 +45,14 @@ if (!empty($infos['menu']) && !file_exists($target . '/www/admin/index.php'))
 	die("ERREUR : Le fichier www/admin/index.php est obligatoire quand menu=1\n");
 }
 
-@unlink($plugin_file . '.tar');
-@unlink($plugin_file . '.tar.gz');
+@unlink('/tmp/plugin.tar');
+@unlink('/tmp/plugin.tar.gz');
 
-$p = new PharData($plugin_file . '.tar');
+$p = new PharData('/tmp/plugin.tar');
 
 $p->buildFromDirectory($target);
 
 $p->compress(Phar::GZ);
 
-@unlink($plugin_file . '.tar');
-
+@unlink('/tmp/plugin.tar');
+rename('/tmp/plugin.tar.gz', $plugin_file . '.tar.gz');
