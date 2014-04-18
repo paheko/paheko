@@ -936,8 +936,8 @@ div.wikiRevision h4 {
 }
 
 .diff .leftChange, .diff .rightChange {
-    padding: 0.2em;
     text-align: center;
+    vertical-align: middle;
 }
 
 .diff ins { background: #9f9; }
@@ -967,17 +967,8 @@ div.wikiRevision h4 {
 }
 
 .diff .leftChange b, .diff .rightChange b {
-    border-radius: 1em;
-    width: 16px;
-    height: 16px;
-    display: inline-block;
-    text-align: center;
-    font-size: 20px;
-    line-height: 16px;
-    vertical-align: middle;
-    padding: .1em;
-    background: #666;
-    color: #fff;
+    text-shadow: 1px 1px 1px #ccc;
+    color: #666;
 }
 
 .pagination {

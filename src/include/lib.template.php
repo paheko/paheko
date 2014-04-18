@@ -277,14 +277,14 @@ function tpl_diff($params)
         if ($type == \simpleDiff::INS)
         {
             $class2 = 'ins';
-            $t2 = '<b>+</b>';
+            $t2 = '<b class="icn">➕</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
         elseif ($type == \simpleDiff::DEL)
         {
             $class1 = 'del';
-            $t1 = '<b>-</b>';
+            $t1 = '<b class="icn">➖</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
@@ -292,8 +292,8 @@ function tpl_diff($params)
         {
             $class1 = 'del';
             $class2 = 'ins';
-            $t1 = '<b>-</b>';
-            $t2 = '<b>+</b>';
+            $t1 = '<b class="icn">➖</b>';
+            $t2 = '<b class="icn">➕</b>';
 
             $lineDiff = \simpleDiff::wdiff($old, $new);
             $lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');
