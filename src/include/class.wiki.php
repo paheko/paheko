@@ -195,7 +195,7 @@ class Wiki
     public function getRevision($id, $rev)
     {
         $db = DB::getInstance();
-        $champ_id = Config::getInstance()->get('champ_identifiant');
+        $champ_id = Config::getInstance()->get('champ_identite');
 
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleQuerySingle('SELECT r.revision, r.modification, r.id_auteur, r.contenu,
@@ -208,7 +208,7 @@ class Wiki
     public function listRevisions($id)
     {
         $db = DB::getInstance();
-        $champ_id = Config::getInstance()->get('champ_identifiant');
+        $champ_id = Config::getInstance()->get('champ_identite');
 
         // FIXME pagination au lieu de bloquer à 1000
         return $db->simpleStatementFetch('SELECT r.revision, r.modification, r.id_auteur,
