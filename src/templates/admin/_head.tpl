@@ -45,7 +45,7 @@
             <li class="plugins">
                 <ul>
                 {foreach from=$plugins_menu key="id" item="name"}
-                    <li class="plugins {$id|escape}{if $current == 'plugin_`$id`'} current{/if}"><a href="{plugin_url id=$id}">{$name|escape}</a></li>
+                    <li class="plugins {if $current == "plugin_`$id`"} current{/if}"><a href="{plugin_url id=$id}">{$name|escape}</a></li>
                 {/foreach}
                 </ul>
             </li>

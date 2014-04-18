@@ -68,7 +68,6 @@ require_once __DIR__ . '/../../include/init.php';
 // Vérifier que les répertoires vides existent, sinon les créer
 $paths = [DATA_ROOT . '/cache', DATA_ROOT . '/cache/static', DATA_ROOT . '/cache/compiled'];
 
-
 foreach ($paths as $path)
 {
     if (!file_exists($path))
@@ -113,7 +112,7 @@ else
 
     if (!empty($_POST['save']))
     {
-        if (!defined('Garradin\AUTOMATED_INSTALL') && !utils::CSRF_check('install'))
+        if (!utils::CSRF_check('install'))
         {
             $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
         }
@@ -229,34 +228,13 @@ else
 
                 $config->save();
 
-                // Installation automatique des plugins fournis
-                $plugins = Plugin::listDownloaded();
-
-                if (!empty($plugins))
-                {
-                    foreach ($plugins as $plugin)
-                    {
-                        Plugin::install($plugin);
-                    }
-                }
-
-                if (!defined('Garradin\AUTOMATED_INSTALL'))
-                {
-                    utils::redirect('/admin/login.php');
-                }
+                utils::redirect('/admin/login.php');
             }
             catch (UserException $e)
             {
                 @unlink(DB_FILE);
 
-                if (defined('Garradin\AUTOMATED_INSTALL'))
-                {
-                    throw $e;
-                }
-                else
-                {
-                    $error = $e->getMessage();
-                }
+                $error = $e->getMessage();
             }
         }
     }
@@ -264,8 +242,5 @@ else
     $tpl->assign('error', $error);
 }
 
-if (!defined('Garradin\AUTOMATED_INSTALL'))
-{
-    $tpl->assign('passphrase', utils::suggestPassword());
-    $tpl->display('admin/install.tpl');
-}
+$tpl->assign('passphrase', utils::suggestPassword());
+$tpl->display('admin/install.tpl');
