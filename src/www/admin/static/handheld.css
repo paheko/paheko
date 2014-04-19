@@ -1,5 +1,6 @@
 body {
-	background: #fff;
+	background: #fff url("bg01.png") no-repeat -180px -50px;
+	font-size: 11pt;
 }
 
 .header h1 {
@@ -13,13 +14,10 @@ body {
 	margin: 0;
 	width: 100%;
     background: none;
-    font-size: .9em;
 }
 
 .header .menu > li {
-	background: #9c4f15;
 	margin: .1em 0;
-	padding: .2em;
 }
 
 .header .menu a {
@@ -27,6 +25,34 @@ body {
 	padding: 0;
 	display: inline;
 	padding: .2em;
+	color: black;
+}
+
+.header .menu a:hover {
+	background: none;
+}
+
+.header .menu > li > a {
+	background: #9c4f15;
+	color: white;
+	display: inline-block;
+	padding: .2em .5em .2em .2em;
+	border-radius: 0 .5em .5em 0;
+}
+
+.header .menu > li > a:hover {
+	color: #000;
+    background: rgb(217, 134, 40);
+    background: rgba(217, 134, 40, 0.5);
+}
+
+.header .menu a b {
+	float: left;
+	font-size: 1.1em;
+	margin: 0 .3em 0 0;
+	width: 1.2em;
+	text-align: center;
+	color: inherit;
 }
 
 .header .menu a small {
@@ -39,11 +65,14 @@ body {
 
 .header .menu li li a {
 	padding: .2em;
+	font-size: .9em;
 }
 
 .header .menu li.current > a {
-	background: white;
+    background: rgb(217, 134, 40);
+    background: rgba(217, 134, 40, 0.5);
 	color: #000;
+	border-radius: .5em;
 }
 
 .page {
@@ -79,10 +108,17 @@ dl.describe dt, dl.describe dd {
 	text-align: center;
 }
 
+/* Petits écrans (smartphones) */
 @media screen and (max-width:600px) {
 	table.list td, table.list th {
 		display: inline-block;
 		border-left: 1px solid #999;
+		width: auto !important;
+	}
+
+	colgroup {
+		/* Hack pour désactiver les largeurs de colonnes */
+		display: none;
 	}
 
 	table.list td:first-child, table.list th:first-child {
