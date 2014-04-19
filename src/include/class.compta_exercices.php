@@ -204,7 +204,7 @@ class Compta_Exercices
             $journal->add([
                 'libelle'   =>  'Résultat de l\'exercice précédent',
                 'date'      =>  $date,
-                'montant'   =>  $resultat,
+                'montant'   =>  abs($resultat),
                 'compte_debit'  =>  $resultat < 0 ? 129 : NULL,
                 'compte_credit' =>  $resultat > 0 ? 120 : NULL,
             ]);
