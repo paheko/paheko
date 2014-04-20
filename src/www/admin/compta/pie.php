@@ -10,7 +10,7 @@ if (!in_array(utils::get('g'), ['recettes', 'depenses']))
 
 $graph = utils::get('g');
 
-if (Static_Cache::expired('graph_' . $graph))
+if (Static_Cache::expired('pie_' . $graph))
 {
 	$stats = new Compta_Stats;
 	$categories = new Compta_Categories;
@@ -55,16 +55,8 @@ if (Static_Cache::expired('graph_' . $graph))
 		$pie->add(new \SVGPie_Data($others, 'Autres', '#ccc'));
 	}
 
-	Static_Cache::store('graph_' . $graph, $pie->output());
+	Static_Cache::store('pie_' . $graph, $pie->output());
 }
 
 header('Content-Type: image/svg+xml');
-Static_Cache::display('graph_' . $graph);
-
-// Clean cache sometimes
-if ((time() % 100) == 0)
-{
-	Static_Cache::clean();
-}
-
-?>
+Static_Cache::display('pie_' . $graph);

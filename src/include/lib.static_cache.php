@@ -49,6 +49,11 @@ class Static_Cache
 		return readfile($path);
 	}
 
+	static public function getPath($id)
+	{
+		return self::_getCachePath($id);
+	}
+
 	static public function remove($id)
 	{
 		$path = self::_getCachePath($id);
@@ -80,5 +85,3 @@ class Static_Cache
 		return true;
 	}
 }
-
-?>

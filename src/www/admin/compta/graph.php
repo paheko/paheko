@@ -81,11 +81,3 @@ if (Static_Cache::expired('graph_' . $graph))
 
 header('Content-Type: image/svg+xml');
 Static_Cache::display('graph_' . $graph);
-
-// Clean cache sometimes
-if ((time() % 100) == 0)
-{
-	Static_Cache::clean();
-}
-
-?>

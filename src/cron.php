@@ -20,3 +20,6 @@ if ($rappels->countAll())
 {
 	$rappels->sendPending();
 }
+
+// Nettoyage du cache statique
+Static_Cache::clean();
