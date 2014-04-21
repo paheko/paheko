@@ -6,7 +6,8 @@ body {
 .header h1 {
 	margin: 0;
 	text-align: center;
-	font-size: 1.5em;
+	font-size: 1.2em;
+	margin: .3em 0;
 }
 
 .header .menu {
@@ -72,7 +73,11 @@ body {
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
 	color: #000;
+}
+
+.header .menu li li.current > a {
 	border-radius: .5em;
+	padding: .2em .4em;
 }
 
 .page {
@@ -85,6 +90,7 @@ ul.actions {
 	border: none;
 	font-size: .8em;
 	text-align: center;
+	margin: .3em 0;
 }
 
 ul.actions li a {
