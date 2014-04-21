@@ -8,7 +8,7 @@
     <p class="confirm">
         {if $ok == 'config'}La configuration a bien été enregistrée.
         {elseif $ok == 'create'}Une nouvelle sauvegarde a été créée.
-        {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>pre-restore</em>, sinon vous pouvez l'effacer.
+        {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>date-du-jour.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
         {elseif $ok == 'remove'}La sauvegarde a été supprimée.
         {/if}
     </p>
