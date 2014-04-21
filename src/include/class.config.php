@@ -255,7 +255,7 @@ class Config
                 // Vérification que le champ est unique pour l'identifiant
                 if ($key == 'champ_identifiant' 
                     && !$db->simpleQuerySingle('SELECT (COUNT(DISTINCT '.$value.') = COUNT(*)) 
-                        FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != "";'))
+                        FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != \'\';'))
                 {
                     throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
                 }

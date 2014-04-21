@@ -175,7 +175,7 @@ class Rappels
 				INNER JOIN membres AS m ON m.id = cm.id_membre
 			WHERE
 				/* Inutile de sélectionner les membres sans email */
-				m.email IS NOT NULL AND m.email != ""
+				m.email IS NOT NULL AND m.email != \'\'
 				/* Les cotisations ponctuelles ne comptent pas */
 				AND (c.fin IS NOT NULL OR c.duree IS NOT NULL)
 				/* Rien nest envoyé aux membres des catégories cachées, logique */
