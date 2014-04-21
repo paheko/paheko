@@ -448,7 +448,10 @@ class Squelette extends \miniSkel
             $out->append(1, 'if (trim($this->getVariable(\'recherche\'))) { ');
         }
 
-        $out->append(1, '$result_'.$hash.' = $db->query(\''.$query.'\'); ');
+        $out->append(1, '$statement = $db->prepare(\''.$query.'\'); ');
+        // Sécurité anti injection
+        $out->append(1, 'if (!$statement->readOnly()) { throw new \\miniSkelMarkupException("Requête en écriture illégale: '.$query.'"); } ');
+        $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
         $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
 
         if ($search)
