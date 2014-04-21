@@ -150,7 +150,8 @@ class Cotisations
 	public function listCurrent()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT * FROM cotisations WHERE fin >= date(\'now\') OR fin IS NULL ORDER BY intitule;');
+		return $db->simpleStatementFetch('SELECT * FROM cotisations WHERE fin >= date(\'now\') OR fin IS NULL
+			ORDER BY transliterate_to_ascii(intitule) COLLATE NOCASE;');
 	}
 
 	public function listCurrentWithStats()
@@ -161,7 +162,8 @@ class Cotisations
 			(SELECT COUNT(DISTINCT id_membre) FROM cotisations_membres AS cm WHERE id_cotisation = co.id
 				AND ((co.duree IS NOT NULL AND date(cm.date, \'+\'||co.duree||\' days\') >= date())
 					OR (co.fin IS NOT NULL AND co.debut <= cm.date AND co.fin >= cm.date))) AS nb_a_jour
-			FROM cotisations AS co WHERE fin >= date(\'now\') OR fin IS NULL ORDER BY intitule;');
+			FROM cotisations AS co WHERE fin >= date(\'now\') OR fin IS NULL
+			ORDER BY transliterate_to_ascii(intitule) COLLATE NOCASE;');
 	}
 }
 
