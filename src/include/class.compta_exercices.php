@@ -259,8 +259,6 @@ class Compta_Exercices
 
     protected function _checkFields(&$data)
     {
-        $db = DB::getInstance();
-
         if (empty($data['libelle']) || !trim($data['libelle']))
         {
             throw new UserException('Le libellé ne peut rester vide.');

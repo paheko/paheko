@@ -284,7 +284,7 @@ class Wiki
     {
         $db = DB::getInstance();
         return $db->simpleStatementFetch('SELECT
-            p.uri, r.*, snippet(wiki_recherche, "<b>", "</b>", "...", -1, -50) AS snippet,
+            p.uri, r.*, snippet(wiki_recherche, \'<b>\', \'</b>\', \'...\', -1, -50) AS snippet,
             rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points
             FROM wiki_recherche AS r INNER JOIN wiki_pages AS p ON p.id = r.id
             WHERE '.$this->_getLectureClause('p.').' AND wiki_recherche MATCH \''.$db->escapeString($query).'\'

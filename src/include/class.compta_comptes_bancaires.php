@@ -17,7 +17,6 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
 
         $new_id = parent::add($data);
 
-        $db = DB::getInstance();
         $db->simpleInsert('compta_comptes_bancaires', [
             'id'        =>  $new_id,
             'banque'    =>  $data['banque'],

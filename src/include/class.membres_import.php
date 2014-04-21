@@ -246,7 +246,7 @@ class Membres_Import
     {
         $db = DB::getInstance();
 
-        $res = $db->prepare('SELECT m.id, c.nom AS "categorie", m.* FROM membres AS m 
+        $res = $db->prepare('SELECT m.id, c.nom AS categorie, m.* FROM membres AS m 
             LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
 
         $fp = fopen('php://output', 'w');
