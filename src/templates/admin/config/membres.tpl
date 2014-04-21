@@ -225,7 +225,7 @@
         actions.className = 'actions';
         field.appendChild(actions);
 
-        var up = document.createElement('span');
+        var up = document.createElement('a');
         up.className = 'icn up';
         up.innerHTML = '&uarr;';
         up.title = 'Déplacer vers le haut';
@@ -238,7 +238,7 @@
         };
         actions.appendChild(up);
 
-        var down = document.createElement('span');
+        var down = document.createElement('a');
         down.className = 'icn down';
         down.innerHTML = '&darr;';
         down.title = 'Déplacer vers le bas';
@@ -261,7 +261,7 @@
         };
         actions.appendChild(down);
 
-        var edit = document.createElement('span');
+        var edit = document.createElement('a');
         edit.className = 'icn edit';
         edit.innerHTML = '&#x270e;';
         edit.title = 'Modifier ce champ';
@@ -277,7 +277,7 @@
 
         if (field.id != 'f_email' && field.id != 'f_passe')
         {
-            var rem = document.createElement('span');
+            var rem = document.createElement('a');
             rem.className = 'icn remove';
             rem.innerHTML = '✘';
             rem.title = 'Enlever ce champ de la fiche';
