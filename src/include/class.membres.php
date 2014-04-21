@@ -641,15 +641,12 @@ class Membres
 
         $fields = implode(', ', $fields);
 
-        return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, '.$fields.', '.$config->get('champ_identite').' AS identite,
-                strftime(\'%s\', date_inscription) AS date_inscription
-                FROM membres '.$where.'
-                ORDER BY '.$order.' LIMIT ?, ?;',
-            SQLITE3_ASSOC,
-            $begin,
-            self::ITEMS_PER_PAGE
-        );
+        $query = 'SELECT id, id_categorie, '.$fields.', '.$config->get('champ_identite').' AS identite,
+            strftime(\'%s\', date_inscription) AS date_inscription
+            FROM membres '.$where.'
+            ORDER BY '.$order.' LIMIT ?, ?;';
+
+        return $db->simpleStatementFetch($query, SQLITE3_ASSOC, $begin, self::ITEMS_PER_PAGE);
     }
 
     public function countByCategory($cat = 0)

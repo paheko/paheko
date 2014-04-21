@@ -443,10 +443,22 @@ class Champs_Membres
                 WHERE '.$config->get('champ_identifiant').' = "";');
 
             // Création de l'index unique
-            $db->exec('DROP INDEX IF EXISTS membres_identifiant;');
             $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
         }
-        
+
+        // Création des index pour les champs affichés dans la liste des membres
+        $listed_fields = array_keys($this->getListedFields());
+        foreach ($listed_fields as $field)
+        {
+            if ($field === $config->get('champ_identifiant'))
+            {
+                // Il y a déjà un index
+                continue;
+            }
+
+            $db->exec('CREATE INDEX membres_liste_' . $field . ' ON membres (' . $field . ');');
+        }
+
     	$db->exec('END;');
     	$db->exec('PRAGMA foreign_keys = ON;');
 
@@ -456,5 +468,3 @@ class Champs_Membres
     	return true;
     }
 }
-
-?>
