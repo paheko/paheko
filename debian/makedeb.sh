@@ -25,6 +25,7 @@ cp ${THISDIR}/garradin ${BINDIR}
 CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
+cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
 
 # Cleaning files that will be copied to /usr/share/doc
 rm -f ${CODEDIR}/{README,COPYING}
@@ -94,7 +95,7 @@ Section: web
 Priority: optional
 Maintainer: Garradin <garradin@kd2.org>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php5-cli (>=5.4)
+Depends: dash | bash, php5-cli (>=5.4), php5-sqlite
 Version: ${PACKAGE_DEB_VERSION}
 Suggests: www-browser
 Homepage: http://garradin.kd2.org/
