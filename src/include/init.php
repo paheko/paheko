@@ -46,7 +46,7 @@ function garradin_manifest()
  * Configuration globale
  */
 
-// Configuration externalisée, pour projets futurs (fermes de garradins ?)
+// Configuration externalisée
 if (file_exists(__DIR__ . '/../config.local.php'))
 {
     require __DIR__ . '/../config.local.php';
