@@ -79,7 +79,8 @@ true && {
     echo "Generating doc..."
     cp ${SRCDIR}/README ${DOCDIR}
     a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt
-    gzip -c ${THISDIR}/garradin.1 > /usr/share/man/man1/${PACKAGE_DEBNAME}.1.gz
+    mkdir -p ${DEBLOCALPREFIX}/share/man/man1
+    gzip -c ${THISDIR}/garradin.1 > ${DEBLOCALPREFIX}/share/man/man1/${PACKAGE_DEBNAME}.1.gz
     rm -f ${THISDIR}/garradin.1
 } || {
     echo "Fail."
