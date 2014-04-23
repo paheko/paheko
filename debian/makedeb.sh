@@ -26,7 +26,7 @@ CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
 cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
-rm ${CODEDIR}/*.sqlite
+rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes
 
 # Cleaning files that will be copied to /usr/share/doc
 rm -f ${CODEDIR}/{README,COPYING}
