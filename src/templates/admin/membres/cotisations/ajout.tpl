@@ -52,7 +52,7 @@
                 </select>
             </dd>
             <dt class="f_compta"><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd class="f_compta"><input type="number" name="montant" step="0.01" min="0.01" id="f_montant" value="{form_field name=montant default=$default_amount}" required="required" /></dd>
+            <dd class="f_compta"><input type="number" name="montant" step="0.01" min="0.01" id="f_montant" value="{form_field name=montant default=$default_amount}" /></dd>
             <dt class="f_compta"><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="f_compta">
                 <select name="moyen_paiement" id="f_moyen_paiement">
