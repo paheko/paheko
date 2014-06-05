@@ -44,6 +44,7 @@ PACKAGE_DEB_VERSION=${PACKAGE_VERSION}-${DEB_REV}
 DEBFILE=${THISDIR}/${PACKAGE_DEBNAME}-${PACKAGE_DEB_VERSION}-dev-${DEB_ARCH_NAME}.deb
 PACKAGE_TIME=$(/bin/date)
 
+sudo chown -R root.root ${DEBLOCALPREFIX}
 rm -f ${DEBFILE}
 echo "Creating .deb package [${DEBFILE}]..."
 
