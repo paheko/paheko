@@ -453,8 +453,9 @@ class Compta_Exercices
         $include = [Compta_Comptes::ACTIF, Compta_Comptes::PASSIF,
             Compta_Comptes::PASSIF | Compta_Comptes::ACTIF];
 
-        $actif      = ['comptes' => [], 'total' => 0.0];
-        $passif     = ['comptes' => [], 'total' => 0.0];
+        $actif           = ['comptes' => [], 'total' => 0.0];
+        $passif          = ['comptes' => [], 'total' => 0.0];
+        $actif_ou_passif = ['comptes' => [], 'total' => 0.0];
 
         $resultat = $this->getCompteResultat($exercice);
 
@@ -498,16 +499,8 @@ class Compta_Exercices
 
             if (($position & Compta_Comptes::ACTIF) && ($position & Compta_Comptes::PASSIF))
             {
+                $position = 'actif_ou_passif';
                 $solde = $debit - $credit;
-
-                if ($solde > 0)
-                    $position = 'actif';
-                elseif ($solde < 0)
-                    $position = 'passif';
-                else
-                    continue;
-
-                $solde = abs($solde);
             }
             else if ($position & Compta_Comptes::ACTIF)
             {
@@ -541,6 +534,40 @@ class Compta_Exercices
         }
 
         $res->finalize();
+
+        foreach ($actif_ou_passif['comptes'] as $parent=>$p)
+        {
+            foreach ($p['comptes'] as $compte=>$solde)
+            {
+                if ($solde > 0)
+                {
+                    $position = 'actif';
+                }
+                else if ($solde < 0)
+                {
+                    $position = 'passif';
+                    $solde = -$solde;
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (!isset(${$position}['comptes'][$parent]))
+                {
+                    ${$position}['comptes'][$parent] = ['comptes' => [], 'solde' => 0];
+                }
+
+                if (!isset(${$position}['comptes'][$parent]['comptes'][$compte]))
+                {
+                    ${$position}['comptes'][$parent]['comptes'][$compte] = 0;
+                }
+
+                ${$position}['comptes'][$parent]['comptes'][$compte] += $solde;
+                ${$position}['total'] += $solde;
+                ${$position}['comptes'][$parent]['solde'] += $solde;
+            }
+        }
 
         // Suppression des soldes nuls
         foreach ($passif['comptes'] as $parent=>$p)
