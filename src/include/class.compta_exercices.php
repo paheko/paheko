@@ -335,6 +335,20 @@ class Compta_Exercices
                     )
                 ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, ['compte' => $compte]);
 
+            $solde = 0.0;
+            foreach ($livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] as &$ligne)
+            {
+                if ($ligne["compte_credit"] == $compte)
+                {
+                    $solde += $ligne['montant'];
+                }
+                else
+                {
+                    $solde -= $ligne['montant'];
+                }
+                $ligne['solde'] = $solde;
+            }
+
             $debit = (float) $db->simpleQuerySingle(
                 'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND id_exercice = '.(int)$exercice.';',
                 false, $compte);
@@ -345,6 +359,7 @@ class Compta_Exercices
 
             $livre['classes'][$classe][$parent]['comptes'][$compte]['debit'] = $debit;
             $livre['classes'][$classe][$parent]['comptes'][$compte]['credit'] = $credit;
+            $livre['classes'][$classe][$parent]['comptes'][$compte]['solde'] = $credit - $debit;
 
             $livre['classes'][$classe][$parent]['total'] += $debit;
             $livre['classes'][$classe][$parent]['total'] -= $credit;
