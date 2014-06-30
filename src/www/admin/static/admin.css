@@ -520,6 +520,10 @@ b.money {
     text-align: left;
 }
 
+#rapport td.money, #rapport th.money {
+    text-align: right;
+}
+
 #rapport .compte th {
     font-weight: normal;
 }

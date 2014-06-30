@@ -15,7 +15,8 @@
         <caption><h4>{$souscode|escape} — {$souscode|get_nom_compte|escape}</h4></caption>
         <colgroup>
             <col width="15%" />
-            <col width="65%" />
+            <col width="55%" />
+            <col width="10%" />
             <col width="10%" />
             <col width="10%" />
         </colgroup>
@@ -23,8 +24,9 @@
             <tr>
                 <td>Date</td>
                 <th>Intitulé</th>
-                <td>Débit</td>
-                <td>Crédit</td>
+                <td class="money">Débit</td>
+                <td class="money">Crédit</td>
+                <td class="money">Solde</td>
             </tr>
         </thead>
         <tbody>
@@ -32,8 +34,9 @@
             <tr>
                 <td>{$ligne.date|date_fr:'d/m/Y'|escape}</td>
                 <th>{$ligne.libelle|escape}</th>
-                <td>{if $ligne.compte_debit == $souscode}{$ligne.montant|html_money}{/if}</td>
-                <td>{if $ligne.compte_credit == $souscode}{$ligne.montant|html_money}{/if}</td>
+                <td class="money">{if $ligne.compte_debit == $souscode}{$ligne.montant|html_money}{/if}</td>
+                <td class="money">{if $ligne.compte_credit == $souscode}{$ligne.montant|html_money}{/if}</td>
+                <td class="money">{$ligne.solde|html_money}</td>
             </tr>
         {/foreach}
         </tbody>
@@ -41,8 +44,9 @@
             <tr>
                 <td></td>
                 <th>Solde final</th>
-                <td>{if $souscompte.debit > 0}{$souscompte.debit|html_money}{/if}</td>
-                <td>{if $souscompte.credit > 0}{$souscompte.credit|html_money}{/if}</td>
+                <td class="money">{if $souscompte.debit > 0}{$souscompte.debit|html_money}{/if}</td>
+                <td class="money">{if $souscompte.credit > 0}{$souscompte.credit|html_money}{/if}</td>
+                <td class="money">{$souscompte.solde|html_money}</td>
             </tr>
         </tfoot>
     </table>
