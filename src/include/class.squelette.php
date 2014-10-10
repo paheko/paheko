@@ -194,6 +194,11 @@ class Squelette extends \miniSkel
         {
             $this->register_modifier($name, ['Garradin\Squelette_Filtres', $func]);
         }
+
+        if (file_exists(DATA_ROOT . '/www/squelettes/mes_filtres.php'))
+        {
+            require_once DATA_ROOT . '/www/squelettes/mes_filtres.php';
+        }
     }
 
     public function __construct()
@@ -749,5 +754,3 @@ class Squelette extends \miniSkel
     }
 
 }
-
-?>
