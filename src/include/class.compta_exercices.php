@@ -153,7 +153,7 @@ class Compta_Exercices
 
         while ($row = $statement->fetchArray(SQLITE3_ASSOC))
         {
-            $solde = ($row['position'] & Compta_Comptes::ACTIF) ? abs($row['solde']) : -abs($row['solde']);
+            $solde = abs($row['solde']);
             $solde = round($solde, 2);
 
             $diff += $solde;
