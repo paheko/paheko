@@ -324,10 +324,15 @@ class Compta_Journal
     {
         $db = DB::getInstance();
 
-        if (!preg_match('/LIMIT\s+/', $query))
+        if (!preg_match('/LIMIT\s+/i', $query))
         {
             $query = preg_replace('/;?\s*$/', '', $query);
             $query .= ' LIMIT 100';
+        }
+
+        if (preg_match('/;\s*(.+?)$/', $query))
+        {
+            throw new UserException('Une seule requête peut être envoyée en même temps.');
         }
 
         $st = $db->prepare($query);

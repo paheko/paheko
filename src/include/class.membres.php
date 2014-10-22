@@ -735,22 +735,10 @@ class Membres
     {
         $db = DB::getInstance();
 
-        $st = $db->prepare($query);
-
-        if (!$st->readOnly())
-        {
-            throw new UserException('Seules les requêtes en lecture sont autorisées.');
-        }
-
-        if (!preg_match('/LIMIT\s+/', $query))
+        if (!preg_match('/LIMIT\s+/i', $query))
         {
             $query = preg_replace('/;?\s*$/', '', $query);
             $query .= ' LIMIT 100';
-        }
-
-        if (!preg_match('/FROM\s+membres(?:\s+|$|;)/i', $query))
-        {
-            throw new UserException('Seules les requêtes sur la table membres sont autorisées.');
         }
 
         if (preg_match('/;\s*(.+?)$/', $query))
@@ -759,6 +747,11 @@ class Membres
         }
 
         $st = $db->prepare($query);
+
+        if (!$st->readOnly())
+        {
+            throw new UserException('Seules les requêtes en lecture sont autorisées.');
+        }
 
         $res = $st->execute();
         $out = [];
