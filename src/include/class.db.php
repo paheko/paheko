@@ -18,8 +18,6 @@ class DB extends \SQLite3
 {
     static protected $_instance = null;
 
-    protected $_running_sum = 0.0;
-
     protected $_transaction = 0;
 
     const NUM = \SQLITE3_NUM;
@@ -54,26 +52,6 @@ class DB extends \SQLite3
         $this->createFunction('transliterate_to_ascii', ['Garradin\utils', 'transliterateToAscii']);
         $this->createFunction('base64', 'base64_encode');
         $this->createFunction('rank', [$this, 'sql_rank']);
-        $this->createFunction('running_sum', [$this, 'sql_running_sum']);
-    }
-
-    public function sql_running_sum($data)
-    {
-        // Why is this function called two times for the first row?!
-        // Dunno but here is a workaround
-        if (is_null($this->_running_sum))
-        {
-            $this->_running_sum = 0.0;
-            return $this->_running_sum;
-        }
-
-        $this->_running_sum += $data;
-        return $this->_running_sum;
-    }
-
-    public function resetRunningSum()
-    {
-        $this->_running_sum = null;
     }
 
     public function sql_rank($aMatchInfo)

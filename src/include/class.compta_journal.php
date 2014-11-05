@@ -86,18 +86,22 @@ class Compta_Journal
             $c = '';
         }
 
-        $query = 'SELECT *, strftime(\'%s\', date) AS date,
-            running_sum(CASE WHEN compte_debit '.$compte.' THEN '.$d.'montant ELSE '.$c.'montant END) AS solde
-            FROM compta_journal WHERE (compte_debit '.$compte.' OR compte_credit '.$compte.') AND id_exercice = '.(int)$exercice.'
+        $query = 'SELECT *, strftime(\'%s\', date) AS date, 
+            (CASE WHEN compte_debit '.$compte.' THEN '.$d.'montant ELSE '.$c.'montant END) AS solde
+            FROM compta_journal WHERE (compte_debit '.$compte.' OR compte_credit '.$compte.') 
+            AND id_exercice = '.(int)$exercice.'
             ORDER BY date ASC;';
 
-        // Obligatoire pour bien taper dans l'index de la date
-        // sinon running_sum est appelé 2 fois et ça marche pas du coup
-        // FIXME mettre ça ailleurs pour que ça soit appelé moins souvent
-        $db->exec('ANALYZE compta_journal;');
+        $result = $db->simpleStatementFetch($query);
+        $solde = 0.0;
 
-        $db->resetRunningSum();
-        return $db->simpleStatementFetch($query);
+        foreach ($result as &$row)
+        {
+            $solde += $row['solde'];
+            $row['solde'] = $solde;
+        }
+
+        return $result;
     }
 
     public function add($data)
