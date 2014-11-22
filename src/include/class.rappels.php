@@ -185,7 +185,7 @@ class Rappels
 		WHERE nb_jours >= delai 
 			/* Pour ne pas spammer on n\'envoie pas de rappel antérieur au dernier rappel déjà effectué */
 			AND id NOT IN (SELECT id_membre FROM rappels_envoyes AS re 
-				WHERE id_cotisation = re.id_cotisation AND id = re.id_membre 
+				WHERE id_cotisation = re.id_cotisation 
 				AND re.date >= date(expiration, delai || \' days\')
 			)
 		/* Grouper par membre, pour n\'envoyer qu\'un seul rappel par membre/cotise */
