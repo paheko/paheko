@@ -3,10 +3,10 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$exercices = new Compta_Exercices;
-$journal = new Compta_Journal;
+$exercices = new Compta\Exercices;
+$journal = new Compta\Journal;
 
-$exercice = utils::get('exercice') ?: $exercices->getCurrentId();
+$exercice = Utils::get('exercice') ?: $exercices->getCurrentId();
 
 if (!$exercice)
 {
@@ -47,5 +47,3 @@ $tpl->assign('exercice', $exercice);
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/compta/operations/membre.tpl');
-
-?>

@@ -1,8 +1,13 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Membres;
 
-class Champs_Membres
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\User_Exception;
+
+class Champs
 {
 	protected $champs = null;
 
@@ -48,39 +53,39 @@ class Champs_Membres
 
 	public function __toString()
 	{
-		return utils::write_ini_string($this->champs);
+		return Utils::write_ini_string($this->champs);
 	}
 
     public function toString()
     {
-        return utils::write_ini_string($this->champs);
+        return Utils::write_ini_string($this->champs);
     }
 
 	static public function importInstall()
 	{
 		$champs = parse_ini_file(ROOT . '/include/data/champs_membres.ini', true);
         $champs = array_filter($champs, function ($row) { return !empty($row['install']); });
-        return new Champs_Membres($champs);
+        return new \Garradin\Membres\Champs($champs);
 	}
 
     static public function importPresets()
     {
         if (is_null(self::$presets))
         {
-            self::$presets = parse_ini_file(ROOT . '/include/data/champs_membres.ini', true);
+            self::$presets = parse_ini_file(\Garradin\ROOT . '/include/data/champs_membres.ini', true);
         }
 
         return self::$presets;
     }
 
-    static public function listUnusedPresets(Champs_Membres $champs)
+    static public function listUnusedPresets(Champs $champs)
     {
         return array_diff_key(self::importPresets(), $champs->getAll());
     }
 
 	public function __construct($champs)
 	{
-		if ($champs instanceOf Champs_Membres)
+		if ($champs instanceOf Champs)
 		{
 			$this->champs = $champs->getAll();
 		}

@@ -2,8 +2,6 @@
 
 namespace Garradin;
 
-require_once ROOT . '/include/libs/miniskel/class.miniskel.php';
-
 class Squelette_Snippet
 {
     const TEXT = 0;
@@ -169,7 +167,7 @@ class Squelette_Snippet
     }
 }
 
-class Squelette extends \miniSkel
+class Squelette extends \KD2\MiniSkel
 {
     private $parent = null;
     private $current = null;
@@ -222,12 +220,12 @@ class Squelette extends \miniSkel
     protected function processInclude($args)
     {
         if (empty($args))
-            throw new \miniSkelMarkupException("Le tag INCLURE demande à préciser le fichier à inclure.");
+            throw new \KD2\MiniSkelMarkupException("Le tag INCLURE demande à préciser le fichier à inclure.");
 
         $file = key($args);
 
         if (empty($file) || !preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $file))
-            throw new \miniSkelMarkupException("INCLURE: le nom de fichier ne peut contenir que des caractères alphanumériques.");
+            throw new \KD2\MiniSkelMarkupException("INCLURE: le nom de fichier ne peut contenir que des caractères alphanumériques.");
 
         return new Squelette_Snippet(1, '$this->fetch("'.$file.'", false);');
     }
@@ -258,7 +256,7 @@ class Squelette extends \miniSkel
         {
             if (!isset($this->modifiers[$modifier['name']]))
             {
-                throw new \miniSkelMarkupException('Filtre '.$modifier['name'].' inconnu !');
+                throw new \KD2\MiniSkelMarkupException('Filtre '.$modifier['name'].' inconnu !');
             }
 
             $out->append(1, '$value = call_user_func_array('.var_export($this->modifiers[$modifier['name']], true).', [$value, ');
@@ -320,7 +318,7 @@ class Squelette extends \miniSkel
     {
         if ($loopType != 'articles' && $loopType != 'rubriques' && $loopType != 'pages')
         {
-            throw new \miniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
+            throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
         }
 
         $loopStart = '';
@@ -359,7 +357,7 @@ class Squelette extends \miniSkel
             {
                 if (!in_array($criteria['field'], $allowed_fields))
                 {
-                    throw new \miniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
+                    throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
                 }
                 elseif ($criteria['field'] == 'rubrique')
                 {
@@ -371,9 +369,9 @@ class Squelette extends \miniSkel
                 }
                 elseif ($criteria['field'] == 'points')
                 {
-                    if ($criteria['action'] != \miniSkel::ACTION_ORDER_BY)
+                    if ($criteria['action'] != \KD2\MiniSkel::ACTION_ORDER_BY)
                     {
-                        throw new \miniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
+                        throw new \KD2\MiniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
                     }
 
                     $search_rank = true;
@@ -382,24 +380,24 @@ class Squelette extends \miniSkel
 
             switch ($criteria['action'])
             {
-                case \miniSkel::ACTION_ORDER_BY:
+                case \KD2\MiniSkel::ACTION_ORDER_BY:
                     if (!$order)
                         $order = 'ORDER BY '.$criteria['field'].'';
                     else
                         $order .= ', '.$criteria['field'].'';
                     break;
-                case \miniSkel::ACTION_ORDER_DESC:
+                case \KD2\MiniSkel::ACTION_ORDER_DESC:
                     if ($order)
                         $order .= ' DESC';
                     break;
-                case \miniSkel::ACTION_LIMIT:
+                case \KD2\MiniSkel::ACTION_LIMIT:
                     $begin = $criteria['begin'];
                     $limit = $criteria['number'];
                     break;
-                case \miniSkel::ACTION_MATCH_FIELD_BY_VALUE:
+                case \KD2\MiniSkel::ACTION_MATCH_FIELD_BY_VALUE:
                     $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
                     break;
-                case \miniSkel::ACTION_MATCH_FIELD:
+                case \KD2\MiniSkel::ACTION_MATCH_FIELD:
                 {
                     if ($criteria['field'] == 'recherche')
                     {
@@ -425,7 +423,7 @@ class Squelette extends \miniSkel
 
         if ($search_rank && !$search)
         {
-            throw new \miniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
+            throw new \KD2\MiniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
         }
 
         if (trim($loopContent))
@@ -455,7 +453,7 @@ class Squelette extends \miniSkel
 
         $out->append(1, '$statement = $db->prepare(\''.$query.'\'); ');
         // Sécurité anti injection
-        $out->append(1, 'if (!$statement->readOnly()) { throw new \\miniSkelMarkupException("Requête en écriture illégale: '.$query.'"); } ');
+        $out->append(1, 'if (!$statement->readOnly()) { throw new \\MiniSkelMarkupException("Requête en écriture illégale: '.$query.'"); } ');
         $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
         $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
 
@@ -518,7 +516,7 @@ class Squelette extends \miniSkel
         {
             if (!file_exists($path))
             {
-                throw new \miniSkelMarkupException('Le squelette "'.$tpl_id.'" n\'existe pas.');
+                throw new \KD2\MiniSkelMarkupException('Le squelette "'.$tpl_id.'" n\'existe pas.');
             }
 
             $content = file_get_contents($path);

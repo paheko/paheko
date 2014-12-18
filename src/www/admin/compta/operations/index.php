@@ -3,12 +3,12 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$cats = new Compta_Categories;
+$cats = new Compta\Categories;
 $cat = $type = false;
 
-if (utils::get('cat'))
+if (Utils::get('cat'))
 {
-	$cat = $cats->get(utils::get('cat'));
+	$cat = $cats->get(Utils::get('cat'));
 
 	if (!$cat)
 	{
@@ -20,22 +20,22 @@ if (utils::get('cat'))
 else
 {
 	if (isset($_GET['autres']))
-		$type = Compta_Categories::AUTRES;
+		$type = Compta\Categories::AUTRES;
 	elseif (isset($_GET['depenses']))
-		$type = Compta_Categories::DEPENSES;
+		$type = Compta\Categories::DEPENSES;
 	else
-		$type = Compta_Categories::RECETTES;
+		$type = Compta\Categories::RECETTES;
 }
 
-$journal = new Compta_Journal;
+$journal = new Compta\Journal;
 
-$list = $journal->getListForCategory($type === Compta_Categories::AUTRES ? null : $type, $cat ? $cat['id'] : null);
+$list = $journal->getListForCategory($type === Compta\Categories::AUTRES ? null : $type, $cat ? $cat['id'] : null);
 
 $tpl->assign('categorie', $cat);
 $tpl->assign('journal', $list);
 $tpl->assign('type', $type);
 
-if ($type !== Compta_Categories::AUTRES)
+if ($type !== Compta\Categories::AUTRES)
 {
 	$tpl->assign('liste_cats', $cats->getList($type));
 }
@@ -50,5 +50,3 @@ foreach ($list as $row)
 $tpl->assign('total', $total);
 
 $tpl->display('admin/compta/operations/index.tpl');
-
-?>

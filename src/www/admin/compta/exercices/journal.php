@@ -3,9 +3,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$exercices = new Compta_Exercices;
+$exercices = new Compta\Exercices;
 
-$exercice = $exercices->get((int)utils::get('id'));
+$exercice = $exercices->get((int)Utils::get('id'));
 
 if (!$exercice)
 {

@@ -8,12 +8,12 @@ if ($user['droits']['wiki'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-if (!trim(utils::get('id')))
+if (!trim(Utils::get('id')))
 {
     throw new UserException("Page inconnue.");
 }
 
-$page = $wiki->getByID(utils::get('id'));
+$page = $wiki->getByID(Utils::get('id'));
 
 if (!$page)
 {
@@ -25,7 +25,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('delete_wiki_'.$page['id']))
+    if (!Utils::CSRF_check('delete_wiki_'.$page['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -33,7 +33,7 @@ if (!empty($_POST['delete']))
     {
         if ($wiki->delete($page['id']))
         {
-            utils::redirect('/admin/wiki/');
+            Utils::redirect('/admin/wiki/');
         }
         else
         {

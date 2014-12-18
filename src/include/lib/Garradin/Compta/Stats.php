@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Stats
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+class Stats
 {
 	protected function _parRepartitionCategorie($type)
 	{
@@ -16,12 +20,12 @@ class Compta_Stats
 
 	public function repartitionRecettes()
 	{
-		return $this->_parRepartitionCategorie(Compta_Categories::RECETTES);
+		return $this->_parRepartitionCategorie(Categories::RECETTES);
 	}
 
 	public function repartitionDepenses()
 	{
-		return $this->_parRepartitionCategorie(Compta_Categories::DEPENSES);
+		return $this->_parRepartitionCategorie(Categories::DEPENSES);
 	}
 
 	protected function _parType($type)
@@ -35,12 +39,12 @@ class Compta_Stats
 
 	public function recettes()
 	{
-		return $this->_parType(Compta_Categories::RECETTES);
+		return $this->_parType(Categories::RECETTES);
 	}
 
 	public function depenses()
 	{
-		return $this->_parType(Compta_Categories::DEPENSES);
+		return $this->_parType(Categories::DEPENSES);
 	}
 
 	public function soldeCompte($compte, $augmente = 'debit', $diminue = 'credit')
@@ -118,5 +122,3 @@ class Compta_Stats
 		return $data;
 	}
 }
-
-?>

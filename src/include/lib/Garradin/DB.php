@@ -49,7 +49,7 @@ class DB extends \SQLite3
         // Activer les contraintes des foreign keys
         $this->exec('PRAGMA foreign_keys = ON;');
 
-        $this->createFunction('transliterate_to_ascii', ['Garradin\utils', 'transliterateToAscii']);
+        $this->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
         $this->createFunction('base64', 'base64_encode');
         $this->createFunction('rank', [$this, 'sql_rank']);
     }

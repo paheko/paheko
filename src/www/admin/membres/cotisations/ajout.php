@@ -19,7 +19,7 @@ if (!empty($_GET['id']) && is_numeric($_GET['id']))
         throw new UserException("Ce membre n'existe pas.");
     }
 
-    $cats = new Membres_Categories;
+    $cats = new Membres\Categories;
     $categorie = $cats->get($membre['id_categorie']);
 }
 else
@@ -28,16 +28,16 @@ else
 }
 
 $cotisations = new Cotisations;
-$m_cotisations = new Cotisations_Membres;
+$m_cotisations = new Membres\Cotisations;
 
-$cats = new Compta_Categories;
-$banques = new Compta_Comptes_Bancaires;
+$cats = new Compta\Categories;
+$banques = new Compta\Comptes_Bancaires;
 
 $error = false;
 
 if (!empty($_POST['add']))
 {
-    if (!utils::CSRF_check('add_cotisation'))
+    if (!Utils::CSRF_check('add_cotisation'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -45,19 +45,19 @@ if (!empty($_POST['add']))
     {
         try {
             $data = [
-                'date'              =>  utils::post('date'),
-                'id_cotisation'     =>  utils::post('id_cotisation'),
-                'id_membre'         =>  utils::post('id_membre'),
+                'date'              =>  Utils::post('date'),
+                'id_cotisation'     =>  Utils::post('id_cotisation'),
+                'id_membre'         =>  Utils::post('id_membre'),
                 'id_auteur'         =>  $user['id'],
-                'montant'           =>  utils::post('montant'),
-                'moyen_paiement'    =>  utils::post('moyen_paiement'),
-                'numero_cheque'     =>  utils::post('numero_cheque'),
-                'banque'            =>  utils::post('banque'),
+                'montant'           =>  Utils::post('montant'),
+                'moyen_paiement'    =>  Utils::post('moyen_paiement'),
+                'numero_cheque'     =>  Utils::post('numero_cheque'),
+                'banque'            =>  Utils::post('banque'),
             ];
 
             $m_cotisations->add($data);
 
-            utils::redirect('/admin/membres/cotisations.php?id=' . (int)utils::post('id_membre'));
+            Utils::redirect('/admin/membres/cotisations.php?id=' . (int)Utils::post('id_membre'));
         }
         catch (UserException $e)
         {
@@ -77,14 +77,14 @@ $tpl->assign('default_date', date('Y-m-d'));
 $tpl->assign('default_compta', null);
 
 $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
-$tpl->assign('moyen_paiement', utils::post('moyen_paiement') ?: 'ES');
+$tpl->assign('moyen_paiement', Utils::post('moyen_paiement') ?: 'ES');
 $tpl->assign('comptes_bancaires', $banques->getList());
-$tpl->assign('banque', utils::post('banque'));
+$tpl->assign('banque', Utils::post('banque'));
 
 
-if (utils::get('cotisation'))
+if (Utils::get('cotisation'))
 {
-    $co = $cotisations->get(utils::get('cotisation'));
+    $co = $cotisations->get(Utils::get('cotisation'));
 
     if (!$co)
     {
@@ -108,5 +108,3 @@ elseif ($membre)
 
 
 $tpl->display('admin/membres/cotisations/ajout.tpl');
-
-?>

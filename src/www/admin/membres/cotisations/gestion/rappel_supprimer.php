@@ -8,14 +8,14 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-if (!utils::get('id') || !is_numeric(utils::get('id')))
+if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
     throw new UserException("Argument du numéro de rappel manquant.");
 }
 
 $rappels = new Rappels;
 
-$rappel = $rappels->get(utils::get('id'));
+$rappel = $rappels->get(Utils::get('id'));
 
 if (!$rappel)
 {
@@ -26,15 +26,15 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('delete_rappel_' . $rappel['id']))
+    if (!Utils::CSRF_check('delete_rappel_' . $rappel['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $rappels->delete($rappel['id'], (bool) utils::post('delete_history'));
-            utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
+            $rappels->delete($rappel['id'], (bool) Utils::post('delete_history'));
+            Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
         }
         catch (UserException $e)
         {

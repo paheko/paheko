@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Categories
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+class Categories
 {
     const DEPENSES = -1;
     const RECETTES = 1;
@@ -122,5 +126,3 @@ class Compta_Categories
         return true;
     }
 }
-
-?>

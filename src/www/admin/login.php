@@ -7,7 +7,7 @@ require_once __DIR__ . '/_inc.php';
 
 if ($membres->isLogged())
 {
-    utils::redirect('/admin/');
+    Utils::redirect('/admin/');
 }
 
 // Relance session_start et renvoie une image de 1px transparente
@@ -26,18 +26,18 @@ if (isset($_GET['keepSessionAlive']))
 
 $error = false;
 
-if (utils::post('login'))
+if (Utils::post('login'))
 {
-    if (!utils::CSRF_check('login'))
+    if (!Utils::CSRF_check('login'))
     {
         $error = 'OTHER';
     }
     else
     {
-        if (utils::post('id') && utils::post('passe')
-            && $membres->login(utils::post('id'), utils::post('passe')))
+        if (Utils::post('id') && Utils::post('passe')
+            && $membres->login(Utils::post('id'), Utils::post('passe')))
         {
-            utils::redirect('/admin/');
+            Utils::redirect('/admin/');
         }
 
         $error = 'LOGIN';

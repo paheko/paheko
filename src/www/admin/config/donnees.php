@@ -6,28 +6,28 @@ require_once __DIR__ . '/_inc.php';
 $s = new Sauvegarde;
 $error = false;
 
-if (utils::post('config'))
+if (Utils::post('config'))
 {
-    if (!utils::CSRF_check('backup_config'))
+    if (!Utils::CSRF_check('backup_config'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $config->set('frequence_sauvegardes', utils::post('frequence_sauvegardes'));
-            $config->set('nombre_sauvegardes', utils::post('nombre_sauvegardes'));
+            $config->set('frequence_sauvegardes', Utils::post('frequence_sauvegardes'));
+            $config->set('nombre_sauvegardes', Utils::post('nombre_sauvegardes'));
             $config->save();
 
-            utils::redirect('/admin/config/donnees.php?ok=config');
+            Utils::redirect('/admin/config/donnees.php?ok=config');
         } catch (UserException $e) {
             $error = $e->getMessage();
         }
     }
 }
-elseif (utils::post('create'))
+elseif (Utils::post('create'))
 {
-    if (!utils::CSRF_check('backup_create'))
+    if (!Utils::CSRF_check('backup_create'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -35,15 +35,15 @@ elseif (utils::post('create'))
     {
         try {
             $s->create();
-            utils::redirect('/admin/config/donnees.php?ok=create');
+            Utils::redirect('/admin/config/donnees.php?ok=create');
         } catch (UserException $e) {
             $error = $e->getMessage();
         }
     }
 }
-elseif (utils::post('download'))
+elseif (Utils::post('download'))
 {
-    if (!utils::CSRF_check('backup_download'))
+    if (!Utils::CSRF_check('backup_download'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -56,41 +56,41 @@ elseif (utils::post('download'))
         exit;
     }
 }
-elseif (utils::post('restore'))
+elseif (Utils::post('restore'))
 {
-    if (!utils::CSRF_check('backup_manage'))
+    if (!Utils::CSRF_check('backup_manage'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $s->restoreFromLocal(utils::post('file'));
-            utils::redirect('/admin/config/donnees.php?ok=restore');
+            $s->restoreFromLocal(Utils::post('file'));
+            Utils::redirect('/admin/config/donnees.php?ok=restore');
         } catch (UserException $e) {
             $error = $e->getMessage();
         }
     }
 }
-elseif (utils::post('remove'))
+elseif (Utils::post('remove'))
 {
-    if (!utils::CSRF_check('backup_manage'))
+    if (!Utils::CSRF_check('backup_manage'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $s->remove(utils::post('file'));
-            utils::redirect('/admin/config/donnees.php?ok=remove');
+            $s->remove(Utils::post('file'));
+            Utils::redirect('/admin/config/donnees.php?ok=remove');
         } catch (UserException $e) {
             $error = $e->getMessage();
         }
     }
 }
-elseif (utils::post('restore_file'))
+elseif (Utils::post('restore_file'))
 {
-    if (!utils::CSRF_check('backup_restore'))
+    if (!Utils::CSRF_check('backup_restore'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -98,7 +98,7 @@ elseif (utils::post('restore_file'))
     {
         try {
             $s->restoreFromUpload($_FILES['file']);
-            utils::redirect('/admin/config/donnees.php?ok=restore');
+            Utils::redirect('/admin/config/donnees.php?ok=restore');
         } catch (UserException $e) {
             $error = $e->getMessage();
         }
@@ -106,9 +106,9 @@ elseif (utils::post('restore_file'))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('ok', utils::get('ok'));
+$tpl->assign('ok', Utils::get('ok'));
 $tpl->assign('liste', $s->getList());
-$tpl->assign('max_file_size', utils::getMaxUploadSize());
+$tpl->assign('max_file_size', Utils::getMaxUploadSize());
 
 $tpl->display('admin/config/donnees.tpl');
 

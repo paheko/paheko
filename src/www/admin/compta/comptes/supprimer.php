@@ -8,7 +8,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$id = utils::get('id');
+$id = Utils::get('id');
 $compte = $comptes->get($id);
 
 if (!$compte)
@@ -20,7 +20,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('compta_delete_compte_'.$compte['id']))
+    if (!Utils::CSRF_check('compta_delete_compte_'.$compte['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -29,7 +29,7 @@ if (!empty($_POST['delete']))
         try
         {
             $comptes->delete($compte['id']);
-            utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
+            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
         }
         catch (UserException $e)
         {
@@ -39,7 +39,7 @@ if (!empty($_POST['delete']))
 }
 elseif (!empty($_POST['disable']))
 {
-    if (!utils::CSRF_check('compta_disable_compte_'.$compte['id']))
+    if (!Utils::CSRF_check('compta_disable_compte_'.$compte['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -48,7 +48,7 @@ elseif (!empty($_POST['disable']))
         try
         {
             $comptes->disable($compte['id']);
-            utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
+            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
         }
         catch (UserException $e)
         {

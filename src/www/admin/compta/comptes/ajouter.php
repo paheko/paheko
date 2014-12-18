@@ -8,7 +8,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$classe = (int) utils::get('classe');
+$classe = (int) Utils::get('classe');
 
 if (!$classe || $classe < 1 || $classe > 9)
 {
@@ -19,7 +19,7 @@ $error = false;
 
 if (!empty($_POST['add']))
 {
-    if (!utils::CSRF_check('compta_ajout_compte'))
+    if (!Utils::CSRF_check('compta_ajout_compte'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -28,13 +28,13 @@ if (!empty($_POST['add']))
         try
         {
             $id = $comptes->add([
-                'id'            =>  utils::post('numero'),
-                'libelle'       =>  utils::post('libelle'),
-                'parent'        =>  utils::post('parent'),
-                'position'      =>  utils::post('position'),
+                'id'            =>  Utils::post('numero'),
+                'libelle'       =>  Utils::post('libelle'),
+                'parent'        =>  Utils::post('parent'),
+                'position'      =>  Utils::post('position'),
             ]);
 
-            utils::redirect('/admin/compta/comptes/?classe='.$classe);
+            Utils::redirect('/admin/compta/comptes/?classe='.$classe);
         }
         catch (UserException $e)
         {
@@ -45,10 +45,10 @@ if (!empty($_POST['add']))
 
 $tpl->assign('error', $error);
 
-$parent = $comptes->get(utils::post('parent') ?: $classe);
+$parent = $comptes->get(Utils::post('parent') ?: $classe);
 
 $tpl->assign('positions', $comptes->getPositions());
-$tpl->assign('position', utils::post('position') ?: $parent['position']);
+$tpl->assign('position', Utils::post('position') ?: $parent['position']);
 $tpl->assign('comptes', $comptes->listTree($classe));
 
 $tpl->display('admin/compta/comptes/ajouter.tpl');

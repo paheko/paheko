@@ -14,11 +14,11 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('edit_me'))
+    if (!Utils::CSRF_check('edit_me'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    elseif (utils::post('passe') != utils::post('repasse'))
+    elseif (Utils::post('passe') != Utils::post('repasse'))
     {
         $error = 'La vérification ne correspond pas au mot de passe.';
     }
@@ -31,14 +31,14 @@ if (!empty($_POST['save']))
             {
                 if (!empty($c['editable']))
                 {
-                    $data[$key] = utils::post($key);
+                    $data[$key] = Utils::post($key);
                 }
             }
 
             $membres->edit($membre['id'], $data, false);
             $membres->updateSessionData();
 
-            utils::redirect('/admin/');
+            Utils::redirect('/admin/');
         }
         catch (UserException $e)
         {
@@ -48,7 +48,7 @@ if (!empty($_POST['save']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('passphrase', utils::suggestPassword());
+$tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membre', $membre);

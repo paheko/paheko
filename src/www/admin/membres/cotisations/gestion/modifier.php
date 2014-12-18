@@ -8,15 +8,15 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-if (!utils::get('id') || !is_numeric(utils::get('id')))
+if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
     throw new UserException("Argument du numéro de cotisation manquant.");
 }
 
 $cotisations = new Cotisations;
 
-$co = $cotisations->get(utils::get('id'));
-$cats = new Compta_Categories;
+$co = $cotisations->get(Utils::get('id'));
+$cats = new Compta\Categories;
 
 if (!$co)
 {
@@ -27,29 +27,29 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('edit_co_' . $co['id']))
+    if (!Utils::CSRF_check('edit_co_' . $co['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $duree = utils::post('periodicite') == 'jours' ? (int) utils::post('duree') : null;
-            $debut = utils::post('periodicite') == 'date' ? utils::post('debut') : null;
-            $fin = utils::post('periodicite') == 'date' ? utils::post('fin') : null;
-            $id_cat = utils::post('categorie') ? (int) utils::post('id_categorie_compta') : null;
+            $duree = Utils::post('periodicite') == 'jours' ? (int) Utils::post('duree') : null;
+            $debut = Utils::post('periodicite') == 'date' ? Utils::post('debut') : null;
+            $fin = Utils::post('periodicite') == 'date' ? Utils::post('fin') : null;
+            $id_cat = Utils::post('categorie') ? (int) Utils::post('id_categorie_compta') : null;
 
             $cotisations->edit($co['id'], [
-                'intitule'          =>  utils::post('intitule'),
-                'description'       =>  utils::post('description'),
-                'montant'           =>  (float) utils::post('montant'),
+                'intitule'          =>  Utils::post('intitule'),
+                'description'       =>  Utils::post('description'),
+                'montant'           =>  (float) Utils::post('montant'),
                 'duree'             =>  $duree,
                 'debut'             =>  $debut,
                 'fin'               =>  $fin,
                 'id_categorie_compta'=> $id_cat,
             ]);
 
-            utils::redirect('/admin/membres/cotisations/');
+            Utils::redirect('/admin/membres/cotisations/');
         }
         catch (UserException $e)
         {
@@ -64,7 +64,7 @@ $co['periodicite'] = $co['duree'] ? 'jours' : ($co['debut'] ? 'date' : 'ponctuel
 $co['categorie'] = $co['id_categorie_compta'] ? 1 : 0;
 
 $tpl->assign('cotisation', $co);
-$tpl->assign('categories', $cats->getList(Compta_Categories::RECETTES));
+$tpl->assign('categories', $cats->getList(Compta\Categories::RECETTES));
 
 $tpl->display('admin/membres/cotisations/gestion/modifier.tpl');
 

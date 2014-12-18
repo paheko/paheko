@@ -3,8 +3,8 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$banques = new Compta_Comptes_Bancaires;
-$journal = new Compta_Journal;
+$banques = new Compta\Comptes_Bancaires;
+$journal = new Compta\Journal;
 
 $liste = $banques->getList();
 
@@ -25,7 +25,7 @@ function tpl_format_rib($iban)
     if (substr($iban, 0, 2) != 'FR')
         return '';
 
-    $rib = utils::IBAN_RIB($iban);
+    $rib = Utils::IBAN_RIB($iban);
     $rib = explode(' ', $rib);
 
     $out = '<table class="rib"><thead><tr><th>Banque</th><th>Guichet</th><th>Compte</th><th>Clé</th></tr></thead>';
@@ -37,5 +37,3 @@ $tpl->register_modifier('format_iban', 'Garradin\tpl_format_iban');
 $tpl->register_modifier('format_rib', 'Garradin\tpl_format_rib');
 
 $tpl->display('admin/compta/banques/index.tpl');
-
-?>

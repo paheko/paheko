@@ -1,20 +1,20 @@
 {include file="admin/_head.tpl" title="Suivi des opérations" current="compta/gestion"}
 
 <ul class="actions">
-    <li class="recettes{if $type == Garradin\Compta_Categories::RECETTES} current{/if}"><a href="{$www_url}admin/compta/operations/?recettes">Recettes</a></li>
-    <li class="depenses{if $type == Garradin\Compta_Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/operations/?depenses">Dépenses</a></li>
-    <li class="autres{if $type == Garradin\Compta_Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/operations/?autres">Autres</a></li>
+    <li class="recettes{if $type == Garradin\Compta\Categories::RECETTES} current{/if}"><a href="{$www_url}admin/compta/operations/?recettes">Recettes</a></li>
+    <li class="depenses{if $type == Garradin\Compta\Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/operations/?depenses">Dépenses</a></li>
+    <li class="autres{if $type == Garradin\Compta\Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/operations/?autres">Autres</a></li>
     {*<li><a href="{$www_url}admin/compta/operations/recherche.php">Recherche d'opération</a></li>*}
     {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
         <li><a href="{$www_url}admin/compta/operations/recherche_sql.php">Recherche par requête SQL</a></li>
     {/if}
 </ul>
 
-{if $type != Garradin\Compta_Categories::AUTRES}
+{if $type != Garradin\Compta\Categories::AUTRES}
 <form method="get" action="{$self_url}">
     <fieldset>
         <legend>Filtrer par catégorie</legend>
-        <select name="cat" onchange="if (!this.value) location.href = '?{if $type == Garradin\Compta_Categories::RECETTES}recettes{else}depenses{/if}'; else this.form.submit();">
+        <select name="cat" onchange="if (!this.value) location.href = '?{if $type == Garradin\Compta\Categories::RECETTES}recettes{else}depenses{/if}'; else this.form.submit();">
             <option value="">-- Toutes</option>
         {foreach from=$liste_cats item="cat"}
             <option value="{$cat.id|escape}"{if $cat.id == $categorie.id} selected="selected"{/if}>{$cat.intitule|escape}</option>

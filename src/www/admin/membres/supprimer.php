@@ -8,7 +8,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$membre = $membres->get(utils::get('id'));
+$membre = $membres->get(Utils::get('id'));
 
 if (!$membre)
 {
@@ -17,9 +17,9 @@ if (!$membre)
 
 $error = false;
 
-if (utils::post('delete'))
+if (Utils::post('delete'))
 {
-    if (!utils::CSRF_check('delete_membre_'.$membre['id']))
+    if (!Utils::CSRF_check('delete_membre_'.$membre['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -27,7 +27,7 @@ if (utils::post('delete'))
     {
         try {
             $membres->delete($membre['id']);
-            utils::redirect('/admin/membres/');
+            Utils::redirect('/admin/membres/');
         }
         catch (UserException $e)
         {

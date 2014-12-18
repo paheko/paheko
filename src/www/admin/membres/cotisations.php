@@ -22,12 +22,12 @@ if (!$membre)
     throw new UserException("Ce membre n'existe pas.");
 }
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 
 $categorie = $cats->get($membre['id_categorie']);
 $tpl->assign('categorie', $categorie);
 
-$cotisations = new Cotisations_Membres;
+$cotisations = new Membres\Cotisations;
 
 if (!empty($categorie['id_cotisation_obligatoire']))
 {

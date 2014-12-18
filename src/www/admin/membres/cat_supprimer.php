@@ -8,7 +8,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 
 if (empty($_GET['id']) || !is_numeric($_GET['id']))
 {
@@ -28,7 +28,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('delete_cat_'.$id))
+    if (!Utils::CSRF_check('delete_cat_'.$id))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -36,7 +36,7 @@ if (!empty($_POST['delete']))
     {
         try {
             $cats->remove($id);
-            utils::redirect('/admin/membres/categories.php');
+            Utils::redirect('/admin/membres/categories.php');
         }
         catch (UserException $e)
         {

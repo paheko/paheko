@@ -93,7 +93,7 @@ if (!file_exists(DB_FILE))
     if (file_exists($old_file))
     {
         rename($old_file, DB_FILE);
-        utils::redirect('/admin/upgrade.php');
+        Utils::redirect('/admin/upgrade.php');
     }
 }
 
@@ -112,11 +112,11 @@ else
 
     if (!empty($_POST['save']))
     {
-        if (!utils::CSRF_check('install'))
+        if (!Utils::CSRF_check('install'))
         {
             $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
         }
-        elseif (utils::post('passe_membre') != utils::post('repasse_membre'))
+        elseif (Utils::post('passe_membre') != Utils::post('repasse_membre'))
         {
             $error = 'La vérification ne correspond pas au mot de passe.';
         }
@@ -132,23 +132,23 @@ else
 
                 // Configuration de base
                 $config = Config::getInstance();
-                $config->set('nom_asso', utils::post('nom_asso'));
-                $config->set('adresse_asso', utils::post('adresse_asso'));
-                $config->set('email_asso', utils::post('email_asso'));
+                $config->set('nom_asso', Utils::post('nom_asso'));
+                $config->set('adresse_asso', Utils::post('adresse_asso'));
+                $config->set('email_asso', Utils::post('email_asso'));
                 $config->set('site_asso', WWW_URL);
                 $config->set('monnaie', '€');
                 $config->set('pays', 'FR');
-                $config->set('email_envoi_automatique', utils::post('email_asso'));
+                $config->set('email_envoi_automatique', Utils::post('email_asso'));
                 $config->setVersion(garradin_version());
 
-                $champs = Champs_Membres::importInstall();
+                $champs = Membres\Champs::importInstall();
                 $champs->save(false); // Pas de copie car pas de table membres existante
 
                 $config->set('champ_identifiant', 'email');
                 $config->set('champ_identite', 'nom');
                 
                 // Création catégories
-                $cats = new Membres_Categories;
+                $cats = new Membres\Categories;
                 $id = $cats->add([
                     'nom' => 'Membres actifs',
                 ]);
@@ -166,7 +166,7 @@ else
                 ]);
 
                 $id = $cats->add([
-                    'nom' => ucfirst(utils::post('cat_membre')),
+                    'nom' => ucfirst(Utils::post('cat_membre')),
                     'droit_inscription' => Membres::DROIT_AUCUN,
                     'droit_wiki' => Membres::DROIT_ADMIN,
                     'droit_membres' => Membres::DROIT_ADMIN,
@@ -178,24 +178,24 @@ else
                 $membres = new Membres;
                 $id_membre = $membres->add([
                     'id_categorie'  =>  $id,
-                    'nom'           =>  utils::post('nom_membre'),
-                    'email'         =>  utils::post('email_membre'),
-                    'passe'         =>  utils::post('passe_membre'),
+                    'nom'           =>  Utils::post('nom_membre'),
+                    'email'         =>  Utils::post('email_membre'),
+                    'passe'         =>  Utils::post('passe_membre'),
                     'pays'          =>  'FR',
                 ]);
 
                 // Création wiki
-                $page = Wiki::transformTitleToURI(utils::post('nom_asso'));
+                $page = Wiki::transformTitleToURI(Utils::post('nom_asso'));
                 $config->set('accueil_wiki', $page);
                 $wiki = new Wiki;
                 $id_page = $wiki->create([
-                    'titre' =>  utils::post('nom_asso'),
+                    'titre' =>  Utils::post('nom_asso'),
                     'uri'   =>  $page,
                 ]);
 
                 $wiki->editRevision($id_page, 0, [
                     'id_auteur' =>  $id_membre,
-                    'contenu'   =>  "Bienvenue dans le wiki de ".utils::post('nom_asso')." !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
+                    'contenu'   =>  "Bienvenue dans le wiki de ".Utils::post('nom_asso')." !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
                 ]);
 
                 // Création page wiki connexion
@@ -208,18 +208,18 @@ else
 
                 $wiki->editRevision($id_page, 0, [
                     'id_auteur' =>  $id_membre,
-                    'contenu'   =>  "Bienvenue dans l'administration de ".utils::post('nom_asso')." !\n\n"
+                    'contenu'   =>  "Bienvenue dans l'administration de ".Utils::post('nom_asso')." !\n\n"
                         .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
                 ]);
 
                 // Mise en place compta
-                $comptes = new Compta_Comptes;
+                $comptes = new Compta\Comptes;
                 $comptes->importPlan();
 
-                $comptes = new Compta_Categories;
+                $comptes = new Compta\Categories;
                 $comptes->importCategories();
 
-                $ex = new Compta_Exercices;
+                $ex = new Compta\Exercices;
                 $ex->add([
                     'libelle'   =>  'Premier exercice',
                     'debut'     =>  date('Y-01-01'),
@@ -228,7 +228,7 @@ else
 
                 $config->save();
 
-                utils::redirect('/admin/login.php');
+                Utils::redirect('/admin/login.php');
             }
             catch (UserException $e)
             {
@@ -242,5 +242,5 @@ else
     $tpl->assign('error', $error);
 }
 
-$tpl->assign('passphrase', utils::suggestPassword());
+$tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->display('admin/install.tpl');

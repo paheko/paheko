@@ -8,9 +8,9 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$e = new Compta_Exercices;
+$e = new Compta\Exercices;
 
-$exercice = $e->get((int)utils::get('id'));
+$exercice = $e->get((int)Utils::get('id'));
 
 if (!$exercice)
 {
@@ -26,7 +26,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('compta_supprimer_exercice_'.$exercice['id']))
+    if (!Utils::CSRF_check('compta_supprimer_exercice_'.$exercice['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -36,7 +36,7 @@ if (!empty($_POST['delete']))
         {
             $id = $e->delete($exercice['id']);
 
-            utils::redirect('/admin/compta/exercices/');
+            Utils::redirect('/admin/compta/exercices/');
         }
         catch (UserException $e)
         {

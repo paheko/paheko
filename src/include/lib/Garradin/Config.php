@@ -77,7 +77,7 @@ class Config
             }
             elseif ($key == 'champs_membres')
             {
-                $value = new Champs_Membres((string)$value);
+                $value = new Membres\Champs((string)$value);
             }
             else
             {
@@ -234,9 +234,9 @@ class Config
             }
             case 'champs_membres':
             {
-                if (!($value instanceOf Champs_Membres))
+                if (!($value instanceOf Membres\Champs))
                 {
-                    throw new \UnexpectedValueException('$value doit être de type Champs_Membres');
+                    throw new \UnexpectedValueException('$value doit être de type Membres\Champs');
                 }
                 break;
             }
@@ -292,7 +292,7 @@ class Config
             }
             case 'pays':
             {
-                if (!trim($value) || !utils::getCountryName($value))
+                if (!trim($value) || !Utils::getCountryName($value))
                 {
                     throw new UserException('Le pays renseigné est invalide.');
                 }

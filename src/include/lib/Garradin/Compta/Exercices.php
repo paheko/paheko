@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Exercices
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+class Exercices
 {
     public function add($data)
     {
@@ -78,7 +82,7 @@ class Compta_Exercices
     {
         $db = DB::getInstance();
 
-        if (!utils::checkDate($end))
+        if (!Utils::checkDate($end))
         {
             throw new UserException('Date de fin vide ou invalide.');
         }
@@ -92,10 +96,10 @@ class Compta_Exercices
         ], 'id = \''.(int)$id.'\'');
 
         // Date de début du nouvel exercice : lendemain de la clôture du précédent exercice
-        $new_begin = utils::modifyDate($end, '+1 day');
+        $new_begin = Utils::modifyDate($end, '+1 day');
 
         // Date de fin du nouvel exercice : un an moins un jour après l'ouverture
-        $new_end = utils::modifyDate($new_begin, '+1 year -1 day');
+        $new_end = Utils::modifyDate($new_begin, '+1 year -1 day');
 
         // Enfin sauf s'il existe déjà des opérations après cette date, auquel cas la date de fin
         // est fixée à la date de la dernière opération, ceci pour ne pas avoir d'opération
@@ -149,7 +153,7 @@ class Compta_Exercices
             GROUP BY compta_comptes.id;', ['id' => $old_id]);
 
         $diff = 0;
-        $journal = new Compta_Journal;
+        $journal = new Journal;
 
         while ($row = $statement->fetchArray(SQLITE3_ASSOC))
         {
@@ -200,7 +204,7 @@ class Compta_Exercices
 
         if ($resultat != 0)
         {
-            $journal = new Compta_Journal;
+            $journal = new Journal;
             $journal->add([
                 'libelle'   =>  'Résultat de l\'exercice précédent',
                 'date'      =>  $date,
@@ -450,8 +454,8 @@ class Compta_Exercices
     {
         $db = DB::getInstance();
 
-        $include = [Compta_Comptes::ACTIF, Compta_Comptes::PASSIF,
-            Compta_Comptes::PASSIF | Compta_Comptes::ACTIF];
+        $include = [Comptes::ACTIF, Comptes::PASSIF,
+            Comptes::PASSIF | Comptes::ACTIF];
 
         $actif           = ['comptes' => [], 'total' => 0.0];
         $passif          = ['comptes' => [], 'total' => 0.0];
@@ -497,17 +501,17 @@ class Compta_Exercices
             $parent = substr($compte, 0, 2);
             $classe = $compte[0];
 
-            if (($position & Compta_Comptes::ACTIF) && ($position & Compta_Comptes::PASSIF))
+            if (($position & Comptes::ACTIF) && ($position & Comptes::PASSIF))
             {
                 $position = 'actif_ou_passif';
                 $solde = $debit - $credit;
             }
-            else if ($position & Compta_Comptes::ACTIF)
+            else if ($position & Comptes::ACTIF)
             {
                 $position = 'actif';
                 $solde = $debit - $credit;
             }
-            else if ($position & Compta_Comptes::PASSIF)
+            else if ($position & Comptes::PASSIF)
             {
                 $position = 'passif';
                 $solde = $credit - $debit;
@@ -607,5 +611,3 @@ class Compta_Exercices
         return ['actif' => $actif, 'passif' => $passif];
     }
 }
-
-?>

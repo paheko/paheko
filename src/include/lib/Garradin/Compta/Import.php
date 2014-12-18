@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Import
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+class Import
 {
 	protected $csv_header = [
 		'Numéro mouvement',
@@ -79,10 +83,10 @@ class Compta_Import
 
 		$db = DB::getInstance();
 		$db->exec('BEGIN;');
-		$comptes = new Compta_Comptes;
-		$banques = new Compta_Comptes_Bancaires;
-		$cats = new Compta_Categories;
-		$journal = new Compta_Journal;
+		$comptes = new Comptes;
+		$banques = new Comptes_Bancaires;
+		$cats = new Categories;
+		$journal = new Journal;
 
 		$columns = array_flip($this->csv_header);
 		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
@@ -101,7 +105,7 @@ class Compta_Import
 		};
 
 		$line = 0;
-		$delim = utils::find_csv_delim($fp);
+		$delim = Utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{
@@ -229,10 +233,10 @@ class Compta_Import
 
 		$db = DB::getInstance();
 		$db->exec('BEGIN;');
-		$comptes = new Compta_Comptes;
-		$banques = new Compta_Comptes_Bancaires;
-		$cats = new Compta_Categories;
-		$journal = new Compta_Journal;
+		$comptes = new Comptes;
+		$banques = new Comptes_Bancaires;
+		$cats = new Categories;
+		$journal = new Journal;
 
 		$columns = [];
 		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
@@ -281,7 +285,7 @@ class Compta_Import
 		};
 
 		$line = 0;
-		$delim = utils::find_csv_delim($fp);
+		$delim = Utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{
@@ -383,5 +387,3 @@ class Compta_Import
 		return true;
 	}
 }
-
-?>

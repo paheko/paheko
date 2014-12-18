@@ -8,8 +8,8 @@ if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$recherche = trim(utils::get('r'));
-$champ = trim(utils::get('c'));
+$recherche = trim(Utils::get('r'));
+$champ = trim(Utils::get('c'));
 
 $champs = $config->get('champs_membres');
 
@@ -44,7 +44,7 @@ if ($recherche != '')
 
     if (count($result) == 1 && $auto)
     {
-        utils::redirect('/admin/membres/fiche.php?id=' . (int)$result[0]['id']);
+        Utils::redirect('/admin/membres/fiche.php?id=' . (int)$result[0]['id']);
     }
 }
 

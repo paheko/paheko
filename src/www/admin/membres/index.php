@@ -10,9 +10,9 @@ if ($user['droits']['membres'] < Membres::DROIT_ACCES)
 
 
 // Recherche de membre (pour ceux qui n'ont qu'un accès à la liste des membres)
-if (utils::get('r'))
+if (Utils::get('r'))
 {
-	$recherche = trim(utils::get('r'));
+	$recherche = trim(Utils::get('r'));
 
 	$result = $membres->search($config->get('champ_identite'), $recherche);
     $tpl->assign('liste', $result);
@@ -20,14 +20,14 @@ if (utils::get('r'))
 }
 else
 {
-	$cats = new Membres_Categories;
+	$cats = new Membres\Categories;
 	$champs = $config->get('champs_membres');
 
 	$membres_cats = $cats->listSimple();
 	$membres_cats_cachees = $cats->listHidden();
 
-	$cat_id = (int) utils::get('cat') ?: 0;
-	$page = (int) utils::get('p') ?: 1;
+	$cat_id = (int) Utils::get('cat') ?: 0;
+	$page = (int) Utils::get('p') ?: 1;
 
 	if ($cat_id)
 	{
@@ -45,8 +45,8 @@ else
 	$order = $champs->getFirst();
 	$desc = false;
 
-	if (utils::get('o'))
-	    $order = utils::get('o');
+	if (Utils::get('o'))
+	    $order = Utils::get('o');
 
 	if (isset($_GET['d']))
 	    $desc = true;
@@ -61,7 +61,7 @@ else
 	$tpl->assign('liste', $membres->listByCategory($cat_id, array_keys($fields), $page, $order, $desc));
 	$tpl->assign('total', $membres->countByCategory($cat_id));
 
-	$tpl->assign('pagination_url', utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : ''));
+	$tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : ''));
 
 	$tpl->assign('membres_cats', $membres_cats);
 	$tpl->assign('membres_cats_cachees', $membres_cats_cachees);

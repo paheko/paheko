@@ -1,8 +1,13 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Comptes_Bancaires extends Compta_Comptes
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+
+class Comptes_Bancaires extends Comptes
 {
     const NUMERO_PARENT_COMPTES = 512;
 
@@ -136,7 +141,7 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
             $data['bic'] = trim(strtoupper($data['bic']));
             $data['bic'] = preg_replace('![^\dA-Z]!', '', $data['bic']);
 
-            if (!utils::checkBIC($data['bic']))
+            if (!Utils::checkBIC($data['bic']))
             {
                 throw new UserException('Code BIC/SWIFT invalide.');
             }
@@ -151,7 +156,7 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
             $data['iban'] = trim(strtoupper($data['iban']));
             $data['iban'] = preg_replace('![^\dA-Z]!', '', $data['iban']);
 
-            if (!utils::checkIBAN($data['iban']))
+            if (!Utils::checkIBAN($data['iban']))
             {
                 throw new UserException('Code IBAN invalide.');
             }
@@ -160,5 +165,3 @@ class Compta_Comptes_Bancaires extends Compta_Comptes
         return true;
     }
 }
-
-?>

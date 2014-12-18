@@ -54,12 +54,12 @@ class Cotisations
 				throw new UserException('Une date de fin est obligatoire avec la date de début de validité.');
 			}
 
-			if (!utils::checkDate($data['debut']))
+			if (!Utils::checkDate($data['debut']))
 			{
 				throw new UserException('La date de début est invalide.');
 			}
 
-			if (!utils::checkDate($data['fin']))
+			if (!Utils::checkDate($data['fin']))
 			{
 				throw new UserException('La date de fin est invalide.');
 			}

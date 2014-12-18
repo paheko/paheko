@@ -11,7 +11,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
 $membre = false;
 
 $cotisations = new Cotisations;
-$m_cotisations = new Cotisations_Membres;
+$m_cotisations = new Membres\Cotisations;
 
 if (empty($_GET['id']) || !is_numeric($_GET['id']))
 {
@@ -38,7 +38,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('del_cotisation_' . $co['id']))
+    if (!Utils::CSRF_check('del_cotisation_' . $co['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -46,7 +46,7 @@ if (!empty($_POST['delete']))
     {
         try {
             $m_cotisations->delete($co['id']);
-            utils::redirect('/admin/membres/cotisations.php?id=' . $membre['id']);
+            Utils::redirect('/admin/membres/cotisations.php?id=' . $membre['id']);
         }
         catch (UserException $e)
         {
@@ -60,5 +60,3 @@ $tpl->assign('membre', $membre);
 $tpl->assign('cotisation', $co);
 
 $tpl->display('admin/membres/cotisations/supprimer.tpl');
-
-?>

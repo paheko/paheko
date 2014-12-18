@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Journal
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+class Journal
 {
     protected function _getCurrentExercice()
     {
@@ -51,7 +55,7 @@ class Compta_Journal
         // L'actif augmente au débit, le passif au crédit
         $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $id_compte);
 
-        if (($position & Compta_Comptes::ACTIF) || ($position & Compta_Comptes::CHARGE))
+        if (($position & Comptes::ACTIF) || ($position & Comptes::CHARGE))
         {
             $query = $debit . ' - ' . $credit;
         }
@@ -75,7 +79,7 @@ class Compta_Journal
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
 
         // L'actif et les charges augmentent au débit, le passif et les produits au crédit
-        if (($position & Compta_Comptes::ACTIF) || ($position & Compta_Comptes::CHARGE))
+        if (($position & Comptes::ACTIF) || ($position & Comptes::CHARGE))
         {
             $d = '';
             $c = '-';
@@ -189,7 +193,7 @@ class Compta_Journal
             throw new UserException('Moyen de paiement invalide.');
         }
 
-        if (empty($data['date']) || !utils::checkDate($data['date']))
+        if (empty($data['date']) || !Utils::checkDate($data['date']))
         {
             throw new UserException('Date vide ou invalide.');
         }
@@ -368,5 +372,3 @@ class Compta_Journal
         return $tables;
     }
 }
-
-?>

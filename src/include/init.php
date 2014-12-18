@@ -177,7 +177,7 @@ function exception_error_handler($errno, $errstr, $errfile, $errline )
 
 function exception_handler($e)
 {
-    if ($e instanceOf UserException || $e instanceOf miniSkelMarkupException)
+    if ($e instanceOf UserException || $e instanceOf \KD2\MiniSkelMarkupException)
     {
         try {
             if (PHP_SAPI == 'cli')
@@ -323,15 +323,13 @@ if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS')
 {
     if (!file_exists(DB_FILE))
     {
-        utils::redirect('/admin/install.php');
+        Utils::redirect('/admin/install.php');
     }
 
     $config = Config::getInstance();
 
     if (version_compare($config->getVersion(), garradin_version(), '<'))
     {
-        utils::redirect('/admin/upgrade.php');
+        Utils::redirect('/admin/upgrade.php');
     }
 }
-
-?>

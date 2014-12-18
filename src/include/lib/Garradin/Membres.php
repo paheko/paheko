@@ -100,7 +100,7 @@ class Membres
         $message.= WWW_URL . 'admin/password.php?c=' . substr($hash, -10);
         $message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-        return utils::mail($membre['email'], '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
+        return Utils::mail($membre['email'], '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
     }
 
     public function recoverPasswordConfirm($hash)
@@ -116,7 +116,7 @@ class Membres
         $config = Config::getInstance();
         $db = DB::getInstance();
 
-        $password = utils::suggestPassword();
+        $password = Utils::suggestPassword();
 
         $dest = $_SESSION['recover_password']['email'];
         $id = (int)$_SESSION['recover_password']['id'];
@@ -130,7 +130,7 @@ class Membres
 
         $db->simpleUpdate('membres', ['passe' => $password], 'id = '.(int)$id);
 
-        return utils::mail($dest, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
+        return Utils::mail($dest, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
     }
 
     public function updateSessionData($membre = null, $droits = null)
@@ -260,10 +260,10 @@ class Membres
 
         if ($copie)
         {
-            utils::mail($from, $sujet, $message);
+            Utils::mail($from, $sujet, $message);
         }
 
-        return utils::mail($dest, $sujet, $message, ['From' => $from]);
+        return Utils::mail($dest, $sujet, $message, ['From' => $from]);
     }
 
     // Gestion des données ///////////////////////////////////////////////////////
@@ -303,13 +303,13 @@ class Membres
                 {
                     throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
                 }
-                elseif ($config['type'] == 'date' && trim($data[$key]) !== '' && !utils::checkDate($data[$key]))
+                elseif ($config['type'] == 'date' && trim($data[$key]) !== '' && !Utils::checkDate($data[$key]))
                 {
                     throw new UserException('Date invalide "' . $config['title'] . '", format attendu : AAAA-MM-JJ.');
                 }
                 elseif ($config['type'] == 'datetime' && trim($data[$key]) !== '')
                 {
-                    if (!utils::checkDateTime($data[$key]) || !($dt = new DateTime($data[$key])))
+                    if (!Utils::checkDateTime($data[$key]) || !($dt = new DateTime($data[$key])))
                     {
                         throw new UserException('Date invalide "' . $config['title'] . '", format attendu : AAAA-MM-JJ HH:mm.');
                     }
@@ -318,7 +318,7 @@ class Membres
                 }
                 elseif ($config['type'] == 'tel')
                 {
-                    $data[$key] = utils::normalizePhoneNumber($data[$key]);
+                    $data[$key] = Utils::normalizePhoneNumber($data[$key]);
                 }
                 elseif ($config['type'] == 'country')
                 {
@@ -561,7 +561,7 @@ class Membres
         }
         elseif ($champ['type'] == 'tel')
         {
-            $query = utils::normalizePhoneNumber($query);
+            $query = Utils::normalizePhoneNumber($query);
             $query = preg_replace('!^0+!', '', $query);
 
             if ($query == '')
@@ -725,7 +725,7 @@ class Membres
 
         while ($row = $res->fetchArray(SQLITE3_ASSOC))
         {
-            utils::mail($row['email'], $sujet, $message, $headers);
+            Utils::mail($row['email'], $sujet, $message, $headers);
         }
 
         return true;

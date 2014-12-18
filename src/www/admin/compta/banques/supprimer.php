@@ -8,9 +8,9 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$banque = new Compta_Comptes_Bancaires;
+$banque = new Compta\Comptes_Bancaires;
 
-$compte = $banque->get(utils::get('id'));
+$compte = $banque->get(Utils::get('id'));
 
 if (!$compte)
 {
@@ -21,7 +21,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('compta_delete_banque_'.$compte['id']))
+    if (!Utils::CSRF_check('compta_delete_banque_'.$compte['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -30,7 +30,7 @@ if (!empty($_POST['delete']))
         try
         {
             $banque->delete($compte['id']);
-            utils::redirect('/admin/compta/banques/');
+            Utils::redirect('/admin/compta/banques/');
         }
         catch (UserException $e)
         {

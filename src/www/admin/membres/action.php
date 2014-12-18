@@ -29,7 +29,7 @@ $error = false;
 
 if (!empty($_POST['move_ok']))
 {
-    if (!utils::CSRF_check('membres_action'))
+    if (!Utils::CSRF_check('membres_action'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -40,12 +40,12 @@ if (!empty($_POST['move_ok']))
             $membres->changeCategorie($_POST['id_categorie'], $_POST['selected']);
         }
 
-        utils::redirect('/admin/membres/');
+        Utils::redirect('/admin/membres/');
     }
 }
 elseif (!empty($_POST['delete_ok']))
 {
-    if (!utils::CSRF_check('membres_action'))
+    if (!Utils::CSRF_check('membres_action'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -53,7 +53,7 @@ elseif (!empty($_POST['delete_ok']))
     {
         $membres->delete($_POST['selected']);
 
-        utils::redirect('/admin/membres/');
+        Utils::redirect('/admin/membres/');
     }
 }
 
@@ -62,7 +62,7 @@ $tpl->assign('nb_selected', count($_POST['selected']));
 
 if (!empty($_POST['move']))
 {
-    $cats = new Membres_Categories;
+    $cats = new Membres\Categories;
 
     $tpl->assign('membres_cats', $cats->listSimple());
     $tpl->assign('action', 'move');

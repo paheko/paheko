@@ -8,13 +8,13 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Compta_Categories;
+$cats = new Compta\Categories;
 
 $error = false;
 
 if (!empty($_POST['add']))
 {
-    if (!utils::CSRF_check('compta_ajout_cat'))
+    if (!Utils::CSRF_check('compta_ajout_cat'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -23,20 +23,20 @@ if (!empty($_POST['add']))
         try
         {
             $id = $cats->add([
-                'intitule'      =>  utils::post('intitule'),
-                'description'   =>  utils::post('description'),
-                'compte'        =>  utils::post('compte'),
-                'type'          =>  utils::post('type'),
+                'intitule'      =>  Utils::post('intitule'),
+                'description'   =>  Utils::post('description'),
+                'compte'        =>  Utils::post('compte'),
+                'type'          =>  Utils::post('type'),
             ]);
 
-            if (utils::post('type') == Compta_Categories::DEPENSES)
+            if (Utils::post('type') == Compta\Categories::DEPENSES)
                 $type = 'depenses';
-            elseif (utils::post('type') == Compta_Categories::AUTRES)
+            elseif (Utils::post('type') == Compta\Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
 
-            utils::redirect('/admin/compta/categories/?'.$type);
+            Utils::redirect('/admin/compta/categories/?'.$type);
         }
         catch (UserException $e)
         {
@@ -47,7 +47,7 @@ if (!empty($_POST['add']))
 
 $tpl->assign('error', $error);
 
-$tpl->assign('type', isset($_POST['type']) ? utils::post('type') : Compta_Categories::RECETTES);
+$tpl->assign('type', isset($_POST['type']) ? Utils::post('type') : Compta\Categories::RECETTES);
 $tpl->assign('comptes', $comptes->listTree());
 
 $tpl->display('admin/compta/categories/ajouter.tpl');

@@ -8,12 +8,12 @@ if ($user['droits']['wiki'] < Membres::DROIT_ECRITURE)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-if (!utils::get('id') || !is_numeric(utils::get('id')))
+if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
     throw new UserException('Numéro de page invalide.');
 }
 
-$page = $wiki->getById(utils::get('id'));
+$page = $wiki->getById(Utils::get('id'));
 $error = false;
 
 if (!$page)
@@ -27,9 +27,9 @@ if (!empty($page['contenu']))
     $page['contenu'] = $page['contenu']['contenu'];
 }
 
-if (utils::post('date'))
+if (Utils::post('date'))
 {
-    $date = strtotime(utils::post('date') . ' ' . utils::post('date_h') . ':' . utils::post('date_min'));
+    $date = strtotime(Utils::post('date') . ' ' . Utils::post('date_h') . ':' . Utils::post('date_min'));
 }
 else
 {
@@ -38,11 +38,11 @@ else
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('wiki_edit_'.$page['id']))
+    if (!Utils::CSRF_check('wiki_edit_'.$page['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    elseif ($page['date_modification'] > (int) utils::post('debut_edition'))
+    elseif ($page['date_modification'] > (int) Utils::post('debut_edition'))
     {
         $error = 'La page a été modifiée par quelqu\'un d\'autre depuis que vous avez commencé l\'édition.';
     }
@@ -50,24 +50,24 @@ if (!empty($_POST['save']))
     {
         try {
             $wiki->edit($page['id'], [
-                'titre'         =>  utils::post('titre'),
-                'uri'           =>  utils::post('uri'),
-                'parent'        =>  utils::post('parent'),
-                'droit_lecture' =>  utils::post('droit_lecture'),
-                'droit_ecriture'=>  utils::post('droit_ecriture'),
+                'titre'         =>  Utils::post('titre'),
+                'uri'           =>  Utils::post('uri'),
+                'parent'        =>  Utils::post('parent'),
+                'droit_lecture' =>  Utils::post('droit_lecture'),
+                'droit_ecriture'=>  Utils::post('droit_ecriture'),
                 'date_creation' =>  $date,
             ]);
 
-            $wiki->editRevision($page['id'], (int) utils::post('revision_edition'), [
-                'contenu'       =>  utils::post('contenu'),
-                'modification'  =>  utils::post('modification'),
+            $wiki->editRevision($page['id'], (int) Utils::post('revision_edition'), [
+                'contenu'       =>  Utils::post('contenu'),
+                'modification'  =>  Utils::post('modification'),
                 'id_auteur'     =>  $user['id'],
-                'chiffrement'   =>  utils::post('chiffrement'),
+                'chiffrement'   =>  Utils::post('chiffrement'),
             ]);
 
             $page = $wiki->getById($page['id']);
 
-            utils::redirect('/admin/wiki/?'.$page['uri']);
+            Utils::redirect('/admin/wiki/?'.$page['uri']);
         }
         catch (UserException $e)
         {
@@ -76,7 +76,7 @@ if (!empty($_POST['save']))
     }
 }
 
-$parent = (int) utils::post('parent') ?: (int) $page['parent'];
+$parent = (int) Utils::post('parent') ?: (int) $page['parent'];
 $tpl->assign('parent', $parent ? $wiki->getTitle($parent) : 0);
 
 $tpl->assign('error', $error);

@@ -9,6 +9,6 @@ if ($user['droits']['compta'] < Membres::DROIT_ACCES)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$comptes = new Compta_Comptes;
+$comptes = new Compta\Comptes;
 
 ?>

@@ -3,11 +3,11 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$q = trim(utils::get('q'));
+$q = trim(Utils::get('q'));
 
 $tpl->assign('recherche', $q);
 
-if (utils::get('q'))
+if (Utils::get('q'))
 {
     $r = $wiki->search($q);
     $tpl->assign('resultats', $r);

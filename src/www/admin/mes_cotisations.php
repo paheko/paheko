@@ -14,12 +14,12 @@ $error = false;
 
 $tpl->assign('membre', $membre);
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 
 $categorie = $cats->get($membre['id_categorie']);
 $tpl->assign('categorie', $categorie);
 
-$cotisations = new Cotisations_Membres;
+$cotisations = new Membres\Cotisations;
 
 if (!empty($categorie['id_cotisation_obligatoire']))
 {
@@ -35,5 +35,3 @@ $tpl->assign('cotisations', $cotisations->listForMember($membre['id']));
 $tpl->assign('cotisations_membre', $cotisations->listSubscriptionsForMember($membre['id']));
 
 $tpl->display('admin/mes_cotisations.tpl');
-
-?>
