@@ -273,13 +273,6 @@ class Loader
      */
     static protected $loaded = [];
 
-    static protected $libs = [
-        'utils',
-        'squelette_filtres',
-        'static_cache',
-        'template'
-    ];
-
     /**
      * Loads a class from the $name
      * @param  stringg $classname
@@ -288,42 +281,33 @@ class Loader
     static public function load($classname)
     {
         $classname = ltrim($classname, '\\');
-        $filename  = '';
-        $namespace = '';
-
-        if ($lastnspos = strripos($classname, '\\')) 
+        
+        if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
         {
-            $namespace = substr($classname, 0, $lastnspos);
-            $classname = substr($classname, $lastnspos + 1);
-
-            if ($namespace != 'Garradin')
-            {
-                $filename  = str_replace('\\', '/', $namespace) . '/';
-            }
+            $classname = substr($classname, 16);
+            $plugin_name = substr($classname, 0, strpos($classname, '\\'));
+            $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
+            
+            $path = 'phar://' . PLUGINS_ROOT . '/' . strtolower($plugin_name) . '.tar.gz/lib/' . $filename . '.php';
+        }
+        else
+        {
+            $filename = str_replace('\\', '/', $classname);
+            $path = ROOT . '/include/lib/' . $filename . '.php';
         }
 
-        $classname = strtolower($classname);
-
-        if (in_array($classname, self::$libs)) {
-            $filename = 'lib.' . $classname . '.php';
-        } else {
-            $filename .= 'class.' . $classname . '.php';
-        }
-
-        $filename = ROOT . '/include/' . $filename;
-
-        if (array_key_exists($filename, self::$loaded))
+        if (array_key_exists($path, self::$loaded))
         {
             return true;
         }
 
-        if (!file_exists($filename)) {
-            throw new \Exception('File '.$filename.' doesn\'t exists');
+        if (!file_exists($path)) {
+            throw new \Exception('File '.$path.' doesn\'t exists');
         }
 
-        self::$loaded[$filename] = true;
+        self::$loaded[$path] = true;
 
-        require $filename;
+        require $path;
     }
 }
 
