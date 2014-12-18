@@ -180,6 +180,8 @@ class Rappels
 				AND (c.fin IS NOT NULL OR c.duree IS NOT NULL)
 				/* Rien nest envoyé aux membres des catégories cachées, logique */
 				AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)
+    		/* Grouper par membre, pour n\'envoyer qu\'un seul rappel par membre/cotise */
+	    	GROUP BY m.id, r.id_cotisation
 			ORDER BY r.delai ASC
 		)
 		WHERE nb_jours >= delai 
@@ -188,8 +190,6 @@ class Rappels
 				WHERE id_cotisation = re.id_cotisation 
 				AND re.date >= date(expiration, delai || \' days\')
 			)
-		/* Grouper par membre, pour n\'envoyer qu\'un seul rappel par membre/cotise */
-		GROUP BY id, id_cotisation
 		ORDER BY nb_jours DESC;';
 
 		$db->exec('BEGIN');
