@@ -6,6 +6,7 @@ class Plugin
 {
 	protected $id = null;
 	protected $plugin = null;
+	protected $config_changed = false;
 
 	protected $mimes = [
 		'css' => 'text/css',
@@ -47,6 +48,20 @@ class Plugin
 		}
 
 		$this->id = $id;
+	}
+
+	/**
+	 * Enregistrer les changements dans la config
+	 */
+	public function __destruct()
+	{
+		if ($this->config_changed)
+		{
+			$db = DB::getInstance();
+			$db->simpleUpdate('plugins', 
+				['config' => json_encode($this->plugin['config'])],
+				'id = \'' . $this->id . '\'');
+		}
 	}
 
 	/**
@@ -96,10 +111,7 @@ class Plugin
 			$this->plugin['config'][$key] = $value;
 		}
 
-		$db = DB::getInstance();
-		$db->simpleUpdate('plugins', 
-			['config' => json_encode($this->plugin['config'])],
-			'id = \'' . $this->id . '\'');
+		$this->config_changed = true;
 
 		return true;
 	}
@@ -459,6 +471,11 @@ class Plugin
 			}
 		}
 
+		if (!empty($infos['min_version']) && !version_compare(garradin_version(), $infos['min_version'], '>='))
+		{
+			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos['min_version'].' ou supérieure.');
+		}
+
 		if (!empty($infos['menu']) && !file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/www/admin/index.php'))
 		{
 			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
@@ -505,6 +522,8 @@ class Plugin
 
 		if (file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/install.php'))
 		{
+			$plugin = new Plugin($id);
+
 			include 'phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/install.php';
 		}
 
