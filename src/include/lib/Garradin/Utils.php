@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-class utils
+class Utils
 {
     static protected $country_list = null;
 
@@ -390,8 +390,7 @@ class utils
     {
         if (!self::$g2x)
         {
-            require_once ROOT . '/include/libs/garbage2xhtml/lib.garbage2xhtml.php';
-            self::$g2x = new \garbage2xhtml;
+            self::$g2x = new \KD2\Garbage2xhtml;
             self::$g2x->core_attributes = ['class', 'id', 'title'];
         }
 
@@ -486,8 +485,7 @@ class utils
 
     static public function suggestPassword()
     {
-        require_once ROOT . '/include/libs/passphrase/lib.passphrase.french.php';
-        return \Passphrase::generate();
+        return \KD2\Passphrase_FR::generate();
     }
 
     static public function checkIBAN($iban)

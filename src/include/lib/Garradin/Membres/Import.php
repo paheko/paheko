@@ -1,8 +1,14 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Membres;
 
-class Membres_Import
+use Garradin\Membres;
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\User_Exception;
+
+class Import
 {
 	/**
 	 * Champs du CSV de Galette
@@ -88,7 +94,7 @@ class Membres_Import
 		};
 
 		$line = 0;
-		$delim = utils::find_csv_delim($fp);
+		$delim = Utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{
@@ -169,7 +175,7 @@ class Membres_Import
 		$champs[] = 'id_categorie';
 
 		$line = 0;
-		$delim = utils::find_csv_delim($fp);
+		$delim = Utils::find_csv_delim($fp);
 
 		while (!feof($fp))
 		{

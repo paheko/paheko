@@ -8,7 +8,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$import = new Membres_Import;
+$import = new Membres\Import;
 
 if (isset($_GET['export']))
 {
@@ -22,10 +22,10 @@ $error = false;
 $champs = $config->get('champs_membres')->getAll();
 $champs['date_inscription'] = ['title' => 'Date inscription', 'type' => 'date'];
 
-if (utils::post('import'))
+if (Utils::post('import'))
 {
     // FIXME
-    if (false && !utils::CSRF_check('membres_import'))
+    if (false && !Utils::CSRF_check('membres_import'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -37,11 +37,11 @@ if (utils::post('import'))
     {
         try
         {
-            if (utils::post('type') == 'galette')
+            if (Utils::post('type') == 'galette')
             {
-                $import->fromGalette($_FILES['upload']['tmp_name'], utils::post('galette_translate'));
+                $import->fromGalette($_FILES['upload']['tmp_name'], Utils::post('galette_translate'));
             }
-            elseif (utils::post('type') == 'garradin')
+            elseif (Utils::post('type') == 'garradin')
             {
                 $import->fromCSV($_FILES['upload']['tmp_name']);
             }
@@ -50,7 +50,7 @@ if (utils::post('import'))
                 throw new UserException('Import inconnu.');
             }
 
-            utils::redirect('/admin/membres/import.php?ok');
+            Utils::redirect('/admin/membres/import.php?ok');
         }
         catch (UserException $e)
         {
@@ -64,7 +64,7 @@ $tpl->assign('ok', isset($_GET['ok']) ? true : false);
 
 $tpl->assign('garradin_champs', $champs);
 $tpl->assign('galette_champs', $import->galette_fields);
-$tpl->assign('translate', utils::post('galette_translate'));
+$tpl->assign('translate', Utils::post('galette_translate'));
 
 $tpl->display('admin/membres/import.tpl');
 

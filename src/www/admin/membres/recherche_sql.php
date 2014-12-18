@@ -8,7 +8,7 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$query = trim(utils::get('query'));
+$query = trim(Utils::get('query'));
 
 $tpl->assign('schema', $membres->schemaSQL());
 $tpl->assign('query', $query);

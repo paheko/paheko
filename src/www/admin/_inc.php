@@ -13,7 +13,7 @@ if (!defined('Garradin\LOGIN_PROCESS'))
 {
     if (!$membres->isLogged())
     {
-        utils::redirect('/admin/login.php');
+        Utils::redirect('/admin/login.php');
     }
 
     $tpl->assign('config', Config::getInstance()->getConfig());

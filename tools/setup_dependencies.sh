@@ -18,18 +18,3 @@ svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ "$SRCPATH/templa
 
 # Liste des pays
 svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/countries/ "$SRCPATH/countries/"
-
-# Passphrase
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/passphrase/ "$SRCPATH/passphrase/"
-
-# Garbage2xhtml
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/garbage2xhtml/ "$SRCPATH/garbage2xhtml/"
-
-# MiniSkel
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/miniskel/ "$SRCPATH/miniskel/"
-
-# Diff
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/diff/ "$SRCPATH/diff/"
-
-# SVGPlot
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/svgplot/ "$SRCPATH/svgplot"

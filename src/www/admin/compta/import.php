@@ -8,8 +8,8 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$e = new Compta_Exercices;
-$import = new Compta_Import;
+$e = new Compta\Exercices;
+$import = new Compta\Import;
 
 if (isset($_GET['export']))
 {
@@ -23,7 +23,7 @@ $error = false;
 
 if (!empty($_POST['import']))
 {
-    if (!utils::CSRF_check('compta_import'))
+    if (!Utils::CSRF_check('compta_import'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -35,11 +35,11 @@ if (!empty($_POST['import']))
     {
         try
         {
-            if (utils::post('type') == 'citizen')
+            if (Utils::post('type') == 'citizen')
             {
                 $import->fromCitizen($_FILES['upload']['tmp_name']);
             }
-            elseif (utils::post('type') == 'garradin')
+            elseif (Utils::post('type') == 'garradin')
             {
                 $import->fromCSV($_FILES['upload']['tmp_name']);
             }
@@ -48,7 +48,7 @@ if (!empty($_POST['import']))
                 throw new UserException('Import inconnu.');
             }
 
-            utils::redirect('/admin/compta/import.php?ok');
+            Utils::redirect('/admin/compta/import.php?ok');
         }
         catch (UserException $e)
         {

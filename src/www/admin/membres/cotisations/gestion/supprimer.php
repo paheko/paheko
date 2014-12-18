@@ -8,14 +8,14 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-if (!utils::get('id') || !is_numeric(utils::get('id')))
+if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
     throw new UserException("Argument du numéro de cotisation manquant.");
 }
 
 $cotisations = new Cotisations;
 
-$co = $cotisations->get(utils::get('id'));
+$co = $cotisations->get(Utils::get('id'));
 
 if (!$co)
 {
@@ -26,7 +26,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('delete_co_' . $co['id']))
+    if (!Utils::CSRF_check('delete_co_' . $co['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -34,7 +34,7 @@ if (!empty($_POST['delete']))
     {
         try {
             $cotisations->delete($co['id']);
-            utils::redirect('/admin/membres/cotisations/');
+            Utils::redirect('/admin/membres/cotisations/');
         }
         catch (UserException $e)
         {

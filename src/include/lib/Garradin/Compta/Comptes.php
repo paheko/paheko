@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Compta;
 
-class Compta_Comptes
+use \Garradin\DB;
+use \Garradin\Utils;
+use \Garradin\UserException;
+
+class Comptes
 {
     const CAISSE = 530;
 
@@ -321,5 +325,3 @@ class Compta_Comptes
         ];
     }
 }
-
-?>

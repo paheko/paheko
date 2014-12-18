@@ -8,7 +8,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$id = utils::get('id');
+$id = Utils::get('id');
 $compte = $comptes->get($id);
 
 if (!$compte)
@@ -20,7 +20,7 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('compta_edit_compte_'.$compte['id']))
+    if (!Utils::CSRF_check('compta_edit_compte_'.$compte['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -29,11 +29,11 @@ if (!empty($_POST['save']))
         try
         {
             $id = $comptes->edit($compte['id'], [
-                'libelle'       =>  utils::post('libelle'),
-                'position'      =>  utils::post('position'),
+                'libelle'       =>  Utils::post('libelle'),
+                'position'      =>  Utils::post('position'),
             ]);
 
-            utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
+            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
         }
         catch (UserException $e)
         {
@@ -45,7 +45,7 @@ if (!empty($_POST['save']))
 $tpl->assign('error', $error);
 
 $tpl->assign('positions', $comptes->getPositions());
-$tpl->assign('position', utils::post('position') ?: $compte['position']);
+$tpl->assign('position', Utils::post('position') ?: $compte['position']);
 $tpl->assign('compte', $compte);
 
 $tpl->display('admin/compta/comptes/modifier.tpl');

@@ -8,9 +8,9 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Compta_Categories;
+$cats = new Compta\Categories;
 
-$id = (int)utils::get('id');
+$id = (int)Utils::get('id');
 $cat = $cats->get($id);
 
 if (!$cat)
@@ -22,7 +22,7 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('compta_edit_cat_'.$cat['id']))
+    if (!Utils::CSRF_check('compta_edit_cat_'.$cat['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -31,18 +31,18 @@ if (!empty($_POST['save']))
         try
         {
             $id = $cats->edit($id, [
-                'intitule'      =>  utils::post('intitule'),
-                'description'   =>  utils::post('description'),
+                'intitule'      =>  Utils::post('intitule'),
+                'description'   =>  Utils::post('description'),
             ]);
 
-            if ($cat['type'] == Compta_Categories::DEPENSES)
+            if ($cat['type'] == Compta\Categories::DEPENSES)
                 $type = 'depenses';
-            elseif ($cat['type'] == Compta_Categories::AUTRES)
+            elseif ($cat['type'] == Compta\Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
 
-            utils::redirect('/admin/compta/categories/?'.$type);
+            Utils::redirect('/admin/compta/categories/?'.$type);
         }
         catch (UserException $e)
         {

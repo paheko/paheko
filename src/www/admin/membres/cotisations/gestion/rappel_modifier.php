@@ -8,14 +8,14 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-if (!utils::get('id') || !is_numeric(utils::get('id')))
+if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
     throw new UserException("Argument du numéro de rappel manquant.");
 }
 
 $rappels = new Rappels;
 
-$rappel = $rappels->get(utils::get('id'));
+$rappel = $rappels->get(Utils::get('id'));
 
 if (!$rappel)
 {
@@ -28,28 +28,28 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('edit_rappel_' . $rappel['id']))
+    if (!Utils::CSRF_check('edit_rappel_' . $rappel['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            if (utils::post('delai_choix') == 0)
+            if (Utils::post('delai_choix') == 0)
                $delai = 0;
-            elseif (utils::post('delai_choix') > 0)
-                $delai = (int) utils::post('delai_post');
+            elseif (Utils::post('delai_choix') > 0)
+                $delai = (int) Utils::post('delai_post');
             else
-                $delai = -(int) utils::post('delai_pre');
+                $delai = -(int) Utils::post('delai_pre');
 
             $rappels->edit($rappel['id'], [
-                'sujet'		=>	utils::post('sujet'),
-                'texte'		=>	utils::post('texte'),
+                'sujet'		=>	Utils::post('sujet'),
+                'texte'		=>	Utils::post('texte'),
                 'delai'		=>	$delai,
-                'id_cotisation'	=>	utils::post('id_cotisation'),
+                'id_cotisation'	=>	Utils::post('id_cotisation'),
             ]);
 
-            utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
+            Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
         }
         catch (UserException $e)
         {

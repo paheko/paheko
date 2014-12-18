@@ -12,23 +12,23 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('send_message_collectif'))
+    if (!Utils::CSRF_check('send_message_collectif'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    elseif (!utils::post('sujet'))
+    elseif (!Utils::post('sujet'))
     {
         $error = 'Le sujet ne peut rester vide.';
     }
-    elseif (!utils::post('message'))
+    elseif (!Utils::post('message'))
     {
         $error = 'Le message ne peut rester vide.';
     }
     else
     {
         try {
-            $membres->sendMessageToCategory(utils::post('dest'), utils::post('sujet'), utils::post('message'), (bool) utils::post('subscribed'));
-            utils::redirect('/admin/membres/?sent');
+            $membres->sendMessageToCategory(Utils::post('dest'), Utils::post('sujet'), Utils::post('message'), (bool) Utils::post('subscribed'));
+            Utils::redirect('/admin/membres/?sent');
         }
         catch (UserException $e)
         {
@@ -37,7 +37,7 @@ if (!empty($_POST['save']))
     }
 }
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 
 $tpl->assign('cats_liste', $cats->listSimple());
 $tpl->assign('cats_cachees', $cats->listHidden());

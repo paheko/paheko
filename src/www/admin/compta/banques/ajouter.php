@@ -8,13 +8,13 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$banque = new Compta_Comptes_Bancaires;
+$banque = new Compta\Comptes_Bancaires;
 
 $error = false;
 
 if (!empty($_POST['add']))
 {
-    if (!utils::CSRF_check('compta_ajout_banque'))
+    if (!Utils::CSRF_check('compta_ajout_banque'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -23,13 +23,13 @@ if (!empty($_POST['add']))
         try
         {
             $id = $banque->add([
-                'libelle'       =>  utils::post('libelle'),
-                'banque'        =>  utils::post('banque'),
-                'iban'          =>  utils::post('iban'),
-                'bic'           =>  utils::post('bic'),
+                'libelle'       =>  Utils::post('libelle'),
+                'banque'        =>  Utils::post('banque'),
+                'iban'          =>  Utils::post('iban'),
+                'bic'           =>  Utils::post('bic'),
             ]);
 
-            utils::redirect('/admin/compta/banques/');
+            Utils::redirect('/admin/compta/banques/');
         }
         catch (UserException $e)
         {

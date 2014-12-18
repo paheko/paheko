@@ -8,13 +8,13 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$e = new Compta_Exercices;
+$e = new Compta\Exercices;
 
 $error = false;
 
 if (!empty($_POST['add']))
 {
-    if (!utils::CSRF_check('compta_ajout_exercice'))
+    if (!Utils::CSRF_check('compta_ajout_exercice'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -23,12 +23,12 @@ if (!empty($_POST['add']))
         try
         {
             $id = $e->add([
-                'libelle'   =>  utils::post('libelle'),
-                'debut'     =>  utils::post('debut'),
-                'fin'       =>  utils::post('fin'),
+                'libelle'   =>  Utils::post('libelle'),
+                'debut'     =>  Utils::post('debut'),
+                'fin'       =>  Utils::post('fin'),
             ]);
 
-            utils::redirect('/admin/compta/exercices/');
+            Utils::redirect('/admin/compta/exercices/');
         }
         catch (UserException $e)
         {

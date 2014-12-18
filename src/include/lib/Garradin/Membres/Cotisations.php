@@ -1,8 +1,13 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Membres;
 
-class Cotisations_Membres
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\User_Exception;
+
+class Cotisations
 {
 	const ITEMS_PER_PAGE = 100;
 
@@ -15,7 +20,7 @@ class Cotisations_Membres
 	{
 		$db = DB::getInstance();
 
-        if (empty($data['date']) || !utils::checkDate($data['date']))
+        if (empty($data['date']) || !Utils::checkDate($data['date']))
         {
             throw new UserException('Date vide ou invalide.');
         }
@@ -162,7 +167,7 @@ class Cotisations_Membres
 	 */
 	public function addOperationCompta($id, $data)
 	{
-		$journal = new Compta_Journal;
+		$journal = new \Garradin\Compta\Journal;
 		$db = DB::getInstance();
 
 		if (!isset($data['libelle']) || trim($data['libelle']) == '')
@@ -185,7 +190,7 @@ class Cotisations_Membres
         }
         else
         {
-        	$debit = Compta_Comptes::CAISSE;
+        	$debit = \Garradin\Compta\Comptes::CAISSE;
         }
 
         $credit = $db->simpleQuerySingle('SELECT compte FROM compta_categories WHERE id = ?;', 

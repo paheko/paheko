@@ -23,13 +23,13 @@ if (!$membre)
 }
 
 $re = new Rappels_Envoyes;
-$cm = new Cotisations_Membres;
+$cm = new Membres\Cotisations;
 
 $error = false;
 
-if (utils::post('save'))
+if (Utils::post('save'))
 {
-    if (!utils::CSRF_check('add_rappel_'.$membre['id']))
+    if (!Utils::CSRF_check('add_rappel_'.$membre['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -37,13 +37,13 @@ if (utils::post('save'))
     {
         try {
 			$re->add([
-				'id_cotisation'	=>	utils::post('id_cotisation'),
+				'id_cotisation'	=>	Utils::post('id_cotisation'),
 				'id_membre'		=>	$membre['id'],
-				'media'			=>	utils::post('media'),
-				'date'			=>	utils::post('date'),
+				'media'			=>	Utils::post('media'),
+				'date'			=>	Utils::post('date'),
 			]);
 
-            utils::redirect('/admin/membres/cotisations/rappels.php?id=' . $membre['id'] . '&ok');
+            Utils::redirect('/admin/membres/cotisations/rappels.php?id=' . $membre['id'] . '&ok');
         }
         catch (UserException $e)
         {
@@ -60,5 +60,3 @@ $tpl->assign('default_date', date('Y-m-d'));
 $tpl->assign('rappels', $re->listForMember($membre['id']));
 
 $tpl->display('admin/membres/cotisations/rappels.tpl');
-
-?>

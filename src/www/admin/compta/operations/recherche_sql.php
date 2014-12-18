@@ -8,9 +8,9 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$journal = new Compta_Journal;
+$journal = new Compta\Journal;
 
-$query = trim(utils::get('query'));
+$query = trim(Utils::get('query'));
 
 $tpl->assign('schema', $journal->schemaSQL());
 $tpl->assign('query', $query);
@@ -32,5 +32,3 @@ else
 }
 
 $tpl->display('admin/compta/operations/recherche_sql.tpl');
-
-?>

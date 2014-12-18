@@ -12,35 +12,35 @@ $cotisations = new Cotisations;
 
 if ($user['droits']['membres'] >= Membres::DROIT_ADMIN)
 {
-	$cats = new Compta_Categories;
+	$cats = new Compta\Categories;
 
 	$error = false;
 
 	if (!empty($_POST['save']))
 	{
-	    if (!utils::CSRF_check('new_cotisation'))
+	    if (!Utils::CSRF_check('new_cotisation'))
 	    {
 	        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
 	    }
 	    else
 	    {
 	        try {
-	            $duree = utils::post('periodicite') == 'jours' ? (int) utils::post('duree') : null;
-	            $debut = utils::post('periodicite') == 'date' ? utils::post('debut') : null;
-	            $fin = utils::post('periodicite') == 'date' ? utils::post('fin') : null;
-	            $id_cat = utils::post('categorie') ? (int) utils::post('id_categorie_compta') : null;
+	            $duree = Utils::post('periodicite') == 'jours' ? (int) Utils::post('duree') : null;
+	            $debut = Utils::post('periodicite') == 'date' ? Utils::post('debut') : null;
+	            $fin = Utils::post('periodicite') == 'date' ? Utils::post('fin') : null;
+	            $id_cat = Utils::post('categorie') ? (int) Utils::post('id_categorie_compta') : null;
 
 	            $cotisations->add([
-	                'intitule'          =>  utils::post('intitule'),
-	                'description'       =>  utils::post('description'),
-	                'montant'           =>  (float) utils::post('montant'),
+	                'intitule'          =>  Utils::post('intitule'),
+	                'description'       =>  Utils::post('description'),
+	                'montant'           =>  (float) Utils::post('montant'),
 	                'duree'             =>  $duree,
 	                'debut'             =>  $debut,
 	                'fin'               =>  $fin,
 	                'id_categorie_compta'=> $id_cat,
 	            ]);
 
-	            utils::redirect('/admin/membres/cotisations/');
+	            Utils::redirect('/admin/membres/cotisations/');
 	        }
 	        catch (UserException $e)
 	        {
@@ -50,7 +50,7 @@ if ($user['droits']['membres'] >= Membres::DROIT_ADMIN)
 	}
 
 	$tpl->assign('error', $error);
-	$tpl->assign('categories', $cats->getList(Compta_Categories::RECETTES));
+	$tpl->assign('categories', $cats->getList(Compta\Categories::RECETTES));
 }
 
 

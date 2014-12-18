@@ -34,7 +34,7 @@
 
         <dt>Catégorie</dt>
         <dd>
-            <a href="{$www_url}admin/compta/operations/?{if $categorie.type == Garradin\Compta_Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin\Compta_Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
+            <a href="{$www_url}admin/compta/operations/?{if $categorie.type == Garradin\Compta\Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin\Compta\Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
             <a href="{$www_url}admin/compta/operations/?cat={$operation.id_categorie|escape}">{$categorie.intitule|escape}</a>
         </dd>
     {/if}

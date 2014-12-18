@@ -4,9 +4,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$page = utils::get('_u') ?: 'index.php';
+$page = Utils::get('_u') ?: 'index.php';
 
-$plugin = new Plugin(utils::get('_p'));
+$plugin = new Plugin(Utils::get('_p'));
 
 define('Garradin\PLUGIN_ROOT', $plugin->path());
 define('Garradin\PLUGIN_URL', WWW_URL . 'admin/plugin/' . $plugin->id() . '/');

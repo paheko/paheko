@@ -14,8 +14,8 @@
 {/if}
 
 <ul class="actions">
-    <li{if $type == Garradin\Compta_Categories::RECETTES} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?recette">Recette</a></li>
-    <li{if $type == Garradin\Compta_Categories::DEPENSES} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?depense">Dépense</a></li>
+    <li{if $type == Garradin\Compta\Categories::RECETTES} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?recette">Recette</a></li>
+    <li{if $type == Garradin\Compta\Categories::DEPENSES} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?depense">Dépense</a></li>
     <li{if $type === 'virement'} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?virement">Virement interne</a></li>
     <li{if $type === 'dette'} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?dette">Dette</a></li>
     <li{if is_null($type)} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?avance">Saisie avancée</a></li>
@@ -46,7 +46,7 @@
             <dt><label for="f_compte1">Compte débité</label></dt>
             <dd>
                 <select name="compte1" id="f_compte1">
-                    <option value="{Garradin\Compta_Comptes::CAISSE}">Caisse</option>
+                    <option value="{Garradin\Compta\Comptes::CAISSE}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
                 {/foreach}
@@ -55,7 +55,7 @@
             <dt><label for="f_compte2">Compte crédité</label></dt>
             <dd>
                 <select name="compte2" id="f_compte2">
-                    <option value="{Garradin\Compta_Comptes::CAISSE}">Caisse</option>
+                    <option value="{Garradin\Compta\Comptes::CAISSE}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
                 {/foreach}
@@ -98,7 +98,7 @@
         </dl>
     </fieldset>
 
-{if $type == Garradin\Compta_Categories::DEPENSES || $type == Garradin\Compta_Categories::RECETTES || $type == 'dette'}
+{if $type == Garradin\Compta\Categories::DEPENSES || $type == Garradin\Compta\Categories::RECETTES || $type == 'dette'}
     <fieldset>
         <legend>Catégorie</legend>
         <dl class="catList">

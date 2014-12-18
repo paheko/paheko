@@ -58,22 +58,22 @@ class Squelette_Filtres
 
     static public function date_en_francais($date)
     {
-        return ucfirst(strtolower(utils::strftime_fr('%A %e %B %Y', $date)));
+        return ucfirst(strtolower(Utils::strftime_fr('%A %e %B %Y', $date)));
     }
 
     static public function heure_en_francais($date)
     {
-        return utils::strftime_fr('%Hh%I', $date);
+        return Utils::strftime_fr('%Hh%I', $date);
     }
 
     static public function mois_en_francais($date)
     {
-        return utils::strftime_fr('%B %Y', $date);
+        return Utils::strftime_fr('%B %Y', $date);
     }
 
     static public function date_perso($date, $format)
     {
-        return utils::strftime_fr($format, $date);
+        return Utils::strftime_fr($format, $date);
     }
 
     static public function date_intelligente($date)
@@ -83,9 +83,9 @@ class Squelette_Filtres
         elseif (date('Ymd', $date) == date('Ymd', strtotime('yesterday')))
             return 'Hier, '.date('H\hi', $date);
         elseif (date('Y', $date) == date('Y'))
-            return strtolower(utils::strftime_fr('%e %B, %Hh%M', $date));
+            return strtolower(Utils::strftime_fr('%e %B, %Hh%M', $date));
         else
-            return strtolower(utils::strftime_fr('%e %B %Y', $date));
+            return strtolower(Utils::strftime_fr('%e %B %Y', $date));
     }
 
     static public function date_atom($date)
@@ -129,9 +129,9 @@ class Squelette_Filtres
 
     static public function formatter_texte($texte)
     {
-        $texte = utils::htmlLinksOnUrls($texte);
-        $texte = utils::htmlSpip($texte);
-        $texte = utils::htmlGarbage2xhtml($texte);
+        $texte = Utils::htmlLinksOnUrls($texte);
+        $texte = Utils::htmlSpip($texte);
+        $texte = Utils::htmlGarbage2xhtml($texte);
 
         $texte = self::typo_fr($texte);
 

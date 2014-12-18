@@ -8,16 +8,16 @@ $error = false;
 
 if (!empty($_POST['install']))
 {
-    if (!utils::CSRF_check('install_plugin'))
+    if (!Utils::CSRF_check('install_plugin'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            Plugin::install(utils::post('to_install'), false);
+            Plugin::install(Utils::post('to_install'), false);
             
-            utils::redirect('/admin/config/plugins.php');
+            Utils::redirect('/admin/config/plugins.php');
         }
         catch (UserException $e)
         {
@@ -26,19 +26,19 @@ if (!empty($_POST['install']))
     }
 }
 
-if (utils::post('delete'))
+if (Utils::post('delete'))
 {
-    if (!utils::CSRF_check('delete_plugin_' . utils::get('delete')))
+    if (!Utils::CSRF_check('delete_plugin_' . Utils::get('delete')))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $plugin = new Plugin(utils::get('delete'));
+            $plugin = new Plugin(Utils::get('delete'));
             $plugin->uninstall();
             
-            utils::redirect('/admin/config/plugins.php');
+            Utils::redirect('/admin/config/plugins.php');
         }
         catch (UserException $e)
         {
@@ -49,9 +49,9 @@ if (utils::post('delete'))
 
 $tpl->assign('error', $error);
 
-if (utils::get('delete'))
+if (Utils::get('delete'))
 {
-    $plugin = new Plugin(utils::get('delete'));
+    $plugin = new Plugin(Utils::get('delete'));
     $tpl->assign('plugin', $plugin->getInfos());
     $tpl->assign('delete', true);
 }

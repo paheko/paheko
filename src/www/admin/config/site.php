@@ -12,19 +12,19 @@ if (isset($_GET['ok']))
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('config_site'))
+    if (!Utils::CSRF_check('config_site'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $config->set('champs_obligatoires', utils::post('champs_obligatoires'));
-            $config->set('champs_modifiables_membre', utils::post('champs_modifiables_membre'));
-            $config->set('categorie_membres', utils::post('categorie_membres'));
+            $config->set('champs_obligatoires', Utils::post('champs_obligatoires'));
+            $config->set('champs_modifiables_membre', Utils::post('champs_modifiables_membre'));
+            $config->set('categorie_membres', Utils::post('categorie_membres'));
             $config->save();
 
-            utils::redirect('/admin/config/site.php?ok');
+            Utils::redirect('/admin/config/site.php?ok');
         }
         catch (UserException $e)
         {
@@ -33,28 +33,28 @@ if (!empty($_POST['save']))
     }
 }
 
-if (utils::get('edit'))
+if (Utils::get('edit'))
 {
-    $source = Squelette::getSource(utils::get('edit'));
+    $source = Squelette::getSource(Utils::get('edit'));
 
     if (!$source)
     {
         throw new UserException("Ce squelette n'existe pas.");
     }
 
-    $csrf_key = 'edit_skel_'.md5(utils::get('edit'));
+    $csrf_key = 'edit_skel_'.md5(Utils::get('edit'));
 
-    if (utils::post('save'))
+    if (Utils::post('save'))
     {
-        if (!utils::CSRF_check($csrf_key))
+        if (!Utils::CSRF_check($csrf_key))
         {
             $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
         }
         else
         {
-            if (Squelette::editSource(utils::get('edit'), utils::post('content')))
+            if (Squelette::editSource(Utils::get('edit'), Utils::post('content')))
             {
-                utils::redirect('/admin/config/site.php?edit='.rawurlencode(utils::get('edit')).'&ok');
+                Utils::redirect('/admin/config/site.php?edit='.rawurlencode(Utils::get('edit')).'&ok');
             }
             else
             {
@@ -63,7 +63,7 @@ if (utils::get('edit'))
         }
     }
 
-    $tpl->assign('edit', ['file' => trim(utils::get('edit')), 'content' => $source]);
+    $tpl->assign('edit', ['file' => trim(Utils::get('edit')), 'content' => $source]);
     $tpl->assign('csrf_key', $csrf_key);
     $tpl->assign('sources_json', json_encode(Squelette::listSources()));
 }

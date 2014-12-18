@@ -3,7 +3,7 @@
 {if isset($tpl.get.suivi)}
 <ul class="actions">
     <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta_Comptes::CAISSE}">Journal de caisse</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}">Journal de caisse</a></li>
     {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}<li><strong><a href="{$www_url}admin/compta/banques/ajouter.php">Ajouter un compte bancaire</a></strong></li>{/if}
 </ul>
 {/if}

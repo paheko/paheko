@@ -8,9 +8,9 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$journal = new Compta_Journal;
+$journal = new Compta\Journal;
 
-$operation = $journal->get(utils::get('id'));
+$operation = $journal->get(Utils::get('id'));
 
 if (!$operation)
 {
@@ -21,7 +21,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('compta_supprimer_'.$operation['id']))
+    if (!Utils::CSRF_check('compta_supprimer_'.$operation['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -30,7 +30,7 @@ if (!empty($_POST['delete']))
         try
         {
             $journal->delete($operation['id']);
-            utils::redirect('/admin/compta/operations/');
+            Utils::redirect('/admin/compta/operations/');
         }
         catch (UserException $e)
         {
@@ -44,5 +44,3 @@ $tpl->assign('error', $error);
 $tpl->assign('operation', $operation);
 
 $tpl->display('admin/compta/operations/supprimer.tpl');
-
-?>

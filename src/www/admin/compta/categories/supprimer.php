@@ -8,9 +8,9 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Compta_Categories;
+$cats = new Compta\Categories;
 
-$id = (int)utils::get('id');
+$id = (int)Utils::get('id');
 $cat = $cats->get($id);
 
 if (!$cat)
@@ -22,7 +22,7 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!utils::CSRF_check('delete_compta_cat_'.$cat['id']))
+    if (!Utils::CSRF_check('delete_compta_cat_'.$cat['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -31,7 +31,7 @@ if (!empty($_POST['delete']))
         try
         {
             $cats->delete($id);
-            utils::redirect('/admin/compta/categories/');
+            Utils::redirect('/admin/compta/categories/');
         }
         catch (UserException $e)
         {

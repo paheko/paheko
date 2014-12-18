@@ -3,32 +3,30 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(utils::get('g'), ['recettes', 'depenses']))
+if (!in_array(Utils::get('g'), ['recettes', 'depenses']))
 {
 	throw new UserException('Graphique inconnu.');
 }
 
-$graph = utils::get('g');
+$graph = Utils::get('g');
 
 if (Static_Cache::expired('pie_' . $graph))
 {
-	$stats = new Compta_Stats;
-	$categories = new Compta_Categories;
+	$stats = new Compta\Stats;
+	$categories = new Compta\Categories;
 
-	require_once ROOT . '/include/libs/svgplot/lib.svgpie.php';
-
-	$pie = new \SVGPie(400, 250);
+	$pie = new \KD2\SVGPie(400, 250);
 
 	if ($graph == 'recettes')
 	{
 		$data = $stats->repartitionRecettes();
-		$categories = $categories->getList(Compta_Categories::RECETTES);
+		$categories = $categories->getList(Compta\Categories::RECETTES);
 		$pie->setTitle('Répartition des recettes');
 	}
 	else
 	{
 		$data = $stats->repartitionDepenses();
-		$categories = $categories->getList(Compta_Categories::DEPENSES);
+		$categories = $categories->getList(Compta\Categories::DEPENSES);
 		$pie->setTitle('Répartition des dépenses');
 	}
 
@@ -52,7 +50,7 @@ if (Static_Cache::expired('pie_' . $graph))
 
 	if ($others > 0)
 	{
-		$pie->add(new \SVGPie_Data($others, 'Autres', '#ccc'));
+		$pie->add(new \KD2\SVGPie_Data($others, 'Autres', '#ccc'));
 	}
 
 	Static_Cache::store('pie_' . $graph, $pie->output());

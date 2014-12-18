@@ -3,27 +3,25 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(utils::get('g'), ['recettes_depenses', 'banques_caisses']))
+if (!in_array(Utils::get('g'), ['recettes_depenses', 'banques_caisses']))
 {
 	throw new UserException('Graphique inconnu.');
 }
 
-$graph = utils::get('g');
+$graph = Utils::get('g');
 
 if (Static_Cache::expired('graph_' . $graph))
 {
-	$stats = new Compta_Stats;
+	$stats = new Compta\Stats;
 
-	require_once ROOT . '/include/libs/svgplot/lib.svgplot.php';
-
-	$plot = new \SVGPlot(400, 300);
+	$plot = new \KD2\SVGPlot(400, 300);
 
 	if ($graph == 'recettes_depenses')
 	{
-		$r = new \SVGPlot_Data($stats->recettes());
+		$r = new \KD2\SVGPlot_Data($stats->recettes());
 		$r->title = 'Recettes';
 
-		$d = new \SVGPlot_Data($stats->depenses());
+		$d = new \KD2\SVGPlot_Data($stats->depenses());
 		$d->title = 'Dépenses';
 
 		$data = [$d, $r];
@@ -32,18 +30,18 @@ if (Static_Cache::expired('graph_' . $graph))
 	}
 	elseif ($graph == 'banques_caisses')
 	{
-		$banques = new Compta_Comptes_Bancaires;
+		$banques = new Compta\Comptes_Bancaires;
 
 		$data = [];
 
-		$r = new \SVGPlot_Data($stats->soldeCompte(Compta_Comptes::CAISSE));
+		$r = new \KD2\SVGPlot_Data($stats->soldeCompte(Compta\Comptes::CAISSE));
 		$r->title = 'Caisse';
 
 		$data[] = $r;
 
 		foreach ($banques->getList() as $banque)
 		{
-			$r = new \SVGPlot_Data($stats->soldeCompte($banque['id']));
+			$r = new \KD2\SVGPlot_Data($stats->soldeCompte($banque['id']));
 			$r->title = $banque['libelle'];
 			$data[] = $r;
 		}
@@ -57,7 +55,7 @@ if (Static_Cache::expired('graph_' . $graph))
 
 		foreach ($data[0]->get() as $k=>$v)
 		{
-			$labels[] = utils::date_fr('M y', strtotime(substr($k, 0, 4) . '-' . substr($k, 4, 2) .'-01'));
+			$labels[] = Utils::date_fr('M y', strtotime(substr($k, 0, 4) . '-' . substr($k, 4, 2) .'-01'));
 		}
 
 		$plot->setLabels($labels);

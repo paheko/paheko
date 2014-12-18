@@ -8,12 +8,12 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Compta_Categories;
+$cats = new Compta\Categories;
 
 if (isset($_GET['depenses']))
-    $type = Compta_Categories::DEPENSES;
+    $type = Compta\Categories::DEPENSES;
 else
-    $type = Compta_Categories::RECETTES;
+    $type = Compta\Categories::RECETTES;
 
 $tpl->assign('type', $type);
 $tpl->assign('liste', $cats->getList($type));

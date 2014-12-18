@@ -25,12 +25,12 @@ if (!$membre)
 $champs = $config->get('champs_membres');
 $tpl->assign('champs', $champs->getAll());
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 
 $categorie = $cats->get($membre['id_categorie']);
 $tpl->assign('categorie', $categorie);
 
-$cotisations = new Cotisations_Membres;
+$cotisations = new Membres\Cotisations;
 
 if (!empty($categorie['id_cotisation_obligatoire']))
 {
@@ -45,7 +45,7 @@ $tpl->assign('nb_activites', $cotisations->countForMember($membre['id']));
 
 if ($user['droits']['compta'] >= Membres::DROIT_ACCES)
 {
-	$journal = new Compta_Journal;
+	$journal = new Compta\Journal;
 	$tpl->assign('nb_operations', $journal->countForMember($membre['id']));
 }
 

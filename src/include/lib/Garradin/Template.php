@@ -31,7 +31,7 @@ class Template extends \Template_Lite
         $this->reserved_template_varname = 'tpl';
 
         $this->assign('www_url', WWW_URL);
-        $this->assign('self_url', utils::getSelfUrl());
+        $this->assign('self_url', Utils::getSelfUrl());
 
         $this->assign('is_logged', false);
     }
@@ -41,8 +41,8 @@ $tpl = Template::getInstance();
 
 function tpl_csrf_field($params)
 {
-    $name = utils::CSRF_field_name($params['key']);
-    $value = utils::CSRF_create($params['key']);
+    $name = Utils::CSRF_field_name($params['key']);
+    $value = Utils::CSRF_create($params['key']);
 
     return '<input type="hidden" name="'.$name.'" value="'.$value.'" />';
 }
@@ -106,12 +106,12 @@ function tpl_format_tel($n)
 
 function tpl_strftime_fr($ts, $format)
 {
-    return utils::strftime_fr($format, $ts);
+    return Utils::strftime_fr($format, $ts);
 }
 
 function tpl_date_fr($ts, $format)
 {
-    return utils::date_fr($format, $ts);
+    return Utils::date_fr($format, $ts);
 }
 
 function tpl_format_droits($params)
@@ -193,9 +193,9 @@ function tpl_format_droits($params)
 
 function tpl_format_wiki($str)
 {
-    $str = utils::htmlLinksOnUrls($str);
-    $str = utils::htmlSpip($str);
-    $str = utils::htmlGarbage2xhtml($str);
+    $str = Utils::htmlLinksOnUrls($str);
+    $str = Utils::htmlSpip($str);
+    $str = Utils::htmlGarbage2xhtml($str);
     return $str;
 }
 
@@ -214,7 +214,7 @@ function tpl_pagination($params)
     if ($params['total'] == -1)
         return '';
 
-    $pagination = utils::getGenericPagination($params['page'], $params['total'], $params['bypage']);
+    $pagination = Utils::getGenericPagination($params['page'], $params['total'], $params['bypage']);
 
     if (empty($pagination))
         return '';
@@ -256,8 +256,7 @@ function tpl_diff($params)
     $old = $params['old'];
     $new = $params['new'];
 
-    require_once ROOT . '/include/libs/diff/class.simplediff.php';
-    $diff = \simpleDiff::diff_to_array(false, $old, $new, 3);
+    $diff = \KD2\SimpleDiff::diff_to_array(false, $old, $new, 3);
 
     $out = '<table class="diff">';
     $prev = key($diff);
@@ -274,28 +273,28 @@ function tpl_diff($params)
         $class1 = $class2 = '';
         $t1 = $t2 = '';
 
-        if ($type == \simpleDiff::INS)
+        if ($type == \KD2\SimpleDiff::INS)
         {
             $class2 = 'ins';
             $t2 = '<b class="icn">➕</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
-        elseif ($type == \simpleDiff::DEL)
+        elseif ($type == \KD2\SimpleDiff::DEL)
         {
             $class1 = 'del';
             $t1 = '<b class="icn">➖</b>';
             $old = htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
             $new = htmlspecialchars($new, ENT_QUOTES, 'UTF-8');
         }
-        elseif ($type == \simpleDiff::CHANGED)
+        elseif ($type == \KD2\SimpleDiff::CHANGED)
         {
             $class1 = 'del';
             $class2 = 'ins';
             $t1 = '<b class="icn">➖</b>';
             $t2 = '<b class="icn">➕</b>';
 
-            $lineDiff = \simpleDiff::wdiff($old, $new);
+            $lineDiff = \KD2\SimpleDiff::wdiff($old, $new);
             $lineDiff = htmlspecialchars($lineDiff, ENT_QUOTES, 'UTF-8');
 
             // Don't show new things in deleted line
@@ -335,7 +334,7 @@ function tpl_select_compte($params)
 {
     $name = $params['name'];
     $comptes = $params['comptes'];
-    $selected = isset($params['data'][$params['name']]) ? $params['data'][$params['name']] : utils::post($name);
+    $selected = isset($params['data'][$params['name']]) ? $params['data'][$params['name']] : Utils::post($name);
 
     $out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
 
@@ -407,7 +406,7 @@ function tpl_html_champ_membre($params)
     elseif ($type == 'country')
     {
         $type = 'select';
-        $config['options'] = utils::getCountryList();
+        $config['options'] = Utils::getCountryList();
         $params['default'] = Config::getInstance()->get('pays');
     }
     elseif ($type == 'date')
@@ -550,9 +549,9 @@ $tpl->register_function('pagination', 'Garradin\tpl_pagination');
 $tpl->register_function('diff', 'Garradin\tpl_diff');
 $tpl->register_function('html_champ_membre', 'Garradin\tpl_html_champ_membre');
 
-$tpl->register_function('plugin_url', ['Garradin\utils', 'plugin_url']);
+$tpl->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 
-$tpl->register_modifier('get_country_name', ['Garradin\utils', 'getCountryName']);
+$tpl->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 $tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'Garradin\tpl_format_wiki');
 $tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
@@ -570,7 +569,7 @@ $tpl->register_modifier('display_champ_membre', function ($v, $config) {
     } elseif ($config['type'] == 'url') {
         return '<a href="' . $v . '">' . $v . '</a>';
     } elseif ($config['type'] == 'country') {
-        return utils::getCountryName($v);
+        return Utils::getCountryName($v);
     } elseif ($config['type'] == 'multiple') {
         $out = [];
 
@@ -587,7 +586,7 @@ $tpl->register_modifier('display_champ_membre', function ($v, $config) {
 
 });
 
-$tpl->register_modifier('format_sqlite_date_to_french', ['Garradin\utils', 'sqliteDateToFrench']);
+$tpl->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
 
 $tpl->register_modifier('format_bytes', function ($size) {
     if ($size > (1024 * 1024))

@@ -52,10 +52,10 @@ if (version_compare($v, '0.4.0', '<'))
     $db->exec(file_get_contents(ROOT . '/include/data/0.4.0.sql'));
 
     // Mise en place compta
-    $comptes = new Compta_Comptes;
+    $comptes = new Compta\Comptes;
     $comptes->importPlan();
 
-    $comptes = new Compta_Categories;
+    $comptes = new Compta\Categories;
     $comptes->importCategories();
 }
 
@@ -67,7 +67,7 @@ if (version_compare($v, '0.4.3', '<'))
 if (version_compare($v, '0.4.5', '<'))
 {
     // Mise à jour plan comptable
-    $comptes = new Compta_Comptes;
+    $comptes = new Compta\Comptes;
     $comptes->importPlan();
 
     // Création page wiki connexion
@@ -103,7 +103,7 @@ if (version_compare($v, '0.5.0', '<'))
     $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : [];
 
     // Import des champs membres par défaut
-    $champs = Champs_Membres::importInstall();
+    $champs = Membres\Champs::importInstall();
 
     // Application de l'ancienne config aux nouveaux champs membres
     foreach ($champs_obligatoires as $name)
@@ -129,7 +129,7 @@ if (version_compare($v, '0.5.0', '<'))
 
 if (version_compare($v, '0.6.0-rc1', '<'))
 {
-    $categories = new Membres_Categories;
+    $categories = new Membres\Categories;
     $list = $categories->listComplete();
 
     $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
@@ -200,7 +200,7 @@ if (version_compare($v, '0.6.0-rc1', '<'))
     $config->save();
 }
 
-utils::clearCaches();
+Utils::clearCaches();
 
 $config->setVersion(garradin_version());
 

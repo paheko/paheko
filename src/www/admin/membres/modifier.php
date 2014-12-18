@@ -22,7 +22,7 @@ if (!$membre)
     throw new UserException("Ce membre n'existe pas.");
 }
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
@@ -37,11 +37,11 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('edit_member_'.$id))
+    if (!Utils::CSRF_check('edit_member_'.$id))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    elseif (utils::post('passe') != utils::post('repasse'))
+    elseif (Utils::post('passe') != Utils::post('repasse'))
     {
         $error = 'La vérification ne correspond pas au mot de passe.';
     }
@@ -52,18 +52,18 @@ if (!empty($_POST['save']))
 
             foreach ($champs->getAll() as $key=>$config)
             {
-                $data[$key] = utils::post($key);
+                $data[$key] = Utils::post($key);
             }
 
             if ($user['droits']['membres'] == Membres::DROIT_ADMIN)
             {
-                $data['id_categorie'] = utils::post('id_categorie');
-                $data['id'] = utils::post('id');
+                $data['id_categorie'] = Utils::post('id_categorie');
+                $data['id'] = Utils::post('id');
             }
 
             $membres->edit($id, $data);
 
-            utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
+            Utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
         catch (UserException $e)
         {
@@ -73,11 +73,11 @@ if (!empty($_POST['save']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('passphrase', utils::suggestPassword());
+$tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
-$tpl->assign('current_cat', utils::post('id_categorie') ?: $membre['id_categorie']);
+$tpl->assign('current_cat', Utils::post('id_categorie') ?: $membre['id_categorie']);
 
 $tpl->assign('can_change_id', $user['droits']['membres'] == Membres::DROIT_ADMIN);
 

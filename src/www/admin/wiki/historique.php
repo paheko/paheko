@@ -3,12 +3,12 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!trim(utils::get('id')))
+if (!trim(Utils::get('id')))
 {
     throw new UserException("Page inconnue.");
 }
 
-$page = $wiki->getByID(utils::get('id'));
+$page = $wiki->getByID(Utils::get('id'));
 
 if (!$page)
 {
@@ -20,9 +20,9 @@ if (!$wiki->canReadPage($page['droit_lecture']))
     throw new UserException("Vous n'avez pas le droit de voir cette page.");
 }
 
-if (utils::get('diff'))
+if (Utils::get('diff'))
 {
-    $revs = explode('.', utils::get('diff'));
+    $revs = explode('.', Utils::get('diff'));
 
     if (count($revs) != 2)
     {

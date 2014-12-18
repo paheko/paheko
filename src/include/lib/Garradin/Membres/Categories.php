@@ -1,8 +1,13 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Membres;
 
-class Membres_Categories
+use Garradin\Membres;
+use Garradin\DB;
+use Garradin\Wiki;
+use Garradin\User_Exception;
+
+class Categories
 {
     protected $droits = [
         'inscription'=> Membres::DROIT_AUCUN,

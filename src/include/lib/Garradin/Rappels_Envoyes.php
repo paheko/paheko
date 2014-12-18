@@ -52,7 +52,7 @@ class Rappels_Envoyes
 
 		$data['media'] = (int) $data['media'];
 
-		if (empty($data['date']) || !utils::checkDate($data['date']))
+		if (empty($data['date']) || !Utils::checkDate($data['date']))
 		{
 			throw new UserException('La date indiquée n\'est pas valide.');
 		}
@@ -135,8 +135,8 @@ class Rappels_Envoyes
 	public function sendAuto($data)
 	{
 		$replace = $data;
-		$replace['date_rappel'] = utils::sqliteDateToFrench($replace['date_rappel']);
-		$replace['date_expiration'] = utils::sqliteDateToFrench($replace['expiration']);
+		$replace['date_rappel'] = Utils::sqliteDateToFrench($replace['date_rappel']);
+		$replace['date_expiration'] = Utils::sqliteDateToFrench($replace['expiration']);
 		$replace['nb_jours'] = abs($replace['nb_jours']);
 		$replace['delai'] = abs($replace['delai']);
 
@@ -144,7 +144,7 @@ class Rappels_Envoyes
 		$text = $this->replaceTagsInContent($data['texte'], $replace);
 
 		// Envoi du mail
-		utils::mail($data['email'], $subject, $text);
+		Utils::mail($data['email'], $subject, $text);
 
 		// Enregistrement en DB
 		$this->add([

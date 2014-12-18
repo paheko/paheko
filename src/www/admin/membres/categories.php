@@ -8,13 +8,13 @@ if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$cats = new Membres_Categories;
+$cats = new Membres\Categories;
 
 $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!utils::CSRF_check('new_cat'))
+    if (!Utils::CSRF_check('new_cat'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -22,10 +22,10 @@ if (!empty($_POST['save']))
     {
         try {
             $cats->add([
-                'nom'           =>  utils::post('nom'),
+                'nom'           =>  Utils::post('nom'),
             ]);
 
-            utils::redirect('/admin/membres/categories.php');
+            Utils::redirect('/admin/membres/categories.php');
         }
         catch (UserException $e)
         {

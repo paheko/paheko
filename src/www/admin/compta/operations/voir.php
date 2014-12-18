@@ -3,15 +3,15 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$journal = new Compta_Journal;
+$journal = new Compta\Journal;
 
-$operation = $journal->get(utils::get('id'));
+$operation = $journal->get(Utils::get('id'));
 
 if (!$operation)
 {
     throw new UserException("L'opération demandée n'existe pas.");
 }
-$exercices = new Compta_Exercices;
+$exercices = new Compta\Exercices;
 
 $tpl->assign('operation', $operation);
 
@@ -25,12 +25,12 @@ $tpl->assign('exercice', $exercices->get($operation['id_exercice']));
 
 if ($operation['id_categorie'])
 {
-    $cats = new Compta_Categories;
+    $cats = new Compta\Categories;
 
     $categorie = $cats->get($operation['id_categorie']);
     $tpl->assign('categorie', $categorie);
 
-    if ($categorie['type'] == Compta_Categories::RECETTES)
+    if ($categorie['type'] == Compta\Categories::RECETTES)
     {
         $tpl->assign('compte', $debit['libelle']);
     }
