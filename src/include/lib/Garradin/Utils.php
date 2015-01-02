@@ -264,13 +264,7 @@ class Utils
 
     static public function &getCountryList()
     {
-        if (is_null(self::$country_list))
-        {
-            require_once ROOT . '/include/libs/countries/countries_fr.php';
-            self::$country_list = $countries;
-        }
-
-        return self::$country_list;
+        return \KD2\Countries_FR::$countries;
     }
 
     static public function getCountryName($code)

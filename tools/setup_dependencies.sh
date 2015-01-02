@@ -11,10 +11,8 @@ then
 fi
 
 KEYWORD="checkout"
-SRCPATH="$SCRIPTPATH/../src/include/libs"
+SRCPATH="$SCRIPTPATH/../src/include/lib"
 
 # Template Lite
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ "$SRCPATH/template_lite/"
+svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ "$SRCPATH/Template_Lite/"
 
-# Liste des pays
-svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/i18n/countries/ "$SRCPATH/countries/"

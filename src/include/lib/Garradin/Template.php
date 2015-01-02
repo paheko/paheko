@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-require_once ROOT . '/include/libs/template_lite/class.template.php';
+require_once ROOT . '/include/lib/Template_Lite/class.template.php';
 
 class Template extends \Template_Lite
 {
@@ -437,7 +437,7 @@ function tpl_html_champ_membre($params)
     if (!empty($params['user_mode']) && empty($config['editable']))
     {
         $out = '<dt>' . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</dt>';
-        $out .= '<dd>' . htmlspecialchars((trim($value) === '' ? 'Non renseigné' : $value), ENT_QUOTES, 'UTF-8') . '</dd>';
+        $out .= '<dd>' . (trim($value) === '' ? 'Non renseigné' : tpl_display_champ_membre($value, $config)) . '</dd>';
         return $out;
     }
 
@@ -536,6 +536,46 @@ function tpl_html_champ_membre($params)
     return $out;
 }
 
+function tpl_display_champ_membre ($v, $config)
+{
+    if ($config['type'] == 'checkbox')
+    {
+        return $v ? 'Oui' : 'Non';
+    }
+    elseif ($config['type'] == 'email')
+    {
+        return '<a href="mailto:' . $v . '">' . $v . '</a>';
+    }
+    elseif ($config['type'] == 'tel')
+    {
+        return '<a href="tel:' . $v . '">' . $v . '</a>';
+    }
+    elseif ($config['type'] == 'url')
+    {
+        return '<a href="' . $v . '">' . $v . '</a>';
+    }
+    elseif ($config['type'] == 'country') 
+    {
+        return Utils::getCountryName($v);
+    }
+    elseif ($config['type'] == 'multiple')
+    {
+        $out = [];
+
+        foreach ($config['options'] as $b => $name)
+        {
+            if ($v & (0x01 << $b))
+                $out[] = $name;
+        }
+
+        return implode(', ', $out);
+    }
+    else
+    {
+        return $v;
+    }
+}
+
 $tpl->register_compiler('continue', function() { return 'continue;'; });
 
 $tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
@@ -559,32 +599,7 @@ $tpl->register_modifier('escape_money', 'Garradin\escape_money');
 $tpl->register_modifier('html_money', 'Garradin\tpl_html_money');
 $tpl->register_modifier('abs', 'abs');
 
-$tpl->register_modifier('display_champ_membre', function ($v, $config) {
-    if ($config['type'] == 'checkbox') {
-        return $v ? 'Oui' : 'Non';
-    } elseif ($config['type'] == 'email') {
-        return '<a href="mailto:' . $v . '">' . $v . '</a>';
-    } elseif ($config['type'] == 'tel') {
-        return '<a href="tel:' . $v . '">' . $v . '</a>';
-    } elseif ($config['type'] == 'url') {
-        return '<a href="' . $v . '">' . $v . '</a>';
-    } elseif ($config['type'] == 'country') {
-        return Utils::getCountryName($v);
-    } elseif ($config['type'] == 'multiple') {
-        $out = [];
-
-        foreach ($config['options'] as $b => $name)
-        {
-            if ($v & (0x01 << $b))
-                $out[] = $name;
-        }
-
-        return implode(', ', $out);
-    } else {
-        return $v;
-    }
-
-});
+$tpl->register_modifier('display_champ_membre', 'Garradin\tpl_display_champ_membre');
 
 $tpl->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
 
