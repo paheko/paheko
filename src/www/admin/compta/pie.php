@@ -39,12 +39,12 @@ if (Static_Cache::expired('pie_' . $graph))
 	{
 		if ($i++ >= $max)
 		{
-			$others += $row['nb'];
+			$others += $row['somme'];
 		}
 		else
 		{
 			$cat = $categories[$row['id_categorie']];
-			$pie->add(new \SVGPie_Data($row['nb'], substr($cat['intitule'], 0, 50), $colors[$i-1]));
+			$pie->add(new \KD2\SVGPie_Data($row['somme'], substr($cat['intitule'], 0, 50), $colors[$i-1]));
 		}
 	}
 
