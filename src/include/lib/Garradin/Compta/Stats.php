@@ -11,11 +11,11 @@ class Stats
 	protected function _parRepartitionCategorie($type)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT COUNT(*) AS nb, id_categorie
+		return $db->simpleStatementFetch('SELECT SUM(montant) AS somme, id_categorie
 			FROM compta_journal
 			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = ?)
 			AND id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0)
-			GROUP BY id_categorie ORDER BY nb DESC;', SQLITE3_ASSOC, $type);
+			GROUP BY id_categorie ORDER BY somme DESC;', SQLITE3_ASSOC, $type);
 	}
 
 	public function repartitionRecettes()
