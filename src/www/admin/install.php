@@ -57,8 +57,13 @@ test_requis(
 );
 
 test_requis(
-    file_exists(__DIR__ . '/../../include/libs/template_lite/class.template.php'),
+    file_exists(__DIR__ . '/../../include/lib/Template_Lite/class.template.php'),
     'Librairie Template_Lite non disponible.'
+);
+
+test_requis(
+    file_exists(__DIR__ . '/../../include/lib/KD2'),
+    'Librairie KD2 non disponible.'
 );
 
 const INSTALL_PROCESS = true;

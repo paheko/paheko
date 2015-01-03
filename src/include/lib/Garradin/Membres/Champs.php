@@ -63,7 +63,7 @@ class Champs
 
 	static public function importInstall()
 	{
-		$champs = parse_ini_file(ROOT . '/include/data/champs_membres.ini', true);
+		$champs = parse_ini_file(\Garradin\ROOT . '/include/data/champs_membres.ini', true);
         $champs = array_filter($champs, function ($row) { return !empty($row['install']); });
         return new \Garradin\Membres\Champs($champs);
 	}
