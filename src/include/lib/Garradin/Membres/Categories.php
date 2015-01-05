@@ -5,7 +5,7 @@ namespace Garradin\Membres;
 use Garradin\Membres;
 use Garradin\DB;
 use Garradin\Wiki;
-use Garradin\User_Exception;
+use Garradin\UserException;
 
 class Categories
 {
