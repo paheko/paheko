@@ -6,7 +6,7 @@ use Garradin\Membres;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
-use Garradin\User_Exception;
+use Garradin\UserException;
 
 class Import
 {
