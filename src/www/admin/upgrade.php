@@ -200,6 +200,16 @@ if (version_compare($v, '0.6.0-rc1', '<'))
     $config->save();
 }
 
+if (version_compare($v, '0.7.0', '<'))
+{
+    $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+
+    // Mise à jour base de données
+    $db->exec(file_get_contents(ROOT . '/include/data/0.7.0.sql'));
+
+    $db->exec('END;');
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());

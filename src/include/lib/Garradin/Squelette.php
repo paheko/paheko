@@ -316,129 +316,151 @@ class Squelette extends \KD2\MiniSkel
 
     protected function processLoop($loopName, $loopType, $loopCriterias, $loopContent, $preContent, $postContent, $altContent)
     {
-        if ($loopType != 'articles' && $loopType != 'rubriques' && $loopType != 'pages')
+        $query = $loopStart = '';
+
+        // Types de boucles natifs
+        if ($loopType == 'articles' || $loopType == 'rubriques' || $loopType == 'pages')
         {
-            throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
-        }
+            $where = $order = '';
+            $limit = $begin = 0;
 
-        $loopStart = '';
-        $query = $where = $order = '';
-        $limit = $begin = 0;
+            $query = 'SELECT w.*, strftime(\\\'%s\\\', w.date_creation) AS date_creation, strftime(\\\'%s\\\', w.date_modification) AS date_modification';
 
-        $query = 'SELECT w.*, strftime(\\\'%s\\\', w.date_creation) AS date_creation, strftime(\\\'%s\\\', w.date_modification) AS date_modification';
+            if (trim($loopContent))
+            {
+                $query .= ', r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
+            }
+            else
+            {
+                $query .= '\'\' AS texte ';
+            }
 
-        if (trim($loopContent))
-        {
-            $query .= ', r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
+            $where = 'WHERE w.droit_lecture = -1 ';
+
+            if ($loopType == 'articles')
+            {
+                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) = 0 ';
+            }
+            elseif ($loopType == 'rubriques')
+            {
+                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
+            }
+
+            $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
+                'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte'];
+            $search = $search_rank = false;
+
+            foreach ($loopCriterias as $criteria)
+            {
+                if (isset($criteria['field']))
+                {
+                    if (!in_array($criteria['field'], $allowed_fields))
+                    {
+                        throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
+                    }
+                    elseif ($criteria['field'] == 'rubrique')
+                    {
+                        $criteria['field'] = 'parent';
+                    }
+                    elseif ($criteria['field'] == 'date')
+                    {
+                        $criteria['field'] = 'date_creation';
+                    }
+                    elseif ($criteria['field'] == 'points')
+                    {
+                        if ($criteria['action'] != \KD2\MiniSkel::ACTION_ORDER_BY)
+                        {
+                            throw new \KD2\MiniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
+                        }
+
+                        $search_rank = true;
+                    }
+                }
+
+                switch ($criteria['action'])
+                {
+                    case \KD2\MiniSkel::ACTION_ORDER_BY:
+                        if (!$order)
+                            $order = 'ORDER BY '.$criteria['field'].'';
+                        else
+                            $order .= ', '.$criteria['field'].'';
+                        break;
+                    case \KD2\MiniSkel::ACTION_ORDER_DESC:
+                        if ($order)
+                            $order .= ' DESC';
+                        break;
+                    case \KD2\MiniSkel::ACTION_LIMIT:
+                        $begin = $criteria['begin'];
+                        $limit = $criteria['number'];
+                        break;
+                    case \KD2\MiniSkel::ACTION_MATCH_FIELD_BY_VALUE:
+                        $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
+                        break;
+                    case \KD2\MiniSkel::ACTION_MATCH_FIELD:
+                    {
+                        if ($criteria['field'] == 'recherche')
+                        {
+                            $query = 'SELECT w.*, r.contenu AS texte, rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points FROM wiki_pages AS w INNER JOIN wiki_recherche AS r ON (w.id = r.id) ';
+                            $where .= ' AND wiki_recherche MATCH \\\'\'.$db->escapeString($this->getVariable(\''.$criteria['field'].'\')).\'\\\'';
+                            $search = true;
+                        }
+                        else
+                        {
+                            if ($criteria['field'] == 'parent')
+                                $field = 'id';
+                            else
+                                $field = $criteria['field'];
+
+                            $where .= ' AND '.$criteria['field'].' = \\\'\'.$db->escapeString($this->getVariable(\''.$field.'\')).\'\\\'';
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if ($search_rank && !$search)
+            {
+                throw new \KD2\MiniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
+            }
+
+            if (trim($loopContent))
+            {
+                $loopStart .= '$row[\'url\'] = WWW_URL . $row[\'uri\']; ';
+            }
+
+            $query .= $where . ' ' . $order;
+
+            if (!$limit || $limit > 100)
+                $limit = 100;
+
+            if ($limit)
+            {
+                $query .= ' LIMIT '.(is_numeric($begin) ? (int) $begin : '\'.$this->variables[\'debut_liste\'].\'').','.(int)$limit;
+            }
         }
         else
         {
-            $query .= '\'\' AS texte ';
-        }
+            $db = DB::getInstance();
 
-        $where = 'WHERE w.droit_lecture = -1 ';
-
-        if ($loopType == 'articles')
-        {
-            $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) = 0 ';
-        }
-        elseif ($loopType == 'rubriques')
-        {
-            $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
-        }
-
-        $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
-            'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte'];
-        $search = $search_rank = false;
-
-        foreach ($loopCriterias as $criteria)
-        {
-            if (isset($criteria['field']))
+            // Type de boucles gérés par des plugins
+            if ($plugin = $db->simpleQuerySingle('SELECT plugin FROM plugins_skel_boucles WHERE nom = ? LIMIT 1;', false, $loopType))
             {
-                if (!in_array($criteria['field'], $allowed_fields))
-                {
-                    throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
-                }
-                elseif ($criteria['field'] == 'rubrique')
-                {
-                    $criteria['field'] = 'parent';
-                }
-                elseif ($criteria['field'] == 'date')
-                {
-                    $criteria['field'] = 'date_creation';
-                }
-                elseif ($criteria['field'] == 'points')
-                {
-                    if ($criteria['action'] != \KD2\MiniSkel::ACTION_ORDER_BY)
-                    {
-                        throw new \KD2\MiniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
-                    }
+                $plugin = new \KD2\Plugin($plugin);
 
-                    $search_rank = true;
+                if (!file_exists($plugin->path() . '/skel_loop.php'))
+                {
+                    throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est géré par un plugin, mais celui-ci ne contient pas de fichier skel_loop.php.");
                 }
+
+                // Ici le plugin peut soit peupler $query et $loopStart lui-même, soit faire un return
+                include $plugin->path() . '/skel_loop.php';
             }
-
-            switch ($criteria['action'])
+            else
             {
-                case \KD2\MiniSkel::ACTION_ORDER_BY:
-                    if (!$order)
-                        $order = 'ORDER BY '.$criteria['field'].'';
-                    else
-                        $order .= ', '.$criteria['field'].'';
-                    break;
-                case \KD2\MiniSkel::ACTION_ORDER_DESC:
-                    if ($order)
-                        $order .= ' DESC';
-                    break;
-                case \KD2\MiniSkel::ACTION_LIMIT:
-                    $begin = $criteria['begin'];
-                    $limit = $criteria['number'];
-                    break;
-                case \KD2\MiniSkel::ACTION_MATCH_FIELD_BY_VALUE:
-                    $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
-                    break;
-                case \KD2\MiniSkel::ACTION_MATCH_FIELD:
-                {
-                    if ($criteria['field'] == 'recherche')
-                    {
-                        $query = 'SELECT w.*, r.contenu AS texte, rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points FROM wiki_pages AS w INNER JOIN wiki_recherche AS r ON (w.id = r.id) ';
-                        $where .= ' AND wiki_recherche MATCH \\\'\'.$db->escapeString($this->getVariable(\''.$criteria['field'].'\')).\'\\\'';
-                        $search = true;
-                    }
-                    else
-                    {
-                        if ($criteria['field'] == 'parent')
-                            $field = 'id';
-                        else
-                            $field = $criteria['field'];
-
-                        $where .= ' AND '.$criteria['field'].' = \\\'\'.$db->escapeString($this->getVariable(\''.$field.'\')).\'\\\'';
-                    }
-                    break;
-                }
-                default:
-                    break;
+                throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
             }
-        }
-
-        if ($search_rank && !$search)
-        {
-            throw new \KD2\MiniSkelMarkupException("Le critère par points n'est possible que dans les boucles de recherche.");
-        }
-
-        if (trim($loopContent))
-        {
-            $loopStart .= '$row[\'url\'] = WWW_URL . $row[\'uri\']; ';
-        }
-
-        $query .= $where . ' ' . $order;
-
-        if (!$limit || $limit > 100)
-            $limit = 100;
-
-        if ($limit)
-        {
-            $query .= ' LIMIT '.(is_numeric($begin) ? (int) $begin : '\'.$this->variables[\'debut_liste\'].\'').','.(int)$limit;
         }
 
         $hash = sha1(uniqid(mt_rand(), true));

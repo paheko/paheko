@@ -253,6 +253,27 @@ class Plugin
 			['version' => $infos['version']]);
 	}
 
+	public function registerSkelLoopName($name)
+	{
+		$db = DB::getInstance();
+		$registered = $db->simpleQuerySingle('SELECT plugin FROM plugins_skel_boucles WHERE nom = ?;', $name);
+
+		if ($registered)
+		{
+			if ($registered != $this->id)
+			{
+				throw new \LogicException('La boucle ' . $name . ' est déjà associée au plugin "'.$registered.'"');
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		return $db->simpleInsert('plugins_skel_boucles', 
+			['nom' => $name, 'plugin' => $this->id]);
+	}
+
 	/**
 	 * Liste des plugins installés (en DB)
 	 * @return array Liste des plugins triés par nom
