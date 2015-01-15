@@ -62,6 +62,11 @@ if (!defined('Garradin\DATA_ROOT'))
     define('Garradin\DATA_ROOT', ROOT);
 }
 
+if (!defined('Garradin\CACHE_ROOT'))
+{
+    define('Garradin\CACHE_ROOT', DATA_ROOT . '/cache');
+}
+
 if (!defined('Garradin\DB_FILE'))
 {
     define('Garradin\DB_FILE', DATA_ROOT . '/association.sqlite');

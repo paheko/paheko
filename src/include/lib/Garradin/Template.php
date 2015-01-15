@@ -23,7 +23,7 @@ class Template extends \Template_Lite
 
         $this->cache = false;
 
-        $this->compile_dir = DATA_ROOT . '/cache/compiled';
+        $this->compile_dir = CACHE_ROOT . '/compiled';
         $this->template_dir = ROOT . '/templates';
 
         $this->compile_check = true;

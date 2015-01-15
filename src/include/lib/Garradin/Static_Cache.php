@@ -9,7 +9,7 @@ class Static_Cache
 
 	protected static function _getCacheDir()
 	{
-		return DATA_ROOT . '/cache/static';
+		return CACHE_ROOT . '/static';
 	}
 
 	protected static function _getCachePath($id)
