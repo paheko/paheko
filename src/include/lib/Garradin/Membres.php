@@ -693,9 +693,19 @@ class Membres
         $membres = implode(',', $membres);
 
         $db = DB::getInstance();
+        
+        // Mise à jour des références, membre qui n'existe plus
         $db->exec('UPDATE wiki_revisions SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
         $db->exec('UPDATE compta_journal SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
+
+        // Suppression des données liées au membre
+        $db->exec('DELETE FROM rappels_envoyes WHERE id_membre IN ('.$membres.');');
+        $db->exec('DELETE FROM membres_operations WHERE id_membre IN ('.$membres.');');
+        $db->exec('DELETE FROM cotisations_membres WHERE id_membre IN ('.$membres.');');
+
         //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
+        
+        // Suppression du membre
         return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
     }
 
