@@ -460,9 +460,16 @@ class Utils
         }
     }
 
-    static public function clearCaches()
+    static public function clearCaches($path = false)
     {
-        $path = DATA_ROOT . '/cache/compiled';
+        if (!$path)
+        {
+            self::clearCaches('compiled');
+            self::clearCaches('static');
+            return true;
+        }
+
+        $path = CACHE_ROOT . '/' . $path;
         $dir = dir($path);
 
         while ($file = $dir->read())

@@ -623,7 +623,7 @@ class Squelette extends \KD2\MiniSkel
     static private function compile_get_path($path)
     {
         $hash = sha1($path);
-        return DATA_ROOT . '/cache/compiled/s_' . $hash . '.php';
+        return CACHE_ROOT . '/compiled/s_' . $hash . '.php';
     }
 
     static private function compile_check($tpl, $check)
