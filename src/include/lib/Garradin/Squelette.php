@@ -415,12 +415,12 @@ class Squelette extends \KD2\MiniSkel
                         }
                         else
                         {
-                            if ($criteria['field'] == 'parent')
-                                $field = 'id';
-                            else
-                                $field = $criteria['field'];
-
                             $where .= ' AND '.$criteria['field'].' = ?';
+
+                            if ($criteria['field'] == 'parent')
+                            {
+                                $criteria['field'] = 'id';
+                            }
                         }
                         
                         $query_args[] = ['$this->getVariable(\'' . $criteria['field'] . '\')'];
