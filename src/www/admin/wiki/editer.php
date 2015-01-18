@@ -29,7 +29,7 @@ if (!empty($page['contenu']))
 
 if (Utils::post('date'))
 {
-    $date = strtotime(Utils::post('date') . ' ' . Utils::post('date_h') . ':' . Utils::post('date_min'));
+    $date = Utils::post('date') . ' ' . Utils::post('date_h') . ':' . Utils::post('date_min');
 }
 else
 {
