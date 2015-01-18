@@ -495,7 +495,8 @@ class Squelette extends \KD2\MiniSkel
 
         foreach ($query_args as $k=>$arg)
         {
-            $out->append(1, '$statement->bindValue(' . ($k+1) . ', ' . (is_array($arg) ? $arg[0] : var_export($arg, true)) . ');');
+            $out->append(1, '$value = ' . (is_array($arg) ? $arg[0] : var_export($arg, true)) . ';');
+            $out->append(1, '$statement->bindValue(' . ($k+1) . ', $value, $db->getArgType($value));');
         }
 
         $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
