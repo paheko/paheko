@@ -447,7 +447,7 @@ class Squelette extends \KD2\MiniSkel
             // Type de boucles gérés par des plugins
             if ($plugin = $db->simpleQuerySingle('SELECT plugin FROM plugins_skel_boucles WHERE nom = ? LIMIT 1;', false, $loopType))
             {
-                $plugin = new \KD2\Plugin($plugin);
+                $plugin = new \Garradin\Plugin($plugin);
 
                 if (!file_exists($plugin->path() . '/skel_loop.php'))
                 {
@@ -468,7 +468,7 @@ class Squelette extends \KD2\MiniSkel
         $out->append(1, '$parent_hash = $this->current[\'_self_hash\'];');
         $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$parent_hash] : null;');
 
-        if ($search)
+        if (!empty($search))
         {
             $out->append(1, 'if (trim($this->getVariable(\'recherche\'))) { ');
         }
@@ -479,7 +479,7 @@ class Squelette extends \KD2\MiniSkel
         $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
         $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
 
-        if ($search)
+        if (!empty($search))
         {
             $out->append(1, '} else { $result_'.$hash.' = false; $nb_rows = 0; }');
         }
