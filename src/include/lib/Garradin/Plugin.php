@@ -244,13 +244,16 @@ class Plugin
 	{
 		if (file_exists($this->path() . '/upgrade.php'))
 		{
+			$plugin = $this;
 			include $this->path() . '/upgrade.php';
 		}
 
+		$infos = parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+
 		$db = DB::getInstance();
 		return $db->simpleUpdate('plugins', 
-			'id = \''.$db->escapeString($this->id).'\'', 
-			['version' => $infos['version']]);
+			['version' => $infos['version']],
+			'id = \''.$db->escapeString($this->id).'\'');
 	}
 
 	public function registerSkelLoopName($name)
