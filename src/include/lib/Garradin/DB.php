@@ -153,18 +153,20 @@ class DB extends \SQLite3
 
     public function getArgType($arg, $name = '')
     {
-        if (is_float($arg))
-            return SQLITE3_FLOAT;
-        elseif (is_int($arg))
-            return SQLITE3_INTEGER;
-        elseif (is_bool($arg))
-            return SQLITE3_INTEGER;
-        elseif (is_null($arg))
-            return SQLITE3_NULL;
-        elseif (is_string($arg))
-            return SQLITE3_TEXT;
-        else
-            throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
+        switch (gettype($arg))
+        {
+            case 'double':
+                return SQLITE3_FLOAT;
+            case 'integer':
+            case 'boolean':
+                return SQLITE3_INTEGER;
+            case 'NULL':
+                return SQLITE3_NULL;
+            case 'string':
+                return SQLITE3_TEXT;
+            default:
+                throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
+        }
     }
 
     public function simpleStatement($query, $args = [])
