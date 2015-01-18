@@ -345,6 +345,11 @@ class Squelette_Filtres
     {
         return ($value <= $test) ? true : false;
     }
+
+    static public function euros($value)
+    {
+        return str_replace(' ', '&nbsp;', number_format($value, (round($value) == round($value, 2) ? 0 : 2), ',', ' ')) . '&nbsp;€';
+    }
 }
 
 ?>
