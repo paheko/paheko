@@ -37,13 +37,13 @@ Pour intégrer le catalogue des plugins officiels disponibles directement depuis
 
 Les plugins sont des archives .tar.gz : tous les fichiers du plugin (code PHP, CSS, templates, images, etc.) sont stockés dans l'archive et y restent.
 
-Il est possible de créer soi-même l'archive .tar.gz de cette manière :
+Il est possible de créer soi-même l'archive .tar.gz de cette manière, depuis le répertoire racine du plugin :
 
-   $ tar czvf src/plugins/test.tar.gz ~/dev/plugins/test
+   $ tar czvf src/plugins/test.tar.gz ./
 
 Un script PHP (**make_plugin.php**) est fourni dans le répertoire **tools/** de la version de développement de Garradin afin de vérifier l'arborescence et de créer l'archive en ligne de commande. Son utilisation est très simple :
 
- $ php ~/dev/plugins/test ~/garradin/src/plugins/test.tar.gz
+ $ php ~/garradin/tools/make_plugin.php ~/dev/plugins/test ~/garradin/src/plugins/test.tar.gz
 
 === Informations sur le plugin (garradin_plugin.ini) ===
 
@@ -56,6 +56,7 @@ Chaque plugin doit au moins fournir à la racine de son archive un fichier nomm�
  version="1.0"
  menu=1
  config=1
+ min_version="0.7.0"
 
 La directive ''nom'' indique le nom du plugin, qui sera utilisé dans les listes et menus. ''description'' fournit une description plus longue d'une phrase ou deux, ''auteur'' donne le nom de l'auteur du plugin, et ''url'' indique l'adresse du site web de l'auteur.
 
@@ -65,6 +66,8 @@ La directive ''nom'' indique le nom du plugin, qui sera utilisé dans les listes
 
 ''config'' indique si l'extension possède une configuration modifiable par l'utilisateur. Si positionné à 1 (ou ''true'') alors la page de gestion des extensions proposera un lien pour configurer l'extension (appelant le fichier **www/admin/config.php**), et le fichier **config.json** sera importé comme configuration par défaut. Ces deux fichiers sont donc obligatoires si ''config'' est activé.
 
+''min_version'' est facultatif et peut comporter le numéro de version de Garradin minimal nécessaire à l'installation du plugin. Par exemple si on renseigne "0.8.0" et que la version installé de Garradin est la 0.7.1, le plugin refusera de s'installer.
+
 Attention, si le fichier **garradin_plugin.ini** n'existe pas dans l'archive elle ne pourra pas être installée, n'étant pas considérée comme un plugin de Garradin.
 
 === Configuration du plugin ===
@@ -72,6 +75,8 @@ Attention, si le fichier **garradin_plugin.ini** n'existe pas dans l'archive ell
 Si ''config'' est positionné à 1 ou true (ou même ''On'') dans garradin_plugin.ini la configuration au format JSON stockée dans **config.json** sera importée comme configuration par défaut du plugin.
 
 Attention les objets javascript sont transformés en tableaux à l'import, il n'est donc pas possible de stocker un objet dynamique dans la configuration.
+
+Le plugin peut ensuite lire sa configuration depuis son code, avec $plugin->getConfig(string $key), et changer ses infos en faisant $plugin->setConfig(string $key, string $value).
 
 === Scripts magiques ===
 
@@ -113,7 +118,7 @@ Pour enregistrer et récupérer des documents il faut utiliser les méthodes de 
 
 === Dans les templates ===
 
-Garradin fournit la lib Template_Lite, déjà chargée par défaut. C'est une version allégée de Smarty 2.
+Garradin fournit la lib Template_Lite pour les pages privées (répertoire /admin/), où elle est déjà chargée par défaut. C'est une version allégée de Smarty 2.
 
 Afficher un template contenu dans le plugin :
 <pre>
@@ -139,3 +144,38 @@ Inclure une feuille de style CSS supplémentaire sur les pages du plugin (chemin
 <pre>
     $tpl->assign('plugin_css', 'styles/bleu.css');
 </pre>
+
+=== Site public ===
+
+Le site public de l'association n'utilise pas Template_Lite mais des squelettes, qui sont très similaires aux squelettes utilisés par SPIP.
+
+Un plugin peut modifier les squelettes (dans ce cas il est intéressant de proposer une sauvegarde à l'utilisateur pour ne pas écraser les modifs qu'il a pu faire), via la méthode Squelette::editSource(string $file, string $content). Ne pas modifier les squelettes directement, mais seulement en utilisant cette méthode.
+
+Un plugin peut également implémenter de nouveaux types de boucles. Dans ce cas l'installation du plugin doit appeler la méthode $plugin->registerSkelLoopName(string $loop_name). Ensuite quand cette boucle sera utilisée dans un squelette, le fichier skel_loop.php à la racine du plugin sera appelé. Les variables fournies sont :
+
+* $loopName = le nom de la boucle (par exemple dans <BOUCLE_actu(ARTICLES)> c'est **actu**)
+* $loopType = le type de boucle
+* $loopCriterias = les critères de la boucle, sous forme de tableau, voir la doc de KD2\MiniSkel pour les détails
+* $loopContent = le contenu de la boucle
+* $preContent = le contenu (facultatif) pré-boucle qui ne sera renvoyé qu'en cas de succès
+* $postContent = le contenu (facultatif) post-boucle qui ne sera renvoyé qu'en cas de succès
+* $altContent = le contenu (facultatif) alternatif qui sera affiché si la boucle ne renvoie rien
+
+La manière la plus simple d'implémenter un nouveau type de boucle est de remplir la variable $query dans skel_loop.php. Exemple :
+
+<pre>
+if ($loopType == 'stats_articles')
+{
+	$query = 'SELECT COUNT(*) AS nb_articles FROM wiki_pages;';
+}
+</pre>
+
+Ainsi la requête SQL sera exécutée dans la base SQLite de Garradin et chaque itération de résultat donnera lieu à l'affichage de $loopContent, dont les tags seront remplacés (ici par exemple #NB_ARTICLES sera automatiquement remplacé).
+
+Il est possible aussi de remplir dans ce contexte la variable $loopStart avec du code PHP, qui sera exécuté à chaque itération de la boucle avant l'affichage. Par exemple on peut l'utiliser pour remplir une balise :
+
+<pre>
+$loopStart = '$row[\'iteration\'] = $i++;';
+</pre>
+
+Enfin, une autre méthode est d'utiliser un return dans skel_loop.php. En ce cas il faut renvoyer un string contenant du code PHP, qui sera enregistré dans le fichier de cache compilé et exécuté. Consulter le code de \KD2\Squelette pour en savoir plus.
