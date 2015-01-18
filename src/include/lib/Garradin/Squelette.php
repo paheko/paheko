@@ -317,6 +317,7 @@ class Squelette extends \KD2\MiniSkel
     protected function processLoop($loopName, $loopType, $loopCriterias, $loopContent, $preContent, $postContent, $altContent)
     {
         $query = $loopStart = '';
+        $query_args = [];
 
         // Types de boucles natifs
         if ($loopType == 'articles' || $loopType == 'rubriques' || $loopType == 'pages')
@@ -324,7 +325,9 @@ class Squelette extends \KD2\MiniSkel
             $where = $order = '';
             $limit = $begin = 0;
 
-            $query = 'SELECT w.*, strftime(\\\'%s\\\', w.date_creation) AS date_creation, strftime(\\\'%s\\\', w.date_modification) AS date_modification';
+            $query = 'SELECT w.*, ';
+            $query.= 'strftime(\\\'%s\\\', w.date_creation) AS date_creation, ';
+            $query.= 'strftime(\\\'%s\\\', w.date_modification) AS date_modification';
 
             if (trim($loopContent))
             {
@@ -347,10 +350,10 @@ class Squelette extends \KD2\MiniSkel
             }
 
             $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
-                'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte'];
+                'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte', 'age'];
             $search = $search_rank = false;
 
-            foreach ($loopCriterias as $criteria)
+            foreach ($loopCriterias as $criteria_id => $criteria)
             {
                 if (isset($criteria['field']))
                 {
@@ -375,6 +378,11 @@ class Squelette extends \KD2\MiniSkel
 
                         $search_rank = true;
                     }
+                    elseif ($criteria['field'] == 'age')
+                    {
+                        $criteria['field'] = 'julianday() - julianday(date_creation)';
+                        $criteria['value'] = (int)$criteria['value'];
+                    }
                 }
 
                 switch ($criteria['action'])
@@ -394,14 +402,15 @@ class Squelette extends \KD2\MiniSkel
                         $limit = $criteria['number'];
                         break;
                     case \KD2\MiniSkel::ACTION_MATCH_FIELD_BY_VALUE:
-                        $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' \\\'\'.$db->escapeString(\''.$criteria['value'].'\').\'\\\'';
+                        $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' ?';
+                        $query_args[] = $criteria['value'];
                         break;
                     case \KD2\MiniSkel::ACTION_MATCH_FIELD:
                     {
                         if ($criteria['field'] == 'recherche')
                         {
                             $query = 'SELECT w.*, r.contenu AS texte, rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points FROM wiki_pages AS w INNER JOIN wiki_recherche AS r ON (w.id = r.id) ';
-                            $where .= ' AND wiki_recherche MATCH \\\'\'.$db->escapeString($this->getVariable(\''.$criteria['field'].'\')).\'\\\'';
+                            $where .= ' AND wiki_recherche MATCH ?';
                             $search = true;
                         }
                         else
@@ -411,8 +420,10 @@ class Squelette extends \KD2\MiniSkel
                             else
                                 $field = $criteria['field'];
 
-                            $where .= ' AND '.$criteria['field'].' = \\\'\'.$db->escapeString($this->getVariable(\''.$field.'\')).\'\\\'';
+                            $where .= ' AND '.$criteria['field'].' = ?';
                         }
+                        
+                        $query_args[] = ['$this->getVariable(\'' . $criteria['field'] . '\')'];
                         break;
                     }
                     default:
@@ -461,6 +472,11 @@ class Squelette extends \KD2\MiniSkel
             {
                 throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
             }
+
+            if (empty($query))
+            {
+                $query = 'SELECT 0 LIMIT 0;';
+            }
         }
 
         $hash = sha1(uniqid(mt_rand(), true));
@@ -476,6 +492,12 @@ class Squelette extends \KD2\MiniSkel
         $out->append(1, '$statement = $db->prepare(\''.$query.'\'); ');
         // Sécurité anti injection
         $out->append(1, 'if (!$statement->readOnly()) { throw new \\MiniSkelMarkupException("Requête en écriture illégale: '.$query.'"); } ');
+
+        foreach ($query_args as $k=>$arg)
+        {
+            $out->append(1, '$statement->bindValue(' . ($k+1) . ', ' . (is_array($arg) ? $arg[0] : var_export($arg, true)) . ');');
+        }
+
         $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
         $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
 
