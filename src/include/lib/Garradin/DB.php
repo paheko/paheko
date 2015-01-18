@@ -151,7 +151,7 @@ class DB extends \SQLite3
         return true;
     }
 
-    protected function _getArgType($arg, $name = '')
+    public function getArgType($arg, $name = '')
     {
         if (is_float($arg))
             return SQLITE3_FLOAT;
@@ -190,7 +190,7 @@ class DB extends \SQLite3
             {
                 foreach ($args as $i=>$arg)
                 {
-                    $statement->bindValue((int)$i+1, $arg, $this->_getArgType($arg, $i+1));
+                    $statement->bindValue((int)$i+1, $arg, $this->getArgType($arg, $i+1));
                 }
             }
             else
@@ -202,7 +202,7 @@ class DB extends \SQLite3
                         throw new \InvalidArgumentException(__FUNCTION__ . ' requires argument to be a named-associative array, but key '.$key.' is an integer.');
                     }
 
-                    $statement->bindValue(':'.$key, $value, $this->_getArgType($value, $key));
+                    $statement->bindValue(':'.$key, $value, $this->getArgType($value, $key));
                 }
             }
         }
@@ -246,7 +246,7 @@ class DB extends \SQLite3
 
     public function escapeAuto($value, $name = '')
     {
-        $type = $this->_getArgType($value, $name);
+        $type = $this->getArgType($value, $name);
 
         switch ($type)
         {
