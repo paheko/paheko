@@ -121,6 +121,12 @@ class Wiki
         $db = DB::getInstance();
         $this->_checkFields($data);
 
+        // Modification de la date de création
+        if (isset($data['date_creation']) && !Utils::checkDateTime($data['date_creation']))
+        {
+            throw new UserException('Date invalide: '.$data['date_creation']);
+        }
+        
         if (isset($data['uri']))
         {
             $data['uri'] = self::transformTitleToURI($data['uri']);
@@ -142,20 +148,6 @@ class Wiki
         }
 
         $data['date_modification'] = gmdate('Y-m-d H:i:s');
-
-        // Modification de la date de création
-        if (isset($data['date_creation']))
-        {
-            // Si la date n'est pas valide tant pis
-            if (!(strtotime($data['date_creation']) > 0))
-            {
-                unset($data['date_creation']);
-            }
-            else
-            {
-                $data['date_creation'] = gmdate('Y-m-d H:i:s', $data['date_creation']);
-            }
-        }
 
         $db->simpleUpdate('wiki_pages', $data, 'id = '.(int)$id);
         return true;
