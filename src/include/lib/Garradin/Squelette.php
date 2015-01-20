@@ -199,10 +199,8 @@ class Squelette extends \KD2\MiniSkel
         }
     }
 
-    public function __construct()
+    private function _registerDefaultTags()
     {
-        $this->_registerDefaultModifiers();
-
         $config = Config::getInstance();
 
         $this->assign('nom_asso', $config->get('nom_asso'));
@@ -215,6 +213,18 @@ class Squelette extends \KD2\MiniSkel
         $this->assign('url_atom', WWW_URL . 'feed/atom/');
         $this->assign('url_elements', WWW_URL . 'squelettes/');
         $this->assign('url_admin', WWW_URL . 'admin/');
+
+        $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) 
+            ? preg_replace('/^.*(\w{2}).*$/U', '$1', $_SERVER['HTTP_ACCEPT_LANGUAGE'])
+            : '';
+        
+        $this->assign('langue_visiteur', $lang);
+    }
+
+    public function __construct()
+    {
+        $this->_registerDefaultModifiers();
+        $this->_registerDefaultTags();
     }
 
     protected function processInclude($args)
@@ -230,7 +240,7 @@ class Squelette extends \KD2\MiniSkel
         return new Squelette_Snippet(1, '$this->fetch("'.$file.'", false);');
     }
 
-    protected function processVariable($name, $value, $applyDefault, $modifiers, $pre, $post, $context)
+    protected function processVariable($name, $applyDefault, $modifiers, $pre, $post, $context)
     {
         if ($context == self::CONTEXT_IN_ARG)
         {
@@ -318,6 +328,7 @@ class Squelette extends \KD2\MiniSkel
     {
         $query = $loopStart = '';
         $query_args = [];
+        $db = DB::getInstance();
 
         // Types de boucles natifs
         if ($loopType == 'articles' || $loopType == 'rubriques' || $loopType == 'pages')
@@ -326,8 +337,8 @@ class Squelette extends \KD2\MiniSkel
             $limit = $begin = 0;
 
             $query = 'SELECT w.*, ';
-            $query.= 'strftime(\\\'%s\\\', w.date_creation) AS date_creation, ';
-            $query.= 'strftime(\\\'%s\\\', w.date_modification) AS date_modification';
+            $query.= 'strftime(\'%s\', w.date_creation) AS date_creation, ';
+            $query.= 'strftime(\'%s\', w.date_modification) AS date_modification';
 
             if (trim($loopContent))
             {
@@ -448,13 +459,23 @@ class Squelette extends \KD2\MiniSkel
 
             if ($limit)
             {
-                $query .= ' LIMIT '.(is_numeric($begin) ? (int) $begin : '\'.$this->variables[\'debut_liste\'].\'').','.(int)$limit;
+                $query .= ' LIMIT ';
+
+                if (is_numeric($begin))
+                {
+                    $query .= (int) $begin;
+                }
+                else
+                {
+                    $query .= '?';
+                    $query_args[] = ['\'.$this->variables[\'debut_liste\'].\''];
+                }
+                
+                $query .= ','.(int)$limit;
             }
         }
         else
         {
-            $db = DB::getInstance();
-
             // Type de boucles gérés par des plugins
             if ($plugin = $db->simpleQuerySingle('SELECT plugin FROM plugins_skel_boucles WHERE nom = ? LIMIT 1;', false, $loopType))
             {
@@ -479,6 +500,14 @@ class Squelette extends \KD2\MiniSkel
             }
         }
 
+        // Sécurité anti injection, à la compilation seulement
+        $statement = $db->prepare($query);
+        
+        if (!$statement->readOnly())
+        {
+            throw new \KD2\MiniSkelMarkupException("Requête en écriture illégale: '.$query.'");
+        }
+
         $hash = sha1(uniqid(mt_rand(), true));
         $out = new Squelette_Snippet();
         $out->append(1, '$parent_hash = $this->current[\'_self_hash\'];');
@@ -489,9 +518,7 @@ class Squelette extends \KD2\MiniSkel
             $out->append(1, 'if (trim($this->getVariable(\'recherche\'))) { ');
         }
 
-        $out->append(1, '$statement = $db->prepare(\''.$query.'\'); ');
-        // Sécurité anti injection
-        $out->append(1, 'if (!$statement->readOnly()) { throw new \\MiniSkelMarkupException("Requête en écriture illégale: '.$query.'"); } ');
+        $out->append(1, '$statement = $db->prepare('.var_export($query, true).'); ');
 
         foreach ($query_args as $k=>$arg)
         {
@@ -566,7 +593,6 @@ class Squelette extends \KD2\MiniSkel
 
             $content = file_get_contents($path);
             $content = strtr($content, ['<?php' => '&lt;?php', '<?' => '<?php echo \'<?\'; ?>']);
-
             $out = new Squelette_Snippet(2, $this->parse($content));
             $out->prepend(1, '/* '.$tpl_id.' */ '.
                 'namespace Garradin; $db = DB::getInstance(); '.
@@ -578,6 +604,7 @@ class Squelette extends \KD2\MiniSkel
                 self::compile_store($tpl_id, $out);
             }
         }
+
 
         if (!$no_display)
         {
