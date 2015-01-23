@@ -122,6 +122,12 @@ if (!defined('Garradin\USE_CRON'))
     define('Garradin\USE_CRON', false);
 }
 
+// Activation de X-SendFile
+if (!defined('Garradin\ENABLE_XSENDFILE'))
+{
+    define('Garradin\ENABLE_XSENDFILE', false);
+}
+
 define('Garradin\WEBSITE', 'http://garradin.eu/');
 define('Garradin\PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
 

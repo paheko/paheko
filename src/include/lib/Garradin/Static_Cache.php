@@ -12,7 +12,7 @@ class Static_Cache
 		return CACHE_ROOT . '/static';
 	}
 
-	protected static function _getCachePath($id)
+	protected static function __getCachePath($id)
 	{
 		$id = 'cache_' . sha1($id);
 		return self::_getCacheDir() . '/' . $id;
@@ -22,6 +22,23 @@ class Static_Cache
 	{
 		$path = self::_getCachePath($id);
 		return (bool) file_put_contents($path, $content);
+	}
+
+	static public function storeFromPointer($id, $pointer)
+	{
+		$path = self::_getCachePath($id);
+
+		$fp = fopen($path, 'wb');
+		$ok = stream_copy_to_stream($pointer, $fp);
+		fclose($fp);
+
+		return $ok;
+	}
+
+	static public function storeFromUpload($id, $uploaded_file)
+	{
+		$path = self::_getCachePath($id);
+		return (bool) move_uploaded_file($uploaded_file, $path);
 	}
 
 	static public function expired($id, $expire = self::EXPIRE)
@@ -52,6 +69,11 @@ class Static_Cache
 	static public function getPath($id)
 	{
 		return self::_getCachePath($id);
+	}
+
+	static public function exists($id)
+	{
+		return file_exists(self::_getCachePath($id));
 	}
 
 	static public function remove($id)

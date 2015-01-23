@@ -61,3 +61,13 @@ const MAIL_ERRORS = false;
 // l'administration ou visite le site.
 // Défaut : false
 const USE_CRON = false;
+
+// Activation de l'envoi de fichier directement par le serveur web.
+// Permet d'améliorer la rapidité d'envoi des fichiers.
+// Supporte les serveurs web suivants :
+// - Apache avec mod_xsendfile (paquet libapache2-mod-xsendfile)
+// - Lighttpd
+// N'activer que si vous êtes sûr que le module est installé et activé.
+// Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
+// qui sont *dans* le document root du vhost, ce qui n'est pas le cas ici.
+const ENABLE_XSENDFILE = false;
