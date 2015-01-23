@@ -25,6 +25,8 @@ class Plugin
 		'svg' => 'image/svg+xml',
 	];
 
+	static protected $signal_files = [];
+
 	/**
 	 * Construire un objet Plugin pour un plugin
 	 * @param string $id Identifiant du plugin
@@ -217,6 +219,7 @@ class Plugin
 		unlink(PLUGINS_ROOT . '/' . $this->id . '.tar.gz');
 
 		$db = DB::getInstance();
+		$db->simpleExec('DELETE FROM plugins_signaux WHERE plugin = ?;', $this->id);
 		return $db->simpleExec('DELETE FROM plugins WHERE id = ?;', $this->id);
 	}
 
@@ -256,25 +259,39 @@ class Plugin
 			'id = \''.$db->escapeString($this->id).'\'');
 	}
 
-	public function registerSkelLoopName($name)
+	/**
+	 * Associer un signal à un callback du plugin
+	 * @param  string $signal   Nom du signal (par exemple boucle.agenda pour la boucle de type AGENDA)
+	 * @param  mixed  $callback Callback, sous forme d'un nom de fonction ou de méthode statique
+	 * @return boolean TRUE
+	 */
+	public function registerSignal($signal, $callback)
 	{
-		$db = DB::getInstance();
-		$registered = $db->simpleQuerySingle('SELECT plugin FROM plugins_skel_boucles WHERE nom = ?;', $name);
+		$callable_name = '';
 
-		if ($registered)
+		if (!is_callable($callback, true, $callable_name) || !is_string($callback))
 		{
-			if ($registered != $this->id)
+			throw new \LogicException('Le callback donné n\'est pas valide.');
+		}
+
+		$db = DB::getInstance();
+
+		// Signaux exclusifs, qui ne peuvent être attribués qu'à un seul plugin
+		if (strpos($signal, 'boucle.') === 0)
+		{
+			$registered = $db->simpleQuerySingle('SELECT plugin FROM plugins_signaux WHERE signal = ? AND plugin != ?;', false, $signal, $this->id);
+
+			if ($registered)
 			{
-				throw new \LogicException('La boucle ' . $name . ' est déjà associée au plugin "'.$registered.'"');
-			}
-			else
-			{
-				return true;
+				throw new \LogicException('Le signal ' . $name . ' est exclusif et déjà associé au plugin "'.$registered.'"');
 			}
 		}
 
-		return $db->simpleInsert('plugins_skel_boucles', 
-			['nom' => $name, 'plugin' => $this->id]);
+		$st = $db->prepare('INSERT OR REPLACE INTO plugins_signaux VALUES (:signal, :plugin, :callback);');
+		$st->bindValue(':signal', $signal);
+		$st->bindValue(':plugin', $this->id);
+		$st->bindValue(':callback', $callable_name);
+		return $st->execute();
 	}
 
 	/**
@@ -562,5 +579,31 @@ class Plugin
 	static public function getInstalledVersion($id)
 	{
 		return DB::getInstance()->simpleQuerySingle('SELECT version FROM plugins WHERE id = ?;');
+	}
+
+	/**
+	 * Déclenche le signal donné auprès des plugins enregistrés
+	 * @param  string $signal Nom du signal
+	 * @param  array  $params Paramètres du callback (array ou null)
+	 * @return NULL 		  NULL si aucun plugin n'a été appelé, true sinon
+	 */
+	static public function fireSignal($signal, $params = null, &$return = null)
+	{
+		$list = DB::getInstance()->simpleStatementFetch('SELECT * FROM plugins_signaux WHERE signal = ?;', SQLITE3_ASSOC, $signal);
+
+		foreach ($list as $row)
+		{
+			if (!in_array($row['plugin'], self::$signal_files))
+			{
+				require_once 'phar://' . PLUGINS_ROOT . '/' . $row['plugin'] . '.tar.gz/signals.php';
+			}
+
+			$return = call_user_func_array($row['callback'], [&$params, &$return]);
+
+			if ($return)
+				return $return;
+		}
+
+		return !empty($list) ? true : null;
 	}
 }

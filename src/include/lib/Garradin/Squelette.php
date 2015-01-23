@@ -215,10 +215,10 @@ class Squelette extends \KD2\MiniSkel
         $this->assign('url_admin', WWW_URL . 'admin/');
 
         $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) 
-            ? preg_replace('/^.*(\w{2}).*$/U', '$1', $_SERVER['HTTP_ACCEPT_LANGUAGE'])
+            ? preg_replace('/^.*(\w{2}).*$/Ui', '$1', $_SERVER['HTTP_ACCEPT_LANGUAGE'])
             : '';
         
-        $this->assign('langue_visiteur', $lang);
+        $this->assign('langue_visiteur', strtolower($lang));
     }
 
     public function __construct()
@@ -326,7 +326,7 @@ class Squelette extends \KD2\MiniSkel
 
     protected function processLoop($loopName, $loopType, $loopCriterias, $loopContent, $preContent, $postContent, $altContent)
     {
-        $query = $loopStart = '';
+        $query = $loop_start = '';
         $query_args = [];
         $db = DB::getInstance();
 
@@ -449,7 +449,7 @@ class Squelette extends \KD2\MiniSkel
 
             if (trim($loopContent))
             {
-                $loopStart .= '$row[\'url\'] = WWW_URL . $row[\'uri\']; ';
+                $loop_start .= '$row[\'url\'] = WWW_URL . $row[\'uri\']; ';
             }
 
             $query .= $where . ' ' . $order;
@@ -476,20 +476,32 @@ class Squelette extends \KD2\MiniSkel
         }
         else
         {
-            // Type de boucles gérés par des plugins
-            if ($plugin = $db->simpleQuerySingle('SELECT plugin FROM plugins_skel_boucles WHERE nom = ? LIMIT 1;', false, $loopType))
+            $params = [
+                'loopName'  =>  $loopName,
+                'loopType'  =>  $loopType,
+                'loopCriterias' =>  $loopCriterias,
+                'loopContent'   =>  $loopContent,
+                'preContent'    =>  $preContent,
+                'postContent'   =>  $postContent,
+                'altContent'    =>  $altContent,
+            ];
+
+            $callback_return = [
+                'query'         =>  &$query,
+                'query_args'    =>  &$query_args,
+                'loop_start'    =>  &$loop_start,
+            ];
+
+            // Appel du plugin lié à cette boucle, si ça existe
+            $return = Plugin::fireSignal('boucle.' . $loopType, $params, $callback_return);
+
+            // Si le retour est du texte on le traite comme tel
+            if (is_string($return))
             {
-                $plugin = new \Garradin\Plugin($plugin);
-
-                if (!file_exists($plugin->path() . '/skel_loop.php'))
-                {
-                    throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est géré par un plugin, mais celui-ci ne contient pas de fichier skel_loop.php.");
-                }
-
-                // Ici le plugin peut soit peupler $query et $loopStart lui-même, soit faire un return
-                include $plugin->path() . '/skel_loop.php';
+                return $return;
             }
-            else
+            // Sinon si ce n'est pas true
+            elseif (!$return)
             {
                 throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
             }
@@ -545,7 +557,7 @@ class Squelette extends \KD2\MiniSkel
 
         $out->append(1, 'while ($row = $result_'.$hash.'->fetchArray(SQLITE3_ASSOC)): ');
         $out->append(1, '$this->_vars[\''.$hash.'\'][\'compteur_boucle\'] += 1; ');
-        $out->append(1, $loopStart);
+        $out->append(1, $loop_start);
         $out->append(1, '$this->_vars[\''.$hash.'\'] = array_merge($this->_vars[\''.$hash.'\'], $row); ');
 
         $out->append(2, $this->parseVariables($loopContent));

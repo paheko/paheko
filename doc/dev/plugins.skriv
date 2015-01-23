@@ -99,6 +99,7 @@ Ces scripts ne peuvent pas être appelés par une requête HTTP via l'interface 
 * uninstall() : désinstaller le plugin
 * id() : renvoie l'identifiant du plugin
 * path() : renvoie le chemin vers l'archive du plugin
+* registerSignal(string $signal, string $callback) 
 
 === Base de données ===
 
@@ -115,6 +116,10 @@ Les seuls fichiers qu'un plugin devrait modifier sont :
 * les squelettes dans le répertoire **www/squelettes/**
 
 Pour enregistrer et récupérer des documents il faut utiliser les méthodes de stockage de fichiers fournies par Garradin.
+
+=== Signaux ===
+
+
 
 === Dans les templates ===
 
@@ -151,15 +156,15 @@ Le site public de l'association n'utilise pas Template_Lite mais des squelettes,
 
 Un plugin peut modifier les squelettes (dans ce cas il est intéressant de proposer une sauvegarde à l'utilisateur pour ne pas écraser les modifs qu'il a pu faire), via la méthode Squelette::editSource(string $file, string $content). Ne pas modifier les squelettes directement, mais seulement en utilisant cette méthode.
 
-Un plugin peut également implémenter de nouveaux types de boucles. Dans ce cas l'installation du plugin doit appeler la méthode $plugin->registerSkelLoopName(string $loop_name). Ensuite quand cette boucle sera utilisée dans un squelette, le fichier skel_loop.php à la racine du plugin sera appelé. Les variables fournies sont :
+Un plugin peut également implémenter de nouveaux types de boucles. Dans ce cas l'installation du plugin doit enregistrer un signal du nom 'boucle.NOM_DE_LA_BOUCLE'. Par exemple : $plugin->registerSignal('boucle.meteo', 'Garradin\Plugin\Meteo::Boucle'). Ensuite quand cette boucle sera utilisée dans un squelette, le fichier signals.php à la racine du plugin sera inclus et la méthode indiquée sera appelée. Les paramètres sont fournis dans un tableau contenant :
 
-* $loopName = le nom de la boucle (par exemple dans <BOUCLE_actu(ARTICLES)> c'est **actu**)
-* $loopType = le type de boucle
-* $loopCriterias = les critères de la boucle, sous forme de tableau, voir la doc de KD2\MiniSkel pour les détails
-* $loopContent = le contenu de la boucle
-* $preContent = le contenu (facultatif) pré-boucle qui ne sera renvoyé qu'en cas de succès
-* $postContent = le contenu (facultatif) post-boucle qui ne sera renvoyé qu'en cas de succès
-* $altContent = le contenu (facultatif) alternatif qui sera affiché si la boucle ne renvoie rien
+* loopName = le nom de la boucle (par exemple dans <BOUCLE_actu(ARTICLES)> c'est **actu**)
+* loopType = le type de boucle
+* loopCriterias = les critères de la boucle, sous forme de tableau, voir la doc de KD2\MiniSkel pour les détails
+* loopContent = le contenu de la boucle
+* preContent = le contenu (facultatif) pré-boucle qui ne sera renvoyé qu'en cas de succès
+* postContent = le contenu (facultatif) post-boucle qui ne sera renvoyé qu'en cas de succès
+* altContent = le contenu (facultatif) alternatif qui sera affiché si la boucle ne renvoie rien
 
 La manière la plus simple d'implémenter un nouveau type de boucle est de remplir la variable $query dans skel_loop.php. Exemple :
 
