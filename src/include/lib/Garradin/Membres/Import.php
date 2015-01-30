@@ -170,9 +170,9 @@ class Import
 		$champs = Config::getInstance()->get('champs_membres')->getAll();
 		$champs = array_keys($champs);
 		$champs[] = 'date_inscription';
-		$champs[] = 'date_connexion';
+		//$champs[] = 'date_connexion';
 		$champs[] = 'id';
-		$champs[] = 'id_categorie';
+		//$champs[] = 'id_categorie';
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
