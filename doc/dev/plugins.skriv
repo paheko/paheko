@@ -85,6 +85,7 @@ Chaque archive peut comporter certains ''scripts magiques'' qui seront appelés 
 * **install.php** est appelé quand le plugin a été téléchargé et qu'il est déjà noté comme installé (post-installation), utile notamment pour créer une table dans la base de données
 * **upgrade.php** : quand la version de l'archive (notée dans garradin_plugin.ini) ne correspond pas à la version enregistrée en base de donnée
 * **uninstall.php** : juste avant que le plugin ne soit supprimé, utile par exemple pour supprimer une table créée dans la base de données
+* **signals.php** : inclus quand un signal enregistré est appelé
 
 Ces scripts ne peuvent pas être appelés par une requête HTTP via l'interface privée ou publique.
 
@@ -99,7 +100,7 @@ Ces scripts ne peuvent pas être appelés par une requête HTTP via l'interface 
 * uninstall() : désinstaller le plugin
 * id() : renvoie l'identifiant du plugin
 * path() : renvoie le chemin vers l'archive du plugin
-* registerSignal(string $signal, string $callback) 
+* registerSignal(string $signal, string $callback) : enregistre un callback associé à un signal
 
 === Base de données ===
 
@@ -119,7 +120,9 @@ Pour enregistrer et récupérer des documents il faut utiliser les méthodes de 
 
 === Signaux ===
 
+Les plugins peuvent se « brancher » sur des signaux émis par Garradin lors de certaines actions.
 
+FIXME plus de doc.
 
 === Dans les templates ===
 
