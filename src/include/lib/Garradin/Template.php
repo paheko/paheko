@@ -193,10 +193,7 @@ function tpl_format_droits($params)
 
 function tpl_format_wiki($str)
 {
-    $str = Utils::htmlLinksOnUrls($str);
-    $str = Utils::htmlSpip($str);
-    $str = Utils::htmlGarbage2xhtml($str);
-    return $str;
+    return Squelette_Filtres::formatter_texte($str);
 }
 
 function tpl_liens_wiki($str, $prefix)

@@ -207,6 +207,30 @@ if (version_compare($v, '0.7.0', '<'))
     // Mise à jour base de données
     $db->exec(file_get_contents(ROOT . '/include/data/0.7.0.sql'));
 
+    // Changement de syntaxe du Wiki vers SkrivML
+    $wiki = new Wiki;
+    $st = $db->prepare('SELECT id_page, contenu, revision, chiffrement FROM wiki_revisions GROUP BY id_page ORDER BY revision DESC;');
+
+    while ($row = $st->fetchArray(\SQLITE3_ASSOC))
+    {
+        // Ne pas convertir le contenu chiffré, de toute évidence
+        if ($row['chiffrement'])
+            continue;
+
+        $content = $row['contenu'];
+        $content = Utils::HTMLToSkriv($content);
+        $content = Utils::SpipToSkriv($content);
+
+        if ($content != $row['contenu'])
+        {
+            $wiki->editRevision($row['id_page'], $row['revision'], [
+                'id_auteur'     =>  null,
+                'contenu'       =>  $content,
+                'modification'  =>  'Mise à jour 0.7.0 (transformation SPIP vers SkrivML)',
+            ]);
+        }
+    }
+
     $db->exec('END;');
 }
 
