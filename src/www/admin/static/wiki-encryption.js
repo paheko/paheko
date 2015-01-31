@@ -25,26 +25,24 @@
 		content = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 			.replace(/'/g, '&#039;').replace(/"/g, '&quot');
 
-		// HTML simple
-		content = content.replace(/&lt;(\/?(del|pre|ins|b|i|strong|em|h\d|code|samp|tt))&gt;/g, '<$1>');
-		console.log(content);
-
 		// Intertitres
-		content = content.replace(/\{{3}([^\n]*)\}{3}/g, '<h3>$1</h3>');
+		content = content.replace(/==([^\n]*)==/g, '<h2>$1</h2>');
+		content = content.replace(/===([^\n]*)===/g, '<h3>$1</h3>');
+		content = content.replace(/====([^\n]*)====/g, '<h4>$1</h4>');
 
 		// Gras
-		content = content.replace(/\{{2}([^\n]*)\}{2}/g, '<strong>$1</strong>');
+		content = content.replace(/\*{2}([^\n]*)\*{2}/g, '<strong>$1</strong>');
 
 		// Italique
-		content = content.replace(/\{([^\n]*)\}/g, '<em>$1</em>');
+		content = content.replace(/''([^\n]*)''/g, '<em>$1</em>');
 
 		// Espaces typograhiques
 		content = content.replace(/\h*([?!;:»])(\s+|$)/g, '&nbsp;$1$2');
 		content = content.replace(/(^|\s+)([«])\h*/g, '$1$2&nbsp;');
 
 		// Liens
-		content = content.replace(/\[([^-]+)-&gt;([^\]]+)\]/g, '<a href="$2">$1</a>');
-		content = content.replace(/\[([^\]]+)\]/g, '<a href="$1">$1</a>');
+		content = content.replace(/\[\[([^|]+)|([^\]]+)\]\]/g, '<a href="$2">$1</a>');
+		content = content.replace(/\[\[([^\]]+)\]\]/g, '<a href="$1">$1</a>');
 
 		// nl2br
 		content = content.replace(/\r/g, '').replace(/\n/g, '<br />');

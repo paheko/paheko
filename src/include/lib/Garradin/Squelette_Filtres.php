@@ -129,10 +129,7 @@ class Squelette_Filtres
 
     static public function formatter_texte($texte)
     {
-        $texte = Utils::htmlLinksOnUrls($texte);
-        $texte = Utils::htmlSpip($texte);
-        $texte = Utils::htmlGarbage2xhtml($texte);
-
+        $texte = Utils::SkrivToHTML($texte);
         $texte = self::typo_fr($texte);
 
         return $texte;

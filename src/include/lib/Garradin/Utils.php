@@ -6,7 +6,7 @@ class Utils
 {
     static protected $country_list = null;
 
-    static protected $g2x = null;
+    static protected $skriv = null;
 
     static private $french_date_names = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
@@ -380,39 +380,51 @@ class Utils
             }, $str);
     }
 
-    static public function htmlGarbage2xhtml($str)
+    /**
+     * Transforme un texte SkrivML en HTML
+     * @param  string $str Texte SkrivML
+     * @return string      Texte HTML
+     */
+    static public function SkrivToHTML($str)
     {
-        if (!self::$g2x)
+        if (!self::$skriv)
         {
-            self::$g2x = new \KD2\Garbage2xhtml;
-            self::$g2x->core_attributes = ['class', 'id', 'title'];
+            self::$skriv = new \KD2\SkrivLite;
         }
 
-        return self::$g2x->process($str);
+        $str = self::$skriv->render($str);
+
+        return $str;
     }
 
-    static public function htmlSpip($str, $prefix = '')
+    /**
+     * Transforme les tags de base SPIP en tags SkrivML
+     * @param  string $str Texte d'entrée
+     * @return string      Texte transformé
+     */
+    static public function SpipToSkriv($str)
     {
-        // Intertitres
-        $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '<h3>$1</h3>', $str);
+        $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '=== $1 ===', $str);
+        $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '**$1**', $str);
+        $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '\'\'$1\'\'', $str);
+        $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '[[$1 | $2]]', $str);
+        $str = preg_replace('/(?<!\\\\)\[(.+?)\]/', '[[$1]]', $str);
+        return $str;
+    }
 
-        // Gras
-        $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '<strong>$1</strong>', $str);
-
-        // Italique
-        $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '<em>$1</em>', $str);
-
-        // Espaces typograhiques
-        $str = preg_replace('/\h*([?!;:»])(\s+|$)/u', '&nbsp;$1$2', $str);
-        $str = preg_replace('/(^|\s+)([«])\h*/u', '$1$2&nbsp;', $str);
-
-        // Liens
-        $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '<a href="$2">$1</a>', $str);
-        $str = preg_replace('/(?<!\\\\)\[(.+?)\]/', '<a href="$1">$1</a>', $str);
-
-        // Adresses email
-        $str = preg_replace('/<a href="((?!http).*@.*)">/iU', '<a href="mailto:$1">', $str);
-
+    /**
+     * Transforme les tags HTML basiques en tags SkrivML
+     * @param  string $str Texte d'entrée
+     * @return string      Texte transformé
+     */
+    static public function HTMLToSkriv($str)
+    {
+        $str = preg_replace('/<h3>(\V*?)<\/h3>/', '=== $1 ===', $str);
+        $str = preg_replace('/<b>(\V*)<\/b>/', '**$1**', $str);
+        $str = preg_replace('/<strong>(\V*?)<\/strong>/', '**$1**', $str);
+        $str = preg_replace('/<i>(\V*?)<\/i>/', '\'\'$1\'\'', $str);
+        $str = preg_replace('/<em>(\V*?)<\/em>/', '\'\'$1\'\'', $str);
+        $str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
         return $str;
     }
 
