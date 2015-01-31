@@ -3,6 +3,7 @@
 namespace Garradin\Membres;
 
 use Garradin\Membres;
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Wiki;
 use Garradin\UserException;
