@@ -157,23 +157,39 @@ class Exercices
 
         while ($row = $statement->fetchArray(SQLITE3_ASSOC))
         {
-            $solde = abs($row['solde']);
-            $solde = round($solde, 2);
+            $solde = $row['solde'];
 
-            $diff += $solde;
-
+            // Solde du compte à zéro : aucun report à faire
             if (empty($solde))
             {
                 continue;
             }
 
+            // ce qui est à l'actif est en débit sauf les valeurs négatives
+            // ce qui est au passif est en crédit, sauf valeurs négatives
+            // cf. ticket [16af9ccf92]
+            if ($row['position'] & Compta_Comptes::ACTIF)
+            {
+                $compte_debit = $solde < 0 ? NULL : $row['compte'];
+                $compte_credit = $solde > 0 ? NULL : $row['compte'];
+            }
+            else
+            {
+                $compte_debit = $solde > 0 ? NULL : $row['compte'];
+                $compte_credit = $solde < 0 ? NULL : $row['compte'];
+            }
+
+            $solde = round(abs($solde), 2);
+
+            $diff += $solde;
+
             // Chaque solde de compte est reporté dans le nouvel exercice
             $journal->add([
                 'libelle'       =>  'Report à nouveau',
                 'date'          =>  $date,
-                'montant'       =>  abs($solde),
-                'compte_debit'  =>  ($solde < 0 ? NULL : $row['compte']),
-                'compte_credit' =>  ($solde > 0 ? NULL : $row['compte']),
+                'montant'       =>  $solde,
+                'compte_debit'  =>  $compte_debit,
+                'compte_credit' =>  $compte_credit,
                 'remarques'     =>  'Report de solde créé automatiquement à la clôture de l\'exercice précédent',
             ]);
         }
