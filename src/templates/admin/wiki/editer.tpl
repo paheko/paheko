@@ -107,6 +107,7 @@
         {csrf_field key="wiki_edit_`$page.id`"}
         <input type="hidden" name="revision_edition" value="{form_field name=revision_edition default=$page.revision}" />
         <input type="hidden" name="debut_edition" value="{form_field name=debut_edition default=$time}" />
+        <input id="f_id" value="{$page.id|escape}" type="hidden" />
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 
