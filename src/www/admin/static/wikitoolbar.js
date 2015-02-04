@@ -80,6 +80,18 @@
 		}
 	};
 
+	function openImageBrowser()
+	{
+		window.open('_images.php?page=' + document.getElementById('f_id').value, 'browseImages',
+            'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
+	}
+
+	function openFileBrowser()
+	{
+		window.open('_fichiers.php?page=' + document.getElementById('f_id').value, 'browseFiles',
+            'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
+	}
+
 	function launchToolbar()
 	{
 		function addBtn(className, label, action)
@@ -97,17 +109,26 @@
 		var toolbar = document.createElement('div');
 		toolbar.className = "toolbar";
 
-		addBtn('title', 'Titre', function () { selection.wrap(txt, '{{{', "}}}\n"); } );
-		addBtn('italic', 'Italique', function () { selection.wrap(txt, '{', '}'); } );
-		addBtn('bold', 'Gras', function () { selection.wrap(txt, '{{', '}}'); } );
-		addBtn('strike', 'Barré', function () { selection.wrap(txt, '<del>', '</del>'); } );
-		addBtn('code', 'Chasse fixe', function () { selection.wrap(txt, '<pre>', '</pre>'); } );
+		addBtn('title', 'Titre', function () { selection.wrap(txt, '=== ', " ===\n"); } );
+		addBtn('italic', 'Italique', function () { selection.wrap(txt, "''", "''"); } );
+		addBtn('bold', 'Gras', function () { selection.wrap(txt, '**', '**'); } );
+		addBtn('strike', 'Barré', function () { selection.wrap(txt, '--', '--'); } );
+		addBtn('code', 'Chasse fixe', function () { selection.wrap(txt, "[[[\n", "\n]]]"); } );
 		addBtn('link', 'Lien', function () {
 				if (url = window.prompt('Adresse du lien ?'))
 				{
-						selection.wrap(txt, '[', '->' + url + ']');
+						selection.wrap(txt, '[[', ' | ' + url + ']]');
 				}
 			} );
+
+		addBtn('image', 'Image', function () {
+			window.open('_images.php?page=' + document.getElementById('f_id').value, 'browseImages',
+            	'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
+		});
+		addBtn('file', 'Fichier', function () {
+			window.open('_fichiers.php?page=' + document.getElementById('f_id').value, 'browseFiles',
+            	'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
+		});
 
 		parent.insertBefore(toolbar, txt.parentNode);
 	}
