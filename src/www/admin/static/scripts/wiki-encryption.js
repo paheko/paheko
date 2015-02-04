@@ -11,11 +11,7 @@
 			return;
 		}
 
-		var s = document.createElement('script');
-		s.type = 'text/javascript';
-		s.src = www_url + 'static/gibberish-aes.min.js';
-
-		document.head.appendChild(s);
+		garradin.script('scripts/gibberish-aes.min.js');
 		aesEnabled = true;
 	}
 
