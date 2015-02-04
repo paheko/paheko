@@ -1,11 +1,5 @@
 (function (){
-	var www_url = document.body.getAttribute('data-url');
-
-	var css = document.createElement('link');
-	css.type = 'text/css';
-	css.rel = 'stylesheet';
-	css.href = www_url + 'static/skel_editor.css';
-	document.head.appendChild(css);
+	garradin.style('scripts/skel_editor.css');
 
 	var save_btn = document.querySelector('input[name=save]');
 	save_btn.type = 'hidden';
@@ -123,7 +117,7 @@
 			return false;
 		}
 
-		var url = www_url + 'config/site.php?edit=' + encodeURIComponent(file);
+		var url = garradin.admin_url + 'config/site.php?edit=' + encodeURIComponent(file);
 
 		window.location.href = url + (code.fullscreen ? '#fullscreen' : '');
 

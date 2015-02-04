@@ -41,6 +41,6 @@ $tpl->assign('max_size', Utils::getMaxUploadSize());
 $tpl->assign('error', $error);
 $tpl->assign('sent', isset($_GET['sent']) ? true : false);
 
-$tpl->assign('custom_js', ['scripts/file_upload.js']);
+$tpl->assign('custom_js', ['file_upload.js']);
 
 $tpl->display('admin/wiki/_fichiers.tpl');

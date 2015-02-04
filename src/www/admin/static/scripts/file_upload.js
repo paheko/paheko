@@ -40,7 +40,7 @@
 			fr.onloadend = function () {
 				if (this.error) return false;
 				var hash = rusha.digestFromArrayBuffer(fr.result);
-				garradin.load('admin/_upload_check.php?hash=' + hash, function (data) {
+				garradin.load(garradin.admin_url + '_upload_check.php?hash=' + hash, function (data) {
 					if (parseInt(data, 10) == 1)
 					{
 						alert('ok');

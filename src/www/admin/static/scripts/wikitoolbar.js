@@ -133,12 +133,5 @@
 		parent.insertBefore(toolbar, txt.parentNode);
 	}
 
-	if (document.addEventListener)
-	{
-		document.addEventListener("DOMContentLoaded", launchToolbar, false);
-	}
-	else
-	{
-		document.attachEvent("onDOMContentLoaded", launchToolbar);
-	}
+	garradin.onload(launchToolbar);
 } () );

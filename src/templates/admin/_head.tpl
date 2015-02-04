@@ -7,12 +7,12 @@
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="all" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css" media="print" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css" media="handheld,screen and (max-width:981px)" />
-    {if isset($js)}
-        <script type="text/javascript" src="{$admin_url}static/global.js"></script>
+    {if isset($js) || isset($custom_js)}
+        <script type="text/javascript" src="{$admin_url}static/scripts/global.js"></script>
     {/if}
     {if isset($custom_js)}
         {foreach from=$custom_js item="js"}
-            <script type="text/javascript" src="{$admin_url}static/{$js|escape}"></script>
+            <script type="text/javascript" src="{$admin_url}static/scripts/{$js|escape}"></script>
         {/foreach}
     {/if}
     {if isset($plugin_css)}
