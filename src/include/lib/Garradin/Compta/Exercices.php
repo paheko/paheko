@@ -179,9 +179,8 @@ class Exercices
                 $compte_credit = $solde < 0 ? NULL : $row['compte'];
             }
 
-            $solde = round(abs($solde), 2);
-
             $diff += $solde;
+            $solde = round(abs($solde), 2);
 
             // Chaque solde de compte est reporté dans le nouvel exercice
             $journal->add([
