@@ -16,20 +16,22 @@ CREATE TABLE fichiers
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
     titre TEXT NOT NULL, -- Titre/description
     date TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d'ajout ou mise à jour du fichier
-    hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
-    taille INTEGER NOT NULL -- Taille en octets
+    id_contenu INTEGER NOT NULL REFERENCES fichiers_contenu (id)
 );
 
-CREATE UNIQUE INDEX fichiers_hash ON fichiers (hash);
 CREATE INDEX fichiers_titre ON fichiers (titre);
 CREATE INDEX fichiers_date ON fichiers (date);
 
 CREATE TABLE fichiers_contenu
 -- Contenu des fichiers
 (
-    id INTEGER NOT NULL PRIMARY KEY REFERENCES fichiers (id),
+    id INTEGER NOT NULL PRIMARY KEY,
+    hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
+    taille INTEGER NOT NULL, -- Taille en octets
     contenu BLOB
 );
+
+CREATE UNIQUE INDEX fichiers_hash ON fichiers_contenu (hash);
 
 CREATE TABLE fichiers_membres
 -- Associations entre fichiers et membres (photo de profil par exemple)

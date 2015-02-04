@@ -1,0 +1,9 @@
+= Les fichiers dans le code de Garradin =
+
+== Stockage ==
+
+Pour minimiser les ressources (espace disque, temps processeur), le contenu du fichier est stocké séparé des méta-données du fichier. Ainsi un fichier peut être uploadé plusieurs fois, à plusieurs endroits différents, et n'être stocké qu'une seule fois. De même le cache ne stocke qu'une seule fois le fichier, quel que soit le nombre d'occurrences.
+
+== Upload ==
+
+L'envoi de fichier utilise l'API javascript File pour lire les données du fichier avant envoi. Cela permet de vérifier que la taille du fichier rentre dans les clous. Mais on fait aussi un appel XHR avec le SHA1 du fichier (on utilise https://github.com/srijs/rusha pour ça) pour savoir s'il n'est pas déjà stocké. S'il est déjà stocké ça ne sert à rien de l'envoyer et gaspiller de la bande passante ou du processeur.

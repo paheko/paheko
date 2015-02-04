@@ -12,7 +12,7 @@ class Static_Cache
 		return CACHE_ROOT . '/static';
 	}
 
-	protected static function __getCachePath($id)
+	protected static function _getCachePath($id)
 	{
 		$id = 'cache_' . sha1($id);
 		return self::_getCacheDir() . '/' . $id;

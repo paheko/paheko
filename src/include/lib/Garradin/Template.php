@@ -606,7 +606,7 @@ $tpl->register_modifier('format_bytes', function ($size) {
     elseif ($size > 1024)
         return round($size / 1024, 2) . ' Ko';
     else
-        return $size . ' ob_get_contents(oid)';
+        return $size . ' o';
 });
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
