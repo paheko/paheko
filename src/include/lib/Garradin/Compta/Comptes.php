@@ -231,6 +231,17 @@ class Comptes
         return $db->simpleUpdate('compta_comptes', ['desactive' => 1], 'id = \''.$db->escapeString(trim($id)).'\'');
     }
 
+    /**
+     * Renvoie si un compte existe et n'est pas désactivé
+     * @param  string  $id Numéro de compte
+     * @return boolean     TRUE si le compte existe et n'est pas désactivé
+     */
+    public function isActive($id)
+    {
+        return DB::getInstance()->simpleQuerySingle('SELECT 1 
+            FROM compta_comptes WHERE id = ? AND desactive != 1;', false, $id);
+    }
+
     public function get($id)
     {
         $db = DB::getInstance();
