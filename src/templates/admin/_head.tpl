@@ -3,6 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>{$title|escape}</title>
+    <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="all" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css" media="print" />

@@ -3,7 +3,7 @@
 <script type="text/javascript" defer="defer">
 {literal}
 (function () {
-    var keep_session_url = "{/literal}{$www_url}{literal}admin/login.php?keepSessionAlive&amp;";
+    var keep_session_url = "{/literal}{$www_url}{literal}admin/login.php?keepSessionAlive&";
 
     function refreshSession()
     {
