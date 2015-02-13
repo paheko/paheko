@@ -137,10 +137,23 @@ class Exercices
 
         $db->exec('BEGIN;');
 
-        $this->solderResultat($old_id, $date);
-
         $report_crediteur = 110;
         $report_debiteur  = 119;
+
+        $comptes = new Comptes;
+
+        if (!$comptes->isActive($report_crediteur))
+        {
+            throw new UserException('Impossible de faire le report à nouveau : le compte de report créditeur ' . $report_crediteur . ' n\'existe pas ou est désactivé.');
+        }
+        else if (!$comptes->isActive($report_debiteur))
+        {
+            throw new UserException('Impossible de faire le report à nouveau : le compte de report débiteur ' . $report_debiteur . ' n\'existe pas ou est désactivé.');
+        }
+
+        unset($comptes);
+
+        $this->solderResultat($old_id, $date);
 
         // Récupérer chacun des comptes de bilan et leurs soldes (uniquement les classes 1 à 5)
         $statement = $db->simpleStatement('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
@@ -214,6 +227,19 @@ class Exercices
         $resultat_excedent = 120;
         $resultat_debiteur = 129;
 
+        $comptes = new Comptes;
+
+        if (!$comptes->isActive($resultat_excedent))
+        {
+            throw new UserException('Impossible de solder l\'exercice : le compte de résultat excédent ' . $resultat_excedent . ' n\'existe pas ou est désactivé.');
+        }
+        else if (!$comptes->isActive($resultat_debiteur))
+        {
+            throw new UserException('Impossible de solder l\'exercice : le compte de résultat débiteur ' . $resultat_debiteur . ' n\'existe pas ou est désactivé.');
+        }
+
+        unset($comptes);
+
         $resultat = $this->getCompteResultat($exercice);
         $resultat = $resultat['resultat'];
 
@@ -224,8 +250,8 @@ class Exercices
                 'libelle'   =>  'Résultat de l\'exercice précédent',
                 'date'      =>  $date,
                 'montant'   =>  abs($resultat),
-                'compte_debit'  =>  $resultat < 0 ? 129 : NULL,
-                'compte_credit' =>  $resultat > 0 ? 120 : NULL,
+                'compte_debit'  =>  $resultat < 0 ? $resultat_debiteur : NULL,
+                'compte_credit' =>  $resultat > 0 ? $resultat_excedent : NULL,
             ]);
         }
 
