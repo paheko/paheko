@@ -655,6 +655,11 @@ class Squelette extends \KD2\MiniSkel
             header('Content-Type: application/atom+xml');
             $skel = 'atom.xml';
         }
+        elseif ($uri == '/favicon.ico')
+        {
+            header('Location: ' . WWW_URI . 'admin/static/icon.png');
+            exit;
+        }
         elseif (substr($uri, -1) == '/')
         {
             $skel = 'rubrique.html';
