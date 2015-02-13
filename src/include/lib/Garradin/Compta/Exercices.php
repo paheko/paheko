@@ -168,7 +168,7 @@ class Exercices
             // ce qui est à l'actif est en débit sauf les valeurs négatives
             // ce qui est au passif est en crédit, sauf valeurs négatives
             // cf. ticket [16af9ccf92]
-            if ($row['position'] & Compta_Comptes::ACTIF)
+            if ($row['position'] & \Garradin\Compta\Comptes::ACTIF)
             {
                 $compte_debit = $solde < 0 ? NULL : $row['compte'];
                 $compte_credit = $solde > 0 ? NULL : $row['compte'];
