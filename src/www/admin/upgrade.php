@@ -209,9 +209,9 @@ if (version_compare($v, '0.7.0', '<'))
 
     // Changement de syntaxe du Wiki vers SkrivML
     $wiki = new Wiki;
-    $st = $db->prepare('SELECT id_page, contenu, revision, chiffrement FROM wiki_revisions GROUP BY id_page ORDER BY revision DESC;');
+    $res = $db->query('SELECT id_page, contenu, revision, chiffrement FROM wiki_revisions GROUP BY id_page ORDER BY revision DESC;');
 
-    while ($row = $st->fetchArray(\SQLITE3_ASSOC))
+    while ($row = $res->fetchArray(\SQLITE3_ASSOC))
     {
         // Ne pas convertir le contenu chiffré, de toute évidence
         if ($row['chiffrement'])
