@@ -178,19 +178,8 @@ class Exercices
                 continue;
             }
 
-            // ce qui est à l'actif est en débit sauf les valeurs négatives
-            // ce qui est au passif est en crédit, sauf valeurs négatives
-            // cf. ticket [16af9ccf92]
-            if ($row['position'] & \Garradin\Compta\Comptes::ACTIF)
-            {
-                $compte_debit = $solde < 0 ? NULL : $row['compte'];
-                $compte_credit = $solde > 0 ? NULL : $row['compte'];
-            }
-            else
-            {
-                $compte_debit = $solde > 0 ? NULL : $row['compte'];
-                $compte_credit = $solde < 0 ? NULL : $row['compte'];
-            }
+            $compte_debit = $solde < 0 ? NULL : $row['compte'];
+            $compte_credit = $solde > 0 ? NULL : $row['compte'];
 
             $diff += $solde;
             $solde = round(abs($solde), 2);
