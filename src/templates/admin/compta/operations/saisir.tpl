@@ -121,8 +121,8 @@
         window.changeMoyenPaiement = function()
         {
             var elm = $('#f_moyen_paiement');
-            toggleElementVisibility('.f_cheque', elm.value == 'CH');
-            toggleElementVisibility('.f_banque', elm.value != 'ES');
+            g.toggle('.f_cheque', elm.value == 'CH');
+            g.toggle('.f_banque', elm.value != 'ES');
         };
 
         changeMoyenPaiement();

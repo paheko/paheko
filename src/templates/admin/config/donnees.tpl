@@ -74,19 +74,19 @@
         <p class="help">Aucune copie de sauvegarde disponible.</p>
     {else}
         <dl>
-        {foreach from=$liste key="f" item="d"}
+            <dt><label for="f_select">Sélectionner une sauvegarde</label></dt>
             <dd>
-                <label>
-                    <input type="radio" name="file" value="{$f|escape}" />
-                    {$f|escape} — {$d|date_fr:'d/m/Y à H:i'}
-                </label>
+                <select name="file" id="f_select">
+                {foreach from=$liste key="f" item="d"}
+                    <option value="{$f|escape}">{$f|escape} — {$d|date_fr:'d/m/Y à H:i'}</option>
+                {/foreach}
+                </select>
             </dd>
-        {/foreach}
+            <dd class="help">
+                Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée. Cependant, afin de prévenir toute erreur
+                une sauvegarde des données sera réalisée avant la restauration.
+            </dd>
         </dl>
-        <p class="alert">
-            Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée. Cependant, afin de prévenir toute erreur
-            une sauvegarde des données sera réalisée avant la restauration.
-        </p>
         <p>
             {csrf_field key="backup_manage"}
             <input type="submit" name="restore" value="Restaurer cette sauvegarde" />

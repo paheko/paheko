@@ -58,9 +58,12 @@
 
 </form>
 
-<script type="text/javascript" src="{$admin_url}static/password.js"></script>
 <script type="text/javascript">
-initPasswordField('password_suggest', 'f_passe', 'f_repasse');
+{literal}
+g.script('scripts/password.js').onload = function () {
+    initPasswordField('password_suggest', 'f_passe', 'f_repasse');
+};
+{/literal}
 </script>
 
 

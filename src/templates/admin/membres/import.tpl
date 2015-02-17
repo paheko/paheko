@@ -75,7 +75,7 @@
 {literal}
 (function () {
     function toggleGalette() {
-        toggleElementVisibility('.galette', $('#f_type_galette').checked);
+        g.toggle('.galette', $('#f_type_galette').checked);
     }
 
     $('#f_type').onchange = toggleGalette;

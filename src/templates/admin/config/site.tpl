@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration — Site public" current="config"}
+{include file="admin/_head.tpl" title="Configuration — Site public" current="config" js=1}
 
 {if $error && $error != 'OK'}
     <p class="error">
@@ -32,13 +32,12 @@
 
     </form>
 
-    <script type="text/javascript" src="{$admin_url}static/code_editor.min.js"></script>
     <script type="text/javascript">
     var doc_url = "{$admin_url}doc/skel/";
     var skel_list = {$sources_json};
     var skel_current = "{$edit.file|escape}";
     </script>
-    <script type="text/javascript" src="{$admin_url}static/skel_editor.js"></script>
+    <script type="text/javascript" src="{$admin_url}static/scripts/skel_editor.js"></script>
 {else}
     <div class="templatesList">
         <h3>Squelettes du site</h3>
