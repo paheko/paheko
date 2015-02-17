@@ -1,5 +1,5 @@
 (function () {
-    window.garradin = {
+    window.g = window.garradin = {
     	url: window.location.href.replace(/\/admin\/.*?$/, ''),
     	admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
     	static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/')
@@ -24,7 +24,7 @@
 		}
 	};
 
-	garradin.onload = function(callback, dom = true)
+	g.onload = function(callback, dom = true)
     {
     	var eventName = dom ? 'DOMContentLoaded' : 'load';
 
@@ -38,7 +38,7 @@
 		}
     };
 
-    window.garradin.toggleElementVisibility = function(selector, visibility)
+    g.toggle = function(selector, visibility)
     {
     	if (!('classList' in document.documentElement))
     		return false;
@@ -47,7 +47,7 @@
     	{
     		for (var i = 0; i < selector.length; i++)
     		{
-    			toggleElementVisibility(selector[i], visibility);
+    			g.toggle(selector[i], visibility);
     		}
 
     		return true;
@@ -66,14 +66,14 @@
         return true;
     };
 
-    garradin.script = function (file) {
+    g.script = function (file) {
     	var script = document.createElement('script');
     	script.type = 'text/javascript';
     	script.src = this.static_url + file;
     	return document.head.appendChild(script);
     };
 
-    garradin.style = function (file) {
+    g.style = function (file) {
     	var link = document.createElement('link');
     	link.rel = 'stylesheet';
     	link.type = 'text/css';
@@ -82,7 +82,7 @@
     };
 
     // From KD2fw/js/xhr.js
-	garradin.load = function(b,d,f,e){var a=new XMLHttpRequest();if(!a||!b)return false;if(a.overrideMimeType)a.overrideMimeType('text/xml');b+=(b.indexOf('?')+1?'&':'?')+(+(new Date));a.onreadystatechange=function(){if(a.readyState!=4)return;if((s=a.status)==200){if(!d)return true;var c=a.responseText;if(f=='json'){return((j=window.JSON)&&j.parse)?j.parse(c):eval('('+c.replace(/[\n\r]/g,'')+')')}d(c)}else if(e){e(s)}};a.open('GET',b,true);a.send(null)};
+	g.load = function(b,d,f,e){var a=new XMLHttpRequest();if(!a||!b)return false;if(a.overrideMimeType)a.overrideMimeType('text/xml');b+=(b.indexOf('?')+1?'&':'?')+(+(new Date));a.onreadystatechange=function(){if(a.readyState!=4)return;if((s=a.status)==200){if(!d)return true;var c=a.responseText;if(f=='json'){return((j=window.JSON)&&j.parse)?j.parse(c):eval('('+c.replace(/[\n\r]/g,'')+')')}d(c)}else if(e){e(s)}};a.open('GET',b,true);a.send(null)};
 
 	var dateInputFallback = function ()
 	{
@@ -102,8 +102,8 @@
 			if (document.querySelector && !document.querySelector('input[type=date]'))
 				return false;
 
-			garradin.script('scripts/datepickr.js');
-			garradin.style('scripts/datepickr.css');
+			g.script('scripts/datepickr.js');
+			g.style('scripts/datepickr.css');
 		}
 		else
 		{
@@ -111,5 +111,5 @@
 		}
 	};
 
-	garradin.onload(dateInputFallback);
+	g.onload(dateInputFallback);
 })();
