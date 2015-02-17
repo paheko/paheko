@@ -133,5 +133,5 @@
 		parent.insertBefore(toolbar, txt.parentNode);
 	}
 
-	garradin.onload(launchToolbar);
+	g.onload(launchToolbar);
 } () );
