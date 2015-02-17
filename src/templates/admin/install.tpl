@@ -57,11 +57,13 @@
         <input type="submit" id="f_submit" name="save" value="Terminer l'installation &rarr;" />
     </p>
 
-    <script type="text/javascript" src="{$admin_url}static/password.js"></script>
     <script type="text/javascript" src="{$admin_url}static/loader.js"></script>
+
     <script type="text/javascript">
     {literal}
-    initPasswordField('password_suggest', 'f_passe_membre', 'f_repasse_membre');
+    g.script('scripts/password.js').onload = function () {
+        initPasswordField('password_suggest', 'f_passe', 'f_repasse');
+    };
     
     var form = $('form')[0];
     form.onsubmit = function () {

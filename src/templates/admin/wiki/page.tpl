@@ -1,5 +1,5 @@
 {if !empty($page.titre) && $can_read}
-    {include file="admin/_head.tpl" title=$page.titre current="wiki"}
+    {include file="admin/_head.tpl" title=$page.titre current="wiki" js=1}
 {else}
     {include file="admin/_head.tpl" title="Wiki" current="wiki"}
 {/if}
@@ -73,7 +73,7 @@
                         Vous dever activer javascript pour pouvoir déchiffrer cette page.
                     </div>
                 </noscript>
-                <script type="text/javascript" src="{$admin_url}static/wiki-encryption.js"></script>
+                <script type="text/javascript" src="{$admin_url}static/scripts/wiki-encryption.js"></script>
                 <div id="wikiEncryptedMessage">
                     <p class="alert">Cette page est chiffrée.
                         <input type="button" onclick="return wikiDecrypt(false);" value="Entrer le mot de passe" />

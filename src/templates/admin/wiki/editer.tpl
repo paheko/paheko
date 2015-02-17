@@ -117,23 +117,23 @@
 var page_id = '{$page.id|escape}';
 {literal}
 (function() {
-    document.getElementById('f_droit_lecture_categorie').onchange = function()
+    $('#f_droit_lecture_categorie').onchange = function()
     {
-        document.getElementById('f_droit_ecriture_normal').checked = false;
-        document.getElementById('f_droit_ecriture_normal').disabled = true;
+        $('#f_droit_ecriture_normal').checked = false;
+        $('#f_droit_ecriture_normal').disabled = true;
 
-        document.getElementById('f_droit_ecriture_categorie').checked = true;
-        document.getElementById('f_droit_ecriture_categorie').disabled = true;
+        $('#f_droit_ecriture_categorie').checked = true;
+        $('#f_droit_ecriture_categorie').disabled = true;
     };
 
-    document.getElementById('f_droit_lecture_normal').onchange = function() {
-        document.getElementById('f_droit_ecriture_normal').disabled = false;
-        document.getElementById('f_droit_ecriture_categorie').disabled = false;
+    $('#f_droit_lecture_normal').onchange = function() {
+        $('#f_droit_ecriture_normal').disabled = false;
+        $('#f_droit_ecriture_categorie').disabled = false;
     };
 
-    document.getElementById('f_droit_lecture_public').onchange = function() {
-        document.getElementById('f_droit_ecriture_normal').disabled = false;
-        document.getElementById('f_droit_ecriture_categorie').disabled = false;
+    $('#f_droit_lecture_public').onchange = function() {
+        $('#f_droit_ecriture_normal').disabled = false;
+        $('#f_droit_ecriture_categorie').disabled = false;
     };
 
     window.changeParent = function(parent, title)
@@ -143,18 +143,18 @@ var page_id = '{$page.id|escape}';
             return false;
         }
 
-        document.getElementById('f_parent').value = parent;
-        document.getElementById('current_parent_name').innerHTML = title;
+        $('#f_parent').value = parent;
+        $('#current_parent_name').innerHTML = title;
         return true;
     };
 
     window.browseWikiForParent = function()
     {
-        window.open('_chercher_parent.php?parent=' + document.getElementById('f_parent').value, 'browseParent',
+        window.open('_chercher_parent.php?parent=' + $('#f_parent').value, 'browseParent',
             'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
     };
 
-    if (document.getElementById('f_chiffrement').checked)
+    if ($('#f_chiffrement').checked)
     {
         wikiDecrypt(true);
     }

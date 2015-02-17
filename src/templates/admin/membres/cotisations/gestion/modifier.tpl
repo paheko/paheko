@@ -87,21 +87,21 @@
     if (!$('#f_periodicite_dates').checked)
         hide.push('.periode_dates');
 
-    toggleElementVisibility(hide, false);
+    g.toggle(hide, false);
 
     $('#f_categorie').onchange = function() {
-        toggleElementVisibility('.cat_compta', this.checked);
+        g.toggle('.cat_compta', this.checked);
         return true;
     };
 
     function togglePeriode()
     {
-        toggleElementVisibility(['.periode_jours', '.periode_dates'], false);
+        g.toggle(['.periode_jours', '.periode_dates'], false);
 
         if (this.checked && this.value == 'jours')
-            toggleElementVisibility('.periode_jours', true);
+            g.toggle('.periode_jours', true);
         else if (this.checked && this.value == 'date')
-            toggleElementVisibility('.periode_dates', true);
+            g.toggle('.periode_dates', true);
     }
 
     $('#f_periodicite_ponctuel').onchange = togglePeriode;

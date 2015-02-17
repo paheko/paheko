@@ -93,8 +93,8 @@
     window.changeMoyenPaiement = function()
     {
         var elm = $('#f_moyen_paiement');
-        toggleElementVisibility('.f_cheque', elm.value == 'CH');
-        toggleElementVisibility('.f_banque', elm.value != 'ES');
+        g.toggle('.f_cheque', elm.value == 'CH');
+        g.toggle('.f_banque', elm.value != 'ES');
     };
 
     changeMoyenPaiement();
@@ -105,19 +105,19 @@
         if (this.options[this.selectedIndex].getAttribute('data-compta'))
         {
             $('#f_montant').value = this.options[this.selectedIndex].getAttribute('data-amount'); 
-            toggleElementVisibility('.f_compta', true);
+            g.toggle('.f_compta', true);
             changeMoyenPaiement();
         }
         else
         {
-            toggleElementVisibility('.f_compta', false);
+            g.toggle('.f_compta', false);
             changeMoyenPaiement();
         }
     };
 
     if (!$('#f_id_cotisation').options[$('#f_id_cotisation').selectedIndex].getAttribute('data-compta'))
     {
-        toggleElementVisibility('.f_compta', false);
+        g.toggle('.f_compta', false);
     }
 } ());
 {/literal}
