@@ -123,6 +123,13 @@
 	        return true;
 	    }
 
+	    if (!pw_elm.value.match(new RegExp(pw_elm.getAttribute('pattern'))))
+	    {
+	    	strength_elm.className = strength_elm.className.split(' ')[0] + ' fail';
+	        strength_elm.innerHTML = 'Trop court&nbsp;!';
+	        return true;
+	    }
+
 	    var score = scorePassword(pw_elm.value);
 
 	    if (score > 80)
