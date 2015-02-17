@@ -5,7 +5,8 @@ require_once __DIR__ . '/_inc.php';
 
 if (!empty($_SERVER['QUERY_STRING']))
 {
-    $page = $wiki->getByURI($_SERVER['QUERY_STRING']);
+    $page_uri = Wiki::transformTitleToURI(rawurldecode($_SERVER['QUERY_STRING']));
+    $page = $wiki->getByURI($page_uri);
 }
 else
 {
@@ -14,7 +15,7 @@ else
 
 if (!$page)
 {
-    $tpl->assign('uri', $_SERVER['QUERY_STRING']);
+    $tpl->assign('uri', $page_uri);
     $tpl->assign('can_edit', $wiki->canWritePage(Wiki::ECRITURE_NORMAL));
     $tpl->assign('can_read', true);
 }
