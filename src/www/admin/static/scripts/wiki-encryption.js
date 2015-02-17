@@ -11,7 +11,7 @@
 			return;
 		}
 
-		garradin.script('scripts/gibberish-aes.min.js');
+		g.script('scripts/gibberish-aes.min.js');
 		aesEnabled = true;
 	}
 
@@ -22,9 +22,10 @@
 			.replace(/'/g, '&#039;').replace(/"/g, '&quot');
 
 		// Intertitres
-		content = content.replace(/==([^\n]*)==/g, '<h2>$1</h2>');
-		content = content.replace(/===([^\n]*)===/g, '<h3>$1</h3>');
-		content = content.replace(/====([^\n]*)====/g, '<h4>$1</h4>');
+		content = content.replace(/(=+)\s*([^\n=]*)\s*(\1\s*)*/g, function (match, h, content) {
+			h = h.length;
+			return '<h'+h+'>'+content+'</h'+h+'>';
+		});
 
 		// Gras
 		content = content.replace(/\*{2}([^\n]*)\*{2}/g, '<strong>$1</strong>');
@@ -36,9 +37,26 @@
 		content = content.replace(/\h*([?!;:»])(\s+|$)/g, '&nbsp;$1$2');
 		content = content.replace(/(^|\s+)([«])\h*/g, '$1$2&nbsp;');
 
+		function linkTag(match, url, label) {
+			if (url.match(/^https?:/))
+			{
+			}
+			else if (url.match(/@/) && !url.match(/^mailto:/))
+			{
+				url = 'mailto:' + url;
+			}
+			else
+			{
+				// Local wiki link
+				url = '?' + url;
+			}
+
+			return '<a href="' + url + '">' + label + '</a>';
+		}
+
 		// Liens
-		content = content.replace(/\[\[([^|]+)|([^\]]+)\]\]/g, '<a href="$2">$1</a>');
-		content = content.replace(/\[\[([^\]]+)\]\]/g, '<a href="$1">$1</a>');
+		content = content.replace(/\[{2}([^\|\]\n]+?)\|([^\]\n]+?)\]{2}/g, linkTag);
+		content = content.replace(/\[{2}(([^\]]+?))\]{2}/g, linkTag);
 
 		// nl2br
 		content = content.replace(/\r/g, '').replace(/\n/g, '<br />');
