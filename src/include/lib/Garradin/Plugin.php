@@ -269,7 +269,7 @@ class Plugin
 	{
 		$callable_name = '';
 
-		if (!is_callable($callback, true, $callable_name) || !is_string($callback))
+		if (!is_callable($callback, true, $callable_name) || !is_string($callable_name))
 		{
 			throw new \LogicException('Le callback donné n\'est pas valide.');
 		}
