@@ -168,17 +168,6 @@ CREATE TRIGGER wiki_recherche_contenu_chiffre AFTER INSERT ON wiki_revisions WHE
     END;
 
 /*
-CREATE TABLE wiki_fichiers (
-    id INTEGER PRIMARY KEY,
-    id_page INTEGER NOT NULL,
-    nom TEXT,
-    hash TEXT,
-
-    FOREIGN KEY (id_page) REFERENCES wiki_pages (id) -- Clé externe obligatoire
-);
-
-CREATE INDEX wiki_fichiers_id_page ON wiki_fichiers (id_page);
-
 CREATE TABLE wiki_suivi
 -- Suivi des pages
 (
@@ -322,6 +311,14 @@ CREATE TABLE plugins_signaux
     plugin TEXT NOT NULL REFERENCES plugins (id),
     callback TEXT NOT NULL,
     PRIMARY KEY (signal, plugin)
+);
+
+CREATE TABLE compta_rapprochement
+-- Rapprochement entre compta et relevés de comptes
+(
+    operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id),
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    auteur INTEGER NOT NULL REFERENCES membres (id)
 );
 
 CREATE TABLE fichiers

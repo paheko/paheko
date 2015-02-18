@@ -156,14 +156,14 @@ class DB extends \SQLite3
         switch (gettype($arg))
         {
             case 'double':
-                return SQLITE3_FLOAT;
+                return \SQLITE3_FLOAT;
             case 'integer':
             case 'boolean':
-                return SQLITE3_INTEGER;
+                return \SQLITE3_INTEGER;
             case 'NULL':
-                return SQLITE3_NULL;
+                return \SQLITE3_NULL;
             case 'string':
-                return SQLITE3_TEXT;
+                return \SQLITE3_TEXT;
             default:
                 throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
         }
@@ -252,13 +252,13 @@ class DB extends \SQLite3
 
         switch ($type)
         {
-            case SQLITE3_FLOAT:
+            case \SQLITE3_FLOAT:
                 return floatval($value);
-            case SQLITE3_INTEGER:
+            case \SQLITE3_INTEGER:
                 return intval($value);
-            case SQLITE3_NULL:
+            case \SQLITE3_NULL:
                 return 'NULL';
-            case SQLITE3_TEXT:
+            case \SQLITE3_TEXT:
                 return '\'' . $this->escapeString($value) . '\'';
         }
     }
