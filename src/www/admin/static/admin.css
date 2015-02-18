@@ -562,6 +562,7 @@ b.money {
     speak: none;
     font-variant: normal;
     text-transform: none;
+    position: relative;
 }
 
 .actions .icn, .icn.action {
@@ -576,6 +577,33 @@ b.money {
     font-family: "gicon", sans-serif;
     color: #9c4f15;
     text-shadow: 1px 1px 1px #999;
+    transition: all .2s;
+}
+
+.icn[title]:after {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    content: attr(title);
+    color: #666;
+    font-size: 10pt;
+    border-radius: .2em;
+    display: inline-block;
+    right: 2em;
+    top: 0;
+    bottom: 0;
+    padding: .2em .4em;
+    background: #ff9;
+    text-shadow: none;
+    white-space: pre;
+    transition: all .2s;
+}
+
+.icn[title]:hover:after {
+    display: inline-block;
+    opacity: 1;
+    visibility: visible;
 }
 
 .num a {
