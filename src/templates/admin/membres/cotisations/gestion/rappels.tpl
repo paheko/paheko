@@ -43,7 +43,7 @@
                             expiration
                         {/if}
                     </td>
-                    <th><a href="{$admin_url}membres/cotisations/rappel.php?id={$rappel.id|escape}">{$rappel.sujet|escape}</a></th>
+                    <th>{* FIXME liste des personnes ayant reçu ce rappel<a href="{$admin_url}membres/cotisations/rappel.php?id={$rappel.id|escape}">{$rappel.sujet|escape}</a>*}{$rappel.sujet|escape}</th>
                     <td class="actions">
                         <a class="icn" href="{$admin_url}membres/cotisations/gestion/rappel_modifier.php?id={$rappel.id|escape}" title="Modifier">✎</a>
                         <a class="icn" href="{$admin_url}membres/cotisations/gestion/rappel_supprimer.php?id={$rappel.id|escape}" title="Supprimer">✘</a>
