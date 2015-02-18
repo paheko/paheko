@@ -590,14 +590,21 @@ b.money {
     font-size: 10pt;
     border-radius: .2em;
     display: inline-block;
-    right: 2em;
+    right: 2.2em;
     top: 0;
     bottom: 0;
-    padding: .2em .4em;
+    padding: .3em .4em;
     background: #ff9;
     text-shadow: none;
     white-space: pre;
+    box-shadow: 0px 0px 2px #000;
     transition: all .2s;
+}
+
+dl dd.actions .icn[title]:after {
+    left: 2.2em;
+    right: auto;
+    z-index: 100000;
 }
 
 .icn[title]:hover:after {

@@ -26,9 +26,9 @@
         {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
         <dd class="actions">
             {if !$exercice.cloture}
-            <a href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id|escape}">Modifier</a>
-            | <a href="{$www_url}admin/compta/exercices/cloturer.php?id={$exercice.id|escape}">Clôturer</a>
-            | <a href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id|escape}">Supprimer</a>
+            <a class="icn" href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id|escape}" title="Modifier">✎</a>
+            <a class="icn" href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id|escape}" title="Supprimer">✘</a>
+            <a class="icn" href="{$www_url}admin/compta/exercices/cloturer.php?id={$exercice.id|escape}" title="Clôturer cet exercice">🔒</a>
             {/if}
         </dd>
         {/if}

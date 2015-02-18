@@ -24,14 +24,18 @@
             <tr class="niveau_{$compte.id|strlen}">
                 <th>{$compte.id|escape}</th>
                 <td class="libelle">{$compte.libelle|escape}</td>
-                <td class="actions">
+                <td>
                     {if !empty($compte.desactive)}
                         <em>Désactivé</em>
                     {else}
                         {$compte.position|get_position}
+                    {/if}
+                </td>
+                <td class="actions">
+                    {if empty($compte.desactive)}
                         {if !$compte.plan_comptable}
-                            | <a href="{$www_url}admin/compta/comptes/modifier.php?id={$compte.id|escape}">Modifier</a>
-                            | <a href="{$www_url}admin/compta/comptes/supprimer.php?id={$compte.id|escape}">Supprimer</a>
+                            <a class="icn" href="{$www_url}admin/compta/comptes/modifier.php?id={$compte.id|escape}" title="Modifier">✎</a>
+                            <a class="icn" href="{$www_url}admin/compta/comptes/supprimer.php?id={$compte.id|escape}" title="Supprimer">✘</a>
                         {else}
                             <em>*</em>
                         {/if}

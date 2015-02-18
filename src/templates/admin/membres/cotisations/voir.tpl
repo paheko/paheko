@@ -43,9 +43,9 @@
                     <td>{if $co.a_jour}<b class="confirm">À jour</b>{else}<b class="error">En retard</b>{/if}</td>
                     <td>{$co.date|format_sqlite_date_to_french}</td>
                     <td class="actions">
-                        <a href="{$admin_url}membres/cotisations/ajout.php?id={$co.id_membre|escape}&amp;cotisation={$cotisation.id|escape}">Saisir</a>
-                        | <a href="{$admin_url}membres/cotisations.php?id={$co.id_membre|escape}" title="Voir toutes les cotisations de ce membre">Cotisations</a>
-                        | <a href="{$admin_url}membres/cotisations/rappels.php?id={$co.id_membre|escape}">Rappels</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/ajout.php?id={$co.id_membre|escape}&amp;cotisation={$cotisation.id|escape}" title="Saisir une cotisation">➕</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations.php?id={$co.id_membre|escape}" title="Voir toutes les cotisations de ce membre">𝍢</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/rappels.php?id={$co.id_membre|escape}" title="Rappels envoyés à ce membre">⚠</a>
                     </td>
                 </tr>
             {/foreach}
