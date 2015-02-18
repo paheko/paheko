@@ -272,7 +272,7 @@ class Exercices
     public function getCurrent()
     {
         $db = DB::getInstance();
-        return $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) FROM compta_exercices
+        return $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) AS fin FROM compta_exercices
             WHERE cloture = 0 LIMIT 1;', true);
     }
 
