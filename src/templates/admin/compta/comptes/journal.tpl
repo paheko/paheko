@@ -1,11 +1,12 @@
-{include file="admin/_head.tpl" title="Journal : `$compte.id` - `$compte.libelle`" current="compta/gestion" body_id="rapport"}
-
 {if isset($tpl.get.suivi)}
-<ul class="actions">
-    <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}">Journal de caisse</a></li>
-    {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}<li><strong><a href="{$www_url}admin/compta/banques/ajouter.php">Ajouter un compte bancaire</a></strong></li>{/if}
-</ul>
+    {include file="admin/_head.tpl" title="Journal : `$compte.id` - `$compte.libelle`" current="compta/banques" body_id="rapport"}
+
+    <ul class="actions">
+        <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
+        <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}">Journal de caisse</a></li>
+    </ul>
+{else}
+    {include file="admin/_head.tpl" title="Journal : `$compte.id` - `$compte.libelle`" current="compta/gestion" body_id="rapport"}
 {/if}
 
 
