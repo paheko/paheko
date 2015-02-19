@@ -66,13 +66,25 @@ if (!$debut || !$fin)
 {
     $date = $exercice['fin'];
     $debut = date('Y-m-01', $date);
-    $fin = date('Y-m-31', $date);
+    $fin = date('Y-m-t', $date);
 }
+
+if (substr($debut, 0, 7) == substr($fin, 0, 7))
+{
+    $tpl->assign('prev', Utils::modifyDate($debut, '-1 month', true));
+    $tpl->assign('next', Utils::modifyDate($fin, '+1 month', true));
+}
+
+$solde_initial = $solde_final = 0;
 
 $tpl->assign('compte', $compte);
 $tpl->assign('debut', $debut);
 $tpl->assign('fin', $fin);
-$tpl->assign('journal', $rapprochement->getJournal($compte['id'], $debut, $fin));
+
+$tpl->assign('journal', $rapprochement->getJournal($compte['id'], $debut, $fin, $solde_initial, $solde_final));
+
+$tpl->assign('solde_initial', $solde_initial);
+$tpl->assign('solde_final', $solde_final);
 
 $tpl->assign('error', $error);
 

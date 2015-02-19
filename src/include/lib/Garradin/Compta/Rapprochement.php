@@ -10,30 +10,38 @@ use \Garradin\Compta\Comptes_Bancaires;
 
 class Rapprochement
 {
-    public function getJournal($compte, $debut, $fin)
+    public function getJournal($compte, $debut, $fin, &$solde_initial, &$solde_final)
     {
         $db = DB::getInstance();
 
         $exercice = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
 
+        $query = 'SELECT 
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND id_exercice = :exercice AND date < :date), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND id_exercice = :exercice AND date < :date), 0)';
+
+        $solde_initial = $solde = $db->simpleQuerySingle($query, false, [
+            'compte'    =>  $compte,
+            'date'      =>  $debut,
+            'exercice'  =>  $exercice
+        ]);
+
         $query = '
-        	SELECT j.*, strftime(\'%s\', j.date) AS date, 
-            	(CASE WHEN j.compte_debit = :compte THEN j.montant ELSE -(j.montant) END) AS solde,
-            	r.date
+            SELECT j.*, strftime(\'%s\', j.date) AS date,
+                (CASE WHEN j.compte_debit = :compte THEN j.montant ELSE -(j.montant) END) AS solde,
+                r.date AS date_rapprochement
             FROM compta_journal AS j
-            	LEFT JOIN compta_rapprochement AS r ON r.operation = j.id
+                LEFT JOIN compta_rapprochement AS r ON r.operation = j.id
             WHERE (compte_debit = :compte OR compte_credit = :compte) AND id_exercice = :exercice
-            	AND j.date >= :debut AND j.date <= :fin
+                AND j.date >= :debut AND j.date <= :fin
             ORDER BY date ASC;';
 
         $result = $db->simpleStatementFetch($query, DB::ASSOC, [
-        	'compte'	=>	$compte,
-        	'debut'		=>	$debut,
-        	'fin'		=>	$fin,
-        	'exercice'	=>	$exercice
+            'compte'    =>  $compte,
+            'debut'     =>  $debut,
+            'fin'       =>  $fin,
+            'exercice'  =>  $exercice
         ]);
-
-        $solde = 0.0;
 
         foreach ($result as &$row)
         {
@@ -41,29 +49,31 @@ class Rapprochement
             $row['solde'] = $solde;
         }
 
+        $solde_final = $solde;
+
         return $result;
     }
 
     public function record($compte, $operations, $auteur)
     {
-    	if (!is_array($operations))
-    	{
-    		throw new \UnexpectedValueException('$operations doit être un tableau.');
-    	}
+        if (!is_array($operations))
+        {
+            throw new \UnexpectedValueException('$operations doit être un tableau.');
+        }
 
-    	$db = DB::getInstance();
-    	$db->exec('BEGIN;');
-    	$st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (operation, auteur) 
-    		VALUES (:operation, :auteur);');
-    	$st->bindValue(':auteur', (int)$auteur, \SQLITE3_INTEGER);
+        $db = DB::getInstance();
+        $db->exec('BEGIN;');
+        $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (operation, auteur) 
+            VALUES (:operation, :auteur);');
+        $st->bindValue(':auteur', (int)$auteur, \SQLITE3_INTEGER);
 
-    	foreach ($operations as $row)
-    	{
-    		$st->bindValue(':operation', (int)$row, \SQLITE3_INTEGER);
-    		$st->execute();
-    	}
+        foreach ($operations as $row)
+        {
+            $st->bindValue(':operation', (int)$row, \SQLITE3_INTEGER);
+            $st->execute();
+        }
 
-    	$db->exec('END;');
-    	return true;
+        $db->exec('END;');
+        return true;
     }
 }
