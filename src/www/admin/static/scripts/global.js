@@ -172,6 +172,11 @@
 						else
 							parent.className = parent.className.replace(/ checked/, '');
 					};
+
+					if (checkBoxes[j].checked)
+					{
+						checkBoxes[j].onchange({target: checkBoxes[j]});
+					}
 				}
 			}
 		});

@@ -22,25 +22,7 @@ if (!$compte)
 
 $error = false;
 
-if (Utils::post('save'))
-{
-    if (!Utils::CSRF_check('compta_rapprocher_' . $compte['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        try
-        {
-            $rapprochement->record($compte['id'], Utils::post('rapprocher'), $user['id']);
-            Utils::redirect('/admin/compta/banques/rapprocher.php?id=');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
-	}
-}
+$solde_initial = $solde_final = 0;
 
 $debut = Utils::get('debut');
 $fin = Utils::get('fin');
@@ -69,19 +51,40 @@ if (!$debut || !$fin)
     $fin = date('Y-m-t', $date);
 }
 
+$journal = $rapprochement->getJournal($compte['id'], $debut, $fin, $solde_initial, $solde_final);
+
+// Enregistrement des cases cochées
+if (Utils::post('save'))
+{
+    if (!Utils::CSRF_check('compta_rapprocher_' . $compte['id']))
+    {
+        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    }
+    else
+    {
+        try
+        {
+            $rapprochement->record($compte['id'], $journal, Utils::post('rapprocher'), $user['id']);
+            Utils::redirect(Utils::getSelfURL());
+        }
+        catch (UserException $e)
+        {
+            $error = $e->getMessage();
+        }
+	}
+}
+
 if (substr($debut, 0, 7) == substr($fin, 0, 7))
 {
     $tpl->assign('prev', Utils::modifyDate($debut, '-1 month', true));
     $tpl->assign('next', Utils::modifyDate($fin, '+1 month', true));
 }
 
-$solde_initial = $solde_final = 0;
-
 $tpl->assign('compte', $compte);
 $tpl->assign('debut', $debut);
 $tpl->assign('fin', $fin);
 
-$tpl->assign('journal', $rapprochement->getJournal($compte['id'], $debut, $fin, $solde_initial, $solde_final));
+$tpl->assign('journal', $journal);
 
 $tpl->assign('solde_initial', $solde_initial);
 $tpl->assign('solde_final', $solde_final);
