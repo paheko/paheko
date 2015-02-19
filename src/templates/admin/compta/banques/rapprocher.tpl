@@ -88,6 +88,7 @@
         </tfoot>
     </table>
     <p class="submit">
+        {csrf_field key="compta_rapprocher_`$compte.id`"}
         <input type="submit" name="save" value="Enregistrer" />
     </p>
 </form>

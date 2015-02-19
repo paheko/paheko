@@ -54,22 +54,44 @@ class Rapprochement
         return $result;
     }
 
-    public function record($compte, $operations, $auteur)
+    public function record($compte, $journal, $cases, $auteur)
     {
-        if (!is_array($operations))
+        if (!is_array($journal))
         {
-            throw new \UnexpectedValueException('$operations doit être un tableau.');
+            throw new \UnexpectedValueException('$journal doit être un tableau.');
+        }
+
+        if (!is_array($cases) && empty($cases))
+        {
+            $cases = [];
         }
 
         $db = DB::getInstance();
         $db->exec('BEGIN;');
+
+        // Synchro des trucs cochés
         $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (operation, auteur) 
             VALUES (:operation, :auteur);');
         $st->bindValue(':auteur', (int)$auteur, \SQLITE3_INTEGER);
 
-        foreach ($operations as $row)
+        foreach ($journal as $row)
         {
-            $st->bindValue(':operation', (int)$row, \SQLITE3_INTEGER);
+            if (!array_key_exists($row['id'], $cases))
+                continue;
+
+            $st->bindValue(':operation', (int)$row['id'], \SQLITE3_INTEGER);
+            $st->execute();
+        }
+
+        // Synchro des trucs NON cochés
+        $st = $db->prepare('DELETE FROM compta_rapprochement WHERE operation = :id;');
+
+        foreach ($journal as $row)
+        {
+            if (array_key_exists($row['id'], $cases))
+                continue;
+
+            $st->bindValue(':id', (int)$row['id'], \SQLITE3_INTEGER);
             $st->execute();
         }
 
