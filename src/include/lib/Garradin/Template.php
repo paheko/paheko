@@ -32,6 +32,7 @@ class Template extends \Template_Lite
 
         $this->assign('www_url', WWW_URL);
         $this->assign('self_url', Utils::getSelfUrl());
+        $this->assign('self_url_no_qs', Utils::getSelfUrl(true));
 
         $this->assign('is_logged', false);
     }
