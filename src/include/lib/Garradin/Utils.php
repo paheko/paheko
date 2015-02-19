@@ -72,11 +72,11 @@ class Utils
         return mktime($d['h'], $d['min'], 0, $d['m'], $d['d'], $d['y']);
     }
 
-    static public function modifyDate($str, $change)
+    static public function modifyDate($str, $change, $as_timestamp = false)
     {
         $date = \DateTime::createFromFormat('Y-m-d', $str);
         $date->modify($change);
-        return $date->format('Y-m-d');
+        return ($as_timestamp ? $date->getTimestamp() : $date->format('Y-m-d'));
     }
 
     static public function checkDate($str)
