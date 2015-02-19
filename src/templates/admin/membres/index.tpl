@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Liste des membres" current="membres"}
+{include file="admin/_head.tpl" title="Liste des membres" current="membres" js=1}
 
 {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
 <ul class="actions">
@@ -16,7 +16,7 @@
 {/if}
 
 {if !empty($membres_cats)}
-<form method="get" action="{$self_url|escape}" class="filterCategory">
+<form method="get" action="{$self_url|escape}" class="shortFormRight">
     <fieldset>
         <legend>Filtrer par catégorie</legend>
         <select name="cat" id="f_cat" onchange="this.form.submit();">
@@ -33,7 +33,7 @@
 </form>
 {/if}
 
-<form method="get" action="{$admin_url}membres/{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}recherche.php{/if}" class="searchMember">
+<form method="get" action="{$admin_url}membres/{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}recherche.php{/if}" class="shortFormLeft">
     <fieldset>
         <legend>Rechercher un membre</legend>
         <input type="text" name="r" value="" />
@@ -48,12 +48,14 @@
     {if !empty($liste)}
     <table class="list">
         <thead class="userOrder">
-            {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
-            <td class="{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro unique"><a href="?o=id&amp;a" class="icn up">&uarr;</a><a href="?o=id&amp;d" class="icn dn">&darr;</a></td>
-            {foreach from=$champs key="c" item="champ"}
-                <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title|escape} <a href="?o={$c|escape}&amp;a" class="icn up">&uarr;</a><a href="?o={$c|escape}&amp;d" class="icn dn">&darr;</a></td>
-            {/foreach}
-            <td></td>
+            <tr>
+                {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
+                <td class="{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro unique"><a href="?o=id&amp;a" class="icn up">&uarr;</a><a href="?o=id&amp;d" class="icn dn">&darr;</a></td>
+                {foreach from=$champs key="c" item="champ"}
+                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title|escape} <a href="?o={$c|escape}&amp;a" class="icn up">&uarr;</a><a href="?o={$c|escape}&amp;d" class="icn dn">&darr;</a></td>
+                {/foreach}
+                <td></td>
+            </tr>
         </thead>
         <tbody>
             {foreach from=$liste item="membre"}
@@ -74,9 +76,6 @@
     </table>
 
     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
-    <p class="checkUncheck">
-        <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
-    </p>
     <p class="actions">
         <em>Pour les membres cochés :</em>
         <input type="submit" name="move" value="Changer de catégorie" />
@@ -93,36 +92,6 @@
     {/if}
 
     </form>
-
-    <script type="text/javascript">
-    {literal}
-    (function() {
-        var checked = false;
-
-        window.checkUncheck = function()
-        {
-            var elements = document.getElementsByTagName('input');
-            var el_length = elements.length;
-
-            for (i = 0; i < el_length; i++)
-            {
-                var elm = elements[i];
-
-                if (elm.type == 'checkbox')
-                {
-                    if (checked)
-                        elm.checked = false;
-                    else
-                        elm.checked = true;
-                }
-            }
-
-            checked = checked ? false : true;
-            return true;
-        }
-    }())
-    {/literal}
-    </script>
 {else}
     {if !empty($liste)}
     <table class="list">

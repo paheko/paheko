@@ -9,7 +9,7 @@
 {/if}
 
 
-<form method="get" action="{$admin_url}membres/recherche.php" class="searchMember">
+<form method="get" action="{$admin_url}membres/recherche.php" class="shortFormLeft">
     <fieldset>
         <legend>Rechercher un membre</legend>
         <dl>

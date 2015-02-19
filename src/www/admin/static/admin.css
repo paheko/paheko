@@ -65,6 +65,7 @@ body#popup {
     padding: 0.4em 0.4em 0.4em 1em;
     display: block;
     text-decoration: none;
+    transition: background .3s;
 }
 
 .header .menu a:hover {
@@ -216,7 +217,7 @@ input[type=number], input[type=date] {
     min-width: 2em;
 }
 
-input[type=submit], input[type=button] {
+input[type=submit], input[type=button], input[type=checkbox] {
     padding: 0.3em;
     cursor: pointer;
     transition: opacity .5s ease;
@@ -407,6 +408,7 @@ table.list th, table.list td {
 table.list tr {
     border: 1px solid rgb(217, 134, 40);
     border: 1px solid rgba(217, 134, 40, 0.5);
+    transition: background .5s
 }
 
 table.list tr:nth-child(even) {
@@ -421,6 +423,11 @@ table.list.multi tr:nth-child(even) {
 table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
+}
+
+table.list tr.checked {
+    color: #633;
+    background: #ffc;
 }
 
 table.list .error {
@@ -701,7 +708,7 @@ dl dd.actions .icn[title]:after {
     margin: 0.2em 1em;
 }
 
-.filterCategory {
+.shortFormRight {
     width: 30em;
     float: right;
     font-size: 80%;
@@ -709,15 +716,15 @@ dl dd.actions .icn[title]:after {
     margin-left: 1em;
 }
 
-.searchMember {
+.shortFormLeft {
     font-size: 80%;
 }
 
-.searchMember .special {
+.shortFormLeft .special {
     display: none;
 }
 
-.filterCategory p.submit {
+.shortFormRight p.submit {
     margin-top: -2em;
     float: right;
 }
