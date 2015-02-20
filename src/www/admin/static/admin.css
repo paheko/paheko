@@ -1193,3 +1193,22 @@ pre.sql_schema {
     display: none;
 }
 
+form#f_upload fieldset {
+    position: relative;
+}
+
+form .fileUpload .uploadHelper_progress {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    right: 1em;
+    text-align: center;
+    padding: 1em;
+    background: #ddd;
+    box-shadow: 0px 0px 5px #999;
+    border-radius: .5em;
+}
+
+form .fileUpload progress {
+    width: 50%;
+}

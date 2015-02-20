@@ -16,6 +16,13 @@ if (!$page)
     throw new UserException('Page introuvable.');
 }
 
+// Vérification des hash avant upload
+if ($hash_check = Utils::post('uploadHelper_hashCheck'))
+{
+    echo json_encode(Fichiers::checkHashList($hash_check));
+    exit;
+}
+
 if (Utils::post('submit'))
 {
     if (!Utils::CSRF_check('file_upload_'.$page['id']))
@@ -41,6 +48,6 @@ $tpl->assign('max_size', Utils::getMaxUploadSize());
 $tpl->assign('error', $error);
 $tpl->assign('sent', isset($_GET['sent']) ? true : false);
 
-$tpl->assign('custom_js', ['file_upload.js']);
+$tpl->assign('custom_js', ['upload_helper.min.js']);
 
 $tpl->display('admin/wiki/_fichiers.tpl');

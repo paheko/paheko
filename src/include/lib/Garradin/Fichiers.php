@@ -4,17 +4,6 @@ namespace Garradin;
 
 class Fichiers
 {
-	protected $allowed_files_extensions = [
-		'jpeg', 'jpg', 'jpe', 'gif', 'png', 'svg', 'svgz', 'psd', 'bmp', 'ico', // Images
-		'pdf', 'txt', 'rtf', 'tex', 'lyx', 'html', 'epub', 'mobi', 'ps', 'xml', // Textes
-		'sxw', 'sxc', 'sxd', 'sxi', 'sxf', 'odt', 'odg', 'odp', 'ods', 'odc', 'odf', // Libre Office
-		'docx', 'xlsx', 'doc', 'xls', 'ppsx', 'pps', 'pptx', 'ppt', 'pub', // Microsoft
-		'webm', 'mp4', 'flv', 'mkv', 'avi', 'mov', // Vidéos
-		'mp3', 'm4a', 'aac', 'ogg', 'mid', // Audio
-		'zip', 'rar', '7z', 'gz', 'xz', 'bz2', 'bz', 'tar', // Archives
-		'sqlite', 'swf', // Divers
-	];
-
 	public $type;
 	public $titre;
 	public $nom;
@@ -181,6 +170,27 @@ class Fichiers
 			false, 
 			trim(strtolower($hash))
 		);
+	}
+
+	/**
+	 * Retourne un tableau de hash trouvés dans la DB parmi une liste de hash fournis
+	 * @param  array  $list Liste de hash à vérifier
+	 * @return array        Liste des hash trouvés
+	 */
+	static public function checkHashList($list)
+	{
+		$hash_list = '';
+		$db = DB::getInstance();
+
+		foreach ($list as $hash)
+		{
+			$hash_list .= '\'' . $db->escapeString($hash) . '\',';
+		}
+
+		$hash_list = substr($hash_list, 0, -1);
+
+		return $db->queryFetchAssoc('SELECT hash, 1
+			FROM fichiers_contenu WHERE hash IN (' . $hash_list . ');');
 	}
 
 	/**
