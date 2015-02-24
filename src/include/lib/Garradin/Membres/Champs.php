@@ -343,13 +343,17 @@ class Champs
 
         $config = Config::getInstance();
 
-        if (!array_key_exists($config->get('champ_identite'), $champs))
+        $identite = $config->get('champ_identite');
+
+        if ($identite != 'id' && !array_key_exists($identite, $champs))
         {
             throw new UserException('Le champ '.$config->get('champ_identite')
                 .' est défini comme identité des membres et ne peut donc être supprimé des fiches membres.');
         }
 
-        if (!array_key_exists($config->get('champ_identifiant'), $champs))
+        $identifiant = $config->get('champ_identifiant');
+
+        if ($identifiant != 'id' && !array_key_exists($identifiant, $champs))
         {
             throw new UserException('Le champ '.$config->get('champ_identifiant')
                 .' est défini comme identifiant à la connexion et ne peut donc être supprimé des fiches membres.');
