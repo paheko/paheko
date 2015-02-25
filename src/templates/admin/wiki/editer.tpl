@@ -85,9 +85,9 @@
 
 
     <fieldset class="wikiText">
-        <p>
+        <div class="textEditor">
             <textarea name="contenu" id="f_contenu" cols="70" rows="35">{form_field data=$page name=contenu}</textarea>
-        </p>
+        </div>
     </fieldset>
 
     <fieldset class="wikiRevision">

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Syntaxe SkrivML</title>
+	<style type="text/css">
+	body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
+	    margin: 0;
+	    padding: 0;
+	}
+	h1  { font-size: 2em; }
+	h2  { font-size: 1.5em; }
+	h3  { font-size: 1.2em; }
+	h4  { font-size: 1em; }
+	h5  { font-size: 0.9em; }
+	h6  { font-size: 0.8em; }
+	article, aside, figure, footer, header, hgroup, menu, nav, section { display: block; }
+
+	body {
+		font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+		padding: .8em;
+	}
+	pre, samp {
+		display: block;
+		background: #ccc;
+		color: #000;
+		border-radius: .5em;
+		padding: .4em;
+		white-space: normal;
+	}
+
+	samp {
+		background: #999;
+		font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+	}
+
+	p, header, article {
+		margin: .8em 0;
+		clear: both;
+	}
+
+	h1, h2, h3, h4, samp, pre {
+		margin: .4em 0;
+	}
+
+	ul, ol {
+		margin-left: 1.5em;
+	}
+
+	table {
+		border-collapse: collapse;
+	}
+	table td, table th {
+		border: 1px solid #666;
+		padding: .3em;
+	}
+
+	a {
+		color: blue;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	</style>
+</head>
+
+<body>
+
+<header>
+	<p>Garradin utilise la syntaxe <a href="http://markup.skriv.org/language/syntax">SkrivML</a> pour 
+		le formatage du texte dans le wiki.</p>
+</header>
+
+<section>
+	<h2>Styles de base</h2>
+	<article>
+		<h3>Gras</h3>
+		<pre>Utiliser **deux astérisques**.</pre>
+		<samp>Utiliser <b>deux astérisques</b>.</samp>
+	</article>
+
+	<article>
+		<h3>Italique</h3>
+		<pre>Pourquoi pas des ''guillemets''.</pre>
+		<samp>Pourquoi pas des <i>guillemets</i>.</samp>
+	</article>
+
+	<article>
+		<h3>Souligné</h3>
+		<pre>Il faut des __tirets bas__ pour souligner.</pre>
+		<samp>Il faut des <u>tirets bas</u> pour souligner.</samp>
+	</article>
+
+	<article>
+		<h3>Barré</h3>
+		<pre>--Tirets hauts-- pour barrer.</pre>
+		<samp><s>Tirets hauts</s> pour barrer.</samp>
+	</article>
+
+	<article>
+		<h3>Exposant</h3>
+		<pre>XXI^^ème^^ siècle</pre>
+		<samp>XXI<sup>ème</sup> siècle.</samp>
+	</article>
+
+
+	<article>
+		<h3>Indice</h3>
+		<pre>CO,,2,,</pre>
+		<samp>CO<sub>2</sub></samp>
+	</article>
+
+	<article>
+		<p>Attention, ces styles ne fonctionnent que si le code entoure des mots complets, ça ne fonctionne pas au milieu de mots.</p>
+		<pre>Un **mot** en gras. Mais on ne peut pas cou**per** un mot avec du gras.</pre>
+		<samp>Un <b>mot</b> en gras. Mais on ne peut pas cou**per** un mot avec du gras.</samp>
+	</article>
+</section>
+
+<section>
+	<h2>Titres</h2>
+	<article>
+		<p>Doivent être précédé d'un ou plusieurs signe égal. Peuvent aussi être suivi du même nombre de signe égal.</p>
+		<pre>= Titre niveau 1<br />== Titre niveau 2<br />=== Titre niveau 3 ===<br />==== Titre de niveau 4 ====</pre>
+		<samp><h1>Titre niveau 1</h1><h2>Titre niveau 2</h2><h3>Titre niveau 3</h3><h4>Titre de niveau 4</h4></samp>
+	</article>
+</section>
+
+
+<section>
+	<h2>Listes</h2>
+	<article>
+		<h3>Listes non ordonnées</h3>
+		<pre>* Item 1<br />* Item 2<br />** Sub-item 2.1<br />** Sub-item 2.2<br />*** Sub-item 2.2.1</pre>
+		<samp><ul><li>Item 1</li><li>Item 2<ul><li>Sub-item 2.1</li><li>Sub-item 2.2<ul><li>Sub-item 2.2.1</li></ul></li></ul></li></ul></samp>
+	</article>
+	<article>
+		<h3>Listes ordonnées</h3>
+		<pre># Item 1<br /># Item 2<br />## Sub-item 2.1<br />## Sub-item 2.2<br />### Sub-item 2.2.1</pre>
+		<samp><ol><li>Item 1</li><li>Item 2<ol><li>Sub-item 2.1</li><li>Sub-item 2.2<ol><li>Sub-item 2.2.1</li></ol></li></ol></li></ol></samp>
+	</article>
+</section>
+
+<section>
+	<h2>Liens</h2>
+	<article>
+		<h3>Lien wiki</h3>
+		<pre>[[Autre page du wiki]]</pre>
+		<samp><a title="Autre_page_du_wiki">Autre page du wiki</a></samp>
+	</article>
+	<article>
+		<h3>Lien wiki avec libellé différent</h3>
+		<pre>Voir [[cette page|Autre page du wiki]]</pre>
+		<samp>Voir <a title="Autre_page_du_wiki">cette page</a></samp>
+	</article>
+	<article>
+		<h3>Lien externe</h3>
+		<pre>[[http://garradin.eu/]]</pre>
+		<samp><a>http://garradin.eu/</a></samp>
+	</article>
+</section>
+
+<section>
+	<h2>Tableaux</h2>
+	<article>
+		<pre>!! Colonne 1 !! Colonne 2<br />|| Cellule 1 || Cellule 2<br />|| Cellule 3 || Cellule 4</pre>
+		<samp><table><thead><tr><th>Colonne 1</th><th>Colonne 2</th></tr></thead><tbody><tr><td>Cellule 1</td><td>Cellule 2</td></tr><tr><td>Cellule 3</td><td>Cellule 4</td></tr></tbody></table></samp>
+	</article>
+</section>
+
+<section>
+	<h3>Autres</h3>
+	<p>Consulter la documentation de <a href="http://markup.skriv.org/language/syntax">SkrivML</a>.</p>
+</section>
+
+</body>
+</html>

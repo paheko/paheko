@@ -43,6 +43,10 @@ body#popup {
     background: url("bg01.png") no-repeat -140px -100px, url("bg00.png") repeat-y -140px bottom, #fff;
 }
 
+body#transparent {
+    background: transparent;
+}
+
 .header {
     color: #fff;
 }
@@ -255,13 +259,6 @@ input[type=submit], input[type=button], input[type=checkbox] {
     opacity: 0;
     transition: all 0.5s ease;
     z-index: 2;
-}
-
-input[type=button].icn {
-    font-size: 1.2em;
-    font-weight: bold;
-    padding: 0 0.3em;
-    font-family: "Courier New", Courier, monospace;
 }
 
 select.large {
@@ -562,7 +559,7 @@ b.money {
     text-align: center;
 }
 
-.icn {
+.icn, .icnl {
     font-family: "gicon", sans-serif;
     font-style: normal;
     font-weight: normal;
@@ -737,10 +734,7 @@ dl dd.actions .icn[title]:after {
 
 fieldset.wikiText {
     border: none;
-}
-
-fieldset.wikiText textarea, fieldset.skelEdit textarea {
-    width: 100%;
+    padding: 0;
 }
 
 fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
@@ -800,30 +794,6 @@ fieldset.wikiRevision #f_modification {
 .wikiContent ol {
     list-style-type: decimal;
 }
-
-.toolbar input {
-    padding: .1em .2em;
-    border: 1px solid #ccc;
-    color: #000;
-    background: #fff;
-    cursor: pointer;
-    margin: 0 .5em .5em .5em;
-    border-bottom: 2px solid #9c4f15;
-    border-radius: .2em;
-}
-
-.toolbar input:hover {
-    color: #fff;
-    background: #d98628;
-    border-color: transparent;
-}
-
-.toolbar .title { font-size: 1.2em; }
-.toolbar .bold { font-weight: bold; }
-.toolbar .italic { font-style: italic; }
-.toolbar .code { font-family: Courier New, Courier, mono; }
-.toolbar .strike { text-decoration: line-through; }
-.toolbar .link { color: blue; text-decoration: underline; }
 
 .wikiFooter {
     font-size: 0.8em;

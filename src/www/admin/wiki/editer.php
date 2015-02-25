@@ -85,8 +85,6 @@ $tpl->assign('page', $page);
 $tpl->assign('time', time());
 $tpl->assign('date', $date ? $date : $page['date_creation']);
 
-$tpl->assign('custom_js', ['wikitoolbar.js', 'wiki-encryption.js']);
+$tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
 
 $tpl->display('admin/wiki/editer.tpl');
-
-?>
