@@ -326,14 +326,12 @@ CREATE TABLE fichiers
 (
     id INTEGER NOT NULL PRIMARY KEY,
     nom TEXT NOT NULL, -- nom de fichier (par exemple image1234.jpeg)
-    type TEXT NOT NULL, -- Type MIME
+    type TEXT NULL, -- Type MIME
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
-    titre TEXT NOT NULL, -- Titre/description
-    date TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d'ajout ou mise à jour du fichier
+    datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Date d'ajout ou mise à jour du fichier
     id_contenu INTEGER NOT NULL REFERENCES fichiers_contenu (id)
 );
 
-CREATE INDEX fichiers_titre ON fichiers (titre);
 CREATE INDEX fichiers_date ON fichiers (date);
 
 CREATE TABLE fichiers_contenu
@@ -342,7 +340,7 @@ CREATE TABLE fichiers_contenu
     id INTEGER NOT NULL PRIMARY KEY,
     hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
     taille INTEGER NOT NULL, -- Taille en octets
-    contenu BLOB
+    contenu BLOB NULL
 );
 
 CREATE UNIQUE INDEX fichiers_hash ON fichiers_contenu (hash);
