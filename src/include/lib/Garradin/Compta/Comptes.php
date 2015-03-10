@@ -64,15 +64,24 @@ class Comptes
         if (empty($data['id']))
         {
             $new_id = $data['parent'];
-            $nb_sous_comptes = $db->simpleQuerySingle('SELECT COUNT(*) FROM compta_comptes WHERE parent = ?;', false, $new_id);
+            $letters = range('A', 'Z');
+            $sub_accounts = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes 
+                WHERE parent = ? ORDER BY id COLLATE NOCASE ASC;', $data['parent']);
 
-            // Pas plus de 26 sous-comptes par compte, parce que l'alphabet s'arrête à 26 lettres
-            if ($nb_sous_comptes >= 26)
+            foreach ($letters as $letter)
+            {
+                if (!in_array($new_id . $letter, $sub_accounts))
+                {
+                    $new_id .= $letter;
+                    break;
+                }
+            }
+
+            // On a exaucé le nombre de sous-comptes possibles
+            if ($new_id == $data['parent'])
             {
                 throw new UserException('Nombre de sous-comptes maximal atteint pour ce compte parent-ci.');
             }
-
-            $new_id .= chr(65+(int)$nb_sous_comptes);
         }
         else
         {

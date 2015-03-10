@@ -30,7 +30,7 @@ if (Utils::post('add'))
                 'bic'           =>  Utils::post('bic'),
             ]);
 
-            if (Utils::post('solde'))
+            if (Utils::post('solde') > 0)
             {
             	$exercices = new Compta\Exercices;
             	$exercice = $exercices->getCurrent();
