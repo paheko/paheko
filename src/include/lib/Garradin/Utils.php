@@ -390,6 +390,7 @@ class Utils
         if (!self::$skriv)
         {
             self::$skriv = new \KD2\SkrivLite;
+            self::$skriv->registerExtension('fichier', ['Fichiers', 'SkrivHTML']);
         }
 
         $str = self::$skriv->render($str);

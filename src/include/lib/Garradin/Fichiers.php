@@ -35,8 +35,15 @@ class Fichiers
 	 */
 	public function getThumbnail($width, $height, $crop = false)
 	{
+		// FIXME
 	}
 
+	/**
+	 * Lier un fichier à un contenu
+	 * @param  string $type       Type de contenu (constantes LIEN_*)
+	 * @param  integer $foreign_id ID du contenu lié
+	 * @return boolean TRUE en cas de succès
+	 */
 	public function linkTo($type, $foreign_id)
 	{
 		$db = DB::getInstance();
@@ -83,16 +90,6 @@ class Fichiers
 		$db->simpleExec('DELETE FROM fichiers WHERE id = ?;', (int)$this->id);
 
 		return $db->exec('END;');
-	}
-
-	/**
-	 * Modifie les informations du fichier
-	 * @param  string $nom   Le nom du fichier (avec extension)
-	 * @return boolean TRUE en cas de succès
-	 */
-	public function edit($nom)
-	{
-
 	}
 
 	/**
@@ -222,7 +219,7 @@ class Fichiers
 	/**
 	 * Upload du fichier par POST
 	 * @param  array  $file  Caractéristiques du fichier envoyé
-	 * @return boolean TRUE en cas de succès
+	 * @return object Un objet Fichiers en cas de succès
 	 */
 	static public function upload($file)
 	{
@@ -282,6 +279,12 @@ class Fichiers
 		return new Fichiers($db->lastInsertRowID());
 	}
 
+	/**
+	 * Envoie un fichier déjà stocké
+	 * @param  string $name Nom du fichier
+	 * @param  string $hash Hash SHA1 du contenu du fichier
+	 * @return object       Un objet Fichiers en cas de succès
+	 */
 	static public function uploadExistingHash($name, $hash)
 	{
 		$db = DB::getInstance();
@@ -303,5 +306,22 @@ class Fichiers
 		]);
 
 		return new Fichiers($db->lastInsertRowID());
+	}
+
+	static public function SkrivHTML($args, $content, $skriv)
+	{
+		if (empty($args['id']) && !empty($content))
+		{
+			$args = ['id' => (int)$content];
+		}
+
+		if (empty($args['id']))
+		{
+			return $this->parseError('Aucun numéro de fichier indiqué.');
+		}
+
+		$db = DB::getInstance();
+
+		// FIXME
 	}
 }
