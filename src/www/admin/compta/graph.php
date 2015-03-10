@@ -69,7 +69,7 @@ if (Static_Cache::expired('graph_' . $graph))
 			$line->width = 2;
 			$plot->add($line);
 
-			if ($i > count($colors))
+			if ($i >= count($colors))
 				$i = 0;
 		}
 	}
