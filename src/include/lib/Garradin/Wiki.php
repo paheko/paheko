@@ -516,5 +516,3 @@ class Wiki
         return $tree;
     }
 }
-
-?>
