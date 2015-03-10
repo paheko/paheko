@@ -5,9 +5,8 @@ namespace Garradin;
 class Fichiers
 {
 	public $type;
-	public $titre;
 	public $nom;
-	public $date;
+	public $datetime;
 	public $hash;
 	public $taille;
 	public $id;
@@ -18,7 +17,7 @@ class Fichiers
 
 	public function __construct($id)
 	{
-		$data = DB::getInstance()->simpleQuerySingle('SELECT *, strftime(\'%s\', date) AS date
+		$data = DB::getInstance()->simpleQuerySingle('SELECT *, strftime(\'%s\', datetime) AS datetime
 			FROM fichiers WHERE id = ?;', true, (int)$id);
 
 		foreach ($data as $key=>$value)
@@ -88,11 +87,10 @@ class Fichiers
 
 	/**
 	 * Modifie les informations du fichier
-	 * @param  string $titre Le titre du fichier
 	 * @param  string $nom   Le nom du fichier (avec extension)
 	 * @return boolean TRUE en cas de succès
 	 */
-	public function edit($titre, $nom)
+	public function edit($nom)
 	{
 
 	}
@@ -194,37 +192,116 @@ class Fichiers
 	}
 
 	/**
+	 * Récupération du message d'erreur
+	 * @param  integer $error Code erreur du $_FILE
+	 * @return string Message d'erreur
+	 */
+	static public function getErrorMessage($error)
+	{
+		switch ($error)
+		{
+			case UPLOAD_ERR_INI_SIZE:
+				return 'Le fichier excède la taille permise par la configuration du serveur.';
+			case UPLOAD_ERR_FORM_SIZE:
+				return 'Le fichier excède la taille permise par le formulaire.';
+			case UPLOAD_ERR_PARTIAL:
+				return 'L\'envoi du fichier a été interrompu.';
+			case UPLOAD_ERR_NO_FILE:
+				return 'Aucun fichier n\'a été reçu.';
+			case UPLOAD_ERR_NO_TMP_DIR:
+				return 'Pas de répertoire temporaire pour stocker le fichier.';
+			case UPLOAD_ERR_CANT_WRITE:
+				return 'Impossible d\'écrire le fichier sur le disque du serveur.';
+			case UPLOAD_ERR_EXTENSION:
+				return 'Une extension du serveur a interrompu l\'envoi du fichier.';
+			default:
+				return 'Erreur inconnue: ' . $error;
+		}
+	}
+
+	/**
 	 * Upload du fichier par POST
 	 * @param  array  $file  Caractéristiques du fichier envoyé
-	 * @param  string $titre Titre descriptif du fichier
 	 * @return boolean TRUE en cas de succès
 	 */
-	static public function upload($file, $titre, $allow_anything = false)
+	static public function upload($file)
 	{
-		// FIXME traiter les images envoyées redimensionnées par javascript (base64)
-
-		$name = '...';
-		// FIXME name sanitization
-
-		if (!$allow_anything && preg_match('/\.(?:php\d*|cgi|pl|perl|jsp|asp|py|exe|com|bat|vb[se]?|chm|pif|reg|ws[cfh]|scr|asp)$/i', $name))
+		if (!empty($file['error']))
 		{
-			throw new UserException('Extension de fichier interdite.');
+			throw new UserException(self::getErrorMessage($file['error']));
 		}
 
-		$ext = substr($name, strrpos($name, '.')+1);
-		$ext = strtolower($ext);
-
-		if (!$allow_anything && !array_key_exists($ext, $this->allowed_files))
+		if (empty($file['size']) || empty($file['name']))
 		{
-			throw new UserException('Ce type de fichier n\'est pas autorisé.');
+			throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
 		}
 
-		$bytes = file_get_contents($path, false, null, -1, 1024);
+		if (!is_uploaded_file($file['tmp_name']))
+		{
+			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
+		}
+
+		$name = preg_replace('/[^\d\w._-]/ui', '', $file['name']);
+
+		$bytes = file_get_contents($file['tmp_name'], false, null, -1, 1024);
 		$type = \KD2\FileInfo::guessMimeType($bytes);
 
-		if (!$allow_anything && !$type)
+		if (!$type)
 		{
-			throw new UserException('Type de fichier inconnu.');
+			$ext = substr($name, strrpos($name, '.')+1);
+			$ext = strtolower($ext);
+
+			$type = \KD2\FileInfo::getMimeTypeFromFileExtension($ext);
 		}
+
+		$is_image = preg_match('/^image\//', $type);
+
+		$hash = sha1_file($file['tmp_name']);
+		$size = filesize($file['tmp_name']);
+
+		$db = DB::getInstance();
+		$db->exec('BEGIN;');
+
+		$db->simpleInsert('fichiers_contenu', [
+			'hash'		=>	$hash,
+			'taille'	=>	(int)$size,
+			'contenu'	=>	[\SQLITE3_BLOB, file_get_contents($file['tmp_name'])],
+		]);
+
+		$id_contenu = $db->lastInsertRowID();
+
+		$db->simpleInsert('fichiers', [
+			'id_contenu'	=>	(int)$id_contenu,
+			'nom'			=>	$name,
+			'type'			=>	$type,
+			'image'			=>	(int)$is_image,
+		]);
+
+		$db->exec('END;');
+
+		return new Fichiers($db->lastInsertRowID());
+	}
+
+	static public function uploadExistingHash($name, $hash)
+	{
+		$db = DB::getInstance();
+		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
+
+		$file = $db->simpleQuerySingle('SELECT * FROM fichiers 
+			INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu AND fc.hash = ?;', true, trim($hash));
+
+		if (!$file)
+		{
+			throw new UserException('Le fichier à copier n\'existe pas (aucun hash ne correspond à '.$hash.').');
+		}
+
+		$db->simpleInsert('fichiers', [
+			'id_contenu'	=>	(int)$file['id_contenu'],
+			'nom'			=>	$name,
+			'type'			=>	$file['type'],
+			'image'			=>	(int)$file['image'],
+		]);
+
+		return new Fichiers($db->lastInsertRowID());
 	}
 }

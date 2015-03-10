@@ -1,4 +1,6 @@
 (function () {
+	var wiki_id = window.location.search.match(/id=(\d+)/)[1];
+
 	g.style('scripts/wiki_editor.css');
 
 	g.script('scripts/text_editor.min.js').onload = function () {
@@ -36,7 +38,7 @@
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
 			form.target = 'editorFrame';
-			form.action = g.admin_url + 'wiki/_preview.php?id=' + window.location.search.match(/id=(\d+)/)[1];
+			form.action = g.admin_url + 'wiki/_preview.php?id=' + wiki_id;
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);
@@ -47,6 +49,11 @@
 		var openSyntaxHelp = function ()
 		{
 			openIFrame(g.admin_url + 'wiki/_syntaxe.html');
+		};
+
+		var openFileInsert = function ()
+		{
+			openIFrame(g.admin_url + 'wiki/_fichiers.php?page=' + wiki_id);
 		};
 
 		var openIFrame = function(url)
@@ -112,7 +119,7 @@
 			if (url = window.prompt('Adresse URL ?')) 
 				wrapTags("[[", "|" + url + ']]'); 
 		} );
-		appendButton('icnl file', "📎", function () {}, 'Insérer fichier / image');
+		appendButton('icnl file', "📎", openFileInsert, 'Insérer fichier / image');
 
 		appendButton('ext icnl preview', '⎙', openPreview, 'Prévisualiser');
 

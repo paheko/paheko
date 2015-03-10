@@ -23,29 +23,60 @@ if ($hash_check = Utils::post('uploadHelper_hashCheck'))
     exit;
 }
 
-if (Utils::post('submit'))
+if (Utils::post('submit') || isset($_POST['uploadHelper_status']))
 {
-    if (!Utils::CSRF_check('file_upload_'.$page['id']))
+    if (!Utils::CSRF_check('wiki_upload_'.$page['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    else
+    elseif (Utils::post('uploadHelper_status') > 0)
+    {
+        $error = 'Un seul fichier peut être envoyé en même temps.';
+    }
+    elseif (!empty($_POST['fichier']) || isset($_FILES['fichier']))
     {
         try {
-            $fichier = Fichiers::upload($_FILES['fichier'], Utils::post('titre'));
-            $fichier->link(Fichiers::LIEN_WIKI, $page['id']);
+            if (isset($_POST['uploadHelper_status']) && !empty($_POST['fichier']))
+            {
+                $fichier = Fichiers::uploadExistingHash(Utils::post('fichier'), Utils::post('uploadHelper_fileHash'));
+            }
+            else
+            {
+                $fichier = Fichiers::upload($_FILES['fichier']);
+            }
 
-            Utils::redirect('/admin/wiki/_fichiers.php?ok');
+            // Lier le fichier à la page wiki
+            $fichier->linkTo(Fichiers::LIEN_WIKI, $page['id']);
+            $uri = '/admin/wiki/_fichiers.php?page=' . $page['id'] . '&sent';
+
+            if (isset($_POST['uploadHelper_status']))
+            {
+                echo json_encode(['redirect' => WWW_URL . $uri]);
+                exit;
+            }
+
+            Utils::redirect($uri);
         }
         catch (UserException $e)
         {
             $error = $e->getMessage();
         }
     }
+    else
+    {
+        $error = 'Aucun fichier envoyé.';
+    }
+
+    if (isset($_POST['uploadHelper_status']))
+    {
+        echo json_encode(['error' => $error]);
+        exit;
+    }
 }
 
 $tpl->assign('max_size', Utils::getMaxUploadSize());
 $tpl->assign('error', $error);
+$tpl->assign('page', $page);
 $tpl->assign('sent', isset($_GET['sent']) ? true : false);
 
 $tpl->assign('custom_js', ['upload_helper.min.js']);

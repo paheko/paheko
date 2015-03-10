@@ -151,7 +151,7 @@ class DB extends \SQLite3
         return true;
     }
 
-    public function getArgType($arg, $name = '')
+    public function getArgType(&$arg, $name = '')
     {
         switch (gettype($arg))
         {
@@ -164,6 +164,15 @@ class DB extends \SQLite3
                 return \SQLITE3_NULL;
             case 'string':
                 return \SQLITE3_TEXT;
+            case 'array':
+                if (count($arg) == 2 
+                    && in_array($arg[0], [\SQLITE3_FLOAT, \SQLITE3_INTEGER, \SQLITE3_NULL, \SQLITE3_TEXT, \SQLITE3_BLOB]))
+                {
+                    $type = $arg[0];
+                    $arg = $arg[1];
+
+                    return $type;
+                }
             default:
                 throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
         }
@@ -192,7 +201,8 @@ class DB extends \SQLite3
             {
                 foreach ($args as $i=>$arg)
                 {
-                    $statement->bindValue((int)$i+1, $arg, $this->getArgType($arg, $i+1));
+                    $type = $this->getArgType($arg, $i+1);
+                    $statement->bindValue((int)$i+1, $arg, $type);
                 }
             }
             else
@@ -204,7 +214,8 @@ class DB extends \SQLite3
                         throw new \InvalidArgumentException(__FUNCTION__ . ' requires argument to be a named-associative array, but key '.$key.' is an integer.');
                     }
 
-                    $statement->bindValue(':'.$key, $value, $this->getArgType($value, $key));
+                    $type = $this->getArgType($value, $key);
+                    $statement->bindValue(':'.$key, $value, $type);
                 }
             }
         }
