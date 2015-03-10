@@ -56,6 +56,15 @@
 			openIFrame(g.admin_url + 'wiki/_fichiers.php?page=' + wiki_id);
 		};
 
+		window.te_insertFile = function (file)
+		{
+			var tag = '<<fichier '+file+'>>';
+			
+			t.insertAtPosition(t.getSelection().start, tag);
+			
+			closeIFrame();
+		};
+
 		var openIFrame = function(url)
 		{
 			if (t.iframe && t.iframe.src == t.base_url + url)

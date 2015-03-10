@@ -24,6 +24,11 @@ uploadHelper($('#f_fichier'), {
     bytes: 'o',
     size_error_msg: 'Le fichier %file fait %size, soit plus que la taille maximale autorisée de %max_size.'
 });
+
+function insertHelper(data) {
+    window.parent.te_insertFile(data.file);
+    return true;
+}
 {/literal}
 </script>
 
