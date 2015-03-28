@@ -58,5 +58,6 @@ if (!empty($_POST['delete']))
 $tpl->assign('error', $error);
 $tpl->assign('membre', $membre);
 $tpl->assign('cotisation', $co);
+$tpl->assign('nb_operations', $m_cotisations->countOperationsCompta($co['id']));
 
 $tpl->display('admin/membres/cotisations/supprimer.tpl');

@@ -20,8 +20,16 @@
             Êtes-vous sûr de vouloir supprimer la cotisation membre
             du {$cotisation.date|format_sqlite_date_to_french}&nbsp;?
         </h3>
-        <p class="alert">Attention si des écritures comptables sont liées à cette cotisation
-            elles ne seront pas supprimées.</p>
+        {if $nb_operations > 0}
+            <p class="alert">
+                Attention il y a {$nb_operations|escape} écritures comptables liées à cette cotisation.
+                Celles-ci ne seront pas supprimées lors de la suppression de la cotisation membre.
+            </p>
+        {else}
+            <p class="help">
+                Aucune écriture comptable n'est liée à cette cotisation.
+            </p>
+        {/if}
     </fieldset>
     </fieldset>
 
