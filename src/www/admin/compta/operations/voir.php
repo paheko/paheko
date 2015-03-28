@@ -48,6 +48,6 @@ if ($operation['id_auteur'])
     $tpl->assign('nom_auteur', $auteur['identite']);
 }
 
-$tpl->display('admin/compta/operations/voir.tpl');
+$tpl->assign('related_members', $journal->listRelatedMembers($operation['id']));
 
-?>
+$tpl->display('admin/compta/operations/voir.tpl');

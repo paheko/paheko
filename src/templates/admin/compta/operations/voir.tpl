@@ -34,14 +34,14 @@
 
         <dt>Catégorie</dt>
         <dd>
-            <a href="{$www_url}admin/compta/operations/?{if $categorie.type == Garradin\Compta\Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin\Compta\Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
-            <a href="{$www_url}admin/compta/operations/?cat={$operation.id_categorie|escape}">{$categorie.intitule|escape}</a>
+            <a href="{$admin_url}compta/operations/?{if $categorie.type == Garradin\Compta\Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin\Compta\Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
+            <a href="{$admin_url}compta/operations/?cat={$operation.id_categorie|escape}">{$categorie.intitule|escape}</a>
         </dd>
     {/if}
 
     <dt>Exercice</dt>
     <dd>
-        <a href="{$www_url}admin/compta/exercices/">{$exercice.libelle|escape}</a>
+        <a href="{$admin_url}compta/exercices/">{$exercice.libelle|escape}</a>
         | Du {$exercice.debut|date_fr:'d/m/Y'} au {$exercice.fin|date_fr:'d/m/Y'}
         | <strong>{if $exercice.cloture}Clôturé{else}En cours{/if}</strong>
     </dd>
@@ -50,12 +50,23 @@
     <dd>
         {if $operation.id_auteur}
             {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
-                <a href="{$www_url}admin/membres/fiche.php?id={$operation.id_auteur|escape}">{$nom_auteur|escape}</a>
+                <a href="{$admin_url}membres/fiche.php?id={$operation.id_auteur|escape}">{$nom_auteur|escape}</a>
             {else}
                 {$nom_auteur|escape}
             {/if}
         {else}
             <em>membre supprimé</em>
+        {/if}
+    </dd>
+
+    <dt>Opération liée à</dt>
+    <dd>
+        {if empty($related_members)}
+            Aucun membre n'est lié à cette opération.
+        {else}
+            {foreach from=$related_members item="membre"}
+                <a href="{$admin_url}membres/{if $membre.id_cotisation}cotisations{else}fiche{/if}.php?id={$membre.id_membre|escape}">{if $membre.id_cotisation}Cotisation pour {/if}{$membre.identite|escape}</a>
+            {/foreach}
         {/if}
     </dd>
 
