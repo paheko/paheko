@@ -5,6 +5,7 @@ namespace Garradin\Compta;
 use \Garradin\DB;
 use \Garradin\Utils;
 use \Garradin\UserException;
+use \Garradin\Config;
 
 class Journal
 {
@@ -162,6 +163,11 @@ class Journal
         return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id = ?;', true, $id);
     }
 
+    /**
+     * Compte le nombre d'écritures liées à un membre
+     * @param  integer $id Numéro de membre
+     * @return integer     Nombre d'écritures liées
+     */
     public function countForMember($id)
     {
         $db = DB::getInstance();
@@ -169,11 +175,32 @@ class Journal
             FROM compta_journal WHERE id_auteur = ?;', false, (int)$id);
     }
 
+    /**
+     * Lister les écritures liées à un membre
+     * @param  integer $id       Identifiant de membre
+     * @param  integer $exercice Identifiant d'exercice
+     * @return array           Liste des écritures liées
+     */
     public function listForMember($id, $exercice)
     {
         $db = DB::getInstance();
         return $db->simpleStatementFetch('SELECT * FROM compta_journal
             WHERE id_auteur = ? AND id_exercice = ?;', \SQLITE3_ASSOC, (int)$id, (int)$exercice);
+    }
+
+    /**
+     * Lister les membres liés à cette écriture
+     * @param  integer $id Numéro d'écriture
+     * @return array     Liste des membres liés
+     */
+    public function listRelatedMembers($id)
+    {
+        $db = DB::getInstance();
+        $champ_id = Config::getInstance()->get('champ_identite');
+
+        return $db->simpleStatementFetch('SELECT id_membre, id_cotisation, m.'.$champ_id.' AS identite
+            FROM membres_operations AS mo INNER JOIN membres AS m ON mo.id_membre = m.id
+            WHERE mo.id_operation = ?;', \SQLITE3_ASSOC, (int)$id);
     }
 
     protected function _checkFields(&$data)
