@@ -287,6 +287,10 @@ class Cotisations
 	 */
 	public function listForMember($id)
 	{
+		// TODO: récupérer ici le solde payé pour une cotisation, pour savoir si tout a été payé
+		// (pour gérer par exemple les paiements effectués en plusieurs versements)
+		// mais pour le moment le fonctionnement de compta_journal est trop compliqué pour arriver
+		// à récupérer un solde dans une requête simple, la requête serait trop lourde donc on laisse tomber
 		$db = DB::getInstance();
 		return $db->simpleStatementFetch('SELECT cm.*, c.intitule, c.duree, c.debut, c.fin, c.montant,
 			(SELECT COUNT(*) FROM membres_operations WHERE id_cotisation = cm.id) AS nb_operations

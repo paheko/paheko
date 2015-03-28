@@ -83,7 +83,7 @@
                 </td>
                 <td>
                     {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE && !empty($c.nb_operations)}
-                        {$c.nb_operations} écritures
+                        <a href="{$admin_url}compta/operations/cotisation.php?id={$c.id|escape}">{$c.nb_operations|escape} écriture{if $c.nb_operations > 1}s{/if}</a>
                     {/if}
                 </td>
                 <td class="actions">
