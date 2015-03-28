@@ -137,7 +137,7 @@ class Cotisations
 	public function delete($id)
 	{
 		$db = DB::getInstance();
-		$db->simpleExec('DELETE FROM membres_operations WHERE id_cotisation = ?;', (int)$id);
+		$db->simpleExec('UPDATE membres_operations SET id_cotisation = NULL WHERE id_cotisation = ?;', (int)$id);
 		return $db->simpleExec('DELETE FROM cotisations_membres WHERE id = ?;', (int) $id);
 	}
 
@@ -158,6 +158,14 @@ class Cotisations
 		return $db->simpleStatementFetch('SELECT * FROM compta_journal
 			WHERE id IN (SELECT id_operation FROM membres_operations
 				WHERE id_cotisation = ?);', \SQLITE3_ASSOC, (int)$id);
+	}
+
+	/**
+	 * Compte les opérations comptables liées à cette cotisation
+	 */
+	public function countOperationsCompta($id)
+	{
+		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM membres_operations WHERE id_cotisation = ?;', false, (int)$id);
 	}
 
 	/**
