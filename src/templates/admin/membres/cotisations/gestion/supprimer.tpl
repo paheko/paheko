@@ -23,6 +23,8 @@
         </h3>
         <p class="help">
             Attention, l'historique des membres ayant cotisé à cette cotisation sera supprimé.
+            Si des écritures comptables sont liées à l'historique des cotisations, elles ne seront pas supprimées,
+            et la comptabilité demeurera inchangée.
         </p>
     </fieldset>
 
