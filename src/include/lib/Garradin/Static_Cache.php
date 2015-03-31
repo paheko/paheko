@@ -79,7 +79,7 @@ class Static_Cache
 	static public function remove($id)
 	{
 		$path = self::_getCachePath($id);
-		return unlink($path);
+		return @unlink($path);
 	}
 
 	static public function clean($expire = self::CLEAN_EXPIRE)
