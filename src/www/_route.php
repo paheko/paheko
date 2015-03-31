@@ -24,6 +24,13 @@ elseif (preg_match('!/admin/plugin/(.+)/(.*)!', $uri, $match))
 	$_GET['_u'] = $match[2];
 	require __DIR__ . '/admin/plugin.php';
 }
+elseif (preg_match('!/f/([\d\w]+)/(t/)?(.+)!', $uri, $match))
+{
+	$_GET['id'] = $match[1];
+	$_GET['thumb'] = $match[2];
+	$_GET['file'] = $match[3];
+	require __DIR__ . '/file.php';
+}
 else
 {
 	require __DIR__ . '/index.php';

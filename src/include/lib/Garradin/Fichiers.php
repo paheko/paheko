@@ -4,21 +4,32 @@ namespace Garradin;
 
 class Fichiers
 {
-	public $type;
+	public $id;
 	public $nom;
+	public $type;
+	public $image;
 	public $datetime;
 	public $hash;
 	public $taille;
-	public $id;
+	public $id_contenu;
 
 	const LIEN_COMPTA = 'compta_journal';
 	const LIEN_WIKI = 'wiki_pages';
 	const LIEN_MEMBRES = 'membres';
 
+	const TAILLE_MINIATURE = 200;
+
 	public function __construct($id)
 	{
-		$data = DB::getInstance()->simpleQuerySingle('SELECT *, strftime(\'%s\', datetime) AS datetime
-			FROM fichiers WHERE id = ?;', true, (int)$id);
+		$data = DB::getInstance()->simpleQuerySingle('SELECT fichiers.*, fc.hash, fc.taille,
+			strftime(\'%s\', datetime) AS datetime
+			FROM fichiers INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu
+			WHERE fichiers.id = ?;', true, (int)$id);
+
+		if (!$data)
+		{
+			throw new \InvalidArgumentException('Ce fichier n\'existe pas.');
+		}
 
 		foreach ($data as $key=>$value)
 		{
@@ -26,16 +37,16 @@ class Fichiers
 		}
 	}	
 
-	/**
-	 * Envoie une miniature à la taille indiquée au client HTTP
-	 * @param  integer $width  Largeur
-	 * @param  integer $height Hauteur
-	 * @param  boolean $crop   TRUE si on doit cropper aux dimensions indiquées
-	 * @return void
-	 */
-	public function getThumbnail($width, $height, $crop = false)
+	public function getURL($thumbnail = false)
 	{
-		// FIXME
+		$url = WWW_URL . 'f/' . base_convert((int)$this->id, 10, 36) . '/';
+
+		if ($thumbnail)
+		{
+			$url .= 't/';
+		}
+
+		return $url . $this->nom;
 	}
 
 	/**
@@ -69,6 +80,76 @@ class Fichiers
 	}
 
 	/**
+	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
+	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Membres::getLoggedUser, ou false
+	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
+	 */
+	public function checkAccess($user = false)
+	{
+		// On regarde déjà si le fichier n'est pas lié au wiki
+		$wiki = DB::getInstance()->simpleQuerySingle('SELECT wp.droit_lecture FROM fichiers_' . self::LIEN_WIKI . ' AS link
+			INNER JOIN wiki_pages AS wp ON wp.id = link.id
+			WHERE link.fichier = ? LIMIT 1;', false, (int)$this->id);
+
+		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
+		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
+		{
+			return true;
+		}
+			
+		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
+		if (empty($user['droits']))
+		{
+			return false;
+		}
+
+		if ($wiki !== false)
+		{
+			// S'il n'a même pas droit à accéder au wiki c'est mort
+			if ($user['droits']['wiki'] < Membres::DROIT_ACCES)
+			{
+				return false;
+			}
+
+			// On renvoie à l'objet Wiki pour savoir si l'utilisateur a le droit de lire ce fichier
+			$_w = new Wiki;
+			$_w->setRestrictionCategorie($user['id_categorie'], $user['droits']['wiki']);
+			return $_w->canReadPage($wiki);
+		}
+
+		// On regarde maintenant si le fichier est lié à la compta
+		$compta = DB::getInstance()->simpleQuerySingle('SELECT 1 
+			FROM fichiers_' . self::LIEN_COMPTA . ' WHERE fichier = ? LIMIT 1;', false, (int)$this->id);
+
+		if ($compta && $user['droits']['compta'] >= Membres::DROIT_ACCES)
+		{
+			// OK si accès à la compta
+			return true;
+		}
+
+		// Enfin, si le fichier est lié à un membre
+		$membre = DB::getInstance()->simpleQuerySingle('SELECT id 
+			FROM fichiers_' . self::LIEN_MEMBRES . ' WHERE fichier = ? LIMIT 1;', false, (int)$this->id);
+
+		if ($membre !== false)
+		{
+			// De manière évidente, l'utilisateur a le droit d'accéder aux fichiers liés à son profil
+			if ((int)$membre == $user['id'])
+			{
+				return true;
+			}
+
+			// Pour voir les fichiers des membres il faut pouvoir les gérer
+			if ($user['droits']['membres'] >= Membres::DROIT_ECRITURE)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Supprime le fichier
 	 * @return boolean TRUE en cas de succès
 	 */
@@ -89,14 +170,15 @@ class Fichiers
 
 		$db->simpleExec('DELETE FROM fichiers WHERE id = ?;', (int)$this->id);
 
+		$cache_id = 'fichiers.' . $this->id_contenu;
+		
+		Static_Cache::remove($cache_id);
+		Static_Cache::remove($cache_id . '.thumb');
+
 		return $db->exec('END;');
 	}
 
-	/**
-	 * Envoie le fichier au client HTTP
-	 * @return void
-	 */
-	public function serve()
+	protected function getFilePathFromCache()
 	{
 		// Le cache est géré par ID contenu, pas ID fichier, pour minimiser l'espace disque utilisé
 		$cache_id = 'fichiers.' . $this->id_contenu;
@@ -109,14 +191,63 @@ class Fichiers
 			fclose($blob);
 		}
 
+		return Static_Cache::getPath($cache_id);
+	}
+
+	/**
+	 * Envoie le fichier au client HTTP
+	 * @return void
+	 */
+	public function serve()
+	{
+		return $this->_serve($this->getFilePathFromCache(), $this->type, $this->nom, $this->taille);
+	}
+
+	/**
+	 * Envoie une miniature à la taille indiquée au client HTTP
+	 * @return void
+	 */
+	public function serveThumbnail()
+	{
+		if (!$this->image)
+		{
+			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+		}
+
+		$cache_id = 'fichiers.' . $this->id_contenu . '.thumb';
 		$path = Static_Cache::getPath($cache_id);
 
+		// La miniature n'existe pas dans le cache statique, on la crée
+		if (!Static_Cache::exists($cache_id))
+		{
+			$source = $this->getFilePathFromCache();
+			\KD2\Image::resize($source, $path, self::TAILLE_MINIATURE);
+		}
+
+		return $this->_serve($path, $this->type);
+	}
+
+	/**
+	 * Servir un fichier local en HTTP
+	 * @param  string $path Chemin vers le fichier local
+	 * @param  string $type Type MIME du fichier
+	 * @param  string $name Nom du fichier avec extension
+	 * @param  integer $size Taille du fichier en octets (facultatif)
+	 * @return boolean TRUE en cas de succès
+	 */
+	protected function _serve($path, $type, $name = false, $size = null)
+	{
 		// Désactiver le cache
 		header('Pragma: public');
 		header('Expires: -1');
 		header('Cache-Control: public, must-revalidate, post-check=0, pre-check=0');
 
-		header('Content-Disposition: attachment; filename="' . $this->nom . '"');
+		header('Content-Type: '.$type);
+
+		if ($name)
+		{
+			header('Content-Disposition: attachment; filename="' . $name . '"');
+		}
 		
 		// Utilisation de XSendFile si disponible
 		if (ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
@@ -143,13 +274,16 @@ class Fichiers
 
 		@ini_set('zlib.output_compression', 'Off');
 
-		header('Content-Length: '. (int)$this->taille);
+		if ($size)
+		{
+			header('Content-Length: '. (int)$size);
+		}
 
 		ob_clean();
 		flush();
 
 		// Sinon on envoie le fichier à la mano
-		readfile($path);
+		return readfile($path);
 	}
 
 	/**
@@ -238,6 +372,7 @@ class Fichiers
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
+		$name = preg_replace('/[ ]/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $file['name']);
 
 		$bytes = file_get_contents($file['tmp_name'], false, null, -1, 1024);
@@ -310,18 +445,37 @@ class Fichiers
 
 	static public function SkrivHTML($args, $content, $skriv)
 	{
-		if (empty($args['id']) && !empty($content))
+		if (empty($args['id']) && !empty($args[0]))
 		{
-			$args = ['id' => (int)$content];
+			$args = ['id' => (int)$args[0]];
 		}
 
 		if (empty($args['id']))
 		{
-			return $this->parseError('Aucun numéro de fichier indiqué.');
+			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
 		}
 
 		$db = DB::getInstance();
 
-		// FIXME
+		try {
+			$file = new Fichiers($args['id']);
+		}
+		catch (\InvalidArgumentException $e)
+		{
+			return $skriv->parseError('/!\ Tag fichier : ' . $e->getMessage());
+		}
+
+		if ($file->image)
+		{
+			return '
+			<figure class="image">
+				<a href="'.$file->getURL().'"><img src="'.$file->getURL(true).'" 
+					alt="'.htmlspecialchars($file->nom, ENT_QUOTES, 'UTF-8').'" /></a>
+			</figure>';
+		}
+		else
+		{
+			return '<a href="'.$file->getURL().'">'.htmlspecialchars($file->nom, ENT_QUOTES, 'UTF-8').'</a>';
+		}
 	}
 }
