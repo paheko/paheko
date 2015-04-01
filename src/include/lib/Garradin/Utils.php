@@ -390,7 +390,8 @@ class Utils
         if (!self::$skriv)
         {
             self::$skriv = new \KD2\SkrivLite;
-            self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivHTML']);
+            self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivFichier']);
+            self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
         }
 
         $str = self::$skriv->render($str);
@@ -591,6 +592,15 @@ class Utils
             case 'K': case 'k': return (int)$size_str * 1024;
             default: return $size_str;
         }
+    }
+
+    static public function format_bytes($size) {
+        if ($size > (1024 * 1024))
+            return round($size / 1024 / 1024, 2) . ' Mo';
+        elseif ($size > 1024)
+            return round($size / 1024, 2) . ' Ko';
+        else
+            return $size . ' o';
     }
 
     static public function deleteRecursive($path, $delete_target = false)

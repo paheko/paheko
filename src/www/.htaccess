@@ -1,7 +1,7 @@
 <IfModule mod_rewrite.c>
     RewriteEngine on
     RewriteRule admin/plugin/(.*?)/(.*) /admin/plugin.php?_p=$1&_u=$2 [QSA,L]
-    RewriteRule f/([\d\w]+)/(t/)?(.*) /file.php?id=$1&thumb=$2&file=$3 [QSA,L]
+    RewriteRule f/([\d\w]+)/(.*) /file.php?id=$1&file=$2 [QSA,L]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule .* /index.php [QSA,L]

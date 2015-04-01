@@ -110,6 +110,11 @@ body#popup .page {
     margin: 1em 1em 1em 2.5em;
 }
 
+body#transparent .page {
+    margin: 0;
+    padding: 0;
+}
+
 span.error, b.error {
     color: #900;
 }
@@ -795,6 +800,64 @@ fieldset.wikiRevision #f_modification {
     list-style-type: decimal;
 }
 
+.wikiContent aside.fichier {
+    margin: 1em;
+}
+
+.wikiContent aside.fichier small {
+    opacity: 0.7;
+}
+
+.wikiContent aside.fichier a {
+    display: inline-block;
+    margin-right: 1em;
+    padding: .5em;
+    padding-left: 1.8em;
+    border: 1px solid #ccc;
+    border-radius: .5em;
+    background-repeat: no-repeat;
+    background-position: .5em center;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAd0lEQVQoz2NgQAVNQDwDCTcw4AF3gPg/Er4xSBWnAXEHFL9HU/wWSS4FpFgZiJ+jKULHT4BYAWa6LhC/w6HwNRBrojvHEoi/oCn8BMQmuDzoBsQ/oQq/A7E9AwEQDMQ/gNiHgUggx0AN8IVI/AGkeA+ReCdJTgAAgMhKhf6mzTIAAAAASUVORK5CYII=");
+    transition: background-color .2s, color .2s;
+}
+
+.wikiContent aside.fichier a:hover {
+    background-color: #eee;
+    color: darkred;
+}
+
+.wikiContent figure.image {
+    text-align: center;
+}
+
+.wikiContent figure.image figcaption {
+    font-style: italic;
+    color: #666;
+    margin-top: 2pt;
+}
+
+.wikiContent figure.image.centre {
+    max-width: 500px;
+    margin: 0 auto 8pt auto;
+}
+
+.wikiContent figure.image.gauche {
+    max-width: 200px;
+    float: left;
+    margin: 0 8pt 4pt 0;
+}
+
+.wikiContent figure.image.droite {
+    max-width: 200px;
+    float: right;
+    margin: 0 0 4pt 8pt;
+}
+
+.wikiContent figure.image.gauche figcaption, .wikiContent figure.image.droite figcaption {
+    font-size: .8em;
+}
+
+
 .wikiFooter {
     font-size: 0.8em;
     color: #666;
@@ -1181,4 +1244,50 @@ form .fileUpload .uploadHelper_progress {
 
 form .fileUpload progress {
     width: 50%;
+}
+
+form#insertImage {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    box-shadow: 5px 5px 10px #999;
+    padding: 1em;
+    background: #ddd;
+    border-radius: .5em;
+    text-align: center;
+}
+
+form#insertImage .align input {
+    font-size: 1.2em;
+    line-height: 32px;
+    background: #fff;
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding: 5px;
+    padding-left: 42px;
+    border: 1px solid #999;
+    border-radius: 5px;
+    margin: .5em;
+}
+
+form#insertImage .align input[name=""] {
+    background-image: url("pics/img_flow.png");
+}
+
+form#insertImage .align input[name="gauche"] {
+    background-image: url("pics/img_left.png");
+}
+
+form#insertImage .align input[name="droite"] {
+    background-image: url("pics/img_right.png");
+}
+
+form#insertImage .align input[name="centre"] {
+    background-image: url("pics/img_center.png");
+}
+
+form#insertImage .align input:hover {
+    background-color: #eee;
+    color: darkred;
 }
