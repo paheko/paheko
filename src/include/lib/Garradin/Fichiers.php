@@ -17,22 +17,67 @@ class Fichiers
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
 	 * @var array
 	 */
-	protected $allowed_thumb_sizes = [200, 500];
+	protected static $allowed_thumb_sizes = [200, 500];
 
 	const LIEN_COMPTA = 'compta_journal';
 	const LIEN_WIKI = 'wiki_pages';
 	const LIEN_MEMBRES = 'membres';
 
 	/**
+	 * Renvoie l'URL vers un fichier
+	 * @param  integer $id   Numéro du fichier
+	 * @param  string  $nom  Nom de fichier avec extension
+	 * @param  integer $size Taille de la miniature désirée (pour les images)
+	 * @return string        URL du fichier
+	 */
+	static protected function _getURL($id, $nom, $size = false)
+	{
+		$url = WWW_URL . 'f/' . base_convert((int)$id, 10, 36) . '/' . $nom;
+
+		if ($size)
+		{
+			$url .= '?' . self::_findThumbSize($size) . 'px';
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Renvoie la taille de miniature la plus proche de la taille demandée
+	 * @param  integer $size Taille demandée
+	 * @return integer       Taille possible
+	 */
+	static protected function _findThumbSize($size)
+	{
+		$size = (int) $size;
+
+		if (in_array($size, self::$allowed_thumb_sizes))
+		{
+			return $size;
+		}
+
+		foreach (self::$allowed_thumb_sizes as $s)
+		{
+			if ($s >= $size)
+				return $size;
+		}
+
+		return max(self::$allowed_thumb_sizes);
+	}
+
+	/**
 	 * Constructeur de l'objet pour un fichier
 	 * @param integer $id Numéro unique du fichier
 	 */
-	public function __construct($id)
+	public function __construct($id, $data = null)
 	{
-		$data = DB::getInstance()->simpleQuerySingle('SELECT fichiers.*, fc.hash, fc.taille,
-			strftime(\'%s\', datetime) AS datetime
-			FROM fichiers INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu
-			WHERE fichiers.id = ?;', true, (int)$id);
+		if (is_null($data))
+		{
+			$data = DB::getInstance()->simpleQuerySingle('SELECT fichiers.*, fc.hash, fc.taille,
+				strftime(\'%s\', datetime) AS datetime
+				FROM fichiers INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu
+				WHERE fichiers.id = ?;', true, (int)$id);
+		}
 
 		if (!$data)
 		{
@@ -46,43 +91,13 @@ class Fichiers
 	}
 
 	/**
-	 * Renvoie la taille de miniature la plus proche de la taille demandée
-	 * @param  integer $size Taille demandée
-	 * @return integer       Taille possible
-	 */
-	protected function _findThumbSize($size)
-	{
-		$size = (int) $size;
-
-		if (in_array($size, $this->allowed_thumb_sizes))
-		{
-			return $size;
-		}
-
-		foreach ($this->allowed_thumb_sizes as $s)
-		{
-			if ($s >= $size)
-				return $size;
-		}
-
-		return max($this->allowed_thumb_sizes);
-	}
-
-	/**
 	 * Renvoie l'adresse d'accès au fichier
 	 * @param  boolean $size Taille éventuelle de la miniature demandée
 	 * @return string        URL d'accès au fichier
 	 */
 	public function getURL($size = false)
 	{
-		$url = WWW_URL . 'f/' . base_convert((int)$this->id, 10, 36) . '/' . $this->nom;
-
-		if ($size)
-		{
-			$url .= '?' . $this->_findThumbSize($size) . 'px';
-		}
-
-		return $url;
+		return self::_getURL($this->id, $this->nom, $size);
 	}
 
 	/**
@@ -214,6 +229,10 @@ class Fichiers
 		return $db->exec('END;');
 	}
 
+	/**
+	 * Renvoie le chemin vers le fichier local en cache, et le crée s'il n'existe pas
+	 * @return string Chemin local
+	 */
 	protected function getFilePathFromCache()
 	{
 		// Le cache est géré par ID contenu, pas ID fichier, pour minimiser l'espace disque utilisé
@@ -250,7 +269,7 @@ class Fichiers
 			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
-		$width = $this->_findThumbSize($width);
+		$width = self::_findThumbSize($width);
 
 		$cache_id = 'fichiers.' . $this->id_contenu . '.thumb.' . (int)$width;
 		$path = Static_Cache::getPath($cache_id);
@@ -481,6 +500,46 @@ class Fichiers
 		return new Fichiers($db->lastInsertRowID());
 	}
 
+    /**
+     * Récupère la liste des fichiers liés à une ressource
+     * 
+     * @param  string  $type    Type de ressource
+     * @param  integer $id      Numéro de ressource
+     * @param  boolean $images  TRUE pour retourner seulement les images,
+     * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
+     * @return array          Liste des fichiers
+     */
+    static public function listLinkedFiles($type, $id, $images = false)
+    {
+		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+
+		if (!in_array($type, $check))
+		{
+			throw new \LogicException('Type de lien de fichier inconnu.');
+		}
+
+    	$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
+
+        $files = DB::getInstance()->simpleStatementFetch('SELECT fichiers.* FROM fichiers 
+            INNER JOIN fichiers_'.$type.' AS fwp ON fwp.fichier = fichiers.id
+            WHERE fwp.id = ? '.$images.'
+            ORDER BY fichiers.nom COLLATE NOCASE;', \SQLITE3_ASSOC, (int)$id);
+
+        foreach ($files as &$file)
+        {
+        	$file['url'] = self::_getURL($file['id'], $file['nom']);
+        	$file['thumb'] = $file['image'] ? self::_getURL($file['id'], $file['nom'], 200) : false;
+        }
+
+        return $files;
+    }
+
+	/**
+	 * Callback utilisé pour l'extension <<fichier>> dans le wiki-texte
+	 * @param array $args    Arguments passés à l'extension
+	 * @param string $content Contenu éventuel (en mode bloc)
+	 * @param object $skriv   Objet SkrivLite
+	 */
 	static public function SkrivFichier($args, $content, $skriv)
 	{
 		$_args = [];
@@ -513,6 +572,12 @@ class Fichiers
 		return $out;
 	}
 
+	/**
+	 * Callback utilisé pour l'extension <<image>> dans le wiki-texte
+	 * @param array $args    Arguments passés à l'extension
+	 * @param string $content Contenu éventuel (en mode bloc)
+	 * @param object $skriv   Objet SkrivLite
+	 */
 	static public function SkrivImage($args, $content, $skriv)
 	{
 		$_args = [];

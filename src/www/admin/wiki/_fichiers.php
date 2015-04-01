@@ -83,6 +83,9 @@ if (Utils::post('submit') || isset($_POST['uploadHelper_status']))
     }
 }
 
+$tpl->assign('fichiers', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page['id'], false));
+$tpl->assign('images', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page['id'], true));
+
 $tpl->assign('max_size', Utils::getMaxUploadSize());
 $tpl->assign('error', $error);
 $tpl->assign('page', $page);

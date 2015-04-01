@@ -1,3 +1,5 @@
+@import url("wiki.css");
+
 @charset "UTF-8";
 
 @font-face {
@@ -11,18 +13,33 @@
     font-style: normal;
 }
 
-body, form, p, div, hr, fieldset, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6 {
-    margin: 0;
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, 
+pre, form, fieldset, input, textarea, p, blockquote, th, td,
+figure, article, aside, section, header, footer { 
     padding: 0;
+    margin: 0;
 }
+fieldset, img { 
+    border: 0;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+ol, ul {
+    list-style: none;
+}
+caption, th {
+    text-align: left;
+}
+article, aside, figure, section, header, footer { display: block; }
+
 h1  { font-size: 2em; }
 h2  { font-size: 1.5em; }
 h3  { font-size: 1.2em; }
 h4  { font-size: 1em; }
 h5  { font-size: 0.9em; }
 h6  { font-size: 0.8em; }
-ul, ol { list-style-type: none; }
-article, aside, figure, footer, header, hgroup, menu, nav, section { display: block; }
 
 /*
     marron : #9c4f15 rgb(156, 79, 21)
@@ -112,7 +129,7 @@ body#popup .page {
 
 body#transparent .page {
     margin: 0;
-    padding: 0;
+    padding: .2em;
 }
 
 span.error, b.error {
@@ -373,8 +390,28 @@ dd.help {
     color: #666;
 }
 
+ul.gallery {
+    text-align: center;
+}
+
+ul.gallery li {
+    display: inline-block;
+    margin: .3em;
+    vertical-align: middle;
+    width: 150px;
+}
+
+ul.gallery li img {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+ul.gallery .actions {
+    text-align: center;
+    z-index: 100;
+}
+
 table.list {
-    border-collapse: collapse;
     margin-bottom: 1em;
     width: 100%;
 }
@@ -508,7 +545,6 @@ b.money {
 
 #rapport table {
     width: 100%;
-    border-collapse: collapse;
 }
 
 #rapport tr {
@@ -782,81 +818,6 @@ fieldset.wikiRevision  {
 fieldset.wikiRevision #f_modification {
     width: 90%;
 }
-
-.wikiContent p, .wikiContent h3, .wikiContent h4, .wikiContent h5, .wikiContent h6,
-.wikiContent ul, .wikiContent ol, .wikiContent table, .wikiContent blockquote {
-    margin-bottom: 8pt;
-}
-
-.wikiContent ul, .wikiContent ol, .wikiContent dd {
-    margin-left: 2em;
-}
-
-.wikiContent ul {
-    list-style-type: disc;
-}
-
-.wikiContent ol {
-    list-style-type: decimal;
-}
-
-.wikiContent aside.fichier {
-    margin: 1em;
-}
-
-.wikiContent aside.fichier small {
-    opacity: 0.7;
-}
-
-.wikiContent aside.fichier a {
-    display: inline-block;
-    margin-right: 1em;
-    padding: .5em;
-    padding-left: 1.8em;
-    border: 1px solid #ccc;
-    border-radius: .5em;
-    background-repeat: no-repeat;
-    background-position: .5em center;
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAd0lEQVQoz2NgQAVNQDwDCTcw4AF3gPg/Er4xSBWnAXEHFL9HU/wWSS4FpFgZiJ+jKULHT4BYAWa6LhC/w6HwNRBrojvHEoi/oCn8BMQmuDzoBsQ/oQq/A7E9AwEQDMQ/gNiHgUggx0AN8IVI/AGkeA+ReCdJTgAAgMhKhf6mzTIAAAAASUVORK5CYII=");
-    transition: background-color .2s, color .2s;
-}
-
-.wikiContent aside.fichier a:hover {
-    background-color: #eee;
-    color: darkred;
-}
-
-.wikiContent figure.image {
-    text-align: center;
-}
-
-.wikiContent figure.image figcaption {
-    font-style: italic;
-    color: #666;
-    margin-top: 2pt;
-}
-
-.wikiContent figure.image.centre {
-    max-width: 500px;
-    margin: 0 auto 8pt auto;
-}
-
-.wikiContent figure.image.gauche {
-    max-width: 200px;
-    float: left;
-    margin: 0 8pt 4pt 0;
-}
-
-.wikiContent figure.image.droite {
-    max-width: 200px;
-    float: right;
-    margin: 0 0 4pt 8pt;
-}
-
-.wikiContent figure.image.gauche figcaption, .wikiContent figure.image.droite figcaption {
-    font-size: .8em;
-}
-
 
 .wikiFooter {
     font-size: 0.8em;
@@ -1247,15 +1208,27 @@ form .fileUpload progress {
 }
 
 form#insertImage {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    box-shadow: 5px 5px 10px #999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.75);
+}
+
+form#insertImage fieldset {
+    box-shadow: 5px 5px 10px #000;
+    margin: 1em;
     padding: 1em;
     background: #ddd;
     border-radius: .5em;
     text-align: center;
+}
+
+form#insertImage dt {
+    margin: .2em 0;
 }
 
 form#insertImage .align input {
@@ -1287,7 +1260,19 @@ form#insertImage .align input[name="centre"] {
     background-image: url("pics/img_center.png");
 }
 
-form#insertImage .align input:hover {
+form#insertImage .cancel input {
+    font-size: 0.8em;
+    background: transparent;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: .5em;
+    color: #666;
+}
+
+form#insertImage .align input:hover, form#insertImage .cancel input:hover,  {
+    cursor: pointer;
     background-color: #eee;
     color: darkred;
 }
+
