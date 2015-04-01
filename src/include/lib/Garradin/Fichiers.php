@@ -13,12 +13,20 @@ class Fichiers
 	public $taille;
 	public $id_contenu;
 
+	/**
+	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
+	 * @var array
+	 */
+	protected $allowed_thumb_sizes = [200, 500];
+
 	const LIEN_COMPTA = 'compta_journal';
 	const LIEN_WIKI = 'wiki_pages';
 	const LIEN_MEMBRES = 'membres';
 
-	const TAILLE_MINIATURE = 200;
-
+	/**
+	 * Constructeur de l'objet pour un fichier
+	 * @param integer $id Numéro unique du fichier
+	 */
 	public function __construct($id)
 	{
 		$data = DB::getInstance()->simpleQuerySingle('SELECT fichiers.*, fc.hash, fc.taille,
@@ -35,18 +43,46 @@ class Fichiers
 		{
 			$this->$key = $value;
 		}
-	}	
+	}
 
-	public function getURL($thumbnail = false)
+	/**
+	 * Renvoie la taille de miniature la plus proche de la taille demandée
+	 * @param  integer $size Taille demandée
+	 * @return integer       Taille possible
+	 */
+	protected function _findThumbSize($size)
 	{
-		$url = WWW_URL . 'f/' . base_convert((int)$this->id, 10, 36) . '/';
+		$size = (int) $size;
 
-		if ($thumbnail)
+		if (in_array($size, $this->allowed_thumb_sizes))
 		{
-			$url .= 't/';
+			return $size;
 		}
 
-		return $url . $this->nom;
+		foreach ($this->allowed_thumb_sizes as $s)
+		{
+			if ($s >= $size)
+				return $size;
+		}
+
+		return max($this->allowed_thumb_sizes);
+	}
+
+	/**
+	 * Renvoie l'adresse d'accès au fichier
+	 * @param  boolean $size Taille éventuelle de la miniature demandée
+	 * @return string        URL d'accès au fichier
+	 */
+	public function getURL($size = false)
+	{
+		$url = WWW_URL . 'f/' . base_convert((int)$this->id, 10, 36) . '/' . $this->nom;
+
+		if ($size)
+		{
+			$url .= '?' . $this->_findThumbSize($size) . 'px';
+		}
+
+		return $url;
 	}
 
 	/**
@@ -200,28 +236,30 @@ class Fichiers
 	 */
 	public function serve()
 	{
-		return $this->_serve($this->getFilePathFromCache(), $this->type, $this->nom, $this->taille);
+		return $this->_serve($this->getFilePathFromCache(), $this->type, ($this->image ? false : $this->nom), $this->taille);
 	}
 
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 * @return void
 	 */
-	public function serveThumbnail()
+	public function serveThumbnail($width = self::TAILLE_MINIATURE)
 	{
 		if (!$this->image)
 		{
 			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
-		$cache_id = 'fichiers.' . $this->id_contenu . '.thumb';
+		$width = $this->_findThumbSize($width);
+
+		$cache_id = 'fichiers.' . $this->id_contenu . '.thumb.' . (int)$width;
 		$path = Static_Cache::getPath($cache_id);
 
 		// La miniature n'existe pas dans le cache statique, on la crée
 		if (!Static_Cache::exists($cache_id))
 		{
 			$source = $this->getFilePathFromCache();
-			\KD2\Image::resize($source, $path, self::TAILLE_MINIATURE);
+			\KD2\Image::resize($source, $path, $width);
 		}
 
 		return $this->_serve($path, $this->type);
@@ -443,39 +481,104 @@ class Fichiers
 		return new Fichiers($db->lastInsertRowID());
 	}
 
-	static public function SkrivHTML($args, $content, $skriv)
+	static public function SkrivFichier($args, $content, $skriv)
 	{
-		if (empty($args['id']) && !empty($args[0]))
+		$_args = [];
+
+		foreach ($args as $value)
 		{
-			$args = ['id' => (int)$args[0]];
+			if (preg_match('/^\d+$/', $value))
+			{
+				$_args['id'] = (int)$value;
+			}
 		}
 
-		if (empty($args['id']))
+		if (empty($_args['id']))
 		{
 			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
 		}
 
-		$db = DB::getInstance();
-
 		try {
-			$file = new Fichiers($args['id']);
+			$file = new Fichiers($_args['id']);
 		}
 		catch (\InvalidArgumentException $e)
 		{
 			return $skriv->parseError('/!\ Tag fichier : ' . $e->getMessage());
 		}
 
-		if ($file->image)
+		$out = '<aside class="fichier" data-type="'.$skriv->escape($file->type).'">';
+		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($file->nom).'</a> ';
+		$out.= '<small>('.$skriv->escape($file->type . ', ' . Utils::format_bytes($file->taille)).')</small>';
+		$out.= '</aside>';
+		return $out;
+	}
+
+	static public function SkrivImage($args, $content, $skriv)
+	{
+		$_args = [];
+		$_align_values = ['droite', 'gauche', 'centre'];
+
+		foreach ($args as $value)
 		{
-			return '
-			<figure class="image">
-				<a href="'.$file->getURL().'"><img src="'.$file->getURL(true).'" 
-					alt="'.htmlspecialchars($file->nom, ENT_QUOTES, 'UTF-8').'" /></a>
-			</figure>';
+			if (preg_match('/^\d+$/', $value))
+			{
+				$_args['id'] = (int)$value;
+			}
+			else if (in_array($value, $_align_values))
+			{
+				$_args['align'] = $value;
+			}
+			else
+			{
+				$_args['caption'] = $value;
+			}
 		}
-		else
+
+		if (empty($_args['id']))
 		{
-			return '<a href="'.$file->getURL().'">'.htmlspecialchars($file->nom, ENT_QUOTES, 'UTF-8').'</a>';
+			return $skriv->parseError('/!\ Tag image : aucun numéro de fichier indiqué.');
 		}
+
+		try {
+			$file = new Fichiers($_args['id']);
+		}
+		catch (\InvalidArgumentException $e)
+		{
+			return $skriv->parseError('/!\ Tag image : ' . $e->getMessage());
+		}
+
+		if (!$file->image)
+		{
+			return $skriv->parseError('/!\ Tag image : ce fichier n\'est pas une image.');
+		}
+
+		if (empty($_args['caption']))
+		{
+			$_args['caption'] = false;
+		}
+
+		$out = '<a href="'.$file->getURL().'" class="internal-image">';
+		$out .= '<img src="'.$file->getURL($_args['align'] == 'centre' ? 500 : 200).'" alt="';
+
+		if ($_args['caption'])
+		{
+			$out .= htmlspecialchars($_args['caption'], ENT_QUOTES, 'UTF-8');
+		}
+
+		$out .= '" /></a>';
+
+		if (!empty($_args['align']))
+		{
+			$out = '<figure class="image ' . $_args['align'] . '">' . $out;
+
+			if ($_args['caption'])
+			{
+				$out .= '<figcaption>' . htmlspecialchars($_args['caption'], ENT_QUOTES, 'UTF-8') . '</figcaption>';
+			}
+
+			$out .= '</figure>';
+		}
+
+		return $out;
 	}
 }

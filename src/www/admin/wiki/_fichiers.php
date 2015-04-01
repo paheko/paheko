@@ -54,7 +54,12 @@ if (Utils::post('submit') || isset($_POST['uploadHelper_status']))
                 echo json_encode([
                     'redirect'  =>  WWW_URL . $uri,
                     'callback'  =>  'insertHelper',
-                    'file'      =>  $fichier->id,
+                    'file'      =>  [
+                        'image' =>  (int)$fichier->image,
+                        'id'    =>  (int)$fichier->id,
+                        'nom'   =>  $fichier->nom,
+                        'thumb' =>  $fichier->image ? $fichier->getURL(200) : false
+                    ],
                 ]);
                 exit;
             }

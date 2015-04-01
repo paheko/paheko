@@ -58,7 +58,24 @@
 
 		window.te_insertFile = function (file)
 		{
-			var tag = '<<fichier '+file+'>>';
+			var tag = '<<fichier|'+file+'>>';
+			
+			t.insertAtPosition(t.getSelection().start, tag);
+			
+			closeIFrame();
+		};
+
+		window.te_insertImage = function (file, position, caption)
+		{
+			var tag = '<<image|' + file;
+
+			if (position)
+				tag += '|' + position;
+
+			if (caption)
+				tag += '|' + caption;
+			
+			tag += '>>';
 			
 			t.insertAtPosition(t.getSelection().start, tag);
 			

@@ -601,14 +601,7 @@ $tpl->register_modifier('display_champ_membre', 'Garradin\tpl_display_champ_memb
 
 $tpl->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
 
-$tpl->register_modifier('format_bytes', function ($size) {
-    if ($size > (1024 * 1024))
-        return round($size / 1024 / 1024, 2) . ' Mo';
-    elseif ($size > 1024)
-        return round($size / 1024, 2) . ' Ko';
-    else
-        return $size . ' o';
-});
+$tpl->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
 $tpl->register_modifier('date_fr', 'Garradin\tpl_date_fr');
