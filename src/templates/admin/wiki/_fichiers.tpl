@@ -17,7 +17,7 @@
 
 <form method="get" action="#" style="display: none;" id="insertImage">
     <fieldset>
-        <legend>Insérer une image</legend>
+        <h3>Insérer une image dans le texte</h3>
         <dl>
             <dd class="image"></dd>
             <dt>Légende <i>(facultatif)</i></dt>
@@ -30,9 +30,45 @@
                 <input type="button" name="centre" value="Au centre" />
                 <input type="button" name="droite" value="À droite" />
             </dd>
+            <dd class="cancel">
+                <input type="reset" value="Annuler" />
+            </dd>
         </dl>
     </fieldset>
 </form>
+
+{if !empty($images)}
+<ul class="gallery">
+{foreach from=$images item="file"}
+    <li>
+        <figure>
+            <a href="{$file.url|escape}" data-id="{$file.id}"><img src="{$file.thumb|escape}" alt="" title="{$file.nom|escape}" /></a>
+            <p class="actions">
+                <a href="{$file.url|escape}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                <a href="?delete={$file.id|escape}" class="icn" title="Supprimer">✘</a>
+            </p>
+        </figure>
+    </li>
+{/foreach}
+</ul>
+{/if}
+
+{if !empty($fichiers)}
+<table class="list">
+    <tbody>
+    {foreach from=$fichiers item="file"}
+        <tr>
+            <th>{$file.nom|escape}</th>
+            <td>{$file.type|escape}</td>
+            <td class="actions">
+                <a href="{$file.url|escape}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                <a href="?delete={$file.id|escape}" class="icn" title="Supprimer">✘</a>
+            </td>
+        </tr>
+    {/foreach}
+    </tbody>
+</table>
+{/if}
 
 <script type="text/javascript">
 {literal}
@@ -44,7 +80,7 @@ uploadHelper($('#f_fichier'), {
     size_error_msg: 'Le fichier %file fait %size, soit plus que la taille maximale autorisée de %max_size.'
 });
 
-function insertImageHelper(file) {
+function insertImageHelper(file, from_upload) {
     if (!document.querySelectorAll)
     {
         window.parent.te_insertImage(file.id, 'centre');
@@ -63,10 +99,20 @@ function insertImageHelper(file) {
         };
     }
 
+    f.querySelector('dd.image').innerHTML = '';
     var img = document.createElement('img');
     img.src = file.thumb;
     img.alt = '';
     f.querySelector('dd.image').appendChild(img);
+
+    f.querySelector('dd.cancel input[type=reset]').onclick = function() {
+        f.style.display = 'none';
+
+        if (from_upload)
+        {
+            location.href = location.href;
+        }
+    };
 }
 
 function insertHelper(data) {
@@ -74,7 +120,7 @@ function insertHelper(data) {
 
     if (file.image)
     {
-        insertImageHelper(file);
+        insertImageHelper(file, true);
     }
     else
     {
@@ -82,6 +128,27 @@ function insertHelper(data) {
     }
 
     return true;
+}
+
+var gallery = document.getElementsByClassName('gallery');
+
+if (gallery.length == 1 && document.querySelector)
+{
+    gallery = gallery[0];
+
+    var items = gallery.getElementsByTagName('li');
+
+    for (var i = 0; i < items.length; i++)
+    {
+        var a = items[i].querySelector('figure > a');
+        a.onclick= function (e) {
+            insertImageHelper({
+                id: this.getAttribute('data-id'),
+                thumb: this.firstChild.src
+            });
+            return false;
+        };
+    }
 }
 
 //insertImageHelper({})
