@@ -623,6 +623,8 @@ b.money {
     color: #9c4f15;
     text-shadow: 1px 1px 1px #999;
     transition: all .2s;
+    border: none;
+    cursor: pointer;
 }
 
 .icn[title]:after {
@@ -1268,6 +1270,7 @@ form#insertImage .cancel input {
     border-radius: 5px;
     margin: .5em;
     color: #666;
+    cursor: pointer;
 }
 
 form#insertImage .align input:hover, form#insertImage .cancel input:hover,  {

@@ -23,9 +23,35 @@ if ($hash_check = Utils::post('uploadHelper_hashCheck'))
     exit;
 }
 
-if (Utils::post('submit') || isset($_POST['uploadHelper_status']))
+if (Utils::post('delete'))
 {
-    if (!Utils::CSRF_check('wiki_upload_'.$page['id']))
+    if (!Utils::CSRF_check('wiki_files_'.$page['id']))
+    {
+        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    }
+    else
+    {
+        try {
+            $fichier = new Fichiers(Utils::post('delete'));
+            
+            if (!$fichier->checkAccess($user))
+            {
+                throw new UserException('Vous n\'avez pas accès à ce fichier.');
+            }
+
+            $fichier->remove();
+            Utils::redirect('/admin/wiki/_fichiers.php?page=' . $page['id']);
+        }
+        catch (UserException $e)
+        {
+            $error = $e->getMessage();
+        }
+    }
+}
+
+if (Utils::post('upload') || isset($_POST['uploadHelper_status']))
+{
+    if (!Utils::CSRF_check('wiki_files_'.$page['id']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -91,6 +117,9 @@ $tpl->assign('error', $error);
 $tpl->assign('page', $page);
 $tpl->assign('sent', isset($_GET['sent']) ? true : false);
 
-$tpl->assign('custom_js', ['upload_helper.min.js']);
+$tpl->assign('custom_js', ['upload_helper.min.js', 'wiki_fichiers.js']);
+
+$tpl->assign('csrf_field_name', Utils::CSRF_field_name('wiki_files_' . $page['id']));
+$tpl->assign('csrf_value', Utils::CSRF_create('wiki_files_' . $page['id']));
 
 $tpl->display('admin/wiki/_fichiers.tpl');
