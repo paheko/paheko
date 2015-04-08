@@ -821,7 +821,11 @@ fieldset.wikiRevision #f_modification {
     width: 90%;
 }
 
-.wikiFooter {
+.wikiFiles {
+    text-align: center;
+}
+
+.wikiFooter, .wikiFiles {
     font-size: 0.8em;
     color: #666;
     border-top: 0.1em solid #ccc;
@@ -1279,3 +1283,36 @@ form#insertImage .align input:hover, form#insertImage .cancel input:hover,  {
     color: darkred;
 }
 
+.imageBrowser {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.75);
+    text-align: center;
+}
+
+.imageBrowser figure {
+    margin: 5%;
+    width: 90%;
+    height: 90%;
+}
+
+.imageBrowser figure img {
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    background: #fff;
+    padding: 2%;
+    max-height: 90%;
+    max-width: 90%;
+    border-radius: .5em;
+    cursor: pointer;
+    transition: all .5s;
+}

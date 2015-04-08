@@ -15,15 +15,15 @@
     list-style-type: decimal;
 }
 
-.wikiContent aside.fichier {
+aside.fichier {
     margin: 1em;
 }
 
-.wikiContent aside.fichier small {
+aside.fichier small {
     opacity: 0.7;
 }
 
-.wikiContent aside.fichier a {
+aside.fichier a {
     display: inline-block;
     margin-right: 1em;
     padding: .5em;
@@ -36,7 +36,7 @@
     transition: background-color .2s, color .2s;
 }
 
-.wikiContent aside.fichier a:hover {
+aside.fichier a:hover {
     background-color: #eee;
     color: darkred;
 }
