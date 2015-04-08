@@ -524,8 +524,10 @@ class Fichiers
 
     	$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
 
-        $files = DB::getInstance()->simpleStatementFetch('SELECT fichiers.* FROM fichiers 
+        $files = DB::getInstance()->simpleStatementFetch('SELECT fichiers.*, c.hash, c.taille
+        	FROM fichiers 
             INNER JOIN fichiers_'.$type.' AS fwp ON fwp.fichier = fichiers.id
+            INNER JOIN fichiers_contenu AS c ON c.id = fichiers.id_contenu
             WHERE fwp.id = ? '.$images.'
             ORDER BY fichiers.nom COLLATE NOCASE;', \SQLITE3_ASSOC, (int)$id);
 

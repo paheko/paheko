@@ -88,6 +88,36 @@
                 </div>
             {/if}
 
+
+            {if !empty($images) || !empty($fichiers)}
+            <div class="wikiFiles">
+                <h3>Fichiers liés à cette page</h3>
+
+                {if !empty($images)}
+                <ul class="gallery">
+                    {foreach from=$images item="file"}
+                        <li>
+                            <figure>
+                                <a href="{$file.url|escape}"><img src="{$file.thumb|escape}" alt="" title="{$file.nom|escape}" /></a>
+                            </figure>
+                        </li>
+                    {/foreach}
+                </ul>
+                {/if}
+
+                {if !empty($fichiers)}
+                <ul class="files">
+                    {foreach from=$fichiers item="file"}
+                        <li>
+                            <aside class="fichier" class="internal-file"><a href="{$file.url|escape}">{$file.nom|escape}</a>
+                            <small>({$file.type|escape}, {$file.taille|format_bytes})</small>
+                       </li>
+                    {/foreach}
+                </ul>
+                {/if}
+            </div>
+            {/if}
+
             <p class="wikiFooter">
                 Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
                 {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}

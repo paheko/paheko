@@ -47,4 +47,6 @@ else
 
 $tpl->assign('page', $page);
 
+$tpl->assign('custom_js', ['wiki_gallery.js']);
+
 $tpl->display('admin/wiki/page.tpl');
