@@ -26,10 +26,25 @@ else
     $tpl->assign('children', $wiki->getList($page['uri'] == $config->get('accueil_wiki') ? 0 : $page['id']));
     $tpl->assign('breadcrumbs', $wiki->listBackBreadCrumbs($page['id']));
     $tpl->assign('auteur', $membres->getNom($page['contenu']['id_auteur']));
+
+    $images = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page['id'], true);
+
+    if ($images && !$page['contenu']['chiffrement'])
+    {
+        $images = Fichiers::filterFilesUsedInText($images, $page['contenu']['contenu']);
+    }
+
+    $fichiers = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page['id'], false);
+
+    if ($fichiers && !$page['contenu']['chiffrement'])
+    {
+        $fichiers = Fichiers::filterFilesUsedInText($fichiers, $page['contenu']['contenu']);
+    }
+
+    $tpl->assign('images', $images);
+    $tpl->assign('fichiers', $fichiers);
 }
 
 $tpl->assign('page', $page);
 
 $tpl->display('admin/wiki/page.tpl');
-
-?>

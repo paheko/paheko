@@ -213,7 +213,7 @@ class Fichiers
 		$db->simpleExec('DELETE FROM fichiers_membres WHERE fichier = ?;', (int)$this->id);
 
 		// Suppression du contenu s'il n'est pas utilisé par un autre fichier
-		if (!($id_contenu = $db->simpleQuerySingle('SELECT id_contenu FROM fichiers AS f1 INNER JOIN fichiers AS f2 
+		if (!($id_contenu = $db->simpleQuerySingle('SELECT f1.id_contenu FROM fichiers AS f1 INNER JOIN fichiers AS f2 
 			ON f1.id_contenu = f2.id_contenu AND f1.id != f2.id WHERE f2.id = ?;', false, (int)$this->id)))
 		{
 			$db->simpleExec('DELETE FROM fichiers_contenu WHERE id = ?;', (int)$id_contenu);
@@ -224,7 +224,11 @@ class Fichiers
 		$cache_id = 'fichiers.' . $this->id_contenu;
 		
 		Static_Cache::remove($cache_id);
-		Static_Cache::remove($cache_id . '.thumb');
+
+		foreach (self::$allowed_thumb_sizes as $size)
+		{
+			Static_Cache::remove($cache_id . '.thumb.' . (int)$size);
+		}
 
 		return $db->exec('END;');
 	}
@@ -532,6 +536,26 @@ class Fichiers
         }
 
         return $files;
+    }
+
+    /**
+     * Enlève d'une liste de fichiers ceux qui sont mentionnés dans un texte wiki
+     * @param  array $files Liste de fichiers
+     * @param  string $text  texte wiki
+     * @return array        Un tableau qui ne contient pas les fichiers mentionnés dans $text
+     */
+    static public function filterFilesUsedInText($files, $text)
+    {
+    	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
+    	
+    	if (empty($match[1]))
+    		return $files;
+
+    	$used = $match[1];
+
+    	return array_filter($files, function ($row) use ($used) {
+    		return !in_array($row['id'], $used);
+    	});
     }
 
 	/**

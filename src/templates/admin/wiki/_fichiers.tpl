@@ -1,5 +1,11 @@
 {include file="admin/_head.tpl" title="Inclure un fichier" current="wiki" body_id="transparent" is_popup=true js=1}
 
+{if $error}
+    <p class="error">
+        {$error|escape}
+    </p>
+{/if}
+
 <form method="post" enctype="multipart/form-data" action="{$self_url|escape}" id="f_upload">
     <fieldset>
         <legend>Téléverser un fichier</legend>
@@ -9,8 +15,8 @@
             <dd class="fileUpload"><input type="file" name="fichier" id="f_fichier" data-hash-check /></dd>
         </dl>
         <p class="submit">
-            {csrf_field key="wiki_upload_`$page.id`"}
-            <input type="submit" id="f_submit" value="Envoyer le fichier" />
+            <input type="hidden" name="{$csrf_field_name|escape}" value="{$csrf_value|escape}" />
+            <input type="submit" name="upload" id="f_submit" value="Envoyer le fichier" />
         </p>
     </fieldset>
 </form>
@@ -43,10 +49,12 @@
     <li>
         <figure>
             <a href="{$file.url|escape}" data-id="{$file.id}"><img src="{$file.thumb|escape}" alt="" title="{$file.nom|escape}" /></a>
-            <p class="actions">
+            <form class="actions" method="post" action="{$self_url|escape}">
                 <a href="{$file.url|escape}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
-                <a href="?delete={$file.id|escape}" class="icn" title="Supprimer">✘</a>
-            </p>
+                <input type="hidden" name="{$csrf_field_name|escape}" value="{$csrf_value|escape}" />
+                <input type="hidden" name="delete" value="{$file.id|escape}" />
+                <noscript><input type="submit" value="Supprimer" /></noscript>
+            </form>
         </figure>
     </li>
 {/foreach}
@@ -61,98 +69,17 @@
             <th>{$file.nom|escape}</th>
             <td>{$file.type|escape}</td>
             <td class="actions">
-                <a href="{$file.url|escape}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
-                <a href="?delete={$file.id|escape}" class="icn" title="Supprimer">✘</a>
+                <form class="actions" method="post" action="{$self_url|escape}">
+                    <a href="{$file.url|escape}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                    <input type="hidden" name="{$csrf_field_name|escape}" value="{$csrf_value|escape}" />
+                    <input type="hidden" name="delete" value="{$file.id|escape}" />
+                    <noscript><input type="submit" value="Supprimer" /></noscript>
+                </form>
             </td>
         </tr>
     {/foreach}
     </tbody>
 </table>
 {/if}
-
-<script type="text/javascript">
-{literal}
-uploadHelper($('#f_fichier'), {
-    width: 1920,
-    height: null,
-    resize: true,
-    bytes: 'o',
-    size_error_msg: 'Le fichier %file fait %size, soit plus que la taille maximale autorisée de %max_size.'
-});
-
-function insertImageHelper(file, from_upload) {
-    if (!document.querySelectorAll)
-    {
-        window.parent.te_insertImage(file.id, 'centre');
-        return true;
-    }
-
-    var f = document.getElementById('insertImage');
-    f.style.display = 'block';
-
-    var inputs = f.querySelectorAll('input[type=button]');
-
-    for (var i = 0; i < inputs.length; i++)
-    {
-        inputs[i].onclick = function(e) {
-            window.parent.te_insertImage(file.id, e.target.name, f.f_caption.value);
-        };
-    }
-
-    f.querySelector('dd.image').innerHTML = '';
-    var img = document.createElement('img');
-    img.src = file.thumb;
-    img.alt = '';
-    f.querySelector('dd.image').appendChild(img);
-
-    f.querySelector('dd.cancel input[type=reset]').onclick = function() {
-        f.style.display = 'none';
-
-        if (from_upload)
-        {
-            location.href = location.href;
-        }
-    };
-}
-
-function insertHelper(data) {
-    var file = (data.file || data);
-
-    if (file.image)
-    {
-        insertImageHelper(file, true);
-    }
-    else
-    {
-        window.parent.te_insertFile(data.file.id);
-    }
-
-    return true;
-}
-
-var gallery = document.getElementsByClassName('gallery');
-
-if (gallery.length == 1 && document.querySelector)
-{
-    gallery = gallery[0];
-
-    var items = gallery.getElementsByTagName('li');
-
-    for (var i = 0; i < items.length; i++)
-    {
-        var a = items[i].querySelector('figure > a');
-        a.onclick= function (e) {
-            insertImageHelper({
-                id: this.getAttribute('data-id'),
-                thumb: this.firstChild.src
-            });
-            return false;
-        };
-    }
-}
-
-//insertImageHelper({})
-{/literal}
-</script>
 
 {include file="admin/_foot.tpl"}
