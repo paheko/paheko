@@ -58,7 +58,7 @@
 
 		window.te_insertFile = function (file)
 		{
-			var tag = ' <<fichier|'+file+'>>';
+			var tag = '<<fichier|'+file+'>>';
 			
 			t.insertAtPosition(t.getSelection().start, tag);
 			
@@ -67,7 +67,7 @@
 
 		window.te_insertImage = function (file, position, caption)
 		{
-			var tag = ' <<image|' + file;
+			var tag = '<<image|' + file;
 
 			if (position)
 				tag += '|' + position;
