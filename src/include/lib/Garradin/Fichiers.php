@@ -593,7 +593,7 @@ class Fichiers
 
 		$out = '<aside class="fichier" data-type="'.$skriv->escape($file->type).'">';
 		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($file->nom).'</a> ';
-		$out.= '<small>('.$skriv->escape($file->type . ', ' . Utils::format_bytes($file->taille)).')</small>';
+		$out.= '<small>('.$skriv->escape(($file->type ? $file->type . ', ' : '') . Utils::format_bytes($file->taille)).')</small>';
 		$out.= '</aside>';
 		return $out;
 	}

@@ -596,9 +596,9 @@ class Utils
 
     static public function format_bytes($size) {
         if ($size > (1024 * 1024))
-            return round($size / 1024 / 1024, 2) . ' Mo';
+            return str_replace('.', ',', round($size / 1024 / 1024, 2)) . ' Mo';
         elseif ($size > 1024)
-            return round($size / 1024, 2) . ' Ko';
+            return str_replace('.', ',', round($size / 1024, 2)) . ' Ko';
         else
             return $size . ' o';
     }

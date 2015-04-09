@@ -67,7 +67,7 @@
     {foreach from=$fichiers item="file"}
         <tr>
             <th>{$file.nom|escape}</th>
-            <td>{$file.type|escape}</td>
+            <td>{if $file.type}{$file.type|escape}{/if}</td>
             <td class="actions">
                 <form class="actions" method="post" action="{$self_url|escape}">
                     <a href="{$file.url|escape}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
