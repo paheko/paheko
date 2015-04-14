@@ -410,7 +410,7 @@ class Utils
         $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '**$1**', $str);
         $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '\'\'$1\'\'', $str);
         $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '[[$1 | $2]]', $str);
-        $str = preg_replace('/(?<!\\\\)\[(.+?)\]/', '[[$1]]', $str);
+        $str = preg_replace('/(?<!\[)\[([^\[\]]+?)\]/', '[[$1]]', $str);
         return $str;
     }
 
@@ -426,6 +426,8 @@ class Utils
         $str = preg_replace('/<strong>(\V*?)<\/strong>/', '**$1**', $str);
         $str = preg_replace('/<i>(\V*?)<\/i>/', '\'\'$1\'\'', $str);
         $str = preg_replace('/<em>(\V*?)<\/em>/', '\'\'$1\'\'', $str);
+        $str = preg_replace('/<li>(\V*?)<\/li>/', '* $1', $str);
+        $str = preg_replace('/<ul>|<\/ul>/', '', $str);
         $str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
         return $str;
     }
