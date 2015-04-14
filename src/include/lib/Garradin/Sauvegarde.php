@@ -161,7 +161,7 @@ class Sauvegarde
 	 */
 	public function restoreFromLocal($file)
 	{
-		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._-]+$!i', $file))
+		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file))
 		{
 			throw new UserException('Nom de fichier non valide.');
 		}
@@ -258,6 +258,22 @@ class Sauvegarde
 		return true;
 	}
 
-}
+	/**
+	 * Taille de la base de données actuelle
+	 * @return integer Taille en octets du fichier SQLite
+	 */
+	public function getDBSize()
+	{
+		return filesize(DB_FILE);
+	}
 
-?>
+	/**
+	 * Taille occupée par les fichiers dans la base de données
+	 * @return integer Taille en octets
+	 */
+	public function getDBFilesSize()
+	{
+		$db = DB::getInstance();
+		return (int) $db->simpleQuerySingle('SELECT SUM(taille) FROM fichiers_contenu;');
+	}
+}
