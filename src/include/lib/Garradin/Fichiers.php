@@ -564,9 +564,6 @@ class Fichiers
 	{
     	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
     	
-    	if (empty($match[1]))
-    		return $files;
-
     	return $match[1];
 	}
 
