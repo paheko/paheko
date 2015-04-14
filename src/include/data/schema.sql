@@ -291,14 +291,6 @@ CREATE TABLE compta_categories
     FOREIGN KEY(compte) REFERENCES compta_comptes(id)
 );
 
-CREATE TABLE compta_rapprochement
--- Rapprochement entre compta et relevés de comptes
-(
-    operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id),
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    auteur INTEGER NOT NULL REFERENCES membres (id)
-);
-
 CREATE TABLE plugins
 (
     id TEXT PRIMARY KEY,
@@ -321,6 +313,14 @@ CREATE TABLE plugins_signaux
     PRIMARY KEY (signal, plugin)
 );
 
+CREATE TABLE compta_rapprochement
+-- Rapprochement entre compta et relevés de comptes
+(
+    operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id),
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    auteur INTEGER NOT NULL REFERENCES membres (id)
+);
+
 CREATE TABLE fichiers
 -- Données sur les fichiers
 (
@@ -332,7 +332,7 @@ CREATE TABLE fichiers
     id_contenu INTEGER NOT NULL REFERENCES fichiers_contenu (id)
 );
 
-CREATE INDEX fichiers_date ON fichiers (date);
+CREATE INDEX fichiers_date ON fichiers (datetime);
 
 CREATE TABLE fichiers_contenu
 -- Contenu des fichiers
