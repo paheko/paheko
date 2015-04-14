@@ -212,14 +212,14 @@ class Fichiers
 		$db->simpleExec('DELETE FROM fichiers_wiki_pages WHERE fichier = ?;', (int)$this->id);
 		$db->simpleExec('DELETE FROM fichiers_membres WHERE fichier = ?;', (int)$this->id);
 
-		// Suppression du contenu s'il n'est pas utilisé par un autre fichier
-		if (!($id_contenu = $db->simpleQuerySingle('SELECT f1.id_contenu FROM fichiers AS f1 INNER JOIN fichiers AS f2 
-			ON f1.id_contenu = f2.id_contenu AND f1.id != f2.id WHERE f2.id = ?;', false, (int)$this->id)))
-		{
-			$db->simpleExec('DELETE FROM fichiers_contenu WHERE id = ?;', (int)$id_contenu);
-		}
-
 		$db->simpleExec('DELETE FROM fichiers WHERE id = ?;', (int)$this->id);
+
+		// Suppression du contenu s'il n'est pas utilisé par un autre fichier
+		if (!$db->simpleQuerySingle('SELECT 1 FROM fichiers WHERE id_contenu = ? AND id != ? LIMIT 1;', 
+			false, (int)$this->id_contenu, (int)$this->id))
+		{
+			$db->simpleExec('DELETE FROM fichiers_contenu WHERE id = ?;', (int)$this->id_contenu);
+		}
 
 		$cache_id = 'fichiers.' . $this->id_contenu;
 		
@@ -433,8 +433,8 @@ class Fichiers
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
-		$name = preg_replace('/[ ]/', '_', $file['name']);
-		$name = preg_replace('/[^\d\w._-]/ui', '', $file['name']);
+		$name = preg_replace('/\s+/', '_', $file['name']);
+		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
 		$bytes = file_get_contents($file['tmp_name'], false, null, -1, 1024);
 		$type = \KD2\FileInfo::guessMimeType($bytes);
@@ -563,8 +563,9 @@ class Fichiers
     static public function listFilesUsedInText($text)
 	{
     	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
+    	preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
     	
-    	return $match[1];
+    	return array_merge($match[1], $match2[1]);
 	}
 
 	/**

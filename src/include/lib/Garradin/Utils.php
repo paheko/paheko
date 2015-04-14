@@ -394,6 +394,20 @@ class Utils
             self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
         }
 
+        $skriv =& self::$skriv;
+
+        $str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
+            try {
+                $file = new Fichiers((int)$match[2]);
+            }
+            catch (\InvalidArgumentException $e)
+            {
+                return $skriv->parseError('/!\ Lien fichier : ' . $e->getMessage());
+            }
+
+            return $file->getURL();
+        }, $str);
+
         $str = self::$skriv->render($str);
 
         return $str;
