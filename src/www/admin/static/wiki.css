@@ -60,14 +60,51 @@ aside.fichier a:hover {
     max-width: 200px;
     float: left;
     margin: 0 8pt 4pt 0;
+    clear: left;
 }
 
 .wikiContent figure.image.droite {
     max-width: 200px;
     float: right;
     margin: 0 0 4pt 8pt;
+    clear: right;
 }
 
 .wikiContent figure.image.gauche figcaption, .wikiContent figure.image.droite figcaption {
     font-size: .8em;
+}
+
+
+.imageBrowser {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.75);
+    text-align: center;
+}
+
+.imageBrowser figure {
+    margin: 5%;
+    width: 90%;
+    height: 90%;
+}
+
+.imageBrowser figure img {
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    background: #fff;
+    padding: 2%;
+    max-height: 90%;
+    max-width: 90%;
+    border-radius: .5em;
+    cursor: pointer;
+    transition: all .5s;
 }

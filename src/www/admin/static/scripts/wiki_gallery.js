@@ -1,5 +1,5 @@
 (function () {
-    g.onload(function () {
+    var enableGallery = function () {
         var gallery = document.getElementsByClassName('gallery');
 
         if (gallery.length == 1 && document.querySelector)
@@ -17,7 +17,12 @@
                 };
             }
         }
-    });
+    };
+
+    if (document.addEventListener)
+        document.addEventListener('DOMContentLoaded', enableGallery, false);
+    else
+        document.attachEvent('onDOMContentLoaded', callback);
 
     function openImageBrowser(items, pos)
     {
