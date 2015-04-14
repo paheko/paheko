@@ -110,6 +110,7 @@ $tpl->assign('ok', Utils::get('ok'));
 $tpl->assign('liste', $s->getList());
 $tpl->assign('max_file_size', Utils::getMaxUploadSize());
 
-$tpl->display('admin/config/donnees.tpl');
+$tpl->assign('db_size', $s->getDBSize());
+$tpl->assign('files_size', $s->getDBFilesSize());
 
-?>
+$tpl->display('admin/config/donnees.tpl');

@@ -16,6 +16,10 @@
 
 <form method="post" action="{$self_url|escape}">
 
+<p class="help">
+    Info : la base de données fait actuellement {$db_size|format_bytes} (dont {$files_size|format_bytes} pour les documents et images).
+</p>
+
 <fieldset>
     <legend>Sauvegarde automatique</legend>
     <p class="help">
