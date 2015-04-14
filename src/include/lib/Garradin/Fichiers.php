@@ -30,7 +30,7 @@ class Fichiers
 	 * @param  integer $size Taille de la miniature désirée (pour les images)
 	 * @return string        URL du fichier
 	 */
-	static protected function _getURL($id, $nom, $size = false)
+	static public function _getURL($id, $nom, $size = false)
 	{
 		$url = WWW_URL . 'f/' . base_convert((int)$id, 10, 36) . '/' . $nom;
 
@@ -548,17 +548,27 @@ class Fichiers
      */
     static public function filterFilesUsedInText($files, $text)
     {
-    	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
-    	
-    	if (empty($match[1]))
-    		return $files;
-
-    	$used = $match[1];
+    	$used = self::listFilesUsedInText($text);
 
     	return array_filter($files, function ($row) use ($used) {
     		return !in_array($row['id'], $used);
     	});
     }
+
+    /**
+     * Renvoie une liste d'ID de fichiers mentionnées dans un texte wiki
+     * @param  string $text Texte wiki
+     * @return array       Liste des IDs de fichiers mentionnés
+     */
+    static public function listFilesUsedInText($text)
+	{
+    	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
+    	
+    	if (empty($match[1]))
+    		return $files;
+
+    	return $match[1];
+	}
 
 	/**
 	 * Callback utilisé pour l'extension <<fichier>> dans le wiki-texte

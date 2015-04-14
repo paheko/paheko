@@ -347,6 +347,9 @@ class Squelette_Filtres
     {
         return str_replace(' ', '&nbsp;', number_format($value, (round($value) == round($value, 2) ? 0 : 2), ',', ' ')) . '&nbsp;€';
     }
-}
 
-?>
+    static public function taille_en_octets($value)
+    {
+        return Utils::format_bytes($value);
+    }
+}
