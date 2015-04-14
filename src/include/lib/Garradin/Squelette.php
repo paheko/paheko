@@ -542,9 +542,8 @@ class Squelette extends \KD2\MiniSkel
                     {
                         if ($criteria['field'] == 'sauf_mention')
                         {
-                            // FIXME marche pas
-                            $where .= " AND f.id NOT IN (?) ";
-                            $query_args[] = ['implode(",", Fichiers::listFilesUsedInText($this->getVariable(\'texte\')))'];
+                            $where .= " AND f.id NOT IN (:php_implode) ";
+                            $query_args[':php_implode'] = '\'.implode(",", Fichiers::listFilesUsedInText($this->getVariable(\'texte\'))).\'';
                             break;
                         }
 
@@ -654,7 +653,18 @@ class Squelette extends \KD2\MiniSkel
             $out->append(1, 'if (trim($this->getVariable(\'recherche\'))) { ');
         }
 
-        $out->append(1, '$statement = $db->prepare('.var_export($query, true).'); ');
+        $query = var_export($query, true);
+
+        foreach ($query_args as $k=>$arg)
+        {
+            if (substr($k, 0, 4) == ':php')
+            {
+                $query = str_replace($k, $arg, $query);
+                unset($query_args[$k]);
+            }
+        }
+
+        $out->append(1, '$statement = $db->prepare('.$query.'); ');
 
         foreach ($query_args as $k=>$arg)
         {
