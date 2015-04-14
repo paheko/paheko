@@ -349,9 +349,10 @@ class Wiki
         return false;
     }
 
-    public function getList($parent = 0)
+    public function getList($parent = 0, $order_by_date = false)
     {
         $db = DB::getInstance();
+        $order = ($order_by_date ? 'date_creation DESC' : 'transliterate_to_ascii(titre) COLLATE NOCASE');
 
         return $db->simpleStatementFetch(
             'SELECT id, revision, uri, titre,
@@ -359,7 +360,7 @@ class Wiki
                 strftime(\'%s\', date_modification) AS date_modification
                 FROM wiki_pages
                 WHERE parent = ? AND '.$this->_getLectureClause().'
-                ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE  LIMIT 500;',
+                ORDER BY '.$order.' LIMIT 500;',
             SQLITE3_ASSOC,
             (int) $parent
         );
