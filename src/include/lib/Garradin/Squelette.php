@@ -346,7 +346,7 @@ class Squelette extends \KD2\MiniSkel
             }
             else
             {
-                $query .= '\'\' AS texte ';
+                $query .= '\'\' AS texte FROM wiki_pages AS w ';
             }
 
             $where = 'WHERE w.droit_lecture = -1 ';
@@ -370,7 +370,7 @@ class Squelette extends \KD2\MiniSkel
                 {
                     if (!in_array($criteria['field'], $allowed_fields))
                     {
-                        throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle '$loopName' de type '$loopType'.");
+                        throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle ".$loopName." de type ".$loopType.".");
                     }
                     elseif ($criteria['field'] == 'rubrique')
                     {
@@ -474,6 +474,124 @@ class Squelette extends \KD2\MiniSkel
                 $query .= ','.(int)$limit;
             }
         }
+        else if ($loopType == 'documents' || $loopType == 'images' || $loopType == 'fichiers')
+        {
+            $where = $order = '';
+            $limit = $begin = 0;
+
+            $link = false;
+
+            $query = 'SELECT f.*, fc.hash, fc.taille, strftime(\'%s\', f.datetime) AS date ';
+            $query.= ' FROM fichiers AS f INNER JOIN fichiers_contenu AS fc ON fc.id = f.id_contenu ';
+            $query.= ' INNER JOIN fichiers_wiki_pages AS fwp ON fwp.fichier = f.id ';
+            $query.= ' INNER JOIN wiki_pages AS w ON w.id = fwp.id AND w.droit_lecture = -1 ';
+            $where = 'WHERE 1 ';
+
+            $allowed_fields = ['id', 'nom', 'type', 'date', 'image', 'hash', 'taille',
+                'parent', 'page', 'rubrique', 'article', 'sauf_mention'];
+
+            if ($loopType == 'images')
+            {
+                $where .= ' AND image = 1 ';
+            }
+            else if ($loopType == 'documents')
+            {
+                $where .= ' AND image = 0 ';
+            }
+
+            foreach ($loopCriterias as $criteria_id => $criteria)
+            {
+                if (isset($criteria['field']))
+                {
+                    if (!in_array($criteria['field'], $allowed_fields))
+                    {
+                        throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle ".$loopName." de type ".$loopType.".");
+                    }
+                    elseif ($criteria['field'] == 'rubrique' || $criteria['field'] == 'page' 
+                        || $criteria['field'] == 'article' || $criteria['field'] == 'parent')
+                    {
+                        $criteria['field'] = 'w.id';
+                    }
+                    elseif ($criteria['field'] == 'date')
+                    {
+                        $criteria['field'] = 'datetime';
+                    }
+                }
+
+                switch ($criteria['action'])
+                {
+                    case \KD2\MiniSkel::ACTION_ORDER_BY:
+                        if (!$order)
+                            $order = 'ORDER BY '.$criteria['field'].'';
+                        else
+                            $order .= ', '.$criteria['field'].'';
+                        break;
+                    case \KD2\MiniSkel::ACTION_ORDER_DESC:
+                        if ($order)
+                            $order .= ' DESC';
+                        break;
+                    case \KD2\MiniSkel::ACTION_LIMIT:
+                        $begin = $criteria['begin'];
+                        $limit = $criteria['number'];
+                        break;
+                    case \KD2\MiniSkel::ACTION_MATCH_FIELD_BY_VALUE:
+                        $where .= ' AND '.$criteria['field'].' '.$criteria['comparison'].' ?';
+                        $query_args[] = $criteria['value'];
+                        break;
+                    case \KD2\MiniSkel::ACTION_MATCH_FIELD:
+                    {
+                        if ($criteria['field'] == 'sauf_mention')
+                        {
+                            // FIXME marche pas
+                            $where .= " AND f.id NOT IN (?) ";
+                            $query_args[] = ['implode(",", Fichiers::listFilesUsedInText($this->getVariable(\'texte\')))'];
+                            break;
+                        }
+
+                        $where .= ' AND '.$criteria['field'].' = ?';
+
+                        if ($criteria['field'] == 'w.id')
+                        {
+                            $criteria['field'] = 'id';
+                        }
+                        
+                        $query_args[] = ['$this->getVariable(\'' . $criteria['field'] . '\')'];
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (trim($loopContent))
+            {
+                $loop_start .= '$row[\'url\'] = Fichiers::_getURL($row[\'id\'], $row[\'nom\']); ';
+                $loop_start .= '$row[\'miniature\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
+                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
+            }
+
+            $query .= $where . ' ' . $order;
+
+            if (!$limit || $limit > 100)
+                $limit = 100;
+
+            if ($limit)
+            {
+                $query .= ' LIMIT ';
+
+                if (is_numeric($begin))
+                {
+                    $query .= (int) $begin;
+                }
+                else
+                {
+                    $query .= '?';
+                    $query_args[] = ['\'.$this->variables[\'debut_liste\'].\''];
+                }
+                
+                $query .= ','.(int)$limit;
+            }
+        }
         else
         {
             $params = [
@@ -512,12 +630,18 @@ class Squelette extends \KD2\MiniSkel
             }
         }
 
-        // Sécurité anti injection, à la compilation seulement
-        $statement = $db->prepare($query);
+        try {
+            // Sécurité anti injection, à la compilation seulement
+            $statement = $db->prepare($query);
+        }
+        catch (\Exception $e)
+        {
+            throw new \KD2\MiniSkelMarkupException("Erreur SQL dans la requête : ".$e->getMessage() . "\n " . $query);
+        }
         
         if (!$statement->readOnly())
         {
-            throw new \KD2\MiniSkelMarkupException("Requête en écriture illégale: '.$query.'");
+            throw new \KD2\MiniSkelMarkupException("Requête en écriture illégale: ".$query);
         }
 
         $hash = sha1(uniqid(mt_rand(), true));
