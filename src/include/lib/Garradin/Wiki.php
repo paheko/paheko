@@ -162,10 +162,20 @@ class Wiki
             return false;
         }
 
+        // Suppression des fichiers liés
+        $files = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $id, null);
+
+        foreach ($files as $file)
+        {
+            $file = new Fichiers($file['id'], $file);
+            $file->remove();
+        }
+
         $db->simpleExec('DELETE FROM wiki_revisions WHERE id_page = ?;', (int)$id);
         //$db->simpleExec('DELETE FROM wiki_suivi WHERE id_page = ?;', (int)$id); FIXME
         $db->simpleExec('DELETE FROM wiki_recherche WHERE id = ?;', (int)$id);
         $db->simpleExec('DELETE FROM wiki_pages WHERE id = ?;', (int)$id);
+
         return true;
     }
 
