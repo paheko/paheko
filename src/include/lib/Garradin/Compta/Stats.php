@@ -94,6 +94,11 @@ class Stats
 		$e = $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut,
 			strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE cloture = 0;', true);
 
+		if (!$e)
+		{
+			return [];
+		}
+
 		$y = date('Y', $e['debut']);
 		$m = date('m', $e['debut']);
 		$max = date('Ym', $e['fin']);
