@@ -168,7 +168,7 @@
 						}
 						
 						if (elm.checked)
-							parent.className += ' checked';
+							parent.className = parent.className.replace(/ checked$|$/, ' checked');
 						else
 							parent.className = parent.className.replace(/ checked/, '');
 					};
