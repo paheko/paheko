@@ -449,7 +449,12 @@ class Membres
             // ce qui est normal. Donc : il n'est pas possible de changer l'ID d'un membre qui
             // a participé au wiki, à la compta, etc.
             if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', false, (int)$id))
+                || $db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM compta_rapprochement WHERE auteur = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM membres_operations WHERE id_membre = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM cotisations_membres WHERE id_membre = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM rappels_envoyes WHERE id_membre = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM fichiers_membres WHERE id = ?;', false, (int)$id))
             # FIXME || $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
             {
                 throw new UserException('Le numéro n\'est pas modifiable pour ce membre car des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');

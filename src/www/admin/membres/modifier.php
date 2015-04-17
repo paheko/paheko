@@ -63,6 +63,11 @@ if (!empty($_POST['save']))
 
             $membres->edit($id, $data);
 
+            if (isset($data['id']) && $data['id'] != $id)
+            {
+                $id = (int)$data['id'];
+            }
+
             Utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
         }
         catch (UserException $e)
