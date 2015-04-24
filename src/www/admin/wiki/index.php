@@ -11,6 +11,7 @@ if (!empty($_SERVER['QUERY_STRING']))
 else
 {
     $page = $wiki->getByURI($config->get('accueil_wiki'));
+    $page_uri = '';
 }
 
 if (!$page)
