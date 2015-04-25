@@ -24,8 +24,11 @@
 		}
 	};
 
-	g.onload = function(callback, dom = true)
+	g.onload = function(callback, dom)
 	{
+		if (typeof dom == 'undefined')
+			dom = true;
+		
 		var eventName = dom ? 'DOMContentLoaded' : 'load';
 
 		if (document.addEventListener)
