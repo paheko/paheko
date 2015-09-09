@@ -62,7 +62,7 @@
     <script type="text/javascript">
     {literal}
     g.script('scripts/password.js').onload = function () {
-        initPasswordField('password_suggest', 'f_passe', 'f_repasse');
+        initPasswordField('password_suggest', 'f_passe_membre', 'f_repasse_membre');
     };
     
     var form = $('form')[0];
