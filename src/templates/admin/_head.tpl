@@ -22,7 +22,7 @@
         {/foreach}
     {/if}
     {if isset($plugin_js)}
-        {foreach from=$plugin_js item="hs"}
+        {foreach from=$plugin_js item="js"}
             <script type="text/javascript" src="{plugin_url file=$js}"></script>
         {/foreach}
     {/if}
