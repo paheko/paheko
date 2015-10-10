@@ -453,15 +453,20 @@ class Fichiers
 		$size = filesize($file['tmp_name']);
 
 		$db = DB::getInstance();
+
 		$db->exec('BEGIN;');
 
-		$db->simpleInsert('fichiers_contenu', [
-			'hash'		=>	$hash,
-			'taille'	=>	(int)$size,
-			'contenu'	=>	[\SQLITE3_BLOB, file_get_contents($file['tmp_name'])],
-		]);
-
-		$id_contenu = $db->lastInsertRowID();
+		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
+		if (!($id_contenu = $db->simpleQuerySingle('SELECT id FROM fichiers_contenu WHERE hash = ?;', false, $hash)))
+		{
+			$db->simpleInsert('fichiers_contenu', [
+				'hash'		=>	$hash,
+				'taille'	=>	(int)$size,
+				'contenu'	=>	[\SQLITE3_BLOB, file_get_contents($file['tmp_name'])],
+			]);
+			
+			$id_contenu = $db->lastInsertRowID();
+		}
 
 		$db->simpleInsert('fichiers', [
 			'id_contenu'	=>	(int)$id_contenu,
