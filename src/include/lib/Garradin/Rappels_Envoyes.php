@@ -26,6 +26,11 @@ class Rappels_Envoyes
 	{
 		$db = DB::getInstance();
 
+		if (empty($data['id_rappel']) || !$db->simpleQuerySingle('SELECT 1 FROM rappels WHERE id = ?;', false, (int) $data['id_rappel']))
+		{
+			throw new \LogicException('ID rappel non fourni ou inexistant dans la table rappels');
+		}
+
         if (isset($data['id_cotisation']))
         {
         	if (!$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', false, (int) $data['id_cotisation']))
@@ -150,6 +155,7 @@ class Rappels_Envoyes
 		$this->add([
 			'id_cotisation'	=>	$data['id_cotisation'],
 			'id_membre'		=>	$data['id'],
+			'id_rappel'		=>	$data['id_rappel'],
 			'media'			=>	Rappels_Envoyes::MEDIA_EMAIL,
 			// On enregistre la date de mise en œuvre du rappel
 			// et non pas la date d'envoi effective du rappel

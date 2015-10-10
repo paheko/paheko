@@ -88,6 +88,7 @@ CREATE TABLE rappels_envoyes
 
     id_membre INTEGER NOT NULL REFERENCES membres (id),
     id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
+    id_rappel INTEGER NULL REFERENCES rappels (id),
 
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
