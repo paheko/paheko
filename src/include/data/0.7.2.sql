@@ -1,0 +1,1 @@
+ALTER TABLE rappels_envoyes ADD COLUMN id_rappel INTEGER NULL REFERENCES rappels (id);

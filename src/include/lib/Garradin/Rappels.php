@@ -165,7 +165,7 @@ class Rappels
 			/* Date de mise en œuvre du rappel */
 			date(expiration, delai || \' days\') AS date_rappel
 		FROM (
-			SELECT m.*, r.delai, r.sujet, r.texte, r.id_cotisation,
+			SELECT m.*, r.delai, r.sujet, r.texte, r.id_cotisation, r.id AS id_rappel,
 				m.'.$config->get('champ_identite').' AS identite,
 				CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 				WHEN c.fin IS NOT NULL THEN c.fin ELSE 0 END AS expiration
