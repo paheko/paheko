@@ -333,7 +333,7 @@ class Exercices
                 UNION
                 SELECT compte_credit AS compte FROM compta_journal
                     WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
-            ORDER BY base64(compte) COLLATE BINARY ASC;'
+            ORDER BY compte ASC;'
             )->execute();
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
@@ -424,7 +424,7 @@ class Exercices
                     FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
             WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
             GROUP BY compte
-            ORDER BY base64(compte) COLLATE BINARY ASC;'
+            ORDER BY compte ASC;'
             )->execute();
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
@@ -522,7 +522,7 @@ class Exercices
                 SELECT compte_credit AS compte, NULL AS debit, SUM(montant) AS credit
                     FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
             WHERE compte IN (SELECT id FROM compta_comptes WHERE position IN ('.implode(', ', $include).'))
-            ORDER BY base64(compte) COLLATE BINARY ASC;'
+            ORDER BY compte ASC;'
             )->execute();
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
