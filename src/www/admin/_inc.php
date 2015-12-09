@@ -5,9 +5,9 @@ namespace Garradin;
 require_once __DIR__ . '/../../include/init.php';
 
 // Redirection automatique en HTTPS si nécessaire
-if (PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']))
+if (PREFER_HTTPS !== true && PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']) && empty($_POST))
 {
-    utils::redirect(str_replace('http://', 'https://', WWW_URL));
+    utils::redirect(str_replace('http://', 'https://', utils::getSelfURL()));
     exit;
 }
 
