@@ -49,7 +49,7 @@ $champs = $config->get('champs_membres');
 $champ = $champs->get($config->get('champ_identifiant'));
 
 $tpl->assign('ssl_enabled', empty($_SERVER['HTTPS']) ? false : true);
-$tpl->assign('prefer_ssl', PREFER_HTTPS);
+$tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
 $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfURL()));
 
 $tpl->assign('champ', $champ);

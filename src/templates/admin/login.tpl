@@ -28,10 +28,10 @@
             <dt><label for="f_passe">Mot de passe</label></dt>
             <dd><input type="password" name="passe" id="f_passe" value="" />
                 {if $ssl_enabled}
-                    <b class="icn" title="Connexion chiffrée">&#x1f512;</b>
+                    <b class="icn confirm" title="Connexion chiffrée">&#x1f512;</b>
                     <span class="confirm">Connexion sécurisée</span>
                 {else}
-                    <b class="icn" title="Connexion non chiffrée">&#x1f513;</b>
+                    <b class="icn error" title="Connexion non chiffrée">&#x1f513;</b>
                     {if $prefer_ssl}
                         <span class="error">Connexion non-sécurisée&nbps;!</span>
                         <a href="{$own_https_url}">Se connecter en HTTPS (sécurisé)</a>
