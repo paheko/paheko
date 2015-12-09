@@ -26,7 +26,8 @@ class Rappels_Envoyes
 	{
 		$db = DB::getInstance();
 
-		if (empty($data['id_rappel']) || !$db->simpleQuerySingle('SELECT 1 FROM rappels WHERE id = ?;', false, (int) $data['id_rappel']))
+		if (!array_key_exists('id_rappel', $data) 
+			|| (!is_null($data['id_rappel']) && (empty($data['id_rappel']) || !$db->simpleQuerySingle('SELECT 1 FROM rappels WHERE id = ?;', false, (int) $data['id_rappel']))))
 		{
 			throw new \LogicException('ID rappel non fourni ou inexistant dans la table rappels');
 		}
