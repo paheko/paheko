@@ -33,7 +33,7 @@
                 {else}
                     <b class="icn error" title="Connexion non chiffrée">&#x1f513;</b>
                     {if $prefer_ssl}
-                        <span class="error">Connexion non-sécurisée&nbps;!</span>
+                        <span class="error">Connexion non-sécurisée&nbsp;!</span>
                         <a href="{$own_https_url}">Se connecter en HTTPS (sécurisé)</a>
                     {else}
                         <span class="alert">Connexion non-sécurisée</span>
