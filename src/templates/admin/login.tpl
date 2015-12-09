@@ -10,6 +10,14 @@
     </p>
 {/if}
 
+{if !$ssl_enabled && $prefer_ssl}
+    <p class="alert">
+        <strong>Message de sécurité</strong><br />
+        Nous vous conseillons de vous connecter sur la version <a href="{$own_https_url}">chiffrée (HTTPS) de cette page</a>
+        pour vous connecter.
+    </p>
+{/if}
+
 <form method="post" action="{$self_url|escape}">
 
     <fieldset>
@@ -18,7 +26,20 @@
             <dt><label for="f_id">{$champ.title}</label></dt>
             <dd><input type="text" name="id" id="f_id" value="{form_field name=id}" /></dd>
             <dt><label for="f_passe">Mot de passe</label></dt>
-            <dd><input type="password" name="passe" id="f_passe" value="" /></dd>
+            <dd><input type="password" name="passe" id="f_passe" value="" />
+                {if $ssl_enabled}
+                    <b class="icn" title="Connexion chiffrée">&#x1f512;</b>
+                    <span class="confirm">Connexion sécurisée</span>
+                {else}
+                    <b class="icn" title="Connexion non chiffrée">&#x1f513;</b>
+                    {if $prefer_ssl}
+                        <span class="error">Connexion non-sécurisée&nbps;!</span>
+                        <a href="{$own_https_url}">Se connecter en HTTPS (sécurisé)</a>
+                    {else}
+                        <span class="alert">Connexion non-sécurisée</span>
+                    {/if}
+                {/if}
+            </dd>
         </dl>
     </fieldset>
 

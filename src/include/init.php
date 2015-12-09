@@ -87,6 +87,11 @@ if (!defined('Garradin\WWW_URI'))
     define('Garradin\WWW_URI', $path);
 }
 
+if (!defined('Garradin\PREFER_HTTPS'))
+{
+    define('Garradin\PREFER_HTTPS', false);
+}
+
 if (!defined('Garradin\WWW_URL'))
 {
     $host = isset($_SERVER['HTTP_HOST']) 

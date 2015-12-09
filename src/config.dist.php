@@ -35,6 +35,14 @@ const WWW_URI = '/garradin/';
 // Défaut : découverte à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
 define('Garradin\WWW_URL', 'http://garradin.net' . WWW_URI);
 
+// Doit-on suggérer à l'utilisateur d'utiliser la version chiffrée du site ?
+// 1 ou true = affiche un message de suggestion sur l'écran de connexion invitant à utiliser le site chiffré
+// (conseillé si vous avez un certificat auto-signé ou peu connu type CACert)
+// 2 = rediriger automatiquement sur la version chiffrée pour l'administration
+// 3 = rediriger automatiquement sur la version chiffrée pour administration et site public
+// false ou 0 = aucune version chiffrée disponible, donc ne rien proposer ni rediriger
+const PREFER_HTTPS = false;
+
 // Emplacement de stockage des plugins
 define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
 

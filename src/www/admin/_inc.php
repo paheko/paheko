@@ -4,6 +4,13 @@ namespace Garradin;
 
 require_once __DIR__ . '/../../include/init.php';
 
+// Redirection automatique en HTTPS si nécessaire
+if (PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']))
+{
+    utils::redirect(str_replace('http://', 'https://', WWW_URL));
+    exit;
+}
+
 $tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
 
@@ -29,5 +36,3 @@ if (!defined('Garradin\LOGIN_PROCESS'))
         $tpl->assign('nb_membres', $membres->countAllButHidden());
     }
 }
-
-?>
