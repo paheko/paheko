@@ -588,6 +588,7 @@ class Fichiers
 			if (preg_match('/^\d+$/', $value))
 			{
 				$_args['id'] = (int)$value;
+				break;
 			}
 		}
 
@@ -624,11 +625,11 @@ class Fichiers
 
 		foreach ($args as $value)
 		{
-			if (preg_match('/^\d+$/', $value))
+			if (preg_match('/^\d+$/', $value) && !array_key_exists('id', $_args))
 			{
 				$_args['id'] = (int)$value;
 			}
-			else if (in_array($value, $_align_values))
+			else if (in_array($value, $_align_values) && !array_key_exists('align', $_args))
 			{
 				$_args['align'] = $value;
 			}
