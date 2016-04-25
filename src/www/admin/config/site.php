@@ -54,7 +54,8 @@ if (Utils::get('edit'))
         {
             if (Squelette::editSource(Utils::get('edit'), Utils::post('content')))
             {
-                Utils::redirect('/admin/config/site.php?edit='.rawurlencode(Utils::get('edit')).'&ok');
+                $fullscreen = isset($_GET['fullscreen']) ? '#fullscreen' : '';
+                Utils::redirect('/admin/config/site.php?edit='.rawurlencode(Utils::get('edit')).'&ok'.$fullscreen);
             }
             else
             {
