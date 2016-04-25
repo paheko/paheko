@@ -5,11 +5,6 @@ require_once __DIR__ . '/_inc.php';
 
 $error = false;
 
-if (isset($_GET['ok']))
-{
-    $error = 'OK';
-}
-
 if (!empty($_POST['save']))
 {
     if (!Utils::CSRF_check('config_site'))
@@ -32,6 +27,33 @@ if (!empty($_POST['save']))
         }
     }
 }
+
+if (Utils::post('select') && Utils::post('reset'))
+{
+    if (!Utils::CSRF_check('squelettes'))
+    {
+        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    }
+    else
+    {
+        try {
+            foreach (Utils::post('select') as $source)
+            {
+                if (!Squelette::resetSource($source))
+                {
+                    throw new UserException('Impossible de réinitialiser le squelette.');
+                }
+            }
+        
+            Utils::redirect('/admin/config/site.php?reset_ok');
+        }
+        catch (UserException $e)
+        {
+            $error = $e->getMessage();
+        }
+    }
+}
+
 
 if (Utils::get('edit'))
 {
@@ -73,7 +95,6 @@ else
     $tpl->assign('sources', Squelette::listSources());
 }
 
+$tpl->assign('reset_ok', Utils::get('reset_ok'));
 $tpl->assign('error', $error);
 $tpl->display('admin/config/site.tpl');
-
-?>

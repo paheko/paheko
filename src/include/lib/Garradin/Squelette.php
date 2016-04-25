@@ -893,7 +893,7 @@ class Squelette extends \KD2\MiniSkel
 
     static public function getSource($template)
     {
-        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template))
             return false;
 
         $path = file_exists(DATA_ROOT . '/www/squelettes/' . $template)
@@ -908,7 +908,7 @@ class Squelette extends \KD2\MiniSkel
 
     static public function editSource($template, $content)
     {
-        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template))
             return false;
 
         $path = DATA_ROOT . '/www/squelettes/' . $template;
@@ -918,15 +918,15 @@ class Squelette extends \KD2\MiniSkel
 
     static public function resetSource($template)
     {
-        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!', $template))
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template))
             return false;
 
         if (file_exists(DATA_ROOT . '/www/squelettes/' . $template))
         {
-            unlink(DATA_ROOT . '/www/squelettes/' . $template);
+            return unlink(DATA_ROOT . '/www/squelettes/' . $template);
         }
 
-        return true;
+        return false;
     }
 
     static public function listSources()
@@ -947,8 +947,8 @@ class Squelette extends \KD2\MiniSkel
 
             if (!preg_match('/\.(?:css|x?html?|atom|rss|xml|svg|txt)$/i', $file))
                 continue;
-            
-            $sources[] = $file;
+
+            $sources[$file] = false;
         }
 
         $dir->close();
@@ -963,13 +963,17 @@ class Squelette extends \KD2\MiniSkel
             if (!preg_match('/\.(?:css|x?html?|atom|rss|xml|svg|txt)$/i', $file))
                 continue;
 
-            $sources[] = $file;
+            $sources[$file] = [
+                // Est-ce que le fichier fait partie de la distribution de Garradin?
+                // (Si non pas possible de faire un reset)
+                'dist'  =>  array_key_exists($file, $sources),
+                'mtime' =>  filemtime($dir->path.'/'.$file),
+            ];
         }
 
         $dir->close();
 
-        $sources = array_unique($sources);
-        sort($sources);
+        ksort($sources);
 
         return $sources;
     }

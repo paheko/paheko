@@ -41,11 +41,44 @@
 {else}
     <div class="templatesList">
         <h3>Squelettes du site</h3>
-        <ul>
-        {foreach from=$sources item="source"}
-            <li><a href="?edit={$source|escape:'url'}">{$source|escape}</a></li>
-        {/foreach}
-        </ul>
+
+        {if $reset_ok}
+        <p class="confirm">
+            Réinitialisation effectuée. Les squelettes ont été remis à jour
+        </p>
+        {/if}
+
+        <form method="post" action="{$self_url|escape}">
+            <table class="list">
+                <thead>
+                    <tr>
+                        <td class="check"></td>
+                        <th>Fichier</th>
+                        <td>Dernière modification</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                {foreach from=$sources key="source" item="local"}
+                    <tr>
+                        <td>{if $local && $local.dist}<input type="checkbox" name="select[]" value="{$source|escape}" />{/if}</td>
+                        <th><a href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">{$source|escape}</a></th>
+                        <td>{if $local}{$local.mtime|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
+                        <td class="actions">
+                            <a class="icn" href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">✎</a>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+
+            <p class="actions">
+                Pour les squelettes sélectionnés&nbsp;:
+                <input type="submit" name="reset" value="Réinitialiser" onclick="return confirm('Effacer toute modification locale et restaurer les squelettes d\'installation ?');" />
+                {csrf_field key="squelettes"}
+            </p>
+        </form>
+
     </div>
 {/if}
 
