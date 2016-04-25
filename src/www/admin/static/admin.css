@@ -386,7 +386,7 @@ h3.warning {
     color: red;
 }
 
-dd.help {
+dd.help, small.help {
     color: #666;
 }
 
