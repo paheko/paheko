@@ -168,7 +168,7 @@
 			if (!skel_list.hasOwnProperty(i))
 				continue;
 
-			var skel = skel_list[i];
+			var skel = i;
 			var opt = document.createElement('option');
 			opt.value = skel;
 			opt.innerHTML = skel;
