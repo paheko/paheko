@@ -34,7 +34,7 @@ function garradin_manifest()
 {
     $file = __DIR__ . '/../../manifest.uuid';
 
-    if (file_exists($file))
+    if (@file_exists($file))
     {
         return substr(trim(file_get_contents($file)), 0, 10);
     }
