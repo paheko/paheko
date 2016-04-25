@@ -21,7 +21,10 @@
         — {$cotisation.montant|escape_money} {$config.monnaie|escape}
     </dd>
     <dt>Nombre de membres ayant cotisé</dt>
-    <dd>{$cotisation.nb_membres|escape}</dd>
+    <dd>
+        {$cotisation.nb_membres|escape}
+        <small class="help">(incluant les membres des catégories cachées)</small>
+    </dd>
 </dl>
 
 {if !empty($liste)}

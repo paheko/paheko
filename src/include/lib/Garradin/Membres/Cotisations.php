@@ -233,8 +233,11 @@ class Cotisations
 	public function countMembersForCotisation($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT COUNT(DISTINCT id_membre) FROM cotisations_membres 
-			WHERE id_cotisation = ?;',
+		return $db->simpleQuerySingle('SELECT COUNT(DISTINCT cm.id_membre)
+			FROM cotisations_membres  AS cm
+				INNER JOIN membres AS m ON m.id = cm.id_membre
+			WHERE cm.id_cotisation = ?
+			AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);',
 			false, (int)$id);
 	}
 
@@ -269,13 +272,15 @@ class Cotisations
 		$desc = $desc ? 'DESC' : 'ASC';
 
 		return $db->simpleStatementFetch('SELECT cm.id_membre, cm.date, cm.id,
-			(SELECT '.$champ_id.' FROM membres WHERE id = cm.id_membre) AS nom, c.montant,
+			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN c.fin >= date() ELSE 1 END AS a_jour
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
+				INNER JOIN membres AS m ON m.id = cm.id_membre
 			WHERE
 				cm.id_cotisation = ?
+				AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)
 			GROUP BY cm.id_membre ORDER BY '.$order.' '.$desc.' LIMIT ?,?;',
 			\SQLITE3_ASSOC, (int)$id, $begin, self::ITEMS_PER_PAGE);
 	}
