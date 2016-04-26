@@ -1,0 +1,57 @@
+= Les squelettes dans Garradin =
+
+Dans Garradin le site public de l'association est affiché via des squelettes. Ce sont des fichiers HTML qui permettent de choisir les données affichées sur le site. Ils sont semblables aux squelettes de SPIP.
+
+= Exemples =
+
+== Contenu conditionnel ==
+
+Si on souhaite afficher un message pour les visiteurs anglophones, on peut utiliser :
+
+[[[
+[(#LANGUE_VISITEUR|=={fr})
+<p>
+	Welcome to our non-profit organization website!
+</p>
+]
+]]]
+
+= Guide de référence =
+
+== Les boucles ==
+
+=== Boucle ARTICLES ===
+
+=== Boucle RUBRIQUES ===
+
+=== Boucle PAGES ===
+
+== Les critères ==
+
+== Les balises générales ==
+
+=== #LANGUE_VISITEUR ===
+
+Donne la langue principale du visiteur.
+
+== Les filtres ==
+
+=== choixsiegal ===
+
+Ce filtre permet d'afficher un contenu alternatif.
+
+== Différences connues avec la syntaxe SPIP ==
+
+=== Boucles ===
+
+* La syntaxe raccourcie n'est pas reconnue (par exemple <BOUCLE_a(ARTICLES) />#TOTAL_BOUCLE<//B_a>)
+
+=== Balises ===
+
+Les fonctions suivantes ne sont pas supportées par Garradin pour le moment :
+
+* La balise #ENV n'est pas gérée
+* La double étoile #BALISE** n'est pas pris en compte, seulement #BALISE* (voir [[http://www.spip.net/fr_article4376.html]])
+* Les paramètres des balises dynamiques ne sont pas supportés (par exemple #ENV{lang,fr})
+* Les balises non-ambigües ne sont pas supportées (par exemple #_rubriques:TITRE)
+* Il n'est pas possible d'imbriquer des balises étendues dans les arguments des filtres d'une balise. Exemple : [(#LANGUE_VISITEUR|!={fr}|et{#LANGUE_VISITEUR|!={ro}})
