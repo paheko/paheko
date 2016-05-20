@@ -55,7 +55,7 @@ if (!empty($_POST['save']))
                 'parent'        =>  Utils::post('parent'),
                 'droit_lecture' =>  Utils::post('droit_lecture'),
                 'droit_ecriture'=>  Utils::post('droit_ecriture'),
-                'date_creation' =>  $date,
+                'date_creation' =>  gmdate('Y-m-d H:i:s', strtotime($date)),
             ]);
 
             $wiki->editRevision($page['id'], (int) Utils::post('revision_edition'), [

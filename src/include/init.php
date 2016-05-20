@@ -143,7 +143,7 @@ define('Garradin\PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
 // un .htaccess ou dans config.local.php
 if (!ini_get('date.timezone'))
 {
-    if ($tz = @date_default_timezone_get())
+    if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
     {
         ini_set('date.timezone', $tz);
     }
