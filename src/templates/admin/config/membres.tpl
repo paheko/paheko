@@ -194,6 +194,9 @@
 </form>
 
 <script type="text/javascript">
+var champ_identifiant = "f_{$config.champ_identifiant|escape:'js'}";
+var champ_identite = "f_{$config.champ_identite|escape:'js'}";
+
 {literal}
 (function () {
     if (!document.querySelector || !document.querySelectorAll)
@@ -275,7 +278,7 @@
         };
         actions.appendChild(edit);
 
-        if (field.id != 'f_email' && field.id != 'f_passe')
+        if (field.id != champ_identifiant && field.id != 'f_passe' && field.id != champ_identite)
         {
             var rem = document.createElement('a');
             rem.className = 'icn remove';
