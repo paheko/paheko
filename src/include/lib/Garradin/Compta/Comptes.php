@@ -85,7 +85,7 @@ class Comptes
         }
         else
         {
-            $new_id = $data['id'];
+            $new_id = strtoupper($data['id']);
         }
 
         if (isset($data['position']))
