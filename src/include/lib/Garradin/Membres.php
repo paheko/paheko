@@ -734,9 +734,15 @@ class Membres
         else
             $where = 'id_categorie = '.(int)$dest;
 
+        // FIXME: filtrage plus intelligent, car le champ lettre_infos peut ne pas exister
         if ($subscribed_only)
         {
-            $where .= ' AND lettre_infos = 1';
+            $champs = Config::getInstance()->get('champs_membres');
+
+            if ($champs->get('lettre_infos'))
+            {
+                $where .= ' AND lettre_infos = 1';
+            }
         }
 
         $db = DB::getInstance();
