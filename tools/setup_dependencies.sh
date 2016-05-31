@@ -16,3 +16,13 @@ SRCPATH="$SCRIPTPATH/../src/include/lib"
 # Template Lite
 svn ${KEYWORD} https://svn.kd2.org/svn/misc/libs/template_lite/ "$SRCPATH/Template_Lite/"
 
+dir=`mktemp -d` && cd $dir
+
+wget https://fossil.kd2.org/kd2fw/zip/KD2+Framework-trunk.zip
+unzip "KD2+Framework-trunk.zip"
+
+mv "KD2 Framework-trunk/src/lib/kd2" "$SRCPATH/KD2"
+
+cd "$SRCPATH"
+
+rm -rf "$dir"
