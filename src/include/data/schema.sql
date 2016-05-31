@@ -128,9 +128,9 @@ CREATE TABLE wiki_revisions
 -- Révisions du contenu des pages
 (
     id_page INTEGER NOT NULL,
-    revision INTEGER,
+    revision INTEGER NULL,
 
-    id_auteur INTEGER,
+    id_auteur INTEGER NULL,
 
     contenu TEXT,
     modification TEXT, -- Description des modifications effectuées
@@ -317,9 +317,9 @@ CREATE TABLE plugins_signaux
 CREATE TABLE compta_rapprochement
 -- Rapprochement entre compta et relevés de comptes
 (
-    operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id),
+    id_operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id),
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    auteur INTEGER NOT NULL REFERENCES membres (id)
+    id_auteur INTEGER NULL REFERENCES membres (id)
 );
 
 CREATE TABLE fichiers

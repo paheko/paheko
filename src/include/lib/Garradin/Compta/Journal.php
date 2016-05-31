@@ -153,7 +153,7 @@ class Journal
 
         $db->exec('BEGIN;');
         $db->simpleExec('DELETE FROM membres_operations WHERE id_operation = ?;', (int)$id);
-        $db->simpleExec('DELETE FROM compta_rapprochement WHERE operation = ?;', (int)$id);
+        $db->simpleExec('DELETE FROM compta_rapprochement WHERE id_operation = ?;', (int)$id);
         $db->simpleExec('DELETE FROM compta_journal WHERE id = ?;', (int)$id);
         $db->exec('END;');
 

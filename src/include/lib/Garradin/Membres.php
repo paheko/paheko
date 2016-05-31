@@ -455,7 +455,7 @@ class Membres
             // a participé au wiki, à la compta, etc.
             if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
                 || $db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM compta_rapprochement WHERE auteur = ?;', false, (int)$id)
+                || $db->simpleQuerySingle('SELECT 1 FROM compta_rapprochement WHERE id_auteur = ?;', false, (int)$id)
                 || $db->simpleQuerySingle('SELECT 1 FROM membres_operations WHERE id_membre = ?;', false, (int)$id)
                 || $db->simpleQuerySingle('SELECT 1 FROM cotisations_membres WHERE id_membre = ?;', false, (int)$id)
                 || $db->simpleQuerySingle('SELECT 1 FROM rappels_envoyes WHERE id_membre = ?;', false, (int)$id)
@@ -707,6 +707,7 @@ class Membres
         // Mise à jour des références, membre qui n'existe plus
         $db->exec('UPDATE wiki_revisions SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
         $db->exec('UPDATE compta_journal SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
+        $db->exec('UPDATE compta_rapprochement SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
 
         // Suppression des données liées au membre
         $db->exec('DELETE FROM rappels_envoyes WHERE id_membre IN ('.$membres.');');
