@@ -22,7 +22,7 @@
         <dl>
         {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
             <dt><label for="f_id">Numéro de membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="id" id="f_id" value="{form_field data=$membre name=id}" /></dd>
+            <dd><input type="text" name="id" id="f_id" value="{form_field data=$membre name=id}" required="required" pattern="^\d+$" /></dd>
         {/if}
             {foreach from=$champs item="champ" key="nom"}
                 {html_champ_membre config=$champ name=$nom data=$membre}
