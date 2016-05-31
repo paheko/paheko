@@ -439,6 +439,11 @@ class Membres
 
         if (!empty($data['id']))
         {
+            if (!preg_match('/^\d+$/', $data['id']))
+            {
+                throw new UserException('Le numéro de membre ne doit contenir que des chiffres.');
+            }
+
             if ($db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int)$data['id']))
             {
                 throw new UserException('Ce numéro est déjà attribué à un autre membre.');
