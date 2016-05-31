@@ -57,7 +57,7 @@
         <input type="submit" id="f_submit" name="save" value="Terminer l'installation &rarr;" />
     </p>
 
-    <script type="text/javascript" src="{$admin_url}static/loader.js"></script>
+    <script type="text/javascript" src="{$admin_url}static/scripts/loader.js"></script>
 
     <script type="text/javascript">
     {literal}
