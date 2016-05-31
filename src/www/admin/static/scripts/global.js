@@ -110,29 +110,33 @@
 
 	var dateInputFallback = function ()
 	{
+		/*
+		// Firefox dit implémenter date, mais ne l'implémente pas, aucun moyen de détecter ce cas
+		// donc on force l'utilisation du custom datepicker de Garradin…
 		var input = document.createElement('input');
 		input.setAttribute('type', 'date');
 		input.value = ':-)';
 		input.style.position = 'absolute';
 		input.style.visibility = 'hidden';
 		document.body.appendChild(input);
-
+		
 		// If input type changed or value hasn't been sanitized then
 		// the input type date element is not supported
-		if (input.type === 'text' || input.value === ':-)')
+		if (input.type !== 'text' && input.value !== ':-)')
 		{
 			document.body.removeChild(input);
-
+		*/
 			if (document.querySelector && !document.querySelector('input[type=date]'))
 				return false;
 
 			g.script('scripts/datepickr.js');
 			g.style('scripts/datepickr.css');
+		/*
 		}
 		else
 		{
 			document.body.removeChild(input);
-		}
+		}*/
 	};
 
 	g.onload(dateInputFallback);

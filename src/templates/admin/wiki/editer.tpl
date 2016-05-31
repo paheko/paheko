@@ -12,12 +12,12 @@
         <legend>Informations générales</legend>
         <dl>
             <dt><label for="f_titre">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="titre" id="f_titre" value="{form_field data=$page name=titre}" /></dd>
+            <dd><input type="text" name="titre" id="f_titre" value="{form_field data=$page name=titre}" required="required" /></dd>
             <dt><label for="f_uri">Adresse unique</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">
                 Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas.
             </dd>
-            <dd><input type="text" name="uri" id="f_uri" value="{form_field data=$page name=uri}" /></dd>
+            <dd><input type="text" name="uri" id="f_uri" value="{form_field data=$page name=uri}" required="required" /></dd>
             <dt><label for="f_browse_parent">Cette page est une sous-rubrique de...</label></dt>
             <dd>
                 <input type="hidden" name="parent" id="f_parent" value="{form_field data=$page name=parent}" />
@@ -30,9 +30,9 @@
             </dd>
             <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <input type="date" size="10" name="date" id="f_date" value="{$date|date_fr:'Y-m-d'|escape}" />
-                <input type="text" class="time" size="2" name="date_h" value="{$date|date_fr:'H'|escape}" /> h
-                <input type="text" class="time" size="2" name="date_min" value="{$date|date_fr:'i'|escape}" />
+                <input type="date" size="10" name="date" id="f_date" value="{$date|date_fr:'Y-m-d'|escape}" pattern="{literal}^\d{4}-\d{2}-\d{2}${/literal}" required="required" />
+                <input type="text" class="time" size="2" name="date_h" value="{$date|date_fr:'H'|escape}" pattern="^{literal}\d{1,2}${/literal}" required="required" /> h
+                <input type="text" class="time" size="2" name="date_min" value="{$date|date_fr:'i'|escape}" pattern="{literal}^\d{1,2}${/literal}" required="required" />
             </dd>
         </dl>
     </fieldset>

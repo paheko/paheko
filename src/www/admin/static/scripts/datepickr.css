@@ -10,6 +10,16 @@
     padding: 0.2em;
     width: 14em;
     box-shadow: 2px 2px 5px #666;
+    transition: all .5s;
+    opacity: 1;
+    display: block;
+    position: absolute;
+}
+
+.calendar.hidden {
+    overflow: hidden;
+    visibility: hidden;
+    opacity: 0;
 }
 
 .calendar a {
