@@ -31,7 +31,7 @@ class Rapprochement
                 (CASE WHEN j.compte_debit = :compte THEN j.montant ELSE -(j.montant) END) AS solde,
                 r.date AS date_rapprochement
             FROM compta_journal AS j
-                LEFT JOIN compta_rapprochement AS r ON r.operation = j.id
+                LEFT JOIN compta_rapprochement AS r ON r.id_operation = j.id
             WHERE (compte_debit = :compte OR compte_credit = :compte) AND id_exercice = :exercice
                 AND j.date >= :debut AND j.date <= :fin
             ORDER BY date ASC;';
@@ -70,7 +70,7 @@ class Rapprochement
         $db->exec('BEGIN;');
 
         // Synchro des trucs cochés
-        $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (operation, auteur) 
+        $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (id_operation, id_auteur) 
             VALUES (:operation, :auteur);');
         $st->bindValue(':auteur', (int)$auteur, \SQLITE3_INTEGER);
 
@@ -84,7 +84,7 @@ class Rapprochement
         }
 
         // Synchro des trucs NON cochés
-        $st = $db->prepare('DELETE FROM compta_rapprochement WHERE operation = :id;');
+        $st = $db->prepare('DELETE FROM compta_rapprochement WHERE id_operation = :id;');
 
         foreach ($journal as $row)
         {
