@@ -289,9 +289,14 @@ class Champs
      */
     public function add($name, $config)
     {
-        if (!preg_match('!^[a-z0-9]+(_[a-z0-9]+)*$!', $name))
+        if (!preg_match('!^[a-z]!', $name))
         {
-            throw new UserException('Le nom du champ est invalide : ne sont acceptés que des lettres minuscules et chiffres.');
+            throw new UserException('Le nom du champ est invalide : le premier caractère doit être une lettre.');
+        }
+        
+        if (!preg_match('!^[a-z][a-z0-9]*(_[a-z0-9]+)*$!', $name))
+        {
+            throw new UserException('Le nom du champ est invalide : ne sont acceptés que les lettres minuscules et les chiffres (éventuellement séparés par un underscore).');
         }
         
         $this->_checkField($name, $config);
