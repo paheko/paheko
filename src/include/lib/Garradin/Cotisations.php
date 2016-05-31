@@ -123,6 +123,9 @@ class Cotisations
 		$db->simpleExec('UPDATE membres_operations SET id_cotisation = NULL 
 			WHERE id_cotisation IN (SELECT id FROM cotisations_membres WHERE id_cotisation = ?);', (int) $id);
 
+		$db->simpleExec('DELETE FROM rappels WHERE id_cotisation = ?;', (int) $id);
+		$db->simpleExec('DELETE FROM rappels_envoyes WHERE id_cotisation = ?;', (int) $id);
+
 		$db->simpleExec('DELETE FROM cotisations_membres WHERE id_cotisation = ?;', (int) $id);
 		$db->simpleExec('DELETE FROM cotisations WHERE id = ?;', (int) $id);
 		$db->exec('END;');
