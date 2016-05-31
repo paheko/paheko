@@ -1,12 +1,14 @@
-# Colonne manquante
+-- Colonne manquante
 ALTER TABLE rappels_envoyes ADD COLUMN id_rappel INTEGER NULL REFERENCES rappels (id);
 
-# Un bug a permis d'insérer des comptes avec des lettres minuscules, créant des problèmes
-# corrigeons donc les comptes pour les mettre en majuscules.
+-- Un bug a permis d'insérer des comptes avec des lettres minuscules, créant des problèmes
+-- corrigeons donc les comptes pour les mettre en majuscules.
+
 UPDATE compta_comptes SET id = UPPER(id);
 
-# Le champ id_auteur était à NOT NULL, il faut corriger ça pour pouvoir avoir un rapprochement anonyme
-# une fois que le membre a été supprimé
+-- Le champ id_auteur était à NOT NULL, il faut corriger ça pour pouvoir avoir un rapprochement anonyme
+-- une fois que le membre a été supprimé
+
 CREATE TABLE compta_rapprochement2
 -- Rapprochement entre compta et relevés de comptes
 (
@@ -15,7 +17,7 @@ CREATE TABLE compta_rapprochement2
     id_auteur INTEGER NULL REFERENCES membres (id)
 );
 
-INSERT INTO compta_rapprochement2 (SELECT operation, date, auteur FROM compta_rapprochement);
+INSERT INTO compta_rapprochement2 SELECT operation, date, auteur FROM compta_rapprochement;
 
 DROP TABLE compta_rapprochement;
 
