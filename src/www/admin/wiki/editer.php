@@ -29,7 +29,7 @@ if (!empty($page['contenu']))
 
 if (Utils::post('date'))
 {
-    $date = Utils::post('date') . ' ' . Utils::post('date_h') . ':' . Utils::post('date_min');
+    $date = Utils::post('date') . ' ' . sprintf('%02d:%02d', Utils::post('date_h'), Utils::post('date_min'));
 }
 else
 {
@@ -55,7 +55,7 @@ if (!empty($_POST['save']))
                 'parent'        =>  Utils::post('parent'),
                 'droit_lecture' =>  Utils::post('droit_lecture'),
                 'droit_ecriture'=>  Utils::post('droit_ecriture'),
-                'date_creation' =>  gmdate('Y-m-d H:i:s', strtotime($date)),
+                'date_creation' =>  $date,
             ]);
 
             $wiki->editRevision($page['id'], (int) Utils::post('revision_edition'), [
@@ -83,7 +83,7 @@ $tpl->assign('error', $error);
 $tpl->assign('page', $page);
 
 $tpl->assign('time', time());
-$tpl->assign('date', $date ? $date : $page['date_creation']);
+$tpl->assign('date', $date ? strtotime($date) : $page['date_creation']);
 
 $tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
 

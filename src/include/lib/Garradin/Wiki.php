@@ -121,11 +121,17 @@ class Wiki
         $db = DB::getInstance();
         $this->_checkFields($data);
 
-        // Modification de la date de création
-        if (isset($data['date_creation']) && !Utils::checkDateTime($data['date_creation']))
+        // Modification de la date de création: vérification que le format est bien conforme SQLite
+        if (isset($data['date_creation']))
         {
-            throw new UserException('Date invalide: '.$data['date_creation']);
-        }
+        	if (!Utils::checkDateTime($data['date_creation']))
+	        {
+	            throw new UserException('Date invalide: '.($data['date_creation'] ?: 'date non reconnue'));
+	        }
+
+	        // On stocke la date en UTC, pas dans le fuseau local
+	        $data['date_creation'] = gmdate('Y-m-d H:i:s', strtotime($data['date_creation']));
+	    }
         
         if (isset($data['uri']))
         {
