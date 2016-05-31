@@ -3,7 +3,7 @@
 <ul class="actions">
     <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">Membre n°{$membre.id|escape}</a></li>
     <li><a href="{$admin_url}membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN && $user.id != $membre.id}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
     {/if}
     <li class="current"><a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Suivi des cotisations</a></li>

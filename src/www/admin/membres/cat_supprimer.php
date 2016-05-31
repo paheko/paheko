@@ -24,6 +24,11 @@ if (!$cat)
     throw new UserException("Cette catégorie n'existe pas.");
 }
 
+if ($cat['id'] == $user['id_categorie'])
+{
+    throw new UserException("Vous ne pouvez pas supprimer votre catégorie.");
+}
+
 $error = false;
 
 if (!empty($_POST['delete']))

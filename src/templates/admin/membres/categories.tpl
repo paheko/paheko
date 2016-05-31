@@ -17,7 +17,9 @@
                 </td>
                 <td class="actions">
                     <a class="icn" href="cat_modifier.php?id={$cat.id|escape}" title="Modifier">✎</a>
+                    {if $cat.id != $user.id_categorie}
                     <a class="icn" href="cat_supprimer.php?id={$cat.id|escape}" title="Supprimer">✘</a>
+                    {/if}
                 </td>
             </tr>
         {/foreach}
