@@ -23,7 +23,7 @@ echo '<!DOCTYPE html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
     <link rel="stylesheet" type="text/css" href="static/admin.css" media="all" />
-    <script type="text/javascript" src="static/loader.js"></script>
+    <script type="text/javascript" src="static/scripts/loader.js"></script>
     <title>Mise à jour</title>
 </head>
 <body>
