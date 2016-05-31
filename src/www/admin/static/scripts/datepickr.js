@@ -256,6 +256,8 @@ function datepickr(targetElement, userConfig) {
 	}
 
 	function open() {
+		element.onkeyup = element.onclick = null;
+
 		document.onmousedown = function(e) {
 			e = e || window.event;
 			var target = e.target || e.srcElement;
@@ -273,20 +275,29 @@ function datepickr(targetElement, userConfig) {
 
 			if (target == element)
 			{
-				close();
+				close(true);
 			}
 
 			e.preventDefault();
+			return false;
 		}
 
 		document.onkeyup = function(e) {
 			var k = e.keyCode || e.which;
 
+			// Esc key pressed
 			if (k == 27)
 			{
 				close();
-				e.preventDefault();
-				return false;
+			}
+			else if ((k >= 37 && k <= 40) || k == 33 || k == 34 || k == 32 || k == 40)
+			{
+				// Handled in onkeypress
+			}
+			else if (e.target == element && element.value.match(/^\d+\/\d+\/\d{4}$/))
+			{
+				parseInputValue();
+				handleMonthClick();
 			}
 		};
 
@@ -336,6 +347,8 @@ function datepickr(targetElement, userConfig) {
 
 				currentPosition = pos;
 				currentDate = new Date(currentYearView, currentMonthView, row.firstChild.innerHTML);
+
+				return false;
 			}
 			else if (k == 13 || k == 32)
 			{
@@ -348,13 +361,48 @@ function datepickr(targetElement, userConfig) {
 		}
 
 		handleMonthClick();
-		container.style.display = 'block';
+		container.className = 'calendar';
+		parseInputValue();
+		handleMonthClick();
+		container.focus();
 	}
 
-	function close() {
+	function close(no_reopen = false) {
 		document.onmousedown = null;
 		document.onkeypress = null;
-		container.style.display = 'none';
+		container.className = 'calendar hidden';
+		element.onclick = function (e) {
+			if (no_reopen) {
+				no_reopen = false;
+				return;
+			}
+
+			open();
+		};
+
+		element.onkeyup = function (e) {
+			var k = e.keyCode || e.which;
+			var c = String.fromCharCode(e.charCode || e.keyCode);
+
+			if (k == 40)
+			{
+				open();
+			}
+			else if (c.match(/[0-9\/]/) && element.value.match(/^\d{2}\/\d{2}\/\d{4}$/))
+			{
+				open();
+			}
+		};
+	}
+
+	function parseInputValue() {
+		if (element.value)
+		{
+			var d = element.value.split('/').reverse();
+			currentDate = new Date(parseInt(d[0], 10), parseInt(d[1], 10) - 1, parseInt(d[2], 10), 0, 0, 0, 0);
+			currentYearView = get.current.year();
+			currentMonthView = get.current.month.integer();
+		}
 	}
 
 	function initialise(userConfig) {
@@ -366,15 +414,9 @@ function datepickr(targetElement, userConfig) {
 			}
 		}
 
-		if (element.value)
-		{
-			var d = element.value.split('/').reverse();
-			currentDate = new Date(parseInt(d[0], 10), parseInt(d[1], 10) - 1, parseInt(d[2], 10), 0, 0, 0, 0);
-			currentYearView = get.current.year();
-			currentMonthView = get.current.month.integer();
-		}
-		container = build('div', { className: 'calendar' });
-		container.style.cssText = 'display: none; position: absolute; z-index: 9999;';
+		parseInputValue();
+		container = build('div', { className: 'calendar hidden' });
+//		container.style.cssText = 'display: none; position: absolute; z-index: 9999;';
 
 		var months = build('div', { className: 'months' });
 		prevMonth = build('span', { className: 'prev-month' }, build('a', { href: '#' }, '&lt;'));
