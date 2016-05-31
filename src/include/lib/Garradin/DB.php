@@ -46,6 +46,9 @@ class DB extends \SQLite3
 
         $this->enableExceptions(true);
 
+        // Le timeout par défaut est 0, on le met à 1 seconde, si ça ne suffit pas on augmentera plus tard
+        $this->busyTimeout(1000);
+
         // Activer les contraintes des foreign keys
         $this->exec('PRAGMA foreign_keys = ON;');
 
