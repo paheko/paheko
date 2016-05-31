@@ -54,12 +54,17 @@
         <legend>Droits</legend>
         <dl class="droits">
             <dt><label for="f_droit_connexion_aucun">Les membres de cette catégorie peuvent-ils se connecter ?</label></dt>
+            {if $readonly}
+                <dd class="help">
+                    Il n'est pas possible de désactiver ce droit pour votre propre catégorie.
+                </dd>
+            {/if}
             <dd>
-                <input type="radio" name="droit_connexion" value="{Garradin\Membres::DROIT_AUCUN}" id="f_droit_connexion_aucun" {if $cat.droit_connexion == Garradin\Membres::DROIT_AUCUN}checked="checked"{/if} />
+                <input type="radio" name="droit_connexion" value="{Garradin\Membres::DROIT_AUCUN}" id="f_droit_connexion_aucun" {if $cat.droit_connexion == Garradin\Membres::DROIT_AUCUN}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_connexion_aucun"><b class="aucun">C</b> Non</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_connexion" value="{Garradin\Membres::DROIT_ACCES}" id="f_droit_connexion_acces" {if $cat.droit_connexion == Garradin\Membres::DROIT_ACCES}checked="checked"{/if} />
+                <input type="radio" name="droit_connexion" value="{Garradin\Membres::DROIT_ACCES}" id="f_droit_connexion_acces" {if $cat.droit_connexion == Garradin\Membres::DROIT_ACCES}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_connexion_acces"><b class="acces">C</b> Oui</label>
             </dd>
         </dl>
@@ -76,20 +81,25 @@
         </dl>
         <dl class="droits">
             <dt><label for="f_droit_membres_aucun">Gestion des membres :</label></dt>
+            {if $readonly}
+                <dd class="help">
+                    Il n'est pas possible de désactiver ce droit pour votre propre catégorie.
+                </dd>
+            {/if}
             <dd>
-                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_AUCUN}" id="f_droit_membres_aucun" {if $cat.droit_membres == Garradin\Membres::DROIT_AUCUN}checked="checked"{/if} />
+                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_AUCUN}" id="f_droit_membres_aucun" {if $cat.droit_membres == Garradin\Membres::DROIT_AUCUN}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_membres_aucun"><b class="aucun">M</b> Pas d'accès</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_ACCES}" id="f_droit_membres_acces" {if $cat.droit_membres == Garradin\Membres::DROIT_ACCES}checked="checked"{/if} />
+                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_ACCES}" id="f_droit_membres_acces" {if $cat.droit_membres == Garradin\Membres::DROIT_ACCES}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_membres_acces"><b class="acces">M</b> Lecture uniquement</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_ECRITURE}" id="f_droit_membres_ecriture" {if $cat.droit_membres == Garradin\Membres::DROIT_ECRITURE}checked="checked"{/if} />
+                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_ECRITURE}" id="f_droit_membres_ecriture" {if $cat.droit_membres == Garradin\Membres::DROIT_ECRITURE}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_membres_ecriture"><b class="ecriture">M</b> Lecture &amp; écriture</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_ADMIN}" id="f_droit_membres_admin" {if $cat.droit_membres == Garradin\Membres::DROIT_ADMIN}checked="checked"{/if} />
+                <input type="radio" name="droit_membres" value="{Garradin\Membres::DROIT_ADMIN}" id="f_droit_membres_admin" {if $cat.droit_membres == Garradin\Membres::DROIT_ADMIN}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_membres_admin"><b class="admin">M</b> Administration</label>
             </dd>
         </dl>
@@ -133,12 +143,17 @@
         </dl>
         <dl class="droits">
             <dt><label for="f_droit_config_aucun">Les membres de cette catégorie peuvent-ils modifier la configuration ?</label></dt>
+            {if $readonly}
+                <dd class="help">
+                    Il n'est pas possible de désactiver ce droit pour votre propre catégorie.
+                </dd>
+            {/if}
             <dd>
-                <input type="radio" name="droit_config" value="{Garradin\Membres::DROIT_AUCUN}" id="f_droit_config_aucun" {if $cat.droit_config == Garradin\Membres::DROIT_AUCUN}checked="checked"{/if} />
+                <input type="radio" name="droit_config" value="{Garradin\Membres::DROIT_AUCUN}" id="f_droit_config_aucun" {if $cat.droit_config == Garradin\Membres::DROIT_AUCUN}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_config_aucun"><b class="aucun">&#x2611;</b> Non</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_config" value="{Garradin\Membres::DROIT_ADMIN}" id="f_droit_config_admin" {if $cat.droit_config == Garradin\Membres::DROIT_ADMIN}checked="checked"{/if} />
+                <input type="radio" name="droit_config" value="{Garradin\Membres::DROIT_ADMIN}" id="f_droit_config_admin" {if $cat.droit_config == Garradin\Membres::DROIT_ADMIN}checked="checked"{/if} {$readonly} />
                 <label for="f_droit_config_admin"><b class="admin">&#x2611;</b> Oui</label>
             </dd>
         </dl>

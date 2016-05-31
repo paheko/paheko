@@ -17,7 +17,12 @@ if (!$membre)
 
 $error = false;
 
-if (Utils::post('delete'))
+if ($membre['id'] == $user['id'])
+{
+    $error = "Il n'est pas possible de supprimer votre propre compte.";
+}
+
+if (Utils::post('delete') && !$error)
 {
     if (!Utils::CSRF_check('delete_membre_'.$membre['id']))
     {

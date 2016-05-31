@@ -34,8 +34,7 @@ if (!empty($_POST['save']))
     }
     else
     {
-        try {
-            $cats->edit($id, [
+        $data = [
                 'nom'           =>  Utils::post('nom'),
                 'description'   =>  Utils::post('description'),
                 'droit_wiki'    =>  (int) Utils::post('droit_wiki'),
@@ -46,7 +45,20 @@ if (!empty($_POST['save']))
                 'droit_inscription' => (int) Utils::post('droit_inscription'),
                 'cacher'        =>  (int) Utils::post('cacher'),
                 'id_cotisation_obligatoire' => (int) Utils::post('id_cotisation_obligatoire'),
-            ]);
+        ];
+
+        // Ne pas permettre de modifier la connexion, l'accès à la config et à la gestion des membres
+        // pour la catégorie du membre qui édite les catégories, sinon il pourrait s'empêcher
+        // de se connecter ou n'avoir aucune catégorie avec le droit de modifier les catégories !
+        if ($cat['id'] == $user['id_categorie'])
+        {
+            $data['droit_connexion'] = Membres::DROIT_ACCES;
+            $data['droit_config'] = Membres::DROIT_ADMIN;
+            $data['droit_membres'] = Membres::DROIT_ADMIN;
+        }
+
+        try {
+            $cats->edit($id, $data);
 
             if ($id == $user['id_categorie'])
             {
@@ -65,9 +77,9 @@ if (!empty($_POST['save']))
 $tpl->assign('cat', $cat);
 $tpl->assign('error', $error);
 
+$tpl->assign('readonly', $cat['id'] == $user['id_categorie'] ? 'disabled="disabled"' : '');
+
 $cotisations = new Cotisations;
 $tpl->assign('cotisations', $cotisations->listCurrent());
 
 $tpl->display('admin/membres/cat_modifier.tpl');
-
-?>
