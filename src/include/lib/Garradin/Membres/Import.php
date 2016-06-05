@@ -219,16 +219,17 @@ class Import
 					$data[$name] = $row[$id];
 			}
 
-			if (!empty($data['id']))
+			if (!empty($data['id']) && $data['id'] > 0)
 			{
 				$id = (int)$data['id'];
-				unset($data['id']);
 			}
 			else
 			{
 				$id = false;
 			}
-			
+
+			unset($data['id']);
+
 			try {
 				if ($id)
 					$membres->edit($id, $data);
