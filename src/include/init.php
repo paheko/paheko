@@ -229,6 +229,7 @@ function exception_handler($e)
     $error .= 'Garradin version: ' . garradin_version() . "\n";
     $error .= 'Garradin manifest: ' . garradin_manifest() . "\n";
     $error .= 'PHP version: ' . phpversion() . "\n";
+    $error .= 'Garradin data root: ' . \Garradin\DATA_ROOT . "\n";
 
     foreach ($_SERVER as $key=>$value)
     {
