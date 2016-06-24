@@ -32,6 +32,7 @@ if (!empty($_POST['move_ok']))
     if (!Utils::CSRF_check('membres_action'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $_POST['move'] = true;
     }
     else
     {
@@ -48,6 +49,7 @@ elseif (!empty($_POST['delete_ok']))
     if (!Utils::CSRF_check('membres_action'))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $_POST['delete'] = true;
     }
     else
     {
@@ -71,9 +73,11 @@ elseif (!empty($_POST['delete']))
 {
     $tpl->assign('action', 'delete');
 }
+else
+{
+    throw new UserException('Aucune action sélectionée.');
+}
 
 $tpl->assign('error', $error);
 
 $tpl->display('admin/membres/action.tpl');
-
-?>
