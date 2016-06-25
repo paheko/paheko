@@ -214,11 +214,16 @@ class Squelette extends \KD2\MiniSkel
         $this->assign('url_elements', WWW_URL . 'squelettes/');
         $this->assign('url_admin', WWW_URL . 'admin/');
 
-        $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) 
-            ? preg_replace('/^.*(\w{2}).*$/Ui', '$1', $_SERVER['HTTP_ACCEPT_LANGUAGE'])
-            : '';
-        
-        $this->assign('langue_visiteur', strtolower($lang));
+        $url = file_exists(DATA_ROOT . '/www/squelettes/default.css')
+            ? WWW_URL . 'squelettes/default.css'
+            : WWW_URL . 'squelettes-dist/default.css';
+
+        $this->assign('url_css_defaut', $url);
+
+        $lang = \Locale::acceptFromHttp($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        $lang = strtolower(substr($lang, 0, 2));
+
+        $this->assign('langue_visiteur', $lang);
     }
 
     public function __construct()
