@@ -1277,7 +1277,7 @@ form#insertImage .cancel input {
     cursor: pointer;
 }
 
-form#insertImage .align input:hover, form#insertImage .cancel input:hover,  {
+form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
     cursor: pointer;
     background-color: #eee;
     color: darkred;
