@@ -220,8 +220,15 @@ class Squelette extends \KD2\MiniSkel
 
         $this->assign('url_css_defaut', $url);
 
-        $lang = \Locale::acceptFromHttp($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-        $lang = strtolower(substr($lang, 0, 2));
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+        {
+	        $lang = \Locale::acceptFromHttp($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+	        $lang = strtolower(substr($lang, 0, 2));
+	    }
+	    else
+	    {
+	    	$lang = '';
+	    }
 
         $this->assign('langue_visiteur', $lang);
     }
