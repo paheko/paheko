@@ -10,11 +10,19 @@ class Config
 
     static protected $_instance = null;
 
+    /**
+     * Singleton simple
+     * @return Config
+     */
     static public function getInstance()
     {
         return self::$_instance ?: self::$_instance = new Config;
     }
 
+    /**
+     * Empêche de cloner l'objet
+     * @return void
+     */
     private function __clone()
     {
     }
@@ -90,6 +98,7 @@ class Config
     {
         if (!empty($this->modified))
         {
+            // FIXME: on devrait loguer/envoyer une erreur ici si on a modifié quelque chose sans le sauver
             //echo '<div style="color: red; background: #fff;">Il y a des champs modifiés non sauvés dans '.__CLASS__.' !</div>';
         }
     }
@@ -322,5 +331,3 @@ class Config
         return $this->config;
     }
 }
-
-?>
