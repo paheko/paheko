@@ -54,8 +54,6 @@ if ($user['droits']['membres'] >= Membres::DROIT_ADMIN)
 }
 
 
-$tpl->assign('liste', $cotisations->listCurrentWithStats());
+$tpl->assign('liste', $cotisations->listWithStats());
 
 $tpl->display('admin/membres/cotisations/index.tpl');
-
-?>
