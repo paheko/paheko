@@ -55,7 +55,7 @@ if (!empty($_POST['save']))
                 $data[$key] = Utils::post($key);
             }
 
-            if ($user['droits']['membres'] == Membres::DROIT_ADMIN)
+            if ($user['droits']['membres'] == Membres::DROIT_ADMIN && $user['id'] != $membre['id'])
             {
                 $data['id_categorie'] = Utils::post('id_categorie');
                 $data['id'] = Utils::post('id');
