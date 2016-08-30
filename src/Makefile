@@ -1,4 +1,4 @@
-KD2_BRANCH=dev
+KD2_BRANCH=trunk
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
