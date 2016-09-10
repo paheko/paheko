@@ -68,7 +68,7 @@
 
     <p class="submit">
         {csrf_field key="edit_co_`$cotisation.id`"}
-        <input type="submit" name="save" value="Ajouter &rarr;" />
+        <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 
 </form>

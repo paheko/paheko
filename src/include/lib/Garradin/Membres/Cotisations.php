@@ -62,9 +62,9 @@ class Cotisations
 	            }
 	        }
 
-	        if (empty($data['montant']) || !is_numeric($data['montant']))
+	        if (!isset($data['montant']) || !is_numeric($data['montant']) || $data['montant'] < 0)
 	        {
-	        	throw new UserException('Le montant indiqué n\'est pas un nombre valide.');
+	        	throw new UserException('Le montant indiqué n\'est pas un nombre valide : doit être supérieur ou égal à zéro.');
 	        }
 	    }
 	}
@@ -102,7 +102,7 @@ class Cotisations
 
 		$id = $db->lastInsertRowId();
 
-		if ($co['id_categorie_compta'] && $co['montant'] > 0)
+		if ($co['id_categorie_compta'] && $data['montant'] > 0)
 		{
 			try {
 		        $id_operation = $this->addOperationCompta($id, [
