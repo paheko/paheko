@@ -27,7 +27,7 @@ class Cotisations
 
 		if (!isset($data['montant']) || !is_numeric($data['montant']) || (float)$data['montant'] < 0)
 		{
-			throw new UserException('Le montant doit être un nombre positif et valide.');
+			throw new UserException('Le montant doit être un nombre supérieur ou égal à zéro et valide.');
 		}
 
 		$data['montant'] = (float) $data['montant'];
