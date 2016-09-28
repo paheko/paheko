@@ -415,7 +415,11 @@ class Membres
         }
 
         $db->simpleInsert('membres', $data);
-        return $db->lastInsertRowId();
+        $id = $db->lastInsertRowId();
+
+        Plugin::fireSignal('membre.nouveau', array_merge(['id' => $id], $data));
+
+        return $id;
     }
 
     public function edit($id, $data = [], $check_editable = true)
@@ -699,6 +703,8 @@ class Membres
         {
             $id = (int) $id;
         }
+
+        Plugin::fireSignal('membre.suppression', $membres);
 
         $membres = implode(',', $membres);
 
