@@ -222,7 +222,16 @@ class Squelette extends \KD2\MiniSkel
 
         if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
         {
-	        $lang = \Locale::acceptFromHttp($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            if (function_exists('locale_accept_from_http'))
+            {
+	           $lang = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            }
+            else
+            {
+                $lang = preg_replace('/[^a-z]/i', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+                $lang = strtolower(substr($lang, 0, 2));
+            }
+
 	        $lang = strtolower(substr($lang, 0, 2));
 	    }
 	    else
