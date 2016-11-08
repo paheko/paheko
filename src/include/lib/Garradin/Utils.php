@@ -234,17 +234,6 @@ class Utils
         return 'gecko/'.base64_encode(sha1($key, true));
     }
 
-    static public function generatePassword($length, $chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
-    {
-        $string = '';
-        for ($i = 0; $i < $length; $i++)
-        {
-            $pos = rand(0, strlen($chars)-1);
-            $string .= $chars[$pos];
-        }
-        return $string;
-    }
-
     static public function post($key)
     {
         return isset($_POST[$key]) ? $_POST[$key] : '';
