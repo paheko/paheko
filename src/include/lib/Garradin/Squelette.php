@@ -954,7 +954,7 @@ class Squelette extends \KD2\MiniSkel
     {
         if (!file_exists(DATA_ROOT . '/www/squelettes'))
         {
-            mkdir(DATA_ROOT . '/www/squelettes');
+            mkdir(DATA_ROOT . '/www/squelettes', 0775, true);
         }
 
         $sources = [];
