@@ -71,7 +71,7 @@ const INSTALL_PROCESS = true;
 require_once __DIR__ . '/../../include/init.php';
 
 // Vérifier que les répertoires vides existent, sinon les créer
-$paths = [CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
+$paths = [DATA_ROOT, PLUGINS_ROOT, CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
 
 foreach ($paths as $path)
 {
