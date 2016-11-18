@@ -42,7 +42,7 @@ else
 	    $cat_id = array_diff(array_keys($membres_cats), array_keys($membres_cats_cachees));
 	}
 
-	$order = $champs->getFirst();
+	$order = $config->get('champ_identite');
 	$desc = false;
 
 	if (Utils::get('o'))
