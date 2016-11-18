@@ -42,6 +42,7 @@ else
 	    $cat_id = array_diff(array_keys($membres_cats), array_keys($membres_cats_cachees));
 	}
 
+	// Par défaut le champ de tri c'est l'identité
 	$order = $config->get('champ_identite');
 	$desc = false;
 
@@ -51,10 +52,17 @@ else
 	if (isset($_GET['d']))
 	    $desc = true;
 
+	$fields = $champs->getListedFields();
+
+	// Vérifier que le champ de tri existe bien dans la table
+	if (!array_key_exists($order, $fields))
+	{
+		// Sinon par défaut c'est le premier champ de la table qui fait le tri
+		$order = key($fields);
+	}
+
 	$tpl->assign('order', $order);
 	$tpl->assign('desc', $desc);
-
-	$fields = $champs->getListedFields();
 
 	$tpl->assign('champs', $fields);
 
