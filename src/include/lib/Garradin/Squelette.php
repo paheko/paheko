@@ -228,7 +228,7 @@ class Squelette extends \KD2\MiniSkel
             }
             else
             {
-                $lang = preg_replace('/[^a-z]/i', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+                $lang = preg_replace('/[^a-z]/i', '', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
                 $lang = strtolower(substr($lang, 0, 2));
             }
 
