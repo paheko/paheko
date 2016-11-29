@@ -53,7 +53,7 @@
     </p>
 {else}
     <p class="help">
-        Idée : les cotisations peuvent également être utilisées pour suivre les activités auxquels
+        Idée : les cotisations peuvent également être utilisées pour suivre les activités auxquelles
         sont inscrits les membres de l'association.
     </p>
 {/if}
