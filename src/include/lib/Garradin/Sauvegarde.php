@@ -179,14 +179,14 @@ class Sauvegarde
 	 * @param  array  $file Tableau provenant de $_FILES
 	 * @return boolean true
 	 */
-	public function restoreFromUpload($file)
+	public function restoreFromUpload($file, $user_id)
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error']))
 		{
 			throw new UserException('Le fichier n\'a pas été correctement envoyé. Essayer de le renvoyer à nouveau.');
 		}
 
-		$r = $this->restoreDB($file['tmp_name']);
+		$r = $this->restoreDB($file['tmp_name'], $user_id);
 
 		if ($r)
 		{
@@ -202,7 +202,7 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file)
+	protected function restoreDB($file, $user_id = false)
 	{
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
@@ -230,6 +230,20 @@ class Sauvegarde
 		if (!$table)
 		{
 			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Garradin.');
+		}
+
+		if ($user_id)
+		{
+			// Empêchons l'admin de se tirer une balle dans le pied
+			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories 
+				WHERE id = (SELECT id_categorie FROM membres WHERE id = ?)
+				AND droit_config >= ' . Membres::DROIT_ADMIN . '
+				AND droit_connexion >= ' . Membres::DROIT_ACCES);
+
+			if (!$is_still_admin)
+			{
+				throw new UserException('Vous n\'êtes pas administrateur dans le fichier de sauvegarde fourni.');
+			}
 		}
 
 		// On récupère la version pour plus tard
