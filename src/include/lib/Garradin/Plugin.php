@@ -177,17 +177,24 @@ class Plugin
 			throw new UserException('Le fichier ' . $file . ' n\'existe pas dans le plugin ' . $this->id);
 		}
 
-		$plugin = $this;
-		global $tpl, $config, $user, $membres;
+		if (is_dir($this->path() . '/www/' . $file))
+		{
+			throw new UserException(sprintf('Sécurité : impossible de lister le répertoire "%s" du plugin "%s".', $file, $this->id));
+		}
 
 		if (substr($file, -4) === '.php')
 		{
+			// Créer l'environnement d'exécution du plugin
+			$plugin = $this;
+			global $tpl, $config, $user, $membres;
+
 			include $this->path() . '/www/' . $file;
 		}
 		else
 		{
 			// Récupération du type MIME à partir de l'extension
-			$ext = substr($file, strrpos($file, '.')+1);
+			$pos = strrpos($file, '.');
+			$ext = substr($file, $pos+1);
 
 			if (isset($this->mimes[$ext]))
 			{
@@ -198,7 +205,7 @@ class Plugin
 				$mime = 'text/plain';
 			}
 
-			header('Content-Type: ' .$this->mimes[$ext]);
+			header('Content-Type: ' .$mime);
 			header('Content-Length: ' . filesize($this->path() . '/www/' . $file));
 
 			readfile($this->path() . '/www/' . $file);
