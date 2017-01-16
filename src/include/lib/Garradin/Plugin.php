@@ -220,9 +220,10 @@ class Plugin
 	{
 		if (file_exists($this->path() . '/uninstall.php'))
 		{
+			$plugin = $this;
 			include $this->path() . '/uninstall.php';
 		}
-		
+
 		unlink(PLUGINS_ROOT . '/' . $this->id . '.tar.gz');
 
 		$db = DB::getInstance();
