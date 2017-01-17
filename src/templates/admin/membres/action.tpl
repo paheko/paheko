@@ -2,27 +2,27 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
     {foreach from=$selected item="id"}
-        <input type="hidden" name="selected[]" value="{$id|escape}" />
+        <input type="hidden" name="selected[]" value="{$id}" />
     {/foreach}
 
     </fieldset>
 
     {if $action == 'move'}
     <fieldset>
-        <legend>Changer la catégorie des {$nb_selected|escape} membres sélectionnés</legend>
+        <legend>Changer la catégorie des {$nb_selected} membres sélectionnés</legend>
         <dl>
             <dt><label for="f_cat">Nouvelle catégorie</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="id_categorie" id="f_cat">
                     <option value="0" selected="selected">-- Pas de changement</option>
                 {foreach from=$membres_cats key="id" item="nom"}
-                    <option value="{$id|escape}">{$nom|escape}</option>
+                    <option value="{$id}">{$nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -38,7 +38,7 @@
     <fieldset>
         <legend>Supprimer les membres sélectionnés ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer les {$nb_selected|escape} membres sélectionnés ?
+            Êtes-vous sûr de vouloir supprimer les {$nb_selected} membres sélectionnés ?
         </h3>
         <p class="alert">
             <strong>Attention</strong> : cette action est irréversible et effacera toutes les

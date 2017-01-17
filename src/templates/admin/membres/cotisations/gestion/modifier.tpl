@@ -10,11 +10,11 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Modifier une cotisation</legend>
@@ -55,9 +55,9 @@
             <dd class="cat_compta">
                 <select name="id_categorie_compta" id="f_id_categorie_compta">
                 {foreach from=$categories item="cat"}
-                    <option value="{$cat.id|escape}" {form_field name="id_categorie_compta" selected=$cat.id data=$cotisation}>{$cat.intitule|escape}
+                    <option value="{$cat.id}" {form_field name="id_categorie_compta" selected=$cat.id data=$cotisation}>{$cat.intitule}
                     {if !empty($cat.description)}
-                        — <em>{$cat.description|escape}</em>
+                        — <em>{$cat.description}</em>
                     {/if}
                     </option>
                 {/foreach}
@@ -67,7 +67,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="edit_co_`$cotisation.id`"}
+        {csrf_field key="edit_co_%s"|args:$cotisation.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

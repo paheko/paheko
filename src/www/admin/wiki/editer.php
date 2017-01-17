@@ -82,6 +82,8 @@ $tpl->assign('parent', $parent ? $wiki->getTitle($parent) : 0);
 $tpl->assign('error', $error);
 $tpl->assign('page', $page);
 
+$tpl->assign('wiki', $wiki);
+
 $tpl->assign('time', time());
 $tpl->assign('date', $date ? strtotime($date) : $page['date_creation']);
 

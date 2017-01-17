@@ -20,24 +20,24 @@
     <tbody>
         {foreach from=$liste item="co"}
             <tr>
-                <th><a href="{$admin_url}membres/cotisations/voir.php?id={$co.id|escape}">{$co.intitule|escape}</a></th>
+                <th><a href="{$admin_url}membres/cotisations/voir.php?id={$co.id}">{$co.intitule}</a></th>
                 <td>
                     {if $co.duree}
-                        {$co.duree|escape} jours
+                        {$co.duree} jours
                     {elseif $co.debut}
                         du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
                     {else}
                         ponctuelle
                     {/if}
                 </td>
-                <td class="num">{$co.montant|html_money} {$config.monnaie|escape}</td>
-                <td class="num">{$co.nb_membres|escape}</td>
-                <td class="num">{$co.nb_a_jour|escape}</td>
+                <td class="num">{$co.montant|raw|html_money} {$config.monnaie}</td>
+                <td class="num">{$co.nb_membres}</td>
+                <td class="num">{$co.nb_a_jour}</td>
                 <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id|escape}" title="Liste des membres cotisants">👪</a>
+                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id}" title="Liste des membres cotisants">👪</a>
                     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id|escape}" title="Modifier">✎</a>
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id|escape}" title="Supprimer">✘</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id}" title="Modifier">✎</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>
@@ -49,7 +49,7 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {else}
     <p class="help">
@@ -58,7 +58,7 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}" id="f_add">
+<form method="post" action="{$self_url}" id="f_add">
 
     <fieldset>
         <legend>Ajouter une cotisation</legend>
@@ -99,9 +99,9 @@
             <dd class="cat_compta">
                 <select name="id_categorie_compta" id="f_id_categorie_compta">
                 {foreach from=$categories item="cat"}
-                    <option value="{$cat.id|escape}" {form_field name="id_categorie_compta" selected=$cat.id}>{$cat.intitule|escape}
+                    <option value="{$cat.id}" {form_field name="id_categorie_compta" selected=$cat.id}>{$cat.intitule}
                     {if !empty($cat.description)}
-                        — <em>{$cat.description|escape}</em>
+                        — <em>{$cat.description}</em>
                     {/if}
                     </option>
                 {/foreach}

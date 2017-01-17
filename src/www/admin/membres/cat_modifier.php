@@ -82,4 +82,6 @@ $tpl->assign('readonly', $cat['id'] == $user['id_categorie'] ? 'disabled="disabl
 $cotisations = new Cotisations;
 $tpl->assign('cotisations', $cotisations->listCurrent());
 
+$tpl->assign('membres', $membres);
+
 $tpl->display('admin/membres/cat_modifier.tpl');

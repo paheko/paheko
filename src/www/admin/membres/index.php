@@ -80,6 +80,6 @@ else
 
 }
 
-$tpl->display('admin/membres/index.tpl');
+$tpl->assign('sent', isset($_GET['sent']));
 
-?>
+$tpl->display('admin/membres/index.tpl');

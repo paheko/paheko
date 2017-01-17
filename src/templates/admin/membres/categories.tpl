@@ -10,15 +10,15 @@
     <tbody>
         {foreach from=$liste item="cat"}
             <tr>
-                <th>{$cat.nom|escape}</th>
-                <td class="num">{$cat.nombre|escape}</td>
+                <th>{$cat.nom}</th>
+                <td class="num">{$cat.nombre}</td>
                 <td class="droits">
                     {format_droits droits=$cat}
                 </td>
                 <td class="actions">
-                    <a class="icn" href="cat_modifier.php?id={$cat.id|escape}" title="Modifier">✎</a>
+                    <a class="icn" href="cat_modifier.php?id={$cat.id}" title="Modifier">✎</a>
                     {if $cat.id != $user.id_categorie}
-                    <a class="icn" href="cat_supprimer.php?id={$cat.id|escape}" title="Supprimer">✘</a>
+                    <a class="icn" href="cat_supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>
@@ -28,11 +28,11 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Ajouter une catégorie</legend>

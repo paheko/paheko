@@ -10,10 +10,10 @@
     </p>
 
     {if !empty($error)}
-        <p class="error">{$error|escape}</p>
+        <p class="error">{$error}</p>
     {/if}
 
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Informations sur l'association</legend>
@@ -44,7 +44,7 @@
             </dd>
             <dd class="help">
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
-                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase|escape}" />
+                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase}" />
             </dd>
             <dd><input type="password" name="passe_membre" id="f_passe_membre" value="{form_field name=passe_membre}" pattern=".{ldelim}5,{rdelim}" required="required" /></dd>
             <dt><label for="f_repasse_membre">Encore le mot de passe</label> (vérification) <b title="(Champ obligatoire)">obligatoire</b></dt>
