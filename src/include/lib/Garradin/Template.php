@@ -2,9 +2,7 @@
 
 namespace Garradin;
 
-require_once ROOT . '/include/lib/Template_Lite/class.template.php';
-
-class Template extends \Template_Lite
+class Template extends \KD2\Smartyer
 {
     static protected $_instance = null;
 
@@ -19,16 +17,10 @@ class Template extends \Template_Lite
 
     public function __construct()
     {
+        self::setCompileDir(CACHE_ROOT . '/compiled');
+        self::setTemplateDir(ROOT . '/templates');
+
         parent::__construct();
-
-        $this->cache = false;
-
-        $this->compile_dir = CACHE_ROOT . '/compiled';
-        $this->template_dir = ROOT . '/templates';
-
-        $this->compile_check = true;
-
-        $this->reserved_template_varname = 'tpl';
 
         $this->assign('www_url', WWW_URL);
         $this->assign('self_url', Utils::getSelfUrl());
@@ -574,8 +566,6 @@ function tpl_display_champ_membre ($v, $config)
     }
 }
 
-$tpl->register_compiler('continue', function() { return 'continue;'; });
-
 $tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
 $tpl->register_function('form_field', 'Garradin\tpl_form_field');
 $tpl->register_function('select_compte', 'Garradin\tpl_select_compte');
@@ -605,5 +595,3 @@ $tpl->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
 $tpl->register_modifier('date_fr', 'Garradin\tpl_date_fr');
-
-?>
