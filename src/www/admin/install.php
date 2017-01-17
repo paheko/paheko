@@ -57,11 +57,6 @@ test_requis(
 );
 
 test_requis(
-    file_exists(__DIR__ . '/../../include/lib/Template_Lite/class.template.php'),
-    'Librairie Template_Lite non disponible.'
-);
-
-test_requis(
     file_exists(__DIR__ . '/../../include/lib/KD2'),
     'Librairie KD2 non disponible.'
 );

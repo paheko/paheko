@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Bonjour `$user.identite` !" current="home"}
+{include file="admin/_head.tpl" title="Bonjour %s !"|args:$user.identite current="home"}
 
 <div class="infos_asso">
     <h3>{$config.nom_asso|escape}</h3>
@@ -9,7 +9,7 @@
     {/if}
     {if !empty($config.email_asso)}
     <p>
-        E-Mail : {mailto address=$config.email_asso}
+        E-Mail : <a href="{$config.email_asso}">{$config.email_asso}</a>
     </p>
     {/if}
     {if !empty($config.site_asso)}
@@ -37,7 +37,7 @@
 </ul>
 
 <div class="wikiContent">
-    {$page.contenu.contenu|format_wiki|liens_wiki:'wiki/?'}
+    {$page.contenu.contenu|raw|format_wiki|liens_wiki:'wiki/?'}
 </div>
 
 {include file="admin/_foot.tpl"}
