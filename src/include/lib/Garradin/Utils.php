@@ -505,7 +505,7 @@ class Utils
 
     static public function suggestPassword()
     {
-        return \KD2\Passphrase_FR::generate();
+        return \KD2\Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
     }
 
     static public function checkIBAN($iban)
