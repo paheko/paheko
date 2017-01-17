@@ -23,7 +23,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_edit_banque_`$compte.id`"}
+        {csrf_field key="compta_edit_banque_%d"|args:$compte.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

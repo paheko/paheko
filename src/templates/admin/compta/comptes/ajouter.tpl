@@ -2,11 +2,11 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Ajouter un compte</legend>
@@ -22,8 +22,8 @@
             <dt><label for="f_position_1">Position</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             {foreach from=$positions item="pos" key="id"}
             <dd>
-                <input type="radio" name="position" id="f_position_{$id|escape}" value="{$id|escape}" {if $position == $id}checked="checked"{/if} />
-                <label for="f_position_{$id|escape}">{$pos|escape}</label>
+                <input type="radio" name="position" id="f_position_{$id}" value="{$id}" {if $position == $id}checked="checked"{/if} />
+                <label for="f_position_{$id}">{$pos}</label>
             </dd>
             {/foreach}
         </dl>

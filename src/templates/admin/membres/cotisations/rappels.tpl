@@ -1,12 +1,12 @@
 {include file="admin/_head.tpl" title="Rappels pour cotisations du membre" current="membres/cotisations" js=1}
 
 <ul class="actions">
-    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}"><b>{$membre.identite|escape}</b></a></li>
-    <li><a href="{$admin_url}membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
+    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
+    <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN && $user.id != $membre.id}
-        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
+        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
     {/if}
-    <li class="current"><a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Suivi des cotisations</a></li>
+    <li class="current"><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
 </ul>
 
 <form method="post" action="{$self_url}">
@@ -17,11 +17,11 @@
             <dd>
                 <select id="f_id_cotisation" name="id_cotisation">
                 {foreach from=$cotisations item="co"}
-                    <option value="{$co.id}">{$co.intitule|escape} — 
+                    <option value="{$co.id}">{$co.intitule} — 
                     {if $co.a_jour}
-                        Expire dans {$co.nb_jours|escape} jours
+                        Expire dans {$co.nb_jours} jours
                     {else}
-                        EXPIRÉE depuis {$co.nb_jours|escape} jours
+                        EXPIRÉE depuis {$co.nb_jours} jours
                     {/if}
                     </option>
                 {/foreach}
@@ -58,7 +58,7 @@
             </dd>
         </dl>
         <p class="submit">
-            {csrf_field key="add_rappel_`$membre.id`"}
+            {csrf_field key="add_rappel_%s"|args:$membre.id}
             <input type="submit" name="save" value="Enregistrer le rappel &rarr;" />
         </p>
     </fieldset>
@@ -88,8 +88,8 @@
                     {/if}
                 </td>
                 <td>
-                    {$r.intitule|escape} — 
-                    {$r.montant|html_money} {$config.monnaie|escape}
+                    {$r.intitule} — 
+                    {$r.montant|escape|html_money} {$config.monnaie}
                 </td>
                 <td class="actions">
                 </td>

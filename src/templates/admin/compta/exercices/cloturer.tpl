@@ -2,16 +2,16 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Clôturer un exercice</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$exercice.libelle|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$exercice.libelle}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, une fois clôturé, les opérations de cet exercice ne pourront plus être supprimées ou modifiées.
@@ -32,7 +32,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_cloturer_exercice_`$exercice.id`"}
+        {csrf_field key="compta_cloturer_exercice_%s"|args:$exercice.id}
         <input type="submit" name="close" value="Clôturer &rarr;" />
     </p>
 

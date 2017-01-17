@@ -1,12 +1,12 @@
-{include file="admin/_head.tpl" title="Modification de l'opération n°`$operation.id`" current="compta/saisie" js=1}
+{include file="admin/_head.tpl" title="Modification de l'opération n°%d"|args:$operation.id current="compta/saisie" js=1}
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Informations sur l'opération</legend>
@@ -16,7 +16,7 @@
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle data=$operation}" required="required" /></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant data=$operation}" min="0.00" step="0.01" required="required" /> {$config.monnaie|escape}</dd>
+            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant data=$operation}" min="0.00" step="0.01" required="required" /> {$config.monnaie}</dd>
 
 {if is_null($type)}
             <dt><label for="f_compte_debit">Compte débité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
@@ -32,7 +32,7 @@
             <dd>
                 <select name="moyen_paiement" id="f_moyen_paiement">
                 {foreach from=$moyens_paiement item="moyen"}
-                    <option value="{$moyen.code|escape}"{if $moyen.code == $operation.moyen_paiement} selected="selected"{/if}>{$moyen.nom|escape}</option>
+                    <option value="{$moyen.code}"{if $moyen.code == $operation.moyen_paiement} selected="selected"{/if}>{$moyen.nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -42,7 +42,7 @@
             <dd class="f_banque">
                 <select name="banque" id="f_banque">
                 {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id|escape}"{if ($type == Garradin\Compta\Categories::DEPENSES && $compte.id == $operation.compte_credit) || $compte.id == $operation.compte_debit} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                    <option value="{$compte.id}"{if ($type == Garradin\Compta\Categories::DEPENSES && $compte.id == $operation.compte_credit) || $compte.id == $operation.compte_debit} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -61,11 +61,11 @@
         <dl class="catList">
         {foreach from=$categories item="cat"}
             <dt>
-                <input type="radio" name="id_categorie" value="{$cat.id|escape}" id="f_cat_{$cat.id|escape}" {form_field name="id_categorie" checked=$cat.id data=$operation} />
-                <label for="f_cat_{$cat.id|escape}">{$cat.intitule|escape}</label>
+                <input type="radio" name="id_categorie" value="{$cat.id}" id="f_cat_{$cat.id}" {form_field name="id_categorie" checked=$cat.id data=$operation} />
+                <label for="f_cat_{$cat.id}">{$cat.intitule}</label>
             </dt>
             {if !empty($cat.description)}
-                <dd class="desc">{$cat.description|escape}</dd>
+                <dd class="desc">{$cat.description}</dd>
             {/if}
         {/foreach}
         </dl>
@@ -91,7 +91,7 @@
 {/if}
 
     <p class="submit">
-        {csrf_field key="compta_modifier_`$operation.id`"}
+        {csrf_field key="compta_modifier_%d"|args:$operation.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

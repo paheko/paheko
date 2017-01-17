@@ -3,11 +3,11 @@
 <form method="get" action="{$admin_url}membres/recherche_sql.php">
     <fieldset>
         <legend>Schéma des tables SQL</legend>
-        <pre class="sql_schema">{$schema.membres|escape}</pre>
+        <pre class="sql_schema">{$schema.membres}</pre>
         <dl>
             <dt><label for="f_query">Requête SQL</label></dt>
             <dd class="help">Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée.</dd>
-            <dd><textarea name="query" id="f_query" cols="50" rows="7" required="required">{$query|escape}</textarea></dd>
+            <dd><textarea name="query" id="f_query" cols="50" rows="7" required="required">{$query}</textarea></dd>
         </dl>
         <p class="submit">
             <input type="submit" value="Exécuter &rarr;" />
@@ -18,7 +18,7 @@
 {if !empty($error)}
 <p class="error">
     <strong>Erreur dans la requête SQL :</strong><br />
-    {$error|escape}
+    {$error}
 </p>
 {/if}
 
@@ -32,7 +32,7 @@
         <td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>
         {/if}
         {foreach from=$result[0] key="col" item="ignore"}
-            <td>{$col|escape}</td>
+            <td>{$col}</td>
         {/foreach}
         {if array_key_exists('id', $result[0])}
         <td></td>
@@ -42,16 +42,16 @@
         {foreach from=$result item="row"}
             <tr>
                 {if array_key_exists('id', $result[0])}
-                    <td class="check">{if !empty($row.id)}<input type="checkbox" name="selected[]" value="{$row.id|escape}" />{/if}</td>
+                    <td class="check">{if !empty($row.id)}<input type="checkbox" name="selected[]" value="{$row.id}" />{/if}</td>
                 {/if}
                 {foreach from=$row item="col"}
-                    <td>{$col|escape}</td>
+                    <td>{$col}</td>
                 {/foreach}
                 {if array_key_exists('id', $result[0])}
                 <td class="actions">
                     {if !empty($row.id)}
-                    <a class="icn" href="{$admin_url}membres/fiche.php?id={$row.id|escape}" title="Fiche membre">👤</a>
-                    <a class="icn" href="{$admin_url}membres/modifier.php?id={$row.id|escape}" title="Modifier ce membre">✎</a>
+                    <a class="icn" href="{$admin_url}membres/fiche.php?id={$row.id}" title="Fiche membre">👤</a>
+                    <a class="icn" href="{$admin_url}membres/modifier.php?id={$row.id}" title="Modifier ce membre">✎</a>
                     {/if}
                 </td>
                 {/if}

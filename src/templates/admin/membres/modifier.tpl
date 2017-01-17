@@ -1,21 +1,21 @@
 {include file="admin/_head.tpl" title="Modifier un membre" current="membres" js=1}
 
 <ul class="actions">
-    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}"><b>{$membre.identite|escape}</b></a></li>
-    <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
+    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
+    <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
     {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN && $user.id != $membre.id}
-        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
+        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
     {/if}
-    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Suivi des cotisations</a></li>
+    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
 </ul>
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Informations personnelles</legend>
@@ -45,7 +45,7 @@
             </dd>
             <dd class="help">
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
-                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase|escape}" />
+                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase}" />
             </dd>
             <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}5,{rdelim}" /></dd>
             <dt><label for="f_repasse">Encore le mot de passe</label> (vérification){if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
@@ -61,7 +61,7 @@
             <dd>
                 <select name="id_categorie" id="f_cat">
                 {foreach from=$membres_cats key="id" item="nom"}
-                    <option value="{$id|escape}"{if $current_cat == $id} selected="selected"{/if}>{$nom|escape}</option>
+                    <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
                 {/foreach}
                 </select>
             </dd>

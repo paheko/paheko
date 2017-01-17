@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>{$title|escape}</title>
+    <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="all" />
@@ -13,7 +13,7 @@
     {/if}
     {if isset($custom_js)}
         {foreach from=$custom_js item="js"}
-            <script type="text/javascript" src="{$admin_url}static/scripts/{$js|escape}"></script>
+            <script type="text/javascript" src="{$admin_url}static/scripts/{$js}"></script>
         {/foreach}
     {/if}
     {if isset($plugin_css)}
@@ -28,7 +28,7 @@
     {/if}
 </head>
 
-<body{if !empty($body_id)} id="{$body_id|escape}"{/if} data-url="{$admin_url|escape}">
+<body{if !empty($body_id)} id="{$body_id}"{/if} data-url="{$admin_url}">
 
 {if empty($is_popup)}
 <div class="header">
@@ -46,7 +46,7 @@
             <li class="plugins">
                 <ul>
                 {foreach from=$plugins_menu key="id" item="name"}
-                    <li class="plugins {if $current == "plugin_`$id`"} current{/if}"><a href="{plugin_url id=$id}">{$name|escape}</a></li>
+                    <li class="plugins {if $current == sprintf("plugin_%s", $id)} current{/if}"><a href="{plugin_url id=$id}">{$name}</a></li>
                 {/foreach}
                 </ul>
             </li>
@@ -106,7 +106,7 @@
     {/if}
     </ul>
 
-    <h1>{$title|escape}</h1>
+    <h1>{$title}</h1>
 </div>
 {/if}
 

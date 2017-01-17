@@ -11,12 +11,12 @@
 </ul>
 {/if}
 
-{if isset($tpl.get.sent)}
+{if $sent}
     <p class="confirm">Votre message a été envoyé.</p>
 {/if}
 
 {if !empty($membres_cats)}
-<form method="get" action="{$self_url|escape}" class="shortFormRight">
+<form method="get" action="{$self_url}" class="shortFormRight">
     <fieldset>
         <legend>Filtrer par catégorie</legend>
         <select name="cat" id="f_cat" onchange="this.form.submit();">
@@ -24,7 +24,7 @@
         {foreach from=$membres_cats key="id" item="nom"}
             {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE
                 || !array_key_exists($id, $membres_cats_cachees)}
-            <option value="{$id|escape}"{if $current_cat == $id} selected="selected"{/if}>{$nom|escape}</option>
+            <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
             {/if}
         {/foreach}
         </select>
@@ -52,7 +52,7 @@
                 {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
                 <td class="{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro unique"><a href="?o=id&amp;a" class="icn up">&uarr;</a><a href="?o=id&amp;d" class="icn dn">&darr;</a></td>
                 {foreach from=$champs key="c" item="champ"}
-                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title|escape} <a href="?o={$c|escape}&amp;a" class="icn up">&uarr;</a><a href="?o={$c|escape}&amp;d" class="icn dn">&darr;</a></td>
+                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title} <a href="?o={$c}&amp;a" class="icn up">&uarr;</a><a href="?o={$c}&amp;d" class="icn dn">&darr;</a></td>
                 {/foreach}
                 <td></td>
             </tr>
@@ -60,15 +60,15 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id|escape}" /></td>{/if}
-                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></th>
+                    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
+                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs key="c" item="cfg"}
-                        <td>{$membre[$c]|escape|display_champ_membre:$cfg}</td>
+                        <td>{$membre[$c]|raw|display_champ_membre:$cfg}</td>
                     {/foreach}
                     <td class="actions">
-                        {if !empty($membre.email)}<a class="icn" href="{$admin_url}membres/message.php?id={$membre.id|escape}" title="Envoyer un message">✉</a> {/if}
-                        <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id|escape}" title="Fiche membre">👤</a>
-                        <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id|escape}" title="Modifier la fiche membre">✎</a>
+                        {if !empty($membre.email)}<a class="icn" href="{$admin_url}membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}
+                        <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
+                        <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
                     </td>
                 </tr>
             {/foreach}
@@ -102,9 +102,9 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <th>{$membre.identite|escape}</th>
+                    <th>{$membre.identite}</th>
                     <td class="actions">
-                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
+                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
                     </td>
                 </tr>
             {/foreach}

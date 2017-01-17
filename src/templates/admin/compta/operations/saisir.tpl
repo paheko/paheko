@@ -2,14 +2,14 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
 {if $ok}
     <p class="confirm">
-        L'opération numéro <a href="{$www_url}admin/compta/operations/voir.php?id={$ok|escape}">{$ok|escape}</a> a été ajoutée.
-        (<a href="{$www_url}admin/compta/operations/voir.php?id={$ok|escape}">Voir l'opération</a>)
+        L'opération numéro <a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">{$ok}</a> a été ajoutée.
+        (<a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">Voir l'opération</a>)
     </p>
 {/if}
 
@@ -21,7 +21,7 @@
     <li{if is_null($type)} class="current"{/if}><a href="{$www_url}admin/compta/operations/saisir.php?avance">Saisie avancée</a></li>
 </ul>
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Informations sur l'opération</legend>
@@ -31,7 +31,7 @@
             <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" required="required" /></dd>
             <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" step="0.01" required="required" /> {$config.monnaie|escape}</dd>
+            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" step="0.01" required="required" /> {$config.monnaie}</dd>
 
 {if is_null($type)}
             <dt><label for="f_compte_debit">Compte débité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
@@ -48,7 +48,7 @@
                 <select name="compte1" id="f_compte1">
                     <option value="{Garradin\Compta\Comptes::CAISSE}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -57,7 +57,7 @@
                 <select name="compte2" id="f_compte2">
                     <option value="{Garradin\Compta\Comptes::CAISSE}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -76,7 +76,7 @@
             <dd>
                 <select name="moyen_paiement" id="f_moyen_paiement" required="required">
                 {foreach from=$moyens_paiement item="moyen"}
-                    <option value="{$moyen.code|escape}"{if $moyen.code == $moyen_paiement} selected="selected"{/if}>{$moyen.nom|escape}</option>
+                    <option value="{$moyen.code}"{if $moyen.code == $moyen_paiement} selected="selected"{/if}>{$moyen.nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -86,7 +86,7 @@
             <dd class="f_banque">
                 <select name="banque" id="f_banque">
                 {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -104,11 +104,11 @@
         <dl class="catList">
         {foreach from=$categories item="cat"}
             <dt>
-                <input type="radio" name="categorie" value="{$cat.id|escape}" id="f_cat_{$cat.id|escape}" {form_field name="categorie" checked=$cat.id} />
-                <label for="f_cat_{$cat.id|escape}">{$cat.intitule|escape}</label>
+                <input type="radio" name="categorie" value="{$cat.id}" id="f_cat_{$cat.id}" {form_field name="categorie" checked=$cat.id} />
+                <label for="f_cat_{$cat.id}">{$cat.intitule}</label>
             </dt>
             {if !empty($cat.description)}
-                <dd class="desc">{$cat.description|escape}</dd>
+                <dd class="desc">{$cat.description}</dd>
             {/if}
         {/foreach}
         </dl>

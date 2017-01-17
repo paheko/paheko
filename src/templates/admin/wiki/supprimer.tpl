@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer : `$page.titre`" current="wiki"}
+{include file="admin/_head.tpl" title="Supprimer : %s"|args:$page.titre current="wiki"}
 
 <ul class="actions">
     <li><a href="{$www_url}admin/wiki/"><strong>Wiki</strong></a></li>

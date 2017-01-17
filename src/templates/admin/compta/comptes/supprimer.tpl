@@ -2,7 +2,7 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
@@ -14,12 +14,12 @@
     </p>
 {elseif $can_disable && !$can_delete}
 
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
         <fieldset>
             <legend>Désactiver le compte ?</legend>
             <h3 class="warning">
-                Êtes-vous sûr de vouloir désactiver le compte «&nbsp;{$compte.id|escape} - {$compte.libelle|escape}&nbsp;»&nbsp;?
+                Êtes-vous sûr de vouloir désactiver le compte «&nbsp;{$compte.id} - {$compte.libelle}&nbsp;»&nbsp;?
             </h3>
             <p class="help">
                 Une fois désactivé il ne sera plus possible de l'utiliser, mais il pourra par contre être réactivé.
@@ -27,23 +27,23 @@
         </fieldset>
 
         <p class="submit">
-            {csrf_field key="compta_disable_compte_`$compte.id`"}
+            {csrf_field key="compta_disable_compte_%s"|args:$compte.id}
             <input type="submit" name="disable" value="Désactiver &rarr;" />
         </p>
 
     </form>
 {else}
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
         <fieldset>
             <legend>Supprimer le compte ?</legend>
             <h3 class="warning">
-                Êtes-vous sûr de vouloir supprimer le compte «&nbsp;{$compte.id|escape} - {$compte.libelle|escape}&nbsp;»&nbsp;?
+                Êtes-vous sûr de vouloir supprimer le compte «&nbsp;{$compte.id} - {$compte.libelle}&nbsp;»&nbsp;?
             </h3>
         </fieldset>
 
         <p class="submit">
-            {csrf_field key="compta_delete_compte_`$compte.id`"}
+            {csrf_field key="compta_delete_compte_%s"|args:$compte.id}
             <input type="submit" name="delete" value="Supprimer &rarr;" />
         </p>
 

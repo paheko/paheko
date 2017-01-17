@@ -2,11 +2,11 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Modifier un exercice</legend>
@@ -21,7 +21,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_modif_exercice_`$exercice.id`"}
+        {csrf_field key="compta_modif_exercice_%s"|args:$exercice.id}
         <input type="submit" name="edit" value="Enregistrer &rarr;" />
     </p>
 
