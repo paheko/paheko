@@ -86,14 +86,14 @@
         <tr>
             <td><a href="{$admin_url}compta/comptes/journal.php?id={$operation.compte_debit}">{$operation.compte_debit}</a></td>
             <td>{$nom_compte_debit}</td>
-            <td>{$operation.montant|html_money}&nbsp;{$config.monnaie}</td>
+            <td>{$operation.montant|escape|html_money}&nbsp;{$config.monnaie}</td>
             <td></td>
         </tr>
         <tr>
             <td><a href="{$admin_url}compta/comptes/journal.php?id={$operation.compte_credit}">{$operation.compte_credit}</a></td>
             <td>{$nom_compte_credit}</td>
             <td></td>
-            <td>{$operation.montant|html_money}&nbsp;{$config.monnaie}</td>
+            <td>{$operation.montant|escape|html_money}&nbsp;{$config.monnaie}</td>
         </tr>
     </tbody>
 </table>

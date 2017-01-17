@@ -30,7 +30,7 @@
                         ponctuelle
                     {/if}
                 </td>
-                <td class="num">{$co.montant|raw|html_money} {$config.monnaie}</td>
+                <td class="num">{$co.montant|escape|html_money} {$config.monnaie}</td>
                 <td class="num">{$co.nb_membres}</td>
                 <td class="num">{$co.nb_a_jour}</td>
                 <td class="actions">

@@ -22,7 +22,7 @@
             <tr>
                 <td>{$compte.banque|escape}</td>
                 <th>{$compte.libelle|escape}</th>
-                <td><strong>{$compte.solde|html_money} {$config.monnaie|escape}</strong></td>
+                <td><strong>{$compte.solde|escape|html_money} {$config.monnaie|escape}</strong></td>
                 <td>{$compte.iban|escape|format_iban}</td>
                 <td>{$compte.bic|escape}</td>
                 <td class="actions">

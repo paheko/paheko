@@ -3,24 +3,24 @@
 <dl class="cotisation">
     <dt>
         {if $nb_activites == 1}
-            Vous avez {$nb_activites|escape} cotisation enregistrée.
+            Vous avez {$nb_activites} cotisation enregistrée.
         {elseif $nb_activites}
-            Vous avez {$nb_activites|escape} cotisations enregistrées.
+            Vous avez {$nb_activites} cotisations enregistrées.
         {else}
             Vous n'avez aucune cotisation enregistrée.
         {/if} 
     </dt>
 {if $cotisation}
     <dt>Cotisation obligatoire</dt>
-    <dd>{$cotisation.intitule|escape} — 
+    <dd>{$cotisation.intitule} — 
         {if $cotisation.duree}
-            {$cotisation.duree|escape} jours
+            {$cotisation.duree} jours
         {elseif $cotisation.debut}
             du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
         {else}
             ponctuelle
         {/if}
-        — {$cotisation.montant|escape_money} {$config.monnaie|escape}
+        — {$cotisation.montant|escape|html_money} {$config.monnaie}
     </dd>
     <dd>
         {if !$cotisation.a_jour}
@@ -36,7 +36,7 @@
 {if !empty($cotisations_membre)}
     <dt>Cotisations en cours</dt>
     {foreach from=$cotisations_membre item="co"}
-    <dd>{$co.intitule|escape} — 
+    <dd>{$co.intitule} — 
         {if $co.a_jour}
             <span class="confirm">À jour</span>{if $co.expiration} — Expire le {$co.expiration|format_sqlite_date_to_french}{/if}
         {else}
@@ -62,15 +62,15 @@
             <tr>
                 <td>{$c.date|format_sqlite_date_to_french}</td>
                 <td>
-                    {$c.intitule|escape} — 
+                    {$c.intitule} — 
                     {if $c.duree}
-                        {$c.duree|escape} jours
+                        {$c.duree} jours
                     {elseif $c.debut}
                         du {$c.debut|format_sqlite_date_to_french} au {$c.fin|format_sqlite_date_to_french}
                     {else}
                         ponctuelle
                     {/if}
-                    — {$c.montant|html_money} {$config.monnaie|escape}
+                    — {$c.montant|escape|html_money} {$config.monnaie}
                 </td>
             </tr>
         {/foreach}

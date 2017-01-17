@@ -2,12 +2,12 @@
     {include file="admin/_head.tpl" title="Enregistrer une cotisation pour le membre" current="membres/cotisations" js=1}
 
     <ul class="actions">
-        <li><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}"><b>{$membre.identite|escape}</b></a></li>
-        <li><a href="{$admin_url}membres/modifier.php?id={$membre.id|escape}">Modifier</a></li>
+        <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
+        <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
         {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN && $user.id != $membre.id}
-            <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id|escape}">Supprimer</a></li>
+            <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
         {/if}
-        <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id|escape}">Suivi des cotisations</a></li>
+        <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
     </ul>
 {else}
     {include file="admin/_head.tpl" title="Enregistrer une cotisation" current="membres/cotisations" js=1}
@@ -22,7 +22,7 @@
 {/if}
 
 {if $error}
-    <p class="error">{$error|escape}</p>
+    <p class="error">{$error}</p>
 {else if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
     <p class="help">
         Cette page sert à enregistrer les cotisations des membres de l'association.
@@ -30,7 +30,7 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
     <fieldset>
         <legend>Enregistrer une cotisation</legend>
         <dl>
@@ -38,10 +38,10 @@
             <dd>
                 <select id="f_id_cotisation" required="required" name="id_cotisation">
                     {foreach from=$cotisations item="co"}
-                    <option value="{$co.id|escape}" {form_field name="id_cotisation" selected=$co.id default=$default_co} data-compta="{$co.id_categorie_compta|escape}" data-amount="{$co.montant|escape}">
-                        {$co.intitule|escape}
-                        — {$co.montant|html_money} {$config.monnaie|escape}
-                        — {if $co.duree}pour {$co.duree|escape} jours
+                    <option value="{$co.id}" {form_field name="id_cotisation" selected=$co.id default=$default_co} data-compta="{$co.id_categorie_compta}" data-amount="{$co.montant}">
+                        {$co.intitule}
+                        — {$co.montant|escape|html_money} {$config.monnaie}
+                        — {if $co.duree}pour {$co.duree} jours
                         {elseif $co.debut}
                             du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
                         {else}
@@ -57,7 +57,7 @@
             <dd class="f_compta">
                 <select name="moyen_paiement" id="f_moyen_paiement">
                 {foreach from=$moyens_paiement item="moyen"}
-                    <option value="{$moyen.code|escape}"{if $moyen.code == $moyen_paiement} selected="selected"{/if}>{$moyen.nom|escape}</option>
+                    <option value="{$moyen.code}"{if $moyen.code == $moyen_paiement} selected="selected"{/if}>{$moyen.nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -67,7 +67,7 @@
             <dd class="f_banque">
                 <select name="banque" id="f_banque">
                 {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id|escape}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle|escape} - {$compte.banque|escape}</option>
+                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -82,7 +82,7 @@
 
     <p class="submit">
         {csrf_field key="add_cotisation"}
-        {if $membre}<input type="hidden" name="id_membre" value="{$membre.id|escape}" />{/if}
+        {if $membre}<input type="hidden" name="id_membre" value="{$membre.id}" />{/if}
         <input type="submit" name="add" value="Enregistrer &rarr;" />
     </p>
 </form>
