@@ -3,7 +3,7 @@
 
     <ul class="actions">
         <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-        <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}">Journal de caisse</a></li>
+        <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_caisse}">Journal de caisse</a></li>
     </ul>
 {else}
     {include file="admin/_head.tpl" title="Journal : %s - %s"|args:$compte.id:$compte.libelle current="compta/gestion" body_id="rapport"}

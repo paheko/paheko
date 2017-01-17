@@ -2,7 +2,7 @@
 
 <ul class="actions">
     <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}&amp;suivi">Journal de caisse</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
     <li class="current"><a href="{$self_url_no_qs}?id={$compte.id}">Rapprochement</a></li>
 </ul>
 

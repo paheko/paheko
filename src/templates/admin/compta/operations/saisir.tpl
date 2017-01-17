@@ -46,7 +46,7 @@
             <dt><label for="f_compte1">Compte débité</label></dt>
             <dd>
                 <select name="compte1" id="f_compte1">
-                    <option value="{Garradin\Compta\Comptes::CAISSE}">Caisse</option>
+                    <option value="{$id_caisse}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
@@ -55,7 +55,7 @@
             <dt><label for="f_compte2">Compte crédité</label></dt>
             <dd>
                 <select name="compte2" id="f_compte2">
-                    <option value="{Garradin\Compta\Comptes::CAISSE}">Caisse</option>
+                    <option value="{$id_caisse}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}

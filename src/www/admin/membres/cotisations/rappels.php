@@ -59,5 +59,6 @@ $tpl->assign('membre', $membre);
 $tpl->assign('cotisations', $cm->listSubscriptionsForMember($membre['id']));
 $tpl->assign('default_date', date('Y-m-d'));
 $tpl->assign('rappels', $re->listForMember($membre['id']));
+$tpl->assign('rappels_envoyes', $re);
 
 $tpl->display('admin/membres/cotisations/rappels.tpl');
