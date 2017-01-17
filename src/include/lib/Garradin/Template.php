@@ -526,7 +526,7 @@ function tpl_html_champ_membre($params)
     return $out;
 }
 
-function tpl_display_champ_membre ($v, $config)
+function tpl_display_champ_membre($v, $config)
 {
     if ($config['type'] == 'checkbox')
     {
@@ -534,15 +534,15 @@ function tpl_display_champ_membre ($v, $config)
     }
     elseif ($config['type'] == 'email')
     {
-        return '<a href="mailto:' . $v . '">' . $v . '</a>';
+        return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
     }
     elseif ($config['type'] == 'tel')
     {
-        return '<a href="tel:' . $v . '">' . $v . '</a>';
+        return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
     }
     elseif ($config['type'] == 'url')
     {
-        return '<a href="' . $v . '">' . $v . '</a>';
+        return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
     }
     elseif ($config['type'] == 'country') 
     {
@@ -562,7 +562,7 @@ function tpl_display_champ_membre ($v, $config)
     }
     else
     {
-        return $v;
+        return htmlspecialchars($v);
     }
 }
 
