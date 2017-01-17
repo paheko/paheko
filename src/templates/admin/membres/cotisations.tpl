@@ -20,7 +20,7 @@
         {else}
             ponctuelle
         {/if}
-        — {$cotisation.montant|raw|html_money} {$config.monnaie}
+        — {$cotisation.montant|escape|html_money} {$config.monnaie}
     </dd>
     <dt>À jour de cotisation ?</dt>
     <dd>
@@ -79,7 +79,7 @@
                     {else}
                         ponctuelle
                     {/if}
-                    — {$c.montant|html_money|raw} {$config.monnaie}
+                    — {$c.montant|escape|html_money} {$config.monnaie}
                 </td>
                 <td>
                     {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE && !empty($c.nb_operations)}

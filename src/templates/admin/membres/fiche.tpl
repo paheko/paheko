@@ -20,7 +20,7 @@
         {else}
             ponctuelle
         {/if}
-        — {$cotisation.montant|raw|html_money} {$config.monnaie}
+        — {$cotisation.montant|escape|html_money} {$config.monnaie}
     </dd>
     <dt>À jour de cotisation ?</dt>
     <dd>

@@ -41,7 +41,7 @@
             {/if}
             </td>
             <td>{$ligne.date|format_sqlite_date_to_french}</td>
-            <td>{$ligne.montant|html_money|raw}</td>
+            <td>{$ligne.montant|escape|html_money}</td>
             <th>{$ligne.libelle}</th>
             <td>{$ligne.compte_debit} — {$ligne.compte_debit|get_nom_compte}</td>
             <td>{$ligne.compte_credit} — {$ligne.compte_credit|get_nom_compte}</td>

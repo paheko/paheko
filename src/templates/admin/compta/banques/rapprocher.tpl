@@ -74,7 +74,7 @@
                 </td>
                 <td>{$ligne.date|date_fr:'d/m/Y'}</td>
                 <td>{if $ligne.compte_credit == $compte.id}-{else}+{/if}{$ligne.montant|escape|html_money}</td>
-                <td>{$ligne.solde|html_money}</td>
+                <td>{$ligne.solde|escape|html_money}</td>
                 <th>{$ligne.libelle}</th>
             </tr>
         {/foreach}

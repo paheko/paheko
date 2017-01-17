@@ -36,7 +36,7 @@
                     {foreach from=$cotisations item="cotisation"}
                     <option value="{$cotisation.id}" {form_field name="id_cotisation_obligatoire" selected=$cotisation.id data=$cat}>
                         {$cotisation.intitule} 
-                        — {$cotisation.montant|html_money|raw} {$config.monnaie}
+                        — {$cotisation.montant|escape|html_money} {$config.monnaie}
                         — {if $cotisation.duree}pour {$cotisation.duree} jours
                         {elseif $cotisation.debut}
                             du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}

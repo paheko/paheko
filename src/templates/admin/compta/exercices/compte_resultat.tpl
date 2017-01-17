@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Compte de résultat" current="compta/exercices" body_id="rapport"}
 
 <div class="exercice">
-    <h2>{$config.nom_asso|escape}</h2>
+    <h2>{$config.nom_asso}</h2>
     <p>Exercice comptable {if $exercice.cloture}clôturé{else}en cours{/if} du
         {$exercice.debut|date_fr:'d/m/Y'} au {$exercice.fin|date_fr:'d/m/Y'}, généré le {$cloture|date_fr:'d/m/Y'}</p>
 </div>
@@ -19,13 +19,13 @@
                     <tbody>
                     {foreach from=$compte_resultat.charges.comptes key="parent_code" item="parent"}
                         <tr class="parent">
-                            <th>{$parent_code|get_nom_compte|escape}</th>
-                            <td>{$parent.solde|html_money}</td>
+                            <th>{$parent_code|get_nom_compte}</th>
+                            <td>{$parent.solde|escape|html_money}</td>
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
-                            <th>{$compte|get_nom_compte|escape}</th>
-                            <td>{$solde|html_money}</td>
+                            <th>{$compte|get_nom_compte}</th>
+                            <td>{$solde|escape|html_money}</td>
                         </tr>
                         {/foreach}
                     {/foreach}
@@ -38,13 +38,13 @@
                     <tbody>
                     {foreach from=$compte_resultat.produits.comptes key="parent_code" item="parent"}
                         <tr class="parent">
-                            <th>{$parent_code|get_nom_compte|escape}</th>
-                            <td>{$parent.solde|html_money}</td>
+                            <th>{$parent_code|get_nom_compte}</th>
+                            <td>{$parent.solde|escape|html_money}</td>
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
-                            <th>{$compte|get_nom_compte|escape}</th>
-                            <td>{$solde|html_money}</td>
+                            <th>{$compte|get_nom_compte}</th>
+                            <td>{$solde|escape|html_money}</td>
                         </tr>
                         {/foreach}
                     {/foreach}
@@ -60,7 +60,7 @@
                     <tfoot>
                         <tr>
                             <th>Total charges</th>
-                            <td>{$compte_resultat.charges.total|html_money}</td>
+                            <td>{$compte_resultat.charges.total|escape|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -70,7 +70,7 @@
                     <tfoot>
                         <tr>
                             <th>Total produits</th>
-                            <td>{$compte_resultat.produits.total|html_money}</td>
+                            <td>{$compte_resultat.produits.total|escape|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -83,7 +83,7 @@
                     <tfoot>
                         <tr>
                             <th>Résultat (excédent)</th>
-                            <td>{$compte_resultat.resultat|html_money}</td>
+                            <td>{$compte_resultat.resultat|escape|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -95,7 +95,7 @@
                     <tfoot>
                         <tr>
                             <th>Résultat (déficit)</th>
-                            <td>{$compte_resultat.resultat|html_money}</td>
+                            <td>{$compte_resultat.resultat|escape|html_money}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -105,6 +105,6 @@
     </tfoot>
 </table>
 
-<p class="help">Toutes les opérations sont libellées en {$config.monnaie|escape}.</p>
+<p class="help">Toutes les opérations sont libellées en {$config.monnaie}.</p>
 
 {include file="admin/_foot.tpl"}
