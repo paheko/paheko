@@ -2,7 +2,7 @@
 
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}&amp;suivi">Journal de caisse</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
 </ul>
 
 {if !empty($liste)}

@@ -49,7 +49,6 @@ $tpl->assign('error', $error);
 
 $tpl->assign('type', isset($_POST['type']) ? Utils::post('type') : Compta\Categories::RECETTES);
 $tpl->assign('comptes', $comptes->listTree());
+$tpl->assign('categories', $cats);
 
 $tpl->display('admin/compta/categories/ajouter.tpl');
-
-?>

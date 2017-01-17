@@ -32,27 +32,27 @@
             <dt><label for="f_media_email">Moyen de communication utilisé</label></dt>
             <dd>
                 <label>
-                    <input id="f_media_email" type="radio" name="media" value="{Garradin\Rappels_envoyes::MEDIA_EMAIL}" />
+                    <input id="f_media_email" type="radio" name="media" value="{$rappels_envoyes::MEDIA_EMAIL}" />
                     E-Mail
                 </label>
             </dd>
             {* FIXME: proposer d'envoyer un email au membre *}
             <dd>
                 <label>
-                    <input type="radio" name="media" value="{Garradin\Rappels_envoyes::MEDIA_TELEPHONE}" />
+                    <input type="radio" name="media" value="{$rappels_envoyes::MEDIA_TELEPHONE}" />
                     Téléphone
                 </label>
             </dd>
             {* FIXME: afficher les différents numéros de téléphone de la fiche membre *}
             <dd>
                 <label>
-                    <input type="radio" name="media" value="{Garradin\Rappels_envoyes::MEDIA_COURRIER}" />
+                    <input type="radio" name="media" value="{$rappels_envoyes::MEDIA_COURRIER}" />
                     Courrier postal
                 </label>
             </dd>
             <dd>
                 <label>
-                    <input type="radio" name="media" value="{Garradin\Rappels_envoyes::MEDIA_AUTRE}" />
+                    <input type="radio" name="media" value="{$rappels_envoyes::MEDIA_AUTRE}" />
                     Autre
                 </label>
             </dd>
