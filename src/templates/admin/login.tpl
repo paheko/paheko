@@ -18,7 +18,7 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Connexion</legend>

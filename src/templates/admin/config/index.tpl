@@ -7,22 +7,22 @@
     </p>
     {else}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
     {/if}
 {/if}
 
 {include file="admin/config/_menu.tpl" current="index"}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Garradin</legend>
         <dl>
             <dt>Version installée</dt>
-            <dd class="help">{$garradin_version|escape} <a href="{Garradin\WEBSITE}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+            <dd class="help">{$garradin_version} <a href="{Garradin\WEBSITE}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
             <dt>Informations système</dt>
-            <dd class="help">PHP version {$php_version|escape} — SQLite version {$sqlite_version|escape}</dd>
+            <dd class="help">PHP version {$php_version} — SQLite version {$sqlite_version}</dd>
         </dl>
     </fieldset>
 
@@ -49,7 +49,7 @@
             <dd>
                 <select name="pays" id="f_pays" required="required">
                 {foreach from=$pays key="cc" item="nom"}
-                    <option value="{$cc|escape}"{if $cc == $config.pays} selected="selected"{/if}>{$nom|escape}</option>
+                    <option value="{$cc}"{if $cc == $config.pays} selected="selected"{/if}>{$nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -85,7 +85,7 @@
             <dd>
                 <select name="categorie_membres" required="required" id="f_categorie_membres">
                 {foreach from=$membres_cats key="id" item="nom"}
-                    <option value="{$id|escape}"{if $config.categorie_membres == $id} selected="selected"{/if}>{$nom|escape}</option>
+                    <option value="{$id}"{if $config.categorie_membres == $id} selected="selected"{/if}>{$nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -94,7 +94,7 @@
             <dd>
                 <select name="champ_identite" required="required" id="f_champ_identite">
                     {foreach from=$champs key="c" value="champ"}
-                        <option value="{$c|escape}" {form_field selected=$c name="champ_identite" data=$config}>{$champ.title|escape}</option>
+                        <option value="{$c}" {form_field selected=$c name="champ_identite" data=$config}>{$champ.title}</option>
                     {/foreach}
                 </select>
             </dd>
@@ -103,7 +103,7 @@
             <dd>
                 <select name="champ_identifiant" required="required" id="f_champ_identifiant">
                     {foreach from=$champs key="c" value="champ"}
-                        <option value="{$c|escape}" {form_field selected=$c name="champ_identifiant" data=$config}>{$champ.title|escape}</option>
+                        <option value="{$c}" {form_field selected=$c name="champ_identifiant" data=$config}>{$champ.title}</option>
                     {/foreach}
                 </select>
             </dd>

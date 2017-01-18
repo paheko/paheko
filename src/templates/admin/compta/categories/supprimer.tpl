@@ -2,16 +2,16 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Supprimer la catégorie comptable ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.intitule|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.intitule}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, la catégorie ne pourra pas être supprimée si des opérations y sont

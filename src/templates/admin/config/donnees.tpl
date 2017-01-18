@@ -3,7 +3,7 @@
 {include file="admin/config/_menu.tpl" current="donnees"}
 
 {if $error}
-    <p class="error">{$error|escape}</p>
+    <p class="error">{$error}</p>
 {elseif $ok}
     <p class="confirm">
         {if $ok == 'config'}La configuration a bien été enregistrée.
@@ -14,7 +14,7 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
 <p class="help">
     Info : la base de données fait actuellement {$db_size|format_bytes} (dont {$files_size|format_bytes} pour les documents et images).
@@ -59,7 +59,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
 <fieldset>
     <legend>Sauvegarde manuelle</legend>
@@ -70,7 +70,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
 <fieldset>
     <legend>Copies de sauvegarde disponibles</legend>
@@ -82,7 +82,7 @@
             <dd>
                 <select name="file" id="f_select">
                 {foreach from=$liste key="f" item="d"}
-                    <option value="{$f|escape}">{$f|escape} — {$d|date_fr:'d/m/Y à H:i'}</option>
+                    <option value="{$f}">{$f} — {$d|date_fr:'d/m/Y à H:i'}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -100,7 +100,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
 <fieldset>
     <legend>Téléchargement</legend>
@@ -111,7 +111,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}" enctype="multipart/form-data">
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
 <fieldset>
     <legend><label for="f_file">Restaurer depuis un fichier</label></legend>
@@ -125,7 +125,7 @@
     </p>
     <p>
         {csrf_field key="backup_restore"}
-        <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size|escape}" />
+        <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size}" />
         <input type="file" name="file" id="f_file" required="required" />
         (maximum {$max_file_size|format_bytes})
         <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />

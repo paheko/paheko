@@ -2,11 +2,11 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
 
     <fieldset>
@@ -34,7 +34,7 @@
                 </dd>
                 <dd class="help">
                     Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
-                    <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase|escape}" />
+                    <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="password_suggest" value="{$passphrase}" />
                 </dd>
                 <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}5,{rdelim}" /></dd>
                 <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>

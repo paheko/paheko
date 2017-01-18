@@ -2,7 +2,7 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {elseif $ok}
     <p class="confirm">
@@ -15,7 +15,7 @@
     <li><a href="{$www_url}admin/compta/import.php?export">Exporter en CSV</a></li>
 </ul>
 
-<form method="post" action="{$self_url|escape}" enctype="multipart/form-data">
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
     <fieldset>
         <legend>Importer depuis un fichier</legend>

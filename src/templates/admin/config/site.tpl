@@ -2,14 +2,14 @@
 
 {if $error && $error != 'OK'}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
 {include file="admin/config/_menu.tpl" current="site"}
 
 {if isset($edit)}
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
         <h3>Éditer un squelette</h3>
 
         {if $error == 'OK'}
@@ -19,7 +19,7 @@
         {/if}
 
         <fieldset class="skelEdit">
-            <legend>{$edit.file|escape}</legend>
+            <legend>{$edit.file}</legend>
             <p>
                 <textarea name="content" cols="90" rows="50" id="f_content">{form_field name=content data=$edit}</textarea>
             </p>
@@ -35,7 +35,7 @@
     <script type="text/javascript">
     var doc_url = "{$admin_url}doc/skel/";
     var skel_list = {$sources_json};
-    var skel_current = "{$edit.file|escape}";
+    var skel_current = "{$edit.file|escape:'js'}";
     </script>
     <script type="text/javascript" src="{$admin_url}static/scripts/skel_editor.js"></script>
 {else}
@@ -48,7 +48,7 @@
         </p>
         {/if}
 
-        <form method="post" action="{$self_url|escape}">
+        <form method="post" action="{$self_url}">
             <table class="list">
                 <thead>
                     <tr>
@@ -61,8 +61,8 @@
                 <tbody>
                 {foreach from=$sources key="source" item="local"}
                     <tr>
-                        <td>{if $local && $local.dist}<input type="checkbox" name="select[]" value="{$source|escape}" />{/if}</td>
-                        <th><a href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">{$source|escape}</a></th>
+                        <td>{if $local && $local.dist}<input type="checkbox" name="select[]" value="{$source}" />{/if}</td>
+                        <th><a href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
                         <td>{if $local}{$local.mtime|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
                         <td class="actions">
                             <a class="icn" href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">✎</a>

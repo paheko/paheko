@@ -10,16 +10,16 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Supprimer cette cotisation ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer la cotisation «&nbsp;{$cotisation.intitule|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir supprimer la cotisation «&nbsp;{$cotisation.intitule}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, l'historique des membres ayant cotisé à cette cotisation sera supprimé.
