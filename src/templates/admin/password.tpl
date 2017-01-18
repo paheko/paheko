@@ -28,7 +28,7 @@
         </p>
     {/if}
 
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
         <fieldset>
             <legend>Recevoir un e-mail avec un nouveau mot de passe</legend>

@@ -8,16 +8,16 @@
 
 {if $error}
     <p class="error">
-        {$error|escape}
+        {$error}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Supprimer ce rappel automatique ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer le rappel «&nbsp;{$rappel.sujet|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir supprimer le rappel «&nbsp;{$rappel.sujet}&nbsp;» ?
         </h3>
         <dl>
             <dt><label for="f_delete_history">Effacer aussi l'historique des e-mails envoyés par le biais de ce rappel&nbsp;?</label></dt>
