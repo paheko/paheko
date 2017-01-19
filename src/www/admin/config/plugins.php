@@ -12,6 +12,10 @@ if (!empty($_POST['install']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
+    elseif (trim(Utils::post('to_install')) === '')
+    {
+        $error = 'Aucun plugin sélectionné.';
+    }
     else
     {
         try {
@@ -62,5 +66,3 @@ else
 }
 
 $tpl->display('admin/config/plugins.tpl');
-
-?>
