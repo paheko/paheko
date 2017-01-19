@@ -67,7 +67,7 @@
     {else}
         <p class="help">
             Aucune extension n'est installée.
-            Vous pouvez consulter <a href="{Garradin\WEBSITE}">le site de Garradin</a> pour obtenir
+            Vous pouvez consulter <a href="{$garradin_website}">le site de Garradin</a> pour obtenir
             des extensions à télécharger.
         </p>
     {/if}
