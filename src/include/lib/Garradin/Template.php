@@ -595,3 +595,10 @@ $tpl->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
 $tpl->register_modifier('date_fr', 'Garradin\tpl_date_fr');
+
+$tpl->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
+    if ($block == 'continue')
+    {
+        return 'continue;';
+    }
+});

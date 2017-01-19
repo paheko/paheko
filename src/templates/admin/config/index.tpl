@@ -20,7 +20,7 @@
         <legend>Garradin</legend>
         <dl>
             <dt>Version installée</dt>
-            <dd class="help">{$garradin_version} <a href="{Garradin\WEBSITE}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+            <dd class="help">{$garradin_version} <a href="{$garradin_website}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
             <dt>Informations système</dt>
             <dd class="help">PHP version {$php_version} — SQLite version {$sqlite_version}</dd>
         </dl>
@@ -93,7 +93,7 @@
             <dd class="help">Ce champ des fiches membres sera utilisé comme identité du membre dans les emails, les fiches, les pages, etc.</dd>
             <dd>
                 <select name="champ_identite" required="required" id="f_champ_identite">
-                    {foreach from=$champs key="c" value="champ"}
+                    {foreach from=$champs key="c" item="champ"}
                         <option value="{$c}" {form_field selected=$c name="champ_identite" data=$config}>{$champ.title}</option>
                     {/foreach}
                 </select>
@@ -102,7 +102,7 @@
             <dd class="help">Ce champ des fiches membres sera utilisé en guise d'identifiant pour se connecter à Garradin. Pour cela le champ doit être unique (pas de doublons).</dd>
             <dd>
                 <select name="champ_identifiant" required="required" id="f_champ_identifiant">
-                    {foreach from=$champs key="c" value="champ"}
+                    {foreach from=$champs key="c" item="champ"}
                         <option value="{$c}" {form_field selected=$c name="champ_identifiant" data=$config}>{$champ.title}</option>
                     {/foreach}
                 </select>

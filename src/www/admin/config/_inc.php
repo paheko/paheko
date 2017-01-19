@@ -9,4 +9,4 @@ if ($user['droits']['config'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-?>
+$tpl->assign('garradin_website', WEBSITE);

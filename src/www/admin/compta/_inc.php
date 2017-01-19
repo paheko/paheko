@@ -11,4 +11,4 @@ if ($user['droits']['compta'] < Membres::DROIT_ACCES)
 
 $comptes = new Compta\Comptes;
 
-$tpl->assign('id_caisse', Garradin\Compta\Comptes::CAISSE);
+$tpl->assign('id_caisse', Compta\Comptes::CAISSE);
