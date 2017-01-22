@@ -620,7 +620,7 @@ class Fichiers
 	 */
 	static public function SkrivImage($args, $content, $skriv)
 	{
-		$_args = [];
+		$_args = ['align' => 'centre'];
 		$_align_values = ['droite', 'gauche', 'centre'];
 
 		foreach ($args as $value)
