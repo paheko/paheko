@@ -1,3 +1,5 @@
+Options -MultiViews -Indexes
+
 <IfModule mod_rewrite.c>
     RewriteEngine on
     RewriteRule admin/plugin/(.*?)/(.*) /admin/plugin.php?_p=$1&_u=$2 [QSA,L]
