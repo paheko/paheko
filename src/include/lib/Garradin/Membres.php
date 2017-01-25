@@ -54,23 +54,81 @@ class Membres
         $db = DB::getInstance();
         $champ_id = Config::getInstance()->get('champ_identifiant');
 
-        $r = $db->simpleQuerySingle('SELECT id, passe, id_categorie FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, trim($id));
+        $r = $db->simpleQuerySingle('SELECT id, passe, id_categorie, secret_otp FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, trim($id));
 
         if (empty($r))
+        {
             return false;
+        }
 
         if (!$this->_checkPassword(trim($passe), $r['passe']))
+        {
             return false;
+        }
 
         $droits = $this->getDroits($r['id_categorie']);
 
         if ($droits['connexion'] == self::DROIT_AUCUN)
+        {
             return false;
+        }
 
         $this->_sessionStart(true);
+
+        $_SESSION['otp_required'] = !empty($r['secret_otp']) ? true : false;
+
         $db->simpleExec('UPDATE membres SET date_connexion = datetime(\'now\') WHERE id = ?;', $r['id']);
 
         return $this->updateSessionData($r['id'], $droits);
+    }
+
+    public function loginOTP($code)
+    {
+        $this->_sessionStart(true);
+
+        if (empty($_SESSION['logged_user']))
+        {
+            return false;
+        }
+
+        $membre = $_SESSION['logged_user'];
+
+        if (!\KD2\Security_OTP::TOTP($membre['secret_otp'], $code))
+        {
+            return false;
+        }
+
+        $_SESSION['otp_required'] = false;
+
+        return true;
+    }
+
+    public function setOTP()
+    {
+        $membre = $this->getLoggedUser();
+
+        $secret = \KD2\Security_OTP::getRandomSecret();
+
+        DB::getInstance()->simpleExec('UPDATE membres SET secret_otp = ? WHERE id = ?;', $secret, $membre['id']);
+
+        $membre['secret_otp'] = $secret;
+
+        $this->updateSessionData($membre);
+
+        return $secret;
+    }
+
+    public function disableOTP()
+    {
+        $membre = $this->getLoggedUser();
+
+        DB::getInstance()->simpleExec('UPDATE membres SET secret_otp = NULL WHERE id = ?;', $membre['id']);
+
+        $membre['secret_otp'] = null;
+
+        $this->updateSessionData($membre);
+
+        return true;
     }
 
     public function recoverPasswordCheck($id)
@@ -194,7 +252,19 @@ class Membres
             return false;
         }
 
+        if (!empty($_SESSION['otp_required']))
+        {
+            return false;
+        }
+
         return true;
+    }
+
+    public function isOTPRequired()
+    {
+        $this->_sessionStart();
+
+        return empty($_SESSION['otp_required']) ? false : true;
     }
 
     public function getLoggedUser()
@@ -814,5 +884,3 @@ class Membres
         return $tables;
     }
 }
-
-?>

@@ -4,6 +4,20 @@
     <p class="error">
         {$error}
     </p>
+{elseif $otp_status == 'off'}
+    <p class="confirm">
+        L'authentification à double facteur a été désactivée.
+    </p>
+{elseif $otp_status}
+    <div class="alert">
+        <img class="qrcode" src="{$otp_qrcode}" alt="" />
+        <p class="confirm">L'authentification à double facteur a été activée.</p>
+        <p class="help">
+            Votre clé secrète est&nbsp;:<br />
+            <code>{$otp_status}</code><br />
+            Recopiez-la ou scannez le QR code pour configurer votre application.
+        </p>
+    </div>
 {/if}
 
 <form method="post" action="{$self_url}">
@@ -41,6 +55,24 @@
                 <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" pattern=".{ldelim}5,{rdelim}" /></dd>
             </dl>
         {/if}
+    </fieldset>
+
+    <fieldset>
+        <legend>Authentification à double facteur (2FA)</legend>
+        <p class="help">Pour renforcer la sécurité de votre connexion en cas de vol de votre mot de passe, vous pouvez activer
+            l'authentification à double facteur. Cela nécessite d'installer une application comme <a href="https://freeotp.github.io/">FreeOTP</a>
+            sur votre téléphone.</p>
+        <dl>
+            <dt>Authentification à double facteur (TOTP)</dt>
+        {if $user.secret_otp}
+            <dd><label><input type="radio" name="otp" value="" checked="checked" /> <strong>Activée</strong></label></dd>
+            <dd><label><input type="radio" name="otp" value="generate" /> Régénérer une nouvelle clé secrète</label></dd>
+            <dd><label><input type="radio" name="otp" value="disable" /> Désactiver l'authentification à double facteur</label></dd>
+        {else}
+            <dd><em>Désactivée</em></dd>
+            <dd><label><input type="checkbox" name="otp" value="generate" /> Activer</label></dd>
+        {/if}
+        </dl>
     </fieldset>
 
     <p class="submit">

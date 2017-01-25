@@ -20,7 +20,14 @@ if (!defined('Garradin\LOGIN_PROCESS'))
 {
     if (!$membres->isLogged())
     {
-        Utils::redirect('/admin/login.php');
+        if ($membres->isOTPRequired())
+        {
+            Utils::redirect('/admin/login_otp.php');
+        }
+        else
+        {
+            Utils::redirect('/admin/login.php');
+        }
     }
 
     $tpl->assign('config', Config::getInstance()->getConfig());

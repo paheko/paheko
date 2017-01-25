@@ -28,7 +28,7 @@ CREATE TABLE membres_categories
 
 -- Membres de l'asso
 -- Table dynamique générée par l'application
--- voir class.champs_membres.php
+-- voir Garradin\Membres\Champs.php
 
 CREATE TABLE cotisations
 -- Types de cotisations et activités
