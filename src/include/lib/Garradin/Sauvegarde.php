@@ -236,7 +236,7 @@ class Sauvegarde
 		{
 			// Empêchons l'admin de se tirer une balle dans le pied
 			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories 
-				WHERE id = (SELECT id_categorie FROM membres WHERE id = ?)
+				WHERE id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
 				AND droit_config >= ' . Membres::DROIT_ADMIN . '
 				AND droit_connexion >= ' . Membres::DROIT_ACCES);
 
