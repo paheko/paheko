@@ -144,25 +144,26 @@ span.alert, b.alert {
     color: #990;
 }
 
-p.error {
+p.error, div.error {
     border: 1px solid #c00;
     background: #fcc;
     padding: 0.5em;
     margin-bottom: 1em;
 }
 
-p.confirm {
+p.confirm, div.confirm {
     border: 1px solid #0c0;
     background: #cfc;
     padding: 0.5em;
     margin-bottom: 1em;
 }
 
-p.alert {
+p.alert, div.alert {
     border: 1px solid #cc0;
     background: #ffc;
     padding: 0.5em;
     margin-bottom: 1em;
+    overflow: auto;
 }
 
 p.help {
@@ -1281,4 +1282,11 @@ form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
     cursor: pointer;
     background-color: #eee;
     color: darkred;
+}
+
+img.qrcode {
+    float: right;
+    padding: .5em;
+    border: .5em solid #000;
+    background: #fff;
 }

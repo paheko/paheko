@@ -244,19 +244,14 @@ if (version_compare($v, '0.7.2', '<'))
     $db->exec('END;');
 }
 
-if (version_compare($v, '0.7.3', '<'))
+if (version_compare($v, '0.8.0', '<'))
 {
-    // Bug étrange dans la 0.7.2 où la base de données n'est pas mise à jour,
-    // donc on vérifie et refait la màj ici
-    try {
-        $db->exec('SELECT id_auteur FROM compta_rapprochement;');
-    }
-    catch (\Exception $e)
-    {
-        $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
-        $db->exec(file_get_contents(ROOT . '/include/data/0.7.2.sql'));
-        $db->exec('END;');
-    }
+    $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+
+    // Mise à jour base de données
+    $db->exec(file_get_contents(ROOT . '/include/data/0.8.0.sql'));
+
+    $db->exec('END;');
 }
 
 Utils::clearCaches();
@@ -279,5 +274,3 @@ if ($redirect)
 
 echo '
 </body>';
-
-?>

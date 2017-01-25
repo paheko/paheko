@@ -390,6 +390,7 @@ class Champs
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
             'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d\'inscription',
+            'secret_otp TEXT NULL, -- Code secret pour TOTP'
     	];
 
         $create_keys = [
@@ -402,6 +403,7 @@ class Champs
     		'id_categorie',
             'date_connexion',
             'date_inscription',
+            'secret_otp',
     	];
 
         $anciens_champs = $config->get('champs_membres');
