@@ -3,5 +3,8 @@
     RedirectMatch 403 /cache/
     RedirectMatch 403 /plugins/
     RedirectMatch 403 /templates/
-    RedirectMatch 403 /*.sqlite
+    RedirectMatch 403 /.*\.sqlite
+    RedirectMatch 403 /.*\.log
+    RedirectMatch 403 /(README|VERSION|COPYING)
+	RedirectMatch 403 /config\.(.*)\.php
 </IfModule>
