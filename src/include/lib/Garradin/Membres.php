@@ -16,10 +16,11 @@ class Membres
         static $str = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         
         $out = '';
+        $max = strlen($str) - 1;
 
         for ($i = 0; $i < $length; $i++)
         {
-            $random = \KD2\Security::random_int(0, strlen($str) - 1);
+            $random = \KD2\Security::random_int(0, $max);
             $out .= $str[$random];
         }
 
