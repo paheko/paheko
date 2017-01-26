@@ -13,14 +13,17 @@ class Membres
 
     protected function _getSalt($length)
     {
-        $str = str_split('./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
-        shuffle($str);
+        static $str = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        
+        $out = '';
 
-        return implode('',
-            array_rand(
-                $str,
-                $length)
-        );
+        for ($i = 0; $i < $length; $i++)
+        {
+            $random = \KD2\Security::random_int(0, strlen($str) - 1);
+            $out .= $str[$random];
+        }
+
+        return $out;
     }
 
     protected function _hashPassword($password)
