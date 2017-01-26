@@ -95,7 +95,14 @@ class Membres
 
         if (!\KD2\Security_OTP::TOTP($membre['secret_otp'], $code))
         {
-            return false;
+            // Vérifier encore, mais avec le temps NTP
+            // au cas où l'horloge du serveur n'est pas à l'heure
+            $time = \KD2\Security_OTP::getTimeFromNTP('fr.pool.ntp.org');
+
+            if (!\KD2\Security_OTP::TOTP($membre['secret_otp'], $code, $time))
+            {
+                return false;
+            }
         }
 
         $_SESSION['otp_required'] = false;
