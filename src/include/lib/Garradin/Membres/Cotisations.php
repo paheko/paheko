@@ -126,6 +126,8 @@ class Cotisations
 
 		$db->commit();
 
+		Plugin::fireSignal('cotisation.ajout', array_merge(['id' => $id], $data));
+
 		return $id;
 	}
 
