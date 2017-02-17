@@ -97,47 +97,43 @@ class Membres
 
         $membre = $_SESSION['logged_user'];
 
-        if (!\KD2\Security_OTP::TOTP($membre['secret_otp'], $code))
+        if (!$this->checkOTP($membre['secret_otp'], $code))
         {
-            // Vérifier encore, mais avec le temps NTP
-            // au cas où l'horloge du serveur n'est pas à l'heure
-            $time = \KD2\Security_OTP::getTimeFromNTP('fr.pool.ntp.org');
-
-            if (!\KD2\Security_OTP::TOTP($membre['secret_otp'], $code, $time))
-            {
-                return false;
-            }
+            return false;
         }
+
 
         $_SESSION['otp_required'] = false;
 
         return true;
     }
 
-    public function setOTP()
+    public function getNewOTPSecret()
     {
-        $membre = $this->getLoggedUser();
+        $out = [];
+        $out['secret'] = \KD2\Security_OTP::getRandomSecret();
+        $out['secret_display'] = implode(' ', str_split($out['secret'], 4));
+        $out['url'] = \KD2\Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $out['secret']);
+    
+        $qrcode = new \KD2\QRCode($out['url']);
+        $out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
 
-        $secret = \KD2\Security_OTP::getRandomSecret();
-
-        DB::getInstance()->simpleExec('UPDATE membres SET secret_otp = ? WHERE id = ?;', $secret, $membre['id']);
-
-        $membre['secret_otp'] = $secret;
-
-        $this->updateSessionData($membre);
-
-        return $secret;
+        return $out;
     }
 
-    public function disableOTP()
+    public function checkOTP($secret, $code)
     {
-        $membre = $this->getLoggedUser();
+        if (!\KD2\Security_OTP::TOTP($secret, $code))
+        {
+            // Vérifier encore, mais avec le temps NTP
+            // au cas où l'horloge du serveur n'est pas à l'heure
+            $time = \KD2\Security_OTP::getTimeFromNTP('fr.pool.ntp.org');
 
-        DB::getInstance()->simpleExec('UPDATE membres SET secret_otp = NULL WHERE id = ?;', $membre['id']);
-
-        $membre['secret_otp'] = null;
-
-        $this->updateSessionData($membre);
+            if (!\KD2\Security_OTP::TOTP($secret, $code, $time))
+            {
+                return false;
+            }
+        }
 
         return true;
     }
@@ -571,6 +567,62 @@ class Membres
         }
 
         return $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
+    }
+
+    public function checkPassword($password)
+    {
+        $user = $this->getLoggedUser();
+
+        if (!$user)
+        {
+            return false;
+        }
+
+        return $this->_checkPassword($password, $user['passe']);
+    }
+
+    public function editSecurity(Array $data = [])
+    {
+        $user = $this->getLoggedUser();
+
+        if (!$user)
+        {
+            throw new \LogicException('Utilisateur non connecté.');
+        }
+
+        $allowed_fields = ['passe', 'clef_pgp', 'secret_otp'];
+
+        foreach ($data as $key=>$value)
+        {
+            if (!in_array($key, $allowed_fields))
+            {
+                throw new \RuntimeException(sprintf('Le champ %s n\'est pas autorisé dans cette méthode.', $key));
+            }
+        }
+
+        if (isset($data['passe']) && trim($data['passe']) !== '')
+        {
+            if (strlen($data['passe']) < 5)
+            {
+                throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
+            }
+
+            $data['passe'] = $this->_hashPassword($data['passe']);
+        }
+        else
+        {
+            unset($data['passe']);
+        }
+
+        if (isset($data['clef_pgp']))
+        {
+            $data['clef_pgp'] = trim($data['clef_pgp']);
+        }
+
+        $db->simpleUpdate('membres', $data, 'id = '.(int)$user['id']);
+        $this->updateSessionData();
+
+        return true;
     }
 
     public function get($id)

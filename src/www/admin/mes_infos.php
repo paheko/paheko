@@ -18,10 +18,6 @@ if (!empty($_POST['save']))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
-    elseif (Utils::post('passe') != Utils::post('repasse'))
-    {
-        $error = 'La vérification ne correspond pas au mot de passe.';
-    }
     else
     {
         try {
@@ -38,20 +34,7 @@ if (!empty($_POST['save']))
             $membres->edit($membre['id'], $data, false);
             $membres->updateSessionData();
 
-            if (Utils::post('otp') == 'generate')
-            {
-                $secret = $membres->setOTP();
-                Utils::redirect('/admin/mes_infos.php?otp=' . rawurlencode($secret));
-            }
-            elseif (Utils::post('otp') == 'disable')
-            {
-                $secret = $membres->disableOTP();
-                Utils::redirect('/admin/mes_infos.php?otp=off');
-            }
-            else
-            {
-                Utils::redirect('/admin/');
-            }
+            Utils::redirect('/admin/');
         }
         catch (UserException $e)
         {
@@ -61,19 +44,7 @@ if (!empty($_POST['save']))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('otp_status', Utils::get('otp'));
 
-if (Utils::get('otp') && Utils::get('otp') != 'off')
-{
-    $url = \KD2\Security_OTP::getOTPAuthURL($config->get('nom_asso'), Utils::get('otp'));
-    $qrcode = new \KD2\QRCode($url);
-    $qrcode = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
-    $tpl->assign('otp_qrcode', $qrcode);
-
-    $tpl->assign('otp_status', implode(' ', str_split(Utils::get('otp'), 4)));
-}
-
-$tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membre', $membre);
