@@ -165,6 +165,8 @@ class Rappels_Envoyes
 			'date'			=>	$data['date_rappel'],
 		]);
 
+		Plugin::fireSignal('rappels.auto', $data);
+
 		return true;
 	}
 
