@@ -618,7 +618,7 @@ class Membres
         {
             $data['clef_pgp'] = trim($data['clef_pgp']);
 
-            if (!\KD2\Security::getEncryptionKeyFingerprint($data['clef_pgp']))
+            if (!$this->getPGPFingerprint($data['clef_pgp']))
             {
                 throw new UserException('Clé PGP invalide : impossible d\'extraire l\'empreinte.');
             }
@@ -632,6 +632,11 @@ class Membres
 
     public function getPGPFingerprint($key, $display = false)
     {
+        if (!\KD2\Security::canUseEncryption())
+        {
+            return false;
+        }
+
         $fingerprint = \KD2\Security::getEncryptionKeyFingerprint($key);
 
         if ($display && $fingerprint)
