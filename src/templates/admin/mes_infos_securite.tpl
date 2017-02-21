@@ -113,7 +113,7 @@
                     sont envoyés seront chiffrés (cryptés) avec cette clé&nbsp;: messages envoyés par les membres, rappels de cotisation,
                     procédure de récupération de mot de passe, etc.</dd>
                 <dd><textarea name="clef_pgp" id="f_clef_pgp" cols="90" rows="5">{form_field name="clef_pgp" data=$user}</textarea></dd>
-                {if $clef_pgp_fingerprint}<dd class="help">L'empreinte de la clé est&nbsp;: {$clef_pgp_fingerprint}</dd>{/if}
+                {if $clef_pgp_fingerprint}<dd class="help">L'empreinte de la clé est&nbsp;: <code>{$clef_pgp_fingerprint}</code></dd>{/if}
             </dl>
             <p class="alert">
                 Attention&nbsp;: en inscrivant ici votre clé PGP, les emails de récupération de mot de passe perdu vous seront envoyés chiffrés

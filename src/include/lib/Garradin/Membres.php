@@ -617,12 +617,30 @@ class Membres
         if (isset($data['clef_pgp']))
         {
             $data['clef_pgp'] = trim($data['clef_pgp']);
+
+            if (!\KD2\Security::getEncryptionKeyFingerprint($data['clef_pgp']))
+            {
+                throw new UserException('Clé PGP invalide : impossible d\'extraire l\'empreinte.');
+            }
         }
 
-        $db->simpleUpdate('membres', $data, 'id = '.(int)$user['id']);
+        DB::getInstance()->simpleUpdate('membres', $data, 'id = '.(int)$user['id']);
         $this->updateSessionData();
 
         return true;
+    }
+
+    public function getPGPFingerprint($key, $display = false)
+    {
+        $fingerprint = \KD2\Security::getEncryptionKeyFingerprint($key);
+
+        if ($display && $fingerprint)
+        {
+            $fingerprint = str_split($fingerprint, 4);
+            $fingerprint = implode(' ', $fingerprint);
+        }
+
+        return $fingerprint;
     }
 
     public function get($id)
