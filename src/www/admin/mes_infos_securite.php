@@ -77,6 +77,10 @@ elseif (Utils::post('save'))
     {
         $error = 'La vérification ne correspond pas au mot de passe.';
     }
+    elseif (Utils::post('clef_pgp') && !$membres->getPGPFingerprint(Utils::post('clef_pgp')))
+    {
+        $error = 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.';
+    }
     else
     {
         $confirm = true;
@@ -91,9 +95,21 @@ if (Utils::post('otp') == 'generate')
     $otp = $membres->getNewOTPSecret();
     $tpl->assign('otp', $otp);
 }
+else
+{
+    $tpl->assign('otp', false);
+}
 
 $tpl->assign('pgp_disponible', \KD2\Security::canUseEncryption());
-$tpl->assign('clef_pgp_fingerprint', !empty($membre['clef_pgp']) ? \KD2\Security::getEncryptionKeyFingerprint($membre['clef_pgp']) : null);
+
+$fingerprint = '';
+
+if ($membre['clef_pgp'])
+{
+    $fingerprint = $membres->getPGPFingerprint($membre['clef_pgp'], true);
+}
+
+$tpl->assign('clef_pgp_fingerprint', $fingerprint);
 
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $config->get('champs_membres')->getAll());
