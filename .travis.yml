@@ -7,7 +7,7 @@ php:
   - '7.1'
   - hhvm
 
-before_script:
+install:
   - cd src && make deps
 
 script:
