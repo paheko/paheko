@@ -7,3 +7,5 @@ use KD2\Test;
 require __DIR__ . '/../src/include/init.php';
 
 Test::assert(garradin_version());
+Test::assert(defined('Garradin\ROOT'));
+Test::assert(is_readable(ROOT));
