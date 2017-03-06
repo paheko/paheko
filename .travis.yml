@@ -16,7 +16,7 @@ script:
 notifications:
   irc:
     channels:
-      - "irc.freenode.net#garradin"
+      - "chat.freenode.net#garradin"
     template:
       - "%{build_number} by %{author} on %{branch}: %{message} "
       - "Build details: %{build_url}"
