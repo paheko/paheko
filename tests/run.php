@@ -1,11 +1,30 @@
 <?php
 
-namespace Garradin;
-
-use KD2\Test;
-
 require __DIR__ . '/../src/include/init.php';
 
-Test::assert(garradin_version());
-Test::assert(defined('Garradin\ROOT'));
-Test::assert(is_readable(ROOT));
+if (!empty($_SERVER['argv'][1]))
+{
+	require $_SERVER['argv'][1];
+	exit;
+}
+else
+{
+	// Lister et exécuter tous les tests unitaires
+	$dir = new RecursiveDirectoryIterator(__DIR__ . '/unit_tests');
+	$iterator = new RecursiveIteratorIterator($dir);
+
+	$files = new RegexIterator($iterator, '/^.*\.php$/i', RecursiveRegexIterator::GET_MATCH);
+	$list = [];
+
+	foreach ($files as $file)
+	{
+		$list[] = $file[0];
+	}
+
+	natcasesort($list);
+
+	foreach ($list as $file)
+	{
+		require $file;
+	}
+}
