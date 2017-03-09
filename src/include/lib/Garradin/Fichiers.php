@@ -581,32 +581,41 @@ class Fichiers
 	 */
 	static public function SkrivFichier($args, $content, $skriv)
 	{
-		$_args = [];
+		$id = $caption = null;
 
 		foreach ($args as $value)
 		{
-			if (preg_match('/^\d+$/', $value))
+			if (preg_match('/^\d+$/', $value) && !$id)
 			{
-				$_args['id'] = (int)$value;
+				$id = (int)$value;
 				break;
+			}
+			else
+			{
+				$caption = trim($value);
 			}
 		}
 
-		if (empty($_args['id']))
+		if (empty($id))
 		{
 			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
 		}
 
 		try {
-			$file = new Fichiers($_args['id']);
+			$file = new Fichiers($id);
 		}
 		catch (\InvalidArgumentException $e)
 		{
 			return $skriv->parseError('/!\ Tag fichier : ' . $e->getMessage());
 		}
 
+		if (empty($caption))
+		{
+			$caption = $file->nom;
+		}
+
 		$out = '<aside class="fichier" data-type="'.$skriv->escape($file->type).'">';
-		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($file->nom).'</a> ';
+		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($caption).'</a> ';
 		$out.= '<small>('.$skriv->escape(($file->type ? $file->type . ', ' : '') . Utils::format_bytes($file->taille)).')</small>';
 		$out.= '</aside>';
 		return $out;
@@ -620,32 +629,34 @@ class Fichiers
 	 */
 	static public function SkrivImage($args, $content, $skriv)
 	{
-		$_args = ['align' => 'centre'];
-		$_align_values = ['droite', 'gauche', 'centre'];
+		static $align_values = ['droite', 'gauche', 'centre'];
+
+		$align = '';
+		$id = $caption = null;
 
 		foreach ($args as $value)
 		{
-			if (preg_match('/^\d+$/', $value) && !array_key_exists('id', $_args))
+			if (preg_match('/^\d+$/', $value) && !$id)
 			{
-				$_args['id'] = (int)$value;
+				$id = (int)$value;
 			}
-			else if (in_array($value, $_align_values) && !array_key_exists('align', $_args))
+			else if (in_array($value, $_align_values) && !$align)
 			{
-				$_args['align'] = $value;
+				$align = $value;
 			}
 			else
 			{
-				$_args['caption'] = $value;
+				$caption = $value;
 			}
 		}
 
-		if (empty($_args['id']))
+		if (!$id)
 		{
 			return $skriv->parseError('/!\ Tag image : aucun numéro de fichier indiqué.');
 		}
 
 		try {
-			$file = new Fichiers($_args['id']);
+			$file = new Fichiers($id);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -657,28 +668,23 @@ class Fichiers
 			return $skriv->parseError('/!\ Tag image : ce fichier n\'est pas une image.');
 		}
 
-		if (empty($_args['caption']))
-		{
-			$_args['caption'] = false;
-		}
-
 		$out = '<a href="'.$file->getURL().'" class="internal-image">';
-		$out .= '<img src="'.$file->getURL($_args['align'] == 'centre' ? 500 : 200).'" alt="';
+		$out .= '<img src="'.$file->getURL($align == 'centre' ? 500 : 200).'" alt="';
 
-		if ($_args['caption'])
+		if ($caption)
 		{
-			$out .= htmlspecialchars($_args['caption'], ENT_QUOTES, 'UTF-8');
+			$out .= htmlspecialchars($caption, ENT_QUOTES, 'UTF-8');
 		}
 
 		$out .= '" /></a>';
 
-		if (!empty($_args['align']))
+		if (!empty($align))
 		{
-			$out = '<figure class="image ' . $_args['align'] . '">' . $out;
+			$out = '<figure class="image ' . $align . '">' . $out;
 
-			if ($_args['caption'])
+			if ($caption)
 			{
-				$out .= '<figcaption>' . htmlspecialchars($_args['caption'], ENT_QUOTES, 'UTF-8') . '</figcaption>';
+				$out .= '<figcaption>' . htmlspecialchars($caption, ENT_QUOTES, 'UTF-8') . '</figcaption>';
 			}
 
 			$out .= '</figure>';
