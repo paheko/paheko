@@ -2,18 +2,6 @@
 
 namespace Garradin;
 
-function str_replace_first ($search, $replace, $subject)
-{
-    $pos = strpos($subject, $search);
-
-    if ($pos !== false)
-    {
-        $subject = substr_replace($subject, $replace, $pos, strlen($search));
-    }
-
-    return $subject;
-}
-
 class DB extends \SQLite3
 {
     static protected $_instance = null;
@@ -23,6 +11,9 @@ class DB extends \SQLite3
     const NUM = \SQLITE3_NUM;
     const ASSOC = \SQLITE3_ASSOC;
     const BOTH = \SQLITE3_BOTH;
+    const OBJ = 4; // SQLITE3_ASSOC, NUM and BOTH are 1, 2 and 3, so let's start at 4
+
+    const ALL_COLUMNS = 1;
 
     static public function getInstance($create = false)
     {
@@ -232,13 +223,8 @@ class DB extends \SQLite3
         }
     }
 
-    public function simpleStatementFetch($query, $mode = SQLITE3_BOTH)
+    public function simpleStatementFetch($query, $mode = null)
     {
-        if ($mode != SQLITE3_BOTH && $mode != SQLITE3_ASSOC && $mode != SQLITE3_NUM)
-        {
-            throw new \InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
-        }
-
         $args = array_slice(func_get_args(), 2);
         return $this->fetchResult($this->simpleStatement($query, $args), $mode);
     }
@@ -249,13 +235,8 @@ class DB extends \SQLite3
         return $this->fetchResultAssoc($this->simpleStatement($query, $args));
     }
 
-    public function simpleStatementFetchAssocKey($query, $mode = SQLITE3_BOTH)
+    public function simpleStatementFetchAssocKey($query, $mode = null)
     {
-        if ($mode != SQLITE3_BOTH && $mode != SQLITE3_ASSOC && $mode != SQLITE3_NUM)
-        {
-            throw new \InvalidArgumentException('Mode argument should be either SQLITE3_BOTH, SQLITE3_ASSOC or SQLITE3_NUM.');
-        }
-
         $args = array_slice(func_get_args(), 2);
         return $this->fetchResultAssocKey($this->simpleStatement($query, $args), $mode);
     }
@@ -312,25 +293,30 @@ class DB extends \SQLite3
         return $this->simpleStatement($query, array_slice(func_get_args(), 1));
     }
 
-    public function simpleQuerySingle($query, $all_columns = false)
+    public function simpleQuerySingle($query, $flags = false)
     {
         $res = $this->simpleStatement($query, array_slice(func_get_args(), 2));
+
+        $all_columns = $flags & self::ALL_COLUMNS;
 
         $row = $res->fetchArray($all_columns ? SQLITE3_ASSOC : SQLITE3_NUM);
 
         if (!$all_columns)
         {
             if (isset($row[0]))
+            {
                 return $row[0];
+            }
+
             return false;
         }
         else
         {
-            return $row;
+            return ($flags & self::OBJ) ? (object) $row : $row;
         }
     }
 
-    public function queryFetch($query, $mode = SQLITE3_BOTH)
+    public function queryFetch($query, $mode = null)
     {
         return $this->fetchResult($this->query($query), $mode);
     }
@@ -340,18 +326,27 @@ class DB extends \SQLite3
         return $this->fetchResultAssoc($this->query($query));
     }
 
-    public function queryFetchAssocKey($query, $mode = SQLITE3_BOTH)
+    public function queryFetchAssocKey($query, $mode = null)
     {
         return $this->fetchResultAssocKey($this->query($query), $mode);
     }
 
-    public function fetchResult($result, $mode = \SQLITE3_BOTH)
+    public function fetchResult($result, $mode = null)
     {
+        $as_obj = false;
+
+        if ($mode === self::OBJ)
+        {
+            $as_obj = true;
+            $mode = self::ASSOC;
+        }
+
         $out = [];
 
         while ($row = $result->fetchArray($mode))
         {
-            $out[] = $row;
+            // FIXME: use generator (PHP 5.6+)
+            $out[] = $as_obj ? (object) $row : $row;
         }
 
         $result->finalize();
@@ -364,7 +359,7 @@ class DB extends \SQLite3
     {
         $out = [];
 
-        while ($row = $result->fetchArray(SQLITE3_NUM))
+        while ($row = $result->fetchArray(\SQLITE3_NUM))
         {
             $out[$row[0]] = $row[1];
         }
@@ -375,14 +370,23 @@ class DB extends \SQLite3
         return $out;
     }
 
-    protected function fetchResultAssocKey($result, $mode = \SQLITE3_BOTH)
+    protected function fetchResultAssocKey($result, $mode = null)
     {
+        $as_obj = false;
+
+        if ($mode === self::OBJ)
+        {
+            $as_obj = true;
+            $mode = self::ASSOC;
+        }
+
         $out = [];
 
         while ($row = $result->fetchArray($mode))
         {
+            // FIXME: use generator (PHP 5.6+)
             $key = current($row);
-            $out[$key] = $row;
+            $out[$key] = $as_obj ? (object) $row : $row;
         }
 
         $result->finalize();
@@ -395,11 +399,13 @@ class DB extends \SQLite3
     {
         $i = 0;
 
-        while ($result->fetchArray(SQLITE3_NUM))
+        while ($result->fetchArray(\SQLITE3_NUM))
+        {
             $i++;
+        }
+
+        $result->reset();
 
         return $i;
     }
 }
-
-?>
