@@ -139,7 +139,7 @@ class Membres
         {
             $membre = $this->get($_SESSION['logged_user']['id']);
         }
-        elseif (is_int($membre))
+        else
         {
             $membre = $this->get($membre);
         }
