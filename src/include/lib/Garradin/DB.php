@@ -2,18 +2,40 @@
 
 namespace Garradin;
 
-class DB extends \SQLite3
+class DB
 {
     static protected $_instance = null;
 
-    protected $_transaction = 0;
+    /**
+     * Instance SQLite3
+     * @var SQLite3
+     */
+    protected $db = null;
 
+    /**
+     * Options d'initialisation de SQLite3
+     * @var null
+     */
+    protected $flags = null;
+
+    /**
+     * Transaction en cours?
+     * @var integer
+     */
+    protected $transaction = 0;
+
+    /**
+     * Modes de retour des résultats
+     */
     const NUM = \SQLITE3_NUM;
     const ASSOC = \SQLITE3_ASSOC;
     const BOTH = \SQLITE3_BOTH;
     const OBJ = 4; // SQLITE3_ASSOC, NUM and BOTH are 1, 2 and 3, so let's start at 4
 
-    const ALL_COLUMNS = 1;
+    /**
+     * Format de date utilisé pour le stockage
+     */
+    const DATE_FORMAT = 'Y-m-d H:i:s';
 
     static public function getInstance($create = false)
     {
@@ -22,130 +44,96 @@ class DB extends \SQLite3
 
     private function __clone()
     {
+        // Désactiver le clonage, car on ne veut qu'une seule instance
     }
 
     public function __construct($create = false)
     {
-        $flags = SQLITE3_OPEN_READWRITE;
+        $this->flags = \SQLITE3_OPEN_READWRITE;
 
         if ($create)
         {
-            $flags |= SQLITE3_OPEN_CREATE;
+            $this->flags |= \SQLITE3_OPEN_CREATE;
         }
 
-        parent::__construct(DB_FILE, $flags);
-
-        $this->enableExceptions(true);
-
-        // Le timeout par défaut est 0, on le met à 1 seconde, si ça ne suffit pas on augmentera plus tard
-        $this->busyTimeout(1000);
-
-        // Activer les contraintes des foreign keys
-        $this->exec('PRAGMA foreign_keys = ON;');
-
-        $this->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
-        $this->createFunction('base64', 'base64_encode');
-        $this->createFunction('rank', [$this, 'sql_rank']);
+        // Ne pas se connecter ici, on ne se connectera que quand une requête sera faite
     }
 
-    public function sql_rank($aMatchInfo)
+    public function connect()
     {
-        $iSize = 4; // byte size
-        $iPhrase = (int) 0;                 // Current phrase //
-        $score = (double)0.0;               // Value to return //
-
-        /* Check that the number of arguments passed to this function is correct.
-        ** If not, jump to wrong_number_args. Set aMatchinfo to point to the array
-        ** of unsigned integer values returned by FTS function matchinfo. Set
-        ** nPhrase to contain the number of reportable phrases in the users full-text
-        ** query, and nCol to the number of columns in the table.
-        */
-        $aMatchInfo = (string) func_get_arg(0);
-        $nPhrase = ord(substr($aMatchInfo, 0, $iSize));
-        $nCol = ord(substr($aMatchInfo, $iSize, $iSize));
-
-        if (func_num_args() > (1 + $nCol))
+        if ($this->db)
         {
-            throw new \Exception("Invalid number of arguments : ".$nCol);
+            return true;
         }
 
-        // Iterate through each phrase in the users query. //
-        for ($iPhrase = 0; $iPhrase < $nPhrase; $iPhrase++)
-        {
-            $iCol = (int) 0; // Current column //
+        $this->db = new \SQLite3(DB_FILE, $this->flags);
 
-            /* Now iterate through each column in the users query. For each column,
-            ** increment the relevancy score by:
-            **
-            **   (<hit count> / <global hit count>) * <column weight>
-            **
-            ** aPhraseinfo[] points to the start of the data for phrase iPhrase. So
-            ** the hit count and global hit counts for each column are found in
-            ** aPhraseinfo[iCol*3] and aPhraseinfo[iCol*3+1], respectively.
-            */
-            $aPhraseinfo = substr($aMatchInfo, (2 + $iPhrase * $nCol * 3) * $iSize);
+        $this->db->enableExceptions(true);
 
-            for ($iCol = 0; $iCol < $nCol; $iCol++)
-            {
-                $nHitCount = ord(substr($aPhraseinfo, 3 * $iCol * $iSize, $iSize));
-                $nGlobalHitCount = ord(substr($aPhraseinfo, (3 * $iCol + 1) * $iSize, $iSize));
-                $weight = ($iCol < func_num_args() - 1) ? (double) func_get_arg($iCol + 1) : 0;
+        // Le timeout par défaut est 0, on le met à 1 seconde, si ça ne suffit pas on augmentera plus tard
+        $this->db->busyTimeout(1000);
 
-                if ($nHitCount > 0)
-                {
-                    $score += ((double)$nHitCount / (double)$nGlobalHitCount) * $weight;
-                }
-            }
-        }
+        // Activer les contraintes des foreign keys
+        $this->db->exec('PRAGMA foreign_keys = ON;');
 
-        return $score;
+        $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
+        $this->db->createFunction('base64', 'base64_encode');
+        $this->db->createFunction('rank', ['\KD2\DB', 'sqlite_rank']);
+        $this->db->createFunction('haversine_distance', ['\KD2\DB', 'sqlite_haversine']);
     }
 
     public function escape($str)
     {
-        return $this->escapeString($str);
+        // escapeString n'est pas binary safe: https://bugs.php.net/bug.php?id=62361
+        $str = str_replace("\0", "\\0", $str);
+
+        $this->connect();
+        return $this->db->escapeString($str);
     }
 
-    public function e($str)
+    public function quote($str)
     {
-        return $this->escapeString($str);
+        return '\'' . $this->escape($str) . '\'';
     }
 
     public function begin()
     {
-        if (!$this->_transaction)
+        if (!$this->transaction)
         {
-            $this->exec('BEGIN;');
+            $this->connect();
+            $this->db->exec('BEGIN;');
         }
 
-        $this->_transaction++;
+        $this->transaction++;
 
-        return $this->_transaction == 1 ? true : false;
+        return $this->transaction == 1 ? true : false;
     }
 
     public function commit()
     {
-        if ($this->_transaction == 1)
+        if ($this->transaction == 1)
         {
-            $this->exec('END;');
+            $this->connect();
+            $this->db->exec('END;');
         }
 
-        if ($this->_transaction > 0)
+        if ($this->transaction > 0)
         {
-            $this->_transaction--;
+            $this->transaction--;
         }
 
-        return $this->_transaction ? false : true;
+        return $this->transaction ? false : true;
     }
 
     public function rollback()
     {
-        $this->exec('ROLLBACK;');
-        $this->_transaction = 0;
+        $this->connect();
+        $this->db->exec('ROLLBACK;');
+        $this->transaction = 0;
         return true;
     }
 
-    public function getArgType(&$arg, $name = '')
+    protected function getArgType(&$arg, $name = '')
     {
         switch (gettype($arg))
         {
@@ -167,14 +155,21 @@ class DB extends \SQLite3
 
                     return $type;
                 }
+            case 'object':
+                if ($arg instanceof \DateTime)
+                {
+                    $arg = $arg->format(self::DATE_FORMAT);
+                    return \SQLITE3_TEXT;
+                }
             default:
                 throw new \InvalidArgumentException('Argument '.$name.' is of invalid type '.gettype($arg));
         }
     }
 
-    public function simpleStatement($query, $args = [])
+    public function query($query, Array $args = [])
     {
-        $statement = $this->prepare($query);
+        $this->connect();
+        $statement = $this->db->prepare($query);
         $nb = $statement->paramCount();
 
         if (!empty($args))
@@ -215,123 +210,103 @@ class DB extends \SQLite3
         }
 
         try {
-            return $statement->execute();
+            // Return a boolean for write queries to avoid accidental duplicate execution
+            // see https://bugs.php.net/bug.php?id=64531
+            
+            $result = $statement->execute();
+            return $statement->readOnly() ? $result : (bool) $result;
         }
         catch (\Exception $e)
         {
-            throw new \Exception($e->getMessage() . "\n" . $query . "\n" . json_encode($args, true));
+            throw new \RuntimeException($e->getMessage() . "\n" . $query . "\n" . json_encode($args, true));
         }
     }
 
-    public function simpleStatementFetch($query, $mode = null)
+    public function get($query)
     {
         $args = array_slice(func_get_args(), 2);
-        return $this->fetchResult($this->simpleStatement($query, $args), $mode);
+        return $this->fetch($this->query($query, $args), self::OBJ);
     }
 
-    public function simpleStatementFetchAssoc($query)
+    public function getAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->fetchResultAssoc($this->simpleStatement($query, $args));
+        return $this->fetchAssoc($this->query($query, $args));
     }
 
-    public function simpleStatementFetchAssocKey($query, $mode = null)
+    public function getAssocKey($query)
     {
         $args = array_slice(func_get_args(), 2);
-        return $this->fetchResultAssocKey($this->simpleStatement($query, $args), $mode);
+        return $this->fetchAssocKey($this->query($query, $args), self::OBJ);
     }
 
-    public function escapeAuto($value, $name = '')
-    {
-        $type = $this->getArgType($value, $name);
-
-        switch ($type)
-        {
-            case \SQLITE3_FLOAT:
-                return floatval($value);
-            case \SQLITE3_INTEGER:
-                return intval($value);
-            case \SQLITE3_NULL:
-                return 'NULL';
-            case \SQLITE3_TEXT:
-                return '\'' . $this->escapeString($value) . '\'';
-        }
-    }
-
-    /**
-     * Simple INSERT query
-     */
-    public function simpleInsert($table, $fields)
+    public function insert($table, Array $fields)
     {
         $fields_names = array_keys($fields);
-        return $this->simpleStatement('INSERT INTO '.$table.' ('.implode(', ', $fields_names).')
-            VALUES (:'.implode(', :', $fields_names).');', $fields);
+        $query = sprintf('INSERT INTO %s (%s) VALUES (:%s);', $table, 
+            implode(', ', $fields_names), implode(', :', $fields_names));
+
+        return $this->query($query, $fields);
     }
 
-    public function simpleUpdate($table, $fields, $where)
+    public function update($table, Array $fields, $where)
     {
+        // No fields to update? no need to do a query
         if (empty($fields))
+        {
             return false;
-        
-        $query = 'UPDATE '.$table.' SET ';
+        }
 
+        $args = array_slice(func_get_args(), 3);
+        $column_updates = [];
+        
         foreach ($fields as $key=>$value)
         {
-            $query .= $key . ' = :'.$key.', ';
+            $key = 'field_' . $key;
+
+            // Append to arguments
+            $args[$key] = $value;
+
+            $column_updates[] = sprintf('%s = :%s', $key, $key);
         }
 
-        $query = substr($query, 0, -2);
-        $query .= ' WHERE '.$where.';';
-        return $this->simpleStatement($query, $fields);
+        $column_updates = implode(', ', $column_updates);
+        $query = sprintf('UPDATE %s SET %s WHERE %s;', $table, $column_updates, $where);
+
+        return $this->query($query, $args);
     }
 
-    /**
-     * Formats and escapes a statement and then returns the result of exec()
-     */
-    public function simpleExec($query)
+    public function delete($table, $where)
     {
-        return $this->simpleStatement($query, array_slice(func_get_args(), 1));
+        $query = sprintf('DELETE FROM %s WHERE %s;', $table, $where);
+        return $this->query($query, array_slice(func_get_args(), 2));
     }
 
-    public function simpleQuerySingle($query, $flags = false)
+    public function exec($query)
     {
-        $res = $this->simpleStatement($query, array_slice(func_get_args(), 2));
+        return $this->query($query, array_slice(func_get_args(), 1));
+    }
 
-        $all_columns = $flags & self::ALL_COLUMNS;
+    public function first($query)
+    {
+        $res = $this->query($query, array_slice(func_get_args(), 2));
 
         $row = $res->fetchArray($all_columns ? SQLITE3_ASSOC : SQLITE3_NUM);
+        $res->finalize();
 
-        if (!$all_columns)
-        {
-            if (isset($row[0]))
-            {
-                return $row[0];
-            }
-
-            return false;
-        }
-        else
-        {
-            return ($flags & self::OBJ) ? (object) $row : $row;
-        }
+        return is_array($row) ? (object) $row : false;
     }
 
-    public function queryFetch($query, $mode = null)
+    public function firstColumn($query)
     {
-        return $this->fetchResult($this->query($query), $mode);
+        $res = $this->query($query, array_slice(func_get_args(), 1));
+
+        $row = $res->fetchArray(\SQLITE3_NUM);
+
+        return count($row) > 0 ? $row[0] : false;
     }
 
-    public function queryFetchAssoc($query)
-    {
-        return $this->fetchResultAssoc($this->query($query));
-    }
-
-    public function queryFetchAssocKey($query, $mode = null)
-    {
-        return $this->fetchResultAssocKey($this->query($query), $mode);
-    }
-
-    public function fetchResult($result, $mode = null)
+    public function fetch(\SQLite3Result $result, $mode = null)
     {
         $as_obj = false;
 
@@ -355,12 +330,13 @@ class DB extends \SQLite3
         return $out;
     }
 
-    protected function fetchResultAssoc($result)
+    protected function fetchAssoc(\SQLite3Result $result)
     {
         $out = [];
 
         while ($row = $result->fetchArray(\SQLITE3_NUM))
         {
+            // FIXME: use generator
             $out[$row[0]] = $row[1];
         }
 
@@ -370,7 +346,7 @@ class DB extends \SQLite3
         return $out;
     }
 
-    protected function fetchResultAssocKey($result, $mode = null)
+    protected function fetchAssocKey(\SQLite3Result $result, $mode = null)
     {
         $as_obj = false;
 
@@ -395,7 +371,7 @@ class DB extends \SQLite3
         return $out;
     }
 
-    public function countRows($result)
+    public function countRows(\SQLite3Result $result)
     {
         $i = 0;
 
@@ -407,5 +383,126 @@ class DB extends \SQLite3
         $result->reset();
 
         return $i;
+    }
+
+    public function prepare($query)
+    {
+        return $this->db->prepare($query);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleInsert($table, Array $fields)
+    {
+        return $this->insert($table, $fields);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleUpdate($table, Array $fields, $where)
+    {
+        return $this->update($table, $fields, $where);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleExec($query)
+    {
+        return $this->simpleStatement($query, array_slice(func_get_args(), 1));
+    }
+
+    /**
+     * @deprecated
+     */
+    public function escapeString($str)
+    {
+        return $this->escape($str);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleStatement($query, Array $args = [])
+    {
+        return $this->statement($query, $args);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleStatementFetch($query, $mode = null)
+    {
+        $args = array_slice(func_get_args(), 2);
+        return $this->fetch($this->query($query, $args), $mode);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleStatementFetchAssoc($query)
+    {
+        $args = array_slice(func_get_args(), 1);
+        return $this->fetchAssoc($this->query($query, $args));
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleStatementFetchAssocKey($query, $mode = null)
+    {
+        $args = array_slice(func_get_args(), 2);
+        return $this->fetchAssocKey($this->query($query, $args), $mode);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function queryFetch($query, $mode = null)
+    {
+        return $this->fetch($this->query($query), $mode);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function queryFetchAssoc($query)
+    {
+        return $this->fetchAssoc($this->query($query));
+    }
+
+    /**
+     * @deprecated
+     */
+    public function queryFetchAssocKey($query, $mode = null)
+    {
+        return $this->fetchAssocKey($this->query($query), $mode);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function simpleQuerySingle($query, $all_columns = false)
+    {
+        $res = $this->query($query, array_slice(func_get_args(), 2));
+
+        $row = $res->fetchArray($all_columns ? SQLITE3_ASSOC : SQLITE3_NUM);
+        $res->finalize();
+
+        if (!$all_columns)
+        {
+            if (isset($row[0]))
+            {
+                return $row[0];
+            }
+
+            return false;
+        }
+        else
+        {
+            return $row;
+        }
     }
 }
