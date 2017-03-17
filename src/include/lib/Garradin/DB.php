@@ -190,6 +190,11 @@ class DB
             {
                 foreach ($args as $i=>$arg)
                 {
+                    if (is_string($i))
+                    {
+                        throw new \InvalidArgumentException(sprintf('%s requires argument to be a keyed array, but key %s is a string.', __FUNCTION__, $i));
+                    }
+
                     $type = $this->getArgType($arg, $i+1);
                     $statement->bindValue((int)$i+1, $arg, $type);
                 }
@@ -200,7 +205,7 @@ class DB
                 {
                     if (is_int($key))
                     {
-                        throw new \InvalidArgumentException(__FUNCTION__ . ' requires argument to be a named-associative array, but key '.$key.' is an integer.');
+                        throw new \InvalidArgumentException(sprintf('%s requires argument to be a named-associative array, but key %s is an integer.', __FUNCTION__, $key));
                     }
 
                     $type = $this->getArgType($value, $key);
@@ -224,7 +229,7 @@ class DB
 
     public function get($query)
     {
-        $args = array_slice(func_get_args(), 2);
+        $args = array_slice(func_get_args(), 1);
         return $this->fetch($this->query($query, $args), self::OBJ);
     }
 
@@ -236,7 +241,7 @@ class DB
 
     public function getAssocKey($query)
     {
-        $args = array_slice(func_get_args(), 2);
+        $args = array_slice(func_get_args(), 1);
         return $this->fetchAssocKey($this->query($query, $args), self::OBJ);
     }
 
@@ -262,12 +267,10 @@ class DB
         
         foreach ($fields as $key=>$value)
         {
-            $key = 'field_' . $key;
-
             // Append to arguments
-            $args[$key] = $value;
+            $args['field_' . $key] = $value;
 
-            $column_updates[] = sprintf('%s = :%s', $key, $key);
+            $column_updates[] = sprintf('%s = :field_%s', $key, $key);
         }
 
         $column_updates = implode(', ', $column_updates);
@@ -289,9 +292,9 @@ class DB
 
     public function first($query)
     {
-        $res = $this->query($query, array_slice(func_get_args(), 2));
+        $res = $this->query($query, array_slice(func_get_args(), 1));
 
-        $row = $res->fetchArray($all_columns ? SQLITE3_ASSOC : SQLITE3_NUM);
+        $row = $res->fetchArray(SQLITE3_ASSOC);
         $res->finalize();
 
         return is_array($row) ? (object) $row : false;
