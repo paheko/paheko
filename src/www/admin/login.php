@@ -5,7 +5,7 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if ($membres->isLogged())
+if ($session)
 {
     Utils::redirect('/admin/');
 }
@@ -13,7 +13,7 @@ if ($membres->isLogged())
 // Relance session_start et renvoie une image de 1px transparente
 if (isset($_GET['keepSessionAlive']))
 {
-    $membres->keepSessionAlive();
+    Session::refresh();
 
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
@@ -35,7 +35,7 @@ if (Utils::post('login'))
     else
     {
         if (Utils::post('id') && Utils::post('passe')
-            && $membres->login(Utils::post('id'), Utils::post('passe')))
+            && Membres\Session::login(Utils::post('id'), Utils::post('passe')))
         {
             Utils::redirect('/admin/');
         }

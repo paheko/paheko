@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+
 require_once __DIR__ . '/../../include/init.php';
 
 // Redirection automatique en HTTPS si nécessaire
@@ -14,13 +16,13 @@ if (PREFER_HTTPS !== true && PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']) && em
 $tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
 
-$membres = new Membres;
+$session = Session::get();
 
 if (!defined('Garradin\LOGIN_PROCESS'))
 {
-    if (!$membres->isLogged())
+    if (!$session)
     {
-        if ($membres->isOTPRequired())
+        if (Session::isOTPRequired())
         {
             Utils::redirect('/admin/login_otp.php');
         }
@@ -32,14 +34,15 @@ if (!defined('Garradin\LOGIN_PROCESS'))
 
     $tpl->assign('config', Config::getInstance()->getConfig());
     $tpl->assign('is_logged', true);
-    $tpl->assign('user', $membres->getLoggedUser());
-    $user = $membres->getLoggedUser();
+
+    $user = $session->getUser();
+    $tpl->assign('user', $user);
 
     $tpl->assign('current', '');
     $tpl->assign('plugins_menu', Plugin::listMenu());
 
-    if ($user['droits']['membres'] >= Membres::DROIT_ACCES)
+    if ($session->canUserAccess('membres', Membres::DROIT_ACCES))
     {
-        $tpl->assign('nb_membres', $membres->countAllButHidden());
+        $tpl->assign('nb_membres', (new Membres)->countAllButHidden());
     }
 }

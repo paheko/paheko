@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use \KD2\Security;
+
 class Membres
 {
     const DROIT_AUCUN = 0;
@@ -11,7 +13,7 @@ class Membres
 
     const ITEMS_PER_PAGE = 50;
 
-    protected function _getSalt($length)
+    static protected function _getSalt($length)
     {
         static $str = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         
@@ -20,327 +22,46 @@ class Membres
 
         for ($i = 0; $i < $length; $i++)
         {
-            $random = \KD2\Security::random_int(0, $max);
+            $random = Security::random_int(0, $max);
             $out .= $str[$random];
         }
 
         return $out;
     }
 
-    protected function _hashPassword($password)
+    static public function hashPassword($password)
     {
-        $salt = '$2a$08$' . $this->_getSalt(22);
-        return crypt($password, $salt);
-    }
+        // Remove NUL bytes
+        // see http://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
+        $password = str_replace("\0", '', $password);
 
-    protected function _checkPassword($password, $stored_hash)
-    {
-        return crypt($password, $stored_hash) == $stored_hash;
-    }
-
-    protected function _sessionStart($force = false)
-    {
-        if (!isset($_SESSION) && ($force || isset($_COOKIE[session_name()])))
+        if (function_exists('password_hash'))
         {
-            session_start();
-        }
-
-        return true;
-    }
-
-    public function keepSessionAlive()
-    {
-        $this->_sessionStart(true);
-    }
-
-    public function login($id, $passe)
-    {
-        $db = DB::getInstance();
-        $champ_id = Config::getInstance()->get('champ_identifiant');
-
-        $r = $db->simpleQuerySingle('SELECT id, passe, id_categorie, secret_otp FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, trim($id));
-
-        if (empty($r))
-        {
-            return false;
-        }
-
-        if (!$this->_checkPassword(trim($passe), $r['passe']))
-        {
-            return false;
-        }
-
-        $droits = $this->getDroits($r['id_categorie']);
-
-        if ($droits['connexion'] == self::DROIT_AUCUN)
-        {
-            return false;
-        }
-
-        $this->_sessionStart(true);
-
-        $_SESSION['otp_required'] = !empty($r['secret_otp']) ? true : false;
-
-        $db->simpleExec('UPDATE membres SET date_connexion = datetime(\'now\') WHERE id = ?;', $r['id']);
-
-        return $this->updateSessionData($r['id'], $droits);
-    }
-
-    public function loginOTP($code)
-    {
-        $this->_sessionStart(true);
-
-        if (empty($_SESSION['logged_user']))
-        {
-            return false;
-        }
-
-        $membre = $_SESSION['logged_user'];
-
-        if (!$this->checkOTP($membre['secret_otp'], $code))
-        {
-            return false;
-        }
-
-
-        $_SESSION['otp_required'] = false;
-
-        return true;
-    }
-
-    public function getNewOTPSecret()
-    {
-        $out = [];
-        $out['secret'] = \KD2\Security_OTP::getRandomSecret();
-        $out['secret_display'] = implode(' ', str_split($out['secret'], 4));
-        $out['url'] = \KD2\Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $out['secret']);
-    
-        $qrcode = new \KD2\QRCode($out['url']);
-        $out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
-
-        return $out;
-    }
-
-    public function checkOTP($secret, $code)
-    {
-        if (!\KD2\Security_OTP::TOTP($secret, $code))
-        {
-            // Vérifier encore, mais avec le temps NTP
-            // au cas où l'horloge du serveur n'est pas à l'heure
-            $time = \KD2\Security_OTP::getTimeFromNTP('fr.pool.ntp.org');
-
-            if (!\KD2\Security_OTP::TOTP($secret, $code, $time))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function recoverPasswordCheck($id)
-    {
-        $db = DB::getInstance();
-        $config = Config::getInstance();
-
-        $champ_id = $config->get('champ_identifiant');
-
-        $membre = $db->simpleQuerySingle('SELECT id, email FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, trim($id));
-
-        if (!$membre || trim($membre['email']) == '')
-        {
-            return false;
-        }
-
-        $this->_sessionStart(true);
-        $hash = sha1($membre['email'] . $membre['id'] . 'recover' . ROOT . time());
-        $_SESSION['recover_password'] = [
-            'id' => (int) $membre['id'],
-            'email' => $membre['email'],
-            'hash' => $hash
-        ];
-
-        $message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
-        $message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
-        $message.= WWW_URL . 'admin/password.php?c=' . substr($hash, -10);
-        $message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
-
-        return Utils::mail($membre['email'], '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
-    }
-
-    public function recoverPasswordConfirm($hash)
-    {
-        $this->_sessionStart();
-
-        if (empty($_SESSION['recover_password']['hash']))
-            return false;
-
-        if (substr($_SESSION['recover_password']['hash'], -10) != $hash)
-            return false;
-
-        $config = Config::getInstance();
-        $db = DB::getInstance();
-
-        $password = Utils::suggestPassword();
-
-        $dest = $_SESSION['recover_password']['email'];
-        $id = (int)$_SESSION['recover_password']['id'];
-
-        $message = "Bonjour,\n\nVous avez demandé un nouveau mot de passe pour votre compte.\n\n";
-        $message.= "Votre adresse email : ".$dest."\n";
-        $message.= "Votre nouveau mot de passe : ".$password."\n\n";
-        $message.= "Si vous n'avez pas demandé à recevoir ce message, merci de nous le signaler.";
-
-        $password = $this->_hashPassword($password);
-
-        $db->simpleUpdate('membres', ['passe' => $password], 'id = '.(int)$id);
-
-        return Utils::mail($dest, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
-    }
-
-    public function updateSessionData($membre = null, $droits = null)
-    {
-        if (is_null($membre))
-        {
-            $membre = $this->get($_SESSION['logged_user']['id']);
-        }
-        elseif (is_int($membre))
-        {
-            $membre = $this->get($membre);
-        }
-
-        if (is_null($droits))
-        {
-            $droits = $this->getDroits($membre['id_categorie']);
-        }
-
-        $membre['droits'] = $droits;
-        $_SESSION['logged_user'] = $membre;
-        return true;
-    }
-
-    public function localLogin()
-    {
-        if (!defined('Garradin\LOCAL_LOGIN'))
-            return false;
-
-        if (trim(LOCAL_LOGIN) == '')
-            return false;
-
-        $db = DB::getInstance();
-        $config = Config::getInstance();
-        $champ_id = $config->get('champ_identifiant');
-        
-        if (is_int(LOCAL_LOGIN) && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ? LIMIT 1;', true, LOCAL_LOGIN))
-        {
-            $this->_sessionStart(true);
-            return $this->updateSessionData(LOCAL_LOGIN);
-        }
-        elseif ($id = $db->simpleQuerySingle('SELECT id FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', true, LOCAL_LOGIN))
-        {
-            $this->_sessionStart(true);
-            return $this->updateSessionData($membre);
-        }
-
-        throw new UserException('Le membre ' . LOCAL_LOGIN . ' n\'existe pas, merci de modifier la directive Garradin\LOCAL_LOGIN.');
-    }
-
-    public function isLogged()
-    {
-        $this->_sessionStart();
-
-        if (empty($_SESSION['logged_user']))
-        {
-            if (defined('Garradin\LOCAL_LOGIN'))
-            {
-                return $this->localLogin();
-            }
-
-            return false;
-        }
-
-        if (!empty($_SESSION['otp_required']))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function isOTPRequired()
-    {
-        $this->_sessionStart();
-
-        return empty($_SESSION['otp_required']) ? false : true;
-    }
-
-    public function getLoggedUser()
-    {
-        if (!$this->isLogged())
-            return false;
-
-        return $_SESSION['logged_user'];
-    }
-
-    public function logout()
-    {
-        $_SESSION = [];
-        setcookie(session_name(), '', 0, '/');
-        return true;
-    }
-
-    public function sessionStore($key, $value)
-    {
-        if (!isset($_SESSION['storage']))
-        {
-            $_SESSION['storage'] = [];
-        }
-
-        if ($value === null)
-        {
-            unset($_SESSION['storage'][$key]);
+            return password_hash($password, \PASSWORD_DEFAULT);
         }
         else
         {
-            $_SESSION['storage'][$key] = $value;
+            // Support for PHP < 5.5, FIXME: remove when dropping support for PHP 5.4
+            $salt = '$2a$08$' . self::_getSalt(22);
+            return crypt($password, $salt);
         }
-
-        return true;
     }
 
-    public function sessionGet($key)
+    static public function checkPassword($password, $stored_hash)
     {
-        if (!isset($_SESSION['storage'][$key]))
+        // Remove NUL bytes
+        // see http://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
+        $password = str_replace("\0", '', $password);
+
+        if (function_exists('password_verify'))
         {
-            return null;
+            return password_verify($password, $stored_hash);
         }
-
-        return $_SESSION['storage'][$key];
-    }
-
-    public function sendMessage($dest, $sujet, $message, $copie = false)
-    {
-        if (!$this->isLogged())
+        else
         {
-            throw new \LogicException('Cette fonction ne peut être appelée que par un utilisateur connecté.');
+            // Support for PHP < 5.5, FIXME: remove when dropping support for PHP 5.4
+            return crypt($password, $stored_hash) === $stored_hash;
         }
-
-        $from = $this->getLoggedUser();
-        $from = $from['email'];
-        // Uniquement adresse email pour le moment car faudrait trouver comment
-        // indiquer le nom mais qu'il soit correctement échappé FIXME
-
-        $config = Config::getInstance();
-
-        $message .= "\n\n--\nCe message a été envoyé par un membre de ".$config->get('nom_asso');
-        $message .= ", merci de contacter ".$config->get('email_asso')." en cas d'abus.";
-
-        if ($copie)
-        {
-            Utils::mail($from, $sujet, $message);
-        }
-
-        return Utils::mail($dest, $sujet, $message, ['From' => $from]);
     }
 
     // Gestion des données ///////////////////////////////////////////////////////
@@ -479,7 +200,7 @@ class Membres
 
         if (isset($data['passe']) && trim($data['passe']) != '')
         {
-            $data['passe'] = $this->_hashPassword($data['passe']);
+            $data['passe'] = self::hashPassword($data['passe']);
         }
         else
         {
@@ -549,7 +270,7 @@ class Membres
 
         if (!empty($data['passe']) && trim($data['passe']))
         {
-            $data['passe'] = $this->_hashPassword($data['passe']);
+            $data['passe'] = self::hashPassword($data['passe']);
         }
         else
         {
@@ -567,85 +288,6 @@ class Membres
         }
 
         return $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
-    }
-
-    public function checkPassword($password)
-    {
-        $user = $this->getLoggedUser();
-
-        if (!$user)
-        {
-            return false;
-        }
-
-        return $this->_checkPassword($password, $user['passe']);
-    }
-
-    public function editSecurity(Array $data = [])
-    {
-        $user = $this->getLoggedUser();
-
-        if (!$user)
-        {
-            throw new \LogicException('Utilisateur non connecté.');
-        }
-
-        $allowed_fields = ['passe', 'clef_pgp', 'secret_otp'];
-
-        foreach ($data as $key=>$value)
-        {
-            if (!in_array($key, $allowed_fields))
-            {
-                throw new \RuntimeException(sprintf('Le champ %s n\'est pas autorisé dans cette méthode.', $key));
-            }
-        }
-
-        if (isset($data['passe']) && trim($data['passe']) !== '')
-        {
-            if (strlen($data['passe']) < 5)
-            {
-                throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
-            }
-
-            $data['passe'] = $this->_hashPassword($data['passe']);
-        }
-        else
-        {
-            unset($data['passe']);
-        }
-
-        if (isset($data['clef_pgp']))
-        {
-            $data['clef_pgp'] = trim($data['clef_pgp']);
-
-            if (!$this->getPGPFingerprint($data['clef_pgp']))
-            {
-                throw new UserException('Clé PGP invalide : impossible d\'extraire l\'empreinte.');
-            }
-        }
-
-        DB::getInstance()->simpleUpdate('membres', $data, 'id = '.(int)$user['id']);
-        $this->updateSessionData();
-
-        return true;
-    }
-
-    public function getPGPFingerprint($key, $display = false)
-    {
-        if (!\KD2\Security::canUseEncryption())
-        {
-            return false;
-        }
-
-        $fingerprint = \KD2\Security::getEncryptionKeyFingerprint($key);
-
-        if ($display && $fingerprint)
-        {
-            $fingerprint = str_split($fingerprint, 4);
-            $fingerprint = implode(' ', $fingerprint);
-        }
-
-        return $fingerprint;
     }
 
     public function get($id)
@@ -667,9 +309,9 @@ class Membres
             $ids = [(int)$ids];
         }
 
-        if ($this->isLogged())
+        if (Membres\Session::isLogged())
         {
-            $user = $this->getLoggedUser();
+            $user = Membres\Session::get();
 
             foreach ($ids as $id)
             {
@@ -689,25 +331,6 @@ class Membres
         $config = Config::getInstance();
 
         return $db->simpleQuerySingle('SELECT '.$config->get('champ_identite').' FROM membres WHERE id = ? LIMIT 1;', false, (int)$id);
-    }
-
-    public function getDroits($id)
-    {
-        $db = DB::getInstance();
-        $droits = $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;', true, (int)$id);
-
-        foreach ($droits as $key=>$value)
-        {
-            unset($droits[$key]);
-            $key = str_replace('droit_', '', $key, $found);
-
-            if ($found)
-            {
-                $droits[$key] = (int) $value;
-            }
-        }
-
-        return $droits;
     }
 
     public function search($field, $query)
