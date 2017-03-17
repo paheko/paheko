@@ -49,8 +49,14 @@ function tpl_form_field($params)
 
     if (isset($_POST[$name]))
         $value = $_POST[$name];
-    elseif (isset($params['data']) && isset($params['data'][$name]))
+    elseif (isset($params['data']) && is_array($params['data']) && array_key_exists($name, $params['data']))
+    {
         $value = $params['data'][$name];
+    }
+    elseif (isset($params['data']) && is_object($params['data']) && property_exists($params['data'], $name))
+    {
+        $value = $params['data']->$name;
+    }
     elseif (isset($params['default']))
         $value = $params['default'];
     else
