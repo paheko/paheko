@@ -166,8 +166,26 @@ class DB
         }
     }
 
+    /**
+     * Performe une requête en utilisant les arguments contenus dans le tableau $args
+     * @param  string       $query Requête SQL
+     * @param  array|object $args  Arguments à utiliser comme bindings pour la requête
+     * @return \SQLite3Statement|boolean Retourne un booléen si c'est une requête 
+     * qui exécute une opération d'écriture, ou un statement si c'est une requête de lecture.
+     *
+     * Note: le fait que cette fonction retourne un booléen est un comportement
+     * volontaire pour éviter un bug dans le module SQLite3 de PHP, qui provoque
+     * un risque de faire des opérations en double en cas d'exécution de 
+     * ->fetchResult() sur un statement d'écriture.
+     */
     public function query($query, Array $args = [])
     {
+        assert(is_string($query));
+        assert(is_array($args) || is_object($args));
+        
+        // Forcer en tableau
+        $args = (array) $args;
+
         $this->connect();
         $statement = $this->db->prepare($query);
         $nb = $statement->paramCount();
@@ -227,26 +245,65 @@ class DB
         }
     }
 
+    /**
+     * Exécute une requête et retourne le résultat sous forme de tableau
+     * @param  string $query Requête SQL
+     * @return array Tableau contenant des objets
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings
+     * pour la clause WHERE.
+     */
     public function get($query)
     {
         $args = array_slice(func_get_args(), 1);
         return $this->fetch($this->query($query, $args), self::OBJ);
     }
 
+    /**
+     * Exécute une requête et retourne le résultat sous forme de tableau associatif
+     * en utilisant les deux premières colonnes retournées,
+     * de la forme [colonne1 => colonne2, colonne1 => colonne2, ...]
+     * @param  string $query Requête SQL
+     * @return array Tableau associatif
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings
+     * pour la clause WHERE.
+     */
     public function getAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
         return $this->fetchAssoc($this->query($query, $args));
     }
 
+    /**
+     * Exécute une requête et retourne le résultat sous forme de tableau associatif
+     * en utilisant la première colonne comme clé:
+     * [colonne1 => (object) [colonne1 => valeur1, colonne2 => valeur2, ...], ...]
+     * @param  string $query Requête SQL
+     * @return array Tableau associatif contenant des objets
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings
+     * pour la clause WHERE.
+     */
     public function getAssocKey($query)
     {
         $args = array_slice(func_get_args(), 1);
         return $this->fetchAssocKey($this->query($query, $args), self::OBJ);
     }
 
-    public function insert($table, Array $fields)
+    /**
+     * Insère une ligne dans la table $table, en remplissant avec les champs donnés
+     * dans $fields (tableau associatif ou objet)
+     * @param  string $table  Table où insérer
+     * @param  string $fields Champs à remplir
+     * @return boolean
+     */
+    public function insert($table, $fields)
     {
+        assert(is_array($fields) || is_object($fields));
+
+        $fields = (array) $fields;
+
         $fields_names = array_keys($fields);
         $query = sprintf('INSERT INTO %s (%s) VALUES (:%s);', $table, 
             implode(', ', $fields_names), implode(', :', $fields_names));
@@ -254,15 +311,31 @@ class DB
         return $this->query($query, $fields);
     }
 
-    public function update($table, Array $fields, $where)
+    /**
+     * Met à jour une ou plusieurs lignes de la table
+     * @param  string       $table  Nom de la table
+     * @param  array|object $fields Liste des champs à mettre à jour
+     * @param  string       $where  Clause WHERE
+     * @param  array|object $args   Arguments pour la clause WHERE
+     * @return boolean
+     */
+    public function update($table, $fields, $where, $args = [])
     {
+        assert(is_string($table));
+        assert(is_string($where) && strlen($where));
+        assert(is_array($fields) || is_object($fields));
+        assert(is_array($args) || is_object($args));
+
+        // Forcer en tableau
+        $fields = (array) $fields;
+        $args = (array) $args;
+
         // No fields to update? no need to do a query
         if (empty($fields))
         {
             return false;
         }
 
-        $args = array_slice(func_get_args(), 3);
         $column_updates = [];
         
         foreach ($fields as $key=>$value)
@@ -273,23 +346,47 @@ class DB
             $column_updates[] = sprintf('%s = :field_%s', $key, $key);
         }
 
+        // Assemblage de la requête
         $column_updates = implode(', ', $column_updates);
         $query = sprintf('UPDATE %s SET %s WHERE %s;', $table, $column_updates, $where);
 
         return $this->query($query, $args);
     }
 
+    /**
+     * Supprime une ou plusieurs lignes d'une table
+     * @param  string $table Nom de la table
+     * @param  string $where Clause WHERE
+     * @return boolean
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings
+     * pour la clause WHERE.
+     */
     public function delete($table, $where)
     {
         $query = sprintf('DELETE FROM %s WHERE %s;', $table, $where);
         return $this->query($query, array_slice(func_get_args(), 2));
     }
 
+    /**
+     * Exécute une requête SQL (alias pour query)
+     * @param  string $query Requête SQL
+     * @return boolean
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings.
+     */
     public function exec($query)
     {
         return $this->query($query, array_slice(func_get_args(), 1));
     }
 
+    /**
+     * Exécute une requête et retourne la première ligne
+     * @param  string $query Requête SQL
+     * @return object
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings.
+     */
     public function first($query)
     {
         $res = $this->query($query, array_slice(func_get_args(), 1));
@@ -300,6 +397,13 @@ class DB
         return is_array($row) ? (object) $row : false;
     }
 
+    /**
+     * Exécute une requête et retourne la première colonne de la première ligne
+     * @param  string $query Requête SQL
+     * @return object
+     *
+     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings.
+     */
     public function firstColumn($query)
     {
         $res = $this->query($query, array_slice(func_get_args(), 1));
@@ -309,6 +413,12 @@ class DB
         return count($row) > 0 ? $row[0] : false;
     }
 
+    /**
+     * Récupère le résultat d'un statement
+     * @param  \SQLite3Result $result Résultat de statement
+     * @param  integer        $mode   Mode de récupération (BOTH, OBJ, NUM ou ASSOC)
+     * @return array
+     */
     public function fetch(\SQLite3Result $result, $mode = null)
     {
         $as_obj = false;
@@ -333,6 +443,14 @@ class DB
         return $out;
     }
 
+    /**
+     * Récupère le résultat d'un statement sous forme de tableau associatif
+     * avec colonne1 comme clé et colonne2 comme valeur.
+     * 
+     * @param  \SQLite3Result $result Résultat de statement
+     * @param  integer        $mode   Mode de récupération (BOTH, OBJ, NUM ou ASSOC)
+     * @return array
+     */
     protected function fetchAssoc(\SQLite3Result $result)
     {
         $out = [];
@@ -349,6 +467,13 @@ class DB
         return $out;
     }
 
+    /**
+     * Récupère le résultat d'un statement sous forme de tableau associatif 
+     * avec colonne1 comme clé et la ligne comme valeur.
+     * @param  \SQLite3Result $result Résultat de statement
+     * @param  integer        $mode   Mode de récupération (BOTH, OBJ, NUM ou ASSOC)
+     * @return array
+     */
     protected function fetchAssocKey(\SQLite3Result $result, $mode = null)
     {
         $as_obj = false;
@@ -374,6 +499,11 @@ class DB
         return $out;
     }
 
+    /**
+     * Compte le nombre de lignes dans un résultat
+     * @param  \SQLite3Result $result Résultat SQLite3
+     * @return integer
+     */
     public function countRows(\SQLite3Result $result)
     {
         $i = 0;
@@ -388,6 +518,11 @@ class DB
         return $i;
     }
 
+    /**
+     * Préparer un statement SQLite3
+     * @param  string $query Requête SQL
+     * @return \SQLite3Statement
+     */
     public function prepare($query)
     {
         return $this->db->prepare($query);
