@@ -463,8 +463,9 @@ class Wiki
 
         $db = DB::getInstance();
         $flat = [];
+        $max = 0;
 
-        while ($id > 0)
+        while ($id > 0 && $max++ < 10)
         {
             $res = $db->simpleQuerySingle('SELECT parent, titre, uri
                 FROM wiki_pages WHERE id = ? LIMIT 1;', true, (int)$id);
@@ -474,6 +475,11 @@ class Wiki
                 'titre'     =>  $res['titre'],
                 'uri'       =>  $res['uri'],
             ];
+
+            if ($id == $res['parent'])
+            {
+                throw new Exception('Parent! ' . $id . '/' . $res['parent']);
+            }
 
             $id = (int)$res['parent'];
         }
@@ -495,6 +501,8 @@ class Wiki
             ]
         ];
 
+        $max = 0;
+
         do
         {
             $parent = $db->simpleQuerySingle('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
@@ -510,7 +518,7 @@ class Wiki
 
             $id = (int)$parent;
         }
-        while ($id != 0);
+        while ($id != 0 && $max++ < 20);
 
         $tree = [];
         foreach ($flat as $id=>&$node)
