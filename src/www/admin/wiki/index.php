@@ -24,7 +24,7 @@ else
 {
     $tpl->assign('can_read', $wiki->canReadPage($page['droit_lecture']));
     $tpl->assign('can_edit', $wiki->canWritePage($page['droit_ecriture']));
-    $tpl->assign('children', $wiki->getList($page['uri'] == $config->get('accueil_wiki') ? 0 : $page['id'], true));
+    $tpl->assign('children', $wiki->getList($page_uri == '' ? 0 : $page['id'], true));
     $tpl->assign('breadcrumbs', $wiki->listBackBreadCrumbs($page['id']));
     $tpl->assign('auteur', $membres->getNom($page['contenu']['id_auteur']));
 
