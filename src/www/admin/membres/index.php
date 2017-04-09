@@ -55,7 +55,7 @@ else
 	$fields = $champs->getListedFields();
 
 	// Vérifier que le champ de tri existe bien dans la table
-	if (!array_key_exists($order, $fields))
+	if ($order != 'id' && !array_key_exists($order, $fields))
 	{
 		// Sinon par défaut c'est le premier champ de la table qui fait le tri
 		$order = key($fields);
