@@ -256,7 +256,15 @@ class DB
     public function get($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->fetch($this->query($query, $args), self::OBJ);
+        
+        $out = [];
+
+        foreach ($this->fetch($this->query($query, $args), self::OBJ) as $key=>$row)
+        {
+            $out[$key] = $row;
+        }
+
+        return $out;
     }
 
     /**
@@ -272,7 +280,15 @@ class DB
     public function getAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->fetchAssoc($this->query($query, $args));
+
+        $out = [];
+        
+        foreach ($this->fetchAssoc($this->query($query, $args)) as $key=>$row)
+        {
+            $out[$key] = $row;
+        }
+
+        return $out;
     }
 
     /**
@@ -288,7 +304,15 @@ class DB
     public function getAssocKey($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->fetchAssocKey($this->query($query, $args), self::OBJ);
+
+        $out = [];
+
+        foreach ($this->fetchAssocKey($this->query($query, $args), self::OBJ) as $key=>$row)
+        {
+            $out[$key] = $row;
+        }
+
+        return $out;
     }
 
     /**
