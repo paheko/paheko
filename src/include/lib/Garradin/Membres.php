@@ -35,16 +35,7 @@ class Membres
         // see http://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
         $password = str_replace("\0", '', $password);
 
-        if (function_exists('password_hash'))
-        {
-            return password_hash($password, \PASSWORD_DEFAULT);
-        }
-        else
-        {
-            // Support for PHP < 5.5, FIXME: remove when dropping support for PHP 5.4
-            $salt = '$2a$08$' . self::_getSalt(22);
-            return crypt($password, $salt);
-        }
+        return password_hash($password, \PASSWORD_DEFAULT);
     }
 
     static public function checkPassword($password, $stored_hash)
@@ -53,15 +44,7 @@ class Membres
         // see http://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
         $password = str_replace("\0", '', $password);
 
-        if (function_exists('password_verify'))
-        {
-            return password_verify($password, $stored_hash);
-        }
-        else
-        {
-            // Support for PHP < 5.5, FIXME: remove when dropping support for PHP 5.4
-            return crypt($password, $stored_hash) === $stored_hash;
-        }
+        return password_verify($password, $stored_hash);
     }
 
     // Gestion des données ///////////////////////////////////////////////////////

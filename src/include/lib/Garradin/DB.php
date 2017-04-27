@@ -429,18 +429,15 @@ class DB
             $mode = self::ASSOC;
         }
 
-        $out = [];
-
         while ($row = $result->fetchArray($mode))
         {
-            // FIXME: use generator (PHP 5.6+)
-            $out[] = $as_obj ? (object) $row : $row;
+            yield ($as_obj ? (object) $row : $row);
         }
 
         $result->finalize();
         unset($result, $row);
 
-        return $out;
+        return;
     }
 
     /**
@@ -453,18 +450,15 @@ class DB
      */
     protected function fetchAssoc(\SQLite3Result $result)
     {
-        $out = [];
-
         while ($row = $result->fetchArray(\SQLITE3_NUM))
         {
-            // FIXME: use generator
-            $out[$row[0]] = $row[1];
+            yield $row[0] => $row[1];
         }
 
         $result->finalize();
         unset($result, $row);
 
-        return $out;
+        return;
     }
 
     /**
@@ -484,19 +478,16 @@ class DB
             $mode = self::ASSOC;
         }
 
-        $out = [];
-
         while ($row = $result->fetchArray($mode))
         {
-            // FIXME: use generator (PHP 5.6+)
             $key = current($row);
-            $out[$key] = $as_obj ? (object) $row : $row;
+            yield $key => ($as_obj ? (object) $row : $row);
         }
 
         $result->finalize();
-        unset($result, $row);
+        unset($result, $row, $key);
 
-        return $out;
+        return;
     }
 
     /**
