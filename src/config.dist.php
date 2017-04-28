@@ -3,6 +3,11 @@
 /**
  * Ce fichier représente un exemple des constantes de configuration
  * disponibles pour Garradin.
+ *
+ * NE PAS MODIFIER CE FICHIER!
+ *
+ * Pour configurer Garradin, copiez ce fichier en 'config.local.php'
+ * et modifiez ce dont vous avez besoin.
  */
 
 // Nécessaire pour situer les constantes dans le bon namespace
@@ -79,3 +84,26 @@ const USE_CRON = false;
 // Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
 // qui sont *dans* le document root du vhost, ce qui n'est pas le cas ici.
 const ENABLE_XSENDFILE = false;
+
+// Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
+// mail() de PHP
+const SMTP_HOST = false;
+
+// Port du serveur SMTP
+// 25 = port standard pour connexion non chiffrée (465 pour Gmail)
+// 587 = port standard pour connexion SSL
+const SMTP_PORT = 587;
+
+// Login utilisateur pour le server SMTP
+// mettre à null pour utiliser un serveur local ou anonyme
+const SMTP_USER = 'garradin@monserveur.com';
+
+// Mot de passe pour le serveur SMTP
+// mettre à null pour utiliser un serveur local ou anonyme
+const SMTP_PASSWORD = 'abcd';
+
+// Sécurité du serveur SMTP
+// NONE = pas de chiffrement
+// SSL = connexion SSL (le plus sécurisé)
+// STARTTLS = utilisation de STARTTLS (moyennement sécurisé)
+const SMTP_SECURITY = 'STARTTLS';
