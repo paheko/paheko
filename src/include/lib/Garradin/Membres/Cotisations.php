@@ -282,7 +282,7 @@ class Cotisations
 				INNER JOIN membres AS m ON m.id = cm.id_membre
 			WHERE
 				cm.id_cotisation = ?
-				AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)
+				AND m.id_categorie NOT IN (SELECT mc.id FROM membres_categories AS mc WHERE mc.cacher = 1)
 			GROUP BY cm.id_membre ORDER BY '.$order.' '.$desc.' LIMIT ?,?;',
 			\SQLITE3_ASSOC, (int)$id, $begin, self::ITEMS_PER_PAGE);
 	}
