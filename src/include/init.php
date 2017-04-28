@@ -52,6 +52,8 @@ if (file_exists(__DIR__ . '/../config.local.php'))
     require __DIR__ . '/../config.local.php';
 }
 
+// Configuration par défaut, si les constantes ne sont pas définies dans config.local.php
+// (fallback)
 if (!defined('Garradin\ROOT'))
 {
     define('Garradin\ROOT', dirname(__DIR__));
@@ -60,21 +62,6 @@ if (!defined('Garradin\ROOT'))
 if (!defined('Garradin\DATA_ROOT'))
 {
     define('Garradin\DATA_ROOT', ROOT);
-}
-
-if (!defined('Garradin\CACHE_ROOT'))
-{
-    define('Garradin\CACHE_ROOT', DATA_ROOT . '/cache');
-}
-
-if (!defined('Garradin\DB_FILE'))
-{
-    define('Garradin\DB_FILE', DATA_ROOT . '/association.sqlite');
-}
-
-if (!defined('Garradin\DB_SCHEMA'))
-{
-    define('Garradin\DB_SCHEMA', ROOT . '/include/data/schema.sql');
 }
 
 if (!defined('Garradin\WWW_URI'))
@@ -87,11 +74,6 @@ if (!defined('Garradin\WWW_URI'))
     define('Garradin\WWW_URI', $path);
 }
 
-if (!defined('Garradin\PREFER_HTTPS'))
-{
-    define('Garradin\PREFER_HTTPS', false);
-}
-
 if (!defined('Garradin\WWW_URL'))
 {
     $host = isset($_SERVER['HTTP_HOST']) 
@@ -100,37 +82,32 @@ if (!defined('Garradin\WWW_URL'))
     define('Garradin\WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
 }
 
-if (!defined('Garradin\PLUGINS_ROOT'))
-{
-    define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
-}
+static $default_config = [
+    'CACHE_ROOT'       => DATA_ROOT . '/cache',
+    'DB_FILE'          => DATA_ROOT . '/association.sqlite',
+    'DB_SCHEMA'        => ROOT . '/include/data/schema.sql',
+    'PLUGINS_ROOT'     => DATA_ROOT . '/plugins',
+    'PREFER_HTTPS'     => false,
+    'PLUGINS_SYSTEM'   => '',
+    'SHOW_ERRORS'      => true,
+    'MAIL_ERRORS'      => false,
+    'USE_CRON'         => false,
+    'ENABLE_XSENDFILE' => false,
+    'SMTP_HOST'        => false,
+    'SMTP_USER'        => null,
+    'SMTP_PASSWORD'    => null,
+    'SMTP_PORT'        => 587,
+    'SMTP_SECURITY'    => 'STARTTLS',
+];
 
-if (!defined('Garradin\PLUGINS_SYSTEM'))
+foreach ($default_config as $const => $value)
 {
-    define('Garradin\PLUGINS_SYSTEM', '');
-}
+    $const = sprintf('Garradin\\%s', $const);
 
-// Affichage des erreurs par défaut
-if (!defined('Garradin\SHOW_ERRORS'))
-{
-    define('Garradin\SHOW_ERRORS', true);
-}
-
-if (!defined('Garradin\MAIL_ERRORS'))
-{
-    define('Garradin\MAIL_ERRORS', false);
-}
-
-// Utilisation de cron pour les tâches automatiques
-if (!defined('Garradin\USE_CRON'))
-{
-    define('Garradin\USE_CRON', false);
-}
-
-// Activation de X-SendFile
-if (!defined('Garradin\ENABLE_XSENDFILE'))
-{
-    define('Garradin\ENABLE_XSENDFILE', false);
+    if (!defined($const))
+    {
+        define($const, $value);
+    }
 }
 
 define('Garradin\WEBSITE', 'http://garradin.eu/');
