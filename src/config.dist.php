@@ -3,13 +3,15 @@
 /**
  * Ce fichier représente un exemple des constantes de configuration
  * disponibles pour Garradin.
+ *
+ * NE PAS MODIFIER CE FICHIER!
+ *
+ * Pour configurer Garradin, copiez ce fichier en 'config.local.php'
+ * et modifiez ce dont vous avez besoin.
  */
 
 // Nécessaire pour situer les constantes dans le bon namespace
 namespace Garradin;
-
-// Connexion automatique à l'administration avec l'adresse e-mail donnée
-#const LOCAL_LOGIN = 'president@association.net';
 
 // Connexion automatique avec le numéro de membre indiqué
 // Défaut : false (connexion automatique désactivée)
@@ -33,7 +35,7 @@ const WWW_URI = '/garradin/';
 
 // Adresse URL HTTP(S) de Garradin
 // Défaut : découverte à partir de HTTP_HOST ou SERVER_NAME + WWW_URI
-define('Garradin\WWW_URL', 'http://garradin.net' . WWW_URI);
+const WWW_URL = 'http://garradin.net' . WWW_URI;
 
 // Doit-on suggérer à l'utilisateur d'utiliser la version chiffrée du site ?
 // 1 ou true = affiche un message de suggestion sur l'écran de connexion invitant à utiliser le site chiffré
@@ -44,7 +46,7 @@ define('Garradin\WWW_URL', 'http://garradin.net' . WWW_URI);
 const PREFER_HTTPS = false;
 
 // Emplacement de stockage des plugins
-define('Garradin\PLUGINS_ROOT', DATA_ROOT . '/plugins');
+const PLUGINS_ROOT = DATA_ROOT . '/plugins';
 
 // Plugins fixes qui ne peuvent être désinstallés (séparés par une virgule)
 const PLUGINS_SYSTEM = 'email,web';
@@ -79,3 +81,26 @@ const USE_CRON = false;
 // Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
 // qui sont *dans* le document root du vhost, ce qui n'est pas le cas ici.
 const ENABLE_XSENDFILE = false;
+
+// Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
+// mail() de PHP
+const SMTP_HOST = false;
+
+// Port du serveur SMTP
+// 25 = port standard pour connexion non chiffrée (465 pour Gmail)
+// 587 = port standard pour connexion SSL
+const SMTP_PORT = 587;
+
+// Login utilisateur pour le server SMTP
+// mettre à null pour utiliser un serveur local ou anonyme
+const SMTP_USER = 'garradin@monserveur.com';
+
+// Mot de passe pour le serveur SMTP
+// mettre à null pour utiliser un serveur local ou anonyme
+const SMTP_PASSWORD = 'abcd';
+
+// Sécurité du serveur SMTP
+// NONE = pas de chiffrement
+// SSL = connexion SSL (le plus sécurisé)
+// STARTTLS = utilisation de STARTTLS (moyennement sécurisé)
+const SMTP_SECURITY = 'STARTTLS';

@@ -3,13 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$membre = $membres->getLoggedUser();
-
-if (!$membre)
-{
-    throw new UserException("Ce membre n'existe pas.");
-}
-
 $error = false;
 
 if (!empty($_POST['save']))
@@ -31,8 +24,7 @@ if (!empty($_POST['save']))
                 }
             }
 
-            $membres->edit($membre['id'], $data, false);
-            $membres->updateSessionData();
+            $session->editUser($data);
 
             Utils::redirect('/admin/');
         }
@@ -47,6 +39,6 @@ $tpl->assign('error', $error);
 
 $tpl->assign('champs', $config->get('champs_membres')->getAll());
 
-$tpl->assign('membre', $membre);
+$tpl->assign('membre', $session->getUser());
 
 $tpl->display('admin/mes_infos.tpl');

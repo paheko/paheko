@@ -470,8 +470,30 @@ class Utils
         {
             foreach ($to as $t)
             {
-                return mail($t, $suject, $content, $headers);
+                return self::_sendMail($t, $suject, $content, $headers);
             }
+        }
+        else
+        {
+            return self::_sendMail($to, $subject, $content, $headers);
+        }
+    }
+
+    static protected function _sendMail($to, $subject, $content, $headers)
+    {
+        if (SMTP_HOST)
+        {
+            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+            
+            if (!defined($const))
+            {
+                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, SSL, NONE.');
+            }
+
+            $secure = constant($const);
+
+            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
+            return $smtp->send($to, $subject, $content, $headers);
         }
         else
         {
