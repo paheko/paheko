@@ -387,32 +387,33 @@ function tpl_html_champ_membre($params)
         throw new \BadFunctionCallException('Paramètres type et name obligatoires.');
 
     $config = $params['config'];
-    $type = $config['type'];
+    $type = $config->type;
 
-    if ($params['name'] == 'passe' || (!empty($params['user_mode']) && !empty($config['private'])))
+    if ($params['name'] == 'passe' || (!empty($params['user_mode']) && !empty($config->private)))
     {
         return '';
     }
 
-    if ($type == 'select')
+    $options = [];
+
+    if ($type == 'select' || $type == 'multiple')
     {
-        if (empty($config['options']))
-            throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type select.');
+        if (empty($config->options))
+        {
+            throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type ' . $type);
+        }
+
+        $options = (array) $config->options;
     }
     elseif ($type == 'country')
     {
         $type = 'select';
-        $config['options'] = Utils::getCountryList();
+        $options = Utils::getCountryList();
         $params['default'] = Config::getInstance()->get('pays');
     }
     elseif ($type == 'date')
     {
         $params['pattern'] = '\d{4}-\d{2}-\d{2}';
-    }
-    elseif ($type == 'multiple')
-    {
-        if (empty($config['options']))
-            throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type multiple.');
     }
 
     $field = '';
@@ -425,14 +426,14 @@ function tpl_html_champ_membre($params)
         $attributes .= 'disabled="disabled" ';
     }
 
-    if (!empty($config['mandatory']))
+    if (!empty($config->mandatory))
     {
         $attributes .= 'required="required" ';
     }
 
-    if (!empty($params['user_mode']) && empty($config['editable']))
+    if (!empty($params['user_mode']) && empty($config->editable))
     {
-        $out = '<dt>' . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</dt>';
+        $out = '<dt>' . htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</dt>';
         $out .= '<dd>' . (trim($value) === '' ? 'Non renseigné' : tpl_display_champ_membre($value, $config)) . '</dd>';
         return $out;
     }
@@ -440,7 +441,7 @@ function tpl_html_champ_membre($params)
     if ($type == 'select')
     {
         $field .= '<select '.$attributes.'>';
-        foreach ($config['options'] as $k=>$v)
+        foreach ($options as $k=>$v)
         {
             if (is_int($k))
                 $k = $v;
@@ -462,7 +463,7 @@ function tpl_html_champ_membre($params)
 
             foreach ($value as $k => $v)
             {
-                if (array_key_exists($k, $config['options']) && !empty($v))
+                if (array_key_exists($k, $options) && !empty($v))
                 {
                     $binary |= 0x01 << $k;
                 }
@@ -471,7 +472,7 @@ function tpl_html_champ_membre($params)
             $value = $binary;
         }
 
-        foreach ($config['options'] as $k=>$v)
+        foreach ($options as $k=>$v)
         {
             $b = 0x01 << (int)$k;
             $field .= '<label><input type="checkbox" name="' 
@@ -508,19 +509,19 @@ function tpl_html_champ_membre($params)
     }
 
     $out .= '<label for="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '">'
-        . htmlspecialchars($config['title'], ENT_QUOTES, 'UTF-8') . '</label>';
+        . htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</label>';
 
-    if (!empty($config['mandatory']))
+    if (!empty($config->mandatory))
     {
         $out .= ' <b title="(Champ obligatoire)">obligatoire</b>';
     }
 
     $out .= '</dt>';
 
-    if (!empty($config['help']))
+    if (!empty($config->help))
     {
         $out .= '
-    <dd class="help">' . htmlspecialchars($config['help'], ENT_QUOTES, 'UTF-8') . '</dd>';
+    <dd class="help">' . htmlspecialchars($config->help, ENT_QUOTES, 'UTF-8') . '</dd>';
     }
 
     if ($type != 'checkbox')
@@ -534,41 +535,30 @@ function tpl_html_champ_membre($params)
 
 function tpl_display_champ_membre($v, $config)
 {
-    if ($config['type'] == 'checkbox')
+    switch ($config->type)
     {
-        return $v ? 'Oui' : 'Non';
-    }
-    elseif ($config['type'] == 'email')
-    {
-        return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
-    }
-    elseif ($config['type'] == 'tel')
-    {
-        return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
-    }
-    elseif ($config['type'] == 'url')
-    {
-        return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
-    }
-    elseif ($config['type'] == 'country') 
-    {
-        return Utils::getCountryName($v);
-    }
-    elseif ($config['type'] == 'multiple')
-    {
-        $out = [];
+        case 'checkbox':
+            return $v ? 'Oui' : 'Non';
+        case 'email':
+            return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+        case 'tel':
+            return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+        case 'url':
+            return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
+        case 'country':
+            return Utils::getCountryName($v);
+        case 'multiple':
+            $out = [];
 
-        foreach ($config['options'] as $b => $name)
-        {
-            if ($v & (0x01 << $b))
-                $out[] = $name;
-        }
+            foreach ($config['options'] as $b => $name)
+            {
+                if ($v & (0x01 << $b))
+                    $out[] = $name;
+            }
 
-        return implode(', ', $out);
-    }
-    else
-    {
-        return htmlspecialchars($v);
+            return implode(', ', $out);
+        default:
+            return htmlspecialchars($v);
     }
 }
 
