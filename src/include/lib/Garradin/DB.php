@@ -533,6 +533,11 @@ class DB
         return $i;
     }
 
+    public function lastInsertRowId()
+    {
+        return $this->db->lastInsertRowId();
+    }
+
     /**
      * Préparer un statement SQLite3
      * @param  string $query Requête SQL

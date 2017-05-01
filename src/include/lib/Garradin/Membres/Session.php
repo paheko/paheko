@@ -458,6 +458,14 @@ class Session
 		return ($this->user->droits->$category >= $permission);
 	}
 
+	public function requireAccess($category, $permission)
+	{
+		if (!$this->canUserAccess($category, $permission))
+		{
+			throw new UserException('Vous n\'avez pas le droit d\'accéder à cette page.');
+		}
+	}
+
 	public function getNewOTPSecret()
 	{
 		$out = [];
