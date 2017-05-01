@@ -82,7 +82,7 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$comptes = new Comptes;
 		$banques = new Comptes_Bancaires;
 		$cats = new Categories;
@@ -129,13 +129,13 @@ class Import
 	
 			if (count($row) != count($columns))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
 			if (trim($row[0]) !== '' && !is_numeric($row[0]))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : la première colonne doit être vide ou contenir le numéro unique d\'opération.');
 			}
 
@@ -144,7 +144,7 @@ class Import
 
 			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
 			}
 
@@ -211,7 +211,7 @@ class Import
 			}
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;
@@ -232,7 +232,7 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$comptes = new Comptes;
 		$banques = new Comptes_Bancaires;
 		$cats = new Categories;
@@ -308,7 +308,7 @@ class Import
 
 			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
 			}
 
@@ -381,7 +381,7 @@ class Import
 			$journal->add($data);
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;

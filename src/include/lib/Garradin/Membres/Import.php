@@ -77,7 +77,7 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$membres = new Membres;
 
 		$columns = array_flip($this->galette_fields);
@@ -108,7 +108,7 @@ class Import
 
 			if (count($row) != count($columns))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
@@ -132,12 +132,12 @@ class Import
 			}
 			catch (UserException $e)
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : ' . $e->getMessage());
 			}
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;
@@ -163,7 +163,7 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$membres = new Membres;
 
 		// On récupère les champs qu'on peut importer
@@ -192,6 +192,7 @@ class Import
 			{
 				if (is_numeric($row[0]))
 				{
+					$db->rollback();
 					throw new UserException('Erreur sur la ligne 1 : devrait contenir l\'en-tête des colonnes.');
 				}
 
@@ -201,7 +202,7 @@ class Import
 
 			if (count($row) != count($columns))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
@@ -238,12 +239,12 @@ class Import
 			}
 			catch (UserException $e)
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : ' . $e->getMessage());
 			}
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;
