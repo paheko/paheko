@@ -133,7 +133,7 @@ class DB
         return true;
     }
 
-    protected function getArgType(&$arg, $name = '')
+    public function getArgType(&$arg, $name = '')
     {
         switch (gettype($arg))
         {
