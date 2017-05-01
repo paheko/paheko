@@ -1,16 +1,13 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
 $cotisations = new Cotisations;
 
-if ($user['droits']['membres'] >= Membres::DROIT_ADMIN)
+if ($session->canAccess('membres', Membres::DROIT_ADMIN))
 {
 	$cats = new Compta\Categories;
 

@@ -1,12 +1,9 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
@@ -28,7 +25,7 @@ $error = false;
 
 if (!empty($_POST['save']))
 {
-    if (!Utils::CSRF_check('edit_rappel_' . $rappel['id']))
+    if (!Utils::CSRF_check('edit_rappel_' . $rappel->id))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
@@ -42,7 +39,7 @@ if (!empty($_POST['save']))
             else
                 $delai = -(int) Utils::post('delai_pre');
 
-            $rappels->edit($rappel['id'], [
+            $rappels->edit($rappel->id, [
                 'sujet'		=>	Utils::post('sujet'),
                 'texte'		=>	Utils::post('texte'),
                 'delai'		=>	$delai,
@@ -60,12 +57,12 @@ if (!empty($_POST['save']))
 
 $tpl->assign('error', $error);
 
-$rappel['delai_pre'] = $rappel['delai_post'] = abs($rappel['delai']) ?: 30;
-$rappel['delai_choix'] = $rappel['delai'] == 0 ? 0 : ($rappel['delai'] > 0 ? 1 : -1);
+$rappel->delai_pre = 
+    $rappel->delai_post = (abs($rappel->delai) ?: 30);
+
+$rappel->delai_choix = ($rappel->delai == 0) ? 0 : ($rappel->delai > 0 ? 1 : -1);
 
 $tpl->assign('rappel', $rappel);
 $tpl->assign('cotisations', $cotisations->listCurrent());
 
 $tpl->display('admin/membres/cotisations/gestion/rappel_modifier.tpl');
-
-?>

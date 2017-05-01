@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (empty($user['email']))
+if (empty($user->email))
 {
     throw new UserException("Vous devez renseigner l'adresse e-mail dans vos informations pour pouvoir contacter les autres membres.");
 }
@@ -20,6 +20,11 @@ $membre = $membres->get($id);
 if (!$membre)
 {
     throw new UserException("Ce membre n'existe pas.");
+}
+
+if (empty($membre->email))
+{
+    throw new UserException('Ce membre n\'a pas d\'adresse email renseignée.');
 }
 
 $error = false;
@@ -41,7 +46,7 @@ if (!empty($_POST['save']))
     else
     {
         try {
-            $membres->sendMessage($membre['email'], Utils::post('sujet'),
+            $membres->sendMessage($membre->email, Utils::post('sujet'),
                 Utils::post('message'), (bool) Utils::post('copie'));
 
             Utils::redirect('/admin/membres/?sent');
@@ -55,7 +60,7 @@ if (!empty($_POST['save']))
 
 $cats = new Membres\Categories;
 
-$tpl->assign('categorie', $cats->get($membre['id_categorie']));
+$tpl->assign('categorie', $cats->get($membre->id_categorie));
 $tpl->assign('membre', $membre);
 $tpl->assign('error', $error);
 
