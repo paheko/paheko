@@ -67,7 +67,7 @@ class Rapprochement
         }
 
         $db = DB::getInstance();
-        $db->exec('BEGIN;');
+        $db->begin();
 
         // Synchro des trucs cochés
         $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (id_operation, id_auteur) 
@@ -95,7 +95,7 @@ class Rapprochement
             $st->execute();
         }
 
-        $db->exec('END;');
+        $db->commit();
         return true;
     }
 }

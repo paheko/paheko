@@ -9,9 +9,9 @@ class Install
 		$db = DB::getInstance(true);
 
 		// Création de la base de données
-		$db->exec('BEGIN;');
+		$db->begin();
 		$db->exec(file_get_contents(DB_SCHEMA));
-		$db->exec('END;');
+		$db->commit();
 
 		// Configuration de base
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)

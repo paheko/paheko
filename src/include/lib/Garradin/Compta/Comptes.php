@@ -20,7 +20,7 @@ class Comptes
         $plan = json_decode(file_get_contents(\Garradin\ROOT . '/include/data/plan_comptable.json'), true);
 
         $db = DB::getInstance();
-        $db->exec('BEGIN;');
+        $db->begin();
         $ids = [];
 
         foreach ($plan as $id=>$compte)
@@ -50,7 +50,7 @@ class Comptes
 
         $db->exec('DELETE FROM compta_comptes WHERE id NOT IN(\''.implode('\', \'', $ids).'\') AND plan_comptable = 1;');
 
-        $db->exec('END;');
+        $db->commit();
 
         return true;
     }

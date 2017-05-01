@@ -451,7 +451,7 @@ class Champs
     	$copy = 'INSERT INTO membres_tmp (' . implode(', ', $copy) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
 
     	$db->exec('PRAGMA foreign_keys = OFF;');
-    	$db->exec('BEGIN;');
+    	$db->begin();
     	$db->exec($create);
     	
     	if ($enable_copy) {
@@ -485,7 +485,7 @@ class Champs
             $db->exec('CREATE INDEX membres_liste_' . $field . ' ON membres (' . $field . ');');
         }
 
-    	$db->exec('END;');
+    	$db->commit();
     	$db->exec('PRAGMA foreign_keys = ON;');
 
     	$config->set('champs_membres', $this);

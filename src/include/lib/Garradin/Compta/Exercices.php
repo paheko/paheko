@@ -87,7 +87,7 @@ class Exercices
             throw new UserException('Date de fin vide ou invalide.');
         }
 
-        $db->exec('BEGIN;');
+        $db->begin();
 
         // Clôture de l'exercice
         $db->simpleUpdate('compta_exercices', [
@@ -119,7 +119,7 @@ class Exercices
         $db->simpleExec('UPDATE compta_journal SET id_exercice = ? WHERE id_exercice = ? AND date >= ?;',
             $new_id, $id, $new_begin);
 
-        $db->exec('END;');
+        $db->commit();
 
         return $new_id;
     }
@@ -135,7 +135,7 @@ class Exercices
     {
         $db = DB::getInstance();
 
-        $db->exec('BEGIN;');
+        $db->begin();
 
         $report_crediteur = 110;
         $report_debiteur  = 119;
@@ -197,7 +197,7 @@ class Exercices
         
         // FIXME utiliser $diff pour équilibrer
 
-        $db->exec('END;');
+        $db->commit();
 
         return true;
     }

@@ -111,7 +111,7 @@ class Config
         $values = [];
 
         $db = DB::getInstance();
-        $db->exec('BEGIN;');
+        $db->begin();
 
         foreach ($this->modified as $key=>$modified)
         {
@@ -141,7 +141,7 @@ class Config
             $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
         }
 
-        $db->exec('END;');
+        $db->commit();
 
         $this->modified = [];
 

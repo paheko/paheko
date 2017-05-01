@@ -207,7 +207,7 @@ class Fichiers
 	public function remove()
 	{
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$db->simpleExec('DELETE FROM fichiers_compta_journal WHERE fichier = ?;', (int)$this->id);
 		$db->simpleExec('DELETE FROM fichiers_wiki_pages WHERE fichier = ?;', (int)$this->id);
 		$db->simpleExec('DELETE FROM fichiers_membres WHERE fichier = ?;', (int)$this->id);
@@ -230,7 +230,7 @@ class Fichiers
 			Static_Cache::remove($cache_id . '.thumb.' . (int)$size);
 		}
 
-		return $db->exec('END;');
+		return $db->commit();
 	}
 
 	/**
@@ -454,7 +454,7 @@ class Fichiers
 
 		$db = DB::getInstance();
 
-		$db->exec('BEGIN;');
+		$db->begin();
 
 		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
 		if (!($id_contenu = $db->simpleQuerySingle('SELECT id FROM fichiers_contenu WHERE hash = ?;', false, $hash)))
@@ -475,7 +475,7 @@ class Fichiers
 			'image'			=>	(int)$is_image,
 		]);
 
-		$db->exec('END;');
+		$db->commit();
 
 		return new Fichiers($db->lastInsertRowID());
 	}

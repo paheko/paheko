@@ -151,11 +151,11 @@ class Journal
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
 
-        $db->exec('BEGIN;');
+        $db->begin();
         $db->simpleExec('DELETE FROM membres_operations WHERE id_operation = ?;', (int)$id);
         $db->simpleExec('DELETE FROM compta_rapprochement WHERE id_operation = ?;', (int)$id);
         $db->simpleExec('DELETE FROM compta_journal WHERE id = ?;', (int)$id);
-        $db->exec('END;');
+        $db->commit();
 
         return true;
     }
