@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
@@ -42,5 +42,3 @@ $tpl->assign('cotisations_membre', $cotisations->listSubscriptionsForMember($mem
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/membres/cotisations.tpl');
-
-?>

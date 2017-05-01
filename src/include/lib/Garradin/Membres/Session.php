@@ -272,6 +272,8 @@ class Session
 		{
 			throw new \LogicException('Aucun utilisateur connecté.');
 		}
+
+		$this->user = $_SESSION['user'];
 	}
 
 	protected function getPermanentCookie()
@@ -448,7 +450,7 @@ class Session
 		}
 	}
 
-	public function canUserAccess($category, $permission)
+	public function canAccess($category, $permission)
 	{
 		if (!$this->user)
 		{
@@ -460,7 +462,7 @@ class Session
 
 	public function requireAccess($category, $permission)
 	{
-		if (!$this->canUserAccess($category, $permission))
+		if (!$this->canAccess($category, $permission))
 		{
 			throw new UserException('Vous n\'avez pas le droit d\'accéder à cette page.');
 		}
@@ -621,5 +623,4 @@ class Session
 
 		return $fingerprint;
 	}
-
 }

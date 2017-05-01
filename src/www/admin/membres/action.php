@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
@@ -16,7 +16,7 @@ foreach ($_POST['selected'] as &$id)
 
     // On ne permet pas d'action collective sur l'utilisateur courant pour éviter les risques
     // d'erreur genre "oh je me suis supprimé du coup j'ai plus accès à rien"
-    if ($id == $user['id'])
+    if ($id == $user->id)
     {
         throw new UserException("Il n'est pas possible de se modifier ou supprimer soi-même.");
     }

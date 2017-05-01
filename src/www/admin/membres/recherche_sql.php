@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
@@ -27,5 +27,3 @@ else
 }
 
 $tpl->display('admin/membres/recherche_sql.tpl');
-
-?>

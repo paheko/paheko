@@ -1,11 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
-
-$session->requireAccess('membres', Membres::DROIT_ACCES);
-
-$membres = new Membres;
+require_once __DIR__ . '/_inc.php';
 
 // Recherche de membre (pour ceux qui n'ont qu'un accès à la liste des membres)
 if (Utils::get('r'))
@@ -53,10 +49,10 @@ else
 	$fields = $champs->getListedFields();
 
 	// Vérifier que le champ de tri existe bien dans la table
-	if ($order != 'id' && !array_key_exists($order, $fields))
+	if ($order != 'id' && !isset($fields->$order))
 	{
 		// Sinon par défaut c'est le premier champ de la table qui fait le tri
-		$order = key($fields);
+		$order = $champs->getFirstListed();
 	}
 
 	$tpl->assign('order', $order);
@@ -64,7 +60,7 @@ else
 
 	$tpl->assign('champs', $fields);
 
-	$tpl->assign('liste', $membres->listByCategory($cat_id, array_keys($fields), $page, $order, $desc));
+	$tpl->assign('liste', $membres->listByCategory($cat_id, array_keys((array) $fields), $page, $order, $desc));
 	$tpl->assign('total', $membres->countByCategory($cat_id));
 
 	$tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : '') . ($cat_id? '&amp;cat='. (int) Utils::get('cat') : ''));

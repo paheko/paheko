@@ -2,7 +2,8 @@
 
 namespace Garradin;
 
-use \KD2\Security;
+use KD2\Security;
+use Garradin\Membres\Session;
 
 class Membres
 {
@@ -292,13 +293,13 @@ class Membres
             $ids = [(int)$ids];
         }
 
-        if (Membres\Session::isLogged())
+        if ($session = Session::get())
         {
-            $user = Membres\Session::get();
+            $user = $session->getUser();
 
             foreach ($ids as $id)
             {
-                if ($user['id'] == $id)
+                if ($user->id == $id)
                 {
                     throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
                 }
@@ -497,6 +498,7 @@ class Membres
         //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
         
         // Suppression du membre
+        $where = sprintf('id IN (%s)', $membres);
         return $db->delete('membres', $where);
     }
 

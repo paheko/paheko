@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
@@ -41,5 +41,3 @@ $tpl->assign('cats_cachees', $cats->listHidden());
 $tpl->assign('error', $error);
 
 $tpl->display('admin/membres/message_collectif.tpl');
-
-?>

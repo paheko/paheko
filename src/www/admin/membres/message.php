@@ -1,9 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
-
-$session->requireAccess('membres', Membres::DROIT_ACCES);
+require_once __DIR__ . '/_inc.php';
 
 if (empty($user['email']))
 {
@@ -62,5 +60,3 @@ $tpl->assign('membre', $membre);
 $tpl->assign('error', $error);
 
 $tpl->display('admin/membres/message.tpl');
-
-?>

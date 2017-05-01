@@ -41,7 +41,7 @@ if (!defined('Garradin\LOGIN_PROCESS'))
     $tpl->assign('current', '');
     $tpl->assign('plugins_menu', Plugin::listMenu());
 
-    if ($session->canUserAccess('membres', Membres::DROIT_ACCES))
+    if ($session->canAccess('membres', Membres::DROIT_ACCES))
     {
         $tpl->assign('nb_membres', (new Membres)->countAllButHidden());
     }

@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
@@ -21,7 +21,7 @@ if (!$cat)
     throw new UserException("Cette catégorie n'existe pas.");
 }
 
-if ($cat['id'] == $user['id_categorie'])
+if ($cat->id == $user->id_categorie)
 {
     throw new UserException("Vous ne pouvez pas supprimer votre catégorie.");
 }
@@ -51,5 +51,3 @@ $tpl->assign('cat', $cat);
 $tpl->assign('error', $error);
 
 $tpl->display('admin/membres/cat_supprimer.tpl');
-
-?>

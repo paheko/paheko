@@ -550,7 +550,7 @@ function tpl_display_champ_membre($v, $config)
         case 'multiple':
             $out = [];
 
-            foreach ($config['options'] as $b => $name)
+            foreach ($config->options as $b => $name)
             {
                 if ($v & (0x01 << $b))
                     $out[] = $name;

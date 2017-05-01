@@ -19,9 +19,9 @@ $categorie = $cats->get($user->id_categorie);
 
 $cotisations = new Membres\Cotisations;
 
-if (!empty($categorie['id_cotisation_obligatoire']))
+if (!empty($categorie->id_cotisation_obligatoire))
 {
-	$tpl->assign('cotisation', $cotisations->isMemberUpToDate($user->id, $categorie['id_cotisation_obligatoire']));
+	$tpl->assign('cotisation', $cotisations->isMemberUpToDate($user->id, $categorie->id_cotisation_obligatoire));
 }
 else
 {
