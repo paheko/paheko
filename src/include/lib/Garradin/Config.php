@@ -69,7 +69,7 @@ class Config
 
         $db = DB::getInstance();
 
-        $this->config = $db->simpleStatementFetchAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
+        $this->config = $db->getAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
 
         foreach ($this->config as $key=>&$value)
         {
@@ -275,7 +275,7 @@ class Config
             {
                 return false;
                 $db = DB::getInstance();
-                if (!$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, $value))
+                if (!$db->firstColumn('SELECT 1 FROM compta_categories WHERE id = ?;', $value))
                 {
                     throw new UserException('Champ '.$key.' : La catégorie comptable numéro \''.$value.'\' ne semble pas exister.');
                 }
@@ -284,7 +284,7 @@ class Config
             case 'categorie_membres':
             {
                 $db = DB::getInstance();
-                if (!$db->simpleQuerySingle('SELECT 1 FROM membres_categories WHERE id = ?;', false, $value))
+                if (!$db->firstColumn('SELECT 1 FROM membres_categories WHERE id = ?;', $value))
                 {
                     throw new UserException('La catégorie de membres par défaut numéro \''.$value.'\' ne semble pas exister.');
                 }

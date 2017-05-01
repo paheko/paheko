@@ -3,11 +3,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ACCES)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ACCES);
 
+$membres = new Membres;
 
 // Recherche de membre (pour ceux qui n'ont qu'un accès à la liste des membres)
 if (Utils::get('r'))
@@ -39,7 +37,7 @@ else
 
 	if (!$cat_id)
 	{
-	    $cat_id = array_diff(array_keys($membres_cats), array_keys($membres_cats_cachees));
+	    $cat_id = array_diff(array_keys((array) $membres_cats), array_keys((array) $membres_cats_cachees));
 	}
 
 	// Par défaut le champ de tri c'est l'identité

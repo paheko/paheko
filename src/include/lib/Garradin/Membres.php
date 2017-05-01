@@ -176,7 +176,7 @@ class Membres
         $id = $config->get('champ_identifiant');
 
         if (!empty($data[$id])
-            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE '.$id.' = ? LIMIT 1;', false, $data[$id]))
+            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$id.' = ? LIMIT 1;', $data[$id]))
         {
             throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
@@ -195,7 +195,7 @@ class Membres
             $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
         }
 
-        $db->simpleInsert('membres', $data);
+        $db->insert('membres', $data);
         $id = $db->lastInsertRowId();
 
         Plugin::fireSignal('membre.nouveau', array_merge(['id' => $id], $data));
@@ -217,7 +217,7 @@ class Membres
         $champ_id = $config->get('champ_identifiant');
 
         if (!empty($data[$champ_id])
-            && $db->simpleQuerySingle('SELECT 1 FROM membres WHERE '.$champ_id.' = ? AND id != ? LIMIT 1;', false, $data[$champ_id], (int)$id))
+            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$champ_id.' = ? AND id != ? LIMIT 1;', $data[$champ_id], (int)$id))
         {
             throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
@@ -229,7 +229,7 @@ class Membres
                 throw new UserException('Le numéro de membre ne doit contenir que des chiffres.');
             }
 
-            if ($db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int)$data['id']))
+            if ($db->firstColumn('SELECT 1 FROM membres WHERE id = ?;', (int)$data['id']))
             {
                 throw new UserException('Ce numéro est déjà attribué à un autre membre.');
             }
@@ -238,13 +238,13 @@ class Membres
             // la requête de modification provoquera une erreur de contrainte de foreign key
             // ce qui est normal. Donc : il n'est pas possible de changer l'ID d'un membre qui
             // a participé au wiki, à la compta, etc.
-            if ($db->simpleQuerySingle('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM compta_rapprochement WHERE id_auteur = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM membres_operations WHERE id_membre = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM cotisations_membres WHERE id_membre = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM rappels_envoyes WHERE id_membre = ?;', false, (int)$id)
-                || $db->simpleQuerySingle('SELECT 1 FROM fichiers_membres WHERE id = ?;', false, (int)$id))
+            if ($db->firstColumn('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', (int)$id)
+                || $db->firstColumn('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', (int)$id)
+                || $db->firstColumn('SELECT 1 FROM compta_rapprochement WHERE id_auteur = ?;', (int)$id)
+                || $db->firstColumn('SELECT 1 FROM membres_operations WHERE id_membre = ?;', (int)$id)
+                || $db->firstColumn('SELECT 1 FROM cotisations_membres WHERE id_membre = ?;', (int)$id)
+                || $db->firstColumn('SELECT 1 FROM rappels_envoyes WHERE id_membre = ?;', (int)$id)
+                || $db->firstColumn('SELECT 1 FROM fichiers_membres WHERE id = ?;', (int)$id))
             # FIXME || $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
             {
                 throw new UserException('Le numéro n\'est pas modifiable pour ce membre car des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
@@ -278,11 +278,11 @@ class Membres
         $db = DB::getInstance();
         $config = Config::getInstance();
 
-        return $db->simpleQuerySingle('SELECT *,
+        return $db->first('SELECT *,
             '.$config->get('champ_identite').' AS identite,
             strftime(\'%s\', date_inscription) AS date_inscription,
             strftime(\'%s\', date_connexion) AS date_connexion
-            FROM membres WHERE id = ? LIMIT 1;', true, (int)$id);
+            FROM membres WHERE id = ? LIMIT 1;', (int)$id);
     }
 
     public function delete($ids)
@@ -313,7 +313,7 @@ class Membres
         $db = DB::getInstance();
         $config = Config::getInstance();
 
-        return $db->simpleQuerySingle('SELECT '.$config->get('champ_identite').' FROM membres WHERE id = ? LIMIT 1;', false, (int)$id);
+        return $db->firstColumn('SELECT '.$config->get('champ_identite').' FROM membres WHERE id = ? LIMIT 1;', (int)$id);
     }
 
     public function search($field, $query)
@@ -345,18 +345,18 @@ class Membres
                 return false;
             }
 
-            $where = 'WHERE '.$field.' LIKE \'%'.$db->escapeString($query).'\'';
+            $where = sprintf('WHERE %s LIKE %s', $field, $db->quote('%' . $query . '%'));
             $order = $field;
         }
         elseif (!$champs->isText($field))
         {
-            $where = 'WHERE '.$field.' = \''.$db->escapeString($query).'\'';
+            $where = sprintf('WHERE %s = %s', $field, $db->quote($query));
             $order = $field;
         }
         else
         {
-            $where = 'WHERE transliterate_to_ascii('.$field.') LIKE transliterate_to_ascii(\'%'.$db->escapeString($query).'%\')';
-            $order = 'transliterate_to_ascii('.$field.') COLLATE NOCASE';
+            $where = sprintf('WHERE transliterate_to_ascii(%s) LIKE %s', $field, $db->quote('%' . Utils::transliterateToAscii($query) . '%'));
+            $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $field);
         }
 
         $fields = array_keys($champs->getListedFields());
@@ -371,14 +371,16 @@ class Membres
             $fields[] = 'email';
         }
 
-        return $db->simpleStatementFetch(
-            'SELECT id, id_categorie, ' . implode(', ', $fields) . ',
-                '.$config->get('champ_identite').' AS identite,
-                strftime(\'%s\', date_inscription) AS date_inscription
-                FROM membres ' . $where . ($order ? ' ORDER BY ' . $order : '') . '
-                LIMIT 1000;',
-            SQLITE3_ASSOC
+        $query = sprintf('SELECT id, id_categorie, %s, %s AS identite,
+            strftime(\'%%s\', date_inscription) AS date_inscription
+            FROM membres %s %s LIMIT 1000;',
+            implode(', ', $fields),
+            $config->get('champ_identite'),
+            $where,
+            $order ? 'ORDER BY ' . $order : ''
         );
+
+        return $db->get($query);
     }
 
     public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)
@@ -402,7 +404,7 @@ class Membres
 
         if (!empty($fields) && $order != 'id' && $champs->isText($order))
         {
-            $order = 'transliterate_to_ascii('.$order.') COLLATE NOCASE';
+            $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $order);
         }
 
         if ($desc)
@@ -415,34 +417,41 @@ class Membres
             $fields []= 'email';
         }
 
-        $fields = implode(', ', $fields);
+        $query = sprintf('SELECT id, id_categorie, %s, %s AS identite,
+            strftime(\'%%s\', date_inscription) AS date_inscription
+            FROM membres %s ORDER BY %s LIMIT ?, ?;',
+            implode(', ', $fields),
+            $config->get('champ_identite'),
+            $where,
+            $order);
 
-        $query = 'SELECT id, id_categorie, '.$fields.', '.$config->get('champ_identite').' AS identite,
-            strftime(\'%s\', date_inscription) AS date_inscription
-            FROM membres '.$where.'
-            ORDER BY '.$order.' LIMIT ?, ?;';
-
-        return $db->simpleStatementFetch($query, SQLITE3_ASSOC, $begin, self::ITEMS_PER_PAGE);
+        return $db->get($query, (int) $begin, self::ITEMS_PER_PAGE);
     }
 
     public function countByCategory($cat = 0)
     {
         $db = DB::getInstance();
 
-        if (is_int($cat) && $cat)
-            $where = 'WHERE id_categorie = '.(int)$cat;
-        elseif (is_array($cat))
-            $where = 'WHERE id_categorie IN ('.implode(',', $cat).')';
-        else
-            $where = '';
+        $query = 'SELECT COUNT(*) FROM membres ';
 
-        return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres '.$where.';');
+        if (is_int($cat) && $cat)
+        {
+            $query .= sprintf('WHERE id_categorie = %d', $cat);
+        }
+        elseif (is_array($cat))
+        {
+            $query .= sprintf('WHERE id_categorie IN (%s)', implode(',', $cat));
+        }
+
+        $query .= ';';
+
+        return $db->firstColumn($query);
     }
 
     public function countAllButHidden()
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
+        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
     }
 
     static public function changeCategorie($id_cat, $membres)
@@ -453,9 +462,9 @@ class Membres
         }
 
         $db = DB::getInstance();
-        return $db->simpleUpdate('membres',
+        return $db->update('membres',
             ['id_categorie' => (int)$id_cat],
-            'id IN ('.implode(',', $membres).')'
+            sprintf('id IN (%s)', implode(',', $membres))
         );
     }
 
@@ -468,26 +477,32 @@ class Membres
 
         Plugin::fireSignal('membre.suppression', $membres);
 
-        $membres = implode(',', $membres);
-
         $db = DB::getInstance();
+
+        $membres = implode(',', $membres);
+        $where = sprintf('id_auteur IN (%s)', $membres);
         
         // Mise à jour des références, membre qui n'existe plus
-        $db->exec('UPDATE wiki_revisions SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
-        $db->exec('UPDATE compta_journal SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
-        $db->exec('UPDATE compta_rapprochement SET id_auteur = NULL WHERE id_auteur IN ('.$membres.');');
+        $db->update('wiki_revisions', ['id_auteur' => null], $where);
+        $db->update('compta_journal', ['id_auteur' => null], $where);
+        $db->update('compta_rapprochement', ['id_auteur' => null], $where);
+
+        $where = sprintf('id_membre IN (%s)', $membres);
 
         // Suppression des données liées au membre
-        $db->exec('DELETE FROM rappels_envoyes WHERE id_membre IN ('.$membres.');');
-        $db->exec('DELETE FROM membres_operations WHERE id_membre IN ('.$membres.');');
-        $db->exec('DELETE FROM cotisations_membres WHERE id_membre IN ('.$membres.');');
+        $db->delete('rappels_envoyes', $where);
+        $db->delete('membres_operations', $where);
+        $db->delete('cotisations_membres', $where);
 
         //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
         
         // Suppression du membre
-        return $db->exec('DELETE FROM membres WHERE id IN ('.$membres.');');
+        return $db->delete('membres', $where);
     }
 
+    /**
+     * @deprecated remplacer par envoyer message à tableau de membres
+     */
     public function sendMessageToCategory($dest, $sujet, $message, $subscribed_only = false)
     {
         $config = Config::getInstance();
@@ -569,8 +584,8 @@ class Membres
         $db = DB::getInstance();
 
         $tables = [
-            'membres'   =>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-            'categories'=>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+            'membres'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
+            'categories'=>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
         ];
 
         return $tables;
