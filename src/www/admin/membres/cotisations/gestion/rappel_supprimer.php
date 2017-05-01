@@ -1,12 +1,9 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 if (!Utils::get('id') || !is_numeric(Utils::get('id')))
 {
@@ -26,14 +23,14 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!Utils::CSRF_check('delete_rappel_' . $rappel['id']))
+    if (!Utils::CSRF_check('delete_rappel_' . $rappel->id))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $rappels->delete($rappel['id'], (bool) Utils::post('delete_history'));
+            $rappels->delete($rappel->id, (bool) Utils::post('delete_history'));
             Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
         }
         catch (UserException $e)
@@ -48,5 +45,3 @@ $tpl->assign('error', $error);
 $tpl->assign('rappel', $rappel);
 
 $tpl->display('admin/membres/cotisations/gestion/rappel_supprimer.tpl');
-
-?>

@@ -1,12 +1,9 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
 $membre = false;
 
@@ -20,7 +17,7 @@ if (!empty($_GET['id']) && is_numeric($_GET['id']))
     }
 
     $cats = new Membres\Categories;
-    $categorie = $cats->get($membre['id_categorie']);
+    $categorie = $cats->get($membre->id_categorie);
 }
 else
 {
@@ -48,7 +45,7 @@ if (!empty($_POST['add']))
                 'date'              =>  Utils::post('date'),
                 'id_cotisation'     =>  Utils::post('id_cotisation'),
                 'id_membre'         =>  Utils::post('id_membre'),
-                'id_auteur'         =>  $user['id'],
+                'id_auteur'         =>  $user->id,
                 'montant'           =>  Utils::post('montant'),
                 'moyen_paiement'    =>  Utils::post('moyen_paiement'),
                 'numero_cheque'     =>  Utils::post('numero_cheque'),
@@ -91,18 +88,18 @@ if (Utils::get('cotisation'))
         throw new UserException("La cotisation indiquée en paramètre n'existe pas.");
     }
 
-    $tpl->assign('default_co', $co['id']);
-    $tpl->assign('default_compta', $co['id_categorie_compta']);
-    $tpl->assign('default_amount', $co['montant']);
+    $tpl->assign('default_co', $co->id);
+    $tpl->assign('default_compta', $co->id_categorie_compta);
+    $tpl->assign('default_amount', $co->montant);
 }
 elseif ($membre)
 {
-    if (!empty($categorie['id_cotisation_obligatoire']))
+    if (!empty($categorie->id_cotisation_obligatoire))
     {
-        $co = $cotisations->get($categorie['id_cotisation_obligatoire']);
+        $co = $cotisations->get($categorie->id_cotisation_obligatoire);
 
-        $tpl->assign('default_co', $co['id']);
-        $tpl->assign('default_amount', $co['montant']);
+        $tpl->assign('default_co', $co->id);
+        $tpl->assign('default_amount', $co->montant);
     }
 }
 

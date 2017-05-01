@@ -1,12 +1,9 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 $rappels = new Rappels;
 $cotisations = new Cotisations;
@@ -56,5 +53,3 @@ $tpl->assign('default_text', "Bonjour #IDENTITE,\n\nVotre cotisation arrive à �
     .   "--\n#NOM_ASSO\n#ADRESSE_ASSO\nE-Mail : #EMAIL_ASSO\nSite web : #SITE_ASSO");
 
 $tpl->display('admin/membres/cotisations/gestion/rappels.tpl');
-
-?>

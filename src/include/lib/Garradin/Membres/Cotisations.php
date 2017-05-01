@@ -78,14 +78,13 @@ class Cotisations
 	{
 		$db = DB::getInstance();
 
-		$co = $db->simpleQuerySingle('SELECT * FROM cotisations WHERE id = ?;', 
-			true, (int)$data['id_cotisation']);
+		$co = $db->first('SELECT * FROM cotisations WHERE id = ?;', (int)$data['id_cotisation']);
 
-		$this->_checkFields($data, !empty($co['id_categorie_compta']));
+		$this->_checkFields($data, !empty($co->id_categorie_compta));
 
-		$check = $db->simpleQuerySingle('SELECT 1 FROM cotisations_membres 
+		$check = $db->firstColumn('SELECT 1 FROM cotisations_membres 
 			WHERE id_cotisation = ? AND id_membre = ? AND date = ?;', 
-			false, (int)$data['id_cotisation'], (int)$data['id_membre'], $data['date']);
+			(int)$data['id_cotisation'], (int)$data['id_membre'], $data['date']);
 
 		if ($check)
 		{
@@ -94,7 +93,7 @@ class Cotisations
 
 		$db->begin();
 
-		$db->simpleInsert('cotisations_membres', [
+		$db->insert('cotisations_membres', [
 			'date'				=>	$data['date'],
 			'id_cotisation'		=>	$data['id_cotisation'],
 			'id_membre'			=>	$data['id_membre'],
@@ -106,7 +105,7 @@ class Cotisations
 		{
 			try {
 		        $id_operation = $this->addOperationCompta($id, [
-		        	'id_categorie'	=>	$co['id_categorie_compta'],
+		        	'id_categorie'	=>	$co->id_categorie_compta,
 		            'libelle'       =>  'Cotisation (automatique)',
 		            'montant'       =>  $data['montant'],
 		            'date'          =>  $data['date'],
@@ -139,14 +138,13 @@ class Cotisations
 	public function delete($id)
 	{
 		$db = DB::getInstance();
-		$db->simpleExec('UPDATE membres_operations SET id_cotisation = NULL WHERE id_cotisation = ?;', (int)$id);
-		return $db->simpleExec('DELETE FROM cotisations_membres WHERE id = ?;', (int) $id);
+		$db->update('membres_operations', ['id_cotisation' => null], 'id_cotisation = ' . (int)$id);
+		return $db->delete('cotisations_membres', 'id = ' . (int)$id);
 	}
 
 	public function get($id)
 	{
-		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT * FROM cotisations_membres WHERE id = ?;', true, (int)$id);
+		return DB::getInstance()->first('SELECT * FROM cotisations_membres WHERE id = ?;', (int)$id);
 	}
 
 	/**
@@ -156,10 +154,9 @@ class Cotisations
 	 */
 	public function listOperationsCompta($id)
 	{
-		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT * FROM compta_journal
+		return DB::getInstance()->get('SELECT * FROM compta_journal
 			WHERE id IN (SELECT id_operation FROM membres_operations
-				WHERE id_cotisation = ?);', \SQLITE3_ASSOC, (int)$id);
+				WHERE id_cotisation = ?);', (int)$id);
 	}
 
 	/**
@@ -167,7 +164,7 @@ class Cotisations
 	 */
 	public function countOperationsCompta($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM membres_operations WHERE id_cotisation = ?;', false, (int)$id);
+		return DB::getInstance()->firstColumn('SELECT COUNT(*) FROM membres_operations WHERE id_cotisation = ?;', (int)$id);
 	}
 
 	/**
@@ -203,8 +200,8 @@ class Cotisations
         	$debit = \Garradin\Compta\Comptes::CAISSE;
         }
 
-        $credit = $db->simpleQuerySingle('SELECT compte FROM compta_categories WHERE id = ?;', 
-        	false, $data['id_categorie']);
+        $credit = $db->firstColumn('SELECT compte FROM compta_categories WHERE id = ?;', 
+        	$data['id_categorie']);
 
         $id_operation = $journal->add([
             'libelle'       =>  $data['libelle'],
@@ -218,10 +215,10 @@ class Cotisations
             'id_auteur'     =>  (int)$data['id_auteur'],
         ]);
 
-        $db->simpleInsert('membres_operations', [
-        	'id_operation' => $id_operation,
-        	'id_membre' => $data['id_membre'],
-        	'id_cotisation' => (int)$id,
+        $db->insert('membres_operations', [
+			'id_operation'  => $id_operation,
+			'id_membre'     => $data['id_membre'],
+			'id_cotisation' => (int)$id,
         ]);
 
         return $id_operation;
@@ -235,12 +232,12 @@ class Cotisations
 	public function countMembersForCotisation($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT COUNT(DISTINCT cm.id_membre)
+		return $db->firstColumn('SELECT COUNT(DISTINCT cm.id_membre)
 			FROM cotisations_membres  AS cm
 				INNER JOIN membres AS m ON m.id = cm.id_membre
 			WHERE cm.id_cotisation = ?
 			AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);',
-			false, (int)$id);
+			(int)$id);
 	}
 
 	/**
@@ -273,7 +270,7 @@ class Cotisations
 
 		$desc = $desc ? 'DESC' : 'ASC';
 
-		return $db->simpleStatementFetch('SELECT cm.id_membre, cm.date, cm.id,
+		return $db->get('SELECT cm.id_membre, cm.date, cm.id,
 			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN c.fin >= date() ELSE 1 END AS a_jour
@@ -284,7 +281,7 @@ class Cotisations
 				cm.id_cotisation = ?
 				AND m.id_categorie NOT IN (SELECT mc.id FROM membres_categories AS mc WHERE mc.cacher = 1)
 			GROUP BY cm.id_membre ORDER BY '.$order.' '.$desc.' LIMIT ?,?;',
-			\SQLITE3_ASSOC, (int)$id, $begin, self::ITEMS_PER_PAGE);
+			(int)$id, $begin, self::ITEMS_PER_PAGE);
 	}
 
 	/**
@@ -299,11 +296,11 @@ class Cotisations
 		// mais pour le moment le fonctionnement de compta_journal est trop compliqué pour arriver
 		// à récupérer un solde dans une requête simple, la requête serait trop lourde donc on laisse tomber
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT cm.*, c.intitule, c.duree, c.debut, c.fin, c.montant,
+		return $db->get('SELECT cm.*, c.intitule, c.duree, c.debut, c.fin, c.montant,
 			(SELECT COUNT(*) FROM membres_operations WHERE id_cotisation = cm.id) AS nb_operations
 			FROM cotisations_membres AS cm
 				LEFT JOIN cotisations AS c ON c.id = cm.id_cotisation
-			WHERE cm.id_membre = ? ORDER BY cm.date DESC;', \SQLITE3_ASSOC, (int)$id);
+			WHERE cm.id_membre = ? ORDER BY cm.date DESC;', (int)$id);
 	}
 
 	/**
@@ -314,7 +311,7 @@ class Cotisations
 	public function listSubscriptionsForMember($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT c.*,
+		return $db->get('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND c.fin >= date())
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
@@ -326,7 +323,7 @@ class Cotisations
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 			WHERE cm.id_membre = ?
 			GROUP BY cm.id_cotisation
-			ORDER BY cm.date DESC;', \SQLITE3_ASSOC, (int)$id);
+			ORDER BY cm.date DESC;', (int)$id);
 	}
 
 	/**
@@ -339,7 +336,7 @@ class Cotisations
 	public function isMemberUpToDate($id, $id_cotisation)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT c.*,
+		return $db->first('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND c.fin >= date())
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
@@ -348,13 +345,13 @@ class Cotisations
 			FROM cotisations AS c 
 				LEFT JOIN cotisations_membres AS cm ON cm.id_cotisation = c.id AND cm.id_membre = ?
 			WHERE c.id = ? ORDER BY cm.date DESC;',
-			true, (int)$id, (int)$id_cotisation);
+			(int)$id, (int)$id_cotisation);
 	}
 
 	public function countForMember($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT COUNT(DISTINCT id_cotisation) FROM cotisations_membres 
-			WHERE id_membre = ?;', false, (int)$id);
+		return $db->firstColumn('SELECT COUNT(DISTINCT id_cotisation) FROM cotisations_membres 
+			WHERE id_membre = ?;', (int)$id);
 	}
 }

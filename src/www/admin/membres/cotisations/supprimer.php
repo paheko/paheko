@@ -1,12 +1,9 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
 $membre = false;
 
@@ -27,7 +24,7 @@ if (!$co)
     throw new UserException("Cette cotisation membre n'existe pas.");
 }
 
-$membre = $membres->get($co['id_membre']);
+$membre = $membres->get($co->id_membre);
 
 if (!$membre)
 {
@@ -38,15 +35,15 @@ $error = false;
 
 if (!empty($_POST['delete']))
 {
-    if (!Utils::CSRF_check('del_cotisation_' . $co['id']))
+    if (!Utils::CSRF_check('del_cotisation_' . $co->id))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $m_cotisations->delete($co['id']);
-            Utils::redirect('/admin/membres/cotisations.php?id=' . $membre['id']);
+            $m_cotisations->delete($co->id);
+            Utils::redirect('/admin/membres/cotisations.php?id=' . $membre->id);
         }
         catch (UserException $e)
         {
@@ -58,6 +55,6 @@ if (!empty($_POST['delete']))
 $tpl->assign('error', $error);
 $tpl->assign('membre', $membre);
 $tpl->assign('cotisation', $co);
-$tpl->assign('nb_operations', $m_cotisations->countOperationsCompta($co['id']));
+$tpl->assign('nb_operations', $m_cotisations->countOperationsCompta($co->id));
 
 $tpl->display('admin/membres/cotisations/supprimer.tpl');

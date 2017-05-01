@@ -1,12 +1,9 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
-{
-	throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
 if (empty($_GET['id']) || !is_numeric($_GET['id']))
 {
@@ -29,7 +26,7 @@ $error = false;
 
 if (Utils::post('save'))
 {
-	if (!Utils::CSRF_check('add_rappel_'.$membre['id']))
+	if (!Utils::CSRF_check('add_rappel_'.$membre->id))
 	{
 		$error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
 	}
@@ -39,12 +36,12 @@ if (Utils::post('save'))
 			$re->add([
 				'id_rappel'     =>  NULL,
 				'id_cotisation'	=>	Utils::post('id_cotisation'),
-				'id_membre'		=>	$membre['id'],
+				'id_membre'		=>	$membre->id,
 				'media'			=>	Utils::post('media'),
 				'date'			=>	Utils::post('date'),
 			]);
 
-			Utils::redirect('/admin/membres/cotisations/rappels.php?id=' . $membre['id'] . '&ok');
+			Utils::redirect('/admin/membres/cotisations/rappels.php?id=' . $membre->id . '&ok');
 		}
 		catch (UserException $e)
 		{
@@ -56,9 +53,9 @@ if (Utils::post('save'))
 $tpl->assign('error', $error);
 $tpl->assign('ok', isset($_GET['ok']));
 $tpl->assign('membre', $membre);
-$tpl->assign('cotisations', $cm->listSubscriptionsForMember($membre['id']));
+$tpl->assign('cotisations', $cm->listSubscriptionsForMember($membre->id));
 $tpl->assign('default_date', date('Y-m-d'));
-$tpl->assign('rappels', $re->listForMember($membre['id']));
+$tpl->assign('rappels', $re->listForMember($membre->id));
 $tpl->assign('rappels_envoyes', $re);
 
 $tpl->display('admin/membres/cotisations/rappels.tpl');
