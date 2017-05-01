@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
@@ -64,5 +64,3 @@ $tpl->assign('galette_champs', $import->galette_fields);
 $tpl->assign('translate', Utils::post('galette_translate'));
 
 $tpl->display('admin/membres/import.tpl');
-
-?>

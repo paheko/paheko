@@ -63,7 +63,7 @@
                     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
                     <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs key="c" item="cfg"}
-                        <td>{$membre[$c]|raw|display_champ_membre:$cfg}</td>
+                        <td>{$membre->$c|raw|display_champ_membre:$cfg}</td>
                     {/foreach}
                     <td class="actions">
                         {if !empty($membre.email)}<a class="icn" href="{$admin_url}membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}

@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
@@ -23,9 +23,10 @@ $cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
-$membre_cat = $cats->get($membre['id_categorie']);
-if (($membre_cat['droit_membres'] == Membres::DROIT_ADMIN)
-    && ($user['droits']['membres'] < Membres::DROIT_ADMIN))
+$membre_cat = $cats->get($membre->id_categorie);
+
+if (($membre_cat->droit_membres == Membres::DROIT_ADMIN)
+    && ($user->droits->membres < Membres::DROIT_ADMIN))
 {
     throw new UserException("Seul un membre admin peut modifier un autre membre admin.");
 }
@@ -52,7 +53,7 @@ if (!empty($_POST['save']))
                 $data[$key] = Utils::post($key);
             }
 
-            if ($user['droits']['membres'] == Membres::DROIT_ADMIN && $user['id'] != $membre['id'])
+            if ($session->canAccess('membres', Membres::DROIT_ADMIN) && $user->id != $membre->id)
             {
                 $data['id_categorie'] = Utils::post('id_categorie');
                 $data['id'] = Utils::post('id');
@@ -79,12 +80,10 @@ $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
-$tpl->assign('current_cat', Utils::post('id_categorie') ?: $membre['id_categorie']);
+$tpl->assign('current_cat', Utils::post('id_categorie') ?: $membre->id_categorie);
 
-$tpl->assign('can_change_id', $user['droits']['membres'] == Membres::DROIT_ADMIN);
+$tpl->assign('can_change_id', $session->canAccess('membres', Membres::DROIT_ADMIN));
 
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/membres/modifier.tpl');
-
-?>

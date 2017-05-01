@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
@@ -24,7 +24,7 @@ if (!empty($_POST['save']))
     {
         try
         {
-            if ($user['droits']['membres'] == Membres::DROIT_ADMIN)
+            if ($session->canAccess('membres', Membres::DROIT_ADMIN))
             {
                 $id_categorie = Utils::post('id_categorie');
             }
@@ -59,5 +59,3 @@ $tpl->assign('membres_cats', $cats->listSimple());
 $tpl->assign('current_cat', Utils::post('id_categorie') ?: $config->get('categorie_membres'));
 
 $tpl->display('admin/membres/ajouter.tpl');
-
-?>

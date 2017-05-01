@@ -68,22 +68,22 @@
     <dt>{$config.title}</dt>
     <dd>
         {if $config.type == 'checkbox'}
-            {if $membre[$c]}Oui{else}Non{/if}
-        {elseif empty($membre[$c])}
+            {if $membre->$c}Oui{else}Non{/if}
+        {elseif empty($membre->$c)}
             <em>(Non renseigné)</em>
         {elseif $c == 'nom'}
-            <strong>{$membre[$c]}</strong>
+            <strong>{$membre->$c}</strong>
         {elseif $c == 'email'}
-            <a href="mailto:{$membre[$c]}">{$membre[$c]}</a>
+            <a href="mailto:{$membre->$c}">{$membre->$c}</a>
             | <a href="{$www_url}admin/membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
         {elseif $config.type == 'email'}
-            <a href="mailto:{$membre[$c]}">{$membre[$c]}</a>
+            <a href="mailto:{$membre->$c}">{$membre->$c}</a>
         {elseif $config.type == 'tel'}
-            <a href="tel:{$membre[$c]}">{$membre[$c]|format_tel}</a>
+            <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
         {elseif $config.type == 'country'}
-            {$membre[$c]|get_country_name}
+            {$membre->$c|get_country_name}
         {elseif $config.type == 'date' || $config.type == 'datetime'}
-            {$membre[$c]|format_sqlite_date_to_french}
+            {$membre->$c|format_sqlite_date_to_french}
         {elseif $c == 'passe'}
             Oui
         {elseif $config.type == 'password'}
@@ -91,13 +91,13 @@
         {elseif $config.type == 'multiple'}
             <ul>
             {foreach from=$config.options key="b" item="name"}
-                {if $membre[$c] & (0x01 << $b)}
+                {if $membre->$c & (0x01 << $b)}
                     <li>{$name}</li>
                 {/if}
             {/foreach}
             </ul>
         {else}
-            {$membre[$c]|escape|rtrim|nl2br}
+            {$membre->$c|escape|rtrim|nl2br}
         {/if}
     </dd>
     {/foreach}
