@@ -140,7 +140,7 @@ class Rappels_Envoyes
 	 */
 	public function sendAuto($data)
 	{
-		$replace = $data;
+		$replace = (array) $data;
 		$replace['date_rappel'] = Utils::sqliteDateToFrench($replace['date_rappel']);
 		$replace['date_expiration'] = Utils::sqliteDateToFrench($replace['expiration']);
 		$replace['nb_jours'] = abs($replace['nb_jours']);
