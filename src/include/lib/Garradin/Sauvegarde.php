@@ -214,8 +214,16 @@ class Sauvegarde
 				'Message d\'erreur de SQLite : ' . $e->getMessage());
 		}
 
-		// Regardons ensuite si la base de données n'est pas corrompue
-		$check = $db->querySingle('PRAGMA integrity_check;');
+		try {
+			// Regardons ensuite si la base de données n'est pas corrompue
+			$check = $db->querySingle('PRAGMA integrity_check;');
+		}
+		catch (\Exception $e)
+		{
+			// Ici SQLite peut rejeter un message type "file is encrypted or is not a db"
+			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
+				'Message d\'erreur de SQLite : ' . $e->getMessage());
+		}
 
 		if (strtolower(trim($check)) != 'ok')
 		{

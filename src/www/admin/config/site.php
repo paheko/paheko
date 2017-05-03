@@ -88,12 +88,9 @@ if (Utils::get('edit'))
 
     $tpl->assign('edit', ['file' => trim(Utils::get('edit')), 'content' => $source]);
     $tpl->assign('csrf_key', $csrf_key);
-    $tpl->assign('sources_json', json_encode(Squelette::listSources()));
 }
-else
-{
-    $tpl->assign('sources', Squelette::listSources());
-}
+
+$tpl->assign('sources', Squelette::listSources());
 
 $tpl->assign('reset_ok', Utils::get('reset_ok'));
 $tpl->assign('error', $error);

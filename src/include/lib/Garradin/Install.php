@@ -2,6 +2,10 @@
 
 namespace Garradin;
 
+/**
+ * Pour procéder à l'installation de l'instance Garradin
+ * Utile pour automatiser l'installation sans passer par la page d'installation
+ */
 class Install
 {
 	static public function install($nom_asso, $adresse_asso, $email_asso, $nom_categorie, $nom_membre, $email_membre, $passe_membre, $site_asso = WWW_URL)

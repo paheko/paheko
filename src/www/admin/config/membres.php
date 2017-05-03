@@ -5,6 +5,8 @@ require_once __DIR__ . '/_inc.php';
 
 $error = false;
 
+$membres = new Membres;
+
 // Restauration de ce qui était en session
 if ($champs = $membres->sessionGet('champs_membres'))
 {
@@ -138,5 +140,3 @@ $tpl->assign('csrf_name', Utils::CSRF_field_name('config_membres'));
 $tpl->assign('csrf_value', Utils::CSRF_create('config_membres'));
 
 $tpl->display('admin/config/membres.tpl');
-
-?>

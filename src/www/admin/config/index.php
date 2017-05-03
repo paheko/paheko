@@ -58,12 +58,6 @@ $tpl->assign('pays', Utils::getCountryList());
 $cats = new Membres\Categories;
 $tpl->assign('membres_cats', $cats->listSimple());
 
-$champs_liste = array_merge(
-    ['id' => ['title' => 'Numéro unique', 'type' => 'number']],
-    $config->get('champs_membres')->getList()
-);
-$tpl->assign('champs', $champs_liste);
+$tpl->assign('champs', $config->get('champs_membres')->getList(true));
 
 $tpl->display('admin/config/index.tpl');
-
-?>
