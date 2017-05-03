@@ -155,10 +155,16 @@ class Champs
 		return $this->champs;
 	}
 
-    public function getList()
+    public function getList($with_id = false)
     {
         $champs = clone $this->champs;
         unset($champs->passe);
+
+        if ($with_id)
+        {
+            $champs->id = $this->get('id');
+        }
+
         return $champs;
     }
 
