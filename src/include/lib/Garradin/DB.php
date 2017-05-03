@@ -594,7 +594,7 @@ class DB
     public function simpleStatementFetch($query, $mode = null)
     {
         $args = array_slice(func_get_args(), 2);
-        return $this->fetch($this->query($query, $args), $mode);
+        return $this->get($this->query($query, $args), $mode);
     }
 
     /**
@@ -603,7 +603,7 @@ class DB
     public function simpleStatementFetchAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->fetchAssoc($this->query($query, $args));
+        return $this->getAssoc($this->query($query, $args));
     }
 
     /**
@@ -612,7 +612,7 @@ class DB
     public function simpleStatementFetchAssocKey($query, $mode = null)
     {
         $args = array_slice(func_get_args(), 2);
-        return $this->fetchAssocKey($this->query($query, $args), $mode);
+        return $this->getAssocKey($this->query($query, $args), $mode);
     }
 
     /**
