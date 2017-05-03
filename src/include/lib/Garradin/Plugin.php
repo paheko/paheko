@@ -35,18 +35,18 @@ class Plugin
 	public function __construct($id)
 	{
 		$db = DB::getInstance();
-		$this->plugin = $db->simpleQuerySingle('SELECT * FROM plugins WHERE id = ?;', true, $id);
+		$this->plugin = $db->first('SELECT * FROM plugins WHERE id = ?;', $id);
 
 		if (!$this->plugin)
 		{
 			throw new UserException('Ce plugin n\'existe pas ou n\'est pas installé correctement.');
 		}
 
-		$this->plugin['config'] = json_decode($this->plugin['config'], true);
+		$this->plugin->config = json_decode($this->plugin->config);
 		
-		if (!is_array($this->plugin['config']))
+		if (!is_array($this->plugin->config))
 		{
-			$this->plugin['config'] = [];
+			$this->plugin->config = [];
 		}
 
 		$this->id = $id;
@@ -60,8 +60,8 @@ class Plugin
 		if ($this->config_changed)
 		{
 			$db = DB::getInstance();
-			$db->simpleUpdate('plugins', 
-				['config' => json_encode($this->plugin['config'])],
+			$db->update('plugins', 
+				['config' => json_encode($this->plugin->config)],
 				'id = \'' . $this->id . '\'');
 		}
 	}
@@ -85,12 +85,12 @@ class Plugin
 	{
 		if (is_null($key))
 		{
-			return $this->plugin['config'];
+			return $this->plugin->config;
 		}
 
-		if (array_key_exists($key, $this->plugin['config']))
+		if (property_exists($this->plugin->config, $key))
 		{
-			return $this->plugin['config'][$key];
+			return $this->plugin->config->$key;
 		}
 
 		return null;
@@ -106,11 +106,11 @@ class Plugin
 	{
 		if (is_null($value))
 		{
-			unset($this->plugin['config'][$key]);
+			unset($this->plugin->config->$key);
 		}
 		else
 		{
-			$this->plugin['config'][$key] = $value;
+			$this->plugin->config->$key = $value;
 		}
 
 		$this->config_changed = true;
@@ -130,9 +130,9 @@ class Plugin
 			return $this->plugin;
 		}
 
-		if (array_key_exists($key, $this->plugin))
+		if (property_exists($this->plugin, $key))
 		{
-			return $this->plugin[$key];
+			return $this->plugin->$key;
 		}
 
 		return null;
@@ -227,8 +227,8 @@ class Plugin
 		unlink(PLUGINS_ROOT . '/' . $this->id . '.tar.gz');
 
 		$db = DB::getInstance();
-		$db->simpleExec('DELETE FROM plugins_signaux WHERE plugin = ?;', $this->id);
-		return $db->simpleExec('DELETE FROM plugins WHERE id = ?;', $this->id);
+		$db->delete('plugins_signaux', 'plugin = ?', $this->id);
+		return $db->delete('plugins', 'id = ?', $this->id);
 	}
 
 	/**
@@ -238,9 +238,9 @@ class Plugin
 	 */
 	public function needUpgrade()
 	{
-		$infos = parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 		
-		if (version_compare($this->plugin['version'], $infos['version'], '!='))
+		if (version_compare($this->plugin->version, $infos->version, '!='))
 			return true;
 
 		return false;
@@ -259,12 +259,13 @@ class Plugin
 			include $this->path() . '/upgrade.php';
 		}
 
-		$infos = parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
-		$db = DB::getInstance();
-		return $db->simpleUpdate('plugins', 
-			['version' => $infos['version']],
-			'id = \''.$db->escapeString($this->id).'\'');
+		return DB::getInstance()->update('plugins', 
+			['version' => $infos->version],
+			'id = :id',
+			['id' => $this->id]
+		);
 	}
 
 	/**
@@ -309,12 +310,12 @@ class Plugin
 	static public function listInstalled()
 	{
 		$db = DB::getInstance();
-		$plugins = $db->simpleStatementFetchAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
+		$plugins = $db->getAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($plugins as &$row)
 		{
-			$row['system'] = in_array($row['id'], $system);
+			$row->system = in_array($row->id, $system);
 		}
 
 		return $plugins;
@@ -327,7 +328,7 @@ class Plugin
 	static public function listMenu()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetchAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
+		return $db->getAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
 	}
 
 	/**
@@ -352,7 +353,7 @@ class Plugin
 			if (array_key_exists($match[1], $installed))
 				continue;
 
-			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $match[1] . '.tar.gz/garradin_plugin.ini', false);
+			$list[$match[1]] = (object) parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $match[1] . '.tar.gz/garradin_plugin.ini', false);
 		}
 
 		$dir->close();
@@ -374,8 +375,6 @@ class Plugin
 			$context_options = [
 				'ssl' => [
 					'verify_peer'   => TRUE,
-					// On vérifie en utilisant le certificat maître de CACert
-					'cafile'        => ROOT . '/include/data/cacert.pem',
 					'verify_depth'  => 5,
 					'CN_match'      => $url['host'],
 					'SNI_enabled'	=> true,
@@ -508,31 +507,31 @@ class Plugin
 			throw new UserException('L\'archive '.$id.'.tar.gz n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.');
 		}
 
-		$infos = parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/garradin_plugin.ini', false);
 
 		$required = ['nom', 'description', 'auteur', 'url', 'version', 'menu', 'config'];
 
 		foreach ($required as $key)
 		{
-			if (!array_key_exists($key, $infos))
+			if (!property_exists($infos, $key))
 			{
 				throw new \RuntimeException('Le fichier garradin_plugin.ini ne contient pas d\'entrée "'.$key.'".');
 			}
 		}
 
-		if (!empty($infos['min_version']) && !version_compare(garradin_version(), $infos['min_version'], '>='))
+		if (!empty($infos->min_version) && !version_compare(garradin_version(), $infos->min_version, '>='))
 		{
-			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos['min_version'].' ou supérieure.');
+			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos->min_version.' ou supérieure.');
 		}
 
-		if (!empty($infos['menu']) && !file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/www/admin/index.php'))
+		if (!empty($infos->menu) && !file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/www/admin/index.php'))
 		{
 			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
 		}
 
 		$config = '';
 
-		if ((bool)$infos['config'])
+		if ((bool)$infos->config)
 		{
 			if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/config.json'))
 			{
@@ -546,7 +545,7 @@ class Plugin
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			$config = json_decode(file_get_contents('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/config.json'), true);
+			$config = json_decode(file_get_contents('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/config.json'));
 
 			if (is_null($config))
 			{
@@ -557,15 +556,15 @@ class Plugin
 		}
 
 		$db = DB::getInstance();
-		$db->simpleInsert('plugins', [
+		$db->insert('plugins', [
 			'id' 		=> 	$id,
 			'officiel' 	=> 	(int)(bool)$official,
-			'nom'		=>	$infos['nom'],
-			'description'=>	$infos['description'],
-			'auteur'	=>	$infos['auteur'],
-			'url'		=>	$infos['url'],
-			'version'	=>	$infos['version'],
-			'menu'		=>	(int)(bool)$infos['menu'],
+			'nom'		=>	$infos->nom,
+			'description'=>	$infos->description,
+			'auteur'	=>	$infos->auteur,
+			'url'		=>	$infos->url,
+			'version'	=>	$infos->version,
+			'menu'		=>	(int)(bool)$infos->menu,
 			'config'	=>	$config,
 		]);
 
@@ -586,7 +585,7 @@ class Plugin
 	 */
 	static public function getInstalledVersion($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT version FROM plugins WHERE id = ?;');
+		return DB::getInstance()->first('SELECT version FROM plugins WHERE id = ?;', $id);
 	}
 
 	/**
@@ -597,7 +596,7 @@ class Plugin
 	 */
 	static public function fireSignal($signal, $params = null, &$return = null)
 	{
-		$list = DB::getInstance()->simpleStatementFetch('SELECT * FROM plugins_signaux WHERE signal = ?;', SQLITE3_ASSOC, $signal);
+		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
 
 		foreach ($list as $row)
 		{
