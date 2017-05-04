@@ -5,6 +5,7 @@ namespace Garradin;
 class Sauvegarde
 {
 	const NEED_UPGRADE = 'nu';
+	const INTEGRITY_FAIL = 'if';
 
 	/**
 	 * Renvoie la liste des fichiers SQLite sauvegardés
@@ -197,13 +198,86 @@ class Sauvegarde
 	}
 
 	/**
+	 * Vérifie l'intégrité d'une sauvegarde Garradin
+	 * @param  string $file Chemin absolu vers la base de donnée
+	 * @return boolean
+	 */
+	protected function checkIntegrity($file_path, $remove_hash = true)
+	{
+		$size = filesize($file_path);
+		$fp = fopen($file_path, 'r');
+
+		$header = fread($fp, 16);
+
+		// Vérifie que le fichier est bien une base SQLite3
+		if ($header !== "SQLite format 3\000")
+		{
+			fclose($fp);
+			return null;
+		}
+
+		fseek($fp, -40, SEEK_END);
+
+		$hash = fread($fp, 40);
+
+		// Ne ressemble pas à un hash sha1
+		if (!preg_match('/[a-f0-9]{40}/', $hash))
+		{
+			fclose($fp);
+			return false;
+		}
+
+		fseek($fp, 0);
+
+		$content = '';
+		$max = $size - 40;
+
+		while (!feof($fp) && strlen($file) < $max)
+		{
+			$content .= fread($fp, 4096);
+		}
+
+		fclose($fp);
+
+		$file_hash = sha1($content);
+
+		// Vérification du hash
+		if ($file_hash === $hash)
+		{
+			// Suppression du hash
+			if ($remove_hash)
+			{
+				file_put_contents($file_path, $content);
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Restauration de base de données, la fonction qui le fait vraiment
 	 * @param  string $file Chemin absolu vers la base de données à utiliser
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false)
+	protected function restoreDB($file, $user_id = false, $check_integrity = true)
 	{
+		if ($check_integrity)
+		{
+			$integrity = $this->checkIntegrity($file);
+
+			if ($integrity === null)
+			{
+				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.');
+			}
+			elseif ($integrity === false)
+			{
+				return self::INTEGRITY_FAIL;
+			}
+		}
+
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
 			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
