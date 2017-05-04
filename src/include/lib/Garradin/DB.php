@@ -585,7 +585,7 @@ class DB
      */
     public function simpleStatement($query, Array $args = [])
     {
-        return $this->statement($query, $args);
+        return $this->query($query, $args);
     }
 
     /**

@@ -17,7 +17,7 @@ if (isset($_GET['export']))
 
 $error = false;
 $champs = $config->get('champs_membres')->getAll();
-$champs['date_inscription'] = ['title' => 'Date inscription', 'type' => 'date'];
+$champs->date_inscription = (object) ['title' => 'Date inscription', 'type' => 'date'];
 
 if (Utils::post('import'))
 {

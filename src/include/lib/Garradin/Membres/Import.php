@@ -168,7 +168,7 @@ class Import
 
 		// On récupère les champs qu'on peut importer
 		$champs = Config::getInstance()->get('champs_membres')->getAll();
-		$champs = array_keys($champs);
+		$champs = array_keys((array)$champs);
 		$champs[] = 'date_inscription';
 		//$champs[] = 'date_connexion';
 		$champs[] = 'id';
