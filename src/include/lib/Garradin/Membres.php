@@ -56,7 +56,7 @@ class Membres
 
         foreach ($champs->getAll() as $key=>$config)
         {
-            if (!$check_editable && (!empty($config['private']) || empty($config['editable'])))
+            if (!$check_editable && (!empty($config->private) || empty($config->editable)))
             {
                 unset($data[$key]);
                 continue;
@@ -65,11 +65,11 @@ class Membres
             if (!isset($data[$key]) || (!is_array($data[$key]) && trim($data[$key]) === '')
                 || (is_array($data[$key]) && empty($data[$key])))
             {
-                if (!empty($config['mandatory']) && ($check_password || $key != 'passe'))
+                if (!empty($config->mandatory) && ($check_password || $key != 'passe'))
                 {
-                    throw new UserException('Le champ "' . $config['title'] . '" doit obligatoirement être renseigné.');
+                    throw new UserException('Le champ "' . $config->title . '" doit obligatoirement être renseigné.');
                 }
-                elseif (!empty($config['mandatory']))
+                elseif (!empty($config->mandatory))
                 {
                     continue;
                 }
@@ -77,40 +77,40 @@ class Membres
 
             if (isset($data[$key]))
             {
-                if ($config['type'] == 'email' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
+                if ($config->type == 'email' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
                 {
-                    throw new UserException('Adresse e-mail invalide dans le champ "' . $config['title'] . '".');
+                    throw new UserException('Adresse e-mail invalide dans le champ "' . $config->title . '".');
                 }
-                elseif ($config['type'] == 'url' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_URL))
+                elseif ($config->type == 'url' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_URL))
                 {
-                    throw new UserException('Adresse URL invalide dans le champ "' . $config['title'] . '".');
+                    throw new UserException('Adresse URL invalide dans le champ "' . $config->title . '".');
                 }
-                elseif ($config['type'] == 'date' && trim($data[$key]) !== '' && !Utils::checkDate($data[$key]))
+                elseif ($config->type == 'date' && trim($data[$key]) !== '' && !Utils::checkDate($data[$key]))
                 {
-                    throw new UserException('Date invalide "' . $config['title'] . '", format attendu : AAAA-MM-JJ.');
+                    throw new UserException('Date invalide "' . $config->title . '", format attendu : AAAA-MM-JJ.');
                 }
-                elseif ($config['type'] == 'datetime' && trim($data[$key]) !== '')
+                elseif ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
                     if (!Utils::checkDateTime($data[$key]) || !($dt = new DateTime($data[$key])))
                     {
-                        throw new UserException('Date invalide "' . $config['title'] . '", format attendu : AAAA-MM-JJ HH:mm.');
+                        throw new UserException('Date invalide "' . $config->title . '", format attendu : AAAA-MM-JJ HH:mm.');
                     }
 
                     $data[$key] = $dt->format('Y-m-d H:i');
                 }
-                elseif ($config['type'] == 'tel')
+                elseif ($config->type == 'tel')
                 {
                     $data[$key] = Utils::normalizePhoneNumber($data[$key]);
                 }
-                elseif ($config['type'] == 'country')
+                elseif ($config->type == 'country')
                 {
                     $data[$key] = strtoupper(substr($data[$key], 0, 2));
                 }
-                elseif ($config['type'] == 'checkbox')
+                elseif ($config->type == 'checkbox')
                 {
                     $data[$key] = empty($data[$key]) ? 0 : 1;
                 }
-                elseif ($config['type'] == 'number' && trim($data[$key]) !== '')
+                elseif ($config->type == 'number' && trim($data[$key]) !== '')
                 {
                     if (empty($data[$key]))
                     {
@@ -118,13 +118,13 @@ class Membres
                     }
 
                     if (!is_numeric($data[$key]))
-                        throw new UserException('Le champ "' . $config['title'] . '" doit contenir un chiffre.');
+                        throw new UserException('Le champ "' . $config->title . '" doit contenir un chiffre.');
                 }
-                elseif ($config['type'] == 'select' && !in_array($data[$key], $config['options']))
+                elseif ($config->type == 'select' && !in_array($data[$key], $config->options))
                 {
-                    throw new UserException('Le champ "' . $config['title'] . '" ne correspond pas à un des choix proposés.');
+                    throw new UserException('Le champ "' . $config->title . '" ne correspond pas à un des choix proposés.');
                 }
-                elseif ($config['type'] == 'multiple')
+                elseif ($config->type == 'multiple')
                 {
                     if (empty($data[$key]) || !is_array($data[$key]))
                     {
@@ -136,7 +136,7 @@ class Membres
 
                     foreach ($data[$key] as $k => $v)
                     {
-                        if (array_key_exists($k, $config['options']) && !empty($v))
+                        if (array_key_exists($k, $config->options) && !empty($v))
                         {
                             $binary |= 0x01 << $k;
                         }

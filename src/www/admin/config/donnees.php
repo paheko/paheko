@@ -97,7 +97,7 @@ elseif (Utils::post('restore_file'))
     else
     {
         try {
-            $s->restoreFromUpload($_FILES['file'], $user['id']);
+            $s->restoreFromUpload($_FILES['file'], $user->id);
             Utils::redirect('/admin/config/donnees.php?ok=restore');
         } catch (UserException $e) {
             $error = $e->getMessage();
