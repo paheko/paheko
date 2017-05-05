@@ -151,6 +151,10 @@ class Sauvegarde
         }
 
         fclose($in);
+
+        // Ajout du hash pour vérification intégrité
+        fwrite($out, sha1_file(DB_FILE));
+
         fclose($out);
         return true;
 	}
@@ -177,14 +181,31 @@ class Sauvegarde
 
 	/**
 	 * Restaure une copie distante (fichier envoyé)
-	 * @param  array  $file Tableau provenant de $_FILES
+	 * @param  array   $file    Tableau provenant de $_FILES
+	 * @param  integer $user_id ID du membre actuellement connecté, utilisé pour 
+	 * vérifier qu'il est toujours administrateur dans la sauvegarde
+	 * @param  boolean $check_integrity Vérifier l'intégrité de la sauvegarde avant de restaurer
 	 * @return boolean true
 	 */
-	public function restoreFromUpload($file, $user_id)
+	public function restoreFromUpload($file, $user_id, $check_integrity = true)
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error']))
 		{
 			throw new UserException('Le fichier n\'a pas été correctement envoyé. Essayer de le renvoyer à nouveau.');
+		}
+
+		if ($check_integrity)
+		{
+			$integrity = $this->checkIntegrity($file['tmp_name']);
+
+			if ($integrity === null)
+			{
+				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.');
+			}
+			elseif ($integrity === false)
+			{
+				return self::INTEGRITY_FAIL;
+			}
 		}
 
 		$r = $this->restoreDB($file['tmp_name'], $user_id);
@@ -205,7 +226,7 @@ class Sauvegarde
 	protected function checkIntegrity($file_path, $remove_hash = true)
 	{
 		$size = filesize($file_path);
-		$fp = fopen($file_path, 'r');
+		$fp = fopen($file_path, 'r+');
 
 		$header = fread($fp, 16);
 
@@ -227,33 +248,20 @@ class Sauvegarde
 			return false;
 		}
 
-		fseek($fp, 0);
-
-		$content = '';
 		$max = $size - 40;
 
-		while (!feof($fp) && strlen($file) < $max)
+		// Suppression du hash
+		if ($remove_hash)
 		{
-			$content .= fread($fp, 4096);
+			ftruncate($fp, $max);
 		}
 
 		fclose($fp);
 
-		$file_hash = sha1($content);
+		$file_hash = sha1_file($file_path);
 
 		// Vérification du hash
-		if ($file_hash === $hash)
-		{
-			// Suppression du hash
-			if ($remove_hash)
-			{
-				file_put_contents($file_path, $content);
-			}
-
-			return true;
-		}
-
-		return false;
+		return ($file_hash === $hash);
 	}
 
 	/**
@@ -262,22 +270,8 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false, $check_integrity = true)
+	protected function restoreDB($file, $user_id = false)
 	{
-		if ($check_integrity)
-		{
-			$integrity = $this->checkIntegrity($file);
-
-			if ($integrity === null)
-			{
-				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.');
-			}
-			elseif ($integrity === false)
-			{
-				return self::INTEGRITY_FAIL;
-			}
-		}
-
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
 			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
@@ -290,7 +284,7 @@ class Sauvegarde
 
 		try {
 			// Regardons ensuite si la base de données n'est pas corrompue
-			$check = $db->querySingle('PRAGMA integrity_check;');
+			$check = $db->firstColumn('PRAGMA integrity_check;');
 		}
 		catch (\Exception $e)
 		{
@@ -307,11 +301,25 @@ class Sauvegarde
 		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
 		// celle-ci pouvant changer d'une version à l'autre et on peut vouloir importer une base
 		// un peu vieille, mais on vérifie quand même que ça ressemble un minimum à une base garradin
-		$table = $db->querySingle('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';');
+		$table = $db->firstColumn('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';');
 
 		if (!$table)
 		{
 			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Garradin.');
+		}
+
+		// On récupère la version
+		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
+
+		// Vérification de l'AppID pour les versions récentes
+		if (version_compare($version, '0.8.0', '>='))
+		{
+			$appid = $db->firstColumn('PRAGMA application_id;');
+
+			if ($appid !== DB::APPID)
+			{
+				throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (AppID ne correspond pas).');
+			}
 		}
 
 		if ($user_id)
@@ -328,8 +336,6 @@ class Sauvegarde
 			}
 		}
 
-		// On récupère la version pour plus tard
-		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
 
 		$db->close();
 
