@@ -14,6 +14,7 @@ class Install
 
 		// Création de la base de données
 		$db->begin();
+		$db->exec('PRAGMA application_id = ' . DB::APPID . ';');
 		$db->exec(file_get_contents(DB_SCHEMA));
 		$db->commit();
 

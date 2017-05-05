@@ -4,6 +4,12 @@ namespace Garradin;
 
 class DB
 {
+    /**
+     * Application ID pour SQLite
+     * @link https://www.sqlite.org/pragma.html#pragma_application_id
+     */
+    const APPID = 0x5da2d811;
+
     static protected $_instance = null;
 
     /**
