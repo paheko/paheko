@@ -340,7 +340,7 @@ function tpl_select_compte($params)
         if (!empty($compte['desactive']))
             continue;
 
-        if (!isset($compte['id'][1]))
+        if (!isset($compte['id'][1]) && empty($params['create']))
         {
             $out.= '<optgroup label="'.htmlspecialchars($compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
         }
