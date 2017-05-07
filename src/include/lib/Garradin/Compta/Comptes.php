@@ -269,20 +269,23 @@ class Comptes
         return $db->queryFetchAssoc('SELECT id, libelle FROM compta_comptes ORDER BY id;');
     }
 
-    public function listTree($parent = 0, $include_children = true)
+    public function listTree($parent_id = 0, $include_children = true)
     {
         $db = DB::getInstance();
 
         if ($include_children)
         {
-            $parent = $parent ? 'WHERE parent LIKE \''.$db->escapeString($parent).'%\' ' : '';
+            $parent_where = $parent_id ? 'parent LIKE \''.$db->escapeString($parent_id).'%\' ' : '1';
         }
         else
         {
-            $parent = $parent ? 'WHERE parent = \''.$db->escapeString($parent).'\' ' : 'WHERE parent = 0';
+            $parent_where = $parent_id ? 'parent = \''.$db->escapeString($parent_id).'\' ' : 'parent = 0';
         }
 
-        return $db->simpleStatementFetch('SELECT * FROM compta_comptes '.$parent.' ORDER BY id;');
+        $query = 'SELECT * FROM compta_comptes WHERE id = \'%s\' OR %s ORDER BY id;';
+        $query = sprintf($query, $db->escapeString($parent_id), $parent_where);
+
+        return $db->simpleStatementFetch($query);
     }
 
     protected function _checkFields(&$data, $force_parent_check = false)
