@@ -118,7 +118,7 @@ class Categories
             'droit_lecture = '.(int)$id.' OR droit_ecriture = '.(int)$id
         );
 
-        return $db->exec('DELETE FROM membres_categories WHERE id = ?;', (int) $id);
+        return $db->delete('membres_categories', 'id = ?', (int) $id);
     }
 
     public function listSimple()
