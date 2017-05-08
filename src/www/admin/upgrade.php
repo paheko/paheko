@@ -246,15 +246,19 @@ if (version_compare($v, '0.7.2', '<'))
 
 if (version_compare($v, '0.8.0', '<'))
 {
-    $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+    $db->exec('PRAGMA foreign_keys = OFF;');
 
-    // Mise à jour base de données
-    $db->exec(file_get_contents(ROOT . '/include/data/0.8.0.sql'));
-
-    // Inscriptin de l'appid
+    // Inscription de l'appid
     $db->exec('PRAGMA application_id = ' . DB::APPID . ';');
 
-    $db->exec('END;');
+    $db->begin();
+
+    $db->import(ROOT . '/include/data/0.8.0.sql');
+
+    $db->commit();
+
+    // Nettoyage de la base de données
+    $db->exec('VACUUM;');
 }
 
 Utils::clearCaches();
