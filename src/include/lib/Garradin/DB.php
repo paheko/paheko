@@ -65,6 +65,12 @@ class DB
         // Ne pas se connecter ici, on ne se connectera que quand une requête sera faite
     }
 
+    public function close()
+    {
+        $this->db->close();
+        $this->db = null;
+    }
+
     public function connect()
     {
         if ($this->db)
@@ -349,10 +355,10 @@ class DB
      * @param  array|object $args   Arguments pour la clause WHERE
      * @return boolean
      */
-    public function update($table, $fields, $where, $args = [])
+    public function update($table, $fields, $where = null, $args = [])
     {
         assert(is_string($table));
-        assert(is_string($where) && strlen($where));
+        assert((is_string($where) && strlen($where)) || is_null($where));
         assert(is_array($fields) || is_object($fields));
         assert(is_array($args) || is_object($args));
 
@@ -374,6 +380,11 @@ class DB
             $args['field_' . $key] = $value;
 
             $column_updates[] = sprintf('%s = :field_%s', $key, $key);
+        }
+
+        if (is_null($where))
+        {
+            $where = '1';
         }
 
         // Assemblage de la requête
