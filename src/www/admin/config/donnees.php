@@ -4,7 +4,7 @@ namespace Garradin;
 require_once __DIR__ . '/_inc.php';
 
 $s = new Sauvegarde;
-$error = false;
+$code = $error = false;
 
 if (Utils::post('config'))
 {
@@ -65,8 +65,8 @@ elseif (Utils::post('restore'))
     else
     {
         try {
-            $s->restoreFromLocal(Utils::post('file'));
-            Utils::redirect('/admin/config/donnees.php?ok=restore');
+            $r = $s->restoreFromLocal(Utils::post('file'));
+            Utils::redirect('/admin/config/donnees.php?ok=restore&code=' . (int)$r);
         } catch (UserException $e) {
             $error = $e->getMessage();
         }
@@ -96,16 +96,22 @@ elseif (Utils::post('restore_file'))
     }
     else
     {
+        // Ignorer la vérification d'intégrité si autorisé et demandé
+        $check = (ALLOW_MODIFIED_IMPORT && Utils::post('force_import')) ? false : true;
+
         try {
-            $s->restoreFromUpload($_FILES['file'], $user->id);
-            Utils::redirect('/admin/config/donnees.php?ok=restore');
+            $r = $s->restoreFromUpload($_FILES['file'], $user->id, $check);
+            Utils::redirect('/admin/config/donnees.php?ok=restore&code=' . (int)$r);
         } catch (UserException $e) {
             $error = $e->getMessage();
+            $code = $e->getCode();
         }
     }
 }
 
 $tpl->assign('error', $error);
+$tpl->assign('code', $code);
+$tpl->assign('ok_code', Utils::get('code'));
 $tpl->assign('ok', Utils::get('ok'));
 $tpl->assign('liste', $s->getList());
 $tpl->assign('max_file_size', Utils::getMaxUploadSize());

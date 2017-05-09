@@ -4,8 +4,12 @@ namespace Garradin;
 
 class Sauvegarde
 {
-	const NEED_UPGRADE = 'nu';
-	const INTEGRITY_FAIL = 'if';
+	const NEED_UPGRADE = 0x01 << 2;
+	const NOT_AN_ADMIN = 0x01 << 3;
+
+	const INTEGRITY_FAIL = 41;
+	const NOT_A_DB = 42;
+	const NO_APP_ID = 43;
 
 	/**
 	 * Renvoie la liste des fichiers SQLite sauvegardés
@@ -200,11 +204,11 @@ class Sauvegarde
 
 			if ($integrity === null)
 			{
-				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.');
+				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.', self::NOT_A_DB);
 			}
 			elseif ($integrity === false)
 			{
-				return self::INTEGRITY_FAIL;
+				throw new UserException('Le fichier fourni a été modifié par un programme externe.', self::INTEGRITY_FAIL);
 			}
 		}
 
@@ -272,6 +276,8 @@ class Sauvegarde
 	 */
 	protected function restoreDB($file, $user_id = false)
 	{
+		$return = 1;
+
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
 			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
@@ -279,18 +285,18 @@ class Sauvegarde
 		catch (\Exception $e)
 		{
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
-				'Message d\'erreur de SQLite : ' . $e->getMessage());
+				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
 		try {
 			// Regardons ensuite si la base de données n'est pas corrompue
-			$check = $db->firstColumn('PRAGMA integrity_check;');
+			$check = $db->querySingle('PRAGMA integrity_check;', false);
 		}
 		catch (\Exception $e)
 		{
 			// Ici SQLite peut rejeter un message type "file is encrypted or is not a db"
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
-				'Message d\'erreur de SQLite : ' . $e->getMessage());
+				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
 		if (strtolower(trim($check)) != 'ok')
@@ -301,7 +307,7 @@ class Sauvegarde
 		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
 		// celle-ci pouvant changer d'une version à l'autre et on peut vouloir importer une base
 		// un peu vieille, mais on vérifie quand même que ça ressemble un minimum à une base garradin
-		$table = $db->firstColumn('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';');
+		$table = $db->querySingle('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';', false);
 
 		if (!$table)
 		{
@@ -314,11 +320,11 @@ class Sauvegarde
 		// Vérification de l'AppID pour les versions récentes
 		if (version_compare($version, '0.8.0', '>='))
 		{
-			$appid = $db->firstColumn('PRAGMA application_id;');
+			$appid = $db->querySingle('PRAGMA application_id;', false);
 
 			if ($appid !== DB::APPID)
 			{
-				throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (AppID ne correspond pas).');
+				throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 			}
 		}
 
@@ -332,7 +338,7 @@ class Sauvegarde
 
 			if (!$is_still_admin)
 			{
-				throw new UserException('Vous n\'êtes pas administrateur dans le fichier de sauvegarde fourni.');
+				$return |= self::NOT_AN_ADMIN;
 			}
 		}
 
@@ -340,6 +346,8 @@ class Sauvegarde
 		$db->close();
 
 		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', DB_FILE);
+
+		DB::getInstance()->close();
 		
 		if (!rename(DB_FILE, $backup))
 		{
@@ -352,12 +360,22 @@ class Sauvegarde
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
 		}
 
-		if ($version != garradin_version())
+		if ($return & self::NOT_AN_ADMIN)
 		{
-			return self::NEED_UPGRADE;
+			// Forcer toutes les catégories à pouvoir gérer les droits
+			$db = DB::getInstance();
+			$db->update('membres_categories', [
+				'droit_membres' => Membres::DROIT_ADMIN,
+				'droit_connexion' => Membres::DROIT_ACCES
+			]);
 		}
 
-		return true;
+		if ($version != garradin_version())
+		{
+			$return |= self::NEED_UPGRADE;
+		}
+
+		return $return;
 	}
 
 	/**

@@ -89,21 +89,22 @@ if (!defined('Garradin\WWW_URL'))
 }
 
 static $default_config = [
-    'CACHE_ROOT'       => DATA_ROOT . '/cache',
-    'DB_FILE'          => DATA_ROOT . '/association.sqlite',
-    'DB_SCHEMA'        => ROOT . '/include/data/schema.sql',
-    'PLUGINS_ROOT'     => DATA_ROOT . '/plugins',
-    'PREFER_HTTPS'     => false,
-    'PLUGINS_SYSTEM'   => '',
-    'SHOW_ERRORS'      => false,
-    'MAIL_ERRORS'      => false,
-    'USE_CRON'         => false,
-    'ENABLE_XSENDFILE' => false,
-    'SMTP_HOST'        => false,
-    'SMTP_USER'        => null,
-    'SMTP_PASSWORD'    => null,
-    'SMTP_PORT'        => 587,
-    'SMTP_SECURITY'    => 'STARTTLS',
+    'CACHE_ROOT'            => DATA_ROOT . '/cache',
+    'DB_FILE'               => DATA_ROOT . '/association.sqlite',
+    'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
+    'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
+    'PREFER_HTTPS'          => false,
+    'ALLOW_MODIFIED_IMPORT' => true,
+    'PLUGINS_SYSTEM'        => '',
+    'SHOW_ERRORS'           => false,
+    'MAIL_ERRORS'           => false,
+    'USE_CRON'              => false,
+    'ENABLE_XSENDFILE'      => false,
+    'SMTP_HOST'             => false,
+    'SMTP_USER'             => null,
+    'SMTP_PASSWORD'         => null,
+    'SMTP_PORT'             => 587,
+    'SMTP_SECURITY'         => 'STARTTLS',
 ];
 
 foreach ($default_config as $const => $value)
