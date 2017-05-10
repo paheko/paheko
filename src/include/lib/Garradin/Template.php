@@ -108,7 +108,7 @@ function tpl_strftime_fr($ts, $format)
     return Utils::strftime_fr($format, $ts);
 }
 
-function tpl_date_fr($ts, $format)
+function tpl_date_fr($ts, $format = 'd/m/Y H:i:s')
 {
     return Utils::date_fr($format, $ts);
 }

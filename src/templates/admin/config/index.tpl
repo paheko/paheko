@@ -22,7 +22,12 @@
             <dt>Version installée</dt>
             <dd class="help">{$garradin_version} <a href="{$garradin_website}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
             <dt>Informations système</dt>
-            <dd class="help">PHP version {$php_version} — SQLite version {$sqlite_version}</dd>
+            <dd class="help">
+                Version PHP&nbsp;: {$php_version}<br />
+                Version SQLite&nbsp;: {$sqlite_version}<br />
+                Heure du serveur&nbsp;: {$server_time|date_fr} ({if $time_diff > -5 && $time_diff < 5}à l'heure{elseif $time_diff < 0}en retard de {$time_diff} secondes{else}en avance de {$time_diff} secondes{/if})<br />
+                Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
+            </dd>
         </dl>
     </fieldset>
 

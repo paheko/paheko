@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration — Fiche membres" current="config" js=1}
+{include file="admin/_head.tpl" current="config" js=1}
 
 {include file="admin/config/_menu.tpl" current="membres"}
 
@@ -19,6 +19,12 @@
 {/if}
 
 {if $review}
+    <p class="help">
+        Voici ce à quoi ressemblera la nouvelle fiche de membre, vérifiez vos modifications avant d'enregistrer les changements.
+    </p>
+    <p class="alert">
+        Attention&nbsp;! Si vous avez supprimé un champ, les données liées à celui-ci seront supprimées de toutes les fiches de tous les membres.
+    </p>
     <fieldset>
         <legend>Fiche membre exemple</legend>
         <dl>
@@ -137,14 +143,14 @@
                 <dt><label>Type</label></dt>
                 <dd>{$champ.type|get_type}</dd>
                 <dt><label for="f_{$nom}_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs[$nom] name=title}" size="60" required="required" /></dd>
+                <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" size="60" required="required" /></dd>
                 <dt><label for="f_{$nom}_help">Aide</label></dt>
-                <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs[$nom] name=help}" size="100" /></dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champs[$nom] name=editable checked="1"} /> Modifiable par les membres</label></dt>
+                <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs->$nom name=help}" size="100" /></dd>
+                <dt><label><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champs->$nom name=editable checked="1"} /> Modifiable par les membres</label></dt>
                 <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champs[$nom] name=mandatory checked="1"} /> Champ obligatoire</label></dt>
+                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champs->$nom name=mandatory checked="1"} /> Champ obligatoire</label></dt>
                 <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][private]" value="1" {form_field data=$champs[$nom] name=private checked="1"} /> Champ privé</label></dt>
+                <dt><label><input type="checkbox" name="champs[{$nom}][private]" value="1" {form_field data=$champs->$nom name=private checked="1"} /> Champ privé</label></dt>
                 <dd class="help">Si coché, ce champ ne sera visible et modifiable que par les personnes pouvant gérer les membres, mais pas les membres eux-même.</dd>
                 {if $champ.type == 'select' || $champ.type == 'multiple'}
                     <dt><label>Options disponibles</label></dt>
@@ -167,7 +173,7 @@
                 {/if}
                 <dt><label for="f_{$nom}_list_row">Numéro de colonne dans la liste des membres</label></dt>
                 <dd class="help">Laisser vide ou indiquer le chiffre zéro pour que ce champ n'apparaisse pas dans la liste des membres. Inscrire un chiffre entre 1 et 10 pour indiquer l'ordre d'affichage du champ dans le tableau de la liste des membres.</dd>
-                <dd><input type="number" id="f_{$nom}_list_row" name="champs[{$nom}][list_row]" min="0" max="10" value="{form_field data=$champs[$nom] name=list_row}" /></dd>
+                <dd><input type="number" id="f_{$nom}_list_row" name="champs[{$nom}][list_row]" min="0" max="10" value="{form_field data=$champs->$nom name=list_row}" /></dd>
             </dl>
         </fieldset>
         {/foreach}
@@ -209,16 +215,12 @@ var champ_identite = "f_{$config.champ_identite|escape:'js'}";
     for (i = 0; i < fields.length; i++)
     {
         var field = fields[i];
-        field.querySelector('dl').style.display = 'none';
+        field.querySelector('dl').classList.toggle('hidden');
 
         var legend = field.querySelector('legend');
 
         legend.onclick = function () {
-            var content = this.parentNode.querySelector('dl');
-            if (content.style.display.toLowerCase() == 'none')
-                content.style.display = 'block';
-            else
-                content.style.display = 'none';
+            this.parentNode.querySelector('dl').classList.toggle('hidden');
         }
 
         legend.className = 'interactive';
@@ -269,11 +271,7 @@ var champ_identite = "f_{$config.champ_identite|escape:'js'}";
         edit.innerHTML = '&#x270e;';
         edit.title = 'Modifier ce champ';
         edit.onclick = function (e) {
-            var content = this.parentNode.parentNode.querySelector('dl');
-            if (content.style.display.toLowerCase() == 'none')
-                content.style.display = 'block';
-            else
-                content.style.display = 'none';
+            this.parentNode.parentNode.querySelector('dl').classList.toggle('hidden');
             return false;
         };
         actions.appendChild(edit);
@@ -291,7 +289,9 @@ var champ_identite = "f_{$config.champ_identite|escape:'js'}";
                 }
 
                 var field = this.parentNode.parentNode;
-                field.parentNode.removeChild(field);
+                this.parentNode.parentNode.querySelector('dl').classList.add('hidden');
+                field.classList.toggle('removed');
+                window.setTimeout(function () { field.parentNode.removeChild(field); }, 1000);
                 return false;
             };
             actions.appendChild(rem);

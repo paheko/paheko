@@ -1145,6 +1145,9 @@ dl.cotisation dd {
 #orderFields fieldset {
     position: relative;
     min-height: 2em;
+    transition: all 1s;
+    overflow: hidden;
+    max-height: 1000px;
 }
 
 #orderFields fieldset legend {
@@ -1156,12 +1159,33 @@ dl.cotisation dd {
 #orderFields fieldset .actions {
     display: block;
     position: absolute;
-    top: 0em;
+    top: 1em;
     right: 1em;
 }
 
 #orderFields fieldset .actions .icn {
     position: absolute;
+}
+
+#orderFields fieldset dl {
+    overflow: hidden;
+    transition: all .5s;
+    opacity: 1;
+    display: block;
+    max-height: 1000px;
+}
+
+#orderFields fieldset dl.hidden {
+    opacity: 0;
+    max-height: 0;
+}
+
+#orderFields fieldset.removed {
+    max-height: 0;
+    opacity: 0;
+    border-color: red;
+    min-height: 0;
+    height: 0;
 }
 
 #orderFields fieldset .actions .remove { right: 0em; }
