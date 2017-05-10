@@ -8,7 +8,7 @@ $error = false;
 $membres = new Membres;
 
 // Restauration de ce qui était en session
-if ($champs = $membres->sessionGet('champs_membres'))
+if ($champs = $session->sessionGet('champs_membres'))
 {
     $champs = new Membres\Champs($champs);
 }
@@ -37,7 +37,7 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
     {
         if (!empty($_POST['reset']))
         {
-            $membres->sessionStore('champs_membres', null);
+            $session->sessionStore('champs_membres', null);
             Utils::redirect('/admin/config/membres.php');
         }
         elseif (!empty($_POST['review']))
@@ -51,7 +51,7 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                 }
                 
                 $champs->setAll($nouveau_champs);
-                $membres->sessionStore('champs_membres', (string)$champs);
+                $session->sessionStore('champs_membres', (string)$champs);
 
                 Utils::redirect('/admin/config/membres.php?review');
             }
@@ -98,7 +98,7 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                     $champs->add($new, $config);
                 }
 
-                $membres->sessionStore('champs_membres', (string) $champs);
+                $session->sessionStore('champs_membres', (string) $champs);
 
                 Utils::redirect('/admin/config/membres.php?added');
             }
@@ -111,7 +111,7 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
         {
             try {
                 $champs->save();
-                $membres->sessionStore('champs_membres', null);
+                $session->sessionStore('champs_membres', null);
                 Utils::redirect('/admin/config/membres.php?ok');
             }
             catch (UserException $e)
@@ -138,5 +138,7 @@ $tpl->register_modifier('get_type', function ($type) use ($types) {
 
 $tpl->assign('csrf_name', Utils::CSRF_field_name('config_membres'));
 $tpl->assign('csrf_value', Utils::CSRF_create('config_membres'));
+
+$tpl->assign('title', 'Configuration — ' . (isset($_GET['review']) ? 'Confirmer les changements' : 'Fiche membres'));
 
 $tpl->display('admin/config/membres.tpl');

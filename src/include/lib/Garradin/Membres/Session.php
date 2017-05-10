@@ -178,7 +178,7 @@ class Session
 		{
 			// Vérifier encore, mais avec le temps NTP
 			// au cas où l'horloge du serveur n'est pas à l'heure
-			$time = Security_OTP::getTimeFromNTP('fr.pool.ntp.org');
+			$time = Security_OTP::getTimeFromNTP(NTP_SERVER);
 
 			if (!Security_OTP::TOTP($user->secret, $code, $time))
 			{
@@ -333,7 +333,7 @@ class Session
 		$hash = hash(self::HASH_ALGO, $row->token . $row->passe);
 
 		// Vérification du token
-		if (!Security::hash_equals($cookie->token, $row->token))
+		if (!hash_equals($cookie->token, $row->token))
 		{
 			// Le sélecteur est valide, mais pas le token ?
 			// c'est probablement que le cookie a été volé, qu'un attaquant

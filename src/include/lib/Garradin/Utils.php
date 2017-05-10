@@ -562,9 +562,10 @@ class Utils
             {
                 return $key . ' = ' . $value;
             }
-            elseif (is_array($value))
+            elseif (is_array($value) || is_object($value))
             {
                 $out = '';
+                $value = (array) $value;
                 foreach ($value as $row)
                 {
                     $out .= $get_ini_line($key . '[]', $row) . "\n";
@@ -580,7 +581,7 @@ class Utils
 
         foreach ($in as $key=>$value)
         {
-            if (is_array($value) && is_string($key))
+            if ((is_array($value) || is_object($value)) && is_string($key))
             {
                 $out .= '[' . $key . "]\n";
 

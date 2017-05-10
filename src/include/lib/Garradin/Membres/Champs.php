@@ -80,7 +80,7 @@ class Champs
 
     static public function listUnusedPresets(Champs $champs)
     {
-        return array_diff_key(self::importPresets(), $champs->getAll());
+        return array_diff_key(self::importPresets(), (array) $champs->getAll());
     }
 
 	public function __construct($champs)
@@ -129,7 +129,7 @@ class Champs
 
         if ($key !== null)
         {
-            if (property_exists($this->champs[$champ], $key))
+            if (property_exists($this->champs->$champ, $key))
                 return $this->champs->$champ->$key;
             else
                 return null;
@@ -279,17 +279,17 @@ class Champs
 
         if (!property_exists($config, 'editable'))
         {
-            $config['editable'] = false;
+            $config->editable = false;
         }
 
         if (!property_exists($config, 'mandatory'))
         {
-            $config['mandatory'] = false;
+            $config->mandatory = false;
         }
 
         if (!property_exists($config, 'private'))
         {
-            $config['private'] = false;
+            $config->private = false;
         }
 
         return true;
@@ -315,7 +315,7 @@ class Champs
         
         $this->_checkField($name, $config);
 
-        $this->champs[$name] = $config;
+        $this->champs->$name = $config;
 
         return true;
     }
@@ -329,17 +329,17 @@ class Champs
      */
 	public function set($champ, $key, $value)
 	{
-        if (!isset($this->champs[$champ]))
+        if (!isset($this->champs->$champ))
         {
             throw new \LogicException('Champ "'.$champ.'" inconnu.');
         }
 
         // Vérification
-        $config = $this->champs[$champ];
-        $config[$key] = $value;
+        $config = clone $this->champs->$champ;
+        $config->$key = $value;
         $this->_checkField($champ, $config);
 
-		$this->champs[$champ] = $config;
+		$this->champs->$champ = $config;
 		return true;
 	}
 
@@ -380,6 +380,7 @@ class Champs
 
         foreach ($champs as $name=>&$config)
         {
+            $config = (object) $config;
             $this->_checkField($name, $config);
         }
 
@@ -479,7 +480,7 @@ class Champs
         }
 
         // Création des index pour les champs affichés dans la liste des membres
-        $listed_fields = array_keys($this->getListedFields());
+        $listed_fields = array_keys((array) $this->getListedFields());
         foreach ($listed_fields as $field)
         {
             if ($field === $config->get('champ_identifiant'))

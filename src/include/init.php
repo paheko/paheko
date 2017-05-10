@@ -117,8 +117,10 @@ foreach ($default_config as $const => $value)
     }
 }
 
-define('Garradin\WEBSITE', 'http://garradin.eu/');
-define('Garradin\PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
+const WEBSITE = 'http://garradin.eu/';
+const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+
+const NTP_SERVER = 'fr.pool.ntp.org';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
