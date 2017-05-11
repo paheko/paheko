@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use KD2\Security;
+
 class Template extends \KD2\Smartyer
 {
     static protected $_instance = null;
@@ -34,10 +36,7 @@ $tpl = Template::getInstance();
 
 function tpl_csrf_field($params)
 {
-    $name = Utils::CSRF_field_name($params['key']);
-    $value = Utils::CSRF_create($params['key']);
-
-    return '<input type="hidden" name="'.$name.'" value="'.$value.'" />';
+    return Security::tokenHTML($params['key']);
 }
 
 function tpl_form_field($params)
