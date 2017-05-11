@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use KD2\Security;
+
 class Utils
 {
     static protected $country_list = null;
@@ -181,57 +183,19 @@ class Utils
           exit();
     }
 
-
-    static protected function _sessionStart($force = false)
-    {
-        if (!isset($_SESSION) && ($force || isset($_COOKIE[session_name()])))
-        {
-            session_start();
-        }
-        return true;
-    }
-
     static public function CSRF_create($key)
     {
-        self::_sessionStart(true);
-
-        if (!isset($_SESSION['csrf']))
-        {
-            $_SESSION['csrf'] = [];
-        }
-
-        $_SESSION['csrf'][$key] = sha1($key . uniqid($key, true) . time());
-        return $_SESSION['csrf'][$key];
+        return Security::tokenGenerate($key);
     }
 
     static public function CSRF_check($key, $hash=null)
     {
-        self::_sessionStart();
-
-        if (is_null($hash))
-        {
-            $name = self::CSRF_field_name($key);
-
-            if (!isset($_POST[$name]))
-                return false;
-
-            $hash = $_POST[$name];
-        }
-
-        if (empty($_SESSION['csrf'][$key]))
-            return false;
-
-        if ($_SESSION['csrf'][$key] != $hash)
-            return false;
-
-        unset($_SESSION['csrf'][$key]);
-
-        return true;
+        return Security::tokenCheck($key, $hash);
     }
 
     static public function CSRF_field_name($key)
     {
-        return 'gecko/'.base64_encode(sha1($key, true));
+        return Security::tokenFieldName($key);
     }
 
     static public function post($key)
@@ -717,5 +681,4 @@ class Utils
         rewind($fp);
         return key($delims);
     }
-
 }
