@@ -170,6 +170,8 @@ class DB
             case 'object':
                 if ($arg instanceof \DateTime)
                 {
+                    $arg = clone $arg;
+                    $arg->setTimezone(new \DateTimezone('UTC'));
                     $arg = $arg->format(self::DATE_FORMAT);
                     return \SQLITE3_TEXT;
                 }
