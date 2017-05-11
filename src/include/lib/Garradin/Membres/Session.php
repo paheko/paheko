@@ -45,17 +45,18 @@ class Session
 		}
 
 		// Only start session if it exists
-		if (!$write && !isset($_COOKIE[self::SESSION_COOKIE_NAME]))
+		if ($write || isset($_COOKIE[self::SESSION_COOKIE_NAME]))
 		{
-			return false;
+			session_name(self::SESSION_COOKIE_NAME);
+			return session_start(self::getSessionOptions());
 		}
 
-		return session_start(self::getSessionOptions());
+		return false;
 	}
 
 	static public function refresh()
 	{
-		return self::start();
+		return self::start(true);
 	}
 
 	static public function get()
@@ -64,7 +65,6 @@ class Session
 			return new Session;
 		}
 		catch (\LogicException $e) {
-			throw $e;
 			return false;
 		}
 	}
@@ -99,14 +99,14 @@ class Session
 		}
 
 		// vérification que le membre a le droit de se connecter
-		if ($membre['droit_connexion'] == Membres::DROIT_AUCUN)
+		if ($membre->droit_connexion == Membres::DROIT_AUCUN)
 		{
 			return false;
 		}
 
-		if ($membre['secret_otp'])
+		if ($membre->secret_otp)
 		{
-			self::start();
+			self::start(true);
 
 			$_SESSION = [];
 
@@ -120,8 +120,48 @@ class Session
 		}
 		else
 		{
-			return self::create((int) $membre->id, $permanent);
+			$user = self::createUserSession($membre->id);
+
+			if ($permanent)
+			{
+				self::createPermanentSession($user);
+			}
+
+			return true;
 		}
+	}
+
+	static protected function createUserSession($id)
+	{
+		$db = DB::getInstance();
+		$user = $db->first('SELECT * FROM membres WHERE id = ?;', (int)$id);
+
+		if (!$user)
+		{
+			throw new \LogicException(sprintf('Aucun utilisateur trouvé avec l\'ID %s', $id));
+		}
+
+		$user->droits = new \stdClass;
+
+		// Récupérer les droits
+		$droits = $db->first('SELECT * FROM membres_categories WHERE id = ?;', (int)$user->id_categorie);
+
+		foreach ($droits as $key=>$value)
+		{
+			// Renommer pour simplifier
+			$key = str_replace('droit_', '', $key, $found);
+
+			// Si le nom de colonne contient droit_ c'est que c'est un droit !
+			if ($found)
+			{
+				$user->droits->$key = (int) $value;
+			}
+		}
+
+		self::start(true);
+		$_SESSION['user'] = $user;
+
+		return $user;
 	}
 
 	/**
@@ -133,7 +173,7 @@ class Session
 	{
 		$selector = hash(self::HASH_ALGO, Security::random_bytes(10));
 		$token = hash(self::HASH_ALGO, Security::random_bytes(10));
-		$expire = (new DateTime)->modify('+3 months');
+		$expire = (new \DateTime)->modify('+3 months');
 
 		DB::getInstance()->insert('membres_sessions', [
 			'selecteur' => $selector,
@@ -145,8 +185,10 @@ class Session
 		$token = hash(self::HASH_ALGO, $token . $user->passe);
 		$cookie = $selector . '|' . $token;
 
+		$options = self::getSessionOptions();
+
 		setcookie(self::PERMANENT_COOKIE_NAME, $cookie, $expire->getTimestamp(),
-			$url['path'], $url['host'], (\Garradin\PREFER_HTTPS >= 2), true);
+			$options['cookie_path'], $options['cookie_domain'], $options['cookie_secure'], true);
 
 		return true;
 	}
@@ -253,20 +295,19 @@ class Session
 
 	public function __construct()
 	{
-		if (defined('\Garradin\LOCAL_LOGIN') && is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
+		if (empty($_SESSION['user']) && defined('\Garradin\LOCAL_LOGIN')
+			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
 		{
-			$this->id = \Garradin\LOCAL_LOGIN;
-
-			if (empty($_SESSION['user']))
-			{
-				$this->populateUserData();
-			}
+			self::createUserSession(\Garradin\LOCAL_LOGIN);
 		}
-
-		$this->autoLogin();
 
 		// Démarrage session
 		self::start();
+
+		if (empty($_SESSION['user']))
+		{
+			$this->autoLogin();
+		}
 
 		if (empty($_SESSION['user']))
 		{
@@ -274,6 +315,7 @@ class Session
 		}
 
 		$this->user = $_SESSION['user'];
+		$this->id = $this->user->id;
 	}
 
 	protected function getPermanentCookie()
@@ -319,12 +361,15 @@ class Session
 		$db = DB::getInstance();
 		$row = $db->first('SELECT ms.token, ms.id_membre, 
 			strftime("%s", ms.expire) AS expire, membres.passe
+			FROM membres_sessions AS ms
 			INNER JOIN membres ON membres.id = ms.id_membre
-			FROM membres_sessions AS ms WHERE ms.selecteur = ?;',
+			WHERE ms.selecteur = ?;',
 			$cookie->selector);
 
 		if ($row->expire < time())
 		{
+			var_dump($row, time());
+			die('expired');
 			return $this->logout();
 		}
 
@@ -333,7 +378,7 @@ class Session
 		$hash = hash(self::HASH_ALGO, $row->token . $row->passe);
 
 		// Vérification du token
-		if (!hash_equals($cookie->token, $row->token))
+		if (!hash_equals($cookie->token, $hash))
 		{
 			// Le sélecteur est valide, mais pas le token ?
 			// c'est probablement que le cookie a été volé, qu'un attaquant
@@ -348,7 +393,7 @@ class Session
 
 		// Re-générons un nouveau token et mettons à jour le cookie
 		$token = hash(self::HASH_ALGO, Security::random_bytes(10));
-		$expire = (new DateTime)->modify('+3 months');
+		$expire = (new \DateTime)->modify('+3 months');
 
 		$db->update('membres_sessions', [
 			'token'     => $token,
@@ -358,15 +403,18 @@ class Session
 			'id_membre' => $row->id_membre,
 		]);
 
-		$new_cookie = $cookie->selector . '|' . $token;
+		$hash = hash(self::HASH_ALGO, $token . $row->passe);
+		$new_cookie = $cookie->selector . '|' . $hash;
+
+		$options = self::getSessionOptions();
 
 		setcookie(self::PERMANENT_COOKIE_NAME, $new_cookie, $expire->getTimestamp(),
-			$url['path'], $url['host'], (\Garradin\PREFER_HTTPS >= 2), true);
+			$options['cookie_path'], $options['cookie_domain'], $options['cookie_secure'], true);
 
 
 		$this->id = $row->id_membre;
 
-		$this->populateUserData();
+		self::createUserSession($this->id);
 
 		return true;
 	}
@@ -395,43 +443,9 @@ class Session
 		return true;
 	}
 
-
-	public function populateUserData()
-	{
-		$db = DB::getInstance();
-		$this->user = $db->first('SELECT * FROM membres WHERE id = ?;', (int)$this->id);
-
-		if (!$this->user)
-		{
-			throw new \LogicException(sprintf('Aucun utilisateur trouvé avec l\'ID %s', var_export($this->id, true)));
-		}
-
-		$this->user->droits = new \stdClass;
-
-		// Récupérer les droits
-		$droits = $db->first('SELECT * FROM membres_categories WHERE id = ?;', (int)$this->user->id_categorie);
-
-		foreach ($droits as $key=>$value)
-		{
-			// Renommer pour simplifier
-			$key = str_replace('droit_', '', $key, $found);
-
-			// Si le nom de colonne contient droit_ c'est que c'est un droit !
-			if ($found)
-			{
-				$this->user->droits->$key = (int) $value;
-			}
-		}
-
-		self::start(true);
-		$_SESSION['user'] =& $this->user;
-
-		return $this->user;
-	}
-
 	public function editUser($data)
 	{
-		return (new \Garradin\Membres)->edit($this->id, $data, false);
+		return (new Membres)->edit($this->id, $data, false);
 	}
 
 	public function getUser($key = null)
