@@ -35,7 +35,7 @@ if (Utils::post('login'))
     else
     {
         if (Utils::post('id') && Utils::post('passe')
-            && Membres\Session::login(Utils::post('id'), Utils::post('passe')))
+            && Membres\Session::login(Utils::post('id'), Utils::post('passe'), (bool) Utils::post('permanent')))
         {
             Utils::redirect('/admin/');
         }

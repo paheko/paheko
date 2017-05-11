@@ -40,6 +40,7 @@
                     {/if}
                 {/if}
             </dd>
+            <dd><label><input type="checkbox" name="permanent" value="1" /> Rester connecté‑e</label></dd>
         </dl>
     </fieldset>
 
