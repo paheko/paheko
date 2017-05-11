@@ -30,6 +30,18 @@ CREATE TABLE IF NOT EXISTS membres_categories
 -- Table dynamique générée par l'application
 -- voir Garradin\Membres\Champs.php
 
+CREATE TABLE membres_sessions
+-- Sessions
+(
+    selecteur TEXT NOT NULL,
+    hash TEXT NOT NULL,
+    id_membre INTEGER NOT NULL,
+    expire TEXT NOT NULL CHECK (datetime(expire) IS NOT NULL AND datetime(expire) = expire),
+
+    FOREIGN KEY (id_membre) REFERENCES membres (id),
+    PRIMARY KEY (selecteur, id_membre)
+);
+
 CREATE TABLE IF NOT EXISTS cotisations
 -- Types de cotisations et activités
 (
