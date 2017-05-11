@@ -14,6 +14,17 @@
 namespace Garradin;
 
 /**
+ * Clé secrète, doit être unique à chaque instance de Garradin
+ *
+ * Ceci est utilisé afin de sécuriser l'envoi de formulaires
+ * (protection anti-CSRF).
+ *
+ * Si aucune valeur n'est définie, Garradin ajoutera automatiquement
+ * une valeur au hasard dans le fichier config.local.php.
+ */
+const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
+
+/**
  * Se connecter automatiquement avec l'ID de membre indiqué
  * Exemple: LOCAL_LOGIN = 42
  *

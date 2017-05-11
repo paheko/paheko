@@ -117,4 +117,33 @@ class Install
 
 		return $config->save();
 	}
+
+	static public function setLocalConfig($key, $value)
+	{
+		$path = ROOT . DIRECTORY_SEPARATOR . 'config.local.php';
+		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
+
+		if (file_exists($path))
+		{
+			$config = file_get_contents($path);
+
+			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
+			
+			$config = preg_replace($pattern, $new_line, $config, -1, $count);
+
+			if (!$count)
+			{
+				$config = preg_replace('/\?>.*/s', '', $config);
+				$config .= PHP_EOL . $new_line . PHP_EOL;
+			}
+		}
+		else
+		{
+			$config = '<?php' . PHP_EOL
+				. 'namespace Garradin;' . PHP_EOL . PHP_EOL
+				. $new_line . PHP_EOL;
+		}
+
+		return file_put_contents($path, $config);
+	}
 }
