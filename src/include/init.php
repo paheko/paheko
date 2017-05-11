@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\ErrorManager;
+use KD2\Security;
 
 error_reporting(-1);
 
@@ -254,6 +255,17 @@ function user_error($e)
 // Message d'erreur simple pour les erreurs de l'utilisateur
 ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
 ErrorManager::setCustomExceptionHandler('\KD2\MiniSkelMarkupException', '\Garradin\user_error');
+
+// Clé secrète utilisée pour chiffrer les tokens CSRF etc.
+if (!defined('Garradin\SECRET_KEY'))
+{
+    $key = base64_encode(Security::random_bytes(64));
+    Install::setLocalConfig('SECRET_KEY', $key);
+    define('Garradin\SECRET_KEY', $key);
+}
+
+// Intégration du secret pour les tokens
+Security::tokenSetSecret(SECRET_KEY);
 
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
