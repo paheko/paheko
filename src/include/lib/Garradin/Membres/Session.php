@@ -124,7 +124,7 @@ class Session
 
 			if ($permanent)
 			{
-				self::createPermanentSession($user);
+				self::createPermanentSession($membre);
 			}
 
 			return true;
@@ -166,24 +166,27 @@ class Session
 
 	/**
 	 * Créer une session permanente "remember me"
+	 *
+	 * @see autoLogin method
 	 * @param  \stdClass $user
 	 * @return boolean
 	 */
 	static protected function createPermanentSession(\stdClass $user)
 	{
 		$selector = hash(self::HASH_ALGO, Security::random_bytes(10));
-		$token = hash(self::HASH_ALGO, Security::random_bytes(10));
+		$verifier = hash(self::HASH_ALGO, Security::random_bytes(10));
 		$expire = (new \DateTime)->modify('+3 months');
+
+		$hash = hash(self::HASH_ALGO, $selector . $verifier . $user->passe . $expire->format(DATE_ATOM));
 
 		DB::getInstance()->insert('membres_sessions', [
 			'selecteur' => $selector,
-			'token'     => $token,
+			'hash'      => $hash,
 			'expire'    => $expire,
 			'id_membre' => $user->id,
 		]);
 
-		$token = hash(self::HASH_ALGO, $token . $user->passe);
-		$cookie = $selector . '|' . $token;
+		$cookie = $selector . '|' . $verifier;
 
 		$options = self::getSessionOptions();
 
@@ -336,7 +339,7 @@ class Session
 
 		return (object) [
 			'selector' => $data[0],
-			'token'    => $data[1],
+			'verifier' => $data[1],
 		];
 	}
 
@@ -346,6 +349,7 @@ class Session
 	 *
 	 * @link   https://www.databasesandlife.com/persistent-login/
 	 * @link   https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
+	 * @link   https://paragonie.com/blog/2017/02/split-tokens-token-based-authentication-protocols-without-side-channels
 	 * @link   http://jaspan.com/improved_persistent_login_cookie_best_practice
 	 * @return boolean
 	 */
@@ -359,26 +363,33 @@ class Session
 		}
 
 		$db = DB::getInstance();
-		$row = $db->first('SELECT ms.token, ms.id_membre, 
+
+		// Suppression des sessions qui ont expiré déjà
+		$db->delete('membres_sessions', 'expire < strftime(\'%s\',\'now\')');
+		
+		$row = $db->first('SELECT ms.hash, ms.id_membre AS id, 
 			strftime("%s", ms.expire) AS expire, membres.passe
 			FROM membres_sessions AS ms
 			INNER JOIN membres ON membres.id = ms.id_membre
 			WHERE ms.selecteur = ?;',
 			$cookie->selector);
 
-		if ($row->expire < time())
+		// Le sélecteur n'est pas valide: supprimons le cookie
+		if (!$row)
 		{
-			var_dump($row, time());
-			die('expired');
 			return $this->logout();
 		}
 
+		// La session stockée ne sert plus à rien à partir de maintenant,
+		// et ça empêche de le rejouer
+		$db->delete('membres_sessions', 'selecteur = ?', $cookie->selector);
+
 		// On utilise le mot de passe: si l'utilisateur change de mot de passe
 		// toutes les sessions précédentes sont invalidées
-		$hash = hash(self::HASH_ALGO, $row->token . $row->passe);
+		$hash = hash(self::HASH_ALGO, $cookie->selector . $cookie->verifier . $row->passe . date(DATE_ATOM, $row->expire));
 
 		// Vérification du token
-		if (!hash_equals($cookie->token, $hash))
+		if (!hash_equals($row->hash, $hash))
 		{
 			// Le sélecteur est valide, mais pas le token ?
 			// c'est probablement que le cookie a été volé, qu'un attaquant
@@ -386,33 +397,15 @@ class Session
 			// avec un token qui n'est plus valide.
 			// Dans ce cas supprimons toutes les sessions de ce membre pour 
 			// le forcer à se re-connecter
-			$db->delete('membres_sessions', 'id_membre = :id', ['id' => (int) $row->id_membre]);
 
 			return $this->logout();
 		}
 
-		// Re-générons un nouveau token et mettons à jour le cookie
-		$token = hash(self::HASH_ALGO, Security::random_bytes(10));
-		$expire = (new \DateTime)->modify('+3 months');
+		// Re-générons un nouveau vérifieur et mettons à jour le cookie
+		// car chaque vérifieur est à usage unique
+		self::createPermanentSession($row);
 
-		$db->update('membres_sessions', [
-			'token'     => $token,
-			'expire'    => $expire,
-		], 'selecteur = :selecteur AND id_membre = :id_membre', [
-			'selecteur' => $cookie->selector,
-			'id_membre' => $row->id_membre,
-		]);
-
-		$hash = hash(self::HASH_ALGO, $token . $row->passe);
-		$new_cookie = $cookie->selector . '|' . $hash;
-
-		$options = self::getSessionOptions();
-
-		setcookie(self::PERMANENT_COOKIE_NAME, $new_cookie, $expire->getTimestamp(),
-			$options['cookie_path'], $options['cookie_domain'], $options['cookie_secure'], true);
-
-
-		$this->id = $row->id_membre;
+		$this->id = $row->id;
 
 		self::createUserSession($this->id);
 
