@@ -4,18 +4,6 @@ ALTER TABLE membres ADD COLUMN secret_otp TEXT NULL;
 -- Ajouter champ clé PGP
 ALTER TABLE membres ADD COLUMN clef_pgp TEXT NULL;
 
-CREATE TABLE membres_sessions
--- Sessions
-(
-	selecteur TEXT NOT NULL,
-	token TEXT NOT NULL,
-	id_membre INTEGER NOT NULL,
-	expire TEXT NOT NULL,
-
-	FOREIGN KEY (id_membre) REFERENCES membres (id),
-	PRIMARY KEY (selecteur, id_membre)
-);
-
 --------------------------------------------------------------------------------
 -- Mise à jour des tables contenant un champ date pour ajouter la contrainte  --
 -- Ceci afin de forcer les champs à contenir un format de date correct        --
