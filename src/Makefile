@@ -10,3 +10,6 @@ deps:
 	rm -rf "include/lib/KD2"
 	mv "${TMP_KD2}/KD2 Framework-${KD2_BRANCH}/src/lib/kd2" "include/lib/KD2"
 	rm -rf ${TMP_KD2}
+
+dev-server:
+	php -S localhost:8082 -t www www/_route.php
