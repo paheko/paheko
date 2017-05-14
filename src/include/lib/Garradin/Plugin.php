@@ -44,9 +44,9 @@ class Plugin
 
 		$this->plugin->config = json_decode($this->plugin->config);
 		
-		if (!is_array($this->plugin->config))
+		if (!is_object($this->plugin->config))
 		{
-			$this->plugin->config = [];
+			$this->plugin->config = new \stdClass;
 		}
 
 		$this->id = $id;
