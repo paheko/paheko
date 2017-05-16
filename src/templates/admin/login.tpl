@@ -1,14 +1,7 @@
 {include file="admin/_head.tpl" title="Connexion"}
 
-{if $error}
-    <p class="error">
-        {if $error == 'OTHER'}
-            Une erreur est survenue, merci de réessayer.
-        {else}
-            Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe.
-        {/if}
-    </p>
-{/if}
+{form_errors}
+{show_error if=$fail message="Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe."}
 
 {if !$ssl_enabled && $prefer_ssl}
     <p class="alert">
@@ -24,7 +17,7 @@
         <legend>Connexion</legend>
         <dl>
             <dt><label for="f_id">{$champ.title}</label></dt>
-            <dd><input type="text" name="id" id="f_id" value="{form_field name=id}" /></dd>
+            <dd><input type="text" name="_id" id="f_id" value="{form_field name=_id}" /></dd>
             <dt><label for="f_passe">Mot de passe</label></dt>
             <dd><input type="password" name="passe" id="f_passe" value="" />
                 {if $ssl_enabled}

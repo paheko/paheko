@@ -5,6 +5,7 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
+// L'utilisateur est déjà connecté
 if ($session)
 {
     Utils::redirect('/admin/');
@@ -24,23 +25,21 @@ if (isset($_GET['keepSessionAlive']))
     exit;
 }
 
-$error = false;
+$errors = [];
+$fail = false;
 
-if (Utils::post('login'))
+// Soumission du formulaire
+if (f('login'))
 {
-    if (!Utils::CSRF_check('login'))
-    {
-        $error = 'OTHER';
-    }
-    else
-    {
-        if (Utils::post('id') && Utils::post('passe')
-            && Membres\Session::login(Utils::post('id'), Utils::post('passe'), (bool) Utils::post('permanent')))
-        {
-            Utils::redirect('/admin/');
-        }
+    $check = fc('login', [
+        '_id'       => 'required|string',
+        'passe'     => 'required|string',
+        'permanent' => 'boolean',
+    ], $errors);
 
-        $error = 'LOGIN';
+    if ($check && ($fail = Membres\Session::login(f('_id'), f('passe'), (bool) f('permanent'))))
+    {
+        Utils::redirect('/admin/');
     }
 }
 
@@ -53,6 +52,7 @@ $tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
 $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfURL()));
 
 $tpl->assign('champ', $champ);
-$tpl->assign('error', $error);
+$tpl->assign('form_errors', $errors);
+$tpl->assign('fail', $fail);
 
 $tpl->display('admin/login.tpl');

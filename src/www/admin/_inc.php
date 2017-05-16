@@ -13,6 +13,17 @@ if (PREFER_HTTPS !== true && PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']) && em
     exit;
 }
 
+// Alias utiles pour la gestion de formulaires
+function f($key)
+{
+    return \KD2\Form::get($key);
+}
+
+function fc($action, Array $rules, Array &$errors = [])
+{
+    return \KD2\Form::check($action, $rules, $errors);
+}
+
 $tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
 

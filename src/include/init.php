@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\ErrorManager;
 use KD2\Security;
+use KD2\Form;
 
 error_reporting(-1);
 
@@ -265,7 +266,18 @@ if (!defined('Garradin\SECRET_KEY'))
 }
 
 // Intégration du secret pour les tokens
-Security::tokenSetSecret(SECRET_KEY);
+Form::tokenSetSecret(SECRET_KEY);
+
+// Fonctions utilitaires bien utiles d'avoir dans le namespace global de Garradin
+function obj_has($obj, $pattern)
+{
+    return \KD2\Helpers::obj_has($obj, $pattern);
+}
+
+function obj_get($src, $pattern, $default = null)
+{
+    return \KD2\Helpers::obj_get($src, $pattern, $default);
+}
 
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
