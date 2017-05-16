@@ -47,7 +47,14 @@ class Template extends \KD2\Smartyer
 
         foreach ($errors as $error)
         {
-            $out[] = $this->getFormErrorMessage($error['rule'], $error['name']);
+            if (is_array($error))
+            {
+                $out[] = $this->getFormErrorMessage($error['rule'], $error['name']);
+            }
+            else
+            {
+                $out[] = $error;
+            }
         }
 
         return '<div class="error"><ul><li>' . implode('</li><li>', $out) . '</li></ul></div>';

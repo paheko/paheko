@@ -219,21 +219,31 @@ class Session
 			return false;
 		}
 
-		if (!Security_OTP::TOTP($user->secret, $code))
+		if (!self::checkOTP($user->secret, $code))
 		{
-			// Vérifier encore, mais avec le temps NTP
-			// au cas où l'horloge du serveur n'est pas à l'heure
-			$time = Security_OTP::getTimeFromNTP(NTP_SERVER);
-
-			if (!Security_OTP::TOTP($user->secret, $code, $time))
-			{
-				return false;
-			}
+			return false;
 		}
 
 		$session = new Session($user->id);
 		$session->updateLoginDate();
 		return $session;
+	}
+
+	static public function checkOTP($secret, $code)
+	{
+		if (!Security_OTP::TOTP($secret, $code))
+		{
+			// Vérifier encore, mais avec le temps NTP
+			// au cas où l'horloge du serveur n'est pas à l'heure
+			$time = Security_OTP::getTimeFromNTP(NTP_SERVER);
+
+			if (!Security_OTP::TOTP($secret, $code, $time))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	static public function recoverPasswordCheck($id)

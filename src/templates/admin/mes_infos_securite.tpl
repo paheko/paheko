@@ -5,14 +5,10 @@
     <li class="current"><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
 </ul>
 
+{form_errors}
+
 {if $confirm}
     <form method="post" action="{$self_url}">
-
-    {if $error}
-        <p class="error">
-            {$error}
-        </p>
-    {/if}
 
     {if !empty($otp)}
         <p class="alert">
@@ -45,7 +41,7 @@
     <p class="submit">
         {csrf_field key="edit_me_security"}
         <input type="hidden" name="passe" value="{form_field name="passe"}" />
-        <input type="hidden" name="repasse" value="{form_field name="repasse"}" />
+        <input type="hidden" name="passe_confirmed" value="{form_field name="passe_confirmed"}" />
         <input type="hidden" name="clef_pgp" value="{form_field name="clef_pgp"}" />
         <input type="hidden" name="otp_secret" value="{$otp.secret}" />
         <input type="hidden" name="otp" value="generate" />
@@ -54,12 +50,6 @@
 
     </form>
 {else}
-
-    {if $error}
-        <p class="error">
-            {$error}
-        </p>
-    {/if}
 
     <form method="post" action="{$self_url}">
 
@@ -81,7 +71,7 @@
                     </dd>
                     <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}5,{rdelim}" /></dd>
                     <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-                    <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" pattern=".{ldelim}5,{rdelim}" /></dd>
+                    <dd><input type="password" name="passe_confirmed" id="f_passe_confirmed" value="{form_field name=passe_confirmed}" pattern=".{ldelim}5,{rdelim}" /></dd>
                 </dl>
             {/if}
         </fieldset>
@@ -132,7 +122,7 @@
     <script type="text/javascript">
     {literal}
     g.script('scripts/password.js').onload = function () {
-        initPasswordField('pw_suggest', 'f_passe', 'f_repasse');
+        initPasswordField('pw_suggest', 'f_passe', 'f_passe_confirmed');
     };
     {/literal}
     </script>
