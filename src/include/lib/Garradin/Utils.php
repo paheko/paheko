@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\Security;
+use KD2\Form;
 
 class Utils
 {
@@ -185,17 +186,17 @@ class Utils
 
     static public function CSRF_create($key)
     {
-        return Security::tokenGenerate($key);
+        return Form::tokenGenerate($key);
     }
 
     static public function CSRF_check($key, $hash=null)
     {
-        return Security::tokenCheck($key, $hash);
+        return Form::tokenCheck($key, $hash);
     }
 
     static public function CSRF_field_name($key)
     {
-        return Security::tokenFieldName($key);
+        return Form::tokenFieldName($key);
     }
 
     static public function post($key)
@@ -491,7 +492,7 @@ class Utils
 
     static public function suggestPassword()
     {
-        return \KD2\Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
+        return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
     }
 
     static public function checkIBAN($iban)
