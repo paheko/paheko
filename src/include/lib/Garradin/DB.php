@@ -632,7 +632,8 @@ class DB
     public function simpleStatementFetch($query, $mode = null)
     {
         $args = array_slice(func_get_args(), 2);
-        return $this->get($this->query($query, $args), $mode);
+        $result = $this->query($query, $args);
+        return $this->fetch($result, $mode);
     }
 
     /**
@@ -641,16 +642,25 @@ class DB
     public function simpleStatementFetchAssoc($query)
     {
         $args = array_slice(func_get_args(), 1);
-        return $this->getAssoc($this->query($query, $args));
+        return $this->getAssoc($query, $args);
     }
 
     /**
      * @deprecated
      */
-    public function simpleStatementFetchAssocKey($query, $mode = null)
+    public function simpleStatementFetchAssocKey($query, $mode = self::ASSOC)
     {
         $args = array_slice(func_get_args(), 2);
-        return $this->getAssocKey($this->query($query, $args), $mode);
+        $result = $this->query($query, $args);
+        $out = [];
+
+        while ($row = $result->fetchArray($mode))
+        {
+            $key = current($row);
+            $out[$key] = $row;
+        }
+
+        return $out;
     }
 
     /**
