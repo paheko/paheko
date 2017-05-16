@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use KD2\Security;
+use KD2\Form;
 
 class Template extends \KD2\Smartyer
 {
@@ -29,6 +29,60 @@ class Template extends \KD2\Smartyer
         $this->assign('self_url_no_qs', Utils::getSelfUrl(true));
 
         $this->assign('is_logged', false);
+
+        $this->register_function('form_errors', [$this, 'formErrors']);
+        $this->register_function('show_error', [$this, 'showError']);
+    }
+
+    protected function formErrors($params)
+    {
+        $errors = $this->getTemplateVars('form_errors');
+
+        if (!$errors || count($errors) == 0)
+        {
+            return '';
+        }
+
+        $out = [];
+
+        foreach ($errors as $error)
+        {
+            $out[] = $this->getFormErrorMessage($error['rule'], $error['name']);
+        }
+
+        return '<div class="error"><ul><li>' . implode('</li><li>', $out) . '</li></ul></div>';
+    }
+
+    protected function getFormErrorMessage($rule, $element)
+    {
+        if ($element == '_id')
+        {
+            $element = 'identifiant';
+        }
+        elseif ($element == 'passe')
+        {
+            $element = 'mot de passe';
+        }
+
+        switch ($rule)
+        {
+            case 'required':
+                return sprintf('Le champ %s est vide.', $element);
+            case 'csrf':
+                return 'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.';
+            default:
+                return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
+        }
+    }
+
+    protected function showError($params)
+    {
+        if (!$params['if'])
+        {
+            return '';
+        }
+
+        return '<p class="error">' . $this->escape($params['message']) . '</p>';
     }
 }
 
@@ -36,7 +90,7 @@ $tpl = Template::getInstance();
 
 function tpl_csrf_field($params)
 {
-    return Security::tokenHTML($params['key']);
+    return Form::tokenHTML($params['key']);
 }
 
 function tpl_form_field($params)
