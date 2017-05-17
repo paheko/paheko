@@ -73,10 +73,10 @@ class Fichiers
 	{
 		if (is_null($data))
 		{
-			$data = DB::getInstance()->simpleQuerySingle('SELECT fichiers.*, fc.hash, fc.taille,
+			$data = DB::getInstance()->first('SELECT fichiers.*, fc.hash, fc.taille,
 				strftime(\'%s\', datetime) AS datetime
 				FROM fichiers INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu
-				WHERE fichiers.id = ?;', true, (int)$id);
+				WHERE fichiers.id = ?;', (int)$id);
 		}
 
 		if (!$data)
@@ -116,17 +116,25 @@ class Fichiers
 			throw new \LogicException('Type de lien de fichier inconnu.');
 		}
 
+		// Ne pas chercher dans le type qu'on veut lier
 		unset($check[array_search($type, $check)]);
-		
-		foreach ($check as $check_type)
+
+		// Vérifier que le fichier n'est pas déjà lié à un autre type
+		$query = [];
+
+		foreach ($check as $type)
 		{
-			if ($db->simpleQuerySingle('SELECT 1 FROM fichiers_' . $check_type . ' WHERE fichier = ?;', false, (int)$this->id))
-			{
-				throw new \LogicException('Ce fichier est déjà lié à un autre contenu : ' . $check_type);
-			}
+			$query[] = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = %d', $type, $this->id);
 		}
 
-		return $db->simpleExec('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
+		$query = implode(' UNION ', $query) . ';';
+
+		if ($db->firstColumn($query))
+		{
+			throw new \LogicException('Ce fichier est déjà lié à un autre contenu : ' . $check_type);
+		}
+
+		return $db->query('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
 			(int)$this->id, (int)$foreign_id);
 	}
 
@@ -137,10 +145,13 @@ class Fichiers
 	 */
 	public function checkAccess($user = false)
 	{
+		$db = DB::getInstance();
+
 		// On regarde déjà si le fichier n'est pas lié au wiki
-		$wiki = DB::getInstance()->simpleQuerySingle('SELECT wp.droit_lecture FROM fichiers_' . self::LIEN_WIKI . ' AS link
+		$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
 			INNER JOIN wiki_pages AS wp ON wp.id = link.id
-			WHERE link.fichier = ? LIMIT 1;', false, (int)$this->id);
+			WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
+		$wiki = $db->firstColumn($query, (int)$this->id);
 
 		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
 		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
@@ -149,7 +160,7 @@ class Fichiers
 		}
 			
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
-		if (empty($user['droits']))
+		if (empty($user->droits))
 		{
 			return false;
 		}
@@ -157,41 +168,41 @@ class Fichiers
 		if ($wiki !== false)
 		{
 			// S'il n'a même pas droit à accéder au wiki c'est mort
-			if ($user['droits']['wiki'] < Membres::DROIT_ACCES)
+			if ($user->droits->wiki < Membres::DROIT_ACCES)
 			{
 				return false;
 			}
 
 			// On renvoie à l'objet Wiki pour savoir si l'utilisateur a le droit de lire ce fichier
 			$_w = new Wiki;
-			$_w->setRestrictionCategorie($user['id_categorie'], $user['droits']['wiki']);
+			$_w->setRestrictionCategorie($user->id_categorie, $user->droits->wiki);
 			return $_w->canReadPage($wiki);
 		}
 
 		// On regarde maintenant si le fichier est lié à la compta
-		$compta = DB::getInstance()->simpleQuerySingle('SELECT 1 
-			FROM fichiers_' . self::LIEN_COMPTA . ' WHERE fichier = ? LIMIT 1;', false, (int)$this->id);
+		$query = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_COMPTA);
+		$compta = $db->firstColumn($query, (int)$this->id);
 
-		if ($compta && $user['droits']['compta'] >= Membres::DROIT_ACCES)
+		if ($compta && $user->droits->compta >= Membres::DROIT_ACCES)
 		{
 			// OK si accès à la compta
 			return true;
 		}
 
 		// Enfin, si le fichier est lié à un membre
-		$membre = DB::getInstance()->simpleQuerySingle('SELECT id 
-			FROM fichiers_' . self::LIEN_MEMBRES . ' WHERE fichier = ? LIMIT 1;', false, (int)$this->id);
+		$query = sprintf('SELECT id FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_MEMBRES);
+		$membre = $db->firstColumn($query, (int)$this->id);
 
 		if ($membre !== false)
 		{
 			// De manière évidente, l'utilisateur a le droit d'accéder aux fichiers liés à son profil
-			if ((int)$membre == $user['id'])
+			if ((int)$membre == $user->id)
 			{
 				return true;
 			}
 
 			// Pour voir les fichiers des membres il faut pouvoir les gérer
-			if ($user['droits']['membres'] >= Membres::DROIT_ECRITURE)
+			if ($user->droits->membres >= Membres::DROIT_ECRITURE)
 			{
 				return true;
 			}
@@ -208,17 +219,17 @@ class Fichiers
 	{
 		$db = DB::getInstance();
 		$db->begin();
-		$db->simpleExec('DELETE FROM fichiers_compta_journal WHERE fichier = ?;', (int)$this->id);
-		$db->simpleExec('DELETE FROM fichiers_wiki_pages WHERE fichier = ?;', (int)$this->id);
-		$db->simpleExec('DELETE FROM fichiers_membres WHERE fichier = ?;', (int)$this->id);
+		$db->delete('fichiers_compta_journal', 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_wiki_pages', 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_membres', 'fichier = ?', (int)$this->id);
 
-		$db->simpleExec('DELETE FROM fichiers WHERE id = ?;', (int)$this->id);
+		$db->delete('fichiers', 'id = ?', (int)$this->id);
 
 		// Suppression du contenu s'il n'est pas utilisé par un autre fichier
-		if (!$db->simpleQuerySingle('SELECT 1 FROM fichiers WHERE id_contenu = ? AND id != ? LIMIT 1;', 
-			false, (int)$this->id_contenu, (int)$this->id))
+		if (!$db->firstColumn('SELECT 1 FROM fichiers WHERE id_contenu = ? AND id != ? LIMIT 1;', 
+			(int)$this->id_contenu, (int)$this->id))
 		{
-			$db->simpleExec('DELETE FROM fichiers_contenu WHERE id = ?;', (int)$this->id_contenu);
+			$db->delete('fichiers_contenu', 'id = ?', (int)$this->id_contenu);
 		}
 
 		$cache_id = 'fichiers.' . $this->id_contenu;
@@ -355,9 +366,8 @@ class Fichiers
 	 */
 	static public function checkHash($hash)
 	{
-		return (boolean) DB::getInstance()->simpleQuerySingle(
+		return (boolean) DB::getInstance()->firstColumn(
 			'SELECT 1 FROM fichiers_contenu WHERE hash = ?;', 
-			false, 
 			trim(strtolower($hash))
 		);
 	}
@@ -369,18 +379,15 @@ class Fichiers
 	 */
 	static public function checkHashList($list)
 	{
-		$hash_list = '';
 		$db = DB::getInstance();
 
-		foreach ($list as $hash)
-		{
-			$hash_list .= '\'' . $db->escapeString($hash) . '\',';
-		}
+		array_walk($list, function ($a) use ($db) {
+			return $db->quote($a);
+		});
 
-		$hash_list = substr($hash_list, 0, -1);
-
-		return $db->queryFetchAssoc('SELECT hash, 1
-			FROM fichiers_contenu WHERE hash IN (' . $hash_list . ');');
+		$query = sprintf('SELECT hash, 1 FROM fichiers_contenu WHERE hash IN (%s);', 
+			$list);
+		return $db->getAssoc($query);
 	}
 
 	/**
@@ -457,9 +464,9 @@ class Fichiers
 		$db->begin();
 
 		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
-		if (!($id_contenu = $db->simpleQuerySingle('SELECT id FROM fichiers_contenu WHERE hash = ?;', false, $hash)))
+		if (!($id_contenu = $db->firstColumn('SELECT id FROM fichiers_contenu WHERE hash = ?;', $hash)))
 		{
-			$db->simpleInsert('fichiers_contenu', [
+			$db->insert('fichiers_contenu', [
 				'hash'		=>	$hash,
 				'taille'	=>	(int)$size,
 				'contenu'	=>	[\SQLITE3_BLOB, file_get_contents($file['tmp_name'])],
@@ -468,7 +475,7 @@ class Fichiers
 			$id_contenu = $db->lastInsertRowID();
 		}
 
-		$db->simpleInsert('fichiers', [
+		$db->insert('fichiers', [
 			'id_contenu'	=>	(int)$id_contenu,
 			'nom'			=>	$name,
 			'type'			=>	$type,
@@ -491,19 +498,19 @@ class Fichiers
 		$db = DB::getInstance();
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		$file = $db->simpleQuerySingle('SELECT * FROM fichiers 
-			INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu AND fc.hash = ?;', true, trim($hash));
+		$file = $db->first('SELECT * FROM fichiers 
+			INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu AND fc.hash = ?;', trim($hash));
 
 		if (!$file)
 		{
 			throw new UserException('Le fichier à copier n\'existe pas (aucun hash ne correspond à '.$hash.').');
 		}
 
-		$db->simpleInsert('fichiers', [
-			'id_contenu'	=>	(int)$file['id_contenu'],
-			'nom'			=>	$name,
-			'type'			=>	$file['type'],
-			'image'			=>	(int)$file['image'],
+		$db->insert('fichiers', [
+			'id_contenu' =>	(int)$file->id_contenu,
+			'nom'        =>	$name,
+			'type'       =>	$file->type,
+			'image'      =>	(int)$file->image,
 		]);
 
 		return new Fichiers($db->lastInsertRowID());
@@ -529,17 +536,17 @@ class Fichiers
 
     	$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
 
-        $files = DB::getInstance()->simpleStatementFetch('SELECT fichiers.*, c.hash, c.taille
+        $files = DB::getInstance()->get('SELECT fichiers.*, c.hash, c.taille
         	FROM fichiers 
             INNER JOIN fichiers_'.$type.' AS fwp ON fwp.fichier = fichiers.id
             INNER JOIN fichiers_contenu AS c ON c.id = fichiers.id_contenu
             WHERE fwp.id = ? '.$images.'
-            ORDER BY fichiers.nom COLLATE NOCASE;', \SQLITE3_ASSOC, (int)$id);
+            ORDER BY fichiers.nom COLLATE NOCASE;', (int)$id);
 
         foreach ($files as &$file)
         {
-        	$file['url'] = self::_getURL($file['id'], $file['nom']);
-        	$file['thumb'] = $file['image'] ? self::_getURL($file['id'], $file['nom'], 200) : false;
+        	$file->url = self::_getURL($file->id, $file->nom);
+        	$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, 200) : false;
         }
 
         return $files;
@@ -556,7 +563,7 @@ class Fichiers
     	$used = self::listFilesUsedInText($text);
 
     	return array_filter($files, function ($row) use ($used) {
-    		return !in_array($row['id'], $used);
+    		return !in_array($row->id, $used);
     	});
     }
 
