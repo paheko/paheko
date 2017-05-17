@@ -416,7 +416,7 @@ class DB
      * @param  string $query Requête SQL
      * @return boolean
      *
-     * Accepte un ou plusieurs arguments supplémentaires utilisés comme bindings.
+     * N'accepte PAS d'arguments supplémentaires
      */
     public function exec($query)
     {
@@ -584,6 +584,11 @@ class DB
     public function prepare($query)
     {
         return $this->db->prepare($query);
+    }
+
+    public function openBlob($table, $column, $rowid)
+    {
+        return $this->db->openBlob($table, $column, $rowid);
     }
 
     /**
