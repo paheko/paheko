@@ -381,12 +381,12 @@ class Fichiers
 	{
 		$db = DB::getInstance();
 
-		array_walk($list, function ($a) use ($db) {
-			return $db->quote($a);
+		array_walk($list, function (&$a) use ($db) {
+			$a = $db->quote($a);
 		});
 
 		$query = sprintf('SELECT hash, 1 FROM fichiers_contenu WHERE hash IN (%s);', 
-			$list);
+			implode(', ', $list));
 		return $db->getAssoc($query);
 	}
 

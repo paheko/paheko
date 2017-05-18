@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Inclure un fichier" current="wiki" body_id="transparent" is_popup=true js=1}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" enctype="multipart/form-data" action="{$self_url}" id="f_upload">
     <fieldset>

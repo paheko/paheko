@@ -3,34 +3,30 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
+$form_errors = [];
 $parent = (int) Utils::get('parent') ?: 0;
 
-if (!empty($_POST['create']))
+if (f('create'))
 {
-    if (!Utils::CSRF_check('wiki_create'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        try {
-            $id = $wiki->create([
-                'titre'         =>  Utils::post('titre'),
-                'parent'        =>  $parent,
-            ]);
+    fc('wiki_create', [
+        'titre' => 'required',
+        'parent'=> 'required|integer'
+    ], $form_errors);
 
-            Utils::redirect('/admin/wiki/editer.php?id='.$id);
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+    try {
+        $id = $wiki->create([
+            'titre'  => f('titre'),
+            'parent' => $parent,
+        ]);
+
+        Utils::redirect('/admin/wiki/editer.php?id='.$id);
+    }
+    catch (UserException $e)
+    {
+        $form_errors[] = $e->getMessage();
     }
 }
 
-$tpl->assign('error', $error);
+$tpl->assign('form_errors', $form_errors);
 
 $tpl->display('admin/wiki/creer.tpl');
-
-?>
