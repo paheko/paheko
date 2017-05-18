@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Éditer une page" current="wiki" js=1}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}" id="f_form">
 
