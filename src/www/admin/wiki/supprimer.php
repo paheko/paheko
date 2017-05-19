@@ -14,8 +14,6 @@ if (!$page)
     throw new UserException("Cette page n'existe pas.");
 }
 
-$form_errors = [];
-
 if (f('delete'))
 {
     if (fc('delete_wiki_'.$page->id, [], $form_errors))
@@ -31,7 +29,6 @@ if (f('delete'))
     }
 }
 
-$tpl->assign('form_errors', $form_errors);
 $tpl->assign('page', $page);
 
 $tpl->display('admin/wiki/supprimer.tpl');

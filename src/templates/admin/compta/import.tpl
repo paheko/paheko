@@ -1,10 +1,8 @@
 {include file="admin/_head.tpl" title="Import / Export" current="compta"}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{elseif $ok}
+{form_errors}
+
+{if $ok}
     <p class="confirm">
         L'import s'est bien déroulé.
     </p>

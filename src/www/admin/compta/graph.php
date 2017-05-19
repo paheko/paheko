@@ -3,12 +3,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(Utils::get('g'), ['recettes_depenses', 'banques_caisses']))
-{
-	throw new UserException('Graphique inconnu.');
-}
+qv(['g' => 'required|in:recettes_depenses:banques_caisses']);
 
-$graph = Utils::get('g');
+$graph = qg('g');
 
 if (Static_Cache::expired('graph_' . $graph))
 {

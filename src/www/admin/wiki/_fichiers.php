@@ -6,7 +6,7 @@ require_once __DIR__ . '/_inc.php';
 qv(['page' => 'required|numeric']);
 
 $page = $wiki->getById(qg('page'));
-$form_errors = [];
+$csrf_id = 'wiki_files_' . $page->id;
 
 if (!$page)
 {
@@ -21,7 +21,7 @@ if ($hash_check = f('uploadHelper_hashCheck'))
 }
 elseif (f('delete'))
 {
-    if (fc('wiki_files_'.$page->id, [], $form_errors))
+    if (fc($csrf_id, [], $form_errors))
     {
         try {
             $fichier = new Fichiers(f('delete'));
@@ -52,7 +52,7 @@ elseif (f('upload') || f('uploadHelper_mode'))
         ];
     }
 
-    fc('wiki_files_'.$page->id, $validate, $form_errors);
+    fc($csrf_id, $validate, $form_errors);
 
     if (f('uploadHelper_status') > 0)
     {
@@ -109,13 +109,12 @@ $tpl->assign('fichiers', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->i
 $tpl->assign('images', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, true));
 
 $tpl->assign('max_size', Utils::getMaxUploadSize());
-$tpl->assign('form_errors', $form_errors);
 $tpl->assign('page', $page);
 $tpl->assign('sent', (bool)qg('sent'));
 
 $tpl->assign('custom_js', ['upload_helper.min.js', 'wiki_fichiers.js']);
 
-$tpl->assign('csrf_field_name', Utils::CSRF_field_name('wiki_files_' . $page->id));
-$tpl->assign('csrf_value', Utils::CSRF_create('wiki_files_' . $page->id));
+$tpl->assign('csrf_field_name', Utils::CSRF_field_name($csrf_id));
+$tpl->assign('csrf_value', Utils::CSRF_create($csrf_id));
 
 $tpl->display('admin/wiki/_fichiers.tpl');

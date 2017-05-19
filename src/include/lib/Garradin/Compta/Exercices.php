@@ -14,19 +14,19 @@ class Exercices
 
         $db = DB::getInstance();
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE
-            (debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin);', false,
+        if ($db->firstColumn('SELECT 1 FROM compta_exercices WHERE
+            (debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin);',
             ['debut' => $data['debut'], 'fin' => $data['fin']]))
         {
             throw new UserException('La date de début ou de fin se recoupe avec un autre exercice.');
         }
 
-        if ($db->querySingle('SELECT 1 FROM compta_exercices WHERE cloture = 0;'))
+        if ($db->firstColumn('SELECT 1 FROM compta_exercices WHERE cloture = 0;'))
         {
             throw new UserException('Il n\'est pas possible de créer un nouvel exercice tant qu\'il existe un exercice non-clôturé.');
         }
 
-        $db->simpleInsert('compta_exercices', [
+        $db->insert('compta_exercices', [
             'libelle'   =>  trim($data['libelle']),
             'debut'     =>  $data['debut'],
             'fin'       =>  $data['fin'],
@@ -42,31 +42,31 @@ class Exercices
         $this->_checkFields($data);
 
         // Evitons que les exercices se croisent
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE id != :id AND
-            ((debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin));', false,
+        if ($db->firstColumn('SELECT 1 FROM compta_exercices WHERE id != :id AND
+            ((debut <= :debut AND fin >= :debut) OR (debut <= :fin AND fin >= :fin));',
             ['debut' => $data['debut'], 'fin' => $data['fin'], 'id' => (int) $id]))
         {
             throw new UserException('La date de début ou de fin se recoupe avec un autre exercice.');
         }
 
         // On vérifie qu'on ne va pas mettre des opérations en dehors de tout exercice
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_exercice = ?
-            AND date < ? LIMIT 1;', false, (int)$id, $data['debut']))
+        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE id_exercice = ?
+            AND date < ? LIMIT 1;', (int)$id, $data['debut']))
         {
             throw new UserException('Des opérations de cet exercice ont une date antérieure à la date de début de l\'exercice.');
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_exercice = ?
-            AND date > ? LIMIT 1;', false, (int)$id, $data['fin']))
+        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE id_exercice = ?
+            AND date > ? LIMIT 1;', (int)$id, $data['fin']))
         {
             throw new UserException('Des opérations de cet exercice ont une date postérieure à la date de fin de l\'exercice.');
         }
 
-        $db->simpleUpdate('compta_exercices', [
+        $db->update('compta_exercices', [
             'libelle'   =>  trim($data['libelle']),
             'debut'     =>  $data['debut'],
             'fin'       =>  $data['fin'],
-        ], 'id = \''.(int)$id.'\'');
+        ], 'id = :id', ['id' => (int)$id]);
 
         return true;
     }
@@ -90,10 +90,10 @@ class Exercices
         $db->begin();
 
         // Clôture de l'exercice
-        $db->simpleUpdate('compta_exercices', [
+        $db->update('compta_exercices', [
             'cloture'   =>  1,
             'fin'       =>  $end,
-        ], 'id = \''.(int)$id.'\'');
+        ], 'id = :id', ['id' => (int)$id]);
 
         // Date de début du nouvel exercice : lendemain de la clôture du précédent exercice
         $new_begin = Utils::modifyDate($end, '+1 day');
@@ -104,7 +104,7 @@ class Exercices
         // Enfin sauf s'il existe déjà des opérations après cette date, auquel cas la date de fin
         // est fixée à la date de la dernière opération, ceci pour ne pas avoir d'opération
         // orpheline d'exercice
-        $last = $db->simpleQuerySingle('SELECT date FROM compta_journal WHERE id_exercice = ? AND date >= ? ORDER BY date DESC LIMIT 1;', false, $id, $new_end);
+        $last = $db->firstColumn('SELECT date FROM compta_journal WHERE id_exercice = ? AND date >= ? ORDER BY date DESC LIMIT 1;', $id, $new_end);
         $new_end = $last ?: $new_end;
 
         // Création du nouvel exercice
@@ -116,8 +116,10 @@ class Exercices
 
         // Ré-attribution des opérations de l'exercice à clôturer qui ne sont pas dans son
         // intervale au nouvel exercice
-        $db->simpleExec('UPDATE compta_journal SET id_exercice = ? WHERE id_exercice = ? AND date >= ?;',
-            $new_id, $id, $new_begin);
+        $db->update('compta_journal', ['id_exercice' => $new_id], 'id_exercice = :id AND date >= :date', [
+            'id'   => $id,
+            'date' => $new_begin,
+        ]);
 
         $db->commit();
 
@@ -156,7 +158,7 @@ class Exercices
         $this->solderResultat($old_id, $date);
 
         // Récupérer chacun des comptes de bilan et leurs soldes (uniquement les classes 1 à 5)
-        $statement = $db->simpleStatement('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
+        $statement = $db->query('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
             COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compta_comptes.id AND id_exercice = :id), 0)
             - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compta_comptes.id AND id_exercice = :id), 0) AS solde
             FROM compta_comptes 
@@ -252,12 +254,12 @@ class Exercices
         $db = DB::getInstance();
 
         // Ne pas supprimer un compte qui est utilisé !
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_exercice = ? LIMIT 1;', false, $id))
+        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE id_exercice = ? LIMIT 1;', $id))
         {
             throw new UserException('Cet exercice ne peut être supprimé car des opérations comptables y sont liées.');
         }
 
-        $db->simpleExec('DELETE FROM compta_exercices WHERE id = ?;', (int)$id);
+        $db->delete('compta_exercices', 'id = ?', (int)$id);
 
         return true;
     }
@@ -265,30 +267,30 @@ class Exercices
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', debut) AS debut,
-            strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE id = ?;', true, (int)$id);
+        return $db->first('SELECT *, strftime(\'%s\', debut) AS debut,
+            strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE id = ?;', (int)$id);
     }
 
     public function getCurrent()
     {
         $db = DB::getInstance();
-        return $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) AS fin FROM compta_exercices
-            WHERE cloture = 0 LIMIT 1;', true);
+        return $db->first('SELECT *, strftime(\'%s\', debut) AS debut, strftime(\'%s\', fin) AS fin FROM compta_exercices
+            WHERE cloture = 0 LIMIT 1;');
     }
 
     public function getCurrentId()
     {
         $db = DB::getInstance();
-        return $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
+        return $db->firstColumn('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
     }
 
     public function getList()
     {
         $db = DB::getInstance();
-        return $db->simpleStatementFetchAssocKey('SELECT id, *, strftime(\'%s\', debut) AS debut,
+        return $db->getAssocKey('SELECT id, *, strftime(\'%s\', debut) AS debut,
             strftime(\'%s\', fin) AS fin,
             (SELECT COUNT(*) FROM compta_journal WHERE id_exercice = compta_exercices.id) AS nb_operations
-            FROM compta_exercices ORDER BY fin DESC;', SQLITE3_ASSOC);
+            FROM compta_exercices ORDER BY fin DESC;');
     }
 
     protected function _checkFields(&$data)
@@ -317,9 +319,8 @@ class Exercices
     public function getJournal($exercice)
     {
         $db = DB::getInstance();
-        $query = 'SELECT *, strftime(\'%s\', date) AS date FROM compta_journal
-            WHERE id_exercice = '.(int)$exercice.' ORDER BY date, id;';
-        return $db->simpleStatementFetch($query);
+        return $db->get('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal
+            WHERE id_exercice = ? ORDER BY date, id;', $exercice);
     }
 
     public function getGrandLivre($exercice)
@@ -327,14 +328,13 @@ class Exercices
         $db = DB::getInstance();
         $livre = ['classes' => [], 'debit' => 0.0, 'credit' => 0.0];
 
-        $res = $db->prepare('SELECT compte FROM
+        $res = $db->query('SELECT compte FROM
             (SELECT compte_debit AS compte FROM compta_journal
-                    WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_debit
+                    WHERE id_exercice = :exercice GROUP BY compte_debit
                 UNION
                 SELECT compte_credit AS compte FROM compta_journal
-                    WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
-            ORDER BY compte ASC;'
-            )->execute();
+                    WHERE id_exercice = :exercice GROUP BY compte_credit)
+            ORDER BY compte ASC;', ['exercice' => (int) $exercice]);
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
         {
@@ -361,35 +361,38 @@ class Exercices
 
             $livre['classes'][$classe][$parent]['comptes'][$compte] = ['debit' => 0.0, 'credit' => 0.0, 'journal' => []];
 
-            $livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] = $db->simpleStatementFetch(
+            $livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] = $db->get(
                 'SELECT *, strftime(\'%s\', date) AS date FROM (
-                    SELECT * FROM compta_journal WHERE compte_debit = :compte AND id_exercice = '.(int)$exercice.'
+                    SELECT * FROM compta_journal WHERE compte_debit = :compte AND id_exercice = :exercice
                     UNION
-                    SELECT * FROM compta_journal WHERE compte_credit = :compte AND id_exercice = '.(int)$exercice.'
+                    SELECT * FROM compta_journal WHERE compte_credit = :compte AND id_exercice = :exercice
                     )
-                ORDER BY date, numero_piece, id;', SQLITE3_ASSOC, ['compte' => $compte]);
+                ORDER BY date, numero_piece, id;', 
+                ['compte' => $compte, 'exercice' => (int) $exercice]);
 
             $solde = 0.0;
+
             foreach ($livre['classes'][$classe][$parent]['comptes'][$compte]['journal'] as &$ligne)
             {
-                if ($ligne["compte_credit"] == $compte)
+                if ($ligne->compte_credit == $compte)
                 {
-                    $solde += $ligne['montant'];
+                    $solde += $ligne->montant;
                 }
                 else
                 {
-                    $solde -= $ligne['montant'];
+                    $solde -= $ligne->montant;
                 }
-                $ligne['solde'] = $solde;
+
+                $ligne->solde = $solde;
             }
 
-            $debit = (float) $db->simpleQuerySingle(
-                'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND id_exercice = '.(int)$exercice.';',
-                false, $compte);
+            $debit = (float) $db->firstColumn(
+                'SELECT SUM(montant) FROM compta_journal WHERE compte_debit = ? AND id_exercice = ?;',
+                $compte, (int) $exercice);
 
-            $credit = (float) $db->simpleQuerySingle(
-                'SELECT SUM(montant) FROM compta_journal WHERE compte_credit = ? AND id_exercice = '.(int)$exercice.';',
-                false, $compte);
+            $credit = (float) $db->firstColumn(
+                'SELECT SUM(montant) FROM compta_journal WHERE compte_credit = ? AND id_exercice = ?;',
+                $compte, (int) $exercice);
 
             $livre['classes'][$classe][$parent]['comptes'][$compte]['debit'] = $debit;
             $livre['classes'][$classe][$parent]['comptes'][$compte]['credit'] = $credit;
@@ -415,17 +418,16 @@ class Exercices
         $produits   = ['comptes' => [], 'total' => 0.0];
         $resultat   = 0.0;
 
-        $res = $db->prepare('SELECT compte, SUM(debit), SUM(credit)
+        $res = $db->query('SELECT compte, SUM(debit), SUM(credit)
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit
-                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_debit
+                    FROM compta_journal WHERE id_exercice = :exercice GROUP BY compte_debit
                 UNION
                 SELECT compte_credit AS compte, 0 AS debit, SUM(montant) AS credit
-                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
+                    FROM compta_journal WHERE id_exercice = :exercice GROUP BY compte_credit)
             WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
             GROUP BY compte
-            ORDER BY compte ASC;'
-            )->execute();
+            ORDER BY compte ASC;', ['exercice' => (int)$exercice]);
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
         {
@@ -514,16 +516,15 @@ class Exercices
 
         // Y'a sûrement moyen d'améliorer tout ça pour que le maximum de travail
         // soit fait au niveau du SQL, mais pour le moment ça marche
-        $res = $db->prepare('SELECT compte, debit, credit, (SELECT position FROM compta_comptes WHERE id = compte) AS position
+        $res = $db->query('SELECT compte, debit, credit, (SELECT position FROM compta_comptes WHERE id = compte) AS position
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, NULL AS credit
-                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_debit
+                    FROM compta_journal WHERE id_exercice = :exercice GROUP BY compte_debit
                 UNION
                 SELECT compte_credit AS compte, NULL AS debit, SUM(montant) AS credit
-                    FROM compta_journal WHERE id_exercice = '.(int)$exercice.' GROUP BY compte_credit)
+                    FROM compta_journal WHERE id_exercice = :exercice GROUP BY compte_credit)
             WHERE compte IN (SELECT id FROM compta_comptes WHERE position IN ('.implode(', ', $include).'))
-            ORDER BY compte ASC;'
-            )->execute();
+            ORDER BY compte ASC;', ['exercice' => (int)$exercice]);
 
         while ($row = $res->fetchArray(SQLITE3_NUM))
         {

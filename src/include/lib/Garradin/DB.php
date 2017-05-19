@@ -674,7 +674,7 @@ class DB
      */
     public function queryFetch($query, $mode = null)
     {
-        return $this->fetch($this->query($query), $mode);
+        return $this->simpleStatementFetch($query, $mode);
     }
 
     /**
@@ -682,7 +682,7 @@ class DB
      */
     public function queryFetchAssoc($query)
     {
-        return $this->fetchAssoc($this->query($query));
+        return $this->simpleStatementFetchAssoc($query);
     }
 
     /**
@@ -690,7 +690,7 @@ class DB
      */
     public function queryFetchAssocKey($query, $mode = null)
     {
-        return $this->fetchAssocKey($this->query($query), $mode);
+        return $this->simpleStatementFetchAssocKey($query, $mode);
     }
 
     /**
