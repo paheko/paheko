@@ -5,7 +5,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $exercices = new Compta\Exercices;
 
-$exercice = $exercices->get((int)Utils::get('id'));
+$exercice = $exercices->get((int)qg('id'));
 
 if (!$exercice)
 {
@@ -21,11 +21,9 @@ function get_nom_compte($compte)
 }
 
 $tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
-$tpl->assign('livre', $exercices->getGrandLivre($exercice['id']));
+$tpl->assign('livre', $exercices->getGrandLivre($exercice->id));
 
-$tpl->assign('cloture', $exercice['cloture'] ? $exercice['fin'] : time());
+$tpl->assign('cloture', $exercice->cloture ? $exercice->fin : time());
 $tpl->assign('exercice', $exercice);
 
 $tpl->display('admin/compta/exercices/grand_livre.tpl');
-
-?>

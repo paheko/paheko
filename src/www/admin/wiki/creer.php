@@ -3,7 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$form_errors = [];
 $parent = (int) Utils::get('parent') ?: 0;
 
 if (f('create'))
@@ -26,7 +25,5 @@ if (f('create'))
         $form_errors[] = $e->getMessage();
     }
 }
-
-$tpl->assign('form_errors', $form_errors);
 
 $tpl->display('admin/wiki/creer.tpl');

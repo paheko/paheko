@@ -8,7 +8,6 @@ $session->requireAccess('wiki', Membres::DROIT_ECRITURE);
 qv(['id' => 'required|numeric']);
 
 $page = $wiki->getById(qg('id'));
-$form_errors = [];
 $date = false;
 
 if (!$page)
@@ -75,7 +74,6 @@ if (f('save'))
 $parent = (int) f('parent') ?: (int) $page->parent;
 $tpl->assign('parent', $parent ? $wiki->getTitle($parent) : 0);
 
-$tpl->assign('form_errors', $form_errors);
 $tpl->assign('page', $page);
 
 $tpl->assign('wiki', $wiki);

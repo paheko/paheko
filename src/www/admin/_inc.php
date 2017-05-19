@@ -3,7 +3,6 @@
 namespace Garradin;
 
 use Garradin\Membres\Session;
-use KD2\Form;
 
 require_once __DIR__ . '/../../include/init.php';
 
@@ -12,20 +11,6 @@ if (PREFER_HTTPS !== true && PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']) && em
 {
     utils::redirect(str_replace('http://', 'https://', utils::getSelfURL()));
     exit;
-}
-
-// Alias utiles pour la gestion de formulaires
-
-// Form element: retourne un élément de formulaire
-function f($key)
-{
-    return Form::get($key);
-}
-
-// Form-Check: valider un formulaire
-function fc($action, Array $rules = [], Array &$errors = [])
-{
-    return Form::check($action, $rules, $errors);
 }
 
 // Query-Validate: valider les éléments passés en GET
@@ -51,6 +36,9 @@ function qg($key)
 
 $tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
+
+$form = new Form;
+$tpl->assign_by_ref('form_errors', $form->getErrors());
 
 $session = Session::get();
 
