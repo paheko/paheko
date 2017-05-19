@@ -213,7 +213,8 @@ class DB
             
             if (count($args) != $nb)
             {
-                throw new \LengthException('Arguments error: '.count($args).' supplied, but '.$nb.' are required by query.');
+                throw new \LengthException(sprintf('Arguments error: %d supplied, but %d are required by query.', 
+                    count($args), $nb));
             }
 
             reset($args);
@@ -241,7 +242,7 @@ class DB
                     }
 
                     $type = $this->getArgType($value, $key);
-                    $statement->bindValue(':'.$key, $value, $type);
+                    $statement->bindValue(':' . $key, $value, $type);
                 }
             }
         }

@@ -98,7 +98,7 @@
                     {foreach from=$images item="file"}
                         <li>
                             <figure>
-                                <a href="{$file.url}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
+                                <a class="internal-image" href="{$file.url}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
                             </figure>
                         </li>
                     {/foreach}

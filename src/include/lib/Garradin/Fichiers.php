@@ -116,15 +116,18 @@ class Fichiers
 			throw new \LogicException('Type de lien de fichier inconnu.');
 		}
 
-		// Ne pas chercher dans le type qu'on veut lier
-		unset($check[array_search($type, $check)]);
-
 		// Vérifier que le fichier n'est pas déjà lié à un autre type
 		$query = [];
 
-		foreach ($check as $type)
+		foreach ($check as $check_type)
 		{
-			$query[] = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = %d', $type, $this->id);
+			// Ne pas chercher dans le type qu'on veut lier
+			if ($check_type == $type)
+			{
+				continue;
+			}
+
+			$query[] = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = %d', $check_type, $this->id);
 		}
 
 		$query = implode(' UNION ', $query) . ';';
@@ -135,7 +138,7 @@ class Fichiers
 		}
 
 		return $db->query('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
-			(int)$this->id, (int)$foreign_id);
+			[(int)$this->id, (int)$foreign_id]);
 	}
 
 	/**
@@ -489,6 +492,7 @@ class Fichiers
 
 	/**
 	 * Envoie un fichier déjà stocké
+	 * 
 	 * @param  string $name Nom du fichier
 	 * @param  string $hash Hash SHA1 du contenu du fichier
 	 * @return object       Un objet Fichiers en cas de succès
@@ -516,17 +520,17 @@ class Fichiers
 		return new Fichiers($db->lastInsertRowID());
 	}
 
-    /**
-     * Récupère la liste des fichiers liés à une ressource
-     * 
-     * @param  string  $type    Type de ressource
-     * @param  integer $id      Numéro de ressource
-     * @param  boolean $images  TRUE pour retourner seulement les images,
-     * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
-     * @return array          Liste des fichiers
-     */
-    static public function listLinkedFiles($type, $id, $images = false)
-    {
+	/**
+	 * Récupère la liste des fichiers liés à une ressource
+	 * 
+	 * @param  string  $type    Type de ressource
+	 * @param  integer $id      Numéro de ressource
+	 * @param  boolean $images  TRUE pour retourner seulement les images,
+	 * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
+	 * @return array          Liste des fichiers
+	 */
+	static public function listLinkedFiles($type, $id, $images = false)
+	{
 		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
 
 		if (!in_array($type, $check))
@@ -534,50 +538,52 @@ class Fichiers
 			throw new \LogicException('Type de lien de fichier inconnu.');
 		}
 
-    	$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
+		$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
 
-        $files = DB::getInstance()->get('SELECT fichiers.*, c.hash, c.taille
-        	FROM fichiers 
-            INNER JOIN fichiers_'.$type.' AS fwp ON fwp.fichier = fichiers.id
-            INNER JOIN fichiers_contenu AS c ON c.id = fichiers.id_contenu
-            WHERE fwp.id = ? '.$images.'
-            ORDER BY fichiers.nom COLLATE NOCASE;', (int)$id);
+		$query = sprintf('SELECT fichiers.*, c.hash, c.taille
+			FROM fichiers 
+			INNER JOIN fichiers_%s AS fwp ON fwp.fichier = fichiers.id
+			INNER JOIN fichiers_contenu AS c ON c.id = fichiers.id_contenu
+			WHERE fwp.id = ? %s
+			ORDER BY fichiers.nom COLLATE NOCASE;', $type, $images);
 
-        foreach ($files as &$file)
-        {
-        	$file->url = self::_getURL($file->id, $file->nom);
-        	$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, 200) : false;
-        }
+		$files = DB::getInstance()->get($query, (int)$id);
 
-        return $files;
-    }
+		foreach ($files as &$file)
+		{
+			$file->url = self::_getURL($file->id, $file->nom);
+			$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, 200) : false;
+		}
 
-    /**
-     * Enlève d'une liste de fichiers ceux qui sont mentionnés dans un texte wiki
-     * @param  array $files Liste de fichiers
-     * @param  string $text  texte wiki
-     * @return array        Un tableau qui ne contient pas les fichiers mentionnés dans $text
-     */
-    static public function filterFilesUsedInText($files, $text)
-    {
-    	$used = self::listFilesUsedInText($text);
+		return $files;
+	}
 
-    	return array_filter($files, function ($row) use ($used) {
-    		return !in_array($row->id, $used);
-    	});
-    }
-
-    /**
-     * Renvoie une liste d'ID de fichiers mentionnées dans un texte wiki
-     * @param  string $text Texte wiki
-     * @return array       Liste des IDs de fichiers mentionnés
-     */
-    static public function listFilesUsedInText($text)
+	/**
+	 * Enlève d'une liste de fichiers ceux qui sont mentionnés dans un texte wiki
+	 * @param  array $files Liste de fichiers
+	 * @param  string $text  texte wiki
+	 * @return array        Un tableau qui ne contient pas les fichiers mentionnés dans $text
+	 */
+	static public function filterFilesUsedInText($files, $text)
 	{
-    	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
-    	preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
-    	
-    	return array_merge($match[1], $match2[1]);
+		$used = self::listFilesUsedInText($text);
+
+		return array_filter($files, function ($row) use ($used) {
+			return !in_array($row->id, $used);
+		});
+	}
+
+	/**
+	 * Renvoie une liste d'ID de fichiers mentionnées dans un texte wiki
+	 * @param  string $text Texte wiki
+	 * @return array       Liste des IDs de fichiers mentionnés
+	 */
+	static public function listFilesUsedInText($text)
+	{
+		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
+		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
+		
+		return array_merge($match[1], $match2[1]);
 	}
 
 	/**
@@ -647,7 +653,7 @@ class Fichiers
 			{
 				$id = (int)$value;
 			}
-			else if (in_array($value, $_align_values) && !$align)
+			else if (in_array($value, $align_values) && !$align)
 			{
 				$align = $value;
 			}

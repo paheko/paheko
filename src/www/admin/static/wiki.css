@@ -85,12 +85,14 @@ aside.fichier a:hover {
     background: rgb(0, 0, 0);
     background: rgba(0, 0, 0, 0.75);
     text-align: center;
+    transition: opacity .5s;
 }
 
 .imageBrowser figure {
     margin: 5%;
     width: 90%;
     height: 90%;
+    transition: all .5s;
 }
 
 .imageBrowser figure img {
@@ -106,5 +108,4 @@ aside.fichier a:hover {
     max-width: 90%;
     border-radius: .5em;
     cursor: pointer;
-    transition: all .5s;
 }

@@ -19,8 +19,7 @@ if ($hash_check = f('uploadHelper_hashCheck'))
     echo json_encode(Fichiers::checkHashList($hash_check));
     exit;
 }
-
-if (f('delete'))
+elseif (f('delete'))
 {
     if (fc('wiki_files_'.$page->id, [], $form_errors))
     {
@@ -41,26 +40,35 @@ if (f('delete'))
         }
     }
 }
-
-if (f('upload') || f('uploadHelper_status') !== null)
+elseif (f('upload') || f('uploadHelper_mode'))
 {
-    fc('wiki_files_'.$page->id, [], $form_errors);
+    $validate = ['fichier' => 'file|required'];
+
+    if (f('uploadHelper_mode') == 'hash_only')
+    {
+        $validate = [
+            'uploadHelper_fileHash' => 'required',
+            'uploadHelper_fileName' => 'required',
+        ];
+    }
+
+    fc('wiki_files_'.$page->id, $validate, $form_errors);
 
     if (f('uploadHelper_status') > 0)
     {
         $form_errors[] = 'Un seul fichier peut être envoyé en même temps.';
     }
     
-    if (f('fichier') && count($form_errors) === 0)
+    if (count($form_errors) === 0)
     {
         try {
-            if (null !== f('uploadHelper_status') && f('fichier'))
+            if (f('uploadHelper_mode') == 'hash_only' && f('uploadHelper_fileHash') && f('uploadHelper_fileName'))
             {
-                $fichier = Fichiers::uploadExistingHash(f('fichier'), f('uploadHelper_fileHash'));
+                $fichier = Fichiers::uploadExistingHash(f('uploadHelper_fileName'), f('uploadHelper_fileHash'));
             }
             else
             {
-                $fichier = Fichiers::upload(f('fichier'));
+                $fichier = Fichiers::upload($_FILES['fichier']);
             }
 
             // Lier le fichier à la page wiki
@@ -89,12 +97,8 @@ if (f('upload') || f('uploadHelper_status') !== null)
             $form_errors[] = $e->getMessage();
         }
     }
-    else
-    {
-        $form_errors[] = 'Aucun fichier envoyé.';
-    }
 
-    if (f('uploadHelper_status') !== null)
+    if (f('uploadHelper_mode') !== null)
     {
         echo json_encode(['error' => implode(PHP_EOL, $form_errors)]);
         exit;
