@@ -1,21 +1,21 @@
 (function () {
     var enableGallery = function () {
-        var gallery = document.getElementsByClassName('gallery');
-
-        if (gallery.length == 1 && document.querySelector)
+        if (!document.querySelectorAll)
         {
-            var items = gallery[0].getElementsByTagName('li');
+            return false;
+        }
 
-            for (var i = 0; i < items.length; i++)
-            {
-                var a = items[i].querySelector('figure > a');
-                a.pos = i;
-                a.onclick= function (e) {
-                    e.preventDefault();
-                    openImageBrowser(items, this.pos);
-                    return false;
-                };
-            }
+        var items = document.querySelectorAll('a.internal-image');
+
+        for (var i = 0; i < items.length; i++)
+        {
+            var a = items[i];
+            a.pos = i;
+            a.onclick= function (e) {
+                e.preventDefault();
+                openImageBrowser(items, this.pos);
+                return false;
+            };
         }
     };
 
@@ -38,9 +38,11 @@
         };
 
         var fig = document.createElement('figure');
+        fig.style.opacity = 0;
 
         div.onclick = function (e) {
-            div.parentNode.removeChild(div);
+            div.style.opacity = 0;
+            window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
         };
 
         fig.appendChild(img);
@@ -53,20 +55,26 @@
     function openImage(img, items)
     {
         // Pour animation
-        img.style.opacity = 0;
+        img.parentNode.style.opacity = 0;
 
         if (++img.pos == items.length)
         {
-            img.pos = 0;
+            var div = img.parentNode.parentNode;
+            div.style.opacity = 0;
+            window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
+            return;
         }
 
         var newImg = new Image;
         newImg.onload = function (e) {
-            img.src = e.target.src;
-            img.style.opacity = 1;
+            var new_src = e.target.src;
+            window.setTimeout(function() {
+                img.src = new_src;
+                img.parentNode.style.opacity = 1;
+            }, img.src ? 250 : 0);
         };
 
-        newImg.src = items[img.pos].querySelector('figure > a').href;
+        newImg.src = items[img.pos].href;
         return false;   
     }
 
