@@ -33,8 +33,9 @@ catch (\InvalidArgumentException $e)
 }
 
 $session = Membres\Session::get();
+$user = $session ? $session->getUser() : false;
 
-if (!$session || !$file->checkAccess($session->getUser()))
+if (!$file->checkAccess($user))
 {
 	header('HTTP/1.1 403 Forbidden', true, 403);
 	throw new UserException('Vous n\'avez pas accès à ce fichier.');

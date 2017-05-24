@@ -12,7 +12,7 @@ if ($session)
 }
 
 // Relance session_start et renvoie une image de 1px transparente
-if (isset($_GET['keepSessionAlive']))
+if (qg('keepSessionAlive') !== null)
 {
     Session::refresh();
 
@@ -25,19 +25,18 @@ if (isset($_GET['keepSessionAlive']))
     exit;
 }
 
-$errors = [];
 $fail = false;
 
 // Soumission du formulaire
 if (f('login'))
 {
-    $check = fc('login', [
+    $form->check('login', [
         '_id'       => 'required|string',
         'passe'     => 'required|string',
         'permanent' => 'boolean',
-    ], $errors);
+    ]);
 
-    if ($check && ($fail = Membres\Session::login(f('_id'), f('passe'), (bool) f('permanent'))))
+    if (!$form->hasErrors() && ($fail = Membres\Session::login(f('_id'), f('passe'), (bool) f('permanent'))))
     {
         Utils::redirect('/admin/');
     }
@@ -52,7 +51,6 @@ $tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
 $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfURL()));
 
 $tpl->assign('champ', $champ);
-$tpl->assign('form_errors', $errors);
 $tpl->assign('fail', $fail);
 
 $tpl->display('admin/login.tpl');

@@ -1,4 +1,4 @@
-</div>
+</main>
 
 <script type="text/javascript" defer="defer">
 var keep_session_url = "{$www_url}admin/login.php?keepSessionAlive&";

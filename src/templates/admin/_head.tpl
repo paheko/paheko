@@ -1,7 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8" />
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
@@ -16,6 +16,11 @@
             <script type="text/javascript" src="{$admin_url}static/scripts/{$js}"></script>
         {/foreach}
     {/if}
+    {if isset($custom_css)}
+        {foreach from=$custom_css item="css"}
+            <link rel="stylesheet" type="text/css" href="{$admin_url}static/{$css}" media="all" />
+        {/foreach}
+    {/if}
     {if isset($plugin_css)}
         {foreach from=$plugin_css item="css"}
             <link rel="stylesheet" type="text/css" href="{plugin_url file=$css}" />
@@ -26,13 +31,15 @@
             <script type="text/javascript" src="{plugin_url file=$js}"></script>
         {/foreach}
     {/if}
+    {custom_colors config=$config}
 </head>
 
 <body{if !empty($body_id)} id="{$body_id}"{/if} data-url="{$admin_url}">
 
 {if empty($is_popup)}
-<div class="header">
-    <ul class="menu">
+<header class="header">
+    <nav class="menu">
+    <ul>
     {if !$is_logged}
         <li><a href="{$www_url}">&larr; Retour au site</a></li>
         <li><a href="{$admin_url}">Connexion</a>
@@ -105,9 +112,10 @@
         {/if}
     {/if}
     </ul>
+    </nav>
 
     <h1>{$title}</h1>
-</div>
+</header>
 {/if}
 
-<div class="page">
+<main>
