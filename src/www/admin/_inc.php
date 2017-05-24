@@ -13,10 +13,15 @@ if (PREFER_HTTPS !== true && PREFER_HTTPS >= 2 && empty($_SERVER['HTTPS']) && em
     exit;
 }
 
+function f($key)
+{
+    return \KD2\Form::get($key);
+}
+
 // Query-Validate: valider les éléments passés en GET
 function qv(Array $rules)
 {
-    if (Form::validate($rules, $errors, $_GET))
+    if (\KD2\Form::validate($rules, $errors, $_GET))
     {
         return true;
     }
@@ -42,6 +47,8 @@ $tpl->assign_by_ref('form_errors', $form->getErrors());
 
 $session = Session::get();
 
+$tpl->assign('config', Config::getInstance()->getConfig());
+
 if (!defined('Garradin\LOGIN_PROCESS'))
 {
     if (!$session)
@@ -56,7 +63,6 @@ if (!defined('Garradin\LOGIN_PROCESS'))
         }
     }
 
-    $tpl->assign('config', Config::getInstance()->getConfig());
     $tpl->assign('is_logged', true);
 
     $user = $session->getUser();

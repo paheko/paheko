@@ -32,6 +32,7 @@ class Template extends \KD2\Smartyer
 
         $this->register_function('form_errors', [$this, 'formErrors']);
         $this->register_function('show_error', [$this, 'showError']);
+        $this->register_function('custom_colors', [$this, 'customColors']);
     }
 
     protected function formErrors($params)
@@ -90,6 +91,35 @@ class Template extends \KD2\Smartyer
         }
 
         return '<p class="error">' . $this->escape($params['message']) . '</p>';
+    }
+
+    protected function customColors()
+    {
+        $config = Config::getInstance();
+
+        if (!$config->get('couleur1') || !$config->get('couleur2') || !$config->get('image_fond'))
+        {
+            return '';
+        }
+
+        $couleur1 = implode(', ', sscanf($config->get('couleur1'), '#%02x%02x%02x'));
+        $couleur2 = implode(', ', sscanf($config->get('couleur2'), '#%02x%02x%02x'));
+
+        $f = new Fichiers($config->get('image_fond'));
+        $image_fond = $f->getURL();
+
+        $out = '
+        <style type="text/css">
+        :root {
+            --gMainColor: %s;
+            --gSecondColor: %s;
+        }
+        .header .menu, html {
+            background-image: url("%s");
+        }
+        </style>';
+
+        return sprintf($out, $couleur1, $couleur2, $image_fond);
     }
 }
 

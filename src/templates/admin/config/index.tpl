@@ -1,18 +1,14 @@
 {include file="admin/_head.tpl" title="Configuration" current="config"}
 
-{if $error}
-    {if $error == 'OK'}
+{include file="admin/config/_menu.tpl" current="index"}
+
+{if $ok}
     <p class="confirm">
         La configuration a bien été enregistrée.
     </p>
-    {else}
-    <p class="error">
-        {$error}
-    </p>
-    {/if}
 {/if}
 
-{include file="admin/config/_menu.tpl" current="index"}
+{form_errors}
 
 <form method="post" action="{$self_url}">
 
@@ -114,6 +110,17 @@
             </dd>
             
         </dl>
+    </fieldset>
+
+    <fieldset id="couleurs">
+        <legend>Personnalisation de l'interface</legend>
+        <dl>
+            <dt><label for="f_couleur1">Couleur principale</label></dt>
+            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[0]}" name="couleur1" value="{form_field name=couleur1 default=$couleur1}" id="f_couleur1" /></dd>
+            <dt><label for="f_couleur2">Couleur secondaire</label></dt>
+            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[1]}" name="couleur2" value="{form_field name=couleur2 default=$couleur2}" id="f_couleur2" /></dd>
+        </dl>
+        <input type="hidden" name="image_fond" id="f_image_fond" value="{form_field name=image_fond}" />
     </fieldset>
 
     <p class="submit">

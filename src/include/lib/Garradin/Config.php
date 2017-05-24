@@ -38,33 +38,37 @@ class Config
         $object = new \stdClass;
 
         $this->fields_types = [
-            'nom_asso'              =>  $string,
-            'adresse_asso'          =>  $string,
-            'email_asso'            =>  $string,
-            'site_asso'             =>  $string,
-
-            'monnaie'               =>  $string,
-            'pays'                  =>  $string,
-
-            'champs_membres'        =>  $object,
-
-            'email_envoi_automatique'=> $string,
-
-            'categorie_membres'     =>  $int,
-
-            'categorie_dons'        =>  $int,
-            'categorie_cotisations' =>  $int,
-
-            'accueil_wiki'          =>  $string,
-            'accueil_connexion'     =>  $string,
-
-            'frequence_sauvegardes' =>  $int,
-            'nombre_sauvegardes'    =>  $int,
-
-            'champ_identifiant'     =>  $string,
-            'champ_identite'        =>  $string,
-
-            'version'               =>  $string,
+            'nom_asso'                =>  $string,
+            'adresse_asso'            =>  $string,
+            'email_asso'              =>  $string,
+            'site_asso'               =>  $string,
+            
+            'monnaie'                 =>  $string,
+            'pays'                    =>  $string,
+            
+            'champs_membres'          =>  $object,
+            
+            'email_envoi_automatique' => $string,
+            
+            'categorie_membres'       =>  $int,
+            
+            'categorie_dons'          =>  $int,
+            'categorie_cotisations'   =>  $int,
+            
+            'accueil_wiki'            =>  $string,
+            'accueil_connexion'       =>  $string,
+            
+            'frequence_sauvegardes'   =>  $int,
+            'nombre_sauvegardes'      =>  $int,
+            
+            'champ_identifiant'       =>  $string,
+            'champ_identite'          =>  $string,
+            
+            'version'                 =>  $string,
+            
+            'couleur1'                =>  $string,
+            'couleur2'                =>  $string,
+            'image_fond'              =>  $string,
         ];
 
         $db = DB::getInstance();
@@ -113,6 +117,22 @@ class Config
         $db = DB::getInstance();
         $db->begin();
 
+        if (isset($this->modified['image_fond']))
+        {
+            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'image_fond\';'))
+            {
+                $f = new Fichiers($current);
+                $f->remove();
+            }
+
+            if (strlen($this->config['image_fond']) > 0)
+            {
+                $f = Fichiers::storeFromBase64('Image_fond_admin.png', $this->config['image_fond']);
+                $this->config['image_fond'] = $f->id;
+                unset($f);
+            }
+        }
+
         foreach ($this->modified as $key=>$modified)
         {
             $value = $this->config[$key];
@@ -126,8 +146,8 @@ class Config
                 $value = (string) $value;
             }
 
-            $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                $key, $value);
+            $db->query('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+                [$key, $value]);
         }
 
         if (!empty($this->modified['champ_identifiant']))

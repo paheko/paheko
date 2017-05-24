@@ -8,3 +8,5 @@ $session->requireAccess('wiki', Membres::DROIT_ACCES);
 
 $wiki = new Wiki;
 $wiki->setRestrictionCategorie($user->id_categorie, $user->droits->wiki);
+
+$tpl->assign('custom_css', ['wiki.css']);

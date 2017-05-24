@@ -1,5 +1,3 @@
-@import url("wiki.css");
-
 @charset "UTF-8";
 
 @font-face {
@@ -46,18 +44,30 @@ h6  { font-size: 0.8em; }
     orange : #d98628 rgb(217, 134, 40)
 */
 
-html { width: 100%; height: 100%; }
+:root {
+    --gBgColor: 255, 255, 255;
+    --gMainColor: 156, 79, 21;
+    --gSecondColor: 217, 134, 40;
+}
+
+html {
+    width: 100%;
+    height: 100%;
+    background: #fff url("gdin_bg.png") no-repeat 0px 0px fixed;
+    background-color: rgb(var(--gBgColor));
+    /* Pas possible d'utiliser une variable CSS pour l'image de fond, c'est bugué dans Chrome
+    cf. https://bugs.chromium.org/p/chromium/issues/detail?id=618165 */
+}
+
 body {
     font-size: 100%;
     color: #000;
     font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
-    background: #fff url("bg00.png") repeat-y left bottom;
-    background: url("bg01.png") no-repeat left -100px, url("bg00.png") repeat-y left bottom, #fff;
     padding-bottom: 1em;
 }
 
 body#popup {
-    background: url("bg01.png") no-repeat -140px -100px, url("bg00.png") repeat-y -140px bottom, #fff;
+    background: rgb(var(--gBgColor));
 }
 
 body#transparent {
@@ -66,22 +76,29 @@ body#transparent {
 
 .header {
     color: #fff;
+    color: rgb(var(--gBgColor));
 }
 
 .header h1 {
     color: #9c4f15;
+    color: rgb(var(--gMainColor));
     margin-left: 180px;
     margin-bottom: 0.4em;
 }
 
 .header .menu {
-    position: absolute;
-    width: 168px;
-    margin-top: 100px;
+    position: fixed;
+    width: 170px;
+    bottom: 0;
+    top: 0;
+    padding-top: 100px;
+    background: #9c4f15 url("gdin_bg.png") no-repeat 0px 0px;
+    background-color: rgb(var(--gMainColor));
 }
 
 .header .menu a {
     color: #fff;
+    color: rgb(var(--gBgColor));
     font-weight: bold;
     padding: 0.4em 0.4em 0.4em 1em;
     display: block;
@@ -93,6 +110,7 @@ body#transparent {
     text-decoration: underline;
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gSecondColor), 0.5);
 }
 
 .header .menu li li a {
@@ -102,7 +120,9 @@ body#transparent {
 
 .header .menu li.current > a {
     background: #fff;
+    background: rgb(var(--gBgColor));
     color: rgb(156, 79, 21);
+    color: rgb(var(--gMainColor));
 }
 
 .header .menu a b {
@@ -111,23 +131,29 @@ body#transparent {
     margin-top: -.2em;
     font-size: 20pt;
     color: rgb(70, 70, 70);
-    color: rgba(0, 0, 0, .5);
+    color: rgba(255, 255, 255, .5);
 }
 
-.page {
+.header .menu li.current > a b {
+    color: rgb(217, 134, 40);
+    color: rgba(217, 134, 40, 0.5);
+    color: rgba(var(--gSecondColor), 0.5);
+}
+
+main {
     margin: 0px 1em 1em 180px;
     position: relative;
 }
 
-.page img {
+main img {
     max-width: 100%;
 }
 
-body#popup .page {
+body#popup main {
     margin: 1em 1em 1em 2.5em;
 }
 
-body#transparent .page {
+body#transparent main {
     margin: 0;
     padding: .2em;
 }
@@ -255,6 +281,11 @@ input[type=submit], input[type=button], input[type=checkbox] {
     transition: opacity .5s ease;
 }
 
+input.resetButton {
+    padding: .1em;
+    margin-left: 1em;
+}
+
 .loader {
     width: 100%;
     min-height: 32px;
@@ -359,6 +390,7 @@ ul.actions {
     list-style-type: none;
     margin: 1em 0;
     border-bottom: .1em solid #9c4f15;
+    border-bottom: .1em solid rgb(var(--gMainColor));
     padding: 0 1em;
 }
 
@@ -371,6 +403,7 @@ ul.actions li a {
     display: inline-block;
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, .5);
+    background: rgba(var(--gSecondColor), .5);
     border-radius: .5em .5em 0 0;
     padding: .1em .5em;
     color: #000;
@@ -379,11 +412,14 @@ ul.actions li a {
 
 ul.actions li.current a {
     background: #9c4f15;
+    background: rgb(var(--gMainColor));
     color: #fff;
+    color: rgb(var(--gBgColor));
 }
 
 ul.actions li a:hover {
     color: #fff;
+    color: rgb(var(--gBgColor));
     text-decoration: underline;
 }
 
@@ -438,12 +474,15 @@ table.list th {
 table.list thead {
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gSecondColor), 0.5);
 }
 
 table.list tfoot tr {
     background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.1);
+    background: rgba(var(--gSecondColor), 0.2);
     color: rgb(156, 79, 21);
+    color: rgb(var(--gMainColor));
 }
 
 table.list th, table.list td {
@@ -453,12 +492,14 @@ table.list th, table.list td {
 table.list tr {
     border: 1px solid rgb(217, 134, 40);
     border: 1px solid rgba(217, 134, 40, 0.5);
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
     transition: background .5s
 }
 
 table.list tr:nth-child(even) {
     background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
+    background: rgba(var(--gSecondColor), 0.2);
 }
 
 table.list.multi tr:nth-child(even) {
@@ -468,6 +509,7 @@ table.list.multi tr:nth-child(even) {
 table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
+    background: rgba(var(--gSecondColor), 0.2);
 }
 
 table.list tr.checked {
@@ -500,11 +542,14 @@ table.list .check {
 table.search th {
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gSecondColor), 0.5);
 }
 
 .userOrder .cur {
     background: rgb(217, 134, 40);
+    background: rgba(var(--gSecondColor), 1.0);
     color: #fff;
+    color: rgb(var(--gBgColor));
 }
 
 .userOrder td, .userOrder th {
@@ -515,6 +560,7 @@ table.search th {
     float: left;
     clear: left;
     color: #9c4f15;
+    color: rgb(var(--gMainColor));
     text-decoration: none;
     font-size: 12pt;
     line-height: 6pt;
@@ -523,6 +569,7 @@ table.search th {
     vertical-align: middle;
     font-weight: normal;
     text-shadow: 0px 0px 1px #fff;
+    text-shadow: 0px 0px 1px rgb(var(--gBgColor));
 }
 
 thead .icn:hover {
@@ -560,6 +607,7 @@ b.money {
 #rapport table table {
     border: 1px solid rgb(217, 134, 40);
     border-color: rgba(217, 134, 40, 0.5);
+    border-color: rgba(var(--gSecondColor), 0.5);
 }
 
 #rapport table table tr th {
@@ -587,12 +635,15 @@ b.money {
     font-weight: bold;
     background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.2);
+    background: rgba(var(--gSecondColor), 0.2);
 }
 
 #rapport table table tfoot tr {
     background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.1);
+    background: rgba(var(--gSecondColor), 0.1);
     color: rgb(156, 79, 21);
+    color: rgb(var(--gMainColor));
 }
 
 #rapport .exercice {
@@ -627,6 +678,7 @@ b.money {
     padding: .2em;
     font-family: "gicon", sans-serif;
     color: #9c4f15;
+    color: rgb(var(--gMainColor));
     text-shadow: 1px 1px 1px #999;
     transition: all .2s;
     border: none;
@@ -674,6 +726,7 @@ dl dd.actions .icn[title]:after {
     padding: 0 .2em;
     background: rgb(247, 164, 70);
     background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gMainColor), 0.5);
 }
 
 .actions .icn:hover, .num a:hover, .icn.action:hover {
@@ -779,250 +832,6 @@ dl dd.actions .icn[title]:after {
     clear: both;
 }
 
-/* WIKI */
-
-fieldset.wikiText {
-    border: none;
-    padding: 0;
-}
-
-fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
-    float: right;
-    width: 35%;
-    margin-left: 3%;
-    clear: right;
-}
-
-fieldset.wikiMain input[type=text] {
-    min-width: 0;
-}
-
-#encryptPasswordDisplay {
-    cursor: help;
-    background: #ddd;
-}
-
-fieldset.wikiEncrypt .help {
-    font-size: .9em;
-}
-
-fieldset.wikiMain #f_titre {
-    width: 90%;
-    font-size: 14pt;
-}
-
-fieldset.wikiMain #f_uri {
-    width: 90%;
-}
-
-fieldset.wikiRights dl {
-    font-size: 10pt;
-}
-
-fieldset.wikiRevision  {
-    clear: both;
-}
-
-fieldset.wikiRevision #f_modification {
-    width: 90%;
-}
-
-.wikiFiles {
-    text-align: center;
-}
-
-.wikiFooter, .wikiFiles {
-    font-size: 0.8em;
-    color: #666;
-    border-top: 0.1em solid #ccc;
-    clear: both;
-}
-
-.wikiMain samp {
-    background: #eee;
-    padding: 0.2em 0.3em;
-}
-
-.wikiChildren {
-    margin: 1em 0 1em 1em;
-    border: .1em solid rgba(217, 134, 40, .5);
-    padding: 1em;
-    background: rgba(255, 255, 255, 0.5);
-    float: right;
-    clear: right;
-    width: 25%;
-}
-
-.wikiChildren ul {
-    color: #ccc;
-    list-style-type: square;
-    margin-left: 1em;
-}
-
-.wikiTree ul {
-    margin-left: 1em;
-    list-style-type: none;
-}
-
-.wikiTree ul ul {
-    margin-left: 2em;
-}
-
-.wikiTree a {
-    color: #666;
-}
-
-.wikiTree h3:before {
-    content: "▸";
-    display: inline;
-    margin-right: .5em;
-}
-
-.wikiTree li {
-    margin: 0.2em 0;
-}
-
-.wikiTree h3 {
-    font-size: 1em;
-    font-weight: normal;
-}
-
-.wikiTree .current > h3 a {
-    font-weight: bold;
-    color: #000;
-}
-
-.wikiTree .choice {
-    text-align: center;
-    margin-bottom: 1em;
-}
-
-.breadCrumbs {
-    margin-bottom: .8em;
-    font-size: .9em;
-    color: #999;
-}
-
-.breadCrumbs ul, .breadCrumbs li {
-    list-style-type: none;
-    display: inline;
-}
-
-.breadCrumbs li:before {
-    content: "> ";
-}
-
-.breadCrumbs li a {
-    color: #333;
-}
-
-.wikiSearch {
-}
-
-.wikiSearch fieldset {
-    padding: .3em;
-}
-
-.wikiSearch input[type=text] {
-    padding: .3em;
-}
-
-.wikiResults h3 {
-    font-weight: normal;
-    margin-bottom: .3em;
-}
-
-.wikiResults p {
-    margin-bottom: .8em;
-    font-size: .9em;
-}
-
-.wikiRevisions .length ins {
-    text-decoration: none;
-    color: green;
-}
-
-.wikiRevisions .length del {
-    text-decoration: none;
-    color: red;
-}
-
-.wikiRevisions .length i {
-    font-style: normal;
-    color: gray;
-}
-
-div.wikiRevision {
-    width: 48%;
-    margin: 1em 1%;
-    text-align: center;
-    float: left;
-}
-
-div.wikiRevision h3 {
-    font-size: 1em;
-}
-
-div.wikiRevision h4 {
-    font-weight: normal;
-    font-size: .9em;
-}
-
-.diff .ins {
-    background: #cfc;
-    width: 45%;
-}
-
-.diff .del {
-    background: #fcc;
-    width: 45%;
-}
-
-.diff .line {
-    width: 2%;
-    padding: 0.2em;
-    text-align: right;
-    font-family: Mono;
-    font-size: 90%;
-    color: #666;
-}
-
-.diff .leftChange, .diff .rightChange {
-    text-align: center;
-    vertical-align: middle;
-}
-
-.diff ins { background: #9f9; }
-.diff del { background: #f99; }
-
-.diff hr {
-    background: none;
-    border: none;
-    border-top: 5px dotted #fff;
-    color: #fff;
-    margin: .2em .4em;
-}
-
-.diff .separator {
-    background: #ccc;
-}
-
-.diff {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 0.9em;
-}
-
-.diff tr {
-    border: 1px solid #ccc;
-    vertical-align: top;
-}
-
-.diff .leftChange b, .diff .rightChange b {
-    text-shadow: 1px 1px 1px #ccc;
-    color: #666;
-}
-
 .pagination {
     clear: both;
     list-style-type: none;
@@ -1067,6 +876,7 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
 
 .catList dd.compte {
     color: #9c4f15;
+    color: rgb(var(--gMainColor));
     margin: .2em 0 .2em 2em;
 }
 
@@ -1125,6 +935,7 @@ dl.describe ul {
 dl.cotisation {
     background: rgb(255, 174, 80);
     background: rgba(217, 134, 40, 0.2);
+    background: rgba(var(--gSecondColor), 0.2);
     padding: .5em;
     border-radius: .5em;
     margin: 1em;
@@ -1221,96 +1032,6 @@ pre.sql_schema {
 
 .hidden {
     display: none;
-}
-
-form#f_upload fieldset {
-    position: relative;
-}
-
-form .fileUpload .uploadHelper_progress {
-    position: absolute;
-    bottom: 1em;
-    left: 1em;
-    right: 1em;
-    text-align: center;
-    padding: 1em;
-    background: #ddd;
-    box-shadow: 0px 0px 5px #999;
-    border-radius: .5em;
-}
-
-form .fileUpload progress {
-    width: 50%;
-}
-
-form#insertImage {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10000;
-    background: rgb(0, 0, 0);
-    background: rgba(0, 0, 0, 0.75);
-}
-
-form#insertImage fieldset {
-    box-shadow: 5px 5px 10px #000;
-    margin: 1em;
-    padding: 1em;
-    background: #ddd;
-    border-radius: .5em;
-    text-align: center;
-}
-
-form#insertImage dt {
-    margin: .2em 0;
-}
-
-form#insertImage .align input {
-    font-size: 1.2em;
-    line-height: 32px;
-    background: #fff;
-    background-position: 5px center;
-    background-repeat: no-repeat;
-    padding: 5px;
-    padding-left: 42px;
-    border: 1px solid #999;
-    border-radius: 5px;
-    margin: .5em;
-}
-
-form#insertImage .align input[name=""] {
-    background-image: url("pics/img_flow.png");
-}
-
-form#insertImage .align input[name="gauche"] {
-    background-image: url("pics/img_left.png");
-}
-
-form#insertImage .align input[name="droite"] {
-    background-image: url("pics/img_right.png");
-}
-
-form#insertImage .align input[name="centre"] {
-    background-image: url("pics/img_center.png");
-}
-
-form#insertImage .cancel input {
-    font-size: 0.8em;
-    background: transparent;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin: .5em;
-    color: #666;
-    cursor: pointer;
-}
-
-form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
-    cursor: pointer;
-    background-color: #eee;
-    color: darkred;
 }
 
 img.qrcode {
