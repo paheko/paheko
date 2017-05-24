@@ -143,11 +143,18 @@ class Fichiers
 
 	/**
 	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
-	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Membres::getLoggedUser, ou false
+	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
 	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
 	 */
 	public function checkAccess($user = false)
 	{
+		$config = Config::getInstance();
+
+		if ($config->get('image_fond') == $this->id)
+		{
+			return true;
+		}
+
 		$db = DB::getInstance();
 
 		// On regarde déjà si le fichier n'est pas lié au wiki
@@ -424,7 +431,7 @@ class Fichiers
 	/**
 	 * Upload du fichier par POST
 	 * @param  array  $file  Caractéristiques du fichier envoyé
-	 * @return object Un objet Fichiers en cas de succès
+	 * @return Fichiers
 	 */
 	static public function upload($file)
 	{
@@ -446,7 +453,46 @@ class Fichiers
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		$bytes = file_get_contents($file['tmp_name'], false, null, -1, 1024);
+		return self::storeFile($name, $file['tmp_name']);
+	}
+
+	/**
+	 * Upload de fichier à partir d'une chaîne en base64
+	 * @param  string $name
+	 * @param  string $content
+	 * @return Fichiers
+	 */
+	static public function storeFromBase64($name, $content)
+	{
+		$content = base64_decode($content);
+		return self::storeFile($name, null, $content);
+	}
+
+	/**
+	 * Upload de fichier (interne)
+	 * 
+	 * @param  string $name
+	 * @param  string $path Chemin du fichier
+	 * @param  string $content Ou contenu du fichier
+	 * @return Fichiers
+	 */
+	static protected function storeFile($name, $path = null, $content = null)
+	{
+		assert($path || $content);
+
+		if ($path && !$content)
+		{
+			$hash = sha1_file($path);
+			$size = filesize($path);
+			$bytes = file_get_contents($path, false, null, -1, 1024);
+		}
+		else
+		{
+			$hash = sha1($content);
+			$size = strlen($content);
+			$bytes = substr($content, 0, 1024);
+		}
+
 		$type = \KD2\FileInfo::guessMimeType($bytes);
 
 		if (!$type)
@@ -459,9 +505,6 @@ class Fichiers
 
 		$is_image = preg_match('/^image\//', $type);
 
-		$hash = sha1_file($file['tmp_name']);
-		$size = filesize($file['tmp_name']);
-
 		$db = DB::getInstance();
 
 		$db->begin();
@@ -472,9 +515,12 @@ class Fichiers
 			$db->insert('fichiers_contenu', [
 				'hash'		=>	$hash,
 				'taille'	=>	(int)$size,
-				'contenu'	=>	[\SQLITE3_BLOB, file_get_contents($file['tmp_name'])],
+				'contenu'	=>	[\SQLITE3_BLOB, $content ?: file_get_contents($path)],
 			]);
-			
+
+			// FIXME: utiliser Sqlite3::openBlob pour écrire quand dispo dans PHP
+			// cf. https://github.com/php/php-src/pull/2528
+
 			$id_contenu = $db->lastInsertRowID();
 		}
 
