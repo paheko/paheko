@@ -1,5 +1,10 @@
 (function () {
-	if (!document.documentElement.style.setProperty) return;
+	if (!document.documentElement.style.setProperty 
+		|| !window.CSS || !window.CSS.supports
+		|| !window.CSS.supports('--var', 0))
+	{
+		return;
+	}
 
 	var logo_limit_x = 170;
 
@@ -16,6 +21,7 @@
 	{
 		var new_color = colorToRGB(color).join(', ');
 
+		// Mise à jour variable CSS
 		document.documentElement.style.setProperty('--' + element, new_color);
 
 		applyLogoColors();
@@ -40,21 +46,18 @@
 
 			for (var i = 0, n = data.length; i < n; i += 4)
 			{
-				var x = (i / 4) % canvas.width;
-
-				var grayscale = data[i] * .3 + data[i+1] * .59 + data[i+2] * .11;
-				var factor = (grayscale / 255);
-
+				// Re-colorier l'image avec la couleur choisie
 				data[i] = color[0]; // red
 				data[i+1] = color[1]; // green
 				data[i+2] = color[2]; // blue
-				//data[i+3] = Math.max(0, data[i+3] - (x >= 170 ? 100 : 50));
+				// i+3 = alpha channel, mais on n'y touche pas
 			}
 
 			ctx.putImageData(imgData, 0, 0);
 
 			var i = canvas.toDataURL('image/png');
 
+			// Prévisualisation
 			document.querySelector('html').style.backgroundImage = 'url("' + i + '")';
 			document.querySelector('.menu').style.backgroundImage = 'url("' + i + '")';
 
@@ -79,6 +82,7 @@
 				changeColor(couleurs[this.name], this.value);
 			};
 
+			// Ajout bouton remise à zéro de la couleur
 			var reset_btn = document.createElement('input');
 			reset_btn.className = 'resetButton';
 			reset_btn.type = 'button';
