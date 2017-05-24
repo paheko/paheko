@@ -48,7 +48,14 @@ class Sauvegarde
 	public function create($auto = false)
 	{
 		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-His')) . '.sqlite', DB_FILE);
+		
+		// Acquire a shared lock before copying
+		$db = DB::getInstance();
+		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
+		
 		copy(DB_FILE, $backup);
+		
+		$db->exec('END TRANSACTION;');
 		return basename($backup);
 	}
 
@@ -146,6 +153,10 @@ class Sauvegarde
 	 */
 	public function dump()
 	{
+		// Acquire a shared lock before copying
+		$db = DB::getInstance();
+		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
+
 		$in = fopen(DB_FILE, 'r');
         $out = fopen('php://output', 'w');
 
@@ -155,6 +166,8 @@ class Sauvegarde
         }
 
         fclose($in);
+
+        $db->exec('END TRANSACTION;');
 
         // Ajout du hash pour vérification intégrité
         fwrite($out, sha1_file(DB_FILE));
