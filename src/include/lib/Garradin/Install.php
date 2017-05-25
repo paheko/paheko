@@ -12,6 +12,11 @@ class Install
 	{
 		$db = DB::getInstance(true);
 
+		// Taille de la page de DB, on force à 4096 (défaut dans les dernières
+		// versions de SQLite mais pas les vieilles)
+		$db->exec('PRAGMA page_size = 4096;');
+		$db->exec('VACUUM;');
+
 		// Création de la base de données
 		$db->begin();
 		$db->exec('PRAGMA application_id = ' . DB::APPID . ';');

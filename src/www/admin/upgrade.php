@@ -27,8 +27,11 @@ echo '<!DOCTYPE html>
     <title>Mise à jour</title>
 </head>
 <body>
-<div class="header"><h1>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h1></div>
-<div class="page">
+<header class="header">
+    <nav class="menu"></nav>
+    <h1>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h1>
+</header>
+<main>
 <div id="loader" class="loader" style="margin: 2em 0; height: 50px;"></div>
 <script>
 animatedLoader(document.getElementById("loader"), 5);
@@ -251,6 +254,13 @@ if (version_compare($v, '0.8.0', '<'))
     // Inscription de l'appid
     $db->exec('PRAGMA application_id = ' . DB::APPID . ';');
 
+    // Changement de la taille de pagesize
+    // Cecit devrait améliorer les performances de la DB
+    $db->exec('PRAGMA page_size = 4096;');
+
+    // Application du changement de taille de page
+    $db->exec('VACUUM;');
+
     $db->begin();
 
     $db->import(ROOT . '/include/data/0.8.0.sql');
@@ -280,4 +290,6 @@ if ($redirect)
 }
 
 echo '
-</body>';
+</main>
+</body>
+</html>';
