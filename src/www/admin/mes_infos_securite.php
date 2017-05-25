@@ -6,26 +6,25 @@ use Garradin\Membres\Session;
 
 require_once __DIR__ . '/_inc.php';
 
-$errors = [];
 $confirm = false;
 
 if (f('confirm'))
 {
-    fc('edit_me_security', [
+    $form->check('edit_me_security', [
         'passe'       => 'confirmed',
         'passe_check' => 'required',
-    ], $errors);
+    ]);
 
     if (f('passe_check') && !$session->checkPassword(f('passe_check')))
     {
-        $errors[] = 'Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.';
+        $form->addError('Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.');
     }
     elseif (f('otp_secret') && !Session::checkOTP(f('otp_secret'), f('code')))
     {
-        $errors[] = 'Le code TOTP entré n\'est pas valide.';
+        $form->addError('Le code TOTP entré n\'est pas valide.');
     }
 
-    if (count($errors) === 0)
+    if (!$form->hasErrors())
     {
         try {
             $data = [
@@ -51,7 +50,7 @@ if (f('confirm'))
         }
         catch (UserException $e)
         {
-            $errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 
@@ -59,22 +58,21 @@ if (f('confirm'))
 }
 elseif (f('save'))
 {
-    fc('edit_me_security', [
+    $form->check('edit_me_security', [
         'passe'       => 'confirmed',
-    ], $errors);
+    ]);
 
     if (f('clef_pgp') && !$session->getPGPFingerprint(f('clef_pgp')))
     {
-        $errors[] = 'Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.';
+        $form->addError('Clé PGP invalide : impossible de récupérer l\'empreinte de la clé.');
     }
     
-    if (count($errors) === 0)
+    if (!$form->hasErrors())
     {
         $confirm = true;
     }
 }
 
-$tpl->assign('form_errors', $errors);
 $tpl->assign('confirm', $confirm);
 
 if (f('otp') == 'generate')

@@ -28,20 +28,20 @@ if (f('date'))
 
 if (f('save'))
 {
-    fc('wiki_edit_'.$page->id, [
+    $form->check('wiki_edit_' . $page->id, [
         'titre'          => 'required',
         'uri'            => 'required',
         'parent'         => 'numeric',
         'droit_lecture'  => 'numeric',
         'droit_ecriture' => 'numeric',
-    ], $form_errors);
+    ]);
     
     if ($page->date_modification > (int) f('debut_edition'))
     {
-        $form_errors[] = 'La page a été modifiée par quelqu\'un d\'autre depuis que vous avez commencé l\'édition.';
+        $form->addError('La page a été modifiée par quelqu\'un d\'autre depuis que vous avez commencé l\'édition.');
     }
 
-    if (count($form_errors) === 0)
+    if (!$form->hasErrors())
     {
         try {
             $wiki->edit($page->id, [
@@ -66,7 +66,7 @@ if (f('save'))
         }
         catch (UserException $e)
         {
-            $form_errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }

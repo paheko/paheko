@@ -3,14 +3,14 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = (int) Utils::get('parent') ?: 0;
+$parent = (int) qg('parent');
 
 if (f('create'))
 {
-    fc('wiki_create', [
+    $form->check('wiki_create', [
         'titre' => 'required',
         'parent'=> 'required|integer'
-    ], $form_errors);
+    ]);
 
     try {
         $id = $wiki->create([
@@ -22,7 +22,7 @@ if (f('create'))
     }
     catch (UserException $e)
     {
-        $form_errors[] = $e->getMessage();
+        $form->addError($e->getMessage());
     }
 }
 

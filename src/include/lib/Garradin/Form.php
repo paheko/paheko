@@ -32,6 +32,11 @@ class Form
 		return $this->errors;
 	}
 
+	public function addError($msg)
+	{
+		$this->errors[] = $msg;
+	}
+
 	public function getErrorMessages()
 	{
 		return;
