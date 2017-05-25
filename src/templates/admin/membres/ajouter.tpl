@@ -29,9 +29,9 @@
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
             </dd>
-            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}5,{rdelim}" /></dd>
+            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}6,{rdelim}" /></dd>
             <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-            <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" pattern=".{ldelim}5,{rdelim}" /></dd>
+            <dd><input type="password" name="repasse" id="f_repasse" value="{form_field name=repasse}" pattern=".{ldelim}6,{rdelim}" /></dd>
         </dl>
     </fieldset>
 

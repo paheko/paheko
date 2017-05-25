@@ -43,7 +43,7 @@ $tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
 
 $form = new Form;
-$tpl->assign_by_ref('form_errors', $form->getErrors());
+$tpl->assign_by_ref('form', $form);
 
 $session = Session::get();
 

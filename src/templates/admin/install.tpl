@@ -46,9 +46,9 @@
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
             </dd>
-            <dd><input type="password" name="passe_membre" id="f_passe_membre" value="{form_field name=passe_membre}" pattern=".{ldelim}5,{rdelim}" required="required" /></dd>
+            <dd><input type="password" name="passe_membre" id="f_passe_membre" value="{form_field name=passe_membre}" pattern=".{ldelim}6,{rdelim}" required="required" /></dd>
             <dt><label for="f_repasse_membre">Encore le mot de passe</label> (vérification) <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="password" name="repasse_membre" id="f_repasse_membre" value="{form_field name=repasse_membre}" pattern=".{ldelim}5,{rdelim}" required="required" /></dd>
+            <dd><input type="password" name="repasse_membre" id="f_repasse_membre" value="{form_field name=repasse_membre}" pattern=".{ldelim}6,{rdelim}" required="required" /></dd>
         </dl>
     </fieldset>
 

@@ -37,50 +37,14 @@ class Template extends \KD2\Smartyer
 
     protected function formErrors($params)
     {
-        $errors = $this->getTemplateVars('form_errors');
+        $form = $this->getTemplateVars('form');
 
-        if (!$errors || count($errors) == 0)
+        if (!$form->hasErrors())
         {
             return '';
         }
 
-        $out = [];
-
-        foreach ($errors as $error)
-        {
-            if (is_array($error))
-            {
-                $out[] = $this->getFormErrorMessage($error['rule'], $error['name']);
-            }
-            else
-            {
-                $out[] = $error;
-            }
-        }
-
-        return '<div class="error"><ul><li>' . implode('</li><li>', $out) . '</li></ul></div>';
-    }
-
-    protected function getFormErrorMessage($rule, $element)
-    {
-        if ($element == '_id')
-        {
-            $element = 'identifiant';
-        }
-        elseif ($element == 'passe')
-        {
-            $element = 'mot de passe';
-        }
-
-        switch ($rule)
-        {
-            case 'required':
-                return sprintf('Le champ %s est vide.', $element);
-            case 'csrf':
-                return 'Une erreur est survenue, merci de bien vouloir renvoyer le formulaire.';
-            default:
-                return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
-        }
+        return '<div class="error"><ul><li>' . implode('</li><li>', $form->getErrorMessages()) . '</li></ul></div>';
     }
 
     protected function showError($params)

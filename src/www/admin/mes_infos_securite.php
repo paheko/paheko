@@ -11,7 +11,7 @@ $confirm = false;
 if (f('confirm'))
 {
     $form->check('edit_me_security', [
-        'passe'       => 'confirmed',
+        'passe'       => 'confirmed|min:6',
         'passe_check' => 'required',
     ]);
 
@@ -59,7 +59,7 @@ if (f('confirm'))
 elseif (f('save'))
 {
     $form->check('edit_me_security', [
-        'passe'       => 'confirmed',
+        'passe'       => 'confirmed|min:6',
     ]);
 
     if (f('clef_pgp') && !$session->getPGPFingerprint(f('clef_pgp')))
