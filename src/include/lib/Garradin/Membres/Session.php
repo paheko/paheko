@@ -299,7 +299,7 @@ class Session
 		$message.= "Votre nouveau mot de passe : ".$password."\n\n";
 		$message.= "Si vous n'avez pas demandé à recevoir ce message, merci de nous le signaler.";
 
-		$password = $this->_hashPassword($password);
+		$password = Membres::hashPassword($password);
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
@@ -448,7 +448,10 @@ class Session
 
 	public function editUser($data)
 	{
-		return (new Membres)->edit($this->id, $data, false);
+		(new Membres)->edit($this->id, $data, false);
+		$this->updateSessionData();
+
+		return true;
 	}
 
 	public function getUser($key = null)
@@ -527,30 +530,9 @@ class Session
 		return $_SESSION['storage'][$key];
 	}
 
-	public function updateSessionData($membre = null, $droits = null)
-	{
-		if (is_null($membre))
-		{
-			$membre = $this->get($_SESSION['logged_user']['id']);
-		}
-		elseif (is_int($membre))
-		{
-			$membre = $this->get($membre);
-		}
-
-		if (is_null($droits))
-		{
-			$droits = $this->getDroits($membre['id_categorie']);
-		}
-
-		$membre['droits'] = $droits;
-		$_SESSION['logged_user'] = $membre;
-		return true;
-	}
-
 	public function sendMessage($dest, $sujet, $message, $copie = false)
 	{
-		$from = $this->getLoggedUser();
+		$from = $this->getUser();
 		$from = $from['email'];
 		// Uniquement adresse email pour le moment car faudrait trouver comment
 		// indiquer le nom mais qu'il soit correctement échappé FIXME
@@ -576,13 +558,6 @@ class Session
 
 	public function editSecurity(Array $data = [])
 	{
-		$user = $this->getLoggedUser();
-
-		if (!$user)
-		{
-			throw new \LogicException('Utilisateur non connecté.');
-		}
-
 		$allowed_fields = ['passe', 'clef_pgp', 'secret_otp'];
 
 		foreach ($data as $key=>$value)
@@ -600,7 +575,7 @@ class Session
 				throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
 			}
 
-			$data['passe'] = $this->_hashPassword($data['passe']);
+			$data['passe'] = Membres::hashPassword(trim($data['passe']));
 		}
 		else
 		{
@@ -617,7 +592,7 @@ class Session
 			}
 		}
 
-		DB::getInstance()->simpleUpdate('membres', $data, 'id = '.(int)$user['id']);
+		DB::getInstance()->simpleUpdate('membres', $data, 'id = '.(int)$this->id);
 		$this->updateSessionData();
 
 		return true;
@@ -639,5 +614,10 @@ class Session
 		}
 
 		return $fingerprint;
+	}
+
+	public function updateSessionData()
+	{
+		$this->user = self::createUserSession($this->id);
 	}
 }
