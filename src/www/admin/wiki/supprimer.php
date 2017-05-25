@@ -16,7 +16,7 @@ if (!$page)
 
 if (f('delete'))
 {
-    if (fc('delete_wiki_'.$page->id, [], $form_errors))
+    if ($form->check('delete_wiki_' . $page->id))
     {
         if ($wiki->delete($page->id))
         {
@@ -24,7 +24,7 @@ if (f('delete'))
         }
         else
         {
-            $form_errors[] = "D'autres pages utilisent cette page comme rubrique parente.";
+            $form->addError('D\'autres pages utilisent cette page comme rubrique parente.');
         }
     }
 }

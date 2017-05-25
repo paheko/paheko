@@ -21,7 +21,7 @@ if ($hash_check = f('uploadHelper_hashCheck'))
 }
 elseif (f('delete'))
 {
-    if (fc($csrf_id, [], $form_errors))
+    if ($form->check($csrf_id))
     {
         try {
             $fichier = new Fichiers(f('delete'));
@@ -36,7 +36,7 @@ elseif (f('delete'))
         }
         catch (UserException $e)
         {
-            $form_errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
@@ -52,14 +52,14 @@ elseif (f('upload') || f('uploadHelper_mode'))
         ];
     }
 
-    fc($csrf_id, $validate, $form_errors);
+    $form->check($csrf_id, $validate);
 
     if (f('uploadHelper_status') > 0)
     {
-        $form_errors[] = 'Un seul fichier peut être envoyé en même temps.';
+        $form->addError('Un seul fichier peut être envoyé en même temps.');
     }
     
-    if (count($form_errors) === 0)
+    if (!$form->hasErrors())
     {
         try {
             if (f('uploadHelper_mode') == 'hash_only' && f('uploadHelper_fileHash') && f('uploadHelper_fileName'))
@@ -94,13 +94,13 @@ elseif (f('upload') || f('uploadHelper_mode'))
         }
         catch (UserException $e)
         {
-            $form_errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 
     if (f('uploadHelper_mode') !== null)
     {
-        echo json_encode(['error' => implode(PHP_EOL, $form_errors)]);
+        echo json_encode(['error' => implode(PHP_EOL, $form->getErrorMessages())]);
         exit;
     }
 }

@@ -12,8 +12,8 @@ $tpl->assign('list', $wiki->listBackParentTree($parent));
 
 function tpl_display_tree($params)
 {
-    if (isset($params->tree))
-        $tree = $params->tree;
+    if (isset($params['tree']))
+        $tree = $params['tree'];
     else
         $tree = $params;
 
