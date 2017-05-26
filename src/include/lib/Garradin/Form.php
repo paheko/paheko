@@ -42,14 +42,24 @@ class Form
 		$this->errors[] = $msg;
 	}
 
-	public function getErrorMessages()
+	public function getErrorMessages($membre = false)
 	{
 		$errors = [];
+
+		if ($membre)
+		{
+			$champs = Config::getInstance()->get('champs_membres');
+		}
 
 		foreach ($this->errors as $error)
 		{
 			if (is_array($error))
 			{
+				if ($membre)
+				{
+					$error['name'] = $champs->get($error['name'], 'title');
+				}
+
 				$errors[] = $this->getErrorMessage($error['rule'], $error['name'], $error['params']);
 			}
 			else
@@ -80,6 +90,10 @@ class Form
 				return sprintf('Le champ %s doit faire au moins %d caractères.', $element, $params[0]);
 			case 'file':
 				return sprintf('Le fichier envoyé n\'est pas valide.');
+			case 'confirmed':
+				return sprintf('La vérification du champ %s n\'est pas identique au champ lui-même.', $element);
+			case 'date_format':
+				return sprintf('Format de date invalide dans le champ %s.', $element);
 			default:
 				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
 		}

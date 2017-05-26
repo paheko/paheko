@@ -3,24 +3,22 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
+$champs = $config->get('champs_membres');
 
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('edit_me'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('edit_me', $champs->getValidationRules('user_edit'));
+
+    if (!$form->hasErrors())
     {
         try {
             $data = [];
 
-            foreach ($config->get('champs_membres')->getAll() as $key=>$c)
+            foreach ($champs->getAll() as $key=>$c)
             {
-                if (!empty($c['editable']))
+                if (!empty($c->editable))
                 {
-                    $data[$key] = Utils::post($key);
+                    $data[$key] = f($key);
                 }
             }
 
@@ -35,9 +33,7 @@ if (!empty($_POST['save']))
     }
 }
 
-$tpl->assign('error', $error);
-
-$tpl->assign('champs', $config->get('champs_membres')->getAll());
+$tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membre', $session->getUser());
 

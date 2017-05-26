@@ -46,7 +46,8 @@ class Champs
         'list_row',
         'mandatory',
         'private',
-        'options'
+        'options',
+        'rules'
     ];
 
     static protected $presets = null;
@@ -197,6 +198,75 @@ class Champs
 
             return $key;
         }
+    }
+
+    public function getValidationRules($mode = 'edit')
+    {
+        assert(in_array($mode, ['edit', 'create', 'user_edit']));
+
+        $all_rules = [];
+
+        foreach ($this->champs as $name => $config)
+        {
+            if (empty($config->editable) && $mode == 'user_edit')
+            {
+                $all_rules[$name] = 'absent';
+                break;
+            }
+
+            $rules = [];
+
+            if (!empty($config->mandatory) && !($name == 'passe' && $mode != 'create'))
+            {
+                $rules[] = 'required';
+            }
+            
+            if ($config->type == 'email')
+            {
+                $rules[] = 'email';
+            }
+            elseif ($config->type == 'url')
+            {
+                $rules[] = 'url';
+            }
+            elseif ($config->type == 'date')
+            {
+                $rules[] = 'date_format:Y-m-d';
+            }
+            elseif ($config->type == 'date')
+            {
+                $rules[] = 'date_format:Y-m-d H\:i';
+            }
+            elseif ($config->type == 'number' || $config->type == 'multiple')
+            {
+                $rules[] = 'numeric';
+            }
+            elseif ($config->type == 'select')
+            {
+                $rules[] = 'in:' . range(0, count($this->options) - 1);
+            }
+            elseif ($config->type == 'checkbox')
+            {
+                $rules[] = 'boolean';
+            }
+
+            if ($name == 'passe')
+            {
+                $rules[] = 'min:6';
+            }
+
+            if (isset($config->rules))
+            {
+                $rules[] = $config->rules;
+            }
+
+            if (count($rules))
+            {
+                $all_rules[$name] = implode('|', $rules);
+            }
+        }
+
+        return $all_rules;
     }
 
     /**

@@ -1,18 +1,13 @@
 {include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos" js=1}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
-
 <ul class="actions">
     <li class="current"><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
     <li><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
 </ul>
 
-<form method="post" action="{$self_url}">
+{form_errors membre=1}
 
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Informations personnelles</legend>

@@ -77,25 +77,9 @@ class Membres
 
             if (isset($data[$key]))
             {
-                if ($config->type == 'email' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL))
+                if ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
-                    throw new UserException('Adresse e-mail invalide dans le champ "' . $config->title . '".');
-                }
-                elseif ($config->type == 'url' && trim($data[$key]) !== '' && !filter_var($data[$key], FILTER_VALIDATE_URL))
-                {
-                    throw new UserException('Adresse URL invalide dans le champ "' . $config->title . '".');
-                }
-                elseif ($config->type == 'date' && trim($data[$key]) !== '' && !Utils::checkDate($data[$key]))
-                {
-                    throw new UserException('Date invalide "' . $config->title . '", format attendu : AAAA-MM-JJ.');
-                }
-                elseif ($config->type == 'datetime' && trim($data[$key]) !== '')
-                {
-                    if (!Utils::checkDateTime($data[$key]) || !($dt = new DateTime($data[$key])))
-                    {
-                        throw new UserException('Date invalide "' . $config->title . '", format attendu : AAAA-MM-JJ HH:mm.');
-                    }
-
+                    $dt = new DateTime($data[$key]);
                     $data[$key] = $dt->format('Y-m-d H:i');
                 }
                 elseif ($config->type == 'tel')
@@ -116,9 +100,6 @@ class Membres
                     {
                         $data[$key] = 0;
                     }
-
-                    if (!is_numeric($data[$key]))
-                        throw new UserException('Le champ "' . $config->title . '" doit contenir un chiffre.');
                 }
                 elseif ($config->type == 'select' && !in_array($data[$key], $config->options))
                 {
@@ -151,19 +132,6 @@ class Membres
                     $data[$key] = null;
                 }
             }
-        }
-
-        if (isset($data['code_postal']) && trim($data['code_postal']) != '')
-        {
-            if (!empty($data['pays']) && $data['pays'] == 'FR' && !preg_match('!^\d{5}$!', $data['code_postal']))
-            {
-                throw new UserException('Code postal invalide.');
-            }
-        }
-
-        if (!empty($data['passe']) && strlen($data['passe']) < 5)
-        {
-            throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
         }
 
         return true;
