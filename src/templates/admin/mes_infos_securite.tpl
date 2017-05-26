@@ -22,6 +22,7 @@
                 <dt>Ma clé secrète est&nbsp;:</dt>
                 <dd><code>{$otp.secret_display}</code></dd>
                 <dd class="help">Recopiez la clé secrète ou scannez le QR code pour configurer votre application TOTP (par exemple <a href="https://freeotp.github.io/">FreeOTP</a>), puis utilisez celle-ci pour générer un code d'accès et confirmer l'activation.</dd>
+                <dd class="help">Pour configurer une autre application, vous pouvez utiliser ces paramètres&nbsp;: <tt>{$otp.url}</tt></dd>
                 <dt><label for="f_code">Code TOTP</label></dt>
                 <dd class="help">Entrez ici le code donné par l'application d'authentification double facteur.</dd>
                 <dd><input type="text" name="code" id="f_code" value="{form_field name=code}" /></dd>
