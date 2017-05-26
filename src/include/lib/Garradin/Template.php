@@ -44,7 +44,7 @@ class Template extends \KD2\Smartyer
             return '';
         }
 
-        return '<div class="error"><ul><li>' . implode('</li><li>', $form->getErrorMessages()) . '</li></ul></div>';
+        return '<div class="error"><ul><li>' . implode('</li><li>', $form->getErrorMessages(!empty($params['membre']) ? true : false)) . '</li></ul></div>';
     }
 
     protected function showError($params)
