@@ -191,7 +191,8 @@ class Session
 		$options = self::getSessionOptions();
 
 		setcookie(self::PERMANENT_COOKIE_NAME, $cookie, $expire->getTimestamp(),
-			$options['cookie_path'], $options['cookie_domain'], $options['cookie_secure'], true);
+			$options['cookie_path'], $options['cookie_domain'], $options['cookie_secure'],
+			$options['cookie_httponly']);
 
 		return true;
 	}
@@ -424,14 +425,15 @@ class Session
 
 	public function logout()
 	{
-		$url = parse_url(\Garradin\WWW_URL);
+		$options = self::getSessionOptions();
 
 		if ($cookie = $this->getPermanentCookie())
 		{
 			// Suppression de cette session permanente
 			DB::getInstance()->delete('membres_sessions', 'selecteur = ?', $cookie->selector);
 
-			setcookie(self::PERMANENT_COOKIE_NAME, null, -1, $url['path'], $url['host'], false, true);
+			setcookie(self::PERMANENT_COOKIE_NAME, null, -1, $options['cookie_path'],
+				$options['cookie_domain'], $options['cookie_secure'], $options['cookie_httponly']);
 			unset($_COOKIE[self::PERMANENT_COOKIE_NAME]);
 		}
 
@@ -439,7 +441,8 @@ class Session
 		session_destroy();
 		$_SESSION = [];
 
-		setcookie(self::SESSION_COOKIE_NAME, null, -1, $url['path'], $url['host'], false, true);
+		setcookie($options['name'], null, -1, $options['cookie_path'],
+			$options['cookie_domain'], $options['cookie_secure'], $options['cookie_httponly']);
 
 		unset($_COOKIE[self::SESSION_COOKIE_NAME]);
 	
