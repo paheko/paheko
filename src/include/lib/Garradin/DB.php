@@ -62,6 +62,14 @@ class DB
             $this->flags |= \SQLITE3_OPEN_CREATE;
         }
 
+        // Fermer toute transaction en cours à la fin du script
+        // pour éviter de locker la base
+        // ceci est utile notamment en cas d'erreur dans le script ou de
+        // max_execution_time
+        register_shutdown_function(function () {
+            DB::getInstance()->commit(true);
+        });
+
         // Ne pas se connecter ici, on ne se connectera que quand une requête sera faite
     }
 
@@ -121,15 +129,15 @@ class DB
         return $this->transaction == 1 ? true : false;
     }
 
-    public function commit()
+    public function commit($force = false)
     {
-        if ($this->transaction == 1)
+        if ($force || $this->transaction == 1)
         {
             $this->connect();
             $this->db->exec('END;');
+            $this->transaction = 0;
         }
-
-        if ($this->transaction > 0)
+        else if ($this->transaction > 1)
         {
             $this->transaction--;
         }
