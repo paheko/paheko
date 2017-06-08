@@ -1,35 +1,33 @@
 <?php
+
 namespace Garradin;
 
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if ($membres->isLogged() && !$membres->isOTPRequired())
+if (!Membres\Session::isOTPRequired())
 {
     Utils::redirect('/admin/');
 }
 
-$error = false;
+$login = null;
 
-if (Utils::post('code'))
+if (f('login'))
 {
-    if (!Utils::CSRF_check('otp'))
-    {
-        $error = 'OTHER';
-    }
-    else
-    {
-        if ($membres->loginOTP(Utils::post('code')))
-        {
-            Utils::redirect('/admin/');
-        }
+    $form->check('otp', [
+        'code' => 'numeric|required',
+    ]);
 
-        $error = 'LOGIN';
+    if (!$form->hasErrors() && ($login = Membres\Session::loginOTP(Utils::post('code'))))
+    {
+        Utils::redirect('/admin/');
     }
 }
 
-$tpl->assign('error', $error);
+//var_dump($form->hasErrors()); exit;
+
+$tpl->assign('fail', $login === false);
 
 $tpl->assign('time', time());
 

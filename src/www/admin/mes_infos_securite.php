@@ -80,6 +80,10 @@ if (f('otp') == 'generate')
     $otp = $session->getNewOTPSecret();
     $tpl->assign('otp', $otp);
 }
+elseif (f('otp_secret'))
+{
+    $tpl->assign('otp', f('otp_secret'));
+}
 else
 {
     $tpl->assign('otp', false);

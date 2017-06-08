@@ -45,7 +45,6 @@
         <input type="hidden" name="passe_confirmed" value="{form_field name="passe_confirmed"}" />
         <input type="hidden" name="clef_pgp" value="{form_field name="clef_pgp"}" />
         <input type="hidden" name="otp_secret" value="{$otp.secret}" />
-        <input type="hidden" name="otp" value="generate" />
         <input type="submit" name="confirm" value="Confirmer &rarr;" />
     </p>
 

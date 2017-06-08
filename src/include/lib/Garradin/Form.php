@@ -94,6 +94,8 @@ class Form
 				return sprintf('La vérification du champ %s n\'est pas identique au champ lui-même.', $element);
 			case 'date_format':
 				return sprintf('Format de date invalide dans le champ %s.', $element);
+			case 'numeric':
+				return sprintf('Le champ %s doit être un nombre.', $element);
 			default:
 				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
 		}
