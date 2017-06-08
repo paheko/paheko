@@ -4,11 +4,10 @@ namespace Garradin;
 
 use KD2\Security;
 use KD2\Form;
+use KD2\Translate;
 
 class Utils
 {
-    static protected $country_list = null;
-
     static protected $skriv = null;
 
     static private $french_date_names = [
@@ -216,9 +215,9 @@ class Utils
         return '';
     }
 
-    static public function &getCountryList()
+    static public function getCountryList()
     {
-        return \KD2\Countries_FR::$countries;
+        return Translate::getCountriesList('fr');
     }
 
     static public function getCountryName($code)
