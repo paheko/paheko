@@ -6,6 +6,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Membres;
+use Garradin\UserException;
 
 use \KD2\Security;
 use \KD2\Security_OTP;
@@ -222,11 +223,13 @@ class Session
 
 		if (!self::checkOTP($user->secret, $code))
 		{
+			var_dump($user->secret, $code);
 			return false;
 		}
 
+		self::createUserSession($user->id);
 		$session = new Session($user->id);
-		$session->updateLoginDate();
+
 		return $session;
 	}
 
@@ -236,7 +239,7 @@ class Session
 		{
 			// Vérifier encore, mais avec le temps NTP
 			// au cas où l'horloge du serveur n'est pas à l'heure
-			$time = Security_OTP::getTimeFromNTP(NTP_SERVER);
+			$time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER);
 
 			if (!Security_OTP::TOTP($secret, $code, $time))
 			{
@@ -585,7 +588,7 @@ class Session
 			unset($data['passe']);
 		}
 
-		if (isset($data['clef_pgp']))
+		if (isset($data['clef_pgp']) && trim($data['clef_pgp']) !== '')
 		{
 			$data['clef_pgp'] = trim($data['clef_pgp']);
 

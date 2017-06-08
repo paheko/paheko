@@ -1,15 +1,7 @@
 {include file="admin/_head.tpl" title="Connexion — double facteur"}
 
-{if $error}
-    <p class="error">
-        {if $error == 'OTHER'}
-            Une erreur est survenue, merci de réessayer.
-        {else}
-            Code incorrect. L'heure du serveur est {$time|date_fr:"d/m/Y H:i:s"}. Vérifiez que votre téléphone est à l'heure.
-        {/if}
-    </p>
-{/if}
-
+{form_errors}
+{show_error if=$fail message="Code incorrect. Vérifiez que votre téléphone est à l'heure."}
 
 <form method="post" action="{$self_url}">
 
