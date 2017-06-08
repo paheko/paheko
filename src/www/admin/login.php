@@ -25,7 +25,7 @@ if (qg('keepSessionAlive') !== null)
     exit;
 }
 
-$fail = false;
+$login = null;
 
 // Soumission du formulaire
 if (f('login'))
@@ -36,7 +36,7 @@ if (f('login'))
         'permanent' => 'boolean',
     ]);
 
-    if (!$form->hasErrors() && ($fail = Membres\Session::login(f('_id'), f('passe'), (bool) f('permanent'))))
+    if (!$form->hasErrors() && ($login = Membres\Session::login(f('_id'), f('passe'), (bool) f('permanent'))))
     {
         Utils::redirect('/admin/');
     }
@@ -51,6 +51,6 @@ $tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
 $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfURL()));
 
 $tpl->assign('champ', $champ);
-$tpl->assign('fail', $fail);
+$tpl->assign('fail', $login === false);
 
 $tpl->display('admin/login.tpl');
