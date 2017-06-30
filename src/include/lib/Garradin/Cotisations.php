@@ -67,7 +67,7 @@ class Cotisations
 
 		if (isset($data['id_categorie_compta']))
 		{
-			if ($data['id_categorie_compta'] != 0 && !$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, (int) $data['id_categorie_compta']))
+			if ($data['id_categorie_compta'] != 0 && !$db->firstColumn('SELECT 1 FROM compta_categories WHERE id = ?;', (int) $data['id_categorie_compta']))
 			{
 				throw new UserException('Catégorie comptable inconnue');
 			}

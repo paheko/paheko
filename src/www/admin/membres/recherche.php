@@ -47,10 +47,7 @@ if ($recherche != '')
 
 $champs_liste = $champs->getList();
 
-$champs_liste = array_merge(
-    ['id' => ['title' => 'Numéro unique', 'type' => 'number']],
-    $champs_liste
-);
+$champs_liste->id = (object) ['title' => 'Numéro unique', 'type' => 'number'];
 
 $champs_entete = $champs->getListedFields();
 

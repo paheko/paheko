@@ -46,8 +46,7 @@ class Champs
         'list_row',
         'mandatory',
         'private',
-        'options',
-        'rules'
+        'options'
     ];
 
     static protected $presets = null;
@@ -120,11 +119,6 @@ class Champs
 
 	public function get($champ, $key = null)
 	{
-        if ($champ == 'id')
-        {
-            return (object) ['title' => 'Numéro unique', 'type' => 'number'];
-        }
-
         if (!property_exists($this->champs, $champ))
             return null;
 

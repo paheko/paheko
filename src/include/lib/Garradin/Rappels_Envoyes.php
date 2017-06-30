@@ -27,14 +27,14 @@ class Rappels_Envoyes
 		$db = DB::getInstance();
 
 		if (!array_key_exists('id_rappel', $data) 
-			|| (!is_null($data['id_rappel']) && (empty($data['id_rappel']) || !$db->simpleQuerySingle('SELECT 1 FROM rappels WHERE id = ?;', false, (int) $data['id_rappel']))))
+			|| (!is_null($data['id_rappel']) && (empty($data['id_rappel']) || !$db->firstColumn('SELECT 1 FROM rappels WHERE id = ?;', (int) $data['id_rappel']))))
 		{
 			throw new \LogicException('ID rappel non fourni ou inexistant dans la table rappels');
 		}
 
         if (isset($data['id_cotisation']))
         {
-        	if (!$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', false, (int) $data['id_cotisation']))
+        	if (!$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', (int) $data['id_cotisation']))
 	        {
 	            throw new UserException('Cotisation inconnue.');
 	        }
@@ -43,7 +43,7 @@ class Rappels_Envoyes
 	    }
 
         if (empty($data['id_membre'])
-        	|| !$db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int) $data['id_membre']))
+        	|| !$db->firstColumn('SELECT 1 FROM membres WHERE id = ?;', (int) $data['id_membre']))
         {
             throw new UserException('Membre inconnu.');
         }
@@ -99,7 +99,7 @@ class Rappels_Envoyes
 	 */
 	public function get($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT * FROM rappels_envoyes WHERE id = ?;', true, (int)$id);
+		return DB::getInstance()->first('SELECT * FROM rappels_envoyes WHERE id = ?;', (int)$id);
 	}
 
 	/**
@@ -207,9 +207,9 @@ class Rappels_Envoyes
 	 */
 	public function countForCotisation($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels_envoyes
+		return DB::getInstance()->firstColumn('SELECT COUNT(*) FROM rappels_envoyes
 			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?);',
-			false, (int)$id);
+			(int)$id);
 	}
 
 	/**
@@ -234,7 +234,7 @@ class Rappels_Envoyes
 	 */
 	public function countForRappel($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels_envoyes 
-			WHERE id_rappel = ?;', false, (int)$id);
+		return DB::getInstance()->firstColumn('SELECT COUNT(*) FROM rappels_envoyes 
+			WHERE id_rappel = ?;', (int)$id);
 	}
 }

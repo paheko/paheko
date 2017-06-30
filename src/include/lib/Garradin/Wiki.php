@@ -474,7 +474,7 @@ class Wiki
                 'id' => 0,
                 'parent' => null,
                 'titre' => 'Racine',
-                'children' => $db->getAssocKey('SELECT id, parent, titre FROM wiki_pages
+                'children' => $db->getGrouped('SELECT id, parent, titre FROM wiki_pages
                     WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;',
                     0)
             ]
@@ -484,13 +484,13 @@ class Wiki
 
         do
         {
-            $parent = $db->simpleQuerySingle('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', false, (int)$id);
+            $parent = $db->get('SELECT parent FROM wiki_pages WHERE id = ? LIMIT 1;', (int)$id);
 
             $flat[$id] = (object) [
                 'id'        =>  $id,
                 'parent'    =>  $id ? (int)$parent : null,
                 'titre'     =>  $id ? $this->getTitle($id) : 'Racine',
-                'children'  =>  $db->getAssocKey('SELECT id, parent, titre FROM wiki_pages
+                'children'  =>  $db->getGrouped('SELECT id, parent, titre FROM wiki_pages
                     WHERE parent = ? ORDER BY transliterate_to_ascii(titre) COLLATE NOCASE;',
                     (int)$id)
             ];
