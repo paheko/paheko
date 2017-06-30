@@ -214,7 +214,7 @@ class Membres
                 || $db->firstColumn('SELECT 1 FROM cotisations_membres WHERE id_membre = ?;', (int)$id)
                 || $db->firstColumn('SELECT 1 FROM rappels_envoyes WHERE id_membre = ?;', (int)$id)
                 || $db->firstColumn('SELECT 1 FROM fichiers_membres WHERE id = ?;', (int)$id))
-            # FIXME || $db->simpleQuerySingle('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
+            # FIXME || $db->firstColumn('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
             {
                 throw new UserException('Le numéro n\'est pas modifiable pour ce membre car des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
             }

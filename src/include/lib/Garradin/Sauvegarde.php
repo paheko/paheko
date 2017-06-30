@@ -407,6 +407,6 @@ class Sauvegarde
 	public function getDBFilesSize()
 	{
 		$db = DB::getInstance();
-		return (int) $db->simpleQuerySingle('SELECT SUM(taille) FROM fichiers_contenu;');
+		return (int) $db->firstColumn('SELECT SUM(taille) FROM fichiers_contenu;');
 	}
 }

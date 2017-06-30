@@ -288,7 +288,7 @@ class Plugin
 		// Signaux exclusifs, qui ne peuvent être attribués qu'à un seul plugin
 		if (strpos($signal, 'boucle.') === 0)
 		{
-			$registered = $db->simpleQuerySingle('SELECT plugin FROM plugins_signaux WHERE signal = ? AND plugin != ?;', false, $signal, $this->id);
+			$registered = $db->firstColumn('SELECT plugin FROM plugins_signaux WHERE signal = ? AND plugin != ?;', $signal, $this->id);
 
 			if ($registered)
 			{
@@ -310,7 +310,7 @@ class Plugin
 	static public function listInstalled()
 	{
 		$db = DB::getInstance();
-		$plugins = $db->getAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
+		$plugins = $db->getGrouped('SELECT id, * FROM plugins ORDER BY nom;');
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($plugins as &$row)

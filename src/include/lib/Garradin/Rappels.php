@@ -14,7 +14,7 @@ class Rappels
 		$db = DB::getInstance();
 
         if (empty($data['id_cotisation'])
-        	|| !$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', false, (int) $data['id_cotisation']))
+        	|| !$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', (int) $data['id_cotisation']))
         {
             throw new UserException('Cotisation inconnue.');
         }

@@ -26,7 +26,7 @@ class Cotisations
         }
 
 		if (empty($data['id_cotisation']) 
-			|| !$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', false, (int) $data['id_cotisation']))
+			|| !$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', (int) $data['id_cotisation']))
 		{
 			throw new UserException('Cotisation inconnue.');
 		}
@@ -34,7 +34,7 @@ class Cotisations
 		$data['id_cotisation'] = (int) $data['id_cotisation'];
 
 		if (empty($data['id_membre']) 
-			|| !$db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int) $data['id_membre']))
+			|| !$db->firstColumn('SELECT 1 FROM membres WHERE id = ?;', (int) $data['id_membre']))
 		{
 			throw new UserException('Membre inconnu ou invalide.');
 		}
@@ -55,8 +55,7 @@ class Cotisations
 	                throw new UserException('Le compte bancaire choisi est invalide.');
 	            }
 
-	            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;',
-	            	false, $data['banque']))
+	            if (!$db->firstColumn('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', $data['banque']))
 	            {
 	                throw new UserException('Le compte bancaire choisi n\'existe pas.');
 	            }
