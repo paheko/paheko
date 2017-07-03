@@ -345,6 +345,9 @@ class Utils
             self::$skriv = new \KD2\SkrivLite;
             self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivFichier']);
             self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
+
+            // Enregistrer d'autres extensions éventuellement
+            Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
         }
 
         $skriv =& self::$skriv;
