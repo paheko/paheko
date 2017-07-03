@@ -18,7 +18,7 @@ class Categories
     public function importCategories()
     {
         $db = DB::getInstance();
-        $db->exec(file_get_contents(\Garradin\ROOT . '/include/data/categories_comptables.sql'));
+        $db->import(\Garradin\ROOT . '/include/data/categories_comptables.sql');
     }
 
     public function add($data)
@@ -34,7 +34,7 @@ class Categories
 
         $data['compte'] = trim($data['compte']);
 
-        if (!$db->firstColumn('SELECT 1 FROM compta_comptes WHERE id = ?;', $data['compte']))
+        if (!$db->test('compta_comptes', $db->where('id', $data['compte'])))
         {
             throw new UserException('Le compte associé n\'existe pas.');
         }
@@ -81,7 +81,7 @@ class Categories
         $id = (int) $id;
 
         // Ne pas supprimer une catégorie qui est utilisée !
-        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE id_categorie = ? LIMIT 1;', $id))
+        if ($db->test('compta_journal', $db->where('id_categorie', $id)))
         {
             throw new UserException('Cette catégorie ne peut être supprimée car des opérations comptables y sont liées.');
         }
