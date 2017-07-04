@@ -491,8 +491,7 @@ table.list th, table.list td {
 
 table.list tr {
     border: 1px solid rgb(217, 134, 40);
-    border: 1px solid rgba(217, 134, 40, 0.5);
-    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    border-color: rgba(var(--gSecondColor), 0.5);
     transition: background .5s
 }
 
@@ -680,30 +679,29 @@ b.money {
     color: #9c4f15;
     color: rgb(var(--gMainColor));
     text-shadow: 1px 1px 1px #999;
-    transition: all .2s;
     border: none;
     cursor: pointer;
+    position: relative;
+    z-index: 200;
 }
 
 .icn[title]:after {
     display: none;
-    visibility: hidden;
-    opacity: 0;
     position: absolute;
     content: attr(title);
-    color: #666;
     font-size: 10pt;
     border-radius: .2em;
-    display: inline-block;
-    right: 2.2em;
     top: 0;
     bottom: 0;
+    right: 0;
+    z-index: -1;
     padding: .3em .4em;
+    padding-right: 2em;
     background: #ff9;
     text-shadow: none;
     white-space: pre;
     box-shadow: 0px 0px 2px #000;
-    transition: all .2s;
+    text-decoration: underline;
 }
 
 dl dd.actions .icn[title]:after {
@@ -714,8 +712,6 @@ dl dd.actions .icn[title]:after {
 
 .icn[title]:hover:after {
     display: inline-block;
-    opacity: 1;
-    visibility: visible;
 }
 
 .num a {
@@ -732,8 +728,8 @@ dl dd.actions .icn[title]:after {
 .actions .icn:hover, .num a:hover, .icn.action:hover {
     color: darkred;
     background: #ff9;
+    z-index: 300;
 }
-
 
 .droits b {
     border: 2px solid #999;
@@ -975,7 +971,7 @@ dl.cotisation dd {
 #orderFields fieldset .actions {
     display: block;
     position: absolute;
-    top: 1em;
+    top: .2em;
     right: 1em;
 }
 
