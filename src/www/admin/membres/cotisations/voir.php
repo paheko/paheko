@@ -22,7 +22,7 @@ if (!$co)
     throw new UserException("Cette cotisation n'existe pas.");
 }
 
-$page = (int) Utils::get('p') ?: 1;
+$page = (int) qg('p') ?: 1;
 
 $tpl->assign('page', $page);
 $tpl->assign('bypage', Membres\Cotisations::ITEMS_PER_PAGE);
@@ -30,9 +30,9 @@ $tpl->assign('total', $m_cotisations->countMembersForCotisation($co->id));
 $tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?id=' . $co->id . '&amp;p=[ID]');
 
 $tpl->assign('cotisation', $co);
-$tpl->assign('order', Utils::get('o') ?: 'date');
+$tpl->assign('order', qg('o') ?: 'date');
 $tpl->assign('desc', !isset($_GET['a']));
 $tpl->assign('liste', $m_cotisations->listMembersForCotisation(
-	$co->id, $page, Utils::get('o'), isset($_GET['a']) ? false : true));
+	$co->id, $page, qg('o'), isset($_GET['a']) ? false : true));
 
 $tpl->display('admin/membres/cotisations/voir.tpl');

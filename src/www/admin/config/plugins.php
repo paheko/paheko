@@ -32,14 +32,14 @@ if (!empty($_POST['install']))
 
 if (Utils::post('delete'))
 {
-    if (!Utils::CSRF_check('delete_plugin_' . Utils::get('delete')))
+    if (!Utils::CSRF_check('delete_plugin_' . qg('delete')))
     {
         $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
     }
     else
     {
         try {
-            $plugin = new Plugin(Utils::get('delete'));
+            $plugin = new Plugin(qg('delete'));
             $plugin->uninstall();
             
             Utils::redirect('/admin/config/plugins.php');
@@ -53,9 +53,9 @@ if (Utils::post('delete'))
 
 $tpl->assign('error', $error);
 
-if (Utils::get('delete'))
+if (qg('delete'))
 {
-    $plugin = new Plugin(Utils::get('delete'));
+    $plugin = new Plugin(qg('delete'));
     $tpl->assign('plugin', $plugin->getInfos());
     $tpl->assign('delete', true);
 }

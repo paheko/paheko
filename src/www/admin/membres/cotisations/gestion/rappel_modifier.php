@@ -5,14 +5,14 @@ require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-if (!Utils::get('id') || !is_numeric(Utils::get('id')))
+if (!qg('id') || !is_numeric(qg('id')))
 {
     throw new UserException("Argument du numéro de rappel manquant.");
 }
 
 $rappels = new Rappels;
 
-$rappel = $rappels->get(Utils::get('id'));
+$rappel = $rappels->get(qg('id'));
 
 if (!$rappel)
 {

@@ -10,7 +10,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
 
 $journal = new Compta\Journal;
 
-$operation = $journal->get(Utils::get('id'));
+$operation = $journal->get(qg('id'));
 
 if (!$operation)
 {

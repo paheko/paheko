@@ -5,7 +5,7 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-$query = trim(Utils::get('query'));
+$query = trim(qg('query'));
 
 $tpl->assign('schema', $membres->schemaSQL());
 $tpl->assign('query', $query);

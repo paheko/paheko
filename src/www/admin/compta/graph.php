@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-qv(['g' => 'required|in:recettes_depenses:banques_caisses']);
+qv(['g' => 'required|in:recettes_depenses,banques_caisses']);
 
 $graph = qg('g');
 

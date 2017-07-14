@@ -55,16 +55,16 @@ if (Utils::post('select') && Utils::post('reset'))
 }
 
 
-if (Utils::get('edit'))
+if (qg('edit'))
 {
-    $source = Squelette::getSource(Utils::get('edit'));
+    $source = Squelette::getSource(qg('edit'));
 
     if (!$source)
     {
         throw new UserException("Ce squelette n'existe pas.");
     }
 
-    $csrf_key = 'edit_skel_'.md5(Utils::get('edit'));
+    $csrf_key = 'edit_skel_'.md5(qg('edit'));
 
     if (Utils::post('save'))
     {
@@ -74,10 +74,10 @@ if (Utils::get('edit'))
         }
         else
         {
-            if (Squelette::editSource(Utils::get('edit'), Utils::post('content')))
+            if (Squelette::editSource(qg('edit'), Utils::post('content')))
             {
                 $fullscreen = isset($_GET['fullscreen']) ? '#fullscreen' : '';
-                Utils::redirect('/admin/config/site.php?edit='.rawurlencode(Utils::get('edit')).'&ok'.$fullscreen);
+                Utils::redirect('/admin/config/site.php?edit='.rawurlencode(qg('edit')).'&ok'.$fullscreen);
             }
             else
             {
@@ -86,12 +86,12 @@ if (Utils::get('edit'))
         }
     }
 
-    $tpl->assign('edit', ['file' => trim(Utils::get('edit')), 'content' => $source]);
+    $tpl->assign('edit', ['file' => trim(qg('edit')), 'content' => $source]);
     $tpl->assign('csrf_key', $csrf_key);
 }
 
 $tpl->assign('sources', Squelette::listSources());
 
-$tpl->assign('reset_ok', Utils::get('reset_ok'));
+$tpl->assign('reset_ok', qg('reset_ok'));
 $tpl->assign('error', $error);
 $tpl->display('admin/config/site.tpl');
