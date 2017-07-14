@@ -10,7 +10,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
 
 $banque = new Compta\Comptes_Bancaires;
 
-$compte = $banque->get(Utils::get('id'));
+$compte = $banque->get(qg('id'));
 
 if (!$compte)
 {

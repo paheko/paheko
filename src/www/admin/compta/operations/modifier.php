@@ -12,7 +12,7 @@ $journal = new Compta\Journal;
 $cats = new Compta\Categories;
 $banques = new Compta\Comptes_Bancaires;
 
-$operation = $journal->get(Utils::get('id'));
+$operation = $journal->get(qg('id'));
 
 if (!$operation)
 {

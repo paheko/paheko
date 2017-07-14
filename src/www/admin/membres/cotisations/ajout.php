@@ -79,9 +79,9 @@ $tpl->assign('comptes_bancaires', $banques->getList());
 $tpl->assign('banque', Utils::post('banque'));
 
 
-if (Utils::get('cotisation'))
+if (qg('cotisation'))
 {
-    $co = $cotisations->get(Utils::get('cotisation'));
+    $co = $cotisations->get(qg('cotisation'));
 
     if (!$co)
     {

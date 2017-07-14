@@ -4,9 +4,9 @@ namespace Garradin;
 require_once __DIR__ . '/_inc.php';
 
 // Recherche de membre (pour ceux qui n'ont qu'un accès à la liste des membres)
-if (Utils::get('r'))
+if (qg('r'))
 {
-	$recherche = trim(Utils::get('r'));
+	$recherche = trim(qg('r'));
 
 	$result = $membres->search($config->get('champ_identite'), $recherche);
     $tpl->assign('liste', $result);
@@ -20,8 +20,8 @@ else
 	$membres_cats = $cats->listSimple();
 	$membres_cats_cachees = $cats->listHidden();
 
-	$cat_id = (int) Utils::get('cat') ?: 0;
-	$page = (int) Utils::get('p') ?: 1;
+	$cat_id = (int) qg('cat') ?: 0;
+	$page = (int) qg('p') ?: 1;
 
 	if ($cat_id)
 	{
@@ -40,8 +40,8 @@ else
 	$order = $config->get('champ_identite');
 	$desc = false;
 
-	if (Utils::get('o'))
-	    $order = Utils::get('o');
+	if (qg('o'))
+	    $order = qg('o');
 
 	if (isset($_GET['d']))
 	    $desc = true;
@@ -63,7 +63,7 @@ else
 	$tpl->assign('liste', $membres->listByCategory($cat_id, array_keys((array) $fields), $page, $order, $desc));
 	$tpl->assign('total', $membres->countByCategory($cat_id));
 
-	$tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : '') . ($cat_id? '&amp;cat='. (int) Utils::get('cat') : ''));
+	$tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : '') . ($cat_id? '&amp;cat='. (int) qg('cat') : ''));
 
 	$tpl->assign('membres_cats', $membres_cats);
 	$tpl->assign('membres_cats_cachees', $membres_cats_cachees);

@@ -5,8 +5,8 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
-$recherche = trim(Utils::get('r'));
-$champ = trim(Utils::get('c'));
+$recherche = trim(qg('r'));
+$champ = trim(qg('c'));
 
 $champs = $config->get('champs_membres');
 

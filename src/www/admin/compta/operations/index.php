@@ -6,9 +6,9 @@ require_once __DIR__ . '/../_inc.php';
 $cats = new Compta\Categories;
 $cat = $type = false;
 
-if (Utils::get('cat'))
+if (qg('cat'))
 {
-	$cat = $cats->get(Utils::get('cat'));
+	$cat = $cats->get(qg('cat'));
 
 	if (!$cat)
 	{

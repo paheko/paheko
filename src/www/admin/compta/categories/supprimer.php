@@ -10,7 +10,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
 
 $cats = new Compta\Categories;
 
-$id = (int)Utils::get('id');
+$id = (int)qg('id');
 $cat = $cats->get($id);
 
 if (!$cat)

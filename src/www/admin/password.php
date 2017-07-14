@@ -7,9 +7,9 @@ require_once __DIR__ . '/_inc.php';
 
 $error = false;
 
-if (trim(Utils::get('c')))
+if (trim(qg('c')))
 {
-    if ($membres->recoverPasswordConfirm(Utils::get('c')))
+    if ($membres->recoverPasswordConfirm(qg('c')))
     {
         Utils::redirect('/admin/password.php?new_sent');
     }

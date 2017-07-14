@@ -6,7 +6,7 @@ require_once __DIR__ . '/../_inc.php';
 $exercices = new Compta\Exercices;
 $journal = new Compta\Journal;
 
-$exercice = Utils::get('exercice') ?: $exercices->getCurrentId();
+$exercice = qg('exercice') ?: $exercices->getCurrentId();
 
 if (!$exercice)
 {

@@ -112,8 +112,8 @@ elseif (Utils::post('restore_file'))
 
 $tpl->assign('error', $error);
 $tpl->assign('code', $code);
-$tpl->assign('ok_code', Utils::get('code'));
-$tpl->assign('ok', Utils::get('ok'));
+$tpl->assign('ok_code', qg('code'));
+$tpl->assign('ok', qg('ok'));
 $tpl->assign('liste', $s->getList());
 $tpl->assign('max_file_size', Utils::getMaxUploadSize());
 

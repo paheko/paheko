@@ -13,7 +13,7 @@ $rapprochement = new Compta\Rapprochement;
 $exercices = new Compta\Exercices;
 $exercice = $exercices->getCurrent();
 
-$compte = $banques->get(Utils::get('id'));
+$compte = $banques->get(qg('id'));
 
 if (!$compte)
 {
@@ -24,8 +24,8 @@ $error = false;
 
 $solde_initial = $solde_final = 0;
 
-$debut = Utils::get('debut');
-$fin = Utils::get('fin');
+$debut = qg('debut');
+$fin = qg('fin');
 
 if ($debut && $fin)
 {

@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$compte = $comptes->get(Utils::get('id'));
+$compte = $comptes->get(qg('id'));
 
 if (!$compte)
 {

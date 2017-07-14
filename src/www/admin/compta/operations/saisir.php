@@ -187,6 +187,6 @@ if (!$membres->sessionGet('compta_date'))
 }
 
 $tpl->assign('date', $membres->sessionGet('compta_date') ?: false);
-$tpl->assign('ok', (int) Utils::get('ok'));
+$tpl->assign('ok', (int) qg('ok'));
 
 $tpl->display('admin/compta/operations/saisir.tpl');

@@ -10,7 +10,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
 
 $e = new Compta\Exercices;
 
-$exercice = $e->get((int)Utils::get('id'));
+$exercice = $e->get((int)qg('id'));
 
 if (!$exercice)
 {

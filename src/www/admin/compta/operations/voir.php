@@ -5,7 +5,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $journal = new Compta\Journal;
 
-$operation = $journal->get(Utils::get('id'));
+$operation = $journal->get(qg('id'));
 
 if (!$operation)
 {

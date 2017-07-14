@@ -8,7 +8,7 @@ if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
     throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
 }
 
-$classe = (int) Utils::get('classe');
+$classe = (int) qg('classe');
 
 if (!$classe || $classe < 1 || $classe > 9)
 {
