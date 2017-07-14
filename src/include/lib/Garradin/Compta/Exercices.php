@@ -287,7 +287,7 @@ class Exercices
     public function getList()
     {
         $db = DB::getInstance();
-        return $db->getAssocKey('SELECT id, *, strftime(\'%s\', debut) AS debut,
+        return $db->getGrouped('SELECT id, *, strftime(\'%s\', debut) AS debut,
             strftime(\'%s\', fin) AS fin,
             (SELECT COUNT(*) FROM compta_journal WHERE id_exercice = compta_exercices.id) AS nb_operations
             FROM compta_exercices ORDER BY fin DESC;');

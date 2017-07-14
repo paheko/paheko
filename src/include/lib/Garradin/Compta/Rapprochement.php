@@ -20,7 +20,7 @@ class Rapprochement
             COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND id_exercice = :exercice AND date < :date), 0)
             - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND id_exercice = :exercice AND date < :date), 0)';
 
-        $solde_initial = $solde = $db->simpleQuerySingle($query, false, [
+        $solde_initial = $solde = $db->firstColumn($query, [
             'compte'    =>  $compte,
             'date'      =>  $debut,
             'exercice'  =>  $exercice
@@ -36,7 +36,7 @@ class Rapprochement
                 AND j.date >= :debut AND j.date <= :fin
             ORDER BY date ASC;';
 
-        $result = $db->simpleStatementFetch($query, DB::ASSOC, [
+        $result = $db->get($query, [
             'compte'    =>  $compte,
             'debut'     =>  $debut,
             'fin'       =>  $fin,

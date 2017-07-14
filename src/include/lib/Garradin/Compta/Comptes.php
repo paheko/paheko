@@ -328,7 +328,7 @@ class Comptes
                 throw new UserException('Le compte ne peut pas ne pas avoir de compte parent.');
             }
 
-            if (!($id = $db->simpleQuerySingle('SELECT id FROM compta_comptes WHERE id = ?;', false, $data['parent'])))
+            if (!($id = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $data['parent'])))
             {
                 throw new UserException('Le compte parent indiqué n\'existe pas.');
             }

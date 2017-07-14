@@ -89,8 +89,8 @@ class Import
 		$journal = new Journal;
 
 		$columns = array_flip($this->csv_header);
-		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
-		$liste_cats = $db->simpleStatementFetchAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_comptes = $db->getAssoc('SELECT id, id FROM compta_comptes;');
+		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
 
 		$col = function($column) use (&$row, &$columns)
@@ -152,8 +152,7 @@ class Import
 			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
 
 			// En dehors de l'exercice courant
-			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices
-				WHERE (? < debut OR ? > fin) AND cloture = 0;', false, $date, $date))
+			if ($db->test('compta_exercices', '(? < debut OR ? > fin) AND cloture = 0', $date, $date))
 			{
 				continue;
 			}
@@ -239,8 +238,8 @@ class Import
 		$journal = new Journal;
 
 		$columns = [];
-		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
-		$liste_cats = $db->simpleStatementFetchAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_comptes = $db->getAssoc('SELECT id, id FROM compta_comptes;');
+		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
 
 		$get_compte = function ($compte, $intitule) use (&$liste_comptes, &$comptes, &$banques)
@@ -315,8 +314,7 @@ class Import
 			$date = explode('/', $date);
 			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
 
-			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices
-				WHERE (? < debut OR ? > fin) AND cloture = 0;', false, $date, $date))
+			if ($db->test('compta_exercices', '(? < debut OR ? > fin) AND cloture = 0', $date, $date))
 			{
 				continue;
 			}

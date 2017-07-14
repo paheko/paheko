@@ -75,7 +75,7 @@ class Rappels_Envoyes
 
 		$this->_checkFields($data);
 
-		$db->simpleInsert('rappels_envoyes', $data);
+		$db->insert('rappels_envoyes', $data);
 
 		return $db->lastInsertRowId();
 	}
@@ -88,7 +88,7 @@ class Rappels_Envoyes
 	public function delete($id)
 	{
 		$db = DB::getInstance();
-		$db->simpleExec('DELETE FROM rappels_envoyes WHERE id = ?;', (int) $id);
+		$db->delete('rappels_envoyes', $db->where('id', (int) $id));
 		return true;
 	}
 
@@ -177,12 +177,12 @@ class Rappels_Envoyes
 	 */
 	public function listForMember($id)
 	{
-		return DB::getInstance()->simpleStatementFetch('SELECT
+		return DB::getInstance()->get('SELECT
 			re.*, c.intitule, c.montant
 			FROM rappels_envoyes AS re 
 				INNER JOIN cotisations AS c ON c.id = re.id_cotisation 
 			WHERE re.id_membre = ?
-			ORDER BY re.date DESC;', \SQLITE3_ASSOC, (int)$id);
+			ORDER BY re.date DESC;', (int)$id);
 	}
 
 	/**
@@ -195,9 +195,9 @@ class Rappels_Envoyes
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
-		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels_envoyes
+		return DB::getInstance()->get('SELECT * FROM rappels_envoyes
 			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?)
-			ORDER BY date DESC;', \SQLITE3_ASSOC, (int)$id);
+			ORDER BY date DESC;', (int)$id);
 	}
 
 	/**
@@ -222,9 +222,9 @@ class Rappels_Envoyes
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
-		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels_envoyes 
+		return DB::getInstance()->get('SELECT * FROM rappels_envoyes 
 			WHERE id_rappel = ? ORDER BY date DESC LIMIT ?,?;',
-			\SQLITE3_ASSOC, (int)$id, (int)$begin, self::ITEMS_PER_PAGE);
+			(int)$id, (int)$begin, self::ITEMS_PER_PAGE);
 	}
 
 	/**

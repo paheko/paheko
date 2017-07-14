@@ -107,13 +107,13 @@ class Categories
                 ON cc.id = cat.compte
             WHERE %s ORDER BY cat.intitule;', $where);
 
-        return $db->getAssocKey($query);
+        return $db->getGrouped($query);
     }
 
     public function listMoyensPaiement()
     {
         $db = DB::getInstance();
-        return $db->getAssocKey('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
+        return $db->getGrouped('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
     }
 
     public function getMoyenPaiement($code)
