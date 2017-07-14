@@ -239,7 +239,7 @@ class Membres
             return true;
         }
 
-        $success = $db->simpleUpdate('membres', $data, 'id = '.(int)$id);
+        $success = $db->update('membres', $data, $db->where('id', (int)$id));
 
         Plugin::fireSignal('membre.edit', $data);
 

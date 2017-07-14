@@ -114,18 +114,18 @@ class Comptes_Bancaires extends Comptes
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM compta_comptes AS c
+        return $db->first('SELECT * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc
             ON c.id = cc.id
-            WHERE c.id = ?;', true, $id);
+            WHERE c.id = ?;', $id);
     }
 
     public function getList($parent = false)
     {
         $db = DB::getInstance();
-        return $db->simpleStatementFetchAssocKey('SELECT c.id AS id, * FROM compta_comptes AS c
+        return $db->getGrouped('SELECT c.id AS id, * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc ON c.id = cc.id
-            WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');
+            WHERE c.parent = ? ORDER BY c.id;', self::NUMERO_PARENT_COMPTES);
     }
 
     protected function _checkBankFields(&$data)

@@ -598,7 +598,8 @@ class Session
 			}
 		}
 
-		DB::getInstance()->simpleUpdate('membres', $data, 'id = '.(int)$this->id);
+		$db = DB::getInstance();
+		$db->update('membres', $data, $db->where('id', (int)$this->id));
 		$this->updateSessionData();
 
 		return true;

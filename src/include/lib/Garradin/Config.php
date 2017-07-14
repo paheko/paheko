@@ -198,7 +198,7 @@ class Config
         $this->config['version'] = $version;
 
         $db = DB::getInstance();
-        $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+        $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
                 'version', $version);
 
         return true;
