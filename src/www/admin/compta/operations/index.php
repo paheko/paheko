@@ -19,9 +19,9 @@ if (qg('cat'))
 }
 else
 {
-	if (isset($_GET['autres']))
+	if (null !== qg('autres'))
 		$type = Compta\Categories::AUTRES;
-	elseif (isset($_GET['depenses']))
+	elseif (null !== qg('depenses'))
 		$type = Compta\Categories::DEPENSES;
 	else
 		$type = Compta\Categories::RECETTES;

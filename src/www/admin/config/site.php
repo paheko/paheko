@@ -76,7 +76,7 @@ if (qg('edit'))
         {
             if (Squelette::editSource(qg('edit'), Utils::post('content')))
             {
-                $fullscreen = isset($_GET['fullscreen']) ? '#fullscreen' : '';
+                $fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
                 Utils::redirect('/admin/config/site.php?edit='.rawurlencode(qg('edit')).'&ok'.$fullscreen);
             }
             else

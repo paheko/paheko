@@ -5,12 +5,9 @@ require_once __DIR__ . '/../_inc.php';
 
 $journal = new Compta\Journal;
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de cotisation manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $m_cotisations = new Membres\Cotisations;
 $cotisations = new Cotisations;

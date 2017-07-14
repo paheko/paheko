@@ -3,10 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ECRITURE);
 
 $journal = new Compta\Journal;
 
@@ -15,13 +12,13 @@ $journal->checkExercice();
 $cats = new Compta\Categories;
 $banques = new Compta\Comptes_Bancaires;
 
-if (isset($_GET['depense']))
+if (null !== qg('depense'))
     $type = Compta\Categories::DEPENSES;
-elseif (isset($_GET['virement']))
+elseif (null !== qg('virement'))
     $type = 'virement';
-elseif (isset($_GET['dette']))
+elseif (null !== qg('dette'))
     $type = 'dette';
-elseif (isset($_GET['avance']))
+elseif (null !== qg('avance'))
     $type = null;
 else
     $type = Compta\Categories::RECETTES;
