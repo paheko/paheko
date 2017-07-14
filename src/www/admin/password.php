@@ -33,11 +33,11 @@ elseif (!empty($_POST['recover']))
     }
 }
 
-if (!$error && isset($_GET['sent']))
+if (!$error && null !== qg('sent'))
 {
     $tpl->assign('sent', true);
 }
-elseif (!$error && isset($_GET['new_sent']))
+elseif (!$error && null !== qg('new_sent'))
 {
     $tpl->assign('new_sent', true);
 }

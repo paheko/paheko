@@ -22,7 +22,7 @@ else
     $champs = new Membres\Champs($config->get('champs_membres'));
 }
 
-if (isset($_GET['ok']))
+if (null !== qg('ok'))
 {
     $error = 'OK';
 }
@@ -123,7 +123,7 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('review', isset($_GET['review']) ? true : false);
+$tpl->assign('review', null !== qg('review') ? true : false);
 
 $types = $champs->getTypes();
 
@@ -139,6 +139,6 @@ $tpl->register_modifier('get_type', function ($type) use ($types) {
 $tpl->assign('csrf_name', Utils::CSRF_field_name('config_membres'));
 $tpl->assign('csrf_value', Utils::CSRF_create('config_membres'));
 
-$tpl->assign('title', 'Configuration — ' . (isset($_GET['review']) ? 'Confirmer les changements' : 'Fiche membres'));
+$tpl->assign('title', 'Configuration — ' . (null !== qg('review') ? 'Confirmer les changements' : 'Fiche membres'));
 
 $tpl->display('admin/config/membres.tpl');

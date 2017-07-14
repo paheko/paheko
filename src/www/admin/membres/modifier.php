@@ -5,12 +5,9 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de membre manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $membre = $membres->get($id);
 

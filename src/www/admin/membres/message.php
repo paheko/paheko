@@ -8,12 +8,9 @@ if (empty($user->email))
     throw new UserException("Vous devez renseigner l'adresse e-mail dans vos informations pour pouvoir contacter les autres membres.");
 }
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de membre manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $membre = $membres->get($id);
 

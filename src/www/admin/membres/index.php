@@ -43,7 +43,7 @@ else
 	if (qg('o'))
 	    $order = qg('o');
 
-	if (isset($_GET['d']))
+	if (null !== qg('d'))
 	    $desc = true;
 
 	$fields = $champs->getListedFields();
@@ -74,6 +74,6 @@ else
 
 }
 
-$tpl->assign('sent', isset($_GET['sent']));
+$tpl->assign('sent', null !== qg('sent'));
 
 $tpl->display('admin/membres/index.tpl');

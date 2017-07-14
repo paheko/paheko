@@ -5,12 +5,9 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-	throw new UserException("Argument du numéro de membre manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $membre = $membres->get($id);
 
@@ -51,7 +48,7 @@ if (Utils::post('save'))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('ok', isset($_GET['ok']));
+$tpl->assign('ok', null !== qg('ok'));
 $tpl->assign('membre', $membre);
 $tpl->assign('cotisations', $cm->listSubscriptionsForMember($membre->id));
 $tpl->assign('default_date', date('Y-m-d'));

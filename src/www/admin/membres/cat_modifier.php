@@ -7,12 +7,9 @@ $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 $cats = new Membres\Categories;
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de catégorie manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $cat = $cats->get($id);
 

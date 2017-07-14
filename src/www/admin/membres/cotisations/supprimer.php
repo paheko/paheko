@@ -10,12 +10,9 @@ $membre = false;
 $cotisations = new Cotisations;
 $m_cotisations = new Membres\Cotisations;
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de cotisation membre manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $co = $m_cotisations->get($id);
 

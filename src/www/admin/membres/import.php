@@ -7,7 +7,7 @@ $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 $import = new Membres\Import;
 
-if (isset($_GET['export']))
+if (null !== qg('export'))
 {
     header('Content-type: application/csv');
     header('Content-Disposition: attachment; filename="Export membres - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.csv"');
@@ -57,7 +57,7 @@ if (Utils::post('import'))
 }
 
 $tpl->assign('error', $error);
-$tpl->assign('ok', isset($_GET['ok']) ? true : false);
+$tpl->assign('ok', null !== qg('ok') ? true : false);
 
 $tpl->assign('garradin_champs', $champs);
 $tpl->assign('galette_champs', $import->galette_fields);

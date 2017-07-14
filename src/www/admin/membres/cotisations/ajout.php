@@ -7,9 +7,9 @@ $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
 $membre = false;
 
-if (!empty($_GET['id']) && is_numeric($_GET['id']))
+if (($id = qg('id')) && is_numeric($id))
 {
-    $membre = $membres->get((int) $_GET['id']);
+    $membre = $membres->get((int) $id);
 
     if (!$membre)
     {
