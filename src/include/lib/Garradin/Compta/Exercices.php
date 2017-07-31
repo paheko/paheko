@@ -159,8 +159,8 @@ class Exercices
 
         // Récupérer chacun des comptes de bilan et leurs soldes (uniquement les classes 1 à 5)
         $statement = $db->query('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compta_comptes.id AND id_exercice = :id), 0)
-            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compta_comptes.id AND id_exercice = :id), 0) AS solde
+            ROUND(COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compta_comptes.id AND id_exercice = :id), 0), 2)
+            - ROUND(COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compta_comptes.id AND id_exercice = :id), 0), 2) AS solde
             FROM compta_comptes 
             INNER JOIN compta_journal ON compta_comptes.id = compta_journal.compte_debit 
                 OR compta_comptes.id = compta_journal.compte_credit
