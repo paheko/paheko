@@ -63,7 +63,7 @@ class Squelette_Filtres
 
     static public function heure_en_francais($date)
     {
-        return Utils::strftime_fr('%Hh%I', $date);
+        return Utils::strftime_fr('%Hh%M', $date);
     }
 
     static public function mois_en_francais($date)
@@ -95,7 +95,7 @@ class Squelette_Filtres
         }
         elseif (date('Y', $date) == date('Y'))
         {
-            $jour = strtolower(Utils::strftime_fr('%e %B', $date));
+            $jour = strtolower(Utils::strftime_fr('%A %e %B', $date));
         }
         else
         {
