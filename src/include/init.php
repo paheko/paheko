@@ -173,7 +173,7 @@ class Loader
             $plugin_name = substr($classname, 0, strpos($classname, '\\'));
             $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
             
-            $path = 'phar://' . PLUGINS_ROOT . '/' . strtolower($plugin_name) . '.tar.gz/lib/' . $filename . '.php';
+            $path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
         }
         else
         {
