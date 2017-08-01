@@ -76,16 +76,38 @@ class Squelette_Filtres
         return Utils::strftime_fr($format, $date);
     }
 
-    static public function date_intelligente($date)
+    static public function date_intelligente($date, $avec_heure = true)
     {
+        $jour = null;
+        $heure = date('H\hi', $date);
+
         if (date('Ymd', $date) == date('Ymd'))
-            return 'Aujourd\'hui, '.date('H\hi', $date);
+        {
+            $jour = 'aujourd\'hui';
+        }
         elseif (date('Ymd', $date) == date('Ymd', strtotime('yesterday')))
-            return 'Hier, '.date('H\hi', $date);
+        {
+            $jour = 'hier';
+        }
+        elseif (date('Ymd', $date) == date('Ymd', strtotime('tomorrow')))
+        {
+            $jour = 'demain';
+        }
         elseif (date('Y', $date) == date('Y'))
-            return strtolower(Utils::strftime_fr('%e %B, %Hh%M', $date));
+        {
+            $jour = strtolower(Utils::strftime_fr('%e %B', $date));
+        }
         else
-            return strtolower(Utils::strftime_fr('%e %B %Y', $date));
+        {
+            $jour = strtolower(Utils::strftime_fr('%e %B %Y', $date));
+        }
+
+        if ($avec_heure)
+        {
+            return sprintf('%s, %s', $jour, $heure);
+        }
+
+        return $jour;
     }
 
     static public function date_atom($date)
