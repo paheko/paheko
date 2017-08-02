@@ -16,21 +16,15 @@
                     {format_droits droits=$cat}
                 </td>
                 <td class="actions">
-                    <a class="icn" href="cat_modifier.php?id={$cat.id}" title="Modifier">✎</a>
+                    <a class="icn" href="{$admin_url}membres/categories/modifier.php?id={$cat.id}" title="Modifier">✎</a>
                     {if $cat.id != $user.id_categorie}
-                    <a class="icn" href="cat_supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
+                    <a class="icn" href="{$admin_url}membres/categories/supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>
         {/foreach}
     </tbody>
 </table>
-
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
 
 <form method="post" action="{$self_url}">
 

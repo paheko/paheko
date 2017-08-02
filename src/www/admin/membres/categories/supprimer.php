@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
@@ -23,28 +23,23 @@ if ($cat->id == $user->id_categorie)
     throw new UserException("Vous ne pouvez pas supprimer votre catégorie.");
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete'))
 {
-    if (!Utils::CSRF_check('delete_cat_'.$id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('delete_cat_' . $id);
+
+    if (!$form->hasErrors())
     {
         try {
             $cats->remove($id);
-            Utils::redirect('/admin/membres/categories.php');
+            Utils::redirect('/admin/membres/categories/');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
 $tpl->assign('cat', $cat);
-$tpl->assign('error', $error);
 
-$tpl->display('admin/membres/cat_supprimer.tpl');
+$tpl->display('admin/membres/categories/supprimer.tpl');
