@@ -701,9 +701,6 @@ b.money {
     white-space: pre;
     box-shadow: 0px 0px 2px #000;
     text-decoration: underline;
-}
-
-table .actions .icn[title]:after {
     padding-right: 2em;
 }
 
@@ -711,6 +708,7 @@ dl dd.actions .icn[title]:after {
     right: auto;
     left: 0;
     padding-left: 2em;
+    padding-right: 0;
 }
 
 .icn[title]:hover:after {
@@ -974,7 +972,7 @@ dl.cotisation dd {
 #orderFields fieldset .actions {
     display: block;
     position: absolute;
-    top: .2em;
+    top: 1em;
     right: 1em;
 }
 

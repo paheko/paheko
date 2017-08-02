@@ -16,6 +16,7 @@ if (f('create'))
         $id = $wiki->create([
             'titre'  => f('titre'),
             'parent' => $parent,
+            'droit_lecture' => qg('public') !== null ? Wiki::LECTURE_PUBLIC : Wiki::LECTURE_NORMAL,
         ]);
 
         Utils::redirect('/admin/wiki/editer.php?id='.$id);
