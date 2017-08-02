@@ -34,8 +34,7 @@ class Categories
         }
 
         if (!empty($data['id_cotisation_obligatoire']) 
-            && !$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', 
-                (int)$data['id_cotisation_obligatoire']))
+            && !$db->test('cotisations', 'id = ?', (int)$data['id_cotisation_obligatoire']))
         {
             throw new UserException('Numéro de cotisation inconnu.');
         }
@@ -104,7 +103,7 @@ class Categories
             throw new UserException('Il est interdit de supprimer la catégorie définie par défaut dans la configuration.');
         }
 
-        if ($db->firstColumn('SELECT 1 FROM membres WHERE id_categorie = ?;', (int)$id))
+        if ($db->test('membres', 'id_categorie = ?', (int)$id))
         {
             throw new UserException('La catégorie contient encore des membres, il n\'est pas possible de la supprimer.');
         }
