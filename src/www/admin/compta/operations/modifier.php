@@ -3,10 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $journal = new Compta\Journal;
 $cats = new Compta\Categories;
@@ -19,18 +16,18 @@ if (!$operation)
     throw new UserException("L'opération demandée n'existe pas.");
 }
 
-if ($operation['id_categorie'])
+if ($operation->id_categorie)
 {
-    $categorie = $cats->get($operation['id_categorie']);
+    $categorie = $cats->get($operation->id_categorie);
 }
 else
 {
     $categorie = false;
 }
 
-if ($categorie && $categorie['type'] != Compta\Categories::AUTRES)
+if ($categorie && $categorie->type != Compta\Categories::AUTRES)
 {
-    $type = $categorie['type'];
+    $type = $categorie->type;
 }
 else
 {
@@ -78,7 +75,7 @@ if (!empty($_POST['save']))
                 if (Utils::post('moyen_paiement') == 'ES')
                 {
                     $a = Compta\Comptes::CAISSE;
-                    $b = $cat['compte'];
+                    $b = $cat->compte;
                 }
                 else
                 {
@@ -93,7 +90,7 @@ if (!empty($_POST['save']))
                     }
 
                     $a = Utils::post('banque');
-                    $b = $cat['compte'];
+                    $b = $cat->compte;
                 }
 
                 if ($type == Compta\Categories::DEPENSES)

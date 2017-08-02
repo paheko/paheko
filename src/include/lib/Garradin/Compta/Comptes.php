@@ -259,7 +259,8 @@ class Comptes
      */
     public function isActive($id)
     {
-        return DB::getInstance()->test('compta_comptes', $db->where('id', trim($id)) . ' AND ' . $db->where('desactive', '!=', 1));
+        $db = DB::getInstance();
+        return $db->test('compta_comptes', $db->where('id', trim($id)) . ' AND ' . $db->where('desactive', '!=', 1));
     }
 
     public function get($id)

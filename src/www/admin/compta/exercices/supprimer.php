@@ -3,10 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $e = new Compta\Exercices;
 
@@ -24,7 +21,7 @@ if ($exercice['cloture'])
 
 $error = false;
 
-if (!empty($_POST['delete']))
+if (f('delete'))
 {
     if (!Utils::CSRF_check('compta_supprimer_exercice_'.$exercice['id']))
     {
@@ -34,7 +31,7 @@ if (!empty($_POST['delete']))
     {
         try
         {
-            $id = $e->delete($exercice['id']);
+            $id = $e->delete($exercice->id);
 
             Utils::redirect('/admin/compta/exercices/');
         }
@@ -49,5 +46,3 @@ $tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
 
 $tpl->display('admin/compta/exercices/supprimer.tpl');
-
-?>

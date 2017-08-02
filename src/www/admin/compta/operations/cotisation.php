@@ -19,8 +19,8 @@ if (!$mco)
 	throw new UserException("La cotisation demandée n'existe pas.");
 }
 
-$co = $cotisations->get($mco['id_cotisation']);
-$membre = $membres->get($mco['id_membre']);
+$co = $cotisations->get($mco->id_cotisation);
+$membre = $membres->get($mco->id_membre);
 
 if (!$membre)
 {
@@ -40,7 +40,7 @@ function get_nom_compte($compte)
 
 $tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
 
-$tpl->assign('journal', $m_cotisations->listOperationsCompta($mco['id']));
+$tpl->assign('journal', $m_cotisations->listOperationsCompta($mco->id));
 
 $tpl->assign('cotisation_membre', $mco);
 $tpl->assign('cotisation', $co);

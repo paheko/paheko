@@ -37,7 +37,7 @@ function get_nom_compte($compte)
 
 $tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
 
-$tpl->assign('journal', $journal->listForMember($membre['id'], $exercice));
+$tpl->assign('journal', $journal->listForMember($membre->id, $exercice));
 
 $tpl->assign('exercices', $exercices->getList());
 $tpl->assign('exercice', $exercice);

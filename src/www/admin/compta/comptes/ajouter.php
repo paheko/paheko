@@ -3,10 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $classe = (int) qg('classe');
 
@@ -52,5 +49,3 @@ $tpl->assign('position', Utils::post('position') ?: $parent['position']);
 $tpl->assign('comptes', $comptes->listTree($classe));
 
 $tpl->display('admin/compta/comptes/ajouter.tpl');
-
-?>

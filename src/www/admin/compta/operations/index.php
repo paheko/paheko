@@ -15,7 +15,7 @@ if (qg('cat'))
 		throw new UserException("La catégorie demandée n'existe pas.");
 	}
 
-	$type = $cat['type'];
+	$type = $cat->type;
 }
 else
 {
@@ -29,7 +29,7 @@ else
 
 $journal = new Compta\Journal;
 
-$list = $journal->getListForCategory($type === Compta\Categories::AUTRES ? null : $type, $cat ? $cat['id'] : null);
+$list = $journal->getListForCategory($type === Compta\Categories::AUTRES ? null : $type, $cat ? $cat->id : null);
 
 $tpl->assign('categorie', $cat);
 $tpl->assign('journal', $list);
@@ -44,7 +44,7 @@ $total = 0.0;
 
 foreach ($list as $row)
 {
-	$total += (float) $row['montant'];
+	$total += (float) $row->montant;
 }
 
 $tpl->assign('total', $total);

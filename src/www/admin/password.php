@@ -52,5 +52,3 @@ $tpl->assign('champ', $champ);
 $tpl->assign('error', $error);
 
 $tpl->display('admin/password.tpl');
-
-?>

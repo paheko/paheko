@@ -10,10 +10,7 @@ $error = false;
 
 if (Utils::post('add'))
 {
-	if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-	{
-	    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-	}
+	$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
     if (!Utils::CSRF_check('compta_ajout_banque'))
     {
@@ -39,12 +36,12 @@ if (Utils::post('add'))
             	$journal->add([
                     'libelle'       =>  'Solde initial',
                     'montant'       =>  abs($solde),
-                    'date'          =>  gmdate('Y-m-d', $exercice['debut']),
+                    'date'          =>  gmdate('Y-m-d', $exercice->debut),
                     'compte_credit' =>  $solde > 0 ? null : $id,
                     'compte_debit'  =>  $solde < 0 ? null : $id,
                     'numero_piece'  =>  null,
                     'remarques'     =>  'Opération automatique à l\'ajout du compte dans la liste des comptes bancaires',
-                    'id_auteur'     =>  $user['id'],
+                    'id_auteur'     =>  $user->id,
                 ]);
             }
 
@@ -61,7 +58,7 @@ $liste = $banques->getList();
 
 foreach ($liste as &$banque)
 {
-    $banque['solde'] = $journal->getSolde($banque['id']);
+    $banque->solde = $journal->getSolde($banque->id);
 }
 
 $tpl->assign('liste', $liste);

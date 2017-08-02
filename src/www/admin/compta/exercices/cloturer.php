@@ -16,12 +16,12 @@ if (!$exercice)
 
 if (f('close'))
 {
-    fc('compta_cloturer_exercice_' . $exercice->id, [
+    $form->check('compta_cloturer_exercice_' . $exercice->id, [
         'fin'     => 'date|required',
         'reports' => 'boolean',
-    ], $form_errors);
+    ]);
 
-    if (count($form_errors) == 0)
+    if (!$form->hasErrors())
     {
         try
         {
@@ -36,7 +36,7 @@ if (f('close'))
         }
         catch (UserException $e)
         {
-            $form_errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
