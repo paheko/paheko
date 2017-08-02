@@ -12,7 +12,7 @@ class Journal
     protected function _getCurrentExercice()
     {
         $db = DB::getInstance();
-        $id = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
+        $id = $db->firstColumn('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
 
         if (!$id)
         {
@@ -65,7 +65,7 @@ class Journal
             $query = $credit . ' - ' . $debit;
         }
 
-        return $db->querySingle('SELECT ' . $query . ';');
+        return $db->firstColumn('SELECT ' . $query . ';');
     }
 
     public function getJournalCompte($compte, $inclure_sous_comptes = false)
@@ -393,7 +393,7 @@ class Journal
         $db = DB::getInstance();
 
         $tables = [
-            'journal'   =>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'compta_journal\';'),
+            'journal'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'compta_journal\';'),
         ];
 
         return $tables;

@@ -158,7 +158,7 @@ class Exercices
         $this->solderResultat($old_id, $date);
 
         // Récupérer chacun des comptes de bilan et leurs soldes (uniquement les classes 1 à 5)
-        $statement = $db->query('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
+        $statement = $db->preparedQuery('SELECT compta_comptes.id AS compte, compta_comptes.position AS position,
             ROUND(COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compta_comptes.id AND id_exercice = :id), 0), 2)
             - ROUND(COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compta_comptes.id AND id_exercice = :id), 0), 2) AS solde
             FROM compta_comptes 
@@ -328,7 +328,7 @@ class Exercices
         $db = DB::getInstance();
         $livre = ['classes' => [], 'debit' => 0.0, 'credit' => 0.0];
 
-        $res = $db->query('SELECT compte FROM
+        $res = $db->preparedQuery('SELECT compte FROM
             (SELECT compte_debit AS compte FROM compta_journal
                     WHERE id_exercice = :exercice GROUP BY compte_debit
                 UNION
@@ -418,7 +418,7 @@ class Exercices
         $produits   = ['comptes' => [], 'total' => 0.0];
         $resultat   = 0.0;
 
-        $res = $db->query('SELECT compte, SUM(debit), SUM(credit)
+        $res = $db->preparedQuery('SELECT compte, SUM(debit), SUM(credit)
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit
                     FROM compta_journal WHERE id_exercice = :exercice GROUP BY compte_debit
@@ -516,7 +516,7 @@ class Exercices
 
         // Y'a sûrement moyen d'améliorer tout ça pour que le maximum de travail
         // soit fait au niveau du SQL, mais pour le moment ça marche
-        $res = $db->query('SELECT compte, debit, credit, (SELECT position FROM compta_comptes WHERE id = compte) AS position
+        $res = $db->preparedQuery('SELECT compte, debit, credit, (SELECT position FROM compta_comptes WHERE id = compte) AS position
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, NULL AS credit
                     FROM compta_journal WHERE id_exercice = :exercice GROUP BY compte_debit

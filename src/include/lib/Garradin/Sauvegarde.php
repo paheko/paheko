@@ -303,7 +303,7 @@ class Sauvegarde
 
 		try {
 			// Regardons ensuite si la base de données n'est pas corrompue
-			$check = $db->querySingle('PRAGMA integrity_check;', false);
+			$check = $db->firstColumn('PRAGMA integrity_check;', false);
 		}
 		catch (\Exception $e)
 		{
@@ -320,7 +320,7 @@ class Sauvegarde
 		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
 		// celle-ci pouvant changer d'une version à l'autre et on peut vouloir importer une base
 		// un peu vieille, mais on vérifie quand même que ça ressemble un minimum à une base garradin
-		$table = $db->querySingle('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';', false);
+		$table = $db->firstColumn('SELECT 1 FROM sqlite_master WHERE type=\'table\' AND tbl_name=\'config\';', false);
 
 		if (!$table)
 		{
@@ -328,12 +328,12 @@ class Sauvegarde
 		}
 
 		// On récupère la version
-		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
+		$version = $db->firstColumn('SELECT valeur FROM config WHERE cle=\'version\';');
 
 		// Vérification de l'AppID pour les versions récentes
 		if (version_compare($version, '0.8.0', '>='))
 		{
-			$appid = $db->querySingle('PRAGMA application_id;', false);
+			$appid = $db->firstColumn('PRAGMA application_id;', false);
 
 			if ($appid !== DB::APPID)
 			{
@@ -344,8 +344,8 @@ class Sauvegarde
 		if ($user_id)
 		{
 			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories 
-				WHERE id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
+			$is_still_admin = $db->test('membres_categories', 
+				'id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
 				AND droit_config >= ' . Membres::DROIT_ADMIN . '
 				AND droit_connexion >= ' . Membres::DROIT_ACCES);
 
