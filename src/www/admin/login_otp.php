@@ -19,13 +19,11 @@ if (f('login'))
         'code' => 'numeric|required',
     ]);
 
-    if (!$form->hasErrors() && ($login = Membres\Session::loginOTP(Utils::post('code'))))
+    if (!$form->hasErrors() && ($login = Membres\Session::loginOTP(f('code'))))
     {
         Utils::redirect('/admin/');
     }
 }
-
-//var_dump($form->hasErrors()); exit;
 
 $tpl->assign('fail', $login === false);
 

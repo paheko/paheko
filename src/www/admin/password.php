@@ -16,20 +16,20 @@ if (trim(qg('c')))
 
     $error = 'EXPIRED';
 }
-elseif (!empty($_POST['recover']))
+elseif (f('recover'))
 {
-    if (!Utils::CSRF_check('recoverPassword'))
+    $form->check('recoverPassword', [
+        'id' => 'required'
+    ]);
+
+    if (!$form->hasErrors())
     {
-        $error = 'OTHER';
-    }
-    else
-    {
-        if (trim(Utils::post('id')) && $membres->recoverPasswordCheck(Utils::post('id')))
+        if (trim(f('id')) && $membres->recoverPasswordCheck(f('id')))
         {
             Utils::redirect('/admin/password.php?sent');
         }
 
-        $error = 'MAIL';
+        $form->addError('Ce membre n\'a pas d\'adresse email enregistrée ou n\'a pas le droit de se connecter.');
     }
 }
 
