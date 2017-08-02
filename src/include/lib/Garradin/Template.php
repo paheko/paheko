@@ -78,7 +78,7 @@ class Template extends \KD2\Smartyer
             --gMainColor: %s;
             --gSecondColor: %s;
         }
-        .header .menu, html {
+        .header .menu, body {
             background-image: url("%s");
         }
         </style>';
