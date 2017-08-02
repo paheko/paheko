@@ -696,7 +696,6 @@ b.money {
     right: 0;
     z-index: -1;
     padding: .3em .4em;
-    padding-right: 2em;
     background: #ff9;
     text-shadow: none;
     white-space: pre;
@@ -704,10 +703,14 @@ b.money {
     text-decoration: underline;
 }
 
+table .actions .icn[title]:after {
+    padding-right: 2em;
+}
+
 dl dd.actions .icn[title]:after {
-    left: 2.2em;
     right: auto;
-    z-index: 100000;
+    left: 0;
+    padding-left: 2em;
 }
 
 .icn[title]:hover:after {
