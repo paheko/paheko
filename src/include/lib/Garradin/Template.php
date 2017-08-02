@@ -30,10 +30,25 @@ class Template extends \KD2\Smartyer
 
         $this->assign('is_logged', false);
 
+        $this->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
+            if ($block == 'continue')
+            {
+                return 'continue;';
+            }
+        });
+
         $this->register_function('form_errors', [$this, 'formErrors']);
         $this->register_function('show_error', [$this, 'showError']);
         $this->register_function('custom_colors', [$this, 'customColors']);
+        $this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
+        $this->register_function('csrf_field', function ($params) {
+            return Form::tokenHTML($params['key']);
+        });
+
         $this->register_modifier('strlen', 'strlen');
+        $this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
+        $this->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
+        $this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
     }
 
     protected function formErrors($params)
@@ -89,11 +104,6 @@ class Template extends \KD2\Smartyer
 }
 
 $tpl = Template::getInstance();
-
-function tpl_csrf_field($params)
-{
-    return Form::tokenHTML($params['key']);
-}
 
 function tpl_form_field($params)
 {
@@ -617,7 +627,6 @@ function tpl_display_champ_membre($v, $config)
     }
 }
 
-$tpl->register_function('csrf_field', 'Garradin\tpl_csrf_field');
 $tpl->register_function('form_field', 'Garradin\tpl_form_field');
 $tpl->register_function('select_compte', 'Garradin\tpl_select_compte');
 
@@ -628,9 +637,6 @@ $tpl->register_function('pagination', 'Garradin\tpl_pagination');
 $tpl->register_function('diff', 'Garradin\tpl_diff');
 $tpl->register_function('html_champ_membre', 'Garradin\tpl_html_champ_membre');
 
-$tpl->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
-
-$tpl->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 $tpl->register_modifier('format_tel', 'Garradin\tpl_format_tel');
 $tpl->register_modifier('format_wiki', 'Garradin\tpl_format_wiki');
 $tpl->register_modifier('liens_wiki', 'Garradin\tpl_liens_wiki');
@@ -640,16 +646,5 @@ $tpl->register_modifier('abs', 'abs');
 
 $tpl->register_modifier('display_champ_membre', 'Garradin\tpl_display_champ_membre');
 
-$tpl->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
-
-$tpl->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
-
 $tpl->register_modifier('strftime_fr', 'Garradin\tpl_strftime_fr');
 $tpl->register_modifier('date_fr', 'Garradin\tpl_date_fr');
-
-$tpl->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
-    if ($block == 'continue')
-    {
-        return 'continue;';
-    }
-});
