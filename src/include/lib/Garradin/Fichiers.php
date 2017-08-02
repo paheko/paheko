@@ -137,7 +137,7 @@ class Fichiers
 			throw new \LogicException('Ce fichier est déjà lié à un autre contenu : ' . $check_type);
 		}
 
-		return $db->query('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
+		return $db->preparedQuery('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
 			[(int)$this->id, (int)$foreign_id]);
 	}
 

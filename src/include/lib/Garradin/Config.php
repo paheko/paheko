@@ -113,9 +113,7 @@ class Config
             return true;
 
         $values = [];
-
         $db = DB::getInstance();
-        $db->begin();
 
         if (isset($this->modified['image_fond']))
         {
@@ -133,6 +131,8 @@ class Config
             }
         }
 
+        $db->begin();
+
         foreach ($this->modified as $key=>$modified)
         {
             $value = $this->config[$key];
@@ -146,7 +146,7 @@ class Config
                 $value = (string) $value;
             }
 
-            $db->query('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+            $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
                 [$key, $value]);
         }
 

@@ -14,7 +14,7 @@ class Rapprochement
     {
         $db = DB::getInstance();
 
-        $exercice = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
+        $exercice = $db->firstColumn('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
 
         $query = 'SELECT 
             COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND id_exercice = :exercice AND date < :date), 0)

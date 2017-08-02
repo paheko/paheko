@@ -38,8 +38,8 @@ if (Static_Cache::expired('graph_' . $graph))
 
 		foreach ($banques->getList() as $banque)
 		{
-			$r = new \KD2\SVGPlot_Data($stats->soldeCompte($banque['id']));
-			$r->title = $banque['libelle'];
+			$r = new \KD2\SVGPlot_Data($stats->soldeCompte($banque->id));
+			$r->title = $banque->libelle;
 			$data[] = $r;
 		}
 

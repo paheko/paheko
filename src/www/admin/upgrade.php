@@ -99,10 +99,10 @@ if (version_compare($v, '0.4.5', '<'))
 if (version_compare($v, '0.5.0', '<'))
 {
     // Récupération de l'ancienne config
-    $champs_modifiables_membre = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
+    $champs_modifiables_membre = $db->firstColumn('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
     $champs_modifiables_membre = !empty($champs_modifiables_membre) ? explode(',', $champs_modifiables_membre) : [];
 
-    $champs_obligatoires = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
+    $champs_obligatoires = $db->firstColumn('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
     $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : [];
 
     // Import des champs membres par défaut
@@ -140,7 +140,7 @@ if (version_compare($v, '0.6.0-rc1', '<'))
     // Mise à jour base de données
     $db->exec(file_get_contents(ROOT . '/include/data/0.6.0.sql'));
 
-    $id_cat_cotisation = $db->querySingle('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
+    $id_cat_cotisation = $db->firstColumn('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
 
     // Conversion des cotisations de catégories en cotisations indépendantes
     foreach ($list as $cat)
