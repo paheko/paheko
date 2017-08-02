@@ -9,5 +9,3 @@ $tpl->assign('liste', $e->getList());
 $tpl->assign('current', $e->getCurrent());
 
 $tpl->display('admin/compta/exercices/index.tpl');
-
-?>

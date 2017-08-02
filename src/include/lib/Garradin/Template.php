@@ -33,6 +33,7 @@ class Template extends \KD2\Smartyer
         $this->register_function('form_errors', [$this, 'formErrors']);
         $this->register_function('show_error', [$this, 'showError']);
         $this->register_function('custom_colors', [$this, 'customColors']);
+        $this->register_modifier('strlen', 'strlen');
     }
 
     protected function formErrors($params)

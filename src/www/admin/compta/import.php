@@ -8,8 +8,6 @@ $session->requireAccess('compta', Membres::DROIT_ADMIN);
 $e = new Compta\Exercices;
 $import = new Compta\Import;
 
-$form_errors = [];
-
 if (qg('export') !== null)
 {
     header('Content-type: application/csv');
@@ -22,12 +20,12 @@ $error = false;
 
 if (f('import'))
 {
-    fc('compta_import', [
+    $form->check('compta_import', [
         'upload' => 'file|required',
         'type'   => 'required|in:citizen,garradin',
-    ], $form_errors);
+    ]);
 
-    if (count($form_errors) === 0)
+    if (!$form->hasErrors())
     {
         try
         {
@@ -48,12 +46,11 @@ if (f('import'))
         }
         catch (UserException $e)
         {
-            $form_errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('form_errors', $form_errors);
 $tpl->assign('ok', qg('ok'));
 
 $tpl->display('admin/compta/import.tpl');

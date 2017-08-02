@@ -3,10 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $banque = new Compta\Comptes_Bancaires;
 
@@ -44,5 +41,3 @@ $tpl->assign('error', $error);
 $tpl->assign('compte', $compte);
 
 $tpl->display('admin/compta/banques/supprimer.tpl');
-
-?>

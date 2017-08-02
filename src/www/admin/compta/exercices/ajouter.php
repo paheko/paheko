@@ -9,13 +9,13 @@ $e = new Compta\Exercices;
 
 if (f('add'))
 {
-    fc('compta_ajout_exercice', [
+    $form->check('compta_ajout_exercice', [
         'libelle' => 'required',
         'fin'     => 'required|date',
         'debut'   => 'required|date',
-    ], $form_errors);
+    ]);
 
-    if (count($form_errors) == 0)
+    if (!$form->hasErrors())
     {
         try
         {
@@ -29,7 +29,7 @@ if (f('add'))
         }
         catch (UserException $e)
         {
-            $form_errors[] = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }

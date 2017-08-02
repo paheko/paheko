@@ -3,10 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $journal = new Compta\Journal;
 
@@ -19,7 +16,7 @@ if (!$operation)
 
 $error = false;
 
-if (!empty($_POST['delete']))
+if (f('delete'))
 {
     if (!Utils::CSRF_check('compta_supprimer_'.$operation['id']))
     {
@@ -29,7 +26,7 @@ if (!empty($_POST['delete']))
     {
         try
         {
-            $journal->delete($operation['id']);
+            $journal->delete($operation->id);
             Utils::redirect('/admin/compta/operations/');
         }
         catch (UserException $e)
