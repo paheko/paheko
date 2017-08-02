@@ -56,6 +56,11 @@ class Squelette_Filtres
         'echapper_xml',
     ];
 
+    static public function date($date, $format)
+    {
+        return strftime($format, $date);
+    }
+
     static public function date_en_francais($date)
     {
         return ucfirst(strtolower(Utils::strftime_fr('%A %e %B %Y', $date)));
