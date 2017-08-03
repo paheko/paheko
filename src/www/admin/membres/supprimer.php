@@ -5,6 +5,8 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
+qv(['id' => 'required|numeric']);
+
 $membre = $membres->get(qg('id'));
 
 if (!$membre)
@@ -12,20 +14,16 @@ if (!$membre)
     throw new UserException("Ce membre n'existe pas.");
 }
 
-$error = false;
-
 if ($membre->id == $user->id)
 {
-    $error = "Il n'est pas possible de supprimer votre propre compte.";
+    throw new UserException("Il n'est pas possible de supprimer votre propre compte.");
 }
 
-if (Utils::post('delete') && !$error)
+if (f('delete'))
 {
-    if (!Utils::CSRF_check('delete_membre_'.$membre->id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('delete_membre_'.$membre->id);
+
+    if (!$form->hasErrors())
     {
         try {
             $membres->delete($membre->id);
@@ -33,12 +31,11 @@ if (Utils::post('delete') && !$error)
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
 $tpl->assign('membre', $membre);
-$tpl->assign('error', $error);
 
 $tpl->display('admin/membres/supprimer.tpl');

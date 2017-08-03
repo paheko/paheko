@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Action collective sur les membres" current="membres"}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}">
     {foreach from=$selected item="id"}
@@ -31,7 +27,8 @@
 
     <p class="submit">
         {csrf_field key="membres_action"}
-        <input type="submit" name="move_ok" value="Enregistrer &rarr;" />
+        <input type="hidden" name="action" value="move" />
+        <input type="submit" name="confirm" value="Enregistrer &rarr;" />
     </p>
 
     {elseif $action == 'delete'}
@@ -53,7 +50,8 @@
 
     <p class="submit">
         {csrf_field key="membres_action"}
-        <input type="submit" name="delete_ok" value="Oui, supprimer ces membres &rarr;" />
+        <input type="hidden" name="action" value="delete" />
+        <input type="submit" name="confirm" value="Oui, supprimer ces membres &rarr;" />
     </p>
     {/if}
 

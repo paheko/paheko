@@ -15,30 +15,26 @@ if (null !== qg('export'))
     exit;
 }
 
-$error = false;
 $champs = $config->get('champs_membres')->getAll();
 $champs->date_inscription = (object) ['title' => 'Date inscription', 'type' => 'date'];
 
-if (Utils::post('import'))
+if (f('import'))
 {
-    // FIXME
-    if (false && !Utils::CSRF_check('membres_import'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    elseif (empty($_FILES['upload']['tmp_name']))
-    {
-        $error = 'Aucun fichier fourni.';
-    }
-    else
+    $form->check('membres_import', [
+        'upload' => 'file|required',
+        'type'   => 'required|in:galette,garradin',
+        'galette_translate' => 'array',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try
         {
-            if (Utils::post('type') == 'galette')
+            if (f('type') == 'galette')
             {
-                $import->fromGalette($_FILES['upload']['tmp_name'], Utils::post('galette_translate'));
+                $import->fromGalette($_FILES['upload']['tmp_name'], f('galette_translate'));
             }
-            elseif (Utils::post('type') == 'garradin')
+            elseif (f('type') == 'garradin')
             {
                 $import->fromCSV($_FILES['upload']['tmp_name']);
             }
@@ -51,16 +47,15 @@ if (Utils::post('import'))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('ok', null !== qg('ok') ? true : false);
 
 $tpl->assign('garradin_champs', $champs);
 $tpl->assign('galette_champs', $import->galette_fields);
-$tpl->assign('translate', Utils::post('galette_translate'));
+$tpl->assign('translate', f('galette_translate'));
 
 $tpl->display('admin/membres/import.tpl');
