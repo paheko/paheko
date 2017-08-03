@@ -28,15 +28,9 @@ if (!$membre)
     throw new UserException("Le membre lié à la cotisation n'existe pas ou plus.");
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete'))
 {
-    if (!Utils::CSRF_check('del_cotisation_' . $co->id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    if ($form->check('del_cotisation_' . $co->id))
     {
         try {
             $m_cotisations->delete($co->id);
@@ -44,12 +38,11 @@ if (!empty($_POST['delete']))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('membre', $membre);
 $tpl->assign('cotisation', $co);
 $tpl->assign('nb_operations', $m_cotisations->countOperationsCompta($co->id));

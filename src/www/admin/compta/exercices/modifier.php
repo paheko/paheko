@@ -33,7 +33,7 @@ if ($form('edit'))
     {
         try
         {
-            $id = $e->edit($exercice['id'], [
+            $id = $e->edit($exercice->id, [
                 'libelle'   =>  Utils::post('libelle'),
                 'debut'     =>  Utils::post('debut'),
                 'fin'       =>  Utils::post('fin'),

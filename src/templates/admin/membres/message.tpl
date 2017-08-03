@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Contacter un membre" current="membres"}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}">
     <fieldset class="memberMessage">

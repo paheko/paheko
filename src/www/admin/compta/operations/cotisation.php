@@ -20,7 +20,7 @@ if (!$mco)
 }
 
 $co = $cotisations->get($mco->id_cotisation);
-$membre = $membres->get($mco->id_membre);
+$membre = (new Membres)->get($mco->id_membre);
 
 if (!$membre)
 {

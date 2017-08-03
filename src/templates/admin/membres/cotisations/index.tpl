@@ -47,16 +47,12 @@
 
 {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{else}
-    <p class="help">
-        Idée : les cotisations peuvent également être utilisées pour suivre les activités auxquelles
-        sont inscrits les membres de l'association.
-    </p>
-{/if}
+{form_errors}
+
+<p class="help">
+    Idée : les cotisations peuvent également être utilisées pour suivre les activités auxquelles
+    sont inscrits les membres de l'association.
+</p>
 
 <form method="post" action="{$self_url}" id="f_add">
 
@@ -68,6 +64,7 @@
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" cols="50" rows="3">{form_field name=description}</textarea></dd>
             <dt><label for="f_montant">Montant minimal</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="help">Laisser à <b>0</b> pour une cotisation à prix libre</dd>
             <dd><input type="number" name="montant" step="0.01" min="0.00" id="f_montant" value="{form_field name=montant default=0.00}" required="required" /></dd>
 
             <dt><label for="f_periodicite_jours">Période de validité</label></dt>

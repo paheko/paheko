@@ -17,7 +17,7 @@ qv(['id' => 'required|numeric']);
 
 $id = (int) qg('id');
 
-$membre = $membres->get($id);
+$membre = (new Membres)->get($id);
 
 if (!$membre)
 {
