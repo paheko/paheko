@@ -5,31 +5,24 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('send_message_collectif'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    elseif (!Utils::post('sujet'))
-    {
-        $error = 'Le sujet ne peut rester vide.';
-    }
-    elseif (!Utils::post('message'))
-    {
-        $error = 'Le message ne peut rester vide.';
-    }
-    else
+    $form->check('send_message_collectif', [
+        'sujet'      => 'required|string',
+        'message'    => 'required|string',
+        'dest'       => 'numeric',
+        'subscribed' => 'boolean',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try {
-            $membres->sendMessageToCategory(Utils::post('dest'), Utils::post('sujet'), Utils::post('message'), (bool) Utils::post('subscribed'));
+            $membres->sendMessageToCategory(f('dest'), f('sujet'), f('message'), (bool) f('subscribed'));
             Utils::redirect('/admin/membres/?sent');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
@@ -38,6 +31,5 @@ $cats = new Membres\Categories;
 
 $tpl->assign('cats_liste', $cats->listSimple());
 $tpl->assign('cats_cachees', $cats->listHidden());
-$tpl->assign('error', $error);
 
 $tpl->display('admin/membres/message_collectif.tpl');

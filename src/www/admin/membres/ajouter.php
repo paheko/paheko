@@ -8,8 +8,6 @@ $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 $cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
-$error = false;
-
 if (f('save'))
 {
     $form->check('new_member', [
@@ -48,7 +46,6 @@ if (f('save'))
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 

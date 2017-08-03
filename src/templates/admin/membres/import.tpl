@@ -1,19 +1,17 @@
 {include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{elseif $ok}
-    <p class="confirm">
-        L'import s'est bien déroulé.
-    </p>
-{/if}
-
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/membres/import.php">Importer</a></li>
     <li><a href="{$www_url}admin/membres/import.php?export">Exporter en CSV</a></li>
 </ul>
+
+{form_errors}
+
+{if $ok}
+    <p class="confirm">
+        L'import s'est bien déroulé.
+    </p>
+{/if}
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 

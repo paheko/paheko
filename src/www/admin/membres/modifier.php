@@ -28,8 +28,6 @@ if (($membre_cat->droit_membres == Membres::DROIT_ADMIN)
     throw new UserException("Seul un membre admin peut modifier un autre membre admin.");
 }
 
-$error = false;
-
 if (f('save'))
 {
     $form->check('edit_member_' . $id, [
@@ -69,7 +67,6 @@ if (f('save'))
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
