@@ -51,7 +51,7 @@ class DB extends DB_SQLite3
 
     /**
      * Import a file containing SQL commands
-     * Allows to use the statement ".import other_file.sql" to load other files
+     * Allows to use the statement ".read other_file.sql" to load other files
      * @param  string $file Path to file containing SQL commands
      * @return boolean
      */
@@ -61,7 +61,7 @@ class DB extends DB_SQLite3
 
         $dir = dirname($file);
 
-        $sql = preg_replace_callback('/^\.import (.+\.sql)$/m', function ($match) use ($dir) {
+        $sql = preg_replace_callback('/^\.read (.+\.sql)$/m', function ($match) use ($dir) {
             return file_get_contents($dir . DIRECTORY_SEPARATOR . $match[1]) . "\n";
         }, $sql);
 
