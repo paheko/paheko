@@ -30,10 +30,18 @@ DROP INDEX compta_operations_comptes;
 DROP INDEX compta_operations_auteur;
 DROP INDEX fichiers_date;
 
-CREATE TABLE test (a, b);
+-- Suppression ancienne table recherche
+DROP TABLE wiki_recherche;
+
+-- Suppression des triggers
+-- Sinon les nouveaux ne seront pas créés sur la nouvelle table
+DROP TRIGGER wiki_recherche_delete;
+DROP TRIGGER wiki_recherche_update;
+DROP TRIGGER wiki_recherche_contenu_insert;
+DROP TRIGGER wiki_recherche_contenu_chiffre;
 
 -- Création des tables mises à jour (et de leurs index)
-.import schema.sql
+.read schema.sql
 
 -- Copie des données
 INSERT INTO cotisations_membres SELECT * FROM cotisations_membres_old;
