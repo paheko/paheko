@@ -249,8 +249,6 @@ if (version_compare($v, '0.7.2', '<'))
 
 if (version_compare($v, '0.8.0', '<'))
 {
-    $db->exec('PRAGMA foreign_keys = OFF;');
-
     // Inscription de l'appid
     $db->exec('PRAGMA application_id = ' . DB::APPID . ';');
 
@@ -260,6 +258,9 @@ if (version_compare($v, '0.8.0', '<'))
 
     // Application du changement de taille de page
     $db->exec('VACUUM;');
+
+    // Désactivation des foreign keys AVANT le début de la transaction
+    $db->exec('PRAGMA foreign_keys = OFF;');
 
     $db->begin();
 
