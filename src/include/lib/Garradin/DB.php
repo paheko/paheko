@@ -40,12 +40,13 @@ class DB extends DB_SQLite3
 
     public function connect()
     {
-        parent::connect();
+        if (parent::connect())
+        {
+            // Activer les contraintes des foreign keys
+            $this->db->exec('PRAGMA foreign_keys = ON;');
 
-        // Activer les contraintes des foreign keys
-        $this->db->exec('PRAGMA foreign_keys = ON;');
-
-        $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
+            $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
+        }
     }
 
 
