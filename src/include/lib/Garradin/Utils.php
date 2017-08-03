@@ -437,13 +437,21 @@ class Utils
         {
             foreach ($to as $t)
             {
-                return self::_sendMail($t, $suject, $content, $headers);
+                if (!self::_sendMail($t, $suject, $content, $headers))
+                {
+                    throw new \RuntimeException('Impossible d\'envoyer l\'email');
+                }
             }
         }
         else
         {
-            return self::_sendMail($to, $subject, $content, $headers);
+            if (!self::_sendMail($to, $subject, $content, $headers))
+            {
+                throw new \RuntimeException('Impossible d\'envoyer l\'email');
+            }
         }
+
+        return true;
     }
 
     static protected function _sendMail($to, $subject, $content, $headers)
@@ -464,7 +472,7 @@ class Utils
         }
         else
         {
-            return mail($to, $subject, $content, $headers);
+            return mail('bohwaz', $subject, $content, $headers);
         }
     }
 

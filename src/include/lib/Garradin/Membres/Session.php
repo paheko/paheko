@@ -7,10 +7,12 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Membres;
 use Garradin\UserException;
+use const Garradin\SECRET_KEY;
+use const Garradin\WWW_URL;
 
-use \KD2\Security;
-use \KD2\Security_OTP;
-use \KD2\QRCode;
+use KD2\Security;
+use KD2\Security_OTP;
+use KD2\QRCode;
 
 class Session
 {
@@ -257,49 +259,74 @@ class Session
 
 		$champ_id = $config->get('champ_identifiant');
 
-		$membre = $db->first('SELECT id, email FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', trim($id));
+		$membre = $db->first('SELECT id, email, passe FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', trim($id));
 
-		if (!$membre || trim($membre['email']) == '')
+		if (!$membre || trim($membre->email) == '')
 		{
 			return false;
 		}
 
-		self::start(true);
-		$hash = sha1($membre['email'] . $membre['id'] . 'recover' . ROOT . time());
-		$_SESSION['recover_password'] = [
-			'id' => (int) $membre['id'],
-			'email' => $membre['email'],
-			'hash' => $hash
-		];
+		// valide pour 1 heure minimum
+		$expire = ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
+
+		$hash = hash_hmac('sha256', $membre->email . $membre->id . $membre->passe . $expire, SECRET_KEY, true);
+		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
+		
+		$id = base_convert($membre->id, 10, 36);
+		$expire = base_convert($expire, 10, 36);
+
+		$query = sprintf('%s.%s.%s', $id, $expire, $hash);
 
 		$message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
 		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
-		$message.= WWW_URL . 'admin/password.php?c=' . substr($hash, -10);
+		$message.= WWW_URL . 'admin/password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		return Utils::mail($membre['email'], '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
+		Utils::mail($membre->email, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message);
+		return true;
 	}
 
-	static public function recoverPasswordConfirm($hash)
+	static public function recoverPasswordConfirm($code)
 	{
-		self::start();
-
-		if (empty($_SESSION['recover_password']['hash']))
+		if (substr_count($code, '.') !== 2)
+		{
 			return false;
+		}
 
-		if (substr($_SESSION['recover_password']['hash'], -10) != $hash)
-			return false;
+		list($id, $expire, $email_hash) = explode('.', $code);
 
 		$config = Config::getInstance();
 		$db = DB::getInstance();
 
+		$id = base_convert($id, 36, 10);
+		$expire = base_convert($expire, 36, 10);
+
+		$expire_timestamp = ($expire * 3600) + strtotime('2017-01-01');
+
+		if (time() / 3600 > $expire_timestamp)
+		{
+			return false;
+		}
+
+		$membre = $db->first('SELECT id, email, passe FROM membres WHERE id = ? LIMIT 1;', (int)$id);
+
+		if (!$membre || trim($membre->email) == '')
+		{
+			return false;
+		}
+
+		$hash = hash_hmac('sha256', $membre->email . $membre->id . $membre->passe . $expire, SECRET_KEY, true);
+		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
+
+		if (!hash_equals($hash, $email_hash))
+		{
+			return false;
+		}
+
 		$password = Utils::suggestPassword();
 
-		$dest = $_SESSION['recover_password']['email'];
-		$id = (int)$_SESSION['recover_password']['id'];
-
 		$message = "Bonjour,\n\nVous avez demandé un nouveau mot de passe pour votre compte.\n\n";
-		$message.= "Votre adresse email : ".$dest."\n";
+		$message.= "Votre adresse email : ".$membre->email."\n";
 		$message.= "Votre nouveau mot de passe : ".$password."\n\n";
 		$message.= "Si vous n'avez pas demandé à recevoir ce message, merci de nous le signaler.";
 
@@ -307,7 +334,7 @@ class Session
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
-		return Utils::mail($dest, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
+		return Utils::mail($membre->email, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message);
 	}
 
 	public function __construct()

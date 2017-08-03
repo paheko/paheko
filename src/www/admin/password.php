@@ -1,5 +1,8 @@
 <?php
+
 namespace Garradin;
+
+use Garradin\Membres\Session;
 
 const LOGIN_PROCESS = true;
 
@@ -9,12 +12,12 @@ $error = false;
 
 if (trim(qg('c')))
 {
-    if ($membres->recoverPasswordConfirm(qg('c')))
+    if (Session::recoverPasswordConfirm(qg('c')))
     {
         Utils::redirect('/admin/password.php?new_sent');
     }
 
-    $error = 'EXPIRED';
+    $form->addError('Le lien que vous avez suivi est invalide ou a expiré.');
 }
 elseif (f('recover'))
 {
@@ -24,7 +27,7 @@ elseif (f('recover'))
 
     if (!$form->hasErrors())
     {
-        if (trim(f('id')) && $membres->recoverPasswordCheck(f('id')))
+        if (trim(f('id')) && Session::recoverPasswordCheck(f('id')))
         {
             Utils::redirect('/admin/password.php?sent');
         }
