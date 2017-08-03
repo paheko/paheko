@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS rappels_envoyes
     id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
     id_rappel INTEGER NULL REFERENCES rappels (id),
 
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
+    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (date(date) IS NOT NULL AND date(date) = date),
 
     media INTEGER NOT NULL -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
 );
