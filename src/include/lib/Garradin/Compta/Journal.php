@@ -185,7 +185,7 @@ class Journal
     public function listForMember($id, $exercice)
     {
         $db = DB::getInstance();
-        return $db->first('SELECT * FROM compta_journal
+        return $db->get('SELECT * FROM compta_journal
             WHERE id_auteur = ? AND id_exercice = ?;', (int)$id, (int)$exercice);
     }
 
@@ -199,7 +199,7 @@ class Journal
         $db = DB::getInstance();
         $champ_id = Config::getInstance()->get('champ_identite');
 
-        return $db->first('SELECT id_membre, id_cotisation, m.'.$champ_id.' AS identite
+        return $db->get('SELECT id_membre, id_cotisation, m.'.$champ_id.' AS identite
             FROM membres_operations AS mo INNER JOIN membres AS m ON mo.id_membre = m.id
             WHERE mo.id_operation = ?;', (int)$id);
     }
