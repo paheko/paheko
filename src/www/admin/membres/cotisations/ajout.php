@@ -32,38 +32,39 @@ $banques = new Compta\Comptes_Bancaires;
 
 $error = false;
 
-if (!empty($_POST['add']))
+if (f('add') && $membre)
 {
-    if (!Utils::CSRF_check('add_cotisation'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('add_cotisation', [
+        'date'          => 'date_format:Y-m-d|required',
+        'id_cotisation' => 'numeric|required|in_table:cotisations,id',
+        'id_membre'     => 'numeric|required|in_table:membres,id',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try {
             $data = [
-                'date'              =>  Utils::post('date'),
-                'id_cotisation'     =>  Utils::post('id_cotisation'),
-                'id_membre'         =>  Utils::post('id_membre'),
-                'id_auteur'         =>  $user->id,
-                'montant'           =>  Utils::post('montant'),
-                'moyen_paiement'    =>  Utils::post('moyen_paiement'),
-                'numero_cheque'     =>  Utils::post('numero_cheque'),
-                'banque'            =>  Utils::post('banque'),
+                'date'           =>  f('date'),
+                'id_cotisation'  =>  f('id_cotisation'),
+                'id_membre'      =>  f('id_membre'),
+                'id_auteur'      =>  $user->id,
+                'montant'        =>  f('montant'),
+                'moyen_paiement' =>  f('moyen_paiement'),
+                'numero_cheque'  =>  f('numero_cheque'),
+                'banque'         =>  f('banque'),
             ];
 
             $m_cotisations->add($data);
 
-            Utils::redirect('/admin/membres/cotisations.php?id=' . (int)Utils::post('id_membre'));
+            Utils::redirect('/admin/membres/cotisations.php?id=' . (int)f('id_membre'));
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('membre', $membre);
 
 $tpl->assign('cotisations', $cotisations->listCurrent());
@@ -74,9 +75,9 @@ $tpl->assign('default_date', date('Y-m-d'));
 $tpl->assign('default_compta', null);
 
 $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
-$tpl->assign('moyen_paiement', Utils::post('moyen_paiement') ?: 'ES');
+$tpl->assign('moyen_paiement', f('moyen_paiement') ?: 'ES');
 $tpl->assign('comptes_bancaires', $banques->getList());
-$tpl->assign('banque', Utils::post('banque'));
+$tpl->assign('banque', f('banque'));
 
 
 if (qg('cotisation'))
@@ -102,6 +103,5 @@ elseif ($membre)
         $tpl->assign('default_amount', $co->montant);
     }
 }
-
 
 $tpl->display('admin/membres/cotisations/ajout.tpl');

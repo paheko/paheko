@@ -44,7 +44,7 @@ if ($operation->id_categorie)
 
 if ($operation->id_auteur)
 {
-    $auteur = $membres->get($operation->id_auteur);
+    $auteur = (new Membres)->get($operation->id_auteur);
     $tpl->assign('nom_auteur', $auteur->identite);
 }
 

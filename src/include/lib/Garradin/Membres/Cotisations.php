@@ -6,6 +6,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\Plugin;
 
 class Cotisations
 {
@@ -100,7 +101,7 @@ class Cotisations
 
 		$id = $db->lastInsertRowId();
 
-		if ($co['id_categorie_compta'] && $data['montant'] > 0)
+		if ($co->id_categorie_compta && $data['montant'] > 0)
 		{
 			try {
 		        $id_operation = $this->addOperationCompta($id, [

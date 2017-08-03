@@ -21,9 +21,9 @@
     </ul>
 {/if}
 
-{if $error}
-    <p class="error">{$error}</p>
-{else if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
+{form_errors}
+
+{if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
     <p class="help">
         Cette page sert à enregistrer les cotisations des membres de l'association.
         Pour enregistrer un don ou une dépense, comme le paiement d'un prestataire ou une facture, il est possible de <a href="{$admin_url}compta/operations/saisir.php">saisir une opération comptable</a>.
