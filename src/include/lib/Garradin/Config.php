@@ -199,7 +199,7 @@ class Config
 
         $db = DB::getInstance();
         $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                'version', $version);
+                ['version', $version]);
 
         return true;
     }
