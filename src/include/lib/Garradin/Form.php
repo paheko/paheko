@@ -6,6 +6,21 @@ class Form
 {
 	protected $errors = [];
 
+	public function __construct()
+	{
+		// Valide un montant de monnaie valide (deux décimales, ne peut être négatif)
+		\KD2\Form::registerValidationRule('money', function ($name, $params, $value) {
+			return preg_match('/^\d+(?:\.\d{1,2})?$/', $value) && $value >= 0;
+		});
+
+		// Test si la valeur existe dans cette table
+		// in_table:compta_categories,id
+		\KD2\Form::registerValidationRule('in_table', function ($name, $params, $value) {
+			$db = DB::getInstance();
+			return $db->test($params[0], $db->where($params[1], $value));
+		});
+	}
+
 	public function check($token_action = '', Array $rules = null)
 	{
 		if (!\KD2\Form::tokenCheck($token_action))
@@ -71,20 +86,32 @@ class Form
 		return $errors;
 	}
 
+	protected function getFieldName($name)
+	{
+		switch ($name)
+		{
+			case '_id': return 'identifiant';
+			case 'passe': return 'mot de passe';
+			case 'debut': return 'date de début';
+			case 'fin': return 'date de fin';
+			case 'duree': return 'durée';
+			default: return $name;
+		}
+	}
+
 	protected function getErrorMessage($rule, $element, Array $params)
 	{
-		if ($element == '_id')
-		{
-			$element = 'identifiant';
-		}
-		elseif ($element == 'passe')
-		{
-			$element = 'mot de passe';
-		}
+		$element = $this->getFieldName($element);
 
 		switch ($rule)
 		{
 			case 'required':
+			case 'required_if':
+			case 'required_unless':
+			case 'required_with':
+			case 'required_with_all':
+			case 'required_without':
+			case 'required_without_all':
 				return sprintf('Le champ %s est vide.', $element);
 			case 'min':
 				return sprintf('Le champ %s doit faire au moins %d caractères.', $element, $params[0]);
@@ -96,6 +123,8 @@ class Form
 				return sprintf('Format de date invalide dans le champ %s.', $element);
 			case 'numeric':
 				return sprintf('Le champ %s doit être un nombre.', $element);
+			case 'money':
+				return sprintf('Le champ %s n\'est pas un nombre valide.', $element);
 			default:
 				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
 		}
