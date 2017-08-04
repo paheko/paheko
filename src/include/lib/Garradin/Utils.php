@@ -120,7 +120,7 @@ class Utils
             return false;
     }
 
-    static public function getSelfURL($no_qs = false)
+    static public function getSelfURL($qs = true)
     {
         $uri = self::getRequestUri();
 
@@ -129,9 +129,14 @@ class Utils
             $uri = substr($uri, strlen(WWW_URI));
         }
 
-        if ($no_qs && (strpos($uri, '?') !== false))
+        if ($qs !== true && (strpos($uri, '?') !== false))
         {
             $uri = substr($uri, 0, strpos($uri, '?'));
+        }
+
+        if (is_array($qs))
+        {
+            $uri .= '?' . http_build_query($qs);
         }
 
         return WWW_URL . $uri;

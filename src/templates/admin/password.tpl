@@ -19,7 +19,7 @@
 
     {form_errors}
 
-    <form method="post" action="{$admin_url}password.php">
+    <form method="post" action="{$self_url_no_qs}">
 
         <fieldset>
             <legend>Recevoir un e-mail avec un nouveau mot de passe</legend>

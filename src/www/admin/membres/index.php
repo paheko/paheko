@@ -63,7 +63,14 @@ else
 	$tpl->assign('liste', $membres->listByCategory($cat_id, array_keys((array) $fields), $page, $order, $desc));
 	$tpl->assign('total', $membres->countByCategory($cat_id));
 
-	$tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?p=[ID]&amp;o=' . $order . ($desc ? '&amp;d' : '') . ($cat_id? '&amp;cat='. (int) qg('cat') : ''));
+	$cat_id = is_array($cat_id) ? 0 : $cat_id;
+
+	$tpl->assign('pagination_url', Utils::getSelfUrl([
+		'p' => '[ID]',
+		'o' => $order,
+		($desc ? 'd' : 'a') => '',
+		'cat' => $cat_id,
+	]));
 
 	$tpl->assign('membres_cats', $membres_cats);
 	$tpl->assign('membres_cats_cachees', $membres_cats_cachees);

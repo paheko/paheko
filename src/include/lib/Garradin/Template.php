@@ -26,7 +26,7 @@ class Template extends \KD2\Smartyer
 
         $this->assign('www_url', WWW_URL);
         $this->assign('self_url', Utils::getSelfUrl());
-        $this->assign('self_url_no_qs', Utils::getSelfUrl(true));
+        $this->assign('self_url_no_qs', Utils::getSelfUrl(false));
 
         $this->assign('is_logged', false);
 
@@ -281,6 +281,7 @@ function tpl_pagination($params)
         return '';
 
     $out = '<ul class="pagination">';
+    $encoded_url = rawurlencode('[ID]');
 
     foreach ($pagination as &$page)
     {
@@ -296,7 +297,7 @@ function tpl_pagination($params)
         if (!empty($page['accesskey']))
             $attributes .= ' accesskey="' . htmlspecialchars($page['accesskey']) . '" ';
 
-        $out .= '<a' . $attributes . ' href="' . str_replace('[ID]', htmlspecialchars($page['id']), $params['url']) . '">';
+        $out .= '<a' . $attributes . ' href="' . str_replace(['[ID]', $encoded_url], htmlspecialchars($page['id']), $params['url']) . '">';
         $out .= htmlspecialchars($page['label']);
         $out .= '</a>';
         $out .= '</li>' . "\n";
