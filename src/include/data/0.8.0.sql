@@ -11,6 +11,7 @@ ALTER TABLE membres ADD COLUMN clef_pgp TEXT NULL;
 
 -- Convertir les dates UNIX en date Y-m-d, apparemment il y en a encore parfois ?
 UPDATE wiki_pages SET date_creation = datetime(date_creation, "unixepoch") WHERE CAST(date_creation AS INT) = date_creation;
+UPDATE wiki_pages SET date_creation = datetime(date_creation) WHERE datetime(date_creation) != date_creation;
 
 -- Renommage des tables qu'il faut mettre à jour
 ALTER TABLE cotisations_membres RENAME TO cotisations_membres_old;
@@ -48,7 +49,7 @@ DROP TRIGGER wiki_recherche_contenu_chiffre;
 
 -- Copie des données
 INSERT INTO cotisations_membres SELECT * FROM cotisations_membres_old;
-INSERT INTO rappels_envoyes SELECT * FROM rappels_envoyes_old;
+INSERT INTO rappels_envoyes SELECT id, id_membre, id_cotisation, id_rappel, date, media FROM rappels_envoyes_old;
 INSERT INTO wiki_pages SELECT * FROM wiki_pages_old;
 INSERT INTO wiki_revisions SELECT * FROM wiki_revisions_old;
 INSERT INTO compta_exercices SELECT * FROM compta_exercices_old;
