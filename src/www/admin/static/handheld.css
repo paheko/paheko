@@ -14,6 +14,7 @@ body {
 	position: relative;
 	margin: 0;
 	width: 100%;
+	padding: 0;
     background: none;
 }
 
@@ -80,7 +81,7 @@ body {
 	padding: .2em .4em;
 }
 
-.page {
+main {
 	margin: 0;
 	padding: .1em;
 }

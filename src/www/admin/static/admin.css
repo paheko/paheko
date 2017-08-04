@@ -685,7 +685,7 @@ b.money {
     z-index: 200;
 }
 
-.icn[title]:after {
+a.icn[title]:after {
     display: none;
     position: absolute;
     content: attr(title);
@@ -704,14 +704,14 @@ b.money {
     padding-right: 2em;
 }
 
-dl dd.actions .icn[title]:after {
+dl dd.actions a.icn[title]:after {
     right: auto;
     left: 0;
     padding-left: 2em;
-    padding-right: 0;
+    padding-right: .4em;
 }
 
-.icn[title]:hover:after {
+a.icn[title]:hover:after {
     display: inline-block;
 }
 
