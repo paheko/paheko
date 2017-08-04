@@ -9,6 +9,9 @@ ALTER TABLE membres ADD COLUMN clef_pgp TEXT NULL;
 -- Ceci afin de forcer les champs à contenir un format de date correct        --
 --------------------------------------------------------------------------------
 
+-- Convertir les dates UNIX en date Y-m-d, apparemment il y en a encore parfois ?
+UPDATE wiki_pages SET date_creation = datetime(date_creation, "unixepoch") WHERE CAST(date_creation AS INT) = date_creation;
+
 -- Renommage des tables qu'il faut mettre à jour
 ALTER TABLE cotisations_membres RENAME TO cotisations_membres_old;
 ALTER TABLE rappels_envoyes RENAME TO rappels_envoyes_old;
