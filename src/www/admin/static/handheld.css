@@ -28,24 +28,21 @@ body {
 	display: inline;
 	padding: .2em;
 	color: black;
+	border-radius: 0 .5em .5em 0;
 }
 
 .header .menu a:hover {
 	background: none;
 }
 
-.header .menu > li > a {
-	background: #9c4f15;
+.header .menu > li a {
 	color: white;
 	display: inline-block;
 	padding: .2em .5em .2em .2em;
-	border-radius: 0 .5em .5em 0;
 }
 
-.header .menu > li > a:hover {
+.header .menu > li > a:active {
 	color: #000;
-    background: rgb(217, 134, 40);
-    background: rgba(217, 134, 40, 0.5);
 }
 
 .header .menu a b {
@@ -135,5 +132,10 @@ dl.describe dt, dl.describe dd {
 	.infos_asso {
 		float: none;
 		width: auto;
+	}
+
+	input[type=text], textarea, input[type=password], input[type=email], input[type=url], input[type=tel], select {
+		min-width: 3em;
+		width: 95%;
 	}
 }
