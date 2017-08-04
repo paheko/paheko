@@ -376,6 +376,8 @@ class Champs
         {
             throw new UserException('Le nom du champ est invalide : ne sont acceptés que les lettres minuscules et les chiffres (éventuellement séparés par un underscore).');
         }
+
+        $config = (object) $config;
         
         $this->_checkField($name, $config);
 
