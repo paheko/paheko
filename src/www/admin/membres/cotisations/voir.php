@@ -24,7 +24,12 @@ $page = (int) qg('p') ?: 1;
 $tpl->assign('page', $page);
 $tpl->assign('bypage', Membres\Cotisations::ITEMS_PER_PAGE);
 $tpl->assign('total', $m_cotisations->countMembersForCotisation($co->id));
-$tpl->assign('pagination_url', Utils::getSelfUrl(true) . '?id=' . $co->id . '&amp;p=[ID]');
+$tpl->assign('pagination_url', Utils::getSelfUrl([
+	'id' => $co->id,
+	'o' => qg('o'),
+	(qg('a') !== null ? 'a' : 'd') => '',
+	'p'  => '[ID]',
+]));
 
 $tpl->assign('cotisation', $co);
 $tpl->assign('order', qg('o') ?: 'date');
