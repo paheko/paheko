@@ -555,6 +555,11 @@ class Plugin
 			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos->min_version.' ou supérieure.');
 		}
 
+		if (!empty($infos->max_version) && !version_compare(garradin_version(), $infos->max_version, '>'))
+		{
+			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos->max_version.' ou inférieure.');
+		}
+
 		if (!empty($infos->menu) && !file_exists($path . '/www/admin/index.php'))
 		{
 			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
