@@ -5,6 +5,7 @@ namespace Garradin;
 use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
+use KD2\SMTP;
 
 class Utils
 {
@@ -442,7 +443,7 @@ class Utils
         {
             foreach ($to as $t)
             {
-                if (!self::_sendMail($t, $suject, $content, $headers))
+                if (!self::_sendMail($t, $subject, $content, $headers))
                 {
                     throw new \RuntimeException('Impossible d\'envoyer l\'email');
                 }
