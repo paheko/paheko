@@ -108,23 +108,23 @@ if (file_exists(DB_FILE))
 else
 {
     $tpl->assign('disabled', false);
-    $error = false;
 
     if (!empty($_POST['save']))
     {
-        if (!Utils::CSRF_check('install'))
-        {
-            $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-        }
-        elseif (Utils::post('passe_membre') != Utils::post('repasse_membre'))
-        {
-            $error = 'La vérification ne correspond pas au mot de passe.';
-        }
-        else
+        $form->check('install', [
+            'nom_asso'     => 'required',
+            'email_asso'   => 'required|email',
+            'nom_membre'   => 'required',
+            'email_membre' => 'required|email',
+            'passe'        => 'confirmed|required',
+            'cat_membre'   => 'required',
+        ]);
+
+        if (!$form->hasErrors())
         {
             try {
-            	Install::install(Utils::post('nom_asso'), Utils::post('adresse_asso'), Utils::post('email_asso'),
-            		Utils::post('cat_membre'), Utils::post('nom_membre'), Utils::post('email_membre'), Utils::post('passe_membre'),
+            	Install::install(f('nom_asso'), f('adresse_asso'), f('email_asso'),
+            		f('cat_membre'), f('nom_membre'), f('email_membre'), f('passe'),
             		WWW_URL);
 
             	Utils::redirect('/admin/login.php');
@@ -133,12 +133,10 @@ else
             {
                 @unlink(DB_FILE);
 
-                $error = $e->getMessage();
+                $form->addError($e->getMessage());
             }
         }
     }
-
-    $tpl->assign('error', $error);
 }
 
 $tpl->assign('passphrase', Utils::suggestPassword());
