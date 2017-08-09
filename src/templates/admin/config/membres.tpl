@@ -2,21 +2,17 @@
 
 {include file="admin/config/_menu.tpl" current="membres"}
 
-{if $error}
-    {if $error == 'OK'}
+{if isset($status) && $status == 'OK'}
     <p class="confirm">
         La configuration a bien été enregistrée.
     </p>
-    {elseif $error == 'ADD_OK'}
+{elseif isset($status) && $status == 'ADDED'}
     <p class="confirm">
         Le champ a été ajouté à la fin de la liste.
     </p>
-    {else}
-    <p class="error">
-        {$error}
-    </p>
-    {/if}
 {/if}
+
+{form_errors}
 
 {if $review}
     <p class="help">
@@ -64,6 +60,7 @@
     <form method="post" action="{$admin_url}config/membres.php">
         <p class="submit">
             {csrf_field key="config_membres"}
+            <input type="hidden" name="champs" value="{$champs|escape:json|escape}" />
             <input type="submit" name="back" value="&larr; Retour à l'édition" class="minor" />
             <input type="submit" name="reset" value="Annuler les changements" class="minor" />
             <input type="submit" name="save" value="Enregistrer &rarr;" />
@@ -74,21 +71,6 @@
         Cette page vous permet de personnaliser les fiches d'information des membres de l'association.<br />
         <strong>Attention :</strong> Les champs supprimés de la fiche seront effacés de toutes les fiches de tous les membres, et les données qu'ils contenaient seront perdues.
     </p>
-
-    <fieldset>
-        <legend>Champs non-personnalisables</legend>
-        <dl>
-            <dt>Numéro unique</dt>
-            <dd>Ce numéro identifie de manière unique chacun des membres. 
-                Il est incrémenté à chaque nouveau membre ajouté.</dd>
-            <dt>Catégorie</dt>
-            <dd>Identifie la catégorie du membre.</dd>
-            <dt>Date de dernière connexion</dt>
-            <dd>Mémorise la date de dernière connexion à l'administration de Garradin.</dd>
-            <dt>Date d'inscription</dt>
-            <dd>Enregistre la date de création de la fiche du membre.</dd>
-        </dl>
-    </fieldset>
 
     {if !empty($presets)}
     <form method="post" action="{$self_url}">
@@ -101,7 +83,7 @@
                 <option value="{$name}">{$name} &mdash; {$preset.title}</option>
                 {/foreach}
             </select>
-            <input type="hidden" name="{$csrf_name}" value="{$csrf_value}" />
+            {csrf_field key="config_membres"}
             <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
         </p>
     </fieldset>
@@ -127,7 +109,7 @@
             </dd>
         </dl>
         <p>
-            <input type="hidden" name="{$csrf_name}" value="{$csrf_value}" />
+            {csrf_field key="config_membres"}
             <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
         </p>
     </fieldset>
@@ -192,7 +174,7 @@
     </fieldset>
 
     <p class="submit">
-        <input type="hidden" name="{$csrf_name}" value="{$csrf_value}" />
+        {csrf_field key="config_membres"}
         <input type="submit" name="reset" value="Annuler les changements" class="minor" />
         <input type="submit" name="review" value="Enregistrer &rarr;" />
         (un récapitulatif sera présenté et une confirmation sera demandée)
@@ -276,7 +258,7 @@ var champ_identite = "f_{$config.champ_identite|escape:'js'}";
         };
         actions.appendChild(edit);
 
-        if (field.id != champ_identifiant && field.id != 'f_passe' && field.id != champ_identite)
+        if (field.id != champ_identifiant && field.id != 'f_passe' && field.id != champ_identite && field.id != 'f_numero')
         {
             var rem = document.createElement('a');
             rem.className = 'icn remove';
@@ -291,7 +273,7 @@ var champ_identite = "f_{$config.champ_identite|escape:'js'}";
                 var field = this.parentNode.parentNode;
                 this.parentNode.parentNode.querySelector('dl').classList.add('hidden');
                 field.classList.toggle('removed');
-                window.setTimeout(function () { field.parentNode.removeChild(field); }, 1000);
+                window.setTimeout(function () { field.parentNode.removeChild(field); }, 800);
                 return false;
             };
             actions.appendChild(rem);

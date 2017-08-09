@@ -268,6 +268,14 @@ if (version_compare($v, '0.8.0', '<'))
 
     $db->commit();
 
+    // Ajout champ numéro de membre
+    $champs = (array) Config::getInstance()->get('champs_membres')->getAll();
+    $presets = Membres\Champs::importPresets();
+
+    // Ajout du numéro au début
+    $champs = array_merge(['numero' => $presets['numero']], $champs);
+    (new Membres\Champs($champs))->save();
+
     // Nettoyage de la base de données
     $db->exec('VACUUM;');
 }

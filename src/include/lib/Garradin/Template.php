@@ -487,6 +487,11 @@ function tpl_html_champ_membre($params)
     $attributes = 'name="' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
     $attributes .= 'id="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
 
+    if ($params['name'] == 'numero' && $config->type == 'number' && !$value)
+    {
+        $value = DB::getInstance()->firstColumn('SELECT MAX(numero) + 1 FROM membres;');
+    }
+
     if (!empty($params['disabled']))
     {
         $attributes .= 'disabled="disabled" ';

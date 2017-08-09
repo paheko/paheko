@@ -91,12 +91,25 @@ class Champs
 		}
         elseif (is_array($champs))
         {
+            $presets = self::importPresets();
+            $this->champs = new \stdClass;
+
             foreach ($champs as $key=>&$config)
             {
-                $this->_checkField($key, $config);
-            }
+                if (is_array($config))
+                {
+                    $config = (object) $config;
+                }
 
-            $this->champs = $champs;
+                if (isset($presets[$key]))
+                {
+                    $config->type = $presets[$key]['type'];
+                }
+
+                $this->_checkField($key, $config);
+
+                $this->champs->$key = $config;
+            }
         }
 		else
 		{
@@ -146,7 +159,6 @@ class Champs
 
 	public function getAll()
 	{
-        $this->champs->passe->title = 'Mot de passe';
 		return $this->champs;
 	}
 
@@ -426,6 +438,11 @@ class Champs
             throw new UserException('Le champ Mot de passe ne peut être supprimé des fiches membres.');
         }
 
+        if (!array_key_exists('numero', $champs))
+        {
+            throw new UserException('Le champ numéro de membre ne peut être supprimé des fiches membres.');
+        }
+
         $config = Config::getInstance();
 
         $identite = $config->get('champ_identite');
@@ -481,12 +498,12 @@ class Champs
 
     	// Champs à recopier
     	$copy = [
-    		'id',
-    		'id_categorie',
-            'date_connexion',
-            'date_inscription',
-            'secret_otp',
-            'clef_pgp',
+    		'id' => 'id',
+    		'id_categorie' => 'id_categorie',
+            'date_connexion' => 'date_connexion',
+            'date_inscription' => 'date_inscription',
+            'secret_otp' => 'secret_otp',
+            'clef_pgp' => 'clef_pgp',
     	];
 
         $anciens_champs = $config->get('champs_membres');
@@ -494,9 +511,7 @@ class Champs
 
     	foreach ($this->champs as $key=>$cfg)
     	{
-    		if ($cfg->type == 'number')
-    			$type = 'FLOAT';
-    		elseif ($cfg->type == 'multiple' || $cfg->type == 'checkbox')
+    		if ($cfg->type == 'number' || $cfg->type == 'multiple' || $cfg->type == 'checkbox')
     			$type = 'INTEGER';
     		elseif ($cfg->type == 'file')
     			$type = 'BLOB';
@@ -514,14 +529,19 @@ class Champs
 
     		if (property_exists($anciens_champs, $key))
     		{
-    			$copy[] = $key;
+    			$copy[$key] = $key;
     		}
+            elseif ($key == 'numero')
+            {
+                // Copie des numéros de membre à partir du champ ID
+                $copy[$key] = 'id';
+            }
     	}
 
     	$create = array_merge($create, $create_keys);
 
     	$create = 'CREATE TABLE membres_tmp (' . "\n\t" . implode("\n\t", $create) . "\n);";
-    	$copy = 'INSERT INTO membres_tmp (' . implode(', ', $copy) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
+    	$copy = 'INSERT INTO membres_tmp (' . implode(', ', array_keys($copy)) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
 
     	$db->exec('PRAGMA foreign_keys = OFF;');
     	$db->begin();
@@ -543,6 +563,11 @@ class Champs
 
             // Création de l'index unique
             $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
+        }
+
+        if (isset($this->champs->numero))
+        {
+            $db->exec('CREATE UNIQUE INDEX membres_numero ON membres (numero);');
         }
 
         // Création des index pour les champs affichés dans la liste des membres

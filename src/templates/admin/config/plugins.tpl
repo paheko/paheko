@@ -2,11 +2,7 @@
 
 {include file="admin/config/_menu.tpl" current="plugins"}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 {if !empty($delete)}
     <form method="post" action="{$self_url}">
@@ -81,7 +77,7 @@
                 {foreach from=$liste_telecharges item="plugin" key="id"}
                 <dt>
                     <label>
-                        <input type="radio" name="to_install" value="{$id}" />
+                        <input type="radio" name="plugin" value="{$id}" />
                         {$plugin.nom}
                     </label>
                     (version {$plugin.version})

@@ -56,8 +56,6 @@
 </dl>
 
 <dl class="describe">
-    <dt>Numéro d'adhérent</dt>
-    <dd>{$membre.id}</dd>
     <dt>Catégorie</dt>
     <dd>{$categorie.nom} <span class="droits">{format_droits droits=$categorie}</span></dd>
     <dt>Inscription</dt>
