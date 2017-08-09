@@ -171,7 +171,7 @@ class Import
 		$champs = array_keys((array)$champs);
 		$champs[] = 'date_inscription';
 		//$champs[] = 'date_connexion';
-		$champs[] = 'id';
+		//$champs[] = 'id';
 		//$champs[] = 'id_categorie';
 
 		$line = 0;
@@ -220,22 +220,26 @@ class Import
 					$data[$name] = $row[$id];
 			}
 
-			if (!empty($data['id']) && $data['id'] > 0)
+			if (!empty($data['numero']) && $data['numero'] > 0)
 			{
-				$id = (int)$data['id'];
+				$numero = (int)$data['numero'];
 			}
 			else
 			{
-				$id = false;
+				$numero = false;
 			}
 
-			unset($data['id']);
+			unset($data['numero']);
 
 			try {
-				if ($id)
+				if ($numero && ($id = $membres->getIDWithNumero($numero)))
+				{
 					$membres->edit($id, $data);
+				}
 				else
+				{
 					$membres->add($data);
+				}
 			}
 			catch (UserException $e)
 			{
@@ -254,7 +258,10 @@ class Import
     {
         $db = DB::getInstance();
 
-        $res = $db->prepare('SELECT m.id, c.nom AS categorie, m.* FROM membres AS m 
+        $champs = Config::getInstance()->get('champs_membres')->getKeys();
+        $champs = 'm.' . implode(', m.', $champs);
+
+        $res = $db->prepare('SELECT ' . $champs . ', c.nom AS categorie FROM membres AS m 
             LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
 
         $fp = fopen('php://output', 'w');

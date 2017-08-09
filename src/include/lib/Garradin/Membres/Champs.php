@@ -157,6 +157,23 @@ class Champs
             return false;
     }
 
+    public function getKeys($all = false)
+    {
+        $keys = [];
+
+        foreach ($this->champs as $key => $config)
+        {
+            if (!$all && $key == 'passe')
+            {
+                continue;
+            }
+
+            $keys[] = $key;
+        }
+
+        return $keys;
+    }
+
 	public function getAll()
 	{
 		return $this->champs;
