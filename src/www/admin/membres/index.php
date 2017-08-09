@@ -49,7 +49,7 @@ else
 	$fields = $champs->getListedFields();
 
 	// Vérifier que le champ de tri existe bien dans la table
-	if ($order != 'id' && !isset($fields->$order))
+	if (!isset($fields->$order))
 	{
 		// Sinon par défaut c'est le premier champ de la table qui fait le tri
 		$order = $champs->getFirstListed();

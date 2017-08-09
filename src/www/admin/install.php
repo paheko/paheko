@@ -109,7 +109,7 @@ else
 {
     $tpl->assign('disabled', false);
 
-    if (!empty($_POST['save']))
+    if (f('save'))
     {
         $form->check('install', [
             'nom_asso'     => 'required',

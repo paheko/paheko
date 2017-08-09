@@ -4,39 +4,32 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
-
-if (!empty($_POST['install']))
+if (f('install'))
 {
-    if (!Utils::CSRF_check('install_plugin'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    elseif (trim(Utils::post('to_install')) === '')
-    {
-        $error = 'Aucun plugin sélectionné.';
-    }
-    else
+    $form->check('install_plugins', [
+        'plugin' => 'required',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try {
-            Plugin::install(Utils::post('to_install'), false);
-            
+            Plugin::install(f('to_install'), false);
             Utils::redirect('/admin/config/plugins.php');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-if (Utils::post('delete'))
+if (f('delete'))
 {
-    if (!Utils::CSRF_check('delete_plugin_' . qg('delete')))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('delete_plugin_' . qg('delete'), [
+        'plugin' => 'required',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try {
             $plugin = new Plugin(qg('delete'));
@@ -46,12 +39,10 @@ if (Utils::post('delete'))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-
-$tpl->assign('error', $error);
 
 if (qg('delete'))
 {

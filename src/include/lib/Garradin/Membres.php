@@ -143,11 +143,24 @@ class Membres
         $db = DB::getInstance();
         $config = Config::getInstance();
         $id = $config->get('champ_identifiant');
+        $champs = $config->get('champs_membres');
 
-        if (!empty($data[$id])
-            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$id.' = ? LIMIT 1;', $data[$id]))
+        if (!empty($data[$id]) && $db->test('membres', $db->where($id, $data[$id])))
         {
             throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
+        }
+
+        // Numéro de membre
+        if ($champs->get('numero'))
+        {
+            if (empty($data['numero']))
+            {
+                $data['numero'] = $db->firstColumn('SELECT MAX(numero) + 1 FROM membres;');
+            }
+            elseif ($db->test('membres', $db->where('numero', $data['numero'])))
+            {
+                throw new UserException('Ce numéro de membre est déjà attribué à un autre membre.');
+            }
         }
 
         if (isset($data['passe']) && trim($data['passe']) != '')
@@ -177,10 +190,7 @@ class Membres
         $db = DB::getInstance();
         $config = Config::getInstance();
 
-        if (isset($data['id']) && ($data['id'] == $id || empty($data['id'])))
-        {
-            unset($data['id']);
-        }
+        unset($data['id']);
 
         $this->_checkFields($data, $check_editable, false);
         $champ_id = $config->get('champ_identifiant');
@@ -191,32 +201,16 @@ class Membres
             throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
 
-        if (!empty($data['id']))
+        if (!empty($data['numero']))
         {
-            if (!preg_match('/^\d+$/', $data['id']))
+            if (!preg_match('/^\d+$/', $data['numero']))
             {
                 throw new UserException('Le numéro de membre ne doit contenir que des chiffres.');
             }
 
-            if ($db->firstColumn('SELECT 1 FROM membres WHERE id = ?;', (int)$data['id']))
+            if ($db->test('membres', 'numero = ? AND id != ?', (int)$data['numero'], $id))
             {
                 throw new UserException('Ce numéro est déjà attribué à un autre membre.');
-            }
-
-            // Si on ne vérifie pas toutes les tables qui sont liées ici à un ID de membre
-            // la requête de modification provoquera une erreur de contrainte de foreign key
-            // ce qui est normal. Donc : il n'est pas possible de changer l'ID d'un membre qui
-            // a participé au wiki, à la compta, etc.
-            if ($db->firstColumn('SELECT 1 FROM wiki_revisions WHERE id_auteur = ?;', (int)$id)
-                || $db->firstColumn('SELECT 1 FROM compta_journal WHERE id_auteur = ?;', (int)$id)
-                || $db->firstColumn('SELECT 1 FROM compta_rapprochement WHERE id_auteur = ?;', (int)$id)
-                || $db->firstColumn('SELECT 1 FROM membres_operations WHERE id_membre = ?;', (int)$id)
-                || $db->firstColumn('SELECT 1 FROM cotisations_membres WHERE id_membre = ?;', (int)$id)
-                || $db->firstColumn('SELECT 1 FROM rappels_envoyes WHERE id_membre = ?;', (int)$id)
-                || $db->firstColumn('SELECT 1 FROM fichiers_membres WHERE id = ?;', (int)$id))
-            # FIXME || $db->firstColumn('SELECT 1 FROM wiki_suivi WHERE id_membre = ?;', false, (int)$id))
-            {
-                throw new UserException('Le numéro n\'est pas modifiable pour ce membre car des contenus sont liés à ce numéro de membre (wiki, compta, etc.).');
             }
         }
 
@@ -289,6 +283,11 @@ class Membres
         return $db->firstColumn('SELECT '.$config->get('champ_identite').' FROM membres WHERE id = ? LIMIT 1;', (int)$id);
     }
 
+    public function getIDWithNumero($numero)
+    {
+        return DB::getInstance()->firstColumn('SELECT id FROM membres WHERE numero = ?;', (int) $numero);
+    }
+
     public function search($field, $query)
     {
         $db = DB::getInstance();
@@ -296,7 +295,7 @@ class Membres
 
         $champs = $config->get('champs_membres');
 
-        if ($field != 'id' && !$champs->get($field))
+        if (!$champs->get($field))
         {
             throw new \UnexpectedValueException($field . ' is not a valid field');
         }

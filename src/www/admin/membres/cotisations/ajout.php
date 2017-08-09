@@ -32,7 +32,7 @@ $banques = new Compta\Comptes_Bancaires;
 
 $error = false;
 
-if (f('add') && $membre)
+if (f('add'))
 {
     $form->check('add_cotisation', [
         'date'          => 'date_format:Y-m-d|required',
@@ -43,10 +43,17 @@ if (f('add') && $membre)
     if (!$form->hasErrors())
     {
         try {
+            $id_membre = f('id_membre');
+
+            if (!$id_membre && f('numero_membre'))
+            {
+                $id_membre = (new Membres)->getIDWithNumero(f('numero_membre'));
+            }
+
             $data = [
                 'date'           =>  f('date'),
                 'id_cotisation'  =>  f('id_cotisation'),
-                'id_membre'      =>  f('id_membre'),
+                'id_membre'      =>  $id_membre,
                 'id_auteur'      =>  $user->id,
                 'montant'        =>  f('montant'),
                 'moyen_paiement' =>  f('moyen_paiement'),
@@ -56,7 +63,7 @@ if (f('add') && $membre)
 
             $m_cotisations->add($data);
 
-            Utils::redirect('/admin/membres/cotisations.php?id=' . (int)f('id_membre'));
+            Utils::redirect('/admin/membres/cotisations.php?id=' . $id_membre);
         }
         catch (UserException $e)
         {

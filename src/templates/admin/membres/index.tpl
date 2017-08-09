@@ -50,9 +50,8 @@
         <thead class="userOrder">
             <tr>
                 {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
-                <td class="{if $order == 'id'} cur {if $desc}desc{else}asc{/if}{/if}" title="Numéro unique"><a href="?o=id&amp;a" class="icn up">&uarr;</a><a href="?o=id&amp;d" class="icn dn">&darr;</a></td>
                 {foreach from=$champs key="c" item="champ"}
-                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{$champ.title} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
+                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{if $c == "numero"}#{else}{$champ.title}{/if} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
                 {/foreach}
                 <td></td>
             </tr>
@@ -61,12 +60,14 @@
             {foreach from=$liste item="membre"}
                 <tr>
                     {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
-                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs key="c" item="cfg"}
-                        <td>{$membre->$c|raw|display_champ_membre:$cfg}</td>
+                        <td>
+                            {if $c == $config.champ_identite}<a href="{$admin_url}membres/fiche.php?id={$membre.id}">{/if}
+                            {$membre->$c|raw|display_champ_membre:$cfg}
+                            {if $c == $config.champ_identite}</a>{/if}
+                        </td>
                     {/foreach}
                     <td class="actions">
-                        {if !empty($membre.email)}<a class="icn" href="{$admin_url}membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}
                         <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
                         <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
                     </td>

@@ -2,13 +2,14 @@
 
 {include file="admin/config/_menu.tpl" current="donnees"}
 
-{if $error}
-    <p class="error">{$error}</p>
-    {if $code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT}
-        <p class="alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
-        Attention, si vous avez effectué des modifications dans la base de données, cela peut créer des bugs&nbsp;!</p>
-    {/if}
-{elseif $ok}
+{form_errors}
+
+{if $code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT}
+    <p class="alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
+    Attention, si vous avez effectué des modifications dans la base de données, cela peut créer des bugs&nbsp;!</p>
+{/if}
+
+{if $ok}
     <p class="confirm">
         {if $ok == 'config'}La configuration a bien été enregistrée.
         {elseif $ok == 'create'}Une nouvelle sauvegarde a été créée.
@@ -24,7 +25,7 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url_no_qs}">
 
 <p class="help">
     Info : la base de données fait actuellement {$db_size|format_bytes} (dont {$files_size|format_bytes} pour les documents et images).
@@ -69,7 +70,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
     <legend>Sauvegarde manuelle</legend>
@@ -80,7 +81,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
     <legend>Copies de sauvegarde disponibles</legend>
@@ -110,7 +111,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
     <legend>Téléchargement</legend>
@@ -121,7 +122,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url}" enctype="multipart/form-data">
+<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
 
 <fieldset>
     <legend><label for="f_file">Restaurer depuis un fichier</label></legend>
@@ -140,7 +141,7 @@
         (maximum {$max_file_size|format_bytes})
         <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />
     </p>
-    {if $error && ($code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT)}
+    {if $code && ($code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT)}
     <p>
         <label><input type="checkbox" name="force_import" value="1" /> Ignorer les erreurs, je sais ce que je fait</label>
     </p>

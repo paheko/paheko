@@ -40,8 +40,8 @@ if (Static_Cache::expired('pie_' . $graph))
 		}
 		else
 		{
-			$cat = $categories[$row['id_categorie']];
-			$pie->add(new \KD2\SVGPie_Data($row['somme'], substr($cat['intitule'], 0, 50), $colors[$i-1]));
+			$cat = $categories[$row->id_categorie];
+			$pie->add(new \KD2\SVGPie_Data($row->somme, substr($cat->intitule, 0, 50), $colors[$i-1]));
 		}
 	}
 
