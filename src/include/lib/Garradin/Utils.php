@@ -408,36 +408,26 @@ class Utils
         return $str;
     }
 
-    static public function mail($to, $subject, $content, $additional_headers = [])
+    static public function mail($to, $subject, $content, $headers = [])
     {
         // Création du contenu du message
         $content = wordwrap($content);
         $content = trim($content);
 
         $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
-
-        // Construction des entêtes
-        $headers = '';
-
         $config = Config::getInstance();
 
-        if (empty($additional_headers['From']))
+        if (empty($headers['From']))
         {
-            $additional_headers['From'] = '"NE PAS REPONDRE" <'.$config->get('email_envoi_automatique').'>';
+            $headers['From'] = '"NE PAS REPONDRE" <'.$config->get('email_envoi_automatique').'>';
         }
 
-        $additional_headers['MIME-Version'] = '1.0';
-        $additional_headers['Content-type'] = 'text/plain; charset=UTF-8';
-        $additional_headers['Return-Path'] = $config->get('email_envoi_automatique');
+        $headers['MIME-Version'] = '1.0';
+        $headers['Content-type'] = 'text/plain; charset=UTF-8';
+        $headers['Return-Path'] = $config->get('email_envoi_automatique');
 
-        foreach ($additional_headers as $name=>$value)
-        {
-            $headers .= $name . ': '.$value."\r\n";
-        }
-
-        $headers = preg_replace("#(?<!\r)\n#si", "\r\n", $headers);
-
-        $subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
+        $hash = sha1(uniqid() . var_export([$additional_headers, $to, $subject, $content], true));
+        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
 
         if (is_array($to))
         {
@@ -460,7 +450,7 @@ class Utils
         return true;
     }
 
-    static protected function _sendMail($to, $subject, $content, $headers)
+    static protected function _sendMail($to, $subject, $content, array $headers)
     {
         if (SMTP_HOST)
         {
@@ -478,7 +468,17 @@ class Utils
         }
         else
         {
-            return mail('bohwaz', $subject, $content, $headers);
+            // Encodage du sujet
+            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
+            $raw_headers = '';
+
+            // Sérialisation des entêtes
+            foreach ($additional_headers as $name=>$value)
+            {
+                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
+            }
+
+            return mail($to, $subject, $content, $raw_headers);
         }
     }
 
