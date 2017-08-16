@@ -21,9 +21,7 @@ if ($exercice->cloture)
 
 if ($form('edit'))
 {
-    $form->check('compta_modif_exercice_' . $exercice->id);
-
-    $form->validate([
+    $form->check('compta_modif_exercice_' . $exercice->id, [
         'libelle' => 'required',
         'fin'     => 'required|date',
         'debut'   => 'required|date',
@@ -34,16 +32,16 @@ if ($form('edit'))
         try
         {
             $id = $e->edit($exercice->id, [
-                'libelle'   =>  Utils::post('libelle'),
-                'debut'     =>  Utils::post('debut'),
-                'fin'       =>  Utils::post('fin'),
+                'libelle'   =>  f('libelle'),
+                'debut'     =>  f('debut'),
+                'fin'       =>  f('fin'),
             ]);
 
             Utils::redirect('/admin/compta/exercices/');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }

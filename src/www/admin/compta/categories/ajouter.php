@@ -1,34 +1,37 @@
 <?php
+
 namespace Garradin;
+
+use Garradin\Compta\Categories;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$cats = new Compta\Categories;
+$cats = new Categories;
 
-$error = false;
-
-if (!empty($_POST['add']))
+if (f('add'))
 {
-    if (!Utils::CSRF_check('compta_ajout_cat'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('compta_ajout_cat', [
+        'intitule' => 'required|string',
+        'compte'   => 'required|in_table:compta_comptes,id',
+        'type'     => 'required|in:' . implode(',', [Categories::DEPENSES, Categories::RECETTES, Categories::AUTRES]),
+    ]);
+
+    if (!$form->hasErrors())
     {
         try
         {
             $id = $cats->add([
-                'intitule'      =>  Utils::post('intitule'),
-                'description'   =>  Utils::post('description'),
-                'compte'        =>  Utils::post('compte'),
-                'type'          =>  Utils::post('type'),
+                'intitule'      =>  f('intitule'),
+                'description'   =>  f('description'),
+                'compte'        =>  f('compte'),
+                'type'          =>  f('type'),
             ]);
 
-            if (Utils::post('type') == Compta\Categories::DEPENSES)
+            if (f('type') == Categories::DEPENSES)
                 $type = 'depenses';
-            elseif (Utils::post('type') == Compta\Categories::AUTRES)
+            elseif (f('type') == Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
@@ -37,14 +40,12 @@ if (!empty($_POST['add']))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
-
-$tpl->assign('type', isset($_POST['type']) ? Utils::post('type') : Compta\Categories::RECETTES);
+$tpl->assign('type', f('type') !== null ? f('type') : Categories::RECETTES);
 $tpl->assign('comptes', $comptes->listTree());
 $tpl->assign('categories', $cats);
 

@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Modifier une catégorie" current="compta/categories"}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}">
 
