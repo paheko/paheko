@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Saisie d'une opération" current="compta/saisie" js=1}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 {if $ok}
     <p class="confirm">

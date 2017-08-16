@@ -102,8 +102,8 @@ class Journal
 
         foreach ($result as &$row)
         {
-            $solde += $row['solde'];
-            $row['solde'] = $solde;
+            $solde += $row->solde;
+            $row->solde = $solde;
         }
 
         return $result;
