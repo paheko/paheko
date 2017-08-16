@@ -45,8 +45,8 @@ class Rapprochement
 
         foreach ($result as &$row)
         {
-            $solde += $row['solde'];
-            $row['solde'] = $solde;
+            $solde += $row->solde;
+            $row->solde = $solde;
         }
 
         $solde_final = $solde;
@@ -76,10 +76,10 @@ class Rapprochement
 
         foreach ($journal as $row)
         {
-            if (!array_key_exists($row['id'], $cases))
+            if (!array_key_exists($row->id, $cases))
                 continue;
 
-            $st->bindValue(':operation', (int)$row['id'], \SQLITE3_INTEGER);
+            $st->bindValue(':operation', (int)$row->id, \SQLITE3_INTEGER);
             $st->execute();
         }
 
@@ -88,10 +88,10 @@ class Rapprochement
 
         foreach ($journal as $row)
         {
-            if (array_key_exists($row['id'], $cases))
+            if (array_key_exists($row->id, $cases))
                 continue;
 
-            $st->bindValue(':id', (int)$row['id'], \SQLITE3_INTEGER);
+            $st->bindValue(':id', (int)$row->id, \SQLITE3_INTEGER);
             $st->execute();
         }
 

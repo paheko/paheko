@@ -511,11 +511,20 @@ class Utils
         return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
     }
 
-    static public function checkIBAN($iban)
+    static public function checkIBAN($value)
     {
-        $iban = substr($iban, 4) . substr($iban, 0, 4);
-        $iban = str_replace(range('A', 'Z'), range(10, 35), $iban);
-        return (bcmod($iban, 97) == 1);
+        // Enlever les caractères indésirables (espaces, tirets),
+        $value = preg_replace('/[^A-Z0-9]/', '', strtoupper($value));
+        
+        // Supprimer les 4 premiers caractères et les replacer à la fin du compte
+        $value = substr($value, 4) . substr($value, 0, 4);
+
+        // Remplacer les lettres par des chiffres au moyen d'une table de conversion (A=10, B=11, C=12 etc.)
+        $value = str_replace(range('A', 'Z'), range(10, 35), $value);
+
+        // Diviser le nombre ainsi obtenu par 97
+        // Si le reste n'est pas égal à 1 l'IBAN est incorrect : Modulo de 97 égal à 1.
+        return (bcmod($value, 97) == 1);
     }
     
     static public function checkBIC($bic)

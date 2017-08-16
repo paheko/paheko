@@ -17,8 +17,6 @@ if (!$compte)
     throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$error = false;
-
 $solde_initial = $solde_final = 0;
 
 $debut = qg('debut');
@@ -28,47 +26,40 @@ if ($debut && $fin)
 {
     if (!Utils::checkDate($debut) || !Utils::checkDate($fin))
     {
-        $error = 'La date donnée est invalide.';
+        $form->addError('La date donnée est invalide.');
         $debut = $fin = false;
     }
-    else if (strtotime($debut) < $exercice['debut'])
+    else if (strtotime($debut) < $exercice->debut)
     {
-        $debut = date('Y-m-d', $exercice['debut']);
+        $debut = date('Y-m-d', $exercice->debut);
     }
-    else if (strtotime($fin) > $exercice['fin'])
+    else if (strtotime($fin) > $exercice->fin)
     {
-        $fin = date('Y-m-d', $exercice['fin']);
+        $fin = date('Y-m-d', $exercice->fin);
     }
 }
 
 if (!$debut || !$fin)
 {
-    $date = $exercice['fin'];
+    $date = $exercice->fin;
     $debut = date('Y-m-01', $date);
     $fin = date('Y-m-t', $date);
 }
 
-$journal = $rapprochement->getJournal($compte['id'], $debut, $fin, $solde_initial, $solde_final);
+$journal = $rapprochement->getJournal($compte->id, $debut, $fin, $solde_initial, $solde_final);
 
 // Enregistrement des cases cochées
-if (Utils::post('save'))
+if (f('save') && $form->check('compta_rapprocher_' . $compte->id))
 {
-    if (!Utils::CSRF_check('compta_rapprocher_' . $compte['id']))
+    try
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $rapprochement->record($compte->id, $journal, f('rapprocher'), $user->id);
+        Utils::redirect(Utils::getSelfURL());
     }
-    else
+    catch (UserException $e)
     {
-        try
-        {
-            $rapprochement->record($compte['id'], $journal, Utils::post('rapprocher'), $user['id']);
-            Utils::redirect(Utils::getSelfURL());
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
-	}
+        $form->addError($e->getMessage());
+    }
 }
 
 if (substr($debut, 0, 7) == substr($fin, 0, 7))
@@ -85,7 +76,5 @@ $tpl->assign('journal', $journal);
 
 $tpl->assign('solde_initial', $solde_initial);
 $tpl->assign('solde_final', $solde_final);
-
-$tpl->assign('error', $error);
 
 $tpl->display('admin/compta/banques/rapprocher.tpl');
