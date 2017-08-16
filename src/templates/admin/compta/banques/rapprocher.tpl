@@ -31,9 +31,7 @@
     </fieldset>
 </form>
 
-{if $error}
-    <p class="error">{$error}</p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}">
     <table class="list">
