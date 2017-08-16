@@ -403,30 +403,30 @@ function tpl_select_compte($params)
     foreach ($comptes as $compte)
     {
         // Ne pas montrer les comptes désactivés
-        if (!empty($compte['desactive']))
+        if (!empty($compte->desactive))
             continue;
 
-        if (!isset($compte['id'][1]) && empty($params['create']))
+        if (!isset($compte->id[1]) && empty($params['create']))
         {
-            $out.= '<optgroup label="'.htmlspecialchars($compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
+            $out.= '<optgroup label="'.htmlspecialchars($compte->libelle, ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
         }
-        elseif (!isset($compte['id'][2]) && empty($params['create']))
+        elseif (!isset($compte->id[2]) && empty($params['create']))
         {
-            if ($compte['id'] > 10)
+            if ($compte->id > 10)
                 $out.= '</optgroup>';
 
-            $out.= '<optgroup label="'.htmlspecialchars($compte['id'] . ' - ' . $compte['libelle'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_2">';
+            $out.= '<optgroup label="'.htmlspecialchars($compte->id . ' - ' . $compte->libelle, ENT_QUOTES, 'UTF-8', false).'" class="niveau_2">';
         }
         else
         {
-            $out .= '<option value="'.htmlspecialchars($compte['id'], ENT_QUOTES, 'UTF-8', false).'" class="niveau_'.strlen($compte['id']).'"';
+            $out .= '<option value="'.htmlspecialchars($compte->id, ENT_QUOTES, 'UTF-8', false).'" class="niveau_'.strlen($compte->id).'"';
 
-            if ($selected == $compte['id'])
+            if ($selected == $compte->id)
             {
                 $out .= ' selected="selected"';
             }
 
-            $out .= '>' . htmlspecialchars($compte['id'] . ' - ' . $compte['libelle'], ENT_QUOTES, 'UTF-8', false);
+            $out .= '>' . htmlspecialchars($compte->id . ' - ' . $compte->libelle, ENT_QUOTES, 'UTF-8', false);
             $out .= '</option>';
         }
     }

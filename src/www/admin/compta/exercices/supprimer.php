@@ -14,20 +14,14 @@ if (!$exercice)
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($exercice['cloture'])
+if ($exercice->cloture)
 {
     throw new UserException('Impossible de supprimer un exercice clôturé.');
 }
 
-$error = false;
-
 if (f('delete'))
 {
-    if (!Utils::CSRF_check('compta_supprimer_exercice_'.$exercice['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    if ($form->check('compta_supprimer_exercice_'.$exercice->id))
     {
         try
         {
@@ -37,12 +31,11 @@ if (f('delete'))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
 
 $tpl->display('admin/compta/exercices/supprimer.tpl');

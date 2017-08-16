@@ -289,9 +289,13 @@ class Comptes
         {
             $where = $db->where('parent', 'LIKE', $parent_id . '%');
         }
+        elseif ($include_children && !$parent_id)
+        {
+            $where = '1';
+        }
         else
         {
-            $where = $db->where('parent', $parent_id);
+            $where = $db->where('parent', !$parent_id ? (int) $parent_id : (string) $parent_id);
         }
 
         $query = 'SELECT * FROM compta_comptes WHERE %s OR %s ORDER BY id;';

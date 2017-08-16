@@ -1,4 +1,4 @@
-{if isset($tpl.get.suivi)}
+{if $suivi}
     {include file="admin/_head.tpl" title="Journal : %s - %s"|args:$compte.id:$compte.libelle current="compta/banques" body_id="rapport"}
 
     <ul class="actions">
