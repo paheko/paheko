@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Modification de l'opération n°%d"|args:$operation.id current="compta/saisie" js=1}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}">
 

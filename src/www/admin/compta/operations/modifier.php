@@ -34,62 +34,62 @@ else
     $type = null;
 }
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('compta_modifier_'.$operation['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('compta_modifier_' . $operation->id, [
+        'libelle' => 'required|string',
+        'montant' => 'required|money',
+        'date'    => 'required|date_format:Y-m-d',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try
         {
             if (is_null($type))
             {
-                $journal->edit($operation['id'], [
-                    'libelle'       =>  Utils::post('libelle'),
-                    'montant'       =>  Utils::post('montant'),
-                    'date'          =>  Utils::post('date'),
-                    'compte_credit' =>  Utils::post('compte_credit'),
-                    'compte_debit'  =>  Utils::post('compte_debit'),
-                    'numero_piece'  =>  Utils::post('numero_piece'),
-                    'remarques'     =>  Utils::post('remarques'),
+                $journal->edit($operation->id, [
+                    'libelle'       =>  f('libelle'),
+                    'montant'       =>  f('montant'),
+                    'date'          =>  f('date'),
+                    'compte_credit' =>  f('compte_credit'),
+                    'compte_debit'  =>  f('compte_debit'),
+                    'numero_piece'  =>  f('numero_piece'),
+                    'remarques'     =>  f('remarques'),
                 ]);
             }
             else
             {
-                $cat = $cats->get(Utils::post('id_categorie'));
+                $cat = $cats->get(f('id_categorie'));
 
                 if (!$cat)
                 {
                     throw new UserException('Il faut choisir une catégorie.');
                 }
 
-                if (!array_key_exists(Utils::post('moyen_paiement'), $cats->listMoyensPaiement()))
+                if (!array_key_exists(f('moyen_paiement'), $cats->listMoyensPaiement()))
                 {
                     throw new UserException('Moyen de paiement invalide.');
                 }
 
-                if (Utils::post('moyen_paiement') == 'ES')
+                if (f('moyen_paiement') == 'ES')
                 {
                     $a = Compta\Comptes::CAISSE;
                     $b = $cat->compte;
                 }
                 else
                 {
-                    if (!trim(Utils::post('banque')))
+                    if (!trim(f('banque')))
                     {
                         throw new UserException('Le compte bancaire choisi est invalide.');
                     }
 
-                    if (!array_key_exists(Utils::post('banque'), $banques->getList()))
+                    if (!array_key_exists(f('banque'), $banques->getList()))
                     {
                         throw new UserException('Le compte bancaire choisi n\'existe pas.');
                     }
 
-                    $a = Utils::post('banque');
+                    $a = f('banque');
                     $b = $cat->compte;
                 }
 
@@ -104,30 +104,28 @@ if (!empty($_POST['save']))
                     $credit = $b;
                 }
 
-                $journal->edit($operation['id'], [
-                    'libelle'       =>  Utils::post('libelle'),
-                    'montant'       =>  Utils::post('montant'),
-                    'date'          =>  Utils::post('date'),
-                    'moyen_paiement'=>  Utils::post('moyen_paiement'),
-                    'numero_cheque' =>  Utils::post('numero_cheque'),
+                $journal->edit($operation->id, [
+                    'libelle'       =>  f('libelle'),
+                    'montant'       =>  f('montant'),
+                    'date'          =>  f('date'),
+                    'moyen_paiement'=>  f('moyen_paiement'),
+                    'numero_cheque' =>  f('numero_cheque'),
                     'compte_credit' =>  $credit,
                     'compte_debit'  =>  $debit,
-                    'numero_piece'  =>  Utils::post('numero_piece'),
-                    'remarques'     =>  Utils::post('remarques'),
-                    'id_categorie'  =>  (int)$cat['id'],
+                    'numero_piece'  =>  f('numero_piece'),
+                    'remarques'     =>  f('remarques'),
+                    'id_categorie'  =>  (int)$cat->id,
                 ]);
             }
 
-            Utils::redirect('/admin/compta/operations/voir.php?id='.(int)$operation['id']);
+            Utils::redirect('/admin/compta/operations/voir.php?id='.(int)$operation->id);
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-
-$tpl->assign('error', $error);
 
 $tpl->assign('type', $type);
 

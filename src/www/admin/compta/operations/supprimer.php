@@ -1,4 +1,5 @@
 <?php
+
 namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
@@ -14,15 +15,9 @@ if (!$operation)
     throw new UserException("L'opération demandée n'existe pas.");
 }
 
-$error = false;
-
 if (f('delete'))
 {
-    if (!Utils::CSRF_check('compta_supprimer_'.$operation['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    if ($form->check('compta_supprimer_' . $operation->id))
     {
         try
         {
@@ -31,12 +26,10 @@ if (f('delete'))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-
-$tpl->assign('error', $error);
 
 $tpl->assign('operation', $operation);
 
