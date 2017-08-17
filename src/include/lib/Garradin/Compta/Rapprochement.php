@@ -54,13 +54,8 @@ class Rapprochement
         return $result;
     }
 
-    public function record($compte, $journal, $cases, $auteur)
+    public function record($compte, array $journal, array $cases = null, $id_auteur)
     {
-        if (!is_array($journal))
-        {
-            throw new \UnexpectedValueException('$journal doit être un tableau.');
-        }
-
         if (!is_array($cases) && empty($cases))
         {
             $cases = [];
@@ -72,7 +67,7 @@ class Rapprochement
         // Synchro des trucs cochés
         $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (id_operation, id_auteur) 
             VALUES (:operation, :auteur);');
-        $st->bindValue(':auteur', (int)$auteur, \SQLITE3_INTEGER);
+        $st->bindValue(':auteur', (int)$id_auteur, \SQLITE3_INTEGER);
 
         foreach ($journal as $row)
         {
