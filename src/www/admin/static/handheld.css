@@ -1,5 +1,6 @@
 body {
-	background: #fff url("bg01.png") no-repeat -180px -50px;
+	background-position: -180px 0px;
+	background-attachment: scroll;
 	font-size: 11pt;
 }
 
@@ -11,11 +12,11 @@ body {
 }
 
 .header .menu {
+	background: none !important;
 	position: relative;
 	margin: 0;
-	width: 100%;
+	width: auto;
 	padding: 0;
-    background: none;
 }
 
 .header .menu > li {
@@ -70,6 +71,7 @@ body {
 .header .menu li.current > a {
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gSecondColor), 0.5);
 	color: #000;
 }
 
