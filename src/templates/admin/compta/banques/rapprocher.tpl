@@ -22,9 +22,9 @@
         <legend>Période de rapprochement</legend>
         <p>
             Du
-            <input type="date" name="debut" id="f_debut" value="{form_field name='debut' default=$debut}" />
+            <span><input type="date" name="debut" id="f_debut" value="{form_field name='debut' default=$debut}" /></span>
             au
-            <input type="date" name="fin" id="f_fin" value="{form_field name='fin' default=$fin}" />
+            <span><input type="date" name="fin" id="f_fin" value="{form_field name='fin' default=$fin}" /></span>
             <input type="hidden" name="id" value="{$compte.id}" />
             <input type="submit" value="Afficher" />
         </p>

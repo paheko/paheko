@@ -43,11 +43,7 @@
 {/if}
 
 {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
-    {if $error}
-        <p class="error">
-            {$error}
-        </p>
-    {/if}
+    {form_errors}
 
     <form method="post" action="{$self_url}">
 
