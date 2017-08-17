@@ -14,6 +14,7 @@
     opacity: 1;
     display: block;
     position: absolute;
+    z-index: 100000;
 }
 
 .calendar.hidden {
