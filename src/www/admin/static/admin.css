@@ -98,6 +98,10 @@ body#transparent {
     background-color: rgb(var(--gMainColor));
 }
 
+.header .menu i {
+    font-style: normal;
+}
+
 .header .menu a {
     color: #fff;
     color: rgb(var(--gBgColor));

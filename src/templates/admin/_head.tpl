@@ -48,18 +48,18 @@
             </ul>
         </li>
     {else}
-        <li class="home{if $current == 'home'} current{/if}"><a href="{$admin_url}"><b class="icn">⌂</b> Accueil</a></li>
-        {if !empty($plugins_menu)}
-            <li class="plugins">
+        <li class="home{if $current == 'home'} current{/if}">
+            <a href="{$admin_url}"><b class="icn">⌂</b><i> Accueil</i></a>
+            {if !empty($plugins_menu)}
                 <ul>
                 {foreach from=$plugins_menu key="id" item="name"}
                     <li class="plugins {if $current == sprintf("plugin_%s", $id)} current{/if}"><a href="{plugin_url id=$id}">{$name}</a></li>
                 {/foreach}
                 </ul>
-            </li>
-        {/if}
+            {/if}
+        </li>
         {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
-            <li class="member list{if $current == 'membres'} current{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b> Membres</a>
+            <li class="member list{if $current == 'membres'} current{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
             {if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
@@ -73,7 +73,7 @@
             </li>
         {/if}
         {if $user.droits.compta >= Garradin\Membres::DROIT_ACCES}
-            <li class="compta{if $current == 'compta'} current{/if}"><a href="{$admin_url}compta/"><b>€</b> Comptabilité</a>
+            <li class="compta{if $current == 'compta'} current{/if}"><a href="{$admin_url}compta/"><b>€</b><i> Comptabilité</i></a>
             <ul>
             {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
                 <li class="compta new{if $current == 'compta/saisie'} current{/if}"><a href="{$admin_url}compta/operations/saisir.php">Saisie</a></li>
@@ -88,7 +88,7 @@
             </li>
         {/if}
         {if $user.droits.wiki >= Garradin\Membres::DROIT_ACCES}
-            <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b> Wiki</a>
+            <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
             <ul>
                 <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
                 <li class="wiki search{if $current == 'wiki/chercher'} current{/if}"><a href="{$admin_url}wiki/chercher.php">Recherche</a>
@@ -100,15 +100,15 @@
             </li>
         {/if}
         {if $user.droits.config >= Garradin\Membres::DROIT_ADMIN}
-            <li class="main config{if $current == 'config'} current{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b>Configuration</a>
+            <li class="main config{if $current == 'config'} current{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
-        <li class="my config{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php"><b class="icn">👤</b> Mes infos personnelles</a>
+        <li class="my config{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
             <ul>
                 <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>
             </ul>
         </li>
         {if !defined('Garradin\LOCAL_LOGIN')}
-        <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b> Déconnexion</a></li>
+        <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
     {/if}
     </ul>

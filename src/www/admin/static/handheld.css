@@ -15,69 +15,78 @@ body {
 	background: none !important;
 	position: relative;
 	margin: 0;
-	width: auto;
+	margin-bottom: 3em;
+	width: 100%;
+	padding: 0;
+	display: block;
+}
+
+.header .menu *, .header .menu a {
+	margin: 0;
 	padding: 0;
 }
 
-.header .menu > li {
-	margin: .1em 0;
+.header .menu > ul {
+	background: rgb(var(--gMainColor));
+	flex-wrap: nowrap;
+	display: flex;
 }
 
-.header .menu a {
-	font-weight: normal;
-	padding: 0;
-	display: inline;
-	padding: .2em;
-	color: black;
-	border-radius: 0 .5em .5em 0;
-}
-
-.header .menu a:hover {
-	background: none;
-}
-
-.header .menu > li a {
-	color: white;
-	display: inline-block;
-	padding: .2em .5em .2em .2em;
-}
-
-.header .menu > li > a:active {
-	color: #000;
-}
-
-.header .menu a b {
-	float: left;
-	font-size: 1.1em;
-	margin: 0 .3em 0 0;
-	width: 1.2em;
+.header .menu > ul > li {
+	flex-grow: 1;
 	text-align: center;
-	color: inherit;
+	width: 30pt;
 }
 
-.header .menu a small {
-	float: none;
+.header .menu > ul > li, .header .menu > ul > li > a {
+	display: inline-flex;
 }
 
-.header .menu li li, .header .menu li ul {
-	display: inline;
+.header .menu > ul > li > a {
+	display: block;
 }
 
-.header .menu li li a {
-	padding: .2em;
-	font-size: .9em;
+.header .menu > ul > li > a i {
+	display: none;
 }
 
-.header .menu li.current > a {
-    background: rgb(217, 134, 40);
-    background: rgba(217, 134, 40, 0.5);
-    background: rgba(var(--gSecondColor), 0.5);
-	color: #000;
+.header .menu > ul > li > ul {
+	display: none;
 }
 
-.header .menu li li.current > a {
-	border-radius: .5em;
-	padding: .2em .4em;
+.header .menu > ul > li > a b {
+	color: #fff;
+	width: 20pt;
+	height: 18pt;
+	padding: 10pt;
+	display: block;
+	line-height: 20pt;
+}
+
+.header .menu > ul > li.current b {
+	color: rgb(var(--gMainColor));
+}
+
+.header .menu > ul > li.current > ul {
+	display: flex;
+	position: absolute;
+	top: 30pt;
+	left: 0;
+	right: 0;
+	background: #fff;
+}
+
+.header .menu > ul > li.current > ul li {
+	flex-grow: 1;
+	text-align: center;
+	display: block;
+}
+
+.header .menu > ul > li.current > ul a {
+    color: #9c4f15;
+    color: rgb(var(--gMainColor));
+    padding: 2pt 3pt;
+    text-decoration: underline
 }
 
 main {
