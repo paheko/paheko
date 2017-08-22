@@ -47,6 +47,7 @@ class Squelette_Filtres
         'and'   =>  'et',
         'or'    =>  'ou',
         'xor'   =>  'xou',
+        'supprimer_spip' => 'supprimer_skriv',
     ];
 
     static public $desactiver_defaut = [
@@ -248,10 +249,12 @@ class Squelette_Filtres
         return preg_replace('!<[^>]*>!', $replace, $value);
     }
 
-    static public function supprimer_spip($value)
+    static public function supprimer_skriv($value)
     {
-        $value = preg_replace('!\[([^\]]+)(?:->[^\]]*)?\]!U', '$1', $value);
+        $value = preg_replace('!\[\[([^\]]+)(?:\|[^\]]*)?\]!U', '$1', $value);
         $value = preg_replace('!\{+([^\}]*)\}+!', '$1', $value);
+        $value = preg_replace('!^=+([^=]+)=*$!mU', '$1', $value);
+        $value = preg_replace('!<<<.*>>>!mU', '', $value);
         return $value;
     }
 
