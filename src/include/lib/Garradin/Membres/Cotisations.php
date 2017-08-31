@@ -138,7 +138,6 @@ class Cotisations
 	public function delete($id)
 	{
 		$db = DB::getInstance();
-		$db->update('membres_operations', ['id_cotisation' => null], 'id_cotisation = ' . (int)$id);
 		return $db->delete('cotisations_membres', 'id = ' . (int)$id);
 	}
 
