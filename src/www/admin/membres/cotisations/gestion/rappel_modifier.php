@@ -21,41 +21,30 @@ if (!$rappel)
 
 $cotisations = new Cotisations;
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save') && $form->check('edit_rappel_' . $rappel->id))
 {
-    if (!Utils::CSRF_check('edit_rappel_' . $rappel->id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    try {
+        if (f('delai_choix') == 0)
+           $delai = 0;
+        elseif (f('delai_choix') > 0)
+            $delai = (int) f('delai_post');
+        else
+            $delai = -(int) f('delai_pre');
+
+        $rappels->edit($rappel->id, [
+            'sujet'         => f('sujet'),
+            'texte'         => f('texte'),
+            'delai'         => $delai,
+            'id_cotisation' => f('id_cotisation'),
+        ]);
+
+        Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
     }
-    else
+    catch (UserException $e)
     {
-        try {
-            if (Utils::post('delai_choix') == 0)
-               $delai = 0;
-            elseif (Utils::post('delai_choix') > 0)
-                $delai = (int) Utils::post('delai_post');
-            else
-                $delai = -(int) Utils::post('delai_pre');
-
-            $rappels->edit($rappel->id, [
-                'sujet'		=>	Utils::post('sujet'),
-                'texte'		=>	Utils::post('texte'),
-                'delai'		=>	$delai,
-                'id_cotisation'	=>	Utils::post('id_cotisation'),
-            ]);
-
-            Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
-
-$tpl->assign('error', $error);
 
 $rappel->delai_pre = 
     $rappel->delai_post = (abs($rappel->delai) ?: 30);

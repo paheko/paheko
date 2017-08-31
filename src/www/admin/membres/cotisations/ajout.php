@@ -30,8 +30,6 @@ $m_cotisations = new Membres\Cotisations;
 $cats = new Compta\Categories;
 $banques = new Compta\Comptes_Bancaires;
 
-$error = false;
-
 if (f('add'))
 {
     $form->check('add_cotisation', [

@@ -18,8 +18,6 @@ if (!$cat)
     throw new UserException('Cette catégorie n\'existe pas.');
 }
 
-$error = false;
-
 if (f('delete') && $form->check('delete_compta_cat_' . $cat->id))
 {
     try

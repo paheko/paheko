@@ -19,28 +19,17 @@ if (!$rappel)
     throw new UserException("Ce rappel n'existe pas.");
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete') && $form->check('delete_rappel_' . $rappel->id))
 {
-    if (!Utils::CSRF_check('delete_rappel_' . $rappel->id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    try {
+        $rappels->delete($rappel->id, (bool) f('delete_history'));
+        Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
     }
-    else
+    catch (UserException $e)
     {
-        try {
-            $rappels->delete($rappel->id, (bool) Utils::post('delete_history'));
-            Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
-
-$tpl->assign('error', $error);
 
 $tpl->assign('rappel', $rappel);
 

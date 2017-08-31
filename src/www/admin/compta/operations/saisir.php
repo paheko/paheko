@@ -114,7 +114,7 @@ if (f('save'))
                 }
                 elseif ($type === 'dette')
                 {
-                    $debit = $cat['compte'];
+                    $debit = $cat->compte;
                     $credit = f('compte');
                 }
 

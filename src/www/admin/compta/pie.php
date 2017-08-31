@@ -36,7 +36,7 @@ if (Static_Cache::expired('pie_' . $graph))
 	{
 		if ($i++ >= $max)
 		{
-			$others += $row['somme'];
+			$others += $row->somme;
 		}
 		else
 		{

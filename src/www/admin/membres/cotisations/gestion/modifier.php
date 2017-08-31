@@ -20,42 +20,32 @@ if (!$co)
     throw new UserException("Cette cotisation n'existe pas.");
 }
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save') && $form->check('edit_co_' . $co->id))
 {
-    if (!Utils::CSRF_check('edit_co_' . $co->id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    try {
+        $duree = f('periodicite') == 'jours' ? (int) f('duree') : null;
+        $debut = f('periodicite') == 'date' ? f('debut') : null;
+        $fin = f('periodicite') == 'date' ? f('fin') : null;
+        $id_cat = f('categorie') ? (int) f('id_categorie_compta') : null;
+
+        $cotisations->edit($co->id, [
+            'intitule'            => f('intitule'),
+            'description'         => f('description'),
+            'montant'             => (float) f('montant'),
+            'duree'               => $duree,
+            'debut'               => $debut,
+            'fin'                 => $fin,
+            'id_categorie_compta' => $id_cat,
+        ]);
+
+        Utils::redirect('/admin/membres/cotisations/');
     }
-    else
+    catch (UserException $e)
     {
-        try {
-            $duree = Utils::post('periodicite') == 'jours' ? (int) Utils::post('duree') : null;
-            $debut = Utils::post('periodicite') == 'date' ? Utils::post('debut') : null;
-            $fin = Utils::post('periodicite') == 'date' ? Utils::post('fin') : null;
-            $id_cat = Utils::post('categorie') ? (int) Utils::post('id_categorie_compta') : null;
-
-            $cotisations->edit($co->id, [
-                'intitule'          =>  Utils::post('intitule'),
-                'description'       =>  Utils::post('description'),
-                'montant'           =>  (float) Utils::post('montant'),
-                'duree'             =>  $duree,
-                'debut'             =>  $debut,
-                'fin'               =>  $fin,
-                'id_categorie_compta'=> $id_cat,
-            ]);
-
-            Utils::redirect('/admin/membres/cotisations/');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
 
-$tpl->assign('error', $error);
 
 $co->periodicite = $co->duree ? 'jours' : ($co->debut ? 'date' : 'ponctuel');
 $co->categorie = $co->id_categorie_compta ? 1 : 0;

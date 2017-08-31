@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Configuration — Site public" current="config" js=1}
 
-{if $error && $error != 'OK'}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 {include file="admin/config/_menu.tpl" current="site"}
 
@@ -12,7 +8,7 @@
     <form method="post" action="{$self_url}">
         <h3>Éditer un squelette</h3>
 
-        {if $error == 'OK'}
+        {if $ok}
         <p class="confirm">
             Modifications enregistrées.
         </p>

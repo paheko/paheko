@@ -12,7 +12,7 @@
         </tbody>
     </table>
 
-    {pagination url="?p=[ID]" page=$page bypage=$bypage total=$total}
+    {pagination url="?p=[ID]" page=$current_page bypage=$bypage total=$total}
 {else}
     <p class="alert">Pas de modification récente.</p>
 {/if}
