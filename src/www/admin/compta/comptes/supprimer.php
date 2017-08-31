@@ -13,51 +13,33 @@ if (!$compte)
     throw new UserException('Le compte demandé n\'existe pas.');
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete') && $form->check('compta_delete_compte_' . $compte->id))
 {
-    if (!Utils::CSRF_check('compta_delete_compte_'.$compte['id']))
+    try
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $comptes->delete($compte->id);
+        Utils::redirect('/admin/compta/comptes/?classe=' . substr($compte->id, 0, 1));
     }
-    else
+    catch (UserException $e)
     {
-        try
-        {
-            $comptes->delete($compte['id']);
-            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
-elseif (!empty($_POST['disable']))
+elseif (f('disable') && $form->check('compta_disable_compte_' . $compte->id))
 {
-    if (!Utils::CSRF_check('compta_disable_compte_'.$compte['id']))
+    try
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $comptes->disable($compte->id);
+        Utils::redirect('/admin/compta/comptes/?classe='.substr($compte->id, 0, 1));
     }
-    else
+    catch (UserException $e)
     {
-        try
-        {
-            $comptes->disable($compte['id']);
-            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
 
-$tpl->assign('can_delete', $comptes->canDelete($compte['id']));
-$tpl->assign('can_disable', $comptes->canDisable($compte['id']));
-
-$tpl->assign('error', $error);
+$tpl->assign('can_delete', $comptes->canDelete($compte->id));
+$tpl->assign('can_disable', $comptes->canDisable($compte->id));
 
 $tpl->assign('compte', $compte);
 

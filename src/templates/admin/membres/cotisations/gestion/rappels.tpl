@@ -54,11 +54,7 @@
     </table>
 {/if}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$self_url}" id="f_add">
 

@@ -147,16 +147,16 @@ if (version_compare($v, '0.6.0-rc1', '<'))
     {
         $db->simpleInsert('cotisations', [
             'id_categorie_compta'   =>  null,
-            'intitule'              =>  $cat['nom'],
-            'montant'               =>  (float) $cat['montant_cotisation'],
+            'intitule'              =>  $cat->nom,
+            'montant'               =>  (float) $cat->montant_cotisation,
             // Convertir un nombre de mois en nombre de jours
-            'duree'                 =>  round($cat['duree_cotisation'] * 30.44),
+            'duree'                 =>  round($cat->duree_cotisation * 30.44),
             'description'           =>  'Créé automatiquement depuis les catégories de membres (version 0.5.x)',
         ]);
 
         $args = [
             'id_cotisation' =>  (int)$db->lastInsertRowId(),
-            'id_categorie'  =>  (int)$cat['id'],
+            'id_categorie'  =>  (int)$cat->id,
         ];
 
         // import des dates de cotisation existantes comme paiements
@@ -217,16 +217,16 @@ if (version_compare($v, '0.7.0', '<'))
     while ($row = $res->fetchArray(\SQLITE3_ASSOC))
     {
         // Ne pas convertir le contenu chiffré, de toute évidence
-        if ($row['chiffrement'])
+        if ($row->chiffrement)
             continue;
 
-        $content = $row['contenu'];
+        $content = $row->contenu;
         $content = Utils::HTMLToSkriv($content);
         $content = Utils::SpipToSkriv($content);
 
-        if ($content != $row['contenu'])
+        if ($content != $row->contenu)
         {
-            $wiki->editRevision($row['id_page'], $row['revision'], [
+            $wiki->editRevision($row->id_page, $row->revision, [
                 'id_auteur'     =>  null,
                 'contenu'       =>  $content,
                 'modification'  =>  'Mise à jour 0.7.0 (transformation SPIP vers SkrivML)',

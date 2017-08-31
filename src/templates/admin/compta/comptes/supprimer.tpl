@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Supprimer un compte" current="compta/categories"}
 
-{if $error}
-    <p class="error">
-        {$error}
-    </p>
-{/if}
+{form_errors}
 
 {if !$can_delete && !$can_disable}
     <p class="alert">

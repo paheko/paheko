@@ -3,54 +3,38 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save') && $form->check('config_site'))
 {
-    if (!Utils::CSRF_check('config_site'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        try {
-            $config->set('champs_obligatoires', Utils::post('champs_obligatoires'));
-            $config->set('champs_modifiables_membre', Utils::post('champs_modifiables_membre'));
-            $config->set('categorie_membres', Utils::post('categorie_membres'));
-            $config->save();
+    try {
+        $config->set('champs_obligatoires', f('champs_obligatoires'));
+        $config->set('champs_modifiables_membre', f('champs_modifiables_membre'));
+        $config->set('categorie_membres', f('categorie_membres'));
+        $config->save();
 
-            Utils::redirect('/admin/config/site.php?ok');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        Utils::redirect('/admin/config/site.php?ok');
+    }
+    catch (UserException $e)
+    {
+        $form->addError($e->getMessage());
     }
 }
 
-if (Utils::post('select') && Utils::post('reset'))
+if (f('select') && f('reset') && $form->check('squelettes'))
 {
-    if (!Utils::CSRF_check('squelettes'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        try {
-            foreach (Utils::post('select') as $source)
-            {
-                if (!Squelette::resetSource($source))
-                {
-                    throw new UserException('Impossible de réinitialiser le squelette.');
-                }
-            }
-        
-            Utils::redirect('/admin/config/site.php?reset_ok');
-        }
-        catch (UserException $e)
+    try {
+        foreach (f('select') as $source)
         {
-            $error = $e->getMessage();
+            if (!Squelette::resetSource($source))
+            {
+                throw new UserException('Impossible de réinitialiser le squelette.');
+            }
         }
+    
+        Utils::redirect('/admin/config/site.php?reset_ok');
+    }
+    catch (UserException $e)
+    {
+        $form->addError($e->getMessage());
     }
 }
 
@@ -64,25 +48,18 @@ if (qg('edit'))
         throw new UserException("Ce squelette n'existe pas.");
     }
 
-    $csrf_key = 'edit_skel_'.md5(qg('edit'));
+    $csrf_key = 'edit_skel_' . md5(qg('edit'));
 
-    if (Utils::post('save'))
+    if (f('save') && $form->check($csrf_key))
     {
-        if (!Utils::CSRF_check($csrf_key))
+        if (Squelette::editSource(qg('edit'), f('content')))
         {
-            $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+            $fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
+            Utils::redirect('/admin/config/site.php?edit='.rawurlencode(qg('edit')).'&ok'.$fullscreen);
         }
         else
         {
-            if (Squelette::editSource(qg('edit'), Utils::post('content')))
-            {
-                $fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
-                Utils::redirect('/admin/config/site.php?edit='.rawurlencode(qg('edit')).'&ok'.$fullscreen);
-            }
-            else
-            {
-                $error = "Impossible d'enregistrer le squelette.";
-            }
+            $form->addError("Impossible d'enregistrer le squelette.");
         }
     }
 
@@ -92,6 +69,6 @@ if (qg('edit'))
 
 $tpl->assign('sources', Squelette::listSources());
 
-$tpl->assign('reset_ok', qg('reset_ok'));
-$tpl->assign('error', $error);
+$tpl->assign('reset_ok', qg('reset_ok') !== null);
+$tpl->assign('ok', qg('ok') !== null);
 $tpl->display('admin/config/site.tpl');

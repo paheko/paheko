@@ -8,8 +8,6 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
-
 if (trim(qg('c')))
 {
     if (Session::recoverPasswordConfirm(qg('c')))
@@ -36,11 +34,11 @@ elseif (f('recover'))
     }
 }
 
-if (!$error && null !== qg('sent'))
+if (!$form->hasErrors() && null !== qg('sent'))
 {
     $tpl->assign('sent', true);
 }
-elseif (!$error && null !== qg('new_sent'))
+elseif (!$form->hasErrors() && null !== qg('new_sent'))
 {
     $tpl->assign('new_sent', true);
 }
@@ -51,7 +49,5 @@ $champs = $config->get('champs_membres');
 $champ = $champs->get($config->get('champ_identifiant'));
 
 $tpl->assign('champ', $champ);
-
-$tpl->assign('error', $error);
 
 $tpl->display('admin/password.tpl');

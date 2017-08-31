@@ -13,36 +13,28 @@ if (!$compte)
     throw new UserException('Le compte demandé n\'existe pas.');
 }
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('compta_edit_compte_'.$compte['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    if ($form->check('compta_edit_compte_' . $compte->id))
     {
         try
         {
-            $id = $comptes->edit($compte['id'], [
-                'libelle'       =>  Utils::post('libelle'),
-                'position'      =>  Utils::post('position'),
+            $id = $comptes->edit($compte->id, [
+                'libelle'  =>  f('libelle'),
+                'position' =>  f('position'),
             ]);
 
-            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
+            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte->id, 0, 1));
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
-
 $tpl->assign('positions', $comptes->getPositions());
-$tpl->assign('position', Utils::post('position') ?: $compte['position']);
+$tpl->assign('position', f('position') ?: $compte->position);
 $tpl->assign('compte', $compte);
 
 $tpl->display('admin/compta/comptes/modifier.tpl');

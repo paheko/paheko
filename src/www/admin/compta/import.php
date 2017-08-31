@@ -16,8 +16,6 @@ if (qg('export') !== null)
     exit;
 }
 
-$error = false;
-
 if (f('import'))
 {
     $form->check('compta_import', [
