@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use KD2\Image;
+
 class Fichiers
 {
 	public $id;
@@ -59,7 +61,9 @@ class Fichiers
 		foreach (self::$allowed_thumb_sizes as $s)
 		{
 			if ($s >= $size)
-				return $size;
+			{
+				return $s;
+			}
 		}
 
 		return max(self::$allowed_thumb_sizes);
@@ -294,7 +298,10 @@ class Fichiers
 			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
-		$width = self::_findThumbSize($width);
+		if (!in_array($width, self::$allowed_thumb_sizes))
+		{
+			throw new UserException('Cette taille de miniature n\'est pas autorisée.');
+		}
 
 		$cache_id = 'fichiers.' . $this->id_contenu . '.thumb.' . (int)$width;
 		$path = Static_Cache::getPath($cache_id);
@@ -303,7 +310,8 @@ class Fichiers
 		if (!Static_Cache::exists($cache_id))
 		{
 			$source = $this->getFilePathFromCache();
-			\KD2\Image::resize($source, $path, $width);
+
+			(new Image($source))->resize($width)->save($path);
 		}
 
 		return $this->_serve($path, $this->type);
