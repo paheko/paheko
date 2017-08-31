@@ -117,15 +117,7 @@ class Cotisations
 
 		$db->begin();
 
-		// Inscrire à NULL les opérations liées à cette cotisation, ainsi on conserve le lien avec les membres
-		$db->update('membres_operations', ['id_cotisation' => null], 
-			'id_cotisation IN (SELECT id FROM cotisations_membres WHERE id_cotisation = :id_select)',
-			['id_select' => (int) $id]);
-
-		$db->delete('rappels', 'id_cotisation = ?', (int) $id);
-		$db->delete('rappels_envoyes', 'id_cotisation = ?', (int) $id);
-
-		$db->delete('cotisations_membres', 'id_cotisation = ?', (int) $id);
+		// Les lignes liées dans les autres tables seront supprimées grâce à ON DELETE CASCADE
 		$db->delete('cotisations', 'id = ?', (int) $id);
 
 		$db->commit();

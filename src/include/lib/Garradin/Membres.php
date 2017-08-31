@@ -451,26 +451,8 @@ class Membres
 
         $db = DB::getInstance();
 
-        $membres = implode(',', $membres);
-        $where = sprintf('id_auteur IN (%s)', $membres);
-        
-        // Mise à jour des références, membre qui n'existe plus
-        $db->update('wiki_revisions', ['id_auteur' => null], $where);
-        $db->update('compta_journal', ['id_auteur' => null], $where);
-        $db->update('compta_rapprochement', ['id_auteur' => null], $where);
-
-        $where = sprintf('id_membre IN (%s)', $membres);
-
-        // Suppression des données liées au membre
-        $db->delete('rappels_envoyes', $where);
-        $db->delete('membres_operations', $where);
-        $db->delete('cotisations_membres', $where);
-
-        //$db->exec('DELETE FROM wiki_suivi WHERE id_membre IN ('.$membres.');');
-        
         // Suppression du membre
-        $where = sprintf('id IN (%s)', $membres);
-        return $db->delete('membres', $where);
+        return $db->delete('membres', $db->where('id', $membres));
     }
 
     /**

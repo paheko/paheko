@@ -23,22 +23,21 @@ CREATE TABLE IF NOT EXISTS membres_categories
     droit_config INTEGER NOT NULL DEFAULT 0,
     cacher INTEGER NOT NULL DEFAULT 0,
 
-    id_cotisation_obligatoire INTEGER NULL REFERENCES cotisations (id)
+    id_cotisation_obligatoire INTEGER NULL REFERENCES cotisations (id) ON DELETE SET NULL
 );
 
 -- Membres de l'asso
 -- Table dynamique générée par l'application
 -- voir Garradin\Membres\Champs.php
 
-CREATE TABLE membres_sessions
+CREATE TABLE IF NOT EXISTS membres_sessions
 -- Sessions
 (
     selecteur TEXT NOT NULL,
     hash TEXT NOT NULL,
-    id_membre INTEGER NOT NULL,
+    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     expire TEXT NOT NULL CHECK (datetime(expire) IS NOT NULL AND datetime(expire) = expire),
 
-    FOREIGN KEY (id_membre) REFERENCES membres (id),
     PRIMARY KEY (selecteur, id_membre)
 );
 
@@ -63,8 +62,8 @@ CREATE TABLE IF NOT EXISTS cotisations_membres
 -- Enregistrement des cotisations et activités
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_membre INTEGER NOT NULL REFERENCES membres (id),
-    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
+    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id) ON DELETE CASCADE,
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
 );
@@ -74,9 +73,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS cm_unique ON cotisations_membres (id_membre, i
 CREATE TABLE IF NOT EXISTS membres_operations
 -- Liaision des enregistrement des paiements en compta
 (
-    id_membre INTEGER NOT NULL REFERENCES membres (id),
-    id_operation INTEGER NOT NULL REFERENCES compta_journal (id),
-    id_cotisation INTEGER NULL REFERENCES cotisations_membres (id),
+    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
+    id_operation INTEGER NOT NULL REFERENCES compta_journal (id) ON DELETE CASCADE,
+    id_cotisation INTEGER NULL REFERENCES cotisations_membres (id) ON DELETE SET NULL,
 
     PRIMARY KEY (id_membre, id_operation)
 );
@@ -85,7 +84,7 @@ CREATE TABLE IF NOT EXISTS rappels
 -- Rappels de devoir renouveller une cotisation
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id) ON DELETE CASCADE,
 
     delai INTEGER NOT NULL, -- Délai en jours pour envoyer le rappel
 
@@ -98,9 +97,9 @@ CREATE TABLE IF NOT EXISTS rappels_envoyes
 (
     id INTEGER NOT NULL PRIMARY KEY,
 
-    id_membre INTEGER NOT NULL REFERENCES membres (id),
-    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id),
-    id_rappel INTEGER NULL REFERENCES rappels (id),
+    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
+    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id) ON DELETE CASCADE,
+    id_rappel INTEGER NULL REFERENCES rappels (id) ON DELETE CASCADE,
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
 
@@ -139,19 +138,17 @@ CREATE VIRTUAL TABLE IF NOT EXISTS wiki_recherche USING fts4
 CREATE TABLE IF NOT EXISTS wiki_revisions
 -- Révisions du contenu des pages
 (
-    id_page INTEGER NOT NULL,
+    id_page INTEGER NOT NULL REFERENCES wiki_pages (id) ON DELETE CASCADE,
     revision INTEGER NULL,
 
-    id_auteur INTEGER NULL,
+    id_auteur INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL,
 
     contenu TEXT NOT NULL,
     modification TEXT NULL, -- Description des modifications effectuées
     chiffrement INTEGER NOT NULL DEFAULT 0, -- 1 si le contenu est chiffré, 0 sinon
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
 
-    PRIMARY KEY(id_page, revision),
-    FOREIGN KEY (id_page) REFERENCES wiki_pages (id), -- Clé externe obligatoire
-    FOREIGN KEY (id_auteur) REFERENCES membres (id)  -- Clé externe non-obligatoire (peut être supprimée après en cas de suppression de membre)
+    PRIMARY KEY(id_page, revision)
 );
 
 CREATE INDEX IF NOT EXISTS wiki_revisions_id_page ON wiki_revisions (id_page);
@@ -237,7 +234,7 @@ CREATE TABLE IF NOT EXISTS compta_comptes_bancaires
     iban TEXT NULL,
     bic TEXT NULL,
 
-    FOREIGN KEY(id) REFERENCES compta_comptes(id)
+    FOREIGN KEY(id) REFERENCES compta_comptes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS compta_journal
@@ -266,8 +263,8 @@ CREATE TABLE IF NOT EXISTS compta_journal
     FOREIGN KEY(compte_debit) REFERENCES compta_comptes(id),
     FOREIGN KEY(compte_credit) REFERENCES compta_comptes(id),
     FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
-    FOREIGN KEY(id_auteur) REFERENCES membres(id),
-    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id)
+    FOREIGN KEY(id_auteur) REFERENCES membres(id) ON DELETE SET NULL,
+    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_journal (id_exercice);
@@ -301,7 +298,7 @@ CREATE TABLE IF NOT EXISTS compta_categories
 
     compte TEXT NOT NULL, -- Compte affecté par cette catégorie
 
-    FOREIGN KEY(compte) REFERENCES compta_comptes(id)
+    FOREIGN KEY(compte) REFERENCES compta_comptes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS plugins
@@ -329,7 +326,7 @@ CREATE TABLE IF NOT EXISTS plugins_signaux
 CREATE TABLE IF NOT EXISTS compta_rapprochement
 -- Rapprochement entre compta et relevés de comptes
 (
-    id_operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id),
+    id_operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id) ON DELETE CASCADE,
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
     id_auteur INTEGER NULL REFERENCES membres (id)
 );
@@ -342,7 +339,7 @@ CREATE TABLE IF NOT EXISTS fichiers
     type TEXT NULL, -- Type MIME
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
     datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(datetime) IS NOT NULL AND datetime(datetime) = datetime), -- Date d'ajout ou mise à jour du fichier
-    id_contenu INTEGER NOT NULL REFERENCES fichiers_contenu (id)
+    id_contenu INTEGER NOT NULL REFERENCES fichiers_contenu (id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS fichiers_date ON fichiers (datetime);
