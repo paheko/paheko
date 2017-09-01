@@ -405,7 +405,7 @@ ul.actions li {
     margin: 0 0.2em;
 }
 
-ul.actions li a {
+ul.actions li a, ul.actions li label {
     display: inline-block;
     background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, .5);
@@ -416,17 +416,22 @@ ul.actions li a {
     text-decoration: none;
 }
 
-ul.actions li.current a {
+ul.actions li input {
+    display: none;
+}
+
+ul.actions li.current a, ul.actions li input:checked + label {
     background: #9c4f15;
     background: rgb(var(--gMainColor));
     color: #fff;
     color: rgb(var(--gBgColor));
 }
 
-ul.actions li a:hover {
+ul.actions li a:hover, ul.actions li label:hover {
     color: #fff;
     color: rgb(var(--gBgColor));
     text-decoration: underline;
+    border-bottom: none;
 }
 
 h3.warning {
