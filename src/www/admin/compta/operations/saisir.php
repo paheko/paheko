@@ -12,16 +12,7 @@ $journal->checkExercice();
 $cats = new Compta\Categories;
 $banques = new Compta\Comptes_Bancaires;
 
-if (null !== qg('depense'))
-    $type = Compta\Categories::DEPENSES;
-elseif (null !== qg('virement'))
-    $type = 'virement';
-elseif (null !== qg('dette'))
-    $type = 'dette';
-elseif (null !== qg('avance'))
-    $type = null;
-else
-    $type = Compta\Categories::RECETTES;
+$type = f('type') ?: 'recette';
 
 if (f('save'))
 {
@@ -35,7 +26,7 @@ if (f('save'))
     {
         try
         {
-            if (is_null($type))
+            if ($type == 'avance')
             {
                 $id = $journal->add([
                     'libelle'       =>  f('libelle'),
@@ -48,7 +39,7 @@ if (f('save'))
                     'id_auteur'     =>  $user->id,
                 ]);
             }
-            elseif ($type === 'virement')
+            elseif ($type == 'virement')
             {
                 $id = $journal->add([
                     'libelle'       =>  f('libelle'),
@@ -63,7 +54,17 @@ if (f('save'))
             }
             else
             {
-                $cat = $cats->get(f('categorie'));
+                if ($type == 'recette')
+                {
+                    $cat = 'categorie_recette';
+                }
+                else
+                {
+                    // Dette ou dépense
+                    $cat = 'categorie_depense';
+                }
+
+                $cat = $cats->get(f($cat));
 
                 if (!$cat)
                 {
@@ -102,17 +103,17 @@ if (f('save'))
                     }
                 }
 
-                if ($type === Compta\Categories::DEPENSES)
+                if ($type == 'depense')
                 {
                     $debit = $b;
                     $credit = $a;
                 }
-                elseif ($type === Compta\Categories::RECETTES)
+                elseif ($type == 'recette')
                 {
                     $debit = $a;
                     $credit = $b;
                 }
-                elseif ($type === 'dette')
+                elseif ($type == 'dette')
                 {
                     $debit = $cat->compte;
                     $credit = f('compte');
@@ -122,8 +123,8 @@ if (f('save'))
                     'libelle'       =>  f('libelle'),
                     'montant'       =>  f('montant'),
                     'date'          =>  f('date'),
-                    'moyen_paiement'=>  ($type === 'dette') ? null : f('moyen_paiement'),
-                    'numero_cheque' =>  ($type === 'dette') ? null : f('numero_cheque'),
+                    'moyen_paiement'=>  ($type == 'dette') ? null : f('moyen_paiement'),
+                    'numero_cheque' =>  ($type == 'dette') ? null : f('numero_cheque'),
                     'compte_credit' =>  $credit,
                     'compte_debit'  =>  $debit,
                     'numero_piece'  =>  f('numero_piece'),
@@ -135,14 +136,7 @@ if (f('save'))
 
             $session->sessionStore('compta_date', f('date'));
 
-            if ($type == Compta\Categories::DEPENSES)
-                $type = 'depense';
-            elseif (is_null($type))
-                $type = 'avance';
-            elseif ($type == Compta\Categories::RECETTES)
-                $type = 'recette';
-
-            Utils::redirect('/admin/compta/operations/saisir.php?'.$type.'&ok='.(int)$id);
+            Utils::redirect('/admin/compta/operations/saisir.php?ok='.(int)$id);
         }
         catch (UserException $e)
         {
@@ -153,18 +147,13 @@ if (f('save'))
 
 $tpl->assign('type', $type);
 
-if ($type === null)
-{
-    $tpl->assign('comptes', $comptes->listTree());
-}
-else
-{
-    $tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
-    $tpl->assign('moyen_paiement', f('moyen_paiement') ?: 'ES');
-    $tpl->assign('categories', $cats->getList($type === 'dette' ? Compta\Categories::DEPENSES : $type));
-    $tpl->assign('comptes_bancaires', $banques->getList());
-    $tpl->assign('banque', f('banque'));
-}
+$tpl->assign('comptes', $comptes->listTree());
+$tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
+$tpl->assign('moyen_paiement', f('moyen_paiement') ?: 'ES');
+$tpl->assign('categories_depenses', $cats->getList(Compta\Categories::DEPENSES));
+$tpl->assign('categories_recettes', $cats->getList(Compta\Categories::RECETTES));
+$tpl->assign('comptes_bancaires', $banques->getList());
+$tpl->assign('banque', f('banque'));
 
 if (!$session->sessionGet('compta_date'))
 {
