@@ -17,14 +17,14 @@ class Cotisations
 	 * @param  array $data Tableau contenant les champs à ajouter/modifier
 	 * @return void
 	 */
-	protected function _checkFields(&$data, $compta = false)
+	protected function _checkFields(&$data)
 	{
 		$db = DB::getInstance();
 
-        if (empty($data['date']) || !Utils::checkDate($data['date']))
-        {
-            throw new UserException('Date vide ou invalide.');
-        }
+		if (empty($data['date']) || !Utils::checkDate($data['date']))
+		{
+			throw new UserException('Date vide ou invalide.');
+		}
 
 		if (empty($data['id_cotisation']) 
 			|| !$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', (int) $data['id_cotisation']))
@@ -41,32 +41,6 @@ class Cotisations
 		}
 
 		$data['id_membre'] = (int) $data['id_membre'];
-
-		if ($compta)
-		{
-	        if (!isset($data['moyen_paiement']) || trim($data['moyen_paiement']) === '')
-	        {
-	        	throw new UserException('Moyen de paiement inconnu ou invalide.');
-	        }
-
-			if ($data['moyen_paiement'] != 'ES')
-	        {
-	            if (trim($data['banque']) == '')
-	            {
-	                throw new UserException('Le compte bancaire choisi est invalide.');
-	            }
-
-	            if (!$db->firstColumn('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', $data['banque']))
-	            {
-	                throw new UserException('Le compte bancaire choisi n\'existe pas.');
-	            }
-	        }
-
-	        if (!isset($data['montant']) || !is_numeric($data['montant']) || $data['montant'] < 0)
-	        {
-	        	throw new UserException('Le montant indiqué n\'est pas un nombre valide : doit être supérieur ou égal à zéro.');
-	        }
-	    }
 	}
 
 	/**
@@ -74,13 +48,13 @@ class Cotisations
 	 * @param array $data Tableau des champs à insérer
 	 * @return integer ID de l'événement créé
 	 */
-	public function add($data)
+	public function add($data, array $data_compta)
 	{
 		$db = DB::getInstance();
 
 		$co = $db->first('SELECT * FROM cotisations WHERE id = ?;', (int)$data['id_cotisation']);
 
-		$this->_checkFields($data, !empty($co->id_categorie_compta));
+		$this->_checkFields($data);
 
 		$check = $db->firstColumn('SELECT 1 FROM cotisations_membres 
 			WHERE id_cotisation = ? AND id_membre = ? AND date = ?;', 
@@ -101,26 +75,24 @@ class Cotisations
 
 		$id = $db->lastInsertRowId();
 
-		if ($co->id_categorie_compta && $data['montant'] > 0)
+		if ($co->id_categorie_compta)
 		{
 			try {
-		        $id_operation = $this->addOperationCompta($id, [
-		        	'id_categorie'	=>	$co->id_categorie_compta,
-		            'libelle'       =>  'Cotisation (automatique)',
-		            'montant'       =>  $data['montant'],
-		            'date'          =>  $data['date'],
-		            'moyen_paiement'=>  $data['moyen_paiement'],
-		            'numero_cheque' =>  isset($data['numero_cheque']) ? $data['numero_cheque'] : null,
-		            'id_auteur'     =>  $data['id_auteur'],
-		            'banque'		=>	isset($data['banque']) ? $data['banque'] : null,
-		            'id_membre'		=>	$data['id_membre'],
-		        ]);
-	        }
-	        catch (\Exception $e)
-	        {
-	        	$db->rollback();
-	        	throw $e;
-	        }
+				$data_compta = array_merge($data_compta, [
+					'id_categorie' => $co->id_categorie_compta,
+					'libelle'      => 'Cotisation (automatique)',
+					'date'         => $data['date'],
+					'id_auteur'    => $data['id_auteur'],
+					'id_membre'    => $data['id_membre'],
+				]);
+
+				$id_operation = $this->addOperationCompta($id, $data_compta);
+			}
+			catch (\Exception $e)
+			{
+				$db->rollback();
+				throw $e;
+			}
 		}
 
 		$db->commit();
@@ -176,6 +148,29 @@ class Cotisations
 		$journal = new \Garradin\Compta\Journal;
 		$db = DB::getInstance();
 
+		if (!isset($data['moyen_paiement']) || trim($data['moyen_paiement']) === '')
+		{
+			throw new UserException('Moyen de paiement inconnu ou invalide.');
+		}
+
+		if ($data['moyen_paiement'] != 'ES')
+		{
+			if (trim($data['banque']) == '')
+			{
+				throw new UserException('Le compte bancaire choisi est invalide.');
+			}
+
+			if (!$db->firstColumn('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', $data['banque']))
+			{
+				throw new UserException('Le compte bancaire choisi n\'existe pas.');
+			}
+		}
+
+		if (!isset($data['montant']) || !is_numeric($data['montant']) || $data['montant'] < 0)
+		{
+			throw new UserException('Le montant indiqué n\'est pas un nombre valide : doit être supérieur ou égal à zéro.');
+		}
+
 		if (!isset($data['libelle']) || trim($data['libelle']) == '')
 		{
 			throw new UserException('Le libellé ne peut rester vide.');
@@ -192,35 +187,37 @@ class Cotisations
 
 		if ($data['moyen_paiement'] != 'ES')
 		{
-            $debit = $data['banque'];
-        }
-        else
-        {
-        	$debit = \Garradin\Compta\Comptes::CAISSE;
-        }
+			$debit = $data['banque'];
+		}
+		else
+		{
+			$debit = \Garradin\Compta\Comptes::CAISSE;
+		}
 
-        $credit = $db->firstColumn('SELECT compte FROM compta_categories WHERE id = ?;', 
-        	$data['id_categorie']);
+		$credit = $db->firstColumn('SELECT compte FROM compta_categories WHERE id = ?;', 
+			$data['id_categorie']);
 
-        $id_operation = $journal->add([
-            'libelle'       =>  $data['libelle'],
-            'montant'       =>  $data['montant'],
-            'date'          =>  $data['date'],
-            'moyen_paiement'=>  $data['moyen_paiement'],
-            'numero_cheque' =>  isset($data['numero_cheque']) ? $data['numero_cheque'] : null,
-            'compte_debit'  =>  $debit,
-            'compte_credit' =>  $credit,
-            'id_categorie'  =>  (int)$data['id_categorie'],
-            'id_auteur'     =>  (int)$data['id_auteur'],
-        ]);
+		$id_operation = $journal->add([
+			'libelle'        => $data['libelle'],
+			'montant'        => $data['montant'],
+			'date'           => $data['date'],
+			'moyen_paiement' => $data['moyen_paiement'],
+			'numero_cheque'  => isset($data['numero_cheque']) ? $data['numero_cheque'] : null,
+			'compte_debit'   => $debit,
+			'compte_credit'  => $credit,
+			'id_categorie'   => (int)$data['id_categorie'],
+			'id_auteur'      => (int)$data['id_auteur'],
+			'remarques'      => isset($data['remarques']) ? $data['remarques'] : null,
+			'numero_piece'   => isset($data['numero_piece']) ? $data['numero_piece'] : null,
+		]);
 
-        $db->insert('membres_operations', [
+		$db->insert('membres_operations', [
 			'id_operation'  => $id_operation,
 			'id_membre'     => $data['id_membre'],
 			'id_cotisation' => (int)$id,
-        ]);
+		]);
 
-        return $id_operation;
+		return $id_operation;
 	}
 
 	/**
