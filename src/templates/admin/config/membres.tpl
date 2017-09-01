@@ -123,7 +123,7 @@
             <legend>{$nom}</legend>
             <dl>
                 <dt><label>Type</label></dt>
-                <dd>{$champ.type|get_type}</dd>
+                <dd><input type="hidden" name="champs[{$nom}][type]" value="{$champ.type}" />{$champ.type|get_type}</dd>
                 <dt><label for="f_{$nom}_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
                 <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" size="60" required="required" /></dd>
                 <dt><label for="f_{$nom}_help">Aide</label></dt>

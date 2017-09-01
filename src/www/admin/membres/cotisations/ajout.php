@@ -49,17 +49,22 @@ if (f('add'))
             }
 
             $data = [
-                'date'           =>  f('date'),
-                'id_cotisation'  =>  f('id_cotisation'),
-                'id_membre'      =>  $id_membre,
-                'id_auteur'      =>  $user->id,
+                'date'          =>  f('date'),
+                'id_cotisation' =>  f('id_cotisation'),
+                'id_membre'     =>  $id_membre,
+                'id_auteur'     =>  $user->id,
+            ];
+
+            $compta = [
                 'montant'        =>  f('montant'),
                 'moyen_paiement' =>  f('moyen_paiement'),
                 'numero_cheque'  =>  f('numero_cheque'),
                 'banque'         =>  f('banque'),
+                'numero_piece'   =>  f('numero_piece'),
+                'remarques'      =>  f('remarques'),
             ];
 
-            $m_cotisations->add($data);
+            $m_cotisations->add($data, $compta);
 
             Utils::redirect('/admin/membres/cotisations.php?id=' . $id_membre);
         }
