@@ -27,10 +27,10 @@
                 <td>{$compte.bic}</td>
                 <td class="actions">
                     <a class="icn" href="{$www_url}admin/compta/comptes/journal.php?id={$compte.id}&amp;suivi" title="Journal">𝍢</a>
-                    {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
+                    {if $session->canAccess('compta', Garradin\Membres::DROIT_ECRITURE)}
                         <a class="icn" href="{$www_url}admin/compta/banques/rapprocher.php?id={$compte.id}" title="Rapprocher">☑</a>
                     {/if}
-                    {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+                    {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
                         <a class="icn" href="{$www_url}admin/compta/banques/modifier.php?id={$compte.id}" title="Modifier">✎</a>
                         <a class="icn" href="{$www_url}admin/compta/banques/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
                     {/if}
@@ -42,7 +42,7 @@
     </dl>
 {/if}
 
-{if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+{if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
     {form_errors}
 
     <form method="post" action="{$self_url}">

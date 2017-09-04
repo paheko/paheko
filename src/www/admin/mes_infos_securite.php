@@ -2,8 +2,6 @@
 
 namespace Garradin;
 
-use Garradin\Membres\Session;
-
 require_once __DIR__ . '/_inc.php';
 
 $confirm = false;
@@ -19,7 +17,7 @@ if (f('confirm'))
     {
         $form->addError('Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.');
     }
-    elseif (f('otp_secret') && !Session::checkOTP(f('otp_secret'), f('code')))
+    elseif (f('otp_secret') && !$session->checkOTP(f('otp_secret'), f('code')))
     {
         $form->addError('Le code TOTP entré n\'est pas valide.');
     }

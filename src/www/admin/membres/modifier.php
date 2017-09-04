@@ -23,7 +23,7 @@ $champs = $config->get('champs_membres');
 $membre_cat = $cats->get($membre->id_categorie);
 
 if (($membre_cat->droit_membres == Membres::DROIT_ADMIN)
-    && ($user->droits->membres < Membres::DROIT_ADMIN))
+    && ($user->droit_membres < Membres::DROIT_ADMIN))
 {
     throw new UserException("Seul un membre admin peut modifier un autre membre admin.");
 }

@@ -23,7 +23,7 @@
             | <a href="{$www_url}admin/compta/exercices/compte_resultat.php?id={$exercice.id}">Compte de résultat</a>
             | <a href="{$www_url}admin/compta/exercices/bilan.php?id={$exercice.id}">Bilan</a>
         </dd>
-        {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+        {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
         <dd class="actions">
             {if !$exercice.cloture}
             <a class="icn" href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id}" title="Modifier">✎</a>

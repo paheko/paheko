@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Opération n°%d"|args:$operation.id current="compta/gestion"}
 
-{if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+{if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
 <ul class="actions">
     <li class="edit"><a href="{$admin_url}compta/operations/modifier.php?id={$operation.id}">Modifier cette opération</a></li>
     <li class="delete"><a href="{$admin_url}compta/operations/supprimer.php?id={$operation.id}">Supprimer cette opération</a></li>
@@ -49,7 +49,7 @@
     <dt>Opération créée par</dt>
     <dd>
         {if $operation.id_auteur}
-            {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
+            {if $session->canAccess('compta', Garradin\Membres::DROIT_ACCES)}
                 <a href="{$admin_url}membres/fiche.php?id={$operation.id_auteur}">{$nom_auteur}</a>
             {else}
                 {$nom_auteur}

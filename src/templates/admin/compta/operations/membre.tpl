@@ -3,7 +3,7 @@
 <ul class="actions">
     <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
     <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
     {/if}
     <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
@@ -58,7 +58,7 @@
         <tr>
             <td><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
             <td class="actions">
-            {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+            {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
                 <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette opération">✎</a>
             {/if}
             </td>

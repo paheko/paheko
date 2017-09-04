@@ -4,7 +4,7 @@
     <ul class="actions">
         <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
         <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-        {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN && $user.id != $membre.id}
+        {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN) && $user.id != $membre.id}
             <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
         {/if}
         <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
@@ -15,7 +15,7 @@
     <ul class="actions">
         <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
         <li class="current"><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-        {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+        {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
             <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
         {/if}
     </ul>
@@ -23,7 +23,7 @@
 
 {form_errors}
 
-{if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
+{if $session->canAccess('compta', Garradin\Membres::DROIT_ECRITURE)}
     <p class="help">
         Cette page sert à enregistrer les cotisations des membres de l'association.
         Pour enregistrer un don ou une dépense, comme le paiement d'un prestataire ou une facture, il est possible de <a href="{$admin_url}compta/operations/saisir.php">saisir une opération comptable</a>.
