@@ -2,15 +2,13 @@
 
 namespace Garradin;
 
-use Garradin\Membres\Session;
-
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
 if (trim(qg('c')))
 {
-    if (Session::recoverPasswordConfirm(qg('c')))
+    if ($session->recoverPasswordConfirm(qg('c')))
     {
         Utils::redirect('/admin/password.php?new_sent');
     }
@@ -25,7 +23,7 @@ elseif (f('recover'))
 
     if (!$form->hasErrors())
     {
-        if (trim(f('id')) && Session::recoverPasswordCheck(f('id')))
+        if (trim(f('id')) && $session->recoverPasswordCheck(f('id')))
         {
             Utils::redirect('/admin/password.php?sent');
         }

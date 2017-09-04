@@ -6,7 +6,7 @@ const LOGIN_PROCESS = true;
 require_once __DIR__ . '/_inc.php';
 
 // L'utilisateur est déjà connecté
-if ($session)
+if ($session->isLogged())
 {
     Utils::redirect('/admin/');
 }
@@ -14,7 +14,7 @@ if ($session)
 // Relance session_start et renvoie une image de 1px transparente
 if (qg('keepSessionAlive') !== null)
 {
-    Session::refresh();
+    $session->keepAlive();
 
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
@@ -36,7 +36,7 @@ if (f('login'))
         'permanent' => 'boolean',
     ]);
 
-    if (!$form->hasErrors() && ($login = Membres\Session::login(f('_id'), f('passe'), (bool) f('permanent'))))
+    if (!$form->hasErrors() && ($login = $session->login(f('_id'), f('passe'), (bool) f('permanent'))))
     {
         Utils::redirect('/admin/');
     }

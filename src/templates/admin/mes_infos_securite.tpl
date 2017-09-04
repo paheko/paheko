@@ -19,7 +19,7 @@
             <legend>Confirmer l'activation de l'authentification à double facteur (2FA)</legend>
             <img class="qrcode" src="{$otp.qrcode}" alt="" />
             <dl>
-                <dt>Ma clé secrète est&nbsp;:</dt>
+                <dt>Votre clé secrète est&nbsp;:</dt>
                 <dd><code>{$otp.secret_display}</code></dd>
                 <dd class="help">Recopiez la clé secrète ou scannez le QR code pour configurer votre application TOTP (par exemple <a href="https://freeotp.github.io/">FreeOTP</a>), puis utilisez celle-ci pour générer un code d'accès et confirmer l'activation.</dd>
                 <dd class="help">Pour configurer une autre application, vous pouvez utiliser ces paramètres&nbsp;: <tt>{$otp.url}</tt></dd>
@@ -55,7 +55,7 @@
 
         <fieldset>
             <legend>Changer mon mot de passe</legend>
-            {if $user.droits.membres < Garradin\Membres::DROIT_ADMIN && (!empty($champs.passe.private) || empty($champs.passe.editable))}
+            {if $user.droit_membres < Garradin\Membres::DROIT_ADMIN && (!empty($champs.passe.private) || empty($champs.passe.editable))}
                 <p class="help">Vous devez contacter un administrateur pour changer votre mot de passe.</p>
             {else}
                 <dl>

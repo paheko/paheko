@@ -6,7 +6,7 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!Membres\Session::isOTPRequired())
+if (!$session->isOTPRequired())
 {
     Utils::redirect('/admin/');
 }
@@ -19,7 +19,7 @@ if (f('login'))
         'code' => 'numeric|required',
     ]);
 
-    if (!$form->hasErrors() && ($login = Membres\Session::loginOTP(f('code'))))
+    if (!$form->hasErrors() && ($login = $session->loginOTP(f('code'))))
     {
         Utils::redirect('/admin/');
     }

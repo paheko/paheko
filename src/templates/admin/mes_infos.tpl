@@ -22,11 +22,7 @@
 
     <fieldset>
         <legend>Changer mon mot de passe</legend>
-        {if $user.droits.membres < Garradin\Membres::DROIT_ADMIN && (!empty($champs.passe.private) || empty($champs.passe.editable))}
-            <p class="help">Vous devez contacter un administrateur pour changer votre mot de passe.</p>
-        {else}
             <p><a href="{$admin_url}mes_infos_securite.php">Modifier mon mot de passe ou autres informations de sécurité.</a></p>
-        {/if}
     </fieldset>
 
     <p class="submit">

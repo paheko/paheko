@@ -66,7 +66,7 @@
                 <td class="check"><input type="checkbox" name="rapprocher[{$ligne.id}]" value="1" {if $ligne.date_rapprochement}checked="checked"{/if} /></td>
                 <td class="num"><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
                 <td class="actions">
-                {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+                {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
                     <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette opération">✎</a>
                 {/if}
                 </td>

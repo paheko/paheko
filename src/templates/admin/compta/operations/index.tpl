@@ -5,7 +5,7 @@
     <li class="depenses{if $type == Garradin\Compta\Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/operations/?depenses">Dépenses</a></li>
     <li class="autres{if $type == Garradin\Compta\Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/operations/?autres">Autres</a></li>
     {*<li><a href="{$www_url}admin/compta/operations/recherche.php">Recherche d'opération</a></li>*}
-    {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
         <li><a href="{$www_url}admin/compta/operations/recherche_sql.php">Recherche par requête SQL</a></li>
     {/if}
 </ul>
@@ -41,7 +41,7 @@
         <tr>
             <td class="num"><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
             <td class="actions">
-            {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
+            {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
                 <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette opération">✎</a>
             {/if}
             </td>

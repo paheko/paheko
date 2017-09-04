@@ -70,7 +70,7 @@ if (f('save'))
             if ($id == $user->id_categorie)
             {
                 // Mise à jour de la session courante
-                $session->updateSessionData();
+                $session->refresh();
             }
 
             Utils::redirect('/admin/membres/categories/');

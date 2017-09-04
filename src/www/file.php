@@ -32,8 +32,8 @@ catch (\InvalidArgumentException $e)
 	throw new UserException('Ce fichier n\'existe pas.');
 }
 
-$session = Membres\Session::get();
-$user = $session ? $session->getUser() : false;
+$session = new Membres\Session;
+$user = $session->isLogged() ? $session->getUser() : false;
 
 if (!$file->checkAccess($user))
 {

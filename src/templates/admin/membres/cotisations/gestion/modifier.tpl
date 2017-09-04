@@ -3,7 +3,7 @@
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
     <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
     {/if}
 </ul>

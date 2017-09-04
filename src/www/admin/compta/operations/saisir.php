@@ -134,7 +134,7 @@ if (f('save'))
                 ]);
             }
 
-            $session->sessionStore('compta_date', f('date'));
+            $session->set('context_compta_date', f('date'));
 
             Utils::redirect('/admin/compta/operations/saisir.php?ok='.(int)$id);
         }
@@ -155,22 +155,22 @@ $tpl->assign('categories_recettes', $cats->getList(Compta\Categories::RECETTES))
 $tpl->assign('comptes_bancaires', $banques->getList());
 $tpl->assign('banque', f('banque'));
 
-if (!$session->sessionGet('compta_date'))
+if (!$session->get('context_compta_date'))
 {
     $exercices = new Compta\Exercices;
     $exercice = $exercices->getCurrent();
 
     if ($exercice->debut > time() || $exercice->fin < time())
     {
-        $session->sessionStore('compta_date', date('Y-m-d', $exercice->debut));
+        $session->set('context_compta_date', date('Y-m-d', $exercice->debut));
     }
     else
     {
-        $session->sessionStore('compta_date', date('Y-m-d'));
+        $session->get('context_compta_date', date('Y-m-d'));
     }
 }
 
-$tpl->assign('date', $session->sessionGet('compta_date') ?: false);
+$tpl->assign('date', $session->get('context_compta_date') ?: false);
 $tpl->assign('ok', (int) qg('ok'));
 
 $tpl->display('admin/compta/operations/saisir.tpl');

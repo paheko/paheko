@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Recherche de membre" current="membres"}
 
-{if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
 <ul class="actions">
     <li><a href="{$admin_url}membres/">Liste des membres</a></li>
     <li class="current"><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
@@ -56,14 +56,14 @@
     </fieldset>
 </form>
 
-{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
 
     <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
     {if !empty($liste)}
     <table class="list search">
         <thead>
-            {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
+            {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
             <td></td>
             {foreach from=$champs_entete key="c" item="cfg"}
                 {if $champ == $c}
@@ -77,7 +77,7 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
+                    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
                     <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs_entete key="c" item="cfg"}
                         {if $champ == $c}
@@ -95,7 +95,7 @@
         </tbody>
     </table>
 
-    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
     <p class="checkUncheck">
         <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
     </p>
