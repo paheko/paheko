@@ -6,7 +6,7 @@ require_once __DIR__ . '/_inc.php';
 
 if (f('install'))
 {
-    $form->check('install_plugins', [
+    $form->check('install_plugin', [
         'plugin' => 'required',
     ]);
 
