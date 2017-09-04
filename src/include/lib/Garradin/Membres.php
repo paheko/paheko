@@ -39,15 +39,6 @@ class Membres
         return password_hash($password, \PASSWORD_DEFAULT);
     }
 
-    static public function checkPassword($password, $stored_hash)
-    {
-        // Remove NUL bytes
-        // see http://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
-        $password = str_replace("\0", '', $password);
-
-        return password_verify($password, $stored_hash);
-    }
-
     // Gestion des données ///////////////////////////////////////////////////////
 
     public function _checkFields(&$data, $check_editable = true, $check_password = true)
@@ -259,7 +250,9 @@ class Membres
             $ids = [(int)$ids];
         }
 
-        if ($session = Session::get())
+        $session = new Session;
+
+        if ($session->isLogged())
         {
             $user = $session->getUser();
 

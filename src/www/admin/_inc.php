@@ -45,15 +45,16 @@ $tpl->assign('admin_url', WWW_URL . 'admin/');
 $form = new Form;
 $tpl->assign_by_ref('form', $form);
 
-$session = Session::get();
+$session = new Session;
 
+$tpl->assign('session', $session);
 $tpl->assign('config', Config::getInstance()->getConfig());
 
 if (!defined('Garradin\LOGIN_PROCESS'))
 {
-    if (!$session)
+    if (!$session->isLogged())
     {
-        if (Session::isOTPRequired())
+        if ($session->isOTPRequired())
         {
             Utils::redirect('/admin/login_otp.php');
         }
