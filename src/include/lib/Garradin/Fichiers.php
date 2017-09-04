@@ -174,7 +174,7 @@ class Fichiers
 		}
 			
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
-		if (empty($user->droits))
+		if (!isset($user->droit_wiki))
 		{
 			return false;
 		}
@@ -182,14 +182,14 @@ class Fichiers
 		if ($wiki !== false)
 		{
 			// S'il n'a même pas droit à accéder au wiki c'est mort
-			if ($user->droits->wiki < Membres::DROIT_ACCES)
+			if (!$session->canAccess('wiki', Membres::DROIT_ACCES))
 			{
 				return false;
 			}
 
 			// On renvoie à l'objet Wiki pour savoir si l'utilisateur a le droit de lire ce fichier
 			$_w = new Wiki;
-			$_w->setRestrictionCategorie($user->id_categorie, $user->droits->wiki);
+			$_w->setRestrictionCategorie($user->id_categorie, $user->droit_wiki);
 			return $_w->canReadPage($wiki);
 		}
 
@@ -197,7 +197,7 @@ class Fichiers
 		$query = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_COMPTA);
 		$compta = $db->firstColumn($query, (int)$this->id);
 
-		if ($compta && $user->droits->compta >= Membres::DROIT_ACCES)
+		if ($compta && $session->canAccess('compta', Membres::DROIT_ACCES))
 		{
 			// OK si accès à la compta
 			return true;
@@ -216,7 +216,7 @@ class Fichiers
 			}
 
 			// Pour voir les fichiers des membres il faut pouvoir les gérer
-			if ($user->droits->membres >= Membres::DROIT_ECRITURE)
+			if ($session->canAccess('membres', Membres::DROIT_ECRITURE))
 			{
 				return true;
 			}
