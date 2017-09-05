@@ -315,7 +315,7 @@ class Plugin
 
 			if ($registered)
 			{
-				throw new \LogicException('Le signal ' . $name . ' est exclusif et déjà associé au plugin "'.$registered.'"');
+				throw new \LogicException('Le signal ' . $signal . ' est exclusif et déjà associé au plugin "'.$registered.'"');
 			}
 		}
 
@@ -592,6 +592,7 @@ class Plugin
 		}
 
 		$db = DB::getInstance();
+		$db->begin();
 		$db->insert('plugins', [
 			'id' 		=> 	$id,
 			'officiel' 	=> 	(int)(bool)$official,
@@ -609,6 +610,8 @@ class Plugin
 			$plugin = new Plugin($id);
 			require $plugin->path() . '/install.php';
 		}
+
+		$db->commit();
 
 		return true;
 	}

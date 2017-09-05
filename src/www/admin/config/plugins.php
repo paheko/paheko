@@ -13,7 +13,7 @@ if (f('install'))
     if (!$form->hasErrors())
     {
         try {
-            Plugin::install(f('to_install'), false);
+            Plugin::install(f('plugin'), false);
             Utils::redirect('/admin/config/plugins.php');
         }
         catch (UserException $e)
