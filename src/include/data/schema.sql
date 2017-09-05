@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS membres_sessions
     selecteur TEXT NOT NULL,
     hash TEXT NOT NULL,
     id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
-    expire TEXT NOT NULL CHECK (datetime(expire) IS NOT NULL AND datetime(expire) = expire),
+    expire INT NOT NULL,
 
     PRIMARY KEY (selecteur, id_membre)
 );
