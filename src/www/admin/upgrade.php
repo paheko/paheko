@@ -268,13 +268,22 @@ if (version_compare($v, '0.8.0', '<'))
 
     $db->commit();
 
+    $config = Config::getInstance();
+
     // Ajout champ numéro de membre
-    $champs = (array) Config::getInstance()->get('champs_membres')->getAll();
+    $champs = (array) $config->get('champs_membres')->getAll();
     $presets = Membres\Champs::importPresets();
 
     // Ajout du numéro au début
     $champs = array_merge(['numero' => $presets['numero']], $champs);
     (new Membres\Champs($champs))->save();
+
+    // Si l'ID était l'identificant, utilisons le numéro de membre à la place
+    if ($config->get('champ_identifiant') == 'id')
+    {
+        $config->set('champ_identifiant', 'numero');
+        $config->save();
+    }
 
     // Nettoyage de la base de données
     $db->exec('VACUUM;');
