@@ -39,16 +39,15 @@ class Session extends \KD2\UserSession
 		$champ_id = Config::getInstance()->get('champ_identifiant');
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
-		$query = 'SELECT id, %1$s AS login, passe AS password, secret_otp AS otp_secret
+		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
 			INNER JOIN membres_categories AS mc ON mc.id = m.id_categorie
-			FROM membres
-			WHERE %1$s = ? AND mc.droit_connexion >= %2$d
+			WHERE m.%1$s = ? AND mc.droit_connexion >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, Membres::DROIT_ACCES);
 
-		return $db->first($query, $login);
+		return $this->db->first($query, $login);
 	}
 
 	protected function getUserDataForSession($id)
@@ -60,7 +59,7 @@ class Session extends \KD2\UserSession
 			WHERE m.id = ? LIMIT 1;', $id);
 	}
 
-	protected function storeRememberMeSelector($selector, $hash, \DateTime $expiry, $user_id)
+	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
 	{
 		return $this->db->insert('membres_sessions', [
 			'selecteur' => $selector,
@@ -72,13 +71,13 @@ class Session extends \KD2\UserSession
 
 	protected function expireRememberMeSelectors()
 	{
-		return $this->db->delete('membres_sessions', $this->db->where('expire', '<', new \DateTime));
+		return $this->db->delete('membres_sessions', $this->db->where('expire', '<', time()));
 	}
 
 	protected function getRememberMeSelector($selector)
 	{
-		return $this->db->get('SELECT selecteur AS selector, hash,
-			id_membre AS user_id, m.passe AS user_password
+		return $this->db->first('SELECT selecteur AS selector, hash,
+			id_membre AS user_id, m.passe AS user_password, expire AS expiry
 			FROM membres_sessions AS s
 			INNER JOIN membres AS m ON m.id = s.id_membre
 			WHERE s.selecteur = ? LIMIT 1;', $selector);
