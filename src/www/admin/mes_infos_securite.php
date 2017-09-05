@@ -11,13 +11,14 @@ if (f('confirm'))
     $form->check('edit_me_security', [
         'passe'       => 'confirmed|min:6',
         'passe_check' => 'required',
+        'code' => 'required_with:otp_secret',
     ]);
 
-    if (f('passe_check') && !$session->checkPassword(f('passe_check')))
+    if (f('passe_check') && !$session->checkPassword(f('passe_check'), $user->passe))
     {
         $form->addError('Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.');
     }
-    elseif (f('otp_secret') && !$session->checkOTP(f('otp_secret'), f('code')))
+    elseif (f('code') && !$session->checkOTP(f('otp_secret'), f('code')))
     {
         $form->addError('Le code TOTP entré n\'est pas valide.');
     }
@@ -34,17 +35,17 @@ if (f('confirm'))
                 $data['passe'] = f('passe');
             }
 
-            if (f('otp_secret'))
-            {
-                $data['secret_otp'] = f('otp_secret');
-            }
-            elseif (f('otp') == 'disable')
+            if (f('otp_secret') == 'disable')
             {
                 $data['secret_otp'] = null;
             }
+            elseif (f('otp_secret') !== null)
+            {
+                $data['secret_otp'] = f('otp_secret');
+            }
 
             $session->editSecurity($data);
-            Utils::redirect('/admin/');
+            Utils::redirect('/admin/mes_infos_securite.php?ok');
         }
         catch (UserException $e)
         {
@@ -75,12 +76,15 @@ $tpl->assign('confirm', $confirm);
 
 if (f('otp') == 'generate')
 {
-    $otp = $session->getNewOTPSecret();
-    $tpl->assign('otp', $otp);
+    $tpl->assign('otp', $session->getNewOTPSecret());
+}
+elseif (f('otp') == 'disable')
+{
+    $tpl->assign('otp', 'disable');
 }
 elseif (f('otp_secret'))
 {
-    $tpl->assign('otp', f('otp_secret'));
+    $tpl->assign('otp', $session->getOTPSecret(f('otp_secret')));
 }
 else
 {
@@ -102,5 +106,6 @@ $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $config->get('champs_membres')->getAll());
 
 $tpl->assign('membre', $user);
+$tpl->assign('ok', qg('ok') !== null);
 
 $tpl->display('admin/mes_infos_securite.tpl');

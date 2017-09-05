@@ -95,6 +95,7 @@ class Form
 			case 'debut': return 'date de début';
 			case 'fin': return 'date de fin';
 			case 'duree': return 'durée';
+			case 'passe_check': return 'vérification de mot de passe';
 			default: return $name;
 		}
 	}
