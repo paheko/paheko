@@ -124,12 +124,17 @@ class Session extends \KD2\UserSession
 		return true;
 	}
 
-	public function generateNewOTPSecret()
+	public function getOTPSecret($secret = null)
 	{
+		if (!$secret)
+		{
+			$secret = Security_OTP::getRandomSecret();
+		}
+
 		$out = [];
-		$out['secret'] = Security_OTP::getRandomSecret();
-		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
-		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $out['secret']);
+		$out['secret'] = $secret;
+		$out['secret_display'] = implode(' ', str_split($secret, 4));
+		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $secret);
 	
 		$qrcode = new QRCode($out['url']);
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
@@ -224,7 +229,7 @@ class Session extends \KD2\UserSession
 
 	public function editUser($data)
 	{
-		(new Membres)->edit($this->id, $data, false);
+		(new Membres)->edit($this->user->id, $data, false);
 		$this->refresh();
 
 		return true;
@@ -264,7 +269,7 @@ class Session extends \KD2\UserSession
 	public function sendMessage($dest, $sujet, $message, $copie = false)
 	{
 		$from = $this->getUser();
-		$from = $from['email'];
+		$from = $from->email;
 		// Uniquement adresse email pour le moment car faudrait trouver comment
 		// indiquer le nom mais qu'il soit correctement échappé FIXME
 
@@ -318,7 +323,7 @@ class Session extends \KD2\UserSession
 		}
 
 		$db = DB::getInstance();
-		$db->update('membres', $data, $db->where('id', (int)$this->id));
+		$db->update('membres', $data, $db->where('id', (int)$this->user->id));
 		$this->refresh();
 
 		return true;

@@ -5,12 +5,22 @@
     <li class="current"><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
 </ul>
 
+{if $ok}
+<p class="confirm">
+    Changements enregistrés.
+</p>
+{/if}
+
 {form_errors}
 
 {if $confirm}
-    <form method="post" action="{$self_url}">
+    <form method="post" action="{$self_url_no_qs}">
 
-    {if !empty($otp)}
+    {if !empty($otp) && $otp == 'disable'}
+        <p class="alert">
+            Confirmez la désactivation de l'authentification à double facteur TOTP.
+        </p>
+    {elseif !empty($otp)}
         <p class="alert">
             Confirmez l'activation de l'authentification à double facteur TOTP en l'utilisant une première fois.
         </p>
@@ -35,7 +45,7 @@
         <dl>
             <dt><label for="f_passe_confirm">Mot de passe actuel</label></dt>
             <dd class="help">Entrez votre mot de passe actuel pour confirmer les changements demandés.</dd>
-            <dd><input type="password" name="passe_confirm" /></dd>
+            <dd><input type="password" name="passe_check" /></dd>
         </dl>
     </fieldset>
 
@@ -44,14 +54,16 @@
         <input type="hidden" name="passe" value="{form_field name="passe"}" />
         <input type="hidden" name="passe_confirmed" value="{form_field name="passe_confirmed"}" />
         <input type="hidden" name="clef_pgp" value="{form_field name="clef_pgp"}" />
+        {if !empty($otp)}
         <input type="hidden" name="otp_secret" value="{$otp.secret}" />
+        {/if}
         <input type="submit" name="confirm" value="Confirmer &rarr;" />
     </p>
 
     </form>
 {else}
 
-    <form method="post" action="{$self_url}">
+    <form method="post" action="{$self_url_no_qs}">
 
         <fieldset>
             <legend>Changer mon mot de passe</legend>
