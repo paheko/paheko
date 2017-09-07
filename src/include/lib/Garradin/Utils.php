@@ -408,7 +408,7 @@ class Utils
         return $str;
     }
 
-    static public function mail($to, $subject, $content, $headers = [])
+    static public function mail($to, $subject, $content, $headers = [], $pgp_key = null)
     {
         // Création du contenu du message
         $content = wordwrap($content);
@@ -429,19 +429,19 @@ class Utils
         $hash = sha1(uniqid() . var_export([$additional_headers, $to, $subject, $content], true));
         $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
 
-        if (is_array($to))
+        if ($pgp_key)
         {
-            foreach ($to as $t)
-            {
-                if (!self::_sendMail($t, $subject, $content, $headers))
-                {
-                    throw new \RuntimeException('Impossible d\'envoyer l\'email');
-                }
-            }
+            $content = Security::encryptWithPublicKey($pgp_key, $content);
         }
-        else
+
+        if (!is_array($to))
         {
-            if (!self::_sendMail($to, $subject, $content, $headers))
+            $to = [$to];
+        }
+
+        foreach ($to as $recipient)
+        {
+            if (!self::_sendMail($recipient, $subject, $content, $headers))
             {
                 throw new \RuntimeException('Impossible d\'envoyer l\'email');
             }
