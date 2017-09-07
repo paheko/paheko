@@ -171,7 +171,7 @@ class Session extends \KD2\UserSession
 		$message.= WWW_URL . 'admin/password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		Utils::mail($membre->email, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message, $membre->clef_pgp);
+		Utils::mail($membre->email, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message, [], $membre->clef_pgp);
 		return true;
 	}
 
@@ -223,7 +223,7 @@ class Session extends \KD2\UserSession
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
-		return Utils::mail($membre->email, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message, $membre->clef_pgp);
+		return Utils::mail($membre->email, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message, [], $membre->clef_pgp);
 	}
 
 	public function editUser($data)

@@ -143,14 +143,6 @@ class Utils
         return WWW_URL . $uri;
     }
 
-    static public function disableHttpCaching()
-    {
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-        header('Pragma: no-cache');
-    }
-
-
     public static function redirect($destination=false, $exit=true)
     {
         if (empty($destination) || !preg_match('/^https?:\/\//', $destination))
@@ -408,7 +400,7 @@ class Utils
         return $str;
     }
 
-    static public function mail($to, $subject, $content, $headers = [], $pgp_key = null)
+    static public function mail($to, $subject, $content, array $headers = [], $pgp_key = null)
     {
         // Création du contenu du message
         $content = wordwrap($content);
@@ -419,14 +411,14 @@ class Utils
 
         if (empty($headers['From']))
         {
-            $headers['From'] = '"NE PAS REPONDRE" <'.$config->get('email_envoi_automatique').'>';
+            $headers['From'] = sprintf('"%s" <%s>', $config->get('nom_asso'), $config->get('email_envoi_automatique'));
         }
 
         $headers['MIME-Version'] = '1.0';
         $headers['Content-type'] = 'text/plain; charset=UTF-8';
         $headers['Return-Path'] = $config->get('email_envoi_automatique');
 
-        $hash = sha1(uniqid() . var_export([$additional_headers, $to, $subject, $content], true));
+        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
         $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
 
         if ($pgp_key)
@@ -473,7 +465,7 @@ class Utils
             $raw_headers = '';
 
             // Sérialisation des entêtes
-            foreach ($additional_headers as $name=>$value)
+            foreach ($headers as $name=>$value)
             {
                 $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
             }
