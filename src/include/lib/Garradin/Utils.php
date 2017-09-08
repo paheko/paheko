@@ -181,31 +181,6 @@ class Utils
           exit();
     }
 
-    static public function CSRF_create($key)
-    {
-        return Form::tokenGenerate($key);
-    }
-
-    static public function CSRF_check($key, $hash=null)
-    {
-        return Form::tokenCheck($key, $hash);
-    }
-
-    static public function CSRF_field_name($key)
-    {
-        return Form::tokenFieldName($key);
-    }
-
-    static public function post($key)
-    {
-        return isset($_POST[$key]) ? $_POST[$key] : '';
-    }
-
-    static public function get($key)
-    {
-        return isset($_GET[$key]) ? $_GET[$key] : '';
-    }
-
     static public function getIP()
     {
         if (!empty($_SERVER['REMOTE_ADDR']))
