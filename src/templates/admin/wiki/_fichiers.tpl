@@ -11,7 +11,7 @@
             <dd class="fileUpload"><input type="file" name="fichier" id="f_fichier" data-hash-check /></dd>
         </dl>
         <p class="submit">
-            <input type="hidden" name="{$csrf_field_name}" value="{$csrf_value}" />
+            {csrf_field key=$csrf_id}
             <input type="submit" name="upload" id="f_submit" value="Envoyer le fichier" />
         </p>
     </fieldset>
@@ -47,7 +47,7 @@
             <a href="{$file.url}" data-id="{$file.id}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
             <form class="actions" method="post" action="{$self_url}">
                 <a href="{$file.url}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
-                <input type="hidden" name="{$csrf_field_name}" value="{$csrf_value}" />
+                {csrf_field key=$csrf_id}
                 <input type="hidden" name="delete" value="{$file.id}" />
                 <noscript><input type="submit" value="Supprimer" /></noscript>
             </form>
@@ -67,7 +67,7 @@
             <td class="actions">
                 <form class="actions" method="post" action="{$self_url}">
                     <a href="{$file.url}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
-                    <input type="hidden" name="{$csrf_field_name}" value="{$csrf_value}" />
+                    {csrf_field key=$csrf_id}
                     <input type="hidden" name="delete" value="{$file.id}" />
                     <noscript><input type="submit" value="Supprimer" /></noscript>
                 </form>

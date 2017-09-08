@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\Image;
+use Garradin\Membres\Session;
 
 class Fichiers
 {
@@ -150,7 +151,7 @@ class Fichiers
 	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
 	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
 	 */
-	public function checkAccess($user = false)
+	public function checkAccess(Session $session)
 	{
 		$config = Config::getInstance();
 
@@ -174,10 +175,12 @@ class Fichiers
 		}
 			
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
-		if (!isset($user->droit_wiki))
+		if (!$session->isLogged())
 		{
 			return false;
 		}
+
+		$user = $session->getUser();
 
 		if ($wiki !== false)
 		{

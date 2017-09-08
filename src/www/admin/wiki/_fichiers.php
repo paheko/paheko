@@ -111,10 +111,8 @@ $tpl->assign('images', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id,
 $tpl->assign('max_size', Utils::getMaxUploadSize());
 $tpl->assign('page', $page);
 $tpl->assign('sent', (bool)qg('sent'));
+$tpl->assign('csrf_id', $csrf_id);
 
 $tpl->assign('custom_js', ['upload_helper.min.js', 'wiki_fichiers.js']);
-
-$tpl->assign('csrf_field_name', Utils::CSRF_field_name($csrf_id));
-$tpl->assign('csrf_value', Utils::CSRF_create($csrf_id));
 
 $tpl->display('admin/wiki/_fichiers.tpl');

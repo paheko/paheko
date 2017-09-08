@@ -145,7 +145,7 @@ if (version_compare($v, '0.6.0-rc1', '<'))
     // Conversion des cotisations de catégories en cotisations indépendantes
     foreach ($list as $cat)
     {
-        $db->simpleInsert('cotisations', [
+        $db->insert('cotisations', [
             'id_categorie_compta'   =>  null,
             'intitule'              =>  $cat->nom,
             'montant'               =>  (float) $cat->montant_cotisation,
@@ -160,7 +160,7 @@ if (version_compare($v, '0.6.0-rc1', '<'))
         ];
 
         // import des dates de cotisation existantes comme paiements
-        $db->simpleExec('INSERT INTO cotisations_membres 
+        $db->preparedQuery('INSERT INTO cotisations_membres 
             (id_membre, id_cotisation, date)
             SELECT id, :id_cotisation, date(date_cotisation) FROM membres
             WHERE date_cotisation IS NOT NULL AND date_cotisation != \'\' AND id_categorie = :id_categorie;',
