@@ -1,0 +1,14 @@
+<B_galerie>
+	<section class="galerie">
+	<BOUCLE_galerie(IMAGES){article}{par nom}{sauf_mention}>
+		<figure>
+			<a href="#URL" class="internal-image"><img src="#MINIATURE" alt="#NOM" /></a>
+		</figure>
+	</BOUCLE_galerie>
+	</section>
+</B_galerie>
+
+<BOUCLE_galerie_script(IMAGES){article}{0,1}>
+	<!-- N'inclure le script de galerie que s'il y a au moins une image dans la page -->
+	<script type="text/javascript" src="[(#URL_ADMIN)static/scripts/wiki_gallery.js"></script>
+</BOUCLE_galerie_script>
