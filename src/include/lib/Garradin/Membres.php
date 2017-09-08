@@ -130,28 +130,29 @@ class Membres
 
     public function add($data = [])
     {
-        $this->_checkFields($data);
         $db = DB::getInstance();
         $config = Config::getInstance();
         $id = $config->get('champ_identifiant');
         $champs = $config->get('champs_membres');
-
-        if (!empty($data[$id]) && $db->test('membres', $db->where($id, $data[$id])))
-        {
-            throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
-        }
 
         // Numéro de membre
         if ($champs->get('numero'))
         {
             if (empty($data['numero']))
             {
-                $data['numero'] = $db->firstColumn('SELECT MAX(numero) + 1 FROM membres;');
+                $data['numero'] = $db->firstColumn('SELECT MAX(numero) + 1 FROM membres;') ?: 1;
             }
             elseif ($db->test('membres', $db->where('numero', $data['numero'])))
             {
                 throw new UserException('Ce numéro de membre est déjà attribué à un autre membre.');
             }
+        }
+
+        $this->_checkFields($data);
+
+        if (!empty($data[$id]) && $db->test('membres', $db->where($id, $data[$id])))
+        {
+            throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
 
         if (isset($data['passe']) && trim($data['passe']) != '')
