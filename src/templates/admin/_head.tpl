@@ -31,7 +31,9 @@
     {/if}
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css" media="print" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css" media="handheld,screen and (max-width:981px)" />
-    {custom_colors config=$config}
+    {if isset($config)}
+        {custom_colors config=$config}
+    {/if}
 </head>
 
 <body{if !empty($body_id)} id="{$body_id}"{/if} data-url="{$admin_url}">
