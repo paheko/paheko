@@ -589,7 +589,7 @@ class Squelette extends \KD2\MiniSkel
             {
                 $loop_start .= '$row[\'url\'] = Fichiers::_getURL($row[\'id\'], $row[\'nom\']); ';
                 $loop_start .= '$row[\'miniature\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
-                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
+                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 500) : \'\'; ';
             }
 
             $query .= $where . ' ' . $order;
