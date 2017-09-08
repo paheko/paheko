@@ -13,3 +13,12 @@ deps:
 
 dev-server:
 	php -S localhost:8082 -t www www/_route.php
+
+release:
+	$(eval VERSION=$(shell cat VERSION))
+	fossil ls | grep '^src/' | sed 's/src/garradin-${VERSION}/' > /tmp/garradin-${VERSION}-list.txt
+	echo "garradin-${VERSION}/include/lib/KD2" >> /tmp/garradin-${VERSION}-list.txt
+	rm -f /tmp/garradin-${VERSION}
+	ln -s ${PWD} /tmp/garradin-${VERSION}
+	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp -T /tmp/garradin-${VERSION}-list.txt
+	rm -f /tmp/garradin-${VERSION}*
