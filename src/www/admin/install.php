@@ -97,9 +97,16 @@ if (!file_exists(DB_FILE))
     }
 }
 
-$tpl = Template::getInstance();
+function f($key)
+{
+    return \KD2\Form::get($key);
+}
 
+$tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
+
+$form = new Form;
+$tpl->assign_by_ref('form', $form);
 
 if (file_exists(DB_FILE))
 {
