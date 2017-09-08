@@ -17,7 +17,7 @@ assert(file_exists($dir . 'garradin_plugin.ini'), sprintf('%s n\'est pas un rép
 
 $dir_iterator = new RecursiveDirectoryIterator(substr($dir, 0, -1), FilesystemIterator::SKIP_DOTS);
 $iterator = new RecursiveIteratorIterator($dir_iterator, RecursiveIteratorIterator::SELF_FIRST);
-
+https://fossil.kd2.org/garradin-plugins/timeline
 $base = realpath($dir);
 
 foreach ($iterator as $file)
@@ -55,6 +55,9 @@ function check_php($file, $source)
 		'->simpleExec',
 		'->simpleUpdate',
 		'->simpleInsert',
+		'utils::get(',
+		'utils::post(',
+		'utils::CRSF',
 	];
 
 	$content = file_get_contents($file);
