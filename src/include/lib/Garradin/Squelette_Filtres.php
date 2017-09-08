@@ -160,6 +160,11 @@ class Squelette_Filtres
         $texte = Utils::SkrivToHTML($texte);
         $texte = self::typo_fr($texte);
 
+        // Liens wiki
+        $texte = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) {
+            return '<a href="' . WWW_URL . Wiki::transformTitleToURI($matches[1]) . '">';
+        }, $texte);
+
         return $texte;
     }
 
