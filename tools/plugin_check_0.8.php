@@ -63,7 +63,7 @@ function check_php($file, $source)
 	{
 		if (stripos($content, $func) !== false)
 		{
-			fputs(STDERR, sprintf('DEPRECATED: %s: la fonction %s est dépréciée et sera supprimée de la prochaine version de Garradin.', $source, $func) . PHP_EOL);
+			fputs(STDERR, sprintf('ERROR: %s: la fonction %s a été supprimée de Garradin.', $source, $func) . PHP_EOL);
 		}
 	}
 }
