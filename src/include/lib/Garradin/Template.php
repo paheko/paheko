@@ -442,7 +442,7 @@ class Template extends \KD2\Smartyer
 	{
 		$name = $params['name'];
 		$comptes = $params['comptes'];
-		$selected = isset($params['data'][$params['name']]) ? $params['data'][$params['name']] : Utils::post($name);
+		$selected = isset($params['data'][$params['name']]) ? $params['data'][$params['name']] : f($name);
 
 		$out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
 
