@@ -8,12 +8,13 @@ body {
 	margin: 0;
 	text-align: center;
 	font-size: 1.2em;
-	margin: .3em 0;
+	margin: 70pt 0 .3em 0;
 }
 
 .header .menu {
 	background: none !important;
-	position: relative;
+	position: fixed;
+	z-index: 10000;
 	margin: 0;
 	margin-bottom: 3em;
 	width: 100%;
@@ -30,20 +31,19 @@ body {
 	background: rgb(var(--gMainColor));
 	flex-wrap: nowrap;
 	display: flex;
+	align-items: center;
 }
 
 .header .menu > ul > li {
 	flex-grow: 1;
 	text-align: center;
-	width: 30pt;
-}
-
-.header .menu > ul > li, .header .menu > ul > li > a {
 	display: inline-flex;
 }
 
 .header .menu > ul > li > a {
-	display: block;
+	display: inline-block;
+	width: 100%;
+	text-align: center;
 }
 
 .header .menu > ul > li > a i {
@@ -55,38 +55,53 @@ body {
 }
 
 .header .menu > ul > li > a b {
+	float: none;
+	display: inline-block;
 	color: #fff;
 	width: 20pt;
-	height: 18pt;
+	height: 14pt;
 	padding: 10pt;
-	display: block;
 	line-height: 20pt;
+	cursor: pointer;
+}
+
+.header .menu li.current_parent > a {
+	background: #fff;
 }
 
 .header .menu > ul > li.current b {
+	color: rgb(var(--gSecondColor));
+}
+
+.header .menu > ul > li.current_parent b {
 	color: rgb(var(--gMainColor));
 }
 
-.header .menu > ul > li.current > ul {
+.header .menu > ul > li.current > ul, .header .menu > ul > li.current_parent > ul {
 	display: flex;
 	position: absolute;
 	top: 30pt;
 	left: 0;
 	right: 0;
 	background: #fff;
+	background: rgba(255, 255, 255, 0.75);
 }
 
-.header .menu > ul > li.current > ul li {
+.header .menu > ul > li.current > ul li, .header .menu > ul > li.current_parent > ul li {
 	flex-grow: 1;
 	text-align: center;
 	display: block;
 }
 
-.header .menu > ul > li.current > ul a {
+.header .menu > ul > li.current > ul a, .header .menu > ul > li.current_parent > ul a {
     color: #9c4f15;
     color: rgb(var(--gMainColor));
     padding: 2pt 3pt;
-    text-decoration: underline
+    text-decoration: underline;
+}
+
+.header .menu > ul > li > ul li.current a {
+	color: rgb(var(--gSecondColor));
 }
 
 main {
@@ -95,14 +110,13 @@ main {
 }
 
 ul.actions {
-	padding: 0;
 	border: none;
-	font-size: .8em;
+	padding: 0;
 	text-align: center;
 	margin: .3em 0;
 }
 
-ul.actions li a {
+ul.actions li a, ul.actions li label {
 	margin: .1em;
 	border-radius: .5em;
 }
@@ -117,10 +131,38 @@ pre.sql_schema, .wikiChildren, fieldset.wikiMain, fieldset.wikiRights, fieldset.
 	width: auto;
 }
 
+dl.describe {
+	margin: 0 .5em;
+}
+
 dl.describe dt, dl.describe dd {
 	float: none;
 	width: auto;
-	text-align: center;
+}
+
+dl.describe dt {
+	font-size: .9em;
+	color: #666;
+}
+
+dl.describe dd {
+	margin-left: 1em;
+}
+
+dl.describe ul {
+	list-style-type: circle;
+}
+
+fieldset {
+	border-left: none;
+	border-right: none;
+}
+
+.shortFormRight, .shortFormLeft {
+	float: none;
+	width: auto;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 /* Petits écrans (smartphones) */
