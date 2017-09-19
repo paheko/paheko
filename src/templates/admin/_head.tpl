@@ -39,6 +39,9 @@
 <body{if !empty($body_id)} id="{$body_id}"{/if} data-url="{$admin_url}">
 
 {if empty($is_popup)}
+<?php
+$current_parent = substr($current, 0, strpos($current, '/'));
+?>
 <header class="header">
     <nav class="menu">
     <ul>
@@ -50,7 +53,7 @@
             </ul>
         </li>
     {else}
-        <li class="home{if $current == 'home'} current{/if}">
+        <li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}">
             <a href="{$admin_url}"><b class="icn">⌂</b><i> Accueil</i></a>
             {if !empty($plugins_menu)}
                 <ul>
@@ -61,7 +64,7 @@
             {/if}
         </li>
         {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
-            <li class="member list{if $current == 'membres'} current{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
+            <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
             {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
@@ -75,7 +78,7 @@
             </li>
         {/if}
         {if $session->canAccess('compta', Garradin\Membres::DROIT_ACCES)}
-            <li class="compta{if $current == 'compta'} current{/if}"><a href="{$admin_url}compta/"><b>€</b><i> Comptabilité</i></a>
+            <li class="compta{if $current == 'compta'} current{elseif $current_parent == 'compta'} current_parent{/if}"><a href="{$admin_url}compta/"><b>€</b><i> Comptabilité</i></a>
             <ul>
             {if $session->canAccess('compta', Garradin\Membres::DROIT_ECRITURE)}
                 <li class="compta new{if $current == 'compta/saisie'} current{/if}"><a href="{$admin_url}compta/operations/saisir.php">Saisie</a></li>
@@ -90,7 +93,7 @@
             </li>
         {/if}
         {if $session->canAccess('wiki', Garradin\Membres::DROIT_ACCES)}
-            <li class="wiki{if $current == 'wiki'} current{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
+            <li class="wiki{if $current == 'wiki'} current{elseif $current_parent == 'wiki'} current_parent{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
             <ul>
                 <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
                 <li class="wiki search{if $current == 'wiki/chercher'} current{/if}"><a href="{$admin_url}wiki/chercher.php">Recherche</a>
@@ -100,9 +103,9 @@
             </li>
         {/if}
         {if $session->canAccess('config', Garradin\Membres::DROIT_ADMIN)}
-            <li class="main config{if $current == 'config'} current{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
+            <li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
-        <li class="my config{if $current == 'mes_infos'} current{/if}"><a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
+        <li class="my config{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}"><a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
             <ul>
                 <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>
             </ul>
