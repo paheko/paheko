@@ -58,8 +58,8 @@
 			var i = canvas.toDataURL('image/png');
 
 			// Prévisualisation
-			document.querySelector('html').style.backgroundImage = 'url("' + i + '")';
-			document.querySelector('.menu').style.backgroundImage = 'url("' + i + '")';
+			document.querySelector('body').style.backgroundImage = 'url("' + i + '")';
+			document.querySelector('.header .menu').style.backgroundImage = 'url("' + i + '")';
 
 			document.getElementById('f_image_fond').value = i.substr(i.indexOf(',')+1);
 
