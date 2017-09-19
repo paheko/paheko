@@ -1,14 +1,5 @@
 {include file="admin/_head.tpl" title="Saisie d'une opération" current="compta/saisie" js=1}
 
-{form_errors}
-
-{if $ok}
-    <p class="confirm">
-        L'opération numéro <a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">{$ok}</a> a été ajoutée.
-        (<a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">Voir l'opération</a>)
-    </p>
-{/if}
-
 <form method="post" action="{$self_url}">
     <ul class="actions">
         <li><input type="radio" name="type" value="recette" {form_field name=type checked=recette default=recette} id="f_type_recette" /><label for="f_type_recette">Recette</label></li>
@@ -17,6 +8,16 @@
         <li><input type="radio" name="type" value="dette" {form_field name=type checked=dette} id="f_type_dette" /><label for="f_type_dette">Dette</label></li>
         <li><input type="radio" name="type" value="avance" {form_field name=type checked=avance} id="f_type_avance" /><label for="f_type_avance">Saisie avancée</label></li>
     </ul>
+
+    {form_errors}
+
+    {if $ok}
+        <p class="confirm">
+            L'opération numéro <a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">{$ok}</a> a été ajoutée.
+            (<a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">Voir l'opération</a>)
+        </p>
+    {/if}
+
     <fieldset>
         <legend>Informations sur l'opération</legend>
         <dl>
@@ -71,18 +72,18 @@
     <fieldset class="type_virement">
         <legend>Virement</legend>
         <dl>
-            <dt><label for="f_compte1">Compte débité</label></dt>
+            <dt><label for="f_compte2">De</label></dt>
             <dd>
-                <select name="compte1" id="f_compte1">
+                <select name="compte2" id="f_compte2">
                     <option value="{$id_caisse}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
                 </select>
             </dd>
-            <dt><label for="f_compte2">Compte crédité</label></dt>
+            <dt><label for="f_compte1">Vers</label></dt>
             <dd>
-                <select name="compte2" id="f_compte2">
+                <select name="compte1" id="f_compte1">
                     <option value="{$id_caisse}">Caisse</option>
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
@@ -156,7 +157,7 @@
         }
 
         changeMoyenPaiement();
-        changeTypeSaisie('recette');
+        changeTypeSaisie(document.forms[0].type.value);
 
         $('#f_moyen_paiement').onchange = changeMoyenPaiement;
 
