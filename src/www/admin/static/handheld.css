@@ -149,10 +149,6 @@ dl.describe dd {
 	margin-left: 1em;
 }
 
-dl.describe ul {
-	list-style-type: circle;
-}
-
 fieldset {
 	border-left: none;
 	border-right: none;

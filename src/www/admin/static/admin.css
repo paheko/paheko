@@ -937,7 +937,8 @@ dl.describe > dd {
 }
 
 dl.describe ul {
-    margin-left: 1em;
+    margin-left: 1.5em;
+    list-style-type: disc;
 }
 
 dl.cotisation {
