@@ -106,6 +106,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -285,6 +286,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -304,15 +306,15 @@ class Import
 			}
 
 			$date = $col('Date');
+			$date = \DateTime::createFromFormat('d/m/Y', $date);
 
-			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
+			if (!$date)
 			{
 				$db->rollback();
-				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
+				throw new UserException(sprintf('Erreur sur la ligne %d : la date "%s" n\'est pas au format jj/mm/aaaa.', $line, $col('Date')));
 			}
 
-			$date = explode('/', $date);
-			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
+			$date = $date->format('Y-m-d');
 
 			if ($db->test('compta_exercices', '(? < debut OR ? > fin) AND cloture = 0', $date, $date))
 			{

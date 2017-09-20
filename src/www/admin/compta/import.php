@@ -49,6 +49,6 @@ if (f('import'))
     }
 }
 
-$tpl->assign('ok', qg('ok'));
+$tpl->assign('ok', qg('ok') !== null);
 
 $tpl->display('admin/compta/import.tpl');
