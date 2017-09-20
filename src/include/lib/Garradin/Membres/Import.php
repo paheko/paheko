@@ -128,7 +128,7 @@ class Import
 			}
 
 			try {
-				$membres->add($data);
+				$membres->add($data, false);
 			}
 			catch (UserException $e)
 			{
@@ -237,7 +237,7 @@ class Import
 				}
 				else
 				{
-					$membres->add($data);
+					$membres->add($data, false);
 				}
 			}
 			catch (UserException $e)

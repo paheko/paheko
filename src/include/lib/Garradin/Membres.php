@@ -135,7 +135,7 @@ class Membres
         return true;
     }
 
-    public function add($data = [])
+    public function add($data = [], $require_password = true)
     {
         $db = DB::getInstance();
         $config = Config::getInstance();
@@ -155,7 +155,7 @@ class Membres
             }
         }
 
-        $this->_checkFields($data);
+        $this->_checkFields($data, true, $require_password);
 
         if (!empty($data[$id]) && $db->test('membres', $db->where($id, $data[$id])))
         {
