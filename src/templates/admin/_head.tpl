@@ -39,9 +39,6 @@
 <body{if !empty($body_id)} id="{$body_id}"{/if} data-url="{$admin_url}">
 
 {if empty($is_popup)}
-<?php
-$current_parent = substr($current, 0, strpos($current, '/'));
-?>
 <header class="header">
     <nav class="menu">
     <ul>
@@ -53,6 +50,9 @@ $current_parent = substr($current, 0, strpos($current, '/'));
             </ul>
         </li>
     {else}
+    <?php
+    $current_parent = substr($current, 0, strpos($current, '/'));
+    ?>
         <li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}">
             <a href="{$admin_url}"><b class="icn">⌂</b><i> Accueil</i></a>
             {if !empty($plugins_menu)}
