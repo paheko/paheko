@@ -23,7 +23,7 @@
 {/if}
 
 {if !empty($result)}
-<p class="alert">{$result|@count} résultats renvoyés.</p>
+<p class="alert">{$result|count} résultats renvoyés.</p>
 <table class="list search">
     <thead>
         {foreach from=$result[0] key="col" item="ignore"}

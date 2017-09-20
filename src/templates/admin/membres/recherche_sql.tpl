@@ -25,7 +25,7 @@
 <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
 {if !empty($result)}
-<p class="alert">{$result|@count} résultats renvoyés.</p>
+<p class="alert">{$result|count} résultats renvoyés.</p>
 <table class="list search">
     <thead>
         {if array_key_exists('id', $result[0])}
