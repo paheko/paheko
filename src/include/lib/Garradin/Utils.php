@@ -650,7 +650,7 @@ class Utils
         return $url;
     }
 
-    static public function find_csv_delim($fp)
+    static public function find_csv_delim(&$fp)
     {
         $line = '';
 
@@ -672,7 +672,17 @@ class Utils
         reset($delims);
 
         rewind($fp);
+
         return key($delims);
+    }
+
+    static public function skip_bom(&$fp)
+    {
+        // Skip BOM
+        if (fgets($fp, 4) !== chr(0xEF) . chr(0xBB) . chr(0xBF))
+        {
+            fseek($fp, 0);
+        }
     }
 
     static public function row_to_csv($row)

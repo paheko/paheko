@@ -95,6 +95,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -176,6 +177,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
