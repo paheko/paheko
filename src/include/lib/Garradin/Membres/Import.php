@@ -226,10 +226,9 @@ class Import
 			}
 			else
 			{
+				unset($data['numero']);
 				$numero = false;
 			}
-
-			unset($data['numero']);
 
 			try {
 				if ($numero && ($id = $membres->getIDWithNumero($numero)))
@@ -269,7 +268,7 @@ class Import
 
         while ($row = $res->fetchArray(SQLITE3_ASSOC))
         {
-            unset($row['passe']);
+            unset($row->passe);
 
             if (!$header)
             {
@@ -277,7 +276,7 @@ class Import
                 $header = true;
             }
 
-            fputcsv($fp, $row);
+            fputs($fp, Utils::CSVLine($row) . "\n");
         }
 
         fclose($fp);

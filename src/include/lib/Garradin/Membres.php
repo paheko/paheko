@@ -98,23 +98,30 @@ class Membres
                 }
                 elseif ($config->type == 'multiple')
                 {
-                    if (empty($data[$key]) || !is_array($data[$key]))
+                    if (empty($data[$key]))
                     {
-                        $data[$key] = 0;
+                        $data[$key] = null;
                         continue;
                     }
 
-                    $binary = 0;
-
-                    foreach ($data[$key] as $k => $v)
+                    if (is_array($data[$key]))
                     {
-                        if (array_key_exists($k, $config->options) && !empty($v))
-                        {
-                            $binary |= 0x01 << $k;
-                        }
-                    }
+                        $binary = 0;
 
-                    $data[$key] = $binary;
+                        foreach ($data[$key] as $k => $v)
+                        {
+                            if (array_key_exists($k, $config->options) && !empty($v))
+                            {
+                                $binary |= 0x01 << $k;
+                            }
+                        }
+
+                        $data[$key] = $binary;
+                    }
+                    elseif (!is_numeric($data[$key]) || $data[$key] < 0 || $data[$key] > PHP_INT_MAX)
+                    {
+                        throw new UserException('Le champs "%s" ne contient pas une valeur binaire.');
+                    }
                 }
 
                 // Un champ texte vide c'est un champ NULL

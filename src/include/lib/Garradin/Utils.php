@@ -674,4 +674,15 @@ class Utils
         rewind($fp);
         return key($delims);
     }
+
+    static public function row_to_csv($row)
+    {
+        $row = (array) $row;
+
+        array_walk($row, function ($field) {
+            return str_replace('"', '""', $field);
+        });
+
+        return '"' . implode('", "', $row) . '"';
+    }
 }
