@@ -7,8 +7,6 @@ $session->requireAccess('compta', Membres::DROIT_ECRITURE);
 
 $banques = new Compta\Comptes_Bancaires;
 $rapprochement = new Compta\Rapprochement;
-$exercices = new Compta\Exercices;
-$exercice = $exercices->getCurrent();
 
 $compte = $banques->get(qg('id'));
 
@@ -29,24 +27,15 @@ if ($debut && $fin)
         $form->addError('La date donnée est invalide.');
         $debut = $fin = false;
     }
-    else if (strtotime($debut) < $exercice->debut)
-    {
-        $debut = date('Y-m-d', $exercice->debut);
-    }
-    else if (strtotime($fin) > $exercice->fin)
-    {
-        $fin = date('Y-m-d', $exercice->fin);
-    }
 }
 
 if (!$debut || !$fin)
 {
-    $date = $exercice->fin;
-    $debut = date('Y-m-01', $date);
-    $fin = date('Y-m-t', $date);
+    $debut = date('Y-m-01');
+    $fin = date('Y-m-t');
 }
 
-$journal = $rapprochement->getJournal($compte->id, $debut, $fin, $solde_initial, $solde_final);
+$journal = $rapprochement->getJournal($compte->id, $debut, $fin, $solde_initial, $solde_final, (bool) qg('sauf'));
 
 // Enregistrement des cases cochées
 if (f('save') && $form->check('compta_rapprocher_' . $compte->id))
@@ -65,7 +54,7 @@ if (f('save') && $form->check('compta_rapprocher_' . $compte->id))
 if (substr($debut, 0, 7) == substr($fin, 0, 7))
 {
     $tpl->assign('prev', Utils::modifyDate($debut, '-1 month', true));
-    $tpl->assign('next', Utils::modifyDate($fin, '+1 month', true));
+    $tpl->assign('next', Utils::modifyDate($debut, '+1 month', true));
 }
 
 $tpl->assign('compte', $compte);
