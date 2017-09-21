@@ -47,7 +47,9 @@ class Sauvegarde
 	 */
 	public function create($auto = false)
 	{
-		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-His')) . '.sqlite', DB_FILE);
+		$suffix = is_string($auto) ? $auto : ($auto ? 'auto.1' : date('Y-m-d-His'));
+
+		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
 		
 		// Acquire a shared lock before copying
 		$db = DB::getInstance();

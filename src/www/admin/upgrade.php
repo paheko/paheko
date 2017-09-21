@@ -17,6 +17,9 @@ if (version_compare($v, garradin_version(), '>='))
 $db = DB::getInstance();
 $redirect = true;
 
+// Créer une sauvegarde automatique
+(new Sauvegarde)->create('pre-upgrade-' . garradin_version());
+
 echo '<!DOCTYPE html>
 <html>
 <head>
