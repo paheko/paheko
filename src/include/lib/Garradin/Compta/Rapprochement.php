@@ -15,8 +15,8 @@ class Rapprochement
         $db = DB::getInstance();
 
         $query = 'SELECT 
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND date < :date), 0)
-            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND date < :date), 0)';
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND compte_credit IS NOT NULL AND date < :date), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND compte_debit IS NOT NULL  AND date < :date), 0)';
 
         $solde_initial = $solde = $db->firstColumn($query, [
             'compte'    =>  $compte,
