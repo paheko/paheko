@@ -12,8 +12,8 @@
         <legend>Rapprochement par mois</legend>
         <dl>
             <dd class="actions">
-            <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$prev|date_fr:'Y-m-01'}&amp;fin={$prev|date_fr:'Y-m-t'}">&larr; {$prev|date_fr:'F Y'}</a>
-            | <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$next|date_fr:'Y-m-01'}&amp;fin={$next|date_fr:'Y-m-t'}">{$next|date_fr:'F Y'} &rarr;</a>
+            <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$prev|date_fr:'Y-m-01'}&amp;fin={$prev|date_fr:'Y-m-t'}{if \Garradin\qg('sauf')}&amp;sauf=1{/if}">&larr; {$prev|date_fr:'F Y'}</a>
+            | <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$next|date_fr:'Y-m-01'}&amp;fin={$next|date_fr:'Y-m-t'}{if \Garradin\qg('sauf')}&amp;sauf=1{/if}">{$next|date_fr:'F Y'} &rarr;</a>
             </dd>
         </dl>
     </fieldset>
@@ -22,9 +22,10 @@
         <legend>Période de rapprochement</legend>
         <p>
             Du
-            <span><input type="date" name="debut" id="f_debut" value="{form_field name='debut' default=$debut}" /></span>
+            <span><input type="date" name="debut" id="f_debut" value="{$debut}" /></span>
             au
-            <span><input type="date" name="fin" id="f_fin" value="{form_field name='fin' default=$fin}" /></span>
+            <span><input type="date" name="fin" id="f_fin" value="{$fin}" /></span>
+            <label><input type="checkbox" name="sauf" value="1" {if \Garradin\qg('sauf')} checked="checked"{/if} /> Ne pas inclure les écritures déjà rapprochées</label>
             <input type="hidden" name="id" value="{$compte.id}" />
             <input type="submit" value="Afficher" />
         </p>

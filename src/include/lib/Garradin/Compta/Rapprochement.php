@@ -10,20 +10,17 @@ use \Garradin\Compta\Comptes_Bancaires;
 
 class Rapprochement
 {
-    public function getJournal($compte, $debut, $fin, &$solde_initial, &$solde_final)
+    public function getJournal($compte, $debut, $fin, &$solde_initial, &$solde_final, $sauf_deja_rapprochees = false)
     {
         $db = DB::getInstance();
 
-        $exercice = $db->firstColumn('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
-
         $query = 'SELECT 
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND id_exercice = :exercice AND date < :date), 0)
-            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND id_exercice = :exercice AND date < :date), 0)';
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND date < :date), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND date < :date), 0)';
 
         $solde_initial = $solde = $db->firstColumn($query, [
             'compte'    =>  $compte,
             'date'      =>  $debut,
-            'exercice'  =>  $exercice
         ]);
 
         $query = '
@@ -32,15 +29,15 @@ class Rapprochement
                 r.date AS date_rapprochement
             FROM compta_journal AS j
                 LEFT JOIN compta_rapprochement AS r ON r.id_operation = j.id
-            WHERE (compte_debit = :compte OR compte_credit = :compte) AND id_exercice = :exercice
+            WHERE (compte_debit = :compte OR compte_credit = :compte)
                 AND j.date >= :debut AND j.date <= :fin
+                ' . ($sauf_deja_rapprochees ? 'AND r.id_operation IS NULL' : '') . '
             ORDER BY date ASC;';
 
         $result = $db->get($query, [
             'compte'    =>  $compte,
             'debut'     =>  $debut,
             'fin'       =>  $fin,
-            'exercice'  =>  $exercice
         ]);
 
         foreach ($result as &$row)
