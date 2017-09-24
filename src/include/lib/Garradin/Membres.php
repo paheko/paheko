@@ -92,6 +92,10 @@ class Membres
                         $data[$key] = 0;
                     }
                 }
+                elseif ($config->type == 'email')
+                {
+                    $data[$key] = strtolower($data[$key]);
+                }
                 elseif ($config->type == 'select' && !in_array($data[$key], $config->options))
                 {
                     throw new UserException('Le champ "' . $config->title . '" ne correspond pas à un des choix proposés.');

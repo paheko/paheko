@@ -42,7 +42,7 @@ class Session extends \KD2\UserSession
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
 			INNER JOIN membres_categories AS mc ON mc.id = m.id_categorie
-			WHERE m.%1$s = ? AND mc.droit_connexion >= %2$d
+			WHERE m.%1$s = ? COLLATE NOCASE AND mc.droit_connexion >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, Membres::DROIT_ACCES);
