@@ -250,7 +250,7 @@ if (version_compare($v, '0.7.2', '<'))
     $db->exec('END;');
 }
 
-if (version_compare($v, '0.8.0', '<'))
+if (version_compare($v, '0.8.0-alpha1', '<'))
 {
     // Inscription de l'appid
     $db->exec('PRAGMA application_id = ' . DB::APPID . ';');
