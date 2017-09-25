@@ -491,7 +491,36 @@ class Utils
 
         // Diviser le nombre ainsi obtenu par 97
         // Si le reste n'est pas égal à 1 l'IBAN est incorrect : Modulo de 97 égal à 1.
-        return (bcmod($value, 97) == 1);
+        return (self::bcmod($value, 97) == 1);
+    }
+
+    /** 
+     * my_bcmod - get modulus (substitute for bcmod) 
+     * string my_bcmod ( string left_operand, int modulus ) 
+     * left_operand can be really big, but be carefull with modulus :( 
+     * by Andrius Baranauskas and Laurynas Butkus :) Vilnius, Lithuania 
+     * @link https://php.net/manual/fr/function.bcmod.php#38474
+     */ 
+    static public function bcmod($x, $y)
+    {
+        if (function_exists('\bcmod'))
+        {
+            return \bcmod($x, $y);
+        }
+
+        // how many numbers to take at once? carefull not to exceed (int)
+        $take = 5;
+        $mod = '';
+
+        do
+        {
+            $a = (int)$mod.substr( $x, 0, $take );
+            $x = substr( $x, $take );
+            $mod = $a % $y;
+        } 
+        while (strlen($x));
+
+        return (int)$mod;
     }
     
     static public function checkBIC($bic)
