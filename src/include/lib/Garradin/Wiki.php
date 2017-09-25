@@ -378,6 +378,13 @@ class Wiki
         return DB::getInstance()->get($query, (int) $parent);
     }
 
+    public function hasChildren($parent, $public_only = false)
+    {
+        $db = DB::getInstance();
+        $public = !$public_only ? '' : ' AND ' . $db->where('droit_lecture', self::LECTURE_PUBLIC);
+        return $db->test('wiki_pages', $db->where('parent', (int)$parent) . $public);
+    }
+
     public function getById($id)
     {
         $db = DB::getInstance();
