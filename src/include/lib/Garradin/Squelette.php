@@ -376,11 +376,11 @@ class Squelette extends \KD2\MiniSkel
 
             if ($loopType == 'articles')
             {
-                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) = 0 ';
+                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id AND droit_lecture = -1) = 0 ';
             }
             elseif ($loopType == 'rubriques')
             {
-                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
+                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id AND droit_lecture = -1) > 0 ';
             }
 
             $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
