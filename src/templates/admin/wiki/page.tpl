@@ -14,7 +14,7 @@
     {if $can_read && $page && $page.contenu}
         <li><a href="{$www_url}admin/wiki/historique.php?id={$page.id}">Historique</a>
         {if $page.droit_lecture == Garradin\Wiki::LECTURE_PUBLIC}
-            <li><a href="{$www_url}{$page.uri}{if !empty($children)}/{/if}">Voir sur le site</a>
+            <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a>
         {/if}
     {/if}
     {if $session->canAccess('wiki', Garradin\Membres::DROIT_ADMIN)}
