@@ -307,12 +307,12 @@ class Membres
 
         $champ = $champs->get($field);
 
-        if ($champ['type'] == 'multiple')
+        if ($champ->type == 'multiple')
         {
             $where = 'WHERE '.$field.' & (1 << '.(int)$query.')';
             $order = false;
         }
-        elseif ($champ['type'] == 'tel')
+        elseif ($champ->type == 'tel')
         {
             $query = Utils::normalizePhoneNumber($query);
             $query = preg_replace('!^0+!', '', $query);
@@ -336,7 +336,7 @@ class Membres
             $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $field);
         }
 
-        $fields = array_keys($champs->getListedFields());
+        $fields = array_keys((array)$champs->getListedFields());
 
         if (!in_array($field, $fields))
         {

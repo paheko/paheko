@@ -81,9 +81,9 @@
                     <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs_entete key="c" item="cfg"}
                         {if $champ == $c}
-                            <th><strong>{$membre[$c]|raw|display_champ_membre:$cfg}</strong></th>
+                            <th><strong>{$membre->$c|raw|display_champ_membre:$cfg}</strong></th>
                         {else}
-                            <td>{$membre[$c]|raw|display_champ_membre:$cfg}</td>
+                            <td>{$membre->$c|raw|display_champ_membre:$cfg}</td>
                         {/if}
                     {/foreach}
                     <td class="actions">
