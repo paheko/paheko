@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Exercices" current="compta/exercices"}
 
-{if !$current}
+{if !$current_exercice}
 <ul class="actions">
     <li><strong><a href="{$www_url}admin/compta/exercices/ajouter.php">Commencer un nouvel exercice</a></strong></li>
 </ul>
@@ -29,6 +29,8 @@
             <a class="icn" href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id}" title="Modifier">✎</a>
             <a class="icn" href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id}" title="Supprimer">✘</a>
             <a class="icn" href="{$www_url}admin/compta/exercices/cloturer.php?id={$exercice.id}" title="Clôturer cet exercice">🔒</a>
+            {elseif $exercice.cloture && $exercice.nb_operations == 0}
+            <a class="icn" href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id}" title="Supprimer">✘</a>
             {/if}
         </dd>
         {/if}

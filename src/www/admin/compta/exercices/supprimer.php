@@ -7,14 +7,14 @@ $session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $e = new Compta\Exercices;
 
-$exercice = $e->get((int)qg('id'));
+$exercice = $e->get((int)qg('id'), true);
 
 if (!$exercice)
 {
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($exercice->cloture)
+if ($exercice->cloture && $exercice->nb_operations > 0)
 {
     throw new UserException('Impossible de supprimer un exercice clôturé.');
 }
