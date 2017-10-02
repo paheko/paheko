@@ -254,7 +254,7 @@ class Exercices
         $db = DB::getInstance();
 
         // Ne pas supprimer un compte qui est utilisé !
-        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE id_exercice = ? LIMIT 1;', $id))
+        if ($db->test('compta_journal', $db->where('id_exercice', $id)))
         {
             throw new UserException('Cet exercice ne peut être supprimé car des opérations comptables y sont liées.');
         }
@@ -264,11 +264,16 @@ class Exercices
         return true;
     }
 
-    public function get($id)
+    public function get($id, $with_count = false)
     {
+        $with_count = $with_count
+            ? ', (SELECT COUNT(*) FROM compta_journal WHERE id_exercice = compta_exercices.id) AS nb_operations'
+            : '';
+
         $db = DB::getInstance();
         return $db->first('SELECT *, strftime(\'%s\', debut) AS debut,
-            strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE id = ?;', (int)$id);
+            strftime(\'%s\', fin) AS fin ' . $with_count . '
+            FROM compta_exercices WHERE id = ?;', (int)$id);
     }
 
     public function getCurrent()
