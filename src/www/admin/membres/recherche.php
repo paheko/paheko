@@ -51,11 +51,11 @@ $champs_liste->id = (object) ['title' => 'Numéro unique', 'type' => 'number'];
 
 $champs_entete = $champs->getListedFields();
 
-if (!array_key_exists($champ, $champs_entete))
+if (!isset($champs_entete->$champ))
 {
     $champs_entete = array_merge(
         [$champ => $champs_liste->$champ],
-        $champs_entete
+        (array)$champs_entete
     );
 }
 
