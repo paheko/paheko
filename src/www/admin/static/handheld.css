@@ -14,6 +14,8 @@ body {
 .header .menu {
 	background: none !important;
 	position: fixed;
+	bottom: inherit;
+	overflow: visible;
 	z-index: 10000;
 	margin: 0;
 	margin-bottom: 3em;
