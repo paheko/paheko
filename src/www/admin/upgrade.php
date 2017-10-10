@@ -292,6 +292,13 @@ if (version_compare($v, '0.8.0-alpha1', '<'))
     $db->exec('VACUUM;');
 }
 
+if (version_compare($v, '0.8.0-beta4', '<'))
+{
+    // Mise à jour plan comptable
+    $comptes = new Compta\Comptes;
+    $comptes->importPlan();
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());

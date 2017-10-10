@@ -8,7 +8,10 @@ use \Garradin\UserException;
 
 class Comptes
 {
-    const CAISSE = 530;
+    const CAISSE = '530';
+
+    const CHEQUE_A_ENCAISSER = '5112';
+    const CARTE_A_ENCAISSER = '5115';
 
     const PASSIF = 0x01;
     const ACTIF = 0x02;
@@ -17,7 +20,7 @@ class Comptes
 
     public function importPlan()
     {
-        $plan = json_decode(file_get_contents(\Garradin\ROOT . '/include/data/plan_comptable.json'), true);
+        $plan = json_decode(file_get_contents(\Garradin\ROOT . '/include/data/plan_comptable.json'));
 
         $db = DB::getInstance();
         $db->begin();
@@ -30,9 +33,9 @@ class Comptes
             if ($db->test('compta_comptes', $db->where('id', $id)))
             {
                 $db->update('compta_comptes', [
-                    'parent'    =>  $compte['parent'],
-                    'libelle'   =>  $compte['nom'],
-                    'position'  =>  $compte['position'],
+                    'parent'    =>  $compte->parent,
+                    'libelle'   =>  $compte->nom,
+                    'position'  =>  $compte->position,
                     'plan_comptable' => 1,
                 ], $db->where('id', $id));
             }
@@ -40,9 +43,9 @@ class Comptes
             {
                 $db->insert('compta_comptes', [
                     'id'        =>  $id,
-                    'parent'    =>  $compte['parent'],
-                    'libelle'   =>  $compte['nom'],
-                    'position'  =>  $compte['position'],
+                    'parent'    =>  $compte->parent,
+                    'libelle'   =>  $compte->nom,
+                    'position'  =>  $compte->position,
                     'plan_comptable' => 1,
                 ]);
             }
