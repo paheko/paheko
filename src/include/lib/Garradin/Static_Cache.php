@@ -9,6 +9,13 @@ class Static_Cache
 
 	protected static function _getCacheDir()
 	{
+		$dir = CACHE_ROOT . '/static';
+
+		if (!file_exists($dir))
+		{
+			mkdir(CACHE_ROOT . '/static');
+		}
+
 		return CACHE_ROOT . '/static';
 	}
 
