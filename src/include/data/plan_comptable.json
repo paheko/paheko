@@ -1061,6 +1061,24 @@
         "parent": 5,
         "position": 2
     },
+    "511": {
+        "code": 511,
+        "nom": "Valeurs à l'encaissement",
+        "parent": 51,
+        "position": 2
+    },
+    "5112": {
+        "code": 5112,
+        "nom": "Chèques à encaisser",
+        "parent": 511,
+        "position": 2
+    },
+    "5115": {
+        "code": 5115,
+        "nom": "Paiements par carte à encaisser",
+        "parent": 511,
+        "position": 2
+    },
     "512": {
         "code": 512,
         "nom": "Banques",

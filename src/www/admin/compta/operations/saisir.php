@@ -86,6 +86,13 @@ if (f('save'))
                         $a = Compta\Comptes::CAISSE;
                         $b = $cat->compte;
                     }
+                    elseif (in_array(f('moyen_paiement'), ['CH', 'CB']) && f('a_encaisser'))
+                    {
+                        $a = f('moyen_paiement') == 'CH' 
+                            ? Compta\Comptes::CHEQUE_A_ENCAISSER
+                            : Compta\Comptes::CARTE_A_ENCAISSER;
+                        $b = $cat->compte;
+                    }
                     else
                     {
                         if (!trim(f('banque')))
@@ -154,6 +161,8 @@ $tpl->assign('categories_depenses', $cats->getList(Compta\Categories::DEPENSES))
 $tpl->assign('categories_recettes', $cats->getList(Compta\Categories::RECETTES));
 $tpl->assign('comptes_bancaires', $banques->getList());
 $tpl->assign('banque', f('banque'));
+$tpl->assign('compte_cheque_e_encaisser', Compta\Comptes::CHEQUE_A_ENCAISSER);
+$tpl->assign('compte_carte_e_encaisser', Compta\Comptes::CARTE_A_ENCAISSER);
 
 if (!$session->get('context_compta_date'))
 {

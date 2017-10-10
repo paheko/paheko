@@ -5,7 +5,7 @@
         <li><input type="radio" name="type" value="recette" {form_field name=type checked=recette default=recette} id="f_type_recette" /><label for="f_type_recette">Recette</label></li>
         <li><input type="radio" name="type" value="depense" {form_field name=type checked=depense} id="f_type_depense" /><label for="f_type_depense">Dépense</label></li>
         <li><input type="radio" name="type" value="virement" {form_field name=type checked=virement} id="f_type_virement" /><label for="f_type_virement">Virement interne</label></li>
-        <li><input type="radio" name="type" value="dette" {form_field name=type checked=dette} id="f_type_dette" /><label for="f_type_dette">Dette</label></li>
+        <li><input type="radio" name="type" value="encaisser" {form_field name=type checked=encaisser} id="f_type_encaisser" /><label for="f_type_encaisser">Encaissement</label></li>
         <li><input type="radio" name="type" value="avance" {form_field name=type checked=avance} id="f_type_avance" /><label for="f_type_avance">Saisie avancée</label></li>
     </ul>
 
@@ -41,6 +41,10 @@
                 {/foreach}
                 </select>
             </dd>
+            <dd class="f_a_encaisser">
+                <input type="checkbox" name="a_encaisser" value="1" id="f_a_encaisser" {form_field name=a_encaisser checked="1"} />
+                <label for="f_a_encaisser">En attente d'encaissement</label>
+            </dd>
             <dt class="f_cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
             <dd class="f_cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque}" /></dd>
             <dt class="f_banque"><label for="f_banque">Compte bancaire</label></dt>
@@ -66,7 +70,6 @@
                 {select_compte comptes=$comptes name="compte_credit"}
             </dd>
         </dl>
-
     </fieldset>
 
     <fieldset class="type_virement">
@@ -79,6 +82,8 @@
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
+                    <option value="{$compte_cheque_e_encaisser}">Chèques à encaisser</option>
+                    <option value="{$compte_carte_e_encaisser}">Paiement CB à encaisser</option>
                 </select>
             </dd>
             <dt><label for="f_compte1">Vers</label></dt>
@@ -148,6 +153,10 @@
             var elm = $('#f_moyen_paiement');
             g.toggle('.f_cheque', elm.value == 'CH');
             g.toggle('.f_banque', elm.value != 'ES');
+
+            g.toggle('.f_a_encaisser', elm.value == 'CB' || elm.value == 'CH');
+
+            cocherAEncaisser();
         }
 
         function changeTypeSaisie(type)
@@ -156,10 +165,19 @@
             g.toggle('.type_' + type, true);
         }
 
+        function cocherAEncaisser()
+        {
+            var elm = $('#f_a_encaisser');
+            g.toggle('.f_banque', !elm.checked);
+        }
+
         changeMoyenPaiement();
         changeTypeSaisie(document.forms[0].type.value);
+        cocherAEncaisser();
 
         $('#f_moyen_paiement').onchange = changeMoyenPaiement;
+
+        $('#f_a_encaisser').onchange = cocherAEncaisser;
 
         $('input[name="type"]').forEach(function (elm) {
             elm.onchange = function (e) {
