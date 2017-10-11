@@ -88,7 +88,7 @@
             {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
                 <li class="compta admin config{if $current == 'compta/categories'} current{/if}"><a href="{$admin_url}compta/categories/">Catégories &amp; comptes</a></li>
             {/if}
-                <li class="compta admin reports{if $current == 'compta/exercices'} current{/if}"><a href="{$admin_url}compta/exercices/">Exercices</a></li>
+                <li class="compta admin reports{if $current == 'compta/exercices'} current{/if}"><a href="{$admin_url}compta/exercices/">Exercices &amp; projets</a></li>
             </ul>
             </li>
         {/if}

@@ -250,7 +250,7 @@ if (version_compare($v, '0.7.2', '<'))
     $db->exec('END;');
 }
 
-if (version_compare($v, '0.8.0-alpha1', '<'))
+if (version_compare($v, '0.8.0-beta4', '<'))
 {
     // Inscription de l'appid
     $db->exec('PRAGMA application_id = ' . DB::APPID . ';');
@@ -290,11 +290,8 @@ if (version_compare($v, '0.8.0-alpha1', '<'))
 
     // Nettoyage de la base de données
     $db->exec('VACUUM;');
-}
 
-if (version_compare($v, '0.8.0-beta4', '<'))
-{
-    // Mise à jour plan comptable
+    // Mise à jour plan comptable: ajout comptes encaissement
     $comptes = new Compta\Comptes;
     $comptes->importPlan();
 }

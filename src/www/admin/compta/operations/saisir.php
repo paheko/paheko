@@ -37,6 +37,7 @@ if (f('save'))
                     'numero_piece'  =>  f('numero_piece'),
                     'remarques'     =>  f('remarques'),
                     'id_auteur'     =>  $user->id,
+                    'id_projet'     =>  f('projet') || null,
                 ]);
             }
             elseif ($type == 'virement')
@@ -50,6 +51,7 @@ if (f('save'))
                     'numero_piece'  =>  f('numero_piece'),
                     'remarques'     =>  f('remarques'),
                     'id_auteur'     =>  $user->id,
+                    'id_projet'     =>  f('projet') || null,
                 ]);
             }
             else
@@ -138,6 +140,7 @@ if (f('save'))
                     'remarques'     =>  f('remarques'),
                     'id_categorie'  =>  ($type === 'dette') ? null : (int)$cat->id,
                     'id_auteur'     =>  $user->id,
+                    'id_projet'     =>  f('projet') || null,
                 ]);
             }
 
@@ -163,6 +166,7 @@ $tpl->assign('comptes_bancaires', $banques->getList());
 $tpl->assign('banque', f('banque'));
 $tpl->assign('compte_cheque_e_encaisser', Compta\Comptes::CHEQUE_A_ENCAISSER);
 $tpl->assign('compte_carte_e_encaisser', Compta\Comptes::CARTE_A_ENCAISSER);
+$tpl->assign('projets', [0 => '-- Aucun'] + (new Compta\Projets)->getAssocList());
 
 if (!$session->get('context_compta_date'))
 {

@@ -1,10 +1,6 @@
 {include file="admin/_head.tpl" title="Bilan" current="compta/exercices" body_id="rapport"}
 
-<div class="exercice">
-    <h2>{$config.nom_asso}</h2>
-    <p>Exercice comptable {if $exercice.cloture}clôturé{else}en cours{/if} du
-        {$exercice.debut|date_fr:'d/m/Y'} au {$exercice.fin|date_fr:'d/m/Y'}, généré le {$cloture|date_fr:'d/m/Y'}</p>
-</div>
+{include file="admin/compta/rapports/_header.tpl"}
 
 <table>
     <colgroup>

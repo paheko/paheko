@@ -46,6 +46,13 @@
         | <strong>{if $exercice.cloture}Clôturé{else}En cours{/if}</strong>
     </dd>
 
+    {if $operation.id_projet}
+        <dt>Projet</dt>
+        <dd>
+            <a href="{$admin_url}compta/projets/">{$projet.libelle}</a>
+        </dd>
+    {/if}
+
     <dt>Opération créée par</dt>
     <dd>
         {if $operation.id_auteur}

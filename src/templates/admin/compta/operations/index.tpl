@@ -28,7 +28,6 @@
 <table class="list">
     <colgroup>
         <col width="3%" />
-        <col width="3%" />
         <col width="12%" />
         <col width="10%" />
         <col />
@@ -40,11 +39,6 @@
     {foreach from=$journal item="ligne"}
         <tr>
             <td class="num"><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
-            <td class="actions">
-            {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
-                <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette opération">✎</a>
-            {/if}
-            </td>
             <td>{$ligne.date|date_fr:'d/m/Y'}</td>
             <td>{$ligne.montant|escape|html_money} {$config.monnaie}</td>
             <th>{$ligne.libelle}</th>
@@ -54,7 +48,7 @@
         </tr>
     {foreachelse}
         <tr>
-            <td colspan="3"></td>
+            <td colspan="2"></td>
             <td colspan="2">
                 Aucune opération.
             </td>
@@ -64,7 +58,6 @@
     </tbody>
     <tfoot>
         <tr>
-            <td></td>
             <td></td>
             <th>Total</th>
             <td>{$total|escape|html_money} {$config.monnaie}</td>

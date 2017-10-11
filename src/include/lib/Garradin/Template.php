@@ -61,6 +61,20 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
+		
+		$this->register_modifier('get_nom_compte', function ($compte) {
+			if (is_null($compte))
+			{
+				return '';
+			}
+
+			if (!isset($this->liste_comptes))
+			{
+				$this->liste_comptes = (new Compta\Comptes)->getListAll();
+			}
+
+			return $this->liste_comptes[$compte];
+		});
 
 		$this->register_modifier('strftime_fr', function ($ts, $format) {
 			return Utils::strftime_fr($format, $ts);

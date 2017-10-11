@@ -1,5 +1,10 @@
 {include file="admin/_head.tpl" title="Exercices" current="compta/exercices"}
 
+<ul class="actions">
+    <li class="current"><a href="{$admin_url}compta/exercices/">Exercices</a></li>
+    <li><a href="{$admin_url}compta/projets/">Projets (compta analytique)</a></li>
+</ul>
+
 {if !$current_exercice}
 <ul class="actions">
     <li><strong><a href="{$www_url}admin/compta/exercices/ajouter.php">Commencer un nouvel exercice</a></strong></li>
@@ -18,10 +23,10 @@
             <strong>{$exercice.nb_operations}</strong> opérations enregistrées.
         </dd>
         <dd class="desc">
-            <a href="{$www_url}admin/compta/exercices/journal.php?id={$exercice.id}">Journal général</a>
-            | <a href="{$www_url}admin/compta/exercices/grand_livre.php?id={$exercice.id}">Grand livre</a>
-            | <a href="{$www_url}admin/compta/exercices/compte_resultat.php?id={$exercice.id}">Compte de résultat</a>
-            | <a href="{$www_url}admin/compta/exercices/bilan.php?id={$exercice.id}">Bilan</a>
+            <a href="{$www_url}admin/compta/rapports/journal.php?exercice={$exercice.id}">Journal général</a>
+            | <a href="{$www_url}admin/compta/rapports/grand_livre.php?exercice={$exercice.id}">Grand livre</a>
+            | <a href="{$www_url}admin/compta/rapports/compte_resultat.php?exercice={$exercice.id}">Compte de résultat</a>
+            | <a href="{$www_url}admin/compta/rapports/bilan.php?exercice={$exercice.id}">Bilan</a>
         </dd>
         {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
         <dd class="actions">

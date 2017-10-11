@@ -31,6 +31,10 @@
             <dd><input type="text" name="numero_piece" id="f_numero_piece" value="{form_field name=numero_piece}" /></dd>
             <dt><label for="f_remarques">Remarques</label></dt>
             <dd><textarea name="remarques" id="f_remarques" rows="4" cols="30">{form_field name=remarques}</textarea></dd>
+            {if count($projets) > 1}
+            <dt><label for="f_projet">Projet</label></dt>
+            <dd>{form_select name="projet" values=$projets}</dd>
+            {/if}
         </dl>
         <dl class="type_recette type_depense">
             <dt><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
