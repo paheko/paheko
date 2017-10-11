@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Plugin;
+use Garradin\Membres;
 
 class Cotisations
 {
@@ -77,10 +78,12 @@ class Cotisations
 
 		if ($co->id_categorie_compta)
 		{
+			$membre = (new Membres)->getNom($data['id_membre']);
+
 			try {
 				$data_compta = array_merge($data_compta, [
 					'id_categorie' => $co->id_categorie_compta,
-					'libelle'      => 'Cotisation (automatique)',
+					'libelle'      => 'Cotisation - ' . $membre,
 					'date'         => $data['date'],
 					'id_auteur'    => $data['id_auteur'],
 					'id_membre'    => $data['id_membre'],
