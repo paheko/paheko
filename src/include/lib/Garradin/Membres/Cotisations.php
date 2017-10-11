@@ -8,6 +8,7 @@ use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Plugin;
 use Garradin\Membres;
+use Garradin\Compta\Comptes;
 
 class Cotisations
 {
@@ -188,7 +189,13 @@ class Cotisations
 
 		$data['montant'] = (float) $data['montant'];
 
-		if ($data['moyen_paiement'] != 'ES')
+		if (!empty($data['a_encaisser']) && ($data['moyen_paiement'] == 'CH' || $data['moyen_paiement'] == 'CB'))
+		{
+            $debit = $data['moyen_paiement'] == 'CH' 
+                ? Comptes::CHEQUE_A_ENCAISSER
+                : Comptes::CARTE_A_ENCAISSER;
+		}
+		elseif ($data['moyen_paiement'] != 'ES')
 		{
 			$debit = $data['banque'];
 		}

@@ -62,6 +62,7 @@ if (f('add'))
                 'banque'         =>  f('banque'),
                 'numero_piece'   =>  f('numero_piece'),
                 'remarques'      =>  f('remarques'),
+                'a_encaisser'    =>  f('a_encaisser'),
             ];
 
             $m_cotisations->add($data, $compta);
