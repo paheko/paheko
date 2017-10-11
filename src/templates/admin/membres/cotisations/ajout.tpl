@@ -67,10 +67,14 @@
                 {/foreach}
                 </select>
             </dd>
-            <dt class="f_cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
-            <dd class="f_cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque}" /></dd>
-            <dt class="f_banque"><label for="f_banque">Compte bancaire</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd class="f_banque">
+            <dd class="f_compta f_a_encaisser">
+                <input type="checkbox" name="a_encaisser" value="1" id="f_a_encaisser" {form_field name=a_encaisser checked="1"} />
+                <label for="f_a_encaisser">En attente d'encaissement</label>
+            </dd>
+            <dt class="f_compta f_cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
+            <dd class="f_compta f_cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque}" /></dd>
+            <dt class="f_compta f_banque"><label for="f_banque">Compte bancaire</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="f_compta f_banque">
                 <select name="banque" id="f_banque">
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
@@ -99,11 +103,22 @@
         var elm = $('#f_moyen_paiement');
         g.toggle('.f_cheque', elm.value == 'CH');
         g.toggle('.f_banque', elm.value != 'ES');
+
+        g.toggle('.f_a_encaisser', elm.value == 'CB' || elm.value == 'CH');
+        cocherAEncaisser();
     };
 
+    function cocherAEncaisser()
+    {
+        var elm = $('#f_a_encaisser');
+        g.toggle('.f_banque', !elm.checked);
+    }
+
     changeMoyenPaiement();
+    cocherAEncaisser();
 
     $('#f_moyen_paiement').onchange = changeMoyenPaiement;
+    $('#f_a_encaisser').onchange = cocherAEncaisser;
 
     $('#f_id_cotisation').onchange = function () {
         if (this.options[this.selectedIndex].getAttribute('data-compta'))
@@ -111,11 +126,11 @@
             $('#f_montant').value = this.options[this.selectedIndex].getAttribute('data-amount'); 
             g.toggle('.f_compta', true);
             changeMoyenPaiement();
+            cocherAEncaisser();
         }
         else
         {
             g.toggle('.f_compta', false);
-            changeMoyenPaiement();
         }
     };
 
