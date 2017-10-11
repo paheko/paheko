@@ -1,11 +1,6 @@
 {include file="admin/_head.tpl" title="Catégories" current="compta/categories"}
 
-<ul class="actions">
-    <li{if $type == Garradin\Compta\Categories::RECETTES} class="current"{/if}><a href="?recettes">Recettes</a></li>
-    <li{if $type == Garradin\Compta\Categories::DEPENSES} class="current"{/if}><a href="?depenses">Dépenses</a></li>
-    <li><strong><a href="{$www_url}admin/compta/categories/ajouter.php">Ajouter une catégorie</a></strong></li>
-    <li><em><a href="{$www_url}admin/compta/comptes/">Plan comptable</a></em></li>
-</ul>
+{include file="admin/compta/categories/_nav.tpl" current=$current_nav}
 
     {if !empty($liste)}
         <dl class="catList">

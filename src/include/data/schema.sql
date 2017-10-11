@@ -237,10 +237,18 @@ CREATE TABLE IF NOT EXISTS compta_comptes_bancaires
     FOREIGN KEY(id) REFERENCES compta_comptes(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS compta_projets
+-- Projets (compta analytique)
+(
+    id INTEGER PRIMARY KEY NOT NULL,
+
+    libelle TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS compta_journal
 -- Journal des opérations comptables
 (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY NOT NULL,
 
     libelle TEXT NOT NULL,
     remarques TEXT NULL,
@@ -258,13 +266,15 @@ CREATE TABLE IF NOT EXISTS compta_journal
     id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
     id_auteur INTEGER NULL,
     id_categorie INTEGER NULL, -- Numéro de catégorie (en mode simple)
+    id_projet INTEGER NULL,
 
     FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
     FOREIGN KEY(compte_debit) REFERENCES compta_comptes(id),
     FOREIGN KEY(compte_credit) REFERENCES compta_comptes(id),
     FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
     FOREIGN KEY(id_auteur) REFERENCES membres(id) ON DELETE SET NULL,
-    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id) ON DELETE SET NULL
+    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id) ON DELETE SET NULL,
+    FOREIGN KEY(id_projet) REFERENCES compta_projets(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_journal (id_exercice);

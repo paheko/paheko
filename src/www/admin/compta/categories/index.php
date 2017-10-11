@@ -12,6 +12,7 @@ if (null !== qg('depenses'))
 else
     $type = Compta\Categories::RECETTES;
 
+$tpl->assign('current_nav', $type == Compta\Categories::DEPENSES ? 'depenses' : 'recettes');
 $tpl->assign('type', $type);
 $tpl->assign('liste', $cats->getList($type));
 

@@ -42,6 +42,11 @@ if ($operation->id_categorie)
     $tpl->assign('moyen_paiement', $cats->getMoyenPaiement($operation->moyen_paiement));
 }
 
+if ($operation->id_projet)
+{
+    $tpl->assign('projet', (new Compta\Projets)->get($operation->id_projet));
+}
+
 if ($operation->id_auteur)
 {
     $auteur = (new Membres)->get($operation->id_auteur);

@@ -313,6 +313,16 @@ class Journal
             $data['id_auteur'] = (int)$data['id_auteur'];
         }
 
+        if (isset($data['id_projet']))
+        {
+            $data['id_projet'] = (int)$data['id_projet'];
+
+            if (!$db->test('compta_projets', $db->where('id', $data['id_projet'])))
+            {
+                throw new UserException('Projet inconnu.');
+            }
+        }
+
         return true;
     }
 

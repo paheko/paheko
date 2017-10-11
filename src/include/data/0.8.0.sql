@@ -62,7 +62,7 @@ INSERT INTO wiki_revisions SELECT * FROM wiki_revisions_old;
 INSERT INTO compta_categories SELECT * FROM compta_categories_old;
 INSERT INTO compta_comptes_bancaires SELECT * FROM compta_comptes_bancaires_old;
 INSERT INTO compta_exercices SELECT * FROM compta_exercices_old;
-INSERT INTO compta_journal SELECT * FROM compta_journal_old;
+INSERT INTO compta_journal SELECT *, NULL FROM compta_journal_old;
 INSERT INTO compta_rapprochement SELECT * FROM compta_rapprochement_old;
 INSERT INTO fichiers SELECT * FROM fichiers_old;
 INSERT INTO membres_operations SELECT * FROM membres_operations_old;

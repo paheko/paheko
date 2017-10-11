@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Supprimer une catégorie" current="compta/categories"}
 
+{include file="admin/compta/categories/_nav.tpl" current=null}
+
 {form_errors}
 
 <form method="post" action="{$self_url}">
