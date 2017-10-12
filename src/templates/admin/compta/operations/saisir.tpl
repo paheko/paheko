@@ -183,11 +183,14 @@
 
         $('#f_a_encaisser').onchange = cocherAEncaisser;
 
-        $('input[name="type"]').forEach(function (elm) {
-            elm.onchange = function (e) {
+        var inputs = $('input[name="type"]');
+
+        for (var i = 0; i < inputs.length; i++)
+        {
+            inputs[i].onchange = function (e) {
                 changeTypeSaisie(this.value);
             };
-        });
+        }
     } ());
     {/literal}
     </script>
