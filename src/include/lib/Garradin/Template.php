@@ -456,7 +456,8 @@ class Template extends \KD2\Smartyer
 	{
 		$name = $params['name'];
 		$comptes = $params['comptes'];
-		$selected = isset($params['data'][$params['name']]) ? $params['data'][$params['name']] : f($name);
+		$data = isset($params['data']) ? (array) $params['data'] : null;
+		$selected = isset($data[$params['name']]) ? $data[$params['name']] : f($name);
 
 		$out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
 
