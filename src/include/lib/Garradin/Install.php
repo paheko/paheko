@@ -141,7 +141,7 @@ class Install
 		    }
 
 		    // On en profite pour vérifier qu'on peut y lire et écrire
-		    if (!is_writable($path) || !s_readable($path))
+		    if (!is_writable($path) || !is_readable($path))
 		    {
 		    	throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
 		    }
