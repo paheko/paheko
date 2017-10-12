@@ -37,7 +37,7 @@
                 <select name="projet" id="f_projet">
                     <option value="0">-- Aucun</option>
                     {foreach from=$projets key="id" item="libelle"}
-                    <option name="{$id}"{form_field name="projet" selected=$id}>{$libelle}</option>
+                    <option value="{$id}"{form_field name="projet" selected=$id}>{$libelle}</option>
                     {/foreach}
                 </select>
             </dd>
