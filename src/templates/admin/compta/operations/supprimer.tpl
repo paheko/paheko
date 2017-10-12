@@ -13,7 +13,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_supprimer_"|args:$operation.id}
+        {csrf_field key="compta_supprimer_%d"|args:$operation.id}
         <input type="submit" name="delete" value="Supprimer &rarr;" />
     </p>
 
