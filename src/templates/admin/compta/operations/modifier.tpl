@@ -48,6 +48,19 @@
             <dd><input type="text" name="numero_piece" id="f_numero_piece" value="{form_field name=numero_piece data=$operation}" /></dd>
             <dt><label for="f_remarques">Remarques</label></dt>
             <dd><textarea name="remarques" id="f_remarques" rows="4" cols="30">{form_field name=remarques data=$operation}</textarea></dd>
+
+            {if count($projets) > 0}
+            <dt><label for="f_projet">Projet</label></dt>
+            <dd>
+                <select name="projet" id="f_projet">
+                    <option value="0">-- Aucun</option>
+                    {foreach from=$projets key="id" item="libelle"}
+                    <option value="{$id}"{form_field name="id_projet" selected=$id data=$operation}>{$libelle}</option>
+                    {/foreach}
+                </select>
+            </dd>
+            {/if}
+
         </dl>
     </fieldset>
 

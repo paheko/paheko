@@ -115,6 +115,7 @@ if (f('save'))
                     'numero_piece'  =>  f('numero_piece'),
                     'remarques'     =>  f('remarques'),
                     'id_categorie'  =>  (int)$cat->id,
+                    'id_projet'     =>  f('id_projet'),
                 ]);
             }
 
@@ -139,6 +140,8 @@ else
     $tpl->assign('categories', $cats->getList($type));
     $tpl->assign('comptes_bancaires', $banques->getList());
 }
+
+$tpl->assign('projets', (new Compta\Projets)->getAssocList());
 
 $tpl->assign('operation', $operation);
 
