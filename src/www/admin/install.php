@@ -65,25 +65,7 @@ const INSTALL_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
-// Vérifier que les répertoires vides existent, sinon les créer
-$paths = [DATA_ROOT, PLUGINS_ROOT, CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
-
-foreach ($paths as $path)
-{
-    if (!file_exists($path))
-        mkdir($path);
-
-    test_requis(
-        file_exists($path) && is_dir($path),
-        'Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.'
-    );
-
-    // On en profite pour vérifier qu'on peut y lire et écrire
-    test_requis(
-        is_writable($path) && is_readable($path),
-        'Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.'
-    );
-}
+Install::checkAndCreateDirectories();
 
 if (!file_exists(DB_FILE))
 {
