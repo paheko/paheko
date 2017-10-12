@@ -313,7 +313,11 @@ class Journal
             $data['id_auteur'] = (int)$data['id_auteur'];
         }
 
-        if (isset($data['id_projet']))
+        if (empty($data['id_projet']))
+        {
+            $data['id_projet'] = null;
+        }
+        elseif (isset($data['id_projet']))
         {
             $data['id_projet'] = (int)$data['id_projet'];
 
