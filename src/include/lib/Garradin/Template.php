@@ -39,7 +39,6 @@ class Template extends \KD2\Smartyer
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
-		$this->register_function('form_select', [$this, 'formSelect']);
 		$this->register_function('form_field', [$this, 'formField']);
 		$this->register_function('select_compte', [$this, 'formSelectCompte']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
@@ -124,52 +123,6 @@ class Template extends \KD2\Smartyer
 		}
 
 		return '<p class="error">' . $this->escape($params['message']) . '</p>';
-	}
-
-	protected function formSelect(array $params)
-	{
-		if (empty($params['name']))
-		{
-			throw new \BadFunctionCallException("Paramètre name manquant pour select");
-		}
-
-		$name = $params['name'];
-		$value = '';
-
-		if (f($name) !== null)
-		{
-			$value = f($name);
-		}
-		elseif (isset($params['data']) && is_array($params['data']) && isset($params['data'][$name]))
-		{
-			$value = $params['data'][$name];
-		}
-		elseif (isset($params['data']) && is_object($params['data']) && isset($params['data']->$name))
-		{
-			$value = $params['data']->$name;
-		}
-		elseif (isset($params['default']))
-		{
-			$value = $params['default'];
-		}
-
-		$out = sprintf('<select name="%s" id="f_%1$s">', $params['name']);
-
-		if (!empty($params['values']))
-		{
-			foreach ($params['values'] as $v)
-			{
-				$out .= '<option value="'.htmlspecialchars($v, ENT_QUOTES, 'UTF-8').'"';
-
-				if ($v == $value)
-					$out .= ' selected="selected"';
-
-				$out .= '>'.htmlspecialchars($v, ENT_QUOTES, 'UTF-8').'</option>';
-			}
-		}
-
-		$out .= '</select>';
-		return $out;
 	}
 
 	protected function formField(array $params)
