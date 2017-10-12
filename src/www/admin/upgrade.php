@@ -5,6 +5,8 @@ const UPGRADE_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
+Install::checkAndCreateDirectories();
+
 $config = Config::getInstance();
 
 $v = $config->getVersion();

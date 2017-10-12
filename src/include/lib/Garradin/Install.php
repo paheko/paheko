@@ -123,6 +123,33 @@ class Install
 		return $config->save();
 	}
 
+	static public function checkAndCreateDirectories()
+	{
+		// Vérifier que les répertoires vides existent, sinon les créer
+		$paths = [DATA_ROOT, PLUGINS_ROOT, CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
+
+		foreach ($paths as $path)
+		{
+		    if (!file_exists($path))
+		    {
+		        mkdir($path);
+		    }
+
+		    if (!is_dir($path))
+		    {
+		    	throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+		    }
+
+		    // On en profite pour vérifier qu'on peut y lire et écrire
+		    if (!is_writable($path) || !s_readable($path))
+		    {
+		    	throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+		    }
+		}
+
+		return true;
+	}
+
 	static public function setLocalConfig($key, $value)
 	{
 		$path = ROOT . DIRECTORY_SEPARATOR . 'config.local.php';
