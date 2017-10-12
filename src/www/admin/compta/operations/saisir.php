@@ -166,7 +166,7 @@ $tpl->assign('comptes_bancaires', $banques->getList());
 $tpl->assign('banque', f('banque'));
 $tpl->assign('compte_cheque_e_encaisser', Compta\Comptes::CHEQUE_A_ENCAISSER);
 $tpl->assign('compte_carte_e_encaisser', Compta\Comptes::CARTE_A_ENCAISSER);
-$tpl->assign('projets', [0 => '-- Aucun'] + (new Compta\Projets)->getAssocList());
+$tpl->assign('projets', (new Compta\Projets)->getAssocList());
 
 if (!$session->get('context_compta_date'))
 {
