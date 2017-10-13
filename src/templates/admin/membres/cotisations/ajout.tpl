@@ -111,7 +111,7 @@
     function cocherAEncaisser()
     {
         var elm = $('#f_a_encaisser');
-        g.toggle('.f_banque', !elm.checked);
+        g.toggle('.f_banque', !elm.checked && $('#f_moyen_paiement').value != 'ES');
     }
 
     changeMoyenPaiement();
