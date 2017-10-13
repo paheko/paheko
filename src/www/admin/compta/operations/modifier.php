@@ -56,6 +56,7 @@ if (f('save'))
                     'compte_debit'  =>  f('compte_debit'),
                     'numero_piece'  =>  f('numero_piece'),
                     'remarques'     =>  f('remarques'),
+                    'id_projet'     =>  f('id_projet'),
                 ]);
             }
             else
