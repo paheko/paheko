@@ -52,10 +52,10 @@
             {if count($projets) > 0}
             <dt><label for="f_projet">Projet</label></dt>
             <dd>
-                <select name="projet" id="f_projet">
+                <select name="id_projet" id="f_projet">
                     <option value="0">-- Aucun</option>
                     {foreach from=$projets key="id" item="libelle"}
-                    <option value="{$id}"{form_field name="id_projet" selected=$id data=$operation}>{$libelle}</option>
+                        <option value="{$id}"{form_field name="id_projet" selected=$id data=$operation}>{$libelle}</option>
                     {/foreach}
                 </select>
             </dd>
