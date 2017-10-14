@@ -5,7 +5,6 @@
         <li><input type="radio" name="type" value="recette" {form_field name=type checked=recette default=recette} id="f_type_recette" /><label for="f_type_recette">Recette</label></li>
         <li><input type="radio" name="type" value="depense" {form_field name=type checked=depense} id="f_type_depense" /><label for="f_type_depense">Dépense</label></li>
         <li><input type="radio" name="type" value="virement" {form_field name=type checked=virement} id="f_type_virement" /><label for="f_type_virement">Virement interne</label></li>
-        <li><input type="radio" name="type" value="encaisser" {form_field name=type checked=encaisser} id="f_type_encaisser" /><label for="f_type_encaisser">Encaissement</label></li>
         <li><input type="radio" name="type" value="avance" {form_field name=type checked=avance} id="f_type_avance" /><label for="f_type_avance">Saisie avancée</label></li>
     </ul>
 
