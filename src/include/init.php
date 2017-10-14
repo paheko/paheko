@@ -77,7 +77,7 @@ if (!defined('Garradin\WWW_URI'))
     $path = (substr($path, -1) != '/') ? $path . '/' : $path;
 
     // Pour installations sans vhost
-    $path = str_replace('/www/', '', $path);
+    $path = str_replace('/www', '', $path);
 
     define('Garradin\WWW_URI', $path);
 }
