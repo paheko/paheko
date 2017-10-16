@@ -40,6 +40,10 @@
                 {foreach from=$comptes_bancaires item="compte"}
                     <option value="{$compte.id}"{if ($type == Garradin\Compta\Categories::DEPENSES && $compte.id == $operation.compte_credit) || $compte.id == $operation.compte_debit} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
                 {/foreach}
+                {if ($type == Garradin\Compta\Categories::RECETTES)}
+                    <option value="{$id_cheque_a_encaisser}"{form_field name="banque" selected=$id_cheque_a_encaisser default=$operation.compte_debit}>Chèques à encaisser</option>
+                    <option value="{$id_carte_a_encaisser}"{form_field name="banque" selected=$id_carte_a_encaisser default=$operation.compte_debit}>Paiement CB à encaisser</option>
+                {/if}
                 </select>
             </dd>
 {/if}
