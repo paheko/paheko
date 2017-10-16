@@ -19,6 +19,11 @@ class Template extends \KD2\Smartyer
 
 	public function __construct()
 	{
+		if (!file_exists(CACHE_ROOT . '/compiled'))
+		{
+			mkdir(CACHE_ROOT . '/compiled');
+		}
+
 		self::setCompileDir(CACHE_ROOT . '/compiled');
 		self::setTemplateDir(ROOT . '/templates');
 
