@@ -85,7 +85,9 @@ if (f('save'))
                         throw new UserException('Le compte bancaire choisi est invalide.');
                     }
 
-                    if (!array_key_exists(f('banque'), $banques->getList()))
+                    if (!array_key_exists(f('banque'), $banques->getList())
+                        && f('banque') != Compta\Comptes::CHEQUE_A_ENCAISSER
+                        && f('banque') != Compta\Comptes::CARTE_A_ENCAISSER)
                     {
                         throw new UserException('Le compte bancaire choisi n\'existe pas.');
                     }
