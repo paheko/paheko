@@ -285,8 +285,6 @@ function datepickr(targetElement, userConfig) {
 		document.onkeyup = function(e) {
 			var k = e.keyCode || e.which;
 
-			console.log(k);
-
 			// Esc key pressed
 			if (k == 27)
 			{
