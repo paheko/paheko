@@ -194,11 +194,9 @@ class Rappels
 		ORDER BY nb_jours DESC;';
 
 		$db->begin();
-		$st = $db->prepare($query);
-		$res = $st->execute();
 		$re = new Rappels_Envoyes;
 
-		while ($row = $db->fetch($res))
+		foreach ($db->iterate($query) as $row)
 		{
 			$re->sendAuto($row);
 		}
