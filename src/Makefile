@@ -24,7 +24,7 @@ release:
 	rm -f /tmp/garradin-${VERSION}*
 
 publish: release
-    $(eval VERSION=$(shell cat VERSION))
+	$(eval VERSION=$(shell cat VERSION))
 	fossil uv sync
 	fossil uv ls | grep '^garradin-.*\.tar\.bz2' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
