@@ -161,7 +161,7 @@ class Membres
 
         $this->_checkFields($data, true, $require_password);
 
-        if (!empty($data[$id]) && $db->test('membres', $id . ' = ? COLLATE NOCASE'))
+        if (!empty($data[$id]) && $db->test('membres', $id . ' = ? COLLATE NOCASE', $data[$id]))
         {
             throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
