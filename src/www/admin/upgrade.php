@@ -5,8 +5,6 @@ const UPGRADE_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
-Install::checkAndCreateDirectories();
-
 $config = Config::getInstance();
 
 $v = $config->getVersion();
@@ -15,6 +13,18 @@ if (version_compare($v, garradin_version(), '>='))
 {
     throw new UserException("Pas de mise à jour à faire.");
 }
+
+Install::checkAndCreateDirectories();
+
+if (Static_Cache::exists('upgrade'))
+{
+    $path = Static_Cache::getPath('upgrade');
+    throw new UserException('Une mise à jour est déjà en cours.'
+        . PHP_EOL . 'Si celle-ci a échouée et que vous voulez ré-essayer, supprimez le fichier suivant:'
+        . PHP_EOL . $path);
+}
+
+Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
 $db = DB::getInstance();
 $redirect = true;
@@ -301,6 +311,8 @@ if (version_compare($v, '0.8.0-beta4', '<'))
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());
+
+Static_Cache::remove('upgrade');
 
 echo '<h2>Mise à jour terminée.</h2>
 <p><a href="'.WWW_URL.'admin/">Retour</a></p>';
