@@ -5,7 +5,7 @@
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?a" media="all" />
     {if isset($js) || isset($custom_js)}
         <script type="text/javascript" src="{$admin_url}static/scripts/global.js"></script>
     {/if}
@@ -29,8 +29,8 @@
             <script type="text/javascript" src="{plugin_url file=$js}"></script>
         {/foreach}
     {/if}
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css" media="print" />
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css" media="handheld,screen and (max-width:981px)" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?a" media="print" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?a" media="handheld,screen and (max-width:981px)" />
     {if isset($config)}
         {custom_colors config=$config}
     {/if}
