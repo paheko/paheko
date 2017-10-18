@@ -12,7 +12,7 @@ class Journal
     protected function _getCurrentExercice()
     {
         $db = DB::getInstance();
-        $id = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
+        $id = $db->firstColumn('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
 
         if (!$id)
         {
@@ -33,8 +33,8 @@ class Journal
             return true;
 
         $db = DB::getInstance();
-        $id = $db->simpleQuerySingle('SELECT id FROM compta_exercices
-            WHERE cloture = 0 AND id = ? LIMIT 1;', false, (int)$id);
+        $id = $db->firstColumn('SELECT id FROM compta_exercices
+            WHERE cloture = 0 AND id = ? LIMIT 1;', (int)$id);
 
         if ($id)
             return true;
@@ -54,7 +54,7 @@ class Journal
         $credit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)';
 
         // L'actif augmente au débit, le passif au crédit
-        $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $id_compte);
+        $position = $db->firstColumn('SELECT position FROM compta_comptes WHERE id = ?;', $id_compte);
 
         if (($position & Comptes::ACTIF) || ($position & Comptes::CHARGE))
         {
@@ -65,14 +65,14 @@ class Journal
             $query = $credit . ' - ' . $debit;
         }
 
-        return $db->querySingle('SELECT ' . $query . ';');
+        return $db->firstColumn('SELECT ' . $query . ';');
     }
 
     public function getJournalCompte($compte, $inclure_sous_comptes = false)
     {
         $db = DB::getInstance();
 
-        $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $compte);
+        $position = $db->firstColumn('SELECT position FROM compta_comptes WHERE id = ?;', $compte);
 
         $exercice = $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
@@ -97,13 +97,13 @@ class Journal
             AND id_exercice = '.(int)$exercice.'
             ORDER BY date ASC;';
 
-        $result = $db->simpleStatementFetch($query);
+        $result = $db->get($query);
         $solde = 0.0;
 
         foreach ($result as &$row)
         {
-            $solde += $row['solde'];
-            $row['solde'] = $solde;
+            $solde += $row->solde;
+            $row->solde = $solde;
         }
 
         return $result;
@@ -117,7 +117,7 @@ class Journal
 
         $data['id_exercice'] = $this->_getCurrentExercice();
 
-        $db->simpleInsert('compta_journal', $data);
+        $db->insert('compta_journal', $data);
         $id = $db->lastInsertRowId();
 
         return $id;
@@ -128,15 +128,14 @@ class Journal
         $db = DB::getInstance();
 
         // Vérification que l'on peut éditer cette opération
-        if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
+        if (!$this->_checkOpenExercice($db->firstColumn('SELECT id_exercice FROM compta_journal WHERE id = ?;', $id)))
         {
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
 
         $this->_checkFields($data);
 
-        $db->simpleUpdate('compta_journal', $data,
-            'id = \''.trim($id).'\'');
+        $db->update('compta_journal', $data, $db->where('id', trim($id)));
 
         return true;
     }
@@ -146,16 +145,16 @@ class Journal
         $db = DB::getInstance();
 
         // Vérification que l'on peut éditer cette opération
-        if (!$this->_checkOpenExercice($db->simpleQuerySingle('SELECT id_exercice FROM compta_journal WHERE id = ?;', false, $id)))
+        if (!$this->_checkOpenExercice($db->firstColumn('SELECT id_exercice FROM compta_journal WHERE id = ?;', $id)))
         {
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
 
-        $db->exec('BEGIN;');
-        $db->simpleExec('DELETE FROM membres_operations WHERE id_operation = ?;', (int)$id);
-        $db->simpleExec('DELETE FROM compta_rapprochement WHERE id_operation = ?;', (int)$id);
-        $db->simpleExec('DELETE FROM compta_journal WHERE id = ?;', (int)$id);
-        $db->exec('END;');
+        $db->begin();
+        $db->delete('membres_operations', $db->where('id_operation', (int)$id));
+        $db->delete('compta_rapprochement', $db->where('id_operation', (int)$id));
+        $db->delete('compta_journal', $db->where('id', (int)$id));
+        $db->commit();
 
         return true;
     }
@@ -163,7 +162,7 @@ class Journal
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id = ?;', true, $id);
+        return $db->first('SELECT *, strftime(\'%s\', date) AS date FROM compta_journal WHERE id = ?;', $id);
     }
 
     /**
@@ -174,8 +173,7 @@ class Journal
     public function countForMember($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT COUNT(*) 
-            FROM compta_journal WHERE id_auteur = ?;', false, (int)$id);
+        return $db->count('compta_journal', $db->where('id_auteur', $id));
     }
 
     /**
@@ -187,8 +185,8 @@ class Journal
     public function listForMember($id, $exercice)
     {
         $db = DB::getInstance();
-        return $db->simpleStatementFetch('SELECT * FROM compta_journal
-            WHERE id_auteur = ? AND id_exercice = ?;', \SQLITE3_ASSOC, (int)$id, (int)$exercice);
+        return $db->get('SELECT * FROM compta_journal
+            WHERE id_auteur = ? AND id_exercice = ?;', (int)$id, (int)$exercice);
     }
 
     /**
@@ -201,9 +199,9 @@ class Journal
         $db = DB::getInstance();
         $champ_id = Config::getInstance()->get('champ_identite');
 
-        return $db->simpleStatementFetch('SELECT id_membre, id_cotisation, m.'.$champ_id.' AS identite
+        return $db->get('SELECT id_membre, id_cotisation, m.'.$champ_id.' AS identite
             FROM membres_operations AS mo INNER JOIN membres AS m ON mo.id_membre = m.id
-            WHERE mo.id_operation = ?;', \SQLITE3_ASSOC, (int)$id);
+            WHERE mo.id_operation = ?;', (int)$id);
     }
 
     protected function _checkFields(&$data)
@@ -218,7 +216,7 @@ class Journal
         $data['libelle'] = trim($data['libelle']);
 
         if (!empty($data['moyen_paiement'])
-            && !$db->simpleQuerySingle('SELECT 1 FROM compta_moyens_paiement WHERE code = ?;', false, $data['moyen_paiement']))
+            && !$db->test('compta_moyens_paiement', $db->where('code', $data['moyen_paiement'])))
         {
             throw new UserException('Moyen de paiement invalide.');
         }
@@ -228,8 +226,8 @@ class Journal
             throw new UserException('Date vide ou invalide.');
         }
 
-        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_exercices WHERE cloture = 0
-            AND debut <= :date AND fin >= :date;', false, ['date' => $data['date']]))
+        if (!$db->test('compta_exercices', 'cloture = 0 AND debut <= :date AND fin >= :date;', 
+            ['date' => $data['date']]))
         {
             throw new UserException('La date ne correspond pas à l\'exercice en cours.');
         }
@@ -248,8 +246,7 @@ class Journal
                 $data['numero_cheque'] = null;
             }
 
-            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_moyens_paiement WHERE code = ? LIMIT 1;',
-                false, $data['moyen_paiement']))
+            if (!$db->test('compta_moyens_paiement', $db->where('code', $data['moyen_paiement'])))
             {
                 throw new UserException('Moyen de paiement invalide.');
             }
@@ -277,14 +274,14 @@ class Journal
 
         if (!array_key_exists('compte_debit', $data) || 
             (!is_null($data['compte_debit']) && 
-                !$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte_debit'])))
+                !$db->test('compta_comptes', $db->where('id', $data['compte_debit']))))
         {
             throw new UserException('Compte débité inconnu.');
         }
 
         if (!array_key_exists('compte_credit', $data) || 
             (!is_null($data['compte_credit']) && 
-                !$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte_credit'])))
+                !$db->test('compta_comptes', $db->where('id', $data['compte_credit']))))
         {
             throw new UserException('Compte crédité inconnu.');
         }
@@ -299,7 +296,7 @@ class Journal
 
         if (isset($data['id_categorie']))
         {
-            if (!$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, (int)$data['id_categorie']))
+            if (!$db->test('compta_categories', $db->where('id', (int)$data['id_categorie'])))
             {
                 throw new UserException('Catégorie inconnue.');
             }
@@ -314,6 +311,20 @@ class Journal
         if (isset($data['id_auteur']))
         {
             $data['id_auteur'] = (int)$data['id_auteur'];
+        }
+
+        if (empty($data['id_projet']))
+        {
+            $data['id_projet'] = null;
+        }
+        elseif (isset($data['id_projet']))
+        {
+            $data['id_projet'] = (int)$data['id_projet'];
+
+            if (!$db->test('compta_projets', $db->where('id', $data['id_projet'])))
+            {
+                throw new UserException('Projet inconnu.');
+            }
         }
 
         return true;
@@ -355,7 +366,7 @@ class Journal
         $query .= ' AND id_exercice = ' . (int)$exercice;
         $query .= ' ORDER BY date;';
 
-        return $db->simpleStatementFetch($query);
+        return $db->get($query);
     }
 
     public function searchSQL($query)
@@ -396,7 +407,7 @@ class Journal
         $db = DB::getInstance();
 
         $tables = [
-            'journal'   =>  $db->querySingle('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'compta_journal\';'),
+            'journal'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'compta_journal\';'),
         ];
 
         return $tables;

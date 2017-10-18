@@ -3,12 +3,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$classe = (int) Utils::get('classe');
+$classe = (int) qg('classe');
 
 $tpl->assign('classe', $classe);
 
@@ -33,5 +30,3 @@ function tpl_get_position($pos)
 $tpl->register_modifier('get_position', 'Garradin\tpl_get_position');
 
 $tpl->display('admin/compta/comptes/index.tpl');
-
-?>

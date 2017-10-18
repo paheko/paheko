@@ -1,12 +1,10 @@
 {include file="admin/_head.tpl" title="Modifier une catégorie" current="compta/categories"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{include file="admin/compta/categories/_nav.tpl" current=null}
 
-<form method="post" action="{$self_url|escape}">
+{form_errors}
+
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Modifier une catégorie</legend>
@@ -19,7 +17,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_edit_cat_`$cat.id`"}
+        {csrf_field key="compta_edit_cat_%s"|args:$cat.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

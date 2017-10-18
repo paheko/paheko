@@ -5,20 +5,20 @@
 {/if}
 
 <ul class="actions">
-    {if $user.droits.wiki >= Garradin\Membres::DROIT_ECRITURE}
-        <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id|escape}{/if}"><strong>Créer une nouvelle page</strong></a></li>
+    {if $session->canAccess('wiki', Garradin\Membres::DROIT_ECRITURE)}
+        <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id}{/if}"><strong>Créer une nouvelle page</strong></a></li>
     {/if}
     {if $can_edit}
-        <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id|escape}">Éditer</a></li>
+        <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id}">Éditer</a></li>
     {/if}
     {if $can_read && $page && $page.contenu}
-        <li><a href="{$www_url}admin/wiki/historique.php?id={$page.id|escape}">Historique</a>
+        <li><a href="{$www_url}admin/wiki/historique.php?id={$page.id}">Historique</a>
         {if $page.droit_lecture == Garradin\Wiki::LECTURE_PUBLIC}
-            <li><a href="{$www_url}{$page.uri|escape}">Voir sur le site</a>
+            <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a>
         {/if}
     {/if}
-    {if $user.droits.wiki >= Garradin\Membres::DROIT_ADMIN}
-        <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id|escape}">Supprimer</a></li>
+    {if $session->canAccess('wiki', Garradin\Membres::DROIT_ADMIN)}
+        <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
     {/if}
 </ul>
 
@@ -30,7 +30,7 @@
             <li><a href="./">Wiki</a></li>
             {if !empty($breadcrumbs)}
             {foreach from=$breadcrumbs item="crumb"}
-            <li><a href="?{$crumb.uri|escape}">{$crumb.titre|escape}</a></li>
+            <li><a href="?{$crumb.uri}">{$crumb.titre}</a></li>
             {/foreach}
             {/if}
         </ul>
@@ -45,7 +45,7 @@
         <form method="post" action="{$www_url}admin/wiki/creer.php">
             <p class="submit">
                 {csrf_field key="wiki_create"}
-                <input type="hidden" name="titre" value="{$uri|escape}" />
+                <input type="hidden" name="titre" value="{$uri}" />
                 <input type="submit" name="create" value="Créer cette page" />
             </p>
         </form>
@@ -57,7 +57,7 @@
             <h4>Dans cette rubrique</h4>
             <ul>
             {foreach from=$children item="child"}
-                <li><a href="?{$child.uri|escape}">{$child.titre|escape}</a></li>
+                <li><a href="?{$child.uri}">{$child.titre}</a></li>
             {/foreach}
             </ul>
         </div>
@@ -80,11 +80,11 @@
                     </p>
                 </div>
                 <div class="wikiContent" style="display: none;" id="wikiEncryptedContent">
-                    {$page.contenu.contenu|escape}
+                    {$page.contenu.contenu}
                 </div>
             {else}
                 <div class="wikiContent">
-                    {$page.contenu.contenu|format_wiki|liens_wiki:'?'}
+                    {$page.contenu.contenu|raw|format_wiki|liens_wiki:'?'}
                 </div>
             {/if}
 
@@ -98,7 +98,7 @@
                     {foreach from=$images item="file"}
                         <li>
                             <figure>
-                                <a href="{$file.url|escape}"><img src="{$file.thumb|escape}" alt="" title="{$file.nom|escape}" /></a>
+                                <a class="internal-image" href="{$file.url}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
                             </figure>
                         </li>
                     {/foreach}
@@ -109,8 +109,8 @@
                 <ul class="files">
                     {foreach from=$fichiers item="file"}
                         <li>
-                            <aside class="fichier" class="internal-file"><a href="{$file.url|escape}">{$file.nom|escape}</a>
-                            <small>({$file.type|escape}, {$file.taille|format_bytes})</small>
+                            <aside class="fichier" class="internal-file"><a href="{$file.url}">{$file.nom}</a>
+                            <small>({$file.type}, {$file.taille|format_bytes})</small>
                        </li>
                     {/foreach}
                 </ul>
@@ -120,8 +120,8 @@
 
             <p class="wikiFooter">
                 Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
-                {if $user.droits.membres >= Garradin\Membres::DROIT_ACCES}
-                par <a href="{$www_url}admin/membres/fiche.php?id={$page.contenu.id_auteur|escape}">{$auteur|escape}</a>
+                {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
+                par <a href="{$www_url}admin/membres/fiche.php?id={$page.contenu.id_auteur}">{$auteur}</a>
                 {/if}
             </p>
         {/if}

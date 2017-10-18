@@ -28,7 +28,8 @@ aside.fichier a {
     margin-right: 1em;
     padding: .5em;
     padding-left: 1.8em;
-    border: 1px solid #ccc;
+    border: 1px solid #999;
+    background: #eee;
     border-radius: .5em;
     background-repeat: no-repeat;
     background-position: .5em center;
@@ -37,7 +38,7 @@ aside.fichier a {
 }
 
 aside.fichier a:hover {
-    background-color: #eee;
+    background-color: #ccc;
     color: darkred;
 }
 
@@ -74,7 +75,6 @@ aside.fichier a:hover {
     font-size: .8em;
 }
 
-
 .imageBrowser {
     position: fixed;
     top: 0;
@@ -85,12 +85,14 @@ aside.fichier a:hover {
     background: rgb(0, 0, 0);
     background: rgba(0, 0, 0, 0.75);
     text-align: center;
+    transition: opacity .5s;
 }
 
 .imageBrowser figure {
     margin: 5%;
     width: 90%;
     height: 90%;
+    transition: all .5s;
 }
 
 .imageBrowser figure img {
@@ -106,5 +108,338 @@ aside.fichier a:hover {
     max-width: 90%;
     border-radius: .5em;
     cursor: pointer;
-    transition: all .5s;
+}
+
+
+fieldset.wikiText {
+    border: none;
+    padding: 0;
+}
+
+fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
+    float: right;
+    width: 35%;
+    margin-left: 3%;
+    clear: right;
+}
+
+fieldset.wikiMain input[type=text] {
+    min-width: 0;
+}
+
+#encryptPasswordDisplay {
+    cursor: help;
+    background: #ddd;
+}
+
+fieldset.wikiEncrypt .help {
+    font-size: .9em;
+}
+
+fieldset.wikiMain #f_titre {
+    width: 90%;
+    font-size: 14pt;
+}
+
+fieldset.wikiMain #f_uri {
+    width: 90%;
+}
+
+fieldset.wikiRights dl {
+    font-size: 10pt;
+}
+
+fieldset.wikiRevision  {
+    clear: both;
+}
+
+fieldset.wikiRevision #f_modification {
+    width: 90%;
+}
+
+.wikiFiles {
+    text-align: center;
+}
+
+.wikiFooter, .wikiFiles {
+    font-size: 0.8em;
+    color: #666;
+    border-top: 0.1em solid #ccc;
+    clear: both;
+}
+
+.wikiMain samp {
+    background: #eee;
+    padding: 0.2em 0.3em;
+}
+
+.wikiChildren {
+    margin: 1em 0 1em 1em;
+    border: .1em solid #999;
+    border-radius: .5em;
+    padding: 1em;
+    background: rgba(255, 255, 255, 0.5);
+    float: right;
+    clear: right;
+    width: 25%;
+}
+
+.wikiChildren ul {
+    color: #ccc;
+    list-style-type: square;
+    margin-left: 1em;
+}
+
+.wikiTree ul {
+    margin-left: 1em;
+    list-style-type: none;
+}
+
+.wikiTree ul ul {
+    margin-left: 2em;
+}
+
+.wikiTree a {
+    color: #666;
+}
+
+.wikiTree h3:before {
+    content: "▸";
+    display: inline;
+    margin-right: .5em;
+}
+
+.wikiTree li {
+    margin: 0.2em 0;
+}
+
+.wikiTree h3 {
+    font-size: 1em;
+    font-weight: normal;
+}
+
+.wikiTree .current > h3 a {
+    font-weight: bold;
+    color: #000;
+}
+
+.wikiTree .choice {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.breadCrumbs {
+    margin-bottom: .8em;
+    font-size: .9em;
+    color: #999;
+}
+
+.breadCrumbs ul, .breadCrumbs li {
+    list-style-type: none;
+    display: inline;
+}
+
+.breadCrumbs li:before {
+    content: "> ";
+}
+
+.breadCrumbs li a {
+    color: #333;
+}
+
+.wikiSearch {
+}
+
+.wikiSearch fieldset {
+    padding: .3em;
+}
+
+.wikiSearch input[type=text] {
+    padding: .3em;
+}
+
+.wikiResults h3 {
+    font-weight: normal;
+    margin-bottom: .3em;
+}
+
+.wikiResults p {
+    margin-bottom: .8em;
+    font-size: .9em;
+}
+
+.wikiRevisions .length ins {
+    text-decoration: none;
+    color: green;
+}
+
+.wikiRevisions .length del {
+    text-decoration: none;
+    color: red;
+}
+
+.wikiRevisions .length i {
+    font-style: normal;
+    color: gray;
+}
+
+div.wikiRevision {
+    width: 48%;
+    margin: 1em 1%;
+    text-align: center;
+    float: left;
+}
+
+div.wikiRevision h3 {
+    font-size: 1em;
+}
+
+div.wikiRevision h4 {
+    font-weight: normal;
+    font-size: .9em;
+}
+
+.diff .ins {
+    background: #cfc;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fcc;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-family: Mono;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.diff ins { background: #9f9; }
+.diff del { background: #f99; }
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #fff;
+    color: #fff;
+    margin: .2em .4em;
+}
+
+.diff .separator {
+    background: #ccc;
+}
+
+.diff {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .leftChange b, .diff .rightChange b {
+    text-shadow: 1px 1px 1px #ccc;
+    color: #666;
+}
+
+form#f_upload fieldset {
+    position: relative;
+}
+
+form .fileUpload .uploadHelper_progress {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    right: 1em;
+    text-align: center;
+    padding: 1em;
+    background: #ddd;
+    box-shadow: 0px 0px 5px #999;
+    border-radius: .5em;
+}
+
+form .fileUpload progress {
+    width: 50%;
+}
+
+form#insertImage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.75);
+}
+
+form#insertImage fieldset {
+    box-shadow: 5px 5px 10px #000;
+    margin: 1em;
+    padding: 1em;
+    background: #ddd;
+    border-radius: .5em;
+    text-align: center;
+}
+
+form#insertImage dt {
+    margin: .2em 0;
+}
+
+form#insertImage .align input {
+    font-size: 1.2em;
+    line-height: 32px;
+    background: #fff;
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding: 5px;
+    padding-left: 42px;
+    border: 1px solid #999;
+    border-radius: 5px;
+    margin: .5em;
+}
+
+form#insertImage .align input[name=""] {
+    background-image: url("pics/img_flow.png");
+}
+
+form#insertImage .align input[name="gauche"] {
+    background-image: url("pics/img_left.png");
+}
+
+form#insertImage .align input[name="droite"] {
+    background-image: url("pics/img_right.png");
+}
+
+form#insertImage .align input[name="centre"] {
+    background-image: url("pics/img_center.png");
+}
+
+form#insertImage .cancel input {
+    font-size: 0.8em;
+    background: transparent;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: .5em;
+    color: #666;
+    cursor: pointer;
+}
+
+form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
+    cursor: pointer;
+    background-color: #eee;
+    color: darkred;
 }

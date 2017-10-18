@@ -4,7 +4,12 @@ namespace Garradin;
 
 class Sauvegarde
 {
-	const NEED_UPGRADE = 'nu';
+	const NEED_UPGRADE = 0x01 << 2;
+	const NOT_AN_ADMIN = 0x01 << 3;
+
+	const INTEGRITY_FAIL = 41;
+	const NOT_A_DB = 42;
+	const NO_APP_ID = 43;
 
 	/**
 	 * Renvoie la liste des fichiers SQLite sauvegardés
@@ -42,8 +47,17 @@ class Sauvegarde
 	 */
 	public function create($auto = false)
 	{
-		$backup = str_replace('.sqlite', ($auto ? '.auto.1' : date('.Y-m-d-His')) . '.sqlite', DB_FILE);
+		$suffix = is_string($auto) ? $auto : ($auto ? 'auto.1' : date('Y-m-d-His'));
+
+		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
+		
+		// Acquire a shared lock before copying
+		$db = DB::getInstance();
+		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
+		
 		copy(DB_FILE, $backup);
+		
+		$db->exec('END TRANSACTION;');
 		return basename($backup);
 	}
 
@@ -141,6 +155,10 @@ class Sauvegarde
 	 */
 	public function dump()
 	{
+		// Acquire a shared lock before copying
+		$db = DB::getInstance();
+		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
+
 		$in = fopen(DB_FILE, 'r');
         $out = fopen('php://output', 'w');
 
@@ -150,6 +168,12 @@ class Sauvegarde
         }
 
         fclose($in);
+
+        $db->exec('END TRANSACTION;');
+
+        // Ajout du hash pour vérification intégrité
+        fwrite($out, sha1_file(DB_FILE));
+
         fclose($out);
         return true;
 	}
@@ -176,14 +200,31 @@ class Sauvegarde
 
 	/**
 	 * Restaure une copie distante (fichier envoyé)
-	 * @param  array  $file Tableau provenant de $_FILES
+	 * @param  array   $file    Tableau provenant de $_FILES
+	 * @param  integer $user_id ID du membre actuellement connecté, utilisé pour 
+	 * vérifier qu'il est toujours administrateur dans la sauvegarde
+	 * @param  boolean $check_integrity Vérifier l'intégrité de la sauvegarde avant de restaurer
 	 * @return boolean true
 	 */
-	public function restoreFromUpload($file, $user_id)
+	public function restoreFromUpload($file, $user_id, $check_integrity = true)
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error']))
 		{
 			throw new UserException('Le fichier n\'a pas été correctement envoyé. Essayer de le renvoyer à nouveau.');
+		}
+
+		if ($check_integrity)
+		{
+			$integrity = $this->checkIntegrity($file['tmp_name']);
+
+			if ($integrity === null)
+			{
+				throw new UserException('Le fichier fourni n\'est pas une base de donnée SQLite3.', self::NOT_A_DB);
+			}
+			elseif ($integrity === false)
+			{
+				throw new UserException('Le fichier fourni a été modifié par un programme externe.', self::INTEGRITY_FAIL);
+			}
 		}
 
 		$r = $this->restoreDB($file['tmp_name'], $user_id);
@@ -197,6 +238,52 @@ class Sauvegarde
 	}
 
 	/**
+	 * Vérifie l'intégrité d'une sauvegarde Garradin
+	 * @param  string $file Chemin absolu vers la base de donnée
+	 * @return boolean
+	 */
+	protected function checkIntegrity($file_path, $remove_hash = true)
+	{
+		$size = filesize($file_path);
+		$fp = fopen($file_path, 'r+');
+
+		$header = fread($fp, 16);
+
+		// Vérifie que le fichier est bien une base SQLite3
+		if ($header !== "SQLite format 3\000")
+		{
+			fclose($fp);
+			return null;
+		}
+
+		fseek($fp, -40, SEEK_END);
+
+		$hash = fread($fp, 40);
+
+		// Ne ressemble pas à un hash sha1
+		if (!preg_match('/[a-f0-9]{40}/', $hash))
+		{
+			fclose($fp);
+			return false;
+		}
+
+		$max = $size - 40;
+
+		// Suppression du hash
+		if ($remove_hash)
+		{
+			ftruncate($fp, $max);
+		}
+
+		fclose($fp);
+
+		$file_hash = sha1_file($file_path);
+
+		// Vérification du hash
+		return ($file_hash === $hash);
+	}
+
+	/**
 	 * Restauration de base de données, la fonction qui le fait vraiment
 	 * @param  string $file Chemin absolu vers la base de données à utiliser
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
@@ -204,6 +291,8 @@ class Sauvegarde
 	 */
 	protected function restoreDB($file, $user_id = false)
 	{
+		$return = 1;
+
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
 			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
@@ -211,11 +300,19 @@ class Sauvegarde
 		catch (\Exception $e)
 		{
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
-				'Message d\'erreur de SQLite : ' . $e->getMessage());
+				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
 
-		// Regardons ensuite si la base de données n'est pas corrompue
-		$check = $db->querySingle('PRAGMA integrity_check;');
+		try {
+			// Regardons ensuite si la base de données n'est pas corrompue
+			$check = $db->querySingle('PRAGMA integrity_check;', false);
+		}
+		catch (\Exception $e)
+		{
+			// Ici SQLite peut rejeter un message type "file is encrypted or is not a db"
+			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
+				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
+		}
 
 		if (strtolower(trim($check)) != 'ok')
 		{
@@ -232,26 +329,40 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni ne semble pas contenir de données liées à Garradin.');
 		}
 
+		// On récupère la version
+		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
+
+		// Vérification de l'AppID pour les versions récentes
+		if (version_compare($version, '0.8.0', '>='))
+		{
+			$appid = $db->querySingle('PRAGMA application_id;', false);
+
+			if ($appid !== DB::APPID)
+			{
+				throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
+			}
+		}
+
 		if ($user_id)
 		{
 			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories 
+			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories
 				WHERE id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
 				AND droit_config >= ' . Membres::DROIT_ADMIN . '
 				AND droit_connexion >= ' . Membres::DROIT_ACCES);
 
 			if (!$is_still_admin)
 			{
-				throw new UserException('Vous n\'êtes pas administrateur dans le fichier de sauvegarde fourni.');
+				$return |= self::NOT_AN_ADMIN;
 			}
 		}
 
-		// On récupère la version pour plus tard
-		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
 
 		$db->close();
 
 		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', DB_FILE);
+
+		DB::getInstance()->close();
 		
 		if (!rename(DB_FILE, $backup))
 		{
@@ -264,12 +375,22 @@ class Sauvegarde
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
 		}
 
-		if ($version != garradin_version())
+		if ($return & self::NOT_AN_ADMIN)
 		{
-			return self::NEED_UPGRADE;
+			// Forcer toutes les catégories à pouvoir gérer les droits
+			$db = DB::getInstance();
+			$db->update('membres_categories', [
+				'droit_membres' => Membres::DROIT_ADMIN,
+				'droit_connexion' => Membres::DROIT_ACCES
+			]);
 		}
 
-		return true;
+		if ($version != garradin_version())
+		{
+			$return |= self::NEED_UPGRADE;
+		}
+
+		return $return;
 	}
 
 	/**
@@ -288,6 +409,6 @@ class Sauvegarde
 	public function getDBFilesSize()
 	{
 		$db = DB::getInstance();
-		return (int) $db->simpleQuerySingle('SELECT SUM(taille) FROM fichiers_contenu;');
+		return (int) $db->firstColumn('SELECT SUM(taille) FROM fichiers_contenu;');
 	}
 }

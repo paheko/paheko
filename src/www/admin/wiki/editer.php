@@ -3,87 +3,83 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['wiki'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('wiki', Membres::DROIT_ECRITURE);
 
-if (!Utils::get('id') || !is_numeric(Utils::get('id')))
-{
-    throw new UserException('Numéro de page invalide.');
-}
+qv(['id' => 'required|numeric']);
 
-$page = $wiki->getById(Utils::get('id'));
-$error = false;
+$page = $wiki->getById(qg('id'));
+$date = false;
 
 if (!$page)
 {
     throw new UserException('Page introuvable.');
 }
 
-if (!empty($page['contenu']))
+if (!empty($page->contenu))
 {
-    $page['chiffrement'] = $page['contenu']['chiffrement'];
-    $page['contenu'] = $page['contenu']['contenu'];
+    $page->chiffrement = $page->contenu->chiffrement;
+    $page->contenu = $page->contenu->contenu;
 }
 
-if (Utils::post('date'))
+if (f('date'))
 {
-    $date = Utils::post('date') . ' ' . sprintf('%02d:%02d', Utils::post('date_h'), Utils::post('date_min'));
-}
-else
-{
-    $date = false;
+    $date = f('date') . ' ' . sprintf('%02d:%02d', f('date_h'), f('date_min'));
 }
 
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('wiki_edit_'.$page['id']))
+    $form->check('wiki_edit_' . $page->id, [
+        'titre'          => 'required',
+        'uri'            => 'required',
+        'parent'         => 'numeric',
+        'droit_lecture'  => 'numeric',
+        'droit_ecriture' => 'numeric',
+    ]);
+    
+    if ($page->date_modification > (int) f('debut_edition'))
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $form->addError('La page a été modifiée par quelqu\'un d\'autre depuis que vous avez commencé l\'édition.');
     }
-    elseif ($page['date_modification'] > (int) Utils::post('debut_edition'))
-    {
-        $error = 'La page a été modifiée par quelqu\'un d\'autre depuis que vous avez commencé l\'édition.';
-    }
-    else
+
+    if (!$form->hasErrors())
     {
         try {
-            $wiki->edit($page['id'], [
-                'titre'         =>  Utils::post('titre'),
-                'uri'           =>  Utils::post('uri'),
-                'parent'        =>  Utils::post('parent'),
-                'droit_lecture' =>  Utils::post('droit_lecture'),
-                'droit_ecriture'=>  Utils::post('droit_ecriture'),
+            $wiki->edit($page->id, [
+                'titre'         =>  f('titre'),
+                'uri'           =>  f('uri'),
+                'parent'        =>  f('parent'),
+                'droit_lecture' =>  f('droit_lecture'),
+                'droit_ecriture'=>  f('droit_ecriture'),
                 'date_creation' =>  $date,
             ]);
 
-            $wiki->editRevision($page['id'], (int) Utils::post('revision_edition'), [
-                'contenu'       =>  Utils::post('contenu'),
-                'modification'  =>  Utils::post('modification'),
-                'id_auteur'     =>  $user['id'],
-                'chiffrement'   =>  Utils::post('chiffrement'),
+            $wiki->editRevision($page->id, (int) f('revision_edition'), [
+                'contenu'      =>  f('contenu'),
+                'modification' =>  f('modification'),
+                'id_auteur'    =>  $user->id,
+                'chiffrement'  =>  f('chiffrement'),
             ]);
 
-            $page = $wiki->getById($page['id']);
+            $page = $wiki->getById($page->id);
 
-            Utils::redirect('/admin/wiki/?'.$page['uri']);
+            Utils::redirect('/admin/wiki/?'.$page->uri);
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$parent = (int) Utils::post('parent') ?: (int) $page['parent'];
+$parent = (int) f('parent') ?: (int) $page->parent;
 $tpl->assign('parent', $parent ? $wiki->getTitle($parent) : 0);
 
-$tpl->assign('error', $error);
 $tpl->assign('page', $page);
 
+$tpl->assign('wiki', $wiki);
+
 $tpl->assign('time', time());
-$tpl->assign('date', $date ? strtotime($date) : $page['date_creation']);
+$tpl->assign('date', $date ? strtotime($date) : $page->date_creation);
 
 $tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
 

@@ -1,14 +1,7 @@
 {include file="admin/_head.tpl" title="Connexion"}
 
-{if $error}
-    <p class="error">
-        {if $error == 'OTHER'}
-            Une erreur est survenue, merci de réessayer.
-        {else}
-            Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe.
-        {/if}
-    </p>
-{/if}
+{form_errors}
+{show_error if=$fail message="Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe."}
 
 {if !$ssl_enabled && $prefer_ssl}
     <p class="alert">
@@ -18,13 +11,13 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Connexion</legend>
         <dl>
             <dt><label for="f_id">{$champ.title}</label></dt>
-            <dd><input type="text" name="id" id="f_id" value="{form_field name=id}" /></dd>
+            <dd><input type="text" name="_id" id="f_id" value="{form_field name=_id}" /></dd>
             <dt><label for="f_passe">Mot de passe</label></dt>
             <dd><input type="password" name="passe" id="f_passe" value="" />
                 {if $ssl_enabled}
@@ -40,6 +33,7 @@
                     {/if}
                 {/if}
             </dd>
+            <dd><label><input type="checkbox" name="permanent" value="1" /> Rester connecté‑e</label></dd>
         </dl>
     </fieldset>
 

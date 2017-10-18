@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8" />
-    <title>[(#TITRE) - ]#NOM_ASSO</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
-    <link rel="stylesheet" type="text/css" href="[(#URL_CSS_DEFAUT)]" media="screen,projection,handheld" />
-    <link rel="alternate" type="application/atom+xml" title="Actualité de #NOM_ASSO" href="#URL_ATOM" />
-    <!--[if lte IE 8]>
-    <script type="text/javascript">
-  	'article aside footer header nav section time'.replace(/\w+/g,function(n){document.createElement(n)})
+	<meta charset="utf-8" />
+	<title>[(#TITRE) - ]#NOM_ASSO</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
+	<link rel="stylesheet" type="text/css" href="[(#URL_CSS_DEFAUT)]?2017" media="screen,projection,handheld" />
+	<link rel="alternate" type="application/atom+xml" title="Actualité de #NOM_ASSO" href="#URL_ATOM" />
+	<!--[if lte IE 8]>
+	<script type="text/javascript">
+	'article aside footer header nav section time'.replace(/\w+/g,function(n){document.createElement(n)})
 	</script>
-    <![endif]-->
+	<![endif]-->
 </head>
 
 <body>
@@ -25,14 +25,14 @@
 </header>
 
 <header class="main">
-    <h1><a href="#URL_RACINE">#NOM_ASSO</a></h1>
-    [<h4>(#ADRESSE_ASSO)</h4>]
+	<h1><a href="#URL_RACINE">#NOM_ASSO</a></h1>
+	[<h4>(#ADRESSE_ASSO)</h4>]
 
 	<B_menu>
 	<nav>
 		<ul>
 		<BOUCLE_menu(RUBRIQUES){parent=0}{par titre}>
-		    <li><a href="#URL/">#TITRE</a></li>
+			<li><a href="#URL/">#TITRE</a></li>
 		</BOUCLE_menu>
 		</ul>
 	</nav>

@@ -1,43 +1,42 @@
 <?php
+
 namespace Garradin;
 
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
-
-if (trim(Utils::get('c')))
+if (trim(qg('c')))
 {
-    if ($membres->recoverPasswordConfirm(Utils::get('c')))
+    if ($session->recoverPasswordConfirm(qg('c')))
     {
         Utils::redirect('/admin/password.php?new_sent');
     }
 
-    $error = 'EXPIRED';
+    $form->addError('Le lien que vous avez suivi est invalide ou a expiré.');
 }
-elseif (!empty($_POST['recover']))
+elseif (f('recover'))
 {
-    if (!Utils::CSRF_check('recoverPassword'))
+    $form->check('recoverPassword', [
+        'id' => 'required'
+    ]);
+
+    if (!$form->hasErrors())
     {
-        $error = 'OTHER';
-    }
-    else
-    {
-        if (trim(Utils::post('id')) && $membres->recoverPasswordCheck(Utils::post('id')))
+        if (trim(f('id')) && $session->recoverPasswordCheck(f('id')))
         {
             Utils::redirect('/admin/password.php?sent');
         }
 
-        $error = 'MAIL';
+        $form->addError('Ce membre n\'a pas d\'adresse email enregistrée ou n\'a pas le droit de se connecter.');
     }
 }
 
-if (!$error && isset($_GET['sent']))
+if (!$form->hasErrors() && null !== qg('sent'))
 {
     $tpl->assign('sent', true);
 }
-elseif (!$error && isset($_GET['new_sent']))
+elseif (!$form->hasErrors() && null !== qg('new_sent'))
 {
     $tpl->assign('new_sent', true);
 }
@@ -49,8 +48,4 @@ $champ = $champs->get($config->get('champ_identifiant'));
 
 $tpl->assign('champ', $champ);
 
-$tpl->assign('error', $error);
-
 $tpl->display('admin/password.tpl');
-
-?>

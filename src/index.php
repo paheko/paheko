@@ -5,9 +5,9 @@
 // auquel cas on limite les dégâts
 
 // Juste une vérification avant de continuer
-if (!version_compare(phpversion(), '5.4.0', '>='))
+if (!version_compare(phpversion(), '5.6.0', '>='))
 {
-	die('PHP 5.4.0 ou supérieur est nécessaire au fonctionnement de Garradin.');
+	die('PHP 5.6.0 ou supérieur est nécessaire au fonctionnement de Garradin.');
 }
 
 header('Location: www/');

@@ -51,8 +51,8 @@ CREATE TABLE compta_journal
 	moyen_paiement TEXT DEFAULT NULL,
 	numero_cheque TEXT DEFAULT NULL,
 
-	compte_debit INTEGER, -- N° du compte dans le plan
-	compte_credit INTEGER, -- N° du compte dans le plan
+	compte_debit TEXT, -- N° du compte dans le plan
+	compte_credit TEXT, -- N° du compte dans le plan
 
 	id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
 	id_auteur INTEGER NULL,

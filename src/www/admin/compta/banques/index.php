@@ -6,72 +6,56 @@ require_once __DIR__ . '/../_inc.php';
 $banques = new Compta\Comptes_Bancaires;
 $journal = new Compta\Journal;
 
-$error = false;
-
-if (Utils::post('add'))
+if (f('add') && $form->check('compta_ajout_banque'))
 {
-	if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-	{
-	    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-	}
+	$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-    if (!Utils::CSRF_check('compta_ajout_banque'))
+    try
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        try
+        $id = $banques->add([
+            'libelle' => f('libelle'),
+            'banque'  => f('banque'),
+            'iban'    => f('iban'),
+            'bic'     => f('bic'),
+        ]);
+
+        if (f('solde') > 0)
         {
-            $id = $banques->add([
-                'libelle'       =>  Utils::post('libelle'),
-                'banque'        =>  Utils::post('banque'),
-                'iban'          =>  Utils::post('iban'),
-                'bic'           =>  Utils::post('bic'),
+        	$exercices = new Compta\Exercices;
+        	$exercice = $exercices->getCurrent();
+        	$solde = f('solde');
+
+        	$journal->add([
+                'libelle'       =>  'Solde initial',
+                'montant'       =>  abs($solde),
+                'date'          =>  gmdate('Y-m-d', $exercice->debut),
+                'compte_credit' =>  $solde > 0 ? null : $id,
+                'compte_debit'  =>  $solde < 0 ? null : $id,
+                'numero_piece'  =>  null,
+                'remarques'     =>  'Opération automatique à l\'ajout du compte dans la liste des comptes bancaires',
+                'id_auteur'     =>  $user->id,
             ]);
-
-            if (Utils::post('solde') > 0)
-            {
-            	$exercices = new Compta\Exercices;
-            	$exercice = $exercices->getCurrent();
-            	$solde = Utils::post('solde');
-
-            	$journal->add([
-                    'libelle'       =>  'Solde initial',
-                    'montant'       =>  abs($solde),
-                    'date'          =>  gmdate('Y-m-d', $exercice['debut']),
-                    'compte_credit' =>  $solde > 0 ? null : $id,
-                    'compte_debit'  =>  $solde < 0 ? null : $id,
-                    'numero_piece'  =>  null,
-                    'remarques'     =>  'Opération automatique à l\'ajout du compte dans la liste des comptes bancaires',
-                    'id_auteur'     =>  $user['id'],
-                ]);
-            }
-
-            Utils::redirect('/admin/compta/banques/');
         }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
-	}
+
+        Utils::redirect('/admin/compta/banques/');
+    }
+    catch (UserException $e)
+    {
+        $form->addError($e->getMessage());
+    }
 }
 
 $liste = $banques->getList();
 
 foreach ($liste as &$banque)
 {
-    $banque['solde'] = $journal->getSolde($banque['id']);
+    $banque->solde = $journal->getSolde($banque->id);
 }
 
 $tpl->assign('liste', $liste);
 
-function tpl_format_iban($iban)
-{
+$tpl->register_modifier('format_iban', function ($iban) {
     return implode(' ', str_split($iban, 4));
-}
-
-$tpl->register_modifier('format_iban', 'Garradin\tpl_format_iban');
-$tpl->assign('error', $error);
+});
 
 $tpl->display('admin/compta/banques/index.tpl');

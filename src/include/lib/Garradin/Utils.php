@@ -2,10 +2,13 @@
 
 namespace Garradin;
 
+use KD2\Security;
+use KD2\Form;
+use KD2\Translate;
+use KD2\SMTP;
+
 class Utils
 {
-    static protected $country_list = null;
-
     static protected $skriv = null;
 
     static private $french_date_names = [
@@ -118,7 +121,7 @@ class Utils
             return false;
     }
 
-    static public function getSelfURL($no_qs = false)
+    static public function getSelfURL($qs = true)
     {
         $uri = self::getRequestUri();
 
@@ -127,21 +130,18 @@ class Utils
             $uri = substr($uri, strlen(WWW_URI));
         }
 
-        if ($no_qs && (strpos($uri, '?') !== false))
+        if ($qs !== true && (strpos($uri, '?') !== false))
         {
             $uri = substr($uri, 0, strpos($uri, '?'));
         }
 
+        if (is_array($qs))
+        {
+            $uri .= '?' . http_build_query($qs);
+        }
+
         return WWW_URL . $uri;
     }
-
-    static public function disableHttpCaching()
-    {
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-        header('Pragma: no-cache');
-    }
-
 
     public static function redirect($destination=false, $exit=true)
     {
@@ -181,69 +181,6 @@ class Utils
           exit();
     }
 
-
-    static protected function _sessionStart($force = false)
-    {
-        if (!isset($_SESSION) && ($force || isset($_COOKIE[session_name()])))
-        {
-            session_start();
-        }
-        return true;
-    }
-
-    static public function CSRF_create($key)
-    {
-        self::_sessionStart(true);
-
-        if (!isset($_SESSION['csrf']))
-        {
-            $_SESSION['csrf'] = [];
-        }
-
-        $_SESSION['csrf'][$key] = sha1($key . uniqid($key, true) . time());
-        return $_SESSION['csrf'][$key];
-    }
-
-    static public function CSRF_check($key, $hash=null)
-    {
-        self::_sessionStart();
-
-        if (is_null($hash))
-        {
-            $name = self::CSRF_field_name($key);
-
-            if (!isset($_POST[$name]))
-                return false;
-
-            $hash = $_POST[$name];
-        }
-
-        if (empty($_SESSION['csrf'][$key]))
-            return false;
-
-        if ($_SESSION['csrf'][$key] != $hash)
-            return false;
-
-        unset($_SESSION['csrf'][$key]);
-
-        return true;
-    }
-
-    static public function CSRF_field_name($key)
-    {
-        return 'gecko/'.base64_encode(sha1($key, true));
-    }
-
-    static public function post($key)
-    {
-        return isset($_POST[$key]) ? $_POST[$key] : '';
-    }
-
-    static public function get($key)
-    {
-        return isset($_GET[$key]) ? $_GET[$key] : '';
-    }
-
     static public function getIP()
     {
         if (!empty($_SERVER['REMOTE_ADDR']))
@@ -251,9 +188,9 @@ class Utils
         return '';
     }
 
-    static public function &getCountryList()
+    static public function getCountryList()
     {
-        return \KD2\Countries_FR::$countries;
+        return Translate::getCountriesList('fr');
     }
 
     static public function getCountryName($code)
@@ -381,6 +318,9 @@ class Utils
             self::$skriv = new \KD2\SkrivLite;
             self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivFichier']);
             self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
+
+            // Enregistrer d'autres extensions éventuellement
+            Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
         }
 
         $skriv =& self::$skriv;
@@ -435,51 +375,49 @@ class Utils
         return $str;
     }
 
-    static public function mail($to, $subject, $content, $additional_headers = [])
+    static public function mail($to, $subject, $content, array $headers = [], $pgp_key = null)
     {
         // Création du contenu du message
         $content = wordwrap($content);
         $content = trim($content);
 
         $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
-
-        // Construction des entêtes
-        $headers = '';
-
         $config = Config::getInstance();
 
-        if (empty($additional_headers['From']))
+        if (empty($headers['From']))
         {
-            $additional_headers['From'] = '"NE PAS REPONDRE" <'.$config->get('email_envoi_automatique').'>';
+            $headers['From'] = sprintf('"%s" <%s>', $config->get('nom_asso'), $config->get('email_envoi_automatique'));
         }
 
-        $additional_headers['MIME-Version'] = '1.0';
-        $additional_headers['Content-type'] = 'text/plain; charset=UTF-8';
-        $additional_headers['Return-Path'] = $config->get('email_envoi_automatique');
+        $headers['MIME-Version'] = '1.0';
+        $headers['Content-type'] = 'text/plain; charset=UTF-8';
+        $headers['Return-Path'] = $config->get('email_envoi_automatique');
 
-        foreach ($additional_headers as $name=>$value)
+        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
+        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
+
+        if ($pgp_key)
         {
-            $headers .= $name . ': '.$value."\r\n";
+            $content = Security::encryptWithPublicKey($pgp_key, $content);
         }
 
-        $headers = preg_replace("#(?<!\r)\n#si", "\r\n", $headers);
-
-        $subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
-
-        if (is_array($to))
+        if (!is_array($to))
         {
-            foreach ($to as $t)
+            $to = [$to];
+        }
+
+        foreach ($to as $recipient)
+        {
+            if (!self::_sendMail($recipient, $subject, $content, $headers))
             {
-                return self::_sendMail($t, $suject, $content, $headers);
+                throw new \RuntimeException('Impossible d\'envoyer l\'email');
             }
         }
-        else
-        {
-            return self::_sendMail($to, $subject, $content, $headers);
-        }
+
+        return true;
     }
 
-    static protected function _sendMail($to, $subject, $content, $headers)
+    static protected function _sendMail($to, $subject, $content, array $headers)
     {
         if (SMTP_HOST)
         {
@@ -497,7 +435,17 @@ class Utils
         }
         else
         {
-            return mail($to, $subject, $content, $headers);
+            // Encodage du sujet
+            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
+            $raw_headers = '';
+
+            // Sérialisation des entêtes
+            foreach ($headers as $name=>$value)
+            {
+                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
+            }
+
+            return mail($to, $subject, $content, $raw_headers);
         }
     }
 
@@ -527,14 +475,52 @@ class Utils
 
     static public function suggestPassword()
     {
-        return \KD2\Passphrase_FR::generate();
+        return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
     }
 
-    static public function checkIBAN($iban)
+    static public function checkIBAN($value)
     {
-        $iban = substr($iban, 4) . substr($iban, 0, 4);
-        $iban = str_replace(range('A', 'Z'), range(10, 35), $iban);
-        return (bcmod($iban, 97) == 1);
+        // Enlever les caractères indésirables (espaces, tirets),
+        $value = preg_replace('/[^A-Z0-9]/', '', strtoupper($value));
+        
+        // Supprimer les 4 premiers caractères et les replacer à la fin du compte
+        $value = substr($value, 4) . substr($value, 0, 4);
+
+        // Remplacer les lettres par des chiffres au moyen d'une table de conversion (A=10, B=11, C=12 etc.)
+        $value = str_replace(range('A', 'Z'), range(10, 35), $value);
+
+        // Diviser le nombre ainsi obtenu par 97
+        // Si le reste n'est pas égal à 1 l'IBAN est incorrect : Modulo de 97 égal à 1.
+        return (self::bcmod($value, 97) == 1);
+    }
+
+    /** 
+     * my_bcmod - get modulus (substitute for bcmod) 
+     * string my_bcmod ( string left_operand, int modulus ) 
+     * left_operand can be really big, but be carefull with modulus :( 
+     * by Andrius Baranauskas and Laurynas Butkus :) Vilnius, Lithuania 
+     * @link https://php.net/manual/fr/function.bcmod.php#38474
+     */ 
+    static public function bcmod($x, $y)
+    {
+        if (function_exists('\bcmod'))
+        {
+            return \bcmod($x, $y);
+        }
+
+        // how many numbers to take at once? carefull not to exceed (int)
+        $take = 5;
+        $mod = '';
+
+        do
+        {
+            $a = (int)$mod.substr( $x, 0, $take );
+            $x = substr( $x, $take );
+            $mod = $a % $y;
+        } 
+        while (strlen($x));
+
+        return (int)$mod;
     }
     
     static public function checkBIC($bic)
@@ -562,9 +548,10 @@ class Utils
             {
                 return $key . ' = ' . $value;
             }
-            elseif (is_array($value))
+            elseif (is_array($value) || is_object($value))
             {
                 $out = '';
+                $value = (array) $value;
                 foreach ($value as $row)
                 {
                     $out .= $get_ini_line($key . '[]', $row) . "\n";
@@ -580,7 +567,7 @@ class Utils
 
         foreach ($in as $key=>$value)
         {
-            if (is_array($value) && is_string($key))
+            if ((is_array($value) || is_object($value)) && is_string($key))
             {
                 $out .= '[' . $key . "]\n";
 
@@ -692,7 +679,7 @@ class Utils
         return $url;
     }
 
-    static public function find_csv_delim($fp)
+    static public function find_csv_delim(&$fp)
     {
         $line = '';
 
@@ -714,7 +701,27 @@ class Utils
         reset($delims);
 
         rewind($fp);
+
         return key($delims);
     }
 
+    static public function skip_bom(&$fp)
+    {
+        // Skip BOM
+        if (fgets($fp, 4) !== chr(0xEF) . chr(0xBB) . chr(0xBF))
+        {
+            fseek($fp, 0);
+        }
+    }
+
+    static public function row_to_csv($row)
+    {
+        $row = (array) $row;
+
+        array_walk($row, function ($field) {
+            return str_replace('"', '""', $field);
+        });
+
+        return '"' . implode('", "', $row) . '"';
+    }
 }

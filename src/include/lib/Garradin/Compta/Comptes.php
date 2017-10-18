@@ -8,7 +8,10 @@ use \Garradin\UserException;
 
 class Comptes
 {
-    const CAISSE = 530;
+    const CAISSE = '530';
+
+    const CHEQUE_A_ENCAISSER = '5112';
+    const CARTE_A_ENCAISSER = '5115';
 
     const PASSIF = 0x01;
     const ACTIF = 0x02;
@@ -17,40 +20,42 @@ class Comptes
 
     public function importPlan()
     {
-        $plan = json_decode(file_get_contents(\Garradin\ROOT . '/include/data/plan_comptable.json'), true);
+        $plan = json_decode(file_get_contents(\Garradin\ROOT . '/include/data/plan_comptable.json'));
 
         $db = DB::getInstance();
-        $db->exec('BEGIN;');
+        $db->begin();
         $ids = [];
 
         foreach ($plan as $id=>$compte)
         {
             $ids[] = $id;
 
-            if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $id))
+            if ($db->test('compta_comptes', $db->where('id', $id)))
             {
-                $db->simpleUpdate('compta_comptes', [
-                    'parent'    =>  $compte['parent'],
-                    'libelle'   =>  $compte['nom'],
-                    'position'  =>  $compte['position'],
+                $db->update('compta_comptes', [
+                    'parent'    =>  $compte->parent,
+                    'libelle'   =>  $compte->nom,
+                    'position'  =>  $compte->position,
                     'plan_comptable' => 1,
-                ], 'id = \''.$db->escapeString($id).'\'');
+                ], $db->where('id', $id));
             }
             else
             {
-                $db->simpleInsert('compta_comptes', [
+                $db->insert('compta_comptes', [
                     'id'        =>  $id,
-                    'parent'    =>  $compte['parent'],
-                    'libelle'   =>  $compte['nom'],
-                    'position'  =>  $compte['position'],
+                    'parent'    =>  $compte->parent,
+                    'libelle'   =>  $compte->nom,
+                    'position'  =>  $compte->position,
                     'plan_comptable' => 1,
                 ]);
             }
         }
 
-        $db->exec('DELETE FROM compta_comptes WHERE id NOT IN(\''.implode('\', \'', $ids).'\') AND plan_comptable = 1;');
+        // Supprime les comptes qui étaient dans l'ancien plan comptable
+        // mais pas dans le nouveau
+        $db->delete('compta_comptes', $db->where('id', 'NOT IN', $ids) . ' AND ' . $db->where('plan_comptable', 1));
 
-        $db->exec('END;');
+        $db->commit();
 
         return true;
     }
@@ -65,7 +70,7 @@ class Comptes
         {
             $new_id = $data['parent'];
             $letters = range('A', 'Z');
-            $sub_accounts = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes 
+            $sub_accounts = $db->getAssoc('SELECT id, id FROM compta_comptes 
                 WHERE parent = ? ORDER BY id COLLATE NOCASE ASC;', $data['parent']);
 
             foreach ($letters as $letter)
@@ -94,10 +99,10 @@ class Comptes
         }
         else
         {
-            $position = $db->simpleQuerySingle('SELECT position FROM compta_comptes WHERE id = ?;', false, $data['parent']);
+            $position = $db->firstColumn('SELECT position FROM compta_comptes WHERE id = ?;', $data['parent']);
         }
 
-        $db->simpleInsert('compta_comptes', [
+        $db->insert('compta_comptes', [
             'id'        =>  $new_id,
             'libelle'   =>  trim($data['libelle']),
             'parent'    =>  $data['parent'],
@@ -112,8 +117,10 @@ class Comptes
     {
         $db = DB::getInstance();
 
+        $id = trim($id);
+
         // Vérification que l'on peut éditer ce compte
-        if ($db->simpleQuerySingle('SELECT plan_comptable FROM compta_comptes WHERE id = ?;', false, $id))
+        if ($db->firstColumn('SELECT plan_comptable FROM compta_comptes WHERE id = ?;', $id))
         {
             throw new UserException('Ce compte fait partie du plan comptable et n\'est pas modifiable.');
         }
@@ -134,7 +141,7 @@ class Comptes
             $update['position'] = (int) trim($data['position']);
         }
 
-        $db->simpleUpdate('compta_comptes', $update, 'id = \''.$db->escapeString(trim($id)).'\'');
+        $db->update('compta_comptes', $update, $db->where('id', $id));
 
         return true;
     }
@@ -143,23 +150,25 @@ class Comptes
     {
         $db = DB::getInstance();
 
+        $id = trim($id);
+
         // Ne pas supprimer un compte qui est utilisé !
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', false, $id, $id))
+        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', $id, $id))
         {
             throw new UserException('Ce compte ne peut être supprimé car des opérations comptables y sont liées.');
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ? LIMIT 1;', false, $id))
+        if ($db->test('compta_comptes_bancaires', $db->where('id', $id)))
         {
             throw new UserException('Ce compte ne peut être supprimé car il est lié à un compte bancaire.');
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        if ($db->test('compta_categories', $db->where('compte', $id)))
         {
             throw new UserException('Ce compte ne peut être supprimé car des catégories y sont liées.');
         }
 
-        $db->simpleExec('DELETE FROM compta_comptes WHERE id = ?;', trim($id));
+        $db->delete('compta_comptes', $db->where('id', $id));
 
         return true;
     }
@@ -173,13 +182,15 @@ class Comptes
     {
         $db = DB::getInstance();
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
-                WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', false, $id, $id))
+        $id = trim($id);
+
+        if ($db->firstColumn('SELECT 1 FROM compta_journal
+                WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', $id, $id))
         {
             return false;
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        if ($db->test('compta_categories', $db->where('compte', $id)))
         {
             return false;
         }
@@ -192,19 +203,23 @@ class Comptes
      * @param  string $id Numéro du compte
      * @return boolean TRUE si le compte n'a pas d'écriture liée dans l'exercice courant
      */
-    public function canDisable($id)
+    public function canDisable($id, &$code = 0)
     {
         $db = DB::getInstance();
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
+        $id = trim($id);
+
+        if ($db->firstColumn('SELECT 1 FROM compta_journal
                 WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
-                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', false, $id, $id))
+                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', $id, $id))
         {
+            $code = 1;
             return false;
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        if ($db->test('compta_categories', $db->where('compte', $id)))
         {
+            $code = 2;
             return false;
         }
 
@@ -221,23 +236,23 @@ class Comptes
     public function disable($id)
     {
         $db = DB::getInstance();
-        
-        // Ne pas désactiver un compte utilisé dans l'exercice courant
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
-                WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
-                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', false, $id, $id))
+
+        $id = trim($id);
+
+        if (!$this->canDisable($id, $code))
         {
-            throw new UserException('Ce compte ne peut être désactivé car des écritures y sont liées sur l\'exercice courant. '
-                . 'Il faut supprimer ou ré-attribuer ces écritures avant de pouvoir supprimer le compte.');
+            if ($code === 1)
+            {
+                throw new UserException('Ce compte ne peut être désactivé car des écritures y sont liées sur l\'exercice courant. '
+                    . 'Il faut supprimer ou ré-attribuer ces écritures avant de pouvoir supprimer le compte.');
+            }
+            else
+            {
+                throw new UserException('Ce compte ne peut être désactivé car des catégories y sont liées.');
+            }
         }
 
-        // Ne pas désactiver un compte utilisé pour une catégorie
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
-        {
-            throw new UserException('Ce compte ne peut être désactivé car des catégories y sont liées.');
-        }
-
-        return $db->simpleUpdate('compta_comptes', ['desactive' => 1], 'id = \''.$db->escapeString(trim($id)).'\'');
+        return $db->update('compta_comptes', ['desactive' => 1], $db->where('id', $id));
     }
 
     /**
@@ -247,45 +262,49 @@ class Comptes
      */
     public function isActive($id)
     {
-        return DB::getInstance()->simpleQuerySingle('SELECT 1 
-            FROM compta_comptes WHERE id = ? AND desactive != 1;', false, $id);
+        $db = DB::getInstance();
+        return $db->test('compta_comptes', $db->where('id', trim($id)) . ' AND ' . $db->where('desactive', '!=', 1));
     }
 
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM compta_comptes WHERE id = ?;', true, trim($id));
+        return $db->first('SELECT * FROM compta_comptes WHERE id = ?;', trim($id));
     }
 
     public function getList($parent = 0)
     {
         $db = DB::getInstance();
-        return $db->simpleStatementFetchAssocKey('SELECT id, * FROM compta_comptes WHERE parent = ? ORDER BY id;', SQLITE3_ASSOC, $parent);
+        return $db->getGrouped('SELECT id, * FROM compta_comptes WHERE parent = ? ORDER BY id;', $parent);
     }
 
-    public function getListAll($parent = 0)
+    public function getListAll()
     {
         $db = DB::getInstance();
-        return $db->queryFetchAssoc('SELECT id, libelle FROM compta_comptes ORDER BY id;');
+        return $db->getAssoc('SELECT id, libelle FROM compta_comptes ORDER BY id;');
     }
 
     public function listTree($parent_id = 0, $include_children = true)
     {
         $db = DB::getInstance();
 
-        if ($include_children)
+        if ($include_children && $parent_id)
         {
-            $parent_where = $parent_id ? 'parent LIKE \''.$db->escapeString($parent_id).'%\' ' : '1';
+            $where = $db->where('parent', 'LIKE', $parent_id . '%');
+        }
+        elseif ($include_children && !$parent_id)
+        {
+            $where = '1';
         }
         else
         {
-            $parent_where = $parent_id ? 'parent = \''.$db->escapeString($parent_id).'\' ' : 'parent = 0';
+            $where = $db->where('parent', !$parent_id ? (int) $parent_id : (string) $parent_id);
         }
 
-        $query = 'SELECT * FROM compta_comptes WHERE id = \'%s\' OR %s ORDER BY id;';
-        $query = sprintf($query, $db->escapeString($parent_id), $parent_where);
+        $query = 'SELECT * FROM compta_comptes WHERE %s OR %s ORDER BY id;';
+        $query = sprintf($query, $db->where('id', (string) $parent_id), $where);
 
-        return $db->simpleStatementFetch($query);
+        return $db->get($query);
     }
 
     protected function _checkFields(&$data, $force_parent_check = false)
@@ -304,7 +323,7 @@ class Comptes
             $force_parent_check = true;
             $data['id'] = trim($data['id']);
 
-            if ($db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['id']))
+            if ($db->test('compta_comptes', $db->where('id', $data['id'])))
             {
                 throw new UserException('Le compte numéro '.$data['id'].' existe déjà.');
             }
@@ -317,7 +336,7 @@ class Comptes
                 throw new UserException('Le compte ne peut pas ne pas avoir de compte parent.');
             }
 
-            if (!($id = $db->simpleQuerySingle('SELECT id FROM compta_comptes WHERE id = ?;', false, $data['parent'])))
+            if (!($id = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $data['parent'])))
             {
                 throw new UserException('Le compte parent indiqué n\'existe pas.');
             }

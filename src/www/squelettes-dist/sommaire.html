@@ -2,10 +2,10 @@
 
 <BOUCLE_une(ARTICLES){par date}{inverse}{0,1}>
 <section class="articles">
-    <article>
-    <h1><a href="#URL">#TITRE</a></h1>
-    <h5>Posté : [(#DATE_CREATION|date_intelligente)]</h5>
-    <p>[(#TEXTE|formatter_texte)]</p>
+	<article>
+	<h1><a href="#URL">#TITRE</a></h1>
+	<h5>Posté : [(#DATE_CREATION|date_intelligente)]</h5>
+	<p>[(#TEXTE|formatter_texte)]</p>
 	</article>
 </section>
 </BOUCLE_une>
@@ -13,10 +13,10 @@
 <B_derniers>
 	<section class="articles">
 	<BOUCLE_derniers(ARTICLES){par date}{inverse}{1,9}>
-	    <article>
-	    <h3><a href="#URL">#TITRE</a></h3>
-	    <h5>Posté : [(#DATE_CREATION|date_intelligente)]</h5>
-	    <p>[(#TEXTE|supprimer_spip|supprimer_tags|couper{200})]</p>
+		<article>
+		<h3><a href="#URL">#TITRE</a></h3>
+		<h5>Posté : [(#DATE_CREATION|date_intelligente)]</h5>
+		<p>[(#TEXTE|supprimer_skriv|couper{200})]</p>
 		</article>
 	</BOUCLE_derniers>
 	</section>

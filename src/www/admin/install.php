@@ -35,8 +35,8 @@ function test_requis($condition, $message)
 }
 
 test_requis(
-    version_compare(phpversion(), '5.4', '>='),
-    'PHP 5.4 ou supérieur requis. PHP version ' . phpversion() . ' installée.'
+    version_compare(phpversion(), '5.6', '>='),
+    'PHP 5.6 ou supérieur requis. PHP version ' . phpversion() . ' installée.'
 );
 
 test_requis(
@@ -57,11 +57,6 @@ test_requis(
 );
 
 test_requis(
-    file_exists(__DIR__ . '/../../include/lib/Template_Lite/class.template.php'),
-    'Librairie Template_Lite non disponible.'
-);
-
-test_requis(
     file_exists(__DIR__ . '/../../include/lib/KD2'),
     'Librairie KD2 non disponible.'
 );
@@ -70,25 +65,7 @@ const INSTALL_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
-// Vérifier que les répertoires vides existent, sinon les créer
-$paths = [DATA_ROOT, PLUGINS_ROOT, CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
-
-foreach ($paths as $path)
-{
-    if (!file_exists($path))
-        mkdir($path);
-
-    test_requis(
-        file_exists($path) && is_dir($path),
-        'Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.'
-    );
-
-    // On en profite pour vérifier qu'on peut y lire et écrire
-    test_requis(
-        is_writable($path) && is_readable($path),
-        'Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.'
-    );
-}
+Install::checkAndCreateDirectories();
 
 if (!file_exists(DB_FILE))
 {
@@ -102,9 +79,16 @@ if (!file_exists(DB_FILE))
     }
 }
 
-$tpl = Template::getInstance();
+function f($key)
+{
+    return \KD2\Form::get($key);
+}
 
+$tpl = Template::getInstance();
 $tpl->assign('admin_url', WWW_URL . 'admin/');
+
+$form = new Form;
+$tpl->assign_by_ref('form', $form);
 
 if (file_exists(DB_FILE))
 {
@@ -113,23 +97,23 @@ if (file_exists(DB_FILE))
 else
 {
     $tpl->assign('disabled', false);
-    $error = false;
 
-    if (!empty($_POST['save']))
+    if (f('save'))
     {
-        if (!Utils::CSRF_check('install'))
-        {
-            $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-        }
-        elseif (Utils::post('passe_membre') != Utils::post('repasse_membre'))
-        {
-            $error = 'La vérification ne correspond pas au mot de passe.';
-        }
-        else
+        $form->check('install', [
+            'nom_asso'     => 'required',
+            'email_asso'   => 'required|email',
+            'nom_membre'   => 'required',
+            'email_membre' => 'required|email',
+            'passe'        => 'confirmed|required',
+            'cat_membre'   => 'required',
+        ]);
+
+        if (!$form->hasErrors())
         {
             try {
-            	Install::install(Utils::post('nom_asso'), Utils::post('adresse_asso'), Utils::post('email_asso'),
-            		Utils::post('cat_membre'), Utils::post('nom_membre'), Utils::post('email_membre'), Utils::post('passe_membre'),
+            	Install::install(f('nom_asso'), f('adresse_asso'), f('email_asso'),
+            		f('cat_membre'), f('nom_membre'), f('email_membre'), f('passe'),
             		WWW_URL);
 
             	Utils::redirect('/admin/login.php');
@@ -138,12 +122,10 @@ else
             {
                 @unlink(DB_FILE);
 
-                $error = $e->getMessage();
+                $form->addError($e->getMessage());
             }
         }
     }
-
-    $tpl->assign('error', $error);
 }
 
 $tpl->assign('passphrase', Utils::suggestPassword());

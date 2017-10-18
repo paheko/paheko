@@ -10,12 +10,11 @@ class Stats
 {
 	protected function _parRepartitionCategorie($type)
 	{
-		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT SUM(montant) AS somme, id_categorie
+		return DB::getInstance()->get('SELECT SUM(montant) AS somme, id_categorie
 			FROM compta_journal
 			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = ?)
 			AND id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0)
-			GROUP BY id_categorie ORDER BY somme DESC;', SQLITE3_ASSOC, $type);
+			GROUP BY id_categorie ORDER BY somme DESC;', $type);
 	}
 
 	public function repartitionRecettes()
@@ -32,9 +31,10 @@ class Stats
 	{
 		return $this->getStats('SELECT strftime(\'%Y%m\', date) AS date,
 			SUM(montant) FROM compta_journal
-			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = '.$type.')
+			WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = :type)
 			AND id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0)
-			GROUP BY strftime(\'%Y-%m\', date) ORDER BY date;');
+			GROUP BY strftime(\'%Y-%m\', date) ORDER BY date;',
+			['type' => $type]);
 	}
 
 	public function recettes()
@@ -85,23 +85,24 @@ class Stats
 		return $stats;
 	}
 
-	public function getStats($query)
+	public function getStats($query, Array $args = [])
 	{
 		$db = DB::getInstance();
 
-		$data = $db->simpleStatementFetchAssoc($query);
+		$data = $db->getAssoc($query, $args);
 
-		$e = $db->querySingle('SELECT *, strftime(\'%s\', debut) AS debut,
-			strftime(\'%s\', fin) AS fin FROM compta_exercices WHERE cloture = 0;', true);
+		$e = $db->first('SELECT *, strftime(\'%s\', debut) AS debut,
+			strftime(\'%s\', fin) AS fin FROM compta_exercices
+			WHERE cloture = 0 LIMIT 1;');
 
 		if (!$e)
 		{
 			return [];
 		}
 
-		$y = date('Y', $e['debut']);
-		$m = date('m', $e['debut']);
-		$max = date('Ym', $e['fin']);
+		$y = date('Y', $e->debut);
+		$m = date('m', $e->debut);
+		$max = date('Ym', $e->fin);
 
 		while ($y . $m <= $max)
 		{

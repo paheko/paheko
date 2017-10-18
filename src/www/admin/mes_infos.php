@@ -3,56 +3,38 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$membre = $membres->getLoggedUser();
+$champs = $config->get('champs_membres');
 
-if (!$membre)
+if (f('save'))
 {
-    throw new UserException("Ce membre n'existe pas.");
-}
+    $form->check('edit_me', $champs->getValidationRules('user_edit'));
 
-$error = false;
-
-if (!empty($_POST['save']))
-{
-    if (!Utils::CSRF_check('edit_me'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    elseif (Utils::post('passe') != Utils::post('repasse'))
-    {
-        $error = 'La vérification ne correspond pas au mot de passe.';
-    }
-    else
+    if (!$form->hasErrors())
     {
         try {
             $data = [];
 
-            foreach ($config->get('champs_membres')->getAll() as $key=>$c)
+            foreach ($champs->getAll() as $key=>$c)
             {
-                if (!empty($c['editable']))
+                if (!empty($c->editable))
                 {
-                    $data[$key] = Utils::post($key);
+                    $data[$key] = f($key);
                 }
             }
 
-            $membres->edit($membre['id'], $data, false);
-            $membres->updateSessionData();
+            $session->editUser($data);
 
             Utils::redirect('/admin/');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
-$tpl->assign('passphrase', Utils::suggestPassword());
-$tpl->assign('champs', $config->get('champs_membres')->getAll());
+$tpl->assign('champs', $champs->getAll());
 
-$tpl->assign('membre', $membre);
+$tpl->assign('membre', $session->getUser());
 
 $tpl->display('admin/mes_infos.tpl');
-
-?>

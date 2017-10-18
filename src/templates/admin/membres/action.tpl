@@ -1,28 +1,24 @@
 {include file="admin/_head.tpl" title="Action collective sur les membres" current="membres"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
     {foreach from=$selected item="id"}
-        <input type="hidden" name="selected[]" value="{$id|escape}" />
+        <input type="hidden" name="selected[]" value="{$id}" />
     {/foreach}
 
     </fieldset>
 
     {if $action == 'move'}
     <fieldset>
-        <legend>Changer la catégorie des {$nb_selected|escape} membres sélectionnés</legend>
+        <legend>Changer la catégorie des {$nb_selected} membres sélectionnés</legend>
         <dl>
             <dt><label for="f_cat">Nouvelle catégorie</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="id_categorie" id="f_cat">
                     <option value="0" selected="selected">-- Pas de changement</option>
                 {foreach from=$membres_cats key="id" item="nom"}
-                    <option value="{$id|escape}">{$nom|escape}</option>
+                    <option value="{$id}">{$nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -31,14 +27,15 @@
 
     <p class="submit">
         {csrf_field key="membres_action"}
-        <input type="submit" name="move_ok" value="Enregistrer &rarr;" />
+        <input type="hidden" name="action" value="move" />
+        <input type="submit" name="confirm" value="Enregistrer &rarr;" />
     </p>
 
     {elseif $action == 'delete'}
     <fieldset>
         <legend>Supprimer les membres sélectionnés ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer les {$nb_selected|escape} membres sélectionnés ?
+            Êtes-vous sûr de vouloir supprimer les {$nb_selected} membres sélectionnés ?
         </h3>
         <p class="alert">
             <strong>Attention</strong> : cette action est irréversible et effacera toutes les
@@ -53,7 +50,8 @@
 
     <p class="submit">
         {csrf_field key="membres_action"}
-        <input type="submit" name="delete_ok" value="Oui, supprimer ces membres &rarr;" />
+        <input type="hidden" name="action" value="delete" />
+        <input type="submit" name="confirm" value="Oui, supprimer ces membres &rarr;" />
     </p>
     {/if}
 

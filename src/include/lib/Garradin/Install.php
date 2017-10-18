@@ -2,16 +2,26 @@
 
 namespace Garradin;
 
+/**
+ * Pour procéder à l'installation de l'instance Garradin
+ * Utile pour automatiser l'installation sans passer par la page d'installation
+ */
 class Install
 {
 	static public function install($nom_asso, $adresse_asso, $email_asso, $nom_categorie, $nom_membre, $email_membre, $passe_membre, $site_asso = WWW_URL)
 	{
 		$db = DB::getInstance(true);
 
+		// Taille de la page de DB, on force à 4096 (défaut dans les dernières
+		// versions de SQLite mais pas les vieilles)
+		$db->exec('PRAGMA page_size = 4096;');
+		$db->exec('VACUUM;');
+
 		// Création de la base de données
-		$db->exec('BEGIN;');
+		$db->begin();
+		$db->exec('PRAGMA application_id = ' . DB::APPID . ';');
 		$db->exec(file_get_contents(DB_SCHEMA));
-		$db->exec('END;');
+		$db->commit();
 
 		// Configuration de base
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
@@ -111,5 +121,61 @@ class Install
 		]);
 
 		return $config->save();
+	}
+
+	static public function checkAndCreateDirectories()
+	{
+		// Vérifier que les répertoires vides existent, sinon les créer
+		$paths = [DATA_ROOT, PLUGINS_ROOT, CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
+
+		foreach ($paths as $path)
+		{
+		    if (!file_exists($path))
+		    {
+		        mkdir($path);
+		    }
+
+		    if (!is_dir($path))
+		    {
+		    	throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+		    }
+
+		    // On en profite pour vérifier qu'on peut y lire et écrire
+		    if (!is_writable($path) || !is_readable($path))
+		    {
+		    	throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+		    }
+		}
+
+		return true;
+	}
+
+	static public function setLocalConfig($key, $value)
+	{
+		$path = ROOT . DIRECTORY_SEPARATOR . 'config.local.php';
+		$new_line = sprintf('const %s = %s;', $key, var_export($value, true));
+
+		if (file_exists($path))
+		{
+			$config = file_get_contents($path);
+
+			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
+			
+			$config = preg_replace($pattern, $new_line, $config, -1, $count);
+
+			if (!$count)
+			{
+				$config = preg_replace('/\?>.*/s', '', $config);
+				$config .= PHP_EOL . $new_line . PHP_EOL;
+			}
+		}
+		else
+		{
+			$config = '<?php' . PHP_EOL
+				. 'namespace Garradin;' . PHP_EOL . PHP_EOL
+				. $new_line . PHP_EOL;
+		}
+
+		return file_put_contents($path, $config);
 	}
 }

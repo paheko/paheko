@@ -2,6 +2,10 @@
 
 namespace Garradin;
 
+use KD2\ErrorManager;
+use KD2\Security;
+use KD2\Form;
+
 error_reporting(-1);
 
 /*
@@ -71,6 +75,10 @@ if (!defined('Garradin\WWW_URI'))
     $path = str_replace($path, '', dirname($_SERVER['SCRIPT_NAME']));
     $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
     $path = (substr($path, -1) != '/') ? $path . '/' : $path;
+
+    // Pour installations sans vhost
+    $path = str_replace('/www', '', $path);
+
     define('Garradin\WWW_URI', $path);
 }
 
@@ -83,21 +91,22 @@ if (!defined('Garradin\WWW_URL'))
 }
 
 static $default_config = [
-    'CACHE_ROOT'       => DATA_ROOT . '/cache',
-    'DB_FILE'          => DATA_ROOT . '/association.sqlite',
-    'DB_SCHEMA'        => ROOT . '/include/data/schema.sql',
-    'PLUGINS_ROOT'     => DATA_ROOT . '/plugins',
-    'PREFER_HTTPS'     => false,
-    'PLUGINS_SYSTEM'   => '',
-    'SHOW_ERRORS'      => true,
-    'MAIL_ERRORS'      => false,
-    'USE_CRON'         => false,
-    'ENABLE_XSENDFILE' => false,
-    'SMTP_HOST'        => false,
-    'SMTP_USER'        => null,
-    'SMTP_PASSWORD'    => null,
-    'SMTP_PORT'        => 587,
-    'SMTP_SECURITY'    => 'STARTTLS',
+    'CACHE_ROOT'            => DATA_ROOT . '/cache',
+    'DB_FILE'               => DATA_ROOT . '/association.sqlite',
+    'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
+    'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
+    'PREFER_HTTPS'          => false,
+    'ALLOW_MODIFIED_IMPORT' => true,
+    'PLUGINS_SYSTEM'        => '',
+    'SHOW_ERRORS'           => false,
+    'MAIL_ERRORS'           => false,
+    'USE_CRON'              => false,
+    'ENABLE_XSENDFILE'      => false,
+    'SMTP_HOST'             => false,
+    'SMTP_USER'             => null,
+    'SMTP_PASSWORD'         => null,
+    'SMTP_PORT'             => 587,
+    'SMTP_SECURITY'         => 'STARTTLS',
 ];
 
 foreach ($default_config as $const => $value)
@@ -110,8 +119,10 @@ foreach ($default_config as $const => $value)
     }
 }
 
-define('Garradin\WEBSITE', 'http://garradin.eu/');
-define('Garradin\PLUGINS_URL', 'https://garradin.eu/plugins/list.json');
+const WEBSITE = 'http://garradin.eu/';
+const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+
+const NTP_SERVER = 'fr.pool.ntp.org';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
@@ -130,28 +141,59 @@ if (!ini_get('date.timezone'))
     }
 }
 
-ini_set('error_log', DATA_ROOT . '/error.log');
-ini_set('log_errors', true);
-
-if (SHOW_ERRORS)
+/**
+ * Auto-chargement des dépendances
+ */
+class Loader
 {
-    // Gestion par défaut des erreurs
-    ini_set('display_errors', true);
-    ini_set('html_errors', false);
+    /**
+     * Liste des classes déjà chargées
+     * @var array
+     */
+    static protected $loaded = [];
 
-    if (PHP_SAPI != 'cli')
+    /**
+     * Inclure un fichier de classe depuis le nom de la classe
+     * @param  string $classname
+     * @return void
+     */
+    static public function load($classname)
     {
-        ini_set('error_prepend_string', '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; } 
-            pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
-            <pre> \__/<br /> (xx)<br />//||\\\\</pre>
-            <h1>Erreur fatale</h1>
-            <p>Une erreur fatale s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
-            merci d\'inclure le message ci-dessous :</p>
-            <h3>');
-        ini_set('error_append_string', '</h3><hr />
-            <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>');
+        $classname = ltrim($classname, '\\');
+
+        if (array_key_exists($classname, self::$loaded))
+        {
+            return true;
+        }
+        
+        // Plugins
+        if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
+        {
+            $classname = substr($classname, 16);
+            $plugin_name = substr($classname, 0, strpos($classname, '\\'));
+            $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
+            
+            $path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
+        }
+        else
+        {
+            // PSR-0 autoload
+            $filename = str_replace('\\', '/', $classname);
+            $path = ROOT . '/include/lib/' . $filename . '.php';
+        }
+        
+        if (!file_exists($path))
+        {
+            throw new \Exception('File '.$path.' doesn\'t exists');
+        }
+
+        self::$loaded[$classname] = true;
+
+        require $path;
     }
 }
+
+\spl_autoload_register(['Garradin\Loader', 'load'], true);
 
 /*
  * Gestion des erreurs et exceptions
@@ -161,156 +203,84 @@ class UserException extends \LogicException
 {
 }
 
-function exception_error_handler($errno, $errstr, $errfile, $errline )
+// activer le gestionnaire d'erreurs/exceptions
+ErrorManager::enable(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION);
+ErrorManager::setLogFile(DATA_ROOT . '/error.log');
+
+// activer l'envoi de mails si besoin est
+if (MAIL_ERRORS)
 {
-    // For @ ignored errors
-    if (error_reporting() === 0) return;
-    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+    ErrorManager::setEmail(MAIL_ERRORS);
 }
 
-function exception_handler($e)
+ErrorManager::setExtraDebugEnv([
+    'Garradin version' => garradin_version(),
+    'Garradin data root' => DATA_ROOT,
+    ]);
+
+ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
+    <style type="text/css">
+    body {font-family: sans-serif; }
+    code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
+    code { text-align: right; color: #666; }
+    a { color: blue; }
+    </style></head><body><h1>Erreur interne</h1><p>Désolé mais le serveur a rencontré une erreur interne
+    et ne peut répondre à votre requête. Merci de ré-essayer plus tard.</p>
+    <p>Si vous suspectez un bug dans Garradin, vous pouvez suivre 
+    <a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>
+    pour le rapporter.</p>
+    <if(email)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
+    <if(log)><code>Référence : <b>{$ref}</b></code></if>
+    <p><a href="' . WWW_URL . '">&larr; Retour à la page d\'accueil</a></p>
+    </body></html>');
+
+ErrorManager::setHtmlFooter('<hr /><section><article>Cette erreur est peut-être un bug dans Garradin&nbsp;? En ce cas vous pouvez le rapporter en suivant <a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>.</section></article>');
+
+function user_error($e)
 {
-    if ($e instanceOf UserException || $e instanceOf \KD2\MiniSkelMarkupException)
-    {
-        try {
-            if (PHP_SAPI == 'cli')
-            {
-                echo $e->getMessage();
-            }
-            else
-            {
-                $tpl = Template::getInstance();
-
-                $tpl->assign('error', $e->getMessage());
-                $tpl->display('error.tpl');
-            }
-
-            exit;
-        }
-        catch (Exception $e)
-        {
-        }
-    }
-
-    $file = str_replace(ROOT, '', $e->getFile());
-
-    $error = "Exception of type ".get_class($e)." happened !\n\n".
-        $e->getCode()." - ".$e->getMessage()."\n\nIn: ".
-        $file . ":" . $e->getLine()."\n\n";
-
-    if (!empty($_SERVER['HTTP_HOST']) && !empty($_SERVER['REQUEST_URI']))
-        $error .= 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."\n\n";
-
-    $error .= $e->getTraceAsString();
-    $error .= "\n-------------\n";
-    $error .= 'Garradin version: ' . garradin_version() . "\n";
-    $error .= 'Garradin manifest: ' . garradin_manifest() . "\n";
-    $error .= 'PHP version: ' . phpversion() . "\n";
-    $error .= 'Garradin data root: ' . \Garradin\DATA_ROOT . "\n";
-
-    foreach ($_SERVER as $key=>$value)
-    {
-        if (is_array($value))
-            $value = json_encode($value);
-
-        $error .= $key . ': ' . $value . "\n";
-    }
-    
-    $error = str_replace("\r", '', $error);
-    error_log($error);
-    
-    if (MAIL_ERRORS)
-    {
-        mail(MAIL_ERRORS, '[Garradin] Erreur d\'exécution', $error, 'From: "' . WWW_URL . '" <noreply@no.reply>');
-    }
-
     if (PHP_SAPI == 'cli')
     {
-        echo $error;
+        echo $e->getMessage();
     }
     else
     {
-        echo '<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">body { font-family: sans-serif; } h3 { color: darkred; }
-        pre { text-shadow: 2px 2px 5px black; color: darkgreen; font-size: 2em; float: left; margin: 0 1em 0 0; padding: 1em; background: #cfc; border-radius: 50px; }</style>
-        <pre> \__/<br /> (xx)<br />//||\\\\</pre>
-        <h1>Erreur d\'exécution</h1>';
+        $tpl = Template::getInstance();
 
-        if (SHOW_ERRORS)
-        {
-            echo '<p>Une erreur s\'est produite à l\'exécution de Garradin. Pour rapporter ce bug
-            merci d\'inclure le message suivant :</p>
-            <textarea cols="70" rows="'.substr_count($error, "\n").'">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</textarea>
-            <hr />
-            <p><a href="http://dev.kd2.org/garradin/Rapporter%20un%20bug">Comment rapporter un bug</a></p>';
-        }
-        else
-        {
-            echo '<p>Une erreur s\'est produite à l\'exécution de Garradin.</p>
-            <p>Le webmaster a été prévenu.</p>';
-        }
+        $tpl->assign('error', $e->getMessage());
+        $tpl->display('error.tpl');
     }
 
     exit;
 }
 
-set_error_handler('Garradin\exception_error_handler');
-set_exception_handler('Garradin\exception_handler');
+// Message d'erreur simple pour les erreurs de l'utilisateur
+ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
+ErrorManager::setCustomExceptionHandler('\KD2\MiniSkelMarkupException', '\Garradin\user_error');
 
-/**
- * Auto-load classes and libs
- */
-class Loader
+// Clé secrète utilisée pour chiffrer les tokens CSRF etc.
+if (!defined('Garradin\SECRET_KEY'))
 {
-    /**
-     * Already loaded filenames
-     * @var array
-     */
-    static protected $loaded = [];
-
-    /**
-     * Loads a class from the $name
-     * @param  stringg $classname
-     * @return bool true
-     */
-    static public function load($classname)
-    {
-        $classname = ltrim($classname, '\\');
-        
-        if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
-        {
-            $classname = substr($classname, 16);
-            $plugin_name = substr($classname, 0, strpos($classname, '\\'));
-            $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
-            
-            $path = 'phar://' . PLUGINS_ROOT . '/' . strtolower($plugin_name) . '.tar.gz/lib/' . $filename . '.php';
-        }
-        else
-        {
-            $filename = str_replace('\\', '/', $classname);
-            $path = ROOT . '/include/lib/' . $filename . '.php';
-        }
-
-        if (array_key_exists($path, self::$loaded))
-        {
-            return true;
-        }
-
-        if (!file_exists($path)) {
-            throw new \Exception('File '.$path.' doesn\'t exists');
-        }
-
-        self::$loaded[$path] = true;
-
-        require $path;
-    }
+    $key = base64_encode(Security::random_bytes(64));
+    Install::setLocalConfig('SECRET_KEY', $key);
+    define('Garradin\SECRET_KEY', $key);
 }
 
-\spl_autoload_register(['Garradin\Loader', 'load'], true);
+// Intégration du secret pour les tokens
+Form::tokenSetSecret(SECRET_KEY);
 
-$n = new Membres;
+// Fonctions utilitaires bien utiles d'avoir dans le namespace global de Garradin
+function obj_has($obj, $pattern)
+{
+    return \KD2\Helpers::obj_has($obj, $pattern);
+}
+
+function obj_get($src, $pattern, $default = null)
+{
+    return \KD2\Helpers::obj_get($src, $pattern, $default);
+}
 
 /*
- * Inclusion des fichiers de base
+ * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
 
 if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS'))

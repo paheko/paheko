@@ -2,6 +2,9 @@
 
 namespace Garradin;
 
+use KD2\Image;
+use Garradin\Membres\Session;
+
 class Fichiers
 {
 	public $id;
@@ -59,7 +62,9 @@ class Fichiers
 		foreach (self::$allowed_thumb_sizes as $s)
 		{
 			if ($s >= $size)
-				return $size;
+			{
+				return $s;
+			}
 		}
 
 		return max(self::$allowed_thumb_sizes);
@@ -73,10 +78,10 @@ class Fichiers
 	{
 		if (is_null($data))
 		{
-			$data = DB::getInstance()->simpleQuerySingle('SELECT fichiers.*, fc.hash, fc.taille,
+			$data = DB::getInstance()->first('SELECT fichiers.*, fc.hash, fc.taille,
 				strftime(\'%s\', datetime) AS datetime
 				FROM fichiers INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu
-				WHERE fichiers.id = ?;', true, (int)$id);
+				WHERE fichiers.id = ?;', (int)$id);
 		}
 
 		if (!$data)
@@ -116,31 +121,52 @@ class Fichiers
 			throw new \LogicException('Type de lien de fichier inconnu.');
 		}
 
-		unset($check[array_search($type, $check)]);
-		
+		// Vérifier que le fichier n'est pas déjà lié à un autre type
+		$query = [];
+
 		foreach ($check as $check_type)
 		{
-			if ($db->simpleQuerySingle('SELECT 1 FROM fichiers_' . $check_type . ' WHERE fichier = ?;', false, (int)$this->id))
+			// Ne pas chercher dans le type qu'on veut lier
+			if ($check_type == $type)
 			{
-				throw new \LogicException('Ce fichier est déjà lié à un autre contenu : ' . $check_type);
+				continue;
 			}
+
+			$query[] = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = %d', $check_type, $this->id);
 		}
 
-		return $db->simpleExec('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
-			(int)$this->id, (int)$foreign_id);
+		$query = implode(' UNION ', $query) . ';';
+
+		if ($db->firstColumn($query))
+		{
+			throw new \LogicException('Ce fichier est déjà lié à un autre contenu : ' . $check_type);
+		}
+
+		return $db->preparedQuery('INSERT OR IGNORE INTO fichiers_' . $type . ' (fichier, id) VALUES (?, ?);',
+			[(int)$this->id, (int)$foreign_id]);
 	}
 
 	/**
 	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
-	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Membres::getLoggedUser, ou false
+	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
 	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
 	 */
-	public function checkAccess($user = false)
+	public function checkAccess(Session $session)
 	{
+		$config = Config::getInstance();
+
+		if ($config->get('image_fond') == $this->id)
+		{
+			return true;
+		}
+
+		$db = DB::getInstance();
+
 		// On regarde déjà si le fichier n'est pas lié au wiki
-		$wiki = DB::getInstance()->simpleQuerySingle('SELECT wp.droit_lecture FROM fichiers_' . self::LIEN_WIKI . ' AS link
+		$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
 			INNER JOIN wiki_pages AS wp ON wp.id = link.id
-			WHERE link.fichier = ? LIMIT 1;', false, (int)$this->id);
+			WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
+		$wiki = $db->firstColumn($query, (int)$this->id);
 
 		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
 		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
@@ -149,49 +175,51 @@ class Fichiers
 		}
 			
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
-		if (empty($user['droits']))
+		if (!$session->isLogged())
 		{
 			return false;
 		}
 
+		$user = $session->getUser();
+
 		if ($wiki !== false)
 		{
 			// S'il n'a même pas droit à accéder au wiki c'est mort
-			if ($user['droits']['wiki'] < Membres::DROIT_ACCES)
+			if (!$session->canAccess('wiki', Membres::DROIT_ACCES))
 			{
 				return false;
 			}
 
 			// On renvoie à l'objet Wiki pour savoir si l'utilisateur a le droit de lire ce fichier
 			$_w = new Wiki;
-			$_w->setRestrictionCategorie($user['id_categorie'], $user['droits']['wiki']);
+			$_w->setRestrictionCategorie($user->id_categorie, $user->droit_wiki);
 			return $_w->canReadPage($wiki);
 		}
 
 		// On regarde maintenant si le fichier est lié à la compta
-		$compta = DB::getInstance()->simpleQuerySingle('SELECT 1 
-			FROM fichiers_' . self::LIEN_COMPTA . ' WHERE fichier = ? LIMIT 1;', false, (int)$this->id);
+		$query = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_COMPTA);
+		$compta = $db->firstColumn($query, (int)$this->id);
 
-		if ($compta && $user['droits']['compta'] >= Membres::DROIT_ACCES)
+		if ($compta && $session->canAccess('compta', Membres::DROIT_ACCES))
 		{
 			// OK si accès à la compta
 			return true;
 		}
 
 		// Enfin, si le fichier est lié à un membre
-		$membre = DB::getInstance()->simpleQuerySingle('SELECT id 
-			FROM fichiers_' . self::LIEN_MEMBRES . ' WHERE fichier = ? LIMIT 1;', false, (int)$this->id);
+		$query = sprintf('SELECT id FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_MEMBRES);
+		$membre = $db->firstColumn($query, (int)$this->id);
 
 		if ($membre !== false)
 		{
 			// De manière évidente, l'utilisateur a le droit d'accéder aux fichiers liés à son profil
-			if ((int)$membre == $user['id'])
+			if ((int)$membre == $user->id)
 			{
 				return true;
 			}
 
 			// Pour voir les fichiers des membres il faut pouvoir les gérer
-			if ($user['droits']['membres'] >= Membres::DROIT_ECRITURE)
+			if ($session->canAccess('membres', Membres::DROIT_ECRITURE))
 			{
 				return true;
 			}
@@ -207,18 +235,18 @@ class Fichiers
 	public function remove()
 	{
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
-		$db->simpleExec('DELETE FROM fichiers_compta_journal WHERE fichier = ?;', (int)$this->id);
-		$db->simpleExec('DELETE FROM fichiers_wiki_pages WHERE fichier = ?;', (int)$this->id);
-		$db->simpleExec('DELETE FROM fichiers_membres WHERE fichier = ?;', (int)$this->id);
+		$db->begin();
+		$db->delete('fichiers_compta_journal', 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_wiki_pages', 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_membres', 'fichier = ?', (int)$this->id);
 
-		$db->simpleExec('DELETE FROM fichiers WHERE id = ?;', (int)$this->id);
+		$db->delete('fichiers', 'id = ?', (int)$this->id);
 
 		// Suppression du contenu s'il n'est pas utilisé par un autre fichier
-		if (!$db->simpleQuerySingle('SELECT 1 FROM fichiers WHERE id_contenu = ? AND id != ? LIMIT 1;', 
-			false, (int)$this->id_contenu, (int)$this->id))
+		if (!$db->firstColumn('SELECT 1 FROM fichiers WHERE id_contenu = ? AND id != ? LIMIT 1;', 
+			(int)$this->id_contenu, (int)$this->id))
 		{
-			$db->simpleExec('DELETE FROM fichiers_contenu WHERE id = ?;', (int)$this->id_contenu);
+			$db->delete('fichiers_contenu', 'id = ?', (int)$this->id_contenu);
 		}
 
 		$cache_id = 'fichiers.' . $this->id_contenu;
@@ -230,7 +258,7 @@ class Fichiers
 			Static_Cache::remove($cache_id . '.thumb.' . (int)$size);
 		}
 
-		return $db->exec('END;');
+		return $db->commit();
 	}
 
 	/**
@@ -273,7 +301,10 @@ class Fichiers
 			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
-		$width = self::_findThumbSize($width);
+		if (!in_array($width, self::$allowed_thumb_sizes))
+		{
+			throw new UserException('Cette taille de miniature n\'est pas autorisée.');
+		}
 
 		$cache_id = 'fichiers.' . $this->id_contenu . '.thumb.' . (int)$width;
 		$path = Static_Cache::getPath($cache_id);
@@ -282,7 +313,8 @@ class Fichiers
 		if (!Static_Cache::exists($cache_id))
 		{
 			$source = $this->getFilePathFromCache();
-			\KD2\Image::resize($source, $path, $width);
+
+			(new Image($source))->resize($width)->save($path);
 		}
 
 		return $this->_serve($path, $this->type);
@@ -355,9 +387,8 @@ class Fichiers
 	 */
 	static public function checkHash($hash)
 	{
-		return (boolean) DB::getInstance()->simpleQuerySingle(
+		return (boolean) DB::getInstance()->firstColumn(
 			'SELECT 1 FROM fichiers_contenu WHERE hash = ?;', 
-			false, 
 			trim(strtolower($hash))
 		);
 	}
@@ -369,18 +400,15 @@ class Fichiers
 	 */
 	static public function checkHashList($list)
 	{
-		$hash_list = '';
 		$db = DB::getInstance();
 
-		foreach ($list as $hash)
-		{
-			$hash_list .= '\'' . $db->escapeString($hash) . '\',';
-		}
+		array_walk($list, function (&$a) use ($db) {
+			$a = $db->quote($a);
+		});
 
-		$hash_list = substr($hash_list, 0, -1);
-
-		return $db->queryFetchAssoc('SELECT hash, 1
-			FROM fichiers_contenu WHERE hash IN (' . $hash_list . ');');
+		$query = sprintf('SELECT hash, 1 FROM fichiers_contenu WHERE hash IN (%s);', 
+			implode(', ', $list));
+		return $db->getAssoc($query);
 	}
 
 	/**
@@ -414,7 +442,7 @@ class Fichiers
 	/**
 	 * Upload du fichier par POST
 	 * @param  array  $file  Caractéristiques du fichier envoyé
-	 * @return object Un objet Fichiers en cas de succès
+	 * @return Fichiers
 	 */
 	static public function upload($file)
 	{
@@ -436,7 +464,46 @@ class Fichiers
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		$bytes = file_get_contents($file['tmp_name'], false, null, -1, 1024);
+		return self::storeFile($name, $file['tmp_name']);
+	}
+
+	/**
+	 * Upload de fichier à partir d'une chaîne en base64
+	 * @param  string $name
+	 * @param  string $content
+	 * @return Fichiers
+	 */
+	static public function storeFromBase64($name, $content)
+	{
+		$content = base64_decode($content);
+		return self::storeFile($name, null, $content);
+	}
+
+	/**
+	 * Upload de fichier (interne)
+	 * 
+	 * @param  string $name
+	 * @param  string $path Chemin du fichier
+	 * @param  string $content Ou contenu du fichier
+	 * @return Fichiers
+	 */
+	static protected function storeFile($name, $path = null, $content = null)
+	{
+		assert($path || $content);
+
+		if ($path && !$content)
+		{
+			$hash = sha1_file($path);
+			$size = filesize($path);
+			$bytes = file_get_contents($path, false, null, -1, 1024);
+		}
+		else
+		{
+			$hash = sha1($content);
+			$size = strlen($content);
+			$bytes = substr($content, 0, 1024);
+		}
+
 		$type = \KD2\FileInfo::guessMimeType($bytes);
 
 		if (!$type)
@@ -449,39 +516,40 @@ class Fichiers
 
 		$is_image = preg_match('/^image\//', $type);
 
-		$hash = sha1_file($file['tmp_name']);
-		$size = filesize($file['tmp_name']);
-
 		$db = DB::getInstance();
 
-		$db->exec('BEGIN;');
+		$db->begin();
 
 		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
-		if (!($id_contenu = $db->simpleQuerySingle('SELECT id FROM fichiers_contenu WHERE hash = ?;', false, $hash)))
+		if (!($id_contenu = $db->firstColumn('SELECT id FROM fichiers_contenu WHERE hash = ?;', $hash)))
 		{
-			$db->simpleInsert('fichiers_contenu', [
+			$db->insert('fichiers_contenu', [
 				'hash'		=>	$hash,
 				'taille'	=>	(int)$size,
-				'contenu'	=>	[\SQLITE3_BLOB, file_get_contents($file['tmp_name'])],
+				'contenu'	=>	[\SQLITE3_BLOB, $content ?: file_get_contents($path)],
 			]);
-			
+
+			// FIXME: utiliser Sqlite3::openBlob pour écrire quand dispo dans PHP
+			// cf. https://github.com/php/php-src/pull/2528
+
 			$id_contenu = $db->lastInsertRowID();
 		}
 
-		$db->simpleInsert('fichiers', [
+		$db->insert('fichiers', [
 			'id_contenu'	=>	(int)$id_contenu,
 			'nom'			=>	$name,
 			'type'			=>	$type,
 			'image'			=>	(int)$is_image,
 		]);
 
-		$db->exec('END;');
+		$db->commit();
 
 		return new Fichiers($db->lastInsertRowID());
 	}
 
 	/**
 	 * Envoie un fichier déjà stocké
+	 * 
 	 * @param  string $name Nom du fichier
 	 * @param  string $hash Hash SHA1 du contenu du fichier
 	 * @return object       Un objet Fichiers en cas de succès
@@ -491,35 +559,35 @@ class Fichiers
 		$db = DB::getInstance();
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		$file = $db->simpleQuerySingle('SELECT * FROM fichiers 
-			INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu AND fc.hash = ?;', true, trim($hash));
+		$file = $db->first('SELECT * FROM fichiers 
+			INNER JOIN fichiers_contenu AS fc ON fc.id = fichiers.id_contenu AND fc.hash = ?;', trim($hash));
 
 		if (!$file)
 		{
 			throw new UserException('Le fichier à copier n\'existe pas (aucun hash ne correspond à '.$hash.').');
 		}
 
-		$db->simpleInsert('fichiers', [
-			'id_contenu'	=>	(int)$file['id_contenu'],
-			'nom'			=>	$name,
-			'type'			=>	$file['type'],
-			'image'			=>	(int)$file['image'],
+		$db->insert('fichiers', [
+			'id_contenu' =>	(int)$file->id_contenu,
+			'nom'        =>	$name,
+			'type'       =>	$file->type,
+			'image'      =>	(int)$file->image,
 		]);
 
 		return new Fichiers($db->lastInsertRowID());
 	}
 
-    /**
-     * Récupère la liste des fichiers liés à une ressource
-     * 
-     * @param  string  $type    Type de ressource
-     * @param  integer $id      Numéro de ressource
-     * @param  boolean $images  TRUE pour retourner seulement les images,
-     * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
-     * @return array          Liste des fichiers
-     */
-    static public function listLinkedFiles($type, $id, $images = false)
-    {
+	/**
+	 * Récupère la liste des fichiers liés à une ressource
+	 * 
+	 * @param  string  $type    Type de ressource
+	 * @param  integer $id      Numéro de ressource
+	 * @param  boolean $images  TRUE pour retourner seulement les images,
+	 * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
+	 * @return array          Liste des fichiers
+	 */
+	static public function listLinkedFiles($type, $id, $images = false)
+	{
 		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
 
 		if (!in_array($type, $check))
@@ -527,50 +595,52 @@ class Fichiers
 			throw new \LogicException('Type de lien de fichier inconnu.');
 		}
 
-    	$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
+		$images = is_null($images) ? '' : ' AND image = ' . (int)$images;
 
-        $files = DB::getInstance()->simpleStatementFetch('SELECT fichiers.*, c.hash, c.taille
-        	FROM fichiers 
-            INNER JOIN fichiers_'.$type.' AS fwp ON fwp.fichier = fichiers.id
-            INNER JOIN fichiers_contenu AS c ON c.id = fichiers.id_contenu
-            WHERE fwp.id = ? '.$images.'
-            ORDER BY fichiers.nom COLLATE NOCASE;', \SQLITE3_ASSOC, (int)$id);
+		$query = sprintf('SELECT fichiers.*, c.hash, c.taille
+			FROM fichiers 
+			INNER JOIN fichiers_%s AS fwp ON fwp.fichier = fichiers.id
+			INNER JOIN fichiers_contenu AS c ON c.id = fichiers.id_contenu
+			WHERE fwp.id = ? %s
+			ORDER BY fichiers.nom COLLATE NOCASE;', $type, $images);
 
-        foreach ($files as &$file)
-        {
-        	$file['url'] = self::_getURL($file['id'], $file['nom']);
-        	$file['thumb'] = $file['image'] ? self::_getURL($file['id'], $file['nom'], 200) : false;
-        }
+		$files = DB::getInstance()->get($query, (int)$id);
 
-        return $files;
-    }
+		foreach ($files as &$file)
+		{
+			$file->url = self::_getURL($file->id, $file->nom);
+			$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, 200) : false;
+		}
 
-    /**
-     * Enlève d'une liste de fichiers ceux qui sont mentionnés dans un texte wiki
-     * @param  array $files Liste de fichiers
-     * @param  string $text  texte wiki
-     * @return array        Un tableau qui ne contient pas les fichiers mentionnés dans $text
-     */
-    static public function filterFilesUsedInText($files, $text)
-    {
-    	$used = self::listFilesUsedInText($text);
+		return $files;
+	}
 
-    	return array_filter($files, function ($row) use ($used) {
-    		return !in_array($row['id'], $used);
-    	});
-    }
-
-    /**
-     * Renvoie une liste d'ID de fichiers mentionnées dans un texte wiki
-     * @param  string $text Texte wiki
-     * @return array       Liste des IDs de fichiers mentionnés
-     */
-    static public function listFilesUsedInText($text)
+	/**
+	 * Enlève d'une liste de fichiers ceux qui sont mentionnés dans un texte wiki
+	 * @param  array $files Liste de fichiers
+	 * @param  string $text  texte wiki
+	 * @return array        Un tableau qui ne contient pas les fichiers mentionnés dans $text
+	 */
+	static public function filterFilesUsedInText($files, $text)
 	{
-    	preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
-    	preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
-    	
-    	return array_merge($match[1], $match2[1]);
+		$used = self::listFilesUsedInText($text);
+
+		return array_filter($files, function ($row) use ($used) {
+			return !in_array($row->id, $used);
+		});
+	}
+
+	/**
+	 * Renvoie une liste d'ID de fichiers mentionnées dans un texte wiki
+	 * @param  string $text Texte wiki
+	 * @return array       Liste des IDs de fichiers mentionnés
+	 */
+	static public function listFilesUsedInText($text)
+	{
+		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
+		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
+		
+		return array_merge($match[1], $match2[1]);
 	}
 
 	/**
@@ -581,32 +651,41 @@ class Fichiers
 	 */
 	static public function SkrivFichier($args, $content, $skriv)
 	{
-		$_args = [];
+		$id = $caption = null;
 
 		foreach ($args as $value)
 		{
-			if (preg_match('/^\d+$/', $value))
+			if (preg_match('/^\d+$/', $value) && !$id)
 			{
-				$_args['id'] = (int)$value;
+				$id = (int)$value;
 				break;
+			}
+			else
+			{
+				$caption = trim($value);
 			}
 		}
 
-		if (empty($_args['id']))
+		if (empty($id))
 		{
 			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
 		}
 
 		try {
-			$file = new Fichiers($_args['id']);
+			$file = new Fichiers($id);
 		}
 		catch (\InvalidArgumentException $e)
 		{
 			return $skriv->parseError('/!\ Tag fichier : ' . $e->getMessage());
 		}
 
+		if (empty($caption))
+		{
+			$caption = $file->nom;
+		}
+
 		$out = '<aside class="fichier" data-type="'.$skriv->escape($file->type).'">';
-		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($file->nom).'</a> ';
+		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($caption).'</a> ';
 		$out.= '<small>('.$skriv->escape(($file->type ? $file->type . ', ' : '') . Utils::format_bytes($file->taille)).')</small>';
 		$out.= '</aside>';
 		return $out;
@@ -620,32 +699,34 @@ class Fichiers
 	 */
 	static public function SkrivImage($args, $content, $skriv)
 	{
-		$_args = ['align' => 'centre'];
-		$_align_values = ['droite', 'gauche', 'centre'];
+		static $align_values = ['droite', 'gauche', 'centre'];
+
+		$align = '';
+		$id = $caption = null;
 
 		foreach ($args as $value)
 		{
-			if (preg_match('/^\d+$/', $value) && !array_key_exists('id', $_args))
+			if (preg_match('/^\d+$/', $value) && !$id)
 			{
-				$_args['id'] = (int)$value;
+				$id = (int)$value;
 			}
-			else if (in_array($value, $_align_values) && !array_key_exists('align', $_args))
+			else if (in_array($value, $align_values) && !$align)
 			{
-				$_args['align'] = $value;
+				$align = $value;
 			}
 			else
 			{
-				$_args['caption'] = $value;
+				$caption = $value;
 			}
 		}
 
-		if (empty($_args['id']))
+		if (!$id)
 		{
 			return $skriv->parseError('/!\ Tag image : aucun numéro de fichier indiqué.');
 		}
 
 		try {
-			$file = new Fichiers($_args['id']);
+			$file = new Fichiers($id);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -657,28 +738,23 @@ class Fichiers
 			return $skriv->parseError('/!\ Tag image : ce fichier n\'est pas une image.');
 		}
 
-		if (empty($_args['caption']))
-		{
-			$_args['caption'] = false;
-		}
-
 		$out = '<a href="'.$file->getURL().'" class="internal-image">';
-		$out .= '<img src="'.$file->getURL($_args['align'] == 'centre' ? 500 : 200).'" alt="';
+		$out .= '<img src="'.$file->getURL($align == 'centre' ? 500 : 200).'" alt="';
 
-		if ($_args['caption'])
+		if ($caption)
 		{
-			$out .= htmlspecialchars($_args['caption'], ENT_QUOTES, 'UTF-8');
+			$out .= htmlspecialchars($caption, ENT_QUOTES, 'UTF-8');
 		}
 
 		$out .= '" /></a>';
 
-		if (!empty($_args['align']))
+		if (!empty($align))
 		{
-			$out = '<figure class="image ' . $_args['align'] . '">' . $out;
+			$out = '<figure class="image ' . $align . '">' . $out;
 
-			if ($_args['caption'])
+			if ($caption)
 			{
-				$out .= '<figcaption>' . htmlspecialchars($_args['caption'], ENT_QUOTES, 'UTF-8') . '</figcaption>';
+				$out .= '<figcaption>' . htmlspecialchars($caption, ENT_QUOTES, 'UTF-8') . '</figcaption>';
 			}
 
 			$out .= '</figure>';

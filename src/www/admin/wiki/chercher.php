@@ -3,11 +3,11 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$q = trim(Utils::get('q'));
+$q = trim(qg('q'));
 
 $tpl->assign('recherche', $q);
 
-if (Utils::get('q'))
+if ($q)
 {
     $r = $wiki->search($q);
     $tpl->assign('resultats', $r);
@@ -22,5 +22,3 @@ function tpl_clean_snippet($str)
 $tpl->register_modifier('clean_snippet', 'Garradin\tpl_clean_snippet');
 
 $tpl->display('admin/wiki/chercher.tpl');
-
-?>

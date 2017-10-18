@@ -1,17 +1,13 @@
 {include file="admin/_head.tpl" title="Supprimer une catégorie" current="membres/categories"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Supprimer la catégorie de membres ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.nom|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.nom}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, la catégorie ne doit plus contenir de membres pour pouvoir

@@ -27,6 +27,20 @@ class Plugin
 
 	static protected $signal_files = [];
 
+	static public function getPath($id)
+	{
+		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
+		{
+			return 'phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz';
+		}
+		elseif (is_dir(PLUGINS_ROOT . '/' . $id))
+		{
+			return PLUGINS_ROOT . '/' . $id;
+		}
+
+		throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
+	}
+
 	/**
 	 * Construire un objet Plugin pour un plugin
 	 * @param string $id Identifiant du plugin
@@ -35,18 +49,18 @@ class Plugin
 	public function __construct($id)
 	{
 		$db = DB::getInstance();
-		$this->plugin = $db->simpleQuerySingle('SELECT * FROM plugins WHERE id = ?;', true, $id);
+		$this->plugin = $db->first('SELECT * FROM plugins WHERE id = ?;', $id);
 
 		if (!$this->plugin)
 		{
 			throw new UserException('Ce plugin n\'existe pas ou n\'est pas installé correctement.');
 		}
 
-		$this->plugin['config'] = json_decode($this->plugin['config'], true);
+		$this->plugin->config = json_decode($this->plugin->config);
 		
-		if (!is_array($this->plugin['config']))
+		if (!is_object($this->plugin->config))
 		{
-			$this->plugin['config'] = [];
+			$this->plugin->config = new \stdClass;
 		}
 
 		$this->id = $id;
@@ -60,8 +74,8 @@ class Plugin
 		if ($this->config_changed)
 		{
 			$db = DB::getInstance();
-			$db->simpleUpdate('plugins', 
-				['config' => json_encode($this->plugin['config'])],
+			$db->update('plugins', 
+				['config' => json_encode($this->plugin->config)],
 				'id = \'' . $this->id . '\'');
 		}
 	}
@@ -72,7 +86,7 @@ class Plugin
 	 */
 	public function path()
 	{
-		return 'phar://' . PLUGINS_ROOT . '/' . $this->id . '.tar.gz';
+		return self::getPath($this->id);
 	}
 
 	/**
@@ -85,12 +99,12 @@ class Plugin
 	{
 		if (is_null($key))
 		{
-			return $this->plugin['config'];
+			return $this->plugin->config;
 		}
 
-		if (array_key_exists($key, $this->plugin['config']))
+		if (property_exists($this->plugin->config, $key))
 		{
-			return $this->plugin['config'][$key];
+			return $this->plugin->config->$key;
 		}
 
 		return null;
@@ -106,15 +120,26 @@ class Plugin
 	{
 		if (is_null($value))
 		{
-			unset($this->plugin['config'][$key]);
+			unset($this->plugin->config->$key);
 		}
 		else
 		{
-			$this->plugin['config'][$key] = $value;
+			$this->plugin->config->$key = $value;
 		}
 
 		$this->config_changed = true;
 
+		return true;
+	}
+
+	/**
+	 * Remplace toute la config du plugin
+	 * @param \stdClass $config Configuration complète du plugin
+	 */
+	public function setConfigAll(\stdClass $config)
+	{
+		$this->plugin->config = $config;
+		$this->config_changed = true;
 		return true;
 	}
 
@@ -130,9 +155,9 @@ class Plugin
 			return $this->plugin;
 		}
 
-		if (array_key_exists($key, $this->plugin))
+		if (property_exists($this->plugin, $key))
 		{
-			return $this->plugin[$key];
+			return $this->plugin->$key;
 		}
 
 		return null;
@@ -186,7 +211,7 @@ class Plugin
 		{
 			// Créer l'environnement d'exécution du plugin
 			$plugin = $this;
-			global $tpl, $config, $user, $membres;
+			global $tpl, $config, $session, $form;
 
 			include $this->path() . '/www/' . $file;
 		}
@@ -224,11 +249,9 @@ class Plugin
 			include $this->path() . '/uninstall.php';
 		}
 
-		unlink(PLUGINS_ROOT . '/' . $this->id . '.tar.gz');
-
 		$db = DB::getInstance();
-		$db->simpleExec('DELETE FROM plugins_signaux WHERE plugin = ?;', $this->id);
-		return $db->simpleExec('DELETE FROM plugins WHERE id = ?;', $this->id);
+		$db->delete('plugins_signaux', 'plugin = ?', $this->id);
+		return $db->delete('plugins', 'id = ?', $this->id);
 	}
 
 	/**
@@ -238,9 +261,9 @@ class Plugin
 	 */
 	public function needUpgrade()
 	{
-		$infos = parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 		
-		if (version_compare($this->plugin['version'], $infos['version'], '!='))
+		if (version_compare($this->plugin->version, $infos->version, '!='))
 			return true;
 
 		return false;
@@ -259,12 +282,13 @@ class Plugin
 			include $this->path() . '/upgrade.php';
 		}
 
-		$infos = parse_ini_file($this->path() . '/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
-		$db = DB::getInstance();
-		return $db->simpleUpdate('plugins', 
-			['version' => $infos['version']],
-			'id = \''.$db->escapeString($this->id).'\'');
+		return DB::getInstance()->update('plugins', 
+			['version' => $infos->version],
+			'id = :id',
+			['id' => $this->id]
+		);
 	}
 
 	/**
@@ -287,11 +311,11 @@ class Plugin
 		// Signaux exclusifs, qui ne peuvent être attribués qu'à un seul plugin
 		if (strpos($signal, 'boucle.') === 0)
 		{
-			$registered = $db->simpleQuerySingle('SELECT plugin FROM plugins_signaux WHERE signal = ? AND plugin != ?;', false, $signal, $this->id);
+			$registered = $db->firstColumn('SELECT plugin FROM plugins_signaux WHERE signal = ? AND plugin != ?;', $signal, $this->id);
 
 			if ($registered)
 			{
-				throw new \LogicException('Le signal ' . $name . ' est exclusif et déjà associé au plugin "'.$registered.'"');
+				throw new \LogicException('Le signal ' . $signal . ' est exclusif et déjà associé au plugin "'.$registered.'"');
 			}
 		}
 
@@ -309,12 +333,12 @@ class Plugin
 	static public function listInstalled()
 	{
 		$db = DB::getInstance();
-		$plugins = $db->simpleStatementFetchAssocKey('SELECT id, * FROM plugins ORDER BY nom;');
+		$plugins = $db->getGrouped('SELECT id, * FROM plugins ORDER BY nom;');
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($plugins as &$row)
 		{
-			$row['system'] = in_array($row['id'], $system);
+			$row->system = in_array($row->id, $system);
 		}
 
 		return $plugins;
@@ -327,7 +351,7 @@ class Plugin
 	static public function listMenu()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetchAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
+		return $db->getAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
 	}
 
 	/**
@@ -346,13 +370,24 @@ class Plugin
 			if (substr($file, 0, 1) == '.')
 				continue;
 
-			if (!preg_match('!^([a-z0-9_.-]+)\.tar\.gz$!', $file, $match))
+			if (preg_match('!^([a-zA-Z0-9_.-]+)\.tar\.gz$!i', $file, $match))
+			{
+				// Sélectionner les archives PHAR
+				$file = $match[1];
+			}
+			elseif (!is_dir(PLUGINS_ROOT . '/' . $file))
+			{
+				// ignorer tout ce qui n'est pas un répertoire ou une archive PHAR
 				continue;
-			
-			if (array_key_exists($match[1], $installed))
-				continue;
+			}
 
-			$list[$match[1]] = parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $match[1] . '.tar.gz/garradin_plugin.ini', false);
+			if (array_key_exists($file, $installed))
+			{
+				// Ignorer les plugins déjà installés
+				continue;
+			}
+
+			$list[$file] = (object) parse_ini_file(self::getPath($file) . '/garradin_plugin.ini', false);
 		}
 
 		$dir->close();
@@ -374,8 +409,6 @@ class Plugin
 			$context_options = [
 				'ssl' => [
 					'verify_peer'   => TRUE,
-					// On vérifie en utilisant le certificat maître de CACert
-					'cafile'        => ROOT . '/include/data/cacert.pem',
 					'verify_depth'  => 5,
 					'CN_match'      => $url['host'],
 					'SNI_enabled'	=> true,
@@ -498,55 +531,57 @@ class Plugin
 	 */
 	static public function install($id, $official = false)
 	{
-		if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz'))
+		$path = self::getPath($id);
+
+		if (!file_exists($path . '/garradin_plugin.ini'))
 		{
-			throw new \RuntimeException('Le plugin ' . $id . ' ne semble pas exister et ne peut donc être installé.');
+			throw new UserException(sprintf('Le plugin "%s" n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.', $id));
 		}
 
-		if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/garradin_plugin.ini'))
-		{
-			throw new UserException('L\'archive '.$id.'.tar.gz n\'est pas une extension Garradin : fichier garradin_plugin.ini manquant.');
-		}
-
-		$infos = parse_ini_file('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/garradin_plugin.ini', false);
+		$infos = (object) parse_ini_file($path . '/garradin_plugin.ini', false);
 
 		$required = ['nom', 'description', 'auteur', 'url', 'version', 'menu', 'config'];
 
 		foreach ($required as $key)
 		{
-			if (!array_key_exists($key, $infos))
+			if (!property_exists($infos, $key))
 			{
 				throw new \RuntimeException('Le fichier garradin_plugin.ini ne contient pas d\'entrée "'.$key.'".');
 			}
 		}
 
-		if (!empty($infos['min_version']) && !version_compare(garradin_version(), $infos['min_version'], '>='))
+		if (!empty($infos->min_version) && !version_compare(garradin_version(), $infos->min_version, '>='))
 		{
-			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos['min_version'].' ou supérieure.');
+			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos->min_version.' ou supérieure.');
 		}
 
-		if (!empty($infos['menu']) && !file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/www/admin/index.php'))
+		if (!empty($infos->max_version) && !version_compare(garradin_version(), $infos->max_version, '>'))
+		{
+			throw new \RuntimeException('Le plugin '.$id.' nécessite Garradin version '.$infos->max_version.' ou inférieure.');
+		}
+
+		if (!empty($infos->menu) && !file_exists($path . '/www/admin/index.php'))
 		{
 			throw new \RuntimeException('Le plugin '.$id.' ne comporte pas de fichier www/admin/index.php alors qu\'il demande à figurer au menu.');
 		}
 
 		$config = '';
 
-		if ((bool)$infos['config'])
+		if ((bool)$infos->config)
 		{
-			if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/config.json'))
+			if (!file_exists($path . '/config.json'))
 			{
 				throw new \RuntimeException('L\'archive '.$id.'.tar.gz ne comporte pas de fichier config.json 
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			if (!file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/www/admin/config.php'))
+			if (!file_exists($path . '/www/admin/config.php'))
 			{
 				throw new \RuntimeException('L\'archive '.$id.'.tar.gz ne comporte pas de fichier www/admin/config.php 
 					alors que le plugin nécessite le stockage d\'une configuration.');
 			}
 
-			$config = json_decode(file_get_contents('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/config.json'), true);
+			$config = json_decode(file_get_contents($path . '/config.json'));
 
 			if (is_null($config))
 			{
@@ -557,24 +592,26 @@ class Plugin
 		}
 
 		$db = DB::getInstance();
-		$db->simpleInsert('plugins', [
+		$db->begin();
+		$db->insert('plugins', [
 			'id' 		=> 	$id,
 			'officiel' 	=> 	(int)(bool)$official,
-			'nom'		=>	$infos['nom'],
-			'description'=>	$infos['description'],
-			'auteur'	=>	$infos['auteur'],
-			'url'		=>	$infos['url'],
-			'version'	=>	$infos['version'],
-			'menu'		=>	(int)(bool)$infos['menu'],
+			'nom'		=>	$infos->nom,
+			'description'=>	$infos->description,
+			'auteur'	=>	$infos->auteur,
+			'url'		=>	$infos->url,
+			'version'	=>	$infos->version,
+			'menu'		=>	(int)(bool)$infos->menu,
 			'config'	=>	$config,
 		]);
 
-		if (file_exists('phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/install.php'))
+		if (file_exists($path . '/install.php'))
 		{
 			$plugin = new Plugin($id);
-
-			include 'phar://' . PLUGINS_ROOT . '/' . $id . '.tar.gz/install.php';
+			require $plugin->path() . '/install.php';
 		}
+
+		$db->commit();
 
 		return true;
 	}
@@ -586,7 +623,7 @@ class Plugin
 	 */
 	static public function getInstalledVersion($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT version FROM plugins WHERE id = ?;');
+		return DB::getInstance()->first('SELECT version FROM plugins WHERE id = ?;', $id);
 	}
 
 	/**
@@ -597,16 +634,16 @@ class Plugin
 	 */
 	static public function fireSignal($signal, $params = null, &$return = null)
 	{
-		$list = DB::getInstance()->simpleStatementFetch('SELECT * FROM plugins_signaux WHERE signal = ?;', SQLITE3_ASSOC, $signal);
+		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
 
 		foreach ($list as $row)
 		{
-			if (!in_array($row['plugin'], self::$signal_files))
+			if (!in_array($row->plugin, self::$signal_files))
 			{
-				require_once 'phar://' . PLUGINS_ROOT . '/' . $row['plugin'] . '.tar.gz/signals.php';
+				require_once self::getPath($row->plugin) . '/signals.php';
 			}
 
-			$return = call_user_func_array($row['callback'], [&$params, &$return]);
+			$return = call_user_func_array($row->callback, [&$params, &$return]);
 
 			if ($return)
 				return $return;

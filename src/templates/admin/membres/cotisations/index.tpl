@@ -3,7 +3,7 @@
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
     <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
     {/if}
 </ul>
@@ -20,24 +20,24 @@
     <tbody>
         {foreach from=$liste item="co"}
             <tr>
-                <th><a href="{$admin_url}membres/cotisations/voir.php?id={$co.id|escape}">{$co.intitule|escape}</a></th>
+                <th><a href="{$admin_url}membres/cotisations/voir.php?id={$co.id}">{$co.intitule}</a></th>
                 <td>
                     {if $co.duree}
-                        {$co.duree|escape} jours
+                        {$co.duree} jours
                     {elseif $co.debut}
                         du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
                     {else}
                         ponctuelle
                     {/if}
                 </td>
-                <td class="num">{$co.montant|html_money} {$config.monnaie|escape}</td>
-                <td class="num">{$co.nb_membres|escape}</td>
-                <td class="num">{$co.nb_a_jour|escape}</td>
+                <td class="num">{$co.montant|escape|html_money} {$config.monnaie}</td>
+                <td class="num">{$co.nb_membres}</td>
+                <td class="num">{$co.nb_a_jour}</td>
                 <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id|escape}" title="Liste des membres cotisants">👪</a>
-                    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id|escape}" title="Modifier">✎</a>
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id|escape}" title="Supprimer">✘</a>
+                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id}" title="Liste des membres cotisants">👪</a>
+                    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
+                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id}" title="Modifier">✎</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>
@@ -45,20 +45,16 @@
     </tbody>
 </table>
 
-{if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{else}
-    <p class="help">
-        Idée : les cotisations peuvent également être utilisées pour suivre les activités auxquelles
-        sont inscrits les membres de l'association.
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}" id="f_add">
+<p class="help">
+    Idée : les cotisations peuvent également être utilisées pour suivre les activités auxquelles
+    sont inscrits les membres de l'association.
+</p>
+
+<form method="post" action="{$self_url}" id="f_add">
 
     <fieldset>
         <legend>Ajouter une cotisation</legend>
@@ -68,6 +64,7 @@
             <dt><label for="f_description">Description</label></dt>
             <dd><textarea name="description" id="f_description" cols="50" rows="3">{form_field name=description}</textarea></dd>
             <dt><label for="f_montant">Montant minimal</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd class="help">Laisser à <b>0</b> pour une cotisation à prix libre</dd>
             <dd><input type="number" name="montant" step="0.01" min="0.00" id="f_montant" value="{form_field name=montant default=0.00}" required="required" /></dd>
 
             <dt><label for="f_periodicite_jours">Période de validité</label></dt>
@@ -99,9 +96,9 @@
             <dd class="cat_compta">
                 <select name="id_categorie_compta" id="f_id_categorie_compta">
                 {foreach from=$categories item="cat"}
-                    <option value="{$cat.id|escape}" {form_field name="id_categorie_compta" selected=$cat.id}>{$cat.intitule|escape}
+                    <option value="{$cat.id}" {form_field name="id_categorie_compta" selected=$cat.id}>{$cat.intitule}
                     {if !empty($cat.description)}
-                        — <em>{$cat.description|escape}</em>
+                        — <em>{$cat.description}</em>
                     {/if}
                     </option>
                 {/foreach}
@@ -131,21 +128,21 @@
     if (!$('#f_periodicite_dates').checked)
         hide.push('.periode_dates');
 
-    g.toggleElementVisibility(hide, false);
+    g.toggle(hide, false);
 
     $('#f_categorie').onchange = function() {
-        g.toggleElementVisibility('.cat_compta', this.checked);
+        g.toggle('.cat_compta', this.checked);
         return true;
     };
 
     function togglePeriode()
     {
-        g.toggleElementVisibility(['.periode_jours', '.periode_dates'], false);
+        g.toggle(['.periode_jours', '.periode_dates'], false);
 
         if (this.checked && this.value == 'jours')
-            g.toggleElementVisibility('.periode_jours', true);
+            g.toggle('.periode_jours', true);
         else if (this.checked && this.value == 'date')
-            g.toggleElementVisibility('.periode_dates', true);
+            g.toggle('.periode_dates', true);
     }
 
     $('#f_periodicite_ponctuel').onchange = togglePeriode;

@@ -6,21 +6,18 @@ require_once __DIR__ . '/../_inc.php';
 $exercices = new Compta\Exercices;
 $journal = new Compta\Journal;
 
-$exercice = Utils::get('exercice') ?: $exercices->getCurrentId();
+$exercice = qg('exercice') ?: $exercices->getCurrentId();
 
 if (!$exercice)
 {
 	throw new UserException('Exercice inconnu.');
 }
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de membre manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
-$membre = $membres->get($id);
+$membre = (new Membres)->get($id);
 
 if (!$membre)
 {
@@ -40,7 +37,7 @@ function get_nom_compte($compte)
 
 $tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
 
-$tpl->assign('journal', $journal->listForMember($membre['id'], $exercice));
+$tpl->assign('journal', $journal->listForMember($membre->id, $exercice));
 
 $tpl->assign('exercices', $exercices->getList());
 $tpl->assign('exercice', $exercice);

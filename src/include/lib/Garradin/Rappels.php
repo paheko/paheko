@@ -14,7 +14,7 @@ class Rappels
 		$db = DB::getInstance();
 
         if (empty($data['id_cotisation'])
-        	|| !$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', false, (int) $data['id_cotisation']))
+        	|| !$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', (int) $data['id_cotisation']))
         {
             throw new UserException('Cotisation inconnue.');
         }
@@ -54,7 +54,7 @@ class Rappels
 
 		$this->_checkFields($data);
 
-		$db->simpleInsert('rappels', $data);
+		$db->insert('rappels', $data);
 
 		return $db->lastInsertRowId();
 	}
@@ -72,7 +72,7 @@ class Rappels
 
 		$this->_checkFields($data);
 
-		return $db->simpleUpdate('rappels', $data, 'id = ' . (int)$id);
+		return $db->update('rappels', $data, 'id = ' . (int)$id);
 	}
 
 	/**
@@ -85,19 +85,20 @@ class Rappels
 	{
 		$db = DB::getInstance();
 
-		$db->exec('BEGIN;');
+		$db->begin();
 
 		if ($delete_history)
 		{
-			$db->simpleExec('DELETE FROM rappels_envoyes WHERE id_rappel = ?;', (int) $id);
+			$db->delete('rappels_envoyes', 'id_rappel = ?', (int) $id);
 		}
 		else
 		{
-			$db->simpleExec('UPDATE rappels_envoyes SET id_rappel = NULL WHERE id_rappel = ?;', (int) $id);
+			$db->update('rappels_envoyes', ['id_rappel' => null], 'id_rappel = ' . (int)$id);
 		}
 
-		$db->simpleExec('DELETE FROM rappels WHERE id = ?;', (int) $id);
-		$db->exec('END;');
+		$db->delete('rappels', 'id = ?', (int) $id);
+		
+		$db->commit();
 
 		return true;
 	}
@@ -109,7 +110,7 @@ class Rappels
 	 */
 	public function get($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT * FROM rappels WHERE id = ?;', true, (int)$id);
+		return DB::getInstance()->first('SELECT * FROM rappels WHERE id = ?;', (int)$id);
 	}
 
 	/**
@@ -118,7 +119,7 @@ class Rappels
 	 */
 	public function countAll()
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels;');
+		return DB::getInstance()->firstColumn('SELECT COUNT(*) FROM rappels;');
 	}
 
 	/**
@@ -127,7 +128,7 @@ class Rappels
 	 */
 	public function listByCotisation()
 	{
-		return DB::getInstance()->simpleStatementFetch('SELECT r.*,
+		return DB::getInstance()->get('SELECT r.*,
 			c.intitule, c.montant, c.duree, c.debut, c.fin
 			FROM rappels AS r
 			INNER JOIN cotisations AS c ON c.id = r.id_cotisation
@@ -141,8 +142,8 @@ class Rappels
 	 */
 	public function listForCotisation($id)
 	{
-		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels 
-			WHERE id_cotisation = ? ORDER BY delai, sujet;', \SQLITE3_ASSOC, (int)$id);
+		return DB::getInstance()->get('SELECT * FROM rappels 
+			WHERE id_cotisation = ? ORDER BY delai, sujet;', (int)$id);
 	}
 
 	/**
@@ -192,17 +193,15 @@ class Rappels
 			)
 		ORDER BY nb_jours DESC;';
 
-		$db->exec('BEGIN');
-		$st = $db->prepare($query);
-		$res = $st->execute();
+		$db->begin();
 		$re = new Rappels_Envoyes;
 
-		while ($row = $res->fetchArray(DB::ASSOC))
+		foreach ($db->iterate($query) as $row)
 		{
 			$re->sendAuto($row);
 		}
 
-		$db->exec('END;');
+		$db->commit();
 		return true;
 	}
 }

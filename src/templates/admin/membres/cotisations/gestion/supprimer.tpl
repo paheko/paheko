@@ -3,23 +3,19 @@
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
     <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
     {/if}
 </ul>
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Supprimer cette cotisation ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer la cotisation «&nbsp;{$cotisation.intitule|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir supprimer la cotisation «&nbsp;{$cotisation.intitule}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, l'historique des membres ayant cotisé à cette cotisation sera supprimé.

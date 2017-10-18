@@ -3,12 +3,25 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
+$membres = new Membres;
 
-// Restauration de ce qui était en session
-if ($champs = $membres->sessionGet('champs_membres'))
+// Restauration de ce qui était 
+if ($champs = f('champs'))
 {
-    $champs = new Membres\Champs($champs);
+    if (is_string($champs))
+    {
+        $champs = json_decode($champs, true);
+    }
+
+    try {
+        $champs = new Membres\Champs($champs);
+    }
+    catch (UserException $e)
+    {
+        $champs = new Membres\Champs($config->get('champs_membres'));
+        unset($_POST['review']);
+        $form->addError($e->getMessage());
+    }
 }
 else
 {
@@ -20,61 +33,33 @@ else
     $champs = new Membres\Champs($config->get('champs_membres'));
 }
 
-if (isset($_GET['ok']))
+if (f('save') || f('add') || f('review') || f('reset'))
 {
-    $error = 'OK';
-}
+    $form->check('config_membres');
 
-if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) || !empty($_POST['reset']))
-{
-    if (!Utils::CSRF_check('config_membres'))
+    if (!$form->hasErrors())
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        if (!empty($_POST['reset']))
+        if (f('reset'))
         {
-            $membres->sessionStore('champs_membres', null);
             Utils::redirect('/admin/config/membres.php');
         }
-        elseif (!empty($_POST['review']))
+        elseif (f('add'))
         {
             try {
-                $nouveau_champs = Utils::post('champs');
-
-                foreach ($nouveau_champs as $key=>&$cfg)
-                {
-                    $cfg['type'] = $champs->get($key, 'type');
-                }
-                
-                $champs->setAll($nouveau_champs);
-                $membres->sessionStore('champs_membres', (string)$champs);
-
-                Utils::redirect('/admin/config/membres.php?review');
-            }
-            catch (UserException $e)
-            {
-                $error = $e->getMessage();
-            }
-        }
-        elseif (!empty($_POST['add']))
-        {
-            try {
-                if (Utils::post('preset'))
+                if (f('preset'))
                 {
                     $presets = Membres\Champs::listUnusedPresets($champs);
-                    if (!array_key_exists(Utils::post('preset'), $presets))
+                    if (!array_key_exists(f('preset'), $presets))
                     {
                         throw new UserException('Le champ pré-défini demandé ne fait pas partie des champs disponibles.');
                     }
 
-                    $champs->add(Utils::post('preset'), $presets[Utils::post('preset')]);
+                    $champs->add(f('preset'), $presets[f('preset')]);
                 }
-                elseif (Utils::post('new'))
+                elseif (f('new'))
                 {
                     $presets = Membres\Champs::importPresets();
-                    $new = Utils::post('new');
+                    $new = f('new');
 
                     if (array_key_exists($new, $presets))
                     {
@@ -82,8 +67,8 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                     }
 
                     $config = [
-                        'type'  =>  Utils::post('new_type'),
-                        'title' =>  Utils::post('new_title'),
+                        'type'  =>  f('new_type'),
+                        'title' =>  f('new_title'),
                         'editable'  =>  true,
                         'mandatory' =>  false,
                     ];
@@ -96,47 +81,44 @@ if (!empty($_POST['save']) || !empty($_POST['add']) || !empty($_POST['review']) 
                     $champs->add($new, $config);
                 }
 
-                $membres->sessionStore('champs_membres', (string) $champs);
-
-                Utils::redirect('/admin/config/membres.php?added');
+                $tpl->assign('status', 'ADDED');
             }
             catch (UserException $e)
             {
-                $error = $e->getMessage();
+                $form->addError($e->getMessage());
             }
         }
-        elseif (!empty($_POST['save']))
+        elseif (f('save'))
         {
             try {
                 $champs->save();
-                $membres->sessionStore('champs_membres', null);
                 Utils::redirect('/admin/config/membres.php?ok');
             }
             catch (UserException $e)
             {
-                $error = $e->getMessage();
+                $form->addError($e->getMessage());
             }
         }
     }
 }
+else
+{
+    $tpl->assign('status', null !== qg('ok'));
+}
 
-$tpl->assign('error', $error);
-$tpl->assign('review', isset($_GET['review']) ? true : false);
+$tpl->assign('review', (bool) f('review'));
 
 $types = $champs->getTypes();
 
 $tpl->assign('champs', $champs->getAll());
 $tpl->assign('types', $types);
 $tpl->assign('presets', Membres\Champs::listUnusedPresets($champs));
-$tpl->assign('new', Utils::post('new'));
+$tpl->assign('new', f('new'));
 
 $tpl->register_modifier('get_type', function ($type) use ($types) {
     return $types[$type];
 });
 
-$tpl->assign('csrf_name', Utils::CSRF_field_name('config_membres'));
-$tpl->assign('csrf_value', Utils::CSRF_create('config_membres'));
+$tpl->assign('title', 'Configuration — ' . (null !== qg('review') ? 'Confirmer les changements' : 'Fiche membres'));
 
 $tpl->display('admin/config/membres.tpl');
-
-?>

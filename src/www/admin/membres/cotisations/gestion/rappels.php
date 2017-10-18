@@ -1,51 +1,37 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 $rappels = new Rappels;
 $cotisations = new Cotisations;
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save') && $form->check('new_rappel'))
 {
-    if (!Utils::CSRF_check('new_rappel'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    try {
+        if (f('delai_choix') == 0)
+    	   $delai = 0;
+        elseif (f('delai_choix') > 0)
+            $delai = (int) f('delai_post');
+        else
+            $delai = -(int) f('delai_pre');
+
+        $rappels->add([
+            'sujet'         => f('sujet'),
+            'texte'         => f('texte'),
+            'delai'         => $delai,
+            'id_cotisation' => f('id_cotisation'),
+        ]);
+
+        Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
     }
-    else
+    catch (UserException $e)
     {
-        try {
-            if (Utils::post('delai_choix') == 0)
-        	   $delai = 0;
-            elseif (Utils::post('delai_choix') > 0)
-                $delai = (int) Utils::post('delai_post');
-            else
-                $delai = -(int) Utils::post('delai_pre');
-
-            $rappels->add([
-                'sujet'		=>	Utils::post('sujet'),
-                'texte'		=>	Utils::post('texte'),
-                'delai'		=>	$delai,
-                'id_cotisation'	=>	Utils::post('id_cotisation'),
-            ]);
-
-            Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
-
-$tpl->assign('error', $error);
 
 $tpl->assign('liste', $rappels->listByCotisation());
 $tpl->assign('cotisations', $cotisations->listCurrent());
@@ -56,5 +42,3 @@ $tpl->assign('default_text', "Bonjour #IDENTITE,\n\nVotre cotisation arrive à �
     .   "--\n#NOM_ASSO\n#ADRESSE_ASSO\nE-Mail : #EMAIL_ASSO\nSite web : #SITE_ASSO");
 
 $tpl->display('admin/membres/cotisations/gestion/rappels.tpl');
-
-?>

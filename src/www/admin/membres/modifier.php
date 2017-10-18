@@ -1,19 +1,13 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de membre manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $membre = $membres->get($id);
 
@@ -26,39 +20,35 @@ $cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
-$membre_cat = $cats->get($membre['id_categorie']);
-if (($membre_cat['droit_membres'] == Membres::DROIT_ADMIN)
-    && ($user['droits']['membres'] < Membres::DROIT_ADMIN))
+$membre_cat = $cats->get($membre->id_categorie);
+
+if (($membre_cat->droit_membres == Membres::DROIT_ADMIN)
+    && ($user->droit_membres < Membres::DROIT_ADMIN))
 {
     throw new UserException("Seul un membre admin peut modifier un autre membre admin.");
 }
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('edit_member_'.$id))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    elseif (Utils::post('passe') != Utils::post('repasse'))
-    {
-        $error = 'La vérification ne correspond pas au mot de passe.';
-    }
-    else
+    $form->check('edit_member_' . $id, [
+        'passe' => 'confirmed',
+        // FIXME: ajouter les règles pour les champs membres
+    ]);
+
+    if (!$form->hasErrors())
     {
         try {
             $data = [];
 
             foreach ($champs->getAll() as $key=>$config)
             {
-                $data[$key] = Utils::post($key);
+                $data[$key] = f($key);
             }
 
-            if ($user['droits']['membres'] == Membres::DROIT_ADMIN && $user['id'] != $membre['id'])
+            if ($session->canAccess('membres', Membres::DROIT_ADMIN) && $user->id != $membre->id)
             {
-                $data['id_categorie'] = Utils::post('id_categorie');
-                $data['id'] = Utils::post('id');
+                $data['id_categorie'] = f('id_categorie');
+                $data['id'] = f('id');
             }
 
             $membres->edit($id, $data);
@@ -72,22 +62,19 @@ if (!empty($_POST['save']))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
-$tpl->assign('current_cat', Utils::post('id_categorie') ?: $membre['id_categorie']);
+$tpl->assign('current_cat', f('id_categorie') ?: $membre->id_categorie);
 
-$tpl->assign('can_change_id', $user['droits']['membres'] == Membres::DROIT_ADMIN);
+$tpl->assign('can_change_id', $session->canAccess('membres', Membres::DROIT_ADMIN));
 
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/membres/modifier.tpl');
-
-?>

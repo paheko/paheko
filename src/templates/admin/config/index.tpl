@@ -1,28 +1,29 @@
 {include file="admin/_head.tpl" title="Configuration" current="config"}
 
-{if $error}
-    {if $error == 'OK'}
+{include file="admin/config/_menu.tpl" current="index"}
+
+{if $ok}
     <p class="confirm">
         La configuration a bien été enregistrée.
     </p>
-    {else}
-    <p class="error">
-        {$error|escape}
-    </p>
-    {/if}
 {/if}
 
-{include file="admin/config/_menu.tpl" current="index"}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Garradin</legend>
         <dl>
             <dt>Version installée</dt>
-            <dd class="help">{$garradin_version|escape} <a href="{Garradin\WEBSITE}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+            <dd class="help">{$garradin_version} <a href="{$garradin_website}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
             <dt>Informations système</dt>
-            <dd class="help">PHP version {$php_version|escape} — SQLite version {$sqlite_version|escape}</dd>
+            <dd class="help">
+                Version PHP&nbsp;: {$php_version}<br />
+                Version SQLite&nbsp;: {$sqlite_version}<br />
+                Heure du serveur&nbsp;: {$server_time|date_fr} ({if $time_diff > -5 && $time_diff < 5}à l'heure{elseif $time_diff < 0}en retard de {$time_diff} secondes{else}en avance de {$time_diff} secondes{/if})<br />
+                Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
+            </dd>
         </dl>
     </fieldset>
 
@@ -49,7 +50,7 @@
             <dd>
                 <select name="pays" id="f_pays" required="required">
                 {foreach from=$pays key="cc" item="nom"}
-                    <option value="{$cc|escape}"{if $cc == $config.pays} selected="selected"{/if}>{$nom|escape}</option>
+                    <option value="{$cc}"{if $cc == $config.pays} selected="selected"{/if}>{$nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -85,7 +86,7 @@
             <dd>
                 <select name="categorie_membres" required="required" id="f_categorie_membres">
                 {foreach from=$membres_cats key="id" item="nom"}
-                    <option value="{$id|escape}"{if $config.categorie_membres == $id} selected="selected"{/if}>{$nom|escape}</option>
+                    <option value="{$id}"{if $config.categorie_membres == $id} selected="selected"{/if}>{$nom}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -93,8 +94,8 @@
             <dd class="help">Ce champ des fiches membres sera utilisé comme identité du membre dans les emails, les fiches, les pages, etc.</dd>
             <dd>
                 <select name="champ_identite" required="required" id="f_champ_identite">
-                    {foreach from=$champs key="c" value="champ"}
-                        <option value="{$c|escape}" {form_field selected=$c name="champ_identite" data=$config}>{$champ.title|escape}</option>
+                    {foreach from=$champs key="c" item="champ"}
+                        <option value="{$c}" {form_field selected=$c name="champ_identite" data=$config}>{$champ.title}</option>
                     {/foreach}
                 </select>
             </dd>
@@ -102,13 +103,24 @@
             <dd class="help">Ce champ des fiches membres sera utilisé en guise d'identifiant pour se connecter à Garradin. Pour cela le champ doit être unique (pas de doublons).</dd>
             <dd>
                 <select name="champ_identifiant" required="required" id="f_champ_identifiant">
-                    {foreach from=$champs key="c" value="champ"}
-                        <option value="{$c|escape}" {form_field selected=$c name="champ_identifiant" data=$config}>{$champ.title|escape}</option>
+                    {foreach from=$champs key="c" item="champ"}
+                        <option value="{$c}" {form_field selected=$c name="champ_identifiant" data=$config}>{$champ.title}</option>
                     {/foreach}
                 </select>
             </dd>
             
         </dl>
+    </fieldset>
+
+    <fieldset id="couleurs">
+        <legend>Personnalisation de l'interface</legend>
+        <dl>
+            <dt><label for="f_couleur1">Couleur principale</label></dt>
+            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[0]}" name="couleur1" value="{form_field name=couleur1 default=$couleur1}" id="f_couleur1" /></dd>
+            <dt><label for="f_couleur2">Couleur secondaire</label></dt>
+            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[1]}" name="couleur2" value="{form_field name=couleur2 default=$couleur2}" id="f_couleur2" /></dd>
+        </dl>
+        <input type="hidden" name="image_fond" id="f_image_fond" value="{form_field name=image_fond}" />
     </fieldset>
 
     <p class="submit">

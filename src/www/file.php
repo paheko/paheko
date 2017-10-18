@@ -32,10 +32,10 @@ catch (\InvalidArgumentException $e)
 	throw new UserException('Ce fichier n\'existe pas.');
 }
 
-$membres = new Membres;
-$is_logged = $membres->isLogged();
+$session = new Membres\Session;
+$user = $session->isLogged() ? $session->getUser() : false;
 
-if (!$file->checkAccess($membres->getLoggedUser()))
+if (!$file->checkAccess($session))
 {
 	header('HTTP/1.1 403 Forbidden', true, 403);
 	throw new UserException('Vous n\'avez pas accès à ce fichier.');

@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Recherche de membre" current="membres"}
 
-{if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
 <ul class="actions">
     <li><a href="{$admin_url}membres/">Liste des membres</a></li>
     <li class="current"><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
@@ -17,31 +17,31 @@
             <dd>
                 <select name="c" id="f_champ">
                     {foreach from=$champs_liste key="k" item="v"}
-                    <option value="{$k|escape}"{form_field name="c" default=$champ selected=$k}>{$v.title|escape}</option>
+                    <option value="{$k}"{form_field name="c" default=$champ selected=$k}>{$v.title}</option>
                     {/foreach}
                 </select>
             </dd>
             <dt><label for="f_texte">Recherche</label></dt>
-            <dd id="f_free"><input id="f_texte" type="text" name="r" value="{$recherche|escape}" required="required" /></dd>
+            <dd id="f_free"><input id="f_texte" type="text" name="r" value="{$recherche}" required="required" /></dd>
             {foreach from=$champs_liste key="k" item="v"}
                 {if $v.type == 'select'}
-                    <dd class="special" id="f_{$k|escape}">
+                    <dd class="special" id="f_{$k}">
                         <select name="r" disabled="disabled">
                             {foreach from=$v.options item="opt"}
-                            <option value="{$opt|escape}"{form_field name="r" default=$recherche selected=$opt}>{$opt|escape}</option>
+                            <option value="{$opt}"{form_field name="r" default=$recherche selected=$opt}>{$opt}</option>
                             {/foreach}
                         </select>
                     </dd>
                 {elseif $v.type == 'multiple'}
-                    <dd class="special" id="f_{$k|escape}">
+                    <dd class="special" id="f_{$k}">
                         <select name="r" disabled="disabled">
                             {foreach from=$v.options key="opt_k" item="opt"}
-                            <option value="{$opt_k|escape}"{form_field name="r" default=$recherche selected=$opt_k}>{$opt|escape}</option>
+                            <option value="{$opt_k}"{form_field name="r" default=$recherche selected=$opt_k}>{$opt}</option>
                             {/foreach}
                         </select>
                     </dd>
                 {elseif $v.type == 'checkbox'}
-                    <dd class="special" id="f_{$k|escape}">
+                    <dd class="special" id="f_{$k}">
                         <select name="r" disabled="disabled">
                             <option value="1"{form_field name="r" default=$recherche selected=1}>Oui</option>
                             <option value="0"{form_field name="r" default=$recherche selected=0}>Non</option>
@@ -56,20 +56,20 @@
     </fieldset>
 </form>
 
-{if $user.droits.membres >= Garradin\Membres::DROIT_ECRITURE}
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
 
     <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
     {if !empty($liste)}
     <table class="list search">
         <thead>
-            {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
+            {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
             <td></td>
             {foreach from=$champs_entete key="c" item="cfg"}
                 {if $champ == $c}
-                    <th><strong>{$cfg.title|escape}</strong></th>
+                    <th><strong>{$cfg.title}</strong></th>
                 {else}
-                    <td>{$cfg.title|escape}</td>
+                    <td>{$cfg.title}</td>
                 {/if}
             {/foreach}
             <td></td>
@@ -77,25 +77,25 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id|escape}" /></td>{/if}
-                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id|escape}">{$membre.id|escape}</a></th>
+                    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
+                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs_entete key="c" item="cfg"}
                         {if $champ == $c}
-                            <th><strong>{$membre[$c]|escape|display_champ_membre:$cfg}</strong></th>
+                            <th><strong>{$membre->$c|raw|display_champ_membre:$cfg}</strong></th>
                         {else}
-                            <td>{$membre[$c]|escape|display_champ_membre:$cfg}</td>
+                            <td>{$membre->$c|raw|display_champ_membre:$cfg}</td>
                         {/if}
                     {/foreach}
                     <td class="actions">
-                        {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id|escape}" title="Envoyer un message">✉</a> {/if}
-                        <a class="icn" href="modifier.php?id={$membre.id|escape}" title="Modifier la fiche membre">✎</a>
+                        {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}
+                        <a class="icn" href="modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
                     </td>
                 </tr>
             {/foreach}
         </tbody>
     </table>
 
-    {if $user.droits.membres == Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
     <p class="checkUncheck">
         <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
     </p>
@@ -154,9 +154,9 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    <th>{$membre.identite|escape}</th>
+                    <th>{$membre.identite}</th>
                     <td class="actions">
-                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id|escape}">Envoyer un message</a>{/if}
+                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
                     </td>
                 </tr>
             {/foreach}

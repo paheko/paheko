@@ -38,38 +38,42 @@ class Config
         $object = new \stdClass;
 
         $this->fields_types = [
-            'nom_asso'              =>  $string,
-            'adresse_asso'          =>  $string,
-            'email_asso'            =>  $string,
-            'site_asso'             =>  $string,
-
-            'monnaie'               =>  $string,
-            'pays'                  =>  $string,
-
-            'champs_membres'        =>  $object,
-
-            'email_envoi_automatique'=> $string,
-
-            'categorie_membres'     =>  $int,
-
-            'categorie_dons'        =>  $int,
-            'categorie_cotisations' =>  $int,
-
-            'accueil_wiki'          =>  $string,
-            'accueil_connexion'     =>  $string,
-
-            'frequence_sauvegardes' =>  $int,
-            'nombre_sauvegardes'    =>  $int,
-
-            'champ_identifiant'     =>  $string,
-            'champ_identite'        =>  $string,
-
-            'version'               =>  $string,
+            'nom_asso'                =>  $string,
+            'adresse_asso'            =>  $string,
+            'email_asso'              =>  $string,
+            'site_asso'               =>  $string,
+            
+            'monnaie'                 =>  $string,
+            'pays'                    =>  $string,
+            
+            'champs_membres'          =>  $object,
+            
+            'email_envoi_automatique' => $string,
+            
+            'categorie_membres'       =>  $int,
+            
+            'categorie_dons'          =>  $int,
+            'categorie_cotisations'   =>  $int,
+            
+            'accueil_wiki'            =>  $string,
+            'accueil_connexion'       =>  $string,
+            
+            'frequence_sauvegardes'   =>  $int,
+            'nombre_sauvegardes'      =>  $int,
+            
+            'champ_identifiant'       =>  $string,
+            'champ_identite'          =>  $string,
+            
+            'version'                 =>  $string,
+            
+            'couleur1'                =>  $string,
+            'couleur2'                =>  $string,
+            'image_fond'              =>  $string,
         ];
 
         $db = DB::getInstance();
 
-        $this->config = $db->simpleStatementFetchAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
+        $this->config = $db->getAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
 
         foreach ($this->config as $key=>&$value)
         {
@@ -109,9 +113,25 @@ class Config
             return true;
 
         $values = [];
-
         $db = DB::getInstance();
-        $db->exec('BEGIN;');
+
+        if (isset($this->modified['image_fond']))
+        {
+            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'image_fond\';'))
+            {
+                $f = new Fichiers($current);
+                $f->remove();
+            }
+
+            if (strlen($this->config['image_fond']) > 0)
+            {
+                $f = Fichiers::storeFromBase64('Image_fond_admin.png', $this->config['image_fond']);
+                $this->config['image_fond'] = $f->id;
+                unset($f);
+            }
+        }
+
+        $db->begin();
 
         foreach ($this->modified as $key=>$modified)
         {
@@ -126,8 +146,8 @@ class Config
                 $value = (string) $value;
             }
 
-            $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                $key, $value);
+            $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+                [$key, $value]);
         }
 
         if (!empty($this->modified['champ_identifiant']))
@@ -141,7 +161,7 @@ class Config
             $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
         }
 
-        $db->exec('END;');
+        $db->commit();
 
         $this->modified = [];
 
@@ -178,8 +198,8 @@ class Config
         $this->config['version'] = $version;
 
         $db = DB::getInstance();
-        $db->simpleExec('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                'version', $version);
+        $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+                ['version', $version]);
 
         return true;
     }
@@ -263,7 +283,7 @@ class Config
 
                 // Vérification que le champ est unique pour l'identifiant
                 if ($key == 'champ_identifiant' 
-                    && !$db->simpleQuerySingle('SELECT (COUNT(DISTINCT '.$value.') = COUNT(*)) 
+                    && !$db->firstColumn('SELECT (COUNT(DISTINCT lower('.$value.')) = COUNT(*)) 
                         FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != \'\';'))
                 {
                     throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
@@ -275,7 +295,7 @@ class Config
             {
                 return false;
                 $db = DB::getInstance();
-                if (!$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, $value))
+                if (!$db->firstColumn('SELECT 1 FROM compta_categories WHERE id = ?;', $value))
                 {
                     throw new UserException('Champ '.$key.' : La catégorie comptable numéro \''.$value.'\' ne semble pas exister.');
                 }
@@ -284,7 +304,7 @@ class Config
             case 'categorie_membres':
             {
                 $db = DB::getInstance();
-                if (!$db->simpleQuerySingle('SELECT 1 FROM membres_categories WHERE id = ?;', false, $value))
+                if (!$db->firstColumn('SELECT 1 FROM membres_categories WHERE id = ?;', $value))
                 {
                     throw new UserException('La catégorie de membres par défaut numéro \''.$value.'\' ne semble pas exister.');
                 }

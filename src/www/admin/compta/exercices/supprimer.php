@@ -3,51 +3,39 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $e = new Compta\Exercices;
 
-$exercice = $e->get((int)Utils::get('id'));
+$exercice = $e->get((int)qg('id'), true);
 
 if (!$exercice)
 {
 	throw new UserException('Exercice inconnu.');
 }
 
-if ($exercice['cloture'])
+if ($exercice->cloture && $exercice->nb_operations > 0)
 {
     throw new UserException('Impossible de supprimer un exercice clôturé.');
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete'))
 {
-    if (!Utils::CSRF_check('compta_supprimer_exercice_'.$exercice['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    if ($form->check('compta_supprimer_exercice_'.$exercice->id))
     {
         try
         {
-            $id = $e->delete($exercice['id']);
+            $id = $e->delete($exercice->id);
 
             Utils::redirect('/admin/compta/exercices/');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('exercice', $exercice);
 
 $tpl->display('admin/compta/exercices/supprimer.tpl');
-
-?>

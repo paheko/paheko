@@ -82,15 +82,15 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$comptes = new Comptes;
 		$banques = new Comptes_Bancaires;
 		$cats = new Categories;
 		$journal = new Journal;
 
 		$columns = array_flip($this->csv_header);
-		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
-		$liste_cats = $db->simpleStatementFetchAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_comptes = $db->getAssoc('SELECT id, id FROM compta_comptes;');
+		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
 
 		$col = function($column) use (&$row, &$columns)
@@ -106,6 +106,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -129,13 +130,13 @@ class Import
 	
 			if (count($row) != count($columns))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
 			if (trim($row[0]) !== '' && !is_numeric($row[0]))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : la première colonne doit être vide ou contenir le numéro unique d\'opération.');
 			}
 
@@ -144,7 +145,7 @@ class Import
 
 			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
 			}
 
@@ -152,8 +153,7 @@ class Import
 			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
 
 			// En dehors de l'exercice courant
-			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices
-				WHERE (? < debut OR ? > fin) AND cloture = 0;', false, $date, $date))
+			if ($db->test('compta_exercices', '(? < debut OR ? > fin) AND cloture = 0', $date, $date))
 			{
 				continue;
 			}
@@ -211,7 +211,7 @@ class Import
 			}
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;
@@ -232,15 +232,15 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$comptes = new Comptes;
 		$banques = new Comptes_Bancaires;
 		$cats = new Categories;
 		$journal = new Journal;
 
 		$columns = [];
-		$liste_comptes = $db->simpleStatementFetchAssoc('SELECT id, id FROM compta_comptes;');
-		$liste_cats = $db->simpleStatementFetchAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_comptes = $db->getAssoc('SELECT id, id FROM compta_comptes;');
+		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
 
 		$get_compte = function ($compte, $intitule) use (&$liste_comptes, &$comptes, &$banques)
@@ -286,6 +286,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -305,18 +306,17 @@ class Import
 			}
 
 			$date = $col('Date');
+			$date = \DateTime::createFromFormat('d/m/Y', $date);
 
-			if (!preg_match('!^\d{2}/\d{2}/\d{4}$!', $date))
+			if (!$date)
 			{
-				$db->exec('ROLLBACK;');
-				throw new UserException('Erreur sur la ligne ' . $line . ' : la date n\'est pas au format jj/mm/aaaa.');
+				$db->rollback();
+				throw new UserException(sprintf('Erreur sur la ligne %d : la date "%s" n\'est pas au format jj/mm/aaaa.', $line, $col('Date')));
 			}
 
-			$date = explode('/', $date);
-			$date = $date[2] . '-' . $date[1] . '-' . $date[0];
+			$date = $date->format('Y-m-d');
 
-			if ($db->simpleQuerySingle('SELECT 1 FROM compta_exercices
-				WHERE (? < debut OR ? > fin) AND cloture = 0;', false, $date, $date))
+			if ($db->test('compta_exercices', '(? < debut OR ? > fin) AND cloture = 0', $date, $date))
 			{
 				continue;
 			}
@@ -381,7 +381,7 @@ class Import
 			$journal->add($data);
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;

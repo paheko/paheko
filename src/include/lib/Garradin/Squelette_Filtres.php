@@ -47,6 +47,7 @@ class Squelette_Filtres
         'and'   =>  'et',
         'or'    =>  'ou',
         'xor'   =>  'xou',
+        'supprimer_spip' => 'supprimer_skriv',
     ];
 
     static public $desactiver_defaut = [
@@ -56,6 +57,11 @@ class Squelette_Filtres
         'echapper_xml',
     ];
 
+    static public function date($date, $format)
+    {
+        return strftime($format, $date);
+    }
+
     static public function date_en_francais($date)
     {
         return ucfirst(strtolower(Utils::strftime_fr('%A %e %B %Y', $date)));
@@ -63,7 +69,7 @@ class Squelette_Filtres
 
     static public function heure_en_francais($date)
     {
-        return Utils::strftime_fr('%Hh%I', $date);
+        return Utils::strftime_fr('%Hh%M', $date);
     }
 
     static public function mois_en_francais($date)
@@ -76,16 +82,38 @@ class Squelette_Filtres
         return Utils::strftime_fr($format, $date);
     }
 
-    static public function date_intelligente($date)
+    static public function date_intelligente($date, $avec_heure = true)
     {
+        $jour = null;
+        $heure = date('H\hi', $date);
+
         if (date('Ymd', $date) == date('Ymd'))
-            return 'Aujourd\'hui, '.date('H\hi', $date);
+        {
+            $jour = 'aujourd\'hui';
+        }
         elseif (date('Ymd', $date) == date('Ymd', strtotime('yesterday')))
-            return 'Hier, '.date('H\hi', $date);
+        {
+            $jour = 'hier';
+        }
+        elseif (date('Ymd', $date) == date('Ymd', strtotime('tomorrow')))
+        {
+            $jour = 'demain';
+        }
         elseif (date('Y', $date) == date('Y'))
-            return strtolower(Utils::strftime_fr('%e %B, %Hh%M', $date));
+        {
+            $jour = strtolower(Utils::strftime_fr('%A %e %B', $date));
+        }
         else
-            return strtolower(Utils::strftime_fr('%e %B %Y', $date));
+        {
+            $jour = strtolower(Utils::strftime_fr('%e %B %Y', $date));
+        }
+
+        if ($avec_heure)
+        {
+            return sprintf('%s, %s', $jour, $heure);
+        }
+
+        return $jour;
     }
 
     static public function date_atom($date)
@@ -131,6 +159,11 @@ class Squelette_Filtres
     {
         $texte = Utils::SkrivToHTML($texte);
         $texte = self::typo_fr($texte);
+
+        // Liens wiki
+        $texte = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) {
+            return '<a href="' . WWW_URL . Wiki::transformTitleToURI($matches[1]) . '">';
+        }, $texte);
 
         return $texte;
     }
@@ -221,10 +254,12 @@ class Squelette_Filtres
         return preg_replace('!<[^>]*>!', $replace, $value);
     }
 
-    static public function supprimer_spip($value)
+    static public function supprimer_skriv($value)
     {
-        $value = preg_replace('!\[([^\]]+)(?:->[^\]]*)?\]!U', '$1', $value);
+        $value = preg_replace('!\[\[([^\]]+)(?:\|[^\]]*)?\]!U', '$1', $value);
         $value = preg_replace('!\{+([^\}]*)\}+!', '$1', $value);
+        $value = preg_replace('!^=+([^=]+)=*$!mU', '$1', $value);
+        $value = preg_replace('!<<<.*>>>!mU', '', $value);
         return $value;
     }
 

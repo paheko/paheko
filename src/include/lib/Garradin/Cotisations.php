@@ -67,7 +67,7 @@ class Cotisations
 
 		if (isset($data['id_categorie_compta']))
 		{
-			if ($data['id_categorie_compta'] != 0 && !$db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE id = ?;', false, (int) $data['id_categorie_compta']))
+			if ($data['id_categorie_compta'] != 0 && !$db->firstColumn('SELECT 1 FROM compta_categories WHERE id = ?;', (int) $data['id_categorie_compta']))
 			{
 				throw new UserException('Catégorie comptable inconnue');
 			}
@@ -87,10 +87,8 @@ class Cotisations
 
 		$this->_checkFields($data);
 
-		$db->simpleInsert('cotisations', $data);
-		$id = $db->lastInsertRowId();
-
-		return $id;
+		$db->insert('cotisations', $data);
+		return $db->lastInsertRowId();
 	}
 
 	/**
@@ -105,7 +103,7 @@ class Cotisations
 
         $this->_checkFields($data);
 
-        return $db->simpleUpdate('cotisations', $data, 'id = \''.(int) $id.'\'');
+        return $db->update('cotisations', $data, 'id = :id', ['id' => (int) $id]);
 	}
 
 	/**
@@ -117,18 +115,12 @@ class Cotisations
 	{
 		$db = DB::getInstance();
 
-		$db->exec('BEGIN;');
+		$db->begin();
 
-		// Inscrire à NULL les opérations liées à cette cotisation, ainsi on conserve le lien avec les membres
-		$db->simpleExec('UPDATE membres_operations SET id_cotisation = NULL 
-			WHERE id_cotisation IN (SELECT id FROM cotisations_membres WHERE id_cotisation = ?);', (int) $id);
+		// Les lignes liées dans les autres tables seront supprimées grâce à ON DELETE CASCADE
+		$db->delete('cotisations', 'id = ?', (int) $id);
 
-		$db->simpleExec('DELETE FROM rappels WHERE id_cotisation = ?;', (int) $id);
-		$db->simpleExec('DELETE FROM rappels_envoyes WHERE id_cotisation = ?;', (int) $id);
-
-		$db->simpleExec('DELETE FROM cotisations_membres WHERE id_cotisation = ?;', (int) $id);
-		$db->simpleExec('DELETE FROM cotisations WHERE id = ?;', (int) $id);
-		$db->exec('END;');
+		$db->commit();
 
 		return true;
 	}
@@ -141,31 +133,31 @@ class Cotisations
 	public function get($id)
 	{
 		$db = DB::getInstance();
-		return $db->simpleQuerySingle('SELECT co.*,
+		return $db->first('SELECT co.*,
 			(SELECT COUNT(DISTINCT id_membre) FROM cotisations_membres WHERE id_cotisation = co.id) AS nb_membres,
 			(SELECT COUNT(DISTINCT id_membre) FROM cotisations_membres AS cm WHERE id_cotisation = co.id
 				AND ((co.duree IS NOT NULL AND date(cm.date, \'+\'||co.duree||\' days\') >= date())
 					OR (co.fin IS NOT NULL AND co.debut <= cm.date AND co.fin >= cm.date))) AS nb_a_jour
-			FROM cotisations AS co WHERE id = :id;', true, ['id' => (int) $id]);
+			FROM cotisations AS co WHERE id = :id;', ['id' => (int) $id]);
 	}
 
 	public function listByName()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT * FROM cotisations ORDER BY intitule;');
+		return $db->get('SELECT * FROM cotisations ORDER BY intitule;');
 	}
 
 	public function listCurrent()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT * FROM cotisations WHERE fin >= date(\'now\') OR fin IS NULL
+		return $db->get('SELECT * FROM cotisations WHERE fin >= date(\'now\') OR fin IS NULL
 			ORDER BY transliterate_to_ascii(intitule) COLLATE NOCASE;');
 	}
 
 	public function listWithStats()
 	{
 		$db = DB::getInstance();
-		return $db->simpleStatementFetch('SELECT co.*,
+		return $db->get('SELECT co.*,
 			(SELECT COUNT(DISTINCT id_membre) FROM cotisations_membres WHERE id_cotisation = co.id) AS nb_membres,
 			(SELECT COUNT(DISTINCT id_membre) FROM cotisations_membres AS cm WHERE id_cotisation = co.id
 				AND ((co.duree IS NOT NULL AND date(cm.date, \'+\'||co.duree||\' days\') >= date())
