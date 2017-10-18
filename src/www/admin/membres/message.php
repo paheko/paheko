@@ -34,7 +34,7 @@ if (f('save'))
     if (!$form->hasErrors())
     {
         try {
-            $membres->sendMessage($membre->email, f('sujet'),
+            $session->sendMessage($membre->email, f('sujet'),
                 f('message'), (bool) f('copie'));
 
             Utils::redirect('/admin/membres/?sent');
