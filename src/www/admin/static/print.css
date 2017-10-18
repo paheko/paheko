@@ -7,10 +7,10 @@ body {
     background: #fff;
     padding: 0;
 }
-.header .menu {
+header.header {
     display: none;
 }
-.page {
+main {
     margin: 0;
 }
 .header h1 {
