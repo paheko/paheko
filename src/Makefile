@@ -17,7 +17,8 @@ dev-server:
 release:
 	$(eval VERSION=$(shell cat VERSION))
 	fossil ls | grep '^src/' | sed 's/src/garradin-${VERSION}/' > /tmp/garradin-${VERSION}-list.txt
-	echo "garradin-${VERSION}/include/lib/KD2" >> /tmp/garradin-${VERSION}-list.txt
+	#echo "garradin-${VERSION}/include/lib/KD2" >> /tmp/garradin-${VERSION}-list.txt
+	cat include/lib/dependencies.list | sed -r "s/^/garradin-${VERSION}\/include\/lib\//" >> /tmp/garradin-${VERSION}-list.txt
 	rm -f /tmp/garradin-${VERSION}
 	ln -s ${PWD} /tmp/garradin-${VERSION}
 	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp -T /tmp/garradin-${VERSION}-list.txt
@@ -29,3 +30,6 @@ publish: release
 	fossil uv ls | grep '^garradin-.*\.tar\.bz2' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
 	fossil uv sync
+
+check-dependencies:
+	grep -hEo '^use \\?KD2\\\w+|\\KD2\\\w+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
