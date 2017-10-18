@@ -39,18 +39,36 @@ if (f('ajouter') && $form->check('ajout_projet'))
 {
 	$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-	$projets->add(f('libelle'));
-	Utils::redirect('/admin/compta/projets/');
+	try {
+		$projets->add(f('libelle'));
+		Utils::redirect('/admin/compta/projets/');
+	}
+	catch (UserException $e)
+	{
+		$form->addError($e->getMessage());
+	}
 }
 elseif (f('modifier') && $form->check('modifier_projet_' . $id))
 {
-	$projets->edit($id, f('libelle'));
-	Utils::redirect('/admin/compta/projets/');
+	try {
+		$projets->edit($id, f('libelle'));
+		Utils::redirect('/admin/compta/projets/');
+	}
+	catch (UserException $e)
+	{
+		$form->addError($e->getMessage());
+	}
 }
 elseif (f('supprimer') && $form->check('supprimer_projet_' . $id))
 {
-	$projets->remove($id);
-	Utils::redirect('/admin/compta/projets/');
+	try {
+		$projets->remove($id);
+		Utils::redirect('/admin/compta/projets/');
+	}
+	catch (UserException $e)
+	{
+		$form->addError($e->getMessage());
+	}
 }
 
 
