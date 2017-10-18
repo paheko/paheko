@@ -34,7 +34,7 @@
 <h1>Erreur</h1>
 
 <p class="error">
-    {$error}
+    {$error|escape|nl2br}
 </p>
 
 <p>
