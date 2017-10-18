@@ -18,7 +18,7 @@ if (!$champ)
     $auto = true;
 
     if (is_numeric(trim($recherche))) {
-        $champ = 'id';
+        $champ = 'numero';
     }
     elseif (strpos($recherche, '@') !== false) {
         $champ = 'email';
@@ -29,7 +29,7 @@ if (!$champ)
 }
 else
 {
-    if ($champ != 'id' && !$champs->get($champ))
+    if ($champ != 'numero' && !$champs->get($champ))
     {
         throw new UserException('Le champ demandé n\'existe pas.');
     }
@@ -46,9 +46,6 @@ if ($recherche != '')
 }
 
 $champs_liste = $champs->getList();
-
-$champs_liste->id = (object) ['title' => 'Numéro unique', 'type' => 'number'];
-
 $champs_entete = $champs->getListedFields();
 
 if (!isset($champs_entete->$champ))

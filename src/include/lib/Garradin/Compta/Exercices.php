@@ -231,7 +231,8 @@ class Exercices
 
         unset($comptes);
 
-        $resultat = $this->getCompteResultat($exercice);
+        $rapports = new Rapports;
+        $resultat = $rapports->getCompteResultat($exercice);
         $resultat = $resultat['resultat'];
 
         if ($resultat != 0)
