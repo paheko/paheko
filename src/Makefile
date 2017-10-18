@@ -22,3 +22,7 @@ release:
 	ln -s ${PWD} /tmp/garradin-${VERSION}
 	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp -T /tmp/garradin-${VERSION}-list.txt
 	rm -f /tmp/garradin-${VERSION}*
+	fossil uv sync
+	fossil uv ls | grep '^garradin-.*\.tar\.bz2' | xargs fossil uv rm
+	fossil uv add garradin-${VERSION}.tar.bz2
+	fossil uv sync
