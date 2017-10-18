@@ -22,11 +22,11 @@ class Comptes_Bancaires extends Comptes
 
         $new_id = parent::add($data);
 
-        $db->simpleInsert('compta_comptes_bancaires', [
-            'id'        =>  $new_id,
-            'banque'    =>  $data['banque'],
-            'iban'      =>  $data['iban'],
-            'bic'       =>  $data['bic'],
+        $db->insert('compta_comptes_bancaires', [
+            'id'     =>  $new_id,
+            'banque' =>  $data['banque'],
+            'iban'   =>  $data['iban'],
+            'bic'    =>  $data['bic'],
         ]);
 
         return $new_id;
@@ -35,8 +35,9 @@ class Comptes_Bancaires extends Comptes
     public function edit($id, $data)
     {
         $db = DB::getInstance();
+        $id = trim($id);
 
-        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', false, $id))
+        if (!$db->test('compta_comptes_bancaires', $db->where('id', $id)))
         {
             throw new UserException('Ce compte n\'est pas un compte bancaire.');
         }
@@ -49,11 +50,11 @@ class Comptes_Bancaires extends Comptes
             return $result;
         }
 
-        $db->simpleUpdate('compta_comptes_bancaires', [
-            'banque'    =>  $data['banque'],
-            'iban'      =>  $data['iban'],
-            'bic'       =>  $data['bic'],
-        ], 'id = \''.$db->escapeString(trim($id)).'\'');
+        $db->update('compta_comptes_bancaires', [
+            'banque' =>  $data['banque'],
+            'iban'   =>  $data['iban'],
+            'bic'    =>  $data['bic'],
+        ], $db->where('id', $id));
 
         return true;
     }
@@ -73,28 +74,30 @@ class Comptes_Bancaires extends Comptes
     public function delete($id)
     {
         $db = DB::getInstance();
-        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes_bancaires WHERE id = ?;', false, trim($id)))
+        $id = trim($id);
+
+        if (!$db->test('compta_comptes_bancaires', $db->where('id', $id)))
         {
             throw new UserException('Ce compte n\'est pas un compte bancaire.');
         }
 
         // Ne pas supprimer/désactiver un compte qui est utilisé dans l'exercice courant
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal
+        if ($db->firstColumn('SELECT 1 FROM compta_journal
                 WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
-                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', false, $id, $id))
+                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', $id, $id))
         {
             throw new UserException('Ce compte ne peut être supprimé car des écritures y sont liées sur l\'exercice courant. '
                 . 'Il faut supprimer ou ré-attribuer ces écritures avant de pouvoir supprimer le compte.');
         }
 
         // Il n'est pas possible de supprimer ou désactiver un compte qui est lié à des catégories
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_categories WHERE compte = ? LIMIT 1;', false, $id))
+        if ($db->test('compta_categories', $db->where('compte', $id)))
         {
             throw new UserException('Ce compte ne peut être supprimé car des catégories y sont liées. '
                 . 'Merci de supprimer ou modifier les catégories liées avant de le supprimer.');
         }
 
-        $db->simpleExec('DELETE FROM compta_comptes_bancaires WHERE id = ?;', trim($id));
+        $db->delete('compta_comptes_bancaires', $db->where('id', $id));
 
         try {
             $return = parent::delete($id);
@@ -111,18 +114,18 @@ class Comptes_Bancaires extends Comptes
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM compta_comptes AS c
+        return $db->first('SELECT * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc
             ON c.id = cc.id
-            WHERE c.id = ?;', true, $id);
+            WHERE c.id = ?;', $id);
     }
 
     public function getList($parent = false)
     {
         $db = DB::getInstance();
-        return $db->simpleStatementFetchAssocKey('SELECT c.id AS id, * FROM compta_comptes AS c
+        return $db->getGrouped('SELECT c.id AS id, * FROM compta_comptes AS c
             INNER JOIN compta_comptes_bancaires AS cc ON c.id = cc.id
-            WHERE c.parent = '.self::NUMERO_PARENT_COMPTES.' ORDER BY c.id;');
+            WHERE c.parent = ? ORDER BY c.id;', self::NUMERO_PARENT_COMPTES);
     }
 
     protected function _checkBankFields(&$data)

@@ -25,9 +25,9 @@
             {foreach from=$liste item="rappel"}
                 <tr>
                     <td>
-                        {$rappel.intitule|escape}
-                        — {$rappel.montant|html_money} {$config.monnaie|escape}
-                        — {if $rappel.duree}pour {$rappel.duree|escape} jours
+                        {$rappel.intitule}
+                        — {$rappel.montant|escape|html_money} {$config.monnaie}
+                        — {if $rappel.duree}pour {$rappel.duree} jours
                         {elseif $rappel.debut}
                             du {$rappel.debut|format_sqlite_date_to_french} au {$rappel.fin|format_sqlite_date_to_french}
                         {else}
@@ -37,16 +37,16 @@
                     <td>
                         {if $rappel.delai == 0}le jour de l'expiration
                         {else}
-                            {$rappel.delai|abs|escape}
+                            {$rappel.delai|abs}
                             {if abs($rappel.delai) > 1}jours{else}jour{/if}
                             {if $rappel.delai > 0}après{else}avant{/if}
                             expiration
                         {/if}
                     </td>
-                    <th>{* FIXME liste des personnes ayant reçu ce rappel<a href="{$admin_url}membres/cotisations/rappel.php?id={$rappel.id|escape}">{$rappel.sujet|escape}</a>*}{$rappel.sujet|escape}</th>
+                    <th>{* FIXME liste des personnes ayant reçu ce rappel<a href="{$admin_url}membres/cotisations/rappel.php?id={$rappel.id}">{$rappel.sujet}</a>*}{$rappel.sujet}</th>
                     <td class="actions">
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/rappel_modifier.php?id={$rappel.id|escape}" title="Modifier">✎</a>
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/rappel_supprimer.php?id={$rappel.id|escape}" title="Supprimer">✘</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/rappel_modifier.php?id={$rappel.id}" title="Modifier">✎</a>
+                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/rappel_supprimer.php?id={$rappel.id}" title="Supprimer">✘</a>
                     </td>
                 </tr>
             {/foreach}
@@ -54,13 +54,9 @@
     </table>
 {/if}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}" id="f_add">
+<form method="post" action="{$self_url}" id="f_add">
 
     <fieldset>
         <legend>Ajouter un rappel automatique</legend>
@@ -70,10 +66,10 @@
                 <select name="id_cotisation" id="f_id_cotisation" required="required">
                     <option value="">--</option>
                     {foreach from=$cotisations item="co"}
-                    <option value="{$co.id|escape}" {form_field name="id_cotisation" selected=$co.id}>
-                        {$co.intitule|escape}
-                        — {$co.montant|html_money} {$config.monnaie|escape}
-                        — {if $co.duree}pour {$co.duree|escape} jours
+                    <option value="{$co.id}" {form_field name="id_cotisation" selected=$co.id}>
+                        {$co.intitule}
+                        — {$co.montant|escape|html_money} {$config.monnaie}
+                        — {if $co.duree}pour {$co.duree} jours
                         {elseif $co.debut}
                             du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
                         {else}

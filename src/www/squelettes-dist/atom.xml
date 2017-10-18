@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="fr">
 
-    <title type="html">[(#NOM_ASSO|echapper_xml)]</title>
-    <link href="[(#URL_ATOM|echapper_xml)]" rel="self"/>
-    <link href="[(#URL_RACINE|echapper_xml)]" rel="alternate" type="text/html" title="[(#NOM_ASSO|echapper_xml)]" />
+	<title type="html">[(#NOM_ASSO|echapper_xml)]</title>
+	<link href="[(#URL_ATOM|echapper_xml)]" rel="self"/>
+	<link href="[(#URL_RACINE|echapper_xml)]" rel="alternate" type="text/html" title="[(#NOM_ASSO|echapper_xml)]" />
 
-    <BOUCLE_derniere(PAGES){par date_creation}{inverse}{0,1}>
-    <updated>[(#DATE_CREATION|date_atom)]</updated>
-    </BOUCLE_derniere>
+	<BOUCLE_derniere(PAGES){par date_creation}{inverse}{0,1}>
+	<updated>[(#DATE_CREATION|date_atom)]</updated>
+	</BOUCLE_derniere>
 
-    <author>
-        <name>[(#NOM_ASSO|echapper_xml)]</name>
-    </author>
+	<author>
+		<name>[(#NOM_ASSO|echapper_xml)]</name>
+	</author>
 
-    <id>[(#URL_RACINE|echapper_xml)]</id>
-    <generator uri="http://dev.kd2.org/garradin/">Garradin</generator>
+	<id>[(#URL_RACINE|echapper_xml)]</id>
+	<generator uri="http://dev.kd2.org/garradin/">Garradin</generator>
 
-    <BOUCLE_actu(PAGES){par date_creation}{inverse}{0,20}>
-    <entry>
-        <title>[(#TITRE|echapper_xml)]</title>
-        <link href="[(#URL|echapper_xml)]" rel="alternate" type="text/html" title="[(#TITRE|echapper_xml)]" />
-        <id>[(#URL|echapper_xml)]</id>
-        <updated>[(#DATE_CREATION|date_atom)]</updated>
-        <author><name>[(#NOM_ASSO|echapper_xml)]</name></author>
-        <content type="html">
-            [(#TEXTE*|formatter_texte|echapper_xml)]
-        </content>
-    </entry>
-    </BOUCLE_actu>
+	<BOUCLE_actu(PAGES){par date_creation}{inverse}{0,20}>
+	<entry>
+		<title>[(#TITRE|echapper_xml)]</title>
+		<link href="[(#URL|echapper_xml)]" rel="alternate" type="text/html" title="[(#TITRE|echapper_xml)]" />
+		<id>[(#URL|echapper_xml)]</id>
+		<updated>[(#DATE_CREATION|date_atom)]</updated>
+		<author><name>[(#NOM_ASSO|echapper_xml)]</name></author>
+		<content type="html">
+			[(#TEXTE*|formatter_texte|echapper_xml)]
+		</content>
+	</entry>
+	</BOUCLE_actu>
 
 </feed>

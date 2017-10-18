@@ -10,20 +10,17 @@ use \Garradin\Compta\Comptes_Bancaires;
 
 class Rapprochement
 {
-    public function getJournal($compte, $debut, $fin, &$solde_initial, &$solde_final)
+    public function getJournal($compte, $debut, $fin, &$solde_initial, &$solde_final, $sauf_deja_rapprochees = false)
     {
         $db = DB::getInstance();
 
-        $exercice = $db->querySingle('SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1;');
-
         $query = 'SELECT 
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND id_exercice = :exercice AND date < :date), 0)
-            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND id_exercice = :exercice AND date < :date), 0)';
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND compte_credit IS NOT NULL AND date < :date), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND compte_debit IS NOT NULL  AND date < :date), 0)';
 
-        $solde_initial = $solde = $db->simpleQuerySingle($query, false, [
+        $solde_initial = $solde = $db->firstColumn($query, [
             'compte'    =>  $compte,
             'date'      =>  $debut,
-            'exercice'  =>  $exercice
         ]);
 
         $query = '
@@ -32,21 +29,21 @@ class Rapprochement
                 r.date AS date_rapprochement
             FROM compta_journal AS j
                 LEFT JOIN compta_rapprochement AS r ON r.id_operation = j.id
-            WHERE (compte_debit = :compte OR compte_credit = :compte) AND id_exercice = :exercice
+            WHERE (compte_debit = :compte OR compte_credit = :compte)
                 AND j.date >= :debut AND j.date <= :fin
+                ' . ($sauf_deja_rapprochees ? 'AND r.id_operation IS NULL' : '') . '
             ORDER BY date ASC;';
 
-        $result = $db->simpleStatementFetch($query, DB::ASSOC, [
+        $result = $db->get($query, [
             'compte'    =>  $compte,
             'debut'     =>  $debut,
             'fin'       =>  $fin,
-            'exercice'  =>  $exercice
         ]);
 
         foreach ($result as &$row)
         {
-            $solde += $row['solde'];
-            $row['solde'] = $solde;
+            $solde += $row->solde;
+            $row->solde = $solde;
         }
 
         $solde_final = $solde;
@@ -54,32 +51,27 @@ class Rapprochement
         return $result;
     }
 
-    public function record($compte, $journal, $cases, $auteur)
+    public function record($compte, array $journal, array $cases = null, $id_auteur)
     {
-        if (!is_array($journal))
-        {
-            throw new \UnexpectedValueException('$journal doit être un tableau.');
-        }
-
         if (!is_array($cases) && empty($cases))
         {
             $cases = [];
         }
 
         $db = DB::getInstance();
-        $db->exec('BEGIN;');
+        $db->begin();
 
         // Synchro des trucs cochés
         $st = $db->prepare('INSERT OR REPLACE INTO compta_rapprochement (id_operation, id_auteur) 
             VALUES (:operation, :auteur);');
-        $st->bindValue(':auteur', (int)$auteur, \SQLITE3_INTEGER);
+        $st->bindValue(':auteur', (int)$id_auteur, \SQLITE3_INTEGER);
 
         foreach ($journal as $row)
         {
-            if (!array_key_exists($row['id'], $cases))
+            if (!array_key_exists($row->id, $cases))
                 continue;
 
-            $st->bindValue(':operation', (int)$row['id'], \SQLITE3_INTEGER);
+            $st->bindValue(':operation', (int)$row->id, \SQLITE3_INTEGER);
             $st->execute();
         }
 
@@ -88,14 +80,14 @@ class Rapprochement
 
         foreach ($journal as $row)
         {
-            if (array_key_exists($row['id'], $cases))
+            if (array_key_exists($row->id, $cases))
                 continue;
 
-            $st->bindValue(':id', (int)$row['id'], \SQLITE3_INTEGER);
+            $st->bindValue(':id', (int)$row->id, \SQLITE3_INTEGER);
             $st->execute();
         }
 
-        $db->exec('END;');
+        $db->commit();
         return true;
     }
 }

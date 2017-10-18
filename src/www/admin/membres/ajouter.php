@@ -1,35 +1,27 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ECRITURE)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
 $cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('new_member'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    elseif (Utils::post('passe') != Utils::post('repasse'))
-    {
-        $error = 'La vérification ne correspond pas au mot de passe.';
-    }
-    else
+    $form->check('new_member', [
+        'passe' => 'confirmed',
+        // FIXME: ajouter les règles pour les champs membres
+    ]);
+
+    if (!$form->hasErrors())
     {
         try
         {
-            if ($user['droits']['membres'] == Membres::DROIT_ADMIN)
+            if ($session->canAccess('membres', Membres::DROIT_ADMIN))
             {
-                $id_categorie = Utils::post('id_categorie');
+                $id_categorie = f('id_categorie');
             }
             else
             {
@@ -40,7 +32,7 @@ if (!empty($_POST['save']))
 
             foreach ($champs->getAll() as $key=>$dismiss)
             {
-                $data[$key] = Utils::post($key);
+                $data[$key] = f($key);
             }
 
             $id = $membres->add($data);
@@ -49,18 +41,15 @@ if (!empty($_POST['save']))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', $cats->listSimple());
-$tpl->assign('current_cat', Utils::post('id_categorie') ?: $config->get('categorie_membres'));
+$tpl->assign('current_cat', f('id_categorie') ?: $config->get('categorie_membres'));
 
 $tpl->display('admin/membres/ajouter.tpl');
-
-?>

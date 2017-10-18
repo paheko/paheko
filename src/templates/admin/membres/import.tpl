@@ -1,21 +1,19 @@
 {include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{elseif $ok}
-    <p class="confirm">
-        L'import s'est bien déroulé.
-    </p>
-{/if}
-
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/membres/import.php">Importer</a></li>
     <li><a href="{$www_url}admin/membres/import.php?export">Exporter en CSV</a></li>
 </ul>
 
-<form method="post" action="{$self_url|escape}" enctype="multipart/form-data">
+{form_errors}
+
+{if $ok}
+    <p class="confirm">
+        L'import s'est bien déroulé.
+    </p>
+{/if}
+
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
     <fieldset>
         <legend>Importer depuis un fichier</legend>
@@ -48,12 +46,12 @@
                     {foreach from=$galette_champs item="galette"}
                         {if is_int($galette)}{continue}{/if}
                         <tr>
-                            <th>{$galette|escape}</th>
-                            <td><select name="galette_translate[{$galette|escape}]">
+                            <th>{$galette}</th>
+                            <td><select name="galette_translate[{$galette}]">
                                 <option value="">-- Ne pas importer ce champ</option>
                                 {foreach from=$garradin_champs item="champ" key="name"}
                                 {if $champ.type == 'checkbox' || $champ.type == 'multiple'}{continue}{/if}
-                                <option value="{$name|escape}" {if (!empty($translate[$galette]) && $translate[$galette] == $name)}selected="selected"{/if}>{$champ.title|escape}</option>
+                                <option value="{$name}" {if (!empty($translate[$galette]) && $translate[$galette] == $name)}selected="selected"{/if}>{$champ.title}</option>
                                 {/foreach}
                             </select></td>
                         </tr>

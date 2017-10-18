@@ -1,7 +1,7 @@
-{include file="admin/_head.tpl" title="Bonjour `$user.identite` !" current="home"}
+{include file="admin/_head.tpl" title="Bonjour %s !"|args:$user.identite current="home"}
 
 <div class="infos_asso">
-    <h3>{$config.nom_asso|escape}</h3>
+    <h3>{$config.nom_asso}</h3>
     {if !empty($config.adresse_asso)}
     <p>
         {$config.adresse_asso|escape|nl2br}
@@ -9,12 +9,12 @@
     {/if}
     {if !empty($config.email_asso)}
     <p>
-        E-Mail : {mailto address=$config.email_asso}
+        E-Mail : <a href="{$config.email_asso}">{$config.email_asso}</a>
     </p>
     {/if}
     {if !empty($config.site_asso)}
     <p>
-        Web : <a href="{$config.site_asso|escape}">{$config.site_asso|escape}</a>
+        Web : <a href="{$config.site_asso}">{$config.site_asso}</a>
     </p>
     {/if}
 </div>
@@ -37,7 +37,7 @@
 </ul>
 
 <div class="wikiContent">
-    {$page.contenu.contenu|format_wiki|liens_wiki:'wiki/?'}
+    {$page.contenu.contenu|raw|format_wiki|liens_wiki:'wiki/?'}
 </div>
 
 {include file="admin/_foot.tpl"}

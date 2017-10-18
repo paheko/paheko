@@ -3,18 +3,14 @@
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
     <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-    {if $user.droits.membres >= Garradin\Membres::DROIT_ADMIN}
+    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
     {/if}
 </ul>
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Modifier une cotisation</legend>
@@ -55,9 +51,9 @@
             <dd class="cat_compta">
                 <select name="id_categorie_compta" id="f_id_categorie_compta">
                 {foreach from=$categories item="cat"}
-                    <option value="{$cat.id|escape}" {form_field name="id_categorie_compta" selected=$cat.id data=$cotisation}>{$cat.intitule|escape}
+                    <option value="{$cat.id}" {form_field name="id_categorie_compta" selected=$cat.id data=$cotisation}>{$cat.intitule}
                     {if !empty($cat.description)}
-                        — <em>{$cat.description|escape}</em>
+                        — <em>{$cat.description}</em>
                     {/if}
                     </option>
                 {/foreach}
@@ -67,7 +63,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="edit_co_`$cotisation.id`"}
+        {csrf_field key="edit_co_%s"|args:$cotisation.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

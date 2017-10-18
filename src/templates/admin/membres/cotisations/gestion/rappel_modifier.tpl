@@ -6,13 +6,9 @@
     <li class="current"><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
 </ul>
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}" id="f_add">
+<form method="post" action="{$self_url}" id="f_add">
 
     <fieldset>
         <legend>Modifier un rappel automatique</legend>
@@ -22,10 +18,10 @@
                 <select name="id_cotisation" id="f_id_cotisation" required="required">
                     <option value="">--</option>
                     {foreach from=$cotisations item="co"}
-                    <option value="{$co.id|escape}" {form_field name="id_cotisation" selected=$co.id data=$rappel}>
-                        {$co.intitule|escape}
-                        — {$co.montant|html_money} {$config.monnaie|escape}
-                        — {if $co.duree}pour {$co.duree|escape} jours
+                    <option value="{$co.id}" {form_field name="id_cotisation" selected=$co.id data=$rappel}>
+                        {$co.intitule}
+                        — {$co.montant|escape|html_money} {$config.monnaie}
+                        — {if $co.duree}pour {$co.duree} jours
                         {elseif $co.debut}
                             du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
                         {else}
@@ -56,7 +52,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="edit_rappel_`$rappel.id`"}
+        {csrf_field key="edit_rappel_%s"|args:$rappel.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

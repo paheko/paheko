@@ -1,5 +1,6 @@
 body {
-	background: #fff url("bg01.png") no-repeat -180px -50px;
+	background-position: -180px 0px;
+	background-attachment: scroll;
 	font-size: 11pt;
 }
 
@@ -7,93 +8,117 @@ body {
 	margin: 0;
 	text-align: center;
 	font-size: 1.2em;
-	margin: .3em 0;
+	margin: 70pt 0 .3em 0;
 }
 
 .header .menu {
-	position: relative;
+	background: none !important;
+	position: fixed;
+	bottom: inherit;
+	overflow: visible;
+	z-index: 10000;
 	margin: 0;
+	margin-bottom: 3em;
 	width: 100%;
-    background: none;
-}
-
-.header .menu > li {
-	margin: .1em 0;
-}
-
-.header .menu a {
-	font-weight: normal;
 	padding: 0;
-	display: inline;
-	padding: .2em;
-	color: black;
+	display: block;
 }
 
-.header .menu a:hover {
-	background: none;
+.header .menu *, .header .menu a {
+	margin: 0;
+	padding: 0;
 }
 
-.header .menu > li > a {
-	background: #9c4f15;
-	color: white;
-	display: inline-block;
-	padding: .2em .5em .2em .2em;
-	border-radius: 0 .5em .5em 0;
+.header .menu > ul {
+	background: rgb(var(--gMainColor));
+	flex-wrap: nowrap;
+	display: flex;
+	align-items: center;
 }
 
-.header .menu > li > a:hover {
-	color: #000;
-    background: rgb(217, 134, 40);
-    background: rgba(217, 134, 40, 0.5);
-}
-
-.header .menu a b {
-	float: left;
-	font-size: 1.1em;
-	margin: 0 .3em 0 0;
-	width: 1.2em;
+.header .menu > ul > li {
+	flex-grow: 1;
 	text-align: center;
-	color: inherit;
+	display: inline-flex;
 }
 
-.header .menu a small {
+.header .menu > ul > li > a {
+	display: inline-block;
+	width: 100%;
+	text-align: center;
+}
+
+.header .menu > ul > li > a i {
+	display: none;
+}
+
+.header .menu > ul > li > ul {
+	display: none;
+}
+
+.header .menu > ul > li > a b {
 	float: none;
+	display: inline-block;
+	color: #fff;
+	width: 20pt;
+	height: 14pt;
+	padding: 10pt;
+	line-height: 20pt;
+	cursor: pointer;
 }
 
-.header .menu li li, .header .menu li ul {
-	display: inline;
+.header .menu li.current_parent > a {
+	background: #fff;
 }
 
-.header .menu li li a {
-	padding: .2em;
-	font-size: .9em;
+.header .menu > ul > li.current b {
+	color: rgb(var(--gSecondColor));
 }
 
-.header .menu li.current > a {
-    background: rgb(217, 134, 40);
-    background: rgba(217, 134, 40, 0.5);
-	color: #000;
+.header .menu > ul > li.current_parent b {
+	color: rgb(var(--gMainColor));
 }
 
-.header .menu li li.current > a {
-	border-radius: .5em;
-	padding: .2em .4em;
+.header .menu > ul > li.current > ul, .header .menu > ul > li.current_parent > ul {
+	display: flex;
+	position: absolute;
+	top: 30pt;
+	left: 0;
+	right: 0;
+	background: #fff;
+	background: rgba(255, 255, 255, 0.75);
 }
 
-.page {
+.header .menu > ul > li.current > ul li, .header .menu > ul > li.current_parent > ul li {
+	flex-grow: 1;
+	text-align: center;
+	display: block;
+}
+
+.header .menu > ul > li.current > ul a, .header .menu > ul > li.current_parent > ul a {
+    color: #9c4f15;
+    color: rgb(var(--gMainColor));
+    padding: 2pt 3pt;
+    text-decoration: underline;
+}
+
+.header .menu > ul > li > ul li.current a {
+	color: rgb(var(--gSecondColor));
+}
+
+main {
 	margin: 0;
 	padding: .1em;
 }
 
 ul.actions {
-	padding: 0;
 	border: none;
-	font-size: .8em;
+	padding: 0;
 	text-align: center;
 	margin: .3em 0;
 }
 
-ul.actions li a {
+ul.actions li a, ul.actions li label {
 	margin: .1em;
 	border-radius: .5em;
 }
@@ -108,10 +133,34 @@ pre.sql_schema, .wikiChildren, fieldset.wikiMain, fieldset.wikiRights, fieldset.
 	width: auto;
 }
 
+dl.describe {
+	margin: 0 .5em;
+}
+
 dl.describe dt, dl.describe dd {
 	float: none;
 	width: auto;
-	text-align: center;
+}
+
+dl.describe dt {
+	font-size: .9em;
+	color: #666;
+}
+
+dl.describe dd {
+	margin-left: 1em;
+}
+
+fieldset {
+	border-left: none;
+	border-right: none;
+}
+
+.shortFormRight, .shortFormLeft {
+	float: none;
+	width: auto;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 /* Petits écrans (smartphones) */
@@ -134,5 +183,10 @@ dl.describe dt, dl.describe dd {
 	.infos_asso {
 		float: none;
 		width: auto;
+	}
+
+	input[type=text], textarea, input[type=password], input[type=email], input[type=url], input[type=tel], select {
+		min-width: 3em;
+		width: 95%;
 	}
 }

@@ -1,15 +1,16 @@
-</div>
+</main>
 
 <script type="text/javascript" defer="defer">
+var keep_session_url = "{$www_url}admin/login.php?keepSessionAlive&";
 {literal}
 (function () {
-    var keep_session_url = "{/literal}{$www_url}{literal}admin/login.php?keepSessionAlive&";
-
     function refreshSession()
     {
-        var _RIMAGE = new Image(1,1);
-        _RIMAGE.src = keep_session_url + Math.round(Math.random()*1000000000);
+        var i = new Image(1, 1);
+        var d = +new Date;
+        i.src = keep_session_url + d;
     }
+
     window.setInterval(refreshSession, 10 * 60 * 1000);
 } ());
 {/literal}

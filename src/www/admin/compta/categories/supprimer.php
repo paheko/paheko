@@ -1,16 +1,16 @@
 <?php
+
 namespace Garradin;
+
+use Garradin\Compta\Categories;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $cats = new Compta\Categories;
 
-$id = (int)Utils::get('id');
+$id = (int)qg('id');
 $cat = $cats->get($id);
 
 if (!$cat)
@@ -18,31 +18,19 @@ if (!$cat)
     throw new UserException('Cette catégorie n\'existe pas.');
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete') && $form->check('delete_compta_cat_' . $cat->id))
 {
-    if (!Utils::CSRF_check('delete_compta_cat_'.$cat['id']))
+    try
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+        $cats->delete($id);
+        Utils::redirect('/admin/compta/categories/');
     }
-    else
+    catch (UserException $e)
     {
-        try
-        {
-            $cats->delete($id);
-            Utils::redirect('/admin/compta/categories/');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('cat', $cat);
 
 $tpl->display('admin/compta/categories/supprimer.tpl');
-
-?>

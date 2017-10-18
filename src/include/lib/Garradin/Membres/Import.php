@@ -77,7 +77,7 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$membres = new Membres;
 
 		$columns = array_flip($this->galette_fields);
@@ -95,6 +95,7 @@ class Import
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -108,7 +109,7 @@ class Import
 
 			if (count($row) != count($columns))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
@@ -128,16 +129,16 @@ class Import
 			}
 
 			try {
-				$membres->add($data);
+				$membres->add($data, false);
 			}
 			catch (UserException $e)
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : ' . $e->getMessage());
 			}
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;
@@ -163,19 +164,20 @@ class Import
 		}
 
 		$db = DB::getInstance();
-		$db->exec('BEGIN;');
+		$db->begin();
 		$membres = new Membres;
 
 		// On récupère les champs qu'on peut importer
 		$champs = Config::getInstance()->get('champs_membres')->getAll();
-		$champs = array_keys($champs);
+		$champs = array_keys((array)$champs);
 		$champs[] = 'date_inscription';
 		//$champs[] = 'date_connexion';
-		$champs[] = 'id';
+		//$champs[] = 'id';
 		//$champs[] = 'id_categorie';
 
 		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
+		Utils::skip_bom($fp);
 
 		while (!feof($fp))
 		{
@@ -192,6 +194,7 @@ class Import
 			{
 				if (is_numeric($row[0]))
 				{
+					$db->rollback();
 					throw new UserException('Erreur sur la ligne 1 : devrait contenir l\'en-tête des colonnes.');
 				}
 
@@ -201,7 +204,7 @@ class Import
 
 			if (count($row) != count($columns))
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
@@ -219,31 +222,34 @@ class Import
 					$data[$name] = $row[$id];
 			}
 
-			if (!empty($data['id']) && $data['id'] > 0)
+			if (!empty($data['numero']) && $data['numero'] > 0)
 			{
-				$id = (int)$data['id'];
+				$numero = (int)$data['numero'];
 			}
 			else
 			{
-				$id = false;
+				unset($data['numero']);
+				$numero = false;
 			}
 
-			unset($data['id']);
-
 			try {
-				if ($id)
+				if ($numero && ($id = $membres->getIDWithNumero($numero)))
+				{
 					$membres->edit($id, $data);
+				}
 				else
-					$membres->add($data);
+				{
+					$membres->add($data, false);
+				}
 			}
 			catch (UserException $e)
 			{
-				$db->exec('ROLLBACK;');
+				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : ' . $e->getMessage());
 			}
 		}
 
-		$db->exec('END;');
+		$db->commit();
 
 		fclose($fp);
 		return true;
@@ -253,7 +259,10 @@ class Import
     {
         $db = DB::getInstance();
 
-        $res = $db->prepare('SELECT m.id, c.nom AS categorie, m.* FROM membres AS m 
+        $champs = Config::getInstance()->get('champs_membres')->getKeys();
+        $champs = 'm.' . implode(', m.', $champs);
+
+        $res = $db->prepare('SELECT ' . $champs . ', c.nom AS categorie FROM membres AS m 
             LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
 
         $fp = fopen('php://output', 'w');
@@ -261,7 +270,7 @@ class Import
 
         while ($row = $res->fetchArray(SQLITE3_ASSOC))
         {
-            unset($row['passe']);
+            unset($row->passe);
 
             if (!$header)
             {
@@ -269,7 +278,7 @@ class Import
                 $header = true;
             }
 
-            fputcsv($fp, $row);
+            fputs($fp, Utils::row_to_csv($row) . "\n");
         }
 
         fclose($fp);

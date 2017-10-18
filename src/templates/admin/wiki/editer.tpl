@@ -1,12 +1,8 @@
 {include file="admin/_head.tpl" title="Éditer une page" current="wiki" js=1}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}" id="f_form">
+<form method="post" action="{$self_url}" id="f_form">
 
     <fieldset class="wikiMain">
         <legend>Informations générales</legend>
@@ -24,15 +20,15 @@
                 {if $page.parent == 0}
                     <samp id="current_parent_name">la racine du site</samp>
                 {else}
-                    <samp id="current_parent_name">{$parent|escape}</samp>
+                    <samp id="current_parent_name">{$parent}</samp>
                 {/if}
                 <input type="button" id="f_browse_parent" onclick="browseWikiForParent();" value="Changer" />
             </dd>
             <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <input type="date" size="10" name="date" id="f_date" value="{$date|date_fr:'Y-m-d'|escape}" pattern="{literal}^\d{4}-\d{2}-\d{2}${/literal}" required="required" />
-                <input type="text" class="time" size="2" name="date_h" value="{$date|date_fr:'H'|escape}" pattern="^{literal}\d{1,2}${/literal}" required="required" /> h
-                <input type="text" class="time" size="2" name="date_min" value="{$date|date_fr:'i'|escape}" pattern="{literal}^\d{1,2}${/literal}" required="required" />
+                <input type="date" size="10" name="date" id="f_date" value="{$date|date_fr:'Y-m-d'}" pattern="{literal}^\d{4}-\d{2}-\d{2}${/literal}" required="required" />
+                <input type="text" class="time" size="2" name="date_h" value="{$date|date_fr:'H'}" pattern="^{literal}\d{1,2}${/literal}" required="required" /> h
+                <input type="text" class="time" size="2" name="date_min" value="{$date|date_fr:'i'}" pattern="{literal}^\d{1,2}${/literal}" required="required" />
             </dd>
         </dl>
     </fieldset>
@@ -42,27 +38,27 @@
         <dl>
             <dt><label for="f_droit_lecture_public">Cette page est visible :</label></dt>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_public" value="{Garradin\Wiki::LECTURE_PUBLIC}" {form_field data=$page name="droit_lecture" checked=Garradin\Wiki::LECTURE_PUBLIC} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_public" value="{$wiki::LECTURE_PUBLIC}" {form_field data=$page name="droit_lecture" checked=$wiki::LECTURE_PUBLIC} />
                 <label for="f_droit_lecture_public"><strong>Sur le site de l'association</strong></label>
                 &mdash; cette page apparaîtra sur le site public de l'association, accessible à tous les visiteurs
             </dd>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_normal" value="{Garradin\Wiki::LECTURE_NORMAL}"  {form_field data=$page name="droit_lecture" checked=Garradin\Wiki::LECTURE_NORMAL} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_normal" value="{$wiki::LECTURE_NORMAL}"  {form_field data=$page name="droit_lecture" checked=$wiki::LECTURE_NORMAL} />
                 <label for="f_droit_lecture_normal"><strong>Sur le wiki uniquement</strong></label>
                 &mdash; seuls les membres ayant accès au wiki pourront la voir
             </dd>
             <dd>
-                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {if $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}checked="checked"{/if} />
+                <input type="radio" name="droit_lecture" id="f_droit_lecture_categorie" value="{$user.id_categorie}"  {if $page.droit_lecture >= $wiki::LECTURE_CATEGORIE}checked="checked"{/if} />
                 <label for="f_droit_lecture_categorie"><strong>Aux membres de ma catégorie</strong></label>
                 &mdash; seuls les membres de la même catégorie que moi pourront voir cette page
             </dd>
             <dt><label for="f_droit_ecriture_normal">Cette page peut être modifiée par :</label></dt>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{Garradin\Wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=Garradin\Wiki::ECRITURE_NORMAL} {if $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_normal" value="{$wiki::ECRITURE_NORMAL}" {form_field data=$page name="droit_ecriture" checked=$wiki::ECRITURE_NORMAL} {if $page.droit_lecture >= $wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
                 <label for="f_droit_ecriture_normal">Les membres qui ont accès au wiki en écriture</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page.droit_ecriture >= Garradin\Wiki::ECRITURE_CATEGORIE || $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}checked="checked"{/if} {if $page.droit_lecture >= Garradin\Wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
+                <input type="radio" name="droit_ecriture" id="f_droit_ecriture_categorie" value="{$user.id_categorie}" {if $page.droit_ecriture >= $wiki::ECRITURE_CATEGORIE || $page.droit_lecture >= $wiki::LECTURE_CATEGORIE}checked="checked"{/if} {if $page.droit_lecture >= $wiki::LECTURE_CATEGORIE}disabled="disabled"{/if} />
                 <label for="f_droit_ecriture_categorie">Les membres de ma catégorie</label>
             </dd>
         </dl>
@@ -104,17 +100,17 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="wiki_edit_`$page.id`"}
+        {csrf_field key="wiki_edit_%d"|args:$page.id}
         <input type="hidden" name="revision_edition" value="{form_field name=revision_edition default=$page.revision}" />
         <input type="hidden" name="debut_edition" value="{form_field name=debut_edition default=$time}" />
-        <input id="f_id" value="{$page.id|escape}" type="hidden" />
+        <input id="f_id" value="{$page.id}" type="hidden" />
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 
 </form>
 
 <script type="text/javascript">
-var page_id = '{$page.id|escape}';
+var page_id = '{$page.id}';
 {literal}
 (function() {
     $('#f_droit_lecture_categorie').onchange = function()

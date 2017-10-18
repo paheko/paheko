@@ -23,14 +23,13 @@ cd ${TMPDIR}
 mkdir ${TMPDIR}/garradin-${VERSION}/www/squelettes
 
 tar cjvf "${MY_PATH}/garradin-${VERSION}.tar.bz2" --wildcards-match-slash \
+    --numeric-owner --owner=0 --group=0 \
     --exclude-vcs \
-    --exclude '*/cache/compiled/*' \
+    --exclude '*/cache/compiled/*.php' \
     --exclude '*/cache/static/*' \
     --exclude 'www/squelettes/*' \
     --exclude 'www/elements' \
     --exclude '*.sqlite' \
-    --exclude 'include/*/README' \
-    --exclude 'include/*/COPYING' \
     --exclude '*.log' \
     --exclude 'plugins/*.gz' \
     --exclude 'config.local.php' \

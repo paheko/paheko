@@ -1,17 +1,15 @@
 {include file="admin/_head.tpl" title="Supprimer une catégorie" current="compta/categories"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{include file="admin/compta/categories/_nav.tpl" current=null}
 
-<form method="post" action="{$self_url|escape}">
+{form_errors}
+
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Supprimer la catégorie comptable ?</legend>
         <h3 class="warning">
-            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.intitule|escape}&nbsp;» ?
+            Êtes-vous sûr de vouloir supprimer la catégorie «&nbsp;{$cat.intitule}&nbsp;» ?
         </h3>
         <p class="help">
             Attention, la catégorie ne pourra pas être supprimée si des opérations y sont

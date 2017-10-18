@@ -1,83 +1,70 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-if (empty($_POST['selected']))
+if (!f('selected') || !is_array(f('selected')) || !count(f('selected')))
 {
     throw new UserException("Aucun membre sélectionné.");
 }
 
-foreach ($_POST['selected'] as &$id)
+foreach (f('selected') as &$id)
 {
     $id = (int) $id;
 
     // On ne permet pas d'action collective sur l'utilisateur courant pour éviter les risques
     // d'erreur genre "oh je me suis supprimé du coup j'ai plus accès à rien"
-    if ($id == $user['id'])
+    if ($id == $user->id)
     {
         throw new UserException("Il n'est pas possible de se modifier ou supprimer soi-même.");
     }
 }
 
-$error = false;
+$action = f('action') ?: (f('move') ? 'move' : (f('delete') ? 'delete' : ''));
 
-if (!empty($_POST['move_ok']))
+if (!$action)
 {
-    if (!Utils::CSRF_check('membres_action'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-        $_POST['move'] = true;
-    }
-    else
-    {
-        if (!empty($_POST['id_categorie']))
-        {
-            $membres->changeCategorie($_POST['id_categorie'], $_POST['selected']);
-        }
+    throw new UserException('Aucune action sélectionnée.');
+}
 
+if ($action == 'move' && f('confirm'))
+{
+    $form->check('membres_action', [
+        'selected' => 'required|array',
+        'id_categorie' => 'required|numeric',
+    ]);
+
+    if (!$form->hasErrors())
+    {
+        $membres->changeCategorie(f('id_categorie'), f('selected'));
         Utils::redirect('/admin/membres/');
     }
 }
-elseif (!empty($_POST['delete_ok']))
+elseif ($action == 'delete' && f('confirm'))
 {
-    if (!Utils::CSRF_check('membres_action'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-        $_POST['delete'] = true;
-    }
-    else
-    {
-        $membres->delete($_POST['selected']);
+    $form->check('membres_action', [
+        'selected' => 'required|array',
+    ]);
 
+    if (!$form->hasErrors())
+    {
+        $membres->delete(f('selected'));
         Utils::redirect('/admin/membres/');
     }
 }
 
-$tpl->assign('selected', $_POST['selected']);
-$tpl->assign('nb_selected', count($_POST['selected']));
+$tpl->assign('selected', f('selected'));
+$tpl->assign('nb_selected', count(f('selected')));
 
-if (!empty($_POST['move']))
+if ($action == 'move')
 {
     $cats = new Membres\Categories;
 
     $tpl->assign('membres_cats', $cats->listSimple());
-    $tpl->assign('action', 'move');
-}
-elseif (!empty($_POST['delete']))
-{
-    $tpl->assign('action', 'delete');
-}
-else
-{
-    throw new UserException('Aucune action sélectionée.');
 }
 
-$tpl->assign('error', $error);
+$tpl->assign('action', $action);
 
 $tpl->display('admin/membres/action.tpl');

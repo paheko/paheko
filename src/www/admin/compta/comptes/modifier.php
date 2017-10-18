@@ -3,12 +3,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$id = Utils::get('id');
+$id = qg('id');
 $compte = $comptes->get($id);
 
 if (!$compte)
@@ -16,38 +13,28 @@ if (!$compte)
     throw new UserException('Le compte demandé n\'existe pas.');
 }
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('compta_edit_compte_'.$compte['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    if ($form->check('compta_edit_compte_' . $compte->id))
     {
         try
         {
-            $id = $comptes->edit($compte['id'], [
-                'libelle'       =>  Utils::post('libelle'),
-                'position'      =>  Utils::post('position'),
+            $id = $comptes->edit($compte->id, [
+                'libelle'  =>  f('libelle'),
+                'position' =>  f('position'),
             ]);
 
-            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte['id'], 0, 1));
+            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte->id, 0, 1));
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
-
 $tpl->assign('positions', $comptes->getPositions());
-$tpl->assign('position', Utils::post('position') ?: $compte['position']);
+$tpl->assign('position', f('position') ?: $compte->position);
 $tpl->assign('compte', $compte);
 
 $tpl->display('admin/compta/comptes/modifier.tpl');
-
-?>

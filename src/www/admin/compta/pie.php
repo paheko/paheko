@@ -3,12 +3,9 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!in_array(Utils::get('g'), ['recettes', 'depenses']))
-{
-	throw new UserException('Graphique inconnu.');
-}
+qv(['g' => 'required|in:recettes,depenses']);
 
-$graph = Utils::get('g');
+$graph = qg('g');
 
 if (Static_Cache::expired('pie_' . $graph))
 {
@@ -39,12 +36,12 @@ if (Static_Cache::expired('pie_' . $graph))
 	{
 		if ($i++ >= $max)
 		{
-			$others += $row['somme'];
+			$others += $row->somme;
 		}
 		else
 		{
-			$cat = $categories[$row['id_categorie']];
-			$pie->add(new \KD2\SVGPie_Data($row['somme'], substr($cat['intitule'], 0, 50), $colors[$i-1]));
+			$cat = $categories[$row->id_categorie];
+			$pie->add(new \KD2\SVGPie_Data($row->somme, substr($cat->intitule, 0, 50), $colors[$i-1]));
 		}
 	}
 

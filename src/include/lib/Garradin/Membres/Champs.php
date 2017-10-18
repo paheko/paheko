@@ -80,7 +80,7 @@ class Champs
 
     static public function listUnusedPresets(Champs $champs)
     {
-        return array_diff_key(self::importPresets(), $champs->getAll());
+        return array_diff_key(self::importPresets(), (array) $champs->getAll());
     }
 
 	public function __construct($champs)
@@ -91,12 +91,25 @@ class Champs
 		}
         elseif (is_array($champs))
         {
+            $presets = self::importPresets();
+            $this->champs = new \stdClass;
+
             foreach ($champs as $key=>&$config)
             {
-                $this->_checkField($key, $config);
-            }
+                if (is_array($config))
+                {
+                    $config = (object) $config;
+                }
 
-            $this->champs = $champs;
+                if (isset($presets[$key]))
+                {
+                    $config->type = $presets[$key]['type'];
+                }
+
+                $this->_checkField($key, $config);
+
+                $this->champs->$key = $config;
+            }
         }
 		else
 		{
@@ -104,10 +117,11 @@ class Champs
 
             foreach ($champs as $key=>&$config)
             {
+                $config = (object) $config;
                 $this->_checkField($key, $config);
             }
 
-            $this->champs = $champs;
+            $this->champs = (object) $champs;
 		}
 	}
 
@@ -118,71 +132,164 @@ class Champs
 
 	public function get($champ, $key = null)
 	{
-        if ($champ == 'id')
-        {
-            return ['title' => 'Numéro unique', 'type' => 'number'];
-        }
-
-        if (!array_key_exists($champ, $this->champs))
+        if (!property_exists($this->champs, $champ))
             return null;
 
         if ($key !== null)
         {
-            if (array_key_exists($key, $this->champs[$champ]))
-                return $this->champs[$champ][$key];
+            if (property_exists($this->champs->$champ, $key))
+                return $this->champs->$champ->$key;
             else
                 return null;
         }
 
-		return $this->champs[$champ];
+		return $this->champs->$champ;
 	}
 
     public function isText($champ)
     {
-        if (!array_key_exists($champ, $this->champs))
+        if (!property_exists($this->champs, $champ))
             return null;
 
-        if (in_array($this->champs[$champ]['type'], $this->text_types))
+        if (in_array($this->champs->$champ->type, $this->text_types))
             return true;
         else
             return false;
     }
 
+    public function getKeys($all = false)
+    {
+        $keys = [];
+
+        foreach ($this->champs as $key => $config)
+        {
+            if (!$all && $key == 'passe')
+            {
+                continue;
+            }
+
+            $keys[] = $key;
+        }
+
+        return $keys;
+    }
+
 	public function getAll()
 	{
-        $this->champs['passe']['title'] = 'Mot de passe';
 		return $this->champs;
 	}
 
-    public function getList()
+    public function getList($with_id = false)
     {
-        $champs = $this->champs;
-        unset($champs['passe']);
-        return $champs;
-    }
+        $champs = clone $this->champs;
+        unset($champs->passe);
 
-    public function getFirst()
-    {
-        reset($this->champs);
-        return key($this->champs);
+        if ($with_id)
+        {
+            $champs->id = $this->get('id');
+        }
+
+        return $champs;
     }
 
     public function getListedFields()
     {
-        $champs = $this->champs;
+        $champs = (array) $this->champs;
 
         $champs = array_filter($champs, function ($a) {
-            return empty($a['list_row']) ? false : true;
+            return empty($a->list_row) ? false : true;
         });
 
         uasort($champs, function ($a, $b) {
-            if ($a['list_row'] == $b['list_row'])
+            if ($a->list_row == $b->list_row)
                 return 0;
 
-            return ($a['list_row'] > $b['list_row']) ? 1 : -1;
+            return ($a->list_row > $b->list_row) ? 1 : -1;
         });
 
-        return $champs;
+        return (object) $champs;
+    }
+
+    public function getFirstListed()
+    {
+        foreach ($this->champs as $key=>$config)
+        {
+            if (empty($config->list_row))
+            {
+                continue;
+            }
+
+            return $key;
+        }
+    }
+
+    public function getValidationRules($mode = 'edit')
+    {
+        assert(in_array($mode, ['edit', 'create', 'user_edit']));
+
+        $all_rules = [];
+
+        foreach ($this->champs as $name => $config)
+        {
+            if (empty($config->editable) && $mode == 'user_edit')
+            {
+                $all_rules[$name] = 'absent';
+                break;
+            }
+
+            $rules = [];
+
+            if (!empty($config->mandatory) && !($name == 'passe' && $mode != 'create'))
+            {
+                $rules[] = 'required';
+            }
+            
+            if ($config->type == 'email')
+            {
+                $rules[] = 'email';
+            }
+            elseif ($config->type == 'url')
+            {
+                $rules[] = 'url';
+            }
+            elseif ($config->type == 'date')
+            {
+                $rules[] = 'date_format:Y-m-d';
+            }
+            elseif ($config->type == 'date')
+            {
+                $rules[] = 'date_format:Y-m-d H\:i';
+            }
+            elseif ($config->type == 'number' || $config->type == 'multiple')
+            {
+                $rules[] = 'numeric';
+            }
+            elseif ($config->type == 'select')
+            {
+                $rules[] = 'in:' . range(0, count($this->options) - 1);
+            }
+            elseif ($config->type == 'checkbox')
+            {
+                $rules[] = 'boolean';
+            }
+
+            if ($name == 'passe')
+            {
+                $rules[] = 'min:6';
+            }
+
+            if (isset($config->rules))
+            {
+                $rules[] = $config->rules;
+            }
+
+            if (count($rules))
+            {
+                $all_rules[$name] = implode('|', $rules);
+            }
+        }
+
+        return $all_rules;
     }
 
     /**
@@ -191,7 +298,7 @@ class Champs
      * @param  array $config    Configuration du champ
      * @return boolean true
      */
-    protected function _checkField($name, &$config)
+    protected function _checkField($name, \stdClass &$config)
     {
         if (!preg_match('!^\w+(_\w+)*$!', $name))
         {
@@ -203,7 +310,7 @@ class Champs
             // Champ install non pris en compte
             if ($key == 'install')
             {
-                unset($config[$key]);
+                unset($config->$key);
                 continue;
             }
 
@@ -238,44 +345,44 @@ class Champs
             }
         }
 
-        if (empty($config['title']) && $name != 'passe')
+        if (empty($config->title) && $name != 'passe')
         {
             throw new UserException('Champ "'.$name.'" : Le titre est obligatoire.');
         }
 
-        if (empty($config['type']) || !array_key_exists($config['type'], $this->types))
+        if (empty($config->type) || !array_key_exists($config->type, $this->types))
         {
             throw new UserException('Champ "'.$name.'" : Le type est vide ou non valide.');
         }
 
-        if ($name == 'email' && $config['type'] != 'email')
+        if ($name == 'email' && $config->type != 'email')
         {
             throw new UserException('Le champ email ne peut être d\'un type différent de email.');
         }
 
-        if ($name == 'passe' && $config['type'] != 'password')
+        if ($name == 'passe' && $config->type != 'password')
         {
             throw new UserException('Le champ mot de passe ne peut être d\'un type différent de mot de passe.');
         }
 
-        if (($config['type'] == 'multiple' || $config['type'] == 'select') && empty($config['options']))
+        if (($config->type == 'multiple' || $config->type == 'select') && empty($config->options))
         {
             throw new UserException('Le champ "'.$name.'" nécessite de comporter au moins une option possible.');
         }
 
-        if (!array_key_exists('editable', $config))
+        if (!property_exists($config, 'editable'))
         {
-            $config['editable'] = false;
+            $config->editable = false;
         }
 
-        if (!array_key_exists('mandatory', $config))
+        if (!property_exists($config, 'mandatory'))
         {
-            $config['mandatory'] = false;
+            $config->mandatory = false;
         }
 
-        if (!array_key_exists('private', $config))
+        if (!property_exists($config, 'private'))
         {
-            $config['private'] = false;
+            $config->private = false;
         }
 
         return true;
@@ -298,10 +405,12 @@ class Champs
         {
             throw new UserException('Le nom du champ est invalide : ne sont acceptés que les lettres minuscules et les chiffres (éventuellement séparés par un underscore).');
         }
+
+        $config = (object) $config;
         
         $this->_checkField($name, $config);
 
-        $this->champs[$name] = $config;
+        $this->champs->$name = $config;
 
         return true;
     }
@@ -315,17 +424,17 @@ class Champs
      */
 	public function set($champ, $key, $value)
 	{
-        if (!isset($this->champs[$champ]))
+        if (!isset($this->champs->$champ))
         {
             throw new \LogicException('Champ "'.$champ.'" inconnu.');
         }
 
         // Vérification
-        $config = $this->champs[$champ];
-        $config[$key] = $value;
+        $config = clone $this->champs->$champ;
+        $config->$key = $value;
         $this->_checkField($champ, $config);
 
-		$this->champs[$champ] = $config;
+		$this->champs->$champ = $config;
 		return true;
 	}
 
@@ -344,6 +453,11 @@ class Champs
         if (!array_key_exists('passe', $champs))
         {
             throw new UserException('Le champ Mot de passe ne peut être supprimé des fiches membres.');
+        }
+
+        if (!array_key_exists('numero', $champs))
+        {
+            throw new UserException('Le champ numéro de membre ne peut être supprimé des fiches membres.');
         }
 
         $config = Config::getInstance();
@@ -366,6 +480,7 @@ class Champs
 
         foreach ($champs as $name=>&$config)
         {
+            $config = (object) $config;
             $this->_checkField($name, $config);
         }
 
@@ -390,6 +505,8 @@ class Champs
     		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
             'date_connexion TEXT NULL, -- Date de dernière connexion',
             'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d\'inscription',
+            'secret_otp TEXT NULL, -- Code secret pour TOTP',
+            'clef_pgp TEXT NULL, -- Clé publique PGP'
     	];
 
         $create_keys = [
@@ -398,10 +515,12 @@ class Champs
 
     	// Champs à recopier
     	$copy = [
-    		'id',
-    		'id_categorie',
-            'date_connexion',
-            'date_inscription',
+    		'id' => 'id',
+    		'id_categorie' => 'id_categorie',
+            'date_connexion' => 'date_connexion',
+            'date_inscription' => 'date_inscription',
+            'secret_otp' => 'secret_otp',
+            'clef_pgp' => 'clef_pgp',
     	];
 
         $anciens_champs = $config->get('champs_membres');
@@ -409,37 +528,40 @@ class Champs
 
     	foreach ($this->champs as $key=>$cfg)
     	{
-    		if ($cfg['type'] == 'number')
-    			$type = 'FLOAT';
-    		elseif ($cfg['type'] == 'multiple' || $cfg['type'] == 'checkbox')
+    		if ($cfg->type == 'number' || $cfg->type == 'multiple' || $cfg->type == 'checkbox')
     			$type = 'INTEGER';
-    		elseif ($cfg['type'] == 'file')
+    		elseif ($cfg->type == 'file')
     			$type = 'BLOB';
     		else
     			$type = 'TEXT';
 
     		$line = $key . ' ' . $type . ',';
 
-            if (!empty($cfg['title']))
+            if (!empty($cfg->title))
             {
-                $line .= ' -- ' . str_replace(["\n", "\r"], '', $cfg['title']);
+                $line .= ' -- ' . str_replace(["\n", "\r"], '', $cfg->title);
             }
 
             $create[] = $line;
 
-    		if (array_key_exists($key, $anciens_champs))
+    		if (property_exists($anciens_champs, $key))
     		{
-    			$copy[] = $key;
+    			$copy[$key] = $key;
     		}
+            elseif ($key == 'numero')
+            {
+                // Copie des numéros de membre à partir du champ ID
+                $copy[$key] = 'id';
+            }
     	}
 
     	$create = array_merge($create, $create_keys);
 
     	$create = 'CREATE TABLE membres_tmp (' . "\n\t" . implode("\n\t", $create) . "\n);";
-    	$copy = 'INSERT INTO membres_tmp (' . implode(', ', $copy) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
+    	$copy = 'INSERT INTO membres_tmp (' . implode(', ', array_keys($copy)) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
 
     	$db->exec('PRAGMA foreign_keys = OFF;');
-    	$db->exec('BEGIN;');
+    	$db->begin();
     	$db->exec($create);
     	
     	if ($enable_copy) {
@@ -460,8 +582,13 @@ class Champs
             $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
         }
 
+        if (isset($this->champs->numero))
+        {
+            $db->exec('CREATE UNIQUE INDEX membres_numero ON membres (numero);');
+        }
+
         // Création des index pour les champs affichés dans la liste des membres
-        $listed_fields = array_keys($this->getListedFields());
+        $listed_fields = array_keys((array) $this->getListedFields());
         foreach ($listed_fields as $field)
         {
             if ($field === $config->get('champ_identifiant'))
@@ -473,7 +600,7 @@ class Champs
             $db->exec('CREATE INDEX membres_liste_' . $field . ' ON membres (' . $field . ');');
         }
 
-    	$db->exec('END;');
+    	$db->commit();
     	$db->exec('PRAGMA foreign_keys = ON;');
 
     	$config->set('champs_membres', $this);

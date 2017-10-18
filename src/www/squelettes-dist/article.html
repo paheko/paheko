@@ -2,27 +2,29 @@
 
 <B_article>
 	<article>
-	    <BOUCLE_article(ARTICLES){uri}>
-	    <h1>#TITRE</h1>
-	    <div class="corps">
-	        [(#TEXTE*|formatter_texte)]
-	    </div>
-	    </BOUCLE_article>
+		<BOUCLE_article(ARTICLES){uri}>
+		<h1>#TITRE</h1>
+		<div class="corps">
+			[(#TEXTE*|formatter_texte)]
+		</div>
+		<INCLURE{galerie.html}>
+		<INCLURE{documents.html}>
+		</BOUCLE_article>
 	</article>
 
 	<B_enfants>
 	<section class="articles">
-	    <BOUCLE_enfants(PAGES){parent}{par uri}>
-	    <article>
-	        <h3><a href="#URL">#TITRE</a></h3>
-	        <p>[(#TEXTE|supprimer_spip|supprimer_tags|couper{200})]</p>
-	    </article>
-	    </BOUCLE_enfants>
+		<BOUCLE_enfants(PAGES){parent}{par uri}>
+		<article>
+			<h3><a href="#URL">#TITRE</a></h3>
+			<p>[(#TEXTE|supprimer_skriv|couper{200})]</p>
+		</article>
+		</BOUCLE_enfants>
 	</section>
 	</B_enfants>
 </B_article>
 <p class="error">
-    Cette page n'existe pas.
+	Cette page n'existe pas.
 </p>
 <//B_article>
 

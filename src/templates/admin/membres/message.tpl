@@ -1,22 +1,18 @@
 {include file="admin/_head.tpl" title="Contacter un membre" current="membres"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
     <fieldset class="memberMessage">
         <legend>Message</legend>
         <dl>
             <dt>Expéditeur</dt>
-            <dd>{$user.identite|escape} &lt;{$user.email|escape}&gt;</dd>
+            <dd>{$user.identite} &lt;{$user.email}&gt;</dd>
             <dd class="help">
                 Votre adresse E-Mail apparaîtra dans le champ "expéditeur" du message reçu par le destinataire.
             </dd>
             <dt>Destinataire</dt>
-            <dd>{$membre.identite|escape} ({$categorie.nom|escape})</dd>
+            <dd>{$membre.identite} ({$categorie.nom})</dd>
             <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" required="required" /></dd>
             <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>

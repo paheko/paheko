@@ -3,52 +3,62 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$error = false;
+$couleur1 = '#9c4f15';
+$couleur2 = '#d98628';
 
-if (isset($_GET['ok']))
+if (f('save') && $form->check('config'))
 {
-    $error = 'OK';
-}
+    try {
+        $config->set('nom_asso', f('nom_asso'));
+        $config->set('email_asso', f('email_asso'));
+        $config->set('adresse_asso', f('adresse_asso'));
+        $config->set('site_asso', f('site_asso'));
+        $config->set('email_envoi_automatique', f('email_envoi_automatique'));
+        $config->set('accueil_wiki', f('accueil_wiki'));
+        $config->set('accueil_connexion', f('accueil_connexion'));
+        $config->set('categorie_membres', f('categorie_membres'));
+        
+        $config->set('champ_identite', f('champ_identite'));
+        $config->set('champ_identifiant', f('champ_identifiant'));
 
-if (!empty($_POST['save']))
-{
-    if (!Utils::CSRF_check('config'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
-        try {
-            $config->set('nom_asso', Utils::post('nom_asso'));
-            $config->set('email_asso', Utils::post('email_asso'));
-            $config->set('adresse_asso', Utils::post('adresse_asso'));
-            $config->set('site_asso', Utils::post('site_asso'));
-            $config->set('email_envoi_automatique', Utils::post('email_envoi_automatique'));
-            $config->set('accueil_wiki', Utils::post('accueil_wiki'));
-            $config->set('accueil_connexion', Utils::post('accueil_connexion'));
-            $config->set('categorie_membres', Utils::post('categorie_membres'));
-            
-            $config->set('champ_identite', Utils::post('champ_identite'));
-            $config->set('champ_identifiant', Utils::post('champ_identifiant'));
+        $config->set('pays', f('pays'));
+        $config->set('monnaie', f('monnaie'));
 
-            $config->set('pays', Utils::post('pays'));
-            $config->set('monnaie', Utils::post('monnaie'));
-
-            $config->save();
-
-            Utils::redirect('/admin/config/?ok');
-        }
-        catch (UserException $e)
+        // N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
+        if (f('couleur1') != $couleur1 || f('couleur2') != $couleur2)
         {
-            $error = $e->getMessage();
+            $config->set('couleur1', f('couleur1'));
+            $config->set('couleur2', f('couleur2'));
+            $config->set('image_fond', f('image_fond'));
         }
+        else
+        {
+            $config->set('couleur1', null);
+            $config->set('couleur2', null);
+            $config->set('image_fond', null);
+        }
+
+        $config->save();
+
+        Utils::redirect('/admin/config/?ok');
+    }
+    catch (UserException $e)
+    {
+        $form->addError($e->getMessage());
     }
 }
 
-$tpl->assign('error', $error);
+$tpl->assign('ok', qg('ok') !== null);
+
+$server_time = time();
+$ntp_time = \KD2\Security_OTP::getTimeFromNTP(NTP_SERVER);
+$diff = $server_time - $ntp_time;
 
 $tpl->assign('garradin_version', garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']');
 $tpl->assign('php_version', phpversion());
+$tpl->assign('has_gpg_support', \KD2\Security::canUseEncryption());
+$tpl->assign('server_time', $server_time);
+$tpl->assign('time_diff', $diff);
 
 $v = \SQLite3::version();
 $tpl->assign('sqlite_version', $v['versionString']);
@@ -58,12 +68,11 @@ $tpl->assign('pays', Utils::getCountryList());
 $cats = new Membres\Categories;
 $tpl->assign('membres_cats', $cats->listSimple());
 
-$champs_liste = array_merge(
-    ['id' => ['title' => 'Numéro unique', 'type' => 'number']],
-    $config->get('champs_membres')->getList()
-);
-$tpl->assign('champs', $champs_liste);
+$tpl->assign('champs', $config->get('champs_membres')->getList(true));
 
+$tpl->assign('couleur1', $config->get('couleur1') ?: $couleur1);
+$tpl->assign('couleur2', $config->get('couleur2') ?: $couleur2);
+$tpl->assign('couleurs_defaut', [$couleur1, $couleur2]);
+
+$tpl->assign('custom_js', ['color_helper.js']);
 $tpl->display('admin/config/index.tpl');
-
-?>

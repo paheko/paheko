@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$compte = $comptes->get(Utils::get('id'));
+$compte = $comptes->get(qg('id'));
 
 if (!$compte)
 {
@@ -12,9 +12,9 @@ if (!$compte)
 
 $journal = new Compta\Journal;
 
-$solde = $journal->getSolde($compte['id']);
+$solde = $journal->getSolde($compte->id);
 
-if (($compte['position'] & Compta\Comptes::ACTIF) || ($compte['position'] & Compta\Comptes::CHARGE))
+if (($compte->position & Compta\Comptes::ACTIF) || ($compte->position & Compta\Comptes::CHARGE))
 {
     $tpl->assign('credit', '-');
     $tpl->assign('debit', '+');
@@ -27,6 +27,7 @@ else
 
 $tpl->assign('compte', $compte);
 $tpl->assign('solde', $solde);
-$tpl->assign('journal', $journal->getJournalCompte($compte['id']));
+$tpl->assign('journal', $journal->getJournalCompte($compte->id));
+$tpl->assign('suivi', qg('suivi'));
 
 $tpl->display('admin/compta/comptes/journal.tpl');

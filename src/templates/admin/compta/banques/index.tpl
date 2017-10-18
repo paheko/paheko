@@ -2,7 +2,9 @@
 
 <ul class="actions">
     <li class="current"><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={Garradin\Compta\Comptes::CAISSE}&amp;suivi">Journal de caisse</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_cheque_a_encaisser}&amp;suivi">Chèques à encaisser</a></li>
+    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_carte_a_encaisser}&amp;suivi">Paiements par carte à encaisser</a></li>
 </ul>
 
 {if !empty($liste)}
@@ -20,19 +22,19 @@
         <tbody>
         {foreach from=$liste item="compte"}
             <tr>
-                <td>{$compte.banque|escape}</td>
-                <th>{$compte.libelle|escape}</th>
-                <td><strong>{$compte.solde|html_money} {$config.monnaie|escape}</strong></td>
+                <td>{$compte.banque}</td>
+                <th>{$compte.libelle}</th>
+                <td><strong>{$compte.solde|escape|html_money} {$config.monnaie}</strong></td>
                 <td>{$compte.iban|escape|format_iban}</td>
-                <td>{$compte.bic|escape}</td>
+                <td>{$compte.bic}</td>
                 <td class="actions">
-                    <a class="icn" href="{$www_url}admin/compta/comptes/journal.php?id={$compte.id|escape}&amp;suivi" title="Journal">𝍢</a>
-                    {if $user.droits.compta >= Garradin\Membres::DROIT_ECRITURE}
-                        <a class="icn" href="{$www_url}admin/compta/banques/rapprocher.php?id={$compte.id|escape}" title="Rapprocher">☑</a>
+                    <a class="icn" href="{$www_url}admin/compta/comptes/journal.php?id={$compte.id}&amp;suivi" title="Journal">𝍢</a>
+                    {if $session->canAccess('compta', Garradin\Membres::DROIT_ECRITURE)}
+                        <a class="icn" href="{$www_url}admin/compta/banques/rapprocher.php?id={$compte.id}" title="Rapprocher">☑</a>
                     {/if}
-                    {if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
-                        <a class="icn" href="{$www_url}admin/compta/banques/modifier.php?id={$compte.id|escape}" title="Modifier">✎</a>
-                        <a class="icn" href="{$www_url}admin/compta/banques/supprimer.php?id={$compte.id|escape}" title="Supprimer">✘</a>
+                    {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+                        <a class="icn" href="{$www_url}admin/compta/banques/modifier.php?id={$compte.id}" title="Modifier">✎</a>
+                        <a class="icn" href="{$www_url}admin/compta/banques/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>
@@ -42,14 +44,10 @@
     </dl>
 {/if}
 
-{if $user.droits.compta >= Garradin\Membres::DROIT_ADMIN}
-    {if $error}
-        <p class="error">
-            {$error|escape}
-        </p>
-    {/if}
+{if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+    {form_errors}
 
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
         <fieldset>
             <legend>Ajouter un compte bancaire</legend>
@@ -59,7 +57,7 @@
                 <dt><label for="f_banque">Nom de la banque</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
                 <dd><input type="text" name="banque" id="f_banque" value="{form_field name=banque}" required="required" /></dd>
                 <dt><label for="f_solde">Solde initial</label></dt>
-                <dd><input type="number" size="5" name="solde" id="f_solde" value="{form_field name=solde default=0.00}" step="0.01" /> {$config.monnaie|escape}</dd>
+                <dd><input type="number" size="5" name="solde" id="f_solde" value="{form_field name=solde default=0.00}" step="0.01" /> {$config.monnaie}</dd>
                 <dt><label for="f_iban">Numéro IBAN</label></dt>
                 <dd><input type="text" size="30" name="iban" id="f_iban" value="{form_field name=iban}" /></dd>
                 <dt><label for="f_bic">Code BIC/SWIFT de la banque</label></dt>

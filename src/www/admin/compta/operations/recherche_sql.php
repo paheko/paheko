@@ -3,14 +3,11 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
 $journal = new Compta\Journal;
 
-$query = trim(Utils::get('query'));
+$query = trim(qg('query'));
 
 $tpl->assign('schema', $journal->schemaSQL());
 $tpl->assign('query', $query);

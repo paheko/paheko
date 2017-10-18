@@ -1,52 +1,36 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-if (!Utils::get('id') || !is_numeric(Utils::get('id')))
+if (!qg('id') || !is_numeric(qg('id')))
 {
     throw new UserException("Argument du numéro de cotisation manquant.");
 }
 
 $cotisations = new Cotisations;
 
-$co = $cotisations->get(Utils::get('id'));
+$co = $cotisations->get(qg('id'));
 
 if (!$co)
 {
     throw new UserException("Cette cotisation n'existe pas.");
 }
 
-$error = false;
-
-if (!empty($_POST['delete']))
+if (f('delete') && $form->check('delete_co_' . $co->id))
 {
-    if (!Utils::CSRF_check('delete_co_' . $co['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
+    try {
+        $cotisations->delete($co->id);
+        Utils::redirect('/admin/membres/cotisations/');
     }
-    else
+    catch (UserException $e)
     {
-        try {
-            $cotisations->delete($co['id']);
-            Utils::redirect('/admin/membres/cotisations/');
-        }
-        catch (UserException $e)
-        {
-            $error = $e->getMessage();
-        }
+        $form->addError($e->getMessage());
     }
 }
-
-$tpl->assign('error', $error);
 
 $tpl->assign('cotisation', $co);
 
 $tpl->display('admin/membres/cotisations/gestion/supprimer.tpl');
-
-?>

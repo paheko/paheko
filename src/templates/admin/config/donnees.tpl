@@ -2,19 +2,30 @@
 
 {include file="admin/config/_menu.tpl" current="donnees"}
 
-{if $error}
-    <p class="error">{$error|escape}</p>
-{elseif $ok}
+{form_errors}
+
+{if $code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT}
+    <p class="alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
+    Attention, si vous avez effectué des modifications dans la base de données, cela peut créer des bugs&nbsp;!</p>
+{/if}
+
+{if $ok}
     <p class="confirm">
         {if $ok == 'config'}La configuration a bien été enregistrée.
         {elseif $ok == 'create'}Une nouvelle sauvegarde a été créée.
         {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>date-du-jour.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
+            {if $ok_code & Garradin\Sauvegarde::NOT_AN_ADMIN}
+            </p>
+            <p class="alert">
+                <strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
+                Merci de corriger les droits des catégories maintenant.
+            {/if}
         {elseif $ok == 'remove'}La sauvegarde a été supprimée.
         {/if}
     </p>
 {/if}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url_no_qs}">
 
 <p class="help">
     Info : la base de données fait actuellement {$db_size|format_bytes} (dont {$files_size|format_bytes} pour les documents et images).
@@ -59,7 +70,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
     <legend>Sauvegarde manuelle</legend>
@@ -70,7 +81,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
     <legend>Copies de sauvegarde disponibles</legend>
@@ -82,7 +93,7 @@
             <dd>
                 <select name="file" id="f_select">
                 {foreach from=$liste key="f" item="d"}
-                    <option value="{$f|escape}">{$f|escape} — {$d|date_fr:'d/m/Y à H:i'}</option>
+                    <option value="{$f}">{$f} — {$d|date_fr:'d/m/Y à H:i'}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -100,7 +111,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
     <legend>Téléchargement</legend>
@@ -111,7 +122,7 @@
 </fieldset>
 
 </form>
-<form method="post" action="{$self_url|escape}" enctype="multipart/form-data">
+<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
 
 <fieldset>
     <legend><label for="f_file">Restaurer depuis un fichier</label></legend>
@@ -125,11 +136,16 @@
     </p>
     <p>
         {csrf_field key="backup_restore"}
-        <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size|escape}" />
+        <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size}" />
         <input type="file" name="file" id="f_file" required="required" />
         (maximum {$max_file_size|format_bytes})
         <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />
     </p>
+    {if $code && ($code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT)}
+    <p>
+        <label><input type="checkbox" name="force_import" value="1" /> Ignorer les erreurs, je sais ce que je fait</label>
+    </p>
+    {/if}
 </fieldset>
 
 </form>

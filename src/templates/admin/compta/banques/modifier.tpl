@@ -1,12 +1,8 @@
 {include file="admin/_head.tpl" title="Modifier un compte" current="compta/banques"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
-<form method="post" action="{$self_url|escape}">
+<form method="post" action="{$self_url}">
 
     <fieldset>
         <legend>Modifier un compte bancaire</legend>
@@ -23,7 +19,7 @@
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="compta_edit_banque_`$compte.id`"}
+        {csrf_field key="compta_edit_banque_%d"|args:$compte.id}
         <input type="submit" name="save" value="Enregistrer &rarr;" />
     </p>
 

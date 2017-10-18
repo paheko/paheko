@@ -1,14 +1,11 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-$query = trim(Utils::get('query'));
+$query = trim(qg('query'));
 
 $tpl->assign('schema', $membres->schemaSQL());
 $tpl->assign('query', $query);
@@ -30,5 +27,3 @@ else
 }
 
 $tpl->display('admin/membres/recherche_sql.tpl');
-
-?>

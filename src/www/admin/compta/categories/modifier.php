@@ -1,16 +1,16 @@
 <?php
+
 namespace Garradin;
+
+use Garradin\Compta\Categories;
 
 require_once __DIR__ . '/../_inc.php';
 
-if ($user['droits']['compta'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$cats = new Compta\Categories;
+$cats = new Categories;
 
-$id = (int)Utils::get('id');
+$id = (int)qg('id');
 $cat = $cats->get($id);
 
 if (!$cat)
@@ -18,26 +18,24 @@ if (!$cat)
     throw new UserException('Cette catégorie n\'existe pas.');
 }
 
-$error = false;
-
-if (!empty($_POST['save']))
+if (f('save'))
 {
-    if (!Utils::CSRF_check('compta_edit_cat_'.$cat['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('compta_edit_cat_' . $cat->id, [
+        'intitule' => 'required|string',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try
         {
             $id = $cats->edit($id, [
-                'intitule'      =>  Utils::post('intitule'),
-                'description'   =>  Utils::post('description'),
+                'intitule'      =>  f('intitule'),
+                'description'   =>  f('description'),
             ]);
 
-            if ($cat['type'] == Compta\Categories::DEPENSES)
+            if ($cat->type == Compta\Categories::DEPENSES)
                 $type = 'depenses';
-            elseif ($cat['type'] == Compta\Categories::AUTRES)
+            elseif ($cat->type == Compta\Categories::AUTRES)
                 $type = 'autres';
             else
                 $type = 'recettes';
@@ -46,14 +44,11 @@ if (!empty($_POST['save']))
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
-$tpl->assign('error', $error);
 $tpl->assign('cat', $cat);
 
 $tpl->display('admin/compta/categories/modifier.tpl');
-
-?>

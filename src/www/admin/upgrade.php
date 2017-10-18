@@ -5,6 +5,8 @@ const UPGRADE_PROCESS = true;
 
 require_once __DIR__ . '/../../include/init.php';
 
+Install::checkAndCreateDirectories();
+
 $config = Config::getInstance();
 
 $v = $config->getVersion();
@@ -17,6 +19,9 @@ if (version_compare($v, garradin_version(), '>='))
 $db = DB::getInstance();
 $redirect = true;
 
+// Créer une sauvegarde automatique
+(new Sauvegarde)->create('pre-upgrade-' . garradin_version());
+
 echo '<!DOCTYPE html>
 <html>
 <head>
@@ -27,8 +32,11 @@ echo '<!DOCTYPE html>
     <title>Mise à jour</title>
 </head>
 <body>
-<div class="header"><h1>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h1></div>
-<div class="page">
+<header class="header">
+    <nav class="menu"></nav>
+    <h1>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h1>
+</header>
+<main>
 <div id="loader" class="loader" style="margin: 2em 0; height: 50px;"></div>
 <script>
 animatedLoader(document.getElementById("loader"), 5);
@@ -96,10 +104,10 @@ if (version_compare($v, '0.4.5', '<'))
 if (version_compare($v, '0.5.0', '<'))
 {
     // Récupération de l'ancienne config
-    $champs_modifiables_membre = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
+    $champs_modifiables_membre = $db->firstColumn('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
     $champs_modifiables_membre = !empty($champs_modifiables_membre) ? explode(',', $champs_modifiables_membre) : [];
 
-    $champs_obligatoires = $db->querySingle('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
+    $champs_obligatoires = $db->firstColumn('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
     $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : [];
 
     // Import des champs membres par défaut
@@ -137,27 +145,27 @@ if (version_compare($v, '0.6.0-rc1', '<'))
     // Mise à jour base de données
     $db->exec(file_get_contents(ROOT . '/include/data/0.6.0.sql'));
 
-    $id_cat_cotisation = $db->querySingle('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
+    $id_cat_cotisation = $db->firstColumn('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
 
     // Conversion des cotisations de catégories en cotisations indépendantes
     foreach ($list as $cat)
     {
-        $db->simpleInsert('cotisations', [
+        $db->insert('cotisations', [
             'id_categorie_compta'   =>  null,
-            'intitule'              =>  $cat['nom'],
-            'montant'               =>  (float) $cat['montant_cotisation'],
+            'intitule'              =>  $cat->nom,
+            'montant'               =>  (float) $cat->montant_cotisation,
             // Convertir un nombre de mois en nombre de jours
-            'duree'                 =>  round($cat['duree_cotisation'] * 30.44),
+            'duree'                 =>  round($cat->duree_cotisation * 30.44),
             'description'           =>  'Créé automatiquement depuis les catégories de membres (version 0.5.x)',
         ]);
 
         $args = [
             'id_cotisation' =>  (int)$db->lastInsertRowId(),
-            'id_categorie'  =>  (int)$cat['id'],
+            'id_categorie'  =>  (int)$cat->id,
         ];
 
         // import des dates de cotisation existantes comme paiements
-        $db->simpleExec('INSERT INTO cotisations_membres 
+        $db->preparedQuery('INSERT INTO cotisations_membres 
             (id_membre, id_cotisation, date)
             SELECT id, :id_cotisation, date(date_cotisation) FROM membres
             WHERE date_cotisation IS NOT NULL AND date_cotisation != \'\' AND id_categorie = :id_categorie;',
@@ -209,21 +217,21 @@ if (version_compare($v, '0.7.0', '<'))
 
     // Changement de syntaxe du Wiki vers SkrivML
     $wiki = new Wiki;
-    $res = $db->query('SELECT id_page, contenu, revision, chiffrement FROM wiki_revisions GROUP BY id_page ORDER BY revision DESC;');
+    $res = $db->get('SELECT id_page, contenu, revision, chiffrement FROM wiki_revisions GROUP BY id_page ORDER BY revision DESC;');
 
-    while ($row = $res->fetchArray(\SQLITE3_ASSOC))
+    foreach ($res as $row)
     {
         // Ne pas convertir le contenu chiffré, de toute évidence
-        if ($row['chiffrement'])
+        if ($row->chiffrement)
             continue;
 
-        $content = $row['contenu'];
+        $content = $row->contenu;
         $content = Utils::HTMLToSkriv($content);
         $content = Utils::SpipToSkriv($content);
 
-        if ($content != $row['contenu'])
+        if ($content != $row->contenu)
         {
-            $wiki->editRevision($row['id_page'], $row['revision'], [
+            $wiki->editRevision($row->id_page, $row->revision, [
                 'id_auteur'     =>  null,
                 'contenu'       =>  $content,
                 'modification'  =>  'Mise à jour 0.7.0 (transformation SPIP vers SkrivML)',
@@ -244,19 +252,50 @@ if (version_compare($v, '0.7.2', '<'))
     $db->exec('END;');
 }
 
-if (version_compare($v, '0.7.3', '<'))
+if (version_compare($v, '0.8.0-beta4', '<'))
 {
-    // Bug étrange dans la 0.7.2 où la base de données n'est pas mise à jour,
-    // donc on vérifie et refait la màj ici
-    try {
-        $db->exec('SELECT id_auteur FROM compta_rapprochement;');
-    }
-    catch (\Exception $e)
+    // Inscription de l'appid
+    $db->exec('PRAGMA application_id = ' . DB::APPID . ';');
+
+    // Changement de la taille de pagesize
+    // Cecit devrait améliorer les performances de la DB
+    $db->exec('PRAGMA page_size = 4096;');
+
+    // Application du changement de taille de page
+    $db->exec('VACUUM;');
+
+    // Désactivation des foreign keys AVANT le début de la transaction
+    $db->exec('PRAGMA foreign_keys = OFF;');
+
+    $db->begin();
+
+    $db->import(ROOT . '/include/data/0.8.0.sql');
+
+    $db->commit();
+
+    $config = Config::getInstance();
+
+    // Ajout champ numéro de membre
+    $champs = (array) $config->get('champs_membres')->getAll();
+    $presets = Membres\Champs::importPresets();
+
+    // Ajout du numéro au début
+    $champs = array_merge(['numero' => $presets['numero']], $champs);
+    (new Membres\Champs($champs))->save();
+
+    // Si l'ID était l'identificant, utilisons le numéro de membre à la place
+    if ($config->get('champ_identifiant') == 'id')
     {
-        $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
-        $db->exec(file_get_contents(ROOT . '/include/data/0.7.2.sql'));
-        $db->exec('END;');
+        $config->set('champ_identifiant', 'numero');
+        $config->save();
     }
+
+    // Nettoyage de la base de données
+    $db->exec('VACUUM;');
+
+    // Mise à jour plan comptable: ajout comptes encaissement
+    $comptes = new Compta\Comptes;
+    $comptes->importPlan();
 }
 
 Utils::clearCaches();
@@ -278,6 +317,6 @@ if ($redirect)
 }
 
 echo '
-</body>';
-
-?>
+</main>
+</body>
+</html>';

@@ -2,19 +2,15 @@
 
 {include file="admin/config/_menu.tpl" current="plugins"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{/if}
+{form_errors}
 
 {if !empty($delete)}
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
         <fieldset>
             <legend>Désinstaller une extension</legend>
             <h3 class="warning">
-                Êtes-vous sûr de vouloir supprimer l'extension «&nbsp;{$plugin.nom|escape}&nbsp;» ?
+                Êtes-vous sûr de vouloir supprimer l'extension «&nbsp;{$plugin.nom}&nbsp;» ?
             </h3>
             <p class="alert">
                 <strong>Attention</strong> : cette action est irréversible et effacera toutes les
@@ -23,7 +19,7 @@
         </fieldset>
 
         <p class="submit">
-            {csrf_field key="delete_plugin_`$plugin.id`"}
+            {csrf_field key="delete_plugin_%s"|args:$plugin.id}
             <input type="submit" name="delete" value="Désinstaller &rarr;" />
         </p>
     </form>
@@ -42,18 +38,18 @@
                 {foreach from=$liste_installes item="plugin"}
                 <tr>
                     <th>
-                        <h4>{$plugin.nom|escape}</h4>
-                        <small>{$plugin.description|escape}</small>
+                        <h4>{$plugin.nom}</h4>
+                        <small>{$plugin.description}</small>
                     </th>
                     <td>
-                        <a href="{$plugin.url|escape}" onclick="return !window.open(this.href);">{$plugin.auteur|escape}</a>
+                        <a href="{$plugin.url}" onclick="return !window.open(this.href);">{$plugin.auteur}</a>
                     </td>
                     <td>
-                        {$plugin.version|escape}
+                        {$plugin.version}
                     </td>
                     <td class="actions">
                         {if empty($plugin.system)}
-                            <a href="{$admin_url}config/plugins.php?delete={$plugin.id|escape}">Désinstaller</a>
+                            <a href="{$admin_url}config/plugins.php?delete={$plugin.id}">Désinstaller</a>
                         {/if}
                         {if !empty($plugin.config)}
                             {if empty($plugin.system)}|{/if}
@@ -67,13 +63,13 @@
     {else}
         <p class="help">
             Aucune extension n'est installée.
-            Vous pouvez consulter <a href="{Garradin\WEBSITE}">le site de Garradin</a> pour obtenir
+            Vous pouvez consulter <a href="{$garradin_website}">le site de Garradin</a> pour obtenir
             des extensions à télécharger.
         </p>
     {/if}
 
     {if !empty($liste_telecharges)}
-    <form method="post" action="{$self_url|escape}">
+    <form method="post" action="{$self_url}">
 
         <fieldset>
             <legend>Extensions à installer</legend>
@@ -81,12 +77,12 @@
                 {foreach from=$liste_telecharges item="plugin" key="id"}
                 <dt>
                     <label>
-                        <input type="radio" name="to_install" value="{$id|escape}" />
-                        {$plugin.nom|escape}
+                        <input type="radio" name="plugin" value="{$id}" />
+                        {$plugin.nom}
                     </label>
-                    (version {$plugin.version|escape})
+                    (version {$plugin.version})
                 </dt>
-                <dd>[<a href="{$plugin.url|escape}" onclick="return !window.open(this.href);">{$plugin.auteur|escape}</a>] {$plugin.description|escape}</dd>
+                <dd>[<a href="{$plugin.url}" onclick="return !window.open(this.href);">{$plugin.auteur}</a>] {$plugin.description}</dd>
                 {/foreach}
             </dl>
         </fieldset>

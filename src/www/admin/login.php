@@ -5,15 +5,16 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if ($membres->isLogged())
+// L'utilisateur est déjà connecté
+if ($session->isLogged())
 {
     Utils::redirect('/admin/');
 }
 
 // Relance session_start et renvoie une image de 1px transparente
-if (isset($_GET['keepSessionAlive']))
+if (qg('keepSessionAlive') !== null)
 {
-    $membres->keepSessionAlive();
+    $session->keepAlive();
 
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
@@ -24,23 +25,20 @@ if (isset($_GET['keepSessionAlive']))
     exit;
 }
 
-$error = false;
+$login = null;
 
-if (Utils::post('login'))
+// Soumission du formulaire
+if (f('login'))
 {
-    if (!Utils::CSRF_check('login'))
-    {
-        $error = 'OTHER';
-    }
-    else
-    {
-        if (Utils::post('id') && Utils::post('passe')
-            && $membres->login(Utils::post('id'), Utils::post('passe')))
-        {
-            Utils::redirect('/admin/');
-        }
+    $form->check('login', [
+        '_id'       => 'required|string',
+        'passe'     => 'required|string',
+        'permanent' => 'boolean',
+    ]);
 
-        $error = 'LOGIN';
+    if (!$form->hasErrors() && ($login = $session->login(f('_id'), f('passe'), (bool) f('permanent'))))
+    {
+        Utils::redirect('/admin/');
     }
 }
 
@@ -53,6 +51,6 @@ $tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
 $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfURL()));
 
 $tpl->assign('champ', $champ);
-$tpl->assign('error', $error);
+$tpl->assign('fail', $login === false);
 
 $tpl->display('admin/login.tpl');

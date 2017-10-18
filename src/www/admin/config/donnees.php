@@ -4,109 +4,106 @@ namespace Garradin;
 require_once __DIR__ . '/_inc.php';
 
 $s = new Sauvegarde;
-$error = false;
+$code = false;
 
-if (Utils::post('config'))
+if (f('config'))
 {
-    if (!Utils::CSRF_check('backup_config'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('backup_config', [
+        'frequence_sauvegardes' => 'present|numeric|min:0|max:365',
+        'nombre_sauvegardes' => 'present|numeric|min:1|max:90',
+    ]);
+
+    if (!$form->hasErrors())
     {
         try {
-            $config->set('frequence_sauvegardes', Utils::post('frequence_sauvegardes'));
-            $config->set('nombre_sauvegardes', Utils::post('nombre_sauvegardes'));
+            $config->set('frequence_sauvegardes', f('frequence_sauvegardes'));
+            $config->set('nombre_sauvegardes', f('nombre_sauvegardes'));
             $config->save();
 
             Utils::redirect('/admin/config/donnees.php?ok=config');
         } catch (UserException $e) {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-elseif (Utils::post('create'))
+elseif (f('create'))
 {
-    if (!Utils::CSRF_check('backup_create'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('backup_create');
+
+    if (!$form->hasErrors())
     {
         try {
             $s->create();
             Utils::redirect('/admin/config/donnees.php?ok=create');
         } catch (UserException $e) {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-elseif (Utils::post('download'))
+elseif (f('download'))
 {
-    if (!Utils::CSRF_check('backup_download'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('backup_download');
+
+    if (!$form->hasErrors())
     {
         header('Content-type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . $config->get('nom_asso') . ' - Sauvegarde données - ' . date('Y-m-d') . '.sqlite"');
+        header('Content-Length: ' . $s->getDBSize());
 
         $s->dump();
         exit;
     }
 }
-elseif (Utils::post('restore'))
+elseif (f('restore'))
 {
-    if (!Utils::CSRF_check('backup_manage'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('backup_manage');
+
+    if (!$form->hasErrors())
     {
         try {
-            $s->restoreFromLocal(Utils::post('file'));
-            Utils::redirect('/admin/config/donnees.php?ok=restore');
+            $r = $s->restoreFromLocal(f('file'));
+            Utils::redirect('/admin/config/donnees.php?ok=restore&code=' . (int)$r);
         } catch (UserException $e) {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-elseif (Utils::post('remove'))
+elseif (f('remove'))
 {
-    if (!Utils::CSRF_check('backup_manage'))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('backup_manage');
+
+    if (!$form->hasErrors())
     {
         try {
-            $s->remove(Utils::post('file'));
+            $s->remove(f('file'));
             Utils::redirect('/admin/config/donnees.php?ok=remove');
         } catch (UserException $e) {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
-elseif (Utils::post('restore_file'))
+elseif (f('restore_file'))
 {
-    if (!Utils::CSRF_check('backup_restore'))
+    $form->check('backup_restore');
+
+    if (!$form->hasErrors())
     {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
-    {
+        // Ignorer la vérification d'intégrité si autorisé et demandé
+        $check = (ALLOW_MODIFIED_IMPORT && f('force_import')) ? false : true;
+
         try {
-            $s->restoreFromUpload($_FILES['file'], $user['id']);
-            Utils::redirect('/admin/config/donnees.php?ok=restore');
+            $r = $s->restoreFromUpload($_FILES['file'], $user->id, $check);
+            Utils::redirect('/admin/config/donnees.php?ok=restore&code=' . (int)$r);
         } catch (UserException $e) {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
+            $code = $e->getCode();
         }
     }
 }
 
-$tpl->assign('error', $error);
-$tpl->assign('ok', Utils::get('ok'));
+$tpl->assign('code', $code);
+$tpl->assign('ok_code', qg('code'));
+$tpl->assign('ok', qg('ok'));
 $tpl->assign('liste', $s->getList());
 $tpl->assign('max_file_size', Utils::getMaxUploadSize());
 

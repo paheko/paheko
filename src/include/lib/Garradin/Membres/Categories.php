@@ -34,8 +34,7 @@ class Categories
         }
 
         if (!empty($data['id_cotisation_obligatoire']) 
-            && !$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', 
-                false, (int)$data['id_cotisation_obligatoire']))
+            && !$db->test('cotisations', 'id = ?', (int)$data['id_cotisation_obligatoire']))
         {
             throw new UserException('Numéro de cotisation inconnu.');
         }
@@ -64,9 +63,9 @@ class Categories
         }
 
         $db = DB::getInstance();
-        $db->simpleInsert('membres_categories', $data);
+        $db->insert('membres_categories', $data);
 
-        return $db->lastInsertRowID();
+        return $db->lastInsertRowId();
     }
 
     public function edit($id, $data)
@@ -83,15 +82,15 @@ class Categories
             $data['cacher'] = 0;
 
         $db = DB::getInstance();
-        return $db->simpleUpdate('membres_categories', $data, 'id = '.(int)$id);
+        return $db->update('membres_categories', $data, 'id = '.(int)$id);
     }
 
     public function get($id)
     {
         $db = DB::getInstance();
 
-        return $db->simpleQuerySingle('SELECT * FROM membres_categories WHERE id = ?;',
-            true, (int) $id);
+        return $db->first('SELECT * FROM membres_categories WHERE id = ?;',
+            (int) $id);
     }
 
     public function remove($id)
@@ -104,12 +103,12 @@ class Categories
             throw new UserException('Il est interdit de supprimer la catégorie définie par défaut dans la configuration.');
         }
 
-        if ($db->simpleQuerySingle('SELECT 1 FROM membres WHERE id_categorie = ?;', false, (int)$id))
+        if ($db->test('membres', 'id_categorie = ?', (int)$id))
         {
             throw new UserException('La catégorie contient encore des membres, il n\'est pas possible de la supprimer.');
         }
 
-        $db->simpleUpdate(
+        $db->update(
             'wiki_pages',
             [
                 'droit_lecture'     =>  Wiki::LECTURE_NORMAL,
@@ -118,39 +117,37 @@ class Categories
             'droit_lecture = '.(int)$id.' OR droit_ecriture = '.(int)$id
         );
 
-        return $db->simpleExec('DELETE FROM membres_categories WHERE id = ?;', (int) $id);
+        return $db->delete('membres_categories', 'id = ?', (int) $id);
     }
 
     public function listSimple()
     {
         $db = DB::getInstance();
-        return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;');
+        return $db->getAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;');
     }
 
     public function listComplete()
     {
         $db = DB::getInstance();
-        return $db->queryFetch('SELECT * FROM membres_categories ORDER BY nom;');
+        return $db->get('SELECT * FROM membres_categories ORDER BY nom;');
     }
 
     public function listCompleteWithStats()
     {
         $db = DB::getInstance();
-        return $db->queryFetch('SELECT *, (SELECT COUNT(*) FROM membres WHERE id_categorie = membres_categories.id) AS nombre FROM membres_categories ORDER BY nom;');
+        return $db->get('SELECT *, (SELECT COUNT(*) FROM membres WHERE id_categorie = membres_categories.id) AS nombre FROM membres_categories ORDER BY nom;');
     }
 
 
     public function listHidden()
     {
         $db = DB::getInstance();
-        return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 1;');
+        return $db->getAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 1;');
     }
 
     public function listNotHidden()
     {
         $db = DB::getInstance();
-        return $db->queryFetchAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 0;');
+        return $db->getAssoc('SELECT id, nom FROM membres_categories WHERE cacher = 0;');
     }
 }
-
-?>

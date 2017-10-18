@@ -5,12 +5,9 @@ require_once __DIR__ . '/../_inc.php';
 
 $journal = new Compta\Journal;
 
-if (empty($_GET['id']) || !is_numeric($_GET['id']))
-{
-    throw new UserException("Argument du numéro de cotisation manquant.");
-}
+qv(['id' => 'required|numeric']);
 
-$id = (int) $_GET['id'];
+$id = (int) qg('id');
 
 $m_cotisations = new Membres\Cotisations;
 $cotisations = new Cotisations;
@@ -22,8 +19,8 @@ if (!$mco)
 	throw new UserException("La cotisation demandée n'existe pas.");
 }
 
-$co = $cotisations->get($mco['id_cotisation']);
-$membre = $membres->get($mco['id_membre']);
+$co = $cotisations->get($mco->id_cotisation);
+$membre = (new Membres)->get($mco->id_membre);
 
 if (!$membre)
 {
@@ -43,7 +40,7 @@ function get_nom_compte($compte)
 
 $tpl->register_modifier('get_nom_compte', 'Garradin\get_nom_compte');
 
-$tpl->assign('journal', $m_cotisations->listOperationsCompta($mco['id']));
+$tpl->assign('journal', $m_cotisations->listOperationsCompta($mco->id));
 
 $tpl->assign('cotisation_membre', $mco);
 $tpl->assign('cotisation', $co);

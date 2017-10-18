@@ -1,49 +1,41 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
-if ($user['droits']['membres'] < Membres::DROIT_ADMIN)
-{
-    throw new UserException("Vous n'avez pas le droit d'accéder à cette page.");
-}
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-$membre = $membres->get(Utils::get('id'));
+qv(['id' => 'required|numeric']);
+
+$membre = $membres->get(qg('id'));
 
 if (!$membre)
 {
     throw new UserException("Ce membre n'existe pas.");
 }
 
-$error = false;
-
-if ($membre['id'] == $user['id'])
+if ($membre->id == $user->id)
 {
-    $error = "Il n'est pas possible de supprimer votre propre compte.";
+    throw new UserException("Il n'est pas possible de supprimer votre propre compte.");
 }
 
-if (Utils::post('delete') && !$error)
+if (f('delete'))
 {
-    if (!Utils::CSRF_check('delete_membre_'.$membre['id']))
-    {
-        $error = 'Une erreur est survenue, merci de renvoyer le formulaire.';
-    }
-    else
+    $form->check('delete_membre_'.$membre->id);
+
+    if (!$form->hasErrors())
     {
         try {
-            $membres->delete($membre['id']);
+            $membres->delete($membre->id);
             Utils::redirect('/admin/membres/');
         }
         catch (UserException $e)
         {
-            $error = $e->getMessage();
+            $form->addError($e->getMessage());
         }
     }
 }
 
 $tpl->assign('membre', $membre);
-$tpl->assign('error', $error);
 
 $tpl->display('admin/membres/supprimer.tpl');
-
-?>

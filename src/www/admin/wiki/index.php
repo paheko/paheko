@@ -22,24 +22,26 @@ if (!$page)
 }
 else
 {
-    $tpl->assign('can_read', $wiki->canReadPage($page['droit_lecture']));
-    $tpl->assign('can_edit', $wiki->canWritePage($page['droit_ecriture']));
-    $tpl->assign('children', $wiki->getList($page_uri == '' ? 0 : $page['id'], true));
-    $tpl->assign('breadcrumbs', $wiki->listBackBreadCrumbs($page['id']));
-    $tpl->assign('auteur', $membres->getNom($page['contenu']['id_auteur']));
+    $membres = new Membres;
+    $tpl->assign('can_read', $wiki->canReadPage($page->droit_lecture));
+    $tpl->assign('can_edit', $wiki->canWritePage($page->droit_ecriture));
+    $tpl->assign('children', $wiki->getList($page_uri == '' ? 0 : $page->id, true));
+    $tpl->assign('has_public_children', $wiki->hasChildren($page_uri == '' ? 0 : $page->id, true));
+    $tpl->assign('breadcrumbs', $wiki->listBackBreadCrumbs($page->id));
+    $tpl->assign('auteur', $page->contenu ? $membres->getNom($page->contenu->id_auteur) : null);
 
-    $images = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page['id'], true);
+    $images = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, true);
 
-    if ($images && !$page['contenu']['chiffrement'])
+    if ($images && !$page->contenu->chiffrement)
     {
-        $images = Fichiers::filterFilesUsedInText($images, $page['contenu']['contenu']);
+        $images = Fichiers::filterFilesUsedInText($images, $page->contenu->contenu);
     }
 
-    $fichiers = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page['id'], false);
+    $fichiers = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, false);
 
-    if ($fichiers && !$page['contenu']['chiffrement'])
+    if ($fichiers && !$page->contenu->chiffrement)
     {
-        $fichiers = Fichiers::filterFilesUsedInText($fichiers, $page['contenu']['contenu']);
+        $fichiers = Fichiers::filterFilesUsedInText($fichiers, $page->contenu->contenu);
     }
 
     $tpl->assign('images', $images);

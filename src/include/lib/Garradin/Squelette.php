@@ -351,6 +351,8 @@ class Squelette extends \KD2\MiniSkel
         $query_args = [];
         $db = DB::getInstance();
 
+        $statement_code = '';
+
         // Types de boucles natifs
         if ($loopType == 'articles' || $loopType == 'rubriques' || $loopType == 'pages')
         {
@@ -374,11 +376,11 @@ class Squelette extends \KD2\MiniSkel
 
             if ($loopType == 'articles')
             {
-                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) = 0 ';
+                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id AND droit_lecture = -1) = 0 ';
             }
             elseif ($loopType == 'rubriques')
             {
-                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id) > 0 ';
+                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id AND droit_lecture = -1) > 0 ';
             }
 
             $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
@@ -587,7 +589,7 @@ class Squelette extends \KD2\MiniSkel
             {
                 $loop_start .= '$row[\'url\'] = Fichiers::_getURL($row[\'id\'], $row[\'nom\']); ';
                 $loop_start .= '$row[\'miniature\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
-                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
+                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 500) : \'\'; ';
             }
 
             $query .= $where . ' ' . $order;
@@ -628,6 +630,7 @@ class Squelette extends \KD2\MiniSkel
                 'query'         =>  &$query,
                 'query_args'    =>  &$query_args,
                 'loop_start'    =>  &$loop_start,
+                'code'          =>  &$statement_code,
             ];
 
             // Appel du plugin lié à cette boucle, si ça existe
@@ -685,16 +688,25 @@ class Squelette extends \KD2\MiniSkel
             }
         }
 
-        $out->append(1, '$statement = $db->prepare('.$query.'); ');
-
-        foreach ($query_args as $k=>$arg)
+        // Si le plugin a donné du code à exécuter à la place d'une requête SQL
+        if ($statement_code)
         {
-            $out->append(1, '$value = ' . (is_array($arg) ? $arg[0] : var_export($arg, true)) . ';');
-            $out->append(1, '$statement->bindValue(' . ($k+1) . ', $value, $db->getArgType($value));');
+            $out->append(1, str_replace('$OBJ_VAR', '$result_' . $hash, $statement_code));
+            $out->append(1, '$nb_rows = $result_'.$hash.'->countRows();');
         }
+        else
+        {
+            $out->append(1, '$statement = $db->prepare('.$query.'); ');
 
-        $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
-        $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
+            foreach ($query_args as $k=>$arg)
+            {
+                $out->append(1, '$value = ' . (is_array($arg) ? $arg[0] : var_export($arg, true)) . ';');
+                $out->append(1, '$statement->bindValue(' . ($k+1) . ', $value, $db->getArgType($value));');
+            }
+
+            $out->append(1, '$result_'.$hash.' = $statement->execute(); ');
+            $out->append(1, '$nb_rows = $db->countRows($result_'.$hash.'); ');
+        }
 
         if (!empty($search))
         {
@@ -705,6 +717,7 @@ class Squelette extends \KD2\MiniSkel
         $out->append(1, '$this->current =& $this->_vars[\''.$hash.'\']; ');
         $out->append(1, 'if ($nb_rows > 0):');
 
+        // Ajout contenu avant tag
         if ($preContent)
         {
             $out->append(2, $this->parse($preContent, $loopName, self::PRE_CONTENT));
@@ -736,7 +749,7 @@ class Squelette extends \KD2\MiniSkel
         $out->append(1, 'unset($result_'.$hash.', $nb_rows, $this->_vars[\''.$hash.'\']); ');
         $out->append(1, 'if ($parent_hash) { $this->current =& $this->_vars[$parent_hash]; $parent_hash = $this->current[\'_parent_hash\']; } ');
         $out->append(1, 'else { $this->current = null; }');
-        $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$_parent_hash] : null;');
+        $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$parent_hash] : null;');
 
         return $out;
     }

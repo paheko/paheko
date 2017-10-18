@@ -202,6 +202,104 @@ article img {
     max-width: 100%;
 }
 
+article figure {
+    text-align: center;
+}
+
+article figcaption {
+    font-style: italic;
+    color: #666;
+    margin-top: 2pt;
+    font-size: .8em;
+}
+
+article figure.image.centre {
+    max-width: 500px;
+    margin: 0 auto 8pt auto;
+}
+
+article figure.image.gauche {
+    max-width: 200px;
+    float: left;
+    margin: 0 8pt 4pt 0;
+    clear: left;
+}
+
+article figure.image.droite {
+    max-width: 200px;
+    float: right;
+    margin: 0 0 4pt 8pt;
+    clear: right;
+}
+
+section.galerie {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+section.galerie figure {
+    display: inline-flex;
+}
+
+aside.fichier {
+    margin: 1em;
+}
+
+aside.fichier small {
+    opacity: 0.7;
+}
+
+aside.fichier a {
+    display: inline-block;
+    margin-right: 1em;
+    padding: .5em;
+    padding-left: 1.8em;
+    border: 1px solid #999;
+    background: #eee;
+    border-radius: .5em;
+    background-repeat: no-repeat;
+    background-position: .5em center;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAd0lEQVQoz2NgQAVNQDwDCTcw4AF3gPg/Er4xSBWnAXEHFL9HU/wWSS4FpFgZiJ+jKULHT4BYAWa6LhC/w6HwNRBrojvHEoi/oCn8BMQmuDzoBsQ/oQq/A7E9AwEQDMQ/gNiHgUggx0AN8IVI/AGkeA+ReCdJTgAAgMhKhf6mzTIAAAAASUVORK5CYII=");
+    transition: background-color .2s, color .2s;
+}
+
+.imageBrowser {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.75);
+    text-align: center;
+    transition: opacity .5s;
+}
+
+.imageBrowser figure {
+    margin: 5%;
+    width: 90%;
+    height: 90%;
+    transition: all .5s;
+}
+
+.imageBrowser figure img {
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    background: #fff;
+    padding: 2%;
+    max-height: 90%;
+    max-width: 90%;
+    border-radius: .5em;
+    cursor: pointer;
+}
+
 @media handheld, screen and (max-width: 980px) {
     body {
         padding: 0;

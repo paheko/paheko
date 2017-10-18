@@ -27,14 +27,14 @@ class Rappels_Envoyes
 		$db = DB::getInstance();
 
 		if (!array_key_exists('id_rappel', $data) 
-			|| (!is_null($data['id_rappel']) && (empty($data['id_rappel']) || !$db->simpleQuerySingle('SELECT 1 FROM rappels WHERE id = ?;', false, (int) $data['id_rappel']))))
+			|| (!is_null($data['id_rappel']) && (empty($data['id_rappel']) || !$db->firstColumn('SELECT 1 FROM rappels WHERE id = ?;', (int) $data['id_rappel']))))
 		{
 			throw new \LogicException('ID rappel non fourni ou inexistant dans la table rappels');
 		}
 
         if (isset($data['id_cotisation']))
         {
-        	if (!$db->simpleQuerySingle('SELECT 1 FROM cotisations WHERE id = ?;', false, (int) $data['id_cotisation']))
+        	if (!$db->firstColumn('SELECT 1 FROM cotisations WHERE id = ?;', (int) $data['id_cotisation']))
 	        {
 	            throw new UserException('Cotisation inconnue.');
 	        }
@@ -43,7 +43,7 @@ class Rappels_Envoyes
 	    }
 
         if (empty($data['id_membre'])
-        	|| !$db->simpleQuerySingle('SELECT 1 FROM membres WHERE id = ?;', false, (int) $data['id_membre']))
+        	|| !$db->firstColumn('SELECT 1 FROM membres WHERE id = ?;', (int) $data['id_membre']))
         {
             throw new UserException('Membre inconnu.');
         }
@@ -75,7 +75,7 @@ class Rappels_Envoyes
 
 		$this->_checkFields($data);
 
-		$db->simpleInsert('rappels_envoyes', $data);
+		$db->insert('rappels_envoyes', $data);
 
 		return $db->lastInsertRowId();
 	}
@@ -88,7 +88,7 @@ class Rappels_Envoyes
 	public function delete($id)
 	{
 		$db = DB::getInstance();
-		$db->simpleExec('DELETE FROM rappels_envoyes WHERE id = ?;', (int) $id);
+		$db->delete('rappels_envoyes', $db->where('id', (int) $id));
 		return true;
 	}
 
@@ -99,7 +99,7 @@ class Rappels_Envoyes
 	 */
 	public function get($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT * FROM rappels_envoyes WHERE id = ?;', true, (int)$id);
+		return DB::getInstance()->first('SELECT * FROM rappels_envoyes WHERE id = ?;', (int)$id);
 	}
 
 	/**
@@ -140,7 +140,7 @@ class Rappels_Envoyes
 	 */
 	public function sendAuto($data)
 	{
-		$replace = $data;
+		$replace = (array) $data;
 		$replace['date_rappel'] = Utils::sqliteDateToFrench($replace['date_rappel']);
 		$replace['date_expiration'] = Utils::sqliteDateToFrench($replace['expiration']);
 		$replace['nb_jours'] = abs($replace['nb_jours']);
@@ -165,6 +165,8 @@ class Rappels_Envoyes
 			'date'			=>	$data['date_rappel'],
 		]);
 
+		Plugin::fireSignal('rappels.auto', $data);
+
 		return true;
 	}
 
@@ -175,12 +177,12 @@ class Rappels_Envoyes
 	 */
 	public function listForMember($id)
 	{
-		return DB::getInstance()->simpleStatementFetch('SELECT
+		return DB::getInstance()->get('SELECT
 			re.*, c.intitule, c.montant
 			FROM rappels_envoyes AS re 
 				INNER JOIN cotisations AS c ON c.id = re.id_cotisation 
 			WHERE re.id_membre = ?
-			ORDER BY re.date DESC;', \SQLITE3_ASSOC, (int)$id);
+			ORDER BY re.date DESC;', (int)$id);
 	}
 
 	/**
@@ -193,9 +195,9 @@ class Rappels_Envoyes
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
-		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels_envoyes
+		return DB::getInstance()->get('SELECT * FROM rappels_envoyes
 			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?)
-			ORDER BY date DESC;', \SQLITE3_ASSOC, (int)$id);
+			ORDER BY date DESC;', (int)$id);
 	}
 
 	/**
@@ -205,9 +207,9 @@ class Rappels_Envoyes
 	 */
 	public function countForCotisation($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels_envoyes
+		return DB::getInstance()->firstColumn('SELECT COUNT(*) FROM rappels_envoyes
 			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?);',
-			false, (int)$id);
+			(int)$id);
 	}
 
 	/**
@@ -220,9 +222,9 @@ class Rappels_Envoyes
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
-		return DB::getInstance()->simpleStatementFetch('SELECT * FROM rappels_envoyes 
+		return DB::getInstance()->get('SELECT * FROM rappels_envoyes 
 			WHERE id_rappel = ? ORDER BY date DESC LIMIT ?,?;',
-			\SQLITE3_ASSOC, (int)$id, (int)$begin, self::ITEMS_PER_PAGE);
+			(int)$id, (int)$begin, self::ITEMS_PER_PAGE);
 	}
 
 	/**
@@ -232,7 +234,7 @@ class Rappels_Envoyes
 	 */
 	public function countForRappel($id)
 	{
-		return DB::getInstance()->simpleQuerySingle('SELECT COUNT(*) FROM rappels_envoyes 
-			WHERE id_rappel = ?;', false, (int)$id);
+		return DB::getInstance()->firstColumn('SELECT COUNT(*) FROM rappels_envoyes 
+			WHERE id_rappel = ?;', (int)$id);
 	}
 }

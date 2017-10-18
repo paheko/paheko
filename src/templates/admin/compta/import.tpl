@@ -1,10 +1,8 @@
 {include file="admin/_head.tpl" title="Import / Export" current="compta"}
 
-{if $error}
-    <p class="error">
-        {$error|escape}
-    </p>
-{elseif $ok}
+{form_errors}
+
+{if $ok}
     <p class="confirm">
         L'import s'est bien déroulé.
     </p>
@@ -15,7 +13,7 @@
     <li><a href="{$www_url}admin/compta/import.php?export">Exporter en CSV</a></li>
 </ul>
 
-<form method="post" action="{$self_url|escape}" enctype="multipart/form-data">
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
 
     <fieldset>
         <legend>Importer depuis un fichier</legend>

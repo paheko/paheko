@@ -2,10 +2,13 @@
 
 namespace Garradin\Compta;
 
-use \Garradin\DB;
-use \Garradin\Utils;
-use \Garradin\UserException;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\UserException;
 
+/**
+ * Catégories comptables
+ */
 class Categories
 {
     const DEPENSES = -1;
@@ -15,7 +18,7 @@ class Categories
     public function importCategories()
     {
         $db = DB::getInstance();
-        $db->exec(file_get_contents(\Garradin\ROOT . '/include/data/categories_comptables.sql'));
+        $db->import(\Garradin\ROOT . '/include/data/categories_comptables.sql');
     }
 
     public function add($data)
@@ -31,7 +34,7 @@ class Categories
 
         $data['compte'] = trim($data['compte']);
 
-        if (!$db->simpleQuerySingle('SELECT 1 FROM compta_comptes WHERE id = ?;', false, $data['compte']))
+        if (!$db->test('compta_comptes', $db->where('id', $data['compte'])))
         {
             throw new UserException('Le compte associé n\'existe pas.');
         }
@@ -43,7 +46,7 @@ class Categories
             throw new UserException('Type de catégorie inconnu.');
         }
 
-        $db->simpleInsert('compta_categories', [
+        $db->insert('compta_categories', [
             'intitule'  =>  $data['intitule'],
             'description'=> $data['description'],
             'compte'    =>  $data['compte'],
@@ -59,12 +62,14 @@ class Categories
 
         $db = DB::getInstance();
 
-        $db->simpleUpdate('compta_categories',
+        $db->update('compta_categories',
             [
                 'intitule'  =>  $data['intitule'],
                 'description'=> $data['description'],
             ],
-            'id = \''.$db->escapeString(trim($id)).'\'');
+            'id = :id_select',
+            ['id_select' => (int) $id]
+        );
 
         return true;
     }
@@ -73,13 +78,15 @@ class Categories
     {
         $db = DB::getInstance();
 
+        $id = (int) $id;
+
         // Ne pas supprimer une catégorie qui est utilisée !
-        if ($db->simpleQuerySingle('SELECT 1 FROM compta_journal WHERE id_categorie = ? LIMIT 1;', false, $id))
+        if ($db->test('compta_journal', $db->where('id_categorie', $id)))
         {
             throw new UserException('Cette catégorie ne peut être supprimée car des opérations comptables y sont liées.');
         }
 
-        $db->simpleExec('DELETE FROM compta_categories WHERE id = ?;', $id);
+        $db->delete('compta_categories', 'id = ?', $id);
 
         return true;
     }
@@ -87,30 +94,32 @@ class Categories
     public function get($id)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT * FROM compta_categories WHERE id = ?;', true, (int)$id);
+        return $db->first('SELECT * FROM compta_categories WHERE id = ?;', (int)$id);
     }
 
     public function getList($type = null)
     {
         $db = DB::getInstance();
-        $type = is_null($type) ? '' : 'cat.type = '.(int)$type;
-        return $db->simpleStatementFetchAssocKey('
-            SELECT cat.id, cat.*, cc.libelle AS compte_libelle
+        $where = is_null($type) ? '1' : 'cat.type = '.(int)$type;
+
+        $query = sprintf('SELECT cat.id, cat.*, cc.libelle AS compte_libelle
             FROM compta_categories AS cat INNER JOIN compta_comptes AS cc
                 ON cc.id = cat.compte
-            WHERE '.$type.' ORDER BY cat.intitule;', SQLITE3_ASSOC);
+            WHERE %s ORDER BY cat.intitule;', $where);
+
+        return $db->getGrouped($query);
     }
 
     public function listMoyensPaiement()
     {
         $db = DB::getInstance();
-        return $db->simpleStatementFetchAssocKey('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
+        return $db->getGrouped('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
     }
 
     public function getMoyenPaiement($code)
     {
         $db = DB::getInstance();
-        return $db->simpleQuerySingle('SELECT nom FROM compta_moyens_paiement WHERE code = ?;', false, $code);
+        return $db->firstColumn('SELECT nom FROM compta_moyens_paiement WHERE code = ?;', $code);
     }
 
     protected function _checkFields(&$data)
