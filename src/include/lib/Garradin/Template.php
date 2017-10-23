@@ -97,7 +97,9 @@ class Template extends \KD2\Smartyer
 		});
 
 		$this->register_modifier('format_wiki', function ($str) {
-			return Squelette_Filtres::formatter_texte($str);
+			$str = Utils::SkrivToHTML($str);
+			$str = Squelette_Filtres::typo_fr($str);
+			return $str;
 		});
 
 		$this->register_modifier('liens_wiki', function ($str, $prefix) {
