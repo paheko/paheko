@@ -146,23 +146,23 @@ class Rappels_Envoyes
 		$replace['nb_jours'] = abs($replace['nb_jours']);
 		$replace['delai'] = abs($replace['delai']);
 
-		$subject = $this->replaceTagsInContent($data['sujet'], $replace);
-		$text = $this->replaceTagsInContent($data['texte'], $replace);
+		$subject = $this->replaceTagsInContent($data->sujet, $replace);
+		$text = $this->replaceTagsInContent($data->texte, $replace);
 
 		// Envoi du mail
-		Utils::mail($data['email'], $subject, $text);
+		Utils::mail($data->email, $subject, $text);
 
 		// Enregistrement en DB
 		$this->add([
-			'id_cotisation'	=>	$data['id_cotisation'],
-			'id_membre'		=>	$data['id'],
-			'id_rappel'		=>	$data['id_rappel'],
-			'media'			=>	Rappels_Envoyes::MEDIA_EMAIL,
+			'id_cotisation' => $data->id_cotisation,
+			'id_membre'     => $data->id,
+			'id_rappel'     => $data->id_rappel,
+			'media'         => Rappels_Envoyes::MEDIA_EMAIL,
 			// On enregistre la date de mise en œuvre du rappel
 			// et non pas la date d'envoi effective du rappel
 			// car l'envoi du rappel peut ne pas être effectué
 			// le jour où il aurait dû être envoyé (la magie des cron)
-			'date'			=>	$data['date_rappel'],
+			'date'          => $data->date_rappel,
 		]);
 
 		Plugin::fireSignal('rappels.auto', $data);
