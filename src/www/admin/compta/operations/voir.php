@@ -16,10 +16,10 @@ $exercices = new Compta\Exercices;
 $tpl->assign('operation', $operation);
 
 $credit = $comptes->get($operation->compte_credit);
-$tpl->assign('nom_compte_credit', $credit->libelle);
+$tpl->assign('nom_compte_credit', $credit ? $credit->libelle : null);
 
 $debit = $comptes->get($operation->compte_debit);
-$tpl->assign('nom_compte_debit', $debit->libelle);
+$tpl->assign('nom_compte_debit', $debit ? $debit->libelle : null);
 
 $tpl->assign('exercice', $exercices->get($operation->id_exercice));
 
