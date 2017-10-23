@@ -58,7 +58,8 @@ class Membres
             {
                 if (!empty($config->mandatory) && ($check_password || $key != 'passe'))
                 {
-                    throw new UserException('Le champ "' . $config->title . '" doit obligatoirement être renseigné.');
+                    $name = isset($config->title) ? $config->title : $key;
+                    throw new UserException('Le champ "' . $name . '" doit obligatoirement être renseigné.');
                 }
                 elseif (!empty($config->mandatory))
                 {
