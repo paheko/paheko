@@ -16,7 +16,6 @@
             <dt><label for="f_cat">Nouvelle catégorie</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="id_categorie" id="f_cat">
-                    <option value="0" selected="selected">-- Pas de changement</option>
                 {foreach from=$membres_cats key="id" item="nom"}
                     <option value="{$id}">{$nom}</option>
                 {/foreach}
