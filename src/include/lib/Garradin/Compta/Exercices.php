@@ -232,7 +232,7 @@ class Exercices
         unset($comptes);
 
         $rapports = new Rapports;
-        $resultat = $rapports->getCompteResultat($exercice);
+        $resultat = $rapports->compteResultat($exercice);
         $resultat = $resultat['resultat'];
 
         if ($resultat != 0)
