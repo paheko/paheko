@@ -25,7 +25,7 @@ else
 
 	if ($cat_id)
 	{
-	    if ($session->canAccess('membres', Membres::DROIT_ECRITURE) && array_key_exists($cat_id, $membres_cats_cachees))
+	    if (!$session->canAccess('membres', Membres::DROIT_ECRITURE) && array_key_exists($cat_id, $membres_cats_cachees))
 	    {
 	    	$cat_id = 0;
 	    }
