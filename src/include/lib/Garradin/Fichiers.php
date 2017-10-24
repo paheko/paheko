@@ -514,7 +514,7 @@ class Fichiers
 			$type = \KD2\FileInfo::getMimeTypeFromFileExtension($ext);
 		}
 
-		$is_image = preg_match('/^image\//', $type);
+		$is_image = preg_match('/^image\/(?:png|jpe?g|gif)$/', $type);
 
 		$db = DB::getInstance();
 
