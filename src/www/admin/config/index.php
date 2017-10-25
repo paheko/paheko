@@ -55,14 +55,11 @@ if (f('save') && $form->check('config'))
 $tpl->assign('ok', qg('ok') !== null);
 
 $server_time = time();
-$ntp_time = \KD2\Security_OTP::getTimeFromNTP(NTP_SERVER);
-$diff = $server_time - $ntp_time;
 
 $tpl->assign('garradin_version', garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']');
 $tpl->assign('php_version', phpversion());
 $tpl->assign('has_gpg_support', \KD2\Security::canUseEncryption());
 $tpl->assign('server_time', $server_time);
-$tpl->assign('time_diff', $diff);
 
 $v = \SQLite3::version();
 $tpl->assign('sqlite_version', $v['versionString']);

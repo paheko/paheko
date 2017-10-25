@@ -21,7 +21,7 @@
             <dd class="help">
                 Version PHP&nbsp;: {$php_version}<br />
                 Version SQLite&nbsp;: {$sqlite_version}<br />
-                Heure du serveur&nbsp;: {$server_time|date_fr} ({if $time_diff > -5 && $time_diff < 5}à l'heure{elseif $time_diff < 0}en retard de {$time_diff} secondes{else}en avance de {$time_diff} secondes{/if})<br />
+                Heure du serveur&nbsp;: {$server_time|date_fr}<br />
                 Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
             </dd>
         </dl>
