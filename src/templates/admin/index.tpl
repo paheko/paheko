@@ -9,7 +9,7 @@
     {/if}
     {if !empty($config.email_asso)}
     <p>
-        E-Mail : <a href="{$config.email_asso}">{$config.email_asso}</a>
+        E-Mail : <a href="mailto:{$config.email_asso}">{$config.email_asso}</a>
     </p>
     {/if}
     {if !empty($config.site_asso)}
