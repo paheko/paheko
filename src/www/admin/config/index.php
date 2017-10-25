@@ -72,7 +72,7 @@ $tpl->assign('pays', Utils::getCountryList());
 $cats = new Membres\Categories;
 $tpl->assign('membres_cats', $cats->listSimple());
 
-$tpl->assign('champs', $config->get('champs_membres')->getList(false));
+$tpl->assign('champs', $config->get('champs_membres')->getList());
 
 $tpl->assign('couleur1', $config->get('couleur1') ?: $couleur1);
 $tpl->assign('couleur2', $config->get('couleur2') ?: $couleur2);
