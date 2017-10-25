@@ -29,7 +29,11 @@ if (f('save') && $form->check('config'))
         {
             $config->set('couleur1', f('couleur1'));
             $config->set('couleur2', f('couleur2'));
-            $config->set('image_fond', f('image_fond'));
+
+            if (f('image_fond'))
+            {
+                $config->set('image_fond', f('image_fond'));
+            }
         }
         else
         {
