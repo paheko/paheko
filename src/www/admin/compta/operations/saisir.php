@@ -37,7 +37,7 @@ if (f('save'))
                     'numero_piece'  =>  f('numero_piece'),
                     'remarques'     =>  f('remarques'),
                     'id_auteur'     =>  $user->id,
-                    'id_projet'     =>  f('projet') || null,
+                    'id_projet'     =>  f('projet') ?: null,
                 ]);
             }
             elseif ($type == 'virement')
@@ -51,7 +51,7 @@ if (f('save'))
                     'numero_piece'  =>  f('numero_piece'),
                     'remarques'     =>  f('remarques'),
                     'id_auteur'     =>  $user->id,
-                    'id_projet'     =>  f('projet') || null,
+                    'id_projet'     =>  f('projet') ?: null,
                 ]);
             }
             else
@@ -140,7 +140,7 @@ if (f('save'))
                     'remarques'     =>  f('remarques'),
                     'id_categorie'  =>  ($type === 'dette') ? null : (int)$cat->id,
                     'id_auteur'     =>  $user->id,
-                    'id_projet'     =>  f('projet') || null,
+                    'id_projet'     =>  f('projet') ?: null,
                 ]);
             }
 
