@@ -32,14 +32,14 @@ else
 
     $images = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, true);
 
-    if ($images && !$page->contenu->chiffrement)
+    if ($images && !empty($page->contenu->chiffrement))
     {
         $images = Fichiers::filterFilesUsedInText($images, $page->contenu->contenu);
     }
 
     $fichiers = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, false);
 
-    if ($fichiers && !$page->contenu->chiffrement)
+    if ($fichiers && !empty($page->contenu->chiffrement))
     {
         $fichiers = Fichiers::filterFilesUsedInText($fichiers, $page->contenu->contenu);
     }
