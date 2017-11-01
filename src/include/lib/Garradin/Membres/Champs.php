@@ -94,6 +94,11 @@ class Champs
             $presets = self::importPresets();
             $this->champs = new \stdClass;
 
+            if (!isset($champs['passe']))
+            {
+                $champs['passe'] = ['type' => 'password'];
+            }
+
             foreach ($champs as $key=>&$config)
             {
                 if (is_array($config))
