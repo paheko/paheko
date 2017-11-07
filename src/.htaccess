@@ -12,13 +12,3 @@ Options -MultiViews -Indexes
 	RedirectMatch 403 /(README|VERSION|COPYING)
 	RedirectMatch 403 /config\.(.*)\.php
 </IfModule>
-
-# Redirection dynamique, pour les installations sans vhost dédié
-# Objectif: supprimer le /www/ de l'URL
-<IfModule mod_rewrite.c>
-	RewriteEngine on
-	RewriteBase /
-	RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
-	RewriteRule ^(.*)$ - [E=BASE:%1]
-	RewriteRule (.*) %{ENV:BASE}/www/$1 [QSA]
-</IfModule>
