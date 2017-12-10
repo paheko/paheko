@@ -719,7 +719,7 @@ class Utils
         $row = (array) $row;
 
         array_walk($row, function ($field) {
-            return str_replace('"', '""', $field);
+            return strtr($field, ['"' => '""', "\r\n" => "\n"]);
         });
 
         return '"' . implode('", "', $row) . '"';
