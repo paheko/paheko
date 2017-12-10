@@ -278,7 +278,7 @@ class Import
                 $header = true;
             }
 
-            fputs($fp, Utils::row_to_csv($row) . "\n");
+            fputs($fp, Utils::row_to_csv($row) . "\r\n");
         }
 
         fclose($fp);
