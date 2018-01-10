@@ -7,7 +7,7 @@
 
 {if !$current_exercice}
 <ul class="actions">
-    <li><strong><a href="{$www_url}admin/compta/exercices/ajouter.php">Commencer un nouvel exercice</a></strong></li>
+    <li><strong><a href="{$admin_url}compta/exercices/ajouter.php">Commencer un nouvel exercice</a></strong></li>
 </ul>
 {/if}
 
@@ -23,19 +23,19 @@
             <strong>{$exercice.nb_operations}</strong> opérations enregistrées.
         </dd>
         <dd class="desc">
-            <a href="{$www_url}admin/compta/rapports/journal.php?exercice={$exercice.id}">Journal général</a>
-            | <a href="{$www_url}admin/compta/rapports/grand_livre.php?exercice={$exercice.id}">Grand livre</a>
-            | <a href="{$www_url}admin/compta/rapports/compte_resultat.php?exercice={$exercice.id}">Compte de résultat</a>
-            | <a href="{$www_url}admin/compta/rapports/bilan.php?exercice={$exercice.id}">Bilan</a>
+            <a href="{$admin_url}compta/rapports/journal.php?exercice={$exercice.id}">Journal général</a>
+            | <a href="{$admin_url}compta/rapports/grand_livre.php?exercice={$exercice.id}">Grand livre</a>
+            | <a href="{$admin_url}compta/rapports/compte_resultat.php?exercice={$exercice.id}">Compte de résultat</a>
+            | <a href="{$admin_url}compta/rapports/bilan.php?exercice={$exercice.id}">Bilan</a>
         </dd>
         {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
         <dd class="actions">
             {if !$exercice.cloture}
-            <a class="icn" href="{$www_url}admin/compta/exercices/modifier.php?id={$exercice.id}" title="Modifier">✎</a>
-            <a class="icn" href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id}" title="Supprimer">✘</a>
-            <a class="icn" href="{$www_url}admin/compta/exercices/cloturer.php?id={$exercice.id}" title="Clôturer cet exercice">🔒</a>
+            <a class="icn" href="{$admin_url}compta/exercices/modifier.php?id={$exercice.id}" title="Modifier">✎</a>
+            <a class="icn" href="{$admin_url}compta/exercices/supprimer.php?id={$exercice.id}" title="Supprimer">✘</a>
+            <a class="icn" href="{$admin_url}compta/exercices/cloturer.php?id={$exercice.id}" title="Clôturer cet exercice">🔒</a>
             {elseif $exercice.cloture && $exercice.nb_operations == 0}
-            <a class="icn" href="{$www_url}admin/compta/exercices/supprimer.php?id={$exercice.id}" title="Supprimer">✘</a>
+            <a class="icn" href="{$admin_url}compta/exercices/supprimer.php?id={$exercice.id}" title="Supprimer">✘</a>
             {/if}
         </dd>
         {/if}

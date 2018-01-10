@@ -19,7 +19,7 @@ if (f('create'))
             'droit_lecture' => qg('public') !== null ? Wiki::LECTURE_PUBLIC : Wiki::LECTURE_NORMAL,
         ]);
 
-        Utils::redirect('/admin/wiki/editer.php?id='.$id);
+        Utils::redirect(ADMIN_URL . 'wiki/editer.php?id='.$id);
     }
     catch (UserException $e)
     {

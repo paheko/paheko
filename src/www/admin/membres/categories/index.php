@@ -19,7 +19,7 @@ if (f('save'))
             'nom' => f('nom'),
         ]);
 
-        Utils::redirect('/admin/membres/categories/');
+        Utils::redirect(ADMIN_URL . 'membres/categories/');
     }
 }
 

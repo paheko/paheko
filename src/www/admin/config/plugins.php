@@ -14,7 +14,7 @@ if (f('install'))
     {
         try {
             Plugin::install(f('plugin'), false);
-            Utils::redirect('/admin/config/plugins.php');
+            Utils::redirect(ADMIN_URL . 'config/plugins.php');
         }
         catch (UserException $e)
         {
@@ -35,7 +35,7 @@ if (f('delete'))
             $plugin = new Plugin(qg('delete'));
             $plugin->uninstall();
             
-            Utils::redirect('/admin/config/plugins.php');
+            Utils::redirect(ADMIN_URL . 'config/plugins.php');
         }
         catch (UserException $e)
         {

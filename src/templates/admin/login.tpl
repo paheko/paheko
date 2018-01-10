@@ -43,7 +43,7 @@
     </p>
 
     <p class="help">
-        <a href="{$www_url}admin/password.php">Pas de mot de passe ou mot de passe perdu ?</a>
+        <a href="{$admin_url}password.php">Pas de mot de passe ou mot de passe perdu ?</a>
     </p>
 
 </form>

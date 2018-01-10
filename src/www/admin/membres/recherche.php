@@ -41,7 +41,7 @@ if ($recherche != '')
 
     if (count($result) == 1 && $auto)
     {
-        Utils::redirect('/admin/membres/fiche.php?id=' . (int)$result[0]->id);
+        Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->id);
     }
 }
 

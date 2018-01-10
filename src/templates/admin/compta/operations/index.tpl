@@ -1,12 +1,12 @@
 {include file="admin/_head.tpl" title="Suivi des opérations" current="compta/gestion"}
 
 <ul class="actions">
-    <li class="recettes{if $type == Garradin\Compta\Categories::RECETTES} current{/if}"><a href="{$www_url}admin/compta/operations/?recettes">Recettes</a></li>
-    <li class="depenses{if $type == Garradin\Compta\Categories::DEPENSES} current{/if}"><a href="{$www_url}admin/compta/operations/?depenses">Dépenses</a></li>
-    <li class="autres{if $type == Garradin\Compta\Categories::AUTRES} current{/if}"><a href="{$www_url}admin/compta/operations/?autres">Autres</a></li>
-    {*<li><a href="{$www_url}admin/compta/operations/recherche.php">Recherche d'opération</a></li>*}
+    <li class="recettes{if $type == Garradin\Compta\Categories::RECETTES} current{/if}"><a href="{$admin_url}compta/operations/?recettes">Recettes</a></li>
+    <li class="depenses{if $type == Garradin\Compta\Categories::DEPENSES} current{/if}"><a href="{$admin_url}compta/operations/?depenses">Dépenses</a></li>
+    <li class="autres{if $type == Garradin\Compta\Categories::AUTRES} current{/if}"><a href="{$admin_url}compta/operations/?autres">Autres</a></li>
+    {*<li><a href="{$admin_url}compta/operations/recherche.php">Recherche d'opération</a></li>*}
     {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
-        <li><a href="{$www_url}admin/compta/operations/recherche_sql.php">Recherche par requête SQL</a></li>
+        <li><a href="{$admin_url}compta/operations/recherche_sql.php">Recherche par requête SQL</a></li>
     {/if}
 </ul>
 

@@ -10,7 +10,7 @@ if (trim(qg('c')))
 {
     if ($session->recoverPasswordConfirm(qg('c')))
     {
-        Utils::redirect('/admin/password.php?new_sent');
+        Utils::redirect(ADMIN_URL . 'password.php?new_sent');
     }
 
     $form->addError('Le lien que vous avez suivi est invalide ou a expiré.');
@@ -25,7 +25,7 @@ elseif (f('recover'))
     {
         if (trim(f('id')) && $session->recoverPasswordCheck(f('id')))
         {
-            Utils::redirect('/admin/password.php?sent');
+            Utils::redirect(ADMIN_URL . 'password.php?sent');
         }
 
         $form->addError('Ce membre n\'a pas d\'adresse email enregistrée ou n\'a pas le droit de se connecter.');

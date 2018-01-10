@@ -32,7 +32,7 @@ if (f('close'))
                 $e->doReports($exercice->id, Utils::modifyDate(f('fin'), '+1 day'));
             }
 
-            Utils::redirect('/admin/compta/exercices/');
+            Utils::redirect(ADMIN_URL . 'compta/exercices/');
         }
         catch (UserException $e)
         {

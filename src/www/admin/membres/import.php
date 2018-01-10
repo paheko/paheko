@@ -43,7 +43,7 @@ if (f('import'))
                 throw new UserException('Import inconnu.');
             }
 
-            Utils::redirect('/admin/membres/import.php?ok');
+            Utils::redirect(ADMIN_URL . 'membres/import.php?ok');
         }
         catch (UserException $e)
         {

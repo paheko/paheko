@@ -25,7 +25,7 @@ if (f('save') && $form->check('compta_edit_banque_' . $compte->id))
             'bic'     =>  f('bic'),
         ]);
 
-        Utils::redirect('/admin/compta/banques/');
+        Utils::redirect(ADMIN_URL . 'compta/banques/');
     }
     catch (UserException $e)
     {

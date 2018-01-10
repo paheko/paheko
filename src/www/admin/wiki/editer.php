@@ -62,7 +62,7 @@ if (f('save'))
 
             $page = $wiki->getById($page->id);
 
-            Utils::redirect('/admin/wiki/?'.$page->uri);
+            Utils::redirect(ADMIN_URL . 'wiki/?'.$page->uri);
         }
         catch (UserException $e)
         {

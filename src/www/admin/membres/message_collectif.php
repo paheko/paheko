@@ -18,7 +18,7 @@ if (f('save'))
     {
         try {
             $membres->sendMessageToCategory(f('dest'), f('sujet'), f('message'), (bool) f('subscribed'));
-            Utils::redirect('/admin/membres/?sent');
+            Utils::redirect(ADMIN_URL . 'membres/?sent');
         }
         catch (UserException $e)
         {

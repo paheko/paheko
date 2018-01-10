@@ -12,8 +12,8 @@
 
     {if $ok}
         <p class="confirm">
-            L'opération numéro <a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">{$ok}</a> a été ajoutée.
-            (<a href="{$www_url}admin/compta/operations/voir.php?id={$ok}">Voir l'opération</a>)
+            L'opération numéro <a href="{$admin_url}compta/operations/voir.php?id={$ok}">{$ok}</a> a été ajoutée.
+            (<a href="{$admin_url}compta/operations/voir.php?id={$ok}">Voir l'opération</a>)
         </p>
     {/if}
 

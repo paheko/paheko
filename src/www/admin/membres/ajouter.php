@@ -37,7 +37,7 @@ if (f('save'))
 
             $id = $membres->add($data);
 
-            Utils::redirect('/admin/membres/fiche.php?id='.(int)$id);
+            Utils::redirect(ADMIN_URL . 'membres/fiche.php?id='.(int)$id);
         }
         catch (UserException $e)
         {

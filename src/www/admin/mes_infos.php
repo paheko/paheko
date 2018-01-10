@@ -24,7 +24,7 @@ if (f('save'))
 
             $session->editUser($data);
 
-            Utils::redirect('/admin/');
+            Utils::redirect(ADMIN_URL);
         }
         catch (UserException $e)
         {

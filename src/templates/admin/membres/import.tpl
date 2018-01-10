@@ -1,8 +1,8 @@
 {include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
 
 <ul class="actions">
-    <li class="current"><a href="{$www_url}admin/membres/import.php">Importer</a></li>
-    <li><a href="{$www_url}admin/membres/import.php?export">Exporter en CSV</a></li>
+    <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
+    <li><a href="{$admin_url}membres/import.php?export">Exporter en CSV</a></li>
 </ul>
 
 {form_errors}

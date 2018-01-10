@@ -25,7 +25,7 @@ if (f('add'))
                 'position' =>  f('position'),
             ]);
 
-            Utils::redirect('/admin/compta/comptes/?classe='.$classe);
+            Utils::redirect(ADMIN_URL . 'compta/comptes/?classe='.$classe);
         }
         catch (UserException $e)
         {

@@ -41,7 +41,7 @@ if (f('ajouter') && $form->check('ajout_projet'))
 
 	try {
 		$projets->add(f('libelle'));
-		Utils::redirect('/admin/compta/projets/');
+		Utils::redirect(ADMIN_URL . 'compta/projets/');
 	}
 	catch (UserException $e)
 	{
@@ -52,7 +52,7 @@ elseif (f('modifier') && $form->check('modifier_projet_' . $id))
 {
 	try {
 		$projets->edit($id, f('libelle'));
-		Utils::redirect('/admin/compta/projets/');
+		Utils::redirect(ADMIN_URL . 'compta/projets/');
 	}
 	catch (UserException $e)
 	{
@@ -63,7 +63,7 @@ elseif (f('supprimer') && $form->check('supprimer_projet_' . $id))
 {
 	try {
 		$projets->remove($id);
-		Utils::redirect('/admin/compta/projets/');
+		Utils::redirect(ADMIN_URL . 'compta/projets/');
 	}
 	catch (UserException $e)
 	{

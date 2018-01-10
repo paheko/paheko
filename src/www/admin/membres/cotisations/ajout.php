@@ -67,7 +67,7 @@ if (f('add'))
 
             $m_cotisations->add($data, $compta);
 
-            Utils::redirect('/admin/membres/cotisations.php?id=' . $id_membre);
+            Utils::redirect(ADMIN_URL . 'membres/cotisations.php?id=' . $id_membre);
         }
         catch (UserException $e)
         {

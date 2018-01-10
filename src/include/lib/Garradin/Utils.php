@@ -658,7 +658,7 @@ class Utils
     {
         if (isset($params['id']))
         {
-            $url = WWW_URL . 'admin/plugin/' . $params['id'] . '/';
+            $url = ADMIN_URL . 'plugin/' . $params['id'] . '/';
         }
         else
         {

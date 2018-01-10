@@ -9,7 +9,7 @@ $page = qg('_u') ?: 'index.php';
 $plugin = new Plugin(qg('_p'));
 
 define('Garradin\PLUGIN_ROOT', $plugin->path());
-define('Garradin\PLUGIN_URL', WWW_URL . 'admin/plugin/' . $plugin->id() . '/');
+define('Garradin\PLUGIN_URL', ADMIN_URL . 'plugin/' . $plugin->id() . '/');
 define('Garradin\PLUGIN_QSP', '?');
 
 $tpl->assign('plugin', $plugin->getInfos());

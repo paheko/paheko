@@ -20,7 +20,7 @@ if (f('config'))
             $config->set('nombre_sauvegardes', f('nombre_sauvegardes'));
             $config->save();
 
-            Utils::redirect('/admin/config/donnees.php?ok=config');
+            Utils::redirect(ADMIN_URL . 'config/donnees.php?ok=config');
         } catch (UserException $e) {
             $form->addError($e->getMessage());
         }
@@ -34,7 +34,7 @@ elseif (f('create'))
     {
         try {
             $s->create();
-            Utils::redirect('/admin/config/donnees.php?ok=create');
+            Utils::redirect(ADMIN_URL . 'config/donnees.php?ok=create');
         } catch (UserException $e) {
             $form->addError($e->getMessage());
         }
@@ -62,7 +62,7 @@ elseif (f('restore'))
     {
         try {
             $r = $s->restoreFromLocal(f('file'));
-            Utils::redirect('/admin/config/donnees.php?ok=restore&code=' . (int)$r);
+            Utils::redirect(ADMIN_URL . 'config/donnees.php?ok=restore&code=' . (int)$r);
         } catch (UserException $e) {
             $form->addError($e->getMessage());
         }
@@ -76,7 +76,7 @@ elseif (f('remove'))
     {
         try {
             $s->remove(f('file'));
-            Utils::redirect('/admin/config/donnees.php?ok=remove');
+            Utils::redirect(ADMIN_URL . 'config/donnees.php?ok=remove');
         } catch (UserException $e) {
             $form->addError($e->getMessage());
         }
@@ -93,7 +93,7 @@ elseif (f('restore_file'))
 
         try {
             $r = $s->restoreFromUpload($_FILES['file'], $user->id, $check);
-            Utils::redirect('/admin/config/donnees.php?ok=restore&code=' . (int)$r);
+            Utils::redirect(ADMIN_URL . 'config/donnees.php?ok=restore&code=' . (int)$r);
         } catch (UserException $e) {
             $form->addError($e->getMessage());
             $code = $e->getCode();

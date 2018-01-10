@@ -11,9 +11,9 @@
             {/if}
             <dd class="compte"><strong>{$cat.compte}</strong> - {$cat.compte_libelle}</dd>
             <dd class="actions">
-                <a class="icn" href="{$www_url}admin/compta/operations/?cat={$cat.id}" title="Lister les opérations de cette catégorie">𝍢</a>
-                <a class="icn" href="{$www_url}admin/compta/categories/modifier.php?id={$cat.id}" title="Modifier">✎</a>
-                <a class="icn" href="{$www_url}admin/compta/categories/supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
+                <a class="icn" href="{$admin_url}compta/operations/?cat={$cat.id}" title="Lister les opérations de cette catégorie">𝍢</a>
+                <a class="icn" href="{$admin_url}compta/categories/modifier.php?id={$cat.id}" title="Modifier">✎</a>
+                <a class="icn" href="{$admin_url}compta/categories/supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
             </dd>
         {/foreach}
         </dl>

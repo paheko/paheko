@@ -37,7 +37,7 @@ if (f('save'))
             $session->sendMessage($membre->email, f('sujet'),
                 f('message'), (bool) f('copie'));
 
-            Utils::redirect('/admin/membres/?sent');
+            Utils::redirect(ADMIN_URL . 'membres/?sent');
         }
         catch (UserException $e)
         {

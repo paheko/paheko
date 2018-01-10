@@ -105,7 +105,7 @@
                 <tr>
                     <th>{$membre.identite}</th>
                     <td class="actions">
-                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
+                        {if !empty($membre.email)}<a href="{$admin_url}membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
                     </td>
                 </tr>
             {/foreach}

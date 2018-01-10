@@ -122,7 +122,7 @@ if (f('save'))
                 ]);
             }
 
-            Utils::redirect('/admin/compta/operations/voir.php?id='.(int)$operation->id);
+            Utils::redirect(ADMIN_URL . 'compta/operations/voir.php?id='.(int)$operation->id);
         }
         catch (UserException $e)
         {

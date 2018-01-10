@@ -9,8 +9,8 @@
 {/if}
 
 <ul class="actions">
-    <li class="current"><a href="{$www_url}admin/compta/import.php">Importer</a></li>
-    <li><a href="{$www_url}admin/compta/import.php?export">Exporter en CSV</a></li>
+    <li class="current"><a href="{$admin_url}compta/import.php">Importer</a></li>
+    <li><a href="{$admin_url}compta/import.php?export">Exporter en CSV</a></li>
 </ul>
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">

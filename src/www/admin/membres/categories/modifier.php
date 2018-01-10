@@ -73,7 +73,7 @@ if (f('save'))
                 $session->refresh();
             }
 
-            Utils::redirect('/admin/membres/categories/');
+            Utils::redirect(ADMIN_URL . 'membres/categories/');
         }
         catch (UserException $e)
         {

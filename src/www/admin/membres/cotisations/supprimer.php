@@ -34,7 +34,7 @@ if (f('delete'))
     {
         try {
             $m_cotisations->delete($co->id);
-            Utils::redirect('/admin/membres/cotisations.php?id=' . $membre->id);
+            Utils::redirect(ADMIN_URL . 'membres/cotisations.php?id=' . $membre->id);
         }
         catch (UserException $e)
         {

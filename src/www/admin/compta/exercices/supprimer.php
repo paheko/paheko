@@ -27,7 +27,7 @@ if (f('delete'))
         {
             $id = $e->delete($exercice->id);
 
-            Utils::redirect('/admin/compta/exercices/');
+            Utils::redirect(ADMIN_URL . 'compta/exercices/');
         }
         catch (UserException $e)
         {

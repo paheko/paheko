@@ -40,7 +40,7 @@ if (f('import'))
                 throw new UserException('Import inconnu.');
             }
 
-            Utils::redirect('/admin/compta/import.php?ok');
+            Utils::redirect(ADMIN_URL . 'compta/import.php?ok');
         }
         catch (UserException $e)
         {

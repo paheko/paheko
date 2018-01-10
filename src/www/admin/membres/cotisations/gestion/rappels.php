@@ -25,7 +25,7 @@ if (f('save') && $form->check('new_rappel'))
             'id_cotisation' => f('id_cotisation'),
         ]);
 
-        Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
+        Utils::redirect(ADMIN_URL . 'membres/cotisations/gestion/rappels.php');
     }
     catch (UserException $e)
     {

@@ -23,7 +23,7 @@ if (f('delete') && $form->check('delete_rappel_' . $rappel->id))
 {
     try {
         $rappels->delete($rappel->id, (bool) f('delete_history'));
-        Utils::redirect('/admin/membres/cotisations/gestion/rappels.php');
+        Utils::redirect(ADMIN_URL . 'membres/cotisations/gestion/rappels.php');
     }
     catch (UserException $e)
     {
