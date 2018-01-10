@@ -22,7 +22,7 @@ if (f('delete'))
         try
         {
             $journal->delete($operation->id);
-            Utils::redirect('/admin/compta/operations/');
+            Utils::redirect(ADMIN_URL . 'compta/operations/');
         }
         catch (UserException $e)
         {

@@ -8,7 +8,7 @@ require_once __DIR__ . '/_inc.php';
 
 if (!$session->isOTPRequired())
 {
-    Utils::redirect('/admin/');
+    Utils::redirect(ADMIN_URL . '');
 }
 
 $login = null;
@@ -21,7 +21,7 @@ if (f('login'))
 
     if (!$form->hasErrors() && ($login = $session->loginOTP(f('code'))))
     {
-        Utils::redirect('/admin/');
+        Utils::redirect(ADMIN_URL);
     }
 }
 

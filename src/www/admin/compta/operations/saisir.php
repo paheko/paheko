@@ -146,7 +146,7 @@ if (f('save'))
 
             $session->set('context_compta_date', f('date'));
 
-            Utils::redirect('/admin/compta/operations/saisir.php?ok='.(int)$id);
+            Utils::redirect(ADMIN_URL . 'compta/operations/saisir.php?ok='.(int)$id);
         }
         catch (UserException $e)
         {

@@ -18,7 +18,7 @@ if (f('delete') && $form->check('compta_delete_compte_' . $compte->id))
     try
     {
         $comptes->delete($compte->id);
-        Utils::redirect('/admin/compta/comptes/?classe=' . substr($compte->id, 0, 1));
+        Utils::redirect(ADMIN_URL . 'compta/comptes/?classe=' . substr($compte->id, 0, 1));
     }
     catch (UserException $e)
     {
@@ -30,7 +30,7 @@ elseif (f('disable') && $form->check('compta_disable_compte_' . $compte->id))
     try
     {
         $comptes->disable($compte->id);
-        Utils::redirect('/admin/compta/comptes/?classe='.substr($compte->id, 0, 1));
+        Utils::redirect(ADMIN_URL . 'compta/comptes/?classe='.substr($compte->id, 0, 1));
     }
     catch (UserException $e)
     {

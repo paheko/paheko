@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Recherche" current="wiki/chercher"}
 
-<form method="get" action="{$www_url}admin/wiki/chercher.php" class="wikiSearch">
+<form method="get" action="{$admin_url}wiki/chercher.php" class="wikiSearch">
     <fieldset>
         <legend>Rechercher une page</legend>
         <p>

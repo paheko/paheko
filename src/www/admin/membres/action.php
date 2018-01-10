@@ -39,7 +39,7 @@ if ($action == 'move' && f('confirm'))
     if (!$form->hasErrors())
     {
         $membres->changeCategorie(f('id_categorie'), f('selected'));
-        Utils::redirect('/admin/membres/');
+        Utils::redirect(ADMIN_URL . 'membres/');
     }
 }
 elseif ($action == 'delete' && f('confirm'))
@@ -51,7 +51,7 @@ elseif ($action == 'delete' && f('confirm'))
     if (!$form->hasErrors())
     {
         $membres->delete(f('selected'));
-        Utils::redirect('/admin/membres/');
+        Utils::redirect(ADMIN_URL . 'membres/');
     }
 }
 

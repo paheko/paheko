@@ -27,7 +27,7 @@ if (f('delete'))
     {
         try {
             $membres->delete($membre->id);
-            Utils::redirect('/admin/membres/');
+            Utils::redirect(ADMIN_URL . 'membres/');
         }
         catch (UserException $e)
         {

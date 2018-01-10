@@ -212,7 +212,7 @@ class Squelette extends \KD2\MiniSkel
         $this->assign('url_site', WWW_URL);
         $this->assign('url_atom', WWW_URL . 'feed/atom/');
         $this->assign('url_elements', WWW_URL . 'squelettes/');
-        $this->assign('url_admin', WWW_URL . 'admin/');
+        $this->assign('url_admin', ADMIN_URL);
 
         $url = file_exists(DATA_ROOT . '/www/squelettes/default.css')
             ? WWW_URL . 'squelettes/default.css'
@@ -825,7 +825,7 @@ class Squelette extends \KD2\MiniSkel
         }
         elseif ($uri == '/favicon.ico')
         {
-            header('Location: ' . WWW_URI . 'admin/static/icon.png');
+            header('Location: ' . ADMIN_URL . 'static/icon.png');
             exit;
         }
         elseif (substr($uri, -1) == '/')

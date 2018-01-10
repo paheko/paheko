@@ -107,6 +107,7 @@ static $default_config = [
     'SMTP_PASSWORD'         => null,
     'SMTP_PORT'             => 587,
     'SMTP_SECURITY'         => 'STARTTLS',
+    'ADMIN_URL'             => WWW_URL . 'admin/',
 ];
 
 foreach ($default_config as $const => $value)
@@ -287,13 +288,13 @@ if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS')
 {
     if (!file_exists(DB_FILE))
     {
-        Utils::redirect('/admin/install.php');
+        Utils::redirect(ADMIN_URL . 'install.php');
     }
 
     $config = Config::getInstance();
 
     if (version_compare($config->getVersion(), garradin_version(), '<'))
     {
-        Utils::redirect('/admin/upgrade.php');
+        Utils::redirect(ADMIN_URL . 'upgrade.php');
     }
 }

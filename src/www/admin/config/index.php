@@ -44,7 +44,7 @@ if (f('save') && $form->check('config'))
 
         $config->save();
 
-        Utils::redirect('/admin/config/?ok');
+        Utils::redirect(ADMIN_URL . 'config/?ok');
     }
     catch (UserException $e)
     {

@@ -6,19 +6,19 @@
 
 <ul class="actions">
     {if $session->canAccess('wiki', Garradin\Membres::DROIT_ECRITURE)}
-        <li><a href="{$www_url}admin/wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id}{/if}"><strong>Créer une nouvelle page</strong></a></li>
+        <li><a href="{$admin_url}wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id}{/if}"><strong>Créer une nouvelle page</strong></a></li>
     {/if}
     {if $can_edit}
-        <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id}">Éditer</a></li>
+        <li><a href="{$admin_url}wiki/editer.php?id={$page.id}">Éditer</a></li>
     {/if}
     {if $can_read && $page && $page.contenu}
-        <li><a href="{$www_url}admin/wiki/historique.php?id={$page.id}">Historique</a>
+        <li><a href="{$admin_url}wiki/historique.php?id={$page.id}">Historique</a>
         {if $page.droit_lecture == Garradin\Wiki::LECTURE_PUBLIC}
             <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a>
         {/if}
     {/if}
     {if $session->canAccess('wiki', Garradin\Membres::DROIT_ADMIN)}
-        <li><a href="{$www_url}admin/wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
+        <li><a href="{$admin_url}wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
     {/if}
 </ul>
 
@@ -42,7 +42,7 @@
         </p>
 
         {if $can_edit}
-        <form method="post" action="{$www_url}admin/wiki/creer.php">
+        <form method="post" action="{$admin_url}wiki/creer.php">
             <p class="submit">
                 {csrf_field key="wiki_create"}
                 <input type="hidden" name="titre" value="{$uri}" />
@@ -121,7 +121,7 @@
             <p class="wikiFooter">
                 Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
                 {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
-                par <a href="{$www_url}admin/membres/fiche.php?id={$page.contenu.id_auteur}">{$auteur}</a>
+                par <a href="{$admin_url}membres/fiche.php?id={$page.contenu.id_auteur}">{$auteur}</a>
                 {/if}
             </p>
         {/if}

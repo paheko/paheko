@@ -20,7 +20,7 @@ if (f('delete') && $form->check('compta_delete_banque_' . $compte->id))
 	try
 	{
 		$banque->delete($compte->id);
-		Utils::redirect('/admin/compta/banques/');
+		Utils::redirect(ADMIN_URL . 'compta/banques/');
 	}
 	catch (UserException $e)
 	{

@@ -38,7 +38,7 @@ if (f('save') && $form->check('edit_co_' . $co->id))
             'id_categorie_compta' => $id_cat,
         ]);
 
-        Utils::redirect('/admin/membres/cotisations/');
+        Utils::redirect(ADMIN_URL . 'membres/cotisations/');
     }
     catch (UserException $e)
     {

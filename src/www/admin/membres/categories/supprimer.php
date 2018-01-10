@@ -31,7 +31,7 @@ if (f('delete'))
     {
         try {
             $cats->remove($id);
-            Utils::redirect('/admin/membres/categories/');
+            Utils::redirect(ADMIN_URL . 'membres/categories/');
         }
         catch (UserException $e)
         {

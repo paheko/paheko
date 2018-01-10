@@ -25,7 +25,7 @@ if (f('add'))
                 'fin'     =>  f('fin'),
             ]);
 
-            Utils::redirect('/admin/compta/exercices/');
+            Utils::redirect(ADMIN_URL . 'compta/exercices/');
         }
         catch (UserException $e)
         {

@@ -8,7 +8,7 @@ require_once __DIR__ . '/_inc.php';
 // L'utilisateur est déjà connecté
 if ($session->isLogged())
 {
-    Utils::redirect('/admin/');
+    Utils::redirect(ADMIN_URL . '');
 }
 
 // Relance session_start et renvoie une image de 1px transparente
@@ -38,7 +38,7 @@ if (f('login'))
 
     if (!$form->hasErrors() && ($login = $session->login(f('_id'), f('passe'), (bool) f('permanent'))))
     {
-        Utils::redirect('/admin/');
+        Utils::redirect(ADMIN_URL);
     }
 }
 

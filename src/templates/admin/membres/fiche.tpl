@@ -73,7 +73,7 @@
             <strong>{$membre->$c}</strong>
         {elseif $c == 'email'}
             <a href="mailto:{$membre->$c}">{$membre->$c}</a>
-            | <a href="{$www_url}admin/membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
+            | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
         {elseif $config.type == 'email'}
             <a href="mailto:{$membre->$c}">{$membre->$c}</a>
         {elseif $config.type == 'tel'}

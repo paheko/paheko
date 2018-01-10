@@ -1,8 +1,8 @@
 {include file="admin/_head.tpl" title="Rapprochement — %s"|args:$compte.id current="compta/banques" js=1}
 
 <ul class="actions">
-    <li><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
+    <li><a href="{$admin_url}compta/banques/">Comptes bancaires</a></li>
+    <li><a href="{$admin_url}compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
     <li class="current"><a href="{$self_url_no_qs}?id={$compte.id}">Rapprochement</a></li>
 </ul>
 

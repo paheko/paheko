@@ -20,7 +20,7 @@ if (f('delete'))
     {
         if ($wiki->delete($page->id))
         {
-            Utils::redirect('/admin/wiki/');
+            Utils::redirect(ADMIN_URL . 'wiki/');
         }
         else
         {

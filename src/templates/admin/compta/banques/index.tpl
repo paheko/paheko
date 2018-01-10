@@ -1,10 +1,10 @@
 {include file="admin/_head.tpl" title="Comptes bancaires" current="compta/banques"}
 
 <ul class="actions">
-    <li class="current"><a href="{$www_url}admin/compta/banques/">Comptes bancaires</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_cheque_a_encaisser}&amp;suivi">Chèques à encaisser</a></li>
-    <li><a href="{$www_url}admin/compta/comptes/journal.php?id={$id_carte_a_encaisser}&amp;suivi">Paiements par carte à encaisser</a></li>
+    <li class="current"><a href="{$admin_url}compta/banques/">Comptes bancaires</a></li>
+    <li><a href="{$admin_url}compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
+    <li><a href="{$admin_url}compta/comptes/journal.php?id={$id_cheque_a_encaisser}&amp;suivi">Chèques à encaisser</a></li>
+    <li><a href="{$admin_url}compta/comptes/journal.php?id={$id_carte_a_encaisser}&amp;suivi">Paiements par carte à encaisser</a></li>
 </ul>
 
 {if !empty($liste)}
@@ -28,13 +28,13 @@
                 <td>{$compte.iban|escape|format_iban}</td>
                 <td>{$compte.bic}</td>
                 <td class="actions">
-                    <a class="icn" href="{$www_url}admin/compta/comptes/journal.php?id={$compte.id}&amp;suivi" title="Journal">𝍢</a>
+                    <a class="icn" href="{$admin_url}compta/comptes/journal.php?id={$compte.id}&amp;suivi" title="Journal">𝍢</a>
                     {if $session->canAccess('compta', Garradin\Membres::DROIT_ECRITURE)}
-                        <a class="icn" href="{$www_url}admin/compta/banques/rapprocher.php?id={$compte.id}" title="Rapprocher">☑</a>
+                        <a class="icn" href="{$admin_url}compta/banques/rapprocher.php?id={$compte.id}" title="Rapprocher">☑</a>
                     {/if}
                     {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
-                        <a class="icn" href="{$www_url}admin/compta/banques/modifier.php?id={$compte.id}" title="Modifier">✎</a>
-                        <a class="icn" href="{$www_url}admin/compta/banques/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
+                        <a class="icn" href="{$admin_url}compta/banques/modifier.php?id={$compte.id}" title="Modifier">✎</a>
+                        <a class="icn" href="{$admin_url}compta/banques/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>

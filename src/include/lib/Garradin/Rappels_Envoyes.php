@@ -118,7 +118,7 @@ class Rappels_Envoyes
 			'#SITE_ASSO'	=>	$config->get('site_asso'),
 			'#URL_RACINE'	=>	WWW_URL,
 			'#URL_SITE'		=>	WWW_URL,
-			'#URL_ADMIN'	=>	WWW_URL . 'admin/',
+			'#URL_ADMIN'	=>	ADMIN_URL,
 		];
 
 		if (!empty($data) && is_array($data))

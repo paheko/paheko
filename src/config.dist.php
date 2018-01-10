@@ -117,6 +117,13 @@ const PLUGINS_SYSTEM = '';
 //const WWW_URL = 'http://garradin.chezmoi.tld' . WWW_URI;
 
 /**
+ * Adresse URL HTTP(S) de l'admin Garradin
+ *
+ * Défaut : WWW_URL + 'admin/'
+ */
+//const ADMIN_URL = 'https://admin.garradin.chezmoi.tld/';
+
+/**
  * Affichage des erreurs
  * Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
  * en cas d'erreur. Sinon rien ne sera affiché.

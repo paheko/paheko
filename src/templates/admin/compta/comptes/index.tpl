@@ -2,15 +2,15 @@
     {include file="admin/_head.tpl" title="Comptes" current="compta/categories"}
     <ul class="accountList">
     {foreach from=$classes item="_classe"}
-        <li><h4><a href="{$www_url}admin/compta/comptes/?classe={$_classe.id}">{$_classe.libelle}</a></h4></li>
+        <li><h4><a href="{$admin_url}compta/comptes/?classe={$_classe.id}">{$_classe.libelle}</a></h4></li>
     {/foreach}
     </ul>
 {else}
     {include file="admin/_head.tpl" title=$classe_compte.libelle current="compta/categories"}
 
     <ul class="actions">
-        <li><a href="{$www_url}admin/compta/comptes/">Liste des classes</a></li>
-        <li><a href="{$www_url}admin/compta/comptes/ajouter.php?classe={$classe}">Ajouter un compte dans cette classe</a></li>
+        <li><a href="{$admin_url}compta/comptes/">Liste des classes</a></li>
+        <li><a href="{$admin_url}compta/comptes/ajouter.php?classe={$classe}">Ajouter un compte dans cette classe</a></li>
     </ul>
 
     <p class="help">
@@ -34,8 +34,8 @@
                 <td class="actions">
                     {if empty($compte.desactive)}
                         {if !$compte.plan_comptable}
-                            <a class="icn" href="{$www_url}admin/compta/comptes/modifier.php?id={$compte.id}" title="Modifier">✎</a>
-                            <a class="icn" href="{$www_url}admin/compta/comptes/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
+                            <a class="icn" href="{$admin_url}compta/comptes/modifier.php?id={$compte.id}" title="Modifier">✎</a>
+                            <a class="icn" href="{$admin_url}compta/comptes/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
                         {else}
                             <em>*</em>
                         {/if}

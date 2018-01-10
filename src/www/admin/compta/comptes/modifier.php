@@ -24,7 +24,7 @@ if (f('save'))
                 'position' =>  f('position'),
             ]);
 
-            Utils::redirect('/admin/compta/comptes/?classe='.substr($compte->id, 0, 1));
+            Utils::redirect(ADMIN_URL . 'compta/comptes/?classe='.substr($compte->id, 0, 1));
         }
         catch (UserException $e)
         {

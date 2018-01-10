@@ -315,14 +315,14 @@ $config->setVersion(garradin_version());
 Static_Cache::remove('upgrade');
 
 echo '<h2>Mise à jour terminée.</h2>
-<p><a href="'.WWW_URL.'admin/">Retour</a></p>';
+<p><a href="'.ADMIN_URL.'">Retour</a></p>';
 
 if ($redirect)
 {
     echo '
     <script type="text/javascript">
     window.setTimeout(function () { 
-        window.location.href = "'.WWW_URL.'admin/"; 
+        window.location.href = "'.ADMIN_URL.'"; 
         stopAnimatedLoader();
     }, 1000);
     </script>';

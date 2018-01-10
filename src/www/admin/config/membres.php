@@ -41,7 +41,7 @@ if (f('save') || f('add') || f('review') || f('reset'))
     {
         if (f('reset'))
         {
-            Utils::redirect('/admin/config/membres.php');
+            Utils::redirect(ADMIN_URL . 'config/membres.php');
         }
         elseif (f('add'))
         {
@@ -92,7 +92,7 @@ if (f('save') || f('add') || f('review') || f('reset'))
         {
             try {
                 $champs->save();
-                Utils::redirect('/admin/config/membres.php?ok');
+                Utils::redirect(ADMIN_URL . 'config/membres.php?ok');
             }
             catch (UserException $e)
             {

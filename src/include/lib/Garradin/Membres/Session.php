@@ -168,7 +168,7 @@ class Session extends \KD2\UserSession
 
 		$message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
 		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
-		$message.= WWW_URL . 'admin/password.php?c=' . $query;
+		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
 		Utils::mail($membre->email, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message, [], $membre->clef_pgp);

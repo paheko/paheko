@@ -32,7 +32,7 @@ elseif (f('delete'))
             }
 
             $fichier->remove();
-            Utils::redirect('/admin/wiki/_fichiers.php?page=' . $page->id);
+            Utils::redirect(ADMIN_URL . 'wiki/_fichiers.php?page=' . $page->id);
         }
         catch (UserException $e)
         {
@@ -73,12 +73,12 @@ elseif (f('upload') || f('uploadHelper_mode'))
 
             // Lier le fichier à la page wiki
             $fichier->linkTo(Fichiers::LIEN_WIKI, $page->id);
-            $uri = '/admin/wiki/_fichiers.php?page=' . $page->id . '&sent';
+            $uri = ADMIN_URL . 'wiki/_fichiers.php?page=' . $page->id . '&sent';
 
             if (f('uploadHelper_status') !== null)
             {
                 echo json_encode([
-                    'redirect'  =>  WWW_URL . $uri,
+                    'redirect'  =>  $uri,
                     'callback'  =>  'insertHelper',
                     'file'      =>  [
                         'image' =>  (int)$fichier->image,

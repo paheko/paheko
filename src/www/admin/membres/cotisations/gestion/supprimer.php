@@ -23,7 +23,7 @@ if (f('delete') && $form->check('delete_co_' . $co->id))
 {
     try {
         $cotisations->delete($co->id);
-        Utils::redirect('/admin/membres/cotisations/');
+        Utils::redirect(ADMIN_URL . 'membres/cotisations/');
     }
     catch (UserException $e)
     {

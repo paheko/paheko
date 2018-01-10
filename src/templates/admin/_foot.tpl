@@ -1,7 +1,7 @@
 </main>
 
 <script type="text/javascript" defer="defer">
-var keep_session_url = "{$www_url}admin/login.php?keepSessionAlive&";
+var keep_session_url = "{$admin_url}login.php?keepSessionAlive&";
 {literal}
 (function () {
     function refreshSession()

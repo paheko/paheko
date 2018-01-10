@@ -75,7 +75,7 @@ if (!file_exists(DB_FILE))
     if (file_exists($old_file))
     {
         rename($old_file, DB_FILE);
-        Utils::redirect('/admin/upgrade.php');
+        Utils::redirect(ADMIN_URL . 'upgrade.php');
     }
 }
 
@@ -85,7 +85,7 @@ function f($key)
 }
 
 $tpl = Template::getInstance();
-$tpl->assign('admin_url', WWW_URL . 'admin/');
+$tpl->assign('admin_url', ADMIN_URL);
 
 $form = new Form;
 $tpl->assign_by_ref('form', $form);
@@ -116,7 +116,7 @@ else
             		f('cat_membre'), f('nom_membre'), f('email_membre'), f('passe'),
             		WWW_URL);
 
-            	Utils::redirect('/admin/login.php');
+            	Utils::redirect(ADMIN_URL . 'login.php');
             }
             catch (UserException $e)
             {

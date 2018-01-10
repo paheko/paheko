@@ -11,7 +11,7 @@ if (f('save') && $form->check('config_site'))
         $config->set('categorie_membres', f('categorie_membres'));
         $config->save();
 
-        Utils::redirect('/admin/config/site.php?ok');
+        Utils::redirect(ADMIN_URL . 'config/site.php?ok');
     }
     catch (UserException $e)
     {
@@ -30,7 +30,7 @@ if (f('select') && f('reset') && $form->check('squelettes'))
             }
         }
     
-        Utils::redirect('/admin/config/site.php?reset_ok');
+        Utils::redirect(ADMIN_URL . 'config/site.php?reset_ok');
     }
     catch (UserException $e)
     {
@@ -55,7 +55,7 @@ if (qg('edit'))
         if (Squelette::editSource(qg('edit'), f('content')))
         {
             $fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
-            Utils::redirect('/admin/config/site.php?edit='.rawurlencode(qg('edit')).'&ok'.$fullscreen);
+            Utils::redirect(ADMIN_URL . 'config/site.php?edit='.rawurlencode(qg('edit')).'&ok'.$fullscreen);
         }
         else
         {

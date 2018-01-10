@@ -40,7 +40,7 @@ function qg($key)
 }
 
 $tpl = Template::getInstance();
-$tpl->assign('admin_url', WWW_URL . 'admin/');
+$tpl->assign('admin_url', ADMIN_URL);
 
 $form = new Form;
 $tpl->assign_by_ref('form', $form);
@@ -56,11 +56,11 @@ if (!defined('Garradin\LOGIN_PROCESS'))
     {
         if ($session->isOTPRequired())
         {
-            Utils::redirect('/admin/login_otp.php');
+            Utils::redirect(ADMIN_URL . 'login_otp.php');
         }
         else
         {
-            Utils::redirect('/admin/login.php');
+            Utils::redirect(ADMIN_URL . 'login.php');
         }
     }
 

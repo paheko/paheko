@@ -14,7 +14,7 @@
         <strong>Un e-mail contenant votre nouveau mot de passe vous a été envoyé.</strong>
         Si le message n'apparaît pas dans les prochaines minutes, vérifiez le dossier Spam ou Indésirables.
     </p>
-    <p><a href="{$www_url}admin/login.php">Connexion &rarr;</a></p>
+    <p><a href="{$admin_url}login.php">Connexion &rarr;</a></p>
 {else}
 
     {form_errors}

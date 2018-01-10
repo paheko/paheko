@@ -40,7 +40,7 @@ if (f('save'))
 				'date'			=> f('date'),
 			]);
 
-			Utils::redirect('/admin/membres/cotisations/rappels.php?id=' . $membre->id . '&ok');
+			Utils::redirect(ADMIN_URL . 'membres/cotisations/rappels.php?id=' . $membre->id . '&ok');
 		}
 		catch (UserException $e)
 		{

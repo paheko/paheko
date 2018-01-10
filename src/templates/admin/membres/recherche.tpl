@@ -87,7 +87,7 @@
                         {/if}
                     {/foreach}
                     <td class="actions">
-                        {if !empty($membre.email)}<a class="icn" href="{$www_url}admin/membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}
+                        {if !empty($membre.email)}<a class="icn" href="{$admin_url}membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}
                         <a class="icn" href="modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
                     </td>
                 </tr>
@@ -156,7 +156,7 @@
                 <tr>
                     <th>{$membre.identite}</th>
                     <td class="actions">
-                        {if !empty($membre.email)}<a href="{$www_url}admin/membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
+                        {if !empty($membre.email)}<a href="{$admin_url}membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
                     </td>
                 </tr>
             {/foreach}

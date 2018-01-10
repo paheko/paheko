@@ -36,7 +36,7 @@ if (f('add'))
             else
                 $type = 'recettes';
 
-            Utils::redirect('/admin/compta/categories/?'.$type);
+            Utils::redirect(ADMIN_URL . 'compta/categories/?'.$type);
         }
         catch (UserException $e)
         {

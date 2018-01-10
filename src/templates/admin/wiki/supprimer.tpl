@@ -1,10 +1,10 @@
 {include file="admin/_head.tpl" title="Supprimer : %s"|args:$page.titre current="wiki"}
 
 <ul class="actions">
-    <li><a href="{$www_url}admin/wiki/"><strong>Wiki</strong></a></li>
-    <li><a href="{$www_url}admin/wiki/chercher.php">Rechercher</a></li>
-    <li><a href="{$www_url}admin/wiki/?{$page.uri}">Voir la page</a></li>
-    <li><a href="{$www_url}admin/wiki/editer.php?id={$page.id}">Éditer</a></li>
+    <li><a href="{$admin_url}wiki/"><strong>Wiki</strong></a></li>
+    <li><a href="{$admin_url}wiki/chercher.php">Rechercher</a></li>
+    <li><a href="{$admin_url}wiki/?{$page.uri}">Voir la page</a></li>
+    <li><a href="{$admin_url}wiki/editer.php?id={$page.id}">Éditer</a></li>
 </ul>
 
 {form_errors}

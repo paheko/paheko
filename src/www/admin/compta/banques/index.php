@@ -37,7 +37,7 @@ if (f('add') && $form->check('compta_ajout_banque'))
             ]);
         }
 
-        Utils::redirect('/admin/compta/banques/');
+        Utils::redirect(ADMIN_URL . 'compta/banques/');
     }
     catch (UserException $e)
     {

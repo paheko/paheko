@@ -45,7 +45,7 @@ if (f('confirm'))
             }
 
             $session->editSecurity($data);
-            Utils::redirect('/admin/mes_infos_securite.php?ok');
+            Utils::redirect(ADMIN_URL . 'mes_infos_securite.php?ok');
         }
         catch (UserException $e)
         {

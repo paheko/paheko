@@ -23,7 +23,7 @@ if (f('delete') && $form->check('delete_compta_cat_' . $cat->id))
     try
     {
         $cats->delete($id);
-        Utils::redirect('/admin/compta/categories/');
+        Utils::redirect(ADMIN_URL . 'compta/categories/');
     }
     catch (UserException $e)
     {
