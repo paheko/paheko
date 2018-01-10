@@ -10,6 +10,7 @@ use Garradin\UserException;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
+use const Garradin\ADMIN_URL;
 
 use KD2\Security;
 use KD2\Security_OTP;
