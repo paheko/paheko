@@ -199,7 +199,7 @@ class Journal
         $db = DB::getInstance();
         $champ_id = Config::getInstance()->get('champ_identite');
 
-        return $db->get('SELECT id_membre, id_cotisation, m.'.$champ_id.' AS identite
+        return $db->get('SELECT mo.id_membre, mo.id_cotisation, m.'.$champ_id.' AS identite
             FROM membres_operations AS mo INNER JOIN membres AS m ON mo.id_membre = m.id
             WHERE mo.id_operation = ?;', (int)$id);
     }
