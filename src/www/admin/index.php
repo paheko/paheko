@@ -28,6 +28,8 @@ else
 	$tpl->assign('cotisation', false);
 }
 
+$tpl->assign('custom_css', ['wiki.css']);
+
 $tpl->display('admin/index.tpl');
 flush();
 
