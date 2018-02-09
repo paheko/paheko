@@ -53,6 +53,9 @@ class Session extends \KD2\UserSession
 
 	protected function getUserDataForSession($id)
 	{
+		// Mettre à jour la date de connexion
+		$this->db->preparedQuery('UPDATE membres SET date_connexion = datetime() WHERE id = ?;', [$id]);
+
 		return $this->db->first('SELECT m.*, c.droit_connexion, c.droit_wiki, 
 			c.droit_membres, c.droit_compta, c.droit_config, c.droit_membres
 			FROM membres AS m
