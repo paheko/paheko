@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Opération n°%d"|args:$operation.id current="compta/gestion"}
 
-{if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+{if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN) && $operation.compte_credit !== null && $operation.compte_debit !== null}
 <ul class="actions">
     <li class="edit"><a href="{$admin_url}compta/operations/modifier.php?id={$operation.id}">Modifier cette opération</a></li>
     <li class="delete"><a href="{$admin_url}compta/operations/supprimer.php?id={$operation.id}">Supprimer cette opération</a></li>
