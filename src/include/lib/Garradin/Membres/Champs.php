@@ -519,12 +519,16 @@ class Champs
     		'id_categorie' => 'id_categorie',
             'date_connexion' => 'date_connexion',
             'date_inscription' => 'date_inscription',
-            'secret_otp' => 'secret_otp',
-            'clef_pgp' => 'clef_pgp',
     	];
 
         $anciens_champs = $config->get('champs_membres');
     	$anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
+
+        if (property_exists($anciens_champs, 'secret_otp'))
+        {
+            $copy['secret_otp'] = 'secret_otp';
+            $copy['clef_pgp'] = 'clef_pgp';
+        }
 
     	foreach ($this->champs as $key=>$cfg)
     	{
