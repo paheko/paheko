@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS cotisations_membres
 CREATE UNIQUE INDEX IF NOT EXISTS cm_unique ON cotisations_membres (id_membre, id_cotisation, date);
 
 CREATE TABLE IF NOT EXISTS membres_operations
--- Liaision des enregistrement des paiements en compta
+-- Liaison des enregistrement des paiements en compta
 (
     id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     id_operation INTEGER NOT NULL REFERENCES compta_journal (id) ON DELETE CASCADE,
