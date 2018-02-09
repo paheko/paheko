@@ -276,7 +276,7 @@ class Cotisations
 
 		$desc = $desc ? 'DESC' : 'ASC';
 
-		return $db->get('SELECT cm.id_membre, cm.date, cm.id,
+		return $db->get('SELECT cm.id_membre, cm.date, cm.id, m.numero,
 			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN c.fin >= date() ELSE 1 END AS a_jour

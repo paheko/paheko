@@ -41,7 +41,7 @@
         <tbody>
             {foreach from=$liste item="co"}
                 <tr>
-                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$co.id_membre}">{$co.id_membre}</a></td>
+                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$co.id_membre}">{$co.numero}</a></td>
                     <th>{$co.nom}</th>
                     <td>{if $co.a_jour}<b class="confirm">À jour</b>{else}<b class="error">En retard</b>{/if}</td>
                     <td>{$co.date|format_sqlite_date_to_french}</td>
