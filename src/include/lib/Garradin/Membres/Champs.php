@@ -65,7 +65,7 @@ class Champs
 	{
 		$champs = parse_ini_file(\Garradin\ROOT . '/include/data/champs_membres.ini', true);
         $champs = array_filter($champs, function ($row) { return !empty($row['install']); });
-        return new \Garradin\Membres\Champs($champs);
+        return new \Garradin\Membres\Champs($champs, true);
 	}
 
     static public function importPresets()
@@ -83,7 +83,7 @@ class Champs
         return array_diff_key(self::importPresets(), (array) $champs->getAll());
     }
 
-	public function __construct($champs)
+	public function __construct($champs, $initial_setup = false)
 	{
 		if ($champs instanceOf Champs)
 		{
@@ -91,7 +91,7 @@ class Champs
 		}
         elseif (is_array($champs))
         {
-            $this->setAll($champs);
+            $this->setAll($champs, $initial_setup);
         }
 		else
 		{
@@ -420,14 +420,14 @@ class Champs
      * @param array $champs Liste des champs
      * @return boolean true
      */
-    public function setAll(array $champs)
+    public function setAll($champs, $initial_setup = false)
     {
         $presets = self::importPresets();
-        $this->champs = new \stdClass;
+        $champs = (object) $champs;
 
-        if (!isset($champs['passe']))
+        if (!isset($champs->passe))
         {
-            $champs['passe'] = ['type' => 'password'];
+            $champs->passe = (object) ['type' => 'password'];
         }
 
         foreach ($champs as $key=>&$config)
@@ -443,11 +443,15 @@ class Champs
             }
 
             $this->_checkField($key, $config);
-
-            $this->champs->$key = $config;
         }
 
         unset($config);
+
+        if ($initial_setup)
+        {
+            $this->champs = $champs;
+            return true;
+        }
 
         if (!array_key_exists('email', $champs))
         {
@@ -480,12 +484,6 @@ class Champs
         {
             throw new UserException('Le champ '.$config->get('champ_identifiant')
                 .' est défini comme identifiant à la connexion et ne peut donc être supprimé des fiches membres.');
-        }
-
-        foreach ($champs as $name=>&$config)
-        {
-            $config = (object) $config;
-            $this->_checkField($name, $config);
         }
 
         $this->champs = $champs;
