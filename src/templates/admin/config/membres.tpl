@@ -258,7 +258,7 @@ var champ_identite = "f_{$config.champ_identite|escape:'js'}";
         };
         actions.appendChild(edit);
 
-        if (field.id != champ_identifiant && field.id != 'f_passe' && field.id != champ_identite && field.id != 'f_numero')
+        if (field.id != champ_identifiant && field.id != 'f_passe' && field.id != champ_identite && field.id != 'f_numero' && field.id != 'f_email')
         {
             var rem = document.createElement('a');
             rem.className = 'icn remove';

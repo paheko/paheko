@@ -91,30 +91,7 @@ class Champs
 		}
         elseif (is_array($champs))
         {
-            $presets = self::importPresets();
-            $this->champs = new \stdClass;
-
-            if (!isset($champs['passe']))
-            {
-                $champs['passe'] = ['type' => 'password'];
-            }
-
-            foreach ($champs as $key=>&$config)
-            {
-                if (is_array($config))
-                {
-                    $config = (object) $config;
-                }
-
-                if (isset($presets[$key]))
-                {
-                    $config->type = $presets[$key]['type'];
-                }
-
-                $this->_checkField($key, $config);
-
-                $this->champs->$key = $config;
-            }
+            $this->setAll($champs);
         }
 		else
 		{
@@ -443,8 +420,35 @@ class Champs
      * @param array $champs Liste des champs
      * @return boolean true
      */
-    public function setAll($champs)
+    public function setAll(array $champs)
     {
+        $presets = self::importPresets();
+        $this->champs = new \stdClass;
+
+        if (!isset($champs['passe']))
+        {
+            $champs['passe'] = ['type' => 'password'];
+        }
+
+        foreach ($champs as $key=>&$config)
+        {
+            if (is_array($config))
+            {
+                $config = (object) $config;
+            }
+
+            if (isset($presets[$key]))
+            {
+                $config->type = $presets[$key]['type'];
+            }
+
+            $this->_checkField($key, $config);
+
+            $this->champs->$key = $config;
+        }
+
+        unset($config);
+
         if (!array_key_exists('email', $champs))
         {
             throw new UserException('Le champ E-Mail ne peut être supprimé des fiches membres.');
