@@ -31,6 +31,7 @@ class Rapprochement
                 LEFT JOIN compta_rapprochement AS r ON r.id_operation = j.id
             WHERE (compte_debit = :compte OR compte_credit = :compte)
                 AND j.date >= :debut AND j.date <= :fin
+                AND compte_debit IS NOT NULL AND compte_credit IS NOT NULL
                 ' . ($sauf_deja_rapprochees ? 'AND r.id_operation IS NULL' : '') . '
             ORDER BY date ASC;';
 
