@@ -386,7 +386,7 @@ class Utils
 
         if (empty($headers['From']))
         {
-            $headers['From'] = sprintf('"%s" <%s>', $config->get('nom_asso'), $config->get('email_envoi_automatique'));
+            $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_envoi_automatique'));
         }
 
         $headers['MIME-Version'] = '1.0';
