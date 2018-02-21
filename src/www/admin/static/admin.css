@@ -996,7 +996,7 @@ dl.cotisation dd {
 #orderFields fieldset .actions {
     display: block;
     position: absolute;
-    top: 1em;
+    top: 0.2em;
     right: 1em;
 }
 
