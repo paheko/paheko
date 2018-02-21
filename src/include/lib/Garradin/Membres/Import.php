@@ -147,9 +147,10 @@ class Import
 	/**
 	 * Importer un CSV de la liste des membres depuis un export Garradin
 	 * @param  string $path 	Chemin vers le CSV
+	 * @param  int    $current_user_id
 	 * @return boolean          TRUE en cas de succès
 	 */
-	public function fromCSV($path)
+	public function fromCSV($path, $current_user_id)
 	{
 		if (!file_exists($path) || !is_readable($path))
 		{
@@ -235,6 +236,12 @@ class Import
 			try {
 				if ($numero && ($id = $membres->getIDWithNumero($numero)))
 				{
+					if ($id === $current_user_id)
+					{
+						// Ne pas modifier le membre courant, on risque de se tirer une balle dans le pied
+						continue;
+					}
+
 					$membres->edit($id, $data);
 				}
 				else

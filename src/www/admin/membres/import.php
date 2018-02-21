@@ -36,7 +36,7 @@ if (f('import'))
             }
             elseif (f('type') == 'garradin')
             {
-                $import->fromCSV($_FILES['upload']['tmp_name']);
+                $import->fromCSV($_FILES['upload']['tmp_name'], $user->id);
             }
             else
             {
