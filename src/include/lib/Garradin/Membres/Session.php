@@ -26,7 +26,7 @@ class Session extends \KD2\UserSession
 	// Extension des méthodes de UserSession
 	public function __construct()
 	{
-		$url = parse_url(WWW_URL);
+		$url = parse_url(ADMIN_URL);
 
 		parent::__construct(DB::getInstance(), [
 			'cookie_domain' => $url['host'],
