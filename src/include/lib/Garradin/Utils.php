@@ -140,7 +140,7 @@ class Utils
             $uri .= '?' . http_build_query($qs);
         }
 
-        return WWW_URL . $uri;
+        return ADMIN_URL . $uri;
     }
 
     public static function redirect($destination=false, $exit=true)
