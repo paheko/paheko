@@ -33,7 +33,6 @@ catch (\InvalidArgumentException $e)
 }
 
 $session = new Membres\Session;
-$user = $session->isLogged() ? $session->getUser() : false;
 
 if (!$file->checkAccess($session))
 {
