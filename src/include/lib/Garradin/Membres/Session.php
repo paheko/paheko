@@ -30,7 +30,7 @@ class Session extends \KD2\UserSession
 
 		parent::__construct(DB::getInstance(), [
 			'cookie_domain' => $url['host'],
-			'cookie_path'   => $url['path'],
+			'cookie_path'   => preg_replace('!/admin/$!', '', $url['path']),
 			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
 		]);
 	}
