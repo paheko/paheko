@@ -541,7 +541,7 @@ class Champs
     		else
     			$type = 'TEXT';
 
-    		$line = $key . ' ' . $type . ',';
+    		$line = sprintf('"%s" %s,', $key, $type);
 
             if (!empty($cfg->title))
             {
