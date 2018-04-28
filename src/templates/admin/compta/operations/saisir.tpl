@@ -197,6 +197,8 @@
                 changeTypeSaisie(this.value);
             };
         }
+
+        $('#f_date').focus();
     } ());
     {/literal}
     </script>
