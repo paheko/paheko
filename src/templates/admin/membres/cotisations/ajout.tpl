@@ -120,10 +120,13 @@
     $('#f_moyen_paiement').onchange = changeMoyenPaiement;
     $('#f_a_encaisser').onchange = cocherAEncaisser;
 
-    $('#f_id_cotisation').onchange = function () {
-        if (this.options[this.selectedIndex].getAttribute('data-compta'))
+    function changeCotisation()
+    {
+        var s = $('#f_id_cotisation');
+
+        if (s.options[s.selectedIndex].getAttribute('data-compta'))
         {
-            $('#f_montant').value = this.options[this.selectedIndex].getAttribute('data-amount'); 
+            $('#f_montant').value = s.options[s.selectedIndex].getAttribute('data-amount'); 
             g.toggle('.f_compta', true);
             changeMoyenPaiement();
             cocherAEncaisser();
@@ -132,11 +135,17 @@
         {
             g.toggle('.f_compta', false);
         }
-    };
+    }
+
+    $('#f_id_cotisation').onchange = changeCotisation;
 
     if (!$('#f_id_cotisation').options[$('#f_id_cotisation').selectedIndex].getAttribute('data-compta'))
     {
         g.toggle('.f_compta', false);
+    }
+    else
+    {
+        changeCotisation();
     }
 } ());
 {/literal}
