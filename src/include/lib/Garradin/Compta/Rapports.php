@@ -328,13 +328,17 @@ class Rapports
         {
             if ($p['solde'] == 0)
             {
-                unset($source[$parent]);
+                unset($source['comptes'][$parent]);
                 continue;
             }
 
-            $this->removeEmptyAccounts($p);
+            foreach ($p['comptes'] as $id=>$solde)
+            {
+                if ($solde == 0)
+                {
+                    unset($source[$parent]['comptes'][$id]);
+                }
+            }
         }
-
-        return true;
     }
 }
