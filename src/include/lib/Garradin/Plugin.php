@@ -345,6 +345,31 @@ class Plugin
 	}
 
 	/**
+	 * Vérifie que les plugins système sont bien installés et sinon les réinstalle
+	 * @return void
+	 */
+	static public function checkAndInstallSystemPlugins()
+	{
+		$system = explode(',', PLUGINS_SYSTEM);
+		$db = DB::getInstance();
+		$installed = $db->get('SELECT id FROM plugins WHERE ' . $db->where('id', 'IN', $system));
+
+		$missing = array_diff($system, $installed);
+
+		if (count($missing) == 0)
+		{
+			return true;
+		}
+
+		foreach ($missing as $plugin)
+		{
+			self::install($plugin);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
