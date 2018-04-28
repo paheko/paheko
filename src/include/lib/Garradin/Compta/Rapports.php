@@ -176,6 +176,10 @@ class Rapports
             }
         }
 
+        // Suppression des soldes nuls
+        $this->removeEmptyAccounts($produits);
+        $this->removeEmptyAccounts($charges);
+
         $res->finalize();
 
         $resultat = $produits['total'] - $charges['total'];
@@ -311,40 +315,26 @@ class Rapports
         }
 
         // Suppression des soldes nuls
-        foreach ($passif['comptes'] as $parent=>$p)
+        $this->removeEmptyAccounts($passif);
+        $this->removeEmptyAccounts($actif);
+
+        return ['actif' => $actif, 'passif' => $passif];
+    }
+
+    protected function removeEmptyAccounts(&$source)
+    {
+        // Suppression des soldes nuls
+        foreach ($source['comptes'] as $parent=>$p)
         {
             if ($p['solde'] == 0)
             {
-                unset($passif['comptes'][$parent]);
+                unset($source[$parent]);
                 continue;
             }
 
-            foreach ($p['comptes'] as $id=>$solde)
-            {
-                if ($solde == 0)
-                {
-                    unset($passif['comptes'][$parent]['comptes'][$id]);
-                }
-            }
+            $this->removeEmptyAccounts($p);
         }
 
-        foreach ($actif['comptes'] as $parent=>$p)
-        {
-            if (empty($p['solde']))
-            {
-                unset($actif['comptes'][$parent]);
-                continue;
-            }
-
-            foreach ($p['comptes'] as $id=>$solde)
-            {
-                if (empty($solde))
-                {
-                    unset($actif['comptes'][$parent]['comptes'][$id]);
-                }
-            }
-        }
-
-        return ['actif' => $actif, 'passif' => $passif];
+        return true;
     }
 }
