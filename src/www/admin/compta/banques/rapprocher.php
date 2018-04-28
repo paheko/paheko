@@ -38,12 +38,21 @@ if (!$debut || !$fin)
 $journal = $rapprochement->getJournal($compte->id, $debut, $fin, $solde_initial, $solde_final, (bool) qg('sauf'));
 
 // Enregistrement des cases cochées
-if (f('save') && $form->check('compta_rapprocher_' . $compte->id))
+if ((f('save') || f('save_next')) && $form->check('compta_rapprocher_' . $compte->id))
 {
     try
     {
         $rapprochement->record($compte->id, $journal, f('rapprocher'), $user->id);
-        Utils::redirect(Utils::getSelfURL());
+
+        if (f('save'))
+        {
+            Utils::redirect(Utils::getSelfURL());
+        }
+        else
+        {
+            $next = Utils::modifyDate($debut, '+1 month', true);
+            Utils::redirect(sprintf('%scompta/banques/rapprocher.php?id=%s&debut=%s&fin=%s&sauf=%s', ADMIN_URL, $compte->id, date('Y-m-01', $next), date('Y-m-t', $next), (int) qg('sauf')));
+        }
     }
     catch (UserException $e)
     {

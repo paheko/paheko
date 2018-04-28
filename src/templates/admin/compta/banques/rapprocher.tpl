@@ -89,6 +89,7 @@
     <p class="submit">
         {csrf_field key="compta_rapprocher_%s"|args:$compte.id}
         <input type="submit" name="save" value="Enregistrer" />
+        <input type="submit" name="save_next" value="Enregistrer et aller au mois suivant &rarr;" class="minor" />
     </p>
 </form>
 
