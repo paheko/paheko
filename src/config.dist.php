@@ -93,6 +93,9 @@ const PLUGINS_ROOT = DATA_ROOT . '/plugins';
  * Plugins fixes qui ne peuvent être désinstallés par l'utilisateur
  * (séparés par une virgule)
  *
+ * Ils seront aussi réinstallés en cas de restauration de sauvegarde,
+ * s'ils ne sont pas dans la sauvegarde.
+ *
  * Exemple : PLUGINS_SYSTEM = 'gestion_emails,factures'
  *
  * Défaut : aucun (chaîne vide)
