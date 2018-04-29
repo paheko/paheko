@@ -81,7 +81,7 @@ class Session extends \KD2\UserSession
 	protected function getRememberMeSelector($selector)
 	{
 		return $this->db->first('SELECT selecteur AS selector, hash,
-			m.id_membre AS user_id, m.passe AS user_password, expire AS expiry
+			s.id_membre AS user_id, m.passe AS user_password, expire AS expiry
 			FROM membres_sessions AS s
 			INNER JOIN membres AS m ON m.id = s.id_membre
 			WHERE s.selecteur = ? LIMIT 1;', $selector);
