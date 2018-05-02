@@ -351,10 +351,16 @@ class Plugin
 	static public function checkAndInstallSystemPlugins()
 	{
 		$system = explode(',', PLUGINS_SYSTEM);
+
+		if (count($system) == 0)
+		{
+			return true;
+		}
+
 		$db = DB::getInstance();
 		$installed = $db->get('SELECT id FROM plugins WHERE ' . $db->where('id', 'IN', $system));
 
-		$missing = array_diff($system, $installed);
+		$missing = array_diff($system, (array) $installed);
 
 		if (count($missing) == 0)
 		{
