@@ -162,9 +162,12 @@ class Exercices
             ROUND(COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = compta_comptes.id AND id_exercice = :id), 0), 2)
             - ROUND(COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = compta_comptes.id AND id_exercice = :id), 0), 2) AS solde
             FROM compta_comptes 
-            INNER JOIN compta_journal ON compta_comptes.id = compta_journal.compte_debit 
-                OR compta_comptes.id = compta_journal.compte_credit
-            WHERE id_exercice = :id AND solde != 0 AND CAST(substr(compta_comptes.id, 1, 1) AS INTEGER) <= 5
+            INNER JOIN compta_journal ON 
+                compta_journal.id_exercice = :id AND (
+                    (compta_comptes.id = compta_journal.compte_debit AND CAST(substr(compta_journal.compte_debit, 1, 1) AS INTEGER) <= 5)
+                    OR (compta_comptes.id = compta_journal.compte_credit AND CAST(substr(compta_journal.compte_credit, 1, 1) AS INTEGER) <= 5)
+                )
+            WHERE solde != 0
             GROUP BY compta_comptes.id;', ['id' => $old_id]);
 
         $diff = 0;
@@ -196,7 +199,7 @@ class Exercices
                 'remarques'     =>  'Report de solde créé automatiquement à la clôture de l\'exercice précédent',
             ]);
         }
-        
+
         // FIXME utiliser $diff pour équilibrer
 
         $db->commit();
