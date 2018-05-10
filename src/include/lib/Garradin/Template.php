@@ -77,6 +77,11 @@ class Template extends \KD2\Smartyer
 				$this->liste_comptes = (new Compta\Comptes)->getListAll();
 			}
 
+			if (!isset($this->liste_comptes[$compte]))
+			{
+				return '';
+			}
+
 			return $this->liste_comptes[$compte];
 		});
 
