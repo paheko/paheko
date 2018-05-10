@@ -112,19 +112,21 @@ class Session extends \KD2\UserSession
 	// Ici checkOTP utilise NTP en second recours
 	public function checkOTP($secret, $code)
 	{
-		if (!Security_OTP::TOTP($secret, $code))
+		if (Security_OTP::TOTP($secret, $code))
 		{
-			// Vérifier encore, mais avec le temps NTP
-			// au cas où l'horloge du serveur n'est pas à l'heure
-			$time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER);
-
-			if (!Security_OTP::TOTP($secret, $code, $time))
-			{
-				return false;
-			}
+			return true;
 		}
 
-		return true;
+		// Vérifier encore, mais avec le temps NTP
+		// au cas où l'horloge du serveur n'est pas à l'heure
+		if (\Garradin\NTP_SERVER 
+			&& ($time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER))
+			&& Security_OTP::TOTP($secret, $code, $time))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	public function getOTPSecret($secret = null)
