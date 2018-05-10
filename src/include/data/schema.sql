@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS cotisations
 -- Types de cotisations et activités
 (
     id INTEGER PRIMARY KEY NOT NULL,
-    id_categorie_compta INTEGER NULL, -- NULL si le type n'est pas associé automatiquement à la compta
+    id_categorie_compta INTEGER NULL REFERENCES compta_categories (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
 
     intitule TEXT NOT NULL,
     description TEXT NULL,
@@ -53,9 +53,7 @@ CREATE TABLE IF NOT EXISTS cotisations
 
     duree INTEGER NULL, -- En jours
     debut TEXT NULL, -- timestamp
-    fin TEXT NULL,
-
-    FOREIGN KEY (id_categorie_compta) REFERENCES compta_categories (id)
+    fin TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS cotisations_membres

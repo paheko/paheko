@@ -308,6 +308,18 @@ if (version_compare($v, '0.8.0-beta4', '<'))
     $comptes->importPlan();
 }
 
+if (version_compare($v, '0.8.3', '<'))
+{
+    // Désactivation des foreign keys AVANT le début de la transaction
+    $db->exec('PRAGMA foreign_keys = OFF;');
+
+    $db->begin();
+
+    $db->import(ROOT . '/include/data/0.8.3.sql');
+
+    $db->commit();
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());
