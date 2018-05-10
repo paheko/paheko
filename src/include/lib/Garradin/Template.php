@@ -214,7 +214,15 @@ class Template extends \KD2\Smartyer
 		$couleur1 = implode(', ', sscanf($config->get('couleur1'), '#%02x%02x%02x'));
 		$couleur2 = implode(', ', sscanf($config->get('couleur2'), '#%02x%02x%02x'));
 
-		$f = new Fichiers($config->get('image_fond'));
+		try {
+			$f = new Fichiers($config->get('image_fond'));
+		}
+		catch (\InvalidArgumentException $e)
+		{
+			// Fichier qui n'existe pas
+			return '';
+		}
+
 		$image_fond = $f->getURL();
 
 		$out = '
