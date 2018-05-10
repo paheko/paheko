@@ -178,6 +178,16 @@ const USE_CRON = false;
 const ENABLE_XSENDFILE = false;
 
 /**
+ * Serveur NTP utilisé pour les connexions avec TOTP
+ * (utilisé seulement si le code OTP fourni est faux)
+ *
+ * Désactiver (false) si vous êtes sûr que votre serveur est toujours à l'heure.
+ *
+ * Défaut : fr.pool.ntp.org
+ */
+const NTP_SERVER = 'fr.pool.ntp.org';
+
+/**
  * Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
  * mail() de PHP
  *
