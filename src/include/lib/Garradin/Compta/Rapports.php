@@ -46,8 +46,10 @@ class Rapports
         {
             $compte = $row[0];
 
-            if (is_null($compte))
+            if (trim($compte) === '')
+            {
                 continue;
+            }
 
             $classe = substr($compte, 0, 1);
             $parent = substr($compte, 0, 2);
