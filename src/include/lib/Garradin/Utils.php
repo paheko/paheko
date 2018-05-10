@@ -465,7 +465,10 @@ class Utils
         {
             if ($file[0] != '.')
             {
-                unlink($path . '/' . $file);
+            	if (file_exists($path . DIRECTORY_SEPARATOR . $file))
+            	{
+                	unlink($path . DIRECTORY_SEPARATOR . $file);
+                }
             }
         }
 
