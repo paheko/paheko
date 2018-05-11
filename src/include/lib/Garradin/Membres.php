@@ -333,7 +333,14 @@ class Membres
         }
         else
         {
-            $where = sprintf('WHERE transliterate_to_ascii(%s) LIKE %s', $field, $db->quote('%' . Utils::transliterateToAscii($query) . '%'));
+            // Si le champ est de type 'select' (sélecteur à choix unique), ne pas utiliser de LIKE mais valeur exacte
+            // @link https://fossil.kd2.org/garradin/info/587f730b661a7ce16bad215d4bd02195e754ec57
+            if ($champ->type != 'select')
+            {
+                $query = '%' . $query . '%';
+            }
+
+            $where = sprintf('WHERE transliterate_to_ascii(%s) LIKE %s', $field, $db->quote(Utils::transliterateToAscii($query)));
             $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $field);
         }
 
