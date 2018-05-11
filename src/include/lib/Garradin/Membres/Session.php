@@ -35,6 +35,17 @@ class Session extends \KD2\UserSession
 		]);
 	}
 
+	/**
+	 * Suppression anciens cookies qui avaient un chemin incorrect
+	 * FIXME supprimer en 2019
+	 * @return void
+	 */
+	public function cleanOldCookies()
+	{
+		setcookie($this->cookie_name, null, -1, '/admin/', $this->cookie_domain, $this->cookie_secure, true);
+		setcookie($this->remember_me_cookie_name, null, -1, '/admin/', $this->cookie_domain, $this->cookie_secure, true);
+	}
+
 	protected function getUserForLogin($login)
 	{
 		$champ_id = Config::getInstance()->get('champ_identifiant');

@@ -42,6 +42,8 @@ if (f('login'))
     }
 }
 
+$session->cleanOldCookies();
+
 $champs = $config->get('champs_membres');
 
 $champ = $champs->get($config->get('champ_identifiant'));
