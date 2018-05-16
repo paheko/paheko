@@ -320,6 +320,15 @@ if (version_compare($v, '0.8.3', '<'))
     $db->commit();
 }
 
+if (version_compare($v, '0.8.4', '<'))
+{
+    $db->begin();
+
+    $db->import(ROOT . '/include/data/0.8.4.sql');
+
+    $db->commit();
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());
