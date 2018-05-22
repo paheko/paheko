@@ -358,7 +358,7 @@ class Plugin
 		}
 
 		$db = DB::getInstance();
-		$installed = $db->get('SELECT id FROM plugins WHERE ' . $db->where('id', 'IN', $system));
+		$installed = $db->getAssoc('SELECT id, id FROM plugins WHERE ' . $db->where('id', 'IN', $system));
 
 		$missing = array_diff($system, (array) $installed);
 
