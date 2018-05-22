@@ -71,7 +71,7 @@ class Membres
             {
                 if ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
-                    $dt = new DateTime($data[$key]);
+                    $dt = new \DateTime($data[$key]);
                     $data[$key] = $dt->format('Y-m-d H:i');
                 }
                 elseif ($config->type == 'tel')
