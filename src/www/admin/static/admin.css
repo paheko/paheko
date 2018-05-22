@@ -91,6 +91,7 @@ body#transparent {
 .header .menu {
     position: fixed;
     overflow: auto;
+    z-index: 10000;
     width: 170px;
     top: 0;
     bottom: 0;
