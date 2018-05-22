@@ -409,7 +409,7 @@ class Utils
         foreach ($to as $recipient)
         {
             // Ne pas envoyer de mail à des adresses invalides
-            if (!var_filter($recipient, FILTER_VALIDATE_EMAIL))
+            if (!filter_var($recipient, FILTER_VALIDATE_EMAIL))
             {
                 continue;
             }
