@@ -62,6 +62,8 @@
     <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
     <dt>Dernière connexion</dt>
     <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
+    <dt>Mot de passe</dt>
+    <dd>{if empty($membre.passe)}Non{else}<b class="icn">☑</b> Oui{if !empty($membre.otp_secret)} (<b class="icn">🔒</b> avec second facteur activé){else} (<b class="icn">🔓</b> second facteur non activé){/if}{/if}</dd>
     {foreach from=$champs key="c" item="config"}
     <dt>{$config.title}</dt>
     <dd>
