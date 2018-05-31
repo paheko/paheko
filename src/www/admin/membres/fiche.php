@@ -17,7 +17,7 @@ if (!$membre)
 }
 
 $champs = $config->get('champs_membres');
-$tpl->assign('champs', $champs->getAll());
+$tpl->assign('champs', $champs->getList());
 
 $cats = new Membres\Categories;
 

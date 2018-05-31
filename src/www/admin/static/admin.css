@@ -411,6 +411,7 @@ ul.actions {
     border-bottom: .1em solid #9c4f15;
     border-bottom: .1em solid rgb(var(--gMainColor));
     padding: 0 1em;
+    z-index: 100;
 }
 
 ul.actions li {
@@ -933,7 +934,6 @@ table.rib th, table.rib td { padding: .1em .3em; border: 1px solid #ccc; }
 
 dl.describe {
     margin-bottom: 1em;
-    clear: both;
 }
 
 dl.describe > dt {
@@ -971,13 +971,22 @@ dl.cotisation dd {
     margin: .2em 0 .4em 1em;
 }
 
-.infos_asso {
-    width: 20%;
+aside.describe {
+    width: 20em;
     float: right;
     margin: .5em;
-    border: .1em solid #ccc;
-    background: #eee;
+    background: rgb(255, 174, 80);
+    background: rgba(217, 134, 40, 0.2);
+    background: rgba(var(--gSecondColor), 0.2);
+    border-radius: .5em;
+    border: 2px solid rgb(217, 134, 40);
+    border-color: rgba(var(--gSecondColor), 0.5);
     padding: .5em;
+    z-index: 200;
+}
+
+aside.describe dt {
+    float: none;
 }
 
 #orderFields fieldset {

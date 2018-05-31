@@ -55,15 +55,31 @@
  {/if}
 </dl>
 
+<aside class="describe">
+	<dl class="describe">
+		<dt>Catégorie</dt>
+		<dd>{$categorie.nom} <span class="droits">{format_droits droits=$categorie}</span></dd>
+		<dt>Inscription</dt>
+		<dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
+		<dt>Dernière connexion</dt>
+		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
+		<dt>Mot de passe</dt>
+		<dd>
+			{if empty($membre.passe)}
+				Pas de mot de passe configuré
+			{else}
+				<b class="icn">☑</b> Oui
+				{if !empty($membre.otp_secret)}
+					(<b class="icn">🔒</b> avec second facteur)
+				{else}
+					(<b class="icn">🔓</b> sans second facteur)
+				{/if}
+		{/if}
+		</dd>
+	</dl>
+</aside>
+
 <dl class="describe">
-    <dt>Catégorie</dt>
-    <dd>{$categorie.nom} <span class="droits">{format_droits droits=$categorie}</span></dd>
-    <dt>Inscription</dt>
-    <dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
-    <dt>Dernière connexion</dt>
-    <dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
-    <dt>Mot de passe</dt>
-    <dd>{if empty($membre.passe)}Non{else}<b class="icn">☑</b> Oui{if !empty($membre.otp_secret)} (<b class="icn">🔒</b> avec second facteur activé){else} (<b class="icn">🔓</b> second facteur non activé){/if}{/if}</dd>
     {foreach from=$champs key="c" item="config"}
     <dt>{$config.title}</dt>
     <dd>
@@ -84,8 +100,6 @@
             {$membre->$c|get_country_name}
         {elseif $config.type == 'date' || $config.type == 'datetime'}
             {$membre->$c|format_sqlite_date_to_french}
-        {elseif $c == 'passe'}
-            Oui
         {elseif $config.type == 'password'}
             *******
         {elseif $config.type == 'multiple'}
