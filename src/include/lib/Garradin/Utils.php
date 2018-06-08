@@ -731,6 +731,6 @@ class Utils
             return strtr($field, ['"' => '""', "\r\n" => "\n"]);
         });
 
-        return '"' . implode('", "', $row) . '"';
+        return '"' . implode('","', $row) . '"';
     }
 }
