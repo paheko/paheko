@@ -406,9 +406,15 @@ class Plugin
 				// Sélectionner les archives PHAR
 				$file = $match[1];
 			}
-			elseif (!is_dir(PLUGINS_ROOT . '/' . $file))
+			elseif (is_dir(PLUGINS_ROOT . '/' . $file)
+				&& preg_match('!^([a-zA-Z0-9_.-]+)$!i', $file)
+				&& is_file(sprintf('%s/%s/garradin_plugin.ini', PLUGINS_ROOT, $file)))
 			{
-				// ignorer tout ce qui n'est pas un répertoire ou une archive PHAR
+				// Rien à faire, le nom valide du plugin est déjà dans "$file"
+			}
+			else
+			{
+				// ignorer tout ce qui n'est pas un répertoire ou une archive PHAR valides
 				continue;
 			}
 
