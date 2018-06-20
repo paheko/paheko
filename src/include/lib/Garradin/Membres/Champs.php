@@ -12,7 +12,6 @@ class Champs
 	protected $champs = null;
 
     protected $system_fields = [
-        'passe',
         'date_connexion',
         'date_inscription',
         'clef_pgp',
