@@ -111,6 +111,7 @@
         <p>
             {csrf_field key="config_membres"}
             <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+            <input type="hidden" name="champs" value="{$champs|escape:json|escape}" />
         </p>
     </fieldset>
 </form>
