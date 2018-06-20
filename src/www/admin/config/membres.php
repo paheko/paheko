@@ -58,13 +58,9 @@ if (f('save') || f('add') || f('review') || f('reset'))
                 }
                 elseif (f('new'))
                 {
-                    $presets = Membres\Champs::importPresets();
                     $new = f('new');
 
-                    if (array_key_exists($new, $presets))
-                    {
-                        throw new UserException('Le champ personnalisé ne peut avoir le même nom qu\'un champ pré-défini.');
-                    }
+                    $champs->checkCustomFieldName($new);
 
                     $config = [
                         'type'  =>  f('new_type'),

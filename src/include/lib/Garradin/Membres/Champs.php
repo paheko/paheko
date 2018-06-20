@@ -11,6 +11,16 @@ class Champs
 {
 	protected $champs = null;
 
+    protected $system_fields = [
+        'passe',
+        'date_connexion',
+        'date_inscription',
+        'clef_pgp',
+        'secret_otp',
+        'id',
+        'id_categorie',
+    ];
+
 	protected $types = [
 		'email'		=>	'Adresse E-Mail',
 		'url'		=>	'Adresse URL',
@@ -415,6 +425,26 @@ class Champs
 		return true;
 	}
 
+    public function checkCustomFieldName($name)
+    {
+        if (in_array($name, $this->system_fields))
+        {
+            throw new UserException('Ce nom unique de champ existe déjà dans les champs systèmes utilisés par Garradin.');
+        }
+
+        $presets = self::importPresets();
+
+        if (array_key_exists($name, $presets))
+        {
+            throw new UserException('Le champ personnalisé ne peut avoir le même nom qu\'un champ pré-défini.');
+        }
+
+        if (isset($this->champs->$name))
+        {
+            throw new UserException('Ce nom est déjà utilisé par un autre champ.');
+        }
+    }
+
     /**
      * Modifie les champs en interne en vérifiant que tout va bien
      * @param array $champs Liste des champs
@@ -432,6 +462,11 @@ class Champs
 
         foreach ($champs as $key=>&$config)
         {
+            if (in_array($key, $this->system_fields))
+            {
+                throw new UserException('Ce nom unique de champ existe déjà dans les champs systèmes utilisés par Garradin.');
+            }
+
             if (is_array($config))
             {
                 $config = (object) $config;
