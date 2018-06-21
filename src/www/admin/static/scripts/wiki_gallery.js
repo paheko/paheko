@@ -10,10 +10,10 @@
         for (var i = 0; i < items.length; i++)
         {
             var a = items[i];
-            a.pos = i;
+            a.setAttribute('data-pos', i);
             a.onclick= function (e) {
                 e.preventDefault();
-                openImageBrowser(items, this.pos);
+                openImageBrowser(items, this.getAttribute('data-pos'));
                 return false;
             };
         }
