@@ -3,6 +3,7 @@
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
     <li><a href="{$admin_url}membres/import.php?export">Exporter en CSV</a></li>
+    <li><a href="{$admin_url}membres/import.php?export=excel">Exporter en CSV (Excel)</a></li>
 </ul>
 
 {form_errors}
