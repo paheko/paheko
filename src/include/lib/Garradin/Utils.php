@@ -723,14 +723,31 @@ class Utils
         }
     }
 
-    static public function row_to_csv($row)
+    static public function row_to_csv($row, $excel = false)
     {
         $row = (array) $row;
+
+        $eol = "\r\n";
+        // Excel ne comprends pas les virgules en france, le c*****!
+        $separator = $excel ? '";"' : '","';
 
         array_walk($row, function ($field) {
             return strtr($field, ['"' => '""', "\r\n" => "\n"]);
         });
 
-        return '"' . implode('","', $row) . '"';
+        $out = '"' . implode($separator, $row) . '"' . $eol;
+
+        return $out;
+    }
+
+    static public function csv_header($excel = false)
+    {
+        if ($excel)
+        {
+            // BOM spécifique pour Excel sinon il ne sait pas lire l'UTF8!
+            return chr(0xEF) . chr(0xBB) . chr(0xBF);
+        }
+
+        return '';
     }
 }

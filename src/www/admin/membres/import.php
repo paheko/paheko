@@ -11,7 +11,7 @@ if (null !== qg('export'))
 {
     header('Content-type: application/csv');
     header('Content-Disposition: attachment; filename="Export membres - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.csv"');
-    $import->toCSV();
+    $import->toCSV(qg('export') == 'excel' ? true : false);
     exit;
 }
 

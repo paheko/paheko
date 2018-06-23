@@ -262,7 +262,7 @@ class Import
 		return true;
 	}
 
-    public function toCSV()
+    public function toCSV($excel = false)
     {
         $db = DB::getInstance();
 
@@ -273,6 +273,7 @@ class Import
             LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
 
         $fp = fopen('php://output', 'w');
+        fputs($fp, Utils::csv_header($excel));
         $header = false;
 
         while ($row = $res->fetchArray(SQLITE3_ASSOC))
@@ -281,11 +282,11 @@ class Import
 
             if (!$header)
             {
-                fputcsv($fp, array_keys($row));
+                fputs($fp, Utils::row_to_csv(array_keys($row), $excel));
                 $header = true;
             }
 
-            fputs($fp, Utils::row_to_csv($row) . "\r\n");
+            fputs($fp, Utils::row_to_csv($row, $excel));
         }
 
         fclose($fp);
