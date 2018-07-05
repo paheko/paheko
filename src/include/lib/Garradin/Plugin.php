@@ -53,7 +53,7 @@ class Plugin
 
 		if (!$this->plugin)
 		{
-			throw new UserException('Ce plugin n\'existe pas ou n\'est pas installé correctement.');
+			throw new UserException(sprintf('Le plugin "%s" n\'existe pas ou n\'est pas installé correctement.', $id));
 		}
 
 		$this->plugin->config = json_decode($this->plugin->config);
