@@ -294,7 +294,7 @@ input[type=number], input[type=date] {
     min-width: 2em;
 }
 
-input[type=submit], input[type=button], input[type=checkbox] {
+input[type=submit], input[type=button], input[type=checkbox], button {
     padding: 0.3em;
     cursor: pointer;
     transition: opacity .5s ease;
@@ -1070,4 +1070,18 @@ img.qrcode {
     padding: .5em;
     border: .5em solid #000;
     background: #fff;
+}
+
+.exercice button {
+    margin: .5em;
+    padding: .5em;
+}
+
+.exercice button b.icn {
+    font-size: 2em;
+    display: block;
+}
+
+.exercice button:hover {
+    opacity: .7;
 }

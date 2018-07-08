@@ -52,7 +52,6 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: #ccc;
 }
 
-#rapport table table tfoot tr {
-    background: #666;
-    color: #fff;
+.noprint {
+    display: none;
 }
