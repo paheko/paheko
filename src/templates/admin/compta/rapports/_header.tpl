@@ -6,4 +6,12 @@
         <p>Exercice comptable {if $exercice.cloture}clôturé{else}en cours{/if} du
             {$exercice.debut|date_fr:'d/m/Y'} au {$exercice.fin|date_fr:'d/m/Y'}, généré le {$cloture|date_fr:'d/m/Y'}</p>
     {/if}
+
+	<p class="noprint">
+		<button onclick="window.print(); return false;">
+			<b href="#need_js" class="action icn print">⎙</b>
+			Imprimer
+		</button>
+	</p>
 </div>
+
