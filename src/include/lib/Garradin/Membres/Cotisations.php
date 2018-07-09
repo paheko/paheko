@@ -279,7 +279,7 @@ class Cotisations
 		return $db->get('SELECT cm.id_membre, cm.date, cm.id, m.numero,
 			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN c.fin >= date() ELSE 1 END AS a_jour
+			WHEN c.fin IS NOT NULL THEN c.fin <= date() ELSE 1 END AS a_jour
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 				INNER JOIN membres AS m ON m.id = cm.id_membre
@@ -319,7 +319,7 @@ class Cotisations
 		$db = DB::getInstance();
 		return $db->get('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND c.fin >= date())
+			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND date() <= c.fin AND date() >= c.debut)
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration,
@@ -328,6 +328,7 @@ class Cotisations
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 			WHERE cm.id_membre = ?
+				AND ((c.fin IS NOT NULL AND date() <= c.fin AND date() >= c.debut) OR c.fin IS NULL)
 			GROUP BY cm.id_cotisation
 			ORDER BY cm.date DESC;', (int)$id);
 	}
@@ -344,7 +345,7 @@ class Cotisations
 		$db = DB::getInstance();
 		return $db->first('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND c.fin >= date())
+			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND date() <= c.fin AND date() >= c.debut)
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration
