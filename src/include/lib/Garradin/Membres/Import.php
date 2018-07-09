@@ -8,6 +8,8 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 
+use KD2\ODSWriter;
+
 class Import
 {
 	/**
@@ -262,35 +264,58 @@ class Import
 		return true;
 	}
 
-    public function toCSV($excel = false)
-    {
+	protected function export()
+	{
         $db = DB::getInstance();
 
         $champs = Config::getInstance()->get('champs_membres')->getKeys();
-        $champs = 'm.' . implode(', m.', $champs);
+        $champs_sql = 'm.' . implode(', m.', $champs);
 
-        $res = $db->prepare('SELECT ' . $champs . ', c.nom AS categorie FROM membres AS m 
+        $res = $db->prepare('SELECT ' . $champs_sql . ', c.nom AS categorie FROM membres AS m 
             LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
 
+        return [array_merge($champs, ['categorie']), $res];
+	}
+
+    public function toCSV()
+    {
+    	list($champs, $result) = $this->export();
+
         $fp = fopen('php://output', 'w');
-        fputs($fp, Utils::csv_header($excel));
         $header = false;
 
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
+        while ($row = $result->fetchArray(SQLITE3_ASSOC))
         {
             unset($row->passe);
 
             if (!$header)
             {
-                fputs($fp, Utils::row_to_csv(array_keys($row), $excel));
+                fputs($fp, Utils::row_to_csv(array_keys($row)));
                 $header = true;
             }
 
-            fputs($fp, Utils::row_to_csv($row, $excel));
+            fputs($fp, Utils::row_to_csv($row));
         }
 
         fclose($fp);
 
         return true;
+    }
+
+    public function toODS()
+    {
+    	list($champs, $result) = $this->export();
+        $ods = new ODSWriter;
+        $ods->table_name = 'Membres';
+
+        $ods->add($champs);
+
+        while ($row = $result->fetchArray(SQLITE3_ASSOC))
+        {
+        	unset($row->passe);
+        	$ods->add($row);
+        }
+
+        $ods->output();
     }
 }
