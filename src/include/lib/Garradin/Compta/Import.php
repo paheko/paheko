@@ -6,9 +6,11 @@ use \Garradin\DB;
 use \Garradin\Utils;
 use \Garradin\UserException;
 
+use KD2\ODSWriter;
+
 class Import
 {
-	protected $csv_header = [
+	protected $header = [
 		'Numéro mouvement',
 		'Date',
 		'Type de mouvement',
@@ -25,11 +27,9 @@ class Import
 		'Remarques'
 	];
 
-	public function toCSV($exercice)
+	protected function export($exercice)
 	{
-		$db = DB::getInstance();
-
-		$res = $db->prepare('SELECT
+		return DB::getInstance()->prepare('SELECT
 			journal.id,
 			strftime(\'%d/%m/%Y\', date) AS date,
 			(CASE cat.type WHEN 1 THEN \'Recette\' WHEN -1 THEN \'Dépense\' ELSE \'Autre\' END) AS type,
@@ -52,10 +52,15 @@ class Import
 			WHERE id_exercice = '.(int)$exercice.'
 			ORDER BY journal.date;
 		')->execute();
+	}
+
+	public function toCSV($exercice)
+	{
+		$res = $this->export($exercice);
 
 		$fp = fopen('php://output', 'w');
 
-		fputcsv($fp, $this->csv_header);
+		fputcsv($fp, $this->header);
 
 		while ($row = $res->fetchArray(SQLITE3_ASSOC))
 		{
@@ -66,6 +71,23 @@ class Import
 
 		return true;
 	}
+
+    public function toODS($exercice)
+    {
+    	$result = $this->export($exercice);
+        $ods = new ODSWriter;
+        $ods->table_name = 'Journal';
+
+        $ods->add($this->header);
+
+        while ($row = $result->fetchArray(SQLITE3_ASSOC))
+        {
+        	unset($row->passe);
+        	$ods->add($row);
+        }
+
+        $ods->output();
+    }
 
 	public function fromCSV($path)
 	{

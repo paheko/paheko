@@ -7,11 +7,20 @@ $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
 $import = new Membres\Import;
 
-if (null !== qg('export'))
+$tpl->assign('tab', null !== qg('export') ? 'export' : 'import');
+
+if (qg('export') == 'csv')
 {
     header('Content-type: application/csv');
     header('Content-Disposition: attachment; filename="Export membres - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.csv"');
-    $import->toCSV(qg('export') == 'excel' ? true : false);
+    $import->toCSV();
+    exit;
+}
+elseif (qg('export') == 'ods')
+{
+    header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
+    header('Content-Disposition: attachment; filename="Export membres - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.ods"');
+    $import->toODS();
     exit;
 }
 

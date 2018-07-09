@@ -10,7 +10,8 @@
 
 <ul class="actions">
     <li class="current"><a href="{$admin_url}compta/import.php">Importer</a></li>
-    <li><a href="{$admin_url}compta/import.php?export">Exporter en CSV</a></li>
+    <li><a href="{$admin_url}compta/import.php?export=csv">Exporter en CSV</a></li>
+    <li><a href="{$admin_url}compta/import.php?export=ods">Exporter en classeur Office</a></li>
 </ul>
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">

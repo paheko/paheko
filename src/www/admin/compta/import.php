@@ -8,11 +8,18 @@ $session->requireAccess('compta', Membres::DROIT_ADMIN);
 $e = new Compta\Exercices;
 $import = new Compta\Import;
 
-if (qg('export') !== null)
+if (qg('export') == 'csv')
 {
     header('Content-type: application/csv');
     header('Content-Disposition: attachment; filename="Export comptabilité - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.csv"');
     $import->toCSV($e->getCurrentId());
+    exit;
+}
+elseif (qg('export') == 'ods')
+{
+    header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
+    header('Content-Disposition: attachment; filename="Export comptabilité - ' . $config->get('nom_asso') . ' - ' . date('Y-m-d') . '.ods"');
+    $import->toODS($e->getCurrentId());
     exit;
 }
 

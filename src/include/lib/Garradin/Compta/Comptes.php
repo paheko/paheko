@@ -163,11 +163,6 @@ class Comptes
             throw new UserException('Ce compte ne peut être supprimé car il est lié à un compte bancaire.');
         }
 
-        if ($db->test('compta_categories', $db->where('compte', $id)))
-        {
-            throw new UserException('Ce compte ne peut être supprimé car des catégories y sont liées.');
-        }
-
         $db->delete('compta_comptes', $db->where('id', $id));
 
         return true;
