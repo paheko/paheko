@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS compta_rapprochement
 (
     id_operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id) ON DELETE CASCADE,
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
-    id_auteur INTEGER NULL REFERENCES membres (id)
+    id_auteur INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS fichiers
