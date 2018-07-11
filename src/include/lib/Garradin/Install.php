@@ -29,7 +29,7 @@ class Install
 		$config->set('nom_asso', $nom_asso);
 		$config->set('adresse_asso', $adresse_asso);
 		$config->set('email_asso', $email_asso);
-		$config->set('site_asso', WWW_URL);
+		$config->set('site_asso', $site_asso);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
 		$config->set('email_envoi_automatique', $email_asso);

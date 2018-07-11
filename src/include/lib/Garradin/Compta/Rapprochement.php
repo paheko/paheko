@@ -52,7 +52,7 @@ class Rapprochement
         return $result;
     }
 
-    public function record($compte, array $journal, array $cases = null, $id_auteur)
+    public function record(array $journal, array $cases = null, $id_auteur)
     {
         if (!is_array($cases) && empty($cases))
         {
