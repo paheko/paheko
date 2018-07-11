@@ -113,13 +113,15 @@ class Session extends \KD2\UserSession
 	// Ajout de la gestion de LOCAL_LOGIN
 	public function isLogged()
 	{
-		if (empty($_COOKIE[$this->cookie_name]) && defined('\Garradin\LOCAL_LOGIN')
+		$logged = parent::isLogged();
+
+		if (!$logged && defined('\Garradin\LOCAL_LOGIN')
 			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
 		{
-			$this->create(\Garradin\LOCAL_LOGIN);
+			$logged = $this->create(\Garradin\LOCAL_LOGIN);
 		}
 
-		return parent::isLogged();
+		return $logged;
 	}
 
 	// Ici checkOTP utilise NTP en second recours
