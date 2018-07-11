@@ -58,7 +58,6 @@ if (f('save'))
         {
             $data['droit_connexion'] = Membres::DROIT_ACCES;
             $data['droit_config'] = Membres::DROIT_ADMIN;
-            $data['droit_membres'] = Membres::DROIT_ADMIN;
         }
 
         try {

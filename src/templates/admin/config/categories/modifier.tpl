@@ -75,25 +75,20 @@
         </dl>
         <dl class="droits">
             <dt><label for="f_droit_membres_aucun">Gestion des membres :</label></dt>
-            {if $readonly}
-                <dd class="help">
-                    Il n'est pas possible de désactiver ce droit pour votre propre catégorie.
-                </dd>
-            {/if}
             <dd>
-                <input type="radio" name="droit_membres" value="{$membres::DROIT_AUCUN}" id="f_droit_membres_aucun" {if $cat.droit_membres == $membres::DROIT_AUCUN}checked="checked"{/if} {$readonly} />
+                <input type="radio" name="droit_membres" value="{$membres::DROIT_AUCUN}" id="f_droit_membres_aucun" {if $cat.droit_membres == $membres::DROIT_AUCUN}checked="checked"{/if} />
                 <label for="f_droit_membres_aucun"><b class="aucun">M</b> Pas d'accès</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_membres" value="{$membres::DROIT_ACCES}" id="f_droit_membres_acces" {if $cat.droit_membres == $membres::DROIT_ACCES}checked="checked"{/if} {$readonly} />
+                <input type="radio" name="droit_membres" value="{$membres::DROIT_ACCES}" id="f_droit_membres_acces" {if $cat.droit_membres == $membres::DROIT_ACCES}checked="checked"{/if} />
                 <label for="f_droit_membres_acces"><b class="acces">M</b> Lecture uniquement</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_membres" value="{$membres::DROIT_ECRITURE}" id="f_droit_membres_ecriture" {if $cat.droit_membres == $membres::DROIT_ECRITURE}checked="checked"{/if} {$readonly} />
+                <input type="radio" name="droit_membres" value="{$membres::DROIT_ECRITURE}" id="f_droit_membres_ecriture" {if $cat.droit_membres == $membres::DROIT_ECRITURE}checked="checked"{/if} />
                 <label for="f_droit_membres_ecriture"><b class="ecriture">M</b> Lecture &amp; écriture</label>
             </dd>
             <dd>
-                <input type="radio" name="droit_membres" value="{$membres::DROIT_ADMIN}" id="f_droit_membres_admin" {if $cat.droit_membres == $membres::DROIT_ADMIN}checked="checked"{/if} {$readonly} />
+                <input type="radio" name="droit_membres" value="{$membres::DROIT_ADMIN}" id="f_droit_membres_admin" {if $cat.droit_membres == $membres::DROIT_ADMIN}checked="checked"{/if} />
                 <label for="f_droit_membres_admin"><b class="admin">M</b> Administration</label>
             </dd>
         </dl>
