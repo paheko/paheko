@@ -42,7 +42,7 @@ if ((f('save') || f('save_next')) && $form->check('compta_rapprocher_' . $compte
 {
     try
     {
-        $rapprochement->record($compte->id, $journal, f('rapprocher'), $user->id);
+        $rapprochement->record($journal, f('rapprocher'), $user->id);
 
         if (f('save'))
         {
