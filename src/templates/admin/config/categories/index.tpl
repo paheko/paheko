@@ -1,9 +1,9 @@
-{include file="admin/_head.tpl" title="Catégories de membres" current="membres/categories"}
+{include file="admin/_head.tpl" title="Catégories de membres" current="config"}
 
 <table class="list">
     <thead>
         <th>Nom</th>
-        <td>Membres</td>
+        <td class="num">Membres</td>
         <td>Droits</td>
         <td></td>
     </thead>
@@ -16,9 +16,10 @@
                     {format_droits droits=$cat}
                 </td>
                 <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/categories/modifier.php?id={$cat.id}" title="Modifier">✎</a>
+                    <a class="icn" href="{$admin_url}membres/?cat={$cat.id}" title="Liste des membres">👪</a>
+                    <a class="icn" href="{$admin_url}config/categories/modifier.php?id={$cat.id}" title="Modifier">✎</a>
                     {if $cat.id != $user.id_categorie}
-                    <a class="icn" href="{$admin_url}membres/categories/supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
+                    <a class="icn" href="{$admin_url}config/categories/supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
                     {/if}
                 </td>
             </tr>

@@ -49,11 +49,6 @@ class Categories
     {
         $this->_checkData($data);
 
-        if (!isset($data['description']))
-        {
-            $data['description'] = '';
-        }
-
         foreach ($this->droits as $key=>$value)
         {
             if (!isset($data['droit_'.$key]))

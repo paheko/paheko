@@ -19,10 +19,10 @@ if (f('save'))
             'nom' => f('nom'),
         ]);
 
-        Utils::redirect(ADMIN_URL . 'membres/categories/');
+        Utils::redirect(ADMIN_URL . 'config/categories/');
     }
 }
 
 $tpl->assign('liste', $cats->listCompleteWithStats());
 
-$tpl->display('admin/membres/categories/index.tpl');
+$tpl->display('admin/config/categories/index.tpl');

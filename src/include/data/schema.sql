@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS membres_categories
 (
     id INTEGER PRIMARY KEY NOT NULL,
     nom TEXT NOT NULL,
-    description TEXT NULL,
 
     droit_wiki INTEGER NOT NULL DEFAULT 1,
     droit_membres INTEGER NOT NULL DEFAULT 1,
