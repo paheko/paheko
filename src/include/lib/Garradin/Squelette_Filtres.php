@@ -4,7 +4,6 @@ namespace Garradin;
 
 class Squelette_Filtres
 {
-    static private $g2x = null;
     static private $alt = [];
 
     static public $filtres_php = [
@@ -304,7 +303,7 @@ class Squelette_Filtres
 
     static public function modulo($a, $mod, $add)
     {
-        return ($mod ? $nb % $mod : 0) + $add;
+        return ($mod ? $a % $mod : 0) + $add;
     }
 
     static public function vide($value)

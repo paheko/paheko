@@ -502,8 +502,6 @@ class Squelette extends \KD2\MiniSkel
             $where = $order = '';
             $limit = $begin = 0;
 
-            $link = false;
-
             $query = 'SELECT f.*, fc.hash, fc.taille, strftime(\'%s\', f.datetime) AS date ';
             $query.= ' FROM fichiers AS f INNER JOIN fichiers_contenu AS fc ON fc.id = f.id_contenu ';
             $query.= ' INNER JOIN fichiers_wiki_pages AS fwp ON fwp.fichier = f.id ';

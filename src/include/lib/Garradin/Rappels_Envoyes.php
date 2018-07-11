@@ -197,7 +197,8 @@ class Rappels_Envoyes
 
 		return DB::getInstance()->get('SELECT * FROM rappels_envoyes
 			WHERE id_rappel IN (SELECT id FROM rappels WHERE id_cotisation = ?)
-			ORDER BY date DESC;', (int)$id);
+			ORDER BY date DESC
+			LIMIT ?, ?;', (int)$id, $begin, self::ITEMS_PER_PAGE);
 	}
 
 	/**

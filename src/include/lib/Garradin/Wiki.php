@@ -433,7 +433,8 @@ class Wiki
                 strftime(\'%s\', date_modification) AS date_modification
                 FROM wiki_pages
                 WHERE '.$this->_getLectureClause().'
-                ORDER BY date_modification DESC;');
+                ORDER BY date_modification DESC
+                LIMIT ?,?;', $begin, self::ITEMS_PER_PAGE);
     }
 
     public function countRecentModifications()

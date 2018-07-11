@@ -216,8 +216,6 @@ class Exercices
      */
     public function solderResultat($exercice, $date)
     {
-        $db = DB::getInstance();
-
         $resultat_excedent = 120;
         $resultat_debiteur = 129;
 

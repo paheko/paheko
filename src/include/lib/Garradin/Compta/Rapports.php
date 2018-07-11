@@ -242,7 +242,6 @@ class Rapports
         {
             list($compte, $debit, $credit, $position) = $row;
             $parent = substr($compte, 0, 2);
-            $classe = $compte[0];
 
             if (($position & Comptes::ACTIF) && ($position & Comptes::PASSIF))
             {

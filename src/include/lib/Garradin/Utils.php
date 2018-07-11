@@ -633,7 +633,7 @@ class Utils
             return $size . ' o';
     }
 
-    static public function deleteRecursive($path, $delete_target = false)
+    static public function deleteRecursive($path)
     {
         if (!file_exists($path))
             return false;
@@ -648,7 +648,7 @@ class Utils
 
             if (is_dir($path . '/' . $file))
             {
-                if (!self::deleteRecursive($path . '/' . $file, true))
+                if (!self::deleteRecursive($path . '/' . $file))
                     return false;
             }
             else

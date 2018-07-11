@@ -105,13 +105,10 @@ class Import
 
 		$db = DB::getInstance();
 		$db->begin();
-		$comptes = new Comptes;
-		$banques = new Comptes_Bancaires;
 		$cats = new Categories;
 		$journal = new Journal;
 
 		$columns = array_flip($this->csv_header);
-		$liste_comptes = $db->getAssoc('SELECT id, id FROM compta_comptes;');
 		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
 
