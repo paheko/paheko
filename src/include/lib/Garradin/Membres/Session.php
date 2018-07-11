@@ -113,7 +113,7 @@ class Session extends \KD2\UserSession
 	// Ajout de la gestion de LOCAL_LOGIN
 	public function isLogged()
 	{
-		if (empty($_SESSION['user']) && defined('\Garradin\LOCAL_LOGIN')
+		if (empty($_COOKIE[$this->cookie_name]) && defined('\Garradin\LOCAL_LOGIN')
 			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
 		{
 			$this->create(\Garradin\LOCAL_LOGIN);
