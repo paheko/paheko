@@ -458,6 +458,15 @@ class Membres
         foreach ($membres as &$id)
         {
             $id = (int) $id;
+
+            // Suppression des fichiers liés
+            $files = Fichiers::listLinkedFiles(Fichiers::LIEN_MEMBRES, $id, null);
+
+            foreach ($files as $file)
+            {
+                $file = new Fichiers($file->id, $file);
+                $file->remove();
+            }
         }
 
         Plugin::fireSignal('membre.suppression', $membres);
