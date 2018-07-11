@@ -66,8 +66,10 @@ class Session extends \KD2\UserSession
 	{
 		// Mettre à jour la date de connexion
 		$this->db->preparedQuery('UPDATE membres SET date_connexion = datetime() WHERE id = ?;', [$id]);
+		$config = Config::getInstance();
 
-		return $this->db->first('SELECT m.*, c.droit_connexion, c.droit_wiki, 
+		return $this->db->first('SELECT m.*, m.'.$config->get('champ_identite').' AS identite,
+			c.droit_connexion, c.droit_wiki, 
 			c.droit_membres, c.droit_compta, c.droit_config, c.droit_membres
 			FROM membres AS m
 			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
