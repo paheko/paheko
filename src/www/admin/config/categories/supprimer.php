@@ -3,8 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
-
 $cats = new Membres\Categories;
 
 qv(['id' => 'required|numeric']);
@@ -31,7 +29,7 @@ if (f('delete'))
     {
         try {
             $cats->remove($id);
-            Utils::redirect(ADMIN_URL . 'membres/categories/');
+            Utils::redirect(ADMIN_URL . 'config/categories/');
         }
         catch (UserException $e)
         {
@@ -42,4 +40,4 @@ if (f('delete'))
 
 $tpl->assign('cat', $cat);
 
-$tpl->display('admin/membres/categories/supprimer.tpl');
+$tpl->display('admin/config/categories/supprimer.tpl');
