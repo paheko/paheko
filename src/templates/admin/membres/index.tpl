@@ -1,6 +1,5 @@
 {include file="admin/_head.tpl" title="Liste des membres" current="membres" js=1}
 
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/">Liste des membres</a></li>
     <li><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
@@ -9,7 +8,6 @@
         <li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
     {/if}
 </ul>
-{/if}
 
 {if $sent}
     <p class="confirm">Votre message a été envoyé.</p>
@@ -33,7 +31,7 @@
 </form>
 {/if}
 
-<form method="get" action="{$admin_url}membres/{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}recherche.php{/if}" class="shortFormLeft">
+<form method="get" action="{$admin_url}membres/" class="shortFormLeft">
     <fieldset>
         <legend>Rechercher un membre</legend>
         <input type="text" name="r" value="" />
@@ -41,11 +39,9 @@
     </fieldset>
 </form>
 
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+<form method="post" action="action.php" class="memberList">
 
-    <form method="post" action="action.php" class="memberList">
-
-    {if !empty($liste)}
+{if !empty($liste)}
     <table class="list">
         <thead class="userOrder">
             <tr>
@@ -69,7 +65,7 @@
                     {/foreach}
                     <td class="actions">
                         <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
-                        <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
+                        {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}<a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>{/if}
                     </td>
                 </tr>
             {/foreach}
@@ -86,41 +82,12 @@
     {/if}
 
     {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
-    {else}
-    <p class="alert">
-        Aucun membre trouvé.
-    </p>
-    {/if}
-
-    </form>
 {else}
-    {if !empty($liste)}
-    <table class="list">
-        <thead>
-            <th>Membre</th>
-            <td></td>
-        </thead>
-        <tbody>
-            {foreach from=$liste item="membre"}
-                <tr>
-                    <th>{$membre.identite}</th>
-                    <td class="actions">
-                        {if !empty($membre.email)}<a href="{$admin_url}membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
-                    </td>
-                </tr>
-            {/foreach}
-        </tbody>
-    </table>
-
-    {if !empty($pagination_url)}
-        {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
-    {/if}
-
-    {else}
     <p class="alert">
         Aucun membre trouvé.
     </p>
-    {/if}
 {/if}
+
+</form>
 
 {include file="admin/_foot.tpl"}

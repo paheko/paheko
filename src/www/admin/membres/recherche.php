@@ -3,8 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
-
 $recherche = trim(qg('r'));
 $champ = trim(qg('c'));
 
