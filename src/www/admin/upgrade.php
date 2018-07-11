@@ -329,6 +329,16 @@ if (version_compare($v, '0.8.4', '<'))
     $db->commit();
 }
 
+if (version_compare($v, '0.9.0', '<'))
+{
+    $db->exec('PRAGMA foreign_keys = OFF;');
+    $db->begin();
+
+    $db->import(ROOT . '/include/data/0.9.0.sql');
+
+    $db->commit();
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());
