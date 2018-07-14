@@ -108,7 +108,7 @@ class Import
 		$cats = new Categories;
 		$journal = new Journal;
 
-		$columns = array_flip($this->csv_header);
+		$columns = array_flip($this->header);
 		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		$liste_moyens = $cats->listMoyensPaiement();
 
