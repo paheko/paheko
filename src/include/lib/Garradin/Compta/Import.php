@@ -220,13 +220,19 @@ class Import
 				$data['id_categorie']	=	$liste_cats[$cat];
 			}
 
-			if (empty($id))
-			{
-				$journal->add($data);
+			try {
+				if (empty($id))
+				{
+					$journal->add($data);
+				}
+				else
+				{
+					$journal->edit($id, $data);
+				}
 			}
-			else
+			catch (UserException $e)
 			{
-				$journal->edit($id, $data);
+				throw new UserException(sprintf('Ligne %s: %s', $line, $e->getMessage()));
 			}
 		}
 
