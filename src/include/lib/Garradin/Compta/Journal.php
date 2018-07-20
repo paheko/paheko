@@ -32,14 +32,7 @@ class Journal
         if (is_null($id))
             return true;
 
-        $db = DB::getInstance();
-        $id = $db->firstColumn('SELECT id FROM compta_exercices
-            WHERE cloture = 0 AND id = ? LIMIT 1;', (int)$id);
-
-        if ($id)
-            return true;
-
-        return false;
+        return DB::getInstance()->test('compta_exercices', 'cloture = 0 AND id = ?', (int)$id);
     }
 
     public function getSolde($id_compte, $inclure_sous_comptes = false)
@@ -127,8 +120,14 @@ class Journal
     {
         $db = DB::getInstance();
 
+        // On ne peut éditer une opération qui n'existe pas
+        if (!$db->test('compta_journal', 'id = ?', $id))
+        {
+            throw new UserException(sprintf('L\'opération n°%s n\'existe pas et ne peut donc être modifiée.', (int)$id));
+        }
+
         // Vérification que l'on peut éditer cette opération
-        if (!$this->_checkOpenExercice($db->firstColumn('SELECT id_exercice FROM compta_journal WHERE id = ?;', $id)))
+        if (!$this->_checkOpenExercice($db->firstColumn('SELECT id_exercice FROM compta_journal WHERE id = ?;', (int)$id)))
         {
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
@@ -144,8 +143,14 @@ class Journal
     {
         $db = DB::getInstance();
 
+        // On ne peut supprimer une opération qui n'existe pas
+        if (!$db->test('compta_journal', 'id = ?', $id))
+        {
+            throw new UserException(sprintf('L\'opération n°%s n\'existe pas et ne peut donc être supprimée.', (int)$id));
+        }
+
         // Vérification que l'on peut éditer cette opération
-        if (!$this->_checkOpenExercice($db->firstColumn('SELECT id_exercice FROM compta_journal WHERE id = ?;', $id)))
+        if (!$this->_checkOpenExercice($db->firstColumn('SELECT id_exercice FROM compta_journal WHERE id = ?;', (int)$id)))
         {
             throw new UserException('Cette opération fait partie d\'un exercice qui a été clôturé.');
         }
