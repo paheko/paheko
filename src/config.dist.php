@@ -229,9 +229,24 @@ const SMTP_PORT = 587;
  * Sécurité du serveur SMTP
  * 
  * NONE = pas de chiffrement
- * SSL = connexion SSL (le plus sécurisé)
+ * SSL = connexion SSL ou TLS native (le plus sécurisé)
  * STARTTLS = utilisation de STARTTLS (moyennement sécurisé)
  *
  * Défaut : STARTTLS
  */
 const SMTP_SECURITY = 'STARTTLS';
+
+/**
+ * Forcer la valeur de l'expéditeur des emails
+ * 
+ * false, null ou vide = désactivé
+ * chaîne = adresse email qui sera utilisé dans le champ From
+ * des emails envoyés
+ * 
+ * Utile pour les services d'envoi SMTP tiers comme Amazon SES.
+ * Si activé le "From" sera : "Nom de l'association" <adresse@email.tld>
+ * avec le Reply-To positionné sur l'adresse de l'association
+ * 
+ * Défaut : false
+ */
+const FORCE_EMAIL_FROM = false;
