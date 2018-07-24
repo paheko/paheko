@@ -475,9 +475,6 @@ class Membres
     {
         $config = Config::getInstance();
 
-        $headers = [
-            'From'  =>  '"'.$config->get('nom_asso').'" <'.$config->get('email_asso').'>',
-        ];
         $message .= "\n\n--\n".$config->get('nom_asso')."\n".$config->get('site_asso');
 
         if ($dest == 0)
@@ -503,7 +500,7 @@ class Membres
 
         while ($row = $res->fetchArray(SQLITE3_ASSOC))
         {
-            Utils::mail($row['email'], $sujet, $message, $headers);
+            Utils::mail($row['email'], $sujet, $message);
         }
 
         return true;

@@ -386,15 +386,18 @@ class Utils
 
         $headers['Return-Path'] = $config->get('email_asso');
 
-        if (FORCE_EMAIL_FROM)
+        if (empty($headers['From']))
         {
-            $headers['Reply-To'] = !empty($headers['From']) ? $headers['From'] : $config->get('email_asso');
-            $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), FORCE_EMAIL_FROM);
-            $headers['Return-Path'] = FORCE_EMAIL_FROM;
-        }
-        elseif (empty($headers['From']))
-        {
-            $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
+            if (FORCE_EMAIL_FROM)
+            {
+                $headers['Reply-To'] = !empty($headers['From']) ? $headers['From'] : $config->get('email_asso');
+                $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), FORCE_EMAIL_FROM);
+                $headers['Return-Path'] = FORCE_EMAIL_FROM;
+            }
+            else
+            {
+                $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
+            }
         }
 
         $headers['MIME-Version'] = '1.0';
