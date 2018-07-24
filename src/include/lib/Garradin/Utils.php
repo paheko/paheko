@@ -438,7 +438,7 @@ class Utils
             
             if (!defined($const))
             {
-                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, SSL, NONE.');
+                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
             }
 
             $secure = constant($const);
