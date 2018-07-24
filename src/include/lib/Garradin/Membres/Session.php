@@ -288,12 +288,10 @@ class Session extends \KD2\UserSession
 
 	public function sendMessage($dest, $sujet, $message, $copie = false)
 	{
-		$from = $this->getUser();
-		$from = $from->email;
-		// Uniquement adresse email pour le moment car faudrait trouver comment
-		// indiquer le nom mais qu'il soit correctement échappé FIXME
-
+		$user = $this->getUser();
 		$config = Config::getInstance();
+
+		$from = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($user->identite)), FORCE_EMAIL_FROM ?: $config->get('email_asso'));
 
 		$message .= "\n\n--\nCe message a été envoyé par un membre de ".$config->get('nom_asso');
 		$message .= ", merci de contacter ".$config->get('email_asso')." en cas d'abus.";

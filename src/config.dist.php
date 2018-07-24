@@ -229,7 +229,8 @@ const SMTP_PORT = 587;
  * Sécurité du serveur SMTP
  * 
  * NONE = pas de chiffrement
- * SSL = connexion SSL ou TLS native (le plus sécurisé)
+ * SSL = connexion SSL native
+ * TLS = connexion TLS native (le plus sécurisé)
  * STARTTLS = utilisation de STARTTLS (moyennement sécurisé)
  *
  * Défaut : STARTTLS
