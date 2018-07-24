@@ -13,7 +13,6 @@ if (f('save') && $form->check('config'))
         $config->set('email_asso', f('email_asso'));
         $config->set('adresse_asso', f('adresse_asso'));
         $config->set('site_asso', f('site_asso'));
-        $config->set('email_envoi_automatique', f('email_envoi_automatique'));
         $config->set('accueil_wiki', f('accueil_wiki'));
         $config->set('accueil_connexion', f('accueil_connexion'));
         $config->set('categorie_membres', f('categorie_membres'));
