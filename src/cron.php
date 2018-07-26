@@ -12,7 +12,6 @@ if ($config->get('frequence_sauvegardes') && $config->get('nombre_sauvegardes'))
 	$s->auto();
 }
 
-
 // Exécution des rappels automatiques
 $rappels = new Rappels;
 
@@ -20,6 +19,8 @@ if ($rappels->countAll())
 {
 	$rappels->sendPending();
 }
+
+(new Email)->runQueue();
 
 // Nettoyage du cache statique
 Static_Cache::clean();

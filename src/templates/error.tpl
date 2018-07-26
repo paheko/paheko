@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Erreur</title>
+    <title>{if empty($title)}Erreur{else}{$title}{/if}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style type="text/css">
     {literal}
@@ -31,14 +31,14 @@
 
 <body>
 
-<h1>Erreur</h1>
+<h1>{if empty($title)}Erreur{else}{$title}{/if}</h1>
 
 <p class="error">
     {$error|escape|nl2br}
 </p>
 
 <p>
-    <a href="{$www_url}" onclick="history.back(); return false;">&larr; Retour</a>
+    <a href="{$www_url}" onclick="return history.back();">&larr; Retour</a>
 </p>
 
 </body>

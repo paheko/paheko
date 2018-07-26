@@ -10,6 +10,7 @@ ALTER TABLE membres_categories RENAME TO membres_categories_old;
 ALTER TABLE compta_rapprochement RENAME TO compta_rapprochement_old;
 
 -- Re-créer la table
+-- Créer également les nouvelles tables email
 .read schema.sql
 
 -- Copie des données, sauf la colonne description
@@ -24,3 +25,6 @@ DROP TABLE membres_categories_old;
 -- Migration des données
 INSERT INTO compta_rapprochement SELECT * FROM compta_rapprochement_old;
 DROP TABLE compta_rapprochement_old;
+
+-- Cette variable n'est plus utilisée
+DELETE FROM config WHERE cle = 'email_envoi_automatique';

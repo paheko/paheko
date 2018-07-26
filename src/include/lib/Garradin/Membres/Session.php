@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Membres;
 use Garradin\UserException;
+use Garradin\Email;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
@@ -192,8 +193,7 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		Utils::mail($membre->email, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message, [], $membre->clef_pgp);
-		return true;
+		return (new Email)->appendToQueue($membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	static public function recoverPasswordConfirm($code)
@@ -244,7 +244,7 @@ class Session extends \KD2\UserSession
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
-		return Utils::mail($membre->email, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message, [], $membre->clef_pgp);
+		return (new Email)->appendToQueue($membre->email, 'Nouveau mot de passe', $message, [], $membre->clef_pgp);
 	}
 
 	public function editUser($data)
@@ -288,22 +288,21 @@ class Session extends \KD2\UserSession
 
 	public function sendMessage($dest, $sujet, $message, $copie = false)
 	{
-		$from = $this->getUser();
-		$from = $from->email;
-		// Uniquement adresse email pour le moment car faudrait trouver comment
-		// indiquer le nom mais qu'il soit correctement échappé FIXME
+		$user = $this->getUser();
 
-		$config = Config::getInstance();
+		$content = "Ce message vous a été envoyé par :\n";
+		$content.= sprintf("%s\n%s\n\n", $user->identite, $user->email);
+		$content.= str_repeat('=', 70) . "\n\n";
+		$content.= $message;
 
-		$message .= "\n\n--\nCe message a été envoyé par un membre de ".$config->get('nom_asso');
-		$message .= ", merci de contacter ".$config->get('email_asso')." en cas d'abus.";
+		$email = new Email;
 
 		if ($copie)
 		{
-			Utils::mail($from, $sujet, $message);
+			$email->appendToQueue($user->email, $sujet, $content);
 		}
 
-		return Utils::mail($dest, $sujet, $message, ['From' => $from]);
+		return $email->appendToQueue($dest, $sujet, $content);
 	}
 
 	public function editSecurity(Array $data = [])
