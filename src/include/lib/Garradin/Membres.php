@@ -484,11 +484,6 @@ class Membres
     {
         $config = Config::getInstance();
 
-        $headers = [
-            'From'  =>  '"'.$config->get('nom_asso').'" <'.$config->get('email_asso').'>',
-        ];
-        $message .= "\n\n--\n".$config->get('nom_asso')."\n".$config->get('site_asso');
-
         if ($dest == 0)
             $where = 'id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)';
         else
@@ -506,13 +501,13 @@ class Membres
         }
 
         $db = DB::getInstance();
-        $res = $db->query('SELECT email FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
+        $res = $db->iterate('SELECT email FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
 
-        $sujet = '['.$config->get('nom_asso').'] '.$sujet;
+        $email = new Email;
 
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
+        foreach ($res as $row)
         {
-            Utils::mail($row['email'], $sujet, $message, $headers);
+            $email->appendToQueue($row->email, $sujet, $message);
         }
 
         return true;

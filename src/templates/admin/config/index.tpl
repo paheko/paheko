@@ -58,14 +58,6 @@
     </fieldset>
 
     <fieldset>
-        <legend>Envois par E-Mail</legend>
-        <dl>
-            <dt><label for="f_email_envoi_automatique">Adresse E-Mail expéditeur des messages automatiques</label></dt>
-            <dd><input type="text" name="email_envoi_automatique" id="f_email_envoi_automatique" value="{form_field data=$config name=email_envoi_automatique}" /></dd>
-        </dl>
-    </fieldset>
-
-    <fieldset>
         <legend>Wiki</legend>
         <dl>
             <dt><label for="f_accueil_wiki">Page d'accueil du wiki</label> 

@@ -109,6 +109,7 @@ static $default_config = [
     'SMTP_SECURITY'         => 'STARTTLS',
     'ADMIN_URL'             => WWW_URL . 'admin/',
     'NTP_SERVER'            => 'fr.pool.ntp.org',
+    'FORCE_EMAIL_FROM'      => false,
 ];
 
 foreach ($default_config as $const => $value)
@@ -121,7 +122,7 @@ foreach ($default_config as $const => $value)
     }
 }
 
-const WEBSITE = 'http://garradin.eu/';
+const WEBSITE = 'https://garradin.eu/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan

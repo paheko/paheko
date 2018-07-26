@@ -48,8 +48,6 @@ class Config
             
             'champs_membres'          =>  $object,
             
-            'email_envoi_automatique' => $string,
-            
             'categorie_membres'       =>  $int,
             
             'categorie_dons'          =>  $int,
@@ -253,7 +251,6 @@ class Config
                 break;
             }
             case 'email_asso':
-            case 'email_envoi_automatique':
             {
                 if (!filter_var($value, FILTER_VALIDATE_EMAIL))
                 {

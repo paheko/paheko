@@ -150,7 +150,7 @@ class Rappels_Envoyes
 		$text = $this->replaceTagsInContent($data->texte, $replace);
 
 		// Envoi du mail
-		Utils::mail($data->email, $subject, $text);
+		(new Email)->appendToQueue($data->email, $subject, $text);
 
 		// Enregistrement en DB
 		$this->add([

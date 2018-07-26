@@ -32,7 +32,6 @@ class Install
 		$config->set('site_asso', $site_asso);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
-		$config->set('email_envoi_automatique', $email_asso);
 		$config->setVersion(garradin_version());
 
 		$champs = Membres\Champs::importInstall();
