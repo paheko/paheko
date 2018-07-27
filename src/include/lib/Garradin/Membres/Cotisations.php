@@ -279,7 +279,7 @@ class Cotisations
 		return $db->get('SELECT cm.id_membre, cm.date, cm.id, m.numero,
 			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN c.fin <= date() ELSE 1 END AS a_jour
+			WHEN c.fin IS NOT NULL THEN (date() <= c.fin AND date() >= c.debut) ELSE 1 END AS a_jour
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 				INNER JOIN membres AS m ON m.id = cm.id_membre
