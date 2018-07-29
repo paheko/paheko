@@ -13,7 +13,7 @@ class Static_Cache
 
 		if (!file_exists($dir))
 		{
-			mkdir(CACHE_ROOT . '/static');
+			mkdir(CACHE_ROOT . '/static', 0777, true);
 		}
 
 		return CACHE_ROOT . '/static';
