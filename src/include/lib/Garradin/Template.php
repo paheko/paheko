@@ -21,7 +21,7 @@ class Template extends \KD2\Smartyer
 	{
 		if (!file_exists(CACHE_ROOT . '/compiled'))
 		{
-			mkdir(CACHE_ROOT . '/compiled');
+			mkdir(CACHE_ROOT . '/compiled', 0777, true);
 		}
 
 		self::setCompileDir(CACHE_ROOT . '/compiled');
