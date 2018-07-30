@@ -28,3 +28,5 @@ DROP TABLE compta_rapprochement_old;
 
 -- Cette variable n'est plus utilisée
 DELETE FROM config WHERE cle = 'email_envoi_automatique';
+
+ALTER TABLE plugins ADD COLUMN menu_condition TEXT NULL;
