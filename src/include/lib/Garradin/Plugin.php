@@ -379,10 +379,41 @@ class Plugin
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
-	static public function listMenu()
+	static public function listMenu($user)
 	{
 		$db = DB::getInstance();
-		return $db->getAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
+		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
+
+		foreach ($list as $id => &$row)
+		{
+			if (!$row->menu_condition)
+			{
+				$row = $row->nom;
+				continue;
+			}
+
+			$query = 'SELECT 1 WHERE ' . preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $row->menu_condition);
+			$st = $db->prepare($query);
+
+			if (!$st->readOnly())
+			{
+				throw new \LogicException('Requête plugin pour affichage dans le menu n\'est pas en lecture : ' . $query);
+			}
+
+			$res = $st->execute();
+
+			if (!$res->fetchArray(\SQLITE3_NUM))
+			{
+				unset($list[$id]);
+				continue;
+			}
+
+			$row = $row->nom;
+		}
+
+		unset($row);
+
+		return $list;
 	}
 
 	/**

@@ -318,6 +318,7 @@ CREATE TABLE IF NOT EXISTS plugins
     url TEXT NULL,
     version TEXT NOT NULL,
     menu INTEGER NOT NULL DEFAULT 0,
+    menu_condition TEXT NULL,
     config TEXT NULL
 );
 
