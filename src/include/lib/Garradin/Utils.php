@@ -384,7 +384,7 @@ class Utils
         $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
         $config = Config::getInstance();
 
-        $headers['Return-Path'] = $config->get('email_asso');
+        $headers['Return-Path'] = FORCE_EMAIL_FROM ?: $config->get('email_asso');
 
         if (empty($headers['From']))
         {
