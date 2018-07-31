@@ -419,7 +419,7 @@ class Utils
         foreach ($to as $recipient)
         {
             // Ne pas envoyer de mail à des adresses invalides
-            if (!filter_var($recipient, FILTER_VALIDATE_EMAIL))
+            if (!SMTP::checkEmailIsValid($recipient, false))
             {
                 continue;
             }
