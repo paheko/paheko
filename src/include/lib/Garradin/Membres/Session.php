@@ -302,7 +302,7 @@ class Session extends \KD2\UserSession
 			Utils::mail($from, $sujet, $message);
 		}
 
-		return Utils::mail($dest, $sujet, $message, ['From' => $from]);
+		return Utils::mail($dest, $sujet, $message, ['From' => $from, 'Reply-To' => $user->email]);
 	}
 
 	public function editSecurity(Array $data = [])
