@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Recherche par requête SQL" current="membres"}
+{include file="admin/_head.tpl" title="Recherche par requête SQL" current="membres" js=1}
 
 <form method="get" action="{$admin_url}membres/recherche_sql.php">
     <fieldset>
@@ -29,7 +29,7 @@
 <table class="list search">
     <thead>
         {if array_key_exists('id', $result[0])}
-        <td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>
+        <td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>
         {/if}
         {foreach from=$result[0] key="col" item="ignore"}
             <td>{$col}</td>
@@ -61,7 +61,7 @@
 </table>
 
 <p class="checkUncheck">
-    <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
+    <input type="button" value="Tout cocher / décocher" onclick="g.checkUncheck();" />
 </p>
 <p class="actions">
     <em>Pour les membres cochés :</em>
@@ -77,35 +77,5 @@
 {/if}
 
 </form>
-
-<script type="text/javascript">
-{literal}
-(function() {
-    var checked = false;
-
-    window.checkUncheck = function()
-    {
-        var elements = document.getElementsByTagName('input');
-        var el_length = elements.length;
-
-        for (i = 0; i < el_length; i++)
-        {
-            var elm = elements[i];
-
-            if (elm.type == 'checkbox')
-            {
-                if (checked)
-                    elm.checked = false;
-                else
-                    elm.checked = true;
-            }
-        }
-
-        checked = checked ? false : true;
-        return true;
-    }
-}())
-{/literal}
-</script>
 
 {include file="admin/_foot.tpl"}
