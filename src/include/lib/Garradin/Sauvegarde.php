@@ -400,9 +400,9 @@ class Sauvegarde
 	 * Taille de la base de données actuelle
 	 * @return integer Taille en octets du fichier SQLite
 	 */
-	public function getDBSize()
+	public function getDBSize($signed = false)
 	{
-		return filesize(DB_FILE);
+		return filesize(DB_FILE) + ($signed ? 40 : 0);
 	}
 
 	/**

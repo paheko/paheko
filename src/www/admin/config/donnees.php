@@ -48,7 +48,7 @@ elseif (f('download'))
     {
         header('Content-type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . $config->get('nom_asso') . ' - Sauvegarde données - ' . date('Y-m-d') . '.sqlite"');
-        header('Content-Length: ' . $s->getDBSize());
+        header('Content-Length: ' . $s->getDBSize(true));
 
         $s->dump();
         exit;
