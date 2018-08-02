@@ -131,7 +131,7 @@ class Install
 		{
 		    if (!file_exists($path))
 		    {
-		        mkdir($path);
+		        mkdir($path, 0777, true);
 		    }
 
 		    if (!is_dir($path))

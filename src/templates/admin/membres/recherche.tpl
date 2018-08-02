@@ -64,7 +64,6 @@
     <table class="list search">
         <thead>
             {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
-            <td></td>
             {foreach from=$champs_entete key="c" item="cfg"}
                 {if $champ == $c}
                     <th><strong>{$cfg.title}</strong></th>
@@ -78,7 +77,6 @@
             {foreach from=$liste item="membre"}
                 <tr>
                     {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
-                    <td class="num"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.id}</a></th>
                     {foreach from=$champs_entete key="c" item="cfg"}
                         {if $champ == $c}
                             <th><strong>{$membre->$c|raw|display_champ_membre:$cfg}</strong></th>
@@ -87,8 +85,8 @@
                         {/if}
                     {/foreach}
                     <td class="actions">
-                        {if !empty($membre.email)}<a class="icn" href="{$admin_url}membres/message.php?id={$membre.id}" title="Envoyer un message">✉</a> {/if}
-                        <a class="icn" href="modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
+                    	<a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
+                        <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
                     </td>
                 </tr>
             {/foreach}
