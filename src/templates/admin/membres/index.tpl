@@ -31,7 +31,7 @@
 </form>
 {/if}
 
-<form method="get" action="{$admin_url}membres/" class="shortFormLeft">
+<form method="get" action="{$admin_url}membres/recherche.php" class="shortFormLeft">
     <fieldset>
         <legend>Rechercher un membre</legend>
         <input type="text" name="r" value="" />
