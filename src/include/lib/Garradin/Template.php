@@ -53,6 +53,7 @@ class Template extends \KD2\Smartyer
 		$this->register_function('diff', [$this, 'diff']);
 		$this->register_function('pagination', [$this, 'pagination']);
 		$this->register_function('format_droits', [$this, 'formatDroits']);
+		$this->register_function('email_link', [$this, 'emailLink']);
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
@@ -113,6 +114,54 @@ class Template extends \KD2\Smartyer
 			}, $str);
 		});
 
+	}
+
+	protected function emailLink($params)
+	{
+		if (empty($params['address']))
+		{
+			throw new \BadFunctionCallException('Missing argument: address');
+		}
+
+		$status = Email::checkAddress($params['address']);
+
+		if ($status === true)
+		{
+			$out = '<a href="mailto:' . $this->escape($params['address'], 'url') . '">' . $this->escape($params['address']) . '</a>';
+
+			if (!empty($params['id_membre']))
+			{
+				$out .= sprintf(' | <a href="%smembres/message.php?id=%s"><b class="icn action">✉</b> Envoyer un message</a>', ADMIN_URL, (int)$params['id_membre']);
+			}
+
+			return $out;
+		}
+
+		$out = '<span class="error invalidEmail">' . $this->escape($params['address']) . '</span> <em>(envois désactivés)</em>';
+
+		if (!empty($params['show_error']))
+		{
+			$out .= '<br />';
+
+			if ($status === Email::REJET_OPTOUT)
+			{
+				$out .= 'Ce destinataire ne souhaite plus recevoir de message de votre part.';
+			}
+			elseif ($status === Email::REJET_DEFINITIF)
+			{
+				$out .= 'Cette adresse n\'existe pas.';
+			}
+			elseif ($status >= EMAIL::REJET_ABANDON)
+			{
+				$out .= 'Cette adresse a renvoyé trop d\'erreurs.';
+			}
+			else
+			{
+				$out .= 'Cette adresse est invalide.';
+			}
+		}
+
+		return $out;
 	}
 
 	protected function formErrors($params)
