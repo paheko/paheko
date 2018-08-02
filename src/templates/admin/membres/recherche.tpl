@@ -8,7 +8,6 @@
 </ul>
 {/if}
 
-
 <form method="get" action="{$admin_url}membres/recherche.php" class="shortFormLeft">
     <fieldset>
         <legend>Rechercher un membre</legend>
@@ -57,10 +56,10 @@
 </form>
 
 {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
-
     <form method="post" action="{$admin_url}membres/action.php" class="memberList">
+{/if}
 
-    {if !empty($liste)}
+{if !empty($liste)}
     <table class="list search">
         <thead>
             {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
@@ -86,7 +85,9 @@
                     {/foreach}
                     <td class="actions">
                     	<a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
+                    	{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
                         <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
+                        {/if}
                     </td>
                 </tr>
             {/foreach}
@@ -105,71 +106,45 @@
     </p>
     {/if}
 
-    {elseif $recherche != ''}
+{elseif $recherche != ''}
+
     <p class="alert">
         Aucun membre trouvé.
     </p>
-    {/if}
 
+{/if}
+
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
     </form>
-
-    <script type="text/javascript">
-    {literal}
-    (function() {
-        var checked = false;
-
-        window.checkUncheck = function()
-        {
-            var elements = document.getElementsByTagName('input');
-            var el_length = elements.length;
-
-            for (i = 0; i < el_length; i++)
-            {
-                var elm = elements[i];
-
-                if (elm.type == 'checkbox')
-                {
-                    if (checked)
-                        elm.checked = false;
-                    else
-                        elm.checked = true;
-                }
-            }
-
-            checked = checked ? false : true;
-            return true;
-        }
-    }())
-    {/literal}
-    </script>
-{else}
-    {if !empty($liste)}
-    <table class="list">
-        <thead>
-            <th>Membre</th>
-            <td></td>
-        </thead>
-        <tbody>
-            {foreach from=$liste item="membre"}
-                <tr>
-                    <th>{$membre.identite}</th>
-                    <td class="actions">
-                        {if !empty($membre.email)}<a href="{$admin_url}membres/message.php?id={$membre.id}">Envoyer un message</a>{/if}
-                    </td>
-                </tr>
-            {/foreach}
-        </tbody>
-    </table>
-    {else}
-    <p class="info">
-        Aucun membre trouvé.
-    </p>
-    {/if}
 {/if}
 
 <script type="text/javascript">
 {literal}
 (function() {
+    var checked = false;
+
+    window.checkUncheck = function()
+    {
+        var elements = document.getElementsByTagName('input');
+        var el_length = elements.length;
+
+        for (i = 0; i < el_length; i++)
+        {
+            var elm = elements[i];
+
+            if (elm.type == 'checkbox')
+            {
+                if (checked)
+                    elm.checked = false;
+                else
+                    elm.checked = true;
+            }
+        }
+
+        checked = checked ? false : true;
+        return true;
+    }
+
     var current = false;
 
     var selectField = function(elm)
