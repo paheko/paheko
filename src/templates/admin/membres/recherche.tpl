@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Recherche de membre" current="membres"}
+{include file="admin/_head.tpl" title="Recherche de membre" current="membres" js=1}
 
 {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
 <ul class="actions">
@@ -62,7 +62,7 @@
 {if !empty($liste)}
     <table class="list search">
         <thead>
-            {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="checkUncheck();" /></td>{/if}
+            {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>{/if}
             {foreach from=$champs_entete key="c" item="cfg"}
                 {if $champ == $c}
                     <th><strong>{$cfg.title}</strong></th>
@@ -96,7 +96,7 @@
 
     {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
     <p class="checkUncheck">
-        <input type="button" value="Tout cocher / décocher" onclick="checkUncheck();" />
+        <input type="button" value="Tout cocher / décocher" onclick="g.checkUncheck();" />
     </p>
     <p class="actions">
         <em>Pour les membres cochés :</em>
@@ -121,30 +121,6 @@
 <script type="text/javascript">
 {literal}
 (function() {
-    var checked = false;
-
-    window.checkUncheck = function()
-    {
-        var elements = document.getElementsByTagName('input');
-        var el_length = elements.length;
-
-        for (i = 0; i < el_length; i++)
-        {
-            var elm = elements[i];
-
-            if (elm.type == 'checkbox')
-            {
-                if (checked)
-                    elm.checked = false;
-                else
-                    elm.checked = true;
-            }
-        }
-
-        checked = checked ? false : true;
-        return true;
-    }
-
     var current = false;
 
     var selectField = function(elm)
