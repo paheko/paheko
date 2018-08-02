@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\Security;
+use KD2\SMTP;
 
 class Email
 {
@@ -48,7 +49,7 @@ class Email
 	public function appendToQueue($to, $subject, $content, $id_membre = null, $pgp_key = null)
 	{
 		// Ne pas envoyer de mail à des adresses invalides
-		if (!filter_var($to, FILTER_VALIDATE_EMAIL))
+		if (!SMTP::checkEmailIsValid($to, false))
 		{
 			throw new UserException('Adresse email invalide: ' . $to);
 		}
@@ -151,7 +152,7 @@ class Email
 	{
 		$address = strtolower(trim($address));
 
-		if (!filter_var($address, FILTER_VALIDATE_EMAIL))
+		if (!SMTP::checkEmailIsValid($address, false))
 		{
 			return false;
 		}
@@ -173,24 +174,29 @@ class Email
 	/**
 	 * Vérifie qu'une adresse est valide
 	 * @param  string $address
-	 * @return boolean|integer FALSE si l'adresse est invalide (syntaxe) ou un entier si l'adresse a été rejetée
+	 * @return integer FALSE si l'adresse est invalide (syntaxe) ou un entier si l'adresse a été rejetée
 	 */
 	static public function checkAddress($address)
 	{
 		$address = strtolower(trim($address));
 
-		if (!filter_var($address, FILTER_VALIDATE_EMAIL))
-		{
-			return false;
-		}
-
 		// Ce domaine n'existe pas (MX inexistant), erreur de saisie courante
-		if (substr($address, -10) == '@gmail.fr')
+		if (substr($address, -9) == '@gmail.fr')
 		{
 			return false;
 		}
 
-		return DB::getInstance()->firstColumn('SELECT statut FROM emails_rejets WHERE adresse = ?;', $address);
+		if ($statut = DB::getInstance()->firstColumn('SELECT statut FROM emails_rejets WHERE adresse = ?;', $address))
+		{
+			return $statut;
+		}
+
+		if (!SMTP::checkEmailIsValid($address, true))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	protected function mail($to, $subject, $content, array $headers = [])
@@ -203,7 +209,7 @@ class Email
 		$unsubscribe_url = sprintf('%semail.php?optout=%s', ADMIN_URL, rawurlencode($to));
 
 		$content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config('site_asso'));
-		$content .= "Vous recevez ce message car vous êtes inscrit comme membre de l'association.\n";
+		$content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
 		$content .= "Pour ne plus recevoir de message de notre part cliquez ici :\n" . $unsubscribe_url;
 
 		$content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);

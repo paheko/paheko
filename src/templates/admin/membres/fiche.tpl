@@ -82,31 +82,30 @@
 </aside>
 
 <dl class="describe">
-    {foreach from=$champs key="c" item="config"}
-    <dt>{$config.title}</dt>
+    {foreach from=$champs key="c" item="c_config"}
+    <dt>{$c_config.title}</dt>
     <dd>
-        {if $config.type == 'checkbox'}
+        {if $c_config.type == 'checkbox'}
             {if $membre->$c}Oui{else}Non{/if}
         {elseif empty($membre->$c)}
             <em>(Non renseigné)</em>
-        {elseif $c == 'nom'}
+        {elseif $c == $c_config.champ_identite}
             <strong>{$membre->$c}</strong>
         {elseif $c == 'email'}
-            <a href="mailto:{$membre->$c}">{$membre->$c}</a>
-            | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
-        {elseif $config.type == 'email'}
-            <a href="mailto:{$membre->$c}">{$membre->$c}</a>
-        {elseif $config.type == 'tel'}
+            {email_link address=$membre->$c show_error=true id_membre=$membre->id}
+        {elseif $c_config.type == 'email'}
+            {email_link address=$membre->$c show_error=true}
+        {elseif $c_config.type == 'tel'}
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
-        {elseif $config.type == 'country'}
+        {elseif $c_config.type == 'country'}
             {$membre->$c|get_country_name}
-        {elseif $config.type == 'date' || $config.type == 'datetime'}
+        {elseif $c_config.type == 'date' || $c_config.type == 'datetime'}
             {$membre->$c|format_sqlite_date_to_french}
-        {elseif $config.type == 'password'}
+        {elseif $c_config.type == 'password'}
             *******
-        {elseif $config.type == 'multiple'}
+        {elseif $c_config.type == 'multiple'}
             <ul>
-            {foreach from=$config.options key="b" item="name"}
+            {foreach from=$c_config.options key="b" item="name"}
                 {if $membre->$c & (0x01 << $b)}
                     <li>{$name}</li>
                 {/if}
