@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use KD2\SMTP;
+
 class Config
 {
     protected $fields_types = null;
@@ -252,7 +254,7 @@ class Config
             }
             case 'email_asso':
             {
-                if (!filter_var($value, FILTER_VALIDATE_EMAIL))
+                if (!SMTP::checkEmailIsValid($value, false))
                 {
                     throw new UserException('Adresse e-mail invalide.');
                 }

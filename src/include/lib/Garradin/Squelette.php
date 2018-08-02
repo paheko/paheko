@@ -882,7 +882,7 @@ class Squelette extends \KD2\MiniSkel
 
         if (!file_exists(dirname($path)))
         {
-            mkdir(dirname($path));
+            mkdir(dirname($path), 0777, true);
         }
 
         file_put_contents($path, $content);
