@@ -532,19 +532,20 @@ class Champs
      */
     public function save($enable_copy = true)
     {
-    	$db = DB::getInstance();
-    	$config = Config::getInstance();
+        $db = DB::getInstance();
+        $config = Config::getInstance();
 
-    	// Champs à créer
-    	$create = [
-    		'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
-    		'id_categorie INTEGER NOT NULL, -- Numéro de catégorie',
-            'date_connexion TEXT NULL, -- Date de dernière connexion',
-            'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE, -- Date d\'inscription',
+        // Champs à créer
+        $create = [
+            'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
+            'id_categorie INTEGER NOT NULL,',
+            'date_connexion TEXT NULL CHECK (date_connexion IS NULL OR datetime(date_connexion) = date_connexion), -- Date de dernière connexion',
+            'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date_inscription) IS NOT NULL AND date(date_inscription) = date_inscription), -- Date d\'inscription',
             'secret_otp TEXT NULL, -- Code secret pour TOTP',
             'clef_pgp TEXT NULL, -- Clé publique PGP'
-    	];
+        ];
 
+        // Clés à créer, permet aussi de clôturer la syntaxe du tableau, noter l'absence de virgule dans cette ligne
         $create_keys = [
             'FOREIGN KEY (id_categorie) REFERENCES membres_categories (id)'
         ];
