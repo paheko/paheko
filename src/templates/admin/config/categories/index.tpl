@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Catégories de membres" current="config"}
 
+{include file="admin/config/_menu.tpl" current="categories"}
+
 <table class="list">
     <thead>
         <th>Nom</th>

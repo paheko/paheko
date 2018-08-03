@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Données — Sauvegarde et restauration" current="config"}
+{include file="admin/_head.tpl" title="Sauvegarde et restauration" current="config"}
 
 {include file="admin/config/_menu.tpl" current="donnees"}
 

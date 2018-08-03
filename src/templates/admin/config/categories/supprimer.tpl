@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Supprimer une catégorie de membre" current="config"}
 
+{include file="admin/config/_menu.tpl" current="categories"}
+
 {form_errors}
 
 <form method="post" action="{$self_url}">
