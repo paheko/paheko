@@ -41,7 +41,7 @@ elseif (f('restore_file'))
 $tpl->assign('db_size', $s->getDBSize());
 $tpl->assign('files_size', $s->getDBFilesSize());
 
-$tpl->assign('code', $code);
+$tpl->assign('code', isset($code) ? $code : null);
 $tpl->assign('ok_code', qg('code'));
 $tpl->assign('ok', qg('ok'));
 $tpl->assign('now_date', date('Y-m-d'));

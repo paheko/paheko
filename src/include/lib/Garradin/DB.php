@@ -49,6 +49,11 @@ class DB extends DB_SQLite3
         }
     }
 
+    public function close()
+    {
+        parent::close();
+        self::$_instance = null;
+    }
 
     /**
      * Import a file containing SQL commands
