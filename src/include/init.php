@@ -110,6 +110,7 @@ static $default_config = [
     'ADMIN_URL'             => WWW_URL . 'admin/',
     'NTP_SERVER'            => 'fr.pool.ntp.org',
     'FORCE_EMAIL_FROM'      => false,
+    'ENABLE_AUTOMATIC_BACKUPS' => true,
 ];
 
 foreach ($default_config as $const => $value)
