@@ -21,6 +21,11 @@ class Config
         return self::$_instance ?: self::$_instance = new Config;
     }
 
+    static public function deleteInstance()
+    {
+        self::$_instance = null;
+    }
+
     /**
      * Empêche de cloner l'objet
      * @return void

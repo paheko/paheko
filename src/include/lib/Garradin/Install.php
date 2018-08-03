@@ -8,6 +8,26 @@ namespace Garradin;
  */
 class Install
 {
+	static public function reset(Membres\Session $session, $password, array $options = [])
+	{
+		$config = (object) Config::getInstance()->getConfig();
+		$user = $session->getUser();
+
+		if (!$session->checkPassword($password, $user->passe))
+		{
+			throw new UserException('Le mot de passe ne correspond pas.');
+		}
+
+		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
+
+		DB::getInstance()->close();
+		Config::deleteInstance();
+
+		unlink(DB_FILE);
+
+		return self::install($config->nom_asso, $config->adresse_asso, $config->email_asso, 'Bureau', $user->identite, $user->email, $password, $config->site_asso);
+	}
+
 	static public function install($nom_asso, $adresse_asso, $email_asso, $nom_categorie, $nom_membre, $email_membre, $passe_membre, $site_asso = WWW_URL)
 	{
 		$db = DB::getInstance(true);

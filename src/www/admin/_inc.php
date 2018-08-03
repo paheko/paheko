@@ -79,9 +79,4 @@ if (!defined('Garradin\LOGIN_PROCESS'))
     }
 
     $tpl->assign('plugins_menu', $session->get('plugins_menu'));
-
-    if ($session->canAccess('membres', Membres::DROIT_ACCES))
-    {
-        $tpl->assign('nb_membres', (new Membres)->countAllButHidden());
-    }
 }
