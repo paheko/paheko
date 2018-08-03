@@ -413,9 +413,17 @@ ul.actions {
     list-style-type: none;
     margin: 1em 0;
     border-bottom: .1em solid #9c4f15;
-    border-bottom: .1em solid rgb(var(--gMainColor));
+    border-bottom-color: rgb(var(--gMainColor));
     padding: 0 1em;
     z-index: 100;
+}
+
+ul.actions.sub {
+    margin: -1em 2em 1em 0;
+    padding-top: 1em;
+    border-right: .1em solid #9c4f15;
+    border-right-color: rgb(var(--gMainColor));
+    border-bottom-right-radius: .5em;
 }
 
 ul.actions li {
@@ -432,6 +440,7 @@ ul.actions li a, ul.actions li label {
     padding: .1em .5em;
     color: #000;
     text-decoration: none;
+    transition: background-color .2s, color .2s;
 }
 
 ul.actions li input {
@@ -447,7 +456,7 @@ ul.actions li.current a, ul.actions li input:checked + label {
 
 ul.actions li a:hover, ul.actions li label:hover {
     color: #fff;
-    color: rgb(var(--gBgColor));
+    background-color: rgb(var(--gMainColor));
     text-decoration: underline;
     border-bottom: none;
 }

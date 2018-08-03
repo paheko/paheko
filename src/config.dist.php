@@ -251,3 +251,18 @@ const SMTP_SECURITY = 'STARTTLS';
  * Défaut : false
  */
 const FORCE_EMAIL_FROM = false;
+
+/**
+ * Activer les sauvegardes automatiques
+ * 
+ * Utile à désactiver si vous avez déjà des sauvegardes effectuées
+ * automatiquement au niveau du système.
+ * 
+ * Sinon les sauvegardes seront effectuées soit par la tâche cron
+ * soit à l'affichage de la page d'accueil (si nécessaire).
+ * 
+ * Voir paramètre USE_CRON aussi
+ * 
+ * Défaut : true
+ */
+const ENABLE_AUTOMATIC_BACKUPS = true;
