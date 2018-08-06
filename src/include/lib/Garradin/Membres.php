@@ -501,13 +501,11 @@ class Membres
         }
 
         $db = DB::getInstance();
-        $res = $db->iterate('SELECT email FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
-
-        $email = new Email;
+        $res = $db->iterate('SELECT email, id FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
 
         foreach ($res as $row)
         {
-            $email->appendToQueue($row->email, $sujet, $message);
+            Utils::sendEmail($row->email, $sujet, $message, $row->id);
         }
 
         return true;

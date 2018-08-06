@@ -91,10 +91,11 @@
             <em>(Non renseigné)</em>
         {elseif $c == $c_config.champ_identite}
             <strong>{$membre->$c}</strong>
-        {elseif $c == 'email'}
-            {email_link address=$membre->$c show_error=true id_membre=$membre->id}
         {elseif $c_config.type == 'email'}
-            {email_link address=$membre->$c show_error=true}
+            <a href="mailto:{$membre->$c|escape:'url'}">{$membre->$c}</a>
+            {if $c == 'email'}
+                | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
+            {/if}
         {elseif $c_config.type == 'tel'}
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
         {elseif $c_config.type == 'country'}

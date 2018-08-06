@@ -189,10 +189,6 @@ span.alert, b.alert {
     color: #990;
 }
 
-.error.invalidEmail {
-    text-decoration: line-through;
-}
-
 p.error, div.error {
     border: 1px solid #c00;
     background: #fcc;

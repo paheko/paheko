@@ -653,4 +653,75 @@ class Utils
 
         return sprintf("\"%s\"\r\n", implode('","', $row));
     }
+
+    static public function sendEmail($recipient, $subject, $content, $id_membre = null, $pgp_key = null)
+    {
+        // Ne pas envoyer de mail à des adresses invalides
+        if (!SMTP::checkEmailIsValid($recipient, false))
+        {
+            throw new UserException('Adresse email invalide: ' . $recipient);
+        }
+
+        return call_user_func(SEND_EMAIL_CALLBACK, $recipient, $id_membre, $subject, $content, $pgp_key);
+    }
+
+    static public function mail($to, $subject, $content, $id_membre, $pgp_key)
+    {
+        $headers = [];
+        $config = Config::getInstance();
+
+        $content = wordwrap($content);
+        $content = trim($content);
+
+        $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config->get('site_asso'));
+        $content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
+        $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('email_asso');
+
+        $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
+
+        if ($pgp_key)
+        {
+            $content = Security::encryptWithPublicKey($pgp_key, $content);
+        }
+
+        $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
+
+        $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
+        $headers['Return-Path'] = $config->get('email_asso');
+
+        $headers['MIME-Version'] = '1.0';
+        $headers['Content-type'] = 'text/plain; charset=UTF-8';
+
+        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
+        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
+
+        if (SMTP_HOST)
+        {
+            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+            
+            if (!defined($const))
+            {
+                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
+            }
+
+            $secure = constant($const);
+
+            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
+            return $smtp->send($to, $subject, $content, $headers);
+        }
+        else
+        {
+            // Encodage du sujet
+            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
+            $raw_headers = '';
+
+            // Sérialisation des entêtes
+            foreach ($headers as $name=>$value)
+            {
+                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
+            }
+
+            return \mail($to, $subject, $content, $raw_headers);
+        }
+    }
 }
