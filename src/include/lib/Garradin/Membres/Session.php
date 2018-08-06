@@ -7,7 +7,6 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Membres;
 use Garradin\UserException;
-use Garradin\Email;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
@@ -193,7 +192,7 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		return (new Email)->appendToQueue($membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
+		return Utils::sendEmail($membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	static public function recoverPasswordConfirm($code)
@@ -244,7 +243,7 @@ class Session extends \KD2\UserSession
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
-		return (new Email)->appendToQueue($membre->email, 'Nouveau mot de passe', $message, [], $membre->clef_pgp);
+		return Utils::sendEmail($membre->email, 'Nouveau mot de passe', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	public function editUser($data)
@@ -295,14 +294,12 @@ class Session extends \KD2\UserSession
 		$content.= str_repeat('=', 70) . "\n\n";
 		$content.= $message;
 
-		$email = new Email;
-
 		if ($copie)
 		{
-			$email->appendToQueue($user->email, $sujet, $content);
+			Utils::sendEmail($user->email, $sujet, $content, $user->id);
 		}
 
-		return $email->appendToQueue($dest, $sujet, $content);
+		return Utils::sendEmail($dest, $sujet, $content);
 	}
 
 	public function editSecurity(Array $data = [])

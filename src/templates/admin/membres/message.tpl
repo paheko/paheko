@@ -8,9 +8,6 @@
         <dl>
             <dt>Expéditeur</dt>
             <dd>{$user.identite} &lt;{$user.email}&gt;</dd>
-            <dd class="help">
-                Votre adresse E-Mail apparaîtra dans le champ "expéditeur" du message reçu par le destinataire.
-            </dd>
             <dt>Destinataire</dt>
             <dd>{$membre.identite} ({$categorie.nom})</dd>
             <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>

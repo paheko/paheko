@@ -20,7 +20,5 @@ if ($rappels->countAll())
 	$rappels->sendPending();
 }
 
-(new Email)->runQueue();
-
 // Nettoyage du cache statique
 Static_Cache::clean();

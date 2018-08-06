@@ -109,7 +109,7 @@ static $default_config = [
     'SMTP_SECURITY'         => 'STARTTLS',
     'ADMIN_URL'             => WWW_URL . 'admin/',
     'NTP_SERVER'            => 'fr.pool.ntp.org',
-    'FORCE_EMAIL_FROM'      => false,
+    'SEND_EMAIL_CALLBACK'   => ['Garradin\Utils', 'mail'],
     'ENABLE_AUTOMATIC_BACKUPS' => true,
 ];
 
