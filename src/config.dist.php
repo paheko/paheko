@@ -238,26 +238,6 @@ const SMTP_PORT = 587;
 const SMTP_SECURITY = 'STARTTLS';
 
 /**
- * Personnalisation de la méthode utilisée pour l'envoi d'emails
- * 
- * Doit être un callback valide en PHP : string ou tableau
- * Les fonctions anonymes ne sont pas acceptées.
- * 
- * Utile pour par exemple déléguer l'envoi d'email à une queue d'envoi
- * ou autre.
- * 
- * Les arguments passé à la méthode seront :
- * @param string $recipient Adresse email du destinataire
- * @param string $subject Sujet du mail
- * @param string $content Contenu du mail
- * @param integer|null $id_membre ID unique du membre (ou null si le destinataire n'est pas un membre)
- * @param string|null $pgp_key Clé PGP du destinataire si le message doit être chiffré
- * 
- * Défaut : ['Garradin\Utils', 'mail']
- */
-const SEND_EMAIL_CALLBACK = ['Garradin\Utils', 'mail'];
-
-/**
  * Activer les sauvegardes automatiques
  * 
  * Utile à désactiver si vous avez déjà des sauvegardes effectuées
