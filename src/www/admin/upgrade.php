@@ -337,6 +337,9 @@ if (version_compare($v, '0.9.0', '<'))
     $db->import(ROOT . '/include/data/0.9.0.sql');
 
     $db->commit();
+
+    $config->set('desactiver_site', false);
+    $config->save();
 }
 
 Utils::clearCaches();

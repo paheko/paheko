@@ -74,6 +74,8 @@ class Config
             'couleur1'                =>  $string,
             'couleur2'                =>  $string,
             'image_fond'              =>  $string,
+
+            'desactiver_site'         => $bool,
         ];
 
         $db = DB::getInstance();
