@@ -662,7 +662,17 @@ class Utils
             throw new UserException('Adresse email invalide: ' . $recipient);
         }
 
-        return call_user_func(SEND_EMAIL_CALLBACK, $recipient, $id_membre, $subject, $content, $pgp_key);
+        // Tentative d'envoi du message en utilisant un plugin
+        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact($recipient, $subject, $content, $id_membre, $pgp_key));
+
+        if (!$email_sent_via_plugin)
+        {
+            // L'envoi d'email n'a pas été effectué par un plugin, utilisons l'envoi interne
+            // via mail() ou SMTP donc
+            return self::mail($recipient, $subject, $content, $id_membre, $pgp_key);
+        }
+
+        return true;
     }
 
     static public function mail($to, $subject, $content, $id_membre, $pgp_key)
