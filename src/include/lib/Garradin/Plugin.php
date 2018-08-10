@@ -25,8 +25,6 @@ class Plugin
 		'svg' => 'image/svg+xml',
 	];
 
-	static protected $signal_files = [];
-
 	static public function getPath($id)
 	{
 		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
@@ -190,7 +188,7 @@ class Plugin
 			throw new \RuntimeException('Chemin de fichier incorrect.');
 		}
 
-		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php', 'signals.php'];
+		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];
 
 		if (in_array($file, $forbidden))
 		{
@@ -299,6 +297,12 @@ class Plugin
 	 */
 	public function registerSignal($signal, $callback)
 	{
+		// pour empêcher d'appeler des méthodes de Garradin après un import de base de données "hackée"
+		if (strpos($callback, 'Garradin\\Plugin\\') !== 0)
+		{
+			throw new \LogicException('Le callback donné n\'utilise pas le namespace Garradin\\Plugin');
+		}
+
 		$callable_name = '';
 
 		if (!is_callable($callback, true, $callable_name) || !is_string($callable_name))
@@ -318,6 +322,8 @@ class Plugin
 				throw new \LogicException('Le signal ' . $signal . ' est exclusif et déjà associé au plugin "'.$registered.'"');
 			}
 		}
+
+		$callable_name = str_replace('Garradin\\Plugin\\', '', $callable_name);
 
 		$st = $db->prepare('INSERT OR REPLACE INTO plugins_signaux VALUES (:signal, :plugin, :callback);');
 		$st->bindValue(':signal', $signal);
@@ -432,13 +438,13 @@ class Plugin
 			if (substr($file, 0, 1) == '.')
 				continue;
 
-			if (preg_match('!^([a-zA-Z0-9_.-]+)\.tar\.gz$!i', $file, $match))
+			if (preg_match('!^([a-z0-9_]+)\.tar\.gz$!i', $file, $match))
 			{
 				// Sélectionner les archives PHAR
 				$file = $match[1];
 			}
 			elseif (is_dir(PLUGINS_ROOT . '/' . $file)
-				&& preg_match('!^([a-zA-Z0-9_.-]+)$!i', $file)
+				&& preg_match('!^([a-z0-9_]+)$!i', $file)
 				&& is_file(sprintf('%s/%s/garradin_plugin.ini', PLUGINS_ROOT, $file)))
 			{
 				// Rien à faire, le nom valide du plugin est déjà dans "$file"
@@ -706,15 +712,12 @@ class Plugin
 
 		foreach ($list as $row)
 		{
-			if (!in_array($row->plugin, self::$signal_files))
-			{
-				require_once self::getPath($row->plugin) . '/signals.php';
-			}
-
-			$return = call_user_func_array($row->callback, [&$params, &$return]);
+			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$return]);
 
 			if ($return)
+			{
 				return $return;
+			}
 		}
 
 		return !empty($list) ? true : null;

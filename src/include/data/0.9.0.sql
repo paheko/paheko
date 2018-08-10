@@ -30,3 +30,6 @@ DROP TABLE compta_rapprochement_old;
 DELETE FROM config WHERE cle = 'email_envoi_automatique';
 
 ALTER TABLE plugins ADD COLUMN menu_condition TEXT NULL;
+
+-- Supprimer le début dans le nom des plugins
+ALTER TABLE plugins_signaux SET callback = replace(callback, 'Garradin\Plugin\', '');
