@@ -1,5 +1,8 @@
 <?php
+
 namespace Garradin;
+
+use Garradin\Membres\Session;
 
 const UPGRADE_PROCESS = true;
 
@@ -348,8 +351,10 @@ $config->setVersion(garradin_version());
 
 Static_Cache::remove('upgrade');
 
+// Réinstaller les plugins système si nécessaire
 Plugin::checkAndInstallSystemPlugins();
 
+// Mettre à jour les plugins si nécessaire
 foreach (Plugin::listInstalled() as $id=>$infos)
 {
     $plugin = new Plugin($id);
@@ -360,6 +365,14 @@ foreach (Plugin::listInstalled() as $id=>$infos)
     }
 
     unset($plugin);
+}
+
+// Forcer à rafraîchir les données de la session si elle existe
+$session = new Session;
+
+if ($session->isLogged())
+{
+    $session->refresh();
 }
 
 echo '<h2>Mise à jour terminée.</h2>
