@@ -410,7 +410,7 @@ class Plugin
 			]);
 
 			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $row->menu_condition);
-			$query = 'SELECT 1 WHERE ' . 
+			$query = 'SELECT 1 WHERE ' . $condition . ';';
 			$st = $db->prepare($query);
 
 			if (!$st->readOnly())
