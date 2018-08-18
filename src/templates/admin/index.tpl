@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Bonjour %s !"|args:$user.identite current="home"}
 
+{$banniere|raw}
+
 <ul class="actions">
     <li><a href="{$admin_url}mes_infos.php">Modifier mes informations personnelles</a></li>
     {if $cotisation}
