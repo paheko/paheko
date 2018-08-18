@@ -348,6 +348,20 @@ $config->setVersion(garradin_version());
 
 Static_Cache::remove('upgrade');
 
+Plugin::checkAndInstallSystemPlugins();
+
+foreach (Plugin::listInstalled() as $id=>$infos)
+{
+    $plugin = new Plugin($id);
+
+    if ($plugin->needUpgrade())
+    {
+        $plugin->upgrade();
+    }
+
+    unset($plugin);
+}
+
 echo '<h2>Mise à jour terminée.</h2>
 <p><a href="'.ADMIN_URL.'">Retour</a></p>';
 
