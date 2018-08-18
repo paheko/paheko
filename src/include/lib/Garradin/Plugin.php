@@ -260,7 +260,7 @@ class Plugin
 	public function needUpgrade()
 	{
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
-		
+
 		if (version_compare($this->plugin->version, $infos->version, '!='))
 			return true;
 
@@ -282,11 +282,15 @@ class Plugin
 
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
-		return DB::getInstance()->update('plugins', 
-			['version' => $infos->version],
-			'id = :id',
-			['id' => $this->id]
-		);
+		return DB::getInstance()->update('plugins', [
+			'nom'		=>	$infos->nom,
+			'description'=>	$infos->description,
+			'auteur'	=>	$infos->auteur,
+			'url'		=>	$infos->url,
+			'version'	=>	$infos->version,
+			'menu'		=>	(int)(bool)$infos->menu,
+			'menu_condition' => $infos->menu && isset($infos->menu_condition) ? trim($infos->menu_condition) : null,
+		], 'id = :id', ['id' => $this->id]);
 	}
 
 	/**
@@ -398,7 +402,15 @@ class Plugin
 				continue;
 			}
 
-			$query = 'SELECT 1 WHERE ' . preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $row->menu_condition);
+			$condition = strtr($row->menu_condition, [
+				'{Membres::DROIT_AUCUN}' => Membres::DROIT_AUCUN,
+				'{Membres::DROIT_ACCES}' => Membres::DROIT_ACCES,
+				'{Membres::DROIT_ECRITURE}' => Membres::DROIT_ECRITURE,
+				'{Membres::DROIT_ADMIN}' => Membres::DROIT_ADMIN,
+			]);
+
+			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $row->menu_condition);
+			$query = 'SELECT 1 WHERE ' . 
 			$st = $db->prepare($query);
 
 			if (!$st->readOnly())
@@ -676,6 +688,7 @@ class Plugin
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
+			'menu_condition' => $infos->menu && isset($infos->menu_condition) ? trim($infos->menu_condition) : null,
 			'config'	=>	$config,
 		]);
 
