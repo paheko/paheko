@@ -4,6 +4,8 @@ namespace Garradin;
 
 class Plugin
 {
+	const PLUGIN_ID_SYNTAX = '[a-z]+(?:_[a-z]+)*';
+
 	protected $id = null;
 	protected $plugin = null;
 	protected $config_changed = false;
@@ -450,13 +452,13 @@ class Plugin
 			if (substr($file, 0, 1) == '.')
 				continue;
 
-			if (preg_match('!^([a-z0-9_]+)\.tar\.gz$!i', $file, $match))
+			if (preg_match('!^(' . self::PLUGIN_ID_SYNTAX . ')\.tar\.gz$!', $file, $match))
 			{
 				// Sélectionner les archives PHAR
 				$file = $match[1];
 			}
 			elseif (is_dir(PLUGINS_ROOT . '/' . $file)
-				&& preg_match('!^([a-z0-9_]+)$!i', $file)
+				&& preg_match('!^' . self::PLUGIN_ID_SYNTAX . '$!', $file)
 				&& is_file(sprintf('%s/%s/garradin_plugin.ini', PLUGINS_ROOT, $file)))
 			{
 				// Rien à faire, le nom valide du plugin est déjà dans "$file"
@@ -719,17 +721,17 @@ class Plugin
 	 * @param  array  $params Paramètres du callback (array ou null)
 	 * @return NULL 		  NULL si aucun plugin n'a été appelé, true sinon
 	 */
-	static public function fireSignal($signal, $params = null, &$return = null)
+	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
 
 		foreach ($list as $row)
 		{
-			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$return]);
+			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 
 			if ($return)
 			{
-				return true;
+				return $return;
 			}
 		}
 
