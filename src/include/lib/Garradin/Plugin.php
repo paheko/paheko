@@ -729,10 +729,10 @@ class Plugin
 
 			if ($return)
 			{
-				return $return;
+				return true;
 			}
 		}
 
-		return !empty($list) ? true : null;
+		return !empty($list) ? false : null;
 	}
 }
