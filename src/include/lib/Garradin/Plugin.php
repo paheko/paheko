@@ -409,7 +409,7 @@ class Plugin
 				'{Membres::DROIT_ADMIN}' => Membres::DROIT_ADMIN,
 			]);
 
-			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $row->menu_condition);
+			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
 			$st = $db->prepare($query);
 
