@@ -19,15 +19,15 @@ class Template extends \KD2\Smartyer
 
 	public function __construct()
 	{
+		parent::__construct();
+
 		if (!file_exists(CACHE_ROOT . '/compiled'))
 		{
 			mkdir(CACHE_ROOT . '/compiled', 0777, true);
 		}
 
-		self::setCompileDir(CACHE_ROOT . '/compiled');
-		self::setTemplateDir(ROOT . '/templates');
-
-		parent::__construct();
+		$this->setTemplatesDir(ROOT . '/templates');
+		$this->setCompiledDir(CACHE_ROOT . '/compiled');
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('self_url', Utils::getSelfUrl());
