@@ -663,7 +663,7 @@ class Utils
         }
 
         // Tentative d'envoi du message en utilisant un plugin
-        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact($recipient, $subject, $content, $id_membre, $pgp_key));
+        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
 
         if (!$email_sent_via_plugin)
         {
