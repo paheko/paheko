@@ -662,6 +662,9 @@ class Utils
             throw new UserException('Adresse email invalide: ' . $recipient);
         }
 
+        $config = Config::getInstance();
+        $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
+
         // Tentative d'envoi du message en utilisant un plugin
         $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
 
@@ -693,8 +696,6 @@ class Utils
         {
             $content = Security::encryptWithPublicKey($pgp_key, $content);
         }
-
-        $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
 
         $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
         $headers['Return-Path'] = $config->get('email_asso');
