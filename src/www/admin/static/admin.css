@@ -690,6 +690,32 @@ b.money {
     text-align: center;
 }
 
+h2.ruler {
+    margin: .5em;
+    text-align: center;
+    color: #333;
+}
+
+h2.ruler:before, h2.ruler:after {
+    background-color: #000;
+    content: "";
+    display: inline-block;
+    height: 1px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+}
+
+h2.ruler:before {
+    right: 0.5em;
+    margin-left: -50%;
+}
+
+h2.ruler:after {
+    left: 0.5em;
+    margin-right: -50%;
+}
+
 .icn, .icnl {
     font-family: "gicon", sans-serif;
     font-style: normal;
