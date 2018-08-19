@@ -69,9 +69,6 @@
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
                 <li class="member cotisations{if $current == 'membres/cotisations'} current{/if}"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
-                {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
-                <li class="members admin mail{if $current == 'membres/message_collectif'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
-                {/if}
             </ul>
             {/if}
             </li>

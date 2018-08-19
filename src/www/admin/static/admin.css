@@ -694,6 +694,7 @@ h2.ruler {
     margin: .5em;
     text-align: center;
     color: #333;
+    overflow: hidden;
 }
 
 h2.ruler:before, h2.ruler:after {

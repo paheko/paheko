@@ -477,40 +477,6 @@ class Membres
         return $db->delete('membres', $db->where('id', $membres));
     }
 
-    /**
-     * @deprecated remplacer par envoyer message à tableau de membres
-     */
-    public function sendMessageToCategory($dest, $sujet, $message, $subscribed_only = false)
-    {
-        $config = Config::getInstance();
-
-        if ($dest == 0)
-            $where = 'id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)';
-        else
-            $where = 'id_categorie = '.(int)$dest;
-
-        // FIXME: filtrage plus intelligent, car le champ lettre_infos peut ne pas exister
-        if ($subscribed_only)
-        {
-            $champs = Config::getInstance()->get('champs_membres');
-
-            if ($champs->get('lettre_infos'))
-            {
-                $where .= ' AND lettre_infos = 1';
-            }
-        }
-
-        $db = DB::getInstance();
-        $res = $db->iterate('SELECT email, id FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
-
-        foreach ($res as $row)
-        {
-            Utils::sendEmail($row->email, $sujet, $message, $row->id);
-        }
-
-        return true;
-    }
-
     public function searchSQL($query)
     {
         $db = DB::getInstance();
