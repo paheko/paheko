@@ -189,61 +189,52 @@ span.alert, b.alert {
     color: #990;
 }
 
-p.error, div.error {
-    border: 1px solid #c00;
-    background: #fcc;
-    padding: 0.5em;
+p.alert, div.alert, p.error, div.error, p.confirm, div.confirm {
+    border: 1px solid #ccc;
+    padding: .5em;
     margin-bottom: 1em;
-    margin-left: 2.5em;
+    border-radius: .3em;
+    padding-left: 3em;
     position: relative;
+}
+
+p.error, div.error {
+    border-color: #c00;
+    background-color: #fcc;
 }
 
 p.confirm, div.confirm {
-    border: 1px solid #0c0;
-    background: #cfc;
-    padding: 0.5em;
-    margin-bottom: 1em;
-    margin-left: 2.5em;
-    position: relative;
+    border-color: #0c0;
+    background-color: #cfc;
 }
 
 p.alert, div.alert {
-    border: 1px solid #cc0;
-    background: #ffc;
-    padding: 0.5em;
-    margin-bottom: 1em;
-    position: relative;
-    margin-left: 2.5em;
+    border-color: #cc0;
+    background-color: #ffc;
 }
 
-p.confirm::before, div.confirm::before {
+p.confirm::before, div.confirm::before, p.alert::before, div.alert::before, p.error::before, div.error::before {
     font-family: "gicon";
-    content: "☑";
-    left: -1.5em;
+    left: .5em;
+    top: .2em;
     position: absolute;
-    color: green;
     font-size: 1.5em;
     text-shadow: 2px 2px 5px #666;
+}    
+
+p.confirm::before, div.confirm::before {
+    content: "☑";
+    color: green;
 }
 
 p.alert::before, div.alert::before {
-    font-family: "gicon";
     content: "⚠";
-    left: -1.5em;
-    position: absolute;
     color: yellow;
-    font-size: 1.5em;
-    text-shadow: 2px 2px 5px #666;
 }
 
 p.error::before, div.error::before {
-    font-family: "gicon";
     content: "⚠";
-    left: -1.5em;
-    position: absolute;
     color: red;
-    font-size: 1.5em;
-    text-shadow: 2px 2px 5px #999;
 }
 
 p.help {
