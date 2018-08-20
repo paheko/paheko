@@ -2,7 +2,7 @@
 
 {include file="admin/config/_menu.tpl" current="index"}
 
-{if $ok}
+{if $ok && !$form->hasErrors()}
     <p class="confirm">
         La configuration a bien été enregistrée.
     </p>
