@@ -194,6 +194,8 @@ p.error, div.error {
     background: #fcc;
     padding: 0.5em;
     margin-bottom: 1em;
+    margin-left: 2.5em;
+    position: relative;
 }
 
 p.confirm, div.confirm {
@@ -201,6 +203,8 @@ p.confirm, div.confirm {
     background: #cfc;
     padding: 0.5em;
     margin-bottom: 1em;
+    margin-left: 2.5em;
+    position: relative;
 }
 
 p.alert, div.alert {
@@ -208,7 +212,38 @@ p.alert, div.alert {
     background: #ffc;
     padding: 0.5em;
     margin-bottom: 1em;
-    overflow: auto;
+    position: relative;
+    margin-left: 2.5em;
+}
+
+p.confirm::before, div.confirm::before {
+    font-family: "gicon";
+    content: "☑";
+    left: -1.5em;
+    position: absolute;
+    color: green;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 5px #666;
+}
+
+p.alert::before, div.alert::before {
+    font-family: "gicon";
+    content: "⚠";
+    left: -1.5em;
+    position: absolute;
+    color: yellow;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 5px #666;
+}
+
+p.error::before, div.error::before {
+    font-family: "gicon";
+    content: "⚠";
+    left: -1.5em;
+    position: absolute;
+    color: red;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 5px #999;
 }
 
 p.help {
