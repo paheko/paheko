@@ -2,11 +2,11 @@
 
 @font-face {
     font-family: 'gicon';
-    src: url('font/garradin.eot?36341436');
-    src: url('font/garradin.eot?36341436#iefix') format('embedded-opentype'),
-        url('font/garradin.woff?36341436') format('woff'),
-        url('font/garradin.ttf?36341436') format('truetype'),
-        url('font/garradin.svg?36341436#garradin') format('svg');
+    src: url('font/garradin.eot?2018');
+    src: url('font/garradin.eot?2018#iefix') format('embedded-opentype'),
+        url('font/garradin.woff?2018') format('woff'),
+        url('font/garradin.ttf?2018') format('truetype'),
+        url('font/garradin.svg?2018#garradin') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -279,6 +279,10 @@ input[type=url], input[type=tel], select {
     max-width: 100%;
 }
 
+input[type=password], input.clearTextPassword {
+    font-family: monospace;
+}
+
 select, input[size] {
     min-width: 0;
 }
@@ -303,6 +307,16 @@ input[type=submit], input[type=button], input[type=checkbox], button {
 input.resetButton {
     padding: .1em;
     margin-left: 1em;
+}
+
+input[type=button].showPassword {
+    margin-left: -2em;
+    margin-right: 1em;
+    background: none;
+}
+
+input[type=button].showPassword:hover {
+    background: none;
 }
 
 .loader {

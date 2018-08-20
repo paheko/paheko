@@ -108,6 +108,38 @@
 		return true;
 	};
 
+	g.enhancePasswordField = function (field, repeat_field = null)
+	{
+		var show_password = document.createElement('input');
+		show_password.type = 'button';
+		show_password.className = 'icn action showPassword';
+		show_password.title = 'Voir/cacher le mot de passe';
+		show_password.value = '👁';
+		show_password.onclick = function (e) {
+			var pos = field.selectionStart;
+			var hidden = field.type.match(/pass/i);
+			field.type = hidden ? 'text' : 'password';
+			this.value = !hidden ? '👁' : '⤫';
+			field.classList.toggle('clearTextPassword');
+
+			if (null !== repeat_field)
+			{
+				repeat_field.type = field.type;
+				repeat_field.classList.toggle('clearTextPassword');
+			}
+
+			// Remettre le focus sur le champ mot de passe
+			// on ne peut pas vraiment remettre le focus sur le champ
+			// précis qui était utilisé avant de cliquer sur le bouton 
+			// car il faudrait enregistrer les actions onfocus de tous
+			// les champs de la page
+			field.focus();
+			field.selectionStart = field.selectionEnd = pos;
+		};
+
+		field.parentNode.insertBefore(show_password, field.nextSibling);
+	};
+
 	var dateInputFallback = function ()
 	{
 		/*

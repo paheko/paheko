@@ -7,9 +7,11 @@
 
 	window.initPasswordField = function(suggest, password, password2)
 	{
-		suggest_elm = (typeof suggest == 'string') ? document.getElementById(suggest) : suggest;
 		pw_elm = (typeof password == 'string') ? document.getElementById(password) : password;
 		pw2_elm = (typeof password2 == 'string') ? document.getElementById(password2) : password2;
+		suggest_elm = (typeof suggest == 'string') ? document.getElementById(suggest) : suggest;
+
+		g.enhancePasswordField(pw_elm, pw2_elm);
 
 		suggest_elm.size = suggest_elm.value.length;
 
