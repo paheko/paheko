@@ -5,32 +5,32 @@
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?2018-07-01" media="all" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}1" media="all" />
     {if isset($js) || isset($custom_js)}
-        <script type="text/javascript" src="{$admin_url}static/scripts/global.js"></script>
+        <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
     {/if}
     {if isset($custom_js)}
         {foreach from=$custom_js item="js"}
-            <script type="text/javascript" src="{$admin_url}static/scripts/{$js}"></script>
+            <script type="text/javascript" src="{$admin_url}static/scripts/{$js}?{$version_hash}"></script>
         {/foreach}
     {/if}
     {if isset($custom_css)}
         {foreach from=$custom_css item="css"}
-            <link rel="stylesheet" type="text/css" href="{$admin_url}static/{$css}" media="all" />
+            <link rel="stylesheet" type="text/css" href="{$admin_url}static/{$css}?{$version_hash}" media="all" />
         {/foreach}
     {/if}
     {if isset($plugin_css)}
         {foreach from=$plugin_css item="css"}
-            <link rel="stylesheet" type="text/css" href="{plugin_url file=$css}" />
+            <link rel="stylesheet" type="text/css" href="{plugin_url file=$css}?{$version_hash}" />
         {/foreach}
     {/if}
     {if isset($plugin_js)}
         {foreach from=$plugin_js item="js"}
-            <script type="text/javascript" src="{plugin_url file=$js}"></script>
+            <script type="text/javascript" src="{plugin_url file=$js}?{$version_hash}"></script>
         {/foreach}
     {/if}
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?b" media="print" />
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?a" media="handheld,screen and (max-width:981px)" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?{$version_hash}" media="print" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
     {if isset($config)}
         {custom_colors config=$config}
     {/if}

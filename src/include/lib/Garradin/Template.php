@@ -29,6 +29,14 @@ class Template extends \KD2\Smartyer
 		$this->setTemplatesDir(ROOT . '/templates');
 		$this->setCompiledDir(CACHE_ROOT . '/compiled');
 
+		// Hash de la version pour les éléments statiques (cache)
+		// On ne peut pas utiliser la version directement comme query string
+		// pour les éléments statiques (genre /admin/static/admin.css?v0.9.0)
+		// car cela dévoilerait la version de Garradin utilisée, posant un souci
+		// en cas de faille, on cache donc la version utilisée, chaque instance
+		// aura sa propre version
+		$this->assign('version_hash', substr(sha1(VERSION . ROOT . SECRET_KEY), 0, 10));
+
 		$this->assign('www_url', WWW_URL);
 		$this->assign('self_url', Utils::getSelfUrl());
 		$this->assign('self_url_no_qs', Utils::getSelfUrl(false));
