@@ -12,59 +12,7 @@ use KD2\ODSWriter;
 
 class Import
 {
-	/**
-	 * Champs du CSV de Galette
-	 * les lignes vides ('') ne seront pas proposées à l'import
-	 * @var array
-	 */
-	public $galette_fields = [
-		'Numéro',
-		1,
-		'Nom',
-		'Prénom',
-		'Pseudo',
-		'Société',
-		2,
-		'Date de naissance',
-		3,
-		'Adresse, ligne 1',
-		'Adresse, ligne 2',
-		'Code postal',
-		'Ville',
-		'Pays',
-		'Téléphone fixe',
-		'Téléphone mobile',
-		'E-Mail',
-		'Site web',
-		'ICQ',
-		'MSN',
-		'Jabber',
-		'Infos (réservé administrateur)',
-		'Infos (public)',
-		'Profession',
-		'Identifiant',
-		'Mot de passe',
-		'Date création fiche',
-		'Date modification fiche',
-		4, // activite_adh
-		5, // bool_admin_adh
-		6, // bool_exempt_adh
-		7, // bool_display_info
-		8, // date_echeance
-		9, // pref_lang
-		'Lieu de naissance',
-		10, // GPG id
-		11 // Fingerprint
-	];
-
-	/**
-	 * Importer un CSV de la liste des membres depuis Galette
-	 * @param  string $path              Chemin vers le CSV
-	 * @param  array  $translation_table Tableau indiquant la correspondance à effectuer entre les champs
-	 * de Galette et ceux de Garradin. Par exemple : ['Date création fiche' => 'date_inscription']
-	 * @return boolean                   TRUE en cas de succès
-	 */
-	public function fromGalette($path, $translation_table)
+	public function getCSVAsArray($path)
 	{
 		if (!file_exists($path) || !is_readable($path))
 		{
@@ -78,26 +26,12 @@ class Import
 			return false;
 		}
 
-		$db = DB::getInstance();
-		$db->begin();
-		$membres = new Membres;
-
-		$columns = array_flip($this->galette_fields);
-
-		$col = function($column) use (&$row, &$columns)
-		{
-			if (!isset($columns[$column]))
-				return null;
-
-			if (!isset($row[$columns[$column]]))
-				return null;
-
-			return $row[$columns[$column]];
-		};
-
-		$line = 0;
 		$delim = Utils::find_csv_delim($fp);
 		Utils::skip_bom($fp);
+
+		$line = 0;
+		$out = [];
+		$nb_columns = null;
 
 		while (!feof($fp))
 		{
@@ -109,7 +43,53 @@ class Import
 				continue;
 			}
 
-			if (count($row) != count($columns))
+			if (null === $nb_columns)
+			{
+				$nb_columns = count($row);
+			}
+
+			if (count($row) != $nb_columns)
+			{
+				throw new UserException('Erreur sur la ligne ' . $line . ' : incohérence dans le nombre de colonnes avec la première ligne.');
+			}
+
+			$out[$line] = $row;
+		}
+
+		fclose($fp);
+
+		return $out;
+	}
+
+	/**
+	 * Importer un CSV générique
+	 * @param  string $path              Chemin vers le CSV
+	 * @param  array  $translation_table Tableau indiquant la correspondance à effectuer entre les colonnes
+	 * du CSV et les champs de Garradin. Par exemple : ['Date création fiche' => 'date_inscription']
+	 * @return boolean                   TRUE en cas de succès
+	 */
+	public function fromArray(array $table, $translation_table, $skip_lines = 0)
+	{
+		$db = DB::getInstance();
+		$db->begin();
+		$membres = new Membres;
+		$champs = Config::getInstance()->get('champs_membres');
+
+		$nb_columns = count($translation_table);
+
+		if ($skip_lines)
+		{
+			$table = array_slice($table, $skip_lines, null, true);
+		}
+
+		foreach ($table as $line => $row)
+		{
+			if (empty($row))
+			{
+				continue;
+			}
+
+			if (count($row) != $nb_columns)
 			{
 				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
@@ -117,17 +97,38 @@ class Import
 
 			$data = [];
 
-			foreach ($translation_table as $galette=>$garradin)
+			foreach ($translation_table as $column_index => $garradin_field)
 			{
 				// Champs qu'on ne veut pas importer
-				if (empty($garradin))
+				if (empty($garradin_field))
+				{
 					continue;
+				}
 
-				// Concaténer plusieurs champs
-				if (isset($data[$garradin]))
-					$data[$garradin] .= "\n" . $col($galette);
+				// Concaténer plusieurs champs, si on choisit d'indiquer plusieurs fois
+				// le même champ pour plusieurs colonnes (par exemple pour mettre nom et prénom
+				// dans un seul champ)
+				if (isset($data[$garradin_field]))
+				{
+					$champ = $champs->get($garradin_field);
+
+					if ($champ->type == 'text')
+					{
+						$data[$garradin_field] .= ' ' . $row[$column_index];
+					}
+					elseif ($champ->type == 'textarea')
+					{
+						$data[$garradin_field] .= "\n" . $row[$column_index];
+					}
+					else
+					{
+						throw new UserException(sprintf('Erreur sur la ligne %d : impossible de concaténer des colonnes avec le champ %s : n\'est pas un champ de type texte', $line, $champ->title));
+					}
+				}
 				else
-					$data[$garradin] = $col($galette);
+				{
+					$data[$garradin_field] = $row[$column_index];
+				}
 			}
 
 			try {
@@ -141,8 +142,6 @@ class Import
 		}
 
 		$db->commit();
-
-		fclose($fp);
 		return true;
 	}
 
@@ -152,7 +151,7 @@ class Import
 	 * @param  int    $current_user_id
 	 * @return boolean          TRUE en cas de succès
 	 */
-	public function fromCSV($path, $current_user_id)
+	public function fromGarradinCSV($path, $current_user_id)
 	{
 		if (!file_exists($path) || !is_readable($path))
 		{
