@@ -387,21 +387,14 @@ CREATE TABLE IF NOT EXISTS fichiers_compta_journal
     PRIMARY KEY(fichier, id)
 );
 
-CREATE TABLE IF NOT EXISTS emails_attente (
--- Emails en attente d'expédition (queue d'envoi)
+CREATE TABLE IF NOT EXISTS recherches
+-- Recherches enregistrées
+(
     id INTEGER NOT NULL PRIMARY KEY,
-    adresse TEXT NOT NULL,
-    id_membre INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE,
-    sujet TEXT NOT NULL,
-    contenu TEXT NOT NULL,
-    date_envoi TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date_envoi) IS NOT NULL AND datetime(date_envoi) = date_envoi),
-    statut INTEGER NOT NULL DEFAULT 0 -- 0 = en attente, 1 = en cours d'envoi
-);
-
-CREATE TABLE IF NOT EXISTS emails_rejets (
--- Adresses email qui ne peuvent recevoir de message
-    adresse TEXT NOT NULL PRIMARY KEY,
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
-    message TEXT NOT NULL,
-    statut INTEGER NOT NULL DEFAULT 0 -- -1 = désinscription à l'initiative de l'utilisateur, -2 = boîte mail inexistante, >= 1 = nombre de rejets temporaire
+    id_membre INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE, -- Si non NULL, alors la recherche ne sera visible que par le membre associé
+    intitule TEXT NOT NULL,
+    creation TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(creation) IS NOT NULL AND datetime(creation) = creation),
+    table TEXT NOT NULL, -- "membres" ou "compta_journal"
+    type TEXT NOT NULL, -- "json" ou "sql"
+    contenu TEXT NOT NULL
 );
