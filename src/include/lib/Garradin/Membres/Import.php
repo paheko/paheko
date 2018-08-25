@@ -271,10 +271,11 @@ class Import
         $champs = Config::getInstance()->get('champs_membres')->getKeys();
         $champs_sql = 'm.' . implode(', m.', $champs);
 
-        $res = $db->prepare('SELECT ' . $champs_sql . ', c.nom AS categorie FROM membres AS m 
+        $res = $db->prepare('SELECT ' . $champs_sql . ', c.nom AS categorie_membre FROM membres AS m 
             LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
 
-        return [array_merge($champs, ['categorie']), $res];
+        $champs[] = 'categorie_membre';
+        return [$champs, $res];
 	}
 
     public function toCSV()
