@@ -252,7 +252,7 @@ class Champs
             }
             elseif ($config->type == 'select')
             {
-                $rules[] = 'in:' . range(0, count($this->options) - 1);
+                $rules[] = 'in:' . range(0, count($config->options) - 1);
             }
             elseif ($config->type == 'checkbox')
             {
