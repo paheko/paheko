@@ -401,12 +401,27 @@ class Membres
         }
 
         $colonnes = array_unique($colonnes);
+
+        if (!in_array($config->get('champ_identite'), $colonnes))
+        {
+            array_unshift($colonnes, $config->get('champ_identite'));
+        }
+
         array_walk($colonnes, [$db, 'quoteIdentifier']);
+
+        if ($champs->isText($order))
+        {
+            $order = sprintf('transliterate_to_ascii(%s)', $db->quoteIdentifier($order));
+        }
+        else
+        {
+            $order = $db->quoteIdentifier($order);
+        }
 
         $sql_query = sprintf('SELECT id, %s FROM membres WHERE %s ORDER BY %s %s LIMIT 0,%d;',
             implode(', ', $colonnes),
             '(' . implode(') AND (', $query_groups) . ')',
-            $db->quoteIdentifier($order),
+            $order,
             $desc ? 'DESC' : 'ASC',
             (int) $limit);
 

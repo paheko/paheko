@@ -6,6 +6,10 @@ require_once __DIR__ . '/_inc.php';
 $champs = $config->get('champs_membres');
 $text_query = trim(qg('qt'));
 $query = null;
+$limit = f('limit') ?: 100;
+$order = f('order');
+$desc = (bool) f('desc');
+$sql_query = null;
 
 // Recherche simple
 if ($text_query !== '')
@@ -44,7 +48,7 @@ elseif (f('q') !== null)
 
 if ($query)
 {
-    $sql_query = $membres->buildSQLSearchQuery($query, 'id', false, 100);
+    $sql_query = $membres->buildSQLSearchQuery($query, $order, $desc, $limit);
     $result = $membres->searchSQL($sql_query);
 
     if (count($result) == 1 && $text_query !== '')
@@ -70,7 +74,11 @@ else
 }
 
 $tpl->assign('query', $query);
+$tpl->assign('sql_query', $sql_query);
 $tpl->assign('result', $result);
+$tpl->assign('order', $order);
+$tpl->assign('desc', $desc);
+$tpl->assign('limit', $limit);
 
 $colonnes = [];
 

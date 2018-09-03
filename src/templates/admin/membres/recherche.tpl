@@ -12,11 +12,23 @@
 	<fieldset>
 		<legend>Rechercher un membre</legend>
 		<div class="queryBuilder" id="queryBuilder"></div>
+		<p class="actions">
+			<label>Trier par 
+				<select name="order">
+					{foreach from=$colonnes key="colonne" item="config"}
+					<option value="{$colonne}"{form_field name="order" selected=$colonne}>{$config.label}</option>
+					{/foreach}
+				</select>
+			</label>
+			<label><input type="checkbox" name="desc" value="1" {form_field name="desc" checked=1 default=$desc} /> Tri inversé</label>
+			<label>Limiter à <input type="number" value="{$limit}" name="limit" size="5" /> résultats</label>
+		</p>
 		<p class="submit">
 			<input type="submit" value="Chercher &rarr;" id="send" />
 			<input type="hidden" name="q" id="jsonQuery" />
 		</p>
 	</fieldset>
+	<p class="help">{$sql_query}</p>
 </form>
 
 <script type="text/javascript">
