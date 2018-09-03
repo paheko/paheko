@@ -115,10 +115,13 @@ class Session extends \KD2\UserSession
 	{
 		$logged = parent::isLogged();
 
-		if (!$disable_local_login && !$logged && defined('\Garradin\LOCAL_LOGIN')
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')
 			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
 		{
-			$logged = $this->create(\Garradin\LOCAL_LOGIN);
+			if (!$logged || ($logged && $this->user->id != \Garradin\LOCAL_LOGIN))
+			{
+				$logged = $this->create(\Garradin\LOCAL_LOGIN);
+			}
 		}
 
 		return $logged;
