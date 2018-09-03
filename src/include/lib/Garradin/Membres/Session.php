@@ -111,11 +111,11 @@ class Session extends \KD2\UserSession
 	}
 
 	// Ajout de la gestion de LOCAL_LOGIN
-	public function isLogged()
+	public function isLogged($disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
-		if (!$logged && defined('\Garradin\LOCAL_LOGIN')
+		if (!$disable_local_login && !$logged && defined('\Garradin\LOCAL_LOGIN')
 			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
 		{
 			$logged = $this->create(\Garradin\LOCAL_LOGIN);

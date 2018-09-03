@@ -33,6 +33,11 @@ if (Static_Cache::exists('upgrade'))
         . PHP_EOL . $path);
 }
 
+// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
+// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
+$session = new Session;
+$user_is_logged = $session->isLogged(true);
+
 Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
 $db = DB::getInstance();
@@ -211,9 +216,7 @@ foreach (Plugin::listInstalled() as $id=>$infos)
 }
 
 // Forcer à rafraîchir les données de la session si elle existe
-$session = new Session;
-
-if ($session->isLogged())
+if ($user_is_logged)
 {
     $session->refresh();
 }
