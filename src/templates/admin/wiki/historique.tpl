@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Historique : %s"|args:$page.titre current="wiki"}
 
 <ul class="actions">
-    <li><a href="{$admin_url}wiki/?{$page.uri}">Voir la page</a></li>
+    <li><a href="{$admin_url}wiki/?{$page.uri}">Retour à la page</a></li>
 </ul>
 
 {if !empty($revisions)}
