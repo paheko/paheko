@@ -255,11 +255,8 @@ class Squelette_Filtres
 
     static public function supprimer_skriv($value)
     {
-        $value = preg_replace('!\[\[([^\]]+)(?:\|[^\]]*)?\]!U', '$1', $value);
-        $value = preg_replace('!\{+([^\}]*)\}+!', '$1', $value);
-        $value = preg_replace('!^=+([^=]+)=*$!mU', '$1', $value);
-        $value = preg_replace('!<<<.*>>>!mU', '', $value);
-        return $value;
+        $value = self::formatter_texte($value);
+        return self::supprimer_tags($value);
     }
 
     static public function couper($texte, $taille, $etc = ' (...)')
