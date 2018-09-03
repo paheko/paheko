@@ -303,17 +303,17 @@ class Plugin
 	 */
 	public function registerSignal($signal, $callback)
 	{
-		// pour empêcher d'appeler des méthodes de Garradin après un import de base de données "hackée"
-		if (strpos($callback, 'Garradin\\Plugin\\') !== 0)
-		{
-			throw new \LogicException('Le callback donné n\'utilise pas le namespace Garradin\\Plugin');
-		}
-
 		$callable_name = '';
 
 		if (!is_callable($callback, true, $callable_name) || !is_string($callable_name))
 		{
 			throw new \LogicException('Le callback donné n\'est pas valide.');
+		}
+
+		// pour empêcher d'appeler des méthodes de Garradin après un import de base de données "hackée"
+		if (strpos($callable_name, 'Garradin\\Plugin\\') !== 0)
+		{
+			throw new \LogicException('Le callback donné n\'utilise pas le namespace Garradin\\Plugin');
 		}
 
 		$db = DB::getInstance();
