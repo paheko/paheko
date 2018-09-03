@@ -294,80 +294,195 @@ class Membres
         return DB::getInstance()->firstColumn('SELECT id FROM membres WHERE numero = ?;', (int) $numero);
     }
 
-    public function search($field, $query)
+    public function buildSQLSearchQuery(array $groups, $order, $desc = false, $limit = 100)
     {
         $db = DB::getInstance();
         $config = Config::getInstance();
 
         $champs = $config->get('champs_membres');
+        $colonnes = [];
 
-        if (!$champs->get($field))
+        $query_groups = [];
+
+        foreach ($groups as $group)
         {
-            throw new \UnexpectedValueException($field . ' is not a valid field');
-        }
-
-        $champ = $champs->get($field);
-
-        if ($champ->type == 'multiple')
-        {
-            $where = 'WHERE '.$field.' & (1 << '.(int)$query.')';
-            $order = false;
-        }
-        elseif ($champ->type == 'tel')
-        {
-            $query = Utils::normalizePhoneNumber($query);
-            $query = preg_replace('!^0+!', '', $query);
-
-            if ($query == '')
+            if (!isset($group['conditions'], $group['operator'])
+                || !is_array($group['conditions'])
+                || ($group['operator'] != 'AND' && $group['operator'] != 'OR'))
             {
-                return false;
+                // Ignorer les groupes de conditions invalides
+                continue;
             }
 
-            $where = sprintf('WHERE %s LIKE %s', $field, $db->quote('%' . $query . '%'));
-            $order = $field;
-        }
-        elseif (!$champs->isText($field))
-        {
-            $where = sprintf('WHERE %s = %s', $field, $db->quote($query));
-            $order = $field;
-        }
-        else
-        {
-            // Si le champ est de type 'select' (sélecteur à choix unique), ne pas utiliser de LIKE mais valeur exacte
-            // @link https://fossil.kd2.org/garradin/info/587f730b661a7ce16bad215d4bd02195e754ec57
-            if ($champ->type != 'select')
+            $query_group_conditions = [];
+
+            foreach ($group['conditions'] as $condition)
             {
-                $query = '%' . $query . '%';
+                if (!isset($condition['column'], $condition['operator'])
+                    || (isset($condition['values']) && !is_array($condition['values'])))
+                {
+                    // Ignorer les conditions invalides
+                    continue;
+                }
+
+                if (!$champs->get($condition['column']))
+                {
+                    // Ignorer une condition qui se rapporte à une colonne
+                    // qui n'existe pas, cas possible si on reprend une recherche
+                    // après avoir modifié les fiches de membres
+                    continue;
+                }
+
+                $colonnes[] = $condition['column'];
+                $champ = $champs->get($condition['column']);
+
+                if ($champs->isText($condition['column']))
+                {
+                    $query = sprintf('transliterate_to_ascii(%s) %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
+                }
+                else
+                {
+                    $query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
+                }
+
+                $values = isset($condition['values']) ? $condition['values'] : [];
+
+                array_walk($values, ['Garradin\Utils', 'transliterateToAscii']);
+                
+                if ($champ->type == 'tel')
+                {
+                    // Normaliser le numéro de téléphone
+                    array_walk($values, ['Garradin\Utils', 'normalizePhoneNumber']);
+                }
+
+                if ($condition['operator'] == '&')
+                {
+                    $new_query = [];
+
+                    foreach ($values as $value)
+                    {
+                        $new_query[] = sprintf('%s (1 << %d)', $query, (int) $value);
+                    }
+
+                    $query = '(' . implode(' AND ', $new_query) . ')';
+                }
+                elseif (strpos($query, '??') !== false)
+                {
+                    $values = array_map([$db, 'quote'], $values);
+                    $query = str_replace('??', implode(', ', $values), $query);
+                }
+                elseif (preg_match('/%\?%|%\?|\?%/', $query, $match))
+                {
+                    $value = str_replace(['%_'], ['\\%', '\\_'], reset($values));
+                    $value = str_replace('?', $value, $match[0]);
+                    $query = str_replace($match[0], sprintf('%s ESCAPE \'\\\'', $db->quote($value)), $query);
+                }
+                elseif (strpos($query, '?') !== false)
+                {
+                    $expected = substr_count($query, '?');
+                    $found = count($values);
+
+                    if ($expected != $found)
+                    {
+                        throw new \RuntimeException(sprintf('Operator %s expects at least %d parameters, only %d supplied', $condition['operator'], $expected, $found));
+                    }
+
+                    for ($i = 0; $i < $expected; $i++)
+                    {
+                        $pos = strpos($query, '?');
+                        $query = substr_replace($query, $db->quote(array_shift($values)), $pos, 1);
+                    }
+                }
+
+                $query_group_conditions[] = $query;
             }
 
-            $where = sprintf('WHERE transliterate_to_ascii(%s) LIKE %s', $field, $db->quote(Utils::transliterateToAscii($query)));
-            $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $field);
+            $query_groups[] = implode(' ' . $group['operator'] . ' ', $query_group_conditions);
         }
 
-        $fields = array_keys((array)$champs->getListedFields());
+        $colonnes = array_unique($colonnes);
+        array_walk($colonnes, [$db, 'quoteIdentifier']);
 
-        if (!in_array($field, $fields))
-        {
-            $fields[] = $field;
-        }
+        $sql_query = sprintf('SELECT id, %s FROM membres WHERE %s ORDER BY %s %s LIMIT 0,%d;',
+            implode(', ', $colonnes),
+            '(' . implode(') AND (', $query_groups) . ')',
+            $db->quoteIdentifier($order),
+            $desc ? 'DESC' : 'ASC',
+            (int) $limit);
 
-        if (!in_array('email', $fields))
-        {
-            $fields[] = 'email';
-        }
-
-        $query = sprintf('SELECT id, id_categorie, %s, %s AS identite,
-            strftime(\'%%s\', date_inscription) AS date_inscription
-            FROM membres %s %s LIMIT 1000;',
-            implode(', ', $fields),
-            $config->get('champ_identite'),
-            $where,
-            $order ? 'ORDER BY ' . $order : ''
-        );
-
-        return $db->get($query);
+        return $sql_query;
     }
 
+    public function getSearchHeaderFields(array $result)
+    {
+        if (!count($result))
+        {
+            return false;
+        }
+
+        $champs = Config::getInstance()->get('champs_membres');
+        $fields = [];
+
+        foreach (reset($result) as $field=>$value)
+        {
+            if ($config = $champs->get($field))
+            {
+                $fields[$field] = $config;
+            }
+        }
+
+        return $fields;
+    }
+
+    public function searchSQL($query)
+    {
+        $db = DB::getInstance();
+
+        if (!preg_match('/LIMIT\s+/i', $query))
+        {
+            $query = preg_replace('/;?\s*$/', '', $query);
+            $query .= ' LIMIT 100';
+        }
+
+        if (preg_match('/;\s*(.+?)$/', $query))
+        {
+            throw new UserException('Une seule requête peut être envoyée en même temps.');
+        }
+
+        $st = $db->prepare($query);
+
+        if (!$st->readOnly())
+        {
+            throw new UserException('Seules les requêtes en lecture sont autorisées.');
+        }
+
+        $res = $st->execute();
+        $out = [];
+
+        while ($row = $res->fetchArray(SQLITE3_ASSOC))
+        {
+            if (array_key_exists('passe', $row))
+            {
+                unset($row['passe']);
+            }
+            
+            $out[] = (object) $row;
+        }
+
+        return $out;
+    }
+
+    public function schemaSQL()
+    {
+        $db = DB::getInstance();
+
+        $tables = [
+            'membres'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
+            'categories'=>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+        ];
+
+        return $tables;
+    }
     public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
@@ -475,55 +590,5 @@ class Membres
 
         // Suppression du membre
         return $db->delete('membres', $db->where('id', $membres));
-    }
-
-    public function searchSQL($query)
-    {
-        $db = DB::getInstance();
-
-        if (!preg_match('/LIMIT\s+/i', $query))
-        {
-            $query = preg_replace('/;?\s*$/', '', $query);
-            $query .= ' LIMIT 100';
-        }
-
-        if (preg_match('/;\s*(.+?)$/', $query))
-        {
-            throw new UserException('Une seule requête peut être envoyée en même temps.');
-        }
-
-        $st = $db->prepare($query);
-
-        if (!$st->readOnly())
-        {
-            throw new UserException('Seules les requêtes en lecture sont autorisées.');
-        }
-
-        $res = $st->execute();
-        $out = [];
-
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
-        {
-            if (array_key_exists('passe', $row))
-            {
-                unset($row['passe']);
-            }
-            
-            $out[] = $row;
-        }
-
-        return $out;
-    }
-
-    public function schemaSQL()
-    {
-        $db = DB::getInstance();
-
-        $tables = [
-            'membres'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-            'categories'=>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
-        ];
-
-        return $tables;
     }
 }

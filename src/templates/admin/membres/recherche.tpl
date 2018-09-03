@@ -1,158 +1,153 @@
-{include file="admin/_head.tpl" title="Recherche de membre" current="membres" js=1}
+{include file="admin/_head.tpl" title="Recherche de membre" current="membres" js=1 custom_js=['sql_query_builder.js']}
 
 {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
 <ul class="actions">
-    <li><a href="{$admin_url}membres/">Liste des membres</a></li>
-    <li class="current"><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
-    <li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
+	<li><a href="{$admin_url}membres/">Liste des membres</a></li>
+	<li class="current"><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
+	<li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
 </ul>
 {/if}
 
-<form method="get" action="{$admin_url}membres/recherche.php" class="shortFormLeft">
-    <fieldset>
-        <legend>Rechercher un membre</legend>
-        <dl>
-            <dt><label for="f_champ">Champ</label></dt>
-            <dd>
-                <select name="c" id="f_champ">
-                    {foreach from=$champs_liste key="k" item="v"}
-                    <option value="{$k}"{form_field name="c" default=$champ selected=$k}>{$v.title}</option>
-                    {/foreach}
-                </select>
-            </dd>
-            <dt><label for="f_texte">Recherche</label></dt>
-            <dd id="f_free"><input id="f_texte" type="text" name="r" value="{$recherche}" required="required" /></dd>
-            {foreach from=$champs_liste key="k" item="v"}
-                {if $v.type == 'select'}
-                    <dd class="special" id="f_{$k}">
-                        <select name="r" disabled="disabled">
-                            {foreach from=$v.options item="opt"}
-                            <option value="{$opt}"{form_field name="r" default=$recherche selected=$opt}>{$opt}</option>
-                            {/foreach}
-                        </select>
-                    </dd>
-                {elseif $v.type == 'multiple'}
-                    <dd class="special" id="f_{$k}">
-                        <select name="r" disabled="disabled">
-                            {foreach from=$v.options key="opt_k" item="opt"}
-                            <option value="{$opt_k}"{form_field name="r" default=$recherche selected=$opt_k}>{$opt}</option>
-                            {/foreach}
-                        </select>
-                    </dd>
-                {elseif $v.type == 'checkbox'}
-                    <dd class="special" id="f_{$k}">
-                        <select name="r" disabled="disabled">
-                            <option value="1"{form_field name="r" default=$recherche selected=1}>Oui</option>
-                            <option value="0"{form_field name="r" default=$recherche selected=0}>Non</option>
-                        </select>
-                    </dd>
-                {/if}
-            {/foreach}
-        </dl>
-        <p class="submit">
-            <input type="submit" value="Chercher &rarr;" />
-        </p>
-    </fieldset>
+<form method="post" action="{$admin_url}membres/recherche.php" id="queryBuilderForm">
+	<fieldset>
+		<legend>Rechercher un membre</legend>
+		<div class="queryBuilder" id="queryBuilder"></div>
+		<p class="submit">
+			<input type="submit" value="Chercher &rarr;" id="send" />
+			<input type="hidden" name="q" id="jsonQuery" />
+		</p>
+	</fieldset>
 </form>
 
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
-    <form method="post" action="{$admin_url}membres/action.php" class="memberList">
-{/if}
-
-{if !empty($liste)}
-    <table class="list search">
-        <thead>
-            {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>{/if}
-            {foreach from=$champs_entete key="c" item="cfg"}
-                {if $champ == $c}
-                    <th><strong>{$cfg.title}</strong></th>
-                {else}
-                    <td>{$cfg.title}</td>
-                {/if}
-            {/foreach}
-            <td></td>
-        </thead>
-        <tbody>
-            {foreach from=$liste item="membre"}
-                <tr>
-                    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
-                    {foreach from=$champs_entete key="c" item="cfg"}
-                        {if $champ == $c}
-                            <th><strong>{$membre->$c|raw|display_champ_membre:$cfg}</strong></th>
-                        {else}
-                            <td>{$membre->$c|raw|display_champ_membre:$cfg}</td>
-                        {/if}
-                    {/foreach}
-                    <td class="actions">
-                    	<a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
-                    	{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
-                        <a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>
-                        {/if}
-                    </td>
-                </tr>
-            {/foreach}
-        </tbody>
-    </table>
-
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
-    <p class="checkUncheck">
-        <input type="button" value="Tout cocher / décocher" onclick="g.checkUncheck();" />
-    </p>
-    <p class="actions">
-        <em>Pour les membres cochés :</em>
-        <input type="submit" name="move" value="Changer de catégorie" />
-        <input type="submit" name="delete" value="Supprimer" />
-        {csrf_field key="membres_action"}
-    </p>
-    {/if}
-
-{elseif $recherche != ''}
-
-    <p class="alert">
-        Aucun membre trouvé.
-    </p>
-
-{/if}
-
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
-    </form>
-{/if}
-
 <script type="text/javascript">
+var colonnes = {$colonnes|escape:'json'};
+
 {literal}
-(function() {
-    var current = false;
+var traductions = {
+	"after": "après",
+	"before": "avant",
+	"is equal to": "est égal à",
+	"is equal to one of": "est égal à une des ces options",
+	"is not equal to one of": "n'est pas égal à une des ces options",
+	"is not equal to": "n'est pas égal à",
+	"is greater than": "est supérieur à",
+	"is greater than or equal to": "est supérieur ou égal à",
+	"is less than": "est inférieur à",
+	"is less than or equal to": "est inférieur ou égal à",
+	"is between": "est situé entre",
+	"is not between": "n'est pas situé entre",
+	"is null": "est nul",
+	"is not null": "n'est pas nul",
+	"begins with": "commence par",
+	"doesn't begin with": "ne commence pas par",
+	"ends with": "se termine par",
+	"doesn't end with": "ne se termine pas par",
+	"contains": "contient",
+	"doesn't contain": "ne contient pas",
+	"matches one of": "correspond à",
+	"is true": "oui",
+	"is false": "non",
+	"Matches ALL of the following conditions:": "Correspond à TOUS les critères suivants :",
+	"Matches ANY of the following conditions:": "Correspond à UN SEUL des critères suivants :",
+	"Add a new set of conditions below this one": "-- Ajouter un groupe de critères",
+	"Remove this set of conditions": "-- Supprimer ce groupe de critères"
+};
 
-    var selectField = function(elm)
-    {
-        if (current)
-        {
-            document.getElementById('f_' + current).style.display = 'none';
-            document.getElementById('f_' + current).querySelector('select').disabled = true;
-            current = false;
-        }
-        
-        if (document.getElementById('f_' + elm.value))
-        {
-            document.getElementById('f_' + elm.value).style.display = 'block';
-            document.getElementById('f_' + elm.value).querySelector('select').disabled = false;
-            document.getElementById('f_free').style.display = 'none';
-            document.getElementById('f_texte').disabled = true;
-            current = elm.value;
-        }
-        else
-        {
-            document.getElementById('f_texte').disabled = false;
-            document.getElementById('f_free').style.display = 'block';
-        }
+var q = new SQLQueryBuilder(colonnes);
+q.__ = function (str) {
+	return traductions[str];
+};
+q.loadDefaultOperators();
+q.buildInput = function (type, label, column) {
+	if (label == '+')
+	{
+		label = '➕';
+	}
+	else if (label == '-')
+	{
+		label = '➖';
+	}
 
-        return true;
-    }
+	var i = document.createElement('input');
+	console.log(type);
+	i.type = type == 'integer' ? 'number' : type;
+	i.value = label;
 
-    document.getElementById('f_champ').onchange = function() { selectField(this); };
-    window.onload = selectField(document.getElementById('f_champ'));
-}())
+	if (type == 'button')
+	{
+		i.className = 'icn action';
+	}
+
+	return i;
+};
+q.init(document.getElementById('queryBuilder'));
+
+$('#queryBuilderForm').onsubmit = function () {
+	$('#jsonQuery').value = JSON.stringify(q.export());
+};
 {/literal}
+q.import({$query|escape:'json'});
 </script>
+
+
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+	<form method="post" action="{$admin_url}membres/action.php" class="memberList">
+{/if}
+
+{if !empty($result)}
+	<table class="list search">
+		<thead>
+			<tr>
+				{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>{/if}
+				{foreach from=$result_header key="c" item="cfg"}
+					<td>{$cfg.title}</td>
+				{/foreach}
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+			{foreach from=$result item="row"}
+				<tr>
+					{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if}
+					{foreach from=$row key="key" item="value"}
+						{if isset($result_header[$key])}
+							<td>{$value|raw|display_champ_membre:$result_header[$key]}</td>
+						{/if}
+					{/foreach}
+					<td class="actions">
+						<a class="icn" href="{$admin_url}membres/fiche.php?id={$row.id}" title="Fiche membre">👤</a>
+						{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+						<a class="icn" href="{$admin_url}membres/modifier.php?id={$row.id}" title="Modifier la fiche membre">✎</a>
+						{/if}
+					</td>
+				</tr>
+			{/foreach}
+		</tbody>
+	</table>
+
+	{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
+	<p class="checkUncheck">
+		<input type="button" value="Tout cocher / décocher" onclick="g.checkUncheck();" />
+	</p>
+	<p class="actions">
+		<em>Pour les membres cochés :</em>
+		<input type="submit" name="move" value="Changer de catégorie" />
+		<input type="submit" name="delete" value="Supprimer" />
+		{csrf_field key="membres_action"}
+	</p>
+	{/if}
+
+{elseif $result !== null}
+
+	<p class="alert">
+		Aucun membre trouvé.
+	</p>
+
+	</form>
+{/if}
+
+{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+	</form>
+{/if}
 
 {include file="admin/_foot.tpl"}
