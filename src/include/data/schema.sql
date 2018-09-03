@@ -394,7 +394,7 @@ CREATE TABLE IF NOT EXISTS recherches
     id_membre INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE, -- Si non NULL, alors la recherche ne sera visible que par le membre associé
     intitule TEXT NOT NULL,
     creation TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(creation) IS NOT NULL AND datetime(creation) = creation),
-    table TEXT NOT NULL, -- "membres" ou "compta_journal"
+    cible TEXT NOT NULL, -- "membres" ou "compta_journal"
     type TEXT NOT NULL, -- "json" ou "sql"
     contenu TEXT NOT NULL
 );

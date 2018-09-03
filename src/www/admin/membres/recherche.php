@@ -3,66 +3,111 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$recherche = trim(qg('r'));
-$champ = trim(qg('c'));
-
 $champs = $config->get('champs_membres');
+$text_query = trim(qg('qt'));
+$query = null;
 
-$auto = false;
-
-// On détermine magiquement quel champ on recherche
-if (!$champ)
+// Recherche simple
+if ($text_query !== '')
 {
-    $auto = true;
+    $operator = 'LIKE %?%';
 
-    if (is_numeric(trim($recherche))) {
-        $champ = 'numero';
-    }
-    elseif (strpos($recherche, '@') !== false) {
-        $champ = 'email';
-    }
-    else {
-        $champ = $config->get('champ_identite');
-    }
-}
-else
-{
-    if ($champ != 'numero' && !$champs->get($champ))
+    if (is_numeric(trim($text_query)))
     {
-        throw new UserException('Le champ demandé n\'existe pas.');
+        $column = 'numero';
+        $operator = '= ?';
     }
+    elseif (strpos($text_query, '@') !== false)
+    {
+        $column = 'email';
+    }
+    else
+    {
+        $column = $config->get('champ_identite');
+    }
+
+    $query = [[
+        'operator' => 'AND',
+        'conditions' => [
+            [
+                'column'   => $column,
+                'operator' => $operator,
+                'values'   => [$text_query],
+            ],
+        ],
+    ]];
+}
+elseif (f('q') !== null)
+{
+    $query = json_decode(f('q'), true);
 }
 
-if ($recherche != '')
+if ($query)
 {
-    $result = $membres->search($champ, $recherche);
+    $sql_query = $membres->buildSQLSearchQuery($query, 'id', false, 100);
+    $result = $membres->searchSQL($sql_query);
 
-    if (count($result) == 1 && $auto)
+    if (count($result) == 1 && $text_query !== '')
     {
         Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->id);
     }
+
+    $tpl->assign('result_header', $membres->getSearchHeaderFields($result));
 }
-
-$champs_liste = $champs->getList();
-$champs_entete = $champs->getListedFields();
-
-if (!isset($champs_entete->$champ))
+else
 {
-    $champs_entete = array_merge(
-        [$champ => $champs_liste->$champ],
-        (array)$champs_entete
-    );
+    $query = [[
+        'operator' => 'AND',
+        'conditions' => [
+            [
+                'column'   => $config->get('champ_identite'),
+                'operator' => '= ?',
+                'values'   => ['Souad Massi'],
+            ],
+        ],
+    ]];
+    $result = null;
 }
 
-$tpl->assign('champs_entete', $champs_entete);
-$tpl->assign('champs_liste', $champs_liste);
-$tpl->assign('champ', $champ);
+$tpl->assign('query', $query);
+$tpl->assign('result', $result);
 
-if ($recherche != '')
+$colonnes = [];
+
+foreach ($champs->getList() as $champ => $config)
 {
-    $tpl->assign('liste', $result);
+    $colonne = [
+        'label' => $config->title,
+        'type'  => 'text',
+        'null'  => true,
+    ];
+
+    if ($config->type == 'checkbox')
+    {
+        $colonne['type'] = 'boolean';
+    }
+    elseif ($config->type == 'select')
+    {
+        $colonne['type'] = 'enum';
+        $colonne['values'] = $config->options;
+    }
+    elseif ($config->type == 'multiple')
+    {
+        $colonne['type'] = 'bitwise';
+        $colonne['values'] = $config->options;
+    }
+    elseif ($config->type == 'date' || $config->type == 'datetime')
+    {
+        $colonne['type'] = $config->type;
+    }
+    elseif ($config->type == 'number' || $champ == 'numero')
+    {
+        $colonne['type'] = 'integer';
+    }
+
+    $colonnes[$champ] = $colonne;
 }
 
-$tpl->assign('recherche', $recherche);
+$tpl->assign('colonnes', $colonnes);
 
 $tpl->display('admin/membres/recherche.tpl');

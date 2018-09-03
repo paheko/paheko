@@ -618,6 +618,10 @@ table.search th {
     background: rgba(var(--gSecondColor), 0.5);
 }
 
+#queryBuilder p select {
+    max-width: 15em;
+}
+
 .userOrder .cur {
     background: rgb(217, 134, 40);
     background: rgba(var(--gSecondColor), 1.0);

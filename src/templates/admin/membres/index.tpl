@@ -34,7 +34,7 @@
 <form method="get" action="{$admin_url}membres/recherche.php" class="shortFormLeft">
     <fieldset>
         <legend>Rechercher un membre</legend>
-        <input type="text" name="r" value="" />
+        <input type="text" name="qt" value="" />
         <input type="submit" value="Chercher &rarr;" />
     </fieldset>
 </form>
