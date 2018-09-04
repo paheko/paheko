@@ -618,8 +618,12 @@ table.search th {
     background: rgba(var(--gSecondColor), 0.5);
 }
 
-#queryBuilder p select {
+#queryBuilder .column select {
     max-width: 15em;
+}
+
+#queryBuilder table td {
+    vertical-align: top;
 }
 
 .userOrder .cur {

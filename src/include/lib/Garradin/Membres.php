@@ -338,7 +338,7 @@ class Membres
 
                 if ($champs->isText($condition['column']))
                 {
-                    $query = sprintf('transliterate_to_ascii(%s) %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
+                    $query = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
                 }
                 else
                 {
@@ -347,12 +347,12 @@ class Membres
 
                 $values = isset($condition['values']) ? $condition['values'] : [];
 
-                array_walk($values, ['Garradin\Utils', 'transliterateToAscii']);
+                $values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
                 
                 if ($champ->type == 'tel')
                 {
                     // Normaliser le numéro de téléphone
-                    array_walk($values, ['Garradin\Utils', 'normalizePhoneNumber']);
+                    $values = array_map(['Garradin\Utils', 'normalizePhoneNumber'], $values);
                 }
 
                 if ($condition['operator'] == '&')
@@ -407,18 +407,18 @@ class Membres
             array_unshift($colonnes, $config->get('champ_identite'));
         }
 
-        array_walk($colonnes, [$db, 'quoteIdentifier']);
+        $colonnes = array_map([$db, 'quoteIdentifier'], $colonnes);
 
         if ($champs->isText($order))
         {
-            $order = sprintf('transliterate_to_ascii(%s)', $db->quoteIdentifier($order));
+            $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $db->quoteIdentifier($order));
         }
         else
         {
             $order = $db->quoteIdentifier($order);
         }
 
-        $sql_query = sprintf('SELECT id, %s FROM membres WHERE %s ORDER BY %s %s LIMIT 0,%d;',
+        $sql_query = sprintf('SELECT id, %s FROM membres WHERE %s ORDER BY %s %s LIMIT %d;',
             implode(', ', $colonnes),
             '(' . implode(') AND (', $query_groups) . ')',
             $order,

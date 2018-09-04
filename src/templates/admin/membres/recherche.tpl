@@ -107,6 +107,7 @@ q.import({$query|escape:'json'});
 {/if}
 
 {if !empty($result)}
+	<p class="help">{$result|count} membres trouvés pour cette recherche.</p>
 	<table class="list search">
 		<thead>
 			<tr>
