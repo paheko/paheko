@@ -233,6 +233,12 @@ Plugin::checkAndInstallSystemPlugins();
 // Mettre à jour les plugins si nécessaire
 foreach (Plugin::listInstalled() as $id=>$infos)
 {
+    // Ne pas tenir compte des plugins dont le code n'est pas dispo
+    if ($infos->disabled)
+    {
+        continue;
+    }
+
     $plugin = new Plugin($id);
 
     if ($plugin->needUpgrade())

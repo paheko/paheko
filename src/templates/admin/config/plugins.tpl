@@ -29,18 +29,24 @@
             <thead>
                 <tr>
                     <th>Extension</th>
-                    <td>Auteur</td>
+                    <td></td>
                     <td>Version installée</td>
                     <td></td>
                 </tr>
             </thead>
             <tbody>
                 {foreach from=$liste_installes item="plugin"}
-                <tr>
+                <tr{if $plugin.disabled} class="disabled"{/if}>
                     <th>
                         <h4>{$plugin.nom}</h4>
                         <small>{$plugin.description}</small>
                     </th>
+                    {if $plugin.disabled}
+                    <td colspan="3">
+                        <span class="alert">Code source du plugin non trouvé dans le répertoire <em>plugins</em>&nbsp;!</span><br />
+                        Ce plugin ne peut fonctionner ou être désinstallé.
+                    </td>
+                    {else}
                     <td>
                         <a href="{$plugin.url}" onclick="return !window.open(this.href);">{$plugin.auteur}</a>
                     </td>
@@ -56,6 +62,7 @@
                             <a href="{plugin_url id=$plugin.id file="config.php"}">Configurer</a>
                         {/if}
                     </td>
+                    {/if}
                 </tr>
                 {/foreach}
             </tbody>
