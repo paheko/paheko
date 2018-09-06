@@ -187,6 +187,34 @@ if (version_compare($v, '0.9.0', '<'))
 
     $db->import(ROOT . '/include/data/0.9.0.sql');
 
+    // Correction des ID parents des comptes qui ont été mal renseignés
+    // exemple : compte 512A avec "5" comme parent (c'était permis,
+    // par erreur, par le formulaire d'ajout de compte dans le plan)
+    // Serait probablement possible en 3-4 lignes de SQL avec
+    // WITH RECURSIVE mais c'est au delà de mes compétences
+    $comptes = $db->iterate('SELECT id FROM compta_comptes WHERE parent != length(id) - 1;');
+
+    foreach ($comptes as $compte)
+    {
+        $parent = false;
+        $id = $compte->id;
+
+        while (!$parent && strlen($id))
+        {
+            // On enlève un caractère à la fin jusqu'à trouver un compte parent correspondant
+            $id = substr($id, 0, -1);
+            $parent = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $id);
+        }
+
+        if (!$parent)
+        {
+            // Situation normalement impossible !
+            throw new \LogicException(sprintf('Le compte %s est invalide et n\'a pas de compte parent possible !', $compte->id));
+        }
+
+        $db->update('compta_comptes', ['parent' => $parent], 'id = :id', ['id' => $compte->id]);
+    }
+
     $db->commit();
 
     $config->set('desactiver_site', false);
