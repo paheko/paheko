@@ -27,7 +27,7 @@ class Plugin
 		'svg' => 'image/svg+xml',
 	];
 
-	static public function getPath($id)
+	static public function getPath($id, $fail_with_exception = true)
 	{
 		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
 		{
@@ -38,7 +38,12 @@ class Plugin
 			return PLUGINS_ROOT . '/' . $id;
 		}
 
-		throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
+		if ($fail_with_exception)
+		{
+			throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
+		}
+
+		return false;
 	}
 
 	/**
@@ -62,6 +67,9 @@ class Plugin
 		{
 			$this->plugin->config = new \stdClass;
 		}
+
+		// Juste pour vérifier que le fichier source du plugin existe bien
+		self::getPath($id);
 
 		$this->id = $id;
 	}
@@ -351,6 +359,7 @@ class Plugin
 		foreach ($plugins as &$row)
 		{
 			$row->system = in_array($row->id, $system);
+			$row->disabled = !self::getPath($row->id, false);
 		}
 
 		return $plugins;

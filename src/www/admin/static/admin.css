@@ -618,6 +618,11 @@ table.search th {
     background: rgba(var(--gSecondColor), 0.5);
 }
 
+table.list .disabled {
+    background: #eee;
+    color: #999;
+}
+
 #queryBuilder .column select {
     max-width: 15em;
 }
