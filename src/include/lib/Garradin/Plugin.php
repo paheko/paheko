@@ -407,6 +407,12 @@ class Plugin
 
 		foreach ($list as $id => &$row)
 		{
+			if (!self::getPath($row->id, false))
+			{
+				// Ne pas lister les plugins dont le code a disparu
+				continue;
+			}
+
 			if (!$row->menu_condition)
 			{
 				$row = $row->nom;
