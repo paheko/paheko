@@ -393,7 +393,13 @@ class Utils
             {
             	if (file_exists($path . DIRECTORY_SEPARATOR . $file))
             	{
-                	@unlink($path . DIRECTORY_SEPARATOR . $file);
+                	if (!@unlink($path . DIRECTORY_SEPARATOR . $file))
+                    {
+                        if (file_exists($path . DIRECTORY_SEPARATOR . $file))
+                        {
+                            throw new \RuntimeException(sprintf('Impossible de supprimer le fichier %s: %s', $path . DIRECTORY_SEPARATOR . $file, error_get_last()));
+                        }
+                    }
                 }
             }
         }
