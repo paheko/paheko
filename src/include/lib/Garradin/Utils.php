@@ -393,7 +393,7 @@ class Utils
             {
             	if (file_exists($path . DIRECTORY_SEPARATOR . $file))
             	{
-                	unlink($path . DIRECTORY_SEPARATOR . $file);
+                	@unlink($path . DIRECTORY_SEPARATOR . $file);
                 }
             }
         }
