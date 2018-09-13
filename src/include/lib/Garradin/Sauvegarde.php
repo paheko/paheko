@@ -146,7 +146,7 @@ class Sauvegarde
 			throw new UserException('Nom de fichier non valide.');
 		}
 
-		return unlink(DATA_ROOT . '/' . $file);
+		return Utils::safe_unlink(DATA_ROOT . '/' . $file);
 	}
 
 	/**
@@ -231,7 +231,7 @@ class Sauvegarde
 
 		if ($r)
 		{
-			unlink($file['tmp_name']);
+			Utils::safe_unlink($file['tmp_name']);
 		}
 
 		return $r;

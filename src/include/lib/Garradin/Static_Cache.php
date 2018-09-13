@@ -13,7 +13,7 @@ class Static_Cache
 
 		if (!file_exists($dir))
 		{
-			mkdir(CACHE_ROOT . '/static', 0777, true);
+			Utils::safe_mkdir(CACHE_ROOT . '/static', 0777, true);
 		}
 
 		return CACHE_ROOT . '/static';
@@ -86,7 +86,7 @@ class Static_Cache
 	static public function remove($id)
 	{
 		$path = self::_getCachePath($id);
-		return @unlink($path);
+		return Utils::safe_unlink($path);
 	}
 
 	static public function clean($expire = self::CLEAN_EXPIRE)
@@ -105,7 +105,7 @@ class Static_Cache
 
 			if (filemtime($dir . '/' . $file) > $expire)
 			{
-				unlink($dir . '/' . $file);
+				Utils::safe_unlink($dir . '/' . $file);
 			}
 		}
 

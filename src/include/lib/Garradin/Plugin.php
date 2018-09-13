@@ -617,7 +617,7 @@ class Plugin
 
 		if (!self::checkHash($id))
 		{
-			unlink(PLUGINS_ROOT . '/' . $id . '.tar.gz');
+			Utils::safe_unlink(PLUGINS_ROOT . '/' . $id . '.tar.gz');
 			throw new \RuntimeException('L\'archive du plugin '.$id.' est corrompue (le hash SHA1 ne correspond pas).');
 		}
 

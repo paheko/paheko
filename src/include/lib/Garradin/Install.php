@@ -149,10 +149,7 @@ class Install
 
 		foreach ($paths as $path)
 		{
-		    if (!file_exists($path))
-		    {
-		        @mkdir($path, 0777, true);
-		    }
+			Utils::safe_mkdir($path);
 
 		    if (!is_dir($path))
 		    {
