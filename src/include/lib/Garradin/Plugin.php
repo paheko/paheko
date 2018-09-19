@@ -410,6 +410,7 @@ class Plugin
 			if (!self::getPath($row->id, false))
 			{
 				// Ne pas lister les plugins dont le code a disparu
+				unset($list[$id]);
 				continue;
 			}
 
