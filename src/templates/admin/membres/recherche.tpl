@@ -123,8 +123,20 @@ q.import({$query|escape:'json'});
 				<tr>
 					{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if}
 					{foreach from=$row key="key" item="value"}
+						<?php $link = false; ?>
 						{if isset($result_header[$key])}
-							<td>{$value|raw|display_champ_membre:$result_header[$key]}</td>
+							<td>
+								{if !$link}
+									<a href="{$admin_url}membres/fiche.php?id={$row.id}">
+								{/if}
+
+								{$value|raw|display_champ_membre:$result_header[$key]}
+
+								{if !$link}
+									<?php $link = true; ?>
+									</a>
+								{/if}
+							</td>
 						{/if}
 					{/foreach}
 					<td class="actions">
