@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Recherche par requête SQL" current="membres" js=1}
 
+{include file="admin/membres/_nav.tpl" current="sql"}
+
 <form method="get" action="{$admin_url}membres/recherche_sql.php">
     <fieldset>
         <legend>Schéma des tables SQL</legend>
@@ -7,10 +9,11 @@
         <dl>
             <dt><label for="f_query">Requête SQL</label></dt>
             <dd class="help">Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée.</dd>
-            <dd><textarea name="query" id="f_query" cols="50" rows="7" required="required">{$query}</textarea></dd>
+            <dd><textarea name="query" id="f_query" cols="70" rows="7" required="required">{$query}</textarea></dd>
         </dl>
         <p class="submit">
-            <input type="submit" value="Exécuter &rarr;" />
+            <input type="submit" name="run" value="Exécuter &rarr;" />
+            {if $query}<input type="submit" name="save" value="Enregistrer la requête" class="minor" />{/if}
         </p>
     </fieldset>
 </form>
@@ -25,7 +28,7 @@
 <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
 {if !empty($result)}
-<p class="alert">{$result|count} résultats renvoyés.</p>
+<p class="alert">{$result|count} résultats retournés.</p>
 <table class="list search">
     <thead>
         {if array_key_exists('id', $result[0])}
@@ -60,9 +63,6 @@
     </tbody>
 </table>
 
-<p class="checkUncheck">
-    <input type="button" value="Tout cocher / décocher" onclick="g.checkUncheck();" />
-</p>
 <p class="actions">
     <em>Pour les membres cochés :</em>
     <input type="submit" name="move" value="Changer de catégorie" />

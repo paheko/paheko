@@ -1,12 +1,6 @@
-{include file="admin/_head.tpl" title="Recherche de membre" current="membres" js=1 custom_js=['sql_query_builder.js']}
+{include file="admin/_head.tpl" title="Recherche de membre" current="membres" js=1 custom_js=['sql_query_builder.min.js']}
 
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
-<ul class="actions">
-	<li><a href="{$admin_url}membres/">Liste des membres</a></li>
-	<li class="current"><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
-	<li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
-</ul>
-{/if}
+{include file="admin/membres/_nav.tpl" current="recherche"}
 
 <form method="post" action="{$admin_url}membres/recherche.php" id="queryBuilderForm">
 	<fieldset>
@@ -26,9 +20,9 @@
 		<p class="submit">
 			<input type="submit" value="Chercher &rarr;" id="send" />
 			<input type="hidden" name="q" id="jsonQuery" />
+			<input type="submit" value="Enregistrer cette recherche" class="minor" />
 		</p>
 	</fieldset>
-	<p class="help">{$sql_query}</p>
 </form>
 
 <script type="text/javascript">
@@ -151,9 +145,6 @@ q.import({$query|escape:'json'});
 	</table>
 
 	{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
-	<p class="checkUncheck">
-		<input type="button" value="Tout cocher / décocher" onclick="g.checkUncheck();" />
-	</p>
 	<p class="actions">
 		<em>Pour les membres cochés :</em>
 		<input type="submit" name="move" value="Changer de catégorie" />
