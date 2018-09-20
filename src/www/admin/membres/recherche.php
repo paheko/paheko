@@ -3,6 +3,8 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
+$recherche = new Recherche;
+
 $champs = $config->get('champs_membres');
 $text_query = trim(qg('qt'));
 $query = null;
@@ -48,8 +50,8 @@ elseif (f('q') !== null)
 
 if ($query)
 {
-    $sql_query = $membres->buildSQLSearchQuery($query, $order, $desc, $limit);
-    $result = $membres->searchSQL($sql_query);
+    $sql_query = $recherche->buildQuery('membres', $query, $order, $desc, $limit);
+    $result = $recherche->searchSQL('membres', $sql_query);
 
     if (count($result) == 1 && $text_query !== '')
     {
@@ -79,43 +81,6 @@ $tpl->assign('result', $result);
 $tpl->assign('order', $order);
 $tpl->assign('desc', $desc);
 $tpl->assign('limit', $limit);
-
-$colonnes = [];
-
-foreach ($champs->getList() as $champ => $config)
-{
-    $colonne = [
-        'label' => $config->title,
-        'type'  => 'text',
-        'null'  => true,
-    ];
-
-    if ($config->type == 'checkbox')
-    {
-        $colonne['type'] = 'boolean';
-    }
-    elseif ($config->type == 'select')
-    {
-        $colonne['type'] = 'enum';
-        $colonne['values'] = $config->options;
-    }
-    elseif ($config->type == 'multiple')
-    {
-        $colonne['type'] = 'bitwise';
-        $colonne['values'] = $config->options;
-    }
-    elseif ($config->type == 'date' || $config->type == 'datetime')
-    {
-        $colonne['type'] = $config->type;
-    }
-    elseif ($config->type == 'number' || $champ == 'numero')
-    {
-        $colonne['type'] = 'integer';
-    }
-
-    $colonnes[$champ] = $colonne;
-}
-
-$tpl->assign('colonnes', $colonnes);
+$tpl->assign('colonnes', $recherche->getColumns('membres'));
 
 $tpl->display('admin/membres/recherche.tpl');

@@ -1,6 +1,8 @@
 {include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
 
-<ul class="actions">
+{include file="admin/membres/_nav.tpl" current="import"}
+
+<ul class="actions sub">
     <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
     <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
     <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>

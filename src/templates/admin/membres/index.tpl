@@ -1,13 +1,6 @@
 {include file="admin/_head.tpl" title="Liste des membres" current="membres" js=1}
 
-<ul class="actions">
-    <li class="current"><a href="{$admin_url}membres/">Liste des membres</a></li>
-    <li><a href="{$admin_url}membres/recherche.php">Recherche avancée</a></li>
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
-        <li><a href="{$admin_url}membres/import.php">Import &amp; export</a></li>
-        <li><a href="{$admin_url}membres/recherche_sql.php">Recherche par requête SQL</a></li>
-    {/if}
-</ul>
+{include file="admin/membres/_nav.tpl" current="index"}
 
 {if $sent}
     <p class="confirm">Votre message a été envoyé.</p>

@@ -623,12 +623,25 @@ table.list .disabled {
     color: #999;
 }
 
-#queryBuilder .column select {
+#queryBuilder .column select, #queryBuilderForm .actions select {
     max-width: 15em;
 }
 
 #queryBuilder table td {
     vertical-align: top;
+    padding: .1em .2em;
+}
+
+#queryBuilder input[type=button], #queryBuilder .values input {
+    margin: .1em;
+}
+
+#queryBuilderForm .actions label {
+    margin: 0 .5em;
+}
+
+#queryBuilderForm input[type=number] {
+    width: 4em;
 }
 
 .userOrder .cur {
