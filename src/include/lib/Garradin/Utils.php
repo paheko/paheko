@@ -481,15 +481,34 @@ class Utils
         {
             if ($file[0] != '.')
             {
-            	if (file_exists($path . DIRECTORY_SEPARATOR . $file))
-            	{
-                	unlink($path . DIRECTORY_SEPARATOR . $file);
-                }
+                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
             }
         }
 
         $dir->close();
         return true;
+    }
+
+    static public function safe_unlink($path)
+    {
+        if (!@unlink($path))
+        {
+            return true;
+        }
+        
+        if (!file_exists($path))
+        {
+            return true;
+        }
+
+        throw new \RuntimeException(sprintf('Impossible de supprimer le fichier %s: %s', $path, error_get_last()));
+
+        return true;
+    }
+
+    static public function safe_mkdir($path, $mode = 0777, $recursive = false)
+    {
+        return @mkdir($path, $mode, $recursive) || is_dir($path);
     }
 
     static public function suggestPassword()
@@ -663,7 +682,7 @@ class Utils
             }
             else
             {
-                unlink($path . '/' . $file);
+                utils::safe_unlink($path . '/' . $file);
             }
         }
 

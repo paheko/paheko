@@ -882,7 +882,7 @@ class Squelette extends \KD2\MiniSkel
 
         if (!file_exists(dirname($path)))
         {
-            mkdir(dirname($path), 0777, true);
+            Utils::safe_mkdir(dirname($path), 0777, true);
         }
 
         file_put_contents($path, $content);
@@ -894,7 +894,9 @@ class Squelette extends \KD2\MiniSkel
         $path = self::compile_get_path($tpl);
 
         if (file_exists($path))
-            unlink($path);
+        {
+            Utils::safe_unlink($path);
+        }
 
         return true;
     }
@@ -955,7 +957,7 @@ class Squelette extends \KD2\MiniSkel
 
         if (file_exists(DATA_ROOT . '/www/squelettes/' . $template))
         {
-            return unlink(DATA_ROOT . '/www/squelettes/' . $template);
+            return Utils::safe_unlink(DATA_ROOT . '/www/squelettes/' . $template);
         }
 
         return false;
@@ -965,7 +967,7 @@ class Squelette extends \KD2\MiniSkel
     {
         if (!file_exists(DATA_ROOT . '/www/squelettes'))
         {
-            mkdir(DATA_ROOT . '/www/squelettes', 0775, true);
+            Utils::safe_mkdir(DATA_ROOT . '/www/squelettes', 0775, true);
         }
 
         $sources = [];
