@@ -20,7 +20,8 @@
 		<p class="submit">
 			<input type="submit" value="Chercher &rarr;" id="send" />
 			<input type="hidden" name="q" id="jsonQuery" />
-			<input type="submit" value="Enregistrer cette recherche" class="minor" />
+			<input type="hidden" name="id" value="{$id}" />
+			<input type="submit" name="save" value="{if $id}Enregistrer : {$recherche.intitule|truncate:40:"…":true}{else}Enregistrer cette recherche{/if}" class="minor" />
 		</p>
 	</fieldset>
 </form>

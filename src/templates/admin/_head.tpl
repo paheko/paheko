@@ -57,8 +57,8 @@
             <a href="{$admin_url}"><b class="icn">⌂</b><i> Accueil</i></a>
             {if !empty($plugins_menu)}
                 <ul>
-                {foreach from=$plugins_menu key="id" item="name"}
-                    <li class="plugins {if $current == sprintf("plugin_%s", $id)} current{/if}"><a href="{plugin_url id=$id}">{$name}</a></li>
+                {foreach from=$plugins_menu key="plugin_id" item="name"}
+                    <li class="plugins {if $current == sprintf("plugin_%s", $plugin_id)} current{/if}"><a href="{plugin_url id=$plugin_id}">{$name}</a></li>
                 {/foreach}
                 </ul>
             {/if}

@@ -13,17 +13,15 @@
         </dl>
         <p class="submit">
             <input type="submit" name="run" value="Exécuter &rarr;" />
-            {if $query}<input type="submit" name="save" value="Enregistrer la requête" class="minor" />{/if}
+            {if $query}
+                {if $id}<input type="hidden" name="id" value="{$id}" />{/if}
+                <input type="submit" name="save" value="{if $id}Enregistrer : {$recherche.intitule}{else}Enregistrer cette recherche{/if}" class="minor" />
+            {/if}
         </p>
     </fieldset>
 </form>
 
-{if !empty($error)}
-<p class="error">
-    <strong>Erreur dans la requête SQL :</strong><br />
-    {$error}
-</p>
-{/if}
+{form_errors}
 
 <form method="post" action="{$admin_url}membres/action.php" class="memberList">
 
