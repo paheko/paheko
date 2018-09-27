@@ -10,7 +10,7 @@
     <p class="confirm">
         {if $ok == 'create'}Une nouvelle sauvegarde a été créée.
         {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>date-du-jour.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
-            {if $ok_code & Garradin\Sauvegarde::NOT_AN_ADMIN}
+            {if $ok_code & Sauvegarde::NOT_AN_ADMIN}
             </p>
             <p class="alert">
                 <strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.

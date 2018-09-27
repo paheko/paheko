@@ -6,7 +6,7 @@
 
 {form_errors}
 
-{if $code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT}
+{if $code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT}
     <p class="alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
     Attention, si vous avez effectué des modifications dans la base de données, cela peut créer des bugs&nbsp;!</p>
 {/if}
@@ -14,7 +14,7 @@
 {if $ok}
     <p class="confirm">
         {if $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>{$now_date}.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
-            {if $ok_code & Garradin\Sauvegarde::NOT_AN_ADMIN}
+            {if $ok_code & Sauvegarde::NOT_AN_ADMIN}
             </p>
             <p class="alert">
                 <strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
@@ -60,7 +60,7 @@
         (maximum {$max_file_size|format_bytes})
         <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />
     </p>
-    {if $code && ($code == Garradin\Sauvegarde::INTEGRITY_FAIL && Garradin\ALLOW_MODIFIED_IMPORT)}
+    {if $code && ($code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
     <p>
         <label><input type="checkbox" name="force_import" value="1" /> Ignorer les erreurs, je sais ce que je fait</label>
     </p>

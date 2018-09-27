@@ -63,9 +63,9 @@
                 </ul>
             {/if}
         </li>
-        {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
+        {if $session->canAccess('membres', Membres::DROIT_ACCES)}
             <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
-            {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
                 <li class="member cotisations{if $current == 'membres/cotisations'} current{/if}"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
@@ -73,22 +73,22 @@
             {/if}
             </li>
         {/if}
-        {if $session->canAccess('compta', Garradin\Membres::DROIT_ACCES)}
+        {if $session->canAccess('compta', Membres::DROIT_ACCES)}
             <li class="compta{if $current == 'compta'} current{elseif $current_parent == 'compta'} current_parent{/if}"><a href="{$admin_url}compta/"><b>€</b><i> Comptabilité</i></a>
             <ul>
-            {if $session->canAccess('compta', Garradin\Membres::DROIT_ECRITURE)}
+            {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
                 <li class="compta new{if $current == 'compta/saisie'} current{/if}"><a href="{$admin_url}compta/operations/saisir.php">Saisie</a></li>
             {/if}
                 <li class="compta list{if $current == 'compta/gestion'} current{/if}"><a href="{$admin_url}compta/operations/">Suivi des opérations</a></li>
                 <li class="compta banks{if $current == 'compta/banques'} current{/if}"><a href="{$admin_url}compta/banques/">Banques &amp; caisse</a></li>
-            {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+            {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
                 <li class="compta admin config{if $current == 'compta/categories'} current{/if}"><a href="{$admin_url}compta/categories/">Catégories &amp; comptes</a></li>
             {/if}
                 <li class="compta admin reports{if $current == 'compta/exercices'} current{/if}"><a href="{$admin_url}compta/exercices/">Exercices &amp; projets</a></li>
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('wiki', Garradin\Membres::DROIT_ACCES)}
+        {if $session->canAccess('wiki', Membres::DROIT_ACCES)}
             <li class="wiki{if $current == 'wiki'} current{elseif $current_parent == 'wiki'} current_parent{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
             <ul>
                 <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
@@ -98,7 +98,7 @@
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('config', Garradin\Membres::DROIT_ADMIN)}
+        {if $session->canAccess('config', Membres::DROIT_ADMIN)}
             <li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
         <li class="my config{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}"><a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
@@ -106,7 +106,7 @@
                 <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>
             </ul>
         </li>
-        {if !defined('Garradin\LOCAL_LOGIN') || !Garradin\LOCAL_LOGIN}
+        {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
         <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
     {/if}

@@ -2,8 +2,8 @@
 
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN) && $user.id != $membre.id}
+    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
+    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
     {/if}
     <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
@@ -46,7 +46,7 @@
     <dd>
         <a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Voir l'historique</a>
     </dd>
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
         <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dd>
         {if !empty($nb_operations)}
             <dt>Écritures comptables</dt>

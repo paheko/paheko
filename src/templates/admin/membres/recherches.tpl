@@ -18,9 +18,9 @@
 			{foreach from=$liste item="recherche"}
 			<tr>
 				<th>{$recherche.intitule}</th>
-				<td>{if $recherche.type == Recherche::JSON}Avancée{else}SQL{/if}</td>
+				<td>{if $recherche.type == Recherche::TYPE_JSON}Avancée{else}SQL{/if}</td>
 				<td>{if !$recherche.id_membre}Publique{else}Personnelle{/if}</td>
-				<td>
+				<td class="actions">
 					<a href="{$admin_url}membres/recherches.php?id={$recherche.id}" class="icn" title="Modifier">✎</a>
 				</td>
 			</tr>

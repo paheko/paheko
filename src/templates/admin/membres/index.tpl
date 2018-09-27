@@ -13,7 +13,7 @@
         <select name="cat" id="f_cat" onchange="this.form.submit();">
             <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
         {foreach from=$membres_cats key="id" item="nom"}
-            {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)
+            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)
                 || !array_key_exists($id, $membres_cats_cachees)}
             <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
             {/if}
@@ -38,7 +38,7 @@
     <table class="list">
         <thead class="userOrder">
             <tr>
-                {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
+                {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
                 {foreach from=$champs key="c" item="champ"}
                     <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{if $c == "numero"}#{else}{$champ.title}{/if} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
                 {/foreach}
@@ -48,7 +48,7 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
+                    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
                     {foreach from=$champs key="c" item="cfg"}
                         <td>
                             {if $c == $config.champ_identite}<a href="{$admin_url}membres/fiche.php?id={$membre.id}">{/if}
@@ -58,14 +58,14 @@
                     {/foreach}
                     <td class="actions">
                         <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
-                        {if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}<a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>{/if}
+                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>{/if}
                     </td>
                 </tr>
             {/foreach}
         </tbody>
     </table>
 
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
+    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
     <p class="actions">
         <em>Pour les membres cochés :</em>
         <input type="submit" name="move" value="Changer de catégorie" />

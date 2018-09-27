@@ -31,7 +31,7 @@
         </dl>
     </fieldset>
 
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
+    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
     <fieldset>
         <legend>Général</legend>
         <dl>
