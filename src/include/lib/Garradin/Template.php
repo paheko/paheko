@@ -28,6 +28,7 @@ class Template extends \KD2\Smartyer
 
 		$this->setTemplatesDir(ROOT . '/templates');
 		$this->setCompiledDir(CACHE_ROOT . '/compiled');
+		$this->setNamespace('Garradin');
 
 		// Hash de la version pour les éléments statiques (cache)
 		// On ne peut pas utiliser la version directement comme query string

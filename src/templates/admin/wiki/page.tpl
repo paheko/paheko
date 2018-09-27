@@ -5,7 +5,7 @@
 {/if}
 
 <ul class="actions">
-    {if $session->canAccess('wiki', Garradin\Membres::DROIT_ECRITURE)}
+    {if $session->canAccess('wiki', Membres::DROIT_ECRITURE)}
         <li><a href="{$admin_url}wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id}{/if}"><strong>Créer une nouvelle page</strong></a></li>
     {/if}
     {if $can_edit}
@@ -13,11 +13,11 @@
     {/if}
     {if $can_read && $page && $page.contenu}
         <li><a href="{$admin_url}wiki/historique.php?id={$page.id}">Historique</a>
-        {if $page.droit_lecture == Garradin\Wiki::LECTURE_PUBLIC}
+        {if $page.droit_lecture == Wiki::LECTURE_PUBLIC}
             <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a>
         {/if}
     {/if}
-    {if $session->canAccess('wiki', Garradin\Membres::DROIT_ADMIN)}
+    {if $session->canAccess('wiki', Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
     {/if}
 </ul>
@@ -120,7 +120,7 @@
 
             <p class="wikiFooter">
                 Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
-                {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
+                {if $session->canAccess('membres', Membres::DROIT_ACCES)}
                 par <a href="{$admin_url}membres/fiche.php?id={$page.contenu.id_auteur}">{$auteur}</a>
                 {/if}
             </p>

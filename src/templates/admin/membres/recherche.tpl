@@ -96,7 +96,7 @@ q.import({$query|escape:'json'});
 </script>
 
 
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 	<form method="post" action="{$admin_url}membres/action.php" class="memberList">
 {/if}
 
@@ -105,7 +105,7 @@ q.import({$query|escape:'json'});
 	<table class="list search">
 		<thead>
 			<tr>
-				{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>{/if}
+				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>{/if}
 				{foreach from=$result_header key="c" item="cfg"}
 					<td>{$cfg.title}</td>
 				{/foreach}
@@ -115,7 +115,7 @@ q.import({$query|escape:'json'});
 		<tbody>
 			{foreach from=$result item="row"}
 				<tr>
-					{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if}
+					{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if}
 					{foreach from=$row key="key" item="value"}
 						<?php $link = false; ?>
 						{if isset($result_header[$key])}
@@ -135,7 +135,7 @@ q.import({$query|escape:'json'});
 					{/foreach}
 					<td class="actions">
 						<a class="icn" href="{$admin_url}membres/fiche.php?id={$row.id}" title="Fiche membre">👤</a>
-						{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+						{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 						<a class="icn" href="{$admin_url}membres/modifier.php?id={$row.id}" title="Modifier la fiche membre">✎</a>
 						{/if}
 					</td>
@@ -144,7 +144,7 @@ q.import({$query|escape:'json'});
 		</tbody>
 	</table>
 
-	{if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN)}
+	{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
 	<p class="actions">
 		<em>Pour les membres cochés :</em>
 		<input type="submit" name="move" value="Changer de catégorie" />
@@ -162,7 +162,7 @@ q.import({$query|escape:'json'});
 	</form>
 {/if}
 
-{if $session->canAccess('membres', Garradin\Membres::DROIT_ECRITURE)}
+{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 	</form>
 {/if}
 
