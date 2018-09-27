@@ -12,75 +12,93 @@ class Recherche
 		'compta_journal',
 	];
 
-	protected function _checkFields($intitule, $id_membre, $type, $cible, &$query)
+	protected function _checkFields($data)
 	{
 		$db = DB::getInstance();
 
-		if (trim($intitule) === '')
+		if (array_key_exists('intitule', $data) && trim($data['intitule']) === '')
 		{
 			throw new UserException('Le champ intitulé ne peut être vide.');
 		}
 
-		if (null !== $id_membre)
+		if (array_key_exists('id_membre', $data) && null !== $data['id_membre'])
 		{
-			$id_membre = (int)$id_membre;
+			$data['id_membre'] = (int)$data['id_membre'];
 		}
 
-		if (null !== $id_membre && !$db->test('membres', 'id = ?', $id_membre))
+		if (array_key_exists('id_membre', $data) && null !== $data['id_membre'] && !$db->test('membres', 'id = ?', $data['id_membre']))
 		{
 			throw new \InvalidArgumentException('Numéro d\'utilisateur inconnu.');
 		}
 
-		if ($type !== self::TYPE_SQL && $type !== self::TYPE_JSON)
+		if (array_key_exists('type', $data) && $data['type'] !== self::TYPE_SQL && $data['type'] !== self::TYPE_JSON)
 		{
 			throw new \InvalidArgumentException('Type de recherche inconnu.');
 		}
 
-		if (!in_array($cible, self::TARGETS, true))
+		if (array_key_exists('cible', $data) && !in_array($data['cible'], self::TARGETS, true))
 		{
 			throw new \InvalidArgumentException('Cible de recherche invalide.');
 		}
 
-		if ($type == self::TYPE_SQL && !is_string($query))
+		if (array_key_exists('type', $data))
 		{
-			throw new \InvalidArgumentException('Recherche invalide pour le type SQL');
-		}
-
-		if ($type == self::TYPE_JSON)
-		{
-			if (!is_array($query))
+			if (empty($data['contenu']))
 			{
-				throw new \InvalidArgumentException('Recherche invalide pour le type JSON');
+				throw new UserException('Le contenu ne peut être vide.');
 			}
 
-			$query = json_encode($query);
-
-			if (!json_decode($query))
+			if ($data['type'] == self::TYPE_SQL && !is_string($data['contenu']))
 			{
-				throw new \InvalidArgumentException('JSON invalide pour le type JSON');
+				throw new \InvalidArgumentException('Recherche invalide pour le type SQL');
+			}
+
+			$query = $data['contenu'];
+
+			if ($data['type']  == self::TYPE_JSON)
+			{
+				if (!is_array($query))
+				{
+					throw new \InvalidArgumentException('Recherche invalide pour le type JSON');
+				}
+
+				$query = json_encode($query);
+
+				if (!json_decode($query))
+				{
+					throw new \InvalidArgumentException('JSON invalide pour le type JSON');
+				}
 			}
 		}
 
-		return true;
+		return $query;
 	}
 
-	public function edit($id, $intitule, $id_membre, $type, $cible, $contenu)
+	public function edit($id, $data)
 	{
-		$this->_checkFields($intitule, $id_membre, $type, $cible, $contenu);
+		$allowed = ['intitule', 'id_membre', 'type', 'cible', 'contenu'];
 
-		return DB::getInstance()->update('recherches',
-			compact('intitule', 'id_membre', 'type', 'cible', 'contenu'),
-			'id = ' . (int)$id);
+		// Supprimer les champs qui ne sont pas ceux de la BDD
+		$data = array_intersect_key($data, array_flip($allowed));
+
+		$query = $this->_checkFields($data);
+
+		if (isset($data['contenu']))
+		{
+			$data['contenu'] = $query;
+		}
+
+		return DB::getInstance()->update('recherches', $data, 'id = ' . (int)$id);
 	}
 
 	public function add($intitule, $id_membre, $type, $cible, $contenu)
 	{
-		$this->_checkFields($intitule, $id_membre, $type, $cible, $contenu);
+		$data = compact('intitule', 'id_membre', 'type', 'cible', 'contenu');
+		$data['contenu'] = $this->_checkFields($data);
 
 		$db = DB::getInstance();
 
-		$db->insert('recherches',
-			compact('intitule', 'id_membre', 'type', 'cible', 'contenu'));
+		$db->insert('recherches', $data);
 
 		return $db->lastInsertRowId();
 	}
