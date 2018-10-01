@@ -41,6 +41,8 @@ class Recherche
 			throw new \InvalidArgumentException('Cible de recherche invalide.');
 		}
 
+		$query = null;
+
 		if (array_key_exists('type', $data))
 		{
 			if (empty($data['contenu']))
