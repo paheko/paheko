@@ -147,10 +147,20 @@ class Recherche
 	public function getColumns($target)
 	{
 		$columns = [];
+		$db = DB::getInstance();
 
 		if ($target == 'membres')
 		{
 			$champs = Config::getInstance()->get('champs_membres');
+
+			$columns['id_categorie'] = (object) [
+					'realType' => 'select',
+					'textMatch'=> false,
+					'label'    => 'Catégorie',
+					'type'     => 'enum',
+					'null'     => false,
+					'values'   => $db->getAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;'),
+				];
 
 			foreach ($champs->getList() as $champ => $config)
 			{
