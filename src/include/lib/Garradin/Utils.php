@@ -6,6 +6,7 @@ use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
 use KD2\SMTP;
+use KD2\ODSWriter;
 
 class Utils
 {
@@ -711,7 +712,7 @@ class Utils
 
         if ($header)
         {
-            $ods->add($header);
+            $ods->add((array) $header);
         }
 
         foreach ($iterator as $row)
@@ -722,7 +723,7 @@ class Utils
                 $header = true;
             }
 
-            $ods->add($row);
+            $ods->add((array) $row);
         }
 
         $ods->output();
