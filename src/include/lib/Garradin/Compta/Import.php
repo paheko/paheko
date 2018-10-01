@@ -54,40 +54,20 @@ class Import
 		')->execute();
 	}
 
-	public function toCSV($exercice)
+	protected function exportName()
 	{
-		$res = $this->export($exercice);
-
-		$fp = fopen('php://output', 'w');
-
-		fputcsv($fp, $this->header);
-
-		while ($row = $res->fetchArray(SQLITE3_ASSOC))
-		{
-			fputcsv($fp, $row);
-		}
-
-		fclose($fp);
-
-		return true;
+		return sprintf('Export comptabilité - %s - %s', Config::getInstance()->get('nom_asso'), date('Y-m-d'));
 	}
 
-    public function toODS($exercice)
-    {
-    	$result = $this->export($exercice);
-        $ods = new ODSWriter;
-        $ods->table_name = 'Journal';
+	public function toCSV($exercice)
+	{
+		return Utils::toCSV($this->exportName(), $this->export());
+	}
 
-        $ods->add($this->header);
-
-        while ($row = $result->fetchArray(SQLITE3_ASSOC))
-        {
-        	unset($row->passe);
-        	$ods->add($row);
-        }
-
-        $ods->output();
-    }
+	public function toODS($exercice)
+	{
+		return Utils::toODS($this->exportName(), $this->export());
+	}
 
 	public function fromCSV($path)
 	{
