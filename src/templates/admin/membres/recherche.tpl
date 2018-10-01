@@ -76,7 +76,6 @@ q.buildInput = function (type, label, column) {
 	}
 
 	var i = document.createElement('input');
-	console.log(type);
 	i.type = type == 'integer' ? 'number' : type;
 	i.value = label;
 
