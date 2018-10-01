@@ -8,8 +8,6 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 
-use KD2\ODSWriter;
-
 class Import
 {
 	public function getCSVAsArray($path)

@@ -2,11 +2,10 @@
 
 namespace Garradin\Compta;
 
-use \Garradin\DB;
-use \Garradin\Utils;
-use \Garradin\UserException;
-
-use KD2\ODSWriter;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\UserException;
+use Garradin\Config;
 
 class Import
 {
@@ -61,12 +60,12 @@ class Import
 
 	public function toCSV($exercice)
 	{
-		return Utils::toCSV($this->exportName(), $this->export());
+		return Utils::toCSV($this->exportName(), $this->export($exercice));
 	}
 
 	public function toODS($exercice)
 	{
-		return Utils::toODS($this->exportName(), $this->export());
+		return Utils::toODS($this->exportName(), $this->export($exercice));
 	}
 
 	public function fromCSV($path)
