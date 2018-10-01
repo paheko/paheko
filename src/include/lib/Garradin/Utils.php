@@ -673,6 +673,63 @@ class Utils
         return sprintf("\"%s\"\r\n", implode('","', $row));
     }
 
+    static public function toCSV($name, $iterator, $header = null)
+    {
+        header('Content-type: application/csv');
+        header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
+
+        $fp = fopen('php://output', 'w');
+
+        if ($header)
+        {
+            fputs($fp, self::row_to_csv($header));
+        }
+
+        foreach ($iterator as $row)
+        {
+            if (!$header)
+            {
+                fputs($fp, self::row_to_csv(array_keys($row)));
+                $header = true;
+            }
+
+            fputs($fp, self::row_to_csv($row));
+        }
+
+        fclose($fp);
+
+        return true;
+    }
+
+    static public function toODS($name, $iterator, $header = null)
+    {
+        header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
+        header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
+
+        $ods = new ODSWriter;
+        $ods->table_name = $name;
+
+        if ($header)
+        {
+            $ods->add($header);
+        }
+
+        foreach ($iterator as $row)
+        {
+            if (!$header)
+            {
+                $ods->add(array_keys($row));
+                $header = true;
+            }
+
+            $ods->add($row);
+        }
+
+        $ods->output();
+
+        return true;
+    }
+
     static public function sendEmail($recipient, $subject, $content, $id_membre = null, $pgp_key = null)
     {
         // Ne pas envoyer de mail à des adresses invalides

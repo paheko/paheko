@@ -147,7 +147,7 @@ class Import
 
 	/**
 	 * Importer un CSV de la liste des membres depuis un export Garradin
-	 * @param  string $path 	Chemin vers le CSV
+	 * @param  string $path     Chemin vers le CSV
 	 * @param  int    $current_user_id
 	 * @return boolean          TRUE en cas de succès
 	 */
@@ -265,56 +265,30 @@ class Import
 
 	protected function export()
 	{
-        $db = DB::getInstance();
+		$db = DB::getInstance();
 
-        $champs = Config::getInstance()->get('champs_membres')->getKeys();
-        $champs_sql = 'm.' . implode(', m.', $champs);
+		$champs = Config::getInstance()->get('champs_membres')->getKeys();
+		$champs_sql = 'm.' . implode(', m.', $champs);
 
-        $res = $db->prepare('SELECT ' . $champs_sql . ', c.nom AS categorie FROM membres AS m 
-            LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;')->execute();
+		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS categorie FROM membres AS m 
+			LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;');
 
-        return [array_merge($champs, ['categorie']), $res];
+		return [
+			array_merge($champs, ['categorie']),
+			$res,
+			sprintf('Export membres - %s - %s', Config::getInstance()->get('nom_asso'), date('Y-m-d')),
+		];
 	}
 
-    public function toCSV()
-    {
-    	list($champs, $result) = $this->export();
+	public function toCSV()
+	{
+		list($champs, $result, $name) = $this->export();
+		return Utils::toCSV($name, $result, $champs);
+	}
 
-        $fp = fopen('php://output', 'w');
-        $header = false;
-
-        while ($row = $result->fetchArray(SQLITE3_ASSOC))
-        {
-            unset($row->passe);
-
-            if (!$header)
-            {
-                fputs($fp, Utils::row_to_csv(array_keys($row)));
-                $header = true;
-            }
-
-            fputs($fp, Utils::row_to_csv($row));
-        }
-
-        fclose($fp);
-
-        return true;
-    }
-
-    public function toODS()
-    {
-    	list($champs, $result) = $this->export();
-        $ods = new ODSWriter;
-        $ods->table_name = 'Membres';
-
-        $ods->add($champs);
-
-        while ($row = $result->fetchArray(SQLITE3_ASSOC))
-        {
-        	unset($row->passe);
-        	$ods->add($row);
-        }
-
-        $ods->output();
-    }
+	public function toODS()
+	{
+		list($champs, $result, $name) = $this->export();
+		return Utils::toODS($name, $result, $champs);
+	}
 }
