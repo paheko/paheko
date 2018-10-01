@@ -29,7 +29,6 @@
             </p>
         {/if}
     </fieldset>
-    </fieldset>
 
     <p class="submit">
         {csrf_field key="del_cotisation_%s"|args:$cotisation.id}
