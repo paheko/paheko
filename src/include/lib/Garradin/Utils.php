@@ -10,6 +10,10 @@ use KD2\ODSWriter;
 
 class Utils
 {
+    const EMAIL_CONTEXT_BULK = 'bulk';
+    const EMAIL_CONTEXT_PRIVATE = 'private';
+    const EMAIL_CONTEXT_SYSTEM = 'system';
+
     static protected $skriv = null;
 
     static private $french_date_names = [
@@ -731,7 +735,7 @@ class Utils
         return true;
     }
 
-    static public function sendEmail($recipient, $subject, $content, $id_membre = null, $pgp_key = null)
+    static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
     {
         // Ne pas envoyer de mail à des adresses invalides
         if (!SMTP::checkEmailIsValid($recipient, false))
@@ -743,19 +747,19 @@ class Utils
         $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
 
         // Tentative d'envoi du message en utilisant un plugin
-        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
+        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('context', 'recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
 
         if (!$email_sent_via_plugin)
         {
             // L'envoi d'email n'a pas été effectué par un plugin, utilisons l'envoi interne
             // via mail() ou SMTP donc
-            return self::mail($recipient, $subject, $content, $id_membre, $pgp_key);
+            return self::mail($context, $recipient, $subject, $content, $id_membre, $pgp_key);
         }
 
         return true;
     }
 
-    static public function mail($to, $subject, $content, $id_membre, $pgp_key)
+    static public function mail($context, $to, $subject, $content, $id_membre, $pgp_key)
     {
         $headers = [];
         $config = Config::getInstance();
@@ -779,6 +783,11 @@ class Utils
 
         $headers['MIME-Version'] = '1.0';
         $headers['Content-type'] = 'text/plain; charset=UTF-8';
+
+        if ($contexte == self::EMAIL_CONTEXT_BULK)
+        {
+            $headers['Precedence'] = 'bulk';
+        }
 
         $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
         $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
