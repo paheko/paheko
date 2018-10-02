@@ -96,16 +96,16 @@ q.import({$query|escape:'json'});
 </script>
 
 
-{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-	<form method="post" action="{$admin_url}membres/action.php" class="memberList">
-{/if}
-
 {if !empty($result)}
+	{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+		<form method="post" action="{$admin_url}membres/action.php" class="memberList">
+	{/if}
+
 	<p class="help">{$result|count} membres trouvés pour cette recherche.</p>
 	<table class="list search">
 		<thead>
 			<tr>
-				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>{/if}
+				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" /></td>{/if}
 				{foreach from=$result_header key="c" item="cfg"}
 					<td>{$cfg.title}</td>
 				{/foreach}
@@ -142,15 +142,34 @@ q.import({$query|escape:'json'});
 				</tr>
 			{/foreach}
 		</tbody>
+	{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+		<tfoot>
+			<tr>
+				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" /></td>{/if}
+				<td class="actions" colspan="<?=count($result_header)+1?>">
+					<em>Pour les membres cochés :</em>
+					{csrf_field key="membres_action"}
+					<select name="action">
+						<option value="">— Choisir une action à effectuer —</option>
+						<option value="move">Changer de catégorie</option>
+						<option value="mail">Envoyer un message</option>
+						<option value="csv">Exporter en tableau CSV</option>
+						<option value="csv">Exporter en classeur ODS</option>
+						<option value="delete">Supprimer</option>
+					</select>
+					<noscript>
+						<input type="submit" value="OK" />
+					</noscript>
+				</td>
+			</tr>
+		</tfoot>
+	{/if}
 	</table>
 
-	{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-	<p class="actions">
-		<em>Pour les membres cochés :</em>
-		<input type="submit" name="move" value="Changer de catégorie" />
-		<input type="submit" name="delete" value="Supprimer" />
-		{csrf_field key="membres_action"}
-	</p>
+
+
+	{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+		</form>
 	{/if}
 
 {elseif $result !== null}
@@ -162,8 +181,5 @@ q.import({$query|escape:'json'});
 	</form>
 {/if}
 
-{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-	</form>
-{/if}
 
 {include file="admin/_foot.tpl"}

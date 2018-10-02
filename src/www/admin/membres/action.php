@@ -10,23 +10,26 @@ if (!f('selected') || !is_array(f('selected')) || !count(f('selected')))
     throw new UserException("Aucun membre sélectionné.");
 }
 
-foreach (f('selected') as &$id)
-{
-    $id = (int) $id;
-
-    // On ne permet pas d'action collective sur l'utilisateur courant pour éviter les risques
-    // d'erreur genre "oh je me suis supprimé du coup j'ai plus accès à rien"
-    if ($id == $user->id)
-    {
-        throw new UserException("Il n'est pas possible de se modifier ou supprimer soi-même.");
-    }
-}
-
-$action = f('action') ?: (f('move') ? 'move' : (f('delete') ? 'delete' : ''));
+$action = f('action');
 
 if (!$action)
 {
     throw new UserException('Aucune action sélectionnée.');
+}
+
+if ($action == 'move' || $action == 'delete')
+{
+    foreach (f('selected') as &$id)
+    {
+        $id = (int) $id;
+
+        // On ne permet pas d'action collective sur l'utilisateur courant pour éviter les risques
+        // d'erreur genre "oh je me suis supprimé du coup j'ai plus accès à rien"
+        if ($id == $user->id)
+        {
+            throw new UserException("Il n'est pas possible de se modifier ou supprimer soi-même.");
+        }
+    }
 }
 
 if ($action == 'move' && f('confirm'))
