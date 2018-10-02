@@ -195,7 +195,7 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		return Utils::sendEmail($membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	static public function recoverPasswordConfirm($code)
@@ -246,7 +246,7 @@ class Session extends \KD2\UserSession
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
-		return Utils::sendEmail($membre->email, 'Nouveau mot de passe', $message, $membre->id, $membre->clef_pgp);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Nouveau mot de passe', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	public function editUser($data)
@@ -299,10 +299,10 @@ class Session extends \KD2\UserSession
 
 		if ($copie)
 		{
-			Utils::sendEmail($user->email, $sujet, $content, $user->id);
+			Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $user->email, $sujet, $content, $user->id);
 		}
 
-		return Utils::sendEmail($dest, $sujet, $content);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $dest, $sujet, $content);
 	}
 
 	public function editSecurity(Array $data = [])
