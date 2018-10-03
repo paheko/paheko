@@ -33,8 +33,7 @@ if ($action == 'ods' || $action == 'csv')
 
     exit;
 }
-
-if ($action == 'move' || $action == 'delete')
+elseif ($action == 'move' || $action == 'delete')
 {
     foreach (f('selected') as &$id)
     {
