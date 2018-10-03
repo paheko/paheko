@@ -143,30 +143,9 @@ q.import({$query|escape:'json'});
 			{/foreach}
 		</tbody>
 	{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-		<tfoot>
-			<tr>
-				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" /></td>{/if}
-				<td class="actions" colspan="<?=count($result_header)+1?>">
-					<em>Pour les membres cochés :</em>
-					{csrf_field key="membres_action"}
-					<select name="action">
-						<option value="">— Choisir une action à effectuer —</option>
-						<option value="move">Changer de catégorie</option>
-						<option value="mail">Envoyer un message</option>
-						<option value="csv">Exporter en tableau CSV</option>
-						<option value="csv">Exporter en classeur ODS</option>
-						<option value="delete">Supprimer</option>
-					</select>
-					<noscript>
-						<input type="submit" value="OK" />
-					</noscript>
-				</td>
-			</tr>
-		</tfoot>
+		{include file="admin/membres/_list_actions.tpl" colspan=count($result_header)+1}
 	{/if}
 	</table>
-
-
 
 	{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 		</form>

@@ -63,16 +63,10 @@
                 </tr>
             {/foreach}
         </tbody>
-    </table>
-
     {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-    <p class="actions">
-        <em>Pour les membres cochés :</em>
-        <input type="submit" name="move" value="Changer de catégorie" />
-        <input type="submit" name="delete" value="Supprimer" />
-        {csrf_field key="membres_action"}
-    </p>
+        {include file="admin/membres/_list_actions.tpl" colspan=count((array)$champs)+1}
     {/if}
+    </table>
 
     {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
 {else}

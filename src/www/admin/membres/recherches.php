@@ -49,7 +49,7 @@ $tpl->assign('mode', $mode);
 
 if (!$mode)
 {
-	$tpl->assign('liste', $recherche->getList($user->id));
+	$tpl->assign('liste', $recherche->getList($user->id, 'membres'));
 }
 
 $tpl->display('admin/membres/recherches.tpl');
