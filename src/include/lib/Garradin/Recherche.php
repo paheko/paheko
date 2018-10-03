@@ -115,10 +115,11 @@ class Recherche
 		return DB::getInstance()->first('SELECT * FROM recherches WHERE id = ?;', (int) $id);
 	}
 
-	public function getList($id_membre)
+	public function getList($id_membre, $cible)
 	{
 		return DB::getInstance()->get('SELECT id, type, intitule, type, id_membre FROM recherches 
-			WHERE id_membre IS NULL OR id_membre = ? ORDER BY intitule;', (int)$id_membre);
+			WHERE (id_membre IS NULL OR id_membre = ?) AND cible = ?
+			ORDER BY intitule;', (int)$id_membre, $cible);
 	}
 
 	/**

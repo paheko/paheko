@@ -20,7 +20,11 @@ if ($id)
 		throw new UserException('Recherche inconnue');
 	}
 
-	$query = $r->contenu;
+	if (!$query)
+	{
+		$query = $r->contenu;
+	}
+
 	$tpl->assign('recherche', $r);
 }
 

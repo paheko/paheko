@@ -11,10 +11,27 @@ if (!f('selected') || !is_array(f('selected')) || !count(f('selected')))
 }
 
 $action = f('action');
+$list = f('selected');
 
 if (!$action)
 {
     throw new UserException('Aucune action sélectionnée.');
+}
+
+if ($action == 'ods' || $action == 'csv')
+{
+    $import = new Membres\Import;
+
+    if ($action == 'ods')
+    {
+        $import->toODS($list);
+    }
+    else
+    {
+        $import->toCSV($list);
+    }
+
+    exit;
 }
 
 if ($action == 'move' || $action == 'delete')
@@ -58,8 +75,8 @@ elseif ($action == 'delete' && f('confirm'))
     }
 }
 
-$tpl->assign('selected', f('selected'));
-$tpl->assign('nb_selected', count(f('selected')));
+$tpl->assign('selected', $list);
+$tpl->assign('nb_selected', count($list));
 
 if ($action == 'move')
 {

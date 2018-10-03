@@ -261,15 +261,18 @@ class Import
 		return true;
 	}
 
-	protected function export()
+	protected function export(array $list = null)
 	{
 		$db = DB::getInstance();
 
 		$champs = Config::getInstance()->get('champs_membres')->getKeys();
 		$champs_sql = 'm.' . implode(', m.', $champs);
+		$where = $list ? 'WHERE ' . $db->where('m.id', $list) : '';
 
 		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS categorie FROM membres AS m 
-			LEFT JOIN membres_categories AS c ON m.id_categorie = c.id ORDER BY c.id;');
+			LEFT JOIN membres_categories AS c ON m.id_categorie = c.id
+			' . $where . '
+			ORDER BY c.id;');
 
 		return [
 			array_merge($champs, ['categorie']),
@@ -278,15 +281,15 @@ class Import
 		];
 	}
 
-	public function toCSV()
+	public function toCSV(array $list = null)
 	{
-		list($champs, $result, $name) = $this->export();
+		list($champs, $result, $name) = $this->export($list);
 		return Utils::toCSV($name, $result, $champs);
 	}
 
-	public function toODS()
+	public function toODS(array $list = null)
 	{
-		list($champs, $result, $name) = $this->export();
+		list($champs, $result, $name) = $this->export($list);
 		return Utils::toODS($name, $result, $champs);
 	}
 }

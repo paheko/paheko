@@ -59,14 +59,11 @@
             </tr>
         {/foreach}
     </tbody>
+    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+        {include file="admin/membres/_list_actions.tpl" colspan=count((array)$result[0])+1}
+    {/if}
 </table>
 
-<p class="actions">
-    <em>Pour les membres cochés :</em>
-    <input type="submit" name="move" value="Changer de catégorie" />
-    <input type="submit" name="delete" value="Supprimer" />
-    {csrf_field key="membres_action"}
-</p>
 
 {else}
 <p class="alert">
