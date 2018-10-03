@@ -3,8 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
-
 $recherche = new Recherche;
 
 $query = trim(qg('query'));
@@ -20,12 +18,16 @@ if ($id)
 		throw new UserException('Recherche inconnue');
 	}
 
-	if (!$query)
+	if (!$session->canAccess('membres', Membres::DROIT_ADMIN) || !$query)
 	{
 		$query = $r->contenu;
 	}
 
 	$tpl->assign('recherche', $r);
+}
+else
+{
+	$session->requireAccess('membres', Membres::DROIT_ADMIN);
 }
 
 $tpl->assign('schema', $recherche->schema('membres'));
