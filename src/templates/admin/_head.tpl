@@ -69,6 +69,7 @@
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
                 <li class="member cotisations{if $current == 'membres/cotisations'} current{/if}"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
+                <li class="member message{if $current == 'membres/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
             </ul>
             {/if}
             </li>

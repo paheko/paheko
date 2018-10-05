@@ -53,11 +53,10 @@ elseif ($id)
         throw new UserException('Recherche inconnue ou invalide');
     }
 
-    $r->contenu = (object) json_decode($r->contenu, true);
-    $query = $r->contenu->query;
-    $order = $r->contenu->order;
-    $desc = $r->contenu->desc;
-    $limit = $r->contenu->limit;
+    $query = $r->query;
+    $order = $r->order;
+    $desc = $r->desc;
+    $limit = $r->limit;
 
     $tpl->assign('recherche', $r);
 }

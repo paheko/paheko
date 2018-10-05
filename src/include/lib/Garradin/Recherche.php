@@ -112,7 +112,21 @@ class Recherche
 
 	public function get($id)
 	{
-		return DB::getInstance()->first('SELECT * FROM recherches WHERE id = ?;', (int) $id);
+		$r = DB::getInstance()->first('SELECT * FROM recherches WHERE id = ?;', (int) $id);
+
+		if ($r && $r->type == self::TYPE_JSON)
+		{
+			$q = json_decode($r->contenu, true);
+
+			$r->query = $q['query'];
+			$r->order = $q['order'];
+			$r->desc = $q['desc'];
+			$r->limit = $q['limit'];
+
+			unset($q);
+		}
+
+		return $r;
 	}
 
 	public function getList($id_membre, $cible)
@@ -125,7 +139,7 @@ class Recherche
 	/**
 	 * Lancer une recherche enregistrée
 	 */
-	public function search($id)
+	public function search($id, $force_select = null)
 	{
 		$search = $this->get($id);
 
@@ -136,10 +150,10 @@ class Recherche
 
 		if ($search->type == self::TYPE_JSON)
 		{
-			$search->contenu = $this->buildQuery($search->target, json_decode($search->contenu));
+			$search->contenu = $this->buildQuery($search->cible, $search->query, $search->order, $search->desc, $search->limit);
 		}
 
-		return $this->searchSQL($search->target, $query);
+		return $this->searchSQL($search->cible, $search->contenu, $force_select);
 	}
 
 	/**
@@ -367,7 +381,7 @@ class Recherche
 	/**
 	 * Lancer une recherche SQL
 	 */
-	public function searchSQL($target, $query)
+	public function searchSQL($target, $query, $force_select = null)
 	{
 		if (!in_array($target, self::TARGETS, true))
 		{
@@ -375,6 +389,11 @@ class Recherche
 		}
 
 		$db = DB::getInstance();
+
+		if ($force_select)
+		{
+			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . $force_select . ' FROM ', $query);
+		}
 
 		if (!preg_match('/LIMIT\s+/i', $query))
 		{
