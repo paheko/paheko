@@ -315,6 +315,28 @@ class Membres
         return $fields;
     }
 
+    public function sendMessage(array $recipients, $subject, $message, $send_copy)
+    {
+        $config = Config::getInstance();
+
+        foreach ($recipients as $recipient)
+        {
+            //Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
+        }
+
+        if ($send_copy)
+        {
+            //Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
+        }
+
+        return true;
+    }
+
+    public function listAllByCategory($id_categorie)
+    {
+        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?;', (int)$id_categorie);
+    }
+
     public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)
     {
         $begin = ($page - 1) * self::ITEMS_PER_PAGE;
