@@ -321,12 +321,12 @@ class Membres
 
         foreach ($recipients as $recipient)
         {
-            //Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
         }
 
         if ($send_copy)
         {
-            //Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
         }
 
         return true;
