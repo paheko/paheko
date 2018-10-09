@@ -371,6 +371,11 @@ class Plugin
 	 */
 	static public function checkAndInstallSystemPlugins()
 	{
+		if (!PLUGINS_SYSTEM)
+		{
+			return true;
+		}
+
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		if (count($system) == 0)
