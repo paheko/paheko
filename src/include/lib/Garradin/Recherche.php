@@ -271,7 +271,7 @@ class Recherche
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
-					continue;
+					throw new UserException('Cette recherche fait référence à un champ qui n\'existe plus dans les fiches de membres.');
 				}
 
 				$query_columns[] = $condition['column'];
@@ -342,7 +342,7 @@ class Recherche
 				$query_group_conditions[] = $query;
 			}
 
-			if ($query_group_conditions)
+			if (count($query_group_conditions))
 			{
 				$query_groups[] = implode(' ' . $group['operator'] . ' ', $query_group_conditions);
 			}
