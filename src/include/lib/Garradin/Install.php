@@ -59,7 +59,7 @@ class Install
 
 		$config->set('champ_identifiant', 'email');
 		$config->set('champ_identite', 'nom');
-		
+
 		// Création catégories
 		$cats = new Membres\Categories;
 		$id = $cats->add([
@@ -139,6 +139,26 @@ class Install
 			'fin'       =>  date('Y-12-31')
 		]);
 
+		// Ajout d'une recherche avancée en exemple
+		$query = [
+			'query' => [[
+				'operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'lettre_infos',
+						'operator' => '= 1',
+						'values'   => [],
+					],
+				],
+			]],
+			'order' => 'numero',
+			'desc' => true,
+			'limit' => '10000',
+		];
+
+		$recherche = new Recherche;
+		$recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+
 		return $config->save();
 	}
 
@@ -151,16 +171,16 @@ class Install
 		{
 			Utils::safe_mkdir($path);
 
-		    if (!is_dir($path))
-		    {
-		    	throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
-		    }
+			if (!is_dir($path))
+			{
+				throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+			}
 
-		    // On en profite pour vérifier qu'on peut y lire et écrire
-		    if (!is_writable($path) || !is_readable($path))
-		    {
-		    	throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
-		    }
+			// On en profite pour vérifier qu'on peut y lire et écrire
+			if (!is_writable($path) || !is_readable($path))
+			{
+				throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+			}
 		}
 
 		return true;
@@ -176,7 +196,7 @@ class Install
 			$config = file_get_contents($path);
 
 			$pattern = sprintf('/^.*(?:const\s+%s|define\s*\(.*%1$s).*$/m', $key);
-			
+
 			$config = preg_replace($pattern, $new_line, $config, -1, $count);
 
 			if (!$count)
