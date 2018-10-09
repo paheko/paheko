@@ -215,6 +215,31 @@ if (version_compare($v, '0.9.0', '<'))
         $db->update('compta_comptes', ['parent' => $parent], 'id = :id', ['id' => $compte->id]);
     }
 
+    $champs = $config->get('champs_membres');
+
+    if ($champs->get('lettre_infos'))
+    {
+        // Ajout d'une recherche avancée en exemple
+        $query = [
+            'query' => [[
+                'operator' => 'AND',
+                'conditions' => [
+                    [
+                        'column'   => 'lettre_infos',
+                        'operator' => '= 1',
+                        'values'   => [],
+                    ],
+                ],
+            ]],
+            'order' => 'numero',
+            'desc' => true,
+            'limit' => '10000',
+        ];
+
+        $recherche = new Recherche;
+        $recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+    }
+
     $db->commit();
 
     $config->set('desactiver_site', false);
