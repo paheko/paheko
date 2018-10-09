@@ -289,7 +289,7 @@ class Recherche
 				$values = isset($condition['values']) ? $condition['values'] : [];
 
 				$values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
-				
+
 				if ($column->type == 'tel')
 				{
 					// Normaliser le numéro de téléphone
@@ -364,7 +364,7 @@ class Recherche
 		{
 			$order = $db->quoteIdentifier($order);
 		}
-		
+
 		$query_columns = array_map([$db, 'quoteIdentifier'], $query_columns);
 
 		$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',

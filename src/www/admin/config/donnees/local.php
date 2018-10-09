@@ -48,7 +48,6 @@ elseif (f('remove'))
     }
 }
 
-$tpl->assign('code', $code);
 $tpl->assign('ok_code', qg('code'));
 $tpl->assign('ok', qg('ok'));
 $tpl->assign('liste', $s->getList());
