@@ -28,7 +28,7 @@ class Import
 
 	protected function export($exercice)
 	{
-		return DB::getInstance()->prepare('SELECT
+		return DB::getInstance()->iterate('SELECT
 			journal.id,
 			strftime(\'%d/%m/%Y\', date) AS date,
 			(CASE cat.type WHEN 1 THEN \'Recette\' WHEN -1 THEN \'Dépense\' ELSE \'Autre\' END) AS type,
@@ -50,7 +50,7 @@ class Import
 				LEFT JOIN compta_moyens_paiement AS moyen ON moyen.code = journal.moyen_paiement
 			WHERE id_exercice = '.(int)$exercice.'
 			ORDER BY journal.date;
-		')->execute();
+		');
 	}
 
 	protected function exportName()
@@ -60,12 +60,12 @@ class Import
 
 	public function toCSV($exercice)
 	{
-		return Utils::toCSV($this->exportName(), $this->export($exercice));
+		return Utils::toCSV($this->exportName(), $this->export($exercice), $this->header);
 	}
 
 	public function toODS($exercice)
 	{
-		return Utils::toODS($this->exportName(), $this->export($exercice));
+		return Utils::toODS($this->exportName(), $this->export($exercice), $this->header);
 	}
 
 	public function fromCSV($path)
