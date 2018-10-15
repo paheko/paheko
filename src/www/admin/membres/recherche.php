@@ -43,6 +43,8 @@ if ($text_query !== '')
             ],
         ],
     ]];
+
+    $order = $column;
 }
 elseif ($id)
 {

@@ -180,7 +180,7 @@ if (version_compare($v, '0.8.4', '<'))
     $db->commit();
 }
 
-if (version_compare($v, '0.9.0', '<'))
+if (version_compare($v, '0.9.0-rc1', '<'))
 {
     $db->exec('PRAGMA foreign_keys = OFF;');
     $db->begin();
