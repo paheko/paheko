@@ -373,6 +373,9 @@ class Template extends \KD2\Smartyer
 				$value = $binary;
 			}
 
+			// Forcer la valeur à être un entier (depuis PHP 7.1)
+			$value = (int)$value;
+
 			foreach ($options as $k=>$v)
 			{
 				$b = 0x01 << (int)$k;
