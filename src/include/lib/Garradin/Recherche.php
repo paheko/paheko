@@ -348,6 +348,11 @@ class Recherche
 			}
 		}
 
+		if (!count($query_groups))
+		{
+			throw new UserException('Aucune clause trouvée dans la recherche.');
+		}
+
 		$query_columns = array_unique($query_columns);
 
 		// Ajout du champ identité si pas présent

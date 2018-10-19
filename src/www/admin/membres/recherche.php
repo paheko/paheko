@@ -70,15 +70,24 @@ if (f('q') !== null)
 
 if ($query)
 {
-    $sql_query = $recherche->buildQuery('membres', $query, $order, $desc, $limit);
-    $result = $recherche->searchSQL('membres', $sql_query);
+    try {
+        $sql_query = $recherche->buildQuery('membres', $query, $order, $desc, $limit);
+        $result = $recherche->searchSQL('membres', $sql_query);
+    }
+    catch (UserException $e) {
+        $form->addError($e->getMessage());
+        $query = null;
+    }
+}
 
+if ($query)
+{
     if (count($result) == 1 && $text_query !== '')
     {
         Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->id);
     }
 
-    if (f('save'))
+    if (f('save') && !$form->hasErrors())
     {
         $query = [
             'query' => $query,
