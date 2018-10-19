@@ -2,6 +2,8 @@
 
 {include file="admin/membres/_nav.tpl" current="recherche"}
 
+{form_errors}
+
 <form method="post" action="{$admin_url}membres/recherche.php" id="queryBuilderForm">
 	<fieldset>
 		<legend>Rechercher un membre</legend>
