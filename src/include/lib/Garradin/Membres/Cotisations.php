@@ -263,8 +263,10 @@ class Cotisations
 
 		switch ($order)
 		{
-			case 'date':
 			case 'a_jour':
+				break;
+			case 'date':
+				$order = 'cm.date';
 				break;
 			case 'identite':
 				$order = 'transliterate_to_ascii('.$champ_id.') COLLATE NOCASE';
