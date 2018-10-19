@@ -1,5 +1,11 @@
 Options -MultiViews -Indexes
+DirectoryIndex index.php
 
 # FallbackResource n'est dispo que depuis Apache 2.2.16, soit Debian Wheezy (2013)
-DirectoryIndex index.php
-FallbackResource /_route.php
+<IfModule mod_version.c>
+	<IfVersion >= 2.2.16>
+		FallbackResource /_route.php
+	</IfVersion>
+</IfModule>
+
+ErrorDocument 404 /_route.php
