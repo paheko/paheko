@@ -747,9 +747,17 @@ class Plugin
 	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
+		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($list as $row)
 		{
+			// Ne pas appeler les plugins dont le code n'existe pas/plus,
+			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
+			if (!self::getPath($row->plugin, in_array($row->plugin, $system)))
+			{
+				continue;
+			}
+
 			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 
 			if ($return)
