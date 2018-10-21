@@ -407,6 +407,8 @@ class Plugin
 	 */
 	static public function listMenu($user)
 	{
+		self::checkAndInstallSystemPlugins();
+
 		$db = DB::getInstance();
 		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
 
