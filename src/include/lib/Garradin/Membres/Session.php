@@ -252,7 +252,7 @@ class Session extends \KD2\UserSession
 	public function editUser($data)
 	{
 		(new Membres)->edit($this->user->id, $data, false);
-		$this->refresh();
+		$this->refresh(false);
 
 		return true;
 	}
@@ -343,7 +343,7 @@ class Session extends \KD2\UserSession
 
 		$db = DB::getInstance();
 		$db->update('membres', $data, $db->where('id', (int)$this->user->id));
-		$this->refresh();
+		$this->refresh(false);
 
 		return true;
 	}
