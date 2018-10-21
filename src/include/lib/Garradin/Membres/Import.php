@@ -269,13 +269,13 @@ class Import
 		$champs_sql = 'm.' . implode(', m.', $champs);
 		$where = $list ? 'WHERE ' . $db->where('m.id', $list) : '';
 
-		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS categorie FROM membres AS m 
-			LEFT JOIN membres_categories AS c ON m.id_categorie = c.id
+		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS "Catégorie membre" FROM membres AS m 
+			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
 			' . $where . '
 			ORDER BY c.id;');
 
 		return [
-			array_merge($champs, ['categorie']),
+			array_keys((array) $res->current()),
 			$res,
 			sprintf('Export membres - %s - %s', Config::getInstance()->get('nom_asso'), date('Y-m-d')),
 		];
