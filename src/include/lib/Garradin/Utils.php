@@ -784,7 +784,7 @@ class Utils
         $headers['MIME-Version'] = '1.0';
         $headers['Content-type'] = 'text/plain; charset=UTF-8';
 
-        if ($contexte == self::EMAIL_CONTEXT_BULK)
+        if ($context == self::EMAIL_CONTEXT_BULK)
         {
             $headers['Precedence'] = 'bulk';
         }
@@ -795,7 +795,7 @@ class Utils
         if (SMTP_HOST)
         {
             $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-            
+
             if (!defined($const))
             {
                 throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
