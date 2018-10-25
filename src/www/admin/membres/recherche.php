@@ -121,7 +121,7 @@ else
             [
                 'column'   => $config->get('champ_identite'),
                 'operator' => '= ?',
-                'values'   => ['Souad Massi'],
+                'values'   => [''],
             ],
         ],
     ]];
