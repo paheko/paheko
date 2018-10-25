@@ -55,7 +55,9 @@
     </dd>
     {/foreach}
 {/if}
+{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
     <dt><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dt>
+{/if}
 </dl>
 
 {if !empty($cotisations)}
@@ -88,7 +90,9 @@
                 </td>
                 <td class="actions">
                     <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$c.id_cotisation}" title="Liste des membres inscrits à cette cotisation">👪</a>
+                    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
                     <a class="icn" href="{$admin_url}membres/cotisations/supprimer.php?id={$c.id}" title="Supprimer cette cotisation pour ce membre">✘</a>
+                    {/if}
                 </td>
             </tr>
         {/foreach}
