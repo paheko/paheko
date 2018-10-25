@@ -184,7 +184,7 @@ class Recherche
 					'textMatch'=> $champs->isText($champ),
 					'label'    => $config->title,
 					'type'     => 'text',
-					'null'     => true,
+					'null'     => $config->mandatory ? false : true,
 				];
 
 				if ($config->type == 'checkbox')
@@ -245,6 +245,8 @@ class Recherche
 
 		$query_groups = [];
 
+		static $no_transform_operators = ['IS NULL', 'IS NOT NULL', '= 0', '= 1', '&'];
+
 		foreach ($groups as $group)
 		{
 			if (!isset($group['conditions'], $group['operator'])
@@ -277,7 +279,7 @@ class Recherche
 				$query_columns[] = $condition['column'];
 				$column = $target_columns[$condition['column']];
 
-				if ($column->textMatch == 'text')
+				if ($column->textMatch == 'text' && !in_array($condition['operator'], $no_transform_operators))
 				{
 					$query = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
 				}
