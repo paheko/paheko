@@ -194,7 +194,7 @@ class Recherche
 				elseif ($config->type == 'select')
 				{
 					$column->type = 'enum';
-					$column->values = $config->options;
+					$column->values = array_combine($config->options, $config->options);
 				}
 				elseif ($config->type == 'multiple')
 				{
