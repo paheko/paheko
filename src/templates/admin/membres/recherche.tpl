@@ -57,7 +57,7 @@ var traductions = {
 	"is true": "oui",
 	"is false": "non",
 	"Matches ALL of the following conditions:": "Correspond à TOUS les critères suivants :",
-	"Matches ANY of the following conditions:": "Correspond à UN SEUL des critères suivants :",
+	"Matches ANY of the following conditions:": "Correspond à UN des critères suivants :",
 	"Add a new set of conditions below this one": "-- Ajouter un groupe de critères",
 	"Remove this set of conditions": "-- Supprimer ce groupe de critères"
 };
