@@ -2,7 +2,9 @@
 
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
-    <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
+    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+        <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
+    {/if}
     {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
     {/if}
@@ -46,7 +48,9 @@
                     <td>{if $co.a_jour}<b class="confirm">À jour</b>{else}<b class="error">En retard</b>{/if}</td>
                     <td>{$co.date|format_sqlite_date_to_french}</td>
                     <td class="actions">
+                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
                         <a class="icn" href="{$admin_url}membres/cotisations/ajout.php?id={$co.id_membre}&amp;cotisation={$cotisation.id}" title="Saisir une cotisation">➕</a>
+                        {/if}
                         <a class="icn" href="{$admin_url}membres/cotisations.php?id={$co.id_membre}" title="Voir toutes les cotisations de ce membre">𝍢</a>
                         <a class="icn" href="{$admin_url}membres/cotisations/rappels.php?id={$co.id_membre}" title="Rappels envoyés à ce membre">⚠</a>
                     </td>
