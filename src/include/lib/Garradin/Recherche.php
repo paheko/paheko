@@ -355,13 +355,13 @@ class Recherche
 			throw new UserException('Aucune clause trouvée dans la recherche.');
 		}
 
-		$query_columns = array_unique($query_columns);
-
 		// Ajout du champ identité si pas présent
 		if ($target == 'membres' && !in_array($config->get('champ_identite'), $query_columns))
 		{
 			array_unshift($query_columns, $config->get('champ_identite'));
 		}
+
+		$query_columns[] = $order;
 
 		if ($target_columns[$order]->textMatch)
 		{
@@ -372,6 +372,7 @@ class Recherche
 			$order = $db->quoteIdentifier($order);
 		}
 
+		$query_columns = array_unique($query_columns);
 		$query_columns = array_map([$db, 'quoteIdentifier'], $query_columns);
 
 		$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
