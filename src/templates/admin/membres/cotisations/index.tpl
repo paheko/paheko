@@ -2,7 +2,9 @@
 
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
-    <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
+    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+        <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
+    {/if}
     {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
     {/if}
