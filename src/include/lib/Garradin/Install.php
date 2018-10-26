@@ -25,7 +25,15 @@ class Install
 
 		unlink(DB_FILE);
 
-		return self::install($config->nom_asso, $config->adresse_asso, $config->email_asso, 'Bureau', $user->identite, $user->email, $password, $config->site_asso);
+		$ok = self::install($config->nom_asso, $config->adresse_asso, $config->email_asso, 'Bureau', $user->identite, $user->email, $password, $config->site_asso);
+
+		if ($ok)
+		{
+			// Force l'installation de plugin système
+			Plugin::checkAndInstallSystemPlugins();
+		}
+
+		return $ok;
 	}
 
 	static public function install($nom_asso, $adresse_asso, $email_asso, $nom_categorie, $nom_membre, $email_membre, $passe_membre, $site_asso = WWW_URL)
