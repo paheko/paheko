@@ -15,7 +15,7 @@ class Sauvegarde
 	 * Renvoie la liste des fichiers SQLite sauvegardés
 	 * @param  boolean $auto Si true ne renvoie que la liste des sauvegardes automatiques
 	 * @return array 		 Liste des fichiers
-	 */	
+	 */
 	public function getList($auto = false)
 	{
 		$ext = $auto ? 'auto\.\d+\.sqlite' : 'sqlite';
@@ -50,13 +50,13 @@ class Sauvegarde
 		$suffix = is_string($auto) ? $auto : ($auto ? 'auto.1' : date('Y-m-d-His'));
 
 		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
-		
+
 		// Acquire a shared lock before copying
 		$db = DB::getInstance();
 		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
-		
+
 		copy(DB_FILE, $backup);
-		
+
 		$db->exec('END TRANSACTION;');
 		return basename($backup);
 	}
@@ -363,7 +363,7 @@ class Sauvegarde
 		$backup = str_replace('.sqlite', date('.Y-m-d-His') . '.avant_restauration.sqlite', DB_FILE);
 
 		DB::getInstance()->close();
-		
+
 		if (!rename(DB_FILE, $backup))
 		{
 			throw new \RuntimeException('Unable to backup current DB file.');
