@@ -8,7 +8,7 @@
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
 						<option value="csv">Exporter en tableau CSV</option>
-						<option value="ods">Exporter en classeur ODS</option>
+						<option value="ods">Exporter en classeur Office</option>
 						<option value="delete">Supprimer</option>
 					</select>
 					<noscript>
