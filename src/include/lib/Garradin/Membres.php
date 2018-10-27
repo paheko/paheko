@@ -298,78 +298,47 @@ class Membres
         return DB::getInstance()->firstColumn('SELECT id FROM membres WHERE numero = ?;', (int) $numero);
     }
 
-    public function search($field, $query)
+    public function getSearchHeaderFields(array $result)
     {
-        $db = DB::getInstance();
+        if (!count($result))
+        {
+            return false;
+        }
+
+        $champs = Config::getInstance()->get('champs_membres');
+        $fields = [];
+
+        foreach (reset($result) as $field=>$value)
+        {
+            if ($config = $champs->get($field))
+            {
+                $fields[$field] = $config;
+            }
+        }
+
+        return $fields;
+    }
+
+    public function sendMessage(array $recipients, $subject, $message, $send_copy)
+    {
         $config = Config::getInstance();
 
-        $champs = $config->get('champs_membres');
-
-        if (!$champs->get($field))
+        foreach ($recipients as $recipient)
         {
-            throw new \UnexpectedValueException($field . ' is not a valid field');
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
         }
 
-        $champ = $champs->get($field);
-
-        if ($champ->type == 'multiple')
+        if ($send_copy)
         {
-            $where = 'WHERE '.$field.' & (1 << '.(int)$query.')';
-            $order = false;
-        }
-        elseif ($champ->type == 'tel')
-        {
-            $query = Utils::normalizePhoneNumber($query);
-            $query = preg_replace('!^0+!', '', $query);
-
-            if ($query == '')
-            {
-                return false;
-            }
-
-            $where = sprintf('WHERE %s LIKE %s', $field, $db->quote('%' . $query . '%'));
-            $order = $field;
-        }
-        elseif (!$champs->isText($field))
-        {
-            $where = sprintf('WHERE %s = %s', $field, $db->quote($query));
-            $order = $field;
-        }
-        else
-        {
-            // Si le champ est de type 'select' (sélecteur à choix unique), ne pas utiliser de LIKE mais valeur exacte
-            // @link https://fossil.kd2.org/garradin/info/587f730b661a7ce16bad215d4bd02195e754ec57
-            if ($champ->type != 'select')
-            {
-                $query = '%' . $query . '%';
-            }
-
-            $where = sprintf('WHERE transliterate_to_ascii(%s) LIKE %s', $field, $db->quote(Utils::transliterateToAscii($query)));
-            $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $field);
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
         }
 
-        $fields = array_keys((array)$champs->getListedFields());
+        return true;
+    }
 
-        if (!in_array($field, $fields))
-        {
-            $fields[] = $field;
-        }
-
-        if (!in_array('email', $fields))
-        {
-            $fields[] = 'email';
-        }
-
-        $query = sprintf('SELECT id, id_categorie, %s, %s AS identite,
-            strftime(\'%%s\', date_inscription) AS date_inscription
-            FROM membres %s %s LIMIT 1000;',
-            implode(', ', $fields),
-            $config->get('champ_identite'),
-            $where,
-            $order ? 'ORDER BY ' . $order : ''
-        );
-
-        return $db->get($query);
+    public function listAllByCategory($id_categorie)
+    {
+        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?;', (int)$id_categorie);
     }
 
     public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)
@@ -462,6 +431,15 @@ class Membres
         foreach ($membres as &$id)
         {
             $id = (int) $id;
+
+            // Suppression des fichiers liés
+            $files = Fichiers::listLinkedFiles(Fichiers::LIEN_MEMBRES, $id, null);
+
+            foreach ($files as $file)
+            {
+                $file = new Fichiers($file->id, $file);
+                $file->remove();
+            }
         }
 
         Plugin::fireSignal('membre.suppression', $membres);
@@ -470,93 +448,5 @@ class Membres
 
         // Suppression du membre
         return $db->delete('membres', $db->where('id', $membres));
-    }
-
-    /**
-     * @deprecated remplacer par envoyer message à tableau de membres
-     */
-    public function sendMessageToCategory($dest, $sujet, $message, $subscribed_only = false)
-    {
-        $config = Config::getInstance();
-
-        $message .= "\n\n--\n".$config->get('nom_asso')."\n".$config->get('site_asso');
-
-        if ($dest == 0)
-            $where = 'id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)';
-        else
-            $where = 'id_categorie = '.(int)$dest;
-
-        // FIXME: filtrage plus intelligent, car le champ lettre_infos peut ne pas exister
-        if ($subscribed_only)
-        {
-            $champs = Config::getInstance()->get('champs_membres');
-
-            if ($champs->get('lettre_infos'))
-            {
-                $where .= ' AND lettre_infos = 1';
-            }
-        }
-
-        $db = DB::getInstance();
-        $res = $db->query('SELECT email FROM membres WHERE LENGTH(email) > 0 AND '.$where.' ORDER BY id;');
-
-        $sujet = '['.$config->get('nom_asso').'] '.$sujet;
-
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
-        {
-            Utils::mail($row['email'], $sujet, $message);
-        }
-
-        return true;
-    }
-
-    public function searchSQL($query)
-    {
-        $db = DB::getInstance();
-
-        if (!preg_match('/LIMIT\s+/i', $query))
-        {
-            $query = preg_replace('/;?\s*$/', '', $query);
-            $query .= ' LIMIT 100';
-        }
-
-        if (preg_match('/;\s*(.+?)$/', $query))
-        {
-            throw new UserException('Une seule requête peut être envoyée en même temps.');
-        }
-
-        $st = $db->prepare($query);
-
-        if (!$st->readOnly())
-        {
-            throw new UserException('Seules les requêtes en lecture sont autorisées.');
-        }
-
-        $res = $st->execute();
-        $out = [];
-
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
-        {
-            if (array_key_exists('passe', $row))
-            {
-                unset($row['passe']);
-            }
-            
-            $out[] = $row;
-        }
-
-        return $out;
-    }
-
-    public function schemaSQL()
-    {
-        $db = DB::getInstance();
-
-        $tables = [
-            'membres'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-            'categories'=>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
-        ];
-
-        return $tables;
     }
 }

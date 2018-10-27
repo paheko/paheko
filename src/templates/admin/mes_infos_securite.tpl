@@ -67,7 +67,7 @@
 
         <fieldset>
             <legend>Changer mon mot de passe</legend>
-            {if $user.droit_membres < Garradin\Membres::DROIT_ADMIN && (!empty($champs.passe.private) || empty($champs.passe.editable))}
+            {if $user.droit_membres < Membres::DROIT_ADMIN && (!empty($champs.passe.private) || empty($champs.passe.editable))}
                 <p class="help">Vous devez contacter un administrateur pour changer votre mot de passe.</p>
             {else}
                 <dl>

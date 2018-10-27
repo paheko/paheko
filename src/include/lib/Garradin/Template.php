@@ -19,15 +19,24 @@ class Template extends \KD2\Smartyer
 
 	public function __construct()
 	{
+		parent::__construct();
+
 		if (!file_exists(CACHE_ROOT . '/compiled'))
 		{
 			Utils::safe_mkdir(CACHE_ROOT . '/compiled', 0777, true);
 		}
 
-		self::setCompileDir(CACHE_ROOT . '/compiled');
-		self::setTemplateDir(ROOT . '/templates');
+		$this->setTemplatesDir(ROOT . '/templates');
+		$this->setCompiledDir(CACHE_ROOT . '/compiled');
+		$this->setNamespace('Garradin');
 
-		parent::__construct();
+		// Hash de la version pour les éléments statiques (cache)
+		// On ne peut pas utiliser la version directement comme query string
+		// pour les éléments statiques (genre /admin/static/admin.css?v0.9.0)
+		// car cela dévoilerait la version de Garradin utilisée, posant un souci
+		// en cas de faille, on cache donc la version utilisée, chaque instance
+		// aura sa propre version
+		$this->assign('version_hash', substr(sha1(VERSION . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('self_url', Utils::getSelfUrl());
@@ -363,6 +372,9 @@ class Template extends \KD2\Smartyer
 
 				$value = $binary;
 			}
+
+			// Forcer la valeur à être un entier (depuis PHP 7.1)
+			$value = (int)$value;
 
 			foreach ($options as $k=>$v)
 			{

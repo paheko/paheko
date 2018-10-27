@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Historique : %s"|args:$page.titre current="wiki"}
 
 <ul class="actions">
-    <li><a href="{$admin_url}wiki/?{$page.uri}">Voir la page</a></li>
+    <li><a href="{$admin_url}wiki/?{$page.uri}">Retour à la page</a></li>
 </ul>
 
 {if !empty($revisions)}
@@ -27,7 +27,7 @@
             </td>
             <th>{$rev.date|date_fr:'d/m/Y à H:i'}</th>
             <td>
-                {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
+                {if $session->canAccess('membres', Membres::DROIT_ACCES)}
                 <a href="{$admin_url}membres/fiche.php?id={$rev.id_auteur}">{$rev.nom_auteur}</a>
                 {/if}
             </td>
@@ -54,7 +54,7 @@
 {elseif !empty($diff)}
     <div class="wikiRevision revisionLeft">
         <h3>Version du {$rev1.date|date_fr:'d/m/Y à H:i'}</h3>
-        {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
+        {if $session->canAccess('membres', Membres::DROIT_ACCES)}
             <h4>De <a href="{$admin_url}membres/fiche.php?id={$rev1.id_auteur}">{$rev1.nom_auteur}</a></h4>
         {/if}
         {if $rev1.modification}
@@ -63,7 +63,7 @@
     </div>
     <div class="wikiRevision revisionRight">
         <h3>Version {if $rev2.revision == $page.revision}actuelle en date{/if} du {$rev2.date|date_fr:'d/m/Y à H:i'}</h3>
-        {if $session->canAccess('membres', Garradin\Membres::DROIT_ACCES)}
+        {if $session->canAccess('membres', Membres::DROIT_ACCES)}
             <h4>De <a href="{$admin_url}membres/fiche.php?id={$rev2.id_auteur}">{$rev2.nom_auteur}</a></h4>
         {/if}
         {if $rev2.modification}

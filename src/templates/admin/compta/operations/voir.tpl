@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Opération n°%d"|args:$operation.id current="compta/gestion"}
 
-{if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN) && $operation.compte_credit !== null && $operation.compte_debit !== null}
+{if $session->canAccess('compta', Membres::DROIT_ADMIN) && $operation.compte_credit !== null && $operation.compte_debit !== null}
 <ul class="actions">
     <li class="edit"><a href="{$admin_url}compta/operations/modifier.php?id={$operation.id}">Modifier cette opération</a></li>
     <li class="delete"><a href="{$admin_url}compta/operations/supprimer.php?id={$operation.id}">Supprimer cette opération</a></li>
@@ -34,7 +34,7 @@
 
         <dt>Catégorie</dt>
         <dd>
-            <a href="{$admin_url}compta/operations/?{if $categorie.type == Garradin\Compta\Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Garradin\Compta\Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
+            <a href="{$admin_url}compta/operations/?{if $categorie.type == Compta\Categories::DEPENSES}depenses{else}recettes{/if}">{if $categorie.type == Compta\Categories::DEPENSES}Dépense{else}Recette{/if}</a>&nbsp;:
             <a href="{$admin_url}compta/operations/?cat={$operation.id_categorie}">{$categorie.intitule}</a>
         </dd>
     {/if}
@@ -56,7 +56,7 @@
     <dt>Opération créée par</dt>
     <dd>
         {if $operation.id_auteur}
-            {if $session->canAccess('compta', Garradin\Membres::DROIT_ACCES)}
+            {if $session->canAccess('compta', Membres::DROIT_ACCES)}
                 <a href="{$admin_url}membres/fiche.php?id={$operation.id_auteur}">{$nom_auteur}</a>
             {else}
                 {$nom_auteur}

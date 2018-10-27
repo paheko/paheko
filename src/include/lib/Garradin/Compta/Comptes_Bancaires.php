@@ -84,7 +84,7 @@ class Comptes_Bancaires extends Comptes
         // Ne pas supprimer/désactiver un compte qui est utilisé dans l'exercice courant
         if ($db->firstColumn('SELECT 1 FROM compta_journal
                 WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
-                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', $id, $id))
+                AND (compte_debit = ? OR compte_credit = ?) LIMIT 1;', $id, $id))
         {
             throw new UserException('Ce compte ne peut être supprimé car des écritures y sont liées sur l\'exercice courant. '
                 . 'Il faut supprimer ou ré-attribuer ces écritures avant de pouvoir supprimer le compte.');

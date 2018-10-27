@@ -56,7 +56,7 @@
                 | <a href="{$admin_url}compta/rapports/compte_resultat.php?projet={$projet.id}">Compte de résultat</a>
                 | <a href="{$admin_url}compta/rapports/bilan.php?projet={$projet.id}">Bilan</a>
             </dd>
-            {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+            {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
             <dd class="actions">
                 <a class="icn" href="{$admin_url}compta/projets/?modifier={$projet.id}" title="Modifier">✎</a>
                 <a class="icn" href="{$admin_url}compta/projets/?supprimer={$projet.id}" title="Supprimer">✘</a>
@@ -66,7 +66,7 @@
         </dl>
     {/if}
 
-    {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+    {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
     <form method="post" action="{$self_url}">
         <fieldset>
             <legend>Ajouter un nouveau projet</legend>

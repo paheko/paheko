@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS membres_categories
 (
     id INTEGER PRIMARY KEY NOT NULL,
     nom TEXT NOT NULL,
-    description TEXT NULL,
 
     droit_wiki INTEGER NOT NULL DEFAULT 1,
     droit_membres INTEGER NOT NULL DEFAULT 1,
@@ -319,6 +318,7 @@ CREATE TABLE IF NOT EXISTS plugins
     url TEXT NULL,
     version TEXT NOT NULL,
     menu INTEGER NOT NULL DEFAULT 0,
+    menu_condition TEXT NULL,
     config TEXT NULL
 );
 
@@ -336,7 +336,7 @@ CREATE TABLE IF NOT EXISTS compta_rapprochement
 (
     id_operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id) ON DELETE CASCADE,
     date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
-    id_auteur INTEGER NULL REFERENCES membres (id)
+    id_auteur INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS fichiers
@@ -385,4 +385,16 @@ CREATE TABLE IF NOT EXISTS fichiers_compta_journal
     fichier INTEGER NOT NULL REFERENCES fichiers (id),
     id INTEGER NOT NULL REFERENCES compta_journal (id),
     PRIMARY KEY(fichier, id)
+);
+
+CREATE TABLE IF NOT EXISTS recherches
+-- Recherches enregistrées
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_membre INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE, -- Si non NULL, alors la recherche ne sera visible que par le membre associé
+    intitule TEXT NOT NULL,
+    creation TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(creation) IS NOT NULL AND datetime(creation) = creation),
+    cible TEXT NOT NULL, -- "membres" ou "compta_journal"
+    type TEXT NOT NULL, -- "json" ou "sql"
+    contenu TEXT NOT NULL
 );

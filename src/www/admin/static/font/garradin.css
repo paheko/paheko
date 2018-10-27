@@ -2,11 +2,12 @@
 
  @font-face {
   font-family: 'garradin';
-  src: url('../font/garradin.eot?36341436');
-  src: url('../font/garradin.eot?36341436#iefix') format('embedded-opentype'),
-       url('../font/garradin.woff?36341436') format('woff'),
-       url('../font/garradin.ttf?36341436') format('truetype'),
-       url('../font/garradin.svg?36341436#garradin') format('svg');
+  src: url('../font/garradin.eot?31180986');
+  src: url('../font/garradin.eot?31180986#iefix') format('embedded-opentype'),
+       url('../font/garradin.woff2?31180986') format('woff2'),
+       url('../font/garradin.woff?31180986') format('woff'),
+       url('../font/garradin.ttf?31180986') format('truetype'),
+       url('../font/garradin.svg?31180986#garradin') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -16,7 +17,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'garradin';
-    src: url('../font/garradin.svg?36341436#garradin') format('svg');
+    src: url('../font/garradin.svg?31180986#garradin') format('svg');
   }
 }
 */
@@ -37,27 +38,46 @@
   /* For safety - reset parent styles, that can break glyph codes*/
   font-variant: normal;
   text-transform: none;
+ 
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+ 
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
  
-.icn-search:before { content: '🔍'; } /* '\1f50d' */
-.icn-user:before { content: '👤'; } /* '\1f464' */
-.icn-users:before { content: '👪'; } /* '\1f46a' */
+.icn-up:before { content: '\2191'; } /* '↑' */
+.icn-down:before { content: '\2193'; } /* '↓' */
+.icn-download:before { content: '\21d3'; } /* '⇓' */
+.icn-home:before { content: '\2302'; } /* '⌂' */
+.icn-print:before { content: '\2399'; } /* '⎙' */
+.icn-check:before { content: '\2611'; } /* '☑' */
+.icn-settings:before { content: '\2638'; } /* '☸' */
+.icn-alert:before { content: '\26a0'; } /* '⚠' */
+.icn-mail:before { content: '\2709'; } /* '✉' */
+.icn-edit:before { content: '\270e'; } /* '✎' */
 .icn-delete:before { content: '\2718'; } /* '✘' */
+.icn-help:before { content: '\2753'; } /* '❓' */
 .icn-plus:before { content: '\2795'; } /* '➕' */
 .icn-minus:before { content: '\2796'; } /* '➖' */
-.icn-help:before { content: '\2753'; } /* '❓' */
-.icn-home:before { content: '\2302'; } /* '⌂' */
-.icn-attach:before { content: '📎'; } /* '\1f4ce' */
-.icn-lock:before { content: '🔒'; } /* '\1f512' */
-.icn-mail:before { content: '\2709'; } /* '✉' */
-.icn-download:before { content: '\21d3'; } /* '⇓' */
-.icn-edit:before { content: '\270e'; } /* '✎' */
-.icn-print:before { content: '\2399'; } /* '⎙' */
-.icn-alert:before { content: '\26a0'; } /* '⚠' */
-.icn-menu:before { content: '𝍢'; } /* '\1d362' */
-.icn-settings:before { content: '\2638'; } /* '☸' */
-.icn-down:before { content: '\2193'; } /* '↓' */
-.icn-up:before { content: '\2191'; } /* '↑' */
 .icn-logout:before { content: '\291d'; } /* '⤝' */
-.icn-check:before { content: '\2611'; } /* '☑' */
+.icn-eye-off:before { content: '\292b'; } /* '⤫' */
+.icn-menu:before { content: '𝍢'; } /* '\1d362' */
+.icn-eye:before { content: '👁'; } /* '\1f441' */
+.icn-user:before { content: '👤'; } /* '\1f464' */
+.icn-users:before { content: '👪'; } /* '\1f46a' */
+.icn-attach:before { content: '📎'; } /* '\1f4ce' */
+.icn-search:before { content: '🔍'; } /* '\1f50d' */
+.icn-lock:before { content: '🔒'; } /* '\1f512' */
 .icn-unlock:before { content: '🔓'; } /* '\1f513' */

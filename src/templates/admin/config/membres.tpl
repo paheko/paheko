@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" current="config" js=1}
 
-{include file="admin/config/_menu.tpl" current="membres"}
+{include file="admin/config/_menu.tpl" current="fiches_membres"}
 
 {if isset($status) && $status == 'OK'}
     <p class="confirm">

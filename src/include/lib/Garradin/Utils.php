@@ -6,9 +6,14 @@ use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
 use KD2\SMTP;
+use KD2\ODSWriter;
 
 class Utils
 {
+    const EMAIL_CONTEXT_BULK = 'bulk';
+    const EMAIL_CONTEXT_PRIVATE = 'private';
+    const EMAIL_CONTEXT_SYSTEM = 'system';
+
     static protected $skriv = null;
 
     static private $french_date_names = [
@@ -375,96 +380,6 @@ class Utils
         return $str;
     }
 
-    static public function mail($to, $subject, $content, array $headers = [], $pgp_key = null)
-    {
-        // Création du contenu du message
-        $content = wordwrap($content);
-        $content = trim($content);
-
-        $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
-        $config = Config::getInstance();
-
-        $headers['Return-Path'] = FORCE_EMAIL_FROM ?: $config->get('email_asso');
-
-        if (empty($headers['From']))
-        {
-            if (FORCE_EMAIL_FROM)
-            {
-                $headers['Reply-To'] = !empty($headers['From']) ? $headers['From'] : $config->get('email_asso');
-                $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), FORCE_EMAIL_FROM);
-                $headers['Return-Path'] = FORCE_EMAIL_FROM;
-            }
-            else
-            {
-                $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
-            }
-        }
-
-        $headers['MIME-Version'] = '1.0';
-        $headers['Content-type'] = 'text/plain; charset=UTF-8';
-
-        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
-        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
-
-        if ($pgp_key)
-        {
-            $content = Security::encryptWithPublicKey($pgp_key, $content);
-        }
-
-        if (!is_array($to))
-        {
-            $to = [$to];
-        }
-
-        foreach ($to as $recipient)
-        {
-            // Ne pas envoyer de mail à des adresses invalides
-            if (!SMTP::checkEmailIsValid($recipient, false))
-            {
-                continue;
-            }
-
-            if (!self::_sendMail($recipient, $subject, $content, $headers))
-            {
-                throw new \RuntimeException('Impossible d\'envoyer l\'email');
-            }
-        }
-
-        return true;
-    }
-
-    static protected function _sendMail($to, $subject, $content, array $headers)
-    {
-        if (SMTP_HOST)
-        {
-            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-            
-            if (!defined($const))
-            {
-                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
-            }
-
-            $secure = constant($const);
-
-            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-            return $smtp->send($to, $subject, $content, $headers);
-        }
-        else
-        {
-            // Encodage du sujet
-            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
-            $raw_headers = '';
-
-            // Sérialisation des entêtes
-            foreach ($headers as $name=>$value)
-            {
-                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
-            }
-
-            return mail($to, $subject, $content, $raw_headers);
-        }
-    }
-
     static public function clearCaches($path = false)
     {
         if (!$path)
@@ -761,5 +676,149 @@ class Utils
         });
 
         return sprintf("\"%s\"\r\n", implode('","', $row));
+    }
+
+    static public function toCSV($name, $iterator, $header = null)
+    {
+        header('Content-type: application/csv');
+        header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
+
+        $fp = fopen('php://output', 'w');
+
+        if ($header)
+        {
+            fputs($fp, self::row_to_csv($header));
+        }
+
+        foreach ($iterator as $row)
+        {
+            if (!$header)
+            {
+                fputs($fp, self::row_to_csv(array_keys($row)));
+                $header = true;
+            }
+
+            fputs($fp, self::row_to_csv($row));
+        }
+
+        fclose($fp);
+
+        return true;
+    }
+
+    static public function toODS($name, $iterator, $header = null)
+    {
+        header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
+        header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
+
+        $ods = new ODSWriter;
+        $ods->table_name = $name;
+
+        if ($header)
+        {
+            $ods->add((array) $header);
+        }
+
+        foreach ($iterator as $row)
+        {
+            if (!$header)
+            {
+                $ods->add(array_keys($row));
+                $header = true;
+            }
+
+            $ods->add((array) $row);
+        }
+
+        $ods->output();
+
+        return true;
+    }
+
+    static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
+    {
+        // Ne pas envoyer de mail à des adresses invalides
+        if (!SMTP::checkEmailIsValid($recipient, false))
+        {
+            throw new UserException('Adresse email invalide: ' . $recipient);
+        }
+
+        $config = Config::getInstance();
+        $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
+
+        // Tentative d'envoi du message en utilisant un plugin
+        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('context', 'recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
+
+        if (!$email_sent_via_plugin)
+        {
+            // L'envoi d'email n'a pas été effectué par un plugin, utilisons l'envoi interne
+            // via mail() ou SMTP donc
+            return self::mail($context, $recipient, $subject, $content, $id_membre, $pgp_key);
+        }
+
+        return true;
+    }
+
+    static public function mail($context, $to, $subject, $content, $id_membre, $pgp_key)
+    {
+        $headers = [];
+        $config = Config::getInstance();
+
+        $content = wordwrap($content);
+        $content = trim($content);
+
+        $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config->get('site_asso'));
+        $content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
+        $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('email_asso');
+
+        $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
+
+        if ($pgp_key)
+        {
+            $content = Security::encryptWithPublicKey($pgp_key, $content);
+        }
+
+        $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
+        $headers['Return-Path'] = $config->get('email_asso');
+
+        $headers['MIME-Version'] = '1.0';
+        $headers['Content-type'] = 'text/plain; charset=UTF-8';
+
+        if ($context == self::EMAIL_CONTEXT_BULK)
+        {
+            $headers['Precedence'] = 'bulk';
+        }
+
+        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
+        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
+
+        if (SMTP_HOST)
+        {
+            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+
+            if (!defined($const))
+            {
+                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
+            }
+
+            $secure = constant($const);
+
+            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
+            return $smtp->send($to, $subject, $content, $headers);
+        }
+        else
+        {
+            // Encodage du sujet
+            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
+            $raw_headers = '';
+
+            // Sérialisation des entêtes
+            foreach ($headers as $name=>$value)
+            {
+                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
+            }
+
+            return \mail($to, $subject, $content, $raw_headers);
+        }
     }
 }

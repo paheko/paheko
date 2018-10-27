@@ -2,8 +2,8 @@
 
 <ul class="actions">
     <li class="current"><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
-    <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN) && $user.id != $membre.id}
+    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
+    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
     {/if}
     <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
@@ -46,13 +46,15 @@
     <dd>
         <a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Voir l'historique</a>
     </dd>
-    <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dd>
-{if !empty($nb_operations)}
-    <dt>Écritures comptables</dt>
-    <dd>{$nb_operations} écritures comptables
-        — <a href="{$admin_url}compta/operations/membre.php?id={$membre.id}">Voir la liste des écritures ajoutées par ce membre</a>
-    </dd>
- {/if}
+    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+        <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dd>
+        {if !empty($nb_operations)}
+            <dt>Écritures comptables</dt>
+            <dd>{$nb_operations} écritures comptables
+                — <a href="{$admin_url}compta/operations/membre.php?id={$membre.id}">Voir la liste des écritures ajoutées par ce membre</a>
+            </dd>
+        {/if}
+    {/if}
 </dl>
 
 <aside class="describe">
@@ -80,31 +82,31 @@
 </aside>
 
 <dl class="describe">
-    {foreach from=$champs key="c" item="config"}
-    <dt>{$config.title}</dt>
+    {foreach from=$champs key="c" item="c_config"}
+    <dt>{$c_config.title}</dt>
     <dd>
-        {if $config.type == 'checkbox'}
+        {if $c_config.type == 'checkbox'}
             {if $membre->$c}Oui{else}Non{/if}
         {elseif empty($membre->$c)}
             <em>(Non renseigné)</em>
-        {elseif $c == 'nom'}
+        {elseif $c == $c_config.champ_identite}
             <strong>{$membre->$c}</strong>
-        {elseif $c == 'email'}
-            <a href="mailto:{$membre->$c}">{$membre->$c}</a>
-            | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
-        {elseif $config.type == 'email'}
-            <a href="mailto:{$membre->$c}">{$membre->$c}</a>
-        {elseif $config.type == 'tel'}
+        {elseif $c_config.type == 'email'}
+            <a href="mailto:{$membre->$c|escape:'url'}">{$membre->$c}</a>
+            {if $c == 'email'}
+                | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
+            {/if}
+        {elseif $c_config.type == 'tel'}
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
-        {elseif $config.type == 'country'}
+        {elseif $c_config.type == 'country'}
             {$membre->$c|get_country_name}
-        {elseif $config.type == 'date' || $config.type == 'datetime'}
+        {elseif $c_config.type == 'date' || $c_config.type == 'datetime'}
             {$membre->$c|format_sqlite_date_to_french}
-        {elseif $config.type == 'password'}
+        {elseif $c_config.type == 'password'}
             *******
-        {elseif $config.type == 'multiple'}
+        {elseif $c_config.type == 'multiple'}
             <ul>
-            {foreach from=$config.options key="b" item="name"}
+            {foreach from=$c_config.options key="b" item="name"}
                 {if $membre->$c & (0x01 << $b)}
                     <li>{$name}</li>
                 {/if}

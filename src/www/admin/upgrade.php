@@ -1,8 +1,12 @@
 <?php
+
 namespace Garradin;
+
+use Garradin\Membres\Session;
 
 const UPGRADE_PROCESS = true;
 
+require_once __DIR__ . '/../../include/test_required.php';
 require_once __DIR__ . '/../../include/init.php';
 
 $config = Config::getInstance();
@@ -14,6 +18,12 @@ if (version_compare($v, garradin_version(), '>='))
     throw new UserException("Pas de mise à jour à faire.");
 }
 
+// versions pré-0.7.0: démerdez-vous !
+if (!$v || version_compare($v, '0.7.0', '<'))
+{
+    throw new UserException("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin 0.8.5 avant de faire la mise à jour vers cette version.");
+}
+
 Install::checkAndCreateDirectories();
 
 if (Static_Cache::exists('upgrade'))
@@ -23,6 +33,11 @@ if (Static_Cache::exists('upgrade'))
         . PHP_EOL . 'Si celle-ci a échouée et que vous voulez ré-essayer, supprimez le fichier suivant:'
         . PHP_EOL . $path);
 }
+
+// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
+// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
+$session = new Session;
+$user_is_logged = $session->isLogged(true);
 
 Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
@@ -54,169 +69,6 @@ animatedLoader(document.getElementById("loader"), 5);
 
 flush();
 
-// versions pré-0.3.0
-if (!$v)
-{
-    $db->exec('ALTER TABLE membres ADD COLUMN lettre_infos INTEGER DEFAULT 0;');
-    $v = '0.3.0';
-}
-
-if (version_compare($v, '0.4.0', '<'))
-{
-    $config->set('monnaie', '€');
-    $config->set('pays', 'FR');
-    $config->save();
-
-    $db->exec(file_get_contents(ROOT . '/include/data/0.4.0.sql'));
-
-    // Mise en place compta
-    $comptes = new Compta\Comptes;
-    $comptes->importPlan();
-
-    $comptes = new Compta\Categories;
-    $comptes->importCategories();
-}
-
-if (version_compare($v, '0.4.3', '<'))
-{
-    $db->exec(file_get_contents(ROOT . '/include/data/0.4.3.sql'));
-}
-
-if (version_compare($v, '0.4.5', '<'))
-{
-    // Mise à jour plan comptable
-    $comptes = new Compta\Comptes;
-    $comptes->importPlan();
-
-    // Création page wiki connexion
-    $wiki = new Wiki;
-    $page = Wiki::transformTitleToURI('Bienvenue');
-    $config->set('accueil_connexion', $page);
-
-    if (!$wiki->getByUri($page))
-    {
-        $id_page = $wiki->create([
-            'titre' =>  'Bienvenue',
-            'uri'   =>  $page,
-        ]);
-
-        $wiki->editRevision($id_page, 0, [
-            'id_auteur' =>  null,
-            'contenu'   =>  "Bienvenue dans l'administration de ".$config->get('nom_asso')." !\n\n"
-                .   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
-        ]);
-    }
-
-    $config->set('accueil_connexion', $page);
-    $config->save();
-}
-
-if (version_compare($v, '0.5.0', '<'))
-{
-    // Récupération de l'ancienne config
-    $champs_modifiables_membre = $db->firstColumn('SELECT valeur FROM config WHERE cle = "champs_modifiables_membre";');
-    $champs_modifiables_membre = !empty($champs_modifiables_membre) ? explode(',', $champs_modifiables_membre) : [];
-
-    $champs_obligatoires = $db->firstColumn('SELECT valeur FROM config WHERE cle = "champs_obligatoires";');
-    $champs_obligatoires = !empty($champs_obligatoires) ? explode(',', $champs_obligatoires) : [];
-
-    // Import des champs membres par défaut
-    $champs = Membres\Champs::importInstall();
-
-    // Application de l'ancienne config aux nouveaux champs membres
-    foreach ($champs_obligatoires as $name)
-    {
-        if ($champs->get($name) !== null)
-            $champs->set($name, 'mandatory', true);
-    }
-
-    foreach ($champs_modifiables_membre as $name)
-    {
-        if ($champs->get($name) !== null)
-            $champs->set($name, 'editable', true);
-    }
-
-    $champs->save();
-
-    $config->set('champs_membres', $champs);
-    $config->save();
-
-    // Suppression de l'ancienne config
-    $db->exec('DELETE FROM config WHERE cle IN ("champs_obligatoires", "champs_modifiables_membre");');
-}
-
-if (version_compare($v, '0.6.0-rc1', '<'))
-{
-    $categories = new Membres\Categories;
-    $list = $categories->listComplete();
-
-    $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
-
-    // Mise à jour base de données
-    $db->exec(file_get_contents(ROOT . '/include/data/0.6.0.sql'));
-
-    $id_cat_cotisation = $db->firstColumn('SELECT id FROM compta_categories WHERE compte = 756 LIMIT 1;');
-
-    // Conversion des cotisations de catégories en cotisations indépendantes
-    foreach ($list as $cat)
-    {
-        $db->insert('cotisations', [
-            'id_categorie_compta'   =>  null,
-            'intitule'              =>  $cat->nom,
-            'montant'               =>  (float) $cat->montant_cotisation,
-            // Convertir un nombre de mois en nombre de jours
-            'duree'                 =>  round($cat->duree_cotisation * 30.44),
-            'description'           =>  'Créé automatiquement depuis les catégories de membres (version 0.5.x)',
-        ]);
-
-        $args = [
-            'id_cotisation' =>  (int)$db->lastInsertRowId(),
-            'id_categorie'  =>  (int)$cat->id,
-        ];
-
-        // import des dates de cotisation existantes comme paiements
-        $db->preparedQuery('INSERT INTO cotisations_membres 
-            (id_membre, id_cotisation, date)
-            SELECT id, :id_cotisation, date(date_cotisation) FROM membres
-            WHERE date_cotisation IS NOT NULL AND date_cotisation != \'\' AND id_categorie = :id_categorie;',
-            $args);
-
-        // Mais on ne crée pas d'écriture comptable, car elles existent probablement déjà
-    }
-
-    // Déplacement des squelettes dans le répertoire public
-    if (!file_exists(ROOT . '/www/squelettes'))
-    {
-        mkdir(ROOT . '/www/squelettes');
-    }
-
-    if (file_exists(ROOT . '/squelettes'))
-    {
-        $dir = dir(ROOT . '/squelettes');
-
-        while ($file = $dir->read())
-        {
-            if ($file == '.' || $file == '..')
-                continue;
-
-            rename(ROOT . '/squelettes/' . $file, ROOT . '/www/squelettes/' . $file);
-        }
-
-        $dir->close();
-
-        @rmdir(ROOT . '/squelettes');
-    }
-
-    $db->exec('END; PRAGMA foreign_keys = ON;');
-
-    // Mise à jour de la table membres, suppression du champ date_cotisation notamment
-    $config->get('champs_membres')->save();
-
-    // Possibilité de choisir l'identité et l'identifiant d'un membre
-    $config->set('champ_identite', 'nom');
-    $config->set('champ_identifiant', 'email');
-    $config->save();
-}
 
 if (version_compare($v, '0.7.0', '<'))
 {
@@ -329,11 +181,105 @@ if (version_compare($v, '0.8.4', '<'))
     $db->commit();
 }
 
+if (version_compare($v, '0.9.0-rc1', '<'))
+{
+    $db->exec('PRAGMA foreign_keys = OFF;');
+    $db->begin();
+
+    $db->import(ROOT . '/include/data/0.9.0.sql');
+
+    // Correction des ID parents des comptes qui ont été mal renseignés
+    // exemple : compte 512A avec "5" comme parent (c'était permis,
+    // par erreur, par le formulaire d'ajout de compte dans le plan)
+    // Serait probablement possible en 3-4 lignes de SQL avec
+    // WITH RECURSIVE mais c'est au delà de mes compétences
+    $comptes = $db->iterate('SELECT id FROM compta_comptes WHERE parent != length(id) - 1;');
+
+    foreach ($comptes as $compte)
+    {
+        $parent = false;
+        $id = $compte->id;
+
+        while (!$parent && strlen($id))
+        {
+            // On enlève un caractère à la fin jusqu'à trouver un compte parent correspondant
+            $id = substr($id, 0, -1);
+            $parent = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $id);
+        }
+
+        if (!$parent)
+        {
+            // Situation normalement impossible !
+            throw new \LogicException(sprintf('Le compte %s est invalide et n\'a pas de compte parent possible !', $compte->id));
+        }
+
+        $db->update('compta_comptes', ['parent' => $parent], 'id = :id', ['id' => $compte->id]);
+    }
+
+    $champs = $config->get('champs_membres');
+
+    if ($champs->get('lettre_infos'))
+    {
+        // Ajout d'une recherche avancée en exemple
+        $query = [
+            'query' => [[
+                'operator' => 'AND',
+                'conditions' => [
+                    [
+                        'column'   => 'lettre_infos',
+                        'operator' => '= 1',
+                        'values'   => [],
+                    ],
+                ],
+            ]],
+            'order' => 'numero',
+            'desc' => true,
+            'limit' => '10000',
+        ];
+
+        $recherche = new Recherche;
+        $recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+    }
+
+    $db->commit();
+
+    $config->set('desactiver_site', false);
+    $config->save();
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());
 
 Static_Cache::remove('upgrade');
+
+// Réinstaller les plugins système si nécessaire
+Plugin::checkAndInstallSystemPlugins();
+
+// Mettre à jour les plugins si nécessaire
+foreach (Plugin::listInstalled() as $id=>$infos)
+{
+    // Ne pas tenir compte des plugins dont le code n'est pas dispo
+    if ($infos->disabled)
+    {
+        continue;
+    }
+
+    $plugin = new Plugin($id);
+
+    if ($plugin->needUpgrade())
+    {
+        $plugin->upgrade();
+    }
+
+    unset($plugin);
+}
+
+// Forcer à rafraîchir les données de la session si elle existe
+if ($user_is_logged)
+{
+    $session->refresh();
+}
 
 echo '<h2>Mise à jour terminée.</h2>
 <p><a href="'.ADMIN_URL.'">Retour</a></p>';

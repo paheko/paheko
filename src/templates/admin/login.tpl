@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Connexion"}
+{include file="admin/_head.tpl" title="Connexion" js=1}
 
 {form_errors}
 {show_error if=$fail message="Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe."}
@@ -47,5 +47,9 @@
     </p>
 
 </form>
+
+<script type="text/javascript">
+g.enhancePasswordField($('#f_passe'));
+</script>
 
 {include file="admin/_foot.tpl"}
