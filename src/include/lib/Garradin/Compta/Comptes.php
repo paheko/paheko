@@ -153,7 +153,7 @@ class Comptes
         $id = trim($id);
 
         // Ne pas supprimer un compte qui est utilisé !
-        if ($db->firstColumn('SELECT 1 FROM compta_journal WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', $id, $id))
+        if ($db->test('compta_journal', 'compte_debit = ? OR compte_credit = ?', $id, $id))
         {
             throw new UserException('Ce compte ne peut être supprimé car des opérations comptables y sont liées.');
         }
