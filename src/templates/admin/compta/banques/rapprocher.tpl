@@ -12,8 +12,8 @@
         <legend>Rapprochement par mois</legend>
         <dl>
             <dd class="actions">
-            <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$prev|date_fr:'Y-m-01'}&amp;fin={$prev|date_fr:'Y-m-t'}{if \Garradin\qg('sauf')}&amp;sauf=1{/if}">&larr; {$prev|date_fr:'F Y'}</a>
-            | <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$next|date_fr:'Y-m-01'}&amp;fin={$next|date_fr:'Y-m-t'}{if \Garradin\qg('sauf')}&amp;sauf=1{/if}">{$next|date_fr:'F Y'} &rarr;</a>
+            <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$prev|date_fr:'Y-m-01'}&amp;fin={$prev|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">&larr; {$prev|date_fr:'F Y'}</a>
+            | <a class="icn" href="{$self_url_no_qs}?id={$compte.id}&amp;debut={$next|date_fr:'Y-m-01'}&amp;fin={$next|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">{$next|date_fr:'F Y'} &rarr;</a>
             </dd>
         </dl>
     </fieldset>
@@ -25,7 +25,7 @@
             <span><input type="date" name="debut" id="f_debut" value="{$debut}" /></span>
             au
             <span><input type="date" name="fin" id="f_fin" value="{$fin}" /></span>
-            <label><input type="checkbox" name="sauf" value="1" {if \Garradin\qg('sauf')} checked="checked"{/if} /> Ne pas inclure les écritures déjà rapprochées</label>
+            <label><input type="checkbox" name="sauf" value="1" {if qg('sauf')} checked="checked"{/if} /> Ne pas inclure les écritures déjà rapprochées</label>
             <input type="hidden" name="id" value="{$compte.id}" />
             <input type="submit" value="Afficher" />
         </p>
@@ -67,7 +67,7 @@
                 <td class="check"><input type="checkbox" name="rapprocher[{$ligne.id}]" value="1" {if $ligne.date_rapprochement}checked="checked"{/if} /></td>
                 <td class="num"><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
                 <td class="actions">
-                {if $session->canAccess('compta', Garradin\Membres::DROIT_ADMIN)}
+                {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
                     <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette opération">✎</a>
                 {/if}
                 </td>

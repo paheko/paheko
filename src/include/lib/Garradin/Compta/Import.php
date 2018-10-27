@@ -2,11 +2,10 @@
 
 namespace Garradin\Compta;
 
-use \Garradin\DB;
-use \Garradin\Utils;
-use \Garradin\UserException;
-
-use KD2\ODSWriter;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\UserException;
+use Garradin\Config;
 
 class Import
 {
@@ -29,7 +28,7 @@ class Import
 
 	protected function export($exercice)
 	{
-		return DB::getInstance()->prepare('SELECT
+		return DB::getInstance()->iterate('SELECT
 			journal.id,
 			strftime(\'%d/%m/%Y\', date) AS date,
 			(CASE cat.type WHEN 1 THEN \'Recette\' WHEN -1 THEN \'Dépense\' ELSE \'Autre\' END) AS type,
@@ -51,43 +50,23 @@ class Import
 				LEFT JOIN compta_moyens_paiement AS moyen ON moyen.code = journal.moyen_paiement
 			WHERE id_exercice = '.(int)$exercice.'
 			ORDER BY journal.date;
-		')->execute();
+		');
+	}
+
+	protected function exportName()
+	{
+		return sprintf('Export comptabilité - %s - %s', Config::getInstance()->get('nom_asso'), date('Y-m-d'));
 	}
 
 	public function toCSV($exercice)
 	{
-		$res = $this->export($exercice);
-
-		$fp = fopen('php://output', 'w');
-
-		fputcsv($fp, $this->header);
-
-		while ($row = $res->fetchArray(SQLITE3_ASSOC))
-		{
-			fputcsv($fp, $row);
-		}
-
-		fclose($fp);
-
-		return true;
+		return Utils::toCSV($this->exportName(), $this->export($exercice), $this->header);
 	}
 
-    public function toODS($exercice)
-    {
-    	$result = $this->export($exercice);
-        $ods = new ODSWriter;
-        $ods->table_name = 'Journal';
-
-        $ods->add($this->header);
-
-        while ($row = $result->fetchArray(SQLITE3_ASSOC))
-        {
-        	unset($row->passe);
-        	$ods->add($row);
-        }
-
-        $ods->output();
-    }
+	public function toODS($exercice)
+	{
+		return Utils::toODS($this->exportName(), $this->export($exercice), $this->header);
+	}
 
 	public function fromCSV($path)
 	{

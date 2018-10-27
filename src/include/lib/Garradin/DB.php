@@ -26,6 +26,11 @@ class DB extends DB_SQLite3
 
     public function __construct($create = false)
     {
+        if (!defined('\SQLITE3_OPEN_READWRITE'))
+        {
+            throw new \Exception('Module SQLite3 de PHP non présent. Merci de l\'installer.');
+        }
+
         $flags = \SQLITE3_OPEN_READWRITE;
 
         if ($create)
@@ -49,6 +54,11 @@ class DB extends DB_SQLite3
         }
     }
 
+    public function close()
+    {
+        parent::close();
+        self::$_instance = null;
+    }
 
     /**
      * Import a file containing SQL commands

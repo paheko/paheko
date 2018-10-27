@@ -14,6 +14,7 @@ if (f('install'))
     {
         try {
             Plugin::install(f('plugin'), false);
+            $session->set('plugins_menu', null);
             Utils::redirect(ADMIN_URL . 'config/plugins.php');
         }
         catch (UserException $e)
@@ -25,16 +26,15 @@ if (f('install'))
 
 if (f('delete'))
 {
-    $form->check('delete_plugin_' . qg('delete'), [
-        'plugin' => 'required',
-    ]);
+    $form->check('delete_plugin_' . qg('delete'));
 
     if (!$form->hasErrors())
     {
         try {
             $plugin = new Plugin(qg('delete'));
             $plugin->uninstall();
-            
+            $session->set('plugins_menu', null);
+
             Utils::redirect(ADMIN_URL . 'config/plugins.php');
         }
         catch (UserException $e)

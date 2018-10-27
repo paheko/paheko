@@ -1,14 +1,11 @@
 Options -MultiViews -Indexes
+DirectoryIndex index.php
 
-<IfModule mod_rewrite.c>
-    RewriteEngine on
-    RewriteRule admin/plugin/(.*?)/(.*) admin/plugin.php?_p=$1&_u=$2 [QSA,L]
-    RewriteRule f/([\d\w]+)/(.*) file.php?id=$1&file=$2 [QSA,L]
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule .* index.php [QSA,L]
+# FallbackResource n'est dispo que depuis Apache 2.2.16, soit Debian Wheezy (2013)
+<IfModule mod_version.c>
+	<IfVersion >= 2.2.16>
+		FallbackResource /_route.php
+	</IfVersion>
 </IfModule>
 
-<IfModule !mod_rewrite.c>
-    ErrorDocument 404 /index.php
-</IfModule>
+ErrorDocument 404 /_route.php

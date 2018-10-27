@@ -238,16 +238,16 @@ const SMTP_PORT = 587;
 const SMTP_SECURITY = 'STARTTLS';
 
 /**
- * Forcer la valeur de l'expéditeur des emails
+ * Activer les sauvegardes automatiques
  * 
- * false, null ou vide = désactivé
- * chaîne = adresse email qui sera utilisé dans le champ From
- * des emails envoyés
+ * Utile à désactiver si vous avez déjà des sauvegardes effectuées
+ * automatiquement au niveau du système.
  * 
- * Utile pour les services d'envoi SMTP tiers comme Amazon SES.
- * Si activé le "From" sera : "Nom de l'association" <adresse@email.tld>
- * avec le Reply-To positionné sur l'adresse de l'association
+ * Sinon les sauvegardes seront effectuées soit par la tâche cron
+ * soit à l'affichage de la page d'accueil (si nécessaire).
  * 
- * Défaut : false
+ * Voir paramètre USE_CRON aussi
+ * 
+ * Défaut : true
  */
-const FORCE_EMAIL_FROM = false;
+const ENABLE_AUTOMATIC_BACKUPS = true;

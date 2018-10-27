@@ -3,7 +3,7 @@
 <ul class="actions">
     <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">Membre n°{$membre.id}</a></li>
     <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-    {if $session->canAccess('membres', Garradin\Membres::DROIT_ADMIN) && $user.id != $membre.id}
+    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
     {/if}
     <li class="current"><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
@@ -28,7 +28,6 @@
                 Aucune écriture comptable n'est liée à cette cotisation.
             </p>
         {/if}
-    </fieldset>
     </fieldset>
 
     <p class="submit">

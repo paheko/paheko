@@ -4,6 +4,8 @@ namespace Garradin;
 
 class Plugin
 {
+	const PLUGIN_ID_SYNTAX = '[a-z]+(?:_[a-z]+)*';
+
 	protected $id = null;
 	protected $plugin = null;
 	protected $config_changed = false;
@@ -25,9 +27,7 @@ class Plugin
 		'svg' => 'image/svg+xml',
 	];
 
-	static protected $signal_files = [];
-
-	static public function getPath($id)
+	static public function getPath($id, $fail_with_exception = true)
 	{
 		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
 		{
@@ -38,7 +38,12 @@ class Plugin
 			return PLUGINS_ROOT . '/' . $id;
 		}
 
-		throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
+		if ($fail_with_exception)
+		{
+			throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
+		}
+
+		return false;
 	}
 
 	/**
@@ -62,6 +67,9 @@ class Plugin
 		{
 			$this->plugin->config = new \stdClass;
 		}
+
+		// Juste pour vérifier que le fichier source du plugin existe bien
+		self::getPath($id);
 
 		$this->id = $id;
 	}
@@ -190,7 +198,7 @@ class Plugin
 			throw new \RuntimeException('Chemin de fichier incorrect.');
 		}
 
-		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php', 'signals.php'];
+		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];
 
 		if (in_array($file, $forbidden))
 		{
@@ -262,7 +270,7 @@ class Plugin
 	public function needUpgrade()
 	{
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
-		
+
 		if (version_compare($this->plugin->version, $infos->version, '!='))
 			return true;
 
@@ -284,11 +292,15 @@ class Plugin
 
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
-		return DB::getInstance()->update('plugins', 
-			['version' => $infos->version],
-			'id = :id',
-			['id' => $this->id]
-		);
+		return DB::getInstance()->update('plugins', [
+			'nom'		=>	$infos->nom,
+			'description'=>	$infos->description,
+			'auteur'	=>	$infos->auteur,
+			'url'		=>	$infos->url,
+			'version'	=>	$infos->version,
+			'menu'		=>	(int)(bool)$infos->menu,
+			'menu_condition' => $infos->menu && isset($infos->menu_condition) ? trim($infos->menu_condition) : null,
+		], 'id = :id', ['id' => $this->id]);
 	}
 
 	/**
@@ -306,6 +318,12 @@ class Plugin
 			throw new \LogicException('Le callback donné n\'est pas valide.');
 		}
 
+		// pour empêcher d'appeler des méthodes de Garradin après un import de base de données "hackée"
+		if (strpos($callable_name, 'Garradin\\Plugin\\') !== 0)
+		{
+			throw new \LogicException('Le callback donné n\'utilise pas le namespace Garradin\\Plugin');
+		}
+
 		$db = DB::getInstance();
 
 		// Signaux exclusifs, qui ne peuvent être attribués qu'à un seul plugin
@@ -318,6 +336,8 @@ class Plugin
 				throw new \LogicException('Le signal ' . $signal . ' est exclusif et déjà associé au plugin "'.$registered.'"');
 			}
 		}
+
+		$callable_name = str_replace('Garradin\\Plugin\\', '', $callable_name);
 
 		$st = $db->prepare('INSERT OR REPLACE INTO plugins_signaux VALUES (:signal, :plugin, :callback);');
 		$st->bindValue(':signal', $signal);
@@ -339,6 +359,7 @@ class Plugin
 		foreach ($plugins as &$row)
 		{
 			$row->system = in_array($row->id, $system);
+			$row->disabled = !self::getPath($row->id, false);
 		}
 
 		return $plugins;
@@ -350,6 +371,11 @@ class Plugin
 	 */
 	static public function checkAndInstallSystemPlugins()
 	{
+		if (!PLUGINS_SYSTEM)
+		{
+			return true;
+		}
+
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		if (count($system) == 0)
@@ -379,10 +405,58 @@ class Plugin
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
-	static public function listMenu()
+	static public function listMenu($user)
 	{
+		self::checkAndInstallSystemPlugins();
+
 		$db = DB::getInstance();
-		return $db->getAssoc('SELECT id, nom FROM plugins WHERE menu = 1 ORDER BY nom;');
+		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
+
+		foreach ($list as $id => &$row)
+		{
+			if (!self::getPath($row->id, false))
+			{
+				// Ne pas lister les plugins dont le code a disparu
+				unset($list[$id]);
+				continue;
+			}
+
+			if (!$row->menu_condition)
+			{
+				$row = $row->nom;
+				continue;
+			}
+
+			$condition = strtr($row->menu_condition, [
+				'{Membres::DROIT_AUCUN}' => Membres::DROIT_AUCUN,
+				'{Membres::DROIT_ACCES}' => Membres::DROIT_ACCES,
+				'{Membres::DROIT_ECRITURE}' => Membres::DROIT_ECRITURE,
+				'{Membres::DROIT_ADMIN}' => Membres::DROIT_ADMIN,
+			]);
+
+			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
+			$query = 'SELECT 1 WHERE ' . $condition . ';';
+			$st = $db->prepare($query);
+
+			if (!$st->readOnly())
+			{
+				throw new \LogicException('Requête plugin pour affichage dans le menu n\'est pas en lecture : ' . $query);
+			}
+
+			$res = $st->execute();
+
+			if (!$res->fetchArray(\SQLITE3_NUM))
+			{
+				unset($list[$id]);
+				continue;
+			}
+
+			$row = $row->nom;
+		}
+
+		unset($row);
+
+		return $list;
 	}
 
 	/**
@@ -401,13 +475,13 @@ class Plugin
 			if (substr($file, 0, 1) == '.')
 				continue;
 
-			if (preg_match('!^([a-zA-Z0-9_.-]+)\.tar\.gz$!i', $file, $match))
+			if (preg_match('!^(' . self::PLUGIN_ID_SYNTAX . ')\.tar\.gz$!', $file, $match))
 			{
 				// Sélectionner les archives PHAR
 				$file = $match[1];
 			}
 			elseif (is_dir(PLUGINS_ROOT . '/' . $file)
-				&& preg_match('!^([a-zA-Z0-9_.-]+)$!i', $file)
+				&& preg_match('!^' . self::PLUGIN_ID_SYNTAX . '$!', $file)
 				&& is_file(sprintf('%s/%s/garradin_plugin.ini', PLUGINS_ROOT, $file)))
 			{
 				// Rien à faire, le nom valide du plugin est déjà dans "$file"
@@ -639,6 +713,7 @@ class Plugin
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
+			'menu_condition' => $infos->menu && isset($infos->menu_condition) ? trim($infos->menu_condition) : null,
 			'config'	=>	$config,
 		]);
 
@@ -669,23 +744,28 @@ class Plugin
 	 * @param  array  $params Paramètres du callback (array ou null)
 	 * @return NULL 		  NULL si aucun plugin n'a été appelé, true sinon
 	 */
-	static public function fireSignal($signal, $params = null, &$return = null)
+	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
+		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($list as $row)
 		{
-			if (!in_array($row->plugin, self::$signal_files))
+			// Ne pas appeler les plugins dont le code n'existe pas/plus,
+			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
+			if (!self::getPath($row->plugin, in_array($row->plugin, $system)))
 			{
-				require_once self::getPath($row->plugin) . '/signals.php';
+				continue;
 			}
 
-			$return = call_user_func_array($row->callback, [&$params, &$return]);
+			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 
 			if ($return)
+			{
 				return $return;
+			}
 		}
 
-		return !empty($list) ? true : null;
+		return !empty($list) ? false : null;
 	}
 }

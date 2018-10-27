@@ -3,8 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
-
 qv(['id' => 'required|numeric']);
 
 $id = (int) qg('id');
@@ -21,6 +19,8 @@ $cm = new Membres\Cotisations;
 
 if (f('save'))
 {
+	$session->requireAccess('membres', Membres::DROIT_ECRITURE);
+
 	$medias = implode(',', [$re::MEDIA_EMAIL, $re::MEDIA_COURRIER, $re::MEDIA_TELEPHONE, $re::MEDIA_AUTRE]);
 
 	$form->check('add_rappel_' . $membre->id, [

@@ -2,11 +2,11 @@
 
 @font-face {
     font-family: 'gicon';
-    src: url('font/garradin.eot?36341436');
-    src: url('font/garradin.eot?36341436#iefix') format('embedded-opentype'),
-        url('font/garradin.woff?36341436') format('woff'),
-        url('font/garradin.ttf?36341436') format('truetype'),
-        url('font/garradin.svg?36341436#garradin') format('svg');
+    src: url('font/garradin.eot?2018');
+    src: url('font/garradin.eot?2018#iefix') format('embedded-opentype'),
+        url('font/garradin.woff?2018') format('woff'),
+        url('font/garradin.ttf?2018') format('truetype'),
+        url('font/garradin.svg?2018#garradin') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -189,26 +189,52 @@ span.alert, b.alert {
     color: #990;
 }
 
-p.error, div.error {
-    border: 1px solid #c00;
-    background: #fcc;
-    padding: 0.5em;
+p.alert, div.alert, p.error, div.error, p.confirm, div.confirm {
+    border: 1px solid #ccc;
+    padding: .5em;
     margin-bottom: 1em;
+    border-radius: .3em;
+    padding-left: 3em;
+    position: relative;
+}
+
+p.error, div.error {
+    border-color: #c00;
+    background-color: #fcc;
 }
 
 p.confirm, div.confirm {
-    border: 1px solid #0c0;
-    background: #cfc;
-    padding: 0.5em;
-    margin-bottom: 1em;
+    border-color: #0c0;
+    background-color: #cfc;
 }
 
 p.alert, div.alert {
-    border: 1px solid #cc0;
-    background: #ffc;
-    padding: 0.5em;
-    margin-bottom: 1em;
-    overflow: auto;
+    border-color: #cc0;
+    background-color: #ffc;
+}
+
+p.confirm::before, div.confirm::before, p.alert::before, div.alert::before, p.error::before, div.error::before {
+    font-family: "gicon";
+    left: .5em;
+    top: .2em;
+    position: absolute;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 5px #666;
+}    
+
+p.confirm::before, div.confirm::before {
+    content: "☑";
+    color: green;
+}
+
+p.alert::before, div.alert::before {
+    content: "⚠";
+    color: yellow;
+}
+
+p.error::before, div.error::before {
+    content: "⚠";
+    color: red;
 }
 
 p.help {
@@ -279,6 +305,10 @@ input[type=url], input[type=tel], select {
     max-width: 100%;
 }
 
+input[type=password], input.clearTextPassword {
+    font-family: monospace;
+}
+
 select, input[size] {
     min-width: 0;
 }
@@ -303,6 +333,16 @@ input[type=submit], input[type=button], input[type=checkbox], button {
 input.resetButton {
     padding: .1em;
     margin-left: 1em;
+}
+
+input[type=button].showPassword {
+    margin-left: -2em;
+    margin-right: 1em;
+    background: none;
+}
+
+input[type=button].showPassword:hover {
+    background: none;
 }
 
 .loader {
@@ -409,9 +449,17 @@ ul.actions {
     list-style-type: none;
     margin: 1em 0;
     border-bottom: .1em solid #9c4f15;
-    border-bottom: .1em solid rgb(var(--gMainColor));
+    border-bottom-color: rgb(var(--gMainColor));
     padding: 0 1em;
     z-index: 100;
+}
+
+ul.actions.sub {
+    margin: -1em 2em 1em 0;
+    padding-top: 1em;
+    border-right: .1em solid #9c4f15;
+    border-right-color: rgb(var(--gMainColor));
+    border-bottom-right-radius: .5em;
 }
 
 ul.actions li {
@@ -428,6 +476,7 @@ ul.actions li a, ul.actions li label {
     padding: .1em .5em;
     color: #000;
     text-decoration: none;
+    transition: background-color .2s, color .2s;
 }
 
 ul.actions li input {
@@ -443,7 +492,7 @@ ul.actions li.current a, ul.actions li input:checked + label {
 
 ul.actions li a:hover, ul.actions li label:hover {
     color: #fff;
-    color: rgb(var(--gBgColor));
+    background-color: rgb(var(--gMainColor));
     text-decoration: underline;
     border-bottom: none;
 }
@@ -569,6 +618,32 @@ table.search th {
     background: rgba(var(--gSecondColor), 0.5);
 }
 
+table.list .disabled {
+    background: #eee;
+    color: #999;
+}
+
+#queryBuilder .column select, #queryBuilderForm .actions select {
+    max-width: 15em;
+}
+
+#queryBuilder table td {
+    vertical-align: top;
+    padding: .1em .2em;
+}
+
+#queryBuilder input[type=button], #queryBuilder .values input {
+    margin: .1em;
+}
+
+#queryBuilderForm .actions label {
+    margin: 0 .5em;
+}
+
+#queryBuilderForm input[type=number] {
+    width: 4em;
+}
+
 .userOrder .cur {
     background: rgb(217, 134, 40);
     background: rgba(var(--gSecondColor), 1.0);
@@ -679,6 +754,33 @@ b.money {
 
 #rapport h1 {
     text-align: center;
+}
+
+h2.ruler {
+    margin: .5em;
+    text-align: center;
+    color: #333;
+    overflow: hidden;
+}
+
+h2.ruler:before, h2.ruler:after {
+    background-color: #000;
+    content: "";
+    display: inline-block;
+    height: 1px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+}
+
+h2.ruler:before {
+    right: 0.5em;
+    margin-left: -50%;
+}
+
+h2.ruler:after {
+    left: 0.5em;
+    margin-right: -50%;
 }
 
 .icn, .icnl {

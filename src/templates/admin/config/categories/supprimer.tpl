@@ -1,4 +1,6 @@
-{include file="admin/_head.tpl" title="Supprimer une catégorie" current="membres/categories"}
+{include file="admin/_head.tpl" title="Supprimer une catégorie de membre" current="config"}
+
+{include file="admin/config/_menu.tpl" current="categories"}
 
 {form_errors}
 

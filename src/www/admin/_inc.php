@@ -70,10 +70,13 @@ if (!defined('Garradin\LOGIN_PROCESS'))
     $tpl->assign('user', $user);
 
     $tpl->assign('current', '');
-    $tpl->assign('plugins_menu', Plugin::listMenu());
 
-    if ($session->canAccess('membres', Membres::DROIT_ACCES))
+    if ($session->get('plugins_menu') === null)
     {
-        $tpl->assign('nb_membres', (new Membres)->countAllButHidden());
+        // Construction de la liste de plugins pour le menu
+        // et stockage en session pour ne pas la recalculer à chaque page
+        $session->set('plugins_menu', Plugin::listMenu($user));
     }
+
+    $tpl->assign('plugins_menu', $session->get('plugins_menu'));
 }

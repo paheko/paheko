@@ -1,5 +1,9 @@
 {include file="admin/_head.tpl" title="Action collective sur les membres" current="membres"}
 
+<p class="alert">
+    {$selected|count} membres sélectionnés
+</p>
+
 {form_errors}
 
 <form method="post" action="{$self_url}">

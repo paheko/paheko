@@ -11,7 +11,6 @@ use Garradin\UserException;
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
 use const Garradin\ADMIN_URL;
-use const Garradin\FORCE_EMAIL_FROM;
 
 use KD2\Security;
 use KD2\Security_OTP;
@@ -112,14 +111,17 @@ class Session extends \KD2\UserSession
 	}
 
 	// Ajout de la gestion de LOCAL_LOGIN
-	public function isLogged()
+	public function isLogged($disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
-		if (!$logged && defined('\Garradin\LOCAL_LOGIN')
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')
 			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
 		{
-			$logged = $this->create(\Garradin\LOCAL_LOGIN);
+			if (!$logged || ($logged && $this->user->id != \Garradin\LOCAL_LOGIN))
+			{
+				$logged = $this->create(\Garradin\LOCAL_LOGIN);
+			}
 		}
 
 		return $logged;
@@ -193,8 +195,7 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		Utils::mail($membre->email, '['.$config->get('nom_asso').'] Mot de passe perdu ?', $message, [], $membre->clef_pgp);
-		return true;
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	static public function recoverPasswordConfirm($code)
@@ -245,13 +246,13 @@ class Session extends \KD2\UserSession
 
 		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
 
-		return Utils::mail($membre->email, '['.$config->get('nom_asso').'] Nouveau mot de passe', $message, [], $membre->clef_pgp);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Nouveau mot de passe', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	public function editUser($data)
 	{
 		(new Membres)->edit($this->user->id, $data, false);
-		$this->refresh();
+		$this->refresh(false);
 
 		return true;
 	}
@@ -290,19 +291,18 @@ class Session extends \KD2\UserSession
 	public function sendMessage($dest, $sujet, $message, $copie = false)
 	{
 		$user = $this->getUser();
-		$config = Config::getInstance();
 
-		$from = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($user->identite)), FORCE_EMAIL_FROM ?: $config->get('email_asso'));
-
-		$message .= "\n\n--\nCe message a été envoyé par un membre de ".$config->get('nom_asso');
-		$message .= ", merci de contacter ".$config->get('email_asso')." en cas d'abus.";
+		$content = "Ce message vous a été envoyé par :\n";
+		$content.= sprintf("%s\n%s\n\n", $user->identite, $user->email);
+		$content.= str_repeat('=', 70) . "\n\n";
+		$content.= $message;
 
 		if ($copie)
 		{
-			Utils::mail($from, $sujet, $message);
+			Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $user->email, $sujet, $content, $user->id);
 		}
 
-		return Utils::mail($dest, $sujet, $message, ['From' => $from, 'Reply-To' => $user->email]);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $dest, $sujet, $content);
 	}
 
 	public function editSecurity(Array $data = [])
@@ -343,7 +343,7 @@ class Session extends \KD2\UserSession
 
 		$db = DB::getInstance();
 		$db->update('membres', $data, $db->where('id', (int)$this->user->id));
-		$this->refresh();
+		$this->refresh(false);
 
 		return true;
 	}

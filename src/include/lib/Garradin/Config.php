@@ -21,6 +21,11 @@ class Config
         return self::$_instance ?: self::$_instance = new Config;
     }
 
+    static public function deleteInstance()
+    {
+        self::$_instance = null;
+    }
+
     /**
      * Empêche de cloner l'objet
      * @return void
@@ -69,6 +74,8 @@ class Config
             'couleur1'                =>  $string,
             'couleur2'                =>  $string,
             'image_fond'              =>  $string,
+
+            'desactiver_site'         => $bool,
         ];
 
         $db = DB::getInstance();

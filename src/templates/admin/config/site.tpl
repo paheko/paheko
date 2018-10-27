@@ -4,7 +4,18 @@
 
 {include file="admin/config/_menu.tpl" current="site"}
 
-{if isset($edit)}
+{if $config.desactiver_site}
+    <div class="alert">
+        <h3>Site public désactivé</h3>
+        <p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
+        <form method="post" action="{$self_url}">
+            <p class="submit">
+                {csrf_field key="config_site"}
+                <input type="submit" name="activer_site" value="Réactiver le site public &rarr;" />
+            </p>
+        </form>
+    </div>
+{elseif isset($edit)}
     <form method="post" action="{$self_url}">
         <h3>Éditer un squelette</h3>
 
@@ -37,8 +48,26 @@
 {else}
 
     <fieldset>
-        <legend>Gérer le site public</legend>
-        <p><a href="{$admin_url}wiki/creer.php?public">Créer une nouvelle page sur le site web public</a></p>
+        <legend>Activation du site public</legend>
+        <dl>
+            <dt>
+                <form method="post" action="{$self_url}">
+                <input type="submit" name="desactiver_site" value="Désactiver le site public" />
+                {csrf_field key="config_site"}
+                </form>
+            </dt>
+            <dd class="help">
+                En désactivant le site public, les visiteurs seront automatiquement redirigés vers la page de connexion.<br />
+                Cette option est utile si vous avez déjà un site web et ne souhaitez pas utiliser la fonctionnalité site web de Garradin.
+            </dd>
+        </dl>
+    </fieldset>
+
+    <fieldset>
+        <legend>Gérer le contenu du site public</legend>
+        <p class="help">
+            Le contenu affiché sur le site est celui présent dans le wiki, il suffit de sélectionner «&nbsp;Cette page est visible ur le site de l'association&nbsp;» à l'édition d'une page wiki. Il est également possible de <a href="{$admin_url}wiki/creer.php?public">créer une nouvelle page publique sur le wiki</a>.
+        </p>
     </fieldset>
 
     <form method="post" action="{$self_url}">

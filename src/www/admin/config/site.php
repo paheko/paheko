@@ -3,20 +3,17 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-if (f('save') && $form->check('config_site'))
+if (f('desactiver_site') && $form->check('config_site'))
 {
-    try {
-        $config->set('champs_obligatoires', f('champs_obligatoires'));
-        $config->set('champs_modifiables_membre', f('champs_modifiables_membre'));
-        $config->set('categorie_membres', f('categorie_membres'));
-        $config->save();
-
-        Utils::redirect(ADMIN_URL . 'config/site.php?ok');
-    }
-    catch (UserException $e)
-    {
-        $form->addError($e->getMessage());
-    }
+    $config->set('desactiver_site', true);
+    $config->save();
+    Utils::redirect(ADMIN_URL . 'config/site.php');
+}
+elseif (f('activer_site') && $form->check('config_site'))
+{
+    $config->set('desactiver_site', false);
+    $config->save();
+    Utils::redirect(ADMIN_URL . 'config/site.php');
 }
 
 if (f('select') && f('reset') && $form->check('squelettes'))

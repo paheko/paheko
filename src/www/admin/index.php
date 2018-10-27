@@ -30,6 +30,8 @@ else
 
 $tpl->assign('custom_css', ['wiki.css']);
 
+$tpl->assign('banniere', Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session]));
+
 $tpl->display('admin/index.tpl');
 flush();
 

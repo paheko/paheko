@@ -3,8 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
-
 $cats = new Membres\Categories;
 
 qv(['id' => 'required|numeric']);
@@ -43,7 +41,6 @@ if (f('save'))
     {
         $data = [
             'nom'           =>  f('nom'),
-            'description'   =>  f('description'),
             'droit_wiki'    =>  (int) f('droit_wiki'),
             'droit_compta'  =>  (int) f('droit_compta'),
             'droit_config'  =>  (int) f('droit_config'),
@@ -61,7 +58,6 @@ if (f('save'))
         {
             $data['droit_connexion'] = Membres::DROIT_ACCES;
             $data['droit_config'] = Membres::DROIT_ADMIN;
-            $data['droit_membres'] = Membres::DROIT_ADMIN;
         }
 
         try {
@@ -73,7 +69,7 @@ if (f('save'))
                 $session->refresh();
             }
 
-            Utils::redirect(ADMIN_URL . 'membres/categories/');
+            Utils::redirect(ADMIN_URL . 'config/categories/');
         }
         catch (UserException $e)
         {
@@ -89,6 +85,6 @@ $tpl->assign('readonly', $cat->id == $user->id_categorie ? 'disabled="disabled"'
 $cotisations = new Cotisations;
 $tpl->assign('cotisations', $cotisations->listCurrent());
 
-$tpl->assign('membres', $membres);
+$tpl->assign('membres', new Membres);
 
-$tpl->display('admin/membres/categories/modifier.tpl');
+$tpl->display('admin/config/categories/modifier.tpl');

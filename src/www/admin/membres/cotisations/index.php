@@ -3,8 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
-
 $cotisations = new Cotisations;
 
 if ($session->canAccess('membres', Membres::DROIT_ADMIN))
