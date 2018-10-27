@@ -263,8 +263,6 @@ class Cotisations
 
 		switch ($order)
 		{
-				$order = 'cm.date';
-				break;
 			case 'a_jour':
 				break;
 			case 'date':
