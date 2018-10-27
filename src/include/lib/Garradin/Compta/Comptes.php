@@ -180,7 +180,7 @@ class Comptes
         $id = trim($id);
 
         if ($db->firstColumn('SELECT 1 FROM compta_journal
-                WHERE compte_debit = ? OR compte_debit = ? LIMIT 1;', $id, $id))
+                WHERE compte_debit = ? OR compte_credit = ? LIMIT 1;', $id, $id))
         {
             return false;
         }
@@ -206,7 +206,7 @@ class Comptes
 
         if ($db->firstColumn('SELECT 1 FROM compta_journal
                 WHERE id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0 LIMIT 1) 
-                AND (compte_debit = ? OR compte_debit = ?) LIMIT 1;', $id, $id))
+                AND (compte_debit = ? OR compte_credit = ?) LIMIT 1;', $id, $id))
         {
             $code = 1;
             return false;
