@@ -1391,6 +1391,12 @@
         "parent": 6,
         "position": 8
     },
+    "652": {
+        "code": 652,
+        "nom": "Licences fédérales",
+        "parent": 652,
+        "position": 8
+    },
     "658": {
         "code": 658,
         "nom": "Charges diverses de gestion courante",

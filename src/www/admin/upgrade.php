@@ -247,6 +247,15 @@ if (version_compare($v, '0.9.0-rc1', '<'))
     $config->save();
 }
 
+if (version_compare($v, '0.9.1', '<'))
+{
+    // Mise à jour plan comptable: ajout compte licences fédérales
+    $comptes = new Compta\Comptes;
+    $comptes->importPlan();
+
+    $db->exec('INSERT INTO "compta_categories" VALUES(NULL,-1,\'Licences fédérales\',\'Licences payées pour les adhérents (par exemple fédération sportive etc.)\',\'652\');');
+}
+
 Utils::clearCaches();
 
 $config->setVersion(garradin_version());
