@@ -1,3 +1,4 @@
+.PHONY: dev-server release deps publish check-dependencies
 KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-5.6.zip
 
 deps:

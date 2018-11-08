@@ -30,7 +30,7 @@ ol, ul {
 caption, th {
     text-align: left;
 }
-article, aside, figure, section, header, footer { display: block; }
+article, aside, figure, section, header, footer, main { display: block; }
 
 span { display: inline-block; }
 

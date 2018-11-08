@@ -205,11 +205,15 @@ class Membres
             throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
 
-        if (!empty($data['numero']))
+        if (isset($data['numero']))
         {
             if (!preg_match('/^\d+$/', $data['numero']))
             {
                 throw new UserException('Le numéro de membre ne doit contenir que des chiffres.');
+            }
+            elseif ($data['numero'] == 0)
+            {
+                throw new UserException('Le numéro de membre ne peut être vide.');
             }
 
             if ($db->test('membres', 'numero = ? AND id != ?', (int)$data['numero'], $id))
