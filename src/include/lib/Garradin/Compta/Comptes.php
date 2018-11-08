@@ -91,6 +91,29 @@ class Comptes
         else
         {
             $new_id = strtoupper($data['id']);
+
+            $parent = false;
+            $id = $new_id;
+
+            // Vérification que c'est bien le bon parent !
+            // Sinon risque par exemple d'avoir parent = 5 et id = 512A !
+            while (!$parent && strlen($id))
+            {
+            	// On enlève un caractère à la fin jusqu'à trouver un compte parent
+            	$id = substr($id, 0, -1);
+            	$parent = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $id);
+            }
+
+            if (!$parent || $parent != $data['parent'])
+            {
+            	throw new UserException('Le compte parent sélectionné est incorrect, par exemple pour créer un compte 512A il faut sélectionner 512 comme compte parent.');
+            }
+        }
+
+        // Vérification que le compte n'existe pas déjà
+        if ($db->test('compta_comptes', 'id = ?', $new_id))
+        {
+        	throw new UserException('Ce numéro de compte existe déjà dans le plan comptable : ' . $new_id);
         }
 
         if (isset($data['position']))

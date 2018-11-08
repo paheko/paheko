@@ -8,7 +8,7 @@ THISDIR=${PWD}
 DEB_ARCH_NAME=all
 
 SRCDIR=$(cd ..; pwd)/src
-SRCDIR='/tmp/garradin-0.6.3'
+SRCDIR='/tmp/garradin-0.9.0'
 test -e ${SRCDIR} || {
     echo "This script must be run from a BUILT copy of the source tree."
     exit 1
@@ -98,9 +98,9 @@ Section: web
 Priority: optional
 Maintainer: Garradin <garradin@kd2.org>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php5-cli (>=5.4), php5-sqlite
+Depends: dash | bash, php5-cli (>=5.6) | php-cli (>=7.0), php5-sqlite | php-sqlite3
 Version: ${PACKAGE_DEB_VERSION}
-Suggests: www-browser
+Suggests: www-browser, php-gd
 Homepage: http://dev.kd2.org/garradin/
 Description: Garradin is a tool to manage non-profit organizations.
  It's only available in french.

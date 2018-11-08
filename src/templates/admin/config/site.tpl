@@ -66,7 +66,7 @@
     <fieldset>
         <legend>Gérer le contenu du site public</legend>
         <p class="help">
-            Le contenu affiché sur le site est celui présent dans le wiki, il suffit de sélectionner «&nbsp;Cette page est visible ur le site de l'association&nbsp;» à l'édition d'une page wiki. Il est également possible de <a href="{$admin_url}wiki/creer.php?public">créer une nouvelle page publique sur le wiki</a>.
+            Le contenu affiché sur le site est celui présent dans le wiki, il suffit de sélectionner «&nbsp;Cette page est visible sur le site de l'association&nbsp;» à l'édition d'une page wiki. Il est également possible de <a href="{$admin_url}wiki/creer.php?public">créer une nouvelle page publique sur le wiki</a>.
         </p>
     </fieldset>
 

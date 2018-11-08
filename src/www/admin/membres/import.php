@@ -21,7 +21,6 @@ elseif (qg('export') == 'ods')
 }
 
 $champs = $config->get('champs_membres')->getAll();
-$champs->date_inscription = (object) ['title' => 'Date inscription', 'type' => 'date'];
 
 $csv_file = false;
 
