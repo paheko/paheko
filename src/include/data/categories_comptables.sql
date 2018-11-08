@@ -8,6 +8,7 @@ INSERT INTO "compta_categories" VALUES(NULL,-1,'Fournitures non stockables : eau
 INSERT INTO "compta_categories" VALUES(NULL,-1,'Fournitures administratives','Cartouches d''encre, papier, matériel bureautique, etc.','6064');
 INSERT INTO "compta_categories" VALUES(NULL,-1,'Frais d''actes et de contentieux','Insertion au Journal Officiel, frais de justice, etc.','6227');
 INSERT INTO "compta_categories" VALUES(NULL,-1,'Frais postaux et télécommunications','Facture d''accès à Internet, timbres, etc.','626');
+INSERT INTO "compta_categories" VALUES(NULL,-1,'Licences fédérales','Licences payées pour les adhérents (par exemple fédération sportive etc.)','652');
 INSERT INTO "compta_categories" VALUES(NULL,-1,'Prime d''assurance','','616');
 INSERT INTO "compta_categories" VALUES(NULL,-1,'Services bancaires','','627');
 INSERT INTO "compta_categories" VALUES(NULL,-1,'Divers','','658');
