@@ -68,13 +68,14 @@ class Template extends \KD2\Smartyer
 		});
 
 		$this->register_modifier('strlen', 'strlen');
+		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 		$this->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
 		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
-		
+
 		$this->register_modifier('get_nom_compte', function ($compte) {
 			if (is_null($compte))
 			{

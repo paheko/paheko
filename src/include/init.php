@@ -98,7 +98,7 @@ static $default_config = [
     'PREFER_HTTPS'          => false,
     'ALLOW_MODIFIED_IMPORT' => true,
     'PLUGINS_SYSTEM'        => '',
-    'SHOW_ERRORS'           => false,
+    'SHOW_ERRORS'           => true,
     'MAIL_ERRORS'           => false,
     'USE_CRON'              => false,
     'ENABLE_XSENDFILE'      => false,
@@ -182,7 +182,7 @@ class Loader
             $filename = str_replace('\\', '/', $classname);
             $path = ROOT . '/include/lib/' . $filename . '.php';
         }
-        
+
         if (!file_exists($path))
         {
             throw new \Exception('File '.$path.' doesn\'t exists');
@@ -214,10 +214,13 @@ if (MAIL_ERRORS)
     ErrorManager::setEmail(MAIL_ERRORS);
 }
 
-ErrorManager::setExtraDebugEnv([
-    'Garradin version' => garradin_version(),
-    'Garradin data root' => DATA_ROOT,
-    ]);
+ErrorManager::setContext([
+    'rootDirectory'      => ROOT,
+    'garradin_data_root' => DATA_ROOT,
+    'garradin_version'   => garradin_version(),
+]);
+
+ErrorManager::setRemoteReporting('https://garradin.eu/report/', false);
 
 ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
     <style type="text/css">
@@ -225,17 +228,39 @@ ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erre
     code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
     code { text-align: right; color: #666; }
     a { color: blue; }
+    form { text-align: center; }
     </style></head><body><h1>Erreur interne</h1><p>Désolé mais le serveur a rencontré une erreur interne
     et ne peut répondre à votre requête. Merci de ré-essayer plus tard.</p>
     <p>Si vous suspectez un bug dans Garradin, vous pouvez suivre 
     <a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>
     pour le rapporter.</p>
-    <if(email)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
-    <if(log)><code>Référence : <b>{$ref}</b></code></if>
+    <if(sent)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
+    <if(logged)><code>L\'erreur a été enregistrée dans le fichier error.log sous la référence : <b>{$ref}</b></code></if>
     <p><a href="' . WWW_URL . '">&larr; Retour à la page d\'accueil</a></p>
     </body></html>');
 
-ErrorManager::setHtmlFooter('<hr /><section><article>Cette erreur est peut-être un bug dans Garradin&nbsp;? En ce cas vous pouvez le rapporter en suivant <a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>.</section></article>');
+ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">
+    body { font-family: sans-serif; } * { margin: 0; padding: 0; }
+    u, code b, i, h3 { font-style: normal; font-weight: normal; text-decoration: none; }
+    #icn { color: #fff; font-size: 2em; float: right; margin: 1em; padding: 1em; background: #900; border-radius: 50%; }
+    section header { background: #fdd; padding: 1em; }
+    section article { margin: 1em; }
+    section article h3, section article h4 { font-size: 1em; font-family: mono; }
+    code { border: 1px dotted #ccc; display: block; }
+    code b { margin-right: 1em; color: #999; }
+    code u { background: #fcc; display: inline-block; width: 100%; }
+    table { border-collapse: collapse; margin: 1em; } td, th { border: 1px solid #ccc; padding: .2em .5em; text-align: left; 
+    vertical-align: top; }
+    input { padding: .3em; margin: .5em; font-size: 1.2em; cursor: pointer; }
+</style>
+<pre id="icn"> \__/<br /> (xx)<br />//||\\\\</pre>
+<section>
+    <article>
+    <h1>Une erreur s\'est produite</h1>
+    <if(report)><form method="post" action="{$report_url}"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Garradin &rarr;" /></p></form></if>
+    </article>
+</section>
+');
 
 function user_error($e)
 {
