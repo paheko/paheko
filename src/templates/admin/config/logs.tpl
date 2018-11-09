@@ -2,10 +2,12 @@
 
 {include file="admin/config/_menu.tpl" current="logs"}
 
+{if ERRORS_ENABLE_LOG_VIEW}
 <ul class="actions sub">
 	<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>
 	<li{if $type == 'errors'} class="current"{/if}><a href="?type=errors">Erreurs système</a></li>
 </ul>
+{/if}
 
 {if isset($reports) && isset($id)}
 	{foreach from=$main.errors item="error"}
