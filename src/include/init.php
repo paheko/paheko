@@ -100,6 +100,8 @@ static $default_config = [
     'PLUGINS_SYSTEM'        => '',
     'SHOW_ERRORS'           => true,
     'MAIL_ERRORS'           => false,
+    'ERRORS_REPORT_URL'     => null,
+    'ERRORS_ENABLE_LOG_VIEW'=> true,
     'USE_CRON'              => false,
     'ENABLE_XSENDFILE'      => false,
     'SMTP_HOST'             => false,
@@ -166,14 +168,14 @@ class Loader
         {
             return true;
         }
-        
+
         // Plugins
         if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
         {
             $classname = substr($classname, 16);
             $plugin_name = substr($classname, 0, strpos($classname, '\\'));
             $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
-            
+
             $path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
         }
         else
@@ -220,7 +222,10 @@ ErrorManager::setContext([
     'garradin_version'   => garradin_version(),
 ]);
 
-ErrorManager::setRemoteReporting('https://garradin.eu/report/', false);
+if (ERRORS_REPORT_URL)
+{
+    ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, false);
+}
 
 ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
     <style type="text/css">
@@ -235,7 +240,7 @@ ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erre
     <a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>
     pour le rapporter.</p>
     <if(sent)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
-    <if(logged)><code>L\'erreur a été enregistrée dans le fichier error.log sous la référence : <b>{$ref}</b></code></if>
+    <if(logged)><code>L\'erreur a été enregistrée dans les journaux système (error.log) sous la référence : <b>{$ref}</b></code></if>
     <p><a href="' . WWW_URL . '">&larr; Retour à la page d\'accueil</a></p>
     </body></html>');
 
@@ -257,7 +262,7 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 <section>
     <article>
     <h1>Une erreur s\'est produite</h1>
-    <if(report)><form method="post" action="{$report_url}"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Garradin &rarr;" /></p></form></if>
+    <if(report)><form method="post" action="https://garradin.eu/report/"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Garradin &rarr;" /></p></form></if>
     </article>
 </section>
 ');
