@@ -337,7 +337,7 @@ class Rapports
             {
                 if ($solde == 0)
                 {
-                    unset($source[$parent]['comptes'][$id]);
+                    unset($source['comptes'][$parent]['comptes'][$id]);
                 }
             }
         }
