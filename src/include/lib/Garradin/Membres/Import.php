@@ -66,7 +66,7 @@ class Import
 	 * du CSV et les champs de Garradin. Par exemple : ['Date création fiche' => 'date_inscription']
 	 * @return boolean                   TRUE en cas de succès
 	 */
-	public function fromArray(array $table, $translation_table, $skip_lines = 0)
+	public function fromArray(array $table, $translation_table, $current_user_id, $skip_lines = 0)
 	{
 		$db = DB::getInstance();
 		$db->begin();
@@ -129,8 +129,31 @@ class Import
 				}
 			}
 
+			if (!empty($data['numero']) && $data['numero'] > 0)
+			{
+				$numero = (int)$data['numero'];
+			}
+			else
+			{
+				unset($data['numero']);
+				$numero = false;
+			}
+
 			try {
-				$membres->add($data, false);
+				if ($numero && ($id = $membres->getIDWithNumero($numero)))
+				{
+					if ($id === $current_user_id)
+					{
+						// Ne pas modifier le membre courant, on risque de se tirer une balle dans le pied
+						continue;
+					}
+
+					$membres->edit($id, $data);
+				}
+				else
+				{
+					$membres->add($data, false);
+				}
 			}
 			catch (UserException $e)
 			{
