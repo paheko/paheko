@@ -632,12 +632,20 @@ table.list .disabled {
     padding: .1em .2em;
 }
 
+#queryBuilder table td.buttons {
+    white-space: nowrap;
+}
+
 #queryBuilder input[type=button], #queryBuilder .values input {
     margin: .1em;
 }
 
 #queryBuilderForm .actions label {
     margin: 0 .5em;
+}
+
+#queryBuilder table .values label {
+    margin: 0 .3em;
 }
 
 #queryBuilderForm input[type=number] {
