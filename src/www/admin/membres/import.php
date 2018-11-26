@@ -38,7 +38,7 @@ if (f('csv_encoded'))
     {
         try
         {
-            $import->fromArray($csv_file, f('csv_translate'), f('skip_first_line') ? 1 : 0);
+            $import->fromArray($csv_file, f('csv_translate'), $user->id, f('skip_first_line') ? 1 : 0);
             Utils::redirect(ADMIN_URL . 'membres/import.php?ok');
         }
         catch (UserException $e)

@@ -1,0 +1,38 @@
+.error .trace {
+	border: 1px solid #ccc;
+	margin: 1em;
+}
+
+.error .trace h4 {
+	background: #ccc;
+	padding: .5em;
+}
+
+.error .trace h5 {
+	background: #ddd;
+	padding: .5em;
+}
+
+.error .trace pre i {
+	color: #999;
+}
+
+.error .trace pre b {
+	background: #fcc;
+	display: inline-block;
+	width: 100%;
+}
+
+.error .trace h4 table {
+	float: right;
+	background: #ddd;
+}
+
+.error .trace h4 table td, .error .trace h4 table th {
+	border: 1px solid #999;
+	padding: .2em .5em;
+}
+
+.error .event table {
+	margin: .5em;
+}
