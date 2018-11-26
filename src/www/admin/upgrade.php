@@ -253,7 +253,13 @@ if (version_compare($v, '0.9.1', '<'))
     $comptes = new Compta\Comptes;
     $comptes->importPlan();
 
+    $db->begin();
+
     $db->exec('INSERT INTO "compta_categories" VALUES(NULL,-1,\'Licences fédérales\',\'Licences payées pour les adhérents (par exemple fédération sportive etc.)\',\'652\');');
+
+    $db->import(ROOT . '/include/data/0.9.1.sql');
+
+    $db->commit();
 }
 
 Utils::clearCaches();
