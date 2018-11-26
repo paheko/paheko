@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\Security;
+use KD2\SMTP;
 use Garradin\Membres\Session;
 
 class Membres
