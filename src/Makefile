@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies
+.PHONY: dev-server release deps publish check-dependencies test
 KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-5.6.zip
 
 deps:
@@ -15,7 +15,10 @@ deps:
 dev-server:
 	php -S localhost:8082 -t www www/_route.php
 
-release:
+test:
+	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+release: test
 	$(eval VERSION=$(shell cat VERSION))
 	fossil ls | grep '^src/' | sed 's/src/garradin-${VERSION}/' > /tmp/garradin-${VERSION}-list.txt
 	#echo "garradin-${VERSION}/include/lib/KD2" >> /tmp/garradin-${VERSION}-list.txt

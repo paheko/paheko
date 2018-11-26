@@ -130,14 +130,16 @@ const PLUGINS_SYSTEM = '';
  * Affichage des erreurs
  * Si "true" alors un message expliquant l'erreur et comment rapporter le bug s'affiche
  * en cas d'erreur. Sinon rien ne sera affiché.
- * 
- * Défaut : true
+ *
+ * Défaut : false
+ *
+ * Il est fortement conseillé de mettre cette valeur à false en production !
  */
-const SHOW_ERRORS = true;
+const SHOW_ERRORS = false;
 
 /**
  * Envoi des erreurs par e-mail
- * 
+ *
  * Si renseigné, un email sera envoyé à l'adresse indiquée à chaque fois qu'une erreur
  * d'exécution sera rencontrée.
  * Si "false" alors aucun email ne sera envoyé.
@@ -148,13 +150,37 @@ const SHOW_ERRORS = true;
 const MAIL_ERRORS = false;
 
 /**
+ * Envoi des erreurs à une API compatible AirBrake/Errbit
+ *
+ * Si renseigné avec une URL HTTP(S) valide, chaque erreur système sera envoyée
+ * automatiquement à cette URL.
+ *
+ * Si laissé à null, aucun rapport ne sera envoyé.
+ *
+ * Défaut : null
+ */
+const ERRORS_REPORT_URL = null;
+
+/**
+ * Activation de la page permettant de visualiser et rapporter les erreurs présentes
+ * dans le error.log.
+ *
+ * Conseillé de mettre à false si vous ne voulez pas que les administrateurs de votre
+ * instance puissent voir les erreurs système.
+ *
+ * Défaut : true
+ * (Afin d'aider au rapport de bugs des instances auto-hébergées)
+ */
+const ERRORS_ENABLE_LOG_VIEW = true;
+
+/**
  * Utilisation de cron pour les tâches automatiques
- * 
+ *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
  * le script cron.php à la racine toutes les 24 heures. Sinon Garradin
- * effectuera les actions automatiques quand quelqu'un se connecte à 
+ * effectuera les actions automatiques quand quelqu'un se connecte à
  * l'administration ou visite le site.
- * 
+ *
  * Défaut : false
  */
 const USE_CRON = false;
@@ -162,12 +188,12 @@ const USE_CRON = false;
 /**
  * Activation de l'envoi de fichier directement par le serveur web.
  * (X-SendFile)
- * 
+ *
  * Permet d'améliorer la rapidité d'envoi des fichiers.
  * Supporte les serveurs web suivants :
  * - Apache avec mod_xsendfile (paquet libapache2-mod-xsendfile)
  * - Lighttpd
- * 
+ *
  * N'activer que si vous êtes sûr que le module est installé et activé (sinon 
  * les fichiers ne pourront être vus ou téléchargés).
  * Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
@@ -197,7 +223,7 @@ const SMTP_HOST = false;
 
 /**
  * Port du serveur SMTP
- * 
+ *
  * 25 = port standard pour connexion non chiffrée (465 pour Gmail)
  * 587 = port standard pour connexion SSL
  *
@@ -207,7 +233,7 @@ const SMTP_PORT = 587;
 
 /**
  * Login utilisateur pour le server SMTP
- * 
+ *
  * mettre à null pour utiliser un serveur local ou anonyme
  *
  * Défaut : null
@@ -217,7 +243,7 @@ const SMTP_PORT = 587;
 
 /**
  * Mot de passe pour le serveur SMTP
- * 
+ *
  * mettre à null pour utiliser un serveur local ou anonyme
  *
  * Défaut : null
@@ -227,7 +253,7 @@ const SMTP_PORT = 587;
 
 /**
  * Sécurité du serveur SMTP
- * 
+ *
  * NONE = pas de chiffrement
  * SSL = connexion SSL native
  * TLS = connexion TLS native (le plus sécurisé)
@@ -239,15 +265,15 @@ const SMTP_SECURITY = 'STARTTLS';
 
 /**
  * Activer les sauvegardes automatiques
- * 
+ *
  * Utile à désactiver si vous avez déjà des sauvegardes effectuées
  * automatiquement au niveau du système.
- * 
+ *
  * Sinon les sauvegardes seront effectuées soit par la tâche cron
  * soit à l'affichage de la page d'accueil (si nécessaire).
- * 
+ *
  * Voir paramètre USE_CRON aussi
- * 
+ *
  * Défaut : true
  */
 const ENABLE_AUTOMATIC_BACKUPS = true;

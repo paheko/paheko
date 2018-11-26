@@ -50,6 +50,10 @@ class DB extends DB_SQLite3
             // Activer les contraintes des foreign keys
             $this->db->exec('PRAGMA foreign_keys = ON;');
 
+            // 10 secondes
+            $this->db->busyTimeout(10 * 1000);
+            $this->db->exec('PRAGMA journal_mode = TRUNCATE;');
+
             $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
         }
     }

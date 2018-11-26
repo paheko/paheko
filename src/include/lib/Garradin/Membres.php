@@ -96,6 +96,11 @@ class Membres
                 elseif ($config->type == 'email')
                 {
                     $data[$key] = strtolower($data[$key]);
+
+                    if (!SMTP::checkEmailIsValid($data[$key], false))
+                    {
+                        throw new UserException(sprintf('Adresse email invalide "%s" pour le champ "%s".', $data[$key], $config->title));
+                    }
                 }
                 elseif ($config->type == 'select' && !in_array($data[$key], $config->options))
                 {
@@ -162,7 +167,7 @@ class Membres
 
         $this->_checkFields($data, true, $require_password);
 
-        if (!empty($data[$id]) && $db->test('membres', $id . ' = ? COLLATE NOCASE', $data[$id]))
+        if (isset($data[$id]) && $db->test('membres', $id . ' = ? COLLATE NOCASE', $data[$id]))
         {
             throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, hors ce champ doit être unique à chaque membre.');
         }
