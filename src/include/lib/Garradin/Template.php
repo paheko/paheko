@@ -147,7 +147,7 @@ class Template extends \KD2\Smartyer
 		return '<p class="error">' . $this->escape($params['message']) . '</p>';
 	}
 
-	protected function formField(array $params)
+	protected function formField(array $params, $escape = true)
 	{
 		if (!isset($params['name']))
 		{
@@ -191,7 +191,7 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+		return $escape ? htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') : $value;
 	}
 
 	protected function formatPhoneNumber($n)
@@ -314,7 +314,7 @@ class Template extends \KD2\Smartyer
 		}
 
 		$field = '';
-		$value = $this->formField($params);
+		$value = $this->formField($params, false);
 		$attributes = 'name="' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
 		$attributes .= 'id="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
 
@@ -388,7 +388,7 @@ class Template extends \KD2\Smartyer
 		}
 		elseif ($type == 'textarea')
 		{
-			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . $value . '</textarea>';
+			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
 		}
 		else
 		{
@@ -402,7 +402,7 @@ class Template extends \KD2\Smartyer
 				$value = '1';
 			}
 
-			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . $value . '" />';
+			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars($value, ENT_QUOTES) . '" />';
 		}
 
 		$out = '
