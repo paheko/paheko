@@ -35,7 +35,7 @@
             <dd><input type="text" name="cat_membre" id="f_cat_membre" required="required" value="{form_field name=cat_membre}" /></dd>
             <dt><label for="f_email_membre">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="email" name="email_membre" id="f_email_membre" required="required" value="{form_field name=email_membre}" /></dd>
-            <dt><label for="f_passe_membre">Mot de passe</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dt><label for="f_passe_membre">Mot de passe</label> (minimum {$password_length} caractères) <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">
                 Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr 
                 et plus simple à retenir qu'un mot de passe composé de 10 lettres et chiffres.
@@ -44,9 +44,9 @@
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
             </dd>
-            <dd><input type="password" name="passe" id="f_passe_membre" value="{form_field name=passe}" pattern=".{ldelim}6,{rdelim}" required="required" /></dd>
+            <dd><input type="password" name="passe" id="f_passe_membre" value="{form_field name=passe}" pattern="{$password_pattern}" required="required" /></dd>
             <dt><label for="f_repasse_membre">Encore le mot de passe</label> (vérification) <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="password" name="passe_confirmed" id="f_repasse_membre" value="{form_field name=passe_confirmed}" pattern=".{ldelim}6,{rdelim}" required="required" /></dd>
+            <dd><input type="password" name="passe_confirmed" id="f_repasse_membre" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" required="required" /></dd>
         </dl>
     </fieldset>
 

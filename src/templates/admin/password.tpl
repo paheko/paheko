@@ -4,17 +4,12 @@
 {if !empty($sent)}
     <p class="confirm">
         Un e-mail vous a été envoyé, cliquez sur le lien dans cet e-mail
-        pour recevoir un nouveau mot de passe.
+        pour modifier votre mot de passe.
     </p>
     <p class="alert">
         Si le message n'apparaît pas dans les prochaines minutes, vérifiez le dossier Spam ou Indésirables.
     </p>
-{elseif !empty($new_sent)}
-    <p class="confirm">
-        <strong>Un e-mail contenant votre nouveau mot de passe vous a été envoyé.</strong>
-        Si le message n'apparaît pas dans les prochaines minutes, vérifiez le dossier Spam ou Indésirables.
-    </p>
-    <p><a href="{$admin_url}login.php">Connexion &rarr;</a></p>
+
 {else}
 
     {form_errors}

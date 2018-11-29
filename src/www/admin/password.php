@@ -8,12 +8,27 @@ require_once __DIR__ . '/_inc.php';
 
 if (trim(qg('c')))
 {
-    if ($session->recoverPasswordConfirm(qg('c')))
+    if (!$session->recoverPasswordCheck(qg('c')))
     {
-        Utils::redirect(ADMIN_URL . 'password.php?new_sent');
+        $form->addError('Le lien que vous avez suivi est invalide ou a expiré.');
     }
+    else
+    {
+        if (f('change') && $form->check('changePassword'))
+        {
+            try {
+                $session->recoverPasswordChange(qg('c'), f('passe'), f('passe_confirmed'));
+                Utils::redirect('/admin/login.php?changed');
+            }
+            catch (UserException $e) {
+                $form->addError($e->getMessage());
+            }
+        }
 
-    $form->addError('Le lien que vous avez suivi est invalide ou a expiré.');
+        $tpl->assign('passphrase', Utils::suggestPassword());
+        $tpl->display('admin/password_change.tpl');
+        exit;
+    }
 }
 elseif (f('recover'))
 {
@@ -23,7 +38,7 @@ elseif (f('recover'))
 
     if (!$form->hasErrors())
     {
-        if (trim(f('id')) && $session->recoverPasswordCheck(f('id')))
+        if (trim(f('id')) && $session->recoverPasswordSend(f('id')))
         {
             Utils::redirect(ADMIN_URL . 'password.php?sent');
         }
@@ -36,11 +51,6 @@ if (!$form->hasErrors() && null !== qg('sent'))
 {
     $tpl->assign('sent', true);
 }
-elseif (!$form->hasErrors() && null !== qg('new_sent'))
-{
-    $tpl->assign('new_sent', true);
-}
-
 
 $champs = $config->get('champs_membres');
 
