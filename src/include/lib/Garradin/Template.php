@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\Form;
+use Garradin\Membres\Session;
 
 class Template extends \KD2\Smartyer
 {
@@ -43,6 +44,9 @@ class Template extends \KD2\Smartyer
 		$this->assign('self_url_no_qs', Utils::getSelfUrl(false));
 
 		$this->assign('is_logged', false);
+
+		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
+		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
 
 		$this->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
 			if ($block == 'continue')
