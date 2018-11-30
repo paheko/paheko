@@ -103,6 +103,7 @@ nav.te .preview {
     height: 98%;
     padding: 1%;
     border-radius: 0;
+    z-index: 100000;
 }
 
 .textEditor.fullscreen textarea {
