@@ -1,7 +1,11 @@
 Options -MultiViews -Indexes
+DirectoryIndex disabled
 DirectoryIndex index.php
 
 # FallbackResource n'est dispo que depuis Apache 2.2.16, soit Debian Wheezy (2013)
+# Mais bugue avant Apache 2.4.15, il faut donc bien désactiver le DirectoryIndex
+# cf. https://bz.apache.org/bugzilla/show_bug.cgi?id=58292
+# et https://serverfault.com/questions/559067/apache-hangs-for-five-seconds-with-fallbackresource-when-accessing
 <IfModule mod_version.c>
 	<IfVersion >= 2.2.16>
 		FallbackResource /_route.php
