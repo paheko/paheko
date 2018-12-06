@@ -16,7 +16,7 @@
     <fieldset>
         <legend>Connexion</legend>
         <dl>
-            <dt><label for="f_passe">Mot de passe</label>{if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
+            <dt><label for="f_passe">Mot de passe</label> (minimum {$password_length} caractères) {if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
             <dd class="help">
                 Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr 
                 et plus simple à retenir qu'un mot de passe composé de 10 lettres et chiffres.
@@ -25,9 +25,9 @@
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
             </dd>
-            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern=".{ldelim}6,{rdelim}" /></dd>
+            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" /></dd>
             <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-            <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern=".{ldelim}6,{rdelim}" /></dd>
+            <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" /></dd>
         </dl>
     </fieldset>
 

@@ -23,6 +23,8 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
+	const MINIMUM_PASSWORD_LENGTH = 8;
+
 	// Extension des méthodes de UserSession
 	public function __construct()
 	{
@@ -158,14 +160,14 @@ class Session extends \KD2\UserSession
 		$out['secret'] = $secret;
 		$out['secret_display'] = implode(' ', str_split($secret, 4));
 		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $secret);
-	
+
 		$qrcode = new QRCode($out['url']);
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
 
 		return $out;
 	}
 
-	static public function recoverPasswordCheck($id)
+	public function recoverPasswordSend($id)
 	{
 		$db = DB::getInstance();
 		$config = Config::getInstance();
@@ -184,7 +186,7 @@ class Session extends \KD2\UserSession
 
 		$hash = hash_hmac('sha256', $membre->email . $membre->id . $membre->passe . $expire, SECRET_KEY, true);
 		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
-		
+
 		$id = base_convert($membre->id, 10, 36);
 		$expire = base_convert($expire, 10, 36);
 
@@ -198,7 +200,7 @@ class Session extends \KD2\UserSession
 		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
 	}
 
-	static public function recoverPasswordConfirm($code)
+	public function recoverPasswordCheck($code, &$membre = null)
 	{
 		if (substr_count($code, '.') !== 2)
 		{
@@ -235,18 +237,39 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		$password = Utils::suggestPassword();
+		return true;
+	}
 
-		$message = "Bonjour,\n\nVous avez demandé un nouveau mot de passe pour votre compte.\n\n";
-		$message.= "Votre adresse email : ".$membre->email."\n";
-		$message.= "Votre nouveau mot de passe : ".$password."\n\n";
-		$message.= "Si vous n'avez pas demandé à recevoir ce message, merci de nous le signaler.";
+	public function recoverPasswordChange($code, $password, $password_confirm)
+	{
+		if (!$this->recoverPasswordCheck($code, $membre))
+		{
+			throw new UserException('Le code permettant de changer le mot de passe a expiré. Merci de bien vouloir recommencer la procédure.');
+		}
+
+		$password = trim($password);
+		$password_confirm = trim($password_confirm);
+
+		if (!hash_equals($password, $password_confirm))
+		{
+			throw new UserException('Le mot de passe et sa vérification ne sont pas identiques.');
+		}
+
+		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
+		{
+			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
+		}
 
 		$password = Membres::hashPassword($password);
 
-		$db->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$id]);
+		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
+		$message.= "Votre adresse email : ".$membre->email."\n";
+		$message.= "La demande émanait de l'adresse IP : ".Utils::getIP()."\n\n";
+		$message.= "Si vous n'avez pas demandé à changer votre mot de passe, merci de nous le signaler.";
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Nouveau mot de passe', $message, $membre->id, $membre->clef_pgp);
+		DB::getInstance()->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$membre->id]);
+
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe changé', $message, $membre->id, $membre->clef_pgp);
 	}
 
 	public function editUser($data)
@@ -281,7 +304,7 @@ class Session extends \KD2\UserSession
 		$out['secret'] = Security_OTP::getRandomSecret();
 		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
 		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $out['secret']);
-	
+
 		$qrcode = new QRCode($out['url']);
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
 
@@ -319,9 +342,9 @@ class Session extends \KD2\UserSession
 
 		if (isset($data['passe']) && trim($data['passe']) !== '')
 		{
-			if (strlen($data['passe']) < 5)
+			if (strlen($data['passe']) < self::MINIMUM_PASSWORD_LENGTH)
 			{
-				throw new UserException('Le mot de passe doit faire au moins 5 caractères.');
+				throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
 			}
 
 			$data['passe'] = Membres::hashPassword(trim($data['passe']));

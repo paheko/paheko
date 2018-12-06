@@ -54,5 +54,6 @@ $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfU
 
 $tpl->assign('champ', $champ);
 $tpl->assign('fail', $login === false);
+$tpl->assign('changed', qg('changed') !== null);
 
 $tpl->display('admin/login.tpl');

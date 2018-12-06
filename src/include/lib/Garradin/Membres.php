@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\Security;
+use KD2\SMTP;
 use Garradin\Membres\Session;
 
 class Membres
@@ -97,7 +98,7 @@ class Membres
                 {
                     $data[$key] = strtolower($data[$key]);
 
-                    if (!SMTP::checkEmailIsValid($data[$key], false))
+                    if (trim($data[$key]) !== '' && !SMTP::checkEmailIsValid($data[$key], false))
                     {
                         throw new UserException(sprintf('Adresse email invalide "%s" pour le champ "%s".', $data[$key], $config->title));
                     }
