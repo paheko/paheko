@@ -289,6 +289,7 @@ class Import
 		$db = DB::getInstance();
 
 		$champs = Config::getInstance()->get('champs_membres')->getKeys();
+		$champs = array_map([$db, 'quoteIdentifier'], $champs);
 		$champs_sql = 'm.' . implode(', m.', $champs);
 		$where = $list ? 'WHERE ' . $db->where('m.id', $list) : '';
 
