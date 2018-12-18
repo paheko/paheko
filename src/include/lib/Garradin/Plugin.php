@@ -436,13 +436,8 @@ class Plugin
 
 			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
-			$st = $db->prepare($query);
 
-			if (!$st->readOnly())
-			{
-				throw new \LogicException('Requête plugin pour affichage dans le menu n\'est pas en lecture : ' . $query);
-			}
-
+			$st = $db->userSelectStatement($query);
 			$res = $st->execute();
 
 			if (!$res->fetchArray(\SQLITE3_NUM))

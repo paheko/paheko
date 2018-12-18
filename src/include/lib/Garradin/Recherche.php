@@ -396,40 +396,23 @@ class Recherche
 			throw new \InvalidArgumentException('Cible inconnue : ' . $target);
 		}
 
-		$db = DB::getInstance();
-
 		if ($force_select)
 		{
 			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . $force_select . ' FROM ', $query);
 		}
 
-		if (!preg_match('/LIMIT\s+/i', $query))
+		if (!preg_match('/LIMIT\s+\d+/i', $query))
 		{
 			$query = preg_replace('/;?\s*$/', '', $query);
 			$query .= ' LIMIT 100';
 		}
 
-		if (preg_match('/;\s*(.+?)$/', $query))
-		{
-			throw new UserException('Une seule requête peut être envoyée en même temps.');
+		try {
+			return DB::getInstance()->userSelectGet($query);
 		}
-
-		$st = $db->prepare($query);
-
-		if (!$st->readOnly())
-		{
-			throw new UserException('Seules les requêtes en lecture sont autorisées.');
+		catch (\Exception $e) {
+			throw new UserException('Erreur dans la requête : ' . $e->getMessage());
 		}
-
-		$res = $st->execute();
-		$out = [];
-
-		while ($row = $res->fetchArray(SQLITE3_ASSOC))
-		{
-			$out[] = (object) $row;
-		}
-
-		return $out;
 	}
 
 	public function schema($target)

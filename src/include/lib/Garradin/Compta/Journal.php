@@ -376,35 +376,18 @@ class Journal
 
     public function searchSQL($query)
     {
-        $db = DB::getInstance();
-
         if (!preg_match('/LIMIT\s+/i', $query))
         {
             $query = preg_replace('/;?\s*$/', '', $query);
             $query .= ' LIMIT 100';
         }
 
-        if (preg_match('/;\s*(.+?)$/', $query))
-        {
-            throw new UserException('Une seule requête peut être envoyée en même temps.');
+        try {
+            return DB::getInstance()->userSelectGet($query);
         }
-
-        $st = $db->prepare($query);
-
-        if (!$st->readOnly())
-        {
-            throw new UserException('Seules les requêtes en lecture sont autorisées.');
+        catch (\Exception $e) {
+            throw new UserException('Erreur dans la requête : ' . $e->getMessage());
         }
-
-        $res = $st->execute();
-        $out = [];
-
-        while ($row = $res->fetchArray(SQLITE3_ASSOC))
-        {
-            $out[] = $row;
-        }
-
-        return $out;
     }
 
     public function schemaSQL()
