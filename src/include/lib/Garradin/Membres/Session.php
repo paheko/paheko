@@ -30,6 +30,8 @@ class Session extends \KD2\UserSession
 	{
 		$url = parse_url(ADMIN_URL);
 
+		//throw new \Exception('lol');
+
 		parent::__construct(DB::getInstance(), [
 			'cookie_domain' => $url['host'],
 			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),

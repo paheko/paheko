@@ -32,11 +32,11 @@ if ($operation->id_categorie)
 
     if ($categorie->type == Compta\Categories::RECETTES)
     {
-        $tpl->assign('compte', $debit->libelle);
+        $tpl->assign('compte', $debit ? $debit->libelle : null);
     }
     else
     {
-        $tpl->assign('compte', $credit->libelle);
+        $tpl->assign('compte', $credit ? $credit->libelle : null);
     }
 
     $tpl->assign('moyen_paiement', $cats->getMoyenPaiement($operation->moyen_paiement));
