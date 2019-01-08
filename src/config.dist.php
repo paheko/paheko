@@ -199,6 +199,14 @@ const USE_CRON = false;
  * Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
  * qui sont *dans* le document root du vhost, ce qui n'est pas le cas ici.
  *
+ * Pour activer X-SendFile mettre dans la config du virtualhost de Garradin:
+ * XSendFile On
+ * XSendFilePath /var/www/garradin
+ *
+ * (remplacer le chemin par le répertoire racine de Garradin)
+ *
+ * Détails : https://tn123.org/mod_xsendfile/
+ *
  * Défaut : false
  */
 const ENABLE_XSENDFILE = false;

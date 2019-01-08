@@ -126,6 +126,7 @@ foreach ($default_config as $const => $value)
 
 const WEBSITE = 'https://garradin.eu/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+const DEFAULT_REPORT_URL = 'http://henga.test/report/?p=ABCD';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
@@ -224,7 +225,11 @@ ErrorManager::setContext([
 
 if (ERRORS_REPORT_URL)
 {
-    ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, false);
+    ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
+}
+else
+{
+    ErrorManager::setRemoteReporting(DEFAULT_REPORT_URL, false);
 }
 
 ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
@@ -262,7 +267,7 @@ ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type=
 <section>
     <article>
     <h1>Une erreur s\'est produite</h1>
-    <if(report)><form method="post" action="https://garradin.eu/report/"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Garradin &rarr;" /></p></form></if>
+    <if(report)><form method="post" action="{$report_url}"><p><input type="hidden" name="report" value="{$report_json}" /><input type="submit" value="Rapporter l\'erreur aux développeur⋅euses de Garradin &rarr;" /></p></form></if>
     </article>
 </section>
 ');

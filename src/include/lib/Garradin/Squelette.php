@@ -574,7 +574,7 @@ class Squelette extends \KD2\MiniSkel
                         {
                             $criteria['field'] = 'id';
                         }
-                        
+
                         $query_args[] = ['$this->getVariable(\'' . $criteria['field'] . '\')'];
                         break;
                     }
@@ -608,7 +608,7 @@ class Squelette extends \KD2\MiniSkel
                     $query .= '?';
                     $query_args[] = ['\'.$this->variables[\'debut_liste\'].\''];
                 }
-                
+
                 $query .= ','.(int)$limit;
             }
         }
@@ -653,16 +653,11 @@ class Squelette extends \KD2\MiniSkel
 
         try {
             // Sécurité anti injection, à la compilation seulement
-            $statement = $db->prepare($query);
+            $statement = $db->userSelectStatement($query);
         }
         catch (\Exception $e)
         {
             throw new \KD2\MiniSkelMarkupException("Erreur SQL dans la requête : ".$e->getMessage() . "\n " . $query);
-        }
-        
-        if (!$statement->readOnly())
-        {
-            throw new \KD2\MiniSkelMarkupException("Requête en écriture illégale: ".$query);
         }
 
         $hash = sha1(uniqid(mt_rand(), true));

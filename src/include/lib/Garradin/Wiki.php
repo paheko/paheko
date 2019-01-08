@@ -33,17 +33,17 @@ class Wiki
     {
         $db = DB::getInstance();
 
-        if (isset($data['titre']) && !trim($data['titre']))
+        if (array_key_exists('titre', $data) && !trim($data['titre']))
         {
             throw new UserException('Le titre ne peut rester vide.');
         }
 
-        if (isset($data['uri']) && !trim($data['uri']))
+        if (array_key_exists('uri', $data) && !trim($data['uri']))
         {
             throw new UserException('L\'adresse de la page ne peut rester vide.');
         }
 
-        if (isset($data['droit_lecture']))
+        if (array_key_exists('droit_lecture', $data))
         {
             $data['droit_lecture'] = (int) $data['droit_lecture'];
 
@@ -53,7 +53,7 @@ class Wiki
             }
         }
 
-        if (isset($data['droit_ecriture']))
+        if (array_key_exists('droit_ecriture', $data))
         {
             $data['droit_ecriture'] = (int) $data['droit_ecriture'];
 
@@ -63,7 +63,7 @@ class Wiki
             }
         }
 
-        if (isset($data['parent']))
+        if (array_key_exists('parent', $data))
         {
             $data['parent'] = (int) $data['parent'];
 

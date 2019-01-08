@@ -292,15 +292,21 @@ class Plugin
 
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
-		return DB::getInstance()->update('plugins', [
+		$data = [
 			'nom'		=>	$infos->nom,
 			'description'=>	$infos->description,
 			'auteur'	=>	$infos->auteur,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
-			'menu_condition' => $infos->menu && isset($infos->menu_condition) ? trim($infos->menu_condition) : null,
-		], 'id = :id', ['id' => $this->id]);
+		];
+
+		if ($infos->menu && !empty($infos->menu_condition))
+		{
+			$data['menu_condition'] = trim($infos->menu_condition);
+		}
+
+		return DB::getInstance()->update('plugins', $data, 'id = :id', ['id' => $this->id]);
 	}
 
 	/**
@@ -436,13 +442,8 @@ class Plugin
 
 			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
-			$st = $db->prepare($query);
 
-			if (!$st->readOnly())
-			{
-				throw new \LogicException('Requête plugin pour affichage dans le menu n\'est pas en lecture : ' . $query);
-			}
-
+			$st = $db->userSelectStatement($query);
 			$res = $st->execute();
 
 			if (!$res->fetchArray(\SQLITE3_NUM))
@@ -702,9 +703,7 @@ class Plugin
 			$config = json_encode($config);
 		}
 
-		$db = DB::getInstance();
-		$db->begin();
-		$db->insert('plugins', [
+		$data = [
 			'id' 		=> 	$id,
 			'officiel' 	=> 	(int)(bool)$official,
 			'nom'		=>	$infos->nom,
@@ -713,9 +712,17 @@ class Plugin
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
-			'menu_condition' => $infos->menu && isset($infos->menu_condition) ? trim($infos->menu_condition) : null,
 			'config'	=>	$config,
-		]);
+		];
+
+		if ($infos->menu && !empty($infos->menu_condition))
+		{
+			$data['menu_condition'] = trim($infos->menu_condition);
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+		$db->insert('plugins', $data);
 
 		if (file_exists($path . '/install.php'))
 		{
