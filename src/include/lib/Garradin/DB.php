@@ -48,11 +48,11 @@ class DB extends DB_SQLite3
         if (parent::connect())
         {
             // Activer les contraintes des foreign keys
-            $this->db->exec('PRAGMA foreign_keys = ON;');
+            $this->exec('PRAGMA foreign_keys = ON;');
 
             // 10 secondes
             $this->db->busyTimeout(10 * 1000);
-            $this->db->exec('PRAGMA journal_mode = TRUNCATE;');
+            $this->exec('PRAGMA journal_mode = TRUNCATE;');
 
             $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
         }
@@ -80,6 +80,70 @@ class DB extends DB_SQLite3
             return file_get_contents($dir . DIRECTORY_SEPARATOR . $match[1]) . "\n";
         }, $sql);
 
-        return $this->db->exec($sql);
+        return $this->exec($sql);
+    }
+
+    public function deleteUndoTriggers()
+    {
+        $triggers = $this->getAssoc('SELECT name, name FROM sqlite_master
+            WHERE type = \'trigger\' AND name LIKE \'!_%!_log!__t\' ESCAPE \'!\';');
+
+        foreach ($triggers as $trigger)
+        {
+            $this->exec(sprintf('DROP TRIGGER %s;', $this->quoteIdentifier($trigger)));
+        }
+    }
+
+    public function createUndoTriggers()
+    {
+        $this->exec('CREATE TABLE undolog (
+            seq INTEGER PRIMARY KEY,
+            sql TEXT NOT NULL,
+            date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            type TEXT NOT NULL,
+            action TEXT NOT NULL
+        );');
+
+        // List all tables except SQLite tables
+        $tables = $this->getAssoc('SELECT name, name FROM sqlite_master
+            WHERE type = \'table\'
+            AND name NOT LIKE \'sqlite!_%\' ESCAPE \'!\' AND name NOT LIKE \'wiki!_recherche%\' ESCAPE \'!\'
+            AND name != \'undolog\';');
+
+
+        $query = 'CREATE TRIGGER _%table_log_it AFTER INSERT ON %table BEGIN
+                DELETE FROM undolog WHERE rowid IN (SELECT rowid FROM undolog LIMIT 500,1000);
+                INSERT INTO undolog (type, action, sql) VALUES (\'%table\', \'I\', \'DELETE FROM %table WHERE rowid=\'||new.rowid);
+            END;
+            CREATE TRIGGER _%table_log_ut AFTER UPDATE ON %table BEGIN
+                DELETE FROM undolog WHERE rowid IN (SELECT rowid FROM undolog LIMIT 500,1000);
+                INSERT INTO undolog (type, action, sql) VALUES (\'%table\', \'U\',  \'UPDATE %table SET %columns_update WHERE rowid = \'||old.rowid);
+            END;
+            CREATE TRIGGER _%table_log_dt BEFORE DELETE ON %table BEGIN
+                DELETE FROM undolog WHERE rowid IN (SELECT rowid FROM undolog LIMIT 500,1000);
+                INSERT INTO undolog (type, action, sql) VALUES (\'%table\', \'D\', \'INSERT INTO %table (rowid, %columns_list) VALUES(\'||old.rowid||\', %columns_insert)\');
+            END;';
+
+        foreach ($tables as $table)
+        {
+            $columns = $this->getAssoc(sprintf('PRAGMA table_info(%s);', $this->quoteIdentifier($table)));
+            $columns_insert = [];
+            $columns_update = [];
+
+            foreach ($columns as &$name)
+            {
+                $columns_update[] = sprintf('%s = \'||quote(old.%1$s)||\'', $name);
+                $columns_insert[] = sprintf('\'||quote(old.%s)||\'', $name);
+            }
+
+            $sql = strtr($query, [
+                '%table' => $table,
+                '%columns_list' => implode(', ', $columns),
+                '%columns_update' => implode(', ', $columns_update),
+                '%columns_insert' => implode(', ', $columns_insert),
+            ]);
+
+            $this->exec($sql);
+        }
     }
 }
