@@ -118,7 +118,7 @@ class Rapports
         return $livre;
     }
 
-    public function compteResultat(array $criterias)
+    public function compteResultat(array $criterias, array $comptes)
     {
         $db = DB::getInstance();
         $where = $this->getWhereClause($criterias);
@@ -127,6 +127,15 @@ class Rapports
         $produits   = ['comptes' => [], 'total' => 0.0];
         $resultat   = 0.0;
 
+        $where_comptes = [];
+
+        foreach ($comptes as $compte)
+        {
+            $where_comptes[] = sprintf('compte LIKE \'%s%%\'', $compte);
+        }
+
+        $where_comptes = implode(' OR ', $where_comptes);
+
         $res = $db->preparedQuery('SELECT compte, SUM(debit), SUM(credit)
             FROM
                 (SELECT compte_debit AS compte, SUM(montant) AS debit, 0 AS credit
@@ -134,7 +143,7 @@ class Rapports
                 UNION
                 SELECT compte_credit AS compte, 0 AS debit, SUM(montant) AS credit
                     FROM compta_journal WHERE ' . $where . ' GROUP BY compte_credit)
-            WHERE compte LIKE \'6%\' OR compte LIKE \'7%\'
+            WHERE ' . $where_comptes . '
             GROUP BY compte
             ORDER BY compte ASC;');
 
@@ -142,9 +151,10 @@ class Rapports
         {
             list($compte, $debit, $credit) = $row;
             $classe = substr($compte, 0, 1);
+            $sousclasse = substr($compte, 0, 2);
             $parent = substr($compte, 0, 2);
 
-            if ($classe == 6)
+            if ($classe == 6 || $sousclasse == 86)
             {
                 if (!isset($charges['comptes'][$parent]))
                 {
@@ -160,7 +170,7 @@ class Rapports
                 $charges['total'] += $solde;
                 $charges['comptes'][$parent]['solde'] += $solde;
             }
-            elseif ($classe == 7)
+            elseif ($classe == 7 || $sousclasse == 87)
             {
                 if (!isset($produits['comptes'][$parent]))
                 {
@@ -205,7 +215,7 @@ class Rapports
         $passif          = ['comptes' => [], 'total' => 0.0];
         $actif_ou_passif = ['comptes' => [], 'total' => 0.0];
 
-        $resultat = $this->compteResultat($criterias);
+        $resultat = $this->compteResultat($criterias, [6, 7]);
 
         if ($resultat['resultat'] >= 0)
         {
