@@ -336,9 +336,11 @@ input.resetButton {
 }
 
 input[type=button].showPassword {
+    position: absolute;
     margin-left: -2em;
     margin-right: 1em;
     background: none;
+    margin-top: .1em;
 }
 
 input[type=button].showPassword:hover {
