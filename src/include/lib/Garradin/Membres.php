@@ -331,6 +331,14 @@ class Membres
 
         foreach ($recipients as $recipient)
         {
+            if (!SMTP::checkEmailIsValid($recipient, true))
+            {
+                throw new UserException(sprintf('Adresse email invalide : "%s". Aucun message n\'a été envoyé.', $recipient));
+            }
+        }
+
+        foreach ($recipients as $recipient)
+        {
             Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
         }
 
