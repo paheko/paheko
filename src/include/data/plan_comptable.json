@@ -1681,7 +1681,7 @@
     },
     "8": {
         "code": 8,
-        "nom": "Classe 8 \u00ad\u2014 Contributions b\u00e9n\u00e9voles en nature",
+        "nom": "Classe 8 \u00ad\u2014 Comptes sp\u00e9ciaux",
         "parent": 0,
         "position": 12
     },
@@ -1732,6 +1732,24 @@
         "nom": "Dons en nature",
         "parent": 87,
         "position": 4
+    },
+    "89": {
+        "code": 89,
+        "nom": "BILAN",
+        "parent": 8,
+        "position": 3
+    },
+    "890": {
+        "code": 890,
+        "nom": "Bilan d'ouverture",
+        "parent": 89,
+        "position": 3
+    },
+    "890": {
+        "code": 891,
+        "nom": "Bilan de clôture",
+        "parent": 89,
+        "position": 3
     },
     "9": {
         "code": 9,

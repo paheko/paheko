@@ -16,11 +16,6 @@ if (!$operation)
     throw new UserException("L'opération demandée n'existe pas.");
 }
 
-if ($operation->compte_credit === null)
-{
-    throw new UserException('Impossible de modifier une écriture de report.');
-}
-
 if ($operation->id_categorie)
 {
     $categorie = $cats->get($operation->id_categorie);
