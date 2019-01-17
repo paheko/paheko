@@ -183,8 +183,8 @@ class Exercices
                 continue;
             }
 
-            $compte_debit = $solde < 0 ? NULL : $row['compte'];
-            $compte_credit = $solde > 0 ? NULL : $row['compte'];
+            $compte_debit = $solde < 0 ? 890 : $row['compte'];
+            $compte_credit = $solde > 0 ? 890 : $row['compte'];
 
             $diff += $solde;
             $solde = round(abs($solde), 2);
@@ -243,14 +243,14 @@ class Exercices
                 'libelle'   =>  'Résultat de l\'exercice précédent',
                 'date'      =>  $date,
                 'montant'   =>  abs($resultat),
-                'compte_debit'  =>  $resultat < 0 ? $resultat_debiteur : NULL,
-                'compte_credit' =>  $resultat > 0 ? $resultat_excedent : NULL,
+                'compte_debit'  =>  $resultat < 0 ? $resultat_debiteur : 890,
+                'compte_credit' =>  $resultat > 0 ? $resultat_excedent : 890,
             ]);
         }
 
         return true;
     }
-    
+
     public function delete($id)
     {
         $db = DB::getInstance();
