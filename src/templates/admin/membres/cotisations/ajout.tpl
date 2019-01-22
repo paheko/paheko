@@ -55,7 +55,7 @@
             <dd><input type="date" name="date" id="f_date" value="{form_field name=date default=$default_date}" required="required" /></dd>
             {if !$membre}
             <dt><label for="f_numero_membre">Numéro de membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" name="id_membre" id="f_numero_membre" value="{form_field name=id_membre}" step="1" min="1" required="required" /></dd>
+            <dd><input type="number" name="numero_membre" id="f_numero_membre" value="{form_field name=numero_membre}" step="1" min="1" required="required" /></dd>
             {/if}
             <dt class="f_compta"><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="f_compta"><input type="number" name="montant" step="0.01" min="0.00" id="f_montant" value="{form_field name=montant default=$default_amount}" /></dd>
