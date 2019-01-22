@@ -176,7 +176,7 @@ class Session extends \KD2\UserSession
 
 		$champ_id = $config->get('champ_identifiant');
 
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? LIMIT 1;', trim($id));
+		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE LIMIT 1;', trim($id));
 
 		if (!$membre || trim($membre->email) == '')
 		{
