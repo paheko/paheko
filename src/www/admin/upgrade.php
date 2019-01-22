@@ -260,8 +260,6 @@ try {
         $db->import(ROOT . '/include/data/0.9.1.sql');
 
         $db->commit();
-
-        $db->createUndoTriggers();
     }
 
     Utils::clearCaches();
