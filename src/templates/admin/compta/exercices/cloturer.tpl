@@ -9,8 +9,9 @@
         <h3 class="warning">
             Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$exercice.libelle}&nbsp;» ?
         </h3>
-        <p class="help">
-            Attention, une fois clôturé, les opérations de cet exercice ne pourront plus être supprimées ou modifiées.
+        <p class="warning">
+            Un exercice clôturé ne peut plus être rouvert ou modifié&nbsp;!<br />
+            Il ne sera plus possible de modifier ou supprimer les écritures de l'exercice clôturé.
         </p>
         <dl>
             <dt>Début de l'exercice</dt>
