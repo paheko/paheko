@@ -347,7 +347,7 @@ class Cotisations
 		$db = DB::getInstance();
 		return $db->first('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND date() <= c.fin AND date() >= c.debut)
+			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL)
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration
