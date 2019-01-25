@@ -3,19 +3,22 @@
 ROOT=/usr/share/garradin/www
 #ROOT=~/fossil/garradin/src/www
 ROUTER=${ROOT}/_route.php
-PORT=8088
+PORT=8081
 ADDRESS="127.0.0.1"
 VERBOSE=0
+PID_FILE="${XDG_RUNTIME_DIR}/garradin/pid"
+
+[ ! -d `dirname $PID_FILE` ] && mkdir -p `dirname $PID_FILE`
 
 # Execute getopt
 ARGS=`getopt -o "p:vh" -l "port:,verbose,help" -n "garradin" -- "$@"`
- 
+
 # Bad arguments
 if [ $? -ne 0 ];
 then
   exit 1
 fi
- 
+
 # A little magic
 eval set -- "$ARGS"
 
@@ -37,9 +40,9 @@ Usage : $0 [COMMANDE] [PROJET]
 
 Où COMMANDE peut être :
 
-        server [-p|--port PORT] 
+        server [-p|--port PORT]
                 Démarre un serveur web Garradin sur le port spécifié
-                (ou sur le port 8000 par défaut)
+                (ou sur le port 8081 par défaut)
 
         ui [-p|--port PORT]
                 Idem que 'server' mais démarre ensuite le navigateur web par défaut
@@ -48,8 +51,8 @@ Où COMMANDE peut être :
 
 Si aucune COMMANDE n'est donnée, Garradin utilisera 'ui' par défaut.
 
-PROJET est le chemin menant à un projet Garradin précis 
-        (fichier .garradin.sqlite). Si aucun projet n'est indiqué, le 
+PROJET est le chemin menant à un projet Garradin précis
+        (fichier .garradin.sqlite). Si aucun projet n'est indiqué, le
         dernier projet ouvert sera rouvert. Si aucun projet n'a jamais été
         ouvert un nouveau projet sera créé.
 
@@ -66,7 +69,7 @@ Options :
 EOF
       exit
       shift;;
- 
+
     --)
       shift
       break;;
@@ -85,6 +88,8 @@ PROJECT="$2"
 
 export GARRADIN_STANDALONE="$PROJECT"
 
+[ -f $PID_FILE ] && kill `cat $PID_FILE` > /dev/null 2>&1 && rm -f $PID_FILE
+
 [ $VERBOSE = 1 ] && {
     php -S ${ADDRESS}:${PORT} -t ${ROOT} -d variables_order=EGPCS ${ROUTER} &
 } || {
@@ -92,18 +97,18 @@ export GARRADIN_STANDALONE="$PROJECT"
 }
 
 php_pid=$!
+
+echo $php_pid > $PID_FILE
+
 sleep .5
 
 [ "$CMD" = "ui" ] && {
-    URL="http://${ADDRESS}:${PORT}/"
+    URL="http://${ADDRESS}:${PORT}/admin/"
     [ "$DISPLAY" != "" ] && {
         x-www-browser ${URL} &
     } || {
         www-browser ${URL} &
     }
-
-    wait $!
-    kill $php_pid
 } || {
     wait $php_pid
 }
