@@ -7,8 +7,14 @@ THISDIR=${PWD}
 
 DEB_ARCH_NAME=all
 
-SRCDIR=$(cd ..; pwd)/src
-SRCDIR='/tmp/garradin-0.9.0'
+PACKAGE_VERSION=`cat ../src/VERSION`
+
+[ ! -f ../src/garradin-${PACKAGE_VERSION}.tar.bz2 ] && (cd ../src; make release)
+
+tar xjvf ../src/garradin-${PACKAGE_VERSION}.tar.bz2 -C /tmp
+
+SRCDIR="/tmp/garradin-${PACKAGE_VERSION}"
+
 test -e ${SRCDIR} || {
     echo "This script must be run from a BUILT copy of the source tree."
     exit 1
@@ -23,11 +29,17 @@ mkdir -p ${BINDIR}
 mkdir -p ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
 cp ${THISDIR}/garradin ${BINDIR}
 
+mkdir -p "${DEBLOCALPREFIX}/share/menu"
+cp ${THISDIR}/garradin.menu "${DEBLOCALPREFIX}/share/menu/garradin"
+mkdir -p "${DEBLOCALPREFIX}/share/applications"
+cp ${THISDIR}/garradin.desktop "${DEBLOCALPREFIX}/share/applications/"
+
 CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
 cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
 rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes
+cp ${THISDIR}/garradin.png "${CODEDIR}"
 
 # Cleaning files that will be copied to /usr/share/doc
 rm -f ${CODEDIR}/{README,COPYING}
@@ -40,7 +52,6 @@ cd $DEBROOT || {
 rm -fr DEBIAN
 mkdir DEBIAN
 
-PACKAGE_VERSION=`cat ${SRCDIR}/VERSION`
 PACKAGE_DEB_VERSION=${PACKAGE_VERSION}-${DEB_REV}
 DEBFILE=${THISDIR}/${PACKAGE_DEBNAME}-${PACKAGE_DEB_VERSION}-dev-${DEB_ARCH_NAME}.deb
 PACKAGE_TIME=$(/bin/date)
@@ -138,6 +149,7 @@ cd - >/dev/null
 true && {
     echo "Cleaning up..."
     rm -fr ${DEBROOT}
+    rm -rf ${SRCDIR}
 }
 
 echo "Done :)"
