@@ -35,7 +35,7 @@ if (f('add'))
     $form->check('add_cotisation', [
         'date'          => 'date_format:Y-m-d|required',
         'id_cotisation' => 'numeric|required|in_table:cotisations,id',
-        'id_membre'     => 'numeric|required|in_table:membres,id',
+        'numero_membre' => 'numeric|required|in_table:membres,numero',
     ]);
 
     if (!$form->hasErrors())
