@@ -30,49 +30,34 @@ $m_cotisations = new Membres\Cotisations;
 $cats = new Compta\Categories;
 $banques = new Compta\Comptes_Bancaires;
 
-if (f('add'))
+if (f('add') && $form->check('add_cotisation'))
 {
-    $form->check('add_cotisation', [
-        'date'          => 'date_format:Y-m-d|required',
-        'id_cotisation' => 'numeric|required|in_table:cotisations,id',
-        'numero_membre' => 'numeric|required|in_table:membres,numero',
-    ]);
+    try {
+        $data = [
+            'date'          =>  f('date'),
+            'id_cotisation' =>  f('id_cotisation'),
+            'id_membre'     =>  f('id_membre'),
+            'numero_membre' =>  f('numero_membre'),
+            'id_auteur'     =>  $user->id,
+        ];
 
-    if (!$form->hasErrors())
+        $compta = [
+            'montant'        =>  f('montant'),
+            'moyen_paiement' =>  f('moyen_paiement'),
+            'numero_cheque'  =>  f('numero_cheque'),
+            'banque'         =>  f('banque'),
+            'numero_piece'   =>  f('numero_piece'),
+            'remarques'      =>  f('remarques'),
+            'a_encaisser'    =>  f('a_encaisser'),
+        ];
+
+        $id_membre = $m_cotisations->add($data, $compta);
+
+        Utils::redirect(ADMIN_URL . 'membres/cotisations.php?id=' . $id_membre);
+    }
+    catch (UserException $e)
     {
-        try {
-            $id_membre = f('id_membre');
-
-            if (!$id_membre && f('numero_membre'))
-            {
-                $id_membre = (new Membres)->getIDWithNumero(f('numero_membre'));
-            }
-
-            $data = [
-                'date'          =>  f('date'),
-                'id_cotisation' =>  f('id_cotisation'),
-                'id_membre'     =>  $id_membre,
-                'id_auteur'     =>  $user->id,
-            ];
-
-            $compta = [
-                'montant'        =>  f('montant'),
-                'moyen_paiement' =>  f('moyen_paiement'),
-                'numero_cheque'  =>  f('numero_cheque'),
-                'banque'         =>  f('banque'),
-                'numero_piece'   =>  f('numero_piece'),
-                'remarques'      =>  f('remarques'),
-                'a_encaisser'    =>  f('a_encaisser'),
-            ];
-
-            $m_cotisations->add($data, $compta);
-
-            Utils::redirect(ADMIN_URL . 'membres/cotisations.php?id=' . $id_membre);
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
+        $form->addError($e->getMessage());
     }
 }
 
