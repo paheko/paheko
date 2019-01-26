@@ -31,7 +31,7 @@ release: test
 publish: release
 	$(eval VERSION=$(shell cat VERSION))
 	fossil uv sync
-	fossil uv ls | grep '^garradin-.*\.tar\.bz2' | xargs fossil uv rm
+	fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.tar\.bz2' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
 	fossil uv sync
 
