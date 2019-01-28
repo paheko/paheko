@@ -350,9 +350,10 @@ class Membres
         return true;
     }
 
-    public function listAllByCategory($id_categorie)
+    public function listAllByCategory($id_categorie, $only_with_email = false)
     {
-        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?;', (int)$id_categorie);
+        $where = $only_with_email ? ' AND email IS NOT NULL' : '';
+        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?' . $where, (int)$id_categorie);
     }
 
     public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)

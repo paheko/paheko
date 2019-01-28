@@ -18,7 +18,7 @@ if (f('send'))
     {
         if ($match[1] == 'categorie')
         {
-            $recipients = $membres->listAllByCategory($match[2]);
+            $recipients = $membres->listAllByCategory($match[2], true);
         }
         else
         {

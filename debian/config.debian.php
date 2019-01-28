@@ -53,13 +53,25 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 	{
 		$last_sqlite = trim(file_get_contents($last_file));
 	}
-	else 
+	else
 	{
 		$last_sqlite = $_ENV['XDG_DATA_HOME'] . '/garradin/association.sqlite';
 	}
 
 	file_put_contents($last_file, $last_sqlite);
-	
+
+	$secret_file = $_ENV['XDG_CONFIG_HOME'] . '/garradin/secret';
+
+	if (!file_exists($secret_file))
+	{
+		$random = function_exists('random_bytes') ? random_bytes(64) : mt_rand();
+		$random = sha1($random . $secret_file);
+
+		file_put_contents($secret_file, $random);
+	}
+
+	define('Garradin\SECRET_KEY', trim(file_get_contents($secret_file)));
+
 	define('Garradin\DB_FILE', $last_sqlite);
 	define('Garradin\LOCAL_LOGIN', 1);
 }

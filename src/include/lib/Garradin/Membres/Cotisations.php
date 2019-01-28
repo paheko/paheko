@@ -36,6 +36,12 @@ class Cotisations
 
 		$data['id_cotisation'] = (int) $data['id_cotisation'];
 
+		if (!empty($data['numero_membre']))
+		{
+			$data['id_membre'] = (new Membres)->getIDWithNumero($data['numero_membre']);
+			unset($data['numero_membre']);
+		}
+
 		if (empty($data['id_membre']) 
 			|| !$db->firstColumn('SELECT 1 FROM membres WHERE id = ?;', (int) $data['id_membre']))
 		{
@@ -103,7 +109,7 @@ class Cotisations
 
 		Plugin::fireSignal('cotisation.ajout', array_merge(['id' => $id], $data));
 
-		return $id;
+		return $data['id_membre'];
 	}
 
 	/**
@@ -347,7 +353,7 @@ class Cotisations
 		$db = DB::getInstance();
 		return $db->first('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND date() <= c.fin AND date() >= c.debut)
+			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL)
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration

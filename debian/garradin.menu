@@ -1,0 +1,3 @@
+?package(garradin):needs="X11" section="Applications/Office"\
+  title="Garradin" command="/usr/bin/garradin"\
+  icon="/usr/share/garradin/garradin.png"

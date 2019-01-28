@@ -253,6 +253,7 @@ try {
         $comptes = new Compta\Comptes;
         $comptes->importPlan();
 
+        $db->exec('PRAGMA foreign_keys = OFF;');
         $db->begin();
 
         $db->exec('INSERT INTO "compta_categories" VALUES(NULL,-1,\'Licences fédérales\',\'Licences payées pour les adhérents (par exemple fédération sportive etc.)\',\'652\');');
