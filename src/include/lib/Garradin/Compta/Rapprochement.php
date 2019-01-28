@@ -15,8 +15,8 @@ class Rapprochement
         $db = DB::getInstance();
 
         $query = 'SELECT 
-            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND compte_credit IS NOT NULL AND date < :date), 0)
-            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND compte_debit IS NOT NULL  AND date < :date), 0)';
+            COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit = :compte AND compte_credit NOT LIKE \'8%\'  AND date < :date), 0)
+            - COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit = :compte AND compte_debit NOT LIKE \'8%\'  AND date < :date), 0)';
 
         $solde_initial = $solde = $db->firstColumn($query, [
             'compte'    =>  $compte,
@@ -31,7 +31,7 @@ class Rapprochement
                 LEFT JOIN compta_rapprochement AS r ON r.id_operation = j.id
             WHERE (compte_debit = :compte OR compte_credit = :compte)
                 AND j.date >= :debut AND j.date <= :fin
-                AND compte_debit IS NOT NULL AND compte_credit IS NOT NULL
+                AND compte_debit NOT LIKE \'8%\' AND compte_credit NOT LIKE \'8%\'
                 ' . ($sauf_deja_rapprochees ? 'AND r.id_operation IS NULL' : '') . '
             ORDER BY date ASC;';
 

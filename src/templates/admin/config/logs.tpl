@@ -18,7 +18,7 @@
 				<article class="trace">
 					{if $trace.function}
 						<h4>
-							{$trace.function}{if !empty($trace.args)} ({$trace.args|count} arg.){/if}
+							{$trace.function}
 						{if !empty($trace.args)}
 							<table>
 							{foreach from=$trace.args key=name item=arg}
