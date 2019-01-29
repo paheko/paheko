@@ -251,14 +251,14 @@ CREATE TABLE IF NOT EXISTS compta_journal
     remarques TEXT NULL,
     numero_piece TEXT NULL, -- N° de pièce comptable
 
-    montant REAL NOT NULL,
-
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
     moyen_paiement TEXT NULL,
     numero_cheque TEXT NULL,
 
-    compte_debit TEXT NULL, -- N° du compte dans le plan, NULL est utilisé pour une opération qui vient d'un exercice précédent
-    compte_credit TEXT NULL, -- N° du compte dans le plan
+    validation INTEGER NOT NULL DEFAULT 0, -- 1 = écriture validée, non modifiable
+
+    hash TEXT NULL,
+    prev_hash TEXT NULL,
 
     id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
     id_auteur INTEGER NULL,
@@ -266,8 +266,6 @@ CREATE TABLE IF NOT EXISTS compta_journal
     id_projet INTEGER NULL,
 
     FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
-    FOREIGN KEY(compte_debit) REFERENCES compta_comptes(id),
-    FOREIGN KEY(compte_credit) REFERENCES compta_comptes(id),
     FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
     FOREIGN KEY(id_auteur) REFERENCES membres(id) ON DELETE SET NULL,
     FOREIGN KEY(id_categorie) REFERENCES compta_categories(id) ON DELETE SET NULL,
@@ -276,8 +274,20 @@ CREATE TABLE IF NOT EXISTS compta_journal
 
 CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_journal (id_exercice);
 CREATE INDEX IF NOT EXISTS compta_operations_date ON compta_journal (date);
-CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_journal (compte_debit, compte_credit);
 CREATE INDEX IF NOT EXISTS compta_operations_auteur ON compta_journal (id_auteur);
+
+CREATE TABLE IF NOT EXISTS compta_journal_ecritures
+-- Ecritures
+(
+    id INTEGER PRIMARY KEY NOT NULL,
+
+    id_journal INTEGER NOT NULL REFERENCES compta_journal (id) ON DELETE CASCADE,
+
+    compte TEXT NOT NULL REFERENCES compta_comptes(id), -- N° du compte dans le plan comptable
+    montant INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_journal_ecritures (compte);
 
 CREATE TABLE IF NOT EXISTS compta_moyens_paiement
 -- Moyens de paiement
