@@ -20,19 +20,25 @@ test:
 
 release: test
 	$(eval VERSION=$(shell cat VERSION))
-	fossil ls | grep '^src/' | sed 's/src/garradin-${VERSION}/' > /tmp/garradin-${VERSION}-list.txt
-	#echo "garradin-${VERSION}/include/lib/KD2" >> /tmp/garradin-${VERSION}-list.txt
-	cat include/lib/dependencies.list | sed -r "s/^/garradin-${VERSION}\/include\/lib\//" >> /tmp/garradin-${VERSION}-list.txt
-	rm -f /tmp/garradin-${VERSION}
-	ln -s ${PWD} /tmp/garradin-${VERSION}
-	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp -T /tmp/garradin-${VERSION}-list.txt
-	rm -f /tmp/garradin-${VERSION}*
+	rm -rf /tmp/garradin-build
+	mkdir -p /tmp/garradin-build
+	fossil zip ${VERSION} /tmp/garradin-build/src.zip --name garradin
+	unzip -d /tmp/garradin-build /tmp/garradin-build/src.zip
+	cd include/lib; rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
+	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
+	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
+	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
+	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp/garradin-build garradin-${VERSION}
 
-publish: release
+deb:
+	cd ../debian; ./makedeb.sh
+
+publish: release deb
 	$(eval VERSION=$(shell cat VERSION))
 	fossil uv sync
-	fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.tar\.bz2' | xargs fossil uv rm
+	fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
+	fossil uv add ../debian/garradin-${VERSION}.deb
 	fossil uv sync
 
 check-dependencies:
