@@ -263,6 +263,13 @@ try {
         $db->commit();
     }
 
+    if (version_compare($v, '0.9.1', '>=') && version_compare($v, '0.10.0', '<'))
+    {
+        // Mise à jour plan comptable: ajout compte 891, renommage compte 890 (typo dans 0.9.1)
+        $comptes = new Compta\Comptes;
+        $comptes->importPlan();
+    }
+
     Utils::clearCaches();
 
     $config->setVersion(garradin_version());
