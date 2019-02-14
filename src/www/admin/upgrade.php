@@ -70,9 +70,12 @@ animatedLoader(document.getElementById("loader"), 5);
 flush();
 
 try {
+    $keycheck = $db->get('PRAGMA foreign_key_check;');
+    $keycheck = $keycheck ? count($keycheck) : 0;
+
     if (version_compare($v, '0.7.0', '<'))
     {
-        $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+        $db->beginSchemaUpdate();
 
         // Mise à jour base de données
         $db->exec(file_get_contents(ROOT . '/include/data/0.7.0.sql'));
@@ -101,17 +104,17 @@ try {
             }
         }
 
-        $db->exec('END;');
+        $db->commitSchemaUpdate();
     }
 
     if (version_compare($v, '0.7.2', '<'))
     {
-        $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+        $db->beginSchemaUpdate();
 
         // Mise à jour base de données
         $db->exec(file_get_contents(ROOT . '/include/data/0.7.2.sql'));
 
-        $db->exec('END;');
+        $db->commitSchemaUpdate();
     }
 
     if (version_compare($v, '0.8.0-beta4', '<'))
@@ -127,13 +130,11 @@ try {
         $db->exec('VACUUM;');
 
         // Désactivation des foreign keys AVANT le début de la transaction
-        $db->exec('PRAGMA foreign_keys = OFF;');
-
-        $db->begin();
+        $db->beginSchemaUpdate();
 
         $db->import(ROOT . '/include/data/0.8.0.sql');
 
-        $db->commit();
+        $db->commitSchemaUpdate();
 
         $config = Config::getInstance();
 
@@ -162,29 +163,25 @@ try {
 
     if (version_compare($v, '0.8.3', '<'))
     {
-        // Désactivation des foreign keys AVANT le début de la transaction
-        $db->exec('PRAGMA foreign_keys = OFF;');
-
-        $db->begin();
+        $db->beginSchemaUpdate();
 
         $db->import(ROOT . '/include/data/0.8.3.sql');
 
-        $db->commit();
+        $db->commitSchemaUpdate();
     }
 
     if (version_compare($v, '0.8.4', '<'))
     {
-        $db->begin();
+        $db->beginSchemaUpdate();
 
         $db->import(ROOT . '/include/data/0.8.4.sql');
 
-        $db->commit();
+        $db->commitSchemaUpdate();
     }
 
     if (version_compare($v, '0.9.0-rc1', '<'))
     {
-        $db->exec('PRAGMA foreign_keys = OFF;');
-        $db->begin();
+        $db->beginSchemaUpdate();
 
         $db->import(ROOT . '/include/data/0.9.0.sql');
 
@@ -241,7 +238,7 @@ try {
             $recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
         }
 
-        $db->commit();
+        $db->commitSchemaUpdate();
 
         $config->set('desactiver_site', false);
         $config->save();
@@ -253,14 +250,13 @@ try {
         $comptes = new Compta\Comptes;
         $comptes->importPlan();
 
-        $db->exec('PRAGMA foreign_keys = OFF;');
-        $db->begin();
+        $db->beginSchemaUpdate();
 
         $db->exec('INSERT INTO "compta_categories" VALUES(NULL,-1,\'Licences fédérales\',\'Licences payées pour les adhérents (par exemple fédération sportive etc.)\',\'652\');');
 
         $db->import(ROOT . '/include/data/0.9.1.sql');
 
-        $db->commit();
+        $db->commitSchemaUpdate();
     }
 
     if (version_compare($v, '0.9.1', '>=') && version_compare($v, '0.10.0', '<'))
@@ -268,6 +264,21 @@ try {
         // Mise à jour plan comptable: ajout compte 891, renommage compte 890 (typo dans 0.9.1)
         $comptes = new Compta\Comptes;
         $comptes->importPlan();
+    }
+
+    if (version_compare($v, '0.10.0', '<'))
+    {
+        $db->beginSchemaUpdate();
+        $db->import(ROOT . '/include/data/0.10.0.sql');
+        $db->commitSchemaUpdate();
+    }
+
+    $keycheck_after = $db->get('PRAGMA foreign_key_check;');
+    $keycheck_after = $keycheck_after ? count($keycheck_after) : 0;
+
+    if ($keycheck_after != $keycheck)
+    {
+        throw new \LogicException('Erreur de cohérence dans la base de données lors de la mise à jour (clés étrangères)');
     }
 
     Utils::clearCaches();

@@ -82,4 +82,18 @@ class DB extends DB_SQLite3
 
         return $this->exec($sql);
     }
+
+    public function beginSchemaUpdate()
+    {
+        $this->exec('PRAGMA legacy_alter_table = ON;');
+        $this->exec('PRAGMA foreign_keys = OFF;');
+        $this->begin();
+    }
+
+    public function commitSchemaUpdate()
+    {
+        $this->commit();
+        $this->exec('PRAGMA legacy_alter_table = OFF;');
+        $this->exec('PRAGMA foreign_keys = ON;');
+    }
 }

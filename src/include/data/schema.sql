@@ -276,7 +276,7 @@ CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_journal (id_exer
 CREATE INDEX IF NOT EXISTS compta_operations_date ON compta_journal (date);
 CREATE INDEX IF NOT EXISTS compta_operations_auteur ON compta_journal (id_auteur);
 
-CREATE TABLE IF NOT EXISTS compta_journal_ecritures
+CREATE TABLE IF NOT EXISTS compta_journal_lignes
 -- Ecritures
 (
     id INTEGER PRIMARY KEY NOT NULL,
@@ -284,10 +284,16 @@ CREATE TABLE IF NOT EXISTS compta_journal_ecritures
     id_journal INTEGER NOT NULL REFERENCES compta_journal (id) ON DELETE CASCADE,
 
     compte TEXT NOT NULL REFERENCES compta_comptes(id), -- N° du compte dans le plan comptable
-    montant INTEGER NOT NULL
+    credit INTEGER NOT NULL,
+    debit INTEGER NOT NULL,
+
+    rapprochement INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT ligne_check1 CHECK ((credit * debit) = 0),
+    CONSTRAINT ligne_check2 CHECK ((credit + debit) > 0)
 );
 
-CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_journal_ecritures (compte);
+CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_journal_lignes (compte);
 
 CREATE TABLE IF NOT EXISTS compta_moyens_paiement
 -- Moyens de paiement
@@ -296,9 +302,10 @@ CREATE TABLE IF NOT EXISTS compta_moyens_paiement
     nom TEXT NOT NULL
 );
 
---INSERT INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
+INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
 INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('CB', 'Carte bleue');
 INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('CH', 'Chèque');
+INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('AC', 'Autres chèques (vacances, cadeau, etc.)');
 INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('ES', 'Espèces');
 INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('PR', 'Prélèvement');
 INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('TI', 'TIP');
