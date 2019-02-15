@@ -227,7 +227,7 @@ class Sauvegarde
 			}
 		}
 
-		$r = $this->restoreDB($file['tmp_name'], $user_id);
+		$r = $this->restoreDB($file['tmp_name'], $user_id, true);
 
 		if ($r)
 		{
@@ -289,13 +289,13 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false)
+	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false)
 	{
 		$return = 1;
 
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
-			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
+			$db = new \SQLite3($file, \SQLITE3_OPEN_READONLY);
 		}
 		catch (\Exception $e)
 		{
@@ -317,6 +317,16 @@ class Sauvegarde
 		if (strtolower(trim($check)) != 'ok')
 		{
 			throw new UserException('Le fichier fourni est corrompu. SQLite a trouvé ' . $check . ' erreurs.');
+		}
+
+		if ($check_foreign_keys)
+		{
+			$check = $db->querySingle('PRAGMA foreign_key_check;');
+
+			if ($check)
+			{
+				throw new UserException('Le fichier fourni est corrompu. Certaines clés étrangères référencent des lignes qui n\'existent pas.');
+			}
 		}
 
 		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
