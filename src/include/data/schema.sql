@@ -242,8 +242,8 @@ CREATE TABLE IF NOT EXISTS compta_projets
     libelle TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS compta_journal
--- Journal des opérations comptables
+CREATE TABLE IF NOT EXISTS compta_mouvements
+-- Opérations comptables
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
@@ -272,16 +272,16 @@ CREATE TABLE IF NOT EXISTS compta_journal
     FOREIGN KEY(id_projet) REFERENCES compta_projets(id) ON DELETE SET NULL
 );
 
-CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_journal (id_exercice);
-CREATE INDEX IF NOT EXISTS compta_operations_date ON compta_journal (date);
-CREATE INDEX IF NOT EXISTS compta_operations_auteur ON compta_journal (id_auteur);
+CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_mouvements (id_exercice);
+CREATE INDEX IF NOT EXISTS compta_operations_date ON compta_mouvements (date);
+CREATE INDEX IF NOT EXISTS compta_operations_auteur ON compta_mouvements (id_auteur);
 
-CREATE TABLE IF NOT EXISTS compta_journal_lignes
+CREATE TABLE IF NOT EXISTS compta_mouvements_lignes
 -- Ecritures
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
-    id_journal INTEGER NOT NULL REFERENCES compta_journal (id) ON DELETE CASCADE,
+    id_mouvement INTEGER NOT NULL REFERENCES compta_mouvements (id) ON DELETE CASCADE,
 
     compte TEXT NOT NULL REFERENCES compta_comptes(id), -- N° du compte dans le plan comptable
     credit INTEGER NOT NULL,
@@ -293,7 +293,7 @@ CREATE TABLE IF NOT EXISTS compta_journal_lignes
     CONSTRAINT ligne_check2 CHECK ((credit + debit) > 0)
 );
 
-CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_journal_lignes (compte);
+CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_mouvements_lignes (compte);
 
 CREATE TABLE IF NOT EXISTS compta_moyens_paiement
 -- Moyens de paiement
