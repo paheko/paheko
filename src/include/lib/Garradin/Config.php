@@ -49,33 +49,33 @@ class Config
             'adresse_asso'            =>  $string,
             'email_asso'              =>  $string,
             'site_asso'               =>  $string,
-            
+
             'monnaie'                 =>  $string,
             'pays'                    =>  $string,
-            
+
             'champs_membres'          =>  $object,
-            
+
             'categorie_membres'       =>  $int,
-            
+
             'categorie_dons'          =>  $int,
             'categorie_cotisations'   =>  $int,
-            
+
             'accueil_wiki'            =>  $string,
             'accueil_connexion'       =>  $string,
-            
+
             'frequence_sauvegardes'   =>  $int,
             'nombre_sauvegardes'      =>  $int,
-            
+
             'champ_identifiant'       =>  $string,
             'champ_identite'          =>  $string,
-            
+
             'version'                 =>  $string,
-            
+
             'couleur1'                =>  $string,
             'couleur2'                =>  $string,
             'image_fond'              =>  $string,
 
-            'desactiver_site'         => $bool,
+            'desactiver_site'         =>  $bool,
         ];
 
         $db = DB::getInstance();
@@ -160,7 +160,7 @@ class Config
         if (!empty($this->modified['champ_identifiant']))
         {
             // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-            $db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL 
+            $db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
                 WHERE '.$this->get('champ_identifiant').' = "";');
 
             // Création de l'index unique
@@ -186,7 +186,7 @@ class Config
         {
             return null;
         }
-        
+
         return $this->config[$key];
     }
 
@@ -288,8 +288,8 @@ class Config
                 }
 
                 // Vérification que le champ est unique pour l'identifiant
-                if ($key == 'champ_identifiant' 
-                    && !$db->firstColumn('SELECT (COUNT(DISTINCT lower('.$value.')) = COUNT(*)) 
+                if ($key == 'champ_identifiant'
+                    && !$db->firstColumn('SELECT (COUNT(DISTINCT lower('.$value.')) = COUNT(*))
                         FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != \'\';'))
                 {
                     throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
