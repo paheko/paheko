@@ -304,17 +304,6 @@ if (!defined('Garradin\SECRET_KEY'))
 // Intégration du secret pour les tokens
 Form::tokenSetSecret(SECRET_KEY);
 
-// Fonctions utilitaires bien utiles d'avoir dans le namespace global de Garradin
-function obj_has($obj, $pattern)
-{
-    return \KD2\Helpers::obj_has($obj, $pattern);
-}
-
-function obj_get($src, $pattern, $default = null)
-{
-    return \KD2\Helpers::obj_get($src, $pattern, $default);
-}
-
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour
  */
