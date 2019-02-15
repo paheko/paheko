@@ -76,6 +76,7 @@ class Config
             'image_fond'              =>  $string,
 
             'desactiver_site'         =>  $bool,
+            'compta_expert'           =>  $bool,
         ];
 
         $db = DB::getInstance();
