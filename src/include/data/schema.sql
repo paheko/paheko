@@ -348,14 +348,6 @@ CREATE TABLE IF NOT EXISTS plugins_signaux
     PRIMARY KEY (signal, plugin)
 );
 
-CREATE TABLE IF NOT EXISTS compta_rapprochement
--- Rapprochement entre compta et relevés de comptes
-(
-    id_operation INTEGER NOT NULL PRIMARY KEY REFERENCES compta_journal (id) ON DELETE CASCADE,
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
-    id_auteur INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
-);
-
 CREATE TABLE IF NOT EXISTS fichiers
 -- Données sur les fichiers
 (

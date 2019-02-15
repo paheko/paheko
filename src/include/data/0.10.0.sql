@@ -2,14 +2,14 @@ ALTER TABLE compta_journal RENAME TO compta_journal_old;
 
 .read schema.sql
 
+INSERT INTO compta_journal (id, libelle, remarques, numero_piece, date, moyen_paiement, numero_cheque, id_exercice, id_auteur, id_categorie, id_projet)
+	SELECT id, libelle, remarques, numero_piece, date, moyen_paiement, numero_cheque, id_exercice, id_auteur, id_categorie, id_projet FROM compta_journal_old;
+
 INSERT INTO compta_journal_ecritures (id_journal, compte, debit, credit, montant)
 	SELECT id, compte_credit, 0, CAST(montant * 100 AS INT) FROM compta_journal_old;
 
 INSERT INTO compta_journal_ecritures (id_journal, compte, debit, credit, montant)
 	SELECT id, compte_debit, CAST(montant * 100 AS INT), 0 FROM compta_journal_old;
-
-INSERT INTO compta_journal (id, libelle, remarques, numero_piece, date, moyen_paiement, numero_cheque, id_exercice, id_auteur, id_categorie, id_projet)
-	SELECT id, libelle, remarques, numero_piece, date, moyen_paiement, numero_cheque, id_exercice, id_auteur, id_categorie, id_projet FROM compta_journal_old;
 
 DROP TABLE compta_journal_old;
 
@@ -25,6 +25,10 @@ DROP TABLE compta_journal_old;
 
 -- CREATE TRIGGER IF NOT EXISTS ON compta_journal_ecritures
 
+-- Transfert des rapprochements
+UPDATE compta_journal_lignes SET rapprochement = 1 WHERE id_journal IN (SELECT id_operation FROM compta_rapprochement);
+
+-- Suppression de la table rapprochements
 DROP TABLE compta_rapprochement;
 
 -- Ajout moyens de paiement
