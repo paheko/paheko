@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS compta_mouvements
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
     moyen_paiement TEXT NULL,
-    numero_cheque TEXT NULL,
+    reference_paiement TEXT NULL,
 
     validation INTEGER NOT NULL DEFAULT 0, -- 1 = écriture validée, non modifiable
 
