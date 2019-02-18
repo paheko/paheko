@@ -2,7 +2,7 @@ ALTER TABLE compta_journal RENAME TO compta_journal_old;
 
 .read schema.sql
 
-INSERT INTO compta_journal (id, libelle, remarques, numero_piece, date, moyen_paiement, numero_cheque, id_exercice, id_auteur, id_categorie, id_projet)
+INSERT INTO compta_journal (id, libelle, remarques, numero_piece, date, moyen_paiement, reference_paiement, id_exercice, id_auteur, id_categorie, id_projet)
 	SELECT id, libelle, remarques, numero_piece, date, moyen_paiement, numero_cheque, id_exercice, id_auteur, id_categorie, id_projet FROM compta_journal_old;
 
 INSERT INTO compta_journal_ecritures (id_journal, compte, debit, credit, montant)

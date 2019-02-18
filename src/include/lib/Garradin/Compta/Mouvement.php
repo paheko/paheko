@@ -3,6 +3,8 @@
 namespace Garradin\Compta;
 
 use Garradin\Entity;
+use Garradin\ValidationException;
+use Garradin\DB;
 
 class Mouvement extends Entity
 {
@@ -15,7 +17,7 @@ class Mouvement extends Entity
 
 	protected $date;
 	protected $moyen_paiement;
-	protected $numero_cheque;
+	protected $reference_paiement;
 
 	protected $validation;
 
@@ -26,6 +28,20 @@ class Mouvement extends Entity
 	protected $id_auteur;
 	protected $id_categorie;
 	protected $id_projet;
+
+	const FIELDS = [
+		'libelle'            => 'required|string',
+		'remarques'          => 'string|max:20000',
+		'numero_piece'       => 'string|max:200',
+		'reference_paiement' => 'string|max:200',
+		'date'               => 'required|date',
+		'moyen_paiement'     => 'string|in_table:compta_moyens_paiement,code|required_with:id_categorie',
+		'validation'         => 'bool',
+		'id_exercice'        => 'integer|in_table:compta_exercices,id',
+		'id_auteur'          => 'integer|in_table:membres,id',
+		'id_categorie'       => 'integer|in_table:compta_categories,id',
+		'id_projet'          => 'integer|in_table:compta_projets,id'
+	];
 
 	protected $lignes = [];
 
@@ -38,6 +54,40 @@ class Mouvement extends Entity
 	public function add(Ligne $ligne)
 	{
 		$this->lignes[] = $ligne;
+	}
+
+	public function simple($montant, $moyen, $compte)
+	{
+		$this->moyen_paiement = $moyen;
+		$categorie = new Categorie($this->id_categorie);
+
+		if ($categorie->type == Categorie::DEPENSE)
+		{
+			$from = $categorie->compte;
+			$to = $compte;
+		}
+		else
+		{
+			$from = $compte;
+			$to = $categorie->compte;
+		}
+
+		return $this->transfer($montant, $from, $to);
+	}
+
+	public function transfer($amount, $from, $to)
+	{
+		$ligne1 = new Ligne;
+		$ligne1->compte = $from;
+		$ligne1->debit = $amount;
+		$ligne1->credit = 0;
+
+		$ligne2 = new Ligne;
+		$ligne1->compte = $to;
+		$ligne1->debit = 0;
+		$ligne1->credit = $amount;
+
+		return $this->add($ligne1) && $this->add($ligne2);
 	}
 
 	public function save()
@@ -54,53 +104,33 @@ class Mouvement extends Entity
 		}
 	}
 
-	public function validate($key, $value)
+	public function filterUserEntry($key, $value)
 	{
-		switch ($key)
+		$value = parent::filterUserEntry($key, $value);
+
+		if ($key == 'moyen_paiement')
 		{
-			case 'date':
-				if (!($value instanceof \DateTime))
-				{
-					throw new ValidationException('La date est invalide.');
-				}
-				break;
-			case 'moyen_paiement':
-				if (!$db->test('compta_moyens_paiement', 'code', $value))
-				{
-					throw new ValidationException('Moyen de paiement inconnu.');
-				}
-				break;
-			case 'id_exercice':
-				if (null !== $value && !$db->test('compta_exercices', 'id', $value))
-				{
-					throw new ValidationException('Numéro d\'exercice invalide.');
-				}
-				break;
-			default:
-				break;
+			$value = strtoupper($value);
+		}
+		elseif ($key == 'date' && !is_object($value))
+		{
+			$value = new \DateTimeImmutable($value);
 		}
 
-		return true;
+		return $value;
 	}
 
 	public function selfCheck()
 	{
-		if (trim($this->libelle) === '')
-		{
-			throw new ValidationException('Le libellé ne peut rester vide.');
-		}
-
-		if (null === $this->date)
-		{
-			throw new ValidationException('Le date ne peut rester vide.');
-		}
+		$db = DB::getInstance();
+		$config = Config::getInstance();
 
 		if (null === $this->id_exercice && $config->get('compta_expert'))
 		{
 			throw new ValidationException('Aucun exercice spécifié.');
 		}
 
-		if (null !== $this->id_exercice 
+		if (null !== $this->id_exercice
 			&& !$db->test('compta_exercices', 'id = ? AND debut <= ? AND fin >= ?;', $this->id_exercice, $this->date, $this->date))
 		{
 			throw new ValidationException('La date ne correspond pas à l\'exercice sélectionné.');
