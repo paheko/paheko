@@ -5,6 +5,7 @@ namespace Garradin\Compta;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\DB;
+use Garradin\Config;
 
 class Mouvement extends Entity
 {
