@@ -320,9 +320,7 @@ CREATE TABLE IF NOT EXISTS compta_categories
     intitule TEXT NOT NULL,
     description TEXT NULL,
 
-    compte TEXT NOT NULL, -- Compte affecté par cette catégorie
-
-    FOREIGN KEY(compte) REFERENCES compta_comptes(id) ON DELETE CASCADE
+    compte TEXT NULL REFERENCES compta_comptes(id) ON DELETE CASCADE -- Compte affecté par cette catégorie
 );
 
 CREATE TABLE IF NOT EXISTS plugins

@@ -2,8 +2,12 @@
 
 namespace Garradin;
 
+use KD2\Form;
+
 class Entity
 {
+	const FIELDS = [];
+
 	protected $id;
 	protected $table;
 	protected $modified = [];
@@ -55,8 +59,15 @@ class Entity
 		return $return;
 	}
 
+	public function selfCheck()
+	{
+		return true;
+	}
+
 	final protected function selfValidate()
 	{
+		$errors = [];
+
 		if (!Form::validate($this::FIELDS, $errors, $this->toArray()))
 		{
 			$messages = [];
