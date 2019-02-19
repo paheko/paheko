@@ -294,11 +294,16 @@ class Fichiers
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 * @return void
 	 */
-	public function serveThumbnail($width = self::TAILLE_MINIATURE)
+	public function serveThumbnail($width = null)
 	{
 		if (!$this->image)
 		{
 			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+		}
+
+		if (!$width)
+		{
+			$width = reset(self::$allowed_thumb_sizes);
 		}
 
 		if (!in_array($width, self::$allowed_thumb_sizes))

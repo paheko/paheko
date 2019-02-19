@@ -187,7 +187,7 @@ class Plugin
 	 * @return void
 	 * @throws UserException Si le fichier n'existe pas ou fait partie des fichiers qui ne peuvent
 	 * être appelés que par des méthodes de Plugin.
-	 * @throws RuntimeException Si le chemin indiqué tente de sortir du contexte du PHAR
+	 * @throws \RuntimeException Si le chemin indiqué tente de sortir du contexte du PHAR
 	 */
 	public function call($file)
 	{
@@ -550,6 +550,11 @@ class Plugin
 		return $list;
 	}
 
+	static public function fetchOfficialList()
+	{
+		return []; // FIXME
+	}
+
 	/**
 	 * Vérifier le hash du plugin $id pour voir s'il correspond au hash du fichier téléchargés
 	 * @param  string $id Identifiant du plugin
@@ -582,9 +587,9 @@ class Plugin
 	 * Télécharge un plugin depuis le repository officiel, et l'installe
 	 * @param  string $id Identifiant du plugin
 	 * @return boolean    TRUE si ça marche
-	 * @throws LogicException Si le plugin n'est pas dans la liste des plugins officiels
+	 * @throws \LogicException Si le plugin n'est pas dans la liste des plugins officiels
 	 * @throws UserException Si le plugin est déjà installé ou que le téléchargement a échoué
-	 * @throws RuntimeException Si l'archive téléchargée est corrompue (intégrité du hash ne correspond pas)
+	 * @throws \RuntimeException Si l'archive téléchargée est corrompue (intégrité du hash ne correspond pas)
 	 */
 	static public function download($id)
 	{
