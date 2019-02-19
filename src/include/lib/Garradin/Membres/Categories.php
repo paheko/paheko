@@ -19,11 +19,6 @@ class Categories
         'config'    =>  Membres::DROIT_AUCUN,
     ];
 
-    static public function getDroitsDefaut()
-    {
-        return $this->droits;
-    }
-
     protected function _checkData(&$data)
     {
         $db = DB::getInstance();
