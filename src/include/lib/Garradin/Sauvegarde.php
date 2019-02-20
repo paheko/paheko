@@ -239,8 +239,8 @@ class Sauvegarde
 
 	/**
 	 * Vérifie l'intégrité d'une sauvegarde Garradin
-	 * @param  string $file Chemin absolu vers la base de donnée
-	 * @return boolean
+	 * @param  string $file_path Chemin absolu vers la base de donnée
+	 * @return boolean|null
 	 */
 	protected function checkIntegrity($file_path, $remove_hash = true)
 	{

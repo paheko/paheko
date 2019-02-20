@@ -532,7 +532,7 @@ class Plugin
 			$context = stream_context_create($context_options);
 
 			try {
-				$result = file_get_contents(PLUGINS_URL, NULL, $context);
+				$result = file_get_contents(PLUGINS_URL, false, $context);
 			}
 			catch (\Exception $e)
 			{

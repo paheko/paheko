@@ -218,17 +218,17 @@ class Utils
      * @param int $bypage
      * @param int $listLength
      * @param bool $showLast Toggle l'affichage du dernier élément de la pagination
-     * @return array
+     * @return array|null
      */
     public static function getGenericPagination($current, $total, $bypage, $listLength=11, $showLast = true)
     {
         if ($total <= $bypage)
-            return false;
+            return null;
 
         $total = ceil($total / $bypage);
 
         if ($total < $current)
-            return false;
+            return null;
 
         $length = ($listLength / 2);
 
@@ -410,7 +410,7 @@ class Utils
         {
             return true;
         }
-        
+
         if (!file_exists($path))
         {
             return true;
@@ -435,7 +435,7 @@ class Utils
     {
         // Enlever les caractères indésirables (espaces, tirets),
         $value = preg_replace('/[^A-Z0-9]/', '', strtoupper($value));
-        
+
         // Supprimer les 4 premiers caractères et les replacer à la fin du compte
         $value = substr($value, 4) . substr($value, 0, 4);
 
@@ -568,11 +568,12 @@ class Utils
         }
     }
 
-    static public function format_bytes($size) {
+    static public function format_bytes($size)
+    {
         if ($size > (1024 * 1024))
-            return str_replace('.', ',', round($size / 1024 / 1024, 2)) . ' Mo';
+            return number_format(round($size / 1024 / 1024, 2), 2, ',', '') . ' Mo';
         elseif ($size > 1024)
-            return str_replace('.', ',', round($size / 1024, 2)) . ' Ko';
+            return round($size / 1024) . ' Ko';
         else
             return $size . ' o';
     }
