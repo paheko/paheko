@@ -587,11 +587,11 @@ class Fichiers
 	 * 
 	 * @param  string  $type    Type de ressource
 	 * @param  integer $id      Numéro de ressource
-	 * @param  boolean $images  TRUE pour retourner seulement les images,
+	 * @param  boolean|null $images  TRUE pour retourner seulement les images,
 	 * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
 	 * @return array          Liste des fichiers
 	 */
-	static public function listLinkedFiles($type, $id, $images = false)
+	static public function listLinkedFiles($type, $id, $images = null)
 	{
 		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
 
