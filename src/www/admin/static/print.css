@@ -1,18 +1,23 @@
 @page {
-    size: A4;
-    margin: 1cm;
+    size: A4 landscape;
+    margin: 0;
 }
 
 body {
     background: #fff;
     padding: 0;
+    margin: 1cm;
+    font-size: 10pt;
 }
+
 header.header {
     display: none;
 }
+
 main {
     margin: 0;
 }
+
 .header h1 {
     margin: 0;
     text-align: center;
@@ -42,6 +47,14 @@ table.list.multi tr:nth-child(even) {
 
 table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: #ddd;
+}
+
+#rapport tr {
+    color: #000 !important;
+}
+
+#rapport table .parent {
+    border-top: 1px dashed #666;
 }
 
 #rapport table table {
