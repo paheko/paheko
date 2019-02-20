@@ -695,6 +695,11 @@ table.list .actions {
     text-align: right;
 }
 
+.money {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
 b.money {
     font-weight: inherit;
     white-space: pre;
@@ -734,6 +739,7 @@ b.money {
 
 #rapport .compte th {
     font-weight: normal;
+    padding-left: 1em;
 }
 
 #rapport table table td {
