@@ -139,7 +139,7 @@ class Recherche
 	/**
 	 * Lancer une recherche enregistrée
 	 */
-	public function search($id, $force_select = null)
+	public function search($id, array $force_select = null, $no_limit = false)
 	{
 		$search = $this->get($id);
 
@@ -150,10 +150,10 @@ class Recherche
 
 		if ($search->type == self::TYPE_JSON)
 		{
-			$search->contenu = $this->buildQuery($search->cible, $search->query, $search->order, $search->desc, $search->limit);
+			$search->contenu = $this->buildQuery($search->cible, $search->query, $search->order, $search->desc, $no_limit ? 10000 : $search->limit);
 		}
 
-		return $this->searchSQL($search->cible, $search->contenu, $force_select);
+		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
 	}
 
 	/**
@@ -389,19 +389,19 @@ class Recherche
 	/**
 	 * Lancer une recherche SQL
 	 */
-	public function searchSQL($target, $query, $force_select = null)
+	public function searchSQL($target, $query, array $force_select = null, $no_limit = false)
 	{
 		if (!in_array($target, self::TARGETS, true))
 		{
 			throw new \InvalidArgumentException('Cible inconnue : ' . $target);
 		}
 
-		if ($force_select)
+		if (null !== $force_select)
 		{
-			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . $force_select . ' FROM ', $query);
+			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
 		}
 
-		if (!preg_match('/LIMIT\s+\d+/i', $query))
+		if (!$no_limit && !preg_match('/LIMIT\s+\d+/i', $query))
 		{
 			$query = preg_replace('/;?\s*$/', '', $query);
 			$query .= ' LIMIT 100';
@@ -411,7 +411,14 @@ class Recherche
 			return DB::getInstance()->userSelectGet($query);
 		}
 		catch (\Exception $e) {
-			throw new UserException('Erreur dans la requête : ' . $e->getMessage());
+			$message = 'Erreur dans la requête : ' . $e->getMessage();
+
+			if (null !== $force_select)
+			{
+				$message .= "\nVérifiez que votre requête sélectionne bien les colonnes suivantes : " . implode(', ', $force_select);
+			}
+
+			throw new UserException($message);
 		}
 	}
 
