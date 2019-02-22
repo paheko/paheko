@@ -22,17 +22,22 @@ if (f('send'))
         }
         else
         {
-            $recipients = $recherche->search($match[2], 'id, email');
+            try {
+                $recipients = $recherche->search($match[2], ['id', 'email'], true);
+            }
+            catch (UserException $e) {
+                $form->addError($e->getMessage());
+            }
         }
 
-        if (!count($recipients) || !isset($recipients[0]->email))
+        if (isset($recipients) && (!count($recipients) || !isset($recipients[0]->email)))
         {
             $form->addError('Aucun membre dans la liste.');
         }
     }
     else
     {
-        throw new UserException('Destinataires invalides : ' . f('recipients'));
+        $form->addErrror('Destinataires invalides : ' . f('recipients'));
     }
 
     if (!$form->hasErrors())
