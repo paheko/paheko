@@ -14,7 +14,7 @@ class Ligne extends Entity
 	protected $credit = 0;
 	protected $debit = 0;
 
-	const FIELDS = [
+	protected $_fields = [
 		'id_mouvement' => 'required|integer|in_table:compta_mouvements,id',
 		'compte'       => 'required|alpha_num|in_table:compta_comptes,id',
 		'credit'       => 'required|integer|min:0',
