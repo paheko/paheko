@@ -12,19 +12,26 @@ use Garradin\Entity;
  */
 class Categorie extends Entity
 {
-    const DEPENSE = 1;
-    const RECETTE = 2;
-    const VIREMENT = 3;
+	const DEPENSE = 1;
+	const RECETTE = 2;
+	const VIREMENT = 3;
 
-    const DETTE_ADHERENT = 5;
-    const DETTE_FOURNISSEUR = 6;
-    const CREANCE_ADHERENT = 7;
-    const CREANCE_FOURNISSEUR = 8;
+	const DETTE_ADHERENT = 5;
+	const DETTE_FOURNISSEUR = 6;
+	const CREANCE_ADHERENT = 7;
+	const CREANCE_FOURNISSEUR = 8;
 
-    protected $id;
-    protected $type;
-    protected $intitule;
-    protected $description;
+	protected $id;
+	protected $type;
+	protected $intitule;
+	protected $description;
 
-    protected $compte;
+	protected $compte;
+
+	protected $_fields = [
+		'type'        => 'required|in:1,2,3',
+		'intitule'    => 'required|string',
+		'description' => 'string',
+		'compte'      => 'required|alpha_num|in_table:compta_comptes,id',
+	];
 }

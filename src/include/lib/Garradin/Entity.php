@@ -59,16 +59,23 @@ class Entity
 		return $return;
 	}
 
+	/**
+	 * Vérifier la cohérence de l'objet avant enregistrement
+	 */
 	public function selfCheck()
 	{
 		return true;
 	}
 
-	final protected function selfValidate()
+	/**
+	 * Valider les champs avant enregistrement
+	 * @throws ValidationException Si une erreur de validation survient
+	 */
+	public function selfValidate()
 	{
 		$errors = [];
 
-		if (!Form::validate($this::FIELDS, $errors, $this->toArray()))
+		if (!Form::validate($this->_fields, $errors, $this->toArray()))
 		{
 			$messages = [];
 
@@ -101,7 +108,7 @@ class Entity
 
 	public function __set($key, $value)
 	{
-		if (!in_array($key, $this::FIELDS))
+		if (!in_array($key, $this->_fields))
 		{
 			throw new ValidationException(sprintf('Le champ "%s" ne peut être modifié.', $key));
 		}
@@ -112,6 +119,15 @@ class Entity
 		$this->modified[$key] = $value;
 	}
 
+	public function __isset($key)
+	{
+		return property_exists($this, $key);
+	}
+
+	/**
+	 * Filtrer/sanitiser la valeur entrée par l'utilisateur pour un champ de l'entité
+	 * (effectué au set)
+	 */
 	public function filterUserEntry($key, $value)
 	{
 		return trim($value);
@@ -121,7 +137,7 @@ class Entity
 	{
 		$out = [];
 
-		foreach ($this::FIELDS as $key)
+		foreach ($this->_fields as $key)
 		{
 			$out[$key] = $this->$key;
 		}

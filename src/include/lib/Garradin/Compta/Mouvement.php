@@ -30,7 +30,7 @@ class Mouvement extends Entity
 	protected $id_categorie;
 	protected $id_projet;
 
-	const FIELDS = [
+	protected $_fields = [
 		'libelle'            => 'required|string',
 		'remarques'          => 'string|max:20000',
 		'numero_piece'       => 'string|max:200',
@@ -126,7 +126,8 @@ class Mouvement extends Entity
 		$db = DB::getInstance();
 		$config = Config::getInstance();
 
-		if (null === $this->id_exercice && $config->get('compta_expert'))
+		// ID d'exercice obligatoire s'il existe déjà des exercices
+		if (null === $this->id_exercice && $db->firstColumn('SELECT 1 FROM compta_exercices LIMIT 1;'))
 		{
 			throw new ValidationException('Aucun exercice spécifié.');
 		}
