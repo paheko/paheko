@@ -215,7 +215,7 @@ class Import
 
 			if ($line == 1)
 			{
-				if (is_numeric($row[0]))
+				if (empty($row[0]) || !is_string($row[0]) || is_numeric($row[0]))
 				{
 					$db->rollback();
 					throw new UserException('Erreur sur la ligne 1 : devrait contenir l\'en-tête des colonnes.');
@@ -236,7 +236,7 @@ class Import
 			foreach ($columns as $name=>$id)
 			{
 				$name = trim($name);
-				
+
 				// Champs qui n'existent pas dans le schéma actuel
 				if (!in_array($name, $champs))
 					continue;
