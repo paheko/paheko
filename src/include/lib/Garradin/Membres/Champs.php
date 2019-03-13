@@ -229,7 +229,7 @@ class Champs
             {
                 $rules[] = 'required';
             }
-            
+
             if ($config->type == 'email')
             {
                 $rules[] = 'email';
@@ -249,10 +249,6 @@ class Champs
             elseif ($config->type == 'number' || $config->type == 'multiple')
             {
                 $rules[] = 'numeric';
-            }
-            elseif ($config->type == 'select')
-            {
-                $rules[] = 'in:' . range(0, count($config->options) - 1);
             }
             elseif ($config->type == 'checkbox')
             {
