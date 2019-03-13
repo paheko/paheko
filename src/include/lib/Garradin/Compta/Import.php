@@ -304,6 +304,11 @@ class Import
 
 			if (empty($columns))
 			{
+				if (empty($row[0]))
+				{
+					throw new UserException(sprintf('Erreur sur la ligne %d : la ligne est vide ?', $line));
+				}
+
 				$columns = $row;
 				$columns = array_flip($columns);
 				continue;
