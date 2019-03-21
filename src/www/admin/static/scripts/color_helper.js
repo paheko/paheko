@@ -30,9 +30,9 @@
 	function applyLogoColors()
 	{
 		var color = colorToRGB(document.getElementById('f_couleur2').value);
-		
+
 		var img = new Image;
-		img.src = g.static_url + 'gdin_bg.png';
+		img.crossOrigin = "Anonymous";
 
 		img.onload = function() {
 			var canvas = document.createElement('canvas');
@@ -67,6 +67,8 @@
 			delete canvas;
 			delete ctx;
 		};
+
+		img.src = document.getElementById('f_image_fond').getAttribute('data-source');
 	}
 
 	garradin.onload(function () {
