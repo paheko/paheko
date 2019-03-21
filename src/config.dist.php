@@ -285,3 +285,32 @@ const SMTP_SECURITY = 'STARTTLS';
  * Défaut : true
  */
 const ENABLE_AUTOMATIC_BACKUPS = true;
+
+
+/**
+ * Couleur primaire de l'interface admin par défaut
+ * (peut être personnalisée dans la configuration)
+ *
+ * Défaut : #9c4f15
+ */
+//const ADMIN_COLOR1 = '#20787a';
+
+/**
+ * Couleur secondaire de l'interface admin
+ * Défaut : #d98628
+ */
+//const ADMIN_COLOR2 = '#85b9ba';
+
+/**
+ * Image de fond par défaut de l'interface admin
+ *
+ * Cette URL doit être absolue (http://...) ou relative à l'admin (/admin/static...)
+ *
+ * Attention si l'image est sur un domaine différent vous devrez activer l'entête CORS:
+ * Access-Control-Allow-Origin "*"
+ *
+ * sinon la personnalisation des couleurs ne fonctionnera pas
+ *
+ * Défaut : [ADMIN_URL]static/gdin_bg.png
+ */
+//const ADMIN_BACKGROUND_IMAGE = 'http://mon-asso.fr/fond_garradin.png';

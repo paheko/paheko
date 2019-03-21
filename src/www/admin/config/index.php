@@ -3,9 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$couleur1 = '#9c4f15';
-$couleur2 = '#d98628';
-
 if (f('save') && $form->check('config'))
 {
     try {
@@ -24,7 +21,7 @@ if (f('save') && $form->check('config'))
         $config->set('monnaie', f('monnaie'));
 
         // N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
-        if (f('couleur1') != $couleur1 || f('couleur2') != $couleur2)
+        if (f('couleur1') != ADMIN_COLOR1 || f('couleur2') != ADMIN_COLOR2)
         {
             $config->set('couleur1', f('couleur1'));
             $config->set('couleur2', f('couleur2'));
@@ -70,9 +67,10 @@ $tpl->assign('membres_cats', $cats->listSimple());
 
 $tpl->assign('champs', $config->get('champs_membres')->getList());
 
-$tpl->assign('couleur1', $config->get('couleur1') ?: $couleur1);
-$tpl->assign('couleur2', $config->get('couleur2') ?: $couleur2);
-$tpl->assign('couleurs_defaut', [$couleur1, $couleur2]);
+$tpl->assign('couleur1', $config->get('couleur1') ?: ADMIN_COLOR1);
+$tpl->assign('couleur2', $config->get('couleur2') ?: ADMIN_COLOR2);
+$tpl->assign('background_image_source', ADMIN_BACKGROUND_IMAGE);
+$tpl->assign('couleurs_defaut', [ADMIN_COLOR1, ADMIN_COLOR2]);
 
 $tpl->assign('custom_js', ['color_helper.js']);
 $tpl->display('admin/config/index.tpl');
