@@ -52,6 +52,10 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: #ccc;
 }
 
-.noprint, .actions {
+.noprint {
+    display: none;
+}
+
+td.actions * {
     display: none;
 }
