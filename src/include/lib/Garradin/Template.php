@@ -246,8 +246,10 @@ class Template extends \KD2\Smartyer
 			--gMainColor: %s;
 			--gSecondColor: %s;
 		}
-		.header .menu, body {
-			background-image: url("%s");
+		@media screen, handheld {
+			.header .menu, body {
+				background-image: url("%s");
+			}
 		}
 		</style>';
 
