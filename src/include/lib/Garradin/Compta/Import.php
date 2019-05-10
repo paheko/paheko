@@ -159,15 +159,6 @@ class Import
 			$debit = $col('Compte de débit - numéro');
 			$credit = $col('Compte de crédit - numéro');
 
-			if (trim($debit) == '' && trim($credit) != '')
-			{
-				$debit = null;
-			}
-			elseif (trim($debit) != '' && trim($credit) == '')
-			{
-				$credit = null;
-			}
-
 			$cat = $col('Catégorie');
 			$moyen = strtoupper(substr($col('Moyen de paiement'), 0, 2));
 
