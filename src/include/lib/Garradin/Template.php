@@ -270,6 +270,8 @@ class Template extends \KD2\Smartyer
 				return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'country':
 				return Utils::getCountryName($v);
+			case 'date':
+				return Utils::sqliteDateToFrench($v);
 			case 'multiple':
 				$out = [];
 
