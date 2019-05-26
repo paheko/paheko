@@ -1,9 +1,11 @@
-{if $suivi}
+{if null !== $suivi}
     {include file="admin/_head.tpl" title="Journal : %s - %s"|args:$compte.id:$compte.libelle current="compta/banques" body_id="rapport"}
 
     <ul class="actions">
         <li><a href="{$admin_url}compta/banques/">Comptes bancaires</a></li>
-        <li><a href="{$admin_url}compta/comptes/journal.php?id={$id_caisse}">Journal de caisse</a></li>
+        <li{if $compte.id == Compta\Comptes::CAISSE} class="current"{/if}><a href="{$admin_url}compta/comptes/journal.php?id={$id_caisse}">Journal de caisse</a></li>
+        <li{if $compte.id == Compta\Comptes::CHEQUE_A_ENCAISSER} class="current"{/if}><a href="{$admin_url}compta/comptes/journal.php?id={$id_cheque_a_encaisser}&amp;suivi">Chèques à encaisser</a></li>
+        <li{if $compte.id == Compta\Comptes::CARTE_A_ENCAISSER} class="current"{/if}><a href="{$admin_url}compta/comptes/journal.php?id={$id_carte_a_encaisser}&amp;suivi">Paiements par carte à encaisser</a></li>
     </ul>
 {else}
     {include file="admin/_head.tpl" title="Journal : %s - %s"|args:$compte.id:$compte.libelle current="compta/gestion" body_id="rapport"}
