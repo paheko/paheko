@@ -1,55 +1,15 @@
-{if empty($classe)}
-    {include file="admin/_head.tpl" title="Comptes" current="compta/categories"}
-    <ul class="accountList">
-    {foreach from=$classes item="_classe"}
-        <li><h4><a href="{$admin_url}compta/comptes/?classe={$_classe.id}">{$_classe.libelle}</a></h4></li>
-    {/foreach}
-    </ul>
-{else}
-    {include file="admin/_head.tpl" title=$classe_compte.libelle current="compta/categories"}
+{include file="admin/_head.tpl" title="Plan comptable" current="compta/categories"}
 
-    <ul class="actions">
-        <li><a href="{$admin_url}compta/comptes/">Liste des classes</a></li>
-        <li><a href="{$admin_url}compta/comptes/ajouter.php?classe={$classe}">Ajouter un compte dans cette classe</a></li>
-    </ul>
+<ul class="actions">
+	<li class="current"><a href="{$admin_url}compta/comptes/">Plan comptable</a></li>
+	<li><a href="?import">Import / remise à zéro</a></li>
+	<li><a href="?export=plan">Exporter le plan en format JSON</a></li>
+</ul>
 
-    <p class="help">
-        Les comptes avec la mention <em>*</em> font partie du plan comptable standard
-        et ne peuvent être modifiés ou supprimés.
-    </p>
-
-    {if !empty($liste)}
-        <table class="list accountList">
-        {foreach from=$liste item="compte"}
-            <tr class="niveau_{$compte.id|strlen}">
-                <th>{$compte.id}</th>
-                <td class="libelle">{$compte.libelle}</td>
-                <td>
-                    {if !empty($compte.desactive)}
-                        <em>Désactivé</em>
-                    {else}
-                        {$compte.position|get_position}
-                    {/if}
-                </td>
-                <td class="actions">
-                    {if empty($compte.desactive)}
-                        {if !$compte.plan_comptable}
-                            <a class="icn" href="{$admin_url}compta/comptes/modifier.php?id={$compte.id}" title="Modifier">✎</a>
-                            <a class="icn" href="{$admin_url}compta/comptes/supprimer.php?id={$compte.id}" title="Supprimer">✘</a>
-                        {else}
-                            <em>*</em>
-                        {/if}
-                    {/if}
-                </td>
-            </tr>
-        {/foreach}
-        </table>
-
-    {else}
-        <p class="alert">
-            Aucun compte trouvé.
-        </p>
-    {/if}
-{/if}
+<ul class="accountList">
+{foreach from=$classes item="_classe"}
+	<li><h4><a href="{$admin_url}compta/comptes/?classe={$_classe.id}">{$_classe.libelle}</a></h4></li>
+{/foreach}
+</ul>
 
 {include file="admin/_foot.tpl"}
