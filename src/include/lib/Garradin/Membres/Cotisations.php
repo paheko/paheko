@@ -90,7 +90,7 @@ class Cotisations
 			try {
 				$data_compta = array_merge($data_compta, [
 					'id_categorie' => $co->id_categorie_compta,
-					'libelle'      => 'Cotisation - ' . $membre,
+					'libelle'      => sprintf('%s - %s', $co->intitule, $membre),
 					'date'         => $data['date'],
 					'id_auteur'    => $data['id_auteur'],
 					'id_membre'    => $data['id_membre'],
