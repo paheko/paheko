@@ -58,7 +58,7 @@ elseif ($id)
     $query = $r->query;
     $order = $r->order;
     $desc = $r->desc;
-    $limit = $r->limit;
+    $limit = (int) f('limit') ?: $r->limit;
 
     $tpl->assign('recherche', $r);
 }
