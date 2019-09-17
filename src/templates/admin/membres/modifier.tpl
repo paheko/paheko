@@ -45,6 +45,20 @@
         </dl>
     </fieldset>
 
+    {if $membre.secret_otp || $membre.clef_pgp}
+    <fieldset>
+        <legend>Options de sécurité</legend>
+        <dl>
+        {if $membre.secret_otp}
+            <dt><label><input type="checkbox" name="clear_otp" value="1" /> Désactiver l'authentification à double facteur TOTP</label></dt>
+        {/if}
+        {if $membre.clef_pgp}
+            <dt><label><input type="checkbox" name="clear_pgp" value="1" /> Supprimer la clé PGP associée au membre</label></dt>
+        {/if}
+        </dl>
+    </fieldset>
+    {/if}
+
     {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
     <fieldset>
         <legend>Général</legend>

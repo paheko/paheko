@@ -51,6 +51,14 @@ if (f('save'))
                 $data['id'] = f('id');
             }
 
+            if (f('clear_otp')) {
+                $data['secret_otp'] = null;
+            }
+
+            if (f('clear_pgp')) {
+                $data['clef_pgp'] = null;
+            }
+
             $membres->edit($id, $data);
 
             if (isset($data['id']) && $data['id'] != $id)
