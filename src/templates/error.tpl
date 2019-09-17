@@ -38,7 +38,7 @@
 </p>
 
 <p>
-    <a href="{$www_url}" onclick="return history.back();">&larr; Retour</a>
+    <a href="{$admin_url}" onclick="history.back(); return false;">&larr; Retour</a>
 </p>
 
 </body>
