@@ -35,10 +35,10 @@ class Journal
         return DB::getInstance()->test('compta_exercices', 'cloture = 0 AND id = ?', (int)$id);
     }
 
-    public function getSolde($id_compte, $inclure_sous_comptes = false)
+    public function getSolde($id_compte, $inclure_sous_comptes = false, $exercice = null)
     {
         $db = DB::getInstance();
-        $exercice = $this->_getCurrentExercice();
+        $exercice = (int) $exercice ?: $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($id_compte)) . '%\''
             : '= \'' . $db->escapeString(trim($id_compte)) . '\'';
@@ -61,13 +61,13 @@ class Journal
         return $db->firstColumn('SELECT ' . $query . ';');
     }
 
-    public function getJournalCompte($compte, $inclure_sous_comptes = false)
+    public function getJournalCompte($compte, $inclure_sous_comptes = false, $exercice = null)
     {
         $db = DB::getInstance();
 
         $position = $db->firstColumn('SELECT position FROM compta_comptes WHERE id = ?;', $compte);
 
-        $exercice = $this->_getCurrentExercice();
+        $exercice = (int) $exercice ?: $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
