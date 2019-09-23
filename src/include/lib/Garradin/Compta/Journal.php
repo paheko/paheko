@@ -35,10 +35,10 @@ class Journal
         return DB::getInstance()->test('compta_exercices', 'cloture = 0 AND id = ?', (int)$id);
     }
 
-    public function getSolde($id_compte, $inclure_sous_comptes = false)
+    public function getSolde($id_compte, $inclure_sous_comptes = false, $exercice = null)
     {
         $db = DB::getInstance();
-        $exercice = $this->_getCurrentExercice();
+        $exercice = (int) $exercice ?: $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($id_compte)) . '%\''
             : '= \'' . $db->escapeString(trim($id_compte)) . '\'';
@@ -61,13 +61,13 @@ class Journal
         return $db->firstColumn('SELECT ' . $query . ';');
     }
 
-    public function getJournalCompte($compte, $inclure_sous_comptes = false)
+    public function getJournalCompte($compte, $inclure_sous_comptes = false, $exercice = null)
     {
         $db = DB::getInstance();
 
         $position = $db->firstColumn('SELECT position FROM compta_comptes WHERE id = ?;', $compte);
 
-        $exercice = $this->_getCurrentExercice();
+        $exercice = (int) $exercice ?: $this->_getCurrentExercice();
         $compte = $inclure_sous_comptes
             ? 'LIKE \'' . $db->escapeString(trim($compte)) . '%\''
             : '= \'' . $db->escapeString(trim($compte)) . '\'';
@@ -277,22 +277,18 @@ class Journal
             }
         }
 
-        if (!array_key_exists('compte_debit', $data) || 
-            (!is_null($data['compte_debit']) && 
-                !$db->test('compta_comptes', $db->where('id', $data['compte_debit']))))
+        if (empty($data['compte_debit']) || !$db->test('compta_comptes', $db->where('id', $data['compte_debit'])))
         {
             throw new UserException('Compte débité inconnu.');
         }
 
-        if (!array_key_exists('compte_credit', $data) || 
-            (!is_null($data['compte_credit']) && 
-                !$db->test('compta_comptes', $db->where('id', $data['compte_credit']))))
+        if (empty($data['compte_credit']) || !$db->test('compta_comptes', $db->where('id', $data['compte_credit'])))
         {
             throw new UserException('Compte crédité inconnu.');
         }
 
-        $data['compte_credit'] = is_null($data['compte_credit']) ? null : strtoupper(trim($data['compte_credit']));
-        $data['compte_debit'] = is_null($data['compte_debit']) ? null : strtoupper(trim($data['compte_debit']));
+        $data['compte_credit'] = strtoupper(trim($data['compte_credit']));
+        $data['compte_debit'] = strtoupper(trim($data['compte_debit']));
 
         if ($data['compte_credit'] == $data['compte_debit'])
         {

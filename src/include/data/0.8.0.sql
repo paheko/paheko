@@ -66,7 +66,8 @@ INSERT INTO compta_journal SELECT *, NULL FROM compta_journal_old;
 INSERT INTO compta_rapprochement SELECT * FROM compta_rapprochement_old;
 INSERT INTO fichiers SELECT * FROM fichiers_old;
 INSERT INTO membres_operations SELECT * FROM membres_operations_old;
-INSERT INTO membres_categories SELECT * FROM membres_categories_old;
+INSERT INTO membres_categories SELECT id, nom, droit_wiki, droit_membres, droit_compta,
+	droit_inscription, droit_connexion, droit_config, cacher, id_cotisation_obligatoire FROM membres_categories_old;
 
 -- Suppression des anciennes tables
 DROP TABLE cotisations_membres_old;

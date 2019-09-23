@@ -71,7 +71,7 @@
 				Pas de mot de passe configuré
 			{else}
 				<b class="icn">☑</b> Oui
-				{if !empty($membre.otp_secret)}
+				{if !empty($membre.secret_otp)}
 					(<b class="icn">🔒</b> avec second facteur)
 				{else}
 					(<b class="icn">🔓</b> sans second facteur)

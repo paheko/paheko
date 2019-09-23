@@ -18,9 +18,32 @@ class Comptes
     const PRODUIT = 0x04;
     const CHARGE = 0x08;
 
-    public function importPlan()
+    /**
+     * Importe un plan comptable
+     * @param  string $source_file Chemin du fichier à importer.
+     * @param  boolean $delete_all True active la suppression des tous les anciens comptes (peu importe plan_comptable)
+     * @return boolean/array Retourne un array des comptes non-supprimés avec leur raison, s'il y en a. Sinon true.
+     *
+     * Accepte 0 ou 1 argument : soit un chemin, soit true.
+     * Sans arguments : importe le plan par défaut et ne supprime que les comptes
+     * plus présent appartenants au plan d'origine (WHERE plan_comptable = 1)
+     */
+    public function importPlan($source_file = null, $delete_all = false)
     {
-        $plan = json_decode(file_get_contents(\Garradin\ROOT . '/include/data/plan_comptable.json'));
+        $reset = false;
+
+        if(null == $source_file)
+        {
+            $reset = true;
+            $source_file = \Garradin\ROOT . '/include/data/plan_comptable.json';
+        }
+
+        $plan = json_decode(file_get_contents($source_file));
+
+        if(is_null($plan))
+        {
+            throw new UserException('Le fichier n\'est pas du JSON ou n\'a pas pu être décodé.');
+        }
 
         $db = DB::getInstance();
         $db->begin();
@@ -36,7 +59,8 @@ class Comptes
                     'parent'    =>  $compte->parent,
                     'libelle'   =>  $compte->nom,
                     'position'  =>  $compte->position,
-                    'plan_comptable' => 1,
+                    'plan_comptable' => $reset || !empty($compte->plan_comptable) ? 1 : 0,
+                    'desactive' => !empty($compte->desactive) ? 1 : 0,
                 ], $db->where('id', $id));
             }
             else
@@ -46,16 +70,56 @@ class Comptes
                     'parent'    =>  $compte->parent,
                     'libelle'   =>  $compte->nom,
                     'position'  =>  $compte->position,
-                    'plan_comptable' => 1,
+                    'plan_comptable' => $reset || !empty($compte->plan_comptable) ? 1 : 0,
+                    'desactive' => !empty($compte->desactive) ? 1 : 0,
                 ]);
             }
         }
 
-        // Supprime les comptes qui étaient dans l'ancien plan comptable
-        // mais pas dans le nouveau
-        $db->delete('compta_comptes', $db->where('id', 'NOT IN', $ids) . ' AND ' . $db->where('plan_comptable', 1));
+        // Effacer les comptes du plan comptable s'ils ne sont pas utilisés ailleurs
+        // et qu'ils ne sont pas dans le nouveau plan comptable qu'on vient d'importer
+        $sql = 'DELETE FROM compta_comptes WHERE id NOT IN (
+            SELECT id FROM compta_comptes_bancaires
+            UNION SELECT compte_credit FROM compta_journal
+            UNION SELECT compte_debit FROM compta_journal
+            UNION SELECT id FROM compta_categories)
+            AND '. $db->where('id', 'NOT IN', $ids);
+
+        // Si on ne fait qu'importer une mise à jour du plan comptable,
+        // ne supprimer que les comptes qui n'ont pas été créés par l'usager
+        if (!$delete_all) {
+            $sql .= ' AND ' . $db->where('plan_comptable', 1);
+        }
 
         $db->commit();
+
+        return true;
+    }
+
+    public function exportPlan()
+    {
+        $name = 'plan_comptable';
+
+        header('Content-type: application/json');
+        header(sprintf('Content-Disposition: attachment; filename="%s.json"', $name));
+
+        $liste = $this->listTree(0, true);
+
+        $export = [];
+
+        foreach ($liste as $k => $v)
+        {
+            $export[$v->id] = [
+                'code'           => $v->id,
+                'nom'            => $v->libelle,
+                'parent'         => $v->parent,
+                'position'       => $v->position,
+                'plan_comptable' => $v->plan_comptable,
+                'desactive'      => $v->desactive,
+            ];
+        }
+
+        file_put_contents('php://output', json_encode($export, JSON_PRETTY_PRINT));
 
         return true;
     }
@@ -99,21 +163,21 @@ class Comptes
             // Sinon risque par exemple d'avoir parent = 5 et id = 512A !
             while (!$parent && strlen($id))
             {
-            	// On enlève un caractère à la fin jusqu'à trouver un compte parent
-            	$id = substr($id, 0, -1);
-            	$parent = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $id);
+                // On enlève un caractère à la fin jusqu'à trouver un compte parent
+                $id = substr($id, 0, -1);
+                $parent = $db->firstColumn('SELECT id FROM compta_comptes WHERE id = ?;', $id);
             }
 
             if (!$parent || $parent != $data['parent'])
             {
-            	throw new UserException('Le compte parent sélectionné est incorrect, par exemple pour créer un compte 512A il faut sélectionner 512 comme compte parent.');
+                throw new UserException('Le compte parent sélectionné est incorrect, par exemple pour créer un compte 512A il faut sélectionner 512 comme compte parent.');
             }
         }
 
         // Vérification que le compte n'existe pas déjà
         if ($db->test('compta_comptes', 'id = ?', $new_id))
         {
-        	throw new UserException('Ce numéro de compte existe déjà dans le plan comptable : ' . $new_id);
+            throw new UserException('Ce numéro de compte existe déjà dans le plan comptable : ' . $new_id);
         }
 
         if (isset($data['position']))
