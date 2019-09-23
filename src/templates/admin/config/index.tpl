@@ -112,7 +112,7 @@
             <dt><label for="f_couleur2">Couleur secondaire</label></dt>
             <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[1]}" name="couleur2" value="{form_field name=couleur2 default=$couleur2}" id="f_couleur2" /></dd>
         </dl>
-        <input type="hidden" name="image_fond" id="f_image_fond" value="{form_field name=image_fond}" />
+        <input type="hidden" name="image_fond" id="f_image_fond" data-source="{$background_image_source}" value="{form_field name=image_fond}" />
     </fieldset>
 
     <p class="submit">

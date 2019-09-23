@@ -301,16 +301,6 @@ class Utils
         return $str;
     }
 
-    static public function htmlLinksOnUrls($str)
-    {
-        return preg_replace_callback('!(?<=\s|^)((?:(ftp|https?|file|ed2k|ircs?)://|(magnet|mailto|data|tel|fax|geo|sips?|xmpp):)([^\s<]+))!',
-            function ($match) {
-                $proto = $match[2] ?: $match[3];
-                $text = ($proto == 'http' || $proto == 'mailto') ? $match[4] : $match[1];
-                return '<a class="'.$proto.'" href="'.htmlspecialchars($match[1], ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($text, ENT_QUOTES, 'UTF-8').'</a>';
-            }, $str);
-    }
-
     /**
      * Transforme un texte SkrivML en HTML
      * @param  string $str Texte SkrivML

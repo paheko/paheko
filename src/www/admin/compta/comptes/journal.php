@@ -12,7 +12,11 @@ if (!$compte)
 
 $journal = new Compta\Journal;
 
-$solde = $journal->getSolde($compte->id);
+// Récupération de l'exercice courant et sélectionné
+$exercices = new Compta\Exercices;
+$exercice = (int) qg('exercice') ?: $exercices->getCurrent()->id;
+
+$solde = $journal->getSolde($compte->id, false, $exercice);
 
 if (($compte->position & Compta\Comptes::ACTIF) || ($compte->position & Compta\Comptes::CHARGE))
 {
@@ -25,9 +29,12 @@ else
     $tpl->assign('debit', '-');
 }
 
+$tpl->assign('exercices', $exercices->getList());
+$tpl->assign('exercice_selectionne', $exercice);
+
 $tpl->assign('compte', $compte);
 $tpl->assign('solde', $solde);
-$tpl->assign('journal', $journal->getJournalCompte($compte->id));
+$tpl->assign('journal', $journal->getJournalCompte($compte->id, false, $exercice));
 $tpl->assign('suivi', qg('suivi'));
 
 $tpl->display('admin/compta/comptes/journal.tpl');

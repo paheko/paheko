@@ -220,24 +220,25 @@ class Template extends \KD2\Smartyer
 	{
 		$config = Config::getInstance();
 
-		if (!$config->get('couleur1') || !$config->get('couleur2') || !$config->get('image_fond'))
+		$couleur1 = $config->get('couleur1') ?: ADMIN_COLOR1;
+		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
+		$image_fond = ADMIN_BACKGROUND_IMAGE;
+
+		if ($config->get('image_fond'))
 		{
-			return '';
+			try {
+				$f = new Fichiers($config->get('image_fond'));
+				$image_fond = $f->getURL();
+			}
+			catch (\InvalidArgumentException $e)
+			{
+				// Fichier qui n'existe pas/plus
+			}
 		}
 
-		$couleur1 = implode(', ', sscanf($config->get('couleur1'), '#%02x%02x%02x'));
-		$couleur2 = implode(', ', sscanf($config->get('couleur2'), '#%02x%02x%02x'));
-
-		try {
-			$f = new Fichiers($config->get('image_fond'));
-		}
-		catch (\InvalidArgumentException $e)
-		{
-			// Fichier qui n'existe pas
-			return '';
-		}
-
-		$image_fond = $f->getURL();
+		// Transformation Hexa vers décimal
+		$couleur1 = implode(', ', sscanf($couleur1, '#%02x%02x%02x'));
+		$couleur2 = implode(', ', sscanf($couleur2, '#%02x%02x%02x'));
 
 		$out = '
 		<style type="text/css">
@@ -245,8 +246,10 @@ class Template extends \KD2\Smartyer
 			--gMainColor: %s;
 			--gSecondColor: %s;
 		}
-		.header .menu, body {
-			background-image: url("%s");
+		@media screen, handheld {
+			.header .menu, body {
+				background-image: url("%s");
+			}
 		}
 		</style>';
 
@@ -267,6 +270,8 @@ class Template extends \KD2\Smartyer
 				return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'country':
 				return Utils::getCountryName($v);
+			case 'date':
+				return Utils::sqliteDateToFrench($v);
 			case 'multiple':
 				$out = [];
 

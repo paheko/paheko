@@ -112,6 +112,8 @@ static $default_config = [
     'ADMIN_URL'             => WWW_URL . 'admin/',
     'NTP_SERVER'            => 'fr.pool.ntp.org',
     'ENABLE_AUTOMATIC_BACKUPS' => true,
+    'ADMIN_COLOR1'          => '#9c4f15',
+    'ADMIN_COLOR2'          => '#d98628',
 ];
 
 foreach ($default_config as $const => $value)
@@ -124,9 +126,14 @@ foreach ($default_config as $const => $value)
     }
 }
 
+if (!defined('Garradin\\ADMIN_BACKGROUND_IMAGE')) {
+    define('Garradin\\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
+}
+
 const WEBSITE = 'https://garradin.eu/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
-const DEFAULT_REPORT_URL = 'http://henga.test/report/?p=ABCD';
+#const DEFAULT_REPORT_URL = 'http://henga.test/report/?p=ABCD';
+const DEFAULT_REPORT_URL = null;
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 

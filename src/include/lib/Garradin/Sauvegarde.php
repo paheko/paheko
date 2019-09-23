@@ -395,12 +395,14 @@ class Sauvegarde
 			]);
 		}
 
-		// Force l'installation de plugin système si non existant dans la sauvegarde existante
-		Plugin::checkAndInstallSystemPlugins();
-
 		if ($version != garradin_version())
 		{
 			$return |= self::NEED_UPGRADE;
+		}
+		else {
+			// Force l'installation de plugin système si non existant dans la sauvegarde existante
+			// si une mise à jour est nécessaire, normalement ça sera fait après la mise à jour
+			Plugin::checkAndInstallSystemPlugins();
 		}
 
 		return $return;

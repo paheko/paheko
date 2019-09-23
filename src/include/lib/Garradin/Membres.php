@@ -329,9 +329,18 @@ class Membres
     {
         $config = Config::getInstance();
 
-        foreach ($recipients as $recipient)
+        foreach ($recipients as $key => $recipient)
         {
-            if (!SMTP::checkEmailIsValid($recipient->email, true))
+            // Ignorer les destinataires avec une adresse email vide
+            if (empty($recipient->email))
+            {
+                unset($recipients[$key]);
+                continue;
+            }
+
+            // Refuser d'envoyer un mail à une adresse invalide, sans vérifier le MX
+            // sinon ça serait trop lent
+            if (!SMTP::checkEmailIsValid($recipient->email, false))
             {
                 throw new UserException(sprintf('Adresse email invalide : "%s". Aucun message n\'a été envoyé.', $recipient->email));
             }

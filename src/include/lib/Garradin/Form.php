@@ -126,6 +126,8 @@ class Form
 				return sprintf('Le champ %s doit être un nombre.', $element);
 			case 'money':
 				return sprintf('Le champ %s n\'est pas un nombre valide.', $element);
+			case 'in':
+				return sprintf('Valeur invalide dans le champ \'%s\'.', $element);
 			default:
 				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
 		}

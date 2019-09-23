@@ -90,7 +90,7 @@ class Cotisations
 			try {
 				$data_compta = array_merge($data_compta, [
 					'id_categorie' => $co->id_categorie_compta,
-					'libelle'      => 'Cotisation - ' . $membre,
+					'libelle'      => sprintf('%s - %s', $co->intitule, $membre),
 					'date'         => $data['date'],
 					'id_auteur'    => $data['id_auteur'],
 					'id_membre'    => $data['id_membre'],
@@ -257,7 +257,7 @@ class Cotisations
 	 * @param  integer $id Numéro de la cotisation
 	 * @return array     Liste des membres
 	 */
-	public function listMembersForCotisation($id, $page = 1, $order = null, $desc = true)
+	public function listMembersForCotisation($id, $include_category, $page = 1, $order = null, $desc = true)
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
@@ -284,10 +284,31 @@ class Cotisations
 
 		$desc = $desc ? 'DESC' : 'ASC';
 
+		// Renvoyer la liste avec tous les membres des catégories dont la cotisation obligatoire est celle-ci
+		if ($include_category)
+		{
+			$cats_obligatoires = $db->getAssoc('SELECT id, id FROM membres_categories WHERE id_cotisation_obligatoire = ? AND cacher = 0;', $id);
+
+			return $db->get('SELECT m.id AS id_membre, cm.date, cm.id, m.numero,
+				m.'.$champ_id.' AS nom, c.montant,
+				CASE WHEN cm.id IS NULL THEN 0
+				WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
+				WHEN c.fin IS NOT NULL THEN (cm.date <= c.fin AND cm.date >= c.debut)
+				ELSE 1 END AS a_jour
+				FROM membres AS m
+					LEFT JOIN cotisations_membres AS cm ON cm.id_membre = m.id AND cm.id_cotisation = ?
+					LEFT JOIN cotisations AS c ON c.id = cm.id_cotisation
+				WHERE
+					'.$db->where('m.id_categorie', $cats_obligatoires) . '
+				GROUP BY m.id ORDER BY '.$order.' '.$desc.' LIMIT ?,?;',
+				$id, $begin, self::ITEMS_PER_PAGE);
+		}
+
 		return $db->get('SELECT cm.id_membre, cm.date, cm.id, m.numero,
 			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN (date() <= c.fin AND date() >= c.debut) ELSE 1 END AS a_jour
+			WHEN c.fin IS NOT NULL THEN (cm.date <= c.fin AND cm.date >= c.debut)
+			ELSE 1 END AS a_jour
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 				INNER JOIN membres AS m ON m.id = cm.id_membre
@@ -327,7 +348,7 @@ class Cotisations
 		$db = DB::getInstance();
 		return $db->get('SELECT c.*,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND date() <= c.fin AND date() >= c.debut)
+			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND cm.date <= c.fin AND cm.date >= c.debut)
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 			WHEN c.fin IS NOT NULL THEN c.fin ELSE 1 END AS expiration,
@@ -336,7 +357,7 @@ class Cotisations
 			FROM cotisations_membres AS cm
 				INNER JOIN cotisations AS c ON c.id = cm.id_cotisation
 			WHERE cm.id_membre = ?
-				AND ((c.fin IS NOT NULL AND date() <= c.fin AND date() >= c.debut) OR c.fin IS NULL)
+				AND ((c.fin IS NOT NULL AND cm.date <= c.fin AND cm.date >= c.debut) OR c.fin IS NULL)
 			GROUP BY cm.id_cotisation
 			ORDER BY cm.date DESC;', (int)$id);
 	}

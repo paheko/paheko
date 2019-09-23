@@ -110,10 +110,18 @@ class Categories
         return $db->getGrouped($query);
     }
 
-    public function listMoyensPaiement()
+    public function listMoyensPaiement($assoc = false)
     {
         $db = DB::getInstance();
-        return $db->getGrouped('SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;');
+
+        $query = 'SELECT code, nom FROM compta_moyens_paiement ORDER BY nom COLLATE NOCASE;';
+
+        if ($assoc) {
+            return $db->getAssoc($query);
+        }
+        else {
+            return $db->getGrouped($query);
+        }
     }
 
     public function getMoyenPaiement($code)
