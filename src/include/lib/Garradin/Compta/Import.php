@@ -89,7 +89,8 @@ class Import
 
 		$columns = array_flip($this->header);
 		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
-		$liste_moyens = $cats->listMoyensPaiement();
+		// Liste des moyens sous la forme nom -> code
+		$liste_moyens = array_flip($cats->listMoyensPaiement(true));
 
 		$col = function($column) use (&$row, &$columns)
 		{
@@ -122,10 +123,10 @@ class Import
 				{
 					throw new UserException('Erreur sur la ligne ' . $line . ' : l\'entête des colonnes est absent ou incorrect.');
 				}
-				
+
 				continue;
 			}
-	
+
 			if (count($row) != count($columns))
 			{
 				$db->rollback();
@@ -162,7 +163,15 @@ class Import
 			$cat = $col('Catégorie');
 			$moyen = strtoupper(substr($col('Moyen de paiement'), 0, 2));
 
-			if (!$moyen || !array_key_exists($moyen, $liste_moyens))
+			// Association du moyen de paiement par nom
+			if ($moyen && array_key_exists($moyen, $liste_moyens))
+			{
+				$moyen = $liste_moyens[$moyen];
+			}
+
+			// Vérification de l'existence du moyen de paiement
+			// s'il n'est pas valide, on ne peut pas avoir de catégorie non plus
+			if (!$moyen || !in_array($moyen, $liste_moyens, true))
 			{
 				$moyen = false;
 				$cat = false;
