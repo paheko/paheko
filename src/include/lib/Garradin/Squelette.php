@@ -922,15 +922,17 @@ class Squelette extends \KD2\MiniSkel
 
     static public function getSource($template)
     {
-        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template))
-            return false;
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template)) {
+            return null;
+        }
 
         $path = file_exists(DATA_ROOT . '/www/squelettes/' . $template)
             ? DATA_ROOT . '/www/squelettes/' . $template
             : ROOT . '/www/squelettes-dist/' . $template;
 
-        if (!file_exists($path))
-            return false;
+        if (!file_exists($path)) {
+            return null;
+        }
 
         return file_get_contents($path);
     }
