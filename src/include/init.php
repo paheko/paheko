@@ -290,6 +290,7 @@ function user_error($e)
         $tpl = Template::getInstance();
 
         $tpl->assign('error', $e->getMessage());
+        $tpl->assign('admin_url', ADMIN_URL);
         $tpl->display('error.tpl');
     }
 
