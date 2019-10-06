@@ -36,7 +36,7 @@
     {/if}
 </head>
 
-<body{if !empty($body_id)} id="{$body_id}"{/if} data-url="{$admin_url}">
+<body{if !empty($body_id)} id="{$body_id}"{/if}>
 
 {if empty($is_popup)}
 <header class="header">
