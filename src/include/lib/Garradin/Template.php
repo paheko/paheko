@@ -37,7 +37,7 @@ class Template extends \KD2\Smartyer
 		// car cela dévoilerait la version de Garradin utilisée, posant un souci
 		// en cas de faille, on cache donc la version utilisée, chaque instance
 		// aura sa propre version
-		$this->assign('version_hash', substr(sha1(VERSION . ROOT . SECRET_KEY), 0, 10));
+		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('self_url', Utils::getSelfUrl());
