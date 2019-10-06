@@ -2,7 +2,8 @@
 	window.g = window.garradin = {
 		url: window.location.href.replace(/\/admin\/.*?$/, ''),
 		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
-		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/')
+		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
+		version: document.head.querySelector('script').src.match(/\?(.*)$/)[1]
 	};
 
 	window.$ = function(selector) {
@@ -28,7 +29,7 @@
 	{
 		if (typeof dom == 'undefined')
 			dom = true;
-		
+
 		var eventName = dom ? 'DOMContentLoaded' : 'load';
 
 		if (document.addEventListener)
@@ -72,7 +73,7 @@
 	g.script = function (file) {
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
-		script.src = this.static_url + file;
+		script.src = this.static_url + file + '?' + this.version;
 		return document.head.appendChild(script);
 	};
 
@@ -80,7 +81,7 @@
 		var link = document.createElement('link');
 		link.rel = 'stylesheet';
 		link.type = 'text/css';
-		link.href = this.static_url + file;
+		link.href = this.static_url + file + '?' + this.version;
 		return document.head.appendChild(link);
 	};
 
@@ -150,7 +151,7 @@
 		input.style.position = 'absolute';
 		input.style.visibility = 'hidden';
 		document.body.appendChild(input);
-		
+
 		// If input type changed or value hasn't been sanitized then
 		// the input type date element is not supported
 		if (input.type !== 'text' && input.value !== ':-)')
@@ -223,7 +224,7 @@
 					{
 						parent = parent.parentNode;
 					}
-					
+
 					if (checked)
 						parent.className = parent.className.replace(/ checked$|$/, ' checked');
 					else
