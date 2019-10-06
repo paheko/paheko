@@ -40,7 +40,7 @@ if (qg('edit'))
 {
     $source = Squelette::getSource(qg('edit'));
 
-    if (!$source)
+    if (null === $source)
     {
         throw new UserException("Ce squelette n'existe pas.");
     }
