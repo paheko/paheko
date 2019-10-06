@@ -43,8 +43,8 @@
     var doc_url = "{$admin_url}doc/skel/";
     var skel_list = {$sources|escape:json};
     var skel_current = "{$edit.file|escape:'js'}";
+    g.script("scripts/skel_editor.js");
     </script>
-    <script type="text/javascript" src="{$admin_url}static/scripts/skel_editor.js"></script>
 {else}
 
     <fieldset>
