@@ -82,4 +82,21 @@ class DB extends DB_SQLite3
 
         return $this->exec($sql);
     }
+
+    /**
+     * @see https://www.sqlite.org/lang_altertable.html
+     */
+    public function toggleForeignKeys($enable)
+    {
+        assert(is_bool($enable));
+
+        if (!$enable) {
+            $this->db->exec('PRAGMA legacy_alter_table = ON;');
+            $this->db->exec('PRAGMA foreign_keys = OFF;');
+        }
+        else {
+            $this->db->exec('PRAGMA legacy_alter_table = OFF;');
+            $this->db->exec('PRAGMA foreign_keys = ON;');
+        }
+    }
 }

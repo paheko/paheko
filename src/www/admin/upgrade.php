@@ -72,7 +72,8 @@ flush();
 try {
     if (version_compare($v, '0.7.0', '<'))
     {
-        $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+        $db->toggleForeignKeys(false);
+        $db->begin();
 
         // Mise à jour base de données
         $db->exec(file_get_contents(ROOT . '/include/data/0.7.0.sql'));
@@ -101,17 +102,18 @@ try {
             }
         }
 
-        $db->exec('END;');
+        $db->commit();
     }
 
     if (version_compare($v, '0.7.2', '<'))
     {
-        $db->exec('PRAGMA foreign_keys = OFF; BEGIN;');
+        $db->toggleForeignKeys(false);
+        $db->begin();
 
         // Mise à jour base de données
         $db->exec(file_get_contents(ROOT . '/include/data/0.7.2.sql'));
 
-        $db->exec('END;');
+        $db->commit();
     }
 
     if (version_compare($v, '0.8.0-beta4', '<'))
@@ -127,7 +129,7 @@ try {
         $db->exec('VACUUM;');
 
         // Désactivation des foreign keys AVANT le début de la transaction
-        $db->exec('PRAGMA foreign_keys = OFF;');
+        $db->toggleForeignKeys(false);
 
         $db->begin();
 
@@ -163,7 +165,7 @@ try {
     if (version_compare($v, '0.8.3', '<'))
     {
         // Désactivation des foreign keys AVANT le début de la transaction
-        $db->exec('PRAGMA foreign_keys = OFF;');
+        $db->toggleForeignKeys(false);
 
         $db->begin();
 
@@ -183,7 +185,7 @@ try {
 
     if (version_compare($v, '0.9.0-rc1', '<'))
     {
-        $db->exec('PRAGMA foreign_keys = OFF;');
+        $db->toggleForeignKeys(false);
         $db->begin();
 
         $db->import(ROOT . '/include/data/0.9.0.sql');
@@ -253,7 +255,7 @@ try {
         $comptes = new Compta\Comptes;
         $comptes->importPlan();
 
-        $db->exec('PRAGMA foreign_keys = OFF;');
+        $db->toggleForeignKeys(false);
         $db->begin();
 
         $db->exec('INSERT INTO "compta_categories" VALUES(NULL,-1,\'Licences fédérales\',\'Licences payées pour les adhérents (par exemple fédération sportive etc.)\',\'652\');');
