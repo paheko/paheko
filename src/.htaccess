@@ -1,5 +1,7 @@
 # Désactiver le multiviews (conflit avec /admin/plugin.php) et les index (sécurité)
 Options -MultiViews -Indexes
+DirectoryIndex disabled
+DirectoryIndex index.php index.html
 
 # Au cas où 
 <IfModule mod_alias.c>
@@ -15,14 +17,20 @@ Options -MultiViews -Indexes
 
 # Redirection dynamique, pour les installations sans vhost dédié
 # Objectif: supprimer le /www/ de l'URL
-# Dé-commenter les lignes suivantes pour une installation ans VHost
+# Dé-commenter les lignes suivantes pour une installation sans VHost
 # Note: il est probable qu'il soit nécessaire d'adapter la configuration
 # à votre hébergeur !
 
 #<IfModule mod_rewrite.c>
-#	RewriteEngine on
-#	RewriteBase /
-#	RewriteCond %{REQUEST_URI}::$1 ^(.*?)/(.*)::\2$
-#	RewriteRule ^(.*)$ - [E=BASE:%1]
-#	RewriteRule (.*) %{ENV:BASE}/www/$1 [QSA]
+	#RewriteEngine on
+	## Remplacer dans les lignes suivantes
+	## /garradin/ par le nom du sous-répertoire où est installé Garradin
+ 	#RewriteBase /garradin/
+	#FallbackResource /garradin/www/_route.php
+
+	## Ne pas modifier les lignes suivantes, les décommenter simplement !
+	#RewriteCond %{REQUEST_URI} !www/
+	#RewriteRule ^(.*)$ www/$1 [QSA,L]
 #</IfModule>
+
+# Une fois ces lignes décommentées, supprimer le fichier .htaccess dans le répertoire www !
