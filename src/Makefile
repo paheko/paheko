@@ -36,9 +36,9 @@ deb:
 publish: release deb
 	$(eval VERSION=$(shell cat VERSION))
 	fossil uv sync
-	fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
+	#fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
-	fossil uv add ../debian/garradin-${VERSION}.deb
+	cd ../debian && fossil uv add garradin-${VERSION}-*.deb
 	fossil uv sync
 
 check-dependencies:
