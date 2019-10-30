@@ -4,9 +4,6 @@ namespace Garradin;
 
 // Routeur pour l'utilisation avec le serveur web intégré à PHP
 
-const WWW_URI = '/';
-//const WWW_URL = '/';
-
 $uri = $_SERVER['REQUEST_URI'];
 
 if (($pos = strpos($uri, '?')) !== false)
