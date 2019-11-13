@@ -119,12 +119,20 @@ class Session extends \KD2\UserSession
 	{
 		$logged = parent::isLogged();
 
-		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')
-			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN'))
 		{
-			if (!$logged || ($logged && $this->user->id != \Garradin\LOCAL_LOGIN))
+			$login_id = \Garradin\LOCAL_LOGIN;
+
+			// On va chercher le premier membre avec le droit de gérer les membres
+			if (-1 === $login_id) {
+				$login_id = $this->db->firstColumn('SELECT id FROM membres
+					WHERE id_categorie = (SELECT id FROM membres_categories WHERE droit_membres = ? LIMIT 1)
+					LIMIT 1', Membres::DROIT_ADMIN);
+			}
+
+			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
 			{
-				$logged = $this->create(\Garradin\LOCAL_LOGIN);
+				$logged = $this->create($login_id);
 			}
 		}
 
