@@ -184,7 +184,7 @@ class Recherche
 					'textMatch'=> $champs->isText($champ),
 					'label'    => $config->title,
 					'type'     => 'text',
-					'null'     => $config->mandatory ? false : true,
+					'null'     => true,
 				];
 
 				if ($config->type == 'checkbox')
