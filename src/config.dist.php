@@ -26,7 +26,12 @@ const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
 
 /**
  * Se connecter automatiquement avec l'ID de membre indiqué
- * Exemple: LOCAL_LOGIN = 42
+ * Exemple: LOCAL_LOGIN = 42 connectera automatiquement le membre n°42
+ * Attention à ne pas utiliser en production !
+ *
+ * Il est aussi possible de mettre "LOCAL_LOGIN = -1" pour se connecter
+ * avec le premier membre trouvé qui peut gérer la configuration (et donc
+ * modifier les droits des membres).
  *
  * Défault : false (connexion automatique désactivée)
  */
