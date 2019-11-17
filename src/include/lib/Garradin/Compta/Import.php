@@ -23,7 +23,8 @@ class Import
 		'Moyen de paiement',
 		'Numéro de chèque',
 		'Numéro de pièce',
-		'Remarques'
+		'Remarques',
+		'Projet'
 	];
 
 	protected function export($exercice)
@@ -42,12 +43,14 @@ class Import
 			(CASE moyen_paiement WHEN NULL THEN \'\' ELSE moyen.nom END) AS moyen,
 			numero_cheque,
 			numero_piece,
-			remarques
+			remarques,
+			projet.libelle AS projet
 			FROM compta_journal AS journal
 				LEFT JOIN compta_categories AS cat ON cat.id = journal.id_categorie
 				LEFT JOIN compta_comptes AS debit ON debit.id = journal.compte_debit
 				LEFT JOIN compta_comptes AS credit ON credit.id = journal.compte_credit
 				LEFT JOIN compta_moyens_paiement AS moyen ON moyen.code = journal.moyen_paiement
+				LEFT JOIN compta_projets AS projet ON projet.id = journal.id_projet
 			WHERE id_exercice = '.(int)$exercice.'
 			ORDER BY journal.date;
 		');
