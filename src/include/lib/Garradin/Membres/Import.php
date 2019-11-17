@@ -337,7 +337,7 @@ class Import
 		return Utils::toODS($name, $result, $champs, [$this, 'exportRow']);
 	}
 
-	public function exportRow(object $row) {
+	public function exportRow(\stdClass $row) {
 		// Pas hyper efficace, il faudrait ne pas récupérer la liste pour chaque ligne... FIXME
 		$champs_multiples = Config::getInstance()->get('champs_membres')->getMultiples();
 
