@@ -668,7 +668,7 @@ class Utils
         return sprintf("\"%s\"\r\n", implode('","', $row));
     }
 
-    static public function toCSV($name, $iterator, $header = null)
+    static public function toCSV($name, $iterator, $header = null, $row_map_callback = null)
     {
         header('Content-type: application/csv');
         header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
@@ -688,6 +688,10 @@ class Utils
                 $header = true;
             }
 
+            if (null !== $row_map_callback) {
+                $row = call_user_func($row_map_callback, $row);
+            }
+
             fputs($fp, self::row_to_csv($row));
         }
 
@@ -696,7 +700,7 @@ class Utils
         return true;
     }
 
-    static public function toODS($name, $iterator, $header = null)
+    static public function toODS($name, $iterator, $header = null, $row_map_callback = null)
     {
         header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
         header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
@@ -715,6 +719,10 @@ class Utils
             {
                 $ods->add(array_keys($row));
                 $header = true;
+            }
+
+            if (null !== $row_map_callback) {
+                $row = call_user_func($row_map_callback, $row);
             }
 
             $ods->add((array) $row);

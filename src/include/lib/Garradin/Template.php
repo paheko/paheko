@@ -281,7 +281,7 @@ class Template extends \KD2\Smartyer
 						$out[] = $name;
 				}
 
-				return implode(', ', $out);
+				return htmlspecialchars(implode(', ', $out));
 			default:
 				return htmlspecialchars($v);
 		}
