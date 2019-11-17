@@ -473,9 +473,7 @@ class Utils
 
     static public function normalizePhoneNumber($n)
     {
-        $n = preg_replace('!(\+\d+)\(0\)!', '\\1', $n);
-        $n = preg_replace('![^\d\+]!', '', $n);
-        return $n;
+        return preg_replace('![^\d\+\(\)p#,;-]!', '', trim($n));
     }
 
     static public function write_ini_string($in)

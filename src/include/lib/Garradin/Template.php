@@ -200,16 +200,13 @@ class Template extends \KD2\Smartyer
 
 	protected function formatPhoneNumber($n)
 	{
-		$n = preg_replace('![^\d\+]!', '', $n);
+		$country = Config::getInstance()->get('pays');
 
-		if (substr($n, 0, 1) == '+')
-		{
-			$n = preg_replace('!^\+(?:1|2[07]|2\d{2}|3[0-469]|3\d{2}|4[013-9]|'
-				. '4\d{2}|5[1-8]|5\d{2}|6[0-6]|6\d{2}|7\d|8[1-469]|8\d{2}|'
-				. '9[0-58]|9\d{2})!', '\\0 ', $n);
+		if ($country !== 'FR') {
+			return $n;
 		}
-		elseif (preg_match('/^\d{10}$/', $n))
-		{
+
+		if ('FR' === $country && $n[0] === '0' && strlen($n) === 10) {
 			$n = preg_replace('!(\d{2})!', '\\1 ', $n);
 		}
 
