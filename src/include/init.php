@@ -63,6 +63,61 @@ if (!defined('Garradin\ROOT'))
     define('Garradin\ROOT', dirname(__DIR__));
 }
 
+
+/**
+ * Auto-chargement des dépendances
+ */
+class Loader
+{
+    /**
+     * Liste des classes déjà chargées
+     * @var array
+     */
+    static protected $loaded = [];
+
+    /**
+     * Inclure un fichier de classe depuis le nom de la classe
+     * @param  string $classname
+     * @return void
+     */
+    static public function load($classname)
+    {
+        $classname = ltrim($classname, '\\');
+
+        if (array_key_exists($classname, self::$loaded))
+        {
+            return true;
+        }
+
+        // Plugins
+        if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
+        {
+            $classname = substr($classname, 16);
+            $plugin_name = substr($classname, 0, strpos($classname, '\\'));
+            $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
+
+            $path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
+        }
+        else
+        {
+            // PSR-0 autoload
+            $filename = str_replace('\\', '/', $classname);
+            $path = ROOT . '/include/lib/' . $filename . '.php';
+        }
+
+        if (!file_exists($path))
+        {
+            throw new \Exception('File '.$path.' doesn\'t exists');
+        }
+
+        self::$loaded[$classname] = true;
+
+        require $path;
+    }
+}
+
+\spl_autoload_register(['Garradin\Loader', 'load'], true);
+
 if (!defined('Garradin\DATA_ROOT'))
 {
     define('Garradin\DATA_ROOT', ROOT);
@@ -70,24 +125,23 @@ if (!defined('Garradin\DATA_ROOT'))
 
 if (!defined('Garradin\WWW_URI'))
 {
-    // Automagic URL discover
-    $path = str_replace(ROOT . '/www', '', getcwd());
-    $path = str_replace($path, '', dirname($_SERVER['SCRIPT_NAME']));
-    $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
-    $path = (substr($path, -1) != '/') ? $path . '/' : $path;
+    $uri = \KD2\HTTP::getRootURI(ROOT);
 
-    // Pour installations sans vhost
-    $path = str_replace('/www', '', $path);
+    if ($uri == '/www/') {
+        $uri = '/';
+    }
+    else {
+        readfile(ROOT . '/sous-domaine.html');
+        exit;
+    }
 
-    define('Garradin\WWW_URI', $path);
+    define('Garradin\WWW_URI', $uri);
+    unset($uri);
 }
 
 if (!defined('Garradin\WWW_URL'))
 {
-    $host = isset($_SERVER['HTTP_HOST']) 
-        ? $_SERVER['HTTP_HOST'] 
-        : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
-    define('Garradin\WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
+    define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . \KD2\HTTP::getHost() . WWW_URI);
 }
 
 static $default_config = [
@@ -151,60 +205,6 @@ if (!ini_get('date.timezone'))
         ini_set('date.timezone', 'Europe/Paris');
     }
 }
-
-/**
- * Auto-chargement des dépendances
- */
-class Loader
-{
-    /**
-     * Liste des classes déjà chargées
-     * @var array
-     */
-    static protected $loaded = [];
-
-    /**
-     * Inclure un fichier de classe depuis le nom de la classe
-     * @param  string $classname
-     * @return void
-     */
-    static public function load($classname)
-    {
-        $classname = ltrim($classname, '\\');
-
-        if (array_key_exists($classname, self::$loaded))
-        {
-            return true;
-        }
-
-        // Plugins
-        if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
-        {
-            $classname = substr($classname, 16);
-            $plugin_name = substr($classname, 0, strpos($classname, '\\'));
-            $filename = str_replace('\\', '/', substr($classname, strpos($classname, '\\')+1));
-
-            $path = Plugin::getPath(strtolower($plugin_name)) . '/lib/' . $filename . '.php';
-        }
-        else
-        {
-            // PSR-0 autoload
-            $filename = str_replace('\\', '/', $classname);
-            $path = ROOT . '/include/lib/' . $filename . '.php';
-        }
-
-        if (!file_exists($path))
-        {
-            throw new \Exception('File '.$path.' doesn\'t exists');
-        }
-
-        self::$loaded[$classname] = true;
-
-        require $path;
-    }
-}
-
-\spl_autoload_register(['Garradin\Loader', 'load'], true);
 
 /*
  * Gestion des erreurs et exceptions
