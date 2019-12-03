@@ -2,7 +2,15 @@
 
 namespace Garradin;
 
+if (empty($_SERVER['REQUEST_URI'])) {
+	die('Appel non supporté');
+}
+
 $uri = $_SERVER['REQUEST_URI'];
+
+if ('_route.php' === basename($uri)) {
+	die('Appel interdit');
+}
 
 if (($pos = strpos($uri, '?')) !== false)
 {
