@@ -15,6 +15,7 @@ use const Garradin\ADMIN_URL;
 use KD2\Security;
 use KD2\Security_OTP;
 use KD2\QRCode;
+use KD2\HTTP;
 
 class Session extends \KD2\UserSession
 {
@@ -23,7 +24,22 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
-	const MINIMUM_PASSWORD_LENGTH = 8;
+	const MINIMUM_PASSWORD_LENGTH = 10;
+
+	static public function checkPasswordValidity($password)
+	{
+		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
+		{
+			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
+		}
+
+		$session = new Session(DB::getInstance());
+		$session->http = new HTTP;
+
+		if ($session->isPasswordCompromised($password)) {
+			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
+		}
+	}
 
 	// Extension des méthodes de UserSession
 	public function __construct()
@@ -149,7 +165,7 @@ class Session extends \KD2\UserSession
 
 		// Vérifier encore, mais avec le temps NTP
 		// au cas où l'horloge du serveur n'est pas à l'heure
-		if (\Garradin\NTP_SERVER 
+		if (\Garradin\NTP_SERVER
 			&& ($time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER))
 			&& Security_OTP::TOTP($secret, $code, $time))
 		{
@@ -265,12 +281,9 @@ class Session extends \KD2\UserSession
 			throw new UserException('Le mot de passe et sa vérification ne sont pas identiques.');
 		}
 
-		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
-		{
-			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
-		}
+		self::checkPasswordValidity($password);
 
-		$password = Membres::hashPassword($password);
+		$password = self::hashPassword($password);
 
 		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
 		$message.= "Votre adresse email : ".$membre->email."\n";
@@ -352,12 +365,11 @@ class Session extends \KD2\UserSession
 
 		if (isset($data['passe']) && trim($data['passe']) !== '')
 		{
-			if (strlen($data['passe']) < self::MINIMUM_PASSWORD_LENGTH)
-			{
-				throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
-			}
+			$data['passe'] = trim($data['passe']);
 
-			$data['passe'] = Membres::hashPassword(trim($data['passe']));
+			self::checkPasswordValidity($data['passe']);
+
+			$data['passe'] = self::hashPassword($data['passe']);
 		}
 		else
 		{
