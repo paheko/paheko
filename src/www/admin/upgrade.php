@@ -265,6 +265,14 @@ try {
         $db->commit();
     }
 
+    if (version_compare($v, '0.9.5', '<'))
+    {
+        $db->begin();
+        // Créer les tables manquantes
+        $db->import(ROOT . '/include/data/schema.sql');
+        $db->commit();
+    }
+
     Utils::clearCaches();
 
     $config->setVersion(garradin_version());
