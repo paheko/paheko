@@ -3,7 +3,7 @@ Options -MultiViews -Indexes
 DirectoryIndex disabled
 DirectoryIndex index.php index.html
 
-# Au cas où 
+# Au cas où
 <IfModule mod_alias.c>
 	RedirectMatch 403 /include/
 	RedirectMatch 403 /cache/
@@ -11,8 +11,10 @@ DirectoryIndex index.php index.html
 	RedirectMatch 403 /templates/
 	RedirectMatch 403 /.*\.sqlite
 	RedirectMatch 403 /.*\.log
-	RedirectMatch 403 /(README|VERSION|COPYING)
+	RedirectMatch 403 /(README|VERSION|COPYING|Makefile|cron\.php)
 	RedirectMatch 403 /config\.(.*)\.php
+	RedirectMatch 403 /sous-domaine\.html
+	RedirectMatch 403 _inc\.php
 </IfModule>
 
 # Redirection dynamique, pour les installations sans vhost dédié
