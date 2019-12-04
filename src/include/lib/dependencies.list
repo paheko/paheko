@@ -20,3 +20,4 @@ KD2/Translate.php
 KD2/UserSession.php
 KD2/ZipWriter.php
 KD2/ODSWriter.php
+KD2/HTTP.php
