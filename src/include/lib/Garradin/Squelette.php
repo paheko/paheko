@@ -634,13 +634,8 @@ class Squelette extends \KD2\MiniSkel
             // Appel du plugin lié à cette boucle, si ça existe
             $return = Plugin::fireSignal('boucle.' . $loopType, $params, $callback_return);
 
-            // Si le retour est du texte on le traite comme tel
-            if (is_string($return))
-            {
-                return $return;
-            }
-            // Sinon si ce n'est pas true
-            elseif (!$return)
+            // Si aucun plugin n'a été appelé c'est que le type de boucle n'est pas défini
+            if (!$return)
             {
                 throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
             }

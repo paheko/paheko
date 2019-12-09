@@ -749,11 +749,18 @@ class Plugin
 	 * Déclenche le signal donné auprès des plugins enregistrés
 	 * @param  string $signal Nom du signal
 	 * @param  array  $params Paramètres du callback (array ou null)
-	 * @return NULL 		  NULL si aucun plugin n'a été appelé, true sinon
+	 * @return NULL 		  NULL si aucun plugin n'a été appelé,
+	 * TRUE si un plugin a été appelé et a arrêté l'exécution,
+	 * FALSE si des plugins ont été appelés mais aucun n'a stopé l'exécution
 	 */
 	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
+
+		if (!count($list)) {
+			return null;
+		}
+
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($list as $row)
@@ -767,12 +774,11 @@ class Plugin
 
 			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 
-			if ($return)
-			{
-				return $return;
+			if (true === $return) {
+				return true;
 			}
 		}
 
-		return !empty($list) ? false : null;
+		return false;
 	}
 }
