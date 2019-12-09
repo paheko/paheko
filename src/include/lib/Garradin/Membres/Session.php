@@ -24,7 +24,7 @@ class Session extends \KD2\UserSession
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
-	const MINIMUM_PASSWORD_LENGTH = 10;
+	const MINIMUM_PASSWORD_LENGTH = 8;
 
 	static public function checkPasswordValidity($password)
 	{
@@ -39,6 +39,20 @@ class Session extends \KD2\UserSession
 		if ($session->isPasswordCompromised($password)) {
 			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 		}
+	}
+
+	public function isPasswordCompromised($password)
+	{
+		// Vérifier s'il n'y a pas un plugin qui gère déjà cet aspect
+		// notamment en installation mutualisée c'est plus efficace
+		$is_compromised = null;
+		$called = Plugin::fireSignal('motdepasse.compromis', ['password' => $password], ['is_compromised' => $is_compromised]);
+
+		if ($called !== null) {
+			return $is_compromised;
+		}
+
+		return parent::isPasswordCompromised($password);
 	}
 
 	// Extension des méthodes de UserSession
