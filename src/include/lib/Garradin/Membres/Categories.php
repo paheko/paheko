@@ -13,8 +13,8 @@ class Categories
     protected $droits = [
         'inscription'=> Membres::DROIT_AUCUN,
         'connexion' =>  Membres::DROIT_ACCES,
-        'membres'   =>  Membres::DROIT_ACCES,
-        'compta'    =>  Membres::DROIT_ACCES,
+        'membres'   =>  Membres::DROIT_AUCUN,
+        'compta'    =>  Membres::DROIT_AUCUN,
         'wiki'      =>  Membres::DROIT_ACCES,
         'config'    =>  Membres::DROIT_AUCUN,
     ];
