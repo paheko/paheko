@@ -189,6 +189,10 @@ span.alert, b.alert {
     color: #990;
 }
 
+.alert p, .error p, .confirm p {
+    margin-bottom: .8em;
+}
+
 p.alert, div.alert, p.error, div.error, p.confirm, div.confirm {
     border: 1px solid #ccc;
     padding: .5em;
@@ -220,7 +224,7 @@ p.confirm::before, div.confirm::before, p.alert::before, div.alert::before, p.er
     position: absolute;
     font-size: 1.5em;
     text-shadow: 2px 2px 5px #666;
-}    
+}
 
 p.confirm::before, div.confirm::before {
     content: "☑";
