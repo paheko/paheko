@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Cotisations du membre" current="membres/cotisations"}
 
 <ul class="actions">
-    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
+    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
     {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
     {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
         <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
