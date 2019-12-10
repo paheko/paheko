@@ -19,6 +19,10 @@ if (($pos = strpos($uri, '?')) !== false)
 
 if (file_exists(__DIR__ . $uri))
 {
+	if (PHP_SAPI != 'cli') {
+		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Garradin');
+	}
+
 	return false;
 }
 elseif (preg_match('!/admin/plugin/(.+?)/(.*)!', $uri, $match))
