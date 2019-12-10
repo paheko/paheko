@@ -5,7 +5,7 @@
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
-    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}1" media="all" />
+    <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
     {if isset($js) || isset($custom_js)}
         <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
     {/if}
