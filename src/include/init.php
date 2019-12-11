@@ -184,9 +184,8 @@ if (!defined('Garradin\\ADMIN_BACKGROUND_IMAGE')) {
     define('Garradin\\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
 
-const WEBSITE = 'https://garradin.eu/';
+const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
-#const DEFAULT_REPORT_URL = 'http://henga.test/report/?p=ABCD';
 const DEFAULT_REPORT_URL = null;
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
