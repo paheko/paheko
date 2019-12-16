@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Membres;
 use Garradin\UserException;
+use Garradin\Plugin;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
