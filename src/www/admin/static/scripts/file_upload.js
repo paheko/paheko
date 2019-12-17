@@ -7,7 +7,7 @@
 		var rusha = new Rusha();
 		var form = $('#f_upload');
 		var max_size = $('#f_maxsize').value;
-		var admin_url = document.body.getAttribute('data-url');
+		var admin_url = g.admin_url;
 
 		form.onsubmit = function () {
 			return true;

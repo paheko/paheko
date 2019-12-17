@@ -23,7 +23,8 @@ class Import
 		'Moyen de paiement',
 		'Numéro de chèque',
 		'Numéro de pièce',
-		'Remarques'
+		'Remarques',
+		'Projet'
 	];
 
 	protected function export($exercice)
@@ -42,12 +43,14 @@ class Import
 			(CASE moyen_paiement WHEN NULL THEN \'\' ELSE moyen.nom END) AS moyen,
 			numero_cheque,
 			numero_piece,
-			remarques
+			remarques,
+			projet.libelle AS projet
 			FROM compta_journal AS journal
 				LEFT JOIN compta_categories AS cat ON cat.id = journal.id_categorie
 				LEFT JOIN compta_comptes AS debit ON debit.id = journal.compte_debit
 				LEFT JOIN compta_comptes AS credit ON credit.id = journal.compte_credit
 				LEFT JOIN compta_moyens_paiement AS moyen ON moyen.code = journal.moyen_paiement
+				LEFT JOIN compta_projets AS projet ON projet.id = journal.id_projet
 			WHERE id_exercice = '.(int)$exercice.'
 			ORDER BY journal.date;
 		');
@@ -87,10 +90,12 @@ class Import
 		$cats = new Categories;
 		$journal = new Journal;
 
-		$columns = array_flip($this->header);
 		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		// Liste des moyens sous la forme nom -> code
 		$liste_moyens = array_flip($cats->listMoyensPaiement(true));
+
+		// Liste associative des projets
+		$liste_projets = $db->getAssoc('SELECT libelle, id FROM compta_projets;');
 
 		$col = function($column) use (&$row, &$columns)
 		{
@@ -123,6 +128,8 @@ class Import
 				{
 					throw new UserException('Erreur sur la ligne ' . $line . ' : l\'entête des colonnes est absent ou incorrect.');
 				}
+
+				$columns = array_flip($row);
 
 				continue;
 			}
@@ -182,6 +189,16 @@ class Import
 				$cat = $moyen = false;
 			}
 
+			$id_projet = null;
+
+			if (!empty($col('Projet'))) {
+				if (!array_key_exists($col('Projet'), $liste_projets)) {
+					throw new UserException(sprintf('Erreur sur la ligne %d : le projet "%s" est inconnu', $line, $col('Projet')));
+				}
+
+				$id_projet = $liste_projets[$col('Projet')];
+			}
+
 			$data = [
 				'libelle'       =>  $col('Libellé'),
 				'montant'       =>  (float) $col('Montant'),
@@ -190,6 +207,7 @@ class Import
 				'compte_debit'  =>  $debit,
 				'numero_piece'  =>  $col('Numéro de pièce'),
 				'remarques'     =>  $col('Remarques'),
+				'id_projet'     =>  $id_projet,
 			];
 
 			if ($cat)

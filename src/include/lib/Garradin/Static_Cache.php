@@ -21,7 +21,7 @@ class Static_Cache
 
 	protected static function _getCachePath($id)
 	{
-		$id = 'cache_' . sha1($id);
+		$id = 'cache_' . sha1(DB_FILE . $id);
 		return self::_getCacheDir() . '/' . $id;
 	}
 

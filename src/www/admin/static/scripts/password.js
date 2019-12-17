@@ -25,12 +25,12 @@
 
 		strength_elm = document.createElement('span');
 		strength_elm.className = 'password_check';
-		
+
 		pw_elm.parentNode.appendChild(strength_elm);
 
 		match_elm = document.createElement('span');
 		match_elm.className = 'password_check';
-		
+
 		pw2_elm.parentNode.appendChild(match_elm);
 
 		pw_elm.onkeyup = checkPasswordStrength;
@@ -92,7 +92,7 @@
 		    	score -= pass.match(r) ? pass.match(r).length * 5 : 0;
 		    }
 	    }
-	    
+
 	    // award every unique letter until 5 repetitions
 	    var letters = new Object();
 	    for (var i=0; i<pass.length; i++) {
@@ -152,7 +152,7 @@
 	    else
 	    {
 	    	strength_elm.className = strength_elm.className.split(' ')[0] + ' fail';
-	        strength_elm.innerHTML = 'Sécurité : <b>aucune</b>';	    	
+	        strength_elm.innerHTML = 'Sécurité : <b>aucune</b>';
 	    }
 
 	    return true;

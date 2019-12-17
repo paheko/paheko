@@ -10,42 +10,46 @@
     {/if}
 </ul>
 
-<table class="list">
-    <thead>
-        <th>Cotisation</th>
-        <td>Période</td>
-        <td>Montant</td>
-        <td>Membres inscrits</td>
-        <td>Membres à jour</td>
-        <td></td>
-    </thead>
-    <tbody>
-        {foreach from=$liste item="co"}
-            <tr>
-                <th><a href="{$admin_url}membres/cotisations/voir.php?id={$co.id}">{$co.intitule}</a></th>
-                <td>
-                    {if $co.duree}
-                        {$co.duree} jours
-                    {elseif $co.debut}
-                        du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
-                    {else}
-                        ponctuelle
-                    {/if}
-                </td>
-                <td class="num">{$co.montant|escape|html_money} {$config.monnaie}</td>
-                <td class="num">{$co.nb_membres}</td>
-                <td class="num">{$co.nb_a_jour}</td>
-                <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id}" title="Liste des membres cotisants">👪</a>
-                    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id}" title="Modifier">✎</a>
-                        <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id}" title="Supprimer">✘</a>
-                    {/if}
-                </td>
-            </tr>
-        {/foreach}
-    </tbody>
-</table>
+{if count($liste)}
+    <table class="list">
+        <thead>
+            <th>Cotisation</th>
+            <td>Période</td>
+            <td>Montant</td>
+            <td>Membres inscrits</td>
+            <td>Membres à jour</td>
+            <td></td>
+        </thead>
+        <tbody>
+            {foreach from=$liste item="co"}
+                <tr>
+                    <th><a href="{$admin_url}membres/cotisations/voir.php?id={$co.id}">{$co.intitule}</a></th>
+                    <td>
+                        {if $co.duree}
+                            {$co.duree} jours
+                        {elseif $co.debut}
+                            du {$co.debut|format_sqlite_date_to_french} au {$co.fin|format_sqlite_date_to_french}
+                        {else}
+                            ponctuelle
+                        {/if}
+                    </td>
+                    <td class="num">{$co.montant|escape|html_money} {$config.monnaie}</td>
+                    <td class="num">{$co.nb_membres}</td>
+                    <td class="num">{$co.nb_a_jour}</td>
+                    <td class="actions">
+                        <a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$co.id}" title="Liste des membres cotisants">👪</a>
+                        {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+                            <a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$co.id}" title="Modifier">✎</a>
+                            <a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$co.id}" title="Supprimer">✘</a>
+                        {/if}
+                    </td>
+                </tr>
+            {/foreach}
+        </tbody>
+    </table>
+{else}
+    <p class="alert">Il n'y a aucun type de cotisation enregistré.</p>
+{/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
 

@@ -63,94 +63,6 @@ if (!defined('Garradin\ROOT'))
     define('Garradin\ROOT', dirname(__DIR__));
 }
 
-if (!defined('Garradin\DATA_ROOT'))
-{
-    define('Garradin\DATA_ROOT', ROOT);
-}
-
-if (!defined('Garradin\WWW_URI'))
-{
-    // Automagic URL discover
-    $path = str_replace(ROOT . '/www', '', getcwd());
-    $path = str_replace($path, '', dirname($_SERVER['SCRIPT_NAME']));
-    $path = (!empty($path[0]) && $path[0] != '/') ? '/' . $path : $path;
-    $path = (substr($path, -1) != '/') ? $path . '/' : $path;
-
-    // Pour installations sans vhost
-    $path = str_replace('/www', '', $path);
-
-    define('Garradin\WWW_URI', $path);
-}
-
-if (!defined('Garradin\WWW_URL'))
-{
-    $host = isset($_SERVER['HTTP_HOST']) 
-        ? $_SERVER['HTTP_HOST'] 
-        : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
-    define('Garradin\WWW_URL', 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $host . WWW_URI);
-}
-
-static $default_config = [
-    'CACHE_ROOT'            => DATA_ROOT . '/cache',
-    'DB_FILE'               => DATA_ROOT . '/association.sqlite',
-    'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
-    'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
-    'PREFER_HTTPS'          => false,
-    'ALLOW_MODIFIED_IMPORT' => true,
-    'PLUGINS_SYSTEM'        => '',
-    'SHOW_ERRORS'           => true,
-    'MAIL_ERRORS'           => false,
-    'ERRORS_REPORT_URL'     => null,
-    'ERRORS_ENABLE_LOG_VIEW'=> true,
-    'USE_CRON'              => false,
-    'ENABLE_XSENDFILE'      => false,
-    'SMTP_HOST'             => false,
-    'SMTP_USER'             => null,
-    'SMTP_PASSWORD'         => null,
-    'SMTP_PORT'             => 587,
-    'SMTP_SECURITY'         => 'STARTTLS',
-    'ADMIN_URL'             => WWW_URL . 'admin/',
-    'NTP_SERVER'            => 'fr.pool.ntp.org',
-    'ENABLE_AUTOMATIC_BACKUPS' => true,
-    'ADMIN_COLOR1'          => '#9c4f15',
-    'ADMIN_COLOR2'          => '#d98628',
-];
-
-foreach ($default_config as $const => $value)
-{
-    $const = sprintf('Garradin\\%s', $const);
-
-    if (!defined($const))
-    {
-        define($const, $value);
-    }
-}
-
-if (!defined('Garradin\\ADMIN_BACKGROUND_IMAGE')) {
-    define('Garradin\\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
-}
-
-const WEBSITE = 'https://garradin.eu/';
-const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
-#const DEFAULT_REPORT_URL = 'http://henga.test/report/?p=ABCD';
-const DEFAULT_REPORT_URL = null;
-
-// PHP devrait être assez intelligent pour chopper la TZ système mais nan
-// il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
-// éviter le message d'erreur à la con on définit une timezone par défaut
-// Pour utiliser une autre timezone, il suffit de définir date.timezone dans
-// un .htaccess ou dans config.local.php
-if (!ini_get('date.timezone'))
-{
-    if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
-    {
-        ini_set('date.timezone', $tz);
-    }
-    else
-    {
-        ini_set('date.timezone', 'Europe/Paris');
-    }
-}
 
 /**
  * Auto-chargement des dépendances
@@ -205,6 +117,93 @@ class Loader
 }
 
 \spl_autoload_register(['Garradin\Loader', 'load'], true);
+
+if (!defined('Garradin\DATA_ROOT'))
+{
+    define('Garradin\DATA_ROOT', ROOT);
+}
+
+if (!defined('Garradin\WWW_URI'))
+{
+    $uri = \KD2\HTTP::getRootURI(ROOT);
+
+    if ($uri == '/www/') {
+        $uri = '/';
+    }
+    else {
+        readfile(ROOT . '/sous-domaine.html');
+        exit;
+    }
+
+    define('Garradin\WWW_URI', $uri);
+    unset($uri);
+}
+
+if (!defined('Garradin\WWW_URL'))
+{
+    define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . \KD2\HTTP::getHost() . WWW_URI);
+}
+
+static $default_config = [
+    'CACHE_ROOT'            => DATA_ROOT . '/cache',
+    'DB_FILE'               => DATA_ROOT . '/association.sqlite',
+    'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
+    'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
+    'PREFER_HTTPS'          => false,
+    'ALLOW_MODIFIED_IMPORT' => true,
+    'PLUGINS_SYSTEM'        => '',
+    'SHOW_ERRORS'           => true,
+    'MAIL_ERRORS'           => false,
+    'ERRORS_REPORT_URL'     => null,
+    'ERRORS_ENABLE_LOG_VIEW'=> true,
+    'USE_CRON'              => false,
+    'ENABLE_XSENDFILE'      => false,
+    'SMTP_HOST'             => false,
+    'SMTP_USER'             => null,
+    'SMTP_PASSWORD'         => null,
+    'SMTP_PORT'             => 587,
+    'SMTP_SECURITY'         => 'STARTTLS',
+    'ADMIN_URL'             => WWW_URL . 'admin/',
+    'NTP_SERVER'            => 'fr.pool.ntp.org',
+    'ENABLE_AUTOMATIC_BACKUPS' => true,
+    'ADMIN_COLOR1'          => '#9c4f15',
+    'ADMIN_COLOR2'          => '#d98628',
+];
+
+foreach ($default_config as $const => $value)
+{
+    $const = sprintf('Garradin\\%s', $const);
+
+    if (!defined($const))
+    {
+        define($const, $value);
+    }
+}
+
+if (!defined('Garradin\\ADMIN_BACKGROUND_IMAGE')) {
+    define('Garradin\\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
+}
+
+const WEBSITE = 'https://fossil.kd2.org/garradin/';
+const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+const DEFAULT_REPORT_URL = null;
+
+// PHP devrait être assez intelligent pour chopper la TZ système mais nan
+// il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
+// éviter le message d'erreur à la con on définit une timezone par défaut
+// Pour utiliser une autre timezone, il suffit de définir date.timezone dans
+// un .htaccess ou dans config.local.php
+if (!ini_get('date.timezone'))
+{
+    if (($tz = @date_default_timezone_get()) && $tz != 'UTC')
+    {
+        ini_set('date.timezone', $tz);
+    }
+    else
+    {
+        ini_set('date.timezone', 'Europe/Paris');
+    }
+}
 
 /*
  * Gestion des erreurs et exceptions
@@ -290,6 +289,7 @@ function user_error($e)
         $tpl = Template::getInstance();
 
         $tpl->assign('error', $e->getMessage());
+        $tpl->assign('admin_url', ADMIN_URL);
         $tpl->display('error.tpl');
     }
 

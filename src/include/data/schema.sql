@@ -405,3 +405,17 @@ CREATE TABLE IF NOT EXISTS recherches
     type TEXT NOT NULL, -- "json" ou "sql"
     contenu TEXT NOT NULL
 );
+
+
+CREATE TABLE IF NOT EXISTS compromised_passwords_cache
+-- Cache des hash de mots de passe compromis
+(
+    hash TEXT NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
+-- Cache des préfixes de mots de passe compromis
+(
+    prefix TEXT NOT NULL PRIMARY KEY,
+    date INTEGER NOT NULL
+);

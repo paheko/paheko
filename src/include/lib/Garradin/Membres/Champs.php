@@ -178,6 +178,19 @@ class Champs
         return $champs;
     }
 
+    public function getMultiples()
+    {
+        $out = [];
+
+        foreach ($this->champs as $id => $champ) {
+            if ($champ->type == 'multiple') {
+                $out[$id] = $champ;
+            }
+        }
+
+        return $out;
+    }
+
     public function getListedFields()
     {
         $champs = (array) $this->champs;

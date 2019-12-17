@@ -281,6 +281,14 @@ try {
         throw new \LogicException('Erreur de cohérence dans la base de données lors de la mise à jour (clés étrangères)');
     }
 
+    if (version_compare($v, '0.9.5', '<'))
+    {
+        $db->beginSchemaUpdate());
+        // Créer les tables manquantes
+        $db->import(ROOT . '/include/data/schema.sql');
+        $db->commitSchemaUpdate();
+    }
+
     Utils::clearCaches();
 
     $config->setVersion(garradin_version());
