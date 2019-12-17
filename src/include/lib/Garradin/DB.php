@@ -85,15 +85,30 @@ class DB extends DB_SQLite3
 
     public function beginSchemaUpdate()
     {
-        $this->exec('PRAGMA legacy_alter_table = ON;');
-        $this->exec('PRAGMA foreign_keys = OFF;');
+        $this->toggleForeignKeys(false);
         $this->begin();
     }
 
     public function commitSchemaUpdate()
     {
         $this->commit();
-        $this->exec('PRAGMA legacy_alter_table = OFF;');
-        $this->exec('PRAGMA foreign_keys = ON;');
+        $this->toggleForeignKeys(true);
+    }
+
+    /**
+     * @see https://www.sqlite.org/lang_altertable.html
+     */
+    public function toggleForeignKeys($enable)
+    {
+        assert(is_bool($enable));
+
+        if (!$enable) {
+            $this->db->exec('PRAGMA legacy_alter_table = ON;');
+            $this->db->exec('PRAGMA foreign_keys = OFF;');
+        }
+        else {
+            $this->db->exec('PRAGMA legacy_alter_table = OFF;');
+            $this->db->exec('PRAGMA foreign_keys = ON;');
+        }
     }
 }

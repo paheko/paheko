@@ -15,31 +15,6 @@ class Membres
 
     const ITEMS_PER_PAGE = 50;
 
-    static protected function _getSalt($length)
-    {
-        static $str = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        
-        $out = '';
-        $max = strlen($str) - 1;
-
-        for ($i = 0; $i < $length; $i++)
-        {
-            $random = Security::random_int(0, $max);
-            $out .= $str[$random];
-        }
-
-        return $out;
-    }
-
-    static public function hashPassword($password)
-    {
-        // Remove NUL bytes
-        // see http://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
-        $password = str_replace("\0", '', $password);
-
-        return password_hash($password, \PASSWORD_DEFAULT);
-    }
-
     // Gestion des données ///////////////////////////////////////////////////////
 
     public function _checkFields(&$data, $check_editable = true, $check_password = true)
@@ -175,7 +150,8 @@ class Membres
 
         if (isset($data['passe']) && trim($data['passe']) != '')
         {
-            $data['passe'] = self::hashPassword($data['passe']);
+            Session::checkPasswordValidity($data['passe']);
+            $data['passe'] = Session::hashPassword($data['passe']);
         }
         else
         {
@@ -230,7 +206,8 @@ class Membres
 
         if (!empty($data['passe']) && trim($data['passe']))
         {
-            $data['passe'] = self::hashPassword($data['passe']);
+            Session::checkPasswordValidity($data['passe']);
+            $data['passe'] = Session::hashPassword($data['passe']);
         }
         else
         {

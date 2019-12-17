@@ -107,11 +107,22 @@ class Exercices
         $last = $db->firstColumn('SELECT date FROM compta_journal WHERE id_exercice = ? AND date >= ? ORDER BY date DESC LIMIT 1;', $id, $new_end);
         $new_end = $last ?: $new_end;
 
+        $year_begin = substr($new_begin, 0, 4);
+        $year_end = substr($new_end, 0, 4);
+
+        // Nom du nouvel exercice
+        if ($year_begin == $year_end) {
+            $label = sprintf('Exercice %d', $year_begin);
+        }
+        else {
+            $label = sprintf('Exercice %d-%d', $year_begin, $year_end);
+        }
+
         // Création du nouvel exercice
         $new_id = $this->add([
             'debut'     =>  $new_begin,
             'fin'       =>  $new_end,
-            'libelle'   =>  'Nouvel exercice'
+            'libelle'   =>  $label,
         ]);
 
         // Ré-attribution des opérations de l'exercice à clôturer qui ne sont pas dans son

@@ -634,13 +634,8 @@ class Squelette extends \KD2\MiniSkel
             // Appel du plugin lié à cette boucle, si ça existe
             $return = Plugin::fireSignal('boucle.' . $loopType, $params, $callback_return);
 
-            // Si le retour est du texte on le traite comme tel
-            if (is_string($return))
-            {
-                return $return;
-            }
-            // Sinon si ce n'est pas true
-            elseif (!$return)
+            // Si aucun plugin n'a été appelé c'est que le type de boucle n'est pas défini
+            if (!$return)
             {
                 throw new \KD2\MiniSkelMarkupException("Le type de boucle '".$loopType."' est inconnu.");
             }
@@ -922,15 +917,17 @@ class Squelette extends \KD2\MiniSkel
 
     static public function getSource($template)
     {
-        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template))
-            return false;
+        if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $template)) {
+            return null;
+        }
 
         $path = file_exists(DATA_ROOT . '/www/squelettes/' . $template)
             ? DATA_ROOT . '/www/squelettes/' . $template
             : ROOT . '/www/squelettes-dist/' . $template;
 
-        if (!file_exists($path))
-            return false;
+        if (!file_exists($path)) {
+            return null;
+        }
 
         return file_get_contents($path);
     }

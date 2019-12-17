@@ -64,6 +64,7 @@
                 <label for="f_droit_connexion_acces"><b class="acces">C</b> Oui</label>
             </dd>
         </dl>
+        {* TODO pas d'inscription pour le moment
         <dl class="droits">
             <dt><label for="f_droit_inscription_aucun">Les membres de cette catégorie peuvent-ils s'inscrire d'eux-même ?</label></dt>
             <dd>
@@ -75,6 +76,7 @@
                 <label for="f_droit_inscription_acces"><b class="acces">I</b> Oui</label>
             </dd>
         </dl>
+        *}
         <dl class="droits">
             <dt><label for="f_droit_membres_aucun">Gestion des membres :</label></dt>
             <dd>
@@ -83,15 +85,15 @@
             </dd>
             <dd>
                 <input type="radio" name="droit_membres" value="{$membres::DROIT_ACCES}" id="f_droit_membres_acces" {if $cat.droit_membres == $membres::DROIT_ACCES}checked="checked"{/if} />
-                <label for="f_droit_membres_acces"><b class="acces">M</b> Lecture uniquement</label>
+                <label for="f_droit_membres_acces"><b class="acces">M</b> Lecture uniquement <em>(peut voir les informations personnelles de tous les membres, y compris leurs cotisations)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_membres" value="{$membres::DROIT_ECRITURE}" id="f_droit_membres_ecriture" {if $cat.droit_membres == $membres::DROIT_ECRITURE}checked="checked"{/if} />
-                <label for="f_droit_membres_ecriture"><b class="ecriture">M</b> Lecture &amp; écriture</label>
+                <label for="f_droit_membres_ecriture"><b class="ecriture">M</b> Lecture &amp; écriture <em>(peut ajouter et modifier des membres, mais pas les supprimer ni les changer de catégorie, peut affecter des cotisations aux membres)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_membres" value="{$membres::DROIT_ADMIN}" id="f_droit_membres_admin" {if $cat.droit_membres == $membres::DROIT_ADMIN}checked="checked"{/if} />
-                <label for="f_droit_membres_admin"><b class="admin">M</b> Administration</label>
+                <label for="f_droit_membres_admin"><b class="admin">M</b> Administration <em>(peut tout faire)</em></label>
             </dd>
         </dl>
         <dl class="droits">
@@ -102,15 +104,15 @@
             </dd>
             <dd>
                 <input type="radio" name="droit_compta" value="{$membres::DROIT_ACCES}" id="f_droit_compta_acces" {if $cat.droit_compta == $membres::DROIT_ACCES}checked="checked"{/if} />
-                <label for="f_droit_compta_acces"><b class="acces">€</b> Lecture uniquement</label>
+                <label for="f_droit_compta_acces"><b class="acces">€</b> Lecture uniquement <em>(peut lire toutes les informations de tous les exercices)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_compta" value="{$membres::DROIT_ECRITURE}" id="f_droit_compta_ecriture" {if $cat.droit_compta == $membres::DROIT_ECRITURE}checked="checked"{/if} />
-                <label for="f_droit_compta_ecriture"><b class="ecriture">€</b> Lecture &amp; écriture</label>
+                <label for="f_droit_compta_ecriture"><b class="ecriture">€</b> Lecture &amp; écriture <em>(peut ajouter des écritures, mais pas les modifier ni les supprimer)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_compta" value="{$membres::DROIT_ADMIN}" id="f_droit_compta_admin" {if $cat.droit_compta == $membres::DROIT_ADMIN}checked="checked"{/if} />
-                <label for="f_droit_compta_admin"><b class="admin">€</b> Administration</label>
+                <label for="f_droit_compta_admin"><b class="admin">€</b> Administration <em>(peut modifier et supprimer des écritures, gérer les comptes, les exercices, etc.)</em></label>
             </dd>
         </dl>
         <dl class="droits">
@@ -121,15 +123,15 @@
             </dd>
             <dd>
                 <input type="radio" name="droit_wiki" value="{$membres::DROIT_ACCES}" id="f_droit_wiki_acces" {if $cat.droit_wiki == $membres::DROIT_ACCES}checked="checked"{/if} />
-                <label for="f_droit_wiki_acces"><b class="acces">W</b> Lecture uniquement</label>
+                <label for="f_droit_wiki_acces"><b class="acces">W</b> Lecture uniquement <em>(peut lire les pages auquel il a le droit d'accéder)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_wiki" value="{$membres::DROIT_ECRITURE}" id="f_droit_wiki_ecriture" {if $cat.droit_wiki == $membres::DROIT_ECRITURE}checked="checked"{/if} />
-                <label for="f_droit_wiki_ecriture"><b class="ecriture">W</b> Lecture &amp; écriture</label>
+                <label for="f_droit_wiki_ecriture"><b class="ecriture">W</b> Lecture &amp; écriture <em>(peut modifier ou ajouter des pages, mais pas les supprimer)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_wiki" value="{$membres::DROIT_ADMIN}" id="f_droit_wiki_admin" {if $cat.droit_wiki == $membres::DROIT_ADMIN}checked="checked"{/if} />
-                <label for="f_droit_wiki_admin"><b class="admin">W</b> Administration</label>
+                <label for="f_droit_wiki_admin"><b class="admin">W</b> Administration <em>(peut tout faire)</em></label>
             </dd>
         </dl>
         <dl class="droits">

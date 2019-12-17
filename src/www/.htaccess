@@ -12,4 +12,10 @@ DirectoryIndex index.php
 	</IfVersion>
 </IfModule>
 
+# Utilisation de ErrorDocument 404 à la place de FallbackResource si possible
 ErrorDocument 404 /_route.php
+
+# Un peu de sécurité
+<IfModule mod_alias.c>
+	RedirectMatch 404 _inc\.php
+</IfModule>

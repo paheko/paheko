@@ -191,8 +191,9 @@ class Import
 		$membres = new Membres;
 
 		// On récupère les champs qu'on peut importer
-		$champs = Config::getInstance()->get('champs_membres')->getAll();
-		$champs = array_keys((array)$champs);
+		$champs_membres = Config::getInstance()->get('champs_membres');
+		$champs_multiples = $champs_membres->getMultiples();
+		$champs = $champs_membres->getKeys();
 		$champs[] = 'date_inscription';
 		//$champs[] = 'date_connexion';
 		//$champs[] = 'id';
@@ -241,8 +242,27 @@ class Import
 				if (!in_array($name, $champs))
 					continue;
 
-				if (trim($row[$id]) !== '')
-					$data[$name] = $row[$id];
+				// Ignorer les champs vides
+				if (trim($row[$id]) === '') {
+					continue;
+				}
+
+				$data[$name] = $row[$id];
+
+				// Restitution de la valeur binaire des champs à choix multiple
+				if (isset($champs_multiples[$name])) {
+					$values = explode(';', $data[$name]);
+					$data[$name] = 0;
+
+					foreach ($values as $v) {
+						$v = trim($v);
+						$found = array_search($v, $champs_multiples[$name]->options);
+
+						if ($found) {
+							$data[$name] |= 0x01 << $found;
+						}
+					}
+				}
 			}
 
 			if (!empty($data['numero']) && $data['numero'] > 0)
@@ -293,7 +313,7 @@ class Import
 		$champs_sql = 'm.' . implode(', m.', $champs);
 		$where = $list ? 'WHERE ' . $db->where('m.id', $list) : '';
 
-		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS "Catégorie membre" FROM membres AS m 
+		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS "Catégorie membre" FROM membres AS m
 			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
 			' . $where . '
 			ORDER BY c.id;');
@@ -308,12 +328,34 @@ class Import
 	public function toCSV(array $list = null)
 	{
 		list($champs, $result, $name) = $this->export($list);
-		return Utils::toCSV($name, $result, $champs);
+		return Utils::toCSV($name, $result, $champs, [$this, 'exportRow']);
 	}
 
 	public function toODS(array $list = null)
 	{
 		list($champs, $result, $name) = $this->export($list);
-		return Utils::toODS($name, $result, $champs);
+		return Utils::toODS($name, $result, $champs, [$this, 'exportRow']);
+	}
+
+	public function exportRow(\stdClass $row) {
+		// Pas hyper efficace, il faudrait ne pas récupérer la liste pour chaque ligne... FIXME
+		$champs_multiples = Config::getInstance()->get('champs_membres')->getMultiples();
+
+		// convertir les champs à choix multiple de binaire vers liste séparée par des points virgules
+		foreach ($champs_multiples as $id=>$config) {
+			$out = [];
+
+			foreach ($config->options as $b => $name)
+			{
+				if ($row->$id & (0x01 << $b)) {
+					$out[] = $name;
+				}
+			}
+
+			$row->$id = implode(';', $out);
+
+		}
+
+		return $row;
 	}
 }

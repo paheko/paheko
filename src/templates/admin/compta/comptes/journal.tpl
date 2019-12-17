@@ -32,35 +32,36 @@
 <table class="list">
     <colgroup>
         <col width="3%" />
-        <col width="3%" />
         <col width="12%" />
         <col width="10%" />
         <col width="12%" />
         <col />
+        <col width="6%" />
     </colgroup>
     <thead>
         <tr>
-            <td></td>
-            <td></td>
+            <td>N°</td>
             <td>Date</td>
             <td>Montant</td>
             <td>Solde cumulé</td>
             <th>Libellé</th>
+            <td></td>
         </tr>
     </thead>
     <tbody>
     {foreach from=$journal item="ligne"}
         <tr>
             <td class="num"><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
-            <td class="actions">
-            {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-                <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette opération">✎</a>
-            {/if}
-            </td>
             <td>{$ligne.date|date_fr:'d/m/Y'}</td>
             <td>{if $ligne.compte_credit == $compte.id}{$credit}{else}{$debit}{/if}{$ligne.montant|escape|html_money}</td>
             <td>{$ligne.solde|escape|html_money}</td>
             <th>{$ligne.libelle}</th>
+            <td class="actions">
+                <a class="icn" href="{$admin_url}compta/operations/voir.php?id={$ligne.id}" title="Détails de l'écriture">❓</a>
+            {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+                <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette écriture">✎</a>
+            {/if}
+            </td>
         </tr>
     {/foreach}
     </tbody>

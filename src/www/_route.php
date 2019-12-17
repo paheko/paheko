@@ -2,12 +2,15 @@
 
 namespace Garradin;
 
-// Routeur pour l'utilisation avec le serveur web intégré à PHP
-
-const WWW_URI = '/';
-//const WWW_URL = '/';
+if (empty($_SERVER['REQUEST_URI'])) {
+	die('Appel non supporté');
+}
 
 $uri = $_SERVER['REQUEST_URI'];
+
+if ('_route.php' === basename($uri)) {
+	die('Appel interdit');
+}
 
 if (($pos = strpos($uri, '?')) !== false)
 {
@@ -16,6 +19,10 @@ if (($pos = strpos($uri, '?')) !== false)
 
 if (file_exists(__DIR__ . $uri))
 {
+	if (PHP_SAPI != 'cli') {
+		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Garradin');
+	}
+
 	return false;
 }
 elseif (preg_match('!/admin/plugin/(.+?)/(.*)!', $uri, $match))

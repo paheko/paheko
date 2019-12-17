@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Membres;
 use Garradin\UserException;
+use Garradin\Plugin;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
@@ -15,6 +16,7 @@ use const Garradin\ADMIN_URL;
 use KD2\Security;
 use KD2\Security_OTP;
 use KD2\QRCode;
+use KD2\HTTP;
 
 class Session extends \KD2\UserSession
 {
@@ -24,6 +26,35 @@ class Session extends \KD2\UserSession
 	protected $remember_me_expiry = '+3 months';
 
 	const MINIMUM_PASSWORD_LENGTH = 8;
+
+	static public function checkPasswordValidity($password)
+	{
+		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
+		{
+			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
+		}
+
+		$session = new Session(DB::getInstance());
+		$session->http = new HTTP;
+
+		if ($session->isPasswordCompromised($password)) {
+			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
+		}
+	}
+
+	public function isPasswordCompromised($password)
+	{
+		// Vérifier s'il n'y a pas un plugin qui gère déjà cet aspect
+		// notamment en installation mutualisée c'est plus efficace
+		$return = ['is_compromised' => null];
+		$called = Plugin::fireSignal('motdepasse.compromis', ['password' => $password], $return);
+
+		if ($called !== null) {
+			return $return['is_compromised'];
+		}
+
+		return parent::isPasswordCompromised($password);
+	}
 
 	// Extension des méthodes de UserSession
 	public function __construct()
@@ -119,12 +150,20 @@ class Session extends \KD2\UserSession
 	{
 		$logged = parent::isLogged();
 
-		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')
-			&& is_int(\Garradin\LOCAL_LOGIN) && \Garradin\LOCAL_LOGIN > 0)
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN'))
 		{
-			if (!$logged || ($logged && $this->user->id != \Garradin\LOCAL_LOGIN))
+			$login_id = \Garradin\LOCAL_LOGIN;
+
+			// On va chercher le premier membre avec le droit de gérer les membres
+			if (-1 === $login_id) {
+				$login_id = $this->db->firstColumn('SELECT id FROM membres
+					WHERE id_categorie = (SELECT id FROM membres_categories WHERE droit_membres = ? LIMIT 1)
+					LIMIT 1', Membres::DROIT_ADMIN);
+			}
+
+			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
 			{
-				$logged = $this->create(\Garradin\LOCAL_LOGIN);
+				$logged = $this->create($login_id);
 			}
 		}
 
@@ -141,7 +180,7 @@ class Session extends \KD2\UserSession
 
 		// Vérifier encore, mais avec le temps NTP
 		// au cas où l'horloge du serveur n'est pas à l'heure
-		if (\Garradin\NTP_SERVER 
+		if (\Garradin\NTP_SERVER
 			&& ($time = Security_OTP::getTimeFromNTP(\Garradin\NTP_SERVER))
 			&& Security_OTP::TOTP($secret, $code, $time))
 		{
@@ -257,12 +296,9 @@ class Session extends \KD2\UserSession
 			throw new UserException('Le mot de passe et sa vérification ne sont pas identiques.');
 		}
 
-		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
-		{
-			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
-		}
+		self::checkPasswordValidity($password);
 
-		$password = Membres::hashPassword($password);
+		$password = self::hashPassword($password);
 
 		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
 		$message.= "Votre adresse email : ".$membre->email."\n";
@@ -344,12 +380,11 @@ class Session extends \KD2\UserSession
 
 		if (isset($data['passe']) && trim($data['passe']) !== '')
 		{
-			if (strlen($data['passe']) < self::MINIMUM_PASSWORD_LENGTH)
-			{
-				throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
-			}
+			$data['passe'] = trim($data['passe']);
 
-			$data['passe'] = Membres::hashPassword(trim($data['passe']));
+			self::checkPasswordValidity($data['passe']);
+
+			$data['passe'] = self::hashPassword($data['passe']);
 		}
 		else
 		{
