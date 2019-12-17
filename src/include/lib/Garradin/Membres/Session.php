@@ -46,12 +46,11 @@ class Session extends \KD2\UserSession
 	{
 		// Vérifier s'il n'y a pas un plugin qui gère déjà cet aspect
 		// notamment en installation mutualisée c'est plus efficace
-		$is_compromised = null;
-		$return = ['is_compromised' => $is_compromised];
+		$return = ['is_compromised' => null];
 		$called = Plugin::fireSignal('motdepasse.compromis', ['password' => $password], $return);
 
 		if ($called !== null) {
-			return $is_compromised;
+			return $return['is_compromised'];
 		}
 
 		return parent::isPasswordCompromised($password);
