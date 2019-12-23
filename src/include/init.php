@@ -125,7 +125,14 @@ if (!defined('Garradin\DATA_ROOT'))
 
 if (!defined('Garradin\WWW_URI'))
 {
-    $uri = \KD2\HTTP::getRootURI(ROOT);
+    try {
+        $uri = \KD2\HTTP::getRootURI(ROOT);
+    }
+    catch (\UnexpectedValueException $e) {
+        echo "<h2>Impossible de détecter le chemin d'accès web de Garradin.</h2>";
+        echo '<p><a href="https://fossil.kd2.org/garradin/wikiedit?name=Installation">Consulter l\'aide pour configurer manuellement le chemin d\'accès</a></p>';
+        exit;
+    }
 
     if ($uri == '/www/') {
         $uri = '/';
