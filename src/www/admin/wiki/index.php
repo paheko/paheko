@@ -17,7 +17,7 @@ else
 if (!$page)
 {
     $tpl->assign('uri', $page_uri);
-    $tpl->assign('can_edit', $wiki->canWritePage(Wiki::ECRITURE_NORMAL));
+    $tpl->assign('can_edit', false);
     $tpl->assign('can_read', true);
 }
 else
