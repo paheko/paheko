@@ -6,7 +6,7 @@
 
 <ul class="actions">
     {if $session->canAccess('wiki', Membres::DROIT_ECRITURE)}
-        <li><a href="{$admin_url}wiki/creer.php?parent={if $config.accueil_wiki == $page.uri}0{else}{$page.id}{/if}"><strong>Créer une nouvelle page</strong></a></li>
+        <li><a href="{$admin_url}wiki/creer.php?parent={if $page && $config.accueil_wiki != $page.uri}{$page.id}{else}0{/if}"><strong>Créer une nouvelle page</strong></a></li>
     {/if}
     {if $can_edit}
         <li><a href="{$admin_url}wiki/editer.php?id={$page.id}">Éditer</a></li>
@@ -17,7 +17,7 @@
             <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a>
         {/if}
     {/if}
-    {if $session->canAccess('wiki', Membres::DROIT_ADMIN)}
+    {if $can_edit && $session->canAccess('wiki', Membres::DROIT_ADMIN)}
         <li><a href="{$admin_url}wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
     {/if}
 </ul>
