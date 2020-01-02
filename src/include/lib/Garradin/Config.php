@@ -253,17 +253,17 @@ class Config
             case 'accueil_connexion':
             {
                 $value = trim($value);
-                $key = str_replace('accueil_', '', $key);
+                $name = str_replace('accueil_', '', $key);
 
                 if ($value === '')
                 {
-                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne peut rester vide.', $key));
+                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne peut rester vide.', $name));
                 }
 
                 $db = DB::getInstance();
 
                 if (!$db->test('wiki_pages', $db->where('uri', $value))) {
-                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne correspond à aucune page existante, merci de la créer auparavant.', $key));
+                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne correspond à aucune page existante, merci de la créer auparavant.', $name));
                 }
                 break;
             }
