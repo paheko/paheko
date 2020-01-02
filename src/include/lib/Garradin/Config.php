@@ -263,7 +263,7 @@ class Config
                 $db = DB::getInstance();
 
                 if (!$db->test('wiki_pages', $db->where('uri', $value))) {
-                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne correspond à aucune page existante.', $key));
+                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne correspond à aucune page existante, merci de la créer auparavant.', $key));
                 }
                 break;
             }
