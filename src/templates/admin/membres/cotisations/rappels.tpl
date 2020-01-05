@@ -11,7 +11,9 @@
     <li class="current"><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
 </ul>
 
-{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+{if !count($cotisations)}
+    <p class="alert">Ce membre n'est lié à aucune cotisation, il n'est donc pas possible de lui associer un rappel de cotisation.</p>
+{elseif $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 <form method="post" action="{$self_url}">
     <fieldset>
         <legend>Enregistrer un rappel fait à ce membre</legend>
@@ -20,11 +22,13 @@
             <dd>
                 <select id="f_id_cotisation" name="id_cotisation">
                 {foreach from=$cotisations item="co"}
-                    <option value="{$co.id}">{$co.intitule} — 
-                    {if $co.a_jour}
-                        Expire dans {$co.nb_jours} jours
-                    {else}
-                        EXPIRÉE depuis {$co.nb_jours} jours
+                    <option value="{$co.id}">{$co.intitule} {if $co.nb_jours}
+                        —
+                        {if $co.a_jour}
+                            Expire dans {$co.nb_jours} jours
+                        {else}
+                            EXPIRÉE depuis {$co.nb_jours} jours
+                        {/if}
                     {/if}
                     </option>
                 {/foreach}
