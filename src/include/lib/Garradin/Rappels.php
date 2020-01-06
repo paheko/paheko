@@ -159,14 +159,14 @@ class Rappels
 		// la logique est un JOIN des tables rappels, cotisations, cotisations_membres et membres
 		// pour récupérer la liste des membres qui doivent recevoir une cotisation
 		$query = '
-		SELECT 
+		SELECT
 			*,
 			/* Nombre de jours avant ou après expiration */
 			(julianday(date()) - julianday(expiration)) AS nb_jours,
 			/* Date de mise en œuvre du rappel */
 			date(expiration, delai || \' days\') AS date_rappel
 		FROM (
-			SELECT m.*, r.delai, r.sujet, r.texte, r.id_cotisation, r.id AS id_rappel,
+			SELECT m.*, MIN(r.delai) AS delai, r.sujet, r.texte, r.id_cotisation, r.id AS id_rappel,
 				m.'.$config->get('champ_identite').' AS identite,
 				CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\')
 				WHEN c.fin IS NOT NULL THEN c.fin ELSE 0 END AS expiration
@@ -185,10 +185,10 @@ class Rappels
 	    	GROUP BY m.id, r.id_cotisation
 			ORDER BY r.delai ASC
 		)
-		WHERE nb_jours >= delai 
+		WHERE nb_jours >= delai
 			/* Pour ne pas spammer on n\'envoie pas de rappel antérieur au dernier rappel déjà effectué */
-			AND id NOT IN (SELECT id_membre FROM rappels_envoyes AS re 
-				WHERE id_cotisation = re.id_cotisation 
+			AND id NOT IN (SELECT id_membre FROM rappels_envoyes AS re
+				WHERE id_cotisation = re.id_cotisation
 				AND re.date >= date(expiration, delai || \' days\')
 			)
 		ORDER BY nb_jours DESC;';

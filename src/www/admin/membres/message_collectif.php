@@ -30,7 +30,7 @@ if (f('send'))
             }
         }
 
-        if (isset($recipients) && (!count($recipients) || !isset($recipients[0]->email)))
+        if (isset($recipients) && !count($recipients))
         {
             $form->addError('Aucun membre dans la liste.');
         }
