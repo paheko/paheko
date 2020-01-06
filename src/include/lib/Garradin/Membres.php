@@ -323,6 +323,10 @@ class Membres
             }
         }
 
+        if (!count($recipients)) {
+        	throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
+        }
+
         foreach ($recipients as $recipient)
         {
             Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);

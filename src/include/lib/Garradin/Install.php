@@ -107,7 +107,6 @@ class Install
 
 		// Création wiki
 		$page = Wiki::transformTitleToURI($nom_asso);
-		$config->set('accueil_wiki', $page);
 		$wiki = new Wiki;
 		$id_page = $wiki->create([
 			'titre' =>  $nom_asso,
@@ -121,17 +120,18 @@ class Install
 
 		// Création page wiki connexion
 		$page = Wiki::transformTitleToURI('Bienvenue');
-		$config->set('accueil_connexion', $page);
 		$id_page = $wiki->create([
 			'titre' =>  'Bienvenue',
 			'uri'   =>  $page,
 		]);
+		$config->set('accueil_wiki', $page);
 
 		$wiki->editRevision($id_page, 0, [
 			'id_auteur' =>  $id_membre,
 			'contenu'   =>  "Bienvenue dans l'administration de ".$nom_asso." !\n\n"
 				.   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
 		]);
+		$config->set('accueil_connexion', $page);
 
 		// Mise en place compta
 		$comptes = new Compta\Comptes;
