@@ -174,20 +174,6 @@ CREATE TRIGGER IF NOT EXISTS wiki_recherche_contenu_chiffre AFTER INSERT ON wiki
         UPDATE wiki_recherche SET contenu = '' WHERE id = new.id_page;
     END;
 
-/*
-CREATE TABLE wiki_suivi
--- Suivi des pages
-(
-    id_membre INTEGER NOT NULL,
-    id_page INTEGER NOT NULL,
-
-    PRIMARY KEY (id_membre, id_page),
-
-    FOREIGN KEY (id_page) REFERENCES wiki_pages (id), -- Clé externe obligatoire
-    FOREIGN KEY (id_membre) REFERENCES membres (id) -- Clé externe obligatoire
-);
-*/
-
 --
 -- COMPTA
 --
@@ -209,22 +195,26 @@ CREATE TABLE IF NOT EXISTS compta_exercices
 CREATE TABLE IF NOT EXISTS compta_comptes
 -- Plan comptable
 (
-    id TEXT NOT NULL PRIMARY KEY, -- peut contenir des lettres, eg. 53A, 53B, etc.
-    parent TEXT NOT NULL DEFAULT 0,
+    id INTEGER NOT NULL PRIMARY KEY,
+    code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
+    parent INTEGER NOT NULL DEFAULT 0,
 
     libelle TEXT NOT NULL,
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
-    plan_comptable INTEGER NOT NULL DEFAULT 1, -- 1 = fait partie du plan comptable, 0 = a été ajouté par l'utilisateur
-    desactive INTEGER NOT NULL DEFAULT 0 -- 1 = compte historique désactivé
+    plan_comptable INTEGER NOT NULL DEFAULT 1, -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
+    id_exercice INTEGER NULL REFERENCES compta_exercices (id)
+    -- Quand un exercice est clôturé, on copie les comptes utilisés dans cet exercice, avec id_exercice renseigné
+    -- pour garder une archive en cas de modification du plan comptable dans les exercices suivants
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS compta_comptes_code ON compta_comptes (code, id_exercice);
 CREATE INDEX IF NOT EXISTS compta_comptes_parent ON compta_comptes (parent);
 
 CREATE TABLE IF NOT EXISTS compta_comptes_bancaires
 -- Comptes bancaires
 (
-    id TEXT NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL PRIMARY KEY,
 
     banque TEXT NOT NULL,
 
@@ -253,7 +243,6 @@ CREATE TABLE IF NOT EXISTS compta_mouvements
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
     moyen_paiement TEXT NULL,
-    reference_paiement TEXT NULL,
 
     validation INTEGER NOT NULL DEFAULT 0, -- 1 = écriture validée, non modifiable
 
@@ -277,13 +266,13 @@ CREATE INDEX IF NOT EXISTS compta_operations_date ON compta_mouvements (date);
 CREATE INDEX IF NOT EXISTS compta_operations_auteur ON compta_mouvements (id_auteur);
 
 CREATE TABLE IF NOT EXISTS compta_mouvements_lignes
--- Ecritures
+-- Écritures
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
     id_mouvement INTEGER NOT NULL REFERENCES compta_mouvements (id) ON DELETE CASCADE,
 
-    compte TEXT NOT NULL REFERENCES compta_comptes(id), -- N° du compte dans le plan comptable
+    compte INTEGER NOT NULL REFERENCES compta_comptes(id), -- N° du compte dans le plan comptable
     credit INTEGER NOT NULL,
     debit INTEGER NOT NULL,
 
@@ -293,7 +282,7 @@ CREATE TABLE IF NOT EXISTS compta_mouvements_lignes
     CONSTRAINT ligne_check2 CHECK ((credit + debit) > 0)
 );
 
-CREATE INDEX IF NOT EXISTS compta_operations_comptes ON compta_mouvements_lignes (compte);
+CREATE INDEX IF NOT EXISTS compta_mouvements_lignes_compte ON compta_mouvements_lignes (compte);
 
 CREATE TABLE IF NOT EXISTS compta_moyens_paiement
 -- Moyens de paiement
@@ -320,7 +309,7 @@ CREATE TABLE IF NOT EXISTS compta_categories
     intitule TEXT NOT NULL,
     description TEXT NULL,
 
-    compte TEXT NULL REFERENCES compta_comptes(id) ON DELETE CASCADE -- Compte affecté par cette catégorie
+    compte INTEGER NULL REFERENCES compta_comptes(id) ON DELETE CASCADE -- Compte affecté par cette catégorie
 );
 
 CREATE TABLE IF NOT EXISTS plugins

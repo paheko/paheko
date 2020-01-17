@@ -270,6 +270,7 @@ try {
     {
         $db->beginSchemaUpdate();
         $db->import(ROOT . '/include/data/0.10.0.sql');
+        // FIXME: Création archives comptes des exercices précédents et association des écritures à ces nouveaux comptes
         $db->commitSchemaUpdate();
     }
 
@@ -283,7 +284,7 @@ try {
 
     if (version_compare($v, '0.9.5', '<'))
     {
-        $db->beginSchemaUpdate());
+        $db->beginSchemaUpdate();
         // Créer les tables manquantes
         $db->import(ROOT . '/include/data/schema.sql');
         $db->commitSchemaUpdate();
