@@ -2,9 +2,10 @@
 
 namespace Garradin\Compta;
 
-use \Garradin\DB;
-use \Garradin\Utils;
-use \Garradin\UserException;
+use Garradin\Entity;
+use Garradin\DB;
+use Garradin\Utils;
+use Garradin\UserException;
 
 class Comptes
 {

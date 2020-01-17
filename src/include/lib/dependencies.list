@@ -1,6 +1,8 @@
 KD2/data/
-KD2/DB.php
-KD2/DB_SQLite3.php
+KD2/DB/DB.php
+KD2/DB/SQLite3.php
+KD2/DB/Entity.php
+KD2/DB/Entity_Manager.php
 KD2/ErrorManager.php
 KD2/FileInfo.php
 KD2/Form.php

@@ -9,7 +9,7 @@ use Garradin\Config;
 
 class Mouvement extends Entity
 {
-	protected $table = 'compta_mouvements';
+	const TABLE = 'compta_mouvements';
 
 	protected $id;
 	protected $libelle;
@@ -18,7 +18,6 @@ class Mouvement extends Entity
 
 	protected $date;
 	protected $moyen_paiement;
-	protected $reference_paiement;
 
 	protected $validation;
 
@@ -30,11 +29,25 @@ class Mouvement extends Entity
 	protected $id_categorie;
 	protected $id_projet;
 
-	protected $_fields = [
+	protected $_types = [
+		'libelle'        => 'string',
+		'remarques'      => '?string',
+		'numero_piece'   => '?string',
+		'date'           => 'date',
+		'moyen_paiement' => '?string',
+		'validation'     => 'bool',
+		'hash'           => '?string',
+		'prev_hash'      => '?string',
+		'id_exercice'    => '?int',
+		'id_auteur'      => '?int',
+		'id_categorie'   => '?int',
+		'id_projet'      => '?int',
+	];
+
+	protected $_validation_rules = [
 		'libelle'            => 'required|string',
 		'remarques'          => 'string|max:20000',
 		'numero_piece'       => 'string|max:200',
-		'reference_paiement' => 'string|max:200',
 		'date'               => 'required|date',
 		'moyen_paiement'     => 'string|in_table:compta_moyens_paiement,code|required_with:id_categorie',
 		'validation'         => 'bool',
