@@ -7,23 +7,31 @@ use Garradin\ValidationException;
 
 class Ligne extends Entity
 {
-	protected $table = 'compta_mouvements_lignes';
+	const TABLE = 'compta_mouvements_lignes';
 
 	protected $id;
 	protected $id_mouvement;
 	protected $credit = 0;
 	protected $debit = 0;
+	protected $compte;
 
-	protected $_fields = [
+	protected $_types = [
+		'id_mouvement' => 'int',
+		'credit'       => 'int',
+		'debit'        => 'int',
+		'compte'       => 'int',
+	];
+
+	protected $_validation_rules = [
 		'id_mouvement' => 'required|integer|in_table:compta_mouvements,id',
-		'compte'       => 'required|alpha_num|in_table:compta_comptes,id',
+		'compte'       => 'required|integer|in_table:compta_comptes,id',
 		'credit'       => 'required|integer|min:0',
 		'debit'        => 'required|integer|min:0'
 	];
 
-	public function filterUserEntry($key, $value)
+	public function filterUserValue(string $key, $value, array $source)
 	{
-		$value = parent::filterUserEntry($key, $value);
+		$value = parent::filterUserValue($key, $value);
 
 		if ($key == 'credit' || $key == 'debit')
 		{
@@ -34,29 +42,15 @@ class Ligne extends Entity
 
 			$value = $match[1] . sprintf('%02d', $match[2]);
 		}
-		elseif ($key == 'compte')
-		{
-			$value = strtoupper($compte);
-		}
 
 		return $value;
 	}
 
 	public function selfCheck()
 	{
-		if (!$this->credit && !$this->debit)
-		{
-			throw new ValidationException('Aucun montant au débit ou au crédit.');
-		}
-
-		if (($this->credit * $this->debit) !== 0 || ($this->credit + $this->debit) !== 0)
-		{
-			throw new ValidationException('Ligne non équilibrée : crédit ou débit doit valoir zéro.');
-		}
-
-		if (!$this->id_mouvement)
-		{
-			throw new ValidationException('Aucun mouvement n\'a été indiqué pour cette ligne.');
-		}
+		parent::selfCheck();
+		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit.');
+		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
+		$this->assert($this->id_mouvement, 'Aucun mouvement n\'a été indiqué pour cette ligne.');
 	}
 }
