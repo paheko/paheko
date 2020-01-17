@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS compta_comptes
 (
     id INTEGER NOT NULL PRIMARY KEY,
     code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
-    parent INTEGER NOT NULL DEFAULT 0,
+    parent INTEGER NULL REFERENCES compta_comptes(id),
 
     libelle TEXT NOT NULL,
 
