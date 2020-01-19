@@ -183,7 +183,7 @@ class Sauvegarde
 	 * @param  string $file Le nom de fichier à utiliser comme point de restauration
 	 * @return boolean true si la restauration a fonctionné, false sinon
 	 */
-	public function restoreFromLocal($file)
+	public function restoreFromLocal($file, bool $do_backup = true)
 	{
 		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file))
 		{
@@ -195,7 +195,7 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(DATA_ROOT . '/' . $file);
+		return $this->restoreDB(DATA_ROOT . '/' . $file, false, false, false);
 	}
 
 	/**
@@ -289,7 +289,7 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false)
+	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false, $do_backup = true)
 	{
 		$return = 1;
 
@@ -383,6 +383,10 @@ class Sauvegarde
 		{
 			rename($backup, DB_FILE);
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
+		}
+
+		if (!$do_backup) {
+			unlink($backup);
 		}
 
 		if ($return & self::NOT_AN_ADMIN)
