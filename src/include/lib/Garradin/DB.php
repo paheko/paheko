@@ -2,9 +2,9 @@
 
 namespace Garradin;
 
-use KD2\DB_SQLite3;
+use KD2\DB\SQLite3;
 
-class DB extends DB_SQLite3
+class DB extends SQLite3
 {
     /**
      * Application ID pour SQLite
@@ -14,9 +14,22 @@ class DB extends DB_SQLite3
 
     static protected $_instance = null;
 
-    static public function getInstance($create = false)
+    static public function getInstance($create = false, $readonly = false)
     {
-        return self::$_instance ?: self::$_instance = new DB($create);
+        if (null === self::$_instance) {
+            self::$_instance = new DB('sqlite', ['file' => DB_FILE]);
+
+            $flags = \SQLITE3_OPEN_READWRITE;
+
+            if ($create)
+            {
+                $flags |= \SQLITE3_OPEN_CREATE;
+            }
+
+            self::$_instance->flags = $flags;
+        }
+
+        return self::$_instance;
     }
 
     private function __clone()
@@ -24,41 +37,25 @@ class DB extends DB_SQLite3
         // Désactiver le clonage, car on ne veut qu'une seule instance
     }
 
-    public function __construct($create = false)
+    public function connect(): void
     {
-        if (!defined('\SQLITE3_OPEN_READWRITE'))
-        {
-            throw new \Exception('Module SQLite3 de PHP non présent. Merci de l\'installer.');
+        if (null !== $this->db) {
+            return;
         }
 
-        $flags = \SQLITE3_OPEN_READWRITE;
+        parent::connect();
 
-        if ($create)
-        {
-            $flags |= \SQLITE3_OPEN_CREATE;
-        }
+        // Activer les contraintes des foreign keys
+        $this->db->exec('PRAGMA foreign_keys = ON;');
 
-        parent::__construct(DB_FILE, $flags);
+        // 10 secondes
+        $this->db->busyTimeout(10 * 1000);
+        $this->exec('PRAGMA journal_mode = TRUNCATE;');
 
-        // Ne pas se connecter ici, on ne se connectera que quand une requête sera faite
+        $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
     }
 
-    public function connect()
-    {
-        if (parent::connect())
-        {
-            // Activer les contraintes des foreign keys
-            $this->exec('PRAGMA foreign_keys = ON;');
-
-            // 10 secondes
-            $this->db->busyTimeout(10 * 1000);
-            $this->exec('PRAGMA journal_mode = TRUNCATE;');
-
-            $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
-        }
-    }
-
-    public function close()
+    public function close(): void
     {
         parent::close();
         self::$_instance = null;
