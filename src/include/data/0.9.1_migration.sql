@@ -3,7 +3,7 @@
 -- ancienne version
 ALTER TABLE cotisations RENAME TO cotisations_old;
 
-.read schema.sql
+.read 0.9.1_schema.sql
 
 INSERT INTO cotisations SELECT * FROM cotisations_old;
 
