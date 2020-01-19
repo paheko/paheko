@@ -78,7 +78,7 @@ try {
         $db->beginSchemaUpdate();
 
         // Mise à jour base de données
-        $db->exec(file_get_contents(ROOT . '/include/data/0.7.0.sql'));
+        $db->exec(file_get_contents(ROOT . '/include/data/0.7.0_migration.sql'));
 
         // Changement de syntaxe du Wiki vers SkrivML
         $wiki = new Wiki;
@@ -112,7 +112,7 @@ try {
         $db->beginSchemaUpdate();
 
         // Mise à jour base de données
-        $db->exec(file_get_contents(ROOT . '/include/data/0.7.2.sql'));
+        $db->exec(file_get_contents(ROOT . '/include/data/0.7.2_migration.sql'));
 
         $db->commitSchemaUpdate();
     }
@@ -132,7 +132,7 @@ try {
         // Désactivation des foreign keys AVANT le début de la transaction
         $db->beginSchemaUpdate();
 
-        $db->import(ROOT . '/include/data/0.8.0.sql');
+        $db->import(ROOT . '/include/data/0.8.0_migration.sql');
 
         $db->commitSchemaUpdate();
 
@@ -165,7 +165,7 @@ try {
     {
         $db->beginSchemaUpdate();
 
-        $db->import(ROOT . '/include/data/0.8.3.sql');
+        $db->import(ROOT . '/include/data/0.8.3_migration.sql');
 
         $db->commitSchemaUpdate();
     }
@@ -174,7 +174,7 @@ try {
     {
         $db->beginSchemaUpdate();
 
-        $db->import(ROOT . '/include/data/0.8.4.sql');
+        $db->import(ROOT . '/include/data/0.8.4_migration.sql');
 
         $db->commitSchemaUpdate();
     }
@@ -183,7 +183,7 @@ try {
     {
         $db->beginSchemaUpdate();
 
-        $db->import(ROOT . '/include/data/0.9.0.sql');
+        $db->import(ROOT . '/include/data/0.9.0_migration.sql');
 
         // Correction des ID parents des comptes qui ont été mal renseignés
         // exemple : compte 512A avec "5" comme parent (c'était permis,
@@ -254,22 +254,23 @@ try {
 
         $db->exec('INSERT INTO "compta_categories" VALUES(NULL,-1,\'Licences fédérales\',\'Licences payées pour les adhérents (par exemple fédération sportive etc.)\',\'652\');');
 
-        $db->import(ROOT . '/include/data/0.9.1.sql');
+        $db->import(ROOT . '/include/data/0.9.1_migration.sql');
 
         $db->commitSchemaUpdate();
     }
 
-    if (version_compare($v, '0.9.1', '>=') && version_compare($v, '0.10.0', '<'))
-    {
-        // Mise à jour plan comptable: ajout compte 891, renommage compte 890 (typo dans 0.9.1)
-        $comptes = new Compta\Comptes;
-        $comptes->importPlan();
-    }
-
-    if (version_compare($v, '0.10.0', '<'))
+    if (version_compare($v, '0.9.5', '<'))
     {
         $db->beginSchemaUpdate();
-        $db->import(ROOT . '/include/data/0.10.0.sql');
+        // Créer les tables manquantes
+        $db->import(ROOT . '/include/data/0.9.5_schema.sql');
+        $db->commitSchemaUpdate();
+    }
+
+    if (version_compare($v, '1.0.0', '<'))
+    {
+        $db->beginSchemaUpdate();
+        $db->import(ROOT . '/include/data/1.0.0_migration.sql');
         // FIXME: Création archives comptes des exercices précédents et association des écritures à ces nouveaux comptes
         $db->commitSchemaUpdate();
     }
@@ -280,14 +281,6 @@ try {
     if ($keycheck_after != $keycheck)
     {
         throw new \LogicException('Erreur de cohérence dans la base de données lors de la mise à jour (clés étrangères)');
-    }
-
-    if (version_compare($v, '0.9.5', '<'))
-    {
-        $db->beginSchemaUpdate();
-        // Créer les tables manquantes
-        $db->import(ROOT . '/include/data/schema.sql');
-        $db->commitSchemaUpdate();
     }
 
     Utils::clearCaches();
