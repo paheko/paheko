@@ -2,7 +2,7 @@
 ALTER TABLE cotisations_membres RENAME TO cotisations_membres_old;
 
 -- Création des tables mises à jour (et de leurs index)
-.read schema.sql
+.read 0.8.3_schema.sql
 
 -- Copie des données
 INSERT INTO cotisations_membres SELECT * FROM cotisations_membres_old;

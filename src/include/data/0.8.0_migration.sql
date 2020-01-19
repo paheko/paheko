@@ -51,7 +51,7 @@ DROP TRIGGER wiki_recherche_contenu_insert;
 DROP TRIGGER wiki_recherche_contenu_chiffre;
 
 -- Création des tables mises à jour (et de leurs index)
-.read schema.sql
+.read 0.8.0_schema.sql
 
 -- Copie des données
 INSERT INTO cotisations_membres SELECT * FROM cotisations_membres_old;
