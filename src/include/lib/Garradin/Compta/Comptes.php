@@ -48,43 +48,54 @@ class Comptes
 
         $db = DB::getInstance();
         $db->begin();
-        $ids = [];
+        $codes = [];
 
-        foreach ($plan as $id=>$compte)
+        foreach ($plan as $code=>$compte)
         {
-            $ids[] = $id;
+            $codes[$code] = $db->firstColumn('SELECT id FROM compta_comptes WHERE code = ?;', $code);
 
-            if ($db->test('compta_comptes', $db->where('id', $id)))
+            if (0 === $compte->parent) {
+                $parent = null;
+            }
+            else {
+                $parent = $db->firstColumn('SELECT id FROM compta_comptes WHERE code = ?;', $compte->parent);
+
+                if (!$parent) {
+                    throw new UserException(sprintf('Le compte parent "%s" n\'existe pas', $compte->parent));
+                }
+            }
+
+            if ($codes[$code])
             {
                 $db->update('compta_comptes', [
-                    'parent'    =>  $compte->parent,
+                    'parent'    =>  $parent,
                     'libelle'   =>  $compte->nom,
                     'position'  =>  $compte->position,
                     'plan_comptable' => $reset || !empty($compte->plan_comptable) ? 1 : 0,
-                    'desactive' => !empty($compte->desactive) ? 1 : 0,
-                ], $db->where('id', $id));
+                ], 'code = :code AND id_exercice IS NULL', ['code' => $code]);
             }
             else
             {
                 $db->insert('compta_comptes', [
-                    'id'        =>  $id,
-                    'parent'    =>  $compte->parent,
+                    'code'      =>  $code,
+                    'parent'    =>  $parent,
                     'libelle'   =>  $compte->nom,
                     'position'  =>  $compte->position,
                     'plan_comptable' => $reset || !empty($compte->plan_comptable) ? 1 : 0,
-                    'desactive' => !empty($compte->desactive) ? 1 : 0,
+                    'id_exercice' => null,
                 ]);
+
+                $codes[$code] = $db->lastInsertRowId();
             }
         }
 
         // Effacer les comptes du plan comptable s'ils ne sont pas utilisés ailleurs
         // et qu'ils ne sont pas dans le nouveau plan comptable qu'on vient d'importer
-        $sql = 'DELETE FROM compta_comptes WHERE id NOT IN (
+        $sql = 'DELETE FROM compta_comptes WHERE id_exercice IS NULL AND id NOT IN (
             SELECT id FROM compta_comptes_bancaires
-            UNION SELECT compte_credit FROM compta_journal
-            UNION SELECT compte_debit FROM compta_journal
-            UNION SELECT id FROM compta_categories)
-            AND '. $db->where('id', 'NOT IN', $ids);
+            UNION SELECT compte FROM compta_mouvements_lignes
+            UNION SELECT compte FROM compta_categories)
+            AND '. $db->where('code', 'NOT IN', array_keys($codes));
 
         // Si on ne fait qu'importer une mise à jour du plan comptable,
         // ne supprimer que les comptes qui n'ont pas été créés par l'usager
