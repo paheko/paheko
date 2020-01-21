@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin\Compta;
+namespace Garradin\Entities\Compta;
 
 use Garradin\Entity;
 use Garradin\DB;
