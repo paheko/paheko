@@ -1,6 +1,7 @@
 ALTER TABLE compta_journal RENAME TO compta_journal_old;
 ALTER TABLE compta_comptes RENAME TO compta_comptes_old;
 ALTER TABLE compta_categories RENAME TO compta_categories_old;
+ALTER TABLE compta_exercices RENAME TO compta_exercices_old;
 ALTER TABLE membres_operations RENAME TO membres_operations_old;
 
 DROP TABLE fichiers_compta_journal; -- Inutilisé à ce jour
@@ -35,10 +36,15 @@ INSERT INTO compta_categories
 INSERT INTO membres_mouvements
 	SELECT * FROM membres_operations_old;
 
+-- Recopie des exercices, mais la date de fin ne peut être nulle
+INSERT INTO compta_exercices
+	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture FROM compta_exercices_old;
+
 DROP TABLE compta_journal_old;
 DROP TABLE membres_operations_old;
 DROP TABLE compta_categories_old;
 DROP TABLE compta_comptes_old;
+DROP TABLE compta_exercices_old;
 
 -- CREATE TABLE IF NOT EXISTS compta_comptes_soldes
 -- -- Soldes des comptes

@@ -185,8 +185,8 @@ CREATE TABLE IF NOT EXISTS compta_exercices
 
     libelle TEXT NOT NULL,
 
-    debut TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
-    fin TEXT NULL DEFAULT NULL CHECK (fin IS NULL OR (date(fin) IS NOT NULL AND date(fin) = fin)),
+    debut TEXT NOT NULL CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
+    fin TEXT NOT NULL CHECK (date(fin) IS NOT NULL AND date(fin) = fin),
 
     cloture INTEGER NOT NULL DEFAULT 0
 );
@@ -262,9 +262,33 @@ CREATE TABLE IF NOT EXISTS compta_mouvements
     FOREIGN KEY(id_projet) REFERENCES compta_projets(id) ON DELETE SET NULL
 );
 
-CREATE INDEX IF NOT EXISTS compta_operations_exercice ON compta_mouvements (id_exercice);
-CREATE INDEX IF NOT EXISTS compta_operations_date ON compta_mouvements (date);
-CREATE INDEX IF NOT EXISTS compta_operations_auteur ON compta_mouvements (id_auteur);
+CREATE INDEX IF NOT EXISTS compta_mouvements_exercice ON compta_mouvements (id_exercice);
+CREATE INDEX IF NOT EXISTS compta_mouvements_date ON compta_mouvements (date);
+CREATE INDEX IF NOT EXISTS compta_mouvements_auteur ON compta_mouvements (id_auteur);
+
+CREATE TRIGGER IF NOT EXISTS compta_mouvements_exercice_i BEFORE INSERT ON compta_mouvements
+BEGIN
+    SELECT
+        CASE WHEN (old.id_exercice IS NOT NULL AND (SELECT cloture FROM compta_exercices WHERE id = old.id_exercice) = 1)
+        THEN RAISE(FAIL, 'Modification interdite de mouvement lié à un exercice clôturé')
+    END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS compta_mouvements_exercice_d BEFORE DELETE ON compta_mouvements
+BEGIN
+    SELECT
+        CASE WHEN (old.id_exercice IS NOT NULL AND (SELECT cloture FROM compta_exercices WHERE id = old.id_exercice) = 1)
+        THEN RAISE(FAIL, 'Modification interdite de mouvement lié à un exercice clôturé')
+    END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS compta_mouvements_exercice_u BEFORE UPDATE ON compta_mouvements
+BEGIN
+    SELECT
+        CASE WHEN (old.id_exercice IS NOT NULL AND (SELECT cloture FROM compta_exercices WHERE id = old.id_exercice) = 1)
+        THEN RAISE(FAIL, 'Modification interdite de mouvement lié à un exercice clôturé')
+    END;
+END;
 
 CREATE TABLE IF NOT EXISTS compta_mouvements_lignes
 -- Écritures
