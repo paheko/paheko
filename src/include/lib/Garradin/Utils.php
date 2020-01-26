@@ -621,15 +621,25 @@ class Utils
         return $url;
     }
 
+    static public function open_csv_file($file)
+    {
+        ini_set('auto_detect_line_endings', true);
+        return fopen($file, 'r');
+    }
+
     static public function find_csv_delim(&$fp)
     {
         $line = '';
 
         while ($line === '' && !feof($fp))
         {
-            $line = trim(fgets($fp, 4096));
+            $line = fgets($fp, 4096);
         }
-        
+
+        if (strlen($line) >= 4095) {
+            throw new UserException('Fichier CSV illisible : la première ligne est trop longue.');
+        }
+
         // Delete the columns content
         $line = preg_replace('/".*?"/', '', $line);
 
