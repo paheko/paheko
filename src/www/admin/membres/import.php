@@ -84,6 +84,8 @@ $tpl->assign('ok', null !== qg('ok') ? true : false);
 $tpl->assign('csv_file', $csv_file);
 $tpl->assign('csv_first_line', $csv_file ? reset($csv_file) : null);
 
+$tpl->assign('max_upload_size', Utils::getMaxUploadSize());
+
 $tpl->assign('garradin_champs', $champs);
 
 $tpl->display('admin/membres/import.tpl');
