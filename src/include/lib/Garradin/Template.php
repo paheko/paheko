@@ -60,6 +60,7 @@ class Template extends \KD2\Smartyer
 		$this->register_function('form_field', [$this, 'formField']);
 		$this->register_function('select_compte', [$this, 'formSelectCompte']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
+		$this->register_function('input', [$this, 'formInput']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
@@ -149,6 +150,59 @@ class Template extends \KD2\Smartyer
 		}
 
 		return '<p class="error">' . $this->escape($params['message']) . '</p>';
+	}
+
+	protected function formInput(array $params)
+	{
+		static $keep_attributes = ['pattern', 'max', 'min', 'step', 'title', 'name', 'cols', 'rows'];
+		extract($params);
+
+		if (!isset($name, $type)) {
+			throw new \InvalidArgumentException('Missing name or type');
+		}
+
+		$current_value = null;
+
+		if (isset($_POST[$name])) {
+			$current_value = $_POST[$name];
+		}
+
+		$required_label = array_key_exists('required', $params) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
+
+		$out .= sprintf('<dt><label for="f_%s">%s</label>%s</dt>', $name, $this->escape($label), $required_label);
+
+		if (isset($help)) {
+			$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
+		}
+
+		$attributes = array_intersect_key($params, $keep_attributes);
+		$attributes['id'] = 'f_' . $name;
+
+		if (array_key_exists('required', $params)) {
+			$attributes['required'] = 'required';
+		}
+
+		$out .= '<dd>';
+
+		if ($type == 'select') {
+			$out .= sprintf('<select %s>', $attributes);
+
+			foreach ($options as $_key => $_value) {
+				$out .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
+			}
+
+			$out .= '</select>';
+		}
+		elseif ($type == 'textarea') {
+			$out .= sprintf('<textarea %s>%s</textarea>', $attributes, $this->escape($value));
+		}
+		else {
+			$out .= sprintf('<input type="%s" %s value="%s" />', $type, $attributes, $this->escape($value));
+		}
+
+		$out .= '</dd>';
+
+		return $out;
 	}
 
 	protected function formField(array $params, $escape = true)
