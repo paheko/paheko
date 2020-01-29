@@ -257,7 +257,7 @@ class Cotisations
 	 * @param  integer $id Numéro de la cotisation
 	 * @return array     Liste des membres
 	 */
-	public function listMembersForCotisation($id, $include_category, $page = 1, $order = null, $desc = true)
+	public function listMembersForCotisation($id, $page = 1, $order = null, $desc = true)
 	{
 		$begin = ($page - 1) * self::ITEMS_PER_PAGE;
 
@@ -283,26 +283,6 @@ class Cotisations
 		}
 
 		$desc = $desc ? 'DESC' : 'ASC';
-
-		// Renvoyer la liste avec tous les membres des catégories dont la cotisation obligatoire est celle-ci
-		if ($include_category)
-		{
-			$cats_obligatoires = $db->getAssoc('SELECT id, id FROM membres_categories WHERE id_cotisation_obligatoire = ? AND cacher = 0;', $id);
-
-			return $db->get('SELECT m.id AS id_membre, cm.date, cm.id, m.numero,
-				m.'.$champ_id.' AS nom, c.montant,
-				CASE WHEN cm.id IS NULL THEN 0
-				WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
-				WHEN c.fin IS NOT NULL THEN (cm.date <= c.fin AND cm.date >= c.debut)
-				ELSE 1 END AS a_jour
-				FROM membres AS m
-					LEFT JOIN cotisations_membres AS cm ON cm.id_membre = m.id AND cm.id_cotisation = ?
-					LEFT JOIN cotisations AS c ON c.id = cm.id_cotisation
-				WHERE
-					'.$db->where('m.id_categorie', $cats_obligatoires) . '
-				GROUP BY m.id ORDER BY '.$order.' '.$desc.' LIMIT ?,?;',
-				$id, $begin, self::ITEMS_PER_PAGE);
-		}
 
 		return $db->get('SELECT cm.id_membre, cm.date, cm.id, m.numero,
 			m.'.$champ_id.' AS nom, c.montant,

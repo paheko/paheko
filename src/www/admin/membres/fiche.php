@@ -24,15 +24,6 @@ $tpl->assign('categorie', $categorie);
 
 $cotisations = new Membres\Cotisations;
 
-if (!empty($categorie->id_cotisation_obligatoire))
-{
-	$tpl->assign('cotisation', $cotisations->isMemberUpToDate($membre->id, $categorie->id_cotisation_obligatoire));
-}
-else
-{
-	$tpl->assign('cotisation', false);
-}
-
 $tpl->assign('nb_activites', $cotisations->countForMember($membre->id));
 
 if ($session->canAccess('compta', Membres::DROIT_ACCES))

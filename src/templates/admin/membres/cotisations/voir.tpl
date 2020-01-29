@@ -22,13 +22,7 @@
         {/if}
         — {$cotisation.montant|escape|html_money} {$config.monnaie}
     </dd>
-    <dd>
-        {if !$cats}
-            <a href="?id={$cotisation.id}&amp;cats=1">Afficher les membres des catégories pour lesquelles cette cotisation est obligatoire</a>
-        {else}
-            <a href="?id={$cotisation.id}">Afficher seulement les membres à jour (ou qui ont déjà payé, mais ne sont plus à jour)</a>
-        {/if}
-    </dd>    <dt>Nombre de membres ayant cotisé</dt>
+    <dt>Nombre de membres ayant cotisé</dt>
     <dd>
         {$cotisation.nb_membres}
         <small class="help">(incluant les membres des catégories cachées)</small>

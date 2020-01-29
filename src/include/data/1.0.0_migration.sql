@@ -3,6 +3,7 @@ ALTER TABLE compta_comptes RENAME TO compta_comptes_old;
 ALTER TABLE compta_categories RENAME TO compta_categories_old;
 ALTER TABLE compta_exercices RENAME TO compta_exercices_old;
 ALTER TABLE membres_operations RENAME TO membres_operations_old;
+ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 DROP TABLE fichiers_compta_journal; -- Inutilisé à ce jour
 
@@ -39,6 +40,10 @@ INSERT INTO membres_mouvements
 -- Recopie des exercices, mais la date de fin ne peut être nulle
 INSERT INTO compta_exercices
 	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture FROM compta_exercices_old;
+
+-- Recopie des catégories, on supprime la colonne id_cotisation_obligatoire
+INSERT INTO membres_categories
+	SELECT id, nom, droit_wiki, droit_membres, droit_compta, droit_inscription, droit_connexion, droit_config, cacher FROM membres_categories_old;
 
 DROP TABLE compta_journal_old;
 DROP TABLE membres_operations_old;

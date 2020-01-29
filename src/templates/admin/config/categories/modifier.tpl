@@ -23,30 +23,6 @@
     </fieldset>
 
     <fieldset>
-        <legend>Cotisation obligatoire</legend>
-        <dl>
-            <dt><label for="f_id_cotisation_obligatoire">Cotisation obligatoire</label></dt>
-            <dd>
-                <select name="id_cotisation_obligatoire" id="f_id_cotisation_obligatoire">
-                    <option value="">-- Non</option>
-                    {foreach from=$cotisations item="cotisation"}
-                    <option value="{$cotisation.id}" {form_field name="id_cotisation_obligatoire" selected=$cotisation.id data=$cat}>
-                        {$cotisation.intitule} 
-                        — {$cotisation.montant|escape|html_money} {$config.monnaie}
-                        — {if $cotisation.duree}pour {$cotisation.duree} jours
-                        {elseif $cotisation.debut}
-                            du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
-                        {else}
-                            ponctuelle
-                        {/if}
-                    </option>
-                    {/foreach}
-                </select>
-            </dd>
-        </dl>
-    </fieldset>
-
-    <fieldset>
         <legend>Droits</legend>
         <dl class="droits">
             <dt><label for="f_droit_connexion_aucun">Les membres de cette catégorie peuvent-ils se connecter ?</label></dt>
