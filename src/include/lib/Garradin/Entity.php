@@ -3,7 +3,7 @@
 namespace Garradin;
 
 use KD2\Form;
-use KD2\AbstractEntity;
+use KD2\DB\AbstractEntity;
 
 class Entity extends AbstractEntity
 {
