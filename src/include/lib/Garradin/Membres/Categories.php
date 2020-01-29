@@ -27,17 +27,6 @@ class Categories
         {
             throw new UserException('Le nom de catégorie ne peut rester vide.');
         }
-
-        if (!empty($data['id_cotisation_obligatoire']) 
-            && !$db->test('cotisations', 'id = ?', (int)$data['id_cotisation_obligatoire']))
-        {
-            throw new UserException('Numéro de cotisation inconnu.');
-        }
-
-        if (isset($data['id_cotisation_obligatoire']) && empty($data['id_cotisation_obligatoire']))
-        {
-            $data['id_cotisation_obligatoire'] = null;
-        }
     }
 
     public function add($data)

@@ -19,10 +19,6 @@ if (($id = qg('id')) && is_numeric($id))
     $cats = new Membres\Categories;
     $categorie = $cats->get($membre->id_categorie);
 }
-else
-{
-    $categorie = ['id_cotisation_obligatoire' => false];
-}
 
 $cotisations = new Cotisations;
 $m_cotisations = new Membres\Cotisations;
@@ -88,16 +84,6 @@ if (qg('cotisation'))
     $tpl->assign('default_co', $co->id);
     $tpl->assign('default_compta', $co->id_categorie_compta);
     $tpl->assign('default_amount', $co->montant);
-}
-elseif ($membre)
-{
-    if (!empty($categorie->id_cotisation_obligatoire))
-    {
-        $co = $cotisations->get($categorie->id_cotisation_obligatoire);
-
-        $tpl->assign('default_co', $co->id);
-        $tpl->assign('default_amount', $co->montant);
-    }
 }
 
 $tpl->display('admin/membres/cotisations/ajout.tpl');

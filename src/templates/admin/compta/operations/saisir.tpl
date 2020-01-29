@@ -1,13 +1,6 @@
 {include file="admin/_head.tpl" title="Saisie d'une opération" current="compta/saisie" js=1}
 
 <form method="post" action="{$self_url}">
-    <ul class="actions">
-        <li><input type="radio" name="type" value="recette" {form_field name=type checked=recette default=recette} id="f_type_recette" /><label for="f_type_recette">Recette</label></li>
-        <li><input type="radio" name="type" value="depense" {form_field name=type checked=depense} id="f_type_depense" /><label for="f_type_depense">Dépense</label></li>
-        <li><input type="radio" name="type" value="virement" {form_field name=type checked=virement} id="f_type_virement" /><label for="f_type_virement">Virement interne</label></li>
-        <li><input type="radio" name="type" value="avance" {form_field name=type checked=avance} id="f_type_avance" /><label for="f_type_avance">Saisie avancée</label></li>
-    </ul>
-
     {form_errors}
 
     {if $ok}
@@ -18,93 +11,52 @@
     {/if}
 
     <fieldset>
-        <legend>Informations sur l'opération</legend>
+        <legend>Type d'écriture</legend>
         <dl>
-            <dt><label for="f_date">Date</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="date" name="date" id="f_date" value="{form_field name=date default=$date}" size="10" required="required" /></dd>
-            <dt><label for="f_libelle">Libellé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="libelle" id="f_libelle" value="{form_field name=libelle}" required="required" /></dd>
-            <dt><label for="f_montant">Montant</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="number" size="5" name="montant" id="f_montant" value="{form_field name=montant default=0.00}" min="0.00" step="0.01" required="required" /> {$config.monnaie}</dd>
-            <dt><label for="f_numero_piece">Numéro de pièce comptable</label></dt>
-            <dd><input type="text" name="numero_piece" id="f_numero_piece" value="{form_field name=numero_piece}" /></dd>
-            <dt><label for="f_remarques">Remarques</label></dt>
-            <dd><textarea name="remarques" id="f_remarques" rows="4" cols="30">{form_field name=remarques}</textarea></dd>
-            {if count($projets) > 0}
-            <dt><label for="f_projet">Projet</label></dt>
-            <dd>
-                <select name="projet" id="f_projet">
-                    <option value="0">-- Aucun</option>
-                    {foreach from=$projets key="id" item="libelle"}
-                    <option value="{$id}"{form_field name="projet" selected=$id}>{$libelle}</option>
-                    {/foreach}
-                </select>
-            </dd>
-            {/if}
-        </dl>
-        <dl class="type_recette type_depense">
-            <dt><label for="f_moyen_paiement">Moyen de paiement</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd>
-                <select name="moyen_paiement" id="f_moyen_paiement" required="required">
-                {foreach from=$moyens_paiement item="moyen"}
-                    <option value="{$moyen.code}"{if $moyen.code == $moyen_paiement} selected="selected"{/if}>{$moyen.nom}</option>
-                {/foreach}
-                </select>
-            </dd>
-            <dd class="f_a_encaisser">
-                <input type="checkbox" name="a_encaisser" value="1" id="f_a_encaisser" {form_field name=a_encaisser checked="1"} />
-                <label for="f_a_encaisser">En attente d'encaissement</label>
-            </dd>
-            <dt class="f_cheque"><label for="f_numero_cheque">Numéro de chèque</label></dt>
-            <dd class="f_cheque"><input type="text" name="numero_cheque" id="f_numero_cheque" value="{form_field name=numero_cheque}" /></dd>
-            <dt class="f_banque"><label for="f_banque">Compte bancaire</label></dt>
-            <dd class="f_banque">
-                <select name="banque" id="f_banque">
-                {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
-                {/foreach}
-                </select>
-            </dd>
+            {input type="radio" name="type" value="recette" label="Recette"}
+            {input type="radio" name="type" value="depense" label="Dépense"}
+            {input type="radio" name="type" value="virement" label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
+            {input type="radio" name="type" value="dette" label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
+            {input type="radio" name="type" value="creance" label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
+            {input type="radio" name="type" value="avance" label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
         </dl>
     </fieldset>
 
-    <fieldset class="type_avance">
-        <legend>Saisie avancée</legend>
+    <fieldset>
+        <legend>Informations</legend>
         <dl>
-            <dt><label for="f_compte_debit">Compte débité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd>
-                {select_compte comptes=$comptes name="compte_debit"}
-            </dd>
-            <dt><label for="f_compte_credit">Compte crédité</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd>
-                {select_compte comptes=$comptes name="compte_credit"}
-            </dd>
+            {input type="date" name="date" value=$date label="Date" required}
+            {input type="text" name="libelle" label="Libellé" required}
+            {input type="number" name="montant" label="Montant" min="0.00" step="0.01" value="0.00" required} {$config.monnaie}
+        </dl>
+        <dl class="type_recette type_depense">
+            {input type="select" name="moyen" label="Moyen de paiement" required options=$moyens_paiement}
+            {input type="select" name="compte" options=$comptes_encaissement label="Compte d'encaissement" required}
+            {input type="text" name="reference_paiement" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
+        </dl>
+        <dl class="type_avance">
+            {input type="compta_lignes" name="lignes" label="Lignes de l'écriture"}
         </dl>
     </fieldset>
 
     <fieldset class="type_virement">
         <legend>Virement</legend>
         <dl>
-            <dt><label for="f_compte2">De</label></dt>
-            <dd>
-                <select name="compte2" id="f_compte2">
-                    <option value="{$id_caisse}">Caisse</option>
-                {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
-                {/foreach}
-                    <option value="{$compte_cheque_e_encaisser}">Chèques à encaisser</option>
-                    <option value="{$compte_carte_e_encaisser}">Paiement CB à encaisser</option>
-                </select>
-            </dd>
-            <dt><label for="f_compte1">Vers</label></dt>
-            <dd>
-                <select name="compte1" id="f_compte1">
-                    <option value="{$id_caisse}">Caisse</option>
-                {foreach from=$comptes_bancaires item="compte"}
-                    <option value="{$compte.id}"{if $compte.id == $banque} selected="selected"{/if}>{$compte.libelle} - {$compte.banque}</option>
-                {/foreach}
-                </select>
-            </dd>
+            {input type="select" name="from" options=$comptes label="De" required}
+            {input type="select" name="to" options=$comptes label="Vers" required}
+        </dl>
+    </fieldset>
+
+    <fieldset>
+        <legend>Détails</legend>
+        <dl>
+            {input type="datalist" name="membre" label="Membres associés"}
+            {input type="text" name="numero_piece" label="Numéro de pièce comptable"}
+            {input type="textarea" name="remarques" label="Remarques" rows=4 cols=30}
+
+            {if count($projets) > 0}
+                {input type="select" name="projet" options=$projets}
+            {/if}
         </dl>
     </fieldset>
 
@@ -127,10 +79,7 @@
         <legend>Catégorie</legend>
         <dl class="catList">
         {foreach from=$categories_recettes item="cat"}
-            <dt>
-                <input type="radio" name="categorie_recette" value="{$cat.id}" id="f_cat_{$cat.id}" {form_field name="categorie" checked=$cat.id} />
-                <label for="f_cat_{$cat.id}">{$cat.intitule}</label>
-            </dt>
+            {input type="radio" name="categorie_recette" value=$cat.id label=$cat.intitule}
             {if !empty($cat.description)}
                 <dd class="desc">{$cat.description}</dd>
             {/if}
@@ -142,10 +91,7 @@
         <legend>Catégorie</legend>
         <dl class="catList">
         {foreach from=$categories_depenses item="cat"}
-            <dt>
-                <input type="radio" name="categorie_depense" value="{$cat.id}" id="f_cat_{$cat.id}" {form_field name="categorie" checked=$cat.id} />
-                <label for="f_cat_{$cat.id}">{$cat.intitule}</label>
-            </dt>
+            {input type="radio" name="categorie_depense" value=$cat.id label=$cat.intitule}
             {if !empty($cat.description)}
                 <dd class="desc">{$cat.description}</dd>
             {/if}

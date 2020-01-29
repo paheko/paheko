@@ -10,29 +10,6 @@
             Vous n'avez aucune cotisation enregistrée.
         {/if} 
     </dt>
-{if $cotisation}
-    <dt>Cotisation obligatoire</dt>
-    <dd>{$cotisation.intitule} — 
-        {if $cotisation.duree}
-            {$cotisation.duree} jours
-        {elseif $cotisation.debut}
-            du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
-        {else}
-            ponctuelle
-        {/if}
-        — {$cotisation.montant|escape|html_money} {$config.monnaie}
-    </dd>
-    <dd>
-        {if !$cotisation.a_jour}
-            <b class="error">Vous n'êtes pas à jour de cotisation</b>
-        {else}
-            <b class="confirm">&#10003; À jour de cotisation</b>
-            {if $cotisation.expiration}
-                (expire le {$cotisation.expiration|format_sqlite_date_to_french})
-            {/if}
-        {/if}
-    </dd>
-{/if}
 {if !empty($cotisations_membre)}
     <dt>Cotisations en cours</dt>
     {foreach from=$cotisations_membre item="co"}

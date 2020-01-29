@@ -20,9 +20,7 @@ CREATE TABLE IF NOT EXISTS membres_categories
     droit_inscription INTEGER NOT NULL DEFAULT 0,
     droit_connexion INTEGER NOT NULL DEFAULT 1,
     droit_config INTEGER NOT NULL DEFAULT 0,
-    cacher INTEGER NOT NULL DEFAULT 0,
-
-    id_cotisation_obligatoire INTEGER NULL REFERENCES cotisations (id) ON DELETE SET NULL
+    cacher INTEGER NOT NULL DEFAULT 0
 );
 
 -- Membres de l'asso

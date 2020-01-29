@@ -18,9 +18,6 @@ if (!$co)
 }
 
 $page = (int) qg('p') ?: 1;
-$categories = (int) qg('cats');
-
-$tpl->assign('cats', $categories);
 $tpl->assign('page', $page);
 $tpl->assign('bypage', Membres\Cotisations::ITEMS_PER_PAGE);
 $tpl->assign('total', $m_cotisations->countMembersForCotisation($co->id));
@@ -36,6 +33,6 @@ $tpl->assign('cotisation', $co);
 $tpl->assign('order', qg('o') ?: 'date');
 $tpl->assign('desc', null === qg('a'));
 $tpl->assign('liste', $m_cotisations->listMembersForCotisation(
-	$co->id, $categories, $page, qg('o'), null !== qg('a') ? false : true));
+	$co->id, $page, qg('o'), null !== qg('a') ? false : true));
 
 $tpl->display('admin/membres/cotisations/voir.tpl');

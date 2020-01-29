@@ -10,30 +10,6 @@
 </ul>
 
 <dl class="cotisation">
-{if $cotisation}
-    <dt>Cotisation obligatoire</dt>
-    <dd>{$cotisation.intitule} — 
-        {if $cotisation.duree}
-            {$cotisation.duree} jours
-        {elseif $cotisation.debut}
-            du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
-        {else}
-            ponctuelle
-        {/if}
-        — {$cotisation.montant|escape|html_money} {$config.monnaie}
-    </dd>
-    <dt>À jour de cotisation ?</dt>
-    <dd>
-        {if !$cotisation.a_jour}
-            <span class="error"><b>Non</b>, cotisation non payée</span>
-        {else}
-            <b class="confirm">&#10003; Oui</b>
-            {if $cotisation.expiration}
-                (expire le {$cotisation.expiration|format_sqlite_date_to_french})
-            {/if}
-        {/if}
-    </dd>
-{/if}
     <dt>
         {if $nb_activites == 1}
             {$nb_activites} cotisation enregistrée

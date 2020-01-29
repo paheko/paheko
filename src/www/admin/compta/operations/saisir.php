@@ -170,17 +170,7 @@ $tpl->assign('projets', (new Compta\Projets)->getAssocList());
 
 if (!$session->get('context_compta_date'))
 {
-    $exercices = new Compta\Exercices;
-    $exercice = $exercices->getCurrent();
-
-    if ($exercice->debut > time() || $exercice->fin < time())
-    {
-        $session->set('context_compta_date', date('Y-m-d', $exercice->debut));
-    }
-    else
-    {
-        $session->get('context_compta_date', date('Y-m-d'));
-    }
+    $session->set('context_compta_date', date('Y-m-d'));
 }
 
 $tpl->assign('date', $session->get('context_compta_date') ?: false);
