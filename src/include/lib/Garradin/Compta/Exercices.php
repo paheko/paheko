@@ -2,13 +2,24 @@
 
 namespace Garradin\Compta;
 
-use Garradin\Entities\Exercice;
+use Garradin\Entities\Compta\Exercice;
+use KD2\DB\EntityManager;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 
 class Exercices
 {
+    public function listOpen()
+    {
+        return EntityManager::getInstance(Exercice::class)->all('SELECT * FROM @TABLE WHERE cloture = 0;');
+    }
+
+    public function getCurrent()
+    {
+        return EntityManager::findOne(Exercice::class, 'SELECT * FROM @TABLE ORDER BY fin DESC LIMIT 1');
+    }
+
     /**
      * Créer les reports à nouveau issus de l'exercice $old_id dans le nouvel exercice courant
      * @param  integer $old_id  ID de l'ancien exercice
