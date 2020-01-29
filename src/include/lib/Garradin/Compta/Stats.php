@@ -47,33 +47,15 @@ class Stats
 		return $this->_parType(Categories::DEPENSES);
 	}
 
-	public function soldeCompte($compte, $augmente = 'debit', $diminue = 'credit')
+	public function soldeCompte(int $compte, ?int $id_exercice = null)
 	{
 		$db = DB::getInstance();
 
-		if (strpos($compte, '%') !== false)
-		{
-			$compte = 'LIKE \''. $db->escapeString($compte) . '\'';
-		}
-		else
-		{
-			$compte = '= \''. $db->escapeString($compte) . '\'';
-		}
-
-		$stats = $this->getStats('SELECT strftime(\'%Y%m\', date) AS date,
-			(COALESCE((SELECT SUM(montant) FROM compta_journal
-				WHERE compte_'.$augmente.' '.$compte.' AND id_exercice = cj.id_exercice
-				AND date >= strftime(\'%Y-%m-01\', cj.date)
-				AND date <= strftime(\'%Y-%m-31\', cj.date)), 0)
-			- COALESCE((SELECT SUM(montant) FROM compta_journal
-				WHERE compte_'.$diminue.' '.$compte.' AND id_exercice = cj.id_exercice
-				AND date >= strftime(\'%Y-%m-01\', cj.date)
-				AND date <= strftime(\'%Y-%m-31\', cj.date)), 0)
-			) AS solde
-			FROM compta_journal AS cj
-			WHERE (compte_debit '.$compte.' OR compte_credit '.$compte.')
-			AND id_exercice = (SELECT id FROM compta_exercices WHERE cloture = 0)
-			GROUP BY strftime(\'%Y-%m\', date) ORDER BY date;');
+		$stats = $this->getAssoc('SELECT strftime(\'%Y%m\', m.date), SUM(credit) - SUM(debit)
+			FROM compta_mouvements_lignes AS l
+            INNER JOIN compta_mouvements AS m ON m.id = l.id_mouvement
+            WHERE compte = ? AND id_exercice = ?
+            GROUP BY strftime(\'%Y%m\', m.date) ORDER BY m.date;');
 
 		$c = 0;
 		foreach ($stats as $k=>$v)
