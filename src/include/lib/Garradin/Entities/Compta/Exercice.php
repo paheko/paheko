@@ -18,11 +18,11 @@ class Exercice extends Entity
     protected $cloture = 0;
 
     protected $_types = [
-        'id'      => 'int',
+        'id'      => 'integer',
         'libelle' => 'string',
         'debut'   => 'date',
         'fin'     => 'date',
-        'cloture' => 'int',
+        'cloture' => 'integer',
     ];
 
     protected $_validation_rules = [
@@ -32,7 +32,7 @@ class Exercice extends Entity
         'cloture' => 'int|min:0|max:1',
     ];
 
-    public function selfCheck()
+    public function selfCheck(): void
     {
         parent::selfCheck();
         $this->assert($this->debut < $this->fin, 'La date de fin doit être postérieure à la date de début');
@@ -76,7 +76,7 @@ class Exercice extends Entity
         $this->set('cloture', 1);
     }
 
-    public function delete()
+    public function delete(): bool
     {
         $db = DB::getInstance();
 
@@ -86,6 +86,6 @@ class Exercice extends Entity
             throw new UserException('Cet exercice ne peut être supprimé car des mouvements y sont liés.');
         }
 
-        parent::delete();
+        return parent::delete();
     }
 }
