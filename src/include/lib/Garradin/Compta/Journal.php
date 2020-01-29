@@ -35,30 +35,22 @@ class Journal
         return DB::getInstance()->test('compta_exercices', 'cloture = 0 AND id = ?', (int)$id);
     }
 
-    public function getSolde($id_compte, $inclure_sous_comptes = false, $exercice = null)
+    public function getSolde(int $id_compte, ?int $id_exercice = null): int
     {
         $db = DB::getInstance();
-        $exercice = (int) $exercice ?: $this->_getCurrentExercice();
-        $compte = $inclure_sous_comptes
-            ? 'LIKE \'' . $db->escapeString(trim($id_compte)) . '%\''
-            : '= \'' . $db->escapeString(trim($id_compte)) . '\'';
 
-        $debit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_debit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)';
-        $credit = 'COALESCE((SELECT SUM(montant) FROM compta_journal WHERE compte_credit '.$compte.' AND id_exercice = '.(int)$exercice.'), 0)';
+        $solide = (int) $db->firstColumn('SELECT SUM(credit) - SUM(debit) FROM compta_mouvements_lignes AS l
+            INNER JOIN compta_mouvements AS m ON m.id = l.id_mouvement
+            WHERE compte = ? AND m.id_exercice = ?;', $id_compte, $id_exercice);
 
-        // L'actif augmente au débit, le passif au crédit
         $position = $db->firstColumn('SELECT position FROM compta_comptes WHERE id = ?;', $id_compte);
 
-        if (($position & Comptes::ACTIF) || ($position & Comptes::CHARGE))
-        {
-            $query = $debit . ' - ' . $credit;
-        }
-        else
-        {
-            $query = $credit . ' - ' . $debit;
+        // L'actif augmente au débit, le passif au crédit
+        if (($position & Comptes::ACTIF) || ($position & Comptes::CHARGE)) {
+            $solde = -$solde;
         }
 
-        return $db->firstColumn('SELECT ' . $query . ';');
+        return $solde;
     }
 
     public function getJournalCompte($compte, $inclure_sous_comptes = false, $exercice = null)
@@ -171,14 +163,14 @@ class Journal
     }
 
     /**
-     * Compte le nombre d'écritures liées à un membre
+     * Compte le nombre d'écritures créées par un membre
      * @param  integer $id Numéro de membre
      * @return integer     Nombre d'écritures liées
      */
     public function countForMember($id)
     {
         $db = DB::getInstance();
-        return $db->count('compta_journal', $db->where('id_auteur', $id));
+        return $db->count('compta_mouvements', $db->where('id_auteur', $id));
     }
 
     /**
