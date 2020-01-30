@@ -657,7 +657,7 @@ class Squelette extends \KD2\MiniSkel
 
         $hash = sha1(uniqid(mt_rand(), true));
         $out = new Squelette_Snippet();
-        $out->append(1, '$parent_hash = $this->current[\'_self_hash\'];');
+        $out->append(1, '$parent_hash = @$this->current[\'_self_hash\'];');
         $out->append(1, '$this->parent =& $parent_hash ? $this->_vars[$parent_hash] : null;');
 
         if (!empty($search))
