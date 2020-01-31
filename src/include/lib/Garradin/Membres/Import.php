@@ -17,7 +17,7 @@ class Import
 			throw new \RuntimeException('Fichier inconnu : '.$path);
 		}
 
-		$fp = fopen($path, 'r');
+		$fp = Utils::open_csv_file($path);
 
 		if (!$fp)
 		{
@@ -179,7 +179,7 @@ class Import
 			throw new \RuntimeException('Fichier inconnu : '.$path);
 		}
 
-		$fp = fopen($path, 'r');
+		$fp = Utils::open_csv_file($path);
 
 		if (!$fp)
 		{
