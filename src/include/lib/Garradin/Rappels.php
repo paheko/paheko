@@ -162,7 +162,7 @@ class Rappels
 		SELECT
 			*,
 			/* Nombre de jours avant ou après expiration */
-			(julianday(date("2020-02-20")) - julianday(expiration)) AS nb_jours,
+			(julianday(date()) - julianday(expiration)) AS nb_jours,
 			/* Date de mise en œuvre du rappel */
 			date(expiration, delai || \' days\') AS date_rappel
 		FROM (
@@ -198,7 +198,6 @@ class Rappels
 
 		foreach ($db->iterate($query) as $row)
 		{
-			var_dump($row); continue;
 			$re->sendAuto($row);
 		}
 
