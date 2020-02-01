@@ -289,7 +289,7 @@ class Cotisations
 		{
 			$cats_obligatoires = $db->getAssoc('SELECT id, id FROM membres_categories WHERE id_cotisation_obligatoire = ? AND cacher = 0;', $id);
 
-			return $db->get('SELECT m.id AS id_membre, cm.date, cm.id, m.numero,
+			return $db->get('SELECT m.id AS id_membre, MAX(cm.date), cm.id, m.numero,
 				m.'.$champ_id.' AS nom, c.montant,
 				CASE WHEN cm.id IS NULL THEN 0
 				WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
@@ -304,7 +304,7 @@ class Cotisations
 				$id, $begin, self::ITEMS_PER_PAGE);
 		}
 
-		return $db->get('SELECT cm.id_membre, cm.date, cm.id, m.numero,
+		return $db->get('SELECT cm.id_membre, MAX(cm.date), cm.id, m.numero,
 			m.'.$champ_id.' AS nom, c.montant,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN (cm.date <= c.fin AND cm.date >= c.debut)
