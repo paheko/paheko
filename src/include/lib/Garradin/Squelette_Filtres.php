@@ -213,7 +213,7 @@ class Squelette_Filtres
     static public function egal_a($value, $test)
     {
         if ($value == $test)
-            return $value;
+            return true;
         else
             return false;
     }
@@ -221,7 +221,7 @@ class Squelette_Filtres
     static public function different_de($value, $test)
     {
         if ($value != $test)
-            return $value;
+            return true;
         else
             return false;
     }
@@ -331,47 +331,47 @@ class Squelette_Filtres
 
     static public function et($value, $test)
     {
-        return ($value && $test) ? $value : false;
+        return ($value && $test) ? true : false;
     }
 
     static public function ou($value, $test)
     {
-        return ($value || $test) ? $value : false;
+        return ($value || $test) ? true : false;
     }
 
     static public function xou($value, $test)
     {
-        return ($value XOR $test) ? $value : false;
+        return ($value XOR $test) ? true : false;
     }
 
     static public function oui($value)
     {
-        return $value ? ' ' : false;
+        return $value ? true : false;
     }
 
     static public function non($value)
     {
-        return !$value ? ' ' : false;
+        return !$value ? true : false;
     }
 
     static public function superieur_a($value, $test)
     {
-        return ($value > $test) ? $value : false;
+        return ($value > $test) ? true : false;
     }
 
     static public function superieur_ou_egal_a($value, $test)
     {
-        return ($value >= $test) ? $value : false;
+        return ($value >= $test) ? true : false;
     }
 
     static public function inferieur_a($value, $test)
     {
-        return ($value < $test) ? $value : false;
+        return ($value < $test) ? true : false;
     }
 
     static public function inferieur_ou_egal_a($value, $test)
     {
-        return ($value <= $test) ? $value : false;
+        return ($value <= $test) ? true : false;
     }
 
     static public function euros($value)
