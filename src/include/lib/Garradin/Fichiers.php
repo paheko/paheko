@@ -466,33 +466,10 @@ class Fichiers
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
-		$max_blob_size = self::getMaxBlobSize();
-
-		// Vérifier que le fichier peut rentrer en base de données (dans PHP < 7.2 on n'utilise pas openBlob)
-		if (null !== $max_blob_size && $file['size'] > $max_blob_size) {
-			unlink($file['tmp_name']);
-			throw new UserException('Taille du fichier supérieure au maximum autorisé en base de données');
-		}
-
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
 		return self::storeFile($name, $file['tmp_name']);
-	}
-
-    /**
-     * Returns the maximum value size that can be handled by a bindValue
-     * @return null|integer
-     */
-	static public function getMaxBlobSize()
-	{
-        $memory_limit = Utils::return_bytes(ini_get('memory_limit'));
-
-        if (!$memory_limit) {
-            return null;
-        }
-
-        return round(($memory_limit - memory_get_usage()) * 0.9);
 	}
 
 	/**
@@ -549,18 +526,22 @@ class Fichiers
 		$db->begin();
 
 		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
-		if (!($id_contenu = $db->firstColumn('SELECT id FROM fichiers_contenu WHERE hash = ?;', $hash)))
-		{
-			$db->insert('fichiers_contenu', [
-				'hash'		=>	$hash,
-				'taille'	=>	(int)$size,
-				'contenu'	=>	[\SQLITE3_BLOB, $content ?: file_get_contents($path)],
-			]);
-
-			// FIXME: utiliser Sqlite3::openBlob pour écrire quand dispo dans PHP
-			// cf. https://github.com/php/php-src/pull/2528
-
+		if (!($id_contenu = $db->firstColumn('SELECT id FROM fichiers_contenu WHERE hash = ?;', $hash))) {
+			$db->preparedQuery('INSERT INTO fichiers_contenu (hash, taille, contenu) VALUES (?, ?, zeroblob(?));',
+				[$hash, (int)$size, (int)$size]);
 			$id_contenu = $db->lastInsertRowID();
+
+			// Écrire le contenu
+			$blob = $db->openBlob('fichiers_contenu', 'contenu', $id_contenu, 'main', SQLITE3_OPEN_READWRITE);
+
+			if (null !== $content) {
+				fwrite($blob, $content);
+			}
+			else{
+				fwrite($blob, file_get_contents($path));
+			}
+
+			fclose($blob);
 		}
 
 		$db->insert('fichiers', [
