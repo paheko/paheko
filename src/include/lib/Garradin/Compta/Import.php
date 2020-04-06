@@ -93,6 +93,7 @@ class Import
 		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
 		// Liste des moyens sous la forme nom -> code
 		$liste_moyens = array_flip($cats->listMoyensPaiement(true));
+		$liste_moyens = array_change_key_case($liste_moyens, \CASE_LOWER);
 
 		// Liste associative des projets
 		$liste_projets = $db->getAssoc('SELECT libelle, id FROM compta_projets;');
@@ -168,17 +169,22 @@ class Import
 			$credit = $col('Compte de crédit - numéro');
 
 			$cat = $col('Catégorie');
-			$moyen = strtoupper(substr($col('Moyen de paiement'), 0, 2));
+			$moyen = strtolower($col('Moyen de paiement'));
 
 			// Association du moyen de paiement par nom
 			if ($moyen && array_key_exists($moyen, $liste_moyens))
 			{
 				$moyen = $liste_moyens[$moyen];
 			}
+			// Sinon on estime que c'est juste le code qui est fourni
+			else
+			{
+				$moyen = substr(strtoupper($moyen), 0, 2);
+			}
 
 			// Vérification de l'existence du moyen de paiement
 			// s'il n'est pas valide, on ne peut pas avoir de catégorie non plus
-			if (!$moyen || !in_array($moyen, $liste_moyens, true))
+			if (!trim($moyen) || !in_array($moyen, $liste_moyens, true))
 			{
 				$moyen = false;
 				$cat = false;
