@@ -90,7 +90,7 @@ class Import
 		$cats = new Categories;
 		$journal = new Journal;
 
-		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_cats = $db->getAssoc('SELECT type || intitule, id FROM compta_categories;');
 		// Liste des moyens sous la forme nom -> code
 		$liste_moyens = array_flip($cats->listMoyensPaiement(true));
 		$liste_moyens = array_change_key_case($liste_moyens, \CASE_LOWER);
@@ -170,6 +170,17 @@ class Import
 
 			$cat = $col('Catégorie');
 			$moyen = strtolower($col('Moyen de paiement'));
+			$type = $col('Type de mouvement');
+
+			if ('Recette' === $type) {
+				$type = 1;
+			}
+			elseif ('Dépense' === $type) {
+				$type = -1;
+			}
+			else {
+				$type = 0;
+			}
 
 			// Association du moyen de paiement par nom
 			if ($moyen && array_key_exists($moyen, $liste_moyens))
@@ -190,8 +201,10 @@ class Import
 				$cat = false;
 			}
 
-			if ($cat && !array_key_exists($cat, $liste_cats))
-			{
+			if ($cat && array_key_exists($type . $cat, $liste_cats)) {
+				$cat = $liste_cats[$type . $cat];
+			}
+			else {
 				$cat = $moyen = false;
 			}
 
@@ -220,7 +233,7 @@ class Import
 			{
 				$data['moyen_paiement']	=	$moyen;
 				$data['numero_cheque']	=	$col('Numéro de chèque');
-				$data['id_categorie']	=	$liste_cats[$cat];
+				$data['id_categorie']	=	$cat;
 			}
 
 			try {
