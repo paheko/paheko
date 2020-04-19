@@ -169,7 +169,7 @@ class Template extends \KD2\Smartyer
 
 		$required_label = array_key_exists('required', $params) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
 
-		$out .= sprintf('<dt><label for="f_%s">%s</label>%s</dt>', $name, $this->escape($label), $required_label);
+		$out = sprintf('<dt><label for="f_%s">%s</label>%s</dt>', $name, $this->escape($label), $required_label);
 
 		if (isset($help)) {
 			$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
@@ -181,6 +181,12 @@ class Template extends \KD2\Smartyer
 		if (array_key_exists('required', $params)) {
 			$attributes['required'] = 'required';
 		}
+
+		array_walk($attributes, function ($v, $k) {
+			return sprintf('%s="%s"', $k, $v);
+		});
+
+		$attributes = implode(' ', $attributes);
 
 		$out .= '<dd>';
 
@@ -194,10 +200,10 @@ class Template extends \KD2\Smartyer
 			$out .= '</select>';
 		}
 		elseif ($type == 'textarea') {
-			$out .= sprintf('<textarea %s>%s</textarea>', $attributes, $this->escape($value));
+			$out .= sprintf('<textarea %s>%s</textarea>', $attributes, $this->escape($current_value));
 		}
 		else {
-			$out .= sprintf('<input type="%s" %s value="%s" />', $type, $attributes, $this->escape($value));
+			$out .= sprintf('<input type="%s" %s value="%s" />', $type, $attributes, $this->escape($current_value));
 		}
 
 		$out .= '</dd>';
