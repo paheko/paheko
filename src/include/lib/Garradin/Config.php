@@ -57,9 +57,6 @@ class Config
 
             'categorie_membres'       =>  $int,
 
-            'categorie_dons'          =>  $int,
-            'categorie_cotisations'   =>  $int,
-
             'accueil_wiki'            =>  $string,
             'accueil_connexion'       =>  $string,
 
@@ -76,7 +73,6 @@ class Config
             'image_fond'              =>  $string,
 
             'desactiver_site'         =>  $bool,
-            'compta_expert'           =>  $bool,
         ];
 
         $db = DB::getInstance();
@@ -302,17 +298,6 @@ class Config
                         FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != \'\';'))
                 {
                     throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
-                }
-                break;
-            }
-            case 'categorie_cotisations':
-            case 'categorie_dons':
-            {
-                return false;
-                $db = DB::getInstance();
-                if (!$db->firstColumn('SELECT 1 FROM compta_categories WHERE id = ?;', $value))
-                {
-                    throw new UserException('Champ '.$key.' : La catégorie comptable numéro \''.$value.'\' ne semble pas exister.');
                 }
                 break;
             }
