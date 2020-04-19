@@ -4,10 +4,6 @@ CREATE TABLE IF NOT EXISTS config (
     valeur TEXT
 );
 
--- On stocke ici les ID de catégorie de compta correspondant aux types spéciaux
--- compta_categorie_cotisations => id_categorie
--- compta_categorie_dons => id_categorie
-
 CREATE TABLE IF NOT EXISTS membres_categories
 -- Catégories de membres
 (
@@ -42,15 +38,23 @@ CREATE TABLE IF NOT EXISTS cotisations
 -- Types de cotisations et activités
 (
     id INTEGER PRIMARY KEY NOT NULL,
-    id_categorie_compta INTEGER NULL REFERENCES compta_categories (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
 
     intitule TEXT NOT NULL,
     description TEXT NULL,
-    montant REAL NOT NULL,
 
     duree INTEGER NULL, -- En jours
     debut TEXT NULL, -- timestamp
     fin TEXT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cotisations_tarifs
+(
+    id INTEGER PRIMARY KEY NOT NULL,
+    label TEXT NOT NULL,
+    description TEXT NULL,
+    amount INTEGER NULL,
+    formula TEXT NULL,
+    id_category INTEGER NULL REFERENCES acc_categories (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
 );
 
 CREATE TABLE IF NOT EXISTS cotisations_membres
@@ -176,163 +180,103 @@ CREATE TRIGGER IF NOT EXISTS wiki_recherche_contenu_chiffre AFTER INSERT ON wiki
 -- COMPTA
 --
 
-CREATE TABLE IF NOT EXISTS compta_exercices
+CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
 (
     id INTEGER NOT NULL PRIMARY KEY,
 
-    libelle TEXT NOT NULL,
+    label TEXT NOT NULL,
 
-    debut TEXT NOT NULL CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
-    fin TEXT NOT NULL CHECK (date(fin) IS NOT NULL AND date(fin) = fin),
+    start_date TEXT NOT NULL CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
+    end_date TEXT NOT NULL CHECK (date(fin) IS NOT NULL AND date(fin) = fin),
 
-    cloture INTEGER NOT NULL DEFAULT 0
+    closed INTEGER NOT NULL DEFAULT 0,
+
+    id_plan INTEGER NOT NULL REFERENCES acc_plans (id)
 );
 
-
-CREATE TABLE IF NOT EXISTS compta_comptes
--- Plan comptable
+CREATE TABLE IF NOT EXISTS acc_plans
+-- Plans comptables : il peut y en avoir plusieurs
 (
     id INTEGER NOT NULL PRIMARY KEY,
+    country TEXT NOT NULL,
+    code TEXT NULL, -- NULL = plan comptable créé par l'utilisateur
+    label TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS acc_accounts
+-- Comptes des plans comptables
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_plan INTEGER NOT NULL REFERENCES compta_plans,
+
     code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
     parent INTEGER NULL REFERENCES compta_comptes(id),
 
-    libelle TEXT NOT NULL,
+    label TEXT NOT NULL,
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
-    plan_comptable INTEGER NOT NULL DEFAULT 1, -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
-    id_exercice INTEGER NULL REFERENCES compta_exercices (id)
-    -- Quand un exercice est clôturé, on copie les comptes utilisés dans cet exercice, avec id_exercice renseigné
-    -- pour garder une archive en cas de modification du plan comptable dans les exercices suivants
+    type INTEGER NOT NULL DEFAULT 0, -- compte spécial : banque, caisse, en attente d'encaissement
+    user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS compta_comptes_code ON compta_comptes (code, id_exercice);
-CREATE INDEX IF NOT EXISTS compta_comptes_parent ON compta_comptes (parent);
+CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_plan);
+CREATE INDEX IF NOT EXISTS acc_accounts_parent ON acc_accounts (parent);
 
-CREATE TABLE IF NOT EXISTS compta_comptes_bancaires
--- Comptes bancaires
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-
-    banque TEXT NOT NULL,
-
-    iban TEXT NULL,
-    bic TEXT NULL,
-
-    FOREIGN KEY(id) REFERENCES compta_comptes(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS compta_projets
--- Projets (compta analytique)
-(
-    id INTEGER PRIMARY KEY NOT NULL,
-
-    libelle TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS compta_mouvements
+CREATE TABLE IF NOT EXISTS acc_transactions
 -- Opérations comptables
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
-    libelle TEXT NOT NULL,
-    remarques TEXT NULL,
-    numero_piece TEXT NULL, -- N° de pièce comptable
+    label TEXT NOT NULL,
+    notes TEXT NULL,
+    reference TEXT NULL, -- N° de pièce comptable
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
-    moyen_paiement TEXT NULL,
-    reference_paiement TEXT NULL, -- Référence de paiement, eg. numéro de chèque
 
-    validation INTEGER NOT NULL DEFAULT 0, -- 1 = écriture validée, non modifiable
+    validated INTEGER NOT NULL DEFAULT 0, -- 1 = écriture validée, non modifiable
 
     hash TEXT NULL,
     prev_hash TEXT NULL,
 
-    id_exercice INTEGER NULL DEFAULT NULL, -- En cas de compta simple, l'exercice est permanent (NULL)
-    id_auteur INTEGER NULL,
-    id_categorie INTEGER NULL, -- Numéro de catégorie (en mode simple)
-    id_projet INTEGER NULL,
-
-    FOREIGN KEY(moyen_paiement) REFERENCES compta_moyens_paiement(code),
-    FOREIGN KEY(id_exercice) REFERENCES compta_exercices(id),
-    FOREIGN KEY(id_auteur) REFERENCES membres(id) ON DELETE SET NULL,
-    FOREIGN KEY(id_categorie) REFERENCES compta_categories(id) ON DELETE SET NULL,
-    FOREIGN KEY(id_projet) REFERENCES compta_projets(id) ON DELETE SET NULL
+    id_year INTEGER NOT NULL REFERENCES acc_years(id),
+    id_category INTEGER NULL REFERENCES acc_categories(id) ON DELETE SET NULL, -- Numéro de catégorie (en mode simple)
+    id_analytical INTEGER NULL REFERENCES acc_accounts(id) ON DELETE SET NULL
 );
 
-CREATE INDEX IF NOT EXISTS compta_mouvements_exercice ON compta_mouvements (id_exercice);
-CREATE INDEX IF NOT EXISTS compta_mouvements_date ON compta_mouvements (date);
-CREATE INDEX IF NOT EXISTS compta_mouvements_auteur ON compta_mouvements (id_auteur);
+CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
+CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
 
-CREATE TRIGGER IF NOT EXISTS compta_mouvements_exercice_i BEFORE INSERT ON compta_mouvements
-BEGIN
-    SELECT
-        CASE WHEN (old.id_exercice IS NOT NULL AND (SELECT cloture FROM compta_exercices WHERE id = old.id_exercice) = 1)
-        THEN RAISE(FAIL, 'Modification interdite de mouvement lié à un exercice clôturé')
-    END;
-END;
-
-CREATE TRIGGER IF NOT EXISTS compta_mouvements_exercice_d BEFORE DELETE ON compta_mouvements
-BEGIN
-    SELECT
-        CASE WHEN (old.id_exercice IS NOT NULL AND (SELECT cloture FROM compta_exercices WHERE id = old.id_exercice) = 1)
-        THEN RAISE(FAIL, 'Modification interdite de mouvement lié à un exercice clôturé')
-    END;
-END;
-
-CREATE TRIGGER IF NOT EXISTS compta_mouvements_exercice_u BEFORE UPDATE ON compta_mouvements
-BEGIN
-    SELECT
-        CASE WHEN (old.id_exercice IS NOT NULL AND (SELECT cloture FROM compta_exercices WHERE id = old.id_exercice) = 1)
-        THEN RAISE(FAIL, 'Modification interdite de mouvement lié à un exercice clôturé')
-    END;
-END;
-
-CREATE TABLE IF NOT EXISTS compta_mouvements_lignes
--- Écritures
+CREATE TABLE IF NOT EXISTS acc_transactions_lines
+-- Lignes d'écritures d'une opération
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
-    id_mouvement INTEGER NOT NULL REFERENCES compta_mouvements (id) ON DELETE CASCADE,
+    id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
+    id_account INTEGER NOT NULL REFERENCES acc_accounts (id), -- N° du compte dans le plan comptable
 
-    compte INTEGER NOT NULL REFERENCES compta_comptes(id), -- N° du compte dans le plan comptable
     credit INTEGER NOT NULL,
     debit INTEGER NOT NULL,
 
-    rapprochement INTEGER NOT NULL DEFAULT 0,
+    reconcilied INTEGER NOT NULL DEFAULT 0,
+    payment_reference TEXT NULL, -- Référence de paiement, eg. numéro de chèque
 
-    CONSTRAINT ligne_check1 CHECK ((credit * debit) = 0),
-    CONSTRAINT ligne_check2 CHECK ((credit + debit) > 0)
+    CONSTRAINT line_check1 CHECK ((credit * debit) = 0),
+    CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
 );
 
-CREATE INDEX IF NOT EXISTS compta_mouvements_lignes_compte ON compta_mouvements_lignes (compte);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 
-CREATE TABLE IF NOT EXISTS compta_moyens_paiement
--- Moyens de paiement
-(
-    code TEXT NOT NULL PRIMARY KEY,
-    nom TEXT NOT NULL
-);
-
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('AU', 'Autre');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('CB', 'Carte bleue');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('CH', 'Chèque');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('AC', 'Autres chèques (vacances, cadeau, etc.)');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('ES', 'Espèces');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('PR', 'Prélèvement');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('TI', 'TIP');
-INSERT OR IGNORE INTO compta_moyens_paiement (code, nom) VALUES ('VI', 'Virement');
-
-CREATE TABLE IF NOT EXISTS compta_categories
+CREATE TABLE IF NOT EXISTS acc_categories
 -- Catégories pour simplifier le plan comptable
 (
     id INTEGER NOT NULL PRIMARY KEY,
     type INTEGER NOT NULL DEFAULT 1, -- 1 = recette, -1 = dépense, 0 = autre (utilisé uniquement pour l'interface)
 
-    intitule TEXT NOT NULL,
+    label TEXT NOT NULL,
     description TEXT NULL,
 
-    compte INTEGER NULL REFERENCES compta_comptes(id) ON DELETE CASCADE -- Compte affecté par cette catégorie
+    id_account INTEGER NULL REFERENCES acc_accounts(id) ON DELETE CASCADE -- Compte affecté par cette catégorie
 );
 
 CREATE TABLE IF NOT EXISTS plugins
@@ -398,11 +342,11 @@ CREATE TABLE IF NOT EXISTS fichiers_wiki_pages
     PRIMARY KEY(fichier, id)
 );
 
-CREATE TABLE IF NOT EXISTS fichiers_compta_mouvements
+CREATE TABLE IF NOT EXISTS fichiers_acc_transactions
 -- Associations entre fichiers et journal de compta (pièce comptable par exemple)
 (
     fichier INTEGER NOT NULL REFERENCES fichiers (id),
-    id INTEGER NOT NULL REFERENCES compta_mouvements (id),
+    id INTEGER NOT NULL REFERENCES acc_transactions (id),
     PRIMARY KEY(fichier, id)
 );
 

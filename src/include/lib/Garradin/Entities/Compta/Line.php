@@ -5,28 +5,34 @@ namespace Garradin\Entities\Compta;
 use Garradin\Entity;
 use Garradin\ValidationException;
 
-class Ligne extends Entity
+class Line extends Entity
 {
-	const TABLE = 'compta_mouvements_lignes';
+	const TABLE = 'acc_transactions_lines';
 
 	protected $id;
-	protected $id_mouvement;
+	protected $id_transaction;
+	protected $id_account;
 	protected $credit = 0;
 	protected $debit = 0;
-	protected $compte;
+	protected $payment_reference;
+	protected $reconciled;
 
 	protected $_types = [
-		'id_mouvement' => 'int',
-		'credit'       => 'int',
-		'debit'        => 'int',
-		'compte'       => 'int',
+		'id_transaction'    => 'int',
+		'id_account'        => 'int',
+		'credit'            => 'int',
+		'debit'             => 'int',
+		'payment_reference' => '?string',
+		'reconcilied'       => 'int',
 	];
 
 	protected $_validation_rules = [
-		'id_mouvement' => 'required|integer|in_table:compta_mouvements,id',
-		'compte'       => 'required|integer|in_table:compta_comptes,id',
-		'credit'       => 'required|integer|min:0',
-		'debit'        => 'required|integer|min:0'
+		'id_transaction'    => 'required|integer|in_table:acc_transactions,id',
+		'id_account'        => 'required|integer|in_table:acc_accounts,id',
+		'credit'            => 'required|integer|min:0',
+		'debit'             => 'required|integer|min:0',
+		'payment_reference' => 'string|max:200',
+		'reconcilied'       => 'int|min:0|max:1',
 	];
 
 	public function filterUserValue(string $key, $value, array $source)
@@ -51,6 +57,6 @@ class Ligne extends Entity
 		parent::selfCheck();
 		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit.');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
-		$this->assert($this->id_mouvement, 'Aucun mouvement n\'a été indiqué pour cette ligne.');
+		$this->assert($this->id_transaction, 'Aucun mouvement n\'a été indiqué pour cette ligne.');
 	}
 }
