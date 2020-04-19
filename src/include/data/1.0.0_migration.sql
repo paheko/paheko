@@ -7,7 +7,13 @@ ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 DROP TABLE fichiers_compta_journal; -- Inutilisé à ce jour
 
+-- N'est pas utilisé
+DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations';
+
 .read 1.0.0_schema.sql
+
+-- FIXME: insertion en comptes analytiques des projets et associations dans transactions
+-- FIXME: création plan comptable
 
 -- Migration comptes de code comme identifiant à ID unique
 INSERT INTO compta_comptes (id, code, parent, libelle, position, plan_comptable, id_exercice)
@@ -68,4 +74,10 @@ UPDATE compta_mouvements_lignes SET rapprochement = 1 WHERE id_mouvement IN (SEL
 
 -- Suppression de la table rapprochements
 DROP TABLE compta_rapprochement;
+
+-- Suppression inutilisées
+DROP TABLE compta_projets;
+DROP TABLE compta_comptes_bancaires;
+DROP TABLE compta_moyens_paiements;
+
 
