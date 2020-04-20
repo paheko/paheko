@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin\Entities\Compta;
+namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
 use Garradin\validatedException;
