@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin\Entities\Compta;
+namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
 use Garradin\DB;
@@ -27,6 +27,9 @@ class Account extends Entity
 	 * Outstanding transaction accounts (like cheque or card payments)
 	 */
 	const TYPE_OUTSTANDING = 3;
+
+	const TYPE_ANALYTICAL = 4;
+	const TYPE_VOLUNTEERING = 5;
 
 	protected $id;
 	protected $id_plan;
