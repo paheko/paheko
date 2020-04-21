@@ -24,7 +24,6 @@ class Transaction extends Entity
 	protected $prev_hash;
 
 	protected $id_year;
-	protected $id_category;
 	protected $id_analytical;
 
 	protected $_types = [
@@ -36,7 +35,6 @@ class Transaction extends Entity
 		'hash'              => '?string',
 		'prev_hash'         => '?string',
 		'id_year'           => 'int',
-		'id_category'       => '?int',
 		'id_analytical'     => '?int',
 	];
 
@@ -47,7 +45,6 @@ class Transaction extends Entity
 		'date'              => 'required|date',
 		'validated'         => 'bool',
 		'id_year'           => 'integer|in_table:acc_years,id',
-		'id_category'       => 'integer|in_table:acc_categories,id',
 		'id_analytical'     => 'integer|in_table:acc_accounts,id'
 	];
 
@@ -102,27 +99,9 @@ class Transaction extends Entity
 	}
 */
 
-	public function add(Ligne $ligne)
+	public function add(Ligne $line)
 	{
-		$this->lines[] = $ligne;
-	}
-
-	public function simple($montant, $compte)
-	{
-		$categorie = new Categorie($this->id_category);
-
-		if ($categorie->type == Categorie::DEPENSE)
-		{
-			$from = $categorie->compte;
-			$to = $compte;
-		}
-		else
-		{
-			$from = $compte;
-			$to = $categorie->compte;
-		}
-
-		return $this->transfer($montant, $from, $to);
+		$this->lines[] = $line;
 	}
 
 	public function transfer(int $amount, int $from, int $to)
