@@ -70,9 +70,6 @@ animatedLoader(document.getElementById("loader"), 5);
 flush();
 
 try {
-    $keycheck = $db->get('PRAGMA foreign_key_check;');
-    $keycheck = $keycheck ? count($keycheck) : 0;
-
     if (version_compare($v, '0.7.0', '<'))
     {
         $db->beginSchemaUpdate();
@@ -271,17 +268,11 @@ try {
     {
         $db->beginSchemaUpdate();
         $db->import(ROOT . '/include/data/1.0.0_migration.sql');
-        // FIXME: Création archives comptes des exercices précédents et association des écritures à ces nouveaux comptes
         $db->commitSchemaUpdate();
     }
 
-    $keycheck_after = $db->get('PRAGMA foreign_key_check;');
-    $keycheck_after = $keycheck_after ? count($keycheck_after) : 0;
-
-    if ($keycheck_after != $keycheck)
-    {
-        throw new \LogicException('Erreur de cohérence dans la base de données lors de la mise à jour (clés étrangères)');
-    }
+    // Vérification de la cohérence des clés étrangères
+    $db->foreignKeyCheck();
 
     Utils::clearCaches();
 

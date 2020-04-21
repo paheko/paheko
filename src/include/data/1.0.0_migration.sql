@@ -14,14 +14,14 @@ DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations'
 
 -- FIXME: insertion en comptes analytiques des projets et associations dans transactions
 
-INSERT INTO acc_plans (id, country, code, label) VALUES (1, 'FR', 'PCG1999', 'Plan comptable associatif (France, 1999-2019)');
+INSERT INTO acc_plans (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
 
 --.read plan_comptable_1999.sql
 --.read plan_comptable_2020.sql
 
 -- Migration comptes de code comme identifiant à ID unique
-INSERT INTO acc_accounts (id, id_plan, code, parent, label, position, user, id_exercice)
-	SELECT NULL, 1, id, NULL, libelle, position, plan_comptable, NULL FROM compta_comptes_old;
+INSERT INTO acc_accounts (id, id_plan, code, parent, label, position, user)
+	SELECT NULL, 1, id, NULL, libelle, position, plan_comptable FROM compta_comptes_old;
 
 -- Migration de la hiérarchie
 UPDATE acc_accounts AS a SET parent = (SELECT id FROM acc_accounts AS b WHERE code = (SELECT parent FROM compta_comptes_old AS c WHERE id = b.code));
@@ -46,8 +46,8 @@ UPDATE acc_accounts SET type = 3 WHERE code = '5112' OR code = '5113';
 UPDATE acc_accounts SET type = 5 WHERE code = '870';
 
 -- Recopie des mouvements
-INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_category, id_analytical)
-	SELECT id, libelle, remarques, numero_piece, date, id_exercice, id_categorie,
+INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_analytical)
+	SELECT id, libelle, remarques, numero_piece, date, id_exercice,
 	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
 	FROM compta_journal_old;
 
@@ -55,12 +55,12 @@ INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_cat
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
 	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(montant * 100 AS INT), numero_cheque FROM compta_journal_old;
 
-INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit)
+INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
 	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque FROM compta_journal_old;
 
 -- Recopie des descriptions de catégories dans la table des comptes
-UPDATE acc_accounts a SET (a.type, a.description) = (SELECT CASE WHEN c.type = -1 THEN 6 ELSE 7 END, c.description FROM compta_categories_old c WHERE c.id = a.code)
-	WHERE EXISTS (SELECT rowid FROM compta_categories_old c WHERE c.id = a.code);
+UPDATE acc_accounts SET (type, description) = (SELECT CASE WHEN c.type = -1 THEN 6 ELSE 7 END, c.description FROM compta_categories_old c WHERE c.id = code)
+	WHERE EXISTS (SELECT rowid FROM compta_categories_old c WHERE c.id = code);
 
 -- Recopie des opérations, mais le nom a changé pour "mouvements"
 INSERT INTO membres_mouvements
@@ -91,6 +91,4 @@ DROP TABLE compta_rapprochement;
 -- Suppression inutilisées
 DROP TABLE compta_projets;
 DROP TABLE compta_comptes_bancaires;
-DROP TABLE compta_moyens_paiements;
-
-
+DROP TABLE compta_moyens_paiement;
