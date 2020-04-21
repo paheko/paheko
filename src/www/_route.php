@@ -12,6 +12,10 @@ if ('_route.php' === basename($uri)) {
 	die('Appel interdit');
 }
 
+if ('favicon.ico' === basename($uri)) {
+	die('');
+}
+
 if (($pos = strpos($uri, '?')) !== false)
 {
 	$uri = substr($uri, 0, $pos);
