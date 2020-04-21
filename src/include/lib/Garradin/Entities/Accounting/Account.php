@@ -31,6 +31,9 @@ class Account extends Entity
 	const TYPE_ANALYTICAL = 4;
 	const TYPE_VOLUNTEERING = 5;
 
+	const TYPE_EXPENSE = 6;
+	const TYPE_REVENUE = 7;
+
 	protected $id;
 	protected $id_plan;
 	protected $code;
@@ -41,22 +44,24 @@ class Account extends Entity
 	protected $user;
 
 	protected $_types = [
-		'id_plan'  => 'int',
-		'code'     => 'string',
-		'parent'   => '?int',
-		'label'    => 'string',
-		'type' => 'int',
-		'special'  => 'int',
-		'user'     => 'int',
+		'id_plan'     => 'int',
+		'code'        => 'string',
+		'parent'      => '?int',
+		'label'       => 'string',
+		'description' => '?string',
+		'position'    => 'int',
+		'type'        => 'int',
+		'user'        => 'int',
 	];
 
 	protected $_validation_rules = [
-		'id'       => 'required|integer',
-		'libelle'  => 'required|string',
-		'parent'   => 'required|nullable|integer|in_table:acc_accounts,id',
-		'id_plan'  => 'required|integer|in_table:acc_plans,id',
-		'type' => 'required|integer',
-		'special'  => 'required|integer',
-		'user'     => 'integer|min:0|max:1',
+		'id_plan'     => 'required|integer|in_table:acc_plans,id',
+		'code'        => 'required|string|alpha_num',
+		'label'       => 'required|string|max:200',
+		'description' => 'string|max:2000',
+		'parent'      => 'required|nullable|integer|in_table:acc_accounts,id',
+		'position'    => 'required|integer',
+		'type'        => 'required|integer',
+		'user'        => 'integer|min:0|max:1',
 	];
 }

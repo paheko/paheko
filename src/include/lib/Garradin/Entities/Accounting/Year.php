@@ -4,7 +4,6 @@ namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
 use Garradin\DB;
-use Garradin\Utils;
 use Garradin\UserException;
 
 class Year extends Entity

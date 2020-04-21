@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS cotisations_tarifs
     description TEXT NULL,
     amount INTEGER NULL,
     formula TEXT NULL,
-    id_category INTEGER NULL REFERENCES acc_categories (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
+    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
 );
 
 CREATE TABLE IF NOT EXISTS cotisations_membres
@@ -180,21 +180,6 @@ CREATE TRIGGER IF NOT EXISTS wiki_recherche_contenu_chiffre AFTER INSERT ON wiki
 -- COMPTA
 --
 
-CREATE TABLE IF NOT EXISTS acc_years
--- Exercices
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-
-    label TEXT NOT NULL,
-
-    start_date TEXT NOT NULL CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
-    end_date TEXT NOT NULL CHECK (date(fin) IS NOT NULL AND date(fin) = fin),
-
-    closed INTEGER NOT NULL DEFAULT 0,
-
-    id_plan INTEGER NOT NULL REFERENCES acc_plans (id)
-);
-
 CREATE TABLE IF NOT EXISTS acc_plans
 -- Plans comptables : il peut y en avoir plusieurs
 (
@@ -214,14 +199,31 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     parent INTEGER NULL REFERENCES compta_comptes(id),
 
     label TEXT NOT NULL,
+    description TEXT NULL,
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
-    type INTEGER NOT NULL DEFAULT 0, -- compte spécial : banque, caisse, en attente d'encaissement
+    type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement
+    bookmark INTEGER NOT NULL DEFAULT 0, -- Signet (ex-catégories): 1 = recette, -1 = dépense
     user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_plan);
 CREATE INDEX IF NOT EXISTS acc_accounts_parent ON acc_accounts (parent);
+
+CREATE TABLE IF NOT EXISTS acc_years
+-- Exercices
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+
+    label TEXT NOT NULL,
+
+    start_date TEXT NOT NULL CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
+    end_date TEXT NOT NULL CHECK (date(fin) IS NOT NULL AND date(fin) = fin),
+
+    closed INTEGER NOT NULL DEFAULT 0,
+
+    id_plan INTEGER NOT NULL REFERENCES acc_plans (id)
+);
 
 CREATE TABLE IF NOT EXISTS acc_transactions
 -- Opérations comptables
@@ -240,7 +242,6 @@ CREATE TABLE IF NOT EXISTS acc_transactions
     prev_hash TEXT NULL,
 
     id_year INTEGER NOT NULL REFERENCES acc_years(id),
-    id_category INTEGER NULL REFERENCES acc_categories(id) ON DELETE SET NULL, -- Numéro de catégorie (en mode simple)
     id_analytical INTEGER NULL REFERENCES acc_accounts(id) ON DELETE SET NULL
 );
 
@@ -266,18 +267,6 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
-
-CREATE TABLE IF NOT EXISTS acc_categories
--- Catégories pour simplifier le plan comptable
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-    type INTEGER NOT NULL DEFAULT 1, -- 1 = recette, -1 = dépense, 0 = autre (utilisé uniquement pour l'interface)
-
-    label TEXT NOT NULL,
-    description TEXT NULL,
-
-    id_account INTEGER NULL REFERENCES acc_accounts(id) ON DELETE CASCADE -- Compte affecté par cette catégorie
-);
 
 CREATE TABLE IF NOT EXISTS plugins
 (
