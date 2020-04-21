@@ -61,25 +61,6 @@ class DB extends SQLite3
         self::$_instance = null;
     }
 
-    /**
-     * Import a file containing SQL commands
-     * Allows to use the statement ".read other_file.sql" to load other files
-     * @param  string $file Path to file containing SQL commands
-     * @return boolean
-     */
-    public function import($file)
-    {
-        $sql = file_get_contents($file);
-
-        $dir = dirname($file);
-
-        $sql = preg_replace_callback('/^\.read (.+\.sql)$/m', function ($match) use ($dir) {
-            return file_get_contents($dir . DIRECTORY_SEPARATOR . $match[1]) . "\n";
-        }, $sql);
-
-        return $this->exec($sql);
-    }
-
     public function beginSchemaUpdate()
     {
         $this->toggleForeignKeys(false);

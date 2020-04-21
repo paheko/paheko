@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS cotisations_tarifs
     description TEXT NULL,
     amount INTEGER NULL,
     formula TEXT NULL,
-    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
+    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL -- NULL si le type n'est pas associé automatiquement à la compta
 );
 
 CREATE TABLE IF NOT EXISTS cotisations_membres
@@ -73,10 +73,10 @@ CREATE TABLE IF NOT EXISTS membres_mouvements
 -- Liaison des enregistrement des paiements en compta
 (
     id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
-    id_mouvement INTEGER NOT NULL REFERENCES compta_mouvements (id) ON DELETE CASCADE,
+    id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
     id_cotisation INTEGER NULL REFERENCES cotisations_membres (id) ON DELETE SET NULL,
 
-    PRIMARY KEY (id_membre, id_mouvement)
+    PRIMARY KEY (id_membre, id_transaction)
 );
 
 CREATE TABLE IF NOT EXISTS rappels
@@ -193,10 +193,10 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 -- Comptes des plans comptables
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_plan INTEGER NOT NULL REFERENCES compta_plans,
+    id_plan INTEGER NOT NULL REFERENCES acc_plans,
 
     code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
-    parent INTEGER NULL REFERENCES compta_comptes(id),
+    parent INTEGER NULL REFERENCES acc_accounts(id),
 
     label TEXT NOT NULL,
     description TEXT NULL,
@@ -217,8 +217,8 @@ CREATE TABLE IF NOT EXISTS acc_years
 
     label TEXT NOT NULL,
 
-    start_date TEXT NOT NULL CHECK (date(debut) IS NOT NULL AND date(debut) = debut),
-    end_date TEXT NOT NULL CHECK (date(fin) IS NOT NULL AND date(fin) = fin),
+    start_date TEXT NOT NULL CHECK (date(start_date) IS NOT NULL AND date(start_date) = start_date),
+    end_date TEXT NOT NULL CHECK (date(end_date) IS NOT NULL AND date(end_date) = end_date),
 
     closed INTEGER NOT NULL DEFAULT 0,
 
