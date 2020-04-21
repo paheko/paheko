@@ -199,6 +199,21 @@ class Template extends \KD2\Smartyer
 
 			$out .= '</select>';
 		}
+		elseif ($type == 'select_groups') {
+			$out .= sprintf('<select %s>', $attributes);
+
+			foreach ($options as $optgroup => $suboptions) {
+				$out .= sprintf('<optgroup label="%s">', $this->escape($optgroup));
+
+				foreach ($suboptions as $_key => $value) {
+					$out .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
+				}
+
+				$out .= '</optgroup>';
+			}
+
+			$out .= '</select>';
+		}
 		elseif ($type == 'textarea') {
 			$out .= sprintf('<textarea %s>%s</textarea>', $attributes, $this->escape($current_value));
 		}
