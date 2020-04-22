@@ -58,8 +58,8 @@ INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, p
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
 	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque FROM compta_journal_old;
 
--- Recopie des descriptions de catégories dans la table des comptes
-UPDATE acc_accounts SET (type, description) = (SELECT CASE WHEN c.type = -1 THEN 6 ELSE 7 END, c.description FROM compta_categories_old c WHERE c.id = code)
+-- Recopie des descriptions de catégories dans la table des comptes, et mise des comptes en signets
+UPDATE acc_accounts SET (type, description) = (SELECT 6, c.description FROM compta_categories_old c WHERE c.id = code)
 	WHERE EXISTS (SELECT rowid FROM compta_categories_old c WHERE c.id = code);
 
 -- Recopie des opérations, mais le nom a changé pour "mouvements"
