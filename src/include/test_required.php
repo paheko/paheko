@@ -51,8 +51,8 @@ test_requis(
 $v = \SQLite3::version();
 
 test_requis(
-    version_compare($v['versionString'], '3.7.4', '>='),
-    'SQLite3 version 3.7.4 ou supérieur requise. Version installée : ' . $v['versionString']
+    version_compare($v['versionString'], '3.16', '>='),
+    'SQLite3 version 3.16 ou supérieur requise. Version installée : ' . $v['versionString']
 );
 
 test_requis(
