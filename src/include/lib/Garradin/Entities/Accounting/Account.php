@@ -31,8 +31,7 @@ class Account extends Entity
 	const TYPE_ANALYTICAL = 4;
 	const TYPE_VOLUNTEERING = 5;
 
-	const TYPE_EXPENSE = 6;
-	const TYPE_REVENUE = 7;
+	const TYPE_BOOKMARK = 6;
 
 	protected $id;
 	protected $id_plan;
