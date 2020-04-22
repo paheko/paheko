@@ -496,17 +496,17 @@ class Champs
             return true;
         }
 
-        if (!array_key_exists('email', $champs))
+        if (!property_exists($champs, 'email'))
         {
             throw new UserException('Le champ E-Mail ne peut être supprimé des fiches membres.');
         }
 
-        if (!array_key_exists('passe', $champs))
+        if (!property_exists($champs, 'passe'))
         {
             throw new UserException('Le champ Mot de passe ne peut être supprimé des fiches membres.');
         }
 
-        if (!array_key_exists('numero', $champs))
+        if (!property_exists($champs, 'numero'))
         {
             throw new UserException('Le champ numéro de membre ne peut être supprimé des fiches membres.');
         }
@@ -515,7 +515,7 @@ class Champs
 
         $identite = $config->get('champ_identite');
 
-        if ($identite != 'id' && !array_key_exists($identite, $champs))
+        if ($identite != 'id' && !property_exists($champs, $identite))
         {
             throw new UserException('Le champ '.$config->get('champ_identite')
                 .' est défini comme identité des membres et ne peut donc être supprimé des fiches membres.');
@@ -523,7 +523,7 @@ class Champs
 
         $identifiant = $config->get('champ_identifiant');
 
-        if ($identifiant != 'id' && !array_key_exists($identifiant, $champs))
+        if ($identifiant != 'id' && !property_exists($champs, $identifiant))
         {
             throw new UserException('Le champ '.$config->get('champ_identifiant')
                 .' est défini comme identifiant à la connexion et ne peut donc être supprimé des fiches membres.');
