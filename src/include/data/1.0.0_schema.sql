@@ -202,8 +202,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     description TEXT NULL,
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
-    type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement
-    bookmark INTEGER NOT NULL DEFAULT 0, -- Signet (ex-catégories): 1 = recette, -1 = dépense
+    type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, favori, etc.
     user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
 );
 
