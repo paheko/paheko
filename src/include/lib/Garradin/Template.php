@@ -178,12 +178,13 @@ class Template extends \KD2\Smartyer
 		$attributes = array_intersect_key($params, $keep_attributes);
 		$attributes['id'] = 'f_' . $name;
 
+		// Create attributes string
 		if (array_key_exists('required', $params)) {
 			$attributes['required'] = 'required';
 		}
 
-		array_walk($attributes, function ($v, $k) {
-			return sprintf('%s="%s"', $k, $v);
+		array_walk($attributes, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $v);
 		});
 
 		$attributes = implode(' ', $attributes);
@@ -205,7 +206,7 @@ class Template extends \KD2\Smartyer
 			foreach ($options as $optgroup => $suboptions) {
 				$out .= sprintf('<optgroup label="%s">', $this->escape($optgroup));
 
-				foreach ($suboptions as $_key => $value) {
+				foreach ($suboptions as $_key => $_value) {
 					$out .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
 				}
 
