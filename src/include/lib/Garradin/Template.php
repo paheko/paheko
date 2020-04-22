@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\Form;
 use Garradin\Membres\Session;
+use Garradin\Entities\Accounting\Account;
 
 class Template extends \KD2\Smartyer
 {
@@ -81,6 +82,14 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
+		$this->register_modifier('account_type', function ($value) {
+			return Account::TYPES_NAMES[$value];
+		});
+
+		$this->register_modifier('account_position', function ($value) {
+			return Account::POSITIONS_NAMES[$value];
+		});
+
 		$this->register_modifier('get_nom_compte', function ($compte) {
 			if (is_null($compte))
 			{
@@ -155,7 +164,7 @@ class Template extends \KD2\Smartyer
 	protected function formInput(array $params)
 	{
 		static $keep_attributes = ['pattern', 'max', 'min', 'step', 'title', 'name', 'cols', 'rows'];
-		extract($params);
+		extract($params, \EXTR_SKIP);
 
 		if (!isset($name, $type)) {
 			throw new \InvalidArgumentException('Missing name or type');
@@ -165,6 +174,9 @@ class Template extends \KD2\Smartyer
 
 		if (isset($_POST[$name])) {
 			$current_value = $_POST[$name];
+		}
+		elseif (isset($default)) {
+			$current_value = $default;
 		}
 
 		$required_label = array_key_exists('required', $params) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
