@@ -16,8 +16,18 @@ class Account extends Entity
 	const ACTIF_PASSIF = 3;
 
 	const PRODUIT = 4;
-	const CHARGE = 5;
-	const PRODUIT_CHARGE = 6;
+	const CHARGE = 8;
+	const PRODUIT_CHARGE = 12;
+
+	const POSITIONS_NAMES = [
+		'',
+		1 => 'Passif',
+		2 => 'Actif',
+		3 => 'Actif ou passif',
+		4 => 'Produit',
+		8 => 'Charge',
+		12 => 'Produit ou charge',
+	];
 
 	const TYPE_NONE = 0;
 	const TYPE_BANK = 1;
@@ -33,16 +43,28 @@ class Account extends Entity
 
 	const TYPE_BOOKMARK = 6;
 
+	const TYPES_NAMES = [
+		'',
+		'Banque',
+		'Caisse',
+		'Attente d\'encaissement',
+		'Analytique',
+		'Bénévolat',
+		'Favori',
+	];
+
 	protected $id;
 	protected $id_plan;
 	protected $code;
 	protected $parent;
 	protected $label;
+	protected $description;
 	protected $position;
 	protected $type;
 	protected $user;
 
 	protected $_types = [
+		'id'          => 'int',
 		'id_plan'     => 'int',
 		'code'        => 'string',
 		'parent'      => '?int',

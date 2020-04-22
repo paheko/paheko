@@ -75,17 +75,16 @@
             </li>
         {/if}
         {if $session->canAccess('compta', Membres::DROIT_ACCES)}
-            <li class="compta{if $current == 'compta'} current{elseif $current_parent == 'compta'} current_parent{/if}"><a href="{$admin_url}compta/"><b>€</b><i> Comptabilité</i></a>
+            <li class="compta{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><a href="{$admin_url}acc/"><b>€</b><i> Comptabilité</i></a>
             <ul>
             {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
-                <li class="compta new{if $current == 'compta/saisie'} current{/if}"><a href="{$admin_url}compta/operations/saisir.php">Saisie</a></li>
+                <li class="compta new{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
             {/if}
-                <li class="compta list{if $current == 'compta/gestion'} current{/if}"><a href="{$admin_url}compta/operations/">Suivi des opérations</a></li>
-                <li class="compta banks{if $current == 'compta/banques'} current{/if}"><a href="{$admin_url}compta/banques/">Banques &amp; caisse</a></li>
+                <li class="compta journals{if $current == 'acc/journals'} current{/if}"><a href="{$admin_url}acc/transactions/">Journaux</a></li>
+                <li class="compta admin reports{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
             {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-                <li class="compta admin config{if $current == 'compta/categories'} current{/if}"><a href="{$admin_url}compta/categories/">Catégories &amp; comptes</a></li>
+                <li class="compta admin config{if $current == 'acc/plans'} current{/if}"><a href="{$admin_url}acc/plans/">Plans comptables</a></li>
             {/if}
-                <li class="compta admin reports{if $current == 'compta/exercices'} current{/if}"><a href="{$admin_url}compta/exercices/">Exercices &amp; projets</a></li>
             </ul>
             </li>
         {/if}

@@ -1028,31 +1028,14 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     margin: .2em 0 1em 2em;
 }
 
-ul.accountList {
-    list-style-type: square;
-    margin-left: 2em;
-}
-
-ul.accountList > li > h4 {
-    font-weight: normal;
-    font-size: 1.2em;
-}
-
-ul.accountList > li {
-    margin-bottom: .8em;
-}
-
-table.accountList .niveau_2 .libelle {
-    font-weight: bold;
-}
-
-table.accountList .niveau_3 .libelle { padding-left: 1em; }
-table.accountList .niveau_4 .libelle { padding-left: 2em; }
-table.accountList .niveau_5 .libelle { padding-left: 3em; }
-table.accountList .niveau_6 .libelle { padding-left: 4em; }
-
-table.rib { display: inline-table; vertical-align: middle; font-size: .9em; text-align: center; border-collapse: collapse; }
-table.rib th, table.rib td { padding: .1em .3em; border: 1px solid #ccc; }
+table.accounts tbody tr td:first-child { font-family: monospace; }
+table.accounts th { font-weight: normal; }
+table.accounts .account-level-1 th { font-size: 1.6em; }
+table.accounts .account-level-2 > th { padding-left: 1em; font-size: 1.3em; }
+table.accounts .account-level-3 > th { padding-left: 2em; }
+table.accounts .account-level-4 > th { padding-left: 3em; }
+table.accounts .account-level-5 > th { padding-left: 4em; }
+table.accounts .account-level-6 > th { padding-left: 5em; }
 
 dl.describe {
     margin-bottom: 1em;
