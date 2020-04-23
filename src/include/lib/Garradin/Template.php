@@ -73,6 +73,8 @@ class Template extends \KD2\Smartyer
 			return Form::tokenHTML($params['key']);
 		});
 
+		$this->register_function('icon', [$this, 'widgetIcon']);
+
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
@@ -161,9 +163,18 @@ class Template extends \KD2\Smartyer
 		return '<p class="error">' . $this->escape($params['message']) . '</p>';
 	}
 
+	protected function widgetIcon(array $params): string
+	{
+		if (empty($params['href'])) {
+			return sprintf('<b class="icn">%s</b>', Utils::iconUnicode($params['shape']));
+		}
+
+		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
+	}
+
 	protected function formInput(array $params)
 	{
-		static $keep_attributes = ['pattern', 'max', 'min', 'step', 'title', 'name', 'cols', 'rows'];
+		static $keep_attributes = ['pattern', 'max', 'min', 'step', 'title', 'name', 'cols', 'rows', 'maxlength'];
 		extract($params, \EXTR_SKIP);
 
 		if (!isset($name, $type)) {
@@ -187,7 +198,7 @@ class Template extends \KD2\Smartyer
 			$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
 		}
 
-		$attributes = array_intersect_key($params, $keep_attributes);
+		$attributes = array_intersect_key($params, array_flip($keep_attributes));
 		$attributes['id'] = 'f_' . $name;
 
 		// Create attributes string

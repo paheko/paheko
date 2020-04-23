@@ -2,8 +2,7 @@
 
 <ul class="actions">
 	<li class="current"><a href="{$admin_url}acc/plans/">Gérer les plans</a></li>
-	<li><a href="{$admin_url}acc/plans/import.php">Import / export</a></li>
-	<li><a href="{$admin_url}acc/plans/reset.php">Remise à zéro</a></li>
+	<li><a href="{$admin_url}acc/plans/import.php">Importer</a></li>
 </ul>
 
 {if count($list)}
@@ -19,12 +18,14 @@
                 	<td>{$item.country|get_country_name}</td>
                     <th><a href="{$admin_url}acc/plans/accounts/?id={$item.id}">{$item.label}</a> <em>{if $item.code}(officiel){else}(copie){/if}</em></th>
                     <td class="actions">
-                    	<a class="icn" href="{$admin_url}acc/plans/accounts/?id={$item.id}" title="Gérer les comptes">𝍢</a>
-                        <a class="icn" href="{$admin_url}acc/plans/edit.php?id={$item.id}" title="Renommer le plan comptable">✎</a>
+                        {icon shape="menu" label="Gérer les comptes" href="acc/plans/accounts/?id=%d"|args:$item.id}
+                        {icon shape="edit" label="Renommer" href="acc/plans/edit.php?id=%d"|args:$item.id}
+                        {icon shape="export" label="Exporter en CSV" href="acc/plans/export.php?id=%d"|args:$item.id}
                         {if empty($item.code)}
-                        	<a class="icn" href="{$admin_url}acc/plans/delete.php?id={$item.id}" title="Supprimer le plan comptable">✘</a>
+                            {icon shape="upload" label="Importer" href="acc/plans/import.php?id=%d"|args:$item.id}
+                            {icon shape="delete" label="Supprimer" href="acc/plans/delete.php?id=%d"|args:$item.id}
                         {else}
-                        	<a class="icn" href="{$admin_url}acc/plans/reset.php?id={$item.id}" title="Remettre à zéro">⤝</a>
+                            {icon shape="reset" label="Remettre à zéro" href="acc/plans/reset.php?id=%d"|args:$item.id}
                         {/if}
                     </td>
                 </tr>
