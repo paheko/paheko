@@ -1,7 +1,3 @@
-ALTER TABLE compta_journal RENAME TO compta_journal_old;
-ALTER TABLE compta_comptes RENAME TO compta_comptes_old;
-ALTER TABLE compta_categories RENAME TO compta_categories_old;
-ALTER TABLE compta_exercices RENAME TO compta_exercices_old;
 ALTER TABLE membres_operations RENAME TO membres_operations_old;
 ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
@@ -21,17 +17,24 @@ INSERT INTO acc_plans (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'P
 
 -- Migration comptes de code comme identifiant à ID unique
 INSERT INTO acc_accounts (id, id_plan, code, parent, label, position, user)
-	SELECT NULL, 1, id, NULL, libelle, position, plan_comptable FROM compta_comptes_old;
+	SELECT NULL, 1, id, NULL, libelle, position, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
 
 -- Migration de la hiérarchie
-UPDATE acc_accounts AS a SET parent = (SELECT id FROM acc_accounts AS b WHERE code = (SELECT parent FROM compta_comptes_old AS c WHERE id = b.code));
+UPDATE acc_accounts AS a SET parent = (SELECT id FROM acc_accounts AS b WHERE code = (SELECT parent FROM compta_comptes AS c WHERE id = b.code));
 
 -- Migrations projets vers comptes analytiques
 INSERT INTO acc_accounts (id_plan, code, parent, label, position, user, type)
-	VALUES (1, '99', (SELECT id FROM acc_accounts WHERE code = '9'), 'Projets', 0, 0, 4);
+	VALUES (1, '99', (SELECT id FROM acc_accounts WHERE code = '9'), 'Projets', 0, 1, 4);
 
 INSERT INTO acc_accounts (id_plan, code, parent, label, position, user, type)
 	SELECT 1, '99' || substr('0000' || id, -4), (SELECT id FROM acc_accounts WHERE code = '99'), libelle, 0, 1, 3 FROM compta_projets;
+
+-- Suppression des positions "actif ou passif" et "charge ou produit"
+UPDATE acc_accounts SET position = 0 WHERE position = 3 OR position = 12;
+
+-- Modification des valeurs de la position (qui n'est plus un champ binaire)
+UPDATE acc_accounts SET position = 3 WHERE position = 4;
+UPDATE acc_accounts SET position = 4 WHERE position = 8;
 
 -- Migration comptes bancaires
 UPDATE acc_accounts SET type = 1 WHERE code IN (SELECT id FROM compta_comptes_bancaires);
@@ -49,18 +52,18 @@ UPDATE acc_accounts SET type = 5 WHERE code = '870';
 INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_analytical)
 	SELECT id, libelle, remarques, numero_piece, date, id_exercice,
 	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
-	FROM compta_journal_old;
+	FROM compta_journal;
 
 -- Création des lignes associées aux mouvements
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
-	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(montant * 100 AS INT), numero_cheque FROM compta_journal_old;
+	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(montant * 100 AS INT), numero_cheque FROM compta_journal;
 
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
-	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque FROM compta_journal_old;
+	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque FROM compta_journal;
 
 -- Recopie des descriptions de catégories dans la table des comptes, et mise des comptes en signets
-UPDATE acc_accounts SET (type, description) = (SELECT 6, c.description FROM compta_categories_old c WHERE c.id = code)
-	WHERE EXISTS (SELECT rowid FROM compta_categories_old c WHERE c.id = code);
+UPDATE acc_accounts SET type = 6, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code);
 
 -- Recopie des opérations, mais le nom a changé pour "mouvements"
 INSERT INTO membres_mouvements
@@ -70,17 +73,17 @@ INSERT INTO membres_mouvements
 
 -- Recopie des exercices, mais la date de fin ne peut être nulle
 INSERT INTO acc_years (id, label, start_date, end_date, closed, id_plan)
-	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture, 1 FROM compta_exercices_old;
+	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture, 1 FROM compta_exercices;
 
 -- Recopie des catégories, on supprime la colonne id_cotisation_obligatoire
 INSERT INTO membres_categories
 	SELECT id, nom, droit_wiki, droit_membres, droit_compta, droit_inscription, droit_connexion, droit_config, cacher FROM membres_categories_old;
 
-DROP TABLE compta_journal_old;
+DROP TABLE compta_journal;
+DROP TABLE compta_categories;
+DROP TABLE compta_comptes;
+DROP TABLE compta_exercices;
 DROP TABLE membres_operations_old;
-DROP TABLE compta_categories_old;
-DROP TABLE compta_comptes_old;
-DROP TABLE compta_exercices_old;
 
 -- Transfert des rapprochements
 UPDATE acc_transactions_lines SET reconcilied = 1 WHERE id_transaction IN (SELECT id_operation FROM compta_rapprochement);
