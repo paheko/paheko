@@ -11,22 +11,24 @@ class Account extends Entity
 {
 	const TABLE = 'acc_accounts';
 
-	const PASSIF = 1;
-	const ACTIF = 2;
-	const ACTIF_PASSIF = 3;
+	// Passif
+	const LIABILITY = 1;
 
-	const PRODUIT = 4;
-	const CHARGE = 8;
-	const PRODUIT_CHARGE = 12;
+	// Actif
+	const ASSET = 2;
+
+	// Produit
+	const REVENUE = 3;
+
+	// Charge
+	const EXPENSE = 4;
 
 	const POSITIONS_NAMES = [
 		'',
-		1 => 'Passif',
-		2 => 'Actif',
-		3 => 'Actif ou passif',
-		4 => 'Produit',
-		8 => 'Charge',
-		12 => 'Produit ou charge',
+		'Passif',
+		'Actif',
+		'Produit',
+		'Charge',
 	];
 
 	const TYPE_NONE = 0;
@@ -77,7 +79,7 @@ class Account extends Entity
 
 	protected $_validation_rules = [
 		'id_plan'     => 'required|integer|in_table:acc_plans,id',
-		'code'        => 'required|string|alpha_num',
+		'code'        => 'required|string|alpha_num|max:8',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
 		'parent'      => 'required|nullable|integer|in_table:acc_accounts,id',
