@@ -828,4 +828,42 @@ class Utils
             return \mail($to, $subject, $content, $raw_headers);
         }
     }
+
+    static public function iconUnicode(string $shape): string
+    {
+        switch ($shape) {
+            case 'up': return '↑';
+            case 'down': return '↓';
+            case 'export': return '↷';
+            case 'reset': return '↺';
+            case 'upload': return '⇑';
+            case 'download': return '⇓';
+            case 'home': return '⌂';
+            case 'print': return '⎙';
+            case 'star': return '★';
+            case 'check': return '☑';
+            case 'settings': return '☸';
+            case 'alert': return '⚠';
+            case 'mail': return '✉';
+            case 'edit': return '✎';
+            case 'delete': return '✘';
+            case 'help': return '❓';
+            case 'plus': return '➕';
+            case 'minus': return '➖';
+            case 'logout': return '⤝';
+            case 'eye-off': return '⤫';
+            case 'menu': return '𝍢';
+            case 'eye': return '👁';
+            case 'user': return '👤';
+            case 'users': return '👪';
+            case 'attach': return '📎';
+            case 'search': return '🔍';
+            case 'lock': return '🔒';
+            case 'unlock': return '🔓';
+            case 'folder': return '🗀';
+            case 'document': return '🗅';
+            default:
+                throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
+        }
+    }
 }
