@@ -77,7 +77,7 @@ class Account extends Entity
 
 	protected $_validation_rules = [
 		'id_plan'     => 'required|integer|in_table:acc_plans,id',
-		'code'        => 'required|string|alpha_num|max:8',
+		'code'        => 'required|string|alpha_num|max:6',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
 		'position'    => 'required|integer',
