@@ -196,7 +196,6 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     id_plan INTEGER NOT NULL REFERENCES acc_plans,
 
     code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
-    parent INTEGER NULL REFERENCES acc_accounts(id),
 
     label TEXT NOT NULL,
     description TEXT NULL,
@@ -207,7 +206,6 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_plan);
-CREATE INDEX IF NOT EXISTS acc_accounts_parent ON acc_accounts (parent);
 
 CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
