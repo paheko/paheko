@@ -24,7 +24,7 @@ INSERT INTO acc_accounts (id_plan, code, label, position, user, type)
 	VALUES (1, '99', 'Projets', 0, 1, 4);
 
 INSERT INTO acc_accounts (id_plan, code, label, position, user, type)
-	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 3 FROM compta_projets;
+	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 4 FROM compta_projets;
 
 -- Suppression des positions "actif ou passif" et "charge ou produit"
 UPDATE acc_accounts SET position = 0 WHERE position = 3 OR position = 12;
