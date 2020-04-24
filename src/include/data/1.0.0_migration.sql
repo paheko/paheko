@@ -16,18 +16,15 @@ INSERT INTO acc_plans (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'P
 --.read plan_comptable_2020.sql
 
 -- Migration comptes de code comme identifiant à ID unique
-INSERT INTO acc_accounts (id, id_plan, code, parent, label, position, user)
-	SELECT NULL, 1, id, NULL, libelle, position, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
-
--- Migration de la hiérarchie
-UPDATE acc_accounts AS a SET parent = (SELECT id FROM acc_accounts AS b WHERE code = (SELECT parent FROM compta_comptes AS c WHERE id = b.code));
+INSERT INTO acc_accounts (id, id_plan, code, label, position, user)
+	SELECT NULL, 1, id, libelle, position, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
 
 -- Migrations projets vers comptes analytiques
-INSERT INTO acc_accounts (id_plan, code, parent, label, position, user, type)
-	VALUES (1, '99', (SELECT id FROM acc_accounts WHERE code = '9'), 'Projets', 0, 1, 4);
+INSERT INTO acc_accounts (id_plan, code, label, position, user, type)
+	VALUES (1, '99', 'Projets', 0, 1, 4);
 
-INSERT INTO acc_accounts (id_plan, code, parent, label, position, user, type)
-	SELECT 1, '99' || substr('0000' || id, -4), (SELECT id FROM acc_accounts WHERE code = '99'), libelle, 0, 1, 3 FROM compta_projets;
+INSERT INTO acc_accounts (id_plan, code, label, position, user, type)
+	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 3 FROM compta_projets;
 
 -- Suppression des positions "actif ou passif" et "charge ou produit"
 UPDATE acc_accounts SET position = 0 WHERE position = 3 OR position = 12;
