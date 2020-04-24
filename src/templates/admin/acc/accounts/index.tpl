@@ -1,12 +1,12 @@
-{include file="admin/_head.tpl" title=$plan.label current="acc/plans"}
+{include file="admin/_head.tpl" title=$chart.label current="acc/charts"}
 
 <ul class="actions">
-	<li><a href="{$admin_url}acc/plans/">Gérer les plans</a></li>
-	<li class="current"><a href="{$admin_url}acc/plans/accounts/?id={$plan.id}">Modifier le plan</a></li>
-	<li><a href="{$admin_url}acc/plans/export.php?id={$plan.id}">Exporter ce plan en CSV</a></li>
-	<li><a href="{$admin_url}acc/plans/import.php?id={$plan.id}">Importer</a></li>
-	<li><a href="{$admin_url}acc/plans/delete.php?id={$plan.id}">Supprimer</a></li>
-	<li><a href="{$admin_url}acc/plans/reset.php?id={$plan.id}">Remettre à zéro</a></li>
+	<li><a href="{$admin_url}acc/charts/">Gérer les plans</a></li>
+	<li class="current"><a href="{$admin_url}acc/accounts/?id={$chart.id}">Modifier le plan</a></li>
+	<li><a href="{$admin_url}acc/charts/export.php?id={$chart.id}">Exporter ce plan en CSV</a></li>
+	<li><a href="{$admin_url}acc/charts/import.php?id={$chart.id}">Importer</a></li>
+	<li><a href="{$admin_url}acc/charts/delete.php?id={$chart.id}">Supprimer</a></li>
+	<li><a href="{$admin_url}acc/charts/reset.php?id={$chart.id}">Remettre à zéro</a></li>
 </ul>
 
 {if count($accounts)}
@@ -30,9 +30,9 @@
 					</td>
 					<td class="actions">
 						{if $item.user}
-							{icon shape="delete" label="Supprimer" href="acc/plans/accounts/delete.php?id=%d"|args:$item.id}
+							{icon shape="delete" label="Supprimer" href="acc/charts/accounts/delete.php?id=%d"|args:$item.id}
 						{/if}
-						{icon shape="edit" label="Modifier" href="acc/plans/accounts/edit.php?id=%d"|args:$item.id}
+						{icon shape="edit" label="Modifier" href="acc/charts/accounts/edit.php?id=%d"|args:$item.id}
 					</td>
 				</tr>
 			{/foreach}

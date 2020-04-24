@@ -10,20 +10,20 @@ DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations'
 
 -- FIXME: insertion en comptes analytiques des projets et associations dans transactions
 
-INSERT INTO acc_plans (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
+INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
 
 --.read plan_comptable_1999.sql
 --.read plan_comptable_2020.sql
 
 -- Migration comptes de code comme identifiant à ID unique
-INSERT INTO acc_accounts (id, id_plan, code, label, position, user)
+INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 	SELECT NULL, 1, id, libelle, position, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
 
 -- Migrations projets vers comptes analytiques
-INSERT INTO acc_accounts (id_plan, code, label, position, user, type)
-	VALUES (1, '99', 'Projets', 0, 1, 4);
+INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
+	VALUES (1, '99', 'Projets', 0, 1, 0);
 
-INSERT INTO acc_accounts (id_plan, code, label, position, user, type)
+INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 4 FROM compta_projets;
 
 -- Suppression des positions "actif ou passif" et "charge ou produit"
@@ -69,7 +69,7 @@ INSERT INTO membres_mouvements
 -- FIXME: ajout d'entrées dans le le log utilisateur à partir de id_auteur
 
 -- Recopie des exercices, mais la date de fin ne peut être nulle
-INSERT INTO acc_years (id, label, start_date, end_date, closed, id_plan)
+INSERT INTO acc_years (id, label, start_date, end_date, closed, id_chart)
 	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture, 1 FROM compta_exercices;
 
 -- Recopie des catégories, on supprime la colonne id_cotisation_obligatoire

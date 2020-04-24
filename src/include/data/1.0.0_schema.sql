@@ -180,20 +180,21 @@ CREATE TRIGGER IF NOT EXISTS wiki_recherche_contenu_chiffre AFTER INSERT ON wiki
 -- COMPTA
 --
 
-CREATE TABLE IF NOT EXISTS acc_plans
+CREATE TABLE IF NOT EXISTS acc_charts
 -- Plans comptables : il peut y en avoir plusieurs
 (
     id INTEGER NOT NULL PRIMARY KEY,
     country TEXT NOT NULL,
     code TEXT NULL, -- NULL = plan comptable créé par l'utilisateur
-    label TEXT NOT NULL
+    label TEXT NOT NULL,
+    archived INTEGER NOT NULL DEFAULT 0 -- 1 = archivé, non-modifiable
 );
 
 CREATE TABLE IF NOT EXISTS acc_accounts
 -- Comptes des plans comptables
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_plan INTEGER NOT NULL REFERENCES acc_plans,
+    id_chart INTEGER NOT NULL REFERENCES acc_charts,
 
     code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
 
@@ -205,7 +206,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_plan);
+CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
 
 CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
@@ -219,7 +220,7 @@ CREATE TABLE IF NOT EXISTS acc_years
 
     closed INTEGER NOT NULL DEFAULT 0,
 
-    id_plan INTEGER NOT NULL REFERENCES acc_plans (id)
+    id_chart INTEGER NOT NULL REFERENCES acc_charts (id)
 );
 
 CREATE TABLE IF NOT EXISTS acc_transactions
