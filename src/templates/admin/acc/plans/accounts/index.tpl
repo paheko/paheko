@@ -44,7 +44,7 @@
 	<fieldset>
 		<legend>Ajouter un compte au plan comptable</legend>
 		<dl>
-			{input type="text" name="code" label="Code" required=1 pattern="\d+" maxlength=8 help="Utilisé pour ordonner la liste des comptes. Seuls les chiffres sont acceptés."}
+			{input type="text" name="code" label="Code" required=1 pattern="\d+" maxlength=6 help="Utilisé pour ordonner la liste des comptes. Seuls les chiffres sont acceptés."}
 			{input type="text" name="label" label="Libellé" required=1}
 		</dl>
 		<p class="submit">
