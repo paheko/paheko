@@ -56,7 +56,7 @@ class Account extends Entity
 	];
 
 	protected $id;
-	protected $id_plan;
+	protected $id_chart;
 	protected $code;
 	protected $label;
 	protected $description;
@@ -66,7 +66,7 @@ class Account extends Entity
 
 	protected $_types = [
 		'id'          => 'int',
-		'id_plan'     => 'int',
+		'id_chart'    => 'int',
 		'code'        => 'string',
 		'label'       => 'string',
 		'description' => '?string',
@@ -76,7 +76,7 @@ class Account extends Entity
 	];
 
 	protected $_validation_rules = [
-		'id_plan'     => 'required|integer|in_table:acc_plans,id',
+		'id_chart'    => 'required|integer|in_table:acc_charts,id',
 		'code'        => 'required|string|alpha_num|max:6',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
