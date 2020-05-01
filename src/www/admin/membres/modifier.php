@@ -16,6 +16,11 @@ if (!$membre)
     throw new UserException("Ce membre n'existe pas.");
 }
 
+// Ne pas modifier le membre courant, on risque de se tirer une balle dans le pied
+if ($membre->id == $user->id) {
+    throw new UserException("Vous ne pouvez pas modifier votre propre profil, la modification doit être faite par un autre membre.");
+}
+
 $cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
