@@ -19,7 +19,7 @@ if (($pos = strpos($uri, '?')) !== false)
 
 if (file_exists(__DIR__ . $uri))
 {
-	if (PHP_SAPI != 'cli') {
+	if (PHP_SAPI != 'cli-server') {
 		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Garradin');
 	}
 
