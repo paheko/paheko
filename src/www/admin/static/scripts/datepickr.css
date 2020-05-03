@@ -80,7 +80,7 @@
     text-align: center;
 }
 
-.calendar td {
+.calendar table td {
     text-align: right;
     padding: 1px;
     width: 14.3%;
