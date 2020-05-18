@@ -50,6 +50,11 @@ class Membres
                     $dt = new \DateTime($data[$key]);
                     $data[$key] = $dt->format('Y-m-d H:i');
                 }
+                elseif ($config->type == 'date' && trim($data[$key]) !== '')
+                {
+                    $dt = new \DateTime($data[$key]);
+                    $data[$key] = $dt->format('Y-m-d');
+                }
                 elseif ($config->type == 'tel')
                 {
                     $data[$key] = Utils::normalizePhoneNumber($data[$key]);
