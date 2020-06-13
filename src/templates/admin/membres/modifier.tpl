@@ -39,9 +39,9 @@
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
             </dd>
-            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" /></dd>
+            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" autocomplete="off" /></dd>
             <dt><label for="f_repasse">Encore le mot de passe</label> (vérification){if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
-            <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" /></dd>
+            <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" autocomplete="off" /></dd>
         </dl>
     </fieldset>
 
