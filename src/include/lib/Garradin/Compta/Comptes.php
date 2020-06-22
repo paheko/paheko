@@ -9,11 +9,6 @@ use Garradin\UserException;
 
 class Comptes
 {
-    const CAISSE = '530';
-
-    const CHEQUE_A_ENCAISSER = '5112';
-    const CARTE_A_ENCAISSER = '5115';
-
     const PASSIF = 0x01;
     const ACTIF = 0x02;
     const PRODUIT = 0x04;
@@ -447,6 +442,26 @@ class Comptes
         }
 
         return true;
+    }
+
+    public function listSimpleTargetAccounts()
+    {
+        $accounts = DB::getInstance()->get('SELECT id, parent, label, b.label AS parent_label
+            FROM acc_accounts a
+            INNER JOIN acc_accounts b ON b.id = a.parent
+            WHERE type != 0 ORDER BY type, parent, code;');
+
+        $out = [];
+
+        foreach ($accounts as $account) {
+            if (!isset($out[$account->parent_label])) {
+                $out[$account->parent_label] = [];
+            }
+
+            $out[$account->parent_label][$account->id] = $account->label;
+        }
+
+        return $out;
     }
 
     public function getPositions()
