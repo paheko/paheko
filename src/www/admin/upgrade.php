@@ -279,7 +279,7 @@ try {
 
         // Conversion des champs date
         $champs = (array) $config->get('champs_membres')->getAll();
-        $formats = ['d/m/Y', 'd/m/Y H:i:s', 'd/m/Y H:i', 'd-m-Y'];
+        $formats = ['d/m/Y', 'd/m/Y H:i:s', 'd/m/Y H:i', 'd/m/y', 'd-m-Y'];
 
         foreach ($champs as $key => $champ) {
             if ($champ->type == 'date') {
