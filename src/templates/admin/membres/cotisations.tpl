@@ -50,8 +50,8 @@
             <span class="confirm">À jour</span>{if $co.expiration} — Expire le {$co.expiration|format_sqlite_date_to_french}{/if}
         {else}
             <span class="error">En retard</span>
-            — <a href="{$admin_url}membres/cotisations/rappels.php?id={$membre.id}">Suivi des rappels</a>
         {/if}
+        — <a href="{$admin_url}membres/cotisations/rappels.php?id={$membre.id}">Suivi des rappels</a>
     </dd>
     {/foreach}
 {/if}
