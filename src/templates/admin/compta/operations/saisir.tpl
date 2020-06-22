@@ -25,13 +25,12 @@
     <fieldset>
         <legend>Informations</legend>
         <dl>
-            {input type="date" name="date" value=$date label="Date" required}
-            {input type="text" name="libelle" label="Libellé" required}
-            {input type="number" name="montant" label="Montant" min="0.00" step="0.01" value="0.00" required} {$config.monnaie}
+            {input type="date" name="date" value=$date label="Date" required=1}
+            {input type="text" name="label" label="Libellé" required=1}
+            {input type="number" name="amount" label="Montant" min="0.00" step="0.01" value="0.00" required=1} {$config.monnaie}
         </dl>
         <dl class="type_recette type_depense">
-            {input type="select" name="moyen" label="Moyen de paiement" required options=$moyens_paiement}
-            {input type="select" name="compte" options=$comptes_encaissement label="Compte d'encaissement" required}
+            {input type="select_groups" name="account" label="Compte" required=1}
             {input type="text" name="reference_paiement" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
         </dl>
         <dl class="type_avance">
@@ -42,8 +41,8 @@
     <fieldset class="type_virement">
         <legend>Virement</legend>
         <dl>
-            {input type="select" name="from" options=$comptes label="De" required}
-            {input type="select" name="to" options=$comptes label="Vers" required}
+            {input type="select" name="from" options=$comptes label="De" required=1}
+            {input type="select" name="to" options=$comptes label="Vers" required=1}
         </dl>
     </fieldset>
 

@@ -10,7 +10,6 @@ $journal = new Compta\Journal;
 $journal->checkExercice();
 
 $cats = new Compta\Categories;
-$banques = new Compta\Comptes_Bancaires;
 
 $type = f('type') ?: 'recette';
 
@@ -158,15 +157,9 @@ if (f('save'))
 $tpl->assign('type', $type);
 
 $tpl->assign('comptes', $comptes->listTree());
-$tpl->assign('moyens_paiement', $cats->listMoyensPaiement());
-$tpl->assign('moyen_paiement', f('moyen_paiement') ?: 'ES');
 $tpl->assign('categories_depenses', $cats->getList(Compta\Categories::DEPENSES));
 $tpl->assign('categories_recettes', $cats->getList(Compta\Categories::RECETTES));
-$tpl->assign('comptes_bancaires', $banques->getList());
-$tpl->assign('banque', f('banque'));
-$tpl->assign('compte_cheque_e_encaisser', Compta\Comptes::CHEQUE_A_ENCAISSER);
-$tpl->assign('compte_carte_e_encaisser', Compta\Comptes::CARTE_A_ENCAISSER);
-$tpl->assign('projets', (new Compta\Projets)->getAssocList());
+$tpl->assign('comptes_simples', $comptes->listSimpleTargetAccounts());
 
 if (!$session->get('context_compta_date'))
 {
