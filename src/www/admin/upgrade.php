@@ -273,6 +273,25 @@ try {
         $db->commit();
     }
 
+    if (version_compare($v, '0.9.7', '<'))
+    {
+        $db->begin();
+
+        // Conversion des champs date
+        $champs = (array) $config->get('champs_membres')->getAll();
+
+        foreach ($champs as $key => $champ) {
+            if ($champ->type == 'date') {
+                $db->exec(sprintf('UPDATE membres SET %s = date(%01$s) WHERE %01$s IS NOT NULL;', $db->quoteIdentifier($key)));
+            }
+            elseif ($champ->type == 'datetime') {
+                $db->exec(sprintf('UPDATE membres SET %s = datetime(%01$s) WHERE %01$s IS NOT NULL;', $db->quoteIdentifier($key)));
+            }
+        }
+
+        $db->commit();
+    }
+
     Utils::clearCaches();
 
     $config->setVersion(garradin_version());
