@@ -26,7 +26,7 @@
             <dt><label for="f_id">{$champ.title}</label></dt>
             <dd><input type="text" name="_id" id="f_id" value="{form_field name=_id}" /></dd>
             <dt><label for="f_passe">Mot de passe</label></dt>
-            <dd><input type="password" name="passe" id="f_passe" value="" />
+            <dd><input type="password" name="passe" id="f_passe" value="" autocomplete="current-password" />
                 {if $ssl_enabled}
                     <b class="icn confirm" title="Connexion chiffrée">&#x1f512;</b>
                     <span class="confirm">Connexion sécurisée</span>

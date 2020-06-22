@@ -35,7 +35,7 @@
                 <dd class="help">Pour configurer une autre application, vous pouvez utiliser ces paramètres&nbsp;: <tt>{$otp.url}</tt></dd>
                 <dt><label for="f_code">Code TOTP</label></dt>
                 <dd class="help">Entrez ici le code donné par l'application d'authentification double facteur.</dd>
-                <dd><input type="text" name="code" id="f_code" value="{form_field name=code}" /></dd>
+                <dd><input type="text" name="code" id="f_code" value="{form_field name=code}" autocomplete="off" /></dd>
             </dl>
         </fieldset>
     {/if}
@@ -45,7 +45,7 @@
         <dl>
             <dt><label for="f_passe_confirm">Mot de passe actuel</label></dt>
             <dd class="help">Entrez votre mot de passe actuel pour confirmer les changements demandés.</dd>
-            <dd><input type="password" name="passe_check" /></dd>
+            <dd><input type="password" name="passe_check" autocomplete="current-password" /></dd>
         </dl>
     </fieldset>
 
@@ -81,9 +81,9 @@
                         Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                         <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
                     </dd>
-                    <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" /></dd>
+                    <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" autocomplete="new-password" /></dd>
                     <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-                    <dd><input type="password" name="passe_confirmed" id="f_passe_confirmed" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" /></dd>
+                    <dd><input type="password" name="passe_confirmed" id="f_passe_confirmed" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" autocomplete="new-password" /></dd>
                 </dl>
             {/if}
         </fieldset>

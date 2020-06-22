@@ -438,6 +438,8 @@ class Template extends \KD2\Smartyer
 			$attributes .= 'required="required" ';
 		}
 
+		$attributes .= 'autocomplete="off" ';
+
 		if (!empty($params['user_mode']) && empty($config->editable))
 		{
 			$out = '<dt>' . htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</dt>';
