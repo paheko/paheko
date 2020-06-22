@@ -23,18 +23,14 @@ if (f('import'))
 {
     $form->check('compta_import', [
         'upload' => 'file|required',
-        'type'   => 'required|in:citizen,garradin',
+        'type'   => 'required|in:garradin',
     ]);
 
     if (!$form->hasErrors())
     {
         try
         {
-            if (f('type') == 'citizen')
-            {
-                $import->fromCitizen($_FILES['upload']['tmp_name']);
-            }
-            elseif (f('type') == 'garradin')
+            if (f('type') == 'garradin')
             {
                 $import->fromCSV($_FILES['upload']['tmp_name']);
             }

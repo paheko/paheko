@@ -31,17 +31,6 @@
                 Les lignes comportant un numéro d'opération mettront à jour les opérations existantes,
                 les lignes sans numéro créeront de nouvelles opérations.
             </dd>
-            <dd>
-                <input type="radio" name="type" id="f_type_citizen" value="citizen" {form_field name=type checked="citizen"} />
-                <label for="f_type_citizen">Export CSV de Citizen Comptabilité</label>
-            </dd>
-            <dd class="help">
-                Export des données au format CSV provenant du logiciel de comptabilité de
-                <a href="http://www.citizenplace.com/">Citizen Place</a>.
-            </dd>
-            <dd class="help">
-                Toutes les opérations du fichier seront créées dans l'exercice en cours.  Les catégories et comptes associés aux opérations seront automatiquement créés s'ils n'existent pas déjà.
-            </dd>
         </dl>
     </fieldset>
 

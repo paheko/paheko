@@ -264,6 +264,50 @@ try {
         $db->commitSchemaUpdate();
     }
 
+    if (version_compare($v, '0.9.7', '<'))
+    {
+        $db->begin();
+
+        // Conversion des champs date
+        $champs = (array) $config->get('champs_membres')->getAll();
+        $formats = ['d/m/Y', 'd/m/Y H:i:s', 'd/m/Y H:i', 'd/m/y', 'd-m-Y'];
+
+        foreach ($champs as $key => $champ) {
+            if ($champ->type == 'date') {
+                $target_format = 'Y-m-d';
+            }
+            elseif ($champ->type == 'datetime') {
+                $target_format = 'Y-m-d H:i:s';
+            }
+            else {
+                continue;
+            }
+
+            $sql = sprintf('SELECT id, %s AS date FROM membres WHERE %01$s IS NOT NULL AND date(%01$s) IS NULL;', $db->quoteIdentifier($key));
+
+            foreach ($db->iterate($sql) as $row) {
+                foreach ($formats as $format) {
+                    $date = \DateTime::createFromFormat($format, $row->date);
+
+                    if ($date) {
+                        break;
+                    }
+                }
+
+                if ($date) {
+                    $date = $date->format($target_format);
+                }
+                else {
+                    $date = null;
+                }
+
+                $db->update('membres', [$key => $date], 'id = ' . (int)$row->id);
+            }
+        }
+
+        $db->commit();
+    }
+
     if (version_compare($v, '1.0.0', '<'))
     {
         $db->beginSchemaUpdate();

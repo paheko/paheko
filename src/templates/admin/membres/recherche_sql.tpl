@@ -33,26 +33,26 @@
 
 	<table class="list search">
 		<thead>
-			{if array_key_exists('id', $result[0])}
+			{if isset($result[0]->id)}
 			<td class="check"><input type="checkbox" value="Tout cocher / décocher" onclick="g.checkUncheck();" /></td>
 			{/if}
 			{foreach from=$result[0] key="col" item="ignore"}
 				<td>{$col}</td>
 			{/foreach}
-			{if array_key_exists('id', $result[0])}
+			{if isset($result[0]->id)}
 			<td></td>
 			{/if}
 		</thead>
 		<tbody>
 			{foreach from=$result item="row"}
 				<tr>
-					{if $session->canAccess('membres', Membres::DROIT_ADMIN) && array_key_exists('id', $result[0])}
+					{if $session->canAccess('membres', Membres::DROIT_ADMIN) && isset($result[0]->id)}
 						<td class="check">{if !empty($row.id)}<input type="checkbox" name="selected[]" value="{$row.id}" />{/if}</td>
 					{/if}
 					{foreach from=$row item="col"}
 						<td>{$col}</td>
 					{/foreach}
-					{if array_key_exists('id', $result[0])}
+					{if isset($row.id)}
 					<td class="actions">
 						{if !empty($row.id)}
 						<a class="icn" href="{$admin_url}membres/fiche.php?id={$row.id}" title="Fiche membre">👤</a>

@@ -22,6 +22,10 @@ if (f('save'))
                 }
             }
 
+            if (isset($data[$config->get('champ_identifiant')]) && !trim($data[$config->get('champ_identifiant')]) && $session->canAccess('config', Membres::DROIT_ADMIN)) {
+                throw new UserException("Le champ identifiant ne peut être vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
+            }
+
             $session->editUser($data);
 
             Utils::redirect(ADMIN_URL);

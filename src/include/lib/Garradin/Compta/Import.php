@@ -90,9 +90,10 @@ class Import
 		$cats = new Categories;
 		$journal = new Journal;
 
-		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
+		$liste_cats = $db->getAssoc('SELECT type || intitule, id FROM compta_categories;');
 		// Liste des moyens sous la forme nom -> code
 		$liste_moyens = array_flip($cats->listMoyensPaiement(true));
+		$liste_moyens = array_change_key_case($liste_moyens, \CASE_LOWER);
 
 		// Liste associative des projets
 		$liste_projets = $db->getAssoc('SELECT libelle, id FROM compta_projets;');
@@ -168,24 +169,42 @@ class Import
 			$credit = $col('Compte de crédit - numéro');
 
 			$cat = $col('Catégorie');
-			$moyen = strtoupper(substr($col('Moyen de paiement'), 0, 2));
+			$moyen = strtolower($col('Moyen de paiement'));
+			$type = $col('Type de mouvement');
+
+			if ('Recette' === $type) {
+				$type = 1;
+			}
+			elseif ('Dépense' === $type) {
+				$type = -1;
+			}
+			else {
+				$type = 0;
+			}
 
 			// Association du moyen de paiement par nom
 			if ($moyen && array_key_exists($moyen, $liste_moyens))
 			{
 				$moyen = $liste_moyens[$moyen];
 			}
+			// Sinon on estime que c'est juste le code qui est fourni
+			else
+			{
+				$moyen = substr(strtoupper($moyen), 0, 2);
+			}
 
 			// Vérification de l'existence du moyen de paiement
 			// s'il n'est pas valide, on ne peut pas avoir de catégorie non plus
-			if (!$moyen || !in_array($moyen, $liste_moyens, true))
+			if (!trim($moyen) || !in_array($moyen, $liste_moyens, true))
 			{
 				$moyen = false;
 				$cat = false;
 			}
 
-			if ($cat && !array_key_exists($cat, $liste_cats))
-			{
+			if ($cat && array_key_exists($type . $cat, $liste_cats)) {
+				$cat = $liste_cats[$type . $cat];
+			}
+			else {
 				$cat = $moyen = false;
 			}
 
@@ -214,7 +233,7 @@ class Import
 			{
 				$data['moyen_paiement']	=	$moyen;
 				$data['numero_cheque']	=	$col('Numéro de chèque');
-				$data['id_categorie']	=	$liste_cats[$cat];
+				$data['id_categorie']	=	$cat;
 			}
 
 			try {
@@ -231,181 +250,6 @@ class Import
 			{
 				throw new UserException(sprintf('Ligne %s: %s', $line, $e->getMessage()));
 			}
-		}
-
-		$db->commit();
-
-		fclose($fp);
-		return true;
-	}
-
-	public function fromCitizen($path)
-	{
-		if (!file_exists($path) || !is_readable($path))
-		{
-			throw new \RuntimeException('Fichier inconnu : '.$path);
-		}
-
-		$fp = fopen($path, 'r');
-
-		if (!$fp)
-		{
-			return false;
-		}
-
-		$db = DB::getInstance();
-		$db->begin();
-		$comptes = new Comptes;
-		$banques = new Comptes_Bancaires;
-		$cats = new Categories;
-		$journal = new Journal;
-
-		$columns = [];
-		$liste_comptes = $db->getAssoc('SELECT id, id FROM compta_comptes;');
-		$liste_cats = $db->getAssoc('SELECT intitule, id FROM compta_categories;');
-		$liste_moyens = $cats->listMoyensPaiement();
-
-		$get_compte = function ($compte, $intitule) use (&$liste_comptes, &$comptes, &$banques)
-		{
-			if (substr($compte, 0, 2) == '51')
-			{
-				$compte = '512' . substr($compte, -1);
-			}
-
-			// Création comptes
-			if (!array_key_exists($compte, $liste_comptes))
-			{
-				if (substr($compte, 0, 3) == '512')
-				{
-					$liste_comptes[$compte] = $banques->add([
-						'libelle'	=>	$intitule,
-						'banque'	=>	'Inconnue',
-					]);
-				}
-				else
-				{
-					$liste_comptes[$compte] = $comptes->add([
-						'id'		=>	$compte,
-						'libelle'	=>	$intitule,
-						'parent'	=>	substr($compte, 0, -1)
-					]);
-				}
-			}
-
-			return $compte;
-		};
-
-		$col = function($column) use (&$row, &$columns)
-		{
-			if (!isset($columns[$column]))
-				return null;
-
-			if (!isset($row[$columns[$column]]))
-				return null;
-
-			return $row[$columns[$column]];
-		};
-
-		$line = 0;
-		$delim = Utils::find_csv_delim($fp);
-		Utils::skip_bom($fp);
-
-		while (!feof($fp))
-		{
-			$row = fgetcsv($fp, 4096, $delim);
-			$line++;
-
-			if (empty($row))
-			{
-				continue;
-			}
-
-			if (empty($columns))
-			{
-				if (empty($row[0]))
-				{
-					throw new UserException(sprintf('Erreur sur la ligne %d : la ligne est vide ?', $line));
-				}
-
-				$columns = $row;
-				$columns = array_flip($columns);
-				continue;
-			}
-
-			$date = $col('Date');
-			$date = \DateTime::createFromFormat('d/m/Y', $date);
-
-			if (!$date)
-			{
-				$db->rollback();
-				throw new UserException(sprintf('Erreur sur la ligne %d : la date "%s" n\'est pas au format jj/mm/aaaa.', $line, $col('Date')));
-			}
-
-			$date = $date->format('Y-m-d');
-
-			if ($db->test('compta_exercices', '(? < debut OR ? > fin) AND cloture = 0', $date, $date))
-			{
-				continue;
-			}
-
-			$debit = $get_compte($col('Compte débité - Numéro'), $col('Compte débité - Intitulé'));
-			$credit = $get_compte($col('Compte crédité - Numéro'), $col('Compte crédité - Intitulé'));
-
-			$cat = $col('Rubrique');
-			$moyen = strtoupper(substr($col('Moyen de paiement'), 0, 2));
-
-			if (!$moyen || !array_key_exists($moyen, $liste_moyens))
-			{
-				$moyen = false;
-				$cat = false;
-			}
-
-			if ($cat && !array_key_exists($cat, $liste_cats))
-			{
-				if ($col('Nature') == 'Recette')
-				{
-					$type = $cats::RECETTES;
-					$compte = $credit;
-				}
-				elseif ($col('Nature') == 'Dépense')
-				{
-					$type = $cats::DEPENSES;
-					$compte = $debit;
-				}
-				else
-				{
-					$type = $cats::AUTRES;
-					$cat = false;
-				}
-
-				if ($type != $cats::AUTRES)
-				{
-					$liste_cats[$cat] = $cats->add([
-						'intitule'	=>	$cat,
-						'type'		=>	$type,
-						'compte'	=>	$compte
-					]);
-				}
-			}
-
-			$data = [
-				'libelle'       =>  $col('Libellé'),
-				'montant'       =>  $col('Montant'),
-				'date'          =>  $date,
-				'compte_credit' =>  $credit,
-				'compte_debit'  =>  $debit,
-				'numero_piece'  =>  $col('Numéro de pièce'),
-				'remarques'     =>  $col('Remarques'),
-			];
-
-			if ($cat)
-			{
-				$data['moyen_paiement']	=	$moyen;
-				$data['numero_cheque']	=	$col('Numéro de chèque');
-				$data['id_categorie']	=	$liste_cats[$cat];
-			}
-
-			$journal->add($data);
 		}
 
 		$db->commit();

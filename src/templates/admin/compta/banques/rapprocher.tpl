@@ -44,6 +44,8 @@
             <col width="10%" />
             <col width="12%" />
             <col />
+            <col width="5%" />
+            <col width="3%" />
         </colgroup>
         <thead>
             <tr>
@@ -54,6 +56,8 @@
                 <td>Montant</td>
                 <td>Solde cumulé</td>
                 <th>Libellé</th>
+                <th>Numéro pièce</th>
+                <th>Numéro chèque</th>
             </tr>
         </thead>
         <tbody>
@@ -61,6 +65,7 @@
                 <td colspan="5"></td>
                 <td>{$solde_initial|escape|html_money} {$config.monnaie}</td>
                 <th>Solde au {$debut|format_sqlite_date_to_french}</th>
+                <td colspan="2"></td>
             </tr>
         {foreach from=$journal item="ligne"}
             <tr>
@@ -75,6 +80,8 @@
                 <td>{if $ligne.compte_credit == $compte.id}-{else}+{/if}{$ligne.montant|escape|html_money}</td>
                 <td>{$ligne.solde|escape|html_money}</td>
                 <th>{$ligne.libelle}</th>
+                <td>{$ligne.numero_piece}</td>
+                <td>{$ligne.numero_cheque}</td>
             </tr>
         {/foreach}
         </tbody>
@@ -83,6 +90,7 @@
                 <td colspan="5"></td>
                 <td>{$solde_final|escape|html_money} {$config.monnaie}</td>
                 <th>Solde au {$fin|format_sqlite_date_to_french}</th>
+                <td colspan="2"></td>
             </tr>
         </tfoot>
     </table>
