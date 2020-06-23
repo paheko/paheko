@@ -191,6 +191,7 @@ class Rappels
 				WHERE id_cotisation = re.id_cotisation
 				AND re.date >= date(expiration, delai || \' days\')
 			)
+			AND CASE WHEN delai < 0 THEN nb_jours < 0 WHEN delai > 0 THEN nb_jours > 0 ELSE nb_jours = 0 END
 		ORDER BY nb_jours DESC;';
 
 		$db->begin();
