@@ -347,7 +347,7 @@ class Cotisations
 	{
 		$db = DB::getInstance();
 		return $db->get('SELECT c.*,
-			MAX(cm.date),
+			MAX(cm.date) AS date,
 			CASE WHEN c.duree IS NOT NULL THEN date(cm.date, \'+\'||c.duree||\' days\') >= date()
 			WHEN c.fin IS NOT NULL THEN (cm.id IS NOT NULL AND cm.date <= c.fin AND cm.date >= c.debut)
 			WHEN cm.id IS NOT NULL THEN 1 ELSE 0 END AS a_jour,
