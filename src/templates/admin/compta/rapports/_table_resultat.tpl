@@ -18,7 +18,7 @@
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
-                            <th>{$compte|get_nom_compte}</th>
+                            <th><a href="{$admin_url}compta/comptes/journal.php?id={$compte}">{$compte|get_nom_compte}</a></th>
                             <td>{$solde|escape|html_money}</td>
                         </tr>
                         {/foreach}
@@ -39,7 +39,7 @@
                         </tr>
                         {foreach from=$parent.comptes item="solde" key="compte"}
                         <tr class="compte">
-                            <th>{$compte|get_nom_compte}</th>
+                            <th><a href="{$admin_url}compta/comptes/journal.php?id={$compte}">{$compte|get_nom_compte}</a></th>
                             <td>{$solde|escape|html_money}</td>
                         </tr>
                         {/foreach}

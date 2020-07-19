@@ -59,3 +59,8 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
 td.actions * {
     display: none;
 }
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
