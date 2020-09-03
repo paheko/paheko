@@ -298,7 +298,7 @@ class Fichiers
 	{
 		if (!$this->image)
 		{
-			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
 		if (!in_array($width, self::$allowed_thumb_sizes))
