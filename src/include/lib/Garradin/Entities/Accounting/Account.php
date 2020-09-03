@@ -43,7 +43,9 @@ class Account extends Entity
 	const TYPE_ANALYTICAL = 4;
 	const TYPE_VOLUNTEERING = 5;
 
-	const TYPE_BOOKMARK = 6;
+	const TYPE_THIRD_PARTY = 6;
+
+	const TYPE_BOOKMARK = 7;
 
 	const TYPES_NAMES = [
 		'',
@@ -52,6 +54,7 @@ class Account extends Entity
 		'Attente d\'encaissement',
 		'Analytique',
 		'Bénévolat',
+		'Tiers',
 		'Favori',
 	];
 
@@ -77,7 +80,7 @@ class Account extends Entity
 
 	protected $_validation_rules = [
 		'id_chart'    => 'required|integer|in_table:acc_charts,id',
-		'code'        => 'required|string|alpha_num|max:6',
+		'code'        => 'required|string|alpha_num|max:10',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
 		'position'    => 'required|integer',
