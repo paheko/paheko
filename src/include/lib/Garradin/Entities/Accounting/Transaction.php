@@ -119,7 +119,7 @@ class Transaction extends Entity
 		return $this->add($ligne1) && $this->add($ligne2);
 	}
 
-	public function save()
+	public function save(): bool
 	{
 		if ($this->validated && !isset($this->_modified['validated'])) {
 			throw new validatedException('Il n\'est pas possible de modifier un mouvement qui a été validé');
@@ -134,18 +134,20 @@ class Transaction extends Entity
 			$ligne->id_transaction = $this->id;
 			$ligne->save();
 		}
+
+		return true;
 	}
 
-	public function delete()
+	public function delete(): bool
 	{
 		if ($this->validated) {
 			throw new validatedException('Il n\'est pas possible de supprimer un mouvement qui a été validé');
 		}
 
-		parent::delete();
+		return parent::delete();
 	}
 
-	public function selfCheck()
+	public function selfCheck(): void
 	{
 		parent::selfCheck();
 
