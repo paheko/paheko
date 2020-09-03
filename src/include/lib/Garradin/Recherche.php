@@ -319,7 +319,7 @@ class Recherche
 				// Remplacement de recherche LIKE
 				elseif (preg_match('/%\?%|%\?|\?%/', $query, $match))
 				{
-					$value = str_replace(['%_'], ['\\%', '\\_'], reset($values));
+					$value = str_replace(['%', '_'], ['\\%', '\\_'], reset($values));
 					$value = str_replace('?', $value, $match[0]);
 					$query = str_replace($match[0], sprintf('%s ESCAPE \'\\\'', $db->quote($value)), $query);
 				}
