@@ -257,8 +257,10 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
     credit INTEGER NOT NULL,
     debit INTEGER NOT NULL,
 
+    reference TEXT NULL, -- Référence de paiement, eg. numéro de chèque
+    label TEXT NULL,
+
     reconcilied INTEGER NOT NULL DEFAULT 0,
-    payment_reference TEXT NULL, -- Référence de paiement, eg. numéro de chèque
 
     CONSTRAINT line_check1 CHECK ((credit * debit) = 0),
     CONSTRAINT line_check2 CHECK ((credit + debit) > 0)

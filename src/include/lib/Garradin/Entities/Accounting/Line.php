@@ -18,21 +18,23 @@ class Line extends Entity
 	protected $reconciled;
 
 	protected $_types = [
-		'id_transaction'    => 'int',
-		'id_account'        => 'int',
-		'credit'            => 'int',
-		'debit'             => 'int',
-		'payment_reference' => '?string',
-		'reconcilied'       => 'int',
+		'id_transaction' => 'int',
+		'id_account'     => 'int',
+		'credit'         => 'int',
+		'debit'          => 'int',
+		'reference'      => '?string',
+		'label'          => '?string',
+		'reconcilied'    => 'int',
 	];
 
 	protected $_validation_rules = [
-		'id_transaction'    => 'required|integer|in_table:acc_transactions,id',
-		'id_account'        => 'required|integer|in_table:acc_accounts,id',
-		'credit'            => 'required|integer|min:0',
-		'debit'             => 'required|integer|min:0',
-		'payment_reference' => 'string|max:200',
-		'reconcilied'       => 'int|min:0|max:1',
+		'id_transaction' => 'required|integer|in_table:acc_transactions,id',
+		'id_account'     => 'required|integer|in_table:acc_accounts,id',
+		'credit'         => 'required|integer|min:0',
+		'debit'          => 'required|integer|min:0',
+		'reference'      => 'string|max:200',
+		'label'          => 'string|max:200',
+		'reconcilied'    => 'int|min:0|max:1',
 	];
 
 	public function filterUserValue(string $key, $value, array $source)
