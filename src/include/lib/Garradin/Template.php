@@ -74,6 +74,7 @@ class Template extends \KD2\Smartyer
 		});
 
 		$this->register_function('icon', [$this, 'widgetIcon']);
+		$this->register_function('button', [$this, 'widgetLinkButton']);
 
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -172,6 +173,11 @@ class Template extends \KD2\Smartyer
 		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
 	}
 
+	protected function widgetLinkButton(array $params): string
+	{
+		return sprintf('<a class="icn-btn" data-icon="%s" href="%s">%s</a>', Utils::iconUnicode($params['shape']), $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']));
+	}
+
 	protected function formInput(array $params)
 	{
 		static $keep_attributes = ['pattern', 'max', 'min', 'step', 'title', 'name', 'cols', 'rows', 'maxlength'];
@@ -183,69 +189,89 @@ class Template extends \KD2\Smartyer
 
 		$current_value = null;
 
-		if (isset($_POST[$name])) {
+		if (isset($value)) {
+			$current_value = $value;
+		}
+		elseif (isset($_POST[$name])) {
 			$current_value = $_POST[$name];
 		}
 		elseif (isset($default)) {
 			$current_value = $default;
 		}
 
-		$required_label = array_key_exists('required', $params) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
-
-		$out = sprintf('<dt><label for="f_%s">%s</label>%s</dt>', $name, $this->escape($label), $required_label);
-
-		if (isset($help)) {
-			$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
-		}
-
 		$attributes = array_intersect_key($params, array_flip($keep_attributes));
 		$attributes['id'] = 'f_' . $name;
+
+		if ($type == 'radio' || $type == 'checkbox') {
+			$attributes['id'] .= '_' . $value;
+		}
 
 		// Create attributes string
 		if (array_key_exists('required', $params)) {
 			$attributes['required'] = 'required';
 		}
 
-		array_walk($attributes, function (&$v, $k) {
+		$attributes_string = $attributes;
+
+		array_walk($attributes_string, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $v);
 		});
 
-		$attributes = implode(' ', $attributes);
-
-		$out .= '<dd>';
+		$attributes_string = implode(' ', $attributes_string);
 
 		if ($type == 'select') {
-			$out .= sprintf('<select %s>', $attributes);
+			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $_key => $_value) {
-				$out .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
+				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
 			}
 
-			$out .= '</select>';
+			$input .= '</select>';
 		}
 		elseif ($type == 'select_groups') {
-			$out .= sprintf('<select %s>', $attributes);
+			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $optgroup => $suboptions) {
-				$out .= sprintf('<optgroup label="%s">', $this->escape($optgroup));
+				$input .= sprintf('<optgroup label="%s">', $this->escape($optgroup));
 
 				foreach ($suboptions as $_key => $_value) {
-					$out .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
+					$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
 				}
 
-				$out .= '</optgroup>';
+				$input .= '</optgroup>';
 			}
 
-			$out .= '</select>';
+			$input .= '</select>';
 		}
 		elseif ($type == 'textarea') {
-			$out .= sprintf('<textarea %s>%s</textarea>', $attributes, $this->escape($current_value));
+			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
 		}
 		else {
-			$out .= sprintf('<input type="%s" %s value="%s" />', $type, $attributes, $this->escape($current_value));
+			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));
 		}
 
-		$out .= '</dd>';
+		// No label? then we only want the input without the widget
+		if (empty($label)) {
+			return $input;
+		}
+
+		$required_label = array_key_exists('required', $params) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
+
+		$out = '<dt>';
+
+		if ($type == 'radio' || $type == 'checkbox') {
+			$out .= $input . ' ';
+		}
+
+		$out .= sprintf('<label for="%s">%s</label>%s</dt>', $attributes['id'], $this->escape($label), $required_label);
+
+		if (isset($help)) {
+			$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
+		}
+
+		if ($type != 'radio' && $type != 'checkbox') {
+			$out .= sprintf('<dd>%s</dd>', $input);
+		}
 
 		return $out;
 	}
