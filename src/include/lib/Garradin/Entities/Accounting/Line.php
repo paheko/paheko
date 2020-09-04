@@ -24,7 +24,7 @@ class Line extends Entity
 		'debit'          => 'int',
 		'reference'      => '?string',
 		'label'          => '?string',
-		'reconcilied'    => 'int',
+		'reconciled'     => 'int',
 	];
 
 	protected $_validation_rules = [
@@ -34,7 +34,7 @@ class Line extends Entity
 		'debit'          => 'required|integer|min:0',
 		'reference'      => 'string|max:200',
 		'label'          => 'string|max:200',
-		'reconcilied'    => 'int|min:0|max:1',
+		'reconciled'     => 'int|min:0|max:1',
 	];
 
 	public function filterUserValue(string $key, $value, array $source)
