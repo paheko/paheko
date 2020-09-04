@@ -20,11 +20,11 @@ INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 	SELECT NULL, 1, id, libelle, position, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
 
 -- Migrations projets vers comptes analytiques
-INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
-	VALUES (1, '99', 'Projets', 0, 1, 0);
+INSERT INTO acc_accounts (id_chart, code, label, position, user, type, type_parent)
+	VALUES (1, '99', 'Projets', 0, 1, 6, 1);
 
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
-	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 4 FROM compta_projets;
+	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 6 FROM compta_projets;
 
 -- Suppression des positions "actif ou passif" et "charge ou produit"
 UPDATE acc_accounts SET position = 0 WHERE position = 3 OR position = 12;
@@ -34,33 +34,41 @@ UPDATE acc_accounts SET position = 3 WHERE position = 4;
 UPDATE acc_accounts SET position = 4 WHERE position = 8;
 
 -- Migration comptes bancaires
-UPDATE acc_accounts SET type = 1 WHERE code IN (SELECT id FROM compta_comptes_bancaires);
+UPDATE acc_accounts SET type = 3 WHERE code IN (SELECT id FROM compta_comptes_bancaires);
 
 -- Caisse
-UPDATE acc_accounts SET type = 2 WHERE code = '530';
+UPDATE acc_accounts SET type = 4 WHERE code = '530';
 
 -- Chèques et carte à encaisser
-UPDATE acc_accounts SET type = 3 WHERE code = '5112' OR code = '5113';
+UPDATE acc_accounts SET type = 5 WHERE code = '5112' OR code = '5113';
 
 -- Bénévolat en nature
-UPDATE acc_accounts SET type = 5 WHERE code = '870';
+UPDATE acc_accounts SET type = 7 WHERE code = '870';
+
+-- FIXME: ajout parents des types
 
 -- Recopie des mouvements
-INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_analytical)
-	SELECT id, libelle, remarques, numero_piece, date, id_exercice,
-	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
+INSERT INTO acc_transactions (id, label, notes, reference, date, id_year)
+	SELECT id, libelle, remarques, numero_piece, date, id_exercice
 	FROM compta_journal;
 
 -- Création des lignes associées aux mouvements
-INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
-	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(montant * 100 AS INT), numero_cheque FROM compta_journal;
+INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, reference, id_analytical)
+	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(montant * 100 AS INT), numero_cheque,
+	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
+	FROM compta_journal;
 
-INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, payment_reference)
-	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque FROM compta_journal;
+INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, reference, id_analytical)
+	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque,
+	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
+	FROM compta_journal;
 
 -- Recopie des descriptions de catégories dans la table des comptes, et mise des comptes en signets
-UPDATE acc_accounts SET type = 6, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
-	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code);
+UPDATE acc_accounts SET type = 1, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = 1);
+
+UPDATE acc_accounts SET type = 2, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1);
 
 -- Recopie des opérations, mais le nom a changé pour "mouvements"
 INSERT INTO membres_mouvements
@@ -83,7 +91,7 @@ DROP TABLE compta_exercices;
 DROP TABLE membres_operations_old;
 
 -- Transfert des rapprochements
-UPDATE acc_transactions_lines SET reconcilied = 1 WHERE id_transaction IN (SELECT id_operation FROM compta_rapprochement);
+UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT id_operation FROM compta_rapprochement);
 
 -- Suppression de la table rapprochements
 DROP TABLE compta_rapprochement;

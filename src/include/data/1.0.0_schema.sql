@@ -203,6 +203,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
     type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, favori, etc.
+    type_parent INTEGER NOT NULL DEFAULT 0, -- Parent d'un type (eg. code = 53 aura comme type = banque et type_parent = 1 pour indiquer que c'est sous ce compte que doivent être créés les sous-comptes banque)
     user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
 );
 
@@ -239,8 +240,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions
     hash TEXT NULL,
     prev_hash TEXT NULL,
 
-    id_year INTEGER NOT NULL REFERENCES acc_years(id),
-    id_analytical INTEGER NULL REFERENCES acc_accounts(id) ON DELETE SET NULL
+    id_year INTEGER NOT NULL REFERENCES acc_years(id)
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
@@ -260,7 +260,9 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
     reference TEXT NULL, -- Référence de paiement, eg. numéro de chèque
     label TEXT NULL,
 
-    reconcilied INTEGER NOT NULL DEFAULT 0,
+    reconciled INTEGER NOT NULL DEFAULT 0,
+
+    id_analytical INTEGER NULL REFERENCES acc_accounts(id) ON DELETE SET NULL,
 
     CONSTRAINT line_check1 CHECK ((credit * debit) = 0),
     CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
