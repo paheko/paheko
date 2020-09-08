@@ -1,8 +1,9 @@
-{include file="admin/_head.tpl" title="Gestion des comptes" current="acc/charts"}
+{include file="admin/_head.tpl" title="%s - Comptes utilisés couramment"|args:$chart.label current="acc/charts"}
 
 <ul class="actions">
-	<li><a href="{$admin_url}acc/accounts/">Gestion des comptes</a></li>
-	<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+	<li class="current"><a href="{$admin_url}acc/accounts/">Comptes utilisés couramment</a></li>
+	<li><a href="{$admin_url}acc/charts/">Gestion des plans comptables</a></li>
+	<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
 </ul>
 
 <form method="post" action="{$self_url_no_qs}">
