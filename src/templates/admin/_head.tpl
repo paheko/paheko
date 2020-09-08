@@ -83,7 +83,7 @@
                 <li class="compta journals{if $current == 'acc/journals'} current{/if}"><a href="{$admin_url}acc/transactions/">Journaux</a></li>
                 <li class="compta admin reports{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
             {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-                <li class="compta admin config{if $current == 'acc/charts'} current{/if}"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+                <li class="compta admin config{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_url}acc/accounts/">Gestion des comptes</a></li>
             {/if}
             </ul>
             </li>
