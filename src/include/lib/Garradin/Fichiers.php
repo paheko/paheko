@@ -547,11 +547,11 @@ class Fichiers
 		// Check that it's a real image
 		if ($is_image) {
 			try {
-				if ($path && null !== $content) {
-					$i = Image::createFromBlob($bytes);
+				if ($path && !$content) {
+					$i = new Image($path);
 				}
 				else {
-					$i = new Image($path);
+					$i = Image::createFromBlob($bytes);
 				}
 
 				unset($i);
