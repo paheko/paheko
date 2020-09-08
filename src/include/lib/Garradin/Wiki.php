@@ -289,6 +289,10 @@ class Wiki
 
     public function search($search)
     {
+        if (strlen($search) > 100) {
+            throw new UserException('Recherche trop longue : maximum 100 caractères');
+        }
+
         $query = sprintf('SELECT
             p.uri, r.*, snippet(wiki_recherche, \'<b>\', \'</b>\', \'...\', -1, -50) AS snippet,
             rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points
