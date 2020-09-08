@@ -116,6 +116,8 @@ class Form
 				return sprintf('Le champ %s est vide.', $element);
 			case 'min':
 				return sprintf('Le champ %s doit faire au moins %d caractères.', $element, $params[0]);
+			case 'max':
+				return sprintf('Le champ %s doit faire moins de %d caractères.', $element, $params[0]);
 			case 'file':
 				return sprintf('Le fichier envoyé n\'est pas valide.');
 			case 'confirmed':
