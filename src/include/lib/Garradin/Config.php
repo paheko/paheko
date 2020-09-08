@@ -126,8 +126,13 @@ class Config
         {
             if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'image_fond\';'))
             {
-                $f = new Fichiers($current);
-                $f->remove();
+                try {
+                    $f = new Fichiers($current);
+                    $f->remove();
+                }
+                catch (\InvalidArgumentException $e) {
+                    // Ignore: the file has already been deleted
+                }
             }
 
             if (strlen($this->config['image_fond']) > 0)
