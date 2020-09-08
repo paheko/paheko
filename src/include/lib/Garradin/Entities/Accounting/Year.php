@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Accounting;
 
+use KD2\DB\EntityManager;
 use Garradin\Entity;
 use Garradin\DB;
 use Garradin\UserException;
@@ -15,13 +16,15 @@ class Year extends Entity
     protected $start_date;
     protected $end_date;
     protected $closed = 0;
+    protected $id_chart;
 
     protected $_types = [
         'id'         => 'integer',
         'label'      => 'string',
-        'start_date' => 'date',
-        'end_date'   => 'date',
+        'start_date' => 'DateTime',
+        'end_date'   => 'DateTime',
         'closed'     => 'integer',
+        'id_chart'   => 'integer',
     ];
 
     protected $_validation_rules = [
@@ -29,6 +32,7 @@ class Year extends Entity
         'start_date' => 'required|date|before:end_date',
         'end_date'   => 'required|date|after:start_date',
         'closed'     => 'int|min:0|max:1',
+        'id_chart'   => 'required|integer',
     ];
 
     public function selfCheck(): void
@@ -86,5 +90,10 @@ class Year extends Entity
         }
 
         return parent::delete();
+    }
+
+    public function chart()
+    {
+        return EntityManager::findOneById(Chart::class, $this->id_chart);
     }
 }

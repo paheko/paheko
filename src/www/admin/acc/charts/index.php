@@ -13,4 +13,4 @@ $tpl->assign('list', $charts->list());
 $tpl->assign('charts_groupped', $charts->listByCountry());
 $tpl->assign('country_list', Utils::getCountryList());
 
-$tpl->display('admin/acc/charts/index.tpl');
+$tpl->display('acc/charts/index.tpl');

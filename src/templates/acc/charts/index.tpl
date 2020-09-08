@@ -1,8 +1,9 @@
 {include file="admin/_head.tpl" title="Gestion des plans comptables" current="acc/charts"}
 
 <ul class="actions">
-	<li class="current"><a href="{$admin_url}acc/charts/">Gérer les plans</a></li>
-	<li><a href="{$admin_url}acc/charts/import.php">Importer</a></li>
+    <li><a href="{$admin_url}acc/accounts/">Comptes utilisés couramment</a></li>
+    <li class="current"><a href="{$admin_url}acc/charts/">Gestion des plans comptables</a></li>
+    <li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
 </ul>
 
 {if count($list)}
@@ -18,7 +19,7 @@
                 	<td>{$item.country|get_country_name}</td>
                     <th><a href="{$admin_url}acc/accounts/?id={$item.id}">{$item.label}</a> <em>{if $item.code}(officiel){else}(copie){/if}</em></th>
                     <td class="actions">
-                        {icon shape="menu" label="Gérer les comptes" href="acc/accounts/?id=%d"|args:$item.id}
+                        {icon shape="menu" label="Gérer les comptes" href="acc/accounts/all.php?id=%d"|args:$item.id}
                         {icon shape="edit" label="Renommer" href="acc/charts/edit.php?id=%d"|args:$item.id}
                         {icon shape="export" label="Exporter en CSV" href="acc/charts/export.php?id=%d"|args:$item.id}
                         {if empty($item.code)}

@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
+use Garradin\Accounting\Accounts;
 
 class Chart extends Entity
 {
@@ -33,5 +34,10 @@ class Chart extends Entity
     {
         parent::selfCheck();
         $this->assert(Utils::getCountryName($this->country), 'Le code pays doit être un code ISO valide');
+    }
+
+    public function accounts()
+    {
+        return new Accounts($this->id());
     }
 }

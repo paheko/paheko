@@ -12,6 +12,7 @@ $session->requireAccess('compta', Membres::DROIT_ADMIN);
 $chart = $year->chart();
 $accounts = $chart->accounts();
 
+$tpl->assign('chart', $chart);
 $tpl->assign('accounts_grouped', $accounts->listCommonGrouped());
 
 $types = array_filter(Account::TYPES_NAMES, function ($v) { return $v !== ''; });
