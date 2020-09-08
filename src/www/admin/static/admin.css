@@ -803,6 +803,31 @@ h2.ruler:after {
     margin-right: -50%;
 }
 
+.icn-btn {
+    border-radius: .2em;
+    padding: .2em .4em;
+    margin: .2em .5em;
+    display: inline-block;
+    background-color: rgba(var(--gSecondColor), 0.1);
+    text-shadow: none;
+    white-space: pre;
+    text-decoration: underline;
+    color: #9c4f15;
+    color: rgb(var(--gMainColor));
+    transition: color .3s, background-color .3s;
+}
+
+.icn-btn[data-icon]:before {
+    display: inline-block;
+    text-shadow: 1px 1px 1px #999;
+    font-family: "gicon", sans-serif;
+    padding-right: .5em;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    content: attr(data-icon);
+}
+
 .icn, .icnl {
     font-family: "gicon", sans-serif;
     font-style: normal;
@@ -873,7 +898,7 @@ a.icn[title]:hover:after {
     background: rgba(var(--gMainColor), 0.5);
 }
 
-.actions .icn:hover, .num a:hover, .icn.action:hover {
+.actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover {
     color: darkred;
     background: #ff9;
     z-index: 300;
@@ -1008,24 +1033,23 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
     margin: 1em 2em;
 }
 
-.catList dt {
+dl.list dt, dl.list dd {
+    margin: .3em 0;
+}
+
+dl.list dt {
     font-size: 1.2em;
     font-weight: bold;
+    margin-top: .8em;
 }
 
-.catList dd.desc {
+dl.list dd.desc {
     color: #666;
-    margin: .2em 0 .2em 2em;
 }
 
-.catList dd.compte {
+dl.list dt em {
     color: #9c4f15;
     color: rgb(var(--gMainColor));
-    margin: .2em 0 .2em 2em;
-}
-
-.catList dd.actions {
-    margin: .2em 0 1em 2em;
 }
 
 table.accounts tbody tr td:first-child { font-family: monospace; }
