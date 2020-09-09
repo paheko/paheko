@@ -217,6 +217,10 @@ class Template extends \KD2\Smartyer
 
 		$attributes_string = $attributes;
 
+		if ($type == 'list') {
+			unset($attributes_string['target']);
+		}
+
 		array_walk($attributes_string, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $v);
 		});
@@ -251,7 +255,7 @@ class Template extends \KD2\Smartyer
 			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
 		}
 		elseif ($type == 'list') {
-			$input = sprintf('<span id="%s_container" class="input-list"><input type="hidden" name="%s" value="%s" /><span class="value">%3$s</span><button type="button" id="%1$s" data-icon="%s" name="list_selector[%2$s]" class="icn-btn" value="%s">%s</button></span>', $this->escape($attributes['id']), $this->escape($name), $this->escape($current_value), Utils::iconUnicode('menu'), $this->escape($attributes['target']), 'Sélectionner');
+			$input = sprintf('<span id="%s_container" class="input-list"><input type="hidden" value="%s" %s /><span class="value">%2$s</span><button type="button" data-icon="%s" name="list_selector[%2$s]" class="icn-btn" value="%s">%s</button></span>', $this->escape($attributes['id']), $this->escape($current_value), $attributes_string, Utils::iconUnicode('menu'), $this->escape($attributes['target']), 'Sélectionner');
 		}
 		else {
 			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));

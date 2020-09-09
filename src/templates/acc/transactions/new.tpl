@@ -37,8 +37,8 @@
 	<fieldset data-types="transfer">
 		<legend>Virement</legend>
 		<dl>
-			{input type="list" target="bank cash outstanding" name="from" label="De" required=1}
-			{input type="list" target="bank cash outstanding" name="to" label="Vers" required=1}
+			{input type="list" target="common" name="from" label="De" required=1}
+			{input type="list" target="common" name="to" label="Vers" required=1}
 		</dl>
 	</fieldset>
 
@@ -46,7 +46,7 @@
 		<legend>Recette</legend>
 		<dl>
 			{input type="list" target="revenue" name="from" label="Type de recette" required=1}
-			{input type="list" target="bank cash outstanding" name="to" label="Compte d'encaissement" required=1}
+			{input type="list" target="common" name="to" label="Compte d'encaissement" required=1}
 		</dl>
 	</fieldset>
 
@@ -54,7 +54,7 @@
 		<legend>Dépense</legend>
 		<dl>
 			{input type="list" target="expense" name="to" label="Type de dépense" required=1}
-			{input type="list" target="bank cash outstanding" name="from" label="Compte de décaissement" required=1}
+			{input type="list" target="common" name="from" label="Compte de décaissement" required=1}
 		</dl>
 	</fieldset>
 
@@ -62,7 +62,7 @@
 		<legend>Dette</legend>
 		<dl>
 			{input type="list" target="thirdparty" name="to" label="Compte de tiers" required=1}
-			{input type="list" target="bank cash outstanding" name="from" label="Type de dette" required=1}
+			{input type="list" target="common" name="from" label="Type de dette" required=1}
 		</dl>
 	</fieldset>
 
@@ -70,14 +70,14 @@
 		<legend>Créance</legend>
 		<dl>
 			{input type="list" target="thirdparty" name="to" label="Compte de tiers" required=1}
-			{input type="list" target="bank cash outstanding" name="from" label="Type de dette" required=1}
+			{input type="list" target="common" name="from" label="Type de dette" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input type="ajax-complete" multiple=true name="membre" label="Membres associés"}
+			{input type="list" multiple=true name="membre" label="Membres associés" target="add"}
 			{input type="text" name="numero_piece" label="Numéro de pièce comptable"}
 			{input type="textarea" name="remarques" label="Remarques" rows=4 cols=30}
 
