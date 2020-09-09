@@ -90,8 +90,8 @@ class Account extends Entity
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
 		'position'    => 'required|integer',
-		'type'        => 'required|integer',
-		'type_parent' => 'integer|min:0|max:1',
+		'type'        => 'required|integer|min:0',
+		'type_parent' => 'integer|min:0',
 		'user'        => 'integer|min:0|max:1',
 	];
 }
