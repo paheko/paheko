@@ -202,8 +202,8 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     description TEXT NULL,
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
-    type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, favori, etc.
-    type_parent INTEGER NOT NULL DEFAULT 0, -- Parent d'un type (eg. code = 53 aura comme type = banque et type_parent = 1 pour indiquer que c'est sous ce compte que doivent être créés les sous-comptes banque)
+    type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, etc.
+    type_parent INTEGER NOT NULL DEFAULT 0, -- Parent d'un type (eg. code = 53 aura comme type = banque et type_parent = 3 pour indiquer que c'est sous ce compte que doivent être créés les sous-comptes banque)
     user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
 );
 
