@@ -204,6 +204,7 @@ class Template extends \KD2\Smartyer
 		}
 
 		$attributes['id'] = 'f_' . $name;
+		$attributes['name'] = $name;
 
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
@@ -250,7 +251,7 @@ class Template extends \KD2\Smartyer
 			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
 		}
 		elseif ($type == 'list') {
-			$input = sprintf('<span id="%s_container" class="input-list"><input type="hidden" name="%s" value="%s" /><span class="value">%3$s</span><button id="%1$s" data-icon="%s" name="list_selector[%2$s]" class="icn-btn" value="%s">%s</button></span>', $this->escape($attributes['id']), $this->escape($name), $this->escape($current_value), Utils::iconUnicode('menu'), $this->escape($attributes['target']), 'Sélectionner');
+			$input = sprintf('<span id="%s_container" class="input-list"><input type="hidden" name="%s" value="%s" /><span class="value">%3$s</span><button type="button" id="%1$s" data-icon="%s" name="list_selector[%2$s]" class="icn-btn" value="%s">%s</button></span>', $this->escape($attributes['id']), $this->escape($name), $this->escape($current_value), Utils::iconUnicode('menu'), $this->escape($attributes['target']), 'Sélectionner');
 		}
 		else {
 			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));
