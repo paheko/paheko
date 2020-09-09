@@ -180,7 +180,11 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $keep_attributes = ['pattern', 'max', 'min', 'step', 'title', 'name', 'cols', 'rows', 'maxlength'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options'];
+
+		// Extract params and keep attributes separated
+		$attributes = array_diff_key($params, array_flip($params_list));
+		$params = array_intersect_key($params, array_flip($params_list));
 		extract($params, \EXTR_SKIP);
 
 		if (!isset($name, $type)) {
@@ -199,7 +203,6 @@ class Template extends \KD2\Smartyer
 			$current_value = $default;
 		}
 
-		$attributes = array_intersect_key($params, array_flip($keep_attributes));
 		$attributes['id'] = 'f_' . $name;
 
 		if ($type == 'radio' || $type == 'checkbox') {
@@ -207,7 +210,7 @@ class Template extends \KD2\Smartyer
 		}
 
 		// Create attributes string
-		if (array_key_exists('required', $params)) {
+		if (array_key_exists('required', $attributes)) {
 			$attributes['required'] = 'required';
 		}
 
@@ -246,6 +249,9 @@ class Template extends \KD2\Smartyer
 		elseif ($type == 'textarea') {
 			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
 		}
+		elseif ($type == 'list') {
+			$input = sprintf('<span id="%s_container" class="input-list"><input type="hidden" name="%s" value="%s" /><span class="value">%3$s</span><button id="%1$s" data-icon="%s" name="list_selector[%2$s]" class="icn-btn" value="%s">%s</button></span>', $this->escape($attributes['id']), $this->escape($name), $this->escape($current_value), Utils::iconUnicode('menu'), $this->escape($attributes['target']), 'Sélectionner');
+		}
 		else {
 			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));
 		}
@@ -255,7 +261,7 @@ class Template extends \KD2\Smartyer
 			return $input;
 		}
 
-		$required_label = array_key_exists('required', $params) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
+		$required_label = array_key_exists('required', $attributes) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
 
 		$out = '<dt>';
 
