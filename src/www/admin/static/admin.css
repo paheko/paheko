@@ -301,13 +301,31 @@ fieldset dl dl {
     margin: .5em 0 .5em 1.2em;
 }
 
-input[type=text], textarea, input[type=password], input[type=email],
-input[type=url], input[type=tel], select, .input-list {
-    padding: 0.2em 0.4em;
+input[type=radio], input[type=checkbox] {
+    cursor: pointer;
+}
+
+input[type=text], textarea, input[type=password], input[type=email], input[type=number],
+input[type=url], input[type=tel], select, button {
+    padding: .4rem .6rem;
     font-family: Sans-serif;
     min-width: 20em;
     max-width: 100%;
     border: 1px solid #999;
+    font-size: inherit;
+    background: #fff;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+input:not([type=checkbox]):not([type=radio]):focus, button:focus, select:focus, textarea:focus {
+    border-color: #009;
+    box-shadow: 0 0 0 0.2rem rgb(var(--gSecondColor));
+    outline: 0;
+}
+
+input:not(:placeholder-shown):focus:invalid {
+    border-color: #f33;
 }
 
 input[type=password], input.clearTextPassword {
