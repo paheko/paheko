@@ -85,6 +85,50 @@
 		return document.head.appendChild(link);
 	};
 
+	g.dialog = null;
+
+	g.openDialog = function (content) {
+		if (null !== g.dialog) {
+			g.closeDialog();
+		}
+
+		g.dialog = document.createElement('div');
+		g.dialog.id = 'dialog';
+		g.dialog.style.opacity = content.style.width = content.style.height = 0;
+		g.dialog.appendChild(content);
+		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
+		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+
+		document.body.appendChild(g.dialog);
+
+		// Restore CSS defaults
+		window.setTimeout(() => { g.dialog.style.opacity = content.style.width = content.style.height = ''; }, 50);
+	}
+
+	g.openFrameDialog = function (url) {
+		var iframe = document.createElement('iframe');
+		iframe.src = url;
+		iframe.name = 'dialog';
+		iframe.frameborder = '0';
+		iframe.scrolling = 'yes';
+		iframe.width = iframe.height = 0;
+
+		g.openDialog(iframe);
+	};
+
+	g.closeDialog = function () {
+		if (null === g.dialog) {
+			return;
+		}
+
+		var d = g.dialog;
+		var c = d.firstChild;
+		d.style.opacity = c.style.width = c.style.height = 0;
+		window.onkeyup = g.dialog = null;
+
+		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
+	}
+
 	// From KD2fw/js/xhr.js
 	g.load = function(b,d,f,e){var a=new XMLHttpRequest();if(!a||!b)return false;if(a.overrideMimeType)a.overrideMimeType('text/xml');b+=(b.indexOf('?')+1?'&':'?')+(+(new Date));a.onreadystatechange=function(){if(a.readyState!=4)return;if((s=a.status)==200){if(!d)return true;var c=a.responseText;if(f=='json'){return((j=window.JSON)&&j.parse)?j.parse(c):eval('('+c.replace(/[\n\r]/g,'')+')')}d(c)}else if(e){e(s)}};a.open('GET',b,true);a.send(null)};
 
