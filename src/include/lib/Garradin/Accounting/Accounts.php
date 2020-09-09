@@ -42,8 +42,7 @@ class Accounts
 	 */
 	public function listAnalytical(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE NOCASE;',
-			$this->chart_id, Account::TYPE_ANALYTICAL);
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
 	/**
@@ -80,6 +79,6 @@ class Accounts
 
 	public function getTypesParents(): array
 	{
-		return $this->em->DB->getAssoc($this->em->formatQuery('SELECT type, code FROM @TABLE WHERE type_parent = 1 ORDER BY type;'));
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT type, code FROM @TABLE WHERE type_parent = 1 ORDER BY type;'));
 	}
 }
