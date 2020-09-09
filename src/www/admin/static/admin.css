@@ -302,11 +302,12 @@ fieldset dl dl {
 }
 
 input[type=text], textarea, input[type=password], input[type=email],
-input[type=url], input[type=tel], select {
+input[type=url], input[type=tel], select, .input-list {
     padding: 0.2em 0.4em;
     font-family: Sans-serif;
     min-width: 20em;
     max-width: 100%;
+    border: 1px solid #999;
 }
 
 input[type=password], input.clearTextPassword {
@@ -349,6 +350,35 @@ input[type=button].showPassword {
 
 input[type=button].showPassword:hover {
     background: none;
+}
+
+form .input-list button {
+    float: left;
+}
+
+#dialog {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    position: fixed;
+    opacity: 1;
+    transition: opacity .5s;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dialog > iframe {
+    width: 90%;
+    height: 90%;
+    border: none;
+    transition: width .5s, height .5s;
+    box-shadow: 0px 0px 5px #000;
 }
 
 .loader {
@@ -804,6 +834,8 @@ h2.ruler:after {
 }
 
 .icn-btn {
+    border: none;
+    font-size: inherit;
     border-radius: .2em;
     padding: .2em .4em;
     margin: .2em .5em;
