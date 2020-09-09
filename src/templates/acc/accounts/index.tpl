@@ -1,8 +1,9 @@
-{include file="admin/_head.tpl" title="%s - Comptes utilisés couramment"|args:$chart.label current="acc/charts"}
+{include file="acc/_head.tpl" title="Comptes favoris" current="acc/charts"}
 
 <ul class="actions">
-	<li class="current"><a href="{$admin_url}acc/accounts/">Comptes utilisés couramment</a></li>
-	<li><a href="{$admin_url}acc/charts/">Gestion des plans comptables</a></li>
+	<li class="current"><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
+	<li><a href="{$admin_url}acc/accounts/all.php">Tous les comptes</a></li>
+	<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
 	<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
 </ul>
 
@@ -36,6 +37,5 @@
 	{/foreach}
 	</dl>
 {/foreach}
-
 
 {include file="admin/_foot.tpl"}
