@@ -219,7 +219,7 @@
 
 		// Sélecteurs de listes
 	g.onload(() => {
-		var inputs = $(' form .input-list button');
+		var inputs = $('form .input-list button');
 
 		inputs.forEach((i) => {
 			i.onclick = () => {

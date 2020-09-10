@@ -78,7 +78,7 @@
 
 	{* Saisie avancée *}
 	<fieldset data-types="advanced">
-		<table class="list">
+		<table class="list transaction-lines">
 			<thead>
 				<tr>
 					<th>Compte</th>
@@ -93,21 +93,21 @@
 			{foreach from=$lines key="line_number" item="line"}
 				<tr>
 					<th>{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[%d][account]"|args:$line_number value=$line.id_account required=1}</th>
-					<td>{input type="number" name="lines[%d][debit]"|args:$line_number min="0.00" step="0.01" value=$line.debit required=1}</td>
-					<td>{input type="number" name="lines[%d][credit]"|args:$line_number min="0.00" step="0.01" value=$line.credit required=1}</td>
-					<td>{input type="text" name="lines[%d][reference]" size=8}</td>
+					<td>{input type="number" name="lines[%d][debit]"|args:$line_number min="0.00" step="0.01" value=$line.debit required=1 size=5}</td>
+					<td>{input type="number" name="lines[%d][credit]"|args:$line_number min="0.00" step="0.01" value=$line.credit required=1 size=5}</td>
+					<td>{input type="text" name="lines[%d][reference]" size=10}</td>
 					<td>{input type="text" name="lines[%d][label]"}</td>
-					<td></td>
+					<td>{button label="Enlever la ligne" shape="minus"}</td>
 				</tr>
 			{/foreach}
 			</tbody>
 			<tfoot>
 				<tr>
 					<th></th>
-					<td id="lines_debit_total"></td>
-					<td id="lines_credit_total"></td>
+					<td><input type="number" id="lines_debit_total" readonly="readonly" size="5" tabindex="-1" /></td>
+					<td><input type="number" id="lines_credit_total" readonly="readonly" size="5" tabindex="-1" /></td>
 					<td colspan="2"></td>
-					<td></td>
+					<td>{button label="Ajouter une ligne" shape="plus"}</td>
 				</tr>
 			</tfoot>
 		</table>
@@ -156,6 +156,42 @@ function initForm() {
 	});
 
 	hideAll();
+
+	var lines = $('.transaction-lines tbody tr');
+
+	function initLine(e) {
+		e.querySelector('button:nth-child(1)').onclick = () => {
+			var count = $('.transaction-lines tbody tr').length;
+
+			if (count <= 2) {
+				alert("Il n'est pas possible d'avoir moins de deux lignes dans une écriture.");
+				return false;
+			}
+
+			e.parentNode.removeChild(e);
+		};
+	}
+
+	lines.forEach((e) => {
+		initLine(e);
+	});
+
+	$('.transaction-lines tfoot button')[0].onclick = () => {
+		var line = $('.transaction-lines tbody tr')[0];
+		var n = line.cloneNode(true);
+		n.querySelectorAll('input').forEach((e) => {
+			e.value = '';
+		});
+		n.querySelector('.input-list .label').innerHTML = '';
+		var b = n.querySelector('.input-list button');
+		b.onclick = () => {
+			g.current_list_input = b.parentNode;
+			g.openFrameDialog(b.value);
+			return false;
+		};
+		initLine(n);
+		line.parentNode.appendChild(n);
+	};
 }
 
 function inputListSelected(value, label) {
