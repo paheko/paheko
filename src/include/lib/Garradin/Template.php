@@ -224,6 +224,10 @@ class Template extends \KD2\Smartyer
 
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
+
+			if (isset($_POST[$name]) && $_POST[$name] == $value) {
+				$attributes['checked'] = 'checked';
+			}
 		}
 
 		// Create attributes string
@@ -234,7 +238,7 @@ class Template extends \KD2\Smartyer
 		$attributes_string = $attributes;
 
 		if ($type == 'list') {
-			unset($attributes_string['target']);
+			unset($attributes_string['target'], $attributes_string['multiple']);
 		}
 
 		array_walk($attributes_string, function (&$v, $k) {
@@ -271,7 +275,15 @@ class Template extends \KD2\Smartyer
 			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
 		}
 		elseif ($type == 'list') {
-			$input = sprintf('<span id="%s_container" class="input-list"><input type="hidden" value="%s" %s /><span class="label">%2$s</span><button type="button" data-icon="%s" name="list_selector[%2$s]" class="icn-btn" value="%s">%s</button></span>', $this->escape($attributes['id']), $this->escape($current_value), $attributes_string, Utils::iconUnicode('menu'), $this->escape($attributes['target']), 'Sélectionner');
+			$multiple = !empty($attributes['multiple']);
+
+			$button = $this->widgetButton([
+				'shape' => $multiple ? 'plus' : 'menu',
+				'value' => $attributes['target'],
+				'label' => $multiple ? 'Ajouter' : 'Sélectionner'
+			]);
+
+			$input = sprintf('<span id="%s_container" class="input-list">%s<input type="hidden" value="%s" %s /><span class="label">%3$s</span></span>', $this->escape($attributes['id']), $button, $this->escape($current_value), $attributes_string);
 		}
 		else {
 			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));

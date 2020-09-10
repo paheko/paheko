@@ -80,22 +80,23 @@ rows.forEach((e) => {
 
 var q = document.getElementById('lookup');
 
-q.onkeyup = (e) => {
-	var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
+if (q) {
+	q.onkeyup = (e) => {
+		var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
 
-	rows.forEach((elm) => {
-		if (elm.getAttribute('data-search-label').match(query)) {
-			elm.style.display = null;
-		}
-		else {
-			elm.style.display = 'none';
-		}
-	});
+		rows.forEach((elm) => {
+			if (elm.getAttribute('data-search-label').match(query)) {
+				elm.style.display = null;
+			}
+			else {
+				elm.style.display = 'none';
+			}
+		});
 
-};
+	};
 
-q.focus();
-
+	q.focus();
+}
 </script>
 {/literal}
 

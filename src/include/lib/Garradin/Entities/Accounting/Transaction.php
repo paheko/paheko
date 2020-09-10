@@ -30,7 +30,7 @@ class Transaction extends Entity
 		'label'             => 'string',
 		'notes'             => '?string',
 		'reference'         => '?string',
-		'date'              => 'date',
+		'date'              => 'DateTime',
 		'validated'         => 'bool',
 		'hash'              => '?string',
 		'prev_hash'         => '?string',

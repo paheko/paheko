@@ -33,32 +33,32 @@
 	<fieldset data-types="revenue">
 		<legend>Recette</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=revenue"|args:$admin_url name="from" label="Type de recette" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="to" label="Compte d'encaissement" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=revenue"|args:$admin_url name="revenue_from" label="Type de recette" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="revenue_to" label="Compte d'encaissement" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="expense">
 		<legend>Dépense</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="to" label="Type de dépense" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="from" label="Compte de décaissement" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="expense_to" label="Type de dépense" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="expense_from" label="Compte de décaissement" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="debt">
 		<legend>Dette</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="to" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="from" label="Type de dette (dépense)" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="debt_to" label="Compte de tiers" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="debt_from" label="Type de dette (dépense)" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="credit">
 		<legend>Créance</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="to" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=revenue"|args:$admin_url name="from" label="Type de créance (recette)" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="credit_to" label="Compte de tiers" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=revenue"|args:$admin_url name="credit_from" label="Type de créance (recette)" required=1}
 		</dl>
 	</fieldset>
 
@@ -66,10 +66,10 @@
 		<legend>Informations</legend>
 		<dl>
 			{input type="text" name="label" label="Libellé" required=1}
-			{input type="date" name="date" value=$date label="Date" required=1}
+			{input type="date" name="date" default=$date label="Date" required=1}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{input type="number" name="amount" label="Montant (%s)"|args:$config.monnaie min="0.00" step="0.01" value="0.00" required=1}
+			{input type="number" name="amount" label="Montant (%s)"|args:$config.monnaie min="0.00" step="0.01" default="0" required=1}
 			{input type="text" name="reference_paiement" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>
 	</fieldset>
@@ -92,11 +92,11 @@
 			<tbody>
 			{foreach from=$lines key="line_number" item="line"}
 				<tr>
-					<th>{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[%d][account]"|args:$line_number value=$line.id_account required=1}</th>
-					<td>{input type="number" name="lines[%d][debit]"|args:$line_number min="0.00" step="0.01" value=$line.debit required=1 size=5}</td>
-					<td>{input type="number" name="lines[%d][credit]"|args:$line_number min="0.00" step="0.01" value=$line.credit required=1 size=5}</td>
-					<td>{input type="text" name="lines[%d][reference]" size=10}</td>
-					<td>{input type="text" name="lines[%d][label]"}</td>
+					<th>{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[%d][account]"|args:$line_number value=$line.id_account}</th>
+					<td>{input type="number" name="lines[%d][debit]"|args:$line_number min="0.00" step="0.01" value=$line.debit size=5}</td>
+					<td>{input type="number" name="lines[%d][credit]"|args:$line_number min="0.00" step="0.01" value=$line.credit size=5}</td>
+					<td>{input type="text" name="lines[%d][reference]"|args:$line_number size=10}</td>
+					<td>{input type="text" name="lines[%d][label]"|args:$line_number}</td>
 					<td>{button label="Enlever la ligne" shape="minus"}</td>
 				</tr>
 			{/foreach}
@@ -116,7 +116,7 @@
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input type="list" multiple=true name="membre" label="Membres associés" target="%smembres/selector.php"|args:$admin_url}
+			{input type="list" multiple=true name="membre" label="Membre associé" target="%smembres/selector.php"|args:$admin_url}
 			{input type="text" name="numero_piece" label="Numéro de pièce comptable"}
 			{input type="textarea" name="remarques" label="Remarques" rows=4 cols=30}
 
@@ -137,7 +137,7 @@
 <script type="text/javascript">
 
 function initForm() {
-	function hideAll() {
+	function hideAllTypes() {
 		var sections = $('fieldset[data-types]');
 
 		sections.forEach((e) => {
@@ -145,17 +145,27 @@ function initForm() {
 		});
 	}
 
+	function selectType(v) {
+		hideAllTypes();
+		$('[data-types=' + v + ']')[0].style.display = 'block';
+		$('[data-types=all-but-advanced]')[0].style.display = v == 'advanced' ? 'none' : 'block';
+	}
+
 	var radios = $('fieldset input[type=radio][name=type]');
 
 	radios.forEach((e) => {
-		e.onchange = (evt) => {
-			hideAll();
-			$('[data-types=' + e.value + ']')[0].style.display = 'block';
-			$('[data-types=all-but-advanced]')[0].style.display = e.value == 'advanced' ? 'none' : 'block';
+		e.onchange = () => {
+			selectType(e.value);
 		};
 	});
 
-	hideAll();
+	hideAllTypes();
+
+	// In case of a pre-filled form
+	var current = document.querySelector('input[name=type]:checked');
+	if (current) {
+		selectType(current.value);
+	}
 
 	var lines = $('.transaction-lines tbody tr');
 

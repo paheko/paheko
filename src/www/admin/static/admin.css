@@ -377,7 +377,6 @@ form .input-list {
     display: inline-flex;
     align-items: center;
     justify-content: start;
-    flex-direction: row-reverse;
     min-width: 0;
 }
 
@@ -876,7 +875,8 @@ h2.ruler:after {
 }
 
 .icn-btn {
-    border: 1px solid #fff;
+    border: 1px solid #9c4f15;
+    border-color: rgba(var(--gSecondColor), 0.5);
     font-size: inherit;
     border-radius: .2em;
     padding: .2em .4em;
