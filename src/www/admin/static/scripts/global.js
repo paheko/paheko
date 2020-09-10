@@ -215,6 +215,21 @@
 		}*/
 	};
 
+	g.current_list_input = null;
+
+		// Sélecteurs de listes
+	g.onload(() => {
+		var inputs = $(' form .input-list button');
+
+		inputs.forEach((i) => {
+			i.onclick = () => {
+				g.current_list_input = i.parentNode;
+				g.openFrameDialog(i.value);
+				return false;
+			};
+		});
+	});
+
 	g.onload(dateInputFallback);
 
 	if (!document.querySelectorAll)

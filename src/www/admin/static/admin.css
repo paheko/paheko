@@ -274,6 +274,13 @@ label:hover {
     border-bottom: 1px dotted #900;
 }
 
+table.list tr.clickable:hover {
+    cursor: pointer;
+    color: #633;
+    background: #ffc;
+
+}
+
 dl dt label {
     font-weight: bold;
 }
@@ -306,9 +313,9 @@ input[type=radio], input[type=checkbox] {
 }
 
 input[type=text], textarea, input[type=password], input[type=email], input[type=number],
-input[type=url], input[type=tel], select, button {
+input[type=url], input[type=tel], select, .input-list {
     padding: .4rem .6rem;
-    font-family: Sans-serif;
+    font-family: inherit;
     min-width: 20em;
     max-width: 100%;
     border: 1px solid #999;
@@ -370,8 +377,25 @@ input[type=button].showPassword:hover {
     background: none;
 }
 
+form .input-list {
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: start;
+    flex-direction: row-reverse;
+    min-width: 0;
+}
+
+form .input-list span.label {
+    padding: .4rem .6rem;
+}
+
 form .input-list button {
-    float: left;
+    padding: .4rem .6rem;
+    margin: 0;
+    border: none;
+    border-right: 1px solid #ccc;
+    border-radius: 0;
 }
 
 #dialog {
@@ -586,6 +610,11 @@ table.list {
     width: 100%;
 }
 
+table.list td.desc {
+    font-size: .9em;
+    color: #666;
+}
+
 table.list.auto {
     width: auto;
 }
@@ -620,7 +649,7 @@ table.list th, table.list td {
 table.list tr {
     border: 1px solid rgb(217, 134, 40);
     border-color: rgba(var(--gSecondColor), 0.5);
-    transition: background .5s
+    transition: background .2s
 }
 
 table.list tr:nth-child(even) {
@@ -852,7 +881,7 @@ h2.ruler:after {
 }
 
 .icn-btn {
-    border: none;
+    border: 1px solid #fff;
     font-size: inherit;
     border-radius: .2em;
     padding: .2em .4em;
