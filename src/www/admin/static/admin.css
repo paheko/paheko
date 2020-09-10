@@ -274,7 +274,7 @@ label:hover {
     border-bottom: 1px dotted #900;
 }
 
-table.list tr.clickable:hover {
+table tr.clickable:hover {
     cursor: pointer;
     color: #633;
     background: #ffc;
@@ -323,6 +323,7 @@ input[type=url], input[type=tel], select, .input-list {
     background: #fff;
     border-radius: .25rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    line-height: 1.5rem;
 }
 
 input:not([type=checkbox]):not([type=radio]):focus, button:focus, select:focus, textarea:focus {
@@ -339,19 +340,9 @@ input[type=password], input.clearTextPassword {
     font-family: monospace;
 }
 
-select, input[size] {
-    min-width: 0;
-}
-
 input.time {
     text-align: center;
     padding: .2em 0;
-}
-
-input[type=number], input[type=date] {
-    padding: 0.2em 0.4em;
-    font-family: Sans-serif;
-    min-width: 2em;
 }
 
 input[type=submit], input[type=button], input[type=checkbox], button {
@@ -375,6 +366,10 @@ input[type=button].showPassword {
 
 input[type=button].showPassword:hover {
     background: none;
+}
+
+select, input[size] {
+    min-width: 0;
 }
 
 form .input-list {
@@ -1131,14 +1126,16 @@ dl.list dt em {
     color: rgb(var(--gMainColor));
 }
 
+table.accounts { width: 100%; }
+table.accounts .actions { text-align: right; }
 table.accounts tbody tr td:first-child { font-family: monospace; }
 table.accounts th { font-weight: normal; }
 table.accounts .account-level-1 th { font-size: 1.6em; }
-table.accounts .account-level-2 > th { padding-left: 1em; font-size: 1.3em; }
-table.accounts .account-level-3 > th { padding-left: 2em; }
-table.accounts .account-level-4 > th { padding-left: 3em; }
-table.accounts .account-level-5 > th { padding-left: 4em; }
-table.accounts .account-level-6 > th { padding-left: 5em; }
+table.accounts .account-level-2 th { padding-left: 1em; font-size: 1.3em; }
+table.accounts .account-level-3 th { padding-left: 2em; }
+table.accounts .account-level-4 th { padding-left: 3em; }
+table.accounts .account-level-5 th { padding-left: 4em; }
+table.accounts .account-level-6 th { padding-left: 5em; }
 
 dl.describe {
     margin-bottom: 1em;

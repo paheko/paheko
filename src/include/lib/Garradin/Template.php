@@ -74,7 +74,8 @@ class Template extends \KD2\Smartyer
 		});
 
 		$this->register_function('icon', [$this, 'widgetIcon']);
-		$this->register_function('button', [$this, 'widgetLinkButton']);
+		$this->register_function('button', [$this, 'widgetButton']);
+		$this->register_function('linkbutton', [$this, 'widgetLinkButton']);
 
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -171,6 +172,21 @@ class Template extends \KD2\Smartyer
 		}
 
 		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
+	}
+
+	protected function widgetButton(array $params): string
+	{
+		$icon = Utils::iconUnicode($params['shape']);
+		$label = $this->escape($params['label']);
+		unset($params['label'], $params['shape']);
+
+		array_walk($params, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $this->escape($v));
+		});
+
+		$params = implode(' ', $params);
+
+		return sprintf('<button %s class="icn-btn" data-icon="%s" type="button">%s</button>', $params, $icon, $label);
 	}
 
 	protected function widgetLinkButton(array $params): string
