@@ -23,5 +23,7 @@ else {
 	}
 }
 
+$chart = $year->chart();
+
 $tpl->assign('year', $year);
-$tpl->assign('chart', $year->chart());
+$tpl->assign('chart', $chart);

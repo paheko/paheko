@@ -58,10 +58,17 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(): array
+	public function listCommonGrouped(array $types = null): array
 	{
+		if (null === $types) {
+			$types = '';
+		}
+		else {
+			$types = ' AND ' . $this->em->DB()->where('type', $types);
+		}
+
 		$out = [];
-		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type_parent = 0 ORDER BY type, code COLLATE NOCASE;',
+		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id);
 
 		foreach ($query as $row) {
