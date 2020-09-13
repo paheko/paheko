@@ -49,8 +49,8 @@
 	<fieldset data-types="debt">
 		<legend>Dette</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="debt_to" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="debt_from" label="Type de dette (dépense)" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="debt_from" label="Compte de tiers" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="debt_to" label="Type de dette (dépense)" required=1}
 		</dl>
 	</fieldset>
 
@@ -70,7 +70,7 @@
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="number" name="amount" label="Montant (%s)"|args:$config.monnaie min="0.00" step="0.01" default="0" required=1}
-			{input type="text" name="reference_paiement" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>
 	</fieldset>
 
@@ -116,9 +116,9 @@
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input type="list" multiple=true name="membre" label="Membre associé" target="%smembres/selector.php"|args:$admin_url}
-			{input type="text" name="numero_piece" label="Numéro de pièce comptable"}
-			{input type="textarea" name="remarques" label="Remarques" rows=4 cols=30}
+			{input type="list" multiple=true name="users" label="Membre associé" target="%smembres/selector.php"|args:$admin_url}
+			{input type="text" name="reference" label="Numéro de pièce comptable"}
+			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
 			{if count($analytical_accounts) > 0}
 				{input type="select" name="analytical_account" label="Compte analytique (projet)" options=$analytical_accounts}

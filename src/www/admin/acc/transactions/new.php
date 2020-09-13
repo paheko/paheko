@@ -13,7 +13,10 @@ $accounts = $chart->accounts();
 $transaction = new Transaction;
 
 if (f('save')) {
-    $transaction->import();
+    $transaction->id_year = $year->id();
+    $transaction->importFromSimpleForm($chart->id());
+    $transaction->save();
+    //echo '<pre>'; print_r($transaction); exit;
 }
 
 $tpl->assign('date', $session->get('context_compta_date') ?: false);

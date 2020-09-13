@@ -18,6 +18,11 @@ class Accounts
 		$this->em = EntityManager::getInstance(Account::class);
 	}
 
+	public function getIdFromCode(string $code): int
+	{
+		return $this->em->col('SELECT id FROM @TABLE WHERE code = ?;', $code);
+	}
+
 	/**
 	 * Return common accounting accounts from current chart
 	 * (will not return analytical and volunteering accounts)
@@ -86,6 +91,6 @@ class Accounts
 
 	public function getTypesParents(): array
 	{
-		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT type, code FROM @TABLE WHERE type_parent = 1 ORDER BY type;'));
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT type, code FROM @TABLE WHERE type_parent = 1 AND id_chart = ? ORDER BY type;', $this->chart_id));
 	}
 }
