@@ -3,7 +3,8 @@
 namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
-use Garradin\validatedException;
+use Garradin\Accounting\Accounts;
+use LogicException;
 use Garradin\DB;
 use Garradin\Config;
 
@@ -18,49 +19,47 @@ class Transaction extends Entity
 
 	protected $date;
 
-	protected $validated;
+	protected $validated = 0;
 
 	protected $hash;
 	protected $prev_hash;
 
 	protected $id_year;
-	protected $id_analytical;
 
 	protected $_types = [
-		'label'             => 'string',
-		'notes'             => '?string',
-		'reference'         => '?string',
-		'date'              => 'DateTime',
-		'validated'         => 'bool',
-		'hash'              => '?string',
-		'prev_hash'         => '?string',
-		'id_year'           => 'int',
-		'id_analytical'     => '?int',
+		'id'        => 'int',
+		'label'     => 'string',
+		'notes'     => '?string',
+		'reference' => '?string',
+		'date'      => 'date',
+		'validated' => 'bool',
+		'hash'      => '?string',
+		'prev_hash' => '?string',
+		'id_year'   => 'int',
 	];
 
 	protected $_validated_rules = [
-		'label'             => 'required|string|max:200',
-		'notes'             => 'string|max:20000',
-		'reference'         => 'string|max:200',
-		'date'              => 'required|date',
-		'validated'         => 'bool',
-		'id_year'           => 'integer|in_table:acc_years,id',
-		'id_analytical'     => 'integer|in_table:acc_accounts,id'
+		'label'     => 'required|string|max:200',
+		'notes'     => 'string|max:20000',
+		'reference' => 'string|max:200',
+		'date'      => 'required|date',
+		'validated' => 'bool',
+		'id_year'   => 'integer|in_table:acc_years,id',
 	];
 
-	protected $lines;
+	protected $_lines;
 
 	public function getLines()
 	{
-		if (null === $this->lines && $this->exists()) {
+		if (null === $this->_lines && $this->exists()) {
 			$db = DB::getInstance();
-			$this->lines = $db->toObject($db->get('SELECT * FROM acc_transactions_lines WHERE id_transaction = ? ORDER BY id;', $this->id), Ligne::class);
+			$this->_lines = $db->toObject($db->get('SELECT * FROM ' . Line::TABLE . ' WHERE id_transaction = ? ORDER BY id;', $this->id), Ligne::class);
 		}
-		else {
-			$this->lines = [];
+		elseif (null === $this->_lines) {
+			$this->_lines = [];
 		}
 
-		return $this->lines;
+		return $this->_lines;
 	}
 
 /*
@@ -86,8 +85,8 @@ class Transaction extends Entity
 		hash_update($hash, implode(',', array_keys($values)));
 		hash_update($hash, implode(',', $values));
 
-		foreach ($this->getLines() as $ligne) {
-			hash_update($hash, implode(',', [$ligne->compte, $ligne->debit, $ligne->credit]));
+		foreach ($this->getLines() as $line) {
+			hash_update($hash, implode(',', [$line->compte, $line->debit, $line->credit]));
 		}
 
 		return hash_final($hash, false);
@@ -99,40 +98,25 @@ class Transaction extends Entity
 	}
 */
 
-	public function add(Ligne $line)
+	public function add(Line $line)
 	{
-		$this->lines[] = $line;
-	}
-
-	public function transfer(int $amount, int $from, int $to)
-	{
-		$ligne1 = new Ligne;
-		$ligne1->compte = $from;
-		$ligne1->debit = $amount;
-		$ligne1->credit = 0;
-
-		$ligne2 = new Ligne;
-		$ligne1->compte = $to;
-		$ligne1->debit = 0;
-		$ligne1->credit = $amount;
-
-		return $this->add($ligne1) && $this->add($ligne2);
+		$this->_lines[] = $line;
 	}
 
 	public function save(): bool
 	{
 		if ($this->validated && !isset($this->_modified['validated'])) {
-			throw new validatedException('Il n\'est pas possible de modifier un mouvement qui a été validé');
+			throw new LogicException('Il n\'est pas possible de modifier un mouvement qui a été validé');
 		}
 
 		if (!parent::save()) {
 			return false;
 		}
 
-		foreach ($this->lines as $ligne)
+		foreach ($this->_lines as &$line)
 		{
-			$ligne->id_transaction = $this->id;
-			$ligne->save();
+			$line->id_transaction = $this->id();
+			$line->save();
 		}
 
 		return true;
@@ -141,7 +125,7 @@ class Transaction extends Entity
 	public function delete(): bool
 	{
 		if ($this->validated) {
-			throw new validatedException('Il n\'est pas possible de supprimer un mouvement qui a été validé');
+			throw new LogicException('Il n\'est pas possible de supprimer un mouvement qui a été validé');
 		}
 
 		return parent::delete();
@@ -154,15 +138,14 @@ class Transaction extends Entity
 		$db = DB::getInstance();
 		$config = Config::getInstance();
 
-		// ID d'exercice obligatoire s'il existe déjà des exercices
-		if (null === $this->id_year && $db->firstColumn('SELECT 1 FROM acc_years LIMIT 1;')) {
-			throw new validatedException('Aucun exercice spécifié.');
+		// ID d'exercice obligatoire
+		if (null === $this->id_year) {
+			throw new LogicException('Aucun exercice spécifié.');
 		}
 
-		if (null !== $this->id_year
-			&& !$db->test('acc_years', 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date, $this->date))
+		if (!$db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date, $this->date))
 		{
-			throw new validatedException('La date ne correspond pas à l\'exercice sélectionné.');
+			throw new LogicException('La date ne correspond pas à l\'exercice sélectionné.');
 		}
 
 		$total = 0;
@@ -175,7 +158,56 @@ class Transaction extends Entity
 		}
 
 		if (0 !== $total) {
-			throw new validatedException('Mouvement non équilibré : déséquilibre entre débits et crédits');
+			throw new LogicException('Mouvement non équilibré : déséquilibre entre débits et crédits');
+		}
+	}
+
+	public function importFromSimpleForm(int $chart_id, ?array $source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (empty($source['type'])) {
+			throw new LogicException('Type d\'écriture inconnu');
+		}
+
+		$type = $source['type'];
+
+		$this->import();
+
+		$accounts = new Accounts($chart_id);
+
+		if ($type !== 'advanced') {
+			$from = $accounts->getIdFromCode($source[$type . '_from']);
+			$to = $accounts->getIdFromCode($source[$type . '_to']);
+			$amount = $source['amount'];
+
+			$line = new Line;
+			$line->import([
+				'reference'  => $source['payment_reference'],
+				'debit'      => $amount,
+				'id_account' => $from,
+				'id_analytical' => $source['id_analytical'] ?? null,
+			]);
+			$this->add($line);
+
+			$line = new Line;
+			$line->import([
+				'reference'  => $source['payment_reference'],
+				'credit'     => $amount,
+				'id_account' => $to,
+				'id_analytical' => $source['id_analytical'] ?? null,
+			]);
+			$this->add($line);
+		}
+		else {
+			foreach ($sources['lines'] as $line) {
+				$line['id_account'] = $accounts->getIdFromCode($line['account']);
+
+				$line = (new Line)->import($line);
+				$this->add($line);
+			}
 		}
 	}
 }

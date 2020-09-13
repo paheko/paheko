@@ -21,8 +21,8 @@ class Year extends Entity
     protected $_types = [
         'id'         => 'integer',
         'label'      => 'string',
-        'start_date' => 'DateTime',
-        'end_date'   => 'DateTime',
+        'start_date' => 'date',
+        'end_date'   => 'date',
         'closed'     => 'integer',
         'id_chart'   => 'integer',
     ];

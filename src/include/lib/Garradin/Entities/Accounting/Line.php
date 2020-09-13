@@ -14,10 +14,11 @@ class Line extends Entity
 	protected $id_account;
 	protected $credit = 0;
 	protected $debit = 0;
-	protected $payment_reference;
-	protected $reconciled;
+	protected $reference;
+	protected $reconciled = 0;
 
 	protected $_types = [
+		'id'             => 'int',
 		'id_transaction' => 'int',
 		'id_account'     => 'int',
 		'credit'         => 'int',
@@ -39,22 +40,23 @@ class Line extends Entity
 
 	public function filterUserValue(string $key, $value, array $source)
 	{
-		$value = parent::filterUserValue($key, $value);
-
 		if ($key == 'credit' || $key == 'debit')
 		{
-			if (!preg_match('/^(\d+)(?:[,.](\d{2}))?$/', $value, $match))
+			if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match))
 			{
 				throw new ValidationException('Le format du montant est invalide. Format accepté, exemple : 142,02');
 			}
 
-			$value = $match[1] . sprintf('%02d', $match[2]);
+			$value = $match[1] . str_pad((int)@$match[2], 2, '0', STR_PAD_RIGHT);
+			$value = (int) $value;
 		}
+
+		$value = parent::filterUserValue($key, $value, $source);
 
 		return $value;
 	}
 
-	public function selfCheck()
+	public function selfCheck(): void
 	{
 		parent::selfCheck();
 		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit.');
