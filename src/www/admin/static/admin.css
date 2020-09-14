@@ -392,6 +392,21 @@ form .input-list button {
     border-radius: 0;
 }
 
+input[readonly] {
+    color: #666;
+    background-color: #eee;
+}
+
+input.money {
+    text-align: right;
+}
+
+input.money + b {
+    padding: .4rem .6rem;
+    line-height: 1.5rem;
+    color: #999;
+}
+
 #dialog {
     width: 100%;
     height: 100%;

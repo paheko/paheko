@@ -84,14 +84,12 @@ class Account extends Entity
 		'user'        => 'int',
 	];
 
-	protected $_validation_rules = [
-		'id_chart'    => 'required|integer|in_table:acc_charts,id',
+	protected $_form_rules = [
 		'code'        => 'required|string|alpha_num|max:10',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
 		'position'    => 'required|integer',
-		'type'        => 'required|integer|min:0',
-		'type_parent' => 'integer|min:0',
-		'user'        => 'integer|min:0|max:1',
+		'type'        => 'numeric|min:0',
+		'type_parent' => 'numeric|min:0',
 	];
 }

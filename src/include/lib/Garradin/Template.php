@@ -285,6 +285,10 @@ class Template extends \KD2\Smartyer
 
 			$input = sprintf('<span id="%s_container" class="input-list">%s<input type="hidden" value="%s" %s /><span class="label">%3$s</span></span>', $this->escape($attributes['id']), $button, $this->escape($current_value), $attributes_string);
 		}
+		elseif ($type == 'money') {
+			$currency = Config::getInstance()->get('monnaie');
+			$input = sprintf('<input type="text" pattern="[0-9.,]*" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b>', $attributes_string, $this->escape($current_value), $currency);
+		}
 		else {
 			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));
 		}

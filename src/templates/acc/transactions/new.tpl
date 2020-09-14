@@ -5,8 +5,8 @@
 
 	{if $ok}
 		<p class="confirm">
-			L'opération numéro <a href="{$admin_url}compta/operations/voir.php?id={$ok}">{$ok}</a> a été ajoutée.
-			(<a href="{$admin_url}compta/operations/voir.php?id={$ok}">Voir l'opération</a>)
+			L'opération numéro <a href="details.php?id={$ok}">{$ok}</a> a été ajoutée.
+			(<a href="details.php?id={$ok}">Voir l'opération</a>)
 		</p>
 	{/if}
 
@@ -69,7 +69,7 @@
 			{input type="date" name="date" default=$date label="Date" required=1}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{input type="number" name="amount" label="Montant (%s)"|args:$config.monnaie min="0.00" step="0.01" default="0" required=1}
+			{input type="money" name="amount" label="Montant" required=1}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>
 	</fieldset>
@@ -90,23 +90,23 @@
 				</tr>
 			</thead>
 			<tbody>
-			{foreach from=$lines key="line_number" item="line"}
+			{foreach from=$lines item="line"}
 				<tr>
-					<th>{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[%d][account]"|args:$line_number value=$line.id_account}</th>
-					<td>{input type="number" name="lines[%d][debit]"|args:$line_number min="0.00" step="0.01" value=$line.debit size=5}</td>
-					<td>{input type="number" name="lines[%d][credit]"|args:$line_number min="0.00" step="0.01" value=$line.credit size=5}</td>
-					<td>{input type="text" name="lines[%d][reference]"|args:$line_number size=10}</td>
-					<td>{input type="text" name="lines[%d][label]"|args:$line_number}</td>
-					<td>{button label="Enlever la ligne" shape="minus"}</td>
+					<th>{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]" value=$line.account}</th>
+					<td>{input type="money" name="lines[debit][]" value=$line.debit size=5}</td>
+					<td>{input type="money" name="lines[credit][]" value=$line.credit size=5}</td>
+					<td>{input type="text" name="lines[reference][]" value=$line.label size=10}</td>
+					<td>{input type="text" name="lines[label][]"}</td>
+					<td>{button label="Enlever la ligne" shape="minus" name="remove_line"}</td>
 				</tr>
 			{/foreach}
 			</tbody>
 			<tfoot>
 				<tr>
 					<th></th>
-					<td><input type="number" id="lines_debit_total" readonly="readonly" size="5" tabindex="-1" /></td>
-					<td><input type="number" id="lines_credit_total" readonly="readonly" size="5" tabindex="-1" /></td>
-					<td colspan="2"></td>
+					<td>{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
+					<td>{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
+					<td colspan="2" id="lines_message"></td>
 					<td>{button label="Ajouter une ligne" shape="plus"}</td>
 				</tr>
 			</tfoot>
@@ -121,7 +121,7 @@
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
 			{if count($analytical_accounts) > 0}
-				{input type="select" name="analytical_account" label="Compte analytique (projet)" options=$analytical_accounts}
+				{input type="select" name="id_analytical" label="Compte analytique (projet)" options=$analytical_accounts}
 			{/if}
 		</dl>
 	</fieldset>
@@ -137,6 +137,7 @@
 <script type="text/javascript">
 
 function initForm() {
+	// Hide type specific parts of the form
 	function hideAllTypes() {
 		var sections = $('fieldset[data-types]');
 
@@ -145,10 +146,16 @@ function initForm() {
 		});
 	}
 
+	// Toggle parts of the form when a type is selected
 	function selectType(v) {
 		hideAllTypes();
 		$('[data-types=' + v + ']')[0].style.display = 'block';
 		$('[data-types=all-but-advanced]')[0].style.display = v == 'advanced' ? 'none' : 'block';
+		// Disable required form elements, or the form won't be able to be submitted
+		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
+			e.disabled = v == 'advanced' ? true : false;
+		});
+
 	}
 
 	var radios = $('fieldset input[type=radio][name=type]');
@@ -161,16 +168,17 @@ function initForm() {
 
 	hideAllTypes();
 
-	// In case of a pre-filled form
+	// In case of a pre-filled form: show the correct part of the form
 	var current = document.querySelector('input[name=type]:checked');
 	if (current) {
 		selectType(current.value);
 	}
 
+	// Advanced transaction: line management
 	var lines = $('.transaction-lines tbody tr');
 
-	function initLine(e) {
-		e.querySelector('button:nth-child(1)').onclick = () => {
+	function initLine(row) {
+		row.querySelector('button[name="remove_line"]').onclick = () => {
 			var count = $('.transaction-lines tbody tr').length;
 
 			if (count <= 2) {
@@ -178,14 +186,64 @@ function initForm() {
 				return false;
 			}
 
-			e.parentNode.removeChild(e);
+			row.parentNode.removeChild(row);
+			updateTotals();
 		};
+
+		// Update totals and disable other amount input
+		var money_inputs = row.querySelectorAll('input.money');
+
+		money_inputs.forEach((i) => {
+			i.onkeyup = (e) => {
+				if (!e.key.match(/^([0-9,.]|Separator|Backspace)$/i)) {
+					return true;
+				}
+
+				var v = i.value.replace(/[^0-9.,]/);
+				var ro = (v.length == 0 || v == 0) ? false : true;
+
+				money_inputs.forEach((i2) => {
+					i2.readOnly = i2 === i ? false : ro;
+					if (i2 !== i) { i2.value = ''; }
+				});
+
+				updateTotals();
+			};
+		});
 	}
 
-	lines.forEach((e) => {
-		initLine(e);
-	});
+	lines.forEach(initLine);
 
+	function updateTotals() {
+		var amounts = $('.transaction-lines tbody input.money');
+		var debit = credit = 0;
+
+		amounts.forEach((i) => {
+			var v = i.value.replace(/[^0-9.,]/, '');
+			if (v.length == 0) return;
+
+			v = v.split(/[,.]/);
+			var d = v.length == 2 ? v[1] : '0';
+			v = v[0] + (d + '00').substr(0, 2);
+			v = parseInt(v, 10);
+
+			if (i.name.match(/debit/)) {
+				debit += v;
+			}
+			else {
+				credit += v;
+			}
+		});
+
+		$('#lines_message').innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée</span>';
+
+		debit = debit ? debit + '' : '000';
+		credit = credit ? credit + '' : '000';
+		$('#f_debit_total').value = debit.substr(0, debit.length-2) + ',' + debit.substr(-2);
+		$('#f_credit_total').value = credit.substr(0, credit.length-2) + ',' + credit.substr(-2);
+	}
+
+	// Add row button
 	$('.transaction-lines tfoot button')[0].onclick = () => {
 		var line = $('.transaction-lines tbody tr')[0];
 		var n = line.cloneNode(true);

@@ -221,6 +221,10 @@ class UserException extends \LogicException
 {
 }
 
+class ValidationException extends UserException
+{
+}
+
 // activer le gestionnaire d'erreurs/exceptions
 ErrorManager::enable(SHOW_ERRORS ? ErrorManager::DEVELOPMENT : ErrorManager::PRODUCTION);
 ErrorManager::setLogFile(DATA_ROOT . '/error.log');
