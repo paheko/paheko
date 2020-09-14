@@ -37,9 +37,9 @@ class Form
 		return true;
 	}
 
-	public function validate(Array $rules)
+	public function validate(Array $rules, array $source = null)
 	{
-		return \KD2\Form::validate($rules, $this->errors, $_POST);
+		return \KD2\Form::validate($rules, $this->errors, $source);
 	}
 
 	public function hasErrors()

@@ -4,7 +4,7 @@ namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
 use Garradin\Accounting\Accounts;
-use LogicException;
+use Garradin\ValidationException;
 use Garradin\DB;
 use Garradin\Config;
 
@@ -38,13 +38,11 @@ class Transaction extends Entity
 		'id_year'   => 'int',
 	];
 
-	protected $_validated_rules = [
+	protected $_form_rules = [
 		'label'     => 'required|string|max:200',
 		'notes'     => 'string|max:20000',
 		'reference' => 'string|max:200',
-		'date'      => 'required|date',
-		'validated' => 'bool',
-		'id_year'   => 'integer|in_table:acc_years,id',
+		'date'      => 'required|date_format:Y-m-d',
 	];
 
 	protected $_lines;
@@ -106,7 +104,7 @@ class Transaction extends Entity
 	public function save(): bool
 	{
 		if ($this->validated && !isset($this->_modified['validated'])) {
-			throw new LogicException('Il n\'est pas possible de modifier un mouvement qui a été validé');
+			throw new ValidationException('Il n\'est pas possible de modifier un mouvement qui a été validé');
 		}
 
 		if (!parent::save()) {
@@ -125,7 +123,7 @@ class Transaction extends Entity
 	public function delete(): bool
 	{
 		if ($this->validated) {
-			throw new LogicException('Il n\'est pas possible de supprimer un mouvement qui a été validé');
+			throw new ValidationException('Il n\'est pas possible de supprimer un mouvement qui a été validé');
 		}
 
 		return parent::delete();
@@ -140,12 +138,12 @@ class Transaction extends Entity
 
 		// ID d'exercice obligatoire
 		if (null === $this->id_year) {
-			throw new LogicException('Aucun exercice spécifié.');
+			throw new \LogicException('Aucun exercice spécifié.');
 		}
 
 		if (!$db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date, $this->date))
 		{
-			throw new LogicException('La date ne correspond pas à l\'exercice sélectionné.');
+			throw new ValidationException('La date ne correspond pas à l\'exercice sélectionné.');
 		}
 
 		$total = 0;
@@ -158,7 +156,7 @@ class Transaction extends Entity
 		}
 
 		if (0 !== $total) {
-			throw new LogicException('Mouvement non équilibré : déséquilibre entre débits et crédits');
+			throw new ValidationException('Écriture non équilibrée : déséquilibre entre débits et crédits');
 		}
 	}
 
@@ -169,12 +167,12 @@ class Transaction extends Entity
 		}
 
 		if (empty($source['type'])) {
-			throw new LogicException('Type d\'écriture inconnu');
+			throw new ValidationException('Type d\'écriture inconnu');
 		}
 
 		$type = $source['type'];
 
-		$this->import();
+		$this->importForm();
 
 		$accounts = new Accounts($chart_id);
 
@@ -184,8 +182,9 @@ class Transaction extends Entity
 			$amount = $source['amount'];
 
 			$line = new Line;
-			$line->import([
+			$line->importForm([
 				'reference'  => $source['payment_reference'],
+				'credit' => '0',
 				'debit'      => $amount,
 				'id_account' => $from,
 				'id_analytical' => $source['id_analytical'] ?? null,
@@ -193,17 +192,22 @@ class Transaction extends Entity
 			$this->add($line);
 
 			$line = new Line;
-			$line->import([
+			$line->importForm([
 				'reference'  => $source['payment_reference'],
 				'credit'     => $amount,
+				'debit' => '0',
 				'id_account' => $to,
 				'id_analytical' => $source['id_analytical'] ?? null,
 			]);
 			$this->add($line);
 		}
 		else {
-			foreach ($sources['lines'] as $line) {
+			foreach ($source['lines'] as $i => $line) {
 				$line['id_account'] = $accounts->getIdFromCode($line['account']);
+
+				if (!$line['id_account']) {
+					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
+				}
 
 				$line = (new Line)->import($line);
 				$this->add($line);

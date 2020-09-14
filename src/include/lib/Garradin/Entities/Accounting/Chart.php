@@ -23,17 +23,17 @@ class Chart extends Entity
         'archived' => 'integer',
     ];
 
-    protected $_validation_rules = [
+    protected $_form_rules = [
         'label'    => 'required|string|max:200',
         'country'  => 'required|string|size:2',
         'code'     => 'string',
-        'archived' => 'integer|required|max:1|min:0',
     ];
 
     public function selfCheck(): void
     {
         parent::selfCheck();
         $this->assert(Utils::getCountryName($this->country), 'Le code pays doit être un code ISO valide');
+        $this->assert($this->archived === 0 || $this->archived === 1);
     }
 
     public function accounts()
