@@ -44,7 +44,13 @@ class Utils
             $format = 'd/m/Y à H:i';
         }
 
-        $date = date($format, $ts);
+        if (is_object($ts)) {
+            $date = $ts->format($format);
+        }
+        else {
+            $date = date($format, $ts);
+        }
+
         $date = strtr($date, self::$french_date_names);
         $date = strtolower($date);
         return $date;
