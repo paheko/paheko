@@ -16,11 +16,11 @@ class Chart extends Entity
     protected $archived;
 
     protected $_types = [
-        'id'       => 'integer',
+        'id'       => 'int',
         'label'    => 'string',
         'country'  => 'string',
         'code'     => '?string',
-        'archived' => 'integer',
+        'archived' => 'int',
     ];
 
     protected $_form_rules = [
