@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new" js=1}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
 	{form_errors}
 
 	{if $ok}
@@ -120,6 +120,8 @@
 			{input type="text" name="reference" label="Numéro de pièce comptable"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
+			{input type="file" name="file" label="Fichier joint"}
+
 			{if count($analytical_accounts) > 0}
 				{input type="select" name="id_analytical" label="Compte analytique (projet)" options=$analytical_accounts}
 			{/if}
@@ -127,7 +129,7 @@
 	</fieldset>
 
 	<p class="submit">
-		{csrf_field key="compta_saisie"}
+		{csrf_field key="acc_transaction_new"}
 		<input type="submit" name="save" value="Enregistrer &rarr;" />
 	</p>
 

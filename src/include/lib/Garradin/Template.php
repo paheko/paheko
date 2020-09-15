@@ -230,6 +230,10 @@ class Template extends \KD2\Smartyer
 			}
 		}
 
+		if ($type == 'file') {
+			$help = sprintf('Taille maximale : %s', Utils::format_bytes(Utils::getMaxUploadSize()));
+		}
+
 		// Create attributes string
 		if (array_key_exists('required', $attributes)) {
 			$attributes['required'] = 'required';
@@ -304,6 +308,10 @@ class Template extends \KD2\Smartyer
 
 		if ($type == 'radio' || $type == 'checkbox') {
 			$out .= $input . ' ';
+		}
+
+		if ($type == 'file') {
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
 		}
 
 		$out .= sprintf('<label for="%s">%s</label>%s</dt>', $attributes['id'], $this->escape($label), $required_label);

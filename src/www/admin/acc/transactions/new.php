@@ -13,7 +13,7 @@ $accounts = $chart->accounts();
 $transaction = new Transaction;
 $lines = [[], []];
 
-if (f('save')) {
+if (f('save') && $form->check('acc_transaction_new')) {
     try {
         if (f('type') == 'advanced' && $lines = f('lines')) {
             $max = count($lines['label']);
@@ -45,6 +45,12 @@ if (f('save')) {
         $transaction->id_year = $year->id();
         $transaction->importFromSimpleForm($chart->id());
         $transaction->save();
+
+        if (!empty($_FILES['file']['name'])) {
+            $file = Fichiers::upload($_FILES['file']);
+            $file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
+        }
+
         Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
     }
     catch (UserException $e) {
