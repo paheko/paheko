@@ -91,6 +91,6 @@ class Accounts
 
 	public function getTypesParents(): array
 	{
-		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT type, code FROM @TABLE WHERE type_parent = 1 AND id_chart = ? ORDER BY type;', $this->chart_id));
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT type_parent, code FROM @TABLE WHERE type_parent != 0 AND id_chart = ? ORDER BY type_parent;'), $this->chart_id);
 	}
 }

@@ -33,6 +33,7 @@
 				<th>{$account.label}</th>
 				<td class="actions">
 					<button class="icn-btn" value="{$account.code}" data-label="{$account.code}" data-icon="&rarr;">Sélectionner</button>
+					}
 				</td>
 			</tr>
 		{/foreach}
