@@ -19,12 +19,12 @@ class Year extends Entity
     protected $id_chart;
 
     protected $_types = [
-        'id'         => 'integer',
+        'id'         => 'int',
         'label'      => 'string',
         'start_date' => 'date',
         'end_date'   => 'date',
-        'closed'     => 'integer',
-        'id_chart'   => 'integer',
+        'closed'     => 'int',
+        'id_chart'   => 'int',
     ];
 
     protected $_form_rules = [
