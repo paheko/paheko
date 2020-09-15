@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Accounting;
 
+use KD2\DB\EntityManager;
 use Garradin\Entity;
 use Garradin\Accounting\Accounts;
 use Garradin\ValidationException;
@@ -47,11 +48,17 @@ class Transaction extends Entity
 
 	protected $_lines;
 
-	public function getLines()
+	public function getLinesWithAccounts()
+	{
+		$em = EntityManager::getInstance(Line::class);
+		return $em->DB()->get('SELECT a.*, b.label AS account_name, b.code AS account_code FROM ' . Line::TABLE  .' a INNER JOIN ' . Account::TABLE . ' b ON b.id = a.id_account WHERE a.id_transaction = ? ORDER BY a.id;', $this->id);
+	}
+
+	public function getLines($with_accounts = false)
 	{
 		if (null === $this->_lines && $this->exists()) {
-			$db = DB::getInstance();
-			$this->_lines = $db->toObject($db->get('SELECT * FROM ' . Line::TABLE . ' WHERE id_transaction = ? ORDER BY id;', $this->id), Ligne::class);
+			$em = EntityManager::getInstance(Line::class);
+			$this->_lines = $em->all('SELECT * FROM @TABLE WHERE id_transaction = ? ORDER BY id;', $this->id);
 		}
 		elseif (null === $this->_lines) {
 			$this->_lines = [];
@@ -214,4 +221,10 @@ class Transaction extends Entity
 			}
 		}
 	}
+
+	public function year()
+	{
+		return EntityManager::findOneById(Year::class, $this->id_year);
+	}
+
 }

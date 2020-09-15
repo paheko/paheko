@@ -15,7 +15,9 @@ $lines = [[], []];
 
 if (f('save') && $form->check('acc_transaction_new')) {
     try {
-        if (f('type') == 'advanced' && $lines = f('lines')) {
+        // Advanced transaction: handle lines
+        if (f('type') == 'advanced' && $lines = f('lines'))
+        {
             $max = count($lines['label']);
 
             if ($max != count($lines['debit'])
@@ -46,6 +48,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
         $transaction->importFromSimpleForm($chart->id());
         $transaction->save();
 
+        // Append file
         if (!empty($_FILES['file']['name'])) {
             $file = Fichiers::upload($_FILES['file']);
             $file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
