@@ -11,6 +11,6 @@ $chart = $year->chart();
 $accounts = $chart->accounts();
 
 $tpl->assign('chart', $chart);
-$tpl->assign('accounts_grouped', $accounts->listCommonGrouped());
+$tpl->assign('accounts', $accounts->listAll());
 
-$tpl->display('acc/accounts/index.tpl');
+$tpl->display('acc/accounts/all.tpl');
