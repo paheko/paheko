@@ -96,6 +96,7 @@ class Form
 			case 'fin': return 'date de fin';
 			case 'duree': return 'durée';
 			case 'passe_check': return 'vérification de mot de passe';
+			case 'id_account': return 'compte';
 			default: return $name;
 		}
 	}
@@ -127,6 +128,7 @@ class Form
 			case 'money':
 				return sprintf('Le champ %s n\'est pas un nombre valide.', $element);
 			case 'in':
+			case 'in_table':
 				return sprintf('Valeur invalide dans le champ \'%s\'.', $element);
 			default:
 				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);

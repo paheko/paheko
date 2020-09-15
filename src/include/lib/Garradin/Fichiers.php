@@ -22,7 +22,7 @@ class Fichiers
 	 */
 	protected static $allowed_thumb_sizes = [200, 500];
 
-	const LIEN_COMPTA = 'compta_journal';
+	const LIEN_COMPTA = 'acc_transactions';
 	const LIEN_WIKI = 'wiki_pages';
 	const LIEN_MEMBRES = 'membres';
 
