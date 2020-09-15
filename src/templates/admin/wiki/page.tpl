@@ -110,7 +110,7 @@
                     {foreach from=$fichiers item="file"}
                         <li>
                             <aside class="fichier" class="internal-file"><a href="{$file.url}">{$file.nom}</a>
-                            <small>({$file.type}, {$file.taille|format_bytes})</small>
+                            <small>({$file.type}, {$file.taille|format_bytes})</small></aside>
                        </li>
                     {/foreach}
                 </ul>
