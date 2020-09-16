@@ -4,6 +4,7 @@ namespace Garradin\Entities\Accounting;
 
 use KD2\DB\EntityManager;
 use Garradin\Entity;
+use Garradin\Fichiers;
 use Garradin\Accounting\Accounts;
 use Garradin\ValidationException;
 use Garradin\DB;
@@ -111,7 +112,13 @@ class Transaction extends Entity
 	public function save(): bool
 	{
 		if ($this->validated && !isset($this->_modified['validated'])) {
-			throw new ValidationException('Il n\'est pas possible de modifier un mouvement qui a été validé');
+			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validé');
+		}
+
+		$db = DB::getInstance();
+
+		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
+			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui fait partie d\'un exercice clôturé');
 		}
 
 		if (!parent::save()) {
@@ -130,8 +137,16 @@ class Transaction extends Entity
 	public function delete(): bool
 	{
 		if ($this->validated) {
-			throw new ValidationException('Il n\'est pas possible de supprimer un mouvement qui a été validé');
+			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui a été validée');
 		}
+
+		$db = DB::getInstance();
+
+		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
+			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
+		}
+
+		Fichiers::deleteLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
 
 		return parent::delete();
 	}
