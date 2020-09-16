@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
-{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$transaction->validated && !$tr_year->closed}
 <ul class="actions">
 	<li class="edit"><a href="edit.php?id={$transaction.id}">Modifier cette écriture</a></li>
 	<li class="delete"><a href="delete.php?id={$transaction.id}">Supprimer cette écriture</a></li>

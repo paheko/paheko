@@ -18,6 +18,11 @@ class Accounts
 		$this->em = EntityManager::getInstance(Account::class);
 	}
 
+	static public function get(int $id)
+	{
+		return EntityManager::findOneById(Account::class, $id);
+	}
+
 	public function getIdFromCode(string $code): int
 	{
 		return $this->em->col('SELECT id FROM @TABLE WHERE code = ?;', $code);

@@ -1,12 +1,11 @@
 <?php
 namespace Garradin;
 
-use Garradin\Entities\Accounting\Transaction;
-use KD2\DB\EntityManager as EM;
+use Garradin\Accounting\Transactions;
 
 require_once __DIR__ . '/../_inc.php';
 
-$transaction = EM::findOneById(Transaction::class, (int) qg('id'));
+$transaction = Transactions::get((int) qg('id'));
 
 if (!$transaction) {
     throw new UserException('Cette écriture n\'existe pas');
