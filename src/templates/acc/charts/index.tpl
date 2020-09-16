@@ -1,11 +1,13 @@
 {include file="admin/_head.tpl" title="Gestion des plans comptables" current="acc/charts"}
 
-<ul class="actions">
-    <li><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
-    <li><a href="{$admin_url}acc/accounts/all.php">Tous les comptes</a></li>
-    <li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
-    <li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
+        <li><a href="{$admin_url}acc/accounts/all.php">Tous les comptes</a></li>
+        <li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+        <li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
+    </ul>
+</nav>
 
 {if count($list)}
     <table class="list">

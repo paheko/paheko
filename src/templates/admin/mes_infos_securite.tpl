@@ -1,9 +1,11 @@
 {include file="admin/_head.tpl" title="Mes informations de connexion et sécurité" current="mes_infos" js=1}
 
-<ul class="actions">
-    <li><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
-    <li class="current"><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
+        <li class="current"><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
+    </ul>
+</nav>
 
 {if $ok}
 <p class="confirm">

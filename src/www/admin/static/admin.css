@@ -532,16 +532,16 @@ form p.actions {
     float: right;
 }
 
-ul.actions {
+nav.tabs ul {
     list-style-type: none;
     margin: 1em 0;
-    border-bottom: .1em solid #9c4f15;
+    border-bottom: 2px solid #9c4f15;
     border-bottom-color: rgb(var(--gMainColor));
     padding: 0 1em;
     z-index: 100;
 }
 
-ul.actions.sub {
+nav.tabs .sub {
     margin: -1em 2em 1em 0;
     padding-top: 1em;
     border-right: .1em solid #9c4f15;
@@ -549,14 +549,13 @@ ul.actions.sub {
     border-bottom-right-radius: .5em;
 }
 
-ul.actions li {
+nav.tabs li {
     display: inline-block;
     margin: 0 0.2em;
 }
 
-ul.actions li a, ul.actions li label {
+nav.tabs li a {
     display: inline-block;
-    background: rgb(217, 134, 40);
     background: rgba(217, 134, 40, .5);
     background: rgba(var(--gSecondColor), .5);
     border-radius: .5em .5em 0 0;
@@ -566,18 +565,14 @@ ul.actions li a, ul.actions li label {
     transition: background-color .2s, color .2s;
 }
 
-ul.actions li input {
-    display: none;
-}
-
-ul.actions li.current a, ul.actions li input:checked + label {
+nav.tabs .current a {
     background: #9c4f15;
     background: rgb(var(--gMainColor));
     color: #fff;
     color: rgb(var(--gBgColor));
 }
 
-ul.actions li a:hover, ul.actions li label:hover {
+nav.tabs li a:hover {
     color: #fff;
     background-color: rgb(var(--gMainColor));
     text-decoration: underline;

@@ -4,23 +4,25 @@
     {include file="admin/_head.tpl" title="Wiki" current="wiki"}
 {/if}
 
-<ul class="actions">
-    {if $session->canAccess('wiki', Membres::DROIT_ECRITURE)}
-        <li><a href="{$admin_url}wiki/creer.php?parent={if $page && $config.accueil_wiki != $page.uri}{$page.id}{else}0{/if}"><strong>Créer une nouvelle page</strong></a></li>
-    {/if}
-    {if $can_edit}
-        <li><a href="{$admin_url}wiki/editer.php?id={$page.id}">Éditer</a></li>
-    {/if}
-    {if $can_read && $page && $page.contenu}
-        <li><a href="{$admin_url}wiki/historique.php?id={$page.id}">Historique</a>
-        {if $page.droit_lecture == Wiki::LECTURE_PUBLIC}
-            <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a>
+<nav class="tabs">
+    <ul>
+        {if $session->canAccess('wiki', Membres::DROIT_ECRITURE)}
+            <li><a href="{$admin_url}wiki/creer.php?parent={if $page && $config.accueil_wiki != $page.uri}{$page.id}{else}0{/if}"><strong>Créer une nouvelle page</strong></a></li>
         {/if}
-    {/if}
-    {if $can_edit && $session->canAccess('wiki', Membres::DROIT_ADMIN)}
-        <li><a href="{$admin_url}wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
-    {/if}
-</ul>
+        {if $can_edit}
+            <li><a href="{$admin_url}wiki/editer.php?id={$page.id}">Éditer</a></li>
+        {/if}
+        {if $can_read && $page && $page.contenu}
+            <li><a href="{$admin_url}wiki/historique.php?id={$page.id}">Historique</a></li>
+            {if $page.droit_lecture == Wiki::LECTURE_PUBLIC}
+                <li><a href="{$www_url}{$page.uri}{if $has_public_children}/{/if}">Voir sur le site</a></li>
+            {/if}
+        {/if}
+        {if $can_edit && $session->canAccess('wiki', Membres::DROIT_ADMIN)}
+            <li><a href="{$admin_url}wiki/supprimer.php?id={$page.id}">Supprimer</a></li>
+        {/if}
+    </ul>
+</nav>
 
 {if !$can_read}
     <p class="alert">Vous n'avez pas le droit de lire cette page.</p>

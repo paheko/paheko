@@ -1,8 +1,10 @@
 {include file="admin/_head.tpl" title="Historique : %s"|args:$page.titre current="wiki"}
 
-<ul class="actions">
-    <li><a href="{$admin_url}wiki/?{$page.uri}">Retour à la page</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}wiki/?{$page.uri}">Retour à la page</a></li>
+    </ul>
+</nav>
 
 {if !empty($revisions)}
     <table class="list wikiRevisions">
