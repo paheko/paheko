@@ -74,7 +74,7 @@ class Fichiers
 	 * Constructeur de l'objet pour un fichier
 	 * @param integer $id Numéro unique du fichier
 	 */
-	public function __construct($id, $data = null)
+	public function __construct(int $id, ?iterable $data = null)
 	{
 		if (is_null($data))
 		{
@@ -236,9 +236,9 @@ class Fichiers
 	{
 		$db = DB::getInstance();
 		$db->begin();
-		$db->delete('fichiers_compta_journal', 'fichier = ?', (int)$this->id);
-		$db->delete('fichiers_wiki_pages', 'fichier = ?', (int)$this->id);
-		$db->delete('fichiers_membres', 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_' . self::LIEN_COMPTA, 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_' . self::LIEN_WIKI, 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_' . self::LIEN_MEMBRES, 'fichier = ?', (int)$this->id);
 
 		$db->delete('fichiers', 'id = ?', (int)$this->id);
 
@@ -622,6 +622,38 @@ class Fichiers
 		}
 
 		return $files;
+	}
+
+	static public function deleteLinkedFiles($type, int $id)
+	{
+		static $check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+
+		if (!in_array($type, $check))
+		{
+			throw new \LogicException('Type de lien de fichier inconnu.');
+		}
+
+		$files = DB::getInstance()->delete('fichiers_' . $type, 'id = ?', $id);
+		return self::deleteUnlinkedFiles();
+	}
+
+	static public function deleteUnlinkedFiles()
+	{
+		static $all = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+
+		$list = DB::getInstance()->iterate(sprintf('SELECT f.id, f.id_contenu FROM fichiers f
+			LEFT JOIN fichiers_%s a ON a.fichier = f.id
+			LEFT JOIN fichiers_%s b ON b.fichier = f.id
+			LEFT JOIN fichiers_%s c ON c.fichier = f.id
+			WHERE a.id IS NULL AND b.id IS NULL AND c.id IS NULL;',
+			self::LIEN_MEMBRES,
+			self::LIEN_WIKI,
+			self::LIEN_COMPTA));
+
+		foreach ($list as $file) {
+			$f = new Fichiers($file->id, (array) $file);
+			$f->remove();
+		}
 	}
 
 	/**
