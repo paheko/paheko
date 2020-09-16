@@ -1,24 +1,28 @@
 {if $membre}
     {include file="admin/_head.tpl" title="Enregistrer une cotisation pour le membre" current="membres/cotisations" js=1}
 
-    <ul class="actions">
-        <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
-        <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-        {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
-            <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
-        {/if}
-        <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
-    </ul>
+    <nav class="tabs">
+        <ul>
+            <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}"><b>{$membre.identite}</b></a></li>
+            <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
+            {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+                <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
+            {/if}
+            <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
+        </ul>
+    </nav>
 {else}
     {include file="admin/_head.tpl" title="Enregistrer une cotisation" current="membres/cotisations" js=1}
 
-    <ul class="actions">
-        <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
-        <li class="current"><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-        {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-            <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
-        {/if}
-    </ul>
+    <nav class="tabs">
+        <ul>
+            <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
+            <li class="current"><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
+            {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+                <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
+            {/if}
+        </ul>
+    </nav>
 {/if}
 
 {form_errors}

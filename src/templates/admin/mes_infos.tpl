@@ -1,9 +1,11 @@
 {include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos" js=1}
 
-<ul class="actions">
-    <li class="current"><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
-    <li><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li class="current"><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
+        <li><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
+    </ul>
+</nav>
 
 {form_errors membre=1}
 

@@ -2,11 +2,13 @@
 
 {include file="admin/membres/_nav.tpl" current="import"}
 
-<ul class="actions sub">
-    <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
-    <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
-    <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
-</ul>
+<nav class="tabs">
+    <ul class="sub">
+        <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
+        <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
+        <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
+    </ul>
+</nav>
 
 {form_errors}
 

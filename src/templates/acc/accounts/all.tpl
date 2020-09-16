@@ -1,15 +1,16 @@
 {include file="acc/_head.tpl" title="Comptes favoris" current="acc/charts"}
 
-<ul class="actions">
-	<li><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
-	<li class="current"><a href="{$admin_url}acc/accounts/all.php">Tous les comptes</a></li>
-	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-	<li><a href="{$admin_url}acc/accounts/new.php"><strong>Ajouter un compte</strong></a></li>
-	<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
-	<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
-	{/if}
-</ul>
-
+<nav class="tabs">
+	<ul>
+		<li><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
+		<li class="current"><a href="{$admin_url}acc/accounts/all.php">Tous les comptes</a></li>
+		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		<li><a href="{$admin_url}acc/accounts/new.php"><strong>Ajouter un compte</strong></a></li>
+		<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+		<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
+		{/if}
+	</ul>
+</nav>
 
 <table class="accounts">
 	<tbody>

@@ -1,10 +1,12 @@
 {include file="admin/_head.tpl" title="Gestion des rappels automatiques" current="membres/cotisations" js=1}
 
-<ul class="actions">
-    <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
-    <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-    <li class="current"><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
+        <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
+        <li class="current"><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
+    </ul>
+</nav>
 
 <p class="help">
     Les rappels automatiques sont envoyés aux membres disposant d'une adresse e-mail
