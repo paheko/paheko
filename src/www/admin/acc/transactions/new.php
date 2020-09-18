@@ -46,6 +46,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 
         $transaction->id_year = $year->id();
         $transaction->importFromSimpleForm($chart->id());
+        $transaction->id_creator = $session->getUser()->id;
         $transaction->save();
 
         // Append file

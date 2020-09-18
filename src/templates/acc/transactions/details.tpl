@@ -33,11 +33,11 @@
 
 	<dt>Opération créée par</dt>
 	<dd>
-		{if $transaction.id_auteur}
+		{if $transaction.id_creator}
 			{if $session->canAccess('compta', Membres::DROIT_ACCES)}
-				<a href="{$admin_url}membres/fiche.php?id={$transaction.id_auteur}">{$nom_auteur}</a>
+				<a href="{$admin_url}membres/fiche.php?id={$transaction.id_creator}">{$creator_name}</a>
 			{else}
-				{$nom_auteur}
+				{$creator_name}
 			{/if}
 		{else}
 			<em>membre supprimé</em>

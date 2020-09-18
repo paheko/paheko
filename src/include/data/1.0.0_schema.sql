@@ -240,7 +240,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions
     hash TEXT NULL,
     prev_hash TEXT NULL,
 
-    id_year INTEGER NOT NULL REFERENCES acc_years(id)
+    id_year INTEGER NOT NULL REFERENCES acc_years(id),
+    id_creator INTEGER NULL REFERENCES membres(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
