@@ -58,8 +58,8 @@ UPDATE acc_accounts SET type_parent = 7 WHERE code = '870';
 UPDATE acc_accounts SET type_parent = 4 WHERE code = '4';
 
 -- Recopie des mouvements
-INSERT INTO acc_transactions (id, label, notes, reference, date, id_year)
-	SELECT id, libelle, remarques, numero_piece, date, id_exercice
+INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_creator)
+	SELECT id, libelle, remarques, numero_piece, date, id_exercice, id_auteur
 	FROM compta_journal;
 
 -- Création des lignes associées aux mouvements

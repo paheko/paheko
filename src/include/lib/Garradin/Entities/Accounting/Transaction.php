@@ -27,6 +27,7 @@ class Transaction extends Entity
 	protected $prev_hash;
 
 	protected $id_year;
+	protected $id_creator;
 
 	protected $_types = [
 		'id'        => 'int',
@@ -38,6 +39,7 @@ class Transaction extends Entity
 		'hash'      => '?string',
 		'prev_hash' => '?string',
 		'id_year'   => 'int',
+		'id_creator' => '?int',
 	];
 
 	protected $_form_rules = [
@@ -242,4 +244,8 @@ class Transaction extends Entity
 		return EntityManager::findOneById(Year::class, $this->id_year);
 	}
 
+	public function listFiles()
+	{
+		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
+	}
 }
