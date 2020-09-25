@@ -1148,20 +1148,21 @@ table.accounts .account-level-5 th { padding-left: 4em; }
 table.accounts .account-level-6 th { padding-left: 5em; }
 
 dl.describe {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template: auto / 15rem 1fr;
 }
 
 dl.describe > dt {
-    font-weight: bold;
-    width: 15em;
-    float: left;
-    clear: left;
-    margin-bottom: .5em;
+    grid-column: 1;
+    margin: .2rem .5rem;
+    text-align: right;
+    color: #666;
 }
 
 dl.describe > dd {
-    margin-bottom: .5em;
-    float: left;
+    grid-column: 2;
+    margin: .2rem .5rem;
 }
 
 dl.describe ul {
