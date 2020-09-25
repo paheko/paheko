@@ -229,9 +229,16 @@ class Template extends \KD2\Smartyer
 				$attributes['checked'] = 'checked';
 			}
 		}
-
-		if ($type == 'file') {
+		elseif ($type == 'file') {
 			$help = sprintf('Taille maximale : %s', Utils::format_bytes(Utils::getMaxUploadSize()));
+		}
+		elseif ($type == 'date') {
+			$type = 'text';
+			$attributes['placeholder'] = 'JJ/MM/AAAA';
+			$attributes['data-input'] = 'date';
+			$attributes['size'] = 12;
+			$attributes['maxlength'] = 10;
+			$attributes['pattern'] = '\d+/\d+/\d{2,4}';
 		}
 
 		// Create attributes string
