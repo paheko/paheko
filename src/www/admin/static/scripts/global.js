@@ -25,6 +25,11 @@
 		}
 	};
 
+	if (!document.querySelectorAll)
+	{
+		return;
+	}
+
 	g.onload = function(callback, dom)
 	{
 		if (typeof dom == 'undefined')
@@ -184,35 +189,11 @@
 		field.parentNode.insertBefore(show_password, field.nextSibling);
 	};
 
-	var dateInputFallback = function ()
-	{
-		/*
-		// Firefox dit implémenter date, mais ne l'implémente pas, aucun moyen de détecter ce cas
-		// donc on force l'utilisation du custom datepicker de Garradin…
-		var input = document.createElement('input');
-		input.setAttribute('type', 'date');
-		input.value = ':-)';
-		input.style.position = 'absolute';
-		input.style.visibility = 'hidden';
-		document.body.appendChild(input);
-
-		// If input type changed or value hasn't been sanitized then
-		// the input type date element is not supported
-		if (input.type !== 'text' && input.value !== ':-)')
-		{
-			document.body.removeChild(input);
-		*/
-			if (document.querySelector && !document.querySelector('input[type=date]'))
-				return false;
-
-			g.script('scripts/datepickr.js');
-			g.style('scripts/datepickr.css');
-		/*
-		}
-		else
-		{
-			document.body.removeChild(input);
-		}*/
+	g.enhanceDateField = (input) => {
+		var btn = document.createElement('button');
+		btn.className = 'icn-btn';
+		btn.innerHTML = 'Cal'; // FIXME: calendar icon
+		input.parentNode.insertBefore(btn, input.nextSibling);
 	};
 
 	g.current_list_input = null;
@@ -230,12 +211,11 @@
 		});
 	});
 
-	g.onload(dateInputFallback);
-
-	if (!document.querySelectorAll)
-	{
-		return;
-	}
+	g.onload(() => {
+		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
+			g.enhanceDateField(e);
+		});
+	});
 
 	g.onload(function () {
 		var tableActions = document.querySelectorAll('form table tfoot .actions select');
