@@ -380,7 +380,7 @@ form .input-list {
     min-width: 0;
 }
 
-form .input-list span.label {
+form .input-list .label {
     padding: .4rem .6rem;
 }
 
@@ -390,6 +390,12 @@ form .input-list button {
     border: none;
     border-right: 1px solid #ccc;
     border-radius: 0;
+}
+
+form .input-list .label button {
+    padding: .2rem;
+    border: none;
+    background: none;
 }
 
 input[readonly] {

@@ -266,8 +266,22 @@ function initForm() {
 
 function inputListSelected(value, label) {
 	var i = g.current_list_input;
-	i.parentNode.querySelector('input[type=hidden]').value = value;
-	i.parentNode.querySelector('span.label').innerHTML = label;
+	var multiple = i.firstChild.getAttribute('data-multiple');
+	var name = i.getAttribute('data-name');
+
+	var span = document.createElement('span');
+	span.className = 'label';
+	span.innerHTML = '<input type="hidden" name="' + name + '[' + value + ']" value="' + label + '" />' + label;
+	if (parseInt(multiple, 10) == 1) {
+		var btn = document.createElement('button');
+		btn.className = 'icn-btn';
+		btn.type = 'button';
+		btn.setAttribute('data-icon', '✘');
+		btn.onclick = () => span.parentNode.removeChild(span);
+		span.appendChild(btn);
+	}
+	console.log(multiple, multiple ? 1 : 2, i);
+	i.appendChild(span);
 	g.closeDialog();
 	i.focus();
 }
