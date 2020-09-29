@@ -238,7 +238,7 @@ class Template extends \KD2\Smartyer
 			$attributes['data-input'] = 'date';
 			$attributes['size'] = 12;
 			$attributes['maxlength'] = 10;
-			$attributes['pattern'] = '\d+/\d+/\d{2,4}';
+			$attributes['pattern'] = '\d\d?/\d\d?/\d{4}';
 		}
 
 		// Create attributes string

@@ -80,8 +80,8 @@ UPDATE acc_accounts SET type = 1, description = (SELECT description FROM compta_
 UPDATE acc_accounts SET type = 2, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1);
 
--- Recopie des opérations, mais le nom a changé pour "mouvements"
-INSERT INTO membres_mouvements
+-- Recopie des opérations, mais le nom a changé pour acc_transactions_users
+INSERT INTO acc_transactions_users
 	SELECT * FROM membres_operations_old;
 
 -- FIXME: ajout d'entrées dans le le log utilisateur à partir de id_auteur
