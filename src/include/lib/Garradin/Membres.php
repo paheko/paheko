@@ -307,6 +307,34 @@ class Membres
         return $fields;
     }
 
+    public function quickSearch(string $query)
+    {
+        $identity = Config::getInstance()->get('champ_identite');
+        $operator = 'LIKE';
+
+        if (is_numeric(trim($query)))
+        {
+            $column = 'numero';
+            $operator = '= ?';
+        }
+        elseif (strpos($query, '@') !== false)
+        {
+            $column = 'email';
+        }
+        else
+        {
+            $column = $identity;
+        }
+
+        if ($operator == 'LIKE') {
+            $query = '%' . str_replace(['%', '_'], '\\', $query) . '%';
+            $operator = 'LIKE ? ESCAPE \'\\\'';
+        }
+
+        $sql = sprintf('SELECT id, numero, %s AS identite FROM membres WHERE %s %s ORDER BY %1$s LIMIT 50;', $identity, $column, $operator);
+        return DB::getInstance()->get($sql, $query);
+    }
+
     public function sendMessage(array $recipients, $subject, $message, $send_copy)
     {
         $config = Config::getInstance();
