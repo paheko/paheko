@@ -177,7 +177,7 @@ class Template extends \KD2\Smartyer
 	protected function widgetButton(array $params): string
 	{
 		$icon = Utils::iconUnicode($params['shape']);
-		$label = $this->escape($params['label']);
+		$label = isset($params['label']) ? $this->escape($params['label']) : '';
 		unset($params['label'], $params['shape']);
 
 		array_walk($params, function (&$v, $k) {
@@ -248,10 +248,6 @@ class Template extends \KD2\Smartyer
 
 		$attributes_string = $attributes;
 
-		if ($type == 'list') {
-			unset($attributes_string['target'], $attributes_string['multiple']);
-		}
-
 		array_walk($attributes_string, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $v);
 		});
@@ -287,14 +283,26 @@ class Template extends \KD2\Smartyer
 		}
 		elseif ($type == 'list') {
 			$multiple = !empty($attributes['multiple']);
+			$values = '';
+			$delete_btn = $this->widgetButton(['shape' => 'minus']);
+
+			if (!is_array($current_value)) {
+				$current_value = [];
+			}
+
+			foreach ($current_value as $v => $l) {
+				$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
+			}
 
 			$button = $this->widgetButton([
 				'shape' => $multiple ? 'plus' : 'menu',
 				'value' => $attributes['target'],
-				'label' => $multiple ? 'Ajouter' : 'Sélectionner'
+				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
+				'data-multiple' => $multiple ? '1' : '0',
+				'data-name' => $name,
 			]);
 
-			$input = sprintf('<span id="%s_container" class="input-list">%s<input type="hidden" value="%s" %s /><span class="label">%3$s</span></span>', $this->escape($attributes['id']), $button, $this->escape($current_value), $attributes_string);
+			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', $this->escape($attributes['id']), $button, $values);
 		}
 		elseif ($type == 'money') {
 			$currency = Config::getInstance()->get('monnaie');
