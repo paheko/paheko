@@ -422,6 +422,47 @@ class Recherche
 		}
 	}
 
+	public function searchQuery(string $table, $query, $order, $desc = false, $limit = 100)
+	{
+        $sql_query = $this->buildQuery($table, $query, $order, $desc, $limit);
+        return $this->searchSQL($table, $sql_query);
+	}
+
+	public function buildSimpleMemberQuery(string $query)
+	{
+	    $operator = 'LIKE %?%';
+
+	    if (is_numeric(trim($query)))
+	    {
+	        $column = 'numero';
+	        $operator = '= ?';
+	    }
+	    elseif (strpos($query, '@') !== false)
+	    {
+	        $column = 'email';
+	    }
+	    else
+	    {
+	        $column = Config::getInstance()->get('champ_identite');
+	    }
+
+	    $query = [[
+	        'operator' => 'AND',
+	        'conditions' => [
+	            [
+	                'column'   => $column,
+	                'operator' => $operator,
+	                'values'   => [$query],
+	            ],
+	        ],
+	    ]];
+
+	    return [
+	    	'query' => $query,
+	    	'order' => $column,
+	    ];
+	}
+
 	public function schema($target)
 	{
 		$db = DB::getInstance();

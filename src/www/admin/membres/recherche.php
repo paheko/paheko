@@ -17,34 +17,7 @@ $id = f('id') ?: qg('id');
 // Recherche simple
 if ($text_query !== '')
 {
-    $operator = 'LIKE %?%';
-
-    if (is_numeric(trim($text_query)))
-    {
-        $column = 'numero';
-        $operator = '= ?';
-    }
-    elseif (strpos($text_query, '@') !== false)
-    {
-        $column = 'email';
-    }
-    else
-    {
-        $column = $config->get('champ_identite');
-    }
-
-    $query = [[
-        'operator' => 'AND',
-        'conditions' => [
-            [
-                'column'   => $column,
-                'operator' => $operator,
-                'values'   => [$text_query],
-            ],
-        ],
-    ]];
-
-    $order = $column;
+    extract($recherche->buildSimpleMemberQuery($text_query));
 }
 elseif ($id)
 {
