@@ -69,16 +69,6 @@ CREATE TABLE IF NOT EXISTS cotisations_membres
 
 CREATE UNIQUE INDEX IF NOT EXISTS cm_unique ON cotisations_membres (id_membre, id_cotisation, date);
 
-CREATE TABLE IF NOT EXISTS membres_mouvements
--- Liaison des enregistrement des paiements en compta
-(
-    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
-    id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-    id_cotisation INTEGER NULL REFERENCES cotisations_membres (id) ON DELETE SET NULL,
-
-    PRIMARY KEY (id_membre, id_transaction)
-);
-
 CREATE TABLE IF NOT EXISTS rappels
 -- Rappels de devoir renouveller une cotisation
 (
@@ -270,6 +260,16 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
+
+CREATE TABLE IF NOT EXISTS acc_transactions_users
+-- Liaison des écritures et des membres
+(
+    id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
+    id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
+    id_service INTEGER NULL REFERENCES cotisations_membres (id) ON DELETE SET NULL,
+
+    PRIMARY KEY (id_user, id_transaction)
+);
 
 CREATE TABLE IF NOT EXISTS plugins
 (
