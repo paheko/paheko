@@ -55,6 +55,13 @@ if (f('save') && $form->check('acc_transaction_new')) {
             $file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
         }
 
+        // Link members
+        if (!empty($_POST['users']) && is_array($_POST['users'])) {
+            foreach ($_POST['users'] as $id => $label) {
+                $transaction->linkToUser((int) $id);
+            }
+        }
+
         Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
     }
     catch (UserException $e) {

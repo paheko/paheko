@@ -267,7 +267,7 @@ function initForm() {
 function inputListSelected(value, label) {
 	var i = g.current_list_input;
 	var multiple = i.firstChild.getAttribute('data-multiple');
-	var name = i.getAttribute('data-name');
+	var name = i.firstChild.getAttribute('data-name');
 
 	var span = document.createElement('span');
 	span.className = 'label';

@@ -46,7 +46,7 @@ class Transaction extends Entity
 		'label'     => 'required|string|max:200',
 		'notes'     => 'string|max:20000',
 		'reference' => 'string|max:200',
-		'date'      => 'required|date_format:Y-m-d',
+		'date'      => 'required|date_format:d/m/Y',
 	];
 
 	protected $_lines;
@@ -198,36 +198,34 @@ class Transaction extends Entity
 
 		$this->importForm();
 
-		$accounts = new Accounts($chart_id);
-
 		if ($type !== 'advanced') {
-			$from = $accounts->getIdFromCode($source[$type . '_from']);
-			$to = $accounts->getIdFromCode($source[$type . '_to']);
+			$from = @count($source[$type . '_from']) ? key($source[$type . '_from']) : null;
+			$to = @count($source[$type . '_to']) ? key($source[$type . '_to']) : null;
 			$amount = $source['amount'];
 
 			$line = new Line;
 			$line->importForm([
-				'reference'  => $source['payment_reference'],
-				'credit' => '0',
-				'debit'      => $amount,
-				'id_account' => $from,
+				'reference'     => $source['payment_reference'],
+				'credit'        => '0',
+				'debit'         => $amount,
+				'id_account'    => $from,
 				'id_analytical' => $source['id_analytical'] ?? null,
 			]);
 			$this->add($line);
 
 			$line = new Line;
 			$line->importForm([
-				'reference'  => $source['payment_reference'],
-				'credit'     => $amount,
-				'debit' => '0',
-				'id_account' => $to,
+				'reference'     => $source['payment_reference'],
+				'credit'        => $amount,
+				'debit'         => '0',
+				'id_account'    => $to,
 				'id_analytical' => $source['id_analytical'] ?? null,
 			]);
 			$this->add($line);
 		}
 		else {
 			foreach ($source['lines'] as $i => $line) {
-				$line['id_account'] = $accounts->getIdFromCode($line['account']);
+				$line['id_account'] = @count($line['id_account']) ? key($line['id_account']) : null;
 
 				if (!$line['id_account']) {
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
@@ -247,5 +245,20 @@ class Transaction extends Entity
 	public function listFiles()
 	{
 		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
+	}
+
+	public function linkTo(int $user_id, ?int $contribution_id = null)
+	{
+		if (!$this->id()) {
+			throw new \LogicException('Cannot link a non-saved transaction');
+		}
+
+		$db = EntityManager::getInstance(self::class)->DB();
+
+		return $db->insert('acc_transactions_users', [
+			'id_transaction' => $this->id(),
+			'id_user'        => $user_id,
+			'id_service'     => $service_id,
+		]);
 	}
 }
