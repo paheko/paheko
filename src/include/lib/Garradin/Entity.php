@@ -15,6 +15,10 @@ class Entity extends AbstractEntity
 	 */
 	public function importForm(array $source = null)
 	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
 		$form = new Form;
 
 		if (!$form->validate($this->_form_rules, $source))
@@ -25,6 +29,16 @@ class Entity extends AbstractEntity
 		}
 
 		return $this->import($source);
+	}
+
+	protected function filterUserValue(string $type, $value)
+	{
+		if ($type == 'date') {
+			return \DateTime::createFromFormat('d/m/Y', $value);
+		}
+		else {
+			return parent::filterUserValue($type, $value);
+		}
 	}
 
 	protected function assert(bool $test, string $message = null): void
