@@ -386,6 +386,7 @@ form .input-list .label {
 
 form .input-list button {
     padding: .4rem .6rem;
+    align-self: stretch;
     margin: 0;
     border: none;
     border-right: 1px solid #ccc;
@@ -408,7 +409,7 @@ input.money {
 }
 
 input.money + b {
-    padding: .4rem .6rem;
+    padding: .2rem .6rem;
     line-height: 1.5rem;
     color: #999;
 }

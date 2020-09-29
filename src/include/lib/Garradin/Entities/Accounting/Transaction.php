@@ -209,7 +209,7 @@ class Transaction extends Entity
 				'credit'        => '0',
 				'debit'         => $amount,
 				'id_account'    => $from,
-				'id_analytical' => $source['id_analytical'] ?? null,
+				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
 			]);
 			$this->add($line);
 
@@ -219,7 +219,7 @@ class Transaction extends Entity
 				'credit'        => $amount,
 				'debit'         => '0',
 				'id_account'    => $to,
-				'id_analytical' => $source['id_analytical'] ?? null,
+				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
 			]);
 			$this->add($line);
 		}
@@ -230,6 +230,9 @@ class Transaction extends Entity
 				if (!$line['id_account']) {
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
 				}
+
+				// FIXME: allow one different analytical account per line
+				$line['id_analytical'] = !empty($source['id_analytical']) ? $source['id_analytical'] : null;
 
 				$line = (new Line)->import($line);
 				$this->add($line);
@@ -247,7 +250,7 @@ class Transaction extends Entity
 		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
 	}
 
-	public function linkTo(int $user_id, ?int $contribution_id = null)
+	public function linkToUser(int $user_id, ?int $service_id = null)
 	{
 		if (!$this->id()) {
 			throw new \LogicException('Cannot link a non-saved transaction');
