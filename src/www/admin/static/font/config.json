@@ -361,6 +361,12 @@
       "css": "export",
       "code": 8631,
       "src": "entypo"
+    },
+    {
+      "uid": "531bc468eecbb8867d822f1c11f1e039",
+      "css": "calendar",
+      "code": 128197,
+      "src": "fontawesome"
     }
   ]
 }

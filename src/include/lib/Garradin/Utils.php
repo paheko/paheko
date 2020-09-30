@@ -862,6 +862,7 @@ class Utils
             case 'eye': return '👁';
             case 'user': return '👤';
             case 'users': return '👪';
+            case 'calendar': return '📅';
             case 'attach': return '📎';
             case 'search': return '🔍';
             case 'lock': return '🔒';

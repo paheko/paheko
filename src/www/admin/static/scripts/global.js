@@ -3,7 +3,8 @@
 		url: window.location.href.replace(/\/admin\/.*?$/, ''),
 		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
 		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: document.head.querySelector('script').src.match(/\?(.*)$/)[1]
+		version: document.head.querySelector('script').src.match(/\?(.*)$/)[1],
+		loaded: {}
 	};
 
 	window.$ = function(selector) {
@@ -75,11 +76,17 @@
 		return true;
 	};
 
-	g.script = function (file) {
-		var script = document.createElement('script');
+	g.script = function (file, callback) {
+		if (file in g.loaded) {
+			callback();
+			return;
+		}
+
+		var script = g.loaded[file] = document.createElement('script');
 		script.type = 'text/javascript';
 		script.src = this.static_url + file + '?' + this.version;
-		return document.head.appendChild(script);
+		script.onload = callback;
+		document.head.appendChild(script);
 	};
 
 	g.style = function (file) {
@@ -190,10 +197,23 @@
 	};
 
 	g.enhanceDateField = (input) => {
+		var span = document.createElement('span');
+		span.className = 'datepicker-parent';
 		var btn = document.createElement('button');
+		var cal;
 		btn.className = 'icn-btn';
-		btn.innerHTML = 'Cal'; // FIXME: calendar icon
-		input.parentNode.insertBefore(btn, input.nextSibling);
+		btn.setAttribute('data-icon', '📅');
+		btn.type = 'button';
+		btn.onclick = () => {
+			g.script('scripts/datepicker2.js', () => {
+				if (null == cal) {
+					cal = new DatePicker(btn, input, {lang: 'fr', format: 1});
+					cal.open();
+				}
+			});
+		};
+		span.appendChild(btn);
+		input.parentNode.insertBefore(span, input.nextSibling);
 	};
 
 	g.current_list_input = null;
