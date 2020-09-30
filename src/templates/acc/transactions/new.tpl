@@ -280,10 +280,9 @@ function inputListSelected(value, label) {
 		btn.onclick = () => span.parentNode.removeChild(span);
 		span.appendChild(btn);
 	}
-	console.log(multiple, multiple ? 1 : 2, i);
 	i.appendChild(span);
 	g.closeDialog();
-	i.focus();
+	i.firstChild.focus();
 }
 
 initForm();
