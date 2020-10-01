@@ -16,4 +16,6 @@ $tpl->assign('transaction', $transaction);
 $tpl->assign('tr_year', $transaction->year());
 $tpl->assign('creator_name', $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null);
 
+$tpl->assign('related_users', $transaction->listLinkedUsers());
+
 $tpl->display('acc/transactions/details.tpl');

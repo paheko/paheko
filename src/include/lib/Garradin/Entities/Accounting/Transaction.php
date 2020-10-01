@@ -264,4 +264,12 @@ class Transaction extends Entity
 			'id_service'     => $service_id,
 		]);
 	}
+
+	public function listLinkedUsers()
+	{
+		$db = EntityManager::getInstance(self::class)->DB();
+		$identity_column = Config::getInstance()->get('champ_identite');
+		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		return $db->get($sql, $this->id());
+	}
 }

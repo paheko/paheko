@@ -116,7 +116,7 @@
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membre associé" target="%smembres/selector.php"|args:$admin_url}
+			{input type="list" multiple=true name="users" label="Membres associés" target="%smembres/selector.php"|args:$admin_url}
 			{input type="text" name="reference" label="Numéro de pièce comptable"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
