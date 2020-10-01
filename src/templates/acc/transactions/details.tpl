@@ -15,7 +15,7 @@
 	<dt>Date</dt>
 	<dd>{$transaction.date|date_fr:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
-	<dd>{if trim($transaction.numero_piece)}{$transaction.numero_piece}{else}-{/if}</dd>
+	<dd>{if trim($transaction.reference)}{$transaction.reference}{else}-{/if}</dd>
 
 	<dt>Exercice</dt>
 	<dd>
@@ -54,7 +54,7 @@
 	{/if}
 
 	<dt>Remarques</dt>
-	<dd>{if trim($transaction.notes)}{$transaction.notes}{else}-{/if}</dd>
+	<dd>{if trim($transaction.notes)}{$transaction.notes|escape|nl2br}{else}-{/if}</dd>
 
 	<dt>Fichiers joints</dt>
 	{foreach from=$files item="file"}

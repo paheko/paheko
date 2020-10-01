@@ -231,9 +231,6 @@ class Transaction extends Entity
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
 				}
 
-				// FIXME: allow one different analytical account per line
-				$line['id_analytical'] = !empty($source['id_analytical']) ? $source['id_analytical'] : null;
-
 				$line = (new Line)->import($line);
 				$this->add($line);
 			}
@@ -271,5 +268,13 @@ class Transaction extends Entity
 		$identity_column = Config::getInstance()->get('champ_identite');
 		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
 		return $db->get($sql, $this->id());
+	}
+
+	public function listLinkedUsersAssoc()
+	{
+		$db = EntityManager::getInstance(self::class)->DB();
+		$identity_column = Config::getInstance()->get('champ_identite');
+		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		return $db->getAssoc($sql, $this->id());
 	}
 }

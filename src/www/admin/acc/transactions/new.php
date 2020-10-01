@@ -38,6 +38,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
                     'reference'  => $lines['reference'][$i],
                     'label'      => $lines['label'][$i],
                     'account'    => $lines['account'][$i],
+                    'id_analytical' => isset($lines['id_analytical'][$i]) ? $lines['id_analytical'][$i] : null,
                 ];
             }
 
