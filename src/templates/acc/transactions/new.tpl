@@ -74,43 +74,9 @@
 		</dl>
 	</fieldset>
 
-
-
 	{* Saisie avancée *}
 	<fieldset data-types="advanced">
-		<table class="list transaction-lines">
-			<thead>
-				<tr>
-					<th>Compte</th>
-					<td>Débit</td>
-					<td>Crédit</td>
-					<td>Réf. pièce</td>
-					<td>Libellé ligne</td>
-					<td></td>
-				</tr>
-			</thead>
-			<tbody>
-			{foreach from=$lines item="line"}
-				<tr>
-					<th>{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]" value=$line.account}</th>
-					<td>{input type="money" name="lines[debit][]" value=$line.debit size=5}</td>
-					<td>{input type="money" name="lines[credit][]" value=$line.credit size=5}</td>
-					<td>{input type="text" name="lines[reference][]" value=$line.label size=10}</td>
-					<td>{input type="text" name="lines[label][]"}</td>
-					<td>{button label="Enlever la ligne" shape="minus" name="remove_line"}</td>
-				</tr>
-			{/foreach}
-			</tbody>
-			<tfoot>
-				<tr>
-					<th></th>
-					<td>{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
-					<td>{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
-					<td colspan="2" id="lines_message"></td>
-					<td>{button label="Ajouter une ligne" shape="plus"}</td>
-				</tr>
-			</tfoot>
-		</table>
+		{include file="acc/transactions/_lines_form.tpl"}
 	</fieldset>
 
 	<fieldset>
@@ -121,7 +87,8 @@
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
 			{input type="file" name="file" label="Fichier joint"}
-
+		</dl>
+		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 0}
 				{input type="select" name="id_analytical" label="Compte analytique (projet)" options=$analytical_accounts}
 			{/if}
@@ -136,23 +103,18 @@
 </form>
 
 {literal}
-<script type="text/javascript">
-
+<script type="text/javascript" defer="defer" async="async">
 function initForm() {
 	// Hide type specific parts of the form
 	function hideAllTypes() {
-		var sections = $('fieldset[data-types]');
-
-		sections.forEach((e) => {
-			e.style.display = 'none';
-		});
+		g.toggle('fieldset[data-types]', false);
 	}
 
 	// Toggle parts of the form when a type is selected
 	function selectType(v) {
 		hideAllTypes();
-		$('[data-types=' + v + ']')[0].style.display = 'block';
-		$('[data-types=all-but-advanced]')[0].style.display = v == 'advanced' ? 'none' : 'block';
+		g.toggle('[data-types=' + v + ']', true);
+		g.toggle('[data-types=all-but-advanced]', v != 'advanced');
 		// Disable required form elements, or the form won't be able to be submitted
 		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
 			e.disabled = v == 'advanced' ? true : false;
@@ -175,96 +137,11 @@ function initForm() {
 	if (current) {
 		selectType(current.value);
 	}
-
-	// Advanced transaction: line management
-	var lines = $('.transaction-lines tbody tr');
-
-	function initLine(row) {
-		row.querySelector('button[name="remove_line"]').onclick = () => {
-			var count = $('.transaction-lines tbody tr').length;
-
-			if (count <= 2) {
-				alert("Il n'est pas possible d'avoir moins de deux lignes dans une écriture.");
-				return false;
-			}
-
-			row.parentNode.removeChild(row);
-			updateTotals();
-		};
-
-		// Update totals and disable other amount input
-		var money_inputs = row.querySelectorAll('input.money');
-
-		money_inputs.forEach((i) => {
-			i.onkeyup = (e) => {
-				if (!e.key.match(/^([0-9,.]|Separator|Backspace)$/i)) {
-					return true;
-				}
-
-				var v = i.value.replace(/[^0-9.,]/);
-				var ro = (v.length == 0 || v == 0) ? false : true;
-
-				money_inputs.forEach((i2) => {
-					i2.readOnly = i2 === i ? false : ro;
-					if (i2 !== i) { i2.value = ''; }
-				});
-
-				updateTotals();
-			};
-		});
-	}
-
-	lines.forEach(initLine);
-
-	function updateTotals() {
-		var amounts = $('.transaction-lines tbody input.money');
-		var debit = credit = 0;
-
-		amounts.forEach((i) => {
-			var v = i.value.replace(/[^0-9.,]/, '');
-			if (v.length == 0) return;
-
-			v = v.split(/[,.]/);
-			var d = v.length == 2 ? v[1] : '0';
-			v = v[0] + (d + '00').substr(0, 2);
-			v = parseInt(v, 10);
-
-			if (i.name.match(/debit/)) {
-				debit += v;
-			}
-			else {
-				credit += v;
-			}
-		});
-
-		$('#lines_message').innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée</span>';
-
-		debit = debit ? debit + '' : '000';
-		credit = credit ? credit + '' : '000';
-		$('#f_debit_total').value = debit.substr(0, debit.length-2) + ',' + debit.substr(-2);
-		$('#f_credit_total').value = credit.substr(0, credit.length-2) + ',' + credit.substr(-2);
-	}
-
-	// Add row button
-	$('.transaction-lines tfoot button')[0].onclick = () => {
-		var line = $('.transaction-lines tbody tr')[0];
-		var n = line.cloneNode(true);
-		n.querySelectorAll('input').forEach((e) => {
-			e.value = '';
-		});
-		n.querySelector('.input-list .label').innerHTML = '';
-		var b = n.querySelector('.input-list button');
-		b.onclick = () => {
-			g.current_list_input = b.parentNode;
-			g.openFrameDialog(b.value);
-			return false;
-		};
-		initLine(n);
-		line.parentNode.appendChild(n);
-	};
 }
 
 initForm();
+
+g.script('scripts/accounting.js', () => { initTransactionForm(); });
 </script>
 {/literal}
 

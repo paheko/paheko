@@ -196,7 +196,7 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -217,6 +217,16 @@ class Template extends \KD2\Smartyer
 		}
 		elseif (isset($default)) {
 			$current_value = $default;
+		}
+		elseif (isset($source) && is_object($source) && isset($source->$name)) {
+			$current_value = $source->$name;
+		}
+		elseif (isset($source) && is_array($source) && isset($source[$name])) {
+			$current_value = $source[$name];
+		}
+
+		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+			$current_value = $current_value->format('d/m/Y');
 		}
 
 		$attributes['id'] = 'f_' . $name;
@@ -286,12 +296,10 @@ class Template extends \KD2\Smartyer
 			$values = '';
 			$delete_btn = $this->widgetButton(['shape' => 'delete']);
 
-			if (!is_array($current_value)) {
-				$current_value = [];
-			}
-
-			foreach ($current_value as $v => $l) {
-				$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
+			if (null !== $current_value) {
+				foreach ($current_value as $v => $l) {
+					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
+				}
 			}
 
 			$button = $this->widgetButton([
@@ -306,7 +314,7 @@ class Template extends \KD2\Smartyer
 		}
 		elseif ($type == 'money') {
 			$currency = Config::getInstance()->get('monnaie');
-			$input = sprintf('<input type="text" pattern="[0-9.,]*" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b>', $attributes_string, $this->escape($current_value), $currency);
+			$input = sprintf('<input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b>', $attributes_string, $this->escape($current_value), $currency);
 		}
 		else {
 			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));

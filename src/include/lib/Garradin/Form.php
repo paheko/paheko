@@ -10,7 +10,7 @@ class Form
 	{
 		// Valide un montant de monnaie valide (deux décimales, ne peut être négatif)
 		\KD2\Form::registerValidationRule('money', function ($name, $params, $value) {
-			return preg_match('/^\d+(?:\.\d{1,2})?$/', $value) && $value >= 0;
+			return preg_match('/^\d+(?:[.,]\d{1,2})?$/', $value) && $value >= 0;
 		});
 
 		// Test si la valeur existe dans cette table
