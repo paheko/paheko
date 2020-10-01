@@ -218,9 +218,33 @@
 
 	g.current_list_input = null;
 
-		// Sélecteurs de listes
+	g.inputListSelected = function(value, label) {
+		var i = g.current_list_input;
+		var multiple = i.firstChild.getAttribute('data-multiple');
+		var name = i.firstChild.getAttribute('data-name');
+
+		var span = document.createElement('span');
+		span.className = 'label';
+		span.innerHTML = '<input type="hidden" name="' + name + '[' + value + ']" value="' + label + '" />' + label;
+
+		// Add delete button
+		if (parseInt(multiple, 10) == 1) {
+			var btn = document.createElement('button');
+			btn.className = 'icn-btn';
+			btn.type = 'button';
+			btn.setAttribute('data-icon', '✘');
+			btn.onclick = () => span.parentNode.removeChild(span);
+			span.appendChild(btn);
+		}
+
+		i.appendChild(span);
+		g.closeDialog();
+		i.firstChild.focus();
+	};
+
+	// Sélecteurs de listes
 	g.onload(() => {
-		var inputs = $('form .input-list button');
+		var inputs = $('form .input-list > button');
 
 		inputs.forEach((i) => {
 			i.onclick = () => {
@@ -228,6 +252,12 @@
 				g.openFrameDialog(i.value);
 				return false;
 			};
+		});
+
+		var multiples = $('form .input-list span button');
+
+		multiples.forEach((btn) => {
+			btn.onclick = () => btn.parentNode.parentNode.removeChild(btn.parentNode);
 		});
 	});
 

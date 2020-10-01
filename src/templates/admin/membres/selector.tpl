@@ -30,7 +30,7 @@ var buttons = document.querySelectorAll('button');
 
 buttons.forEach((e) => {
 	e.onclick = () => {
-		window.parent.inputListSelected(e.value, e.getAttribute('data-label'));
+		window.parent.g.inputListSelected(e.value, e.getAttribute('data-label'));
 	};
 });
 
