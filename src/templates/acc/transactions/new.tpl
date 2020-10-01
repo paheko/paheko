@@ -264,27 +264,6 @@ function initForm() {
 	};
 }
 
-function inputListSelected(value, label) {
-	var i = g.current_list_input;
-	var multiple = i.firstChild.getAttribute('data-multiple');
-	var name = i.firstChild.getAttribute('data-name');
-
-	var span = document.createElement('span');
-	span.className = 'label';
-	span.innerHTML = '<input type="hidden" name="' + name + '[' + value + ']" value="' + label + '" />' + label;
-	if (parseInt(multiple, 10) == 1) {
-		var btn = document.createElement('button');
-		btn.className = 'icn-btn';
-		btn.type = 'button';
-		btn.setAttribute('data-icon', '✘');
-		btn.onclick = () => span.parentNode.removeChild(span);
-		span.appendChild(btn);
-	}
-	i.appendChild(span);
-	g.closeDialog();
-	i.firstChild.focus();
-}
-
 initForm();
 </script>
 {/literal}

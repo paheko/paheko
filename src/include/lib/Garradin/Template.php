@@ -284,7 +284,7 @@ class Template extends \KD2\Smartyer
 		elseif ($type == 'list') {
 			$multiple = !empty($attributes['multiple']);
 			$values = '';
-			$delete_btn = $this->widgetButton(['shape' => 'minus']);
+			$delete_btn = $this->widgetButton(['shape' => 'delete']);
 
 			if (!is_array($current_value)) {
 				$current_value = [];
