@@ -15,7 +15,7 @@
 	<dt>Date</dt>
 	<dd>{$transaction.date|date_fr:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
-	<dd>{if trim($transaction.numero_piece)}{$transaction.numero_piece}{else}<em>Non renseigné</em>{/if}</dd>
+	<dd>{if trim($transaction.numero_piece)}{$transaction.numero_piece}{else}-{/if}</dd>
 
 	<dt>Exercice</dt>
 	<dd>
@@ -45,18 +45,16 @@
 	</dd>
 
 	<dt>Opération liée à</dt>
-	<dd>
-		{if empty($related_members)}
-			Aucun membre n'est lié à cette opération.
-		{else}
-			{foreach from=$related_members item="membre"}
-				<a href="{$admin_url}membres/{if $membre.id_cotisation}cotisations{else}fiche{/if}.php?id={$membre.id_membre}">{if $membre.id_cotisation}Cotisation pour {/if}{$membre.identite}</a>
-			{/foreach}
-		{/if}
-	</dd>
+	{if empty($related_users)}
+		<dd><em>Aucun membre n'est lié à cette opération.</em></dd>
+	{else}
+		{foreach from=$related_users item="u"}
+			<dd><a href="{$admin_url}membres/fiche.php?id={$u.id}">{$u.identity}</a></dd>
+		{/foreach}
+	{/if}
 
 	<dt>Remarques</dt>
-	<dd>{if trim($transaction.notes)}{$transaction.notes}{else}<em>Non renseigné</em>{/if}</dd>
+	<dd>{if trim($transaction.notes)}{$transaction.notes}{else}-{/if}</dd>
 
 	<dt>Fichiers joints</dt>
 	{foreach from=$files item="file"}
@@ -66,6 +64,8 @@
 			<small>({$file.type}, {$file.taille|format_bytes})</small>
 		</aside>
 	</dd>
+	{foreachelse}
+	<dd>-</dd>
 	{/foreach}
 </dl>
 
