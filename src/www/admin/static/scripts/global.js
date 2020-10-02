@@ -236,6 +236,9 @@
 			btn.onclick = () => span.parentNode.removeChild(span);
 			span.appendChild(btn);
 		}
+		else {
+			i.removeChild(i.querySelector('span'));
+		}
 
 		i.appendChild(span);
 		g.closeDialog();

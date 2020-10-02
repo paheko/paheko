@@ -23,7 +23,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 		<tr>
 			<th>
 				{if isset($lines_accounts)}
-					{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]" value=$lines_accounts[$k]}
+					{input type="list" target="%sacc/accounts/selector.php?target=all&fullname=1"|args:$admin_url name="lines[account][]" value=$lines_accounts[$k]}
 				{else}
 					{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]"}
 				{/if}

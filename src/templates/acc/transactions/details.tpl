@@ -69,7 +69,7 @@
 	{/foreach}
 </dl>
 
-<table class="list multi">
+<table class="list">
 	<thead>
 		<tr>
 			<th colspan="2">Comptes</th>

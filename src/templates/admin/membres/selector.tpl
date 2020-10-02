@@ -51,6 +51,8 @@ rows.forEach((e) => {
 		e.querySelector('button').click();
 	};
 });
+
+document.querySelector('input').focus();
 </script>
 {/literal}
 
