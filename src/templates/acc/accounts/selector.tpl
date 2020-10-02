@@ -32,8 +32,7 @@
 				<td>{$account.code}</td>
 				<th>{$account.label}</th>
 				<td class="actions">
-					<button class="icn-btn" value="{$account.id}" data-label="{$account.code}" data-icon="&rarr;">Sélectionner</button>
-					}
+					<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
 				</td>
 			</tr>
 		{/foreach}

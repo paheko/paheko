@@ -50,6 +50,7 @@ class Transaction extends Entity
 	];
 
 	protected $_lines;
+	protected $_old_lines = [];
 
 	public function getLinesWithAccounts()
 	{
@@ -133,6 +134,11 @@ class Transaction extends Entity
 			$line->save();
 		}
 
+		foreach ($this->_old_lines as $line)
+		{
+			$line->delete();
+		}
+
 		return true;
 	}
 
@@ -184,7 +190,7 @@ class Transaction extends Entity
 		}
 	}
 
-	public function importFromSimpleForm(int $chart_id, ?array $source = null): void
+	public function importFromNewForm(int $chart_id, ?array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -225,7 +231,7 @@ class Transaction extends Entity
 		}
 		else {
 			foreach ($source['lines'] as $i => $line) {
-				$line['id_account'] = @count($line['id_account']) ? key($line['id_account']) : null;
+				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 
 				if (!$line['id_account']) {
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
@@ -234,6 +240,30 @@ class Transaction extends Entity
 				$line = (new Line)->import($line);
 				$this->add($line);
 			}
+		}
+	}
+
+	public function importFromEditForm(?array $source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		$this->importForm();
+
+		$this->_old_lines = $this->getLines();
+		$this->_lines = [];
+
+		foreach ($source['lines'] as $i => $line) {
+			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+
+			if (!$line['id_account']) {
+				var_dump($source); exit;
+				throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
+			}
+
+			$line = (new Line)->import($line);
+			$this->add($line);
 		}
 	}
 
@@ -247,19 +277,20 @@ class Transaction extends Entity
 		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
 	}
 
-	public function linkToUser(int $user_id, ?int $service_id = null)
+	public function updateLinkedUsers(array $users)
 	{
-		if (!$this->id()) {
-			throw new \LogicException('Cannot link a non-saved transaction');
-		}
-
 		$db = EntityManager::getInstance(self::class)->DB();
 
-		return $db->insert('acc_transactions_users', [
-			'id_transaction' => $this->id(),
-			'id_user'        => $user_id,
-			'id_service'     => $service_id,
-		]);
+		$db->begin();
+
+		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s;', $db->where('id_user', 'NOT IN', $users));
+		$db->preparedQuery($sql, $this->id());
+
+		foreach ($users as $id) {
+			$db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user) VALUES (?, ?);', $this->id(), $id);
+		}
+
+		$db->commit();
 	}
 
 	public function listLinkedUsers()

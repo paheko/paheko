@@ -14,60 +14,58 @@ $transaction = new Transaction;
 $lines = [[], []];
 
 if (f('save') && $form->check('acc_transaction_new')) {
-    try {
-        // Advanced transaction: handle lines
-        if (f('type') == 'advanced' && $lines = f('lines'))
-        {
-            $max = count($lines['label']);
+	try {
+		// Advanced transaction: handle lines
+		if (f('type') == 'advanced' && $lines = f('lines'))
+		{
+			$max = count($lines['label']);
 
-            if ($max != count($lines['debit'])
-                || $max != count($lines['credit'])
-                || $max != count($lines['reference'])
-                || $max != count($lines['account']))
-            {
-                throw new UserException('Erreur dans les lignes de l\'écriture');
-            }
+			if ($max != count($lines['debit'])
+				|| $max != count($lines['credit'])
+				|| $max != count($lines['reference'])
+				|| $max != count($lines['account']))
+			{
+				throw new UserException('Erreur dans les lignes de l\'écriture');
+			}
 
-            $out = [];
+			$out = [];
 
-            // Reorder the POST data as a proper array
-            for ($i = 0; $i < $max; $i++) {
-                $out[] = [
-                    'debit'      => $lines['debit'][$i],
-                    'credit'     => $lines['credit'][$i],
-                    'reference'  => $lines['reference'][$i],
-                    'label'      => $lines['label'][$i],
-                    'account'    => $lines['account'][$i],
-                    'id_analytical' => isset($lines['id_analytical'][$i]) ? $lines['id_analytical'][$i] : null,
-                ];
-            }
+			// Reorder the POST data as a proper array
+			for ($i = 0; $i < $max; $i++) {
+				$out[] = [
+					'debit'      => $lines['debit'][$i],
+					'credit'     => $lines['credit'][$i],
+					'reference'  => $lines['reference'][$i],
+					'label'      => $lines['label'][$i],
+					'account'    => $lines['account'][$i],
+					'id_analytical' => !empty($lines['id_analytical'][$i]) ? $lines['id_analytical'][$i] : null,
+				];
+			}
 
-            $_POST['lines'] = $lines = $out;
-        }
+			$_POST['lines'] = $lines = $out;
+		}
 
-        $transaction->id_year = $year->id();
-        $transaction->importFromSimpleForm($chart->id());
-        $transaction->id_creator = $session->getUser()->id;
-        $transaction->save();
+		$transaction->id_year = $year->id();
+		$transaction->importFromNewForm($chart->id());
+		$transaction->id_creator = $session->getUser()->id;
+		$transaction->save();
 
-        // Append file
-        if (!empty($_FILES['file']['name'])) {
-            $file = Fichiers::upload($_FILES['file']);
-            $file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
-        }
+		// Append file
+		if (!empty($_FILES['file']['name'])) {
+			$file = Fichiers::upload($_FILES['file']);
+			$file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
+		}
 
-        // Link members
-        if (!empty($_POST['users']) && is_array($_POST['users'])) {
-            foreach ($_POST['users'] as $id => $label) {
-                $transaction->linkToUser((int) $id);
-            }
-        }
+		 // Link members
+		if (null !== f('users') && is_array(f('users'))) {
+			$transaction->updateLinkedUsers(array_keys(f('users')));
+		}
 
-        Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
-    }
-    catch (UserException $e) {
-        $form->addError($e->getMessage());
-    }
+		Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
+	}
+	catch (UserException $e) {
+		$form->addError($e->getMessage());
+	}
 }
 
 $tpl->assign('date', $session->get('context_compta_date') ?: false);
