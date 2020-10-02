@@ -24,4 +24,10 @@ class Years
 		$em = EntityManager::getInstance(Year::class);
 		return $em->all('SELECT * FROM @TABLE WHERE closed = 0 ORDER BY end_date;');
 	}
+
+	static public function list()
+	{
+		$em = EntityManager::getInstance(Year::class);
+		return $em->all('SELECT * FROM @TABLE ORDER BY end_date;');
+	}
 }

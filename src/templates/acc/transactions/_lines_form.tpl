@@ -41,7 +41,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	</tbody>
 	<tfoot>
 		<tr>
-			<th></th>
+			<th>Total</th>
 			<td>{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 			<td>{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 			<td colspan="3" id="lines_message"></td>

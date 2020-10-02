@@ -1,4 +1,4 @@
-{include file="acc/_head.tpl" title="Comptes favoris" current="acc/charts"}
+{include file="acc/_head.tpl" title="Comptes favoris" current="acc/accounts"}
 
 <nav class="tabs">
 	<ul>
