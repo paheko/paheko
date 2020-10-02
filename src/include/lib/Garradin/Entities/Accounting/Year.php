@@ -29,8 +29,8 @@ class Year extends Entity
 
     protected $_form_rules = [
         'label'      => 'required|string|max:200',
-        'start_date' => 'required|date|before:end_date',
-        'end_date'   => 'required|date|after:start_date',
+        'start_date' => 'required|date_format:d/m/Y',
+        'end_date'   => 'required|date_format:d/m/Y',
     ];
 
     public function selfCheck(): void
@@ -48,24 +48,24 @@ class Year extends Entity
         if ($this->exists()) {
             $this->assert(
                 !$db->test(self::TABLE, 'id != :id AND ((start_date <= :start_date AND end_date >= :start_date) OR (start_date <= :end_date AND end_date >= :start_date))',
-                    ['id' => $this->id(), 'start_date' => $this->start_date, 'end_date' => $this->end_date]),
+                    ['id' => $this->id(), 'start_date' => $this->start_date->format('Y-m-d'), 'end_date' => $this->end_date->format('Y-m-d')]),
                 'La date de début ou de fin se recoupe avec un exercice existant.'
             );
 
             $this->assert(
-                !$db->test(Transaction::TABLE, 'id_year = ? AND date < ?', $this->id(), $this->start_date),
+                !$db->test(Transaction::TABLE, 'id_year = ? AND date < ?', $this->id(), $this->start_date->format('Y-m-d')),
                 'Des mouvements de cet exercice ont une date antérieure à la date de début de l\'exercice.'
             );
 
             $this->assert(
-                !$db->test(Transaction::TABLE, 'id_year = ? AND date > ?', $this->id(), $this->end_date),
+                !$db->test(Transaction::TABLE, 'id_year = ? AND date > ?', $this->id(), $this->end_date->format('Y-m-d')),
                 'Des mouvements de cet exercice ont une date postérieure à la date de fin de l\'exercice.'
             );
         }
         else {
             $this->assert(
                 !$db->test(self::TABLE, '(start_date <= :start_date AND end_date >= :start_date) OR (start_date <= :end_date AND end_date >= :start_date)',
-                    ['start_date' => $this->start_date, 'end_date' => $this->end_date]),
+                    ['start_date' => $this->start_date->format('Y-m-d'), 'end_date' => $this->end_date->format('Y-m-d')]),
                 'La date de début ou de fin se recoupe avec un exercice existant.'
             );
         }
