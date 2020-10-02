@@ -30,11 +30,15 @@ function initTransactionForm() {
 					inputs[+!k].readOnly = true;
 					inputs[+!k].value = '0';
 				}
+				else if (!inputs[+!k].readOnly) {
+					inputs[+!k].readOnly = true;
+					inputs[+!k].value = '0';
+				}
 
 				updateTotals();
 			};
 
-			if (+i.value == 0) {
+			if (+i.value == 0 && +inputs[+!k].value != 0) {
 				i.readOnly = true;
 				i.value = '0';
 			}
