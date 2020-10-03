@@ -23,7 +23,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 		<tr>
 			<th>
 				{if isset($lines_accounts)}
-					{input type="list" target="%sacc/accounts/selector.php?target=all&fullname=1"|args:$admin_url name="lines[account][]" value=$lines_accounts[$k]}
+					{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]" value=$lines_accounts[$k]}
 				{else}
 					{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]"}
 				{/if}
@@ -35,7 +35,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			{if count($analytical_accounts) > 0}
 				<td>{input value=$line.id_analytical type="select" name="lines[id_analytical][]" options=$analytical_accounts}</td>
 			{/if}
-			<td>{button label="Enlever la ligne" shape="minus" name="remove_line"}</td>
+			<td>{button label="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
 		</tr>
 	{/foreach}
 	</tbody>

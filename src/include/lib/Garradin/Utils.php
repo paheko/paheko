@@ -873,4 +873,28 @@ class Utils
                 throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
         }
     }
+
+    static public function array_transpose(array $array): array
+    {
+        $out = [];
+        $count = null;
+
+        foreach ($array as $column => $rows) {
+            if (null !== $count && count($rows) != $count) {
+                throw new \LogicException('Array is inconsistent');
+            }
+
+            $count = count($rows);
+
+            foreach ($rows as $k => $v) {
+                if (!isset($out[$k])) {
+                    $out[$k] = [];
+                }
+
+                $out[$k][$column] = $v;
+            }
+        }
+
+        return $out;
+    }
 }

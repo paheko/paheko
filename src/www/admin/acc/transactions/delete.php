@@ -11,23 +11,20 @@ $session->requireAccess('compta', Membres::DROIT_ADMIN);
 $transaction = Transactions::get((int) qg('id'));
 
 if (!$transaction) {
-    throw new UserException('Cette écriture n\'existe pas');
+	throw new UserException('Cette écriture n\'existe pas');
 }
 
-if (f('delete'))
+if (f('delete') && $form->check('acc_delete_' . $transaction->id))
 {
-    if ($form->check('acc_delete_' . $transaction->id))
-    {
-        try
-        {
-            $transaction->delete();
-            Utils::redirect(ADMIN_URL . 'acc/');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
+	try
+	{
+		$transaction->delete();
+		Utils::redirect(ADMIN_URL . 'acc/');
+	}
+	catch (UserException $e)
+	{
+		$form->addError($e->getMessage());
+	}
 }
 
 $tpl->assign('transaction', $transaction);

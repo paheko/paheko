@@ -46,6 +46,9 @@ class Account extends Entity
 	const TYPE_VOLUNTEERING = 7;
 	const TYPE_THIRD_PARTY = 8;
 
+	const TYPE_OPENING = 9;
+	const TYPE_CLOSING = 10;
+
 	const TYPES_NAMES = [
 		'',
 		'Recettes',
@@ -56,6 +59,8 @@ class Account extends Entity
 		'Analytique',
 		'Bénévolat',
 		'Tiers',
+		'Ouverture',
+		'Clôture',
 	];
 
 	protected $id;

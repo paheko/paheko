@@ -3,11 +3,13 @@ function initTransactionForm() {
 	var lines = $('.transaction-lines tbody tr');
 
 	function initLine(row) {
-		row.querySelector('button[name="remove_line"]').onclick = () => {
+		var removeBtn = row.querySelector('button[name="remove_line"]');
+		removeBtn.onclick = () => {
 			var count = $('.transaction-lines tbody tr').length;
+			var min = removeBtn.getAttribute('min');
 
-			if (count <= 2) {
-				alert("Il n'est pas possible d'avoir moins de deux lignes dans une écriture.");
+			if (count <= min) {
+				alert("Il n'est pas possible d'avoir moins de " + min + " lignes dans une écriture.");
 				return false;
 			}
 
@@ -68,7 +70,9 @@ function initTransactionForm() {
 			}
 		});
 
-		$('#lines_message').innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée</span>';
+		if (m = $('#lines_message')) {
+			m.innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée</span>';
+		}
 
 		debit = debit ? debit + '' : '000';
 		credit = credit ? credit + '' : '000';
@@ -83,7 +87,9 @@ function initTransactionForm() {
 		n.querySelectorAll('input').forEach((e) => {
 			e.value = '';
 		});
-		n.querySelector('.input-list .label').innerHTML = '';
+		if (l = n.querySelector('.input-list .label')) {
+			l.parentNode.removeChild(l);
+		}
 		var b = n.querySelector('.input-list button');
 		b.onclick = () => {
 			g.current_list_input = b.parentNode;

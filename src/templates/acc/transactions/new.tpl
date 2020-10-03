@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new" js=1}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data">
+<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
 	{form_errors}
 
 	{if $ok}
@@ -25,8 +25,8 @@
 	<fieldset data-types="transfer">
 		<legend>Virement</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="from" label="De" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="to" label="Vers" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="transfer_from" label="De" required=1}
+			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="transfer_to" label="Vers" required=1}
 		</dl>
 	</fieldset>
 

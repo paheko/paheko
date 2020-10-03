@@ -236,8 +236,8 @@
 			btn.onclick = () => span.parentNode.removeChild(span);
 			span.appendChild(btn);
 		}
-		else {
-			i.removeChild(i.querySelector('span'));
+		else if (old = i.querySelector('span')) {
+			i.removeChild(old);
 		}
 
 		i.appendChild(span);
