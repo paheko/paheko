@@ -833,15 +833,21 @@ b.money {
 }
 
 nav.acc-year {
-    max-width: 28rem;
+    background: white;
+    text-align: center;
+    border-radius: .5rem;
+    border: .2rem solid rgba(var(--gMainColor), 0.5);
+    display: flex;
+    align-items: center;
+    margin-bottom: .5rem;
 }
 
-nav.acc-year fieldset {
-    background: #fff;
+nav.acc-year > * {
+    padding: .2rem .5rem;
 }
 
-nav.acc-year select {
-    max-width: 20rem;
+nav.acc-year h4 {
+    font-weight: normal;
 }
 
 #rapport h3 {

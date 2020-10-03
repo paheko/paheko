@@ -7,6 +7,6 @@ require_once __DIR__ . '/../_inc.php';
 
 $years = new Years;
 
-$tpl->assign('list', $years->list());
+$tpl->assign('list', $years->list(true));
 
 $tpl->display('acc/years/index.tpl');

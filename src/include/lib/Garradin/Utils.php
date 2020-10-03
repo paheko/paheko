@@ -154,6 +154,11 @@ class Utils
         return str_replace('/admin', '', ADMIN_URL) . $uri;
     }
 
+    static public function getSelfURI(bool $qs = true)
+    {
+        return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
+    }
+
     public static function redirect($destination=false, $exit=true)
     {
         if (empty($destination) || !preg_match('/^https?:\/\//', $destination))

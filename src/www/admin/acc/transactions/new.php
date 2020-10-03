@@ -8,8 +8,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ECRITURE);
 
-$year = Years::get(SELECTED_YEAR_ID);
-$chart = $year->chart();
+$chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 $transaction = new Transaction;
@@ -17,7 +16,7 @@ $lines = [[], []];
 
 if (f('save') && $form->check('acc_transaction_new')) {
 	try {
-		$transaction->id_year = $year->id();
+		$transaction->id_year = $current_year->id();
 		$transaction->importFromNewForm($chart->id());
 		$transaction->id_creator = $session->getUser()->id;
 		$transaction->save();

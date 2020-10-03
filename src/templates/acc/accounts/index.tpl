@@ -22,10 +22,10 @@
 		<dt>{$account.label} <em>({$account.code})</em></dt>
 		<dd class="desc">{$account.description}</dd>
 		<dd class="actions">
-			{button shape="menu" label="Journal" href="acc/transactions/journal.php?id=%d"|args:$account.id}
+			{linkbutton shape="menu" label="Journal" href="acc/accounts/journal.php?id=%d"|args:$account.id}
 			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-				{button shape="edit" label="Modifier" href="acc/accounts/edit.php?id=%d"|args:$account.id}
-				{button shape="delete" label="Supprimer" href="acc/accounts/delete.php?id=%d"|args:$account.id}
+				{linkbutton shape="edit" label="Modifier" href="acc/accounts/edit.php?id=%d"|args:$account.id}
+				{linkbutton shape="delete" label="Supprimer" href="acc/accounts/delete.php?id=%d"|args:$account.id}
 			{/if}
 		</dd>
 	{/foreach}
