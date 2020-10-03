@@ -15,7 +15,7 @@ if (f('new') && $form->check('acc_years_new')) {
 		$year->importForm();
 		$year->save();
 
-		Utils::redirect(ADMIN_URL . 'acc/years/balance.php');
+		Utils::redirect(ADMIN_URL . 'acc/years/balance.php?id=' . $year->id());
 	}
 	catch (UserException $e)
 	{

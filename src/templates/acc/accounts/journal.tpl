@@ -1,38 +1,12 @@
-{if null !== $suivi}
-    {include file="admin/_head.tpl" title="Journal : %s - %s"|args:$compte.id:$compte.libelle current="compta/banques" body_id="rapport"}
+{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
 
-    <ul class="actions">
-        <li><a href="{$admin_url}compta/banques/">Comptes bancaires</a></li>
-        <li{if $compte.id == Compta\Comptes::CAISSE} class="current"{/if}><a href="{$admin_url}compta/comptes/journal.php?id={$id_caisse}&amp;suivi">Journal de caisse</a></li>
-        <li{if $compte.id == Compta\Comptes::CHEQUE_A_ENCAISSER} class="current"{/if}><a href="{$admin_url}compta/comptes/journal.php?id={$id_cheque_a_encaisser}&amp;suivi">Chèques à encaisser</a></li>
-        <li{if $compte.id == Compta\Comptes::CARTE_A_ENCAISSER} class="current"{/if}><a href="{$admin_url}compta/comptes/journal.php?id={$id_carte_a_encaisser}&amp;suivi">Paiements par carte à encaisser</a></li>
-    </ul>
-{else}
-    {include file="admin/_head.tpl" title="Journal : %s - %s"|args:$compte.id:$compte.libelle current="compta/gestion" body_id="rapport"}
-{/if}
-
-{if count($exercices)}
-    <form action="{$self_url_no_qs}" method="get" class="shortFormRight">
-        <fieldset>
-            <legend><label for="f_exercice">Afficher le journal de l'exercice suivant :</label></legend>
-            <p>
-                <select name="exercice" id="f_exercice" onchange="this.form.submit();">
-                {foreach from=$exercices item="exercice"}
-                    <option value="{$exercice.id}"{if $exercice_selectionne == $exercice.id} selected="selected"{/if}>{$exercice.libelle}</option>
-                {/foreach}
-                </select>
-                <input type="hidden" name="id" value="{$compte.id}" />
-                {if null !== $suivi}<input type="hidden" name="suivi" value=""/>{/if}
-                <noscript><input type="submit" value="Afficher"/></noscript>
-            </p>
-        </fieldset>
-    </form>
-{/if}
+{include file="acc/_year_select.tpl"}
 
 <table class="list">
     <colgroup>
         <col width="3%" />
         <col width="12%" />
+        <col width="10%" />
         <col width="10%" />
         <col width="12%" />
         <col />
@@ -42,34 +16,33 @@
         <tr>
             <td>N°</td>
             <td>Date</td>
-            <td>Montant</td>
+            <td>Débit</td>
+            <td>Crédit</td>
             <td>Solde cumulé</td>
             <th>Libellé</th>
             <td></td>
         </tr>
     </thead>
     <tbody>
-    {foreach from=$journal item="ligne"}
+    {foreach from=$journal item="line"}
         <tr>
-            <td class="num"><a href="{$admin_url}compta/operations/voir.php?id={$ligne.id}">{$ligne.id}</a></td>
-            <td>{$ligne.date|date_fr:'d/m/Y'}</td>
-            <td>{if $ligne.compte_credit == $compte.id}{$credit}{else}{$debit}{/if}{$ligne.montant|escape|html_money}</td>
-            <td>{$ligne.solde|escape|html_money}</td>
-            <th>{$ligne.libelle}</th>
+            <td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{$line.id}</a></td>
+            <td>{$line.date|date_fr:'d/m/Y'}</td>
+            <td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
+            <td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+            <td class="money">{$line.running_sum|escape|html_money}</td>
+            <th>{$line.label}</th>
             <td class="actions">
-                <a class="icn" href="{$admin_url}compta/operations/voir.php?id={$ligne.id}" title="Détails de l'écriture">❓</a>
-            {if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-                <a class="icn" href="{$admin_url}compta/operations/modifier.php?id={$ligne.id}" title="Modifier cette écriture">✎</a>
-            {/if}
+                {linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
             </td>
         </tr>
     {/foreach}
     </tbody>
     <tfoot>
         <tr>
-            <td colspan="3"></td>
-            <th>Solde</th>
-            <td colspan="2">{$solde|escape|html_money} {$config.monnaie}</td>
+            <td colspan="4">Solde</td>
+            <td class="money">{$sum|escape|html_money}</td>
+            <td colspan="2"></td>
         </tr>
     </tfoot>
 </table>

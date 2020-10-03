@@ -97,4 +97,23 @@ class Account extends Entity
 		'type'        => 'numeric|min:0',
 		'type_parent' => 'numeric|min:0',
 	];
+
+	public function getJournal(int $year_id) {
+		$db = DB::getInstance();
+		$rows = $db->get('SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE l.id_account = ? AND t.id_year = ?
+			ORDER BY t.date;', $this->id(), $year_id);
+
+		$sum = 0;
+
+		foreach ($rows as &$row) {
+			$sum += ($row->credit - $row->debit);
+			$row->running_sum = $sum;
+			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
+		}
+
+		return $rows;
+	}
 }

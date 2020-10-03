@@ -1,23 +1,24 @@
 <?php
 namespace Garradin;
 
+use Garradin\Accounting\Accounts;
+
 require_once __DIR__ . '/../_inc.php';
 
-$compte = $comptes->get(qg('id'));
+$account = Accounts::get((int) qg('id'));
 
-if (!$compte)
-{
+if (!$account) {
     throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$journal = new Compta\Journal;
+$journal = $account->getJournal(CURRENT_YEAR_ID);
+$sum = 0;
 
-// Récupération de l'exercice courant et sélectionné
-$exercices = new Compta\Exercices;
-$exercice = (int) qg('exercice') ?: $exercices->getCurrent()->id;
+if (count($journal)) {
+	$sum = end($journal)->running_sum;
+}
 
-$solde = $journal->getSolde($compte->id, false, $exercice);
-
+/*
 if (($compte->position & Compta\Comptes::ACTIF) || ($compte->position & Compta\Comptes::CHARGE))
 {
     $tpl->assign('credit', '-');
@@ -28,13 +29,9 @@ else
     $tpl->assign('credit', '+');
     $tpl->assign('debit', '-');
 }
+*/
 
-$tpl->assign('exercices', $exercices->getList());
-$tpl->assign('exercice_selectionne', $exercice);
-
-$tpl->assign('compte', $compte);
-$tpl->assign('solde', $solde);
-$tpl->assign('journal', $journal->getJournalCompte($compte->id, false, $exercice));
-$tpl->assign('suivi', qg('suivi'));
-
-$tpl->display('admin/compta/comptes/journal.tpl');
+$tpl->assign('account', $account);
+$tpl->assign('journal', $journal);
+$tpl->assign('sum', $sum);
+$tpl->display('acc/accounts/journal.tpl');

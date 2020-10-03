@@ -34,4 +34,6 @@ if ($session->get('acc_year') != $current_year_id) {
 	$session->set('acc_year', $current_year_id);
 }
 
+define('Garradin\CURRENT_YEAR_ID', $current_year->id());
+
 $tpl->assign('current_year', $current_year);

@@ -82,7 +82,7 @@
 	<tbody>
 		{foreach from=$transaction->getLinesWithAccounts() item="line"}
 		<tr>
-			<td><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}">{$line.account_code}</a></td>
+			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>
 			<td>{$line.debit|escape|html_money}&nbsp;{$config.monnaie}</td>
 			<td>{$line.credit|escape|html_money}&nbsp;{$config.monnaie}</td>
