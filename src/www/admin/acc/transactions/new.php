@@ -32,6 +32,8 @@ if (f('save') && $form->check('acc_transaction_new')) {
 			$transaction->updateLinkedUsers(array_keys(f('users')));
 		}
 
+		$session->set('acc_last_date', f('date'));
+
 		Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
 	}
 	catch (UserException $e) {
@@ -39,7 +41,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 	}
 }
 
-$tpl->assign('date', $session->get('context_compta_date') ?: false);
+$tpl->assign('date', $session->get('acc_last_date') ?: $current_year->start_date->format('d/m/Y'));
 $tpl->assign('ok', (int) qg('ok'));
 
 $tpl->assign('lines', $lines);

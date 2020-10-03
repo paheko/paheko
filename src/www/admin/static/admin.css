@@ -1195,11 +1195,6 @@ dl.list dd.desc {
     color: #666;
 }
 
-dl.list dt em {
-    color: #9c4f15;
-    color: rgb(var(--gMainColor));
-}
-
 table.accounts { width: 100%; }
 table.accounts .actions { text-align: right; }
 table.accounts tbody tr td:first-child { font-family: monospace; }

@@ -14,22 +14,27 @@
 	</ul>
 </nav>
 
+<table class="list">
 {foreach from=$accounts_grouped key="group_name" item="accounts"}
-	<h2 class="ruler">{$group_name}</h2>
+	<tbody>
+		<tr><td colspan="4"><h2 class="ruler">{$group_name}</h2></td></tr>
 
-	<dl class="list">
 	{foreach from=$accounts item="account"}
-		<dt>{$account.label} <em>({$account.code})</em></dt>
-		<dd class="desc">{$account.description}</dd>
-		<dd class="actions">
-			{linkbutton shape="menu" label="Journal" href="acc/accounts/journal.php?id=%d"|args:$account.id}
-			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-				{linkbutton shape="edit" label="Modifier" href="acc/accounts/edit.php?id=%d"|args:$account.id}
-				{linkbutton shape="delete" label="Supprimer" href="acc/accounts/delete.php?id=%d"|args:$account.id}
-			{/if}
-		</dd>
+		<tr>
+			<td class="num">{$account.code}</td>
+			<th>{$account.label}</th>
+			<td class="desc">{$account.description}</td>
+			<td class="actions">
+				{linkbutton shape="menu" label="Journal" href="acc/accounts/journal.php?id=%d"|args:$account.id}
+				{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+					{linkbutton shape="edit" label="Modifier" href="acc/accounts/edit.php?id=%d"|args:$account.id}
+					{linkbutton shape="delete" label="Supprimer" href="acc/accounts/delete.php?id=%d"|args:$account.id}
+				{/if}
+			</td>
+		</tr>
 	{/foreach}
-	</dl>
+	</tbody>
 {/foreach}
+</table>
 
 {include file="admin/_foot.tpl"}

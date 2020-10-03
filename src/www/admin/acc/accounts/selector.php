@@ -25,6 +25,7 @@ switch ($_GET['target']) {
 		break;
 }
 
+$chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 if ($_GET['target'] == 'all') {
