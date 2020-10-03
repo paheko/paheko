@@ -31,10 +31,11 @@ class Years
 		return $em->all('SELECT * FROM @TABLE WHERE closed = 1 ORDER BY end_date;');
 	}
 
-	static public function list()
+	static public function list(bool $reverse = false)
 	{
+		$desc = $reverse ? 'DESC' : '';
 		$em = EntityManager::getInstance(Year::class);
-		return $em->all('SELECT * FROM @TABLE ORDER BY end_date;');
+		return $em->all(sprintf('SELECT * FROM @TABLE ORDER BY end_date %s;', $desc));
 	}
 
 	static public function getNewYearDates(): array

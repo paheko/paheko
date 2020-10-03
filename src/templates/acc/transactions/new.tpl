@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new" js=1}
 
-{include file="acc/_year_select.tpl" only_open=true}
+{include file="acc/_year_select.tpl"}
 
 <form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
 	{form_errors}

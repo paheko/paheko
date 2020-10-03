@@ -8,9 +8,7 @@ use Garradin\Entities\Accounting\Account;
 
 require_once __DIR__ . '/../_inc.php';
 
-$year = Years::get(SELECTED_YEAR_ID);
-
-$chart = $year->chart();
+$chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 $tpl->assign('chart', $chart);

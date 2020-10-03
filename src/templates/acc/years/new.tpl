@@ -1,5 +1,11 @@
 {include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years" js=1}
 
+{if $_GET.msg == 'FIRST'}
+<p class="alert">
+	Merci de créer un premier exercice pour commencer.
+</p>
+{/if}
+
 {form_errors}
 
 <form method="post" action="{$self_url}">
