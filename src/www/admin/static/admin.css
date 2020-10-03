@@ -177,6 +177,12 @@ body#transparent main {
     padding: .2em;
 }
 
+/** Alert, confirm and error messages */
+h3.warning {
+    margin: 1em;
+    color: red;
+}
+
 span.error, b.error {
     color: #900;
 }
@@ -246,16 +252,12 @@ p.help {
     color: #666;
 }
 
-p.intro {
-    margin: 1em;
-}
-
 .error ul, .alert ul, .confirm ul {
     margin-left: 1.5em;
     list-style: disc;
 }
 
-/* Formulaires */
+/* Forms */
 fieldset {
     border: 1px solid #ccc;
     padding: 0.8em 1em 0 1em;
@@ -414,6 +416,44 @@ input.money + b {
     color: #999;
 }
 
+p.submit {
+    margin: 1em;
+}
+
+.submit input[type=submit] {
+    font-size: 1.2em;
+}
+
+.submit input.minor {
+    font-size: .9em;
+}
+
+form .checkUncheck {
+    float: left;
+}
+
+form span.password_check {
+    margin-left: 1em;
+    padding: .1em .3em;
+    border-radius: .5em;
+}
+
+form span.password_check.fail { background-color: #f99; }
+form span.password_check.weak { background-color: #ff9; }
+form span.password_check.medium { background-color: #ccf; }
+form span.password_check.ok { background-color: #cfc; }
+
+dd.help input[type=text] {
+    cursor: pointer;
+    padding: 0;
+    font-family: monospace;
+}
+
+form p.actions {
+    float: right;
+}
+
+/** Datepicker widget */
 .datepicker-parent {
     position: relative;
 }
@@ -476,7 +516,7 @@ dialog.datepicker {
     color: #fff;
 }
 
-
+/** Dialogs pop-ins */
 #dialog {
     width: 100%;
     height: 100%;
@@ -536,72 +576,8 @@ dialog.datepicker {
     z-index: 2;
 }
 
-select.large {
-    width: 95%;
-}
 
-select.large .niveau_1 {
-    background: #333;
-    color: #fff;
-    font-style: normal;
-    font-size: 1.2em;
-}
-
-select.large optgroup.niveau_2 {
-    background: #666;
-    color: #fff;
-    font-style: normal;
-    padding-left: 1em;
-}
-
-select.large option {
-    background: #fff;
-    color: #000;
-}
-
-select.large .niveau_2 { font-style: italic; background: #eee; }
-select.large .niveau_3 { padding-left: 1em; font-weight: bold; }
-select.large .niveau_4 { padding-left: 2em; }
-select.large .niveau_5 { padding-left: 3em; }
-select.large .niveau_6 { padding-left: 4em; }
-
-p.submit {
-    margin: 1em;
-}
-
-.submit input[type=submit] {
-    font-size: 1.2em;
-}
-
-.submit input.minor {
-    font-size: .9em;
-}
-
-form .checkUncheck {
-    float: left;
-}
-
-form span.password_check {
-    margin-left: 1em;
-    padding: .1em .3em;
-    border-radius: .5em;
-}
-
-form span.password_check.fail { background-color: #f99; }
-form span.password_check.weak { background-color: #ff9; }
-form span.password_check.medium { background-color: #ccf; }
-form span.password_check.ok { background-color: #cfc; }
-
-dd.help input[type=text] {
-    cursor: pointer;
-    padding: 0;
-    font-family: monospace;
-}
-
-form p.actions {
-    float: right;
-}
-
+/** Context-specific tabs */
 nav.tabs ul {
     list-style-type: none;
     margin: 1em 0;
@@ -647,11 +623,6 @@ nav.tabs li a:hover {
     background-color: rgb(var(--gMainColor));
     text-decoration: underline;
     border-bottom: none;
-}
-
-h3.warning {
-    margin: 1em;
-    color: red;
 }
 
 dd.help, small.help {
@@ -850,6 +821,7 @@ table.list .actions {
     text-align: right;
 }
 
+/** Accounting specifics */
 .money {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
@@ -858,6 +830,18 @@ table.list .actions {
 b.money {
     font-weight: inherit;
     white-space: pre;
+}
+
+nav.acc-year {
+    max-width: 28rem;
+}
+
+nav.acc-year fieldset {
+    background: #fff;
+}
+
+nav.acc-year select {
+    max-width: 20rem;
 }
 
 #rapport h3 {

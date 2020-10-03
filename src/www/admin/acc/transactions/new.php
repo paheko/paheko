@@ -2,11 +2,13 @@
 namespace Garradin;
 
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ECRITURE);
 
+$year = Years::get(SELECTED_YEAR_ID);
 $chart = $year->chart();
 $accounts = $chart->accounts();
 

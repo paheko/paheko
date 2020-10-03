@@ -8,22 +8,21 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ACCES);
 
-if ($year_id = $session->get('acc_year')) {
-	$year = Years::get($year_id);
+if (qg('change_year')) {
+	$session->set('acc_year', (int)qg('change_year'));
 }
-else {
+
+$current_year_id = $session->get('acc_year');
+
+if (!$current_year_id) {
 	$year = Years::getCurrentOpenYearIfSingle();
 
-	if ($year) {
-		$year_id = $year->id();
-		$session->set('acc_year', $year_id);
+	if (!$year) {
+		Utils::redirect(ADMIN_URL . '/acc/years/new.php?msg=FIRST');
 	}
-	else {
-		Utils::redirect(ADMIN_URL . '/acc/years/?msg=SELECT_YEAR');
-	}
+
+	$current_year_id = $year->id();
 }
 
-$chart = $year->chart();
-
-$tpl->assign('year', $year);
-$tpl->assign('chart', $chart);
+define('Garradin\SELECTED_YEAR_ID', $current_year_id);
+$tpl->assign('current_year_id', SELECTED_YEAR_ID);

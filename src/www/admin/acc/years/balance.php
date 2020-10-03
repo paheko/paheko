@@ -26,7 +26,7 @@ if (f('save') && $form->check('acc_years_balance_' . $year->id()))
 		$transaction->importFromBalanceForm($year);
 		$transaction->save();
 
-		Utils::redirect(ADMIN_URL . 'acc/years/');
+		Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
 	}
 	catch (UserException $e)
 	{
@@ -51,7 +51,7 @@ if ($previous_year) {
 	$lines_accounts = [];
 
 	foreach ($lines as $k => $line) {
-		$lines_accounts[$k] = [$line->id_account => sprintf('%s - %s', $line->account_code, $line->account_name)];
+		$lines_accounts[$k] = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
 	}
 }
 

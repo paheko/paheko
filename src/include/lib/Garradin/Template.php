@@ -59,7 +59,6 @@ class Template extends \KD2\Smartyer
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('form_field', [$this, 'formField']);
-		$this->register_function('select_compte', [$this, 'formSelectCompte']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
 		$this->register_function('input', [$this, 'formInput']);
 
@@ -92,25 +91,6 @@ class Template extends \KD2\Smartyer
 
 		$this->register_modifier('account_position', function ($value) {
 			return Account::POSITIONS_NAMES[$value];
-		});
-
-		$this->register_modifier('get_nom_compte', function ($compte) {
-			if (is_null($compte))
-			{
-				return '';
-			}
-
-			if (!isset($this->liste_comptes))
-			{
-				$this->liste_comptes = (new Compta\Comptes)->getListAll();
-			}
-
-			if (!isset($this->liste_comptes[$compte]))
-			{
-				return '';
-			}
-
-			return $this->liste_comptes[$compte];
 		});
 
 		$this->register_modifier('strftime_fr', function ($ts, $format) {
@@ -641,52 +621,6 @@ class Template extends \KD2\Smartyer
 			$out .= '
 		<dd>' . $field . '</dd>';
 		}
-
-		return $out;
-	}
-
-	protected function formSelectCompte($params)
-	{
-		$name = $params['name'];
-		$comptes = $params['comptes'];
-		$data = isset($params['data']) ? (array) $params['data'] : null;
-		$selected = isset($data[$params['name']]) ? $data[$params['name']] : f($name);
-
-		$out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
-
-		foreach ($comptes as $compte)
-		{
-			// Ne pas montrer les comptes désactivés
-			if (!empty($compte->desactive))
-				continue;
-
-			if (!isset($compte->id[1]) && empty($params['create']))
-			{
-				$out.= '<optgroup label="'.htmlspecialchars($compte->libelle, ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
-			}
-			elseif (!isset($compte->id[2]) && empty($params['create']))
-			{
-				if ($compte->id > 10)
-					$out.= '</optgroup>';
-
-				$out.= '<optgroup label="'.htmlspecialchars($compte->id . ' - ' . $compte->libelle, ENT_QUOTES, 'UTF-8', false).'" class="niveau_2">';
-			}
-			else
-			{
-				$out .= '<option value="'.htmlspecialchars($compte->id, ENT_QUOTES, 'UTF-8', false).'" class="niveau_'.strlen($compte->id).'"';
-
-				if ($selected == $compte->id)
-				{
-					$out .= ' selected="selected"';
-				}
-
-				$out .= '>' . htmlspecialchars($compte->id . ' - ' . $compte->libelle, ENT_QUOTES, 'UTF-8', false);
-				$out .= '</option>';
-			}
-		}
-
-		$out .= '</optgroup>';
-		$out .= '</select>';
 
 		return $out;
 	}
