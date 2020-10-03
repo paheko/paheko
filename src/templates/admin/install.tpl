@@ -3,7 +3,7 @@
 {if $disabled}
     <p class="error">Garradin est déjà installé.</p>
 {else}
-    <p class="intro">
+    <p class="help">
         Bienvenue dans Garradin !
         Veuillez remplir les quelques informations suivantes pour terminer
         l'installation.

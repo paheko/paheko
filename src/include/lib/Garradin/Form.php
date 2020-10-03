@@ -97,6 +97,7 @@ class Form
 			case 'duree': return 'durée';
 			case 'passe_check': return 'vérification de mot de passe';
 			case 'id_account': return 'compte';
+			case 'label': return 'libellé';
 			default: return $name;
 		}
 	}

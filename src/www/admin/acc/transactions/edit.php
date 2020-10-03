@@ -56,7 +56,7 @@ $lines = $transaction->getLinesWithAccounts();
 $lines_accounts = [];
 
 foreach ($lines as $k => $line) {
-	$lines_accounts[$k] = [$line->id_account => sprintf('%s - %s', $line->account_code, $line->account_name)];
+	$lines_accounts[$k] = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
 }
 
 $tpl->assign('lines', $lines);

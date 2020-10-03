@@ -34,8 +34,8 @@ class Line extends Entity
 	protected $_form_rules = [
 		'id_account'     => 'required|numeric|in_table:acc_accounts,id',
 		'id_analytical'  => 'numeric|in_table:acc_accounts,id',
-		'credit'         => 'required|money|min:0',
-		'debit'          => 'required|money|min:0',
+		'credit'         => 'money|min:0',
+		'debit'          => 'money|min:0',
 		'reference'      => 'string|max:200',
 		'label'          => 'string|max:200',
 	];
