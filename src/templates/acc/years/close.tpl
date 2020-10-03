@@ -1,37 +1,32 @@
-{include file="admin/_head.tpl" title="Clôturer un exercice" current="compta/exercices" js=1}
+{include file="admin/_head.tpl" title="Clôturer un exercice" current="acc/years"}
 
 {form_errors}
 
 <form method="post" action="{$self_url}">
 
-    <fieldset>
-        <legend>Clôturer un exercice</legend>
-        <h3 class="warning">
-            Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$exercice.libelle}&nbsp;» ?
-        </h3>
-        <p class="warning">
-            Un exercice clôturé ne peut plus être rouvert ou modifié&nbsp;!<br />
-            Il ne sera plus possible de modifier ou supprimer les écritures de l'exercice clôturé.
-        </p>
-        <dl>
-            <dt>Début de l'exercice</dt>
-            <dd>{$exercice.debut|date_fr:'d/m/Y'}</dd>
-            <dt><label for="f_fin">Fin de l'exercice</label></dt>
-            <dd class="help">Si des opérations existent après cette date, elles seront automatiquement
-                attribuées à un nouvel exercice.</dd>
-            <dd><input type="date" name="fin" id="f_fin" value="{form_field name=fin default=$exercice.fin|date_fr:'Y-m-d'}" size="10" /></dd>
-            <dt>
-                <input type="checkbox" name="reports" {form_field name=reports default="1" checked=true} id="f_reports" /> <label for="f_reports">Exécuter automatiquement les reports à nouveau</label>
-            </dt>
-            <dd class="help">Les soldes créditeurs et débiteurs de chaque compte seront reportés 
-                automatiquement dans le nouvel exercice. Si vous ne cochez pas la case, vous devrez faire les reports à nouveau vous-même.</dd>
-        </h3>
-    </fieldset>
+	<fieldset>
+		<legend>Clôturer un exercice</legend>
+		<h3 class="warning">
+			Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$year.label}&nbsp;» ?
+		</h3>
+		<p class="alert">
+			Un exercice clôturé ne peut plus être rouvert ou modifié&nbsp;!<br />
+			Il ne sera plus possible de modifier ou supprimer les écritures de l'exercice clôturé.
+		</p>
+		<dl>
+			<dt>Début de l'exercice</dt>
+			<dd>{$year.start_date|date_fr:'d/m/Y'}</dd>
+			<dt>Fin de l'exercice</dt>
+			<dd>{$year.end_date|date_fr:'d/m/Y'}</dd>
+		</h3>
+	</fieldset>
 
-    <p class="submit">
-        {csrf_field key="compta_cloturer_exercice_%s"|args:$exercice.id}
-        <input type="submit" name="close" value="Clôturer &rarr;" />
-    </p>
+	<p class="help">Les soldes créditeurs ou débiteurs de chaque compte pourront être reportés automatiquement lors de l'ouverture de l'exercice suivant.</p>
+
+	<p class="submit">
+		{csrf_field key="acc_years_close_%d"|args:$year.id}
+		<input type="submit" name="close" value="Clôturer &rarr;" />
+	</p>
 
 </form>
 

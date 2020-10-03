@@ -15,36 +15,6 @@ $lines = [[], []];
 
 if (f('save') && $form->check('acc_transaction_new')) {
 	try {
-		// Advanced transaction: handle lines
-		if (f('type') == 'advanced' && $lines = f('lines'))
-		{
-			$max = count($lines['label']);
-
-			if ($max != count($lines['debit'])
-				|| $max != count($lines['credit'])
-				|| $max != count($lines['reference'])
-				|| $max != count($lines['account']))
-			{
-				throw new UserException('Erreur dans les lignes de l\'écriture');
-			}
-
-			$out = [];
-
-			// Reorder the POST data as a proper array
-			for ($i = 0; $i < $max; $i++) {
-				$out[] = [
-					'debit'      => $lines['debit'][$i],
-					'credit'     => $lines['credit'][$i],
-					'reference'  => $lines['reference'][$i],
-					'label'      => $lines['label'][$i],
-					'account'    => $lines['account'][$i],
-					'id_analytical' => !empty($lines['id_analytical'][$i]) ? $lines['id_analytical'][$i] : null,
-				];
-			}
-
-			$_POST['lines'] = $lines = $out;
-		}
-
 		$transaction->id_year = $year->id();
 		$transaction->importFromNewForm($chart->id());
 		$transaction->id_creator = $session->getUser()->id;

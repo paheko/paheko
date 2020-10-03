@@ -9,6 +9,7 @@ use Garradin\Accounting\Accounts;
 use Garradin\ValidationException;
 use Garradin\DB;
 use Garradin\Config;
+use Garradin\Utils;
 
 class Transaction extends Entity
 {
@@ -230,7 +231,9 @@ class Transaction extends Entity
 			$this->add($line);
 		}
 		else {
-			foreach ($source['lines'] as $i => $line) {
+			$lines = Utils::array_transpose($source['lines']);
+
+			foreach ($lines as $i => $line) {
 				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 
 				if (!$line['id_account']) {
@@ -254,15 +257,65 @@ class Transaction extends Entity
 		$this->_old_lines = $this->getLines();
 		$this->_lines = [];
 
-		foreach ($source['lines'] as $i => $line) {
+		$lines = Utils::array_transpose($source['lines']);
+
+		foreach ($lines as $i => $line) {
 			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 
 			if (!$line['id_account']) {
-				var_dump($source); exit;
 				throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
 			}
 
-			$line = (new Line)->import($line);
+			$line = (new Line)->importForm($line);
+			$this->add($line);
+		}
+	}
+
+	public function importFromBalanceForm(Year $year, ?array $source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (!isset($source['lines']) || !is_array($source['lines'])) {
+			throw new ValidationException('Aucun contenu trouvé dans le formulaire.');
+		}
+
+		$this->label = 'Balance d\'ouverture';
+		$this->date = $year->start_date;
+		$this->id_year = $year->id();
+
+		$lines = Utils::array_transpose($source['lines']);
+		$debit = $credit = 0;
+
+		foreach ($lines as $line) {
+			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+			$line = (new Line)->importForm($line);
+			$this->add($line);
+
+			$debit += $line->debit;
+			$credit += $line->credit;
+		}
+
+		if ($debit != $credit) {
+			// Add final balance line
+			$line = new Line;
+
+			if ($debit > $credit) {
+				$line->debit = $debit - $credit;
+			}
+			else {
+				$line->credit = $credit - $debit;
+			}
+
+			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
+
+			if (!$open_account) {
+				throw new ValidationException('Aucun compte favori de bilan d\'ouverture n\'existe dans le plan comptable');
+			}
+
+			$line->id_account = $open_account->id();
+
 			$this->add($line);
 		}
 	}

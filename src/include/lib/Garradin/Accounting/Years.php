@@ -25,9 +25,37 @@ class Years
 		return $em->all('SELECT * FROM @TABLE WHERE closed = 0 ORDER BY end_date;');
 	}
 
+	static public function listClosed()
+	{
+		$em = EntityManager::getInstance(Year::class);
+		return $em->all('SELECT * FROM @TABLE WHERE closed = 1 ORDER BY end_date;');
+	}
+
 	static public function list()
 	{
 		$em = EntityManager::getInstance(Year::class);
 		return $em->all('SELECT * FROM @TABLE ORDER BY end_date;');
+	}
+
+	static public function getNewYearDates(): array
+	{
+		$last_year = EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE ORDER BY end_date DESC LIMIT 1;');
+
+		if ($last_year) {
+			$diff = $last_year->start_date->diff($last_year->end_date);
+
+			$start_date = clone $last_year->end_date;
+			$start_date->modify('+1 day');
+
+			$end_date = clone $start_date;
+			$end_date->add($diff);
+		}
+		else {
+			$start_date = new \DateTime;
+			$end_date = clone $start_date;
+			$end_date->modify('+1 year');
+		}
+
+		return [$start_date, $end_date];
 	}
 }

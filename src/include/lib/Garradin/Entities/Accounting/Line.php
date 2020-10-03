@@ -51,16 +51,32 @@ class Line extends Entity
 			$value = $match[1] . str_pad((int)@$match[2], 2, '0', STR_PAD_RIGHT);
 			$value = (int) $value;
 		}
+		elseif ($key == 'id_analytical' && $value == 0) {
+			$value = null;
+		}
 
 		$value = parent::filterUserValue($key, $value);
 
 		return $value;
 	}
 
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (empty($source['id_analytical'])) {
+			unset($source['id_analytical']);
+		}
+
+		return parent::importForm($source);
+	}
+
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
-		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit.');
+		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
 		$this->assert($this->id_transaction, 'Aucun mouvement n\'a été indiqué pour cette ligne.');
 		$this->assert($this->reconciled === 0 || $this->reconciled === 1);

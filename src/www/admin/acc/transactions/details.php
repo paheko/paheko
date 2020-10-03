@@ -8,7 +8,7 @@ require_once __DIR__ . '/../_inc.php';
 $transaction = Transactions::get((int) qg('id'));
 
 if (!$transaction) {
-    throw new UserException('Cette écriture n\'existe pas');
+	throw new UserException('Cette écriture n\'existe pas');
 }
 
 $tpl->assign('files', $transaction->listFiles());
