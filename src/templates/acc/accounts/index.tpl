@@ -25,7 +25,7 @@
 			<th>{$account.label}</th>
 			<td class="desc">{$account.description}</td>
 			<td class="actions">
-				{linkbutton shape="menu" label="Journal" href="acc/accounts/journal.php?id=%d"|args:$account.id}
+				{linkbutton shape="menu" label="Journal" href="acc/accounts/journal.php?id=%d&simple=1"|args:$account.id}
 				{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 					{linkbutton shape="edit" label="Modifier" href="acc/accounts/edit.php?id=%d"|args:$account.id}
 					{linkbutton shape="delete" label="Supprimer" href="acc/accounts/delete.php?id=%d"|args:$account.id}

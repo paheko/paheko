@@ -31,6 +31,7 @@ else
 }
 */
 
+$tpl->assign('simple_view', qg('simple'));
 $tpl->assign('account', $account);
 $tpl->assign('journal', $journal);
 $tpl->assign('sum', $sum);

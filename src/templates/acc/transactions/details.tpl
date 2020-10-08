@@ -72,9 +72,10 @@
 <table class="list">
 	<thead>
 		<tr>
-			<th colspan="2">Comptes</th>
-			<td>Débit</td>
-			<td>Crédit</td>
+			<td>N°</td>
+			<th>Comptes</th>
+			<td class="money">Débit</td>
+			<td class="money">Crédit</td>
 			<td>Libellé</td>
 			<td>Référence</td>
 		</tr>
@@ -84,8 +85,8 @@
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>
-			<td>{$line.debit|escape|html_money}&nbsp;{$config.monnaie}</td>
-			<td>{$line.credit|escape|html_money}&nbsp;{$config.monnaie}</td>
+            <td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
+            <td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 		</tr>

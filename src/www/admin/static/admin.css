@@ -878,7 +878,7 @@ nav.acc-year h4 {
     text-align: left;
 }
 
-#rapport td.money, #rapport th.money {
+td.money, th.money {
     text-align: right;
 }
 

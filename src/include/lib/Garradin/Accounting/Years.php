@@ -14,9 +14,9 @@ class Years
 		return EntityManager::findOneById(Year::class, $year_id);
 	}
 
-	static public function getCurrentOpenYearIfSingle()
+	static public function getCurrentOpenYear()
 	{
-		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE WHERE closed = 0 GROUP BY closed HAVING COUNT(*) = 1;');
+		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
 	}
 
 	static public function listOpen()
