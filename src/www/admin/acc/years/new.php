@@ -5,7 +5,7 @@ use Garradin\Accounting\Years;
 use Garradin\Accounting\Charts;
 use Garradin\Entities\Accounting\Year;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ADMIN);
 
