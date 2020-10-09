@@ -11,6 +11,13 @@
 
 
 {if $account.type}
+
+{if $simple_view}
+	<p class="alert">
+		Attention&nbsp;: en comptabilité, les comptes de banque, de caisse, et de tiers apparaissent inversés par rapport aux relevés (<em>la banque doit de l'argent à l'association, donc les sommes placées sur le compte bancaires apparaissent au débit</em>).
+	</p>
+{/if}
+
 <nav class="tabs">
 	<ul>
 		<li{if $simple_view} class="current"{/if}><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;simple=1&amp;year={$year_id}">Vue simplifiée</a></li>
@@ -50,12 +57,12 @@
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.line_reference}{$line.line_reference}{elseif $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
 			<td>{$line.date|date_fr:'d/m/Y'}</td>
 			{if $simple_view}
-			<td class="money">{if $line.debit}-{$line.debit|escape|html_money}{else}+{$line.credit|escape|html_money}{/if}</td>
+			<td class="money">{if $line.debit}-{$line.debit|raw|html_money}{else}+{$line.credit|raw|html_money}{/if}</td>
 			{else}
-			<td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
-			<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+			<td class="money">{$line.debit|raw|html_money}</td>
+			<td class="money">{$line.credit|raw|html_money}</td>
 			{/if}
-			<td class="money">{$line.running_sum|escape|html_money}</td>
+			<td class="money">{$line.running_sum|raw|html_money:false}</td>
 			<th>{$line.label}</th>
 			<td class="actions">
 				{linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
@@ -66,7 +73,7 @@
 	<tfoot>
 		<tr>
 			<td colspan="{if $simple_view}3{else}4{/if}">Solde</td>
-			<td class="money">{$sum|escape|html_money}</td>
+			<td class="money">{$sum|raw|html_money:false}</td>
 			<td colspan="2"></td>
 		</tr>
 	</tfoot>

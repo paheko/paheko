@@ -4,6 +4,7 @@
         <ul>
             <li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a></li>
             <li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a></li>
+            <li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a></li>
             <li{if $current == "statement"} class="current"{/if}><a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a></li>
             <li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?year={$year.id}">Bilan</a></li>
         </ul>

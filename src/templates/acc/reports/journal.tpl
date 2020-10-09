@@ -23,8 +23,8 @@
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
 		{foreach from=$transaction.lines item="line"}
 			<td>{$line.account_code} - {$line.account_label}</td>
-			<td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
-			<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+			<td class="money">{$line.debit|escape|html_money}</td>
+			<td class="money">{$line.credit|escape|html_money}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 		</tr>
