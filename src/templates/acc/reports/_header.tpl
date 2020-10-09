@@ -3,8 +3,8 @@
     {if isset($projet)}
         <h3>Projet&nbsp;: {$projet.libelle}</h3>
     {else}
-        <p>Exercice comptable {if $exercice.cloture}clôturé{else}en cours{/if} du
-            {$exercice.debut|date_fr:'d/m/Y'} au {$exercice.fin|date_fr:'d/m/Y'}, généré le {$cloture|date_fr:'d/m/Y'}</p>
+        <p>Exercice comptable {if $year.closed}clôturé{else}en cours{/if} du
+            {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}, généré le {$close_date|date_fr:'d/m/Y'}</p>
     {/if}
 
 	<p class="noprint">

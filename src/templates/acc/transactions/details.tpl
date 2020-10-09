@@ -19,7 +19,7 @@
 
 	<dt>Exercice</dt>
 	<dd>
-		<a href="{$admin_url}acc/years/year.php?id={$transaction.id_year}">{$tr_year.label}</a>
+		<a href="{$admin_url}acc/reports/ledger.php?year={$transaction.id_year}">{$tr_year.label}</a>
 		| Du {$tr_year.start_date|date_fr:'d/m/Y'} au {$tr_year.end_date|date_fr:'d/m/Y'}
 		| <strong>{if $tr_year.closed}Clôturé{else}En cours{/if}</strong>
 	</dd>
@@ -83,7 +83,7 @@
 	<tbody>
 		{foreach from=$transaction->getLinesWithAccounts() item="line"}
 		<tr>
-			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}">{$line.account_code}</a></td>
+			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>
             <td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
             <td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>

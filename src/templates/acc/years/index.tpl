@@ -16,10 +16,10 @@
 			| Du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}
 		</dd>
 		<dd class="desc">
-			<a href="{$admin_url}acc/reports/journal.php?exercice={$year.id}">Journal général</a>
-			| <a href="{$admin_url}acc/reports/grand_livre.php?exercice={$year.id}">Grand livre</a>
-			| <a href="{$admin_url}acc/reports/compte_resultat.php?exercice={$year.id}">Compte de résultat</a>
-			| <a href="{$admin_url}acc/reports/bilan.php?exercice={$year.id}">Bilan</a>
+			<a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a>
+			| <a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a>
+			| <a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a>
+			| <a href="{$admin_url}acc/reports/balance_sheet.php?year={$year.id}">Bilan</a>
 		</dd>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$year.closed}
 		<dd class="actions">

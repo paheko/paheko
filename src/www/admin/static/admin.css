@@ -850,11 +850,6 @@ nav.acc-year h4 {
     font-weight: normal;
 }
 
-#rapport h3 {
-    text-align: center;
-    margin-bottom: .5em;
-}
-
 #rapport table {
     width: 100%;
 }
@@ -1037,13 +1032,13 @@ a.icn[title]:hover:after {
 
 .num a {
     text-decoration: none;
-    border-radius: .5em;
+    border-radius: .5rem;
     display: inline-block;
     text-align: center;
-    padding: 0 .2em;
-    background: rgb(247, 164, 70);
-    background: rgba(217, 134, 40, 0.5);
-    background: rgba(var(--gMainColor), 0.5);
+    padding: 0 .3rem;
+    background: rgba(var(--gMainColor), 0.7);
+    color: #fff;
+    white-space: pre;
 }
 
 .actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover {
