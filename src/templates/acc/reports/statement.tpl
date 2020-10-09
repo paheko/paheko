@@ -24,7 +24,7 @@
 					<tfoot>
 						<tr>
 							<th>Total charges</th>
-							<td class="money">{$expense_sum|escape|html_money}</td>
+							<td class="money">{$expense_sum|raw|html_money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -34,7 +34,7 @@
 					<tfoot>
 						<tr>
 							<th>Total produits</th>
-							<td class="money">{$revenue_sum|escape|html_money}</td>
+							<td class="money">{$revenue_sum|raw|html_money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -48,7 +48,7 @@
 					<tfoot>
 						<tr>
 							<th>Résultat (excédent)</th>
-							<td class="money">{$result|escape|html_money}</td>
+							<td class="money">{$result|raw|html_money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -60,7 +60,7 @@
 					<tfoot>
 						<tr>
 							<th>Résultat (déficit)</th>
-							<td class="money">{$result|escape|html_money}</td>
+							<td class="money">{$result|raw|html_money:false}</td>
 						</tr>
 					</tfoot>
 				</table>

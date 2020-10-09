@@ -101,7 +101,10 @@ class Template extends \KD2\Smartyer
 			return Utils::date_fr($format, $ts);
 		});
 
-		$this->register_modifier('html_money', function (string $number): string {
+		$this->register_modifier('html_money', function (string $number, bool $hide_empty = true): string {
+			if ($hide_empty && !$number) {
+				return '';
+			}
 			return sprintf('<b class="money">%s</b>', number_format($number/100, 2, ',', '&nbsp;'));
 		});
 

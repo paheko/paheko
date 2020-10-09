@@ -7,7 +7,8 @@
 	<table class="list">
 		<caption><h4><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code} — {$account.label}</h4></caption>
 		<colgroup>
-			<col width="10%" />
+			<col width="5%" />
+			<col width="5%" />
 			<col width="10%" />
 			<col width="50%" />
 			<col width="10%" />
@@ -17,6 +18,7 @@
 		<thead>
 			<tr>
 				<td>Réf.</td>
+				<td>Réf. ligne</td>
 				<td>Date</td>
 				<th>Intitulé</th>
 				<td class="money">Débit</td>
@@ -27,23 +29,23 @@
 		<tbody>
 		{foreach from=$account.lines item="line"}
 			<tr>
-				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.line_reference}{$line.line_reference}{elseif $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
+				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
+				<td class="num">{$line.line_reference}</td>
 				<td>{$line.date|date_fr:'d/m/Y'}</td>
 				<th>{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
-				<td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
-				<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
-				<td class="money">{$line.running_sum|escape|html_money}</td>
+				<td class="money">{$line.debit|raw|html_money}</td>
+				<td class="money">{$line.credit|raw|html_money}</td>
+				<td class="money">{$line.running_sum|raw|html_money:false}</td>
 			</tr>
 		{/foreach}
 		</tbody>
 		<tfoot>
 			<tr>
-				<td></td>
-				<td></td>
+				<td colspan="3"></td>
 				<th>Solde final</th>
-				<td class="money">{if $account.debit}{$account.debit|escape|html_money}{/if}</td>
-				<td class="money">{if $account.credit}{$account.credit|escape|html_money}{/if}</td>
-				<td class="money">{$account.sum|escape|html_money}</td>
+				<td class="money">{$account.debit|raw|html_money}</td>
+				<td class="money">{$account.credit|raw|html_money}</td>
+				<td class="money">{$account.sum|raw|html_money:false}</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -59,8 +61,8 @@
 		<tfoot>
 			<tr>
 				<td><strong>Totaux</strong></td>
-				<td class="money">{$account.all_debit|escape|html_money}</td>
-				<td class="money">{$account.all_credit|escape|html_money}</td>
+				<td class="money">{$account.all_debit|raw|html_money:false}</td>
+				<td class="money">{$account.all_credit|raw|html_money:false}</td>
 				<td></td>
 			</tr>
 		</tfoot>
