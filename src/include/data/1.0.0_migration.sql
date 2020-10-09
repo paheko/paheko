@@ -64,12 +64,12 @@ INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_cre
 
 -- Création des lignes associées aux mouvements
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, reference, id_analytical)
-	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(montant * 100 AS INT), numero_cheque,
+	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(REPLACE(montant * 100, '.0', '') AS INT), numero_cheque,
 	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
 	FROM compta_journal;
 
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, reference, id_analytical)
-	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(montant * 100 AS INT), 0, numero_cheque,
+	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_debit), CAST(REPLACE(montant * 100, '.0', '') AS INT), 0, numero_cheque,
 	CASE WHEN id_projet IS NOT NULL THEN (SELECT id FROM acc_accounts WHERE code = '99' || substr('0000' || id_projet, -4)) ELSE NULL END
 	FROM compta_journal;
 
