@@ -11,6 +11,18 @@ use KD2\DB\EntityManager;
 
 class Reports
 {
+	static public function getResult(array $criterias): ?int
+	{
+		$where = self::getWhereClause($criterias);
+		$sql = sprintf('SELECT SUM(l.credit) - SUM(l.debit)
+			FROM %s l
+			INNER JOIN %s t ON t.id = l.id_transaction
+			INNER JOIN %s a ON a.id = l.id_account
+			WHERE %s AND a.position IN (?, ?);',
+			Line::TABLE, Transaction::TABLE, Account::TABLE, $where);
+		return DB::getInstance()->firstColumn($sql, Account::EXPENSE, Account::REVENUE);
+	}
+
 	static public function getClosingSumsWithAccounts(array $criterias): array
 	{
 		$where = self::getWhereClause($criterias);
