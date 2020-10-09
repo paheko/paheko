@@ -655,6 +655,11 @@ table.list {
     width: 100%;
 }
 
+table.list caption {
+    text-align: center;
+    font-size: 1.2em;
+}
+
 table.list td.desc {
     font-size: .9em;
     color: #666;
@@ -692,25 +697,16 @@ table.list th, table.list td {
 }
 
 table.list tr {
-    border: 1px solid rgb(217, 134, 40);
-    border-color: rgba(var(--gSecondColor), 0.5);
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
     transition: background .2s
 }
 
-table.list tr:nth-child(even) {
-    background: rgb(255, 174, 80);
-    background: rgba(217, 134, 40, 0.2);
+table.list tr:nth-child(even), table.multi tbody:nth-child(even) {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
-table.list.multi tr:nth-child(even) {
-    background: inherit;
-}
-
-table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
-    background: rgb(255, 174, 80);
-    background: rgba(217, 134, 40, 0.2);
-    background: rgba(var(--gSecondColor), 0.2);
+table.multi tr {
+    background: inherit !important;
 }
 
 table.list tr.checked {
@@ -864,22 +860,8 @@ nav.acc-year h4 {
     border-color: rgba(var(--gSecondColor), 0.5);
 }
 
-#rapport table table tr th {
-    width: 80%;
-}
-
-#rapport td, #rapport th {
-    padding: 0.2em 0.5em;
-    text-align: left;
-}
-
 td.money, th.money {
     text-align: right;
-}
-
-#rapport .compte th {
-    font-weight: normal;
-    padding-left: 1em;
 }
 
 #rapport table table td {

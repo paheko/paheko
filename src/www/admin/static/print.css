@@ -23,9 +23,9 @@ main {
     text-align: center;
 }
 
-table.list thead {
-    background: #000;
-    color: #fff;
+table thead {
+    background: #333;
+    color: #fff !important;
 }
 
 table.list tfoot tr {
@@ -49,6 +49,10 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: #ddd;
 }
 
+table.list td {
+    border: 1px solid #999;
+}
+
 #rapport tr {
     color: #000 !important;
 }
@@ -68,6 +72,22 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
 .noprint {
     display: none;
 }
+
 td.actions * {
     display: none;
+}
+
+td.num a {
+    border: .1rem solid #000;
+    background: #fff;
+}
+
+a {
+    color: black !important;
+    text-decoration: none;
+}
+
+/* Don't repeat the table footer on every printed page */
+table tfoot{
+    display:table-row-group;
 }

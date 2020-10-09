@@ -53,18 +53,24 @@ class Reports
 		return DB::getInstance()->getAssoc($sql);
 	}
 
+	static protected function getWhereClause(array $criterias): string
+	{
+		if (!empty($criterias['year'])) {
+			$where = sprintf('t.id_year = %d', $criterias['year']);
+		}
+		else {
+			throw new \LogicException('Unknown criteria');
+		}
+
+		return $where;
+	}
+
 	/**
 	 * Grand livre
 	 */
 	static public function getGeneralLedger(array $criterias): \Generator
 	{
-		if (!empty($criterias['year'])) {
-			$year_id = (int)$criterias['year'];
-			$where = sprintf('t.id_year = %d', $year_id);
-		}
-		else {
-			throw new \LogicException('Unknown criteria');
-		}
+		$where = self::getWhereClause($criterias);
 
 		$db = DB::getInstance();
 
@@ -77,9 +83,13 @@ class Reports
 
 		$account = null;
 		$debit = $credit = 0;
-		$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $year_id);
+		$accounts = null;
 
 		foreach ($db->iterate($sql) as $row) {
+			if (null === $accounts) {
+				$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $row->id_year);
+			}
+
 			if (null !== $account && $account->id != $row->id_account) {
 				yield $account;
 				$account = null;
@@ -110,9 +120,63 @@ class Reports
 			$account->lines[] = $row;
 		}
 
+		if (null === $account) {
+			return;
+		}
+
 		$account->all_debit = $debit;
 		$account->all_credit = $credit;
 
 		yield $account;
+	}
+
+	static public function getJournal(array $criterias): \Generator
+	{
+		$where = self::getWhereClause($criterias);
+
+		$sql = sprintf('SELECT t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label FROM acc_transactions t
+			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			WHERE %s ORDER BY t.date;', $where);
+
+		$transaction = null;
+		$accounts = null;
+		$db = DB::getInstance();
+
+		foreach ($db->iterate($sql) as $row) {
+			if (null === $accounts) {
+				$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $row->id_year);
+			}
+
+			if (null !== $transaction && $transaction->id != $row->id) {
+				yield $transaction;
+				$transaction = null;
+			}
+
+			if (null === $transaction) {
+				$transaction = (object) [
+					'id'        => $row->id,
+					'label'     => $row->label,
+					'date'      => \DateTime::createFromFormat('Y-m-d', $row->date),
+					'reference' => $row->reference,
+					'lines'     => [],
+				];
+			}
+
+			$transaction->lines[] = (object) [
+				'account_label' => $accounts[$row->id_account]->label,
+				'account_code'  => $accounts[$row->id_account]->code,
+				'label'         => $row->line_label,
+				'reference'     => $row->line_reference,
+				'id_account'    => $row->id_account,
+				'credit'        => $row->credit,
+				'debit'         => $row->debit,
+			];
+		}
+
+		if (null === $transaction) {
+			return;
+		}
+
+		yield $transaction;
 	}
 }
