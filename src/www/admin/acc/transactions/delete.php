@@ -14,6 +14,10 @@ if (!$transaction) {
 	throw new UserException('Cette écriture n\'existe pas');
 }
 
+if ($transaction->validated) {
+	throw new UserException('Cette écriture est validée et ne peut être modifiée');
+}
+
 if (f('delete') && $form->check('acc_delete_' . $transaction->id))
 {
 	try
