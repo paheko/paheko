@@ -101,12 +101,8 @@ class Template extends \KD2\Smartyer
 			return Utils::date_fr($format, $ts);
 		});
 
-		$this->register_modifier('escape_money', function ($number) {
-			return number_format((float)$number, 2, ',', ' ');
-		});
-
-		$this->register_modifier('html_money', function ($number) {
-			return '<b class="money">' . number_format((float)$number, 2, ',', '&nbsp;') . '</b>';
+		$this->register_modifier('html_money', function (string $number): string {
+			return sprintf('<b class="money">%s</b>', number_format($number/100, 2, ',', '&nbsp;'));
 		});
 
 		$this->register_modifier('format_wiki', function ($str) {
