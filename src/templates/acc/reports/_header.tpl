@@ -1,4 +1,4 @@
-<div class="exercice">
+<div class="year-header">
 
     <nav class="tabs noprint">
         <ul>
@@ -18,9 +18,6 @@
     {/if}
 
 	<p class="noprint">
-		<button onclick="window.print(); return false;">
-			<b href="#need_js" class="action icn print">⎙</b>
-			Imprimer
-		</button>
+		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
 	</p>
 </div>

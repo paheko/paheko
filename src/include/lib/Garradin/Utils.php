@@ -117,11 +117,27 @@ class Utils
 
         if ((int) $match[3] < 0 || (int) $match[3] > 59)
             return false;
-        
+
         if (isset($match[4]) && ((int) $match[4] < 0 || (int) $match[4] > 59))
             return false;
 
         return true;
+    }
+
+    static public function money_format(string $number, string $dec_point = ',', string $thousands_sep = ' '): string {
+        $decimals = substr($number, -2);
+        $number = substr($number, 0, -2);
+        $digits = '';
+
+        for ($i = strlen($number); $i > 0; $i--) {
+            $digits .= $number[$i - 1];
+
+            if ($i % 3 == 0) {
+                $digits .= $thousands_sep;
+            }
+        }
+
+        return sprintf('%s%s%s', strrev($digits), $dec_point, $decimals);
     }
 
     static public function getRequestURI()

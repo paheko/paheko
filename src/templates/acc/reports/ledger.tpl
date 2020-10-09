@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Grand livre" current="compta/exercices" body_id="rapport"}
+{include file="admin/_head.tpl" title="Grand livre" current="acc/years"}
 
 {include file="acc/reports/_header.tpl" current="ledger"}
 
@@ -51,17 +51,17 @@
 {if isset($account->all_debit)}
 	<table class="list">
 		<colgroup>
-			<col width="15%" />
-			<col width="65%" />
+			<col width="70%" />
+			<col width="10%" />
 			<col width="10%" />
 			<col width="10%" />
 		</colgroup>
 		<tfoot>
 			<tr>
-				<td><strong>Total</strong></td>
-				<th></th>
-				<td>{$account.all_debit|escape|html_money}</td>
-				<td>{$account.all_credit|escape|html_money}</td>
+				<td><strong>Totaux</strong></td>
+				<td class="money">{$account.all_debit|escape|html_money}</td>
+				<td class="money">{$account.all_credit|escape|html_money}</td>
+				<td></td>
 			</tr>
 		</tfoot>
 	</table>

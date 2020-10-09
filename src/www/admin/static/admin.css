@@ -846,52 +846,41 @@ nav.acc-year h4 {
     font-weight: normal;
 }
 
-#rapport table {
+table.statement, table.statement table {
     width: 100%;
 }
 
-#rapport tr {
+table.statement td, table.statement th {
+    padding: .5rem;
     vertical-align: top;
 }
 
-#rapport table table {
-    border: 1px solid rgb(217, 134, 40);
-    border-color: rgba(217, 134, 40, 0.5);
-    border-color: rgba(var(--gSecondColor), 0.5);
+table.statement table.list td, table.statement table.list th {
+    padding: .2rem .5rem;
+}
+
+table.statement table {
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
 }
 
 td.money, th.money {
     text-align: right;
 }
 
-#rapport table table td {
-    text-align: right;
-}
-
-#rapport .parent {
-    font-weight: bold;
-    background: rgb(247, 164, 70);
-    background: rgba(217, 134, 40, 0.2);
-    background: rgba(var(--gSecondColor), 0.2);
-}
-
-#rapport table table tfoot tr {
-    background: rgb(247, 164, 70);
-    background: rgba(217, 134, 40, 0.1);
+.statement table tfoot tr {
     background: rgba(var(--gSecondColor), 0.1);
-    color: rgb(156, 79, 21);
     color: rgb(var(--gMainColor));
 }
 
-#rapport .exercice {
+.year-header {
     text-align: center;
     margin-bottom: .8em;
     padding-bottom: .5em;
     border-bottom: 1pt solid #999;
 }
 
-#rapport h1 {
-    text-align: center;
+.year-header button {
+    font-size: 1.3rem;
 }
 
 h2.ruler {

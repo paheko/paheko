@@ -11,15 +11,20 @@ use KD2\DB\EntityManager;
 
 class Reports
 {
-	static public function getClosingSumsWithAccounts(int $year_id): array
+	static public function getClosingSumsWithAccounts(array $criterias): array
 	{
+		$where = self::getWhereClause($criterias);
+
 		// Find sums, link them to accounts
-		$sql = sprintf('SELECT l.id_account, a.code AS account_code, a.label AS account_name, SUM(l.credit) AS credit, SUM(l.debit) AS debit
+		$sql = sprintf('SELECT a.id, a.code, a.label, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			SUM(l.credit) - SUM(l.debit) AS sum
 			FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			INNER JOIN %s a ON a.id = l.id_account
-			WHERE t.id_year = %d GROUP BY l.id_account;',
-			Line::TABLE, Transaction::TABLE, Account::TABLE, $year_id);
+			WHERE %s
+			GROUP BY l.id_account
+			ORDER BY a.code COLLATE NOCASE;',
+			Line::TABLE, Transaction::TABLE, Account::TABLE, $where);
 		return DB::getInstance()->getGrouped($sql);
 	}
 
@@ -27,7 +32,7 @@ class Reports
 	{
 		$year = Years::get($year_id);
 
-		if (true || $year->closed) {
+		if (true || $year->closed) { // FIXME!!!!
 			return self::computeClosingSums($year->id());
 		}
 		else {
@@ -55,14 +60,21 @@ class Reports
 
 	static protected function getWhereClause(array $criterias): string
 	{
+		$where = [];
+
 		if (!empty($criterias['year'])) {
-			$where = sprintf('t.id_year = %d', $criterias['year']);
+			$where[] = sprintf('t.id_year = %d', $criterias['year']);
 		}
-		else {
+
+		if (!empty($criterias['position'])) {
+			$where[] = sprintf('a.position = %d', $criterias['position']);
+		}
+
+		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}
 
-		return $where;
+		return implode(' AND ', $where);
 	}
 
 	/**
@@ -79,7 +91,7 @@ class Reports
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			WHERE %s
-			ORDER BY a.code COLLATE NOCASE, t.date;', $where);
+			ORDER BY a.code COLLATE NOCASE, t.date, t.id;', $where);
 
 		$account = null;
 		$debit = $credit = 0;
@@ -136,7 +148,7 @@ class Reports
 
 		$sql = sprintf('SELECT t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
-			WHERE %s ORDER BY t.date;', $where);
+			WHERE %s ORDER BY t.date, t.id;', $where);
 
 		$transaction = null;
 		$accounts = null;
