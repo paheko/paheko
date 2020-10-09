@@ -1,33 +1,38 @@
 {include file="admin/_head.tpl" title="Journal général" current="compta/exercices" body_id="rapport"}
 
-{include file="admin/compta/rapports/_header.tpl"}
+{include file="acc/reports/_header.tpl" current="journal"}
 
 <table class="list multi">
     <thead>
         <tr>
+            <td>Réf.</td>
             <td>Date</td>
-            <th>Intitulé</th>
+            <th>Libellé</th>
             <td>Comptes</td>
-            <td>Débit</td>
-            <td>Crédit</td>
+            <td class="money">Débit</td>
+            <td class="money">Crédit</td>
+            <td>Libellé ligne</td>
+            <td>Réf. ligne</td>
         </tr>
     </thead>
+    {foreach from=$journal item="transaction"}
     <tbody>
-    {foreach from=$journal item="ligne"}
         <tr>
-            <td rowspan="2">{$ligne.date|date_fr:'d/m/Y'}</td>
-            <th rowspan="2">{$ligne.libelle}</th>
-            <td>{$ligne.compte_debit} - {$ligne.compte_debit|get_nom_compte}</td>
-            <td>{$ligne.montant|escape|html_money}</td>
-            <td></td>
+            <td rowspan="{$transaction.lines|count}" class="num"><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">{if $transaction.reference}{$transaction.reference}{else}#{$transaction.id}{/if}</a></td>
+            <td rowspan="{$transaction.lines|count}">{$transaction.date|date_fr:'d/m/Y'}</td>
+            <th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
+        {foreach from=$transaction.lines item="line"}
+            <td>{$line.account_code} - {$line.account_label}</td>
+            <td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
+            <td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+            <td>{$line.label}</td>
+            <td>{$line.reference}</td>
         </tr>
         <tr>
-            <td>{$ligne.compte_credit} - {$ligne.compte_credit|get_nom_compte}</td>
-            <td></td>
-            <td>{$ligne.montant|escape|html_money}</td>
+        {/foreach}
         </tr>
-    {/foreach}
     </tbody>
+    {/foreach}
 </table>
 
 <p class="help">Toutes les opérations sont libellées en {$config.monnaie}.</p>
