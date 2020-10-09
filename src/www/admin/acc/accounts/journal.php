@@ -31,20 +31,14 @@ if (count($journal)) {
 	$sum = end($journal)->running_sum;
 }
 
-/*
-if (($compte->position & Compta\Comptes::ACTIF) || ($compte->position & Compta\Comptes::CHARGE))
-{
-    $tpl->assign('credit', '-');
-    $tpl->assign('debit', '+');
-}
-else
-{
-    $tpl->assign('credit', '+');
-    $tpl->assign('debit', '-');
-}
-*/
+$simple = qg('simple');
 
-$tpl->assign('simple_view', qg('simple'));
+// Use simplified view for favourite accounts
+if (null === $simple) {
+	$simple = (bool) $account->type;
+}
+
+$tpl->assign('simple_view', $simple);
 $tpl->assign('year_id', $year_id);
 $tpl->assign('account', $account);
 $tpl->assign('journal', $journal);
