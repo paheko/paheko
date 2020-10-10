@@ -31,13 +31,13 @@ class Entity extends AbstractEntity
 		return $this->import($source);
 	}
 
-	protected function filterUserValue(string $type, $value)
+	protected function filterUserValue(string $type, $value, string $key)
 	{
 		if ($type == 'date') {
 			return \DateTime::createFromFormat('d/m/Y', $value);
 		}
 		else {
-			return parent::filterUserValue($type, $value);
+			return parent::filterUserValue($type, $value, $key);
 		}
 	}
 

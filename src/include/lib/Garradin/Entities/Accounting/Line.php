@@ -40,13 +40,14 @@ class Line extends Entity
 		'label'          => 'string|max:200',
 	];
 
-	public function filterUserValue(string $key, $value)
+	public function filterUserValue(string $type, $value, string $key)
 	{
 		if ($key == 'credit' || $key == 'debit')
 		{
 			if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
 				throw new ValidationException('Le format du montant est invalide. Format accepté, exemple : 142,02');
 			}
+
 
 			$value = $match[1] . str_pad((int)@$match[2], 2, '0', STR_PAD_RIGHT);
 			$value = (int) $value;
@@ -55,7 +56,7 @@ class Line extends Entity
 			$value = null;
 		}
 
-		$value = parent::filterUserValue($key, $value);
+		$value = parent::filterUserValue($type, $value, $key);
 
 		return $value;
 	}

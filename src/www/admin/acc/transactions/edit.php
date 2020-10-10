@@ -28,6 +28,8 @@ if ($year->closed) {
 $chart = $year->chart();
 $accounts = $chart->accounts();
 
+$tpl->assign('chart', $chart);
+
 $rules = [
 	'lines' => 'array|required',
 ];

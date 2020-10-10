@@ -8,6 +8,10 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ECRITURE);
 
+if (!CURRENT_YEAR_ID) {
+	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
+}
+
 $chart = $current_year->chart();
 $accounts = $chart->accounts();
 
@@ -45,6 +49,7 @@ $tpl->assign('date', $session->get('acc_last_date') ?: $current_year->start_date
 $tpl->assign('ok', (int) qg('ok'));
 
 $tpl->assign('lines', $lines);
+$tpl->assign('chart_id', $chart->id());
 
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
 $tpl->display('acc/transactions/new.tpl');

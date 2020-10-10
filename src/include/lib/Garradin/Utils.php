@@ -124,20 +124,15 @@ class Utils
         return true;
     }
 
-    static public function money_format(string $number, string $dec_point = ',', string $thousands_sep = ' '): string {
-        $decimals = substr($number, -2);
-        $number = substr($number, 0, -2);
-        $digits = '';
-
-        for ($i = strlen($number); $i > 0; $i--) {
-            $digits .= $number[$i - 1];
-
-            if ($i % 3 == 0) {
-                $digits .= $thousands_sep;
-            }
+    static public function money_format($number, string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
+        if ($number == 0) {
+            return $zero_if_empty ? '0' : '0,00';
         }
 
-        return sprintf('%s%s%s', strrev($digits), $dec_point, $decimals);
+        $decimals = substr($number, -2);
+        $number = substr($number, 0, -2);
+
+        return sprintf('%s%s%s', number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
 
     static public function getRequestURI()

@@ -13,7 +13,7 @@
 
 	{* Saisie avancée *}
 	<fieldset data-types="advanced">
-		{include file="acc/transactions/_lines_form.tpl"}
+		{include file="acc/transactions/_lines_form.tpl" chart_id=$chart.id}
 	</fieldset>
 
 	<fieldset>

@@ -101,11 +101,11 @@ class Template extends \KD2\Smartyer
 			return Utils::date_fr($format, $ts);
 		});
 
-		$this->register_modifier('html_money', function (string $number, bool $hide_empty = true): string {
+		$this->register_modifier('html_money', function ($number, bool $hide_empty = true): string {
 			if ($hide_empty && !$number) {
 				return '';
 			}
-			return sprintf('<b class="money">%s</b>', number_format($number/100, 2, ',', '&nbsp;'));
+			return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
 		});
 
 		$this->register_modifier('format_wiki', function ($str) {
@@ -187,12 +187,14 @@ class Template extends \KD2\Smartyer
 		}
 
 		$current_value = null;
+		$current_value_from_user = false;
 
 		if (isset($value)) {
 			$current_value = $value;
 		}
 		elseif (isset($_POST[$name])) {
 			$current_value = $_POST[$name];
+			$current_value_from_user = true;
 		}
 		elseif (isset($default)) {
 			$current_value = $default;
@@ -292,6 +294,10 @@ class Template extends \KD2\Smartyer
 			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', $this->escape($attributes['id']), $button, $values);
 		}
 		elseif ($type == 'money') {
+			if (null !== $current_value && !$current_value_from_user) {
+				$current_value = Utils::money_format($current_value, ',', '');
+			}
+
 			$currency = Config::getInstance()->get('monnaie');
 			$input = sprintf('<input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b>', $attributes_string, $this->escape($current_value), $currency);
 		}

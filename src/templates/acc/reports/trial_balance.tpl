@@ -13,8 +13,8 @@
 			<td class="money">Solde créditeur</td>
 		</tr>
 	</thead>
-	{foreach from=$balance item="account"}
 	<tbody>
+	{foreach from=$balance item="account"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a></td>
 			<th>{$account.label}</th>
@@ -23,8 +23,8 @@
 			<td class="money">{if $account.sum < 0}{$account.debit|escape|html_money}{/if}</td>
 			<td class="money">{if $account.sum > 0}{$account.credit|escape|html_money}{/if}</td>
 		</tr>
-	</tbody>
 	{/foreach}
+	</tbody>
 </table>
 
 <p class="help">Toutes les opérations sont libellées en {$config.monnaie}.</p>

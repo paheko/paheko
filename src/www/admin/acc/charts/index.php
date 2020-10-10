@@ -3,14 +3,12 @@ namespace Garradin;
 
 use Garradin\Accounting\Charts;
 
-require_once __DIR__ . '/../../_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess('compta', Membres::DROIT_ACCES);
 
-$charts = new Charts;
-
-$tpl->assign('list', $charts->list());
-$tpl->assign('charts_groupped', $charts->listByCountry());
+$tpl->assign('list', Charts::list());
+$tpl->assign('charts_groupped', Charts::listByCountry());
 $tpl->assign('country_list', Utils::getCountryList());
 
 $tpl->display('acc/charts/index.tpl');

@@ -23,17 +23,12 @@ if ($current_year_id) {
 if (!$current_year_id) {
 	$current_year = Years::getCurrentOpenYear();
 
-	if (!$current_year) {
-		Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
+	if ($current_year) {
+		$current_year_id = $current_year->id();
+		$session->set('acc_year', $current_year_id);
 	}
-
-	$current_year_id = $current_year->id();
 }
 
-if ($session->get('acc_year') != $current_year_id) {
-	$session->set('acc_year', $current_year_id);
-}
-
-define('Garradin\CURRENT_YEAR_ID', $current_year->id());
+define('Garradin\CURRENT_YEAR_ID', $current_year_id);
 
 $tpl->assign('current_year', $current_year);

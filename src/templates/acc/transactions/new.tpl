@@ -27,40 +27,40 @@
 	<fieldset data-types="transfer">
 		<legend>Virement</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="transfer_from" label="De" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="transfer_to" label="Vers" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="transfer_from" label="De" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="transfer_to" label="Vers" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="revenue">
 		<legend>Recette</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=revenue"|args:$admin_url name="revenue_from" label="Type de recette" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="revenue_to" label="Compte d'encaissement" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=revenue&chart=%d"|args:$admin_url,$chart_id name="revenue_from" label="Type de recette" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="revenue_to" label="Compte d'encaissement" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="expense">
 		<legend>Dépense</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="expense_to" label="Type de dépense" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=common"|args:$admin_url name="expense_from" label="Compte de décaissement" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=expense&chart=%d"|args:$admin_url,$chart_id name="expense_to" label="Type de dépense" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="expense_from" label="Compte de décaissement" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="debt">
 		<legend>Dette</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="debt_from" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=expense"|args:$admin_url name="debt_to" label="Type de dette (dépense)" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=thirdparty&chart=%d"|args:$admin_url,$chart_id name="debt_from" label="Compte de tiers" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=expense&chart=%d"|args:$admin_url,$chart_id name="debt_to" label="Type de dette (dépense)" required=1}
 		</dl>
 	</fieldset>
 
 	<fieldset data-types="credit">
 		<legend>Créance</legend>
 		<dl>
-			{input type="list" target="%sacc/accounts/selector.php?target=thirdparty"|args:$admin_url name="credit_to" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/accounts/selector.php?target=revenue"|args:$admin_url name="credit_from" label="Type de créance (recette)" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=thirdparty"|args:$admin_url,$chart_id name="credit_to" label="Compte de tiers" required=1}
+			{input type="list" target="%sacc/charts/accounts/selector.php?target=revenue"|args:$admin_url,$chart_id name="credit_from" label="Type de créance (recette)" required=1}
 		</dl>
 	</fieldset>
 
