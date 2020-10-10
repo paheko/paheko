@@ -1,11 +1,22 @@
 {include file="admin/_head.tpl" title="Exercices" current="acc/years"}
 
+{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
 		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
 	</ul>
 </nav>
+{/if}
+
+{if $_GET.msg == 'OPEN'}
+<p class="error">
+	Il n'existe aucun exercice ouvert.
+	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
+	{/if}
+</p>
+{/if}
 
 {if !empty($list)}
 	<dl class="list">

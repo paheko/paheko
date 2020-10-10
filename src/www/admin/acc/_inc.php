@@ -24,7 +24,7 @@ if (!$current_year_id) {
 	$current_year = Years::getCurrentOpenYear();
 
 	if (!$current_year) {
-		Utils::redirect(ADMIN_URL . 'acc/years/new.php?msg=FIRST');
+		Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
 	}
 
 	$current_year_id = $current_year->id();
