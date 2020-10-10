@@ -47,11 +47,11 @@ elseif (null !== f('from_year')) {
 }
 
 if ($previous_year) {
-	$lines = Reports::getClosingSumsWithAccounts($previous_year);
+	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year]);
 	$lines_accounts = [];
 
 	foreach ($lines as $k => $line) {
-		$lines_accounts[$k] = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+		$lines_accounts[$k] = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
 	}
 }
 

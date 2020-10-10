@@ -1,11 +1,18 @@
 <?php
 
+namespace Garradin;
+
 use Garradin\Entities\Accounting\Account;
+use Garradin\Accounting\Charts;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/../../_inc.php';
 
-if (empty($_GET['target'])) {
-	throw new Garradin\UserException('Aucune cible spécifiée');
+if (!qg('target')) {
+	throw new UserException('Aucune cible spécifiée');
+}
+
+if (!qg('chart') || !($chart = Charts::get((int)qg('chart')))) {
+	throw new UserException('Aucun ID de plan comptable spécifié');
 }
 
 switch ($_GET['target']) {
@@ -22,10 +29,9 @@ switch ($_GET['target']) {
 		$types = [Account::TYPE_THIRD_PARTY];
 		break;
 	default:
-		break;
+		throw new UserException('Invalid target');
 }
 
-$chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 if ($_GET['target'] == 'all') {
@@ -36,4 +42,4 @@ else {
 }
 
 
-$tpl->display('acc/accounts/selector.tpl');
+$tpl->display('acc/charts/accounts/selector.tpl');

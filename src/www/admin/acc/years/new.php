@@ -26,6 +26,6 @@ if (f('new') && $form->check('acc_years_new')) {
 $new_dates = Years::getNewYearDates();
 $tpl->assign('start_date', $new_dates[0]);
 $tpl->assign('end_date', $new_dates[1]);
-$tpl->assign('charts', (new Charts)->listByCountry());
+$tpl->assign('charts', Charts::listByCountry());
 
 $tpl->display('acc/years/new.tpl');

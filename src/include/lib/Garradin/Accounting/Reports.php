@@ -40,6 +40,19 @@ class Reports
 		return DB::getInstance()->getGrouped($sql);
 	}
 
+	static public function getClosingSumsFavoriteAccounts(int $chart_id, int $year_id): array
+	{
+		// Find sums, link them to accounts
+		$sql = sprintf('SELECT a.id, a.code, a.label, a.description, a.type,
+			(SELECT SUM(l.credit) - SUM(l.debit) FROM %s l INNER JOIN %s t ON t.id = l.id_transaction WHERE l.id_account = a.id AND t.id_year = %d) AS sum
+			FROM %s a
+			WHERE a.id_chart = %d AND a.type != 0
+			GROUP BY a.id
+			ORDER BY a.code COLLATE NOCASE;',
+			Line::TABLE, Transaction::TABLE, $year_id, Account::TABLE, $chart_id);
+		return DB::getInstance()->getGrouped($sql);
+	}
+
 	static public function getClosingSums(int $year_id): array
 	{
 		$year = Years::get($year_id);

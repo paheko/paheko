@@ -588,11 +588,10 @@ nav.tabs ul {
 }
 
 nav.tabs .sub {
-    margin: -1em 2em 1em 0;
+    margin: -1em 0 1em 2em;
     padding-top: 1em;
-    border-right: .1em solid #9c4f15;
-    border-right-color: rgb(var(--gMainColor));
-    border-bottom-right-radius: .5em;
+    border-left: .1em solid rgb(var(--gMainColor));
+    border-bottom-left-radius: .5em;
 }
 
 nav.tabs li {

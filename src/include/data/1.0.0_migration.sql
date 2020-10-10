@@ -3,6 +3,10 @@ ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 DROP TABLE fichiers_compta_journal; -- Inutilisé à ce jour
 
+-- Fix: comptes de clôture et fermeture
+UPDATE compta_comptes SET libelle = 'Bilan d''ouverture' WHERE id = '890' AND libelle = 'Bilan de clôture';
+INSERT OR REPLACE INTO compta_comptes (id, parent, libelle, position) VALUES ('891', '89', 'Bilan de clôture', 0);
+
 -- N'est pas utilisé
 DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations';
 
@@ -56,6 +60,10 @@ UPDATE acc_accounts SET type_parent = 7 WHERE code = '870';
 
 -- Comptes de tiers
 UPDATE acc_accounts SET type_parent = 4 WHERE code = '4';
+
+-- Comptes d'ouverture et de clôture
+UPDATE acc_accounts SET type = 9 WHERE code = '890';
+UPDATE acc_accounts SET type = 10 WHERE code = '891';
 
 -- Recopie des mouvements
 INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_creator)

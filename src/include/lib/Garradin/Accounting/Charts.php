@@ -9,18 +9,18 @@ use KD2\DB\EntityManager;
 
 class Charts
 {
-	public function get(int $id)
+	static public function get(int $id)
 	{
 		return EntityManager::findOneById(Chart::class, $id);
 	}
 
-	public function list()
+	static public function list()
 	{
 		$em = EntityManager::getInstance(Chart::class);
 		return $em->all('SELECT * FROM @TABLE ORDER BY country, label;');
 	}
 
-	public function listByCountry()
+	static public function listByCountry()
 	{
 		$sql = sprintf('SELECT id, country, label FROM %s ORDER BY country, label;', Chart::TABLE);
 		$list = DB::getInstance()->getGrouped($sql);
