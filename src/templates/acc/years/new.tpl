@@ -1,11 +1,5 @@
 {include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years" js=1}
 
-{if $_GET.msg == 'FIRST'}
-<p class="alert">
-	Merci de créer un premier exercice pour commencer.
-</p>
-{/if}
-
 {form_errors}
 
 <form method="post" action="{$self_url}">
@@ -14,6 +8,7 @@
 		<legend>Commencer un nouvel exercice</legend>
 		<dl>
 			{input type="select_groups" options=$charts name="id_chart" label="Plan comptable" required=true}
+			<dd class="help">{linkbutton shape="settings" label="Gestion des plans comptables" href="acc/charts/"}</dd>
 			{input type="text" name="label" label="Libellé" required=true}
 			{input type="date" label="Début de l'exercice" name="start_date" required=true default=$start_date}
 			{input type="date" label="Fin de l'exercice" name="end_date" required=true default=$end_date}
