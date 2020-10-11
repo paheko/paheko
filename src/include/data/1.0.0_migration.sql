@@ -59,7 +59,7 @@ UPDATE acc_accounts SET type_parent = 6 WHERE code = '9';
 UPDATE acc_accounts SET type_parent = 7 WHERE code = '870';
 
 -- Comptes de tiers
-UPDATE acc_accounts SET type_parent = 4 WHERE code = '4';
+UPDATE acc_accounts SET type_parent = 8 WHERE code = '4';
 
 -- Comptes d'ouverture et de clôture
 UPDATE acc_accounts SET type = 9 WHERE code = '890';
@@ -86,7 +86,10 @@ UPDATE acc_accounts SET type = 1, description = (SELECT description FROM compta_
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = 1);
 
 UPDATE acc_accounts SET type = 2, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
-	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1);
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte NOT LIKE '4%');
+
+UPDATE acc_accounts SET type = 8, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte LIKE '4%');
 
 -- Recopie des opérations, mais le nom a changé pour acc_transactions_users
 INSERT INTO acc_transactions_users
