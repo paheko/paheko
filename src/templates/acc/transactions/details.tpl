@@ -85,8 +85,8 @@
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>
-            <td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
-            <td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+			<td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
+			<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 		</tr>

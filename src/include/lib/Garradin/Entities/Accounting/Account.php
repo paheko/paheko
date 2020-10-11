@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Accounting;
 
+use DateTimeInterface;
 use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Utils;
@@ -98,13 +99,15 @@ class Account extends Entity
 		'type_parent' => 'numeric|min:0',
 	];
 
-	public function getJournal(int $year_id) {
+	public function getJournal(int $year_id)
+	{
 		$db = DB::getInstance();
-		$rows = $db->get('SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label
+		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			WHERE l.id_account = ? AND t.id_year = ?
-			ORDER BY t.date;', $this->id(), $year_id);
+			ORDER BY t.date, t.id;';
+		$rows = $db->get($sql, $this->id(), $year_id);
 
 		$sum = 0;
 
@@ -115,5 +118,48 @@ class Account extends Entity
 		}
 
 		return $rows;
+	}
+
+	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, int &$start_sum, int &$end_sum)
+	{
+		if ($end_date < $start_date) {
+			throw new ValidationException('La date de début ne peut être avant la date de fin.');
+		}
+
+		$db = DB::getInstance();
+		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE l.id_account = ? AND t.id_year = ? AND t.date >= ? AND t.date <= ?
+			ORDER BY t.date, t.id;';
+		$rows = $db->iterate($sql, $this->id(), $year_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
+
+		$sum = $this->getSumAtDate($year_id, $start_date);
+
+		$start_sum = false;
+
+		foreach ($rows as $row) {
+			if (!$start_sum) {
+				yield ['sum' => $sum, 'date' => $start_date];
+				$start_sum = true;
+			}
+
+			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
+			$sum += ($row->credit - $row->debit);
+			$row->running_sum = $sum;
+
+			yield $row;
+		}
+
+		yield ['sum' => $sum, 'date' => $end_date];
+	}
+
+	public function getSumAtDate(int $year_id, DateTimeInterface $date): int
+	{
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ?
+			ORDER BY t.date, t.id;', $this->id(), $year_id, $date->format('Y-m-d'));
 	}
 }
