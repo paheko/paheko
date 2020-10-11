@@ -1,78 +1,84 @@
 <?php
 namespace Garradin;
 
+use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Transactions;
+
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ECRITURE);
+$session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$banques = new Compta\Comptes_Bancaires;
-$rapprochement = new Compta\Rapprochement;
+$account = Accounts::get((int)qg('id'));
 
-$compte = $banques->get(qg('id'));
-
-if (!$compte)
-{
-    throw new UserException("Le compte demandé n'existe pas.");
+if (!$account) {
+	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$solde_initial = $solde_final = 0;
+$start = qg('start');
+$end = qg('end');
 
-$debut = qg('debut');
-$fin = qg('fin');
-
-if ($debut && $fin)
+if (null !== $start && null !== $end)
 {
-    if (!Utils::checkDate($debut) || !Utils::checkDate($fin))
-    {
-        $form->addError('La date donnée est invalide.');
-        $debut = $fin = false;
-    }
+	$start = \DateTime::createFromFormat('Y-m-d', $start);
+	$end = \DateTime::createFromFormat('Y-m-d', $end);
+
+	if (!$start || !$end) {
+		$form->addError('La date donnée est invalide.');
+	}
 }
 
-if (!$debut || !$fin)
-{
-    $debut = date('Y-m-01');
-    $fin = date('Y-m-t');
+if (!$start || !$end) {
+	$start = new \DateTime('first day of this month');
+	$end = new \DateTime('last day of this month');
 }
 
-$journal = $rapprochement->getJournal($compte->id, $debut, $fin, $solde_initial, $solde_final, (bool) qg('sauf'));
+if ($start < $current_year->start_date || $start > $current_year->end_date
+	|| $end < $current_year->start_date || $end > $current_year->end_date) {
+	$start = clone $current_year->start_date;
+	$end = clone $start;
+	$end->modify('last day of this month');
+}
+
+$start_sum = 0;$end_sum = 0;
+$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end, $start_sum, $end_sum);
 
 // Enregistrement des cases cochées
-if ((f('save') || f('save_next')) && $form->check('compta_rapprocher_' . $compte->id))
+if ((f('save') || f('save_next')) && $form->check('acc_reconcile_' . $account->id))
 {
-    try
-    {
-        $rapprochement->record($journal, f('rapprocher'), $user->id);
+	try {
+		Transactions::saveReconciled($journal, f('reconcile'));
 
-        if (f('save'))
-        {
-            Utils::redirect(Utils::getSelfURL());
-        }
-        else
-        {
-            $next = Utils::modifyDate($debut, '+1 month', true);
-            Utils::redirect(sprintf('%scompta/banques/rapprocher.php?id=%s&debut=%s&fin=%s&sauf=%s', ADMIN_URL, $compte->id, date('Y-m-01', $next), date('Y-m-t', $next), (int) qg('sauf')));
-        }
-    }
-    catch (UserException $e)
-    {
-        $form->addError($e->getMessage());
-    }
+		if (f('save')) {
+			Utils::redirect(Utils::getSelfURL());
+		}
+		else {
+			$start->modify('+1 month');
+			$end->modify('+1 month');
+			$url = sprintf('%sacc/accounts/reconcile.php?id=%s&debut=%s&fin=%s&sauf=%s',
+				ADMIN_URL, $account->id(), $next->format('Y-m-d'), $end->format('Y-m-d'), (int) qg('sauf'));
+			Utils::redirect($url);
+		}
+	}
+	catch (UserException $e) {
+		$form->addError($e->getMessage());
+	}
 }
 
-if (substr($debut, 0, 7) == substr($fin, 0, 7))
-{
-    $tpl->assign('prev', Utils::modifyDate($debut, '-1 month', true));
-    $tpl->assign('next', Utils::modifyDate($debut, '+1 month', true));
-}
+$prev = clone $start;
+$next = clone $start;
+$prev->modify('-1 month');
+$next->modify('+1 month');
 
-$tpl->assign('compte', $compte);
-$tpl->assign('debut', $debut);
-$tpl->assign('fin', $fin);
+$tpl->assign(compact(
+	'account',
+	'start',
+	'end',
+	'prev',
+	'next',
+	'journal',
+));
 
-$tpl->assign('journal', $journal);
+$tpl->assign_by_ref('start_sum', $start_sum);
+$tpl->assign_by_ref('end_sum', $end_sum);
 
-$tpl->assign('solde_initial', $solde_initial);
-$tpl->assign('solde_final', $solde_final);
-
-$tpl->display('admin/compta/banques/rapprocher.tpl');
+$tpl->display('acc/accounts/reconcile.tpl');
