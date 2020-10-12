@@ -46,7 +46,7 @@
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>
 			{/if}
-			<td>Solde cumulé</td>
+			<td class="money">Solde cumulé</td>
 			<th>Libellé</th>
 			<td></td>
 		</tr>

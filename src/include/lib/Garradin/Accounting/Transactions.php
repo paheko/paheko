@@ -38,4 +38,9 @@ class Transactions
 
 		$db->commit();
 	}
+
+	static public function countForUser(int $user_id)
+	{
+		return DB::getInstance()->count('acc_transactions_users', 'id_user = ?', $user_id);
+	}
 }

@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Accounting\Transactions;
+
 require_once __DIR__ . '/_inc.php';
 
 qv(['id' => 'required|numeric']);
@@ -26,10 +28,8 @@ $cotisations = new Membres\Cotisations;
 
 $tpl->assign('nb_activites', $cotisations->countForMember($membre->id));
 
-if ($session->canAccess('compta', Membres::DROIT_ACCES))
-{
-	$journal = new Compta\Journal;
-	$tpl->assign('nb_operations', $journal->countForMember($membre->id));
+if ($session->canAccess('compta', Membres::DROIT_ACCES)) {
+	$tpl->assign('nb_operations', Transactions::countForUser($membre->id));
 }
 
 $tpl->assign('membre', $membre);
