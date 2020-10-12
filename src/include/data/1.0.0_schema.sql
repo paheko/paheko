@@ -219,6 +219,9 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
+    type INTEGER NOT NULL DEFAULT 0, -- Type d'écriture, 0 = avancée (normale)
+    status INTEGER NOT NULL DEFAULT 0, -- Statut (bitmask)
+
     label TEXT NOT NULL,
     notes TEXT NULL,
     reference TEXT NULL, -- N° de pièce comptable
@@ -231,7 +234,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions
     prev_hash TEXT NULL,
 
     id_year INTEGER NOT NULL REFERENCES acc_years(id),
-    id_creator INTEGER NULL REFERENCES membres(id) ON DELETE SET NULL
+    id_creator INTEGER NULL REFERENCES membres(id) ON DELETE SET NULL,
+    id_related INTEGER NULL REFERENCES acc_transactions(id) ON DELETE SET NULL -- écriture liée (par ex. remboursement d'une dette)
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);

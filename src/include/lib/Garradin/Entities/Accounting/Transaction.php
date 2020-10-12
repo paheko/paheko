@@ -15,7 +15,28 @@ class Transaction extends Entity
 {
 	const TABLE = 'acc_transactions';
 
+	const TYPE_ADVANCED = 0;
+	const TYPE_REVENUE = 1;
+	const TYPE_EXPENSE = 2;
+	const TYPE_TRANSFER = 3;
+	const TYPE_DEBT = 4;
+	const TYPE_CREDIT = 5;
+
+	const STATUS_WAITING = 1;
+	const STATUS_PAID = 2;
+
+	const TYPES_NAMES = [
+		'Avancé',
+		'Recette',
+		'Dépense',
+		'Virement',
+		'Dette',
+		'Créance',
+	];
+
 	protected $id;
+	protected $type;
+	protected $status;
 	protected $label;
 	protected $notes;
 	protected $reference;
@@ -29,9 +50,12 @@ class Transaction extends Entity
 
 	protected $id_year;
 	protected $id_creator;
+	protected $id_related;
 
 	protected $_types = [
 		'id'        => 'int',
+		'type'      => 'int',
+		'status'    => 'int',
 		'label'     => 'string',
 		'notes'     => '?string',
 		'reference' => '?string',
@@ -41,6 +65,7 @@ class Transaction extends Entity
 		'prev_hash' => '?string',
 		'id_year'   => 'int',
 		'id_creator' => '?int',
+		'id_related' => '?int',
 	];
 
 	protected $_form_rules = [
@@ -172,7 +197,7 @@ class Transaction extends Entity
 			throw new \LogicException('Aucun exercice spécifié.');
 		}
 
-		if (!$db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date, $this->date))
+		if (!$db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d')))
 		{
 			throw new ValidationException('La date ne correspond pas à l\'exercice sélectionné.');
 		}
@@ -188,6 +213,10 @@ class Transaction extends Entity
 
 		if (0 !== $total) {
 			throw new ValidationException('Écriture non équilibrée : déséquilibre entre débits et crédits');
+		}
+
+		if (!in_array($this->type, [self::TYPE_ADVANCED, self::TYPE_CREDIT, self::TYPE_DEBT, self::TYPE_EXPENSE, self::TYPE_REVENUE, self::TYPE_TRANSFER])) {
+			throw new ValidationException('Type d\'écriture inconnu');
 		}
 	}
 
@@ -205,30 +234,38 @@ class Transaction extends Entity
 
 		$this->importForm();
 
-		if ($type !== 'advanced') {
-			$from = @count($source[$type . '_from']) ? key($source[$type . '_from']) : null;
-			$to = @count($source[$type . '_to']) ? key($source[$type . '_to']) : null;
+		if ($type !== self::TYPE_ADVANCED) {
+			$from = @count($source['from_' . $type]) ? key($source['from_' . $type]) : null;
+			$to = @count($source['to_' . $type]) ? key($source['to_' . $type]) : null;
+
+			if ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT) {
+				$this->status = self::STATUS_WAITING;
+			}
+
 			$amount = $source['amount'];
+			$details = self::getTypesDetails();
 
-			$line = new Line;
-			$line->importForm([
-				'reference'     => $source['payment_reference'],
-				'credit'        => '0',
-				'debit'         => $amount,
-				'id_account'    => $from,
-				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
-			]);
-			$this->add($line);
+			if (!array_key_exists($type, $details)) {
+				throw new ValidationException('Type d\'écriture inconnu');
+			}
 
-			$line = new Line;
-			$line->importForm([
-				'reference'     => $source['payment_reference'],
-				'credit'        => $amount,
-				'debit'         => '0',
-				'id_account'    => $to,
-				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
-			]);
-			$this->add($line);
+			// Fill lines using a pre-defined setup obtained from getTypesDetails
+			foreach ($details[$type]->accounts as $k => $account) {
+				$credit = $account->position == 'credit' ? $amount : 0;
+				$debit = $account->position == 'debit' ? $amount : 0;
+				$key = sprintf('account_%d_%d', $type, $k);
+				$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+
+				$line = new Line;
+				$line->importForm([
+					'reference'     => $source['payment_reference'],
+					'credit'        => $credit,
+					'debit'         => $debit,
+					'id_account'    => $account,
+					'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
+				]);
+				$this->add($line);
+			}
 		}
 		else {
 			$lines = Utils::array_transpose($source['lines']);
@@ -360,5 +397,90 @@ class Transaction extends Entity
 		$identity_column = Config::getInstance()->get('champ_identite');
 		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
+	}
+
+	static public function getTypesDetails()
+	{
+		$details = [
+			[
+				[
+					'label' => 'Type de recette',
+					'targets' => [Account::TYPE_REVENUE],
+					'position' => 'debit',
+				],
+				[
+					'label' => 'Compte d\'encaissement',
+					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+					'position' => 'credit',
+				],
+			],
+			[
+				[
+					'label' => 'Type de dépense',
+					'targets' => [Account::TYPE_EXPENSE],
+					'position' => 'credit',
+				],
+				[
+					'label' => 'Compte de décaissement',
+					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+					'position' => 'debit',
+				],
+			],
+			[
+				[
+					'label' => 'De',
+					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+					'position' => 'debit',
+				],
+				[
+					'label' => 'Vers',
+					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+					'position' => 'credit',
+				],
+			],
+			[
+				[
+					'label' => 'Compte de tiers',
+					'targets' => [Account::TYPE_THIRD_PARTY],
+					'position' => 'debit',
+				],
+				[
+					'label' => 'Type de dette (dépense)',
+					'targets' => [Account::TYPE_EXPENSE],
+					'position' => 'credit',
+				],
+			],
+			[
+				[
+					'label' => 'Compte de tiers',
+					'targets' => [Account::TYPE_THIRD_PARTY],
+					'position' => 'credit',
+				],
+				[
+					'label' => 'Type de créance (recette)',
+					'targets' => [Account::TYPE_REVENUE],
+					'position' => 'debit',
+				],
+			],
+		];
+
+		$out = [];
+
+		foreach ($details as $k => $accounts) {
+			$d = (object) [
+				'id' => $k+1,
+				'label' => self::TYPES_NAMES[$k+1],
+				'accounts' => [],
+			];
+
+			foreach ($accounts as $account) {
+				$account['targets'] = implode(':', $account['targets']);
+				$d->accounts[] = (object) $account;
+			}
+
+			$out[$d->id] = $d;
+		}
+
+		return $out;
 	}
 }

@@ -159,13 +159,17 @@ class Template extends \KD2\Smartyer
 		$label = isset($params['label']) ? $this->escape($params['label']) : '';
 		unset($params['label'], $params['shape']);
 
+		if (!isset($params['type'])) {
+			$params['type'] = 'button';
+		}
+
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $this->escape($v));
 		});
 
 		$params = implode(' ', $params);
 
-		return sprintf('<button %s class="icn-btn" data-icon="%s" type="button">%s</button>', $params, $icon, $label);
+		return sprintf('<button %s class="icn-btn" data-icon="%s">%s</button>', $params, $icon, $label);
 	}
 
 	protected function widgetLinkButton(array $params): string

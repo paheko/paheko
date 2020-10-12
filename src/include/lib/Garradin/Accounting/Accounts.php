@@ -74,6 +74,7 @@ class Accounts
 			$types = '';
 		}
 		else {
+			$types = array_map('intval', $types);
 			$types = ' AND ' . $this->em->DB()->where('type', $types);
 		}
 

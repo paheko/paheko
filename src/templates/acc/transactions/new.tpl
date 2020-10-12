@@ -15,54 +15,25 @@
 	<fieldset>
 		<legend>Type d'écriture</legend>
 		<dl>
-			{input type="radio" name="type" value="revenue" label="Recette"}
-			{input type="radio" name="type" value="expense" label="Dépense"}
-			{input type="radio" name="type" value="transfer" label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
-			{input type="radio" name="type" value="debt" label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
-			{input type="radio" name="type" value="credit" label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
-			{input type="radio" name="type" value="advanced" label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
+			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_REVENUE label="Recette"}
+			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_EXPENSE label="Dépense"}
+			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_TRANSFER label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
+			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_DEBT label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
+			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_CREDIT label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
+			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_ADVANCED label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
 		</dl>
 	</fieldset>
 
-	<fieldset data-types="transfer">
-		<legend>Virement</legend>
-		<dl>
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="transfer_from" label="De" required=1}
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="transfer_to" label="Vers" required=1}
-		</dl>
-	</fieldset>
-
-	<fieldset data-types="revenue">
-		<legend>Recette</legend>
-		<dl>
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=revenue&chart=%d"|args:$admin_url,$chart_id name="revenue_from" label="Type de recette" required=1}
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="revenue_to" label="Compte d'encaissement" required=1}
-		</dl>
-	</fieldset>
-
-	<fieldset data-types="expense">
-		<legend>Dépense</legend>
-		<dl>
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=expense&chart=%d"|args:$admin_url,$chart_id name="expense_to" label="Type de dépense" required=1}
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=common&chart=%d"|args:$admin_url,$chart_id name="expense_from" label="Compte de décaissement" required=1}
-		</dl>
-	</fieldset>
-
-	<fieldset data-types="debt">
-		<legend>Dette</legend>
-		<dl>
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=thirdparty&chart=%d"|args:$admin_url,$chart_id name="debt_from" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=expense&chart=%d"|args:$admin_url,$chart_id name="debt_to" label="Type de dette (dépense)" required=1}
-		</dl>
-	</fieldset>
-
-	<fieldset data-types="credit">
-		<legend>Créance</legend>
-		<dl>
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=thirdparty"|args:$admin_url,$chart_id name="credit_to" label="Compte de tiers" required=1}
-			{input type="list" target="%sacc/charts/accounts/selector.php?target=revenue"|args:$admin_url,$chart_id name="credit_from" label="Type de créance (recette)" required=1}
-		</dl>
-	</fieldset>
+	{foreach from=$types item="type"}
+		<fieldset data-types="t{$type.id}">
+			<legend>{$type.name}</legend>
+			<dl>
+			{foreach from=$type.accounts key="key" item="account"}
+				{input type="list" target="%sacc/charts/accounts/selector.php?targets=%d&chart=%d"|args:$admin_url,$account.targets,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
+			{/foreach}
+			</dl>
+		</fieldset>
+	{/foreach}
 
 	<fieldset>
 		<legend>Informations</legend>
@@ -77,7 +48,7 @@
 	</fieldset>
 
 	{* Saisie avancée *}
-	<fieldset data-types="advanced">
+	<fieldset data-types="t<?=Entities\Accounting\Transaction::TYPE_ADVANCED?>">
 		{include file="acc/transactions/_lines_form.tpl"}
 	</fieldset>
 
@@ -115,8 +86,8 @@ function initForm() {
 	// Toggle parts of the form when a type is selected
 	function selectType(v) {
 		hideAllTypes();
-		g.toggle('[data-types=' + v + ']', true);
-		g.toggle('[data-types=all-but-advanced]', v != 'advanced');
+		g.toggle('[data-types=t' + v + ']', true);
+		g.toggle('[data-types=all-but-advanced]', v != <?=Entities\Accounting\Transaction::TYPE_ADVANCED?>);
 		// Disable required form elements, or the form won't be able to be submitted
 		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
 			e.disabled = v == 'advanced' ? true : false;
