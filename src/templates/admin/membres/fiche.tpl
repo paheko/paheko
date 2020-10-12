@@ -19,7 +19,7 @@
             {$nb_activites} cotisations enregistrées
         {else}
             Aucune cotisation enregistrée
-        {/if} 
+        {/if}
     </dt>
     <dd>
         <a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Voir l'historique</a>
@@ -29,7 +29,7 @@
         {if !empty($nb_operations)}
             <dt>Écritures comptables</dt>
             <dd>{$nb_operations} écritures comptables
-                — <a href="{$admin_url}compta/operations/membre.php?id={$membre.id}">Voir la liste des écritures ajoutées par ce membre</a>
+                — <a href="{$admin_url}acc/transactions/user.php?id={$membre.id}">Voir la liste des écritures liées à ce membre</a>
             </dd>
         {/if}
     {/if}

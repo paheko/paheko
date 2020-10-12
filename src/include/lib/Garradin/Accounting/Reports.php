@@ -135,6 +135,10 @@ class Reports
 			$where[] = sprintf('a.position = %d', $criterias['position']);
 		}
 
+		if (!empty($criterias['user'])) {
+			$where[] = sprintf('t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = %d)', $criterias['user']);
+		}
+
 		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}
@@ -177,6 +181,7 @@ class Reports
 					'code'  => $accounts[$row->id_account]->code,
 					'label' => $accounts[$row->id_account]->label,
 					'id'    => $row->id_account,
+					'id_year' => $row->id_year,
 					'sum'   => 0,
 					'debit' => 0,
 					'credit'=> 0,

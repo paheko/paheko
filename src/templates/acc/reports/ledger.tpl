@@ -5,7 +5,7 @@
 {foreach from=$ledger item="account"}
 
 	<table class="list">
-		<caption><h4><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code} — {$account.label}</h4></caption>
+		<caption><h4><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$account.id_year}">{$account.code} — {$account.label}</h4></caption>
 		<colgroup>
 			<col width="5%" />
 			<col width="5%" />
