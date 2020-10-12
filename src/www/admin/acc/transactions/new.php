@@ -49,6 +49,7 @@ $tpl->assign('date', $session->get('acc_last_date') ?: $current_year->start_date
 $tpl->assign('ok', (int) qg('ok'));
 
 $tpl->assign('lines', $lines);
+$tpl->assign('types', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
 
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());

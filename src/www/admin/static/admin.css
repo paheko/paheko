@@ -323,6 +323,7 @@ input[type=url], input[type=tel], select, .input-list {
     border: 1px solid #999;
     font-size: inherit;
     background: #fff;
+    color: #000;
     border-radius: .25rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     line-height: 1.5rem;

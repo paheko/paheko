@@ -9,6 +9,21 @@
 </nav>
 {/if}
 
+{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
+<form method="post" action="{$admin_url}acc/transactions/new.php">
+<div class="alert">
+	{if $transaction.type == $transaction::TYPE_DEBT}
+		<h3>Dette en attente</h3>
+		<input type="hidden" name="label" value="Règlement de dette" />
+		{button shape="check" label="Enregistrer le règlement de cette dette" type="submit"}
+	{else}
+		<h3>Créance en attente</h3>
+		{button shape="export" label="Enregistrer le règlement de cette créance"}
+	{/if}
+</div>
+</form>
+{/if}
+
 <dl class="describe">
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label}</h2></dd>
