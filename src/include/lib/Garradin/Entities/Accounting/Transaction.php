@@ -188,7 +188,6 @@ class Transaction extends Entity
 			$status |= self::STATUS_PAID;
 			$this->_related->set('status', $status );
 			$this->_related->save();
-			var_dump($this->_related->status); exit;
 		}
 
 		return true;

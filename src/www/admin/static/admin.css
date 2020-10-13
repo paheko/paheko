@@ -1218,18 +1218,22 @@ aside.describe {
     width: 20em;
     float: right;
     margin: .5em;
-    background: rgb(255, 174, 80);
-    background: rgba(217, 134, 40, 0.2);
     background: rgba(var(--gSecondColor), 0.2);
     border-radius: .5em;
-    border: 2px solid rgb(217, 134, 40);
-    border-color: rgba(var(--gSecondColor), 0.5);
+    border: 2px solid rgba(var(--gSecondColor), 0.5);
     padding: .5em;
     z-index: 200;
+    color: #666;
 }
 
-aside.describe dt {
-    float: none;
+aside.describe dl.describe {
+    display: block;
+}
+
+aside.describe dl.describe dt {
+    text-align: left;
+    font-weight: bold;
+    color: #000;
 }
 
 #orderFields fieldset {

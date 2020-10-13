@@ -139,6 +139,10 @@ class Reports
 			$where[] = sprintf('t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = %d)', $criterias['user']);
 		}
 
+		if (!empty($criterias['creator'])) {
+			$where[] = sprintf('t.id_creator = %d', $criterias['creator']);
+		}
+
 		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}

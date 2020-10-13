@@ -26,11 +26,15 @@
     </dd>
     {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
         <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dd>
-        {if !empty($nb_operations)}
-            <dt>Écritures comptables</dt>
-            <dd>{$nb_operations} écritures comptables
-                — <a href="{$admin_url}acc/transactions/user.php?id={$membre.id}">Voir la liste des écritures liées à ce membre</a>
-            </dd>
+    {/if}
+    {if $session->canAccess('membres', Membres::DROIT_ACCES)}
+        {if !empty($transactions_linked)}
+            <dt>Écritures comptables liées</dt>
+            <dd><a href="{$admin_url}acc/transactions/user.php?id={$membre.id}">{$transactions_linked} écritures comptables liées à ce membre</a></dd>
+        {/if}
+        {if !empty($transactions_created)}
+            <dt>Écritures comptables créées</dt>
+            <dd><a href="{$admin_url}acc/transactions/creator.php?id={$membre.id}">{$transactions_created} écritures comptables créées par ce membre</a></dd>
         {/if}
     {/if}
 </dl>

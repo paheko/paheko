@@ -29,7 +29,8 @@ $cotisations = new Membres\Cotisations;
 $tpl->assign('nb_activites', $cotisations->countForMember($membre->id));
 
 if ($session->canAccess('compta', Membres::DROIT_ACCES)) {
-	$tpl->assign('nb_operations', Transactions::countForUser($membre->id));
+	$tpl->assign('transactions_linked', Transactions::countForUser($membre->id));
+	$tpl->assign('transactions_created', Transactions::countForCreator($membre->id));
 }
 
 $tpl->assign('membre', $membre);
