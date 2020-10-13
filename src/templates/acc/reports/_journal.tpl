@@ -19,8 +19,8 @@
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
 		{foreach from=$transaction.lines item="line"}
 			<td>{$line.account_code} - {$line.account_label}</td>
-			<td class="money">{$line.debit|escape|html_money}</td>
-			<td class="money">{$line.credit|escape|html_money}</td>
+			<td class="money">{$line.debit|raw|html_money}</td>
+			<td class="money">{$line.credit|raw|html_money}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 		</tr>

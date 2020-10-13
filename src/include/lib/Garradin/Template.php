@@ -105,6 +105,7 @@ class Template extends \KD2\Smartyer
 			if ($hide_empty && !$number) {
 				return '';
 			}
+
 			return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
 		});
 

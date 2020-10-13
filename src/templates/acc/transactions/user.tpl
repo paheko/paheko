@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Écritures liées à un membre : %s"|args:$transaction_user.identite current="acc/accounts"}
+{include file="admin/_head.tpl" title="Écritures liées à %s"|args:$transaction_user.identite current="acc/accounts"}
 
 {include file="acc/reports/_journal.tpl"}
 
