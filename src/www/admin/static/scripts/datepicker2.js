@@ -49,6 +49,12 @@
 			this.focus();
 
 			this.container.open = true;
+
+			// Support for legacy browsers
+			if (!this.container.hasAttribute('open')) {
+				this.container.style.display = 'block';
+			}
+
 			this.keyEvent = (e) => {
 				var r = this.key(e.key);
 
@@ -82,6 +88,12 @@
 		{
 			this.container.innerHTML = '';
 			this.container.open = false;
+
+			// Support for legacy browsers
+			if (!this.container.hasAttribute('open')) {
+				this.container.style.display = 'none';
+			}
+
 			document.removeEventListener('keydown', this.keyEvent);
 		}
 

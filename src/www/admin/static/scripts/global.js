@@ -38,14 +38,7 @@
 
 		var eventName = dom ? 'DOMContentLoaded' : 'load';
 
-		if (document.addEventListener)
-		{
-			document.addEventListener(eventName, callback, false);
-		}
-		else
-		{
-			document.attachEvent('on' + eventName, callback);
-		}
+		document.addEventListener(eventName, callback, false);
 	};
 
 	g.toggle = function(selector, visibility)
@@ -200,7 +193,7 @@
 		var span = document.createElement('span');
 		span.className = 'datepicker-parent';
 		var btn = document.createElement('button');
-		var cal;
+		var cal = null;
 		btn.className = 'icn-btn';
 		btn.setAttribute('data-icon', '📅');
 		btn.type = 'button';
