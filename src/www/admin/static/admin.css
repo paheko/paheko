@@ -471,7 +471,8 @@ dialog.datepicker {
 
 .datepicker nav {
     display: flex;
-    justify-content: space-between
+    justify-content: space-between;
+    text-align: center;
 }
 
 .datepicker h3 {
