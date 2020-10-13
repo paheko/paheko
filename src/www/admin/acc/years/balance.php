@@ -48,15 +48,17 @@ elseif (null !== f('from_year')) {
 
 if ($previous_year) {
 	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year]);
-	$lines_accounts = [];
 
-	foreach ($lines as $k => $line) {
-		$lines_accounts[$k] = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
+	foreach ($lines as $k => &$line) {
+		$line->credit = $line->sum > 0 ? $line->sum : 0;
+		$line->debit = $line->sum < 0 ? abs($line->sum) : 0;
+		$line->account_selected = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
 	}
+
+	unset($line);
 }
 
 $tpl->assign('lines', $lines);
-$tpl->assign('lines_accounts', $lines_accounts);
 $tpl->assign('years', $years);
 $tpl->assign('previous_year', $previous_year);
 $tpl->assign('year', $year);
