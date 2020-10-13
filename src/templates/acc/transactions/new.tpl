@@ -12,43 +12,56 @@
 		</p>
 	{/if}
 
-	<fieldset>
-		<legend>Type d'écriture</legend>
-		<dl>
-			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_REVENUE label="Recette"}
-			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_EXPENSE label="Dépense"}
-			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_TRANSFER label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
-			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_DEBT label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
-			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_CREDIT label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
-			{input type="radio" name="type" value=Entities\Accounting\Transaction::TYPE_ADVANCED label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
-		</dl>
-	</fieldset>
-
-	{foreach from=$types item="type"}
-		<fieldset data-types="t{$type.id}">
-			<legend>{$type.name}</legend>
+	{if $payoff_for}
+		<input type="hidden" name="type" value="{$transaction::TYPE_PAYOFF}" />
+		<input type="hidden" name="payoff_for" value="{$payoff_for.id}" />
+		<fieldset>
+			<legend>{if $payoff_for->type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
 			<dl>
-			{foreach from=$type.accounts key="key" item="account"}
-				{input type="list" target="%sacc/charts/accounts/selector.php?targets=%d&chart=%d"|args:$admin_url,$account.targets,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
-			{/foreach}
+				<dt>Écriture d'origine</dt>
+				<dd><a class="num" href="{$admin_url}acc/transactions/details.php?id={$payoff_for.id}">#{$payoff_for.id}</a></dd>
+				{input type="list" target="%sacc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$admin_url,$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
 			</dl>
 		</fieldset>
-	{/foreach}
+	{else}
+		<fieldset>
+			<legend>Type d'écriture</legend>
+			<dl>
+				{input type="radio" name="type" value=$transaction::TYPE_REVENUE label="Recette"}
+				{input type="radio" name="type" value=$transaction::TYPE_EXPENSE label="Dépense"}
+				{input type="radio" name="type" value=$transaction::TYPE_TRANSFER label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
+				{input type="radio" name="type" value=$transaction::TYPE_DEBT label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
+				{input type="radio" name="type" value=$transaction::TYPE_CREDIT label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
+				{input type="radio" name="type" value=$transaction::TYPE_ADVANCED label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
+			</dl>
+		</fieldset>
+
+		{foreach from=$types item="type"}
+			<fieldset data-types="t{$type.id}">
+				<legend>{$type.label}</legend>
+				<dl>
+				{foreach from=$type.accounts key="key" item="account"}
+					{input type="list" target="%sacc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$admin_url,$account.targets,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
+				{/foreach}
+				</dl>
+			</fieldset>
+		{/foreach}
+	{/if}
 
 	<fieldset>
 		<legend>Informations</legend>
 		<dl>
-			{input type="text" name="label" label="Libellé" required=1}
-			{input type="date" name="date" default=$date label="Date" required=1}
+			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
+			{input type="date" name="date" default=$date label="Date" required=1 source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{input type="money" name="amount" label="Montant" required=1}
-			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
+			{input type="money" name="amount" label="Montant" required=1 default=$amount}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
 		</dl>
 	</fieldset>
 
 	{* Saisie avancée *}
-	<fieldset data-types="t<?=Entities\Accounting\Transaction::TYPE_ADVANCED?>">
+	<fieldset data-types="t{$transaction::TYPE_ADVANCED}">
 		{include file="acc/transactions/_lines_form.tpl"}
 	</fieldset>
 
@@ -87,7 +100,7 @@ function initForm() {
 	function selectType(v) {
 		hideAllTypes();
 		g.toggle('[data-types=t' + v + ']', true);
-		g.toggle('[data-types=all-but-advanced]', v != <?=Entities\Accounting\Transaction::TYPE_ADVANCED?>);
+		g.toggle('[data-types=all-but-advanced]', v != <?=$transaction::TYPE_ADVANCED?>);
 		// Disable required form elements, or the form won't be able to be submitted
 		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
 			e.disabled = v == 'advanced' ? true : false;
