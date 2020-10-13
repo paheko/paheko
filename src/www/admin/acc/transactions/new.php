@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Accounting\Years;
 
@@ -17,6 +18,13 @@ $accounts = $chart->accounts();
 
 $transaction = new Transaction;
 $lines = [[], []];
+$amount = 0;
+$payoff_for = null;
+
+if ($id = f('payoff_for')) {
+	$payoff_for = $transaction->payOffFrom($id);
+	$amount = $payoff_for->sum();
+}
 
 if (f('save') && $form->check('acc_transaction_new')) {
 	try {
@@ -46,9 +54,10 @@ if (f('save') && $form->check('acc_transaction_new')) {
 }
 
 $tpl->assign('date', $session->get('acc_last_date') ?: $current_year->start_date->format('d/m/Y'));
+$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines'));
+$tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
 
-$tpl->assign('lines', $lines);
 $tpl->assign('types', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
 

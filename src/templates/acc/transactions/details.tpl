@@ -14,17 +14,24 @@
 <div class="alert">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
-		<input type="hidden" name="label" value="Règlement de dette" />
+		<input type="hidden" name="payoff_for" value="{$transaction.id}" />
 		{button shape="check" label="Enregistrer le règlement de cette dette" type="submit"}
 	{else}
 		<h3>Créance en attente</h3>
-		{button shape="export" label="Enregistrer le règlement de cette créance"}
+		<input type="hidden" name="payoff_for" value="{$transaction.id}" />
+		{button shape="export" label="Enregistrer le règlement de cette créance" type="submit"}
 	{/if}
 </div>
 </form>
 {/if}
 
 <dl class="describe">
+	{if $transaction.id_related}
+	<dt>Écriture liée à</dt>
+	<dd><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id_related}">#{$transaction.id_related}</a>
+		{if $transaction.type == $transaction::TYPE_PAYOFF}(en règlement de){/if}
+	</dd>
+	{/if}
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label}</h2></dd>
 	<dt>Date</dt>

@@ -21,6 +21,7 @@ class Transaction extends Entity
 	const TYPE_TRANSFER = 3;
 	const TYPE_DEBT = 4;
 	const TYPE_CREDIT = 5;
+	const TYPE_PAYOFF = 6;
 
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
@@ -32,11 +33,12 @@ class Transaction extends Entity
 		'Virement',
 		'Dette',
 		'Créance',
+		'Règlement',
 	];
 
 	protected $id;
 	protected $type;
-	protected $status;
+	protected $status = 0;
 	protected $label;
 	protected $notes;
 	protected $reference;
@@ -77,6 +79,8 @@ class Transaction extends Entity
 
 	protected $_lines;
 	protected $_old_lines = [];
+
+	protected $_related;
 
 	public function getLinesWithAccounts()
 	{
@@ -138,6 +142,18 @@ class Transaction extends Entity
 		$this->_lines[] = $line;
 	}
 
+	public function sum(): int
+	{
+		$sum = 0;
+
+		foreach ($this->getLines() as $line) {
+			$sum += $line->credit;
+			// Because credit == debit, we only use credit
+		}
+
+		return $sum;
+	}
+
 	public function save(): bool
 	{
 		if ($this->validated && !isset($this->_modified['validated'])) {
@@ -154,7 +170,7 @@ class Transaction extends Entity
 			return false;
 		}
 
-		foreach ($this->_lines as &$line)
+		foreach ($this->getLines() as $line)
 		{
 			$line->id_transaction = $this->id();
 			$line->save();
@@ -163,6 +179,16 @@ class Transaction extends Entity
 		foreach ($this->_old_lines as $line)
 		{
 			$line->delete();
+		}
+
+		// Remove flag
+		if (self::TYPE_PAYOFF == $this->type && $this->_related) {
+			$status = $this->_related->status;
+			$status &= ~self::STATUS_WAITING;
+			$status |= self::STATUS_PAID;
+			$this->_related->set('status', $status );
+			$this->_related->save();
+			var_dump($this->_related->status); exit;
 		}
 
 		return true;
@@ -215,7 +241,7 @@ class Transaction extends Entity
 			throw new ValidationException('Écriture non équilibrée : déséquilibre entre débits et crédits');
 		}
 
-		if (!in_array($this->type, [self::TYPE_ADVANCED, self::TYPE_CREDIT, self::TYPE_DEBT, self::TYPE_EXPENSE, self::TYPE_REVENUE, self::TYPE_TRANSFER])) {
+		if (!array_key_exists($this->type, self::TYPES_NAMES)) {
 			throw new ValidationException('Type d\'écriture inconnu');
 		}
 	}
@@ -234,20 +260,56 @@ class Transaction extends Entity
 
 		$this->importForm();
 
-		if ($type !== self::TYPE_ADVANCED) {
-			$from = @count($source['from_' . $type]) ? key($source['from_' . $type]) : null;
-			$to = @count($source['to_' . $type]) ? key($source['to_' . $type]) : null;
+		if (self::TYPE_PAYOFF == $type) {
+			$amount = $source['amount'];
+
+			$key = 'account_payoff';
+			$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+
+			if (!count($this->getLines())) {
+				throw new \LogicException('Invalid operation: payoff must already have one line');
+			}
+
+			$line = current($this->_lines);
+			$debit = $line->debit ? 0 : $amount;
+			$credit = $line->credit ? 0 : $amount;
+
+			$line2 = new Line;
+			$line2->importForm([
+				'reference'     => $source['payment_reference'],
+				'credit'        => $credit,
+				'debit'         => $debit,
+				'id_account'    => $account,
+				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
+			]);
+			$this->add($line2);
+		}
+		elseif (self::TYPE_ADVANCED == $type) {
+			$lines = Utils::array_transpose($source['lines']);
+
+			foreach ($lines as $i => $line) {
+				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+
+				if (!$line['id_account']) {
+					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
+				}
+
+				$line = (new Line)->import($line);
+				$this->add($line);
+			}
+		}
+		else {
+			$details = self::getTypesDetails();
+
+			if (!array_key_exists($type, $details)) {
+				throw new ValidationException('Type d\'écriture inconnu');
+			}
 
 			if ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT) {
 				$this->status = self::STATUS_WAITING;
 			}
 
 			$amount = $source['amount'];
-			$details = self::getTypesDetails();
-
-			if (!array_key_exists($type, $details)) {
-				throw new ValidationException('Type d\'écriture inconnu');
-			}
 
 			// Fill lines using a pre-defined setup obtained from getTypesDetails
 			foreach ($details[$type]->accounts as $k => $account) {
@@ -264,20 +326,6 @@ class Transaction extends Entity
 					'id_account'    => $account,
 					'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
 				]);
-				$this->add($line);
-			}
-		}
-		else {
-			$lines = Utils::array_transpose($source['lines']);
-
-			foreach ($lines as $i => $line) {
-				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
-
-				if (!$line['id_account']) {
-					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
-				}
-
-				$line = (new Line)->import($line);
 				$this->add($line);
 			}
 		}
@@ -482,5 +530,30 @@ class Transaction extends Entity
 		}
 
 		return $out;
+	}
+
+	public function payOffFrom(int $id): self
+	{
+		$this->_related = EntityManager::findOneById(self::class, $id);
+
+		if (!$this->_related) {
+			throw new \LogicException('Écriture d\'origine invalide');
+		}
+
+		$this->id_related = $this->_related->id();
+		$this->label = ($this->_related->type == Transaction::TYPE_DEBT ? 'Règlement de dette : ' : 'Règlement de créance : ') . $this->_related->label;
+		$this->type = Transaction::TYPE_PAYOFF;
+
+		foreach ($this->_related->getLines() as $line) {
+			if (($this->_related->type == self::TYPE_DEBT && $line->credit)
+				|| ($this->_related->type == self::TYPE_CREDIT && $line->debit)) {
+				// Skip the type of debt/credit, just keep the thirdparty account
+				continue;
+			}
+
+			$this->add(clone $line);
+		}
+
+		return $this->_related;
 	}
 }
