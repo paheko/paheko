@@ -130,7 +130,7 @@ class Utils
         }
 
         $decimals = substr($number, -2);
-        $number = substr($number, 0, -2);
+        $number = (int) substr($number, 0, -2);
 
         return sprintf('%s%s%s', number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
