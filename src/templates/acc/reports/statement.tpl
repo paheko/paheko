@@ -10,10 +10,10 @@
 	<tbody>
 		<tr>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$expense caption="Charges"}
+				{include file="acc/reports/_statement_table.tpl" accounts=$expense caption="Charges" abs=true}
 			</td>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$revenue caption="Produits"}
+				{include file="acc/reports/_statement_table.tpl" accounts=$revenue caption="Produits" abs=true}
 			</td>
 		</tr>
 	</tbody>
@@ -43,11 +43,11 @@
 		{if $result}
 		<tr>
 			<td>
-			{if ($result >= 0)}
+			{if ($result < 0)}
 				<table>
 					<tfoot>
 						<tr>
-							<th>Résultat (excédent)</th>
+							<th>Résultat (déficit)</th>
 							<td class="money">{$result|raw|html_money:false}</td>
 						</tr>
 					</tfoot>
@@ -55,11 +55,11 @@
 			{/if}
 			</td>
 			<td>
-			{if ($result < 0)}
+			{if ($result >= 0)}
 				<table>
 					<tfoot>
 						<tr>
-							<th>Résultat (déficit)</th>
+							<th>Résultat (excédent)</th>
 							<td class="money">{$result|raw|html_money:false}</td>
 						</tr>
 					</tfoot>

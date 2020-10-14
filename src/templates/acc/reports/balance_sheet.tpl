@@ -10,10 +10,10 @@
 	<tbody>
 		<tr>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$asset caption="Actif"}
+				{include file="acc/reports/_statement_table.tpl" accounts=$asset caption="Actif" abs=false}
 			</td>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$liability caption="Passif"}
+				{include file="acc/reports/_statement_table.tpl" accounts=$liability caption="Passif" abs=false}
 			</td>
 		</tr>
 	</tbody>
