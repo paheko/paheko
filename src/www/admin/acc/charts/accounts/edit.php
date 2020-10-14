@@ -19,12 +19,11 @@ if ($chart->archived) {
 	throw new UserException("Il n'est pas possible de modifier un compte d'un plan comptable archivé.");
 }
 
-$can_edit = $account->canEdit();
+$can_edit = ($account->user || !$chart->code) && $account->canEdit();
 
 if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 {
-	try
-	{
+	try {
 		if ($can_edit) {
 			$account->importForm();
 		}

@@ -4,7 +4,7 @@
 	<ul>
 		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-		<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
+			<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
 		{/if}
 	</ul>
 </nav>
@@ -39,7 +39,8 @@
 						{linkbutton shape="menu" label="Tous les comptes" href="acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="acc/charts/edit.php?id=%d"|args:$item.id}
-							{linkbutton shape="export" label="Exporter en CSV" href="acc/charts/export.php?id=%d"|args:$item.id}
+							{linkbutton shape="export" label="Export CSV" href="acc/charts/export.php?id=%d"|args:$item.id}
+							{linkbutton shape="export" label="Export tableur" href="acc/charts/export.php?id=%d&ods"|args:$item.id}
 							{if !$item.code && !$item.archived}
 								{linkbutton shape="delete" label="Supprimer" href="acc/charts/delete.php?id=%d"|args:$item.id}
 							{/if}
