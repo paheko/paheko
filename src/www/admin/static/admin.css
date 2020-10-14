@@ -248,9 +248,20 @@ p.error::before, div.error::before {
     color: red;
 }
 
+.help {
+    color: #666;
+}
+
 p.help {
     margin: 1em;
-    color: #666;
+}
+
+dd em.help {
+    margin-left: 1em;
+}
+
+dd.help li {
+    list-style-type: disc;
 }
 
 .error ul, .alert ul, .confirm ul {
@@ -593,7 +604,7 @@ nav.tabs ul {
 nav.tabs .sub {
     margin: -1em 0 1em 2em;
     padding-top: 1em;
-    border-left: .1em solid rgb(var(--gMainColor));
+    border-left: 2px solid rgb(var(--gMainColor));
     border-bottom-left-radius: .5em;
 }
 

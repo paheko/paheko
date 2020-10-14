@@ -13,7 +13,8 @@ if (!$chart) {
 	throw new UserException("Le plan comptable demandé n'existe pas.");
 }
 
-Utils::toCSV(
+Utils::export(
+	null !== qg('ods') ? 'ods' : 'csv',
 	sprintf('Plan comptable - %s', $chart->label),
 	$chart->accounts()->export()
 );

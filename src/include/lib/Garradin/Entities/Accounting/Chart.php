@@ -5,6 +5,8 @@ namespace Garradin\Entities\Accounting;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Utils;
+use Garradin\ValidationException;
+use Garradin\UserException;
 use Garradin\Accounting\Accounts;
 
 class Chart extends Entity
@@ -31,6 +33,8 @@ class Chart extends Entity
 		'archived' => 'numeric|min:0|max:1'
 	];
 
+	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'type'];
+
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
@@ -46,5 +50,37 @@ class Chart extends Entity
 	public function canDelete()
 	{
 		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_chart = ? LIMIT 1;', Year::TABLE), $this->id());
+	}
+
+	public function importCSV(array $file): void
+	{
+		$db = DB::getInstance();
+		$positions = array_flip(Account::POSITIONS_NAMES);
+		$types = array_flip(Account::TYPES_NAMES);
+
+		$db->begin();
+		$this->save();
+
+		try {
+			foreach (Utils::fromCSV($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
+				$account = new Account;
+				$account->id_chart = $this->id();
+				try {
+					$row['position'] = $positions[$row['position']];
+					$row['type'] = $types[$row['type']];
+					$account->importForm($row);
+					$account->save();
+				}
+				catch (ValidationException $e) {
+					throw new UserException(sprintf('Ligne %d : %s', $line, $e->getMessage()));
+				}
+			}
+
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollback();
+			throw $e;
+		}
 	}
 }

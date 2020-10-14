@@ -6,7 +6,7 @@ use KD2\Security;
 use KD2\Form;
 use KD2\Translate;
 use KD2\SMTP;
-use KD2\ODSWriter;
+use KD2\Office\Calc\Writer as ODSWriter;
 
 class Utils
 {
@@ -699,6 +699,16 @@ class Utils
         return sprintf("\"%s\"\r\n", implode('","', $row));
     }
 
+    static public function export(string $format, string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
+    {
+        if ('csv' == $format) {
+            self::toCSV(... array_slice(func_get_args(), 1));
+        }
+        else {
+            self::toODS(... array_slice(func_get_args(), 1));
+        }
+    }
+
     static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
     {
         header('Content-type: application/csv');
@@ -751,6 +761,13 @@ class Utils
 
         foreach ($iterator as $row)
         {
+            if (is_object($row) && $row instanceof Entity) {
+                $row = $row->asArray();
+            }
+            elseif (is_object($row)) {
+                $row = (array) $row;
+            }
+
             if (!$header)
             {
                 $ods->add(array_keys($row));
@@ -765,6 +782,58 @@ class Utils
         }
 
         $ods->output();
+    }
+
+    static public function fromCSV(array $file, array $expected_columns): \Generator
+    {
+        if (empty($file['size']) || empty($file['tmp_name'])) {
+            throw new UserException('Fichier invalide');
+        }
+
+        $fp = fopen($file['tmp_name'], 'r');
+
+        if (!$fp) {
+            throw new UserException('Le fichier ne peut être ouvert');
+        }
+
+        // Find the delimiter
+        $delim = self::find_csv_delim($fp);
+        self::skip_bom($fp);
+
+        $line = 1;
+
+        $columns = fgetcsv($fp, 4096, $delim);
+        $columns = array_map('trim', $columns);
+
+        // Check for required columns
+        foreach ($expected_columns as $column) {
+            if (!in_array($column, $columns, true)) {
+                throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $column));
+            }
+        }
+
+        while (!feof($fp))
+        {
+            $row = fgetcsv($fp, 4096, $delim);
+            $line++;
+
+            // Empty line, skip
+            if (empty($row)) {
+                continue;
+            }
+
+            if (count($row) != count($columns))
+            {
+                $db->rollback();
+                throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
+            }
+
+            $row = array_combine($columns, $row);
+
+            yield $line => $row;
+        }
+
+        fclose($fp);
     }
 
     static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
