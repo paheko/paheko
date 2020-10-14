@@ -1,5 +1,5 @@
 .PHONY: dev-server release deps publish check-dependencies test
-KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-5.6.zip
+KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.3.zip
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
@@ -42,4 +42,4 @@ publish: release deb
 	fossil uv sync
 
 check-dependencies:
-	grep -hEo '^use \\?KD2\\\w+|\\KD2\\\w+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
+	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
