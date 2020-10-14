@@ -18,11 +18,14 @@ class Account extends Entity
 	// Actif
 	const ASSET = 2;
 
+	// Passif ou actif
+	const LIABILITY_OR_ASSET = 3;
+
 	// Produit
-	const REVENUE = 3;
+	const REVENUE = 4;
 
 	// Charge
-	const EXPENSE = 4;
+	const EXPENSE = 5;
 
 	const POSITIONS_NAMES = [
 		'',
@@ -71,11 +74,6 @@ class Account extends Entity
 	protected $description;
 	protected $position;
 	protected $type;
-	/**
-	 * Parent of type (then type needs to be filled)
-	 * @var integer either 1 or 0
-	 */
-	protected $type_parent;
 	protected $user;
 
 	protected $_types = [
@@ -86,7 +84,6 @@ class Account extends Entity
 		'description' => '?string',
 		'position'    => 'int',
 		'type'        => 'int',
-		'type_parent' => 'int',
 		'user'        => 'int',
 	];
 
@@ -96,7 +93,6 @@ class Account extends Entity
 		'description' => 'string|max:2000',
 		'position'    => 'required|integer',
 		'type'        => 'numeric|min:0',
-		'type_parent' => 'numeric|min:0',
 	];
 
 	public function getJournal(int $year_id)

@@ -11,16 +11,21 @@ use KD2\DB\EntityManager;
 
 class Reports
 {
-	static public function getResult(array $criterias): ?int
+	static public function getResult(array $criterias): int
 	{
 		$where = self::getWhereClause($criterias);
 		$sql = sprintf('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			INNER JOIN %s a ON a.id = l.id_account
-			WHERE %s AND a.position IN (?, ?);',
+			WHERE %s AND a.position = ?;',
 			Line::TABLE, Transaction::TABLE, Account::TABLE, $where);
-		return DB::getInstance()->firstColumn($sql, Account::EXPENSE, Account::REVENUE);
+
+		$db = DB::getInstance();
+		$a = $db->firstColumn($sql, Account::REVENUE);
+		$b = $db->firstColumn($sql, Account::EXPENSE);
+
+		return (int)$a - abs((int)$b);
 	}
 
 	static public function getClosingSumsWithAccounts(array $criterias): array
@@ -28,7 +33,7 @@ class Reports
 		$where = self::getWhereClause($criterias);
 
 		// Find sums, link them to accounts
-		$sql = sprintf('SELECT a.id, a.code, a.label, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+		$sql = sprintf('SELECT a.id, a.code, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
 			SUM(l.credit) - SUM(l.debit) AS sum
 			FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
@@ -38,6 +43,66 @@ class Reports
 			ORDER BY a.code COLLATE NOCASE;',
 			Line::TABLE, Transaction::TABLE, Account::TABLE, $where);
 		return DB::getInstance()->getGrouped($sql);
+	}
+
+	static public function getBalanceSheet(array $criterias): array
+	{
+		$out = [
+			Account::ASSET => [],
+			Account::LIABILITY => [],
+			'sums' => [
+				Account::ASSET => 0,
+				Account::LIABILITY => 0,
+			],
+		];
+
+		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::LIABILITY_OR_ASSET]];
+		$list = self::getClosingSumsWithAccounts($criterias + $position_criteria);
+
+		foreach ($list as $row) {
+			if ($row->sum == 0) {
+				// Ignore empty accounts
+				continue;
+			}
+
+			$sum = $row->sum;
+			$row->sum = abs($row->sum);
+
+			if ($row->position == Account::LIABILITY_OR_ASSET) {
+				if ($sum < 0) {
+					$out[Account::ASSET][] = $row;
+				}
+				else {
+					$out[Account::LIABILITY][] = $row;
+				}
+			}
+			else {
+				$out[$row->position][] = $row;
+			}
+		}
+
+		$result = self::getResult($criterias);
+
+		$out[Account::LIABILITY][] = (object) [
+			'id' => null,
+			'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
+			'sum' => $result,
+		];
+
+		foreach ($out as $position => $rows) {
+			if ($position == 'sums') {
+				continue;
+			}
+
+			$sum = 0;
+			foreach ($rows as $row) {
+				$sum += $row->sum;
+			}
+
+			$out['sums'][$position] = $sum;
+		}
+
+		return $out;
 	}
 
 	/**
@@ -132,7 +197,8 @@ class Reports
 		}
 
 		if (!empty($criterias['position'])) {
-			$where[] = sprintf('a.position = %d', $criterias['position']);
+			$db = DB::getInstance();
+			$where[] = $db->where('position', $criterias['position']);
 		}
 
 		if (!empty($criterias['user'])) {

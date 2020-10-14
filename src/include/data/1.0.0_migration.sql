@@ -31,35 +31,25 @@ INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 6 FROM compta_projets;
 
 -- Suppression des positions "actif ou passif" et "charge ou produit"
-UPDATE acc_accounts SET position = 0 WHERE position = 3 OR position = 12;
+UPDATE acc_accounts SET position = 0 WHERE position = 12;
 
 -- Modification des valeurs de la position (qui n'est plus un champ binaire)
-UPDATE acc_accounts SET position = 3 WHERE position = 4;
-UPDATE acc_accounts SET position = 4 WHERE position = 8;
+UPDATE acc_accounts SET position = 5 WHERE position = 8;
 
-UPDATE acc_accounts SET type_parent = 1 WHERE code = '7';
-UPDATE acc_accounts SET type_parent = 2 WHERE code = '6';
+-- Mise à jour de la position pour les comptes de tiers qui peuvent varier actif ou passif
+UPDATE acc_accounts SET position = 3 WHERE code IN (4010, 4110, 4210, 428, 438);
+
+-- Mise à jour position comptes bancaires, qui peuvent être à découvert et donc changer de côté au bilan
+UPDATE acc_accounts SET position = 3 WHERE code LIKE '512%';
 
 -- Migration comptes bancaires
 UPDATE acc_accounts SET type = 3 WHERE code IN (SELECT id FROM compta_comptes_bancaires);
-UPDATE acc_accounts SET type_parent = 3 WHERE code = '512';
 
 -- Caisse
 UPDATE acc_accounts SET type = 4 WHERE code = '530';
-UPDATE acc_accounts SET type_parent = 4 WHERE code = '53';
 
 -- Chèques et carte à encaisser
 UPDATE acc_accounts SET type = 5 WHERE code = '5112' OR code = '5113';
-UPDATE acc_accounts SET type_parent = 5 WHERE code = '51';
-
--- Comptes analytiques
-UPDATE acc_accounts SET type_parent = 6 WHERE code = '9';
-
--- Bénévolat en nature
-UPDATE acc_accounts SET type_parent = 7 WHERE code = '870';
-
--- Comptes de tiers
-UPDATE acc_accounts SET type_parent = 8 WHERE code = '4';
 
 -- Comptes d'ouverture et de clôture
 UPDATE acc_accounts SET type = 9 WHERE code = '890';

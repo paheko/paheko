@@ -453,24 +453,24 @@ class Transaction extends Entity
 				[
 					'label' => 'Type de recette',
 					'targets' => [Account::TYPE_REVENUE],
-					'position' => 'debit',
+					'position' => 'credit',
 				],
 				[
 					'label' => 'Compte d\'encaissement',
 					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-					'position' => 'credit',
+					'position' => 'debit',
 				],
 			],
 			[
 				[
 					'label' => 'Type de dépense',
 					'targets' => [Account::TYPE_EXPENSE],
-					'position' => 'credit',
+					'position' => 'debit',
 				],
 				[
 					'label' => 'Compte de décaissement',
 					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-					'position' => 'debit',
+					'position' => 'credit',
 				],
 			],
 			[

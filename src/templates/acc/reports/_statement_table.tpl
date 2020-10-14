@@ -7,7 +7,7 @@
 		<tr class="compte">
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a></td>
 			<th>{$account.label}</th>
-			<td class="money">{$account.sum|abs|escape|html_money}</td>
+			<td class="money">{if $abs}{$account.sum|abs|raw|html_money}{else}{$account.sum|raw|html_money}{/if}</td>
 		</tr>
 	{/foreach}
 	</tbody>
