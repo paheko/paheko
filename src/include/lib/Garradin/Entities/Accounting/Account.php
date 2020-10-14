@@ -31,8 +31,9 @@ class Account extends Entity
 
 	const POSITIONS_NAMES = [
 		'',
-		'Passif',
 		'Actif',
+		'Passif',
+		'Actif ou passif',
 		'Produit',
 		'Charge',
 	];

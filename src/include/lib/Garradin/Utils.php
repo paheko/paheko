@@ -699,7 +699,7 @@ class Utils
         return sprintf("\"%s\"\r\n", implode('","', $row));
     }
 
-    static public function toCSV($name, $iterator, $header = null, $row_map_callback = null)
+    static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
     {
         header('Content-type: application/csv');
         header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
@@ -713,6 +713,13 @@ class Utils
 
         foreach ($iterator as $row)
         {
+            if (is_object($row) && $row instanceof Entity) {
+                $row = $row->asArray();
+            }
+            elseif (is_object($row)) {
+                $row = (array) $row;
+            }
+
             if (!$header)
             {
                 fputs($fp, self::row_to_csv(array_keys($row)));
@@ -727,11 +734,9 @@ class Utils
         }
 
         fclose($fp);
-
-        return true;
     }
 
-    static public function toODS($name, $iterator, $header = null, $row_map_callback = null)
+    static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
     {
         header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
         header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
@@ -760,8 +765,6 @@ class Utils
         }
 
         $ods->output();
-
-        return true;
     }
 
     static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
