@@ -77,7 +77,7 @@ class Account extends Entity
 	protected $description;
 	protected $position;
 	protected $type;
-	protected $user;
+	protected $user = 0;
 
 	protected $_types = [
 		'id'          => 'int',
@@ -102,12 +102,18 @@ class Account extends Entity
 	{
 		$db = DB::getInstance();
 
-		$where = 'code = ?';
+		$this->assert(!empty($this->id_chart), 'Aucun plan comptable lié');
+
+		$where = 'code = ? AND id_chart = ?';
 		$where .= $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
 
-		if ($db->test(self::TABLE, $where, $this->code)) {
-			throw new ValidationException('Ce code est déjà utilisé par un autre compte.');
+		if ($db->test(self::TABLE, $where, $this->code, $this->id_chart)) {
+			throw new ValidationException(sprintf('Le code "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
+
+		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide');
+		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
+		$this->assert($this->user === 0 || $this->user === 1);
 
 		parent::selfCheck();
 	}

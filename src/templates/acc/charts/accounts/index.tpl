@@ -21,8 +21,10 @@
 			<td class="desc">{$account.description}</td>
 			<td class="actions">
 				{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$chart.archived}
+					{if $account.user || !$chart.code}
+						{linkbutton shape="delete" label="Supprimer" href="acc/charts/accounts/delete.php?id=%d"|args:$account.id}
+					{/if}
 					{linkbutton shape="edit" label="Modifier" href="acc/charts/accounts/edit.php?id=%d"|args:$account.id}
-					{linkbutton shape="delete" label="Supprimer" href="acc/charts/accounts/delete.php?id=%d"|args:$account.id}
 				{/if}
 			</td>
 		</tr>
