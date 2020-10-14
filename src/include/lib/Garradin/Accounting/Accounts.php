@@ -118,4 +118,11 @@ class Accounts
 		unset($code);
 		return $codes;
 	}
+
+	public function copyFrom(int $id)
+	{
+		$db = DB::getInstance();
+		return $db->exec(sprintf('INSERT INTO %s (id_chart, code, label, description, position, type, user)
+			SELECT %d, code, label, description, position, type, user FROM %1$s WHERE id_chart = %d;', Account::TABLE, $this->chart_id, $id));
+	}
 }
