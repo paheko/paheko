@@ -56,7 +56,7 @@ class Reports
 			],
 		];
 
-		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::LIABILITY_OR_ASSET]];
+		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::ASSET_OR_LIABILITY]];
 		$list = self::getClosingSumsWithAccounts($criterias + $position_criteria);
 
 		foreach ($list as $row) {
@@ -68,7 +68,7 @@ class Reports
 			$sum = $row->sum;
 			$row->sum = abs($row->sum);
 
-			if ($row->position == Account::LIABILITY_OR_ASSET) {
+			if ($row->position == Account::ASSET_OR_LIABILITY) {
 				if ($sum < 0) {
 					$out[Account::ASSET][] = $row;
 				}

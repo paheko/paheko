@@ -194,10 +194,7 @@ class Template extends \KD2\Smartyer
 		$current_value = null;
 		$current_value_from_user = false;
 
-		if (isset($value)) {
-			$current_value = $value;
-		}
-		elseif (isset($_POST[$name])) {
+		if (isset($_POST[$name])) {
 			$current_value = $_POST[$name];
 			$current_value_from_user = true;
 		}

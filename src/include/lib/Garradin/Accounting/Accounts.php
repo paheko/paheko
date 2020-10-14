@@ -83,15 +83,39 @@ class Accounts
 			$this->chart_id);
 
 		foreach ($query as $row) {
-			$name = Account::TYPES_NAMES[$row->type];
-
-			if (!isset($out[$name])) {
-				$out[$name] = [];
+			if (!isset($out[$row->type])) {
+				$out[$row->type] = (object) [
+					'label'    => Account::TYPES_NAMES[$row->type],
+					'type'     => $row->type,
+					'accounts' => [],
+				];
 			}
 
-			$out[$name][] = $row;
+			$out[$row->type]->accounts[] = $row;
 		}
 
 		return $out;
+	}
+
+	public function getNextCodesForTypes(): array
+	{
+		$db = DB::getInstance();
+		$codes = $db->getAssoc(sprintf('SELECT type, MAX(code) FROM %s WHERE id_chart = ? AND type > 0 GROUP BY type;', Account::TABLE), $this->chart_id);
+
+		foreach ($codes as &$code) {
+			if (($letter = substr($code, -1)) && !is_numeric($letter)) {
+				$code = substr($code, 0, -1);
+				$letter = strtoupper($letter);
+				$letter = ($letter == 'Z') ? 'AA' : chr(ord($letter)+1);
+			}
+			else {
+				$letter = 'A';
+			}
+
+			$code = $code . $letter;
+		}
+
+		unset($code);
+		return $codes;
 	}
 }

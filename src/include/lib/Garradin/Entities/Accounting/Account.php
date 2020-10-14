@@ -7,6 +7,7 @@ use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\ValidationException;
 
 class Account extends Entity
 {
@@ -19,7 +20,7 @@ class Account extends Entity
 	const LIABILITY = 2;
 
 	// Passif ou actif
-	const LIABILITY_OR_ASSET = 3;
+	const ASSET_OR_LIABILITY = 3;
 
 	// Produit
 	const REVENUE = 4;
@@ -95,6 +96,20 @@ class Account extends Entity
 		'type'        => 'required|numeric|min:0',
 	];
 
+	public function selfCheck(): void
+	{
+		$db = DB::getInstance();
+
+		$where = 'code = ?';
+		$where .= $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
+
+		if ($db->test(self::TABLE, $where, $this->code)) {
+			throw new ValidationException('Ce code est déjà utilisé par un autre compte.');
+		}
+
+		parent::selfCheck();
+	}
+
 	public function getJournal(int $year_id)
 	{
 		$db = DB::getInstance();
@@ -157,5 +172,31 @@ class Account extends Entity
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ?
 			ORDER BY t.date, t.id;', $this->id(), $year_id, $date->format('Y-m-d'));
+	}
+
+	public function importSimpleForm(array $translate_type_position, array $translate_type_codes, ?array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (empty($source['type'])) {
+			throw new UserException('Le type est obligatoire dans ce formulaire');
+		}
+
+		$type = (int) $source['type'];
+
+		if (array_key_exists($type, $translate_type_position)) {
+			$source['position'] = $translate_type_position[$type];
+		}
+		else {
+			$source['position'] = self::ASSET_OR_LIABILITY;
+		}
+
+		if (array_key_exists($type, $translate_type_codes)) {
+			$source['code'] = $translate_type_codes[$type];
+		}
+
+		$this->importForm($source);
 	}
 }
