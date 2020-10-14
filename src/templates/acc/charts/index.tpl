@@ -55,7 +55,7 @@
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>
 			<dl>
-				{input type="select_groups" name="plan" options=$charts_groupped label="Recopier depuis" required=1}
+				{input type="select_groups" name="plan" options=$charts_groupped label="Recopier depuis" required=1 default=$from}
 				{input type="text" name="label" label="Libellé" required=1}
 				{input type="select" name="country" label="Pays" required=1 options=$country_list default=$config.pays}
 			</dl>

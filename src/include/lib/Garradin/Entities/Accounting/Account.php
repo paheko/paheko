@@ -199,4 +199,28 @@ class Account extends Entity
 
 		$this->importForm($source);
 	}
+
+	public function importLimitedForm(?array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		$data = array_intersect_key($source, array_flip(['type', 'description']));
+		parent::import($data);
+	}
+
+	public function canDelete(): bool
+	{
+		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_account = ? LIMIT 1;', Line::TABLE), $this->id());
+	}
+
+	public function canEdit(): bool
+	{
+		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s l
+			INNER JOIN %s t ON t.id = l.id_transaction
+			INNER JOIN %s y ON y.id = t.id_year
+			WHERE l.id_account = ? AND y.closed = 1
+			LIMIT 1;', Line::TABLE, Transaction::TABLE, Year::TABLE), $this->id());
+	}
 }

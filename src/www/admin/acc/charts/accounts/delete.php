@@ -1,46 +1,42 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+use Garradin\Accounting\Accounts;
+
+require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$id = qg('id');
-$compte = $comptes->get($id);
+$account = Accounts::get((int) qg('id'));
 
-if (!$compte)
-{
-    throw new UserException('Le compte demandé n\'existe pas.');
+if (!$account) {
+	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-if (f('delete') && $form->check('compta_delete_compte_' . $compte->id))
-{
-    try
-    {
-        $comptes->delete($compte->id);
-        Utils::redirect(ADMIN_URL . 'compta/comptes/?classe=' . substr($compte->id, 0, 1));
-    }
-    catch (UserException $e)
-    {
-        $form->addError($e->getMessage());
-    }
-}
-elseif (f('disable') && $form->check('compta_disable_compte_' . $compte->id))
-{
-    try
-    {
-        $comptes->disable($compte->id);
-        Utils::redirect(ADMIN_URL . 'compta/comptes/?classe='.substr($compte->id, 0, 1));
-    }
-    catch (UserException $e)
-    {
-        $form->addError($e->getMessage());
-    }
+if (!$account->canDelete()) {
+	throw new UserException("Ce compte ne peut être supprimé car des écritures y sont liées (peut-être sur l'exercice courant ou sur un exercice clôt).\nSi vous souhaitez faire du ménage dans la liste des comptes il est recommandé de créer un nouveau comptable.");
 }
 
-$tpl->assign('can_delete', $comptes->canDelete($compte->id));
-$tpl->assign('can_disable', $comptes->canDisable($compte->id));
+if (f('delete') && $form->check('acc_accounts_delete_' . $account->id()))
+{
+	try
+	{
+		$page = '';
 
-$tpl->assign('compte', $compte);
+		if (!$account->type) {
+			$page = 'all.php';
+		}
 
-$tpl->display('admin/compta/comptes/supprimer.tpl');
+		$account->delete();
+
+		Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
+	}
+	catch (UserException $e)
+	{
+		$form->addError($e->getMessage());
+	}
+}
+
+$tpl->assign(compact('account'));
+
+$tpl->display('acc/charts/accounts/delete.tpl');

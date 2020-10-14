@@ -13,11 +13,19 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
+$can_edit = $account->canEdit();
+
 if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 {
 	try
 	{
-		$account->importForm();
+		if ($can_edit) {
+			$account->importForm();
+		}
+		else {
+			$account->importLimitedForm();
+		}
+
 		$account->save();
 
 		$page = '';
@@ -37,6 +45,6 @@ if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 $types = $account::TYPES_NAMES;
 $types[0] = '-- Pas un compte favori';
 
-$tpl->assign(compact('types', 'account'));
+$tpl->assign(compact('types', 'account', 'can_edit'));
 
 $tpl->display('acc/charts/accounts/edit.tpl');
