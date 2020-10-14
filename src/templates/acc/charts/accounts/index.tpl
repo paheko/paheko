@@ -3,11 +3,16 @@
 {include file="acc/charts/accounts/_nav.tpl" current="favorites"}
 
 <table class="list">
-{foreach from=$accounts_grouped key="group_name" item="accounts"}
+{foreach from=$accounts_grouped item="group"}
 	<tbody>
-		<tr><td colspan="4"><h2 class="ruler">{$group_name}</h2></td></tr>
+		<tr>
+			<td colspan="3"><h2 class="ruler">{$group.label}</h2></td>
+			<td class="actions">
+				{linkbutton label="Ajouter un compte" shape="plus" href="acc/charts/accounts/new.php?id=%d&type=%d"|args:$chart.id,$group.type}
+			</td>
+		</tr>
 
-	{foreach from=$accounts item="account"}
+	{foreach from=$group.accounts item="account"}
 		<tr>
 			<td class="num">{$account.code}</td>
 			<th>{$account.label}</th>
