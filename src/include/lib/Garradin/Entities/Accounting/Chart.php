@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Accounting;
 
+use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Utils;
 use Garradin\Accounting\Accounts;
@@ -40,5 +41,10 @@ class Chart extends Entity
 	public function accounts()
 	{
 		return new Accounts($this->id());
+	}
+
+	public function canDelete()
+	{
+		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_chart = ? LIMIT 1;', Year::TABLE), $this->id());
 	}
 }

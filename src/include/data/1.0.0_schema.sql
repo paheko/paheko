@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 -- Comptes des plans comptables
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_chart INTEGER NOT NULL REFERENCES acc_charts,
+    id_chart INTEGER NOT NULL REFERENCES acc_charts ON DELETE CASCADE,
 
     code TEXT NOT NULL, -- peut contenir des lettres, eg. 53A, 53B, etc.
 
