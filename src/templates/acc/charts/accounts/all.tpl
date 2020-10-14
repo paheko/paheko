@@ -2,6 +2,10 @@
 
 {include file="acc/charts/accounts/_nav.tpl" current="all"}
 
+<p class="help">
+	Les comptes marqués comme «&nbsp;<em>Ajouté</em>&nbsp;» ont été ajoutés au plan comptable officiel par vous-même.
+</p>
+
 <table class="accounts">
 	<tbody>
 	{foreach from=$accounts item="account"}
@@ -10,8 +14,11 @@
 			<th>{$account.label}</th>
 			<td>
 				{if $account.type}
-					<?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
+					{icon shape="star"} <?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
 				{/if}
+			</td>
+			<td>
+				{if $account.user}<em>Ajouté</em>{/if}
 			</td>
 			<td class="actions">
 				{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
@@ -23,5 +30,6 @@
 	{/foreach}
 	</tbody>
 </table>
+
 
 {include file="admin/_foot.tpl"}
