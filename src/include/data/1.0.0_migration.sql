@@ -20,8 +20,9 @@ INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', '
 --.read plan_comptable_2020.sql
 
 -- Migration comptes de code comme identifiant à ID unique
+-- Inversement valeurs actif/passif
 INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
-	SELECT NULL, 1, id, libelle, position, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
+	SELECT NULL, 1, id, libelle, CASE WHEN position = 2 THEN 1 WHEN position = 1 THEN 2 ELSE position END, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
 
 -- Migrations projets vers comptes analytiques
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
@@ -30,7 +31,7 @@ INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 6 FROM compta_projets;
 
--- Suppression des positions "actif ou passif" et "charge ou produit"
+-- Suppression de la position "charge ou produit" qui n'a aucun sens
 UPDATE acc_accounts SET position = 0 WHERE position = 12;
 
 -- Modification des valeurs de la position (qui n'est plus un champ binaire)

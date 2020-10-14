@@ -12,11 +12,11 @@ class Account extends Entity
 {
 	const TABLE = 'acc_accounts';
 
-	// Passif
-	const LIABILITY = 1;
-
 	// Actif
-	const ASSET = 2;
+	const ASSET = 1;
+
+	// Passif
+	const LIABILITY = 2;
 
 	// Passif ou actif
 	const LIABILITY_OR_ASSET = 3;
@@ -91,8 +91,8 @@ class Account extends Entity
 		'code'        => 'required|string|alpha_num|max:10',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
-		'position'    => 'required|integer',
-		'type'        => 'numeric|min:0',
+		'position'    => 'required|numeric|min:0',
+		'type'        => 'required|numeric|min:0',
 	];
 
 	public function getJournal(int $year_id)

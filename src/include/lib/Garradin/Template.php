@@ -221,7 +221,7 @@ class Template extends \KD2\Smartyer
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
 
-			if (isset($_POST[$name]) && $_POST[$name] == $value) {
+			if ($current_value == $value) {
 				$attributes['checked'] = 'checked';
 			}
 		}
@@ -317,24 +317,27 @@ class Template extends \KD2\Smartyer
 
 		$required_label = array_key_exists('required', $attributes) ? ' <b title="Champ obligatoire">(obligatoire)</b>' : '';
 
-		$out = '<dt>';
-
-		if ($type == 'radio' || $type == 'checkbox') {
-			$out .= $input . ' ';
-		}
-
 		if ($type == 'file') {
 			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
 		}
 
-		$out .= sprintf('<label for="%s">%s</label>%s</dt>', $attributes['id'], $this->escape($label), $required_label);
+		$label = sprintf('<label for="%s">%s</label>%s', $attributes['id'], $this->escape($label), $required_label);
 
-		if (isset($help)) {
-			$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
+		if ($type == 'radio' || $type == 'checkbox') {
+			$out = sprintf('<dd>%s %s', $input, $label);
+
+			if (isset($help)) {
+				$out .= sprintf(' <em class="help">(%s)</em>', $this->escape($help));
+			}
+
+			$out .= '</dd>';
 		}
+		else {
+			$out = sprintf('<dt>%s</dt><dd>%s</dd>', $label, $input);
 
-		if ($type != 'radio' && $type != 'checkbox') {
-			$out .= sprintf('<dd>%s</dd>', $input);
+			if (isset($help)) {
+				$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
+			}
 		}
 
 		return $out;
