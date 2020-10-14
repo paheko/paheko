@@ -707,6 +707,10 @@ table.list tr:nth-child(even), table.multi tbody:nth-child(even) {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
+table.list tr.disabled {
+    color: #666;
+}
+
 table.multi tr {
     background: inherit !important;
 }

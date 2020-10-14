@@ -27,7 +27,7 @@ class Chart extends Entity
 	protected $_form_rules = [
 		'label'    => 'required|string|max:200',
 		'country'  => 'required|string|size:2',
-		'code'     => 'string',
+		'archived' => 'numeric|min:0|max:1'
 	];
 
 	public function selfCheck(): void

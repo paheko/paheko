@@ -8,7 +8,9 @@
 		<tr>
 			<td colspan="3"><h2 class="ruler">{$group.label}</h2></td>
 			<td class="actions">
-				{linkbutton label="Ajouter un compte" shape="plus" href="acc/charts/accounts/new.php?id=%d&type=%d"|args:$chart.id,$group.type}
+				{if !$chart.archived}
+					{linkbutton label="Ajouter un compte" shape="plus" href="acc/charts/accounts/new.php?id=%d&type=%d"|args:$chart.id,$group.type}
+				{/if}
 			</td>
 		</tr>
 
@@ -18,7 +20,7 @@
 			<th>{$account.label}</th>
 			<td class="desc">{$account.description}</td>
 			<td class="actions">
-				{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+				{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$chart.archived}
 					{linkbutton shape="edit" label="Modifier" href="acc/charts/accounts/edit.php?id=%d"|args:$account.id}
 					{linkbutton shape="delete" label="Supprimer" href="acc/charts/accounts/delete.php?id=%d"|args:$account.id}
 				{/if}

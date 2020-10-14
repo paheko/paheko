@@ -15,6 +15,10 @@ if (!$chart) {
 	throw new UserException('Ce plan comptable n\'existe pas');
 }
 
+if ($chart->archived) {
+	throw new UserException("Il n'est pas possible de modifier un plan comptable archivé.");
+}
+
 $account = new Account;
 $account->position = Account::ASSET_OR_LIABILITY;
 
