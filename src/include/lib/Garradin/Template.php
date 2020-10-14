@@ -221,6 +221,8 @@ class Template extends \KD2\Smartyer
 			if ($current_value == $value) {
 				$attributes['checked'] = 'checked';
 			}
+
+			$attributes['value'] = $value;
 		}
 		elseif ($type == 'file') {
 			$help = sprintf('Taille maximale : %s', Utils::format_bytes(Utils::getMaxUploadSize()));

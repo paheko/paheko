@@ -13,6 +13,12 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
+$chart = $account->chart();
+
+if ($chart->archived) {
+	throw new UserException("Il n'est pas possible de modifier un compte d'un plan comptable archivé.");
+}
+
 if (!$account->canDelete()) {
 	throw new UserException("Ce compte ne peut être supprimé car des écritures y sont liées (peut-être sur l'exercice courant ou sur un exercice clôt).\nSi vous souhaitez faire du ménage dans la liste des comptes il est recommandé de créer un nouveau comptable.");
 }

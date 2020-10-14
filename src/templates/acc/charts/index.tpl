@@ -23,20 +23,24 @@
 		<thead>
 			<td>Pays</td>
 			<th>Libellé</th>
+			<td>Type</td>
+			<td>Archivé</td>
 			<td></td>
 		</thead>
 		<tbody>
 			{foreach from=$list item="item"}
-				<tr>
+				<tr{if $item.archived} class="disabled"{/if}>
 					<td>{$item.country|get_country_name}</td>
-					<th><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a> <em>{if $item.code}(officiel){else}(copie){/if}</em></th>
+					<th><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a></th>
+					<td>{if $item.code}Officiel{else}Copie{/if}</td>
+					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td>
 						{linkbutton shape="star" label="Comptes favoris" href="acc/charts/accounts/?id=%d"|args:$item.id}
 						{linkbutton shape="menu" label="Tous les comptes" href="acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="acc/charts/edit.php?id=%d"|args:$item.id}
 							{linkbutton shape="export" label="Exporter en CSV" href="acc/charts/export.php?id=%d"|args:$item.id}
-							{if empty($item.code)}
+							{if !$item.code && !$item.archived}
 								{linkbutton shape="delete" label="Supprimer" href="acc/charts/delete.php?id=%d"|args:$item.id}
 							{/if}
 						{/if}

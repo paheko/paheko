@@ -8,6 +8,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
+use Garradin\Accounting\Charts;
 
 class Account extends Entity
 {
@@ -222,5 +223,10 @@ class Account extends Entity
 			INNER JOIN %s y ON y.id = t.id_year
 			WHERE l.id_account = ? AND y.closed = 1
 			LIMIT 1;', Line::TABLE, Transaction::TABLE, Year::TABLE), $this->id());
+	}
+
+	public function chart(): Chart
+	{
+		return Charts::get($this->id_chart);
 	}
 }

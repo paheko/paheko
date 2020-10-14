@@ -13,6 +13,12 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
+$chart = $account->chart();
+
+if ($chart->archived) {
+	throw new UserException("Il n'est pas possible de modifier un compte d'un plan comptable archivé.");
+}
+
 $can_edit = $account->canEdit();
 
 if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
