@@ -32,7 +32,7 @@
 				<tr{if $item.archived} class="disabled"{/if}>
 					<td>{$item.country|get_country_name}</td>
 					<th><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a></th>
-					<td>{if $item.code}Officiel{else}Copie{/if}</td>
+					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td>
 						{linkbutton shape="star" label="Comptes favoris" href="acc/charts/accounts/?id=%d"|args:$item.id}

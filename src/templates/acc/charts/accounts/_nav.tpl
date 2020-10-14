@@ -1,7 +1,9 @@
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 		<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
+		{/if}
 	</ul>
 	<ul class="sub">
 		<li><strong>{$chart.label}&nbsp;:</strong></li>
