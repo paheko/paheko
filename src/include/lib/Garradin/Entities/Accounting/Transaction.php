@@ -550,7 +550,11 @@ class Transaction extends Entity
 				continue;
 			}
 
-			$this->add(clone $line);
+			// Invert debit/credit
+			$line2 = clone $line;
+			$line2->debit = $line->debit ? 0 : $line->credit;
+			$line2->credit = $line->credit ? 0 : $line->debit;
+			$this->add($line2);
 		}
 
 		return $this->_related;
