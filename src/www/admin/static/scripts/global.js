@@ -97,8 +97,9 @@
 			g.closeDialog();
 		}
 
-		g.dialog = document.createElement('div');
+		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
+		g.dialog.open = true;
 		g.dialog.style.opacity = content.style.width = content.style.height = 0;
 		g.dialog.appendChild(content);
 		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };

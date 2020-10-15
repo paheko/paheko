@@ -2,12 +2,12 @@
 
 {if isset($grouped_accounts)}
 
-	{foreach from=$grouped_accounts key="group_name" item="accounts"}
-		<h2 class="ruler">{$group_name}</h2>
+	{foreach from=$grouped_accounts item="group"}
+		<h2 class="ruler">{$group.label}</h2>
 
 		<table class="list">
 			<tbody>
-			{foreach from=$accounts item="account"}
+			{foreach from=$group.accounts item="account"}
 				<tr>
 					<td>{$account.code}</td>
 					<th>{$account.label}</th>
@@ -97,6 +97,8 @@ if (q) {
 
 	q.focus();
 }
+
+window.onkeyup = (e) => { if (e.key == 'Escape') window.parent.g.closeDialog(); };
 </script>
 {/literal}
 

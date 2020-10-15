@@ -289,7 +289,7 @@ class Template extends \KD2\Smartyer
 
 			$button = $this->widgetButton([
 				'shape' => $multiple ? 'plus' : 'menu',
-				'value' => $attributes['target'],
+				'value' => (substr($attributes['target'], 0, 4) === 'http') ? $attributes['target'] : ADMIN_URL . $attributes['target'],
 				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
 				'data-multiple' => $multiple ? '1' : '0',
 				'data-name' => $name,

@@ -23,17 +23,17 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 		<tr>
 			<th>
 				{if isset($lines_accounts)}
-					{input type="list" target="%sacc/charts/accounts/selector.php?target=all"|args:$admin_url,$chart_id name="lines[account][]" value=$lines_accounts[$k]}
+					{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account][]" default=$lines_accounts[$k]}
 				{else}
-					{input type="list" target="%sacc/charts/accounts/selector.php?target=all"|args:$admin_url,$chart_id name="lines[account][]"}
+					{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account][]"}
 				{/if}
 			</th>
-			<td>{input type="money" name="lines[debit][]" value=$line.debit size=5}</td>
-			<td>{input type="money" name="lines[credit][]" value=$line.credit size=5}</td>
-			<td>{input type="text" name="lines[reference][]" value=$line.reference size=10}</td>
-			<td>{input type="text" name="lines[label][]" value=$line.label}</td>
+			<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
+			<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
+			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10}</td>
+			<td>{input type="text" name="lines[label][]" default=$line.label}</td>
 			{if count($analytical_accounts) > 0}
-				<td>{input value=$line.id_analytical type="select" name="lines[id_analytical][]" options=$analytical_accounts}</td>
+				<td>{input default=$line.id_analytical type="select" name="lines[id_analytical][]" options=$analytical_accounts}</td>
 			{/if}
 			<td>{button label="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
 		</tr>
