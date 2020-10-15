@@ -17,9 +17,6 @@
 		</dl>
 	</fieldset>
 
-	<p class="help">
-		Note&nbsp;: 
-
 	<p class="submit">
 		{csrf_field key="acc_years_new"}
 		<input type="submit" name="new" value="Créer ce nouvel exercice &rarr;" />

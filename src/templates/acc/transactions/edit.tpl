@@ -19,7 +19,7 @@
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input default=$linked_users type="list" multiple=true name="users" label="Membres associés" target="%smembres/selector.php"|args:$admin_url}
+			{input default=$linked_users type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
 			{input source=$transaction type="text" name="reference" label="Numéro de pièce comptable"}
 			{input source=$transaction type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 

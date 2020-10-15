@@ -11,6 +11,79 @@ use KD2\DB\EntityManager;
 
 class Reports
 {
+	static public function getWhereClause(array $criterias): string
+	{
+		$where = [];
+
+		if (!empty($criterias['year'])) {
+			$where[] = sprintf('t.id_year = %d', $criterias['year']);
+		}
+
+		if (!empty($criterias['position'])) {
+			$db = DB::getInstance();
+			$where[] = $db->where('position', $criterias['position']);
+		}
+
+		if (!empty($criterias['type'])) {
+			$db = DB::getInstance();
+			$criterias['type'] = array_map('intval', (array)$criterias['type']);
+			$where[] = sprintf('a.type IN (%s)', implode(',', $criterias['type']));
+		}
+
+		if (!empty($criterias['user'])) {
+			$where[] = sprintf('t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = %d)', $criterias['user']);
+		}
+
+		if (!empty($criterias['creator'])) {
+			$where[] = sprintf('t.id_creator = %d', $criterias['creator']);
+		}
+
+		if (!count($where)) {
+			throw new \LogicException('Unknown criteria');
+		}
+
+		return implode(' AND ', $where);
+	}
+
+	static public function getSumsByInterval(array $criterias, int $interval)
+	{
+		$where = self::getWhereClause($criterias);
+
+		$db = DB::getInstance();
+
+		$sql = sprintf('SELECT
+			strftime(\'%%s\', MIN(date)) / %d AS start_interval,
+			strftime(\'%%s\', MAX(date)) / %1$d AS end_interval
+			FROM acc_transactions WHERE id_year = %d;',
+			$interval, $criterias['year']);
+
+		extract((array)$db->first($sql));
+
+		$out = array_fill_keys(range($start_interval, $end_interval), 0);
+
+		$sql = sprintf('SELECT strftime(\'%%s\', t.date) / %d AS interval, SUM(l.credit) - SUM(l.debit)
+			FROM acc_transactions t
+			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			WHERE %s
+			GROUP BY interval;', $interval, $where);
+
+		$data = $db->getAssoc($sql);
+		$sum = 0;
+
+		foreach ($out as $k => &$v) {
+			if (array_key_exists($k, $data)) {
+				$sum += $v;
+			}
+
+			$v = $sum;
+		}
+
+		unset($v);
+
+		return $out;
+	}
+
 	static public function getResult(array $criterias): int
 	{
 		$where = self::getWhereClause($criterias);
@@ -160,60 +233,12 @@ class Reports
 
 	static public function getClosingSums(int $year_id): array
 	{
-		$year = Years::get($year_id);
-
-		if (true || $year->closed) { // FIXME!!!!
-			return self::computeClosingSums($year->id());
-		}
-		else {
-			// Get the ID of the account used to store closing sums
-			$closing_account_id = $db->firstColumn(sprintf('SELECT id FROM %s WHERE id_chart = ? AND type = ?;', Account::TABLE, $year->id_chart, Account::TYPE_CLOSING));
-
-			// Find sums, link them to accounts
-			$sql = sprintf('SELECT b.id_account, SUM(a.credit) - SUM(a.debit)
-				FROM %s a
-				INNER JOIN %s b ON b.id_transaction = a.id_transaction
-				WHERE a.id_account = %d AND a.id_year = %d;', Line::TABLE, Line::TABLE, $closing_account_id, $year_id);
-			return DB::getInstance()->getAssoc($sql);
-		}
-	}
-
-	static protected function computeClosingSums(int $year_id): array
-	{
 		// Find sums, link them to accounts
 		$sql = sprintf('SELECT l.id_account, SUM(l.credit) - SUM(l.debit)
 			FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			WHERE t.id_year = %d GROUP BY l.id_account;', Line::TABLE, Transaction::TABLE, $year_id);
 		return DB::getInstance()->getAssoc($sql);
-	}
-
-	static protected function getWhereClause(array $criterias): string
-	{
-		$where = [];
-
-		if (!empty($criterias['year'])) {
-			$where[] = sprintf('t.id_year = %d', $criterias['year']);
-		}
-
-		if (!empty($criterias['position'])) {
-			$db = DB::getInstance();
-			$where[] = $db->where('position', $criterias['position']);
-		}
-
-		if (!empty($criterias['user'])) {
-			$where[] = sprintf('t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = %d)', $criterias['user']);
-		}
-
-		if (!empty($criterias['creator'])) {
-			$where[] = sprintf('t.id_creator = %d', $criterias['creator']);
-		}
-
-		if (!count($where)) {
-			throw new \LogicException('Unknown criteria');
-		}
-
-		return implode(' AND ', $where);
 	}
 
 	/**

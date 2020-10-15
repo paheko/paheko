@@ -326,8 +326,7 @@ input[type=radio], input[type=checkbox] {
     cursor: pointer;
 }
 
-input[type=text], textarea, input[type=password], input[type=email], input[type=number],
-input[type=url], input[type=tel], select, .input-list {
+input:not([type=checkbox]):not([type=radio]):not([type=submit]), textarea, select, .input-list {
     padding: .4rem .6rem;
     font-family: inherit;
     min-width: 20em;
@@ -383,8 +382,8 @@ input[type=button].showPassword:hover {
     background: none;
 }
 
-select, input[size] {
-    min-width: 0;
+select, input[size], input[type=color], button, input[type=button], input[type=submit] {
+    min-width: 0 !important;
 }
 
 form .input-list {

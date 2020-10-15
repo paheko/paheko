@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Importer un plan comptable" current="acc/charts"}
+{include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts"}
 
 {form_errors}
 
@@ -17,6 +17,7 @@
 					<li>Le séparateur doit être le point-virgule ou la virgule</li>
 					<li>Cocher l'option <em>"Mettre en guillemets toutes les cellules du texte"</em></li>
 					<li>Le fichier doit comporter les colonnes suivantes : <em>{$columns}</em></li>
+					<li>Pour obtenir un exemple du format attendu, faire un export d'un exercice existant</li>
 				</ul>
 			</dd>
 		</dl>
