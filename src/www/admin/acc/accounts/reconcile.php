@@ -39,8 +39,7 @@ if ($start < $current_year->start_date || $start > $current_year->end_date
 	$end->modify('last day of this month');
 }
 
-$start_sum = 0;$end_sum = 0;
-$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end, $start_sum, $end_sum);
+$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end);
 
 // Enregistrement des cases cochées
 if ((f('save') || f('save_next')) && $form->check('acc_reconcile_' . $account->id))
@@ -77,8 +76,5 @@ $tpl->assign(compact(
 	'next',
 	'journal',
 ));
-
-$tpl->assign_by_ref('start_sum', $start_sum);
-$tpl->assign_by_ref('end_sum', $end_sum);
 
 $tpl->display('acc/accounts/reconcile.tpl');

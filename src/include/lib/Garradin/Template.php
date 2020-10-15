@@ -306,7 +306,8 @@ class Template extends \KD2\Smartyer
 			$input = sprintf('<input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b>', $attributes_string, $this->escape($current_value), $currency);
 		}
 		else {
-			$input = sprintf('<input type="%s" %s value="%s" />', $type, $attributes_string, $this->escape($current_value));
+			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', $this->escape($current_value));
+			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
 		// No label? then we only want the input without the widget

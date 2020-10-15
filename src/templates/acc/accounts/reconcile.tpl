@@ -27,7 +27,7 @@
 
 <p class="alert">
 	<strong>Attention&nbsp;!</strong>
-	Les écritures apparaissent ici dans le sens de la banque, à l'inverse des journaux comptables.
+	Afin de simplifier les choses, les écritures apparaissent ici dans le sens de la banque, à l'inverse des journaux comptables.
 </p>
 
 {form_errors}

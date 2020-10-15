@@ -76,8 +76,8 @@ function initTransactionForm() {
 
 		debit = debit ? debit + '' : '000';
 		credit = credit ? credit + '' : '000';
-		$('#f_debit_total').value = (debit.substr(0, debit.length-2) || '0') + ',' + debit.substr(-2);
-		$('#f_credit_total').value = (credit.substr(0, credit.length-2) || '0') + ',' + credit.substr(-2);
+		$('#f_debit_total').value = g.formatMoney(debit);
+		$('#f_credit_total').value = g.formatMoney(credit);
 	}
 
 	// Add row button
