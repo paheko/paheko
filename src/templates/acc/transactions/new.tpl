@@ -62,7 +62,7 @@
 
 	{* Saisie avancée *}
 	<fieldset data-types="t{$transaction::TYPE_ADVANCED}">
-		{include file="acc/transactions/_lines_form.tpl"}
+		{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
 	</fieldset>
 
 	<fieldset>

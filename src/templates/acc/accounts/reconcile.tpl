@@ -16,9 +16,9 @@
 		<legend>Période de rapprochement</legend>
 		<p>
 			Du
-			{input type="date" name="start" value=$start}
+			{input type="date" name="start" default=$start}
 			au
-			{input type="date" name="end" value=$end}
+			{input type="date" name="end" default=$end}
 			<input type="hidden" name="id" value="{$account.id}" />
 			<input type="submit" value="Afficher" />
 		</p>
