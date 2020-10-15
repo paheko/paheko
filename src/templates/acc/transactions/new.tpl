@@ -20,7 +20,7 @@
 			<dl>
 				<dt>Écriture d'origine</dt>
 				<dd><a class="num" href="{$admin_url}acc/transactions/details.php?id={$payoff_for.id}">#{$payoff_for.id}</a></dd>
-				{input type="list" target="%sacc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$admin_url,$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
+				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
 			</dl>
 		</fieldset>
 	{else}
@@ -41,7 +41,7 @@
 				<legend>{$type.label}</legend>
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
-					{input type="list" target="%sacc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$admin_url,$account.targets,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
+					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
 				{/foreach}
 				</dl>
 			</fieldset>
@@ -68,7 +68,7 @@
 	<fieldset>
 		<legend>Détails</legend>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="%smembres/selector.php"|args:$admin_url}
+			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
 			{input type="text" name="reference" label="Numéro de pièce comptable"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 

@@ -43,7 +43,7 @@
 			{foreach from=$lines key="k" item="line"}
 				<tr>
 					<th>
-						{input type="list" target="%sacc/accounts/selector.php?target=all"|args:$admin_url name="lines[account][]" default=$line.account_selected}
+						{input type="list" target="acc/accounts/selector.php" name="lines[account][]" default=$line.account_selected}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
