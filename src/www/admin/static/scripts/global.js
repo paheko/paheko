@@ -239,6 +239,11 @@
 		i.firstChild.focus();
 	};
 
+	g.formatMoney = (v) => {
+		v = '' + v;
+		return (v.substr(0, v.length-2) || '0') + ',' + (v + '00').substr(-2);
+	};
+
 	// Sélecteurs de listes
 	g.onload(() => {
 		var inputs = $('form .input-list > button');

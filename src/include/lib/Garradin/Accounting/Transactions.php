@@ -2,6 +2,7 @@
 
 namespace Garradin\Accounting;
 
+use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use KD2\DB\EntityManager;
 use Garradin\DB;
@@ -37,6 +38,41 @@ class Transactions
 		}
 
 		$db->commit();
+	}
+
+	static public function saveDeposit(Transaction $transaction, \Generator $journal, array $checked)
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		try {
+			$ids = [];
+			foreach ($journal as $row) {
+				if (!array_key_exists($row->id, $checked)) {
+					continue;
+				}
+
+				$ids[] = (int)$row->id;
+
+				$line = new Line;
+				$line->importForm([
+					'reference'  => $row->line_reference,
+					'id_account' => $row->id_account,
+				]);
+				$line->credit = $row->debit;
+
+				$transaction->add($line);
+			}
+
+			$transaction->save();
+			$ids = implode(',', $ids);
+			$db->exec(sprintf('UPDATE acc_transactions SET status = (status | %d) WHERE id IN (%s);', Transaction::STATUS_DEPOSIT, $ids));
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollback();
+			throw $e;
+		}
 	}
 
 	static public function countForUser(int $user_id): int

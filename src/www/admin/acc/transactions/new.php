@@ -29,7 +29,7 @@ if ($id = f('payoff_for')) {
 if (f('save') && $form->check('acc_transaction_new')) {
 	try {
 		$transaction->id_year = $current_year->id();
-		$transaction->importFromNewForm($chart->id());
+		$transaction->importFromNewForm();
 		$transaction->id_creator = $session->getUser()->id;
 		$transaction->save();
 

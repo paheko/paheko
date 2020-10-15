@@ -139,7 +139,7 @@ class Account extends Entity
 		return $rows;
 	}
 
-	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, int &$start_sum, int &$end_sum)
+	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date)
 	{
 		if ($end_date < $start_date) {
 			throw new ValidationException('La date de début ne peut être avant la date de fin.');
@@ -171,6 +171,24 @@ class Account extends Entity
 		}
 
 		yield ['sum' => $sum, 'date' => $end_date];
+	}
+
+	public function getDepositJournal(int $year_id): \Generator
+	{
+		$res = DB::getInstance()->iterate('SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line, l.id_account
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0 AND NOT (t.status & ?);',
+			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
+
+		$sum = 0;
+
+		foreach ($res as $row) {
+			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
+			$sum += ($row->credit - $row->debit);
+			$row->running_sum = $sum;
+			yield $row;
+		}
 	}
 
 	public function getSumAtDate(int $year_id, DateTimeInterface $date): int

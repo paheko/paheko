@@ -25,6 +25,7 @@ class Transaction extends Entity
 
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
+	const STATUS_DEPOSIT = 4;
 
 	const TYPES_NAMES = [
 		'Avancé',
@@ -237,7 +238,7 @@ class Transaction extends Entity
 		}
 
 		if (0 !== $total) {
-			throw new ValidationException('Écriture non équilibrée : déséquilibre entre débits et crédits');
+			throw new ValidationException(sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
 		}
 
 		if (!array_key_exists($this->type, self::TYPES_NAMES)) {
@@ -245,7 +246,31 @@ class Transaction extends Entity
 		}
 	}
 
-	public function importFromNewForm(int $chart_id, ?array $source = null): void
+	public function importFromDepositForm(?array $source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		$this->type = self::TYPE_TRANSFER;
+		$amount = $source['amount'];
+
+		$key = 'account_transfer';
+		$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+
+		$line = new Line;
+		$line->importForm([
+			'debit'      => $amount,
+			'credit'     => 0,
+			'id_account' => $account,
+		]);
+
+		$this->add($line);
+
+		$this->importForm($source);
+	}
+
+	public function importFromNewForm(?array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
