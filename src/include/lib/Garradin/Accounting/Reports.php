@@ -73,13 +73,11 @@ class Reports
 
 		foreach ($out as $k => &$v) {
 			if (array_key_exists($k, $data)) {
-				$sum += $v;
+				$sum += $data[$k];
 			}
 
 			$v = $sum;
 		}
-
-		unset($v);
 
 		return $out;
 	}

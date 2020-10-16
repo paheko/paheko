@@ -899,6 +899,20 @@ td.money, th.money {
     font-size: 1.3rem;
 }
 
+.year-infos {
+    text-align: center;
+}
+
+.year-infos .graphs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.year-infos .graphs figure {
+    margin: 1rem;
+}
+
 h2.ruler {
     margin: .5em;
     text-align: center;
