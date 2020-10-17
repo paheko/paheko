@@ -58,13 +58,29 @@ if ($previous_year) {
 
 	if ($previous_year->id_chart != $year->id_chart) {
 		$chart_change = true;
+		$codes = [];
+
+		foreach ($lines as $line) {
+			$codes[] = $line->code;
+		}
+
+		$matching_accounts = $year->accounts()->listForCodes($codes);
 	}
 
 	foreach ($lines as $k => &$line) {
 		$line->credit = $line->sum > 0 ? $line->sum : 0;
 		$line->debit = $line->sum < 0 ? abs($line->sum) : 0;
 
-		if (!$chart_change) {
+		if ($chart_change) {
+			if (array_key_exists($line->code, $matching_accounts)) {
+				$acc = $matching_accounts[$line->code];
+				$line->account_selected = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
+			}
+			else {
+				$line->account_selected = null;
+			}
+		}
+		else {
 			$line->account_selected = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
 		}
 	}

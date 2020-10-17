@@ -47,6 +47,11 @@ class Accounts
 			$this->chart_id);
 	}
 
+	public function listForCodes(array $codes): array
+	{
+		return DB::getInstance()->getGrouped('SELECT code, id, label FROM acc_accounts WHERE id_chart = ?;', $this->chart_id);
+	}
+
 	/**
 	 * Return all accounts from current chart
 	 */
