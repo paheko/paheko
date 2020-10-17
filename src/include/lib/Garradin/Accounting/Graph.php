@@ -9,6 +9,7 @@ use Garradin\Utils;
 use Garradin\Config;
 use Garradin\DB;
 use const Garradin\ADMIN_COLOR1;
+use const Garradin\ADMIN_URL;
 use KD2\DB\EntityManager;
 
 use KD2\Graphics\SVG\Plot;
@@ -19,6 +20,15 @@ use KD2\Graphics\SVG\Pie_Data;
 
 class Graph
 {
+	const URL_LIST = [
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=assets&year=%s' => 'Évolution banques et caisses',
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=result&year=%s' => 'Évolution dépenses et recettes',
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=debts&year=%s' => 'Évolution dettes et créances',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=revenue&year=%s' => 'Répartition recettes',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=expense&year=%s' => 'Répartition dépenses',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=assets&year=%s' => 'Répartition actif',
+	];
+
 	const PLOT_TYPES = [
 		'assets' => [
 			'Total' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
@@ -41,26 +51,30 @@ class Graph
 		'assets' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
 	];
 
-	const PLOT_INTERVAL = 604800; // 7 days
+	const WEEKLY_INTERVAL = 604800; // 7 days
+	const MONTHLY_INTERVAL = 2635200; // 1 month
 
-	static public function plot(string $type, array $criterias)
+	static public function plot(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700)
 	{
 		if (!array_key_exists($type, self::PLOT_TYPES)) {
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
-		$plot = new Plot(700, 300);
+		$plot = new Plot($width, 300);
 
 		$lines = self::PLOT_TYPES[$type];
 		$data = [];
 
 		foreach ($lines as $label => $line_criterias) {
 			$line_criterias = array_merge($criterias, $line_criterias);
-			$sums = Reports::getSumsByInterval($line_criterias, self::PLOT_INTERVAL);
+			$sums = Reports::getSumsByInterval($line_criterias, $interval);
 
 			// Invert sums for banks, cash, etc.
 			if ('assets' === $type) {
 				$sums = array_map(function ($v) { return $v * -1; }, $sums);
+			}
+			elseif ('result' === $type) {
+				$sums = array_map('abs', $sums);
 			}
 
 			$sums = array_map(function ($v) { return (int)$v/100; }, $sums);
@@ -76,7 +90,7 @@ class Graph
 
 			foreach ($data[0]->get() as $k=>$v)
 			{
-				$date = new \DateTime('@' . ($k * self::PLOT_INTERVAL));
+				$date = new \DateTime('@' . ($k * $interval));
 				$labels[] = Utils::date_fr('M y', $date);
 			}
 
@@ -105,10 +119,10 @@ class Graph
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
-		$pie = new Pie(400, 250);
+		$pie = new Pie(700, 300);
 
 		$pie_criterias = self::PIE_TYPES[$type];
-		$data = Reports::getClosingSumsWithAccounts(array_merge($criterias, $pie_criterias), 'sum DESC');
+		$data = Reports::getClosingSumsWithAccounts(array_merge($criterias, $pie_criterias), 'ABS(sum) DESC');
 
 		$others = 0;
 		$colors = self::getColors();
@@ -145,7 +159,7 @@ class Graph
 		$v = 70;
 		$colors = [];
 
-		for ($i = 0; $i < 8; $i++) {
+		for ($i = 0; $i < 6; $i++) {
 			$colors[] = sprintf('hsl(%d, %d%%, %d%%)', $h, $s, $v);
 
 			$h += 20;

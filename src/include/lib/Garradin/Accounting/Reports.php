@@ -48,32 +48,40 @@ class Reports
 	static public function getSumsByInterval(array $criterias, int $interval)
 	{
 		$where = self::getWhereClause($criterias);
+		$where_interval = !empty($criterias['year']) ? sprintf(' WHERE id_year = %d', $criterias['year']) : '';
 
 		$db = DB::getInstance();
 
 		$sql = sprintf('SELECT
 			strftime(\'%%s\', MIN(date)) / %d AS start_interval,
 			strftime(\'%%s\', MAX(date)) / %1$d AS end_interval
-			FROM acc_transactions WHERE id_year = %d;',
-			$interval, $criterias['year']);
+			FROM acc_transactions %s;',
+			$interval, $where_interval);
 
 		extract((array)$db->first($sql));
 
 		$out = array_fill_keys(range($start_interval, $end_interval), 0);
 
-		$sql = sprintf('SELECT strftime(\'%%s\', t.date) / %d AS interval, SUM(l.credit) - SUM(l.debit)
+		$sql = sprintf('SELECT strftime(\'%%s\', t.date) / %d AS interval, SUM(l.credit) - SUM(l.debit) AS sum, t.id_year
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			WHERE %s
-			GROUP BY interval;', $interval, $where);
+			GROUP BY %s ORDER BY %3$s;', $interval, $where, isset($criterias['year']) ? 'interval' : 't.id_year');
 
-		$data = $db->getAssoc($sql);
+		$data = $db->getGrouped($sql);
 		$sum = 0;
+		$year = null;
 
 		foreach ($out as $k => &$v) {
 			if (array_key_exists($k, $data)) {
-				$sum += $data[$k];
+				$row = $data[$k];
+				if ($row->id_year != $year) {
+					$sum = 0;
+					$year = $row->id_year;
+				}
+
+				$sum += $data[$k]->sum;
 			}
 
 			$v = $sum;

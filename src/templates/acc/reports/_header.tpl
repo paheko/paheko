@@ -2,6 +2,7 @@
 
 	<nav class="tabs noprint">
 		<ul>
+			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a></li>
 			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a></li>
 			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a></li>
 			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a></li>
