@@ -19,7 +19,7 @@
 
 		{if null === $previous_year}
 		<dl>
-			<dt><label for="f_from_year">Reprendre les soldes de fermeture de l'exercice suivant</label></dt>
+			<dt><label for="f_from_year">Reprendre les soldes de fermeture d'un exercice clôturé</label></dt>
 			<dd>
 				<select id="f_from_year" name="from_year">
 					<option value="">-- Aucun</option>
@@ -33,7 +33,12 @@
 		<table class="list transaction-lines">
 			<thead>
 				<tr>
-					<th>Compte</th>
+					{if $chart_change}
+						<td>Ancien compte</td>
+						<th>Nouveau compte</th>
+					{else}
+						<th>Compte</th>
+					{/if}
 					<td>Débit</td>
 					<td>Crédit</td>
 					<td></td>
@@ -42,6 +47,9 @@
 			<tbody>
 			{foreach from=$lines key="k" item="line"}
 				<tr>
+					{if $chart_change}
+						<td>{$line.code} — {$line.label}</td>
+					{/if}
 					<th>
 						{input type="list" target="acc/accounts/selector.php" name="lines[account][]" default=$line.account_selected}
 					</th>
@@ -68,7 +76,7 @@
 			<input type="submit" name="next" value="Continuer &rarr;" />
 		{else}
 			{csrf_field key="acc_years_balance_%s"|args:$year.id}
-			<input type="hidden" name="from_year" value="{$previous_year}" />
+			<input type="hidden" name="from_year" value="{$previous_year.id}" />
 			<input type="submit" name="save" value="Sauvegarder &rarr;" />
 
 			{literal}
