@@ -99,9 +99,11 @@ class Reports
 		return (int)$a - abs((int)$b);
 	}
 
-	static public function getClosingSumsWithAccounts(array $criterias): array
+	static public function getClosingSumsWithAccounts(array $criterias, ?string $order = null): array
 	{
 		$where = self::getWhereClause($criterias);
+
+		$order = $order ?: 'a.code COLLATE NOCASE';
 
 		// Find sums, link them to accounts
 		$sql = sprintf('SELECT a.id, a.code, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
@@ -111,8 +113,8 @@ class Reports
 			INNER JOIN %s a ON a.id = l.id_account
 			WHERE %s
 			GROUP BY l.id_account
-			ORDER BY a.code COLLATE NOCASE;',
-			Line::TABLE, Transaction::TABLE, Account::TABLE, $where);
+			ORDER BY %s;',
+			Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $order);
 		return DB::getInstance()->getGrouped($sql);
 	}
 

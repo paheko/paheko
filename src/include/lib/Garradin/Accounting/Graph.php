@@ -14,9 +14,12 @@ use KD2\DB\EntityManager;
 use KD2\Graphics\SVG\Plot;
 use KD2\Graphics\SVG\Plot_Data;
 
+use KD2\Graphics\SVG\Pie;
+use KD2\Graphics\SVG\Pie_Data;
+
 class Graph
 {
-	const PLOT_LINES = [
+	const PLOT_TYPES = [
 		'assets' => [
 			'Total' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
 			'Banques' => ['type' => Account::TYPE_BANK],
@@ -32,17 +35,23 @@ class Graph
 		],
 	];
 
+	const PIE_TYPES = [
+		'revenue' => ['position' => Account::REVENUE],
+		'expense' => ['position' => Account::EXPENSE],
+		'assets' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
+	];
+
 	const PLOT_INTERVAL = 604800; // 7 days
 
 	static public function plot(string $type, array $criterias)
 	{
-		if (!array_key_exists($type, self::PLOT_LINES)) {
+		if (!array_key_exists($type, self::PLOT_TYPES)) {
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
 		$plot = new Plot(700, 300);
 
-		$lines = self::PLOT_LINES[$type];
+		$lines = self::PLOT_TYPES[$type];
 		$data = [];
 
 		foreach ($lines as $label => $line_criterias) {
@@ -90,6 +99,42 @@ class Graph
 		return $plot->output();
 	}
 
+	static public function pie(string $type, array $criterias)
+	{
+		if (!array_key_exists($type, self::PIE_TYPES)) {
+			throw new \InvalidArgumentException('Unknown type');
+		}
+
+		$pie = new Pie(400, 250);
+
+		$pie_criterias = self::PIE_TYPES[$type];
+		$data = Reports::getClosingSumsWithAccounts(array_merge($criterias, $pie_criterias), 'sum DESC');
+
+		$others = 0;
+		$colors = self::getColors();
+		$max = count($colors);
+		$i = 0;
+
+		foreach ($data as $row)
+		{
+			if ($i++ >= $max)
+			{
+				$others += $row->sum;
+			}
+			else
+			{
+				$pie->add(new Pie_Data(abs($row->sum) / 100, substr($row->label, 0, 50), $colors[$i-1]));
+			}
+		}
+
+		if ($others != 0)
+		{
+			$pie->add(new Pie_Data(abs($others) / 100, 'Autres', '#ccc'));
+		}
+
+		return $pie->output();
+	}
+
 	static protected function getColors()
 	{
 		$config = Config::getInstance();
@@ -100,10 +145,10 @@ class Graph
 		$v = 70;
 		$colors = [];
 
-		for ($i = 0; $i < 6; $i++) {
+		for ($i = 0; $i < 8; $i++) {
 			$colors[] = sprintf('hsl(%d, %d%%, %d%%)', $h, $s, $v);
 
-			$h += 60;
+			$h += 20;
 
 			if ($h > 360) {
 				$h -= 360;
