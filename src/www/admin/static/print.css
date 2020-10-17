@@ -1,5 +1,5 @@
 @page {
-    size: A4 landscape;
+    size: A4 portrait;
     margin: 0;
 }
 
@@ -78,8 +78,9 @@ td.actions * {
 }
 
 td.num a {
-    border: .1rem solid #000;
-    background: #fff;
+    border: none;
+    padding: 0;
+    background: none;
 }
 
 a {

@@ -4,14 +4,13 @@ namespace Garradin;
 use Garradin\Accounting\Years;
 use Garradin\Accounting\Graph;
 
-require_once __DIR__ . '/../_inc.php';
+require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ACCES);
 
-$years = new Years;
+$year = Years::get((int)qg('year'));
 
 $tpl->assign('graphs', Graph::URL_LIST);
+$tpl->assign('year', $year);
 
-$tpl->assign('years', $years->listOpen());
-
-$tpl->display('acc/index.tpl');
+$tpl->display('acc/reports/graphs.tpl');

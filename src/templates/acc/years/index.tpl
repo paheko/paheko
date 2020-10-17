@@ -19,6 +19,19 @@
 {/if}
 
 {if !empty($list)}
+	{if count($list) > 1}
+	<section class="year-infos">
+		<section class="graphs">
+			<figure>
+				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=result" alt="" />
+			</figure>
+			<figure>
+				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=assets" alt="" />
+			</figure>
+		</section>
+	</section>
+	{/if}
+
 	<dl class="list">
 	{foreach from=$list item="year"}
 		<dt>{$year.label}</dt>
@@ -27,7 +40,8 @@
 			| Du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}
 		</dd>
 		<dd class="desc">
-			<a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a>
+			<a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a>
+			| <a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a>
 			| <a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a>
 			| <a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a>
 			| <a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a>
