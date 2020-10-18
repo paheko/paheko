@@ -20,7 +20,7 @@ if (f('import') && $form->check('acc_charts_import', ['file' => 'file|required']
 	}
 }
 
-$tpl->assign('columns', implode(', ', Chart::EXPECTED_CSV_COLUMNS));
+$tpl->assign('columns', implode(', ', Accounts::EXPECTED_CSV_COLUMNS));
 $tpl->assign('country_list', Utils::getCountryList());
 
 $tpl->display('acc/charts/import.tpl');
