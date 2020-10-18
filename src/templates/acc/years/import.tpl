@@ -31,7 +31,7 @@
 						<tr>
 							<th>{$csv_field}</th>
 							<td>
-								<select name="csv_translate[{$index}]">
+								<select name="translate[{$index}]">
 									<option value="">-- Ne pas importer cette colonne</option>
 									{foreach from=$possible_columns item="label" key="key"}
 										<option value="{$key}">{$label}</option>
@@ -81,6 +81,9 @@
 
 	<p class="submit">
 		{csrf_field key="acc_years_import_%d"|args:$year.id}
+		{if $csv_file}
+			<input type="submit" name="cancel" class="minor" value="Annuler l'import" />
+		{/if}
 		<input type="submit" name="import" value="{if $csv_file}Importer{else}Choisir les colonnes{/if} &rarr;" />
 	</p>
 

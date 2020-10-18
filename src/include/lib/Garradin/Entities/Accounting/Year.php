@@ -6,6 +6,7 @@ use KD2\DB\EntityManager;
 use Garradin\Entity;
 use Garradin\DB;
 use Garradin\UserException;
+use Garradin\Accounting\Accounts;
 
 class Year extends Entity
 {
@@ -101,6 +102,11 @@ class Year extends Entity
 		return EntityManager::findOneById(Chart::class, $this->id_chart);
 	}
 
+	public function accounts()
+	{
+		return new Accounts($this->id_chart);
+	}
+
 	public function openBalanceFromForm(?array $source = null): Transaction
 	{
 		if (null === $source) {
@@ -126,7 +132,7 @@ class Year extends Entity
 		foreach ($lines as $line) {
 			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 			$line = (new Line)->importForm($line);
-			$transaction->add($line);
+			$transaction->addLine($line);
 
 			$debit += $line->debit;
 			$credit += $line->credit;
@@ -143,7 +149,7 @@ class Year extends Entity
 
 		$line->id_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $this->id_chart, Account::TYPE_OPENING);
 
-		$transaction->add($line);
+		$transaction->addLine($line);
 
 		return $transaction;
 	}
