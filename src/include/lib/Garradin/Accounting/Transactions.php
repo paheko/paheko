@@ -6,9 +6,27 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use KD2\DB\EntityManager;
 use Garradin\DB;
+use Garradin\Utils;
 
 class Transactions
 {
+	const EXPECTED_CSV_COLUMNS_SELF = ['id', 'type', 'status', 'label', 'date', 'notes', 'reference',
+		'line_id_account', 'line_credit', 'line_debit', 'line_reference', 'line_label', 'line_reconciled'];
+
+	const POSSIBLE_CSV_COLUMNS = [
+		'id'             => 'Numéro d\'écriture',
+		'label'          => 'Libellé',
+		'date'           => 'Date',
+		'notes'          => 'Notes',
+		'reference'      => 'Numéro pièce comptable',
+		'p_reference'    => 'Référence paiement',
+		'debit_account'  => 'Compte de débit',
+		'credit_account' => 'Compte de crédit',
+		'amount'         => 'Montant',
+	];
+
+	const MANDATORY_CSV_COLUMNS = ['id', 'label', 'date', 'credit_account', 'debit_account', 'amount'];
+
 	static public function get(int $id)
 	{
 		return EntityManager::findOneById(Transaction::class, $id);
@@ -84,4 +102,46 @@ class Transactions
 	{
 		return DB::getInstance()->count('acc_transactions', 'id_creator = ?', $user_id);
 	}
+
+	/**
+	 * Return all transactions from year
+	 */
+	static public function export(int $year_id): \Generator
+	{
+		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
+			a.code AS account, l.debit, l.credit, l.reference AS line_reference, l.label AS line_label, l.reconciled
+			FROM acc_transactions t
+			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			WHERE t.id_year = ? ORDER BY t.date, t.id, l.id;';
+
+		$res = DB::getInstance()->iterate($sql, $year_id);
+
+		$previous_id = null;
+
+		foreach ($res as $row) {
+			if ($previous_id === $row->id) {
+				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = null;
+			}
+			else {
+				$row->type = Transaction::TYPES_NAMES[$row->type];
+
+				$status = [];
+
+				foreach (Transaction::STATUS_NAMES as $k => $v) {
+					if ($row->status & $k) {
+						$status[] = $v;
+					}
+				}
+			}
+
+			$row->status = implode(', ', $status);
+			$row->credit = Utils::money_format($row->credit);
+			$row->debit = Utils::money_format($row->debit);
+
+			$previous_id = $row->id;
+			yield $row;
+		}
+	}
+
 }

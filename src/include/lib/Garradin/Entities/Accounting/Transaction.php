@@ -27,6 +27,12 @@ class Transaction extends Entity
 	const STATUS_PAID = 2;
 	const STATUS_DEPOSIT = 4;
 
+	const STATUS_NAMES = [
+		1 => 'En attente de règlement',
+		2 => 'Réglé',
+		4 => 'Déposé en banque',
+	];
+
 	const TYPES_NAMES = [
 		'Avancé',
 		'Recette',
