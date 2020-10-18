@@ -155,14 +155,14 @@ class Graph
 		$c1 = $config->get('couleur1') ?: ADMIN_COLOR1;
 		list($h, $s, $v) = Utils::rgbToHsv($c1);
 
-		$s = 100;
-		$v = 70;
+		$s = 80;
+		$v = 50;
 		$colors = [];
 
 		for ($i = 0; $i < 6; $i++) {
 			$colors[] = sprintf('hsl(%d, %d%%, %d%%)', $h, $s, $v);
 
-			$h += 20;
+			$h += 30;
 
 			if ($h > 360) {
 				$h -= 360;

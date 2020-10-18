@@ -9,6 +9,10 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ADMIN);
 
+if (!CURRENT_YEAR_ID) {
+	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
+}
+
 $account = Accounts::get((int)qg('id'));
 
 if (!$account) {

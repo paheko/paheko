@@ -39,7 +39,7 @@ if (null === $simple) {
 }
 
 $tpl->assign('simple_view', $simple);
-$tpl->assign('year_id', $year_id);
+$tpl->assign('year', $year);
 $tpl->assign('account', $account);
 $tpl->assign('journal', $journal);
 $tpl->assign('sum', $sum);
