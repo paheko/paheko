@@ -6,59 +6,11 @@ use Garradin\Membres;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\CSV;
 use Garradin\UserException;
 
 class Import
 {
-	public function getCSVAsArray($path)
-	{
-		if (!file_exists($path) || !is_readable($path))
-		{
-			throw new \RuntimeException('Fichier inconnu : '.$path);
-		}
-
-		$fp = Utils::open_csv_file($path);
-
-		if (!$fp)
-		{
-			return false;
-		}
-
-		$delim = Utils::find_csv_delim($fp);
-		Utils::skip_bom($fp);
-
-		$line = 0;
-		$out = [];
-		$nb_columns = null;
-
-		while (!feof($fp))
-		{
-			$row = fgetcsv($fp, 4096, $delim);
-			$line++;
-
-			if (empty($row))
-			{
-				continue;
-			}
-
-			if (null === $nb_columns)
-			{
-				$nb_columns = count($row);
-			}
-
-			if (count($row) != $nb_columns)
-			{
-				throw new UserException('Erreur sur la ligne ' . $line . ' : incohérence dans le nombre de colonnes avec la première ligne.');
-			}
-
-			$out[$line] = $row;
-		}
-
-		fclose($fp);
-
-		return $out;
-	}
-
 	/**
 	 * Importer un CSV générique
 	 * @param  string $path              Chemin vers le CSV
@@ -179,7 +131,7 @@ class Import
 			throw new \RuntimeException('Fichier inconnu : '.$path);
 		}
 
-		$fp = Utils::open_csv_file($path);
+		$fp = CSV::open($path);
 
 		if (!$fp)
 		{
@@ -200,8 +152,8 @@ class Import
 		//$champs[] = 'id_categorie';
 
 		$line = 0;
-		$delim = Utils::find_csv_delim($fp);
-		Utils::skip_bom($fp);
+		$delim = CSV::findDelimiter($fp);
+		CSV::skipBOM($fp);
 
 		while (!feof($fp))
 		{
@@ -328,13 +280,13 @@ class Import
 	public function toCSV(array $list = null)
 	{
 		list($champs, $result, $name) = $this->export($list);
-		return Utils::toCSV($name, $result, $champs, [$this, 'exportRow']);
+		return CSV::toCSV($name, $result, $champs, [$this, 'exportRow']);
 	}
 
 	public function toODS(array $list = null)
 	{
 		list($champs, $result, $name) = $this->export($list);
-		return Utils::toODS($name, $result, $champs, [$this, 'exportRow']);
+		return CSV::toODS($name, $result, $champs, [$this, 'exportRow']);
 	}
 
 	public function exportRow(\stdClass $row) {
