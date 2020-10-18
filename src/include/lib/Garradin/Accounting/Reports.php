@@ -355,6 +355,7 @@ class Reports
 				'id_account'    => $row->id_account,
 				'credit'        => $row->credit,
 				'debit'         => $row->debit,
+				'id_year'       => $row->id_year,
 			];
 		}
 

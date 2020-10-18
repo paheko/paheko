@@ -5,7 +5,7 @@
 {else}
 	<nav class="acc-year">
 		<h4>Exercice sélectionné&nbsp;:</h4>
-		<h3>{$current_year.label} — {$current_year.start_date|date_fr:'d/m/Y'} au {$current_year.end_date|date_fr:'d/m/Y'}</h3>
+		<h3>{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h3>
 	</nav>
 {/if}
 
@@ -20,8 +20,8 @@
 
 <nav class="tabs">
 	<ul>
-		<li{if $simple_view} class="current"{/if}><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;simple=1&amp;year={$year_id}">Vue simplifiée</a></li>
-		<li{if !$simple_view} class="current"{/if}><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;simple=0&amp;year={$year_id}">Vue normale</a></li>
+		<li{if $simple_view} class="current"{/if}><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
+		<li{if !$simple_view} class="current"{/if}><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue normale</a></li>
 	</ul>
 </nav>
 {/if}
