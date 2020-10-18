@@ -14,7 +14,10 @@ if (!$account) {
 
 $year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
 
-if ($year_id !== CURRENT_YEAR_ID) {
+if ($year_id === CURRENT_YEAR_ID) {
+	$year = $current_year;
+}
+else {
 	$year = Years::get($year_id);
 
 	if (!$year) {

@@ -15,7 +15,7 @@ if (!$year) {
 }
 
 if (qg('export')) {
-	Utils::export(
+	CSV::export(
 		qg('export'),
 		sprintf('Export comptable - %s', $year->label),
 		Transactions::export($year->id())
@@ -27,10 +27,21 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
-if (f('import') && $form->check('acc_years_import_' . $year->id()))
+if (f('import_translate') && $form->check('acc_years_import_' . $year->id(), ['translate' => 'array|required']))
+{
+
+}
+elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' => 'file|required']))
 {
 	try {
-		$year->import($year, $_FILES['csv']);
+		if (f('type') === 'csv') {
+			$csv = CSV::readAsArray($_FILES['file']['tmp_name']);
+			$session->set('acc_import_csv', $csv);
+			Utils::redirect(Utils::getSelfURI());
+		}
+		else {
+			Transactions::import($year, $_FILES['file']['tmp_name']);
+		}
 
 		Utils::redirect(ADMIN_URL . 'acc/years/');
 	}
@@ -40,9 +51,12 @@ if (f('import') && $form->check('acc_years_import_' . $year->id()))
 	}
 }
 
-$csv_file = null;
+$csv_file = $session->get('acc_import_csv');
+$csv_first_line = !empty($csv_file) ? reset($csv_file) : null;
 
-$tpl->assign('columns', Transactions::EXPECTED_CSV_COLUMNS);
-$tpl->assign(compact('csv_file'));
+$tpl->assign('columns', implode(', ', array_intersect_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));
+$tpl->assign('other_columns', implode(', ', array_diff_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));
+$tpl->assign('possible_columns', Transactions::POSSIBLE_CSV_COLUMNS);
+$tpl->assign(compact('csv_file', 'year', 'csv_first_line'));
 
 $tpl->display('acc/years/import.tpl');

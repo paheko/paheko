@@ -5,8 +5,8 @@
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$admin_url}admin/acc/years/import.php">Import</a></li>
-		<li><a href="{$admin_url}admin/acc/years/import.php?export=csv">Export journal général CSV</a></li>
-		<li><a href="{$admin_url}admin/acc/years/import.php?export=ods">Export journal général tableur</a></li>
+		<li><a href="{$admin_url}admin/acc/years/import.php?export=csv">Export journal général - CSV</a></li>
+		<li><a href="{$admin_url}admin/acc/years/import.php?export=ods">Export journal général - tableur</a></li>
 	</ul>
 </nav>
 
@@ -14,12 +14,48 @@
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 
+	{if $csv_file}
+
+	<fieldset>
+		<legend>Importer depuis un fichier CSV générique</legend>
+		<p class="help">{$csv_file|count} lignes trouvées dans le fichier</p>
+		<dl>
+			<dt><label><input type="checkbox" name="skip_first_line" value="1" checked="checked" /> Ne pas importer la première ligne</label></dt>
+			<dd class="help">Décocher cette case si la première ligne ne contient pas l'intitulé des colonnes, mais des données.</dd>
+			<dt><label>Correspondance des colonnes</label></dt>
+			<dd class="help">Indiquer la correspondance entre colonnes du CSV et données comptables.</dd>
+			<dd>
+				<table class="list auto">
+					<tbody>
+					{foreach from=$csv_first_line key="index" item="csv_field"}
+						<tr>
+							<th>{$csv_field}</th>
+							<td>
+								<select name="csv_translate[{$index}]">
+									<option value="">-- Ne pas importer cette colonne</option>
+									{foreach from=$possible_columns item="label" key="key"}
+										<option value="{$key}">{$label}</option>
+									{/foreach}
+								</select>
+							</td>
+						</tr>
+					{/foreach}
+					</tbody>
+				</table>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<input type="hidden" name="csv_encoded" value="{$csv_file|escape:'json'|escape}" />
+
+	{else}
+
 	<fieldset>
 		<legend>Import d'écritures</legend>
 		<dl>
 			<dt><label for="f_type_garradin">Format de fichier</label></dt>
 			{input type="radio" name="type" value="garradin" label="Journal général, format Garradin"}
-			{input type="radio" name="type" value="garradin" label="Journal format libre"}
+			{input type="radio" name="type" value="csv" label="Journal au format CSV libre"}
 			<dd class="help">
 				Règles à suivre pour créer le fichier CSV&nbsp;:
 				<ul>
@@ -28,6 +64,7 @@
 					<li>Le séparateur doit être le point-virgule ou la virgule</li>
 					<li>Cocher l'option <em>"Mettre en guillemets toutes les cellules du texte"</em></li>
 					<li>Le fichier doit comporter les colonnes suivantes : <em>{$columns}</em></li>
+					<li>Le fichier peut également comporter les colonnes suivantes : <em>{$other_columns}</em></li>
 				</ul>
 			</dd>
 			{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
@@ -40,10 +77,13 @@
 		</dl>
 	</fieldset>
 
+	{/if}
+
 	<p class="submit">
 		{csrf_field key="acc_years_import_%d"|args:$year.id}
 		<input type="submit" name="import" value="{if $csv_file}Importer{else}Choisir les colonnes{/if} &rarr;" />
 	</p>
+
 
 </form>
 

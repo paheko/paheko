@@ -65,7 +65,7 @@ elseif (f('import'))
             }
             elseif (f('type') == 'csv')
             {
-                $csv_file = $import->getCSVAsArray($_FILES['upload']['tmp_name']);
+                $csv_file = CSV::readAsArray($_FILES['upload']['tmp_name']);
             }
             else
             {

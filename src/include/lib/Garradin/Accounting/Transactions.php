@@ -11,7 +11,7 @@ use Garradin\Utils;
 class Transactions
 {
 	const EXPECTED_CSV_COLUMNS_SELF = ['id', 'type', 'status', 'label', 'date', 'notes', 'reference',
-		'line_id_account', 'line_credit', 'line_debit', 'line_reference', 'line_label', 'line_reconciled'];
+		'line_id', 'account', 'credit', 'debit', 'line_reference', 'line_label', 'reconciled'];
 
 	const POSSIBLE_CSV_COLUMNS = [
 		'id'             => 'Numéro d\'écriture',
@@ -109,7 +109,8 @@ class Transactions
 	static public function export(int $year_id): \Generator
 	{
 		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
-			a.code AS account, l.debit, l.credit, l.reference AS line_reference, l.label AS line_label, l.reconciled
+			l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
+			l.reference AS line_reference, l.label AS line_label, l.reconciled
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
