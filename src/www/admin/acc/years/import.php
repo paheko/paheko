@@ -27,9 +27,21 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
-if (f('import_translate') && $form->check('acc_years_import_' . $year->id(), ['translate' => 'array|required']))
-{
+if (f('cancel')) {
+	$session->set('acc_import_csv', null);
+}
 
+$csv_file = $session->get('acc_import_csv');
+
+if (f('import') && $csv_file && $form->check('acc_years_import_' . $year->id(), ['translate' => 'array|required']))
+{
+	try {
+		Transactions::importArray($year, $csv_file, f('translate'), (int) f('skip_first_line'), $user->id);
+		Utils::redirect(ADMIN_URL . 'acc/years/');
+	}
+	catch (UserException $e) {
+		$form->addError($e->getMessage());
+	}
 }
 elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' => 'file|required']))
 {
@@ -40,7 +52,7 @@ elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' =
 			Utils::redirect(Utils::getSelfURI());
 		}
 		else {
-			Transactions::import($year, $_FILES['file']['tmp_name']);
+			Transactions::importCSV($year, $_FILES['file']['tmp_name']);
 		}
 
 		Utils::redirect(ADMIN_URL . 'acc/years/');
@@ -51,7 +63,6 @@ elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' =
 	}
 }
 
-$csv_file = $session->get('acc_import_csv');
 $csv_first_line = !empty($csv_file) ? reset($csv_file) : null;
 
 $tpl->assign('columns', implode(', ', array_intersect_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));

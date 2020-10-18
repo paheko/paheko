@@ -4,9 +4,12 @@ namespace Garradin\Accounting;
 
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
+use Garradin\CSV;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
 
 class Transactions
 {
@@ -79,7 +82,7 @@ class Transactions
 				]);
 				$line->credit = $row->debit;
 
-				$transaction->add($line);
+				$transaction->addLine($line);
 			}
 
 			$transaction->save();
@@ -145,4 +148,102 @@ class Transactions
 		}
 	}
 
+	static public function importArray(Year $year, array $table, array $translation_table, int $skip_lines, int $user_id)
+	{
+		if ($year->closed) {
+			throw new \InvalidArgumentException('Closed year');
+		}
+
+		unset($v);
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		$nb_columns = count($translation_table);
+
+		if ($skip_lines)
+		{
+			$table = array_slice($table, $skip_lines, null, true);
+		}
+
+		$transaction = null;
+		$accounts = $year->accounts();
+
+		try {
+			foreach ($table as $l => $row)
+			{
+				if (!count($row)) {
+					continue;
+				}
+
+				$row = (object) array_combine($translation_table, $row);
+
+				$has_transaction = !empty($row->id) || !empty($row->type) || !empty($row->status) || !empty($row->label) || !empty($row->date) || !empty($row->notes) || !empty($row->reference);
+
+				if (null !== $transaction && $has_transaction) {
+					$transaction->save();
+					$transaction = null;
+				}
+
+				if (null === $transaction) {
+					if (!$has_transaction) {
+						throw new UserException(sprintf('Ligne %d : ligne reliée à aucune écriture', $l));
+					}
+
+					if ($row->id) {
+						$transaction = self::get((int)$row->id);
+
+						if (!$transaction) {
+							throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est introuvable', $l, $row->id));
+						}
+
+						if ($transaction->validated) {
+							throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est validée et ne peut être modifiée', $l, $row->id));
+						}
+
+						$transaction->resetLines();
+					}
+					else {
+						$transaction = new Transaction;
+						$transaction->type = Transaction::TYPE_ADVANCED;
+					}
+
+					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
+
+					$transaction->importForm($fields);
+				}
+
+				$row->credit_account = $accounts->getIdFromCode($row->credit_account);
+				$row->debit_account = $accounts->getIdFromCode($row->debit_account);
+
+				$line = new Line;
+				$line->importForm([
+					'credit'     => $row->amount,
+					'debit'      => 0,
+					'id_account' => $row->credit_account,
+					'reference'  => $row->p_reference,
+				]);
+				$transaction->addLine($line);
+
+				$line = new Line;
+				$line->importForm([
+					'credit'     => 0,
+					'debit'      => $row->amount,
+					'id_account' => $row->debit_account,
+					'reference'  => $row->p_reference,
+				]);
+				$transaction->addLine($line);
+			}
+
+			if (null !== $transaction) {
+				$transaction->save();
+			}
+		}
+		catch (UserException $e) {
+			$db->rollback();
+			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+		}
+
+		$db->commit();
+	}
 }

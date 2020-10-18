@@ -108,6 +108,28 @@ class Transaction extends Entity
 		return $this->_lines;
 	}
 
+	public function removeLine(Line $remove)
+	{
+		$new = [];
+
+		foreach ($this->getLines() as $line) {
+			if ($line->id === $remove->id) {
+				$this->_old_lines[] = $remove;
+			}
+			else {
+				$new[] = $line;
+			}
+		}
+
+		$this->_lines = $new;
+	}
+
+	public function resetLines()
+	{
+		$this->_old_lines = $this->getLines();
+		$this->_lines = [];
+	}
+
 /*
 	public function getHash()
 	{
@@ -144,7 +166,7 @@ class Transaction extends Entity
 	}
 */
 
-	public function add(Line $line)
+	public function addLine(Line $line)
 	{
 		$this->_lines[] = $line;
 	}
@@ -271,7 +293,7 @@ class Transaction extends Entity
 			'id_account' => $account,
 		]);
 
-		$this->add($line);
+		$this->addLine($line);
 
 		$this->importForm($source);
 	}
@@ -288,7 +310,7 @@ class Transaction extends Entity
 
 		$type = $source['type'];
 
-		$this->importForm();
+		$this->importForm($source);
 
 		if (self::TYPE_PAYOFF == $type) {
 			$amount = $source['amount'];
@@ -312,7 +334,7 @@ class Transaction extends Entity
 				'id_account'    => $account,
 				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
 			]);
-			$this->add($line2);
+			$this->addLine($line2);
 		}
 		elseif (self::TYPE_ADVANCED == $type) {
 			$lines = Utils::array_transpose($source['lines']);
@@ -325,7 +347,7 @@ class Transaction extends Entity
 				}
 
 				$line = (new Line)->import($line);
-				$this->add($line);
+				$this->addLine($line);
 			}
 		}
 		else {
@@ -356,7 +378,7 @@ class Transaction extends Entity
 					'id_account'    => $account,
 					'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
 				]);
-				$this->add($line);
+				$this->addLine($line);
 			}
 		}
 	}
@@ -369,8 +391,7 @@ class Transaction extends Entity
 
 		$this->importForm();
 
-		$this->_old_lines = $this->getLines();
-		$this->_lines = [];
+		$this->resetLines();
 
 		$lines = Utils::array_transpose($source['lines']);
 
@@ -382,7 +403,7 @@ class Transaction extends Entity
 			}
 
 			$line = (new Line)->importForm($line);
-			$this->add($line);
+			$this->addLine($line);
 		}
 	}
 
@@ -406,7 +427,7 @@ class Transaction extends Entity
 		foreach ($lines as $line) {
 			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 			$line = (new Line)->importForm($line);
-			$this->add($line);
+			$this->addLine($line);
 
 			$debit += $line->debit;
 			$credit += $line->credit;
@@ -431,7 +452,7 @@ class Transaction extends Entity
 
 			$line->id_account = $open_account->id();
 
-			$this->add($line);
+			$this->addLine($line);
 		}
 	}
 
@@ -585,7 +606,7 @@ class Transaction extends Entity
 			$line2 = clone $line;
 			$line2->debit = $line->debit ? 0 : $line->credit;
 			$line2->credit = $line->credit ? 0 : $line->debit;
-			$this->add($line2);
+			$this->addLine($line2);
 		}
 
 		return $this->_related;
