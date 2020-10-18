@@ -156,7 +156,6 @@ class Accounts
 		$types = array_flip(Account::TYPES_NAMES);
 
 		$db->begin();
-		$this->save();
 
 		try {
 			foreach (Utils::fromCSV($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {

@@ -37,6 +37,7 @@ if (f('import') && $csv_file && $form->check('acc_years_import_' . $year->id(), 
 {
 	try {
 		Transactions::importArray($year, $csv_file, f('translate'), (int) f('skip_first_line'), $user->id);
+		$session->set('acc_import_csv', null);
 		Utils::redirect(ADMIN_URL . 'acc/years/');
 	}
 	catch (UserException $e) {
@@ -52,7 +53,7 @@ elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' =
 			Utils::redirect(Utils::getSelfURI());
 		}
 		else {
-			Transactions::importCSV($year, $_FILES['file']['tmp_name']);
+			Transactions::importCSV($year, $_FILES['file']);
 		}
 
 		Utils::redirect(ADMIN_URL . 'acc/years/');
