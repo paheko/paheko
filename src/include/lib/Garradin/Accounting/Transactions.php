@@ -137,46 +137,36 @@ class Transactions
 						$status[] = $v;
 					}
 				}
+
+				$row->status = implode(', ', $status);
+				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
+				$row->date = $row->date->format('d/m/Y');
 			}
 
-			$row->status = implode(', ', $status);
-			$row->credit = Utils::money_format($row->credit);
-			$row->debit = Utils::money_format($row->debit);
+			$row->credit = Utils::money_format($row->credit, ',', '');
+			$row->debit = Utils::money_format($row->debit, ',', '');
 
 			$previous_id = $row->id;
 			yield $row;
 		}
 	}
 
-	static public function importArray(Year $year, array $table, array $translation_table, int $skip_lines, int $user_id)
+	static public function importCSV(Year $year, array $file)
 	{
 		if ($year->closed) {
 			throw new \InvalidArgumentException('Closed year');
 		}
 
-		unset($v);
-
 		$db = DB::getInstance();
 		$db->begin();
 
-		$nb_columns = count($translation_table);
-
-		if ($skip_lines)
-		{
-			$table = array_slice($table, $skip_lines, null, true);
-		}
-
-		$transaction = null;
 		$accounts = $year->accounts();
+		$transaction = null;
+		$types = array_flip(Transaction::TYPES_NAMES);
 
 		try {
-			foreach ($table as $l => $row)
-			{
-				if (!count($row)) {
-					continue;
-				}
-
-				$row = (object) array_combine($translation_table, $row);
+			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS_SELF) as $l => $row) {
+				$row = (object) $row;
 
 				$has_transaction = !empty($row->id) || !empty($row->type) || !empty($row->status) || !empty($row->label) || !empty($row->date) || !empty($row->notes) || !empty($row->reference);
 
@@ -200,18 +190,95 @@ class Transactions
 						if ($transaction->validated) {
 							throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est validée et ne peut être modifiée', $l, $row->id));
 						}
-
-						$transaction->resetLines();
 					}
 					else {
 						$transaction = new Transaction;
-						$transaction->type = Transaction::TYPE_ADVANCED;
+						$transaction->id_user = $user_id;
 					}
 
+					$row->type = $types[$row->type];
 					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 
 					$transaction->importForm($fields);
 				}
+
+				$row->account = $accounts->getIdFromCode($row->account);
+
+				if ($row->line_id) {
+					$line = $transaction->getLine($row->line_id);
+				}
+				else {
+					$line = new Line;
+				}
+
+				$line->importForm([
+					'credit'     => $row->credit ?: 0,
+					'debit'      => $row->debit ?: 0,
+					'id_account' => $row->account,
+					'reference'  => $row->line_reference,
+					'label'      => $row->line_label,
+					'reconciled' => $row->reconciled,
+				]);
+
+				if (!$row->line_id) {
+					$transaction->addLine($line);
+				}
+			}
+
+			if (null !== $transaction) {
+				var_dump($transaction); exit;
+				$transaction->save();
+			}
+		}
+		catch (UserException $e) {
+			$db->rollback();
+			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+		}
+
+		$db->commit();
+	}
+
+	static public function importArray(Year $year, array $table, array $translation_table, int $skip_lines, int $user_id)
+	{
+		if ($year->closed) {
+			throw new \InvalidArgumentException('Closed year');
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		if ($skip_lines)
+		{
+			$table = array_slice($table, $skip_lines, null, true);
+		}
+
+		$accounts = $year->accounts();
+
+		try {
+			foreach ($table as $l => $row) {
+				$row = (object) array_combine(self::EXPECTED_CSV_COLUMNS_SELF, $row);
+
+				if ($row->id) {
+					$transaction = self::get((int)$row->id);
+
+					if (!$transaction) {
+						throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est introuvable', $l, $row->id));
+					}
+
+					if ($transaction->validated) {
+						throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est validée et ne peut être modifiée', $l, $row->id));
+					}
+
+					$transaction->resetLines();
+				}
+				else {
+					$transaction = new Transaction;
+					$transaction->type = Transaction::TYPE_ADVANCED;
+					$transaction->id_user = $user_id;
+				}
+
+				$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
+				$transaction->importForm($fields);
 
 				$row->credit_account = $accounts->getIdFromCode($row->credit_account);
 				$row->debit_account = $accounts->getIdFromCode($row->debit_account);
@@ -233,9 +300,6 @@ class Transactions
 					'reference'  => $row->p_reference,
 				]);
 				$transaction->addLine($line);
-			}
-
-			if (null !== $transaction) {
 				$transaction->save();
 			}
 		}

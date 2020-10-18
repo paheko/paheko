@@ -130,6 +130,17 @@ class Transaction extends Entity
 		$this->_lines = [];
 	}
 
+	public function getLine(int $id)
+	{
+		foreach ($this->getLines() as $line) {
+			if ($line->id === $id) {
+				return $line;
+			}
+		}
+
+		return null;
+	}
+
 /*
 	public function getHash()
 	{
