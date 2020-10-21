@@ -23,10 +23,10 @@
 	<section class="year-infos">
 		<section class="graphs">
 			<figure>
-				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=result" alt="" />
+				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=assets" alt="" />
 			</figure>
 			<figure>
-				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=assets" alt="" />
+				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=result" alt="" />
 			</figure>
 		</section>
 	</section>
