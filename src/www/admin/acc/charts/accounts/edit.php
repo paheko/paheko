@@ -19,16 +19,16 @@ if ($chart->archived) {
 	throw new UserException("Il n'est pas possible de modifier un compte d'un plan comptable archivé.");
 }
 
-$can_edit = ($account->user || !$chart->code) && $account->canEdit();
+$edit_disabled = !$account->canEdit();
 
 if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 {
 	try {
-		if ($can_edit) {
-			$account->importForm();
+		if ($edit_disabled) {
+			$account->importLimitedForm();
 		}
 		else {
-			$account->importLimitedForm();
+			$account->importForm();
 		}
 
 		$account->save();
@@ -50,6 +50,6 @@ if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 $types = $account::TYPES_NAMES;
 $types[0] = '-- Pas un compte favori';
 
-$tpl->assign(compact('types', 'account', 'can_edit'));
+$tpl->assign(compact('types', 'account', 'edit_disabled'));
 
 $tpl->display('acc/charts/accounts/edit.tpl');

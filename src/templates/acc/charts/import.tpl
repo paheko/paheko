@@ -1,5 +1,12 @@
 {include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts"}
 
+<nav class="tabs">
+	<ul>
+		<li><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+		<li class="current"><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
+	</ul>
+</nav>
+
 {form_errors}
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">

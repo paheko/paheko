@@ -365,6 +365,11 @@ input[type=submit], input[type=button], input[type=checkbox], button {
     transition: opacity .5s ease;
 }
 
+input[disabled], input[disabled] + label {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 input.resetButton {
     padding: .1em;
     margin-left: 1em;

@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Charts;
 use Garradin\Entities\Accounting\Chart;
 

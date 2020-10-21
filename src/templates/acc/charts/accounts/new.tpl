@@ -6,7 +6,7 @@
 
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
-		{include file="acc/charts/accounts/_account_form.tpl" simple=$simple can_edit=true}
+		{include file="acc/charts/accounts/_account_form.tpl" simple=$simple edit_disabled=false}
 	</fieldset>
 
 	<p class="submit">
