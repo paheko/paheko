@@ -84,7 +84,7 @@
 		{if $csv_file}
 			<input type="submit" name="cancel" class="minor" value="Annuler l'import" />
 		{/if}
-		<input type="submit" name="import" value="{if $csv_file}Importer{else}Choisir les colonnes{/if} &rarr;" />
+		<input type="submit" name="import" value="Importer &rarr;" />
 	</p>
 
 

@@ -53,7 +53,7 @@ elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' =
 			Utils::redirect(Utils::getSelfURI());
 		}
 		else {
-			Transactions::importCSV($year, $_FILES['file']);
+			Transactions::importCSV($year, $_FILES['file'], $user->id);
 		}
 
 		Utils::redirect(ADMIN_URL . 'acc/years/');

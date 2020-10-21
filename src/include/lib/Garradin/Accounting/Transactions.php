@@ -151,7 +151,7 @@ class Transactions
 		}
 	}
 
-	static public function importCSV(Year $year, array $file)
+	static public function importCSV(Year $year, array $file, int $user_id)
 	{
 		if ($year->closed) {
 			throw new \InvalidArgumentException('Closed year');
@@ -177,32 +177,37 @@ class Transactions
 
 				if (null === $transaction) {
 					if (!$has_transaction) {
-						throw new UserException(sprintf('Ligne %d : ligne reliée à aucune écriture', $l));
+						throw new UserException('cette ligne n\'est reliée à aucune écriture');
 					}
 
 					if ($row->id) {
 						$transaction = self::get((int)$row->id);
 
 						if (!$transaction) {
-							throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est introuvable', $l, $row->id));
+							throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
 						}
 
 						if ($transaction->validated) {
-							throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est validée et ne peut être modifiée', $l, $row->id));
+							throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
 						}
 					}
 					else {
 						$transaction = new Transaction;
-						$transaction->id_user = $user_id;
+						$transaction->id_creator = $user_id;
+						$transaction->id_year = $year->id();
 					}
 
-					$row->type = $types[$row->type];
+					$transaction->type = $types[$row->type];
 					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 
 					$transaction->importForm($fields);
 				}
 
-				$row->account = $accounts->getIdFromCode($row->account);
+				$id_account = $accounts->getIdFromCode($row->account);
+
+				if (!$id_account) {
+					throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
+				}
 
 				if ($row->line_id) {
 					$line = $transaction->getLine($row->line_id);
@@ -214,7 +219,7 @@ class Transactions
 				$line->importForm([
 					'credit'     => $row->credit ?: 0,
 					'debit'      => $row->debit ?: 0,
-					'id_account' => $row->account,
+					'id_account' => $id_account,
 					'reference'  => $row->line_reference,
 					'label'      => $row->line_label,
 					'reconciled' => $row->reconciled,
@@ -226,7 +231,6 @@ class Transactions
 			}
 
 			if (null !== $transaction) {
-				var_dump($transaction); exit;
 				$transaction->save();
 			}
 		}
