@@ -9,4 +9,4 @@ qv(['type' => 'string|required']);
 
 header('Content-Type: image/svg+xml');
 
-echo Graph::plot(qg('type'), [], Graph::MONTHLY_INTERVAL, 400);
+echo Graph::plot(qg('type'), [], Graph::MONTHLY_INTERVAL, 600);

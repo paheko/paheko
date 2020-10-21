@@ -153,13 +153,22 @@ class Graph
 	{
 		$config = Config::getInstance();
 		$c1 = $config->get('couleur1') ?: ADMIN_COLOR1;
+		$c2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		list($h, $s, $v) = Utils::rgbToHsv($c1);
+		list($h1, $s, $v) = Utils::rgbToHsv($c2);
 
-		$s = 80;
-		$v = 50;
 		$colors = [];
 
 		for ($i = 0; $i < 6; $i++) {
+			if ($i % 2 == 0) {
+				$s = $v = 50;
+				$h =& $h1;
+			}
+			else {
+				$s = $v = 70;
+				$h =& $h2;
+			}
+
 			$colors[] = sprintf('hsl(%d, %d%%, %d%%)', $h, $s, $v);
 
 			$h += 30;

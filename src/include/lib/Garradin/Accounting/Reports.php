@@ -67,7 +67,7 @@ class Reports
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			WHERE %s
-			GROUP BY %s ORDER BY %3$s;', $interval, $where, isset($criterias['year']) ? 'interval' : 't.id_year');
+			GROUP BY %s ORDER BY %3$s;', $interval, $where, isset($criterias['year']) ? 'interval' : 't.id_year, interval');
 
 		$data = $db->getGrouped($sql);
 		$sum = 0;
