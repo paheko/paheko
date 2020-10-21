@@ -241,6 +241,11 @@ class Template extends \KD2\Smartyer
 			$attributes['required'] = 'required';
 		}
 
+		if (!empty($attributes['disabled'])) {
+			$attributes['disabled'] = 'disabled';
+			unset($attributes['required']);
+		}
+
 		$attributes_string = $attributes;
 
 		array_walk($attributes_string, function (&$v, $k) {

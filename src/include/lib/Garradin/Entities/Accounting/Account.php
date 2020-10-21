@@ -241,13 +241,31 @@ class Account extends Entity
 		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s WHERE id_account = ? LIMIT 1;', Line::TABLE), $this->id());
 	}
 
+	/**
+	 * An account properties (position, label and code) can only be changed if:
+	 * * it's either a user-created account or an account part of a user-created chart
+	 * * has no transactions in a closed year
+	 * @return bool
+	 */
 	public function canEdit(): bool
 	{
-		return !DB::getInstance()->firstColumn(sprintf('SELECT 1 FROM %s l
+		$db = DB::getInstance();
+		$sql = sprintf('SELECT 1 FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
 			INNER JOIN %s y ON y.id = t.id_year
 			WHERE l.id_account = ? AND y.closed = 1
-			LIMIT 1;', Line::TABLE, Transaction::TABLE, Year::TABLE), $this->id());
+			LIMIT 1;', Line::TABLE, Transaction::TABLE, Year::TABLE);
+		$has_transactions_in_closed_year = $db->firstColumn($sql, $this->id());
+
+		if ($has_transactions_in_closed_year) {
+			return false;
+		}
+
+		if ($this->user) {
+			return true;
+		}
+
+		return $db->test(Chart::TABLE, 'id = ? AND code IS NULL', $this->id_chart);
 	}
 
 	public function chart(): Chart
