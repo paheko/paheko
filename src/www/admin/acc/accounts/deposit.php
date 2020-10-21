@@ -24,7 +24,7 @@ $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 
 $rules = [
-	'deposit' => 'array',
+	'deposit' => 'array|required',
 ];
 
 // Enregistrement des cases cochées

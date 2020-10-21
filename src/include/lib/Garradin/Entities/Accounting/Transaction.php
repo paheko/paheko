@@ -281,7 +281,7 @@ class Transaction extends Entity
 		}
 
 		if (!array_key_exists($this->type, self::TYPES_NAMES)) {
-			throw new ValidationException('Type d\'écriture inconnu');
+			throw new ValidationException('Type d\'écriture inconnu : ' . $this->type);
 		}
 	}
 

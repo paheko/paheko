@@ -245,6 +245,9 @@ class Template extends \KD2\Smartyer
 			$attributes['disabled'] = 'disabled';
 			unset($attributes['required']);
 		}
+		else {
+			unset($attributes['disabled']);
+		}
 
 		$attributes_string = $attributes;
 
