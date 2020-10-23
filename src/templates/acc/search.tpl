@@ -55,7 +55,7 @@
 {elseif $result !== null}
 
 	<p class="alert">
-		Aucun membre trouvé.
+		Aucun résultat trouvé.
 	</p>
 
 	</form>
