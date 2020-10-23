@@ -210,7 +210,7 @@ class Reports
 				FROM %s a
 				INNER JOIN %s t ON t.id = l.id_transaction
 				INNER JOIN %s l ON a.id = l.id_account
-				WHERE t.id_year = %d
+				WHERE t.id_year = %d AND a.type != 0
 				GROUP BY l.id_account
 				ORDER BY a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $year_id);
 		}
