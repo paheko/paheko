@@ -56,6 +56,9 @@ UPDATE acc_accounts SET type = 5 WHERE code = '5112' OR code = '5113';
 UPDATE acc_accounts SET type = 9 WHERE code = '890';
 UPDATE acc_accounts SET type = 10 WHERE code = '891';
 
+-- Comptes de tiers
+UPDATE acc_accounts SET type = 8 WHERE code IN (SELECT id FROM compta_comptes WHERE id LIKE '4%' AND plan_comptable = 0 AND desactive = 0);
+
 -- Recopie des mouvements
 INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_creator)
 	SELECT id, libelle, remarques, numero_piece, date, id_exercice, id_auteur
