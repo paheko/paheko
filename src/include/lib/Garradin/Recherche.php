@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Transaction;
+
 class Recherche
 {
 	const TYPE_JSON = 'json';
@@ -9,7 +11,7 @@ class Recherche
 
 	const TARGETS = [
 		'membres',
-		'acc_transactions',
+		'compta',
 	];
 
 	protected function _checkFields($data)
@@ -148,6 +150,26 @@ class Recherche
 		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
 	}
 
+	public function getResultHeader(string $target, array $result)
+	{
+		if (!count($result)) {
+			return [];
+		}
+
+		$out = [];
+		$columns = $this->getColumns($target);
+
+		foreach (reset($result) as $key => $v) {
+			foreach ($columns as $ckey => $config) {
+				if ($ckey == $key || $config->alias == $key) {
+					$out[] = $config->label;
+				}
+			}
+		}
+
+		return $out;
+	}
+
 	/**
 	 * Renvoie la liste des colonnes d'une cible
 	 */
@@ -161,7 +183,6 @@ class Recherche
 			$champs = Config::getInstance()->get('champs_membres');
 
 			$columns['id_categorie'] = (object) [
-					'realType' => 'select',
 					'textMatch'=> false,
 					'label'    => 'Catégorie',
 					'type'     => 'enum',
@@ -172,7 +193,6 @@ class Recherche
 			foreach ($champs->getList() as $champ => $config)
 			{
 				$column = (object) [
-					'realType' => $config->type,
 					'textMatch'=> $champs->isText($champ),
 					'label'    => $config->title,
 					'type'     => 'text',
@@ -202,8 +222,105 @@ class Recherche
 					$column->type = 'integer';
 				}
 
+				if ($config->type == 'tel') {
+					$column->originalType = 'tel';
+				}
+
 				$columns[$champ] = $column;
 			}
+		}
+		elseif ($target === 'compta') {
+			$columns['t.id_year'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Exercice',
+				'type'     => 'enum',
+				'null'     => false,
+				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
+				'alias'    => 'id_year',
+			];
+
+			$columns['t.id'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Numéro écriture',
+				'type'     => 'integer',
+				'null'     => false,
+				'alias'    => 'id',
+			];
+
+			$columns['t.date'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Date',
+				'type'     => 'date',
+				'null'     => false,
+				'alias'    => 'date',
+			];
+
+			$columns['t.label'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Libellé écriture',
+				'type'     => 'text',
+				'null'     => false,
+				'alias'    => 'label',
+			];
+
+			$columns['t.reference'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Numéro pièce comptable',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'reference',
+			];
+
+			$columns['t.notes'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Notes',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'notes',
+			];
+
+			$columns['l.label'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Libellé ligne',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'line_label',
+			];
+
+			$columns['l.debit'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Débit',
+				'type'     => 'integer',
+				'null'     => false,
+				'alias'    => 'debit',
+				'originalType' => 'money',
+			];
+
+			$columns['l.credit'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Crédit',
+				'type'     => 'integer',
+				'null'     => false,
+				'alias'    => 'credit',
+				'originalType' => 'money',
+			];
+
+			$columns['l.reference'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Référence ligne écriture',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'line_reference',
+			];
+
+			$columns['t.type'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Type d\'écriture',
+				'type'     => 'enum',
+				'null'     => false,
+				'values'   => Transaction::TYPES_NAMES,
+				'alias'    => 'type',
+			];
 		}
 
 		return $columns;
@@ -284,10 +401,14 @@ class Recherche
 
 				$values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
 
-				if ($column->type == 'tel')
-				{
-					// Normaliser le numéro de téléphone
-					$values = array_map(['Garradin\Utils', 'normalizePhoneNumber'], $values);
+				if (!empty($column->originalType)) {
+					if ($column->originalType == 'tel') {
+						// Normaliser le numéro de téléphone
+						$values = array_map(['Garradin\Utils', 'normalizePhoneNumber'], $values);
+					}
+					elseif ($column->originalType == 'money') {
+						$values = array_map(['Garradin\Utils', 'moneyToInteger'], $values);
+					}
 				}
 
 				// L'opérateur binaire est un peu spécial
@@ -348,9 +469,14 @@ class Recherche
 		}
 
 		// Ajout du champ identité si pas présent
-		if ($target == 'membres' && !in_array($config->get('champ_identite'), $query_columns))
+		if ($target == 'membres')
 		{
-			array_unshift($query_columns, $config->get('champ_identite'));
+			$query_columns = array_merge(['id', $config->get('champ_identite')], $query_columns);
+		}
+		// Ajout de champs compta si pas présents
+		elseif ($target == 'compta')
+		{
+			$query_columns = array_merge(['t.id', 't.date', 't.label', 'l.debit', 'l.credit'], $query_columns);
 		}
 
 		$query_columns[] = $order;
@@ -365,15 +491,28 @@ class Recherche
 		}
 
 		$query_columns = array_unique($query_columns);
-		$query_columns = array_map([$db, 'quoteIdentifier'], $query_columns);
+		$query_columns = array_map(function ($column) use ($target_columns, $db) {
+			if (isset($target_columns[$column]->alias)) {
+				return sprintf('%s AS %s', $db->quoteIdentifier($column), $db->quote($target_columns[$column]->alias));
+			}
+			return $db->quoteIdentifier($column);
+		}, $query_columns);
 
-		$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
-			implode(', ', $query_columns),
-			$target,
-			'(' . implode(') AND (', $query_groups) . ')',
-			$order,
-			$desc ? 'DESC' : 'ASC',
-			(int) $limit);
+		$query_columns = implode(', ', $query_columns);
+
+		$query_groups = '(' . implode(') AND (', $query_groups) . ')';
+
+		$desc = $desc ? 'DESC' : 'ASC';
+
+		if ('compta' === $target) {
+			$sql_query = sprintf('SELECT %s FROM acc_transactions t INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
+				$query_columns, $query_groups, $order, $desc, (int) $limit);
+			$sql_query = str_replace(['"t.', '"l.'], ['"t"."', '"l"."'], $sql_query);
+		}
+		else {
+			$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
+				$query_columns, $target, $query_groups, $order, $desc, (int) $limit);
+		}
 
 		return $sql_query;
 	}
@@ -465,7 +604,7 @@ class Recherche
 				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
 			];
 		}
-		elseif ($target == 'acc_transactions') {
+		elseif ($target == 'compta') {
 			$tables = [
 				'acc_transactions'       => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions\';'),
 				'acc_transactions_lines' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions_lines\';'),

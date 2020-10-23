@@ -177,7 +177,13 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetLinkButton(array $params): string
 	{
-		return sprintf('<a class="icn-btn" data-icon="%s" href="%s">%s</a>', Utils::iconUnicode($params['shape']), $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']));
+		$href = $params['href'];
+
+		if (!preg_match('!^(?:/|https?://)!', $href)) {
+			$href = ADMIN_URL . $params['href'];
+		}
+
+		return sprintf('<a class="icn-btn" data-icon="%s" href="%s">%s</a>', Utils::iconUnicode($params['shape']), $this->escape($href), $this->escape($params['label']));
 	}
 
 	protected function formInput(array $params)

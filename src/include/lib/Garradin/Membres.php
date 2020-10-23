@@ -286,27 +286,6 @@ class Membres
         return DB::getInstance()->firstColumn('SELECT id FROM membres WHERE numero = ?;', (int) $numero);
     }
 
-    public function getSearchHeaderFields(array $result)
-    {
-        if (!count($result))
-        {
-            return false;
-        }
-
-        $champs = Config::getInstance()->get('champs_membres');
-        $fields = [];
-
-        foreach (reset($result) as $field=>$value)
-        {
-            if ($config = $champs->get($field))
-            {
-                $fields[$field] = $config;
-            }
-        }
-
-        return $fields;
-    }
-
     public function quickSearch(string $query)
     {
         $identity = Config::getInstance()->get('champ_identite');
