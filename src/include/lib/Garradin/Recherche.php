@@ -9,7 +9,7 @@ class Recherche
 
 	const TARGETS = [
 		'membres',
-		'compta_journal',
+		'acc_transactions',
 	];
 
 	protected function _checkFields($data)
@@ -59,7 +59,7 @@ class Recherche
 
 			if ($data['type']  == self::TYPE_JSON)
 			{
-				if (!is_array($query))
+				if (!is_object($query))
 				{
 					throw new \InvalidArgumentException('Recherche invalide pour le type JSON');
 				}
@@ -114,16 +114,8 @@ class Recherche
 	{
 		$r = DB::getInstance()->first('SELECT * FROM recherches WHERE id = ?;', (int) $id);
 
-		if ($r && $r->type == self::TYPE_JSON)
-		{
-			$q = json_decode($r->contenu, true);
-
-			$r->query = $q['query'];
-			$r->order = $q['order'];
-			$r->desc = $q['desc'];
-			$r->limit = $q['limit'];
-
-			unset($q);
+		if ($r && $r->type == self::TYPE_JSON) {
+			$r->query = (object) json_decode($r->contenu, true);
 		}
 
 		return $r;
@@ -226,7 +218,7 @@ class Recherche
 	 * @param  integer $limit  Limite
 	 * @return string Chaîne SQL
 	 */
-	public function buildQuery($target, array $groups, $order, $desc = false, $limit = 100)
+	public function buildQuery(string $target, array $groups, string $order, bool $desc = false, int $limit = 100)
 	{
 		if (!in_array($target, self::TARGETS, true))
 		{
@@ -457,7 +449,7 @@ class Recherche
 	        ],
 	    ]];
 
-	    return [
+	    return (object) [
 	    	'query' => $query,
 	    	'order' => $column,
 	    ];
@@ -467,11 +459,16 @@ class Recherche
 	{
 		$db = DB::getInstance();
 
-		if ($target == 'membres')
-		{
+		if ($target == 'membres') {
 			$tables = [
-				'membres'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-				'categories'=>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
+				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+			];
+		}
+		elseif ($target == 'acc_transactions') {
+			$tables = [
+				'acc_transactions'       => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions\';'),
+				'acc_transactions_lines' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions_lines\';'),
 			];
 		}
 

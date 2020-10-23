@@ -14,7 +14,7 @@
 
 {if $simple_view}
 	<p class="alert">
-		Attention&nbsp;: en comptabilité, les comptes de banque, de caisse, et de tiers apparaissent inversés par rapport aux relevés (<em>la banque doit de l'argent à l'association, donc les sommes placées sur le compte bancaires apparaissent au débit</em>).
+		Rappel&nbsp;: en comptabilité, les comptes de banque et de caisse apparaissent inversés par rapport aux relevés (<em>la banque doit de l'argent, donc les sommes placées sur le compte bancaires apparaissent ici au débit</em>).
 	</p>
 {/if}
 

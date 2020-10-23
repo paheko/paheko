@@ -5,80 +5,91 @@ require_once __DIR__ . '/_inc.php';
 
 $recherche = new Recherche;
 
-$champs = $config->get('champs_membres');
+$query = (object) [
+    'query' => f('q') ? json_decode(f('q'), true) : null,
+    'order' => f('order'),
+    'limit' => f('limit') ?: 100,
+    'desc'  => (bool) f('desc'),
+];
+
 $text_query = trim(qg('qt'));
-$query = null;
-$limit = f('limit') ?: 100;
-$order = f('order');
-$desc = (bool) f('desc');
-$sql_query = null;
+$result = null;
+$sql_query = null !== qg('sql') ? 'SELECT * FROM membres LIMIT 10;' : null;
+$search = null;
 $id = f('id') ?: qg('id');
 
 // Recherche simple
 if ($text_query !== '')
 {
-    extract($recherche->buildSimpleMemberQuery($text_query));
+    $query = $recherche->buildSimpleMemberQuery($text_query);
 }
+// Recherche existante
 elseif ($id)
 {
-    $r = $recherche->get($id);
+    $search = $recherche->get($id);
 
-    if (!$r || $r->type != Recherche::TYPE_JSON)
-    {
+    if (!$search) {
         throw new UserException('Recherche inconnue ou invalide');
     }
 
-    $query = $r->query;
-    $order = $r->order;
-    $desc = $r->desc;
-    $limit = (int) f('limit') ?: $r->limit;
-
-    $tpl->assign('recherche', $r);
+    if ($search->type === Recherche::TYPE_SQL) {
+        $sql_query = $search->contenu;
+    }
+    else {
+        $query = $search->query;
+        $query->limit = (int) f('limit') ?: $query->limit;
+    }
 }
 
-if (f('q') !== null)
-{
-    $query = json_decode(f('q'), true);
+// Recherche SQL
+if (f('sql_query')) {
+    // Only admins can run custom queries, others can only run saved queries
+    $session->requireAccess('membres', Membres::DROIT_ADMIN);
+    $sql_query = f('sql_query');
 }
 
-if ($query)
-{
+// Execute search
+if ($query->query || $sql_query) {
     try {
-        $sql_query = $recherche->buildQuery('membres', $query, $order, $desc, $limit);
-        $result = $recherche->searchSQL('membres', $sql_query);
+        if ($sql_query) {
+            $sql = $sql_query;
+        }
+        else {
+            $sql = $recherche->buildQuery('membres', $query->query, $query->order, $query->desc, $query->limit);
+        }
+
+       $result = $recherche->searchSQL('membres', $sql);
     }
     catch (UserException $e) {
         $form->addError($e->getMessage());
-        $query = null;
+    }
+
+    if (f('to_sql')) {
+        $sql_query = $sql;
     }
 }
 
-if ($query)
+if ($result)
 {
-    if (count($result) == 1 && $text_query !== '')
-    {
+    if (count($result) == 1 && $text_query !== '') {
         Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->id);
     }
 
     if (f('save') && !$form->hasErrors())
     {
-        $query = [
-            'query' => $query,
-            'order' => $order,
-            'limit' => $limit,
-            'desc'  => $desc,
-        ];
+        $type = $sql_query ? Recherche::TYPE_SQL : Recherche::TYPE_JSON;
 
-        if ($id)
-        {
+        if ($id) {
             $recherche->edit($id, [
-                'type'    => Recherche::TYPE_JSON,
-                'contenu' => $query,
+                'type'    => $type,
+                'contenu' => $sql_query ?: $query,
             ]);
         }
         else
         {
-            $id = $recherche->add('Recherche avancée du ' . date('d/m/Y H:i:s'), $user->id, $recherche::TYPE_JSON, 'membres', $query);
+            $label = $sql_query ? 'Recherche SQL du ' : 'Recherche avancée du ';
+            $label .= date('d/m/Y à H:i:s');
+            $id = $recherche->add($label, $user->id, $type, 'membres', $sql_query ?: $query);
         }
 
         Utils::redirect('/admin/membres/recherches.php?id=' . $id);
@@ -88,7 +99,7 @@ if ($query)
 }
 else
 {
-    $query = [[
+    $query->query = [[
         'operator' => 'AND',
         'conditions' => [
             [
@@ -101,13 +112,10 @@ else
     $result = null;
 }
 
-$tpl->assign('id', $id);
-$tpl->assign('query', $query);
-$tpl->assign('sql_query', $sql_query);
-$tpl->assign('result', $result);
-$tpl->assign('order', $order);
-$tpl->assign('desc', $desc);
-$tpl->assign('limit', $limit);
-$tpl->assign('colonnes', $recherche->getColumns('membres'));
+$columns = $recherche->getColumns('membres');
+$is_admin = $session->canAccess('membres', Membres::DROIT_ADMIN);
+$schema = $recherche->schema('membres');
+
+$tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search'));
 
 $tpl->display('admin/membres/recherche.tpl');

@@ -57,14 +57,14 @@
 		<tbody>
 			{foreach from=$liste item="recherche"}
 			<tr>
-				<th>{$recherche.intitule}</th>
+				<th><a href="{$admin_url}membres/recherche.php?id={$recherche.id}">{$recherche.intitule}</a></th>
 				<td>{if $recherche.type == Recherche::TYPE_JSON}Avancée{else}SQL{/if}</td>
 				<td>{if !$recherche.id_membre}Publique{else}Privée{/if}</td>
 				<td class="actions">
-					<a href="{$admin_url}membres/recherche{if $recherche.type == Recherche::TYPE_SQL}_sql{/if}.php?id={$recherche.id}" class="icn" title="Exécuter">𝍢</a>
+					{linkbutton href="membres/recherche.php?id=%d"|args:$recherche.id shape="search" label="Rechercher"}
 					{if $recherche.id_membre || $session->canAccess('membres', Membres::DROIT_ADMIN)}
-					<a href="{$admin_url}membres/recherches.php?edit={$recherche.id}" class="icn" title="Modifier">✎</a>
-					<a href="{$admin_url}membres/recherches.php?delete={$recherche.id}" class="icn" title="Supprimer">✘</a>
+						{linkbutton href="membres/recherche.php?edit=%d"|args:$recherche.id shape="edit" label="Renommer"}
+						{linkbutton href="membres/recherche.php?delete=%d"|args:$recherche.id shape="delete" label="Supprimer"}
 					{/if}
 				</td>
 			</tr>
