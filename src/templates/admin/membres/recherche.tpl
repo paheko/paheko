@@ -2,7 +2,7 @@
 
 {include file="admin/membres/_nav.tpl" current="recherche"}
 
-{include file="common/search/advanced.tpl" action_url="%smembres/recherche.php"|args:$admin_url}
+{include file="common/search/advanced.tpl" action_url=$self_url}
 
 {if !empty($result)}
 	{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}

@@ -124,6 +124,17 @@ class Utils
         return true;
     }
 
+    static public function moneyToInteger($value)
+    {
+        if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
+            throw new UserException('Le format du montant est invalide. Format accepté, exemple : 142,02');
+        }
+
+        $value = $match[1] . str_pad((int)@$match[2], 2, '0', STR_PAD_RIGHT);
+        $value = (int) $value;
+        return $value;
+    }
+
     static public function money_format($number, string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
         if ($number == 0) {
             return $zero_if_empty ? '0' : '0,00';

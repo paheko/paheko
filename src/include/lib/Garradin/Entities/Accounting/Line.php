@@ -4,6 +4,7 @@ namespace Garradin\Entities\Accounting;
 
 use Garradin\Entity;
 use Garradin\ValidationException;
+use Garradin\Utils;
 
 class Line extends Entity
 {
@@ -44,13 +45,7 @@ class Line extends Entity
 	{
 		if ($key == 'credit' || $key == 'debit')
 		{
-			if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
-				throw new ValidationException('Le format du montant est invalide. Format accepté, exemple : 142,02');
-			}
-
-
-			$value = $match[1] . str_pad((int)@$match[2], 2, '0', STR_PAD_RIGHT);
-			$value = (int) $value;
+			$value = Utils::moneyToInteger($value);
 		}
 		elseif ($key == 'id_analytical' && $value == 0) {
 			$value = null;
