@@ -164,13 +164,15 @@ class Template extends \KD2\Smartyer
 			$params['type'] = 'button';
 		}
 
+		$params['class'] = ' icn-btn';
+
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $this->escape($v));
 		});
 
 		$params = implode(' ', $params);
 
-		return sprintf('<button %s class="icn-btn" data-icon="%s">%s</button>', $params, $icon, $label);
+		return sprintf('<button %s data-icon="%s">%s</button>', $params, $icon, $label);
 	}
 
 	protected function widgetLinkButton(array $params): string
