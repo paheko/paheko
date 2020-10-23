@@ -64,31 +64,8 @@ if (!defined('Garradin\ROOT'))
     define('Garradin\ROOT', dirname(__DIR__));
 }
 
-
-/**
- * Auto-chargement des dépendances
- */
-class Loader
-{
-    /**
-     * Liste des classes déjà chargées
-     * @var array
-     */
-    static protected $loaded = [];
-
-    /**
-     * Inclure un fichier de classe depuis le nom de la classe
-     * @param  string $classname
-     * @return void
-     */
-    static public function load($classname)
-    {
+\spl_autoload_register(function (string $classname) {
         $classname = ltrim($classname, '\\');
-
-        if (array_key_exists($classname, self::$loaded))
-        {
-            return true;
-        }
 
         // Plugins
         if (substr($classname, 0, 16) == 'Garradin\\Plugin\\')
@@ -106,18 +83,10 @@ class Loader
             $path = ROOT . '/include/lib/' . $filename . '.php';
         }
 
-        if (!file_exists($path))
-        {
-            throw new \Exception('File '.$path.' doesn\'t exists');
+        if (file_exists($path)) {
+            require_once $path;
         }
-
-        self::$loaded[$classname] = true;
-
-        require $path;
-    }
-}
-
-\spl_autoload_register(['Garradin\Loader', 'load'], true);
+}, true);
 
 if (!defined('Garradin\DATA_ROOT'))
 {
