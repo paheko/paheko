@@ -38,6 +38,7 @@
 		<dd class="desc">
 			{if $year.closed}Clôturé{else}En cours{/if}
 			| Du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}
+			| <a href="../charts/accounts/?id={$year.id_chart}">Plan comptable</a>
 		</dd>
 		<dd class="desc">
 			<a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a>

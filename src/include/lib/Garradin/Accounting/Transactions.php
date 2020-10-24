@@ -165,7 +165,7 @@ class Transactions
 		$types = array_flip(Transaction::TYPES_NAMES);
 
 		try {
-			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS_SELF) as $l => $row) {
+			foreach (CSV::importUpload($file, self::EXPECTED_CSV_COLUMNS_SELF) as $l => $row) {
 				$row = (object) $row;
 
 				$has_transaction = !empty($row->id) || !empty($row->type) || !empty($row->status) || !empty($row->label) || !empty($row->date) || !empty($row->notes) || !empty($row->reference);

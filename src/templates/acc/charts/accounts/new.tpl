@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Nouveau compte" current="acc/charts" js=1}
 
+{include file="acc/charts/accounts/_nav.tpl" current="new"}
+
 {form_errors}
 
 <form method="post" action="{$self_url}">

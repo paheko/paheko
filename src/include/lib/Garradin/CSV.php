@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use KD2\Office\Calc\Writer as ODSWriter;
+
 class CSV
 {
 	static public function readAsArray(string $path)
@@ -194,13 +196,18 @@ class CSV
 		$ods->output();
 	}
 
-	static public function import(array $file, array $expected_columns): \Generator
+	static public function importUpload(array $file, array $expected_columns): \Generator
 	{
 		if (empty($file['size']) || empty($file['tmp_name'])) {
 			throw new UserException('Fichier invalide');
 		}
 
-		$fp = fopen($file['tmp_name'], 'r');
+		self::import($file['tmp_name']);
+	}
+
+	static public function import(string $file, array $expected_columns): \Generator
+	{
+		$fp = fopen($file, 'r');
 
 		if (!$fp) {
 			throw new UserException('Le fichier ne peut être ouvert');

@@ -16,9 +16,6 @@ DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations'
 
 INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
 
---.read plan_comptable_1999.sql
---.read plan_comptable_2020.sql
-
 -- Migration comptes de code comme identifiant à ID unique
 -- Inversement valeurs actif/passif
 INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
