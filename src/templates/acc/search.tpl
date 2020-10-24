@@ -1,5 +1,12 @@
 {include file="admin/_head.tpl" title="Recherche" current="acc" js=1 custom_js=['query_builder.min.js']}
 
+<nav class="tabs">
+	<ul>
+		<li class="current"><a href="{$self_url}">Recherche</a></li>
+		<li><a href="saved_searches.php">Recherches enregistrées</a></li>
+	</ul>
+</nav>
+
 {include file="common/search/advanced.tpl" action_url=$self_url}
 
 {if !empty($result)}

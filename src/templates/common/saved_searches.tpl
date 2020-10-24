@@ -2,7 +2,14 @@
 
 {if $target == 'membres'}
 	{include file="admin/membres/_nav.tpl" current="recherches"}
-{/if}
+{else}
+	<nav class="tabs">
+		<ul>
+			<li><a href="search.php">Recherche</a></li>
+			<li class="current"><a href="saved_searches.php">Recherches enregistrées</a></li>
+		</ul>
+	</nav>
+	{/if}
 
 {form_errors}
 

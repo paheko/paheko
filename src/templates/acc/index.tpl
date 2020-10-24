@@ -13,7 +13,7 @@
 			<li><a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a></li>
 			<li><a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a></li>
 			<li><a href="{$admin_url}acc/reports/balance_sheet.php?year={$year.id}">Bilan</a></li>
-			<li><a href="{$admin_url}acc/transactions/search.php?year={$year.id}"><strong>Recherche</strong></a></li>
+			<li><a href="{$admin_url}acc/search.php?year={$year.id}"><strong>Recherche</strong></a></li>
 			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 				<li><a href="{$admin_url}acc/years/import.php?id={$year.id}">Import / export</a></li>
 			{/if}

@@ -75,7 +75,7 @@ if ($query->query || $sql_query) {
 	}
 }
 
-if ($result)
+if (null !== $result)
 {
 	if (count($result) == 1 && $text_query !== '' && $target === 'membres') {
 		Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->id);
@@ -127,7 +127,7 @@ elseif ($target === 'compta')
 			[
 				'column'   => 't.id_year',
 				'operator' => '= ?',
-				'values'   => [$years],
+				'values'   => [qg('year')],
 			],
 			[
 				'column'   => 't.reference',
@@ -136,6 +136,7 @@ elseif ($target === 'compta')
 			],
 		],
 	]];
+	$query->desc = true;
 	$result = null;
 }
 
