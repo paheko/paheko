@@ -1,5 +1,12 @@
 {include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years" js=1}
 
+<nav class="tabs">
+	<ul>
+		<li><a href="./">Exercices</a></li>
+		<li class="current"><a href="new.php">Nouvel exercice</a></li>
+	</ul>
+</nav>
+
 {form_errors}
 
 <form method="post" action="{$self_url}">

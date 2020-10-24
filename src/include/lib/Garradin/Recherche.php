@@ -230,15 +230,6 @@ class Recherche
 			}
 		}
 		elseif ($target === 'compta') {
-			$columns['t.id_year'] = (object) [
-				'textMatch'=> false,
-				'label'    => 'Exercice',
-				'type'     => 'enum',
-				'null'     => false,
-				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
-				'alias'    => 'id_year',
-			];
-
 			$columns['t.id'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Numéro écriture',
@@ -320,6 +311,15 @@ class Recherche
 				'null'     => false,
 				'values'   => Transaction::TYPES_NAMES,
 				'alias'    => 'type',
+			];
+
+			$columns['t.id_year'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Exercice',
+				'type'     => 'enum',
+				'null'     => false,
+				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
+				'alias'    => 'id_year',
 			];
 		}
 

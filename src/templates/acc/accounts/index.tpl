@@ -5,6 +5,7 @@
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$admin_url}acc/accounts/">Comptes</a></li>
+		<li><a href="{$admin_url}acc/search.php?year={$current_year.id}">Recherche</a></li>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 			<li><a href="{$admin_url}acc/charts/accounts/?id={$chart_id}">Gestion des comptes</a></li>
 		{/if}
