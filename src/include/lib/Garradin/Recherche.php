@@ -591,6 +591,8 @@ class Recherche
 	    return (object) [
 	    	'query' => $query,
 	    	'order' => $column,
+	    	'desc' => false,
+	    	'limit' => 50,
 	    ];
 	}
 
