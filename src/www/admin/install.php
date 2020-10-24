@@ -8,18 +8,6 @@ require_once __DIR__ . '/../../include/init.php';
 
 Install::checkAndCreateDirectories();
 
-if (!file_exists(DB_FILE))
-{
-    // Renommage du fichier sqlite à la version 0.5.0
-    $old_file = str_replace('.sqlite', '.db', DB_FILE);
-
-    if (file_exists($old_file))
-    {
-        rename($old_file, DB_FILE);
-        Utils::redirect(ADMIN_URL . 'upgrade.php');
-    }
-}
-
 function f($key)
 {
     return \KD2\Form::get($key);
