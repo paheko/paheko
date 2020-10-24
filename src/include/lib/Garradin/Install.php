@@ -133,13 +133,6 @@ class Install
 		]);
 		$config->set('accueil_connexion', $page);
 
-		// Mise en place compta
-		$comptes = new Compta\Comptes;
-		$comptes->importPlan();
-
-		$comptes = new Compta\Categories;
-		$comptes->importCategories();
-
 		$ex = new Compta\Exercices;
 		$ex->add([
 			'libelle'   =>  'Premier exercice',

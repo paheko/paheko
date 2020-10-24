@@ -18,15 +18,6 @@ class DB extends SQLite3
     {
         if (null === self::$_instance) {
             self::$_instance = new DB('sqlite', ['file' => DB_FILE]);
-
-            $flags = \SQLITE3_OPEN_READWRITE;
-
-            if ($create)
-            {
-                $flags |= \SQLITE3_OPEN_CREATE;
-            }
-
-            self::$_instance->flags = $flags;
         }
 
         return self::$_instance;
