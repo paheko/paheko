@@ -18,10 +18,9 @@ if (version_compare($v, garradin_version(), '>='))
     throw new UserException("Pas de mise à jour à faire.");
 }
 
-// versions pré-0.7.0: démerdez-vous !
-if (!$v || version_compare($v, '0.7.0', '<'))
+if (!$v || version_compare($v, '0.9.8', '<'))
 {
-    throw new UserException("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin 0.8.5 avant de faire la mise à jour vers cette version.");
+    throw new UserException("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin 0.9.8 avant de faire la mise à jour vers cette version.");
 }
 
 Install::checkAndCreateDirectories();
