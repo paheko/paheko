@@ -3,8 +3,9 @@
 namespace Garradin\Accounting;
 
 use Garradin\Entities\Accounting\Account;
-use Garradin\Utils;
+use Garradin\CSV;
 use Garradin\DB;
+use Garradin\Utils;
 use KD2\DB\EntityManager;
 
 class Accounts
@@ -148,8 +149,16 @@ class Accounts
 			SELECT %d, code, label, description, position, type, user FROM %1$s WHERE id_chart = %d;', Account::TABLE, $this->chart_id, $id));
 	}
 
+	public function importUpload(array $file)
+	{
+		if (empty($file['size']) || empty($file['tmp_name'])) {
+			throw new UserException('Fichier invalide');
+		}
 
-	public function importCSV(array $file): void
+		self::importCSV($file['tmp_name']);
+	}
+
+	public function importCSV(string $file): void
 	{
 		$db = DB::getInstance();
 		$positions = array_flip(Account::POSITIONS_NAMES);
@@ -158,7 +167,7 @@ class Accounts
 		$db->begin();
 
 		try {
-			foreach (Utils::fromCSV($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
+			foreach (CSV::import($file, self::EXPECTED_CSV_COLUMNS) as $line => $row) {
 				$account = new Account;
 				$account->id_chart = $this->chart_id;
 				try {

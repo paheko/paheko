@@ -2,6 +2,10 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Chart;
+use Garradin\Entities\Accounting\Year;
+
 /**
  * Pour procéder à l'installation de l'instance Garradin
  * Utile pour automatiser l'installation sans passer par la page d'installation
@@ -133,12 +137,33 @@ class Install
 		]);
 		$config->set('accueil_connexion', $page);
 
-		$ex = new Compta\Exercices;
-		$ex->add([
-			'libelle'   =>  'Premier exercice',
-			'debut'     =>  date('Y-01-01'),
-			'fin'       =>  date('Y-12-31')
-		]);
+        // Import plan comptable
+        $chart = new Chart;
+        $chart->label = 'Plan comptable associatif 2018';
+        $chart->country = 'FR';
+        $chart->code = 'PCA2018';
+        $chart->save();
+        $chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
+
+        // Premier exercice
+        $year = new Year;
+        $year->label = sprintf('Exercice %d', date('Y'));
+        $year->start_date = new \DateTime('January 1st');
+        $year->end_date = new \DateTime('December 31');
+        $year->id_chart = $chart->id();
+        $year->save();
+
+        // Compte bancaire
+        $account = new Account;
+        $account->import([
+        	'label' => 'Compte courant',
+        	'code' => '512A',
+        	'type' => Account::TYPE_BANK,
+        	'position' => Account::ASSET_OR_LIABILITY,
+        	'id_chart' => $chart->id(),
+        	'user' => 1,
+        ]);
+        $account->save();
 
 		// Ajout d'une recherche avancée en exemple
 		$query = [

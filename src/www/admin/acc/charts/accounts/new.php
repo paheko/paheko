@@ -73,6 +73,6 @@ if (f('save') && $form->check('acc_accounts_new'))
 	}
 }
 
-$tpl->assign(compact('simple', 'types', 'account', 'translate_type_position', 'translate_type_codes'));
+$tpl->assign(compact('simple', 'types', 'account', 'translate_type_position', 'translate_type_codes', 'chart'));
 
 $tpl->display('acc/charts/accounts/new.tpl');
