@@ -260,9 +260,13 @@ class Transactions
 
 		try {
 			foreach ($table as $l => $row) {
-				$row = (object) array_combine(self::EXPECTED_CSV_COLUMNS_SELF, $row);
+				$row = (object) array_combine($translation_table, $row);
 
-				if ($row->id) {
+				if (!isset($row->credit_account, $row->debit_account, $row->amount)) {
+					throw new UserException('Une des colonnes compte de crédit, compte de débit ou montant est manquante.');
+				}
+
+				if (!empty($row->id)) {
 					$transaction = self::get((int)$row->id);
 
 					if (!$transaction) {
@@ -278,7 +282,8 @@ class Transactions
 				else {
 					$transaction = new Transaction;
 					$transaction->type = Transaction::TYPE_ADVANCED;
-					$transaction->id_user = $user_id;
+					$transaction->id_creator = $user_id;
+					$transaction->id_year = $year->id();
 				}
 
 				$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
@@ -292,7 +297,7 @@ class Transactions
 					'credit'     => $row->amount,
 					'debit'      => 0,
 					'id_account' => $row->credit_account,
-					'reference'  => $row->p_reference,
+					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
 				]);
 				$transaction->addLine($line);
 
@@ -301,7 +306,7 @@ class Transactions
 					'credit'     => 0,
 					'debit'      => $row->amount,
 					'id_account' => $row->debit_account,
-					'reference'  => $row->p_reference,
+					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
 				]);
 				$transaction->addLine($line);
 				$transaction->save();

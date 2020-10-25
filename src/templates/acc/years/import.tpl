@@ -4,7 +4,7 @@
 
 <nav class="tabs">
 	<ul>
-		<li class="current"><a href="{$admin_url}admin/acc/years/import.php?id={$year.id}">Import</a></li>
+		<li class="current"><a href="{$admin_url}acc/years/import.php?id={$year.id}">Import</a></li>
 		<li><a href="{$admin_url}acc/years/import.php?id={$year.id}&amp;export=csv">Export journal général - CSV</a></li>
 		<li><a href="{$admin_url}acc/years/import.php?id={$year.id}&amp;export=ods">Export journal général - tableur</a></li>
 	</ul>
