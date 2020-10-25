@@ -202,7 +202,7 @@ class CSV
 			throw new UserException('Fichier invalide');
 		}
 
-		self::import($file['tmp_name']);
+		return self::import($file['tmp_name'], $expected_columns);
 	}
 
 	static public function import(string $file, array $expected_columns): \Generator
