@@ -9,6 +9,7 @@ use Garradin\Utils;
 use Garradin\Config;
 use Garradin\DB;
 use const Garradin\ADMIN_COLOR1;
+use const Garradin\ADMIN_COLOR2;
 use const Garradin\ADMIN_URL;
 use KD2\DB\EntityManager;
 

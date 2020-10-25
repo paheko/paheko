@@ -15,6 +15,8 @@ if (!qg('chart') || !($chart = Charts::get((int)qg('chart')))) {
 
 $accounts = $chart->accounts();
 
+$tpl->assign(compact('chart'));
+
 if (!qg('targets')) {
 	$tpl->assign('accounts', $accounts->listAll());
 }
