@@ -115,7 +115,7 @@ INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
 	INNER JOIN cotisations c ON c.id = cm.id_cotisation;
 
 INSERT INTO services_fees (label, amount, id_service, id_account)
-	SELECT intitule, CAST(montant AS integer), id,
+	SELECT intitule, CAST(montant*100 AS integer), id,
 		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta))
 	FROM cotisations WHERE montant > 0 OR id_categorie_compta IS NOT NULL;
 
