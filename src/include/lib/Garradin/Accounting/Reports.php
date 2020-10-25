@@ -347,6 +347,10 @@ class Reports
 				];
 			}
 
+			if (!isset($accounts[$row->id_account])) {
+				throw new \LogicException(sprintf('Account #%s not found', $row->id_account));
+			}
+
 			$transaction->lines[] = (object) [
 				'account_label' => $accounts[$row->id_account]->label,
 				'account_code'  => $accounts[$row->id_account]->code,

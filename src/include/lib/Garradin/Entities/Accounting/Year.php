@@ -45,14 +45,7 @@ class Year extends Entity
 
 		$this->assert($this->id_chart !== null);
 
-		// Vérifier qu'on ne crée pas 2 exercices qui se recoupent
 		if ($this->exists()) {
-			$this->assert(
-				!$db->test(self::TABLE, 'id != :id AND ((start_date <= :start_date AND end_date >= :start_date) OR (start_date <= :end_date AND end_date >= :start_date))',
-					['id' => $this->id(), 'start_date' => $this->start_date->format('Y-m-d'), 'end_date' => $this->end_date->format('Y-m-d')]),
-				'La date de début ou de fin se recoupe avec un exercice existant.'
-			);
-
 			$this->assert(
 				!$db->test(Transaction::TABLE, 'id_year = ? AND date < ?', $this->id(), $this->start_date->format('Y-m-d')),
 				'Des mouvements de cet exercice ont une date antérieure à la date de début de l\'exercice.'
@@ -61,13 +54,6 @@ class Year extends Entity
 			$this->assert(
 				!$db->test(Transaction::TABLE, 'id_year = ? AND date > ?', $this->id(), $this->end_date->format('Y-m-d')),
 				'Des mouvements de cet exercice ont une date postérieure à la date de fin de l\'exercice.'
-			);
-		}
-		else {
-			$this->assert(
-				!$db->test(self::TABLE, '(start_date <= :start_date AND end_date >= :start_date) OR (start_date <= :end_date AND end_date >= :start_date)',
-					['start_date' => $this->start_date->format('Y-m-d'), 'end_date' => $this->end_date->format('Y-m-d')]),
-				'La date de début ou de fin se recoupe avec un exercice existant.'
 			);
 		}
 	}
