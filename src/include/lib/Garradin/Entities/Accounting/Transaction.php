@@ -264,7 +264,7 @@ class Transaction extends Entity
 
 		if (!$db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d')))
 		{
-			throw new ValidationException('La date ne correspond pas à l\'exercice sélectionné.');
+			throw new ValidationException('La date ne correspond pas à l\'exercice sélectionné : ' . $this->date->format('d/m/Y'));
 		}
 
 		$total = 0;
