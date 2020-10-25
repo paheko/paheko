@@ -28,7 +28,7 @@ class Accounts
 
 	public function getIdFromCode(string $code): int
 	{
-		return $this->em->col('SELECT id FROM @TABLE WHERE code = ?;', $code);
+		return $this->em->col('SELECT id FROM @TABLE WHERE code = ? AND id_chart = ?;', $code, $this->chart_id);
 	}
 
 	/**

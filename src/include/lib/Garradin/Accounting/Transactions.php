@@ -289,14 +289,22 @@ class Transactions
 				$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 				$transaction->importForm($fields);
 
-				$row->credit_account = $accounts->getIdFromCode($row->credit_account);
-				$row->debit_account = $accounts->getIdFromCode($row->debit_account);
+				$credit_account = $accounts->getIdFromCode($row->credit_account);
+				$debit_account = $accounts->getIdFromCode($row->debit_account);
+
+				if (!$credit_account) {
+					throw new UserException('Compte inconnu dans le plan comptable : ' . $row->credit_account);
+				}
+
+				if (!$debit_account) {
+					throw new UserException('Compte inconnu dans le plan comptable : ' . $row->debit_account);
+				}
 
 				$line = new Line;
 				$line->importForm([
 					'credit'     => $row->amount,
 					'debit'      => 0,
-					'id_account' => $row->credit_account,
+					'id_account' => $credit_account,
 					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
 				]);
 				$transaction->addLine($line);
@@ -305,7 +313,7 @@ class Transactions
 				$line->importForm([
 					'credit'     => 0,
 					'debit'      => $row->amount,
-					'id_account' => $row->debit_account,
+					'id_account' => $debit_account,
 					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
 				]);
 				$transaction->addLine($line);

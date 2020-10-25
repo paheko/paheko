@@ -13,7 +13,8 @@ if (f('import') && $form->check('acc_charts_import', ['file' => 'file|required']
 	try {
 		$chart = new Chart;
 		$chart->importForm();
-		$chart->importUpload($_FILES['file']); // This will save everything
+		$chart->save();
+		$chart->accounts()->importUpload($_FILES['file']); // This will save everything
 		Utils::redirect(ADMIN_URL . 'acc/charts/');
 	}
 	catch (UserException $e) {

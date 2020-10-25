@@ -19,6 +19,10 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
+if (f('next') && !f('from_year')) {
+	Utils::redirect('/admin/acc/years/');
+}
+
 if (f('save') && $form->check('acc_years_balance_' . $year->id()))
 {
 	try {
