@@ -823,6 +823,7 @@ class Squelette extends \KD2\MiniSkel
         }
         elseif (preg_match('!^/admin/!', $uri))
         {
+            http_response_code(404);
             throw new UserException('Cette page n\'existe pas.');
         }
         else
