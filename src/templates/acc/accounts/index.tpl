@@ -54,6 +54,11 @@
 			</tr>
 		{/foreach}
 	</tbody>
+	{foreachelse}
+	<tbody>
+		<tr>
+			<td colspan="4">Il n'y a aucun compte favori avec des écritures pour l'exercice sélectionné.</td>
+		</tr>
 	{/foreach}
 </table>
 

@@ -14,7 +14,7 @@ if ($current_year_id) {
 	// Check that the year is still valid
 	$current_year = Years::get($current_year_id);
 
-	if ($current_year->closed) {
+	if (!$current_year || $current_year->closed) {
 		$current_year_id = null;
 		$session->set('acc_year', null);
 	}
