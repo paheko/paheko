@@ -14,6 +14,7 @@ DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations'
 
 -- FIXME: insertion en comptes analytiques des projets et associations dans transactions
 
+-------- MIGRATION COMPTA ---------
 INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
 
 -- Migration comptes de code comme identifiant à ID unique
@@ -96,19 +97,44 @@ INSERT INTO acc_years (id, label, start_date, end_date, closed, id_chart)
 INSERT INTO membres_categories
 	SELECT id, nom, droit_wiki, droit_membres, droit_compta, droit_inscription, droit_connexion, droit_config, cacher FROM membres_categories_old;
 
+-- Transfert des rapprochements
+UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT id_operation FROM compta_rapprochement);
+
+--------- MIGRATION COTISATIONS ----------
+
+INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
+INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
+	NULL,
+	1,
+	CASE
+		WHEN c.duree IS NOT NULL THEN date(cm.date, '+'||c.duree||' days')
+		WHEN c.fin IS NOT NULL THEN c.fin
+		ELSE NULL
+	END
+	FROM cotisations_membres cm
+	INNER JOIN cotisations c ON c.id = cm.id_cotisation;
+
+INSERT INTO services_fees (label, amount, id_service, id_account)
+	SELECT intitule, CAST(montant AS integer), id,
+		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta))
+	FROM cotisations WHERE montant > 0 OR id_categorie_compta IS NOT NULL;
+
+INSERT INTO services_reminders SELECT * FROM rappels;
+INSERT INTO services_reminders_sent SELECT id, id_membre, id_cotisation, id_rappel, date FROM rappels_envoyes;
+
+DROP TABLE cotisations;
+DROP TABLE cotisations_membres;
+DROP TABLE rappels;
+DROP TABLE rappels_envoyes;
+
+-- Suppression inutilisées
+DROP TABLE compta_rapprochement;
 DROP TABLE compta_journal;
 DROP TABLE compta_categories;
 DROP TABLE compta_comptes;
 DROP TABLE compta_exercices;
 DROP TABLE membres_operations_old;
 
--- Transfert des rapprochements
-UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT id_operation FROM compta_rapprochement);
-
--- Suppression de la table rapprochements
-DROP TABLE compta_rapprochement;
-
--- Suppression inutilisées
 DROP TABLE compta_projets;
 DROP TABLE compta_comptes_bancaires;
 DROP TABLE compta_moyens_paiement;

@@ -34,65 +34,70 @@ CREATE TABLE IF NOT EXISTS membres_sessions
     PRIMARY KEY (selecteur, id_membre)
 );
 
-CREATE TABLE IF NOT EXISTS cotisations
--- Types de cotisations et activités
+CREATE TABLE IF NOT EXISTS services
+-- Types de services (cotisations)
 (
     id INTEGER PRIMARY KEY NOT NULL,
 
-    intitule TEXT NOT NULL,
-    description TEXT NULL,
-
-    duree INTEGER NULL, -- En jours
-    debut TEXT NULL, -- timestamp
-    fin TEXT NULL
-);
-
-CREATE TABLE IF NOT EXISTS cotisations_tarifs
-(
-    id INTEGER PRIMARY KEY NOT NULL,
     label TEXT NOT NULL,
     description TEXT NULL,
+
+    duration INTEGER NULL CHECK (duration IS NULL OR duration > 0), -- En jours
+    start_date TEXT NULL CHECK (start_date IS NULL OR date(start_date) = start_date),
+    end_date TEXT NULL CHECK (end_date IS NULL OR (date(end_date) = end_date AND date(end_date) >= date(start_date)))
+);
+
+CREATE TABLE IF NOT EXISTS services_fees
+(
+    id INTEGER PRIMARY KEY NOT NULL,
+
+    label TEXT NOT NULL,
+    description TEXT NULL,
+
     amount INTEGER NULL,
-    formula TEXT NULL,
+    formula TEXT NULL, -- Formule de calcul du montant de la cotisation, si cotisation dynamique (exemple : membres.revenu_imposable * 0.01)
+
+    id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
     id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL -- NULL si le type n'est pas associé automatiquement à la compta
 );
 
-CREATE TABLE IF NOT EXISTS cotisations_membres
+CREATE TABLE IF NOT EXISTS services_users
 -- Enregistrement des cotisations et activités
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
-    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id) ON DELETE CASCADE,
+    id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
+    id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
+    id_fee INTEGER NULL REFERENCES services_fee (id) ON DELETE CASCADE,
 
-    date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
+    paid INTEGER NOT NULL DEFAULT 0,
+
+    expiry_date TEXT NULL DEFAULT CURRENT_DATE CHECK (date(expiry_date) IS NOT NULL AND date(expiry_date) = expiry_date)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS cm_unique ON cotisations_membres (id_membre, id_cotisation, date);
+CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, expiry_date);
 
-CREATE TABLE IF NOT EXISTS rappels
+CREATE TABLE IF NOT EXISTS services_reminders
 -- Rappels de devoir renouveller une cotisation
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id) ON DELETE CASCADE,
+    id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
 
-    delai INTEGER NOT NULL, -- Délai en jours pour envoyer le rappel
+    delay INTEGER NOT NULL, -- Délai en jours pour envoyer le rappel
 
-    sujet TEXT NOT NULL,
-    texte TEXT NOT NULL
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS rappels_envoyes
+CREATE TABLE IF NOT EXISTS services_reminders_sent
 -- Enregistrement des rappels envoyés à qui et quand
 (
     id INTEGER NOT NULL PRIMARY KEY,
 
-    id_membre INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
-    id_cotisation INTEGER NOT NULL REFERENCES cotisations (id) ON DELETE CASCADE,
-    id_rappel INTEGER NULL REFERENCES rappels (id) ON DELETE CASCADE,
+    id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
+    id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
+    id_reminder INTEGER NULL REFERENCES services_reminders (id) ON DELETE CASCADE,
 
-    date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
-
-    media INTEGER NOT NULL -- Média utilisé pour le rappel : 1 = email, 2 = courrier, 3 = autre
+    date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
 );
 
 --
