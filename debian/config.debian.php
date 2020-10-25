@@ -17,6 +17,10 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 		mkdir($_ENV['XDG_CONFIG_HOME'] . '/garradin', 0700, true);
 	}
 
+	if (file_exists($_ENV['XDG_CONFIG_HOME'] . '/garradin/config.local.php')) {
+		require_once $_ENV['XDG_CONFIG_HOME'] . '/garradin/config.local.php';
+	}
+
 	// Data directory: where the data will go
 	if (empty($_ENV['XDG_DATA_HOME']))
 	{
@@ -28,7 +32,9 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 		mkdir($_ENV['XDG_DATA_HOME'] . '/garradin', 0700, true);
 	}
 
-	define('Garradin\DATA_ROOT', $_ENV['XDG_DATA_HOME'] . '/garradin');
+	if (!defined('Garradin\DATA_ROOT')) {
+		define('Garradin\DATA_ROOT', $_ENV['XDG_DATA_HOME'] . '/garradin');
+	}
 
 	// Cache directory: temporary stuff
 	if (empty($_ENV['XDG_CACHE_HOME']))
@@ -41,37 +47,32 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 		mkdir($_ENV['XDG_CACHE_HOME'] . '/garradin', 0700, true);
 	}
 
-	define('Garradin\CACHE_ROOT', $_ENV['XDG_CACHE_HOME'] . '/garradin');
-
-	$last_file = $_ENV['XDG_CONFIG_HOME'] . '/garradin/last';
-
-	if ($_ENV['GARRADIN_STANDALONE'] != 1)
-	{
-		$last_sqlite = trim($_ENV['GARRADIN_STANDALONE']);
-	}
-	else if (file_exists($last_file))
-	{
-		$last_sqlite = trim(file_get_contents($last_file));
-	}
-	else
-	{
-		$last_sqlite = $_ENV['XDG_DATA_HOME'] . '/garradin/association.sqlite';
+	if (!defined('Garradin\DATA_ROOT')) {
+		define('Garradin\CACHE_ROOT', $_ENV['XDG_CACHE_HOME'] . '/garradin');
 	}
 
-	file_put_contents($last_file, $last_sqlite);
+	if (!defined('Garradin\DB_FILE')) {
+		$last_file = $_ENV['XDG_CONFIG_HOME'] . '/garradin/last';
 
-	$secret_file = $_ENV['XDG_CONFIG_HOME'] . '/garradin/secret';
+		if ($_ENV['GARRADIN_STANDALONE'] != 1)
+		{
+			$last_sqlite = trim($_ENV['GARRADIN_STANDALONE']);
+		}
+		else if (file_exists($last_file))
+		{
+			$last_sqlite = trim(file_get_contents($last_file));
+		}
+		else
+		{
+			$last_sqlite = $_ENV['XDG_DATA_HOME'] . '/garradin/association.sqlite';
+		}
 
-	if (!file_exists($secret_file))
-	{
-		$random = function_exists('random_bytes') ? random_bytes(64) : mt_rand();
-		$random = sha1($random . $secret_file);
+		file_put_contents($last_file, $last_sqlite);
 
-		file_put_contents($secret_file, $random);
+		define('Garradin\DB_FILE', $last_sqlite);
 	}
 
-	define('Garradin\SECRET_KEY', trim(file_get_contents($secret_file)));
-
-	define('Garradin\DB_FILE', $last_sqlite);
-	define('Garradin\LOCAL_LOGIN', 1);
+	if (!defined('Garradin\LOCAL_LOGIN')) {
+		define('Garradin\LOCAL_LOGIN', true);
+	}
 }
