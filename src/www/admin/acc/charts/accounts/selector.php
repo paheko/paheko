@@ -7,6 +7,8 @@ use Garradin\Accounting\Charts;
 
 require_once __DIR__ . '/../../_inc.php';
 
+header('X-Frame-Options: SAMEORIGIN', true);
+
 if (!qg('chart') || !($chart = Charts::get((int)qg('chart')))) {
 	throw new UserException('Aucun ID de plan comptable spécifié');
 }

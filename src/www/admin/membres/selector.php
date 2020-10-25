@@ -3,6 +3,8 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
+header('X-Frame-Options: SAMEORIGIN', true);
+
 $text_query = trim(qg('q'));
 
 $tpl->assign('list', []);
