@@ -5,6 +5,7 @@ namespace Garradin\Entities\Services;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Utils;
+use Garradin\Services\Fees;
 
 class Service extends Entity
 {
@@ -66,5 +67,10 @@ class Service extends Entity
 		}
 
 		parent::importForm($source);
+	}
+
+	public function fees()
+	{
+		return new Fees($this->id());
 	}
 }
