@@ -12,7 +12,7 @@ if ($session->canAccess('membres', Membres::DROIT_ADMIN) && f('add') && $form->c
 		$service->importForm();
 		$service->save();
 
-		Utils::redirect(ADMIN_URL . 'services/');
+		Utils::redirect(ADMIN_URL . 'services/fees/?id=' . $service->id());
 	}
 	catch (UserException $e)
 	{

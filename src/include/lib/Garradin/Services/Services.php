@@ -4,9 +4,16 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Entities\Services\Service;
+use KD2\DB\EntityManager;
 
 class Services
 {
+	static public function get(int $id)
+	{
+		return EntityManager::findOneById(Service::class, $id);
+	}
+
 	static public function listWithStats()
 	{
 		$db = DB::getInstance();
