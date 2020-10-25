@@ -1,16 +1,6 @@
-{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/cotisations" js=1}
+{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services" js=1}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}membres/cotisations/">Activités et cotisations</a></li>
-		{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-			<li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-		{/if}
-		{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-			<li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
-		{/if}
-	</ul>
-</nav>
+{include file="services/_nav.tpl" current="index"}
 
 {if count($list)}
 	<table class="list">
@@ -39,10 +29,11 @@
 					<td class="num">{$row.nb_users_expired}</td>
 					<td class="num">{$row.nb_users_unpaid}</td>
 					<td class="actions">
-						<a class="icn" href="{$admin_url}membres/cotisations/voir.php?id={$row.id}" title="Liste des membres cotisants">👪</a>
+						{linkbutton shape="menu" label="Tarifs" href="services/fees/?id=%d"|args:$row.id}
+						{linkbutton shape="users" label="Liste des inscrits" href="services/details.php?id=%d"|args:$row.id}
 						{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-							<a class="icn" href="{$admin_url}membres/cotisations/gestion/modifier.php?id={$row.id}" title="Modifier">✎</a>
-							<a class="icn" href="{$admin_url}membres/cotisations/gestion/supprimer.php?id={$row.id}" title="Supprimer">✘</a>
+							{linkbutton shape="edit" label="Modifier" href="services/edit.php?id=%d"|args:$row.id}
+							{linkbutton shape="delete" label="Supprimer" href="services/delete.php?id=%d"|args:$row.id}
 						{/if}
 					</td>
 				</tr>
@@ -82,6 +73,10 @@
 			</dd>
 		</dl>
 	</fieldset>
+
+	<p class="help">
+		Il sera possible de définir les tarifs applicables à cette activité dans l'écran suivant.
+	</p>
 
 	<p class="submit">
 		{csrf_field key="service_new"}

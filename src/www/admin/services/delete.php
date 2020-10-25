@@ -1,50 +1,29 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../_inc.php';
+use Garradin\Services\Services;
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
+require_once __DIR__ . '/_inc.php';
 
-$membre = false;
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-$cotisations = new Cotisations;
-$m_cotisations = new Membres\Cotisations;
+$service = Services::get((int) qg('id'));
 
-qv(['id' => 'required|numeric']);
-
-$id = (int) qg('id');
-
-$co = $m_cotisations->get($id);
-
-if (!$co)
-{
-    throw new UserException("Cette cotisation membre n'existe pas.");
+if (!$service) {
+	throw new UserException("Cette activité n'existe pas");
 }
 
-$membre = $membres->get($co->id_membre);
-
-if (!$membre)
-{
-    throw new UserException("Le membre lié à la cotisation n'existe pas ou plus.");
+if (f('delete') && $form->check('service_delete_' . $service->id())) {
+	try {
+		$service->delete();
+		Utils::redirect(ADMIN_URL . 'services/');
+	}
+	catch (UserException $e)
+	{
+		$form->addError($e->getMessage());
+	}
 }
 
-if (f('delete'))
-{
-    if ($form->check('del_cotisation_' . $co->id))
-    {
-        try {
-            $m_cotisations->delete($co->id);
-            Utils::redirect(ADMIN_URL . 'membres/cotisations.php?id=' . $membre->id);
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
+$tpl->assign('service', $service);
 
-$tpl->assign('membre', $membre);
-$tpl->assign('cotisation', $co);
-$tpl->assign('nb_operations', $m_cotisations->countOperationsCompta($co->id));
-
-$tpl->display('admin/membres/cotisations/supprimer.tpl');
+$tpl->display('services/delete.tpl');
