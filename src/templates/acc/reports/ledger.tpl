@@ -2,10 +2,17 @@
 
 {include file="acc/reports/_header.tpl" current="ledger"}
 
+<div class="year-header noprint">
+	<button type="button" data-icon="↓" class="icn-btn" id="open_details">Déplier tous les comptes</button>
+	<button type="button" data-icon="↑" class="icn-btn" id="close_details">Replier tous les comptes</button>
+</div>
+
 {foreach from=$ledger item="account"}
 
+<details open="open">
+	<summary><h2 class="ruler"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$account.id_year}">{$account.code} — {$account.label}</a></h2></summary>
+
 	<table class="list">
-		<caption><h4><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$account.id_year}">{$account.code} — {$account.label}</h4></caption>
 		<colgroup>
 			<col width="5%" />
 			<col width="5%" />
@@ -50,6 +57,8 @@
 		</tfoot>
 	</table>
 
+</details>
+
 {if isset($account->all_debit)}
 	<table class="list">
 		<colgroup>
@@ -70,6 +79,21 @@
 {/if}
 
 {/foreach}
+
+{literal}
+<script type="text/javascript">
+document.querySelector('#open_details').onclick = () => {
+	document.querySelectorAll('details').forEach((e) => {
+		e.setAttribute('open', 'open');
+	});
+};
+document.querySelector('#close_details').onclick = () => {
+	document.querySelectorAll('details').forEach((e) => {
+		e.removeAttribute('open');
+	});
+};
+</script>
+{/literal}
 
 <p class="help">Toutes les opérations sont libellées en {$config.monnaie}.</p>
 

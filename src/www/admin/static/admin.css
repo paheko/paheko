@@ -1353,16 +1353,36 @@ img.qrcode {
     background: #fff;
 }
 
-.exercice button {
-    margin: .5em;
-    padding: .5em;
+details summary {
+    list-style: none;
+    padding: 0.2em 0.5em;
+    transition: background-color .2s;
 }
 
-.exercice button b.icn {
-    font-size: 2em;
-    display: block;
+details summary:hover {
+    cursor: pointer;
+    background-color: rgba(var(--gMainColor), 0.1);
 }
 
-.exercice button:hover {
-    opacity: .7;
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary:before {
+    content: "↓";
+    font-size: 1.5rem;
+    font-family: gicon;
+    border-radius: .2em;
+    padding: .2em .4em;
+    margin: .2em .5em;
+    display: inline-block;
+    border-color: rgba(var(--gSecondColor), 0.5);
+    background-color: rgba(var(--gMainColor), 0.1);
+    color: rgb(var(--gMainColor));
+    transition: color .3s, background-color .3s;
+    float: right;
+}
+
+details[open] summary:before {
+    content: "↑";
 }
