@@ -315,7 +315,7 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (empty($source['type'])) {
+		if (!isset($source['type'])) {
 			throw new ValidationException('Type d\'écriture inconnu');
 		}
 
