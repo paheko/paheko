@@ -298,7 +298,7 @@ class Fichiers
 	{
 		if (!$this->image)
 		{
-			throw new \LogicException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
 		if (!$width)
@@ -319,7 +319,12 @@ class Fichiers
 		{
 			$source = $this->getFilePathFromCache();
 
-			(new Image($source))->resize($width)->save($path);
+			try {
+				(new Image($source))->resize($width)->save($path);
+			}
+			catch (\RuntimeException $e) {
+				throw new UserException('Impossible de créer la miniature');
+			}
 		}
 
 		return $this->_serve($path, $this->type);
@@ -486,7 +491,7 @@ class Fichiers
 
 	/**
 	 * Upload de fichier (interne)
-	 * 
+	 *
 	 * @param  string $name
 	 * @param  string $path Chemin du fichier
 	 * @param  string $content Ou contenu du fichier
@@ -520,6 +525,23 @@ class Fichiers
 		}
 
 		$is_image = preg_match('/^image\/(?:png|jpe?g|gif)$/', $type);
+
+		// Check that it's a real image
+		if ($is_image) {
+			try {
+				if ($path && !$content) {
+					$i = new Image($path);
+				}
+				else {
+					$i = Image::createFromBlob($bytes);
+				}
+
+				unset($i);
+			}
+			catch (\RuntimeException $e) {
+				throw new UserException('Fichier image invalide');
+			}
+		}
 
 		$db = DB::getInstance();
 
