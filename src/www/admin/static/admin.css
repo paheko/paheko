@@ -475,6 +475,14 @@ form p.actions {
     position: relative;
 }
 
+dialog {
+    display: none;
+}
+
+dialog[open] {
+    display: block;
+}
+
 dialog.datepicker {
     position: absolute;
     left: 0;

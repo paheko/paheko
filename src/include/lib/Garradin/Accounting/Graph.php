@@ -70,6 +70,10 @@ class Graph
 			$line_criterias = array_merge($criterias, $line_criterias);
 			$sums = Reports::getSumsByInterval($line_criterias, $interval);
 
+			if (count($sums) <= 1) {
+				continue;
+			}
+
 			// Invert sums for banks, cash, etc.
 			if ('assets' === $type) {
 				$sums = array_map(function ($v) { return $v * -1; }, $sums);
@@ -84,6 +88,7 @@ class Graph
 			$graph->title = $label;
 			$data[] = $graph;
 		}
+
 
 		if (count($data))
 		{
