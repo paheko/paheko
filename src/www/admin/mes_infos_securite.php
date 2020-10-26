@@ -11,12 +11,15 @@ if (f('confirm'))
     $form->check('edit_me_security', [
         'passe'       => 'confirmed|min:6',
         'passe_check' => 'required',
-        'code' => 'required_with:otp_secret',
+        'code'        => 'min:6|max:6',
     ]);
 
     if (f('passe_check') && !$session->checkPassword(f('passe_check'), $user->passe))
     {
         $form->addError('Le mot de passe fourni ne correspond pas au mot de passe actuel. Merci de bien vouloir renseigner votre mot de passe courant pour confirmer les changements.');
+    }
+    elseif (f('otp_secret') && f('otp_secret') != 'disable' && !f('code')) {
+        $form->addError('Le code OTP est obligatoire');
     }
     elseif (f('code') && !$session->checkOTP(f('otp_secret'), f('code')))
     {

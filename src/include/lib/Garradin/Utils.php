@@ -190,6 +190,11 @@ class Utils
                 $destination = WWW_URL . preg_replace('/^\//', '', $destination);
         }
 
+        if (PHP_SAPI == 'cli') {
+            echo 'Please visit ' . $destination . PHP_EOL;
+            exit;
+        }
+
         if (headers_sent())
         {
             echo

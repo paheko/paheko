@@ -47,12 +47,18 @@ class Membres
             {
                 if ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
-                    $dt = new \DateTime($data[$key]);
+                    $dt = \DateTime::createFromFormat('Y-m-d H:i', $data[$key]);
+                    if (!$dt) {
+                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ HH:mm attendu.', $config->title));
+                    }
                     $data[$key] = $dt->format('Y-m-d H:i');
                 }
                 elseif ($config->type == 'date' && trim($data[$key]) !== '')
                 {
-                    $dt = new \DateTime($data[$key]);
+                    $dt = \DateTime::createFromFormat('Y-m-d', $data[$key]);
+                    if (!$dt) {
+                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ attendu.', $config->title));
+                    }
                     $data[$key] = $dt->format('Y-m-d');
                 }
                 elseif ($config->type == 'tel')
