@@ -9,19 +9,33 @@ require_once __DIR__ . '/../../_inc.php';
 
 header('X-Frame-Options: SAMEORIGIN', true);
 
-if (!qg('chart') || !($chart = Charts::get((int)qg('chart')))) {
-	throw new UserException('Aucun ID de plan comptable spécifié');
+$charts = $chart = null;
+$targets = qg('targets');
+
+if (qg('chart')) {
+	$chart = Charts::get((int)qg('chart'));
+}
+elseif ($current_year) {
+	$chart = $current_year->chart();
+}
+
+if (qg('chart_choice')) {
+	$charts = Charts::listAssoc();
+}
+
+if (!$chart) {
+	throw new UserException('Aucun plan comptable ouvert actuellement');
 }
 
 $accounts = $chart->accounts();
 
-$tpl->assign(compact('chart'));
+$tpl->assign(compact('chart', 'charts', 'targets'));
 
-if (!qg('targets')) {
+if (!$targets) {
 	$tpl->assign('accounts', $accounts->listAll());
 }
 else {
-	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped(explode(':', qg('targets'))));
+	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped(explode(':', $targets)));
 }
 
 

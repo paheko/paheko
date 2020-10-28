@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Services\Fee;
 use Garradin\Services\Services;
 
@@ -29,7 +30,9 @@ if ($session->canAccess('membres', Membres::DROIT_ADMIN) && f('add') && $form->c
 	}
 }
 
-$tpl->assign(compact('service'));
+$targets = Account::TYPE_REVENUE;
+
+$tpl->assign(compact('service', 'targets'));
 $tpl->assign('list', $fees->listWithStats());
 
 $tpl->display('services/fees/index.tpl');
