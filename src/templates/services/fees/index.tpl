@@ -19,7 +19,7 @@
 						{if $row.formula}
 							Formule
 						{else}
-							{$row.amount|html_money|raw}
+							{$row.amount|html_money|raw}&nbsp;{$config.monnaie}
 						{/if}
 					</td>
 					<td class="num">{$row.nb_users_ok}</td>
@@ -51,6 +51,8 @@
 			{input name="label" type="text" required=1 label="Libellé"}
 			{input name="description" type="textarea" label="Description"}
 
+			{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart_choice=1"|args:$targets name="account" label="Enregistrer les règlements pour ce tarif dans le compte" help="Si aucun compte n'est sélectionné, les règlements ne seront pas enregistrés en comptabilité"}
+
 			{input name="amount" type="money" label="Montant fixe (en %s)"|args:$config.monnaie help="Pour pratiquer le prix libre il suffira de marquer comme payé les membres, sans considérer le montant."}
 			{input name="formula" type="textarea" label="Alternativement : formule de calcul"}
 			<dd class="help">
@@ -65,36 +67,6 @@
 	</p>
 
 </form>
-
-<script type="text/javascript">
-{literal}
-(function () {
-	var hide = [];
-	if (!$('#f_period_1').checked)
-		hide.push('.period_1');
-
-	if (!$('#f_period_2').checked)
-		hide.push('.period_2');
-
-	g.toggle(hide, false);
-
-	function togglePeriod()
-	{
-		g.toggle(['.period_1', '.period_2'], false);
-
-		if (this.checked && this.value == 1)
-			g.toggle('.period_1', true);
-		else if (this.checked && this.value == 2)
-			g.toggle('.period_2', true);
-	}
-
-	$('#f_period_0').onchange = togglePeriod;
-	$('#f_period_1').onchange = togglePeriod;
-	$('#f_period_2').onchange = togglePeriod;
-})();
-{/literal}
-</script>
-
 {/if}
 
 {include file="admin/_foot.tpl"}

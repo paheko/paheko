@@ -20,6 +20,11 @@ class Charts
 		return $em->all('SELECT * FROM @TABLE ORDER BY country, label;');
 	}
 
+	static public function listAssoc()
+	{
+		return DB::getInstance()->getAssoc(sprintf('SELECT id, country || \' - \' || label FROM %s ORDER BY country, label;', Chart::TABLE));
+	}
+
 	static public function listByCountry()
 	{
 		$sql = sprintf('SELECT id, country, label FROM %s ORDER BY country, label;', Chart::TABLE);
