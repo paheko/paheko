@@ -41,7 +41,7 @@
 		</tbody>
 	</table>
 {else}
-	<p class="alert">Il n'y a aucune activité enregistrée.</p>
+	<p class="block alert">Il n'y a aucune activité enregistrée.</p>
 {/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}

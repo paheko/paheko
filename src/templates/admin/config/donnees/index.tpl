@@ -7,7 +7,7 @@
 {form_errors}
 
 {if $code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT}
-    <p class="alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
+    <p class="block alert">Pour passer outre, renvoyez le fichier en cochant la case «&nbsp;Ignorer les erreurs&nbsp;».
     Attention, si vous avez effectué des modifications dans la base de données, cela peut créer des bugs&nbsp;!</p>
 {/if}
 
@@ -16,7 +16,7 @@
         {if $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>{$now_date}.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
             {if $ok_code & Sauvegarde::NOT_AN_ADMIN}
             </p>
-            <p class="alert">
+            <p class="block alert">
                 <strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
                 Merci de corriger les droits des catégories maintenant.
             {/if}
@@ -45,7 +45,7 @@
 
 <fieldset>
     <legend><label for="f_file">Restaurer depuis un fichier de sauvegarde</label></legend>
-    <p class="alert">
+    <p class="block alert">
         Attention, l'intégralité des données courantes seront effacées et remplacées par celles
         contenues dans le fichier fourni.
     </p>

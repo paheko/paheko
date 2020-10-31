@@ -14,7 +14,7 @@
 
     {pagination url="?p=[ID]" page=$current_page bypage=$bypage total=$total}
 {else}
-    <p class="alert">Pas de modification récente.</p>
+    <p class="block alert">Pas de modification récente.</p>
 {/if}
 
 {include file="admin/_foot.tpl"}

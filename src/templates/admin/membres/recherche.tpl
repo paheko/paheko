@@ -61,7 +61,7 @@
 
 {elseif $result !== null}
 
-	<p class="alert">
+	<p class="block alert">
 		Aucun membre trouvé.
 	</p>
 

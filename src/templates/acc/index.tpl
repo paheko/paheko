@@ -32,7 +32,7 @@
 
 
 {foreachelse}
-	<p class="alert">
+	<p class="block alert">
 		Il n'y a aucun exercice ouvert en cours.<br />
 		{linkbutton label="Ouvrir un nouvel exercice" shape="plus" href="acc/years/new.php"}
 	</p>

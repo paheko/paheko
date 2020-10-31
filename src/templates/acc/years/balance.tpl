@@ -3,7 +3,7 @@
 {form_errors}
 
 {if $year->countTransactions()}
-<p class="alert">
+<p class="block alert">
 	<strong>Attention&nbsp;!</strong>
 	Cet exercice a déjà des écritures, peut-être avez-vous déjà renseigné la balance d'ouverture&nbsp;?
 </p>

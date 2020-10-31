@@ -132,7 +132,7 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		return '<div class="error"><ul><li>' . implode('</li><li>', $form->getErrorMessages(!empty($params['membre']) ? true : false)) . '</li></ul></div>';
+		return '<div class="block error"><ul><li>' . implode('</li><li>', $form->getErrorMessages(!empty($params['membre']) ? true : false)) . '</li></ul></div>';
 	}
 
 	protected function showError($params)
@@ -142,7 +142,7 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		return '<p class="error">' . $this->escape($params['message']) . '</p>';
+		return '<p class="block error">' . $this->escape($params['message']) . '</p>';
 	}
 
 	protected function widgetIcon(array $params): string

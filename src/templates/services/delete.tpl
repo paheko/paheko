@@ -11,7 +11,7 @@
 		<h3 class="warning">
 			Êtes-vous sûr de vouloir supprimer l'activité «&nbsp;{$service.label}&nbsp;» ?
 		</h3>
-		<p class="alert">
+		<p class="block alert">
 			Attention, cela supprimera également l'historique des membres inscrits à cette activité, ainsi que les rappels associés.
 		</p>
 		<p class="help">

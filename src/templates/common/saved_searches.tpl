@@ -52,7 +52,7 @@
 		</p>
 	</form>
 {elseif count($liste) == 0}
-	<p class="alert">Aucune recherche enregistrée. <a href="{$search_url}">Faire une nouvelle recherche</a></p>
+	<p class="block alert">Aucune recherche enregistrée. <a href="{$search_url}">Faire une nouvelle recherche</a></p>
 {else}
 	<table class="list">
 		<thead>

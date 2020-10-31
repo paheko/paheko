@@ -14,7 +14,7 @@
 </p>
 
 {if empty($liste)}
-    <p class="alert">Aucun rappel automatique n'est enregistré.</p>
+    <p class="alert block">Aucun rappel automatique n'est enregistré.</p>
 {else}
     <table class="list">
         <thead>

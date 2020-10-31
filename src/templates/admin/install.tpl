@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Garradin - Installation" js=1}
 
 {if $disabled}
-    <p class="error">Garradin est déjà installé.</p>
+    <p class="block error">Garradin est déjà installé.</p>
 {else}
     <p class="help">
         Bienvenue dans Garradin !

@@ -12,7 +12,7 @@
             <h3 class="warning">
                 Êtes-vous sûr de vouloir supprimer l'extension «&nbsp;{$plugin.nom}&nbsp;» ?
             </h3>
-            <p class="alert">
+            <p class="block alert">
                 <strong>Attention</strong> : cette action est irréversible et effacera toutes les
                 données associées à l'extension.
             </p>

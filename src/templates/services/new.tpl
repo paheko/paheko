@@ -35,7 +35,7 @@
 {/if}
 
 {if !count($cotisations)}
-    <div class="alert">
+    <div class="block alert">
         <p>Il n'y a aucun type de cotisation créé. Il n'est pas possible d'affecter une cotisation à un membre.</p>
         <form method="get" action="{$admin_url}membres/cotisations/">
             <p><input type="submit" value="Ajouter une cotisation &rarr;" /></p>

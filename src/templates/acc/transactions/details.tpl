@@ -11,7 +11,7 @@
 
 {if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
 <form method="post" action="{$admin_url}acc/transactions/new.php">
-<div class="alert">
+<div class="block alert">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
 		<input type="hidden" name="payoff_for" value="{$transaction.id}" />

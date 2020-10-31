@@ -10,7 +10,7 @@
 </nav>
 
 {if $_GET.msg == 'OPEN'}
-<p class="alert">
+<p class="block alert">
 	Il n'existe aucun exercice ouvert.
 	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.

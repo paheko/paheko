@@ -68,11 +68,9 @@
 				</ul>
 			</dd>
 			{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
-			<dd class="alert">
-				Les lignes comportant un numéro d'écriture mettront à jour les écritures existantes correspondant à ces numéros (sauf si celles-ci ont été validées), alors que les lignes sans numéro créeront de nouvelles écritures.
-			</dd>
-			<dd class="help">
-				Si le fichier comporte des opérations dont la date est en dehors de l'exercice courant,	elles seront ignorées.
+			<dd class="help block">
+				- Les lignes comportant un numéro d'écriture mettront à jour les écritures existantes correspondant à ces numéros (sauf si celles-ci ont été validées), alors que les lignes sans numéro créeront de nouvelles écritures.<br />
+				- Si le fichier comporte des écritures dont la date est en dehors de l'exercice courant, elles seront ignorées.
 			</dd>
 		</dl>
 	</fieldset>
