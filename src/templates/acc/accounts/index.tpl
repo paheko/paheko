@@ -12,9 +12,7 @@
 	</ul>
 </nav>
 
-<p class="alert">
-	Attention&nbsp;: en comptabilité, les comptes de banque, de caisse, et de tiers apparaissent inversés par rapport aux relevés (<em>la banque doit de l'argent à l'association, donc les sommes placées sur le compte bancaires apparaissent au débit</em>).
-</p>
+{include file="acc/_simple_help.tpl" link=null type=null}
 
 <table class="list">
 	<thead>
