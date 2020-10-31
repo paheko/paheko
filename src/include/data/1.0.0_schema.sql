@@ -71,7 +71,8 @@ CREATE TABLE IF NOT EXISTS services_users
 
     paid INTEGER NOT NULL DEFAULT 0,
 
-    expiry_date TEXT NULL DEFAULT CURRENT_DATE CHECK (date(expiry_date) IS NOT NULL AND date(expiry_date) = expiry_date)
+    date TEXT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
+    expiry_date TEXT NULL CHECK (date(expiry_date) IS NULL OR date(expiry_date) = expiry_date)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, expiry_date);
