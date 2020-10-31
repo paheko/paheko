@@ -118,7 +118,7 @@ class Account extends Entity
 		parent::selfCheck();
 	}
 
-	public function getJournal(int $year_id)
+	public function getJournal(int $year_id, bool $simple = false)
 	{
 		$db = DB::getInstance();
 		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled
@@ -130,13 +130,21 @@ class Account extends Entity
 
 		$sum = 0;
 
+		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
+
 		foreach ($rows as &$row) {
 			$sum += ($row->credit - $row->debit);
-			$row->running_sum = $sum;
+			$row->change = ($row->credit - $row->debit) * $reverse;
+			$row->running_sum = $sum * $reverse;
 			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 		}
 
 		return $rows;
+	}
+
+	static public function isReversed(int $type): bool
+	{
+		return in_array($type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY]);
 	}
 
 	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date)

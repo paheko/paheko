@@ -200,7 +200,7 @@ span.alert, b.alert {
     margin-bottom: .8em;
 }
 
-p.alert, div.alert, p.error, div.error, p.confirm, div.confirm {
+.alert.block, .error.block, .confirm.block, .help.block {
     border: 1px solid #ccc;
     padding: .5em;
     margin-bottom: 1em;
@@ -209,22 +209,27 @@ p.alert, div.alert, p.error, div.error, p.confirm, div.confirm {
     position: relative;
 }
 
-p.error, div.error {
-    border-color: #c00;
-    background-color: #fcc;
-}
-
-p.confirm, div.confirm {
-    border-color: #0c0;
-    background-color: #cfc;
-}
-
-p.alert, div.alert {
+.alert.block {
     border-color: #cc0;
     background-color: #ffc;
 }
 
-p.confirm::before, div.confirm::before, p.alert::before, div.alert::before, p.error::before, div.error::before {
+.error.block {
+    border-color: #c00;
+    background-color: #fcc;
+}
+
+.confirm.block {
+    border-color: #0c0;
+    background-color: #cfc;
+}
+
+.help.block {
+    border-color: #999;
+    background-color: #eee;
+}
+
+.confirm.block::before, .alert.block::before, .error.block::before, .help.block::before {
     font-family: "gicon";
     left: .5em;
     top: .2em;
@@ -233,19 +238,24 @@ p.confirm::before, div.confirm::before, p.alert::before, div.alert::before, p.er
     text-shadow: 2px 2px 5px #666;
 }
 
-p.confirm::before, div.confirm::before {
+.confirm.block::before {
     content: "☑";
     color: green;
 }
 
-p.alert::before, div.alert::before {
+.alert.block::before {
     content: "⚠";
     color: yellow;
 }
 
-p.error::before, div.error::before {
+.error.block::before {
     content: "⚠";
     color: red;
+}
+
+.help.block::before {
+    content: "❓";
+    color: #666;
 }
 
 .help {
@@ -254,6 +264,12 @@ p.error::before, div.error::before {
 
 p.help {
     margin: 1em;
+}
+
+.help ul li {
+    list-style-type: disc;
+    margin: .5em;
+    margin-left: 2em;
 }
 
 dd em.help {
@@ -955,26 +971,23 @@ h2.ruler:after {
 }
 
 .icn-btn {
-    border: 1px solid #9c4f15;
-    border-color: rgba(var(--gSecondColor), 0.5);
+    display: inline-block;
+    color: rgb(var(--gMainColor));
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    background-color: rgba(var(--gSecondColor), 0.1);
     font-size: inherit;
     border-radius: .2em;
     padding: .2em .4em;
     margin: .2em .5em;
-    display: inline-block;
-    background-color: rgba(var(--gSecondColor), 0.1);
-    text-shadow: none;
     white-space: pre;
     text-decoration: underline;
-    color: #9c4f15;
-    color: rgb(var(--gMainColor));
     transition: color .3s, background-color .3s;
 }
 
-.icn-btn[data-icon]:before {
+.icn-btn[data-icon]:before, summary::after {
     display: inline-block;
-    text-shadow: 1px 1px 1px #999;
     font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px #999;
     padding-right: .5em;
     font-size: 1.2em;
     line-height: .8em;
@@ -1365,6 +1378,7 @@ details summary {
     list-style: none;
     padding: 0.2em 0.5em;
     transition: background-color .2s;
+    position: relative;
 }
 
 details summary:hover {
@@ -1376,21 +1390,39 @@ details summary::-webkit-details-marker {
     display: none;
 }
 
-details summary:before {
+details summary::after {
     content: "↓";
-    font-size: 1.5rem;
-    font-family: gicon;
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* From .icn-btn */
+    display: inline-block;
+    color: rgb(var(--gMainColor));
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    background: #fff;
+    font-size: 1.5em;
     border-radius: .2em;
     padding: .2em .4em;
     margin: .2em .5em;
-    display: inline-block;
-    border-color: rgba(var(--gSecondColor), 0.5);
-    background-color: rgba(var(--gMainColor), 0.1);
-    color: rgb(var(--gMainColor));
     transition: color .3s, background-color .3s;
-    float: right;
+    font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px #999;
 }
 
-details[open] summary:before {
+details[open] summary::after {
     content: "↑";
+}
+
+details summary:hover::after {
+    background-color: rgb(var(--gMainColor));
+    color: #fff;
+}
+
+details summary.block {
+    padding-right: 4em;
+}
+
+details summary.block::after {
+    right: 0;
+    left: inherit;
 }

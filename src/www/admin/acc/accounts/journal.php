@@ -27,13 +27,6 @@ else {
 	$tpl->assign('year', $year);
 }
 
-$journal = $account->getJournal($year_id);
-$sum = 0;
-
-if (count($journal)) {
-	$sum = end($journal)->running_sum;
-}
-
 $simple = qg('simple');
 
 // Use simplified view for favourite accounts
@@ -41,9 +34,13 @@ if (null === $simple) {
 	$simple = (bool) $account->type;
 }
 
-$tpl->assign('simple_view', $simple);
-$tpl->assign('year', $year);
-$tpl->assign('account', $account);
-$tpl->assign('journal', $journal);
-$tpl->assign('sum', $sum);
+$journal = $account->getJournal($year_id, $simple);
+$sum = 0;
+
+if (count($journal)) {
+	$sum = end($journal)->running_sum;
+}
+
+$tpl->assign(compact('simple', 'year', 'account', 'journal', 'sum'));
+
 $tpl->display('acc/accounts/journal.tpl');
