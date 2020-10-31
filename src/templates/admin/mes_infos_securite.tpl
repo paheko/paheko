@@ -19,11 +19,11 @@
     <form method="post" action="{$self_url_no_qs}">
 
     {if !empty($otp) && $otp == 'disable'}
-        <p class="alert">
+        <p class="block alert">
             Confirmez la désactivation de l'authentification à double facteur TOTP.
         </p>
     {elseif !empty($otp)}
-        <p class="alert">
+        <p class="block alert">
             Confirmez l'activation de l'authentification à double facteur TOTP en l'utilisant une première fois.
         </p>
 
@@ -119,7 +119,7 @@
                 <dd><textarea name="clef_pgp" id="f_clef_pgp" cols="90" rows="5">{form_field name="clef_pgp" data=$user}</textarea></dd>
                 {if $clef_pgp_fingerprint}<dd class="help">L'empreinte de la clé est&nbsp;: <code>{$clef_pgp_fingerprint}</code></dd>{/if}
             </dl>
-            <p class="alert">
+            <p class="block alert">
                 Attention&nbsp;: en inscrivant ici votre clé PGP, les emails de récupération de mot de passe perdu vous seront envoyés chiffrés
                 et ne pourront être lus sans utiliser le mot de passe protégeant votre clé privée correspondante.
             </p>

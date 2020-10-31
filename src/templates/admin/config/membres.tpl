@@ -7,7 +7,7 @@
         La configuration a bien été enregistrée.
     </p>
 {elseif isset($status) && $status == 'ADDED'}
-    <p class="alert">
+    <p class="block alert">
         Le champ a été ajouté à la fin de la liste. Pour sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Enregistrer&nbsp;» en base de page.
     </p>
 {/if}
@@ -18,7 +18,7 @@
     <p class="help">
         Voici ce à quoi ressemblera la nouvelle fiche de membre, vérifiez vos modifications avant d'enregistrer les changements.
     </p>
-    <p class="alert">
+    <p class="block alert">
         Attention&nbsp;! Si vous avez supprimé un champ, les données liées à celui-ci seront supprimées de toutes les fiches de tous les membres.
     </p>
     <fieldset>

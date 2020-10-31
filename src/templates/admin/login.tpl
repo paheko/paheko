@@ -11,7 +11,7 @@
 {/if}
 
 {if !$ssl_enabled && $prefer_ssl}
-    <p class="alert">
+    <p class="block alert">
         <strong>Message de sécurité</strong><br />
         Nous vous conseillons de vous connecter sur la version <a href="{$own_https_url}">chiffrée (HTTPS) de cette page</a>
         pour vous connecter.

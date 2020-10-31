@@ -9,7 +9,7 @@
 		<h3 class="warning">
 			Êtes-vous sûr de vouloir clôturer l'exercice «&nbsp;{$year.label}&nbsp;» ?
 		</h3>
-		<p class="alert">
+		<p class="block alert">
 			Un exercice clôturé ne peut plus être rouvert ou modifié&nbsp;!<br />
 			Il ne sera plus possible de modifier ou supprimer les écritures de l'exercice clôturé.
 		</p>

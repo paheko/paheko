@@ -5,7 +5,7 @@
 <form method="post" action="{$self_url}">
 
 	{if $edit_disabled}
-		<p class="alert">
+		<p class="block alert">
 			Il n'est pas possible de modifier le libellé, le code ou la position de ce compte car il {if $account.user}est utilisé par des écritures liées à des exercices clôturés{else}fait partie du plan comptable officiel{/if}.<br />
 			Pour pouvoir modifier ce compte pour l'exercice courant, il est conseillé de <a href="{$admin_url}acc/charts/?from={$account.id_chart}">créer un nouveau plan comptable</a> en y recopiant l'ancien plan comptable.
 		</p>

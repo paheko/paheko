@@ -14,7 +14,7 @@
 </nav>
 
 {if !count($cotisations)}
-    <p class="alert">Ce membre n'est lié à aucune cotisation, il n'est donc pas possible de lui associer un rappel de cotisation.</p>
+    <p class="block alert">Ce membre n'est lié à aucune cotisation, il n'est donc pas possible de lui associer un rappel de cotisation.</p>
 {elseif $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 <form method="post" action="{$self_url}">
     <fieldset>

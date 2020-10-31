@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Action collective sur les membres" current="membres"}
 
-<p class="alert">
+<p class="block alert">
     {$selected|count} membres sélectionnés
 </p>
 
@@ -40,7 +40,7 @@
         <h3 class="warning">
             Êtes-vous sûr de vouloir supprimer les {$nb_selected} membres sélectionnés ?
         </h3>
-        <p class="alert">
+        <p class="block alert">
             <strong>Attention</strong> : cette action est irréversible et effacera toutes les
             données personnelles et l'historique de ces membres.
         </p>

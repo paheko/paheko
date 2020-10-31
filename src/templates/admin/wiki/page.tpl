@@ -25,7 +25,7 @@
 </nav>
 
 {if !$can_read}
-    <p class="alert">Vous n'avez pas le droit de lire cette page.</p>
+    <p class="block alert">Vous n'avez pas le droit de lire cette page.</p>
 {else}
     <div class="breadCrumbs">
         <ul>
@@ -39,7 +39,7 @@
     </div>
 
     {if !$page}
-        <p class="error">
+        <p class="block error">
             Cette page n'existe pas.
         </p>
 
@@ -66,7 +66,7 @@
         {/if}
 
         {if !$page.contenu}
-            <p class="alert">Cette page est vide, cliquez sur « Éditer » pour la modifier.</p>
+            <p class="block alert">Cette page est vide, cliquez sur « Éditer » pour la modifier.</p>
         {else}
 
             {if $page.contenu.chiffrement}
@@ -77,7 +77,7 @@
                 </noscript>
                 <script type="text/javascript" src="{$admin_url}static/scripts/wiki-encryption.js"></script>
                 <div id="wikiEncryptedMessage">
-                    <p class="alert">Cette page est chiffrée.
+                    <p class="block alert">Cette page est chiffrée.
                         <input type="button" onclick="return wikiDecrypt(false);" value="Entrer le mot de passe" />
                     </p>
                 </div>

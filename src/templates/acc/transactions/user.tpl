@@ -4,7 +4,7 @@
 
 <h2 class="ruler">Solde des comptes</h2>
 
-<p class="alert">Cette liste représente le solde des comptes uniquement pour les écritures liées à un membre, et ce sur tous les exercices réunis.</p>
+<p class="block alert">Cette liste représente le solde des comptes uniquement pour les écritures liées à un membre, et ce sur tous les exercices réunis.</p>
 
 <table class="list">
 	<thead>

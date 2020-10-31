@@ -6,7 +6,7 @@
         Un e-mail vous a été envoyé, cliquez sur le lien dans cet e-mail
         pour modifier votre mot de passe.
     </p>
-    <p class="alert">
+    <p class="block alert">
         Si le message n'apparaît pas dans les prochaines minutes, vérifiez le dossier Spam ou Indésirables.
     </p>
 

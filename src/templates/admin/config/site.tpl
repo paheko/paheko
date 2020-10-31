@@ -5,7 +5,7 @@
 {include file="admin/config/_menu.tpl" current="site"}
 
 {if $config.desactiver_site}
-    <div class="alert">
+    <div class="block alert">
         <h3>Site public désactivé</h3>
         <p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
         <form method="post" action="{$self_url}">

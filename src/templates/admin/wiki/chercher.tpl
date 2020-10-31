@@ -12,11 +12,11 @@
 
 
 {if !$recherche}
-    <p class="alert">
+    <p class="block alert">
         Aucun terme recherché.
     </p>
 {else}
-    <p class="alert">
+    <p class="block alert">
         <strong>{$nb_resultats}</strong> pages trouvées pour «&nbsp;{$recherche}&nbsp;»
     </p>
 

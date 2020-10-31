@@ -36,7 +36,7 @@
 		</tbody>
 	</table>
 {else}
-	<p class="alert">Il n'y a aucun tarif enregistré.</p>
+	<p class="block alert">Il n'y a aucun tarif enregistré.</p>
 {/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}

@@ -74,7 +74,7 @@
     </div>
     {diff old=$rev1.contenu new=$rev2.contenu}
 {else}
-    <p class="alert">
+    <p class="block alert">
         Cette page n'a pas d'historique.
     </p>
 {/if}

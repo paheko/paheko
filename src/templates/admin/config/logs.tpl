@@ -63,7 +63,7 @@
 	</p>
 
 	{if !count($errors)}
-		<p class="alert">Aucune erreur n'a été trouvée dans le journal error.log</p>
+		<p class="block alert">Aucune erreur n'a été trouvée dans le journal error.log</p>
 	{else}
 		<table class="list">
 			<thead>
@@ -97,7 +97,7 @@
 	</p>
 
 	{if empty($list)}
-		<p class="alert">
+		<p class="block alert">
 			Aucune entrée dans le journal d'actions.
 		</p>
 	{/if}

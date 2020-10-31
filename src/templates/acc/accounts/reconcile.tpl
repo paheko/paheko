@@ -25,7 +25,7 @@
 	</fieldset>
 </form>
 
-<p class="alert">
+<p class="block alert">
 	<strong>Attention&nbsp;!</strong>
 	Afin de simplifier les choses, les écritures apparaissent ici dans le sens de la banque, à l'inverse des journaux comptables.
 </p>

@@ -10,7 +10,7 @@
 {/if}
 
 {if $_GET.msg == 'OPEN'}
-<p class="error">
+<p class="block error">
 	Il n'existe aucun exercice ouvert.
 	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
@@ -64,7 +64,7 @@
 	{/foreach}
 	</dl>
 {else}
-	<p class="alert">
+	<p class="block alert">
 		Il n'y a pas d'exercice en cours.
 	</p>
 {/if}
