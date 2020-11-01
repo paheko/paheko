@@ -13,17 +13,14 @@ if (!$service) {
     throw new UserException("Cette activité n'existe pas");
 }
 
-if (f('save') && $form->check('service_edit_' . $service->id())) {
-    try {
-        $service->importForm();
-        $service->save();
+$csrf_key = 'service_edit_' . $service->id();
 
-        Utils::redirect(ADMIN_URL . 'services/');
-    }
-    catch (UserException $e) {
-        $form->addError($e->getMessage());
-    }
-}
+$form->runIf('save', function () use ($service) {
+    $service->importForm();
+    $service->save();
+
+    Utils::redirect(ADMIN_URL . 'services/');
+}, $csrf_key);
 
 if ($service->duration) {
     $period = 1;
@@ -35,6 +32,6 @@ else {
     $period = 0;
 }
 
-$tpl->assign(compact('service', 'period'));
+$tpl->assign(compact('service', 'period', 'csrf_key'));
 
 $tpl->display('services/edit.tpl');

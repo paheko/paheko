@@ -45,75 +45,7 @@
 {/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-
-{form_errors}
-
-<form method="post" action="{$self_url}">
-
-	<fieldset>
-		<legend>Ajouter une activité</legend>
-		<dl>
-			{input name="label" type="text" required=1 label="Libellé"}
-			{input name="description" type="textarea" label="Description"}
-
-			<dt><label for="f_periodicite_jours">Période de validité</label></dt>
-			{input name="period" type="radio" value="0" label="Pas de période (cotisation ponctuelle)" default=0}
-			{input name="period" type="radio" value="1" label="En nombre de jours"}
-			<dd class="period_1">
-				<dl>
-				{input name="duration" type="number" step="1" label="Durée de validité" size="5"}
-				</dl>
-			</dd>
-			{input name="period" type="radio" value="2" label="Période définie (date à date)"}
-			<dd class="period_2">
-				<dl class="periode_dates">
-					{input type="date" name="start_date" label="Date de début"}
-					{input type="date" name="end_date" label="Date de fin"}
-				</dl>
-			</dd>
-		</dl>
-	</fieldset>
-
-	<p class="help">
-		Il sera possible de définir les tarifs applicables à cette activité dans l'écran suivant.
-	</p>
-
-	<p class="submit">
-		{csrf_field key="service_new"}
-		<input type="submit" name="add" value="Ajouter &rarr;" />
-	</p>
-
-</form>
-
-<script type="text/javascript">
-{literal}
-(function () {
-	var hide = [];
-	if (!$('#f_period_1').checked)
-		hide.push('.period_1');
-
-	if (!$('#f_period_2').checked)
-		hide.push('.period_2');
-
-	g.toggle(hide, false);
-
-	function togglePeriod()
-	{
-		g.toggle(['.period_1', '.period_2'], false);
-
-		if (this.checked && this.value == 1)
-			g.toggle('.period_1', true);
-		else if (this.checked && this.value == 2)
-			g.toggle('.period_2', true);
-	}
-
-	$('#f_period_0').onchange = togglePeriod;
-	$('#f_period_1').onchange = togglePeriod;
-	$('#f_period_2').onchange = togglePeriod;
-})();
-{/literal}
-</script>
-
+	{include file="services/_service_form.tpl" legend="Ajouter une activité" service=null period=0}
 {/if}
 
 {include file="admin/_foot.tpl"}

@@ -6,20 +6,17 @@ use Garradin\Services\Services;
 
 require_once __DIR__ . '/_inc.php';
 
-if ($session->canAccess('membres', Membres::DROIT_ADMIN) && f('add') && $form->check('service_new')) {
-	try {
-		$service = new Service;
-		$service->importForm();
-		$service->save();
+$csrf_key = 'service_add';
 
-		Utils::redirect(ADMIN_URL . 'services/fees/?id=' . $service->id());
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+$form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('add'), function () {
+	$service = new Service;
+	$service->importForm();
+	$service->save();
 
+	Utils::redirect(ADMIN_URL . 'services/fees/?id=' . $service->id());
+}, $csrf_key);
+
+$tpl->assign(compact('csrf_key'));
 $tpl->assign('list', Services::listWithStats());
 
 $tpl->display('services/index.tpl');

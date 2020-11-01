@@ -21,6 +21,34 @@ class Form
 		});
 	}
 
+	public function run(callable $fn, ?string $csrf_key = null): bool
+	{
+		if (!$this->check($csrf_key)) {
+			return false;
+		}
+
+		try {
+			call_user_func($fn);
+			return true;
+		}
+		catch (UserException $e) {
+			$this->addError($e->getMessage());
+			return false;
+		}
+	}
+
+	public function runIf($condition, callable $fn, ?string $csrf_key = null): ?bool
+	{
+		if (is_string($condition) && empty($_POST[$condition])) {
+			return null;
+		}
+		elseif (is_bool($condition) && !$condition) {
+			return null;
+		}
+
+		return $this->run($fn, $csrf_key);
+	}
+
 	public function check($token_action = '', Array $rules = null)
 	{
 		if (!\KD2\Form::tokenCheck($token_action))
