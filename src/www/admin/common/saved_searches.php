@@ -56,4 +56,4 @@ if (!$mode)
 
 $tpl->assign(compact('mode', 'target', 'search_url'));
 
-$tpl->display('common/saved_searches.tpl');
+$tpl->display('common/search/saved_searches.tpl');
