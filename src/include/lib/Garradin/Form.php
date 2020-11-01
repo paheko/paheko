@@ -21,7 +21,7 @@ class Form
 		});
 	}
 
-	public function run(callable $fn, ?string $csrf_key = null): bool
+	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null): bool
 	{
 		if (!$this->check($csrf_key)) {
 			return false;
@@ -29,6 +29,11 @@ class Form
 
 		try {
 			call_user_func($fn);
+
+			if (null !== $redirect) {
+				Utils::redirect(ADMIN_URL . $redirect);
+			}
+
 			return true;
 		}
 		catch (UserException $e) {
@@ -37,7 +42,7 @@ class Form
 		}
 	}
 
-	public function runIf($condition, callable $fn, ?string $csrf_key = null): ?bool
+	public function runIf($condition, callable $fn, ?string $csrf_key = null, ?string $redirect = null): ?bool
 	{
 		if (is_string($condition) && empty($_POST[$condition])) {
 			return null;
@@ -46,7 +51,7 @@ class Form
 			return null;
 		}
 
-		return $this->run($fn, $csrf_key);
+		return $this->run($fn, $csrf_key, $redirect);
 	}
 
 	public function check($token_action = '', Array $rules = null)
