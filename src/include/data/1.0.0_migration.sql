@@ -106,6 +106,7 @@ INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM co
 INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
 	NULL,
 	1,
+	cm.date,
 	CASE
 		WHEN c.duree IS NOT NULL THEN date(cm.date, '+'||c.duree||' days')
 		WHEN c.fin IS NOT NULL THEN c.fin
