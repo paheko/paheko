@@ -37,7 +37,7 @@
 				<td>{$line.reference}</td>
 				<td>{$line.line_reference}</td>
 				<th>{$line.label}</th>
-				<td class="money">{$line.debit|raw|html_money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
+				<td class="money">{$line.debit|raw|html_money}</td>
 				<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|html_money:false}</td>
 			</tr>
 			{/if}
