@@ -11,25 +11,25 @@ $session->requireAccess('membres', Membres::DROIT_ADMIN);
 $fee = Fees::get((int) qg('id'));
 
 if (!$fee) {
-    throw new UserException("Ce tarif n'existe pas");
+	throw new UserException("Ce tarif n'existe pas");
 }
 
 $service = $fee->service();
 $csrf_key = 'fee_edit_' . $fee->id();
 
 $form->runIf('save', function () use ($fee) {
-    $fee->importForm();
-    $fee->save();
+	$fee->importForm();
+	$fee->save();
 }, $csrf_key, 'services/fees/?id=' . $service->id());
 
 if ($fee->amount) {
-    $amount_type = 1;
+	$amount_type = 1;
 }
 elseif ($fee->formula) {
-    $amount_type = 2;
+	$amount_type = 2;
 }
 else {
-    $amount_type = 0;
+	$amount_type = 0;
 }
 
 $account = $fee->id_account ? [$fee->id_account => Accounts::getSelectorLabel($fee->id_account)] : null;
