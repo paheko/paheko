@@ -1,22 +1,9 @@
 {include file="admin/_head.tpl" title="Supprimer l'écriture n°%d"|args:$transaction.id current="acc"}
 
-{form_errors}
-
-<form method="post" action="{$self_url}">
-
-	<fieldset>
-		<legend>Supprimer cette écriture ?</legend>
-		<h3 class="warning">
-			Êtes-vous sûr de vouloir supprimer l'opération n°{$transaction.id}
-			«&nbsp;{$transaction.label}&nbsp;» du {$transaction.date|date_fr:'d/m/Y'} ?
-		</h3>
-	</fieldset>
-
-	<p class="submit">
-		{csrf_field key="acc_delete_%d"|args:$transaction.id}
-		<input type="submit" name="delete" value="Supprimer &rarr;" />
-	</p>
-
-</form>
+{include file="common/delete_form.tpl"
+	legend="Supprimer cette écriture ?"
+	warning="Êtes-vous sûr de vouloir supprimer l'écriture n°%d « %s » ?"|args:$transaction.id,$transaction.label
+	csrf_key="acc_delete_%s"|args:$transaction.id
+}
 
 {include file="admin/_foot.tpl"}
