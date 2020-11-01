@@ -48,12 +48,14 @@ if ($date > $current_year->end_date) {
 }
 
 $target = $account::TYPE_BANK;
+$checked = f('deposit') ?: [];
 
 $tpl->assign(compact(
 	'account',
 	'journal',
 	'date',
-	'target'
+	'target',
+	'checked'
 ));
 
 $tpl->display('acc/accounts/deposit.tpl');

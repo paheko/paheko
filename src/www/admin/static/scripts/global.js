@@ -241,7 +241,7 @@
 
 	g.formatMoney = (v) => {
 		v = '' + v;
-		return (v.substr(0, v.length-2) || '0') + ',' + (v + '00').substr(-2);
+		return (v.substr(0, v.length-2) || '0') + ',' + v.substr(-2);
 	};
 
 	// Sélecteurs de listes

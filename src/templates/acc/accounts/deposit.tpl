@@ -31,7 +31,7 @@
 			</tr>
 			{else}
 			<tr>
-				<td class="check"><input type="checkbox" name="deposit[{$line.id}]" value="1" data-debit="{$line.debit}" data-credit="{$line.credit}" /></td>
+				<td class="check"><input type="checkbox" name="deposit[{$line.id}]" value="1" data-debit="{$line.debit}" data-credit="{$line.credit}" {if array_key_exists($line.id, $checked)}checked="checked"{/if} /></td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_fr:'d/m/Y'}</td>
 				<td>{$line.reference}</td>
