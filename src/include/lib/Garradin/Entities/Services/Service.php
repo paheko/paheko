@@ -27,20 +27,16 @@ class Service extends Entity
 		'end_date'    => '?date',
 	];
 
-	protected $_form_rules = [
-		'label'       => 'string|max:200|required',
-		'description' => 'string|max:2000',
-		'duration'    => 'numeric|min:0',
-		'start_date'  => 'date_format:d/m/Y',
-		'end_date'    => 'date_format:d/m/Y',
-	];
-
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
+		$this->assert(trim($this->label) !== '', 'Le libellé doit être renseigné');
+		$this->assert(strlen($this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
+		$this->assert(strlen($this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
 		$this->assert(!isset($this->duration, $this->start_date, $this->end_date) || $this->duration || ($this->start_date && $this->end_date), 'Seulement une option doit être choisie : durée ou dates de début et de fin de validité');
-
-		$this->assert(null === $this->duration || $this->duration > 0);
+		$this->assert(null === $this->start_date || $this->start_date instanceof \DateTimeInterface);
+		$this->assert(null === $this->end_date || $this->end_date instanceof \DateTimeInterface);
+		$this->assert(null === $this->duration || (is_int($this->duration) && $this->duration > 0), 'La durée n\'est pas valide');
 		$this->assert(null === $this->start_date || $this->end_date > $this->start_date, 'La date de fin de validité doit être après la date de début');
 	}
 
@@ -56,14 +52,16 @@ class Service extends Entity
 			$source = $_POST;
 		}
 
-		if (!empty($source['duration'])) {
-			unset($source['start_date'], $source['end_date']);
-		}
-		elseif (!empty($source['start_date'])) {
-			unset($source['duration']);
-		}
-		else {
-			unset($source['start_date'], $source['end_date'], $source['duration']);
+		if (isset($source['period'])) {
+			if (1 == $source['period']) {
+				$source['start_date'] = $source['end_date'] = null;
+			}
+			elseif (2 == $source['period']) {
+				$source['duration'] = null;
+			}
+			else {
+				$source['duration'] = $source['start_date'] = $source['end_date'] = null;
+			}
 		}
 
 		parent::importForm($source);
