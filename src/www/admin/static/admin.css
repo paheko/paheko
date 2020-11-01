@@ -628,6 +628,9 @@ nav.tabs ul {
     border-bottom-color: rgb(var(--gMainColor));
     padding: 0 1em;
     z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
 }
 
 nav.tabs .sub {
@@ -638,7 +641,6 @@ nav.tabs .sub {
 }
 
 nav.tabs li {
-    display: inline-block;
     margin: 0 0.2em;
 }
 

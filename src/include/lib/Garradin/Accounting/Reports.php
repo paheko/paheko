@@ -231,6 +231,9 @@ class Reports
 				];
 			}
 
+			$reverse = Account::isReversed($row->type) ? -1 : 1;
+			$row->sum *= $reverse;
+
 			$group->accounts[] = $row;
 		}
 

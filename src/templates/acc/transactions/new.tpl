@@ -27,12 +27,12 @@
 		<fieldset>
 			<legend>Type d'écriture</legend>
 			<dl>
-				{input type="radio" name="type" value=$transaction::TYPE_REVENUE default=-1 label="Recette"}
-				{input type="radio" name="type" value=$transaction::TYPE_EXPENSE default=-1 label="Dépense"}
-				{input type="radio" name="type" value=$transaction::TYPE_TRANSFER default=-1 label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
-				{input type="radio" name="type" value=$transaction::TYPE_DEBT default=-1 label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
-				{input type="radio" name="type" value=$transaction::TYPE_CREDIT default=-1 label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
-				{input type="radio" name="type" value=$transaction::TYPE_ADVANCED default=-1 label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
+				{input type="radio" name="type" value=$transaction::TYPE_REVENUE default=-1 source=$transaction label="Recette"}
+				{input type="radio" name="type" value=$transaction::TYPE_EXPENSE default=-1 source=$transaction label="Dépense"}
+				{input type="radio" name="type" value=$transaction::TYPE_TRANSFER default=-1 source=$transaction label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
+				{input type="radio" name="type" value=$transaction::TYPE_DEBT default=-1 source=$transaction label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
+				{input type="radio" name="type" value=$transaction::TYPE_CREDIT default=-1 source=$transaction label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
+				{input type="radio" name="type" value=$transaction::TYPE_ADVANCED default=-1 source=$transaction label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
 			</dl>
 		</fieldset>
 

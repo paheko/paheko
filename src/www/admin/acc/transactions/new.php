@@ -21,9 +21,26 @@ $lines = [[], []];
 $amount = 0;
 $payoff_for = null;
 
+// Quick pay-off for debts and credits, directly from a debt/credit details page
 if ($id = f('payoff_for')) {
 	$payoff_for = $transaction->payOffFrom($id);
 	$amount = $payoff_for->sum();
+}
+
+// Quick transaction from an account journal page
+if ($id = qg('account')) {
+	$account = $accounts::get($id);
+
+	if (!$account || $account->id_chart != $current_year->id_chart) {
+		throw new UserException('Ce compte ne correspond pas à l\'exercice comptable ou n\'existe pas');
+	}
+
+	$transaction->type = Transaction::getTypeFromAccountType($account->type);
+	$key = sprintf('account_%d_%d', $transaction->type, 0);
+
+	if (!isset($_POST[$key])) {
+		$_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
+	}
 }
 
 if (f('save') && $form->check('acc_transaction_new')) {

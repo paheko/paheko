@@ -89,6 +89,20 @@ class Transaction extends Entity
 
 	protected $_related;
 
+	static public function getTypeFromAccountType(int $account_type)
+	{
+		switch ($account_type) {
+			case Account::TYPE_REVENUE:
+				return self::TYPE_REVENUE;
+			case Account::TYPE_EXPENSE:
+				return self::TYPE_EXPENSE;
+			case Account::TYPE_THIRD_PARTY:
+				return self::TYPE_DEBT;
+			default:
+				return self::TYPE_TRANSFER;
+		}
+	}
+
 	public function getLinesWithAccounts()
 	{
 		$em = EntityManager::getInstance(Line::class);
