@@ -10,7 +10,7 @@ require_once __DIR__ . '/../_inc.php';
 $service = Services::get((int)qg('id'));
 
 if (!$service) {
-    throw new UserException("Cette activité n'existe pas");
+	throw new UserException("Cette activité n'existe pas");
 }
 
 $fees = $service->fees();

@@ -10,24 +10,24 @@ $session->requireAccess('membres', Membres::DROIT_ADMIN);
 $service = Services::get((int) qg('id'));
 
 if (!$service) {
-    throw new UserException("Cette activité n'existe pas");
+	throw new UserException("Cette activité n'existe pas");
 }
 
 $csrf_key = 'service_edit_' . $service->id();
 
 $form->runIf('save', function () use ($service) {
-    $service->importForm();
-    $service->save();
+	$service->importForm();
+	$service->save();
 }, $csrf_key, 'services/');
 
 if ($service->duration) {
-    $period = 1;
+	$period = 1;
 }
 elseif ($service->start_date) {
-    $period = 2;
+	$period = 2;
 }
 else {
-    $period = 0;
+	$period = 0;
 }
 
 $tpl->assign(compact('service', 'period', 'csrf_key'));
