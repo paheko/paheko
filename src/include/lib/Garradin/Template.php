@@ -85,14 +85,6 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('account_type', function ($value) {
-			return Account::TYPES_NAMES[$value];
-		});
-
-		$this->register_modifier('account_position', function ($value) {
-			return Account::POSITIONS_NAMES[$value];
-		});
-
 		$this->register_modifier('strftime_fr', function ($ts, $format) {
 			return Utils::strftime_fr($format, $ts);
 		});
@@ -101,13 +93,8 @@ class Template extends \KD2\Smartyer
 			return Utils::date_fr($format, $ts);
 		});
 
-		$this->register_modifier('html_money', function ($number, bool $hide_empty = true): string {
-			if ($hide_empty && !$number) {
-				return '';
-			}
-
-			return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
-		});
+		$this->register_modifier('html_money', [$this, 'htmlMoney']);
+		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
 
 		$this->register_modifier('format_wiki', function ($str) {
 			$str = Utils::SkrivToHTML($str);
@@ -121,6 +108,26 @@ class Template extends \KD2\Smartyer
 			}, $str);
 		});
 
+	}
+
+	protected function htmlMoney($number, bool $hide_empty = true): string
+	{
+		if ($hide_empty && !$number) {
+			return '';
+		}
+
+		return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
+	}
+
+	protected function htmlMoneyCurrency($number, bool $hide_empty = true): string
+	{
+		$out = $this->htmlMoney($number, false);
+
+		if ($out !== '') {
+			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');
+		}
+
+		return $out;
 	}
 
 	protected function formErrors($params)

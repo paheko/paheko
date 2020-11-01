@@ -125,6 +125,10 @@ class Utils
 
     static public function moneyToInteger($value)
     {
+        if (trim($value) === '') {
+            return null;
+        }
+
         if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
             throw new UserException('Le format du montant est invalide. Format accepté, exemple : 142,02');
         }

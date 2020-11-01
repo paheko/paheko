@@ -18,8 +18,10 @@
 					<td>
 						{if $row.formula}
 							Formule
+						{elseif $row.amount}
+							{$row.amount|money_currency|raw}
 						{else}
-							{$row.amount|html_money|raw}&nbsp;{$config.monnaie}
+							-
 						{/if}
 					</td>
 					<td class="num">{$row.nb_users_ok}</td>
@@ -40,33 +42,7 @@
 {/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-
-{form_errors}
-
-<form method="post" action="{$self_url}">
-
-	<fieldset>
-		<legend>Ajouter un tarif</legend>
-		<dl>
-			{input name="label" type="text" required=1 label="Libellé"}
-			{input name="description" type="textarea" label="Description"}
-
-			{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart_choice=1"|args:$targets name="account" label="Enregistrer les règlements pour ce tarif dans le compte" help="Si aucun compte n'est sélectionné, les règlements ne seront pas enregistrés en comptabilité"}
-
-			{input name="amount" type="money" label="Montant fixe (en %s)"|args:$config.monnaie help="Pour pratiquer le prix libre il suffira de marquer comme payé les membres, sans considérer le montant."}
-			{input name="formula" type="textarea" label="Alternativement : formule de calcul"}
-			<dd class="help">
-				<a href="https://fossil.kd2.org/garradin/wiki?name=Formule_calcul_activit%C3%A9">Aide sur les formules de calcul</a>
-			</dd>
-		</dl>
-	</fieldset>
-
-	<p class="submit">
-		{csrf_field key="fee_new"}
-		<input type="submit" name="add" value="Ajouter &rarr;" />
-	</p>
-
-</form>
+	{include file="services/fees/_fee_form.tpl" legend="Ajouter un tarif" submit_label="Ajouter" csrf_key="fee_add" fee=null amount_type=0 account=null}
 {/if}
 
 {include file="admin/_foot.tpl"}

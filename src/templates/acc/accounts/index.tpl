@@ -35,7 +35,7 @@
 				<th>{$account.label}</th>
 				<td class="money">
 					{if $account.sum < 0}<strong class="error">{/if}
-					{$account.sum|raw|html_money:false}&nbsp;{$config.monnaie}
+					{$account.sum|raw|money_currency:false}
 					{if $account.sum < 0}</strong>{/if}
 				</td>
 				<td>
