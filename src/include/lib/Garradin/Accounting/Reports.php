@@ -146,20 +146,18 @@ class Reports
 				continue;
 			}
 
-			$sum = $row->sum;
-			$row->sum = abs($row->sum);
+			$position = $row->position;
 
-			if ($row->position == Account::ASSET_OR_LIABILITY) {
-				if ($sum < 0) {
-					$out[Account::ASSET][] = $row;
-				}
-				else {
-					$out[Account::LIABILITY][] = $row;
-				}
+			if ($position == Account::ASSET_OR_LIABILITY) {
+				$position = $row->sum < 0 ? Account::ASSET : Account::LIABILITY;
+				$row->sum = abs($row->sum);
 			}
-			else {
-				$out[$row->position][] = $row;
+			elseif ($position == Account::ASSET) {
+				// reverse number for assets
+				$row->sum *= -1;
 			}
+
+			$out[$position][] = $row;
 		}
 
 		$result = self::getResult($criterias);
@@ -170,6 +168,7 @@ class Reports
 			'sum' => $result,
 		];
 
+		// Calculate the total sum for assets and liabilities
 		foreach ($out as $position => $rows) {
 			if ($position == 'sums') {
 				continue;
