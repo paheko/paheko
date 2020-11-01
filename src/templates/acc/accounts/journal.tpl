@@ -9,50 +9,51 @@
 	</nav>
 {/if}
 
-
 {if $account.type}
 
-{if $simple && $account::isReversed($account.type)}
-	{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
-{/if}
+	{if $simple && $account::isReversed($account.type)}
+		{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
+	{/if}
 
-{if $simple}
-	{if $account.type == $account::TYPE_THIRD_PARTY}
-		{if $sum < 0}
-			<p class="alert block">Vous devez <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong> à ce tiers.</p>
-		{elseif $sum > 0}
-			<p class="alert block">Ce tiers vous doit <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong>.</p>
-		{else}
-			<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
-		{/if}
-	{elseif $account.type == $account::TYPE_BANK}
-		{if $sum < 0}
-			<p class="error block">Ce compte est à découvert de <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong> à la banque.</p>
-		{elseif $sum >= 0}
-			<p class="confirm block">Ce compte est créditeur de <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong> à la banque.</p>
-		{/if}
-	{elseif $account.type == $account::TYPE_CASH}
-		{if $sum < 0}
-			<p class="error block">Cette caisse est débiteur de <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-		{elseif $sum >= 0}
-			<p class="confirm block">Cette caisse est créditrice de <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong>.</p>
-		{/if}
-	{elseif $account.type == $account::TYPE_OUTSTANDING}
-		{if $sum < 0}
-			<p class="error block">Ce compte est débiteur <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-		{elseif $sum >= 0}
-			<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
+	{if $simple}
+		{if $account.type == $account::TYPE_THIRD_PARTY}
+			{if $sum < 0}
+				<p class="alert block">Vous devez <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong> à ce tiers.</p>
+			{elseif $sum > 0}
+				<p class="alert block">Ce tiers vous doit <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong>.</p>
+			{else}
+				<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
+			{/if}
+		{elseif $account.type == $account::TYPE_BANK}
+			{if $sum < 0}
+				<p class="error block">Ce compte est à découvert de <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong> à la banque.</p>
+			{elseif $sum >= 0}
+				<p class="confirm block">Ce compte est créditeur de <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong> à la banque.</p>
+			{/if}
+		{elseif $account.type == $account::TYPE_CASH}
+			{if $sum < 0}
+				<p class="error block">Cette caisse est débiteur de <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
+			{elseif $sum >= 0}
+				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong>.</p>
+			{/if}
+		{elseif $account.type == $account::TYPE_OUTSTANDING}
+			{if $sum < 0}
+				<p class="error block">Ce compte est débiteur <strong>{$sum|abs|raw|html_money}&nbsp;{$config.monnaie}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
+			{elseif $sum >= 0}
+				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|raw|html_money}&nbsp;{$config.monnaie}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
+			{/if}
 		{/if}
 	{/if}
-{/if}
 
 
-<nav class="tabs">
-	<ul>
-		<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
-		<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
-	</ul>
-</nav>
+	<nav class="tabs">
+		<ul>
+			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
+			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
+		{if $year.id == CURRENT_YEAR_ID}
+			<li><form method="get" action="../transactions/new.php">{button label="Saisir une écriture dans ce compte" shape="plus" type="submit"}<input type="hidden" name="account" value="{$account.id}" /></form></li>
+		{/if}
+		</ul>
 {/if}
 
 <table class="list">

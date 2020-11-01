@@ -206,14 +206,14 @@ class Template extends \KD2\Smartyer
 			$current_value = $_POST[$name];
 			$current_value_from_user = true;
 		}
-		elseif (isset($default)) {
-			$current_value = $default;
-		}
 		elseif (isset($source) && is_object($source) && isset($source->$name)) {
 			$current_value = $source->$name;
 		}
 		elseif (isset($source) && is_array($source) && isset($source[$name])) {
 			$current_value = $source[$name];
+		}
+		elseif (isset($default)) {
+			$current_value = $default;
 		}
 
 		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {

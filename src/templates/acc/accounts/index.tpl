@@ -12,31 +12,39 @@
 	</ul>
 </nav>
 
-{include file="acc/_simple_help.tpl" link=null type=null}
+{include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
 
 <table class="list">
 	<thead>
 		<tr>
-			<td>Numéro</td>
+			<td class="num">Numéro</td>
 			<th>Compte</th>
 			<td class="money">Solde</td>
+			<td></td>
 			<td></td>
 		</tr>
 	</thead>
 	{foreach from=$grouped_accounts item="group"}
 	<tbody>
 		<tr>
-			<td colspan="4"><h2 class="ruler">{$group.label}</h2></td>
+			<td colspan="5"><h2 class="ruler">{$group.label}</h2></td>
 		</tr>
 		{foreach from=$group.accounts item="account"}
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a></td>
 				<th>{$account.label}</th>
 				<td class="money">
-					{if in_array($account.type, [Entities\Accounting\Account::TYPE_REVENUE, Entities\Accounting\Account::TYPE_EXPENSE])}
-						{$account.sum|abs|raw|html_money:false}&nbsp;{$config.monnaie}
-					{else}
-						{$account.sum|raw|html_money:false}&nbsp;{$config.monnaie}
+					{if $account.sum < 0}<strong class="error">{/if}
+					{$account.sum|raw|html_money:false}&nbsp;{$config.monnaie}
+					{if $account.sum < 0}</strong>{/if}
+				</td>
+				<td>
+					{if $account.type == Entities\Accounting\Account::TYPE_THIRD_PARTY}
+					<em class="alert">
+						{if $account.sum < 0}(Dette)
+						{elseif $account.sum > 0}(Créance)
+						{/if}
+					</em>
 					{/if}
 				</td>
 				<td class="actions">

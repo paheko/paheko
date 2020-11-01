@@ -1,7 +1,7 @@
 <details>
 	<summary class="help block">
 		Attention&nbsp;: dans cette vue simplifiée,
-		{if $type == Entities\Accounting\Account::TYPE_THIRD_PARTY}les dettes du fournisseur/usager envers l'association apparaissent au crédit (positif) et les créances au débit (négatif)&nbsp;!
+		{if $type == Entities\Accounting\Account::TYPE_THIRD_PARTY}les dettes de ce tiers envers l'association apparaissent au crédit (positif) et les créances au débit (négatif)&nbsp;!
 		{elseif $type}les écritures apparaissent tels que sur le relevé de banque ou le journal de caisse&nbsp;!
 		{else}les comptes de banque, caisse, dépenses et tiers apparaissent de manière «&nbsp;simplifiée&nbsp;»&nbsp;!
 		{/if}
