@@ -1421,7 +1421,7 @@ details summary:hover::after {
 }
 
 details summary.block {
-    padding-right: 4em;
+    padding-right: 4em !important;
 }
 
 details summary.block::after {
