@@ -13,17 +13,12 @@ if (!$service) {
 	throw new UserException("Cette activité n'existe pas");
 }
 
-if (f('delete') && $form->check('service_delete_' . $service->id())) {
-	try {
-		$service->delete();
-		Utils::redirect(ADMIN_URL . 'services/');
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+$csrf_key = 'service_delete_' . $service->id();
 
-$tpl->assign('service', $service);
+$form->runIf('delete', function () use ($service) {
+	$service->delete();
+}, $csrf_key, 'services/');
+
+$tpl->assign(compact('service', 'csrf_key'));
 
 $tpl->display('services/delete.tpl');

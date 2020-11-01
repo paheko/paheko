@@ -9,11 +9,11 @@
 			<li class="current"><a href="saved_searches.php">Recherches enregistrées</a></li>
 		</ul>
 	</nav>
-	{/if}
-
-{form_errors}
+{/if}
 
 {if $mode == 'edit'}
+	{form_errors}
+
 	<form method="post" action="{$self_url}">
 		<fieldset>
 			<legend>Modifier une recherche enregistrée</legend>
@@ -37,20 +37,12 @@
 	</form>
 {elseif $mode == 'delete'}
 
-	<form method="post" action="{$self_url}">
-		<fieldset>
-			<legend>Supprimer une recherche enregistrée</legend>
-			<h3 class="warning">
-				Êtes-vous sûr de vouloir supprimer la recherche enregistrée
-				{$recherche.intitule}&nbsp;?
-			</h3>
-		</fieldset>
+	{include file="common/delete_form.tpl"
+		legend="Supprimer cette recherche enregistrée ?"
+		warning="Êtes-vous sûr de vouloir supprimer la recherche enregistrée « %s » ?"|args:$recherche.intitule
+		csrf_key="del_recherche_%s"|args:$recherche.id
+	}
 
-		<p class="submit">
-			{csrf_field key="del_recherche_%s"|args:$recherche.id}
-			<input type="submit" name="delete" value="Supprimer &rarr;" />
-		</p>
-	</form>
 {elseif count($liste) == 0}
 	<p class="block alert">Aucune recherche enregistrée. <a href="{$search_url}">Faire une nouvelle recherche</a></p>
 {else}
