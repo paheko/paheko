@@ -103,8 +103,14 @@ UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT
 --------- MIGRATION COTISATIONS ----------
 
 INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
+
+INSERT INTO services_fees (id, label, amount, id_service, id_account)
+	SELECT id, intitule, CAST(montant*100 AS integer), id,
+		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta))
+	FROM cotisations WHERE montant > 0 OR id_categorie_compta IS NOT NULL;
+
 INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
-	NULL,
+	cm.id_cotisation,
 	1,
 	cm.date,
 	CASE
@@ -114,11 +120,6 @@ INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
 	END
 	FROM cotisations_membres cm
 	INNER JOIN cotisations c ON c.id = cm.id_cotisation;
-
-INSERT INTO services_fees (label, amount, id_service, id_account)
-	SELECT intitule, CAST(montant*100 AS integer), id,
-		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta))
-	FROM cotisations WHERE montant > 0 OR id_categorie_compta IS NOT NULL;
 
 INSERT INTO services_reminders SELECT * FROM rappels;
 INSERT INTO services_reminders_sent SELECT id, id_membre, id_cotisation, id_rappel, date FROM rappels_envoyes;

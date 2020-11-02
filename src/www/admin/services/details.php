@@ -3,36 +3,33 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-qv(['id' => 'required|numeric']);
+use Garradin\Services\Services;
 
-$id = (int) qg('id');
+require_once __DIR__ . '/_inc.php';
 
-$cotisations = new Cotisations;
-$m_cotisations = new Membres\Cotisations;
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-$co = $cotisations->get($id);
+$service = Services::get((int) qg('id'));
 
-if (!$co)
-{
-    throw new UserException("Cette cotisation n'existe pas.");
+if (!$service) {
+	throw new UserException("Cette activité n'existe pas");
 }
 
-$page = (int) qg('p') ?: 1;
-$tpl->assign('page', $page);
-$tpl->assign('bypage', Membres\Cotisations::ITEMS_PER_PAGE);
-$tpl->assign('total', $m_cotisations->countMembersForCotisation($co->id));
-$tpl->assign('pagination_url', Utils::getSelfUrl([
-	'id' => $co->id,
-	'o' => qg('o'),
-	(qg('a') !== null ? 'a' : 'd') => '',
-	'p'  => '[ID]',
-	'cats' => $categories,
-]));
+$type = qg('type');
 
-$tpl->assign('cotisation', $co);
-$tpl->assign('order', qg('o') ?: 'date');
-$tpl->assign('desc', null === qg('a'));
-$tpl->assign('liste', $m_cotisations->listMembersForCotisation(
-	$co->id, $page, qg('o'), null !== qg('a') ? false : true));
+if ('unpaid' == $type) {
+	$list = $service->unpaidUsersList();
+}
+elseif ('expired' == $type) {
+	$list = $service->expiredUsersList();
+}
+else {
+	$type = 'all';
+	$list = $service->distinctUsersList();
+}
 
-$tpl->display('admin/membres/cotisations/voir.tpl');
+$list->loadFromQueryString();
+
+$tpl->assign(compact('list', 'service', 'type'));
+
+$tpl->display('services/details.tpl');

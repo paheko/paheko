@@ -1,68 +1,74 @@
-{include file="admin/_head.tpl" title="Membres ayant cotisé" current="membres/cotisations"}
+{include file="admin/_head.tpl" title="%s — Liste des membres inscrits"|args:$service.label current="membres/services"}
+
+{include file="services/_nav.tpl" current="index"}
 
 <nav class="tabs">
-    <ul>
-        <li class="current"><a href="{$admin_url}membres/cotisations/">Cotisations</a></li>
-        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-            <li><a href="{$admin_url}membres/cotisations/ajout.php">Saisie d'une cotisation</a></li>
-        {/if}
-        {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-            <li><a href="{$admin_url}membres/cotisations/gestion/rappels.php">Gestion des rappels automatiques</a></li>
-        {/if}
-    </ul>
+	<ul class="sub">
+		<li>
+			{$service.label} —
+			{if $service.duration}
+				{$service.duration} jours
+			{elseif $service.start_date}
+				du {$service.start_date|format_sqlite_date_to_french} au {$service.end_date|format_sqlite_date_to_french}
+			{else}
+				ponctuelle
+			{/if}
+		</li>
+		<li{if $type == 'all'} class="current"{/if}><a href="?id={$service.id}">Tous les inscrits</a></li>
+		<li{if $type == 'expired'} class="current"{/if}><a href="?id={$service.id}&amp;type=expired">Inscription expirée</a></li>
+		<li{if $type == 'unpaid'} class="current"{/if}><a href="?id={$service.id}&amp;type=unpaid">En attente de règlement</a></li>
+	</ul>
 </nav>
 
 <dl class="cotisation">
-    <dt>Cotisation</dt>
-    <dd>{$cotisation.intitule} — 
-        {if $cotisation.duree}
-            {$cotisation.duree} jours
-        {elseif $cotisation.debut}
-            du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
-        {else}
-            ponctuelle
-        {/if}
-        — {$cotisation.montant|escape|html_money} {$config.monnaie}
-    </dd>
-    <dt>Nombre de membres ayant cotisé</dt>
-    <dd>
-        {$cotisation.nb_membres}
-        <small class="help">(incluant les membres des catégories cachées)</small>
-    </dd>
+	<dt>Nombre de membres inscrits</dt>
+	<dd>
+		{$list->count()}
+		<em class="help">(N'apparaît ici que l'inscription la plus récente de chaque membre.)</em>
+	</dd>
 </dl>
 
-{if !empty($liste)}
-    <table class="list">
-        <thead class="userOrder">
-            <tr>
-                <td class="{if $order == "id"} cur {if $desc}desc{else}asc{/if}{/if}"><a href="?id={$cotisation.id}&amp;o=id&amp;a&amp;cats={$cats}" class="icn up">&uarr;</a><a href="?id={$cotisation.id}&amp;o=id&amp;d&amp;cats={$cats}" class="icn dn">&darr;</a></td>
-                <th class="{if $order == "identite"} cur {if $desc}desc{else}asc{/if}{/if}">Membre <a href="?id={$cotisation.id}&amp;o=identite&amp;a&amp;cats={$cats}" class="icn up">&uarr;</a><a href="?id={$cotisation.id}&amp;o=identite&amp;d&amp;cats={$cats}" class="icn dn">&darr;</a></th>
-                <td class="{if $order == "a_jour"} cur {if $desc}desc{else}asc{/if}{/if}">Statut <a href="?id={$cotisation.id}&amp;o=a_jour&amp;a&amp;cats={$cats}" class="icn up">&uarr;</a><a href="?id={$cotisation.id}&amp;o=a_jour&amp;d&amp;cats={$cats}" class="icn dn">&darr;</a></td>
-                <td class="{if $order == "date"} cur {if $desc}desc{else}asc{/if}{/if}">Date de cotisation <a href="?id={$cotisation.id}&amp;o=date&amp;a" class="icn up">&uarr;</a><a href="?id={$cotisation.id}&amp;o=date&amp;d&amp;cats={$cats}" class="icn dn">&darr;</a></td>
-                <td></td>
-            </tr>
-        </thead>
-        <tbody>
-            {foreach from=$liste item="co"}
-                <tr>
-                    <td class="num">{$co.numero}</td>
-                    <th><a href="{$admin_url}membres/fiche.php?id={$co.id_membre}" class="icn">{$co.nom}</a></th>
-                    <td>{if $co.a_jour}<b class="confirm">À jour</b>{else}<b class="error">En retard</b>{/if}</td>
-                    <td>{$co.date|format_sqlite_date_to_french}</td>
-                    <td class="actions">
-                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-                        <a class="icn" href="{$admin_url}membres/cotisations/ajout.php?id={$co.id_membre}&amp;cotisation={$cotisation.id}" title="Saisir une cotisation">➕</a>
-                        {/if}
-                        <a class="icn" href="{$admin_url}membres/cotisations.php?id={$co.id_membre}" title="Voir toutes les cotisations de ce membre">𝍢</a>
-                        <a class="icn" href="{$admin_url}membres/cotisations/rappels.php?id={$co.id_membre}" title="Rappels envoyés à ce membre">⚠</a>
-                    </td>
-                </tr>
-            {/foreach}
-        </tbody>
-    </table>
+<table class="list">
+	<thead class="userOrder">
+		<tr>
+			{foreach from=$list.columns key="key" item="column"}
+			<?php if (!isset($column['label'])) { continue; } ?>
+			<td class="{if $list->order == $key}cur {if $list->desc}desc{else}asc{/if}{/if}">
+				{$column.label}
+				<a href="{$list->orderURL($key, false)}" class="icn up">&uarr;</a>
+				<a href="{$list->orderURL($key, true)}" class="icn dn">&darr;</a>
+			</td>
+			{/foreach}
+			<td></td>
+		</tr>
+	</thead>
+	<tbody>
+{foreach from=$list->iterate() item="row"}
+	<tr>
+		<th><a href="../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
+		<td>
+			{if $row.status == 1}
+				<b class="confirm">À jour</b>
+			{elseif $row.status == -1}
+				<b class="error">En retard</b>
+			{else}
+				Pas d'expiration
+			{/if}
+		</td>
+		<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
+		<td>{$row.expiry|format_sqlite_date_to_french}</td>
+		<td>{$row.fee}</td>
+		<td>{$row.date|format_sqlite_date_to_french}</td>
+		<td class="actions">
+			{linkbutton shape="user" label="Toutes les activités de ce membre" href="services/user.php?id=%d"|args:$row.id_user}
+			{linkbutton shape="alert" label="Rappels envoyés" href="services/reminders/user.php?id=%d"|args:$row.id_user}
+		</td>
+	</tr>
+{/foreach}
+	</tbody>
+</table>
 
-    {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
-{/if}
+{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 
 
 {include file="admin/_foot.tpl"}
