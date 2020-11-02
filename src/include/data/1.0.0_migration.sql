@@ -97,6 +97,8 @@ INSERT INTO acc_years (id, label, start_date, end_date, closed, id_chart)
 INSERT INTO membres_categories
 	SELECT id, nom, droit_wiki, droit_membres, droit_compta, droit_inscription, droit_connexion, droit_config, cacher FROM membres_categories_old;
 
+DROP TABLE membres_categories_old;
+
 -- Transfert des rapprochements
 UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT id_operation FROM compta_rapprochement);
 
