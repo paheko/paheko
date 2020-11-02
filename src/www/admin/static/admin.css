@@ -704,7 +704,7 @@ table.list caption {
     font-size: 1.2em;
 }
 
-table.list td.desc {
+table.list tbody td.desc {
     font-size: .9em;
     color: #666;
 }
@@ -831,24 +831,34 @@ table.list .disabled {
     color: rgb(var(--gBgColor));
 }
 
-.userOrder td, .userOrder th {
+table.list .userOrder td, table.list .userOrder th {
     position: relative;
+    padding-left: 2.3em;
+}
+
+table.list .userOrder .check {
+    padding-left: .5em;
 }
 
 .userOrder .icn {
-    float: left;
-    clear: left;
-    color: #9c4f15;
+    position: absolute;
+    left: .3em;
+    top: 0;
     color: rgb(var(--gMainColor));
     text-decoration: none;
-    font-size: 12pt;
-    line-height: 6pt;
-    width: 12pt;
-    height: 8pt;
+    font-size: 1.5em;
+    line-height: .5em;
+    width: 1em;
+    height: .5em;
+    text-align: center;
     vertical-align: middle;
     font-weight: normal;
-    text-shadow: 0px 0px 1px #fff;
     text-shadow: 0px 0px 1px rgb(var(--gBgColor));
+    margin: 0;
+}
+
+.userOrder .icn.dn {
+    margin-top: .6em;
 }
 
 thead .icn:hover {

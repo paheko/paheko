@@ -71,11 +71,13 @@ CREATE TABLE IF NOT EXISTS services_users
 
     paid INTEGER NOT NULL DEFAULT 0,
 
-    date TEXT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
+    date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
     expiry_date TEXT NULL CHECK (date(expiry_date) IS NULL OR date(expiry_date) = expiry_date)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, date);
+
+CREATE INDEX IF NOT EXISTS su_expiry ON services_users (id_service, expiry_date);
 
 CREATE TABLE IF NOT EXISTS services_reminders
 -- Rappels de devoir renouveller une cotisation
