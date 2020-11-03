@@ -23,49 +23,50 @@ class Account extends Entity
 	// Passif ou actif
 	const ASSET_OR_LIABILITY = 3;
 
-	// Produit
-	const REVENUE = 4;
-
 	// Charge
-	const EXPENSE = 5;
+	const EXPENSE = 4;
+
+	// Produit
+	const REVENUE = 5;
 
 	const POSITIONS_NAMES = [
 		'',
 		'Actif',
 		'Passif',
 		'Actif ou passif',
-		'Produit',
 		'Charge',
+		'Produit',
 	];
 
 	const TYPE_NONE = 0;
-	const TYPE_REVENUE = 1;
-	const TYPE_EXPENSE = 2;
-	const TYPE_BANK = 3;
-	const TYPE_CASH = 4;
+	const TYPE_BANK = 1;
+	const TYPE_CASH = 2;
 
 	/**
 	 * Outstanding transaction accounts (like cheque or card payments)
 	 */
-	const TYPE_OUTSTANDING = 5;
+	const TYPE_OUTSTANDING = 3;
+	const TYPE_THIRD_PARTY = 4;
 
-	const TYPE_ANALYTICAL = 6;
-	const TYPE_VOLUNTEERING = 7;
-	const TYPE_THIRD_PARTY = 8;
+	const TYPE_EXPENSE = 5;
+	const TYPE_REVENUE = 6;
+
+	const TYPE_ANALYTICAL = 7;
+	const TYPE_VOLUNTEERING = 8;
 
 	const TYPE_OPENING = 9;
 	const TYPE_CLOSING = 10;
 
 	const TYPES_NAMES = [
 		'',
-		'Recettes',
-		'Dépenses',
 		'Banque',
 		'Caisse',
 		'Attente d\'encaissement',
+		'Tiers',
+		'Dépenses',
+		'Recettes',
 		'Analytique',
 		'Bénévolat',
-		'Tiers',
 		'Ouverture',
 		'Clôture',
 	];

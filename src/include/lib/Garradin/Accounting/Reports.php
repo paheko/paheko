@@ -200,7 +200,7 @@ class Reports
 				FROM %s a
 				WHERE a.id_chart = %d AND a.type != 0
 				GROUP BY a.id
-				ORDER BY a.code COLLATE NOCASE;',
+				ORDER BY a.type, a.code COLLATE NOCASE;',
 				Line::TABLE, Transaction::TABLE, $year_id, Account::TABLE, $chart_id);
 		}
 		else {
@@ -211,7 +211,7 @@ class Reports
 				INNER JOIN %s l ON a.id = l.id_account
 				WHERE t.id_year = %d AND a.type != 0
 				GROUP BY l.id_account
-				ORDER BY a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $year_id);
+				ORDER BY a.type, a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $year_id);
 		}
 
 		$group = null;
