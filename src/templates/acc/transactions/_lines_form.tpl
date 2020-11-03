@@ -10,7 +10,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<th>Compte</th>
 			<td>Débit</td>
 			<td>Crédit</td>
-			<td>Réf. pièce</td>
+			<td>Réf. ligne</td>
 			<td>Libellé ligne</td>
 			{if count($analytical_accounts) > 0}
 				<td>Analytique</td>
@@ -28,8 +28,8 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 					{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account][]"}
 				{/if}
 			</th>
-			<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
-			<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
+			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
+			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
 			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10}</td>
 			<td>{input type="text" name="lines[label][]" default=$line.label}</td>
 			{if count($analytical_accounts) > 0}
@@ -42,8 +42,8 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	<tfoot>
 		<tr>
 			<th>Total</th>
-			<td>{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
-			<td>{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
+			<td class="money">{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
+			<td class="money">{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 			<td colspan="3" id="lines_message"></td>
 			<td>{button label="Ajouter une ligne" shape="plus"}</td>
 		</tr>
