@@ -42,6 +42,7 @@
 		<dl>
 			{input type="date" name="date" default=$date label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}
@@ -73,7 +74,6 @@
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
 		</dl>
 		<dl>
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
