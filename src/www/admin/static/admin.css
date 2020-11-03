@@ -322,6 +322,13 @@ fieldset dl dt b {
     vertical-align: super;
 }
 
+fieldset dl dt i {
+    color: #999;
+    font-size: 0.7em;
+    font-weight: normal;
+    vertical-align: super;
+}
+
 fieldset dl dd.tip {
     color: #666;
 }
