@@ -94,8 +94,8 @@
 <table class="list">
 	<thead>
 		<tr>
-			<td>N°</td>
-			<th>Comptes</th>
+			<td class="num">N° compte</td>
+			<th>Compte</th>
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>
 			<td>Libellé</td>

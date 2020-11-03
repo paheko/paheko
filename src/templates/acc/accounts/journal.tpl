@@ -71,20 +71,22 @@
 			<td>Réf.</td>
 			<td>Date</td>
 			{if $simple}
-			<td>Mouvement</td>
+			<td class="money">Mouvement</td>
 			{else}
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>
 			{/if}
 			<td class="money">Solde cumulé</td>
 			<th>Libellé</th>
+			{if !$simple}<td>Libellé ligne</td>{/if}
+			<td>{if $simple}Réf. paiement{else}Réf. ligne{/if}</td>
 			<td></td>
 		</tr>
 	</thead>
 	<tbody>
 	{foreach from=$journal item="line"}
 		<tr>
-			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.line_reference}{$line.line_reference}{elseif $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
+			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
 			<td>{$line.date|date_fr:'d/m/Y'}</td>
 			{if $simple}
 			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|html_money}</td>
@@ -94,6 +96,8 @@
 			{/if}
 			<td class="money">{$line.running_sum|raw|html_money:false}</td>
 			<th>{$line.label}</th>
+			{if !$simple}<td>{$line.line_label}</td>{/if}
+			<td>{$line.line_reference}</td>
 			<td class="actions">
 				{linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
 			</td>
@@ -104,7 +108,7 @@
 		<tr>
 			<td colspan="{if $simple}3{else}4{/if}">Solde</td>
 			<td class="money">{$sum|raw|html_money:false}</td>
-			<td colspan="2"></td>
+			<td colspan="{if $simple}3{else}4{/if}"></td>
 		</tr>
 	</tfoot>
 </table>

@@ -881,9 +881,13 @@ table.list .actions {
     font-feature-settings: "tnum";
 }
 
-b.money {
+b.money, td.money {
     font-weight: inherit;
     white-space: pre;
+}
+
+.transaction-lines td.money {
+    text-align: left;
 }
 
 nav.acc-year {

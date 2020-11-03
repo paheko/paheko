@@ -35,6 +35,20 @@
 				{input type="radio" name="type" value=$transaction::TYPE_ADVANCED default=-1 source=$transaction label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
 			</dl>
 		</fieldset>
+	{/if}
+
+	<fieldset>
+		<legend>Informations</legend>
+		<dl>
+			{input type="date" name="date" default=$date label="Date" required=1 source=$transaction}
+			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
+		</dl>
+		<dl data-types="all-but-advanced">
+			{input type="money" name="amount" label="Montant" required=1 default=$amount}
+		</dl>
+	</fieldset>
+
+	{if !$payoff_for}
 
 		{foreach from=$types item="type"}
 			<fieldset data-types="t{$type.id}">
@@ -48,28 +62,19 @@
 		{/foreach}
 	{/if}
 
-	<fieldset>
-		<legend>Informations</legend>
-		<dl>
-			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="date" name="date" default=$date label="Date" required=1 source=$transaction}
-		</dl>
-		<dl data-types="all-but-advanced">
-			{input type="money" name="amount" label="Montant" required=1 default=$amount}
-			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
-		</dl>
-	</fieldset>
-
 	{* Saisie avancée *}
 	<fieldset data-types="t{$transaction::TYPE_ADVANCED}">
 		{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
 	</fieldset>
 
 	<fieldset>
-		<legend>Détails</legend>
+		<legend>Détails facultatifs</legend>
+		<dl data-types="t{$transaction::TYPE_REVENUE} t{$transaction::TYPE_EXPENSE} t{$transaction::TYPE_TRANSFER}">
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
+		</dl>
 		<dl>
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
-			{input type="text" name="reference" label="Numéro de pièce comptable"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 
 			{input type="file" name="file" label="Fichier joint"}
@@ -93,13 +98,13 @@
 function initForm() {
 	// Hide type specific parts of the form
 	function hideAllTypes() {
-		g.toggle('fieldset[data-types]', false);
+		g.toggle('[data-types]', false);
 	}
 
 	// Toggle parts of the form when a type is selected
 	function selectType(v) {
 		hideAllTypes();
-		g.toggle('[data-types=t' + v + ']', true);
+		g.toggle('[data-types~=t' + v + ']', true);
 		g.toggle('[data-types=all-but-advanced]', v != <?=$transaction::TYPE_ADVANCED?>);
 		// Disable required form elements, or the form won't be able to be submitted
 		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
