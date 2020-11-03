@@ -18,22 +18,28 @@ DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations'
 INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
 
 -- Migration comptes de code comme identifiant à ID unique
--- Inversement valeurs actif/passif
+-- Inversement valeurs actif/passif et produit/charge
 INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
-	SELECT NULL, 1, id, libelle, CASE WHEN position = 2 THEN 1 WHEN position = 1 THEN 2 ELSE position END, CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END FROM compta_comptes;
+	SELECT NULL, 1, id, libelle,
+	CASE position
+		WHEN 1 THEN 2
+		WHEN 2 THEN 1
+		WHEN 3 THEN 3
+		WHEN 4 THEN 5
+		WHEN 8 THEN 4
+		-- Suppression de la position "charge ou produit" qui n'a aucun sens
+		WHEN 12 THEN 0
+		ELSE 0
+	END,
+	CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END
+	FROM compta_comptes;
 
 -- Migrations projets vers comptes analytiques
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 	VALUES (1, '99', 'Projets', 0, 1, 6);
 
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
-	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 6 FROM compta_projets;
-
--- Suppression de la position "charge ou produit" qui n'a aucun sens
-UPDATE acc_accounts SET position = 0 WHERE position = 12;
-
--- Modification des valeurs de la position (qui n'est plus un champ binaire)
-UPDATE acc_accounts SET position = 5 WHERE position = 8;
+	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 7 FROM compta_projets;
 
 -- Mise à jour de la position pour les comptes de tiers qui peuvent varier actif ou passif
 UPDATE acc_accounts SET position = 3 WHERE code IN (4010, 4110, 4210, 428, 438);
@@ -42,13 +48,13 @@ UPDATE acc_accounts SET position = 3 WHERE code IN (4010, 4110, 4210, 428, 438);
 UPDATE acc_accounts SET position = 3 WHERE code LIKE '512%';
 
 -- Migration comptes bancaires
-UPDATE acc_accounts SET type = 3 WHERE code IN (SELECT id FROM compta_comptes_bancaires);
+UPDATE acc_accounts SET type = 1 WHERE code IN (SELECT id FROM compta_comptes_bancaires);
 
 -- Caisse
-UPDATE acc_accounts SET type = 4 WHERE code = '530';
+UPDATE acc_accounts SET type = 2 WHERE code = '530';
 
 -- Chèques et carte à encaisser
-UPDATE acc_accounts SET type = 5 WHERE code = '5112' OR code = '5113';
+UPDATE acc_accounts SET type = 3 WHERE code = '5112' OR code = '5113';
 
 -- Comptes d'ouverture et de clôture
 UPDATE acc_accounts SET type = 9 WHERE code = '890';
@@ -74,13 +80,16 @@ INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, r
 	FROM compta_journal;
 
 -- Recopie des descriptions de catégories dans la table des comptes, et mise des comptes en signets
-UPDATE acc_accounts SET type = 1, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+-- Revenus
+UPDATE acc_accounts SET type = 6, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = 1);
 
-UPDATE acc_accounts SET type = 2, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+-- Dépenses
+UPDATE acc_accounts SET type = 5, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte NOT LIKE '4%');
 
-UPDATE acc_accounts SET type = 8, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
+-- Tiers
+UPDATE acc_accounts SET type = 4, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte LIKE '4%');
 
 -- Recopie des opérations, mais le nom a changé pour acc_transactions_users
