@@ -31,7 +31,7 @@ class Form
 			call_user_func($fn);
 
 			if (null !== $redirect) {
-				Utils::redirect(ADMIN_URL . $redirect);
+				Utils::redirect($redirect);
 			}
 
 			return true;
