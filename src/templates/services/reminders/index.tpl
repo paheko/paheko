@@ -33,6 +33,7 @@
 					</td>
 					<th><a href="details.php?id={$reminder.id}">{$reminder.subject}</a></th>
 					<td class="actions">
+						{linkbutton shape="mail" label="Liste des rappels envoyés" href="services/reminders/details.php?id=%d"|args:$reminder.id}
 						{linkbutton shape="edit" label="Modifier" href="services/reminders/edit.php?id=%d"|args:$reminder.id}
 						{linkbutton shape="delete" label="Supprimer" href="services/reminders/delete.php?id=%d"|args:$reminder.id}
 					</td>
@@ -42,6 +43,7 @@
 	</table>
 {/if}
 
-{include file="services/reminders/_form.tpl" legend="Ajouter un rappel automatique"}
+{include file="services/reminders/_form.tpl" legend="Ajouter un rappel automatique"
+	reminder=null delay_type=0 delay_before=15 delay_after=5}
 
 {include file="admin/_foot.tpl"}

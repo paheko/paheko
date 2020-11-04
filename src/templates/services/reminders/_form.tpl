@@ -9,15 +9,15 @@
 			{input type="text" name="subject" required=1 source=$reminder default=$default_subject label="Sujet du message envoyé"}
 
 			<dt><label for="f_delay_type_0">Délai d'envoi</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-			{input type="radio" name="delay_type" value=0 source=$reminder label="Le jour de l'expiration de l'activité"}
+			{input type="radio" name="delay_type" value=0 default=$delay_type label="Le jour de l'expiration de l'activité"}
 			<dd>
-				{input type="radio" name="delay_type" value=1 source=$reminder}
-				{input type="number" name="delay_before" min=1 max=999 source=$reminder default=30 size=4}
+				{input type="radio" name="delay_type" value=1 default=$delay_type}
+				{input type="number" name="delay_before" min=1 max=999 default=$delay_before size=4}
 				<label for="f_delay_1">jours <strong>avant</strong> expiration</label>
 			</dd>
 			<dd>
-				{input type="radio" name="delay_type" value=2 source=$reminder}
-				{input type="number" name="delay_after" min=1 max=999 source=$reminder default=30 size=4}
+				{input type="radio" name="delay_type" value=2 default=$delay_type}
+				{input type="number" name="delay_after" min=1 max=999 size=4 default=$delay_after}
 				<label for="f_delay_2">jours <strong>après</strong> expiration</label>
 			</dd>
 			{input type="textarea" name="body" required=1 source=$reminder default=$default_body label="Texte du message envoyé" help="Pour inclure dans le contenu du mail le nom du membre, utilisez #IDENTITE, pour inclure le délai de l'envoi utilisez #NB_JOURS." cols="90" rows="15"}

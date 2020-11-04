@@ -1,36 +1,26 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+use Garradin\Entities\Services\Reminder;
+use Garradin\Services\Reminders;
+use Garradin\Services\Services;
+
+require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-if (!qg('id') || !is_numeric(qg('id')))
-{
-    throw new UserException("Argument du numéro de rappel manquant.");
+$reminder = Reminders::get((int) qg('id'));
+
+if (!$reminder) {
+	throw new UserException("Ce rappel n'existe pas");
 }
 
-$rappels = new Rappels;
+$csrf_key = 'reminder_delete_' . $reminder->id();
 
-$rappel = $rappels->get(qg('id'));
+$form->runIf('delete', function () use ($reminder) {
+	$reminder->delete();
+}, $csrf_key, ADMIN_URL . 'services/reminders/');
 
-if (!$rappel)
-{
-    throw new UserException("Ce rappel n'existe pas.");
-}
+$tpl->assign(compact('reminder', 'csrf_key'));
 
-if (f('delete') && $form->check('delete_rappel_' . $rappel->id))
-{
-    try {
-        $rappels->delete($rappel->id, (bool) f('delete_history'));
-        Utils::redirect(ADMIN_URL . 'membres/cotisations/gestion/rappels.php');
-    }
-    catch (UserException $e)
-    {
-        $form->addError($e->getMessage());
-    }
-}
-
-$tpl->assign('rappel', $rappel);
-
-$tpl->display('admin/membres/cotisations/gestion/rappel_supprimer.tpl');
+$tpl->display('services/reminders/delete.tpl');

@@ -1,57 +1,43 @@
 <?php
 namespace Garradin;
 
-require_once __DIR__ . '/../../_inc.php';
+use Garradin\Entities\Services\Reminder;
+use Garradin\Services\Reminders;
+use Garradin\Services\Services;
+
+require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
-if (!qg('id') || !is_numeric(qg('id')))
-{
-    throw new UserException("Argument du numéro de rappel manquant.");
+$reminder = Reminders::get((int) qg('id'));
+
+if (!$reminder) {
+	throw new UserException("Ce rappel n'existe pas");
 }
 
-$rappels = new Rappels;
+$csrf_key = 'reminder_edit_' . $reminder->id();
 
-$rappel = $rappels->get(qg('id'));
+$form->runIf('save', function () use ($reminder) {
+	$reminder->importForm();
+	$reminder->save();
+}, $csrf_key, ADMIN_URL . 'services/reminders/');
 
-if (!$rappel)
-{
-    throw new UserException("Ce rappel n'existe pas.");
+$delay_before = $delay_after = '';
+
+if ($reminder->delay < 0) {
+	$delay_type = 1;
+	$delay_before = abs($reminder->delay);
+}
+elseif ($reminder->delay > 0) {
+	$delay_type = 2;
+	$delay_after = abs($reminder->delay);
+}
+else {
+	$delay_type = 0;
 }
 
-$cotisations = new Cotisations;
+$services_list = Services::listAssoc();
 
-if (f('save') && $form->check('edit_rappel_' . $rappel->id))
-{
-    try {
-        if (f('delai_choix') == 0)
-           $delai = 0;
-        elseif (f('delai_choix') > 0)
-            $delai = (int) f('delai_post');
-        else
-            $delai = -(int) f('delai_pre');
+$tpl->assign(compact('delay_type', 'delay_before', 'delay_after', 'reminder', 'csrf_key', 'services_list'));
 
-        $rappels->edit($rappel->id, [
-            'sujet'         => f('sujet'),
-            'texte'         => f('texte'),
-            'delai'         => $delai,
-            'id_cotisation' => f('id_cotisation'),
-        ]);
-
-        Utils::redirect(ADMIN_URL . 'membres/cotisations/gestion/rappels.php');
-    }
-    catch (UserException $e)
-    {
-        $form->addError($e->getMessage());
-    }
-}
-
-$rappel->delai_pre = 
-    $rappel->delai_post = (abs($rappel->delai) ?: 30);
-
-$rappel->delai_choix = ($rappel->delai == 0) ? 0 : ($rappel->delai > 0 ? 1 : -1);
-
-$tpl->assign('rappel', $rappel);
-$tpl->assign('cotisations', $cotisations->listCurrent());
-
-$tpl->display('admin/membres/cotisations/gestion/rappel_modifier.tpl');
+$tpl->display('services/reminders/edit.tpl');

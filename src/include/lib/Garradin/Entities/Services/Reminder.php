@@ -5,6 +5,7 @@ namespace Garradin\Entities\Services;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Config;
+use KD2\DB\EntityManager;
 
 class Reminder extends Entity
 {
@@ -46,12 +47,13 @@ class Reminder extends Entity
 			$source = $_POST;
 		}
 
-		if (!empty($source['delay_type'])) {
+
+		if (isset($source['delay_type'])) {
 			if (1 == $source['delay_type'] && !empty($source['delay_before'])) {
-				$source['delay'] = $source['delay_before'];
+				$source['delay'] = (int)$source['delay_before'] * -1;
 			}
 			elseif (2 == $source['delay_type'] && !empty($source['delay_after'])) {
-				$source['delay'] = $source['delay_after'];
+				$source['delay'] = (int)$source['delay_after'];
 			}
 			else {
 				$source['delay'] = 0;
