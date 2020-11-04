@@ -12,7 +12,8 @@ $form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('add'), f
 	$service = new Service;
 	$service->importForm();
 	$service->save();
-}, $csrf_key, ADMIN_URL . 'services/fees/?id=' . $service->id());
+	Utils::redirect(ADMIN_URL . 'services/fees/?id=' . $service->id());
+}, $csrf_key);
 
 $tpl->assign(compact('csrf_key'));
 $tpl->assign('list', Services::listWithStats());
