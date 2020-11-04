@@ -25,7 +25,7 @@
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			<th><a href="../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
+			<th><a href="../../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td class="money">{$row.paid_amount|raw|money_currency}</td>
 			<td>{$row.date|format_sqlite_date_to_french}</td>
