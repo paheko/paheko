@@ -80,13 +80,14 @@ INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, r
 	FROM compta_journal;
 
 -- Recopie des descriptions de catégories dans la table des comptes, et mise des comptes en signets
+-- +Fix éventuels types qui ne correspondent pas à leur type… (@Fred C.) (... a.position = X)
 -- Revenus
 UPDATE acc_accounts SET type = 6, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
-	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = 1);
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = 1 AND a.position = 5);
 
 -- Dépenses
 UPDATE acc_accounts SET type = 5, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
-	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte NOT LIKE '4%');
+	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte NOT LIKE '4%' AND a.position = 4);
 
 -- Tiers
 UPDATE acc_accounts SET type = 4, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
