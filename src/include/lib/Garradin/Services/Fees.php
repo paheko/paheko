@@ -26,6 +26,7 @@ class Fees
 		$db = DB::getInstance();
 		return $db->get('SELECT f.*,
 			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_fee = f.id AND expiry_date >= date() AND paid = 1) AS nb_users_ok,
+			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_fee = f.id AND expiry_date < date()) AS nb_users_expired,
 			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_fee = f.id AND paid = 0) AS nb_users_unpaid
 			FROM services_fees f
 			WHERE id_service = ?

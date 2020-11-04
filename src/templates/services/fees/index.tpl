@@ -8,6 +8,7 @@
 			<th>Tarif</th>
 			<td>Montant</td>
 			<td>Membres à jour et ayant payé</td>
+			<td>Membres expirés</td>
 			<td>Membres en attente de règlement</td>
 			<td></td>
 		</thead>
@@ -24,8 +25,9 @@
 							-
 						{/if}
 					</td>
-					<td class="num">{$row.nb_users_ok}</td>
-					<td class="num">{$row.nb_users_unpaid}</td>
+					<td class="num"><a href="details.php?id={$row.id}">{$row.nb_users_ok}</a></td>
+					<td class="num"><a href="details.php?id={$row.id}&amp;type=expired">{$row.nb_users_expired}</a></td>
+					<td class="num"><a href="details.php?id={$row.id}&amp;type=unpaid">{$row.nb_users_unpaid}</td>
 					<td class="actions">
 						{linkbutton shape="users" label="Liste des inscrits" href="services/fees/details.php?id=%d"|args:$row.id}
 						{if $session->canAccess('membres', Membres::DROIT_ADMIN)}

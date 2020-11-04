@@ -2,7 +2,9 @@
 
 namespace Garradin\Entities\Services;
 
+use Garradin\Config;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Utils;
@@ -113,5 +115,61 @@ class Fee extends Entity
 	public function service()
 	{
 		return EntityManager::findOneById(Service::class, $this->id_service);
+	}
+
+	public function paidUsersList(): DynamicList
+	{
+		$identity = Config::getInstance()->get('champ_identite');
+		$columns = [
+			'id_user' => [
+				'select' => 'su.id_user',
+			],
+			'identity' => [
+				'label' => 'Membre',
+				'select' => 'm.' . $identity,
+				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE', $identity),
+			],
+			'paid' => [
+				'label' => 'Payé ?',
+				'select' => 'su.paid',
+			],
+			'paid_amount' => [
+				'label' => 'Montant payé',
+				'select' => 'SUM(l.credit)',
+			],
+			'date' => [
+				'label' => 'Date',
+				'select' => 'su.date',
+			],
+		];
+
+		$tables = 'services_users su
+			INNER JOIN membres m ON m.id = su.id_user
+			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
+			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
+		$conditions = sprintf('su.id_fee = %d AND su.paid = 1 AND su.expiry_date >= date()', $this->id());
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->groupBy('su.id_user');
+		$list->orderBy('date', true);
+		$list->setCount('COUNT(DISTINCT su.id_user)');
+		return $list;
+	}
+
+	public function unpaidUsersList(): DynamicList
+	{
+		$list = $this->paidUsersList();
+		$conditions = sprintf('su.id_fee = %d AND su.paid = 0', $this->id());
+		$list->setConditions($conditions);
+		return $list;
+	}
+
+	public function expiredUsersList(): DynamicList
+	{
+		$list = $this->paidUsersList();
+		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date()', $this->id());
+		$list->setConditions($conditions);
+		return $list;
 	}
 }

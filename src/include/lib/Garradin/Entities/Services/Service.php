@@ -74,7 +74,7 @@ class Service extends Entity
 		return new Fees($this->id());
 	}
 
-	public function distinctUsersList(): DynamicList
+	public function paidUsersList(): DynamicList
 	{
 		$identity = Config::getInstance()->get('champ_identite');
 		$columns = [
@@ -111,18 +111,18 @@ class Service extends Entity
 		$tables = 'services_users su
 			INNER JOIN membres m ON m.id = su.id_user
 			INNER JOIN services_fees sf ON sf.id = su.id_fee';
-		$conditions = sprintf('su.id_service = %d', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND su.expiry_date >= date()', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(DISTINCT id_user)');
+		$list->setCount('COUNT(DISTINCT su.id_user)');
 		return $list;
 	}
 
 	public function unpaidUsersList(): DynamicList
 	{
-		$list = $this->distinctUsersList();
+		$list = $this->paidUsersList();
 		$conditions = sprintf('su.id_service = %d AND su.paid = 0', $this->id());
 		$list->setConditions($conditions);
 		return $list;
@@ -130,7 +130,7 @@ class Service extends Entity
 
 	public function expiredUsersList(): DynamicList
 	{
-		$list = $this->distinctUsersList();
+		$list = $this->paidUsersList();
 		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date()', $this->id());
 		$list->setConditions($conditions);
 		return $list;

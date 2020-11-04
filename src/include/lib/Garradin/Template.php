@@ -121,7 +121,7 @@ class Template extends \KD2\Smartyer
 
 	protected function htmlMoneyCurrency($number, bool $hide_empty = true): string
 	{
-		$out = $this->htmlMoney($number, false);
+		$out = $this->htmlMoney($number, $hide_empty);
 
 		if ($out !== '') {
 			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');
