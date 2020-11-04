@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 (
     id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     id_transaction INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-    id_service INTEGER NULL REFERENCES cotisations_membres (id) ON DELETE SET NULL,
+    id_service_user INTEGER NULL REFERENCES services_users (id) ON DELETE SET NULL,
 
     PRIMARY KEY (id_user, id_transaction)
 );

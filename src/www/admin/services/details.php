@@ -1,8 +1,5 @@
 <?php
 namespace Garradin;
-
-require_once __DIR__ . '/../_inc.php';
-
 use Garradin\Services\Services;
 
 require_once __DIR__ . '/_inc.php';
@@ -24,8 +21,8 @@ elseif ('expired' == $type) {
 	$list = $service->expiredUsersList();
 }
 else {
-	$type = 'all';
-	$list = $service->distinctUsersList();
+	$type = 'paid';
+	$list = $service->paidUsersList();
 }
 
 $list->loadFromQueryString();

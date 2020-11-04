@@ -888,13 +888,17 @@ table.list .actions {
     font-feature-settings: "tnum";
 }
 
-b.money, td.money {
+b.money {
     font-weight: inherit;
     white-space: pre;
 }
 
 .transaction-lines td.money {
     text-align: left;
+}
+
+.transaction-lines td.money input + b {
+    display: none;
 }
 
 nav.acc-year {

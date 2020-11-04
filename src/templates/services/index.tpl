@@ -25,9 +25,9 @@
 							ponctuelle
 						{/if}
 					</td>
-					<td class="num">{$row.nb_users_ok}</td>
-					<td class="num">{$row.nb_users_expired}</td>
-					<td class="num">{$row.nb_users_unpaid}</td>
+					<td class="num"><a href="details.php?id={$row.id}">{$row.nb_users_ok}</a></td>
+					<td class="num"><a href="details.php?id={$row.id}&amp;type=expired">{$row.nb_users_expired}</a></td>
+					<td class="num"><a href="details.php?id={$row.id}&amp;type=unpaid">{$row.nb_users_unpaid}</a></td>
 					<td class="actions">
 						{linkbutton shape="menu" label="Tarifs" href="services/fees/?id=%d"|args:$row.id}
 						{linkbutton shape="users" label="Liste des inscrits" href="services/details.php?id=%d"|args:$row.id}

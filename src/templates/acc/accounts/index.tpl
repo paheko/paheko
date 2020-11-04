@@ -32,7 +32,7 @@
 		{foreach from=$group.accounts item="account"}
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a></td>
-				<th>{$account.label}</th>
+				<th><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
 				<td class="money">
 					{if $account.sum < 0}<strong class="error">{/if}
 					{$account.sum|raw|money_currency:false}
