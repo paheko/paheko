@@ -14,6 +14,11 @@ class Services
 		return EntityManager::findOneById(Service::class, $id);
 	}
 
+	static public function listAssoc()
+	{
+		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE NOCASE;');
+	}
+
 	static public function listWithStats()
 	{
 		$db = DB::getInstance();

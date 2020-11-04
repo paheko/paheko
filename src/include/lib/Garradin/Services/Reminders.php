@@ -4,9 +4,22 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Entities\Services\Reminder;
+use KD2\DB\EntityManager;
 
 class Reminders
 {
+	static public function list()
+	{
+		return DB::getInstance()->get('SELECT s.label AS service_label, sr.* FROM services_reminders sr INNER JOIN services s ON s.id = sr.id_service
+			ORDER BY s.label COLLATE NOCASE;');
+	}
+
+	static public function get(int $id)
+	{
+		return EntityManager::findOneById(Reminder::class, $id);
+	}
+
 	static public function listSentForUser(int $user_id)
 	{
 		return DB::getInstance()->get('SELECT rs.date AS sent_date, r.delay, s.label, rs.id AS sent_id, s.id AS service_id
