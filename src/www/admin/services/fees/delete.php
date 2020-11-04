@@ -17,7 +17,7 @@ $csrf_key = 'fee_delete_' . $fee->id();
 
 $form->runIf('delete', function () use ($fee) {
 	$fee->delete();
-}, $csrf_key, 'services/fees/?id=' . $fee->id_service);
+}, $csrf_key, ADMIN_URL . 'services/fees/?id=' . $fee->id_service);
 
 $tpl->assign(compact('fee', 'csrf_key'));
 

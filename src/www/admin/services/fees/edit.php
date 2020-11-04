@@ -20,7 +20,7 @@ $csrf_key = 'fee_edit_' . $fee->id();
 $form->runIf('save', function () use ($fee) {
 	$fee->importForm();
 	$fee->save();
-}, $csrf_key, 'services/fees/?id=' . $service->id());
+}, $csrf_key, ADMIN_URL . 'services/fees/?id=' . $service->id());
 
 if ($fee->amount) {
 	$amount_type = 1;
