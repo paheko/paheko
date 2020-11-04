@@ -1014,7 +1014,7 @@ h2.ruler:after {
 .icn-btn[data-icon]:before, summary::after {
     display: inline-block;
     font-family: "gicon", sans-serif;
-    text-shadow: 1px 1px 1px #999;
+    text-shadow: 1px 1px 1px #ccc;
     padding-right: .5em;
     font-size: 1.2em;
     line-height: .8em;

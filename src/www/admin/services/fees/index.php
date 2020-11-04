@@ -15,16 +15,12 @@ if (!$service) {
 
 $fees = $service->fees();
 
-if ($session->canAccess('membres', Membres::DROIT_ADMIN) && f('save')) {
-	$form->run(function () use ($service) {
-		$fee = new Fee;
-		$fee->id_service = $service->id();
-		$fee->importForm();
-		$fee->save();
-
-		Utils::redirect(ADMIN_URL . 'services/fees/?id=' . $service->id());
-	}, 'fee_add');
-}
+$form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('save'), function () use ($service) {
+	$fee = new Fee;
+	$fee->id_service = $service->id();
+	$fee->importForm();
+	$fee->save();
+}, 'fee_add', ADMIN_URL . 'services/fees/?id=' . $service->id());
 
 $targets = Account::TYPE_REVENUE;
 

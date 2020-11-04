@@ -17,7 +17,7 @@ $csrf_key = 'service_delete_' . $service->id();
 
 $form->runIf('delete', function () use ($service) {
 	$service->delete();
-}, $csrf_key, 'services/');
+}, $csrf_key, ADMIN_URL . 'services/');
 
 $tpl->assign(compact('service', 'csrf_key'));
 

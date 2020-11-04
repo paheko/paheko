@@ -18,7 +18,7 @@ $csrf_key = 'service_edit_' . $service->id();
 $form->runIf('save', function () use ($service) {
 	$service->importForm();
 	$service->save();
-}, $csrf_key, 'services/');
+}, $csrf_key, ADMIN_URL . 'services/');
 
 if ($service->duration) {
 	$period = 1;
