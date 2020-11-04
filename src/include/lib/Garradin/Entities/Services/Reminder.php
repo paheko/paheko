@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Services;
 
+use Garradin\DynamicList;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Config;
@@ -62,4 +63,36 @@ class Reminder extends Entity
 
 		parent::importForm($source);
 	}
+
+	public function sentList(): DynamicList
+	{
+		$identity = Config::getInstance()->get('champ_identite');
+		$columns = [
+			'id_user' => [
+				'select' => 'srs.id_user',
+			],
+			'identity' => [
+				'label' => 'Membre',
+				'select' => 'm.' . $identity,
+				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE', $identity),
+			],
+			'email' => [
+				'label' => 'Adresse e-mail',
+				'select' => 'm.email',
+			],
+			'date' => [
+				'label' => 'Date',
+				'select' => 'srs.date',
+			],
+		];
+
+		$tables = 'services_reminders_sent srs
+			INNER JOIN membres m ON m.id = srs.id_user';
+		$conditions = sprintf('srs.id_reminder = %d', $this->id());
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		return $list;
+	}
+
 }
