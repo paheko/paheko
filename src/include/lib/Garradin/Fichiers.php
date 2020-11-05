@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use KD2\Image;
+use KD2\Graphics\Image;
 use Garradin\Membres\Session;
 
 class Fichiers
