@@ -164,6 +164,8 @@ class Transactions
 		$transaction = null;
 		$types = array_flip(Transaction::TYPES_NAMES);
 
+		$l = 0;
+
 		try {
 			foreach (CSV::importUpload($file, self::EXPECTED_CSV_COLUMNS_SELF) as $l => $row) {
 				$row = (object) $row;
@@ -257,6 +259,7 @@ class Transactions
 		}
 
 		$accounts = $year->accounts();
+		$l = 0;
 
 		try {
 			foreach ($table as $l => $row) {
