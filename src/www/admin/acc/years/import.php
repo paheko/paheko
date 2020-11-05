@@ -17,7 +17,7 @@ if (!$year) {
 if (qg('export')) {
 	CSV::export(
 		qg('export'),
-		sprintf('Export comptable - %s', $year->label),
+		sprintf('Export comptable - %s - %s', Config::getInstance()->get('nom_asso'), $year->label),
 		Transactions::export($year->id())
 	);
 	exit;

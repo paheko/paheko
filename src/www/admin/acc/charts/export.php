@@ -15,6 +15,6 @@ if (!$chart) {
 
 CSV::export(
 	null !== qg('ods') ? 'ods' : 'csv',
-	sprintf('Plan comptable - %s', $chart->label),
+	sprintf('Plan comptable - %s - %s', Config::getInstance()->get('nom_asso'), $chart->label),
 	$chart->accounts()->export()
 );
