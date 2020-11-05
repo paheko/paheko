@@ -4,7 +4,7 @@
 {show_error if=$fail message="Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe."}
 
 {if $changed}
-    <p class="confirm">
+    <p class="block confirm">
         Votre mot de passe a bien été modifié.<br />
         Vous pouvez maintenant l'utiliser pour vous reconnecter.
     </p>

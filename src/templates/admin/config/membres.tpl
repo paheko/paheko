@@ -3,7 +3,7 @@
 {include file="admin/config/_menu.tpl" current="fiches_membres"}
 
 {if isset($status) && $status == 'OK'}
-    <p class="confirm">
+    <p class="block confirm">
         La configuration a bien été enregistrée.
     </p>
 {elseif isset($status) && $status == 'ADDED'}

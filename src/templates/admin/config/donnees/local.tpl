@@ -7,7 +7,7 @@
 {form_errors}
 
 {if $ok}
-    <p class="confirm">
+    <p class="block confirm">
         {if $ok == 'create'}Une nouvelle sauvegarde a été créée.
         {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>date-du-jour.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
             {if $ok_code & Sauvegarde::NOT_AN_ADMIN}

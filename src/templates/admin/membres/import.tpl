@@ -13,7 +13,7 @@
 {form_errors}
 
 {if $ok}
-    <p class="confirm">
+    <p class="block confirm">
         L'import s'est bien déroulé.
     </p>
 {/if}

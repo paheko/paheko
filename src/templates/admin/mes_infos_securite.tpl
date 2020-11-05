@@ -8,7 +8,7 @@
 </nav>
 
 {if $ok}
-<p class="confirm">
+<p class="block confirm">
     Changements enregistrés.
 </p>
 {/if}
