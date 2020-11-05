@@ -6,7 +6,7 @@
 	{form_errors}
 
 	{if $ok}
-		<p class="confirm">
+		<p class="block confirm">
 			L'opération numéro <a href="details.php?id={$ok}">{$ok}</a> a été ajoutée.
 			(<a href="details.php?id={$ok}">Voir l'opération</a>)
 		</p>
@@ -20,7 +20,7 @@
 			<dl>
 				<dt>Écriture d'origine</dt>
 				<dd><a class="num" href="{$admin_url}acc/transactions/details.php?id={$payoff_for.id}">#{$payoff_for.id}</a></dd>
-				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d&chart_choice=1"|args:$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
+				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
 			</dl>
 		</fieldset>
 	{else}
