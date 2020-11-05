@@ -82,7 +82,7 @@
 	{foreach from=$files item="file"}
 	<dd>
 		<aside class="file">
-			<a href="{$file.url}">{$file.nom}</a>
+			<a target="_blank" href="{$file.url}">{$file.nom}</a>
 			<small>({$file.type}, {$file.taille|format_bytes})</small>
 		</aside>
 	</dd>
