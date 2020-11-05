@@ -364,7 +364,6 @@ input:not([type=checkbox]):not([type=radio]):not([type=submit]), textarea, selec
 }
 
 input:not([type=checkbox]):not([type=radio]):focus, button:focus, select:focus, textarea:focus {
-    border-color: #009;
     box-shadow: 0 0 0 0.2rem rgb(var(--gSecondColor));
     outline: 0;
 }
