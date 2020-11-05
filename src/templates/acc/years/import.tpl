@@ -54,7 +54,7 @@
 		<legend>Import d'écritures</legend>
 		<dl>
 			<dt><label for="f_type_garradin">Format de fichier</label></dt>
-			{input type="radio" name="type" value="garradin" label="Journal général, format Garradin"}
+			{input type="radio" name="type" value="garradin" label="Journal général au format CSV Garradin"}
 			{input type="radio" name="type" value="csv" label="Journal au format CSV libre"}
 			<dd class="help">
 				Règles à suivre pour créer le fichier CSV&nbsp;:

@@ -211,8 +211,14 @@ class Transactions
 					throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
 				}
 
+				$row->line_id = trim($row->line_id);
+
 				if ($row->line_id) {
-					$line = $transaction->getLine($row->line_id);
+					$line = $transaction->getLine((int)$row->line_id);
+
+					if (!$line) {
+						throw new UserException(sprintf('le numéro de ligne "%s" n\'existe pas dans l\'écriture "%s"', $row->line_id, $transaction->id ?: 'à créer'));
+					}
 				}
 				else {
 					$line = new Line;
