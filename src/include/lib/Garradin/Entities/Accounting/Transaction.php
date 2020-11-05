@@ -562,28 +562,30 @@ class Transaction extends Entity
 					'position' => 'credit',
 				],
 			],
+			// Debt (dette)
 			[
 				[
 					'label' => 'Compte de tiers',
 					'targets' => [Account::TYPE_THIRD_PARTY],
-					'position' => 'debit',
+					'position' => 'credit',
 				],
 				[
 					'label' => 'Type de dette (dépense)',
 					'targets' => [Account::TYPE_EXPENSE],
-					'position' => 'credit',
+					'position' => 'debit',
 				],
 			],
+			// Credit (créance)
 			[
 				[
 					'label' => 'Compte de tiers',
 					'targets' => [Account::TYPE_THIRD_PARTY],
-					'position' => 'credit',
+					'position' => 'debit',
 				],
 				[
 					'label' => 'Type de créance (recette)',
 					'targets' => [Account::TYPE_REVENUE],
-					'position' => 'debit',
+					'position' => 'credit',
 				],
 			],
 		];
