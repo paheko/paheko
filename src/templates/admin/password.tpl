@@ -2,7 +2,7 @@
 
 
 {if !empty($sent)}
-    <p class="confirm">
+    <p class="block confirm">
         Un e-mail vous a été envoyé, cliquez sur le lien dans cet e-mail
         pour modifier votre mot de passe.
     </p>

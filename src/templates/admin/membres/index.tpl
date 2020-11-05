@@ -3,7 +3,7 @@
 {include file="admin/membres/_nav.tpl" current="index"}
 
 {if $sent}
-    <p class="confirm">Votre message a été envoyé.</p>
+    <p class="block confirm">Votre message a été envoyé.</p>
 {/if}
 
 {if !empty($membres_cats)}

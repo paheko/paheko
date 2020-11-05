@@ -7,7 +7,7 @@
 {form_errors}
 
 {if $ok !== null}
-    <p class="confirm">La remise à zéro a été effectuée. Une sauvegarde a également été créée.</p>
+    <p class="block confirm">La remise à zéro a été effectuée. Une sauvegarde a également été créée.</p>
     </p>
 {/if}
 

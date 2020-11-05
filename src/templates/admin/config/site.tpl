@@ -20,7 +20,7 @@
         <h3>Éditer un squelette</h3>
 
         {if $ok}
-        <p class="confirm">
+        <p class="block confirm">
             Modifications enregistrées.
         </p>
         {/if}
@@ -75,7 +75,7 @@
         <legend>Squelettes du site</legend>
 
         {if $reset_ok}
-        <p class="confirm">
+        <p class="block confirm">
             Réinitialisation effectuée. Les squelettes ont été remis à jour
         </p>
         {/if}
