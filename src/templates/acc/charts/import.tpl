@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts"}
+{include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts" js=1}
 
 <nav class="tabs">
 	<ul>
@@ -9,7 +9,7 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data">
+<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
 	<fieldset>
 		<legend>Importer un plan comptable</legend>
 		<dl>

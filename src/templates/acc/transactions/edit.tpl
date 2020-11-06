@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Modification d'une écriture" current="acc/new" js=1}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data">
+<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
 	{form_errors}
 
 	<fieldset>

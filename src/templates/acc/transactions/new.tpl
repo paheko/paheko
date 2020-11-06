@@ -2,7 +2,7 @@
 
 {include file="acc/_year_select.tpl"}
 
-<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data">
+<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data" data-focus="1">
 	{form_errors}
 
 	{if $ok}
