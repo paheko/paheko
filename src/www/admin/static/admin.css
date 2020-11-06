@@ -416,6 +416,7 @@ select, input[size], input[type=color], button, input[type=button], input[type=s
 form .input-list {
     padding: 0;
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: start;
     min-width: 0;
@@ -428,10 +429,9 @@ form .input-list .label {
 form .input-list button {
     padding: .4rem .6rem;
     align-self: stretch;
+    flex-shrink: 0;
     margin: 0;
     border: none;
-    border-right: 1px solid #ccc;
-    border-radius: 0;
 }
 
 form .input-list .label button {
@@ -1269,11 +1269,13 @@ dl.describe > dt {
     margin: .2rem .5rem;
     text-align: right;
     color: #666;
+    align-self: center;
 }
 
 dl.describe > dd {
     grid-column: 2;
     margin: .2rem .5rem;
+    align-self: center;
 }
 
 dl.describe ul {
