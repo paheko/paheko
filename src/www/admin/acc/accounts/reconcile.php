@@ -83,7 +83,7 @@ $tpl->assign(compact(
 	'end',
 	'prev',
 	'next',
-	'journal',
+	'journal'
 ));
 
 $tpl->display('acc/accounts/reconcile.tpl');
