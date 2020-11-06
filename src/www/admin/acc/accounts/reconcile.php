@@ -18,13 +18,18 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$start = qg('start');
-$end = qg('end');
+$start = null;
+$end = null;
 
-if (null !== $start && null !== $end)
+if (null !== qg('start') && null !== qg('end'))
 {
-	$start = \DateTime::createFromFormat('Y-m-d', $start);
-	$end = \DateTime::createFromFormat('Y-m-d', $end);
+	$start = \DateTime::createFromFormat('d/m/Y', qg('start'));
+	$end = \DateTime::createFromFormat('d/m/Y', qg('end'));
+
+	if (!$start || !$end) {
+		$start = \DateTime::createFromFormat('Y-m-d', qg('start'));
+		$end = \DateTime::createFromFormat('Y-m-d', qg('end'));
+	}
 
 	if (!$start || !$end) {
 		$form->addError('La date donnée est invalide.');
