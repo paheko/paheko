@@ -32,7 +32,7 @@
 									<a href="{$admin_url}membres/fiche.php?id={$row.id}">
 								{/if}
 
-								{$value|raw|display_champ_membre:$result_header[$key]}
+								{$value|raw|display_champ_membre:$key}
 
 								{if !$link}
 									<?php $link = true; ?>
