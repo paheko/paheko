@@ -1,5 +1,5 @@
 .PHONY: dev-server release deps publish check-dependencies test
-KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.3.zip
+KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.2.zip
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
