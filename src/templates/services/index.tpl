@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services" js=1}
 
-{include file="services/_nav.tpl" current="index"}
+{include file="services/_nav.tpl" current="index" service=null fee=null}
 
 {if count($list)}
 	<table class="list">
@@ -15,7 +15,7 @@
 		<tbody>
 			{foreach from=$list item="row"}
 				<tr>
-					<th><a href="details.php?id={$row.id}">{$row.label}</a></th>
+					<th><a href="fees/?id={$row.id}">{$row.label}</a></th>
 					<td>
 						{if $row.duration}
 							{$row.duration} jours

@@ -1,17 +1,6 @@
 {include file="admin/_head.tpl" title="Tarif : %s — Liste des membres inscrits"|args:$fee.label current="membres/services"}
 
-{include file="services/_nav.tpl" current="index"}
-
-<nav class="tabs">
-	<ul class="sub">
-		<li>
-			{$service.label} — {$fee.label}
-		</li>
-		<li{if $type == 'all'} class="current"{/if}><a href="?id={$service.id}">À jour et payés</a></li>
-		<li{if $type == 'expired'} class="current"{/if}><a href="?id={$service.id}&amp;type=expired">Inscription expirée</a></li>
-		<li{if $type == 'unpaid'} class="current"{/if}><a href="?id={$service.id}&amp;type=unpaid">En attente de règlement</a></li>
-	</ul>
-</nav>
+{include file="services/_nav.tpl" current="index" current_service=$service service_page="index" current_fee=$fee fee_page=$type}
 
 <dl class="cotisation">
 	<dt>Nombre de membres trouvés</dt>

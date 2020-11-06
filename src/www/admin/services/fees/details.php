@@ -21,7 +21,7 @@ elseif ('expired' == $type) {
 	$list = $fee->expiredUsersList();
 }
 else {
-	$type = 'all';
+	$type = 'paid';
 	$list = $fee->paidUsersList();
 }
 

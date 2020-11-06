@@ -646,13 +646,18 @@ nav.tabs .sub {
     border-bottom-left-radius: .5em;
 }
 
+nav.tabs .sub .title {
+    margin: 0 1em 0 -1em;
+    font-weight: bold;
+    padding: .1em .5em;
+}
+
 nav.tabs li {
     margin: 0 0.2em;
 }
 
 nav.tabs li a {
     display: inline-block;
-    background: rgba(217, 134, 40, .5);
     background: rgba(var(--gSecondColor), .5);
     border-radius: .5em .5em 0 0;
     padding: .1em .5em;
@@ -662,14 +667,12 @@ nav.tabs li a {
 }
 
 nav.tabs .current a {
-    background: #9c4f15;
     background: rgb(var(--gMainColor));
-    color: #fff;
     color: rgb(var(--gBgColor));
 }
 
 nav.tabs li a:hover {
-    color: #fff;
+    color: rgb(var(--gBgColor));
     background-color: rgb(var(--gMainColor));
     text-decoration: underline;
     border-bottom: none;
