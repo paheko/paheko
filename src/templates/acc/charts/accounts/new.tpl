@@ -4,7 +4,7 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url}" data-focus="1">
 
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>

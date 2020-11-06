@@ -51,6 +51,7 @@
 			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
 			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
 		{if $year.id == CURRENT_YEAR_ID}
+			{* Currently can't use a 'linkbutton' here because of styles *}
 			<li><form method="get" action="../transactions/new.php">{button label="Saisir une écriture dans ce compte" shape="plus" type="submit"}<input type="hidden" name="account" value="{$account.id}" /></form></li>
 		{/if}
 		</ul>

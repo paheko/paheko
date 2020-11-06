@@ -244,6 +244,13 @@
 		return (v.substr(0, v.length-2) || '0') + ',' + v.substr(-2);
 	};
 
+	// Focus on first form input when loading the page
+	g.onload(() => {
+		if ((i = document.querySelector('form[data-focus="1"] [name][id]')) && (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body')) {
+			i.focus();
+		}
+	}, 'dom');
+
 	// Sélecteurs de listes
 	g.onload(() => {
 		var inputs = $('form .input-list > button');
