@@ -19,10 +19,10 @@ $accounts = $chart->accounts();
 $transaction = new Transaction;
 $lines = [[], []];
 $amount = 0;
-$payoff_for = null;
+$payoff_for = qg('payoff_for') ?: f('payoff_for');
 
 // Quick pay-off for debts and credits, directly from a debt/credit details page
-if ($id = f('payoff_for')) {
+if ($id = $payoff_for) {
 	$payoff_for = $transaction->payOffFrom($id);
 	$amount = $payoff_for->sum();
 }

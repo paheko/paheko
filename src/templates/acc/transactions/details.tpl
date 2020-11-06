@@ -10,19 +10,15 @@
 {/if}
 
 {if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
-<form method="post" action="{$admin_url}acc/transactions/new.php">
 <div class="block alert">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
-		<input type="hidden" name="payoff_for" value="{$transaction.id}" />
-		{button shape="check" label="Enregistrer le règlement de cette dette" type="submit"}
+		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
 	{else}
 		<h3>Créance en attente</h3>
-		<input type="hidden" name="payoff_for" value="{$transaction.id}" />
-		{button shape="export" label="Enregistrer le règlement de cette créance" type="submit"}
+		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
 	{/if}
 </div>
-</form>
 {/if}
 
 <dl class="describe">

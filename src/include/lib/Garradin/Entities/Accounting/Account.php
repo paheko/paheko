@@ -122,7 +122,7 @@ class Account extends Entity
 	public function getJournal(int $year_id, bool $simple = false)
 	{
 		$db = DB::getInstance();
-		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled
+		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, t.type, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			WHERE l.id_account = ? AND t.id_year = ?

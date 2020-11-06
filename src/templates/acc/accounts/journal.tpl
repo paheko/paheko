@@ -99,6 +99,12 @@
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
 			<td class="actions">
+				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
+					{linkbutton shape="check" label="Régler cette dette" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
+				{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT}
+					{linkbutton shape="export" label="Régler cette créance" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
+				{/if}
+
 				{linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
 			</td>
 		</tr>
