@@ -8,7 +8,7 @@ require_once __DIR__ . '/_inc.php';
 
 $csrf_key = 'service_add';
 
-$form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('add'), function () {
+$form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('save'), function () {
 	$service = new Service;
 	$service->importForm();
 	$service->save();

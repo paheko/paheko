@@ -104,10 +104,12 @@ class Fee extends Entity
 	{
 		try {
 			$db = DB::getInstance();
-			$db->firstColumn($this->getFormulaSQL(), 0);
+			$sql = $this->getFormulaSQL();
+			$db->protectSelect(['membres' => null], $sql);
 			return true;
 		}
 		catch (\Exception $e) {
+			throw $e;
 			return false;
 		}
 	}

@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="%s — Tarifs"|args:$service.label current="membres/services" js=1}
 
-{include file="services/_nav.tpl" current="index"}
+{include file="services/_nav.tpl" current="index" current_service=$service service_page="index"}
 
 {if count($list)}
 	<table class="list">

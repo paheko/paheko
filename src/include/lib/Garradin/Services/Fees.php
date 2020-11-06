@@ -21,6 +21,31 @@ class Fees
 		return EntityManager::findOneById(Fee::class, $id);
 	}
 
+	/**
+	 * If $user_id is specified, then it will return a column 'user_amount' containing the amount that this specific user should pay
+	 */
+	static public function listAllByService(?int $user_id = null)
+	{
+		$db = DB::getInstance();
+
+		$sql = 'SELECT *, CASE WHEN amount THEN amount ELSE NULL END AS user_amount
+			FROM services_fees ORDER BY id_service, label COLLATE NOCASE;';
+		$result = $db->get($sql);
+
+		if (!$user_id) {
+			return $result;
+		}
+
+		foreach ($result as &$row) {
+			if ($row->formula) {
+				$sql = sprintf('SELECT %s FROM membres WHERE id = %d;', $row->formula, $user_id);
+				$row->user_amount = $db->firstColumn($sql);
+			}
+		}
+
+		return $result;
+	}
+
 	public function listWithStats()
 	{
 		$db = DB::getInstance();

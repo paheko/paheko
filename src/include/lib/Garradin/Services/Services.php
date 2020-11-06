@@ -19,6 +19,25 @@ class Services
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE NOCASE;');
 	}
 
+	static public function listGroupedWithFees(?int $user_id = null)
+	{
+		$services = self::listAssoc();
+		$fees = Fees::listAllByService($user_id);
+		$out = [];
+
+		foreach ($fees as $fee) {
+			$id = $fee->id_service;
+
+			if (!array_key_exists($id, $out)) {
+				$out[$id] = (object) ['label' => $services[$id], 'id' => $id, 'fees' => []];
+			}
+
+			$out[$id]->fees[] = $fee;
+		}
+
+		return $out;
+	}
+
 	static public function listWithStats()
 	{
 		$db = DB::getInstance();
