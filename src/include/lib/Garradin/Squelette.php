@@ -648,7 +648,7 @@ class Squelette extends \KD2\MiniSkel
 
         try {
             // Sécurité anti injection, à la compilation seulement
-            $statement = $db->userSelectStatement($query);
+            $statement = $db->protectSelect(null, $query);
         }
         catch (\Exception $e)
         {

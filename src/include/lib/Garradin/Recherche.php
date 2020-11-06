@@ -161,8 +161,11 @@ class Recherche
 
 		foreach (reset($result) as $key => $v) {
 			foreach ($columns as $ckey => $config) {
-				if ($ckey == $key || $config->alias == $key) {
-					$out[] = $config->label;
+				if ($ckey == $key) {
+					$out[$key] = $config->label;
+				}
+				elseif (isset($config->alias) && $config->alias == $key) {
+					$out[$config->alias] = $config->label;
 				}
 			}
 		}
@@ -539,7 +542,14 @@ class Recherche
 		}
 
 		try {
-			return DB::getInstance()->userSelectGet($query);
+			$db = DB::getInstance();
+			static $allowed = [
+				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null],
+				'membres' => ['membres' => null],
+			];
+
+			$db->protectSelect($allowed[$target], $query);
+			return $db->get($query);
 		}
 		catch (\Exception $e) {
 			$message = 'Erreur dans la requête : ' . $e->getMessage();
