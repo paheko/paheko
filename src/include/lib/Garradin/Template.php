@@ -85,12 +85,12 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('strftime_fr', function ($ts, $format) {
-			return Utils::strftime_fr($format, $ts);
-		});
-
 		$this->register_modifier('date_fr', function ($ts, $format = 'd/m/Y H:i:s') {
 			return Utils::date_fr($format, $ts);
+		});
+
+		$this->register_modifier('date_short', function ($dt) {
+			return Utils::date_fr('d/m/Y', $dt);
 		});
 
 		$this->register_modifier('html_money', [$this, 'htmlMoney']);
@@ -473,8 +473,16 @@ class Template extends \KD2\Smartyer
 		return sprintf($out, $couleur1, $couleur2, $image_fond);
 	}
 
-	protected function displayChampMembre($v, $config)
+	protected function displayChampMembre($v, $config = null)
 	{
+		if (is_string($config)) {
+			$config = Config::getInstance()->get('champs_membres')->get($config);
+		}
+
+		if (null === $config) {
+			return htmlspecialchars($v);
+		}
+
 		switch ($config->type)
 		{
 			case 'checkbox':
