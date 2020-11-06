@@ -443,10 +443,9 @@ class Plugin
 			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
 
-			$st = $db->userSelectStatement($query);
-			$res = $st->execute();
+			$res = $db->protectSelect(['membres' => []], $query);
 
-			if (!$res->fetchArray(\SQLITE3_NUM))
+			if (!$db->firstColumn($query))
 			{
 				unset($list[$id]);
 				continue;
