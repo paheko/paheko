@@ -41,6 +41,10 @@ if ($type = (int)qg('type')) {
 	$simple = true;
 
 	$types = array_slice($types, 1, null, true);
+
+	if (isset($translate_type_codes[$type])) {
+		$account->code = $translate_type_codes[$type];
+	}
 }
 
 
