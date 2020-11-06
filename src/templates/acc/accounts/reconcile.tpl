@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts" js=1}
 
+{include file="acc/_year_select.tpl"}
+
 <form method="get" action="{$self_url_no_qs}">
 	{if !empty($prev) && !empty($next)}
 	<fieldset class="shortFormRight">
