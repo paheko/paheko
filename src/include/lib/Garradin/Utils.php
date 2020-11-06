@@ -46,8 +46,12 @@ class Utils
         if (is_object($ts)) {
             $date = $ts->format($format);
         }
-        else {
+        elseif (is_numeric($ts)) {
             $date = date($format, $ts);
+        }
+        elseif (strlen($ts) == 10) {
+            $ts = \DateTime::createFromFormat('Y-m-d', $ts);
+            $date = $ts->format($format);
         }
 
         $date = strtr($date, self::$french_date_names);
@@ -59,39 +63,23 @@ class Utils
     {
         if (strlen($d) == 10 || $short)
         {
-            $d = substr($d, 0, 10);
-            $f = 'Y-m-d';
-            $f2 = 'd/m/Y';
+            $f = 'd/m/Y';
         }
         elseif (strlen($d) == 16)
         {
-            $f = 'Y-m-d H:i';
-            $f2 = 'd/m/Y H:i';
+            $f = 'd/m/Y H:i';
         }
         else
         {
-            $f = 'Y-m-d H:i:s';
-            $f2 = 'd/m/Y H:i';
+            $f = 'd/m/Y H:i';
         }
-        
-        if ($dt = \DateTime::createFromFormat($f, $d))
-            return $dt->format($f2);
-        else
-            return $d;
+
+        return self::date_fr($f, $d);
     }
 
-    static public function makeTimestampFromForm($d)
-    {
-        return mktime($d['h'], $d['min'], 0, $d['m'], $d['d'], $d['y']);
-    }
-
-    static public function modifyDate($str, $change, $as_timestamp = false)
-    {
-        $date = \DateTime::createFromFormat('Y-m-d', $str);
-        $date->modify($change);
-        return ($as_timestamp ? $date->getTimestamp() : $date->format('Y-m-d'));
-    }
-
+    /**
+     * @deprecated
+     */
     static public function checkDate($str)
     {
         if (!preg_match('!^(\d{4})-(\d{2})-(\d{2})$!', $str, $match))
@@ -103,6 +91,9 @@ class Utils
         return true;
     }
 
+    /**
+     * @deprecated
+     */
     static public function checkDateTime($str)
     {
         if (!preg_match('!^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})!', $str, $match))
@@ -460,56 +451,6 @@ class Utils
     static public function suggestPassword()
     {
         return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
-    }
-
-    static public function checkIBAN($value)
-    {
-        // Enlever les caractères indésirables (espaces, tirets),
-        $value = preg_replace('/[^A-Z0-9]/', '', strtoupper($value));
-
-        // Supprimer les 4 premiers caractères et les replacer à la fin du compte
-        $value = substr($value, 4) . substr($value, 0, 4);
-
-        // Remplacer les lettres par des chiffres au moyen d'une table de conversion (A=10, B=11, C=12 etc.)
-        $value = str_replace(range('A', 'Z'), range(10, 35), $value);
-
-        // Diviser le nombre ainsi obtenu par 97
-        // Si le reste n'est pas égal à 1 l'IBAN est incorrect : Modulo de 97 égal à 1.
-        return (self::bcmod($value, 97) == 1);
-    }
-
-    /** 
-     * my_bcmod - get modulus (substitute for bcmod) 
-     * string my_bcmod ( string left_operand, int modulus ) 
-     * left_operand can be really big, but be carefull with modulus :( 
-     * by Andrius Baranauskas and Laurynas Butkus :) Vilnius, Lithuania 
-     * @link https://php.net/manual/fr/function.bcmod.php#38474
-     */ 
-    static public function bcmod($x, $y)
-    {
-        if (function_exists('\bcmod'))
-        {
-            return \bcmod($x, $y);
-        }
-
-        // how many numbers to take at once? carefull not to exceed (int)
-        $take = 5;
-        $mod = '';
-
-        do
-        {
-            $a = (int)$mod.substr( $x, 0, $take );
-            $x = substr( $x, $take );
-            $mod = $a % $y;
-        } 
-        while (strlen($x));
-
-        return (int)$mod;
-    }
-    
-    static public function checkBIC($bic)
-    {
-        return preg_match('!^[A-Z]{4}[A-Z]{2}[1-9A-Z]{2}(?:[A-Z\d]{3})?$!', $bic);
     }
 
     static public function normalizePhoneNumber($n)
