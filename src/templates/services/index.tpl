@@ -2,6 +2,10 @@
 
 {include file="services/_nav.tpl" current="index" service=null fee=null}
 
+{if isset($_GET['CREATE'])}
+	<p class="block error">Vous devez déjà créer une activité pour pouvoir utiliser cette fonction.</p>
+{/if}
+
 {if count($list)}
 	<table class="list">
 		<thead>

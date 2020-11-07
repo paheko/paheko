@@ -329,6 +329,10 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
+		$input = function (string $key) use ($source) {
+			return isset($source[$key]) ? $source[$key] : null;
+		};
+
 		if (!isset($source['type'])) {
 			throw new ValidationException('Type d\'écriture inconnu');
 		}

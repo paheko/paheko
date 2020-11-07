@@ -21,7 +21,7 @@ class Services
 
 	static public function listGroupedWithFees(?int $user_id = null)
 	{
-		$services = self::listAssoc();
+		$services = DB::getInstance()->getGrouped('SELECT id, label, duration, start_date, end_date FROM services;');
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 
@@ -29,7 +29,8 @@ class Services
 			$id = $fee->id_service;
 
 			if (!array_key_exists($id, $out)) {
-				$out[$id] = (object) ['label' => $services[$id], 'id' => $id, 'fees' => []];
+				$out[$id] = (object) $services[$id];
+				$out[$id]->fees = [];
 			}
 
 			$out[$id]->fees[] = $fee;

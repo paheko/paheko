@@ -22,6 +22,7 @@ class Fee extends Entity
 	protected $formula;
 	protected $id_service;
 	protected $id_account;
+	protected $id_year;
 
 	protected $_types = [
 		'id'          => 'int',
@@ -31,6 +32,7 @@ class Fee extends Entity
 		'formula'     => '?string',
 		'id_service'  => 'int',
 		'id_account'  => '?int',
+		'id_year'     => '?int',
 	];
 
 	public function filterUserValue(string $type, $value, string $key)

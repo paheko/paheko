@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS services_fees
     formula TEXT NULL, -- Formule de calcul du montant de la cotisation, si cotisation dynamique (exemple : membres.revenu_imposable * 0.01)
 
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL -- NULL si le type n'est pas associé automatiquement à la compta
+    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL, -- NULL si le type n'est pas associé automatiquement à la compta
+    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL si le type n'est pas associé automatiquement à la compta
 );
 
 CREATE TABLE IF NOT EXISTS services_users

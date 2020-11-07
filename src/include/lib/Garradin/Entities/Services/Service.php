@@ -42,12 +42,6 @@ class Service extends Entity
 		$this->assert(null === $this->start_date || $this->end_date > $this->start_date, 'La date de fin de validité doit être après la date de début');
 	}
 
-	public function registerUser(int $user_id, \DateTime $expiry_date)
-	{
-		$db = DB::getInstance();
-		$db->preparedQuery('INSERT IGNORE INTO services_users (id_user, id_service, expiry_date) VALUES (?, ?, ?);', $user_id, $this->id(), $expiry_date->format('Y-m-d'));
-	}
-
 	public function importForm(?array $source = null)
 	{
 		if (null === $source) {
