@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Services\Fees;
 use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -32,8 +33,12 @@ else {
 	$amount_type = 0;
 }
 
+$accounting_enabled = (bool) $fee->id_account;
+
+$years = Years::listOpen();
+
 $account = $fee->id_account ? [$fee->id_account => Accounts::getSelectorLabel($fee->id_account)] : null;
 
-$tpl->assign(compact('service', 'amount_type', 'fee', 'csrf_key', 'account'));
+$tpl->assign(compact('service', 'amount_type', 'fee', 'csrf_key', 'account', 'accounting_enabled', 'years'));
 
 $tpl->display('services/fees/edit.tpl');

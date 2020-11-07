@@ -21,7 +21,7 @@ class Services
 
 	static public function listGroupedWithFees(?int $user_id = null)
 	{
-		$services = DB::getInstance()->getGrouped('SELECT id, label, duration, start_date, end_date FROM services;');
+		$services = DB::getInstance()->getGrouped('SELECT id, label, duration, start_date, end_date, description FROM services;');
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 

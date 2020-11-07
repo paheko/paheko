@@ -264,6 +264,17 @@ class Template extends \KD2\Smartyer
 			unset($attributes['disabled']);
 		}
 
+		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
+			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
+		}
+		else {
+			$required_label =  ' <i>(facultatif)</i>';
+		}
+
+		// Fake required: doesn't set the required attribute, just the label
+		// (useful for form elements that are hidden by JS)
+		unset($attributes['fake_required']);
+
 		$attributes_string = $attributes;
 
 		array_walk($attributes_string, function (&$v, $k) {
@@ -354,13 +365,6 @@ class Template extends \KD2\Smartyer
 			$out .= '</dd>';
 		}
 		else {
-			if (array_key_exists('required', $attributes)) {
-				$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
-			}
-			else {
-				$required_label =  ' <i>(facultatif)</i>';
-			}
-
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
 			if (isset($help)) {

@@ -2,11 +2,10 @@
 
 namespace Garradin\Entities\Services;
 
-use Garradin\Config;
-use Garradin\DynamicList;
+use Garradin\DB;
 use Garradin\Entity;
 use Garradin\ValidationException;
-use Garradin\Utils;
+use Garradin\Services\Fees;
 use Garradin\Services\Services;
 use Garradin\Entities\Accounting\Transaction;
 
@@ -32,7 +31,12 @@ class Service_User extends Entity
 		'expiry_date' => '?date',
 	];
 
-	protected $_service;
+	protected $_service, $_fee;
+
+	public function selfCheck(): void
+	{
+		$this->assert(!DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et ce jour');
+	}
 
 	public function importForm(?array $source = null)
 	{
@@ -50,7 +54,7 @@ class Service_User extends Entity
 			if ($service->duration) {
 				$dt = new \DateTime;
 				$dt->modify(sprintf('+%d days', $service->duration));
-				$this->expiry_date = $dt->format('Y-m-d');
+				$this->expiry_date = $dt;
 			}
 			elseif ($service->end_date) {
 				$this->expiry_date = $service->end_date;
@@ -72,28 +76,47 @@ class Service_User extends Entity
 		return $this->_service;
 	}
 
+	public function fee()
+	{
+		if (null === $this->_fee) {
+			$this->_fee = Fees::get($this->id_fee);
+		}
+
+		return $this->_fee;
+	}
+
 	static public function saveFromForm(int $user_id, ?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
 		}
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		$su = new self;
+		$su->date = new \DateTime;
 		$su->importForm($source);
 		$su->save();
 
-		if ($su->service()->id_account && !empty($source['paid_amount'])) {
+		if ($su->fee()->id_account && !empty($source['amount'])) {
 			$transaction = new Transaction;
-			$transaction->id_user = $user_id;
+			$transaction->id_creator = $user_id;
+			$transaction->id_year = $su->fee()->id_year;
 
 			$source['type'] = Transaction::TYPE_REVENUE;
 			$key = sprintf('account_%d_', $source['type']);
-			$source[$key . '0'] = [$su->service()->id_account() => ''];
-			$source[$key . '1'] = $source['account'];
+			$source[$key . '0'] = [$su->fee()->id_account => ''];
+			$source[$key . '1'] = isset($source['account']) ? $source['account'] : null;
+
+			$source['label'] = 'Règlement activité - ' . $su->service()->label . ' - ' . $su->fee()->label;
+			$source['date'] = $su->date->format('d/m/Y');
 
 			$transaction->importFromNewForm($source);
 			$transaction->save();
-			$transaction->updateLinkedUsers([$su->id_user]);
+			$transaction->linkToUser($su->id_user, $su->id());
 		}
+
+		$db->commit();
 	}
 }

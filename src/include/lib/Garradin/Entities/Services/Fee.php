@@ -9,6 +9,7 @@ use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Utils;
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
 
 class Fee extends Entity
@@ -66,6 +67,10 @@ class Fee extends Entity
 			}
 		}
 
+		if (empty($source['accounting'])) {
+			$source['id_account'] = $source['id_year'] = null;
+		}
+
 		return parent::importForm($source);
 	}
 
@@ -79,7 +84,10 @@ class Fee extends Entity
 		$this->assert(strlen($this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
 		$this->assert(null === $this->amount || $this->amount > 0, 'Le montant est invalide');
 		$this->assert($this->id_service, 'Aucun service n\'a été indiqué pour ce tarif.');
-		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte du plan comptable indiqué n\'existe pas');
+		$this->assert((null === $this->id_account && null === $this->id_year)
+			|| (null !== $this->id_account && null !== $this->id_year), 'Le compte doit être indiqué avec l\'exercice');
+		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte indiqué n\'existe pas');
+		$this->assert(null === $this->id_year || $db->test(Year::TABLE, 'id = ?', $this->id_year), 'L\'exercice indiqué n\'existe pas');
 		$this->assert(null === $this->formula || $this->checkFormula(), 'Formule de calcul invalide');
 		$this->assert(null === $this->amount || null === $this->formula, 'Il n\'est pas possible de spécifier à la fois une formule et un montant');
 	}

@@ -134,6 +134,8 @@ class Utils
             return $zero_if_empty ? '0' : '0,00';
         }
 
+        $number = (int) $number;
+
         $decimals = substr($number, -2);
         $number = (int) substr($number, 0, -2);
 

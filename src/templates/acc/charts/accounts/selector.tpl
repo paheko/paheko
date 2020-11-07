@@ -1,19 +1,5 @@
 {include file="admin/_head.tpl" title="Sélectionner un compte" body_id="popup" is_popup=true}
 
-{if $charts}
-	<form method="get" action="{$self_url_no_qs}">
-		<nav class="acc-year">
-			<h4>Plan comptable à utiliser&nbsp;:</h4>
-			<dl>{input type="select" name="chart" options=$charts default=$chart.id onchange="this.form.submit();"}</dl>
-			<p>
-				<input type="hidden" name="targets" value="{$targets}" />
-				<input type="hidden" name="chart_choice" value="1" />
-				<noscript><input type="submit" value="OK" /></noscript>
-			</p>
-		</nav>
-	</form>
-{/if}
-
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type. Pour afficher des comptes ici, les <a href="{$www_url}admin/acc/charts/accounts/all.php?id={$chart.id}" target="_blank">modifier dans le plan comptable</a> en sélectionnant le type de compte favori voulu.</td>
 
@@ -114,8 +100,6 @@ if (q) {
 
 	q.focus();
 }
-
-window.onkeyup = (e) => { if (e.key == 'Escape') window.parent.g.closeDialog(); };
 </script>
 {/literal}
 
