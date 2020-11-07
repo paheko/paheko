@@ -118,5 +118,7 @@ class Service_User extends Entity
 		}
 
 		$db->commit();
+
+		return $su;
 	}
 }

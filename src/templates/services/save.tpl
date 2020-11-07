@@ -9,7 +9,7 @@
 	<fieldset>
 		<legend>Enregistrer une activité</legend>
 
-{if !$selected_user}
+{if !$user_id}
 		<dl>
 			{input type="list" name="user" required=1 label="Sélectionner un membre" default=$selected_user target="membres/selector.php"}
 		</dl>
@@ -94,7 +94,11 @@
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}
-		<input type="submit" name="save" value="Enregistrer &rarr;" />
+		{if $user_id}
+			<input type="submit" name="save" value="Enregistrer &rarr;" />
+		{else}
+			<input type="submit" name="next" value="Continuer &rarr;" />
+		{/if}
 	</p>
 
 </form>
