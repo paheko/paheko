@@ -9,6 +9,12 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ADMIN);
 
+$services_list = Services::listAssoc();
+
+if (!count($services_list)) {
+	Utils::redirect(ADMIN_URL . 'services/?CREATE');
+}
+
 $csrf_key = 'reminder_add';
 
 $form->runIf('save', function () {
