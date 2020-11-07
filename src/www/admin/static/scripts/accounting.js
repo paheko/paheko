@@ -54,13 +54,7 @@ function initTransactionForm() {
 		var debit = credit = 0;
 
 		amounts.forEach((i) => {
-			var v = i.value.replace(/[^0-9.,]/, '');
-			if (v.length == 0) return;
-
-			v = v.split(/[,.]/);
-			var d = v.length == 2 ? v[1] : '0';
-			v = v[0] + (d + '00').substr(0, 2);
-			v = parseInt(v, 10);
+			var v = g.getMoneyAsInt(i.value);
 
 			if (i.name.match(/debit/)) {
 				debit += v;
