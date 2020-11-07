@@ -244,9 +244,20 @@
 		return (v.substr(0, v.length-2) || '0') + ',' + v.substr(-2);
 	};
 
+	g.getMoneyAsInt = (v) => {
+		v = v.replace(/[^0-9.,]/, '');
+		if (v.length == 0) return;
+
+		v = v.split(/[,.]/);
+		var d = v.length == 2 ? v[1] : '0';
+		v = v[0] + (d + '00').substr(0, 2);
+		v = parseInt(v, 10);
+		return v;
+	};
+
 	// Focus on first form input when loading the page
 	g.onload(() => {
-		if ((i = document.querySelector('form[data-focus="1"] [name][id]')) && (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body')) {
+		if ((i = document.querySelector('form[data-focus="1"] [value]')) && (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body')) {
 			i.focus();
 		}
 	}, 'dom');
