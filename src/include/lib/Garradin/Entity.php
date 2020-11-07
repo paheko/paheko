@@ -48,7 +48,18 @@ class Entity extends AbstractEntity
 
 	protected function assert(bool $test, string $message = null): void
 	{
-		if (null !== $message && !$test) {
+		if ($test) {
+			return;
+		}
+
+		if (null === $message) {
+			$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+			$caller_class = array_pop($backtrace);
+			$caller = array_pop($backtrace);
+			$message = sprintf('Entity assertion fail from class %s on line %d', $caller_class['class'], $caller['line']);
+			throw new \UnexpectedValueException($message);
+		}
+		else {
 			throw new ValidationException($message);
 		}
 	}

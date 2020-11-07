@@ -16,7 +16,7 @@
 <fieldset>
     <legend>Remise à zéro</legend>
 	<p class="block error">
-		Attention : toutes les données seront effacées&nbsp;! Ceci inclut les membres, les opérations comptables, les pages du wiki, etc.
+		Attention : toutes les données seront effacées&nbsp;! Ceci inclut les membres, les écritures comptables, les pages du wiki, etc.
         Seul votre compte membre sera re-créé avec le même email et mot de passe.
 	</p>
     <p class="help">

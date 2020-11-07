@@ -8,49 +8,88 @@
 
 	<fieldset>
 		<legend>Enregistrer une activité</legend>
+
+{if !$selected_user}
 		<dl>
-			{input type="list" name="user" required=1 label="Membre concerné" default=$selected_user target="membres/selector.php"}
-
+			{input type="list" name="user" required=1 label="Sélectionner un membre" default=$selected_user target="membres/selector.php"}
+		</dl>
+{else}
+		<dl>
+			<dt>Membre sélectionné</dt>
+			<dd><h3>{$user_name}</h3><input type="hidden" name="id_user" value="{$user_id}" /></dd>
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
-			{foreach from=$grouped_services item="service"}
-				<dd><label>
-					<input type="radio" name="id_service" id="f_id_service_{$service.id}" value="{$service.id}" {if f('id_service') == $service->id}checked="checked"{/if} />
-					{$service.label} —
-					{if $service.duration}
-						{$service.duration} jours
-					{elseif $service.start_date}
-						du {$service.start_date|date_short} au {$service.end_date|date_short}
-					{else}
-						ponctuelle
-					{/if}
-					</label>
-				</dd>
-				{if $service.description}
-				<dd class="help">
-					{$service.description|escape|nl2br}
-				</dd>
-				{/if}
-				<dd data-service="s{$service.id}">
-					<dl>
-						<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
-					{foreach from=$service.fees key="service_id" item="fee"}
-						{input type="radio" name="id_fee" value=$fee.id label=$fee.label help=$fee.description data-amount=$fee.amount data-user-amount=$fee.user_amount data-account=$fee.id_account}
-					{/foreach}
-					</dl>
-				</dd>
-			{/foreach}
 
-			<dt><strong>Montant de l'activité à payer</strong></dt>
-			<dd><h3 class="money warning" id="target_amount" data-currency="{$config.monnaie}">--</h3></dd>
+		{foreach from=$grouped_services item="service"}
+			<dd>
+				<label class="radio-btn">
+					{input type="radio" name="id_service" value=$service.id}
+					<div>
+						<h3>{$service.label}</h3>
+						<p>
+							{if $service.duration}
+								{$service.duration} jours
+							{elseif $service.start_date}
+								du {$service.start_date|date_short} au {$service.end_date|date_short}
+							{else}
+								ponctuelle
+							{/if}
+						</p>
+						{if $service.description}
+						<p class="help">
+							{$service.description|escape|nl2br}
+						</p>
+						{/if}
+					</div>
+				</label>
+			</dd>
+		{/foreach}
 		</dl>
-		<dl class="accounting">
-			{input type="money" name="amount" label="Montant réglé par le membre"}
-			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
+
+		{foreach from=$grouped_services item="service"}
+		<dl data-service="s{$service.id}">
+			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
+			{foreach from=$service.fees key="service_id" item="fee"}
+			<dd>
+				<label class="radio-btn">
+					{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account}
+					<div>
+						<h3>{$fee.label}</h3>
+						<p>
+							{if !$fee.user_amount}
+								prix libre ou gratuit
+							{elseif $fee.user_amount && $fee.formula}
+								<strong>{$fee.user_amount|raw|money_currency}</strong> (montant calculé)
+							{elseif $fee.user_amount}
+								<strong>{$fee.user_amount|raw|money_currency}</strong>
+							{/if}
+						</p>
+						{if $fee.description}
+						<p class="help">
+							{$fee.description|escape|nl2br}
+						</p>
+						{/if}
+					</div>
+				</label>
+			</dd>
+			{/foreach}
 		</dl>
+		{/foreach}
+
 		<dl>
 			{input type="checkbox" name="paid" value="1" label="Marquer cette activité comme payée"}
 			<dd class="help">En cas de règlement en plusieurs fois, il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
+	</fieldset>
+
+	<fieldset class="accounting">
+		<legend>Enregistrement en comptabilité</legend>
+
+		<dl>
+			{input type="money" name="amount" label="Montant réglé par le membre" required=1}
+			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
+		</dl>
+{/if}
 	</fieldset>
 
 	<p class="submit">
@@ -73,34 +112,18 @@ function selectService(elm) {
 }
 
 function selectFee(elm) {
-	var userAmount = parseInt(elm.getAttribute('data-user-amount'), 10);
-	var amount = parseInt(elm.getAttribute('data-amount'), 10);
+	var amount = parseInt(elm.getAttribute('data-user-amount'), 10);
 
-	if (userAmount) {
-		amount = userAmount;
-	}
+	// Toggle accounting part of the form
+	var accounting = elm.getAttribute('data-account') ? true : false;
+	g.toggle('.accounting', accounting);
+	$('#f_amount').required = accounting;
 
-	if (elm.getAttribute('data-account')) {
-		g.toggle('.accounting', true);
-	}
-	else {
-		g.toggle('.accounting', false);
-	}
+	$('#f_paid_1').checked = true;
 
-	console.log(elm.getAttribute('data-account'));
-
-	var a = $('#target_amount');
-
+	// Fill the amount paid by the user
 	if (amount) {
-		a.innerHTML = g.formatMoney(amount) + ' ' + a.getAttribute('data-currency');
-		a.setAttribute('data-amount', amount);
-		$('#f_paid_amount').value = g.formatMoney(amount);
-		$('#f_paid_1').checked = true;
-	}
-	else {
-		a.innerHTML = 'prix libre';
-		a.setAttribute('data-amount', 0);
-		$('#f_paid_1').checked = true;
+		$('#f_amount').value = g.formatMoney(amount);
 	}
 }
 
@@ -111,18 +134,6 @@ $('input[name=id_service]').forEach((e) => {
 $('input[name=id_fee]').forEach((e) => {
 	e.onchange = () => { selectFee(e); };
 });
-
-$('#f_paid_amount').onkeyup = () => {
-	var v = g.getMoneyAsInt($('#f_paid_amount').value);
-	var expected = parseInt($('#target_amount').getAttribute('data-amount'), 10);
-
-	if (v >= expected) {
-		$('#f_paid_1').checked = true;
-	}
-	else {
-		$('#f_paid_1').checked = false;
-	}
-}
 
 var selected = document.querySelector('input[name="id_service"]:checked, input[name="id_service"]');
 selected.checked = true;

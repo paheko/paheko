@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Entities\Accounting\Account;
+use Garradin\Accounting\Years;
 use Garradin\Entities\Services\Fee;
 use Garradin\Services\Services;
 
@@ -24,7 +25,10 @@ $form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('save'), 
 
 $targets = Account::TYPE_REVENUE;
 
-$tpl->assign(compact('service', 'targets'));
+$accounting_enabled = false;
+$years = Years::listOpen();
+
+$tpl->assign(compact('service', 'targets', 'accounting_enabled', 'years'));
 $tpl->assign('list', $fees->listWithStats());
 
 $tpl->display('services/fees/index.tpl');

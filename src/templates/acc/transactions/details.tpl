@@ -49,7 +49,7 @@
 		</dd>
 	{/if}
 
-	<dt>Opération créée par</dt>
+	<dt>Écriture créée par</dt>
 	<dd>
 		{if $transaction.id_creator}
 			{if $session->canAccess('compta', Membres::DROIT_ACCES)}
@@ -62,12 +62,15 @@
 		{/if}
 	</dd>
 
-	<dt>Opération liée à</dt>
+	<dt>Écriture liée à</dt>
 	{if empty($related_users)}
-		<dd><em>Aucun membre n'est lié à cette opération.</em></dd>
+		<dd><em>Aucun membre n'est lié à cette écriture.</em></dd>
 	{else}
 		{foreach from=$related_users item="u"}
-			<dd><a href="{$admin_url}membres/fiche.php?id={$u.id}">{$u.identity}</a></dd>
+			<dd>
+				<a href="{$admin_url}membres/fiche.php?id={$u.id}">{$u.identity}</a>
+				{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user.php?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
+			</dd>
 		{/foreach}
 	{/if}
 
