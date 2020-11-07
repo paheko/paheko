@@ -23,7 +23,7 @@ class Form
 
 	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null): bool
 	{
-		if (!$this->check($csrf_key)) {
+		if (null !== $csrf_key && !$this->check($csrf_key)) {
 			return false;
 		}
 

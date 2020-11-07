@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS services_users
     id_fee INTEGER NULL REFERENCES services_fees (id) ON DELETE CASCADE,
 
     paid INTEGER NOT NULL DEFAULT 0,
+    expected_amount INTEGER NULL,
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date),
     expiry_date TEXT NULL CHECK (date(expiry_date) IS NULL OR date(expiry_date) = expiry_date)

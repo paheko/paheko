@@ -20,11 +20,13 @@
         {else}
             N'est inscrit à aucune activité
         {/if}
-        — <a href="{$admin_url}services/user.php?id={$membre.id}">Voir les inscriptions et règlements des activités</a>
     </dd>
-    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-        <dd>{linkbutton href="services/save.php?user=%d"|args:$membre.id label="Enregistrer une activité" shape="plus"}</dd>
-    {/if}
+    <dd>
+        {linkbutton href="services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
+        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {linkbutton href="services/save.php?user=%d"|args:$membre.id label="Enregistrer une activité" shape="plus"}
+        {/if}
+    </dd>
     {if $session->canAccess('membres', Membres::DROIT_ACCES)}
         {if !empty($transactions_linked)}
             <dt>Écritures comptables liées</dt>

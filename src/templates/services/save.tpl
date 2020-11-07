@@ -76,8 +76,8 @@
 		{/foreach}
 
 		<dl>
-			{input type="checkbox" name="paid" value="1" label="Marquer cette activité comme payée"}
-			<dd class="help">En cas de règlement en plusieurs fois, il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
+			{input type="checkbox" name="paid" value="1" default="1" label="Marquer cette activité comme payée"}
+			<dd class="help">Décocher cette case pour pouvoir suivre les règlements de personnes qui payent en plusieurs fois. Il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
 	</fieldset>
 
@@ -85,7 +85,7 @@
 		<legend>Enregistrement en comptabilité</legend>
 
 		<dl>
-			{input type="money" name="amount" label="Montant réglé par le membre" required=1}
+			{input type="money" name="amount" label="Montant réglé par le membre" required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
 			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>
@@ -122,8 +122,6 @@ function selectFee(elm) {
 	var accounting = elm.getAttribute('data-account') ? true : false;
 	g.toggle('.accounting', accounting);
 	$('#f_amount').required = accounting;
-
-	$('#f_paid_1').checked = true;
 
 	// Fill the amount paid by the user
 	if (amount) {

@@ -124,6 +124,7 @@ INSERT INTO services_fees (id, label, amount, id_service, id_account)
 INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
 	cm.id_cotisation,
 	1,
+	NULL,
 	cm.date,
 	CASE
 		WHEN c.duree IS NOT NULL THEN date(cm.date, '+'||c.duree||' days')

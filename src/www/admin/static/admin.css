@@ -1038,6 +1038,7 @@ h2.ruler:after {
 }
 
 .icn-btn {
+    user-select: none;
     display: inline-block;
     color: rgb(var(--gMainColor));
     border: 1px solid rgba(var(--gSecondColor), 0.5);

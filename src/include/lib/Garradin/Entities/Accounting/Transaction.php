@@ -540,19 +540,18 @@ class Transaction extends Entity
 		$details = [
 			self::TYPE_REVENUE => [
 				'accounts' => [
-						[
-						'label' => 'De',
+					[
+						'label' => 'Type de recette',
+						'targets' => [Account::TYPE_REVENUE],
+						'position' => 'credit',
+					],
+					[
+						'label' => 'Compte d\'encaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'position' => 'debit',
 					],
-					[
-						'label' => 'Vers',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'credit',
-					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_REVENUE],
-				'help' => null,
 			],
 			self::TYPE_EXPENSE => [
 				'accounts' => [
@@ -569,6 +568,22 @@ class Transaction extends Entity
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_EXPENSE],
 				'help' => null,
+			],
+			self::TYPE_TRANSFER => [
+				'accounts' => [
+						[
+						'label' => 'De',
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'position' => 'debit',
+					],
+					[
+						'label' => 'Vers',
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'position' => 'credit',
+					],
+				],
+				'label' => self::TYPES_NAMES[self::TYPE_TRANSFER],
+				'help' => 'Dépôt en banque, virement interne, etc.',
 			],
 			self::TYPE_DEBT => [
 				'accounts' => [
@@ -603,18 +618,7 @@ class Transaction extends Entity
 				'help' => 'Quand un membre ou un fournisseur doit de l\'argent à l\'association',
 			],
 			self::TYPE_ADVANCED => [
-				'accounts' => [
-					[
-						'label' => 'Type de recette',
-						'targets' => [Account::TYPE_REVENUE],
-						'position' => 'credit',
-					],
-					[
-						'label' => 'Compte d\'encaissement',
-						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'debit',
-					],
-				],
+				'accounts' => [],
 				'label' => self::TYPES_NAMES[self::TYPE_ADVANCED],
 				'help' => 'Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc.',
 			],
