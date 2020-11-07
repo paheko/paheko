@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Accounting\Transactions;
+use Garradin\Services\Services;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -24,9 +25,7 @@ $cats = new Membres\Categories;
 $categorie = $cats->get($membre->id_categorie);
 $tpl->assign('categorie', $categorie);
 
-$cotisations = new Membres\Cotisations;
-
-$tpl->assign('nb_activites', $cotisations->countForMember($membre->id));
+$tpl->assign('nb_services', Services::countForUser($membre->id));
 
 if ($session->canAccess('compta', Membres::DROIT_ACCES)) {
 	$tpl->assign('transactions_linked', Transactions::countForUser($membre->id));
