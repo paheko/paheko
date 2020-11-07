@@ -495,13 +495,21 @@ class Transaction extends Entity
 		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
 	}
 
+	public function linkToUser(int $user_id, ?int $service_id = null)
+	{
+		$db = EntityManager::getInstance(self::class)->DB();
+
+		return $db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, ?);',
+			$this->id(), $user_id, $service_id);
+	}
+
 	public function updateLinkedUsers(array $users)
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 
 		$db->begin();
 
-		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s;', $db->where('id_user', 'NOT IN', $users));
+		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND id_service_user IS NULL AND %s;', $db->where('id_user', 'NOT IN', $users));
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
@@ -515,7 +523,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = Config::getInstance()->get('champ_identite');
-		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
 		return $db->get($sql, $this->id());
 	}
 
@@ -530,88 +538,98 @@ class Transaction extends Entity
 	static public function getTypesDetails()
 	{
 		$details = [
-			[
-				[
-					'label' => 'Type de recette',
-					'targets' => [Account::TYPE_REVENUE],
-					'position' => 'credit',
+			self::TYPE_REVENUE => [
+				'accounts' => [
+						[
+						'label' => 'De',
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'position' => 'debit',
+					],
+					[
+						'label' => 'Vers',
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'position' => 'credit',
+					],
 				],
-				[
-					'label' => 'Compte d\'encaissement',
-					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-					'position' => 'debit',
-				],
+				'label' => self::TYPES_NAMES[self::TYPE_REVENUE],
+				'help' => null,
 			],
-			[
-				[
-					'label' => 'Type de dépense',
-					'targets' => [Account::TYPE_EXPENSE],
-					'position' => 'debit',
+			self::TYPE_EXPENSE => [
+				'accounts' => [
+					[
+						'label' => 'Type de dépense',
+						'targets' => [Account::TYPE_EXPENSE],
+						'position' => 'debit',
+					],
+					[
+						'label' => 'Compte de décaissement',
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'position' => 'credit',
+					],
 				],
-				[
-					'label' => 'Compte de décaissement',
-					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-					'position' => 'credit',
-				],
+				'label' => self::TYPES_NAMES[self::TYPE_EXPENSE],
+				'help' => null,
 			],
-			[
-				[
-					'label' => 'De',
-					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-					'position' => 'debit',
+			self::TYPE_DEBT => [
+				'accounts' => [
+					[
+						'label' => 'Compte de tiers',
+						'targets' => [Account::TYPE_THIRD_PARTY],
+						'position' => 'credit',
+					],
+					[
+						'label' => 'Type de dette (dépense)',
+						'targets' => [Account::TYPE_EXPENSE],
+						'position' => 'debit',
+					],
 				],
-				[
-					'label' => 'Vers',
-					'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-					'position' => 'credit',
-				],
+				'label' => self::TYPES_NAMES[self::TYPE_DEBT],
+				'help' => 'Quand l\'association doit de l\'argent à un membre ou un fournisseur',
 			],
-			// Debt (dette)
-			[
-				[
-					'label' => 'Compte de tiers',
-					'targets' => [Account::TYPE_THIRD_PARTY],
-					'position' => 'credit',
+			self::TYPE_CREDIT => [
+				'accounts' => [
+					[
+						'label' => 'Compte de tiers',
+						'targets' => [Account::TYPE_THIRD_PARTY],
+						'position' => 'debit',
+					],
+					[
+						'label' => 'Type de créance (recette)',
+						'targets' => [Account::TYPE_REVENUE],
+						'position' => 'credit',
+					],
 				],
-				[
-					'label' => 'Type de dette (dépense)',
-					'targets' => [Account::TYPE_EXPENSE],
-					'position' => 'debit',
-				],
+				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
+				'help' => 'Quand un membre ou un fournisseur doit de l\'argent à l\'association',
 			],
-			// Credit (créance)
-			[
-				[
-					'label' => 'Compte de tiers',
-					'targets' => [Account::TYPE_THIRD_PARTY],
-					'position' => 'debit',
+			self::TYPE_ADVANCED => [
+				'accounts' => [
+					[
+						'label' => 'Type de recette',
+						'targets' => [Account::TYPE_REVENUE],
+						'position' => 'credit',
+					],
+					[
+						'label' => 'Compte d\'encaissement',
+						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
+						'position' => 'debit',
+					],
 				],
-				[
-					'label' => 'Type de créance (recette)',
-					'targets' => [Account::TYPE_REVENUE],
-					'position' => 'credit',
-				],
+				'label' => self::TYPES_NAMES[self::TYPE_ADVANCED],
+				'help' => 'Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc.',
 			],
 		];
 
-		$out = [];
-
-		foreach ($details as $k => $accounts) {
-			$d = (object) [
-				'id' => $k+1,
-				'label' => self::TYPES_NAMES[$k+1],
-				'accounts' => [],
-			];
-
-			foreach ($accounts as $account) {
-				$account['targets'] = implode(':', $account['targets']);
-				$d->accounts[] = (object) $account;
+		foreach ($details as $key => &$type) {
+			$type = (object) $type;
+			$type->id = $key;
+			foreach ($type->accounts as &$account) {
+				$account = (object) $account;
+				$account->targets_string = implode(':', $account->targets);
 			}
-
-			$out[$d->id] = $d;
 		}
 
-		return $out;
+		return $details;
 	}
 
 	public function payOffFrom(int $id): self
