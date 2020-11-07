@@ -4,7 +4,7 @@ use Garradin\Services\Services;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
+$session->requireAccess('membres', Membres::DROIT_ACCES);
 
 $service = Services::get((int) qg('id'));
 

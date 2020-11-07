@@ -18,6 +18,7 @@ class Service_User extends Entity
 	protected $id_service;
 	protected $id_fee;
 	protected $paid;
+	protected $expected_amount;
 	protected $date;
 	protected $expiry_date;
 
@@ -27,6 +28,7 @@ class Service_User extends Entity
 		'id_fee'      => 'int',
 		'id_service'  => 'int',
 		'paid'        => 'bool',
+		'expected_amount' => '?int',
 		'date'        => 'date',
 		'expiry_date' => '?date',
 	];
@@ -35,7 +37,8 @@ class Service_User extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(!DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et ce jour');
+		$this->paid = (bool) $this->paid;
+		$this->assert(!DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ? AND id != ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d'), $this->id), 'Cette activité a déjà été enregistrée pour ce membre et ce jour');
 	}
 
 	public function importForm(?array $source = null)
@@ -97,6 +100,11 @@ class Service_User extends Entity
 		$su = new self;
 		$su->date = new \DateTime;
 		$su->importForm($source);
+
+		if ($su->fee() && $su->id_user) {
+			$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
+		}
+
 		$su->save();
 
 		if ($su->fee()->id_account && !empty($source['amount'])) {

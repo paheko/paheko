@@ -23,6 +23,10 @@ if (!$user_id) {
 $user_id = (int) $user_id ?: null;
 $user_name = $user_id ? (new Membres)->getNom($user_id) : null;
 
+if (!$user_name) {
+	$user_id = null;
+}
+
 $grouped_services = Services::listGroupedWithFees($user_id);
 
 if (!count($grouped_services)) {
