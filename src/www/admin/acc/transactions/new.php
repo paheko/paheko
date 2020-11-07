@@ -17,6 +17,7 @@ $chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 $transaction = new Transaction;
+$transaction->type = -1;
 $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
@@ -75,7 +76,7 @@ $tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
 
-$tpl->assign('types', Transaction::getTypesDetails());
+$tpl->assign('types_details', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
 
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());

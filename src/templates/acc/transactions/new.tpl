@@ -7,8 +7,8 @@
 
 	{if $ok}
 		<p class="block confirm">
-			L'opération numéro <a href="details.php?id={$ok}">{$ok}</a> a été ajoutée.
-			(<a href="details.php?id={$ok}">Voir l'opération</a>)
+			L'écriture numéro <a href="details.php?id={$ok}">{$ok}</a> a été ajoutée.
+			(<a href="details.php?id={$ok}">Voir l'écriture</a>)
 		</p>
 	{/if}
 
@@ -27,12 +27,17 @@
 		<fieldset>
 			<legend>Type d'écriture</legend>
 			<dl>
-				{input type="radio" name="type" value=$transaction::TYPE_REVENUE default=-1 source=$transaction label="Recette"}
-				{input type="radio" name="type" value=$transaction::TYPE_EXPENSE default=-1 source=$transaction label="Dépense"}
-				{input type="radio" name="type" value=$transaction::TYPE_TRANSFER default=-1 source=$transaction label="Virement" help="Faire un virement entre comptes, déposer des espèces en banque, etc."}
-				{input type="radio" name="type" value=$transaction::TYPE_DEBT default=-1 source=$transaction label="Dette" help="Quand l'association doit de l'argent à un membre ou un fournisseur"}
-				{input type="radio" name="type" value=$transaction::TYPE_CREDIT default=-1 source=$transaction label="Créance" help="Quand un membre ou un fournisseur doit de l'argent à l'association"}
-				{input type="radio" name="type" value=$transaction::TYPE_ADVANCED default=-1 source=$transaction label="Saisie avancée" help="Choisir les comptes du plan comptable, ventiler une écriture sur plusieurs comptes, etc."}
+			{foreach from=$types_details item="type"}
+				<label class="radio-btn">
+					{input type="radio" name="type" value=$type.id source=$transaction}
+					<div>
+						<h3>{$type.label}</h3>
+						{if !empty($type.help)}
+							<p>{$type.help}</p>
+						{/if}
+					</div>
+				</label>
+			{/foreach}
 			</dl>
 		</fieldset>
 	{/if}
@@ -51,12 +56,12 @@
 
 	{if !$payoff_for}
 
-		{foreach from=$types item="type"}
+		{foreach from=$types_details item="type"}
 			<fieldset data-types="t{$type.id}">
 				<legend>{$type.label}</legend>
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
-					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
+					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
 				{/foreach}
 				</dl>
 			</fieldset>
