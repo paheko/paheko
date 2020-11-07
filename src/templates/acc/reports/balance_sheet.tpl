@@ -43,6 +43,6 @@
 	</tfoot>
 </table>
 
-<p class="help">Toutes les opérations sont libellées en {$config.monnaie}.</p>
+<p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
 
 {include file="admin/_foot.tpl"}
