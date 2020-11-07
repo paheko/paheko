@@ -7,25 +7,23 @@
         {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
             <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
         {/if}
-        <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
     </ul>
 </nav>
 
 <dl class="cotisation">
-    <dt>
-        {if $nb_activites == 1}
-            {$nb_activites} cotisation enregistrée
-        {elseif $nb_activites}
-            {$nb_activites} cotisations enregistrées
-        {else}
-            Aucune cotisation enregistrée
-        {/if}
-    </dt>
+    <dt>Activités et cotisations</dt>
     <dd>
-        <a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Voir l'historique</a>
+        {if $nb_services == 1}
+            Inscrit à <strong>{$nb_services}</strong> activité
+        {elseif $nb_activites}
+            Inscrit à <strong>{$nb_services}</strong> activités
+        {else}
+            N'est inscrit à aucune activité
+        {/if}
+        — <a href="{$admin_url}services/user.php?id={$membre.id}">Voir les inscriptions et règlements des activités</a>
     </dd>
     {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-        <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dd>
+        <dd>{linkbutton href="services/save.php?user=%d"|args:$membre.id label="Enregistrer une activité" shape="plus"}</dd>
     {/if}
     {if $session->canAccess('membres', Membres::DROIT_ACCES)}
         {if !empty($transactions_linked)}

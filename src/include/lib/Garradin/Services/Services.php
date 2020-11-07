@@ -5,6 +5,7 @@ namespace Garradin\Services;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entities\Services\Service;
+use Garradin\Entities\Services\Service_User;
 use KD2\DB\EntityManager;
 
 class Services
@@ -17,6 +18,11 @@ class Services
 	static public function listAssoc()
 	{
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE NOCASE;');
+	}
+
+	static public function countForUser(int $user_id)
+	{
+		return DB::getInstance()->count(Service_User::TABLE, 'id_user = ?', $user_id);
 	}
 
 	static public function listGroupedWithFees(?int $user_id = null)
