@@ -53,6 +53,7 @@ rows.forEach((e) => {
 });
 
 document.querySelector('input').focus();
+window.onkeyup = (e) => { if (e.key == 'Escape') window.parent.g.closeDialog(); };
 </script>
 {/literal}
 
