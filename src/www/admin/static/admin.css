@@ -364,7 +364,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=submit]), textarea, selec
 }
 
 input:not([type=checkbox]):not([type=radio]):focus, button:focus, select:focus, textarea:focus {
-    box-shadow: 0 0 0 0.2rem rgb(var(--gSecondColor));
+    box-shadow: 0 0 1px .2rem rgb(var(--gSecondColor));
     outline: 0;
 }
 
@@ -411,6 +411,44 @@ input[type=button].showPassword:hover {
 
 select, input[size], input[type=color], button, input[type=button], input[type=submit] {
     min-width: 0 !important;
+}
+
+form .radio-btn {
+    display: flex;
+}
+
+form label.radio-btn:hover {
+    border: none;
+}
+
+form .radio-btn div {
+    flex-grow: 1;
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    background-color: rgba(var(--gSecondColor), 0.1);
+    font-size: inherit;
+    border-radius: .2em;
+    padding: .2em .4em;
+    margin: .2em .5em;
+    transition: color .3s, background-color .3s;
+    color: #333;
+}
+
+form .radio-btn h3 {
+    color: rgb(var(--gMainColor));
+    text-decoration: underline;
+}
+
+form .radio-btn input {
+    margin: 1em;
+}
+
+form .radio-btn .help {
+    margin: .8em 0 0 0;
+    font-size: .8em;
+}
+
+form .radio-btn input:checked + div {
+    background-color: rgba(var(--gSecondColor), 0.5);
 }
 
 form .input-list {
@@ -1098,7 +1136,7 @@ a.icn[title]:hover:after {
     white-space: pre;
 }
 
-.actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover {
+.actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover, .radio-btn:hover div {
     color: darkred;
     background: #ff9;
     z-index: 300;
