@@ -12,15 +12,15 @@
 
 <dl class="cotisation">
     <dt>Activités et cotisations</dt>
+    {foreach from=$services item="service"}
     <dd>
-        {if $nb_services == 1}
-            <strong>{$nb_services}</strong> inscription à une activité
-        {elseif $nb_services}
-            <strong>{$nb_services}</strong> inscriptions à des activités
-        {else}
-            Aucune inscription à des activités
-        {/if}
+        {$service.label}
+        {if $service.status == -1} — <b class="error">en retard</b>
+        {elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
+        {if $service.status.expiry_date} — expire le {$service.expiry_date|date_short}{/if}
+        {if !$service.paid} — <b class="error">À payer&nbsp;!</b>{/if}
     </dd>
+    {/foreach}
     <dd>
         {linkbutton href="services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
         {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}

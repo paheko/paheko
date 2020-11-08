@@ -11,7 +11,7 @@
 {else}
 	<table class="list">
 		<thead>
-			<td>Cotisation</td>
+			<td>Activité</td>
 			<td>Délai de rappel</td>
 			<th>Sujet</th>
 			<td></td>

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../_inc.php';
 $account = Accounts::get((int) qg('id'));
 
 if (!$account) {
-    throw new UserException("Le compte demandé n'existe pas.");
+	throw new UserException("Le compte demandé n'existe pas.");
 }
 
 $year_id = (int) qg('year') ?: CURRENT_YEAR_ID;

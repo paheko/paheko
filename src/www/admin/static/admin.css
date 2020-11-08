@@ -372,10 +372,6 @@ input:not(:placeholder-shown):focus:invalid {
     border-color: #f33;
 }
 
-input[type=password], input.clearTextPassword {
-    font-family: monospace;
-}
-
 input.time {
     text-align: center;
     padding: .2em 0;
@@ -395,18 +391,6 @@ input[disabled], input[disabled] + label {
 input.resetButton {
     padding: .1em;
     margin-left: 1em;
-}
-
-input[type=button].showPassword {
-    position: absolute;
-    margin-left: -2em;
-    margin-right: 1em;
-    background: none;
-    margin-top: .1em;
-}
-
-input[type=button].showPassword:hover {
-    background: none;
 }
 
 select, input[size], input[type=color], button, input[type=button], input[type=submit] {
@@ -479,8 +463,8 @@ form .input-list .label button {
 }
 
 input[readonly] {
-    color: #666;
-    background-color: #eee;
+    color: #666 !important;
+    background-color: #eee !important;
 }
 
 input.money {
