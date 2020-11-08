@@ -117,7 +117,7 @@ class Utils
     static public function moneyToInteger($value)
     {
         if (trim($value) === '') {
-            return null;
+            return 0;
         }
 
         if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
@@ -134,12 +134,13 @@ class Utils
             return $zero_if_empty ? '0' : '0,00';
         }
 
-        $number = (int) $number;
+        $sign = $number < 0 ? '-' : '';
+        $number = abs((int) $number);
 
-        $decimals = substr($number, -2);
+        $decimals = substr('0' . $number, -2);
         $number = (int) substr($number, 0, -2);
 
-        return sprintf('%s%s%s', number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
+        return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
 
     static public function getRequestURI()

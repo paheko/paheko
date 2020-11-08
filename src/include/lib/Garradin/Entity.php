@@ -40,6 +40,9 @@ class Entity extends AbstractEntity
 			elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
 				return \DateTime::createFromFormat('d/m/Y', $value);
 			}
+			else {
+				throw new ValidationException('Format de date invalide (merci d\'utiliser le format) JJ/MM/AAAA) : ' . $value);
+			}
 		}
 		else {
 			return parent::filterUserValue($type, $value, $key);

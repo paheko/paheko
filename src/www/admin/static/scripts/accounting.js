@@ -65,7 +65,8 @@ function initTransactionForm() {
 		});
 
 		if (m = $('#lines_message')) {
-			m.innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée</span>';
+			var diff = credit - debit;
+			m.innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée (' + g.formatMoney(diff) + ')</span>';
 		}
 
 		debit = debit ? debit + '' : '000';
@@ -79,7 +80,7 @@ function initTransactionForm() {
 		var line = $('.transaction-lines tbody tr')[0];
 		var n = line.cloneNode(true);
 		n.querySelectorAll('input').forEach((e) => {
-			e.value = '';
+			e.value = e.className.match(/money/) ? '0' : '';
 		});
 		if (l = n.querySelector('.input-list .label')) {
 			l.parentNode.removeChild(l);
@@ -90,8 +91,8 @@ function initTransactionForm() {
 			g.openFrameDialog(b.value);
 			return false;
 		};
-		initLine(n);
 		line.parentNode.appendChild(n);
+		initLine(n);
 	};
 
 	updateTotals();

@@ -256,8 +256,9 @@
 	};
 
 	g.formatMoney = (v) => {
-		v = '' + v;
-		return (v.substr(0, v.length-2) || '0') + ',' + v.substr(-2);
+		var s = v < 0 ? '-' : '';
+		v = '' + Math.abs(v);
+		return s + (v.substr(0, v.length-2) || '0') + ',' + ('00' + v).substr(-2);
 	};
 
 	g.getMoneyAsInt = (v) => {

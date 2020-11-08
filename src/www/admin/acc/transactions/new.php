@@ -43,6 +43,14 @@ if ($id = qg('account')) {
 		$_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
 	}
 }
+elseif (!empty($_POST['lines']) && is_array($_POST['lines'])) {
+	$lines = Utils::array_transpose($_POST['lines']);
+
+	foreach ($lines as &$line) {
+		$line['credit'] = Utils::moneyToInteger($line['credit']);
+		$line['debit'] = Utils::moneyToInteger($line['debit']);
+	}
+}
 
 if (f('save') && $form->check('acc_transaction_new')) {
 	try {

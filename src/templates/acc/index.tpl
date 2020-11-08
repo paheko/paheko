@@ -20,6 +20,7 @@
 		</ul>
 	</nav>
 
+	{if $year.has_transactions}
 	<section class="graphs">
 		{foreach from=$graphs key="url" item="label"}
 		<figure>
@@ -28,6 +29,7 @@
 		</figure>
 		{/foreach}
 	</section>
+	{/if}
 </section>
 
 
