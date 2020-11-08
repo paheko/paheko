@@ -3,13 +3,18 @@
 {include file="acc/_year_select.tpl"}
 
 <form method="get" action="{$self_url_no_qs}">
-	{if !empty($prev) && !empty($next)}
+	{if $prev || $next}
 	<fieldset class="shortFormRight">
 		<legend>Rapprochement par mois</legend>
 		<dl>
 			<dd class="actions">
-			<a class="icn" href="{$self_url_no_qs}?id={$account.id}&amp;start={$prev|date_fr:'Y-m-01'}&amp;end={$prev|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">&larr; {$prev|date_fr:'F Y'}</a>
-			| <a class="icn" href="{$self_url_no_qs}?id={$account.id}&amp;start={$next|date_fr:'Y-m-01'}&amp;end={$next|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">{$next|date_fr:'F Y'} &rarr;</a>
+				{if $prev}
+					<a class="icn" href="{$self_url_no_qs}?id={$account.id}&amp;start={$prev|date_fr:'Y-m-01'}&amp;end={$prev|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">&larr; {$prev|date_fr:'F Y'}</a>
+				{/if}
+				{if $prev && $next} | {/if}
+				{if $next}
+					<a class="icn" href="{$self_url_no_qs}?id={$account.id}&amp;start={$next|date_fr:'Y-m-01'}&amp;end={$next|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">{$next|date_fr:'F Y'} &rarr;</a>
+				{/if}
 			</dd>
 		</dl>
 	</fieldset>
@@ -50,7 +55,7 @@
 		</thead>
 		<tbody>
 			{foreach from=$journal item="line"}
-			{if isset($line.sum)}
+			{if isset($line->sum)}
 			<tr>
 				<td colspan="5"></td>
 				<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>

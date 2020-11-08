@@ -168,7 +168,7 @@ class Account extends Entity
 
 		foreach ($rows as $row) {
 			if (!$start_sum) {
-				yield ['sum' => $sum, 'date' => $start_date];
+				yield (object) ['sum' => $sum, 'date' => $start_date];
 				$start_sum = true;
 			}
 
@@ -179,7 +179,7 @@ class Account extends Entity
 			yield $row;
 		}
 
-		yield ['sum' => $sum, 'date' => $end_date];
+		yield (object) ['sum' => $sum, 'date' => $end_date];
 	}
 
 	public function getDepositJournal(int $year_id): \Generator
