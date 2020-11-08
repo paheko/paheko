@@ -26,6 +26,7 @@ $form->runIf($session->canAccess('membres', Membres::DROIT_ECRITURE) && null !==
 $list = Services_User::perUserList($user->id);
 $list->loadFromQueryString();
 
+$tpl->assign('services', Services_User::listDistinctForUser($user->id));
 $tpl->assign(compact('list', 'user'));
 
 $tpl->display('services/user.tpl');

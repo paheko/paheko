@@ -93,17 +93,16 @@
             <ul>
                 <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
                 <li class="wiki search{if $current == 'wiki/chercher'} current{/if}"><a href="{$admin_url}wiki/chercher.php">Recherche</a>
-                {*<li class="wiki follow{if $current == 'wiki/suivi'} current{/if}"><a href="{$admin_url}wiki/suivi.php">Mes pages suivies</a>*}
-                {*<li class="wiki follow{if $current == 'wiki/contribution'} current{/if}"><a href="{$admin_url}wiki/contributions.php">Mes contributions</a>*}
             </ul>
             </li>
         {/if}
         {if $session->canAccess('config', Membres::DROIT_ADMIN)}
             <li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
-        <li class="my config{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}"><a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
+        <li class="{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}">
+            <a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
             <ul>
-                <li class="my cotisations{if $current == 'mes_cotisations'} current{/if}"><a href="{$admin_url}mes_cotisations.php">Mes cotisations</a></li>
+                <li{if $current == 'my_services'}  class="current"{/if}><a href="{$admin_url}my_services.php">Mes activités &amp; cotisations</a></li>
             </ul>
         </li>
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}

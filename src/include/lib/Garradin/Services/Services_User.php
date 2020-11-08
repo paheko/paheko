@@ -48,10 +48,6 @@ class Services_User
 				'label' => 'Date d\'inscription',
 				'select' => 'su.date',
 			],
-			'status' => [
-				'label' => 'Statut',
-				'select' => 'CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END',
-			],
 			'expiry' => [
 				'label' => 'Date d\'expiration',
 				'select' => 'MAX(su.expiry_date)',
