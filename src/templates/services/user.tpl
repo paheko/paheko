@@ -8,6 +8,20 @@
 {form_errors}
 
 <dl class="cotisation">
+	<dt>Statut des inscriptions</dt>
+	{foreach from=$services item="service"}
+	<dd>
+		{$service.label}
+		{if $service.status == -1} — <b class="error">en retard</b>
+		{elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
+		{if $service.status.expiry_date} — expire le {$service.expiry_date|date_short}{/if}
+		{if !$service.paid} — <b class="error">À payer&nbsp;!</b>{/if}
+	</dd>
+	{foreachelse}
+	<dd>
+		Aucune inscription.
+	</dd>
+	{/foreach}
 	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
@@ -20,15 +34,6 @@
 		<tr>
 			<th>{$row.label}</th>
 			<td>{$row.date|date_short}</td>
-			<td>
-				{if $row.status == 1}
-					<b class="confirm">À jour</b>
-				{elseif $row.status == -1}
-					<b class="error">En retard</b>
-				{else}
-					Pas d'expiration
-				{/if}
-			</td>
 			<td>{$row.expiry|date_short}</td>
 			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
