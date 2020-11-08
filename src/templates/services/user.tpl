@@ -1,8 +1,8 @@
-{include file="admin/_head.tpl" title="%s — Liste des activités"|args:$user.identite current="membres/services"}
+{include file="admin/_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user.identite current="membres/services"}
 
 <p>
 	{linkbutton href="membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="services/save.php?user=%d"|args:$user.id label="Enregistrer une activité" shape="plus"}
+	{linkbutton href="services/save.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
 </p>
 
 {form_errors}
