@@ -65,15 +65,23 @@ if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 
 $tpl->assign('transaction', $transaction);
 
-$lines = $transaction->getLinesWithAccounts();
-$lines_accounts = [];
+if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
+	$lines = Utils::array_transpose($_POST['lines']);
 
-foreach ($lines as $k => $line) {
-	$lines_accounts[$k] = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+	foreach ($lines as &$line) {
+		$line['credit'] = Utils::moneyToInteger($line['credit']);
+		$line['debit'] = Utils::moneyToInteger($line['debit']);
+	}
+}
+else {
+	$lines = $transaction->getLinesWithAccounts();
+
+	foreach ($lines as $k => &$line) {
+		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+	}
 }
 
 $tpl->assign('lines', $lines);
-$tpl->assign('lines_accounts', $lines_accounts);
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
 
