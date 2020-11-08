@@ -14,11 +14,11 @@
     <dt>Activités et cotisations</dt>
     <dd>
         {if $nb_services == 1}
-            Inscrit à <strong>{$nb_services}</strong> activité
-        {elseif $nb_activites}
-            Inscrit à <strong>{$nb_services}</strong> activités
+            <strong>{$nb_services}</strong> inscription à une activité
+        {elseif $nb_services}
+            <strong>{$nb_services}</strong> inscriptions à des activités
         {else}
-            N'est inscrit à aucune activité
+            Aucune inscription à des activités
         {/if}
     </dd>
     <dd>

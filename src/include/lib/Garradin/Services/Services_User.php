@@ -25,6 +25,9 @@ class Services_User
 			'id' => [
 				'select' => 'su.id',
 			],
+			'id_account' => [
+				'select' => 'sf.id_account',
+			],
 			'label' => [
 				'select' => 's.label',
 				'label' => 'Activité',
@@ -65,7 +68,7 @@ class Services_User
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
 		$list->groupBy('su.id');
-		$list->setCount('COUNT(*)');
+		$list->setCount('COUNT(DISTINCT su.id)');
 		return $list;
 	}
 }

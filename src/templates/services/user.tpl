@@ -8,7 +8,7 @@
 {form_errors}
 
 <dl class="cotisation">
-	<dt>Nombre d'activités inscrites pour ce membre</dt>
+	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
 	</dd>
@@ -41,10 +41,10 @@
 						{linkbutton shape="check" label="Marquer comme payé" href="services/user.php?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
 					{/if}
 				{/if}
-				{if $session->canAccess('compta', Membres::DROIT_ACCES)}
+				{if $session->canAccess('compta', Membres::DROIT_ACCES) && $row.id_account}
 					{linkbutton shape="menu" label="Liste des écritures" href="acc/transactions/service_user.php?id=%d"|args:$row.id}
 				{/if}
-				{if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
+				{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="services/payment.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
