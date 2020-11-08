@@ -30,20 +30,15 @@ else
     if (f('save'))
     {
         $form->check('install', [
-            'nom_asso'     => 'required',
-            'email_asso'   => 'required|email',
             'nom_membre'   => 'required',
             'email_membre' => 'required|email',
             'passe'        => 'confirmed|required',
-            'cat_membre'   => 'required',
         ]);
 
         if (!$form->hasErrors())
         {
             try {
-            	Install::install(f('nom_asso'), f('adresse_asso'), f('email_asso'),
-            		f('cat_membre'), f('nom_membre'), f('email_membre'), f('passe'),
-            		WWW_URL);
+            	Install::install(f('nom_asso'), f('nom_membre'), f('email_membre'), f('passe'));
 
             	Utils::redirect(ADMIN_URL . 'login.php');
             }

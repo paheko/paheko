@@ -159,36 +159,51 @@
 		return true;
 	};
 
-	g.enhancePasswordField = function (field, repeat_field = null)
+	g.togglePasswordVisibility = (field, repeat, show) => {
+		if (typeof show == 'undefined') {
+			show = field.type.toLowerCase() == 'password';
+		}
+
+		var btn = field.nextSibling;
+
+		if (!btn) {
+			throw Error('button not found');
+		}
+
+		field.type = show ? 'text' : 'password';
+		btn.dataset.icon = !show ? '👁' : '⤫';
+		btn.innerHTML = !show ? 'Voir le mot de passe' : 'Cacher le mot de passe';
+		field.classList.toggle('clearTextPassword', !show);
+
+		if (repeat) {
+			repeat.type = field.type;
+			repeat.classList.toggle('clearTextPassword', !show);
+		}
+	};
+
+	g.enhancePasswordField = function (field, repeat_field)
 	{
-		var show_password = document.createElement('input');
+		var show_password = document.createElement('button');
 		show_password.type = 'button';
-		show_password.className = 'icn action showPassword';
-		show_password.title = 'Voir/cacher le mot de passe';
-		show_password.value = '👁';
+		show_password.className = 'icn-btn';
+
+		field.parentNode.insertBefore(show_password, field.nextSibling);
+
+		g.togglePasswordVisibility(field, repeat_field, false);
+
 		show_password.onclick = function (e) {
 			var pos = field.selectionStart;
-			var hidden = field.type.match(/pass/i);
-			field.type = hidden ? 'text' : 'password';
-			this.value = !hidden ? '👁' : '⤫';
-			field.classList.toggle('clearTextPassword');
 
-			if (null !== repeat_field)
-			{
-				repeat_field.type = field.type;
-				repeat_field.classList.toggle('clearTextPassword');
-			}
+			g.togglePasswordVisibility(field, repeat_field);
 
 			// Remettre le focus sur le champ mot de passe
 			// on ne peut pas vraiment remettre le focus sur le champ
-			// précis qui était utilisé avant de cliquer sur le bouton 
+			// précis qui était utilisé avant de cliquer sur le bouton
 			// car il faudrait enregistrer les actions onfocus de tous
 			// les champs de la page
 			field.focus();
 			field.selectionStart = field.selectionEnd = pos;
 		};
-
-		field.parentNode.insertBefore(show_password, field.nextSibling);
 	};
 
 	g.enhanceDateField = (input) => {
@@ -288,6 +303,7 @@
 		});
 	});
 
+	// To be able to select a whole table line just by clicking the row
 	g.onload(function () {
 		var tableActions = document.querySelectorAll('form table tfoot .actions select');
 
