@@ -10,6 +10,6 @@ if (!CURRENT_YEAR_ID) {
 }
 
 $tpl->assign('chart_id', $current_year->id_chart);
-$tpl->assign('grouped_accounts', Reports::getClosingSumsFavoriteAccounts($current_year->id_chart, CURRENT_YEAR_ID));
+$tpl->assign('grouped_accounts', Reports::getClosingSumsFavoriteAccounts(['year' => CURRENT_YEAR_ID]));
 
 $tpl->display('acc/accounts/index.tpl');

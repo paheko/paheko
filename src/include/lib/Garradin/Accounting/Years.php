@@ -25,6 +25,11 @@ class Years
 		return $em->all('SELECT * FROM @TABLE WHERE closed = 0 ORDER BY end_date;');
 	}
 
+	static public function listAssoc()
+	{
+		return DB::getInstance()->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;');
+	}
+
 	static public function listClosed()
 	{
 		$em = EntityManager::getInstance(Year::class);

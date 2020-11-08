@@ -42,7 +42,7 @@
 					{/if}
 				{/if}
 				{if $session->canAccess('compta', Membres::DROIT_ACCES) && $row.id_account}
-					{linkbutton shape="menu" label="Liste des écritures" href="acc/transactions/service_user.php?id=%d"|args:$row.id}
+					{linkbutton shape="menu" label="Liste des écritures" href="acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
 				{/if}
 				{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="services/payment.php?id=%d"|args:$row.id}

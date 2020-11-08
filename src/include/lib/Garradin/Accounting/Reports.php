@@ -38,6 +38,10 @@ class Reports
 			$where[] = sprintf('t.id_creator = %d', $criterias['creator']);
 		}
 
+		if (!empty($criterias['service_user'])) {
+			$where[] = sprintf('t.id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['service_user']);
+		}
+
 		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}
@@ -187,32 +191,20 @@ class Reports
 
 	/**
 	 * Return list of favorite accounts (accounts with a type), grouped by type, with their current sum
-	 * @param  int    $chart_id
-	 * @param  int    $year_id
 	 * @return \Generator list of accounts grouped by type
 	 */
-	static public function getClosingSumsFavoriteAccounts(int $chart_id, int $year_id, bool $include_all = false): \Generator
+	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
 	{
-		if ($include_all) {
-			// List all accounts, including those with no amount
-			$sql = sprintf('SELECT a.id, a.code, a.label, a.description, a.type,
-				(SELECT SUM(l.credit) - SUM(l.debit) FROM %s l INNER JOIN %s t ON t.id = l.id_transaction WHERE l.id_account = a.id AND t.id_year = %d) AS sum
-				FROM %s a
-				WHERE a.id_chart = %d AND a.type != 0
-				GROUP BY a.id
-				ORDER BY a.type, a.code COLLATE NOCASE;',
-				Line::TABLE, Transaction::TABLE, $year_id, Account::TABLE, $chart_id);
-		}
-		else {
-			$sql = sprintf('SELECT a.id, a.code, a.label, a.description, a.type,
-				SUM(l.credit) - SUM(l.debit) AS sum
-				FROM %s a
-				INNER JOIN %s t ON t.id = l.id_transaction
-				INNER JOIN %s l ON a.id = l.id_account
-				WHERE t.id_year = %d AND a.type != 0
-				GROUP BY l.id_account
-				ORDER BY a.type, a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $year_id);
-		}
+		$where = self::getWhereClause($criterias);
+
+		$sql = sprintf('SELECT a.id, a.code, a.label, a.description, a.type,
+			SUM(l.credit) - SUM(l.debit) AS sum
+			FROM %s a
+			INNER JOIN %s t ON t.id = l.id_transaction
+			INNER JOIN %s l ON a.id = l.id_account
+			WHERE a.type != 0 AND %s
+			GROUP BY l.id_account
+			ORDER BY a.type, a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $where);
 
 		$group = null;
 
@@ -239,16 +231,6 @@ class Reports
 		if (null !== $group) {
 			yield $group;
 		}
-	}
-
-	static public function getClosingSums(int $year_id): array
-	{
-		// Find sums, link them to accounts
-		$sql = sprintf('SELECT l.id_account, SUM(l.credit) - SUM(l.debit)
-			FROM %s l
-			INNER JOIN %s t ON t.id = l.id_transaction
-			WHERE t.id_year = %d GROUP BY l.id_account;', Line::TABLE, Transaction::TABLE, $year_id);
-		return DB::getInstance()->getAssoc($sql);
 	}
 
 	/**
