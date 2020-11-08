@@ -86,9 +86,9 @@
 
 <script type="text/javascript">
 {literal}
-g.script('scripts/password.js').onload = function () {
+g.script('scripts/password.js', () => {
     initPasswordField('pw_suggest', 'f_passe', 'f_repasse');
-};
+});
 {/literal}
 </script>
 

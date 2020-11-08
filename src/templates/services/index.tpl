@@ -9,7 +9,7 @@
 {if count($list)}
 	<table class="list">
 		<thead>
-			<th>Cotisation</th>
+			<th>Activité</th>
 			<td>Période</td>
 			<td>Membres à jour</td>
 			<td>Membres expirés</td>

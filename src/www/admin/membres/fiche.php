@@ -25,7 +25,7 @@ $cats = new Membres\Categories;
 $categorie = $cats->get($membre->id_categorie);
 $tpl->assign('categorie', $categorie);
 
-$tpl->assign('nb_services', Services_User::countForUser($membre->id));
+$tpl->assign('services', Services_User::listDistinctForUser($membre->id));
 
 if ($session->canAccess('compta', Membres::DROIT_ACCES)) {
 	$tpl->assign('transactions_linked', Transactions::countForUser($membre->id));
