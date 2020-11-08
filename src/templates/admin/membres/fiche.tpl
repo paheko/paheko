@@ -20,11 +20,17 @@
         {if $service.status.expiry_date} — expire le {$service.expiry_date|date_short}{/if}
         {if !$service.paid} — <b class="error">À payer&nbsp;!</b>{/if}
     </dd>
+    {foreachelse}
+    <dd>
+        Ce membre n'est inscrit à aucune activité ou cotisation.
+    </dd>
     {/foreach}
     <dd>
-        {linkbutton href="services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
+        {if count($services)}
+            {linkbutton href="services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
+        {/if}
         {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-            {linkbutton href="services/save.php?user=%d"|args:$membre.id label="Enregistrer une activité" shape="plus"}
+            {linkbutton href="services/save.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
         {/if}
     </dd>
     {if $session->canAccess('membres', Membres::DROIT_ACCES)}
