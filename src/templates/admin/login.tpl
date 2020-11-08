@@ -1,7 +1,6 @@
 {include file="admin/_head.tpl" title="Connexion" js=1}
 
 {form_errors}
-{show_error if=$fail message="Connexion impossible. Vérifiez l'adresse e-mail et le mot de passe."}
 
 {if $changed}
     <p class="block confirm">
@@ -23,10 +22,10 @@
     <fieldset>
         <legend>Connexion</legend>
         <dl>
-            <dt><label for="f_id">{$champ.title}</label></dt>
+            <dt><label for="f_id">{$id_field_name}</label></dt>
             <dd><input type="text" name="_id" id="f_id" value="{form_field name=_id}" /></dd>
             <dt><label for="f_passe">Mot de passe</label></dt>
-            <dd><input type="password" name="passe" id="f_passe" value="" autocomplete="current-password" />
+            <dd><input type="password" name="password" id="f_passe" value="" autocomplete="current-password" />
                 {if $ssl_enabled}
                     <b class="icn confirm" title="Connexion chiffrée">&#x1f512;</b>
                     <span class="confirm">Connexion sécurisée</span>

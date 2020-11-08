@@ -139,7 +139,11 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		return '<div class="block error"><ul><li>' . implode('</li><li>', $form->getErrorMessages(!empty($params['membre']) ? true : false)) . '</li></ul></div>';
+		$errors = $form->getErrorMessages(!empty($params['membre']) ? true : false);
+		$errors = array_map([$this, 'escape'], $errors);
+		$errors = array_map('nl2br', $errors);
+
+		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
 
 	protected function showError($params)
