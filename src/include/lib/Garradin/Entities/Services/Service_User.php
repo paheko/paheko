@@ -88,6 +88,31 @@ class Service_User extends Entity
 		return $this->_fee;
 	}
 
+	public function addPayment(int $user_id, ?array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		$transaction = new Transaction;
+		$transaction->id_creator = $user_id;
+		$transaction->id_year = $this->fee()->id_year;
+
+		$source['type'] = Transaction::TYPE_REVENUE;
+		$key = sprintf('account_%d_', $source['type']);
+		$source[$key . '0'] = [$this->fee()->id_account => ''];
+		$source[$key . '1'] = isset($source['account']) ? $source['account'] : null;
+
+		$source['label'] = 'Règlement activité - ' . $this->service()->label . ' - ' . $this->fee()->label;
+		$source['date'] = $this->date->format('d/m/Y');
+
+		$transaction->importFromNewForm($source);
+		$transaction->save();
+		$transaction->linkToUser($this->id_user, $this->id());
+
+		return $transaction;
+	}
+
 	static public function saveFromForm(int $user_id, ?array $source = null)
 	{
 		if (null === $source) {
@@ -105,25 +130,11 @@ class Service_User extends Entity
 			$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 		}
 
-		$su->save();
-
 		if ($su->fee()->id_account && !empty($source['amount'])) {
-			$transaction = new Transaction;
-			$transaction->id_creator = $user_id;
-			$transaction->id_year = $su->fee()->id_year;
-
-			$source['type'] = Transaction::TYPE_REVENUE;
-			$key = sprintf('account_%d_', $source['type']);
-			$source[$key . '0'] = [$su->fee()->id_account => ''];
-			$source[$key . '1'] = isset($source['account']) ? $source['account'] : null;
-
-			$source['label'] = 'Règlement activité - ' . $su->service()->label . ' - ' . $su->fee()->label;
-			$source['date'] = $su->date->format('d/m/Y');
-
-			$transaction->importFromNewForm($source);
-			$transaction->save();
-			$transaction->linkToUser($su->id_user, $su->id());
+			$su->addPayment($user_id, $source);
 		}
+
+		$su->save();
 
 		$db->commit();
 

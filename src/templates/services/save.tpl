@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Enregistrer une activité" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Enregistrer un règlement" current="membres/services" js=1}
 
 {include file="services/_nav.tpl" current="save" fee=null service=null}
 
@@ -7,7 +7,7 @@
 <form method="post" action="{$self_url}" data-focus="1">
 
 	<fieldset>
-		<legend>Enregistrer une activité</legend>
+		<legend>Inscrire un membre à une activité</legend>
 
 {if !$user_id}
 		<dl>
@@ -76,7 +76,7 @@
 		{/foreach}
 
 		<dl>
-			{input type="checkbox" name="paid" value="1" default="1" label="Marquer cette activité comme payée"}
+			{input type="checkbox" name="paid" value="1" default="1" label="Marquer cette inscription comme payée"}
 			<dd class="help">Décocher cette case pour pouvoir suivre les règlements de personnes qui payent en plusieurs fois. Il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
 	</fieldset>
@@ -85,7 +85,7 @@
 		<legend>Enregistrement en comptabilité</legend>
 
 		<dl>
-			{input type="money" name="amount" label="Montant réglé par le membre" required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
+			{input type="money" name="amount" label="Montant réglé par le membre" fake_required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
 			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>

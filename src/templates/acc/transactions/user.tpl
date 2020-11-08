@@ -1,5 +1,9 @@
 {include file="admin/_head.tpl" title="Écritures liées à %s"|args:$transaction_user.identite current="acc/accounts"}
 
+<p>
+	{linkbutton href="membres/fiche.php?id=%d"|args:$transaction_user.id label="Retour à la fiche membre" shape="user"}
+</p>
+
 {include file="acc/reports/_journal.tpl"}
 
 <h2 class="ruler">Solde des comptes</h2>
