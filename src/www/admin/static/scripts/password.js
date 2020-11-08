@@ -13,7 +13,7 @@
 
 		g.enhancePasswordField(pw_elm, pw2_elm);
 
-		suggest_elm.size = suggest_elm.value.length;
+		suggest_elm.size = suggest_elm.value.length + 3;
 
 		suggest_elm.onclick = function () {
 	        pw_elm.value = this.value;

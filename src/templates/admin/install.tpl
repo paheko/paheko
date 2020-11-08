@@ -18,26 +18,19 @@
         <dl>
             <dt><label for="f_nom_asso">Nom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom_asso" id="f_nom_asso" required="required" value="{form_field name=nom_asso}" /></dd>
-            <dt><label for="f_email_asso">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="email" name="email_asso" id="f_email_asso" required="required" value="{form_field name=email_asso}" /></dd>
-            <dt><label for="f_adresse_asso">Adresse postale</label></dt>
-            <dd><textarea cols="50" rows="5" name="adresse_asso" id="f_adresse_asso">{form_field name=adresse_asso}</textarea></dd>
         </dl>
     </fieldset>
 
     <fieldset>
-        <legend>Informations sur le premier membre</legend>
+        <legend>Création du compte administrateur</legend>
         <dl>
             <dt><label for="f_nom_membre">Nom et prénom</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="nom_membre" id="f_nom_membre" required="required" value="{form_field name=nom_membre}" /></dd>
-            <dt><label for="f_cat_membre">Catégorie du membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd class="tip">Par exemple : bureau, conseil d'administration, présidente, trésorier, etc.</dd>
-            <dd><input type="text" name="cat_membre" id="f_cat_membre" required="required" value="{form_field name=cat_membre}" /></dd>
             <dt><label for="f_email_membre">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="email" name="email_membre" id="f_email_membre" required="required" value="{form_field name=email_membre}" /></dd>
             <dt><label for="f_passe_membre">Mot de passe</label> (minimum {$password_length} caractères) <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">
-                Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr 
+                Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr
                 et plus simple à retenir qu'un mot de passe composé de 10 lettres et chiffres.
             </dd>
             <dd class="help">
@@ -59,10 +52,10 @@
 
     <script type="text/javascript">
     {literal}
-    g.script('scripts/password.js').onload = function () {
+    g.script('scripts/password.js', () => {
         initPasswordField('pw_suggest', 'f_passe_membre', 'f_repasse_membre');
-    };
-    
+    });
+
     var form = $('form')[0];
     form.onsubmit = function () {
         $('#f_submit').style.opacity = 0;

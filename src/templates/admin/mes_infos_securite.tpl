@@ -135,9 +135,9 @@
 
     <script type="text/javascript">
     {literal}
-    g.script('scripts/password.js').onload = function () {
-        initPasswordField('pw_suggest', 'f_passe', 'f_passe_confirmed');
-    };
+    g.script('scripts/password.js', () => {
+        initPasswordField('pw_suggest', 'f_passe', 'f_repasse');
+    });
     {/literal}
     </script>
 {/if}

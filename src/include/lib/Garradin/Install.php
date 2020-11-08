@@ -40,7 +40,7 @@ class Install
 		return $ok;
 	}
 
-	static public function install($nom_asso, $adresse_asso, $email_asso, $nom_categorie, $nom_membre, $email_membre, $passe_membre, $site_asso = WWW_URL)
+	static public function install($nom_asso, $nom_membre, $email_membre, $passe_membre)
 	{
 		$db = DB::getInstance(true);
 
@@ -59,9 +59,8 @@ class Install
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
 		$config = Config::getInstance();
 		$config->set('nom_asso', $nom_asso);
-		$config->set('adresse_asso', $adresse_asso);
-		$config->set('email_asso', $email_asso);
-		$config->set('site_asso', $site_asso);
+		$config->set('email_asso', $email_membre);
+		$config->set('site_asso', WWW_URL);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
 		$config->setVersion(garradin_version());
@@ -91,7 +90,7 @@ class Install
 		]);
 
 		$id = $cats->add([
-			'nom' => ucfirst($nom_categorie),
+			'nom' => 'Administrateurs',
 			'droit_inscription' => Membres::DROIT_AUCUN,
 			'droit_wiki' => Membres::DROIT_ADMIN,
 			'droit_membres' => Membres::DROIT_ADMIN,
@@ -166,7 +165,7 @@ class Install
         $account->save();
 
 		// Ajout d'une recherche avancée en exemple
-		$query = [
+		$query = (object) [
 			'query' => [[
 				'operator' => 'AND',
 				'conditions' => [
