@@ -77,6 +77,14 @@ $next = clone $start;
 $prev->modify('-1 month');
 $next->modify('+1 month');
 
+if ($next > $current_year->end_date) {
+	$next = null;
+}
+
+if ($prev < $current_year->start_date) {
+	$prev = null;
+}
+
 $tpl->assign(compact(
 	'account',
 	'start',
