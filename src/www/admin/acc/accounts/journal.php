@@ -34,13 +34,11 @@ if (null === $simple) {
 	$simple = (bool) $account->type;
 }
 
-$journal = $account->getJournal($year_id, $simple);
-$sum = 0;
+$list = $account->listJournal($year_id, $simple);
+$list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
+$list->loadFromQueryString();
 
-if (count($journal)) {
-	$sum = end($journal)->running_sum;
-}
-
-$tpl->assign(compact('simple', 'year', 'account', 'journal', 'sum'));
+$sum = $account->getSum($year_id);
+$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum'));
 
 $tpl->display('acc/accounts/journal.tpl');

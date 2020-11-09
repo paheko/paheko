@@ -3,8 +3,9 @@
 namespace Garradin\Entities\Accounting;
 
 use DateTimeInterface;
-use Garradin\Entity;
 use Garradin\DB;
+use Garradin\DynamicList;
+use Garradin\Entity;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -119,28 +120,77 @@ class Account extends Entity
 		parent::selfCheck();
 	}
 
-	public function getJournal(int $year_id, bool $simple = false)
+	public function listJournal(int $year_id, bool $simple = false)
 	{
-		$db = DB::getInstance();
-		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, t.type, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE l.id_account = ? AND t.id_year = ?
-			ORDER BY t.date, t.id;';
-		$rows = $db->get($sql, $this->id(), $year_id);
+		$columns = [
+			'id' => [
+				'select' => 't.id',
+				'label' => 'N°',
+			],
+			'date' => [
+				'label' => 'Date',
+				'select' => 't.date',
+				'order' => 'date %s, id %1$s',
+			],
+			'debit' => [
+				'select' => 'l.debit',
+				'label' => 'Débit',
+			],
+			'credit' => [
+				'select' => 'l.credit',
+				'label' => 'Crédit',
+			],
+			'sum' => [
+				'select' => NULL,
+				'label' => 'Solde cumulé',
+			],
+			'reference' => [
+				'label' => 'Pièce comptable',
+				'select' => 't.reference',
+			],
+			'type' => [
+				'select' => 't.type',
+			],
+			'label' => [
+				'select' => 't.label',
+				'label' => 'Libellé',
+			],
+			'line_label' => [
+				'select' => 'l.label',
+				'label' => 'Libellé ligne'
+			],
+			'line_reference' => [
+				'label' => 'Réf. ligne',
+				'select' => 'l.reference',
+			],
+		];
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction';
+		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = 0;
-
 		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
 
-		foreach ($rows as &$row) {
+		if ($simple) {
+			unset($columns['debit']['label'], $columns['line_label']);
+			$columns['credit']['label'] = 'Mouvement';
+			$columns['line_reference']['label'] = 'Réf. paiement';
+		}
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		$list->setCount('COUNT(*)');
+		$list->setPageSize(null);
+		$list->setModifier(function ($row) use (&$sum, $reverse) {
 			$sum += ($row->credit - $row->debit);
 			$row->change = ($row->credit - $row->debit) * $reverse;
 			$row->running_sum = $sum * $reverse;
 			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
-		}
+			return $row;
+		});
 
-		return $rows;
+		return $list;
 	}
 
 	static public function isReversed(int $type): bool
@@ -201,13 +251,21 @@ class Account extends Entity
 		}
 	}
 
+	public function getSum(int $year_id): int
+	{
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			wHERE l.id_account = ? AND t.id_year = ?;', $this->id(), $year_id);
+	}
+
+
 	public function getSumAtDate(int $year_id, DateTimeInterface $date): int
 	{
 		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ?
-			ORDER BY t.date, t.id;', $this->id(), $year_id, $date->format('Y-m-d'));
+			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ?;', $this->id(), $year_id, $date->format('Y-m-d'));
 	}
 
 	public function importSimpleForm(array $translate_type_position, array $translate_type_codes, ?array $source = null)

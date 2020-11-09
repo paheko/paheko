@@ -25,21 +25,21 @@
 				<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_BANK}
-			{if $sum < 0}
+			{if $sum > 0}
 				<p class="error block">Ce compte est à découvert de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
-			{elseif $sum >= 0}
+			{elseif $sum <= 0}
 				<p class="confirm block">Ce compte est créditeur de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_CASH}
-			{if $sum < 0}
+			{if $sum > 0}
 				<p class="error block">Cette caisse est débiteur de <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum >= 0}
+			{elseif $sum <= 0}
 				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum|abs|raw|money_currency}</strong>.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_OUTSTANDING}
-			{if $sum < 0}
+			{if $sum > 0}
 				<p class="error block">Ce compte est débiteur <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum >= 0}
+			{elseif $sum <= 0}
 				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|abs|raw|money_currency}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
 			{/if}
 		{/if}
@@ -47,47 +47,27 @@
 
 
 	<nav class="tabs">
+		<aside>
+		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+			{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
+			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
+		{/if}
+		{if $year.id == CURRENT_YEAR_ID}
+			{linkbutton href="acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
+		{/if}
+		</aside>
 		<ul>
 			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
 			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
-		{if $year.id == CURRENT_YEAR_ID}
-			{* Currently can't use a 'linkbutton' here because of styles *}
-			<li><form method="get" action="../transactions/new.php">{button label="Saisir une écriture dans ce compte" shape="plus" type="submit"}<input type="hidden" name="account" value="{$account.id}" /></form></li>
-		{/if}
 		</ul>
+	</nav>
 {/if}
 
-<table class="list">
-	<colgroup>
-		<col width="3%" />
-		<col width="12%" />
-		<col width="10%" />
-		{if !$simple}<col width="10%" />{/if}
-		<col width="12%" />
-		<col />
-		<col width="6%" />
-	</colgroup>
-	<thead>
+{include file="common/dynamic_list_head.tpl"}
+
+	{foreach from=$list->iterate() item="line"}
 		<tr>
-			<td>Réf.</td>
-			<td>Date</td>
-			{if $simple}
-			<td class="money">Mouvement</td>
-			{else}
-			<td class="money">Débit</td>
-			<td class="money">Crédit</td>
-			{/if}
-			<td class="money">Solde cumulé</td>
-			<th>Libellé</th>
-			{if !$simple}<td>Libellé ligne</td>{/if}
-			<td>{if $simple}Réf. paiement{else}Réf. ligne{/if}</td>
-			<td></td>
-		</tr>
-	</thead>
-	<tbody>
-	{foreach from=$journal item="line"}
-		<tr>
-			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
+			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 			<td>{$line.date|date_fr:'d/m/Y'}</td>
 			{if $simple}
 			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|html_money}</td>
@@ -96,6 +76,7 @@
 			<td class="money">{$line.credit|raw|html_money}</td>
 			{/if}
 			<td class="money">{$line.running_sum|raw|html_money:false}</td>
+			<td>{$line.reference}</td>
 			<th>{$line.label}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>

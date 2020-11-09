@@ -121,6 +121,31 @@ class CSV
 		}
 	}
 
+	static protected function rowToArray($row, ?callable $row_map_callback)
+	{
+		if (null !== $row_map_callback) {
+			$row = call_user_func($row_map_callback, $row);
+		}
+
+		if (is_object($row) && $row instanceof Entity) {
+			$row = $row->asArray();
+		}
+		elseif (is_object($row)) {
+			$row = (array) $row;
+		}
+
+		foreach ($row as $key => &$v) {
+			if (is_object($v)&& $v instanceof \DateTimeInterface) {
+				$v = $v->format('d/m/Y');
+			}
+			elseif (is_object($v) || is_array($v)) {
+				throw new \UnexpectedValueException(sprintf('Unexpected value for "%s": %s', $key, gettype($v)));
+			}
+		}
+
+		return $row;
+	}
+
 	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
 	{
 		header('Content-type: application/csv');
@@ -135,21 +160,12 @@ class CSV
 
 		foreach ($iterator as $row)
 		{
-			if (is_object($row) && $row instanceof Entity) {
-				$row = $row->asArray();
-			}
-			elseif (is_object($row)) {
-				$row = (array) $row;
-			}
+			$row = self::rowToArray($row, $row_map_callback);
 
 			if (!$header)
 			{
 				fputs($fp, self::row(array_keys($row)));
 				$header = true;
-			}
-
-			if (null !== $row_map_callback) {
-				$row = call_user_func($row_map_callback, $row);
 			}
 
 			fputs($fp, self::row($row));
@@ -173,21 +189,12 @@ class CSV
 
 		foreach ($iterator as $row)
 		{
-			if (is_object($row) && $row instanceof Entity) {
-				$row = $row->asArray();
-			}
-			elseif (is_object($row)) {
-				$row = (array) $row;
-			}
+			$row = self::rowToArray($row, $row_map_callback);
 
 			if (!$header)
 			{
 				$ods->add(array_keys($row));
 				$header = true;
-			}
-
-			if (null !== $row_map_callback) {
-				$row = call_user_func($row_map_callback, $row);
 			}
 
 			$ods->add((array) $row);
