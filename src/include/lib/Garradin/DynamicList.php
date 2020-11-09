@@ -9,6 +9,7 @@ class DynamicList
 	protected $conditions;
 	protected $group;
 	protected $order;
+	protected $title = 'Liste';
 	protected $count = 'COUNT(*)';
 	protected $desc = true;
 	protected $per_page = 100;
@@ -27,6 +28,10 @@ class DynamicList
 	public function __get($key)
 	{
 		return $this->$key;
+	}
+
+	public function setTitle(string $title) {
+		$this->title = $title;
 	}
 
 	public function setConditions(string $conditions)
@@ -59,6 +64,27 @@ class DynamicList
 		return $this->count_result;
 	}
 
+	public function export(string $name, string $format = 'csv')
+	{
+		$columns = [];
+
+		foreach ($this->columns as $key => $column) {
+			if (empty($column['label'])) {
+				$columns[] = $key;
+				continue;
+			}
+
+			$columns[] = $column['label'];
+		}
+
+		if ('csv' == $format) {
+			CSV::toCSV($name, $this->iterate(false), $columns);
+		}
+		else if ('ods' == $format) {
+			CSV::toODS($name, $this->iterate(false), $columns);
+		}
+	}
+
 	public function paginationURL()
 	{
 		$query = array_merge($_GET, ['p' => '[ID]']);
@@ -78,7 +104,7 @@ class DynamicList
 		$this->count = $count;
 	}
 
-	public function iterate()
+	public function iterate(bool $paginate = true)
 	{
 		$start = ($this->page - 1) * $this->per_page;
 		$columns = [];
@@ -98,14 +124,23 @@ class DynamicList
 
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
 
-		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s LIMIT %d,%d;',
-			$columns, $this->tables, $this->conditions, $group, $order, $start, $this->per_page);
+		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
+			$columns, $this->tables, $this->conditions, $group, $order);
+
+		if ($paginate) {
+			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
+		}
 
 		return DB::getInstance()->iterate($sql);
 	}
 
 	public function loadFromQueryString()
 	{
+		if (!empty($_GET['export'])) {
+			$this->export($this->title, $_GET['export']);
+			exit;
+		}
+
 		if (!empty($_GET['o'])) {
 			$this->orderBy($_GET['o'], !empty($_GET['d']));
 		}
