@@ -5,6 +5,7 @@ namespace Garradin\Accounting;
 use Garradin\Entities\Accounting\Account;
 use Garradin\CSV;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Utils;
 use KD2\DB\EntityManager;
 
@@ -192,5 +193,40 @@ class Accounts
 			$db->rollback();
 			throw $e;
 		}
+	}
+
+	static public function listByType(int $year_id, ?int $type)
+	{
+		$reverse = Account::isReversed((int) $type) ? -1 : 1;
+
+		$columns = Account::LIST_COLUMNS;
+		unset($columns['sum'], $columns['credit'], $columns['debit'], $columns['line_label']);
+		$columns['line_reference']['label'] = 'Réf. paiement';
+		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
+
+		$acc_columns = [
+			'account' => ['label' => 'Compte', 'select' => 'a.code'],
+			'account_label' => ['label' => 'Nom du compte', 'select' => 'a.label'],
+			'id_account' => [],
+		];
+
+		$columns = array_merge($acc_columns, $columns);
+
+		if (null === $type) {
+			$other_types = implode(',', [0, Account::TYPE_OPENING, Account::TYPE_CLOSING]);
+		}
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account';
+		$conditions = sprintf('a.type IN (%s) AND t.id_year = %d', $type ?: $other_types, $year_id);
+
+		$sum = 0;
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		$list->setCount('COUNT(*)');
+
+		return $list;
 	}
 }

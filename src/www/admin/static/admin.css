@@ -1113,7 +1113,7 @@ a.icn[title]:hover:after {
     display: inline-block;
 }
 
-.num a {
+.num a, a.num {
     text-decoration: none;
     border-radius: .5rem;
     display: inline-block;
@@ -1124,7 +1124,7 @@ a.icn[title]:hover:after {
     white-space: pre;
 }
 
-.actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover, .radio-btn:hover div {
+.actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover, .radio-btn:hover div, a.num:hover {
     color: darkred;
     background: #ff9;
     z-index: 300;

@@ -25,21 +25,21 @@
 				<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_BANK}
-			{if $sum > 0}
+			{if $sum < 0}
 				<p class="error block">Ce compte est à découvert de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
-			{elseif $sum <= 0}
+			{elseif $sum >= 0}
 				<p class="confirm block">Ce compte est créditeur de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_CASH}
-			{if $sum > 0}
+			{if $sum < 0}
 				<p class="error block">Cette caisse est débiteur de <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum <= 0}
+			{elseif $sum >= 0}
 				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum|abs|raw|money_currency}</strong>.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_OUTSTANDING}
-			{if $sum > 0}
+			{if $sum < 0}
 				<p class="error block">Ce compte est débiteur <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum <= 0}
+			{elseif $sum >= 0}
 				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|abs|raw|money_currency}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
 			{/if}
 		{/if}

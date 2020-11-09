@@ -75,15 +75,16 @@
             </li>
         {/if}
         {if $session->canAccess('compta', Membres::DROIT_ACCES)}
-            <li class="compta{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><a href="{$admin_url}acc/"><b>€</b><i> Comptabilité</i></a>
+            <li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><a href="{$admin_url}acc/"><b>€</b><i> Comptabilité</i></a>
             <ul>
             {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
-                <li class="compta new{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
+                <li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
             {/if}
-                <li class="compta admin accounts{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_url}acc/accounts/">Comptes &amp; journaux</a></li>
-                <li class="compta admin reports{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
+                <li class="{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_url}acc/accounts/">Comptes</a></li>
+                <li class="{if $current == 'acc/journals'} current{/if}"><a href="{$admin_url}acc/accounts/simple.php">Suivi des écritures</a></li>
+                <li class="{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
             {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
-                <li class="compta admin reports{if $current == 'acc/charts'} current{/if}"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+                <li class="{if $current == 'acc/charts'} current{/if}"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
             {/if}
             </ul>
             </li>
