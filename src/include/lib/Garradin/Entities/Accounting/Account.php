@@ -72,6 +72,53 @@ class Account extends Entity
 		'Clôture',
 	];
 
+	const LIST_COLUMNS = [
+		'id' => [
+			'select' => 't.id',
+			'label' => 'N°',
+		],
+		'date' => [
+			'label' => 'Date',
+			'select' => 't.date',
+			'order' => 'date %s, id %1$s',
+		],
+		'debit' => [
+			'select' => 'l.debit',
+			'label' => 'Débit',
+		],
+		'credit' => [
+			'select' => 'l.credit',
+			'label' => 'Crédit',
+		],
+		'change' => [
+			'select' => '(l.credit - l.debit) * %d',
+			'label' => 'Mouvement',
+		],
+		'sum' => [
+			'select' => NULL,
+			'label' => 'Solde cumulé',
+		],
+		'reference' => [
+			'label' => 'Pièce comptable',
+			'select' => 't.reference',
+		],
+		'type' => [
+			'select' => 't.type',
+		],
+		'label' => [
+			'select' => 't.label',
+			'label' => 'Libellé',
+		],
+		'line_label' => [
+			'select' => 'l.label',
+			'label' => 'Libellé ligne'
+		],
+		'line_reference' => [
+			'label' => 'Réf. ligne',
+			'select' => 'l.reference',
+		],
+	];
+
 	protected $id;
 	protected $id_chart;
 	protected $code;
@@ -122,48 +169,7 @@ class Account extends Entity
 
 	public function listJournal(int $year_id, bool $simple = false)
 	{
-		$columns = [
-			'id' => [
-				'select' => 't.id',
-				'label' => 'N°',
-			],
-			'date' => [
-				'label' => 'Date',
-				'select' => 't.date',
-				'order' => 'date %s, id %1$s',
-			],
-			'debit' => [
-				'select' => 'l.debit',
-				'label' => 'Débit',
-			],
-			'credit' => [
-				'select' => 'l.credit',
-				'label' => 'Crédit',
-			],
-			'sum' => [
-				'select' => NULL,
-				'label' => 'Solde cumulé',
-			],
-			'reference' => [
-				'label' => 'Pièce comptable',
-				'select' => 't.reference',
-			],
-			'type' => [
-				'select' => 't.type',
-			],
-			'label' => [
-				'select' => 't.label',
-				'label' => 'Libellé',
-			],
-			'line_label' => [
-				'select' => 'l.label',
-				'label' => 'Libellé ligne'
-			],
-			'line_reference' => [
-				'label' => 'Réf. ligne',
-				'select' => 'l.reference',
-			],
-		];
+		$columns = self::LIST_COLUMNS;
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction';
@@ -173,9 +179,12 @@ class Account extends Entity
 		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
 
 		if ($simple) {
-			unset($columns['debit']['label'], $columns['line_label']);
-			$columns['credit']['label'] = 'Mouvement';
+			unset($columns['debit']['label'], $columns['credit']['label'], $columns['line_label']);
 			$columns['line_reference']['label'] = 'Réf. paiement';
+			$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
+		}
+		else {
+			unset($columns['change']);
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -184,7 +193,6 @@ class Account extends Entity
 		$list->setPageSize(null);
 		$list->setModifier(function ($row) use (&$sum, $reverse) {
 			$sum += ($row->credit - $row->debit);
-			$row->change = ($row->credit - $row->debit) * $reverse;
 			$row->running_sum = $sum * $reverse;
 			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 			return $row;
@@ -253,10 +261,16 @@ class Account extends Entity
 
 	public function getSum(int $year_id): int
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
+		$sum = (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			wHERE l.id_account = ? AND t.id_year = ?;', $this->id(), $year_id);
+
+		if (self::isReversed($this->type)) {
+			$sum *= -1;
+		}
+
+		return $sum;
 	}
 
 
