@@ -24,6 +24,7 @@ $form->runIf($session->canAccess('membres', Membres::DROIT_ECRITURE) && null !==
 }, null, ADMIN_URL . 'services/user.php?id=' . $user->id);
 
 $list = Services_User::perUserList($user->id);
+$list->setTitle(sprintf('Inscriptions — %s', $user->identite));
 $list->loadFromQueryString();
 
 $tpl->assign('services', Services_User::listDistinctForUser($user->id));
