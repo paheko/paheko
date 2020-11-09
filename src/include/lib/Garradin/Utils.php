@@ -124,7 +124,7 @@ class Utils
             throw new UserException('Le format du montant est invalide. Format accepté, exemple : 142,02');
         }
 
-        $value = $match[1] . str_pad((int)@$match[2], 2, '0', STR_PAD_RIGHT);
+        $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
         $value = (int) $value;
         return $value;
     }

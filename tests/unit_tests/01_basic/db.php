@@ -5,8 +5,9 @@ namespace Garradin;
 use KD2\Test;
 
 const DB_FILE = ':memory:';
+const INSTALL_PROCESS = true;
 
-require __DIR__ . '/../init.php';
+require INIT;
 
 $db = DB::getInstance();
 
