@@ -1,13 +1,14 @@
-{include file="admin/_head.tpl" title="Comptes" current="acc/accounts"}
+{include file="admin/_head.tpl" title="Comptes favoris" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
 <nav class="tabs">
 	<ul>
-		<li class="current"><a href="{$admin_url}acc/accounts/">Comptes</a></li>
+		<li class="current"><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
+		<li><a href="{$admin_url}acc/reports/trial_balance.php?year={$current_year.id}">Balance générale (tous les comptes)</a></li>
 		<li><a href="{$admin_url}acc/search.php?year={$current_year.id}">Recherche</a></li>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-			<li><a href="{$admin_url}acc/charts/accounts/?id={$chart_id}">Gestion des comptes</a></li>
+			<li><a href="{$admin_url}acc/charts/accounts/all.php?id={$chart_id}">Plan comptable</a></li>
 		{/if}
 	</ul>
 </nav>

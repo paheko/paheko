@@ -700,6 +700,10 @@ nav.tabs li a:hover {
     border-bottom: none;
 }
 
+nav.tabs aside {
+    float: right;
+}
+
 dd.help, small.help {
     color: #666;
 }
@@ -880,7 +884,6 @@ table.list .userOrder .check {
     font-size: 1.5em;
     line-height: .5em;
     width: 1em;
-    height: .5em;
     text-align: center;
     vertical-align: middle;
     font-weight: normal;

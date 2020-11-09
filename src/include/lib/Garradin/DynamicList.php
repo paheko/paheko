@@ -9,6 +9,7 @@ class DynamicList
 	protected $conditions;
 	protected $group;
 	protected $order;
+	protected $modifier;
 	protected $title = 'Liste';
 	protected $count = 'COUNT(*)';
 	protected $desc = true;
@@ -32,6 +33,14 @@ class DynamicList
 
 	public function setTitle(string $title) {
 		$this->title = $title;
+	}
+
+	public function setModifier(callable $fn) {
+		$this->modifier = $fn;
+	}
+
+	public function setPageSize(?int $size) {
+		$this->per_page = $size;
 	}
 
 	public function setConditions(string $conditions)
@@ -83,6 +92,9 @@ class DynamicList
 		else if ('ods' == $format) {
 			CSV::toODS($name, $this->iterate(false), $columns);
 		}
+		else {
+			throw new UserException('Invalid export format');
+		}
 	}
 
 	public function paginationURL()
@@ -110,16 +122,26 @@ class DynamicList
 		$columns = [];
 
 		foreach ($this->columns as $alias => $properties) {
-			$select = isset($properties['select']) ? $properties['select'] : $alias;
+			$select = array_key_exists('select', $properties) ? $properties['select'] : $alias;
+
+			if (null === $select) {
+				$select = 'NULL';
+			}
+
 			$columns[] = sprintf('%s AS %s', $select, $alias);
 		}
 
 		$columns = implode(', ', $columns);
 
-		$order = isset($this->columns[$this->order]['order']) ? $this->columns[$this->order]['order'] : $this->order;
+		if (isset($this->columns[$this->order]['order'])) {
+			$order = sprintf($this->columns[$this->order]['order'], $this->desc ? 'DESC' : 'ASC');
+		}
+		else {
+			$order = $this->order;
 
-		if ($this->desc) {
-			$order .= ' DESC';
+			if (true === $this->desc) {
+				$order .= ' DESC';
+			}
 		}
 
 		$group = $this->group ? 'GROUP BY ' . $this->group : '';
@@ -127,11 +149,17 @@ class DynamicList
 		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
 			$columns, $this->tables, $this->conditions, $group, $order);
 
-		if ($paginate) {
+		if ($paginate && null !== $this->per_page) {
 			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
 		}
 
-		return DB::getInstance()->iterate($sql);
+		foreach (DB::getInstance()->iterate($sql) as $row) {
+			if ($this->modifier) {
+				$row = call_user_func($this->modifier, $row);
+			}
+
+			yield $row;
+		}
 	}
 
 	public function loadFromQueryString()
