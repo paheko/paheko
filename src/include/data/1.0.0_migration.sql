@@ -61,7 +61,7 @@ UPDATE acc_accounts SET type = 9 WHERE code = '890';
 UPDATE acc_accounts SET type = 10 WHERE code = '891';
 
 -- Comptes de tiers
-UPDATE acc_accounts SET type = 8 WHERE code IN (SELECT id FROM compta_comptes WHERE id LIKE '4%' AND plan_comptable = 0 AND desactive = 0);
+UPDATE acc_accounts SET type = 4 WHERE code IN (SELECT id FROM compta_comptes WHERE id LIKE '4%' AND plan_comptable = 0 AND desactive = 0);
 
 -- Recopie des mouvements
 INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_creator)
@@ -96,8 +96,6 @@ UPDATE acc_accounts SET type = 4, description = (SELECT description FROM compta_
 -- Recopie des opérations, mais le nom a changé pour acc_transactions_users
 INSERT INTO acc_transactions_users
 	SELECT * FROM membres_operations_old;
-
--- FIXME: ajout d'entrées dans le le log utilisateur à partir de id_auteur
 
 -- Recopie des exercices, mais la date de fin ne peut être nulle
 INSERT INTO acc_years (id, label, start_date, end_date, closed, id_chart)
