@@ -24,7 +24,7 @@ class Graph
 	const URL_LIST = [
 		ADMIN_URL . 'acc/reports/graph_plot.php?type=assets&year=%s' => 'Évolution banques et caisses',
 		ADMIN_URL . 'acc/reports/graph_plot.php?type=result&year=%s' => 'Évolution dépenses et recettes',
-		ADMIN_URL . 'acc/reports/graph_plot.php?type=debts&year=%s' => 'Évolution dettes et créances',
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=debts&year=%s' => 'Évolution créances (positif) et dettes (négatif)',
 		ADMIN_URL . 'acc/reports/graph_pie.php?type=revenue&year=%s' => 'Répartition recettes',
 		ADMIN_URL . 'acc/reports/graph_pie.php?type=expense&year=%s' => 'Répartition dépenses',
 		ADMIN_URL . 'acc/reports/graph_pie.php?type=assets&year=%s' => 'Répartition actif',
@@ -42,7 +42,7 @@ class Graph
 			'Dépenses' => ['position' => Account::EXPENSE],
 		],
 		'debts' => [
-			'Tiers' => ['type' => Account::TYPE_THIRD_PARTY],
+			'Comptes de tiers' => ['type' => Account::TYPE_THIRD_PARTY],
 		],
 	];
 
@@ -75,7 +75,7 @@ class Graph
 			}
 
 			// Invert sums for banks, cash, etc.
-			if ('assets' === $type) {
+			if ('assets' === $type || 'debts' === $type) {
 				$sums = array_map(function ($v) { return $v * -1; }, $sums);
 			}
 			elseif ('result' === $type) {
