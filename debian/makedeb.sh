@@ -41,6 +41,10 @@ cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
 rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes
 cp ${THISDIR}/garradin.png "${CODEDIR}"
 
+mkdir -p "${DEBROOT}/var/lib/${PACKAGE_DEBNAME}"
+mkdir -p "${DEBROOT}/var/cache/${PACKAGE_DEBNAME}"
+mkdir -p "${DEBROOT}/etc/${PACKAGE_DEBNAME}"
+
 # Cleaning files that will be copied to /usr/share/doc
 #rm -f ${CODEDIR}/../{README.md,COPYING}
 
@@ -68,6 +72,20 @@ true && {
 } || {
 	echo "Fail."
 	exit 1
+}
+
+true && {
+    cat <<EOF > DEBIAN/postinst
+#!/bin/sh
+
+chown www-data:www-data /var/lib/garradin /var/cache/garradin
+chown root:www-data /etc/garradin
+chmod g=rX,o= /etc/garradin
+chmod ug=rwX,o= /var/lib/garradin /var/cache/garradin
+EOF
+
+    chmod +x DEBIAN/postinst
+
 }
 
 true && {
@@ -109,7 +127,7 @@ Section: web
 Priority: optional
 Maintainer: Garradin <garradin@kd2.org>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php5-cli (>=5.6) | php-cli (>=7.0), php5-sqlite | php-sqlite3
+Depends: dash | bash, php-cli (>=7.2), php-sqlite3
 Version: ${PACKAGE_DEB_VERSION}
 Suggests: www-browser, php-gd
 Homepage: http://dev.kd2.org/garradin/

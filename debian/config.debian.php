@@ -47,7 +47,7 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 		mkdir($_ENV['XDG_CACHE_HOME'] . '/garradin', 0700, true);
 	}
 
-	if (!defined('Garradin\DATA_ROOT')) {
+	if (!defined('Garradin\CACHE_ROOT')) {
 		define('Garradin\CACHE_ROOT', $_ENV['XDG_CACHE_HOME'] . '/garradin');
 	}
 
@@ -74,5 +74,28 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 
 	if (!defined('Garradin\LOCAL_LOGIN')) {
 		define('Garradin\LOCAL_LOGIN', true);
+	}
+}
+elseif (isset($_SERVER['SERVER_NAME'])) {
+	if (file_exists('/etc/garradin/config.php')) {
+		require_once '/etc/garradin/config.php';
+	}
+
+	if (!defined('Garradin\DATA_ROOT')) {
+		define('Garradin\DATA_ROOT', '/var/lib/garradin');
+	}
+
+	if (!defined('Garradin\CACHE_ROOT')) {
+		define('Garradin\CACHE_ROOT', '/var/cache/garradin');
+	}
+}
+
+if (!defined('Garradin\SECRET_KEY')) {
+	if (file_exists(CACHE_ROOT . '/key')) {
+		define('Garradin\SECRET_KEY', trim(file_get_contents(CACHE_ROOT . '/key')));
+	}
+	else {
+		define('Garradin\SECRET_KEY', base64_encode(random_bytes(64)));
+		file_put_contents(CACHE_ROOT . '/key', SECRET_KEY);
 	}
 }
