@@ -150,7 +150,8 @@ class Graph
 			}
 			else
 			{
-				$pie->add(new Pie_Data(abs($row->sum) / 100, substr($row->label, 0, 50), $colors[$i-1]));
+				$label = strlen($row->label) > 40 ? substr($row->label, 0, 38) . '…' : $row->label;
+				$pie->add(new Pie_Data(abs($row->sum) / 100, $label, $colors[$i-1]));
 			}
 
 			$count += $row->sum;
