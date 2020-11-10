@@ -284,7 +284,7 @@ ErrorManager::setCustomExceptionHandler('\KD2\MiniSkelMarkupException', '\Garrad
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Garradin\SECRET_KEY'))
 {
-    $key = base64_encode(Security::random_bytes(64));
+    $key = base64_encode(random_bytes(64));
     Install::setLocalConfig('SECRET_KEY', $key);
     define('Garradin\SECRET_KEY', $key);
 }
