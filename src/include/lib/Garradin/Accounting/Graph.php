@@ -133,11 +133,18 @@ class Graph
 		$others = 0;
 		$colors = self::getColors();
 		$max = count($colors);
+		$total = 0;
+		$count = 0;
 		$i = 0;
+
+		foreach ($data as $row) {
+			$row->sum = abs($row->sum);
+			$total += $row->sum;
+		}
 
 		foreach ($data as $row)
 		{
-			if ($i++ >= $max)
+			if ($i++ >= $max || $count > $total*0.95)
 			{
 				$others += $row->sum;
 			}
@@ -145,12 +152,16 @@ class Graph
 			{
 				$pie->add(new Pie_Data(abs($row->sum) / 100, substr($row->label, 0, 50), $colors[$i-1]));
 			}
+
+			$count += $row->sum;
 		}
 
 		if ($others != 0)
 		{
 			$pie->add(new Pie_Data(abs($others) / 100, 'Autres', '#ccc'));
 		}
+
+		$pie->togglePercentage(true);
 
 		return $pie->output();
 	}
