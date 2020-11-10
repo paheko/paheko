@@ -9,8 +9,8 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-		{linkbutton href="%s?type=%d&export=csv"|args:$type,$self_url label="Export CSV" shape="export"}
-		{linkbutton href="%s?type=%d&export=ods"|args:$type,$self_url label="Export tableur" shape="export"}
+		{linkbutton href="%s?type=%d&export=csv"|args:$self_url,$type label="Export CSV" shape="export"}
+		{linkbutton href="%s?type=%d&export=ods"|args:$self_url,$type label="Export tableur" shape="export"}
 	{/if}
 	</aside>
 	<ul>
