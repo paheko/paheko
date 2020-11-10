@@ -42,13 +42,6 @@
 		| <strong>{if $tr_year.closed}Clôturé{else}En cours{/if}</strong>
 	</dd>
 
-	{if $transaction.id_projet}
-		<dt>Projet</dt>
-		<dd>
-			<a href="{$admin_url}compta/projets/">{$projet.libelle}</a>
-		</dd>
-	{/if}
-
 	<dt>Écriture créée par</dt>
 	<dd>
 		{if $transaction.id_creator}
@@ -110,6 +103,11 @@
 			<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
+			<td>
+				{if $line.id_analytical}
+					<a href="{$admin_url}acc/reports/analytical.php?id={$line.id_analytical}">{*FIXME*}</a>
+				{/if}
+			</td>
 		</tr>
 		{/foreach}
 	</tbody>
