@@ -3,7 +3,7 @@
 namespace Garradin;
 use KD2\Test;
 
-require __DIR__ . '/../init.php';
+require_once INIT;
 
 Test::assert(defined('Garradin\ROOT'));
 Test::assert(is_readable(ROOT));
