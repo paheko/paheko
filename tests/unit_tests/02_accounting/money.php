@@ -3,7 +3,7 @@
 namespace Garradin;
 use KD2\Test;
 
-require INIT;
+require_once INIT;
 
 Test::strictlyEquals(500, Utils::moneyToInteger('5'));
 Test::strictlyEquals(442, Utils::moneyToInteger('4,42'));
