@@ -38,7 +38,7 @@ $list = $account->listJournal($year_id, $simple);
 $list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
 $list->loadFromQueryString();
 
-$sum = $account->getSum($year_id);
+$sum = $account->getSum($year_id, $simple);
 $tpl->assign(compact('simple', 'year', 'account', 'list', 'sum'));
 
 $tpl->display('acc/accounts/journal.tpl');

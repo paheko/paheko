@@ -200,7 +200,7 @@ class Accounts
 		$reverse = Account::isReversed((int) $type) ? -1 : 1;
 
 		$columns = Account::LIST_COLUMNS;
-		unset($columns['sum'], $columns['credit'], $columns['debit'], $columns['line_label']);
+		unset($columns['credit'], $columns['debit'], $columns['line_label'], $columns['sum']);
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
 
@@ -226,6 +226,12 @@ class Accounts
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
 		$list->setCount('COUNT(*)');
+		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+		});
+		$list->setExportCallback(function (&$row) {
+			$row->change = Utils::money_format($row->change, '.', '', false);
+		});
 
 		return $list;
 	}

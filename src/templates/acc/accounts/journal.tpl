@@ -75,7 +75,9 @@
 			<td class="money">{$line.debit|raw|html_money}</td>
 			<td class="money">{$line.credit|raw|html_money}</td>
 			{/if}
-			<td class="money">{$line.running_sum|raw|html_money:false}</td>
+			{if isset($line.sum)}
+				<td class="money">{$line.sum|raw|html_money:false}</td>
+			{/if}
 			<td>{$line.reference}</td>
 			<th>{$line.label}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}

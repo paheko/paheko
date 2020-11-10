@@ -1,8 +1,7 @@
 <table class="list">
 	<thead class="userOrder">
 		<tr>
-			{foreach from=$list.columns key="key" item="column"}
-			<?php if (!isset($column['label'])) { continue; } ?>
+			{foreach from=$list->getHeaderColumns() key="key" item="column"}
 			<td class="{if $list->order == $key}cur {if $list->desc}desc{else}asc{/if}{/if}">
 				{$column.label}
 				{if isset($column['select'])}

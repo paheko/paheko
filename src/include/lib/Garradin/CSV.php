@@ -124,7 +124,7 @@ class CSV
 	static protected function rowToArray($row, ?callable $row_map_callback)
 	{
 		if (null !== $row_map_callback) {
-			$row = call_user_func($row_map_callback, $row);
+			call_user_func_array($row_map_callback, [&$row]);
 		}
 
 		if (is_object($row) && $row instanceof Entity) {
@@ -135,10 +135,7 @@ class CSV
 		}
 
 		foreach ($row as $key => &$v) {
-			if (is_object($v)&& $v instanceof \DateTimeInterface) {
-				$v = $v->format('d/m/Y');
-			}
-			elseif (is_object($v) || is_array($v)) {
+			if ((is_object($v) && !($v instanceof \DateTimeInterface)) || is_array($v)) {
 				throw new \UnexpectedValueException(sprintf('Unexpected value for "%s": %s', $key, gettype($v)));
 			}
 		}
@@ -160,6 +157,12 @@ class CSV
 
 		foreach ($iterator as $row)
 		{
+			foreach ($row as $key => &$v) {
+				if (is_object($v)&& $v instanceof \DateTimeInterface) {
+					$v = $v->format('d/m/Y');
+				}
+			}
+
 			$row = self::rowToArray($row, $row_map_callback);
 
 			if (!$header)

@@ -8,10 +8,17 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess('compta', Membres::DROIT_ADMIN);
 
-$year = Years::get((int)qg('id'));
+$year_id = (int) qg('id') ?: CURRENT_YEAR_ID;
 
-if (!$year) {
-	throw new UserException('Exercice inconnu.');
+if ($year_id === CURRENT_YEAR_ID) {
+	$year = $current_year;
+}
+else {
+	$year = Years::get($year_id);
+
+	if (!$year) {
+		throw new UserException("L'exercice demandé n'existe pas.");
+	}
 }
 
 if (qg('export')) {

@@ -97,6 +97,7 @@ class Account extends Entity
 		'sum' => [
 			'select' => NULL,
 			'label' => 'Solde cumulé',
+			'only_with_order' => 'date',
 		],
 		'reference' => [
 			'label' => 'Pièce comptable',
@@ -188,14 +189,24 @@ class Account extends Entity
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('date', true);
+		$list->orderBy('date', false);
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
-		$list->setModifier(function ($row) use (&$sum, $reverse) {
-			$sum += ($row->credit - $row->debit);
-			$row->running_sum = $sum * $reverse;
-			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
-			return $row;
+		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+			if (property_exists($row, 'sum')) {
+				$sum += isset($row->change) ? $row->change : ($row->credit - $row->debit);
+				$row->sum = $sum;
+			}
+
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+		});
+		$list->setExportCallback(function (&$row) {
+			static $columns = ['change', 'sum', 'credit', 'debit'];
+			foreach ($columns as $key) {
+				if (isset($row->$key)) {
+					$row->$key = Utils::money_format($row->$key, '.', '', false);
+				}
+			}
 		});
 
 		return $list;
@@ -259,14 +270,14 @@ class Account extends Entity
 		}
 	}
 
-	public function getSum(int $year_id): int
+	public function getSum(int $year_id, bool $simple = false): int
 	{
 		$sum = (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			wHERE l.id_account = ? AND t.id_year = ?;', $this->id(), $year_id);
 
-		if (self::isReversed($this->type)) {
+		if ($simple && self::isReversed($this->type)) {
 			$sum *= -1;
 		}
 

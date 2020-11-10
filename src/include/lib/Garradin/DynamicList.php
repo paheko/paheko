@@ -10,6 +10,7 @@ class DynamicList
 	protected $group;
 	protected $order;
 	protected $modifier;
+	protected $export_callback;
 	protected $title = 'Liste';
 	protected $count = 'COUNT(*)';
 	protected $desc = true;
@@ -37,6 +38,10 @@ class DynamicList
 
 	public function setModifier(callable $fn) {
 		$this->modifier = $fn;
+	}
+
+	public function setExportCallback(callable $fn) {
+		$this->export_callback = $fn;
 	}
 
 	public function setPageSize(?int $size) {
@@ -75,6 +80,7 @@ class DynamicList
 
 	public function export(string $name, string $format = 'csv')
 	{
+		$this->setPageSize(null);
 		$columns = [];
 
 		foreach ($this->columns as $key => $column) {
@@ -87,10 +93,10 @@ class DynamicList
 		}
 
 		if ('csv' == $format) {
-			CSV::toCSV($name, $this->iterate(false), $columns);
+			CSV::toCSV($name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
 		}
 		else if ('ods' == $format) {
-			CSV::toODS($name, $this->iterate(false), $columns);
+			CSV::toODS($name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
 		}
 		else {
 			throw new UserException('Invalid export format');
@@ -116,12 +122,50 @@ class DynamicList
 		$this->count = $count;
 	}
 
-	public function iterate(bool $paginate = true)
+	public function getHeaderColumns(bool $label_only = false)
+	{
+		$columns = [];
+
+		foreach ($this->columns as $alias => $properties) {
+			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order && !$this->desc)) {
+				continue;
+			}
+
+			// Skip columns that require a certain order AND paginated result
+			if (isset($properties['only_with_order']) && $this->page > 1) {
+				continue;
+			}
+
+			if (!isset($properties['label'])) {
+				continue;
+			}
+
+			$columns[$alias] = $label_only ? $properties['label'] : $properties;
+		}
+
+		return $columns;
+	}
+
+	public function iterate(bool $include_hidden = true)
 	{
 		$start = ($this->page - 1) * $this->per_page;
 		$columns = [];
 
 		foreach ($this->columns as $alias => $properties) {
+			// Skip columns that require a certain order (eg. calculating a running sum)
+			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order && !$this->desc)) {
+				continue;
+			}
+
+			// Skip columns that require a certain order AND paginated result
+			if (isset($properties['only_with_order']) && $this->page > 1) {
+				continue;
+			}
+
+			if (!isset($properties['label']) && !$include_hidden) {
+				continue;
+			}
+
 			$select = array_key_exists('select', $properties) ? $properties['select'] : $alias;
 
 			if (null === $select) {
@@ -149,13 +193,13 @@ class DynamicList
 		$sql = sprintf('SELECT %s FROM %s WHERE %s %s ORDER BY %s',
 			$columns, $this->tables, $this->conditions, $group, $order);
 
-		if ($paginate && null !== $this->per_page) {
+		if (null !== $this->per_page) {
 			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
 		}
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
 			if ($this->modifier) {
-				$row = call_user_func($this->modifier, $row);
+				call_user_func_array($this->modifier, [&$row]);
 			}
 
 			yield $row;
