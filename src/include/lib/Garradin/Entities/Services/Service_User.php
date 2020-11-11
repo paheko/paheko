@@ -130,11 +130,11 @@ class Service_User extends Entity
 			$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 		}
 
+		$su->save();
+
 		if ($su->fee()->id_account && !empty($source['amount'])) {
 			$su->addPayment($user_id, $source);
 		}
-
-		$su->save();
 
 		$db->commit();
 
