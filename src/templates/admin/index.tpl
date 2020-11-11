@@ -5,7 +5,7 @@
 <nav class="tabs">
     <ul>
         <li><a href="{$admin_url}mes_infos.php">Modifier mes informations personnelles</a></li>
-        <li><a href="{$admin_url}mes_cotisations.php">Suivi de mes cotisations</a></li>
+        <li><a href="{$admin_url}my_services.php">Suivi de mes cotisations</a></li>
     </ul>
 </nav>
 

@@ -34,7 +34,7 @@
 					<th><a href="{$admin_url}acc/charts/accounts/?id={$item.id}">{$item.label}</a></th>
 					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
-					<td>
+					<td class="actions">
 						{linkbutton shape="star" label="Comptes favoris" href="acc/charts/accounts/?id=%d"|args:$item.id}
 						{linkbutton shape="menu" label="Tous les comptes" href="acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess('compta', Membres::DROIT_ADMIN)}

@@ -418,7 +418,6 @@ form .radio-btn div {
 }
 
 form .radio-btn h3 {
-    color: rgb(var(--gMainColor));
     text-decoration: underline;
 }
 
@@ -591,6 +590,8 @@ dialog.datepicker {
 #dialog {
     width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
     top: 0;
     left: 0;
     right: 0;
@@ -601,16 +602,25 @@ dialog.datepicker {
     transition: opacity .5s;
     z-index: 100000;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    border: none;
 }
 
 #dialog > iframe {
     width: 90%;
     height: 90%;
     border: none;
-    transition: width .5s, height .5s;
     box-shadow: 0px 0px 5px #000;
+}
+
+#dialog button {
+    background: rgb(var(--gMainColor));
+    color: #fff;
+    font-size: 1.3em;
+    display: block;
+    width: 90%;
 }
 
 .loader {
@@ -979,7 +989,7 @@ td.money, th.money {
     border-bottom: 1pt solid #999;
 }
 
-.year-header button {
+.year-header .print-btn button {
     font-size: 1.3rem;
 }
 

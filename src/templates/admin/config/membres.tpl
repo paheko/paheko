@@ -96,9 +96,9 @@
         <dl>
             <dt><label for="f_name">Nom unique</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">Ne peut comporter que des lettres minuscules et des tirets bas.</dd>
-            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" size="30" required="required" /></dd>
+            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" required="required" /></dd>
             <dt><label for="f_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" size="60" required="required" /></dd>
+            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" required="required" /></dd>
             <dt><label for="f_type">Type de champ</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="new_type" id="f_type" required="required">
@@ -126,9 +126,9 @@
                 <dt><label>Type</label></dt>
                 <dd><input type="hidden" name="champs[{$nom}][type]" value="{$champ.type}" />{$champ.type|get_type}</dd>
                 <dt><label for="f_{$nom}_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" size="60" required="required" /></dd>
+                <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" required="required" /></dd>
                 <dt><label for="f_{$nom}_help">Aide</label></dt>
-                <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs->$nom name=help}" size="100" /></dd>
+                <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs->$nom name=help}" /></dd>
                 <dt><label><input type="checkbox" name="champs[{$nom}][private]" value="1" {form_field data=$champs->$nom name=private checked="1"} /> Caché pour les membres</label></dt>
                 <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
                 <dt><label><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champs->$nom name=editable checked="1"} /> Modifiable par les membres</label></dt>
@@ -146,11 +146,11 @@
                         <{if $champ.type == 'multiple'}ol{else}ul{/if} class="options">
                         {if !empty($champ.options)}
                             {foreach from=$champ.options key="key" item="opt"}
-                                <li><input type="text" name="champs[{$nom}][options][]" value="{$opt}" size="50" /></li>
+                                <li><input type="text" name="champs[{$nom}][options][]" value="{$opt}" /></li>
                             {/foreach}
                         {/if}
                         {if $champ.type == 'select' || empty($champ.options) || count($champ.options) < 32}
-                            <li><input type="text" name="champs[{$nom}][options][]" value="" size="50" /></li>
+                            <li><input type="text" name="champs[{$nom}][options][]" value="" /></li>
                         {/if}
                     </dd>
                 {/if}

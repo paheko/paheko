@@ -19,7 +19,7 @@
 			{$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}, généré le {$close_date|date_fr:'d/m/Y'}</p>
 	{/if}
 
-	<p class="noprint">
+	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
 	</p>
 </div>

@@ -100,7 +100,16 @@
 		g.dialog = document.createElement('dialog');
 		g.dialog.id = 'dialog';
 		g.dialog.open = true;
-		g.dialog.style.opacity = content.style.width = content.style.height = 0;
+
+		var btn = document.createElement('button');
+		btn.className = 'icn-btn';
+		btn.setAttribute('data-icon', '✘');
+		btn.type = 'button';
+		btn.innerHTML = 'Fermer';
+		btn.onclick = g.closeDialog;
+		g.dialog.appendChild(btn);
+
+		content.style.opacity = g.dialog.style.opacity = 0;
 		g.dialog.appendChild(content);
 		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
 		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
@@ -108,7 +117,8 @@
 		document.body.appendChild(g.dialog);
 
 		// Restore CSS defaults
-		window.setTimeout(() => { g.dialog.style.opacity = content.style.width = content.style.height = ''; }, 50);
+		window.setTimeout(() => { g.dialog.style.opacity = ''; }, 50);
+		window.setTimeout(() => { content.style.opacity = ''; }, 100);
 	}
 
 	g.openFrameDialog = function (url) {
@@ -129,8 +139,7 @@
 		}
 
 		var d = g.dialog;
-		var c = d.firstChild;
-		d.style.opacity = c.style.width = c.style.height = 0;
+		d.style.opacity = 0;
 		window.onkeyup = g.dialog = null;
 
 		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
@@ -256,6 +265,10 @@
 	};
 
 	g.formatMoney = (v) => {
+		if (!v) {
+			return '0,00';
+		}
+
 		var s = v < 0 ? '-' : '';
 		v = '' + Math.abs(v);
 		return s + (v.substr(0, v.length-2) || '0') + ',' + ('00' + v).substr(-2);
