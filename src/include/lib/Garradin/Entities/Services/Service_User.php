@@ -25,8 +25,8 @@ class Service_User extends Entity
 	protected $_types = [
 		'id'          => 'int',
 		'id_user'     => 'int',
-		'id_fee'      => 'int',
 		'id_service'  => 'int',
+		'id_fee'      => '?int',
 		'paid'        => 'bool',
 		'expected_amount' => '?int',
 		'date'        => 'date',
@@ -126,13 +126,13 @@ class Service_User extends Entity
 		$su->date = new \DateTime;
 		$su->importForm($source);
 
-		if ($su->fee()->id_account && $su->id_user) {
+		if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
 			$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 		}
 
 		$su->save();
 
-		if ($su->fee()->id_account && !empty($source['amount'])) {
+		if ($su->id_fee && $su->fee()->id_account && !empty($source['amount'])) {
 			$su->addPayment($user_id, $source);
 		}
 

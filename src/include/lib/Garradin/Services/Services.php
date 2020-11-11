@@ -25,15 +25,13 @@ class Services
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 
+		foreach ($services as $service) {
+			$out[$service->id] = $service;
+			$out[$service->id]->fees = [];
+		}
+
 		foreach ($fees as $fee) {
-			$id = $fee->id_service;
-
-			if (!array_key_exists($id, $out)) {
-				$out[$id] = (object) $services[$id];
-				$out[$id]->fees = [];
-			}
-
-			$out[$id]->fees[] = $fee;
+			$out[$fee->id_service]->fees[] = $fee;
 		}
 
 		return $out;
