@@ -12,8 +12,6 @@ DELETE FROM config WHERE cle = 'categorie_dons' OR cle = 'categorie_cotisations'
 
 .read 1.0.0_schema.sql
 
--- FIXME: insertion en comptes analytiques des projets et associations dans transactions
-
 -------- MIGRATION COMPTA ---------
 INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', 'Plan comptable associatif 1999');
 
