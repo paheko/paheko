@@ -24,7 +24,7 @@
 	<section class="graphs">
 		{foreach from=$graphs key="url" item="label"}
 		<figure>
-			<img src="{$url|args:$year.id}" alt="" />
+			<img src="{$url|args:'year='|cat:$year.id}" alt="" />
 			<figcaption>{$label}</figcaption>
 		</figure>
 		{/foreach}

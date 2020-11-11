@@ -22,12 +22,12 @@ use KD2\Graphics\SVG\Pie_Data;
 class Graph
 {
 	const URL_LIST = [
-		ADMIN_URL . 'acc/reports/graph_plot.php?type=assets&year=%s' => 'Évolution banques et caisses',
-		ADMIN_URL . 'acc/reports/graph_plot.php?type=result&year=%s' => 'Évolution dépenses et recettes',
-		ADMIN_URL . 'acc/reports/graph_plot.php?type=debts&year=%s' => 'Évolution créances (positif) et dettes (négatif)',
-		ADMIN_URL . 'acc/reports/graph_pie.php?type=revenue&year=%s' => 'Répartition recettes',
-		ADMIN_URL . 'acc/reports/graph_pie.php?type=expense&year=%s' => 'Répartition dépenses',
-		ADMIN_URL . 'acc/reports/graph_pie.php?type=assets&year=%s' => 'Répartition actif',
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=assets&%s' => 'Évolution banques et caisses',
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=result&%s' => 'Évolution dépenses et recettes',
+		ADMIN_URL . 'acc/reports/graph_plot.php?type=debts&%s' => 'Évolution créances (positif) et dettes (négatif)',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=revenue&%s' => 'Répartition recettes',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=expense&%s' => 'Répartition dépenses',
+		ADMIN_URL . 'acc/reports/graph_pie.php?type=assets&%s' => 'Répartition actif',
 	];
 
 	const PLOT_TYPES = [

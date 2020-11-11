@@ -235,4 +235,9 @@ class Accounts
 
 		return $list;
 	}
+
+	public function countByType(int $type)
+	{
+		return DB::getInstance()->count(Account::TABLE, 'id_chart = ? AND type = ?', $this->chart_id, $type);
+	}
 }

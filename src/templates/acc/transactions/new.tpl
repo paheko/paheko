@@ -85,8 +85,8 @@
 			{input type="file" name="file" label="Fichier joint"}
 		</dl>
 		<dl data-types="all-but-advanced">
-			{if count($analytical_accounts) > 0}
-				{input type="select" name="id_analytical" label="Compte analytique (projet)" options=$analytical_accounts}
+			{if count($analytical_accounts) > 1}
+				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts}
 			{/if}
 		</dl>
 	</fieldset>

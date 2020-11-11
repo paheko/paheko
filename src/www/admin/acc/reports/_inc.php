@@ -22,7 +22,8 @@ if (qg('analytical'))
 	$criterias['analytical'] = $account->id();
 	$tpl->assign('analytical', $account);
 }
-elseif (qg('year'))
+
+if (qg('year'))
 {
 	$year = Years::get((int) qg('year'));
 
@@ -34,7 +35,10 @@ elseif (qg('year'))
 	$tpl->assign('year', $year);
 	$tpl->assign('close_date', $year->closed ? $year->end_date : time());
 }
-else
+
+if (!count($criterias))
 {
 	throw new UserException('Critère de rapport inconnu.');
 }
+
+$tpl->assign('criterias_query', http_build_query($criterias));

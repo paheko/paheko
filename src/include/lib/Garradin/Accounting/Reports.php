@@ -42,11 +42,62 @@ class Reports
 			$where[] = sprintf('t.id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['service_user']);
 		}
 
+		if (!empty($criterias['analytical'])) {
+			$where[] = sprintf('l.id_analytical = %d', $criterias['analytical']);
+		}
+
 		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}
 
 		return implode(' AND ', $where);
+	}
+
+	static public function getSumsByAnalyticalAndYear(): \Generator
+	{
+		$sql = 'SELECT a.label, a.id, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
+			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
+			FROM acc_accounts a
+			INNER JOIN acc_transactions_lines l ON l.id_analytical = a.id
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_years y ON y.id = t.id_year
+			GROUP BY y.id
+			ORDER BY a.label COLLATE NOCASE, y.start_date;';
+
+		$account = null;
+
+		foreach (DB::getInstance()->iterate($sql) as $row) {
+			if (null !== $account && $account->id !== $row->id) {
+				$account->years[] = (object) [
+					'id_year' => null,
+					'year_label' => 'Total',
+					'credit' => $account->credit,
+					'debit' => $account->debit,
+					'sum' => $account->sum,
+				];
+
+				yield $account;
+				$account = null;
+			}
+
+			if (null === $account) {
+				$account = (object) ['id' => $row->id, 'label' => $row->label, 'credit' => 0, 'debit' => 0, 'sum' => 0, 'years' => []];
+			}
+
+			$account->years[] = $row;
+			$account->credit += $row->credit;
+			$account->debit += $row->debit;
+			$account->sum += $row->sum;
+		}
+
+		$account->years[] = (object) [
+			'id_year' => null,
+			'year_label' => 'Total',
+			'credit' => $account->credit,
+			'debit' => $account->debit,
+			'sum' => $account->sum,
+		];
+		yield $account;
 	}
 
 	static public function getSumsByInterval(array $criterias, int $interval)

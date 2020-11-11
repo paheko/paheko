@@ -36,7 +36,7 @@ INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 
 -- Migrations projets vers comptes analytiques
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
-	VALUES (1, '99', 'Projets', 0, 1, 6);
+	VALUES (1, '99', 'Projets', 0, 1, 7);
 
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 7 FROM compta_projets;
