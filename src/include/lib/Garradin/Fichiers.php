@@ -146,12 +146,25 @@ class Fichiers
 			[(int)$this->id, (int)$foreign_id]);
 	}
 
+	public function getLinkedId(string $type)
+	{
+		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+
+		if (!in_array($type, $check))
+		{
+			throw new \LogicException('Type de lien de fichier inconnu.');
+		}
+
+
+		return DB::getInstance()->firstColumn(sprintf('SELECT id FROM fichiers_%s WHERE fichier = %d;', $type, $this->id));
+	}
+
 	/**
 	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
 	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
 	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
 	 */
-	public function checkAccess(Session $session)
+	public function checkAccess(Session $session, bool $require_admin = false)
 	{
 		$config = Config::getInstance();
 
@@ -162,18 +175,20 @@ class Fichiers
 
 		$db = DB::getInstance();
 
-		// On regarde déjà si le fichier n'est pas lié au wiki
-		$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
-			INNER JOIN wiki_pages AS wp ON wp.id = link.id
-			WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
-		$wiki = $db->firstColumn($query, (int)$this->id);
+		if (!$require_admin) {
+			// On regarde déjà si le fichier n'est pas lié au wiki
+			$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
+				INNER JOIN wiki_pages AS wp ON wp.id = link.id
+				WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
+			$wiki = $db->firstColumn($query, (int)$this->id);
 
-		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
-		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
-		{
-			return true;
+			// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
+			if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
+			{
+				return true;
+			}
 		}
-			
+
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
 		if (!$session->isLogged())
 		{
@@ -193,17 +208,19 @@ class Fichiers
 			// On renvoie à l'objet Wiki pour savoir si l'utilisateur a le droit de lire ce fichier
 			$_w = new Wiki;
 			$_w->setRestrictionCategorie($user->id_categorie, $user->droit_wiki);
-			return $_w->canReadPage($wiki);
+			return $require_admin ? $_w->canWritePage($wiki) : $_w->canReadPage($wiki);
 		}
+
+		$level = $require_admin ? Membres::DROIT_ADMIN : Membres::DROIT_ACCES;
 
 		// On regarde maintenant si le fichier est lié à la compta
 		$query = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_COMPTA);
 		$compta = $db->firstColumn($query, (int)$this->id);
 
-		if ($compta && $session->canAccess('compta', Membres::DROIT_ACCES))
+		if ($compta)
 		{
 			// OK si accès à la compta
-			return true;
+			return $session->canAccess('compta', $level);
 		}
 
 		// Enfin, si le fichier est lié à un membre
@@ -219,7 +236,11 @@ class Fichiers
 			}
 
 			// Pour voir les fichiers des membres il faut pouvoir les gérer
-			if ($session->canAccess('membres', Membres::DROIT_ECRITURE))
+			if ($level == Membres::DROIT_ACCES) {
+				$level = Membres::DROIT_ECRITURE;
+			}
+
+			if ($session->canAccess('membres', $level))
 			{
 				return true;
 			}
