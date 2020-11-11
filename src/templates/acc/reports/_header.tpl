@@ -2,19 +2,23 @@
 
 	<nav class="tabs noprint">
 		<ul>
-			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a></li>
-			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a></li>
-			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a></li>
-			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a></li>
-			<li{if $current == "statement"} class="current"{/if}><a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a></li>
-			<li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?year={$year.id}">Bilan</a></li>
+			{if isset($analytical)}
+			<li><strong><a href="{$admin_url}acc/reports/projects.php">Projets</a></strong></li>
+			{/if}
+			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?{$criterias_query}">Graphiques</a></li>
+			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?{$criterias_query}">Journal général</a></li>
+			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query}">Grand livre</a></li>
+			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?{$criterias_query}">Balance générale</a></li>
+			<li{if $current == "statement"} class="current"{/if}><a href="{$admin_url}acc/reports/statement.php?{$criterias_query}">Compte de résultat</a></li>
+			<li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?{$criterias_query}">Bilan</a></li>
 		</ul>
 	</nav>
 
 	<h2>{$config.nom_asso}</h2>
-	{if isset($projet)}
-		<h3>Projet&nbsp;: {$projet.libelle}</h3>
-	{else}
+	{if isset($analytical)}
+		<h3>Projet&nbsp;: {$analytical.label}</h3>
+	{/if}
+	{if isset($year)}
 		<p>Exercice comptable {if $year.closed}clôturé{else}en cours{/if} du
 			{$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}, généré le {$close_date|date_fr:'d/m/Y'}</p>
 	{/if}

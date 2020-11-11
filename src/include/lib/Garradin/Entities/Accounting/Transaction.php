@@ -106,7 +106,13 @@ class Transaction extends Entity
 	public function getLinesWithAccounts()
 	{
 		$em = EntityManager::getInstance(Line::class);
-		return $em->DB()->get('SELECT a.*, b.label AS account_name, b.code AS account_code FROM ' . Line::TABLE  .' a INNER JOIN ' . Account::TABLE . ' b ON b.id = a.id_account WHERE a.id_transaction = ? ORDER BY a.id;', $this->id);
+		return $em->DB()->get('SELECT
+			l.*, a.label AS account_name, a.code AS account_code,
+			b.label AS analytical_name
+			FROM acc_transactions_lines l
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_accounts b ON b.id = l.id_analytical
+			WHERE l.id_transaction = ? ORDER BY l.id;', $this->id);
 	}
 
 	public function getLines($with_accounts = false)

@@ -1,13 +1,14 @@
 {include file="admin/_head.tpl" title="Exercices" current="acc/years"}
 
-{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
+		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
+		{/if}
+		<li><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
 	</ul>
 </nav>
-{/if}
 
 {if $_GET.msg == 'OPEN'}
 <p class="block error">

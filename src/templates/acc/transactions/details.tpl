@@ -94,6 +94,7 @@
 			<td class="money">Crédit</td>
 			<td>Libellé</td>
 			<td>Référence</td>
+			<td>Projet</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -107,7 +108,7 @@
 			<td>{$line.reference}</td>
 			<td>
 				{if $line.id_analytical}
-					<a href="{$admin_url}acc/reports/analytical.php?id={$line.id_analytical}">{*FIXME*}</a>
+					<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.analytical_name}</a>
 				{/if}
 			</td>
 		</tr>

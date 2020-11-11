@@ -6,7 +6,7 @@
 	<section class="graphs">
 		{foreach from=$graphs key="url" item="label"}
 		<figure>
-			<img src="{$url|args:$year.id}" alt="" />
+			<img src="{$url|args:$criterias_query}" alt="" />
 			<figcaption>{$label}</figcaption>
 		</figure>
 		{/foreach}
