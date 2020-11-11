@@ -99,15 +99,13 @@ if (!defined('Garradin\WWW_URI'))
         $uri = \KD2\HTTP::getRootURI(ROOT);
     }
     catch (\UnexpectedValueException $e) {
-        echo "<h2>Impossible de détecter le chemin d'accès web de Garradin.</h2>";
-        echo '<p><a href="https://fossil.kd2.org/garradin/wiki?name=Installation">Consulter l\'aide pour configurer manuellement le chemin d\'accès</a></p>';
-        exit;
+        $uri = null;
     }
 
     if ($uri == '/www/') {
         $uri = '/';
     }
-    else {
+    elseif ($uri !== null) {
         readfile(ROOT . '/sous-domaine.html');
         exit;
     }
@@ -116,9 +114,27 @@ if (!defined('Garradin\WWW_URI'))
     unset($uri);
 }
 
-if (!defined('Garradin\WWW_URL'))
-{
-    define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . \KD2\HTTP::getHost() . WWW_URI);
+if (!defined('Garradin\WWW_URL')) {
+    $host = \KD2\HTTP::getHost();
+}
+
+if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
+    $title = 'Impossible de détecter automatiquement l\'URL du site web.';
+    $info = 'Consulter l\'aide pour configurer manuellement l\'URL avec la directive WWW_URL et WWW_URI.';
+    $url ='https://fossil.kd2.org/garradin/wiki?name=Installation';
+
+    if (PHP_SAPI == 'cli') {
+        printf("\n/!\\ %s\n%s\n-> %s\n\n", $title, $info, $url);
+    }
+    else {
+        printf('<h2 style="color: red">%s</h2><p><a href="%s">%s</a></p>', $title, $url, $info);
+    }
+
+    exit(1);
+}
+
+if (!defined('Garradin\WWW_URL')) {
+    define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
 }
 
 static $default_config = [
