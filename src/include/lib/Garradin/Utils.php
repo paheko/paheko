@@ -53,6 +53,9 @@ class Utils
             $ts = \DateTime::createFromFormat('Y-m-d', $ts);
             $date = $ts->format($format);
         }
+        else {
+            return null;
+        }
 
         $date = strtr($date, self::$french_date_names);
         $date = strtolower($date);

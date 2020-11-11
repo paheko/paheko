@@ -46,6 +46,7 @@
 		</dl>
 
 		{foreach from=$grouped_services item="service"}
+		<?php if (!count($service->fees)) { continue; } ?>
 		<dl data-service="s{$service.id}">
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
 			{foreach from=$service.fees key="service_id" item="fee"}
@@ -111,8 +112,11 @@ function selectService(elm) {
 	});
 
 	var first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
-	first.checked = true;
-	selectFee(first);
+
+	if (first) {
+		first.checked = true;
+		selectFee(first);
+	}
 }
 
 function selectFee(elm) {
@@ -140,6 +144,7 @@ $('input[name=id_fee]').forEach((e) => {
 var selected = document.querySelector('input[name="id_service"]:checked, input[name="id_service"]');
 selected.checked = true;
 
+g.toggle('.accounting', false);
 selectService(selected);
 </script>
 {/literal}
