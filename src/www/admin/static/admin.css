@@ -938,6 +938,15 @@ b.money {
     display: none;
 }
 
+.transaction-lines select {
+    max-width: 10em;
+}
+
+.transaction-lines input[type=text] {
+    width: 85%;
+    min-width: 0 !important;
+}
+
 nav.acc-year {
     background: white;
     text-align: center;
