@@ -4,8 +4,13 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Plugin;
+use Garradin\Utils;
 use Garradin\Entities\Services\Reminder;
 use KD2\DB\EntityManager;
+
+use const Garradin\WWW_URL;
+use const Garradin\ADMIN_URL;
 
 class Reminders
 {
@@ -76,33 +81,28 @@ class Reminders
 
 	/**
 	 * Envoi de mail pour rappel automatisé
-	 * @param  array $data Données du rappel automatisé
-	 * @return boolean     TRUE
 	 */
-	static public function sendAuto($reminder)
+	static public function sendAuto(\stdClass $reminder)
 	{
-		$replace = (array) $data;
-		$replace['date_rappel'] = Utils::sqliteDateToFrench($replace['date_rappel']);
-		$replace['date_expiration'] = Utils::sqliteDateToFrench($replace['expiration']);
-		$replace['nb_jours'] = abs($replace['nb_jours']);
-		$replace['delai'] = abs($replace['delai']);
+		$replace = [
+			'identite'        => $reminder->identity,
+			'date_rappel'     => Utils::sqliteDateToFrench($reminder->reminder_date),
+			'date_expiration' => Utils::sqliteDateToFrench($reminder->expiry_date),
+			'nb_jours'        => $reminder->nb_days,
+			'delai'           => $reminder->delay,
+		];
 
-		$subject = self::replaceTagsInContent($data->sujet, $replace);
-		$text = self::replaceTagsInContent($data->texte, $replace);
+		$subject = self::replaceTagsInContent($reminder->subject, $replace);
+		$text = self::replaceTagsInContent($reminder->body, $replace);
 
 		// Envoi du mail
-		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $data->email, $subject, $text, $data->id);
+		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $reminder->email, $subject, $text, $reminder->id_user);
 
 		$db = DB::getInstance();
 		$db->insert('services_reminders_sent', [
 			'id_service'  => $reminder->id_service,
 			'id_user'     => $reminder->id_user,
 			'id_reminder' => $reminder->id_reminder,
-			// On enregistre la date de mise en œuvre du rappel
-			// et non pas la date d'envoi effective du rappel
-			// car l'envoi du rappel peut ne pas être effectué
-			// le jour où il aurait dû être envoyé (la magie des cron)
-			'date'        => $reminder->sent_date,
 		]);
 
 		Plugin::fireSignal('rappels.auto', $reminder);
@@ -119,10 +119,14 @@ class Reminders
 		$db = DB::getInstance();
 		$config = Config::getInstance();
 
-		$sql = 'SELECT MIN(sr.delay), sr.subject, sr.body,
-			s.label, s.description, su.id_service, su.id_user,
-			m.email, m.%s AS identity, su.expiry_date
+		$sql = 'SELECT
+			date(su.expiry_date, sr.delay || \' days\') AS reminder_date,
+			ABS(julianday(date()) - julianday(expiry_date)) AS nb_days,
+			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
+			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
+			m.email, m.%s AS identity
 			FROM services_users su
+			INNER JOIN services s ON s.id = su.id_service
 			INNER JOIN services_reminders sr ON sr.id_service = su.id_service
 			-- Join with users, but not ones part of a hidden category
 			INNER JOIN membres m ON su.id_user = m.id
@@ -130,21 +134,19 @@ class Reminders
 				AND (m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1))
 			-- Join with sent reminders to exclude users that already have received this reminder
 			LEFT JOIN services_reminders_sent srs ON srs.id_reminder = sr.id AND srs.id_user = su.id_user
-			WHERE date() > date(su.expiry_date, sr.delay || \' days\')
-			AND srs.id IS NULL
-			GROUP BY su.id_user, su.id_service
+			WHERE
+				date() > date(su.expiry_date, sr.delay || \' days\')
+				AND srs.id IS NULL
+			GROUP BY su.id_user, s.id
 			ORDER BY su.id_user;';
 
 		$sql = sprintf($sql, $config->get('champ_identite'));
-
-		$db->begin();
 
 		foreach ($db->iterate($sql) as $row)
 		{
 			self::sendAuto($row);
 		}
 
-		$db->commit();
 		return true;
 	}
 }
