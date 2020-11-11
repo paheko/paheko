@@ -169,8 +169,8 @@
 
 		select(e)
 		{
-			if (e) {
-				this.date.setDate(parseInt(e.target.innerHTML, 10));
+			if (e && e.target.textContent.match(/\d+/)) {
+				this.date.setDate(parseInt(e.target.textContent, 10));
 			}
 
 			var y = this.date.getFullYear(),
