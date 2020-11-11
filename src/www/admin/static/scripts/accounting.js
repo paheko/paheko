@@ -54,6 +54,10 @@ function initTransactionForm() {
 		var debit = credit = 0;
 
 		amounts.forEach((i) => {
+			if (!i.value) {
+				return;
+			}
+
 			var v = g.getMoneyAsInt(i.value);
 
 			if (i.name.match(/debit/)) {
@@ -66,7 +70,7 @@ function initTransactionForm() {
 
 		if (m = $('#lines_message')) {
 			var diff = credit - debit;
-			m.innerHTML = (debit === credit) ? '' : '<span class="alert">Écriture non équilibrée (' + g.formatMoney(diff) + ')</span>';
+			m.innerHTML = (!diff) ? '' : '<span class="alert">Écriture non équilibrée (' + g.formatMoney(diff) + ')</span>';
 		}
 
 		debit = debit ? debit + '' : '000';

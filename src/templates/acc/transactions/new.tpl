@@ -59,19 +59,19 @@
 		{foreach from=$types_details item="type"}
 			<fieldset data-types="t{$type.id}">
 				<legend>{$type.label}</legend>
-				<dl>
-				{foreach from=$type.accounts key="key" item="account"}
-					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
-				{/foreach}
-				</dl>
+				{if $type.id == $transaction::TYPE_ADVANCED}
+					{* Saisie avancée *}
+					{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
+				{else}
+					<dl>
+					{foreach from=$type.accounts key="key" item="account"}
+						{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
+					{/foreach}
+					</dl>
+				{/if}
 			</fieldset>
 		{/foreach}
 	{/if}
-
-	{* Saisie avancée *}
-	<fieldset data-types="t{$transaction::TYPE_ADVANCED}">
-		{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
-	</fieldset>
 
 	<fieldset>
 		<legend>Détails facultatifs</legend>
