@@ -75,11 +75,8 @@ class Graph
 			}
 
 			// Invert sums for banks, cash, etc.
-			if ('assets' === $type || 'debts' === $type) {
+			if ('assets' === $type || 'debts' === $type || ('result' === $type && $line_criterias['position'] == Account::EXPENSE)) {
 				$sums = array_map(function ($v) { return $v * -1; }, $sums);
-			}
-			elseif ('result' === $type) {
-				$sums = array_map('abs', $sums);
 			}
 
 			$sums = array_map(function ($v) { return (int)$v/100; }, $sums);
