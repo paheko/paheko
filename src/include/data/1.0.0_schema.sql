@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS services_reminders_sent
 
     id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-    id_reminder INTEGER NULL REFERENCES services_reminders (id) ON DELETE CASCADE,
+    id_reminder INTEGER NOT NULL REFERENCES services_reminders (id) ON DELETE CASCADE,
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
 );
