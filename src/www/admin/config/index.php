@@ -13,7 +13,7 @@ if (f('save') && $form->check('config'))
         $config->set('accueil_wiki', f('accueil_wiki'));
         $config->set('accueil_connexion', f('accueil_connexion'));
         $config->set('categorie_membres', f('categorie_membres'));
-        
+
         $config->set('champ_identite', f('champ_identite'));
         $config->set('champ_identifiant', f('champ_identifiant'));
 
@@ -25,17 +25,15 @@ if (f('save') && $form->check('config'))
         {
             $config->set('couleur1', f('couleur1'));
             $config->set('couleur2', f('couleur2'));
-
-            if (f('image_fond'))
-            {
-                $config->set('image_fond', f('image_fond'));
-            }
         }
         else
         {
             $config->set('couleur1', null);
             $config->set('couleur2', null);
-            $config->set('image_fond', null);
+        }
+
+        if (trim(f('image_fond')) != '') {
+            $config->set('image_fond', f('image_fond') ?: null);
         }
 
         $config->save();

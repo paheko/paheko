@@ -159,12 +159,7 @@ class Fichiers
 		return DB::getInstance()->firstColumn(sprintf('SELECT id FROM fichiers_%s WHERE fichier = %d;', $type, $this->id));
 	}
 
-	/**
-	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
-	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
-	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
-	 */
-	public function checkAccess(Session $session, bool $require_admin = false)
+	public function isPublic(): bool
 	{
 		$config = Config::getInstance();
 
@@ -173,20 +168,33 @@ class Fichiers
 			return true;
 		}
 
+
 		$db = DB::getInstance();
 
-		if (!$require_admin) {
-			// On regarde déjà si le fichier n'est pas lié au wiki
-			$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
-				INNER JOIN wiki_pages AS wp ON wp.id = link.id
-				WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
-			$wiki = $db->firstColumn($query, (int)$this->id);
+		// On regarde déjà si le fichier n'est pas lié au wiki
+		$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
+			INNER JOIN wiki_pages AS wp ON wp.id = link.id
+			WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
+		$wiki = $db->firstColumn($query, (int)$this->id);
 
-			// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
-			if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
-			{
-				return true;
-			}
+		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
+		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
+	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
+	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
+	 */
+	public function checkAccess(Session $session, bool $require_admin = false)
+	{
+		if (!$require_admin && $this->isPublic()) {
+			return true;
 		}
 
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
@@ -308,7 +316,7 @@ class Fichiers
 	 */
 	public function serve()
 	{
-		return $this->_serve($this->getFilePathFromCache(), $this->type, ($this->image ? false : $this->nom), $this->taille);
+		return $this->_serve($this->getFilePathFromCache(), $this->type, ($this->image ? false : $this->nom), $this->taille, $this->isPublic());
 	}
 
 	/**
@@ -359,12 +367,27 @@ class Fichiers
 	 * @param  integer $size Taille du fichier en octets (facultatif)
 	 * @return boolean TRUE en cas de succès
 	 */
-	protected function _serve($path, $type, $name = false, $size = null)
+	protected function _serve($path, $type, $name = false, $size = null, bool $public = false)
 	{
-		// Désactiver le cache
-		header('Pragma: public');
-		header('Expires: -1');
-		header('Cache-Control: public, must-revalidate, post-check=0, pre-check=0');
+		if ($public) {
+			header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $this->datetime)));
+			header(sprintf('Etag: %s', $this->hash));
+			header('Cache-Control: public');
+
+			$etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
+			$last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
+
+			if ($etag === $this->hash && $last_modified <= $this->datetime) {
+				header('HTTP/1.1 304 Not Modified', true, 304);
+				exit;
+			}
+		}
+		else {
+			// Désactiver le cache
+			header('Pragma: public');
+			header('Expires: -1');
+			header('Cache-Control: public, must-revalidate, post-check=0, pre-check=0');
+		}
 
 		header('Content-Type: '.$type);
 
@@ -372,7 +395,7 @@ class Fichiers
 		{
 			header('Content-Disposition: attachment; filename="' . $name . '"');
 		}
-		
+
 		// Utilisation de XSendFile si disponible
 		if (ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
 		{
@@ -554,12 +577,21 @@ class Fichiers
 					$i = new Image($path);
 				}
 				else {
-					$i = Image::createFromBlob($bytes);
+					$i = Image::createFromBlob($content);
+				}
+
+				// Recompress PNG files from base64, assuming they are coming
+				// from JS canvas which doesn't know how to gzip (d'oh!)
+				if ($i->format() == 'png' && null !== $content) {
+					$content = $i->output('png', true);
+					$hash = sha1($content);
+					$size = strlen($content);
 				}
 
 				unset($i);
 			}
 			catch (\RuntimeException $e) {
+				throw $e;
 				throw new UserException('Fichier image invalide');
 			}
 		}
@@ -723,7 +755,7 @@ class Fichiers
 	{
 		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
 		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
-		
+
 		return array_merge($match[1], $match2[1]);
 	}
 

@@ -119,9 +119,12 @@ class Config
         $values = [];
         $db = DB::getInstance();
 
-        if (isset($this->modified['image_fond']))
-        {
-            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'image_fond\';'))
+        // Image files
+        if (isset($this->modified['image_fond'])) {
+            $key = 'image_fond';
+            $value =& $this->config[$key];
+
+            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = ?;', $key))
             {
                 try {
                     $f = new Fichiers($current);
@@ -132,13 +135,15 @@ class Config
                 }
             }
 
-            if (strlen($this->config['image_fond']) > 0)
+            if (strlen($value) > 0)
             {
-                $f = Fichiers::storeFromBase64('Image_fond_admin.png', $this->config['image_fond']);
-                $this->config['image_fond'] = $f->id;
+                $f = Fichiers::storeFromBase64($key . '.png', $value);
+                $value = $f->id;
                 unset($f);
             }
         }
+
+        unset($value, $key);
 
         $db->begin();
 

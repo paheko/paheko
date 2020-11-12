@@ -243,9 +243,6 @@ class Template extends \KD2\Smartyer
 
 			$attributes['value'] = $value;
 		}
-		elseif ($type == 'file') {
-			$help = sprintf('Taille maximale : %s', Utils::format_bytes(Utils::getMaxUploadSize()));
-		}
 		elseif ($type == 'date') {
 			$type = 'text';
 			$attributes['placeholder'] = 'JJ/MM/AAAA';
@@ -371,6 +368,10 @@ class Template extends \KD2\Smartyer
 		else {
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
+			if ($type == 'file') {
+				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
+			}
+
 			if (isset($help)) {
 				$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
 			}
@@ -470,11 +471,7 @@ class Template extends \KD2\Smartyer
 		:root {
 			--gMainColor: %s;
 			--gSecondColor: %s;
-		}
-		@media screen, handheld {
-			.header .menu, body {
-				background-image: url("%s");
-			}
+			--gBgImage: url("%s");
 		}
 		</style>';
 
