@@ -10,10 +10,10 @@
 	<tbody>
 		<tr>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$expense caption="Charges" abs=true}
+				{include file="acc/reports/_statement_table.tpl" accounts=$expense caption="Charges"}
 			</td>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$revenue caption="Produits" abs=true}
+				{include file="acc/reports/_statement_table.tpl" accounts=$revenue caption="Produits"}
 			</td>
 		</tr>
 	</tbody>
@@ -47,7 +47,7 @@
 				<table>
 					<tfoot>
 						<tr>
-							<th>Résultat (déficit)</th>
+							<th>Résultat (perte)</th>
 							<td class="money">{$result|raw|html_money:false}</td>
 						</tr>
 					</tfoot>

@@ -11,7 +11,7 @@
 				{/if}
 			</td>
 			<th>{$account.label}</th>
-			<td class="money">{if $abs}{$account.sum|abs|raw|html_money}{else}{$account.sum|raw|html_money}{/if}</td>
+			<td class="money">{$account.sum|raw|html_money}</td>
 		</tr>
 	{/foreach}
 	</tbody>

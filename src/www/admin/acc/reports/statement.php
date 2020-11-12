@@ -8,7 +8,7 @@ use Garradin\Entities\Accounting\Account;
 require_once __DIR__ . '/_inc.php';
 
 $revenue = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::REVENUE]);
-$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE]);
+$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE], null, true);
 
 $get_sum = function (array $in): int {
 	$sum = 0;
