@@ -5,7 +5,11 @@
 	<tbody>
 	{foreach from=$accounts item="account"}
 		<tr class="compte">
-			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a></td>
+			<td class="num">
+				{if !empty($year)}<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a>
+				{else}{$account.code}
+				{/if}
+			</td>
 			<th>{$account.label}</th>
 			<td class="money">{if $abs}{$account.sum|abs|raw|html_money}{else}{$account.sum|raw|html_money}{/if}</td>
 		</tr>

@@ -16,7 +16,11 @@
 	<tbody>
 	{foreach from=$balance item="account"}
 		<tr>
-			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a></td>
+			<td class="num">
+				{if !empty($year)}<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a>
+				{else}{$account.code}
+				{/if}
+			</td>
 			<th>{$account.label}</th>
 			<td class="money">{$account.debit|raw|html_money}</td>
 			<td class="money">{$account.credit|raw|html_money}</td>
