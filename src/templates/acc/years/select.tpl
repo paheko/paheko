@@ -11,6 +11,8 @@
 					{/foreach}
 				</select>
 			</dd>
+			<dd class="help">Ici ne peuvent être sélectionnés que les exercices ouverts, car il n'est pas possible de modifier un exercice clos.
+				Pour consulter les rapports pour les exercices clos, voir <a href="{$www_url}admin/acc/years/">la liste des exercices</a>.</dd>
 		</dl>
 	</fieldset>
 
