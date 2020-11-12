@@ -107,10 +107,9 @@
     <fieldset id="couleurs">
         <legend>Personnalisation de l'interface</legend>
         <dl>
-            <dt><label for="f_couleur1">Couleur principale</label></dt>
-            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[0]}" name="couleur1" value="{form_field name=couleur1 default=$couleur1}" id="f_couleur1" /></dd>
-            <dt><label for="f_couleur2">Couleur secondaire</label></dt>
-            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[1]}" name="couleur2" value="{form_field name=couleur2 default=$couleur2}" id="f_couleur2" /></dd>
+            {input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$couleur1 name="couleur1" label="Couleur primaire" placeholder=$couleurs_defaut[0]}
+            {input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$couleur2 name="couleur2" label="Couleur secondaire" placeholder=$couleurs_defaut[1]}
+            {input type="file" label="Image de fond" name="background" help="Il est conseillé d'utiliser une image en noir et blanc avec un fond blanc pour un meilleur rendu. Dimensions recommandées : 380x200"}
         </dl>
         <input type="hidden" name="image_fond" id="f_image_fond" data-source="{$background_image_source}" value="{form_field name=image_fond}" />
     </fieldset>

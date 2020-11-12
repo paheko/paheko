@@ -51,6 +51,7 @@ h6  { font-size: 0.8em; }
     --gBgColor: 255, 255, 255;
     --gMainColor: 156, 79, 21;
     --gSecondColor: 217, 134, 40;
+    --gBgImage: url("gdin_bg.png");
 }
 
 html {
@@ -63,7 +64,7 @@ body {
     color: #000;
     font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
     padding-bottom: 1em;
-    background: #fff url("gdin_bg.png") no-repeat 0px 0px fixed;
+    background: #fff var(--gBgImage) no-repeat 0px 0px fixed;
     background-color: rgb(var(--gBgColor));
     /* Pas possible d'utiliser une variable CSS pour l'image de fond, c'est bugué dans Chrome
     cf. https://bugs.chromium.org/p/chromium/issues/detail?id=618165 */
@@ -97,7 +98,7 @@ body#transparent {
     top: 0;
     bottom: 0;
     padding-top: 100px;
-    background: #9c4f15 url("gdin_bg.png") no-repeat 0px 0px;
+    background: #9c4f15 var(--gBgImage) no-repeat 0px 0px;
     background-color: rgb(var(--gMainColor));
 }
 
@@ -389,7 +390,6 @@ input[disabled], input[disabled] + label {
 }
 
 input.resetButton {
-    padding: .1em;
     margin-left: 1em;
 }
 
