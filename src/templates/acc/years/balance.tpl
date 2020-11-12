@@ -13,9 +13,6 @@
 
 	<fieldset>
 		<legend>Exercice&nbsp;: «&nbsp;{$year.label}&nbsp;» du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</legend>
-		<p class="help">
-			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
-		</p>
 
 		{if null === $previous_year}
 		<dl>
@@ -30,6 +27,9 @@
 			</dd>
 		</dl>
 		{else}
+		<p class="help">
+			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
+		</p>
 		<table class="list transaction-lines">
 			<thead>
 				<tr>
@@ -62,6 +62,7 @@
 			<tfoot>
 				<tr>
 					<th>Total</th>
+					<td></td>
 					<td>{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 					<td>{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 					<td>{button label="Ajouter une ligne" shape="plus"}</td>
@@ -74,6 +75,8 @@
 	<p class="submit">
 		{if null === $previous_year}
 			<input type="submit" name="next" value="Continuer &rarr;" />
+			- ou -
+			{linkbutton shape="reset" href="acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
 			{csrf_field key="acc_years_balance_%s"|args:$year.id}
 			<input type="hidden" name="from_year" value="{$previous_year.id}" />
