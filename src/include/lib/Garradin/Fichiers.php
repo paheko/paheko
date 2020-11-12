@@ -159,7 +159,7 @@ class Fichiers
 		return DB::getInstance()->firstColumn(sprintf('SELECT id FROM fichiers_%s WHERE fichier = %d;', $type, $this->id));
 	}
 
-	public function isPublic(): bool
+	public function isPublic(&$wiki = null): bool
 	{
 		$config = Config::getInstance();
 
@@ -168,14 +168,11 @@ class Fichiers
 			return true;
 		}
 
-
-		$db = DB::getInstance();
-
 		// On regarde déjà si le fichier n'est pas lié au wiki
 		$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
 			INNER JOIN wiki_pages AS wp ON wp.id = link.id
 			WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
-		$wiki = $db->firstColumn($query, (int)$this->id);
+		$wiki = DB::getInstance()->firstColumn($query, (int)$this->id);
 
 		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
 		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
@@ -193,7 +190,7 @@ class Fichiers
 	 */
 	public function checkAccess(Session $session, bool $require_admin = false)
 	{
-		if (!$require_admin && $this->isPublic()) {
+		if (!$require_admin && $this->isPublic($wiki)) {
 			return true;
 		}
 
@@ -220,6 +217,8 @@ class Fichiers
 		}
 
 		$level = $require_admin ? Membres::DROIT_ADMIN : Membres::DROIT_ACCES;
+
+		$db = DB::getInstance();
 
 		// On regarde maintenant si le fichier est lié à la compta
 		$query = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_COMPTA);
