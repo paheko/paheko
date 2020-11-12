@@ -67,7 +67,23 @@ $tpl->assign('champs', $config->get('champs_membres')->getList());
 
 $tpl->assign('couleur1', $config->get('couleur1') ?: ADMIN_COLOR1);
 $tpl->assign('couleur2', $config->get('couleur2') ?: ADMIN_COLOR2);
-$tpl->assign('background_image_source', ADMIN_BACKGROUND_IMAGE);
+
+$image_fond = ADMIN_BACKGROUND_IMAGE;
+
+if ($config->get('image_fond'))
+{
+    try {
+        $f = new Fichiers($config->get('image_fond'));
+        $image_fond = $f->getURL();
+    }
+    catch (\InvalidArgumentException $e)
+    {
+        // Fichier qui n'existe pas/plus
+    }
+}
+
+$tpl->assign('background_image_source', $image_fond);
+$tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
 $tpl->assign('couleurs_defaut', [ADMIN_COLOR1, ADMIN_COLOR2]);
 
 $tpl->assign('custom_js', ['color_helper.js']);

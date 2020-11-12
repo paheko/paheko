@@ -184,6 +184,7 @@
 
 		reset_btn.onclick = () => {
 			$('#f_image_fond').value = '0';
+			$('#f_image_fond').dataset.source = $('#f_image_fond').dataset.default;
 			applyColors();
 		};
 
