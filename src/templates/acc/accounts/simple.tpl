@@ -1,6 +1,13 @@
 {include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
-{include file="acc/_year_select.tpl"}
+{if empty($year)}
+	{include file="acc/_year_select.tpl"}
+{else}
+	<nav class="acc-year">
+		<h4>Exercice sélectionné&nbsp;:</h4>
+		<h3>{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h3>
+	</nav>
+{/if}
 
 {if Entities\Accounting\Account::isReversed($type)}
 	{include file="acc/_simple_help.tpl" link=null type=$type}
