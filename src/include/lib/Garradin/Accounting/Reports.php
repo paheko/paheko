@@ -57,11 +57,11 @@ class Reports
 	{
 		$sql = 'SELECT a.label, a.id, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
-			FROM acc_accounts a
-			INNER JOIN acc_transactions_lines l ON l.id_analytical = a.id
+			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_analytical
 			INNER JOIN acc_years y ON y.id = t.id_year
-			GROUP BY y.id
+			GROUP BY a.id, y.id
 			ORDER BY a.label COLLATE NOCASE, y.start_date;';
 
 		$account = null;
