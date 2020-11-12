@@ -26,6 +26,8 @@
 				</select>
 			</dd>
 		</dl>
+		{elseif 0 === $previous_year}
+			<p class="alert block">Il n'existe aucun exercice clôturé, il n'est donc pas possible de reprendre une balance de clôture.</p>
 		{else}
 		<p class="help">
 			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
@@ -79,7 +81,7 @@
 			<input type="submit" name="next" value="Continuer &rarr;" />
 			- ou -
 			{linkbutton shape="reset" href="acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
-		{else}
+		{elseif $previous_year}
 			{csrf_field key="acc_years_balance_%s"|args:$year.id}
 			<input type="hidden" name="from_year" value="{$previous_year.id}" />
 			<input type="submit" name="save" value="Sauvegarder &rarr;" />
