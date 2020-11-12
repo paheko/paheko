@@ -455,6 +455,7 @@ class Transaction extends Entity
 		$this->label = 'Balance d\'ouverture';
 		$this->date = $year->start_date;
 		$this->id_year = $year->id();
+		$this->type = self::TYPE_ADVANCED;
 
 		try {
 			$lines = Utils::array_transpose($source['lines']);
