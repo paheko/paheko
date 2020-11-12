@@ -41,7 +41,11 @@ class DB extends SQLite3
 
         // 10 secondes
         $this->db->busyTimeout(10 * 1000);
-        $this->exec('PRAGMA journal_mode = TRUNCATE;');
+
+        // Performance enhancement
+        // see https://www.cs.utexas.edu/~jaya/slides/apsys17-sqlite-slides.pdf
+        // https://ericdraken.com/sqlite-performance-testing/
+        $this->exec(sprintf('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;', 32 * 1024 * 1024));
 
         $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
     }
