@@ -16,8 +16,8 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-		{linkbutton href="%s?type=%d&export=csv"|args:$self_url,$type label="Export CSV" shape="export"}
-		{linkbutton href="%s?type=%d&export=ods"|args:$self_url,$type label="Export tableur" shape="export"}
+		{linkbutton href="%s?type=%d&export=csv"|args:$self_url_no_qs,$type label="Export CSV" shape="export"}
+		{linkbutton href="%s?type=%d&export=ods"|args:$self_url_no_qs,$type label="Export tableur" shape="export"}
 	{/if}
 	</aside>
 	<ul>
