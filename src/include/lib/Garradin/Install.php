@@ -29,7 +29,11 @@ class Install
 
 		unlink(DB_FILE);
 
-		$ok = self::install($config->nom_asso, $config->adresse_asso, $config->email_asso, 'Bureau', $user->identite, $user->email, $password, $config->site_asso);
+		// We can't use the real password, as it might not be valid (too short or compromised)
+		$ok = self::install($config->nom_asso, $user->identite, $user->email, md5($password . SECRET_KEY));
+
+		// Restore password
+		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$session::hashPassword($password)]);
 
 		if ($ok)
 		{
