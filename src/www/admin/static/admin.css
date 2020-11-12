@@ -943,7 +943,6 @@ b.money {
 }
 
 .transaction-lines input[type=text] {
-    width: 85%;
     min-width: 0 !important;
 }
 
