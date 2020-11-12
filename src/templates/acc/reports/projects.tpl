@@ -41,9 +41,9 @@
 					<th>{$year.year_label}</th>
 					<td>
 						<a href="{$admin_url}acc/reports/graphs.php?analytical={$account.id}&year={$year.id_year}">Graphiques</a>
+						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$account.id}&year={$year.id_year}">Balance générale</a>
 						| <a href="{$admin_url}acc/reports/journal.php?analytical={$account.id}&year={$year.id_year}">Journal général</a>
 						| <a href="{$admin_url}acc/reports/ledger.php?analytical={$account.id}&year={$year.id_year}">Grand livre</a>
-						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$account.id}&year={$year.id_year}">Balance générale</a>
 						| <a href="{$admin_url}acc/reports/statement.php?analytical={$account.id}&year={$year.id_year}">Compte de résultat</a>
 						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$account.id}&year={$year.id_year}">Bilan</a>
 					</td>
