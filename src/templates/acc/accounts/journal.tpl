@@ -98,7 +98,7 @@
 		<tr>
 			<td colspan="{if $simple}3{else}4{/if}">Solde</td>
 			<td class="money">{$sum|raw|html_money:false}</td>
-			<td colspan="{if $simple}3{else}4{/if}"></td>
+			<td colspan="{if $simple}4{else}5{/if}"></td>
 		</tr>
 	</tfoot>
 </table>
