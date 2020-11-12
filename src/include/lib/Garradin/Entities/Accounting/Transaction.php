@@ -456,7 +456,13 @@ class Transaction extends Entity
 		$this->date = $year->start_date;
 		$this->id_year = $year->id();
 
-		$lines = Utils::array_transpose($source['lines']);
+		try {
+			$lines = Utils::array_transpose($source['lines']);
+		}
+		catch (\LogicException $e) {
+			throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
+		}
+
 		$debit = $credit = 0;
 
 		foreach ($lines as $line) {
