@@ -62,7 +62,9 @@
 			<tfoot>
 				<tr>
 					<th>Total</th>
-					<td></td>
+					{if $chart_change}
+						<td></td>
+					{/if}
 					<td>{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 					<td>{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 					<td>{button label="Ajouter une ligne" shape="plus"}</td>
