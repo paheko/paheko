@@ -37,6 +37,11 @@ class Years
 		return $em->all('SELECT * FROM @TABLE WHERE closed = 1 ORDER BY end_date;');
 	}
 
+	static public function countClosed()
+	{
+		return DB::getInstance()->count(Year::TABLE, 'closed = 1');
+	}
+
 	static public function list(bool $reverse = false)
 	{
 		$desc = $reverse ? 'DESC' : '';
