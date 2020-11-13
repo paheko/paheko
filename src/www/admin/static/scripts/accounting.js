@@ -17,31 +17,38 @@ function initTransactionForm() {
 			updateTotals();
 		};
 
+		// To be able to change input just by pressing up/down
+		var inputs = row.querySelectorAll('input, select, button');
+
+		inputs.forEach((i, k) => {
+			i.onkeydown = (e) => {
+				if (e.key == 'ArrowUp' && (p = row.previousElementSibling)) {
+					p.querySelectorAll('input, select, button')[k].focus();
+					return false;
+				}
+				else if (e.key == 'ArrowDown' && (n = row.nextElementSibling)) {
+					n.querySelectorAll('input, select, button')[k].focus();
+					return false;
+				}
+			};
+		});
+
 		// Update totals and disable other amount input
 		var inputs = row.querySelectorAll('input.money');
 
 		inputs.forEach((i, k) => {
 			i.onkeyup = (e) => {
-				if (!e.key.match(/^([0-9,.]|Separator|Backspace|Delete)$/i)) {
-					return true;
-				}
-
-				if (i.readOnly) {
-					i.value = e.key.match(/[0-9.,]/) ? e.key : '0';
-					i.readOnly = false;
-					inputs[+!k].readOnly = true;
+				var v = i.value.replace(/[^0-9,.]/);
+				if (v.length && v != 0) {
+					i.classList.remove('disabled');
+					inputs[+!k].classList.add('disabled');
 					inputs[+!k].value = '0';
+					updateTotals();
 				}
-				else if (!inputs[+!k].readOnly) {
-					inputs[+!k].readOnly = true;
-					inputs[+!k].value = '0';
-				}
-
-				updateTotals();
 			};
 
 			if (+i.value == 0 && +inputs[+!k].value != 0) {
-				i.readOnly = true;
+				i.classList.add('disabled');
 				i.value = '0';
 			}
 		});

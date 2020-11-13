@@ -461,7 +461,7 @@ form .input-list .label button {
     background: none;
 }
 
-input[readonly] {
+input[readonly], input.disabled {
     color: #666 !important;
     background-color: #eee !important;
 }
