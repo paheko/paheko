@@ -1,6 +1,9 @@
 {include file="admin/_head.tpl" title="Importer des écritures" current="acc/years"}
 
-{include file="acc/_year_select.tpl"}
+<nav class="acc-year">
+	<h4>Exercice sélectionné&nbsp;:</h4>
+	<h3>{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h3>
+</nav>
 
 <nav class="tabs">
 	<ul>
