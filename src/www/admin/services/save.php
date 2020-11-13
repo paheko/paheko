@@ -46,6 +46,8 @@ $selected_user = $user_name ? [$user_id => $user_name] : null;
 $types_details = Transaction::getTypesDetails();
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$tpl->assign(compact('grouped_services', 'csrf_key', 'selected_user', 'account_targets', 'user_name', 'user_id'));
+$today = new \DateTime;
+
+$tpl->assign(compact('today', 'grouped_services', 'csrf_key', 'selected_user', 'account_targets', 'user_name', 'user_id'));
 
 $tpl->display('services/save.tpl');
