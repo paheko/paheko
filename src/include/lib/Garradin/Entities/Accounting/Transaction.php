@@ -243,14 +243,20 @@ class Transaction extends Entity
 
 		// Remove flag
 		if (self::TYPE_PAYOFF == $this->type && $this->_related) {
-			$status = $this->_related->status;
-			$status &= ~self::STATUS_WAITING;
-			$status |= self::STATUS_PAID;
-			$this->_related->set('status', $status );
+			$this->_related->removeStatus(self::STATUS_WAITING);
+			$this->_related->addStatus(self::STATUS_PAID);
 			$this->_related->save();
 		}
 
 		return true;
+	}
+
+	public function removeStatus(int $property) {
+		$this->status &= ~$property;
+	}
+
+	public function addStatus(int $property) {
+		$this->status |= $property;
 	}
 
 	public function delete(): bool
@@ -662,8 +668,8 @@ class Transaction extends Entity
 		$this->type = Transaction::TYPE_PAYOFF;
 
 		foreach ($this->_related->getLines() as $line) {
-			if (($this->_related->type == self::TYPE_DEBT && $line->credit)
-				|| ($this->_related->type == self::TYPE_CREDIT && $line->debit)) {
+			if (($this->_related->type == self::TYPE_DEBT && $line->debit)
+				|| ($this->_related->type == self::TYPE_CREDIT && $line->credit)) {
 				// Skip the type of debt/credit, just keep the thirdparty account
 				continue;
 			}
