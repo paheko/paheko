@@ -14,6 +14,11 @@
 		{/if}
 		<li class="current"><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
 	</ul>
+
+	<ul class="sub">
+		<li{if !$by_year} class="current"{/if}><a href="{$self_url_no_qs}">Par projet</a></li>
+		<li{if $by_year} class="current"{/if}><a href="{$self_url_no_qs}?by_year=1">Par exercice</a></li>
+	</ul>
 </nav>
 
 {if !empty($list)}
@@ -29,27 +34,27 @@
 				<td class="money">Solde</td>
 			</tr>
 		</thead>
-		{foreach from=$list item="account"}
+		{foreach from=$list item="parent"}
 			<tbody>
 				<tr>
 					<th colspan="5">
-						<h2 class="ruler">{$account.label}</h2>
+						<h2 class="ruler">{$parent.label}</h2>
 					</th>
 				</tr>
-			{foreach from=$account.years item="year"}
+			{foreach from=$parent.items item="item"}
 				<tr>
-					<th>{$year.year_label}</th>
+					<th>{$item.label}</th>
 					<td>
-						<a href="{$admin_url}acc/reports/graphs.php?analytical={$account.id}&year={$year.id_year}">Graphiques</a>
-						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$account.id}&year={$year.id_year}">Balance générale</a>
-						| <a href="{$admin_url}acc/reports/journal.php?analytical={$account.id}&year={$year.id_year}">Journal général</a>
-						| <a href="{$admin_url}acc/reports/ledger.php?analytical={$account.id}&year={$year.id_year}">Grand livre</a>
-						| <a href="{$admin_url}acc/reports/statement.php?analytical={$account.id}&year={$year.id_year}">Compte de résultat</a>
-						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$account.id}&year={$year.id_year}">Bilan</a>
+						<a href="{$admin_url}acc/reports/graphs.php?analytical={$item.id_account}&year={$item.id_year}">Graphiques</a>
+						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$item.id_account}&year={$item.id_year}">Balance générale</a>
+						| <a href="{$admin_url}acc/reports/journal.php?analytical={$item.id_account}&year={$item.id_year}">Journal général</a>
+						| <a href="{$admin_url}acc/reports/ledger.php?analytical={$item.id_account}&year={$item.id_year}">Grand livre</a>
+						| <a href="{$admin_url}acc/reports/statement.php?analytical={$item.id_account}&year={$item.id_year}">Compte de résultat</a>
+						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$item.id_account}&year={$item.id_year}">Bilan</a>
 					</td>
-					<td class="money">{$year.debit|raw|html_money}</td>
-					<td class="money">{$year.credit|raw|html_money}</td>
-					<td class="money">{$year.sum|raw|html_money:false}</td>
+					<td class="money">{$item.debit|raw|html_money}</td>
+					<td class="money">{$item.credit|raw|html_money}</td>
+					<td class="money">{$item.sum|raw|html_money:false}</td>
 				</tr>
 			{/foreach}
 			</tbody>
