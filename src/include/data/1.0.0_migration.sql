@@ -34,7 +34,7 @@ INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 
 -- Migrations projets vers comptes analytiques
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
-	VALUES (1, '99', 'Projets', 0, 1, 7);
+	VALUES (1, '99', 'Projets', 0, 1, 0);
 
 INSERT INTO acc_accounts (id_chart, code, label, position, user, type)
 	SELECT 1, '99' || substr('0000' || id, -4), libelle, 0, 1, 7 FROM compta_projets;
@@ -55,8 +55,8 @@ UPDATE acc_accounts SET type = 2 WHERE code = '530';
 UPDATE acc_accounts SET type = 3 WHERE code = '5112' OR code = '5113';
 
 -- Comptes d'ouverture et de clôture
-UPDATE acc_accounts SET type = 9 WHERE code = '890';
-UPDATE acc_accounts SET type = 10 WHERE code = '891';
+UPDATE acc_accounts SET type = 9, position = 0 WHERE code = '890';
+UPDATE acc_accounts SET type = 10, position = 0 WHERE code = '891';
 
 -- Comptes de tiers
 UPDATE acc_accounts SET type = 4 WHERE code IN (SELECT id FROM compta_comptes WHERE id LIKE '4%' AND plan_comptable = 0 AND desactive = 0);
