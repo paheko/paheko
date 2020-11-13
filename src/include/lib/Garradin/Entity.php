@@ -34,6 +34,10 @@ class Entity extends AbstractEntity
 	protected function filterUserValue(string $type, $value, string $key)
 	{
 		if ($type == 'date') {
+			if (!trim($value)) {
+				return null;
+			}
+
 			if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
 				return \DateTime::createFromFormat('d/m/y', $value);
 			}

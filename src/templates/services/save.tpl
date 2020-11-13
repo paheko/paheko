@@ -22,7 +22,7 @@
 		{foreach from=$grouped_services item="service"}
 			<dd>
 				<label class="radio-btn">
-					{input type="radio" name="id_service" value=$service.id}
+					{input type="radio" name="id_service" value=$service.id data-expiry=$service.expiry_date|date_short}
 					<div>
 						<h3>{$service.label}</h3>
 						<p>
@@ -75,8 +75,13 @@
 			{/foreach}
 		</dl>
 		{/foreach}
+	</fieldset>
 
+	<fieldset>
+		<legend>Détails</legend>
 		<dl>
+			{input type="date" name="date" required=1 default=$today label="Date d'inscription"}
+			{input type="date" name="expiry_date" default=$today label="Date d'expiration de l'inscription"}
 			{input type="checkbox" name="paid" value="1" default="1" label="Marquer cette inscription comme payée"}
 			<dd class="help">Décocher cette case pour pouvoir suivre les règlements de personnes qui payent en plusieurs fois. Il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
@@ -110,6 +115,8 @@ function selectService(elm) {
 	$('[data-service]').forEach((e) => {
 		e.style.display = ('s' + elm.value == e.getAttribute('data-service')) ? 'block' : 'none';
 	});
+
+	$('#f_expiry_date').value = elm.dataset.expiry;
 
 	var first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
 

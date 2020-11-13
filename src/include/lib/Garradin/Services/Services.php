@@ -21,7 +21,10 @@ class Services
 
 	static public function listGroupedWithFees(?int $user_id = null)
 	{
-		$services = DB::getInstance()->getGrouped('SELECT id, label, duration, start_date, end_date, description FROM services;');
+		$services = DB::getInstance()->getGrouped('SELECT
+			id, label, duration, start_date, end_date, description,
+			CASE WHEN end_date IS NOT NULL THEN end_date WHEN duration IS NOT NULL THEN date(\'now\', \'+\'||duration||\' days\') ELSE NULL END AS expiry_date
+			FROM services;');
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 
