@@ -49,6 +49,7 @@
 					{else}
 						{linkbutton shape="check" label="Marquer comme payé" href="services/user.php?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
 					{/if}
+					{linkbutton shape="delete" label="Supprimer" href="services/user_delete.php?id=%d"|args:$row.id}
 				{/if}
 				{if $session->canAccess('compta', Membres::DROIT_ACCES) && $row.id_account}
 					{linkbutton shape="menu" label="Liste des écritures" href="acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
