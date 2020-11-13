@@ -53,51 +53,78 @@ class Reports
 		return implode(' AND ', $where);
 	}
 
-	static public function getSumsByAnalyticalAndYear(): \Generator
+	/**
+	 * Return account sums per year or per account
+	 * @param  bool $order_year If true will return accounts grouped by year, if false it will return years grouped by account
+	 */
+	static public function getAnalyticalSums(bool $by_year = false): \Generator
 	{
-		$sql = 'SELECT a.label, a.id, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
+		$sql = 'SELECT a.label AS account_label, a.id AS id_account, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_analytical
 			INNER JOIN acc_years y ON y.id = t.id_year
-			GROUP BY a.id, y.id
-			ORDER BY a.label COLLATE NOCASE, y.id;';
+			GROUP BY %s
+			ORDER BY %s;';
 
-		$account = null;
-
-		foreach (DB::getInstance()->iterate($sql) as $row) {
-			if (null !== $account && $account->id !== $row->id) {
-				$account->years[] = (object) [
-					'id_year' => null,
-					'year_label' => 'Total',
-					'credit' => $account->credit,
-					'debit' => $account->debit,
-					'sum' => $account->sum,
-				];
-
-				yield $account;
-				$account = null;
-			}
-
-			if (null === $account) {
-				$account = (object) ['id' => $row->id, 'label' => $row->label, 'credit' => 0, 'debit' => 0, 'sum' => 0, 'years' => []];
-			}
-
-			$account->years[] = $row;
-			$account->credit += $row->credit;
-			$account->debit += $row->debit;
-			$account->sum += $row->sum;
+		if ($by_year) {
+			$group = 'y.id, a.id';
+			$order = 'y.start_date, a.label COLLATE NOCASE';
+		}
+		else {
+			$group = 'a.id, y.id';
+			$order = 'a.label COLLATE NOCASE, y.id';
 		}
 
-		$account->years[] = (object) [
-			'id_year' => null,
-			'year_label' => 'Total',
-			'credit' => $account->credit,
-			'debit' => $account->debit,
-			'sum' => $account->sum,
+		$sql = sprintf($sql, $group, $order);
+
+		$current = null;
+
+		foreach (DB::getInstance()->iterate($sql) as $row) {
+			$id = $by_year ? $row->id_year : $row->id_account;
+
+			if (null !== $current && $current->id !== $id) {
+				$current->items[] = (object) [
+					'label' => 'Total',
+					'credit' => $current->credit,
+					'debit' => $current->debit,
+					'sum' => $current->sum,
+					'id_account' => $by_year ? null : $row->id_account,
+					'id_year' => $by_year ? $row->id_year : null,
+				];
+
+				yield $current;
+				$current = null;
+			}
+
+			if (null === $current) {
+				$current = (object) [
+					'id' => $by_year ? $row->id_year : $row->id_account,
+					'label' => $by_year ? $row->year_label : $row->account_label,
+					'credit' => 0,
+					'debit' => 0,
+					'sum' => 0,
+					'items' => []
+				];
+			}
+
+			$row->label = !$by_year ? $row->year_label : $row->account_label;
+			$current->items[] = $row;
+			$current->credit += $row->credit;
+			$current->debit += $row->debit;
+			$current->sum += $row->sum;
+		}
+
+		$current->items[] = (object) [
+			'label' => 'Total',
+			'credit' => $current->credit,
+			'debit' => $current->debit,
+			'sum' => $current->sum,
+			'id_account' => $by_year ? null : $row->id_account,
+			'id_year' => $by_year ? $row->id_year : null,
 		];
-		yield $account;
+		yield $current;
 	}
 
 	static public function getSumsByInterval(array $criterias, int $interval)
@@ -141,6 +168,8 @@ class Reports
 
 			$v = $sum;
 		}
+
+		unset($v);
 
 		return $out;
 	}
