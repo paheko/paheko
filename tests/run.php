@@ -1,7 +1,7 @@
 <?php
 
-
 define('Garradin\WWW_URI', '/');
+define('Garradin\WWW_URL', 'http://localhost/');
 
 const INIT = __DIR__ . '/../src/include/init.php';
 
