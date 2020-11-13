@@ -206,6 +206,7 @@ class Reports
 			INNER JOIN %s a ON a.id = l.id_account
 			WHERE %s
 			GROUP BY l.id_account
+			HAVING sum != 0
 			ORDER BY %s;',
 			$reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $order);
 		return DB::getInstance()->getGrouped($sql);
