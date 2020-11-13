@@ -75,7 +75,7 @@
 			<td class="money">{$line.debit|raw|html_money}</td>
 			<td class="money">{$line.credit|raw|html_money}</td>
 			{/if}
-			{if isset($line.sum)}
+			{if isset($line->sum)}
 				<td class="money">{$line.sum|raw|html_money:false}</td>
 			{/if}
 			<td>{$line.reference}</td>
@@ -83,11 +83,13 @@
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
 			<td class="actions">
+			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
 					{linkbutton shape="check" label="Régler cette dette" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 				{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT}
 					{linkbutton shape="export" label="Régler cette créance" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 				{/if}
+			{/if}
 
 				{linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
 			</td>
