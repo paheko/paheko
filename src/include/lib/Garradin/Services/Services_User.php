@@ -22,13 +22,13 @@ class Services_User
 	static public function listDistinctForUser(int $user_id)
 	{
 		return DB::getInstance()->get('SELECT
-			s.label, MAX(su.expiry_date) AS expiry_date, sf.label AS fee_label, su.paid,
+			s.label, MAX(su.expiry_date) AS expiry_date, sf.label AS fee_label, su.paid, s.end_date,
 			CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END AS status
 			FROM services_users su
 			INNER JOIN services s ON s.id = su.id_service
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
 			WHERE su.id_user = ?
-			GROUP BY su.id_service ORDER BY s.label COLLATE NOCASE;', $user_id);
+			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
 	static public function perUserList(int $user_id): DynamicList

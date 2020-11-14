@@ -20,8 +20,12 @@
 		<tr>
 			<th><a href="../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
 			<td>
-				{if $row.status == 1}
+				{if $row.status == 1 && $row.end_date}
+					En cours
+				{elseif $row.status == 1}
 					<b class="confirm">À jour</b>
+				{elseif $row.status == -1 && $row.end_date}
+					Terminée
 				{elseif $row.status == -1}
 					<b class="error">En retard</b>
 				{else}
