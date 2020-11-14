@@ -82,7 +82,7 @@
         {elseif $c_config.type == 'email'}
             <a href="mailto:{$membre->$c|escape:'url'}">{$membre->$c}</a>
             {if $c == 'email'}
-                | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
+                {linkbutton href="membres/message.php?id=%d"|args:$membre.id label="Envoyer un message" shape="mail"}
             {/if}
         {elseif $c_config.type == 'tel'}
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
