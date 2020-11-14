@@ -70,7 +70,7 @@ class Reports
 
 		if ($by_year) {
 			$group = 'y.id, a.id';
-			$order = 'y.start_date, a.label COLLATE NOCASE';
+			$order = 'y.start_date DESC, a.label COLLATE NOCASE';
 		}
 		else {
 			$group = 'a.id, y.id';
@@ -114,6 +114,10 @@ class Reports
 			$current->credit += $row->credit;
 			$current->debit += $row->debit;
 			$current->sum += $row->sum;
+		}
+
+		if ($current === null) {
+			return;
 		}
 
 		$current->items[] = (object) [

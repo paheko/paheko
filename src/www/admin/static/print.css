@@ -1,5 +1,5 @@
 @page {
-    size: A4 portrait;
+    size: A4 landscape;
     margin: 0;
 }
 
@@ -23,14 +23,23 @@ main {
     text-align: center;
 }
 
-table thead {
-    background: #333;
-    color: #fff !important;
+table.list thead {
+    border-bottom: solid .3rem #000;
 }
 
-table.list tfoot tr {
-    background: #666;
-    color: #fff;
+table.list thead td, table.list thead th {
+    background: #ccc !important;
+    color: #000 !important;
+    border-right: 1px solid #999;
+}
+
+table.list tfoot {
+    border-top: double .3rem #000;
+}
+
+table.list tfoot tr td, table.list tfoot th {
+    background: #fff;
+    color: #000;
 }
 
 table.list tr {
@@ -73,8 +82,8 @@ table.list td {
     display: none;
 }
 
-td.actions * {
-    display: none;
+td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
+    display: none !important;
 }
 
 td.num a {

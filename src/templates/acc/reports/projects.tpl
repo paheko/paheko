@@ -45,12 +45,14 @@
 				<tr>
 					<th>{$item.label}</th>
 					<td>
+					<span class="noprint">
 						<a href="{$admin_url}acc/reports/graphs.php?analytical={$item.id_account}&year={$item.id_year}">Graphiques</a>
 						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$item.id_account}&year={$item.id_year}">Balance générale</a>
 						| <a href="{$admin_url}acc/reports/journal.php?analytical={$item.id_account}&year={$item.id_year}">Journal général</a>
 						| <a href="{$admin_url}acc/reports/ledger.php?analytical={$item.id_account}&year={$item.id_year}">Grand livre</a>
 						| <a href="{$admin_url}acc/reports/statement.php?analytical={$item.id_account}&year={$item.id_year}">Compte de résultat</a>
 						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$item.id_account}&year={$item.id_year}">Bilan</a>
+					</span>
 					</td>
 					<td class="money">{$item.debit|raw|html_money}</td>
 					<td class="money">{$item.credit|raw|html_money}</td>
