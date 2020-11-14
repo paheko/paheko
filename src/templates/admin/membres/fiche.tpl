@@ -15,7 +15,9 @@
     {foreach from=$services item="service"}
     <dd>
         {$service.label}
-        {if $service.status == -1} — <b class="error">en retard</b>
+        {if $service.status == -1 && $service.end_date} — terminée
+        {elseif $service.status == -1} — <b class="error">en retard</b>
+        {elseif $service.status == 1 && $service.end_date} — <b class="confirm">en cours</b>
         {elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
         {if $service.status.expiry_date} — expire le {$service.expiry_date|date_short}{/if}
         {if !$service.paid} — <b class="error">À payer&nbsp;!</b>{/if}
