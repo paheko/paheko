@@ -1144,7 +1144,7 @@ a.icn[title]:hover:after {
 
 .actions .icn:hover, .num a:hover, .icn.action:hover, .icn-btn:hover, .radio-btn:hover div, a.num:hover {
     color: darkred;
-    background: #ff9;
+    background-color: #ff9;
     z-index: 300;
 }
 
