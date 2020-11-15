@@ -736,6 +736,17 @@ class Utils
             case 'unlock': return '🔓';
             case 'folder': return '🗀';
             case 'document': return '🗅';
+            case 'bold': return 'B';
+            case 'italic': return 'I';
+            case 'header': return 'H';
+            case 'paragraph': return '§';
+            case 'list-ol': return 'ģ';
+            case 'list-ul': return '•';
+            case 'table': return '◫';
+            case 'radio-unchecked': return '◯';
+            case 'uncheck': return '☐';
+            case 'radio-checked': return '⬤';
+            case 'image': return '🖻';
             default:
                 throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
         }
