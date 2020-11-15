@@ -105,9 +105,7 @@ class DynamicList
 
 	public function paginationURL()
 	{
-		$query = array_merge($_GET, ['p' => '[ID]']);
-		$url = Utils::getSelfURL($query);
-		return $url;
+		return Utils::getModifiedURL('?p=[ID]');
 	}
 
 	public function orderURL(string $order, bool $desc)

@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\Security;
 use KD2\Form;
+use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
 
@@ -179,6 +180,11 @@ class Utils
     static public function getSelfURI(bool $qs = true)
     {
         return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
+    }
+
+    static public function getModifiedURL(string $new)
+    {
+        return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
     public static function redirect($destination=false, $exit=true)
