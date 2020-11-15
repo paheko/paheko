@@ -4,7 +4,7 @@
 			{foreach from=$list->getHeaderColumns() key="key" item="column"}
 			<td class="{if $list->order == $key}cur {if $list->desc}desc{else}asc{/if}{/if}">
 				{$column.label}
-				{if isset($column['select'])}
+				{if !array_key_exists('select', $column) || !is_null($column['select'])}
 				<a href="{$list->orderURL($key, false)}" class="icn up">&uarr;</a>
 				<a href="{$list->orderURL($key, true)}" class="icn dn">&darr;</a>
 				{/if}
