@@ -190,7 +190,9 @@ class Fichiers
 	 */
 	public function checkAccess(Session $session, bool $require_admin = false)
 	{
-		if (!$require_admin && $this->isPublic($wiki)) {
+		$wiki = null;
+
+		if ($this->isPublic($wiki) && !$require_admin) {
 			return true;
 		}
 
