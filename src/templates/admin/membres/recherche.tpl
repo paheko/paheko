@@ -13,7 +13,7 @@
 	<table class="list search">
 		<thead>
 			<tr>
-				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" /></td>{/if}
+				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>{/if}
 				{foreach from=$result_header key="c" item="cfg"}
 					<td>{$cfg.title}</td>
 				{/foreach}
@@ -23,7 +23,7 @@
 		<tbody>
 			{foreach from=$result item="row"}
 				<tr>
-					{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if}
+					{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>{/if}
 					{foreach from=$row key="key" item="value"}
 						<?php $link = false; ?>
 						{if isset($result_header[$key])}

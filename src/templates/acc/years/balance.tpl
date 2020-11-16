@@ -78,13 +78,13 @@
 
 	<p class="submit">
 		{if null === $previous_year}
-			<input type="submit" name="next" value="Continuer &rarr;" />
+			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 			- ou -
 			{linkbutton shape="reset" href="acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{elseif $previous_year}
 			{csrf_field key="acc_years_balance_%s"|args:$year.id}
 			<input type="hidden" name="from_year" value="{$previous_year.id}" />
-			<input type="submit" name="save" value="Sauvegarder &rarr;" />
+			{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 
 			{literal}
 			<script type="text/javascript" defer="defer" async="async">

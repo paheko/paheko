@@ -25,7 +25,7 @@
 
 	<p class="submit">
 		{csrf_field key="changePassword"}
-		<input type="submit" name="change" value="Modifier le mot de passe &rarr;" />
+		{button type="submit" name="change" label="Modifier le mot de passe" shape="right" class="main"}
 	</p>
 
 

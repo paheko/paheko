@@ -31,7 +31,7 @@
     <p class="submit">
         {csrf_field key="membres_action"}
         <input type="hidden" name="action" value="move" />
-        <input type="submit" name="confirm" value="Enregistrer &rarr;" />
+        {button type="submit" name="confirm" label="Enregistrer" shape="right" class="main"}
     </p>
 
     {elseif $action == 'delete'}
@@ -54,7 +54,7 @@
     <p class="submit">
         {csrf_field key="membres_action"}
         <input type="hidden" name="action" value="delete" />
-        <input type="submit" name="confirm" value="Oui, supprimer ces membres &rarr;" />
+        {button type="submit" name="confirm" label="Oui, supprimer ces membres" shape="delete" class="main"}
     </p>
     {/if}
 

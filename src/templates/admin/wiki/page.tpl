@@ -48,7 +48,7 @@
             <p class="submit">
                 {csrf_field key="wiki_create"}
                 <input type="hidden" name="titre" value="{$uri}" />
-                <input type="submit" name="create" value="Créer cette page" />
+                {button type="submit" name="create" label="Créer cette page" shape="right" class="main"}
             </p>
         </form>
         {/if}

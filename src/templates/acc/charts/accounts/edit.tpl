@@ -18,7 +18,7 @@
 
 	<p class="submit">
 		{csrf_field key="acc_accounts_edit_%s"|args:$account.id}
-		<input type="submit" name="edit" value="Enregistrer &rarr;" />
+		{button type="submit" name="edit" label="Enregistrer" shape="right" class="main"}
 	</p>
 
 </form>

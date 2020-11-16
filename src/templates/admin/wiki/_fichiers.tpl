@@ -12,7 +12,7 @@
         </dl>
         <p class="submit">
             {csrf_field key=$csrf_id}
-            <input type="submit" name="upload" id="f_submit" value="Envoyer le fichier" />
+            {button type="submit" name="upload" label="Envoyer le fichier" shape="upload" class="main" id="f_submit"}
         </p>
     </fieldset>
 </form>

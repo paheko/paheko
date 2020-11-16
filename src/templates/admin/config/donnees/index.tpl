@@ -33,9 +33,9 @@
 	<p class="help">
 		Info : la base de données fait actuellement {$db_size|format_bytes} (dont {$files_size|format_bytes} pour les documents et images).
 	</p>
-    <p>
+    <p class="submit">
         {csrf_field key="backup_download"}
-        <input type="submit" name="download" value="Télécharger une copie de la base de données sur mon ordinateur &rarr;" />
+        {button type="submit" name="download" label="Télécharger une copie de la base de données sur mon ordinateur" shape="download" class="main"}
     </p>
 </fieldset>
 
@@ -58,7 +58,9 @@
         <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size}" />
         <input type="file" name="file" id="f_file" required="required" />
         (maximum {$max_file_size|format_bytes})
-        <input type="submit" name="restore_file" value="Restaurer depuis le fichier sélectionné &rarr;" />
+    </p>
+    <p class="submit">
+        {button type="submit" name="restore_file" label="Restaurer depuis le fichier sélectionné" shape="upload" class="main"}
     </p>
     {if $code && ($code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
     <p>

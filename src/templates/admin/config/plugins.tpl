@@ -20,7 +20,7 @@
 
         <p class="submit">
             {csrf_field key="delete_plugin_%s"|args:$plugin.id}
-            <input type="submit" name="delete" value="Désinstaller &rarr;" />
+            {button type="submit" name="delete" label="Désinstaller" shape="delete" class="main"}
         </p>
     </form>
 {else}
@@ -101,7 +101,7 @@
 
         <p class="submit">
             {csrf_field key="install_plugin"}
-            <input type="submit" name="install" value="Installer &rarr;" />
+            {button type="submit" name="install" label="Installer" shape="right" class="main"}
         </p>
     </form>
     {/if}

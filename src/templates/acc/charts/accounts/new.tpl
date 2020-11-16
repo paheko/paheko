@@ -13,7 +13,7 @@
 
 	<p class="submit">
 		{csrf_field key="acc_accounts_new"}
-		<input type="submit" name="save" value="Créer &rarr;" />
+		{button type="submit" name="save" label="Créer" shape="right" class="main"}
 	</p>
 
 </form>

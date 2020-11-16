@@ -3,7 +3,8 @@
 <form method="get" action="{$self_url_no_qs}">
 	<h2 class="ruler">
 		<input type="text" placeholder="Recherche rapide de membre" value="{$query}" name="q" />
-		<input type="submit" value="Chercher &rarr;" /></h2>
+		<input type="submit" value="Chercher &rarr;" />
+	</h2>
 </form>
 
 <table class="list">

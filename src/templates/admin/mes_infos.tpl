@@ -29,7 +29,7 @@
 
     <p class="submit">
         {csrf_field key="edit_me"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>

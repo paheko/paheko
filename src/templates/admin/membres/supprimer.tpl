@@ -32,7 +32,7 @@
 
     <p class="submit">
         {csrf_field key="delete_membre_"|cat:$membre.id}
-        <input type="submit" name="delete" value="Supprimer &rarr;" />
+        {button type="submit" name="delete" label="Supprimer" shape="delete" class="main"}
     </p>
 
 </form>

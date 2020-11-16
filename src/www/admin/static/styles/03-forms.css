@@ -12,11 +12,6 @@ fieldset legend {
     color: #000;
 }
 
-label:hover {
-    cursor: pointer;
-    border-bottom: 1px dotted #900;
-}
-
 table tr.clickable:hover {
     cursor: pointer;
     color: #633;
@@ -58,8 +53,13 @@ fieldset dl dl {
     margin: .5em 0 .5em 1.2em;
 }
 
-input[type=radio], input[type=checkbox] {
+label:hover {
     cursor: pointer;
+    border-bottom: 1px dotted #900;
+}
+
+input[type=checkbox] + label:hover {
+    border: none;
 }
 
 /* We can't use :not([type=checkbox]):not([type=radio]) here as it is too specific
@@ -284,6 +284,8 @@ p.submit {
 
 .submit input[type=submit] {
     font-size: 1.2em;
+    color: #000;
+    border-color: rgb(var(--gMainColor));
 }
 
 .submit .main {

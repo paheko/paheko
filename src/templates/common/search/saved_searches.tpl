@@ -32,7 +32,7 @@
 
 		<p class="submit">
 			{csrf_field key="edit_recherche_%s"|args:$recherche.id}
-			<input type="submit" name="save" value="Enregistrer &rarr;" />
+			{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 		</p>
 	</form>
 {elseif $mode == 'delete'}

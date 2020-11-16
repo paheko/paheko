@@ -45,7 +45,7 @@
 
     <p class="submit">
         {csrf_field key="install"}
-        <input type="submit" id="f_submit" name="save" value="Terminer l'installation &rarr;" />
+        {button type="submit" name="save" label="Terminer l'installation" shape="right" class="main"}
     </p>
 
     <script type="text/javascript" src="{$admin_url}static/scripts/loader.js"></script>

@@ -43,7 +43,7 @@
 
 	<p class="submit">
 		{csrf_field key="send_message_co"}
-		<input type="submit" name="send" value="Envoyer &rarr;" />
+		{button type="submit" name="send" label="Envoyer" shape="right" class="main"}
 	</p>
 </form>
 

@@ -25,7 +25,7 @@
 
 	<p class="submit">
 		{csrf_field key="acc_years_close_%d"|args:$year.id}
-		<input type="submit" name="close" value="Clôturer &rarr;" />
+		{button type="submit" name="close" label="Clôturer" shape="lock" class="main"}
 	</p>
 
 </form>

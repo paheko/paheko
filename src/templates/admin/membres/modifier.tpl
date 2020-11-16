@@ -78,7 +78,7 @@
 
     <p class="submit">
         {csrf_field key="edit_member_"|cat:$membre.id}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>

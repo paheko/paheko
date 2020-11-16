@@ -6,17 +6,14 @@
 	{if $prev || $next}
 	<fieldset class="shortFormRight">
 		<legend>Rapprochement par mois</legend>
-		<dl>
-			<dd class="actions">
-				{if $prev}
-					<a class="icn" href="{$self_url_no_qs}?id={$account.id}&amp;start={$prev|date_fr:'Y-m-01'}&amp;end={$prev|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">&larr; {$prev|date_fr:'F Y'}</a>
-				{/if}
-				{if $prev && $next} | {/if}
-				{if $next}
-					<a class="icn" href="{$self_url_no_qs}?id={$account.id}&amp;start={$next|date_fr:'Y-m-01'}&amp;end={$next|date_fr:'Y-m-t'}{if qg('sauf')}&amp;sauf=1{/if}">{$next|date_fr:'F Y'} &rarr;</a>
-				{/if}
-			</dd>
-		</dl>
+		<p>
+			{if $prev}
+				{linkbutton shape="left" href=$prev.url label=$prev.date|date_fr:'F Y'}
+			{/if}
+			{if $next}
+				{linkbutton shape="right" href=$next.url label=$next.date|date_fr:'F Y'}
+			{/if}
+		</p>
 	</fieldset>
 	{/if}
 	<fieldset>
@@ -42,7 +39,7 @@
 	<table class="list">
 		<thead>
 			<tr>
-				<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>
+				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 				<td></td>
 				<td>Date</td>
 				<td class="money">Débit</td>
@@ -64,7 +61,9 @@
 			</tr>
 			{else}
 			<tr>
-				<td class="check"><input type="checkbox" name="reconcile[{$line.id_line}]" value="1" {if $line.reconciled}checked="checked"{/if} /></td>
+				<td class="check">
+					{input type="checkbox" name="reconcile[%d]"|args:$line.id_line value="1" default=$line.reconciled}
+				</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_fr:'d/m/Y'}</td>
 				<td class="money">{$line.credit|raw|html_money}</td>
@@ -80,8 +79,10 @@
 	</table>
 	<p class="submit">
 		{csrf_field key="acc_reconcile_%s"|args:$account.id}
-		<input type="submit" name="save" value="Enregistrer" />
-		<input type="submit" name="save_next" value="Enregistrer et aller au mois suivant &rarr;" class="minor" />
+		{button type="submit" name="save" label="Enregistrer" class="main" shape="check"}
+		{if $next}
+			{button type="submit" name="save_next" label="Enregistrer et aller au mois suivant" class="main minor" shape="right"}
+		{/if}
 	</p>
 </form>
 

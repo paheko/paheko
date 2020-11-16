@@ -3,9 +3,9 @@
 <form method="get" action="{$admin_url}wiki/chercher.php" class="wikiSearch">
     <fieldset>
         <legend>Rechercher une page</legend>
-        <p>
+        <p class="submit">
             <input type="text" name="q" value="{$recherche}" size="25" />
-            <input type="submit" value="Chercher" />
+            {button type="submit" name="search" label="Chercher" shape="search" class="main"}
         </p>
     </fieldset>
 </form>

@@ -59,7 +59,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}
-		<input type="submit" name="save" value="{$submit_label} &rarr;" />
+		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 	</p>
 
 </form>
