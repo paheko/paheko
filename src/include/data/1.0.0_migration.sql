@@ -113,10 +113,10 @@ UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT
 INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
 
 INSERT INTO services_fees (id, label, amount, id_service, id_account, id_year)
-	SELECT id, intitule, CAST(montant*100 AS integer), id,
+	SELECT id, intitule, CASE WHEN montant IS NOT NULL THEN CAST(montant*100 AS integer) ELSE NULL END, id,
 		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta)),
 		(SELECT MAX(id) FROM acc_years WHERE closed = 0)
-	FROM cotisations WHERE montant > 0 OR id_categorie_compta IS NOT NULL;
+	FROM cotisations;
 
 INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
 	cm.id_cotisation,
