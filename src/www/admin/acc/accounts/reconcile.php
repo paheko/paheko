@@ -63,7 +63,7 @@ if ((f('save') || f('save_next')) && $form->check('acc_reconcile_' . $account->i
 			$start->modify('+1 month');
 			$end->modify('+1 month');
 			$url = sprintf('%sacc/accounts/reconcile.php?id=%s&debut=%s&fin=%s&sauf=%s',
-				ADMIN_URL, $account->id(), $next->format('Y-m-d'), $end->format('Y-m-d'), (int) qg('sauf'));
+				ADMIN_URL, $account->id(), $start->format('Y-m-d'), $end->format('Y-m-d'), (int) qg('sauf'));
 			Utils::redirect($url);
 		}
 	}
