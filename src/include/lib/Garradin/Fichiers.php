@@ -369,17 +369,7 @@ class Fichiers
 	protected function _serve($path, $type, $name = false, $size = null, bool $public = false)
 	{
 		if ($public) {
-			header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $this->datetime)));
-			header(sprintf('Etag: %s', $this->hash));
-			header('Cache-Control: public');
-
-			$etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
-			$last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
-
-			if ($etag === $this->hash && $last_modified <= $this->datetime) {
-				header('HTTP/1.1 304 Not Modified', true, 304);
-				exit;
-			}
+			Utils::HTTPCache($this->hash, $this->datetime);
 		}
 		else {
 			// Désactiver le cache
