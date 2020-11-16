@@ -116,7 +116,7 @@
 
     <p class="submit">
         {csrf_field key="config"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>
