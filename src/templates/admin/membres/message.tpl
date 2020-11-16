@@ -23,7 +23,7 @@
 
     <p class="submit">
         {csrf_field key="send_message_"|cat:$membre.id}
-        <input type="submit" name="save" value="Envoyer &rarr;" />
+        {button type="submit" name="save" label="Envoyer" shape="right" class="main"}
     </p>
 </form>
 

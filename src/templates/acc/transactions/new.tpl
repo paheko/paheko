@@ -29,7 +29,7 @@
 			<dl>
 			{foreach from=$types_details item="type"}
 				<dd class="radio-btn">
-					{input type="radio" name="type" value=$type.id source=$transaction}
+					{input type="radio" name="type" value=$type.id source=$transaction label=null}
 					<label for="f_type_{$type.id}">
 						<div>
 							<h3>{$type.label}</h3>

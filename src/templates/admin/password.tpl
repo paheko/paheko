@@ -31,7 +31,7 @@
 
         <p class="submit">
             {csrf_field key="recoverPassword"}
-            <input type="submit" name="recover" value="Envoyer &rarr;" />
+            {button type="submit" name="recover" label="Envoyer" shape="right" class="main"}
         </p>
 
     </form>

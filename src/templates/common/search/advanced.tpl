@@ -17,7 +17,7 @@ $sql_disabled = !$is_admin;
 			{input type="textarea" name="sql_query" cols="100" rows="7" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query disabled=$sql_disabled}
 		</dl>
 		<p class="submit">
-			<input type="submit" value="Exécuter &rarr;" />
+			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
 				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
@@ -40,7 +40,7 @@ $sql_disabled = !$is_admin;
 			<label>Limiter à <input type="number" value="{$query.limit}" name="limit" size="5" /> résultats</label>
 		</p>
 		<p class="submit">
-			<input type="submit" value="Chercher &rarr;" id="send" />
+			{button name="search" value=1 type="submit" label="Chercher" shape="search" id="send" class="main"}
 			<input type="hidden" name="q" id="jsonQuery" />
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}

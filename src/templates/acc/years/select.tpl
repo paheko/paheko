@@ -19,7 +19,7 @@
 	<p class="submit">
 		{csrf_field key="acc_select_year"}
 		<input type="hidden" name="from" value="{$from}" />
-		<input type="submit" name="change" value="Changer &rarr;" />
+		{button type="submit" name="change" label="Changer" shape="right" class="main"}
 	</p>
 </form>
 

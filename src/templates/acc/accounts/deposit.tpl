@@ -10,7 +10,7 @@
 	<table class="list">
 		<thead>
 			<tr>
-				<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>
+				<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 				<td></td>
 				<td>Date</td>
 				<td>Réf. écriture</td>
@@ -31,7 +31,9 @@
 			</tr>
 			{else}
 			<tr>
-				<td class="check"><input type="checkbox" name="deposit[{$line.id}]" value="1" data-debit="{$line.debit}" data-credit="{$line.credit}" {if array_key_exists($line.id, $checked)}checked="checked"{/if} /></td>
+				<td class="check">
+					{input type="checkbox" name="deposit[%d]"|args:$line.id value="1" data-debit=$line.debit|abs data-credit=$line.credit default=$line.checked}
+				</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_fr:'d/m/Y'}</td>
 				<td>{$line.reference}</td>
@@ -59,7 +61,7 @@
 
 	<p class="submit">
 		{csrf_field key="acc_deposit_%s"|args:$account.id}
-		<input type="submit" name="save" value="Enregistrer le dépôt &rarr;" />
+		{button type="submit" name="save" label="Enregistrer" class="main" shape="check"}
 	</p>
 </form>
 
@@ -71,8 +73,16 @@ $('tbody input[type=checkbox]').forEach((e) => {
 		var v = e.getAttribute('data-debit') || e.getAttribute('data-credit');
 		v = parseInt(v, 10);
 		total += e.checked ? v : -v;
+		if (total < 0) {
+			total = 0;
+		}
 		$('#f_amount').value = g.formatMoney(total);
 	});
+});
+
+$('#f_all').addEventListener('change', (e) => {
+	$('#f_amount').value = '';
+	total = 0;
 });
 </script>
 {/literal}

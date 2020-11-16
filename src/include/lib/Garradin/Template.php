@@ -179,6 +179,10 @@ class Template extends \KD2\Smartyer
 			$params['class'] = '';
 		}
 
+		if (isset($params['name']) && !isset($params['value'])) {
+			$params['value'] = 1;
+		}
+
 		$params['class'] .= ' icn-btn';
 
 		array_walk($params, function (&$v, $k) {
@@ -351,6 +355,10 @@ class Template extends \KD2\Smartyer
 
 		// No label? then we only want the input without the widget
 		if (empty($label)) {
+			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
+				$input .= sprintf('<label for="%s"></label>', $attributes['id']);
+			}
+
 			return $input;
 		}
 

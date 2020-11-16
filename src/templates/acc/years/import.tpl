@@ -83,9 +83,9 @@
 	<p class="submit">
 		{csrf_field key="acc_years_import_%d"|args:$year.id}
 		{if $csv_file}
-			<input type="submit" name="cancel" class="minor" value="Annuler l'import" />
+			{button type="submit" name="cancel" label="Annuler" shape="left"}
 		{/if}
-		<input type="submit" name="import" value="Importer &rarr;" />
+		{button type="submit" name="import" label="Importer" shape="upload" class="main"}
 	</p>
 
 

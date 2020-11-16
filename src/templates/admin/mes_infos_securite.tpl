@@ -59,7 +59,7 @@
         {if !empty($otp)}
         <input type="hidden" name="otp_secret" value="{$otp.secret}" />
         {/if}
-        <input type="submit" name="confirm" value="Confirmer &rarr;" />
+        {button type="submit" name="confirm" label="Confirmer" shape="right" class="main"}
     </p>
 
     </form>
@@ -128,7 +128,7 @@
 
         <p class="submit">
             {csrf_field key="edit_me_security"}
-            <input type="submit" name="save" value="Enregistrer &rarr;" />
+            {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
         </p>
 
     </form>

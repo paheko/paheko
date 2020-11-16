@@ -26,7 +26,7 @@
 
     <p class="submit">
         {csrf_field key="delete_wiki_"|cat:$page.id}
-        <input type="submit" name="delete" value="Supprimer &rarr;" />
+        {button type="submit" name="delete" label="Supprimer" shape="right" class="main"}
     </p>
 
 </form>

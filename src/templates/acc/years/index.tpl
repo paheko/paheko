@@ -54,7 +54,7 @@
 			{linkbutton label="Export CSV" shape="export" href="acc/years/import.php?id=%d&export=csv"|args:$year.id}
 			{linkbutton label="Export tableur" shape="export" href="acc/years/import.php?id=%d&export=ods"|args:$year.id}
 			{if !$year.closed}
-				{linkbutton label="Import" shape="download" href="acc/years/import.php?id=%d"|args:$year.id}
+				{linkbutton label="Import" shape="upload" href="acc/years/import.php?id=%d"|args:$year.id}
 				{linkbutton label="Balance d'ouverture" shape="reset" href="acc/years/balance.php?id=%d"|args:$year.id}
 				{linkbutton label="Modifier" shape="edit" href="acc/years/edit.php?id=%d"|args:$year.id}
 				{linkbutton label="Clôturer" shape="lock" href="acc/years/close.php?id=%d"|args:$year.id}

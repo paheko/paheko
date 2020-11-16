@@ -45,7 +45,7 @@
 
     <p class="submit">
         {csrf_field key="login"}
-        <input type="submit" name="login" value="Se connecter &rarr;" />
+        {button type="submit" name="login" label="Se connecter" shape="right" class="main"}
     </p>
 
     <p class="help">

@@ -63,7 +63,7 @@
 			</dl>
 			<p class="submit">
 				{csrf_field key="acc_charts_new"}
-				<input type="submit" name="new" value="Créer &rarr;" />
+				{button type="submit" name="new" label="Créer" shape="right" class="main"}
 			</p>
 		</fieldset>
 	</form>

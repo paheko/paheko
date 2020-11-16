@@ -15,7 +15,7 @@
 
 	<p class="submit">
 		{csrf_field key="acc_years_edit_%s"|args:$year.id}
-		<input type="submit" name="edit" value="Enregistrer &rarr;" />
+		{button type="submit" name="edit" label="Enregistrer" shape="right" class="main"}
 	</p>
 
 </form>

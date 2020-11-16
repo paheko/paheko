@@ -63,7 +63,7 @@
             <input type="hidden" name="champs" value="{$champs|escape:json|escape}" />
             <input type="submit" name="back" value="&larr; Retour à l'édition" class="minor" />
             <input type="submit" name="reset" value="Annuler les changements" class="minor" />
-            <input type="submit" name="save" value="Enregistrer &rarr;" />
+            {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
         </p>
     </form>
 {else}
@@ -84,7 +84,7 @@
                 {/foreach}
             </select>
             {csrf_field key="config_membres"}
-            <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+            {button type="submit" name="add" label="Ajouter ce champ à la fiche membre" shape="plus"}
         </p>
     </fieldset>
     </form>
@@ -110,7 +110,7 @@
         </dl>
         <p>
             {csrf_field key="config_membres"}
-            <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+            {button type="submit" name="add" label="Ajouter ce champ à la fiche membre" shape="plus"}
             <input type="hidden" name="champs" value="{$champs|escape:json|escape}" />
         </p>
     </fieldset>
@@ -176,8 +176,8 @@
 
     <p class="submit">
         {csrf_field key="config_membres"}
-        <input type="submit" name="reset" value="Annuler les changements" class="minor" />
-        <input type="submit" name="review" value="Enregistrer &rarr;" />
+        {button type="submit" name="reset" label="Annuler les changements" shape="left"}
+        {button type="submit" name="review" label="Vérifier les changements" shape="right" class="main"}
         (un récapitulatif sera présenté et une confirmation sera demandée)
     </p>
 </form>

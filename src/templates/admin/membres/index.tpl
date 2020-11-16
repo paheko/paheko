@@ -38,9 +38,9 @@
     <table class="list">
         <thead class="userOrder">
             <tr>
-                {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
+                {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>{/if}
                 {foreach from=$champs key="c" item="champ"}
-                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{if $c == "numero"}#{else}{$champ.title}{/if} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
+                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{if $c == "numero"}Num.{else}{$champ.title}{/if} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
                 {/foreach}
                 <td></td>
             </tr>
@@ -48,7 +48,7 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
+                    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check">{input type="checkbox" name="selected[]" value=$membre.id}</td>{/if}
                     {foreach from=$champs key="c" item="cfg"}
                         <td>
                             {if $c == $config.champ_identite}<a href="{$admin_url}membres/fiche.php?id={$membre.id}">{/if}

@@ -28,11 +28,11 @@
 				</ul>
 			</dd>
 		</dl>
-		<p class="submit">
-			{csrf_field key="acc_charts_import"}
-			<input type="submit" name="import" value="Importer &rarr;" />
-		</p>
 	</fieldset>
+	<p class="submit">
+		{csrf_field key="acc_charts_import"}
+		{button type="submit" name="import" label="Importer" shape="upload" class="main"}
+	</p>
 </form>
 
 {include file="admin/_foot.tpl"}

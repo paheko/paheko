@@ -44,8 +44,8 @@
         </dl>
         <p>
             {csrf_field key="backup_manage"}
-            <input type="submit" name="restore" value="Restaurer cette sauvegarde" />
-            <input type="submit" name="remove" value="Supprimer cette sauvegarde" />
+            {button type="submit" name="restore" label="Restaurer cette sauvegarde" shape="reset"}
+            {button type="submit" name="delete" label="Supprimer cette sauvegarde" shape="delete"}
         </p>
     {/if}
 </fieldset>
@@ -56,9 +56,9 @@
 
 <fieldset>
     <legend>Sauvegarde manuelle</legend>
-    <p>
+    <p class="submit">
         {csrf_field key="backup_create"}
-        <input type="submit" name="create" value="Créer une nouvelle sauvegarde des données &rarr;" />
+        {button type="submit" name="create" label="Créer une nouvelle sauvegarde des données" shape="right" class="main"}
     </p>
 </fieldset>
 

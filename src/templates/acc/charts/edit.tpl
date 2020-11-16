@@ -13,7 +13,7 @@
 		</dl>
 		<p class="submit">
 			{csrf_field key="acc_charts_edit_%d"|args:$chart.id}
-			<input type="submit" name="save" value="Enregistrer &rarr;" />
+			{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 		</p>
 	</fieldset>
 </form>

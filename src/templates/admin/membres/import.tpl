@@ -89,7 +89,7 @@
 
     <p class="submit">
         {csrf_field key="membres_import"}
-        <input type="submit" name="import" value="Importer &rarr;" />
+        {button type="submit" name="import" label="Importer" shape="upload" class="main"}
     </p>
 
 </form>
