@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" current="config" js=1}
+{include file="admin/_head.tpl" current="config" js=1 custom_css=['styles/config.css']}
 
 {include file="admin/config/_menu.tpl" current="fiches_membres"}
 
@@ -178,7 +178,7 @@
         {csrf_field key="config_membres"}
         {button type="submit" name="reset" label="Annuler les changements" shape="left"}
         {button type="submit" name="review" label="Vérifier les changements" shape="right" class="main"}
-        (un récapitulatif sera présenté et une confirmation sera demandée)
+        <em class="help">(un récapitulatif sera présenté et une confirmation sera demandée)</em>
     </p>
 </form>
 

@@ -105,11 +105,6 @@ dd.help li {
     list-style: disc;
 }
 
-dd.help, small.help {
-    color: #666;
-}
-
-
 h2.ruler {
     margin: .5em;
     text-align: center;
