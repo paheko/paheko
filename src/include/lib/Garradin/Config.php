@@ -67,6 +67,7 @@ class Config
             'champ_identite'          =>  $string,
 
             'version'                 =>  $string,
+            'last_chart_change'       =>  $int,
 
             'couleur1'                =>  $string,
             'couleur2'                =>  $string,
