@@ -197,20 +197,11 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetLinkButton(array $params): string
 	{
-		if (isset($params['href'])) {
-			$href = $params['href'];
+		$href = $params['href'];
 
-			// href can be prefixed with '!' to make the URL relative to ADMIN_URL
-			if (substr($href, 0, 1) == '!') {
-				$href = ADMIN_URL . substr($params['href'], 1);
-			}
-		}
-		else {
-			$href = Utils::getSelfURL();
-		}
-
-		if (isset($params['merge_url'])) {
-			$href = HTTP::mergeURLs($href, $params['merge_url']);
+		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
+		if (substr($href, 0, 1) == '!') {
+			$href = ADMIN_URL . substr($params['href'], 1);
 		}
 
 		return sprintf('<a class="icn-btn" data-icon="%s" href="%s">%s</a>', Utils::iconUnicode($params['shape']), $this->escape($href), $this->escape($params['label']));
