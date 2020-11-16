@@ -46,7 +46,7 @@
         <figure>
             <a href="{$file.url}" data-id="{$file.id}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
             <form class="actions" method="post" action="{$self_url}">
-                <a href="{$file.url}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                {linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
                 {csrf_field key=$csrf_id}
                 <input type="hidden" name="delete" value="{$file.id}" />
                 <noscript><input type="submit" value="Supprimer" /></noscript>
@@ -66,7 +66,7 @@
             <td>{if $file.type}{$file.type}{/if}</td>
             <td class="actions">
                 <form class="actions" method="post" action="{$self_url}">
-                    <a href="{$file.url}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                    {linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
                     {csrf_field key=$csrf_id}
                     <input type="hidden" name="delete" value="{$file.id}" />
                     <noscript><input type="submit" value="Supprimer" /></noscript>

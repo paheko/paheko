@@ -5,7 +5,7 @@
 {if ERRORS_ENABLE_LOG_VIEW}
 <nav class="tabs">
 	<ul class="sub">
-		<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>
+		{*<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>*}
 		<li{if $type == 'errors'} class="current"{/if}><a href="?type=errors">Erreurs système</a></li>
 	</ul>
 </nav>
@@ -85,7 +85,9 @@
 					</td>
 					<td>{$error.count}</td>
 					<td>{$error.last_seen|date_fr}</td>
-					<td class="actions"><a title="Voir les détails" class="icn" href="?type=errors&id={$ref}">𝍢</a></td>
+					<td class="actions">
+						{linkbutton shape="menu" label="Voir les détails" href="%s?type=errors&id=%s"|args:$self_url_no_qs,$ref}
+					</td>
 				</tr>
 				{/foreach}
 			</tbody>

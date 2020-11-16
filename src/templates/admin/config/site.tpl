@@ -52,8 +52,10 @@
         <dl>
             <dt>
                 <form method="post" action="{$self_url}">
-                    {button type="submit" name="desactiver_site" label="Désactiver le site public" shape="right" class="main"}
-                {csrf_field key="config_site"}
+                    <p class="submit">
+                        {button type="submit" name="desactiver_site" label="Désactiver le site public" shape="right" class="main"}
+                        {csrf_field key="config_site"}
+                    </p>
                 </form>
             </dt>
             <dd class="help">
@@ -96,7 +98,7 @@
                     <th><a href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
                     <td>{if $local}{$local.mtime|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
                     <td class="actions">
-                        <a class="icn" href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">✎</a>
+                        {linkbutton shape="edit" label="Éditer" href="config/site.php?edit=%s"|args:$source}
                     </td>
                 </tr>
             {/foreach}
