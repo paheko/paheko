@@ -19,7 +19,9 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$journal = $account->getDepositJournal(CURRENT_YEAR_ID);
+$checked = f('deposit') ?: [];
+
+$journal = $account->getDepositJournal(CURRENT_YEAR_ID, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 
@@ -48,7 +50,6 @@ if ($date > $current_year->end_date) {
 }
 
 $target = $account::TYPE_BANK;
-$checked = f('deposit') ?: [];
 
 $tpl->assign(compact(
 	'account',
