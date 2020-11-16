@@ -64,9 +64,9 @@
 				<td class="actions">
 					{linkbutton href="%s?id=%d"|args:$search_url,$recherche.id shape="search" label="Rechercher"}
 					{if $recherche.id_membre || $session->canAccess($target, Membres::DROIT_ADMIN)}
-						{linkbutton href="%s?duplicate=%d"|args:$self_url_no_qs,$recherche.id shape="export" label="Dupliquer"}
-						{linkbutton href="%s?edit=%d"|args:$self_url_no_qs,$recherche.id shape="edit" label="Modifier"}
-						{linkbutton href="%s?delete=%d"|args:$self_url_no_qs,$recherche.id shape="delete" label="Supprimer"}
+						{linkbutton href="?duplicate=%d"|args:$recherche.id shape="export" label="Dupliquer"}
+						{linkbutton href="?edit=%d"|args:$recherche.id shape="edit" label="Modifier"}
+						{linkbutton href="?delete=%d"|args:$recherche.id shape="delete" label="Supprimer"}
 					{/if}
 				</td>
 			</tr>

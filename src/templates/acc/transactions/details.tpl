@@ -13,10 +13,10 @@
 <div class="block alert">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
-		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
+		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
 	{else}
 		<h3>Créance en attente</h3>
-		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
+		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
 	{/if}
 </div>
 {/if}
@@ -77,7 +77,7 @@
 			<a target="_blank" href="{$file.url}">{$file.nom}</a>
 			<small>({$file.type}, {$file.taille|format_bytes})</small>
 			{linkbutton shape="download" href=$file.url target="_blank" label="Télécharger"}
-			{linkbutton shape="delete" href="acc/transactions/delete_file.php?id=%d&from=%d"|args:$file.id,$transaction.id label="Supprimer"}
+			{linkbutton shape="delete" href="!acc/transactions/delete_file.php?id=%d&from=%d"|args:$file.id,$transaction.id label="Supprimer"}
 		</aside>
 	</dd>
 	{foreachelse}

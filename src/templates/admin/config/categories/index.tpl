@@ -19,10 +19,10 @@
                 </td>
                 <td class="actions">
                     {if $cat.id != $user.id_categorie}
-                        {linkbutton shape="delete" label="Supprimer" href="config/categories/supprimer.php?id=%d"|args:$cat.id}
+                        {linkbutton shape="delete" label="Supprimer" href="supprimer.php?id=%d"|args:$cat.id}
                     {/if}
-                    {linkbutton shape="edit" label="Modifier" href="config/categories/modifier.php?id=%d"|args:$cat.id}
-                    {linkbutton shape="users" label="Liste des membres" href="membres/?cat=%d"|args:$cat.id}
+                    {linkbutton shape="edit" label="Modifier" href="modifier.php?id=%d"|args:$cat.id}
+                    {linkbutton shape="users" label="Liste des membres" href="!membres/?cat=%d"|args:$cat.id}
                 </td>
             </tr>
         {/foreach}

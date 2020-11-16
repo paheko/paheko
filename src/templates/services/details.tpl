@@ -37,8 +37,8 @@
 			<td>{$row.fee}</td>
 			<td>{$row.date|date_short}</td>
 			<td class="actions">
-				{linkbutton shape="user" label="Toutes les activités de ce membre" href="services/user.php?id=%d"|args:$row.id_user}
-				{linkbutton shape="alert" label="Rappels envoyés" href="services/reminders/user.php?id=%d"|args:$row.id_user}
+				{linkbutton shape="user" label="Toutes les activités de ce membre" href="!services/user.php?id=%d"|args:$row.id_user}
+				{linkbutton shape="alert" label="Rappels envoyés" href="!services/reminders/user.php?id=%d"|args:$row.id_user}
 			</td>
 		</tr>
 	{/foreach}

@@ -80,7 +80,7 @@
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 			- ou -
-			{linkbutton shape="reset" href="acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
+			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{elseif $previous_year}
 			{csrf_field key="acc_years_balance_%s"|args:$year.id}
 			<input type="hidden" name="from_year" value="{$previous_year.id}" />

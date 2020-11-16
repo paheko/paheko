@@ -53,7 +53,7 @@
 			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
 		{/if}
 		{if $year.id == CURRENT_YEAR_ID}
-			{linkbutton href="acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
+			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
 		{/if}
 		</aside>
 		<ul>
@@ -85,13 +85,13 @@
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
-					{linkbutton shape="check" label="Régler cette dette" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
+					{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 				{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT}
-					{linkbutton shape="export" label="Régler cette créance" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
+					{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 				{/if}
 			{/if}
 
-				{linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
+				{linkbutton href="!acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
 			</td>
 		</tr>
 	{/foreach}

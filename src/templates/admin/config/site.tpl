@@ -98,7 +98,7 @@
                     <th><a href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
                     <td>{if $local}{$local.mtime|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
                     <td class="actions">
-                        {linkbutton shape="edit" label="Éditer" href="config/site.php?edit=%s"|args:$source}
+                        {linkbutton shape="edit" label="Éditer" href="?edit=%s"|args:$source}
                     </td>
                 </tr>
             {/foreach}

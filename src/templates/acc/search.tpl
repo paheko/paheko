@@ -45,7 +45,7 @@
 						{/if}
 					{/foreach}
 					<td class="actions">
-						{linkbutton shape="search" label="Détails" href="acc/transactions/details.php?id=%d"|args:$row.id}
+						{linkbutton shape="search" label="Détails" href="!acc/transactions/details.php?id=%d"|args:$row.id}
 					</td>
 				</tr>
 			{/foreach}

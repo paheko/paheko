@@ -16,8 +16,8 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-		{linkbutton href="%s?type=%d&export=csv"|args:$self_url_no_qs,$type label="Export CSV" shape="export"}
-		{linkbutton href="%s?type=%d&export=ods"|args:$self_url_no_qs,$type label="Export tableur" shape="export"}
+		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
+		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
 	{/if}
 	</aside>
 	<ul>
@@ -41,12 +41,12 @@
 			<td>{$line.line_reference}</td>
 			<td class="actions">
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
-					{linkbutton shape="check" label="Régler cette dette" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
+					{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 				{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT}
-					{linkbutton shape="export" label="Régler cette créance" href="acc/transactions/new.php?payoff_for=%d"|args:$line.id}
+					{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 				{/if}
 
-				{linkbutton href="acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
+				{linkbutton href="!acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
 			</td>
 		</tr>
 	{/foreach}
