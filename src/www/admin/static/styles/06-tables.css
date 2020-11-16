@@ -27,17 +27,11 @@ table.list th {
 }
 
 table.list thead {
-    background: rgb(217, 134, 40);
-    background: rgba(217, 134, 40, 0.5);
     background: rgba(var(--gSecondColor), 0.5);
 }
 
 table.list tfoot tr {
-    background: rgb(247, 164, 70);
-    background: rgba(217, 134, 40, 0.1);
     background: rgba(var(--gSecondColor), 0.2);
-    color: rgb(156, 79, 21);
-    color: rgb(var(--gMainColor));
 }
 
 table.list th, table.list td {
