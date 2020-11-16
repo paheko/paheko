@@ -57,8 +57,10 @@
                         </td>
                     {/foreach}
                     <td class="actions">
-                        <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
-                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>{/if}
+                        {linkbutton label="Fiche membre" shape="user" href="membres/fiche.php?id=%d"|args:$membre.id}
+                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+                            {linkbutton label="Modifier" shape="edit" href="membres/modifier.php?id=%d"|args:$membre.id}
+                        {/if}
                     </td>
                 </tr>
             {/foreach}

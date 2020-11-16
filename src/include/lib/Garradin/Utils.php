@@ -747,6 +747,8 @@ class Utils
             case 'uncheck': return '☐';
             case 'radio-checked': return '⬤';
             case 'image': return '🖻';
+            case 'left': return '←';
+            case 'right': return '→';
             default:
                 throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
         }

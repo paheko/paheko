@@ -1,0 +1,500 @@
+/* Forms */
+fieldset {
+    border: 1px solid #ccc;
+    padding: 0.8em 1em 0 1em;
+    margin-bottom: 1em;
+    padding: 0.5em;
+}
+
+fieldset legend {
+    padding: 0 0.5em;
+    font-weight: bold;
+    color: #000;
+}
+
+label:hover {
+    cursor: pointer;
+    border-bottom: 1px dotted #900;
+}
+
+table tr.clickable:hover {
+    cursor: pointer;
+    color: #633;
+    background: #ffc;
+
+}
+
+dl dt label {
+    font-weight: bold;
+}
+
+fieldset dl dt b {
+    color: #900;
+    font-size: 0.7em;
+    font-weight: normal;
+    vertical-align: super;
+}
+
+fieldset dl dt i {
+    color: #999;
+    font-size: 0.7em;
+    font-weight: normal;
+    vertical-align: super;
+}
+
+fieldset dl dd.tip {
+    color: #666;
+}
+
+fieldset dl dd {
+    padding: 0.2em 0.5em 0.2em 1em;
+}
+
+fieldset dl dd ol, fieldset dl dd ul {
+    margin-left: 1.5em;
+}
+
+fieldset dl dl {
+    margin: .5em 0 .5em 1.2em;
+}
+
+input[type=radio], input[type=checkbox] {
+    cursor: pointer;
+}
+
+/* We can't use :not([type=checkbox]):not([type=radio]) here as it is too specific
+and then it's a mess to override the selector after... */
+input[type=text], input[type=number], input[type=color],
+input[type=date], input[type=datetime-local], input[type=datetime], input[type=time], input[type=week],
+input[type=email], input[type=file], input[type=url], input[type=month],
+input[type=password], input[type=range], input[type=search], input[type=tel],
+textarea, select, .input-list {
+    padding: .4rem .6rem;
+    font-family: inherit;
+    min-width: 20em;
+    max-width: 100%;
+    border: 1px solid rgb(var(--gMainColor));
+    font-size: inherit;
+    background: #fff;
+    color: #000;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+input:not(:placeholder-shown):focus:invalid {
+    border-color: #f33;
+}
+
+input.time {
+    text-align: center;
+    padding: .2em 0;
+}
+
+/* Fake checkbox and radio buttons */
+input[type=checkbox], input[type=radio] {
+    position: absolute;
+    top: -9999px;
+}
+
+input[type=checkbox] + label::before, input[type=radio] + label::before {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    transition: color .2s, box-shadow .2s ease-in-out;
+    text-shadow: 1px 1px 3px #ccc;
+    cursor: pointer;
+    font-family: gicon;
+    font-size: 1.2rem;
+    font-weight: normal;
+    color: rgb(var(--gMainColor));
+    margin-right: .5em;
+    border-radius: .25rem;
+    padding: .1rem .2rem;
+}
+
+input[type=checkbox] + label::before {
+    content: "☐";
+}
+
+input[type=checkbox]:checked + label::before {
+    content: "☑";
+}
+
+input[type=radio] + label::before {
+    content: "◯";
+}
+
+input[type=radio]:checked + label::before {
+    content: "⬤";
+}
+
+input:hover + label::before {
+    color: rgb(var(--gSecondColor));
+}
+
+input:checked + label::before {
+    color: rgb(var(--gSecondColor));
+    text-shadow: 1px 1px 10px #ff9;
+}
+
+input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
+    box-shadow: 0 0 1px .2rem rgb(var(--gSecondColor));
+    outline: 0;
+}
+
+/* buttons */
+
+input[type=submit], input[type=button], button, .icn-btn, input[type=file] {
+    cursor: pointer;
+    transition: background .5s ease;
+    color: rgb(var(--gMainColor));
+    border: 1px solid rgba(var(--gSecondColor), 0.7);
+    background-color: rgba(var(--gSecondColor), 0.1);
+    user-select: none;
+    display: inline-block;
+    font-size: inherit;
+    border-radius: .2em;
+    padding: .2em .4em;
+    margin: .2em .5em;
+    white-space: pre;
+    text-decoration: none;
+    transition: color .3s, background-color .3s;
+    -webkit-appearance: inherit;
+
+}
+
+input[type=submit]:hover, input[type=button]:hover, button, .icn-btn:hover, input[type=file]:hover,
+.actions .icn:hover, .icn.action:hover, .radio-btn:hover div, a.num:hover, .num a:hover  {
+    color: darkred;
+    background-color: #ff9;
+    z-index: 300;
+}
+
+input[disabled], input[disabled] + label {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+input[readonly], input.disabled {
+    color: #666;
+    background-color: #eee;
+    border-color: #999;
+}
+
+input.resetButton {
+    margin-left: 1em;
+}
+
+select, input[size], input[type=color], button, input[type=button], input[type=submit] {
+    min-width: 0 !important;
+}
+
+form .radio-btn {
+    display: table;
+    width: 100%;
+    padding: 0;
+    border-spacing: .5rem .2rem;
+}
+
+form .radio-btn label {
+    display: table-row;
+}
+
+form .radio-btn input + label::before {
+    display: table-cell;
+}
+
+form .radio-btn input:focus + label::before {
+    box-shadow: none;
+}
+
+form .radio-btn input:focus + label div {
+    box-shadow: 0 0 1px .2rem rgb(var(--gSecondColor));
+}
+
+form .radio-btn div {
+    display: table-cell;
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    background-color: rgba(var(--gSecondColor), 0.1);
+    font-size: inherit;
+    border-radius: .2em;
+    padding: .2em .4em;
+    transition: color .3s, background-color .3s;
+    color: #333;
+}
+
+form .radio-btn h3 {
+    text-decoration: underline;
+}
+
+form .radio-btn input {
+    margin: 1em;
+}
+
+form .radio-btn .help {
+    margin: .8em 0 0 0;
+    font-size: .8em;
+}
+
+form .radio-btn input:checked + div {
+    background-color: rgba(var(--gSecondColor), 0.5);
+}
+
+form .input-list {
+    padding: 0;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: start;
+    min-width: 0;
+}
+
+form .input-list .label {
+    padding: .4rem .6rem;
+}
+
+form .input-list button {
+    padding: .4rem .6rem;
+    align-self: stretch;
+    flex-shrink: 0;
+    margin: 0;
+    border: none;
+}
+
+form .input-list .label button {
+    padding: .2rem;
+    border: none;
+    background: none;
+}
+
+input.money {
+    text-align: right;
+}
+
+input.money + b {
+    padding: .2rem .6rem;
+    line-height: 1.5rem;
+    color: #999;
+}
+
+p.submit {
+    margin: 1em;
+}
+
+.submit input[type=submit] {
+    font-size: 1.2em;
+}
+
+.submit .main {
+    font-size: 1.2em;
+    text-decoration: none;
+    border-radius: 1em;
+    padding: .5em 1em;
+    border: none;
+    box-shadow: 0px 0px 10px 0 #999;
+    overflow: hidden;
+}
+
+.submit .main[data-icon]:before {
+    display: none;
+}
+
+p.submit .main[data-icon]:after {
+    padding: 0 0 0 .5rem;
+    color: rgba(var(--gSecondColor));
+    font-size: 1.5rem;
+    line-height: .2em;
+}
+
+.submit .minor {
+    font-size: .9em;
+}
+
+form .checkUncheck {
+    float: left;
+}
+
+form span.password_check {
+    margin-left: 1em;
+    padding: .1em .3em;
+    border-radius: .5em;
+}
+
+form span.password_check.fail { background-color: #f99; }
+form span.password_check.weak { background-color: #ff9; }
+form span.password_check.medium { background-color: #ccf; }
+form span.password_check.ok { background-color: #cfc; }
+
+dd.help input[type=text] {
+    cursor: pointer;
+    font-family: monospace;
+}
+
+form p.actions {
+    float: right;
+}
+
+/** Datepicker widget */
+.datepicker-parent {
+    position: relative;
+}
+
+dialog {
+    display: none;
+}
+
+dialog[open] {
+    display: block;
+}
+
+dialog.datepicker {
+    position: absolute;
+    left: 0;
+    margin: 0;
+    padding: .3rem;
+    border: none;
+    box-shadow: 0 0 5px #000;
+    border-radius: .5rem;
+    z-index: 1000;
+}
+
+.datepicker nav {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.datepicker h3 {
+    font-size: inherit;
+    margin: 0 .5rem;
+}
+
+.datepicker table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.datepicker thead td {
+    font-size: 80%;
+    color: #999;
+}
+
+.datepicker tbody tr:nth-child(even) {
+    background-color: #eee;
+}
+
+.datepicker tbody td:nth-child(6) {
+    color: #666;
+}
+.datepicker tbody td:nth-child(7) {
+    color: #999;
+}
+
+.datepicker tbody td {
+    padding: .2rem .4rem;
+    text-align: center;
+    width: 14.3%;
+}
+
+.datepicker tbody td:not(:empty):hover {
+    cursor: pointer;
+    background: #fcc;
+    text-decoration: underline;
+}
+
+.datepicker tbody td.focus {
+    background: #339;
+    color: #fff;
+}
+
+.datepicker input {
+    font-family: gicon;
+}
+
+.icn-btn {
+    text-decoration: underline;
+}
+
+.icn-btn[data-icon]:before, summary::after, .submit .main[data-icon]:after {
+    display: inline-block;
+    font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px #ccc;
+    padding-right: .5em;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    content: attr(data-icon);
+}
+
+.icn-btn[data-icon]:empty:before {
+    padding: 0;
+}
+
+.icn, .icnl {
+    font-family: "gicon", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    font-variant: normal;
+    text-transform: none;
+    position: relative;
+}
+
+.actions .icn, .icn.action {
+    text-decoration: none;
+    border-radius: 1em;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    padding: .2em;
+    font-family: "gicon", sans-serif;
+    color: #9c4f15;
+    color: rgb(var(--gMainColor));
+    text-shadow: 1px 1px 1px #999;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 200;
+}
+
+a.icn[title]:after {
+    display: none;
+    position: absolute;
+    content: attr(title);
+    font-size: 10pt;
+    border-radius: .2em;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: -1;
+    padding: .3em .4em;
+    background: #ff9;
+    text-shadow: none;
+    white-space: pre;
+    box-shadow: 0px 0px 2px #000;
+    text-decoration: underline;
+    padding-right: 2em;
+}
+
+dl dd.actions a.icn[title]:after {
+    right: auto;
+    left: 0;
+    padding-left: 2em;
+    padding-right: .4em;
+}
+
+a.icn[title]:hover:after {
+    display: inline-block;
+}
+
+
+fieldset.memberMessage {
+    max-width: 30em;
+}
+
+fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
+    width: 95%;
+}
