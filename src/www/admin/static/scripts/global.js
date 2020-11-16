@@ -150,7 +150,7 @@
 
 	g.checkUncheck = function()
 	{
-		var elements = this.form.querySelectorAll('input[type=checkbox]');
+		var elements = this.form.querySelectorAll('tbody input[type=checkbox]');
 		var el_length = elements.length;
 		var checked = this.checked;
 
@@ -158,11 +158,7 @@
 		{
 			var elm = elements[i];
 			elm.checked = checked;
-
-			if (elm.onchange && elm.name)
-			{
-				elm.onchange({target: elm});
-			}
+			elm.dispatchEvent(new Event("change"));
 		}
 
 		return true;
@@ -355,7 +351,7 @@
 			for (var j = 0; j < ll; j++)
 			{
 				checkBoxes[j].onchange = function (e) {
-					var elm = e.target || this;
+					let elm = e.target;
 					var checked = elm.checked ? true : false;
 
 					var parent = elm.parentNode;
@@ -373,7 +369,8 @@
 
 				if (checkBoxes[j].checked)
 				{
-					checkBoxes[j].onchange({target: checkBoxes[j]});
+					checkBoxes[j].checkUncheck(checkBoxes[j]);
+					elm.dispatchEvent(new Event("change"));
 				}
 			}
 		}
