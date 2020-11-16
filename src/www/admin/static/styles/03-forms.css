@@ -152,13 +152,11 @@ input[type=submit], input[type=button], button, input[type=file] {
     cursor: pointer;
     border: 2px solid rgba(var(--gMainColor), 0.5);
     background-color: rgba(var(--gSecondColor), 0.1);
-    user-select: none;
     display: inline-block;
     font-size: inherit;
     border-radius: .2em;
     padding: .2em .4em;
     margin: .2em .5em;
-    white-space: pre;
     text-decoration: none;
     transition: color .3s, background-color .3s;
 }
@@ -232,7 +230,7 @@ input[readonly], input.disabled {
 }
 
 select, input[size], input[type=color], button, input[type=button], input[type=submit] {
-    min-width: 0 !important;
+    min-width: 0;
 }
 
 /* Radio button lists (eg. new transaction) */
