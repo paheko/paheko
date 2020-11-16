@@ -3,7 +3,7 @@
 <nav class="tabs">
 	{if CURRENT_YEAR_ID}
 	<aside>
-		{linkbutton label="Créer un nouveau compte de projet" href="acc/charts/accounts/new.php?id=%d&type=%d"|args:$current_year.id_chart,$analytical_type shape="plus"}
+		{linkbutton label="Créer un nouveau compte de projet" href="!acc/charts/accounts/new.php?id=%d&type=%d"|args:$current_year.id_chart,$analytical_type shape="plus"}
 	</aside>
 	{/if}
 
@@ -67,7 +67,7 @@
 	<p class="block alert">
 		Il n'y a pas de projet visible en cours.
 		{if $current_year && !$analytical_accounts_count}
-			{linkbutton label="Créer un nouveau compte de projet" href="acc/charts/accounts/new.php?id=%d&type=%d"|args:$current_year.id_chart,$analytical_type shape="plus"}
+			{linkbutton label="Créer un nouveau compte de projet" href="!acc/charts/accounts/new.php?id=%d&type=%d"|args:$current_year.id_chart,$analytical_type shape="plus"}
 		{else}
 			Le solde des projets apparaîtra quand des écritures seront affectées à ces projets.
 		{/if}

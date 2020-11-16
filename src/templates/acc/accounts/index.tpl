@@ -49,12 +49,12 @@
 					{/if}
 				</td>
 				<td class="actions">
-					{linkbutton label="Journal" shape="menu" href="acc/accounts/journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
+					{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
 					{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 						{if $account.type == Entities\Accounting\Account::TYPE_BANK}
-							{linkbutton label="Rapprochement" shape="check" href="acc/accounts/reconcile.php?id=%d"|args:$account.id}
+							{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
 						{elseif $account.type == Entities\Accounting\Account::TYPE_OUTSTANDING}
-							{linkbutton label="Dépôt en banque" shape="check" href="acc/accounts/deposit.php?id=%d"|args:$account.id}
+							{linkbutton label="Dépôt en banque" shape="check" href="deposit.php?id=%d"|args:$account.id}
 						{/if}
 					{/if}
 				</td>

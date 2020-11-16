@@ -33,11 +33,11 @@
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=expired">{$row.nb_users_expired}</a></td>
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=unpaid">{$row.nb_users_unpaid}</a></td>
 					<td class="actions">
-						{linkbutton shape="menu" label="Tarifs" href="services/fees/?id=%d"|args:$row.id}
-						{linkbutton shape="users" label="Liste des inscrits" href="services/details.php?id=%d"|args:$row.id}
+						{linkbutton shape="menu" label="Tarifs" href="!services/fees/?id=%d"|args:$row.id}
+						{linkbutton shape="users" label="Liste des inscrits" href="!services/details.php?id=%d"|args:$row.id}
 						{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-							{linkbutton shape="edit" label="Modifier" href="services/edit.php?id=%d"|args:$row.id}
-							{linkbutton shape="delete" label="Supprimer" href="services/delete.php?id=%d"|args:$row.id}
+							{linkbutton shape="edit" label="Modifier" href="!services/edit.php?id=%d"|args:$row.id}
+							{linkbutton shape="delete" label="Supprimer" href="!services/delete.php?id=%d"|args:$row.id}
 						{/if}
 					</td>
 				</tr>

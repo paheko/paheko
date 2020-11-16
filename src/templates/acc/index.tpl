@@ -7,9 +7,9 @@
 
 	<nav class="tabs">
 		<aside>
-			{linkbutton shape="search" href="acc/search.php?year=%d"|args:$year.id label="Recherche"}
+			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-				{linkbutton shape="upload" href="acc/years/import.php?year=%d"|args:$year.id label="Import & export"}
+				{linkbutton shape="upload" href="!acc/years/import.php?year=%d"|args:$year.id label="Import & export"}
 			{/if}
 		</aside>
 		<ul>
@@ -38,7 +38,7 @@
 {foreachelse}
 	<p class="block alert">
 		Il n'y a aucun exercice ouvert en cours.<br />
-		{linkbutton label="Ouvrir un nouvel exercice" shape="plus" href="acc/years/new.php"}
+		{linkbutton label="Ouvrir un nouvel exercice" shape="plus" href="!acc/years/new.php"}
 	</p>
 {/foreach}
 

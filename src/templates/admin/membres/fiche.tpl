@@ -29,10 +29,10 @@
     {/foreach}
     <dd>
         {if count($services)}
-            {linkbutton href="services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
+            {linkbutton href="!services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
         {/if}
         {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-            {linkbutton href="services/save.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
+            {linkbutton href="!services/save.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
         {/if}
     </dd>
     {if $session->canAccess('membres', Membres::DROIT_ACCES)}
@@ -84,7 +84,7 @@
         {elseif $c_config.type == 'email'}
             <a href="mailto:{$membre->$c|escape:'url'}">{$membre->$c}</a>
             {if $c == 'email'}
-                {linkbutton href="membres/message.php?id=%d"|args:$membre.id label="Envoyer un message" shape="mail"}
+                {linkbutton href="!membres/message.php?id=%d"|args:$membre.id label="Envoyer un message" shape="mail"}
             {/if}
         {elseif $c_config.type == 'tel'}
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>

@@ -35,14 +35,14 @@
 					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td class="actions">
-						{linkbutton shape="star" label="Comptes favoris" href="acc/charts/accounts/?id=%d"|args:$item.id}
-						{linkbutton shape="menu" label="Tous les comptes" href="acc/charts/accounts/all.php?id=%d"|args:$item.id}
+						{linkbutton shape="star" label="Comptes favoris" href="!acc/charts/accounts/?id=%d"|args:$item.id}
+						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-							{linkbutton shape="edit" label="Modifier" href="acc/charts/edit.php?id=%d"|args:$item.id}
-							{linkbutton shape="export" label="Export CSV" href="acc/charts/export.php?id=%d"|args:$item.id}
-							{linkbutton shape="export" label="Export tableur" href="acc/charts/export.php?id=%d&ods"|args:$item.id}
+							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id}
+							{linkbutton shape="export" label="Export CSV" href="!acc/charts/export.php?id=%d"|args:$item.id}
+							{linkbutton shape="export" label="Export tableur" href="!acc/charts/export.php?id=%d&ods"|args:$item.id}
 							{if !$item.code && !$item.archived}
-								{linkbutton shape="delete" label="Supprimer" href="acc/charts/delete.php?id=%d"|args:$item.id}
+								{linkbutton shape="delete" label="Supprimer" href="!acc/charts/delete.php?id=%d"|args:$item.id}
 							{/if}
 						{/if}
 					</td>

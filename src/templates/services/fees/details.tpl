@@ -23,8 +23,8 @@
 			<td class="money">{$row.paid_amount|raw|money_currency}</td>
 			<td>{$row.date|format_sqlite_date_to_french}</td>
 			<td class="actions">
-				{linkbutton shape="user" label="Toutes les activités de ce membre" href="services/user.php?id=%d"|args:$row.id_user}
-				{linkbutton shape="alert" label="Rappels envoyés" href="services/reminders/user.php?id=%d"|args:$row.id_user}
+				{linkbutton shape="user" label="Toutes les activités de ce membre" href="!services/user.php?id=%d"|args:$row.id_user}
+				{linkbutton shape="alert" label="Rappels envoyés" href="!services/reminders/user.php?id=%d"|args:$row.id_user}
 			</td>
 		</tr>
 	{/foreach}

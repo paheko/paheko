@@ -1,8 +1,8 @@
 {include file="admin/_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user.identite current="membres/services"}
 
 <p>
-	{linkbutton href="membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="services/save.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
+	{linkbutton href="!membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
+	{linkbutton href="!services/save.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
 </p>
 
 {form_errors}
@@ -28,8 +28,8 @@
 	<dd>
 		{$list->count()}
 		{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-			{linkbutton href="%s&export=csv"|args:$self_url shape="export" label="Export CSV"}
-			{linkbutton href="%s&export=ods"|args:$self_url shape="export" label="Export tableur"}
+			{linkbutton href="?export=csv" shape="export" label="Export CSV"}
+			{linkbutton href="?export=ods" shape="export" label="Export tableur"}
 		{/if}
 	</dd>
 </dl>
@@ -47,17 +47,17 @@
 			<td class="actions">
 				{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
 					{if $row.paid}
-						{linkbutton shape="reset" label="Marquer comme non payé" href="services/user.php?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
+						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
 					{else}
-						{linkbutton shape="check" label="Marquer comme payé" href="services/user.php?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
+						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
 					{/if}
-					{linkbutton shape="delete" label="Supprimer" href="services/user_delete.php?id=%d"|args:$row.id}
+					{linkbutton shape="delete" label="Supprimer" href="user_delete.php?id=%d"|args:$row.id}
 				{/if}
 				{if $session->canAccess('compta', Membres::DROIT_ACCES) && $row.id_account}
-					{linkbutton shape="menu" label="Liste des écritures" href="acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
 				{/if}
 				{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $row.id_account}
-					{linkbutton shape="plus" label="Nouveau règlement" href="services/payment.php?id=%d"|args:$row.id}
+					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
 		</tr>

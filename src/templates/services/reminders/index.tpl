@@ -33,9 +33,9 @@
 					</td>
 					<th><a href="details.php?id={$reminder.id}">{$reminder.subject}</a></th>
 					<td class="actions">
-						{linkbutton shape="mail" label="Liste des rappels envoyés" href="services/reminders/details.php?id=%d"|args:$reminder.id}
-						{linkbutton shape="edit" label="Modifier" href="services/reminders/edit.php?id=%d"|args:$reminder.id}
-						{linkbutton shape="delete" label="Supprimer" href="services/reminders/delete.php?id=%d"|args:$reminder.id}
+						{linkbutton shape="mail" label="Liste des rappels envoyés" href="!services/reminders/details.php?id=%d"|args:$reminder.id}
+						{linkbutton shape="edit" label="Modifier" href="!services/reminders/edit.php?id=%d"|args:$reminder.id}
+						{linkbutton shape="delete" label="Supprimer" href="!services/reminders/delete.php?id=%d"|args:$reminder.id}
 					</td>
 				</tr>
 			{/foreach}
