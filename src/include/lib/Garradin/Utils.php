@@ -51,7 +51,11 @@ class Utils
             $date = date($format, $ts);
         }
         elseif (strlen($ts) == 10) {
-            $ts = \DateTime::createFromFormat('Y-m-d', $ts);
+            $ts = \DateTime::createFromFormat('!Y-m-d', $ts);
+            $date = $ts->format($format);
+        }
+        elseif (strlen($ts) == 19) {
+            $ts = \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
             $date = $ts->format($format);
         }
         else {
