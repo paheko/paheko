@@ -8,28 +8,37 @@
 
 	var logo_limit_x = 170;
 
-	function colorToRGB(color)
+	function colorToRGB(color, type)
 	{
 		// Conversion vers décimal RGB
 		return color.replace(/^#/, '').match(/.{1,2}/g).map(function (el) {
 			// On limite la luminosité comme ça, c'est pas parfait mais ça marche
-			return Math.min(parseInt(el, 16), 210);
+			return Math.min(parseInt(el, 16), type == 'gMainColor' ? 180 : 220);
 		});
+	}
+
+	function RGBToHex(color) {
+		// Conversion vers décimal RGB
+		return '#' + color.split(/,/).map(function (el) {
+			return ('0' + parseInt(el, 10).toString(16)).substr(-2);
+		}).join('');
 	}
 
 	function changeColor(element, color)
 	{
-		var new_color = colorToRGB(color).join(', ');
+		var new_color = colorToRGB(color, element).join(',');
 
 		// Mise à jour variable CSS
 		document.documentElement.style.setProperty('--' + element, new_color);
 
 		applyColors();
+		return new_color;
 	}
 
 	function applyColors()
 	{
-		var color = colorToRGB($('#f_couleur2').value);
+		let input = $('#f_couleur2');
+		var color = colorToRGB(input.value, 'gSecondColor');
 
 		var img = new Image;
 		img.crossOrigin = "Anonymous";
@@ -146,7 +155,8 @@
 			var input = document.getElementById('f_' + couleur);
 
 			input.oninput = function () {
-				changeColor(couleurs[this.name], this.value);
+				var c = changeColor(couleurs[this.name], this.value);
+				this.value = RGBToHex(c);
 			};
 
 			// Ajout bouton remise à zéro de la couleur
@@ -183,8 +193,14 @@
 		reset_btn.innerHTML = 'RàZ';
 
 		reset_btn.onclick = () => {
-			$('#f_image_fond').value = '0';
 			$('#f_image_fond').dataset.source = $('#f_image_fond').dataset.default;
+			$('#f_image_fond').value = '0';
+
+			var input = $('#f_couleur2');
+			if (input.getAttribute('placeholder') == input.value) {
+				return;
+			}
+
 			applyColors();
 		};
 
