@@ -11,10 +11,15 @@ require_once __DIR__ . '/../../_inc.php';
 header('X-Frame-Options: SAMEORIGIN', true);
 
 $targets = qg('targets');
+$chart = qg('chart');
 
-$chart = null;
+// Cache the page until the charts have changed
+$hash = sha1($targets . $chart);
+$expiry = Config::getInstance()->get('last_chart_change') ?: time();
 
-if (qg('chart')) {
+Utils::HTTPCache($hash, $expiry);
+
+if ($chart) {
 	$chart = Charts::get((int)qg('chart'));
 }
 elseif (qg('year')) {
