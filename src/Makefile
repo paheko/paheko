@@ -24,8 +24,14 @@ release: test minify
 	mkdir -p /tmp/garradin-build
 	fossil zip ${VERSION} /tmp/garradin-build/src.zip --name garradin
 	unzip -d /tmp/garradin-build /tmp/garradin-build/src.zip
-	cd include/lib; rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
-	cd ../../www/admin/static; rm -f styles/[0-9]*.css admin.css; mv mini.css admin.css
+	cd include/lib; \
+		rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
+	mv www/admin/static/mini.css /tmp/garradin-build/garradin/src/www/admin/static/admin.css
+	cd /tmp/garradin-build/garradin/src/www/admin/static; \
+		rm -f styles/[0-9]*.css; \
+		rm -f font/*.css font/*.json
+	cd /tmp/garradin-build/garradin/src; \
+		rm -f Makefile include/lib/KD2/data/countries.en.json
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
 	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
@@ -46,5 +52,5 @@ check-dependencies:
 	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
 
 minify:
-	cat `ls www/admin/static/styles/[01]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
+	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
 	yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
