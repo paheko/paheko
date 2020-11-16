@@ -8,6 +8,11 @@ require_once __DIR__ . '/_inc.php';
 if (qg('type') == 'errors' && ERRORS_ENABLE_LOG_VIEW)
 {
     $reports = ErrorManager::getReportsFromLog(null, qg('id'));
+
+    if (!count($reports)) {
+        throw new UserException('Erreur inconnue');
+    }
+
     $reports = array_reverse($reports, true);
 
     foreach ($reports as &$report)
@@ -22,7 +27,7 @@ if (qg('type') == 'errors' && ERRORS_ENABLE_LOG_VIEW)
     if (qg('id'))
     {
         $tpl->assign('id', qg('id'));
-        $tpl->assign('main', $reports[0]);
+        $tpl->assign('main', reset($reports));
         $tpl->assign('reports', $reports);
     }
     else
