@@ -15,7 +15,7 @@ use const Garradin\ADMIN_URL;
 
 use KD2\Security;
 use KD2\Security_OTP;
-use KD2\QRCode;
+use KD2\Graphics\QRCode;
 use KD2\HTTP;
 
 class Session extends \KD2\UserSession
