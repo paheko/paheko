@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Accounting;
 
 use DateTimeInterface;
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
@@ -365,5 +366,11 @@ class Account extends Entity
 	public function chart(): Chart
 	{
 		return Charts::get($this->id_chart);
+	}
+
+	public function save(): bool
+	{
+		Config::getInstance()->set('last_chart_change', time());
+		return parent::save();
 	}
 }
