@@ -1,0 +1,158 @@
+/*
+    marron : #9c4f15 rgb(156, 79, 21)
+    orange : #d98628 rgb(217, 134, 40)
+*/
+
+:root {
+    --gBgColor: 255, 255, 255;
+    --gMainColor: 156, 79, 21;
+    --gSecondColor: 217, 134, 40;
+    --gBgImage: url("../gdin_bg.png");
+}
+
+html {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-size: 100%;
+    color: #000;
+    font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
+    padding-bottom: 1em;
+    background: rgb(var(--gBgColor)) var(--gBgImage) no-repeat 0px 0px fixed;
+}
+
+main {
+    margin: 0px 1em 1em 180px;
+    position: relative;
+}
+
+main img {
+    max-width: 100%;
+}
+
+
+
+.header h1 {
+    color: rgb(var(--gMainColor));
+    margin-left: 180px;
+    margin-bottom: 0.4em;
+}
+
+.header .menu {
+    position: fixed;
+    overflow: auto;
+    z-index: 10000;
+    width: 170px;
+    top: 0;
+    bottom: 0;
+    padding-top: 100px;
+    background: rgb(var(--gMainColor)) var(--gBgImage) no-repeat 0px 0px;
+}
+
+.header .menu::-webkit-scrollbar {
+    width: 8px;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0px 0px 10px #666;
+}
+
+.header .menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
+
+.header .menu i {
+    font-style: normal;
+}
+
+.header .menu a {
+    color: #fff;
+    color: rgb(var(--gBgColor));
+    font-weight: bold;
+    padding: 0.4em 0.4em 0.4em 1em;
+    display: block;
+    text-decoration: none;
+    transition: background .3s;
+}
+
+.header .menu a:hover {
+    text-decoration: underline;
+    background: rgba(var(--gSecondColor), 0.5);
+}
+
+.header .menu li li a {
+    font-size: 0.8em;
+    padding-left: 2em;
+}
+
+.header .menu li.current > a {
+    background: #fff;
+    background: rgb(var(--gBgColor));
+    color: rgb(var(--gMainColor));
+}
+
+.header .menu a b {
+    float: right;
+    text-decoration: none;
+    margin-top: -.2em;
+    font-size: 20pt;
+    color: rgba(255, 255, 255, .5);
+}
+
+.header .menu li.current > a b {
+    color: rgba(var(--gSecondColor), 0.5);
+}
+
+
+ul.gallery {
+    text-align: center;
+}
+
+ul.gallery li {
+    display: inline-block;
+    margin: .3em;
+    vertical-align: middle;
+    width: 150px;
+}
+
+ul.gallery li img {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+ul.gallery .actions {
+    text-align: center;
+    z-index: 100;
+}
+
+
+
+#queryBuilder .column select, #queryBuilderForm .actions select {
+    max-width: 15em;
+}
+
+#queryBuilder table td {
+    vertical-align: top;
+    padding: .1em .2em;
+}
+
+#queryBuilder table td.buttons {
+    white-space: nowrap;
+}
+
+#queryBuilder input[type=button], #queryBuilder .values input {
+    margin: .1em;
+}
+
+#queryBuilderForm .actions label {
+    margin: 0 .5em;
+}
+
+#queryBuilder table .values label {
+    margin: 0 .3em;
+}
+
+#queryBuilderForm input[type=number] {
+    width: 4em;
+}

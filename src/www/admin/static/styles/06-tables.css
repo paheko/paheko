@@ -1,0 +1,148 @@
+table.list {
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+table.list caption {
+    text-align: center;
+    font-size: 1.2em;
+}
+
+table.list tbody td.desc {
+    font-size: .9em;
+    color: #666;
+}
+
+table.list.auto {
+    width: auto;
+}
+
+table.list table {
+    margin: 0;
+}
+
+table.list th {
+    text-align: left;
+    font-weight: bold;
+}
+
+table.list thead {
+    background: rgb(217, 134, 40);
+    background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gSecondColor), 0.5);
+}
+
+table.list tfoot tr {
+    background: rgb(247, 164, 70);
+    background: rgba(217, 134, 40, 0.1);
+    background: rgba(var(--gSecondColor), 0.2);
+    color: rgb(156, 79, 21);
+    color: rgb(var(--gMainColor));
+}
+
+table.list th, table.list td {
+    padding: 0.2em 0.5em;
+}
+
+table.list tr {
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+    transition: background .2s
+}
+
+table.list tr:nth-child(even), table.multi tbody:nth-child(even) {
+    background: rgba(var(--gSecondColor), 0.2);
+}
+
+table.list tr.disabled {
+    color: #666;
+}
+
+table.multi tr {
+    background: inherit !important;
+}
+
+table.list tr.checked {
+    color: #633;
+    background: #ffc;
+}
+
+table.list .error {
+    color: red;
+    font-weight: bold;
+}
+
+table.list .alert {
+    color: darkred;
+    font-weight: bold;
+}
+
+table.list .confirm {
+    color: darkgreen;
+}
+
+table.list .num {
+    text-align: center;
+}
+
+table.list .check {
+    width: 1%;
+}
+
+table.search th {
+    background: rgb(217, 134, 40);
+    background: rgba(217, 134, 40, 0.5);
+    background: rgba(var(--gSecondColor), 0.5);
+}
+
+table.list .disabled {
+    background: #eee;
+    color: #999;
+}
+
+.userOrder .cur {
+    background: rgba(var(--gSecondColor), 1.0);
+    color: rgb(var(--gBgColor));
+}
+
+table.list .userOrder td, table.list .userOrder th {
+    position: relative;
+    padding-left: 2.3em;
+}
+
+table.list .userOrder .check {
+    padding-left: .5em;
+}
+
+.userOrder .icn {
+    position: absolute;
+    left: .3em;
+    top: 0;
+    color: rgb(var(--gMainColor));
+    text-decoration: none;
+    font-size: 1.5em;
+    line-height: .5em;
+    width: 1em;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: normal;
+    text-shadow: 0px 0px 1px rgb(var(--gBgColor));
+    margin: 0;
+}
+
+.userOrder .icn.dn {
+    margin-top: .6em;
+}
+
+thead .icn:hover {
+    color: darkred;
+    text-shadow: none;
+}
+
+thead .cur.desc .icn.dn, thead .cur.asc .icn.up {
+    color: #fff;
+    text-shadow: none;
+}
+
+table.list .actions {
+    text-align: right;
+}

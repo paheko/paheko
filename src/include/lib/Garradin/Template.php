@@ -175,7 +175,11 @@ class Template extends \KD2\Smartyer
 			$params['type'] = 'button';
 		}
 
-		$params['class'] = ' icn-btn';
+		if (!isset($params['class'])) {
+			$params['class'] = '';
+		}
+
+		$params['class'] .= ' icn-btn';
 
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $this->escape($v));

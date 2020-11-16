@@ -28,15 +28,17 @@
 			<legend>Type d'écriture</legend>
 			<dl>
 			{foreach from=$types_details item="type"}
-				<label class="radio-btn">
+				<dd class="radio-btn">
 					{input type="radio" name="type" value=$type.id source=$transaction}
-					<div>
-						<h3>{$type.label}</h3>
-						{if !empty($type.help)}
-							<p>{$type.help}</p>
-						{/if}
-					</div>
-				</label>
+					<label for="f_type_{$type.id}">
+						<div>
+							<h3>{$type.label}</h3>
+							{if !empty($type.help)}
+								<p>{$type.help}</p>
+							{/if}
+						</div>
+					</label>
+				</dd>
 			{/foreach}
 			</dl>
 		</fieldset>
@@ -93,7 +95,7 @@
 
 	<p class="submit">
 		{csrf_field key="acc_transaction_new"}
-		<input type="submit" name="save" value="Enregistrer &rarr;" />
+		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 	</p>
 
 </form>

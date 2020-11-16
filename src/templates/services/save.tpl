@@ -20,9 +20,9 @@
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
 
 		{foreach from=$grouped_services item="service"}
-			<dd>
-				<label class="radio-btn">
-					{input type="radio" name="id_service" value=$service.id data-expiry=$service.expiry_date|date_short}
+			<dd class="radio-btn">
+				{input type="radio" name="id_service" value=$service.id data-expiry=$service.expiry_date|date_short}
+				<label for="f_id_service_{$service.id}">
 					<div>
 						<h3>{$service.label}</h3>
 						<p>
@@ -50,9 +50,9 @@
 		<dl data-service="s{$service.id}">
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
 			{foreach from=$service.fees key="service_id" item="fee"}
-			<dd>
-				<label class="radio-btn">
-					{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account}
+			<dd class="radio-btn">
+				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account}
+				<label for="f_id_fee_{$fee.id}">
 					<div>
 						<h3>{$fee.label}</h3>
 						<p>

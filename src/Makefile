@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test
+.PHONY: dev-server release deps publish check-dependencies test minify
 KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.2.zip
 
 deps:
@@ -18,13 +18,14 @@ dev-server:
 test:
 	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
-release: test
+release: test minify
 	$(eval VERSION=$(shell cat VERSION))
 	rm -rf /tmp/garradin-build
 	mkdir -p /tmp/garradin-build
 	fossil zip ${VERSION} /tmp/garradin-build/src.zip --name garradin
 	unzip -d /tmp/garradin-build /tmp/garradin-build/src.zip
 	cd include/lib; rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
+	cd ../../www/admin/static; rm -f styles/[0-9]*.css admin.css; mv mini.css admin.css
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
 	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
@@ -43,3 +44,7 @@ publish: release deb
 
 check-dependencies:
 	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
+
+minify:
+	cat `ls www/admin/static/styles/[01]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
+	yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
