@@ -251,7 +251,7 @@ class Account extends Entity
 		yield (object) ['sum' => $sum, 'date' => $end_date];
 	}
 
-	public function getDepositJournal(int $year_id): \Generator
+	public function getDepositJournal(int $year_id, array $checked = []): \Generator
 	{
 		$res = DB::getInstance()->iterate('SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line, l.id_account
 			FROM acc_transactions_lines l
@@ -266,6 +266,7 @@ class Account extends Entity
 			$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 			$sum += ($row->credit - $row->debit);
 			$row->running_sum = $sum;
+			$row->checked = array_key_exists($row->id, $checked);
 			yield $row;
 		}
 	}

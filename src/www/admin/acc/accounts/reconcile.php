@@ -85,6 +85,22 @@ if ($prev < $current_year->start_date) {
 	$prev = null;
 }
 
+$self_uri = Utils::getSelfURI(false);
+
+if (null !== $prev) {
+	$prev = [
+		'date' => $prev,
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $prev->format('Y-m-01'), $prev->format('Y-m-t'), qg('sauf')),
+	];
+}
+
+if (null !== $next) {
+	$next = [
+		'date' => $next,
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $next->format('Y-m-01'), $next->format('Y-m-t'), qg('sauf')),
+	];
+}
+
 $tpl->assign(compact(
 	'account',
 	'start',
