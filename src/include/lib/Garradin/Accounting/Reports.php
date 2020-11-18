@@ -90,8 +90,8 @@ class Reports
 					'credit' => $current->credit,
 					'debit' => $current->debit,
 					'sum' => $current->sum,
-					'id_account' => $by_year ? null : $row->id_account,
-					'id_year' => $by_year ? $row->id_year : null,
+					'id_account' => $by_year ? null : $current->id,
+					'id_year' => $by_year ? $current->id : null,
 				];
 
 				yield $current;
