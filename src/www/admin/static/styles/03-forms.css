@@ -93,7 +93,7 @@ input.time {
 /* Fake checkbox and radio buttons */
 input[type=checkbox], input[type=radio] {
     position: absolute;
-    top: -9999px;
+    opacity: 0;
 }
 
 input[type=checkbox] + label::before, input[type=radio] + label::before {
@@ -134,8 +134,7 @@ input:hover + label::before {
 }
 
 input:checked + label::before {
-    color: rgb(var(--gSecondColor));
-    text-shadow: 1px 1px 10px #ff9;
+    text-shadow: 1px 1px 5px #ff9;
 }
 
 input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
