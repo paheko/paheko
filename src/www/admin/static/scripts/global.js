@@ -150,16 +150,15 @@
 
 	g.checkUncheck = function()
 	{
-		var elements = this.form.querySelectorAll('tbody input[type=checkbox]');
-		var el_length = elements.length;
 		var checked = this.checked;
-
-		for (var i = 0; i < el_length; i++)
-		{
-			var elm = elements[i];
+		this.form.querySelectorAll('tbody input[type=checkbox]').forEach((elm) => {
 			elm.checked = checked;
 			elm.dispatchEvent(new Event("change"));
-		}
+		});
+
+		this.form.querySelectorAll('thead input[type=checkbox], tfoot input[type=checkbox]').forEach((elm) => {
+			elm.checked = checked;
+		});
 
 		return true;
 	};
@@ -330,49 +329,15 @@
 		}
 
 		// Ajouter action check/uncheck sur les checkbox de raccourci dans les tableaux
-		var checkTables = document.querySelectorAll('table thead input[type=checkbox], table tfoot input[type=checkbox]');
-		var l = checkTables.length;
+		document.querySelectorAll('table thead input[type=checkbox], table tfoot input[type=checkbox]').forEach((elm) => {
+			elm.addEventListener('change', g.checkUncheck);
+		});
 
-		for (var i = 0; i < l; i++)
-		{
-			var masterCheck = checkTables[i];
-			masterCheck.onchange = g.checkUncheck;
-
-			var parent = masterCheck.parentNode;
-
-			while (parent.nodeType != Node.ELEMENT_NODE || parent.tagName != 'TABLE')
-			{
-				parent = parent.parentNode;
-			}
-
-			var checkBoxes = parent.querySelectorAll('tbody tr input[type=checkbox]');
-			var ll = checkBoxes.length;
-
-			for (var j = 0; j < ll; j++)
-			{
-				checkBoxes[j].onchange = function (e) {
-					let elm = e.target;
-					var checked = elm.checked ? true : false;
-
-					var parent = elm.parentNode;
-
-					while (parent.nodeType != Node.ELEMENT_NODE || parent.tagName != 'TR')
-					{
-						parent = parent.parentNode;
-					}
-
-					if (checked)
-						parent.className = parent.className.replace(/ checked$|$/, ' checked');
-					else
-						parent.className = parent.className.replace(/ checked/, '');
-				};
-
-				if (checkBoxes[j].checked)
-				{
-					checkBoxes[j].checkUncheck(checkBoxes[j]);
-					elm.dispatchEvent(new Event("change"));
-				}
-			}
-		}
+		document.querySelectorAll('table tbody input[type=checkbox]').forEach((elm) => {
+			elm.addEventListener('change', () => {
+				elm.parentNode.parentNode.classList.toggle('checked', elm.checked);
+			});
+		});
 	});
+
 })();
