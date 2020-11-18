@@ -69,10 +69,8 @@ class Year extends Entity
 
 	public function delete(): bool
 	{
-		// Ne pas supprimer un compte qui est utilisé !
-		if ($count = $this->countTransactions()) {
-			throw new UserException(sprintf('Cet exercice ne peut être supprimé car %d écritures y sont liées.', $count));
-		}
+		// Manual delete of transactions, as there is a voluntary safeguard in SQL: no cascade
+		DB::getInstance()->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
 
 		return parent::delete();
 	}
