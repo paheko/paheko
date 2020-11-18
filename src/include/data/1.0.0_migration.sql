@@ -134,7 +134,8 @@ INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
 INSERT INTO services_reminders SELECT * FROM rappels;
 INSERT INTO services_reminders_sent SELECT id, id_membre, id_cotisation,
 	CASE WHEN id_rappel IS NULL THEN (SELECT MAX(id) FROM rappels) ELSE id_rappel END, date
-	FROM rappels_envoyes;
+	FROM rappels_envoyes
+	GROUP BY id_membre, id_cotisation, id_rappel;
 
 DROP TABLE cotisations;
 DROP TABLE cotisations_membres;
