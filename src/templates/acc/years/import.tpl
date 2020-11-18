@@ -37,7 +37,7 @@
 								<select name="translate[{$index}]">
 									<option value="">-- Ne pas importer cette colonne</option>
 									{foreach from=$possible_columns item="label" key="key"}
-										<option value="{$key}" {if isset($_POST['translate'][$index]) && $key == $_POST['translate'][$index]}selected="selected"{/if}>{$label}</option>
+										<option value="{$key}" {if $csv_selected[$index] == $key}selected="selected"{/if}>{$label}</option>
 									{/foreach}
 								</select>
 							</td>

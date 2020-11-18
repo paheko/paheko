@@ -71,11 +71,31 @@ elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' =
 	}
 }
 
-$csv_first_line = !empty($csv_file) ? reset($csv_file) : null;
+$csv_first_line = null;
+$csv_selected = [];
+
+if ($csv_file) {
+	$csv_first_line = reset($csv_file);
+	$csv_selected = [];
+
+	foreach ($csv_first_line as $index => $label) {
+		$label = trim($label);
+
+		if (isset($_POST['translate'][$index])) {
+			$csv_selected[$index] = $_POST['translate'][$index];
+		}
+		elseif (false !== ($pos = array_search($label, Transactions::POSSIBLE_CSV_COLUMNS, true))) {
+			$csv_selected[$index] = $pos;
+		}
+		else {
+			$csv_selected[$index] = null;
+		}
+	}
+}
 
 $tpl->assign('columns', implode(', ', array_intersect_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));
 $tpl->assign('other_columns', implode(', ', array_diff_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));
 $tpl->assign('possible_columns', Transactions::POSSIBLE_CSV_COLUMNS);
-$tpl->assign(compact('csv_file', 'year', 'csv_first_line'));
+$tpl->assign(compact('csv_file', 'year', 'csv_first_line', 'csv_selected'));
 
 $tpl->display('acc/years/import.tpl');
