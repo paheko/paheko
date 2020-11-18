@@ -79,7 +79,10 @@ CREATE TABLE IF NOT EXISTS services_users
 
 CREATE UNIQUE INDEX IF NOT EXISTS su_unique ON services_users (id_user, id_service, date);
 
-CREATE INDEX IF NOT EXISTS su_expiry ON services_users (id_service, expiry_date);
+CREATE INDEX IF NOT EXISTS su_service ON services_users (id_service);
+CREATE INDEX IF NOT EXISTS su_fee ON services_users (id_fee);
+CREATE INDEX IF NOT EXISTS su_paid ON services_users (paid);
+CREATE INDEX IF NOT EXISTS su_expiry ON services_users (expiry_date);
 
 CREATE TABLE IF NOT EXISTS services_reminders
 -- Rappels de devoir renouveller une cotisation
@@ -104,6 +107,11 @@ CREATE TABLE IF NOT EXISTS services_reminders_sent
 
     date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS srs_index ON services_reminders_sent (id_user, id_service, id_reminder, date);
+
+CREATE INDEX IF NOT EXISTS srs_reminder ON services_reminders_sent (id_reminder);
+CREATE INDEX IF NOT EXISTS srs_user ON services_reminders_sent (id_user);
 
 --
 -- WIKI
@@ -207,6 +215,8 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
+CREATE INDEX IF NOT EXISTS acc_accounts_type ON acc_accounts (type);
+CREATE INDEX IF NOT EXISTS acc_accounts_position ON acc_accounts (position);
 
 CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
@@ -222,6 +232,8 @@ CREATE TABLE IF NOT EXISTS acc_years
 
     id_chart INTEGER NOT NULL REFERENCES acc_charts (id)
 );
+
+CREATE INDEX IF NOT EXISTS acc_years_closed ON acc_years (closed);
 
 CREATE TABLE IF NOT EXISTS acc_transactions
 -- Opérations comptables
@@ -249,6 +261,9 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
+CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
+CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type);
+CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
 -- Lignes d'écritures d'une opération
@@ -273,6 +288,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
 );
 
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_analytical ON acc_transactions_lines (id_analytical);
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_users
 -- Liaison des écritures et des membres
@@ -283,6 +300,8 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 
     PRIMARY KEY (id_user, id_transaction)
 );
+
+CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_users (id_service_user);
 
 CREATE TABLE IF NOT EXISTS plugins
 (
