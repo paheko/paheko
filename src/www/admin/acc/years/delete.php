@@ -17,18 +17,11 @@ if ($year->closed) {
 	throw new UserException('Impossible de supprimer un exercice clôturé.');
 }
 
-if (f('delete') && $form->check('acc_years_delete_' . $year->id())) {
-	try
-	{
-		$year->delete();
-		Utils::redirect(ADMIN_URL . 'acc/years/');
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+$form->runIf(f('delete') && f('confirm_delete'), function () use ($year) {
+	$year->delete();
+}, 'acc_years_delete_' . $year->id(), ADMIN_URL . 'acc/years/');
 
+$tpl->assign('nb_transactions', $year->countTransactions());
 $tpl->assign('year', $year);
 
 $tpl->display('acc/years/delete.tpl');

@@ -17,6 +17,11 @@
 			{$info}
 		</p>
 		{/if}
+		{if isset($confirm)}
+		<p>
+			{input type="checkbox" name="confirm_delete" value=1 label=$confirm}
+		</p>
+		{/if}
 	</fieldset>
 
 	<p class="submit">
