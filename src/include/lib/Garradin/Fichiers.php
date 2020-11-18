@@ -706,6 +706,7 @@ class Fichiers
 	static public function deleteUnlinkedFiles()
 	{
 		static $all = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+		$id_background = Config::getInstance()->get('image_fond');
 
 		$list = DB::getInstance()->iterate(sprintf('SELECT f.id, f.id_contenu FROM fichiers f
 			LEFT JOIN fichiers_%s a ON a.fichier = f.id
@@ -717,6 +718,10 @@ class Fichiers
 			self::LIEN_COMPTA));
 
 		foreach ($list as $file) {
+			if ($file->id == $id_background) { // FIXME: want to use something cleaner here!
+				continue;
+			}
+
 			$f = new Fichiers($file->id, (array) $file);
 			$f->remove();
 		}
