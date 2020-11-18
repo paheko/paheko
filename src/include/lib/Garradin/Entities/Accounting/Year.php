@@ -3,8 +3,9 @@
 namespace Garradin\Entities\Accounting;
 
 use KD2\DB\EntityManager;
-use Garradin\Entity;
 use Garradin\DB;
+use Garradin\Entity;
+use Garradin\Fichiers;
 use Garradin\UserException;
 use Garradin\Accounting\Accounts;
 
@@ -71,6 +72,9 @@ class Year extends Entity
 	{
 		// Manual delete of transactions, as there is a voluntary safeguard in SQL: no cascade
 		DB::getInstance()->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
+
+		// Clean up files
+		Fichiers::deleteUnlinkedFiles();
 
 		return parent::delete();
 	}
