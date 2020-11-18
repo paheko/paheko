@@ -353,24 +353,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS fichiers_hash ON fichiers_contenu (hash);
 CREATE TABLE IF NOT EXISTS fichiers_membres
 -- Associations entre fichiers et membres (photo de profil par exemple)
 (
-    fichier INTEGER NOT NULL REFERENCES fichiers (id),
-    id INTEGER NOT NULL REFERENCES membres (id),
+    fichier INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
+    id INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     PRIMARY KEY(fichier, id)
 );
 
 CREATE TABLE IF NOT EXISTS fichiers_wiki_pages
 -- Associations entre fichiers et pages du wiki
 (
-    fichier INTEGER NOT NULL REFERENCES fichiers (id),
-    id INTEGER NOT NULL REFERENCES wiki_pages (id),
+    fichier INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
+    id INTEGER NOT NULL REFERENCES wiki_pages (id) ON DELETE CASCADE,
     PRIMARY KEY(fichier, id)
 );
 
 CREATE TABLE IF NOT EXISTS fichiers_acc_transactions
 -- Associations entre fichiers et journal de compta (pièce comptable par exemple)
 (
-    fichier INTEGER NOT NULL REFERENCES fichiers (id),
-    id INTEGER NOT NULL REFERENCES acc_transactions (id),
+    fichier INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
+    id INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
     PRIMARY KEY(fichier, id)
 );
 

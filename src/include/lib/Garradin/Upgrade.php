@@ -68,6 +68,13 @@ class Upgrade
 				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
 			}
 
+			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-beta6', '<'))
+			{
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-beta6_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
