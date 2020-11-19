@@ -37,8 +37,8 @@ class Transactions
 
 	static public function saveReconciled(\Generator $journal, ?array $checked)
 	{
-		if (!is_array($checked)) {
-			return;
+		if (null === $checked) {
+			$checked = [];
 		}
 
 		$db = DB::getInstance();
