@@ -128,8 +128,8 @@ class Utils
             return 0;
         }
 
-        if (!preg_match('/^(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
-            throw new UserException('Le format du montant est invalide. Format accepté, exemple : 142,02');
+        if (!preg_match('/^-?(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
+            throw new UserException(sprintf('Le format du montant est invalide : %s. Format accepté, exemple : 142,02', $value));
         }
 
         $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
