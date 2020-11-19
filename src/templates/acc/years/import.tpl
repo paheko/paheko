@@ -19,37 +19,7 @@
 
 	{if $csv_file}
 
-	<fieldset>
-		<legend>Importer depuis un fichier CSV générique</legend>
-		<p class="help">{$csv_file|count} lignes trouvées dans le fichier</p>
-		<dl>
-			<dt><label><input type="checkbox" name="skip_first_line" value="1" checked="checked" /> Ne pas importer la première ligne</label></dt>
-			<dd class="help">Décocher cette case si la première ligne ne contient pas l'intitulé des colonnes, mais des données.</dd>
-			<dt><label>Correspondance des colonnes</label></dt>
-			<dd class="help">Indiquer la correspondance entre colonnes du CSV et données comptables.</dd>
-			<dd>
-				<table class="list auto">
-					<tbody>
-					{foreach from=$csv_first_line key="index" item="csv_field"}
-						<tr>
-							<th>{$csv_field}</th>
-							<td>
-								<select name="translate[{$index}]">
-									<option value="">-- Ne pas importer cette colonne</option>
-									{foreach from=$possible_columns item="label" key="key"}
-										<option value="{$key}" {if $csv_selected[$index] == $key}selected="selected"{/if}>{$label}</option>
-									{/foreach}
-								</select>
-							</td>
-						</tr>
-					{/foreach}
-					</tbody>
-				</table>
-			</dd>
-		</dl>
-	</fieldset>
-
-	<input type="hidden" name="csv_encoded" value="{$csv_file|escape:'json'|escape}" />
+		{include file="common/_csv_match_columns.tpl"}
 
 	{else}
 
@@ -59,17 +29,7 @@
 			<dt><label for="f_type_garradin">Format de fichier</label></dt>
 			{input type="radio" name="type" value="garradin" label="Journal général au format CSV Garradin" default="garradin"}
 			{input type="radio" name="type" value="csv" label="Journal au format CSV libre"}
-			<dd class="help">
-				Règles à suivre pour créer le fichier CSV&nbsp;:
-				<ul>
-					<li>Il est recommandé d'utiliser LibreOffice pour créer le fichier CSV</li>
-					<li>Le fichier doit être en UTF-8</li>
-					<li>Le séparateur doit être le point-virgule ou la virgule</li>
-					<li>Cocher l'option <em>"Mettre en guillemets toutes les cellules du texte"</em></li>
-					<li>Le fichier doit comporter les colonnes suivantes : <em>{$columns}</em></li>
-					<li>Le fichier peut également comporter les colonnes suivantes : <em>{$other_columns}</em></li>
-				</ul>
-			</dd>
+			{include file="common/_csv_help.tpl"}
 			{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
 			<dd class="help block">
 				- Les lignes comportant un numéro d'écriture mettront à jour les écritures existantes correspondant à ces numéros (sauf si celles-ci ont été validées), alors que les lignes sans numéro créeront de nouvelles écritures.<br />

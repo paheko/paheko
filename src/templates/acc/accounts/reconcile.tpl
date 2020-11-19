@@ -2,6 +2,13 @@
 
 {include file="acc/_year_select.tpl"}
 
+<nav class="tabs">
+	<ul>
+		<li class="current"><a href="{$admin_url}acc/accounts/reconcile.php?id={$account.id}">Rapprochement manuel</a></li>
+		<li><a href="{$admin_url}acc/accounts/reconcile_assist.php?id={$account.id}">Rapprochement assisté</a></li>
+	</ul>
+</nav>
+
 <form method="get" action="{$self_url_no_qs}">
 	{if $prev || $next}
 	<fieldset class="shortFormRight">

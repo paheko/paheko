@@ -140,3 +140,7 @@ thead .cur.desc .icn.dn, thead .cur.asc .icn.up {
 table.list .actions {
     text-align: right;
 }
+
+table.list .separator {
+    border-left: 2px dashed #999;
+}

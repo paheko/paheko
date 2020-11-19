@@ -18,8 +18,8 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
-$start = null;
-$end = null;
+$start = new \DateTime('first day of this month');
+$end = new \DateTime('last day of this month');
 
 if (null !== qg('start') && null !== qg('end'))
 {
@@ -27,18 +27,8 @@ if (null !== qg('start') && null !== qg('end'))
 	$end = \DateTime::createFromFormat('!d/m/Y', qg('end'));
 
 	if (!$start || !$end) {
-		$start = \DateTime::createFromFormat('!Y-m-d', qg('start'));
-		$end = \DateTime::createFromFormat('!Y-m-d', qg('end'));
-	}
-
-	if (!$start || !$end) {
 		$form->addError('La date donnée est invalide.');
 	}
-}
-
-if (!$start || !$end) {
-	$start = new \DateTime('first day of this month');
-	$end = new \DateTime('last day of this month');
 }
 
 if ($start < $current_year->start_date || $start > $current_year->end_date
@@ -51,26 +41,20 @@ if ($start < $current_year->start_date || $start > $current_year->end_date
 $journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end);
 
 // Enregistrement des cases cochées
-if ((f('save') || f('save_next')) && $form->check('acc_reconcile_' . $account->id))
-{
-	try {
-		Transactions::saveReconciled($journal, f('reconcile'));
+$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $end, $account) {
+	Transactions::saveReconciled($journal, f('reconcile'));
 
-		if (f('save')) {
-			Utils::redirect(Utils::getSelfURL());
-		}
-		else {
-			$start->modify('+1 month');
-			$end->modify('+1 month');
-			$url = sprintf('%sacc/accounts/reconcile.php?id=%s&debut=%s&fin=%s&sauf=%s',
-				ADMIN_URL, $account->id(), $start->format('Y-m-d'), $end->format('Y-m-d'), (int) qg('sauf'));
-			Utils::redirect($url);
-		}
+	if (f('save')) {
+		Utils::redirect(Utils::getSelfURL());
 	}
-	catch (UserException $e) {
-		$form->addError($e->getMessage());
+	else {
+		$start->modify('+1 month');
+		$end->modify('+1 month');
+		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&debut=%s&fin=%s&sauf=%s',
+			ADMIN_URL, $account->id(), $start->format('Y-m-d'), $end->format('Y-m-d'), (int) qg('sauf'));
+		Utils::redirect($url);
 	}
-}
+}, 'acc_reconcile_' . $account->id());
 
 $prev = clone $start;
 $next = clone $start;
@@ -90,14 +74,14 @@ $self_uri = Utils::getSelfURI(false);
 if (null !== $prev) {
 	$prev = [
 		'date' => $prev,
-		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $prev->format('Y-m-01'), $prev->format('Y-m-t'), qg('sauf')),
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $prev->format('01/m/Y'), $prev->format('t/m/Y'), qg('sauf')),
 	];
 }
 
 if (null !== $next) {
 	$next = [
 		'date' => $next,
-		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $next->format('Y-m-01'), $next->format('Y-m-t'), qg('sauf')),
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $next->format('01/m/Y'), $next->format('t/m/Y'), qg('sauf')),
 	];
 }
 
