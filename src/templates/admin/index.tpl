@@ -23,7 +23,7 @@
     {/if}
     {if !empty($config.site_asso)}
     <p>
-        Web : <a href="{$config.site_asso}">{$config.site_asso}</a>
+        Web : <a href="{$config.site_asso}" target="_blank">{$config.site_asso}</a>
     </p>
     {/if}
 </aside>
