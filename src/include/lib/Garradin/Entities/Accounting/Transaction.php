@@ -317,6 +317,10 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
+		if (empty($source['amount'])) {
+			throw new UserException('Montant non précisé');
+		}
+
 		$this->type = self::TYPE_TRANSFER;
 		$amount = $source['amount'];
 
@@ -341,10 +345,6 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		$input = function (string $key) use ($source) {
-			return isset($source[$key]) ? $source[$key] : null;
-		};
-
 		if (!isset($source['type'])) {
 			throw new ValidationException('Type d\'écriture inconnu');
 		}
@@ -354,6 +354,10 @@ class Transaction extends Entity
 		$this->importForm($source);
 
 		if (self::TYPE_PAYOFF == $type) {
+			if (empty($source['amount'])) {
+				throw new UserException('Montant non précisé');
+			}
+
 			$amount = $source['amount'];
 
 			$key = 'account_payoff';
@@ -400,6 +404,10 @@ class Transaction extends Entity
 
 			if ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT) {
 				$this->status = self::STATUS_WAITING;
+			}
+
+			if (empty($source['amount'])) {
+				throw new UserException('Montant non précisé');
 			}
 
 			$amount = $source['amount'];
