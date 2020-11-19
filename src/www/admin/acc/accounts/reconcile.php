@@ -23,12 +23,12 @@ $end = null;
 
 if (null !== qg('start') && null !== qg('end'))
 {
-	$start = \DateTime::createFromFormat('d/m/Y', qg('start'));
-	$end = \DateTime::createFromFormat('d/m/Y', qg('end'));
+	$start = \DateTime::createFromFormat('!d/m/Y', qg('start'));
+	$end = \DateTime::createFromFormat('!d/m/Y', qg('end'));
 
 	if (!$start || !$end) {
-		$start = \DateTime::createFromFormat('Y-m-d', qg('start'));
-		$end = \DateTime::createFromFormat('Y-m-d', qg('end'));
+		$start = \DateTime::createFromFormat('!Y-m-d', qg('start'));
+		$end = \DateTime::createFromFormat('!Y-m-d', qg('end'));
 	}
 
 	if (!$start || !$end) {
