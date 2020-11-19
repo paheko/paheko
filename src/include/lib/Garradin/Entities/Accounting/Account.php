@@ -4,6 +4,7 @@ namespace Garradin\Entities\Accounting;
 
 use DateTimeInterface;
 use Garradin\Config;
+use Garradin\CSV_Custom;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
@@ -250,6 +251,87 @@ class Account extends Entity
 		}
 
 		yield (object) ['sum' => $sum, 'date' => $end_date];
+	}
+
+	public function mergeReconcileJournalAndCSV(\Generator $journal, CSV_Custom $csv)
+	{
+		$lines = [];
+
+		$csv = iterator_to_array($csv->iterate());
+		$journal = iterator_to_array($journal);
+		$i = 0;
+		$sum = 0;
+
+		foreach ($csv as $k => &$line) {
+			try {
+				$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
+				$amount = Utils::moneyToInteger($line->amount);
+
+				if (!$date) {
+					throw new UserException('Date invalide : ' . $line->date);
+				}
+
+				$line->date = $date;
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf('Ligne %d : %s', $k, $e->getMessage()));
+			}
+
+			$line->debit = null;
+			$line->credit = null;
+
+			if (substr(trim($line->amount), 0, 1) == '-') {
+				$line->debit = $amount;
+			}
+			else {
+				$line->credit = $amount;
+			}
+		}
+		unset($line);
+
+		foreach ($journal as $j) {
+			$id = $j->date->format('Ymd') . '.' . $i++;
+
+			$row = (object) ['csv' => null, 'journal' => $j];
+
+			if (isset($j->debit)) {
+				foreach ($csv as &$line) {
+					if (!isset($line->date)) {
+						 continue;
+					}
+					if ($j->date->format('Ymd') == $line->date->format('Ymd')
+						&& ($j->credit == $line->debit || $j->debit == $line->credit)) {
+						$row->csv = $line;
+						$line = null;
+						break;
+					}
+				}
+			}
+
+			$lines[$id] = $row;
+		}
+
+		unset($j);
+
+		foreach ($csv as $line) {
+			if (null == $line) {
+				continue;
+			}
+
+			$id = $line->date->format('Ymd') . '.' . $i++;
+			$lines[$id] = (object) ['csv' => $line, 'journal' => null];
+		}
+
+		ksort($lines);
+
+		foreach ($lines as &$line) {
+			if (isset($line->csv)) {
+				$sum += $line->csv->credit - $line->csv->debit;
+				$line->csv->running_sum = $sum;
+			}
+		}
+
+		return $lines;
 	}
 
 	public function getDepositJournal(int $year_id, array $checked = []): \Generator
