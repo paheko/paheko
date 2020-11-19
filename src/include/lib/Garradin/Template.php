@@ -198,13 +198,23 @@ class Template extends \KD2\Smartyer
 	protected function widgetLinkButton(array $params): string
 	{
 		$href = $params['href'];
+		$shape = $params['shape'];
+		$label = $params['label'];
 
 		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
 		if (substr($href, 0, 1) == '!') {
 			$href = ADMIN_URL . substr($params['href'], 1);
 		}
 
-		return sprintf('<a class="icn-btn" data-icon="%s" href="%s">%s</a>', Utils::iconUnicode($params['shape']), $this->escape($href), $this->escape($params['label']));
+		unset($params['href'], $params['shape'], $params['label']);
+
+		array_walk($params, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $this->escape($v));
+		});
+
+		$params = implode(' ', $params);
+
+		return sprintf('<a class="icn-btn" data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
 	}
 
 	protected function formInput(array $params)
