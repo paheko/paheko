@@ -33,7 +33,7 @@ $csv->setColumns([
 $csv->setMandatoryColumns(['label', 'date', 'amount']);
 
 $form->runIf('cancel', function () use ($csv) {
-	$csv->cancel();
+	$csv->clear();
 }, $csrf_key, Utils::getSelfURL());
 
 $form->runIf(f('upload') && isset($_FILES['file']['name']), function () use ($csv) {
@@ -82,7 +82,7 @@ if ($start && $end) {
 // Enregistrement des cases cochées
 $form->runIf('save', function () use ($journal, $csv) {
 	Transactions::saveReconciled($journal, f('reconcile'));
-	$csv->cancel();
+	$csv->clear();
 }, $csrf_key, Utils::getSelfURL());
 
 $lines = null;

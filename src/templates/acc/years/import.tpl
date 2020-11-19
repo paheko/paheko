@@ -17,11 +17,17 @@
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 
-	{if $csv_file}
+{if $csv->loaded()}
 
 		{include file="common/_csv_match_columns.tpl"}
 
-	{else}
+		<p class="submit">
+			{csrf_field key=$csrf_key}
+			{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}
+			{button type="submit" name="assign" label="Continuer" class="main" shape="right"}
+		</p>
+
+{else}
 
 	<fieldset>
 		<legend>Import d'écritures</legend>
@@ -38,16 +44,12 @@
 		</dl>
 	</fieldset>
 
-	{/if}
-
 	<p class="submit">
-		{csrf_field key="acc_years_import_%d"|args:$year.id}
-		{if $csv_file}
-			{button type="submit" name="cancel" label="Annuler" shape="left"}
-		{/if}
-		{button type="submit" name="import" label="Importer" shape="upload" class="main"}
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="load" label="Importer" shape="upload" class="main"}
 	</p>
 
+{/if}
 
 </form>
 

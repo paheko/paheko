@@ -7,6 +7,7 @@ use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
 use Garradin\CSV;
+use Garradin\CSV_Custom;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
@@ -250,7 +251,7 @@ class Transactions
 		$db->commit();
 	}
 
-	static public function importArray(Year $year, array $table, array $translation_table, int $skip_lines, int $user_id)
+	static public function importCustom(Year $year, CSV_Custom $csv, int $user_id)
 	{
 		if ($year->closed) {
 			throw new \InvalidArgumentException('Closed year');
@@ -259,18 +260,11 @@ class Transactions
 		$db = DB::getInstance();
 		$db->begin();
 
-		if ($skip_lines)
-		{
-			$table = array_slice($table, $skip_lines, null, true);
-		}
-
 		$accounts = $year->accounts();
 		$l = 0;
 
 		try {
-			foreach ($table as $l => $row) {
-				$row = (object) array_combine($translation_table, $row);
-
+			foreach ($csv->iterate() as $l => $row) {
 				if (!isset($row->credit_account, $row->debit_account, $row->amount)) {
 					throw new UserException('Une des colonnes compte de crédit, compte de débit ou montant est manquante.');
 				}
@@ -302,11 +296,11 @@ class Transactions
 				$debit_account = $accounts->getIdFromCode($row->debit_account);
 
 				if (!$credit_account) {
-					throw new UserException('Compte inconnu dans le plan comptable : ' . $row->credit_account);
+					throw new UserException(sprintf('Compte de crédit "%s" inconnu dans le plan comptable', $row->credit_account));
 				}
 
 				if (!$debit_account) {
-					throw new UserException('Compte inconnu dans le plan comptable : ' . $row->debit_account);
+					throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
 				}
 
 				$line = new Line;
