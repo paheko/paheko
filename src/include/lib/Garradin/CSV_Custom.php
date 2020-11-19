@@ -142,7 +142,7 @@ class CSV_Custom
 		$this->session->set($this->key . '_translation', $this->translation);
 	}
 
-	public function cancel(): void
+	public function clear(): void
 	{
 		$this->session->set($this->key, null);
 		$this->session->set($this->key . '_translation', null);

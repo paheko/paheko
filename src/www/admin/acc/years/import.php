@@ -34,68 +34,39 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
+$csv = new CSV_Custom($session, 'acc_import_year');
+$csv->setColumns(Transactions::POSSIBLE_CSV_COLUMNS);
+$csv->setMandatoryColumns(Transactions::MANDATORY_CSV_COLUMNS);
+
 if (f('cancel')) {
-	$session->set('acc_import_csv', null);
+	$csv->clear();
+	Utils::redirect(Utils::getSelfURL());
 }
 
-$csv_file = $session->get('acc_import_csv');
+$csrf_key = 'acc_years_import_' . $year->id();
 
-if (f('import') && $csv_file && $form->check('acc_years_import_' . $year->id(), ['translate' => 'array|required']))
-{
-	try {
-		Transactions::importArray($year, $csv_file, f('translate'), (int) f('skip_first_line'), $user->id);
-		$session->set('acc_import_csv', null);
+$form->runIf(f('assign') && $csv->loaded(), function () use ($csv, $year, $user) {
+	$csv->skip(f('skip_first_line'));
+	$csv->setTranslationTable(f('translation_table'));
+
+	Transactions::importCustom($year, $csv, $user->id);
+	$csv->clear();
+}, $csrf_key, ADMIN_URL . 'acc/years/');
+
+$form->runIf('load', function () use ($csv, $year, $user) {
+	if (f('type') == 'garradin') {
+		Transactions::importCSV($year, $_FILES['file'], $user->id);
 		Utils::redirect(ADMIN_URL . 'acc/years/');
 	}
-	catch (UserException $e) {
-		$form->addError($e->getMessage());
+	elseif (isset($_FILES['file']['tmp_name'])) {
+		$csv->load($_FILES['file']);
+		Utils::redirect(Utils::getSelfURI());
 	}
-}
-elseif (f('import') && $form->check('acc_years_import_' . $year->id(), ['file' => 'file|required']))
-{
-	try {
-		if (f('type') === 'csv') {
-			$csv = CSV::readAsArray($_FILES['file']['tmp_name']);
-			$session->set('acc_import_csv', $csv);
-			Utils::redirect(Utils::getSelfURI());
-		}
-		else {
-			Transactions::importCSV($year, $_FILES['file'], $user->id);
-		}
-
-		Utils::redirect(ADMIN_URL . 'acc/years/');
+	else {
+		throw new UserException('Fichier invalide');
 	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+}, $csrf_key, Utils::getSelfURI());
 
-$csv_first_line = null;
-$csv_selected = [];
-
-if ($csv_file) {
-	$csv_first_line = reset($csv_file);
-	$csv_selected = [];
-
-	foreach ($csv_first_line as $index => $label) {
-		$label = trim($label);
-
-		if (isset($_POST['translate'][$index])) {
-			$csv_selected[$index] = $_POST['translate'][$index];
-		}
-		elseif (false !== ($pos = array_search($label, Transactions::POSSIBLE_CSV_COLUMNS, true))) {
-			$csv_selected[$index] = $pos;
-		}
-		else {
-			$csv_selected[$index] = null;
-		}
-	}
-}
-
-$tpl->assign('columns', implode(', ', array_intersect_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));
-$tpl->assign('other_columns', implode(', ', array_diff_key(Transactions::POSSIBLE_CSV_COLUMNS, array_flip(Transactions::MANDATORY_CSV_COLUMNS))));
-$tpl->assign('possible_columns', Transactions::POSSIBLE_CSV_COLUMNS);
-$tpl->assign(compact('csv_file', 'year', 'csv_first_line', 'csv_selected'));
+$tpl->assign(compact('csv', 'year', 'csrf_key'));
 
 $tpl->display('acc/years/import.tpl');

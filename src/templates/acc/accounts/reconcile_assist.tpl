@@ -32,6 +32,7 @@
 		{include file="common/_csv_match_columns.tpl"}
 		<p class="submit">
 			{csrf_field key=$csrf_key}
+			{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}
 			{button type="submit" name="assign" label="Continuer" class="main" shape="right"}
 		</p>
 	{else}
@@ -68,34 +69,34 @@
 		<table class="list">
 			<thead>
 				<tr>
-					<th colspan="7">Journal du compte (compta)</th>
-					<td class="separator">Correspondance</td>
-					<th colspan="5" class="separator">Extrait de compte (banque)</th>
+					<th colspan="6">Journal du compte (compta)</th>
+					<td class="separator"></td>
+					<th colspan="4" class="separator">Extrait de compte (banque)</th>
 				</tr>
 				<tr>
 					<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 					<td></td>
 					<td>Date</td>
-					<td class="money">Débit</td>
-					<td class="money">Crédit</td>
+					<td class="money">Mouvement</td>
 					<td class="money">Solde cumulé</td>
-					<th>Libellé</th>
-					<td></td>
-					<td class="separator">Date</td>
-					<th>Libellé</th>
-					<td class="money">Débit</td>
-					<td class="money">Crédit</td>
+					<th style="text-align: right">Libellé</th>
+					<td class="separator"></td>
+					<th class="separator">Libellé</th>
+					<td class="money">Mouvement</td>
 					<td class="money">Solde cumulé</td>
+					<td>Date</td>
 				</tr>
 			</thead>
 			<tbody>
-				{foreach from=$lines item="line"}
+				{foreach from=$lines key="line_id" item="line"}
 				{if isset($line->journal->sum)}
 				<tr>
-					<td colspan="5"></td>
-					<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>
-					<th>Solde au {$line.date|date_fr:'d/m/Y'}</th>
-					<td colspan="2"></td>
+					<td colspan="4"></td>
+					<td class="money">{if $line.journal.sum > 0}-{/if}{$line.journal.sum|abs|raw|html_money:false}</td>
+					<th style="text-align: right">Solde au {$line.journal.date|date_fr:'d/m/Y'}</th>
+					<td class="separator"></td>
+					<td class="separator"></td>
+					<td colspan="3"></td>
 				</tr>
 				{else}
 				<tr>
@@ -105,12 +106,25 @@
 						</td>
 						<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.journal.id}">#{$line.journal.id}</a></td>
 						<td>{$line.journal.date|date_short}</td>
-						<td class="money">{$line.journal.credit|raw|html_money}</td>
-						<td class="money">{$line.journal.debit|raw|html_money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
 						<td class="money">{if $line.journal.running_sum > 0}-{/if}{$line.journal.running_sum|abs|raw|html_money:false}</td>
-						<th>{$line.journal.label}</th>
+						<td class="money">
+							{if $line.journal.credit}
+								{* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
+								-{$line.journal.credit|raw|html_money}
+							{else}
+								{$line.journal.debit|raw|html_money}
+							{/if}
+						</td>
+						<th style="text-align: right">{$line.journal.label}</th>
 					{else}
-						<td colspan="7"></td>
+						<td colspan="5"></td>
+						<td style="text-align: right">
+							{if $line.add}
+							{* FIXME later add ability to pre-fill multi-line transactions in new.php
+								{linkbutton label="Créer cette écriture" target="_blank" href="%s&create=%s"|args:$self_url,$line_id shape="plus"}
+							*}
+							{/if}
+						</td>
 					{/if}
 						<td class="separator">
 						{if $line->journal && $line->csv}
@@ -120,13 +134,14 @@
 						{/if}
 						</td>
 					{if isset($line->csv)}
-						<td class="separator">{$line.csv.date|date_short}</td>
-						<th>{$line.csv.label}</th>
-						<td class="money">{$line.csv.debit|raw|html_money}</td>
-						<td class="money">{$line.csv.credit|raw|html_money}</td>
+						<th class="separator">{$line.csv.label}</th>
+						<td class="money">
+							{$line.csv.amount|raw|html_money}
+						</td>
 						<td class="money">{$line.csv.running_sum|raw|html_money}</td>
+						<td>{$line.csv.date|date_short}</td>
 					{else}
-						<td colspan="5" class="separator"></td>
+						<td colspan="4" class="separator"></td>
 					{/if}
 				</tr>
 				{/if}

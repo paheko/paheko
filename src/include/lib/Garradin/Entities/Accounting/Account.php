@@ -265,7 +265,7 @@ class Account extends Entity
 		foreach ($csv as $k => &$line) {
 			try {
 				$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
-				$amount = Utils::moneyToInteger($line->amount);
+				$line->amount = ($line->amount < 0 ? -1 : 1) * Utils::moneyToInteger($line->amount);
 
 				if (!$date) {
 					throw new UserException('Date invalide : ' . $line->date);
@@ -275,16 +275,6 @@ class Account extends Entity
 			}
 			catch (UserException $e) {
 				throw new UserException(sprintf('Ligne %d : %s', $k, $e->getMessage()));
-			}
-
-			$line->debit = null;
-			$line->credit = null;
-
-			if (substr(trim($line->amount), 0, 1) == '-') {
-				$line->debit = $amount;
-			}
-			else {
-				$line->credit = $amount;
 			}
 		}
 		unset($line);
@@ -300,7 +290,7 @@ class Account extends Entity
 						 continue;
 					}
 					if ($j->date->format('Ymd') == $line->date->format('Ymd')
-						&& ($j->credit == $line->debit || $j->debit == $line->credit)) {
+						&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))) {
 						$row->csv = $line;
 						$line = null;
 						break;
@@ -318,16 +308,32 @@ class Account extends Entity
 				continue;
 			}
 
-			$id = $line->date->format('Ymd') . '.' . $i++;
+			$id = $line->date->format('Ymd') . '.' . ($i++);
 			$lines[$id] = (object) ['csv' => $line, 'journal' => null];
 		}
 
 		ksort($lines);
+		$prev = null;
 
 		foreach ($lines as &$line) {
+			$line->add = false;
+
 			if (isset($line->csv)) {
-				$sum += $line->csv->credit - $line->csv->debit;
+				$sum += $line->csv->amount;
 				$line->csv->running_sum = $sum;
+
+				if ($prev && ($prev->date->format('Ymd') != $line->csv->date->format('Ymd') || $prev->label != $line->csv->label)) {
+					$prev = null;
+				}
+			}
+
+			if (isset($line->csv) && isset($line->journal)) {
+				$prev = null;
+			}
+
+			if (isset($line->csv) && !isset($line->journal) && !$prev) {
+				$line->add = true;
+				$prev = $line->csv;
 			}
 		}
 
