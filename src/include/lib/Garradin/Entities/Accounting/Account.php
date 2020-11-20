@@ -219,19 +219,21 @@ class Account extends Entity
 		return in_array($type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY]);
 	}
 
-	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date)
+	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled)
 	{
 		if ($end_date < $start_date) {
 			throw new ValidationException('La date de début ne peut être avant la date de fin.');
 		}
 
+		$condition = $only_non_reconciled ? ' AND l.reconciled = 0' : '';
+
 		$db = DB::getInstance();
 		$sql = 'SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			WHERE l.id_account = ? AND t.id_year = ? AND t.date >= ? AND t.date <= ?
+			WHERE l.id_account = ? AND t.id_year = ? AND t.date >= ? AND t.date <= ? %s
 			ORDER BY t.date, t.id;';
-		$rows = $db->iterate($sql, $this->id(), $year_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
+		$rows = $db->iterate(sprintf($sql, $condition), $this->id(), $year_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
 
 		$sum = $this->getSumAtDate($year_id, $start_date);
 
@@ -250,7 +252,9 @@ class Account extends Entity
 			yield $row;
 		}
 
-		yield (object) ['sum' => $sum, 'date' => $end_date];
+		if (!$only_non_reconciled) {
+			yield (object) ['sum' => $sum, 'date' => $end_date];
+		}
 	}
 
 	public function mergeReconcileJournalAndCSV(\Generator $journal, CSV_Custom $csv)

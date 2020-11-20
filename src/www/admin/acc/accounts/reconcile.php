@@ -20,6 +20,7 @@ if (!$account) {
 
 $start = new \DateTime('first day of this month');
 $end = new \DateTime('last day of this month');
+$only = (bool) qg('only');
 
 if (null !== qg('start') && null !== qg('end'))
 {
@@ -38,10 +39,10 @@ if ($start < $current_year->start_date || $start > $current_year->end_date
 	$end->modify('last day of this month');
 }
 
-$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end);
+$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end, $only);
 
 // Enregistrement des cases cochées
-$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $end, $account) {
+$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $end, $account, $only) {
 	Transactions::saveReconciled($journal, f('reconcile'));
 
 	if (f('save')) {
@@ -50,8 +51,8 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $en
 	else {
 		$start->modify('+1 month');
 		$end->modify('+1 month');
-		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&debut=%s&fin=%s&sauf=%s',
-			ADMIN_URL, $account->id(), $start->format('Y-m-d'), $end->format('Y-m-d'), (int) qg('sauf'));
+		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&start=%s&end=%s&only=%d',
+			ADMIN_URL, $account->id(), $start->format('Y-m-d'), $end->format('Y-m-d'), $only);
 		Utils::redirect($url);
 	}
 }, 'acc_reconcile_' . $account->id());
@@ -74,14 +75,14 @@ $self_uri = Utils::getSelfURI(false);
 if (null !== $prev) {
 	$prev = [
 		'date' => $prev,
-		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $prev->format('01/m/Y'), $prev->format('t/m/Y'), qg('sauf')),
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&only=%d', $account->id, $prev->format('01/m/Y'), $prev->format('t/m/Y'), $only),
 	];
 }
 
 if (null !== $next) {
 	$next = [
 		'date' => $next,
-		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&sauf=%d', $account->id, $next->format('01/m/Y'), $next->format('t/m/Y'), qg('sauf')),
+		'url' => sprintf($self_uri . '?id=%d&start=%s&end=%s&only=%d', $account->id, $next->format('01/m/Y'), $next->format('t/m/Y'), $only),
 	];
 }
 
@@ -91,7 +92,8 @@ $tpl->assign(compact(
 	'end',
 	'prev',
 	'next',
-	'journal'
+	'journal',
+	'only'
 ));
 
 $tpl->display('acc/accounts/reconcile.tpl');
