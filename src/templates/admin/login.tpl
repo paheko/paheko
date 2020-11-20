@@ -17,6 +17,11 @@
     </p>
 {/if}
 
+<p class="block error" style="display: none;" id="old_browser">
+    Le navigateur que vous utilisez n'est pas supporté. Des fonctionnalités peuvent ne pas fonctionner.<br />
+    Merci d'utiliser un navigateur web moderne comme <a href="https://www.getfirefox.com/" target="_blank">Firefox</a> ou <a href="https://vivaldi.com/fr/" target="_blank">Vivaldi</a>.
+</p>
+
 <form method="post" action="{$self_url}">
 
     <fieldset>
@@ -39,7 +44,7 @@
                     {/if}
                 {/if}
             </dd>
-            <dd><label><input type="checkbox" name="permanent" value="1" /> Rester connecté‑e</label></dd>
+            {input type="checkbox" name="permanent" value="1" label="Rester connecté‑e" help="recommandé seulement sur ordinateur personnel"}
         </dl>
     </fieldset>
 
@@ -54,8 +59,14 @@
 
 </form>
 
+{literal}
 <script type="text/javascript">
 g.enhancePasswordField($('#f_passe'));
+
+if (!!window.document.documentMode) {
+    document.getElementById('old_browser').style.display = 'block';
+}
 </script>
+{/literal}
 
 {include file="admin/_foot.tpl"}
