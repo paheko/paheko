@@ -219,7 +219,7 @@ class Account extends Entity
 		return in_array($type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY]);
 	}
 
-	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled)
+	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled = false)
 	{
 		if ($end_date < $start_date) {
 			throw new ValidationException('La date de début ne peut être avant la date de fin.');
