@@ -106,7 +106,6 @@
 						</td>
 						<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.journal.id}">#{$line.journal.id}</a></td>
 						<td>{$line.journal.date|date_short}</td>
-						<td class="money">{if $line.journal.running_sum > 0}-{/if}{$line.journal.running_sum|abs|raw|html_money:false}</td>
 						<td class="money">
 							{if $line.journal.credit}
 								{* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
@@ -115,6 +114,7 @@
 								{$line.journal.debit|raw|html_money}
 							{/if}
 						</td>
+						<td class="money">{if $line.journal.running_sum > 0}-{/if}{$line.journal.running_sum|abs|raw|html_money:false}</td>
 						<th style="text-align: right">{$line.journal.label}</th>
 					{else}
 						<td colspan="5"></td>
