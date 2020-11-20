@@ -51,10 +51,10 @@
         <legend>Options de sécurité</legend>
         <dl>
         {if $membre.secret_otp}
-            <dt><label><input type="checkbox" name="clear_otp" value="1" /> Désactiver l'authentification à double facteur TOTP</label></dt>
+            {input type="checkbox" name="clear_otp" value="1" label="Désactiver l'authentification à double facteur TOTP"}
         {/if}
         {if $membre.clef_pgp}
-            <dt><label><input type="checkbox" name="clear_pgp" value="1" /> Supprimer la clé PGP associée au membre</label></dt>
+            {input type="checkbox" name="clear_pgp" value="1" label="Supprimer la clé PGP associée au membre"}
         {/if}
         </dl>
     </fieldset>

@@ -11,7 +11,6 @@ if (f('confirm'))
     $form->check('edit_me_security', [
         'passe'       => 'confirmed|min:6',
         'passe_check' => 'required',
-        'code'        => 'min:6|max:6',
     ]);
 
     if (f('passe_check') && !$session->checkPassword(f('passe_check'), $user->passe))
