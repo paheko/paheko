@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Sélectionner un compte" body_id="popup" is_popup=true}
+{include file="admin/_head.tpl" title="Sélectionner un compte" body_id="popup" is_popup=true js=1}
 
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type. Pour afficher des comptes ici, les <a href="{$www_url}admin/acc/charts/accounts/all.php?id={$chart.id}" target="_blank">modifier dans le plan comptable</a> en sélectionnant le type de compte favori voulu.</td>
@@ -26,14 +26,22 @@
 
 {else}
 
-	<h2 class="ruler"><input type="text" placeholder="Recherche rapide" id="lookup" /></h2>
+	<h2 class="ruler">
+		<input type="text" placeholder="Recherche rapide" id="lookup" />
+		<label>{input type="checkbox" name="typed_only" value=1 default=1} N'afficher que les comptes favoris</label>
+	</h2>
 
 	<table class="accounts">
 		<tbody>
 		{foreach from=$accounts item="account"}
-			<tr class="account-level-{$account.code|strlen}">
+			<tr class="account-level-{$account.code|strlen} t{$account.type}">
 				<td>{$account.code}</td>
 				<th>{$account.label}</th>
+				<td>
+				{if $account.type}
+					{icon shape="star"} <?=Entities\Accounting\Account::TYPES_NAMES[$account->type]?>
+				{/if}
+				</td>
 				<td class="actions">
 					<button class="icn-btn" value="{$account.id}" data-label="{$account.code} — {$account.label}" data-icon="&rarr;">Sélectionner</button>
 				</td>
@@ -99,6 +107,15 @@ if (q) {
 	};
 
 	q.focus();
+}
+
+var o = document.getElementById('f_typed_only_1');
+
+if (o) {
+	o.onchange = () => {
+		g.toggle('.t0', !o.checked);
+	};
+	g.toggle('.t0', !o.checked);
 }
 </script>
 {/literal}
