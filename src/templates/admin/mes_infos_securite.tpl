@@ -98,12 +98,12 @@
             <dl>
                 <dt>Authentification à double facteur (TOTP)</dt>
             {if $membre.secret_otp}
-                <dd><label><input type="radio" name="otp" value="" checked="checked" /> <strong>Activée</strong></label></dd>
-                <dd><label><input type="radio" name="otp" value="generate" /> Régénérer une nouvelle clé secrète</label></dd>
-                <dd><label><input type="radio" name="otp" value="disable" /> Désactiver l'authentification à double facteur</label></dd>
+                {input type="radio" name="otp" value="" default="" label="Activée"}
+                {input type="radio" name="otp" value="generate" label="Re-générer une nouvelle clé secrète" help="Si la clé a été compromise ou perdue"}
+                {input type="radio" name="otp" value="disable" label="Désactiver l'authentification à double facteur"}
             {else}
                 <dd><em>Désactivée</em></dd>
-                <dd><label><input type="checkbox" name="otp" value="generate" /> Activer</label></dd>
+                {input type="checkbox" name="otp" value="generate" label="Activer"}
             {/if}
             </dl>
         </fieldset>
@@ -136,7 +136,7 @@
     <script type="text/javascript">
     {literal}
     g.script('scripts/password.js', () => {
-        initPasswordField('pw_suggest', 'f_passe', 'f_repasse');
+        initPasswordField('pw_suggest', 'f_passe', 'f_passe_confirmed');
     });
     {/literal}
     </script>
