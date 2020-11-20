@@ -33,14 +33,16 @@ class Fichiers
 	 * @param  integer $size Taille de la miniature désirée (pour les images)
 	 * @return string        URL du fichier
 	 */
-	static public function _getURL($id, $nom, $size = false)
+	static public function _getURL(int $id, string $nom, string $hash, $size = false): string
 	{
-		$url = WWW_URL . 'f/' . base_convert((int)$id, 10, 36) . '/' . $nom;
+		$url = sprintf('%sf/%s/%s?', WWW_URL, base_convert((int)$id, 10, 36), $nom);
 
 		if ($size)
 		{
-			$url .= '?' . self::_findThumbSize($size) . 'px';
+			$url .= self::_findThumbSize($size) . 'px&';
 		}
+
+		$url .= substr($hash, 0, 10);
 
 		return $url;
 	}
@@ -102,7 +104,7 @@ class Fichiers
 	 */
 	public function getURL($size = false)
 	{
-		return self::_getURL($this->id, $this->nom, $size);
+		return self::_getURL($this->id, $this->nom, $this->hash, $size);
 	}
 
 	/**
@@ -683,8 +685,8 @@ class Fichiers
 
 		foreach ($files as &$file)
 		{
-			$file->url = self::_getURL($file->id, $file->nom);
-			$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, 200) : false;
+			$file->url = self::_getURL($file->id, $file->nom, $file->hash);
+			$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, $file->hash, 200) : false;
 		}
 
 		return $files;
