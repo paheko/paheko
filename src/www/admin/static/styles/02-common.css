@@ -218,7 +218,6 @@ h2.ruler:after {
 .shortFormRight {
     width: 30em;
     float: right;
-    font-size: 80%;
     text-align: center;
     margin-left: 1em;
 }
