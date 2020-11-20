@@ -238,6 +238,7 @@ class Account extends Entity
 		$sum = $this->getSumAtDate($year_id, $start_date);
 
 		$start_sum = false;
+		$reconciled_sum = $sum;
 
 		foreach ($rows as $row) {
 			if (!$start_sum) {
@@ -249,11 +250,17 @@ class Account extends Entity
 			$sum += ($row->credit - $row->debit);
 			$row->running_sum = $sum;
 
+			if ($row->reconciled) {
+				$reconciled_sum += ($row->credit - $row->debit);
+			}
+
+			$row->reconciled_sum = $reconciled_sum;
+
 			yield $row;
 		}
 
 		if (!$only_non_reconciled) {
-			yield (object) ['sum' => $sum, 'date' => $end_date];
+			yield (object) ['sum' => $sum, 'reconciled_sum' => $reconciled_sum, 'date' => $end_date];
 		}
 	}
 
