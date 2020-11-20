@@ -194,7 +194,7 @@
 
 		reset_btn.onclick = () => {
 			$('#f_image_fond').dataset.source = $('#f_image_fond').dataset.default;
-			$('#f_image_fond').value = '0';
+			$('#f_image_fond').value = '';
 
 			var input = $('#f_couleur2');
 			if (input.getAttribute('placeholder') == input.value) {

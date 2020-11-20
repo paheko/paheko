@@ -33,7 +33,10 @@ if (f('save') && $form->check('config'))
         }
 
         if (trim(f('image_fond')) != '') {
-            $config->set('image_fond', f('image_fond') ?: null);
+            $config->set('image_fond', f('image_fond'));
+        }
+        elseif (!f('image_fond') && !$config->get('couleur1') && !$config->get('couleur2')) {
+            $config->set('image_fond', null);
         }
 
         $config->save();
