@@ -202,6 +202,10 @@ class Transactions
 						$transaction->id_year = $year->id();
 					}
 
+					if (!isset($types[$row->type])) {
+						throw new UserException(sprintf('le type "%s" est inconnu', $row->type));
+					}
+
 					$transaction->type = $types[$row->type];
 					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 

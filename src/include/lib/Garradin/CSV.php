@@ -251,7 +251,6 @@ class CSV
 
 			if (count($row) != count($columns))
 			{
-				$db->rollback();
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
 
