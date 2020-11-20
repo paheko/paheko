@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
+{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport" js=1}
 
 {if empty($year)}
 	{include file="acc/_year_select.tpl"}
@@ -63,10 +63,17 @@
 	</nav>
 {/if}
 
-{include file="common/dynamic_list_head.tpl"}
+<form method="post" action="{$admin_url}acc/transactions/actions.php">
+
+{include file="common/dynamic_list_head.tpl" check=$can_delete}
 
 	{foreach from=$list->iterate() item="line"}
 		<tr>
+			{if $can_delete}
+			<td class="check">
+				{input type="checkbox" name="check[]" value=$line.id default=0}
+			</td>
+			{/if}
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 			<td>{$line.date|date_fr:'d/m/Y'}</td>
 			{if $simple}
@@ -98,11 +105,23 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			<td colspan="{if $simple}3{else}4{/if}">Solde</td>
+			{if $can_delete}
+				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
+			{/if}
+			{if !$simple}<td></td>{/if}
+			<td colspan="3">Solde</td>
 			<td class="money">{$sum|raw|html_money:false}</td>
-			<td colspan="{if $simple}4{else}5{/if}"></td>
+			{if !$simple}<td></td>{/if}
+			<td class="actions" colspan="4">
+				{if $can_delete}
+					<input type="hidden" name="form" value="{$self_url}" />
+					{button type="submit" name="ask_delete" shape="delete" label="Supprimer les écritures sélectionnées"}
+				{/if}
+			</td>
 		</tr>
 	</tfoot>
 </table>
+
+</form>
 
 {include file="admin/_foot.tpl"}

@@ -27,6 +27,17 @@
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="delete" label="Supprimer" shape="delete" class="main"}
+		{if isset($extra)}
+			{foreach from=$extra key="key" item="value"}
+				{if is_array($value)}
+					{foreach from=$value key="subkey" item="subvalue"}
+						<input type="hidden" name="{$key}[{$subkey}]" value="{$subvalue}" />
+					{/foreach}
+				{else}
+					<input type="hidden" name="{$key}" value="{$value}" />
+				{/if}
+			{/foreach}
+		{/if}
 	</p>
 
 </form>
