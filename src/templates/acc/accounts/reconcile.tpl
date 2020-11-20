@@ -53,6 +53,7 @@
 				<td class="money">Débit</td>
 				<td class="money">Crédit</td>
 				<td class="money">Solde cumulé</td>
+				<td class="money">Solde rapproché</td>
 				<th>Libellé</th>
 				<th>Réf. écriture</th>
 				<th>Réf. ligne</th>
@@ -64,6 +65,7 @@
 			<tr>
 				<td colspan="5"></td>
 				<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>
+				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|html_money}</td>
 				<th>Solde au {$line.date|date_fr:'d/m/Y'}</th>
 				<td colspan="2"></td>
 			</tr>
@@ -77,6 +79,7 @@
 				<td class="money">{$line.credit|raw|html_money}</td>
 				<td class="money">{$line.debit|raw|html_money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
 				<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|html_money:false}</td>
+				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|html_money:false}</td>
 				<th>{$line.label}</th>
 				<td>{$line.reference}</td>
 				<td>{$line.line_reference}</td>
