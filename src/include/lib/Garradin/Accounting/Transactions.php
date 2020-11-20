@@ -114,10 +114,12 @@ class Transactions
 	{
 		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
 			l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
-			l.reference AS line_reference, l.label AS line_label, l.reconciled
+			l.reference AS line_reference, l.label AS line_label, l.reconciled,
+			a2.code AS analytical
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_accounts a2 ON a2.id = l.id_analytical
 			WHERE t.id_year = ? ORDER BY t.date, t.id, l.id;';
 
 		$res = DB::getInstance()->iterate($sql, $year_id);
@@ -213,6 +215,15 @@ class Transactions
 				}
 
 				$row->line_id = trim($row->line_id);
+				$id_analytical = null;
+
+				if (!empty($row->analytical)) {
+					$id_analytical = $accounts->getIdFromCode($row->analytical);
+
+					if (!$id_analytical) {
+						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
+					}
+				}
 
 				if ($row->line_id) {
 					$line = $transaction->getLine((int)$row->line_id);
@@ -232,6 +243,7 @@ class Transactions
 					'reference'  => $row->line_reference,
 					'label'      => $row->line_label,
 					'reconciled' => $row->reconciled,
+					'id_analytical' => $id_analytical,
 				]);
 
 				if (!$row->line_id) {
