@@ -52,7 +52,7 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $en
 		$start->modify('+1 month');
 		$end->modify('+1 month');
 		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&start=%s&end=%s&only=%d',
-			ADMIN_URL, $account->id(), $start->format('Y-m-d'), $end->format('Y-m-d'), $only);
+			ADMIN_URL, $account->id(), $start->format('d/m/Y'), $end->format('d/m/Y'), $only);
 		Utils::redirect($url);
 	}
 }, 'acc_reconcile_' . $account->id());
