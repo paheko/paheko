@@ -24,9 +24,6 @@
 
         {include file="common/_csv_match_columns.tpl"}
 
-        <p class="help">Astuce : pour fusionner des colonnes, il suffit d'indiquer le même nom de champ pour plusieurs colonnes.
-            Par exemple si la fiche membre a un champ «&nbsp;Nom et prénom&nbsp;» mais le CSV deux colonnes «&nbsp;Nom&nbsp;» et «&nbsp;Prénom&nbsp;» séparés, choisir le même champ «&nbsp;Nom et prénom&nbsp;» pour les deux colonnes.</p>
-
     {else}
 
     <fieldset>
