@@ -161,6 +161,7 @@ static $default_config = [
     'ENABLE_AUTOMATIC_BACKUPS' => true,
     'ADMIN_COLOR1'          => '#9c4f15',
     'ADMIN_COLOR2'          => '#d98628',
+    'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/gdin_bg.png'
 ];
 
 foreach ($default_config as $const => $value)
@@ -173,16 +174,11 @@ foreach ($default_config as $const => $value)
     }
 }
 
-if (!defined('Garradin\\ADMIN_BACKGROUND_IMAGE')) {
-    define('Garradin\\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
-}
-
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
-const DEFAULT_REPORT_URL = null;
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
-// il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour 
+// il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
 // éviter le message d'erreur à la con on définit une timezone par défaut
 // Pour utiliser une autre timezone, il suffit de définir date.timezone dans
 // un .htaccess ou dans config.local.php
@@ -229,10 +225,6 @@ ErrorManager::setContext([
 if (ERRORS_REPORT_URL)
 {
     ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
-}
-else
-{
-    ErrorManager::setRemoteReporting(DEFAULT_REPORT_URL, false);
 }
 
 ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>

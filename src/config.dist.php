@@ -19,10 +19,14 @@ namespace Garradin;
  * Ceci est utilisé afin de sécuriser l'envoi de formulaires
  * (protection anti-CSRF).
  *
- * Si aucune valeur n'est définie, Garradin ajoutera automatiquement
- * une valeur au hasard dans le fichier config.local.php.
+ * Cette valeur peut être modifiée sans autre impact que la déconnexion des utilisateurs
+ * actuellement connectés.
+ *
+ * Si cette constante n'est définie, Garradin ajoutera automatiquement
+ * une valeur aléatoire dans le fichier config.local.php.
  */
-const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
+
+//const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
 
 /**
  * Se connecter automatiquement avec l'ID de membre indiqué
@@ -35,26 +39,28 @@ const SECRET_KEY = '3xUhIgGwuovRKOjVsVPQ5yUMfXUSIOX2GKzcebsz5OINrYC50r';
  *
  * Défault : false (connexion automatique désactivée)
  */
-const LOCAL_LOGIN = false;
+
+//const LOCAL_LOGIN = false;
 
 /**
  * Autoriser (ou non) l'import de sauvegarde qui a été modifiée ?
- * 
+ *
  * Si mis à true, un avertissement et une confirmation seront demandés
  * Si mis à false, tout fichier SQLite importé qui ne comporte pas une signature
  * valide (hash SHA1) sera refusé.
- * 
+ *
  * Ceci ne s'applique qu'à la page "Sauvegarde et restauration" de l'admin,
  * il est toujours possible de restaurer une base de données non signée en
  * la recopiant à la place du fichier association.sqlite
  *
  * Défaut : true
  */
-const ALLOW_MODIFIED_IMPORT = true;
+
+//const ALLOW_MODIFIED_IMPORT = true;
 
 /**
  * Doit-on suggérer à l'utilisateur d'utiliser la version chiffrée du site ?
- * 
+ *
  * 1 ou true = affiche un message de suggestion sur l'écran de connexion invitant à utiliser le site chiffré
  * (conseillé si vous avez un certificat auto-signé ou peu connu type CACert)
  * 2 = rediriger automatiquement sur la version chiffrée pour l'administration (mais pas le site public)
@@ -63,36 +69,49 @@ const ALLOW_MODIFIED_IMPORT = true;
  *
  * Défaut : false
  */
-const PREFER_HTTPS = false;
+
+//const PREFER_HTTPS = false;
 
 /**
  * Répertoire où se situe le code source de Garradin
  *
  * Défaut : répertoire racine de Garradin (__DIR__)
  */
-const ROOT = __DIR__;
+
+//const ROOT = __DIR__;
 
 /**
  * Répertoire où sont situées les données de Garradin
- * (incluant la base de données SQLite, le cache et les fichiers locaux)
+ * (incluant la base de données SQLite, les sauvegardes, le cache et les fichiers locaux)
  *
  * Défaut : identique à ROOT
  */
-const DATA_ROOT = ROOT;
+
+//const DATA_ROOT = ROOT;
+
+/**
+ * Répertoire où est situé le cache (fichiers temporaires utilisés pour accélérer le chargement des pages)
+ *
+ * Défaut : sous-répertoire 'cache' de DATA_ROOT
+ */
+
+//const CACHE_ROOT = ROOT . '/cache';
 
 /**
  * Emplacement du fichier de base de données de Garradin
  *
- * Défaut : ROOT . '/association.sqlite'
+ * Défaut : DATA_ROOT . '/association.sqlite'
  */
-const DB_FILE = ROOT . '/association.sqlite';
+
+//const DB_FILE = DATA_ROOT . '/association.sqlite';
 
 /**
  * Emplacement de stockage des plugins
  *
  * Défaut : DATA_ROOT . '/plugins'
  */
-const PLUGINS_ROOT = DATA_ROOT . '/plugins';
+
+//const PLUGINS_ROOT = DATA_ROOT . '/plugins';
 
 /**
  * Plugins fixes qui ne peuvent être désinstallés par l'utilisateur
@@ -105,7 +124,8 @@ const PLUGINS_ROOT = DATA_ROOT . '/plugins';
  *
  * Défaut : aucun (chaîne vide)
  */
-const PLUGINS_SYSTEM = '';
+
+//const PLUGINS_SYSTEM = '';
 
 /**
  * Adresse URI de la racine du site Garradin
@@ -129,6 +149,7 @@ const PLUGINS_SYSTEM = '';
  *
  * Défaut : WWW_URL + 'admin/'
  */
+
 //const ADMIN_URL = 'https://admin.garradin.chezmoi.tld/';
 
 /**
@@ -140,7 +161,8 @@ const PLUGINS_SYSTEM = '';
  *
  * Il est fortement conseillé de mettre cette valeur à false en production !
  */
-const SHOW_ERRORS = false;
+
+//const SHOW_ERRORS = false;
 
 /**
  * Envoi des erreurs par e-mail
@@ -152,7 +174,8 @@ const SHOW_ERRORS = false;
  *
  * Défaut : false
  */
-const MAIL_ERRORS = false;
+
+//const MAIL_ERRORS = false;
 
 /**
  * Envoi des erreurs à une API compatible AirBrake/Errbit
@@ -164,7 +187,8 @@ const MAIL_ERRORS = false;
  *
  * Défaut : null
  */
-const ERRORS_REPORT_URL = null;
+
+//const ERRORS_REPORT_URL = null;
 
 /**
  * Activation de la page permettant de visualiser et rapporter les erreurs présentes
@@ -176,7 +200,8 @@ const ERRORS_REPORT_URL = null;
  * Défaut : true
  * (Afin d'aider au rapport de bugs des instances auto-hébergées)
  */
-const ERRORS_ENABLE_LOG_VIEW = true;
+
+//const ERRORS_ENABLE_LOG_VIEW = true;
 
 /**
  * Utilisation de cron pour les tâches automatiques
@@ -188,7 +213,8 @@ const ERRORS_ENABLE_LOG_VIEW = true;
  *
  * Défaut : false
  */
-const USE_CRON = false;
+
+//const USE_CRON = false;
 
 /**
  * Activation de l'envoi de fichier directement par le serveur web.
@@ -199,7 +225,7 @@ const USE_CRON = false;
  * - Apache avec mod_xsendfile (paquet libapache2-mod-xsendfile)
  * - Lighttpd
  *
- * N'activer que si vous êtes sûr que le module est installé et activé (sinon 
+ * N'activer que si vous êtes sûr que le module est installé et activé (sinon
  * les fichiers ne pourront être vus ou téléchargés).
  * Nginx n'est PAS supporté, car X-Accel-Redirect ne peut gérer que des fichiers
  * qui sont *dans* le document root du vhost, ce qui n'est pas le cas ici.
@@ -214,7 +240,8 @@ const USE_CRON = false;
  *
  * Défaut : false
  */
-const ENABLE_XSENDFILE = false;
+
+//const ENABLE_XSENDFILE = false;
 
 /**
  * Serveur NTP utilisé pour les connexions avec TOTP
@@ -224,7 +251,8 @@ const ENABLE_XSENDFILE = false;
  *
  * Défaut : fr.pool.ntp.org
  */
-const NTP_SERVER = 'fr.pool.ntp.org';
+
+//const NTP_SERVER = 'fr.pool.ntp.org';
 
 /**
  * Hôte du serveur SMTP, mettre à false (défaut) pour utiliser la fonction
@@ -232,7 +260,8 @@ const NTP_SERVER = 'fr.pool.ntp.org';
  *
  * Défaut : false
  */
-const SMTP_HOST = false;
+
+//const SMTP_HOST = false;
 
 /**
  * Port du serveur SMTP
@@ -242,7 +271,8 @@ const SMTP_HOST = false;
  *
  * Défaut : 587
  */
-const SMTP_PORT = 587;
+
+//const SMTP_PORT = 587;
 
 /**
  * Login utilisateur pour le server SMTP
@@ -274,7 +304,8 @@ const SMTP_PORT = 587;
  *
  * Défaut : STARTTLS
  */
-const SMTP_SECURITY = 'STARTTLS';
+
+//const SMTP_SECURITY = 'STARTTLS';
 
 /**
  * Activer les sauvegardes automatiques
@@ -289,7 +320,8 @@ const SMTP_SECURITY = 'STARTTLS';
  *
  * Défaut : true
  */
-const ENABLE_AUTOMATIC_BACKUPS = true;
+
+//const ENABLE_AUTOMATIC_BACKUPS = true;
 
 
 /**
@@ -298,12 +330,14 @@ const ENABLE_AUTOMATIC_BACKUPS = true;
  *
  * Défaut : #9c4f15
  */
+
 //const ADMIN_COLOR1 = '#20787a';
 
 /**
  * Couleur secondaire de l'interface admin
  * Défaut : #d98628
  */
+
 //const ADMIN_COLOR2 = '#85b9ba';
 
 /**
@@ -318,4 +352,5 @@ const ENABLE_AUTOMATIC_BACKUPS = true;
  *
  * Défaut : [ADMIN_URL]static/gdin_bg.png
  */
+
 //const ADMIN_BACKGROUND_IMAGE = 'http://mon-asso.fr/fond_garradin.png';
