@@ -20,72 +20,41 @@ elseif (qg('export') == 'ods')
     exit;
 }
 
+$csv = new CSV_Custom($session, 'users_import');
 $champs = $config->get('champs_membres')->getAll();
+$csrf_key = 'membres_import';
 
-$csv_file = false;
+$columns = [];
 
-if (f('csv_encoded'))
-{
-    $form->check('membres_import', [
-        'csv_encoded'     => 'required|json',
-        'csv_translate'   => 'required|array',
-        'skip_first_line' => 'boolean',
-    ]);
-
-    $csv_file = json_decode(f('csv_encoded'), true);
-
-    if (!$form->hasErrors())
-    {
-        try
-        {
-            $import->fromArray($csv_file, f('csv_translate'), $user->id, f('skip_first_line') ? 1 : 0);
-            Utils::redirect(ADMIN_URL . 'membres/import.php?ok');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
+foreach ($champs as $key => $config) {
+    if (!isset($config->title)) {
+        continue;
     }
-}
-elseif (f('import'))
-{
-    $form->check('membres_import', [
-        'upload' => 'file|required',
-        'type'   => 'required|in:csv,garradin',
-    ]);
 
-    if (!$form->hasErrors())
-    {
-        try
-        {
-            if (f('type') == 'garradin')
-            {
-                $import->fromGarradinCSV($_FILES['upload']['tmp_name'], $user->id);
-                Utils::redirect(ADMIN_URL . 'membres/import.php?ok');
-            }
-            elseif (f('type') == 'csv')
-            {
-                $csv_file = CSV::readAsArray($_FILES['upload']['tmp_name']);
-            }
-            else
-            {
-                throw new UserException('Import inconnu.');
-            }
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
+    $columns[$key] = $config->title;
 }
+
+$csv->setColumns($columns);
+
+$form->runIf(f('import') && $csv->ready(), function () use ($csv, $import, $user) {
+    $csv->setTranslationTable(f('translation_table'));
+    $csv->skip((int)f('skip_first_line'));
+    $import->fromCustomCSV($csv, $user->id);
+    $csv->clear();
+}, $csrf_key, ADMIN_URL . 'membres/import.php?ok');
+
+$form->runIf(f('import') && f('type') == 'garradin' && !empty($_FILES['upload']['tmp_name']), function () use ($import, $user) {
+    $import->fromGarradinCSV($_FILES['upload']['tmp_name'], $user->id);
+}, $csrf_key, ADMIN_URL . 'membres/import.php?ok');
+
+$form->runIf(f('import') && f('type') == 'custom' && !empty($_FILES['upload']['tmp_name']), function () use ($csv) {
+    $csv->load($_FILES['upload']);
+}, $csrf_key, ADMIN_URL . 'membres/import.php?ok');
 
 $tpl->assign('ok', null !== qg('ok') ? true : false);
 
-$tpl->assign('csv_file', $csv_file);
-$tpl->assign('csv_first_line', $csv_file ? reset($csv_file) : null);
+$tpl->assign(compact('csv', 'csrf_key'));
 
 $tpl->assign('max_upload_size', Utils::getMaxUploadSize());
-
-$tpl->assign('garradin_champs', $champs);
 
 $tpl->display('admin/membres/import.tpl');

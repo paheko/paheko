@@ -11,7 +11,7 @@ class CSV_Custom
 	protected $csv;
 	protected $translation;
 	protected $columns;
-	protected $mandatory_columns;
+	protected $mandatory_columns = [];
 	protected $skip = 1;
 
 	public function __construct(UserSession $session, string $key)
@@ -29,7 +29,7 @@ class CSV_Custom
 			throw new UserException('Fichier invalide');
 		}
 
-		$csv = CSV::readAsArray($_FILES['file']['tmp_name']);
+		$csv = CSV::readAsArray($file['tmp_name']);
 
 		if (!count($csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');

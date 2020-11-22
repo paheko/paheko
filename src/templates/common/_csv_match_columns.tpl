@@ -4,7 +4,6 @@
 		<dd class="help">{$csv->count()} lignes trouvées dans le fichier</dd>
 		<dt>{input type="checkbox" name="skip_first_line" value="1" label="Ne pas importer la première ligne" help="Décocher cette case si la première ligne ne contient pas l'intitulé des colonnes, mais des données" default=1}
 		<dt><label>Correspondance des colonnes</label></dt>
-		<dd class="help">Indiquer la correspondance entre colonnes du CSV et données comptables.</dd>
 		<dd>
 			<table class="list auto">
 				<tbody>
