@@ -419,7 +419,10 @@ class Fichiers
 			header('Content-Length: '. (int)$size);
 		}
 
-		ob_clean();
+		if (@ob_get_length()) {
+			@ob_clean();
+		}
+
 		flush();
 
 		// Sinon on envoie le fichier à la mano
