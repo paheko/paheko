@@ -168,7 +168,7 @@ class Install
         ]);
         $account->save();
 
-		// Ajout d'une recherche avancée en exemple
+		// Ajout d'une recherche avancée en exemple (membres)
 		$query = (object) [
 			'query' => [[
 				'operator' => 'AND',
@@ -187,6 +187,26 @@ class Install
 
 		$recherche = new Recherche;
 		$recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+
+		// Ajout d'une recherche avancée en exemple (compta)
+		$query = (object) [
+			'query' => [[
+				'operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'a2.code',
+						'operator' => 'IS NULL',
+						'values'   => [],
+					],
+				],
+			]],
+			'order' => 't.id',
+			'desc' => false,
+			'limit' => '100',
+		];
+
+		$recherche = new Recherche;
+		$recherche->add('Écritures sans projet', null, $recherche::TYPE_JSON, 'compta', $query);
 
 		return $config->save();
 	}

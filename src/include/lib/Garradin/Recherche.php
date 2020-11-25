@@ -322,6 +322,14 @@ class Recherche
 				'alias'    => 'type',
 			];
 
+			$columns['a.code'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Numéro de compte',
+				'type'     => 'text',
+				'null'     => false,
+				'alias'    => 'code',
+			];
+
 			$columns['t.id_year'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Exercice',
@@ -329,6 +337,14 @@ class Recherche
 				'null'     => false,
 				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
 				'alias'    => 'id_year',
+			];
+
+			$columns['a2.code'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'N° de compte projet',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'id_analytical',
 			];
 		}
 
@@ -359,6 +375,11 @@ class Recherche
 
 		$db = DB::getInstance();
 		$target_columns = $this->getColumns($target);
+
+		if (!isset($target_columns[$order])) {
+			throw new UserException('Colonne de tri inconnue : ' . $order);
+		}
+
 		$query_columns = [];
 
 		$query_groups = [];
@@ -391,7 +412,7 @@ class Recherche
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
-					throw new UserException('Cette recherche fait référence à un champ qui n\'existe plus dans les fiches de membres.');
+					throw new UserException('Cette recherche fait référence à une colonne qui n\'existe pas : ' . $condition['column']);
 				}
 
 				$query_columns[] = $condition['column'];
@@ -485,7 +506,7 @@ class Recherche
 		// Ajout de champs compta si pas présents
 		elseif ($target == 'compta')
 		{
-			$query_columns = array_merge(['t.id', 't.date', 't.label', 'l.debit', 'l.credit'], $query_columns);
+			$query_columns = array_merge(['t.id', 't.date', 't.label', 'l.debit', 'l.credit', 'a.code'], $query_columns);
 		}
 
 		$query_columns[] = $order;
@@ -514,9 +535,14 @@ class Recherche
 		$desc = $desc ? 'DESC' : 'ASC';
 
 		if ('compta' === $target) {
-			$sql_query = sprintf('SELECT %s FROM acc_transactions AS t INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
+			$sql_query = sprintf('SELECT %s
+				FROM acc_transactions AS t
+				INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
+				INNER JOIN acc_accounts AS a ON l.id_account = a.id
+				LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id
+				WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
 				$query_columns, $query_groups, $order, $desc, (int) $limit);
-			$sql_query = str_replace(['"t.', '"l.'], ['"t"."', '"l"."'], $sql_query);
+			$sql_query = preg_replace('/"(a|a2|l|t)\./', '"$1"."', $sql_query);
 		}
 		else {
 			$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
@@ -550,7 +576,7 @@ class Recherche
 		try {
 			$db = DB::getInstance();
 			static $allowed = [
-				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null],
+				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null],
 				'membres' => ['membres' => null],
 			];
 

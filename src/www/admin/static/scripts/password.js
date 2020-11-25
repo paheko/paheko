@@ -36,9 +36,7 @@
 		pw_elm.onkeyup = checkPasswordStrength;
 		pw_elm.onchange = function () { checkPasswordStrength(); checkPasswordMatch(); };
 		pw_elm.onblur = function () { checkPasswordStrength(); checkPasswordMatch(); };
-		pw2_elm.onkeypress = checkPasswordMatch;
-		pw2_elm.onblur = checkPasswordMatch;
-		pw2_elm.onchange = checkPasswordMatch;
+		pw2_elm.onkeyup = checkPasswordMatch;
 
 		pw_elm.form.addEventListener('submit', function (e) {
 			if (pw_elm.value == '') return true;
