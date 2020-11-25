@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\Form;
 use KD2\HTTP;
+use KD2\Translate;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
 
@@ -80,18 +81,16 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
-		$this->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
-		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('date_fr', function ($ts, $format = 'd/m/Y H:i:s') {
-			return Utils::date_fr($format, $ts);
-		});
+		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
+		$this->register_modifier('strftime_fr', [Utils::class, 'strftime_fr']);
+		$this->register_modifier('date_fr', [Utils::class, 'date_fr']);
 
 		$this->register_modifier('date_short', function ($dt) {
-			return Utils::date_fr('d/m/Y', $dt);
+			return Utils::date_fr($dt, 'd/m/Y');
 		});
 
 		$this->register_modifier('html_money', [$this, 'htmlMoney']);
@@ -249,6 +248,11 @@ class Template extends \KD2\Smartyer
 
 		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('d/m/Y');
+		}
+		elseif ($type == 'date' && is_string($current_value)) {
+			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
 		}
 
 		$attributes['id'] = 'f_' . $name;

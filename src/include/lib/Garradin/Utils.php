@@ -16,7 +16,7 @@ class Utils
 
     static protected $skriv = null;
 
-    static private $french_date_names = [
+    const FRENCH_DATE_NAMES = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
         'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
         'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
@@ -24,45 +24,46 @@ class Utils
         'Feb'=>'Fév','Apr'=>'Avr','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
         'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
 
-    static public function strftime_fr($format=null, $ts=null)
+    static public function get_datetime($ts)
     {
-        if (is_null($format))
-        {
-            $format = '%d/%m/%Y à %H:%M';
+        if (is_object($ts) && $ts instanceof \DateTimeInterface) {
+            return $ts;
         }
+        elseif (is_numeric($ts)) {
+            return new \DateTime('@' . $ts);
+        }
+        elseif (strlen($ts) == 10) {
+            return \DateTime::createFromFormat('!Y-m-d', $ts);
+        }
+        elseif (strlen($ts) == 19) {
+            return \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
+        }
+        else {
+            return null;
+        }
+    }
 
-        $date = strftime($format, $ts);
-        $date = strtr($date, self::$french_date_names);
+    static public function strftime_fr($ts, $format)
+    {
+        $ts = self::get_datetime($ts);
+        $date = strftime($format, $ts->getTimestamp());
+
+        $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
     }
 
-    static public function date_fr($format=null, $ts=null)
+    static public function date_fr($ts, $format = null)
     {
         if (is_null($format))
         {
             $format = 'd/m/Y à H:i';
         }
 
-        if (is_object($ts)) {
-            $date = $ts->format($format);
-        }
-        elseif (is_numeric($ts)) {
-            $date = date($format, $ts);
-        }
-        elseif (strlen($ts) == 10) {
-            $ts = \DateTime::createFromFormat('!Y-m-d', $ts);
-            $date = $ts->format($format);
-        }
-        elseif (strlen($ts) == 19) {
-            $ts = \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
-            $date = $ts->format($format);
-        }
-        else {
-            return null;
-        }
+        $date = self::get_datetime($ts);
+        $date = $date->format($format);
 
-        $date = strtr($date, self::$french_date_names);
+        $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
     }

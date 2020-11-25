@@ -229,7 +229,7 @@ input[readonly], input.disabled {
     border-color: #999;
 }
 
-select, input[size], input[type=color], button, input[type=button], input[type=submit] {
+select, input[size], input[type=color], button, input[type=button], input[type=submit], input[type=number] {
     min-width: 0;
 }
 
