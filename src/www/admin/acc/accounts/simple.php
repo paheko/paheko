@@ -10,20 +10,7 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
 }
 
-$year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
-
-if ($year_id === CURRENT_YEAR_ID) {
-	$year = $current_year;
-}
-else {
-	$year = Years::get($year_id);
-
-	if (!$year) {
-		throw new UserException("L'exercice demandé n'existe pas.");
-	}
-
-	$tpl->assign('year', $year);
-}
+$year = $current_year;
 
 $types = [
 	Account::TYPE_REVENUE => 'Recettes',
