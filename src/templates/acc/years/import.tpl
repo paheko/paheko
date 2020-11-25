@@ -2,7 +2,7 @@
 
 <nav class="acc-year">
 	<h4>Exercice sélectionné&nbsp;:</h4>
-	<h3>{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h3>
+	<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
 </nav>
 
 <nav class="tabs">

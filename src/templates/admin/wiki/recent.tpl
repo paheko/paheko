@@ -6,7 +6,7 @@
         {foreach from=$list item="page"}
         <tr>
             <th><a href="{$admin_url}wiki/?{$page.uri}">{$page.titre}</a></th>
-            <td>{$page.date_modification|date_fr:'d/m/Y à H:i'}</td>
+            <td>{$page.date_modification|date_long}</td>
         </tr>
         {/foreach}
         </tbody>

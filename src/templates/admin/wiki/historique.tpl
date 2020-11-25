@@ -27,7 +27,7 @@
                     {/if}
                 {/if}
             </td>
-            <th>{$rev.date|date_fr:'d/m/Y à H:i'}</th>
+            <th>{$rev.date|date_long}</th>
             <td>
                 {if $session->canAccess('membres', Membres::DROIT_ACCES)}
                 <a href="{$admin_url}membres/fiche.php?id={$rev.id_auteur}">{$rev.nom_auteur}</a>
@@ -55,7 +55,7 @@
     </table>
 {elseif !empty($diff)}
     <div class="wikiRevision revisionLeft">
-        <h3>Version du {$rev1.date|date_fr:'d/m/Y à H:i'}</h3>
+        <h3>Version du {$rev1.date|date_long}</h3>
         {if $session->canAccess('membres', Membres::DROIT_ACCES)}
             <h4>De <a href="{$admin_url}membres/fiche.php?id={$rev1.id_auteur}">{$rev1.nom_auteur}</a></h4>
         {/if}
@@ -64,7 +64,7 @@
         {/if}
     </div>
     <div class="wikiRevision revisionRight">
-        <h3>Version {if $rev2.revision == $page.revision}actuelle en date{/if} du {$rev2.date|date_fr:'d/m/Y à H:i'}</h3>
+        <h3>Version {if $rev2.revision == $page.revision}actuelle en date{/if} du {$rev2.date|date_long}</h3>
         {if $session->canAccess('membres', Membres::DROIT_ACCES)}
             <h4>De <a href="{$admin_url}membres/fiche.php?id={$rev2.id_auteur}">{$rev2.nom_auteur}</a></h4>
         {/if}

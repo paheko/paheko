@@ -48,7 +48,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 			<dd>
 				<select id="f_id_year" name="id_year">
 					{foreach from=$years item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</option>
+					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}
 				</select>
 			</dd>

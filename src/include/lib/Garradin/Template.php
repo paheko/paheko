@@ -88,6 +88,7 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 		$this->register_modifier('strftime_fr', [Utils::class, 'strftime_fr']);
 		$this->register_modifier('date_fr', [Utils::class, 'date_fr']);
+		$this->register_modifier('date_long', [Utils::class, 'date_fr']);
 
 		$this->register_modifier('date_short', function ($dt) {
 			return Utils::date_fr($dt, 'd/m/Y');

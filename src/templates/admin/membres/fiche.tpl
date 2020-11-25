@@ -52,9 +52,9 @@
 		<dt>Catégorie</dt>
 		<dd>{$categorie.nom} <span class="droits">{format_droits droits=$categorie}</span></dd>
 		<dt>Inscription</dt>
-		<dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
+		<dd>{$membre.date_inscription|date_short}</dd>
 		<dt>Dernière connexion</dt>
-		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
+		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_long}{/if}</dd>
 		<dt>Mot de passe</dt>
 		<dd>
 			{if empty($membre.passe)}
@@ -90,8 +90,10 @@
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
         {elseif $c_config.type == 'country'}
             {$membre->$c|get_country_name}
-        {elseif $c_config.type == 'date' || $c_config.type == 'datetime'}
-            {$membre->$c|format_sqlite_date_to_french}
+        {elseif $c_config.type == 'date'}
+            {$membre->$c|date_short}
+        {elseif $c_config.type == 'datetime'}
+            {$membre->$c|date_fr}
         {elseif $c_config.type == 'password'}
             *******
         {elseif $c_config.type == 'multiple'}

@@ -33,7 +33,7 @@
             <dd>
                 <select name="file" id="f_select">
                 {foreach from=$liste key="f" item="d"}
-                    <option value="{$f}">{$f} — {$d|date_fr:'d/m/Y à H:i'}</option>
+                    <option value="{$f}">{$f} — {$d|date_long}</option>
                 {/foreach}
                 </select>
             </dd>

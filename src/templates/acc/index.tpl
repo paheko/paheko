@@ -3,7 +3,7 @@
 {foreach from=$years item="year"}
 <section class="year-infos">
 	<h2 class="ruler">{$year.label} —
-		Du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h2>
+		Du {$year.start_date|date_short} au {$year.end_date|date_short}</h2>
 
 	<nav class="tabs">
 		<aside>
