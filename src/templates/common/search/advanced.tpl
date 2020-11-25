@@ -36,7 +36,7 @@ $sql_disabled = !$is_admin;
 					{/foreach}
 				</select>
 			</label>
-			<label><input type="checkbox" name="desc" value="1" {if $query.desc}checked="checked"{/if} /> Tri inversé</label>
+			<input type="checkbox" name="desc" value="1" {if $query.desc}checked="checked"{/if} id="f_desc" /> <label for="f_desc">Tri inversé</label>
 			<label>Limiter à <input type="number" value="{$query.limit}" name="limit" size="5" /> résultats</label>
 		</p>
 		<p class="submit">

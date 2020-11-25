@@ -64,7 +64,7 @@
     </p>
     {if $code && ($code == Sauvegarde::INTEGRITY_FAIL && ALLOW_MODIFIED_IMPORT)}
     <p>
-        <label><input type="checkbox" name="force_import" value="1" /> Ignorer les erreurs, je sais ce que je fait</label>
+        {input type="checkbox" name="force_import" value="1" label="Ignorer les erreurs, je sais ce que je fait"}
     </p>
     {/if}
 </fieldset>
