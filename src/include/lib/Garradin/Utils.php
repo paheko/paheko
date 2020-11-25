@@ -45,6 +45,10 @@ class Utils
 
     static public function strftime_fr($ts, $format)
     {
+        if (null === $ts) {
+            return $ts;
+        }
+
         $ts = self::get_datetime($ts);
         $date = strftime($format, $ts->getTimestamp());
 
@@ -55,6 +59,10 @@ class Utils
 
     static public function date_fr($ts, $format = null)
     {
+        if (null === $ts) {
+            return $ts;
+        }
+
         if (is_null($format))
         {
             $format = 'd/m/Y à H:i';
