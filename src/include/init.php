@@ -47,6 +47,11 @@ function garradin_manifest()
 	return false;
 }
 
+if (!defined('\SQLITE3_OPEN_READWRITE')) {
+	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
+	exit(1);
+}
+
 /*
  * Configuration globale
  */
