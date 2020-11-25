@@ -27,7 +27,7 @@ else {
 	$tpl->assign('year', $year);
 }
 
-$can_delete = $session->canAccess('compta', Membres::DROIT_ADMIN) && !$year->closed;
+$can_edit = $session->canAccess('compta', Membres::DROIT_ADMIN) && !$year->closed;
 $simple = qg('simple');
 
 // Use simplified view for favourite accounts
@@ -40,6 +40,6 @@ $list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
 $list->loadFromQueryString();
 
 $sum = $account->getSum($year_id, $simple);
-$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_delete'));
+$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_edit'));
 
 $tpl->display('acc/accounts/journal.tpl');

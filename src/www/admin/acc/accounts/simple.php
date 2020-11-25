@@ -10,6 +10,21 @@ if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
 }
 
+$year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
+
+if ($year_id === CURRENT_YEAR_ID) {
+	$year = $current_year;
+}
+else {
+	$year = Years::get($year_id);
+
+	if (!$year) {
+		throw new UserException("L'exercice demandé n'existe pas.");
+	}
+
+	$tpl->assign('year', $year);
+}
+
 $types = [
 	Account::TYPE_REVENUE => 'Recettes',
 	Account::TYPE_EXPENSE => 'Dépenses',
@@ -30,6 +45,8 @@ $list = Accounts::listByType(CURRENT_YEAR_ID, $type ?: null);
 $list->setTitle(sprintf('Suivi - %s', $types[$type]));
 $list->loadFromQueryString();
 
-$tpl->assign(compact('type', 'list', 'types'));
+$can_edit = $session->canAccess('compta', Membres::DROIT_ADMIN) && !$year->closed;
+
+$tpl->assign(compact('type', 'list', 'types', 'can_edit', 'year'));
 
 $tpl->display('acc/accounts/simple.tpl');
