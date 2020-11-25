@@ -225,6 +225,12 @@ input[readonly], input.disabled, input[disabled], textarea[disabled], select[dis
     border-color: #999;
 }
 
+input[disabled]:hover, input[readonly]:hover {
+    background-color: unset;
+    color: unset;
+    border-color: unset;
+}
+
 select, input[size], input[type=color], button, input[type=button], input[type=submit], input[type=number] {
     min-width: 0;
 }
