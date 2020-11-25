@@ -221,7 +221,8 @@ class Accounts
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			INNER JOIN acc_accounts a ON a.id = l.id_account';
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('a.type IN (%s) AND t.id_year = %d', $type ?: $other_types, $year_id);
 
 		$sum = 0;

@@ -51,6 +51,7 @@
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
+				<td class="num">{if $line.id_analytical}<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.code_analytical}</a>{/if}</td>
 				<td class="actions">
 					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
@@ -67,7 +68,7 @@
 			<tfoot>
 			<tr>
 				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
-				<td class="actions" colspan="9">
+				<td class="actions" colspan="10">
 					<em>Pour les écritures cochées :</em>
 					<input type="hidden" name="from" value="{$self_url}" />
 					<input type="hidden" name="year" value="{$year.id}" />
