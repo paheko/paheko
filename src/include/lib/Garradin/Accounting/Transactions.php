@@ -2,6 +2,7 @@
 
 namespace Garradin\Accounting;
 
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
@@ -345,5 +346,20 @@ class Transactions
 		}
 
 		$db->commit();
+	}
+
+	static public function setAnalytical(?int $id_analytical, array $lines)
+	{
+		$db = DB::getInstance();
+
+		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = 7 AND id = ?', $id_analytical)) {
+			throw new \InvalidArgumentException('Chosen account ID is not analytical');
+		}
+
+		$lines = array_map('intval', $lines);
+
+		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE id IN (%s);',
+			(int)$id_analytical ?: 'NULL',
+			implode(', ', $lines)));
 	}
 }

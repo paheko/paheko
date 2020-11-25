@@ -65,13 +65,13 @@
 
 <form method="post" action="{$admin_url}acc/transactions/actions.php">
 
-{include file="common/dynamic_list_head.tpl" check=$can_delete}
+{include file="common/dynamic_list_head.tpl" check=$can_edit}
 
 	{foreach from=$list->iterate() item="line"}
 		<tr>
-			{if $can_delete}
+			{if $can_edit}
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$line.id default=0}
+				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
 			</td>
 			{/if}
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
@@ -105,7 +105,7 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			{if $can_delete}
+			{if $can_edit}
 				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
@@ -113,9 +113,19 @@
 			<td class="money">{$sum|raw|html_money:false}</td>
 			{if !$simple}<td></td>{/if}
 			<td class="actions" colspan="4">
-				{if $can_delete}
-					<input type="hidden" name="form" value="{$self_url}" />
-					{button type="submit" name="ask_delete" shape="delete" label="Supprimer les écritures sélectionnées"}
+				{if $can_edit}
+					<em>Pour les écritures cochées :</em>
+					<input type="hidden" name="from" value="{$self_url}" />
+					<input type="hidden" name="year" value="{$year.id}" />
+					{csrf_field key="projects_action"}
+					<select name="action">
+						<option value="">— Choisir une action à effectuer —</option>
+						<option value="change_analytical">Ajouter/enlever d'un projet</option>
+						<option value="delete">Supprimer les écritures</option>
+					</select>
+					<noscript>
+						{button type="submit" value="OK" shape="right" label="Valider"}
+					</noscript>
 				{/if}
 			</td>
 		</tr>

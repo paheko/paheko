@@ -84,6 +84,9 @@ class Account extends Entity
 			'select' => 't.id',
 			'label' => 'N°',
 		],
+		'id_line' => [
+			'select' => 'l.id',
+		],
 		'date' => [
 			'label' => 'Date',
 			'select' => 't.date',
