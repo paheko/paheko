@@ -109,7 +109,7 @@
         <dl>
             {input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$couleur1 name="couleur1" label="Couleur primaire" placeholder=$couleurs_defaut[0]}
             {input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$couleur2 name="couleur2" label="Couleur secondaire" placeholder=$couleurs_defaut[1]}
-            {input type="file" label="Image de fond" name="background" help="Il est conseillé d'utiliser une image en noir et blanc avec un fond blanc pour un meilleur rendu. Dimensions recommandées : 380x200"}
+            {input type="file" label="Image de fond" name="background" help="Il est conseillé d'utiliser une image en noir et blanc avec un fond blanc pour un meilleur rendu. Dimensions recommandées : 380x200" accept="image/*,*.jpeg,*.jpg,*.png,*.gif"}
         </dl>
         <input type="hidden" name="image_fond" id="f_image_fond" data-source="{$background_image_source}" data-default="{$background_image_default}" value="{form_field name=image_fond}" />
     </fieldset>
