@@ -15,9 +15,9 @@
 		</p>
 		<dl>
 			<dt>Début de l'exercice</dt>
-			<dd>{$year.start_date|date_fr:'d/m/Y'}</dd>
+			<dd>{$year.start_date|date_short}</dd>
 			<dt>Fin de l'exercice</dt>
-			<dd>{$year.end_date|date_fr:'d/m/Y'}</dd>
+			<dd>{$year.end_date|date_short}</dd>
 		</h3>
 	</fieldset>
 

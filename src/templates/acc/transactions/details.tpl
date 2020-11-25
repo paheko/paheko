@@ -38,7 +38,7 @@
 	<dt>Exercice</dt>
 	<dd>
 		<a href="{$admin_url}acc/reports/ledger.php?year={$transaction.id_year}">{$tr_year.label}</a>
-		| Du {$tr_year.start_date|date_fr:'d/m/Y'} au {$tr_year.end_date|date_fr:'d/m/Y'}
+		| Du {$tr_year.start_date|date_short} au {$tr_year.end_date|date_short}
 		| <strong>{if $tr_year.closed}Clôturé{else}En cours{/if}</strong>
 	</dd>
 

@@ -12,7 +12,7 @@
 <form method="post" action="{$self_url}">
 
 	<fieldset>
-		<legend>Exercice&nbsp;: «&nbsp;{$year.label}&nbsp;» du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</legend>
+		<legend>Exercice&nbsp;: «&nbsp;{$year.label}&nbsp;» du {$year.start_date|date_short} au {$year.end_date|date_short}</legend>
 
 		{if null === $previous_year}
 		<dl>
@@ -21,7 +21,7 @@
 				<select id="f_from_year" name="from_year">
 					<option value="">-- Aucun</option>
 					{foreach from=$years item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</option>
+					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}
 				</select>
 			</dd>

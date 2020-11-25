@@ -7,7 +7,7 @@
 			<dd>
 				<select name="year">
 					{foreach from=$list item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</option>
+					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}
 				</select>
 			</dd>

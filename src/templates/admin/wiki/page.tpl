@@ -121,7 +121,7 @@
             {/if}
 
             <p class="wikiFooter">
-                Dernière modification le {$page.date_modification|date_fr:'d/m/Y à H:i'}
+                Dernière modification le {$page.date_modification|date_long}
                 {if $session->canAccess('membres', Membres::DROIT_ACCES)}
                 par <a href="{$admin_url}membres/fiche.php?id={$page.contenu.id_auteur}">{$auteur}</a>
                 {/if}

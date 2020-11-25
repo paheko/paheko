@@ -5,7 +5,7 @@
 {else}
 	<nav class="acc-year">
 		<h4>Exercice sélectionné&nbsp;:</h4>
-		<h3>{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h3>
+		<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
 	</nav>
 {/if}
 
@@ -34,7 +34,7 @@
 			<td class="num"><a href="journal.php?id={$line.id_account}">{$line.account}</a></td>
 			<td>{$line.account_label}</td>
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
-			<td>{$line.date|date_fr:'d/m/Y'}</td>
+			<td>{$line.date|date_short}</td>
 			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|html_money}</td>
 			<td>{$line.reference}</td>
 			<th>{$line.label}</th>

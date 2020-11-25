@@ -15,7 +15,7 @@
 	<tbody>
 		<tr>
 			<td rowspan="{$transaction.lines|count}" class="num"><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">{if $transaction.reference}{$transaction.reference}{else}#{$transaction.id}{/if}</a></td>
-			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_fr:'d/m/Y'}</td>
+			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_short}</td>
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
 		{foreach from=$transaction.lines item="line"}
 			<td>{$line.account_code} - {$line.account_label}</td>

@@ -20,7 +20,7 @@
 	{/if}
 	{if isset($year)}
 		<p>Exercice comptable {if $year.closed}clôturé{else}en cours{/if} du
-			{$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}, généré le {$close_date|date_fr:'d/m/Y'}</p>
+			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short}</p>
 	{/if}
 
 	<p class="noprint print-btn">

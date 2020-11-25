@@ -38,7 +38,7 @@
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
 				<td class="num">{$line.line_reference}</td>
-				<td>{$line.date|date_fr:'d/m/Y'}</td>
+				<td>{$line.date|date_short}</td>
 				<th>{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
 				<td class="money">{$line.debit|raw|html_money}</td>
 				<td class="money">{$line.credit|raw|html_money}</td>
