@@ -94,7 +94,7 @@ class Graph
 			foreach ($data[0]->get() as $k=>$v)
 			{
 				$date = new \DateTime('@' . ($k * $interval));
-				$labels[] = Utils::date_fr('M y', $date);
+				$labels[] = Utils::date_fr($date, 'M y');
 			}
 
 			$plot->setLabels($labels);
