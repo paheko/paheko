@@ -218,12 +218,8 @@ input.resetButton {
     margin-left: 1em;
 }
 
-input[disabled], input[disabled] + label {
+input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled] {
     cursor: not-allowed;
-    opacity: 0.5;
-}
-
-input[readonly], input.disabled {
     color: #666;
     background-color: #eee;
     border-color: #999;

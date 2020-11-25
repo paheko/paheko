@@ -129,12 +129,10 @@
                 <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" required="required" /></dd>
                 <dt><label for="f_{$nom}_help">Aide</label></dt>
                 <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs->$nom name=help}" /></dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][private]" value="1" {form_field data=$champs->$nom name=private checked="1"} /> Caché pour les membres</label></dt>
-                <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champs->$nom name=editable checked="1"} /> Modifiable par les membres</label></dt>
-                <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champs->$nom name=mandatory checked="1"} /> Champ obligatoire</label></dt>
-                <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
+                <dt>Préférences</dt>
+                {input type="checkbox" name="champs[%s][private]"|args:$nom value="1" default=$champs->$nom->private label="Caché pour les membres" help="Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel"}
+                {input type="checkbox" name="champs[%s][editable]"|args:$nom value="1" default=$champs->$nom->editable label="Modifiable par les membres" help="Si coché, les membres pourront changer cette information depuis leur espace personnel"}
+                {input type="checkbox" name="champs[%s][mandatory]"|args:$nom value="1" default=$champs->$nom->mandatory label="Champ obligatoire" help="Si coché, ce champ ne pourra rester vide"}
                 {if $champ.type == 'select' || $champ.type == 'multiple'}
                     <dt><label>Options disponibles</label></dt>
                     {if $champ.type == 'multiple'}
@@ -165,12 +163,9 @@
     <fieldset id="f_passe">
         <legend>Mot de passe</legend>
         <dl>
-            <dt><label><input type="checkbox" name="champs[passe][private]" value="1" {form_field data=$champs.passe name=private checked="1"} /> Caché pour les membres</label></dt>
-            <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
-            <dt><label><input type="checkbox" name="champs[passe][editable]" value="1" {form_field data=$champs.passe name=editable checked="1"} /> Modifiable par les membres</label></dt>
-            <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-            <dt><label><input type="checkbox" name="champs[passe][mandatory]" value="1" {form_field data=$champs.passe name=mandatory checked="1"} /> Champ obligatoire</label></dt>
-            <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
+            {input type="checkbox" name="champs[passe][private]" value="1" default=$champs.passe.private label="Caché pour les membres" help="Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel"}
+            {input type="checkbox" name="champs[passe][editable]" value="1" default=$champs.passe.editable label="Modifiable par les membres" help="Si coché, les membres pourront changer cette information depuis leur espace personnel"}
+            {input type="checkbox" name="champs[passe][mandatory]" value="1" default=$champs.passe.mandatory label="Champ obligatoire" help="Si coché, ce champ ne pourra rester vide lors de la création d'un membre"}
         </dl>
     </fieldset>
 
