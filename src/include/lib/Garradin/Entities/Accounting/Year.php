@@ -59,13 +59,14 @@ class Year extends Entity
 		}
 	}
 
-	public function close()
+	public function close(int $user_id): void
 	{
 		if ($this->closed) {
 			throw new \LogicException('Cet exercice est déjà clôturé');
 		}
 
 		$this->set('closed', 1);
+		$this->save();
 	}
 
 	public function delete(): bool

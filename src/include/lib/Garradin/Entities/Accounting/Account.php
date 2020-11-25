@@ -60,6 +60,9 @@ class Account extends Entity
 	const TYPE_OPENING = 9;
 	const TYPE_CLOSING = 10;
 
+	const TYPE_POSITIVE_RESULT = 11;
+	const TYPE_NEGATIVE_RESULT = 12;
+
 	const TYPES_NAMES = [
 		'',
 		'Banque',
@@ -72,6 +75,8 @@ class Account extends Entity
 		'Bénévolat',
 		'Ouverture',
 		'Clôture',
+		'Résultat excédentaire',
+		'Résultat déficitaire',
 	];
 
 	const LIST_COLUMNS = [

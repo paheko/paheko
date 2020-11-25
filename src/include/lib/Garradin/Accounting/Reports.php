@@ -24,6 +24,11 @@ class Reports
 			$where[] = $db->where('position', $criterias['position']);
 		}
 
+		if (!empty($criterias['exclude_position'])) {
+			$db = DB::getInstance();
+			$where[] = $db->where('position', 'NOT IN', $criterias['exclude_position']);
+		}
+
 		if (!empty($criterias['type'])) {
 			$db = DB::getInstance();
 			$criterias['type'] = array_map('intval', (array)$criterias['type']);

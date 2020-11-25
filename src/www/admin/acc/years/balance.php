@@ -1,6 +1,7 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Accounting\Reports;
 use Garradin\Accounting\Years;
@@ -58,7 +59,7 @@ elseif (null !== f('from_year')) {
 
 
 if ($previous_year) {
-	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year->id()]);
+	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
 
 	if ($previous_year->id_chart != $year->id_chart) {
 		$chart_change = true;
@@ -70,6 +71,31 @@ if ($previous_year) {
 
 		$matching_accounts = $year->accounts()->listForCodes($codes);
 	}
+
+	// Append result
+	$result = Reports::getResult(['year' => $previous_year->id()]);
+
+	if ($result > 0) {
+		$account = $year->accounts()->getSingleAccountForType(Account::TYPE_POSITIVE_RESULT);
+	}
+	else {
+		$account = $year->accounts()->getSingleAccountForType(Account::TYPE_NEGATIVE_RESULT);
+	}
+
+	if (!$account) {
+		$account = (object) [
+			'id' => null,
+			'code' => null,
+			'label' => 'Résultat de l\'exercice',
+		];
+	}
+
+	$lines[] = (object) [
+		'sum' => $result,
+		'id' => $account->id,
+		'code' => $account->code,
+		'label' => $account->label,
+	];
 
 	foreach ($lines as $k => &$line) {
 		$line->credit = $line->sum > 0 ? $line->sum : 0;
