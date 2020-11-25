@@ -89,6 +89,7 @@
 			<th>{$line.label}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
+			<td class="num">{if $line.id_analytical}<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.code_analytical}</a>{/if}</td>
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
@@ -112,7 +113,7 @@
 			<td colspan="3">Solde</td>
 			<td class="money">{$sum|raw|html_money:false}</td>
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="4">
+			<td class="actions" colspan="5">
 				{if $can_edit}
 					<em>Pour les écritures cochées :</em>
 					<input type="hidden" name="from" value="{$self_url}" />

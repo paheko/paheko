@@ -128,6 +128,13 @@ class Account extends Entity
 			'label' => 'Réf. ligne',
 			'select' => 'l.reference',
 		],
+		'id_analytical' => [
+			'select' => 'l.id_analytical',
+		],
+		'code_analytical' => [
+			'label' => 'Projet',
+			'select' => 'b.code',
+		],
 	];
 
 	protected $id;
@@ -183,7 +190,8 @@ class Account extends Entity
 		$columns = self::LIST_COLUMNS;
 
 		$tables = 'acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction';
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = 0;
