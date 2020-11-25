@@ -8,7 +8,7 @@
 		<legend>Affecter {$count} écritures sélectionnées à un projet</legend>
 		<dl>
 			<dd>
-				{input type="select" name="id_analytical" options=$analytical_accounts required="" label="Projet à utiliser" help="Pour retirer les écritures de leur projet actuellement affecté, sélectionner simplement « Aucun projet »."}
+				{input type="select" name="id_analytical" options=$analytical_accounts label="Projet à utiliser" help="Pour retirer les écritures de leur projet actuellement affecté, sélectionner simplement « Aucun projet »."}
 			</dd>
 		</dl>
 	</fieldset>
