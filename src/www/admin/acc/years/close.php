@@ -24,7 +24,7 @@ $rules = [
 if (f('close') && $form->check('acc_years_close_' . $year->id()))
 {
 	try {
-		$year->close();
+		$year->close($user->id);
 		$year->save();
 		$session->set('acc_year', null);
 

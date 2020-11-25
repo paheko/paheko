@@ -75,6 +75,13 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.0.0-beta6', '>=') && version_compare($v, '1.0.0-beta8', '<'))
+			{
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-beta8_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 

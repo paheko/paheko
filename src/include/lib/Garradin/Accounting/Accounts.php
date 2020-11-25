@@ -3,6 +3,9 @@
 namespace Garradin\Accounting;
 
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Line;
+use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Accounting\Year;
 use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
@@ -240,4 +243,79 @@ class Accounts
 	{
 		return DB::getInstance()->count(Account::TABLE, 'id_chart = ? AND type = ?', $this->chart_id, $type);
 	}
+
+	public function getSingleAccountForType(int $type)
+	{
+		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
+	}
+
+/* FIXME: implement closing of accounts
+	public function getClosingAccountId()
+	{
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
+	}
+
+	public function closeRevenueExpenseAccounts(Year $year, int $user_id)
+	{
+		$closing_id = $this->getClosingAccountId();
+
+		if (!$closing_id) {
+			throw new UserException('Aucun compte n\'est indiqué comme compte de clôture dans le plan comptable');
+		}
+
+		$transaction = new Transaction;
+		$transaction->id_creator = $user_id;
+		$transaction->id_year = $year->id();
+		$transaction->type = Transaction::TYPE_ADVANCED;
+		$transaction->label = 'Clôture de l\'exercice';
+		$transaction->date = new \DateTime;
+		$debit = 0;
+		$credit = 0;
+
+		$sql = 'SELECT a.id, SUM(l.credit - l.debit) AS sum, a.position, a.code
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			WHERE t.id_year = ? AND a.position IN (?, ?)
+			GROUP BY a.id
+			ORDER BY a.code;';
+
+		$res = DB::getInstance()->iterate($sql, $year->id(), Account::REVENUE, Account::EXPENSE);
+
+		foreach ($res as $row) {
+			$reversed = $row->position == Account::ASSET;
+
+			$line = new Line;
+			$line->id_account = $row->id;
+			$line->credit = $reversed ? abs($row->sum) : 0;
+			$line->debit = !$reversed ? abs($row->sum) : 0;
+			$transaction->addLine($line);
+
+			if ($reversed) {
+				$debit += abs($row->sum);
+			}
+			else {
+				$credit += abs($row->sum);
+			}
+		}
+
+		if ($debit) {
+			$line = new Line;
+			$line->id_account = $closing_id;
+			$line->credit = 0;
+			$line->debit = $debit;
+			$transaction->addLine($line);
+		}
+
+		if ($credit) {
+			$line = new Line;
+			$line->id_account = $closing_id;
+			$line->credit = $credit;
+			$line->debit = 0;
+			$transaction->addLine($line);
+		}
+
+		$transaction->save();
+	}
+*/
 }

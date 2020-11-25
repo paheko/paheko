@@ -26,8 +26,8 @@ code,label,description,position,type
 110,Report à nouveau (Solde créditeur),,Passif,
 119,Report à nouveau (Solde débiteur),,Passif,
 12,RÉSULTAT NET DE L'EXERCICE,,Passif,
-120,Résultat de l'exercice (Excédent),,Passif,
-129,Résultat de l'exercice (déficit),,Passif,
+120,Résultat de l'exercice (excédent),,Passif,Résultat excédentaire
+129,Résultat de l'exercice (déficit),,Passif,Résultat déficitaire
 13,SUBVENTIONS D'INVESTISSEMENTS,,Passif,
 131,Subventions d'équipement,,Passif,
 139,Subventions inscrites au compte de résultat,,Passif,
