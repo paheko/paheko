@@ -23,13 +23,15 @@
 		</p>
 	</fieldset>
 	{/if}
-	<fieldset>
+	<fieldset class="shortFormLeft">
 		<legend>Période de rapprochement</legend>
 		<p>
 			Du
 			{input type="date" name="start" default=$start}
 			au
 			{input type="date" name="end" default=$end}
+		</p>
+		<p>
 			<label>{input type="checkbox" name="only" value=1 default=$only} Seulement les écritures non rapprochées</label>
 			<input type="hidden" name="id" value="{$account.id}" />
 			<input type="submit" value="Afficher" />

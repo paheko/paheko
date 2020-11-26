@@ -222,8 +222,8 @@ h2.ruler:after {
     margin-left: 1em;
 }
 
-.shortFormLeft {
-    font-size: 80%;
+.shortFormLeft p {
+    display: inline-block;
 }
 
 .shortFormLeft .special {
