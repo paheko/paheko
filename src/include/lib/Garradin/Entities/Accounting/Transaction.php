@@ -10,6 +10,7 @@ use Garradin\ValidationException;
 use Garradin\DB;
 use Garradin\Config;
 use Garradin\Utils;
+use Garradin\UserException;
 
 class Transaction extends Entity
 {
