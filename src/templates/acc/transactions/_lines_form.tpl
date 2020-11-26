@@ -31,7 +31,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			{if count($analytical_accounts) > 1}
 				<td>{input default=$line.id_analytical type="select" name="lines[id_analytical][]" options=$analytical_accounts}</td>
 			{/if}
-			<td>{button label="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
+			<td>{button label="Enlever" title="Enlever la ligne" shape="minus" min="2" name="remove_line"}</td>
 		</tr>
 	{/foreach}
 	</tbody>
@@ -41,7 +41,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<td class="money">{input type="money" name="debit_total" readonly="readonly" tabindex="-1" }</td>
 			<td class="money">{input type="money" name="credit_total" readonly="readonly" tabindex="-1" }</td>
 			<td colspan="{if count($analytical_accounts) > 1}3{else}2{/if}" id="lines_message"></td>
-			<td>{button label="Ajouter une ligne" shape="plus"}</td>
+			<td>{button label="Ajouter" title="Ajouter une ligne" shape="plus"}</td>
 		</tr>
 	</tfoot>
 </table>
