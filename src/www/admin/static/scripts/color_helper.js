@@ -86,8 +86,6 @@
 		else {
 			img.src = bg.dataset.default;
 		}
-
-		console.log(img.src);
 	}
 
 	/**
@@ -147,8 +145,6 @@
 			delete canvas;
 			delete ctx;
 			delete img;
-
-			console.log()
 
 			callback();
 		};
