@@ -100,11 +100,11 @@ class Squelette_Filtres
         }
         elseif (date('Y', $date) == date('Y'))
         {
-            $jour = strtolower(Utils::strftime_fr('%A %e %B', $date));
+            $jour = strtolower(Utils::strftime_fr($date, '%A %e %B'));
         }
         else
         {
-            $jour = strtolower(Utils::strftime_fr('%e %B %Y', $date));
+            $jour = strtolower(Utils::strftime_fr($date, '%e %B %Y'));
         }
 
         if ($avec_heure)

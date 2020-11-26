@@ -45,11 +45,12 @@ class Utils
 
     static public function strftime_fr($ts, $format)
     {
+        $ts = self::get_datetime($ts);
+
         if (null === $ts) {
             return $ts;
         }
 
-        $ts = self::get_datetime($ts);
         $date = strftime($format, $ts->getTimestamp());
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
@@ -59,6 +60,8 @@ class Utils
 
     static public function date_fr($ts, $format = null)
     {
+        $ts = self::get_datetime($ts);
+
         if (null === $ts) {
             return $ts;
         }
@@ -68,30 +71,11 @@ class Utils
             $format = 'd/m/Y à H:i';
         }
 
-        $date = self::get_datetime($ts);
-        $date = $date->format($format);
+        $date = $ts->format($format);
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
-    }
-
-    static public function sqliteDateToFrench($d, $short = false)
-    {
-        if (strlen($d) == 10 || $short)
-        {
-            $f = 'd/m/Y';
-        }
-        elseif (strlen($d) == 16)
-        {
-            $f = 'd/m/Y H:i';
-        }
-        else
-        {
-            $f = 'd/m/Y H:i';
-        }
-
-        return self::date_fr($f, $d);
     }
 
     /**
