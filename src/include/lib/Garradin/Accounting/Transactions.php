@@ -221,6 +221,14 @@ class Transactions
 
 				$row->line_id = trim($row->line_id);
 				$id_analytical = null;
+				$data = [
+					'credit'     => $row->credit ?: 0,
+					'debit'      => $row->debit ?: 0,
+					'id_account' => $id_account,
+					'reference'  => $row->line_reference,
+					'label'      => $row->line_label,
+					'reconciled' => $row->reconciled,
+				];
 
 				if (!empty($row->analytical)) {
 					$id_analytical = $accounts->getIdFromCode($row->analytical);
@@ -228,6 +236,11 @@ class Transactions
 					if (!$id_analytical) {
 						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
 					}
+
+					$row['id_analytical'] = $id_analytical;
+				}
+				elseif (property_exists($row, 'analytical')) {
+					$row['id_analytical'] = null;
 				}
 
 				if ($row->line_id) {
@@ -241,15 +254,7 @@ class Transactions
 					$line = new Line;
 				}
 
-				$line->importForm([
-					'credit'     => $row->credit ?: 0,
-					'debit'      => $row->debit ?: 0,
-					'id_account' => $id_account,
-					'reference'  => $row->line_reference,
-					'label'      => $row->line_label,
-					'reconciled' => $row->reconciled,
-					'id_analytical' => $id_analytical,
-				]);
+				$line->importForm($data);
 
 				if (!$row->line_id) {
 					$transaction->addLine($line);
