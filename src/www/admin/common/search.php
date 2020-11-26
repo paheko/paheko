@@ -30,7 +30,7 @@ if ($text_query !== '' && $target === 'membres')
 	$query = $recherche->buildSimpleMemberQuery($text_query);
 }
 // Recherche existante
-elseif ($id)
+elseif ($id && !f('q'))
 {
 	$search = $recherche->get($id);
 
