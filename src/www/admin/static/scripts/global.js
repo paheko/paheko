@@ -55,8 +55,12 @@
 
 			return true;
 		}
-
-		var elements = document.querySelectorAll(selector);
+		else if (selector instanceof HTMLElement) {
+			var elements = [selector];
+		}
+		else {
+			var elements = document.querySelectorAll(selector);
+		}
 
 		for (var i = 0; i < elements.length; i++)
 		{
@@ -282,7 +286,14 @@
 
 	// Focus on first form input when loading the page
 	g.onload(() => {
-		if ((i = document.querySelector('form[data-focus="1"] [value]')) && (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body')) {
+		if (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body') {
+			let form = document.querySelector('form[data-focus]');
+
+			if (!form) {
+				return;
+			}
+
+			var i = form.querySelector(form.dataset.focus == 1 ? '[name]' : form.dataset.focus);
 			i.focus();
 		}
 	}, 'dom');
