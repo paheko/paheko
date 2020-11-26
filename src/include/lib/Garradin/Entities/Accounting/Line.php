@@ -56,19 +56,6 @@ class Line extends Entity
 		return $value;
 	}
 
-	public function importForm(array $source = null)
-	{
-		if (null === $source) {
-			$source = $_POST;
-		}
-
-		if (empty($source['id_analytical'])) {
-			unset($source['id_analytical']);
-		}
-
-		return parent::importForm($source);
-	}
-
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
