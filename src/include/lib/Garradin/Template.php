@@ -530,7 +530,7 @@ class Template extends \KD2\Smartyer
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
-				return Utils::sqliteDateToFrench($v);
+				return Utils::date_fr($v);
 			case 'multiple':
 				$out = [];
 
