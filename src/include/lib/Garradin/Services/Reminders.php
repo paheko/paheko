@@ -86,8 +86,8 @@ class Reminders
 	{
 		$replace = [
 			'identite'        => $reminder->identity,
-			'date_rappel'     => Utils::sqliteDateToFrench($reminder->reminder_date),
-			'date_expiration' => Utils::sqliteDateToFrench($reminder->expiry_date),
+			'date_rappel'     => Utils::date_fr($reminder->reminder_date),
+			'date_expiration' => Utils::date_fr($reminder->expiry_date),
 			'nb_jours'        => $reminder->nb_days,
 			'delai'           => $reminder->delay,
 		];
