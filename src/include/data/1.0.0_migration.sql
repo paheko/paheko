@@ -66,6 +66,12 @@ INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_cre
 	SELECT id, libelle, remarques, numero_piece, date, id_exercice, id_auteur
 	FROM compta_journal;
 
+-- Recettes
+UPDATE acc_transactions SET type = 1 WHERE id IN (SELECT id FROM compta_journal WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = 1));
+
+-- Dépenses
+UPDATE acc_transactions SET type = 2 WHERE id IN (SELECT id FROM compta_journal WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = -1));
+
 -- Création des lignes associées aux mouvements
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, reference, id_analytical)
 	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(REPLACE(montant * 100, '.0', '') AS INT), numero_cheque,
