@@ -1,4 +1,4 @@
-function initTransactionForm() {
+function initTransactionForm(is_new) {
 	// Advanced transaction: line management
 	var lines = $('.transaction-lines tbody tr');
 
@@ -107,4 +107,50 @@ function initTransactionForm() {
 	};
 
 	updateTotals();
+
+	// Hide type specific parts of the form
+	function hideAllTypes() {
+		g.toggle('[data-types]', false);
+	}
+
+	// Toggle parts of the form when a type is selected
+	function selectType(v) {
+		hideAllTypes();
+		g.toggle('[data-types~=t' + v + ']', true);
+		g.toggle('[data-types=all-but-advanced]', v != 0);
+		// Disable required form elements, or the form won't be able to be submitted
+		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
+			e.disabled = v == 'advanced' ? true : false;
+		});
+
+	}
+
+	var radios = $('fieldset input[type=radio][name=type]');
+
+	radios.forEach((e) => {
+		e.onchange = () => {
+			document.querySelectorAll('fieldset').forEach((e, k) => {
+				if (!is_new || k == 0 || e.dataset.types) return;
+				g.toggle(e, true);
+				g.toggle('p.submit', true);
+			});
+			selectType(e.value);
+		};
+	});
+
+	hideAllTypes();
+
+	// In case of a pre-filled form: show the correct part of the form
+	var current = document.querySelector('input[name=type]:checked');
+	if (current) {
+		selectType(current.value);
+	}
+
+	if (is_new) {
+		document.querySelectorAll('fieldset').forEach((e, k) => {
+			if (k == 0) return;
+			g.toggle(e, false);
+			g.toggle('p.submit', false);
+		});
+	}
 }

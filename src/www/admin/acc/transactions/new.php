@@ -17,7 +17,7 @@ $chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 $transaction = new Transaction;
-$transaction->type = Transaction::TYPE_REVENUE;
+$transaction->type = -1;
 $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
