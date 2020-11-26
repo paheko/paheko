@@ -100,46 +100,10 @@
 
 </form>
 
-{literal}
 <script type="text/javascript" defer="defer" async="async">
-function initForm() {
-	// Hide type specific parts of the form
-	function hideAllTypes() {
-		g.toggle('[data-types]', false);
-	}
-
-	// Toggle parts of the form when a type is selected
-	function selectType(v) {
-		hideAllTypes();
-		g.toggle('[data-types~=t' + v + ']', true);
-		g.toggle('[data-types=all-but-advanced]', v != <?=$transaction::TYPE_ADVANCED?>);
-		// Disable required form elements, or the form won't be able to be submitted
-		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
-			e.disabled = v == 'advanced' ? true : false;
-		});
-
-	}
-
-	var radios = $('fieldset input[type=radio][name=type]');
-
-	radios.forEach((e) => {
-		e.onchange = () => {
-			selectType(e.value);
-		};
-	});
-
-	hideAllTypes();
-
-	// In case of a pre-filled form: show the correct part of the form
-	var current = document.querySelector('input[name=type]:checked');
-	if (current) {
-		selectType(current.value);
-	}
-}
-
-initForm();
-
-g.script('scripts/accounting.js', () => { initTransactionForm(); });
+let is_new = {if $payoff_for}false{else}true{/if};
+{literal}
+g.script('scripts/accounting.js', () => { initTransactionForm(is_new); });
 </script>
 {/literal}
 

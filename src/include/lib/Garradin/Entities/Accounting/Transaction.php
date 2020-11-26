@@ -161,6 +161,47 @@ class Transaction extends Entity
 		return null;
 	}
 
+	public function getLinesCreditSum()
+	{
+		$sum = 0;
+
+		foreach ($this->getLines() as $line) {
+			$sum += $line->credit;
+		}
+
+		return $sum;
+	}
+
+	public function getTypesAccounts()
+	{
+		if ($this->type == self::TYPE_ADVANCED) {
+			return [];
+		}
+
+		$debit = null;
+		$credit = null;
+
+		$lines = $this->getLinesWithAccounts();
+
+		foreach ($lines as $line) {
+			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+
+			if ($line->debit) {
+				$debit = $account;
+			}
+			else {
+				$credit = $account;
+			}
+		}
+
+		$type = $this->getTypesDetails()[$this->type];
+
+		return [
+			$type->accounts[0]->position == 'credit' ? $credit : $debit,
+			$type->accounts[1]->position == 'credit' ? $credit : $debit,
+		];
+	}
+
 /*
 	public function getHash()
 	{
@@ -438,22 +479,9 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		$this->importForm();
 
 		$this->resetLines();
-
-		$lines = Utils::array_transpose($source['lines']);
-
-		foreach ($lines as $i => $line) {
-			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
-
-			if (!$line['id_account']) {
-				throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
-			}
-
-			$line = (new Line)->importForm($line);
-			$this->addLine($line);
-		}
+		$this->importFromNewForm($source);
 	}
 
 	public function importFromBalanceForm(Year $year, ?array $source = null): void
@@ -598,7 +626,7 @@ class Transaction extends Entity
 			],
 			self::TYPE_TRANSFER => [
 				'accounts' => [
-						[
+					[
 						'label' => 'De',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
 						'position' => 'debit',
