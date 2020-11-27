@@ -138,7 +138,9 @@ class Config
 
             if (strlen($value) > 0)
             {
-                $f = Fichiers::storeFromBase64($key . '.png', $value);
+                $content = $value;
+                $value = null;
+                $f = Fichiers::storeFromBase64($key . '.png', $content);
                 $value = $f->id;
                 unset($f);
             }

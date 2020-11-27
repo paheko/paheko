@@ -587,7 +587,10 @@ class Fichiers
 				unset($i);
 			}
 			catch (\RuntimeException $e) {
-				throw $e;
+				if (strstr($e->getMessage(), 'No suitable image library found')) {
+					throw new UserException('Le serveur n\'a aucune bibliothèque de gestion d\'image installée, et ne peut donc pas accepter les images. Installez Imagick ou GD.');
+				}
+
 				throw new UserException('Fichier image invalide');
 			}
 		}
