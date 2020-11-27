@@ -283,8 +283,8 @@ form .radio-btn .help {
     font-size: .8em;
 }
 
-form .radio-btn input:checked + div {
-    background-color: rgba(var(--gSecondColor), 0.5);
+form .radio-btn input:checked + label div {
+    background-color: rgba(var(--gSecondColor), 0.3);
 }
 
 /* Custom list input */
