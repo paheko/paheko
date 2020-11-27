@@ -103,7 +103,7 @@
 <script type="text/javascript" defer="defer" async="async">
 let is_new = {if $payoff_for}false{else}true{/if};
 {literal}
-g.script('scripts/accounting.js', () => { initTransactionForm(is_new); });
+g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
 </script>
 {/literal}
 
