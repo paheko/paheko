@@ -43,7 +43,8 @@
 			{else}
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
-					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$types_accounts[$key]}
+					<?php $selected = $types_accounts[$key] ?? null; ?>
+					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
 				{/foreach}
 				</dl>
 			{/if}
