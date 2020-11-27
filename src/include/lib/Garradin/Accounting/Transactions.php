@@ -237,10 +237,10 @@ class Transactions
 						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
 					}
 
-					$row['id_analytical'] = $id_analytical;
+					$data['id_analytical'] = $id_analytical;
 				}
 				elseif (property_exists($row, 'analytical')) {
-					$row['id_analytical'] = null;
+					$data['id_analytical'] = null;
 				}
 
 				if ($row->line_id) {
