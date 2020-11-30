@@ -25,7 +25,12 @@ $payoff_for = qg('payoff_for') ?: f('payoff_for');
 // Quick pay-off for debts and credits, directly from a debt/credit details page
 if ($id = $payoff_for) {
 	$payoff_for = $transaction->payOffFrom($id);
-	$amount = $payoff_for->sum();
+
+	if (!$payoff_for) {
+		throw new UserException('Écriture inconnue');
+	}
+
+	$amount = $payoff_for->sum;
 }
 
 // Quick transaction from an account journal page

@@ -2,7 +2,7 @@
 
 {include file="acc/_year_select.tpl"}
 
-<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data" data-focus="1">
+<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
 	{form_errors}
 
 	{if $ok}
@@ -13,14 +13,15 @@
 	{/if}
 
 	{if $payoff_for}
-		<input type="hidden" name="type" value="{$transaction::TYPE_PAYOFF}" />
+		<input type="hidden" name="type" value="{$transaction.type}" />
 		<input type="hidden" name="payoff_for" value="{$payoff_for.id}" />
+		<input type="hidden" name="{$payoff_for.form_account_name}[{$payoff_for.id_account}]" value="-" />
 		<fieldset>
-			<legend>{if $payoff_for->type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
+			<legend>{if $payoff_for.type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
 			<dl>
 				<dt>Écriture d'origine</dt>
 				<dd><a class="num" href="{$admin_url}acc/transactions/details.php?id={$payoff_for.id}">#{$payoff_for.id}</a></dd>
-				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
+				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name=$payoff_for.form_target_name label="Compte de règlement" required=1}
 			</dl>
 		</fieldset>
 	{else}

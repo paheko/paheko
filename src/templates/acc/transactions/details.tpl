@@ -25,7 +25,7 @@
 	{if $transaction.id_related}
 	<dt>Écriture liée à</dt>
 	<dd><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id_related}">#{$transaction.id_related}</a>
-		{if $transaction.type == $transaction::TYPE_PAYOFF}(en règlement de){/if}
+		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
 	</dd>
 	{/if}
 	<dt>Libellé</dt>
