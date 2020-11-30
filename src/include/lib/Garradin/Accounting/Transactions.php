@@ -10,6 +10,7 @@ use KD2\DB\EntityManager;
 use Garradin\CSV;
 use Garradin\CSV_Custom;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Utils;
 use Garradin\UserException;
 
@@ -366,5 +367,37 @@ class Transactions
 		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE id IN (%s);',
 			(int)$id_analytical ?: 'NULL',
 			implode(', ', $lines)));
+	}
+
+	static public function listByType(int $year_id, int $type)
+	{
+		$reverse = 1;
+
+		$columns = Account::LIST_COLUMNS;
+		unset($columns['line_label'], $columns['sum'], $columns['debit'], $columns['credit']);
+		$columns['line_reference']['label'] = 'Réf. paiement';
+		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
+		$columns['change']['label'] = 'Montant';
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
+		$conditions = sprintf('t.type = %s AND t.id_year = %d', $type, $year_id);
+
+		$sum = 0;
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		$list->setCount('COUNT(*)');
+		$list->groupBy('t.id');
+		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+		});
+		$list->setExportCallback(function (&$row) {
+			$row->change = Utils::money_format($row->change, '.', '', false);
+		});
+
+		return $list;
 	}
 }
