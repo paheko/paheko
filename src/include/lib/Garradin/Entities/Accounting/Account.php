@@ -135,6 +135,9 @@ class Account extends Entity
 			'label' => 'Projet',
 			'select' => 'b.code',
 		],
+		'status' => [
+			'select' => 't.status',
+		],
 	];
 
 	protected $id;
