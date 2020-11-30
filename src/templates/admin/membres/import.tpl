@@ -57,6 +57,7 @@
 
     <p class="submit">
         {csrf_field key=$csrf_key}
+        {if $csv->loaded()}{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}{/if}
         {button type="submit" name="import" label="Importer" shape="upload" class="main"}
     </p>
 

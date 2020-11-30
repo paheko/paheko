@@ -36,7 +36,12 @@ foreach ($champs as $key => $config) {
 
 $csv->setColumns($columns);
 
-$form->runIf(f('import') && $csv->ready(), function () use ($csv, $import, $user) {
+if (f('cancel')) {
+    $csv->clear();
+    Utils::redirect(Utils::getSelfURL(false));
+}
+
+$form->runIf(f('import') && $csv->loaded(), function () use ($csv, $import, $user) {
     $csv->setTranslationTable(f('translation_table'));
     $csv->skip((int)f('skip_first_line'));
     $import->fromCustomCSV($csv, $user->id);
@@ -49,7 +54,7 @@ $form->runIf(f('import') && f('type') == 'garradin' && !empty($_FILES['upload'][
 
 $form->runIf(f('import') && f('type') == 'custom' && !empty($_FILES['upload']['tmp_name']), function () use ($csv) {
     $csv->load($_FILES['upload']);
-}, $csrf_key, ADMIN_URL . 'membres/import.php?ok');
+}, $csrf_key, ADMIN_URL . 'membres/import.php');
 
 $tpl->assign('ok', null !== qg('ok') ? true : false);
 
