@@ -39,7 +39,11 @@ if (buttons.length) {
 	buttons[0].focus();
 }
 
-var rows = document.querySelectorAll('table tr');
+var rows = document.querySelectorAll('table tbody tr');
+
+if (rows.length == 1) {
+	rows[0].querySelector('button').click();
+}
 
 rows.forEach((e) => {
 	e.classList.add('clickable');
