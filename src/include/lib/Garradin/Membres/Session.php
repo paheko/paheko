@@ -141,10 +141,10 @@ class Session extends \KD2\UserSession
 		{
 			$login_id = \Garradin\LOCAL_LOGIN;
 
-			// On va chercher le premier membre avec le droit de gérer les membres
+			// On va chercher le premier membre avec le droit de gérer la config
 			if (-1 === $login_id) {
 				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_categorie = (SELECT id FROM membres_categories WHERE droit_membres = ? LIMIT 1)
+					WHERE id_categorie IN (SELECT id FROM membres_categories WHERE droit_config = ?)
 					LIMIT 1', Membres::DROIT_ADMIN);
 			}
 
