@@ -9,10 +9,6 @@
 	</nav>
 {/if}
 
-{if Entities\Accounting\Account::isReversed($type)}
-	{include file="acc/_simple_help.tpl" link=null type=$type}
-{/if}
-
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
@@ -43,19 +39,17 @@
 					{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
 				</td>
 				{/if}
-				<td class="num"><a href="journal.php?id={$line.id_account}">{$line.account}</a></td>
-				<td>{$line.account_label}</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_short}</td>
-				<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|html_money}</td>
+				<td class="money">{$line.change|abs|raw|html_money}</td>
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
 				<td class="num">{if $line.id_analytical}<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.code_analytical}</a>{/if}</td>
 				<td class="actions">
-					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
+					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
-					{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT}
+					{elseif $line.type == Entities\Accounting\Transaction::TYPE_CREDIT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 						{linkbutton shape="export" label="Régler cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}
 					{/if}
 
