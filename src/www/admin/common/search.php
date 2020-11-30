@@ -25,12 +25,12 @@ $search = null;
 $id = f('id') ?: qg('id');
 
 // Recherche simple
-if ($text_query !== '' && $target === 'membres')
+if ($text_query !== '' && $target === 'membres' && empty($query->query))
 {
 	$query = $recherche->buildSimpleMemberQuery($text_query);
 }
 // Recherche existante
-elseif ($id && !f('q'))
+elseif ($id && empty($query->query))
 {
 	$search = $recherche->get($id);
 
