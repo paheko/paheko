@@ -376,7 +376,7 @@ class Transactions
 		$columns = Account::LIST_COLUMNS;
 		unset($columns['line_label'], $columns['sum'], $columns['debit'], $columns['credit']);
 		$columns['line_reference']['label'] = 'Réf. paiement';
-		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
+		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
 
 		$tables = 'acc_transactions_lines l
