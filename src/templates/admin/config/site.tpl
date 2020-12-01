@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration — Site public" current="config" js=1}
+{include file="admin/_head.tpl" title="Configuration — Site public" current="config"}
 
 {form_errors}
 

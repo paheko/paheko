@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Éditer une page" current="wiki" js=1}
+{include file="admin/_head.tpl" title="Éditer une page" current="wiki"}
 
 {form_errors}
 

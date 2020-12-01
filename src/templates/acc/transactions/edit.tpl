@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modification d'une écriture" current="acc/simple" js=1}
+{include file="admin/_head.tpl" title="Modification d'une écriture" current="acc/simple"}
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="#f_date">
 	{form_errors}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport" js=1}
+{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
 
 {if empty($year)}
 	{include file="acc/_year_select.tpl"}

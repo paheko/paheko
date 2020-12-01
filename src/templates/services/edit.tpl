@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier une activité" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Modifier une activité" current="membres/services"}
 
 {include file="services/_nav.tpl" current="index"}
 

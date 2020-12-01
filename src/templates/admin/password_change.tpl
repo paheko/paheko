@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Changement de mot de passe" js=1}
+{include file="admin/_head.tpl" title="Changement de mot de passe"}
 
 
 {form_errors}

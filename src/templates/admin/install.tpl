@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Garradin - Installation" js=1}
+{include file="admin/_head.tpl" title="Garradin - Installation"}
 
 {if $disabled}
     <p class="block error">Garradin est déjà installé.</p>
