@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new" js=1}
+{include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new"}
 
 {include file="acc/_year_select.tpl"}
 

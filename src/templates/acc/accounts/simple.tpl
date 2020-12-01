@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple" js=1}
+{include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
 {if empty($year)}
 	{include file="acc/_year_select.tpl"}

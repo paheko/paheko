@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
+{include file="admin/_head.tpl" title="Import & export des membres" current="membres"}
 
 {include file="admin/membres/_nav.tpl" current="import"}
 

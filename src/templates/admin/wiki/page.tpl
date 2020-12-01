@@ -1,5 +1,5 @@
 {if !empty($page.titre) && $can_read}
-    {include file="admin/_head.tpl" title=$page.titre current="wiki" js=1}
+    {include file="admin/_head.tpl" title=$page.titre current="wiki"}
 {else}
     {include file="admin/_head.tpl" title="Wiki" current="wiki"}
 {/if}

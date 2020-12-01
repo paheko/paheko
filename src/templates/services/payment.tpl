@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Enregistrer un règlement" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Enregistrer un règlement" current="membres/services"}
 
 {form_errors}
 

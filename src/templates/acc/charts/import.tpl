@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts" js=1}
+{include file="admin/_head.tpl" title="Importer un nouveau plan comptable" current="acc/charts"}
 
 <nav class="tabs">
 	<ul>

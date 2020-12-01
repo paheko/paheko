@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years" js=1}
+{include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years"}
 
 <nav class="tabs">
 	<ul>

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un compte" current="acc/charts" js=1}
+{include file="admin/_head.tpl" title="Modifier un compte" current="acc/charts"}
 
 {form_errors}
 

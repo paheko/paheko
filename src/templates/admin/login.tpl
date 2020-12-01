@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Connexion" js=1}
+{include file="admin/_head.tpl" title="Connexion"}
 
 {form_errors}
 

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services"}
 
 {include file="services/_nav.tpl" current="index" service=null fee=null}
 

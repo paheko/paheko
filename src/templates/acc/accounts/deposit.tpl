@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts" js=1}
+{include file="admin/_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
 <p class="help">
 	Cocher les cases correspondant aux montants à déposer, une nouvelle écriture sera générée.
