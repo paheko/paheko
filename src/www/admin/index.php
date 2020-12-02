@@ -15,7 +15,9 @@ $tpl->assign('page', $page);
 
 $tpl->assign('custom_css', ['wiki.css']);
 
-$tpl->assign('banniere', Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session]));
+$banner = null;
+Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session], $banner);
+$tpl->assign('banniere', $banner);
 
 $tpl->display('admin/index.tpl');
 flush();
