@@ -113,6 +113,12 @@
 		btn.onclick = g.closeDialog;
 		g.dialog.appendChild(btn);
 
+		if (typeof content == 'string') {
+			var container = document.createElement('div');
+			container.innerHTML = content;
+			content = container;
+		}
+
 		content.style.opacity = g.dialog.style.opacity = 0;
 		g.dialog.appendChild(content);
 		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
