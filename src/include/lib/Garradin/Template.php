@@ -259,6 +259,10 @@ class Template extends \KD2\Smartyer
 		$attributes['id'] = 'f_' . $name;
 		$attributes['name'] = $name;
 
+		if (!isset($attributes['autocomplete'])) {
+			$attributes['autocomplete'] = 'off';
+		}
+
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
 
