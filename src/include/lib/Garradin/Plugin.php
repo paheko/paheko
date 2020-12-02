@@ -765,16 +765,24 @@ class Plugin
 			return null;
 		}
 
+		if (null === $params) {
+			$params = [];
+		}
+
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($list as $row)
 		{
+			$path = self::getPath($row->plugin, in_array($row->plugin, $system));
+
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
 			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
-			if (!self::getPath($row->plugin, in_array($row->plugin, $system)))
+			if (!$path)
 			{
 				continue;
 			}
+
+			$params['plugin_root'] = $path;
 
 			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 
