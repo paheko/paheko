@@ -63,22 +63,22 @@ class Squelette_Filtres
 
     static public function date_en_francais($date)
     {
-        return ucfirst(strtolower(Utils::strftime_fr('%A %e %B %Y', $date)));
+        return ucfirst(strtolower(Utils::strftime_fr($date, '%A %e %B %Y')));
     }
 
     static public function heure_en_francais($date)
     {
-        return Utils::strftime_fr('%Hh%M', $date);
+        return Utils::strftime_fr($date, '%Hh%M');
     }
 
     static public function mois_en_francais($date)
     {
-        return Utils::strftime_fr('%B %Y', $date);
+        return Utils::strftime_fr($date, '%B %Y');
     }
 
     static public function date_perso($date, $format)
     {
-        return Utils::strftime_fr($format, $date);
+        return Utils::strftime_fr($date, $format);
     }
 
     static public function date_intelligente($date, $avec_heure = true)
