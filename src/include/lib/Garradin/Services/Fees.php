@@ -43,6 +43,14 @@ class Fees
 			}
 		}
 
+		usort($result, function ($a, $b) {
+			if ($a->user_amount == $b->user_amount) {
+				return 0;
+			}
+
+			return $a->user_amount > $b->user_amount ? 1 : -1;
+		});
+
 		return $result;
 	}
 
