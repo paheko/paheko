@@ -83,8 +83,8 @@
             <dl>
                 {foreach from=$liste_telecharges item="plugin" key="id"}
                 <dt>
-                    <label>
-                        <input type="radio" name="plugin" value="{$id}" />
+                    <input type="radio" name="plugin" value="{$id}" id="f_{$id}" />
+                    <label for="f_{$id}">
                         {$plugin.nom}
                     </label>
                     (version {$plugin.version})
