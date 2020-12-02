@@ -259,7 +259,7 @@ class Template extends \KD2\Smartyer
 		$attributes['id'] = 'f_' . $name;
 		$attributes['name'] = $name;
 
-		if (!isset($attributes['autocomplete'])) {
+		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
 			$attributes['autocomplete'] = 'off';
 		}
 
