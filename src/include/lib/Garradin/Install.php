@@ -208,6 +208,13 @@ class Install
 		$recherche = new Recherche;
 		$recherche->add('Écritures sans projet', null, $recherche::TYPE_JSON, 'compta', $query);
 
+		// Install welcome plugin if available
+		$has_welcome_plugin = Plugin::getPath('welcome', false);
+
+		if ($has_welcome_plugin) {
+			Plugin::install('welcome', true);
+		}
+
 		return $config->save();
 	}
 
