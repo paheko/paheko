@@ -12,11 +12,17 @@ fieldset legend {
     color: #000;
 }
 
-table tr.clickable:hover {
+table.list tr.clickable:hover {
     cursor: pointer;
     color: #633;
     background: #ffc;
 
+}
+
+table tr.focused {
+    color: #633;
+    background: #ffc !important;
+    box-shadow: 0 0 5px .2rem #990;
 }
 
 dl dt label {
