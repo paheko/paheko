@@ -244,6 +244,11 @@
 
 	g.inputListSelected = function(value, label) {
 		var i = g.current_list_input;
+
+		if (!i) {
+			throw Error('Parent input list not found');
+		}
+
 		var multiple = i.firstChild.getAttribute('data-multiple');
 		var name = i.firstChild.getAttribute('data-name');
 
