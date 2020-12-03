@@ -41,12 +41,15 @@ $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart', 'targets'));
 
+$all = (bool) qg('all');
+
 if (!$targets) {
-	$tpl->assign('accounts', $accounts->listAll());
+	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());
 }
 else {
 	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped(explode(':', $targets)));
 }
 
+$tpl->assign('all', $all);
 
 $tpl->display('acc/charts/accounts/selector.tpl');
