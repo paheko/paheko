@@ -32,14 +32,15 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 					</dd>
 				</dl>
 			</dd>
-			<dt><strong>Enregistrement en comptabilité</strong></dt>
+			<dt><strong>Comptabilité</strong></dt>
 			{input name="accounting" type="checkbox" value="1" label="Enregistrer en comptabilité" default=$accounting_enabled}
-			<dd class="help">Chaque nouvelle inscription de membre dans ce tarif sera enregistrée dans la comptabilité.</dd>
+			<dd class="help">Laissez cette case décochée si vous n'utilisez pas Garradin pour la comptabilité. Il ne sera pas possible de suivre le montant des règlements effectués pour ce tarif.</dd>
 		</dl>
 	</fieldset>
 
 	<fieldset class="accounting">
 		<legend>Enregistrer en comptabilité</legend>
+		<p class="help">Chaque règlement d'un membre lié à ce tarif sera enregistré dans la comptabilité, permettant de suivre le montant des règlements effectués.</p>
 		{if !count($years)}
 			<p class="error block">Il n'y a aucun exercice ouvert dans la comptabilité, il n'est donc pas possible d'enregistrer les activités dans la comptabilité. Merci de commencer par <a href="{$admin_url}acc/years/new.php">créer un exercice</a>.</p>
 		{else}
