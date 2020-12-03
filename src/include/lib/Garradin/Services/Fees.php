@@ -63,6 +63,6 @@ class Fees
 			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_fee = f.id AND paid = 0) AS nb_users_unpaid
 			FROM services_fees f
 			WHERE id_service = ?
-			ORDER BY transliterate_to_ascii(label) COLLATE NOCASE;', $this->service_id);
+			ORDER BY amount, transliterate_to_ascii(label) COLLATE NOCASE;', $this->service_id);
 	}
 }
