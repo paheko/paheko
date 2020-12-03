@@ -40,7 +40,9 @@
 		</tbody>
 	</table>
 {else}
-	<p class="block alert">Il n'y a aucun tarif enregistré.</p>
+	<p class="block alert">
+		Il n'y a aucun tarif enregistré. Créez un premier tarif pour l'activité «&nbsp;{$service.label}&nbsp;» pour pouvoir y inscrire des membres.
+	</p>
 {/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
