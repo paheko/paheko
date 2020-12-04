@@ -23,7 +23,7 @@
                 <a href="{$garradin_website}" target="_blank">Aller télécharger la nouvelle version</a>
             </p></dd>
             {/if}
-            {if ERRORS_ENABLE_LOG_VIEW}
+            {if ENABLE_TECH_DETAILS}
             <dt>Informations système</dt>
             <dd class="help">
                 Version PHP&nbsp;: {$php_version}<br />

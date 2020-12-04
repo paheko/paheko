@@ -191,25 +191,26 @@ namespace Garradin;
 //const ERRORS_REPORT_URL = null;
 
 /**
- * Activation de la page permettant de visualiser et rapporter les erreurs présentes
- * dans le error.log.
+ * Activation des détails techniques (utile en auto-hébergement) :
+ * - version de PHP
+ * - page permettant de visualiser les erreurs présentes dans le error.log
+ * - vérification de nouvelle version
  *
- * Conseillé de mettre à false si vous ne voulez pas que les administrateurs de votre
- * instance puissent voir les erreurs système.
+ * Ces infos ne sont visibles que par les membres ayant accès à la configuration.
  *
  * Défaut : true
  * (Afin d'aider au rapport de bugs des instances auto-hébergées)
  */
 
-//const ERRORS_ENABLE_LOG_VIEW = true;
+//const ENABLE_TECH_DETAILS = true;
 
 /**
  * Utilisation de cron pour les tâches automatiques
  *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
- * le script cron.php à la racine toutes les 24 heures. Sinon Garradin
- * effectuera les actions automatiques quand quelqu'un se connecte à
- * l'administration ou visite le site.
+ * le script cron.php dans le répertoire "scripts" toutes les 24 heures.
+ * Sinon Garradin effectuera les actions automatiques quand quelqu'un
+ * se connecte à l'administration ou visite le site.
  *
  * Défaut : false
  */

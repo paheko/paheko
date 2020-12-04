@@ -55,7 +55,7 @@ $server_time = time();
 
 $tpl->assign('garradin_version', garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']');
 
-$tpl->assign('new_version', ERRORS_ENABLE_LOG_VIEW ? Utils::getLatestVersion() : null);
+$tpl->assign('new_version', ENABLE_TECH_DETAILS ? Utils::getLatestVersion() : null);
 $tpl->assign('php_version', phpversion());
 $tpl->assign('has_gpg_support', \KD2\Security::canUseEncryption());
 $tpl->assign('server_time', $server_time);
