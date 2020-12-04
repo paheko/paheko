@@ -166,7 +166,6 @@ static $default_config = [
 	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
-	'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/gdin_bg.png'
 ];
 
 foreach ($default_config as $const => $value)
@@ -177,6 +176,10 @@ foreach ($default_config as $const => $value)
 	{
 		define($const, $value);
 	}
+}
+
+if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
+	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
 
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
