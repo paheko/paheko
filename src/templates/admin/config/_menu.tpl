@@ -6,6 +6,8 @@
 		<li{if $current == 'site'} class="current"{/if}><a href="{$admin_url}config/site.php">Site public</a></li>
 		<li{if $current == 'donnees'} class="current"{/if}><a href="{$admin_url}config/donnees/">Sauvegarde et restauration</a></li>
 		<li{if $current == 'plugins'} class="current"{/if}><a href="{$admin_url}config/plugins.php">Extensions</a></li>
+		{if ERRORS_ENABLE_LOG_VIEW}
 		<li{if $current == 'logs'} class="current"{/if}><a href="{$admin_url}config/logs.php?type=errors">Journaux</a></li>
+		{/if}
 	</ul>
 </nav>
