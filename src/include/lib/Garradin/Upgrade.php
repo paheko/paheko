@@ -6,14 +6,14 @@ use Garradin\Membres\Session;
 
 class Upgrade
 {
-	static public function preCheck()
+	static public function preCheck(): bool
 	{
 		$config = Config::getInstance();
 		$v = $config->getVersion();
 
 		if (version_compare($v, garradin_version(), '>='))
 		{
-			throw new UserException("Pas de mise à jour à faire.");
+			return false;
 		}
 
 		if (!$v || version_compare($v, '0.9.8', '<'))
@@ -35,6 +35,7 @@ class Upgrade
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
 		$session = new Session;
 		$user_is_logged = $session->isLogged(true);
+		return true;
 	}
 
 	static public function upgrade()
