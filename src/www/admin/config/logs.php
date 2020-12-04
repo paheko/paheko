@@ -5,7 +5,7 @@ use KD2\ErrorManager;
 
 require_once __DIR__ . '/_inc.php';
 
-if (qg('type') == 'errors' && ERRORS_ENABLE_LOG_VIEW)
+if (qg('type') == 'errors' && ENABLE_TECH_DETAILS)
 {
     $reports = ErrorManager::getReportsFromLog(null, qg('id'));
 
