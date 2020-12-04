@@ -18,6 +18,8 @@ if (version_compare($config->getVersion(), garradin_version(), '<')) {
 		echo $e->getMessage() . PHP_EOL;
 		exit(1);
 	}
+
+	exit(2);
 }
 
 exit(0);
