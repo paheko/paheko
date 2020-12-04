@@ -16,7 +16,14 @@
         <legend>Garradin</legend>
         <dl>
             <dt>Version installée</dt>
-            <dd class="help">{$garradin_version} <a href="{$garradin_website}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+            <dd class="help">{$garradin_version}</dd>
+            {if $new_version}
+            <dd><p class="block alert">
+                Une nouvelle version <strong>{$new_version}</strong> est disponible !<br />
+                <a href="{$garradin_website}" target="_blank">Aller télécharger la nouvelle version</a>
+            </p></dd>
+            {/if}
+            {if ERRORS_ENABLE_LOG_VIEW}
             <dt>Informations système</dt>
             <dd class="help">
                 Version PHP&nbsp;: {$php_version}<br />
@@ -24,6 +31,7 @@
                 Heure du serveur&nbsp;: {$server_time|date_fr}<br />
                 Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
             </dd>
+            {/if}
         </dl>
     </fieldset>
 

@@ -68,6 +68,7 @@ class Config
 
             'version'                 =>  $string,
             'last_chart_change'       =>  $int,
+            'last_version_check'      =>  $string,
 
             'couleur1'                =>  $string,
             'couleur2'                =>  $string,
