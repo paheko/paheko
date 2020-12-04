@@ -703,6 +703,12 @@ class Template extends \KD2\Smartyer
 		<dd class="help">' . htmlspecialchars($config->help, ENT_QUOTES, 'UTF-8') . '</dd>';
 		}
 
+		$id_field = Config::getInstance()->get('champ_identifiant');
+
+		if ($params['name'] == $id_field && empty($params['user_mode'])) {
+			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
+		}
+
 		if ($type != 'checkbox')
 		{
 			$out .= '
