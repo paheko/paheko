@@ -22,15 +22,18 @@
 		</ul>
 	</nav>
 
-	{if $year.has_transactions}
-	<section class="graphs">
-		{foreach from=$graphs key="url" item="label"}
-		<figure>
-			<img src="{$url|args:'year='|cat:$year.id}" alt="" />
-			<figcaption>{$label}</figcaption>
-		</figure>
-		{/foreach}
-	</section>
+	{if $year.nb_transactions > 3}
+		<section class="graphs">
+			{foreach from=$graphs key="url" item="label"}
+			<figure>
+				<img src="{$url|args:'year='|cat:$year.id}" alt="" />
+				<figcaption>{$label}</figcaption>
+			</figure>
+			{/foreach}
+		</section>
+	{else}
+		<p class="help block">Il n'y a pas encore suffisamment d'écritures dans cet exercice pour pouvoir afficher les statistiques.</p>
+		<p>{linkbutton label="Saisir une nouvelle écriture" shape="plus" href="transactions/new.php"}</p>
 	{/if}
 </section>
 

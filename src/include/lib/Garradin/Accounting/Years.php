@@ -22,7 +22,7 @@ class Years
 	static public function listOpen()
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
-		return $db->get('SELECT *, (SELECT 1 FROM acc_transactions WHERE id_year = acc_years.id LIMIT 1) AS has_transactions
+		return $db->get('SELECT *, (SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions
 			FROM acc_years WHERE closed = 0 ORDER BY end_date;');
 	}
 
