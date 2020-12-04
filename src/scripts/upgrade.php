@@ -8,18 +8,16 @@ require_once __DIR__ . '/../include/init.php';
 
 $config = Config::getInstance();
 
-if (version_compare($config->getVersion(), garradin_version(), '<')) {
-	try {
-		if (Upgrade::preCheck()) {
-			Upgrade::upgrade();
-		}
+try {
+	if (Upgrade::preCheck()) {
+		Upgrade::upgrade();
+		exit(2);
 	}
-	catch (UserException $e) {
-		echo $e->getMessage() . PHP_EOL;
-		exit(1);
+	else {
+		exit(0);
 	}
-
-	exit(2);
 }
-
-exit(0);
+catch (UserException $e) {
+	echo $e->getMessage() . PHP_EOL;
+	exit(1);
+}
