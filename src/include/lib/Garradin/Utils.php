@@ -754,14 +754,17 @@ class Utils
     static public function array_transpose(array $array): array
     {
         $out = [];
-        $count = null;
+        $max = 0;
+
+        foreach ($array as $rows) {
+            $max = max($max, count($rows));
+        }
 
         foreach ($array as $column => $rows) {
-            if (null !== $count && count($rows) != $count) {
-                throw new \LogicException('Array is inconsistent');
+            // Match number of rows of largest sub-array, in case there is a missing row in a column
+            if ($max != count($rows)) {
+                $rows = array_merge($rows, array_fill(0, $max - count($rows), null));
             }
-
-            $count = count($rows);
 
             foreach ($rows as $k => $v) {
                 if (!isset($out[$k])) {
