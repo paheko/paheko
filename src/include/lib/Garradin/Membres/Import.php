@@ -205,13 +205,21 @@ class Import
 
 		$champs = Config::getInstance()->get('champs_membres')->getKeys();
 		$champs = array_map([$db, 'quoteIdentifier'], $champs);
-		$champs_sql = 'm.' . implode(', m.', $champs);
-		$where = $list ? 'WHERE ' . $db->where('m.id', $list) : '';
+		$fields = 'm.' . implode(', m.', $champs);
 
-		$res = $db->iterate('SELECT ' . $champs_sql . ', c.nom AS "Catégorie membre" FROM membres AS m
+		if ($list) {
+			$list = array_map('intval', $list);
+			$where = sprintf('WHERE m.%s', $db->where('id', $list));
+		}
+		else {
+			$where = '';
+		}
+
+		$sql = sprintf('SELECT %s, c.nom AS "Catégorie membre" FROM membres AS m
 			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
-			' . $where . '
-			ORDER BY c.id;');
+			%s ORDER BY c.id;', $fields, $where);
+
+		$res = $db->iterate($sql);
 
 		return [
 			array_keys((array) $res->current()),
