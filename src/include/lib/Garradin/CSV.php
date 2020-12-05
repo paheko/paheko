@@ -150,28 +150,28 @@ class CSV
 
 		$fp = fopen('php://output', 'w');
 
-		if ($header)
-		{
+		if ($header) {
 			fputs($fp, self::row($header));
 		}
 
-		foreach ($iterator as $row)
-		{
-			foreach ($row as $key => &$v) {
-				if (is_object($v)&& $v instanceof \DateTimeInterface) {
-					$v = $v->format('d/m/Y');
+		if ($iterator->valid()) {
+			foreach ($iterator as $row) {
+				foreach ($row as $key => &$v) {
+					if (is_object($v)&& $v instanceof \DateTimeInterface) {
+						$v = $v->format('d/m/Y');
+					}
 				}
+
+				$row = self::rowToArray($row, $row_map_callback);
+
+				if (!$header)
+				{
+					fputs($fp, self::row(array_keys($row)));
+					$header = true;
+				}
+
+				fputs($fp, self::row($row));
 			}
-
-			$row = self::rowToArray($row, $row_map_callback);
-
-			if (!$header)
-			{
-				fputs($fp, self::row(array_keys($row)));
-				$header = true;
-			}
-
-			fputs($fp, self::row($row));
 		}
 
 		fclose($fp);
@@ -185,22 +185,22 @@ class CSV
 		$ods = new ODSWriter;
 		$ods->table_name = $name;
 
-		if ($header)
-		{
+		if ($header) {
 			$ods->add((array) $header);
 		}
 
-		foreach ($iterator as $row)
-		{
-			$row = self::rowToArray($row, $row_map_callback);
+		if ($iterator->valid()) {
+			foreach ($iterator as $row) {
+				$row = self::rowToArray($row, $row_map_callback);
 
-			if (!$header)
-			{
-				$ods->add(array_keys($row));
-				$header = true;
+				if (!$header)
+				{
+					$ods->add(array_keys($row));
+					$header = true;
+				}
+
+				$ods->add((array) $row);
 			}
-
-			$ods->add((array) $row);
 		}
 
 		$ods->output();
