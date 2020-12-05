@@ -138,10 +138,17 @@ class Squelette_Filtres
         if (!trim($contact))
             return '';
 
-        if (strpos($contact, '@'))
-            return '<span style="unicode-bidi:bidi-override;direction: rtl;">'.htmlspecialchars(strrev($contact), ENT_QUOTES, 'UTF-8').'</span>';
-        else
+        if (strpos($contact, '@')) {
+            $reversed = strrev($contact);
+            // https://unicode-table.com/en/FF20/
+            $reversed = strtr($reversed, ['@' => '＠']);
+
+            return sprintf('<a href="#error" onclick="this.href = (this.innerText + \':otliam\').split(\'\').reverse().join(\'\').replace(/＠/, \'@\');"><span style="unicode-bidi:bidi-override;direction: rtl;">%s</span></a>',
+                htmlspecialchars($reversed));
+        }
+        else {
             return '<a href="'.htmlspecialchars($contact, ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($contact, ENT_QUOTES, 'UTF-8').'</a>';
+        }
     }
 
     static public function entites_html($texte)
