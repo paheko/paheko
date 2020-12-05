@@ -54,6 +54,6 @@
 
 {/if}
 
-<script type="text/javascript" src="{$admin_url}static/scripts/selector.js"></script>
+<script type="text/javascript" src="{$admin_url}static/scripts/selector.js?{$version_hash}"></script>
 
 {include file="admin/_foot.tpl"}
