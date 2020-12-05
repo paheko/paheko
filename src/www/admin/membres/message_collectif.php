@@ -32,7 +32,7 @@ if (f('send'))
 
         if (isset($recipients) && !count($recipients))
         {
-            $form->addError('Aucun membre dans la liste.');
+            $form->addError('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
         }
     }
     else

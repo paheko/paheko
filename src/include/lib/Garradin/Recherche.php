@@ -150,7 +150,8 @@ class Recherche
 
 		if ($search->type == self::TYPE_JSON)
 		{
-			$search->contenu = $this->buildQuery($search->cible, $search->query, $search->order, $search->desc, $no_limit ? 10000 : $search->limit);
+			$query = $search->query;
+			$search->contenu = $this->buildQuery($search->cible, $query->query, $query->order, $query->desc, $no_limit ? 10000 : $query->limit);
 		}
 
 		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
