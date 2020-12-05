@@ -26,5 +26,5 @@ flush();
 // c'est pas idéal mais mieux que rien
 if (!USE_CRON)
 {
-	require_once ROOT . '/cron.php';
+	require_once ROOT . '/scripts/cron.php';
 }
