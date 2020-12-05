@@ -8,7 +8,10 @@ require_once __DIR__ . '/../../include/test_required.php';
 require_once __DIR__ . '/../../include/init.php';
 
 $config = Config::getInstance();
-Upgrade::preCheck();
+
+if (!Upgrade::preCheck()) {
+	throw new UserException('Aucune mise à jour à effectuer, tout est à jour :-)');
+}
 
 echo '<!DOCTYPE html>
 <html>
