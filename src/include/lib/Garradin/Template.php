@@ -654,10 +654,8 @@ class Template extends \KD2\Smartyer
 			foreach ($options as $k=>$v)
 			{
 				$b = 0x01 << (int)$k;
-				$field .= '<label><input type="checkbox" name="' 
-					. htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '[' . (int)$k . ']" value="1" '
-					. (($value & $b) ? 'checked="checked"' : '') . ' ' . $attributes . '/> ' 
-					. htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</label><br />';
+				$field .= sprintf('<input type="checkbox" name="%s[%d]" id="f_%1$s_%2$d" value="1" %s %s /> <label for="f_%1$s_%2$d">%s</label><br />',
+					htmlspecialchars($params['name']), $k, ($value & $b) ? 'checked="checked"' : '', $attributes, htmlspecialchars($v));
 			}
 		}
 		elseif ($type == 'textarea')
