@@ -484,6 +484,53 @@ fieldset.memberMessage {
     max-width: 30em;
 }
 
-fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
-    width: 95%;
+fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.memberMessage select {
+    width: calc(100% - 2em);
+}
+
+
+#queryBuilder .column select, #queryBuilderForm .actions select {
+    max-width: 15em;
+}
+
+#queryBuilder table td {
+    vertical-align: top;
+    padding: .1em .2em;
+}
+
+#queryBuilder table td.buttons {
+    white-space: nowrap;
+}
+
+#queryBuilder input[type=button], #queryBuilder .values input {
+    margin: .1em;
+}
+
+#queryBuilderForm .actions label {
+    margin: 0 .5em;
+}
+
+#queryBuilder table .values label {
+    margin: 0 .3em;
+}
+
+#queryBuilderForm input[type=number] {
+    width: 4em;
+}
+
+@media screen and (max-width: 1279px) {
+    #queryBuilder table tr {
+        display: flex;
+        flex-wrap: wrap;
+        padding: .5em 0;
+        margin-left: 6rem;
+        border-top: .2rem solid #ccc;
+        clear: both;
+    }
+    #queryBuilder table td {
+        display: block;
+    }
+    #queryBuilder table td.buttons {
+        margin-left: -6rem;
+    }
 }

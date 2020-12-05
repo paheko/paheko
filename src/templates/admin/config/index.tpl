@@ -43,7 +43,7 @@
             <dt><label for="f_email_asso">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="email" name="email_asso" id="f_email_asso" required="required" value="{form_field data=$config name=email_asso}" /></dd>
             <dt><label for="f_adresse_asso">Adresse postale</label></dt>
-            <dd><textarea cols="50" rows="5" name="adresse_asso" id="f_adresse_asso">{form_field data=$config name=adresse_asso}</textarea></dd>
+            <dd><textarea cols="30" rows="5" name="adresse_asso" id="f_adresse_asso">{form_field data=$config name=adresse_asso}</textarea></dd>
             <dt><label for="f_site_asso">Site web</label></dt>
             <dd><input type="url" name="site_asso" id="f_site_asso" value="{form_field name=site_asso data=$config}" /></dd>
         </dl>
