@@ -75,8 +75,9 @@ class Fichiers
 	/**
 	 * Constructeur de l'objet pour un fichier
 	 * @param integer $id Numéro unique du fichier
+	 * @param $data array|object File data to populate object
 	 */
-	public function __construct(int $id, ?iterable $data = null)
+	public function __construct(int $id, $data = null)
 	{
 		if (is_null($data))
 		{
@@ -91,7 +92,7 @@ class Fichiers
 			throw new \InvalidArgumentException('Ce fichier n\'existe pas.');
 		}
 
-		foreach ($data as $key=>$value)
+		foreach ((array)$data as $key => $value)
 		{
 			$this->$key = $value;
 		}
