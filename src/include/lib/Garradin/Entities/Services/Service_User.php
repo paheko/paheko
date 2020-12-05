@@ -38,7 +38,7 @@ class Service_User extends Entity
 	public function selfCheck(): void
 	{
 		$this->paid = (bool) $this->paid;
-		$this->assert(!DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ? AND id != ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d'), $this->id), 'Cette activité a déjà été enregistrée pour ce membre et ce jour');
+		$this->assert(!$this->exists() && !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
 	}
 
 	public function importForm(?array $source = null)
