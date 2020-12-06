@@ -678,8 +678,8 @@ class Transaction extends Entity
 			'id' => $this->_related->id,
 			'sum' => $this->_related->sum(),
 			'id_account' => null,
-			'form_account_name' => sprintf('account_%d_%d', $this->type, $this->_related->type == self::TYPE_DEBT ? 1 : 0),
-			'form_target_name' => sprintf('account_%d_%d', $this->type, $this->_related->type == self::TYPE_DEBT ? 0 : 1),
+			'form_account_name' => sprintf('account_%d_%d', $this->type, 1),
+			'form_target_name' => sprintf('account_%d_%d', $this->type, 0),
 		];
 
 		foreach ($this->_related->getLines() as $line) {
