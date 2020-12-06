@@ -33,7 +33,7 @@
 
 <h1>{if empty($title)}Erreur{else}{$title}{/if}</h1>
 
-<p class="error">
+<p class="block error">
     {$error|escape|nl2br}
 </p>
 

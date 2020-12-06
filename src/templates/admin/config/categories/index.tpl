@@ -18,11 +18,11 @@
                     {format_droits droits=$cat}
                 </td>
                 <td class="actions">
-                    <a class="icn" href="{$admin_url}membres/?cat={$cat.id}" title="Liste des membres">👪</a>
-                    <a class="icn" href="{$admin_url}config/categories/modifier.php?id={$cat.id}" title="Modifier">✎</a>
                     {if $cat.id != $user.id_categorie}
-                    <a class="icn" href="{$admin_url}config/categories/supprimer.php?id={$cat.id}" title="Supprimer">✘</a>
+                        {linkbutton shape="delete" label="Supprimer" href="supprimer.php?id=%d"|args:$cat.id}
                     {/if}
+                    {linkbutton shape="edit" label="Modifier" href="modifier.php?id=%d"|args:$cat.id}
+                    {linkbutton shape="users" label="Liste des membres" href="!membres/?cat=%d"|args:$cat.id}
                 </td>
             </tr>
         {/foreach}
@@ -41,7 +41,7 @@
 
     <p class="submit">
         {csrf_field key="new_cat"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Ajouter" shape="right" class="main"}
     </p>
 
 </form>

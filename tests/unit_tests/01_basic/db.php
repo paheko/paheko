@@ -5,8 +5,9 @@ namespace Garradin;
 use KD2\Test;
 
 const DB_FILE = ':memory:';
+const INSTALL_PROCESS = true;
 
-require __DIR__ . '/../init.php';
+require_once INIT;
 
 $db = DB::getInstance();
 
@@ -34,7 +35,7 @@ try {
 	$db->update('test', ['a' => 5, 'b' => 6], 'a = ? AND b = ?', [3, 4]);
 	$failed = false;
 }
-catch (\InvalidArgumentException $e) {
+catch (\LogicException $e) {
 	$failed = true;
 }
 
@@ -66,16 +67,12 @@ $expected = [1 => 2, 9 => 10];
 Test::equals($expected, $db->getAssoc('SELECT * FROM test LIMIT 2;'));
 
 $expected = [1 => (object) ['a' => 1, 'b' => 2], 9 => (object) ['a' => 9, 'b' => 10]];
-Test::equals($expected, $db->getAssocKey('SELECT * FROM test LIMIT 2;'));
+Test::equals(json_encode($expected), json_encode($db->getGrouped('SELECT * FROM test LIMIT 2;')));
 
 // test transactions
 Test::assert($db->begin());
 
 Test::assert($db->insert('test', ['a' => 42, 'b' => 43]));
-
-// test nested transaction
-Test::assert(!$db->begin());
-Test::assert(!$db->commit());
 
 Test::assert($db->insert('test', ['a' => 44, 'b' => 45]));
 

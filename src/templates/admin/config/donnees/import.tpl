@@ -11,9 +11,9 @@
 	<dd><a href="{$admin_url}membres/import.php?export=ods">Export de la liste des membres au format tableur Calc / Excel</a></dd>
 	<dd><a href="{$admin_url}membres/import.php?export=csv">Export de la liste des membres au format CSV</a></dd>
 	<dt>Comptabilité</dt>
-	<dd><a href="{$admin_url}compta/import.php">Import des données comptables</a></dd>
-	<dd><a href="{$admin_url}compta/import.php?export=ods">Export des données comptables au format tableur Calc / Excel</a></dd>
-	<dd><a href="{$admin_url}compta/import.php?export=csv">Export des données comptables au format CSV</a></dd>
+	<dd><a href="{$admin_url}acc/years/import.php">Import des données comptables</a></dd>
+	<dd><a href="{$admin_url}acc/years/import.php?export=ods">Export des données comptables au format tableur Calc / Excel</a></dd>
+	<dd><a href="{$admin_url}acc/years/import.php?export=csv">Export des données comptables au format CSV</a></dd>
 </dl>
 </fieldset>
 

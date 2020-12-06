@@ -2,11 +2,11 @@
 
 
 {if !empty($sent)}
-    <p class="confirm">
+    <p class="block confirm">
         Un e-mail vous a été envoyé, cliquez sur le lien dans cet e-mail
         pour modifier votre mot de passe.
     </p>
-    <p class="alert">
+    <p class="block alert">
         Si le message n'apparaît pas dans les prochaines minutes, vérifiez le dossier Spam ou Indésirables.
     </p>
 
@@ -31,7 +31,7 @@
 
         <p class="submit">
             {csrf_field key="recoverPassword"}
-            <input type="submit" name="recover" value="Envoyer &rarr;" />
+            {button type="submit" name="recover" label="Envoyer" shape="right" class="main"}
         </p>
 
     </form>

@@ -1,0 +1,55 @@
+/** Context-specific tabs */
+nav.tabs ul {
+    list-style-type: none;
+    margin: 1em 0;
+    border-bottom: 2px solid #9c4f15;
+    border-bottom-color: rgb(var(--gMainColor));
+    padding: 0 1em;
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+nav.tabs .sub {
+    margin: -1em 0 1em 2em;
+    padding-top: 1em;
+    border-left: 2px solid rgb(var(--gMainColor));
+    border-bottom-left-radius: .5em;
+}
+
+nav.tabs .sub .title {
+    margin: 0 1em 0 -1em;
+    font-weight: bold;
+    padding: .1em .5em;
+}
+
+nav.tabs li {
+    margin: 0 0.2em;
+}
+
+nav.tabs li a {
+    display: inline-block;
+    background: rgba(var(--gSecondColor), .5);
+    border-radius: .5em .5em 0 0;
+    padding: .1em .5em;
+    color: #000;
+    text-decoration: none;
+    transition: background-color .2s, color .2s;
+}
+
+nav.tabs .current a {
+    background: rgb(var(--gMainColor));
+    color: rgb(var(--gBgColor));
+}
+
+nav.tabs li a:hover {
+    color: rgb(var(--gBgColor));
+    background-color: rgb(var(--gMainColor));
+    text-decoration: underline;
+    border-bottom: none;
+}
+
+nav.tabs aside {
+    float: right;
+}

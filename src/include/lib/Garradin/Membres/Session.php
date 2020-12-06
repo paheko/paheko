@@ -15,7 +15,7 @@ use const Garradin\ADMIN_URL;
 
 use KD2\Security;
 use KD2\Security_OTP;
-use KD2\QRCode;
+use KD2\Graphics\QRCode;
 use KD2\HTTP;
 
 class Session extends \KD2\UserSession
@@ -61,24 +61,11 @@ class Session extends \KD2\UserSession
 	{
 		$url = parse_url(ADMIN_URL);
 
-		//throw new \Exception('lol');
-
 		parent::__construct(DB::getInstance(), [
 			'cookie_domain' => $url['host'],
 			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
 			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
 		]);
-	}
-
-	/**
-	 * Suppression anciens cookies qui avaient un chemin incorrect
-	 * FIXME supprimer en 2019
-	 * @return void
-	 */
-	public function cleanOldCookies()
-	{
-		setcookie($this->cookie_name, null, -1, '/admin/', $this->cookie_domain, $this->cookie_secure, true);
-		setcookie($this->remember_me_cookie_name, null, -1, '/admin/', $this->cookie_domain, $this->cookie_secure, true);
 	}
 
 	protected function getUserForLogin($login)
@@ -154,10 +141,10 @@ class Session extends \KD2\UserSession
 		{
 			$login_id = \Garradin\LOCAL_LOGIN;
 
-			// On va chercher le premier membre avec le droit de gérer les membres
+			// On va chercher le premier membre avec le droit de gérer la config
 			if (-1 === $login_id) {
 				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_categorie = (SELECT id FROM membres_categories WHERE droit_membres = ? LIMIT 1)
+					WHERE id_categorie IN (SELECT id FROM membres_categories WHERE droit_config = ?)
 					LIMIT 1', Membres::DROIT_ADMIN);
 			}
 

@@ -12,7 +12,7 @@
             <h3 class="warning">
                 Êtes-vous sûr de vouloir supprimer l'extension «&nbsp;{$plugin.nom}&nbsp;» ?
             </h3>
-            <p class="alert">
+            <p class="block alert">
                 <strong>Attention</strong> : cette action est irréversible et effacera toutes les
                 données associées à l'extension.
             </p>
@@ -20,7 +20,7 @@
 
         <p class="submit">
             {csrf_field key="delete_plugin_%s"|args:$plugin.id}
-            <input type="submit" name="delete" value="Désinstaller &rarr;" />
+            {button type="submit" name="delete" label="Désinstaller" shape="delete" class="main"}
         </p>
     </form>
 {else}
@@ -83,8 +83,8 @@
             <dl>
                 {foreach from=$liste_telecharges item="plugin" key="id"}
                 <dt>
-                    <label>
-                        <input type="radio" name="plugin" value="{$id}" />
+                    <input type="radio" name="plugin" value="{$id}" id="f_{$id}" />
+                    <label for="f_{$id}">
                         {$plugin.nom}
                     </label>
                     (version {$plugin.version})
@@ -101,7 +101,7 @@
 
         <p class="submit">
             {csrf_field key="install_plugin"}
-            <input type="submit" name="install" value="Installer &rarr;" />
+            {button type="submit" name="install" label="Installer" shape="right" class="main"}
         </p>
     </form>
     {/if}

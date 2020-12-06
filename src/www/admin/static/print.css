@@ -1,31 +1,45 @@
 @page {
-    size: A4;
-    margin: 1cm;
+    size: A4 landscape;
+    margin: 0;
 }
 
 body {
     background: #fff;
     padding: 0;
+    margin: 1cm;
+    font-size: 10pt;
 }
+
 header.header {
     display: none;
 }
+
 main {
     margin: 0;
 }
+
 .header h1 {
     margin: 0;
     text-align: center;
 }
 
 table.list thead {
-    background: #000;
-    color: #fff;
+    border-bottom: solid .3rem #000;
 }
 
-table.list tfoot tr {
-    background: #666;
-    color: #fff;
+table.list thead td, table.list thead th {
+    background: #ccc !important;
+    color: #000 !important;
+    border-right: 1px solid #999;
+}
+
+table.list tfoot {
+    border-top: double .3rem #000;
+}
+
+table.list tfoot tr td, table.list tfoot th {
+    background: #fff;
+    color: #000;
 }
 
 table.list tr {
@@ -44,6 +58,18 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     background: #ddd;
 }
 
+table.list td {
+    border: 1px solid #999;
+}
+
+#rapport tr {
+    color: #000 !important;
+}
+
+#rapport table .parent {
+    border-top: 1px dashed #666;
+}
+
 #rapport table table {
     border: 1px solid #666;
 }
@@ -56,11 +82,22 @@ table.list.multi tr:nth-child(4n+1), table.list.multi tr:nth-child(4n+2) {
     display: none;
 }
 
-td.actions * {
-    display: none;
+td.actions *, nav.tabs, .icn-btn, .pagination, a.icn {
+    display: none !important;
+}
+
+td.num a {
+    border: none;
+    padding: 0;
+    background: none;
 }
 
 a {
-    color: inherit;
+    color: black !important;
     text-decoration: none;
+}
+
+/* Don't repeat the table footer on every printed page */
+table tfoot{
+    display:table-row-group;
 }

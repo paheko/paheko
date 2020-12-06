@@ -4,11 +4,20 @@ body {
 	font-size: 11pt;
 }
 
+input, select, textarea {
+    min-width: 0 !important;
+    max-width: calc(100% - 2em);
+}
+
+select {
+	width: calc(100% - 3em);
+}
+
 .header h1 {
 	margin: 0;
 	text-align: center;
 	font-size: 1.2em;
-	margin: 70pt 0 .3em 0;
+	margin: 6em 0 .3em 0;
 }
 
 .header .menu {
@@ -81,29 +90,34 @@ body {
 
 .header .menu > ul > li.current > ul, .header .menu > ul > li.current_parent > ul {
 	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
 	position: absolute;
 	top: 30pt;
 	left: 0;
 	right: 0;
-	background: #fff;
 	background: rgba(255, 255, 255, 0.75);
+	border-bottom: .2rem solid rgba(var(--gMainColor), 0.5);
 }
 
 .header .menu > ul > li.current > ul li, .header .menu > ul > li.current_parent > ul li {
-	flex-grow: 1;
 	text-align: center;
 	display: block;
 }
 
 .header .menu > ul > li.current > ul a, .header .menu > ul > li.current_parent > ul a {
-    color: #9c4f15;
-    color: rgb(var(--gMainColor));
-    padding: 2pt 3pt;
-    text-decoration: underline;
+	background: rgb(var(--gSecondColor), 0.3);
+	border-radius: .5em;
+	margin: .2rem;
+	color: rgb(var(--gMainColor));
+	padding: .3em .5em;
+	font-size: .9em;
+	font-weight: normal;
 }
 
 .header .menu > ul > li > ul li.current a {
-	color: rgb(var(--gSecondColor));
+	background: rgb(var(--gSecondColor));
+	color: #fff;
 }
 
 main {
@@ -111,16 +125,22 @@ main {
 	padding: .1em;
 }
 
-ul.actions {
+nav.tabs ul {
 	border: none;
 	padding: 0;
-	text-align: center;
 	margin: .3em 0;
+	justify-content: center;
 }
 
-ul.actions li a, ul.actions li label {
+nav.tabs ul li a, nav.tabs ul li label {
 	margin: .1em;
 	border-radius: .5em;
+}
+
+nav.tabs .sub {
+	margin: 1em 0;
+	border: none;
+	border-top: .2rem dashed rgb(var(--gSecondColor));
 }
 
 .filterCategory, .searchMember {
@@ -165,15 +185,28 @@ fieldset {
 
 /* Petits écrans (smartphones) */
 @media screen and (max-width:600px) {
+	table.list tr {
+		display: block;
+	}
+
 	table.list td, table.list th {
 		display: inline-block;
-		border-left: 1px solid #999;
+		border-left: 2px dashed #999;
 		width: auto !important;
 	}
 
 	colgroup {
 		/* Hack pour désactiver les largeurs de colonnes */
 		display: none;
+	}
+
+	.print-btn {
+		display: none;
+	}
+
+	.radio-btn input {
+		position: absolute;
+		right: 1em;
 	}
 
 	table.list td:first-child, table.list th:first-child {
@@ -185,8 +218,64 @@ fieldset {
 		width: auto;
 	}
 
-	input[type=text], textarea, input[type=password], input[type=email], input[type=url], input[type=tel], select {
-		min-width: 3em;
-		width: 95%;
+	nav.acc-year {
+		flex-direction: column;
+		border: none;
+		border-radius: 0;
+		background: rgba(var(--gMainColor), 0.2);
+		font-size: .8em;
+	}
+
+	.actions, table.list .actions {
+		text-align: center;
+	}
+
+	.actions a {
+		margin: .2em;
+		font-size: .9em;
+	}
+
+	nav.tabs aside {
+		float: none;
+		text-align: center;
+	}
+
+	#dialog {
+		background: black;
+	}
+
+	#dialog > iframe {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+	}
+
+	#dialog > button {
+		border: none;
+		background: none;
+	}
+
+	body#popup main {
+		margin: .2em;
+	}
+
+	dl.list {
+		text-align: center;
+	}
+
+	table.statement td, table.statement tr {
+		display: block;
+	}
+
+	dl.describe {
+		grid-template: auto / 30% 1fr;
+	}
+
+	.datepicker-parent {
+		position: static;
+	}
+
+	dialog.datepicker {
+		margin: auto;
 	}
 }

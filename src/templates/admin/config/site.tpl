@@ -1,17 +1,17 @@
-{include file="admin/_head.tpl" title="Configuration — Site public" current="config" js=1}
+{include file="admin/_head.tpl" title="Configuration — Site public" current="config"}
 
 {form_errors}
 
 {include file="admin/config/_menu.tpl" current="site"}
 
 {if $config.desactiver_site}
-    <div class="alert">
+    <div class="block alert">
         <h3>Site public désactivé</h3>
         <p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
         <form method="post" action="{$self_url}">
             <p class="submit">
                 {csrf_field key="config_site"}
-                <input type="submit" name="activer_site" value="Réactiver le site public &rarr;" />
+                {button type="submit" name="activer_site" label="Réactiver le site public" shape="right" class="main"}
             </p>
         </form>
     </div>
@@ -20,7 +20,7 @@
         <h3>Éditer un squelette</h3>
 
         {if $ok}
-        <p class="confirm">
+        <p class="block confirm">
             Modifications enregistrées.
         </p>
         {/if}
@@ -34,7 +34,7 @@
 
         <p class="submit">
             {csrf_field key=$csrf_key}
-            <input type="submit" name="save" value="Enregistrer &rarr;" />
+            {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
         </p>
 
     </form>
@@ -52,8 +52,10 @@
         <dl>
             <dt>
                 <form method="post" action="{$self_url}">
-                <input type="submit" name="desactiver_site" value="Désactiver le site public" />
-                {csrf_field key="config_site"}
+                    <p class="submit">
+                        {button type="submit" name="desactiver_site" label="Désactiver le site public" shape="right" class="main"}
+                        {csrf_field key="config_site"}
+                    </p>
                 </form>
             </dt>
             <dd class="help">
@@ -75,7 +77,7 @@
         <legend>Squelettes du site</legend>
 
         {if $reset_ok}
-        <p class="confirm">
+        <p class="block confirm">
             Réinitialisation effectuée. Les squelettes ont été remis à jour
         </p>
         {/if}
@@ -92,11 +94,11 @@
             <tbody>
             {foreach from=$sources key="source" item="local"}
                 <tr>
-                    <td>{if $local && $local.dist}<input type="checkbox" name="select[]" value="{$source}" />{/if}</td>
+                    <td>{if $local && $local.dist}<input type="checkbox" name="select[]" value="{$source}" id="f_source_{$iteration}" /><label for="f_source_{$iteration}"></label>{/if}</td>
                     <th><a href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
                     <td>{if $local}{$local.mtime|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
                     <td class="actions">
-                        <a class="icn" href="{$admin_url}config/site.php?edit={$source|escape:'url'}" title="Éditer">✎</a>
+                        {linkbutton shape="edit" label="Éditer" href="?edit=%s"|args:$source}
                     </td>
                 </tr>
             {/foreach}

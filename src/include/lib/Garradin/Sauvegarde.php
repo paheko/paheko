@@ -183,7 +183,7 @@ class Sauvegarde
 	 * @param  string $file Le nom de fichier à utiliser comme point de restauration
 	 * @return boolean true si la restauration a fonctionné, false sinon
 	 */
-	public function restoreFromLocal($file)
+	public function restoreFromLocal($file, bool $do_backup = true)
 	{
 		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file))
 		{
@@ -195,7 +195,7 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(DATA_ROOT . '/' . $file);
+		return $this->restoreDB(DATA_ROOT . '/' . $file, false, false, false);
 	}
 
 	/**
@@ -227,7 +227,7 @@ class Sauvegarde
 			}
 		}
 
-		$r = $this->restoreDB($file['tmp_name'], $user_id);
+		$r = $this->restoreDB($file['tmp_name'], $user_id, true);
 
 		if ($r)
 		{
@@ -239,8 +239,8 @@ class Sauvegarde
 
 	/**
 	 * Vérifie l'intégrité d'une sauvegarde Garradin
-	 * @param  string $file Chemin absolu vers la base de donnée
-	 * @return boolean
+	 * @param  string $file_path Chemin absolu vers la base de donnée
+	 * @return boolean|null
 	 */
 	protected function checkIntegrity($file_path, $remove_hash = true)
 	{
@@ -289,13 +289,13 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false)
+	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false, $do_backup = true)
 	{
 		$return = 1;
 
 		// Essayons déjà d'ouvrir la base de données à restaurer en lecture
 		try {
-			$db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
+			$db = new \SQLite3($file, \SQLITE3_OPEN_READONLY);
 		}
 		catch (\Exception $e)
 		{
@@ -319,6 +319,16 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni est corrompu. SQLite a trouvé ' . $check . ' erreurs.');
 		}
 
+		if ($check_foreign_keys)
+		{
+			$check = $db->querySingle('PRAGMA foreign_key_check;');
+
+			if ($check)
+			{
+				throw new UserException('Le fichier fourni est corrompu. Certaines clés étrangères référencent des lignes qui n\'existent pas.');
+			}
+		}
+
 		// On ne peut pas faire de vérifications très poussées sur la structure de la base de données,
 		// celle-ci pouvant changer d'une version à l'autre et on peut vouloir importer une base
 		// un peu vieille, mais on vérifie quand même que ça ressemble un minimum à une base garradin
@@ -332,15 +342,18 @@ class Sauvegarde
 		// On récupère la version
 		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
 
-		// Vérification de l'AppID pour les versions récentes
-		if (version_compare($version, '0.8.0', '>='))
+		// On ne permet pas de restaurer une vieille version
+		if (version_compare($version, '0.9.8', '<'))
 		{
-			$appid = $db->querySingle('PRAGMA application_id;', false);
+			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
+		}
 
-			if ($appid !== DB::APPID)
-			{
-				throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
-			}
+		// Vérification de l'AppID pour les versions récentes
+		$appid = $db->querySingle('PRAGMA application_id;', false);
+
+		if ($appid !== DB::APPID)
+		{
+			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
 		if ($user_id)
@@ -373,6 +386,10 @@ class Sauvegarde
 		{
 			rename($backup, DB_FILE);
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
+		}
+
+		if (!$do_backup) {
+			unlink($backup);
 		}
 
 		if ($return & self::NOT_AN_ADMIN)

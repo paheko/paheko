@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use KD2\Image;
+use KD2\Graphics\Image;
 use Garradin\Membres\Session;
 
 class Fichiers
@@ -22,7 +22,7 @@ class Fichiers
 	 */
 	protected static $allowed_thumb_sizes = [200, 500];
 
-	const LIEN_COMPTA = 'compta_journal';
+	const LIEN_COMPTA = 'acc_transactions';
 	const LIEN_WIKI = 'wiki_pages';
 	const LIEN_MEMBRES = 'membres';
 
@@ -33,14 +33,16 @@ class Fichiers
 	 * @param  integer $size Taille de la miniature désirée (pour les images)
 	 * @return string        URL du fichier
 	 */
-	static public function _getURL($id, $nom, $size = false)
+	static public function _getURL(int $id, string $nom, string $hash, $size = false): string
 	{
-		$url = WWW_URL . 'f/' . base_convert((int)$id, 10, 36) . '/' . $nom;
+		$url = sprintf('%sf/%s/%s?', WWW_URL, base_convert((int)$id, 10, 36), $nom);
 
 		if ($size)
 		{
-			$url .= '?' . self::_findThumbSize($size) . 'px';
+			$url .= self::_findThumbSize($size) . 'px&';
 		}
+
+		$url .= substr($hash, 0, 10);
 
 		return $url;
 	}
@@ -73,8 +75,9 @@ class Fichiers
 	/**
 	 * Constructeur de l'objet pour un fichier
 	 * @param integer $id Numéro unique du fichier
+	 * @param $data array|object File data to populate object
 	 */
-	public function __construct($id, $data = null)
+	public function __construct(int $id, $data = null)
 	{
 		if (is_null($data))
 		{
@@ -89,7 +92,7 @@ class Fichiers
 			throw new \InvalidArgumentException('Ce fichier n\'existe pas.');
 		}
 
-		foreach ($data as $key=>$value)
+		foreach ((array)$data as $key => $value)
 		{
 			$this->$key = $value;
 		}
@@ -102,7 +105,7 @@ class Fichiers
 	 */
 	public function getURL($size = false)
 	{
-		return self::_getURL($this->id, $this->nom, $size);
+		return self::_getURL($this->id, $this->nom, $this->hash, $size);
 	}
 
 	/**
@@ -146,12 +149,20 @@ class Fichiers
 			[(int)$this->id, (int)$foreign_id]);
 	}
 
-	/**
-	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
-	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
-	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
-	 */
-	public function checkAccess(Session $session)
+	public function getLinkedId(string $type)
+	{
+		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+
+		if (!in_array($type, $check))
+		{
+			throw new \LogicException('Type de lien de fichier inconnu.');
+		}
+
+
+		return DB::getInstance()->firstColumn(sprintf('SELECT id FROM fichiers_%s WHERE fichier = %d;', $type, $this->id));
+	}
+
+	public function isPublic(&$wiki = null): bool
 	{
 		$config = Config::getInstance();
 
@@ -160,20 +171,34 @@ class Fichiers
 			return true;
 		}
 
-		$db = DB::getInstance();
-
 		// On regarde déjà si le fichier n'est pas lié au wiki
 		$query = sprintf('SELECT wp.droit_lecture FROM fichiers_%s AS link
 			INNER JOIN wiki_pages AS wp ON wp.id = link.id
 			WHERE link.fichier = ? LIMIT 1;', self::LIEN_WIKI);
-		$wiki = $db->firstColumn($query, (int)$this->id);
+		$wiki = DB::getInstance()->firstColumn($query, (int)$this->id);
 
 		// Page wiki publique, aucune vérification à faire, seul cas d'accès à un fichier en dehors de l'espace admin
 		if ($wiki !== false && $wiki == Wiki::LECTURE_PUBLIC)
 		{
 			return true;
 		}
-			
+
+		return false;
+	}
+
+	/**
+	 * Vérifie que l'utilisateur a bien le droit d'accéder à ce fichier
+	 * @param  mixed   $user Tableau contenant les infos sur l'utilisateur connecté, provenant de Session::getUser, ou false
+	 * @return boolean       TRUE si l'utilisateur a le droit d'accéder au fichier, sinon FALSE
+	 */
+	public function checkAccess(Session $session, bool $require_admin = false)
+	{
+		$wiki = null;
+
+		if ($this->isPublic($wiki) && !$require_admin) {
+			return true;
+		}
+
 		// Pas d'utilisateur connecté, pas d'accès aux fichiers de l'espace admin
 		if (!$session->isLogged())
 		{
@@ -193,17 +218,21 @@ class Fichiers
 			// On renvoie à l'objet Wiki pour savoir si l'utilisateur a le droit de lire ce fichier
 			$_w = new Wiki;
 			$_w->setRestrictionCategorie($user->id_categorie, $user->droit_wiki);
-			return $_w->canReadPage($wiki);
+			return $require_admin ? $_w->canWritePage($wiki) : $_w->canReadPage($wiki);
 		}
+
+		$level = $require_admin ? Membres::DROIT_ADMIN : Membres::DROIT_ACCES;
+
+		$db = DB::getInstance();
 
 		// On regarde maintenant si le fichier est lié à la compta
 		$query = sprintf('SELECT 1 FROM fichiers_%s WHERE fichier = ? LIMIT 1;', self::LIEN_COMPTA);
 		$compta = $db->firstColumn($query, (int)$this->id);
 
-		if ($compta && $session->canAccess('compta', Membres::DROIT_ACCES))
+		if ($compta)
 		{
 			// OK si accès à la compta
-			return true;
+			return $session->canAccess('compta', $level);
 		}
 
 		// Enfin, si le fichier est lié à un membre
@@ -219,7 +248,11 @@ class Fichiers
 			}
 
 			// Pour voir les fichiers des membres il faut pouvoir les gérer
-			if ($session->canAccess('membres', Membres::DROIT_ECRITURE))
+			if ($level == Membres::DROIT_ACCES) {
+				$level = Membres::DROIT_ECRITURE;
+			}
+
+			if ($session->canAccess('membres', $level))
 			{
 				return true;
 			}
@@ -236,9 +269,9 @@ class Fichiers
 	{
 		$db = DB::getInstance();
 		$db->begin();
-		$db->delete('fichiers_compta_journal', 'fichier = ?', (int)$this->id);
-		$db->delete('fichiers_wiki_pages', 'fichier = ?', (int)$this->id);
-		$db->delete('fichiers_membres', 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_' . self::LIEN_COMPTA, 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_' . self::LIEN_WIKI, 'fichier = ?', (int)$this->id);
+		$db->delete('fichiers_' . self::LIEN_MEMBRES, 'fichier = ?', (int)$this->id);
 
 		$db->delete('fichiers', 'id = ?', (int)$this->id);
 
@@ -287,18 +320,23 @@ class Fichiers
 	 */
 	public function serve()
 	{
-		return $this->_serve($this->getFilePathFromCache(), $this->type, ($this->image ? false : $this->nom), $this->taille);
+		return $this->_serve($this->getFilePathFromCache(), $this->type, ($this->image ? false : $this->nom), $this->taille, $this->isPublic());
 	}
 
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 * @return void
 	 */
-	public function serveThumbnail($width = self::TAILLE_MINIATURE)
+	public function serveThumbnail($width = null)
 	{
 		if (!$this->image)
 		{
 			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+		}
+
+		if (!$width)
+		{
+			$width = reset(self::$allowed_thumb_sizes);
 		}
 
 		if (!in_array($width, self::$allowed_thumb_sizes))
@@ -333,12 +371,17 @@ class Fichiers
 	 * @param  integer $size Taille du fichier en octets (facultatif)
 	 * @return boolean TRUE en cas de succès
 	 */
-	protected function _serve($path, $type, $name = false, $size = null)
+	protected function _serve($path, $type, $name = false, $size = null, bool $public = false)
 	{
-		// Désactiver le cache
-		header('Pragma: public');
-		header('Expires: -1');
-		header('Cache-Control: public, must-revalidate, post-check=0, pre-check=0');
+		if ($public) {
+			Utils::HTTPCache($this->hash, $this->datetime);
+		}
+		else {
+			// Désactiver le cache
+			header('Pragma: public');
+			header('Expires: -1');
+			header('Cache-Control: public, must-revalidate, post-check=0, pre-check=0');
+		}
 
 		header('Content-Type: '.$type);
 
@@ -346,7 +389,7 @@ class Fichiers
 		{
 			header('Content-Disposition: attachment; filename="' . $name . '"');
 		}
-		
+
 		// Utilisation de XSendFile si disponible
 		if (ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
 		{
@@ -377,7 +420,10 @@ class Fichiers
 			header('Content-Length: '. (int)$size);
 		}
 
-		ob_clean();
+		if (@ob_get_length()) {
+			@ob_clean();
+		}
+
 		flush();
 
 		// Sinon on envoie le fichier à la mano
@@ -466,33 +512,10 @@ class Fichiers
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
-		$max_blob_size = self::getMaxBlobSize();
-
-		// Vérifier que le fichier peut rentrer en base de données (dans PHP < 7.2 on n'utilise pas openBlob)
-		if (null !== $max_blob_size && $file['size'] > $max_blob_size) {
-			unlink($file['tmp_name']);
-			throw new UserException('Taille du fichier supérieure au maximum autorisé en base de données');
-		}
-
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
 		return self::storeFile($name, $file['tmp_name']);
-	}
-
-    /**
-     * Returns the maximum value size that can be handled by a bindValue
-     * @return null|integer
-     */
-	static public function getMaxBlobSize()
-	{
-        $memory_limit = Utils::return_bytes(ini_get('memory_limit'));
-
-        if (!$memory_limit) {
-            return null;
-        }
-
-        return round(($memory_limit - memory_get_usage()) * 0.9);
 	}
 
 	/**
@@ -551,12 +574,24 @@ class Fichiers
 					$i = new Image($path);
 				}
 				else {
-					$i = Image::createFromBlob($bytes);
+					$i = Image::createFromBlob($content);
+				}
+
+				// Recompress PNG files from base64, assuming they are coming
+				// from JS canvas which doesn't know how to gzip (d'oh!)
+				if ($i->format() == 'png' && null !== $content) {
+					$content = $i->output('png', true);
+					$hash = sha1($content);
+					$size = strlen($content);
 				}
 
 				unset($i);
 			}
 			catch (\RuntimeException $e) {
+				if (strstr($e->getMessage(), 'No suitable image library found')) {
+					throw new UserException('Le serveur n\'a aucune bibliothèque de gestion d\'image installée, et ne peut donc pas accepter les images. Installez Imagick ou GD.');
+				}
+
 				throw new UserException('Fichier image invalide');
 			}
 		}
@@ -566,18 +601,22 @@ class Fichiers
 		$db->begin();
 
 		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
-		if (!($id_contenu = $db->firstColumn('SELECT id FROM fichiers_contenu WHERE hash = ?;', $hash)))
-		{
-			$db->insert('fichiers_contenu', [
-				'hash'		=>	$hash,
-				'taille'	=>	(int)$size,
-				'contenu'	=>	[\SQLITE3_BLOB, $content ?: file_get_contents($path)],
-			]);
-
-			// FIXME: utiliser Sqlite3::openBlob pour écrire quand dispo dans PHP
-			// cf. https://github.com/php/php-src/pull/2528
-
+		if (!($id_contenu = $db->firstColumn('SELECT id FROM fichiers_contenu WHERE hash = ?;', $hash))) {
+			$db->preparedQuery('INSERT INTO fichiers_contenu (hash, taille, contenu) VALUES (?, ?, zeroblob(?));',
+				[$hash, (int)$size, (int)$size]);
 			$id_contenu = $db->lastInsertRowID();
+
+			// Écrire le contenu
+			$blob = $db->openBlob('fichiers_contenu', 'contenu', $id_contenu, 'main', SQLITE3_OPEN_READWRITE);
+
+			if (null !== $content) {
+				fwrite($blob, $content);
+			}
+			else{
+				fwrite($blob, file_get_contents($path));
+			}
+
+			fclose($blob);
 		}
 
 		$db->insert('fichiers', [
@@ -627,11 +666,11 @@ class Fichiers
 	 * 
 	 * @param  string  $type    Type de ressource
 	 * @param  integer $id      Numéro de ressource
-	 * @param  boolean $images  TRUE pour retourner seulement les images,
+	 * @param  boolean|null $images  TRUE pour retourner seulement les images,
 	 * FALSE pour retourner les fichiers sans images, NULL pour tout retourner
 	 * @return array          Liste des fichiers
 	 */
-	static public function listLinkedFiles($type, $id, $images = false)
+	static public function listLinkedFiles($type, $id, $images = null)
 	{
 		$check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
 
@@ -653,11 +692,48 @@ class Fichiers
 
 		foreach ($files as &$file)
 		{
-			$file->url = self::_getURL($file->id, $file->nom);
-			$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, 200) : false;
+			$file->url = self::_getURL($file->id, $file->nom, $file->hash);
+			$file->thumb = $file->image ? self::_getURL($file->id, $file->nom, $file->hash, 200) : false;
 		}
 
 		return $files;
+	}
+
+	static public function deleteLinkedFiles($type, int $id)
+	{
+		static $check = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+
+		if (!in_array($type, $check))
+		{
+			throw new \LogicException('Type de lien de fichier inconnu.');
+		}
+
+		$files = DB::getInstance()->delete('fichiers_' . $type, 'id = ?', $id);
+		return self::deleteUnlinkedFiles();
+	}
+
+	static public function deleteUnlinkedFiles()
+	{
+		static $all = [self::LIEN_MEMBRES, self::LIEN_WIKI, self::LIEN_COMPTA];
+		$id_background = Config::getInstance()->get('image_fond');
+
+		$list = DB::getInstance()->iterate(sprintf('SELECT f.id, f.id_contenu FROM fichiers f
+			LEFT JOIN fichiers_%s a ON a.fichier = f.id
+			LEFT JOIN fichiers_%s b ON b.fichier = f.id
+			LEFT JOIN fichiers_%s c ON c.fichier = f.id
+			WHERE a.id IS NULL AND b.id IS NULL AND c.id IS NULL;',
+			self::LIEN_MEMBRES,
+			self::LIEN_WIKI,
+			self::LIEN_COMPTA));
+
+		foreach ($list as $file) {
+			if ($file->id == $id_background) { // FIXME: want to use something cleaner here!
+				continue;
+			}
+
+			$f = new Fichiers($file->id, (array) $file);
+			$f->remove();
+		}
 	}
 
 	/**
@@ -684,7 +760,7 @@ class Fichiers
 	{
 		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
 		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
-		
+
 		return array_merge($match[1], $match2[1]);
 	}
 

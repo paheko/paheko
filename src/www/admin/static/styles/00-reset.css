@@ -1,0 +1,43 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: 'gicon';
+    src: url('../font/garradin.eot?2021');
+    src: url('../font/garradin.eot?2021#iefix') format('embedded-opentype'),
+        url('../font/garradin.woff?2021') format('woff'),
+        url('../font/garradin.woff2?2021') format('woff2'),
+        url('../font/garradin.ttf?2021') format('truetype'),
+        url('../font/garradin.svg?2021#garradin') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, 
+pre, form, fieldset, input, textarea, p, blockquote, th, td,
+figure, article, aside, section, header, footer { 
+    padding: 0;
+    margin: 0;
+}
+fieldset, img { 
+    border: 0;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+ol, ul {
+    list-style: none;
+}
+caption, th {
+    text-align: left;
+}
+article, aside, figure, section, header, footer, main { display: block; }
+
+span { display: inline-block; }
+
+h1  { font-size: 2em; }
+h2  { font-size: 1.5em; }
+h3  { font-size: 1.2em; }
+h4  { font-size: 1em; }
+h5  { font-size: 0.9em; }
+h6  { font-size: 0.8em; }

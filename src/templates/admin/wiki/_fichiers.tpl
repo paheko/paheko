@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Inclure un fichier" current="wiki" body_id="transparent" is_popup=true js=1}
+{include file="admin/_head.tpl" title="Inclure un fichier" current="wiki" body_id="transparent" is_popup=true}
 
 {form_errors}
 
@@ -12,7 +12,7 @@
         </dl>
         <p class="submit">
             {csrf_field key=$csrf_id}
-            <input type="submit" name="upload" id="f_submit" value="Envoyer le fichier" />
+            {button type="submit" name="upload" label="Envoyer le fichier" shape="upload" class="main" id="f_submit"}
         </p>
     </fieldset>
 </form>
@@ -46,7 +46,7 @@
         <figure>
             <a href="{$file.url}" data-id="{$file.id}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
             <form class="actions" method="post" action="{$self_url}">
-                <a href="{$file.url}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                {linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
                 {csrf_field key=$csrf_id}
                 <input type="hidden" name="delete" value="{$file.id}" />
                 <noscript><input type="submit" value="Supprimer" /></noscript>
@@ -66,7 +66,7 @@
             <td>{if $file.type}{$file.type}{/if}</td>
             <td class="actions">
                 <form class="actions" method="post" action="{$self_url}">
-                    <a href="{$file.url}" onclick="return !window.open(this.href);" class="icn" title="Télécharger">⇓</a>
+                    {linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
                     {csrf_field key=$csrf_id}
                     <input type="hidden" name="delete" value="{$file.id}" />
                     <noscript><input type="submit" value="Supprimer" /></noscript>

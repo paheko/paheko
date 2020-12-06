@@ -469,7 +469,7 @@ class Wiki
 
             if ($id == $res->parent)
             {
-                throw new Exception('Parent! ' . $id . '/' . $res->parent);
+                throw new \Exception('Parent! ' . $id . '/' . $res->parent);
             }
 
             $id = (int)$res->parent;

@@ -1,9 +1,9 @@
-{include file="admin/_head.tpl" title="Liste des membres" current="membres" js=1}
+{include file="admin/_head.tpl" title="Liste des membres" current="membres"}
 
 {include file="admin/membres/_nav.tpl" current="index"}
 
 {if $sent}
-    <p class="confirm">Votre message a été envoyé.</p>
+    <p class="block confirm">Votre message a été envoyé.</p>
 {/if}
 
 {if !empty($membres_cats)}
@@ -38,9 +38,9 @@
     <table class="list">
         <thead class="userOrder">
             <tr>
-                {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" title="Tout cocher / décocher" /></td>{/if}
+                {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" title="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>{/if}
                 {foreach from=$champs key="c" item="champ"}
-                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{if $c == "numero"}#{else}{$champ.title}{/if} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
+                    <td class="{if $order == $c} cur {if $desc}desc{else}asc{/if}{/if}">{if $c == "numero"}Num.{else}{$champ.title}{/if} <a href="?o={$c}&amp;a&amp;cat={$current_cat}" class="icn up">&uarr;</a><a href="?o={$c}&amp;d&amp;cat={$current_cat}" class="icn dn">&darr;</a></td>
                 {/foreach}
                 <td></td>
             </tr>
@@ -48,7 +48,7 @@
         <tbody>
             {foreach from=$liste item="membre"}
                 <tr>
-                    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$membre.id}" /></td>{/if}
+                    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check">{input type="checkbox" name="selected[]" value=$membre.id}</td>{/if}
                     {foreach from=$champs key="c" item="cfg"}
                         <td>
                             {if $c == $config.champ_identite}<a href="{$admin_url}membres/fiche.php?id={$membre.id}">{/if}
@@ -57,8 +57,10 @@
                         </td>
                     {/foreach}
                     <td class="actions">
-                        <a class="icn" href="{$admin_url}membres/fiche.php?id={$membre.id}" title="Fiche membre">👤</a>
-                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<a class="icn" href="{$admin_url}membres/modifier.php?id={$membre.id}" title="Modifier la fiche membre">✎</a>{/if}
+                        {linkbutton label="Fiche membre" shape="user" href="!membres/fiche.php?id=%d"|args:$membre.id}
+                        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+                            {linkbutton label="Modifier" shape="edit" href="!membres/modifier.php?id=%d"|args:$membre.id}
+                        {/if}
                     </td>
                 </tr>
             {/foreach}
@@ -70,7 +72,7 @@
 
     {pagination url=$pagination_url page=$page bypage=$bypage total=$total}
 {else}
-    <p class="alert">
+    <p class="block alert">
         Aucun membre trouvé.
     </p>
 {/if}

@@ -7,7 +7,7 @@
 {form_errors}
 
 {if $ok == 'config'}
-	<p class="confirm">La configuration a bien été enregistrée.</p>
+	<p class="block confirm">La configuration a bien été enregistrée.</p>
 {/if}
 
 <form method="post" action="{$self_url_no_qs}">

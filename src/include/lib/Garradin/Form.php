@@ -10,7 +10,7 @@ class Form
 	{
 		// Valide un montant de monnaie valide (deux décimales, ne peut être négatif)
 		\KD2\Form::registerValidationRule('money', function ($name, $params, $value) {
-			return preg_match('/^\d+(?:\.\d{1,2})?$/', $value) && $value >= 0;
+			return preg_match('/^\d+(?:[.,]\d{1,2})?$/', $value) && $value >= 0;
 		});
 
 		// Test si la valeur existe dans cette table
@@ -19,6 +19,39 @@ class Form
 			$db = DB::getInstance();
 			return $db->test($params[0], $db->where($params[1], $value));
 		});
+	}
+
+	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null): bool
+	{
+		if (null !== $csrf_key && !$this->check($csrf_key)) {
+			return false;
+		}
+
+		try {
+			call_user_func($fn);
+
+			if (null !== $redirect) {
+				Utils::redirect($redirect);
+			}
+
+			return true;
+		}
+		catch (UserException $e) {
+			$this->addError($e->getMessage());
+			return false;
+		}
+	}
+
+	public function runIf($condition, callable $fn, ?string $csrf_key = null, ?string $redirect = null): ?bool
+	{
+		if (is_string($condition) && empty($_POST[$condition])) {
+			return null;
+		}
+		elseif (is_bool($condition) && !$condition) {
+			return null;
+		}
+
+		return $this->run($fn, $csrf_key, $redirect);
 	}
 
 	public function check($token_action = '', Array $rules = null)
@@ -37,9 +70,9 @@ class Form
 		return true;
 	}
 
-	public function validate(Array $rules)
+	public function validate(Array $rules, array $source = null)
 	{
-		return \KD2\Form::validate($rules, $this->errors, $_POST);
+		return \KD2\Form::validate($rules, $this->errors, $source);
 	}
 
 	public function hasErrors()
@@ -96,6 +129,8 @@ class Form
 			case 'fin': return 'date de fin';
 			case 'duree': return 'durée';
 			case 'passe_check': return 'vérification de mot de passe';
+			case 'id_account': return 'compte';
+			case 'label': return 'libellé';
 			default: return $name;
 		}
 	}
@@ -129,6 +164,7 @@ class Form
 			case 'money':
 				return sprintf('Le champ %s n\'est pas un nombre valide.', $element);
 			case 'in':
+			case 'in_table':
 				return sprintf('Valeur invalide dans le champ \'%s\'.', $element);
 			default:
 				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);

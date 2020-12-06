@@ -2,6 +2,10 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Chart;
+use Garradin\Entities\Accounting\Year;
+
 /**
  * Pour procéder à l'installation de l'instance Garradin
  * Utile pour automatiser l'installation sans passer par la page d'installation
@@ -25,7 +29,11 @@ class Install
 
 		unlink(DB_FILE);
 
-		$ok = self::install($config->nom_asso, $config->adresse_asso, $config->email_asso, 'Bureau', $user->identite, $user->email, $password, $config->site_asso);
+		// We can't use the real password, as it might not be valid (too short or compromised)
+		$ok = self::install($config->nom_asso, $user->identite, $user->email, md5($password . SECRET_KEY));
+
+		// Restore password
+		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$session::hashPassword($password)]);
 
 		if ($ok)
 		{
@@ -36,7 +44,7 @@ class Install
 		return $ok;
 	}
 
-	static public function install($nom_asso, $adresse_asso, $email_asso, $nom_categorie, $nom_membre, $email_membre, $passe_membre, $site_asso = WWW_URL)
+	static public function install($nom_asso, $nom_membre, $email_membre, $passe_membre)
 	{
 		$db = DB::getInstance(true);
 
@@ -55,9 +63,8 @@ class Install
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
 		$config = Config::getInstance();
 		$config->set('nom_asso', $nom_asso);
-		$config->set('adresse_asso', $adresse_asso);
-		$config->set('email_asso', $email_asso);
-		$config->set('site_asso', $site_asso);
+		$config->set('email_asso', $email_membre);
+		$config->set('site_asso', WWW_URL);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
 		$config->setVersion(garradin_version());
@@ -87,7 +94,7 @@ class Install
 		]);
 
 		$id = $cats->add([
-			'nom' => ucfirst($nom_categorie),
+			'nom' => 'Administrateurs',
 			'droit_inscription' => Membres::DROIT_AUCUN,
 			'droit_wiki' => Membres::DROIT_ADMIN,
 			'droit_membres' => Membres::DROIT_ADMIN,
@@ -133,22 +140,36 @@ class Install
 		]);
 		$config->set('accueil_connexion', $page);
 
-		// Mise en place compta
-		$comptes = new Compta\Comptes;
-		$comptes->importPlan();
+        // Import plan comptable
+        $chart = new Chart;
+        $chart->label = 'Plan comptable associatif 2018';
+        $chart->country = 'FR';
+        $chart->code = 'PCA2018';
+        $chart->save();
+        $chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
 
-		$comptes = new Compta\Categories;
-		$comptes->importCategories();
+        // Premier exercice
+        $year = new Year;
+        $year->label = sprintf('Exercice %d', date('Y'));
+        $year->start_date = new \DateTime('January 1st');
+        $year->end_date = new \DateTime('December 31');
+        $year->id_chart = $chart->id();
+        $year->save();
 
-		$ex = new Compta\Exercices;
-		$ex->add([
-			'libelle'   =>  'Premier exercice',
-			'debut'     =>  date('Y-01-01'),
-			'fin'       =>  date('Y-12-31')
-		]);
+        // Compte bancaire
+        $account = new Account;
+        $account->import([
+        	'label' => 'Compte courant',
+        	'code' => '512A',
+        	'type' => Account::TYPE_BANK,
+        	'position' => Account::ASSET_OR_LIABILITY,
+        	'id_chart' => $chart->id(),
+        	'user' => 1,
+        ]);
+        $account->save();
 
-		// Ajout d'une recherche avancée en exemple
-		$query = [
+		// Ajout d'une recherche avancée en exemple (membres)
+		$query = (object) [
 			'query' => [[
 				'operator' => 'AND',
 				'conditions' => [
@@ -166,6 +187,33 @@ class Install
 
 		$recherche = new Recherche;
 		$recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+
+		// Ajout d'une recherche avancée en exemple (compta)
+		$query = (object) [
+			'query' => [[
+				'operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 'a2.code',
+						'operator' => 'IS NULL',
+						'values'   => [],
+					],
+				],
+			]],
+			'order' => 't.id',
+			'desc' => false,
+			'limit' => '100',
+		];
+
+		$recherche = new Recherche;
+		$recherche->add('Écritures sans projet', null, $recherche::TYPE_JSON, 'compta', $query);
+
+		// Install welcome plugin if available
+		$has_welcome_plugin = Plugin::getPath('welcome', false);
+
+		if ($has_welcome_plugin) {
+			Plugin::install('welcome', true);
+		}
 
 		return $config->save();
 	}

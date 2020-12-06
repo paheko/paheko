@@ -2,9 +2,9 @@
 
 namespace Garradin;
 
-use KD2\DB_SQLite3;
+use KD2\DB\SQLite3;
 
-class DB extends DB_SQLite3
+class DB extends SQLite3
 {
     /**
      * Application ID pour SQLite
@@ -14,9 +14,13 @@ class DB extends DB_SQLite3
 
     static protected $_instance = null;
 
-    static public function getInstance($create = false)
+    static public function getInstance($create = false, $readonly = false)
     {
-        return self::$_instance ?: self::$_instance = new DB($create);
+        if (null === self::$_instance) {
+            self::$_instance = new DB('sqlite', ['file' => DB_FILE]);
+        }
+
+        return self::$_instance;
     }
 
     private function __clone()
@@ -24,63 +28,44 @@ class DB extends DB_SQLite3
         // Désactiver le clonage, car on ne veut qu'une seule instance
     }
 
-    public function __construct($create = false)
+    public function connect(): void
     {
-        if (!defined('\SQLITE3_OPEN_READWRITE'))
-        {
-            throw new \Exception('Module SQLite3 de PHP non présent. Merci de l\'installer.');
+        if (null !== $this->db) {
+            return;
         }
 
-        $flags = \SQLITE3_OPEN_READWRITE;
+        parent::connect();
 
-        if ($create)
-        {
-            $flags |= \SQLITE3_OPEN_CREATE;
-        }
+        // Activer les contraintes des foreign keys
+        $this->db->exec('PRAGMA foreign_keys = ON;');
 
-        parent::__construct(DB_FILE, $flags);
+        // 10 secondes
+        $this->db->busyTimeout(10 * 1000);
 
-        // Ne pas se connecter ici, on ne se connectera que quand une requête sera faite
+        // Performance enhancement
+        // see https://www.cs.utexas.edu/~jaya/slides/apsys17-sqlite-slides.pdf
+        // https://ericdraken.com/sqlite-performance-testing/
+        $this->exec(sprintf('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;', 32 * 1024 * 1024));
+
+        $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
     }
 
-    public function connect()
-    {
-        if (parent::connect())
-        {
-            // Activer les contraintes des foreign keys
-            $this->exec('PRAGMA foreign_keys = ON;');
-
-            // 10 secondes
-            $this->db->busyTimeout(10 * 1000);
-            $this->exec('PRAGMA journal_mode = TRUNCATE;');
-
-            $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
-        }
-    }
-
-    public function close()
+    public function close(): void
     {
         parent::close();
         self::$_instance = null;
     }
 
-    /**
-     * Import a file containing SQL commands
-     * Allows to use the statement ".read other_file.sql" to load other files
-     * @param  string $file Path to file containing SQL commands
-     * @return boolean
-     */
-    public function import($file)
+    public function beginSchemaUpdate()
     {
-        $sql = file_get_contents($file);
+        $this->toggleForeignKeys(false);
+        $this->begin();
+    }
 
-        $dir = dirname($file);
-
-        $sql = preg_replace_callback('/^\.read (.+\.sql)$/m', function ($match) use ($dir) {
-            return file_get_contents($dir . DIRECTORY_SEPARATOR . $match[1]) . "\n";
-        }, $sql);
-
-        return $this->exec($sql);
+    public function commitSchemaUpdate()
+    {
+        $this->commit();
+        $this->toggleForeignKeys(true);
     }
 
     /**

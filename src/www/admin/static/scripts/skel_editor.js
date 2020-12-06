@@ -1,8 +1,8 @@
 (function (){
 	g.style('scripts/skel_editor.css');
-	g.script('scripts/code_editor.min.js').onload = function ()
+	g.script('scripts/code_editor.min.js', function ()
 	{
-		var save_btn = document.querySelector('input[name=save]');
+		var save_btn = document.querySelector('[name=save]');
 		save_btn.type = 'hidden';
 
 		var code = new codeEditor('f_content');
@@ -195,5 +195,5 @@
 
 			window.location.hash = '';
 		}
-	};
+	});
 }());

@@ -77,10 +77,11 @@
             }
         }
 
-        var a = document.createElement('a');
-        a.className = 'icn';
-        a.title = 'Supprimer';
-        a.innerHTML = '✘';
+        var a = document.createElement('button');
+        a.className = 'icn-btn';
+        a.innerText = 'Supprimer';
+        a.dataset.icon = '✘';
+        a.type = 'button';
         a.onclick = function() { if (confirm('Supprimer ce fichier ?')) this.parentNode.submit(); };
 
         var items = document.body.getElementsByTagName('form');

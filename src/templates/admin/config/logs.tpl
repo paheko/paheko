@@ -2,11 +2,13 @@
 
 {include file="admin/config/_menu.tpl" current="logs"}
 
-{if ERRORS_ENABLE_LOG_VIEW}
-<ul class="actions sub">
-	<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>
-	<li{if $type == 'errors'} class="current"{/if}><a href="?type=errors">Erreurs système</a></li>
-</ul>
+{if ENABLE_TECH_DETAILS}
+<nav class="tabs">
+	<ul class="sub">
+		{*<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>*}
+		<li{if $type == 'errors'} class="current"{/if}><a href="?type=errors">Erreurs système</a></li>
+	</ul>
+</nav>
 {/if}
 
 {if isset($reports) && isset($id)}
@@ -61,7 +63,7 @@
 	</p>
 
 	{if !count($errors)}
-		<p class="alert">Aucune erreur n'a été trouvée dans le journal error.log</p>
+		<p class="block alert">Aucune erreur n'a été trouvée dans le journal error.log</p>
 	{else}
 		<table class="list">
 			<thead>
@@ -83,7 +85,9 @@
 					</td>
 					<td>{$error.count}</td>
 					<td>{$error.last_seen|date_fr}</td>
-					<td class="actions"><a title="Voir les détails" class="icn" href="?type=errors&id={$ref}">𝍢</a></td>
+					<td class="actions">
+						{linkbutton shape="menu" label="Voir les détails" href="%s?type=errors&id=%s"|args:$self_url_no_qs,$ref}
+					</td>
 				</tr>
 				{/foreach}
 			</tbody>
@@ -95,7 +99,7 @@
 	</p>
 
 	{if empty($list)}
-		<p class="alert">
+		<p class="block alert">
 			Aucune entrée dans le journal d'actions.
 		</p>
 	{/if}
