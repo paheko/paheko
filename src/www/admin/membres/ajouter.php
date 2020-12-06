@@ -46,6 +46,8 @@ if (f('save'))
     }
 }
 
+$tpl->assign('id_field_name', $config->get('champ_identifiant'));
+
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 

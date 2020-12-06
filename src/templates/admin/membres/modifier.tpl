@@ -13,6 +13,10 @@
 {form_errors}
 
 <form method="post" action="{$self_url}">
+    <!-- This is to avoid chrome autofill, Chrome developers you suck -->
+    <input type="text" style="display: none;" name="email" />
+    {if $id_field_name != 'email'}<input type="text" style="display: none;" name="{$id_field_name}" />{/if}
+    <input type="password" style="display: none;" name="password" />
 
     <fieldset>
         <legend>Informations personnelles</legend>
