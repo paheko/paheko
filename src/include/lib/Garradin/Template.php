@@ -605,7 +605,8 @@ class Template extends \KD2\Smartyer
 			$attributes .= 'required="required" ';
 		}
 
-		$attributes .= 'autocomplete="off" ';
+		// Fix for autocomplete, lpignore is for Lastpass
+		$attributes .= 'autocomplete="off" data-lpignore="true" ';
 
 		if (!empty($params['user_mode']) && empty($config->editable))
 		{
