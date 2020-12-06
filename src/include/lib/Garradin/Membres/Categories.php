@@ -19,11 +19,6 @@ class Categories
         'config'    =>  Membres::DROIT_AUCUN,
     ];
 
-    static public function getDroitsDefaut()
-    {
-        return $this->droits;
-    }
-
     protected function _checkData(&$data)
     {
         $db = DB::getInstance();
@@ -31,17 +26,6 @@ class Categories
         if (!isset($data['nom']) || !trim($data['nom']))
         {
             throw new UserException('Le nom de catégorie ne peut rester vide.');
-        }
-
-        if (!empty($data['id_cotisation_obligatoire']) 
-            && !$db->test('cotisations', 'id = ?', (int)$data['id_cotisation_obligatoire']))
-        {
-            throw new UserException('Numéro de cotisation inconnu.');
-        }
-
-        if (isset($data['id_cotisation_obligatoire']) && empty($data['id_cotisation_obligatoire']))
-        {
-            $data['id_cotisation_obligatoire'] = null;
         }
     }
 

@@ -3,7 +3,10 @@
 namespace Garradin;
 
 use KD2\Form;
+use KD2\HTTP;
+use KD2\Translate;
 use Garradin\Membres\Session;
+use Garradin\Entities\Accounting\Account;
 
 class Template extends \KD2\Smartyer
 {
@@ -40,8 +43,8 @@ class Template extends \KD2\Smartyer
 		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
-		$this->assign('self_url', Utils::getSelfUrl());
-		$this->assign('self_url_no_qs', Utils::getSelfUrl(false));
+		$this->assign('self_url', Utils::getSelfURI());
+		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
 		$this->assign('is_logged', false);
 
@@ -58,8 +61,8 @@ class Template extends \KD2\Smartyer
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('form_field', [$this, 'formField']);
-		$this->register_function('select_compte', [$this, 'formSelectCompte']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
+		$this->register_function('input', [$this, 'formInput']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
@@ -71,49 +74,28 @@ class Template extends \KD2\Smartyer
 			return Form::tokenHTML($params['key']);
 		});
 
+		$this->register_function('icon', [$this, 'widgetIcon']);
+		$this->register_function('button', [$this, 'widgetButton']);
+		$this->register_function('linkbutton', [$this, 'widgetLinkButton']);
+
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
-		$this->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
-		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('get_nom_compte', function ($compte) {
-			if (is_null($compte))
-			{
-				return '';
-			}
+		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
+		$this->register_modifier('strftime_fr', [Utils::class, 'strftime_fr']);
+		$this->register_modifier('date_fr', [Utils::class, 'date_fr']);
+		$this->register_modifier('date_long', [Utils::class, 'date_fr']);
 
-			if (!isset($this->liste_comptes))
-			{
-				$this->liste_comptes = (new Compta\Comptes)->getListAll();
-			}
-
-			if (!isset($this->liste_comptes[$compte]))
-			{
-				return '';
-			}
-
-			return $this->liste_comptes[$compte];
+		$this->register_modifier('date_short', function ($dt) {
+			return Utils::date_fr($dt, 'd/m/Y');
 		});
 
-		$this->register_modifier('strftime_fr', function ($ts, $format) {
-			return Utils::strftime_fr($format, $ts);
-		});
-
-		$this->register_modifier('date_fr', function ($ts, $format = 'd/m/Y H:i:s') {
-			return Utils::date_fr($format, $ts);
-		});
-
-		$this->register_modifier('escape_money', function ($number) {
-			return number_format((float)$number, 2, ',', ' ');
-		});
-
-		$this->register_modifier('html_money', function ($number) {
-			return '<b class="money">' . number_format((float)$number, 2, ',', '&nbsp;') . '</b>';
-		});
+		$this->register_modifier('html_money', [$this, 'htmlMoney']);
+		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
 
 		$this->register_modifier('format_wiki', function ($str) {
 			$str = Utils::SkrivToHTML($str);
@@ -129,6 +111,26 @@ class Template extends \KD2\Smartyer
 
 	}
 
+	protected function htmlMoney($number, bool $hide_empty = true): string
+	{
+		if ($hide_empty && !$number) {
+			return '';
+		}
+
+		return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
+	}
+
+	protected function htmlMoneyCurrency($number, bool $hide_empty = true): string
+	{
+		$out = $this->htmlMoney($number, $hide_empty);
+
+		if ($out !== '') {
+			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');
+		}
+
+		return $out;
+	}
+
 	protected function formErrors($params)
 	{
 		$form = $this->getTemplateVars('form');
@@ -138,7 +140,11 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		return '<div class="error"><ul><li>' . implode('</li><li>', $form->getErrorMessages(!empty($params['membre']) ? true : false)) . '</li></ul></div>';
+		$errors = $form->getErrorMessages(!empty($params['membre']) ? true : false);
+		$errors = array_map([$this, 'escape'], $errors);
+		$errors = array_map('nl2br', $errors);
+
+		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
 
 	protected function showError($params)
@@ -148,7 +154,263 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		return '<p class="error">' . $this->escape($params['message']) . '</p>';
+		return '<p class="block error">' . $this->escape($params['message']) . '</p>';
+	}
+
+	protected function widgetIcon(array $params): string
+	{
+		if (empty($params['href'])) {
+			return sprintf('<b class="icn">%s</b>', Utils::iconUnicode($params['shape']));
+		}
+
+		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
+	}
+
+	protected function widgetButton(array $params): string
+	{
+		$icon = Utils::iconUnicode($params['shape']);
+		$label = isset($params['label']) ? $this->escape($params['label']) : '';
+		unset($params['label'], $params['shape']);
+
+		if (!isset($params['type'])) {
+			$params['type'] = 'button';
+		}
+
+		if (!isset($params['class'])) {
+			$params['class'] = '';
+		}
+
+		if (isset($params['name']) && !isset($params['value'])) {
+			$params['value'] = 1;
+		}
+
+		$params['class'] .= ' icn-btn';
+
+		array_walk($params, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $this->escape($v));
+		});
+
+		$params = implode(' ', $params);
+
+		return sprintf('<button %s data-icon="%s">%s</button>', $params, $icon, $label);
+	}
+
+	protected function widgetLinkButton(array $params): string
+	{
+		$href = $params['href'];
+		$shape = $params['shape'];
+		$label = $params['label'];
+
+		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
+		if (substr($href, 0, 1) == '!') {
+			$href = ADMIN_URL . substr($params['href'], 1);
+		}
+
+		unset($params['href'], $params['shape'], $params['label']);
+
+		array_walk($params, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $this->escape($v));
+		});
+
+		$params = implode(' ', $params);
+
+		return sprintf('<a class="icn-btn" data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+	}
+
+	protected function formInput(array $params)
+	{
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source'];
+
+		// Extract params and keep attributes separated
+		$attributes = array_diff_key($params, array_flip($params_list));
+		$params = array_intersect_key($params, array_flip($params_list));
+		extract($params, \EXTR_SKIP);
+
+		if (!isset($name, $type)) {
+			throw new \InvalidArgumentException('Missing name or type');
+		}
+
+		$current_value = null;
+		$current_value_from_user = false;
+
+		if (isset($_POST[$name])) {
+			$current_value = $_POST[$name];
+			$current_value_from_user = true;
+		}
+		elseif (isset($source) && is_object($source) && isset($source->$name)) {
+			$current_value = $source->$name;
+		}
+		elseif (isset($source) && is_array($source) && isset($source[$name])) {
+			$current_value = $source[$name];
+		}
+		elseif (isset($default)) {
+			$current_value = $default;
+		}
+
+		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+			$current_value = $current_value->format('d/m/Y');
+		}
+		elseif ($type == 'date' && is_string($current_value)) {
+			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
+		}
+
+		$attributes['id'] = 'f_' . $name;
+		$attributes['name'] = $name;
+
+		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
+			$attributes['autocomplete'] = 'off';
+		}
+
+		if ($type == 'radio' || $type == 'checkbox') {
+			$attributes['id'] .= '_' . $value;
+
+			if ($current_value == $value) {
+				$attributes['checked'] = 'checked';
+			}
+
+			$attributes['value'] = $value;
+		}
+		elseif ($type == 'date') {
+			$type = 'text';
+			$attributes['placeholder'] = 'JJ/MM/AAAA';
+			$attributes['data-input'] = 'date';
+			$attributes['size'] = 12;
+			$attributes['maxlength'] = 10;
+			$attributes['pattern'] = '\d\d?/\d\d?/\d{4}';
+		}
+
+		// Create attributes string
+		if (array_key_exists('required', $attributes)) {
+			$attributes['required'] = 'required';
+		}
+
+		if (!empty($attributes['disabled'])) {
+			$attributes['disabled'] = 'disabled';
+			unset($attributes['required']);
+		}
+		else {
+			unset($attributes['disabled']);
+		}
+
+		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
+			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
+		}
+		else {
+			$required_label =  ' <i>(facultatif)</i>';
+		}
+
+		// Fake required: doesn't set the required attribute, just the label
+		// (useful for form elements that are hidden by JS)
+		unset($attributes['fake_required']);
+
+		$attributes_string = $attributes;
+
+		array_walk($attributes_string, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $v);
+		});
+
+		$attributes_string = implode(' ', $attributes_string);
+
+		if ($type == 'select') {
+			$input = sprintf('<select %s>', $attributes_string);
+
+			foreach ($options as $_key => $_value) {
+				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
+			}
+
+			$input .= '</select>';
+		}
+		elseif ($type == 'select_groups') {
+			$input = sprintf('<select %s>', $attributes_string);
+
+			foreach ($options as $optgroup => $suboptions) {
+				$input .= sprintf('<optgroup label="%s">', $this->escape($optgroup));
+
+				foreach ($suboptions as $_key => $_value) {
+					$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
+				}
+
+				$input .= '</optgroup>';
+			}
+
+			$input .= '</select>';
+		}
+		elseif ($type == 'textarea') {
+			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
+		}
+		elseif ($type == 'list') {
+			$multiple = !empty($attributes['multiple']);
+			$values = '';
+			$delete_btn = $this->widgetButton(['shape' => 'delete']);
+
+			if (null !== $current_value) {
+				foreach ($current_value as $v => $l) {
+					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
+				}
+			}
+
+			$button = $this->widgetButton([
+				'shape' => $multiple ? 'plus' : 'menu',
+				'value' => (substr($attributes['target'], 0, 4) === 'http') ? $attributes['target'] : ADMIN_URL . $attributes['target'],
+				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
+				'data-multiple' => $multiple ? '1' : '0',
+				'data-name' => $name,
+			]);
+
+			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', $this->escape($attributes['id']), $button, $values);
+		}
+		elseif ($type == 'money') {
+			if (null !== $current_value && !$current_value_from_user) {
+				$current_value = Utils::money_format($current_value, ',', '');
+			}
+
+			$currency = Config::getInstance()->get('monnaie');
+			$input = sprintf('<nobr><input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, $this->escape($current_value), $currency);
+		}
+		else {
+			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', $this->escape($current_value));
+			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
+		}
+
+		// No label? then we only want the input without the widget
+		if (empty($label)) {
+			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
+				$input .= sprintf('<label for="%s"></label>', $attributes['id']);
+			}
+
+			return $input;
+		}
+
+		if ($type == 'file') {
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
+		}
+
+		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $this->escape($label));
+
+		if ($type == 'radio' || $type == 'checkbox') {
+			$out = sprintf('<dd>%s %s', $input, $label);
+
+			if (isset($help)) {
+				$out .= sprintf(' <em class="help">(%s)</em>', $this->escape($help));
+			}
+
+			$out .= '</dd>';
+		}
+		else {
+			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
+
+			if ($type == 'file') {
+				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
+			}
+
+			if (isset($help)) {
+				$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
+			}
+		}
+
+		return $out;
 	}
 
 	protected function formField(array $params, $escape = true)
@@ -242,19 +504,23 @@ class Template extends \KD2\Smartyer
 		:root {
 			--gMainColor: %s;
 			--gSecondColor: %s;
-		}
-		@media screen, handheld {
-			.header .menu, body {
-				background-image: url("%s");
-			}
+			--gBgImage: url("%s");
 		}
 		</style>';
 
 		return sprintf($out, $couleur1, $couleur2, $image_fond);
 	}
 
-	protected function displayChampMembre($v, $config)
+	protected function displayChampMembre($v, $config = null)
 	{
+		if (is_string($config)) {
+			$config = Config::getInstance()->get('champs_membres')->get($config);
+		}
+
+		if (null === $config) {
+			return htmlspecialchars($v);
+		}
+
 		switch ($config->type)
 		{
 			case 'checkbox':
@@ -268,7 +534,7 @@ class Template extends \KD2\Smartyer
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
-				return Utils::sqliteDateToFrench($v);
+				return Utils::date_fr($v);
 			case 'multiple':
 				$out = [];
 
@@ -339,7 +605,8 @@ class Template extends \KD2\Smartyer
 			$attributes .= 'required="required" ';
 		}
 
-		$attributes .= 'autocomplete="off" ';
+		// Fix for autocomplete, lpignore is for Lastpass
+		$attributes .= 'autocomplete="off" data-lpignore="true" ';
 
 		if (!empty($params['user_mode']) && empty($config->editable))
 		{
@@ -388,10 +655,8 @@ class Template extends \KD2\Smartyer
 			foreach ($options as $k=>$v)
 			{
 				$b = 0x01 << (int)$k;
-				$field .= '<label><input type="checkbox" name="' 
-					. htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '[' . (int)$k . ']" value="1" '
-					. (($value & $b) ? 'checked="checked"' : '') . ' ' . $attributes . '/> ' 
-					. htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</label><br />';
+				$field .= sprintf('<input type="checkbox" name="%s[%d]" id="f_%1$s_%2$d" value="1" %s %s /> <label for="f_%1$s_%2$d">%s</label><br />',
+					htmlspecialchars($params['name']), $k, ($value & $b) ? 'checked="checked"' : '', $attributes, htmlspecialchars($v));
 			}
 		}
 		elseif ($type == 'textarea')
@@ -437,57 +702,17 @@ class Template extends \KD2\Smartyer
 		<dd class="help">' . htmlspecialchars($config->help, ENT_QUOTES, 'UTF-8') . '</dd>';
 		}
 
+		$id_field = Config::getInstance()->get('champ_identifiant');
+
+		if ($params['name'] == $id_field && empty($params['user_mode'])) {
+			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
+		}
+
 		if ($type != 'checkbox')
 		{
 			$out .= '
 		<dd>' . $field . '</dd>';
 		}
-
-		return $out;
-	}
-
-	protected function formSelectCompte($params)
-	{
-		$name = $params['name'];
-		$comptes = $params['comptes'];
-		$data = isset($params['data']) ? (array) $params['data'] : null;
-		$selected = isset($data[$params['name']]) ? $data[$params['name']] : f($name);
-
-		$out = '<select name="'.$name.'" id="f_'.$name.'" class="large">';
-
-		foreach ($comptes as $compte)
-		{
-			// Ne pas montrer les comptes désactivés
-			if (!empty($compte->desactive))
-				continue;
-
-			if (!isset($compte->id[1]) && empty($params['create']))
-			{
-				$out.= '<optgroup label="'.htmlspecialchars($compte->libelle, ENT_QUOTES, 'UTF-8', false).'" class="niveau_1"></optgroup>';
-			}
-			elseif (!isset($compte->id[2]) && empty($params['create']))
-			{
-				if ($compte->id > 10)
-					$out.= '</optgroup>';
-
-				$out.= '<optgroup label="'.htmlspecialchars($compte->id . ' - ' . $compte->libelle, ENT_QUOTES, 'UTF-8', false).'" class="niveau_2">';
-			}
-			else
-			{
-				$out .= '<option value="'.htmlspecialchars($compte->id, ENT_QUOTES, 'UTF-8', false).'" class="niveau_'.strlen($compte->id).'"';
-
-				if ($selected == $compte->id)
-				{
-					$out .= ' selected="selected"';
-				}
-
-				$out .= '>' . htmlspecialchars($compte->id . ' - ' . $compte->libelle, ENT_QUOTES, 'UTF-8', false);
-				$out .= '</option>';
-			}
-		}
-
-		$out .= '</optgroup>';
-		$out .= '</select>';
 
 		return $out;
 	}

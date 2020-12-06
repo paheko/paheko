@@ -12,6 +12,10 @@ if ('_route.php' === basename($uri)) {
 	die('Appel interdit');
 }
 
+if ('favicon.ico' === basename($uri)) {
+	die('');
+}
+
 if (($pos = strpos($uri, '?')) !== false)
 {
 	$uri = substr($uri, 0, $pos);
@@ -42,6 +46,12 @@ elseif (preg_match('!/f/([\d\w]+)/(.+)!', $uri, $match))
 	$_GET['id'] = $match[1];
 	$_GET['file'] = $match[2];
 	require __DIR__ . '/file.php';
+}
+elseif (preg_match('!/admin/!', $uri, $match))
+{
+	require __DIR__ . '/_inc.php';
+	http_response_code(404);
+	throw new UserException('Cette page n\'existe pas.');
 }
 else
 {

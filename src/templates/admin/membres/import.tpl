@@ -1,58 +1,28 @@
-{include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
+{include file="admin/_head.tpl" title="Import & export des membres" current="membres"}
 
 {include file="admin/membres/_nav.tpl" current="import"}
 
-<ul class="actions sub">
-    <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
-    <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
-    <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
-</ul>
+<nav class="tabs">
+    <ul class="sub">
+        <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
+        <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
+        <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
+    </ul>
+</nav>
 
 {form_errors}
 
 {if $ok}
-    <p class="confirm">
+    <p class="block confirm">
         L'import s'est bien déroulé.
     </p>
 {/if}
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 
-    {if $csv_file}
+    {if $csv->loaded()}
 
-    <fieldset>
-        <legend>Importer depuis un fichier CSV générique</legend>
-        <p class="help">{$csv_file|count} lignes trouvées dans le fichier</p>
-        <dl>
-            <dt><label><input type="checkbox" name="skip_first_line" value="1" checked="checked" /> Ne pas importer la première ligne</label></dt>
-            <dd class="help">Décocher cette case si la première ligne ne contient pas l'intitulé des colonnes mais des données.</dd>
-            <dt><label>Correspondance des champs</label></dt>
-            <dd class="help">Indiquer la correspondance entre colonnes du CSV et champs des fiches membre.</dd>
-            <dd>
-                <table class="list auto">
-                    <tbody>
-                    {foreach from=$csv_first_line key="index" item="csv_field"}
-                        <tr>
-                            <th>{$csv_field}</th>
-                            <td>
-                                <select name="csv_translate[{$index}]">
-                                    <option value="">-- Ne pas importer ce champ</option>
-                                    {foreach from=$garradin_champs item="champ" key="name"}
-                                        {if $champ.type == 'multiple' || $champ.type == 'file' || $name == 'passe'}{continue}{/if}
-                                        <option value="{$name}">{$champ.title}</option>
-                                    {/foreach}
-                                </select>
-                            </td>
-                        </tr>
-                    {/foreach}
-                    </tbody>
-                </table>
-            </dd>
-            <dd class="help">Pour fusionner des colonnes, il suffit d'indiquer le même nom de champ pour plusieurs colonnes.</dd>
-        </dl>
-    </fieldset>
-
-    <input type="hidden" name="csv_encoded" value="{$csv_file|escape:'json'|escape}" />
+        {include file="common/_csv_match_columns.tpl"}
 
     {else}
 
@@ -73,7 +43,7 @@
                 les lignes sans numéro ou avec un numéro inexistant créeront de nouveaux membres.
             </dd>
             <dd>
-                <input type="radio" name="type" id="f_type_csv" value="csv" {form_field name=type checked="csv"} />
+                <input type="radio" name="type" id="f_type_csv" value="custom" {form_field name=type checked="csv"} />
                 <label for="f_type_csv">Fichier CSV générique</label>
             </dd>
             <dd class="help">
@@ -86,8 +56,9 @@
     {/if}
 
     <p class="submit">
-        {csrf_field key="membres_import"}
-        <input type="submit" name="import" value="Importer &rarr;" />
+        {csrf_field key=$csrf_key}
+        {if $csv->loaded()}{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}{/if}
+        {button type="submit" name="import" label="Importer" shape="upload" class="main"}
     </p>
 
 </form>

@@ -1,13 +1,14 @@
 {include file="admin/_head.tpl" title="Supprimer un membre" current="membres"}
 
-<ul class="actions">
-    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
-    <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
-        <li class="current"><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
-    {/if}
-    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
+        <li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
+        {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+            <li class="current"><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
+        {/if}
+    </ul>
+</nav>
 
 {form_errors}
 
@@ -18,7 +19,7 @@
         <h3 class="warning">
             Êtes-vous sûr de vouloir supprimer le membre «&nbsp;{$membre.identite}&nbsp;» ?
         </h3>
-        <p class="alert">
+        <p class="block alert">
             <strong>Attention</strong> : cette action est irréversible et effacera toutes les
             données personnelles et l'historique de ces membres.
         </p>
@@ -31,7 +32,7 @@
 
     <p class="submit">
         {csrf_field key="delete_membre_"|cat:$membre.id}
-        <input type="submit" name="delete" value="Supprimer &rarr;" />
+        {button type="submit" name="delete" label="Supprimer" shape="delete" class="main"}
     </p>
 
 </form>

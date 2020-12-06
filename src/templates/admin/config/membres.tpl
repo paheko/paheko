@@ -1,13 +1,13 @@
-{include file="admin/_head.tpl" current="config" js=1}
+{include file="admin/_head.tpl" current="config" custom_css=['styles/config.css']}
 
 {include file="admin/config/_menu.tpl" current="fiches_membres"}
 
 {if isset($status) && $status == 'OK'}
-    <p class="confirm">
+    <p class="block confirm">
         La configuration a bien été enregistrée.
     </p>
 {elseif isset($status) && $status == 'ADDED'}
-    <p class="alert">
+    <p class="block alert">
         Le champ a été ajouté à la fin de la liste. Pour sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Enregistrer&nbsp;» en base de page.
     </p>
 {/if}
@@ -18,7 +18,7 @@
     <p class="help">
         Voici ce à quoi ressemblera la nouvelle fiche de membre, vérifiez vos modifications avant d'enregistrer les changements.
     </p>
-    <p class="alert">
+    <p class="block alert">
         Attention&nbsp;! Si vous avez supprimé un champ, les données liées à celui-ci seront supprimées de toutes les fiches de tous les membres.
     </p>
     <fieldset>
@@ -63,7 +63,7 @@
             <input type="hidden" name="champs" value="{$champs|escape:json|escape}" />
             <input type="submit" name="back" value="&larr; Retour à l'édition" class="minor" />
             <input type="submit" name="reset" value="Annuler les changements" class="minor" />
-            <input type="submit" name="save" value="Enregistrer &rarr;" />
+            {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
         </p>
     </form>
 {else}
@@ -84,7 +84,7 @@
                 {/foreach}
             </select>
             {csrf_field key="config_membres"}
-            <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+            {button type="submit" name="add" label="Ajouter ce champ à la fiche membre" shape="plus"}
         </p>
     </fieldset>
     </form>
@@ -96,9 +96,9 @@
         <dl>
             <dt><label for="f_name">Nom unique</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd class="help">Ne peut comporter que des lettres minuscules et des tirets bas.</dd>
-            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" size="30" required="required" /></dd>
+            <dd><input type="text" name="new" id="f_name" value="{form_field name=new}" required="required" /></dd>
             <dt><label for="f_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" size="60" required="required" /></dd>
+            <dd><input type="text" name="new_title" id="f_title" value="{form_field name=new_title}" required="required" /></dd>
             <dt><label for="f_type">Type de champ</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
                 <select name="new_type" id="f_type" required="required">
@@ -110,7 +110,7 @@
         </dl>
         <p>
             {csrf_field key="config_membres"}
-            <input type="submit" name="add" value="Ajouter ce champ à la fiche membre" />
+            {button type="submit" name="add" label="Ajouter ce champ à la fiche membre" shape="plus"}
             <input type="hidden" name="champs" value="{$champs|escape:json|escape}" />
         </p>
     </fieldset>
@@ -126,15 +126,13 @@
                 <dt><label>Type</label></dt>
                 <dd><input type="hidden" name="champs[{$nom}][type]" value="{$champ.type}" />{$champ.type|get_type}</dd>
                 <dt><label for="f_{$nom}_title">Titre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-                <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" size="60" required="required" /></dd>
+                <dd><input type="text" name="champs[{$nom}][title]" id="f_{$nom}_title" value="{form_field data=$champs->$nom name=title}" required="required" /></dd>
                 <dt><label for="f_{$nom}_help">Aide</label></dt>
-                <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs->$nom name=help}" size="100" /></dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][private]" value="1" {form_field data=$champs->$nom name=private checked="1"} /> Caché pour les membres</label></dt>
-                <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champs->$nom name=editable checked="1"} /> Modifiable par les membres</label></dt>
-                <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champs->$nom name=mandatory checked="1"} /> Champ obligatoire</label></dt>
-                <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
+                <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champs->$nom name=help}" /></dd>
+                <dt>Préférences</dt>
+                {input type="checkbox" name="champs[%s][private]"|args:$nom value="1" default=$champs->$nom->private label="Caché pour les membres" help="Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel"}
+                {input type="checkbox" name="champs[%s][editable]"|args:$nom value="1" default=$champs->$nom->editable label="Modifiable par les membres" help="Si coché, les membres pourront changer cette information depuis leur espace personnel"}
+                {input type="checkbox" name="champs[%s][mandatory]"|args:$nom value="1" default=$champs->$nom->mandatory label="Champ obligatoire" help="Si coché, ce champ ne pourra rester vide"}
                 {if $champ.type == 'select' || $champ.type == 'multiple'}
                     <dt><label>Options disponibles</label></dt>
                     {if $champ.type == 'multiple'}
@@ -146,11 +144,11 @@
                         <{if $champ.type == 'multiple'}ol{else}ul{/if} class="options">
                         {if !empty($champ.options)}
                             {foreach from=$champ.options key="key" item="opt"}
-                                <li><input type="text" name="champs[{$nom}][options][]" value="{$opt}" size="50" /></li>
+                                <li><input type="text" name="champs[{$nom}][options][]" value="{$opt}" /></li>
                             {/foreach}
                         {/if}
                         {if $champ.type == 'select' || empty($champ.options) || count($champ.options) < 32}
-                            <li><input type="text" name="champs[{$nom}][options][]" value="" size="50" /></li>
+                            <li><input type="text" name="champs[{$nom}][options][]" value="" /></li>
                         {/if}
                     </dd>
                 {/if}
@@ -165,20 +163,17 @@
     <fieldset id="f_passe">
         <legend>Mot de passe</legend>
         <dl>
-            <dt><label><input type="checkbox" name="champs[passe][private]" value="1" {form_field data=$champs.passe name=private checked="1"} /> Caché pour les membres</label></dt>
-            <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
-            <dt><label><input type="checkbox" name="champs[passe][editable]" value="1" {form_field data=$champs.passe name=editable checked="1"} /> Modifiable par les membres</label></dt>
-            <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-            <dt><label><input type="checkbox" name="champs[passe][mandatory]" value="1" {form_field data=$champs.passe name=mandatory checked="1"} /> Champ obligatoire</label></dt>
-            <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
+            {input type="checkbox" name="champs[passe][private]" value="1" default=$champs.passe.private label="Caché pour les membres" help="Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel"}
+            {input type="checkbox" name="champs[passe][editable]" value="1" default=$champs.passe.editable label="Modifiable par les membres" help="Si coché, les membres pourront changer cette information depuis leur espace personnel"}
+            {input type="checkbox" name="champs[passe][mandatory]" value="1" default=$champs.passe.mandatory label="Champ obligatoire" help="Si coché, ce champ ne pourra rester vide lors de la création d'un membre"}
         </dl>
     </fieldset>
 
     <p class="submit">
         {csrf_field key="config_membres"}
-        <input type="submit" name="reset" value="Annuler les changements" class="minor" />
-        <input type="submit" name="review" value="Enregistrer &rarr;" />
-        (un récapitulatif sera présenté et une confirmation sera demandée)
+        {button type="submit" name="reset" label="Annuler les changements" shape="left"}
+        {button type="submit" name="review" label="Vérifier les changements" shape="right" class="main"}
+        <em class="help">(un récapitulatif sera présenté et une confirmation sera demandée)</em>
     </p>
 </form>
 

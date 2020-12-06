@@ -1,58 +1,48 @@
 {include file="admin/_head.tpl" title="%s (%s)"|args:$membre.identite:$categorie.nom current="membres"}
 
-<ul class="actions">
-    <li class="current"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
-    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
-        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
-    {/if}
-    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li class="current"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
+        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
+        {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+            <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
+        {/if}
+    </ul>
+</nav>
 
 <dl class="cotisation">
-{if $cotisation}
-    <dt>Cotisation obligatoire</dt>
-    <dd>{$cotisation.intitule} — 
-        {if $cotisation.duree}
-            {$cotisation.duree} jours
-        {elseif $cotisation.debut}
-            du {$cotisation.debut|format_sqlite_date_to_french} au {$cotisation.fin|format_sqlite_date_to_french}
-        {else}
-            ponctuelle
-        {/if}
-        — {$cotisation.montant|escape|html_money} {$config.monnaie}
-    </dd>
-    <dt>À jour de cotisation ?</dt>
+    <dt>Activités et cotisations</dt>
+    {foreach from=$services item="service"}
     <dd>
-        {if !$cotisation.a_jour}
-            <span class="error"><b>Non</b>, cotisation non payée</span>
-        {else}
-            <b class="confirm">&#10003; Oui</b>
-            {if $cotisation.expiration}
-                (expire le {$cotisation.expiration|format_sqlite_date_to_french})
-            {/if}
+        {$service.label}
+        {if $service.status == -1 && $service.end_date} — terminée
+        {elseif $service.status == -1} — <b class="error">en retard</b>
+        {elseif $service.status == 1 && $service.end_date} — <b class="confirm">en cours</b>
+        {elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
+        {if $service.status.expiry_date} — expire le {$service.expiry_date|date_short}{/if}
+        {if !$service.paid} — <b class="error">À payer&nbsp;!</b>{/if}
+    </dd>
+    {foreachelse}
+    <dd>
+        Ce membre n'est inscrit à aucune activité ou cotisation.
+    </dd>
+    {/foreach}
+    <dd>
+        {if count($services)}
+            {linkbutton href="!services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
+        {/if}
+        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {linkbutton href="!services/save.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
         {/if}
     </dd>
-{/if}
-    <dt>
-        {if $nb_activites == 1}
-            {$nb_activites} cotisation enregistrée
-        {elseif $nb_activites}
-            {$nb_activites} cotisations enregistrées
-        {else}
-            Aucune cotisation enregistrée
-        {/if} 
-    </dt>
-    <dd>
-        <a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Voir l'historique</a>
-    </dd>
-    {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-        <dd><form method="get" action="{$admin_url}membres/cotisations/ajout.php"><input type="submit" value="Enregistrer une cotisation &rarr;" /><input type="hidden" name="id" value="{$membre.id}" /></form></dd>
-        {if !empty($nb_operations)}
-            <dt>Écritures comptables</dt>
-            <dd>{$nb_operations} écritures comptables
-                — <a href="{$admin_url}compta/operations/membre.php?id={$membre.id}">Voir la liste des écritures ajoutées par ce membre</a>
-            </dd>
+    {if $session->canAccess('membres', Membres::DROIT_ACCES)}
+        {if !empty($transactions_linked)}
+            <dt>Écritures comptables liées</dt>
+            <dd><a href="{$admin_url}acc/transactions/user.php?id={$membre.id}">{$transactions_linked} écritures comptables liées à ce membre</a></dd>
+        {/if}
+        {if !empty($transactions_created)}
+            <dt>Écritures comptables créées</dt>
+            <dd><a href="{$admin_url}acc/transactions/creator.php?id={$membre.id}">{$transactions_created} écritures comptables créées par ce membre</a></dd>
         {/if}
     {/if}
 </dl>
@@ -62,9 +52,9 @@
 		<dt>Catégorie</dt>
 		<dd>{$categorie.nom} <span class="droits">{format_droits droits=$categorie}</span></dd>
 		<dt>Inscription</dt>
-		<dd>{$membre.date_inscription|date_fr:'d/m/Y'}</dd>
+		<dd>{$membre.date_inscription|date_short}</dd>
 		<dt>Dernière connexion</dt>
-		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_fr:'d/m/Y à H:i'}{/if}</dd>
+		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_long}{/if}</dd>
 		<dt>Mot de passe</dt>
 		<dd>
 			{if empty($membre.passe)}
@@ -94,14 +84,16 @@
         {elseif $c_config.type == 'email'}
             <a href="mailto:{$membre->$c|escape:'url'}">{$membre->$c}</a>
             {if $c == 'email'}
-                | <a href="{$admin_url}membres/message.php?id={$membre.id}"><b class="icn action">✉</b> Envoyer un message</a>
+                {linkbutton href="!membres/message.php?id=%d"|args:$membre.id label="Envoyer un message" shape="mail"}
             {/if}
         {elseif $c_config.type == 'tel'}
             <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
         {elseif $c_config.type == 'country'}
             {$membre->$c|get_country_name}
-        {elseif $c_config.type == 'date' || $c_config.type == 'datetime'}
-            {$membre->$c|format_sqlite_date_to_french}
+        {elseif $c_config.type == 'date'}
+            {$membre->$c|date_short}
+        {elseif $c_config.type == 'datetime'}
+            {$membre->$c|date_fr}
         {elseif $c_config.type == 'password'}
             *******
         {elseif $c_config.type == 'multiple'}

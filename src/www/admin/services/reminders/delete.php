@@ -1,0 +1,26 @@
+<?php
+namespace Garradin;
+
+use Garradin\Entities\Services\Reminder;
+use Garradin\Services\Reminders;
+use Garradin\Services\Services;
+
+require_once __DIR__ . '/../_inc.php';
+
+$session->requireAccess('membres', Membres::DROIT_ADMIN);
+
+$reminder = Reminders::get((int) qg('id'));
+
+if (!$reminder) {
+	throw new UserException("Ce rappel n'existe pas");
+}
+
+$csrf_key = 'reminder_delete_' . $reminder->id();
+
+$form->runIf('delete', function () use ($reminder) {
+	$reminder->delete();
+}, $csrf_key, ADMIN_URL . 'services/reminders/');
+
+$tpl->assign(compact('reminder', 'csrf_key'));
+
+$tpl->display('services/reminders/delete.tpl');

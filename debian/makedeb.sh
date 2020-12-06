@@ -38,11 +38,15 @@ CODEDIR=${DEBLOCALPREFIX}/share/${PACKAGE_DEBNAME}
 mkdir -p ${CODEDIR}
 cp -r ${SRCDIR}/* ${CODEDIR}
 cp ${THISDIR}/config.debian.php ${CODEDIR}/config.local.php
-rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes
+rm -rf ${CODEDIR}/*.sqlite ${CODEDIR}/cache ${CODEDIR}/www/squelettes ${CODEDIR}/www/plugins/*
 cp ${THISDIR}/garradin.png "${CODEDIR}"
 
+mkdir -p "${DEBROOT}/var/lib/${PACKAGE_DEBNAME}"
+mkdir -p "${DEBROOT}/var/cache/${PACKAGE_DEBNAME}"
+mkdir -p "${DEBROOT}/etc/${PACKAGE_DEBNAME}"
+
 # Cleaning files that will be copied to /usr/share/doc
-rm -f ${CODEDIR}/{README,COPYING}
+#rm -f ${CODEDIR}/../{README.md,COPYING}
 
 cd $DEBROOT || {
     echo "Debian dest dir [$DEBROOT] not found. :("
@@ -64,10 +68,24 @@ find ${DEBLOCALPREFIX} -type f -exec md5sum {} \; > DEBIAN/md5sums
 
 true && {
     echo "Generating Debian-specific files..."
-    cp ${SRCDIR}/COPYING ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}/copyright
+    cp ${THISDIR}/../COPYING ${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}/copyright
 } || {
 	echo "Fail."
 	exit 1
+}
+
+true && {
+    cat <<EOF > DEBIAN/postinst
+#!/bin/sh
+
+chown www-data:www-data /var/lib/garradin /var/cache/garradin
+chown root:www-data /etc/garradin
+chmod g=rX,o= /etc/garradin
+chmod ug=rwX,o= /var/lib/garradin /var/cache/garradin
+EOF
+
+    chmod +x DEBIAN/postinst
+
 }
 
 true && {
@@ -90,7 +108,7 @@ DOCDIR=${DEBLOCALPREFIX}/share/doc/${PACKAGE_DEBNAME}
 
 true && {
     echo "Generating doc..."
-    cp ${SRCDIR}/README ${DOCDIR}
+    cp ${THISDIR}/../README.md ${DOCDIR}
     a2x --doctype manpage --format manpage ${THISDIR}/manpage.txt
     mkdir -p ${DEBLOCALPREFIX}/share/man/man1
     gzip -c ${THISDIR}/garradin.1 > ${DEBLOCALPREFIX}/share/man/man1/${PACKAGE_DEBNAME}.1.gz
@@ -109,7 +127,7 @@ Section: web
 Priority: optional
 Maintainer: Garradin <garradin@kd2.org>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php5-cli (>=5.6) | php-cli (>=7.0), php5-sqlite | php-sqlite3
+Depends: dash | bash, php-cli (>=7.2), php-sqlite3
 Version: ${PACKAGE_DEB_VERSION}
 Suggests: www-browser, php-gd
 Homepage: http://dev.kd2.org/garradin/

@@ -1,0 +1,87 @@
+body#popup {
+    background-position: -170px 0px;
+}
+
+body#transparent {
+    background: transparent;
+}
+
+body#popup main {
+    margin: 1em 1em 1em 2.5em;
+}
+
+body#transparent main {
+    margin: 0;
+    padding: .2em;
+}
+
+/** Dialogs pop-ins */
+#dialog {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    position: fixed;
+    opacity: 1;
+    transition: opacity .5s;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+#dialog > iframe {
+    width: 90%;
+    height: 90%;
+    border: none;
+    box-shadow: 0px 0px 5px #000;
+}
+
+#dialog button {
+    background: rgb(var(--gMainColor));
+    color: #fff;
+    font-size: 1.3em;
+    display: block;
+    width: 90%;
+}
+
+.loader {
+    width: 100%;
+    min-height: 32px;
+    display: block;
+    position: relative;
+}
+
+.loader.install {
+    margin-top: -40px;
+}
+
+.loader b {
+    text-shadow: 2px 2px 5px #999;
+    background: rgb(255, 255, 255);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: .5em;
+    font-size: 16px;
+    line-height: 16px;
+    height: 16px;
+    z-index: 9999;
+    position: absolute;
+    display: block;
+    left: 10px;
+    top: 10px;
+    padding: .2em;
+}
+
+.loader img {
+    position: absolute;
+    opacity: 0;
+    transition: all 0.5s ease;
+    z-index: 2;
+}

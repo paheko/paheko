@@ -1,9 +1,11 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos" js=1}
+{include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos"}
 
-<ul class="actions">
-    <li class="current"><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
-    <li><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li class="current"><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
+        <li><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
+    </ul>
+</nav>
 
 {form_errors membre=1}
 
@@ -27,7 +29,7 @@
 
     <p class="submit">
         {csrf_field key="edit_me"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>

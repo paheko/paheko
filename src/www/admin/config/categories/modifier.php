@@ -34,7 +34,6 @@ if (f('save'))
         'droit_connexion'           => sprintf('in:%s,%s', Membres::DROIT_ACCES, Membres::DROIT_AUCUN),
         'droit_inscription'         => sprintf('in:%s,%s', Membres::DROIT_ACCES, Membres::DROIT_AUCUN),
         'cacher'                    => 'boolean',
-        'id_cotisation_obligatoire' => 'numeric',
     ]);
 
     if (!$form->hasErrors())
@@ -48,7 +47,6 @@ if (f('save'))
             'droit_connexion' => (int) f('droit_connexion'),
             'droit_inscription' => (int) f('droit_inscription'),
             'cacher'        =>  (int) f('cacher'),
-            'id_cotisation_obligatoire' => (int) f('id_cotisation_obligatoire'),
         ];
 
         // Ne pas permettre de modifier la connexion, l'accès à la config et à la gestion des membres
@@ -81,9 +79,6 @@ if (f('save'))
 $tpl->assign('cat', $cat);
 
 $tpl->assign('readonly', $cat->id == $user->id_categorie ? 'disabled="disabled"' : '');
-
-$cotisations = new Cotisations;
-$tpl->assign('cotisations', $cotisations->listCurrent());
 
 $tpl->assign('membres', new Membres);
 

@@ -1,0 +1,106 @@
+/** Accounting specifics */
+.money {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+b.money {
+    font-weight: inherit;
+    white-space: pre;
+}
+
+.transaction-lines td.money {
+    text-align: left;
+}
+
+.transaction-lines td.money input + b {
+    display: none;
+}
+
+.transaction-lines select {
+    max-width: 10em;
+}
+
+.transaction-lines input[type=text] {
+    min-width: 0 !important;
+}
+
+nav.acc-year {
+    background: white;
+    text-align: center;
+    border-radius: .5rem;
+    border: .2rem solid rgba(var(--gMainColor), 0.5);
+    display: flex;
+    align-items: center;
+    margin-bottom: .5rem;
+}
+
+nav.acc-year > * {
+    padding: .2rem .5rem;
+}
+
+nav.acc-year h4 {
+    font-weight: normal;
+}
+
+table.statement, table.statement table {
+    width: 100%;
+}
+
+table.statement td, table.statement th {
+    padding: .5rem;
+    vertical-align: top;
+}
+
+table.statement table.list td, table.statement table.list th {
+    padding: .2rem .5rem;
+}
+
+table.statement table {
+    border: 1px solid rgba(var(--gSecondColor), 0.5);
+}
+
+td.money, th.money {
+    text-align: right;
+}
+
+.statement table tfoot tr {
+    background: rgba(var(--gSecondColor), 0.1);
+    color: rgb(var(--gMainColor));
+}
+
+.year-header {
+    text-align: center;
+    margin-bottom: .8em;
+    padding-bottom: .5em;
+    border-bottom: 1pt solid #999;
+}
+
+.year-header .print-btn button {
+    font-size: 1.3rem;
+}
+
+.year-infos {
+    text-align: center;
+}
+
+.year-infos .graphs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.year-infos .graphs figure {
+    margin: 1rem;
+}
+
+table.accounts { width: 100%; }
+table.accounts .actions { text-align: right; }
+table.accounts tbody tr td:first-child { font-family: monospace; }
+table.accounts th { font-weight: normal; }
+table.accounts .account-level-1 th { font-size: 1.6em; }
+table.accounts .account-level-2 th { padding-left: 1em; font-size: 1.3em; }
+table.accounts .account-level-3 th { padding-left: 2em; }
+table.accounts .account-level-4 th { padding-left: 3em; }
+table.accounts .account-level-5 th { padding-left: 4em; }
+table.accounts .account-level-6 th { padding-left: 5em; }

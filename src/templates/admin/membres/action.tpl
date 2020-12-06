@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Action collective sur les membres" current="membres"}
 
-<p class="alert">
+<p class="block alert">
     {$selected|count} membres sélectionnés
 </p>
 
@@ -31,7 +31,7 @@
     <p class="submit">
         {csrf_field key="membres_action"}
         <input type="hidden" name="action" value="move" />
-        <input type="submit" name="confirm" value="Enregistrer &rarr;" />
+        {button type="submit" name="confirm" label="Enregistrer" shape="right" class="main"}
     </p>
 
     {elseif $action == 'delete'}
@@ -40,7 +40,7 @@
         <h3 class="warning">
             Êtes-vous sûr de vouloir supprimer les {$nb_selected} membres sélectionnés ?
         </h3>
-        <p class="alert">
+        <p class="block alert">
             <strong>Attention</strong> : cette action est irréversible et effacera toutes les
             données personnelles et l'historique de ces membres.
         </p>
@@ -54,7 +54,7 @@
     <p class="submit">
         {csrf_field key="membres_action"}
         <input type="hidden" name="action" value="delete" />
-        <input type="submit" name="confirm" value="Oui, supprimer ces membres &rarr;" />
+        {button type="submit" name="confirm" label="Oui, supprimer ces membres" shape="delete" class="main"}
     </p>
     {/if}
 

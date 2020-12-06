@@ -3,7 +3,7 @@
 {include file="admin/config/_menu.tpl" current="index"}
 
 {if $ok && !$form->hasErrors()}
-    <p class="confirm">
+    <p class="block confirm">
         La configuration a bien été enregistrée.
     </p>
 {/if}
@@ -16,7 +16,14 @@
         <legend>Garradin</legend>
         <dl>
             <dt>Version installée</dt>
-            <dd class="help">{$garradin_version} <a href="{$garradin_website}">[Vérifier la disponibilité d'une nouvelle version]</a></dd>
+            <dd class="help">{$garradin_version}</dd>
+            {if $new_version}
+            <dd><p class="block alert">
+                Une nouvelle version <strong>{$new_version}</strong> est disponible !<br />
+                <a href="{$garradin_website}" target="_blank">Aller télécharger la nouvelle version</a>
+            </p></dd>
+            {/if}
+            {if ENABLE_TECH_DETAILS}
             <dt>Informations système</dt>
             <dd class="help">
                 Version PHP&nbsp;: {$php_version}<br />
@@ -24,6 +31,7 @@
                 Heure du serveur&nbsp;: {$server_time|date_fr}<br />
                 Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
             </dd>
+            {/if}
         </dl>
     </fieldset>
 
@@ -35,7 +43,7 @@
             <dt><label for="f_email_asso">Adresse E-Mail</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="email" name="email_asso" id="f_email_asso" required="required" value="{form_field data=$config name=email_asso}" /></dd>
             <dt><label for="f_adresse_asso">Adresse postale</label></dt>
-            <dd><textarea cols="50" rows="5" name="adresse_asso" id="f_adresse_asso">{form_field data=$config name=adresse_asso}</textarea></dd>
+            <dd><textarea cols="30" rows="5" name="adresse_asso" id="f_adresse_asso">{form_field data=$config name=adresse_asso}</textarea></dd>
             <dt><label for="f_site_asso">Site web</label></dt>
             <dd><input type="url" name="site_asso" id="f_site_asso" value="{form_field name=site_asso data=$config}" /></dd>
         </dl>
@@ -107,17 +115,16 @@
     <fieldset id="couleurs">
         <legend>Personnalisation de l'interface</legend>
         <dl>
-            <dt><label for="f_couleur1">Couleur principale</label></dt>
-            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[0]}" name="couleur1" value="{form_field name=couleur1 default=$couleur1}" id="f_couleur1" /></dd>
-            <dt><label for="f_couleur2">Couleur secondaire</label></dt>
-            <dd><input type="color" pattern="#[a-f0-9]{ldelim}6{rdelim}" title="Couleur au format hexadécimal" placeholder="{$couleurs_defaut[1]}" name="couleur2" value="{form_field name=couleur2 default=$couleur2}" id="f_couleur2" /></dd>
+            {input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$couleur1 name="couleur1" label="Couleur primaire" placeholder=$couleurs_defaut[0]}
+            {input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$couleur2 name="couleur2" label="Couleur secondaire" placeholder=$couleurs_defaut[1]}
+            {input type="file" label="Image de fond" name="background" help="Il est conseillé d'utiliser une image en noir et blanc avec un fond blanc pour un meilleur rendu. Dimensions recommandées : 380x200" accept="image/*,*.jpeg,*.jpg,*.png,*.gif"}
         </dl>
-        <input type="hidden" name="image_fond" id="f_image_fond" data-source="{$background_image_source}" value="{form_field name=image_fond}" />
+        <input type="hidden" name="image_fond" id="f_image_fond" data-source="{$background_image_source}" data-default="{$background_image_default}" value="{form_field name=image_fond}" />
     </fieldset>
 
     <p class="submit">
         {csrf_field key="config"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>

@@ -6,7 +6,7 @@
         {foreach from=$list item="page"}
         <tr>
             <th><a href="{$admin_url}wiki/?{$page.uri}">{$page.titre}</a></th>
-            <td>{$page.date_modification|date_fr:'d/m/Y à H:i'}</td>
+            <td>{$page.date_modification|date_long}</td>
         </tr>
         {/foreach}
         </tbody>
@@ -14,7 +14,7 @@
 
     {pagination url="?p=[ID]" page=$current_page bypage=$bypage total=$total}
 {else}
-    <p class="alert">Pas de modification récente.</p>
+    <p class="block alert">Pas de modification récente.</p>
 {/if}
 
 {include file="admin/_foot.tpl"}

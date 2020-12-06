@@ -1,8 +1,12 @@
-{include file="admin/_head.tpl" title="Ajouter un membre" current="membres/ajouter" js=1}
+{include file="admin/_head.tpl" title="Ajouter un membre" current="membres/ajouter"}
 
 {form_errors}
 
 <form method="post" action="{$self_url}">
+    <!-- This is to avoid chrome autofill, Chrome developers you suck -->
+    <input type="text" style="display: none;" name="email" />
+    {if $id_field_name != 'email'}<input type="text" style="display: none;" name="{$id_field_name}" />{/if}
+    <input type="password" style="display: none;" name="password" />
 
     <fieldset>
         <legend>Informations personnelles</legend>
@@ -25,9 +29,9 @@
                 Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$passphrase}" autocomplete="off" />
             </dd>
-            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" autocomplete="off" /></dd>
+            <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" autocomplete="new-password" /></dd>
             <dt><label for="f_repasse">Encore le mot de passe</label> (vérification)</dt>
-            <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" autocomplete="off" /></dd>
+            <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" autocomplete="new-password" /></dd>
         </dl>
     </fieldset>
 
@@ -49,16 +53,16 @@
 
     <p class="submit">
         {csrf_field key="new_member"}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>
 
 <script type="text/javascript">
 {literal}
-g.script('scripts/password.js').onload = function () {
+g.script('scripts/password.js', () => {
     initPasswordField('pw_suggest', 'f_passe', 'f_repasse');
-};
+});
 {/literal}
 </script>
 

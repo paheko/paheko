@@ -187,7 +187,7 @@ class Plugin
 	 * @return void
 	 * @throws UserException Si le fichier n'existe pas ou fait partie des fichiers qui ne peuvent
 	 * être appelés que par des méthodes de Plugin.
-	 * @throws RuntimeException Si le chemin indiqué tente de sortir du contexte du PHAR
+	 * @throws \RuntimeException Si le chemin indiqué tente de sortir du contexte du PHAR
 	 */
 	public function call($file)
 	{
@@ -443,10 +443,9 @@ class Plugin
 			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
 
-			$st = $db->userSelectStatement($query);
-			$res = $st->execute();
+			$res = $db->protectSelect(['membres' => []], $query);
 
-			if (!$res->fetchArray(\SQLITE3_NUM))
+			if (!$db->firstColumn($query))
 			{
 				unset($list[$id]);
 				continue;
@@ -532,7 +531,7 @@ class Plugin
 			$context = stream_context_create($context_options);
 
 			try {
-				$result = file_get_contents(PLUGINS_URL, NULL, $context);
+				$result = file_get_contents(PLUGINS_URL, false, $context);
 			}
 			catch (\Exception $e)
 			{
@@ -548,6 +547,11 @@ class Plugin
 
 		$list = json_decode($result, true);
 		return $list;
+	}
+
+	static public function fetchOfficialList()
+	{
+		return []; // FIXME
 	}
 
 	/**
@@ -582,9 +586,9 @@ class Plugin
 	 * Télécharge un plugin depuis le repository officiel, et l'installe
 	 * @param  string $id Identifiant du plugin
 	 * @return boolean    TRUE si ça marche
-	 * @throws LogicException Si le plugin n'est pas dans la liste des plugins officiels
+	 * @throws \LogicException Si le plugin n'est pas dans la liste des plugins officiels
 	 * @throws UserException Si le plugin est déjà installé ou que le téléchargement a échoué
-	 * @throws RuntimeException Si l'archive téléchargée est corrompue (intégrité du hash ne correspond pas)
+	 * @throws \RuntimeException Si l'archive téléchargée est corrompue (intégrité du hash ne correspond pas)
 	 */
 	static public function download($id)
 	{
@@ -761,16 +765,24 @@ class Plugin
 			return null;
 		}
 
+		if (null === $params) {
+			$params = [];
+		}
+
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($list as $row)
 		{
+			$path = self::getPath($row->plugin, in_array($row->plugin, $system));
+
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
 			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
-			if (!self::getPath($row->plugin, in_array($row->plugin, $system)))
+			if (!$path)
 			{
 				continue;
 			}
+
+			$params['plugin_root'] = $path;
 
 			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 

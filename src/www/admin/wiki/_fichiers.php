@@ -26,7 +26,7 @@ elseif (f('delete'))
         try {
             $fichier = new Fichiers(f('delete'));
             
-            if (!$fichier->checkAccess($session))
+            if (!$fichier->checkAccess($session, true))
             {
                 throw new UserException('Vous n\'avez pas accès à ce fichier.');
             }

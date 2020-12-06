@@ -292,25 +292,32 @@ class Membres
         return DB::getInstance()->firstColumn('SELECT id FROM membres WHERE numero = ?;', (int) $numero);
     }
 
-    public function getSearchHeaderFields(array $result)
+    public function quickSearch(string $query)
     {
-        if (!count($result))
+        $identity = Config::getInstance()->get('champ_identite');
+        $operator = 'LIKE';
+
+        if (is_numeric(trim($query)))
         {
-            return false;
+            $column = 'numero';
+            $operator = '= ?';
+        }
+        elseif (strpos($query, '@') !== false)
+        {
+            $column = 'email';
+        }
+        else
+        {
+            $column = $identity;
         }
 
-        $champs = Config::getInstance()->get('champs_membres');
-        $fields = [];
-
-        foreach (reset($result) as $field=>$value)
-        {
-            if ($config = $champs->get($field))
-            {
-                $fields[$field] = $config;
-            }
+        if ($operator == 'LIKE') {
+            $query = '%' . str_replace(['%', '_'], '\\', $query) . '%';
+            $operator = 'LIKE ? ESCAPE \'\\\'';
         }
 
-        return $fields;
+        $sql = sprintf('SELECT id, numero, %s AS identite FROM membres WHERE %s %s ORDER BY %1$s LIMIT 50;', $identity, $column, $operator);
+        return DB::getInstance()->get($sql, $query);
     }
 
     public function sendMessage(array $recipients, $subject, $message, $send_copy)

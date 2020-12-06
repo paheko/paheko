@@ -2,23 +2,12 @@
 
 {$banniere|raw}
 
-<ul class="actions">
-    <li><a href="{$admin_url}mes_infos.php">Modifier mes informations personnelles</a></li>
-    {if $cotisation}
-    <li>
-        {if !$cotisation.a_jour}
-            <b class="error">Cotisation en retard&nbsp;!</b>
-        {else}
-            <b class="confirm">Cotisation à jour</b>
-            {if $cotisation.expiration}
-                (expire le {$cotisation.expiration|format_sqlite_date_to_french})
-            {/if}
-        {/if}
-    </li>
-    {/if}
-    <li><a href="{$admin_url}mes_cotisations.php">Suivi de mes cotisations</a></li>
-</ul>
-
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}mes_infos.php">Modifier mes informations personnelles</a></li>
+        <li><a href="{$admin_url}my_services.php">Suivi de mes activités et cotisations</a></li>
+    </ul>
+</nav>
 
 <aside class="describe">
     <h3>{$config.nom_asso}</h3>
@@ -34,7 +23,7 @@
     {/if}
     {if !empty($config.site_asso)}
     <p>
-        Web : <a href="{$config.site_asso}">{$config.site_asso}</a>
+        Web : <a href="{$config.site_asso}" target="_blank">{$config.site_asso}</a>
     </p>
     {/if}
 </aside>

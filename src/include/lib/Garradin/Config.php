@@ -49,33 +49,32 @@ class Config
             'adresse_asso'            =>  $string,
             'email_asso'              =>  $string,
             'site_asso'               =>  $string,
-            
+
             'monnaie'                 =>  $string,
             'pays'                    =>  $string,
-            
+
             'champs_membres'          =>  $object,
-            
+
             'categorie_membres'       =>  $int,
-            
-            'categorie_dons'          =>  $int,
-            'categorie_cotisations'   =>  $int,
-            
+
             'accueil_wiki'            =>  $string,
             'accueil_connexion'       =>  $string,
-            
+
             'frequence_sauvegardes'   =>  $int,
             'nombre_sauvegardes'      =>  $int,
-            
+
             'champ_identifiant'       =>  $string,
             'champ_identite'          =>  $string,
-            
+
             'version'                 =>  $string,
-            
+            'last_chart_change'       =>  $int,
+            'last_version_check'      =>  $string,
+
             'couleur1'                =>  $string,
             'couleur2'                =>  $string,
             'image_fond'              =>  $string,
 
-            'desactiver_site'         => $bool,
+            'desactiver_site'         =>  $bool,
         ];
 
         $db = DB::getInstance();
@@ -122,9 +121,12 @@ class Config
         $values = [];
         $db = DB::getInstance();
 
-        if (isset($this->modified['image_fond']))
-        {
-            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'image_fond\';'))
+        // Image files
+        if (isset($this->modified['image_fond'])) {
+            $key = 'image_fond';
+            $value =& $this->config[$key];
+
+            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = ?;', $key))
             {
                 try {
                     $f = new Fichiers($current);
@@ -135,13 +137,17 @@ class Config
                 }
             }
 
-            if (strlen($this->config['image_fond']) > 0)
+            if (strlen($value) > 0)
             {
-                $f = Fichiers::storeFromBase64('Image_fond_admin.png', $this->config['image_fond']);
-                $this->config['image_fond'] = $f->id;
+                $content = $value;
+                $value = null;
+                $f = Fichiers::storeFromBase64($key . '.png', $content);
+                $value = $f->id;
                 unset($f);
             }
         }
+
+        unset($value, $key);
 
         $db->begin();
 
@@ -165,7 +171,7 @@ class Config
         if (!empty($this->modified['champ_identifiant']))
         {
             // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-            $db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL 
+            $db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
                 WHERE '.$this->get('champ_identifiant').' = "";');
 
             // Création de l'index unique
@@ -191,7 +197,7 @@ class Config
         {
             return null;
         }
-        
+
         return $this->config[$key];
     }
 
@@ -301,22 +307,11 @@ class Config
                 }
 
                 // Vérification que le champ est unique pour l'identifiant
-                if ($key == 'champ_identifiant' 
-                    && !$db->firstColumn('SELECT (COUNT(DISTINCT lower('.$value.')) = COUNT(*)) 
+                if ($key == 'champ_identifiant'
+                    && !$db->firstColumn('SELECT (COUNT(DISTINCT lower('.$value.')) = COUNT(*))
                         FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != \'\';'))
                 {
                     throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
-                }
-                break;
-            }
-            case 'categorie_cotisations':
-            case 'categorie_dons':
-            {
-                return false;
-                $db = DB::getInstance();
-                if (!$db->firstColumn('SELECT 1 FROM compta_categories WHERE id = ?;', $value))
-                {
-                    throw new UserException('Champ '.$key.' : La catégorie comptable numéro \''.$value.'\' ne semble pas exister.');
                 }
                 break;
             }

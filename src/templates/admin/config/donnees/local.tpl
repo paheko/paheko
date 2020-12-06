@@ -7,12 +7,12 @@
 {form_errors}
 
 {if $ok}
-    <p class="confirm">
+    <p class="block confirm">
         {if $ok == 'create'}Une nouvelle sauvegarde a été créée.
         {elseif $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>date-du-jour.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
             {if $ok_code & Sauvegarde::NOT_AN_ADMIN}
             </p>
-            <p class="alert">
+            <p class="block alert">
                 <strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
                 Merci de corriger les droits des catégories maintenant.
             {/if}
@@ -33,7 +33,7 @@
             <dd>
                 <select name="file" id="f_select">
                 {foreach from=$liste key="f" item="d"}
-                    <option value="{$f}">{$f} — {$d|date_fr:'d/m/Y à H:i'}</option>
+                    <option value="{$f}">{$f} — {$d|date_long}</option>
                 {/foreach}
                 </select>
             </dd>
@@ -44,8 +44,8 @@
         </dl>
         <p>
             {csrf_field key="backup_manage"}
-            <input type="submit" name="restore" value="Restaurer cette sauvegarde" />
-            <input type="submit" name="remove" value="Supprimer cette sauvegarde" />
+            {button type="submit" name="restore" label="Restaurer cette sauvegarde" shape="reset"}
+            {button type="submit" name="delete" label="Supprimer cette sauvegarde" shape="delete"}
         </p>
     {/if}
 </fieldset>
@@ -56,9 +56,9 @@
 
 <fieldset>
     <legend>Sauvegarde manuelle</legend>
-    <p>
+    <p class="submit">
         {csrf_field key="backup_create"}
-        <input type="submit" name="create" value="Créer une nouvelle sauvegarde des données &rarr;" />
+        {button type="submit" name="create" label="Créer une nouvelle sauvegarde des données" shape="right" class="main"}
     </p>
 </fieldset>
 

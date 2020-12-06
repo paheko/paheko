@@ -1,17 +1,22 @@
-{include file="admin/_head.tpl" title="Modifier un membre" current="membres" js=1}
+{include file="admin/_head.tpl" title="Modifier un membre" current="membres"}
 
-<ul class="actions">
-    <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
-    <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
-        <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
-    {/if}
-    <li><a href="{$admin_url}membres/cotisations.php?id={$membre.id}">Suivi des cotisations</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
+        <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
+        {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+            <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
+        {/if}
+    </ul>
+</nav>
 
 {form_errors}
 
 <form method="post" action="{$self_url}">
+    <!-- This is to avoid chrome autofill, Chrome developers you suck -->
+    <input type="text" style="display: none;" name="email" />
+    {if $id_field_name != 'email'}<input type="text" style="display: none;" name="{$id_field_name}" />{/if}
+    <input type="password" style="display: none;" name="password" />
 
     <fieldset>
         <legend>Informations personnelles</legend>
@@ -50,10 +55,10 @@
         <legend>Options de sécurité</legend>
         <dl>
         {if $membre.secret_otp}
-            <dt><label><input type="checkbox" name="clear_otp" value="1" /> Désactiver l'authentification à double facteur TOTP</label></dt>
+            {input type="checkbox" name="clear_otp" value="1" label="Désactiver l'authentification à double facteur TOTP"}
         {/if}
         {if $membre.clef_pgp}
-            <dt><label><input type="checkbox" name="clear_pgp" value="1" /> Supprimer la clé PGP associée au membre</label></dt>
+            {input type="checkbox" name="clear_pgp" value="1" label="Supprimer la clé PGP associée au membre"}
         {/if}
         </dl>
     </fieldset>
@@ -77,16 +82,16 @@
 
     <p class="submit">
         {csrf_field key="edit_member_"|cat:$membre.id}
-        <input type="submit" name="save" value="Enregistrer &rarr;" />
+        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
     </p>
 
 </form>
 
 <script type="text/javascript">
 {literal}
-g.script('scripts/password.js').onload = function () {
+g.script('scripts/password.js', () => {
     initPasswordField('pw_suggest', 'f_passe', 'f_repasse');
-};
+});
 {/literal}
 </script>
 

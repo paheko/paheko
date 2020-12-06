@@ -1,6 +1,9 @@
 <?php
 namespace Garradin;
 
+use Garradin\Accounting\Transactions;
+use Garradin\Services\Services_User;
+
 require_once __DIR__ . '/_inc.php';
 
 qv(['id' => 'required|numeric']);
@@ -22,23 +25,11 @@ $cats = new Membres\Categories;
 $categorie = $cats->get($membre->id_categorie);
 $tpl->assign('categorie', $categorie);
 
-$cotisations = new Membres\Cotisations;
+$tpl->assign('services', Services_User::listDistinctForUser($membre->id));
 
-if (!empty($categorie->id_cotisation_obligatoire))
-{
-	$tpl->assign('cotisation', $cotisations->isMemberUpToDate($membre->id, $categorie->id_cotisation_obligatoire));
-}
-else
-{
-	$tpl->assign('cotisation', false);
-}
-
-$tpl->assign('nb_activites', $cotisations->countForMember($membre->id));
-
-if ($session->canAccess('compta', Membres::DROIT_ACCES))
-{
-	$journal = new Compta\Journal;
-	$tpl->assign('nb_operations', $journal->countForMember($membre->id));
+if ($session->canAccess('compta', Membres::DROIT_ACCES)) {
+	$tpl->assign('transactions_linked', Transactions::countForUser($membre->id));
+	$tpl->assign('transactions_created', Transactions::countForCreator($membre->id));
 }
 
 $tpl->assign('membre', $membre);

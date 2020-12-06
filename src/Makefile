@@ -1,5 +1,5 @@
-.PHONY: dev-server release deps publish check-dependencies test
-KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-5.6.zip
+.PHONY: dev-server release deps publish check-dependencies test minify
+KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.2.zip
 
 deps:
 	$(eval TMP_KD2=$(shell mktemp -d))
@@ -18,13 +18,22 @@ dev-server:
 test:
 	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
-release: test
+release: test minify
 	$(eval VERSION=$(shell cat VERSION))
 	rm -rf /tmp/garradin-build
 	mkdir -p /tmp/garradin-build
 	fossil zip ${VERSION} /tmp/garradin-build/src.zip --name garradin
 	unzip -d /tmp/garradin-build /tmp/garradin-build/src.zip
-	cd include/lib; rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
+	cd include/lib; \
+		rsync --files-from=dependencies.list -r ./ /tmp/garradin-build/garradin/src/include/lib/
+	mv www/admin/static/mini.css /tmp/garradin-build/garradin/src/www/admin/static/admin.css
+	cd /tmp/garradin-build/garradin/src/www/admin/static; \
+		rm -f styles/[0-9]*.css; \
+		rm -f font/*.css font/*.json
+	cd /tmp/garradin-build/garradin/src; \
+		rm -f Makefile include/lib/KD2/data/countries.en.json
+	cd /tmp/garradin-build/garradin/src/plugins; \
+		wget https://fossil.kd2.org/garradin-plugins/uv/welcome.tar.gz
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
 	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
@@ -42,4 +51,8 @@ publish: release deb
 	fossil uv sync
 
 check-dependencies:
-	grep -hEo '^use \\?KD2\\\w+|\\KD2\\\w+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
+	grep -hEo '^use \\?KD2\\[^; ]+|\\KD2\\[^\(:; ]+' -R include/lib/Garradin www | sed -r 's/^use \\?KD2\\|^\\KD2\\//' | sort | uniq
+
+minify:
+	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
+	yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css

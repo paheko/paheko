@@ -1,6 +1,9 @@
 <?php
 
-require __DIR__ . '/../src/include/init.php';
+define('Garradin\WWW_URI', '/');
+define('Garradin\WWW_URL', 'http://localhost/');
+
+const INIT = __DIR__ . '/../src/include/init.php';
 
 if (!empty($_SERVER['argv'][1]))
 {

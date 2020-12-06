@@ -4,9 +4,9 @@ namespace Garradin;
 
 use KD2\Security;
 use KD2\Form;
+use KD2\HTTP;
 use KD2\Translate;
 use KD2\SMTP;
-use KD2\ODSWriter;
 
 class Utils
 {
@@ -16,77 +16,71 @@ class Utils
 
     static protected $skriv = null;
 
-    static private $french_date_names = [
+    const FRENCH_DATE_NAMES = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
         'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
         'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
         'Thursday'=>'Jeudi','Friday'=>'Vendredi','Saturday'=>'Samedi','Sunday'=>'Dimanche',
-        'Feb'=>'Fév','Apr'=>'Avr','May'=>'Mai','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
+        'Feb'=>'Fév','Apr'=>'Avr','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
         'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
 
-    static public function strftime_fr($format=null, $ts=null)
+    static public function get_datetime($ts)
     {
-        if (is_null($format))
-        {
-            $format = '%d/%m/%Y à %H:%M';
+        if (is_object($ts) && $ts instanceof \DateTimeInterface) {
+            return $ts;
+        }
+        elseif (is_numeric($ts)) {
+            return new \DateTime('@' . $ts);
+        }
+        elseif (strlen($ts) == 10) {
+            return \DateTime::createFromFormat('!Y-m-d', $ts);
+        }
+        elseif (strlen($ts) == 19) {
+            return \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
+        }
+        else {
+            return null;
+        }
+    }
+
+    static public function strftime_fr($ts, $format)
+    {
+        $ts = self::get_datetime($ts);
+
+        if (null === $ts) {
+            return $ts;
         }
 
-        $date = strftime($format, $ts);
-        $date = strtr($date, self::$french_date_names);
+        $date = strftime($format, $ts->getTimestamp());
+
+        $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
     }
 
-    static public function date_fr($format=null, $ts=null)
+    static public function date_fr($ts, $format = null)
     {
+        $ts = self::get_datetime($ts);
+
+        if (null === $ts) {
+            return $ts;
+        }
+
         if (is_null($format))
         {
             $format = 'd/m/Y à H:i';
         }
 
-        $date = date($format, $ts);
-        $date = strtr($date, self::$french_date_names);
+        $date = $ts->format($format);
+
+        $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
     }
 
-    static public function sqliteDateToFrench($d, $short = false)
-    {
-        if (strlen($d) == 10 || $short)
-        {
-            $d = substr($d, 0, 10);
-            $f = 'Y-m-d';
-            $f2 = 'd/m/Y';
-        }
-        elseif (strlen($d) == 16)
-        {
-            $f = 'Y-m-d H:i';
-            $f2 = 'd/m/Y H:i';
-        }
-        else
-        {
-            $f = 'Y-m-d H:i:s';
-            $f2 = 'd/m/Y H:i';
-        }
-        
-        if ($dt = \DateTime::createFromFormat($f, $d))
-            return $dt->format($f2);
-        else
-            return $d;
-    }
-
-    static public function makeTimestampFromForm($d)
-    {
-        return mktime($d['h'], $d['min'], 0, $d['m'], $d['d'], $d['y']);
-    }
-
-    static public function modifyDate($str, $change, $as_timestamp = false)
-    {
-        $date = \DateTime::createFromFormat('Y-m-d', $str);
-        $date->modify($change);
-        return ($as_timestamp ? $date->getTimestamp() : $date->format('Y-m-d'));
-    }
-
+    /**
+     * @deprecated
+     */
     static public function checkDate($str)
     {
         if (!preg_match('!^(\d{4})-(\d{2})-(\d{2})$!', $str, $match))
@@ -98,6 +92,9 @@ class Utils
         return true;
     }
 
+    /**
+     * @deprecated
+     */
     static public function checkDateTime($str)
     {
         if (!preg_match('!^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})!', $str, $match))
@@ -111,11 +108,40 @@ class Utils
 
         if ((int) $match[3] < 0 || (int) $match[3] > 59)
             return false;
-        
+
         if (isset($match[4]) && ((int) $match[4] < 0 || (int) $match[4] > 59))
             return false;
 
         return true;
+    }
+
+    static public function moneyToInteger($value)
+    {
+        if (trim($value) === '') {
+            return 0;
+        }
+
+        if (!preg_match('/^-?(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
+            throw new UserException(sprintf('Le format du montant est invalide : %s. Format accepté, exemple : 142,02', $value));
+        }
+
+        $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
+        $value = (int) $value;
+        return $value;
+    }
+
+    static public function money_format($number, string $dec_point = ',', string $thousands_sep = ' ', $zero_if_empty = true): string {
+        if ($number == 0) {
+            return $zero_if_empty ? '0' : '0,00';
+        }
+
+        $sign = $number < 0 ? '-' : '';
+        $number = abs((int) $number);
+
+        $decimals = substr('0' . $number, -2);
+        $number = (int) substr($number, 0, -2);
+
+        return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
 
     static public function getRequestURI()
@@ -146,6 +172,16 @@ class Utils
         }
 
         return str_replace('/admin', '', ADMIN_URL) . $uri;
+    }
+
+    static public function getSelfURI(bool $qs = true)
+    {
+        return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
+    }
+
+    static public function getModifiedURL(string $new)
+    {
+        return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
     public static function redirect($destination=false, $exit=true)
@@ -223,17 +259,17 @@ class Utils
      * @param int $bypage
      * @param int $listLength
      * @param bool $showLast Toggle l'affichage du dernier élément de la pagination
-     * @return array
+     * @return array|null
      */
     public static function getGenericPagination($current, $total, $bypage, $listLength=11, $showLast = true)
     {
         if ($total <= $bypage)
-            return false;
+            return null;
 
         $total = ceil($total / $bypage);
 
         if ($total < $current)
-            return false;
+            return null;
 
         $length = ($listLength / 2);
 
@@ -405,7 +441,7 @@ class Utils
         {
             return true;
         }
-        
+
         if (!file_exists($path))
         {
             return true;
@@ -424,56 +460,6 @@ class Utils
     static public function suggestPassword()
     {
         return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
-    }
-
-    static public function checkIBAN($value)
-    {
-        // Enlever les caractères indésirables (espaces, tirets),
-        $value = preg_replace('/[^A-Z0-9]/', '', strtoupper($value));
-        
-        // Supprimer les 4 premiers caractères et les replacer à la fin du compte
-        $value = substr($value, 4) . substr($value, 0, 4);
-
-        // Remplacer les lettres par des chiffres au moyen d'une table de conversion (A=10, B=11, C=12 etc.)
-        $value = str_replace(range('A', 'Z'), range(10, 35), $value);
-
-        // Diviser le nombre ainsi obtenu par 97
-        // Si le reste n'est pas égal à 1 l'IBAN est incorrect : Modulo de 97 égal à 1.
-        return (self::bcmod($value, 97) == 1);
-    }
-
-    /** 
-     * my_bcmod - get modulus (substitute for bcmod) 
-     * string my_bcmod ( string left_operand, int modulus ) 
-     * left_operand can be really big, but be carefull with modulus :( 
-     * by Andrius Baranauskas and Laurynas Butkus :) Vilnius, Lithuania 
-     * @link https://php.net/manual/fr/function.bcmod.php#38474
-     */ 
-    static public function bcmod($x, $y)
-    {
-        if (function_exists('\bcmod'))
-        {
-            return \bcmod($x, $y);
-        }
-
-        // how many numbers to take at once? carefull not to exceed (int)
-        $take = 5;
-        $mod = '';
-
-        do
-        {
-            $a = (int)$mod.substr( $x, 0, $take );
-            $x = substr( $x, $take );
-            $mod = $a % $y;
-        } 
-        while (strlen($x));
-
-        return (int)$mod;
-    }
-    
-    static public function checkBIC($bic)
-    {
-        return preg_match('!^[A-Z]{4}[A-Z]{2}[1-9A-Z]{2}(?:[A-Z\d]{3})?$!', $bic);
     }
 
     static public function normalizePhoneNumber($n)
@@ -561,11 +547,12 @@ class Utils
         }
     }
 
-    static public function format_bytes($size) {
+    static public function format_bytes($size)
+    {
         if ($size > (1024 * 1024))
-            return str_replace('.', ',', round($size / 1024 / 1024, 2)) . ' Mo';
+            return number_format(round($size / 1024 / 1024, 2), 2, ',', '') . ' Mo';
         elseif ($size > 1024)
-            return str_replace('.', ',', round($size / 1024, 2)) . ' Ko';
+            return round($size / 1024) . ' Ko';
         else
             return $size . ' o';
     }
@@ -590,7 +577,7 @@ class Utils
             }
             else
             {
-                utils::safe_unlink($path . '/' . $file);
+                self::safe_unlink($path . '/' . $file);
             }
         }
 
@@ -623,127 +610,6 @@ class Utils
         }
 
         return $url;
-    }
-
-    static public function open_csv_file($file)
-    {
-        ini_set('auto_detect_line_endings', true);
-        return fopen($file, 'r');
-    }
-
-    static public function find_csv_delim(&$fp)
-    {
-        $line = '';
-
-        while ($line === '' && !feof($fp))
-        {
-            $line = fgets($fp, 4096);
-        }
-
-        if (strlen($line) >= 4095) {
-            throw new UserException('Fichier CSV illisible : la première ligne est trop longue.');
-        }
-
-        // Delete the columns content
-        $line = preg_replace('/".*?"/', '', $line);
-
-        $delims = [
-            ';' => substr_count($line, ';'),
-            ',' => substr_count($line, ','),
-            "\t"=> substr_count($line, "\t")
-        ];
-
-        arsort($delims);
-        reset($delims);
-
-        rewind($fp);
-
-        return key($delims);
-    }
-
-    static public function skip_bom(&$fp)
-    {
-        // Skip BOM
-        if (fgets($fp, 4) !== chr(0xEF) . chr(0xBB) . chr(0xBF))
-        {
-            fseek($fp, 0);
-        }
-    }
-
-    static public function row_to_csv($row)
-    {
-        $row = (array) $row;
-
-        array_walk($row, function (&$field) {
-            $field = strtr($field, ['"' => '""', "\r\n" => "\n"]);
-        });
-
-        return sprintf("\"%s\"\r\n", implode('","', $row));
-    }
-
-    static public function toCSV($name, $iterator, $header = null, $row_map_callback = null)
-    {
-        header('Content-type: application/csv');
-        header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
-
-        $fp = fopen('php://output', 'w');
-
-        if ($header)
-        {
-            fputs($fp, self::row_to_csv($header));
-        }
-
-        foreach ($iterator as $row)
-        {
-            if (!$header)
-            {
-                fputs($fp, self::row_to_csv(array_keys($row)));
-                $header = true;
-            }
-
-            if (null !== $row_map_callback) {
-                $row = call_user_func($row_map_callback, $row);
-            }
-
-            fputs($fp, self::row_to_csv($row));
-        }
-
-        fclose($fp);
-
-        return true;
-    }
-
-    static public function toODS($name, $iterator, $header = null, $row_map_callback = null)
-    {
-        header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
-        header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
-
-        $ods = new ODSWriter;
-        $ods->table_name = $name;
-
-        if ($header)
-        {
-            $ods->add((array) $header);
-        }
-
-        foreach ($iterator as $row)
-        {
-            if (!$header)
-            {
-                $ods->add(array_keys($row));
-                $header = true;
-            }
-
-            if (null !== $row_map_callback) {
-                $row = call_user_func($row_map_callback, $row);
-            }
-
-            $ods->add((array) $row);
-        }
-
-        $ods->output();
-
-        return true;
     }
 
     static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
@@ -831,5 +697,201 @@ class Utils
 
             return \mail($to, $subject, $content, $raw_headers);
         }
+    }
+
+    static public function iconUnicode(string $shape): string
+    {
+        switch ($shape) {
+            case 'up': return '↑';
+            case 'down': return '↓';
+            case 'export': return '↷';
+            case 'reset': return '↺';
+            case 'upload': return '⇑';
+            case 'download': return '⇓';
+            case 'home': return '⌂';
+            case 'print': return '⎙';
+            case 'star': return '★';
+            case 'check': return '☑';
+            case 'settings': return '☸';
+            case 'alert': return '⚠';
+            case 'mail': return '✉';
+            case 'edit': return '✎';
+            case 'delete': return '✘';
+            case 'help': return '❓';
+            case 'plus': return '➕';
+            case 'minus': return '➖';
+            case 'logout': return '⤝';
+            case 'eye-off': return '⤫';
+            case 'menu': return '𝍢';
+            case 'eye': return '👁';
+            case 'user': return '👤';
+            case 'users': return '👪';
+            case 'calendar': return '📅';
+            case 'attach': return '📎';
+            case 'search': return '🔍';
+            case 'lock': return '🔒';
+            case 'unlock': return '🔓';
+            case 'folder': return '🗀';
+            case 'document': return '🗅';
+            case 'bold': return 'B';
+            case 'italic': return 'I';
+            case 'header': return 'H';
+            case 'paragraph': return '§';
+            case 'list-ol': return 'ģ';
+            case 'list-ul': return '•';
+            case 'table': return '◫';
+            case 'radio-unchecked': return '◯';
+            case 'uncheck': return '☐';
+            case 'radio-checked': return '⬤';
+            case 'image': return '🖻';
+            case 'left': return '←';
+            case 'right': return '→';
+            default:
+                throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
+        }
+    }
+
+    static public function array_transpose(array $array): array
+    {
+        $out = [];
+        $max = 0;
+
+        foreach ($array as $rows) {
+            $max = max($max, count($rows));
+        }
+
+        foreach ($array as $column => $rows) {
+            // Match number of rows of largest sub-array, in case there is a missing row in a column
+            if ($max != count($rows)) {
+                $rows = array_merge($rows, array_fill(0, $max - count($rows), null));
+            }
+
+            foreach ($rows as $k => $v) {
+                if (!isset($out[$k])) {
+                    $out[$k] = [];
+                }
+
+                $out[$k][$column] = $v;
+            }
+        }
+
+        return $out;
+    }
+
+    static public function rgbHexToDec(string $hex)
+    {
+        return sscanf($hex, '#%02x%02x%02x');
+    }
+
+    /**
+     * Converts an RGB color value to HSV. Conversion formula
+     * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+     * Assumes r, g, and b are contained in the set [0, 255] and
+     * returns h, s, and v in the set [0, 1].
+     *
+     * @param   Number  r       The red color value
+     * @param   Number  g       The green color value
+     * @param   Number  b       The blue color value
+     * @return  Array           The HSV representation
+     */
+    static public function rgbToHsv($r, $g = null, $b = null)
+    {
+        if (is_string($r) && is_null($g) && is_null($b))
+        {
+            list($r, $g, $b) = self::rgbHexToDec($r);
+        }
+
+        $r /= 255;
+        $g /= 255;
+        $b /= 255;
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $h = $s = $v = $max;
+
+        $d = $max - $min;
+        $s = ($max == 0) ? 0 : $d / $max;
+
+        if($max == $min)
+        {
+            $h = 0; // achromatic
+        }
+        else
+        {
+            switch($max)
+            {
+                case $r: $h = ($g - $b) / $d + ($g < $b ? 6 : 0); break;
+                case $g: $h = ($b - $r) / $d + 2; break;
+                case $b: $h = ($r - $g) / $d + 4; break;
+            }
+            $h /= 6;
+        }
+
+        return array($h * 360, $s, $v);
+    }
+
+    static public function HTTPCache(string $hash, int $expiry): bool
+    {
+        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
+        $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
+
+        if ($etag === $hash && $last_modified <= $expiry) {
+            header('HTTP/1.1 304 Not Modified', true, 304);
+            exit;
+        }
+
+        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $expiry)));
+        header(sprintf('Etag: %s', $hash));
+        header('Cache-Control: private');
+
+        return false;
+    }
+
+    static public function getLatestVersion(): ?string
+    {
+        $config = Config::getInstance();
+        $last = $config->get('last_version_check');
+
+        if ($last) {
+            $last = json_decode($last);
+        }
+
+        // Only check once every two weeks
+        if ($last && $last->time > (time() - 3600 * 24 * 15)) {
+            return $last->version;
+        }
+
+        $current_version = garradin_version();
+        $last = (object) ['time' => time(), 'version' => null];
+        $config->set('last_version_check', json_encode($last));
+        $config->save();
+
+        $list = (new HTTP)->GET(WEBSITE . 'juvlist');
+
+        if (!$list) {
+            return null;
+        }
+
+        $list = json_decode($list);
+
+        if (!$list) {
+            return null;
+        }
+
+        $last->version = $current_version;
+
+        foreach ($list as $item) {
+            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1]) && version_compare($last->version, $match[1], '<')) {
+                $last->version = $match[1];
+            }
+        }
+
+        if ($last->version == $current_version) {
+            $last->version = null;
+        }
+
+        $config->set('last_version_check', json_encode($last));
+        $config->save();
+
+        return $last->version;
     }
 }

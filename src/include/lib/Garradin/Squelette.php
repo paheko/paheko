@@ -585,9 +585,9 @@ class Squelette extends \KD2\MiniSkel
 
             if (trim($loopContent))
             {
-                $loop_start .= '$row[\'url\'] = Fichiers::_getURL($row[\'id\'], $row[\'nom\']); ';
-                $loop_start .= '$row[\'miniature\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 200) : \'\'; ';
-                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], 500) : \'\'; ';
+                $loop_start .= '$row[\'url\'] = Fichiers::_getURL($row[\'id\'], $row[\'nom\'], $row[\'hash\']); ';
+                $loop_start .= '$row[\'miniature\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], $row[\'hash\'], 200) : \'\'; ';
+                $loop_start .= '$row[\'moyenne\'] = $row[\'image\'] ? Fichiers::_getURL($row[\'id\'], $row[\'nom\'], $row[\'hash\'], 500) : \'\'; ';
             }
 
             $query .= $where . ' ' . $order;
@@ -648,7 +648,7 @@ class Squelette extends \KD2\MiniSkel
 
         try {
             // Sécurité anti injection, à la compilation seulement
-            $statement = $db->userSelectStatement($query);
+            $statement = $db->protectSelect(null, $query);
         }
         catch (\Exception $e)
         {
@@ -823,6 +823,7 @@ class Squelette extends \KD2\MiniSkel
         }
         elseif (preg_match('!^/admin/!', $uri))
         {
+            http_response_code(404);
             throw new UserException('Cette page n\'existe pas.');
         }
         else

@@ -1,12 +1,14 @@
-{include file="admin/_head.tpl" title="Mes informations de connexion et sécurité" current="mes_infos" js=1}
+{include file="admin/_head.tpl" title="Mes informations de connexion et sécurité" current="mes_infos"}
 
-<ul class="actions">
-    <li><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
-    <li class="current"><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
-</ul>
+<nav class="tabs">
+    <ul>
+        <li><a href="{$admin_url}mes_infos.php">Mes informations personnelles</a></li>
+        <li class="current"><a href="{$admin_url}mes_infos_securite.php">Mot de passe et options de sécurité</a></li>
+    </ul>
+</nav>
 
 {if $ok}
-<p class="confirm">
+<p class="block confirm">
     Changements enregistrés.
 </p>
 {/if}
@@ -17,11 +19,11 @@
     <form method="post" action="{$self_url_no_qs}">
 
     {if !empty($otp) && $otp == 'disable'}
-        <p class="alert">
+        <p class="block alert">
             Confirmez la désactivation de l'authentification à double facteur TOTP.
         </p>
     {elseif !empty($otp)}
-        <p class="alert">
+        <p class="block alert">
             Confirmez l'activation de l'authentification à double facteur TOTP en l'utilisant une première fois.
         </p>
 
@@ -57,7 +59,7 @@
         {if !empty($otp)}
         <input type="hidden" name="otp_secret" value="{$otp.secret}" />
         {/if}
-        <input type="submit" name="confirm" value="Confirmer &rarr;" />
+        {button type="submit" name="confirm" label="Confirmer" shape="right" class="main"}
     </p>
 
     </form>
@@ -96,12 +98,12 @@
             <dl>
                 <dt>Authentification à double facteur (TOTP)</dt>
             {if $membre.secret_otp}
-                <dd><label><input type="radio" name="otp" value="" checked="checked" /> <strong>Activée</strong></label></dd>
-                <dd><label><input type="radio" name="otp" value="generate" /> Régénérer une nouvelle clé secrète</label></dd>
-                <dd><label><input type="radio" name="otp" value="disable" /> Désactiver l'authentification à double facteur</label></dd>
+                {input type="radio" name="otp" value="" default="" label="Activée"}
+                {input type="radio" name="otp" value="generate" label="Re-générer une nouvelle clé secrète" help="Si la clé a été compromise ou perdue"}
+                {input type="radio" name="otp" value="disable" label="Désactiver l'authentification à double facteur"}
             {else}
                 <dd><em>Désactivée</em></dd>
-                <dd><label><input type="checkbox" name="otp" value="generate" /> Activer</label></dd>
+                {input type="checkbox" name="otp" value="generate" label="Activer"}
             {/if}
             </dl>
         </fieldset>
@@ -117,7 +119,7 @@
                 <dd><textarea name="clef_pgp" id="f_clef_pgp" cols="90" rows="5">{form_field name="clef_pgp" data=$user}</textarea></dd>
                 {if $clef_pgp_fingerprint}<dd class="help">L'empreinte de la clé est&nbsp;: <code>{$clef_pgp_fingerprint}</code></dd>{/if}
             </dl>
-            <p class="alert">
+            <p class="block alert">
                 Attention&nbsp;: en inscrivant ici votre clé PGP, les emails de récupération de mot de passe perdu vous seront envoyés chiffrés
                 et ne pourront être lus sans utiliser le mot de passe protégeant votre clé privée correspondante.
             </p>
@@ -126,16 +128,16 @@
 
         <p class="submit">
             {csrf_field key="edit_me_security"}
-            <input type="submit" name="save" value="Enregistrer &rarr;" />
+            {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
         </p>
 
     </form>
 
     <script type="text/javascript">
     {literal}
-    g.script('scripts/password.js').onload = function () {
+    g.script('scripts/password.js', () => {
         initPasswordField('pw_suggest', 'f_passe', 'f_passe_confirmed');
-    };
+    });
     {/literal}
     </script>
 {/if}

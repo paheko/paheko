@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Transaction;
+
 class Recherche
 {
 	const TYPE_JSON = 'json';
@@ -9,7 +11,7 @@ class Recherche
 
 	const TARGETS = [
 		'membres',
-		'compta_journal',
+		'compta',
 	];
 
 	protected function _checkFields($data)
@@ -59,7 +61,7 @@ class Recherche
 
 			if ($data['type']  == self::TYPE_JSON)
 			{
-				if (!is_array($query))
+				if (!is_object($query))
 				{
 					throw new \InvalidArgumentException('Recherche invalide pour le type JSON');
 				}
@@ -74,6 +76,12 @@ class Recherche
 		}
 
 		return $query;
+	}
+
+	public function duplicate(int $id)
+	{
+		DB::getInstance()->preparedQuery('INSERT INTO recherches (id_membre, intitule, cible, type, contenu)
+			SELECT id_membre, \'Copie de : \' || intitule, cible, type, contenu FROM recherches WHERE id = ?;', [$id]);
 	}
 
 	public function edit($id, $data)
@@ -114,16 +122,8 @@ class Recherche
 	{
 		$r = DB::getInstance()->first('SELECT * FROM recherches WHERE id = ?;', (int) $id);
 
-		if ($r && $r->type == self::TYPE_JSON)
-		{
-			$q = json_decode($r->contenu, true);
-
-			$r->query = $q['query'];
-			$r->order = $q['order'];
-			$r->desc = $q['desc'];
-			$r->limit = $q['limit'];
-
-			unset($q);
+		if ($r && $r->type == self::TYPE_JSON) {
+			$r->query = (object) json_decode($r->contenu, true);
 		}
 
 		return $r;
@@ -150,10 +150,34 @@ class Recherche
 
 		if ($search->type == self::TYPE_JSON)
 		{
-			$search->contenu = $this->buildQuery($search->cible, $search->query, $search->order, $search->desc, $no_limit ? 10000 : $search->limit);
+			$query = $search->query;
+			$search->contenu = $this->buildQuery($search->cible, $query->query, $query->order, $query->desc, $no_limit ? 10000 : $query->limit);
 		}
 
 		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
+	}
+
+	public function getResultHeader(string $target, array $result)
+	{
+		if (!count($result)) {
+			return [];
+		}
+
+		$out = [];
+		$columns = $this->getColumns($target);
+
+		foreach (reset($result) as $key => $v) {
+			foreach ($columns as $ckey => $config) {
+				if ($ckey == $key) {
+					$out[$key] = $config->label;
+				}
+				elseif (isset($config->alias) && $config->alias == $key) {
+					$out[$config->alias] = $config->label;
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	/**
@@ -169,7 +193,6 @@ class Recherche
 			$champs = Config::getInstance()->get('champs_membres');
 
 			$columns['id_categorie'] = (object) [
-					'realType' => 'select',
 					'textMatch'=> false,
 					'label'    => 'Catégorie',
 					'type'     => 'enum',
@@ -180,7 +203,6 @@ class Recherche
 			foreach ($champs->getList() as $champ => $config)
 			{
 				$column = (object) [
-					'realType' => $config->type,
 					'textMatch'=> $champs->isText($champ),
 					'label'    => $config->title,
 					'type'     => 'text',
@@ -210,8 +232,121 @@ class Recherche
 					$column->type = 'integer';
 				}
 
+				if ($config->type == 'tel') {
+					$column->originalType = 'tel';
+				}
+
 				$columns[$champ] = $column;
 			}
+		}
+		elseif ($target === 'compta') {
+			$columns['t.id'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Numéro écriture',
+				'type'     => 'integer',
+				'null'     => false,
+				'alias'    => 'id',
+			];
+
+			$columns['t.date'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Date',
+				'type'     => 'date',
+				'null'     => false,
+				'alias'    => 'date',
+			];
+
+			$columns['t.label'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Libellé écriture',
+				'type'     => 'text',
+				'null'     => false,
+				'alias'    => 'label',
+			];
+
+			$columns['t.reference'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Numéro pièce comptable',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'reference',
+			];
+
+			$columns['t.notes'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Notes',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'notes',
+			];
+
+			$columns['l.label'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Libellé ligne',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'line_label',
+			];
+
+			$columns['l.debit'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Débit',
+				'type'     => 'integer',
+				'null'     => false,
+				'alias'    => 'debit',
+				'originalType' => 'money',
+			];
+
+			$columns['l.credit'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Crédit',
+				'type'     => 'integer',
+				'null'     => false,
+				'alias'    => 'credit',
+				'originalType' => 'money',
+			];
+
+			$columns['l.reference'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Référence ligne écriture',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'line_reference',
+			];
+
+			$columns['t.type'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Type d\'écriture',
+				'type'     => 'enum',
+				'null'     => false,
+				'values'   => Transaction::TYPES_NAMES,
+				'alias'    => 'type',
+			];
+
+			$columns['a.code'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Numéro de compte',
+				'type'     => 'text',
+				'null'     => false,
+				'alias'    => 'code',
+			];
+
+			$columns['t.id_year'] = (object) [
+				'textMatch'=> false,
+				'label'    => 'Exercice',
+				'type'     => 'enum',
+				'null'     => false,
+				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
+				'alias'    => 'id_year',
+			];
+
+			$columns['a2.code'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'N° de compte projet',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'id_analytical',
+			];
 		}
 
 		return $columns;
@@ -226,7 +361,7 @@ class Recherche
 	 * @param  integer $limit  Limite
 	 * @return string Chaîne SQL
 	 */
-	public function buildQuery($target, array $groups, $order, $desc = false, $limit = 100)
+	public function buildQuery(string $target, array $groups, string $order, bool $desc = false, int $limit = 100)
 	{
 		if (!in_array($target, self::TARGETS, true))
 		{
@@ -241,6 +376,11 @@ class Recherche
 
 		$db = DB::getInstance();
 		$target_columns = $this->getColumns($target);
+
+		if (!isset($target_columns[$order])) {
+			throw new UserException('Colonne de tri inconnue : ' . $order);
+		}
+
 		$query_columns = [];
 
 		$query_groups = [];
@@ -273,7 +413,7 @@ class Recherche
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
-					throw new UserException('Cette recherche fait référence à un champ qui n\'existe plus dans les fiches de membres.');
+					throw new UserException('Cette recherche fait référence à une colonne qui n\'existe pas : ' . $condition['column']);
 				}
 
 				$query_columns[] = $condition['column'];
@@ -292,10 +432,14 @@ class Recherche
 
 				$values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
 
-				if ($column->type == 'tel')
-				{
-					// Normaliser le numéro de téléphone
-					$values = array_map(['Garradin\Utils', 'normalizePhoneNumber'], $values);
+				if (!empty($column->originalType)) {
+					if ($column->originalType == 'tel') {
+						// Normaliser le numéro de téléphone
+						$values = array_map(['Garradin\Utils', 'normalizePhoneNumber'], $values);
+					}
+					elseif ($column->originalType == 'money') {
+						$values = array_map(['Garradin\Utils', 'moneyToInteger'], $values);
+					}
 				}
 
 				// L'opérateur binaire est un peu spécial
@@ -319,7 +463,7 @@ class Recherche
 				// Remplacement de recherche LIKE
 				elseif (preg_match('/%\?%|%\?|\?%/', $query, $match))
 				{
-					$value = str_replace(['%_'], ['\\%', '\\_'], reset($values));
+					$value = str_replace(['%', '_'], ['\\%', '\\_'], reset($values));
 					$value = str_replace('?', $value, $match[0]);
 					$query = str_replace($match[0], sprintf('%s ESCAPE \'\\\'', $db->quote($value)), $query);
 				}
@@ -356,9 +500,14 @@ class Recherche
 		}
 
 		// Ajout du champ identité si pas présent
-		if ($target == 'membres' && !in_array($config->get('champ_identite'), $query_columns))
+		if ($target == 'membres')
 		{
-			array_unshift($query_columns, $config->get('champ_identite'));
+			$query_columns = array_merge(['id', $config->get('champ_identite')], $query_columns);
+		}
+		// Ajout de champs compta si pas présents
+		elseif ($target == 'compta')
+		{
+			$query_columns = array_merge(['t.id', 't.date', 't.label', 'l.debit', 'l.credit', 'a.code'], $query_columns);
 		}
 
 		$query_columns[] = $order;
@@ -373,15 +522,33 @@ class Recherche
 		}
 
 		$query_columns = array_unique($query_columns);
-		$query_columns = array_map([$db, 'quoteIdentifier'], $query_columns);
+		$query_columns = array_map(function ($column) use ($target_columns, $db) {
+			if (isset($target_columns[$column]->alias)) {
+				return sprintf('%s AS %s', $db->quoteIdentifier($column), $db->quote($target_columns[$column]->alias));
+			}
+			return $db->quoteIdentifier($column);
+		}, $query_columns);
 
-		$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
-			implode(', ', $query_columns),
-			$target,
-			'(' . implode(') AND (', $query_groups) . ')',
-			$order,
-			$desc ? 'DESC' : 'ASC',
-			(int) $limit);
+		$query_columns = implode(', ', $query_columns);
+
+		$query_groups = '(' . implode(') AND (', $query_groups) . ')';
+
+		$desc = $desc ? 'DESC' : 'ASC';
+
+		if ('compta' === $target) {
+			$sql_query = sprintf('SELECT %s
+				FROM acc_transactions AS t
+				INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
+				INNER JOIN acc_accounts AS a ON l.id_account = a.id
+				LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id
+				WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
+				$query_columns, $query_groups, $order, $desc, (int) $limit);
+			$sql_query = preg_replace('/"(a|a2|l|t)\./', '"$1"."', $sql_query);
+		}
+		else {
+			$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
+				$query_columns, $target, $query_groups, $order, $desc, (int) $limit);
+		}
 
 		return $sql_query;
 	}
@@ -408,7 +575,14 @@ class Recherche
 		}
 
 		try {
-			return DB::getInstance()->userSelectGet($query);
+			$db = DB::getInstance();
+			static $allowed = [
+				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null],
+				'membres' => ['membres' => null],
+			];
+
+			$db->protectSelect($allowed[$target], $query);
+			return $db->get($query);
 		}
 		catch (\Exception $e) {
 			$message = 'Erreur dans la requête : ' . $e->getMessage();
@@ -422,15 +596,63 @@ class Recherche
 		}
 	}
 
+	public function searchQuery(string $table, $query, $order, $desc = false, $limit = 100)
+	{
+        $sql_query = $this->buildQuery($table, $query, $order, $desc, $limit);
+        return $this->searchSQL($table, $sql_query);
+	}
+
+	public function buildSimpleMemberQuery(string $query)
+	{
+	    $operator = 'LIKE %?%';
+
+	    if (is_numeric(trim($query)))
+	    {
+	        $column = 'numero';
+	        $operator = '= ?';
+	    }
+	    elseif (strpos($query, '@') !== false)
+	    {
+	        $column = 'email';
+	    }
+	    else
+	    {
+	        $column = Config::getInstance()->get('champ_identite');
+	    }
+
+	    $query = [[
+	        'operator' => 'AND',
+	        'conditions' => [
+	            [
+	                'column'   => $column,
+	                'operator' => $operator,
+	                'values'   => [$query],
+	            ],
+	        ],
+	    ]];
+
+	    return (object) [
+	    	'query' => $query,
+	    	'order' => $column,
+	    	'desc' => false,
+	    	'limit' => 50,
+	    ];
+	}
+
 	public function schema($target)
 	{
 		$db = DB::getInstance();
 
-		if ($target == 'membres')
-		{
+		if ($target == 'membres') {
 			$tables = [
-				'membres'   =>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-				'categories'=>  $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
+				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+			];
+		}
+		elseif ($target == 'compta') {
+			$tables = [
+				'acc_transactions'       => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions\';'),
+				'acc_transactions_lines' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions_lines\';'),
 			];
 		}
 

@@ -4,7 +4,7 @@
 	g.onload(function () {
 		g.style('scripts/wiki_editor.css');
 
-		g.script('scripts/text_editor.min.js').onload = function () {
+		g.script('scripts/text_editor.min.js', function () {
 			var t = new textEditor('f_contenu');
 			t.parent = t.textarea.parentNode;
 
@@ -122,11 +122,16 @@
 
 			var appendButton = function (name, title, action, altTitle)
 			{
-				var btn = document.createElement('input');
+				var btn = document.createElement('button');
 				btn.type = 'button';
 				btn.title = altTitle ? altTitle : title;
-				btn.value = title;
-				btn.className = name;
+				if (title.length == 1) {
+					btn.dataset.icon = title;
+				}
+				else {
+					btn.innerText = title;
+				}
+				btn.className = 'icn-btn ' +name;
 				btn.onclick = function () { action.call(); return false; };
 
 				toolbar.appendChild(btn);
@@ -146,11 +151,11 @@
 				if (url = window.prompt('Adresse URL ?')) 
 					wrapTags("[[", "|" + url + ']]'); 
 			} );
-			appendButton('icnl file', "📎", openFileInsert, 'Insérer fichier / image');
+			appendButton('file', "📎", openFileInsert, 'Insérer fichier / image');
 
-			appendButton('ext icnl preview', '⎙', openPreview, 'Prévisualiser');
+			appendButton('ext preview', '⎙', openPreview, 'Prévisualiser');
 
-			appendButton('ext icnl help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
+			appendButton('ext help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
 			appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
 			appendButton('ext close', 'Fermer', closeIFrame);
 			
@@ -166,6 +171,6 @@
 				t.toggleFullscreen();
 				window.location.hash = '';
 			}
-		};
+		});
 	});
 }());
