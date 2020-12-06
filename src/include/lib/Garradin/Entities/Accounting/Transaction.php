@@ -600,12 +600,12 @@ class Transaction extends Entity
 					[
 						'label' => 'De',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'debit',
+						'position' => 'credit',
 					],
 					[
 						'label' => 'Vers',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'credit',
+						'position' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_TRANSFER],
