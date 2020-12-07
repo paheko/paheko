@@ -15,14 +15,19 @@
 		<li class="current"><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
 	</ul>
 
-	<aside>
-		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
-	</aside>
 	<ul class="sub">
 		<li{if !$by_year} class="current"{/if}><a href="{$self_url_no_qs}">Par projet</a></li>
 		<li{if $by_year} class="current"{/if}><a href="{$self_url_no_qs}?by_year=1">Par exercice</a></li>
 	</ul>
 </nav>
+
+<div class="year-header">
+	<h2>{$config.nom_asso} — Projets</h2>
+
+	<p class="noprint print-btn">
+		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
+	</p>
+</div>
 
 {if !empty($list)}
 

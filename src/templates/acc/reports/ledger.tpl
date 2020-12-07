@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Grand livre" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="ledger"}
+{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre"}
 
 <div class="year-header noprint">
 	<button type="button" data-icon="↓" class="icn-btn" id="open_details">Déplier tous les comptes</button>
