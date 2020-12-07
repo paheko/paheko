@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Balance générale" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="trial_balance"}
+{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale"}
 
 <table class="list">
 	<thead>

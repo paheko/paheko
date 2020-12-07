@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Compte de résultat" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="statement"}
+{include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat"}
 
 <table class="statement">
 	<colgroup>
