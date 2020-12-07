@@ -355,3 +355,41 @@ namespace Garradin;
  */
 
 //const ADMIN_BACKGROUND_IMAGE = 'http://mon-asso.fr/fond_garradin.png';
+
+
+/**
+ * Stockage des fichiers
+ *
+ * Indiquer ici le nom d'une classe de stockage de fichiers
+ * (parmis celles disponibles dans lib/Garradin/Files/Backend)
+ *
+ * Indiquer NULL si vous souhaitez stocker les fichier dans la base
+ * de données SQLite (valeur par défaut).
+ *
+ * Classes de stockage possibles :
+ * - SQLite : enregistre dans la base de données (défaut)
+ * - FileSystem : enregistrement des fichiers dans le système de fichier
+ * - FileSystem : idem mais permet de spécifier un quota maximal
+ *
+ * Défaut : null
+ */
+
+//const FILE_STORAGE_BACKEND = null;
+
+/**
+ * Configuration du stockage des fichiers
+ *
+ * Indiquer dans cette constante la configuration de la classe de stockage
+ * des fichiers (en string).
+ *
+ * Valeurs possibles :
+ * - SQLite : null, aucune configuration possible
+ * - FileSystem : chemin du répertoire où doivent être stockés les fichiers,
+ * %s doit être ajouté à la fin pour indiquer le répertoire et nom du fichier
+ * - FileSystemQuota : idem, mais il faut rajouter ';quota=XXX' à la fin pour
+ * indiquer la taille maximale de stockage autorisée.
+ *
+ * Défaut : null
+ */
+
+//const FILE_STORAGE_CONFIG = null;
