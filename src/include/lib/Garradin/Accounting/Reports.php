@@ -64,7 +64,8 @@ class Reports
 	 */
 	static public function getAnalyticalSums(bool $by_year = false): \Generator
 	{
-		$sql = 'SELECT a.label AS account_label, a.id AS id_account, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
+		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
+			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
@@ -107,6 +108,7 @@ class Reports
 				$current = (object) [
 					'id' => $by_year ? $row->id_year : $row->id_account,
 					'label' => $by_year ? $row->year_label : $row->account_label,
+					'description' => !$by_year ? $row->account_description : null,
 					'credit' => 0,
 					'debit' => 0,
 					'sum' => 0,
