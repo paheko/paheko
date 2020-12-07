@@ -146,12 +146,12 @@ class Transactions
 				$row->status = implode(', ', $status);
 				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 				$row->date = $row->date->format('d/m/Y');
+				$previous_id = $row->id;
 			}
 
 			$row->credit = Utils::money_format($row->credit, ',', '');
 			$row->debit = Utils::money_format($row->debit, ',', '');
 
-			$previous_id = $row->id;
 			yield $row;
 		}
 	}
