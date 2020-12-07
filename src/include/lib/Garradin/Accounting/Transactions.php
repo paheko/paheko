@@ -191,11 +191,15 @@ class Transactions
 						$transaction = self::get((int)$row->id);
 
 						if (!$transaction) {
-							throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row->id));
+						}
+
+						if (!$transaction->id_year != $year->id()) {
+							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row->id));
 						}
 
 						if ($transaction->validated) {
-							throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
 						}
 					}
 					else {
