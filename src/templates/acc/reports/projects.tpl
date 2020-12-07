@@ -32,7 +32,7 @@
 {if !empty($list)}
 
 
-	<table class="list">
+	<table class="list projects">
 		<thead>
 			<tr>
 				<td>Année</td>
@@ -44,9 +44,10 @@
 		</thead>
 		{foreach from=$list item="parent"}
 			<tbody>
-				<tr>
+				<tr class="title">
 					<th colspan="5">
 						<h2 class="ruler">{$parent.label}</h2>
+						{if $parent.description}<p class="help">{$parent.description|escape|nl2br}</p>{/if}
 					</th>
 				</tr>
 			{foreach from=$parent.items item="item"}

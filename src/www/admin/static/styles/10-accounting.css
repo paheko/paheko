@@ -104,3 +104,5 @@ table.accounts .account-level-3 th { padding-left: 2em; }
 table.accounts .account-level-4 th { padding-left: 3em; }
 table.accounts .account-level-5 th { padding-left: 4em; }
 table.accounts .account-level-6 th { padding-left: 5em; }
+
+table.projects tr.title p.help { font-weight: normal; text-align: center; }
