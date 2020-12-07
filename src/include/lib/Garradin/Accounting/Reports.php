@@ -30,9 +30,13 @@ class Reports
 		}
 
 		if (!empty($criterias['type'])) {
-			$db = DB::getInstance();
 			$criterias['type'] = array_map('intval', (array)$criterias['type']);
 			$where[] = sprintf('a.type IN (%s)', implode(',', $criterias['type']));
+		}
+
+		if (!empty($criterias['exclude_type'])) {
+			$criterias['exclude_type'] = array_map('intval', (array)$criterias['exclude_type']);
+			$where[] = sprintf('a.type NOT IN (%s)', implode(',', $criterias['exclude_type']));
 		}
 
 		if (!empty($criterias['user'])) {
@@ -445,5 +449,27 @@ class Reports
 		}
 
 		yield $transaction;
+	}
+
+	static public function getStatement(array $criterias): array
+	{
+		$revenue = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::REVENUE]);
+		$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE], null, true);
+
+		$get_sum = function (array $in): int {
+			$sum = 0;
+
+			foreach ($in as $row) {
+				$sum += $row->sum;
+			}
+
+			return abs($sum);
+		};
+
+		$revenue_sum = $get_sum($revenue);
+		$expense_sum = $get_sum($expense);
+		$result = $revenue_sum - $expense_sum;
+
+		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result');
 	}
 }
