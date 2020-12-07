@@ -1,6 +1,9 @@
 {include file="admin/_head.tpl" title="Exercices" current="acc/years"}
 
 <nav class="tabs">
+	<aside>
+		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
+	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}

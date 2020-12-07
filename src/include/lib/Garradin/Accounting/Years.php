@@ -19,6 +19,11 @@ class Years
 		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
 	}
 
+	static public function getCurrentOpenYearId()
+	{
+		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
+	}
+
 	static public function listOpen()
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();

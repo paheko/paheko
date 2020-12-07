@@ -120,14 +120,19 @@ elseif ($target === 'membres')
 }
 elseif ($target === 'compta')
 {
-	$years = Years::list();
+	// Default
 	$query->query = [[
 		'operator' => 'AND',
 		'conditions' => [
 			[
 				'column'   => 't.id_year',
 				'operator' => '= ?',
-				'values'   => [qg('year')],
+				'values'   => [(int)qg('year') ?: Years::getCurrentOpenYearId()],
+			],
+			[
+				'column'   => 't.label',
+				'operator' => 'LIKE %?%',
+				'values'   => '',
 			],
 			[
 				'column'   => 't.reference',
@@ -136,6 +141,23 @@ elseif ($target === 'compta')
 			],
 		],
 	]];
+
+	if (null !== qg('type')) {
+		$query->query[0]['conditions'][] = [
+			'column' => 't.type',
+			'operator' => '= ?',
+			'values' => [(int)qg('type')],
+		];
+	}
+
+	if (null !== qg('account')) {
+		$query->query[0]['conditions'][] = [
+			'column' => 'a.code',
+			'operator' => '= ?',
+			'values' => [qg('account')],
+		];
+	}
+
 	$query->desc = true;
 	$result = null;
 }

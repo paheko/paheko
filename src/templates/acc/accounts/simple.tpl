@@ -15,6 +15,7 @@
 		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
 		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
 	{/if}
+		{linkbutton shape="search" href="!acc/search.php?year=%d&type=%d"|args:$year.id,$type label="Recherche"}
 	</aside>
 	<ul>
 		{foreach from=$types key="key" item="label"}
