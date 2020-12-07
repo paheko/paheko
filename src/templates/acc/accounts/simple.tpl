@@ -1,13 +1,6 @@
 {include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
-{if empty($year)}
-	{include file="acc/_year_select.tpl"}
-{else}
-	<nav class="acc-year">
-		<h4>Exercice sélectionné&nbsp;:</h4>
-		<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
-	</nav>
-{/if}
+{include file="acc/_year_select.tpl"}
 
 <nav class="tabs">
 	<aside>
