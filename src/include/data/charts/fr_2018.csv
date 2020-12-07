@@ -530,18 +530,18 @@ code,label,description,position,type
 797,Transferts de charges exceptionnelles,,Produit,
 8,Classe 8 ­— Comptes spéciaux,,,
 86,EMPLOIS CONTRIBUTIONS VOLONTAIRES EN NATURE,,,
-860,Secours en nature,,,
-8601,Alimentaires,,,
-8602,Vestimentaires,,,
-861,Mise à dispositions gratuites de biens,,,
-8611,Locaux,,,
-8612,Matériels,,,
-862,Prestations,,,
-864,Personnel bénévole,,,
+860,Secours en nature,,Charge,Bénévolat
+8601,Alimentaires,,Charge,Bénévolat
+8602,Vestimentaires,,Charge,Bénévolat
+861,Mise à dispositions gratuites de biens,,Charge,Bénévolat
+8611,Locaux,,Charge,Bénévolat
+8612,Matériels,,Charge,Bénévolat
+862,Prestations,,Charge,Bénévolat
+864,Personnel bénévole,,Charge,Bénévolat
 87,CONTRIBUTIONS VOLONTAIRES EN NATURE,,,
-870,Dons en nature,,,
-871,Prestations en nature,,,
-875,Bénévolat,,,Bénévolat
+870,Dons en nature,,Produit,Bénévolat
+871,Prestations en nature,,Produit,Bénévolat
+875,Bénévolat,,Produit,Bénévolat
 89,COMPTES DE BILAN,,,
 890,Bilan d'ouverture,,,Ouverture
 891,Bilan de clôture,,,Clôture
