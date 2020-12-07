@@ -171,6 +171,17 @@ class Transaction extends Entity
 		return $sum;
 	}
 
+	public function getAnalyticalId(): ?int
+	{
+		$lines = $this->getLines();
+
+		if (!count($lines)) {
+			return null;
+		}
+
+		return current($lines)->id_analytical;
+	}
+
 	public function getTypesAccounts()
 	{
 		if ($this->type == self::TYPE_ADVANCED) {
