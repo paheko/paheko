@@ -20,10 +20,6 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
-if (f('next') && !f('from_year')) {
-	Utils::redirect('/admin/acc/years/');
-}
-
 if (f('save') && $form->check('acc_years_balance_' . $year->id()))
 {
 	try {
@@ -45,7 +41,8 @@ $lines = [[]];
 $lines_accounts = [[]];
 $years = Years::listClosed();
 
-if (!count($years)) {
+// Empty balance
+if (!count($years) || f('from_year') === '') {
 	$previous_year = 0;
 }
 elseif (null !== f('from_year')) {
