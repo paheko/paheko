@@ -39,7 +39,8 @@ document.head.innerHTML += `<style type="text/css">
 	margin-bottom: 1em;
 	font-size: 1.2em;
 	list-style: none;
-	align-items: stretch;
+	justify-content: center;
+	align-items: center;
 }
 
 #gnav li {
@@ -55,22 +56,23 @@ document.head.innerHTML += `<style type="text/css">
 	padding: .5rem;
 	background: #ddf;
 	color: black;
-	text-decoration: none;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border-radius: .5em;
 	border: 2px solid #99f;
+	text-decoration: none;
 }
 
 #gnav li strong, #gnav li em {
 	height: 100%;
-	padding: .5rem 1rem;
+	padding: .5rem;
+	display: block;
 }
 
 #gnav li a:hover {
 	text-decoration: underline;
-	background: #eef;
+	opacity: 0.7;
 }
 
 #download li {
@@ -134,14 +136,14 @@ fetch('/garradin/juvlist').then((r) => {
 
 Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
 
-*  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, avec la possibilité de choisir les informations présentes sur les fiches adhérent
+*  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, possibilité de choisir les informations présentes sur les fiches adhérent, envoi de mails collectifs aux adhérent⋅e⋅s
 *  la tenue de la __comptabilité__ : avoir une gestion comptable complète à même de satisfaire un expert-comptable tout en restant à la portée de celles et ceux qui ne savent pas ce qu'est la comptabilité à double entrée, permettre la production des rapports et bilans annuels et de suivre au jour le jour le budget de l'association
-*  la gestion des __cotisations__ et __activités__ : suivi des cotisations à jour, rappels automatiques par e-mail, etc.
-*  le travail __collaboratif__ et __collectif__ : wiki, gestion fine des droits d'accès aux fonctions via les catégories, échange de mails entre membres ;
-*  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), aide aux procédures administratives, etc.
+*  la gestion des __cotisations__ et __activités__ : suivi des cotisations à jour, inscriptions et paiement des activités, rappels automatiques par e-mail, etc.
+*  le travail __collaboratif__ et __collectif__ : gestion fine des droits d'accès aux fonctions, échange de mails entre membres…
+*  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), etc.
 *  la publication d'un __site web__ pour l'association, simple mais suffisamment flexible pour pouvoir adapter le fonctionnement à la plupart des besoins
 *  l'__autonomisation des adhérents__ : possibilité de mettre à jour leurs informations par eux-même, ou de s'inscrire seul depuis un ordinateur ou un smartphone
-*  l'intégration avec les besoins spécifiques de l'association via les __extensions__.
+*  la possibilité d'adapter aux besoins spécifiques de chaque association via des __extensions__.
 
 Tous ces objectifs ne sont pas encore réalisés, voir :
 
