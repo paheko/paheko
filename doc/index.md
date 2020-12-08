@@ -14,96 +14,59 @@
 
 <p id="give"><a href="http://kd2.org/asso/soutien/" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
 
-## C'est quoi ?
-
-Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
-
-*  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, avec la possibilité de choisir les informations présentes sur les fiches adhérent
-*  la tenue de la __comptabilité__ : avoir une gestion comptable complète à même de satisfaire un expert-comptable tout en restant à la portée de celles et ceux qui ne savent pas ce qu'est la comptabilité à double entrée, permettre la production des rapports et bilans annuels et de suivre au jour le jour le budget de l'association
-*  la gestion des __cotisations__ et __activités__ : suivi des cotisations à jour, rappels automatiques par e-mail, etc.
-*  le travail __collaboratif__ et __collectif__ : wiki, gestion fine des droits d'accès aux fonctions via les catégories, échange de mails entre membres ;
-*  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), aide aux procédures administratives, etc.
-*  la publication d'un __site web__ pour l'association, simple mais suffisamment flexible pour pouvoir adapter le fonctionnement à la plupart des besoins
-*  l'__autonomisation des adhérents__ : possibilité de mettre à jour leurs informations par eux-même, ou de s'inscrire seul depuis un ordinateur ou un smartphone
-*  l'intégration avec les besoins spécifiques de l'association via les __extensions__.
-
-Tous ces objectifs ne sont pas encore réalisés, voir :
-* [la liste fonctionnalités disponibles](Fonctionnalités) pour ce qui est actuellement disponible ;
-* [la feuille de route](Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
-
-Garradin est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
-
-Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Australie.
-
-## Documentation et entraide
-
-*  D'abord lire la [documentation](?name=Documentation) et notamment la [foire aux questions](FAQ)
-*  La [liste de discussion d'entraide entre utilisateurs](https://admin.kd2.org/lists/aide@garradin.eu) est le meilleur moyen de vous faire aider :)
-*  [Chat d'entraide en direct](https://kiwiirc.com/nextclient/#irc://irc.freenode.net/#garradin?nick=garradin%7C?), ou via IRC : salon `#garradin` sur `irc.freenode.net`
-
-## Participer
-
-Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](Contribuer) pour vous aider à voir comment vous pouvez participer à Garradin :)
-
-### Développement
-
-Garradin est un logiciel libre, développé en PHP, utilisant la base de données SQLite, et avec une interface utilisant HTML, CSS et un peu de Javascript.
-
-Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](Documentation développeur) pour découvrir comment vous pouvez contribuer.
-
 
 <script type="text/javascript">
 document.head.innerHTML += `<style type="text/css">
 #give {
-	text-align: center;
-	padding: 1em;
+text-align: center;
+padding: 1em;
 }
 
 #give a {
-	display: inline-block;
-	padding: .5em;
-	padding-left: 70px;
-	border-radius: .5em;
-	font-size: 1.5em;
-	background: #ffc url("https://kd2.org/asso/soutien/coins.png") no-repeat .5em .5em;
-	border: 2px solid #990;
+display: inline-block;
+padding: .5em;
+padding-left: 70px;
+border-radius: .5em;
+font-size: 1.5em;
+background: #ffc url("https://kd2.org/asso/soutien/coins.png") no-repeat .5em .5em;
+border: 2px solid #990;
 }
 
 #gnav ul {
-	display: flex;
-	padding: 0;
-	margin: 1em;
-	margin-bottom: 1em;
-	font-size: 1.2em;
-	list-style: none;
-	align-items: stretch;
-	flex-wrap: wrap;
+display: flex;
+padding: 0;
+margin: 1em;
+margin-bottom: 1em;
+font-size: 1.2em;
+list-style: none;
+align-items: stretch;
+flex-wrap: wrap;
 }
 
 #gnav li {
-	margin: 0;
-	padding: 0;
-	font-size: 1.2em;
-	padding: .5rem 1rem;
-	margin: 0 .5em;
-	text-align: center;
-	height: 100%;
+margin: 0;
+padding: 0;
+font-size: 1.2em;
+padding: .5rem 1rem;
+margin: 0 .5em;
+text-align: center;
+height: 100%;
 }
 
 #gnav li a {
-	background: #ddf;
-	color: black;
-	text-decoration: none;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: .5em;
-	border: 2px solid #99f;
+background: #ddf;
+color: black;
+text-decoration: none;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: .5em;
+border: 2px solid #99f;
 }
 
 #gnav li a:hover {
-	text-decoration: underline;
-	background: #eef;
+text-decoration: underline;
+background: #eef;
 }
 `;
 
@@ -153,3 +116,41 @@ fetch('./juvlist').then((r) => {
 	});
 });
 </script>
+
+## C'est quoi ?
+
+Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
+
+*  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, avec la possibilité de choisir les informations présentes sur les fiches adhérent
+*  la tenue de la __comptabilité__ : avoir une gestion comptable complète à même de satisfaire un expert-comptable tout en restant à la portée de celles et ceux qui ne savent pas ce qu'est la comptabilité à double entrée, permettre la production des rapports et bilans annuels et de suivre au jour le jour le budget de l'association
+*  la gestion des __cotisations__ et __activités__ : suivi des cotisations à jour, rappels automatiques par e-mail, etc.
+*  le travail __collaboratif__ et __collectif__ : wiki, gestion fine des droits d'accès aux fonctions via les catégories, échange de mails entre membres ;
+*  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), aide aux procédures administratives, etc.
+*  la publication d'un __site web__ pour l'association, simple mais suffisamment flexible pour pouvoir adapter le fonctionnement à la plupart des besoins
+*  l'__autonomisation des adhérents__ : possibilité de mettre à jour leurs informations par eux-même, ou de s'inscrire seul depuis un ordinateur ou un smartphone
+*  l'intégration avec les besoins spécifiques de l'association via les __extensions__.
+
+Tous ces objectifs ne sont pas encore réalisés, voir :
+
+* [la liste fonctionnalités disponibles](Fonctionnalités) pour ce qui est actuellement disponible ;
+* [la feuille de route](Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
+
+Garradin est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
+
+Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Australie.
+
+## Documentation et entraide
+
+*  D'abord lire la [documentation](?name=Documentation) et notamment la [foire aux questions](FAQ)
+*  La [liste de discussion d'entraide entre utilisateurs](https://admin.kd2.org/lists/aide@garradin.eu) est le meilleur moyen de vous faire aider :)
+*  [Chat d'entraide en direct](https://kiwiirc.com/nextclient/#irc://irc.freenode.net/#garradin?nick=garradin%7C?), ou via IRC : salon `#garradin` sur `irc.freenode.net`
+
+## Participer
+
+Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](Contribuer) pour vous aider à voir comment vous pouvez participer à Garradin :)
+
+### Développement
+
+Garradin est un logiciel libre, développé en PHP, utilisant la base de données SQLite, et avec une interface utilisant HTML, CSS et un peu de Javascript.
+
+Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](Documentation développeur) pour découvrir comment vous pouvez contribuer.
