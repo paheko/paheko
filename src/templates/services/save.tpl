@@ -88,7 +88,7 @@
 	</fieldset>
 
 	<fieldset class="accounting">
-		<legend>Enregistrement en comptabilité</legend>
+		<legend>{input type="checkbox" name="create_payment" value=1 default=1 label="Enregistrer en comptabilité"}</legend>
 
 		<dl>
 			{input type="money" name="amount" label="Montant réglé par le membre" fake_required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
@@ -154,6 +154,10 @@ selected.checked = true;
 
 g.toggle('.accounting', false);
 selectService(selected);
+
+$('#f_create_payment_1').onchange = (e) => {
+	g.toggle('.accounting dl', $('#f_create_payment_1').checked);
+};
 </script>
 {/literal}
 
