@@ -89,7 +89,7 @@ class Service_User extends Entity
 		return $this->_fee;
 	}
 
-	public function addPayment(int $user_id, ?array $source = null)
+	public function addPayment(int $user_id, ?array $source = null): Transaction
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -141,7 +141,9 @@ class Service_User extends Entity
 
 		$su->save();
 
-		if ($su->id_fee && $su->fee()->id_account && !empty($source['amount'])) {
+		if ($su->id_fee && $su->fee()->id_account
+			&& !empty($source['amount'])
+			&& !empty($source['create_payment'])) {
 			$su->addPayment($user_id, $source);
 		}
 
