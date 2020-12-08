@@ -82,17 +82,15 @@ else {
 	}
 }
 
-$id_analytical = null;
+$first_line = $transaction->getFirstLine();
 
 if ($transaction->type != Transaction::TYPE_ADVANCED) {
 	$types_accounts = $transaction->getTypesAccounts();
-
-	$id_analytical = $transaction->getAnalyticalId();
 }
 
 $amount = $transaction->getLinesCreditSum();
 
-$tpl->assign(compact('transaction', 'lines', 'types_accounts', 'amount', 'id_analytical'));
+$tpl->assign(compact('transaction', 'lines', 'types_accounts', 'amount', 'first_line'));
 
 $tpl->assign('types_details', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
