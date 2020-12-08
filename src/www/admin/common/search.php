@@ -24,6 +24,8 @@ $sql_query = null;
 $search = null;
 $id = f('id') ?: qg('id');
 
+$is_unprotected = false;
+
 // Recherche simple
 if ($text_query !== '' && $target === 'membres' && empty($query->query))
 {
@@ -38,7 +40,11 @@ elseif ($id && empty($query->query))
 		throw new UserException('Recherche inconnue ou invalide');
 	}
 
-	if ($search->type === Recherche::TYPE_SQL) {
+	if ($search->type != Recherche::TYPE_JSON) {
+		if ($search->type == Recherche::TYPE_SQL_UNPROTECTED) {
+			$is_unprotected = true;
+		}
+
 		$sql_query = $search->contenu;
 	}
 	else {
@@ -52,6 +58,13 @@ if (f('sql_query')) {
 	// Only admins can run custom queries, others can only run saved queries
 	$session->requireAccess($target, Membres::DROIT_ADMIN);
 	$sql_query = f('sql_query');
+
+	if ($session->canAccess('config', Membres::DROIT_ADMIN)) {
+		$is_unprotected = (bool) f('unprotected');
+	}
+	else {
+		$is_unprotected = false;
+	}
 }
 
 // Execute search
@@ -64,7 +77,7 @@ if ($query->query || $sql_query) {
 			$sql = $recherche->buildQuery($target, $query->query, $query->order, $query->desc, $query->limit);
 		}
 
-	   $result = $recherche->searchSQL($target, $sql);
+	   $result = $recherche->searchSQL($target, $sql, null, false, $is_unprotected);
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());
@@ -83,7 +96,15 @@ if (null !== $result)
 
 	if (f('save') && !$form->hasErrors())
 	{
-		$type = $sql_query ? Recherche::TYPE_SQL : Recherche::TYPE_JSON;
+		if (!$sql_query) {
+			$type = Recherche::TYPE_JSON;
+		}
+		elseif ($is_unprotected) {
+			$type = Recherche::TYPE_SQL_UNPROTECTED;
+		}
+		else {
+			$type = Recherche::TYPE_SQL;
+		}
 
 		if ($id) {
 			$recherche->edit($id, [
@@ -166,7 +187,7 @@ $columns = $recherche->getColumns($target);
 $is_admin = $session->canAccess($target, Membres::DROIT_ADMIN);
 $schema = $recherche->schema($target);
 
-$tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search'));
+$tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search', 'target', 'is_unprotected'));
 
 if ($target == 'compta') {
 	$tpl->display('acc/search.tpl');
