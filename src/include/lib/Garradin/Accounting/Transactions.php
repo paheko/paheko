@@ -393,7 +393,7 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(*)');
+		$list->setCount('COUNT(DISTINCT t.id)');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) use (&$sum, $reverse) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
