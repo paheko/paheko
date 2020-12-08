@@ -18,55 +18,55 @@
 <script type="text/javascript">
 document.head.innerHTML += `<style type="text/css">
 #give {
-text-align: center;
-padding: 1em;
+	text-align: center;
+	padding: 1em;
 }
 
 #give a {
-display: inline-block;
-padding: .5em;
-padding-left: 70px;
-border-radius: .5em;
-font-size: 1.5em;
-background: #ffc url("https://kd2.org/asso/soutien/coins.png") no-repeat .5em .5em;
-border: 2px solid #990;
+	display: inline-block;
+	padding: .5em;
+	padding-left: 70px;
+	border-radius: .5em;
+	font-size: 1.5em;
+	background: #ffc url("https://kd2.org/asso/soutien/coins.png") no-repeat .5em .5em;
+	border: 2px solid #990;
 }
 
 #gnav ul {
-display: flex;
-padding: 0;
-margin: 1em;
-margin-bottom: 1em;
-font-size: 1.2em;
-list-style: none;
-align-items: stretch;
-flex-wrap: wrap;
+	display: flex;
+	padding: 0;
+	margin: 1em;
+	margin-bottom: 1em;
+	font-size: 1.2em;
+	list-style: none;
+	align-items: stretch;
+	flex-wrap: wrap;
 }
 
 #gnav li {
-margin: 0;
-padding: 0;
-font-size: 1.2em;
-padding: .5rem 1rem;
-margin: 0 .5em;
-text-align: center;
-height: 100%;
+	margin: 0;
+	padding: 0;
+	font-size: 1.2em;
+	padding: .5rem 1rem;
+	margin: 0 .5em;
+	text-align: center;
+	height: 100%;
 }
 
 #gnav li a {
-background: #ddf;
-color: black;
-text-decoration: none;
-display: flex;
-align-items: center;
-justify-content: center;
-border-radius: .5em;
-border: 2px solid #99f;
+	background: #ddf;
+	color: black;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: .5em;
+	border: 2px solid #99f;
 }
 
 #gnav li a:hover {
-text-decoration: underline;
-background: #eef;
+	text-decoration: underline;
+	background: #eef;
 }
 `;
 
