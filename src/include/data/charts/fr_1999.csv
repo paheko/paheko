@@ -177,11 +177,11 @@ code,label,description,position,type
 50,VALEURS MOBILIÈRES DE PLACEMENT,,Actif,
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,Actif,
 511,Valeurs à l'encaissement,,Actif,
-5112,Chèques à encaisser,,Actif,Attente d'encaissement
-5115,Paiements par carte à encaisser,,Actif,
+5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif ou passif,
 53,CAISSE,,Actif,
-530,Caisse,,Actif,Caisse
+530,Caisse,,Actif ou passif,Caisse
 54,RÉGIES D'AVANCES ET ACCRÉDITIFS,,Actif,
 58,VIREMENTS INTERNES,,Actif,
 59,PROVISIONS POUR DÉPRÉCIATION DES COMPTES FINANCIERS,,Actif,

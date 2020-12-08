@@ -229,13 +229,13 @@ code,label,description,position,type
 506,Obligations,,Actif,
 508,Autres VMP et créances assimilées,,Actif,
 51,"BANQUES, ETABLISSEMENTS FINANCIERS",,Actif,
-5112,Chèques à encaisser,,Actif,Attente d'encaissement
-5115,Paiements par carte à encaisser,,Actif,
+5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif ou passif,
 5186,Intérêts courus à payer,,Passif,
 5187,Intérêts courus à recevoir,,Actif,
 53,Caisses,,Actif ou passif,
-530,Caisse,,Actif,Caisse
+530,Caisse,,Actif ou passif,Caisse
 58,VIREMENTS INTERNES,,Actif ou passif,
 580,Virements internes,,Actif ou passif,
 59,DEPRECIATIONS DES COMPTES FINANCIERS,,Actif ou passif,
