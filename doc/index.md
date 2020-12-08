@@ -146,8 +146,7 @@ fetch('./juvlist').then((r) => {
 			time = Math.round(days / 30.5) + ' mois';
 		}
 
-		document.querySelector('#download').innerHTML += `
-			<li><h3>Dernière version : ${last}</h3></li>
+		document.querySelector('#download').innerHTML += `<li><h3>Dernière version : ${last}</h3></li>
 			<li><em>il y a ${days}</em></li>
 			<li><a href="./wiki/?name=Changelog">Nouveautés</a></li>
 			<li><a href="./uv/${selected.name}">Télécharger</a></li>`;
