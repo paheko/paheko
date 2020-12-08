@@ -45,9 +45,9 @@
 					{/foreach}
 					<td class="actions">
 						{if $row._user_id}
-							{linkbutton shape="user" label="Fiche membre" href="!membres/fiche.php?id=%d"|args:$row.id}
+							{linkbutton shape="user" label="Fiche membre" href="!membres/fiche.php?id=%d"|args:$row._user_id}
 							{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
-								{linkbutton shape="edit" label="Modifier" href="!membres/modifier.php?id=%d"|args:$row.id}
+								{linkbutton shape="edit" label="Modifier" href="!membres/modifier.php?id=%d"|args:$row._user_id}
 							{/if}
 						{/if}
 					</td>
