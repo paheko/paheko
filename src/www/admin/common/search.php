@@ -91,7 +91,7 @@ if ($query->query || $sql_query) {
 if (null !== $result)
 {
 	if (count($result) == 1 && $text_query !== '' && $target === 'membres') {
-		Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->id);
+		Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->_user_id);
 	}
 
 	if (f('save') && !$form->hasErrors())
