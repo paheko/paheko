@@ -160,6 +160,17 @@ class Transaction extends Entity
 		return null;
 	}
 
+	public function getFirstLine()
+	{
+		$lines = $this->getLines();
+
+		if (!count($lines)) {
+			return null;
+		}
+
+		return reset($lines);
+	}
+
 	public function getLinesCreditSum()
 	{
 		$sum = 0;
