@@ -156,7 +156,7 @@ Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Aus
 
 ## Documentation et entraide
 
-*  D'abord lire la [documentation](?name=Documentation) et notamment la [foire aux questions](FAQ)
+*  D'abord lire la [documentation](Documentation) et notamment la [foire aux questions](FAQ)
 *  La [liste de discussion d'entraide entre utilisateurs](https://admin.kd2.org/lists/aide@garradin.eu) est le meilleur moyen de vous faire aider :)
 *  [Chat d'entraide en direct](https://kiwiirc.com/nextclient/#irc://irc.freenode.net/#garradin?nick=garradin%7C?), ou via IRC : salon `#garradin` sur `irc.freenode.net`
 
