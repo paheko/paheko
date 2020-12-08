@@ -142,6 +142,11 @@ input:checked + label::before {
     text-shadow: 1px 1px 5px #ff9;
 }
 
+#queryBuilder input[type=checkbox] {
+    position: unset;
+    opacity: unset;
+}
+
 input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
     box-shadow: 0 0 5px .2rem rgb(var(--gSecondColor));
     outline: 0;
