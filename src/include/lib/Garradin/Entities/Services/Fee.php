@@ -160,7 +160,7 @@ class Fee extends Entity
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
-		$conditions = sprintf('su.id_fee = %d AND su.paid = 1 AND su.expiry_date >= date()', $this->id());
+		$conditions = sprintf('su.id_fee = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
