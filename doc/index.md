@@ -46,13 +46,13 @@ document.head.innerHTML += `<style type="text/css">
 	margin: 0;
 	padding: 0;
 	font-size: 1.2em;
-	margin: 0 .5em;
+	margin: .5em;
 	text-align: center;
 }
 
 #gnav li a {
 	height: 100%;
-	padding: .5rem 1rem;
+	padding: .5rem;
 	background: #ddf;
 	color: black;
 	text-decoration: none;
@@ -73,8 +73,13 @@ document.head.innerHTML += `<style type="text/css">
 	background: #eef;
 }
 
-#download {
-	font-size: .8em;
+#download li {
+	font-size: 1em;
+}
+
+#download li a {
+	border-color: #060;
+	background: #dfd;
 }
 `;
 
@@ -118,7 +123,7 @@ fetch('/garradin/juvlist').then((r) => {
 		}
 
 		document.querySelector('#download').innerHTML += `<li><strong>Dernière version : ${last}</strong></li>
-			<li><em>il y a ${days}</em></li>
+			<li><em>il y a ${time}</em></li>
 			<li><a href="/garradin/wiki/?name=Changelog">Nouveautés</a></li>
 			<li><a href="/garradin/uv/${selected.name}">Télécharger</a></li>`;
 	});
