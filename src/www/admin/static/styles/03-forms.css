@@ -236,6 +236,15 @@ input[disabled]:hover, input[readonly]:hover {
     border-color: unset;
 }
 
+input[disabled] + label {
+    color: #666;
+}
+
+input[disabled] + label::before {
+    color: #999;
+    cursor: not-allowed;
+}
+
 select, input[size], input[type=color], button, input[type=button], input[type=submit], input[type=number] {
     min-width: 0;
 }
