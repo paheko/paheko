@@ -40,20 +40,19 @@ document.head.innerHTML += `<style type="text/css">
 	font-size: 1.2em;
 	list-style: none;
 	align-items: stretch;
-	flex-wrap: wrap;
 }
 
 #gnav li {
 	margin: 0;
 	padding: 0;
 	font-size: 1.2em;
-	padding: .5rem 1rem;
 	margin: 0 .5em;
 	text-align: center;
-	height: 100%;
 }
 
 #gnav li a {
+	height: 100%;
+	padding: .5rem 1rem;
 	background: #ddf;
 	color: black;
 	text-decoration: none;
@@ -64,9 +63,18 @@ document.head.innerHTML += `<style type="text/css">
 	border: 2px solid #99f;
 }
 
+#gnav li strong, #gnav li em {
+	height: 100%;
+	padding: .5rem 1rem;
+}
+
 #gnav li a:hover {
 	text-decoration: underline;
 	background: #eef;
+}
+
+#download {
+	font-size: .8em;
 }
 `;
 
@@ -82,7 +90,7 @@ function isNewerVersion (oldVer, newVer) {
 	return false
 }
 
-fetch('./juvlist').then((r) => {
+fetch('/garradin/juvlist').then((r) => {
 	r.json().then((list) => {
 		let last;
 		let selected;
@@ -109,10 +117,10 @@ fetch('./juvlist').then((r) => {
 			time = Math.round(days / 30.5) + ' mois';
 		}
 
-		document.querySelector('#download').innerHTML += `<li><h3>Dernière version : ${last}</h3></li>
+		document.querySelector('#download').innerHTML += `<li><strong>Dernière version : ${last}</strong></li>
 			<li><em>il y a ${days}</em></li>
-			<li><a href="./wiki/?name=Changelog">Nouveautés</a></li>
-			<li><a href="./uv/${selected.name}">Télécharger</a></li>`;
+			<li><a href="/garradin/wiki/?name=Changelog">Nouveautés</a></li>
+			<li><a href="/garradin/uv/${selected.name}">Télécharger</a></li>`;
 	});
 });
 </script>
