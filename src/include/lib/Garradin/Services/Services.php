@@ -24,7 +24,7 @@ class Services
 		$services = DB::getInstance()->getGrouped('SELECT
 			id, label, duration, start_date, end_date, description,
 			CASE WHEN end_date IS NOT NULL THEN end_date WHEN duration IS NOT NULL THEN date(\'now\', \'+\'||duration||\' days\') ELSE NULL END AS expiry_date
-			FROM services;');
+			FROM services ORDER BY label COLLATE NOCASE;');
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 
