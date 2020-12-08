@@ -24,7 +24,14 @@
 				{input type="radio" name="prive" value="1" default=$checked label="Recherche privée" help="Visible seulement par moi-même"}
 				{input type="radio" name="prive" value="0" default=$checked label="Recherche publique" help="Visible et exécutable par tous les membres ayant accès à la gestion %s"|args:$target}
 				<dt>Type</dt>
-				<dd>{if $recherche.type == Recherche::TYPE_JSON}Avancée{else}SQL{/if}</dd>
+				<dd>
+					{if $recherche.type == Recherche::TYPE_JSON}
+						Avancée
+					{elseif $recherche.type == Recherche::TYPE_SQL_UNPROTECTED}
+						SQL non protégée
+					{else}
+						SQL
+					{/if}</dd>
 				<dt>Cible</dt>
 				<dd>{$recherche.cible}</dd>
 			</dl>

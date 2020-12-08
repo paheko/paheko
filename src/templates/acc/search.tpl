@@ -30,7 +30,7 @@
 				<tr>
 					{*if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if*}
 					{foreach from=$row key="key" item="value"}
-						{if $key == 'id'}
+						{if $key == 'transaction_id'}
 						<td class="num">
 							<a href="{$admin_url}acc/transactions/details.php?id={$value}">{$value}</a>
 						</td>
@@ -47,7 +47,9 @@
 						{/if}
 					{/foreach}
 					<td class="actions">
-						{linkbutton shape="search" label="Détails" href="!acc/transactions/details.php?id=%d"|args:$row.id}
+						{if $row.transaction_id}
+						{linkbutton shape="search" label="Détails" href="!acc/transactions/details.php?id=%d"|args:$row.transaction_id}
+						{/if}
 					</td>
 				</tr>
 			{/foreach}

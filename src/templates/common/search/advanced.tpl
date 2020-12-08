@@ -3,18 +3,22 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($query));
 assert(isset($is_admin));
-$sql_disabled = !$is_admin;
+$sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
 
 <form method="post" action="{$action_url}" id="queryBuilderForm">
 	<fieldset>
-	{if $sql_query}
+	{if $sql_query && !$sql_disabled}
 		<legend>Schéma des tables SQL</legend>
 		<pre class="sql_schema">{foreach from=$schema item="table"}{$table}<br />{/foreach}</pre>
 		<dl>
-			{input type="textarea" name="sql_query" cols="100" rows="7" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query disabled=$sql_disabled}
+			{input type="textarea" name="sql_query" cols="100" rows="7" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
+			{if $session->canAccess('config', Membres::DROIT_ADMIN)}
+				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données"|args:$target default=$is_unprotected}
+				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
+			{/if}
 		</dl>
 		<p class="submit">
 			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
@@ -25,7 +29,7 @@ $sql_disabled = !$is_admin;
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
 		</p>
-	{else}
+	{elseif !$sql_disabled}
 		<legend>Rechercher</legend>
 		<div class="queryBuilder" id="queryBuilder"></div>
 		<p class="actions">
@@ -52,6 +56,9 @@ $sql_disabled = !$is_admin;
 				{button name="to_sql" value=1 type="submit" label="Recherche SQL" shape="edit"}
 			{/if}
 		</p>
+	{else}
+		<legend>Recherche enregistrée</legend>
+		<h3>{$search.intitule}</h3>
 	{/if}
 	</fieldset>
 </form>
