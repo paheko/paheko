@@ -3,9 +3,9 @@
 <nav id="gnav">
 
 * [Guides d'installation](/wiki/?name=Installation)
-* [Documentation](Documentation)
+* [Documentation](/wiki/?name=Documentation)
 * <a href="https://garradin.eu/" target="_blank">Essayer gratuitement</a>
-* [Dernières nouveautés](Changelog)
+* [Entraide](/wiki/?name=Entraide)
 
 <ul id="download">
 </ul>
@@ -126,15 +126,15 @@ fetch('/garradin/juvlist').then((r) => {
 
 		document.querySelector('#download').innerHTML += `<li><strong>Dernière version : ${last}</strong></li>
 			<li><em>il y a ${time}</em></li>
-			<li><a href="/garradin/wiki/?name=Changelog">Nouveautés</a></li>
-			<li><a href="/garradin/uv/${selected.name}">Télécharger</a></li>`;
+			<li><a href="/wiki/?name=Changelog">Nouveautés</a></li>
+			<li><a href="/uv/${selected.name}">Télécharger</a></li>`;
 	});
 });
 </script>
 
 ## C'est quoi ?
 
-<a href="https://fossil.kd2.org/garradin/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="https://fossil.kd2.org/garradin/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
+<a href="/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
 
 Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
 
@@ -149,8 +149,8 @@ Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son 
 
 Tous ces objectifs ne sont pas encore réalisés, voir :
 
-* [la liste des fonctionnalités disponibles](Fonctionnalités) pour ce qui est actuellement disponible ;
-* [la feuille de route](Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
+* [la liste des fonctionnalités disponibles](/wiki/?name=Fonctionnalités) pour ce qui est actuellement disponible ;
+* [la feuille de route](/wiki/?name=Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
 
 Garradin est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
 
@@ -158,16 +158,16 @@ Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Aus
 
 ## Documentation et entraide
 
-*  D'abord lire la [documentation](Documentation) et notamment la [foire aux questions](FAQ)
+*  D'abord lire la [documentation](/wiki/?name=Documentation) et notamment la [foire aux questions](/wiki/?name=FAQ)
 *  La [liste de discussion d'entraide entre utilisateurs](https://admin.kd2.org/lists/aide@garradin.eu) est le meilleur moyen de vous faire aider :)
 *  [Chat d'entraide en direct](https://kiwiirc.com/nextclient/#irc://irc.freenode.net/#garradin?nick=garradin%7C?), ou via IRC : salon `#garradin` sur `irc.freenode.net`
 
 ## Participer
 
-Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](Contribuer) pour vous aider à voir comment vous pouvez participer à Garradin :)
+Tout coup de main est le bienvenu, pas besoin d'avoir des connaissances techniques ! Nous avons un [guide de contribution](/wiki/?name=Contribuer) pour vous aider à voir comment vous pouvez participer à Garradin :)
 
 ### Développement
 
 Garradin est un logiciel libre, développé en PHP, utilisant la base de données SQLite, et avec une interface utilisant HTML, CSS et un peu de Javascript.
 
-Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](Documentation développeur) pour découvrir comment vous pouvez contribuer.
+Nous acceptons les contributions (plugins, patch, code, tickets, etc.) avec plaisir, consultez la [documentation développeur⋅euse](/wiki/?name=Documentation développeur) pour découvrir comment vous pouvez contribuer.
