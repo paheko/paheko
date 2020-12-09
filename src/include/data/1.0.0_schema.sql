@@ -233,6 +233,10 @@ CREATE TABLE IF NOT EXISTS acc_years
     id_chart INTEGER NOT NULL REFERENCES acc_charts (id)
 );
 
+CREATE TRIGGER IF NOT EXISTS acc_years_delete BEFORE DELETE ON acc_years BEGIN
+    UPDATE services_fees SET id_account = NULL, id_year = NULL WHERE id_year = OLD.id;
+END;
+
 CREATE INDEX IF NOT EXISTS acc_years_closed ON acc_years (closed);
 
 CREATE TABLE IF NOT EXISTS acc_transactions
