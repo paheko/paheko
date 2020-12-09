@@ -2,7 +2,7 @@
 
 <nav id="gnav">
 
-* [Guides d'installation](Installation)
+* [Guides d'installation](wiki:Installation)
 * [Documentation](Documentation)
 * <a href="https://garradin.eu/" target="_blank">Essayer gratuitement</a>
 * [Dernières nouveautés](Changelog)
