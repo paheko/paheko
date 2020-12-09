@@ -19,14 +19,15 @@ INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', '
 -- Inversement valeurs actif/passif et produit/charge
 INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 	SELECT NULL, 1, id, libelle,
-	CASE position
-		WHEN 1 THEN 2
-		WHEN 2 THEN 1
-		WHEN 3 THEN 3
-		WHEN 4 THEN 5
-		WHEN 8 THEN 4
+	CASE
+		WHEN position = 1 THEN 2
+		WHEN position = 2 THEN 1
+		WHEN position = 3 THEN 3
+		WHEN position = 4 THEN 5
+		WHEN position = 8 THEN 4
 		-- Suppression de la position "charge ou produit" qui n'a aucun sens
-		WHEN 12 THEN 0
+		WHEN position = 12 AND code LIKE '6%' THEN 4
+		WHEN position = 12 AND code LIKE '7%' THEN 5
 		ELSE 0
 	END,
 	CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END
