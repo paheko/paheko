@@ -50,8 +50,9 @@ class Years
 	static public function list(bool $reverse = false)
 	{
 		$desc = $reverse ? 'DESC' : '';
-		$em = EntityManager::getInstance(Year::class);
-		return $em->all(sprintf('SELECT * FROM @TABLE ORDER BY end_date %s;', $desc));
+		return DB::getInstance()->get(sprintf('SELECT *,
+			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions
+			FROM acc_years ORDER BY end_date %s;', $desc));
 	}
 
 	static public function getNewYearDates(): array
