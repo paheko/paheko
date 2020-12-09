@@ -134,6 +134,8 @@ fetch('/garradin/juvlist').then((r) => {
 
 ## C'est quoi ?
 
+<a href="https://fossil.kd2.org/garradin/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank"><img src="https://fossil.kd2.org/garradin/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="700" /></a>
+
 Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
 
 *  la gestion des __adhérent⋅e⋅s__ : ajout, modification, suppression, possibilité de choisir les informations présentes sur les fiches adhérent, envoi de mails collectifs aux adhérent⋅e⋅s
@@ -147,7 +149,7 @@ Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son 
 
 Tous ces objectifs ne sont pas encore réalisés, voir :
 
-* [la liste fonctionnalités disponibles](Fonctionnalités) pour ce qui est actuellement disponible ;
+* [la liste des fonctionnalités disponibles](Fonctionnalités) pour ce qui est actuellement disponible ;
 * [la feuille de route](Roadmap) pour la liste des fonctionnalités qu'il reste à implémenter.
 
 Garradin est un logiciel libre disponible sous licence [AGPL v3](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
