@@ -126,15 +126,15 @@ fetch('/garradin/juvlist').then((r) => {
 
 		document.querySelector('#download').innerHTML += `<li><strong>Dernière version : ${last}</strong></li>
 			<li><em>il y a ${time}</em></li>
-			<li><a href="/wiki/?name=Changelog">Nouveautés</a></li>
-			<li><a href="/uv/${selected.name}">Télécharger</a></li>`;
+			<li><a href="$ROOT/wiki/?name=Changelog">Nouveautés</a></li>
+			<li><a href="$ROOT/uv/${selected.name}">Télécharger</a></li>`;
 	});
 });
 </script>
 
 ## C'est quoi ?
 
-<a href="/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
+<a href="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" target="_blank" style="float: right; margin: 1em;"><img src="$ROOT/raw/7bb068963b9f6301b27b81fe925caae9e86a229b?m=image/png" alt="Liste des membres" width="400" /></a>
 
 Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son but est de permettre :
 
