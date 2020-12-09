@@ -28,6 +28,7 @@ INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 		-- Suppression de la position "charge ou produit" qui n'a aucun sens
 		WHEN position = 12 AND code LIKE '6%' THEN 4
 		WHEN position = 12 AND code LIKE '7%' THEN 5
+		WHEN position = 12 THEN 0
 		ELSE 0
 	END,
 	CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END
