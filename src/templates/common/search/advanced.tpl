@@ -16,7 +16,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 		<dl>
 			{input type="textarea" name="sql_query" cols="100" rows="7" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
 			{if $session->canAccess('config', Membres::DROIT_ADMIN)}
-				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données"|args:$target default=$is_unprotected}
+				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
 				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 			{/if}
 		</dl>
