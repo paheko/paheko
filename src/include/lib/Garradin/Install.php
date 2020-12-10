@@ -142,7 +142,7 @@ class Install
 
         // Import plan comptable
         $chart = new Chart;
-        $chart->label = 'Plan comptable associatif 2018';
+        $chart->label = 'Plan comptable associatif 2020 (Règlement ANC n°2018-06)';
         $chart->country = 'FR';
         $chart->code = 'PCA2018';
         $chart->save();
