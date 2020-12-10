@@ -1,13 +1,6 @@
 {include file="admin/_head.tpl" title="Suivi : %s"|args:$types[$type] current="acc/simple"}
 
-{if empty($year)}
-	{include file="acc/_year_select.tpl"}
-{else}
-	<nav class="acc-year">
-		<h4>Exercice sélectionné&nbsp;:</h4>
-		<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
-	</nav>
-{/if}
+{include file="acc/_year_select.tpl"}
 
 <nav class="tabs">
 	<aside>
@@ -15,6 +8,7 @@
 		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
 		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
 	{/if}
+		{linkbutton shape="search" href="!acc/search.php?year=%d&type=%d"|args:$year.id,$type label="Recherche"}
 	</aside>
 	<ul>
 		{foreach from=$types key="key" item="label"}

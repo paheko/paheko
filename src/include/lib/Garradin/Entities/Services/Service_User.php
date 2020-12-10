@@ -4,6 +4,7 @@ namespace Garradin\Entities\Services;
 
 use Garradin\DB;
 use Garradin\Entity;
+use Garradin\Membres;
 use Garradin\ValidationException;
 use Garradin\Services\Fees;
 use Garradin\Services\Services;
@@ -88,7 +89,7 @@ class Service_User extends Entity
 		return $this->_fee;
 	}
 
-	public function addPayment(int $user_id, ?array $source = null)
+	public function addPayment(int $user_id, ?array $source = null): Transaction
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -103,7 +104,15 @@ class Service_User extends Entity
 		$source[$key . '0'] = [$this->fee()->id_account => ''];
 		$source[$key . '1'] = isset($source['account']) ? $source['account'] : null;
 
-		$source['label'] = 'Règlement activité - ' . $this->service()->label . ' - ' . $this->fee()->label;
+		$label = $this->service()->label;
+
+		if ($this->fee()->label != $label) {
+			$label .= ' - ' . $this->fee()->label;
+		}
+
+		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
+
+		$source['label'] = $label;
 		$source['date'] = $this->date->format('d/m/Y');
 
 		$transaction->importFromNewForm($source);
@@ -132,7 +141,9 @@ class Service_User extends Entity
 
 		$su->save();
 
-		if ($su->id_fee && $su->fee()->id_account && !empty($source['amount'])) {
+		if ($su->id_fee && $su->fee()->id_account
+			&& !empty($source['amount'])
+			&& !empty($source['create_payment'])) {
 			$su->addPayment($user_id, $source);
 		}
 

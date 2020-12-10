@@ -106,7 +106,7 @@
 		g.dialog.open = true;
 
 		var btn = document.createElement('button');
-		btn.className = 'icn-btn';
+		btn.className = 'icn-btn closeBtn';
 		btn.setAttribute('data-icon', '✘');
 		btn.type = 'button';
 		btn.innerHTML = 'Fermer';
@@ -118,9 +118,15 @@
 			container.innerHTML = content;
 			content = container;
 		}
+		else if (content instanceof DocumentFragment) {
+			var container = document.createElement('div');
+			container.appendChild(content.cloneNode(true));
+			content = container;
+		}
+
+		g.dialog.appendChild(content);
 
 		content.style.opacity = g.dialog.style.opacity = 0;
-		g.dialog.appendChild(content);
 		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
 		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 
@@ -129,6 +135,8 @@
 		// Restore CSS defaults
 		window.setTimeout(() => { g.dialog.style.opacity = ''; }, 50);
 		window.setTimeout(() => { content.style.opacity = ''; }, 100);
+
+		return content;
 	}
 
 	g.openFrameDialog = function (url) {

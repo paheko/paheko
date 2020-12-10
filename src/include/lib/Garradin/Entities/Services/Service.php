@@ -107,7 +107,7 @@ class Service extends Entity
 			INNER JOIN membres m ON m.id = su.id_user
 			INNER JOIN services s ON s.id = su.id_service
 			INNER JOIN services_fees sf ON sf.id = su.id_fee';
-		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND su.expiry_date >= date()', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');

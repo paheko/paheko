@@ -52,6 +52,7 @@
 			{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
 			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
 		{/if}
+			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}
 			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
 		{/if}

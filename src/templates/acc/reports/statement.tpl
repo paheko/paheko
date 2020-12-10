@@ -1,75 +1,13 @@
 {include file="admin/_head.tpl" title="Compte de résultat" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="statement"}
+{include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat"}
 
-<table class="statement">
-	<colgroup>
-		<col width="50%" />
-		<col width="50%" />
-	</colgroup>
-	<tbody>
-		<tr>
-			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$expense caption="Charges"}
-			</td>
-			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$revenue caption="Produits"}
-			</td>
-		</tr>
-	</tbody>
-	<tfoot>
-		<tr>
-			<td>
-				<table>
-					<tfoot>
-						<tr>
-							<th>Total charges</th>
-							<td class="money">{$expense_sum|raw|html_money:false}</td>
-						</tr>
-					</tfoot>
-				</table>
-			</td>
-			<td>
-				<table>
-					<tfoot>
-						<tr>
-							<th>Total produits</th>
-							<td class="money">{$revenue_sum|raw|html_money:false}</td>
-						</tr>
-					</tfoot>
-				</table>
-			</td>
-		</tr>
-		{if $result}
-		<tr>
-			<td>
-			{if ($result < 0)}
-				<table>
-					<tfoot>
-						<tr>
-							<th>Résultat (perte)</th>
-							<td class="money">{$result|raw|html_money:false}</td>
-						</tr>
-					</tfoot>
-				</table>
-			{/if}
-			</td>
-			<td>
-			{if ($result >= 0)}
-				<table>
-					<tfoot>
-						<tr>
-							<th>Résultat (excédent)</th>
-							<td class="money">{$result|raw|html_money:false}</td>
-						</tr>
-					</tfoot>
-				</table>
-			{/if}
-			</td>
-		</tr>
-		{/if}
-	</tfoot>
-</table>
+{include file="acc/reports/_statement.tpl" statement=$general caption1="Charges" caption2="Produits"}
+
+{if !empty($volunteering.expense_sum) || !empty($volunteering.revenue_sum)}
+	<h2 class="ruler">Contributions en nature</h2>
+	{include file="acc/reports/_statement.tpl" statement=$volunteering header=false caption1="Emplois des contributions volontaires en nature" caption2="Contributions volontaires en nature"}
+{/if}
 
 <p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
 

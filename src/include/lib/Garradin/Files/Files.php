@@ -16,7 +16,7 @@ class Files
 		return call_user_func_array([$class_name, $function], $args);
 	}
 
-	static public function migrateStorage(string $from, string $to)
+	static public function migrateStorage(string $from, string $to): void
 	{
 		$res = EM::getInstance(File::class)->iterate('SELECT * FROM @TABLE;');
 
@@ -26,6 +26,20 @@ class Files
 		foreach ($res as $file) {
 			$from_path = call_user_func([$from, 'path'], $file);
 			call_user_func([$to, 'store'], $file, $from_path);
+		}
+	}
+
+	static public function generatePathsIndex(): void
+	{
+		$all = DB::getInstance()->getAssoc('SELECT path, path FROM files GROUP BY path;');
+		$paths = [];
+
+		foreach ($all as $path) {
+			$path = explode('/', $path);
+
+			foreach ($path as $part) {
+				
+			}
 		}
 	}
 }

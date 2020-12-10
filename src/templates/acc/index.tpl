@@ -7,10 +7,10 @@
 
 	<nav class="tabs">
 		<aside>
-			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
 				{linkbutton shape="upload" href="!acc/years/import.php?year=%d"|args:$year.id label="Import & export"}
 			{/if}
+			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 		</aside>
 		<ul>
 			<li><a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a></li>
