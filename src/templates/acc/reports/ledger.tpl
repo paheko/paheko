@@ -13,15 +13,6 @@
 	<summary><h2 class="ruler"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$account.id_year}">{$account.code} — {$account.label}</a></h2></summary>
 
 	<table class="list">
-		<colgroup>
-			<col width="5%" />
-			<col width="5%" />
-			<col width="10%" />
-			<col width="50%" />
-			<col width="10%" />
-			<col width="10%" />
-			<col width="10%" />
-		</colgroup>
 		<thead>
 			<tr>
 				<td></td>
@@ -38,8 +29,8 @@
 		{foreach from=$account.lines item="line"}
 			<tr>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
-				<td class="num">{$line.reference}</td>
-				<td class="num">{$line.line_reference}</td>
+				<td>{$line.reference}</td>
+				<td>{$line.line_reference}</td>
 				<td>{$line.date|date_short}</td>
 				<th>{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
 				<td class="money">{$line.debit|raw|html_money}</td>
