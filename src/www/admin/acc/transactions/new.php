@@ -84,7 +84,17 @@ if (f('save') && $form->check('acc_transaction_new')) {
 	}
 }
 
-$tpl->assign('date', $session->get('acc_last_date') ?: $current_year->start_date->format('d/m/Y'));
+$date = new \DateTime;
+
+if ($session->get('acc_last_date')) {
+	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+}
+
+if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
+	$date = $current_year->start_date;
+}
+
+$tpl->assign('date', $date->format('d/m/Y'));
 $tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
