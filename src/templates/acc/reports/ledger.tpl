@@ -24,7 +24,8 @@
 		</colgroup>
 		<thead>
 			<tr>
-				<td>Réf.</td>
+				<td></td>
+				<td>N° pièce</td>
 				<td>Réf. ligne</td>
 				<td>Date</td>
 				<th>Intitulé</th>
@@ -36,7 +37,8 @@
 		<tbody>
 		{foreach from=$account.lines item="line"}
 			<tr>
-				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">{if $line.reference}{$line.reference}{else}#{$line.id}{/if}</a></td>
+				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
+				<td class="num">{$line.reference}</td>
 				<td class="num">{$line.line_reference}</td>
 				<td>{$line.date|date_short}</td>
 				<th>{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
@@ -48,7 +50,7 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3"></td>
+				<td colspan="4"></td>
 				<th>Solde final</th>
 				<td class="money">{$account.debit|raw|html_money}</td>
 				<td class="money">{$account.credit|raw|html_money}</td>
