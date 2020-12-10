@@ -29,6 +29,37 @@ class Files
 		}
 	}
 
+	static public function deleteOrphanFiles()
+	{
+		$db = DB::getInstance();
+		$sql = 'SELECT f.* FROM files f LEFT JOIN files_links l ON f.id = l.id WHERE l.id IS NULL;';
+
+		foreach ($db->iterate($sql) as $file) {
+			$f = new Fichiers($file->id, (array) $file);
+			$f->remove();
+		}
+
+		// Remove any left-overs
+		$db->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
+	}
+
+	static public function deleteLinkedFiles(string $type, ?int $value = null)
+	{
+		foreach (self::iterateLinkedTo($type, $value) as $file) {
+			$file->delete();
+		}
+
+		self::deleteOrphanFiles();
+	}
+
+	static public function iterateLinkedTo(string $type, ?int $value = null)
+	{
+		$where = $value ? sprintf('l.%s = %d', $value) : sprintf('l.%s IS NOT NULL');
+		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN files_links l ON l.id = f.id WHERE %s;', $where);
+
+		return EM::getInstance(File::class)->iterate($sql);
+	}
+
 	static public function generatePathsIndex(): void
 	{
 		$all = DB::getInstance()->getAssoc('SELECT path, path FROM files GROUP BY path;');

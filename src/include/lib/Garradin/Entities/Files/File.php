@@ -12,12 +12,55 @@ class File extends Entity
 	const TABLE = 'files';
 
 	protected $id;
+	protected $path;
 	protected $name;
+	protected $type;
+	protected $image;
+	protected $size;
+	protected $hash;
+
+	protected $storage;
+	protected $storage_path;
+
+	protected $created;
+	protected $modified;
+
+	protected $author_id;
 
 	protected $_types = [
-		'id'         => 'int',
-		'label'      => 'name',
+		'id'           => 'int',
+		'path'         => 'string',
+		'name'         => 'string',
+		'type'         => '?string',
+		'image'        => 'int',
+		'size'         => 'int',
+		'hash'         => 'string',
+		'storage'      => '?string',
+		'storage_path' => '?string',
+		'created'      => 'DateTime',
+		'modified'     => 'DateTime',
+		'author_id'    => '?int',
 	];
+
+	protected $_public;
+
+	/**
+	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
+	 * @var array
+	 */
+	const ALLOWED_THUMB_SIZES = [200, 500, 1200];
+
+	const LINK_USER = 'user_id';
+	const LINK_TRANSACTION = 'transaction_id';
+	const LINK_CONFIG = 'config';
+	const LINK_WEB = 'web';
+
+	const PATH_USER = 'users/%d';
+	const PATH_TRANSACTION = 'accounting/transactions/%d';
+	const PATH_CONFIG = 'config';
+	const PATH_WEB = 'web/%s';
+
+	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
 	public function selfCheck(): void
 	{
@@ -28,8 +71,11 @@ class File extends Entity
 	{
 		$return = parent::delete();
 
-		// Clean up files
-		Files::deleteOrphanFiles();
+		// clean up thumbs
+		foreach (self::ALLOWED_THUMB_SIZES as $size)
+		{
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->id(), $size));
+		}
 
 		return $return;
 	}
@@ -150,4 +196,290 @@ class File extends Entity
 		return self::store($path, $name, $file['tmp_name']);
 	}
 
+
+	/**
+	 * Récupération du message d'erreur
+	 * @param  integer $error Code erreur du $_FILE
+	 * @return string Message d'erreur
+	 */
+	static public function getErrorMessage($error)
+	{
+		switch ($error)
+		{
+			case UPLOAD_ERR_INI_SIZE:
+				return 'Le fichier excède la taille permise par la configuration du serveur.';
+			case UPLOAD_ERR_FORM_SIZE:
+				return 'Le fichier excède la taille permise par le formulaire.';
+			case UPLOAD_ERR_PARTIAL:
+				return 'L\'envoi du fichier a été interrompu.';
+			case UPLOAD_ERR_NO_FILE:
+				return 'Aucun fichier n\'a été reçu.';
+			case UPLOAD_ERR_NO_TMP_DIR:
+				return 'Pas de répertoire temporaire pour stocker le fichier.';
+			case UPLOAD_ERR_CANT_WRITE:
+				return 'Impossible d\'écrire le fichier sur le disque du serveur.';
+			case UPLOAD_ERR_EXTENSION:
+				return 'Une extension du serveur a interrompu l\'envoi du fichier.';
+			default:
+				return 'Erreur inconnue: ' . $error;
+		}
+	}
+
+	public function url(?int $size = null): string
+	{
+		return self::getFileURL($this->id, $this->name, $this->hash, $size);
+	}
+
+	/**
+	 * Renvoie l'URL vers un fichier
+	 * @param  integer $id   Numéro du fichier
+	 * @param  string  $name  Nom de fichier avec extension
+	 * @param  integer $size Taille de la miniature désirée (pour les images)
+	 * @return string        URL du fichier
+	 */
+	static public function getFileURL(int $id, string $name, string $hash, ?int $size = null): string
+	{
+		$url = sprintf('%sf/%s/%s?', WWW_URL, base_convert((int)$id, 10, 36), $name);
+
+		if ($size)
+		{
+			$url .= self::_findNearestThumbSize($size) . 'px&';
+		}
+
+		$url .= substr($hash, 0, 10);
+
+		return $url;
+	}
+
+	/**
+	 * Renvoie la taille de miniature la plus proche de la taille demandée
+	 * @param  integer $size Taille demandée
+	 * @return integer       Taille possible
+	 */
+	static protected function _findNearestThumbSize($size)
+	{
+		$size = (int) $size;
+
+		if (in_array($size, self::ALLOWED_THUMB_SIZES))
+		{
+			return $size;
+		}
+
+		foreach (self::ALLOWED_THUMB_SIZES as $s)
+		{
+			if ($s >= $size)
+			{
+				return $s;
+			}
+		}
+
+		return max(self::ALLOWED_THUMB_SIZES);
+	}
+
+	/**
+	 * Lier un fichier à un contenu
+	 * @param  string $type       Type de contenu (constantes LINK_*)
+	 * @param  integer $foreign_id ID du contenu lié
+	 * @return boolean TRUE en cas de succès
+	 */
+	public function linkTo(string $type, int $foreign_id): bool
+	{
+		$db = DB::getInstance();
+		static $types = [self::LINK_WEB, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
+
+		if (!in_array($type, $types)) {
+			throw new \InvalidArgumentException('Unknown file link type.');
+		}
+
+		if ($db->test('files_links', 'id = ?', $this->id())) {
+			throw new \LogicException('This file is already linked to something else');
+		}
+
+		$sql = sprintf('INSERT OR IGNORE INTO files_links (id, %s) VALUES (?, ?);', $type);
+
+		return $db->preparedQuery($sql, [$this->id, $foreign_id]);
+	}
+
+	public function getLinkedId(string $type): ?int
+	{
+		static $types = [self::LINK_WEB, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
+
+		if (!in_array($type, $types)) {
+			throw new \InvalidArgumentException('Unknown file link type.');
+		}
+
+		return DB::getInstance()->firstColumn(sprintf('SELECT %s FROM files_links WHERE id = %d;', $type, $this->id()));
+	}
+
+	/**
+	 * Envoie le fichier au client HTTP
+	 */
+	public function serve(?Session $session = null): void
+	{
+		if (!$this->checkAccess($session)) {
+			header('HTTP/1.1 403 Forbidden', true, 403);
+			throw new UserException('Accès interdit');
+			return;
+		}
+
+		$path = Files::callStorage('getPath', $this);
+		$content = null === $path ? Files::callStorage('fetch', $this) : null;
+
+		$this->_serve($session, $path, $content);
+	}
+
+	/**
+	 * Envoie une miniature à la taille indiquée au client HTTP
+	 */
+	public function serveThumbnail(?Session $session = null, ?int $width = null): void
+	{
+		if (!$this->checkAccess($session)) {
+			header('HTTP/1.1 403 Forbidden', true, 403);
+			throw new UserException('Accès interdit');
+			return;
+		}
+
+		if (!$this->image) {
+			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
+		}
+
+		if (!$width) {
+			$width = reset(self::ALLOWED_THUMB_SIZES);
+		}
+
+		if (!in_array($width, self::ALLOWED_THUMB_SIZES)) {
+			throw new UserException('Cette taille de miniature n\'est pas autorisée.');
+		}
+
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->id(), $width);
+		$destination = Static_Cache::getPath($cache_id);
+
+		// La miniature n'existe pas dans le cache statique, on la crée
+		if (!Static_Cache::exists($cache_id))
+		{
+			try {
+				if ($path = Files::callStorage('getPath', $file)) {
+					(new Image($source))->resize($width)->save($destination);
+				}
+				elseif ($content = Files::callStorage('fetch', $file)) {
+					Image::createFromBlob($content)->resize($width)->save($destination);
+				}
+				else {
+					throw new \RuntimeException('Unable to fetch file');
+				}
+			}
+			catch (\RuntimeException $e) {
+				throw new UserException('Impossible de créer la miniature');
+			}
+		}
+
+		$this->_serve($session, $path, null);
+	}
+
+	/**
+	 * Servir un fichier local en HTTP
+	 * @param  string $path Chemin vers le fichier local
+	 * @param  string $type Type MIME du fichier
+	 * @param  string $name Nom du fichier avec extension
+	 * @param  integer $size Taille du fichier en octets (facultatif)
+	 * @return boolean TRUE en cas de succès
+	 */
+	protected function _serve(?string $path, ?string $content): void
+	{
+		if ($this->isPublic()) {
+			Utils::HTTPCache($this->hash, $this->datetime);
+		}
+		else {
+			// Disable browser cache
+			header('Pragma: private');
+			header('Expires: -1');
+			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
+		}
+
+		header(sprintf('Content-Type: %s', $this->type));
+		header(sprintf('Content-Disposition: inline; filename="%s"', $this->name));
+
+		// Utilisation de XSendFile si disponible
+		if (null !== $path && ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
+		{
+			if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache') 
+				&& function_exists('apache_get_modules') 
+				&& in_array('mod_xsendfile', apache_get_modules()))
+			{
+				header('X-Sendfile: ' . $path);
+				return;
+			}
+			else if (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd'))
+			{
+				header('X-Sendfile: ' . $path);
+				return;
+			}
+		}
+
+		// Désactiver gzip
+		if (function_exists('apache_setenv'))
+		{
+			@apache_setenv('no-gzip', 1);
+		}
+
+		@ini_set('zlib.output_compression', 'Off');
+
+		header(sprintf('Content-Length: %d', $this->size));
+
+		if (@ob_get_length()) {
+			@ob_clean();
+		}
+
+		flush();
+
+		if (null !== $path) {
+			readfile($path);
+		}
+		else {
+			echo $content;
+		}
+	}
+
+	public function isPublic(): bool
+	{
+		if (null === $this->_public) {
+			throw new \RuntimeException('_public is unset');
+		}
+
+		return $this->_public;
+	}
+
+	public function checkAccess(Session $session): bool
+	{
+		$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $this->id());
+
+		$this->_public = false;
+
+		// Everyone has access to web content as long it's not draft (0)
+		if ($link->{LINK_WEB} == 1) {
+			$this->_public = true;
+			return true;
+		}
+		elseif ($link->{LINK_WEB} == 0) {
+			return false;
+		}
+		// Everyone has access to config files (logo etc.)
+		else if ($link->{LINK_CONFIG}) {
+			$this->_public = true;
+			return true;
+		}
+		else if ($link->{LINK_TRANSACTION} && $session->canAccess('compta', Membres::DROIT_ACCES)) {
+			return true;
+		}
+		// The user can access his own profile files
+		else if ($link->{LINK_USER} && $link->{LINK_USER} == $session->getUser()->id) {
+			return true;
+		}
+		// Only users able to manage users can see their profile files
+		else if ($link->{LINK_USER} && $session->canAccess('membres', Membres::DROIT_ECRITURE)) {
+			return true;
+		}
+
+		return $session->canAccess(Session::SECTION_DOCUMENTS, Membres::DROIT_ACCES);
+	}
 }

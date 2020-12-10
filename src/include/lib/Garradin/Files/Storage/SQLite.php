@@ -51,7 +51,7 @@ class SQLite implements StorageInterface
 
 	static public function getPath(File $file): ?string
 	{
-		return null;
+		return self::_getFilePathFromCache($file);
 	}
 
 	static public function display(File $file): void

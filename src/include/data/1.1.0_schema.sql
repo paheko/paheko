@@ -263,27 +263,31 @@ CREATE TABLE IF NOT EXISTS files
     name TEXT NOT NULL, -- file name (eg. image1234.jpeg)
     type TEXT NULL, -- MIME type
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
+    size INTEGER NOT NULL DEFAULT 0,
+    hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
+
+    storage TEXT NULL, -- Storage medium, NULL means stored in content BLOB
+    storage_path TEXT NULL,
+
     created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
     modified TEXT NULL CHECK (datetime(modified) IS NULL OR datetime(modified) = modified),
-    content_id INTEGER NOT NULL REFERENCES files_contents (id) ON DELETE CASCADE,
+
     author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS files_path ON files (path);
 CREATE INDEX IF NOT EXISTS files_date ON files (datetime);
+CREATE INDEX IF NOT EXISTS files_hash ON files (hash);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Contenu des fichiers
 (
     id INTEGER NOT NULL PRIMARY KEY,
     hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
-    size INTEGER NOT NULL, -- Taille en octets
-    content BLOB NULL,
-    storage TEXT NULL, -- Storage medium, NULL means stored in content BLOB
-    storage_path TEXT NULL
+    content BLOB NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS files_hash ON files_contents (hash);
+CREATE UNIQUE INDEX IF NOT EXISTS files_contents_hash ON files_contents (hash);
 
 CREATE TABLE IF NOT EXISTS files_folders
 (
@@ -301,15 +305,16 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 
 CREATE TABLE IF NOT EXISTS files_links
 -- This references use of a file outside of the documents module
+-- One file can only be linked to one thing
 (
-    id INTEGER NOT NULL PRIMARY KEY,
-    file_id INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES fichiers (id) ON DELETE CASCADE,
+    file_id INTEGER NULL REFERENCES fichiers (id) ON DELETE CASCADE,
     user_id INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE,
     transaction_id INTEGER NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
     config TEXT NULL REFERENCES config (valeur) ON DELETE CASCADE,
     web INTEGER NULL,
     -- Make sure that only one is filled
-    CHECK ((user_id IS NULL) + (transaction_id IS NULL) + (config IS NULL) + (web IS NULL) = 1)
+    CHECK ((user_id IS NULL) + (transaction_id IS NULL) + (config IS NULL) + (web IS NULL) + (file_id IS NULL) = 1)
 );
 
 CREATE UNIQUE INDEX files_links_unique ON files_links (file_id, user_id, transaction_id, config, web);
