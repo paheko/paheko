@@ -186,10 +186,6 @@ fieldset {
 		display: none;
 	}
 
-	.print-btn {
-		display: none;
-	}
-
 	.radio-btn input {
 		position: absolute;
 		right: 1em;
