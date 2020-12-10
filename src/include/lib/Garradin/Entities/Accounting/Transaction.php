@@ -416,6 +416,10 @@ class Transaction extends Entity
 		$this->importForm($source);
 
 		if (self::TYPE_ADVANCED == $type) {
+			if (!isset($source['lines']) || !in_array($source['lines'])) {
+				throw new ValidationException('Aucune ligne dans la saisie');
+			}
+
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
