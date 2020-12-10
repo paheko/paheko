@@ -18,7 +18,8 @@
 			Object.assign(this, {
 				format: 0, // 0 = Y-m-d, 1 = d/m/Y
 				lang: 'fr',
-				class: 'datepicker'
+				class: 'datepicker',
+				onchange: null
 			}, config);
 
 			var c = document.createElement('dialog');
@@ -30,7 +31,8 @@
 
 		open()
 		{
-			var d = this.input.value;
+			var d = this.input ? this.input.value : '';
+
 			if (d == '') {
 				d = new CalendarDate;
 			}
@@ -177,8 +179,17 @@
 				m = ('0' + (this.date.getMonth() + 1)).substr(-2),
 				d = ('0' + this.date.getDate()).substr(-2);
 
-			this.input.value = this.format == 1 ? d + '/' + m + '/' + y : y + '-' + m + '-' + d;
+			let v = this.format == 1 ? d + '/' + m + '/' + y : y + '-' + m + '-' + d;
+
+			if (this.input) {
+				this.input.value = v;
+			}
+
 			this.close();
+
+			if (this.onchange) {
+				this.onchange(v, this);
+			}
 		}
 
 		focus()
