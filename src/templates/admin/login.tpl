@@ -61,11 +61,11 @@
 
 {literal}
 <script type="text/javascript">
-g.enhancePasswordField($('#f_passe'));
-
-if (!!window.document.documentMode) {
+if (window.navigator.userAgent.match(/MSIE|Trident\/|Edge\//)) {
     document.getElementById('old_browser').style.display = 'block';
 }
+
+g.enhancePasswordField($('#f_passe'));
 </script>
 {/literal}
 

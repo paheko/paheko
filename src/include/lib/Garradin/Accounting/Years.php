@@ -19,6 +19,11 @@ class Years
 		return EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
 	}
 
+	static public function getCurrentOpenYearId()
+	{
+		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
+	}
+
 	static public function listOpen()
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
@@ -45,8 +50,9 @@ class Years
 	static public function list(bool $reverse = false)
 	{
 		$desc = $reverse ? 'DESC' : '';
-		$em = EntityManager::getInstance(Year::class);
-		return $em->all(sprintf('SELECT * FROM @TABLE ORDER BY end_date %s;', $desc));
+		return DB::getInstance()->get(sprintf('SELECT *,
+			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions
+			FROM acc_years ORDER BY end_date %s;', $desc));
 	}
 
 	static public function getNewYearDates(): array

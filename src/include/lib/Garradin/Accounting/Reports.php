@@ -30,9 +30,13 @@ class Reports
 		}
 
 		if (!empty($criterias['type'])) {
-			$db = DB::getInstance();
 			$criterias['type'] = array_map('intval', (array)$criterias['type']);
 			$where[] = sprintf('a.type IN (%s)', implode(',', $criterias['type']));
+		}
+
+		if (!empty($criterias['exclude_type'])) {
+			$criterias['exclude_type'] = array_map('intval', (array)$criterias['exclude_type']);
+			$where[] = sprintf('a.type NOT IN (%s)', implode(',', $criterias['exclude_type']));
 		}
 
 		if (!empty($criterias['user'])) {
@@ -64,7 +68,8 @@ class Reports
 	 */
 	static public function getAnalyticalSums(bool $by_year = false): \Generator
 	{
-		$sql = 'SELECT a.label AS account_label, a.id AS id_account, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
+		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
+			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
@@ -107,6 +112,7 @@ class Reports
 				$current = (object) [
 					'id' => $by_year ? $row->id_year : $row->id_account,
 					'label' => $by_year ? $row->year_label : $row->account_label,
+					'description' => !$by_year ? $row->account_description : null,
 					'credit' => 0,
 					'debit' => 0,
 					'sum' => 0,
@@ -443,5 +449,27 @@ class Reports
 		}
 
 		yield $transaction;
+	}
+
+	static public function getStatement(array $criterias): array
+	{
+		$revenue = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::REVENUE]);
+		$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE], null, true);
+
+		$get_sum = function (array $in): int {
+			$sum = 0;
+
+			foreach ($in as $row) {
+				$sum += $row->sum;
+			}
+
+			return abs($sum);
+		};
+
+		$revenue_sum = $get_sum($revenue);
+		$expense_sum = $get_sum($expense);
+		$result = $revenue_sum - $expense_sum;
+
+		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result');
 	}
 }

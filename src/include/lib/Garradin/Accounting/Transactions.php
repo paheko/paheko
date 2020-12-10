@@ -146,12 +146,12 @@ class Transactions
 				$row->status = implode(', ', $status);
 				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 				$row->date = $row->date->format('d/m/Y');
+				$previous_id = $row->id;
 			}
 
 			$row->credit = Utils::money_format($row->credit, ',', '');
 			$row->debit = Utils::money_format($row->debit, ',', '');
 
-			$previous_id = $row->id;
 			yield $row;
 		}
 	}
@@ -191,11 +191,15 @@ class Transactions
 						$transaction = self::get((int)$row->id);
 
 						if (!$transaction) {
-							throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row->id));
+						}
+
+						if (!$transaction->id_year != $year->id()) {
+							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row->id));
 						}
 
 						if ($transaction->validated) {
-							throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
 						}
 					}
 					else {
@@ -389,7 +393,7 @@ class Transactions
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('date', true);
-		$list->setCount('COUNT(*)');
+		$list->setCount('COUNT(DISTINCT t.id)');
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) use (&$sum, $reverse) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);

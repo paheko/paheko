@@ -1,7 +1,8 @@
 <table class="list multi">
 	<thead>
 		<tr>
-			<td>Réf.</td>
+			<td class="num">N°</td>
+			<td>Pièce comptable</td>
 			<td>Date</td>
 			<th>Libellé</th>
 			<td>Comptes</td>
@@ -14,7 +15,8 @@
 	{foreach from=$journal item="transaction"}
 	<tbody>
 		<tr>
-			<td rowspan="{$transaction.lines|count}" class="num"><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">{if $transaction.reference}{$transaction.reference}{else}#{$transaction.id}{/if}</a></td>
+			<td rowspan="{$transaction.lines|count}" class="num"><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a></td>
+			<td rowspan="{$transaction.lines|count}">{$transaction.reference}</td>
 			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_short}</td>
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>
 		{foreach from=$transaction.lines item="line"}

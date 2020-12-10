@@ -177,11 +177,11 @@ code,label,description,position,type
 50,VALEURS MOBILIÈRES DE PLACEMENT,,Actif,
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,Actif,
 511,Valeurs à l'encaissement,,Actif,
-5112,Chèques à encaisser,,Actif,Attente d'encaissement
-5115,Paiements par carte à encaisser,,Actif,
+5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif ou passif,
 53,CAISSE,,Actif,
-530,Caisse,,Actif,Caisse
+530,Caisse,,Actif ou passif,Caisse
 54,RÉGIES D'AVANCES ET ACCRÉDITIFS,,Actif,
 58,VIREMENTS INTERNES,,Actif,
 59,PROVISIONS POUR DÉPRÉCIATION DES COMPTES FINANCIERS,,Actif,
@@ -283,13 +283,13 @@ code,label,description,position,type
 797,Transferts de charges exceptionnels,,Produit,
 8,Classe 8 ­— Comptes spéciaux,,,
 86,RÉPARTITION PAR NATURE DE CHARGES,,Charge,
-861,Mise à dispositions gratuites de biens,,Charge,
-862,Prestations,,Charge,
-864,Personnel bénévole,,Charge,
+861,Mise à dispositions gratuites de biens,,Charge,Bénévolat
+862,Prestations,,Charge,Bénévolat
+864,Personnel bénévole,,Charge,Bénévolat
 87,RÉPARTITION PAR NATURE DE RESSOURCES,,Produit,
-870,Bénévolat,,Produit,
-871,Prestations en nature,,Produit,
-875,Dons en nature,,Produit,
+870,Bénévolat,,Produit,Bénévolat
+871,Prestations en nature,,Produit,Bénévolat
+875,Dons en nature,,Produit,Bénévolat
 89,BILAN,,,
 890,Bilan d'ouverture,,,Ouverture
 891,Bilan de clôture,,,Clôture

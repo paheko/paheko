@@ -24,7 +24,7 @@ class Services
 		$services = DB::getInstance()->getGrouped('SELECT
 			id, label, duration, start_date, end_date, description,
 			CASE WHEN end_date IS NOT NULL THEN end_date WHEN duration IS NOT NULL THEN date(\'now\', \'+\'||duration||\' days\') ELSE NULL END AS expiry_date
-			FROM services;');
+			FROM services ORDER BY label COLLATE NOCASE;');
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 
@@ -44,7 +44,7 @@ class Services
 	{
 		$db = DB::getInstance();
 		return $db->get('SELECT s.*,
-			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND expiry_date >= date() AND paid = 1) AS nb_users_ok,
+			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1) AS nb_users_ok,
 			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND expiry_date < date()) AS nb_users_expired,
 			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND paid = 0) AS nb_users_unpaid
 			FROM services s

@@ -54,7 +54,7 @@
 	<fieldset>
 		<legend>Détails facultatifs</legend>
 		<dl data-types="t{$transaction::TYPE_REVENUE} t{$transaction::TYPE_EXPENSE} t{$transaction::TYPE_TRANSFER}">
-			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$first_line.reference}
 		</dl>
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php" default=$linked_users}
@@ -64,7 +64,7 @@
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}
-				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts}
+				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts default=$first_line.id_analytical}
 			{/if}
 		</dl>
 	</fieldset>

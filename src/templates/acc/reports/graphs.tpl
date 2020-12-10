@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Graphiques" current="acc"}
 
-{include file="acc/reports/_header.tpl" current="graphs"}
+{include file="acc/reports/_header.tpl" current="graphs" title="Graphiques"}
 
 <section class="year-infos">
 	<section class="graphs">
