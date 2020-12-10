@@ -27,7 +27,7 @@
 		<dl>
 			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc." source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}
