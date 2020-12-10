@@ -83,31 +83,30 @@ if ($previous_year) {
 		$account = (object) [
 			'id' => null,
 			'code' => null,
-			'label' => 'Résultat de l\'exercice',
+			'label' => 'Résultat de l\'exercice précédent, à affecter',
 		];
 	}
 
 	$lines[] = (object) [
-		'sum' => $result,
-		'id' => $account->id,
-		'code' => $account->code,
+		'sum'   => $result,
+		'id'    => $account->id,
+		'code'  => $account->code,
 		'label' => $account->label,
+		'missing' => !$account->id,
 	];
 
 	foreach ($lines as $k => &$line) {
 		$line->credit = $line->sum > 0 ? $line->sum : 0;
 		$line->debit = $line->sum < 0 ? abs($line->sum) : 0;
+		$line->account_selected = null;
 
 		if ($chart_change) {
 			if (array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
 				$line->account_selected = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}
-			else {
-				$line->account_selected = null;
-			}
 		}
-		else {
+		elseif ($line->id) {
 			$line->account_selected = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
 		}
 	}
