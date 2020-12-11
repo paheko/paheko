@@ -62,7 +62,7 @@ class Graph
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
-		$cache_id = sha1(json_encode(func_get_args()));
+		$cache_id = sha1('plot' . json_encode(func_get_args()));
 
 		if (!Static_Cache::expired($cache_id)) {
 			return Static_Cache::get($cache_id);
@@ -133,7 +133,7 @@ class Graph
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
-		$cache_id = sha1(json_encode(func_get_args()));
+		$cache_id = sha1('pie' . json_encode(func_get_args()));
 
 		if (!Static_Cache::expired($cache_id)) {
 			return Static_Cache::get($cache_id);
