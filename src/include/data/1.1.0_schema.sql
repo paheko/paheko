@@ -255,14 +255,17 @@ CREATE TABLE IF NOT EXISTS plugins_signaux
     PRIMARY KEY (signal, plugin)
 );
 
+---------- FILES ----------------
+
 CREATE TABLE IF NOT EXISTS files
 -- Files metadata
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    path TEXT NOT NULL,
+    folder_id INTEGER NOT NULL REFERENCES files_folders,
     name TEXT NOT NULL, -- file name (eg. image1234.jpeg)
     type TEXT NULL, -- MIME type
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
+    public INTEGER NOT NULL DEFAULT 0,
     size INTEGER NOT NULL DEFAULT 0,
     hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
 
@@ -270,7 +273,6 @@ CREATE TABLE IF NOT EXISTS files
     storage_path TEXT NULL,
 
     created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
-    modified TEXT NULL CHECK (datetime(modified) IS NULL OR datetime(modified) = modified),
 
     author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
@@ -293,14 +295,16 @@ CREATE TABLE IF NOT EXISTS files_folders
 (
     id INTEGER NOT NULL PRIMARY KEY,
     parent_id INTEGER NULL REFERENCES files_folders(id) ON DELETE CASCADE,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    system INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
     id INT PRIMARY KEY NOT NULL REFERENCES files_contents(id),
-    content TEXT NULL -- Text content
+    title TEXT NULL,
+    content TEXT NOT NULL -- Text content
 );
 
 CREATE TABLE IF NOT EXISTS files_links
@@ -312,12 +316,39 @@ CREATE TABLE IF NOT EXISTS files_links
     user_id INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE,
     transaction_id INTEGER NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
     config TEXT NULL REFERENCES config (valeur) ON DELETE CASCADE,
-    web INTEGER NULL,
+    web_page_id INTEGER NULL REFERENCES web_pages (id) ON DELETE CASCADE,
+    web_category_id INTEGER NULL REFERENCES web_categories (id) ON DELETE CASCADE,
     -- Make sure that only one is filled
-    CHECK ((user_id IS NULL) + (transaction_id IS NULL) + (config IS NULL) + (web IS NULL) + (file_id IS NULL) = 1)
+    CHECK ((user_id IS NULL) + (transaction_id IS NULL) + (config IS NULL) + (web_page_id IS NULL) + (web_category_id IS NULL) + (file_id IS NULL) = 1)
 );
 
-CREATE UNIQUE INDEX files_links_unique ON files_links (file_id, user_id, transaction_id, config, web);
+CREATE UNIQUE INDEX files_links_unique ON files_links (file_id, user_id, transaction_id, config, web_pages, web_category_id);
+
+CREATE TABLE IF NOT EXISTS web_pages
+(
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
+    category_id INTEGER NOT NULL REFERENCES web_categories(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    draft INTEGER NOT NULL DEFAULT 0,
+    modified TEXT NULL CHECK (datetime(modified) IS NULL OR datetime(modified) = modified)
+);
+
+CREATE TABLE IF NOT EXISTS web_categories
+(
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
+    parent_id INTEGER NOT NULL REFERENCES web_categories(id) ON DELETE CASCADE,
+    title TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS web_page_insert AFTER INSERT ON web_pages
+    BEGIN
+        UPDATE files SET public = NEW.draft WHERE id = NEW.id;
+    END;
+
+CREATE TRIGGER IF NOT EXISTS web_page_update AFTER UPDATE ON web_pages
+    BEGIN
+        UPDATE files SET public = NEW.draft WHERE id = NEW.id;
+    END;
 
 -- FIXME: rename to english
 CREATE TABLE IF NOT EXISTS recherches
