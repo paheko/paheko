@@ -50,15 +50,13 @@ class File extends Entity
 	 */
 	const ALLOWED_THUMB_SIZES = [200, 500, 1200];
 
+	// Link to another file (ie. image included in a HTML file)
+	const LINK_FILE = 'file_id';
 	const LINK_USER = 'user_id';
 	const LINK_TRANSACTION = 'transaction_id';
 	const LINK_CONFIG = 'config';
-	const LINK_WEB = 'web';
-
-	const PATH_USER = 'users/%d';
-	const PATH_TRANSACTION = 'accounting/transactions/%d';
-	const PATH_CONFIG = 'config';
-	const PATH_WEB = 'web/%s';
+	const LINK_WEB_PAGE = 'web_page_id';
+	const LINK_WEB_CATEGORY = 'web_category_id';
 
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
@@ -452,6 +450,11 @@ class File extends Entity
 	public function checkAccess(Session $session): bool
 	{
 		$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $this->id());
+
+		// If it's linked to a file, then we want to know what the parent file is linked to
+		if ($link->{LINK_FILE}) {
+			$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $link->{LINK_FILE});
+		}
 
 		$this->_public = false;
 
