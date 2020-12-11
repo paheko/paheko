@@ -97,7 +97,7 @@ function isNewerVersion (oldVer, newVer) {
 	return false
 }
 
-fetch('/garradin/juvlist').then((r) => {
+fetch('/garradin/juvlist?'+(+(new Date))).then((r) => {
 	r.json().then((list) => {
 		let last;
 		let selected;
