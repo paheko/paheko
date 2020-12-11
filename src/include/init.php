@@ -245,7 +245,7 @@ ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erre
 	</style></head><body><h1>Erreur interne</h1><p>Désolé mais le serveur a rencontré une erreur interne
 	et ne peut répondre à votre requête. Merci de ré-essayer plus tard.</p>
 	<p>Si vous suspectez un bug dans Garradin, vous pouvez suivre 
-	<a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>
+	<a href="https://fossil.kd2.org/garradin/wiki?name=Rapporter+un+bug&p">ces instructions</a>
 	pour le rapporter.</p>
 	<if(sent)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
 	<if(logged)><code>L\'erreur a été enregistrée dans les journaux système (error.log) sous la référence : <b>{$ref}</b></code></if>
