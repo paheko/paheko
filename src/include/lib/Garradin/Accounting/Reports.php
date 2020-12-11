@@ -400,19 +400,19 @@ class Reports
 	{
 		$where = self::getWhereClause($criterias);
 
-		$sql = sprintf('SELECT t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label FROM acc_transactions t
+		$sql = sprintf('SELECT
+			t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference,
+			l.reference AS line_reference, t.label, l.label AS line_label,
+			a.label AS account_label, a.code AS account_code
+			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts a ON l.id_account = a.id
 			WHERE %s ORDER BY t.date, t.id;', $where);
 
 		$transaction = null;
-		$accounts = null;
 		$db = DB::getInstance();
 
 		foreach ($db->iterate($sql) as $row) {
-			if (null === $accounts) {
-				$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $row->id_year);
-			}
-
 			if (null !== $transaction && $transaction->id != $row->id) {
 				yield $transaction;
 				$transaction = null;
@@ -427,14 +427,10 @@ class Reports
 					'lines'     => [],
 				];
 			}
-
-			if (!isset($accounts[$row->id_account])) {
-				throw new \LogicException(sprintf('Account #%s not found', $row->id_account));
-			}
-
+strpos();
 			$transaction->lines[] = (object) [
-				'account_label' => $accounts[$row->id_account]->label,
-				'account_code'  => $accounts[$row->id_account]->code,
+				'account_label' => $row->account_label,
+				'account_code'  => $row->account_code,
 				'label'         => $row->line_label,
 				'reference'     => $row->line_reference,
 				'id_account'    => $row->id_account,
