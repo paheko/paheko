@@ -191,6 +191,17 @@ namespace Garradin;
 //const ERRORS_REPORT_URL = null;
 
 /**
+ * Template HTML d'erreur personnalisé (en production)
+ *
+ * Si SHOW_ERRORS est à FALSE un message d'erreur générique (sans détail technique)
+ * est affiché. Il est possible de personnaliser ce message avec cette constante.
+ *
+ * Voir include/init.php pour le template par défaut.
+ */
+
+// const ERRORS_TEMPLATE = null;
+
+/**
  * Activation des détails techniques (utile en auto-hébergement) :
  * - version de PHP
  * - page permettant de visualiser les erreurs présentes dans le error.log

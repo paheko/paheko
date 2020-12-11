@@ -235,7 +235,7 @@ if (ERRORS_REPORT_URL)
 	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
-ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
+ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
 	body {font-family: sans-serif; }
 	code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
