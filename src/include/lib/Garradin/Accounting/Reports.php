@@ -427,7 +427,7 @@ class Reports
 					'lines'     => [],
 				];
 			}
-strpos();
+
 			$transaction->lines[] = (object) [
 				'account_label' => $row->account_label,
 				'account_code'  => $row->account_code,
