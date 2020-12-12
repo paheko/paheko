@@ -76,10 +76,6 @@ class Config extends Entity
 
 	static protected $_instance = null;
 
-	/**
-	 * Singleton simple
-	 * @return Config
-	 */
 	static public function getInstance()
 	{
 		return self::$_instance ?: self::$_instance = new self;
@@ -122,8 +118,7 @@ class Config extends Entity
 
 		$this->load($config);
 
-		$this->champs_membres = new Membres\Champs((string)$value);
-		$this->accueil_connexion = $this->accueil_connexion ? Files::get($this->accueil_connexion) : null;
+		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
 	}
 
 	public function save(): bool
