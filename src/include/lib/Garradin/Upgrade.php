@@ -34,7 +34,7 @@ class Upgrade
 
 		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
-		$session = new Session;
+		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);
 		return true;
 	}
@@ -43,7 +43,7 @@ class Upgrade
 	{
 		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
 
-		$session = new Session;
+		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);
 
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
