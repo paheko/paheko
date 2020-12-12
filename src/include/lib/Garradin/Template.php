@@ -483,16 +483,8 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$image_fond = ADMIN_BACKGROUND_IMAGE;
 
-		if ($config->get('image_fond'))
-		{
-			try {
-				$f = new Fichiers($config->get('image_fond'));
-				$image_fond = $f->getURL();
-			}
-			catch (\InvalidArgumentException $e)
-			{
-				// Fichier qui n'existe pas/plus
-			}
+		if ($f = $config->get('image_fond')) {
+			$image_fond = $f->url();
 		}
 
 		// Transformation Hexa vers décimal
