@@ -315,7 +315,7 @@ CREATE TABLE IF NOT EXISTS files_links
 -- This references use of a file outside of the documents module
 -- One file can only be linked to one thing
 (
-    id INTEGER NOT NULL PRIMARY KEY REFERENCES files (id) ON DELETE CASCADE,
+    id INTEGER NOT NULL REFERENCES files (id) ON DELETE CASCADE,
     file_id INTEGER NULL REFERENCES files (id) ON DELETE CASCADE,
     user_id INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE,
     transaction_id INTEGER NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
@@ -325,7 +325,7 @@ CREATE TABLE IF NOT EXISTS files_links
     CHECK ((file_id IS NOT NULL) + (user_id IS NOT NULL) + (transaction_id IS NOT NULL) + (config IS NOT NULL) + (web_page_id IS NOT NULL) = 1)
 );
 
-CREATE UNIQUE INDEX files_links_unique ON files_links (file_id, user_id, transaction_id, config, web_page_id);
+CREATE UNIQUE INDEX IF NOT EXISTS files_links_unique ON files_links (id, file_id, user_id, transaction_id, config, web_page_id);
 
 CREATE TABLE IF NOT EXISTS web_pages
 (
