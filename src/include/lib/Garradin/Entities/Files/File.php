@@ -7,6 +7,8 @@ use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
 
+use const Garradin\WWW_URL;
+
 class File extends Entity
 {
 	const TABLE = 'files';
