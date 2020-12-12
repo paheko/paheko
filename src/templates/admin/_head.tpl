@@ -87,12 +87,8 @@
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('wiki', Membres::DROIT_ACCES)}
-            <li class="wiki{if $current == 'wiki'} current{elseif $current_parent == 'wiki'} current_parent{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
-            <ul>
-                <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
-                <li class="wiki search{if $current == 'wiki/chercher'} current{/if}"><a href="{$admin_url}wiki/chercher.php">Recherche</a>
-            </ul>
+        {if $session->canAccess('web', Membres::DROIT_ACCES)}
+            <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">✎</b><i> Site web</i></a>
             </li>
         {/if}
         {if $session->canAccess('config', Membres::DROIT_ADMIN)}

@@ -105,6 +105,15 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.1.0', '<='))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->createFunction('sha1', 'sha1');
+				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 

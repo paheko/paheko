@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS membres_categories
     id INTEGER PRIMARY KEY NOT NULL,
     nom TEXT NOT NULL,
 
-    droit_wiki INTEGER NOT NULL DEFAULT 1,
+    droit_web INTEGER NOT NULL DEFAULT 1,
+    droit_documents INTEGER NOT NULL DEFAULT 1,
     droit_membres INTEGER NOT NULL DEFAULT 1,
     droit_compta INTEGER NOT NULL DEFAULT 1,
     droit_inscription INTEGER NOT NULL DEFAULT 0,
@@ -261,7 +262,7 @@ CREATE TABLE IF NOT EXISTS files
 -- Files metadata
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    folder_id INTEGER NOT NULL REFERENCES files_folders,
+    folder_id INTEGER NULL REFERENCES files_folders,
     name TEXT NOT NULL, -- file name (eg. image1234.jpeg)
     type TEXT NULL, -- MIME type
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
@@ -274,18 +275,20 @@ CREATE TABLE IF NOT EXISTS files
 
     created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
 
-    author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
+    author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL,
+    content_id INTEGER NULL REFERENCES files_contents (id) ON DELETE SET NULL,
+
+    CHECK (storage IS NOT NULL OR content_id IS NOT NULL)
 );
 
-CREATE INDEX IF NOT EXISTS files_path ON files (path);
-CREATE INDEX IF NOT EXISTS files_date ON files (datetime);
+CREATE INDEX IF NOT EXISTS files_date ON files (created);
 CREATE INDEX IF NOT EXISTS files_hash ON files (hash);
 
 CREATE TABLE IF NOT EXISTS files_contents
--- Contenu des fichiers
+-- Files contents (if storage backend is SQLite)
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
+    hash TEXT NOT NULL,
     content BLOB NULL
 );
 
@@ -302,7 +305,8 @@ CREATE TABLE IF NOT EXISTS files_folders
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
-    id INT PRIMARY KEY NOT NULL REFERENCES files_contents(id),
+    tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
+    id INT PRIMARY KEY NOT NULL REFERENCES files(id),
     title TEXT NULL,
     content TEXT NOT NULL -- Text content
 );
@@ -311,43 +315,39 @@ CREATE TABLE IF NOT EXISTS files_links
 -- This references use of a file outside of the documents module
 -- One file can only be linked to one thing
 (
-    id INTEGER NOT NULL PRIMARY KEY REFERENCES fichiers (id) ON DELETE CASCADE,
-    file_id INTEGER NULL REFERENCES fichiers (id) ON DELETE CASCADE,
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES files (id) ON DELETE CASCADE,
+    file_id INTEGER NULL REFERENCES files (id) ON DELETE CASCADE,
     user_id INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE,
     transaction_id INTEGER NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-    config TEXT NULL REFERENCES config (valeur) ON DELETE CASCADE,
+    config TEXT NULL REFERENCES config (cle) ON DELETE CASCADE,
     web_page_id INTEGER NULL REFERENCES web_pages (id) ON DELETE CASCADE,
-    web_category_id INTEGER NULL REFERENCES web_categories (id) ON DELETE CASCADE,
     -- Make sure that only one is filled
-    CHECK ((user_id IS NULL) + (transaction_id IS NULL) + (config IS NULL) + (web_page_id IS NULL) + (web_category_id IS NULL) + (file_id IS NULL) = 1)
+    CHECK ((file_id IS NOT NULL) + (user_id IS NOT NULL) + (transaction_id IS NOT NULL) + (config IS NOT NULL) + (web_page_id IS NOT NULL) = 1)
 );
 
-CREATE UNIQUE INDEX files_links_unique ON files_links (file_id, user_id, transaction_id, config, web_pages, web_category_id);
+CREATE UNIQUE INDEX files_links_unique ON files_links (file_id, user_id, transaction_id, config, web_page_id);
 
 CREATE TABLE IF NOT EXISTS web_pages
 (
     id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
-    category_id INTEGER NOT NULL REFERENCES web_categories(id) ON DELETE CASCADE,
+    parent_id INTEGER NULL REFERENCES web_pages(id) ON DELETE SET NULL,
+    type INTEGER NOT NULL, -- 1 = Category, 2 = Page
+    status INTEGER NOT NULL DEFAULT 0, -- 0 = draft, 1 = online
+    uri TEXT NOT NULL,
     title TEXT NOT NULL,
-    draft INTEGER NOT NULL DEFAULT 0,
     modified TEXT NULL CHECK (datetime(modified) IS NULL OR datetime(modified) = modified)
 );
 
-CREATE TABLE IF NOT EXISTS web_categories
-(
-    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
-    parent_id INTEGER NOT NULL REFERENCES web_categories(id) ON DELETE CASCADE,
-    title TEXT NOT NULL
-);
+CREATE UNIQUE INDEX web_pages_uri ON web_pages (uri);
 
 CREATE TRIGGER IF NOT EXISTS web_page_insert AFTER INSERT ON web_pages
     BEGIN
-        UPDATE files SET public = NEW.draft WHERE id = NEW.id;
+        UPDATE files SET public = CASE WHEN NEW.status = 1 THEN 1 ELSE 0 END WHERE id = NEW.id;
     END;
 
-CREATE TRIGGER IF NOT EXISTS web_page_update AFTER UPDATE ON web_pages
+CREATE TRIGGER IF NOT EXISTS web_page_update AFTER UPDATE OF status ON web_pages
     BEGIN
-        UPDATE files SET public = NEW.draft WHERE id = NEW.id;
+        UPDATE files SET public = CASE WHEN NEW.status = 1 THEN 1 ELSE 0 END WHERE id = NEW.id;
     END;
 
 -- FIXME: rename to english
