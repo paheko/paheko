@@ -6,19 +6,20 @@ use Garradin\Membres\Session;
 
 class Upgrade
 {
+	const MIN_REQUIRED_VERSION = '1.0.0-rc8';
+
 	static public function preCheck(): bool
 	{
-		$config = Config::getInstance();
-		$v = $config->getVersion();
+		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
 
 		if (version_compare($v, garradin_version(), '>='))
 		{
 			return false;
 		}
 
-		if (!$v || version_compare($v, '0.9.8', '<'))
+		if (!$v || version_compare($v, self::MIN_REQUIRED_VERSION, '<'))
 		{
-			throw new UserException("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin 0.9.8 avant de faire la mise à jour vers cette version.");
+			throw new UserException(sprintf("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
 		}
 
 		Install::checkAndCreateDirectories();
@@ -40,8 +41,7 @@ class Upgrade
 
 	static public function upgrade()
 	{
-		$config = Config::getInstance();
-		$v = $config->getVersion();
+		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
 
 		$session = new Session;
 		$user_is_logged = $session->isLogged(true);
@@ -54,57 +54,6 @@ class Upgrade
 		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
 
 		try {
-			if (version_compare($v, '1.0.0-alpha1', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
-				$db->commitSchemaUpdate();
-
-				// Import nouveau plan comptable
-				$chart = new \Garradin\Entities\Accounting\Chart;
-				$chart->label = 'Plan comptable associatif 2018';
-				$chart->country = 'FR';
-				$chart->code = 'PCA2018';
-				$chart->save();
-				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-beta6', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-beta6_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta6', '>=') && version_compare($v, '1.0.0-beta8', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-beta8_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc3', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc3_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc10', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc10_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc11', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0_schema.sql');
-				$db->commitSchemaUpdate();
-			}
-
 			if (version_compare($v, '1.1.0', '<='))
 			{
 				// Missing trigger
@@ -119,7 +68,7 @@ class Upgrade
 
 			Utils::clearCaches();
 
-			$config->setVersion(garradin_version());
+			DB::getInstance()->update('config', ['valeur' => garradin_version()], 'cle = \'version\';');
 
 			Static_Cache::remove('upgrade');
 
