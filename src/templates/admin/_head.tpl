@@ -87,8 +87,18 @@
             </ul>
             </li>
         {/if}
+        {if $session->canAccess('documents', Membres::DROIT_ACCES)}
+            <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Fichiers</i></a>
+            <ul>
+                <li class="{if $current == 'docs/recent'} current{/if}"><a href="{$admin_url}docs/recent.php">Récents</a></li>
+            </ul>
+            </li>
+        {/if}
         {if $session->canAccess('web', Membres::DROIT_ACCES)}
-            <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">✎</b><i> Site web</i></a>
+            <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
+            <ul>
+                <li class="{if $current == 'web/themes'} current{/if}"><a href="{$admin_url}web/themes/">Thèmes</a></li>
+            </ul>
             </li>
         {/if}
         {if $session->canAccess('config', Membres::DROIT_ADMIN)}

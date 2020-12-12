@@ -65,7 +65,7 @@ INSERT INTO files (hash, folder_id, name, type, created, content_id, author_id, 
 INSERT INTO files_search (id, content) SELECT new_id, content FROM wiki_as_files WHERE encrypted = 0;
 
 UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE hash = wiki_as_files.hash);
-UPDATE wiki_as_files SET new_parent = (SELECT new_id FROM wiki_as_files WHERE old_id = wiki_as_files.old_parent);
+UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
 
 INSERT INTO web_pages
 	SELECT new_id, new_parent, type, 1, uri, title, modified FROM wiki_as_files WHERE public = 1;
@@ -77,6 +77,28 @@ INSERT INTO files_links (id, web_page_id)
 	FROM web_pages
 	WHERE status = 1;
 
+INSERT INTO files_links (id, file_id)
+	SELECT f.id, w.fichier
+		FROM fichiers_wiki_pages w
+		INNER JOIN wiki_as_files waf ON waf.old_id = w.id
+		INNER JOIN files f ON f.hash = waf.hash;
+
+INSERT INTO files_links (id, transaction_id)
+	SELECT fichier, id FROM fichiers_acc_transactions;
+
+INSERT INTO files_links (id, config)
+	SELECT valeur, cle FROM config WHERE cle = 'image_fond' AND valeur > 0;
+
+INSERT INTO files (hash, folder_id, name, type, created, content_id, author_id, public)
+	SELECT hash, NULL, name, type, created, content_id, author_id, 0
+	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
+
+UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE cle = 'accueil_connexion';
+UPDATE config SET cle = 'admin_homepage' WHERE cle = 'accueil_connexion';
+DELETE FROM config WHERE cle = 'accueil_wiki';
+INSERT INTO config (cle, valeur) VALUES ('telephone_asso', NULL);
+
+
 DROP TRIGGER wiki_recherche_delete;
 DROP TRIGGER wiki_recherche_update;
 DROP TRIGGER wiki_recherche_contenu_insert;
@@ -86,3 +108,7 @@ DROP TABLE wiki_recherche;
 
 DROP TABLE wiki_pages;
 DROP TABLE wiki_revisions;
+
+DROP TABLE fichiers_wiki_pages;
+DROP TABLE fichiers_acc_transactions;
+DROP TABLE fichiers_membres;

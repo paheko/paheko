@@ -16,6 +16,7 @@ class File extends Entity
 	protected $name;
 	protected $type;
 	protected $image;
+	protected $public;
 	protected $size;
 	protected $hash;
 
@@ -23,23 +24,24 @@ class File extends Entity
 	protected $storage_path;
 
 	protected $created;
-	protected $modified;
 
 	protected $author_id;
+	protected $content_id;
 
 	protected $_types = [
 		'id'           => 'int',
 		'folder_id'    => '?int',
 		'name'         => 'string',
 		'type'         => '?string',
+		'public'         => 'int',
 		'image'        => 'int',
 		'size'         => 'int',
 		'hash'         => 'string',
 		'storage'      => '?string',
 		'storage_path' => '?string',
 		'created'      => 'DateTime',
-		'modified'     => 'DateTime',
 		'author_id'    => '?int',
+		'content_id'   => '?int',
 	];
 
 	protected $_public;

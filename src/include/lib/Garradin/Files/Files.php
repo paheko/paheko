@@ -4,6 +4,8 @@ namespace Garradin\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
+use Garradin\Entities\Files\File;
+use KD2\DB\EntityManager as EM;
 
 use const Garradin\FILE_STORAGE_BACKEND;
 
@@ -72,6 +74,11 @@ class Files
 				
 			}
 		}
+	}
+
+	static public function get(int $id): ?File
+	{
+		return EM::findOneById(File::class, $id);
 	}
 }
 
