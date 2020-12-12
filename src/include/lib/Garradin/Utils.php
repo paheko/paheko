@@ -14,8 +14,6 @@ class Utils
     const EMAIL_CONTEXT_PRIVATE = 'private';
     const EMAIL_CONTEXT_SYSTEM = 'system';
 
-    static protected $skriv = null;
-
     const FRENCH_DATE_NAMES = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
         'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
@@ -339,57 +337,6 @@ class Utils
         $str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
         $str = preg_replace('![^[:ascii:]]+!', '', $str);
 
-        return $str;
-    }
-
-    /**
-     * Transforme un texte SkrivML en HTML
-     * @param  string $str Texte SkrivML
-     * @return string      Texte HTML
-     */
-    static public function SkrivToHTML($str)
-    {
-        if (!self::$skriv)
-        {
-            self::$skriv = new \KD2\SkrivLite;
-            self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivFichier']);
-            self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
-
-            // Enregistrer d'autres extensions éventuellement
-            Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
-        }
-
-        $skriv =& self::$skriv;
-
-        $str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
-            try {
-                $file = new Fichiers((int)$match[2]);
-            }
-            catch (\InvalidArgumentException $e)
-            {
-                return $skriv->parseError('/!\ Lien fichier : ' . $e->getMessage());
-            }
-
-            return $file->getURL();
-        }, $str);
-
-        $str = self::$skriv->render($str);
-
-        return $str;
-    }
-
-    /**
-     * Transforme les tags de base SPIP en tags SkrivML
-     * @param  string $str Texte d'entrée
-     * @return string      Texte transformé
-     */
-    static public function SpipToSkriv($str)
-    {
-        $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '=== $1 ===', $str);
-        $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '**$1**', $str);
-        $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '\'\'$1\'\'', $str);
-        $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '[[$1 | $2]]', $str);
-        $str = preg_replace('/(?<!\[)\[([^\[\]]+?)\]/', '[[$1]]', $str);
         return $str;
     }
 

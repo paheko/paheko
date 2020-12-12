@@ -464,6 +464,29 @@ class File extends Entity
 		}
 	}
 
+	public function render(): string
+	{
+		static $render_types = ['text/html', 'text/vnd.skriv', 'text/vnd.skriv.encrypted'];
+
+		if (!in_array($this->type, $render_types)) {
+			throw new \LogicException('Render can not be called on files of type: ' . $this->type);
+		}
+
+		$content = Files::callStorage('fetch', $this);
+
+		if ($this->type == 'text/html') {
+			return \Garradin\Files\Render\HTML::render($this, $content);
+		}
+		elseif ($this->type == 'text/vnd.skriv') {
+			return \Garradin\Files\Render\Skriv::render($this, $content);
+		}
+		elseif ($this->type == 'text/vnd.skriv.encrypted') {
+			return \Garradin\Files\Render\EncryptedSkriv::render($this, $content);
+		}
+
+		throw new \LogicException('Unknown render type');
+	}
+
 	public function isPublic(): bool
 	{
 		if (null === $this->_public) {

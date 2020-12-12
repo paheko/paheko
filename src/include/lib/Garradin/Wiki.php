@@ -16,17 +16,6 @@ class Wiki
     protected $restriction_categorie = null;
     protected $restriction_droit = null;
 
-    static public function transformTitleToURI($str)
-    {
-        $str = Utils::transliterateToAscii($str);
-
-        $str = preg_replace('![^\w\d_-]!i', '-', $str);
-        $str = preg_replace('!-{2,}!', '-', $str);
-        $str = trim($str, '-');
-
-        return $str;
-    }
-
     // Gestion des données ///////////////////////////////////////////////////////
 
     public function _checkFields(&$data)
