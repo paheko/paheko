@@ -12,7 +12,7 @@ class File extends Entity
 	const TABLE = 'files';
 
 	protected $id;
-	protected $path;
+	protected $folder_id;
 	protected $name;
 	protected $type;
 	protected $image;
@@ -29,7 +29,7 @@ class File extends Entity
 
 	protected $_types = [
 		'id'           => 'int',
-		'path'         => 'string',
+		'folder_id'    => '?int',
 		'name'         => 'string',
 		'type'         => '?string',
 		'image'        => 'int',
@@ -73,6 +73,28 @@ class File extends Entity
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
 		{
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->id(), $size));
+		}
+
+		return $return;
+	}
+
+	public function save(): bool
+	{
+		$return = parent::save();
+
+		// Store content in search table
+		if ($return && substr($this->type, 0, 5) == 'text/') {
+			$content = Files::callStorage('fetch', $this);
+
+			if ($this->type == 'text/html') {
+				$content = strip_tags($content);
+			}
+
+			if ($this->type == 'text/vnd.skriv.encrypted') {
+				$content = 'Contenu chiffré';
+			}
+
+			$db->preparedQuery('INSERT OR REPLACE INTO files_search (id, content) VALUES (?, ?);', $this->id(), $content);
 		}
 
 		return $return;

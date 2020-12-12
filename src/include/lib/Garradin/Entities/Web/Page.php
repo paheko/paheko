@@ -10,20 +10,25 @@ use KD2\DB\EntityManager;
 class Page extends Entity
 {
 	protected $id;
-	protected $category_id;
+	protected $parent_id;
+	protected $status;
 	protected $title;
 	protected $draft;
 	protected $modified;
 
 	protected $_types = [
-		'id'          => 'int',
-		'category_id' => 'int',
-		'title'       => 'string',
-		'draft'       => 'int',
-		'modified'    => 'DateTime',
+		'id'        => 'int',
+		'parent_id' => 'int',
+		'status'    => 'int',
+		'title'     => 'string',
+		'draft'     => 'int',
+		'modified'  => 'DateTime',
 	];
 
 	protected $_file;
+
+	const STATUS_ONLINE = 1;
+	const STATUS_DRAFT = 0;
 
 	public function file(): File
 	{

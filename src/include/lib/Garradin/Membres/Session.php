@@ -91,7 +91,7 @@ class Session extends \KD2\UserSession
 		$config = Config::getInstance();
 
 		return $this->db->first('SELECT m.*, m.'.$config->get('champ_identite').' AS identite,
-			c.droit_connexion, c.droit_wiki, 
+			c.droit_connexion, c.droit_web, c.droit_documents,
 			c.droit_membres, c.droit_compta, c.droit_config, c.droit_membres
 			FROM membres AS m
 			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
