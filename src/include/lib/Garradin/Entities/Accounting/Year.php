@@ -49,12 +49,12 @@ class Year extends Entity
 		if ($this->exists()) {
 			$this->assert(
 				!$db->test(Transaction::TABLE, 'id_year = ? AND date < ?', $this->id(), $this->start_date->format('Y-m-d')),
-				'Des mouvements de cet exercice ont une date antérieure à la date de début de l\'exercice.'
+				'Des écritures de cet exercice ont une date antérieure à la date de début de l\'exercice.'
 			);
 
 			$this->assert(
 				!$db->test(Transaction::TABLE, 'id_year = ? AND date > ?', $this->id(), $this->end_date->format('Y-m-d')),
-				'Des mouvements de cet exercice ont une date postérieure à la date de fin de l\'exercice.'
+				'Des écritures de cet exercice ont une date postérieure à la date de fin de l\'exercice.'
 			);
 		}
 	}
@@ -67,6 +67,24 @@ class Year extends Entity
 
 		$this->set('closed', 1);
 		$this->save();
+	}
+
+	/**
+	 * Splits an accounting year between the current year and another one, at a given date
+	 * Any transaction after the given date will be moved to the target year.
+	 */
+	public function split(\DateTime $date, Year $target): void
+	{
+		if ($this->closed) {
+			throw new \LogicException('Cet exercice est déjà clôturé');
+		}
+
+		if ($target->closed) {
+			throw new \LogicException('L\'exercice cible est déjà clôturé');
+		}
+
+		DB::getInstance()->preparedQuery('UPDATE acc_transactions SET id_year = ? WHERE id_year = ? AND date > ?;',
+			$target->id(), $this->id(), $date->format('Y-m-d'));
 	}
 
 	public function delete(): bool
