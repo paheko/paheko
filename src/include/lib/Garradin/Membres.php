@@ -261,7 +261,7 @@ class Membres
             $ids = [(int)$ids];
         }
 
-        $session = new Session;
+        $session = Session::getInstance();
 
         if ($session->isLogged())
         {
