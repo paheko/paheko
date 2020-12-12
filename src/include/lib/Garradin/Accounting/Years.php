@@ -50,9 +50,12 @@ class Years
 	static public function list(bool $reverse = false)
 	{
 		$desc = $reverse ? 'DESC' : '';
-		return DB::getInstance()->get(sprintf('SELECT *,
-			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions
-			FROM acc_years ORDER BY end_date %s;', $desc));
+		return DB::getInstance()->get(sprintf('SELECT y.*,
+			(SELECT COUNT(*) FROM acc_transactions WHERE id_year = y.id) AS nb_transactions,
+			c.label AS chart_name
+			FROM acc_years y
+			INNER JOIN acc_charts c ON c.id = y.id_chart
+			ORDER BY end_date %s;', $desc));
 	}
 
 	static public function getNewYearDates(): array
