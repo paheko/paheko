@@ -41,7 +41,7 @@
 		<tbody>
 			<tr>
 				<th><h3>{$year.label}</h3></th>
-				<td>{$year.nb_transactions} écritures | <a href="../charts/accounts/?id={$year.id_chart}">Plan comptable</a></td>
+				<td>{$year.nb_transactions} écritures | <a href="../charts/accounts/?id={$year.id_chart}">{$year.chart_name}</a></td>
 			</tr>
 			<tr>
 				<td>{$year.start_date|date_short} au {$year.end_date|date_short}</td>
