@@ -27,6 +27,33 @@ class Session extends \KD2\UserSession
 
 	const MINIMUM_PASSWORD_LENGTH = 8;
 
+	static protected $_instance = null;
+
+	static public function getInstance()
+	{
+		return self::$_instance ?: self::$_instance = new self;
+	}
+
+	public function __clone()
+	{
+		throw new \LogicException('Cannot clone');
+	}
+
+	public function __construct()
+	{
+		if (self::$_instance !== null) {
+			throw new \LogicException('Wrong call, use getInstance');
+		}
+
+		$url = parse_url(ADMIN_URL);
+
+		parent::__construct(DB::getInstance(), [
+			'cookie_domain' => $url['host'],
+			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
+			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
+		]);
+	}
+
 	static public function checkPasswordValidity($password)
 	{
 		if (strlen($password) < self::MINIMUM_PASSWORD_LENGTH)
@@ -54,18 +81,6 @@ class Session extends \KD2\UserSession
 		}
 
 		return parent::isPasswordCompromised($password);
-	}
-
-	// Extension des méthodes de UserSession
-	public function __construct()
-	{
-		$url = parse_url(ADMIN_URL);
-
-		parent::__construct(DB::getInstance(), [
-			'cookie_domain' => $url['host'],
-			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
-			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
-		]);
 	}
 
 	protected function getUserForLogin($login)
