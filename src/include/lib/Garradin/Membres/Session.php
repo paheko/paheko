@@ -20,6 +20,11 @@ use KD2\HTTP;
 
 class Session extends \KD2\UserSession
 {
+	const SECTION_WEB = 'web';
+	const SECTION_DOCUMENTS = 'documents';
+	const SECTION_USERS = 'membres';
+	const SECTION_ACCOUNTING = 'compta';
+
 	// Personalisation de la config de UserSession
 	protected $cookie_name = 'gdin';
 	protected $remember_me_cookie_name = 'gdinp';

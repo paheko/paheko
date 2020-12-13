@@ -2,6 +2,12 @@ ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 .read 1.1.0_schema.sql
 
+INSERT INTO files_contents (id, hash, content)
+	SELECT id, hash, contenu FROM fichiers_contenu;
+
+INSERT INTO files (id, hash, folder_id, name, type, created, content_id, author_id, public)
+	SELECT f.id, c.hash, NULL, nom, type, datetime, c.id, NULL, 0 FROM fichiers f INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+
 INSERT INTO membres_categories
 	SELECT id, nom,
 		droit_wiki, -- droit_web
@@ -89,6 +95,8 @@ INSERT INTO files_links (id, transaction_id)
 INSERT INTO files_links (id, config)
 	SELECT valeur, cle FROM config WHERE cle = 'image_fond' AND valeur > 0;
 
+UPDATE files SET public = 1 WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond');
+
 INSERT INTO files (hash, folder_id, name, type, created, content_id, author_id, public)
 	SELECT hash, NULL, name, type, created, content_id, author_id, 0
 	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
@@ -97,7 +105,6 @@ UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion
 UPDATE config SET cle = 'admin_homepage' WHERE cle = 'accueil_connexion';
 DELETE FROM config WHERE cle = 'accueil_wiki';
 INSERT INTO config (cle, valeur) VALUES ('telephone_asso', NULL);
-
 
 DROP TRIGGER wiki_recherche_delete;
 DROP TRIGGER wiki_recherche_update;
@@ -112,3 +119,6 @@ DROP TABLE wiki_revisions;
 DROP TABLE fichiers_wiki_pages;
 DROP TABLE fichiers_acc_transactions;
 DROP TABLE fichiers_membres;
+
+DROP TABLE fichiers;
+DROP TABLE fichiers_contenu;
