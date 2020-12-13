@@ -369,7 +369,6 @@ namespace Garradin;
  * Classes de stockage possibles :
  * - SQLite : enregistre dans la base de données (défaut)
  * - FileSystem : enregistrement des fichiers dans le système de fichier
- * - FileSystem : idem mais permet de spécifier un quota maximal
  *
  * Défaut : null
  */
@@ -380,16 +379,28 @@ namespace Garradin;
  * Configuration du stockage des fichiers
  *
  * Indiquer dans cette constante la configuration de la classe de stockage
- * des fichiers (en string).
+ * des fichiers.
  *
  * Valeurs possibles :
- * - SQLite : null, aucune configuration possible
- * - FileSystem : chemin du répertoire où doivent être stockés les fichiers,
+ * - SQLite : aucune configuration possible
+ * - FileSystem : 'string' = chemin du répertoire où doivent être stockés les fichiers,
  * %s doit être ajouté à la fin pour indiquer le répertoire et nom du fichier
- * - FileSystemQuota : idem, mais il faut rajouter ';quota=XXX' à la fin pour
- * indiquer la taille maximale de stockage autorisée.
  *
  * Défaut : null
+ *
+ * @vararray
  */
 
 //const FILE_STORAGE_CONFIG = null;
+
+/**
+ * Forcer le quota disponible pour les fichiers
+ *
+ * Si cette constante est renseignée (en octets) alors il ne sera
+ * pas possible de stocker plus que cette valeur.
+ * Tout envoi de fichier sera refusé.
+ *
+ * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible)
+ */
+
+//const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
