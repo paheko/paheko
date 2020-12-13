@@ -119,7 +119,6 @@ class Fee extends Entity
 			return true;
 		}
 		catch (\Exception $e) {
-			throw $e;
 			return false;
 		}
 	}
