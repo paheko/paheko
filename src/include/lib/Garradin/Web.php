@@ -2,6 +2,10 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Web\Page;
+
+use KD2\DB\EntityManager as EM;
+
 class Web
 {
     static public function search(string $search, bool $online_only = true): array
@@ -27,5 +31,25 @@ class Web
             LIMIT 0,50;', $where);
 
         return DB::getInstance()->get($query, $search);
+    }
+
+    static public function listCategories(?int $parent): array
+    {
+        $where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
+        $sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE NOCASE;', $where, Page::TYPE_CATEGORY);
+        return EM::getInstance(Page::class)->all($sql);
+    }
+
+    static public function listPages(?int $parent, bool $order_by_date = true): array
+    {
+        $where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
+        $order = $order_by_date ? 'modified DESC' : 'title COLLATE NOCASE';
+        $sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
+        return EM::getInstance(Page::class)->all($sql);
+    }
+
+    static public function get(int $id): Page
+    {
+        return EM::findOneById(Page::class, $id);
     }
 }

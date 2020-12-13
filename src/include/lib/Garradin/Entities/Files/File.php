@@ -41,7 +41,7 @@ class File extends Entity
 		'folder_id'    => '?int',
 		'name'         => 'string',
 		'type'         => '?string',
-		'public'         => 'int',
+		'public'       => 'int',
 		'image'        => 'int',
 		'size'         => 'int',
 		'hash'         => 'string',
@@ -108,31 +108,21 @@ class File extends Entity
 		return $return;
 	}
 
-	static protected function store(?string $path, string $name, string $source_path = null, $source_content = null): self
+	public function store(string $source_path = null, $source_content = null): self
 	{
-		assert($path || $content);
-
-		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-		$file = new self;
-		$file->path = $path;
-
 		if ($source_path && !$source_content)
 		{
-			$file->hash = sha1_file($source_path);
-			$file->size = filesize($source_path);
-			$file->type = finfo_file($finfo, $source_path);
+			$this->hash = sha1_file($source_path);
+			$this->size = filesize($source_path);
 		}
 		else
 		{
-			$file->hash = sha1($source_content);
-			$file->size = strlen($source_content);
-			$file->type = finfo_buffer($finfo, $source_content);
+			$this->hash = sha1($source_content);
+			$this->size = strlen($source_content);
 		}
 
-		$file->image = preg_match('/^image\/(?:png|jpe?g|gif)$/', $file->type);
-
 		// Check that it's a real image
-		if ($file->image) {
+		if ($this->image) {
 			try {
 				if ($source_path && !$source_content) {
 					$i = new Image($source_path);
@@ -145,8 +135,8 @@ class File extends Entity
 				// from JS canvas which doesn't know how to gzip (d'oh!)
 				if ($i->format() == 'png' && null !== $source_content) {
 					$source_content = $i->output('png', true);
-					$file->hash = sha1($source_content);
-					$file->size = strlen($source_content);
+					$this->hash = sha1($source_content);
+					$this->size = strlen($source_content);
 				}
 
 				unset($i);
@@ -160,27 +150,38 @@ class File extends Entity
 			}
 		}
 
+		if (!Files::callStorage('store', $file, $source_path, $source_content)) {
+			throw new UserException('Le fichier n\'a pas pu être enregistré.');
+		}
+
+		return $this;
+	}
+
+	static protected function create(string $name, string $source_path = null, $source_content = null): self
+	{
+		assert($source_path || $source_content);
+
+		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
+		$file = new self;
+		$file->name = $name;
+
+		if ($source_path && !$source_content) {
+			$file->type = finfo_file($finfo, $source_path);
+		}
+		else {
+			$file->type = finfo_buffer($finfo, $source_content);
+		}
+
+		$file->image = preg_match('/^image\/(?:png|jpe?g|gif)$/', $file->type);
+
 		$db = DB::getInstance();
 
 		$db->begin();
 
-		// Il peut arriver que l'on renvoie ici un fichier déjà stocké, auquel cas, ne pas le re-stocker
-		if ($content_id = $db->firstColumn('SELECT id FROM files_contents WHERE hash = ?;', $hash)) {
-			$file->content_id = $content_id;
-		}
-		else {
-			$db->preparedQuery('INSERT INTO files_contents (hash, size) VALUES (?, ?);', [$file->hash, (int)$file->size]);
-			$file->content_id = $db->lastInsertRowID();
-
-			if (!Files::callStorage('store', $file, $path, $content)) {
-				throw new UserException('Le fichier n\'a pas pu être enregistré.');
-			}
-		}
-
+		$file->store($source_path, $source_content);
 		$file->save();
 
 		$db->commit();
-
 		return $file;
 	}
 
@@ -190,10 +191,10 @@ class File extends Entity
 	 * @param  string $content
 	 * @return File
 	 */
-	static public function storeFromBase64(?string $path, string $name, string $encoded_content): self
+	static public function storeFromBase64(string $name, string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
-		return self::store($path, $name, null, $content);
+		return self::store($name, null, $content);
 	}
 
 	/**
