@@ -2,6 +2,8 @@
 
 namespace Garradin\Files\Storage;
 
+use Garradin\Entities\Files\File;
+
 use Garradin\Static_Cache;
 use Garradin\DB;
 
@@ -77,14 +79,9 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
-	static public function getTotalSize(): ?int
+	static public function getTotalSize(): int
 	{
 		return (int) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files_contents;');
-	}
-
-	static public function getRemainingQuota(): int
-	{
-		return disk_free_space(dirname(DB_FILE));
 	}
 
 	static public function getQuota(): int

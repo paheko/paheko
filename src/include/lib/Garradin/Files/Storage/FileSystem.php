@@ -2,6 +2,8 @@
 
 namespace Garradin\Files\Storage;
 
+use Garradin\Entities\Files\File;
+
 use const Garradin\FILE_STORAGE_CONFIG;
 
 /**
@@ -115,11 +117,6 @@ class FileSystem implements StorageInterface
 		self::$_size = (int) $total;
 
 		return self::$_size;
-	}
-
-	static public function getRemainingQuota(): int
-	{
-		return disk_free_space(self::_getRoot());
 	}
 
 	static public function getQuota(): int

@@ -4,6 +4,7 @@ namespace Garradin\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
+use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
 use KD2\DB\EntityManager as EM;
 
@@ -13,8 +14,20 @@ class Files
 {
 	static public function callStorage(string $function, ...$args)
 	{
+		// Check that we can store this data
+		if ($function == 'store') {
+			$quota = FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
+			$used = self::callStorage('getTotalSize');
+
+			$size = $args[0] ? filesize($args[0]) : strlen($args[1]);
+
+			if (($used + $size) >= $quota) {
+				throw new \OutOfBoundsException('File quota has been exhausted');
+			}
+		}
+
 		$storage = FILE_STORAGE_BACKEND ?? 'SQLite';
-		$class_name = get_class(__NAMESPACE__ . '\\Backend\\' . $storage);
+		$class_name = __NAMESPACE__ . '\\Storage\\' . $storage;
 		return call_user_func_array([$class_name, $function], $args);
 	}
 
@@ -79,6 +92,44 @@ class Files
 	static public function get(int $id): ?File
 	{
 		return EM::findOneById(File::class, $id);
+	}
+
+	static public function serveFromQueryString(): void
+	{
+		$id = isset($_GET['id']) ? $_GET['id'] : null;
+		$filename = !empty($_GET['file']) ? $_GET['file'] : null;
+
+		$size = null;
+
+		if (empty($id)) {
+			header('HTTP/1.1 404 Not Found', true, 404);
+			throw new UserException('Fichier inconnu.');
+		}
+
+		foreach ($_GET as $key => $value) {
+			if (substr($key, -2) == 'px') {
+				$size = (int)substr($key, 0, -2);
+				break;
+			}
+		}
+
+		$id = base_convert($id, 36, 10);
+
+		$file = self::get((int) $id);
+
+		if (!$file) {
+			header('HTTP/1.1 404 Not Found', true, 404);
+			throw new UserException('Ce fichier n\'existe pas.');
+		}
+
+		$session = Session::getInstance();
+
+		if ($size) {
+			$file->serveThumbnail($session, $size);
+		}
+		else {
+			$file->serve($session);
+		}
 	}
 }
 

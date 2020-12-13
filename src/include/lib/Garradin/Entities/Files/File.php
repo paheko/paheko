@@ -3,11 +3,17 @@
 namespace Garradin\Entities\Files;
 
 use KD2\Image;
+
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
+use Garradin\Membres\Session;
+use Garradin\Membres;
+use Garradin\Utils;
 
-use const Garradin\WWW_URL;
+use Garradin\Files\Files;
+
+use const Garradin\{WWW_URL, ENABLE_XSENDFILE};
 
 class File extends Entity
 {
@@ -45,8 +51,6 @@ class File extends Entity
 		'author_id'    => '?int',
 		'content_id'   => '?int',
 	];
-
-	protected $_public;
 
 	/**
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
@@ -340,16 +344,16 @@ class File extends Entity
 	 */
 	public function serve(?Session $session = null): void
 	{
-		if (!$this->checkAccess($session)) {
+		if (!$this->checkReadAccess($session)) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
-			throw new UserException('Accès interdit');
+			throw new UserException('Vous n\'avez pas accès à ce fichier.');
 			return;
 		}
 
 		$path = Files::callStorage('getPath', $this);
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
-		$this->_serve($session, $path, $content);
+		$this->_serve($path, $content);
 	}
 
 	/**
@@ -357,7 +361,7 @@ class File extends Entity
 	 */
 	public function serveThumbnail(?Session $session = null, ?int $width = null): void
 	{
-		if (!$this->checkAccess($session)) {
+		if (!$this->checkReadAccess($session)) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
 			throw new UserException('Accès interdit');
 			return;
@@ -397,7 +401,7 @@ class File extends Entity
 			}
 		}
 
-		$this->_serve($session, $path, null);
+		$this->_serve($path, null);
 	}
 
 	/**
@@ -410,8 +414,8 @@ class File extends Entity
 	 */
 	protected function _serve(?string $path, ?string $content): void
 	{
-		if ($this->isPublic()) {
-			Utils::HTTPCache($this->hash, $this->datetime);
+		if ($this->public) {
+			Utils::HTTPCache($this->hash, $this->created->getTimestamp());
 		}
 		else {
 			// Disable browser cache
@@ -487,48 +491,29 @@ class File extends Entity
 		throw new \LogicException('Unknown render type');
 	}
 
-	public function isPublic(): bool
+	public function checkReadAccess(Session $session): bool
 	{
-		if (null === $this->_public) {
-			throw new \RuntimeException('_public is unset');
+		// Web and config files should be marked as public when not in draft
+		if ($this->public) {
+			return true;
 		}
 
-		return $this->_public;
-	}
-
-	public function checkAccess(Session $session): bool
-	{
 		$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $this->id());
 
 		// If it's linked to a file, then we want to know what the parent file is linked to
-		if ($link->{LINK_FILE}) {
+		if ($link->{self::LINK_FILE}) {
 			$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $link->{LINK_FILE});
 		}
 
-		$this->_public = false;
-
-		// Everyone has access to web content as long it's not draft (0)
-		if ($link->{LINK_WEB} == 1) {
-			$this->_public = true;
-			return true;
-		}
-		elseif ($link->{LINK_WEB} == 0) {
-			return false;
-		}
-		// Everyone has access to config files (logo etc.)
-		else if ($link->{LINK_CONFIG}) {
-			$this->_public = true;
-			return true;
-		}
-		else if ($link->{LINK_TRANSACTION} && $session->canAccess('compta', Membres::DROIT_ACCES)) {
+		if ($link->{self::LINK_TRANSACTION} && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
 			return true;
 		}
 		// The user can access his own profile files
-		else if ($link->{LINK_USER} && $link->{LINK_USER} == $session->getUser()->id) {
+		else if ($link->{self::LINK_USER} && $link->{self::LINK_USER} == $session->getUser()->id) {
 			return true;
 		}
 		// Only users able to manage users can see their profile files
-		else if ($link->{LINK_USER} && $session->canAccess('membres', Membres::DROIT_ECRITURE)) {
+		else if ($link->{self::LINK_USER} && $session->canAccess(Session::SECTION_USERS, Membres::DROIT_ECRITURE)) {
 			return true;
 		}
 

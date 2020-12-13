@@ -2,6 +2,8 @@
 
 namespace Garradin\Files\Storage;
 
+use Garradin\Entities\Files\File;
+
 interface StorageInterface
 {
 	static public function store(File $file, ?string $path, ?string $content): bool;
@@ -30,8 +32,6 @@ interface StorageInterface
 	static public function move(File $old_file, File $new_file): bool;
 
 	static public function getTotalSize(): int;
-
-	static public function getRemainingQuota(): int;
 
 	static public function getQuota(): int;
 }

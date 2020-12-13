@@ -96,19 +96,6 @@ class Template extends \KD2\Smartyer
 
 		$this->register_modifier('html_money', [$this, 'htmlMoney']);
 		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
-
-		$this->register_modifier('format_wiki', function ($str) {
-			$str = Utils::SkrivToHTML($str);
-			$str = Squelette_Filtres::typo_fr($str);
-			return $str;
-		});
-
-		$this->register_modifier('liens_wiki', function ($str, $prefix) {
-			return preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($prefix) {
-				return '<a href="' . $prefix . Wiki::transformTitleToURI($matches[1]) . '">';
-			}, $str);
-		});
-
 	}
 
 	protected function htmlMoney($number, bool $hide_empty = true): string
