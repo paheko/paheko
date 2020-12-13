@@ -841,4 +841,15 @@ class Utils
 
         return $last->version;
     }
+
+    static public function transformTitleToURI($str)
+    {
+        $str = Utils::transliterateToAscii($str);
+
+        $str = preg_replace('![^\w\d_-]!i', '-', $str);
+        $str = preg_replace('!-{2,}!', '-', $str);
+        $str = trim($str, '-');
+
+        return $str;
+    }
 }

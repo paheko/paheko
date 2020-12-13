@@ -45,17 +45,6 @@ class Skriv
 		return $str;
 	}
 
-    static public function transformTitleToURI($str)
-    {
-        $str = Utils::transliterateToAscii($str);
-
-        $str = preg_replace('![^\w\d_-]!i', '-', $str);
-        $str = preg_replace('!-{2,}!', '-', $str);
-        $str = trim($str, '-');
-
-        return $str;
-    }
-
 	/**
 	 * Callback utilisé pour l'extension <<fichier>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension

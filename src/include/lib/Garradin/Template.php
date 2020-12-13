@@ -193,6 +193,12 @@ class Template extends \KD2\Smartyer
 			$href = ADMIN_URL . substr($params['href'], 1);
 		}
 
+		if (!isset($params['class'])) {
+			$params['class'] = '';
+		}
+
+		$params['class'] .= ' icn-btn';
+
 		unset($params['href'], $params['shape'], $params['label']);
 
 		array_walk($params, function (&$v, $k) {
@@ -201,7 +207,7 @@ class Template extends \KD2\Smartyer
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a class="icn-btn" data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+		return sprintf('<a data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
 	}
 
 	protected function formInput(array $params)
