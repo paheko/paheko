@@ -469,6 +469,11 @@ class File extends Entity
 		}
 	}
 
+	public function fetch()
+	{
+		return Files::callStorage('fetch', $this);
+	}
+
 	public function render(): string
 	{
 		static $render_types = ['text/html', 'text/vnd.skriv', 'text/vnd.skriv.encrypted'];
@@ -477,7 +482,7 @@ class File extends Entity
 			throw new \LogicException('Render can not be called on files of type: ' . $this->type);
 		}
 
-		$content = Files::callStorage('fetch', $this);
+		$content = $this->fetch();
 
 		if ($this->type == 'text/html') {
 			return \Garradin\Files\Render\HTML::render($this, $content);

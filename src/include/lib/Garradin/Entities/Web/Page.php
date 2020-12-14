@@ -4,10 +4,11 @@ namespace Garradin\Entities\Web;
 
 use Garradin\Entity;
 use Garradin\UserException;
-
-use const Garradin\WWW_URL;
+use Garradin\Entities\Files\File;
 
 use KD2\DB\EntityManager as EM;
+
+use const Garradin\WWW_URL;
 
 class Page extends Entity
 {
@@ -48,6 +49,11 @@ class Page extends Entity
 		}
 
 		return $url;
+	}
+
+	public function raw(): string
+	{
+		return $this->file()->fetch();
 	}
 
 	public function file(): File

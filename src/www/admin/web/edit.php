@@ -23,4 +23,7 @@ $form->runIf('save', function ($page) {
 
 $tpl->assign(compact('page', 'csrf_key'));
 
+$tpl->assign('custom_css', ['styles/web-content.css', 'styles/web.css']);
+//$tpl->assign('custom_js', ['trix.min.js']);
+
 $tpl->display('web/edit.tpl');
