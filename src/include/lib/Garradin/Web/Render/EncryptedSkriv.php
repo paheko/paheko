@@ -1,6 +1,9 @@
 <?php
 
-namespace Garradin\Files\Render;
+namespace Garradin\Web\Render;
+
+use Garradin\Entities\Files\File;
+use Garradin\Template;
 
 class EncryptedSkriv
 {

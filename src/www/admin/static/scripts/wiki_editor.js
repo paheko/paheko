@@ -39,7 +39,7 @@
 				form.appendChild(t.textarea.cloneNode(true));
 				form.firstChild.value = t.textarea.value;
 				form.target = 'editorFrame';
-				form.action = g.admin_url + 'wiki/_preview.php?id=' + wiki_id;
+				form.action = g.admin_url + 'web/_preview.php?id=' + wiki_id;
 				form.style.display = 'none';
 				form.method = 'post';
 				document.body.appendChild(form);
@@ -49,20 +49,20 @@
 
 			var openSyntaxHelp = function ()
 			{
-				openIFrame(g.admin_url + 'wiki/_syntaxe.html');
+				openIFrame(g.admin_url + 'web/_syntaxe.html');
 			};
 
 			var openFileInsert = function ()
 			{
-				openIFrame(g.admin_url + 'wiki/_fichiers.php?page=' + wiki_id);
+				openIFrame(g.admin_url + 'web/_attach.php?page=' + wiki_id);
 			};
 
 			window.te_insertFile = function (file)
 			{
 				var tag = '<<fichier|'+file+'>>';
-				
+
 				t.insertAtPosition(t.getSelection().start, tag);
-				
+
 				closeIFrame();
 			};
 
@@ -75,11 +75,11 @@
 
 				if (caption)
 					tag += '|' + caption;
-				
+
 				tag += '>>';
-				
+
 				t.insertAtPosition(t.getSelection().start, tag);
-				
+
 				closeIFrame();
 			};
 
@@ -147,9 +147,9 @@
 			appendButton('title', "== Titre", function () { wrapTags("== ", ""); } );
 			appendButton('bold', '**gras**', function () { wrapTags('**', '**'); } );
 			appendButton('italic', "''italique''", function () { wrapTags("''", "''"); } );
-			appendButton('link', "[[lien|http://]]", function () { 
-				if (url = window.prompt('Adresse URL ?')) 
-					wrapTags("[[", "|" + url + ']]'); 
+			appendButton('link', "[[lien|http://]]", function () {
+				if (url = window.prompt('Adresse URL ?'))
+					wrapTags("[[", "|" + url + ']]');
 			} );
 			appendButton('file', "📎", openFileInsert, 'Insérer fichier / image');
 

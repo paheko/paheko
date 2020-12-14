@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Files;
 
 use KD2\Image;
+use KD2\DB\EntityManager as EM;
 
 use Garradin\DB;
 use Garradin\Entity;
@@ -339,6 +340,11 @@ class File extends Entity
 		}
 
 		return DB::getInstance()->firstColumn(sprintf('SELECT %s FROM files_links WHERE id = %d;', $type, $this->id()));
+	}
+
+	public function listLinked(): array
+	{
+		return EM::getInstance(File::class)->all('SELECT f.* FROM files f INNER JOIN files_links l ON l.id = f.id WHERE l.file_id = ?;', $this->id());
 	}
 
 	/**

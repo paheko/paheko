@@ -2,6 +2,8 @@
 
 namespace Garradin\Files\Render;
 
+use Garradin\Entities\Files\File;
+
 use KD2\Garbage2xhtml;
 
 class HTML

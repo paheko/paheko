@@ -333,37 +333,6 @@ class Wiki
         return $db->firstColumn('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
     }
 
-    public function listBackBreadCrumbs($id)
-    {
-        if ($id == 0)
-            return [];
-
-        $db = DB::getInstance();
-        $flat = [];
-        $max = 0;
-
-        while ($id > 0 && $max++ < 10)
-        {
-            $res = $db->first('SELECT parent, titre, uri
-                FROM wiki_pages WHERE id = ? LIMIT 1;', (int)$id);
-
-            $flat[] = [
-                'id'        =>  $id,
-                'titre'     =>  $res->titre,
-                'uri'       =>  $res->uri,
-            ];
-
-            if ($id == $res->parent)
-            {
-                throw new \Exception('Parent! ' . $id . '/' . $res->parent);
-            }
-
-            $id = (int)$res->parent;
-        }
-
-        return array_reverse($flat);
-    }
-
     public function listBackParentTree($id)
     {
         $db = DB::getInstance();

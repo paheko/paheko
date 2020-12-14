@@ -88,17 +88,4 @@ class Fichiers
 		});
 	}
 
-	/**
-	 * Renvoie une liste d'ID de fichiers mentionnées dans un texte wiki
-	 * @param  string $text Texte wiki
-	 * @return array       Liste des IDs de fichiers mentionnés
-	 */
-	static public function listFilesUsedInText($text)
-	{
-		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
-		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
-
-		return array_merge($match[1], $match2[1]);
-	}
-
 }

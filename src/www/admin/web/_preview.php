@@ -2,10 +2,12 @@
 
 namespace Garradin;
 
+use Garradin\Web\Render\Skriv;
+
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('wiki', Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE);
 
-$tpl->assign('contenu', f('contenu'));
+$tpl->assign('content', Skriv::render(null, (string) f('content'), ['prefix' => '#']));
 
-$tpl->display('admin/wiki/_preview.tpl');
+$tpl->display('web/_preview.tpl');
