@@ -7,6 +7,8 @@ use Garradin\Entities\Files\File;
 use Garradin\Static_Cache;
 use Garradin\DB;
 
+use const Garradin\DB_FILE;
+
 class SQLite implements StorageInterface
 {
 	/**
@@ -30,7 +32,18 @@ class SQLite implements StorageInterface
 	static public function store(File $file, ?string $path, ?string $content): bool
 	{
 		$db = DB::getInstance();
-		$db->exec(sprintf('UPDATE files_contents SET blob = zeroblob(%d) WHERE id = %d;', $file->size, $file->content_id));
+
+		if (!$file->content_id) {
+			$db->preparedQuery('INSERT INTO files_contents (hash, content) VALUES (?, ?, zeroblob(?));', $file->hash, $file->size);
+			$file->content_id = $db->lastInsertId();
+		}
+		else {
+			$cache_id = 'files.' . $file->content_id;
+
+			Static_Cache::remove($cache_id);
+
+			$db->preparedQuery('UPDATE files_contents SET hash = ?, content = zeroblob(?) WHERE id = ?;', $file->hash, $file->size, $file->content_id);
+		}
 
 		$blob = $db->openBlob('files_contents', 'content', $file->content_id, 'main', SQLITE3_OPEN_READWRITE);
 
@@ -81,7 +94,7 @@ class SQLite implements StorageInterface
 
 	static public function getTotalSize(): int
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files_contents;');
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(LENGTH(content)) FROM files_contents;');
 	}
 
 	static public function getQuota(): int

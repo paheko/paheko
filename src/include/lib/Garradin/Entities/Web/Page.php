@@ -40,6 +40,10 @@ class Page extends Entity
 	const TYPE_CATEGORY = 1;
 	const TYPE_PAGE = 2;
 
+	const FILE_TYPE_HTML = 'text/html';
+	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
+	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
+
 	public function url(): string
 	{
 		$url = WWW_URL . $this->uri;
@@ -88,7 +92,7 @@ class Page extends Entity
 		$this->assert($this->status === self::STATUS_DRAFT || $this->status === self::STATUS_ONLINE, 'Unknown page status');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
-		$this->assert(!$this->_file, 'Fichier manquant');
+		$this->assert((bool) $this->_file, 'Fichier manquant');
 	}
 
 	public function importForm(array $source = null)
@@ -97,10 +101,25 @@ class Page extends Entity
 			$source = $_POST;
 		}
 
+		if (isset($source['parent_id']) && is_array($source['parent_id'])) {
+			$source['parent_id'] = key($source['parent_id']);
+		}
+
 		$file = $this->file();
 
 		if (isset($source['content']) && sha1($source['content']) != $file->hash) {
-			$file->store(null, $content);
+			$file->store(null, $source['content']);
+		}
+
+		if (isset($source['date']) && isset($source['date_time'])) {
+			$file->importForm(['created' => sprintf('%s %s', $source['date'], $source['date_time'])]);
+		}
+
+		if (!empty($source['encrypted']) ) {
+			$file->set('type', self::FILE_TYPE_ENCRYPTED);
+		}
+		else {
+			$file->set('type', self::FILE_TYPE_SKRIV);
 		}
 
 		return $this->import($source);
@@ -135,5 +154,28 @@ class Page extends Entity
 		$page->save();
 
 		return $page;
+	}
+
+	public function render(): string
+	{
+		static $render_types = [self::FILE_TYPE_SKRIV, self::FILE_TYPE_ENCRYPTED, self::FILE_TYPE_HTML];
+
+		if (!in_array($this->type, $render_types)) {
+			throw new \LogicException('Render can not be called on files of type: ' . $this->type);
+		}
+
+		$content = $this->fetch();
+
+		if ($this->type == self::FILE_TYPE_HTML) {
+			return \Garradin\Files\Render\HTML::render($this, $content);
+		}
+		elseif ($this->type == self::FILE_TYPE_SKRIV) {
+			return \Garradin\Files\Render\Skriv::render($this, $content);
+		}
+		elseif ($this->type == self::FILE_TYPE_ENCRYPTED) {
+			return \Garradin\Files\Render\EncryptedSkriv::render($this, $content);
+		}
+
+		throw new \LogicException('Unknown render type');
 	}
 }

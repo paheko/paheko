@@ -10,6 +10,7 @@ use Garradin\UserException;
 use Garradin\Membres\Session;
 use Garradin\Membres;
 use Garradin\Utils;
+use Garradin\Entities\Web\Page;
 
 use Garradin\Files\Files;
 
@@ -94,15 +95,15 @@ class File extends Entity
 		if ($return && substr($this->type, 0, 5) == 'text/') {
 			$content = Files::callStorage('fetch', $this);
 
-			if ($this->type == 'text/html') {
+			if ($this->type == Page::FILE_TYPE_HTML) {
 				$content = strip_tags($content);
 			}
 
-			if ($this->type == 'text/vnd.skriv.encrypted') {
+			if ($this->type == Page::FILE_TYPE_ENCRYPTED) {
 				$content = 'Contenu chiffré';
 			}
 
-			$db->preparedQuery('INSERT OR REPLACE INTO files_search (id, content) VALUES (?, ?);', $this->id(), $content);
+			DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (id, content) VALUES (?, ?);', $this->id(), $content);
 		}
 
 		return $return;
@@ -150,7 +151,7 @@ class File extends Entity
 			}
 		}
 
-		if (!Files::callStorage('store', $file, $source_path, $source_content)) {
+		if (!Files::callStorage('store', $this, $source_path, $source_content)) {
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
 
@@ -472,29 +473,6 @@ class File extends Entity
 	public function fetch()
 	{
 		return Files::callStorage('fetch', $this);
-	}
-
-	public function render(): string
-	{
-		static $render_types = ['text/html', 'text/vnd.skriv', 'text/vnd.skriv.encrypted'];
-
-		if (!in_array($this->type, $render_types)) {
-			throw new \LogicException('Render can not be called on files of type: ' . $this->type);
-		}
-
-		$content = $this->fetch();
-
-		if ($this->type == 'text/html') {
-			return \Garradin\Files\Render\HTML::render($this, $content);
-		}
-		elseif ($this->type == 'text/vnd.skriv') {
-			return \Garradin\Files\Render\Skriv::render($this, $content);
-		}
-		elseif ($this->type == 'text/vnd.skriv.encrypted') {
-			return \Garradin\Files\Render\EncryptedSkriv::render($this, $content);
-		}
-
-		throw new \LogicException('Unknown render type');
 	}
 
 	public function checkReadAccess(Session $session): bool

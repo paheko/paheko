@@ -3,15 +3,99 @@
 {form_errors}
 
 <form method="post" action="{$self_url}" class="web-edit">
-	<fieldset>
-		<legend>Édition</legend>
+
+	<fieldset class="wikiMain">
+		<legend>Informations générales</legend>
 		<dl>
-			{input type="text" label="Titre" required=true name="title" source=$page}
-			{input type="text" label="Adresse unique" required=true name="uri" source=$page}
-			{input type="checkbox" label="Brouillon" name="status" value=$page::STATUS_DRAFT source=$page help="Si coché, ne sera pas visible sur le site public"}
+			{input type="text" name="title" source=$page required=true label="Titre"}
+			{input type="text" name="uri" source=$page required=true label="Adresse unique URI" help="Utilisée pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas." pattern="[A-Za-z0-9_-]+"}
+			{input type="list" name="parent_id" label="Catégorie" default=$parent target="web/_selector.php?current=%d"|args:$page.parent_id required=true}
+			{input type="datetime" name="date" label="Date" required=true default=$page->file()->created}
+			<dt>Statut</dt>
+			{input type="radio" name="status" value=$page::STATUS_ONLINE label="En ligne" source=$page}
+			{input type="radio" name="status" value=$page::STATUS_DRAFT label="Brouillon" source=$page}
 		</dl>
 	</fieldset>
+
+	<fieldset class="wikiEncrypt">
+		<dl>
+			<dt>
+				<input type="checkbox" name="encryption" id="f_encryption" {if $encrypted} checked="checked"{/if} value="1" onchange="checkEncryption(this);" />
+				<label for="f_encryption">Chiffrer le contenu</label> <i>(facultatif)</i>
+			</dt>
+			<noscript>
+			<dd>Nécessite JavaScript activé pour fonctionner !</dd>
+			</noscript>
+			<dd>Mot de passe : <i id="encryptPasswordDisplay" title="Chiffrement désactivé">désactivé</i></dd>
+			<dd class="help">Le mot de passe n'est ni transmis ni enregistré, vous seul le connaissez,
+				il n'est pas possible de retrouver le contenu si vous l'oubliez.</dd>
+		</dl>
+	</fieldset>
+
+
+	<fieldset class="wikiText">
+		<div class="textEditor">
+			{input type="textarea" name="content" cols="70" rows="35" default=$page->file()->fetch() required=true}
+		</div>
+	</fieldset>
+
+	<p class="submit">
+		{csrf_field key=$csrf_key}
+		<input type="hidden" name="editing_started" value="{$editing_started}" />
+		{button type="submit" name="save" label="Enregistrer" shape="upload" class="main"}
+		{button type="submit" name="cancel" label="Retourner à la liste" shape="reset"}
+	</p>
+
 </form>
+<script type="text/javascript">
+var page_id = '{$page.id}';
+{literal}
+(function() {
+	window.changeParent = function(parent, title)
+	{
+		if (parent == page_id)
+		{
+			return false;
+		}
+
+		$('#f_parent').value = parent;
+		$('#current_parent_name').innerHTML = title;
+		return true;
+	};
+
+	window.browseWikiForParent = function()
+	{
+		window.open('_chercher_parent.php?parent=' + $('#f_parent').value, 'browseParent',
+			'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
+	};
+
+	if ($('#f_encryption').checked)
+	{
+		wikiDecrypt(true);
+	}
+
+	if (location.hash == '#saved') {
+		location.hash = '';
+
+		let c = document.createElement('p');
+		c.className = 'block confirm';
+		c.id = 'confirm_saved';
+		c.innerText = 'Enregistré';
+		c.style.right = '-10em';
+
+		document.querySelector('#f_content').parentNode.appendChild(c);
+
+		window.setTimeout(() => {
+			c.style.right = '';
+		}, 200);
+
+		window.setTimeout(() => {
+			c.style.opacity = 0;
+		}, 3000);
+	}
+}());
+</script>
+{/literal}
 
 
 {include file="admin/_foot.tpl"}

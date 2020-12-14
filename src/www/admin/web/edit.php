@@ -15,15 +15,22 @@ if (!$page) {
 }
 
 $csrf_key = 'edit_' . $page->id();
+$editing_started = f('editing_started') ?: date('Y-m-d H:i:s');
 
-$form->runIf('save', function ($page) {
+if (f('cancel')) {
+	Utils::redirect(ADMIN_URL . 'web/?parent=' . $page->parent_id);
+}
+
+$form->runIf('save', function () use ($page) {
     $page->importForm();
     $page->save();
-}, $csrf_key, Utils::getSelfURI());
+}, $csrf_key, Utils::getSelfURI() . '#saved');
 
-$tpl->assign(compact('page', 'csrf_key'));
+$parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
+$encrypted = f('encrypted') || $page->file()->type == Page::FILE_TYPE_ENCRYPTED;
 
-$tpl->assign('custom_css', ['styles/web-content.css', 'styles/web.css']);
-//$tpl->assign('custom_js', ['trix.min.js']);
+$tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key'));
+
+$tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
 
 $tpl->display('web/edit.tpl');
