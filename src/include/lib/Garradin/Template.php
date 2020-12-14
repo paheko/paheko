@@ -223,6 +223,17 @@ class Template extends \KD2\Smartyer
 			throw new \InvalidArgumentException('Missing name or type');
 		}
 
+		$suffix = null;
+
+		if ($type == 'datetime') {
+			$type = 'date';
+			$tparams = func_get_arg(0);
+			$tparams['type'] = 'time';
+			$tparams['name'] = sprintf('%s_time', $name);
+			unset($tparams['label']);
+			$suffix = self::formInput($tparams);
+		}
+
 		$current_value = null;
 		$current_value_from_user = false;
 
@@ -242,6 +253,9 @@ class Template extends \KD2\Smartyer
 
 		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('d/m/Y');
+		}
+		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+			$current_value = $current_value->format('H:i');
 		}
 		elseif ($type == 'date' && is_string($current_value)) {
 			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
@@ -272,6 +286,14 @@ class Template extends \KD2\Smartyer
 			$attributes['size'] = 12;
 			$attributes['maxlength'] = 10;
 			$attributes['pattern'] = '\d\d?/\d\d?/\d{4}';
+		}
+		elseif ($type == 'time') {
+			$type = 'text';
+			$attributes['placeholder'] = 'HH:MM';
+			$attributes['data-input'] = 'time';
+			$attributes['size'] = 8;
+			$attributes['maxlength'] = 5;
+			$attributes['pattern'] = '\d\d?:\d\d?';
 		}
 
 		// Create attributes string
@@ -380,6 +402,8 @@ class Template extends \KD2\Smartyer
 			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
 		}
 
+		$input .= $suffix;
+
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $this->escape($label));
 
 		if ($type == 'radio' || $type == 'checkbox') {
@@ -406,6 +430,9 @@ class Template extends \KD2\Smartyer
 		return $out;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	protected function formField(array $params, $escape = true)
 	{
 		if (!isset($params['name']))

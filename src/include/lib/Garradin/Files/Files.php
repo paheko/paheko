@@ -8,7 +8,7 @@ use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\FILE_STORAGE_BACKEND;
+use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA};
 
 class Files
 {
@@ -19,7 +19,7 @@ class Files
 			$quota = FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
 			$used = self::callStorage('getTotalSize');
 
-			$size = $args[0] ? filesize($args[0]) : strlen($args[1]);
+			$size = $args[0] ? filesize($args[1]) : strlen($args[2]);
 
 			if (($used + $size) >= $quota) {
 				throw new \OutOfBoundsException('File quota has been exhausted');

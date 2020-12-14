@@ -74,13 +74,13 @@
 		{
 			encryptPassword = null;
 
-			if (document.getElementById('f_contenu'))
+			if (document.getElementById('f_content'))
 			{
 				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
 				{
-					document.getElementById('f_contenu').value = '';
-					document.getElementById('f_chiffrement').checked = false;
-					checkEncryption(document.getElementById('f_chiffrement'));
+					document.getElementById('f_content').value = '';
+					document.getElementById('f_encrypted').checked = false;
+					checkEncryption(document.getElementById('f_encrypted'));
 				}
 				else
 				{
@@ -112,7 +112,7 @@
 			return;
 		}
 
-		var content = document.getElementById('f_contenu');
+		var content = document.getElementById('f_content');
 		var edit = true;
 
 		if (!content) {
@@ -148,7 +148,7 @@
 		else
 		{
 			content.value = wikiContent;
-			checkEncryption(document.getElementById('f_chiffrement'));
+			checkEncryption(document.getElementById('f_encrypted'));
 		}
 	};
 
@@ -201,7 +201,7 @@
 					return false;
 				}
 
-				var content = document.getElementById('f_contenu');
+				var content = document.getElementById('f_content');
 				content.value = GibberishAES.enc(content.value, encryptPassword);
 				content.readOnly = true;
 				return true;
