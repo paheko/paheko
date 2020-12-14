@@ -353,7 +353,10 @@ class Reports
 
 		$db = DB::getInstance();
 
-		$sql = sprintf('SELECT t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label
+		$sql = sprintf('SELECT
+			t.id_year, l.id_account, t.id, t.date, t.reference,
+			l.debit, l.credit, l.reference AS line_reference, t.label, l.label AS line_label,
+			a.label AS account_label, a.code AS account_code
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
@@ -362,13 +365,8 @@ class Reports
 
 		$account = null;
 		$debit = $credit = 0;
-		$accounts = null;
 
 		foreach ($db->iterate($sql) as $row) {
-			if (null === $accounts) {
-				$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $row->id_year);
-			}
-
 			if (null !== $account && $account->id != $row->id_account) {
 				yield $account;
 				$account = null;
@@ -376,8 +374,8 @@ class Reports
 
 			if (null === $account) {
 				$account = (object) [
-					'code'  => $accounts[$row->id_account]->code,
-					'label' => $accounts[$row->id_account]->label,
+					'code'  => $row->account_code,
+					'label' => $row->account_label,
 					'id'    => $row->id_account,
 					'id_year' => $row->id_year,
 					'sum'   => 0,
@@ -396,6 +394,7 @@ class Reports
 			$credit += $row->credit;
 			$row->running_sum = $account->sum;
 
+			unset($row->account_code, $row->account_label, $row->id_account, $row->id_year);
 
 			$account->lines[] = $row;
 		}
