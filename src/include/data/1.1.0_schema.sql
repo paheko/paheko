@@ -299,7 +299,8 @@ CREATE TABLE IF NOT EXISTS files_folders
     id INTEGER NOT NULL PRIMARY KEY,
     parent_id INTEGER NULL REFERENCES files_folders(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    system INTEGER NOT NULL DEFAULT 0
+    system INTEGER NOT NULL DEFAULT 0,
+    CHECK (parent_id IS NULL OR parent_id != id)
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4

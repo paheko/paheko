@@ -1,7 +1,7 @@
-{include file="admin/_head.tpl" title="Wiki" current="wiki" is_popup=1 body_id="transparent"}
+{include file="admin/_head.tpl" title="Web" current="web" is_popup=1 body_id="transparent"}
 
 <div class="wikiContent">
-{$contenu|raw|format_wiki|liens_wiki:'#'}
+	{$content|raw}
 </div>
 
 {include file="admin/_foot.tpl"}

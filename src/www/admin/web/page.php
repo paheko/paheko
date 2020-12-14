@@ -1,55 +1,39 @@
 <?php
 
 namespace Garradin;
+
+use Garradin\Web;
+use Garradin\Entities\Web\Page;
+
 require_once __DIR__ . '/_inc.php';
 
-if (!empty($_SERVER['QUERY_STRING']))
+if ($uri = qg('uri'))
 {
-    $page_uri = Wiki::transformTitleToURI(rawurldecode($_SERVER['QUERY_STRING']));
-    $page = $wiki->getByURI($page_uri);
+	$page_uri = Wiki::transformTitleToURI($uri);
+	$page = Web::getByURI($page_uri);
 }
 else
 {
-    $page = $wiki->getByURI($config->get('accueil_wiki'));
-    $page_uri = '';
+	$page = Web::get((int) qg('id'));
 }
 
-if (!$page)
-{
-    $tpl->assign('uri', $page_uri);
-    $tpl->assign('can_edit', false);
-    $tpl->assign('can_read', true);
-}
-else
-{
-    $membres = new Membres;
-    $tpl->assign('can_read', $wiki->canReadPage($page->droit_lecture));
-    $tpl->assign('can_edit', $wiki->canWritePage($page->droit_ecriture));
-    $tpl->assign('children', $wiki->getList($page_uri == '' ? 0 : $page->id, true));
-    $tpl->assign('has_public_children', $wiki->hasChildren($page_uri == '' ? 0 : $page->id, true));
-    $tpl->assign('breadcrumbs', $wiki->listBackBreadCrumbs($page->id));
-    $tpl->assign('auteur', $page->contenu ? $membres->getNom($page->contenu->id_auteur) : null);
 
-    $images = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, true);
-
-    if ($images && !empty($page->contenu->chiffrement))
-    {
-        $images = Fichiers::filterFilesUsedInText($images, $page->contenu->contenu);
-    }
-
-    $fichiers = Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, false);
-
-    if ($fichiers && !empty($page->contenu->chiffrement))
-    {
-        $fichiers = Fichiers::filterFilesUsedInText($fichiers, $page->contenu->contenu);
-    }
-
-    $tpl->assign('images', $images);
-    $tpl->assign('fichiers', $fichiers);
+if (!$page) {
+	throw new UserException('Page inconnue');
 }
 
-$tpl->assign('page', $page);
+$membres = new Membres;
+
+$tpl->assign('breadcrumbs', $page->getBreadcrumbs());
+$tpl->assign('auteur', $page->file()->author_id ? $membres->getNom($page->file()->author_id) : null);
+
+$images = $page->getImageGallery(false);
+$files = $page->getAttachmentsGallery(false);
+
+$content = $page->render(['prefix' => ADMIN_URL . 'web/page.php?uri=']);
+
+$tpl->assign(compact('page', 'images', 'files', 'content'));
 
 $tpl->assign('custom_js', ['wiki_gallery.js']);
 
-$tpl->display('admin/wiki/page.tpl');
+$tpl->display('web/page.tpl');

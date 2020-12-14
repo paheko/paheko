@@ -2,6 +2,7 @@
 
 namespace Garradin\Entities\Web;
 
+use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
 use Garradin\Entities\Files\File;
@@ -44,6 +45,9 @@ class Page extends Entity
 	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
 	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
 
+	protected $_attachments;
+	protected $_content;
+
 	public function url(): string
 	{
 		$url = WWW_URL . $this->uri;
@@ -57,7 +61,11 @@ class Page extends Entity
 
 	public function raw(): string
 	{
-		return $this->file()->fetch();
+		if (null === $this->_content) {
+			$this->_content = $this->file()->fetch();
+		}
+
+		return $this->_content;
 	}
 
 	public function file(): File
@@ -108,6 +116,7 @@ class Page extends Entity
 		$file = $this->file();
 
 		if (isset($source['content']) && sha1($source['content']) != $file->hash) {
+			$this->_content = $source['content'];
 			$file->store(null, $source['content']);
 		}
 
@@ -156,26 +165,97 @@ class Page extends Entity
 		return $page;
 	}
 
-	public function render(): string
+	public function render(array $options = []): string
 	{
-		static $render_types = [self::FILE_TYPE_SKRIV, self::FILE_TYPE_ENCRYPTED, self::FILE_TYPE_HTML];
+		$file = $this->file();
+		$type = $file->type;
 
-		if (!in_array($this->type, $render_types)) {
-			throw new \LogicException('Render can not be called on files of type: ' . $this->type);
+		// Load content
+		$this->raw();
+
+		if ($type == self::FILE_TYPE_HTML) {
+			return \Garradin\Web\Render\HTML::render($file, $this->_content, $options);
+		}
+		elseif ($type == self::FILE_TYPE_SKRIV) {
+			return \Garradin\Web\Render\Skriv::render($file, $this->_content, $options);
+		}
+		elseif ($type == self::FILE_TYPE_ENCRYPTED) {
+			return \Garradin\Web\Render\EncryptedSkriv::render($file, $this->_content, $options);
 		}
 
-		$content = $this->fetch();
+		throw new \LogicException('Unknown render type: ' . $type);
+	}
 
-		if ($this->type == self::FILE_TYPE_HTML) {
-			return \Garradin\Files\Render\HTML::render($this, $content);
-		}
-		elseif ($this->type == self::FILE_TYPE_SKRIV) {
-			return \Garradin\Files\Render\Skriv::render($this, $content);
-		}
-		elseif ($this->type == self::FILE_TYPE_ENCRYPTED) {
-			return \Garradin\Files\Render\EncryptedSkriv::render($this, $content);
+	public function getBreadcrumbs()
+	{
+		$sql = '
+			WITH RECURSIVE parents(id, name, parent_id, level) AS (
+				SELECT id, title, parent_id, 1 FROM web_pages WHERE id = ?
+				UNION ALL
+				SELECT p.id, p.title, p.parent_id, level + 1
+				FROM web_pages p
+					JOIN parents ON p.id = parents.parent_id
+			)
+			SELECT id, name FROM parents ORDER BY level DESC;';
+		return DB::getInstance()->getAssoc($sql, $this->id());
+	}
+
+	public function listAttachments(): array
+	{
+		if (null === $this->_attachments) {
+			$this->_attachments = $this->file()->listLinked();
 		}
 
-		throw new \LogicException('Unknown render type');
+		return $this->_attachments;
+	}
+
+	public function findTaggedAttachments(): array
+	{
+		$this->raw();
+
+		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $this->_content, $match, PREG_PATTERN_ORDER);
+		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $this->_content, $match2, PREG_PATTERN_ORDER);
+
+		return array_merge($match[1], $match2[1]);
+	}
+
+	/**
+	 * Return list of images
+	 * If $all is FALSE then this will only return images that are not present in the content
+	 */
+	public function getImageGallery(bool $all = true): array
+	{
+		return $this->getAttachmentsGallery($all, true);
+	}
+
+	/**
+	 * Return list of files
+	 * If $all is FALSE then this will only return files that are not present in the content
+	 */
+	public function getAttachmentsGallery(bool $all = true, bool $images = false): array
+	{
+		$out = [];
+
+		if (!$all) {
+			$tagged = $this->findTaggedAttachments();
+		}
+
+		foreach ($this->listAttachments() as $a) {
+			if ($images && !$a->image) {
+				continue;
+			}
+			elseif (!$images && $a->image) {
+				continue;
+			}
+
+			// Skip
+			if (!$all && in_array($a->id, $tagged)) {
+				continue;
+			}
+
+			$out[] = $a;
+		}
+
+		return $out;
 	}
 }

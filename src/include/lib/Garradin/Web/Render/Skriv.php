@@ -1,8 +1,12 @@
 <?php
 
-namespace Garradin\Files\Render;
+namespace Garradin\Web\Render;
 
-use Garradin\Web\Squelette_Filtres;
+use Garradin\Entities\Files\File;
+
+use Garradin\Squelette_Filtres;
+use Garradin\Plugin;
+use Garradin\Files\Files;
 
 use KD2\SkrivLite;
 
@@ -10,8 +14,12 @@ class Skriv
 {
 	static protected $skriv;
 
-	static public function render(File $file, string $str): string
+	static public function render(?File $file, string $str, array $options = []): string
 	{
+		if (!isset($options['prefix'])) {
+			throw new \InvalidArgumentException('Missing "prefix" option');
+		}
+
 		if (!self::$skriv)
 		{
 			self::$skriv = new \KD2\SkrivLite;
@@ -38,8 +46,8 @@ class Skriv
 
 		$str = Squelette_Filtres::typo_fr($str);
 
-		$str = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($prefix) {
-			return '<a href="' . $prefix . self::transformTitleToURI($matches[1]) . '">';
+		$str = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($options) {
+			return sprintf('<a href="%s%s">', $options['prefix'], self::transformTitleToURI($matches[1]));
 		}, $str);
 
 		return $str;
@@ -51,7 +59,7 @@ class Skriv
 	 * @param string $content Contenu éventuel (en mode bloc)
 	 * @param object $skriv   Objet SkrivLite
 	 */
-	static public function SkrivFichier($args, $content, $skriv)
+	static public function SkrivFichier(array $args, ?string $content, SkrivLite $skriv): string
 	{
 		$id = $caption = null;
 
@@ -73,7 +81,7 @@ class Skriv
 			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
 		}
 
-		$file = Files::get((int)$match[2]);
+		$file = Files::get((int)$id);
 
 		if (!$file) {
 			return $skriv->parseError('/!\ Tag fichier invalide');
@@ -97,7 +105,7 @@ class Skriv
 	 * @param string $content Contenu éventuel (en mode bloc)
 	 * @param object $skriv   Objet SkrivLite
 	 */
-	static public function SkrivImage($args, $content, $skriv)
+	static public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
 	{
 		static $align_values = ['droite', 'gauche', 'centre'];
 
@@ -125,7 +133,7 @@ class Skriv
 			return $skriv->parseError('/!\ Tag image : aucun numéro de fichier indiqué.');
 		}
 
-		$file = Files::get((int)$match[2]);
+		$file = Files::get((int)$id);
 
 		if (!$file) {
 			return $skriv->parseError('/!\ Tag image invalide');
