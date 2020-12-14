@@ -70,7 +70,15 @@ class Reports
 	{
 		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
 			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
-			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
+			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
+				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
+				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical) * -1 AS sum_expense,
+			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
+				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
+				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical) AS sum_revenue
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_analytical
@@ -87,22 +95,32 @@ class Reports
 			$order = 'a.label COLLATE NOCASE, y.id';
 		}
 
-		$sql = sprintf($sql, $group, $order);
+		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);
 
 		$current = null;
+
+		static $sums = ['credit', 'debit', 'sum', 'sum_expense', 'sum_revenue'];
+
+		$total = function (\stdClass $current, bool $by_year) use ($sums)
+		{
+			$out = (object) [
+				'label' => 'Total',
+				'id_account' => $by_year ? null : $current->id,
+				'id_year' => $by_year ? $current->id : null,
+			];
+
+			foreach ($sums as $s) {
+				$out->{$s} = $current->{$s};
+			}
+
+			return $out;
+		};
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
 			$id = $by_year ? $row->id_year : $row->id_account;
 
 			if (null !== $current && $current->id !== $id) {
-				$current->items[] = (object) [
-					'label' => 'Total',
-					'credit' => $current->credit,
-					'debit' => $current->debit,
-					'sum' => $current->sum,
-					'id_account' => $by_year ? null : $current->id,
-					'id_year' => $by_year ? $current->id : null,
-				];
+				$current->items[] = $total($current, $by_year);
 
 				yield $current;
 				$current = null;
@@ -113,32 +131,28 @@ class Reports
 					'id' => $by_year ? $row->id_year : $row->id_account,
 					'label' => $by_year ? $row->year_label : $row->account_label,
 					'description' => !$by_year ? $row->account_description : null,
-					'credit' => 0,
-					'debit' => 0,
-					'sum' => 0,
 					'items' => []
 				];
+
+				foreach ($sums as $s) {
+					$current->$s = 0;
+				}
 			}
 
 			$row->label = !$by_year ? $row->year_label : $row->account_label;
 			$current->items[] = $row;
-			$current->credit += $row->credit;
-			$current->debit += $row->debit;
-			$current->sum += $row->sum;
+
+			foreach ($sums as $s) {
+				$current->$s += $row->$s;
+			}
 		}
 
 		if ($current === null) {
 			return;
 		}
 
-		$current->items[] = (object) [
-			'label' => 'Total',
-			'credit' => $current->credit,
-			'debit' => $current->debit,
-			'sum' => $current->sum,
-			'id_account' => $by_year ? null : $row->id_account,
-			'id_year' => $by_year ? $row->id_year : null,
-		];
+		$current->items[] = $total($current, $by_year);
+
 		yield $current;
 	}
 
