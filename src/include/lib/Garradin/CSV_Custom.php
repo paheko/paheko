@@ -117,6 +117,10 @@ class CSV_Custom
 
 	public function setTranslationTable(array $table): void
 	{
+		if (!count($table)) {
+			throw new UserException('Aucune colonne n\'a été sélectionnée');
+		}
+
 		$translation = [];
 
 		foreach ($table as $csv => $target) {
