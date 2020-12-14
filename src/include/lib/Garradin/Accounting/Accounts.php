@@ -179,6 +179,14 @@ class Accounts
 				$account = new Account;
 				$account->id_chart = $this->chart_id;
 				try {
+					if (!isset($positions[$row['position']])) {
+						throw new ValidationException('Position inconnue : ' . $row['position']);
+					}
+
+					if (!isset($types[$row['type']])) {
+						throw new ValidationException('Type inconnu : ' . $row['type']);
+					}
+
 					$row['position'] = $positions[$row['position']];
 					$row['type'] = $types[$row['type']];
 					$account->importForm($row);
