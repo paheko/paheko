@@ -295,7 +295,7 @@ class Account extends Entity
 		foreach ($csv as $k => &$line) {
 			try {
 				$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
-				$line->amount = ($line->amount < 0 ? -1 : 1) * Utils::moneyToInteger($line->amount);
+				$line->amount = (substr($line->amount, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->amount);
 
 				if (!$date) {
 					throw new UserException('Date invalide : ' . $line->date);
