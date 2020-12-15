@@ -48,7 +48,12 @@ class Web
         return EM::getInstance(Page::class)->all($sql);
     }
 
-    static public function get(int $id): Page
+    static public function getByURI(string $uri): ?Page
+    {
+        return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
+    }
+
+    static public function get(int $id): ?Page
     {
         return EM::findOneById(Page::class, $id);
     }

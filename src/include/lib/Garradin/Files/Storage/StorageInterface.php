@@ -34,4 +34,6 @@ interface StorageInterface
 	static public function getTotalSize(): int;
 
 	static public function getQuota(): int;
+
+	static public function cleanup(): void;
 }

@@ -123,4 +123,8 @@ class FileSystem implements StorageInterface
 	{
 		return disk_total_space(self::_getRoot());
 	}
+
+	static public function cleanup(): void
+	{
+	}
 }

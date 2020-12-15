@@ -1,6 +1,6 @@
 (function () {
     g.onload(function () {
-        uploadHelper($('#f_fichier'), {
+        uploadHelper($('#f_file'), {
             width: 1920,
             height: null,
             resize: true,
