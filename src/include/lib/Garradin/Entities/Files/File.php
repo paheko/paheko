@@ -112,13 +112,13 @@ class File extends Entity
 	{
 		if ($source_path && !$source_content)
 		{
-			$this->hash = sha1_file($source_path);
-			$this->size = filesize($source_path);
+			$this->set('hash', sha1_file($source_path));
+			$this->set('size', filesize($source_path));
 		}
 		else
 		{
-			$this->hash = sha1($source_content);
-			$this->size = strlen($source_content);
+			$this->set('hash', sha1($source_content));
+			$this->set('size', strlen($source_content));
 		}
 
 		// Check that it's a real image
@@ -135,8 +135,8 @@ class File extends Entity
 				// from JS canvas which doesn't know how to gzip (d'oh!)
 				if ($i->format() == 'png' && null !== $source_content) {
 					$source_content = $i->output('png', true);
-					$this->hash = sha1($source_content);
-					$this->size = strlen($source_content);
+					$this->set('hash', sha1($source_content));
+					$this->set('size', strlen($source_content));
 				}
 
 				unset($i);

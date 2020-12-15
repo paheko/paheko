@@ -6,6 +6,7 @@ use Garradin\Entities\Files\File;
 
 use Garradin\Squelette_Filtres;
 use Garradin\Plugin;
+use Garradin\Utils;
 use Garradin\Files\Files;
 
 use KD2\SkrivLite;
@@ -47,7 +48,7 @@ class Skriv
 		$str = Squelette_Filtres::typo_fr($str);
 
 		$str = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($options) {
-			return sprintf('<a href="%s%s">', $options['prefix'], self::transformTitleToURI($matches[1]));
+			return sprintf('<a href="%s%s">', $options['prefix'], Utils::transformTitleToURI($matches[1]));
 		}, $str);
 
 		return $str;
