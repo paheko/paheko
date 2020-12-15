@@ -17,7 +17,6 @@ else
 	$page = Web::get((int) qg('id'));
 }
 
-
 if (!$page) {
 	throw new UserException('Page inconnue');
 }

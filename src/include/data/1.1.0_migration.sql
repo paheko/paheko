@@ -2,11 +2,11 @@ ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 .read 1.1.0_schema.sql
 
-INSERT INTO files_contents (id, hash, content)
-	SELECT id, hash, contenu FROM fichiers_contenu;
+INSERT INTO files_contents (id, hash, content, size)
+	SELECT id, hash, contenu, taille FROM fichiers_contenu;
 
-INSERT INTO files (id, hash, folder_id, name, type, created, content_id, author_id, public)
-	SELECT f.id, c.hash, NULL, nom, type, datetime, c.id, NULL, 0 FROM fichiers f INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+INSERT INTO files (id, hash, folder_id, name, type, created, author_id, public)
+	SELECT f.id, c.hash, NULL, nom, type, datetime, NULL, 0 FROM fichiers f INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
 
 INSERT INTO membres_categories
 	SELECT id, nom,
@@ -53,17 +53,16 @@ INSERT INTO files_folders (id, parent_id, name, system)
 
 UPDATE files_folders SET parent_id = (SELECT CASE WHEN f.system = 0 THEN f.id ELSE f.id + 10000 END FROM files_folders f WHERE f.id = parent_id);
 
-INSERT INTO files_contents (hash, content) SELECT hash, content FROM wiki_as_files;
+INSERT INTO files_contents (hash, content, size) SELECT hash, content, size FROM wiki_as_files;
 UPDATE wiki_as_files SET content_id = (SELECT fc.id FROM files_contents fc WHERE fc.hash = wiki_as_files.hash);
 
-INSERT INTO files (hash, folder_id, name, type, created, content_id, author_id, public)
+INSERT INTO files (hash, folder_id, name, type, created, author_id, public)
 	SELECT
 		hash,
 		(SELECT CASE WHEN public = 0 THEN f.id ELSE f.id + 10000 END FROM files_folders f WHERE f.id = old_parent),
 		name,
 		CASE WHEN encrypted THEN 'text/vnd.skriv.encrypted' ELSE 'text/vnd.skriv' END,
 		created,
-		content_id,
 		author_id,
 		public
 	FROM wiki_as_files;
@@ -97,8 +96,8 @@ INSERT INTO files_links (id, config)
 
 UPDATE files SET public = 1 WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond');
 
-INSERT INTO files (hash, folder_id, name, type, created, content_id, author_id, public)
-	SELECT hash, NULL, name, type, created, content_id, author_id, 0
+INSERT INTO files (hash, folder_id, name, type, created, author_id, public)
+	SELECT hash, NULL, name, type, created, author_id, 0
 	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
 
 UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE cle = 'accueil_connexion';

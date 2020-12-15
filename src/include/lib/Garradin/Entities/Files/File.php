@@ -2,7 +2,7 @@
 
 namespace Garradin\Entities\Files;
 
-use KD2\Image;
+use KD2\Graphics\Image;
 use KD2\DB\EntityManager as EM;
 
 use Garradin\DB;
@@ -10,6 +10,7 @@ use Garradin\Entity;
 use Garradin\UserException;
 use Garradin\Membres\Session;
 use Garradin\Membres;
+use Garradin\Static_Cache;
 use Garradin\Utils;
 use Garradin\Entities\Web\Page;
 
@@ -36,7 +37,6 @@ class File extends Entity
 	protected $created;
 
 	protected $author_id;
-	protected $content_id;
 
 	protected $_types = [
 		'id'           => 'int',
@@ -51,7 +51,6 @@ class File extends Entity
 		'storage_path' => '?string',
 		'created'      => 'DateTime',
 		'author_id'    => '?int',
-		'content_id'   => '?int',
 	];
 
 	/**
@@ -66,7 +65,6 @@ class File extends Entity
 	const LINK_TRANSACTION = 'transaction_id';
 	const LINK_CONFIG = 'config';
 	const LINK_WEB_PAGE = 'web_page_id';
-	const LINK_WEB_CATEGORY = 'web_category_id';
 
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
@@ -196,35 +194,36 @@ class File extends Entity
 	static public function storeFromBase64(string $name, string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
-		return self::store($name, null, $content);
+		return self::create($name, null, $content);
 	}
 
 	/**
 	 * Upload du fichier par POST
-	 * @param  array  $file  Caractéristiques du fichier envoyé
-	 * @return File
 	 */
-	static public function upload(?string $path, array $file): self
+	static public function upload(string $key): self
 	{
-		if (!empty($file['error']))
-		{
+		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
+			throw new UserException('Aucun fichier reçu');
+		}
+
+		$file = $_FILES[$key];
+
+		if (!empty($file['error'])) {
 			throw new UserException(self::getErrorMessage($file['error']));
 		}
 
-		if (empty($file['size']) || empty($file['name']))
-		{
+		if (empty($file['size']) || empty($file['name'])) {
 			throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
 		}
 
-		if (!is_uploaded_file($file['tmp_name']))
-		{
+		if (!is_uploaded_file($file['tmp_name'])) {
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		return self::store($path, $name, $file['tmp_name']);
+		return self::create($name, $file['tmp_name']);
 	}
 
 
@@ -259,6 +258,11 @@ class File extends Entity
 	public function url(?int $size = null): string
 	{
 		return self::getFileURL($this->id, $this->name, $this->hash, $size);
+	}
+
+	public function thumb_url(): string
+	{
+		return $this->url(min(self::ALLOWED_THUMB_SIZES));
 	}
 
 	/**
@@ -316,7 +320,7 @@ class File extends Entity
 	public function linkTo(string $type, int $foreign_id): bool
 	{
 		$db = DB::getInstance();
-		static $types = [self::LINK_WEB, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
+		static $types = [self::LINK_WEB_PAGE, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
 
 		if (!in_array($type, $types)) {
 			throw new \InvalidArgumentException('Unknown file link type.');
@@ -333,7 +337,7 @@ class File extends Entity
 
 	public function getLinkedId(string $type): ?int
 	{
-		static $types = [self::LINK_WEB, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
+		static $types = [self::LINK_WEB_PAGE, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
 
 		if (!in_array($type, $types)) {
 			throw new \InvalidArgumentException('Unknown file link type.');
@@ -394,10 +398,10 @@ class File extends Entity
 		if (!Static_Cache::exists($cache_id))
 		{
 			try {
-				if ($path = Files::callStorage('getPath', $file)) {
-					(new Image($source))->resize($width)->save($destination);
+				if ($path = Files::callStorage('getPath', $this)) {
+					(new Image($path))->resize($width)->save($destination);
 				}
-				elseif ($content = Files::callStorage('fetch', $file)) {
+				elseif ($content = Files::callStorage('fetch', $this)) {
 					Image::createFromBlob($content)->resize($width)->save($destination);
 				}
 				else {
@@ -409,7 +413,7 @@ class File extends Entity
 			}
 		}
 
-		$this->_serve($path, null);
+		$this->_serve($destination, null);
 	}
 
 	/**
@@ -492,7 +496,7 @@ class File extends Entity
 
 		// If it's linked to a file, then we want to know what the parent file is linked to
 		if ($link->{self::LINK_FILE}) {
-			$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $link->{LINK_FILE});
+			return Files::get((int)$link->{self::LINK_FILE})->checkReadAccess($session);
 		}
 
 		if ($link->{self::LINK_TRANSACTION} && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {

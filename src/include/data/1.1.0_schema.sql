@@ -275,10 +275,7 @@ CREATE TABLE IF NOT EXISTS files
 
     created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
 
-    author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL,
-    content_id INTEGER NULL REFERENCES files_contents (id) ON DELETE SET NULL,
-
-    CHECK (storage IS NOT NULL OR content_id IS NOT NULL)
+    author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS files_date ON files (created);
@@ -289,6 +286,7 @@ CREATE TABLE IF NOT EXISTS files_contents
 (
     id INTEGER NOT NULL PRIMARY KEY,
     hash TEXT NOT NULL,
+    size INT NOT NULL,
     content BLOB NULL
 );
 

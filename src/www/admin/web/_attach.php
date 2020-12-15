@@ -3,116 +3,74 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-qv(['page' => 'required|numeric']);
+use Garradin\Web;
+use Garradin\Entities\Web\Page;
+use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 
-$page = $wiki->getById(qg('page'));
-$csrf_id = 'wiki_files_' . $page->id;
+require_once __DIR__ . '/_inc.php';
 
-if (!$page)
-{
-    throw new UserException('Page introuvable.');
+$session->requireAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE);
+
+$page = Web::get((int) qg('page'));
+
+if (!$page) {
+	throw new UserException('Page inconnue');
 }
 
-// Vérification des hash avant upload
-if ($hash_check = f('uploadHelper_hashCheck'))
-{
-    echo json_encode(Fichiers::checkHashList($hash_check));
-    exit;
-}
-elseif (f('delete'))
-{
-    if ($form->check($csrf_id))
-    {
-        try {
-            $fichier = new Fichiers(f('delete'));
-            
-            if (!$fichier->checkAccess($session, true))
-            {
-                throw new UserException('Vous n\'avez pas accès à ce fichier.');
-            }
+$csrf_key = 'attach_' . $page->id();
 
-            $fichier->remove();
-            Utils::redirect(ADMIN_URL . 'wiki/_fichiers.php?page=' . $page->id);
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
-elseif (f('upload') || f('uploadHelper_mode'))
-{
-    $validate = ['fichier' => 'file|required'];
+$form->runIf('delete', function () use ($page) {
+	$file = Files::get((int) f('delete'));
 
-    if (f('uploadHelper_mode') == 'hash_only')
-    {
-        $validate = [
-            'uploadHelper_fileHash' => 'required',
-            'uploadHelper_fileName' => 'required',
-        ];
-    }
+	if (!$file->getLinkedId($file::LINK_FILE) == $page->id()) {
+		throw new UserException('Ce fichier n\'est pas lié à cette page');
+	}
 
-    $form->check($csrf_id, $validate);
+	$file->delete();
+}, $csrf_key, Utils::getSelfURI());
 
-    if (f('uploadHelper_status') > 0)
-    {
-        $form->addError('Un seul fichier peut être envoyé en même temps.');
-    }
-    
-    if (!$form->hasErrors())
-    {
-        try {
-            if (f('uploadHelper_mode') == 'hash_only' && f('uploadHelper_fileHash') && f('uploadHelper_fileName'))
-            {
-                $fichier = Fichiers::uploadExistingHash(f('uploadHelper_fileName'), f('uploadHelper_fileHash'));
-            }
-            else
-            {
-                $fichier = Fichiers::upload($_FILES['fichier']);
-            }
 
-            // Lier le fichier à la page wiki
-            $fichier->linkTo(Fichiers::LIEN_WIKI, $page->id);
-            $uri = ADMIN_URL . 'wiki/_fichiers.php?page=' . $page->id . '&sent';
+$form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
+	if (f('uploadHelper_status') > 0) {
+		throw new UserException('Un seul fichier peut être envoyé en même temps.');
+	}
 
-            if (f('uploadHelper_status') !== null)
-            {
-                echo json_encode([
-                    'redirect'  =>  $uri,
-                    'callback'  =>  'insertHelper',
-                    'file'      =>  [
-                        'image' =>  (int)$fichier->image,
-                        'id'    =>  (int)$fichier->id,
-                        'nom'   =>  $fichier->nom,
-                        'thumb' =>  $fichier->image ? $fichier->getURL(200) : false
-                    ],
-                ]);
-                exit;
-            }
+	$file = File::upload('file');
 
-            Utils::redirect($uri);
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
+	// Lier le fichier à la page wiki
+	$file->linkTo(File::LINK_FILE, $page->id());
 
-    if (f('uploadHelper_mode') !== null)
-    {
-        echo json_encode(['error' => implode(PHP_EOL, $form->getErrorMessages())]);
-        exit;
-    }
+	if (f('uploadHelper_status') !== null)
+	{
+		$uri = Utils::getSelfURI() . '&sent';
+		echo json_encode([
+			'redirect'  =>  $uri,
+			'callback'  =>  'insertHelper',
+			'file'      =>  [
+				'image' =>  (int)$file->image,
+				'id'    =>  (int)$file->id(),
+				'nom'   =>  $file->name,
+				'thumb' =>  $file->image ? $file->thumb_url() : false
+			],
+		]);
+		exit;
+	}
+}, $csrf_key, Utils::getSelfURI() . '&sent');
+
+if (f('uploadHelper_mode') !== null && $form->hasErrors()) {
+	echo json_encode(['error' => implode(PHP_EOL, $form->getErrorMessages())]);
+	exit;
 }
 
-$tpl->assign('fichiers', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, false));
-$tpl->assign('images', Fichiers::listLinkedFiles(Fichiers::LIEN_WIKI, $page->id, true));
 
-$tpl->assign('max_size', Utils::getMaxUploadSize());
-$tpl->assign('page', $page);
+$files = $page->getAttachmentsGallery(true);
+$images = $page->getImageGallery(true);
+$max_size = Utils::getMaxUploadSize();
+
+$tpl->assign(compact('page', 'files', 'images', 'max_size', 'csrf_key'));
 $tpl->assign('sent', (bool)qg('sent'));
-$tpl->assign('csrf_id', $csrf_id);
 
-$tpl->assign('custom_js', ['upload_helper.min.js', 'wiki_fichiers.js']);
+$tpl->assign('custom_js', ['upload_helper.js', 'wiki_fichiers.js']);
 
-$tpl->display('admin/wiki/_fichiers.tpl');
+$tpl->display('web/_attach.tpl');

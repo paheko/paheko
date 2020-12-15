@@ -101,6 +101,10 @@ class Page extends Entity
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
 		$this->assert((bool) $this->_file, 'Fichier manquant');
+
+		$db = DB::getInstance();
+		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
+		$this->assert(!$db->test(self::TABLE, 'uri = ?' . $where, $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre');
 	}
 
 	public function importForm(array $source = null)

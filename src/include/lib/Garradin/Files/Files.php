@@ -75,20 +75,6 @@ class Files
 		return EM::getInstance(File::class)->iterate($sql);
 	}
 
-	static public function generatePathsIndex(): void
-	{
-		$all = DB::getInstance()->getAssoc('SELECT path, path FROM files GROUP BY path;');
-		$paths = [];
-
-		foreach ($all as $path) {
-			$path = explode('/', $path);
-
-			foreach ($path as $part) {
-				
-			}
-		}
-	}
-
 	static public function get(int $id): ?File
 	{
 		return EM::findOneById(File::class, $id);
