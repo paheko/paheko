@@ -47,55 +47,6 @@
 	</p>
 
 </form>
-<script type="text/javascript">
-var page_id = '{$page.id}';
-{literal}
-(function() {
-	window.changeParent = function(parent, title)
-	{
-		if (parent == page_id)
-		{
-			return false;
-		}
-
-		$('#f_parent').value = parent;
-		$('#current_parent_name').innerHTML = title;
-		return true;
-	};
-
-	window.browseWikiForParent = function()
-	{
-		window.open('_chercher_parent.php?parent=' + $('#f_parent').value, 'browseParent',
-			'width=500,height=600,top=150,left=150,scrollbars=1,location=false');
-	};
-
-	if ($('#f_encryption').checked)
-	{
-		wikiDecrypt(true);
-	}
-
-	if (location.hash == '#saved') {
-		location.hash = '';
-
-		let c = document.createElement('p');
-		c.className = 'block confirm';
-		c.id = 'confirm_saved';
-		c.innerText = 'Enregistré';
-		c.style.right = '-10em';
-
-		document.querySelector('#f_content').parentNode.appendChild(c);
-
-		window.setTimeout(() => {
-			c.style.right = '';
-		}, 200);
-
-		window.setTimeout(() => {
-			c.style.opacity = 0;
-		}, 3000);
-	}
-}());
-</script>
-{/literal}
 
 
 {include file="admin/_foot.tpl"}

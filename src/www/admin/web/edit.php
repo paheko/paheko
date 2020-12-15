@@ -32,5 +32,6 @@ $encrypted = f('encrypted') || $page->file()->type == Page::FILE_TYPE_ENCRYPTED;
 $tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key'));
 
 $tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
+$tpl->assign('custom_css', ['wiki.css', 'scripts/wiki_editor.css']);
 
 $tpl->display('web/edit.tpl');
