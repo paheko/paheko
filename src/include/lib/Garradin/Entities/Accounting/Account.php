@@ -319,8 +319,11 @@ class Account extends Entity
 					if (!isset($line->date)) {
 						 continue;
 					}
+
+					// Match date, amount and label
 					if ($j->date->format('Ymd') == $line->date->format('Ymd')
-						&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))) {
+						&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))
+						&& strtolower($j->label) == strtolower($line->label)) {
 						$row->csv = $line;
 						$line = null;
 						break;
@@ -331,8 +334,33 @@ class Account extends Entity
 			$lines[$id] = $row;
 		}
 
+		unset($line, $row, $j);
+
+		// Second round to match only amount and label
+		foreach ($lines as $row) {
+			if ($row->csv || !isset($row->journal->debit)) {
+				continue;
+			}
+
+			$j = $row->journal;
+
+			foreach ($csv as &$line) {
+				if (!isset($line->date)) {
+					 continue;
+				}
+
+				if ($j->date->format('Ymd') == $line->date->format('Ymd')
+					&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))) {
+					$row->csv = $line;
+					$line = null;
+					break;
+				}
+			}
+		}
+
 		unset($j);
 
+		// Then add CSV lines on the right
 		foreach ($csv as $line) {
 			if (null == $line) {
 				continue;
