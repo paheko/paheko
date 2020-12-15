@@ -97,8 +97,12 @@ class Transaction extends Entity
 				return self::TYPE_EXPENSE;
 			case Account::TYPE_THIRD_PARTY:
 				return self::TYPE_DEBT;
-			default:
+			case Account::TYPE_BANK:
+			case Account::TYPE_CASH:
+			case Account::TYPE_OUTSTANDING:
 				return self::TYPE_TRANSFER;
+			default:
+				return self::TYPE_ADVANCED;
 		}
 	}
 
