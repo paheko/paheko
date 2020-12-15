@@ -322,7 +322,7 @@ class Account extends Entity
 
 					// Match date, amount and label
 					if ($j->date->format('Ymd') == $line->date->format('Ymd')
-						&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))
+						&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)
 						&& strtolower($j->label) == strtolower($line->label)) {
 						$row->csv = $line;
 						$line = null;
@@ -350,7 +350,7 @@ class Account extends Entity
 				}
 
 				if ($j->date->format('Ymd') == $line->date->format('Ymd')
-					&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))) {
+					&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)) {
 					$row->csv = $line;
 					$line = null;
 					break;
