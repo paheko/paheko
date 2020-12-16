@@ -9,6 +9,8 @@ use Garradin\Entities\Accounting\Year;
 use Garradin\CSV;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
+use Garradin\ValidationException;
 use KD2\DB\EntityManager;
 
 class Accounts

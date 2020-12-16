@@ -34,7 +34,7 @@ class Session extends \KD2\UserSession
 			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
 		}
 
-		$session = new Session(DB::getInstance());
+		$session = new Session();
 		$session->http = new HTTP;
 
 		if ($session->isPasswordCompromised($password)) {

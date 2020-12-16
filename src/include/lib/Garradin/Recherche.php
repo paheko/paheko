@@ -386,9 +386,10 @@ class Recherche
 			throw new \InvalidArgumentException('Cible inconnue : ' . $target);
 		}
 
+		$config = Config::getInstance();
+
 		if ($target == 'membres')
 		{
-			$config = Config::getInstance();
 			$champs = $config->get('champs_membres');
 		}
 
@@ -668,7 +669,7 @@ class Recherche
 	    ];
 	}
 
-	public function schema($target)
+	public function schema(string $target)
 	{
 		$db = DB::getInstance();
 
@@ -683,6 +684,9 @@ class Recherche
 				'acc_transactions'       => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions\';'),
 				'acc_transactions_lines' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions_lines\';'),
 			];
+		}
+		else {
+			throw new \LogicException('Unknown target');
 		}
 
 		return $tables;

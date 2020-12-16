@@ -593,9 +593,12 @@ class Utils
         {
             $url = ADMIN_URL . 'plugin/' . $params['id'] . '/';
         }
-        else
+        elseif (defined('Garradin\PLUGIN_URL'))
         {
             $url = PLUGIN_URL;
+        }
+        else {
+            throw new \RuntimeException('Missing plugin URL');
         }
 
         if (!empty($params['file']))

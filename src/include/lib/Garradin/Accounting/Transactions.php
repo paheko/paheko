@@ -395,7 +395,7 @@ class Transactions
 		$list->orderBy('date', true);
 		$list->setCount('COUNT(DISTINCT t.id)');
 		$list->groupBy('t.id');
-		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 		});
 		$list->setExportCallback(function (&$row) {

@@ -468,6 +468,8 @@ class Champs
             $champs->passe = (object) ['type' => 'password'];
         }
 
+        $config = null;
+
         foreach ($champs as $key=>&$config)
         {
             if (in_array($key, $this->system_fields))

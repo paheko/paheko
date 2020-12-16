@@ -213,7 +213,7 @@ class Account extends Entity
 		$list->orderBy('date', false);
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
-		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+		$list->setModifier(function (&$row) use (&$sum) {
 			if (property_exists($row, 'sum')) {
 				$sum += isset($row->change) ? $row->change : ($row->credit - $row->debit);
 				$row->sum = $sum;
