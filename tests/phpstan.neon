@@ -1,0 +1,18 @@
+parameters:
+    bootstrapFiles:
+      - phpstan.config.php
+      - ../src/include/init.php
+    level: 1
+    scanDirectories:
+      - ../src/include
+      - ../src/www
+      - ../src/scripts
+    excludes_analyse:
+      - ../src/include/lib/KD2
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Access to protected property Garradin\\Entities#'
+        - '#Access to an undefined property KD2\\DB\\AbstractEntity#'
+        -
+          message: '#Variable \$(tpl|form|session|user|session|wiki|config|membres) might not be defined#'
+          path: ../src/www/*
