@@ -86,16 +86,21 @@ function initTransactionForm(is_new) {
 		$('#f_credit_total').value = g.formatMoney(credit);
 	}
 
-	// Add row button
+	// Add row "plus" button
 	$('.transaction-lines tfoot button')[0].onclick = () => {
-		var line = $('.transaction-lines tbody tr')[0];
+		let lines = $('.transaction-lines tbody tr');
+		var line = lines[lines.length - 1];
 		var n = line.cloneNode(true);
-		n.querySelectorAll('input').forEach((e) => {
-			e.value = e.className.match(/money/) ? '0' : '';
-		});
-		if (l = n.querySelector('.input-list .label')) {
-			l.parentNode.removeChild(l);
-		}
+
+		// Reset label and reference
+		n.querySelectorAll('input').forEach((i) => {
+			if (!i.name.match(/label|reference/)) {
+				return;
+			}
+
+			i.value = '';
+		})
+
 		var b = n.querySelector('.input-list button');
 		b.onclick = () => {
 			g.current_list_input = b.parentNode;
