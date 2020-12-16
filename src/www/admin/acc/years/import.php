@@ -46,7 +46,7 @@ if (f('cancel')) {
 $csrf_key = 'acc_years_import_' . $year->id();
 
 $form->runIf(f('assign') && $csv->loaded(), function () use ($csv, $year, $user) {
-	$csv->skip(f('skip_first_line'));
+	$csv->skip((int)f('skip_first_line'));
 	$csv->setTranslationTable(f('translation_table'));
 
 	Transactions::importCustom($year, $csv, $user->id);
