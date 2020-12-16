@@ -266,7 +266,7 @@ class Template extends \KD2\Smartyer
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
 
-			if ($current_value == $value) {
+			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
