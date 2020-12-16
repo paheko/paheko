@@ -64,7 +64,7 @@ class Reports
 
 	/**
 	 * Return account sums per year or per account
-	 * @param  bool $order_year If true will return accounts grouped by year, if false it will return years grouped by account
+	 * @param  bool $by_year If true will return accounts grouped by year, if false it will return years grouped by account
 	 */
 	static public function getAnalyticalSums(bool $by_year = false): \Generator
 	{
@@ -169,7 +169,12 @@ class Reports
 			FROM acc_transactions %s;',
 			$interval, $where_interval);
 
-		extract((array)$db->first($sql));
+		$result = (array)$db->first($sql);
+		extract($result);
+
+		if (!isset($start_interval, $end_interval)) {
+			return [];
+		}
 
 		$out = array_fill_keys(range($start_interval, $end_interval), 0);
 

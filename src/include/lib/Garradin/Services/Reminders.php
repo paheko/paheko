@@ -40,7 +40,7 @@ class Reminders
 			FROM services_reminders_sent rs
 			INNER JOIN services_reminders r ON r.id = rs.id_reminder
 			INNER JOIN services s ON s.id = rs.id_service
-			WHERE rs.id_reminder = ?;', $user_id);
+			WHERE rs.id_reminder = ?;', $reminder_id);
 	}
 
 	static public function listForService(int $service_id)
