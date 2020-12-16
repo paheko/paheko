@@ -243,7 +243,7 @@ class Template extends \KD2\Smartyer
 		elseif (isset($source) && is_array($source) && isset($source[$name])) {
 			$current_value = $source[$name];
 		}
-		elseif (isset($default)) {
+		elseif (isset($default) && !isset($_POST)) {
 			$current_value = $default;
 		}
 

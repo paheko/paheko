@@ -112,22 +112,24 @@
 
 {literal}
 <script type="text/javascript">
-function selectService(elm) {
+function selectService(elm, first_load) {
 	$('[data-service]').forEach((e) => {
 		e.style.display = ('s' + elm.value == e.getAttribute('data-service')) ? 'block' : 'none';
 	});
 
-	$('#f_expiry_date').value = elm.dataset.expiry;
+	if (!first_load) {
+		$('#f_expiry_date').value = elm.dataset.expiry;
+	}
 
 	var first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
 
 	if (first) {
 		first.checked = true;
-		selectFee(first);
+		selectFee(first, first_load);
 	}
 }
 
-function selectFee(elm) {
+function selectFee(elm, first_load) {
 	var amount = parseInt(elm.getAttribute('data-user-amount'), 10);
 
 	// Toggle accounting part of the form
@@ -136,7 +138,7 @@ function selectFee(elm) {
 	$('#f_amount').required = accounting;
 
 	// Fill the amount paid by the user
-	if (amount) {
+	if (amount && !first_load) {
 		$('#f_amount').value = g.formatMoney(amount);
 	}
 }
@@ -149,11 +151,11 @@ $('input[name=id_fee]').forEach((e) => {
 	e.onchange = () => { selectFee(e); };
 });
 
-var selected = document.querySelector('input[name="id_service"]:checked, input[name="id_service"]');
+var selected = document.querySelector('input[name="id_service"]:checked') || document.querySelector('input[name="id_service"]');
 selected.checked = true;
 
 g.toggle('.accounting', false);
-selectService(selected);
+selectService(selected, true);
 
 $('#f_create_payment_1').onchange = (e) => {
 	g.toggle('.accounting dl', $('#f_create_payment_1').checked);
