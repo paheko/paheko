@@ -74,11 +74,11 @@ class Reports
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
 				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
 				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
-				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical) * -1 AS sum_expense,
+				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical AND t2.id_year = t.id_year) * -1 AS sum_expense,
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
 				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
 				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
-				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical) AS sum_revenue
+				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical AND t2.id_year = t.id_year) AS sum_revenue
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_analytical
@@ -99,7 +99,7 @@ class Reports
 
 		$current = null;
 
-		static $sums = ['credit', 'debit', 'sum', 'sum_expense', 'sum_revenue'];
+		static $sums = ['credit', 'debit', 'sum'];
 
 		$total = function (\stdClass $current, bool $by_year) use ($sums)
 		{
