@@ -19,7 +19,7 @@ test:
 	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
 phpstan:
-	php ../tests/phpstan.phar analyze -c ../tests/phpstan.neon include www
+	phpstan.phar analyze -c ../tests/phpstan.neon include www
 
 release: test minify
 	$(eval VERSION=$(shell cat VERSION))
