@@ -221,9 +221,6 @@ class Template extends \KD2\Smartyer
 	{
 		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source'];
 
-		$value = null;
-		$options = null;
-
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
 		$params = array_intersect_key($params, array_flip($params_list));
