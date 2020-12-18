@@ -76,6 +76,45 @@ class Utils
         return $date;
     }
 
+    static public function relative_date($ts, bool $with_hour = false): string
+    {
+        $day = null;
+        $date = self::get_datetime($ts);
+
+        if (null === $ts) {
+            return $ts;
+        }
+
+        if ($date->format('Ymd') == date('Ymd'))
+        {
+            $day = 'aujourd\'hui';
+        }
+        elseif ($date->format('Ymd') == date('Ymd', strtotime('yesterday')))
+        {
+            $day = 'hier';
+        }
+        elseif ($date->format('Ymd') == date('Ymd', strtotime('tomorrow')))
+        {
+            $day = 'demain';
+        }
+        elseif ($date->format('Y') == date('Y'))
+        {
+            $day = strtolower(self::strftime_fr($date, '%A %e %B'));
+        }
+        else
+        {
+            $day = strtolower(self::strftime_fr($date, '%e %B %Y'));
+        }
+
+        if ($with_hour)
+        {
+            $hour = $date->format('H\hi');
+            return sprintf('%s, %s', $day, $hour);
+        }
+
+        return $day;
+    }
+
     /**
      * @deprecated
      */

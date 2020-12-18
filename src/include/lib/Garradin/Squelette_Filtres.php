@@ -83,36 +83,7 @@ class Squelette_Filtres
 
     static public function date_intelligente($date, $avec_heure = true)
     {
-        $jour = null;
-        $heure = date('H\hi', $date);
-
-        if (date('Ymd', $date) == date('Ymd'))
-        {
-            $jour = 'aujourd\'hui';
-        }
-        elseif (date('Ymd', $date) == date('Ymd', strtotime('yesterday')))
-        {
-            $jour = 'hier';
-        }
-        elseif (date('Ymd', $date) == date('Ymd', strtotime('tomorrow')))
-        {
-            $jour = 'demain';
-        }
-        elseif (date('Y', $date) == date('Y'))
-        {
-            $jour = strtolower(Utils::strftime_fr($date, '%A %e %B'));
-        }
-        else
-        {
-            $jour = strtolower(Utils::strftime_fr($date, '%e %B %Y'));
-        }
-
-        if ($avec_heure)
-        {
-            return sprintf('%s, %s', $jour, $heure);
-        }
-
-        return $jour;
+        return Utils::relative_date($date, $avec_heure);
     }
 
     static public function date_atom($date)

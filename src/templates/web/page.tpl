@@ -3,8 +3,8 @@
 <nav class="tabs">
 	{if $page.type == $page::TYPE_CATEGORY}
 	<aside>
-		{linkbutton shape="plus" label="Nouvelle page" href="new.php?type=%d&parent=%d"|args:$type_page,$parent}
-		{linkbutton shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%d"|args:$type_category,$parent}
+		{linkbutton shape="plus" label="Nouvelle page" href="new.php?type=%d&parent=%d"|args:$type_page,$page.id}
+		{linkbutton shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%d"|args:$type_category,$page.id}
 	</aside>
 	{/if}
 	<ul>
@@ -59,7 +59,7 @@
 	{/if}
 
 	{if !$content}
-		<p class="block alert">Cette page est vide, cliquez sur « Éditer » pour la modifier.</p>
+		<p class="block alert">Cette page est vide, cliquez sur « Modifier » pour commencer à rédiger son contenu.</p>
 	{else}
 		<div class="wikiContent">
 			{$content|raw}

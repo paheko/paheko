@@ -1,41 +1,27 @@
 <?php
 namespace Garradin;
 
+use Garradin\Web;
+use Garradin\Entities\Web\Page;
+
 require_once __DIR__ . '/_inc.php';
 
-qv(['parent' => 'required|numeric']);
+$parent = (int)qg('parent');
+$breadcrumbs = [];
 
-$parent = (int) qg('parent');
+if ($parent) {
+	$page = Web::get($parent);
 
-$tpl->assign('parent', $parent);
-$tpl->assign('list', $wiki->listBackParentTree($parent));
+	if (!$page) {
+		throw new UserException('Page inconnue');
+	}
 
-function tpl_display_tree($params)
-{
-    if (isset($params['tree']))
-        $tree = $params['tree'];
-    else
-        $tree = $params;
-
-    $out = '<ul>';
-
-    foreach ($tree as $node)
-    {
-        $out .= '<li'.(qg('parent') == $node->id ? ' class="current"' : '').'><h3><a href="?parent='.(int)$node->id.'">'.htmlspecialchars($node->titre, ENT_QUOTES, 'UTF-8', false).'</a></h3>';
-
-        if (!empty($node->children))
-        {
-            $out .= tpl_display_tree($node->children);
-        }
-
-        $out .= '</li>';
-    }
-
-    $out .= '</ul>';
-
-    return $out;
+	$tpl->assign('page', $page);
+	$breadcrumbs = $page->getBreadcrumbs();
 }
 
-$tpl->register_function('display_tree', 'Garradin\tpl_display_tree');
+$tpl->assign(compact('breadcrumbs', 'parent'));
 
-$tpl->display('admin/wiki/_chercher_parent.tpl');
+$tpl->assign('categories', Web::listCategories($parent));
+
+$tpl->display('web/_selector.tpl');

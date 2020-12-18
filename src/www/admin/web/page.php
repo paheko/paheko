@@ -31,7 +31,10 @@ $files = $page->getAttachmentsGallery(false);
 
 $content = $page->render(['prefix' => ADMIN_URL . 'web/page.php?uri=']);
 
-$tpl->assign(compact('page', 'images', 'files', 'content'));
+$type_page = Page::TYPE_PAGE;
+$type_category = Page::TYPE_CATEGORY;
+
+$tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category'));
 
 $tpl->assign('custom_js', ['wiki_gallery.js']);
 

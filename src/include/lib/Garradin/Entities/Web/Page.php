@@ -68,6 +68,11 @@ class Page extends Entity
 		return $this->_content;
 	}
 
+	public function created(): \DateTime
+	{
+		return $this->file()->created;
+	}
+
 	public function file(): File
 	{
 		if (null === $this->_file) {
@@ -84,7 +89,7 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$this->modified = new \DateTime;
+		$this->set('modified', new \DateTime);
 
 		$file = $this->file();
 		$file->save();
