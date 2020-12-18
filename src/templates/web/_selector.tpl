@@ -1,39 +1,42 @@
-{include file="admin/_head.tpl" title="Choisir la page parent" current="wiki" body_id="popup" is_popup=true}
+{include file="admin/_head.tpl" title="Choisir la page parent" current="web" body_id="popup" is_popup=true}
 
-<div class="wikiTree">
-    <p class="choice">
-        <input type="button" onclick="chooseParent();" value="Choisir la page sélectionnée" />
-    </p>
-
-    {display_tree tree=$list}
-
-</div>
+<table class="web-tree list">
+	<tbody>
+		<tr{if !$parent} class="focused"{/if}>
+			<td><input type="button" value="Choisir" data-id="0" data-label="Racine du site" /></td>
+			<th><h3><a href="?">Racine du site</a></h3></th>
+		</tr>
+		<?php $last = 1; ?>
+		{foreach from=$breadcrumbs item="_title" key="_id"}
+		<tr{if $_id == $parent} class="focused"{/if}>
+			<td><input type="button" value="Choisir" data-id="{$_id}" data-label="{$_title}" /></td>
+			<th><?=str_repeat('<i>&nbsp;</i>', $last)?> <b class="icn">&rarr;</b> <a href="?parent={$_id}">{$_title}</a></th>
+			<?php $last = $iteration; ?>
+		</tr>
+		{/foreach}
+		{foreach from=$categories item="cat"}
+		<tr{if $cat.id == $parent} class="focused"{/if}>
+			<td><input type="button" value="Choisir" data-id="{$cat.id}" data-label="{$cat.title}" /></td>
+			<th><?=str_repeat('<i>&nbsp;</i>', $last)?> <b class="icn">&rarr;</b> <a href="?parent={$cat.id}">{$cat.title}</a></th>
+		</tr>
+		{foreachelse}
+		<tr>
+			<td></td>
+			<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> <b class="icn">&rarr;</b> <em>Pas de sous-catégorie…</em></th>
+		</tr>
+		{/foreach}
+	</tbody>
+</table>
 
 {literal}
 <script type="text/javascript">
-(function() {
-    window.chooseParent = function()
-    {
-        var elm = document.getElementsByClassName("current")[0].getElementsByTagName("a")[0];
+var buttons = document.querySelectorAll('input');
 
-        if (match = elm.href.match(/=(\d+)$/))
-        {
-            var id = parseInt(match[1], 10);
-            var titre = (id == 0 ? 'la racine du site' : elm.innerHTML);
-
-            if (window.opener.changeParent(id, titre))
-            {
-                self.close();
-            }
-            else
-            {
-                alert("Impossible de choisir la page comme parent d'elle-même !");
-            }
-
-            return false;
-        }
-    };
-}());
+buttons.forEach((e) => {
+	e.onclick = () => {
+		window.parent.g.inputListSelected(e.dataset.id, e.dataset.label);
+	};
+});
 </script>
 {/literal}
 
