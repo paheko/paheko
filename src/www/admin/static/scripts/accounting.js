@@ -40,15 +40,12 @@ function initTransactionForm(is_new) {
 			i.onkeyup = (e) => {
 				var v = i.value.replace(/[^0-9,.]/);
 				if (v.length && v != 0) {
-					i.classList.remove('disabled');
-					inputs[+!k].classList.add('disabled');
 					inputs[+!k].value = '0';
 					updateTotals();
 				}
 			};
 
 			if (+i.value == 0 && +inputs[+!k].value != 0) {
-				i.classList.add('disabled');
 				i.value = '0';
 			}
 		});
