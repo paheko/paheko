@@ -1,34 +1,25 @@
 <?php
 namespace Garradin;
 
+use Garradin\Web;
+use Garradin\Entities\Web\Page;
+
 require_once __DIR__ . '/_inc.php';
 
-qv(['id' => 'required|numeric']);
+$page = Web::get((int) qg('id'));
 
-$session->requireAccess('wiki', Membres::DROIT_ADMIN);
-
-$page = $wiki->getByID(qg('id'));
-
-if (!$page)
-{
-    throw new UserException("Cette page n'existe pas.");
+if (!$page) {
+	throw new UserException('Page inconnue');
 }
 
-if (f('delete'))
-{
-    if ($form->check('delete_wiki_' . $page->id))
-    {
-        if ($wiki->delete($page->id))
-        {
-            Utils::redirect(ADMIN_URL . 'wiki/');
-        }
-        else
-        {
-            $form->addError('D\'autres pages utilisent cette page comme rubrique parente.');
-        }
-    }
-}
+$csrf_key = 'web_delete_' . $page->id();
 
-$tpl->assign('page', $page);
+$form->runIf('delete', function () use ($page) {
+	$page->delete();
+}, $csrf_key, ADMIN_URL . 'web/?parent=' . $page->parent_id);
 
-$tpl->display('admin/wiki/supprimer.tpl');
+$tpl->assign(compact('page', 'csrf_key'));
+$tpl->assign('title', $page->type == Page::TYPE_CATEGORY ? 'Supprimer une catégorie' : 'Supprimer une page');
+$tpl->assign('alert', $page->type == Page::TYPE_CATEGORY ? 'Attention ceci supprimera toutes les sous-catégories, pages et fichiers dans cette catégorie.' : 'Attention ceci supprimera tous les fichiers liés dans cette page.');
+
+$tpl->display('web/delete.tpl');

@@ -2,6 +2,10 @@
 
 {form_errors}
 
+{if $diff}
+<pre>{$diff}</pre>
+{/if}
+
 <form method="post" action="{$self_url}" class="web-edit">
 
 	<fieldset class="wikiMain">
