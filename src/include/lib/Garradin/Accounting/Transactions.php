@@ -194,7 +194,7 @@ class Transactions
 							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row->id));
 						}
 
-						if (!$transaction->id_year != $year->id()) {
+						if ($transaction->id_year != $year->id()) {
 							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row->id));
 						}
 
