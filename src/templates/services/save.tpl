@@ -81,7 +81,7 @@
 		<legend>Détails</legend>
 		<dl>
 			{input type="date" name="date" required=1 default=$today label="Date d'inscription"}
-			{input type="date" name="expiry_date" default=$today label="Date d'expiration de l'inscription"}
+			{input type="date" name="expiry_date" label="Date d'expiration de l'inscription"}
 			{input type="checkbox" name="paid" value="1" default="1" label="Marquer cette inscription comme payée"}
 			<dd class="help">Décocher cette case pour pouvoir suivre les règlements de personnes qui payent en plusieurs fois. Il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
@@ -117,8 +117,10 @@ function selectService(elm, first_load) {
 		e.style.display = ('s' + elm.value == e.getAttribute('data-service')) ? 'block' : 'none';
 	});
 
-	if (!first_load) {
-		$('#f_expiry_date').value = elm.dataset.expiry;
+	let expiry = $('#f_expiry_date');
+
+	if (!first_load || !expiry.value) {
+		expiry.value = elm.dataset.expiry;
 	}
 
 	var first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
