@@ -41,7 +41,7 @@ class Service_User extends Entity
 		$this->paid = (bool) $this->paid;
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
-		$this->assert(!$this->exists() && !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+		$this->assert($this->id || !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
 	}
 
 	public function importForm(?array $source = null)
