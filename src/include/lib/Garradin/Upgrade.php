@@ -133,24 +133,7 @@ class Upgrade
 			// Réinstaller les plugins système si nécessaire
 			Plugin::checkAndInstallSystemPlugins();
 
-			// Mettre à jour les plugins si nécessaire
-			foreach (Plugin::listInstalled() as $id=>$infos)
-			{
-				// Ne pas tenir compte des plugins dont le code n'est pas dispo
-				if ($infos->disabled)
-				{
-					continue;
-				}
-
-				$plugin = new Plugin($id);
-
-				if ($plugin->needUpgrade())
-				{
-					$plugin->upgrade();
-				}
-
-				unset($plugin);
-			}
+			Plugin::upgradeAllIfRequired();
 		}
 		catch (\Exception $e)
 		{
