@@ -408,8 +408,10 @@ class Sauvegarde
 		}
 		else {
 			// Force l'installation de plugin système si non existant dans la sauvegarde existante
-			// si une mise à jour est nécessaire, normalement ça sera fait après la mise à jour
 			Plugin::checkAndInstallSystemPlugins();
+
+			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
+			Plugin::upgradeAllIfRequired();
 		}
 
 		return $return;
