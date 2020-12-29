@@ -157,7 +157,9 @@ class Recherche
 			$search->contenu = $this->buildQuery($search->cible, $query->query, $query->order, $query->desc, $no_limit ? 10000 : $query->limit);
 		}
 
-		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
+		$unprotected = $search->type == self::TYPE_SQL_UNPROTECTED;
+
+		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit, $unprotected);
 	}
 
 	public function getResultHeader(string $target, array $result)
