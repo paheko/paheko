@@ -883,12 +883,13 @@ class Utils
         $last->version = $current_version;
 
         foreach ($list as $item) {
-            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1]) && version_compare($last->version, $match[1], '<')) {
+            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1])
+                && version_compare($last->version, $match[1], '<')) {
                 $last->version = $match[1];
             }
         }
 
-        if ($last->version == $current_version) {
+        if (version_compare($last->version, $current_version, '==')) {
             $last->version = null;
         }
 
