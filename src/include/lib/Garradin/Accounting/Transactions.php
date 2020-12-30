@@ -23,7 +23,7 @@ class Transactions
 		'id'             => 'Numéro d\'écriture',
 		'label'          => 'Libellé',
 		'date'           => 'Date',
-		'notes'          => 'Notes',
+		'notes'          => 'Remarques',
 		'reference'      => 'Numéro pièce comptable',
 		'p_reference'    => 'Référence paiement',
 		'debit_account'  => 'Compte de débit',
