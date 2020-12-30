@@ -50,6 +50,9 @@ class Upgrade
 
 		$db = DB::getInstance();
 
+		// reset last version check
+		$db->exec('UPDATE config SET valeur = NULL WHERE cle = \'last_version_check\';');
+
 		// Créer une sauvegarde automatique
 		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
 
