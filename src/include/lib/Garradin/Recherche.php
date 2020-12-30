@@ -294,7 +294,7 @@ class Recherche
 
 			$columns['t.notes'] = (object) [
 				'textMatch'=> true,
-				'label'    => 'Notes',
+				'label'    => 'Remarques',
 				'type'     => 'text',
 				'null'     => true,
 				'alias'    => 'notes',
