@@ -79,7 +79,7 @@ class Service extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => 'm.' . $identity,
-				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE', $identity),
+				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE %%s', $identity),
 			],
 			'status' => [
 				'label' => 'Statut',
