@@ -20,6 +20,8 @@ if (!$account) {
 
 $start = new \DateTime('first day of this month');
 $end = new \DateTime('last day of this month');
+$start->setTime(0, 0, 0);
+$end->setTime(0, 0, 0);
 $only = (bool) qg('only');
 
 if (null !== qg('start') && null !== qg('end'))
