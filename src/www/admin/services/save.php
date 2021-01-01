@@ -10,6 +10,12 @@ require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess('membres', Membres::DROIT_ECRITURE);
 
+$count_all = Services::count();
+
+if (!$count_all) {
+	Utils::redirect(ADMIN_URL . 'services/?CREATE');
+}
+
 $user_id = qg('user');
 
 if (!$user_id && ($user_id = f('user'))) {
@@ -27,11 +33,15 @@ if (!$user_name) {
 	$user_id = null;
 }
 
-$grouped_services = Services::listGroupedWithFees($user_id);
+$current_only = !qg('past_services');
+
+$grouped_services = Services::listGroupedWithFees($user_id, $current_only);
 
 if (!count($grouped_services)) {
-	Utils::redirect(ADMIN_URL . 'services/?CREATE');
+	Utils::redirect(Utils::getSelfURI(['user' => $user_id, 'past_services' => $current_only]));
 }
+
+$has_past_services = count($grouped_services) != $count_all;
 
 $csrf_key = 'service_save';
 
@@ -48,6 +58,6 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 
 $today = new \DateTime;
 
-$tpl->assign(compact('today', 'grouped_services', 'csrf_key', 'selected_user', 'account_targets', 'user_name', 'user_id'));
+$tpl->assign(compact('today', 'grouped_services', 'csrf_key', 'selected_user', 'account_targets', 'user_name', 'user_id', 'current_only', 'has_past_services'));
 
 $tpl->display('services/save.tpl');
