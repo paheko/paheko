@@ -2,10 +2,18 @@
 
 {include file="services/_nav.tpl" current="save" fee=null service=null}
 
-{form_errors}
-
 <form method="post" action="{$self_url}" data-focus="1">
 
+	{if $user_id && $has_past_services}
+	<nav class="tabs">
+		<ul class="sub">
+			<li{if $current_only} class="current"{/if}><a href="?user={$user_id}">Inscrire à une activité courante</a></li>
+			<li{if !$current_only} class="current"{/if}><a href="?user={$user_id}&amp;past_services=1">Inscrire à une activité passée</a></li>
+		</ul>
+	</nav>
+	{/if}
+
+{form_errors}
 	<fieldset>
 		<legend>Inscrire un membre à une activité</legend>
 
@@ -42,7 +50,10 @@
 					</div>
 				</label>
 			</dd>
+		{foreachelse}
+			<dd><p class="error block">Aucune activité trouvée</p></dd>
 		{/foreach}
+
 		</dl>
 
 		{foreach from=$grouped_services item="service"}

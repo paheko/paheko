@@ -174,7 +174,7 @@ class Utils
         return str_replace('/admin', '', ADMIN_URL) . $uri;
     }
 
-    static public function getSelfURI(bool $qs = true)
+    static public function getSelfURI($qs = true)
     {
         return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
     }

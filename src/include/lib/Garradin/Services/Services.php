@@ -19,12 +19,21 @@ class Services
 		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE NOCASE;');
 	}
 
-	static public function listGroupedWithFees(?int $user_id = null)
+	static public function count()
 	{
-		$services = DB::getInstance()->getGrouped('SELECT
+		return DB::getInstance()->count(Service::TABLE, 1);
+	}
+
+	static public function listGroupedWithFees(?int $user_id = null, bool $current_only = true)
+	{
+		$where = $current_only ? 'WHERE end_date IS NULL OR end_date >= date()' : 'WHERE end_date IS NOT NULL AND end_date < date()';
+
+		$sql = sprintf('SELECT
 			id, label, duration, start_date, end_date, description,
 			CASE WHEN end_date IS NOT NULL THEN end_date WHEN duration IS NOT NULL THEN date(\'now\', \'+\'||duration||\' days\') ELSE NULL END AS expiry_date
-			FROM services ORDER BY label COLLATE NOCASE;');
+			FROM services %s ORDER BY label COLLATE NOCASE;', $where);
+
+		$services = DB::getInstance()->getGrouped($sql);
 		$fees = Fees::listAllByService($user_id);
 		$out = [];
 
@@ -34,7 +43,9 @@ class Services
 		}
 
 		foreach ($fees as $fee) {
-			$out[$fee->id_service]->fees[] = $fee;
+			if (isset($out[$fee->id_service])) {
+				$out[$fee->id_service]->fees[] = $fee;
+			}
 		}
 
 		return $out;
