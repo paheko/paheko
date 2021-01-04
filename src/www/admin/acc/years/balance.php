@@ -103,8 +103,10 @@ if ($previous_year) {
 				$line->account = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}
 		}
+		else {
+			$line->account = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
+		}
 
-		$line->account = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
 		$line = (array) $line;
 	}
 
