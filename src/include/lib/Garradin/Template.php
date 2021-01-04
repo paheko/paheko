@@ -536,6 +536,11 @@ class Template extends \KD2\Smartyer
 			case 'date':
 				return Utils::date_fr($v);
 			case 'multiple':
+				// Useful for search results, if a value is not a number
+				if (!is_numeric($v)) {
+					return htmlspecialchars($v);
+				}
+
 				$out = [];
 
 				foreach ($config->options as $b => $name)
