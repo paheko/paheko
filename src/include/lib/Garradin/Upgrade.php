@@ -128,7 +128,7 @@ class Upgrade
 			{
 				// Missing trigger
 				$db->begin();
-				$db->import(ROOT . '/include/data/1.0.1.sql');
+				$db->import(ROOT . '/include/data/1.0.1_migration.sql');
 				$db->commit();
 			}
 
