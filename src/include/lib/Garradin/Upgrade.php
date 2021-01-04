@@ -127,9 +127,9 @@ class Upgrade
 			if (version_compare($v, '1.0.1', '<'))
 			{
 				// Missing trigger
-				$db->beginSchemaUpdate();
+				$db->begin();
 				$db->import(ROOT . '/include/data/1.0.1.sql');
-				$db->commitSchemaUpdate();
+				$db->commit();
 			}
 
 			// Vérification de la cohérence des clés étrangères
