@@ -113,7 +113,9 @@ class Transaction extends Entity
 			l.*, a.label AS account_name, a.code AS account_code,
 			b.label AS analytical_name
 			FROM acc_transactions_lines l
-			INNER JOIN acc_accounts a ON a.id = l.id_account
+			INNER JOIN acc_accounts a ON a.id = l.id_account AND a.id_chart = y.id_chart
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_years y ON y.id = t.id_year
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical
 			WHERE l.id_transaction = ? ORDER BY l.id;', $this->id);
 	}
