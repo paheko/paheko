@@ -289,7 +289,7 @@ class Transaction extends Entity
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui fait partie d\'un exercice clôturé');
+			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
 		}
 
 		if (!parent::save()) {
