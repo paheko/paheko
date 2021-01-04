@@ -494,6 +494,10 @@ class File extends Entity
 
 		$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $this->id());
 
+		if (!$link) {
+			return false;
+		}
+
 		// If it's linked to a file, then we want to know what the parent file is linked to
 		if ($link->{self::LINK_FILE}) {
 			return Files::get((int)$link->{self::LINK_FILE})->checkReadAccess($session);
