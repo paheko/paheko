@@ -3,6 +3,12 @@
 <form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="#f_date">
 	{form_errors}
 
+	{if $has_reconciled_lines}
+	<p class="alert block">
+		Attention, cette écriture contient des lignes qui ont été rapprochées. La modification de cette écriture entraînera la perte du rapprochement.
+	</p>
+	{/if}
+
 	<fieldset>
 		<legend>Type d'écriture</legend>
 		<dl>
