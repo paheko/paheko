@@ -5,8 +5,8 @@ ALTER TABLE membres_categories RENAME TO membres_categories_old;
 INSERT INTO files_contents (id, hash, content, size)
 	SELECT id, hash, contenu, taille FROM fichiers_contenu;
 
-INSERT INTO files (id, hash, folder_id, name, type, created, author_id, public)
-	SELECT f.id, c.hash, NULL, nom, type, datetime, NULL, 0 FROM fichiers f INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+INSERT INTO files (id, hash, folder_id, name, type, created, author_id, public, image)
+	SELECT f.id, c.hash, NULL, nom, type, datetime, NULL, 0, image FROM fichiers f INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
 
 INSERT INTO membres_categories
 	SELECT id, nom,
@@ -23,13 +23,13 @@ INSERT INTO membres_categories
 DROP TABLE membres_categories_old;
 
 -- Copy wiki pages content
-CREATE TEMP TABLE wiki_as_files (old_id, new_id, hash, size, content, name, title, uri, old_parent, new_parent, created, modified, author_id, encrypted, content_id, type, public);
+CREATE TEMP TABLE wiki_as_files (old_id, new_id, hash, size, content, name, title, uri, old_parent, new_parent, created, modified, author_id, encrypted, image, content_id, type, public);
 
 INSERT INTO wiki_as_files
 	SELECT
 		id, NULL, sha1(contenu), LENGTH(contenu), contenu,
 		uri || '.skriv', titre, uri, parent, NULL,
-		date_creation, date_modification, id_auteur, chiffrement, NULL,
+		date_creation, date_modification, id_auteur, chiffrement, 0, NULL,
 		CASE WHEN (SELECT 1 FROM wiki_pages pp WHERE pp.parent = p.id LIMIT 1) THEN 1 ELSE 2 END, -- Type, 1 = category, 2 = page
 		CASE WHEN droit_lecture = -1 THEN 1 ELSE 0 END -- public
 	FROM wiki_pages p
@@ -56,7 +56,7 @@ UPDATE files_folders SET parent_id = (SELECT CASE WHEN f.system = 0 THEN f.id EL
 INSERT INTO files_contents (hash, content, size) SELECT hash, content, size FROM wiki_as_files;
 UPDATE wiki_as_files SET content_id = (SELECT fc.id FROM files_contents fc WHERE fc.hash = wiki_as_files.hash);
 
-INSERT INTO files (hash, folder_id, name, type, created, author_id, public)
+INSERT INTO files (hash, folder_id, name, type, created, author_id, public, image)
 	SELECT
 		hash,
 		(SELECT CASE WHEN public = 0 THEN f.id ELSE f.id + 10000 END FROM files_folders f WHERE f.id = old_parent),
@@ -64,7 +64,8 @@ INSERT INTO files (hash, folder_id, name, type, created, author_id, public)
 		CASE WHEN encrypted THEN 'text/vnd.skriv.encrypted' ELSE 'text/vnd.skriv' END,
 		created,
 		author_id,
-		public
+		public,
+		image
 	FROM wiki_as_files;
 
 INSERT INTO files_search (id, content) SELECT new_id, content FROM wiki_as_files WHERE encrypted = 0;
@@ -83,7 +84,7 @@ INSERT INTO files_links (id, web_page_id)
 	WHERE status = 1;
 
 INSERT INTO files_links (id, file_id)
-	SELECT f.id, w.fichier
+	SELECT w.fichier, waf.new_id
 		FROM fichiers_wiki_pages w
 		INNER JOIN wiki_as_files waf ON waf.old_id = w.id
 		INNER JOIN files f ON f.hash = waf.hash;
@@ -96,8 +97,9 @@ INSERT INTO files_links (id, config)
 
 UPDATE files SET public = 1 WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond');
 
+-- Copy connection page
 INSERT INTO files (hash, folder_id, name, type, created, author_id, public)
-	SELECT hash, NULL, name, type, created, author_id, 0
+	SELECT hash, NULL, 'Accueil_connexion.skriv', type, created, author_id, 0
 	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
 
 UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE cle = 'accueil_connexion';
