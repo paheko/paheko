@@ -101,7 +101,7 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null): array
+	public function listCommonGrouped(array $types = null, bool $include_empty_types = false): array
 	{
 		if (null === $types) {
 			$types = '';
@@ -112,6 +112,21 @@ class Accounts
 		}
 
 		$out = [];
+
+		if ($include_empty_types) {
+			foreach (Account::TYPES_NAMES as $key => $label) {
+				if (!$label) {
+					continue;
+				}
+
+				$out[$key] = (object) [
+					'label'    => $label,
+					'type'     => $key,
+					'accounts' => [],
+				];
+			}
+		}
+
 		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id);
 
