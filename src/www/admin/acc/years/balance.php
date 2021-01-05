@@ -82,7 +82,7 @@ if ($previous_year) {
 		$account = (object) [
 			'id' => null,
 			'code' => null,
-			'label' => 'Résultat de l\'exercice précédent, à affecter',
+			'label' => null,
 		];
 	}
 
@@ -91,6 +91,7 @@ if ($previous_year) {
 		'id'    => $account->id,
 		'code'  => $account->code,
 		'label' => $account->label,
+		'message' => 'Résultat de l\'exercice précédent, à affecter',
 	];
 
 	foreach ($lines as $k => &$line) {
@@ -104,7 +105,7 @@ if ($previous_year) {
 			}
 		}
 		else {
-			$line->account = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
+			$line->account = $line->id ? [$line->id => sprintf('%s — %s', $line->code, $line->label)] : null;
 		}
 
 		$line = (array) $line;
