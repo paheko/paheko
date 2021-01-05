@@ -56,6 +56,7 @@
 					{/if}
 					<th>
 						{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account][]" default=$line.account}
+						{if !empty($line.message)}<span class="alert">{$line.message}</span>{/if}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
