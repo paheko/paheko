@@ -7,3 +7,9 @@ UPDATE acc_transactions SET label = '[ERREUR ! À corriger !] ' || label, status
 		INNER JOIN acc_accounts a ON l.id_account = a.id
 		INNER JOIN acc_years y ON y.id = t.id_year AND y.closed = 0 AND y.id_chart != a.id_chart
 );
+
+UPDATE services_fees SET id_account = NULL, id_year = NULL WHERE id_account IN (
+	SELECT sf.id_account FROM services_fees sf
+		INNER JOIN acc_accounts a ON a.id = sf.id_account
+		INNER JOIN acc_years y ON y.id = sf.id_year
+	WHERE a.id_chart != y.id_chart);
