@@ -70,6 +70,9 @@ class Fee extends Entity
 		if (empty($source['accounting'])) {
 			$source['id_account'] = $source['id_year'] = null;
 		}
+		elseif (!empty($source['accounting']) && empty($source['id_account'])) {
+			$source['id_account'] = null;
+		}
 
 		return parent::importForm($source);
 	}
@@ -88,6 +91,7 @@ class Fee extends Entity
 			|| (null !== $this->id_account && null !== $this->id_year), 'Le compte doit être indiqué avec l\'exercice');
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte indiqué n\'existe pas');
 		$this->assert(null === $this->id_year || $db->test(Year::TABLE, 'id = ?', $this->id_year), 'L\'exercice indiqué n\'existe pas');
+		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_account, $this->id_year), 'Le compte sélectionné ne correspond pas à l\'exercice');
 		$this->assert(null === $this->formula || $this->checkFormula(), 'Formule de calcul invalide');
 		$this->assert(null === $this->amount || null === $this->formula, 'Il n\'est pas possible de spécifier à la fois une formule et un montant');
 	}

@@ -49,7 +49,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 			<dd>
 				<select id="f_id_year" name="id_year">
 					{foreach from=$years item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
+					<option value="{$year.id}"{if $year.id == $fee.id_year} selected="selected"{/if}>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}
 				</select>
 			</dd>
@@ -97,12 +97,16 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 	{
 		var btn = document.querySelector('#f_account_container button');
 		btn.value = btn.value.replace(/year=\d+/, 'year=' + y.value);
+
+		let v = btn.parentNode.querySelector('span');
+		if (v) {
+			v.parentNode.removeChild(v);
+		}
 	}
 
 	var y = $('#f_id_year')
 
 	y.onchange = toggleYearForSelector;
-	toggleYearForSelector();
 })();
 {/literal}
 </script>
