@@ -1,6 +1,6 @@
 UPDATE acc_accounts SET position = 3 WHERE code = '445' OR code = '444' AND id_chart IN (SELECT id FROM acc_charts WHERE code = 'PCGA1999');
 
-UPDATE acc_transactions SET label = '[ERREUR ! À corriger !] ' || label WHERE id IN (
+UPDATE acc_transactions SET label = '[ERREUR ! À corriger !] ' || label, status = 8 WHERE id IN (
 	SELECT DISTINCT t.id
 		FROM acc_transactions t
 		INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id

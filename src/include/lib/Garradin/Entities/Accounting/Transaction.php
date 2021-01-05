@@ -26,6 +26,7 @@ class Transaction extends Entity
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
 	const STATUS_DEPOSIT = 4;
+	const STATUS_ERROR = 8;
 
 	const STATUS_NAMES = [
 		1 => 'En attente de règlement',
@@ -311,8 +312,7 @@ class Transaction extends Entity
 
 		// Remove flag
 		if ((self::TYPE_DEBT == $this->type || self::TYPE_CREDIT == $this->type) && $this->_related) {
-			$this->_related->removeStatus(self::STATUS_WAITING);
-			$this->_related->addStatus(self::STATUS_PAID);
+			$this->_related->markPaid();
 			$this->_related->save();
 		}
 
@@ -325,6 +325,11 @@ class Transaction extends Entity
 
 	public function addStatus(int $property) {
 		$this->set('status', $this->status | $property);
+	}
+
+	public function markPaid() {
+		$this->removeStatus(self::STATUS_WAITING);
+		$this->addStatus(self::STATUS_PAID);
 	}
 
 	public function delete(): bool
@@ -729,5 +734,10 @@ class Transaction extends Entity
 		}
 
 		return $out;
+	}
+
+	public function getTypeName(): string
+	{
+		return self::TYPES_NAMES[$this->type];
 	}
 }

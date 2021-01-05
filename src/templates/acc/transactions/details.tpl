@@ -11,6 +11,7 @@
 
 {if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
 <div class="block alert">
+	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
 		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
@@ -18,7 +19,17 @@
 		<h3>Créance en attente</h3>
 		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
 	{/if}
+		{button type="submit" shape="check" label="Marquer manuellement comme réglée" name="mark_paid" value="1"}
+		{csrf_field key=$csrf_key}
+	</form>
 </div>
+{/if}
+
+{if $transaction.status & $transaction::STATUS_ERROR}
+<p class="error block">
+	Cette écriture est erronée suite à un bug. Il est conseillé de la supprimer et la re-créer.
+	Voir <a href="https://fossil.kd2.org/garradin/wiki?name=Changelog#1_0_1" target="_blank">cette page pour plus d'explications</a>
+</p>
 {/if}
 
 <dl class="describe">
@@ -28,6 +39,10 @@
 		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
 	</dd>
 	{/if}
+	<dt>Type</dt>
+	<dd>
+		{$transaction->getTypeName()}
+	</dd>
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label}</h2></dd>
 	<dt>Date</dt>
