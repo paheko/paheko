@@ -518,7 +518,10 @@ class Account extends Entity
 
 	public function save(): bool
 	{
-		Config::getInstance()->set('last_chart_change', time());
+		$c = Config::getInstance();
+		$c->set('last_chart_change', time());
+		$c->save();
+
 		return parent::save();
 	}
 }
