@@ -529,10 +529,16 @@ class Transaction extends Entity
 
 		$debit = $credit = 0;
 
-		foreach ($lines as $line) {
+		foreach ($lines as $k => $line) {
 			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
-			$line = (new Line)->importForm($line);
-			$this->addLine($line);
+
+			try {
+				$line = (new Line)->importForm($line);
+				$this->addLine($line);
+			}
+			catch (ValidationException $e) {
+				throw new ValidationException(sprintf('Ligne %d : %s', $k+1, $e->getMessage()), 0, $e);
+			}
 
 			$debit += $line->debit;
 			$credit += $line->credit;
