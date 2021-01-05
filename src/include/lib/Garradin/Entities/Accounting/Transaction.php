@@ -489,6 +489,9 @@ class Transaction extends Entity
 				$this->addLine($line);
 			}
 		}
+
+		// Remove error status when changed
+		$this->removeStatus(self::STATUS_ERROR);
 	}
 
 	public function importFromEditForm(?array $source = null): void
