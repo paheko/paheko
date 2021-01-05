@@ -520,7 +520,6 @@ class Account extends Entity
 	{
 		$c = Config::getInstance();
 		$c->set('last_chart_change', time());
-		$c->save();
 
 		return parent::save();
 	}

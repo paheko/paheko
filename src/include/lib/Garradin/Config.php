@@ -108,8 +108,7 @@ class Config
     {
         if (!empty($this->modified))
         {
-            // FIXME: on devrait loguer/envoyer une erreur ici si on a modifié quelque chose sans le sauver
-            //echo '<div style="color: red; background: #fff;">Il y a des champs modifiés non sauvés dans '.__CLASS__.' !</div>';
+            $this->save();
         }
     }
 
