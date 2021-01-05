@@ -26,10 +26,12 @@
 {/if}
 
 {if $transaction.status & $transaction::STATUS_ERROR}
-<p class="error block">
-	Cette écriture est erronée suite à un bug. Il est conseillé de la modifier pour remettre les comptes manquants, ou la supprimer et la re-créer.
-	Voir <a href="https://fossil.kd2.org/garradin/wiki?name=Changelog#1_0_1" target="_blank">cette page pour plus d'explications</a>
-</p>
+<div class="error block">
+	<p>Cette écriture est erronée suite à un bug. Il est conseillé de la modifier pour remettre les comptes manquants, ou la supprimer et la re-créer.
+	Voir <a href="https://fossil.kd2.org/garradin/wiki?name=Changelog#1_0_1" target="_blank">cette page pour plus d'explications</a></p>
+	<p>Les lignes erronées sont affichées en bas de cette page.</p>
+	<p><em>(Ce message disparaîtra si vous modifiez l'écriture pour la corriger.)</em></p>
+</div>
 {/if}
 
 <dl class="describe">
@@ -113,7 +115,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{foreach from=$transaction->getLinesWithAccounts() item="line"}
+		{foreach from=$transaction->getLinesWithAccounts(false) item="line"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>

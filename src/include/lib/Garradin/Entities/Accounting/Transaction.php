@@ -107,18 +107,25 @@ class Transaction extends Entity
 		}
 	}
 
-	public function getLinesWithAccounts()
+	/**
+	 * @param  bool $restrict_year Set to TRUE to only return lines linked to the correct chart, or FALSE (deprecated/legacy) to return all lines even if they are linked to accounts in the wrong chart!
+	 */
+	public function getLinesWithAccounts(bool $restrict_year = true)
 	{
-		$em = EntityManager::getInstance(Line::class);
-		return $em->DB()->get('SELECT
+		$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
+
+		$sql = sprintf('SELECT
 			l.*, a.label AS account_name, a.code AS account_code,
 			b.label AS analytical_name
 			FROM acc_transactions_lines l
-			INNER JOIN acc_accounts a ON a.id = l.id_account AND a.id_chart = y.id_chart
+			INNER JOIN acc_accounts a ON a.id = l.id_account %s
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_years y ON y.id = t.id_year
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical
-			WHERE l.id_transaction = ? ORDER BY l.id;', $this->id);
+			WHERE l.id_transaction = ? ORDER BY l.id;', $restrict);
+
+		$em = EntityManager::getInstance(Line::class);
+		return $em->DB()->get($sql, $this->id);
 	}
 
 	public function getLines($with_accounts = false)
