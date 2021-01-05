@@ -447,7 +447,10 @@ class Transaction extends Entity
 			}
 
 			if (empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
-				$this->status = self::STATUS_WAITING;
+				$this->addStatus(self::STATUS_WAITING);
+			}
+			else {
+				$this->removeStatus(self::STATUS_WAITING);
 			}
 
 			if (empty($source['amount'])) {
