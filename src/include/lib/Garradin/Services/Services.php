@@ -4,6 +4,7 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Membres\Categories;
 use Garradin\Entities\Services\Service;
 use KD2\DB\EntityManager;
 
@@ -54,11 +55,19 @@ class Services
 	static public function listWithStats()
 	{
 		$db = DB::getInstance();
-		return $db->get('SELECT s.*,
-			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1) AS nb_users_ok,
-			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND expiry_date < date()) AS nb_users_expired,
-			(SELECT COUNT(DISTINCT id_user) FROM services_users WHERE id_service = s.id AND paid = 0) AS nb_users_unpaid
+		$hidden_cats = array_keys((new Categories)->listHidden());
+
+		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
+			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_service = s.id AND m.id_categorie NOT IN (%s)',
+			implode(',', $hidden_cats));
+
+		$sql = sprintf('SELECT s.*,
+			(%s AND (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1) AS nb_users_ok,
+			(%1$s AND expiry_date < date()) AS nb_users_expired,
+			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services s
-			ORDER BY transliterate_to_ascii(s.label) COLLATE NOCASE;');
+			ORDER BY transliterate_to_ascii(s.label) COLLATE NOCASE;', $condition);
+
+		return $db->get($sql);
 	}
 }
