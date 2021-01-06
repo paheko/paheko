@@ -282,11 +282,13 @@ class Reports
 
 		$result = self::getResult($criterias);
 
-		$out[Account::LIABILITY][] = (object) [
-			'id' => null,
-			'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
-			'sum' => $result,
-		];
+		if ($result != 0) {
+			$out[Account::LIABILITY][] = (object) [
+				'id' => null,
+				'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
+				'sum' => $result,
+			];
+		}
 
 		// Calculate the total sum for assets and liabilities
 		foreach ($out as $position => $rows) {
