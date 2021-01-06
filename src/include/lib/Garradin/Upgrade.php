@@ -79,7 +79,7 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
-			if (version_compare($v, '1.0.0-beta6', '>=') && version_compare($v, '1.0.0-beta8', '<'))
+			if (version_compare($v, '1.0.0-beta8', '<'))
 			{
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0-beta8_migration.sql');
@@ -93,7 +93,7 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc10', '<'))
+			if (version_compare($v, '1.0.0-rc10', '<'))
 			{
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0-rc10_migration.sql');
@@ -108,7 +108,7 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc14', '<'))
+			if (version_compare($v, '1.0.0-rc14', '<'))
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
@@ -116,7 +116,7 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc16', '<'))
+			if (version_compare($v, '1.0.0-rc16', '<'))
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
