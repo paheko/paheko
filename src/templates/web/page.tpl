@@ -12,7 +12,7 @@
 		{if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE)}
 			<li><a href="{$admin_url}web/edit.php?id={$page.id}">Modifier</a></li>
 		{/if}
-		{if $page.status == $page::STATUS_ONLINE}
+		{if $page.status == $page::STATUS_ONLINE && !$config.desactiver_site}
 			<li><a href="{$page->url()}">Voir sur le site</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ADMIN)}
