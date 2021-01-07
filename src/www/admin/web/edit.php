@@ -17,18 +17,19 @@ if (!$page) {
 
 $csrf_key = 'edit_' . $page->id();
 $editing_started = f('editing_started') ?: date('Y-m-d H:i:s');
-$diff = null;
 
 if (f('cancel')) {
 	Utils::redirect(ADMIN_URL . 'web/?parent=' . $page->parent_id);
 }
 
-$form->runIf('save', function () use ($page, $editing_started, &$diff) {
+$show_diff = false;
+
+$form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	$editing_started = new \DateTime($editing_started);
 
 	if ($editing_started < $page->modified) {
-		$diff = SimpleDiff::diff($page->raw(), f('content'));
-		throw new UserException('La page a été modifiée par quelqu\'un d\'autre.');
+		$show_diff = true;
+		throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
 	}
 
 	$page->importForm();
@@ -38,7 +39,10 @@ $form->runIf('save', function () use ($page, $editing_started, &$diff) {
 $parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
 $encrypted = f('encrypted') || $page->file()->type == Page::FILE_TYPE_ENCRYPTED;
 
-$tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'diff'));
+$old_content = f('content');
+$new_content = $page->raw();
+
+$tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
 
 $tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
 $tpl->assign('custom_css', ['wiki.css', 'scripts/wiki_editor.css']);
