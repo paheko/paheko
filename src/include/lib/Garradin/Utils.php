@@ -832,17 +832,17 @@ class Utils
         return array($h * 360, $s, $v);
     }
 
-    static public function HTTPCache(string $hash, int $expiry): bool
+    static public function HTTPCache(string $hash, int $last_change): bool
     {
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
-        if ($etag === $hash && $last_modified <= $expiry) {
+        if ($etag === $hash && $last_modified >= $last_change) {
             header('HTTP/1.1 304 Not Modified', true, 304);
             exit;
         }
 
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $expiry)));
+        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
         header(sprintf('Etag: %s', $hash));
         header('Cache-Control: private');
 
