@@ -2,8 +2,9 @@
 
 {form_errors}
 
-{if $diff}
-<pre>{$diff}</pre>
+{if $show_diff}
+	<h3>Modifications entre votre version et la nouvelle version</h3>
+	{diff old=$old_content new=$new_content}
 {/if}
 
 <form method="post" action="{$self_url}" class="web-edit">

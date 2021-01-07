@@ -373,3 +373,62 @@ form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
     text-align: center;
     transition: all .5s, opacity 3s;
 }
+
+.diff {
+    margin: 1em;
+}
+
+.diff .ins {diff
+    background: #cfc;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fcc;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-family: Mono;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.diff ins { background: #9f9; }
+.diff del { background: #f99; }
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #fff;
+    color: #fff;
+    margin: .2em .4em;
+}
+
+.diff .separator {
+    background: #ccc;
+}
+
+.diff {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .leftChange b, .diff .rightChange b {
+    text-shadow: 1px 1px 1px #ccc;
+    color: #666;
+}
