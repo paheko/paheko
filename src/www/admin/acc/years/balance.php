@@ -36,9 +36,9 @@ if (f('save') && $form->check('acc_years_balance_' . $year->id()))
 }
 
 $previous_year = null;
+$year_selected = f('from_year') !== null;
 $chart_change = false;
 $lines = [[]];
-$lines_accounts = [[]];
 $years = Years::listClosed();
 
 // Empty balance
@@ -53,7 +53,6 @@ elseif (null !== f('from_year')) {
 		throw new UserException('Année précédente invalide');
 	}
 }
-
 
 if ($previous_year) {
 	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
@@ -83,15 +82,16 @@ if ($previous_year) {
 		$account = (object) [
 			'id' => null,
 			'code' => null,
-			'label' => 'Résultat de l\'exercice',
+			'label' => null,
 		];
 	}
 
 	$lines[] = (object) [
-		'sum' => $result,
-		'id' => $account->id,
-		'code' => $account->code,
+		'sum'   => $result,
+		'id'    => $account->id,
+		'code'  => $account->code,
 		'label' => $account->label,
+		'message' => 'Résultat de l\'exercice précédent, à affecter',
 	];
 
 	foreach ($lines as $k => &$line) {
@@ -101,20 +101,29 @@ if ($previous_year) {
 		if ($chart_change) {
 			if (array_key_exists($line->code, $matching_accounts)) {
 				$acc = $matching_accounts[$line->code];
-				$line->account_selected = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
-			}
-			else {
-				$line->account_selected = null;
+				$line->account = [$acc->id => sprintf('%s — %s', $acc->code, $acc->label)];
 			}
 		}
 		else {
-			$line->account_selected = [$line->id => sprintf('%s — %s', $line->code, $line->label)];
+			$line->account = $line->id ? [$line->id => sprintf('%s — %s', $line->code, $line->label)] : null;
 		}
+
+		$line = (array) $line;
 	}
 
 	unset($line);
 }
 
-$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year'));
+if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
+	$lines = Utils::array_transpose($_POST['lines']);
+
+	foreach ($lines as &$line) {
+		$line['credit'] = Utils::moneyToInteger($line['credit']);
+		$line['debit'] = Utils::moneyToInteger($line['debit']);
+	}
+}
+
+
+$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year'));
 
 $tpl->display('acc/years/balance.tpl');

@@ -82,6 +82,14 @@ else {
 	}
 }
 
+$has_reconciled_lines = true;
+
+array_walk($lines, function ($l) use (&$has_reconciled_lines) {
+	if (!empty($line->reconciled)) {
+		$has_reconciled_lines = true;
+	}
+});
+
 $first_line = $transaction->getFirstLine();
 
 if ($transaction->type != Transaction::TYPE_ADVANCED) {
@@ -90,7 +98,7 @@ if ($transaction->type != Transaction::TYPE_ADVANCED) {
 
 $amount = $transaction->getLinesCreditSum();
 
-$tpl->assign(compact('transaction', 'lines', 'types_accounts', 'amount', 'first_line'));
+$tpl->assign(compact('transaction', 'lines', 'types_accounts', 'amount', 'first_line', 'has_reconciled_lines'));
 
 $tpl->assign('types_details', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());

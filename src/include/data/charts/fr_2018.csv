@@ -218,8 +218,8 @@ code,label,description,position,type
 4718,Compte d'attente,,Actif ou passif,
 48,COMPTES DE REGULARISATION,,Actif ou passif,
 481,Charges à répartir,,Passif,
-486,Charges constatées d'avance,,Passif,
-487,Produits constatés d'avance,,Actif,
+486,Charges constatées d'avance,,Actif,
+487,Produits constatés d'avance,,Passif,
 49,DÉPRECIATIONS DES COMPTES DE TIERS,,Actif ou passif,
 491,Prov. pour dépreciation des comptes d'usagers,,Passif,
 496,Prov. pour dépreci. cptes débiteurs divers,,Passif,
@@ -543,8 +543,8 @@ code,label,description,position,type
 871,Prestations en nature,,Produit,Bénévolat
 875,Bénévolat,,Produit,Bénévolat
 89,COMPTES DE BILAN,,,
-890,Bilan d'ouverture,,,Ouverture
-891,Bilan de clôture,,,Clôture
+890,Bilan d'ouverture,,Actif ou passif,Ouverture
+891,Bilan de clôture,,Actif ou passif,Clôture
 9,Classe 9 — Comptes analytiques,,,
 90,COMPTES RÉFLÉCHIS,,,
 906,Charges réfléchies,,,

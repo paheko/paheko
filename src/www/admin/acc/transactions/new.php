@@ -17,7 +17,6 @@ $chart = $current_year->chart();
 $accounts = $chart->accounts();
 
 $transaction = new Transaction;
-$transaction->type = -1;
 $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
@@ -45,7 +44,7 @@ if ($id = qg('account')) {
 	$key = sprintf('account_%d_%d', $transaction->type, 0);
 
 	if (!isset($_POST[$key])) {
-		$_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
+		$lines[0]['account'] = $_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
 	}
 }
 elseif (!empty($_POST['lines']) && is_array($_POST['lines'])) {
@@ -64,7 +63,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 		$transaction->id_creator = $session->getUser()->id;
 		$transaction->save();
 
-		// Append file
+		// Append fileTYPE_ANALYTICAL
 		if (!empty($_FILES['file']['name'])) {
 			$file = Fichiers::upload($_FILES['file']);
 			$file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());

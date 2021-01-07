@@ -1,4 +1,4 @@
-.PHONY: dev-server release deps publish check-dependencies test minify
+.PHONY: dev-server release deps publish check-dependencies test minify phpstan
 KD2_FILE := https://fossil.kd2.org/kd2fw/uv/KD2-7.2.zip
 
 deps:
@@ -17,6 +17,9 @@ dev-server:
 
 test:
 	find . -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+phpstan:
+	phpstan.phar analyze -c ../tests/phpstan.neon include www
 
 release: test minify
 	$(eval VERSION=$(shell cat VERSION))
@@ -55,4 +58,5 @@ check-dependencies:
 
 minify:
 	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
-	yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
+	# Minify is only gaining 500 gzipped bytes (4kB uncompressed) but making things hard to read/hack
+	#yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css

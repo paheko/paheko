@@ -238,7 +238,7 @@ if (ERRORS_REPORT_URL)
 	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
-ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
+ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
 	body {font-family: sans-serif; }
 	code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
@@ -248,7 +248,7 @@ ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erre
 	</style></head><body><h1>Erreur interne</h1><p>Désolé mais le serveur a rencontré une erreur interne
 	et ne peut répondre à votre requête. Merci de ré-essayer plus tard.</p>
 	<p>Si vous suspectez un bug dans Garradin, vous pouvez suivre 
-	<a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>
+	<a href="https://fossil.kd2.org/garradin/wiki?name=Rapporter+un+bug&p">ces instructions</a>
 	pour le rapporter.</p>
 	<if(sent)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
 	<if(logged)><code>L\'erreur a été enregistrée dans les journaux système (error.log) sous la référence : <b>{$ref}</b></code></if>

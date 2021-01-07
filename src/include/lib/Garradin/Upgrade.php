@@ -50,6 +50,9 @@ class Upgrade
 
 		$db = DB::getInstance();
 
+		// reset last version check
+		$db->exec('UPDATE config SET valeur = NULL WHERE cle = \'last_version_check\';');
+
 		// Créer une sauvegarde automatique
 		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
 
@@ -75,24 +78,7 @@ class Upgrade
 			// Réinstaller les plugins système si nécessaire
 			Plugin::checkAndInstallSystemPlugins();
 
-			// Mettre à jour les plugins si nécessaire
-			foreach (Plugin::listInstalled() as $id=>$infos)
-			{
-				// Ne pas tenir compte des plugins dont le code n'est pas dispo
-				if ($infos->disabled)
-				{
-					continue;
-				}
-
-				$plugin = new Plugin($id);
-
-				if ($plugin->needUpgrade())
-				{
-					$plugin->upgrade();
-				}
-
-				unset($plugin);
-			}
+			Plugin::upgradeAllIfRequired();
 		}
 		catch (\Exception $e)
 		{

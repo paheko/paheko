@@ -9,6 +9,8 @@ use Garradin\Entities\Accounting\Year;
 use Garradin\CSV;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
+use Garradin\ValidationException;
 use KD2\DB\EntityManager;
 
 class Accounts
@@ -99,7 +101,7 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null): array
+	public function listCommonGrouped(array $types = null, bool $include_empty_types = false): array
 	{
 		if (null === $types) {
 			$types = '';
@@ -110,6 +112,21 @@ class Accounts
 		}
 
 		$out = [];
+
+		if ($include_empty_types) {
+			foreach (Account::TYPES_NAMES as $key => $label) {
+				if (!$label) {
+					continue;
+				}
+
+				$out[$key] = (object) [
+					'label'    => $label,
+					'type'     => $key,
+					'accounts' => [],
+				];
+			}
+		}
+
 		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id);
 
@@ -179,6 +196,14 @@ class Accounts
 				$account = new Account;
 				$account->id_chart = $this->chart_id;
 				try {
+					if (!isset($positions[$row['position']])) {
+						throw new ValidationException('Position inconnue : ' . $row['position']);
+					}
+
+					if (!isset($types[$row['type']])) {
+						throw new ValidationException('Type inconnu : ' . $row['type']);
+					}
+
 					$row['position'] = $positions[$row['position']];
 					$row['type'] = $types[$row['type']];
 					$account->importForm($row);
