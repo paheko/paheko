@@ -8,6 +8,8 @@
 * [Entraide](/wiki/?name=Entraide)
 
 <ul id="download">
+	<li><a href="$ROOT/wiki/?name=Changelog">Nouveautés</a></li>
+	<li><a href="$ROOT/uvlist">Anciennes versions</a></li>
 </ul>
 
 </nav>
@@ -97,7 +99,7 @@ function isNewerVersion (oldVer, newVer) {
 	return false
 }
 
-fetch('/garradin/juvlist').then((r) => {
+fetch('/garradin/juvlist?'+(+(new Date))).then((r) => {
 	r.json().then((list) => {
 		let last;
 		let selected;
@@ -124,10 +126,9 @@ fetch('/garradin/juvlist').then((r) => {
 			time = Math.round(days / 30.5) + ' mois';
 		}
 
-		document.querySelector('#download').innerHTML += `<li><strong>Dernière version : ${last}</strong></li>
+		document.querySelector('#download').innerHTML = `<li><strong>Dernière version : ${last}</strong></li>
 			<li><em>il y a ${time}</em></li>
-			<li><a href="$ROOT/wiki/?name=Changelog">Nouveautés</a></li>
-			<li><a href="$ROOT/uv/${selected.name}">Télécharger</a></li>`;
+			<li><a href="$ROOT/uv/${selected.name}">Télécharger</a></li>` + document.querySelector('#download').innerHTML;
 	});
 });
 </script>

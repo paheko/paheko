@@ -159,7 +159,7 @@ class Utils
         }
 
         if (!preg_match('/^-?(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
-            throw new UserException(sprintf('Le format du montant est invalide : %s. Format accepté, exemple : 142,02', $value));
+            throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
         }
 
         $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
@@ -211,7 +211,7 @@ class Utils
         return str_replace('/admin', '', ADMIN_URL) . $uri;
     }
 
-    static public function getSelfURI(bool $qs = true)
+    static public function getSelfURI($qs = true)
     {
         return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
     }
@@ -579,9 +579,12 @@ class Utils
         {
             $url = ADMIN_URL . 'plugin/' . $params['id'] . '/';
         }
-        else
+        elseif (defined('Garradin\PLUGIN_URL'))
         {
             $url = PLUGIN_URL;
+        }
+        else {
+            throw new \RuntimeException('Missing plugin URL');
         }
 
         if (!empty($params['file']))
@@ -815,17 +818,17 @@ class Utils
         return array($h * 360, $s, $v);
     }
 
-    static public function HTTPCache(string $hash, int $expiry): bool
+    static public function HTTPCache(string $hash, int $last_change): bool
     {
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
-        if ($etag === $hash && $last_modified <= $expiry) {
+        if ($etag === $hash && $last_modified >= $last_change) {
             header('HTTP/1.1 304 Not Modified', true, 304);
             exit;
         }
 
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $expiry)));
+        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
         header(sprintf('Etag: %s', $hash));
         header('Cache-Control: private');
 
@@ -866,12 +869,13 @@ class Utils
         $last->version = $current_version;
 
         foreach ($list as $item) {
-            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1]) && version_compare($last->version, $match[1], '<')) {
+            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1])
+                && version_compare($last->version, $match[1], '<')) {
                 $last->version = $match[1];
             }
         }
 
-        if ($last->version == $current_version) {
+        if (version_compare($last->version, $current_version, '==')) {
             $last->version = null;
         }
 

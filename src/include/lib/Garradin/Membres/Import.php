@@ -121,6 +121,10 @@ class Import
 				continue;
 			}
 
+			if (!isset($columns)) {
+				throw new UserException('Entête introuvable');
+			}
+
 			if (count($row) != count($columns))
 			{
 				$db->rollback();
@@ -228,16 +232,16 @@ class Import
 		];
 	}
 
-	public function toCSV(array $list = null)
+	public function toCSV(array $list = null): void
 	{
 		list($champs, $result, $name) = $this->export($list);
-		return CSV::toCSV($name, $result, $champs, [$this, 'exportRow']);
+		CSV::toCSV($name, $result, $champs, [$this, 'exportRow']);
 	}
 
-	public function toODS(array $list = null)
+	public function toODS(array $list = null): void
 	{
 		list($champs, $result, $name) = $this->export($list);
-		return CSV::toODS($name, $result, $champs, [$this, 'exportRow']);
+		CSV::toODS($name, $result, $champs, [$this, 'exportRow']);
 	}
 
 	public function exportRow(\stdClass $row) {

@@ -98,9 +98,20 @@ table.list .disabled {
     color: rgb(var(--gBgColor));
 }
 
+.userOrder a {
+    text-decoration: none;
+    display: block;
+    color: inherit;
+    padding: .2em;
+    border-radius: .5em;
+}
+
+.userOrder a:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 table.list .userOrder td, table.list .userOrder th {
-    position: relative;
-    padding-left: 2.3em;
+    padding: .2em;
 }
 
 table.list .userOrder .check {
@@ -108,33 +119,18 @@ table.list .userOrder .check {
 }
 
 .userOrder .icn {
-    position: absolute;
-    left: .3em;
-    top: 0;
+    display: inline-block;
     color: rgb(var(--gMainColor));
-    text-decoration: none;
     font-size: 1.5em;
-    line-height: .5em;
+    line-height: .2em;
     width: 1em;
     text-align: center;
     vertical-align: middle;
     font-weight: normal;
-    text-shadow: 0px 0px 1px rgb(var(--gBgColor));
-    margin: 0;
 }
 
-.userOrder .icn.dn {
-    margin-top: .6em;
-}
-
-thead .icn:hover {
-    color: darkred;
-    text-shadow: none;
-}
-
-thead .cur.desc .icn.dn, thead .cur.asc .icn.up {
+thead .cur .icn {
     color: #fff;
-    text-shadow: none;
 }
 
 table.list .actions {

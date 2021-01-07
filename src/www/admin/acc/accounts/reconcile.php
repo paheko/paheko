@@ -32,11 +32,16 @@ if (null !== qg('start') && null !== qg('end'))
 	}
 }
 
-if ($start < $current_year->start_date || $start > $current_year->end_date
-	|| $end < $current_year->start_date || $end > $current_year->end_date) {
+if ($start < $current_year->start_date || $start > $current_year->end_date) {
 	$start = clone $current_year->start_date;
+}
+
+if ($end < $current_year->start_date || $end > $current_year->end_date) {
+	$end = clone $current_year->end_date;
+}
+
+if ($start > $end) {
 	$end = clone $start;
-	$end->modify('last day of this month');
 }
 
 $journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end, $only);

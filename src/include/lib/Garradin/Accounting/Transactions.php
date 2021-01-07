@@ -23,7 +23,7 @@ class Transactions
 		'id'             => 'Numéro d\'écriture',
 		'label'          => 'Libellé',
 		'date'           => 'Date',
-		'notes'          => 'Notes',
+		'notes'          => 'Remarques',
 		'reference'      => 'Numéro pièce comptable',
 		'p_reference'    => 'Référence paiement',
 		'debit_account'  => 'Compte de débit',
@@ -194,7 +194,7 @@ class Transactions
 							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row->id));
 						}
 
-						if (!$transaction->id_year != $year->id()) {
+						if ($transaction->id_year != $year->id()) {
 							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row->id));
 						}
 
@@ -395,7 +395,7 @@ class Transactions
 		$list->orderBy('date', true);
 		$list->setCount('COUNT(DISTINCT t.id)');
 		$list->groupBy('t.id');
-		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 		});
 		$list->setExportCallback(function (&$row) {

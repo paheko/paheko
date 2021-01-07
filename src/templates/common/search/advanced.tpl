@@ -29,7 +29,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
 		</p>
-	{elseif !$sql_disabled}
+	{elseif !$sql_query}
 		<legend>Rechercher</legend>
 		<div class="queryBuilder" id="queryBuilder"></div>
 		<p class="actions">

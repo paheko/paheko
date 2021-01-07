@@ -157,7 +157,9 @@ class Recherche
 			$search->contenu = $this->buildQuery($search->cible, $query->query, $query->order, $query->desc, $no_limit ? 10000 : $query->limit);
 		}
 
-		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
+		$unprotected = $search->type == self::TYPE_SQL_UNPROTECTED;
+
+		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit, $unprotected);
 	}
 
 	public function getResultHeader(string $target, array $result)
@@ -292,7 +294,7 @@ class Recherche
 
 			$columns['t.notes'] = (object) [
 				'textMatch'=> true,
-				'label'    => 'Notes',
+				'label'    => 'Remarques',
 				'type'     => 'text',
 				'null'     => true,
 				'alias'    => 'notes',
@@ -386,9 +388,10 @@ class Recherche
 			throw new \InvalidArgumentException('Cible inconnue : ' . $target);
 		}
 
+		$config = Config::getInstance();
+
 		if ($target == 'membres')
 		{
-			$config = Config::getInstance();
 			$champs = $config->get('champs_membres');
 		}
 
@@ -668,7 +671,7 @@ class Recherche
 	    ];
 	}
 
-	public function schema($target)
+	public function schema(string $target)
 	{
 		$db = DB::getInstance();
 
@@ -683,6 +686,9 @@ class Recherche
 				'acc_transactions'       => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions\';'),
 				'acc_transactions_lines' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions_lines\';'),
 			];
+		}
+		else {
+			throw new \LogicException('Unknown target');
 		}
 
 		return $tables;

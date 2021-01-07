@@ -248,7 +248,7 @@ class Template extends \KD2\Smartyer
 		elseif (isset($source) && is_array($source) && isset($source[$name])) {
 			$current_value = $source[$name];
 		}
-		elseif (isset($default)) {
+		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
 			$current_value = $default;
 		}
 
@@ -274,7 +274,7 @@ class Template extends \KD2\Smartyer
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
 
-			if ($current_value == $value) {
+			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
@@ -549,6 +549,11 @@ class Template extends \KD2\Smartyer
 			case 'date':
 				return Utils::date_fr($v);
 			case 'multiple':
+				// Useful for search results, if a value is not a number
+				if (!is_numeric($v)) {
+					return htmlspecialchars($v);
+				}
+
 				$out = [];
 
 				foreach ($config->options as $b => $name)

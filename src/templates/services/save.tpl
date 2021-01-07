@@ -2,10 +2,18 @@
 
 {include file="services/_nav.tpl" current="save" fee=null service=null}
 
-{form_errors}
-
 <form method="post" action="{$self_url}" data-focus="1">
 
+	{if $user_id && $has_past_services}
+	<nav class="tabs">
+		<ul class="sub">
+			<li{if $current_only} class="current"{/if}><a href="?user={$user_id}">Inscrire à une activité courante</a></li>
+			<li{if !$current_only} class="current"{/if}><a href="?user={$user_id}&amp;past_services=1">Inscrire à une activité passée</a></li>
+		</ul>
+	</nav>
+	{/if}
+
+{form_errors}
 	<fieldset>
 		<legend>Inscrire un membre à une activité</legend>
 
@@ -42,7 +50,10 @@
 					</div>
 				</label>
 			</dd>
+		{foreachelse}
+			<dd><p class="error block">Aucune activité trouvée</p></dd>
 		{/foreach}
+
 		</dl>
 
 		{foreach from=$grouped_services item="service"}
@@ -81,7 +92,7 @@
 		<legend>Détails</legend>
 		<dl>
 			{input type="date" name="date" required=1 default=$today label="Date d'inscription"}
-			{input type="date" name="expiry_date" default=$today label="Date d'expiration de l'inscription"}
+			{input type="date" name="expiry_date" label="Date d'expiration de l'inscription"}
 			{input type="checkbox" name="paid" value="1" default="1" label="Marquer cette inscription comme payée"}
 			<dd class="help">Décocher cette case pour pouvoir suivre les règlements de personnes qui payent en plusieurs fois. Il sera possible de cocher cette case lorsque le solde aura été réglé.</dd>
 		</dl>
@@ -112,22 +123,26 @@
 
 {literal}
 <script type="text/javascript">
-function selectService(elm) {
+function selectService(elm, first_load) {
 	$('[data-service]').forEach((e) => {
 		e.style.display = ('s' + elm.value == e.getAttribute('data-service')) ? 'block' : 'none';
 	});
 
-	$('#f_expiry_date').value = elm.dataset.expiry;
+	let expiry = $('#f_expiry_date');
+
+	if (!first_load || !expiry.value) {
+		expiry.value = elm.dataset.expiry;
+	}
 
 	var first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
 
 	if (first) {
 		first.checked = true;
-		selectFee(first);
+		selectFee(first, first_load);
 	}
 }
 
-function selectFee(elm) {
+function selectFee(elm, first_load) {
 	var amount = parseInt(elm.getAttribute('data-user-amount'), 10);
 
 	// Toggle accounting part of the form
@@ -136,7 +151,7 @@ function selectFee(elm) {
 	$('#f_amount').required = accounting;
 
 	// Fill the amount paid by the user
-	if (amount) {
+	if (amount && !first_load) {
 		$('#f_amount').value = g.formatMoney(amount);
 	}
 }
@@ -149,11 +164,11 @@ $('input[name=id_fee]').forEach((e) => {
 	e.onchange = () => { selectFee(e); };
 });
 
-var selected = document.querySelector('input[name="id_service"]:checked, input[name="id_service"]');
+var selected = document.querySelector('input[name="id_service"]:checked') || document.querySelector('input[name="id_service"]');
 selected.checked = true;
 
 g.toggle('.accounting', false);
-selectService(selected);
+selectService(selected, true);
 
 $('#f_create_payment_1').onchange = (e) => {
 	g.toggle('.accounting dl', $('#f_create_payment_1').checked);

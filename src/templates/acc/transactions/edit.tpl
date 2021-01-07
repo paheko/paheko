@@ -3,6 +3,12 @@
 <form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="#f_date">
 	{form_errors}
 
+	{if $has_reconciled_lines}
+	<p class="alert block">
+		Attention, cette écriture contient des lignes qui ont été rapprochées. La modification de cette écriture entraînera la perte du rapprochement.
+	</p>
+	{/if}
+
 	<fieldset>
 		<legend>Type d'écriture</legend>
 		<dl>
@@ -27,7 +33,7 @@
 		<dl>
 			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc." source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}

@@ -10,7 +10,8 @@
 		<li class="current"><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
 		<li><a href="{$admin_url}acc/reports/trial_balance.php?year={$current_year.id}">Balance générale (tous les comptes)</a></li>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-			<li><a href="{$admin_url}acc/charts/accounts/all.php?id={$chart_id}">Plan comptable</a></li>
+			<li><a href="{$admin_url}acc/charts/accounts/?id={$chart_id}">Modifier les comptes</a></li>
+			<li><a href="{$admin_url}acc/charts/accounts/all.php?id={$chart_id}">Plan comptable complet</a></li>
 		{/if}
 	</ul>
 </nav>
@@ -69,8 +70,9 @@
 {/if}
 
 <p class="help">
-	Note : n'apparaissent ici que les comptes favoris.
-	Pour voir le solde de tous les comptes, se référer à la <a href="{$admin_url}acc/reports/trial_balance.php?year={$current_year.id}">balance générale de l'exercice</a>.
+	Note : n'apparaissent ici que les comptes <strong>favoris</strong> qui ont été utilisés dans cet exercice (au moins une écriture).<br />
+	Pour voir le solde de tous les comptes, se référer à la <a href="{$admin_url}acc/reports/trial_balance.php?year={$current_year.id}">balance générale de l'exercice</a>.<br />
+	Pour voir la liste complète des comptes, même ceux qui n'ont pas été utilisés, se référer au <a href="{$admin_url}acc/charts/accounts/?id={$current_year.id_chart}">plan comptable</a>.
 </p>
 
 {include file="admin/_foot.tpl"}
