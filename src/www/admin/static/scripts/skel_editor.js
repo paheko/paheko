@@ -118,7 +118,7 @@
 				return false;
 			}
 
-			var url = garradin.admin_url + 'config/site.php?edit=' + encodeURIComponent(file);
+			var url = '?edit=' + encodeURIComponent(file);
 
 			window.location.href = url + (code.fullscreen ? '#fullscreen' : '');
 

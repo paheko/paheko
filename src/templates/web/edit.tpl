@@ -18,7 +18,7 @@
 			{input type="datetime" name="date" label="Date" required=true default=$page->file()->created}
 			<dt>Statut</dt>
 			{input type="radio" name="status" value=$page::STATUS_ONLINE label="En ligne" source=$page}
-			{input type="radio" name="status" value=$page::STATUS_DRAFT label="Brouillon" source=$page}
+			{input type="radio" name="status" value=$page::STATUS_DRAFT label="Brouillon" source=$page help="ne sera pas visible sur le site"}
 		</dl>
 	</fieldset>
 
