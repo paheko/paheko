@@ -74,6 +74,8 @@ class Config extends Entity
 		'desactiver_site'       => 'bool',
 	];
 
+	protected $_modified;
+
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -150,9 +152,9 @@ class Config extends Entity
 
 		$db->begin();
 
-		foreach ($this->modified as $key=>$modified)
+		foreach ($this->_modified as $key=>$modified)
 		{
-			$value = $this->config[$key];
+			$value = $this->get($key);
 
 			if (is_array($value))
 			{
@@ -167,7 +169,7 @@ class Config extends Entity
 				[$key, $value]);
 		}
 
-		if (!empty($this->modified['champ_identifiant']))
+		if (!empty($this->_modified['champ_identifiant']))
 		{
 			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
 			$db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
