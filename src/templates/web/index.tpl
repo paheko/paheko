@@ -23,7 +23,7 @@
 				<th><a href="?parent={$p.id}">{$p.title}</a></th>
 				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
 				<td class="actions">
-					{if $p.status == $p::STATUS_ONLINE}
+					{if $p.status == $p::STATUS_ONLINE && !$config.desactiver_site}
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
 					{linkbutton shape="menu" label="Sous-catégories et pages" href="?parent=%d"|args:$p.id}
