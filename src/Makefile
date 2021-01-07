@@ -58,4 +58,5 @@ check-dependencies:
 
 minify:
 	cat `ls www/admin/static/styles/[0-9]*.css` | sed 's/\.\.\///' > www/admin/static/mini.css
-	yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
+	# Minify is only gaining 500 gzipped bytes (4kB uncompressed) but making things hard to read/hack
+	#yui-compressor --nomunge www/admin/static/mini.css -o www/admin/static/mini.css
