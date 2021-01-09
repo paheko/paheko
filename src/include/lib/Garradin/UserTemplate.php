@@ -2,21 +2,15 @@
 
 namespace Garradin;
 
-class UserTemplate
+use KD2\Dumbyer;
+
+class UserTemplate extends Dumbyer
 {
-	protected $file;
-
-	public function __construct(string $file)
-	{
-		$this->file = $file;
-	}
-
-	protected function fetch()
+	public function __construct()
 	{
 		$config = Config::getInstance();
 
-		$d = new Dumbyer;
-		$d->assignArray([
+		$this->assignArray([
 			'nom_asso' => $config->get('nom_asso'),
 			'adresse_asso' => $config->get('adresse_asso'),
 			'email_asso' => $config->get('email_asso'),
@@ -24,6 +18,7 @@ class UserTemplate
 			'root_url' => WWW_URL,
 			'admin_url' => ADMIN_URL,
 		]);
+
 
 		$url = file_exists(DATA_ROOT . '/www/squelettes/default.css')
 			? WWW_URL . 'squelettes/default.css'
@@ -50,41 +45,74 @@ class UserTemplate
 			$lang = '';
 		}
 
-		$d->assign('visitor_lang', $lang);
+		$this->assign('visitor_lang', $lang);
 
 		$params = [
-			'dumbyer' => $d,
 			'template' => $this,
 		];
 
-		Plugin::fireSignal('usertemplate.init', $params, $callback_return);
+		Plugin::fireSignal('usertemplate.init', $params);
 
-		$d->registerSection('pages', [$this, 'sectionPages']);
-		$d->registerSection('articles', [$this, 'sectionArticles']);
-		$d->registerSection('categories', [$this, 'sectionCategories']);
+		$this->registerSection('pages', [$this, 'sectionPages']);
+		$this->registerSection('articles', [$this, 'sectionArticles']);
+		$this->registerSection('categories', [$this, 'sectionCategories']);
+
+		$this->registerSection('files', [$this, 'sectionFiles']);
+		$this->registerSection('documents', [$this, 'sectionDocuments']);
+		$this->registerSection('images', [$this, 'sectionImages']);
 	}
 
-	protected function sectionCategories(array $params, Dumbyer $tpl): \Generator
+	public function fetch(string $file): string
+	{
+		$hash = sha1($path);
+		$cpath = CACHE_ROOT . '/compiled/s_' . $hash . '.php';
+
+		if (file_exists($cpath) && filemtime($cpath) >= filemtime($file)) {
+			ob_start();
+			include $cpath;
+			return ob_get_clean();
+		}
+
+		try {
+			$code = $this->compile(file_get_contents($file));
+			ob_start();
+			eval('?>' . $code);
+			$return = ob_get_clean();
+		}
+		catch (\Exception $e) {
+			throw new Dumbyer_Exception('Erreur de syntaxe : ' . $e->getMessage(), 0, $e);
+		}
+
+		if (!file_exists(dirname($cpath)))
+		{
+			Utils::safe_mkdir(dirname($cpath), 0777, true);
+		}
+
+		file_put_contents($cpath, $code);
+		return $return;
+	}
+
+	protected function sectionCategories(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
 		$params['where'] .= ' AND w.type = ' . Page::TYPE_CATEGORY;
-		return $this->sectionPages($params, $tpl);
+		return $this->sectionPages($params);
 	}
 
-	protected function sectionArticles(array $params, Dumbyer $tpl): \Generator
+	protected function sectionArticles(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
 		$params['where'] .= ' AND w.type = ' . Page::TYPE_PAGE;
-		return $this->sectionPages($params, $tpl);
+		return $this->sectionPages($params);
 	}
 
-	protected function sectionPages(array $params, Dumbyer $tpl): \Generator
+	protected function sectionPages(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -106,7 +134,7 @@ class UserTemplate
 			unset($params['search']);
 		}
 
-		foreach ($this->sectionSQL($params, $tpl) as $row) {
+		foreach ($this->sectionSQL($params) as $row) {
 			$data = $row;
 			unset($data['points']);
 
@@ -121,7 +149,47 @@ class UserTemplate
 		}
 	}
 
-	protected function sectionSQL(array $params, Dumbyer $tpl): \Generator
+	protected function sectionImages(array $params): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$params['where'] .= ' AND f.image = 1';
+		return $this->sectionFiles($params);
+	}
+
+	protected function sectionDocuments(array $params): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$params['where'] .= ' AND f.image = 0';
+		return $this->sectionFiles($params);
+	}
+
+	protected function sectionFiles(array $params): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$params['select'] = 'f.*';
+		$params['tables'] = 'files f';
+		$params['where'] .= ' AND f.public = 1';
+
+		foreach ($this->sectionSQL($params) as $row) {
+			$file = new File;
+			$file->load($row);
+			$row = $file->asArray();
+			$row['url'] = $page->url();
+
+			yield $row;
+		}
+	}
+
+	protected function sectionSQL(array $params): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
