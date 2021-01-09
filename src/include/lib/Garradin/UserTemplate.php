@@ -179,6 +179,12 @@ class UserTemplate extends Dumbyer
 		$params['tables'] = 'files f';
 		$params['where'] .= ' AND f.public = 1';
 
+		if (isset($params['except_in_text'])) {
+			$found = Page::findTaggedAttachments($params['except_in_text']);
+			$found = array_map('intval', $found);
+			$params['where'] .= sprintf(' AND f.id NOT IN (%s)', implode(', ', $found));
+		}
+
 		foreach ($this->sectionSQL($params) as $row) {
 			$file = new File;
 			$file->load($row);
