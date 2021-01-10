@@ -61,6 +61,7 @@ class Fees
 		$hidden_cats = array_keys((new Categories)->listHidden());
 
 		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
+			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) su2 ON su2.id = su.id
 			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_fee = f.id AND m.id_categorie NOT IN (%s)',
 			implode(',', $hidden_cats));
 
