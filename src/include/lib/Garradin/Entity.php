@@ -53,7 +53,7 @@ class Entity extends AbstractEntity
 		}
 	}
 
-	protected function assert(bool $test, string $message = null): void
+	protected function assert(?bool $test, string $message = null): void
 	{
 		if ($test) {
 			return;
