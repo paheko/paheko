@@ -91,4 +91,49 @@ class Web
 	{
 		return EM::findOneById(Page::class, $id);
 	}
+
+	static public function dispatchURI()
+	{
+		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+
+		header('HTTP/1.1 200 OK', 200, true);
+
+		if ($pos = strpos($uri, '?')) {
+			$uri = substr($uri, 0, $pos);
+		}
+		else {
+			// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
+			$uri = substr($uri, strlen(WWW_URI) - 1);
+		}
+
+		if ($uri == '/') {
+			$skel = 'index.html';
+		}
+		// Redirect old URLs (pre-1.1)
+		elseif ($uri == '/feed/atom/') {
+			Utils::redirect('/atom.xml');
+		}
+		// URLs with an ending slash are categories
+		elseif (substr($uri, -1) == '/') {
+			$skel = 'category.html';
+			$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1, -1);
+		}
+		elseif (preg_match('!^/admin/!', $uri)) {
+			http_response_code(404);
+			throw new UserException('Cette page n\'existe pas.');
+		}
+		else {
+			$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
+
+			// Custom templates
+			if (preg_match('!^[\w\d_-.]+$!i', $_GET['uri']) && Template::exists($_GET['uri'])) {
+				$skel = $_GET['uri'];
+			}
+			else {
+				$skel = 'article.html';
+			}
+		}
+
+		Web\Template::display($skel);
+	}
 }
