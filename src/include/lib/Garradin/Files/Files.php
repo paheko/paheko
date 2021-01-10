@@ -12,6 +12,18 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA};
 
 class Files
 {
+	static public function getSystemFile(string $file, string $folder, ?string $subfolder = null): ?File
+	{
+		$where = Folders::getFolderClause(true, $folder, $subfolder);
+		return EM::findOne(File::class, sprintf('SELECT * FROM files WHERE name = ? AND folder_id = (%s) LIMIT 1;', $where), $file);
+	}
+
+	static public function listSystemFiles(string $folder, ?string $subfolder = null): array
+	{
+		$where = Folders::getFolderClause(true, $folder, $subfolder);
+		return EM::get(sprintf('SELECT * FROM files WHERE folder_id = (%s) ORDER BY name;', $where));
+	}
+
 	static public function callStorage(string $function, ...$args)
 	{
 		// Check that we can store this data

@@ -218,12 +218,10 @@ class Page extends Entity
 		return $this->_attachments;
 	}
 
-	public function findTaggedAttachments(): array
+	static public function findTaggedAttachments(string $text): array
 	{
-		$this->raw();
-
-		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $this->_content, $match, PREG_PATTERN_ORDER);
-		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $this->_content, $match2, PREG_PATTERN_ORDER);
+		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
+		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
 
 		return array_merge($match[1], $match2[1]);
 	}
@@ -246,7 +244,7 @@ class Page extends Entity
 		$out = [];
 
 		if (!$all) {
-			$tagged = $this->findTaggedAttachments();
+			$tagged = $this->findTaggedAttachments($this->raw());
 		}
 
 		foreach ($this->listAttachments() as $a) {

@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Web\Page;
+
 class Squelette_Snippet
 {
     const TEXT = 0;
@@ -352,59 +354,57 @@ class Squelette extends \KD2\MiniSkel
         $db = DB::getInstance();
 
         $statement_code = '';
+        $type = null;
 
         // Types de boucles natifs
         if ($loopType == 'articles' || $loopType == 'rubriques' || $loopType == 'pages')
         {
-            $where = $order = '';
+            $type = Page::class;
+            $order = null;
             $limit = $begin = 0;
 
-            $query = 'SELECT w.*, ';
-            $query.= 'strftime(\'%s\', w.date_creation) AS date_creation, ';
-            $query.= 'strftime(\'%s\', w.date_modification) AS date_modification';
+            $select = 'w.*, strftime(\'%s\', w.modified) AS date_modification, strftime(\'%s\', f.created) AS date_creation';
+            $tables = 'web_pages w
+                INNER JOIN files f USING (id)
+                INNER JOIN files_search s USING (id)';
 
-            if (trim($loopContent))
-            {
-                $query .= ', r.contenu AS texte FROM wiki_pages AS w LEFT JOIN wiki_revisions AS r ON (w.id = r.id_page AND w.revision = r.revision) ';
-            }
-            else
-            {
-                $query .= '\'\' AS texte FROM wiki_pages AS w ';
-            }
+            $where = sprintf(' AND w.status = %d', Page::STATUS_ONLINE);
 
-            $where = 'WHERE w.droit_lecture = -1 ';
-
-            if ($loopType == 'articles')
-            {
-                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id AND droit_lecture = -1) = 0 ';
+            if ($loopType == 'articles') {
+                $where .= sprintf(' AND w.type = %d', Page::TYPE_PAGE);
             }
-            elseif ($loopType == 'rubriques')
-            {
-                $where .= 'AND (SELECT COUNT(id) FROM wiki_pages WHERE parent = w.id AND droit_lecture = -1) > 0 ';
+            elseif ($loopType == 'rubriques') {
+                $where .= sprintf(' AND w.type = %d ', Page::TYPE_CATEGORY);
             }
 
-            $allowed_fields = ['id', 'uri', 'titre', 'date', 'date_creation', 'date_modification',
-                'parent', 'rubrique', 'revision', 'points', 'recherche', 'texte', 'age'];
+            $allowed_fields = [
+                'id'                => 'w.id',
+                'uri'               => 'w.uri',
+                'titre'             => 'w.title',
+                'date'              => 'f.created',
+                'date_creation'     => 'f.created',
+                'date_modification' => 'w.modified',
+                'parent'            => 'w.parent_id',
+                'rubrique'          => 'w.parent_id',
+                'points'            => 'points',
+                'recherche'         => 'search',
+                'texte'             => 's.content',
+                'age'               => 'age'
+            ];
+
             $search = $search_rank = false;
 
             foreach ($loopCriterias as $criteria_id => $criteria)
             {
                 if (isset($criteria['field']))
                 {
-                    if (!in_array($criteria['field'], $allowed_fields))
-                    {
+                    if (!array_key_exists($criteria['field'], $allowed_fields)) {
                         throw new \KD2\MiniSkelMarkupException("Critère '".$criteria['field']."' invalide pour la boucle ".$loopName." de type ".$loopType.".");
                     }
-                    elseif ($criteria['field'] == 'rubrique')
-                    {
-                        $criteria['field'] = 'parent';
-                    }
-                    elseif ($criteria['field'] == 'date')
-                    {
-                        $criteria['field'] = 'date_creation';
-                    }
-                    elseif ($criteria['field'] == 'points')
-                    {
+
+                    $criteria['field'] = $allowed_fields[$criteria['field']];
+
+                    if ($criteria['field'] == 'points') {
                         if ($criteria['action'] != \KD2\MiniSkel::ACTION_ORDER_BY)
                         {
                             throw new \KD2\MiniSkelMarkupException("Le critère 'points' n\'est pas valide dans ce contexte.");
@@ -412,9 +412,8 @@ class Squelette extends \KD2\MiniSkel
 
                         $search_rank = true;
                     }
-                    elseif ($criteria['field'] == 'age')
-                    {
-                        $criteria['field'] = 'julianday() - julianday(date_creation)';
+                    elseif ($criteria['field'] == 'age') {
+                        $criteria['field'] = 'julianday() - julianday(f.created)';
                         $criteria['value'] = (int)$criteria['value'];
                     }
                 }
@@ -441,22 +440,21 @@ class Squelette extends \KD2\MiniSkel
                         break;
                     case \KD2\MiniSkel::ACTION_MATCH_FIELD:
                     {
-                        if ($criteria['field'] == 'recherche')
-                        {
-                            $query = 'SELECT w.*, r.contenu AS texte, rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points FROM wiki_pages AS w INNER JOIN wiki_recherche AS r ON (w.id = r.id) ';
-                            $where .= ' AND wiki_recherche MATCH ?';
+                        if ($criteria['field'] == 'search') {
+                            $where .= ' AND s MATCH ?';
+                            $select .= ', rank(matchinfo(s), 0, 1.0, 1.0) AS points';
                             $search = true;
                         }
                         else
                         {
                             $where .= ' AND '.$criteria['field'].' = ?';
 
-                            if ($criteria['field'] == 'parent')
+                            if ($criteria['field'] == 'w.parent_id')
                             {
                                 $criteria['field'] = 'id';
                             }
                         }
-                        
+
                         $query_args[] = ['$this->getVariable(\'' . $criteria['field'] . '\')'];
                         break;
                     }
@@ -472,30 +470,25 @@ class Squelette extends \KD2\MiniSkel
 
             if (trim($loopContent))
             {
-                $loop_start .= '$row[\'url\'] = WWW_URL . $row[\'uri\']; ';
+                $loop_start .= '$row = $p->asArray(); $row[\'url\'] = $p->url(); ';
             }
 
-            $query .= $where . ' ' . $order;
-
-            if (!$limit || $limit > 100)
+            if (!$limit || $limit > 100) {
                 $limit = 100;
+            }
 
             if ($limit)
             {
-                $query .= ' LIMIT ';
-
-                if (is_numeric($begin))
-                {
-                    $query .= (int) $begin;
+                if (is_numeric($begin)) {
+                    $begin = (int) $begin;
                 }
-                else
-                {
-                    $query .= '?';
+                else {
+                    $begin = '?';
                     $query_args[] = ['\'.$this->variables[\'debut_liste\'].\''];
                 }
-                
-                $query .= ','.(int)$limit;
             }
+
+            $query = sprintf('SELECT %s FROM %s WHERE 1 %s ORDER BY %s LIMIT %s, %d;', $select, $tables, $where, $order ?: 'w.id', $begin, $limit);
         }
         else if ($loopType == 'documents' || $loopType == 'images' || $loopType == 'fichiers')
         {
@@ -712,6 +705,7 @@ class Squelette extends \KD2\MiniSkel
         }
 
         $out->append(1, 'while ($row = $result_'.$hash.'->fetchArray(SQLITE3_ASSOC)): ');
+        $out->append(1, sprintf('$e = new %s; $e->import($row); ', $class::class));
         $out->append(1, '$this->_vars[\''.$hash.'\'][\'compteur_boucle\'] += 1; ');
         $out->append(1, $loop_start);
         $out->append(1, '$this->_vars[\''.$hash.'\'] = array_merge($this->_vars[\''.$hash.'\'], $row); ');

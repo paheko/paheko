@@ -3,28 +3,40 @@
 namespace Garradin;
 
 use KD2\Dumbyer;
+use KD2\Dumbyer_Exception;
 
-class UserTemplate extends Dumbyer
+class UserTemplate
 {
-	public function __construct()
+	protected $dumbyer;
+	protected $path;
+	protected $hash;
+	protected $modified;
+	protected $file;
+
+	public function __construct(?File $file = null)
 	{
+		if ($file) {
+			$this->file = $file;
+			$this->hash = $file->hash;
+			$this->modified = $file->modified;
+		}
+
 		$config = Config::getInstance();
+		$d = $this->dumbyer = new Dumbyer;
 
-		$this->assignArray([
-			'nom_asso' => $config->get('nom_asso'),
-			'adresse_asso' => $config->get('adresse_asso'),
-			'email_asso' => $config->get('email_asso'),
-			'site_asso' => $config->get('site_asso'),
-			'root_url' => WWW_URL,
+		$d->assignArray([
+			'config'    => $config->asArray(),
+			'root_url'  => WWW_URL,
 			'admin_url' => ADMIN_URL,
+			'_GET'      => $_GET,
+			'_POST'     => $_POST,
 		]);
-
 
 		$url = file_exists(DATA_ROOT . '/www/squelettes/default.css')
 			? WWW_URL . 'squelettes/default.css'
 			: WWW_URL . 'squelettes-dist/default.css';
 
-		$this->assign('url_css_defaut', $url);
+		$d->assign('url_css_defaut', $url);
 
 		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
@@ -45,7 +57,7 @@ class UserTemplate extends Dumbyer
 			$lang = '';
 		}
 
-		$this->assign('visitor_lang', $lang);
+		$d->assign('visitor_lang', $lang);
 
 		$params = [
 			'template' => $this,
@@ -53,46 +65,139 @@ class UserTemplate extends Dumbyer
 
 		Plugin::fireSignal('usertemplate.init', $params);
 
-		$this->registerSection('pages', [$this, 'sectionPages']);
-		$this->registerSection('articles', [$this, 'sectionArticles']);
-		$this->registerSection('categories', [$this, 'sectionCategories']);
+		$d->registerSection('pages', [$this, 'sectionPages']);
+		$d->registerSection('articles', [$this, 'sectionArticles']);
+		$d->registerSection('categories', [$this, 'sectionCategories']);
 
-		$this->registerSection('files', [$this, 'sectionFiles']);
-		$this->registerSection('documents', [$this, 'sectionDocuments']);
-		$this->registerSection('images', [$this, 'sectionImages']);
+		$d->registerSection('files', [$this, 'sectionFiles']);
+		$d->registerSection('documents', [$this, 'sectionDocuments']);
+		$d->registerSection('images', [$this, 'sectionImages']);
+
+		$d->registerSection('http', [$this, 'sectionHTTP']);
 	}
 
-	public function fetch(string $file): string
+	public function setSource(string $path)
 	{
-		$hash = sha1($path);
-		$cpath = CACHE_ROOT . '/compiled/s_' . $hash . '.php';
+		$this->path = $path;
+		$this->hash = sha1($path);
+		$this->last_modified = filemtime($path);
+	}
 
-		if (file_exists($cpath) && filemtime($cpath) >= filemtime($file)) {
-			ob_start();
+	public function display(): void
+	{
+		$cpath = CACHE_ROOT . '/compiled/s_' . $this->hash . '.php';
+
+
+		if (file_exists($cpath) && filemtime($cpath) >= $this->modified) {
 			include $cpath;
-			return ob_get_clean();
+			return;
 		}
 
 		try {
-			$code = $this->compile(file_get_contents($file));
-			ob_start();
+			$code = $this->dumbyer->compile($this->file ? $this->file->fetch() : file_get_contents($this->path));
 			eval('?>' . $code);
-			$return = ob_get_clean();
 		}
 		catch (\Exception $e) {
 			throw new Dumbyer_Exception('Erreur de syntaxe : ' . $e->getMessage(), 0, $e);
 		}
 
-		if (!file_exists(dirname($cpath)))
-		{
+		if (!file_exists(dirname($cpath))) {
 			Utils::safe_mkdir(dirname($cpath), 0777, true);
 		}
 
 		file_put_contents($cpath, $code);
-		return $return;
 	}
 
-	protected function sectionCategories(array $params): \Generator
+	public function fetch(File $file): string
+	{
+		ob_start();
+		$this->display($file);
+		return ob_get_clean();
+	}
+
+	public function sectionHTTP(array $params): void
+	{
+		if (headers_sent()) {
+			return;
+		}
+
+		if (isset($params['code'])) {
+			static $codes = [
+				100 => 'Continue',
+				101 => 'Switching Protocols',
+				102 => 'Processing',
+				200 => 'OK',
+				201 => 'Created',
+				202 => 'Accepted',
+				203 => 'Non-Authoritative Information',
+				204 => 'No Content',
+				205 => 'Reset Content',
+				206 => 'Partial Content',
+				207 => 'Multi-Status',
+				300 => 'Multiple Choices',
+				301 => 'Moved Permanently',
+				302 => 'Found',
+				303 => 'See Other',
+				304 => 'Not Modified',
+				305 => 'Use Proxy',
+				306 => 'Switch Proxy',
+				307 => 'Temporary Redirect',
+				400 => 'Bad Request',
+				401 => 'Unauthorized',
+				402 => 'Payment Required',
+				403 => 'Forbidden',
+				404 => 'Not Found',
+				405 => 'Method Not Allowed',
+				406 => 'Not Acceptable',
+				407 => 'Proxy Authentication Required',
+				408 => 'Request Timeout',
+				409 => 'Conflict',
+				410 => 'Gone',
+				411 => 'Length Required',
+				412 => 'Precondition Failed',
+				413 => 'Request Entity Too Large',
+				414 => 'Request-URI Too Long',
+				415 => 'Unsupported Media Type',
+				416 => 'Requested Range Not Satisfiable',
+				417 => 'Expectation Failed',
+				418 => 'I\'m a teapot',
+				422 => 'Unprocessable Entity',
+				423 => 'Locked',
+				424 => 'Failed Dependency',
+				425 => 'Unordered Collection',
+				426 => 'Upgrade Required',
+				449 => 'Retry With',
+				450 => 'Blocked by Windows Parental Controls',
+				500 => 'Internal Server Error',
+				501 => 'Not Implemented',
+				502 => 'Bad Gateway',
+				503 => 'Service Unavailable',
+				504 => 'Gateway Timeout',
+				505 => 'HTTP Version Not Supported',
+				506 => 'Variant Also Negotiates',
+				507 => 'Insufficient Storage',
+				509 => 'Bandwidth Limit Exceeded',
+				510 => 'Not Extended',
+			];
+
+			if (!isset($codes[$params['code']])) {
+				throw new Dumbyer_Exception('Code HTTP inconnu');
+			}
+
+			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
+		}
+		elseif (isset($params['redirect'])) {
+			header('Location: ' . WWW_URL . $params['redirect'], true);
+		}
+		elseif (isset($params['type'])) {
+			header('Content-Type: ' . $params['type'], true);
+		}
+		else {
+			throw new Dumbyer_Exception('No valid parameter found for http function');
+		}
+	}
+
+	public function sectionCategories(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -102,7 +207,7 @@ class UserTemplate extends Dumbyer
 		return $this->sectionPages($params);
 	}
 
-	protected function sectionArticles(array $params): \Generator
+	public function sectionArticles(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -112,7 +217,7 @@ class UserTemplate extends Dumbyer
 		return $this->sectionPages($params);
 	}
 
-	protected function sectionPages(array $params): \Generator
+	public function sectionPages(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -149,7 +254,7 @@ class UserTemplate extends Dumbyer
 		}
 	}
 
-	protected function sectionImages(array $params): \Generator
+	public function sectionImages(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -159,7 +264,7 @@ class UserTemplate extends Dumbyer
 		return $this->sectionFiles($params);
 	}
 
-	protected function sectionDocuments(array $params): \Generator
+	public function sectionDocuments(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -169,7 +274,7 @@ class UserTemplate extends Dumbyer
 		return $this->sectionFiles($params);
 	}
 
-	protected function sectionFiles(array $params): \Generator
+	public function sectionFiles(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -195,7 +300,7 @@ class UserTemplate extends Dumbyer
 		}
 	}
 
-	protected function sectionSQL(array $params): \Generator
+	public function sectionSQL(array $params): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
