@@ -24,6 +24,7 @@ $checked = f('deposit') ?: [];
 $journal = $account->getDepositJournal(CURRENT_YEAR_ID, $checked);
 $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
+$transaction->id_creator = $session->getUser()->id;
 
 $rules = [
 	'deposit' => 'array|required',
