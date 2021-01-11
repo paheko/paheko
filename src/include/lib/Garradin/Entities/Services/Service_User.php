@@ -146,7 +146,17 @@ class Service_User extends Entity
 		if ($su->id_fee && $su->fee()->id_account
 			&& !empty($source['amount'])
 			&& !empty($source['create_payment'])) {
-			$su->addPayment($user_id, $source);
+			try {
+				$su->addPayment($user_id, $source);
+			}
+			catch (ValidationException $e) {
+				if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {
+					throw new ValidationException('Impossible d\'enregistrer l\'inscription : ce tarif d\'activité est lié à un exercice clôturé. Merci de modifier le tarif et choisir un autre exercice.', 0, $e);
+				}
+				else {
+					throw $e;
+				}
+			}
 		}
 
 		$db->commit();

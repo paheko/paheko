@@ -16,6 +16,12 @@
 	</ul>
 </nav>
 
+{if isset($_GET['chart_change'])}
+<p class="block error">
+	L'exercice sélectionné utilise un plan comptable différent, merci de sélectionner un autre compte.
+</p>
+{/if}
+
 {include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
 
 {if !empty($grouped_accounts)}

@@ -57,7 +57,7 @@ class Entity extends AbstractEntity
 		return parent::filterUserValue($type, $value, $key);
 	}
 
-	protected function assert(bool $test, string $message = null): void
+	protected function assert(?bool $test, string $message = null): void
 	{
 		if ($test) {
 			return;

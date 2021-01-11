@@ -18,6 +18,12 @@ if (!$account) {
 	throw new UserException("Le compte demandé n'existe pas.");
 }
 
+// The account has a different chart after changing the current year:
+// get back to the list of accounts to select a new account!
+if ($account->id_chart != $current_year->id_chart) {
+	Utils::redirect(ADMIN_URL . 'acc/accounts/?chart_change');
+}
+
 $start = new \DateTime('first day of this month');
 $end = new \DateTime('last day of this month');
 $only = (bool) qg('only');
@@ -44,7 +50,7 @@ if ($start > $end) {
 	$end = clone $start;
 }
 
-$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end, $only);
+$journal = $account->getReconcileJournal($current_year->id(), $start, $end, $only);
 
 // Enregistrement des cases cochées
 $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $end, $account, $only) {

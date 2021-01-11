@@ -24,6 +24,7 @@ if (f('save') && $form->check('acc_years_balance_' . $year->id()))
 {
 	try {
 		$transaction = new Transaction;
+		$transaction->id_creator = $session->getUser()->id;
 		$transaction->importFromBalanceForm($year);
 		$transaction->save();
 
