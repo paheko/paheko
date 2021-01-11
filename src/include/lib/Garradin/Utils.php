@@ -154,12 +154,20 @@ class Utils
 
     static public function getSelfURL($qs = true)
     {
-        $uri = self::getRequestUri();
+        $uri = self::getSelfURI($qs);
 
+        // Make absolute URI relative to parent URI
         if (strpos($uri, WWW_URI) === 0)
         {
             $uri = substr($uri, strlen(WWW_URI));
         }
+
+        return WWW_URL . $uri;
+    }
+
+    static public function getSelfURI($qs = true)
+    {
+        $uri = self::getRequestURI();
 
         if ($qs !== true && (strpos($uri, '?') !== false))
         {
@@ -171,12 +179,7 @@ class Utils
             $uri .= '?' . http_build_query($qs);
         }
 
-        return str_replace('/admin', '', ADMIN_URL) . $uri;
-    }
-
-    static public function getSelfURI($qs = true)
-    {
-        return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
+        return $uri;
     }
 
     static public function getModifiedURL(string $new)
