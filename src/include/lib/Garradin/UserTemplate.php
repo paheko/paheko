@@ -5,9 +5,11 @@ namespace Garradin;
 use KD2\Dumbyer;
 use KD2\Dumbyer_Exception;
 
-class UserTemplate
+use Garradin\Files\Files;
+use Garradin\Files\Folders;
+
+class UserTemplate extends Dumbyer
 {
-	protected $dumbyer;
 	protected $path;
 	protected $hash;
 	protected $modified;
@@ -22,9 +24,8 @@ class UserTemplate
 		}
 
 		$config = Config::getInstance();
-		$d = $this->dumbyer = new Dumbyer;
 
-		$d->assignArray([
+		$this->assignArray([
 			'config'    => $config->asArray(),
 			'root_url'  => WWW_URL,
 			'admin_url' => ADMIN_URL,
@@ -36,7 +37,7 @@ class UserTemplate
 			? WWW_URL . 'squelettes/default.css'
 			: WWW_URL . 'squelettes-dist/default.css';
 
-		$d->assign('url_css_defaut', $url);
+		$this->assign('url_css_defaut', $url);
 
 		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
@@ -57,7 +58,7 @@ class UserTemplate
 			$lang = '';
 		}
 
-		$d->assign('visitor_lang', $lang);
+		$this->assign('visitor_lang', $lang);
 
 		$params = [
 			'template' => $this,
@@ -65,28 +66,28 @@ class UserTemplate
 
 		Plugin::fireSignal('usertemplate.init', $params);
 
-		$d->registerSection('pages', [$this, 'sectionPages']);
-		$d->registerSection('articles', [$this, 'sectionArticles']);
-		$d->registerSection('categories', [$this, 'sectionCategories']);
+		$this->registerSection('pages', [self::class, 'sectionPages']);
+		$this->registerSection('articles', [self::class, 'sectionArticles']);
+		$this->registerSection('categories', [self::class, 'sectionCategories']);
 
-		$d->registerSection('files', [$this, 'sectionFiles']);
-		$d->registerSection('documents', [$this, 'sectionDocuments']);
-		$d->registerSection('images', [$this, 'sectionImages']);
+		$this->registerSection('files', [self::class, 'sectionFiles']);
+		$this->registerSection('documents', [self::class, 'sectionDocuments']);
+		$this->registerSection('images', [self::class, 'sectionImages']);
 
-		$d->registerSection('http', [$this, 'sectionHTTP']);
+		$this->registerFunction('http', [self::class, 'functionHTTP']);
+		$this->registerFunction('include', [self::class, 'functionInclude']);
 	}
 
 	public function setSource(string $path)
 	{
 		$this->path = $path;
 		$this->hash = sha1($path);
-		$this->last_modified = filemtime($path);
+		$this->modified = filemtime($path);
 	}
 
 	public function display(): void
 	{
 		$cpath = CACHE_ROOT . '/compiled/s_' . $this->hash . '.php';
-
 
 		if (file_exists($cpath) && filemtime($cpath) >= $this->modified) {
 			include $cpath;
@@ -94,7 +95,7 @@ class UserTemplate
 		}
 
 		try {
-			$code = $this->dumbyer->compile($this->file ? $this->file->fetch() : file_get_contents($this->path));
+			$code = $this->compile($this->file ? $this->file->fetch() : file_get_contents($this->path));
 			eval('?>' . $code);
 		}
 		catch (\Exception $e) {
@@ -115,7 +116,21 @@ class UserTemplate
 		return ob_get_clean();
 	}
 
-	public function sectionHTTP(array $params): void
+	static public function functionInclude(array $params, UserTemplate $ut): string
+	{
+		if (empty($params['file'])) {
+			throw new Dumbyer_Exception('Argument "file" manquant pour la fonction "include"');
+		}
+
+		$file = Files::getSystemFile($params['file'], Folders::TEMPLATES);
+
+		if (!$file) {
+			throw new Dumbyer_Exception(sprintf('Le fichier à inclure "%s" n\'existe pas', $params['file']));
+		}
+		return $ut->fetch($file);
+	}
+
+	static public function functionHTTP(array $params): void
 	{
 		if (headers_sent()) {
 			return;
@@ -197,7 +212,7 @@ class UserTemplate
 		}
 	}
 
-	public function sectionCategories(array $params): \Generator
+	static public function sectionCategories(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -207,7 +222,7 @@ class UserTemplate
 		return $this->sectionPages($params);
 	}
 
-	public function sectionArticles(array $params): \Generator
+	static public function sectionArticles(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -217,7 +232,7 @@ class UserTemplate
 		return $this->sectionPages($params);
 	}
 
-	public function sectionPages(array $params): \Generator
+	static public function sectionPages(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -254,7 +269,7 @@ class UserTemplate
 		}
 	}
 
-	public function sectionImages(array $params): \Generator
+	static public function sectionImages(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -264,7 +279,7 @@ class UserTemplate
 		return $this->sectionFiles($params);
 	}
 
-	public function sectionDocuments(array $params): \Generator
+	static public function sectionDocuments(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -274,7 +289,7 @@ class UserTemplate
 		return $this->sectionFiles($params);
 	}
 
-	public function sectionFiles(array $params): \Generator
+	static public function sectionFiles(array $params): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -300,7 +315,7 @@ class UserTemplate
 		}
 	}
 
-	public function sectionSQL(array $params): \Generator
+	static public function sectionSQL(array $params): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
