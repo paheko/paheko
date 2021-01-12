@@ -45,7 +45,7 @@
         <p>
             {csrf_field key="backup_manage"}
             {button type="submit" name="restore" label="Restaurer cette sauvegarde" shape="reset"}
-            {button type="submit" name="delete" label="Supprimer cette sauvegarde" shape="delete"}
+            {button type="submit" name="remove" label="Supprimer cette sauvegarde" shape="delete"}
         </p>
     {/if}
 </fieldset>
