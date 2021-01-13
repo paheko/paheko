@@ -12,26 +12,10 @@ use const Garradin\ROOT;
 
 class Template
 {
-	const TEMPLATE_TYPES = '!^(?:text/\w+|\w+/(?:\w+\+)?xml)$!';
+	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml)$!';
 
 	protected $template;
 	protected $file;
-
-	static public function display(string $file)
-	{
-		header('Content-Type: text/html;charset=utf-8', true);
-
-		$tpl = new self($file);
-
-		if (!$tpl->serve()) {
-			header('HTTP/1.1 404 Not Found', true);
-			$tpl = new self('404.html');
-
-			if (!$tpl->serve()) {
-				throw new UserException('Cette page n\'existe pas.');
-			}
-		}
-	}
 
 	public function __construct(string $tpl)
 	{
@@ -61,8 +45,15 @@ class Template
 
 	public function serve(): bool
 	{
+		header('Content-Type: text/html;charset=utf-8', true);
+
 		if (!$this->exists()) {
-			return false;
+			header('HTTP/1.1 404 Not Found', true);
+			$tpl = new self('404.html');
+
+			if (!$tpl->serve()) {
+				throw new UserException('Cette page n\'existe pas.');
+			}
 		}
 
 		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
@@ -74,7 +65,7 @@ class Template
 
 			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
 
-			$ut->display($this->raw());
+			$ut->display();
 		}
 		elseif ($this->file) {
 			$this->file->serve();
@@ -84,7 +75,33 @@ class Template
 			readfile($this->defaultPath());
 		}
 
+
 		return true;
+	}
+
+	public function fetch(array $params = []): string
+	{
+		if (!$this->exists()) {
+			return '';
+		}
+
+		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
+			$ut = new UserTemplate($this->file);
+
+			if (!$this->file) {
+				$ut->setSource($this->defaultPath());
+			}
+
+			$ut->assignArray($params);
+
+			return $ut->fetch();
+		}
+		elseif ($this->file) {
+			$this->file->fetch();
+		}
+		else {
+			return file_get_contents($this->defaultPath());
+		}
 	}
 
 	public function exists()
@@ -109,6 +126,19 @@ class Template
 
 	public function type(): string
 	{
+		$name = $this->file->name ?? $this->defaultPath();
+		$ext = substr($name, strrpos($name, '.')+1);
+
+		if ($ext == 'css') {
+			return 'text/css';
+		}
+		elseif ($ext == 'html') {
+			return 'text/html';
+		}
+		elseif ($ext == 'js') {
+			return 'text/javascript';
+		}
+
 		if ($this->file) {
 			return $this->file->type;
 		}

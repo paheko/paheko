@@ -7,6 +7,8 @@ use KD2\Dumbyer_Exception;
 
 use Garradin\Files\Files;
 use Garradin\Files\Folders;
+use Garradin\Web\Template;
+use Garradin\Entities\Web\Page;
 
 class UserTemplate extends Dumbyer
 {
@@ -15,29 +17,15 @@ class UserTemplate extends Dumbyer
 	protected $modified;
 	protected $file;
 
-	public function __construct(?File $file = null)
+	static protected $root_variables;
+
+	static public function getRootVariables()
 	{
-		if ($file) {
-			$this->file = $file;
-			$this->hash = $file->hash;
-			$this->modified = $file->modified;
+		if (null !== self::$root_variables) {
+			return self::$root_variables;
 		}
 
-		$config = Config::getInstance();
-
-		$this->assignArray([
-			'config'    => $config->asArray(),
-			'root_url'  => WWW_URL,
-			'admin_url' => ADMIN_URL,
-			'_GET'      => $_GET,
-			'_POST'     => $_POST,
-		]);
-
-		$url = file_exists(DATA_ROOT . '/www/squelettes/default.css')
-			? WWW_URL . 'squelettes/default.css'
-			: WWW_URL . 'squelettes-dist/default.css';
-
-		$this->assign('url_css_defaut', $url);
+		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'champs_membres', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso'];
 
 		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
@@ -58,7 +46,32 @@ class UserTemplate extends Dumbyer
 			$lang = '';
 		}
 
-		$this->assign('visitor_lang', $lang);
+		$config = Config::getInstance();
+		$image_fond = $config->get('image_fond') ? $config->get('image_fond')->url() : null;
+
+		$config = array_intersect_key($config->asArray(), array_flip($keys)) + ['image_fond' => $image_fond];
+
+		self::$root_variables = [
+			'root_url'     => WWW_URL,
+			'admin_url'    => ADMIN_URL,
+			'_GET'         => &$_GET,
+			'_POST'        => &$_POST,
+			'visitor_lang' => $lang,
+			'config'       => $config,
+		];
+
+		return self::$root_variables;
+	}
+
+	public function __construct(?File $file = null)
+	{
+		if ($file) {
+			$this->file = $file;
+			$this->hash = sha1(DATA_ROOT . $file->id);
+			$this->modified = $file->modified;
+		}
+
+		$this->assignArray(self::getRootVariables());
 
 		$params = [
 			'template' => $this,
@@ -66,16 +79,16 @@ class UserTemplate extends Dumbyer
 
 		Plugin::fireSignal('usertemplate.init', $params);
 
-		$this->registerSection('pages', [self::class, 'sectionPages']);
-		$this->registerSection('articles', [self::class, 'sectionArticles']);
-		$this->registerSection('categories', [self::class, 'sectionCategories']);
+		$this->registerSection('pages', [$this, 'sectionPages']);
+		$this->registerSection('articles', [$this, 'sectionArticles']);
+		$this->registerSection('categories', [$this, 'sectionCategories']);
 
-		$this->registerSection('files', [self::class, 'sectionFiles']);
-		$this->registerSection('documents', [self::class, 'sectionDocuments']);
-		$this->registerSection('images', [self::class, 'sectionImages']);
+		$this->registerSection('files', [$this, 'sectionFiles']);
+		$this->registerSection('documents', [$this, 'sectionDocuments']);
+		$this->registerSection('images', [$this, 'sectionImages']);
 
-		$this->registerFunction('http', [self::class, 'functionHTTP']);
-		$this->registerFunction('include', [self::class, 'functionInclude']);
+		$this->registerFunction('http', [$this, 'functionHTTP']);
+		$this->registerFunction('include', [$this, 'functionInclude']);
 	}
 
 	public function setSource(string $path)
@@ -87,50 +100,69 @@ class UserTemplate extends Dumbyer
 
 	public function display(): void
 	{
-		$cpath = CACHE_ROOT . '/compiled/s_' . $this->hash . '.php';
+		$compiled_path = CACHE_ROOT . '/compiled/s_' . $this->hash . '.php';
 
-		if (file_exists($cpath) && filemtime($cpath) >= $this->modified) {
-			include $cpath;
+		if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
+			require $compiled_path;
 			return;
 		}
 
+		$tmp_path = $compiled_path . '.tmp';
+
 		try {
 			$code = $this->compile($this->file ? $this->file->fetch() : file_get_contents($this->path));
-			eval('?>' . $code);
+			file_put_contents($tmp_path, $code);
+
+			require $tmp_path;
 		}
-		catch (\Exception $e) {
+		catch (Dumbyer_Exception $e) {
+			@unlink($tmp_path);
 			throw new Dumbyer_Exception('Erreur de syntaxe : ' . $e->getMessage(), 0, $e);
 		}
-
-		if (!file_exists(dirname($cpath))) {
-			Utils::safe_mkdir(dirname($cpath), 0777, true);
+		catch (\Throwable $e) {
+			// Don't delete temporary file as it can be used to debug
+			throw $e;
 		}
 
-		file_put_contents($cpath, $code);
+		if (!file_exists(dirname($compiled_path))) {
+			Utils::safe_mkdir(dirname($compiled_path), 0777, true);
+		}
+
+		rename($tmp_path, $compiled_path);
 	}
 
-	public function fetch(File $file): string
+	public function fetch(): string
 	{
 		ob_start();
-		$this->display($file);
+		$this->display();
 		return ob_get_clean();
 	}
 
-	static public function functionInclude(array $params, UserTemplate $ut): string
+	public function functionInclude(array $params, UserTemplate $ut, int $line): string
 	{
 		if (empty($params['file'])) {
-			throw new Dumbyer_Exception('Argument "file" manquant pour la fonction "include"');
+			throw new Dumbyer_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
 		}
 
-		$file = Files::getSystemFile($params['file'], Folders::TEMPLATES);
+		// Avoid recursive loops
+		$from = $ut->get('included_from') ?? [];
 
-		if (!$file) {
-			throw new Dumbyer_Exception(sprintf('Le fichier à inclure "%s" n\'existe pas', $params['file']));
+		if (in_array($params['file'], $from)) {
+			throw new Dumbyer_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
 		}
-		return $ut->fetch($file);
+
+		$tpl = new Template($params['file']);
+
+		if (!$tpl->exists()) {
+			throw new Dumbyer_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
+		}
+
+		$params['included_from'] = array_merge($from, [$params['file']]);
+
+		return $tpl->fetch($params);
 	}
 
-	static public function functionHTTP(array $params): void
+	public function functionHTTP(array $params): void
 	{
 		if (headers_sent()) {
 			return;
@@ -212,27 +244,27 @@ class UserTemplate extends Dumbyer
 		}
 	}
 
-	static public function sectionCategories(array $params): \Generator
+	public function sectionCategories(array $params, self $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
 		$params['where'] .= ' AND w.type = ' . Page::TYPE_CATEGORY;
-		return $this->sectionPages($params);
+		return $this->sectionPages($params, $tpl, $line);
 	}
 
-	static public function sectionArticles(array $params): \Generator
+	public function sectionArticles(array $params, self $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
 		$params['where'] .= ' AND w.type = ' . Page::TYPE_PAGE;
-		return $this->sectionPages($params);
+		return $this->sectionPages($params, $tpl, $line);
 	}
 
-	static public function sectionPages(array $params): \Generator
+	public function sectionPages(array $params, self $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
@@ -254,7 +286,14 @@ class UserTemplate extends Dumbyer
 			unset($params['search']);
 		}
 
-		foreach ($this->sectionSQL($params) as $row) {
+		if (isset($params['uri'])) {
+			$params['where'] .= ' AND w.uri = :uri';
+			$params['limit'] = 1;
+			$params[':uri'] = $params['uri'];
+			unset($params['uri']);
+		}
+
+		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
 			$data = $row;
 			unset($data['points']);
 
@@ -269,29 +308,29 @@ class UserTemplate extends Dumbyer
 		}
 	}
 
-	static public function sectionImages(array $params): \Generator
+	public function sectionImages(array $params, self $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
 		$params['where'] .= ' AND f.image = 1';
-		return $this->sectionFiles($params);
+		return $this->sectionFiles($params, $tpl, $line);
 	}
 
-	static public function sectionDocuments(array $params): \Generator
+	public function sectionDocuments(array $params, self $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
 		$params['where'] .= ' AND f.image = 0';
-		return $this->sectionFiles($params);
+		return $this->sectionFiles($params, $tpl, $line);
 	}
 
-	static public function sectionFiles(array $params): \Generator
+	public function sectionFiles(array $params, self $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params)) {
+		if (!array_key_exists('where', $params, $tpl, $line)) {
 			$params['where'] = '';
 		}
 
@@ -305,7 +344,7 @@ class UserTemplate extends Dumbyer
 			$params['where'] .= sprintf(' AND f.id NOT IN (%s)', implode(', ', $found));
 		}
 
-		foreach ($this->sectionSQL($params) as $row) {
+		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
 			$file = new File;
 			$file->load($row);
 			$row = $file->asArray();
@@ -315,11 +354,11 @@ class UserTemplate extends Dumbyer
 		}
 	}
 
-	static public function sectionSQL(array $params): \Generator
+	public function sectionSQL(array $params, self $tpl, int $line): \Generator
 	{
 		static $defaults = [
 			'select' => '*',
-			'order' => 'rowid',
+			'order' => '1',
 			'begin' => 0,
 			'limit' => 1000,
 			'where' => '',
@@ -336,17 +375,42 @@ class UserTemplate extends Dumbyer
 		}
 
 		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
-			$params['select'], $params['tables'], $params['where'] ?? '', $params['group'] ? 'GROUP BY ' . $params['group'] : '', $params['order'], $params['begin'], $params['limit']);
+			$params['select'],
+			$params['tables'],
+			$params['where'] ?? '',
+			isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
+			$params['order'],
+			$params['begin'],
+			$params['limit']
+		);
+
+		$db = DB::getInstance();
+		$statement = $db->protectSelect(null, $sql);
 
 		$args = [];
 
 		foreach ($params as $key => $value) {
 			if (substr($key, 0, 1) == ':') {
-				$args[substr($key, 1)] = $value;
+				$args[$key] = $value;
 			}
 		}
 
-		// FIXME: use protectSelect
-		return DB::getInstance()->iterate($sql, $args);
+		unset($params, $sql);
+
+		foreach ($args as $key => $value) {
+			$statement->bindValue($key, $value, $db->getArgType($value));
+		}
+
+		try {
+			$result = $statement->execute();
+		}
+		catch (\Exception $e) {
+			throw new Dumbyer_Exception("Erreur SQL à la ligne %d : %s\nRequête exécutée : %s", $line, $statement->getSQL(true));
+		}
+
+		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
+		{
+			yield $row;
+		}
 	}
 }
