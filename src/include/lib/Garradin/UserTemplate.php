@@ -9,6 +9,7 @@ use Garradin\Files\Files;
 use Garradin\Files\Folders;
 use Garradin\Web\Template;
 use Garradin\Entities\Web\Page;
+use Garradin\UserTemplate\Modifiers;
 
 class UserTemplate extends Dumbyer
 {
@@ -73,6 +74,12 @@ class UserTemplate extends Dumbyer
 
 		$this->assignArray(self::getRootVariables());
 
+		$this->registerDefaults();
+
+		foreach (Modifiers::DEFAULTS as $name => $callback) {
+			$this->registerModifier($name, $callback);
+		}
+
 		$params = [
 			'template' => $this,
 		];
@@ -89,6 +96,7 @@ class UserTemplate extends Dumbyer
 
 		$this->registerFunction('http', [$this, 'functionHTTP']);
 		$this->registerFunction('include', [$this, 'functionInclude']);
+
 	}
 
 	public function setSource(string $path)
@@ -384,28 +392,28 @@ class UserTemplate extends Dumbyer
 			$params['limit']
 		);
 
-		$db = DB::getInstance();
-		$statement = $db->protectSelect(null, $sql);
-
-		$args = [];
-
-		foreach ($params as $key => $value) {
-			if (substr($key, 0, 1) == ':') {
-				$args[$key] = $value;
-			}
-		}
-
-		unset($params, $sql);
-
-		foreach ($args as $key => $value) {
-			$statement->bindValue($key, $value, $db->getArgType($value));
-		}
-
 		try {
+			$db = DB::getInstance();
+			$statement = $db->protectSelect(null, $sql);
+
+			$args = [];
+
+			foreach ($params as $key => $value) {
+				if (substr($key, 0, 1) == ':') {
+					$args[$key] = $value;
+				}
+			}
+
+			unset($params, $sql);
+
+			foreach ($args as $key => $value) {
+				$statement->bindValue($key, $value, $db->getArgType($value));
+			}
+
 			$result = $statement->execute();
 		}
 		catch (\Exception $e) {
-			throw new Dumbyer_Exception("Erreur SQL à la ligne %d : %s\nRequête exécutée : %s", $line, $statement->getSQL(true));
+			throw new Dumbyer_Exception(sprintf("Erreur SQL à la ligne %d : %s\nRequête exécutée : %s", $line, $db->lastErrorMsg(), $sql));
 		}
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))

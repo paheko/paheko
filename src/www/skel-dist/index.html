@@ -1,14 +1,14 @@
 {{:include file="_head.html"}}
 
-<BOUCLE_une(ARTICLES){par date}{inverse}{0,1}>
+{{#articles order="modified DESC" limit=1}}
 <section class="articles">
 	<article>
-	<h1><a href="#URL">#TITRE</a></h1>
-	<h5>Posté : [(#DATE_CREATION|date_intelligente)]</h5>
-	<p>[(#TEXTE|formatter_texte)]</p>
+	<h1><a href="{{ $url }}">{{ $title }}</a></h1>
+	<h5>Posté : {{ $modified|relative_date }}</h5>
+	<p>{{ $html|raw|strip_tags|truncate:600 }}</p>
 	</article>
 </section>
-</BOUCLE_une>
+{{/articles}}
 
 <B_derniers>
 	<section class="articles">
