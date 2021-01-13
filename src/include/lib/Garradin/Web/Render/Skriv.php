@@ -11,6 +11,8 @@ use Garradin\Files\Files;
 
 use KD2\SkrivLite;
 
+use const Garradin\WWW_URL;
+
 class Skriv
 {
 	static protected $skriv;
@@ -18,7 +20,7 @@ class Skriv
 	static public function render(?File $file, string $str, array $options = []): string
 	{
 		if (!isset($options['prefix'])) {
-			throw new \InvalidArgumentException('Missing "prefix" option');
+			$options['prefix'] = WWW_URL;
 		}
 
 		if (!self::$skriv)

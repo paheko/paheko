@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Entities\Web\Page;
+use Garradin\Web\Template;
 
 use KD2\DB\EntityManager as EM;
 
@@ -126,14 +127,20 @@ class Web
 			$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
 
 			// Custom templates
-			if (preg_match('!^[\w\d_-.]+$!i', $_GET['uri']) && Template::exists($_GET['uri'])) {
-				$skel = $_GET['uri'];
+			if (preg_match('!^[\w\d_.-]+$!i', $_GET['uri'])) {
+				$tpl = new Template($_GET['uri']);
+
+				if ($tpl->exists()) {
+					$tpl->serve();
+					return;
+				}
 			}
-			else {
-				$skel = 'article.html';
-			}
+
+			// Fallback to article.html
+			$skel = 'article.html';
 		}
 
-		Web\Template::display($skel);
+		$tpl = new Template($skel);
+		$tpl->serve();
 	}
 }
