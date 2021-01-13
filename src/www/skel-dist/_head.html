@@ -23,15 +23,13 @@
 	<h1><a href="{{$root_url}}">{{$config.nom_asso}}</a></h1>
 	{{if $config.adresse_asso}}<h4>{{$config.adresse_asso}}</h4>{{/if}}
 
-	<B_menu>
 	<nav>
 		<ul>
-		<BOUCLE_menu(RUBRIQUES){parent=0}{par titre}>
-			<li><a href="#URL/">#TITRE</a></li>
-		</BOUCLE_menu>
+		{{#categories parent=0 order="title"}}
+			<li><a href="{{$url}}">{{ $title }}</a></li>
+		{{/categories}}
 		</ul>
 	</nav>
-	</B_menu>
 </header>
 
 <section class="page">

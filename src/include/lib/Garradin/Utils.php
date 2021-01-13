@@ -79,11 +79,12 @@ class Utils
     static public function relative_date($ts, bool $with_hour = false): string
     {
         $day = null;
-        $date = self::get_datetime($ts);
 
         if (null === $ts) {
-            return $ts;
+            return '';
         }
+
+        $date = self::get_datetime($ts);
 
         if ($date->format('Ymd') == date('Ymd'))
         {
