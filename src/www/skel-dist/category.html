@@ -1,33 +1,40 @@
-<BOUCLE_rubrique(RUBRIQUES){uri}>
+{{#categories uri=$_GET.uri}}
 
-	<INCLURE{entete.html}>
+	{{:include file="_head.html"}}
 
-	<article class="rubrique">
-		<h1>#TITRE</h1>
+
+	<section class="subcategories">
+		{{#categories parent=$id order="title"}}
+		<article>
+			<h2><a href="{{$url}}">{{$title}}</a></h2>
+		</article>
+		{{/categories}}
+	</section>
+
+	<article>
+		<h1>{{$title}}</h1>
+
 		<div class="corps">
-			[(#TEXTE*|formatter_texte)]
+			{{$html|raw}}
 		</div>
-		<INCLURE{galerie.html}>
-		<INCLURE{documents.html}>
+
+		{{:include file="gallery.html" parent=$id}}
+		{{:include file="documents.html" parent=$id}}
 	</article>
 
 	<section class="articles">
-	<BOUCLE_articles(ARTICLES){rubrique}{par uri}>
+		{{#articles parent=$id order="created DESC"}}
 		<article>
-		<h3><a href="#URL">#TITRE</a></h3>
-		<p>[(#TEXTE|supprimer_skriv|couper{200})]</p>
+			<h3><a href="{{$url}}">{{$title}}</a></h3>
+			<p>{{$html|raw|strip_tags|truncate:200}}</p>
 		</article>
-	</BOUCLE_articles>
+		{{/articles}}
 	</section>
 
-	<INCLURE{pied.html}>
+	{{:include file="_foot.html"}}
 
-</BOUCLE_rubrique>
+{{else}}
 
-	<INCLURE{entete.html}>
-	<p class="error">
-		Cette page n'existe pas.
-	</p>
-	<INCLURE{pied.html}>
+	{{:include file="404.html"}}
 
-<//B_rubrique>
+{{/categories}}
