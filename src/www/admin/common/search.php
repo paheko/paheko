@@ -78,13 +78,13 @@ if ($query->query || $sql_query) {
 		}
 
 	   $result = $recherche->searchSQL($target, $sql, null, false, $is_unprotected);
+
+		if (f('to_sql')) {
+			$sql_query = $sql;
+		}
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());
-	}
-
-	if (f('to_sql')) {
-		$sql_query = $sql;
 	}
 }
 
