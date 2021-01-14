@@ -397,6 +397,11 @@ class UserTemplate extends Brindille
 			}
 		}
 
+		// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
+		if (isset($params['count'])) {
+			$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
+		}
+
 		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
 			$params['select'],
 			$params['tables'],
