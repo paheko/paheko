@@ -29,7 +29,7 @@ else {
 
 // The account has a different chart after changing the current year:
 // get back to the list of accounts to select a new account!
-if ($account->id_chart != $current_year->id_chart) {
+if ($account->id_chart != $year->id_chart) {
 	Utils::redirect(ADMIN_URL . 'acc/accounts/?chart_change');
 }
 
