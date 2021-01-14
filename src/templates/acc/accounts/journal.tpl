@@ -42,6 +42,10 @@
 			{elseif $sum >= 0}
 				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|abs|raw|money_currency}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
 			{/if}
+		{elseif $account.type == $account::TYPE_REVENUE && $sum < 0}
+			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez dû procéder à des remboursements par exemple, et que ceux-ci couvrent des recettes perçues sur un exercice précédent.</p>
+		{elseif $account.type == $account::TYPE_EXPENSE && $sum < 0}
+			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez reçu des remboursements par exemple, et que ceux-ci couvrent des dépenses réglées sur un exercice précédent.</p>
 		{/if}
 	{/if}
 
