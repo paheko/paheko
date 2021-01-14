@@ -418,6 +418,16 @@ class Account extends Entity
 		}
 	}
 
+	public function countDepositJournal(int $year_id): int
+	{
+		 return DB::getInstance()->firstColumn('SELECT COUNT(*)
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE t.id_year = ? AND l.id_account = ? AND l.credit = 0 AND NOT (t.status & ?)
+			ORDER BY t.date, t.id;',
+			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
+	}
+
 	public function getSum(int $year_id, bool $simple = false): int
 	{
 		$sum = (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
