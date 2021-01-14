@@ -372,6 +372,30 @@ class Plugin
 	}
 
 	/**
+	 * Checks if a plugin requires an upgrade and upgrade it
+	 * This is run after an upgrade, a database restoration, or in the Plugins page
+	 */
+	static public function upgradeAllIfRequired(): void
+	{
+		// Mettre à jour les plugins si nécessaire
+		foreach (self::listInstalled() as $id => $infos)
+		{
+			// Ne pas tenir compte des plugins dont le code n'est pas dispo
+			if ($infos->disabled) {
+				continue;
+			}
+
+			$plugin = new Plugin($id);
+
+			if ($plugin->needUpgrade()) {
+				$plugin->upgrade();
+			}
+
+			unset($plugin);
+		}
+	}
+
+	/**
 	 * Vérifie que les plugins système sont bien installés et sinon les réinstalle
 	 * @return void
 	 */
@@ -765,16 +789,24 @@ class Plugin
 			return null;
 		}
 
+		if (null === $params) {
+			$params = [];
+		}
+
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($list as $row)
 		{
+			$path = self::getPath($row->plugin, in_array($row->plugin, $system));
+
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
 			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
-			if (!self::getPath($row->plugin, in_array($row->plugin, $system)))
+			if (!$path)
 			{
 				continue;
 			}
+
+			$params['plugin_root'] = $path;
 
 			$return = call_user_func_array('Garradin\\Plugin\\' . $row->callback, [&$params, &$callback_return]);
 

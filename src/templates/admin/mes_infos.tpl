@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos" js=1}
+{include file="admin/_head.tpl" title="Mes informations personnelles" current="mes_infos"}
 
 <nav class="tabs">
     <ul>

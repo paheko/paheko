@@ -1,13 +1,13 @@
 {include file="admin/_head.tpl" title="Changer d'exercice" current="acc/years"}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url}" data-focus="1">
 	<fieldset>
 		<legend>Changer l'exercice de travail</legend>
 		<dl>
 			<dd>
 				<select name="year">
 					{foreach from=$list item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</option>
+					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}
 				</select>
 			</dd>

@@ -9,4 +9,9 @@ qv(['type' => 'string|required']);
 
 header('Content-Type: image/svg+xml');
 
-echo Graph::plot(qg('type'), [], Graph::MONTHLY_INTERVAL, 600);
+$expiry = time() - 600;
+$hash = sha1('plot_all');
+
+if (!Utils::HTTPCache($hash, $expiry)) {
+	echo Graph::plot(qg('type'), [], Graph::MONTHLY_INTERVAL, 600);
+}

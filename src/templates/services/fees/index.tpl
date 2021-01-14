@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s — Tarifs"|args:$service.label current="membres/services" js=1}
+{include file="admin/_head.tpl" title="%s — Tarifs"|args:$service.label current="membres/services"}
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index"}
 
@@ -40,7 +40,9 @@
 		</tbody>
 	</table>
 {else}
-	<p class="block alert">Il n'y a aucun tarif enregistré.</p>
+	<p class="block alert">
+		Il n'y a aucun tarif enregistré. Créez un premier tarif pour l'activité «&nbsp;{$service.label}&nbsp;» pour pouvoir y inscrire des membres.
+	</p>
 {/if}
 
 {if $session->canAccess('membres', Membres::DROIT_ADMIN)}

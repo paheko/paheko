@@ -20,12 +20,44 @@ use KD2\HTTP;
 
 class Session extends \KD2\UserSession
 {
+	const SECTION_WEB = 'web';
+	const SECTION_DOCUMENTS = 'documents';
+	const SECTION_USERS = 'membres';
+	const SECTION_ACCOUNTING = 'compta';
+
 	// Personalisation de la config de UserSession
 	protected $cookie_name = 'gdin';
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
 	const MINIMUM_PASSWORD_LENGTH = 8;
+
+	static protected $_instance = null;
+
+	static public function getInstance()
+	{
+		return self::$_instance ?: self::$_instance = new self;
+	}
+
+	public function __clone()
+	{
+		throw new \LogicException('Cannot clone');
+	}
+
+	public function __construct()
+	{
+		if (self::$_instance !== null) {
+			throw new \LogicException('Wrong call, use getInstance');
+		}
+
+		$url = parse_url(ADMIN_URL);
+
+		parent::__construct(DB::getInstance(), [
+			'cookie_domain' => $url['host'],
+			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
+			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
+		]);
+	}
 
 	static public function checkPasswordValidity($password)
 	{
@@ -34,7 +66,7 @@ class Session extends \KD2\UserSession
 			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
 		}
 
-		$session = new Session(DB::getInstance());
+		$session = self::getInstance();
 		$session->http = new HTTP;
 
 		if ($session->isPasswordCompromised($password)) {
@@ -54,31 +86,6 @@ class Session extends \KD2\UserSession
 		}
 
 		return parent::isPasswordCompromised($password);
-	}
-
-	// Extension des méthodes de UserSession
-	public function __construct()
-	{
-		$url = parse_url(ADMIN_URL);
-
-		//throw new \Exception('lol');
-
-		parent::__construct(DB::getInstance(), [
-			'cookie_domain' => $url['host'],
-			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
-			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
-		]);
-	}
-
-	/**
-	 * Suppression anciens cookies qui avaient un chemin incorrect
-	 * FIXME supprimer en 2019
-	 * @return void
-	 */
-	public function cleanOldCookies()
-	{
-		setcookie($this->cookie_name, null, -1, '/admin/', $this->cookie_domain, $this->cookie_secure, true);
-		setcookie($this->remember_me_cookie_name, null, -1, '/admin/', $this->cookie_domain, $this->cookie_secure, true);
 	}
 
 	protected function getUserForLogin($login)
@@ -104,7 +111,7 @@ class Session extends \KD2\UserSession
 		$config = Config::getInstance();
 
 		return $this->db->first('SELECT m.*, m.'.$config->get('champ_identite').' AS identite,
-			c.droit_connexion, c.droit_wiki, 
+			c.droit_connexion, c.droit_web, c.droit_documents,
 			c.droit_membres, c.droit_compta, c.droit_config, c.droit_membres
 			FROM membres AS m
 			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
@@ -154,10 +161,10 @@ class Session extends \KD2\UserSession
 		{
 			$login_id = \Garradin\LOCAL_LOGIN;
 
-			// On va chercher le premier membre avec le droit de gérer les membres
+			// On va chercher le premier membre avec le droit de gérer la config
 			if (-1 === $login_id) {
 				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_categorie = (SELECT id FROM membres_categories WHERE droit_membres = ? LIMIT 1)
+					WHERE id_categorie IN (SELECT id FROM membres_categories WHERE droit_config = ?)
 					LIMIT 1', Membres::DROIT_ADMIN);
 			}
 

@@ -3,14 +3,14 @@
 {foreach from=$years item="year"}
 <section class="year-infos">
 	<h2 class="ruler">{$year.label} —
-		Du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h2>
+		Du {$year.start_date|date_short} au {$year.end_date|date_short}</h2>
 
 	<nav class="tabs">
 		<aside>
-			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-				{linkbutton shape="upload" href="!acc/years/import.php?year=%d"|args:$year.id label="Import & export"}
+				{linkbutton shape="upload" href="!acc/years/import.php?id=%d"|args:$year.id label="Import & export"}
 			{/if}
+			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 		</aside>
 		<ul>
 			<li><a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a></li>
@@ -22,15 +22,18 @@
 		</ul>
 	</nav>
 
-	{if $year.has_transactions}
-	<section class="graphs">
-		{foreach from=$graphs key="url" item="label"}
-		<figure>
-			<img src="{$url|args:'year='|cat:$year.id}" alt="" />
-			<figcaption>{$label}</figcaption>
-		</figure>
-		{/foreach}
-	</section>
+	{if $year.nb_transactions > 3}
+		<section class="graphs">
+			{foreach from=$graphs key="url" item="label"}
+			<figure>
+				<img src="{$url|args:'year='|cat:$year.id}" alt="" />
+				<figcaption>{$label}</figcaption>
+			</figure>
+			{/foreach}
+		</section>
+	{else}
+		<p class="help block">Il n'y a pas encore suffisamment d'écritures dans cet exercice pour pouvoir afficher les statistiques.</p>
+		<p>{linkbutton label="Saisir une nouvelle écriture" shape="plus" href="transactions/new.php"}</p>
 	{/if}
 </section>
 

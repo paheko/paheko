@@ -3,10 +3,14 @@
 namespace Garradin\Accounting;
 
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Line;
+use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Accounting\Year;
 use Garradin\CSV;
 use Garradin\DB;
-use Garradin\DynamicList;
 use Garradin\Utils;
+use Garradin\UserException;
+use Garradin\ValidationException;
 use KD2\DB\EntityManager;
 
 class Accounts
@@ -43,8 +47,8 @@ class Accounts
 	 */
 	public function listCommonTypes(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?, ?) ORDER BY code COLLATE NOCASE;',
-			$this->chart_id, Account::TYPE_ANALYTICAL, Account::TYPE_VOLUNTEERING);
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?) ORDER BY code COLLATE NOCASE;',
+			$this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
 	/**
@@ -97,7 +101,7 @@ class Accounts
 	 * List common accounts, grouped by type
 	 * @return array
 	 */
-	public function listCommonGrouped(array $types = null): array
+	public function listCommonGrouped(array $types = null, bool $include_empty_types = false): array
 	{
 		if (null === $types) {
 			$types = '';
@@ -108,6 +112,21 @@ class Accounts
 		}
 
 		$out = [];
+
+		if ($include_empty_types) {
+			foreach (Account::TYPES_NAMES as $key => $label) {
+				if (!$label) {
+					continue;
+				}
+
+				$out[$key] = (object) [
+					'label'    => $label,
+					'type'     => $key,
+					'accounts' => [],
+				];
+			}
+		}
+
 		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE NOCASE;',
 			$this->chart_id);
 
@@ -177,6 +196,14 @@ class Accounts
 				$account = new Account;
 				$account->id_chart = $this->chart_id;
 				try {
+					if (!isset($positions[$row['position']])) {
+						throw new ValidationException('Position inconnue : ' . $row['position']);
+					}
+
+					if (!isset($types[$row['type']])) {
+						throw new ValidationException('Type inconnu : ' . $row['type']);
+					}
+
 					$row['position'] = $positions[$row['position']];
 					$row['type'] = $types[$row['type']];
 					$account->importForm($row);
@@ -195,49 +222,83 @@ class Accounts
 		}
 	}
 
-	static public function listByType(int $year_id, ?int $type)
-	{
-		$reverse = Account::isReversed((int) $type) ? -1 : 1;
-
-		$columns = Account::LIST_COLUMNS;
-		unset($columns['credit'], $columns['debit'], $columns['line_label'], $columns['sum']);
-		$columns['line_reference']['label'] = 'Réf. paiement';
-		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
-
-		$acc_columns = [
-			'account' => ['label' => 'Compte', 'select' => 'a.code'],
-			'account_label' => ['label' => 'Nom du compte', 'select' => 'a.label'],
-			'id_account' => [],
-		];
-
-		$columns = array_merge($acc_columns, $columns);
-
-		if (null === $type) {
-			$other_types = implode(',', [0, Account::TYPE_OPENING, Account::TYPE_CLOSING]);
-		}
-
-		$tables = 'acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			INNER JOIN acc_accounts a ON a.id = l.id_account';
-		$conditions = sprintf('a.type IN (%s) AND t.id_year = %d', $type ?: $other_types, $year_id);
-
-		$sum = 0;
-
-		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('date', true);
-		$list->setCount('COUNT(*)');
-		$list->setModifier(function (&$row) use (&$sum, $reverse) {
-			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
-		});
-		$list->setExportCallback(function (&$row) {
-			$row->change = Utils::money_format($row->change, '.', '', false);
-		});
-
-		return $list;
-	}
-
 	public function countByType(int $type)
 	{
 		return DB::getInstance()->count(Account::TABLE, 'id_chart = ? AND type = ?', $this->chart_id, $type);
 	}
+
+	public function getSingleAccountForType(int $type)
+	{
+		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
+	}
+
+/* FIXME: implement closing of accounts
+	public function getClosingAccountId()
+	{
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
+	}
+
+	public function closeRevenueExpenseAccounts(Year $year, int $user_id)
+	{
+		$closing_id = $this->getClosingAccountId();
+
+		if (!$closing_id) {
+			throw new UserException('Aucun compte n\'est indiqué comme compte de clôture dans le plan comptable');
+		}
+
+		$transaction = new Transaction;
+		$transaction->id_creator = $user_id;
+		$transaction->id_year = $year->id();
+		$transaction->type = Transaction::TYPE_ADVANCED;
+		$transaction->label = 'Clôture de l\'exercice';
+		$transaction->date = new \DateTime;
+		$debit = 0;
+		$credit = 0;
+
+		$sql = 'SELECT a.id, SUM(l.credit - l.debit) AS sum, a.position, a.code
+			FROM acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			WHERE t.id_year = ? AND a.position IN (?, ?)
+			GROUP BY a.id
+			ORDER BY a.code;';
+
+		$res = DB::getInstance()->iterate($sql, $year->id(), Account::REVENUE, Account::EXPENSE);
+
+		foreach ($res as $row) {
+			$reversed = $row->position == Account::ASSET;
+
+			$line = new Line;
+			$line->id_account = $row->id;
+			$line->credit = $reversed ? abs($row->sum) : 0;
+			$line->debit = !$reversed ? abs($row->sum) : 0;
+			$transaction->addLine($line);
+
+			if ($reversed) {
+				$debit += abs($row->sum);
+			}
+			else {
+				$credit += abs($row->sum);
+			}
+		}
+
+		if ($debit) {
+			$line = new Line;
+			$line->id_account = $closing_id;
+			$line->credit = 0;
+			$line->debit = $debit;
+			$transaction->addLine($line);
+		}
+
+		if ($credit) {
+			$line = new Line;
+			$line->id_account = $closing_id;
+			$line->credit = $credit;
+			$line->debit = 0;
+			$transaction->addLine($line);
+		}
+
+		$transaction->save();
+	}
+*/
 }

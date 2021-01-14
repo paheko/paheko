@@ -1,0 +1,36 @@
+# Désactiver le multiviews (conflit avec /admin/plugin.php) et les index (sécurité)
+Options -MultiViews -Indexes
+DirectoryIndex disabled
+DirectoryIndex index.php index.html
+
+# Au cas où
+<IfModule mod_alias.c>
+	RedirectMatch 403 /include/
+	RedirectMatch 403 /cache/
+	RedirectMatch 403 /plugins/
+	RedirectMatch 403 /templates/
+	RedirectMatch 403 ^/scripts/
+	RedirectMatch 403 /.*\.sqlite
+	RedirectMatch 403 /.*\.log
+	RedirectMatch 403 /(README|VERSION|COPYING|Makefile|cron\.php)
+	RedirectMatch 403 /config\.(.*)\.php
+	RedirectMatch 403 /sous-domaine\.html
+	RedirectMatch 403 _inc\.php
+</IfModule>
+
+# Redirection dynamique, pour les installations sans vhost dédié
+# Objectif: supprimer le /www/ de l'URL
+# Note: il est probable qu'il soit nécessaire d'adapter la configuration
+# à votre hébergeur !
+
+<IfModule mod_rewrite.c>
+	RewriteEngine on
+	## Remplacer dans les lignes suivantes
+	## /garradin/ par le nom du sous-répertoire où est installé Garradin
+ 	RewriteBase /garradin/
+	FallbackResource /garradin/www/_route.php
+
+	## Ne pas modifier les lignes suivantes, les décommenter simplement !
+	RewriteCond %{REQUEST_URI} !www/
+	RewriteRule ^(.*)$ www/$1 [QSA,L]
+</IfModule>

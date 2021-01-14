@@ -114,20 +114,28 @@ aside.fichier a:hover {
     cursor: e-resize;
 }
 
+.web-edit {
+    display: grid;
+    grid-template-columns: 1fr 30%;
+    grid-template-rows: .3fr .3fr .3fr;
+    grid-gap: 2em;
+}
+
 fieldset.wikiText {
+    grid-column: 1;
+    grid-row: 1/3;
     border: none;
     padding: 0;
 }
 
-fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
-    float: right;
-    width: 35%;
-    margin-left: 3%;
-    clear: right;
+.web-edit input[type=text] {
+    min-width: 0;
 }
 
-fieldset.wikiMain input[type=text] {
-    min-width: 0;
+@media screen and (max-width: 980px) {
+    .web-edit {
+        display: block;
+    }
 }
 
 #encryptPasswordDisplay {
@@ -135,11 +143,15 @@ fieldset.wikiMain input[type=text] {
     background: #ddd;
 }
 
-fieldset.wikiEncrypt .help {
+fieldset.wikiEncrypt, fieldset.wikiMain, .web-edit p.submit {
+    grid-column: 2;
+}
+
+.web-edit dd.help {
     font-size: .9em;
 }
 
-fieldset.wikiMain #f_titre {
+fieldset.wikiMain #f_title {
     width: 90%;
     font-size: 14pt;
 }
@@ -148,17 +160,6 @@ fieldset.wikiMain #f_uri {
     width: 90%;
 }
 
-fieldset.wikiRights dl {
-    font-size: 10pt;
-}
-
-fieldset.wikiRevision  {
-    clear: both;
-}
-
-fieldset.wikiRevision #f_modification {
-    width: 90%;
-}
 
 .wikiFiles {
     text-align: center;
@@ -193,40 +194,44 @@ fieldset.wikiRevision #f_modification {
     margin-left: 1em;
 }
 
-.wikiTree ul {
+.web-tree ul {
     margin-left: 1em;
     list-style-type: none;
 }
 
-.wikiTree ul ul {
-    margin-left: 2em;
-}
-
-.wikiTree a {
+.web-tree a {
     color: #666;
 }
 
-.wikiTree h3:before {
-    content: "▸";
-    display: inline;
-    margin-right: .5em;
+.web-tree td {
+    width: 15%;
 }
 
-.wikiTree li {
-    margin: 0.2em 0;
+.web-tree i {
+    display: inline-block;
+    padding: 0 .5em;
 }
 
-.wikiTree h3 {
-    font-size: 1em;
+.web-tree b {
+    display: inline-block;
+    padding: 0 .5em;
+    color: #999;
+}
+
+.web-tree em {
     font-weight: normal;
 }
 
-.wikiTree .current > h3 a {
+.web-tree h3 {
+    display: inline-block;
+}
+
+.web-tree .current > a {
     font-weight: bold;
     color: #000;
 }
 
-.wikiTree .choice {
+.web-tree .choice {
     text-align: center;
     margin-bottom: 1em;
 }
@@ -269,92 +274,6 @@ fieldset.wikiRevision #f_modification {
 .wikiResults p {
     margin-bottom: .8em;
     font-size: .9em;
-}
-
-.wikiRevisions .length ins {
-    text-decoration: none;
-    color: green;
-}
-
-.wikiRevisions .length del {
-    text-decoration: none;
-    color: red;
-}
-
-.wikiRevisions .length i {
-    font-style: normal;
-    color: gray;
-}
-
-div.wikiRevision {
-    width: 48%;
-    margin: 1em 1%;
-    text-align: center;
-    float: left;
-}
-
-div.wikiRevision h3 {
-    font-size: 1em;
-}
-
-div.wikiRevision h4 {
-    font-weight: normal;
-    font-size: .9em;
-}
-
-.diff .ins {
-    background: #cfc;
-    width: 45%;
-}
-
-.diff .del {
-    background: #fcc;
-    width: 45%;
-}
-
-.diff .line {
-    width: 2%;
-    padding: 0.2em;
-    text-align: right;
-    font-family: Mono;
-    font-size: 90%;
-    color: #666;
-}
-
-.diff .leftChange, .diff .rightChange {
-    text-align: center;
-    vertical-align: middle;
-}
-
-.diff ins { background: #9f9; }
-.diff del { background: #f99; }
-
-.diff hr {
-    background: none;
-    border: none;
-    border-top: 5px dotted #fff;
-    color: #fff;
-    margin: .2em .4em;
-}
-
-.diff .separator {
-    background: #ccc;
-}
-
-.diff {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 0.9em;
-}
-
-.diff tr {
-    border: 1px solid #ccc;
-    vertical-align: top;
-}
-
-.diff .leftChange b, .diff .rightChange b {
-    text-shadow: 1px 1px 1px #ccc;
-    color: #666;
 }
 
 form#f_upload fieldset {
@@ -445,4 +364,71 @@ form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
     cursor: pointer;
     background-color: #eee;
     color: darkred;
+}
+
+#confirm_saved {
+    position: absolute;
+    top: .5em;
+    right: 4em;
+    text-align: center;
+    transition: all .5s, opacity 3s;
+}
+
+.diff {
+    margin: 1em;
+}
+
+.diff .ins {diff
+    background: #cfc;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fcc;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-family: Mono;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.diff ins { background: #9f9; }
+.diff del { background: #f99; }
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #fff;
+    color: #fff;
+    margin: .2em .4em;
+}
+
+.diff .separator {
+    background: #ccc;
+}
+
+.diff {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .leftChange b, .diff .rightChange b {
+    text-shadow: 1px 1px 1px #ccc;
+    color: #666;
 }

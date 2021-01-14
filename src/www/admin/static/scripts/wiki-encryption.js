@@ -64,7 +64,7 @@
 		return content;
 	}
 
-	window.wikiDecrypt = function (edit)
+	window.wikiDecrypt = function ()
 	{
 		loadAESlib();
 
@@ -74,17 +74,17 @@
 		{
 			encryptPassword = null;
 
-			if (edit)
+			if (document.getElementById('f_content'))
 			{
 				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
 				{
-					document.getElementById('f_contenu').value = '';
-					document.getElementById('f_chiffrement').checked = false;
-					checkEncryption(document.getElementById('f_chiffrement'));
+					document.getElementById('f_content').value = '';
+					document.getElementById('f_encrypted').checked = false;
+					checkEncryption(document.getElementById('f_encrypted'));
 				}
 				else
 				{
-					wikiDecrypt(true);
+					wikiDecrypt();
 				}
 			}
 
@@ -92,10 +92,10 @@
 		}
 
 		iteration = 0;
-		decrypt(edit);
+		decrypt();
 	};
 
-	var decrypt = function (edit)
+	var decrypt = function ()
 	{
 		if (typeof GibberishAES == 'undefined')
 		{
@@ -112,8 +112,15 @@
 			return;
 		}
 
-		var content = document.getElementById(edit ? 'f_contenu' : 'wikiEncryptedContent');
-		var wikiContent = !edit ? (content.textContent ? content.textContent : content.innerText) : content.value;
+		var content = document.getElementById('f_content');
+		var edit = true;
+
+		if (!content) {
+		 	content = document.getElementById('wikiEncryptedContent');
+		 	edit = false;
+		}
+
+		var wikiContent = content.value || content.innerText;
 		wikiContent = wikiContent.replace(/\s+/g, '');
 
 		try {
@@ -127,7 +134,7 @@
 			if (edit)
 			{
 				// Redemander le mot de passe
-				wikiDecrypt(true);
+				wikiDecrypt();
 			}
 			return false;
 		}
@@ -141,7 +148,7 @@
 		else
 		{
 			content.value = wikiContent;
-			checkEncryption(document.getElementById('f_chiffrement'));
+			checkEncryption(document.getElementById('f_encrypted'));
 		}
 	};
 
@@ -194,7 +201,7 @@
 					return false;
 				}
 
-				var content = document.getElementById('f_contenu');
+				var content = document.getElementById('f_content');
 				content.value = GibberishAES.enc(content.value, encryptPassword);
 				content.readOnly = true;
 				return true;

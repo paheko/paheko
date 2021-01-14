@@ -6,19 +6,20 @@ use Garradin\Membres\Session;
 
 class Upgrade
 {
-	static public function preCheck()
+	const MIN_REQUIRED_VERSION = '1.0.0-rc8';
+
+	static public function preCheck(): bool
 	{
-		$config = Config::getInstance();
-		$v = $config->getVersion();
+		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
 
 		if (version_compare($v, garradin_version(), '>='))
 		{
-			throw new UserException("Pas de mise à jour à faire.");
+			return false;
 		}
 
-		if (!$v || version_compare($v, '0.9.8', '<'))
+		if (!$v || version_compare($v, self::MIN_REQUIRED_VERSION, '<'))
 		{
-			throw new UserException("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin 0.9.8 avant de faire la mise à jour vers cette version.");
+			throw new UserException(sprintf("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
 		}
 
 		Install::checkAndCreateDirectories();
@@ -33,45 +34,35 @@ class Upgrade
 
 		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
-		$session = new Session;
+		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);
+		return true;
 	}
 
 	static public function upgrade()
 	{
-		$config = Config::getInstance();
-		$v = $config->getVersion();
+		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
 
-		$session = new Session;
+		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);
 
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
 		$db = DB::getInstance();
 
+		// reset last version check
+		$db->exec('UPDATE config SET valeur = NULL WHERE cle = \'last_version_check\';');
+
 		// Créer une sauvegarde automatique
 		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
 
 		try {
-			if (version_compare($v, '1.0.0-alpha1', '<'))
+			if (version_compare($v, '1.1.0', '<='))
 			{
+				// Missing trigger
 				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
-				$db->commitSchemaUpdate();
-
-				// Import nouveau plan comptable
-				$chart = new \Garradin\Entities\Accounting\Chart;
-				$chart->label = 'Plan comptable associatif 2018';
-				$chart->country = 'FR';
-				$chart->code = 'PCA2018';
-				$chart->save();
-				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-beta6', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-beta6_migration.sql');
+				$db->createFunction('sha1', 'sha1');
+				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
 				$db->commitSchemaUpdate();
 			}
 
@@ -80,31 +71,14 @@ class Upgrade
 
 			Utils::clearCaches();
 
-			$config->setVersion(garradin_version());
+			DB::getInstance()->update('config', ['valeur' => garradin_version()], 'cle = \'version\';');
 
 			Static_Cache::remove('upgrade');
 
 			// Réinstaller les plugins système si nécessaire
 			Plugin::checkAndInstallSystemPlugins();
 
-			// Mettre à jour les plugins si nécessaire
-			foreach (Plugin::listInstalled() as $id=>$infos)
-			{
-				// Ne pas tenir compte des plugins dont le code n'est pas dispo
-				if ($infos->disabled)
-				{
-					continue;
-				}
-
-				$plugin = new Plugin($id);
-
-				if ($plugin->needUpgrade())
-				{
-					$plugin->upgrade();
-				}
-
-				unset($plugin);
-			}
+			Plugin::upgradeAllIfRequired();
 		}
 		catch (\Exception $e)
 		{

@@ -16,17 +16,6 @@ class Wiki
     protected $restriction_categorie = null;
     protected $restriction_droit = null;
 
-    static public function transformTitleToURI($str)
-    {
-        $str = Utils::transliterateToAscii($str);
-
-        $str = preg_replace('![^\w\d_-]!i', '-', $str);
-        $str = preg_replace('!-{2,}!', '-', $str);
-        $str = trim($str, '-');
-
-        return $str;
-    }
-
     // Gestion des données ///////////////////////////////////////////////////////
 
     public function _checkFields(&$data)
@@ -200,109 +189,6 @@ class Wiki
         return $db->firstColumn('SELECT titre FROM wiki_pages WHERE id = ? LIMIT 1;', (int)$id);
     }
 
-    public function getRevision($id, $rev)
-    {
-        $db = DB::getInstance();
-        $champ_id = Config::getInstance()->get('champ_identite');
-
-        return $db->first('SELECT r.revision, r.modification, r.id_auteur, r.contenu,
-            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.'.$champ_id.' AS nom_auteur,
-            r.chiffrement
-            FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
-            WHERE r.id_page = ? AND revision = ? LIMIT 1;', (int) $id, (int) $rev);
-    }
-
-    public function listRevisions($id)
-    {
-        $db = DB::getInstance();
-        $champ_id = Config::getInstance()->get('champ_identite');
-
-        // FIXME pagination au lieu de bloquer à 1000
-        return $db->get('SELECT r.revision, r.modification, r.id_auteur,
-            strftime(\'%s\', r.date) AS date, LENGTH(r.contenu) AS taille, m.'.$champ_id.' AS nom_auteur,
-            LENGTH(r.contenu) - (SELECT LENGTH(contenu) FROM wiki_revisions WHERE id_page = r.id_page AND revision < r.revision ORDER BY revision DESC LIMIT 1)
-            AS diff_taille, r.chiffrement
-            FROM wiki_revisions AS r LEFT JOIN membres AS m ON m.id = r.id_auteur
-            WHERE r.id_page = ? ORDER BY r.revision DESC LIMIT 1000;', (int) $id);
-    }
-
-    public function editRevision($id, $revision_edition = 0, $data)
-    {
-        $db = DB::getInstance();
-
-        $revision = $db->firstColumn('SELECT revision FROM wiki_pages WHERE id = ?;', (int)$id);
-
-        // ?! L'ID fournit ne correspond à rien ?
-        if ($revision === false)
-        {
-            throw new \RuntimeException('La page demandée n\'existe pas.');
-        }
-
-        // Pas de révision
-        if ($revision == 0 && !trim($data['contenu']))
-        {
-            return true;
-        }
-
-        // Il faut obligatoirement fournir un ID d'auteur
-        if (empty($data['id_auteur']) && $data['id_auteur'] !== null)
-        {
-            throw new \BadMethodCallException('Aucun ID auteur de fourni.');
-        }
-
-        $contenu = $db->firstColumn('SELECT contenu FROM wiki_revisions WHERE revision = ? AND id_page = ?;', (int)$revision, (int)$id);
-
-        // Pas de changement au contenu, pas la peine d'enregistrer une nouvelle révision
-        if (trim($contenu) == trim($data['contenu']))
-        {
-            return true;
-        }
-
-        // Révision sur laquelle est basée la nouvelle révision
-        // utilisé pour vérifier que le contenu n'a pas été modifié depuis qu'on
-        // a chargé la page d'édition
-        if ($revision > $revision_edition)
-        {
-            throw new UserException('La page a été modifiée depuis le début de votre modification.');
-        }
-
-        if (empty($data['chiffrement']))
-            $data['chiffrement'] = 0;
-
-        if (!isset($data['modification']) || !trim($data['modification']))
-            $data['modification'] = null;
-
-        // Incrémentons le numéro de révision
-        $revision++;
-
-        $data['id_page'] = $id;
-        $data['revision'] = $revision;
-
-        $db->insert('wiki_revisions', $data);
-        $db->update('wiki_pages', [
-            'revision'          =>  $revision,
-            'date_modification' =>  gmdate('Y-m-d H:i:s'),
-        ], 'id = :id', ['id' => (int)$id]);
-
-        return true;
-    }
-
-    public function search($search)
-    {
-        if (strlen($search) > 100) {
-            throw new UserException('Recherche trop longue : maximum 100 caractères');
-        }
-
-        $query = sprintf('SELECT
-            p.uri, r.*, snippet(wiki_recherche, \'<b>\', \'</b>\', \'...\', -1, -50) AS snippet,
-            rank(matchinfo(wiki_recherche), 0, 1.0, 1.0) AS points
-            FROM wiki_recherche AS r INNER JOIN wiki_pages AS p ON p.id = r.id
-            WHERE %s AND wiki_recherche MATCH ?
-            ORDER BY points DESC LIMIT 0,50;', $this->_getLectureClause('p.'));
-
-        return DB::getInstance()->get($query, $search);
-    }
-
     public function setRestrictionCategorie($id, $droit_wiki)
     {
         $this->restriction_categorie = $id;
@@ -445,37 +331,6 @@ class Wiki
     {
         $db = DB::getInstance();
         return $db->firstColumn('SELECT COUNT(*) FROM wiki_pages WHERE '.$this->_getLectureClause().';');
-    }
-
-    public function listBackBreadCrumbs($id)
-    {
-        if ($id == 0)
-            return [];
-
-        $db = DB::getInstance();
-        $flat = [];
-        $max = 0;
-
-        while ($id > 0 && $max++ < 10)
-        {
-            $res = $db->first('SELECT parent, titre, uri
-                FROM wiki_pages WHERE id = ? LIMIT 1;', (int)$id);
-
-            $flat[] = [
-                'id'        =>  $id,
-                'titre'     =>  $res->titre,
-                'uri'       =>  $res->uri,
-            ];
-
-            if ($id == $res->parent)
-            {
-                throw new \Exception('Parent! ' . $id . '/' . $res->parent);
-            }
-
-            $id = (int)$res->parent;
-        }
-
-        return array_reverse($flat);
     }
 
     public function listBackParentTree($id)

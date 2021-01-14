@@ -45,10 +45,11 @@ $tpl->assign('admin_url', ADMIN_URL);
 $form = new Form;
 $tpl->assign_by_ref('form', $form);
 
-$session = new Session;
+$session = Session::getInstance();
+$config = Config::getInstance();
 
 $tpl->assign('session', $session);
-$tpl->assign('config', Config::getInstance()->getConfig());
+$tpl->assign('config', $config->getConfig());
 
 if (!defined('Garradin\LOGIN_PROCESS'))
 {

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier un rappel automatique" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Modifier un rappel automatique" current="membres/services"}
 
 {include file="services/_nav.tpl" current="reminders"}
 

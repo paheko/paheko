@@ -79,7 +79,7 @@ class Service extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => 'm.' . $identity,
-				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE', $identity),
+				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE %%s', $identity),
 			],
 			'status' => [
 				'label' => 'Statut',
@@ -106,8 +106,10 @@ class Service extends Entity
 		$tables = 'services_users su
 			INNER JOIN membres m ON m.id = su.id_user
 			INNER JOIN services s ON s.id = su.id_service
-			INNER JOIN services_fees sf ON sf.id = su.id_fee';
-		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND su.expiry_date >= date()', $this->id());
+			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
+		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
+			AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
@@ -119,7 +121,7 @@ class Service extends Entity
 	public function unpaidUsersList(): DynamicList
 	{
 		$list = $this->paidUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.paid = 0', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.paid = 0 AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}
@@ -127,7 +129,7 @@ class Service extends Entity
 	public function expiredUsersList(): DynamicList
 	{
 		$list = $this->paidUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date()', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}

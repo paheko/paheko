@@ -1,4 +1,4 @@
-function initTransactionForm() {
+function initTransactionForm(is_new) {
 	// Advanced transaction: line management
 	var lines = $('.transaction-lines tbody tr');
 
@@ -40,15 +40,12 @@ function initTransactionForm() {
 			i.onkeyup = (e) => {
 				var v = i.value.replace(/[^0-9,.]/);
 				if (v.length && v != 0) {
-					i.classList.remove('disabled');
-					inputs[+!k].classList.add('disabled');
 					inputs[+!k].value = '0';
 					updateTotals();
 				}
 			};
 
 			if (+i.value == 0 && +inputs[+!k].value != 0) {
-				i.classList.add('disabled');
 				i.value = '0';
 			}
 		});
@@ -86,16 +83,21 @@ function initTransactionForm() {
 		$('#f_credit_total').value = g.formatMoney(credit);
 	}
 
-	// Add row button
+	// Add row "plus" button
 	$('.transaction-lines tfoot button')[0].onclick = () => {
-		var line = $('.transaction-lines tbody tr')[0];
+		let lines = $('.transaction-lines tbody tr');
+		var line = lines[lines.length - 1];
 		var n = line.cloneNode(true);
-		n.querySelectorAll('input').forEach((e) => {
-			e.value = e.className.match(/money/) ? '0' : '';
-		});
-		if (l = n.querySelector('.input-list .label')) {
-			l.parentNode.removeChild(l);
-		}
+
+		// Reset label and reference
+		n.querySelectorAll('input').forEach((i) => {
+			if (!i.name.match(/label|reference/)) {
+				return;
+			}
+
+			i.value = '';
+		})
+
 		var b = n.querySelector('.input-list button');
 		b.onclick = () => {
 			g.current_list_input = b.parentNode;
@@ -107,4 +109,50 @@ function initTransactionForm() {
 	};
 
 	updateTotals();
+
+	// Hide type specific parts of the form
+	function hideAllTypes() {
+		g.toggle('[data-types]', false);
+	}
+
+	// Toggle parts of the form when a type is selected
+	function selectType(v) {
+		hideAllTypes();
+		g.toggle('[data-types~=t' + v + ']', true);
+		g.toggle('[data-types=all-but-advanced]', v != 0);
+		// Disable required form elements, or the form won't be able to be submitted
+		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
+			e.disabled = v == 'advanced' ? true : false;
+		});
+
+	}
+
+	var radios = $('fieldset input[type=radio][name=type]');
+
+	radios.forEach((e) => {
+		e.onchange = () => {
+			document.querySelectorAll('fieldset').forEach((e, k) => {
+				if (!is_new || k == 0 || e.dataset.types) return;
+				g.toggle(e, true);
+				g.toggle('p.submit', true);
+			});
+			selectType(e.value);
+		};
+	});
+
+	hideAllTypes();
+
+	// In case of a pre-filled form: show the correct part of the form
+	var current = document.querySelector('input[name=type]:checked');
+	if (current) {
+		selectType(current.value);
+	}
+
+	if (is_new) {
+		document.querySelectorAll('fieldset').forEach((e, k) => {
+			if (k == 0) return;
+			g.toggle(e, false);
+			g.toggle('p.submit', false);
+		});
+	}
 }

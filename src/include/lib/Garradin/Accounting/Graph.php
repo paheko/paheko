@@ -8,6 +8,7 @@ use Garradin\Entities\Accounting\Transaction;
 use Garradin\Utils;
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Static_Cache;
 use const Garradin\ADMIN_COLOR1;
 use const Garradin\ADMIN_COLOR2;
 use const Garradin\ADMIN_URL;
@@ -61,6 +62,12 @@ class Graph
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
+		$cache_id = sha1('plot' . json_encode(func_get_args()));
+
+		if (!Static_Cache::expired($cache_id)) {
+			return Static_Cache::get($cache_id);
+		}
+
 		$plot = new Plot($width, 300);
 
 		$lines = self::PLOT_TYPES[$type];
@@ -94,7 +101,7 @@ class Graph
 			foreach ($data[0]->get() as $k=>$v)
 			{
 				$date = new \DateTime('@' . ($k * $interval));
-				$labels[] = Utils::date_fr('M y', $date);
+				$labels[] = Utils::date_fr($date, 'M y');
 			}
 
 			$plot->setLabels($labels);
@@ -113,13 +120,23 @@ class Graph
 			}
 		}
 
-		return $plot->output();
+		$out = $plot->output();
+
+		Static_Cache::store($cache_id, $out);
+
+		return $out;
 	}
 
 	static public function pie(string $type, array $criterias)
 	{
 		if (!array_key_exists($type, self::PIE_TYPES)) {
 			throw new \InvalidArgumentException('Unknown type');
+		}
+
+		$cache_id = sha1('pie' . json_encode(func_get_args()));
+
+		if (!Static_Cache::expired($cache_id)) {
+			return Static_Cache::get($cache_id);
 		}
 
 		$pie = new Pie(700, 300);
@@ -161,7 +178,11 @@ class Graph
 
 		$pie->togglePercentage(true);
 
-		return $pie->output();
+		$out = $pie->output();
+
+		Static_Cache::store($cache_id, $out);
+
+		return $out;
 	}
 
 	static protected function getColors()

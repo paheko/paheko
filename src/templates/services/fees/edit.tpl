@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s — Tarifs"|args:$service.label current="membres/services" js=1}
+{include file="admin/_head.tpl" title="%s — Tarifs"|args:$service.label current="membres/services"}
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index"}
 

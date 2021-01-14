@@ -17,25 +17,14 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
-$rules = [
-	'end_date' => 'date_format:d/m/Y|required',
-];
+$csrf_key = 'acc_years_close_' . $year->id();
 
-if (f('close') && $form->check('acc_years_close_' . $year->id()))
-{
-	try {
-		$year->close();
-		$year->save();
-		$session->set('acc_year', null);
+$form->runIf('close', function () use ($year, $user, $session) {
+	$year->close($user->id);
+	$year->save();
+	$session->set('acc_year', null);
+}, $csrf_key, ADMIN_URL . 'acc/years/');
 
-		Utils::redirect(ADMIN_URL . 'acc/years/');
-	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
-
-$tpl->assign('year', $year);
+$tpl->assign(compact('year', 'csrf_key'));
 
 $tpl->display('acc/years/close.tpl');

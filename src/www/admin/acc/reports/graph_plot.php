@@ -7,4 +7,10 @@ require_once __DIR__ . '/_inc.php';
 
 header('Content-Type: image/svg+xml');
 
-echo Graph::plot(qg('type'), $criterias);
+$expiry = time() - 600;
+$hash = sha1('plot_' . json_encode($criterias));
+
+if (!Utils::HTTPCache($hash, $expiry)) {
+	echo Graph::plot(qg('type'), $criterias);
+}
+

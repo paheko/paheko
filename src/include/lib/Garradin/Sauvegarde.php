@@ -342,15 +342,18 @@ class Sauvegarde
 		// On récupère la version
 		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
 
-		// Vérification de l'AppID pour les versions récentes
-		if (version_compare($version, '0.8.0', '>='))
+		// On ne permet pas de restaurer une vieille version
+		if (version_compare($version, '0.9.8', '<'))
 		{
-			$appid = $db->querySingle('PRAGMA application_id;', false);
+			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
+		}
 
-			if ($appid !== DB::APPID)
-			{
-				throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
-			}
+		// Vérification de l'AppID pour les versions récentes
+		$appid = $db->querySingle('PRAGMA application_id;', false);
+
+		if ($appid !== DB::APPID)
+		{
+			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
 		if ($user_id)
@@ -405,8 +408,10 @@ class Sauvegarde
 		}
 		else {
 			// Force l'installation de plugin système si non existant dans la sauvegarde existante
-			// si une mise à jour est nécessaire, normalement ça sera fait après la mise à jour
 			Plugin::checkAndInstallSystemPlugins();
+
+			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
+			Plugin::upgradeAllIfRequired();
 		}
 
 		return $return;

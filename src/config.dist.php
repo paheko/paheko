@@ -191,25 +191,37 @@ namespace Garradin;
 //const ERRORS_REPORT_URL = null;
 
 /**
- * Activation de la page permettant de visualiser et rapporter les erreurs présentes
- * dans le error.log.
+ * Template HTML d'erreur personnalisé (en production)
  *
- * Conseillé de mettre à false si vous ne voulez pas que les administrateurs de votre
- * instance puissent voir les erreurs système.
+ * Si SHOW_ERRORS est à FALSE un message d'erreur générique (sans détail technique)
+ * est affiché. Il est possible de personnaliser ce message avec cette constante.
+ *
+ * Voir include/init.php pour le template par défaut.
+ */
+
+// const ERRORS_TEMPLATE = null;
+
+/**
+ * Activation des détails techniques (utile en auto-hébergement) :
+ * - version de PHP
+ * - page permettant de visualiser les erreurs présentes dans le error.log
+ * - vérification de nouvelle version
+ *
+ * Ces infos ne sont visibles que par les membres ayant accès à la configuration.
  *
  * Défaut : true
  * (Afin d'aider au rapport de bugs des instances auto-hébergées)
  */
 
-//const ERRORS_ENABLE_LOG_VIEW = true;
+//const ENABLE_TECH_DETAILS = true;
 
 /**
  * Utilisation de cron pour les tâches automatiques
  *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
- * le script cron.php à la racine toutes les 24 heures. Sinon Garradin
- * effectuera les actions automatiques quand quelqu'un se connecte à
- * l'administration ou visite le site.
+ * le script cron.php dans le répertoire "scripts" toutes les 24 heures.
+ * Sinon Garradin effectuera les actions automatiques quand quelqu'un
+ * se connecte à l'administration ou visite le site.
  *
  * Défaut : false
  */
@@ -354,3 +366,52 @@ namespace Garradin;
  */
 
 //const ADMIN_BACKGROUND_IMAGE = 'http://mon-asso.fr/fond_garradin.png';
+
+
+/**
+ * Stockage des fichiers
+ *
+ * Indiquer ici le nom d'une classe de stockage de fichiers
+ * (parmis celles disponibles dans lib/Garradin/Files/Backend)
+ *
+ * Indiquer NULL si vous souhaitez stocker les fichier dans la base
+ * de données SQLite (valeur par défaut).
+ *
+ * Classes de stockage possibles :
+ * - SQLite : enregistre dans la base de données (défaut)
+ * - FileSystem : enregistrement des fichiers dans le système de fichier
+ *
+ * Défaut : null
+ */
+
+//const FILE_STORAGE_BACKEND = null;
+
+/**
+ * Configuration du stockage des fichiers
+ *
+ * Indiquer dans cette constante la configuration de la classe de stockage
+ * des fichiers.
+ *
+ * Valeurs possibles :
+ * - SQLite : aucune configuration possible
+ * - FileSystem : 'string' = chemin du répertoire où doivent être stockés les fichiers,
+ * %s doit être ajouté à la fin pour indiquer le répertoire et nom du fichier
+ *
+ * Défaut : null
+ *
+ * @vararray
+ */
+
+//const FILE_STORAGE_CONFIG = null;
+
+/**
+ * Forcer le quota disponible pour les fichiers
+ *
+ * Si cette constante est renseignée (en octets) alors il ne sera
+ * pas possible de stocker plus que cette valeur.
+ * Tout envoi de fichier sera refusé.
+ *
+ * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible)
+ */
+
+//const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage

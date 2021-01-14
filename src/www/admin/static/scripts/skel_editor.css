@@ -31,6 +31,7 @@
 	border: none;
 	border-radius: .2em;
 	height: 24px;
+	padding: 1px;
 	padding-left: 24px;
 	margin: 4px .5em;
 	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEUAAACZm4leYFyOkX1RU09MTkp9f2+ys6KwsZrn5+KanIz///+6u6vGxryDhXtVV1Otpz1oAAAAA3RSTlMA+7omiqY6AAAAgklEQVQI12NI+f9fgQEEfO7e+QBm/BGU+P8fJPrd2LgLCD4AGSCBLCDD8Pfu3bu9QCK/Z86e/esDw4/Hv+/euf0ZyEj7PXPnbCDDI+33kZDQkE8M/11D1969e9eEwRNIlpe332f421Ne0dHRcYnh75k7Z8/cudPEoOIS4uriAlQMAwDpN0taA/g97gAAAABJRU5ErkJggg==") no-repeat 5px center;

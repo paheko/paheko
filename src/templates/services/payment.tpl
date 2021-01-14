@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Enregistrer un règlement" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Enregistrer un règlement" current="membres/services"}
 
 {form_errors}
 
@@ -14,6 +14,7 @@
 			{input type="checkbox" name="paid" value="1" default=$su.paid label="Marquer cette inscription comme payée"}
 			{input type="money" name="amount" label="Montant réglé par le membre" required=1}
 			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>
 	</fieldset>

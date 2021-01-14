@@ -24,7 +24,7 @@ $csv = new CSV_Custom($session, 'acc_reconcile_csv');
 $csv->setColumns([
 	'label'          => 'Libellé',
 	'date'           => 'Date',
-	'notes'          => 'Notes',
+	'notes'          => 'Remarques',
 	'reference'      => 'Numéro pièce comptable',
 	'p_reference'    => 'Référence paiement',
 	'amount'         => 'Montant',

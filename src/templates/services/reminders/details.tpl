@@ -18,7 +18,7 @@
 		<tr>
 			<th><a href="../../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
 			<td>{$row.email}</td>
-			<td>{$row.date|format_sqlite_date_to_french}</td>
+			<td>{$row.date|date_short}</td>
 			<td></td>
 		</tr>
 	{/foreach}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services" js=1}
+{include file="admin/_head.tpl" title="Activités et cotisations" current="membres/services"}
 
 {include file="services/_nav.tpl" current="index" service=null fee=null}
 
@@ -24,7 +24,7 @@
 						{if $row.duration}
 							{$row.duration} jours
 						{elseif $row.start_date}
-							du {$row.start_date|format_sqlite_date_to_french} au {$row.end_date|format_sqlite_date_to_french}
+							du {$row.start_date|date_short} au {$row.end_date|date_short}
 						{else}
 							ponctuelle
 						{/if}

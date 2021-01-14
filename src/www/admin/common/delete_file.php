@@ -11,7 +11,12 @@ if (!isset($csrf_key, $redirect)) {
 	throw new \InvalidArgumentException('Missing params');
 }
 
-$file = new Fichiers(qg('id'));
+try {
+	$file = new Fichiers(qg('id'));
+}
+catch (\InvalidArgumentException $e) {
+	throw new UserException($e->getMessage());
+}
 
 if (!$file->checkAccess($session))
 {

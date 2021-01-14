@@ -261,7 +261,7 @@ class Membres
             $ids = [(int)$ids];
         }
 
-        $session = new Session;
+        $session = Session::getInstance();
 
         if ($session->isLogged())
         {
@@ -364,49 +364,51 @@ class Membres
         return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?' . $where, (int)$id_categorie);
     }
 
-    public function listByCategory($cat, $fields, $page = 1, $order = null, $desc = false)
+    public function listByCategory(?int $category_id): DynamicList
     {
-        $begin = ($page - 1) * self::ITEMS_PER_PAGE;
-
-        $db = DB::getInstance();
         $config = Config::getInstance();
-
+        $db = DB::getInstance();
+        $identity = $config->get('champ_identite');
         $champs = $config->get('champs_membres');
 
-        if (is_int($cat) && $cat)
-            $where = 'WHERE id_categorie = '.(int)$cat;
-        elseif (is_array($cat))
-            $where = 'WHERE id_categorie IN ('.implode(',', $cat).')';
-        else
-            $where = '';
+        $columns = [
+            '_user_id' => [
+                'select' => 'id',
+            ],
+            'numero' => [
+                'label' => 'Num.',
+            ],
+        ];
 
-        if (is_null($order) || !$champs->get($order))
-            $order = 'id';
+        $fields = $champs->getListedFields();
 
-        if (!empty($fields) && $order != 'id' && $champs->isText($order))
-        {
-            $order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $order);
+        foreach ($fields as $key => $config) {
+            if (isset($columns[$key])) {
+                continue;
+            }
+
+            $columns[$key] = [
+                'label' => $config->title
+            ];
+
+            if ($champs->isText($key)) {
+                $columns[$key]['order'] = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %%s', $db->quoteIdentifier($key));
+            }
+
         }
 
-        if ($desc)
-        {
-            $order .= ' DESC';
+        $tables = 'membres';
+        $conditions = $category_id ? sprintf('id_categorie = %d', $category_id) : sprintf('id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)');
+
+        $order = $identity;
+
+        if (!isset($columns[$order])) {
+            $order = $champs->getFirstListed();
         }
 
-        if (!in_array('email', $fields))
-        {
-            $fields []= 'email';
-        }
-
-        $query = sprintf('SELECT id, id_categorie, %s, %s AS identite,
-            strftime(\'%%s\', date_inscription) AS date_inscription
-            FROM membres %s ORDER BY %s LIMIT ?, ?;',
-            implode(', ', $fields),
-            $config->get('champ_identite'),
-            $where,
-            $order);
-
-        return $db->get($query, (int) $begin, self::ITEMS_PER_PAGE);
+        $list = new DynamicList($columns, $tables, $conditions);
+        $list->orderBy($order, false);
+        return $list;
     }
 
     public function countByCategory($cat = 0)

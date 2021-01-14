@@ -14,9 +14,7 @@ class Utils
     const EMAIL_CONTEXT_PRIVATE = 'private';
     const EMAIL_CONTEXT_SYSTEM = 'system';
 
-    static protected $skriv = null;
-
-    static private $french_date_names = [
+    const FRENCH_DATE_NAMES = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
         'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
         'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
@@ -24,65 +22,98 @@ class Utils
         'Feb'=>'Fév','Apr'=>'Avr','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
         'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
 
-    static public function strftime_fr($format=null, $ts=null)
+    static public function get_datetime($ts)
     {
-        if (is_null($format))
-        {
-            $format = '%d/%m/%Y à %H:%M';
+        if (is_object($ts) && $ts instanceof \DateTimeInterface) {
+            return $ts;
+        }
+        elseif (is_numeric($ts)) {
+            return new \DateTime('@' . $ts);
+        }
+        elseif (strlen($ts) == 10) {
+            return \DateTime::createFromFormat('!Y-m-d', $ts);
+        }
+        elseif (strlen($ts) == 19) {
+            return \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
+        }
+        else {
+            return null;
+        }
+    }
+
+    static public function strftime_fr($ts, $format)
+    {
+        $ts = self::get_datetime($ts);
+
+        if (null === $ts) {
+            return $ts;
         }
 
-        $date = strftime($format, $ts);
-        $date = strtr($date, self::$french_date_names);
+        $date = strftime($format, $ts->getTimestamp());
+
+        $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
     }
 
-    static public function date_fr($format=null, $ts=null)
+    static public function date_fr($ts, $format = null)
     {
+        $ts = self::get_datetime($ts);
+
+        if (null === $ts) {
+            return $ts;
+        }
+
         if (is_null($format))
         {
             $format = 'd/m/Y à H:i';
         }
 
-        if (is_object($ts)) {
-            $date = $ts->format($format);
-        }
-        elseif (is_numeric($ts)) {
-            $date = date($format, $ts);
-        }
-        elseif (strlen($ts) == 10) {
-            $ts = \DateTime::createFromFormat('!Y-m-d', $ts);
-            $date = $ts->format($format);
-        }
-        elseif (strlen($ts) == 19) {
-            $ts = \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
-            $date = $ts->format($format);
-        }
-        else {
-            return null;
-        }
+        $date = $ts->format($format);
 
-        $date = strtr($date, self::$french_date_names);
+        $date = strtr($date, self::FRENCH_DATE_NAMES);
         $date = strtolower($date);
         return $date;
     }
 
-    static public function sqliteDateToFrench($d, $short = false)
+    static public function relative_date($ts, bool $with_hour = false): string
     {
-        if (strlen($d) == 10 || $short)
-        {
-            $f = 'd/m/Y';
+        $day = null;
+
+        if (null === $ts) {
+            return '';
         }
-        elseif (strlen($d) == 16)
+
+        $date = self::get_datetime($ts);
+
+        if ($date->format('Ymd') == date('Ymd'))
         {
-            $f = 'd/m/Y H:i';
+            $day = 'aujourd\'hui';
+        }
+        elseif ($date->format('Ymd') == date('Ymd', strtotime('yesterday')))
+        {
+            $day = 'hier';
+        }
+        elseif ($date->format('Ymd') == date('Ymd', strtotime('tomorrow')))
+        {
+            $day = 'demain';
+        }
+        elseif ($date->format('Y') == date('Y'))
+        {
+            $day = strtolower(self::strftime_fr($date, '%A %e %B'));
         }
         else
         {
-            $f = 'd/m/Y H:i';
+            $day = strtolower(self::strftime_fr($date, '%e %B %Y'));
         }
 
-        return self::date_fr($f, $d);
+        if ($with_hour)
+        {
+            $hour = $date->format('H\hi');
+            return sprintf('%s, %s', $day, $hour);
+        }
+
+        return $day;
     }
 
     /**
@@ -129,7 +160,7 @@ class Utils
         }
 
         if (!preg_match('/^-?(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
-            throw new UserException(sprintf('Le format du montant est invalide : %s. Format accepté, exemple : 142,02', $value));
+            throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
         }
 
         $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
@@ -181,7 +212,7 @@ class Utils
         return str_replace('/admin', '', ADMIN_URL) . $uri;
     }
 
-    static public function getSelfURI(bool $qs = true)
+    static public function getSelfURI($qs = true)
     {
         return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
     }
@@ -346,57 +377,6 @@ class Utils
         $str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
         $str = preg_replace('![^[:ascii:]]+!', '', $str);
 
-        return $str;
-    }
-
-    /**
-     * Transforme un texte SkrivML en HTML
-     * @param  string $str Texte SkrivML
-     * @return string      Texte HTML
-     */
-    static public function SkrivToHTML($str)
-    {
-        if (!self::$skriv)
-        {
-            self::$skriv = new \KD2\SkrivLite;
-            self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivFichier']);
-            self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
-
-            // Enregistrer d'autres extensions éventuellement
-            Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
-        }
-
-        $skriv =& self::$skriv;
-
-        $str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
-            try {
-                $file = new Fichiers((int)$match[2]);
-            }
-            catch (\InvalidArgumentException $e)
-            {
-                return $skriv->parseError('/!\ Lien fichier : ' . $e->getMessage());
-            }
-
-            return $file->getURL();
-        }, $str);
-
-        $str = self::$skriv->render($str);
-
-        return $str;
-    }
-
-    /**
-     * Transforme les tags de base SPIP en tags SkrivML
-     * @param  string $str Texte d'entrée
-     * @return string      Texte transformé
-     */
-    static public function SpipToSkriv($str)
-    {
-        $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '=== $1 ===', $str);
-        $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '**$1**', $str);
-        $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '\'\'$1\'\'', $str);
-        $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '[[$1 | $2]]', $str);
-        $str = preg_replace('/(?<!\[)\[([^\[\]]+?)\]/', '[[$1]]', $str);
         return $str;
     }
 
@@ -600,9 +580,12 @@ class Utils
         {
             $url = ADMIN_URL . 'plugin/' . $params['id'] . '/';
         }
-        else
+        elseif (defined('Garradin\PLUGIN_URL'))
         {
             $url = PLUGIN_URL;
+        }
+        else {
+            throw new \RuntimeException('Missing plugin URL');
         }
 
         if (!empty($params['file']))
@@ -761,14 +744,17 @@ class Utils
     static public function array_transpose(array $array): array
     {
         $out = [];
-        $count = null;
+        $max = 0;
+
+        foreach ($array as $rows) {
+            $max = max($max, count($rows));
+        }
 
         foreach ($array as $column => $rows) {
-            if (null !== $count && count($rows) != $count) {
-                throw new \LogicException('Array is inconsistent');
+            // Match number of rows of largest sub-array, in case there is a missing row in a column
+            if ($max != count($rows)) {
+                $rows = array_merge($rows, array_fill(0, $max - count($rows), null));
             }
-
-            $count = count($rows);
 
             foreach ($rows as $k => $v) {
                 if (!isset($out[$k])) {
@@ -833,20 +819,81 @@ class Utils
         return array($h * 360, $s, $v);
     }
 
-    static public function HTTPCache(string $hash, int $expiry): bool
+    static public function HTTPCache(string $hash, int $last_change): bool
     {
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
-        if ($etag === $hash && $last_modified <= $expiry) {
+        if ($etag === $hash && $last_modified >= $last_change) {
             header('HTTP/1.1 304 Not Modified', true, 304);
             exit;
         }
 
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $expiry)));
+        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
         header(sprintf('Etag: %s', $hash));
         header('Cache-Control: private');
 
         return false;
+    }
+
+    static public function getLatestVersion(): ?string
+    {
+        $config = Config::getInstance();
+        $last = $config->get('last_version_check');
+
+        if ($last) {
+            $last = json_decode($last);
+        }
+
+        // Only check once every two weeks
+        if ($last && $last->time > (time() - 3600 * 24 * 15)) {
+            return $last->version;
+        }
+
+        $current_version = garradin_version();
+        $last = (object) ['time' => time(), 'version' => null];
+        $config->set('last_version_check', json_encode($last));
+        $config->save();
+
+        $list = (new HTTP)->GET(WEBSITE . 'juvlist');
+
+        if (!$list) {
+            return null;
+        }
+
+        $list = json_decode($list);
+
+        if (!$list) {
+            return null;
+        }
+
+        $last->version = $current_version;
+
+        foreach ($list as $item) {
+            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1])
+                && version_compare($last->version, $match[1], '<')) {
+                $last->version = $match[1];
+            }
+        }
+
+        if (version_compare($last->version, $current_version, '==')) {
+            $last->version = null;
+        }
+
+        $config->set('last_version_check', json_encode($last));
+        $config->save();
+
+        return $last->version;
+    }
+
+    static public function transformTitleToURI($str)
+    {
+        $str = Utils::transliterateToAscii($str);
+
+        $str = preg_replace('![^\w\d_-]!i', '-', $str);
+        $str = preg_replace('!-{2,}!', '-', $str);
+        $str = trim($str, '-');
+
+        return $str;
     }
 }

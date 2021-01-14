@@ -11,6 +11,7 @@
 
 {if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
 <div class="block alert">
+	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
 		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
@@ -18,6 +19,18 @@
 		<h3>Créance en attente</h3>
 		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
 	{/if}
+		{button type="submit" shape="check" label="Marquer manuellement comme réglée" name="mark_paid" value="1"}
+		{csrf_field key=$csrf_key}
+	</form>
+</div>
+{/if}
+
+{if $transaction.status & $transaction::STATUS_ERROR}
+<div class="error block">
+	<p>Cette écriture est erronée suite à un bug. Il est conseillé de la modifier pour remettre les comptes manquants, ou la supprimer et la re-créer.
+	Voir <a href="https://fossil.kd2.org/garradin/wiki?name=Changelog#1_0_1" target="_blank">cette page pour plus d'explications</a></p>
+	<p>Les lignes erronées sont affichées en bas de cette page.</p>
+	<p><em>(Ce message disparaîtra si vous modifiez l'écriture pour la corriger.)</em></p>
 </div>
 {/if}
 
@@ -25,9 +38,13 @@
 	{if $transaction.id_related}
 	<dt>Écriture liée à</dt>
 	<dd><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id_related}">#{$transaction.id_related}</a>
-		{if $transaction.type == $transaction::TYPE_PAYOFF}(en règlement de){/if}
+		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
 	</dd>
 	{/if}
+	<dt>Type</dt>
+	<dd>
+		{$transaction->getTypeName()}
+	</dd>
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label}</h2></dd>
 	<dt>Date</dt>
@@ -38,7 +55,7 @@
 	<dt>Exercice</dt>
 	<dd>
 		<a href="{$admin_url}acc/reports/ledger.php?year={$transaction.id_year}">{$tr_year.label}</a>
-		| Du {$tr_year.start_date|date_fr:'d/m/Y'} au {$tr_year.end_date|date_fr:'d/m/Y'}
+		| Du {$tr_year.start_date|date_short} au {$tr_year.end_date|date_short}
 		| <strong>{if $tr_year.closed}Clôturé{else}En cours{/if}</strong>
 	</dd>
 
@@ -98,7 +115,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{foreach from=$transaction->getLinesWithAccounts() item="line"}
+		{foreach from=$transaction->getLinesWithAccounts(false) item="line"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>

@@ -63,56 +63,27 @@ class Squelette_Filtres
 
     static public function date_en_francais($date)
     {
-        return ucfirst(strtolower(Utils::strftime_fr('%A %e %B %Y', $date)));
+        return ucfirst(strtolower(Utils::strftime_fr($date, '%A %e %B %Y')));
     }
 
     static public function heure_en_francais($date)
     {
-        return Utils::strftime_fr('%Hh%M', $date);
+        return Utils::strftime_fr($date, '%Hh%M');
     }
 
     static public function mois_en_francais($date)
     {
-        return Utils::strftime_fr('%B %Y', $date);
+        return Utils::strftime_fr($date, '%B %Y');
     }
 
     static public function date_perso($date, $format)
     {
-        return Utils::strftime_fr($format, $date);
+        return Utils::strftime_fr($date, $format);
     }
 
     static public function date_intelligente($date, $avec_heure = true)
     {
-        $jour = null;
-        $heure = date('H\hi', $date);
-
-        if (date('Ymd', $date) == date('Ymd'))
-        {
-            $jour = 'aujourd\'hui';
-        }
-        elseif (date('Ymd', $date) == date('Ymd', strtotime('yesterday')))
-        {
-            $jour = 'hier';
-        }
-        elseif (date('Ymd', $date) == date('Ymd', strtotime('tomorrow')))
-        {
-            $jour = 'demain';
-        }
-        elseif (date('Y', $date) == date('Y'))
-        {
-            $jour = strtolower(Utils::strftime_fr('%A %e %B', $date));
-        }
-        else
-        {
-            $jour = strtolower(Utils::strftime_fr('%e %B %Y', $date));
-        }
-
-        if ($avec_heure)
-        {
-            return sprintf('%s, %s', $jour, $heure);
-        }
-
-        return $jour;
+        return Utils::relative_date($date, $avec_heure);
     }
 
     static public function date_atom($date)
@@ -138,10 +109,17 @@ class Squelette_Filtres
         if (!trim($contact))
             return '';
 
-        if (strpos($contact, '@'))
-            return '<span style="unicode-bidi:bidi-override;direction: rtl;">'.htmlspecialchars(strrev($contact), ENT_QUOTES, 'UTF-8').'</span>';
-        else
+        if (strpos($contact, '@')) {
+            $reversed = strrev($contact);
+            // https://unicode-table.com/en/FF20/
+            $reversed = strtr($reversed, ['@' => '＠']);
+
+            return sprintf('<a href="#error" onclick="this.href = (this.innerText + \':otliam\').split(\'\').reverse().join(\'\').replace(/＠/, \'@\');"><span style="unicode-bidi:bidi-override;direction: rtl;">%s</span></a>',
+                htmlspecialchars($reversed));
+        }
+        else {
             return '<a href="'.htmlspecialchars($contact, ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($contact, ENT_QUOTES, 'UTF-8').'</a>';
+        }
     }
 
     static public function entites_html($texte)

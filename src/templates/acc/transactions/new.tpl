@@ -1,8 +1,8 @@
-{include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new" js=1}
+{include file="admin/_head.tpl" title="Saisie d'une écriture" current="acc/new"}
 
 {include file="acc/_year_select.tpl"}
 
-<form method="post" action="{$self_url_no_qs}" enctype="multipart/form-data" data-focus="1">
+<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
 	{form_errors}
 
 	{if $ok}
@@ -13,14 +13,15 @@
 	{/if}
 
 	{if $payoff_for}
-		<input type="hidden" name="type" value="{$transaction::TYPE_PAYOFF}" />
+		<input type="hidden" name="type" value="{$transaction.type}" />
 		<input type="hidden" name="payoff_for" value="{$payoff_for.id}" />
+		<input type="hidden" name="{$payoff_for.form_account_name}[{$payoff_for.id_account}]" value="-" />
 		<fieldset>
-			<legend>{if $payoff_for->type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
+			<legend>{if $payoff_for.type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
 			<dl>
 				<dt>Écriture d'origine</dt>
 				<dd><a class="num" href="{$admin_url}acc/transactions/details.php?id={$payoff_for.id}">#{$payoff_for.id}</a></dd>
-				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name="account_payoff" label="Compte de règlement" required=1}
+				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name=$payoff_for.form_target_name label="Compte de règlement" required=1}
 			</dl>
 		</fieldset>
 	{else}
@@ -100,46 +101,10 @@
 
 </form>
 
-{literal}
 <script type="text/javascript" defer="defer" async="async">
-function initForm() {
-	// Hide type specific parts of the form
-	function hideAllTypes() {
-		g.toggle('[data-types]', false);
-	}
-
-	// Toggle parts of the form when a type is selected
-	function selectType(v) {
-		hideAllTypes();
-		g.toggle('[data-types~=t' + v + ']', true);
-		g.toggle('[data-types=all-but-advanced]', v != <?=$transaction::TYPE_ADVANCED?>);
-		// Disable required form elements, or the form won't be able to be submitted
-		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
-			e.disabled = v == 'advanced' ? true : false;
-		});
-
-	}
-
-	var radios = $('fieldset input[type=radio][name=type]');
-
-	radios.forEach((e) => {
-		e.onchange = () => {
-			selectType(e.value);
-		};
-	});
-
-	hideAllTypes();
-
-	// In case of a pre-filled form: show the correct part of the form
-	var current = document.querySelector('input[name=type]:checked');
-	if (current) {
-		selectType(current.value);
-	}
-}
-
-initForm();
-
-g.script('scripts/accounting.js', () => { initTransactionForm(); });
+let is_new = {if $payoff_for || null !== $transaction->type}false{else}true{/if};
+{literal}
+g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
 </script>
 {/literal}
 

@@ -1,11 +1,11 @@
-{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport" js=1}
+{include file="admin/_head.tpl" title="Journal : %s - %s"|args:$account.code:$account.label current="acc/accounts" body_id="rapport"}
 
 {if empty($year)}
 	{include file="acc/_year_select.tpl"}
 {else}
 	<nav class="acc-year">
 		<h4>Exercice sélectionné&nbsp;:</h4>
-		<h3>{$year.label} — {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}</h3>
+		<h3>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</h3>
 	</nav>
 {/if}
 
@@ -52,6 +52,7 @@
 			{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
 			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
 		{/if}
+			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}
 			{linkbutton href="!acc/transactions/new.php?account=%d"|args:$account.id label="Saisir une écriture dans ce compte" shape="plus"}
 		{/if}
@@ -65,17 +66,17 @@
 
 <form method="post" action="{$admin_url}acc/transactions/actions.php">
 
-{include file="common/dynamic_list_head.tpl" check=$can_delete}
+{include file="common/dynamic_list_head.tpl" check=$can_edit}
 
 	{foreach from=$list->iterate() item="line"}
 		<tr>
-			{if $can_delete}
+			{if $can_edit}
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$line.id default=0}
+				{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
 			</td>
 			{/if}
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
-			<td>{$line.date|date_fr:'d/m/Y'}</td>
+			<td>{$line.date|date_short}</td>
 			{if $simple}
 			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|html_money}</td>
 			{else}
@@ -89,6 +90,7 @@
 			<th>{$line.label}</th>
 			{if !$simple}<td>{$line.line_label}</td>{/if}
 			<td>{$line.line_reference}</td>
+			<td class="num">{if $line.id_analytical}<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.code_analytical}</a>{/if}</td>
 			<td class="actions">
 			{if ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 				{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT}
@@ -105,17 +107,27 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			{if $can_delete}
+			{if $can_edit}
 				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
 			<td colspan="3">Solde</td>
 			<td class="money">{$sum|raw|html_money:false}</td>
 			{if !$simple}<td></td>{/if}
-			<td class="actions" colspan="4">
-				{if $can_delete}
-					<input type="hidden" name="form" value="{$self_url}" />
-					{button type="submit" name="ask_delete" shape="delete" label="Supprimer les écritures sélectionnées"}
+			<td class="actions" colspan="5">
+				{if $can_edit}
+					<em>Pour les écritures cochées :</em>
+					<input type="hidden" name="from" value="{$self_url}" />
+					<input type="hidden" name="year" value="{$year.id}" />
+					{csrf_field key="projects_action"}
+					<select name="action">
+						<option value="">— Choisir une action à effectuer —</option>
+						<option value="change_analytical">Ajouter/enlever d'un projet</option>
+						<option value="delete">Supprimer les écritures</option>
+					</select>
+					<noscript>
+						{button type="submit" value="OK" shape="right" label="Valider"}
+					</noscript>
 				{/if}
 			</td>
 		</tr>

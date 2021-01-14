@@ -16,7 +16,12 @@ table tr.clickable:hover {
     cursor: pointer;
     color: #633;
     background: #ffc;
+}
 
+table tr.focused {
+    color: #633;
+    background: #ffc !important;
+    box-shadow: 0 0 5px .2rem #990;
 }
 
 dl dt label {
@@ -137,6 +142,11 @@ input:checked + label::before {
     text-shadow: 1px 1px 5px #ff9;
 }
 
+#queryBuilder input[type=checkbox] {
+    position: unset;
+    opacity: unset;
+}
+
 input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
     box-shadow: 0 0 5px .2rem rgb(var(--gSecondColor));
     outline: 0;
@@ -218,18 +228,29 @@ input.resetButton {
     margin-left: 1em;
 }
 
-input[disabled], input[disabled] + label {
+input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled] {
     cursor: not-allowed;
-    opacity: 0.5;
-}
-
-input[readonly], input.disabled {
     color: #666;
     background-color: #eee;
     border-color: #999;
 }
 
-select, input[size], input[type=color], button, input[type=button], input[type=submit] {
+input[disabled]:hover, input[readonly]:hover {
+    background-color: unset;
+    color: unset;
+    border-color: unset;
+}
+
+input[disabled] + label {
+    color: #666;
+}
+
+input[disabled] + label::before {
+    color: #999;
+    cursor: not-allowed;
+}
+
+select, input[size], input[type=color], button, input[type=button], input[type=submit], input[type=number] {
     min-width: 0;
 }
 
@@ -281,8 +302,8 @@ form .radio-btn .help {
     font-size: .8em;
 }
 
-form .radio-btn input:checked + div {
-    background-color: rgba(var(--gSecondColor), 0.5);
+form .radio-btn input:checked + label div {
+    background-color: rgba(var(--gSecondColor), 0.3);
 }
 
 /* Custom list input */
@@ -477,6 +498,53 @@ fieldset.memberMessage {
     max-width: 30em;
 }
 
-fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message {
-    width: 95%;
+fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.memberMessage select {
+    width: calc(100% - 2em);
+}
+
+
+#queryBuilder .column select, #queryBuilderForm .actions select {
+    max-width: 15em;
+}
+
+#queryBuilder table td {
+    vertical-align: top;
+    padding: .1em .2em;
+}
+
+#queryBuilder table td.buttons {
+    white-space: nowrap;
+}
+
+#queryBuilder input[type=button], #queryBuilder .values input {
+    margin: .1em;
+}
+
+#queryBuilderForm .actions label {
+    margin: 0 .5em;
+}
+
+#queryBuilder table .values label {
+    margin: 0 .3em;
+}
+
+#queryBuilderForm input[type=number] {
+    width: 4em;
+}
+
+@media screen and (max-width: 1279px) {
+    #queryBuilder table tr {
+        display: flex;
+        flex-wrap: wrap;
+        padding: .5em 0;
+        margin-left: 6rem;
+        border-top: .2rem solid #ccc;
+        clear: both;
+    }
+    #queryBuilder table td {
+        display: block;
+    }
+    #queryBuilder table td.buttons {
+        margin-left: -6rem;
+    }
 }

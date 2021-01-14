@@ -2,6 +2,7 @@
 
 namespace Garradin\Accounting;
 
+use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
@@ -9,6 +10,7 @@ use KD2\DB\EntityManager;
 use Garradin\CSV;
 use Garradin\CSV_Custom;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Utils;
 use Garradin\UserException;
 
@@ -21,7 +23,7 @@ class Transactions
 		'id'             => 'Numéro d\'écriture',
 		'label'          => 'Libellé',
 		'date'           => 'Date',
-		'notes'          => 'Notes',
+		'notes'          => 'Remarques',
 		'reference'      => 'Numéro pièce comptable',
 		'p_reference'    => 'Référence paiement',
 		'debit_account'  => 'Compte de débit',
@@ -144,12 +146,12 @@ class Transactions
 				$row->status = implode(', ', $status);
 				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
 				$row->date = $row->date->format('d/m/Y');
+				$previous_id = $row->id;
 			}
 
 			$row->credit = Utils::money_format($row->credit, ',', '');
 			$row->debit = Utils::money_format($row->debit, ',', '');
 
-			$previous_id = $row->id;
 			yield $row;
 		}
 	}
@@ -189,11 +191,15 @@ class Transactions
 						$transaction = self::get((int)$row->id);
 
 						if (!$transaction) {
-							throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est introuvable', $row->id));
+						}
+
+						if ($transaction->id_year != $year->id()) {
+							throw new UserException(sprintf('l\'écriture #%d appartient à un autre exercice', $row->id));
 						}
 
 						if ($transaction->validated) {
-							throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
+							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
 						}
 					}
 					else {
@@ -220,6 +226,14 @@ class Transactions
 
 				$row->line_id = trim($row->line_id);
 				$id_analytical = null;
+				$data = [
+					'credit'     => $row->credit ?: 0,
+					'debit'      => $row->debit ?: 0,
+					'id_account' => $id_account,
+					'reference'  => $row->line_reference,
+					'label'      => $row->line_label,
+					'reconciled' => $row->reconciled,
+				];
 
 				if (!empty($row->analytical)) {
 					$id_analytical = $accounts->getIdFromCode($row->analytical);
@@ -227,6 +241,11 @@ class Transactions
 					if (!$id_analytical) {
 						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
 					}
+
+					$data['id_analytical'] = $id_analytical;
+				}
+				elseif (property_exists($row, 'analytical')) {
+					$data['id_analytical'] = null;
 				}
 
 				if ($row->line_id) {
@@ -240,15 +259,7 @@ class Transactions
 					$line = new Line;
 				}
 
-				$line->importForm([
-					'credit'     => $row->credit ?: 0,
-					'debit'      => $row->debit ?: 0,
-					'id_account' => $id_account,
-					'reference'  => $row->line_reference,
-					'label'      => $row->line_label,
-					'reconciled' => $row->reconciled,
-					'id_analytical' => $id_analytical,
-				]);
+				$line->importForm($data);
 
 				if (!$row->line_id) {
 					$transaction->addLine($line);
@@ -345,5 +356,52 @@ class Transactions
 		}
 
 		$db->commit();
+	}
+
+	static public function setAnalytical(?int $id_analytical, array $lines)
+	{
+		$db = DB::getInstance();
+
+		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = 7 AND id = ?', $id_analytical)) {
+			throw new \InvalidArgumentException('Chosen account ID is not analytical');
+		}
+
+		$lines = array_map('intval', $lines);
+
+		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE id IN (%s);',
+			(int)$id_analytical ?: 'NULL',
+			implode(', ', $lines)));
+	}
+
+	static public function listByType(int $year_id, int $type)
+	{
+		$reverse = 1;
+
+		$columns = Account::LIST_COLUMNS;
+		unset($columns['line_label'], $columns['sum'], $columns['debit'], $columns['credit']);
+		$columns['line_reference']['label'] = 'Réf. paiement';
+		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
+		$columns['change']['label'] = 'Montant';
+
+		$tables = 'acc_transactions_lines l
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
+		$conditions = sprintf('t.type = %s AND t.id_year = %d', $type, $year_id);
+
+		$sum = 0;
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		$list->setCount('COUNT(DISTINCT t.id)');
+		$list->groupBy('t.id');
+		$list->setModifier(function (&$row) {
+			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+		});
+		$list->setExportCallback(function (&$row) {
+			$row->change = Utils::money_format($row->change, '.', '', false);
+		});
+
+		return $list;
 	}
 }

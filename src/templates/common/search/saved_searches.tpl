@@ -18,13 +18,20 @@
 		<fieldset>
 			<legend>Modifier une recherche enregistrée</legend>
 			<dl>
-				<dt><label for="f_intitule">Intitulé</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-				<dd><input type="text" name="intitule" id="f_intitule" value="{form_field name="intitule" data=$recherche}" size="80" required="required" /></dd>
+				{input type="text" name="intitule" label="Intitulé" required=1 source=$recherche}
 				<dt>Statut</dt>
-				<dd><label><input type="radio" name="prive" value="1" {if $recherche.id_membre}checked="checked"{/if} /> Recherche privée</label> — Visible seulement par moi-même</dd>
-				<dd><label><input type="radio" name="prive" value="0" {if !$recherche.id_membre}checked="checked"{/if} /> Recherche publique</label> — Visible et exécutable par tous les membres ayant accès à la gestion {$target}</dd>
+				<?php $checked = (int)(bool)$recherche->id_membre; ?>
+				{input type="radio" name="prive" value="1" default=$checked label="Recherche privée" help="Visible seulement par moi-même"}
+				{input type="radio" name="prive" value="0" default=$checked label="Recherche publique" help="Visible et exécutable par tous les membres ayant accès à la gestion %s"|args:$target}
 				<dt>Type</dt>
-				<dd>{if $recherche.type == Recherche::TYPE_JSON}Avancée{else}SQL{/if}</dd>
+				<dd>
+					{if $recherche.type == Recherche::TYPE_JSON}
+						Avancée
+					{elseif $recherche.type == Recherche::TYPE_SQL_UNPROTECTED}
+						SQL non protégée
+					{else}
+						SQL
+					{/if}</dd>
 				<dt>Cible</dt>
 				<dd>{$recherche.cible}</dd>
 			</dl>

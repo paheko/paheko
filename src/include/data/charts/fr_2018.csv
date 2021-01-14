@@ -26,8 +26,8 @@ code,label,description,position,type
 110,Report à nouveau (Solde créditeur),,Passif,
 119,Report à nouveau (Solde débiteur),,Passif,
 12,RÉSULTAT NET DE L'EXERCICE,,Passif,
-120,Résultat de l'exercice (Excédent),,Passif,
-129,Résultat de l'exercice (déficit),,Passif,
+120,Résultat de l'exercice (excédent),,Passif,Résultat excédentaire
+129,Résultat de l'exercice (déficit),,Passif,Résultat déficitaire
 13,SUBVENTIONS D'INVESTISSEMENTS,,Passif,
 131,Subventions d'équipement,,Passif,
 139,Subventions inscrites au compte de résultat,,Passif,
@@ -218,8 +218,8 @@ code,label,description,position,type
 4718,Compte d'attente,,Actif ou passif,
 48,COMPTES DE REGULARISATION,,Actif ou passif,
 481,Charges à répartir,,Passif,
-486,Charges constatées d'avance,,Passif,
-487,Produits constatés d'avance,,Actif,
+486,Charges constatées d'avance,,Actif,
+487,Produits constatés d'avance,,Passif,
 49,DÉPRECIATIONS DES COMPTES DE TIERS,,Actif ou passif,
 491,Prov. pour dépreciation des comptes d'usagers,,Passif,
 496,Prov. pour dépreci. cptes débiteurs divers,,Passif,
@@ -229,13 +229,13 @@ code,label,description,position,type
 506,Obligations,,Actif,
 508,Autres VMP et créances assimilées,,Actif,
 51,"BANQUES, ETABLISSEMENTS FINANCIERS",,Actif,
-5112,Chèques à encaisser,,Actif,Attente d'encaissement
-5115,Paiements par carte à encaisser,,Actif,
+5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif ou passif,
 5186,Intérêts courus à payer,,Passif,
 5187,Intérêts courus à recevoir,,Actif,
 53,Caisses,,Actif ou passif,
-530,Caisse,,Actif,Caisse
+530,Caisse,,Actif ou passif,Caisse
 58,VIREMENTS INTERNES,,Actif ou passif,
 580,Virements internes,,Actif ou passif,
 59,DEPRECIATIONS DES COMPTES FINANCIERS,,Actif ou passif,
@@ -530,21 +530,21 @@ code,label,description,position,type
 797,Transferts de charges exceptionnelles,,Produit,
 8,Classe 8 ­— Comptes spéciaux,,,
 86,EMPLOIS CONTRIBUTIONS VOLONTAIRES EN NATURE,,,
-860,Secours en nature,,,
-8601,Alimentaires,,,
-8602,Vestimentaires,,,
-861,Mise à dispositions gratuites de biens,,,
-8611,Locaux,,,
-8612,Matériels,,,
-862,Prestations,,,
-864,Personnel bénévole,,,
+860,Secours en nature,,Charge,Bénévolat
+8601,Alimentaires,,Charge,Bénévolat
+8602,Vestimentaires,,Charge,Bénévolat
+861,Mise à dispositions gratuites de biens,,Charge,Bénévolat
+8611,Locaux,,Charge,Bénévolat
+8612,Matériels,,Charge,Bénévolat
+862,Prestations,,Charge,Bénévolat
+864,Personnel bénévole,,Charge,Bénévolat
 87,CONTRIBUTIONS VOLONTAIRES EN NATURE,,,
-870,Dons en nature,,,
-871,Prestations en nature,,,
-875,Bénévolat,,,Bénévolat
+870,Dons en nature,,Produit,Bénévolat
+871,Prestations en nature,,Produit,Bénévolat
+875,Bénévolat,,Produit,Bénévolat
 89,COMPTES DE BILAN,,,
-890,Bilan d'ouverture,,,Ouverture
-891,Bilan de clôture,,,Clôture
+890,Bilan d'ouverture,,Actif ou passif,Ouverture
+891,Bilan de clôture,,Actif ou passif,Clôture
 9,Classe 9 — Comptes analytiques,,,
 90,COMPTES RÉFLÉCHIS,,,
 906,Charges réfléchies,,,

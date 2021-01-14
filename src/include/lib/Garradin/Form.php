@@ -93,9 +93,9 @@ class Form
 	public function getErrorMessages($membre = false)
 	{
 		$errors = [];
+		$champs = null;
 
-		if ($membre)
-		{
+		if ($membre) {
 			$champs = Config::getInstance()->get('champs_membres');
 		}
 
@@ -103,8 +103,7 @@ class Form
 		{
 			if (is_array($error))
 			{
-				if ($membre)
-				{
+				if ($membre && $champs) {
 					$error['name'] = $champs->get($error['name'], 'title');
 				}
 

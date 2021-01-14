@@ -6,9 +6,7 @@
     <link rel="icon" type="image/png" href="{$admin_url}static/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
-    {if isset($js) || isset($custom_js)}
-        <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
-    {/if}
+    <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
     {if isset($custom_js)}
         {foreach from=$custom_js item="js"}
             <script type="text/javascript" src="{$admin_url}static/scripts/{$js}?{$version_hash}"></script>
@@ -89,12 +87,20 @@
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('wiki', Membres::DROIT_ACCES)}
-            <li class="wiki{if $current == 'wiki'} current{elseif $current_parent == 'wiki'} current_parent{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
+        {if $session->canAccess('documents', Membres::DROIT_ACCES)}
+            <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Fichiers</i></a>
             <ul>
-                <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
-                <li class="wiki search{if $current == 'wiki/chercher'} current{/if}"><a href="{$admin_url}wiki/chercher.php">Recherche</a>
+                <li class="{if $current == 'docs/recent'} current{/if}"><a href="{$admin_url}docs/recent.php">Récents</a></li>
             </ul>
+            </li>
+        {/if}
+        {if $session->canAccess('web', Membres::DROIT_ACCES)}
+            <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
+            {* TODO
+            <ul>
+                <li class="{if $current == 'web/themes'} current{/if}"><a href="{$admin_url}web/themes/">Thèmes</a></li>
+            </ul>
+            *}
             </li>
         {/if}
         {if $session->canAccess('config', Membres::DROIT_ADMIN)}

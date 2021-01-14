@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts" js=1}
+{include file="admin/_head.tpl" title="Dépôt en banque : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
 <p class="help">
 	Cocher les cases correspondant aux montants à déposer, une nouvelle écriture sera générée.
@@ -26,7 +26,7 @@
 			<tr>
 				<td colspan="5"></td>
 				<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>
-				<th>Solde au {$line.date|date_fr:'d/m/Y'}</th>
+				<th>Solde au {$line.date|date_short}</th>
 				<td colspan="2"></td>
 			</tr>
 			{else}
@@ -35,7 +35,7 @@
 					{input type="checkbox" name="deposit[%d]"|args:$line.id value="1" data-debit=$line.debit|abs data-credit=$line.credit default=$line.checked}
 				</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
-				<td>{$line.date|date_fr:'d/m/Y'}</td>
+				<td>{$line.date|date_short}</td>
 				<td>{$line.reference}</td>
 				<td>{$line.line_reference}</td>
 				<th>{$line.label}</th>

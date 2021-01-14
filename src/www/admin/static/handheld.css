@@ -4,6 +4,15 @@ body {
 	font-size: 11pt;
 }
 
+input, select, textarea {
+    min-width: 0 !important;
+    max-width: calc(100% - 2em);
+}
+
+select {
+	width: calc(100% - 3em);
+}
+
 .header h1 {
 	margin: 0;
 	text-align: center;
@@ -148,20 +157,6 @@ dl.describe {
 	margin: 0 .5em;
 }
 
-dl.describe dt, dl.describe dd {
-	float: none;
-	width: auto;
-}
-
-dl.describe dt {
-	font-size: .9em;
-	color: #666;
-}
-
-dl.describe dd {
-	margin-left: 1em;
-}
-
 fieldset {
 	border-left: none;
 	border-right: none;
@@ -188,10 +183,6 @@ fieldset {
 
 	colgroup {
 		/* Hack pour désactiver les largeurs de colonnes */
-		display: none;
-	}
-
-	.print-btn {
 		display: none;
 	}
 
@@ -258,7 +249,31 @@ fieldset {
 		display: block;
 	}
 
+	aside.describe {
+		float: none;
+		margin: 1em auto;
+	}
+
 	dl.describe {
-		grid-template: auto / 30% 1fr;
+		display: block;
+		margin: 1em;
+		text-align: left;
+	}
+
+	dl.describe > dt {
+		text-align: unset;
+	}
+
+	dl.describe > dd {
+		font-size: 1.2em;
+		margin-bottom: .8em;
+	}
+
+	.datepicker-parent {
+		position: static;
+	}
+
+	dialog.datepicker {
+		margin: auto;
 	}
 }

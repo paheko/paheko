@@ -22,7 +22,7 @@ class Services_User
 	static public function listDistinctForUser(int $user_id)
 	{
 		return DB::getInstance()->get('SELECT
-			s.label, MAX(su.expiry_date) AS expiry_date, sf.label AS fee_label, su.paid, s.end_date,
+			s.label, MAX(su.date) AS last_date, su.expiry_date AS expiry_date, sf.label AS fee_label, su.paid, s.end_date,
 			CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END AS status
 			FROM services_users su
 			INNER JOIN services s ON s.id = su.id_service

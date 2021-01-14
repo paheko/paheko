@@ -1,0 +1,32 @@
+{{:http type="application/atom+xml"}}
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="fr">
+
+	<title type="html">{{$config.nom_asso|escape:xml}}</title>
+	<link href="{{$root_url|escape:xml}}" rel="alternate" type="text/html" title="{{$config.nom_asso|escape:xml}}" />
+
+	{{#articles order="created DESC" limit=1}}
+	<updated>{{$created|atom_date}}</updated>
+	{{/articles}}
+
+	<author>
+		<name>{{$config.nom_asso|escape:xml}}</name>
+	</author>
+
+	<id>{{$root_url|escape:xml}}</id>
+	<generator uri="https://fossil.kd2.org/garradin/">Garradin</generator>
+
+	{{#articles order="created DESC" limit=20}}
+	<entry>
+		<title>{{$title|escape:xml}}</title>
+		<link href="{{$url|escape:xml}}" rel="alternate" type="text/html" title="{{$title|escape:xml}}" />
+		<id>{{$url|escape:xml}}</id>
+		<updated>{{$modified|atom_date}}</updated>
+		<author><name>{{$config.nom_asso|escape:xml}}</name></author>
+		<content type="html">
+			{{$html|raw|escape:xml}}
+		</content>
+	</entry>
+	{{/articles}}
+
+</feed>

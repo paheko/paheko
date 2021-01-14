@@ -10,6 +10,7 @@ use Garradin\ValidationException;
 use Garradin\DB;
 use Garradin\Config;
 use Garradin\Utils;
+use Garradin\UserException;
 
 class Transaction extends Entity
 {
@@ -21,7 +22,6 @@ class Transaction extends Entity
 	const TYPE_TRANSFER = 3;
 	const TYPE_DEBT = 4;
 	const TYPE_CREDIT = 5;
-	const TYPE_PAYOFF = 6;
 
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
@@ -40,7 +40,6 @@ class Transaction extends Entity
 		'Virement',
 		'Dette',
 		'Créance',
-		'Règlement',
 	];
 
 	protected $id;
@@ -161,6 +160,47 @@ class Transaction extends Entity
 		return null;
 	}
 
+	public function getLinesCreditSum()
+	{
+		$sum = 0;
+
+		foreach ($this->getLines() as $line) {
+			$sum += $line->credit;
+		}
+
+		return $sum;
+	}
+
+	public function getTypesAccounts()
+	{
+		if ($this->type == self::TYPE_ADVANCED) {
+			return [];
+		}
+
+		$debit = null;
+		$credit = null;
+
+		$lines = $this->getLinesWithAccounts();
+
+		foreach ($lines as $line) {
+			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+
+			if ($line->debit) {
+				$debit = $account;
+			}
+			else {
+				$credit = $account;
+			}
+		}
+
+		$type = $this->getTypesDetails()[$this->type];
+
+		return [
+			$type->accounts[0]->position == 'credit' ? $credit : $debit,
+			$type->accounts[1]->position == 'credit' ? $credit : $debit,
+		];
+	}
+
 /*
 	public function getHash()
 	{
@@ -242,7 +282,7 @@ class Transaction extends Entity
 		}
 
 		// Remove flag
-		if (self::TYPE_PAYOFF == $this->type && $this->_related) {
+		if ((self::TYPE_DEBT == $this->type || self::TYPE_CREDIT == $this->type) && $this->_related) {
 			$this->_related->removeStatus(self::STATUS_WAITING);
 			$this->_related->addStatus(self::STATUS_PAID);
 			$this->_related->save();
@@ -252,11 +292,11 @@ class Transaction extends Entity
 	}
 
 	public function removeStatus(int $property) {
-		$this->status &= ~$property;
+		$this->set('status', $this->status & ~$property);
 	}
 
 	public function addStatus(int $property) {
-		$this->status |= $property;
+		$this->set('status', $this->status | $property);
 	}
 
 	public function delete(): bool
@@ -353,35 +393,7 @@ class Transaction extends Entity
 
 		$this->importForm($source);
 
-		if (self::TYPE_PAYOFF == $type) {
-			if (empty($source['amount'])) {
-				throw new UserException('Montant non précisé');
-			}
-
-			$amount = $source['amount'];
-
-			$key = 'account_payoff';
-			$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
-
-			if (!count($this->getLines())) {
-				throw new \LogicException('Invalid operation: payoff must already have one line');
-			}
-
-			$line = current($this->_lines);
-			$debit = $line->debit ? 0 : $amount;
-			$credit = $line->credit ? 0 : $amount;
-
-			$line2 = new Line;
-			$line2->importForm([
-				'reference'     => $source['payment_reference'],
-				'credit'        => $credit,
-				'debit'         => $debit,
-				'id_account'    => $account,
-				'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
-			]);
-			$this->addLine($line2);
-		}
-		elseif (self::TYPE_ADVANCED == $type) {
+		if (self::TYPE_ADVANCED == $type) {
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
@@ -402,7 +414,7 @@ class Transaction extends Entity
 				throw new ValidationException('Type d\'écriture inconnu');
 			}
 
-			if ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT) {
+			if (empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
 				$this->status = self::STATUS_WAITING;
 			}
 
@@ -438,22 +450,9 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		$this->importForm();
 
 		$this->resetLines();
-
-		$lines = Utils::array_transpose($source['lines']);
-
-		foreach ($lines as $i => $line) {
-			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
-
-			if (!$line['id_account']) {
-				throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
-			}
-
-			$line = (new Line)->importForm($line);
-			$this->addLine($line);
-		}
+		$this->importFromNewForm($source);
 	}
 
 	public function importFromBalanceForm(Year $year, ?array $source = null): void
@@ -598,15 +597,15 @@ class Transaction extends Entity
 			],
 			self::TYPE_TRANSFER => [
 				'accounts' => [
-						[
+					[
 						'label' => 'De',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'debit',
+						'position' => 'credit',
 					],
 					[
 						'label' => 'Vers',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'credit',
+						'position' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_TRANSFER],
@@ -663,7 +662,7 @@ class Transaction extends Entity
 		return $details;
 	}
 
-	public function payOffFrom(int $id): self
+	public function payOffFrom(int $id): \stdClass
 	{
 		$this->_related = EntityManager::findOneById(self::class, $id);
 
@@ -673,7 +672,15 @@ class Transaction extends Entity
 
 		$this->id_related = $this->_related->id();
 		$this->label = ($this->_related->type == Transaction::TYPE_DEBT ? 'Règlement de dette : ' : 'Règlement de créance : ') . $this->_related->label;
-		$this->type = Transaction::TYPE_PAYOFF;
+		$this->type = $this->_related->type;
+
+		$out = (object) [
+			'id' => $this->_related->id,
+			'sum' => $this->_related->sum(),
+			'id_account' => null,
+			'form_account_name' => sprintf('account_%d_%d', $this->type, 1),
+			'form_target_name' => sprintf('account_%d_%d', $this->type, 0),
+		];
 
 		foreach ($this->_related->getLines() as $line) {
 			if (($this->_related->type == self::TYPE_DEBT && $line->debit)
@@ -682,13 +689,10 @@ class Transaction extends Entity
 				continue;
 			}
 
-			// Invert debit/credit
-			$line2 = clone $line;
-			$line2->debit = $line->debit ? 0 : $line->credit;
-			$line2->credit = $line->credit ? 0 : $line->debit;
-			$this->addLine($line2);
+			$out->id_account = $line->id_account;
+			break;
 		}
 
-		return $this->_related;
+		return $out;
 	}
 }

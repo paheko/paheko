@@ -8,6 +8,7 @@ class Recherche
 {
 	const TYPE_JSON = 'json';
 	const TYPE_SQL = 'sql';
+	const TYPE_SQL_UNPROTECTED = 'sql_unprotected';
 
 	const TARGETS = [
 		'membres',
@@ -33,7 +34,9 @@ class Recherche
 			throw new \InvalidArgumentException('Numéro d\'utilisateur inconnu.');
 		}
 
-		if (array_key_exists('type', $data) && $data['type'] !== self::TYPE_SQL && $data['type'] !== self::TYPE_JSON)
+		static $types = [self::TYPE_SQL, self::TYPE_JSON, self::TYPE_SQL_UNPROTECTED];
+
+		if (array_key_exists('type', $data) && !in_array($data['type'], $types))
 		{
 			throw new \InvalidArgumentException('Type de recherche inconnu.');
 		}
@@ -150,10 +153,13 @@ class Recherche
 
 		if ($search->type == self::TYPE_JSON)
 		{
-			$search->contenu = $this->buildQuery($search->cible, $search->query, $search->order, $search->desc, $no_limit ? 10000 : $search->limit);
+			$query = $search->query;
+			$search->contenu = $this->buildQuery($search->cible, $query->query, $query->order, $query->desc, $no_limit ? 10000 : $query->limit);
 		}
 
-		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit);
+		$unprotected = $search->type == self::TYPE_SQL_UNPROTECTED;
+
+		return $this->searchSQL($search->cible, $search->contenu, $force_select, $no_limit, $unprotected);
 	}
 
 	public function getResultHeader(string $target, array $result)
@@ -166,14 +172,29 @@ class Recherche
 		$columns = $this->getColumns($target);
 
 		foreach (reset($result) as $key => $v) {
+			if (substr($key, 0, 1) == '_') {
+				continue;
+			}
+
+			$label = null;
+
 			foreach ($columns as $ckey => $config) {
 				if ($ckey == $key) {
-					$out[$key] = $config->label;
+					$label = $config->label;
+					break;
 				}
 				elseif (isset($config->alias) && $config->alias == $key) {
-					$out[$config->alias] = $config->label;
+					$key = $config->alias;
+					$label = $config->label;
+					break;
 				}
 			}
+
+			if (!$label) {
+				$label = $key;
+			}
+
+			$out[$key] = $label;
 		}
 
 		return $out;
@@ -244,7 +265,7 @@ class Recherche
 				'label'    => 'Numéro écriture',
 				'type'     => 'integer',
 				'null'     => false,
-				'alias'    => 'id',
+				'alias'    => 'transaction_id',
 			];
 
 			$columns['t.date'] = (object) [
@@ -273,7 +294,7 @@ class Recherche
 
 			$columns['t.notes'] = (object) [
 				'textMatch'=> true,
-				'label'    => 'Notes',
+				'label'    => 'Remarques',
 				'type'     => 'text',
 				'null'     => true,
 				'alias'    => 'notes',
@@ -322,6 +343,14 @@ class Recherche
 				'alias'    => 'type',
 			];
 
+			$columns['a.code'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'Numéro de compte',
+				'type'     => 'text',
+				'null'     => false,
+				'alias'    => 'code',
+			];
+
 			$columns['t.id_year'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Exercice',
@@ -329,6 +358,14 @@ class Recherche
 				'null'     => false,
 				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
 				'alias'    => 'id_year',
+			];
+
+			$columns['a2.code'] = (object) [
+				'textMatch'=> true,
+				'label'    => 'N° de compte projet',
+				'type'     => 'text',
+				'null'     => true,
+				'alias'    => 'id_analytical',
 			];
 		}
 
@@ -351,14 +388,20 @@ class Recherche
 			throw new \InvalidArgumentException('Cible inconnue : ' . $target);
 		}
 
+		$config = Config::getInstance();
+
 		if ($target == 'membres')
 		{
-			$config = Config::getInstance();
 			$champs = $config->get('champs_membres');
 		}
 
 		$db = DB::getInstance();
 		$target_columns = $this->getColumns($target);
+
+		if (!isset($target_columns[$order])) {
+			throw new UserException('Colonne de tri inconnue : ' . $order);
+		}
+
 		$query_columns = [];
 
 		$query_groups = [];
@@ -391,7 +434,7 @@ class Recherche
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
-					throw new UserException('Cette recherche fait référence à un champ qui n\'existe plus dans les fiches de membres.');
+					throw new UserException('Cette recherche fait référence à une colonne qui n\'existe pas : ' . $condition['column']);
 				}
 
 				$query_columns[] = $condition['column'];
@@ -480,12 +523,12 @@ class Recherche
 		// Ajout du champ identité si pas présent
 		if ($target == 'membres')
 		{
-			$query_columns = array_merge(['id', $config->get('champ_identite')], $query_columns);
+			$query_columns = array_merge([$config->get('champ_identite')], $query_columns);
 		}
 		// Ajout de champs compta si pas présents
 		elseif ($target == 'compta')
 		{
-			$query_columns = array_merge(['t.id', 't.date', 't.label', 'l.debit', 'l.credit'], $query_columns);
+			$query_columns = array_merge(['t.id', 't.date', 't.label', 'l.debit', 'l.credit', 'a.code'], $query_columns);
 		}
 
 		$query_columns[] = $order;
@@ -514,9 +557,18 @@ class Recherche
 		$desc = $desc ? 'DESC' : 'ASC';
 
 		if ('compta' === $target) {
-			$sql_query = sprintf('SELECT %s FROM acc_transactions AS t INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
+			$sql_query = sprintf('SELECT %s
+				FROM acc_transactions AS t
+				INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
+				INNER JOIN acc_accounts AS a ON l.id_account = a.id
+				LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id
+				WHERE %s GROUP BY t.id ORDER BY %s %s LIMIT %d;',
 				$query_columns, $query_groups, $order, $desc, (int) $limit);
-			$sql_query = str_replace(['"t.', '"l.'], ['"t"."', '"l"."'], $sql_query);
+			$sql_query = preg_replace('/"(a|a2|l|t)\./', '"$1"."', $sql_query);
+		}
+		else if ('membres' === $target) {
+			$sql_query = sprintf('SELECT id AS _user_id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
+				$query_columns, $target, $query_groups, $order, $desc, (int) $limit);
 		}
 		else {
 			$sql_query = sprintf('SELECT id, %s FROM %s WHERE %s ORDER BY %s %s LIMIT %d;',
@@ -529,7 +581,7 @@ class Recherche
 	/**
 	 * Lancer une recherche SQL
 	 */
-	public function searchSQL($target, $query, array $force_select = null, $no_limit = false)
+	public function searchSQL(string $target, $query, array $force_select = null, bool $no_limit = false, bool $unprotected = false)
 	{
 		if (!in_array($target, self::TARGETS, true))
 		{
@@ -550,11 +602,18 @@ class Recherche
 		try {
 			$db = DB::getInstance();
 			static $allowed = [
-				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null],
-				'membres' => ['membres' => null],
+				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null],
+				'membres' => ['membres' => null, 'membres_categories' => null],
 			];
 
-			$db->protectSelect($allowed[$target], $query);
+			if ($unprotected) {
+				$allowed_tables = null;
+			}
+			else {
+				$allowed_tables = $allowed[$target];
+			}
+
+			$db->protectSelect($allowed_tables, $query);
 			return $db->get($query);
 		}
 		catch (\Exception $e) {
@@ -612,7 +671,7 @@ class Recherche
 	    ];
 	}
 
-	public function schema($target)
+	public function schema(string $target)
 	{
 		$db = DB::getInstance();
 
@@ -627,6 +686,9 @@ class Recherche
 				'acc_transactions'       => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions\';'),
 				'acc_transactions_lines' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'acc_transactions_lines\';'),
 			];
+		}
+		else {
+			throw new \LogicException('Unknown target');
 		}
 
 		return $tables;

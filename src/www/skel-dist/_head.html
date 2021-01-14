@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8" />
+	<title>{{if $title}}{{$title}} — {{/if}}{{$config.nom_asso}}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
+	<link rel="stylesheet" type="text/css" href="{{$root_url}}default.css" media="screen,projection,handheld" />
+	<link rel="alternate" type="application/atom+xml" title="{{$config.nom_asso}}" href="{{$root_url}}atom.xml" />
+</head>
+
+<body>
+
+<header class="nav">
+	<nav>
+		<ul>
+			<li class="current"><a href="{{$root_url}}">Accueil</a></li>
+			<li><a href="{{$admin_url}}">Administration</a></li>
+		</ul>
+	</nav>
+</header>
+
+<header class="main">
+	<h1><a href="{{$root_url}}">{{$config.nom_asso}}</a></h1>
+	{{if $config.adresse_asso}}<h4>{{$config.adresse_asso}}</h4>{{/if}}
+
+	<nav>
+		<ul>
+		{{#categories parent=null order="title"}}
+			<li><a href="{{$url}}">{{ $title }}</a></li>
+		{{/categories}}
+		</ul>
+	</nav>
+</header>
+
+<section class="page">

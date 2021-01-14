@@ -2,6 +2,7 @@
 
 namespace Garradin;
 
+use Garradin\Entities\Accounting\Transaction;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -36,8 +37,6 @@ $rules = [
 
 if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 	try {
-		$_POST['type'] = 'advanced';
-
 		$transaction->importFromEditForm();
 		$transaction->save();
 
@@ -63,14 +62,16 @@ if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 	}
 }
 
-$tpl->assign('transaction', $transaction);
+$types_accounts = [];
+$lines = [];
 
 if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
 	$lines = Utils::array_transpose($_POST['lines']);
 
 	foreach ($lines as &$line) {
-		$line['credit'] = Utils::moneyToInteger($line['credit']);
-		$line['debit'] = Utils::moneyToInteger($line['debit']);
+		$line = (object) $line;
+		$line->credit = Utils::moneyToInteger($line->credit);
+		$line->debit = Utils::moneyToInteger($line->debit);
 	}
 }
 else {
@@ -81,7 +82,26 @@ else {
 	}
 }
 
-$tpl->assign('lines', $lines);
+$has_reconciled_lines = true;
+
+array_walk($lines, function ($l) use (&$has_reconciled_lines) {
+	if (!empty($line->reconciled)) {
+		$has_reconciled_lines = true;
+	}
+});
+
+$first_line = $transaction->getFirstLine();
+
+if ($transaction->type != Transaction::TYPE_ADVANCED) {
+	$types_accounts = $transaction->getTypesAccounts();
+}
+
+$amount = $transaction->getLinesCreditSum();
+
+$tpl->assign(compact('transaction', 'lines', 'types_accounts', 'amount', 'first_line', 'has_reconciled_lines'));
+
+$tpl->assign('types_details', Transaction::getTypesDetails());
+$tpl->assign('chart_id', $chart->id());
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
 

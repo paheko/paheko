@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\Form;
 use KD2\HTTP;
+use KD2\Translate;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
 
@@ -80,35 +81,22 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
-		$this->register_modifier('format_sqlite_date_to_french', ['Garradin\Utils', 'sqliteDateToFrench']);
-		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('date_fr', function ($ts, $format = 'd/m/Y H:i:s') {
-			return Utils::date_fr($format, $ts);
-		});
+		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
+		$this->register_modifier('strftime_fr', [Utils::class, 'strftime_fr']);
+		$this->register_modifier('date_fr', [Utils::class, 'date_fr']);
+		$this->register_modifier('date_long', [Utils::class, 'date_fr']);
+		$this->register_modifier('relative_date', [Utils::class, 'relative_date']);
 
 		$this->register_modifier('date_short', function ($dt) {
-			return Utils::date_fr('d/m/Y', $dt);
+			return Utils::date_fr($dt, 'd/m/Y');
 		});
 
 		$this->register_modifier('html_money', [$this, 'htmlMoney']);
 		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
-
-		$this->register_modifier('format_wiki', function ($str) {
-			$str = Utils::SkrivToHTML($str);
-			$str = Squelette_Filtres::typo_fr($str);
-			return $str;
-		});
-
-		$this->register_modifier('liens_wiki', function ($str, $prefix) {
-			return preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($prefix) {
-				return '<a href="' . $prefix . Wiki::transformTitleToURI($matches[1]) . '">';
-			}, $str);
-		});
-
 	}
 
 	protected function htmlMoney($number, bool $hide_empty = true): string
@@ -206,6 +194,12 @@ class Template extends \KD2\Smartyer
 			$href = ADMIN_URL . substr($params['href'], 1);
 		}
 
+		if (!isset($params['class'])) {
+			$params['class'] = '';
+		}
+
+		$params['class'] .= ' icn-btn';
+
 		unset($params['href'], $params['shape'], $params['label']);
 
 		array_walk($params, function (&$v, $k) {
@@ -214,7 +208,7 @@ class Template extends \KD2\Smartyer
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a class="icn-btn" data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+		return sprintf('<a data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
 	}
 
 	protected function formInput(array $params)
@@ -230,6 +224,17 @@ class Template extends \KD2\Smartyer
 			throw new \InvalidArgumentException('Missing name or type');
 		}
 
+		$suffix = null;
+
+		if ($type == 'datetime') {
+			$type = 'date';
+			$tparams = func_get_arg(0);
+			$tparams['type'] = 'time';
+			$tparams['name'] = sprintf('%s_time', $name);
+			unset($tparams['label']);
+			$suffix = self::formInput($tparams);
+		}
+
 		$current_value = null;
 		$current_value_from_user = false;
 
@@ -243,21 +248,33 @@ class Template extends \KD2\Smartyer
 		elseif (isset($source) && is_array($source) && isset($source[$name])) {
 			$current_value = $source[$name];
 		}
-		elseif (isset($default)) {
+		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
 			$current_value = $default;
 		}
 
 		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('d/m/Y');
 		}
+		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+			$current_value = $current_value->format('H:i');
+		}
+		elseif ($type == 'date' && is_string($current_value)) {
+			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
+		}
 
 		$attributes['id'] = 'f_' . $name;
 		$attributes['name'] = $name;
 
+		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
+			$attributes['autocomplete'] = 'off';
+		}
+
 		if ($type == 'radio' || $type == 'checkbox') {
 			$attributes['id'] .= '_' . $value;
 
-			if ($current_value == $value) {
+			if ($current_value == $value && $current_value !== null) {
 				$attributes['checked'] = 'checked';
 			}
 
@@ -270,6 +287,14 @@ class Template extends \KD2\Smartyer
 			$attributes['size'] = 12;
 			$attributes['maxlength'] = 10;
 			$attributes['pattern'] = '\d\d?/\d\d?/\d{4}';
+		}
+		elseif ($type == 'time') {
+			$type = 'text';
+			$attributes['placeholder'] = 'HH:MM';
+			$attributes['data-input'] = 'time';
+			$attributes['size'] = 8;
+			$attributes['maxlength'] = 5;
+			$attributes['pattern'] = '\d\d?:\d\d?';
 		}
 
 		// Create attributes string
@@ -378,6 +403,8 @@ class Template extends \KD2\Smartyer
 			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
 		}
 
+		$input .= $suffix;
+
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $this->escape($label));
 
 		if ($type == 'radio' || $type == 'checkbox') {
@@ -404,6 +431,9 @@ class Template extends \KD2\Smartyer
 		return $out;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	protected function formField(array $params, $escape = true)
 	{
 		if (!isset($params['name']))
@@ -474,16 +504,8 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$image_fond = ADMIN_BACKGROUND_IMAGE;
 
-		if ($config->get('image_fond'))
-		{
-			try {
-				$f = new Fichiers($config->get('image_fond'));
-				$image_fond = $f->getURL();
-			}
-			catch (\InvalidArgumentException $e)
-			{
-				// Fichier qui n'existe pas/plus
-			}
+		if ($f = $config->get('image_fond')) {
+			$image_fond = $f->url();
 		}
 
 		// Transformation Hexa vers décimal
@@ -525,8 +547,13 @@ class Template extends \KD2\Smartyer
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
-				return Utils::sqliteDateToFrench($v);
+				return Utils::date_fr($v);
 			case 'multiple':
+				// Useful for search results, if a value is not a number
+				if (!is_numeric($v)) {
+					return htmlspecialchars($v);
+				}
+
 				$out = [];
 
 				foreach ($config->options as $b => $name)
@@ -596,7 +623,8 @@ class Template extends \KD2\Smartyer
 			$attributes .= 'required="required" ';
 		}
 
-		$attributes .= 'autocomplete="off" ';
+		// Fix for autocomplete, lpignore is for Lastpass
+		$attributes .= 'autocomplete="off" data-lpignore="true" ';
 
 		if (!empty($params['user_mode']) && empty($config->editable))
 		{
@@ -645,10 +673,8 @@ class Template extends \KD2\Smartyer
 			foreach ($options as $k=>$v)
 			{
 				$b = 0x01 << (int)$k;
-				$field .= '<label><input type="checkbox" name="' 
-					. htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '[' . (int)$k . ']" value="1" '
-					. (($value & $b) ? 'checked="checked"' : '') . ' ' . $attributes . '/> ' 
-					. htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</label><br />';
+				$field .= sprintf('<input type="checkbox" name="%s[%d]" id="f_%1$s_%2$d" value="1" %s %s /> <label for="f_%1$s_%2$d">%s</label><br />',
+					htmlspecialchars($params['name']), $k, ($value & $b) ? 'checked="checked"' : '', $attributes, htmlspecialchars($v));
 			}
 		}
 		elseif ($type == 'textarea')
@@ -692,6 +718,12 @@ class Template extends \KD2\Smartyer
 		{
 			$out .= '
 		<dd class="help">' . htmlspecialchars($config->help, ENT_QUOTES, 'UTF-8') . '</dd>';
+		}
+
+		$id_field = Config::getInstance()->get('champ_identifiant');
+
+		if ($params['name'] == $id_field && empty($params['user_mode'])) {
+			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
 		}
 
 		if ($type != 'checkbox')

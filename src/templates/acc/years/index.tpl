@@ -1,6 +1,9 @@
 {include file="admin/_head.tpl" title="Exercices" current="acc/years"}
 
 <nav class="tabs">
+	<aside>
+		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
+	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
 		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
@@ -33,37 +36,43 @@
 	</section>
 	{/if}
 
-	<dl class="list">
+	<table class="list">
 	{foreach from=$list item="year"}
-		<dt>{$year.label}</dt>
-		<dd class="desc">
-			{if $year.closed}Clôturé{else}En cours{/if}
-			| Du {$year.start_date|date_fr:'d/m/Y'} au {$year.end_date|date_fr:'d/m/Y'}
-			| <a href="../charts/accounts/?id={$year.id_chart}">Plan comptable</a>
-		</dd>
-		<dd class="desc">
-			<a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a>
-			| <a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a>
-			| <a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a>
-			| <a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a>
-			| <a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a>
-			| <a href="{$admin_url}acc/reports/balance_sheet.php?year={$year.id}">Bilan</a>
-		</dd>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-		<dd class="actions">
-			{linkbutton label="Export CSV" shape="export" href="import.php?id=%d&export=csv"|args:$year.id}
-			{linkbutton label="Export tableur" shape="export" href="import.php?id=%d&export=ods"|args:$year.id}
-			{if !$year.closed}
-				{linkbutton label="Import" shape="upload" href="import.php?id=%d"|args:$year.id}
-				{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
-				{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
-				{linkbutton label="Clôturer" shape="lock" href="close.php?id=%d"|args:$year.id}
-				{linkbutton label="Supprimer" shape="delete" href="delete.php?id=%d"|args:$year.id}
-			{/if}
-		</dd>
-		{/if}
+		<tbody>
+			<tr>
+				<th><h3>{$year.label}</h3></th>
+				<td>{$year.nb_transactions} écritures | <a href="../charts/accounts/?id={$year.id_chart}">{$year.chart_name}</a></td>
+			</tr>
+			<tr>
+				<td>{$year.start_date|date_short} au {$year.end_date|date_short}</td>
+				<td>
+					<a href="{$admin_url}acc/reports/graphs.php?year={$year.id}">Graphiques</a>
+					| <a href="{$admin_url}acc/reports/trial_balance.php?year={$year.id}">Balance générale</a>
+					| <a href="{$admin_url}acc/reports/journal.php?year={$year.id}">Journal général</a>
+					| <a href="{$admin_url}acc/reports/ledger.php?year={$year.id}">Grand livre</a>
+					| <a href="{$admin_url}acc/reports/statement.php?year={$year.id}">Compte de résultat</a>
+					| <a href="{$admin_url}acc/reports/balance_sheet.php?year={$year.id}">Bilan</a>
+				</td>
+			</tr>
+			<tr>
+				<td><em>{if $year.closed}Clôturé{else}En cours{/if}</em></td>
+				<td>
+				{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+					{linkbutton label="Export CSV" shape="export" href="import.php?id=%d&export=csv"|args:$year.id}
+					{linkbutton label="Export tableur" shape="export" href="import.php?id=%d&export=ods"|args:$year.id}
+					{if !$year.closed}
+						{linkbutton label="Import" shape="upload" href="import.php?id=%d"|args:$year.id}
+						{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
+						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
+						{linkbutton label="Clôturer" shape="lock" href="close.php?id=%d"|args:$year.id}
+						{linkbutton label="Supprimer" shape="delete" href="delete.php?id=%d"|args:$year.id}
+					{/if}
+				{/if}
+				</td>
+			</tr>
+		</tbody>
 	{/foreach}
-	</dl>
+	</table>
 {else}
 	<p class="block alert">
 		Il n'y a pas d'exercice en cours.

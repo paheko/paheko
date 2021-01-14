@@ -24,10 +24,19 @@ class Reports
 			$where[] = $db->where('position', $criterias['position']);
 		}
 
-		if (!empty($criterias['type'])) {
+		if (!empty($criterias['exclude_position'])) {
 			$db = DB::getInstance();
+			$where[] = $db->where('position', 'NOT IN', $criterias['exclude_position']);
+		}
+
+		if (!empty($criterias['type'])) {
 			$criterias['type'] = array_map('intval', (array)$criterias['type']);
 			$where[] = sprintf('a.type IN (%s)', implode(',', $criterias['type']));
+		}
+
+		if (!empty($criterias['exclude_type'])) {
+			$criterias['exclude_type'] = array_map('intval', (array)$criterias['exclude_type']);
+			$where[] = sprintf('a.type NOT IN (%s)', implode(',', $criterias['exclude_type']));
 		}
 
 		if (!empty($criterias['user'])) {
@@ -55,12 +64,21 @@ class Reports
 
 	/**
 	 * Return account sums per year or per account
-	 * @param  bool $order_year If true will return accounts grouped by year, if false it will return years grouped by account
+	 * @param  bool $by_year If true will return accounts grouped by year, if false it will return years grouped by account
 	 */
 	static public function getAnalyticalSums(bool $by_year = false): \Generator
 	{
-		$sql = 'SELECT a.label AS account_label, a.id AS id_account, y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
-			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit
+		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
+			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
+			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
+				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
+				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical AND t2.id_year = t.id_year) * -1 AS sum_expense,
+			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
+				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
+				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+				WHERE a2.position = %d AND l2.id_analytical = l.id_analytical AND t2.id_year = t.id_year) AS sum_revenue
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_analytical
@@ -77,22 +95,32 @@ class Reports
 			$order = 'a.label COLLATE NOCASE, y.id';
 		}
 
-		$sql = sprintf($sql, $group, $order);
+		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);
 
 		$current = null;
+
+		static $sums = ['credit', 'debit', 'sum'];
+
+		$total = function (\stdClass $current, bool $by_year) use ($sums)
+		{
+			$out = (object) [
+				'label' => 'Total',
+				'id_account' => $by_year ? null : $current->id,
+				'id_year' => $by_year ? $current->id : null,
+			];
+
+			foreach ($sums as $s) {
+				$out->{$s} = $current->{$s};
+			}
+
+			return $out;
+		};
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
 			$id = $by_year ? $row->id_year : $row->id_account;
 
 			if (null !== $current && $current->id !== $id) {
-				$current->items[] = (object) [
-					'label' => 'Total',
-					'credit' => $current->credit,
-					'debit' => $current->debit,
-					'sum' => $current->sum,
-					'id_account' => $by_year ? null : $current->id,
-					'id_year' => $by_year ? $current->id : null,
-				];
+				$current->items[] = $total($current, $by_year);
 
 				yield $current;
 				$current = null;
@@ -102,32 +130,29 @@ class Reports
 				$current = (object) [
 					'id' => $by_year ? $row->id_year : $row->id_account,
 					'label' => $by_year ? $row->year_label : $row->account_label,
-					'credit' => 0,
-					'debit' => 0,
-					'sum' => 0,
+					'description' => !$by_year ? $row->account_description : null,
 					'items' => []
 				];
+
+				foreach ($sums as $s) {
+					$current->$s = 0;
+				}
 			}
 
 			$row->label = !$by_year ? $row->year_label : $row->account_label;
 			$current->items[] = $row;
-			$current->credit += $row->credit;
-			$current->debit += $row->debit;
-			$current->sum += $row->sum;
+
+			foreach ($sums as $s) {
+				$current->$s += $row->$s;
+			}
 		}
 
 		if ($current === null) {
 			return;
 		}
 
-		$current->items[] = (object) [
-			'label' => 'Total',
-			'credit' => $current->credit,
-			'debit' => $current->debit,
-			'sum' => $current->sum,
-			'id_account' => $by_year ? null : $row->id_account,
-			'id_year' => $by_year ? $row->id_year : null,
-		];
+		$current->items[] = $total($current, $by_year);
+
 		yield $current;
 	}
 
@@ -144,7 +169,12 @@ class Reports
 			FROM acc_transactions %s;',
 			$interval, $where_interval);
 
-		extract((array)$db->first($sql));
+		$result = (array)$db->first($sql);
+		extract($result);
+
+		if (!isset($start_interval, $end_interval)) {
+			return [];
+		}
 
 		$out = array_fill_keys(range($start_interval, $end_interval), 0);
 
@@ -252,11 +282,13 @@ class Reports
 
 		$result = self::getResult($criterias);
 
-		$out[Account::LIABILITY][] = (object) [
-			'id' => null,
-			'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
-			'sum' => $result,
-		];
+		if ($result != 0) {
+			$out[Account::LIABILITY][] = (object) [
+				'id' => null,
+				'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
+				'sum' => $result,
+			];
+		}
 
 		// Calculate the total sum for assets and liabilities
 		foreach ($out as $position => $rows) {
@@ -328,7 +360,10 @@ class Reports
 
 		$db = DB::getInstance();
 
-		$sql = sprintf('SELECT t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label
+		$sql = sprintf('SELECT
+			t.id_year, l.id_account, t.id, t.date, t.reference,
+			l.debit, l.credit, l.reference AS line_reference, t.label, l.label AS line_label,
+			a.label AS account_label, a.code AS account_code
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
@@ -337,13 +372,8 @@ class Reports
 
 		$account = null;
 		$debit = $credit = 0;
-		$accounts = null;
 
 		foreach ($db->iterate($sql) as $row) {
-			if (null === $accounts) {
-				$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $row->id_year);
-			}
-
 			if (null !== $account && $account->id != $row->id_account) {
 				yield $account;
 				$account = null;
@@ -351,8 +381,8 @@ class Reports
 
 			if (null === $account) {
 				$account = (object) [
-					'code'  => $accounts[$row->id_account]->code,
-					'label' => $accounts[$row->id_account]->label,
+					'code'  => $row->account_code,
+					'label' => $row->account_label,
 					'id'    => $row->id_account,
 					'id_year' => $row->id_year,
 					'sum'   => 0,
@@ -371,6 +401,7 @@ class Reports
 			$credit += $row->credit;
 			$row->running_sum = $account->sum;
 
+			unset($row->account_code, $row->account_label, $row->id_account, $row->id_year);
 
 			$account->lines[] = $row;
 		}
@@ -389,19 +420,19 @@ class Reports
 	{
 		$where = self::getWhereClause($criterias);
 
-		$sql = sprintf('SELECT t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label FROM acc_transactions t
+		$sql = sprintf('SELECT
+			t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference,
+			l.reference AS line_reference, t.label, l.label AS line_label,
+			a.label AS account_label, a.code AS account_code
+			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts a ON l.id_account = a.id
 			WHERE %s ORDER BY t.date, t.id;', $where);
 
 		$transaction = null;
-		$accounts = null;
 		$db = DB::getInstance();
 
 		foreach ($db->iterate($sql) as $row) {
-			if (null === $accounts) {
-				$accounts = $db->getGrouped('SELECT id, code, label FROM acc_accounts WHERE id_chart = (SELECT id_chart FROM acc_years WHERE id = ?);', $row->id_year);
-			}
-
 			if (null !== $transaction && $transaction->id != $row->id) {
 				yield $transaction;
 				$transaction = null;
@@ -417,13 +448,9 @@ class Reports
 				];
 			}
 
-			if (!isset($accounts[$row->id_account])) {
-				throw new \LogicException(sprintf('Account #%s not found', $row->id_account));
-			}
-
 			$transaction->lines[] = (object) [
-				'account_label' => $accounts[$row->id_account]->label,
-				'account_code'  => $accounts[$row->id_account]->code,
+				'account_label' => $row->account_label,
+				'account_code'  => $row->account_code,
 				'label'         => $row->line_label,
 				'reference'     => $row->line_reference,
 				'id_account'    => $row->id_account,
@@ -438,5 +465,27 @@ class Reports
 		}
 
 		yield $transaction;
+	}
+
+	static public function getStatement(array $criterias): array
+	{
+		$revenue = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::REVENUE]);
+		$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE], null, true);
+
+		$get_sum = function (array $in): int {
+			$sum = 0;
+
+			foreach ($in as $row) {
+				$sum += $row->sum;
+			}
+
+			return abs($sum);
+		};
+
+		$revenue_sum = $get_sum($revenue);
+		$expense_sum = $get_sum($expense);
+		$result = $revenue_sum - $expense_sum;
+
+		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result');
 	}
 }

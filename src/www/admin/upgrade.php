@@ -7,8 +7,9 @@ const UPGRADE_PROCESS = true;
 require_once __DIR__ . '/../../include/test_required.php';
 require_once __DIR__ . '/../../include/init.php';
 
-$config = Config::getInstance();
-Upgrade::preCheck();
+if (!Upgrade::preCheck()) {
+	throw new UserException('Aucune mise à jour à effectuer, tout est à jour :-)');
+}
 
 echo '<!DOCTYPE html>
 <html>
@@ -22,7 +23,7 @@ echo '<!DOCTYPE html>
 <body>
 <header class="header">
     <nav class="menu"></nav>
-    <h1>Mise à jour de Garradin '.$config->getVersion().' vers la version '.garradin_version().'...</h1>
+    <h1>Mise à jour de Garradin vers la version '.garradin_version().'...</h1>
 </header>
 <main>
 <div id="loader" class="loader" style="margin: 2em 0; height: 50px;"></div>

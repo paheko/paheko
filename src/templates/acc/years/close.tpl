@@ -15,16 +15,17 @@
 		</p>
 		<dl>
 			<dt>Début de l'exercice</dt>
-			<dd>{$year.start_date|date_fr:'d/m/Y'}</dd>
+			<dd>{$year.start_date|date_short}</dd>
 			<dt>Fin de l'exercice</dt>
-			<dd>{$year.end_date|date_fr:'d/m/Y'}</dd>
+			<dd>{$year.end_date|date_short}</dd>
+			<dd class="help">Si la date de clôture ne convient pas, il est possible de <a href="edit.php?id={$year.id}">modifier l'exercice</a> préalablement à la clôture.</dd>
 		</h3>
 	</fieldset>
 
 	<p class="help">Les soldes créditeurs ou débiteurs de chaque compte pourront être reportés automatiquement lors de l'ouverture de l'exercice suivant.</p>
 
 	<p class="submit">
-		{csrf_field key="acc_years_close_%d"|args:$year.id}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="close" label="Clôturer" shape="lock" class="main"}
 	</p>
 

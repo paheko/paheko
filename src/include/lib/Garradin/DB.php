@@ -68,6 +68,11 @@ class DB extends SQLite3
         $this->toggleForeignKeys(true);
     }
 
+    public function lastErrorMsg()
+    {
+        return $this->db->lastErrorMsg();
+    }
+
     /**
      * @see https://www.sqlite.org/lang_altertable.html
      */

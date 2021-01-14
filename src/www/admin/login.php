@@ -43,8 +43,6 @@ $form->runIf('login', function () use ($id_field_name, $session) {
     }
 }, 'login', ADMIN_URL);
 
-$session->cleanOldCookies();
-
 $tpl->assign('ssl_enabled', empty($_SERVER['HTTPS']) ? false : true);
 $tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
 $tpl->assign('own_https_url', str_replace('http://', 'https://', utils::getSelfURL()));

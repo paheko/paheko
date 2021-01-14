@@ -48,12 +48,16 @@ class Entity extends AbstractEntity
 				throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
 			}
 		}
-		else {
-			return parent::filterUserValue($type, $value, $key);
+		elseif ($type == 'DateTime') {
+			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}$!', $value)) {
+				return \DateTime::createFromFormat('d/m/Y H:i', $value);
+			}
 		}
+
+		return parent::filterUserValue($type, $value, $key);
 	}
 
-	protected function assert(bool $test, string $message = null): void
+	protected function assert(?bool $test, string $message = null): void
 	{
 		if ($test) {
 			return;

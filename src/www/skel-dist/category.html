@@ -1,0 +1,40 @@
+{{#categories uri=$_GET.uri}}
+
+	{{:include file="_head.html"}}
+
+
+	<section class="subcategories">
+		{{#categories parent=$id order="title"}}
+		<article>
+			<h2><a href="{{$url}}">{{$title}}</a></h2>
+		</article>
+		{{/categories}}
+	</section>
+
+	<article>
+		<h1>{{$title}}</h1>
+
+		<div class="corps">
+			{{$html|raw}}
+		</div>
+
+		{{:include file="gallery.html" parent=$id}}
+		{{:include file="documents.html" parent=$id}}
+	</article>
+
+	<section class="articles">
+		{{#articles parent=$id order="created DESC"}}
+		<article>
+			<h3><a href="{{$url}}">{{$title}}</a></h3>
+			<p>{{$html|raw|strip_tags|truncate:200}}</p>
+		</article>
+		{{/articles}}
+	</section>
+
+	{{:include file="_foot.html"}}
+
+{{else}}
+
+	{{:include file="404.html"}}
+
+{{/categories}}

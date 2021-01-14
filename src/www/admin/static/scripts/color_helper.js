@@ -76,7 +76,16 @@
 		};
 
 		var bg = $('#f_image_fond');
-		img.src = (bg.value && bg.value != '0')  ? 'data:image/png;base64,' + bg.value : bg.getAttribute('data-source');
+
+		if (bg.value) {
+			img.src = 'data:image/png;base64,' + bg.value;
+		}
+		else if (bg.dataset.source) {
+			img.src = 'data:image/png;base64,' + bg.dataset.source;
+		}
+		else {
+			img.src = bg.dataset.default;
+		}
 	}
 
 	/**
@@ -137,8 +146,6 @@
 			delete ctx;
 			delete img;
 
-			console.log()
-
 			callback();
 		};
 
@@ -182,6 +189,7 @@
 			var reader = new FileReader;
 			reader.onload = (e) => {
 				importBackgroundImage(e.target.result, applyColors);
+				bg.disabled = true;
 				bg.value = '';
 			};
 			reader.readAsDataURL(bg.files[0]);
@@ -193,13 +201,9 @@
 		reset_btn.innerHTML = 'RàZ';
 
 		reset_btn.onclick = () => {
-			$('#f_image_fond').dataset.source = $('#f_image_fond').dataset.default;
+			$('#f_image_fond').dataset.source = '';
 			$('#f_image_fond').value = '';
-
-			var input = $('#f_couleur2');
-			if (input.getAttribute('placeholder') == input.value) {
-				return;
-			}
+			bg.disabled = false;
 
 			applyColors();
 		};

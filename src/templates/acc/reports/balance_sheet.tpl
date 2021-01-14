@@ -1,6 +1,13 @@
 {include file="admin/_head.tpl" title="Bilan" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="balance_sheet"}
+{include file="acc/reports/_header.tpl" current="balance_sheet" title="Bilan"}
+
+{if $asset_sum != $liability_sum}
+	<p class="alert block">
+		<strong>Le bilan n'est pas équilibré&nbsp;!</strong><br />
+		Vérifiez que vous n'avez pas oublié de reporter des soldes depuis le précédent exercice.
+	</p>
+{/if}
 
 <table class="statement">
 	<colgroup>

@@ -55,8 +55,12 @@
 
 			return true;
 		}
-
-		var elements = document.querySelectorAll(selector);
+		else if (selector instanceof HTMLElement) {
+			var elements = [selector];
+		}
+		else {
+			var elements = document.querySelectorAll(selector);
+		}
 
 		for (var i = 0; i < elements.length; i++)
 		{
@@ -102,15 +106,27 @@
 		g.dialog.open = true;
 
 		var btn = document.createElement('button');
-		btn.className = 'icn-btn';
+		btn.className = 'icn-btn closeBtn';
 		btn.setAttribute('data-icon', '✘');
 		btn.type = 'button';
 		btn.innerHTML = 'Fermer';
 		btn.onclick = g.closeDialog;
 		g.dialog.appendChild(btn);
 
-		content.style.opacity = g.dialog.style.opacity = 0;
+		if (typeof content == 'string') {
+			var container = document.createElement('div');
+			container.innerHTML = content;
+			content = container;
+		}
+		else if (content instanceof DocumentFragment) {
+			var container = document.createElement('div');
+			container.appendChild(content.cloneNode(true));
+			content = container;
+		}
+
 		g.dialog.appendChild(content);
+
+		content.style.opacity = g.dialog.style.opacity = 0;
 		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
 		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 
@@ -119,6 +135,8 @@
 		// Restore CSS defaults
 		window.setTimeout(() => { g.dialog.style.opacity = ''; }, 50);
 		window.setTimeout(() => { content.style.opacity = ''; }, 100);
+
+		return content;
 	}
 
 	g.openFrameDialog = function (url) {
@@ -234,6 +252,11 @@
 
 	g.inputListSelected = function(value, label) {
 		var i = g.current_list_input;
+
+		if (!i) {
+			throw Error('Parent input list not found');
+		}
+
 		var multiple = i.firstChild.getAttribute('data-multiple');
 		var name = i.firstChild.getAttribute('data-name');
 
@@ -282,7 +305,14 @@
 
 	// Focus on first form input when loading the page
 	g.onload(() => {
-		if ((i = document.querySelector('form[data-focus="1"] [value]')) && (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body')) {
+		if (!document.activeElement || document.activeElement.tagName.toLowerCase() == 'body') {
+			let form = document.querySelector('form[data-focus]');
+
+			if (!form) {
+				return;
+			}
+
+			var i = form.querySelector(form.dataset.focus == 1 ? '[name]' : form.dataset.focus);
 			i.focus();
 		}
 	}, 'dom');

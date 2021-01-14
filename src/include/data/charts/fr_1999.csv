@@ -16,8 +16,8 @@ code,label,description,position,type
 110,Report à nouveau (Solde créditeur),,Passif,
 119,Report à nouveau (Solde débiteur),,Passif,
 12,RÉSULTAT NET DE L'EXERCICE,,Passif,
-120,Résultat de l'exercice (excédent),,Passif,
-129,Résultat de l'exercice (déficit),,Passif,
+120,Résultat de l'exercice (excédent),,Passif,Résultat excédentaire
+129,Résultat de l'exercice (déficit),,Passif,Résultat déficitaire
 13,SUBVENTIONS D'INVESTISSEMENT AFFECTÉES A DES BIENS NON RENOUVELABLES,,Passif,
 131,Subventions d'investissement (renouvelables),,Passif,
 139,Subventions d'investissement inscrites au compte de résultat,,Passif,
@@ -123,8 +123,8 @@ code,label,description,position,type
 4418,Subventions d'équilibre,,Actif,
 4419,Avances sur subventions,,Actif,
 442,État - Impôts et taxes recouvrables sur des tiers,,Passif,
-444,État - Impôts sur les bénéfices,,Actif,
-445,État - Taxes sur le chiffre d'affaires,,Actif,
+444,État - Impôts sur les bénéfices,,Actif ou passif,
+445,État - Taxes sur le chiffre d'affaires,,Actif ou passif,
 4455,Taxes sur le chiffre d'affaires à décaisser,,Actif,
 44551,TVA à décaisser,,Actif,
 44558,Taxes assimilées à la TVA,,Actif,
@@ -177,11 +177,11 @@ code,label,description,position,type
 50,VALEURS MOBILIÈRES DE PLACEMENT,,Actif,
 51,"BANQUES, ÉTABLISSEMENTS FINANCIERS ET ASSIMILÉS",,Actif,
 511,Valeurs à l'encaissement,,Actif,
-5112,Chèques à encaisser,,Actif,Attente d'encaissement
-5115,Paiements par carte à encaisser,,Actif,
+5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5115,Paiements par carte à encaisser,,Actif ou passif,
 512,Banques,,Actif ou passif,
 53,CAISSE,,Actif,
-530,Caisse,,Actif,Caisse
+530,Caisse,,Actif ou passif,Caisse
 54,RÉGIES D'AVANCES ET ACCRÉDITIFS,,Actif,
 58,VIREMENTS INTERNES,,Actif,
 59,PROVISIONS POUR DÉPRÉCIATION DES COMPTES FINANCIERS,,Actif,
@@ -283,15 +283,15 @@ code,label,description,position,type
 797,Transferts de charges exceptionnels,,Produit,
 8,Classe 8 ­— Comptes spéciaux,,,
 86,RÉPARTITION PAR NATURE DE CHARGES,,Charge,
-861,Mise à dispositions gratuites de biens,,Charge,
-862,Prestations,,Charge,
-864,Personnel bénévole,,Charge,
+861,Mise à dispositions gratuites de biens,,Charge,Bénévolat
+862,Prestations,,Charge,Bénévolat
+864,Personnel bénévole,,Charge,Bénévolat
 87,RÉPARTITION PAR NATURE DE RESSOURCES,,Produit,
-870,Bénévolat,,Produit,
-871,Prestations en nature,,Produit,
-875,Dons en nature,,Produit,
+870,Bénévolat,,Produit,Bénévolat
+871,Prestations en nature,,Produit,Bénévolat
+875,Dons en nature,,Produit,Bénévolat
 89,BILAN,,,
-890,Bilan d'ouverture,,,Ouverture
-891,Bilan de clôture,,,Clôture
+890,Bilan d'ouverture,,Actif ou passif,Ouverture
+891,Bilan de clôture,,Actif ou passif,Clôture
 9,Classe 9 — Comptes analytiques,,,
 99,Projets,,,Analytique

@@ -60,6 +60,9 @@ class Account extends Entity
 	const TYPE_OPENING = 9;
 	const TYPE_CLOSING = 10;
 
+	const TYPE_POSITIVE_RESULT = 11;
+	const TYPE_NEGATIVE_RESULT = 12;
+
 	const TYPES_NAMES = [
 		'',
 		'Banque',
@@ -72,12 +75,17 @@ class Account extends Entity
 		'Bénévolat',
 		'Ouverture',
 		'Clôture',
+		'Résultat excédentaire',
+		'Résultat déficitaire',
 	];
 
 	const LIST_COLUMNS = [
 		'id' => [
 			'select' => 't.id',
 			'label' => 'N°',
+		],
+		'id_line' => [
+			'select' => 'l.id',
 		],
 		'date' => [
 			'label' => 'Date',
@@ -119,6 +127,16 @@ class Account extends Entity
 		'line_reference' => [
 			'label' => 'Réf. ligne',
 			'select' => 'l.reference',
+		],
+		'id_analytical' => [
+			'select' => 'l.id_analytical',
+		],
+		'code_analytical' => [
+			'label' => 'Projet',
+			'select' => 'b.code',
+		],
+		'status' => [
+			'select' => 't.status',
 		],
 	];
 
@@ -175,7 +193,8 @@ class Account extends Entity
 		$columns = self::LIST_COLUMNS;
 
 		$tables = 'acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction';
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = 0;
@@ -236,9 +255,9 @@ class Account extends Entity
 		$rows = $db->iterate(sprintf($sql, $condition), $this->id(), $year_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
 
 		$sum = $this->getSumAtDate($year_id, $start_date);
+		$reconciled_sum = $this->getSumAtDate($year_id, $start_date, true);
 
 		$start_sum = false;
-		$reconciled_sum = $sum;
 
 		foreach ($rows as $row) {
 			if (!$start_sum) {
@@ -386,12 +405,14 @@ class Account extends Entity
 	}
 
 
-	public function getSumAtDate(int $year_id, DateTimeInterface $date): int
+	public function getSumAtDate(int $year_id, DateTimeInterface $date, bool $reconciled_only = false): int
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
+		$sql = sprintf('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ?;', $this->id(), $year_id, $date->format('Y-m-d'));
+			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ? %s;',
+			$reconciled_only ? 'AND l.reconciled = 1' : '');
+		return (int) DB::getInstance()->firstColumn($sql, $this->id(), $year_id, $date->format('Y-m-d'));
 	}
 
 	public function importSimpleForm(array $translate_type_position, array $translate_type_codes, ?array $source = null)

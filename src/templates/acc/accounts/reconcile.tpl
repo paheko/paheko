@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts" js=1}
+{include file="admin/_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -23,13 +23,15 @@
 		</p>
 	</fieldset>
 	{/if}
-	<fieldset>
+	<fieldset class="shortFormLeft">
 		<legend>Période de rapprochement</legend>
 		<p>
 			Du
 			{input type="date" name="start" default=$start}
 			au
 			{input type="date" name="end" default=$end}
+		</p>
+		<p>
 			<label>{input type="checkbox" name="only" value=1 default=$only} Seulement les écritures non rapprochées</label>
 			<input type="hidden" name="id" value="{$account.id}" />
 			<input type="submit" value="Afficher" />
@@ -66,7 +68,7 @@
 				<td colspan="5"></td>
 				<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>
 				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|html_money}</td>
-				<th>Solde au {$line.date|date_fr:'d/m/Y'}</th>
+				<th>Solde au {$line.date|date_short}</th>
 				<td colspan="2"></td>
 			</tr>
 			{else}
@@ -75,7 +77,7 @@
 					{input type="checkbox" name="reconcile[%d]"|args:$line.id_line value="1" default=$line.reconciled}
 				</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
-				<td>{$line.date|date_fr:'d/m/Y'}</td>
+				<td>{$line.date|date_short}</td>
 				<td class="money">{$line.credit|raw|html_money}</td>
 				<td class="money">{$line.debit|raw|html_money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
 				<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|html_money:false}</td>

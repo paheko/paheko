@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Import & export des membres" current="membres" js=1}
+{include file="admin/_head.tpl" title="Import & export des membres" current="membres"}
 
 {include file="admin/membres/_nav.tpl" current="import"}
 
@@ -57,6 +57,7 @@
 
     <p class="submit">
         {csrf_field key=$csrf_key}
+        {if $csv->loaded()}{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}{/if}
         {button type="submit" name="import" label="Importer" shape="upload" class="main"}
     </p>
 

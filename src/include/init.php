@@ -47,6 +47,11 @@ function garradin_manifest()
 	return false;
 }
 
+if (!defined('\SQLITE3_OPEN_READWRITE')) {
+	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
+	exit(1);
+}
+
 /*
  * Configuration globale
  */
@@ -148,7 +153,7 @@ static $default_config = [
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
-	'ERRORS_ENABLE_LOG_VIEW'=> true,
+	'ENABLE_TECH_DETAILS'   => true,
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
 	'SMTP_HOST'             => false,
@@ -161,7 +166,9 @@ static $default_config = [
 	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
-	'ADMIN_BACKGROUND_IMAGE' => WWW_URL . 'admin/static/gdin_bg.png'
+	'FILE_STORAGE_BACKEND'  => null,
+	'FILE_STORAGE_CONFIG'   => [],
+	'FILE_STORAGE_QUOTA'    => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -172,6 +179,10 @@ foreach ($default_config as $const => $value)
 	{
 		define($const, $value);
 	}
+}
+
+if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
+	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
 
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
@@ -227,7 +238,7 @@ if (ERRORS_REPORT_URL)
 	ErrorManager::setRemoteReporting(ERRORS_REPORT_URL, true);
 }
 
-ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erreur interne</title>
+ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
 	body {font-family: sans-serif; }
 	code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
@@ -237,7 +248,7 @@ ErrorManager::setProductionErrorTemplate('<!DOCTYPE html><html><head><title>Erre
 	</style></head><body><h1>Erreur interne</h1><p>Désolé mais le serveur a rencontré une erreur interne
 	et ne peut répondre à votre requête. Merci de ré-essayer plus tard.</p>
 	<p>Si vous suspectez un bug dans Garradin, vous pouvez suivre 
-	<a href="http://dev.kd2.org/garradin/Rapporter+un+bug">ces instructions</a>
+	<a href="https://fossil.kd2.org/garradin/wiki?name=Rapporter+un+bug&p">ces instructions</a>
 	pour le rapporter.</p>
 	<if(sent)><p>Un-e responsable a été notifié-e et cette erreur sera corrigée dès que possible.</p></if>
 	<if(logged)><code>L\'erreur a été enregistrée dans les journaux système (error.log) sous la référence : <b>{$ref}</b></code></if>
@@ -313,9 +324,9 @@ if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS')
 		Utils::redirect(ADMIN_URL . 'install.php');
 	}
 
-	$config = Config::getInstance();
+	$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
 
-	if (version_compare($config->getVersion(), garradin_version(), '<'))
+	if (version_compare($v, garradin_version(), '<'))
 	{
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}

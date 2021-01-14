@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts" js=1}
+{include file="admin/_head.tpl" title="Rapprochement : %s — %s"|args:$account.code,$account.label current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
@@ -93,7 +93,7 @@
 				<tr>
 					<td colspan="4"></td>
 					<td class="money">{if $line.journal.sum > 0}-{/if}{$line.journal.sum|abs|raw|html_money:false}</td>
-					<th style="text-align: right">Solde au {$line.journal.date|date_fr:'d/m/Y'}</th>
+					<th style="text-align: right">Solde au {$line.journal.date|date_short}</th>
 					<td class="separator"></td>
 					<td class="separator"></td>
 					<td colspan="3"></td>

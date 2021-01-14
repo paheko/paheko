@@ -40,7 +40,7 @@ class Reminders
 			FROM services_reminders_sent rs
 			INNER JOIN services_reminders r ON r.id = rs.id_reminder
 			INNER JOIN services s ON s.id = rs.id_service
-			WHERE rs.id_reminder = ?;', $user_id);
+			WHERE rs.id_reminder = ?;', $reminder_id);
 	}
 
 	static public function listForService(int $service_id)
@@ -86,8 +86,8 @@ class Reminders
 	{
 		$replace = [
 			'identite'        => $reminder->identity,
-			'date_rappel'     => Utils::sqliteDateToFrench($reminder->reminder_date),
-			'date_expiration' => Utils::sqliteDateToFrench($reminder->expiry_date),
+			'date_rappel'     => Utils::date_fr($reminder->reminder_date),
+			'date_expiration' => Utils::date_fr($reminder->expiry_date),
 			'nb_jours'        => $reminder->nb_days,
 			'delai'           => $reminder->delay,
 		];

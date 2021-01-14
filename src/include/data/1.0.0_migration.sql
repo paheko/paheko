@@ -66,6 +66,23 @@ INSERT INTO acc_transactions (id, label, notes, reference, date, id_year, id_cre
 	SELECT id, libelle, remarques, numero_piece, date, id_exercice, id_auteur
 	FROM compta_journal;
 
+-- Recettes
+UPDATE acc_transactions SET type = 1 WHERE id IN (SELECT id FROM compta_journal WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = 1));
+
+-- Dépenses
+UPDATE acc_transactions SET type = 2 WHERE id IN (SELECT id FROM compta_journal WHERE id_categorie IN (SELECT id FROM compta_categories WHERE type = -1));
+
+-- Virements
+UPDATE acc_transactions SET type = 3 WHERE id IN (SELECT id FROM compta_journal
+	WHERE (compte_credit IN ('530', '5112', '5115') OR compte_credit LIKE '512%')
+	AND (compte_debit IN ('530', '5112', '5115') OR compte_debit LIKE '512%'));
+
+-- Dettes
+UPDATE acc_transactions SET type = 4 WHERE id IN (SELECT id FROM compta_journal WHERE compte_debit LIKE '6%' AND compte_credit LIKE '4%');
+
+-- Créances
+UPDATE acc_transactions SET type = 5 WHERE id IN (SELECT id FROM compta_journal WHERE compte_credit LIKE '7%' AND compte_debit LIKE '4%');
+
 -- Création des lignes associées aux mouvements
 INSERT INTO acc_transactions_lines (id_transaction, id_account, debit, credit, reference, id_analytical)
 	SELECT id, (SELECT id FROM acc_accounts WHERE code = compte_credit), 0, CAST(REPLACE(montant * 100, '.0', '') AS INT), numero_cheque,
@@ -110,6 +127,9 @@ UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT
 
 --------- MIGRATION COTISATIONS ----------
 
+-- A edge-case where the end date is after the start date, let's fix it…
+UPDATE cotisations SET fin = debut WHERE fin < debut;
+
 INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
 
 INSERT INTO services_fees (id, label, amount, id_service, id_account, id_year)
@@ -135,6 +155,7 @@ INSERT INTO services_reminders SELECT * FROM rappels;
 INSERT INTO services_reminders_sent SELECT id, id_membre, id_cotisation,
 	CASE WHEN id_rappel IS NULL THEN (SELECT MAX(id) FROM rappels) ELSE id_rappel END, date
 	FROM rappels_envoyes
+	WHERE id_rappel IS NOT NULL
 	GROUP BY id_membre, id_cotisation, id_rappel;
 
 DROP TABLE cotisations;

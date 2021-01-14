@@ -2,7 +2,7 @@
 
 {include file="admin/config/_menu.tpl" current="logs"}
 
-{if ERRORS_ENABLE_LOG_VIEW}
+{if ENABLE_TECH_DETAILS}
 <nav class="tabs">
 	<ul class="sub">
 		{*<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>*}
