@@ -26,22 +26,19 @@ $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 $transaction->id_creator = $session->getUser()->id;
 
-$rules = [
-	'deposit' => 'array|required',
-];
+$form->runIf('save', function () use ($account, $checked, $transaction, $journal) {
+	if (!count($checked)) {
+		throw new UserException('Aucune ligne n\'a été cochée, impossible de créer un dépôt. Peut-être vouliez-vous saisir un virement ?');
+	}
 
-// Enregistrement des cases cochées
-if (f('save') && $form->check('acc_deposit_' . $account->id, $rules))
-{
-	try {
-		$transaction->importFromDepositForm();
-		Transactions::saveDeposit($transaction, $journal, f('deposit'));
-		Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
-	}
-	catch (UserException $e) {
-		$journal = $account->getDepositJournal(CURRENT_YEAR_ID);
-		$form->addError($e->getMessage());
-	}
+	$transaction->importFromDepositForm();
+	Transactions::saveDeposit($transaction, $journal, $checked);
+
+	Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
+}, 'acc_deposit_' . $account->id());
+
+if ($form->hasErrors()) {
+	$journal = $account->getDepositJournal(CURRENT_YEAR_ID);
 }
 
 $date = new \DateTime;
