@@ -14,6 +14,10 @@ if (!$account) {
 
 $year_id = (int) qg('year') ?: CURRENT_YEAR_ID;
 
+if (!$year_id) {
+	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
+}
+
 if ($year_id === CURRENT_YEAR_ID) {
 	$year = $current_year;
 }
