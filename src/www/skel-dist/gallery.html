@@ -1,12 +1,10 @@
-<B_galerie>
-	<section class="galerie">
-	<BOUCLE_galerie(IMAGES){article}{par nom}{sauf_mention}>
-		<figure>
-			<a href="#URL" class="internal-image"><img src="#MINIATURE" alt="#NOM" /></a>
-		</figure>
-	</BOUCLE_galerie>
-	</section>
-</B_galerie>
+<section class="galerie">
+{{#images order="name" parent=$parent debug=1}}
+	<figure>
+		<a href="{{$url}}" class="internal-image"><img src="{{$thumb_url}}" alt="{{$name}}" /></a>
+	</figure>
+{{/images}}
+</section>
 
 <BOUCLE_galerie_script(IMAGES){article}{0,1}>
 	<!-- N'inclure le script de galerie que s'il y a au moins une image dans la page -->

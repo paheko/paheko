@@ -2,16 +2,17 @@
 
 namespace Garradin;
 
-use KD2\Dumbyer;
-use KD2\Dumbyer_Exception;
+use KD2\Brindille;
+use KD2\Brindille_Exception;
 
 use Garradin\Files\Files;
 use Garradin\Files\Folders;
 use Garradin\Web\Template;
 use Garradin\Entities\Web\Page;
+use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modifiers;
 
-class UserTemplate extends Dumbyer
+class UserTemplate extends Brindille
 {
 	protected $path;
 	protected $hash;
@@ -123,9 +124,9 @@ class UserTemplate extends Dumbyer
 
 			require $tmp_path;
 		}
-		catch (Dumbyer_Exception $e) {
+		catch (Brindille_Exception $e) {
 			@unlink($tmp_path);
-			throw new Dumbyer_Exception('Erreur de syntaxe : ' . $e->getMessage(), 0, $e);
+			throw new Brindille_Exception('Erreur de syntaxe : ' . $e->getMessage(), 0, $e);
 		}
 		catch (\Throwable $e) {
 			// Don't delete temporary file as it can be used to debug
@@ -149,20 +150,20 @@ class UserTemplate extends Dumbyer
 	public function functionInclude(array $params, UserTemplate $ut, int $line): string
 	{
 		if (empty($params['file'])) {
-			throw new Dumbyer_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
 		}
 
 		// Avoid recursive loops
 		$from = $ut->get('included_from') ?? [];
 
 		if (in_array($params['file'], $from)) {
-			throw new Dumbyer_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
+			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
 		}
 
 		$tpl = new Template($params['file']);
 
 		if (!$tpl->exists()) {
-			throw new Dumbyer_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
+			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
 		}
 
 		$params['included_from'] = array_merge($from, [$params['file']]);
@@ -236,7 +237,7 @@ class UserTemplate extends Dumbyer
 			];
 
 			if (!isset($codes[$params['code']])) {
-				throw new Dumbyer_Exception('Code HTTP inconnu');
+				throw new Brindille_Exception('Code HTTP inconnu');
 			}
 
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
@@ -248,7 +249,7 @@ class UserTemplate extends Dumbyer
 			header('Content-Type: ' . $params['type'], true);
 		}
 		else {
-			throw new Dumbyer_Exception('No valid parameter found for http function');
+			throw new Brindille_Exception('No valid parameter found for http function');
 		}
 	}
 
@@ -301,6 +302,12 @@ class UserTemplate extends Dumbyer
 			unset($params['uri']);
 		}
 
+		if (isset($params['parent'])) {
+			$params['where'] .= ' AND w.parent_id = :parent_id';
+			$params[':parent_id'] = $params['parent'];
+			unset($params['parent']);
+		}
+
 		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
 			$data = $row;
 			unset($data['points']);
@@ -338,7 +345,7 @@ class UserTemplate extends Dumbyer
 
 	public function sectionFiles(array $params, self $tpl, int $line): \Generator
 	{
-		if (!array_key_exists('where', $params, $tpl, $line)) {
+		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
@@ -352,11 +359,19 @@ class UserTemplate extends Dumbyer
 			$params['where'] .= sprintf(' AND f.id NOT IN (%s)', implode(', ', $found));
 		}
 
+		if (isset($params['parent'])) {
+			$params['tables'] .= ' INNER JOIN files_links l ON l.id = f.id';
+			$params['where'] .= ' AND l.file_id = :parent_id';
+			$params[':parent_id'] = $params['parent'];
+			unset($params['parent']);
+		}
+
 		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
 			$file = new File;
 			$file->load($row);
 			$row = $file->asArray();
-			$row['url'] = $page->url();
+			$row['url'] = $file->url();
+			$row['thumb_url'] = $file->image ? $file->thumb_url() : null;
 
 			yield $row;
 		}
@@ -373,7 +388,7 @@ class UserTemplate extends Dumbyer
 		];
 
 		if (!isset($params['tables'])) {
-			throw new Dumbyer_Exception('Missing parameter "tables"');
+			throw new Brindille_Exception('Missing parameter "tables"');
 		}
 
 		foreach ($defaults as $key => $default_value) {
@@ -396,6 +411,10 @@ class UserTemplate extends Dumbyer
 			$db = DB::getInstance();
 			$statement = $db->protectSelect(null, $sql);
 
+			if (!empty($params['debug'])) {
+				echo sprintf('<pre style="padding: 5px; background: yellow;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
+			}
+
 			$args = [];
 
 			foreach ($params as $key => $value) {
@@ -407,13 +426,14 @@ class UserTemplate extends Dumbyer
 			unset($params, $sql);
 
 			foreach ($args as $key => $value) {
+				var_dump($key, $value);
 				$statement->bindValue($key, $value, $db->getArgType($value));
 			}
 
 			$result = $statement->execute();
 		}
 		catch (\Exception $e) {
-			throw new Dumbyer_Exception(sprintf("Erreur SQL à la ligne %d : %s\nRequête exécutée : %s", $line, $db->lastErrorMsg(), $sql));
+			throw new Brindille_Exception(sprintf("Erreur SQL à la ligne %d : %s\nRequête exécutée : %s", $line, $db->lastErrorMsg(), $sql));
 		}
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
