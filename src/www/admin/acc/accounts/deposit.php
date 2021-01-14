@@ -37,6 +37,7 @@ $form->runIf('save', function () use ($account, $checked, $transaction, $journal
 	Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
 }, 'acc_deposit_' . $account->id());
 
+// Uncheck everything if there was an error
 if ($form->hasErrors()) {
 	$journal = $account->getDepositJournal(CURRENT_YEAR_ID);
 }
@@ -49,12 +50,15 @@ if ($date > $current_year->end_date) {
 
 $target = $account::TYPE_BANK;
 
+$journal_count = $account->countDepositJournal(CURRENT_YEAR_ID);
+
 $tpl->assign(compact(
 	'account',
 	'journal',
 	'date',
 	'target',
-	'checked'
+	'checked',
+	'journal_count'
 ));
 
 $tpl->display('acc/accounts/deposit.tpl');
