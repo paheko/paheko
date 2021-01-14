@@ -222,7 +222,7 @@ class Reports
 		$a = $db->firstColumn($sql, Account::REVENUE);
 		$b = $db->firstColumn($sql, Account::EXPENSE);
 
-		return (int)$a - abs((int)$b);
+		return (int)$a - (int)$b * -1;
 	}
 
 	static public function getClosingSumsWithAccounts(array $criterias, ?string $order = null, bool $reverse = false): array
@@ -230,7 +230,7 @@ class Reports
 		$where = self::getWhereClause($criterias);
 
 		$order = $order ?: 'a.code COLLATE NOCASE';
-		$reverse = $reverse ? '* - 1' : '';
+		$reverse = $reverse ? '* -1' : '';
 
 		// Find sums, link them to accounts
 		$sql = sprintf('SELECT a.id, a.code, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
@@ -479,7 +479,7 @@ class Reports
 				$sum += $row->sum;
 			}
 
-			return abs($sum);
+			return $sum;
 		};
 
 		$revenue_sum = $get_sum($revenue);
