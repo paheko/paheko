@@ -400,20 +400,24 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
     date INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS doc_templates
+CREATE TABLE IF NOT EXISTS docs_templates
 -- Dynamic printable document templates
 (
     id INTEGER NOT NULL PRIMARY KEY,
+    related_type TEXT NOT NULL,
+    related_to TEXT NULL,
     label TEXT NOT NULL,
     description TEXT NULL,
-    content TEXT NOT NULL
+    content TEXT NOT NULL,
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
+    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified)
 );
 
-CREATE TABLE IF NOT EXISTS doc_templates_fields
+CREATE TABLE IF NOT EXISTS docs_saved
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    template_id INTEGER NOT NULL REFERENCES templates(id),
+    template_id INTEGER NOT NULL REFERENCES docs_templates(id),
     label TEXT NOT NULL,
-    type TEXT NOT NULL,
-    help TEXT NULL
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
+    data TEXT NOT NULL
 );

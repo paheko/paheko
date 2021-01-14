@@ -7,50 +7,36 @@ use Garradin\ValidationException;
 
 class Template extends Entity
 {
-	const TABLE = 'doc_templates';
+	const TABLE = 'docs_templates';
 
 	protected $id;
+	protected $related_type;
+	protected $related_to;
 	protected $label;
 	protected $description;
 	protected $content;
+	protected $created;
+	protected $modified;
 
 	protected $_types = [
-		'id'          => 'int',
-		'label'       => 'string',
-		'description' => '?string',
-		'content'     => 'string',
+		'id'           => 'int',
+		'related_type' => 'string',
+		'related_to'   => '?string',
+		'label'        => 'string',
+		'description'  => '?string',
+		'content'      => 'string',
+		'created'      => 'DateTime',
+		'modified'     => 'DateTime',
 	];
+
+	const TYPE_USERS = 'users';
+	const TYPE_ACCOUNTING = 'accounting';
 
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
-	}
 
-	public function render(array $fields): string
-	{
-		$mu = new \KD2\Mustachier(null, CACHE_ROOT);
-		$db = DB::getInstance();
-		$content = $this->content;
-
-		static $config_keys = ['nom_asso', 'adresse_asso', 'email_asso'];
-		$config = Config::getInstance();
-
-		foreach ($config_keys as $key) {
-			$mu->assign($key, $config->get($key));
-		}
-
-		preg_match_all('!\{\{sql\s+(\w+)=(.*)\}\}!ism', $content, $matches, PREG_SET_ORDER);
-
-		foreach ($matches as $match) {
-			$sql = $match[2];
-			$mu->assign($match[1], $db->iterate($sql));
-			$content = str_replace($match[0], '', $content);
-		}
-
-		foreach ($fields as $key => $value) {
-			$mu->assign($key, $value);
-		}
-
-		return $mu->render($content, [], true);
+		static $related_types = [self::USERS, self::ACCOUNTING];
+		$this->assert(in_array($this->related, $related_types), 'Type inconnu');
 	}
 }
