@@ -8,6 +8,8 @@ use Garradin\Entities\Files\File;
 use Garradin\UserException;
 use Garradin\UserTemplate;
 
+use KD2\Brindille_Exception;
+
 use const Garradin\ROOT;
 
 class Template
@@ -65,7 +67,12 @@ class Template
 
 			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
 
-			$ut->display();
+			try {
+				$ut->display();
+			}
+			catch (Brindille_Exception $e) {
+				printf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le squelette</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
+			}
 		}
 		elseif ($this->file) {
 			$this->file->serve();
