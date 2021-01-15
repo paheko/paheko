@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\Brindille;
 use KD2\Brindille_Exception;
+use KD2\ErrorManager;
 
 use Garradin\Files\Files;
 use Garradin\Files\Folders;
@@ -97,7 +98,17 @@ class UserTemplate extends Brindille
 
 		$this->registerFunction('http', [$this, 'functionHTTP']);
 		$this->registerFunction('include', [$this, 'functionInclude']);
+		$this->registerFunction('dump', function (array $params, Brindille $tpl) {
+			if (!count($params)) {
+				$params = $tpl->getAllVariables();
+			}
 
+			$dump = htmlspecialchars(ErrorManager::dump($params));
+			// FIXME: only send back HTML when content-type is text/html, or send raw text
+			return sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
+		});
+
+		$this->registerModifier('format_file_size', [Utils::class, 'format_bytes']);
 	}
 
 	public function setSource(string $path)
@@ -118,15 +129,18 @@ class UserTemplate extends Brindille
 
 		$tmp_path = $compiled_path . '.tmp';
 
+		$source = $this->file ? $this->file->fetch() : file_get_contents($this->path);
+
 		try {
-			$code = $this->compile($this->file ? $this->file->fetch() : file_get_contents($this->path));
+			$code = $this->compile($source);
 			file_put_contents($tmp_path, $code);
 
 			require $tmp_path;
 		}
 		catch (Brindille_Exception $e) {
-			@unlink($tmp_path);
-			throw new Brindille_Exception('Erreur de syntaxe : ' . $e->getMessage(), 0, $e);
+			throw new Brindille_Exception(sprintf("Erreur de syntaxe dans '%s' : %s",
+				$this->file ? $this->file->name : basename($this->path),
+				$e->getMessage()), 0, $e);
 		}
 		catch (\Throwable $e) {
 			// Don't delete temporary file as it can be used to debug
@@ -416,10 +430,6 @@ class UserTemplate extends Brindille
 			$db = DB::getInstance();
 			$statement = $db->protectSelect(null, $sql);
 
-			if (!empty($params['debug'])) {
-				echo sprintf('<pre style="padding: 5px; background: yellow;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
-			}
-
 			$args = [];
 
 			foreach ($params as $key => $value) {
@@ -428,12 +438,15 @@ class UserTemplate extends Brindille
 				}
 			}
 
-			unset($params, $sql);
-
 			foreach ($args as $key => $value) {
-				var_dump($key, $value);
 				$statement->bindValue($key, $value, $db->getArgType($value));
 			}
+
+			if (!empty($params['debug'])) {
+				echo sprintf('<pre style="padding: 5px; background: yellow;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
+			}
+
+			unset($params, $sql);
 
 			$result = $statement->execute();
 		}
