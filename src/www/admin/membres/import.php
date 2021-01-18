@@ -38,7 +38,7 @@ $csv->setColumns($columns);
 
 if (f('cancel')) {
     $csv->clear();
-    Utils::redirect(Utils::getSelfURL(false));
+    Utils::redirect(Utils::getSelfURI(false));
 }
 
 $form->runIf(f('import') && $csv->loaded(), function () use ($csv, $import, $user) {

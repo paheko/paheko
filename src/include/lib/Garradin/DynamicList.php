@@ -111,7 +111,7 @@ class DynamicList
 	public function orderURL(string $order, bool $desc)
 	{
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
-		$url = Utils::getSelfURL($query);
+		$url = Utils::getSelfURI($query);
 		return $url;
 	}
 

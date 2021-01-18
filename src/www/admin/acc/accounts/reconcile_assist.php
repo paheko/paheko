@@ -34,16 +34,16 @@ $csv->setMandatoryColumns(['label', 'date', 'amount']);
 
 $form->runIf('cancel', function () use ($csv) {
 	$csv->clear();
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $form->runIf(f('upload') && isset($_FILES['file']['name']), function () use ($csv) {
 	$csv->load($_FILES['file']);
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $form->runIf('assign', function () use ($csv) {
 	$csv->setTranslationTable(f('translation_table'));
 	$csv->skip((int)f('skip_first_line'));
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $start = null;
 $end = null;
@@ -83,7 +83,7 @@ if ($start && $end) {
 $form->runIf('save', function () use ($journal, $csv) {
 	Transactions::saveReconciled($journal, f('reconcile'));
 	$csv->clear();
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $lines = null;
 
