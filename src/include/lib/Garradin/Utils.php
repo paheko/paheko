@@ -157,9 +157,9 @@ class Utils
         $uri = self::getSelfURI($qs);
 
         // Make absolute URI relative to parent URI
-        if (strpos($uri, WWW_URI) === 0)
+        if (strpos($uri, WWW_URI . 'admin/') === 0)
         {
-            $uri = substr($uri, strlen(WWW_URI));
+            $uri = substr($uri, strlen(WWW_URI . 'admin/'));
         }
 
         return ADMIN_URL . $uri;
