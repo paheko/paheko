@@ -317,7 +317,7 @@ EntityManager::setGlobalDB(DB::getInstance());
 if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS'))
 {
 	if (!file_exists(DB_FILE)) {
-		if (Utils::getSelfURL() == ADMIN_URL . 'install.php') {
+		if (in_array('install.php', get_included_files())) {
 			die('Erreur de redirection en boucle : problème de configuration ?');
 		}
 

@@ -162,7 +162,7 @@ class Utils
             $uri = substr($uri, strlen(WWW_URI));
         }
 
-        return WWW_URL . $uri;
+        return ADMIN_URL . $uri;
     }
 
     static public function getSelfURI($qs = true)

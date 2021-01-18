@@ -21,7 +21,7 @@ $form->runIf('save', function () {
 	$reminder = new Reminder;
 	$reminder->importForm();
 	$reminder->save();
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $list = Reminders::list();
 $services_list = Services::listAssoc();
