@@ -10,6 +10,6 @@ $session->requireAccess('compta', Membres::DROIT_ACCES);
 
 $tpl->assign('graphs', Graph::URL_LIST);
 
-$tpl->assign('years', Years::listOpen());
+$tpl->assign('years', Years::listOpen(true));
 
 $tpl->display('acc/index.tpl');
