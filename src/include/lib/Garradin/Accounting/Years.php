@@ -24,11 +24,11 @@ class Years
 		return EntityManager::getInstance(Year::class)->col('SELECT id FROM @TABLE WHERE closed = 0 ORDER BY start_date LIMIT 1;');
 	}
 
-	static public function listOpen()
+	static public function listOpen($with_stats = false)
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
-		return $db->get('SELECT *, (SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions
-			FROM acc_years WHERE closed = 0 ORDER BY end_date;');
+		$stats = $with_stats ? ', (SELECT COUNT(*) FROM acc_transactions WHERE id_year = acc_years.id) AS nb_transactions' : '';
+		return $db->getGrouped(sprintf('SELECT id, * %s FROM acc_years WHERE closed = 0 ORDER BY end_date;', $stats));
 	}
 
 	static public function listOpenAssocExcept(int $id)

@@ -57,7 +57,7 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $en
 	Transactions::saveReconciled($journal, f('reconcile'));
 
 	if (f('save')) {
-		Utils::redirect(Utils::getSelfURL());
+		Utils::redirect(Utils::getSelfURI());
 	}
 	else {
 		$start->modify('+1 month');

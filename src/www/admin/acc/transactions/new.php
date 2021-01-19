@@ -76,7 +76,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 
 		$session->set('acc_last_date', f('date'));
 
-		Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
+		Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());

@@ -48,6 +48,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 			<dt><label for="f_id_year">Exercice</label> <b>(obligatoire)</b></dt>
 			<dd>
 				<select id="f_id_year" name="id_year">
+					<option value="">-- Sélectionner un exercice</option>
 					{foreach from=$years item="year"}
 					<option value="{$year.id}"{if $year.id == $fee.id_year} selected="selected"{/if}>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}

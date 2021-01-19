@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Years;
 use Garradin\Accounting\Charts;
+use Garradin\Services\Fees;
 use Garradin\Entities\Accounting\Year;
 
 require_once __DIR__ . '/../../_inc.php';
@@ -14,6 +15,15 @@ if (f('new') && $form->check('acc_years_new')) {
 		$year = new Year;
 		$year->importForm();
 		$year->save();
+
+		if ($old_id = qg('from')) {
+			$old = Years::get((int) $old_id);
+			$changed = Fees::updateYear($old, $year);
+
+			if (!$changed) {
+				Utils::redirect(ADMIN_URL . 'acc/years/?msg=UPDATE_FEES');
+			}
+		}
 
 		if (Years::countClosed()) {
 			Utils::redirect(ADMIN_URL . 'acc/years/balance.php?id=' . $year->id());
