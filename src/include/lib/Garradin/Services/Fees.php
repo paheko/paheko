@@ -6,6 +6,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Membres\Categories;
 use Garradin\Entities\Services\Fee;
+use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
 
 class Fees
@@ -20,6 +21,20 @@ class Fees
 	static public function get(int $id)
 	{
 		return EntityManager::findOneById(Fee::class, $id);
+	}
+
+	static public function updateYear(Year $old, Year $new): bool
+	{
+		$db = DB::getInstance();
+
+		if ($new->id_chart == $old->id_chart) {
+			$db->preparedQuery('UPDATE services_fees SET id_year = ? WHERE id_year = ?;', $new->id(), $old->id());
+			return true;
+		}
+		else {
+			$db->preparedQuery('UPDATE services_fees SET id_year = NULL, id_account = NULL WHERE id_year = ?;', $old->id());
+			return false;
+		}
 	}
 
 	/**
