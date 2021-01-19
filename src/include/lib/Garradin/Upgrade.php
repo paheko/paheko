@@ -132,6 +132,14 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.0.3', '<'))
+			{
+				// Missing trigger
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.0.3_migration.sql');
+				$db->commit();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
