@@ -44,8 +44,9 @@ UPDATE wiki_as_files SET name = 'index.skriv' WHERE type = 1;
 --	WHERE parent > 0;
 
 -- Create private folders
+INSERT INTO files_folders (id, parent_id, name, system) VALUES (1, NULL, 'Wiki', 1);
 INSERT INTO files_folders (id, parent_id, name, system)
-	SELECT old_id, old_parent, uri, 0 FROM wiki_as_files WHERE type = 1;
+	SELECT old_id, CASE WHEN old_parent = 0 THEN 1 ELSE old_parent END, uri, 0 FROM wiki_as_files WHERE type = 1;
 
 -- Create web folders
 INSERT INTO files_folders (id, parent_id, name, system)

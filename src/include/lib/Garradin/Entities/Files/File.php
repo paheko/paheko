@@ -59,12 +59,19 @@ class File extends Entity
 	 */
 	const ALLOWED_THUMB_SIZES = [200, 500, 1200];
 
+	const FILE_TYPE_HTML = 'text/html';
+	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
+	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
+
 	// Link to another file (ie. image included in a HTML file)
 	const LINK_FILE = 'file_id';
 	const LINK_USER = 'user_id';
 	const LINK_TRANSACTION = 'transaction_id';
 	const LINK_CONFIG = 'config';
 	const LINK_WEB_PAGE = 'web_page_id';
+
+	const PUBLIC = 1;
+	const PRIVATE = 0;
 
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
@@ -94,11 +101,11 @@ class File extends Entity
 		if ($return && substr($this->type, 0, 5) == 'text/') {
 			$content = Files::callStorage('fetch', $this);
 
-			if ($this->type == Page::FILE_TYPE_HTML) {
+			if ($this->type == self::FILE_TYPE_HTML) {
 				$content = strip_tags($content);
 			}
 
-			if ($this->type == Page::FILE_TYPE_ENCRYPTED) {
+			if ($this->type == self::FILE_TYPE_ENCRYPTED) {
 				$content = 'Contenu chiffré';
 			}
 
@@ -483,6 +490,22 @@ class File extends Entity
 	public function fetch()
 	{
 		return Files::callStorage('fetch', $this);
+	}
+
+	public function render(array $options = [])
+	{
+		$type = $this->type;
+		if ($type == self::FILE_TYPE_HTML) {
+			return \Garradin\Web\Render\HTML::render($this, $options);
+		}
+		elseif ($type == self::FILE_TYPE_SKRIV) {
+			return \Garradin\Web\Render\Skriv::render($this, $options);
+		}
+		elseif ($type == self::FILE_TYPE_ENCRYPTED) {
+			return \Garradin\Web\Render\EncryptedSkriv::render($this, $options);
+		}
+
+		throw new \LogicException('Unknown render type: ' . $type);
 	}
 
 	public function checkReadAccess(Session $session): bool

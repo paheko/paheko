@@ -9,7 +9,7 @@ require_once __DIR__ . '/_inc.php';
 
 if ($uri = qg('uri'))
 {
-	$page_uri = Wiki::transformTitleToURI($uri);
+	$page_uri = Utils::transformTitleToURI($uri);
 	$page = Web::getByURI($page_uri);
 }
 else

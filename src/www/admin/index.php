@@ -2,7 +2,14 @@
 
 namespace Garradin;
 
+use Garradin\Files\Files;
+
 require_once __DIR__ . '/_inc.php';
+
+if (qg('uri')) {
+	Files::redirectOldWikiPage(qg('uri'));
+	throw new UserException('Page introuvable');
+}
 
 $cats = new Membres\Categories;
 $categorie = $cats->get($user->id_categorie);

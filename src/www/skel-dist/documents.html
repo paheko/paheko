@@ -1,5 +1,5 @@
 <section class="documents">
-{{#documents order="name" parent=$parent debug=1}}
+{{#documents order="name" parent=$parent debug=1 except_in_text=$text}}
 	<aside class="fichier">
 		<a href="{{$url}}">{{$name}} ({{$type}}, {{$size|format_file_size}})</a>
 	</aside>
