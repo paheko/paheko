@@ -22,6 +22,13 @@
 </p>
 {/if}
 
+{if $_GET.msg == 'UPDATE_FEES'}
+<p class="block error">
+	Des tarifs d'activité étaient associés à l'ancien exercice clôturé.
+	Ces tarifs ont été déconnectés de la comptabilité à cause du changement de plan comptable, il vous faudra les reconnecter manuellement au nouvel exercice.
+</p>
+{/if}
+
 {if !empty($list)}
 	{if count($list) > 1}
 	<section class="year-infos">

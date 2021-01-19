@@ -40,7 +40,7 @@ $csv->setMandatoryColumns(Transactions::MANDATORY_CSV_COLUMNS);
 
 if (f('cancel')) {
 	$csv->clear();
-	Utils::redirect(Utils::getSelfURL());
+	Utils::redirect(Utils::getSelfURI());
 }
 
 $csrf_key = 'acc_years_import_' . $year->id();

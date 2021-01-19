@@ -6,7 +6,13 @@ const INSTALL_PROCESS = true;
 require_once __DIR__ . '/../../include/test_required.php';
 require_once __DIR__ . '/../../include/init.php';
 
-Install::checkAndCreateDirectories();
+try {
+    Install::checkAndCreateDirectories();
+}
+catch (UserException $e) {
+    echo $e->getMessage();
+    exit;
+}
 
 function f($key)
 {

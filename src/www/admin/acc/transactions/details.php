@@ -16,7 +16,7 @@ $csrf_key = 'details_' . $transaction->id();
 $form->runIf('mark_paid', function () use ($transaction) {
 	$transaction->markPaid();
 	$transaction->save();
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $tpl->assign(compact('transaction', 'csrf_key'));
 

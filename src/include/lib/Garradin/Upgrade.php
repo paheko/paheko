@@ -6,7 +6,7 @@ use Garradin\Membres\Session;
 
 class Upgrade
 {
-	const MIN_REQUIRED_VERSION = '1.0.0-rc8';
+	const MIN_REQUIRED_VERSION = '1.0.3';
 
 	static public function preCheck(): bool
 	{
