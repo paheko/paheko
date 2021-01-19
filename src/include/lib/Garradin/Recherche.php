@@ -578,6 +578,25 @@ class Recherche
 		return $sql_query;
 	}
 
+	static public function rawSQL(string $query, array $allowed_tables = null, bool $no_limit = false): array
+	{
+		if (!$no_limit && !preg_match('/LIMIT\s+\d+/i', $query))
+		{
+			$query = preg_replace('/;?\s*$/', '', $query);
+			$query .= ' LIMIT 100';
+		}
+
+		$st = DB::getInstance()->protectSelect($allowed_tables, $query);
+		$res = $st->execute();
+		$out = [];
+
+		while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+			$out[] = (object) $row;
+		}
+
+		return $out;
+	}
+
 	/**
 	 * Lancer une recherche SQL
 	 */
