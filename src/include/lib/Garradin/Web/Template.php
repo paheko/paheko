@@ -126,9 +126,15 @@ class Template
 		if (!$this->file) {
 			$this->file = new File;
 			$this->file->set('type', $this->type());
+			$this->file->set('name', $this->template);
+			$this->file->set('public', File::PUBLIC);
+			$this->file->set('image', 0);
+			$this->file->set('created', new \DateTime);
+			$this->file->set('folder_id', Folders::getSystemFolderId(Folders::TEMPLATES));
 		}
 
 		$this->file->store(null, $content);
+		$this->file->save();
 	}
 
 	public function type(): string
@@ -159,6 +165,14 @@ class Template
 	{
 		if ($this->file) {
 			$this->file->delete();
+		}
+	}
+
+	static public function resetSelected(array $selected)
+	{
+		foreach ($selected as $file) {
+			$f = new self($file);
+			$f->reset();
 		}
 	}
 

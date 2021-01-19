@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Web;
 use Garradin\Entities\Web\Page;
+use Garradin\Entities\Files\File;
 use KD2\SimpleDiff;
 
 require_once __DIR__ . '/_inc.php';
@@ -37,7 +38,7 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 }, $csrf_key, Utils::getSelfURI() . '#saved');
 
 $parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
-$encrypted = f('encrypted') || $page->file()->type == Page::FILE_TYPE_ENCRYPTED;
+$encrypted = f('encrypted') || $page->file()->type == File::FILE_TYPE_ENCRYPTED;
 
 $old_content = f('content');
 $new_content = $page->raw();

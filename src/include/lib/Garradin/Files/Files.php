@@ -4,14 +4,34 @@ namespace Garradin\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
+use Garradin\Utils;
 use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\Web\Page;
 use KD2\DB\EntityManager as EM;
 
 use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA};
 
 class Files
 {
+	static public function redirectOldWikiPage(string $uri): ?File {
+		$uri = Utils::transformTitleToURI($uri);
+
+		$db = DB::getInstance();
+
+		if ($db->test(Page::TABLE, 'uri = ?')) {
+			Utils::redirect(ADMIN_URL . 'web/page.php?uri=' . $uri);
+		}
+
+		$id = $db->firstColumn('SELECT id FROM files WHERE name = ?;', $uri . '.skriv');
+
+		if ($id) {
+			Utils::redirect(ADMIN_URL . 'files/file.php?id=' . $id);
+		}
+
+		return null;
+	}
+
 	static public function getSystemFile(string $file, string $folder, ?string $subfolder = null): ?File
 	{
 		$where = Folders::getFolderClause(true, $folder, $subfolder);
@@ -21,7 +41,7 @@ class Files
 	static public function listSystemFiles(string $folder, ?string $subfolder = null): array
 	{
 		$where = Folders::getFolderClause(true, $folder, $subfolder);
-		return EM::get(sprintf('SELECT * FROM files WHERE folder_id = (%s) ORDER BY name;', $where));
+		return EM::getInstance(File::class)->all(sprintf('SELECT * FROM files WHERE folder_id = (%s) ORDER BY name;', $where));
 	}
 
 	static public function callStorage(string $function, ...$args)

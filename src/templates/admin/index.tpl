@@ -35,7 +35,7 @@
 
 {if $homepage}
 	<article class="web">
-		{$homepage->render()}
+		{$homepage->render(['prefix' => ADMIN_URL . '?uri='])|raw}
 	</article>
 {/if}
 

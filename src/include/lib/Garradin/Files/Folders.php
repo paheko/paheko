@@ -27,5 +27,10 @@ class Folders
 
 		return $where;
 	}
+
+	static public function getSystemFolderId(string $name)
+	{
+		return DB::getInstance()->firstColumn(self::getFolderClause(true, $name));
+	}
 }
 

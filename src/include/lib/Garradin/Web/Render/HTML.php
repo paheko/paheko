@@ -10,13 +10,13 @@ class HTML
 {
 	static protected $g2x;
 
-	static public function render(File $file, string $content): string
+	static public function render(File $file): string
 	{
 		if (null === self::$g2x) {
 			$g2x = self::$g2x = new Garbage2xhtml;
 			$g2x->auto_br = false;
 		}
 
-		return self::$g2x->process($content);
+		return self::$g2x->process($file->fetch());
 	}
 }

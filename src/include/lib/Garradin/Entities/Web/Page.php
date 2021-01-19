@@ -41,12 +41,7 @@ class Page extends Entity
 	const TYPE_CATEGORY = 1;
 	const TYPE_PAGE = 2;
 
-	const FILE_TYPE_HTML = 'text/html';
-	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
-	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
-
 	protected $_attachments;
-	protected $_content;
 
 	public function url(): string
 	{
@@ -61,11 +56,7 @@ class Page extends Entity
 
 	public function raw(): string
 	{
-		if (null === $this->_content) {
-			$this->_content = $this->file()->fetch();
-		}
-
-		return $this->_content;
+		return $this->file()->fetch();
 	}
 
 	public function created(): \DateTime
@@ -125,7 +116,6 @@ class Page extends Entity
 		$file = $this->file();
 
 		if (isset($source['content']) && sha1($source['content']) != $file->hash) {
-			$this->_content = $source['content'];
 			$file->store(null, $source['content']);
 		}
 
@@ -134,10 +124,10 @@ class Page extends Entity
 		}
 
 		if (!empty($source['encrypted']) ) {
-			$file->set('type', self::FILE_TYPE_ENCRYPTED);
+			$file->set('type', File::FILE_TYPE_ENCRYPTED);
 		}
 		else {
-			$file->set('type', self::FILE_TYPE_SKRIV);
+			$file->set('type', File::FILE_TYPE_SKRIV);
 		}
 
 		return $this->import($source);
@@ -176,23 +166,7 @@ class Page extends Entity
 
 	public function render(array $options = []): string
 	{
-		$file = $this->file();
-		$type = $file->type;
-
-		// Load content
-		$this->raw();
-
-		if ($type == self::FILE_TYPE_HTML) {
-			return \Garradin\Web\Render\HTML::render($file, $this->_content, $options);
-		}
-		elseif ($type == self::FILE_TYPE_SKRIV) {
-			return \Garradin\Web\Render\Skriv::render($file, $this->_content, $options);
-		}
-		elseif ($type == self::FILE_TYPE_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($file, $this->_content, $options);
-		}
-
-		throw new \LogicException('Unknown render type: ' . $type);
+		return $this->file()->render();
 	}
 
 	public function getBreadcrumbs()
