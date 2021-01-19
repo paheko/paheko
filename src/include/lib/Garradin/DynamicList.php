@@ -19,7 +19,7 @@ class DynamicList
 
 	private $count_result;
 
-	public function __construct(array $columns, string $tables, string $conditions)
+	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
 		$this->columns = $columns;
 		$this->tables = $tables;
