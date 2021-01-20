@@ -1,12 +1,9 @@
 <section class="galerie">
-{{#images order="name" parent=$parent debug=1 except_in_text=$text}}
+{{#images order="name" parent=$parent except_in_text=$text}}
 	<figure>
 		<a href="{{$url}}" class="internal-image"><img src="{{$thumb_url}}" alt="{{$name}}" /></a>
 	</figure>
 {{/images}}
 </section>
 
-<BOUCLE_galerie_script(IMAGES){article}{0,1}>
-	<!-- N'inclure le script de galerie que s'il y a au moins une image dans la page -->
-	<script type="text/javascript" src="[(#URL_ADMIN)static/scripts/wiki_gallery.js"></script>
-</BOUCLE_galerie_script>
+<script type="text/javascript" src="{{$admin_url}}static/scripts/wiki_gallery.js"></script>

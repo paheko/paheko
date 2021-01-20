@@ -132,7 +132,7 @@ class Files
 	static public function iterateLinkedTo(string $context, $value = null): \Generator
 	{
 		$db = DB::getInstance();
-		$where = $value !== null ? sprintf(' AND c.context_ref = %s', $db->quote($value)) : '';
+		$where = $value !== null ? sprintf(' AND f.context_ref = %s', $db->quote($value)) : '';
 		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN %s WHERE 1 %s;', self::getContextJoinClause($context), $where);
 
 		return EM::getInstance(File::class)->iterate($sql);
