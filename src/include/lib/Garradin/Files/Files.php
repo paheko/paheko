@@ -23,7 +23,7 @@ class Files
 			Utils::redirect(ADMIN_URL . 'web/page.php?uri=' . $uri);
 		}
 
-		$id = $db->firstColumn('SELECT id FROM files WHERE name = ?;', $uri . '.skriv');
+		$id = $db->firstColumn('SELECT id FROM files WHERE name = ? AND context != ?;', $uri . '.skriv', File::CONTEXT_WEB);
 
 		if ($id) {
 			Utils::redirect(ADMIN_URL . 'files/file.php?id=' . $id);
@@ -32,16 +32,14 @@ class Files
 		return null;
 	}
 
-	static public function getSystemFile(string $file, string $folder, ?string $subfolder = null): ?File
+	static public function getWithNameAndContext(string $name, int $context): ?File
 	{
-		$where = Folders::getFolderClause(true, $folder, $subfolder);
-		return EM::findOne(File::class, sprintf('SELECT * FROM files WHERE name = ? AND folder_id = (%s) LIMIT 1;', $where), $file);
+		return EM::findOne(File::class, 'SELECT * FROM files WHERE name = ? AND context = ?;', $name, $context);
 	}
 
-	static public function listSystemFiles(string $folder, ?string $subfolder = null): array
+	static public function listNamesForContext(int $context): array
 	{
-		$where = Folders::getFolderClause(true, $folder, $subfolder);
-		return EM::getInstance(File::class)->all(sprintf('SELECT * FROM files WHERE folder_id = (%s) ORDER BY name;', $where));
+		return EM::getInstance(File::class)->DB()->getAssoc('SELECT id, name FROM files WHERE context = ? ORDER BY name;', $context);
 	}
 
 	static public function callStorage(string $function, ...$args)
@@ -76,33 +74,66 @@ class Files
 		}
 	}
 
-	static public function deleteOrphanFiles()
+	static public function getContextJoinClause(int $context): ?string
 	{
-		$db = DB::getInstance();
-		$sql = 'SELECT f.* FROM files f LEFT JOIN files_links l ON f.id = l.id WHERE l.id IS NULL;';
+		switch ($context) {
+			case File::CONTEXT_TRANSACTION:
+				return 'acc_transactions c ON c.id = f.context_ref';
+			case File::CONTEXT_USER:
+				return 'membres c ON c.id = f.context_ref';
+			case File::CONTEXT_FILE:
+				return 'files c ON c.id = f.context_ref';
+			case File::CONTEXT_CONFIG:
+				return 'config c ON c.cle = f.context_ref';
+			case File::CONTEXT_WEB:
+			case File::CONTEXT_DOCUMENTS:
+			case File::CONTEXT_SKELETON:
+			default:
+				return null;
+		}
+	}
 
-		foreach ($db->iterate($sql) as $file) {
-			$f = new Fichiers($file->id, (array) $file);
-			$f->remove();
+	/**
+	 * Remove any files from a specific context where the linked context reference is not valid anymore
+	 * This is when eg. a transaction has been deleted but not its linked files
+	 */
+	static public function deleteOrphanFiles(): void
+	{
+		static $contexts = [File::CONTEXT_FILE, File::CONTEXT_USER, File::CONTEXT_TRANSACTION, File::CONTEXT_CONFIG];
+
+		$db = DB::getInstance();
+
+		foreach ($contexts as $context) {
+			$sql = sprintf('SELECT f.* FROM files f LEFT JOIN %s WHERE f.context = %d AND c.id IS NULL;', self::getContextJoinClause($context), $context);
+
+			foreach ($db->iterate($sql) as $file) {
+				$f = new Fichiers($file->id, (array) $file);
+				$f->delete();
+			}
 		}
 
 		// Remove any left-overs
 		$db->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
 	}
 
-	static public function deleteLinkedFiles(string $type, ?int $value = null)
+	static public function deleteLinkedFiles(int $context, $value): void
 	{
-		foreach (self::iterateLinkedTo($type, $value) as $file) {
+		if (null === $value) {
+			throw new \InvalidArgumentException('value argument cannot be null');
+		}
+
+		foreach (self::iterateLinkedTo($context, $value) as $file) {
 			$file->delete();
 		}
 
 		self::deleteOrphanFiles();
 	}
 
-	static public function iterateLinkedTo(string $type, ?int $value = null)
+	static public function iterateLinkedTo(string $context, $value = null): \Generator
 	{
-		$where = $value ? sprintf('l.%s = %d', $value) : sprintf('l.%s IS NOT NULL');
-		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN files_links l ON l.id = f.id WHERE %s;', $where);
+		$db = DB::getInstance();
+		$where = $value !== null ? sprintf(' AND c.context_ref = %s', $db->quote($value)) : '';
+		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN %s WHERE 1 %s;', self::getContextJoinClause($context), $where);
 
 		return EM::getInstance(File::class)->iterate($sql);
 	}

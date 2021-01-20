@@ -3,7 +3,7 @@
 namespace Garradin;
 
 use Garradin\Entities\Web\Page;
-use Garradin\Web\Template;
+use Garradin\Web\Skeleton;
 
 use KD2\DB\EntityManager as EM;
 
@@ -128,10 +128,10 @@ class Web
 
 			// Custom templates
 			if (preg_match('!^[\w\d_.-]+$!i', $_GET['uri'])) {
-				$tpl = new Template($_GET['uri']);
+				$s = new Skeleton($_GET['uri']);
 
-				if ($tpl->exists()) {
-					$tpl->serve();
+				if ($s->exists()) {
+					$s->serve();
 					return;
 				}
 			}
@@ -140,7 +140,7 @@ class Web
 			$skel = 'article.html';
 		}
 
-		$tpl = new Template($skel);
-		$tpl->serve();
+		$s = new Skeleton($skel);
+		$s->serve();
 	}
 }

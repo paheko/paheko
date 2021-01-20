@@ -23,7 +23,8 @@ class File extends Entity
 	const TABLE = 'files';
 
 	protected $id;
-	protected $folder_id;
+	protected $context;
+	protected $context_ref;
 	protected $name;
 	protected $type;
 	protected $image;
@@ -35,12 +36,14 @@ class File extends Entity
 	protected $storage_path;
 
 	protected $created;
+	protected $modified;
 
 	protected $author_id;
 
 	protected $_types = [
 		'id'           => 'int',
-		'folder_id'    => '?int',
+		'context'      => 'int',
+		'context_ref'  => '?int|string',
 		'name'         => 'string',
 		'type'         => '?string',
 		'public'       => 'int',
@@ -50,6 +53,7 @@ class File extends Entity
 		'storage'      => '?string',
 		'storage_path' => '?string',
 		'created'      => 'DateTime',
+		'modified'     => 'DateTime',
 		'author_id'    => '?int',
 	];
 
@@ -63,15 +67,13 @@ class File extends Entity
 	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
 	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
 
-	// Link to another file (ie. image included in a HTML file)
-	const LINK_FILE = 'file_id';
-	const LINK_USER = 'user_id';
-	const LINK_TRANSACTION = 'transaction_id';
-	const LINK_CONFIG = 'config';
-	const LINK_WEB_PAGE = 'web_page_id';
-
-	const PUBLIC = 1;
-	const PRIVATE = 0;
+	const CONTEXT_DOCUMENTS = 0;
+	const CONTEXT_USER = 1;
+	const CONTEXT_TRANSACTION = 2;
+	const CONTEXT_CONFIG = 3;
+	const CONTEXT_WEB = 4;
+	const CONTEXT_SKELETON = 5;
+	const CONTEXT_FILE = 6;
 
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
@@ -324,38 +326,19 @@ class File extends Entity
 	 * @param  integer $foreign_id ID du contenu lié
 	 * @return boolean TRUE en cas de succès
 	 */
-	public function linkTo(string $type, int $foreign_id): bool
+	public function setContext(int $context, string $reference): void
 	{
-		$db = DB::getInstance();
-		static $types = [self::LINK_WEB_PAGE, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
-
-		if (!in_array($type, $types)) {
-			throw new \InvalidArgumentException('Unknown file link type.');
-		}
-
-		if ($db->test('files_links', 'id = ?', $this->id())) {
+		if ($this->context) {
 			throw new \LogicException('This file is already linked to something else');
 		}
 
-		$sql = sprintf('INSERT OR IGNORE INTO files_links (id, %s) VALUES (?, ?);', $type);
-
-		return $db->preparedQuery($sql, [$this->id, $foreign_id]);
+		$this->set('context', $context);
+		$this->set('context_ref', $reference);
 	}
 
-	public function getLinkedId(string $type): ?int
+	public function listLinked(): \Generator
 	{
-		static $types = [self::LINK_WEB_PAGE, self::LINK_FILE, self::LINK_TRANSACTION, self::LINK_USER, self::LINK_CONFIG];
-
-		if (!in_array($type, $types)) {
-			throw new \InvalidArgumentException('Unknown file link type.');
-		}
-
-		return DB::getInstance()->firstColumn(sprintf('SELECT %s FROM files_links WHERE id = %d;', $type, $this->id()));
-	}
-
-	public function listLinked(): array
-	{
-		return EM::getInstance(File::class)->all('SELECT f.* FROM files f INNER JOIN files_links l ON l.id = f.id WHERE l.file_id = ?;', $this->id());
+		return Files::iterateLinkedTo(self::CONTEXT_FILE, $this->id());
 	}
 
 	/**
@@ -449,8 +432,8 @@ class File extends Entity
 		// Utilisation de XSendFile si disponible
 		if (null !== $path && ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
 		{
-			if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache') 
-				&& function_exists('apache_get_modules') 
+			if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache')
+				&& function_exists('apache_get_modules')
 				&& in_array('mod_xsendfile', apache_get_modules()))
 			{
 				header('X-Sendfile: ' . $path);
@@ -515,29 +498,25 @@ class File extends Entity
 			return true;
 		}
 
-		$link = DB::getInstance()->first('SELECT * FROM files_links WHERE id = ?;', $this->id());
-
-		if (!$link) {
-			return false;
-		}
-
 		// If it's linked to a file, then we want to know what the parent file is linked to
-		if ($link->{self::LINK_FILE}) {
-			return Files::get((int)$link->{self::LINK_FILE})->checkReadAccess($session);
+		if ($this->context == self::CONTEXT_FILE) {
+			return Files::get((int)$this->context_ref)->checkReadAccess($session);
 		}
 
-		if ($link->{self::LINK_TRANSACTION} && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
+		if ($this->context == self::CONTEXT_TRANSACTION && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
 			return true;
 		}
 		// The user can access his own profile files
-		else if ($link->{self::LINK_USER} && $link->{self::LINK_USER} == $session->getUser()->id) {
+		else if ($this->context == self::CONTEXT_USER && $this->context_ref == $session->getUser()->id) {
 			return true;
 		}
 		// Only users able to manage users can see their profile files
-		else if ($link->{self::LINK_USER} && $session->canAccess(Session::SECTION_USERS, Membres::DROIT_ECRITURE)) {
+		else if ($this->context == self::CONTEXT_USER && $session->canAccess(Session::SECTION_USERS, Membres::DROIT_ECRITURE)) {
 			return true;
 		}
-
-		return $session->canAccess(Session::SECTION_DOCUMENTS, Membres::DROIT_ACCES);
+		// Only users with right to access documents can read documents
+		else if ($this->context == self::CONTEXT_DOCUMENTS && $session->canAccess(Session::SECTION_DOCUMENTS, Membres::DROIT_ACCES)) {
+			return true;
+		}
 	}
 }

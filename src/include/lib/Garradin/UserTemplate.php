@@ -7,8 +7,7 @@ use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 
 use Garradin\Files\Files;
-use Garradin\Files\Folders;
-use Garradin\Web\Template;
+use Garradin\Web\Skeleton;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modifiers;
@@ -174,15 +173,15 @@ class UserTemplate extends Brindille
 			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
 		}
 
-		$tpl = new Template($params['file']);
+		$s = new Skeleton($params['file']);
 
-		if (!$tpl->exists()) {
+		if (!$s->exists()) {
 			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
 		}
 
 		$params['included_from'] = array_merge($from, [$params['file']]);
 
-		return $tpl->fetch($params);
+		return $s->fetch($params);
 	}
 
 	public function functionHTTP(array $params): void
@@ -374,8 +373,7 @@ class UserTemplate extends Brindille
 		}
 
 		if (isset($params['parent'])) {
-			$params['tables'] .= ' INNER JOIN files_links l ON l.id = f.id';
-			$params['where'] .= ' AND l.file_id = :parent_id';
+			$params['where'] .= sprintf(' AND f.context = %d AND f.context_ref = :parent_id', File::CONTEXT_FILE);
 			$params[':parent_id'] = $params['parent'];
 			unset($params['parent']);
 		}

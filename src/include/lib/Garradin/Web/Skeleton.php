@@ -3,7 +3,6 @@
 namespace Garradin\Web;
 
 use Garradin\Files\Files;
-use Garradin\Files\Folders;
 use Garradin\Entities\Files\File;
 use Garradin\UserException;
 use Garradin\UserTemplate;
@@ -12,31 +11,27 @@ use KD2\Brindille_Exception;
 
 use const Garradin\ROOT;
 
-class Template
+class Skeleton
 {
 	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml)$!';
 
-	protected $template;
+	protected $name;
 	protected $file;
 
 	public function __construct(string $tpl)
 	{
 		if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $tpl)) {
-			throw new \InvalidArgumentException('Invalid template name');
+			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$this->file = Files::getSystemFile($tpl, Folders::TEMPLATES);
+		$this->file = Files::getWithNameAndContext($tpl, File::CONTEXT_SKELETON);
 
-		if ($this->file && !$this->file->public) {
-			throw new \InvalidArgumentException('This file is not public');
-		}
-
-		$this->template = $tpl;
+		$this->name = $tpl;
 	}
 
 	public function defaultPath(): ?string
 	{
-		$path = ROOT . '/www/skel-dist/' . $this->template;
+		$path = ROOT . '/www/skel-dist/' . $this->name;
 
 		if (file_exists($path)) {
 			return $path;
@@ -125,12 +120,14 @@ class Template
 	{
 		if (!$this->file) {
 			$this->file = new File;
-			$this->file->set('type', $this->type());
-			$this->file->set('name', $this->template);
-			$this->file->set('public', File::PUBLIC);
-			$this->file->set('image', 0);
-			$this->file->set('created', new \DateTime);
-			$this->file->set('folder_id', Folders::getSystemFolderId(Folders::TEMPLATES));
+			$this->file->import([
+				'type' => $this->type(),
+				'name' => $this->name,
+				'image' => 0,
+				'created' => new \DateTime,
+				'modified' => new \DateTime,
+				'context' => File::CONTEXT_SKELETON,
+			]);
 		}
 
 		$this->file->store(null, $content);
@@ -192,9 +189,9 @@ class Template
 
 		$dir->close();
 
-		$templates = Files::listSystemFiles(Folders::TEMPLATES);
+		$skeletons = Files::listNamesForContext(File::CONTEXT_SKELETON);
 
-		$sources = array_merge($defaults, $templates);
+		$sources = array_merge($defaults, array_flip($skeletons));
 		ksort($sources);
 
 		return $sources;
