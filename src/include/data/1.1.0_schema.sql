@@ -262,24 +262,30 @@ CREATE TABLE IF NOT EXISTS files
 -- Files metadata
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    folder_id INTEGER NULL REFERENCES files_folders,
+    context INTEGER NOT NULL, -- File context (0 = documents, 1 = user-specific file, etc.)
+    context_ref INTEGER NULL, -- Context reference (eg. user ID, or directory path, etc.)
+    public INTEGER NOT NULL DEFAULT 0,
     name TEXT NOT NULL, -- file name (eg. image1234.jpeg)
     type TEXT NULL, -- MIME type
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
-    public INTEGER NOT NULL DEFAULT 0,
     size INTEGER NOT NULL DEFAULT 0,
     hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
 
     storage TEXT NULL, -- Storage medium, NULL means stored in content BLOB
     storage_path TEXT NULL,
 
-    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
+    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified),
 
     author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS files_date ON files (created);
+CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
+CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_hash ON files (hash);
+CREATE INDEX IF NOT EXISTS files_context ON files (context, context_ref);
+CREATE INDEX IF NOT EXISTS files_author ON files (author_id);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (if storage backend is SQLite)
@@ -292,15 +298,6 @@ CREATE TABLE IF NOT EXISTS files_contents
 
 CREATE UNIQUE INDEX IF NOT EXISTS files_contents_hash ON files_contents (hash);
 
-CREATE TABLE IF NOT EXISTS files_folders
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-    parent_id INTEGER NULL REFERENCES files_folders(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    system INTEGER NOT NULL DEFAULT 0,
-    CHECK (parent_id IS NULL OR parent_id != id)
-);
-
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
@@ -309,22 +306,6 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
     title TEXT NULL,
     content TEXT NOT NULL -- Text content
 );
-
-CREATE TABLE IF NOT EXISTS files_links
--- This references use of a file outside of the documents module
--- One file can only be linked to one thing
-(
-    id INTEGER NOT NULL REFERENCES files (id) ON DELETE CASCADE,
-    file_id INTEGER NULL REFERENCES files (id) ON DELETE CASCADE,
-    user_id INTEGER NULL REFERENCES membres (id) ON DELETE CASCADE,
-    transaction_id INTEGER NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-    config TEXT NULL REFERENCES config (cle) ON DELETE CASCADE,
-    web_page_id INTEGER NULL REFERENCES web_pages (id) ON DELETE CASCADE,
-    -- Make sure that only one is filled
-    CHECK ((file_id IS NOT NULL) + (user_id IS NOT NULL) + (transaction_id IS NOT NULL) + (config IS NOT NULL) + (web_page_id IS NOT NULL) = 1)
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS files_links_unique ON files_links (id, file_id, user_id, transaction_id, config, web_page_id);
 
 CREATE TABLE IF NOT EXISTS web_pages
 (
