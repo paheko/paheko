@@ -36,10 +36,7 @@ $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
 		throw new UserException('Un seul fichier peut être envoyé en même temps.');
 	}
 
-	$file = File::upload('file');
-
-	// Lier le fichier à la page wiki
-	$file->linkTo(File::LINK_FILE, $page->id());
+	$file = File::upload('file', File::CONTEXT_FILE, $page->id());
 
 	if (f('uploadHelper_status') !== null)
 	{

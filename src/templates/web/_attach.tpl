@@ -55,13 +55,13 @@
 </ul>
 {/if}
 
-{if !empty($fichiers)}
+{if !empty($files)}
 <table class="list">
 	<tbody>
-	{foreach from=$fichiers item="file"}
+	{foreach from=$files item="file"}
 		<tr>
-			<th>{$file.nom}</th>
-			<td>{if $file.type}{$file.type}{/if}</td>
+			<th>{$file.name}</th>
+			<td>{$file.type}, {$file.size|format_bytes}</td>
 			<td class="actions">
 				<form class="actions" method="post" action="{$self_url}">
 					{linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}

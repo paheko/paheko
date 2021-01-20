@@ -77,9 +77,42 @@ class File extends Entity
 
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
+	public function __construct()
+	{
+		parent::__construct();
+		$this->created = new \DateTime;
+		$this->modified = new \DateTime;
+	}
+
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
+
+		$this->assert(in_array($this->context, $this->getContexts(), true), 'Invalid context');
+
+		if ($this->context == self::CONTEXT_TRANSACTION || $this->context == self::CONTEXT_USER || $this->context_ref == self::CONTEXT_FILE) {
+			$this->assert(is_int($this->context_ref) && $this->context_ref > 0, 'Invalid context reference');
+		}
+
+		if ($this->context == self::CONTEXT_CONFIG) {
+			$this->assert(is_string($this->context_ref) && !empty($this->context_ref));
+		}
+
+		$this->assert($this->public === 0 || $this->public === 1);
+		$this->assert($this->image === 0 || $this->image === 1);
+	}
+
+	public function getContexts(): array
+	{
+		return [
+			self::CONTEXT_DOCUMENTS,
+			self::CONTEXT_USER,
+			self::CONTEXT_TRANSACTION,
+			self::CONTEXT_CONFIG,
+			self::CONTEXT_WEB,
+			self::CONTEXT_SKELETON,
+			self::CONTEXT_FILE,
+		];
 	}
 
 	public function delete(): bool
@@ -166,24 +199,42 @@ class File extends Entity
 		return $this;
 	}
 
-	static protected function create(string $name, string $source_path = null, $source_content = null): self
+	static protected function create(string $name, int $context, $context_ref = null, string $source_path = null, $source_content = null): self
 	{
 		assert($source_path || $source_content);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		$file = new self;
-		$file->name = $name;
-
-		if ($source_path && !$source_content) {
-			$file->type = finfo_file($finfo, $source_path);
-		}
-		else {
-			$file->type = finfo_buffer($finfo, $source_content);
-		}
-
-		$file->image = preg_match('/^image\/(?:png|jpe?g|gif)$/', $file->type);
+		$file->set('name', $name);
+		$file->set('context', $context);
+		$file->set('context_ref', $context_ref);
 
 		$db = DB::getInstance();
+
+		if ($context == self::CONTEXT_FILE) {
+			$context = $db->firstColumn('SELECT context FROM files WHERE id = ?;', (int)$context_ref);
+
+			if ($context === false) {
+				throw new \InvalidArgumentException('Invalid context reference ID: unknown file #' . $context_ref);
+			}
+		}
+
+		if ($context == self::CONTEXT_WEB || $context == self::CONTEXT_CONFIG) {
+			$file->set('public', 1);
+		}
+		else {
+			$file->set('public', 0);
+		}
+
+		if ($source_path && !$source_content) {
+			$file->set('type', finfo_file($finfo, $source_path));
+		}
+		else {
+			$file->set('type', finfo_buffer($finfo, $source_content));
+		}
+
+		$file->set('image', preg_match('/^image\/(?:png|jpe?g|gif)$/', $file->type));
+
 
 		$db->begin();
 
@@ -200,16 +251,16 @@ class File extends Entity
 	 * @param  string $content
 	 * @return File
 	 */
-	static public function storeFromBase64(string $name, string $encoded_content): self
+	static public function storeFromBase64(string $name, string $encoded_content, int $context, $context_ref = null): self
 	{
 		$content = base64_decode($encoded_content);
-		return self::create($name, null, $content);
+		return self::create($name, $context, $context_ref, null, $content);
 	}
 
 	/**
 	 * Upload du fichier par POST
 	 */
-	static public function upload(string $key): self
+	static public function upload(string $key, int $context, $context_ref = null): self
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -232,7 +283,7 @@ class File extends Entity
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		return self::create($name, $file['tmp_name']);
+		return self::create($name, $context, $context_ref, $file['tmp_name']);
 	}
 
 
@@ -336,9 +387,9 @@ class File extends Entity
 		$this->set('context_ref', $reference);
 	}
 
-	public function listLinked(): \Generator
+	public function listLinked(): array
 	{
-		return Files::iterateLinkedTo(self::CONTEXT_FILE, $this->id());
+		return iterator_to_array(Files::iterateLinkedTo(self::CONTEXT_FILE, $this->id()));
 	}
 
 	/**
