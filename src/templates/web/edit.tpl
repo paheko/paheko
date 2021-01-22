@@ -7,15 +7,13 @@
 	{diff old=$old_content new=$new_content}
 {/if}
 
-<form method="post" action="{$self_url}" class="web-edit">
+<form method="post" action="{$self_url}" class="web-edit" data-focus="#f_content">
 
 	<fieldset class="wikiMain">
 		<legend>Informations générales</legend>
 		<dl>
 			{input type="text" name="title" source=$page required=true label="Titre"}
-			{if $page->exists()}
-				{input type="text" name="uri" source=$page required=true label="Adresse unique URI" help="Utilisée pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas." pattern="[A-Za-z0-9_-]+"}
-			{/if}
+			{input type="text" name="uri" source=$page required=true label="Adresse unique URI" help="Utilisée pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas." pattern="[A-Za-z0-9_-]+"}
 			{input type="list" name="parent_id" label="Catégorie" default=$parent target="web/_selector.php?parent=%d"|args:$page.parent_id required=true}
 			{input type="datetime" name="date" label="Date" required=true default=$created}
 			<dt>Statut</dt>
@@ -50,7 +48,7 @@
 		{csrf_field key=$csrf_key}
 		<input type="hidden" name="editing_started" value="{$editing_started}" />
 		{button type="submit" name="save" label="Enregistrer" shape="upload" class="main"}
-		{button type="submit" name="cancel" label="Retourner à la liste" shape="reset"}
+		{linkbutton href="!web/?parent=%d"|args:$page.parent_id label="Retourner à la liste" shape="reset"}
 	</p>
 
 </form>
