@@ -192,6 +192,27 @@ class Config extends Entity
 		throw new \LogicException('Cannot delete config');
 	}
 
+	public function importForm($source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
+		if (!isset($source['couleur1'], $source['couleur2'])
+			|| ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
+		{
+			$source['couleur1'] = null;
+			$source['couleur2'] = null;
+		}
+
+		if (trim($source['image_fond']) == '') {
+			$source['image_fond'] = null;
+		}
+
+		parent::importForm($source);
+	}
+
 	public function getVersion(): string
 	{
 		return $this->get('version');
