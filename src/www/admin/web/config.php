@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-use Garradin\Web\Template;
+use Garradin\Web\Skeleton;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -21,7 +21,7 @@ elseif (f('activer_site') && $form->check('config_site'))
 }
 
 $form->runIf('reset', function () {
-	Template::resetSelected(f('select'));
+	Skeleton::resetSelected(f('select'));
 }, 'squelettes', Utils::getSelfURI('reset_ok'));
 
 if (qg('edit')) {
@@ -29,17 +29,17 @@ if (qg('edit')) {
 	$csrf_key = 'edit_skel_' . md5($source);
 
 	$form->runIf('save', function () use ($source) {
-		$tpl = new Template($source);
+		$tpl = new Skeleton($source);
 		$tpl->edit(f('content'));
 		$fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
 		Utils::redirect(Utils::getSelfURI(sprintf('edit=%s&ok%s', rawurlencode($source), $fullscreen)));
 	}, $csrf_key);
 
-	$tpl->assign('edit', ['file' => $source, 'content' => (new Template($source))->raw()]);
+	$tpl->assign('edit', ['file' => $source, 'content' => (new Skeleton($source))->raw()]);
 	$tpl->assign('csrf_key', $csrf_key);
 }
 
-$tpl->assign('sources', Template::list());
+$tpl->assign('sources', Skeleton::list());
 
 $tpl->assign('reset_ok', qg('reset_ok') !== null);
 $tpl->assign('ok', qg('ok') !== null);

@@ -118,7 +118,7 @@ UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE hash = wiki_as_fil
 UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
 
 INSERT INTO web_pages
-	SELECT new_id, new_parent, type, 1, uri, title, modified FROM wiki_as_files WHERE public = 1;
+	SELECT new_id, new_parent, type, 1, uri, title FROM wiki_as_files WHERE public = 1;
 
 -- Link transactions to files
 UPDATE files SET context = 2, context_ref = (SELECT id FROM fichiers_acc_transactions WHERE fichier = files.id) WHERE id IN (SELECT id FROM fichiers_acc_transactions WHERE fichier = files.id);

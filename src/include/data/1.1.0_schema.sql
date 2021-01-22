@@ -314,8 +314,7 @@ CREATE TABLE IF NOT EXISTS web_pages
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status INTEGER NOT NULL DEFAULT 0, -- 0 = draft, 1 = online
     uri TEXT NOT NULL,
-    title TEXT NOT NULL,
-    modified TEXT NULL CHECK (datetime(modified) IS NULL OR datetime(modified) = modified)
+    title TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX web_pages_uri ON web_pages (uri);

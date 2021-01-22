@@ -8,6 +8,7 @@ use Garradin\UserException;
 use Garradin\UserTemplate;
 
 use KD2\Brindille_Exception;
+use KD2\DB\EntityManager as EM;
 
 use const Garradin\ROOT;
 
@@ -124,8 +125,7 @@ class Skeleton
 				'type' => $this->type(),
 				'name' => $this->name,
 				'image' => 0,
-				'created' => new \DateTime,
-				'modified' => new \DateTime,
+				'public' => 0,
 				'context' => File::CONTEXT_SKELETON,
 			]);
 		}
@@ -189,9 +189,9 @@ class Skeleton
 
 		$dir->close();
 
-		$skeletons = Files::listNamesForContext(File::CONTEXT_SKELETON);
+		$modified_skeletons = EM::getInstance(File::class)->DB()->getGrouped('SELECT name, id, modified FROM files WHERE context = ? ORDER BY name;', File::CONTEXT_SKELETON);
 
-		$sources = array_merge($defaults, array_flip($skeletons));
+		$sources = array_merge($defaults, $modified_skeletons);
 		ksort($sources);
 
 		return $sources;

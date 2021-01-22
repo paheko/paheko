@@ -43,9 +43,9 @@ class Web
 
 	static public function listPages(?int $parent, bool $order_by_date = true): array
 	{
-		$where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
-		$order = $order_by_date ? 'modified DESC' : 'title COLLATE NOCASE';
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
+		$where = $parent ? sprintf('w.parent_id = %d', $parent) : 'w.parent_id IS NULL';
+		$order = $order_by_date ? 'f.modified DESC' : 'w.title COLLATE NOCASE';
+		$sql = sprintf('SELECT w.* FROM @TABLE w INNER JOIN files f USING (id) WHERE %s AND w.type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
 		return EM::getInstance(Page::class)->all($sql);
 	}
 
