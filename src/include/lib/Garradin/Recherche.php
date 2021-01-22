@@ -311,7 +311,7 @@ class Recherche
 			$columns['l.debit'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Débit',
-				'type'     => 'integer',
+				'type'     => 'text',
 				'null'     => false,
 				'alias'    => 'debit',
 				'originalType' => 'money',
@@ -320,7 +320,7 @@ class Recherche
 			$columns['l.credit'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Crédit',
-				'type'     => 'integer',
+				'type'     => 'text',
 				'null'     => false,
 				'alias'    => 'credit',
 				'originalType' => 'money',
