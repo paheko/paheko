@@ -358,19 +358,23 @@ class Transactions
 		$db->commit();
 	}
 
-	static public function setAnalytical(?int $id_analytical, array $lines)
+	static public function setAnalytical(?int $id_analytical, ?array $transactions = null, ?array $lines = null)
 	{
 		$db = DB::getInstance();
 
-		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = 7 AND id = ?', $id_analytical)) {
+		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = ? AND id = ?', Account::TYPE_ANALYTICAL, $id_analytical)) {
 			throw new \InvalidArgumentException('Chosen account ID is not analytical');
 		}
 
-		$lines = array_map('intval', $lines);
+		if (isset($transactions, $lines) || ($transactions === null && $lines === null)) {
+			throw new BadMethodCallException('Only one of transactions or lines should be set');
+		}
 
-		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE id IN (%s);',
-			(int)$id_analytical ?: 'NULL',
-			implode(', ', $lines)));
+		$selection = array_map('intval', $transactions ?? $lines);
+		$where = sprintf($transactions ? 'id_transaction IN (%s)' : 'id IN (%s)', implode(', ', $selection));
+
+		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE %s;',
+			(int)$id_analytical ?: 'NULL', $where));
 	}
 
 	static public function listByType(int $year_id, int $type)
