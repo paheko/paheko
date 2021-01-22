@@ -5,6 +5,7 @@ namespace Garradin\Entities\Web;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
+use Garradin\Utils;
 use Garradin\Entities\Files\File;
 
 use KD2\DB\EntityManager as EM;
@@ -21,7 +22,6 @@ class Page extends Entity
 	protected $status;
 	protected $title;
 	protected $uri;
-	protected $modified;
 
 	protected $_types = [
 		'id'        => 'int',
@@ -30,7 +30,6 @@ class Page extends Entity
 		'status'    => 'int',
 		'uri'       => 'string',
 		'title'     => 'string',
-		'modified'  => 'DateTime',
 	];
 
 	protected $_file;
@@ -67,7 +66,16 @@ class Page extends Entity
 	public function file(): File
 	{
 		if (null === $this->_file) {
-			$this->_file = EM::findOneById(File::class, $this->id);
+			if ($this->exists()) {
+				$this->_file = EM::findOneById(File::class, $this->id());
+			}
+			else {
+				$file = $this->_file = new File;
+				$file->type = File::FILE_TYPE_SKRIV;
+				$file->context = File::CONTEXT_WEB;
+				$file->public = 1;
+				$file->image = 0;
+			}
 		}
 
 		return $this->_file;
@@ -80,9 +88,18 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$this->set('modified', new \DateTime);
-
 		$file = $this->file();
+
+		$this->set('uri', Utils::transformTitleToURI($this->uri));
+
+		if ($this->type == self::TYPE_CATEGORY) {
+			$file->set('name', 'index.skriv');
+		}
+		else {
+			$file->set('name', $this->uri . '.skriv');
+		}
+
+		$file->set('modified', new \DateTime);
 		$file->save();
 
 		$this->id($file->id());
@@ -131,37 +148,6 @@ class Page extends Entity
 		}
 
 		return $this->import($source);
-	}
-
-	static public function create(int $type, string $title, string $content, int $status = self::STATUS_ONLINE): Page
-	{
-		static $types = [self::TYPE_PAGE, self::TYPE_CATEGORY];
-
-		if (!in_array($type, $types)) {
-			throw new \InvalidArgumentException('Unknown type');
-		}
-
-		$page = new self;
-		$page->type = $type;
-		$page->title = $title;
-		$page->uri = Utils::transformTitleToURI($title);
-		$page->status = $status;
-
-		$file = new File;
-		$file->type = 'text/html';
-		$file->image = 0;
-
-		if ($type == self::TYPE_PAGE) {
-			$file->name = $page->uri . '.html';
-		}
-		else {
-			$file->name = 'index.html';
-		}
-
-		$file->store(null, $content);
-		$page->save();
-
-		return $page;
 	}
 
 	public function render(array $options = []): string
