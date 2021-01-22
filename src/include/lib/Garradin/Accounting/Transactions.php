@@ -300,11 +300,11 @@ class Transactions
 					$transaction = self::get((int)$row->id);
 
 					if (!$transaction) {
-						throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est introuvable', $l, $row->id));
+						throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
 					}
 
 					if ($transaction->validated) {
-						throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est validée et ne peut être modifiée', $l, $row->id));
+						throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
 					}
 
 					$transaction->resetLines();
