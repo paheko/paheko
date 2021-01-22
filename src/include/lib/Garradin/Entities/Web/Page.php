@@ -42,6 +42,18 @@ class Page extends Entity
 
 	protected $_attachments;
 
+	static public function create(int $type, ?int $parent_id, string $title, int $status = self::STATUS_ONLINE): self
+	{
+		$page = new self;
+		$data = compact('type', 'parent_id', 'title', 'status');
+		$data['uri'] = Utils::transformTitleToURI($title);
+		$data['content'] = '';
+
+		$page->importForm($data);
+
+		return $page;
+	}
+
 	public function url(): string
 	{
 		$url = WWW_URL . $this->uri;

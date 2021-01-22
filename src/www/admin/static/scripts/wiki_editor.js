@@ -57,7 +57,7 @@
 				form.appendChild(t.textarea.cloneNode(true));
 				form.firstChild.value = t.textarea.value;
 				form.target = 'editorFrame';
-				form.action = g.admin_url + 'web/_preview.php?id=' + wiki_id;
+				form.action = g.admin_url + 'web/_preview.php';
 				form.style.display = 'none';
 				form.method = 'post';
 				document.body.appendChild(form);

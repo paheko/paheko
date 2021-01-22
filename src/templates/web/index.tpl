@@ -2,8 +2,8 @@
 
 <nav class="tabs">
 	<aside>
-		{linkbutton shape="plus" label="Nouvelle page" href="edit.php?type=%d&parent=%d"|args:$type_page,$parent}
-		{linkbutton shape="plus" label="Nouvelle catégorie" href="edit.php?type=%d&parent=%d"|args:$type_category,$parent}
+		{linkbutton shape="plus" label="Nouvelle page" href="new.php?type=%d&parent=%d"|args:$type_page,$parent}
+		{linkbutton shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%d"|args:$type_category,$parent}
 	</aside>
 	<ul>
 		<li class="current"><a href="./">Gestion du site web</a></li>
@@ -37,7 +37,7 @@
 	</table>
 {else}
 	<p class="submit">
-		{linkbutton class="main" shape="plus" label="Nouvelle catégorie" href="edit.php?type=%d&parent=%d"|args:$type_category,$parent}
+		{linkbutton class="main" shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%d"|args:$type_category,$parent}
 	</p>
 {/if}
 
@@ -72,7 +72,7 @@
 	</table>
 {else}
 	<p class="submit">
-		{linkbutton shape="plus" class="main" label="Nouvelle page" href="edit.php?type=%d&parent=%d"|args:$type_page,$parent}
+		{linkbutton shape="plus" class="main" label="Nouvelle page" href="new.php?type=%d&parent=%d"|args:$type_page,$parent}
 	</p>
 {/if}
 
