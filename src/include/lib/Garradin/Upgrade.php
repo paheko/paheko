@@ -6,6 +6,8 @@ use Garradin\Membres\Session;
 
 class Upgrade
 {
+	const MIN_REQUIRED_VERSION = '0.9.8';
+
 	static public function preCheck(): bool
 	{
 		$config = Config::getInstance();
@@ -16,9 +18,9 @@ class Upgrade
 			return false;
 		}
 
-		if (!$v || version_compare($v, '0.9.8', '<'))
+		if (!$v || version_compare($v, self::MIN_REQUIRED_VERSION, '<'))
 		{
-			throw new UserException("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin 0.9.8 avant de faire la mise à jour vers cette version.");
+			throw new UserException(sprintf("Votre version de Garradin est trop ancienne pour être mise à jour. Mettez à jour vers Garradin %s avant de faire la mise à jour vers cette version.", self::MIN_REQUIRED_VERSION));
 		}
 
 		Install::checkAndCreateDirectories();
