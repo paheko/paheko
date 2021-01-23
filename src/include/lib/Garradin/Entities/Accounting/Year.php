@@ -40,7 +40,6 @@ class Year extends Entity
 		parent::selfCheck();
 		$this->assert($this->start_date < $this->end_date, 'La date de fin doit être postérieure à la date de début');
 		$this->assert($this->closed === 0 || $this->closed === 1);
-		$this->assert($this->closed == 1 || !isset($this->_modified['closed']), 'Il est interdit de réouvrir un exercice clôturé');
 
 		$db = DB::getInstance();
 
@@ -67,6 +66,51 @@ class Year extends Entity
 
 		$this->set('closed', 1);
 		$this->save();
+	}
+
+	public function reopen(int $user_id): void
+	{
+		if (!$this->closed) {
+			throw new \LogicException('This year is already open');
+		}
+
+		$closing_id = $this->accounts()->getClosingAccountId();
+
+		if (!$closing_id) {
+			throw new UserException('Aucun compte n\'est indiqué comme compte de clôture dans le plan comptable');
+		}
+
+		$this->set('closed', 0);
+		$this->save();
+
+		// Create validated transaction to show that someone has reopened the year
+		$t = new Transaction;
+		$t->import([
+			'id_year'    => $this->id(),
+			'label'      => sprintf('Exercice réouvert le %s', date('d/m/Y à H:i:s')),
+			'type'       => Transaction::TYPE_ADVANCED,
+			'date'       => $this->end_date->format('d/m/Y'),
+			'id_creator' => $user_id,
+			'validated'  => 1,
+		]);
+
+		$line = new Line;
+		$line->import([
+			'debit' => 0,
+			'credit' => 1,
+			'id_account' => $closing_id,
+		]);
+		$t->addLine($line);
+
+		$line = new Line;
+		$line->import([
+			'debit'      => 1,
+			'credit'     => 0,
+			'id_account' => $closing_id,
+		]);
+		$t->addLine($line);
+
+		$t->save();
 	}
 
 	/**

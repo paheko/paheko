@@ -292,7 +292,7 @@ class Transaction extends Entity
 
 	public function save(): bool
 	{
-		if ($this->validated && !isset($this->_modified['validated'])) {
+		if ($this->validated && empty($this->_modified['validated'])) {
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
