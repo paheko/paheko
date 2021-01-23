@@ -82,13 +82,14 @@ else {
 	}
 }
 
-$has_reconciled_lines = true;
+$has_reconciled_lines = false;
 
-array_walk($lines, function ($l) use (&$has_reconciled_lines) {
+foreach ($lines as $line) {
 	if (!empty($line->reconciled)) {
 		$has_reconciled_lines = true;
+		break;
 	}
-});
+}
 
 $first_line = $transaction->getFirstLine();
 
