@@ -3,7 +3,7 @@ namespace Garradin;
 
 use KD2\ErrorManager;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 $list = null;
 $table = qg('table');
@@ -57,4 +57,4 @@ else {
 
 $tpl->assign(compact('index_list', 'triggers_list', 'tables_list', 'query', 'table', 'list', 'result', 'result_header'));
 
-$tpl->display('admin/config/sql.tpl');
+$tpl->display('admin/config/advanced/sql.tpl');

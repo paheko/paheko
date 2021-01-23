@@ -6,6 +6,5 @@
 		{if ENABLE_AUTOMATIC_BACKUPS}
 		<li{if $current == 'automatique'} class="current"{/if}><a href="{$admin_url}config/donnees/automatique.php">Configuration de la sauvegarde automatique</a></li>
 		{/if}
-		<li{if $current == 'reset'} class="current"{/if}><a href="{$admin_url}config/donnees/reset.php">Remise à zéro</a></li>
 	</ul>
 </nav>
