@@ -200,6 +200,26 @@ class Recherche
 		return $out;
 	}
 
+	public function getDefaultOrder(string $target): string
+	{
+		if ($target == 'compta') {
+			return 't.date';
+		}
+		else {
+			return Config::getInstance()->get('champ_identite');
+		}
+	}
+
+	public function getDefaultDesc(string $target): bool
+	{
+		if ($target == 'compta') {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	/**
 	 * Renvoie la liste des colonnes d'une cible
 	 */
