@@ -141,11 +141,12 @@ class Sauvegarde
 			return $a->auto > $b->auto ? -1 : 1;
 		});
 
-		// Delete oldest backup
-		if (count($list) >= $nb)
-		{
-			$this->remove(reset($list)->filename);
-			array_shift($list);
+		// Delete oldest backups + 1 as we are about to create a new one
+		$delete = count($list) - ($nb - 1);
+
+		for ($i = 0; $i < $delete; $i++) {
+			$backup = array_shift($list);
+			$this->remove($backup->filename);
 		}
 
 		$i = count($list) + 1;
