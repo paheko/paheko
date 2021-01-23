@@ -5,51 +5,26 @@ require_once __DIR__ . '/../_inc.php';
 
 $s = new Sauvegarde;
 
-if (f('create'))
-{
-    $form->check('backup_create');
-
-    if (!$form->hasErrors())
-    {
-        try {
-            $s->create();
-            Utils::redirect(ADMIN_URL . 'config/donnees/local.php?ok=create');
-        } catch (UserException $e) {
-            $form->addError($e->getMessage());
-        }
-    }
+if (qg('download')) {
+	$s->dump(qg('download'));
+	exit;
 }
-if (f('restore'))
-{
-    $form->check('backup_manage');
 
-    if (!$form->hasErrors())
-    {
-        try {
-            $r = $s->restoreFromLocal(f('file'));
-            Utils::redirect(ADMIN_URL . 'config/donnees/local.php?ok=restore&code=' . (int)$r);
-        } catch (UserException $e) {
-            $form->addError($e->getMessage());
-        }
-    }
-}
-elseif (f('remove'))
-{
-    $form->check('backup_manage');
+$form->runIf('create', function () use ($s) {
+	$s->create();
+}, 'backup_create', Utils::getSelfURI(['ok' => 'create']));
 
-    if (!$form->hasErrors())
-    {
-        try {
-            $s->remove(f('file'));
-            Utils::redirect(ADMIN_URL . 'config/donnees/local.php?ok=remove');
-        } catch (UserException $e) {
-            $form->addError($e->getMessage());
-        }
-    }
-}
+$form->runIf('restore', function () use ($s) {
+	$r = $s->restoreFromLocal(f('selected'));
+	Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
+}, 'backup_manage');
+
+$form->runIf('remove', function () use ($s) {
+	$s->remove(f('selected'));
+}, 'backup_manage', Utils::getSelfURI(['ok' => 'remove']));
 
 $tpl->assign('ok_code', qg('code'));
 $tpl->assign('ok', qg('ok'));
-$tpl->assign('liste', $s->getList());
+$tpl->assign('list', $s->getList());
 
 $tpl->display('admin/config/donnees/local.tpl');

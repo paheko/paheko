@@ -21,36 +21,6 @@
     </p>
 {/if}
 
-<form method="post" action="{$self_url_no_qs}">
-
-<fieldset>
-    <legend>Copies de sauvegarde disponibles</legend>
-    {if empty($liste)}
-        <p class="help">Aucune copie de sauvegarde disponible.</p>
-    {else}
-        <dl>
-            <dt><label for="f_select">Sélectionner une sauvegarde</label></dt>
-            <dd>
-                <select name="file" id="f_select">
-                {foreach from=$liste key="f" item="d"}
-                    <option value="{$f}">{$f} — {$d|date_long}</option>
-                {/foreach}
-                </select>
-            </dd>
-            <dd class="help">
-                Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée. Cependant, afin de prévenir toute erreur
-                une sauvegarde des données sera réalisée avant la restauration.
-            </dd>
-        </dl>
-        <p>
-            {csrf_field key="backup_manage"}
-            {button type="submit" name="restore" label="Restaurer cette sauvegarde" shape="reset"}
-            {button type="submit" name="remove" label="Supprimer cette sauvegarde" shape="delete"}
-        </p>
-    {/if}
-</fieldset>
-
-</form>
 
 <form method="post" action="{$self_url_no_qs}">
 
@@ -58,8 +28,44 @@
     <legend>Sauvegarde manuelle</legend>
     <p class="submit">
         {csrf_field key="backup_create"}
-        {button type="submit" name="create" label="Créer une nouvelle sauvegarde des données" shape="right" class="main"}
+        {button type="submit" name="create" label="Créer une nouvelle sauvegarde manuelle" shape="right" class="main"}
     </p>
+</fieldset>
+
+</form>
+
+<form method="post" action="{$self_url_no_qs}">
+
+<fieldset>
+    <legend>Sauvegardes disponibles</legend>
+    {if empty($list)}
+        <p class="help">Aucune copie de sauvegarde disponible.</p>
+    {else}
+        <table class="list">
+            <tbody>
+            {foreach from=$list item="backup"}
+                <tr>
+                    <td class="check">{if $backup.can_restore}{input type="radio" name="selected" value=$backup.filename}{/if}</td>
+                    <th><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
+                    <td>{$backup.size|format_bytes}</td>
+                    <td>{$backup.date|date_long}</td>
+                    <td>{if !$backup.can_restore}<span class="alert">Version {$backup.version} trop ancienne pour pouvoir être restaurée</span>{/if}</td>
+                    <td class="actions">
+                        {linkbutton href="?download=%s"|args:$backup.filename label="Télécharger" shape="download"}
+                    </td>
+                </tr>
+            {/foreach}
+            </tbody>
+        </table>
+        <p class="alert block">
+            Attention, en cas de restauration, l'intégralité des données courantes seront effacées et remplacées par celles contenues dans la sauvegarde sélectionnée.
+        </p>
+        <p>
+            {csrf_field key="backup_manage"}
+            {button type="submit" name="restore" label="Restaurer cette sauvegarde" shape="reset"}
+            {button type="submit" name="remove" label="Supprimer cette sauvegarde" shape="delete"}
+        </p>
+    {/if}
 </fieldset>
 
 </form>
