@@ -53,6 +53,7 @@ class Sauvegarde
 
 		// Acquire a shared lock before copying
 		$db = DB::getInstance();
+		$db->exec('VACUUM;');
 		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
 
 		copy(DB_FILE, $backup);
@@ -157,6 +158,7 @@ class Sauvegarde
 	{
 		// Acquire a shared lock before copying
 		$db = DB::getInstance();
+		$db->exec('VACUUM;');
 		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
 
 		$in = fopen(DB_FILE, 'r');
@@ -433,6 +435,6 @@ class Sauvegarde
 	public function getDBFilesSize()
 	{
 		$db = DB::getInstance();
-		return (int) $db->firstColumn('SELECT SUM(taille) FROM fichiers_contenu;');
+		return (int) $db->firstColumn('SELECT SUM(size) FROM files_contents;');
 	}
 }
