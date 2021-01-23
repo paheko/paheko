@@ -251,10 +251,16 @@ class File extends Entity
 	 * @param  string $content
 	 * @return File
 	 */
-	static public function storeFromBase64(string $name, string $encoded_content, int $context, $context_ref = null): self
+	static public function createFromBase64(string $name, string $encoded_content, int $context, $context_ref = null): self
 	{
 		$content = base64_decode($encoded_content);
 		return self::create($name, $context, $context_ref, null, $content);
+	}
+
+	public function storeFromBase64(string $encoded_content): self
+	{
+		$content = base64_decode($encoded_content);
+		return $this->store(null, $content);
 	}
 
 	/**

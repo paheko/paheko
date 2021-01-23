@@ -74,7 +74,7 @@ class Config extends Entity
 		'desactiver_site'       => 'bool',
 	];
 
-	protected $_modified;
+	protected $_deleted_files = [];
 
 	static protected $_instance = null;
 
@@ -123,11 +123,26 @@ class Config extends Entity
 		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
 	}
 
+	public function set(string $key, $value, bool $loose = false, bool $check_for_changes = true)
+	{
+		// Append to deleted files queue if it's set to null
+		if (isset($this->_types[$key])
+			&& substr($this->_types[$key], -strlen(File::class)) == File::class
+			&& $value === null
+			&& $this->$key !== null) {
+			$this->_deleted_files[] = $this->$key;
+		}
+
+		parent::set($key, $value, $loose, $check_for_changes);
+	}
+
 	public function save(): bool
 	{
 		if (!count($this->_modified)) {
 			return true;
 		}
+
+		$this->selfCheck();
 
 		$values = [];
 		$db = DB::getInstance();
@@ -135,10 +150,7 @@ class Config extends Entity
 		foreach ($this->_modified as $key => $modified) {
 			$value = $this->$key;
 
-			if ($this->_types[$key] == File::class && null === $value && $this->$key !== null) {
-				$this->$key->delete();
-			}
-			elseif ($this->_types[$key] == File::class && null !== $value) {
+			if ($this->_types[$key] == File::class && null !== $value) {
 				$value = $value->id();
 			}
 			else if ($this->_types[$key] == Champs::class) {
@@ -156,13 +168,16 @@ class Config extends Entity
 		{
 			$value = $this->get($key);
 
-			if (is_array($value))
-			{
+			if (is_array($value)) {
 				$value = implode(',', $value);
 			}
-			elseif (is_object($value))
-			{
-				$value = (string) $value;
+			elseif (is_object($value)) {
+				if ($value instanceof File) {
+					$value = $value->id();
+				}
+				else {
+					$value = (string) $value;
+				}
 			}
 
 			$db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
@@ -179,6 +194,12 @@ class Config extends Entity
 			$db->exec('DROP INDEX IF EXISTS membres_identifiant;');
 			$db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
 		}
+
+		foreach ($this->_deleted_files as $file) {
+			$file->delete();
+		}
+
+		Files::deleteOrphanFiles();
 
 		$db->commit();
 
@@ -206,8 +227,19 @@ class Config extends Entity
 			$source['couleur2'] = null;
 		}
 
-		if (trim($source['image_fond']) == '') {
+		if (isset($source['image_fond']) && trim($source['image_fond']) == 'RESET') {
 			$source['image_fond'] = null;
+		}
+		elseif (isset($source['image_fond']) && strlen($source['image_fond'])) {
+			if ($this->image_fond) {
+				$this->image_fond->storeFromBase64($source['image_fond']);
+				$this->image_fond->save();
+			}
+			else {
+				$this->set('image_fond', File::createFromBase64('image_fond.png', $source['image_fond'], File::CONTEXT_CONFIG, 'image_fond'));
+			}
+
+			unset($source['image_fond']);
 		}
 
 		parent::importForm($source);
@@ -252,6 +284,7 @@ class Config extends Entity
 		$this->assert(trim($this->nom_asso) != '', 'Le nom de l\'association ne peut rester vide.');
 		$this->assert(trim($this->monnaie) != '', 'La monnaie ne peut rester vide.');
 		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
+		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
 		$this->assert(null === $this->admin_homepage || $this->admin_homepage instanceof File, 'Page d\'accueil invalide');
 		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');

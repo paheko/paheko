@@ -178,6 +178,21 @@ class Champs
         return $champs;
     }
 
+    public function listAssocNames()
+    {
+        $out = [];
+
+        foreach ($this->champs as $key => $config) {
+            if ($key == 'passe') {
+                continue;
+            }
+
+            $out[$key] = $config->title;
+        }
+
+        return $out;
+    }
+
     public function getMultiples()
     {
         $out = [];

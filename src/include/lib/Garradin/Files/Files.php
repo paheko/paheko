@@ -84,7 +84,7 @@ class Files
 			case File::CONTEXT_FILE:
 				return 'files c ON c.id = f.context_ref';
 			case File::CONTEXT_CONFIG:
-				return 'config c ON c.cle = f.context_ref';
+				return 'config c ON c.cle = f.context_ref AND c.valeur = f.id';
 			case File::CONTEXT_WEB:
 			case File::CONTEXT_DOCUMENTS:
 			case File::CONTEXT_SKELETON:
@@ -101,19 +101,18 @@ class Files
 	{
 		static $contexts = [File::CONTEXT_FILE, File::CONTEXT_USER, File::CONTEXT_TRANSACTION, File::CONTEXT_CONFIG];
 
-		$db = DB::getInstance();
+		$em = EM::getInstance(File::class);
 
 		foreach ($contexts as $context) {
-			$sql = sprintf('SELECT f.* FROM files f LEFT JOIN %s WHERE f.context = %d AND c.id IS NULL;', self::getContextJoinClause($context), $context);
+			$sql = sprintf('SELECT f.* FROM files f LEFT JOIN %s WHERE f.context = %d AND %s IS NULL;', self::getContextJoinClause($context), $context, $context == File::CONTEXT_CONFIG ? 'c.cle' : 'c.id');
 
-			foreach ($db->iterate($sql) as $file) {
-				$f = new Fichiers($file->id, (array) $file);
-				$f->delete();
+			foreach ($em->iterate($sql) as $file) {
+				$file->delete();
 			}
 		}
 
 		// Remove any left-overs
-		$db->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
+		DB::getInstance()->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
 	}
 
 	static public function deleteLinkedFiles(int $context, $value): void

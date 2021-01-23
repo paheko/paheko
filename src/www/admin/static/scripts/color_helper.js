@@ -38,7 +38,9 @@
 	function applyColors()
 	{
 		let input = $('#f_couleur2');
-		var color = colorToRGB(input.value, 'gSecondColor');
+		let color = colorToRGB(input.value, 'gSecondColor');
+		let color1 = $('#f_couleur1'), color2 = $('#f_couleur2');
+		let default_colors = color1.value == color1.placeholder && color2.value == color2.placeholder;
 
 		var img = new Image;
 		img.crossOrigin = "Anonymous";
@@ -77,11 +79,17 @@
 
 		var bg = $('#f_image_fond');
 
-		if (bg.value) {
+		if (bg.value == 'RESET' && default_colors) {
+			document.documentElement.style.setProperty('--gBgImage', 'url("' + bg.dataset.default + '")');
+		}
+		else if (bg.value == 'RESET') {
+			img.src = bg.dataset.default;
+		}
+		else if (bg.value) {
 			img.src = 'data:image/png;base64,' + bg.value;
 		}
-		else if (bg.dataset.source) {
-			img.src = 'data:image/png;base64,' + bg.dataset.source;
+		else if (bg.dataset.current) {
+			img.src = bg.dataset.current;
 		}
 		else {
 			img.src = bg.dataset.default;
@@ -201,8 +209,8 @@
 		reset_btn.innerHTML = 'RàZ';
 
 		reset_btn.onclick = () => {
-			$('#f_image_fond').dataset.source = '';
-			$('#f_image_fond').value = '';
+			$('#f_image_fond').dataset.current = '';
+			$('#f_image_fond').value = 'RESET';
 			bg.disabled = false;
 
 			applyColors();
