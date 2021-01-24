@@ -1,6 +1,6 @@
 {{#categories uri=$_GET.uri}}
 
-	{{:include file="_head.html"}}
+	{{:include file="_head.html" title=$title}}
 
 
 	<section class="subcategories">
@@ -23,7 +23,7 @@
 	</article>
 
 	<section class="articles">
-		{{#articles parent=$id order="created DESC"}}
+		{{#articles parent=$id order="created DESC" future=false}}
 		<article>
 			<h3><a href="{{$url}}">{{$title}}</a></h3>
 			<p>{{$html|raw|strip_tags|truncate:200}}</p>
