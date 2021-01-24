@@ -22,7 +22,12 @@ class SQLite implements StorageInterface
 		if (!Static_Cache::exists($cache_id))
 		{
 			$db = DB::getInstance();
-			$id = $db->firstColumn('SELECT id FROM files_contents WHERE hash = ?;', $file->hash);
+			$id = $db->firstColumn('SELECT rowid FROM files_contents WHERE hash = ?;', $file->hash);
+
+			if (!$id) {
+				throw new \LogicException('There is no file with hash = ' . $file->hash);
+			}
+
 			$blob = $db->openBlob('files_contents', 'content', (int)$id);
 			Static_Cache::storeFromPointer($cache_id, $blob);
 			fclose($blob);

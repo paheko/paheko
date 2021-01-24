@@ -75,6 +75,16 @@ class Page extends Entity
 		return $this->file()->created;
 	}
 
+	public function modified(): \DateTime
+	{
+		return $this->file()->modified;
+	}
+
+	public function render(array $options = []): string
+	{
+		return $this->file()->render($options);
+	}
+
 	public function file(): File
 	{
 		if (null === $this->_file) {
@@ -160,11 +170,6 @@ class Page extends Entity
 		}
 
 		return $this->import($source);
-	}
-
-	public function render(array $options = []): string
-	{
-		return $this->file()->render();
 	}
 
 	public function getBreadcrumbs()

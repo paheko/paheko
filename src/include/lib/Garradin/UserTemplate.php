@@ -327,6 +327,8 @@ class UserTemplate extends Brindille
 
 			$page = new Page;
 			$page->load($data);
+			$page->exists(true);
+
 			$row = array_merge($row, $page->asArray());
 			$row['url'] = $page->url();
 			$row['raw'] = $page->raw();
@@ -381,6 +383,8 @@ class UserTemplate extends Brindille
 		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
 			$file = new File;
 			$file->load($row);
+			$file->exists(true);
+
 			$row = $file->asArray();
 			$row['url'] = $file->url();
 			$row['thumb_url'] = $file->image ? $file->thumb_url() : null;
