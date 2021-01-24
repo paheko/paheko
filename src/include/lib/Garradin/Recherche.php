@@ -200,6 +200,26 @@ class Recherche
 		return $out;
 	}
 
+	public function getDefaultOrder(string $target): string
+	{
+		if ($target == 'compta') {
+			return 't.date';
+		}
+		else {
+			return Config::getInstance()->get('champ_identite');
+		}
+	}
+
+	public function getDefaultDesc(string $target): bool
+	{
+		if ($target == 'compta') {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	/**
 	 * Renvoie la liste des colonnes d'une cible
 	 */
@@ -311,7 +331,7 @@ class Recherche
 			$columns['l.debit'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Débit',
-				'type'     => 'integer',
+				'type'     => 'text',
 				'null'     => false,
 				'alias'    => 'debit',
 				'originalType' => 'money',
@@ -320,7 +340,7 @@ class Recherche
 			$columns['l.credit'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Crédit',
-				'type'     => 'integer',
+				'type'     => 'text',
 				'null'     => false,
 				'alias'    => 'credit',
 				'originalType' => 'money',

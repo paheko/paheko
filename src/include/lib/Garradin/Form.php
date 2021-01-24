@@ -19,6 +19,14 @@ class Form
 			$db = DB::getInstance();
 			return $db->test($params[0], $db->where($params[1], $value));
 		});
+
+		// Catch file size https://stackoverflow.com/questions/2133652/how-to-gracefully-handle-files-that-exceed-phps-post-max-size
+		if (empty($_FILES) && empty($_POST)
+			&& isset($_SERVER['REQUEST_METHOD'])
+			&& !empty($_SERVER['CONTENT_LENGTH'])
+			&& strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
+			$this->addError('Le fichier envoyé dépasse la taille autorisée');
+		}
 	}
 
 	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null): bool

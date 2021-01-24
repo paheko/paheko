@@ -13,10 +13,12 @@ $recherche = new Recherche;
 
 $query = (object) [
 	'query' => f('q') ? json_decode(f('q'), true) : null,
-	'order' => f('order'),
+	'order' => f('order') ?: $recherche->getDefaultOrder($target),
 	'limit' => f('limit') ?: 100,
-	'desc'  => (bool) f('desc'),
+	'desc'  => $recherche->getDefaultDesc($target),
 ];
+
+$query->desc = (bool) f('desc');
 
 $text_query = trim(qg('qt'));
 $result = null;

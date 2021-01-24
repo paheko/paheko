@@ -13,7 +13,7 @@
 
 {if $ok}
     <p class="block confirm">
-        {if $ok == 'restore'}La restauration a bien été effectuée. Si vous désirez revenir en arrière, vous pouvez utiliser la sauvegarde automatique nommée <em>{$now_date}.avant_restauration.sqlite</em>, sinon vous pouvez l'effacer.
+        {if $ok == 'restore'}La restauration a bien été effectuée.
             {if $ok_code & Sauvegarde::NOT_AN_ADMIN}
             </p>
             <p class="block alert">

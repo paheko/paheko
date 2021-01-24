@@ -61,11 +61,11 @@
             </dd>
             <dd>
                 <input type="radio" name="droit_membres" value="{$membres::DROIT_ACCES}" id="f_droit_membres_acces" {if $cat.droit_membres == $membres::DROIT_ACCES}checked="checked"{/if} />
-                <label for="f_droit_membres_acces"><b class="acces">M</b> Lecture uniquement <em>(peut voir les informations personnelles de tous les membres, y compris leurs cotisations)</em></label>
+                <label for="f_droit_membres_acces"><b class="acces">M</b> Lecture uniquement <em>(peut voir les informations personnelles de tous les membres, y compris leurs inscriptions à des activités)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_membres" value="{$membres::DROIT_ECRITURE}" id="f_droit_membres_ecriture" {if $cat.droit_membres == $membres::DROIT_ECRITURE}checked="checked"{/if} />
-                <label for="f_droit_membres_ecriture"><b class="ecriture">M</b> Lecture &amp; écriture <em>(peut ajouter et modifier des membres, mais pas les supprimer ni les changer de catégorie, peut affecter des cotisations aux membres)</em></label>
+                <label for="f_droit_membres_ecriture"><b class="ecriture">M</b> Lecture &amp; écriture <em>(peut ajouter et modifier des membres, mais pas les supprimer ni les changer de catégorie, peut inscrire des membres à des activités)</em></label>
             </dd>
             <dd>
                 <input type="radio" name="droit_membres" value="{$membres::DROIT_ADMIN}" id="f_droit_membres_admin" {if $cat.droit_membres == $membres::DROIT_ADMIN}checked="checked"{/if} />

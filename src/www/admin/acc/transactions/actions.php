@@ -34,9 +34,17 @@ $form->runIf('delete', function () use ($transactions) {
 }, $csrf_key, f('from') ?: ADMIN_URL);
 
 // Add/remove lines to analytical
-$form->runIf('change_analytical', function () use ($lines) {
+$form->runIf('change_analytical', function () use ($transactions, $lines) {
 	$id = f('id_analytical') ?: null;
-	Transactions::setAnalytical($id, $lines);
+
+	if (f('apply_lines')) {
+		$lines = null;
+	}
+	else {
+		$transactions = null;
+	}
+
+	Transactions::setAnalytical($id, $transactions, $lines);
 }, $csrf_key, f('from') ?: ADMIN_URL);
 
 $from = f('from');
