@@ -321,6 +321,14 @@ class UserTemplate extends Brindille
 			unset($params['parent']);
 		}
 
+		if (isset($params['future'])) {
+			if (!$params['future']) {
+				$params['where'] .= ' AND f.created <= datetime()';
+			}
+
+			unset($params['future']);
+		}
+
 		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
 			$data = $row;
 			unset($data['points']);
