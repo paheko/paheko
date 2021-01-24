@@ -38,7 +38,9 @@
 			{include file="common/_csv_help.tpl"}
 			{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
 			<dd class="help block">
-				- Les lignes comportant un numéro d'écriture mettront à jour les écritures existantes correspondant à ces numéros (sauf si celles-ci ont été validées), alors que les lignes sans numéro créeront de nouvelles écritures.<br />
+				- Les lignes comportant un numéro d'écriture existant mettront à jour les écritures correspondant à ces numéros.<br />
+				- Les lignes comportant un numéro inexistant renverront une erreur.<br />
+				- Les lignes sans numéro créeront de nouvelles écritures.<br />
 				- Si le fichier comporte des écritures dont la date est en dehors de l'exercice courant, elles seront ignorées.
 			</dd>
 		</dl>

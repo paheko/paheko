@@ -1,15 +1,6 @@
 {include file="admin/_head.tpl" title="Journaux" current="config" custom_css=["styles/config.css"]}
 
-{include file="admin/config/_menu.tpl" current="logs"}
-
-{if ENABLE_TECH_DETAILS}
-<nav class="tabs">
-	<ul class="sub">
-		{*<li{if $type != 'errors'} class="current"{/if}><a href="{$self_url_no_qs}">Actions utilisateurs</a></li>*}
-		<li{if $type == 'errors'} class="current"{/if}><a href="?type=errors">Erreurs système</a></li>
-	</ul>
-</nav>
-{/if}
+{include file="admin/config/_menu.tpl" current="advanced" sub_current="errors"}
 
 {if isset($reports) && isset($id)}
 	<section class="error">
@@ -92,16 +83,6 @@
 				{/foreach}
 			</tbody>
 		</table>
-	{/if}
-{else}
-	<p class="help">
-		Cette page permet de suivre les actions effectuées par les utilisateurs.
-	</p>
-
-	{if empty($list)}
-		<p class="block alert">
-			Aucune entrée dans le journal d'actions.
-		</p>
 	{/if}
 {/if}
 

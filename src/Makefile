@@ -47,9 +47,11 @@ deb:
 
 publish: release deb
 	$(eval VERSION=$(shell cat VERSION))
+	gpg --armor --detach-sign garradin-${VERSION}.tar.bz2
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
+	fossil uv add garradin-${VERSION}.tar.bz2.asc
 	cd ../debian && fossil uv add garradin-${VERSION}-*.deb
 	fossil uv sync
 

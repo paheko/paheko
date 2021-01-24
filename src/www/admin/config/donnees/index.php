@@ -5,43 +5,29 @@ require_once __DIR__ . '/../_inc.php';
 
 $s = new Sauvegarde;
 
-if (f('download'))
-{
-    $form->check('backup_download');
+$tpl->assign('code', null);
 
-    if (!$form->hasErrors())
-    {
-        header('Content-type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $config->get('nom_asso') . ' - Sauvegarde données - ' . date('Y-m-d') . '.sqlite"');
-        header('Content-Length: ' . $s->getDBSize(true));
+$form->runIf('download', function () use ($s) {
+    $s->dump();
+    exit;
+}, 'backup_download');
 
-        $s->dump();
-        exit;
+$form->runIf('restore_file', function () use ($s, $tpl, $session) {
+    // Ignorer la vérification d'intégrité si autorisé et demandé
+    $check = (ALLOW_MODIFIED_IMPORT && f('force_import')) ? false : true;
+
+    try {
+        $r = $s->restoreFromUpload($_FILES['file'], $session->getUser()->id, $check);
+        Utils::redirect(ADMIN_URL . 'config/donnees/?ok=restore&code=' . (int)$r);
+    } catch (UserException $e) {
+        $form->addError($e->getMessage());
+        $tpl->assign('code', $e->getCode());
     }
-}
-elseif (f('restore_file'))
-{
-    $form->check('backup_restore');
-
-    if (!$form->hasErrors())
-    {
-        // Ignorer la vérification d'intégrité si autorisé et demandé
-        $check = (ALLOW_MODIFIED_IMPORT && f('force_import')) ? false : true;
-
-        try {
-            $r = $s->restoreFromUpload($_FILES['file'], $user->id, $check);
-            Utils::redirect(ADMIN_URL . 'config/donnees/?ok=restore&code=' . (int)$r);
-        } catch (UserException $e) {
-            $form->addError($e->getMessage());
-            $code = $e->getCode();
-        }
-    }
-}
+}, 'backup_restore');
 
 $tpl->assign('db_size', $s->getDBSize());
 $tpl->assign('files_size', $s->getDBFilesSize());
 
-$tpl->assign('code', isset($code) ? $code : null);
 $tpl->assign('ok_code', qg('code'));
 $tpl->assign('ok', qg('ok'));
 $tpl->assign('now_date', date('Y-m-d'));
