@@ -341,6 +341,8 @@ class UserTemplate extends Brindille
 			$row['url'] = $page->url();
 			$row['raw'] = $page->raw();
 			$row['html'] = $page->render();
+			$row['created'] = $page->created();
+			$row['modified'] = $page->modified();
 
 			yield $row;
 		}
