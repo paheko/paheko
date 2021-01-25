@@ -263,16 +263,12 @@ CREATE TABLE IF NOT EXISTS files
 (
     id INTEGER NOT NULL PRIMARY KEY,
     context INTEGER NOT NULL, -- File context (0 = documents, 1 = user-specific file, etc.)
-    context_ref INTEGER NULL, -- Context reference (eg. user ID, or directory path, etc.)
-    public INTEGER NOT NULL DEFAULT 0,
-    name TEXT NOT NULL, -- file name (eg. image1234.jpeg)
+    context_ref INTEGER NULL, -- Context reference (eg. user ID)
+    name TEXT NOT NULL, -- File name
     type TEXT NULL, -- MIME type
     image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
     size INTEGER NOT NULL DEFAULT 0,
     hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
-
-    storage TEXT NULL, -- Storage medium, NULL means stored in content BLOB
-    storage_path TEXT NULL,
 
     created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
     modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified),
@@ -318,16 +314,6 @@ CREATE TABLE IF NOT EXISTS web_pages
 );
 
 CREATE UNIQUE INDEX web_pages_uri ON web_pages (uri);
-
-CREATE TRIGGER IF NOT EXISTS web_page_insert AFTER INSERT ON web_pages
-    BEGIN
-        UPDATE files SET public = CASE WHEN NEW.status = 1 THEN 1 ELSE 0 END WHERE id = NEW.id;
-    END;
-
-CREATE TRIGGER IF NOT EXISTS web_page_update AFTER UPDATE OF status ON web_pages
-    BEGIN
-        UPDATE files SET public = CASE WHEN NEW.status = 1 THEN 1 ELSE 0 END WHERE id = NEW.id;
-    END;
 
 -- FIXME: rename to english
 CREATE TABLE IF NOT EXISTS recherches

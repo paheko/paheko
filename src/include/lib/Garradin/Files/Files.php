@@ -10,7 +10,7 @@ use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA};
+use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG};
 
 class Files
 {
@@ -32,7 +32,7 @@ class Files
 		return null;
 	}
 
-	static public function getWithNameAndContext(string $name, int $context): ?File
+	static public function getWithNameAndContext(string $name, string $context): ?File
 	{
 		return EM::findOne(File::class, 'SELECT * FROM files WHERE name = ? AND context = ?;', $name, $context);
 	}
@@ -44,6 +44,11 @@ class Files
 
 	static public function callStorage(string $function, ...$args)
 	{
+		$storage = FILE_STORAGE_BACKEND ?? 'SQLite';
+		$class_name = __NAMESPACE__ . '\\Storage\\' . $storage;
+
+		call_user_func([$class_name, 'configure'], FILE_STORAGE_CONFIG);
+
 		// Check that we can store this data
 		if ($function == 'store') {
 			$quota = FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
@@ -56,22 +61,69 @@ class Files
 			}
 		}
 
-		$storage = FILE_STORAGE_BACKEND ?? 'SQLite';
-		$class_name = __NAMESPACE__ . '\\Storage\\' . $storage;
 		return call_user_func_array([$class_name, $function], $args);
 	}
 
-	static public function migrateStorage(string $from, string $to): void
+	/**
+	 * Copy all files from a storage backend to another one
+	 * This can be used to move from SQLite to FileSystem for example
+	 * Note that this only copies files, and is not removing them from the source storage backend.
+	 */
+	static public function migrateStorage(string $from, string $to, $from_config = null, $to_config = null, ?callable $callback = null): void
 	{
+		$from = __NAMESPACE__ . '\\Storage\\' . $from;
+		$to = __NAMESPACE__ . '\\Storage\\' . $to;
+
+		if (!class_exists($from)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $from);
+		}
+
+		if (!class_exists($to)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $to);
+		}
+
+		call_user_func([$from, 'configure'], $from_config);
+		call_user_func([$to, 'configure'], $to_config);
+
+		call_user_func([$from, 'checkLock']);
+		call_user_func([$to, 'checkLock']);
+
+		call_user_func([$from, 'lock']);
+		call_user_func([$to, 'lock']);
+
+		$db = DB::getInstance();
+		$db->begin();
 		$res = EM::getInstance(File::class)->iterate('SELECT * FROM @TABLE;');
 
-		$from = get_class(__NAMESPACE__ . '\\Backend\\' . $from);
-		$to = get_class(__NAMESPACE__ . '\\Backend\\' . $to);
-
 		foreach ($res as $file) {
-			$from_path = call_user_func([$from, 'path'], $file);
-			call_user_func([$to, 'store'], $file, $from_path);
+			$from_path = call_user_func([$from, 'getPath'], $file);
+			call_user_func([$to, 'store'], $file, $from_path, null);
+
+			if (null !== $callback) {
+				$callback($file);
+			}
 		}
+
+		$db->commit();
+
+		call_user_func([$from, 'unlock']);
+		call_user_func([$to, 'unlock']);
+	}
+
+	/**
+	 * Delete all files from a storage backend
+	 */
+	static public function resetStorage(string $backend, $config = null): void
+	{
+		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
+
+		call_user_func([$backend, 'configure'], $config);
+
+		if (!class_exists($backend)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $from);
+		}
+
+		call_user_func([$backend, 'reset']);
 	}
 
 	static public function getContextJoinClause(int $context): ?string

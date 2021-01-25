@@ -394,12 +394,9 @@ namespace Garradin;
  *
  * Valeurs possibles :
  * - SQLite : aucune configuration possible
- * - FileSystem : 'string' = chemin du répertoire où doivent être stockés les fichiers,
- * %s doit être ajouté à la fin pour indiquer le répertoire et nom du fichier
+ * - FileSystem : 'string' = chemin du répertoire où doivent être stockés les fichiers
  *
  * Défaut : null
- *
- * @vararray
  */
 
 //const FILE_STORAGE_CONFIG = null;

@@ -11,6 +11,10 @@ use const Garradin\DB_FILE;
 
 class SQLite implements StorageInterface
 {
+	static public function configure(?string $config): void
+	{
+	}
+
 	/**
 	 * Renvoie le chemin vers le fichier local en cache, et le crée s'il n'existe pas
 	 * @return string Chemin local
@@ -38,13 +42,14 @@ class SQLite implements StorageInterface
 
 	static public function store(File $file, ?string $path, ?string $content): bool
 	{
+		$file->storage_path = null;
 		$db = DB::getInstance();
 
 		if ($db->test('files_contents', 'hash = ?', $file->hash)) {
 			return true;
 		}
 
-		$db->preparedQuery('INSERT INTO files_contents (hash, content, size) VALUES (?, zeroblob(?), ?);',
+		$db->preparedQuery('INSERT OR IGNORE INTO files_contents (hash, content, size) VALUES (?, zeroblob(?), ?);',
 			$file->hash, $file->size, $file->size);
 
 		$id = (int) $db->lastInsertId();
@@ -63,9 +68,15 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
-	static public function list(string $path): ?array
+	static public function list(string $path): array
 	{
-		return null;
+		$level = substr_count($path, '/');
+		$directories = $db->getAssoc('SELECT path, path FROM files
+			WHERE path LIKE ? AND LEN(path) - LEN(REPLACE(path, \'/\', \'\')) = ? GROUP BY path ORDER BY path COLLATE NOCASE;',
+			$path . '/%', $level);
+
+		$files = EM::getInstance(File::class)->all('SELECT * FROM files WHERE path = ? ORDER BY name COLLATE NOCASE;', $path);
+		return $directories + $files;
 	}
 
 	static public function getPath(File $file): ?string
@@ -85,10 +96,19 @@ class SQLite implements StorageInterface
 
 	static public function delete(File $file): bool
 	{
+		$db = DB::getInstance();
+
+		$is_used_by_others = $db->firstColumn('SELECT 1 FROM files WHERE id != ? AND hash = ?;', $file->id(), $file->hash);
+
+		// Don't delete yet, if this hash is still used by other files
+		if ($is_used_by_others) {
+			return true;
+		}
+
 		$cache_id = 'files.' . $file->hash;
 		Static_Cache::remove($cache_id);
 
-		return DB::getInstance()->delete('files_contents', 'hash = ?', (int)$file->hash);
+		return $db->delete('files_contents', 'hash = ?', (int)$file->hash);
 	}
 
 	static public function move(File $old_file, File $new_file): bool
@@ -120,5 +140,30 @@ class SQLite implements StorageInterface
 		}
 
 		$db->delete('files_contents', $db->where('id', $ids));
+	}
+
+	static public function reset(): void
+	{
+		$db = DB::getInstance();
+		$db->exec('DELETE FROM files_contents; VACUUM;');
+	}
+
+	static public function lock(): void
+	{
+		DB::getInstance()->exec('INSERT INTO files_contents (hash, content, size) VALUES (\'.lock\', \'.lock\', 5);');
+	}
+
+	static public function unlock(): void
+	{
+		DB::getInstance()->exec('DELETE FROM files_contents WHERE hash = \'.lock\';');
+	}
+
+	static public function checkLock(): void
+	{
+		$lock = DB::getInstance()->firstColumn('SELECT 1 FROM files_contents WHERE hash = \'.lock\';');
+
+		if ($lock) {
+			throw new \RuntimeException('File storage is locked');
+		}
 	}
 }

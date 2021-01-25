@@ -22,9 +22,9 @@ INSERT INTO files_contents (id, hash, content, size)
 	SELECT id, hash, contenu, taille FROM fichiers_contenu;
 
 -- Copy existing file metadata, including context
-INSERT INTO files (id, hash, name, type, created, author_id, public, image, context, context_ref)
-	SELECT f.id, c.hash, nom, type, datetime, NULL, 0, image,
-		CASE WHEN t.id THEN 2 ELSE 6 END, -- context
+INSERT INTO files (id, hash, name, type, created, author_id, image, context, context_ref)
+	SELECT f.id, c.hash, nom, type, datetime, NULL, image,
+		CASE WHEN t.id THEN 'transaction' ELSE 'file' END, -- context
 		CASE WHEN t.id THEN t.fichier ELSE 10000 + w.id END
 	FROM fichiers f
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
@@ -97,7 +97,7 @@ UPDATE wiki_as_files SET new_parent = NULL;
 INSERT INTO files_contents (hash, content, size) SELECT hash, content, size FROM wiki_as_files;
 UPDATE wiki_as_files SET content_id = (SELECT fc.id FROM files_contents fc WHERE fc.hash = wiki_as_files.hash);
 
-INSERT INTO files (id, hash, name, type, created, modified, author_id, public, image, context, context_ref)
+INSERT INTO files (id, hash, name, type, created, modified, author_id, image, context, context_ref)
 	SELECT
 		old_id + 10000,
 		hash,
@@ -106,9 +106,8 @@ INSERT INTO files (id, hash, name, type, created, modified, author_id, public, i
 		created,
 		modified,
 		author_id,
-		public,
 		image,
-		CASE WHEN public = 0 THEN 0 ELSE 4 END, -- private wiki page = documents, public wiki page = public website
+		CASE WHEN public = 0 THEN 'documents' ELSE 'web' END, -- private wiki page = documents, public wiki page = public website
 		CASE WHEN public = 0 THEN path ELSE NULL END -- private wiki page has a path
 	FROM wiki_as_files;
 
@@ -120,18 +119,12 @@ UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHER
 INSERT INTO web_pages
 	SELECT new_id, new_parent, type, 1, uri, title FROM wiki_as_files WHERE public = 1;
 
--- Link transactions to files
-UPDATE files SET context = 2, context_ref = (SELECT id FROM fichiers_acc_transactions WHERE fichier = files.id) WHERE id IN (SELECT id FROM fichiers_acc_transactions WHERE fichier = files.id);
-
 -- Link background image file to config
-UPDATE files SET context = 3, context_ref = 'image_fond' WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond' AND valeur > 0);
-
--- Set public
-UPDATE files SET public = 1 WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond');
+UPDATE files SET context = 'config', context_ref = 'image_fond' WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond' AND valeur > 0);
 
 -- Copy connection page as a single file
-INSERT INTO files (hash, context, context_ref, name, type, created, author_id, public)
-	SELECT hash, 3, 'admin_homepage', 'Accueil_connexion.skriv', type, created, author_id, 0
+INSERT INTO files (hash, context, context_ref, name, type, created, author_id)
+	SELECT hash, 'config', 'admin_homepage', 'Accueil_connexion.skriv', type, created, author_id
 	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
 
 UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE cle = 'accueil_connexion';

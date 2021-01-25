@@ -547,7 +547,7 @@ class Utils
             return $size . ' o';
     }
 
-    static public function deleteRecursive($path)
+    static public function deleteRecursive(string $path): bool
     {
         if (!file_exists($path))
             return false;
