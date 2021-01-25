@@ -134,7 +134,7 @@
                 <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
                 <dt><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champ name=editable checked="1"} id="f_{$nom}_editable" /> <label for="f_{$nom}_editable">Modifiable par les membres</label></dt>
                 <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champ name=mandatory checked="1"} for="f_{$nom}_mandatory" /> <label for="f_{$nom}_mandatory">Champ obligatoire</label></dt>
+                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champ name=mandatory checked="1"} id="f_{$nom}_mandatory" /> <label for="f_{$nom}_mandatory">Champ obligatoire</label></dt>
                 <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
 
                 {if $champ.type == 'select' || $champ.type == 'multiple'}

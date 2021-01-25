@@ -605,7 +605,7 @@ class Template extends \KD2\Smartyer
 			$attributes .= 'disabled="disabled" ';
 		}
 
-		if (!empty($config->mandatory))
+		if (!empty($config->mandatory) && $type != 'checkbox' && $type != 'multiple')
 		{
 			$attributes .= 'required="required" ';
 		}
