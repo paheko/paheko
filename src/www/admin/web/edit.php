@@ -34,7 +34,7 @@ $show_diff = false;
 $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	$editing_started = new \DateTime($editing_started);
 
-	if ($editing_started < $page->modified) {
+	if ($editing_started < $page->modified()) {
 		$show_diff = true;
 		throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
 	}
@@ -49,7 +49,7 @@ $encrypted = f('encrypted') || $page->file()->type == File::FILE_TYPE_ENCRYPTED;
 
 $old_content = f('content');
 $new_content = $page->raw();
-$created = $page->file()->created;
+$created = $page->created();
 
 $tpl->assign(compact('created', 'page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
 
