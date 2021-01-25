@@ -167,7 +167,7 @@ static $default_config = [
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
 	'FILE_STORAGE_BACKEND'  => null,
-	'FILE_STORAGE_CONFIG'   => [],
+	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
 ];
 

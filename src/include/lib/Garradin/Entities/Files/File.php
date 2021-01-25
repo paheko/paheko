@@ -28,12 +28,8 @@ class File extends Entity
 	protected $name;
 	protected $type;
 	protected $image;
-	protected $public;
 	protected $size;
 	protected $hash;
-
-	protected $storage;
-	protected $storage_path;
 
 	protected $created;
 	protected $modified;
@@ -42,20 +38,19 @@ class File extends Entity
 
 	protected $_types = [
 		'id'           => 'int',
-		'context'      => 'int',
+		'context'      => 'string',
 		'context_ref'  => '?int|string',
 		'name'         => 'string',
 		'type'         => '?string',
-		'public'       => 'int',
 		'image'        => 'int',
 		'size'         => 'int',
 		'hash'         => 'string',
-		'storage'      => '?string',
-		'storage_path' => '?string',
 		'created'      => 'DateTime',
 		'modified'     => 'DateTime',
 		'author_id'    => '?int',
 	];
+
+	protected $_parent;
 
 	/**
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
@@ -67,13 +62,13 @@ class File extends Entity
 	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
 	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
 
-	const CONTEXT_DOCUMENTS = 0;
-	const CONTEXT_USER = 1;
-	const CONTEXT_TRANSACTION = 2;
-	const CONTEXT_CONFIG = 3;
-	const CONTEXT_WEB = 4;
-	const CONTEXT_SKELETON = 5;
-	const CONTEXT_FILE = 6;
+	const CONTEXT_DOCUMENTS = 'documents';
+	const CONTEXT_USER = 'user';
+	const CONTEXT_TRANSACTION = 'transaction';
+	const CONTEXT_CONFIG = 'config';
+	const CONTEXT_WEB = 'web';
+	const CONTEXT_SKELETON = 'skel';
+	const CONTEXT_FILE = 'file';
 
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
@@ -87,18 +82,6 @@ class File extends Entity
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
-
-		$this->assert(in_array($this->context, $this->getContexts(), true), 'Invalid context');
-
-		if ($this->context == self::CONTEXT_TRANSACTION || $this->context == self::CONTEXT_USER || $this->context_ref == self::CONTEXT_FILE) {
-			$this->assert(is_int($this->context_ref) && $this->context_ref > 0, 'Invalid context reference');
-		}
-
-		if ($this->context == self::CONTEXT_CONFIG) {
-			$this->assert(is_string($this->context_ref) && !empty($this->context_ref));
-		}
-
-		$this->assert($this->public === 0 || $this->public === 1);
 		$this->assert($this->image === 0 || $this->image === 1);
 	}
 
@@ -117,6 +100,9 @@ class File extends Entity
 
 	public function delete(): bool
 	{
+		Files::callStorage('checkLock');
+		Files::callStorage('delete', $this);
+
 		$return = parent::delete();
 
 		// clean up thumbs
@@ -192,6 +178,8 @@ class File extends Entity
 			}
 		}
 
+		Files::callStorage('checkLock');
+
 		if (!Files::callStorage('store', $this, $source_path, $source_content)) {
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
@@ -199,32 +187,27 @@ class File extends Entity
 		return $this;
 	}
 
-	static protected function create(string $name, int $context, $context_ref = null, string $source_path = null, $source_content = null): self
+	static protected function createAndStore(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
 	{
-		assert($source_path || $source_content);
+		$file = self::create($name, $context, $context_ref, $source_path, $source_content);
+
+		$file->store($source_path, $source_content);
+		$file->save();
+
+		return $file;
+	}
+
+	static protected function create(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
+	{
+		if (!isset($source_path, $source_content)) {
+			throw new \InvalidArgumentException('Either source path or source content should be set');
+		}
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		$file = new self;
 		$file->set('name', $name);
-		$file->set('context', $context);
-		$file->set('context_ref', $context_ref);
 
 		$db = DB::getInstance();
-
-		if ($context == self::CONTEXT_FILE) {
-			$context = $db->firstColumn('SELECT context FROM files WHERE id = ?;', (int)$context_ref);
-
-			if ($context === false) {
-				throw new \InvalidArgumentException('Invalid context reference ID: unknown file #' . $context_ref);
-			}
-		}
-
-		if ($context == self::CONTEXT_WEB || $context == self::CONTEXT_CONFIG) {
-			$file->set('public', 1);
-		}
-		else {
-			$file->set('public', 0);
-		}
 
 		if ($source_path && !$source_content) {
 			$file->set('type', finfo_file($finfo, $source_path));
@@ -235,13 +218,6 @@ class File extends Entity
 
 		$file->set('image', preg_match('/^image\/(?:png|jpe?g|gif)$/', $file->type));
 
-
-		$db->begin();
-
-		$file->store($source_path, $source_content);
-		$file->save();
-
-		$db->commit();
 		return $file;
 	}
 
@@ -251,10 +227,10 @@ class File extends Entity
 	 * @param  string $content
 	 * @return File
 	 */
-	static public function createFromBase64(string $name, string $encoded_content, int $context, $context_ref = null): self
+	static public function createFromBase64(string $name, string $context, ?string $context_ref, string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
-		return self::create($name, $context, $context_ref, null, $content);
+		return self::createAndStore($name, $context, $context_ref, null, $content);
 	}
 
 	public function storeFromBase64(string $encoded_content): self
@@ -266,7 +242,7 @@ class File extends Entity
 	/**
 	 * Upload du fichier par POST
 	 */
-	static public function upload(string $key, int $context, $context_ref = null): self
+	static public function upload(string $key, string $context, ?string $context_ref): self
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -289,7 +265,7 @@ class File extends Entity
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		return self::create($name, $context, $context_ref, $file['tmp_name']);
+		return self::createAndStore($name, $context, $context_ref, $file['tmp_name']);
 	}
 
 
@@ -377,25 +353,10 @@ class File extends Entity
 		return max(self::ALLOWED_THUMB_SIZES);
 	}
 
-	/**
-	 * Lier un fichier à un contenu
-	 * @param  string $type       Type de contenu (constantes LINK_*)
-	 * @param  integer $foreign_id ID du contenu lié
-	 * @return boolean TRUE en cas de succès
-	 */
-	public function setContext(int $context, string $reference): void
-	{
-		if ($this->context) {
-			throw new \LogicException('This file is already linked to something else');
-		}
-
-		$this->set('context', $context);
-		$this->set('context_ref', $reference);
-	}
-
 	public function listLinked(): array
 	{
-		return iterator_to_array(Files::iterateLinkedTo(self::CONTEXT_FILE, $this->id()));
+		return EM::getInstance(self::class)->all('SELECT * FROM files WHERE context = ? AND context_ref = ? ORDER BY name;',
+			$this->context, $this->id());
 	}
 
 	/**
@@ -473,7 +434,7 @@ class File extends Entity
 	 */
 	protected function _serve(?string $path, ?string $content): void
 	{
-		if ($this->public) {
+		if ($this->isPublic()) {
 			Utils::HTTPCache($this->hash, $this->created->getTimestamp());
 		}
 		else {
@@ -536,13 +497,13 @@ class File extends Entity
 	{
 		$type = $this->type;
 		if ($type == self::FILE_TYPE_HTML) {
-			return \Garradin\Web\Render\HTML::render($this, $options);
+			return \Garradin\Web\Render\HTML::render($this, null, $options);
 		}
 		elseif ($type == self::FILE_TYPE_SKRIV) {
-			return \Garradin\Web\Render\Skriv::render($this, $options);
+			return \Garradin\Web\Render\Skriv::render($this, null, $options);
 		}
 		elseif ($type == self::FILE_TYPE_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($this, $options);
+			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
 		}
 
 		throw new \LogicException('Unknown render type: ' . $type);
@@ -550,30 +511,91 @@ class File extends Entity
 
 	public function checkReadAccess(Session $session): bool
 	{
-		// Web and config files should be marked as public when not in draft
-		if ($this->public) {
-			return true;
-		}
+		$context = $this->context;
+		$ref = $this->contex_ref;
 
 		// If it's linked to a file, then we want to know what the parent file is linked to
-		if ($this->context == self::CONTEXT_FILE) {
-			return Files::get((int)$this->context_ref)->checkReadAccess($session);
+		if ($context == self::CONTEXT_FILE) {
+			return $this->parent()->checkReadAccess($session);
 		}
-
-		if ($this->context == self::CONTEXT_TRANSACTION && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
+		// Web pages and config files are always public
+		else if ($context == self::CONTEXT_WEB || $context == self::CONTEXT_CONFIG) {
+			return true;
+		}
+		else if ($context == self::CONTEXT_TRANSACTION && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
 			return true;
 		}
 		// The user can access his own profile files
-		else if ($this->context == self::CONTEXT_USER && $this->context_ref == $session->getUser()->id) {
+		else if ($context == self::CONTEXT_USER && $ref == $session->getUser()->id) {
 			return true;
 		}
 		// Only users able to manage users can see their profile files
-		else if ($this->context == self::CONTEXT_USER && $session->canAccess(Session::SECTION_USERS, Membres::DROIT_ECRITURE)) {
+		else if ($context == self::CONTEXT_USER && $session->canAccess(Session::SECTION_USERS, Membres::DROIT_ECRITURE)) {
 			return true;
 		}
 		// Only users with right to access documents can read documents
-		else if ($this->context == self::CONTEXT_DOCUMENTS && $session->canAccess(Session::SECTION_DOCUMENTS, Membres::DROIT_ACCES)) {
+		else if ($context == self::CONTEXT_DOCUMENTS && $session->canAccess(Session::SECTION_DOCUMENTS, Membres::DROIT_ACCES)) {
 			return true;
 		}
+
+		return false;
+	}
+
+	public function getPathForContext(string $context, $value): string
+	{
+		return $context . '/' . $value;
+	}
+
+	/**
+	 * Create a file in DB from an existing file in the local filesysteme
+	 */
+	static public function createFromExisting(string $path, string $root): File
+	{
+		$ctx = self::getContextFromPath($path);
+		$fullpath = $root . '/' . $path;
+
+		$file = File::create($name, $ctx[0], $ctx[1], $fullpath);
+
+		$file->set('hash', sha1_file($fullpath));
+		$file->set('size', filesize($fullpath));
+		$file->set('modified', filemtime($fullpath));
+		$file->set('created', filemtime($fullpath));
+
+		$file->save();
+
+		return $file;
+	}
+
+	static public function getContextFromPath(string $path): array
+	{
+		$context = strtok($this->path, '/');
+		$value = strtok('');
+
+		return [$context, $value];
+	}
+
+	public function parent(): ?File
+	{
+		if (null === $this->_parent && $this->context == self::CONTEXT_FILE) {
+			$this->_parent = Files::get((int) $this->context_ref);
+		}
+
+		return $this->_parent;
+	}
+
+	public function isPublic(): bool
+	{
+		if ($this->context == self::CONTEXT_FILE) {
+			$context = $this->parent()->context;
+		}
+		else {
+			$context = $this->context;
+		}
+
+		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
+			return true;
+		}
+
+		return false;
 	}
 }
