@@ -17,7 +17,7 @@ class Skriv
 {
 	static protected $skriv;
 
-	static public function render(?File $file, array $options = []): string
+	static public function render(?File $file, ?string $content = null, array $options = []): string
 	{
 		if (!isset($options['prefix'])) {
 			$options['prefix'] = WWW_URL;
@@ -34,7 +34,7 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		$str = $file->fetch();
+		$str = $content ?? $file->fetch();
 
 		$str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
 			$file = Files::get((int)$match[2]);
