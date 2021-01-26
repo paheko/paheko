@@ -375,8 +375,8 @@ class UserTemplate extends Brindille
 		}
 
 		$params['select'] = 'f.*';
-		$params['tables'] = 'files f';
-		$params['where'] .= ' AND f.public = 1';
+		$params['tables'] = 'files f INNER JOIN files f2 ON f2.id = f.context_ref';
+		$params['where'] .= sprintf(' AND f2.context = \'%s\'', File::CONTEXT_WEB);
 
 		if (isset($params['except_in_text'])) {
 			$found = Page::findTaggedAttachments($params['except_in_text']);

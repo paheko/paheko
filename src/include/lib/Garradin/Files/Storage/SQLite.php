@@ -42,7 +42,6 @@ class SQLite implements StorageInterface
 
 	static public function store(File $file, ?string $path, ?string $content): bool
 	{
-		$file->storage_path = null;
 		$db = DB::getInstance();
 
 		if ($db->test('files_contents', 'hash = ?', $file->hash)) {

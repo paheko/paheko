@@ -85,29 +85,32 @@ class Files
 		call_user_func([$from, 'configure'], $from_config);
 		call_user_func([$to, 'configure'], $to_config);
 
-		call_user_func([$from, 'checkLock']);
-		call_user_func([$to, 'checkLock']);
+		try {
+			call_user_func([$from, 'checkLock']);
+			call_user_func([$to, 'checkLock']);
 
-		call_user_func([$from, 'lock']);
-		call_user_func([$to, 'lock']);
+			call_user_func([$from, 'lock']);
+			call_user_func([$to, 'lock']);
 
-		$db = DB::getInstance();
-		$db->begin();
-		$res = EM::getInstance(File::class)->iterate('SELECT * FROM @TABLE;');
+			$db = DB::getInstance();
+			$db->begin();
+			$res = EM::getInstance(File::class)->iterate('SELECT * FROM @TABLE;');
 
-		foreach ($res as $file) {
-			$from_path = call_user_func([$from, 'getPath'], $file);
-			call_user_func([$to, 'store'], $file, $from_path, null);
+			foreach ($res as $file) {
+				$from_path = call_user_func([$from, 'getPath'], $file);
+				call_user_func([$to, 'store'], $file, $from_path, null);
 
-			if (null !== $callback) {
-				$callback($file);
+				if (null !== $callback) {
+					$callback($file);
+				}
 			}
+
+			$db->commit();
 		}
-
-		$db->commit();
-
-		call_user_func([$from, 'unlock']);
-		call_user_func([$to, 'unlock']);
+		finally {
+			call_user_func([$from, 'unlock']);
+			call_user_func([$to, 'unlock']);
+		}
 	}
 
 	/**
@@ -126,7 +129,7 @@ class Files
 		call_user_func([$backend, 'reset']);
 	}
 
-	static public function getContextJoinClause(int $context): ?string
+	static public function getContextJoinClause(string $context): ?string
 	{
 		switch ($context) {
 			case File::CONTEXT_TRANSACTION:
