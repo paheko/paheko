@@ -236,7 +236,7 @@ class Config extends Entity
 				$this->image_fond->save();
 			}
 			else {
-				$this->set('image_fond', File::createFromBase64('image_fond.png', $source['image_fond'], File::CONTEXT_CONFIG, 'image_fond'));
+				$this->set('image_fond', File::createFromBase64('image_fond.png', File::CONTEXT_CONFIG, 'image_fond', $source['image_fond']));
 			}
 
 			unset($source['image_fond']);

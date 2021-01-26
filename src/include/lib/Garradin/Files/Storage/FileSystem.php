@@ -3,6 +3,7 @@
 namespace Garradin\Files\Storage;
 
 use Garradin\Entities\Files\File;
+use Garradin\Utils;
 
 use const Garradin\FILE_STORAGE_CONFIG;
 
@@ -76,11 +77,7 @@ class FileSystem implements StorageInterface
 
 	static public function getPath(File $file): ?string
 	{
-		if (null == $file->storage_path) {
-			$file->storage_path = $file->path() . DIRECTORY_SEPARATOR . $file->name;
-		}
-
-		return self::_getRoot() . DIRECTORY_SEPARATOR . $file->storage_path;
+		return self::_getRoot() . DIRECTORY_SEPARATOR . $file->path();
 	}
 
 	static public function display(File $file): void
@@ -130,6 +127,12 @@ class FileSystem implements StorageInterface
 		return disk_total_space(self::_getRoot());
 	}
 
+	static public function cleanup(): void
+	{
+		// FIXME
+	}
+
+/*
 	static public function sync(): void
 	{
 		$db = DB::getInstance();
@@ -173,6 +176,7 @@ class FileSystem implements StorageInterface
 
 		self::unlock();
 	}
+*/
 
 	static public function reset(): void
 	{

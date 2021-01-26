@@ -199,13 +199,15 @@ class File extends Entity
 
 	static protected function create(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
 	{
-		if (!isset($source_path, $source_content)) {
-			throw new \InvalidArgumentException('Either source path or source content should be set');
+		if (isset($source_path, $source_content)) {
+			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
 		}
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		$file = new self;
 		$file->set('name', $name);
+		$file->set('context', $context);
+		$file->set('context_ref', $context_ref);
 
 		$db = DB::getInstance();
 
@@ -512,7 +514,7 @@ class File extends Entity
 	public function checkReadAccess(Session $session): bool
 	{
 		$context = $this->context;
-		$ref = $this->contex_ref;
+		$ref = $this->context_ref;
 
 		// If it's linked to a file, then we want to know what the parent file is linked to
 		if ($context == self::CONTEXT_FILE) {
@@ -543,7 +545,12 @@ class File extends Entity
 
 	public function getPathForContext(string $context, $value): string
 	{
-		return $context . '/' . $value;
+		return rtrim($context . '/' . $value, '/');
+	}
+
+	public function path(): string
+	{
+		return self::getPathForContext($this->context, $this->context_ref) . '/' . $this->name;
 	}
 
 	/**
