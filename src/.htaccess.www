@@ -6,11 +6,9 @@ DirectoryIndex index.php index.html
 # Au cas où
 <IfModule mod_alias.c>
 	RedirectMatch 403 /include/
-	RedirectMatch 403 /cache/
-	RedirectMatch 403 /plugins/
 	RedirectMatch 403 /templates/
 	RedirectMatch 403 ^/scripts/
-	RedirectMatch 403 /.*\.sqlite
+	RedirectMatch 403 /data/
 	RedirectMatch 403 /.*\.log
 	RedirectMatch 403 /(README|VERSION|COPYING|Makefile|cron\.php)
 	RedirectMatch 403 /config\.(.*)\.php
