@@ -95,4 +95,23 @@ class Upgrade
 			$session->refresh();
 		}
 	}
+
+	/**
+	 * Move data from root to data/ subdirectory
+	 * (migration from 1.0 to 1.1 version)
+	 */
+	static public function moveDataRoot(): void
+	{
+		Utils::safe_mkdir(ROOT . '/data');
+		file_put_contents(ROOT . '/data/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
+
+		rename(ROOT . '/cache', ROOT . '/data/cache');
+		rename(ROOT . '/plugins', ROOT . '/data/plugins');
+
+		$files = glob(ROOT . '/*.sqlite');
+
+		foreach ($files as $file) {
+			rename($file, ROOT . '/data/' . basename($file));
+		}
+	}
 }
