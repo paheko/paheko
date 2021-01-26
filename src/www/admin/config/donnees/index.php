@@ -20,7 +20,6 @@ $form->runIf('restore_file', function () use ($s, $tpl, $session) {
         $r = $s->restoreFromUpload($_FILES['file'], $session->getUser()->id, $check);
         Utils::redirect(ADMIN_URL . 'config/donnees/?ok=restore&code=' . (int)$r);
     } catch (UserException $e) {
-        $form->addError($e->getMessage());
         $tpl->assign('code', $e->getCode());
     }
 }, 'backup_restore');
