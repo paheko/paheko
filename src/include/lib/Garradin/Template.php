@@ -97,6 +97,8 @@ class Template extends \KD2\Smartyer
 
 		$this->register_modifier('html_money', [$this, 'htmlMoney']);
 		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
+
+		$this->register_modifier('local_url', [Utils::class, 'getLocalURL']);
 	}
 
 	protected function htmlMoney($number, bool $hide_empty = true): string

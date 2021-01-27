@@ -61,7 +61,7 @@
 	{if !$content}
 		<p class="block alert">Cette page est vide, cliquez sur « Modifier » pour commencer à rédiger son contenu.</p>
 	{else}
-		<div class="wikiContent">
+		<div class="web-content">
 			{$content|raw}
 		</div>
 

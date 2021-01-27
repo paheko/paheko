@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Web" current="web" is_popup=1 body_id="transparent"}
 
-<div class="wikiContent">
+<div class="web-content">
 	{$content|raw}
 </div>
 

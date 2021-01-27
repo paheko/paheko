@@ -13,8 +13,8 @@
         {/foreach}
     {/if}
     {if isset($custom_css)}
-        {foreach from=$custom_css item="css"}
-            <link rel="stylesheet" type="text/css" href="{$admin_url}static/{$css}?{$version_hash}" media="all" />
+        {foreach from=$custom_css item="css_url"}
+            <link rel="stylesheet" type="text/css" href="{$css_url|local_url:"!/static/styles/"}?{$version_hash}" media="all" />
         {/foreach}
     {/if}
     {if isset($plugin_css)}
