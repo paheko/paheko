@@ -11,7 +11,7 @@ class Modifiers
 		'truncate'        => [self::class, 'truncate'],
 		'protect_contact' => [self::class, 'protect_contact'],
 		'atom_date'       => [self::class, 'atom_date'],
-		'xml_escape'       => [self::class, 'xml_escape'],
+		'xml_escape'      => [self::class, 'xml_escape'],
 	];
 
 	/**

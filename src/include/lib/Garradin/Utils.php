@@ -182,6 +182,26 @@ class Utils
         return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
 
+    static public function getLocalURL(string $url, ?string $default_prefix = null): string
+    {
+        if ($url[0] == '!') {
+            return ADMIN_URL . substr($url, 1);
+        }
+        elseif ($url[0] == '/') {
+            return WWW_URL . ltrim($url, '/');
+        }
+        elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
+            return $url;
+        }
+        else {
+            if (null !== $default_prefix) {
+                $default_prefix = self::getLocalURL($default_prefix);
+            }
+
+            return $default_prefix . $url;
+        }
+    }
+
     static public function getRequestURI()
     {
         if (!empty($_SERVER['REQUEST_URI']))

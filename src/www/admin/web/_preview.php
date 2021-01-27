@@ -10,4 +10,6 @@ $session->requireAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE);
 
 $tpl->assign('content', Skriv::render(null, (string) f('content'), ['prefix' => '#']));
 
+$tpl->assign('custom_css', ['!web/css.php']);
+
 $tpl->display('web/_preview.tpl');
