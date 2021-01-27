@@ -91,14 +91,15 @@ class File extends Entity
 			$args = [$this->context, $this->name];
 
 			if (null === $this->context_ref) {
-				$clause .= 'IS NULL';
+				$clause .= ' IS NULL';
 			}
 			else {
+				$clause .= ' = ?';
 				$args[] = $this->context_ref;
 			}
 
-			$this->assert($this->exists() || !$db->test(self::CLASS, $clause, $args), 'Un fichier avec ce nom existe déjà');
-			$this->assert(!$this->exists() || $db->test(self::CLASS, $clause . ' AND id != ?', $args + [$this->id()]), 'Un fichier avec ce nom existe déjà');
+			$this->assert($this->exists() || !$db->test(self::TABLE, $clause, $args), 'Un fichier avec ce nom existe déjà');
+			$this->assert(!$this->exists() || $db->test(self::TABLE, $clause . ' AND id != ?', $args + [$this->id()]), 'Un fichier avec ce nom existe déjà');
 		}
 	}
 

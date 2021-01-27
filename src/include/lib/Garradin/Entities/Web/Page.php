@@ -46,7 +46,7 @@ class Page extends Entity
 	{
 		$page = new self;
 		$data = compact('type', 'parent_id', 'title', 'status');
-		$data['uri'] = Utils::transformTitleToURI($title);
+		$data['uri'] = $title;
 		$data['content'] = '';
 
 		$page->importForm($data);
@@ -95,7 +95,6 @@ class Page extends Entity
 				$file = $this->_file = new File;
 				$file->type = File::FILE_TYPE_SKRIV;
 				$file->context = File::CONTEXT_WEB;
-				$file->public = 1;
 				$file->image = 0;
 			}
 		}
@@ -111,15 +110,6 @@ class Page extends Entity
 	public function save(): bool
 	{
 		$file = $this->file();
-
-		$this->set('uri', Utils::transformTitleToURI($this->uri));
-
-		if ($this->type == self::TYPE_CATEGORY) {
-			$file->set('name', 'index.skriv');
-		}
-		else {
-			$file->set('name', $this->uri . '.skriv');
-		}
 
 		$file->set('modified', new \DateTime);
 		$file->save();
@@ -154,10 +144,6 @@ class Page extends Entity
 
 		$file = $this->file();
 
-		if (isset($source['content']) && sha1($source['content']) != $file->hash) {
-			$file->store(null, $source['content']);
-		}
-
 		if (isset($source['date']) && isset($source['date_time'])) {
 			$file->importForm(['created' => sprintf('%s %s', $source['date'], $source['date_time'])]);
 		}
@@ -167,6 +153,15 @@ class Page extends Entity
 		}
 		else {
 			$file->set('type', File::FILE_TYPE_SKRIV);
+		}
+
+		if (!empty($source['uri'])) {
+			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+			$file->set('name', $source['uri'] . '.skriv');
+		}
+
+		if (isset($source['content']) && sha1($source['content']) != $file->hash) {
+			$file->store(null, $source['content']);
 		}
 
 		return $this->import($source);

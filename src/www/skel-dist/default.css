@@ -300,6 +300,10 @@ aside.fichier a {
     cursor: pointer;
 }
 
+article > h1 {
+    margin-bottom: 1rem;
+}
+
 @media handheld, screen and (max-width: 980px) {
     body {
         padding: 0;
