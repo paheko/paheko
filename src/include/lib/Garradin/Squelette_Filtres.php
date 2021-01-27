@@ -86,11 +86,6 @@ class Squelette_Filtres
         return Utils::relative_date($date, $avec_heure);
     }
 
-    static public function date_atom($date)
-    {
-        return date(DATE_ATOM, $date);
-    }
-
     static public function alterner($v, $name, $valeur1, $valeur2)
     {
         if (!array_key_exists($name, self::$alt))
@@ -102,34 +97,6 @@ class Squelette_Filtres
             return $valeur1;
         else
             return $valeur2;
-    }
-
-    static public function proteger_contact($contact)
-    {
-        if (!trim($contact))
-            return '';
-
-        if (strpos($contact, '@')) {
-            $reversed = strrev($contact);
-            // https://unicode-table.com/en/FF20/
-            $reversed = strtr($reversed, ['@' => '＠']);
-
-            return sprintf('<a href="#error" onclick="this.href = (this.innerText + \':otliam\').split(\'\').reverse().join(\'\').replace(/＠/, \'@\');"><span style="unicode-bidi:bidi-override;direction: rtl;">%s</span></a>',
-                htmlspecialchars($reversed));
-        }
-        else {
-            return '<a href="'.htmlspecialchars($contact, ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($contact, ENT_QUOTES, 'UTF-8').'</a>';
-        }
-    }
-
-    static public function entites_html($texte)
-    {
-        return htmlspecialchars($texte, ENT_QUOTES, 'UTF-8');
-    }
-
-    static public function echapper_xml($texte)
-    {
-        return str_replace('&#039;', '&apos;', htmlspecialchars($texte, ENT_QUOTES, 'UTF-8'));
     }
 
     static public function formatter_texte($texte)

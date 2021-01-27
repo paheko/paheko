@@ -44,8 +44,6 @@ INSERT INTO wiki_as_files
 	FROM wiki_pages p
 	INNER JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
 
-UPDATE wiki_as_files SET name = 'index.skriv' WHERE type = 1;
-
 -- Build back path, up to ten levels
 UPDATE wiki_as_files AS waf SET
 	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
