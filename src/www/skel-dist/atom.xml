@@ -2,29 +2,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="fr">
 
-	<title type="html">{{$config.nom_asso|escape:xml}}</title>
-	<link href="{{$root_url|escape:xml}}" rel="alternate" type="text/html" title="{{$config.nom_asso|escape:xml}}" />
+	<title type="html">{{$config.nom_asso|xml_escape}}</title>
+	<link href="{{$root_url|xml_escape}}" rel="alternate" type="text/html" title="{{$config.nom_asso|xml_escape}}" />
 
 	{{#articles order="created DESC" limit=1}}
 	<updated>{{$created|atom_date}}</updated>
 	{{/articles}}
 
 	<author>
-		<name>{{$config.nom_asso|escape:xml}}</name>
+		<name>{{$config.nom_asso|xml_escape}}</name>
 	</author>
 
-	<id>{{$root_url|escape:xml}}</id>
+	<id>{{$root_url|xml_escape}}</id>
 	<generator uri="https://fossil.kd2.org/garradin/">Garradin</generator>
 
 	{{#articles order="created DESC" limit=20}}
 	<entry>
-		<title>{{$title|escape:xml}}</title>
-		<link href="{{$url|escape:xml}}" rel="alternate" type="text/html" title="{{$title|escape:xml}}" />
-		<id>{{$url|escape:xml}}</id>
+		<title>{{$title|xml_escape}}</title>
+		<link href="{{$url|xml_escape}}" rel="alternate" type="text/html" title="{{$title|xml_escape}}" />
+		<id>{{$url|xml_escape}}</id>
 		<updated>{{$modified|atom_date}}</updated>
-		<author><name>{{$config.nom_asso|escape:xml}}</name></author>
+		<author><name>{{$config.nom_asso|xml_escape}}</name></author>
 		<content type="html">
-			{{$html|raw|escape:xml}}
+			{{$html|raw|xml_escape}}
 		</content>
 	</entry>
 	{{/articles}}

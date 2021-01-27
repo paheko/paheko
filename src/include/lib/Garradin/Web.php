@@ -97,8 +97,6 @@ class Web
 	{
 		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
-		header('HTTP/1.1 200 OK', 200, true);
-
 		if ($pos = strpos($uri, '?')) {
 			$uri = substr($uri, 0, $pos);
 		}
@@ -106,6 +104,20 @@ class Web
 			// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
 			$uri = substr($uri, strlen(WWW_URI) - 1);
 		}
+
+		if (Config::getInstance()->get('desactiver_site')) {
+
+			// Specific rule for content.css, should always be available, even if website is disabled
+			if ($uri == '/content.css') {
+				header('Content-Type: text/css; charset=utf-8', true);
+				readfile(ROOT . '/www/skel-dist/content.css');
+				exit;
+			}
+
+			Utils::redirect(ADMIN_URL);
+		}
+
+		header('HTTP/1.1 200 OK', 200, true);
 
 		if ($uri == '/') {
 			$skel = 'index.html';

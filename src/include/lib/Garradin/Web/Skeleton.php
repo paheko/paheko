@@ -107,6 +107,31 @@ class Skeleton
 		}
 	}
 
+	public function display(array $params = []): void
+	{
+		if (!$this->exists()) {
+			return;
+		}
+
+		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
+			$ut = new UserTemplate($this->file);
+
+			if (!$this->file) {
+				$ut->setSource($this->defaultPath());
+			}
+
+			$ut->assignArray($params);
+
+			$ut->display();
+		}
+		elseif ($this->file) {
+			$this->file->display();
+		}
+		else {
+			readfile($this->defaultPath());
+		}
+	}
+
 	public function exists()
 	{
 		return $this->file ? true : ($this->defaultPath() ? true : false);
@@ -197,4 +222,18 @@ class Skeleton
 		return $sources;
 	}
 
+	static public function upload(string $name, ?string $file): void
+	{
+		if (empty($_FILES[$file]['tmp_name'])) {
+			File::createAndStore($name, File::CONTEXT_SKELETON, null, null, 'À modifier…');
+		}
+		else {
+			$f = File::upload($file, File::CONTEXT_SKELETON, null);
+
+			if ($f->name != $name) {
+				$f->importForm(['name' => $name]);
+				$f->save();
+			}
+		}
+	}
 }

@@ -70,7 +70,7 @@ class UserTemplate extends Brindille
 		if ($file) {
 			$this->file = $file;
 			$this->hash = sha1(DATA_ROOT . $file->id);
-			$this->modified = $file->modified;
+			$this->modified = $file->modified->getTimestamp();
 		}
 
 		$this->assignArray(self::getRootVariables());
@@ -160,7 +160,7 @@ class UserTemplate extends Brindille
 		return ob_get_clean();
 	}
 
-	public function functionInclude(array $params, UserTemplate $ut, int $line): string
+	public function functionInclude(array $params, UserTemplate $ut, int $line): void
 	{
 		if (empty($params['file'])) {
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
@@ -181,7 +181,7 @@ class UserTemplate extends Brindille
 
 		$params['included_from'] = array_merge($from, [$params['file']]);
 
-		return $s->fetch($params);
+		$s->display($params);
 	}
 
 	public function functionHTTP(array $params): void

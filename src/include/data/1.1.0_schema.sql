@@ -276,6 +276,8 @@ CREATE TABLE IF NOT EXISTS files
     author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
 );
 
+-- Unique index as this is used to make up a file path
+CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (context, IFNULL(context_ref, ''), name);
 CREATE INDEX IF NOT EXISTS files_date ON files (created);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 CREATE INDEX IF NOT EXISTS files_name ON files (name);

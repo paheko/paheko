@@ -83,6 +83,23 @@ class File extends Entity
 	{
 		parent::selfCheck();
 		$this->assert($this->image === 0 || $this->image === 1);
+
+		// Check file path uniqueness
+		if (isset($this->_modified['name'])) {
+			$db = DB::getInstance();
+			$clause = 'context = ? AND name = ? AND context_ref';
+			$args = [$this->context, $this->name];
+
+			if (null === $this->context_ref) {
+				$clause .= 'IS NULL';
+			}
+			else {
+				$args[] = $this->context_ref;
+			}
+
+			$this->assert($this->exists() || !$db->test(self::CLASS, $clause, $args), 'Un fichier avec ce nom existe déjà');
+			$this->assert(!$this->exists() || $db->test(self::CLASS, $clause . ' AND id != ?', $args + [$this->id()]), 'Un fichier avec ce nom existe déjà');
+		}
 	}
 
 	public function getContexts(): array
@@ -116,6 +133,14 @@ class File extends Entity
 
 	public function save(): bool
 	{
+		// Force CSS mimetype
+		if (substr($this->name, -4) == '.css') {
+			$this->set('type', 'text/css');
+		}
+		elseif (substr($this->name, -3) == '.js') {
+			$this->set('type', 'text/javascript');
+		}
+
 		$return = parent::save();
 
 		// Store content in search table
@@ -187,7 +212,7 @@ class File extends Entity
 		return $this;
 	}
 
-	static protected function createAndStore(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
+	static public function createAndStore(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
 	{
 		$file = self::create($name, $context, $context_ref, $source_path, $source_content);
 
@@ -511,7 +536,7 @@ class File extends Entity
 		throw new \LogicException('Unknown render type: ' . $type);
 	}
 
-	public function checkReadAccess(Session $session): bool
+	public function checkReadAccess(?Session $session): bool
 	{
 		$context = $this->context;
 		$ref = $this->context_ref;
@@ -521,10 +546,15 @@ class File extends Entity
 			return $this->parent()->checkReadAccess($session);
 		}
 		// Web pages and config files are always public
-		else if ($context == self::CONTEXT_WEB || $context == self::CONTEXT_CONFIG) {
+		else if ($context == self::CONTEXT_WEB || $context == self::CONTEXT_CONFIG || $context == self::CONTEXT_SKELETON) {
 			return true;
 		}
-		else if ($context == self::CONTEXT_TRANSACTION && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
+
+		if (null === $session) {
+			return false;
+		}
+
+		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
 			return true;
 		}
 		// The user can access his own profile files
