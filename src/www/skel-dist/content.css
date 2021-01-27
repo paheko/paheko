@@ -75,6 +75,10 @@ aside.fichier a:hover {
     font-size: .8em;
 }
 
+img {
+    max-width: 100%;
+}
+
 .imageBrowser {
     position: fixed;
     top: 0;

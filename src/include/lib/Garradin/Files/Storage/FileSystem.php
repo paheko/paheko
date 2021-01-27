@@ -59,7 +59,7 @@ class FileSystem implements StorageInterface
 			return copy($path, $target);
 		}
 		else {
-			return file_put_contents($target, $content);
+			return file_put_contents($target, $content) === false ? false : true;
 		}
 	}
 
