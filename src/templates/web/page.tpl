@@ -9,13 +9,13 @@
 	{/if}
 	<ul>
 		<li><a href="{$admin_url}web/?parent={$page.parent_id}">Retour à la liste</a></li>
-		{if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE)}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 			<li><a href="{$admin_url}web/edit.php?id={$page.id}">Modifier</a></li>
 		{/if}
 		{if $page.status == $page::STATUS_ONLINE && !$config.desactiver_site}
 			<li><a href="{$page->url()}">Voir sur le site</a></li>
 		{/if}
-		{if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 			<li><a href="{$admin_url}web/delete.php?id={$page.id}">Supprimer</a></li>
 		{/if}
 	</ul>

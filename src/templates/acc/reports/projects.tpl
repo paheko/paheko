@@ -9,7 +9,7 @@
 
 	<ul>
 		<li><a href="{$admin_url}acc/years/">Exercices</a></li>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
 		{/if}
 		<li class="current"><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>

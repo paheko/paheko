@@ -58,10 +58,10 @@ elseif ($id && empty($query->query))
 // Recherche SQL
 if (f('sql_query')) {
 	// Only admins can run custom queries, others can only run saved queries
-	$session->requireAccess($target, Membres::DROIT_ADMIN);
+	$session->requireAccess($target, $session::ACCESS_ADMIN);
 	$sql_query = f('sql_query');
 
-	if ($session->canAccess('config', Membres::DROIT_ADMIN)) {
+	if ($session->canAccess('config', $session::ACCESS_ADMIN)) {
 		$is_unprotected = (bool) f('unprotected');
 	}
 	else {
@@ -186,7 +186,7 @@ elseif ($target === 'compta')
 }
 
 $columns = $recherche->getColumns($target);
-$is_admin = $session->canAccess($target, Membres::DROIT_ADMIN);
+$is_admin = $session->canAccess($target, $session::ACCESS_ADMIN);
 $schema = $recherche->schema($target);
 
 $tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search', 'target', 'is_unprotected'));

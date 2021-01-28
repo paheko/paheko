@@ -3,6 +3,6 @@ namespace Garradin;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ACCES);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_READ);
 
 $membres = new Membres;

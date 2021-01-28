@@ -7,7 +7,7 @@
 	<dd>
 		{$list->count()}
 		<em class="help">(N'apparaît ici que l'inscription la plus récente de chaque membre.)</em>
-		{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 		{linkbutton href="%s&export=csv"|args:$self_url shape="export" label="Export CSV"}
 		{linkbutton href="%s&export=ods"|args:$self_url shape="export" label="Export tableur"}
 		{/if}

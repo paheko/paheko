@@ -9,7 +9,6 @@ use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
 use Garradin\Membres\Session;
-use Garradin\Membres;
 use Garradin\Static_Cache;
 use Garradin\Utils;
 use Garradin\Entities\Web\Page;
@@ -555,7 +554,7 @@ class File extends Entity
 			return false;
 		}
 
-		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess(Session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)) {
+		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 			return true;
 		}
 		// The user can access his own profile files
@@ -563,11 +562,11 @@ class File extends Entity
 			return true;
 		}
 		// Only users able to manage users can see their profile files
-		else if ($context == self::CONTEXT_USER && $session->canAccess(Session::SECTION_USERS, Membres::DROIT_ECRITURE)) {
+		else if ($context == self::CONTEXT_USER && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)) {
 			return true;
 		}
 		// Only users with right to access documents can read documents
-		else if ($context == self::CONTEXT_DOCUMENTS && $session->canAccess(Session::SECTION_DOCUMENTS, Membres::DROIT_ACCES)) {
+		else if ($context == self::CONTEXT_DOCUMENTS && $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)) {
 			return true;
 		}
 

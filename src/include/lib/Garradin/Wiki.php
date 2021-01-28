@@ -208,7 +208,7 @@ class Wiki
             throw new UserException('Vous n\'avez pas accès au wiki.');
         }
 
-        if ($this->restriction_droit == Membres::DROIT_ADMIN)
+        if ($this->restriction_droit == $session::ACCESS_ADMIN)
             return '1';
 
         return '('.$prefix.'droit_lecture = '.self::LECTURE_NORMAL.' OR '.$prefix.'droit_lecture = '.self::LECTURE_PUBLIC.'
@@ -222,12 +222,12 @@ class Wiki
             throw new \UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
-        if ($this->restriction_droit < Membres::DROIT_ACCES)
+        if ($this->restriction_droit < $session::ACCESS_READ)
         {
             return false;
         }
 
-        if ($this->restriction_droit == Membres::DROIT_ADMIN
+        if ($this->restriction_droit == $session::ACCESS_ADMIN
             || $lecture == self::LECTURE_NORMAL || $lecture == self::LECTURE_PUBLIC
             || $lecture == $this->restriction_categorie)
             return true;
@@ -242,12 +242,12 @@ class Wiki
             throw new \UnexpectedValueException('setRestrictionCategorie doit être appelé auparavant.');
         }
 
-        if ($this->restriction_droit < Membres::DROIT_ECRITURE)
+        if ($this->restriction_droit < $session::ACCESS_WRITE)
         {
             return false;
         }
 
-        if ($this->restriction_droit == Membres::DROIT_ADMIN
+        if ($this->restriction_droit == $session::ACCESS_ADMIN
             || $ecriture == self::ECRITURE_NORMAL
             || $ecriture == $this->restriction_categorie)
             return true;

@@ -6,7 +6,7 @@ use Garradin\Web\Render\Skriv;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
 $tpl->assign('content', Skriv::render(null, (string) f('content'), ['prefix' => '#']));
 

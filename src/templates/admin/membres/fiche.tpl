@@ -3,8 +3,8 @@
 <nav class="tabs">
     <ul>
         <li class="current"><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
-        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
-        {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}<li><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>{/if}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user.id != $membre.id}
             <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
         {/if}
     </ul>
@@ -31,11 +31,11 @@
         {if count($services)}
             {linkbutton href="!services/user.php?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
         {/if}
-        {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
             {linkbutton href="!services/save.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
         {/if}
     </dd>
-    {if $session->canAccess('membres', Membres::DROIT_ACCES)}
+    {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
         {if !empty($transactions_linked)}
             <dt>Écritures comptables liées</dt>
             <dd><a href="{$admin_url}acc/transactions/user.php?id={$membre.id}">{$transactions_linked} écritures comptables liées à ce membre</a></dd>

@@ -8,7 +8,7 @@ use Garradin\Entities\Accounting\Year;
 
 require_once __DIR__ . '/../../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 if (f('new') && $form->check('acc_years_new')) {
 	try {

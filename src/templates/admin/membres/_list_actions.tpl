@@ -1,6 +1,6 @@
 		<tfoot>
 			<tr>
-				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>{/if}
+				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>{/if}
 				<td class="actions" colspan="{$colspan}">
 					<em>Pour les membres cochés :</em>
 					{csrf_field key="membres_action"}

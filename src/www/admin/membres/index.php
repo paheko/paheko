@@ -1,21 +1,21 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
-$cats = new Membres\Categories;
-
-$categories = $cats->listSimple();
-$hidden_categories = $cats->listHidden();
+$categories = Categories::listSimple();
+$hidden_categories = Categories::listHidden();
 
 $current_cat = (int) qg('cat') ?: null;
 
 // Deny access to hidden categories to users that are not admins
-if ($current_cat && !$session->canAccess('membres', Membres::DROIT_ADMIN) && array_key_exists($current_cat, $hidden_categories)) {
+if ($current_cat && !$session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && array_key_exists($current_cat, $hidden_categories)) {
 	$current_cat = null;
 }
 
-$can_edit = $session->canAccess('membres', Membres::DROIT_ADMIN);
+$can_edit = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 $list = $membres->listByCategory($current_cat);
 $list->loadFromQueryString();

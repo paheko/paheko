@@ -4,7 +4,7 @@
 
 <nav class="tabs">
 	<aside>
-	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
 		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
 	{/if}

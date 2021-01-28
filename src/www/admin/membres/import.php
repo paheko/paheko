@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 $import = new Membres\Import;
 

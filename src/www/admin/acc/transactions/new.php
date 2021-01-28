@@ -7,7 +7,7 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 
 if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
