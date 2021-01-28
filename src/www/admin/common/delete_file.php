@@ -1,7 +1,8 @@
 <?php
 namespace Garradin;
 
-use Garradin\Services\Services;
+use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 
 if (!defined('Garradin\ROOT')) {
 	die('Access denied.');
@@ -12,19 +13,18 @@ if (!isset($csrf_key, $redirect)) {
 }
 
 try {
-	$file = new Fichiers(qg('id'));
+	$file = Files::get(qg('id'));
 }
 catch (\InvalidArgumentException $e) {
 	throw new UserException($e->getMessage());
 }
 
-if (!$file->checkAccess($session))
-{
-    throw new UserException('Vous n\'avez pas accès à ce fichier.');
+if (!$file->checkWriteAccess($session)) {
+    throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
 $form->runIf('delete', function () use ($file) {
-	$file->remove();
+	$file->delete();
 }, $csrf_key, $redirect);
 
 $tpl->assign(compact('file', 'csrf_key'));

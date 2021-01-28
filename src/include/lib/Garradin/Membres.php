@@ -6,6 +6,9 @@ use KD2\Security;
 use KD2\SMTP;
 use Garradin\Membres\Session;
 
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
 class Membres
 {
     const ITEMS_PER_PAGE = 50;
@@ -452,14 +455,7 @@ class Membres
         {
             $id = (int) $id;
 
-            // Suppression des fichiers liés
-            $files = Fichiers::listLinkedFiles(Fichiers::LIEN_MEMBRES, $id, null);
-
-            foreach ($files as $file)
-            {
-                $file = new Fichiers($file->id, $file);
-                $file->remove();
-            }
+            Files::deleteLinkedFiles(File::CONTEXT_USER, $id);
         }
 
         Plugin::fireSignal('membre.suppression', $membres);

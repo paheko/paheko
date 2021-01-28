@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Files\File;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
@@ -65,8 +66,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 
 		// Append fileTYPE_ANALYTICAL
 		if (!empty($_FILES['file']['name'])) {
-			$file = Fichiers::upload($_FILES['file']);
-			$file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
+			File::upload('file', File::CONTEXT_TRANSACTION, $transaction->id());
 		}
 
 		 // Link members

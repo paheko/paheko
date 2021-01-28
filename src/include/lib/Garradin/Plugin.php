@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+
 class Plugin
 {
 	const PLUGIN_ID_SYNTAX = '[a-z]+(?:_[a-z]+)*';

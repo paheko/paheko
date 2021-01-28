@@ -170,7 +170,7 @@ class Files
 		DB::getInstance()->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
 	}
 
-	static public function deleteLinkedFiles(int $context, $value): void
+	static public function deleteLinkedFiles(string $context, $value): void
 	{
 		if (null === $value) {
 			throw new \InvalidArgumentException('value argument cannot be null');
@@ -185,11 +185,20 @@ class Files
 
 	static public function iterateLinkedTo(string $context, $value = null): \Generator
 	{
+		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
+			throw new \InvalidArgumentException('Invalid context');
+		}
+
 		$db = DB::getInstance();
 		$where = $value !== null ? sprintf(' AND f.context_ref = %s', $db->quote($value)) : '';
 		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN %s WHERE 1 %s;', self::getContextJoinClause($context), $where);
 
 		return EM::getInstance(File::class)->iterate($sql);
+	}
+
+	static public function listLinkedFiles(string $context, $value = null): array
+	{
+		return iterator_to_array(self::iterateLinkedTo($context, $value));
 	}
 
 	static public function get(int $id): ?File
