@@ -30,7 +30,6 @@ class Config extends Entity
 	protected $champ_identifiant;
 	protected $champ_identite;
 
-	protected $version;
 	protected $last_chart_change;
 	protected $last_version_check;
 
@@ -63,7 +62,6 @@ class Config extends Entity
 		'champ_identifiant'     => 'string',
 		'champ_identite'        => 'string',
 
-		'version'               => 'string',
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',
 
@@ -99,7 +97,7 @@ class Config extends Entity
 
 		$db = DB::getInstance();
 
-		$config = $db->getAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
+		$config = $db->getAssoc('SELECT key, value FROM config ORDER BY key;');
 
 		$default = array_fill_keys(array_keys($this->_types), null);
 		$config = array_merge($default, $config);
@@ -180,7 +178,7 @@ class Config extends Entity
 				}
 			}
 
-			$db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
+			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);',
 				[$key, $value]);
 		}
 
@@ -243,20 +241,6 @@ class Config extends Entity
 		}
 
 		parent::importForm($source);
-	}
-
-	public function getVersion(): string
-	{
-		return $this->get('version');
-	}
-
-	public function setVersion(string $version): void
-	{
-		$this->config->version = $version;
-
-		$db = DB::getInstance();
-		$db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-			['version', $version]);
 	}
 
 	protected function _filterType(string $key, $value)

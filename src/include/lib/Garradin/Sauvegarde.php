@@ -58,7 +58,12 @@ class Sauvegarde
 			}
 
 			$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
-			$version = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
+			$version = DB::parseVersion($db->querySingle('PRAGMA user_version;'));
+
+			if (null === $version) {
+				// for versions prior to 1.1.0
+				$version = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
+			}
 
 			// Delete SHM and WAL files
 			if ($db->querySingle('PRAGMA journal_mode;') == 'wal') {

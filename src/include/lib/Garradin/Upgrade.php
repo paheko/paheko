@@ -10,7 +10,7 @@ class Upgrade
 
 	static public function preCheck(): bool
 	{
-		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
+		$v = DB::getInstance()->version();
 
 		if (version_compare($v, garradin_version(), '>='))
 		{
@@ -41,17 +41,13 @@ class Upgrade
 
 	static public function upgrade()
 	{
-		$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
+		$db = DB::getInstance();
+		$v = $db->version();
 
 		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);
 
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
-
-		$db = DB::getInstance();
-
-		// reset last version check
-		$db->exec('UPDATE config SET valeur = NULL WHERE cle = \'last_version_check\';');
 
 		// Créer une sauvegarde automatique
 		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
@@ -71,7 +67,10 @@ class Upgrade
 
 			Utils::clearCaches();
 
-			DB::getInstance()->update('config', ['valeur' => garradin_version()], 'cle = \'version\';');
+			$db->setVersion(garradin_version());
+
+			// reset last version check
+			$db->exec('UPDATE config SET value = NULL WHERE key = \'last_version_check\';');
 
 			Static_Cache::remove('upgrade');
 
