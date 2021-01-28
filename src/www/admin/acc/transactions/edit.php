@@ -73,6 +73,8 @@ if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
 		$line->credit = Utils::moneyToInteger($line->credit);
 		$line->debit = Utils::moneyToInteger($line->debit);
 	}
+
+	unset($line);
 }
 else {
 	$lines = $transaction->getLinesWithAccounts();
@@ -80,6 +82,8 @@ else {
 	foreach ($lines as $k => &$line) {
 		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
 	}
+
+	unset($line);
 }
 
 $has_reconciled_lines = false;
