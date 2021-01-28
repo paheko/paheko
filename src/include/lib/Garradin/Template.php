@@ -7,6 +7,7 @@ use KD2\HTTP;
 use KD2\Translate;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Users\Category;
 
 class Template extends \KD2\Smartyer
 {
@@ -68,7 +69,7 @@ class Template extends \KD2\Smartyer
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 		$this->register_function('diff', [$this, 'diff']);
 		$this->register_function('pagination', [$this, 'pagination']);
-		$this->register_function('format_droits', [$this, 'formatDroits']);
+		$this->register_function('display_permissions', [$this, 'displayPermissions']);
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
@@ -862,78 +863,16 @@ class Template extends \KD2\Smartyer
 		return $out;
 	}
 
-	protected function formatDroits(array $params)
+	protected function displayPermissions(array $params): string
 	{
-		$droits = $params['droits'];
+		$perms = $params['permissions'];
 
-		$out = ['connexion' => '', 'inscription' => '', 'membres' => '', 'compta' => '',
-			'wiki' => '', 'config' => ''];
-		$classes = [
-			Membres::DROIT_AUCUN   =>  'aucun',
-			Membres::DROIT_ACCES   =>  'acces',
-			Membres::DROIT_ECRITURE=>  'ecriture',
-			Membres::DROIT_ADMIN   =>  'admin',
-		];
+		$out = [];
 
-		foreach ($droits as $cle=>$droit)
-		{
-			$cle = str_replace('droit_', '', $cle);
-
-			if (array_key_exists($cle, $out))
-			{
-
-				$class = $classes[$droit];
-				$desc = false;
-				$s = false;
-
-				if ($cle == 'connexion')
-				{
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc = 'N\'a pas le droit de se connecter';
-					else
-						$desc = 'A le droit de se connecter';
-				}
-				elseif ($cle == 'inscription')
-				{
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc = 'N\'a pas le droit de s\'inscrire seul';
-					else
-						$desc = 'A le droit de s\'inscrire seul';
-				}
-				elseif ($cle == 'config')
-				{
-					$s = '&#x2611;';
-
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc = 'Ne peut modifier la configuration';
-					else
-						$desc = 'Peut modifier la configuration';
-				}
-				elseif ($cle == 'compta')
-				{
-					$s = '&euro;';
-				}
-
-				if (!$s)
-					$s = strtoupper($cle[0]);
-
-				if (!$desc)
-				{
-					$desc = ucfirst($cle). ' : ';
-
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc .= 'Pas accès';
-					elseif ($droit == Membres::DROIT_ACCES)
-						$desc .= 'Lecture uniquement';
-					elseif ($droit == Membres::DROIT_ECRITURE)
-						$desc .= 'Lecture & écriture';
-					else
-						$desc .= 'Administration';
-				}
-
-				$out[$cle] = '<b class="'.$class.' '.$cle.'" title="'
-					.htmlspecialchars($desc, ENT_QUOTES, 'UTF-8').'">'.$s.'</b>';
-			}
+		foreach (Category::PERMISSIONS as $name => $config) {
+			$access = $perms->{'perm_' . $name};
+			$label = $config['options'][$access];
+			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $access, $name, htmlspecialchars($label), $config['shape']);
 		}
 
 		return implode(' ', $out);

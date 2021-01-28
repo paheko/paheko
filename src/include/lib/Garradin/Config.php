@@ -284,7 +284,7 @@ class Config extends Entity
 
 		$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
 
-		$this->assert($db->test('membres_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
+		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
 	}
 
 	public function getConfig()

@@ -5,6 +5,7 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Chart;
 use Garradin\Entities\Accounting\Year;
+use Garradin\Entities\Users\Category;
 
 /**
  * Pour procéder à l'installation de l'instance Garradin
@@ -65,42 +66,37 @@ class Install
 		$config->set('pays', 'FR');
 
 		$champs = Membres\Champs::importInstall();
-		$champs->save(false); // Pas de copie car pas de table membres existante
+		$champs->create(); // Pas de copie car pas de table membres existante
 
 		$config->set('champ_identifiant', 'email');
 		$config->set('champ_identite', 'nom');
 
 		// Création catégories
-		$cats = new Membres\Categories;
-		$id = $cats->add([
-			'nom' => 'Membres actifs',
-		]);
-		$config->set('categorie_membres', $id);
+		$cat = new Category;
+		$cat->importForm(['name' => 'Membres actifs']);
+		$cat->save();
 
-		$id = $cats->add([
-			'nom' => 'Anciens membres',
-			'droit_inscription' => Membres::DROIT_AUCUN,
-			'droit_wiki' => Membres::DROIT_AUCUN,
-			'droit_membres' => Membres::DROIT_AUCUN,
-			'droit_compta' => Membres::DROIT_AUCUN,
-			'droit_config' => Membres::DROIT_AUCUN,
-			'droit_connexion' => Membres::DROIT_AUCUN,
-			'cacher' => 1,
-		]);
+		$config->set('categorie_membres', $cat->id());
 
-		$id = $cats->add([
-			'nom' => 'Administrateurs',
-			'droit_inscription' => Membres::DROIT_AUCUN,
-			'droit_wiki' => Membres::DROIT_ADMIN,
-			'droit_membres' => Membres::DROIT_ADMIN,
-			'droit_compta' => Membres::DROIT_ADMIN,
-			'droit_config' => Membres::DROIT_ADMIN,
+		$cat = new Category;
+		$cat->importForm([
+			'name' => 'Anciens membres',
+			'hidden' => 1,
 		]);
+		$cat->setAllPermissions(Session::ACCESS_NONE);
+		$cat->save();
+
+		$cat = new Category;
+		$cat->importForm([
+			'name' => 'Administrateurs',
+		]);
+		$cat->setAllPermissions(Session::ACCESS_ADMIN);
+		$cat->save();
 
 		// Création premier membre
 		$membres = new Membres;
 		$id_membre = $membres->add([
-			'id_categorie'  =>  $id,
+			'category_id'  =>  $cat->id(),
 			'nom'           =>  $nom_membre,
 			'email'         =>  $email_membre,
 			'passe'         =>  $passe_membre,

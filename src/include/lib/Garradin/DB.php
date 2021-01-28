@@ -104,11 +104,19 @@ class DB extends SQLite3
      */
     public function setVersion(string $version): void
     {
-        if (!preg_match('/^\d+\.\d+\.\d+(?:-(?:beta|rc)(\d+))?$/', $version, $match)) {
+        if (!preg_match('/^(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)(\d+))?$/', $version, $match)) {
             throw new \InvalidArgumentException('Invalid version number: ' . $version);
         }
 
-        $version = ($match[1] * 100 * 100 * 100) + ($match[2] * 100 * 100) + ($match[3] * 100) + ($match[4]);
+        $version = ($match[1] * 100 * 100 * 100) + ($match[2] * 100 * 100) + ($match[3] * 100);
+
+        if (isset($match[4]) && $match[4] == 'beta') {
+            $version += $match[5];
+        }
+        elseif (isset($match[4]) && $match[4] == 'rc') {
+            $version += $match[5] + 50;
+        }
+
         $this->db->exec(sprintf('PRAGMA user_version = %d;', $version));
     }
 

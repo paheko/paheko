@@ -193,6 +193,9 @@ class Utils
         elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
             return $url;
         }
+        elseif ($url == '') {
+            return ADMIN_URL;
+        }
         else {
             if (null !== $default_prefix) {
                 $default_prefix = self::getLocalURL($default_prefix);
@@ -245,15 +248,9 @@ class Utils
         return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
-    public static function redirect($destination=false, $exit=true)
+    public static function redirect($destination = '', $exit=true)
     {
-        if (empty($destination) || !preg_match('/^https?:\/\//', $destination))
-        {
-            if (empty($destination))
-                $destination = WWW_URL;
-            else
-                $destination = WWW_URL . preg_replace('/^\//', '', $destination);
-        }
+        $destination = self::getLocalURL($destination);
 
         if (PHP_SAPI == 'cli') {
             echo 'Please visit ' . $destination . PHP_EOL;

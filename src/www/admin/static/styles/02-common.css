@@ -143,7 +143,7 @@ h2.ruler:after {
     white-space: pre;
 }
 
-.droits b {
+.permissions b {
     border: 2px solid #999;
     border-radius: 1em;
     color: #000;
@@ -159,25 +159,25 @@ h2.ruler:after {
     font-family: "gicon", "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 
-.droits b.aucun {
+.permissions b.access_0 {
     border-color: #ccc;
     background: #eee;
     color: #999;
 }
 
-.droits b.acces {
+.permissions b.access_1 {
     border-color: #cc9;
     color: #660;
     background: #ffe;
 }
 
-.droits b.ecriture {
+.permissions b.access_2 {
     border-color: #9c9;
     color: #060;
     background: #efe;
 }
 
-.droits b.aucun:before {
+.permissions b.access_0:before {
     content: "X";
     position: absolute;
     left: 0;
@@ -189,7 +189,7 @@ h2.ruler:after {
     overflow: hidden;
 }
 
-.droits b.admin {
+.permissions b.access_9 {
     color: #900;
     border-color: #c99;
     background: #fee;

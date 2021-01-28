@@ -1,23 +1,25 @@
 CREATE TABLE IF NOT EXISTS config (
--- Configuration de Garradin
-    cle TEXT PRIMARY KEY NOT NULL,
-    valeur TEXT
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NULL
 );
 
-CREATE TABLE IF NOT EXISTS membres_categories
--- Catégories de membres
+CREATE TABLE IF NOT EXISTS users_categories
+-- Users categories, mainly used to manage rights
 (
     id INTEGER PRIMARY KEY NOT NULL,
-    nom TEXT NOT NULL,
+    name TEXT NOT NULL,
 
-    droit_web INTEGER NOT NULL DEFAULT 1,
-    droit_documents INTEGER NOT NULL DEFAULT 1,
-    droit_membres INTEGER NOT NULL DEFAULT 1,
-    droit_compta INTEGER NOT NULL DEFAULT 1,
-    droit_inscription INTEGER NOT NULL DEFAULT 0,
-    droit_connexion INTEGER NOT NULL DEFAULT 1,
-    droit_config INTEGER NOT NULL DEFAULT 0,
-    cacher INTEGER NOT NULL DEFAULT 0
+    -- Permissions, 0 = no access, 1 = read-only, 2 = read-write, 9 = admin
+    perm_web INTEGER NOT NULL DEFAULT 1,
+    perm_documents INTEGER NOT NULL DEFAULT 1,
+    perm_users INTEGER NOT NULL DEFAULT 1,
+    perm_accounting INTEGER NOT NULL DEFAULT 1,
+
+    perm_subscribe INTEGER NOT NULL DEFAULT 0,
+    perm_connect INTEGER NOT NULL DEFAULT 1,
+    perm_config INTEGER NOT NULL DEFAULT 0,
+
+    hidden INTEGER NOT NULL DEFAULT 0
 );
 
 -- Membres de l'asso

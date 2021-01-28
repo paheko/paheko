@@ -11,15 +11,12 @@ if (qg('uri')) {
 	throw new UserException('Page introuvable');
 }
 
-$cats = new Membres\Categories;
-$categorie = $cats->get($user->id_categorie);
-
 $homepage = Config::getInstance()->get('admin_homepage');
 
 $banner = null;
 Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session], $banner);
 
-$tpl->assign(compact('categorie', 'homepage', 'banner'));
+$tpl->assign(compact('homepage', 'banner'));
 
 $tpl->display('admin/index.tpl');
 flush();
