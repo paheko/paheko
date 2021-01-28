@@ -8,11 +8,6 @@ use Garradin\Membres\Session;
 
 class Membres
 {
-    const DROIT_AUCUN = Session::ACCESS_NONE;
-    const DROIT_ACCES = Session::ACCESS_READ;
-    const DROIT_ECRITURE = Session::ACCESS_WRITE;
-    const DROIT_ADMIN = Session::ACCESS_ADMIN;
-
     const ITEMS_PER_PAGE = 50;
 
     // Gestion des données ///////////////////////////////////////////////////////
@@ -169,9 +164,9 @@ class Membres
             unset($data['passe']);
         }
 
-        if (empty($data['id_categorie']))
+        if (empty($data['category_id']))
         {
-            $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
+            $data['category_id'] = Config::getInstance()->get('categorie_membres');
         }
 
         $db->insert('membres', $data);
@@ -225,9 +220,9 @@ class Membres
             unset($data['passe']);
         }
 
-        if (isset($data['id_categorie']) && empty($data['id_categorie']))
+        if (isset($data['category_id']) && empty($data['category_id']))
         {
-            $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
+            $data['category_id'] = Config::getInstance()->get('categorie_membres');
         }
 
         if (empty($data))
@@ -358,10 +353,10 @@ class Membres
         return true;
     }
 
-    public function listAllByCategory($id_categorie, $only_with_email = false)
+    public function listAllByCategory($category_id, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';
-        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?' . $where, (int)$id_categorie);
+        return DB::getInstance()->get('SELECT id, email FROM membres WHERE category_id = ?' . $where, (int)$category_id);
     }
 
     public function listByCategory(?int $category_id): DynamicList
@@ -398,7 +393,7 @@ class Membres
         }
 
         $tables = 'membres';
-        $conditions = $category_id ? sprintf('id_categorie = %d', $category_id) : sprintf('id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)');
+        $conditions = $category_id ? sprintf('category_id = %d', $category_id) : sprintf('category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1)');
 
         $order = $identity;
 
@@ -419,11 +414,11 @@ class Membres
 
         if (is_int($cat) && $cat)
         {
-            $query .= sprintf('WHERE id_categorie = %d', $cat);
+            $query .= sprintf('WHERE category_id = %d', $cat);
         }
         elseif (is_array($cat))
         {
-            $query .= sprintf('WHERE id_categorie IN (%s)', implode(',', $cat));
+            $query .= sprintf('WHERE category_id IN (%s)', implode(',', $cat));
         }
 
         $query .= ';';
@@ -434,7 +429,7 @@ class Membres
     public function countAllButHidden()
     {
         $db = DB::getInstance();
-        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
+        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
     }
 
     static public function changeCategorie($id_cat, $membres)
@@ -446,7 +441,7 @@ class Membres
 
         $db = DB::getInstance();
         return $db->update('membres',
-            ['id_categorie' => (int)$id_cat],
+            ['category_id' => (int)$id_cat],
             sprintf('id IN (%s)', implode(',', $membres))
         );
     }

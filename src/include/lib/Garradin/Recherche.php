@@ -232,12 +232,12 @@ class Recherche
 		{
 			$champs = Config::getInstance()->get('champs_membres');
 
-			$columns['id_categorie'] = (object) [
+			$columns['category_id'] = (object) [
 					'textMatch'=> false,
 					'label'    => 'Catégorie',
 					'type'     => 'enum',
 					'null'     => false,
-					'values'   => $db->getAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;'),
+					'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE NOCASE;'),
 				];
 
 			foreach ($champs->getList() as $champ => $config)
@@ -642,7 +642,7 @@ class Recherche
 			$db = DB::getInstance();
 			static $allowed = [
 				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null],
-				'membres' => ['membres' => null, 'membres_categories' => null],
+				'membres' => ['membres' => null, 'users_categories' => null],
 			];
 
 			if ($unprotected) {
@@ -717,7 +717,7 @@ class Recherche
 		if ($target == 'membres') {
 			$tables = [
 				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'users_categories\';'),
 			];
 		}
 		elseif ($target == 'compta') {

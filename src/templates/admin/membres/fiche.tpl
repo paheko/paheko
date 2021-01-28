@@ -50,7 +50,7 @@
 <aside class="describe">
 	<dl class="describe">
 		<dt>Catégorie</dt>
-		<dd>{$categorie.nom} <span class="droits">{format_droits droits=$categorie}</span></dd>
+		<dd>{$categorie.nom} <span class="permissions">{display_permissions permissions=$categorie}</span></dd>
 		<dt>Inscription</dt>
 		<dd>{$membre.date_inscription|date_short}</dd>
 		<dt>Dernière connexion</dt>

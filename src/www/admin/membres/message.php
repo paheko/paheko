@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
 if (empty($user->email))
@@ -46,9 +48,7 @@ if (f('save'))
     }
 }
 
-$cats = new Membres\Categories;
-
-$tpl->assign('categorie', $cats->get($membre->id_categorie));
+$tpl->assign('categorie', Categories::get($membre->category_id));
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/membres/message.tpl');

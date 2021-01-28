@@ -1,9 +1,10 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
-$cats = new Membres\Categories;
 $recherche = new Recherche;
 
 if (f('send'))
@@ -55,7 +56,7 @@ if (f('send'))
     }
 }
 
-$tpl->assign('categories', $cats->listNotHidden());
+$tpl->assign('categories', Categories::listNotHidden());
 $tpl->assign('recherches', $recherche->getList($user->id, 'membres'));
 
 $tpl->display('admin/membres/message_collectif.tpl');
