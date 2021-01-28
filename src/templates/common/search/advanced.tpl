@@ -3,7 +3,7 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($query));
 assert(isset($is_admin));
-$sql_disabled = !$is_admin || (!$session->canAccess('config', $session::ACCESS_ADMIN) && $is_unprotected);
+$sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
@@ -15,7 +15,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', $session::ACCESS_A
 		<pre class="sql_schema">{foreach from=$schema item="table"}{$table}<br />{/foreach}</pre>
 		<dl>
 			{input type="textarea" name="sql_query" cols="100" rows="7" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
-			{if $session->canAccess('config', $session::ACCESS_ADMIN)}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
 				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 			{/if}

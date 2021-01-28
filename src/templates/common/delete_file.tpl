@@ -2,7 +2,7 @@
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer ce fichier ?"
-	warning="Êtes-vous sûr de vouloir supprimer le fichier « %s » ?"|args:$file.nom
+	warning="Êtes-vous sûr de vouloir supprimer le fichier « %s » ?"|args:$file.name
 }
 
 {include file="admin/_foot.tpl"}

@@ -43,7 +43,7 @@ if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 
 		// Append file
 		if (!empty($_FILES['file']['name'])) {
-			File::upload($_FILES['file'], File::CONTEXT_TRANSACTION, $transaction->id());
+			File::upload('file', File::CONTEXT_TRANSACTION, $transaction->id());
 		}
 
 		// Link members

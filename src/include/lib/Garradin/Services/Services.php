@@ -55,7 +55,7 @@ class Services
 	static public function listWithStats()
 	{
 		$db = DB::getInstance();
-		$hidden_cats = array_keys((new Categories)->listHidden());
+		$hidden_cats = array_keys(Categories::listHidden());
 
 		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) su2 ON su2.id = su.id

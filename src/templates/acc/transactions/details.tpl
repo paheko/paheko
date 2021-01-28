@@ -91,9 +91,9 @@
 	{foreach from=$files item="file"}
 	<dd>
 		<aside class="file">
-			<a target="_blank" href="{$file.url}">{$file.nom}</a>
-			<small>({$file.type}, {$file.taille|format_bytes})</small>
-			{linkbutton shape="download" href=$file.url target="_blank" label="Télécharger"}
+			<a target="_blank" href="{$file.url}">{$file.name}</a>
+			<small>({$file.type}, {$file.size|format_bytes})</small>
+			{linkbutton shape="download" href=$file->url() target="_blank" label="Télécharger"}
 			{linkbutton shape="delete" href="!acc/transactions/delete_file.php?id=%d&from=%d"|args:$file.id,$transaction.id label="Supprimer"}
 		</aside>
 	</dd>

@@ -30,6 +30,7 @@ class Transaction extends Entity
 	const STATUS_WAITING = 1;
 	const STATUS_PAID = 2;
 	const STATUS_DEPOSIT = 4;
+	const STATUS_ERROR = 8;
 
 	const STATUS_NAMES = [
 		1 => 'En attente de règlement',
@@ -101,21 +102,34 @@ class Transaction extends Entity
 				return self::TYPE_EXPENSE;
 			case Account::TYPE_THIRD_PARTY:
 				return self::TYPE_DEBT;
-			default:
+			case Account::TYPE_BANK:
+			case Account::TYPE_CASH:
+			case Account::TYPE_OUTSTANDING:
 				return self::TYPE_TRANSFER;
+			default:
+				return self::TYPE_ADVANCED;
 		}
 	}
 
-	public function getLinesWithAccounts()
+	/**
+	 * @param  bool $restrict_year Set to TRUE to only return lines linked to the correct chart, or FALSE (deprecated/legacy) to return all lines even if they are linked to accounts in the wrong chart!
+	 */
+	public function getLinesWithAccounts(bool $restrict_year = true)
 	{
-		$em = EntityManager::getInstance(Line::class);
-		return $em->DB()->get('SELECT
+		$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
+
+		$sql = sprintf('SELECT
 			l.*, a.label AS account_name, a.code AS account_code,
 			b.label AS analytical_name
 			FROM acc_transactions_lines l
-			INNER JOIN acc_accounts a ON a.id = l.id_account
+			INNER JOIN acc_accounts a ON a.id = l.id_account %s
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			INNER JOIN acc_years y ON y.id = t.id_year
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical
-			WHERE l.id_transaction = ? ORDER BY l.id;', $this->id);
+			WHERE l.id_transaction = ? ORDER BY l.id;', $restrict);
+
+		$em = EntityManager::getInstance(Line::class);
+		return $em->DB()->get($sql, $this->id);
 	}
 
 	public function getLines($with_accounts = false)
@@ -164,6 +178,17 @@ class Transaction extends Entity
 		return null;
 	}
 
+	public function getFirstLine()
+	{
+		$lines = $this->getLines();
+
+		if (!count($lines)) {
+			return null;
+		}
+
+		return reset($lines);
+	}
+
 	public function getLinesCreditSum()
 	{
 		$sum = 0;
@@ -173,6 +198,17 @@ class Transaction extends Entity
 		}
 
 		return $sum;
+	}
+
+	public function getAnalyticalId(): ?int
+	{
+		$lines = $this->getLines();
+
+		if (!count($lines)) {
+			return null;
+		}
+
+		return current($lines)->id_analytical;
 	}
 
 	public function getTypesAccounts()
@@ -260,14 +296,14 @@ class Transaction extends Entity
 
 	public function save(): bool
 	{
-		if ($this->validated && !isset($this->_modified['validated'])) {
-			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validé');
+		if ($this->validated && empty($this->_modified['validated'])) {
+			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
-			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui fait partie d\'un exercice clôturé');
+			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
 		}
 
 		if (!parent::save()) {
@@ -287,8 +323,7 @@ class Transaction extends Entity
 
 		// Remove flag
 		if ((self::TYPE_DEBT == $this->type || self::TYPE_CREDIT == $this->type) && $this->_related) {
-			$this->_related->removeStatus(self::STATUS_WAITING);
-			$this->_related->addStatus(self::STATUS_PAID);
+			$this->_related->markPaid();
 			$this->_related->save();
 		}
 
@@ -301,6 +336,11 @@ class Transaction extends Entity
 
 	public function addStatus(int $property) {
 		$this->set('status', $this->status | $property);
+	}
+
+	public function markPaid() {
+		$this->removeStatus(self::STATUS_WAITING);
+		$this->addStatus(self::STATUS_PAID);
 	}
 
 	public function delete(): bool
@@ -398,6 +438,10 @@ class Transaction extends Entity
 		$this->importForm($source);
 
 		if (self::TYPE_ADVANCED == $type) {
+			if (!isset($source['lines']) || !is_array($source['lines'])) {
+				throw new ValidationException('Aucune ligne dans la saisie');
+			}
+
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
@@ -419,7 +463,10 @@ class Transaction extends Entity
 			}
 
 			if (empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
-				$this->status = self::STATUS_WAITING;
+				$this->addStatus(self::STATUS_WAITING);
+			}
+			else {
+				$this->removeStatus(self::STATUS_WAITING);
 			}
 
 			if (empty($source['amount'])) {
@@ -446,6 +493,9 @@ class Transaction extends Entity
 				$this->addLine($line);
 			}
 		}
+
+		// Remove error status when changed
+		$this->removeStatus(self::STATUS_ERROR);
 	}
 
 	public function importFromEditForm(?array $source = null): void
@@ -483,10 +533,16 @@ class Transaction extends Entity
 
 		$debit = $credit = 0;
 
-		foreach ($lines as $line) {
+		foreach ($lines as $k => $line) {
 			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
-			$line = (new Line)->importForm($line);
-			$this->addLine($line);
+
+			try {
+				$line = (new Line)->importForm($line);
+				$this->addLine($line);
+			}
+			catch (ValidationException $e) {
+				throw new ValidationException(sprintf('Ligne %d : %s', $k+1, $e->getMessage()), 0, $e);
+			}
 
 			$debit += $line->debit;
 			$credit += $line->credit;
@@ -698,5 +754,10 @@ class Transaction extends Entity
 		}
 
 		return $out;
+	}
+
+	public function getTypeName(): string
+	{
+		return self::TYPES_NAMES[$this->type];
 	}
 }
