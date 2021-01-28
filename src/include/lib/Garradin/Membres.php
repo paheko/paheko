@@ -8,10 +8,10 @@ use Garradin\Membres\Session;
 
 class Membres
 {
-    const DROIT_AUCUN = 0;
-    const DROIT_ACCES = 1;
-    const DROIT_ECRITURE = 2;
-    const DROIT_ADMIN = 9;
+    const DROIT_AUCUN = Session::ACCESS_NONE;
+    const DROIT_ACCES = Session::ACCESS_READ;
+    const DROIT_ECRITURE = Session::ACCESS_WRITE;
+    const DROIT_ADMIN = Session::ACCESS_ADMIN;
 
     const ITEMS_PER_PAGE = 50;
 
