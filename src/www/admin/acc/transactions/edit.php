@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Files\File;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -42,8 +43,7 @@ if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 
 		// Append file
 		if (!empty($_FILES['file']['name'])) {
-			$file = Fichiers::upload($_FILES['file']);
-			$file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
+			File::upload($_FILES['file'], File::CONTEXT_TRANSACTION, $transaction->id());
 		}
 
 		// Link members

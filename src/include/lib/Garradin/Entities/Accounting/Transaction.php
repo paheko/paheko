@@ -3,14 +3,18 @@
 namespace Garradin\Entities\Accounting;
 
 use KD2\DB\EntityManager;
+
 use Garradin\Entity;
-use Garradin\Fichiers;
-use Garradin\Accounting\Accounts;
-use Garradin\ValidationException;
 use Garradin\DB;
 use Garradin\Config;
 use Garradin\Utils;
 use Garradin\UserException;
+
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
+use Garradin\Accounting\Accounts;
+use Garradin\ValidationException;
 
 class Transaction extends Entity
 {
@@ -311,7 +315,7 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
 		}
 
-		Fichiers::deleteLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
+		Files::deleteLinkedFiles(File::CONTEXT_TRANSACTION, $this->id());
 
 		return parent::delete();
 	}
@@ -518,7 +522,7 @@ class Transaction extends Entity
 
 	public function listFiles()
 	{
-		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
+		return Files::listLinkedFiles(File::CONTEXT_TRANSACTION, $this->id());
 	}
 
 	public function linkToUser(int $user_id, ?int $service_id = null)

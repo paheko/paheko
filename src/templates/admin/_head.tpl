@@ -88,7 +88,7 @@
             </li>
         {/if}
         {if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
-            <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Fichiers</i></a>
+            <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Documents</i></a>
             <ul>
                 <li class="{if $current == 'docs/recent'} current{/if}"><a href="{$admin_url}docs/recent.php">Récents</a></li>
             </ul>
@@ -96,11 +96,6 @@
         {/if}
         {if $session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)}
             <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
-            {* TODO
-            <ul>
-                <li class="{if $current == 'web/themes'} current{/if}"><a href="{$admin_url}web/themes/">Thèmes</a></li>
-            </ul>
-            *}
             </li>
         {/if}
         {if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}

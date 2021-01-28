@@ -69,6 +69,16 @@ class File extends Entity
 	const CONTEXT_SKELETON = 'skel';
 	const CONTEXT_FILE = 'file';
 
+	const CONTEXTS_NAMES = [
+		self::CONTEXT_DOCUMENTS => 'Documents',
+		self::CONTEXT_USER => 'Membre',
+		self::CONTEXT_TRANSACTION => 'Écriture comptable',
+		self::CONTEXT_CONFIG => 'Configuration',
+		self::CONTEXT_WEB => 'Site web',
+		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_FILE => 'Fichier',
+	];
+
 	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
 
 	public function __construct()
@@ -102,27 +112,20 @@ class File extends Entity
 		}
 	}
 
-	public function getContexts(): array
-	{
-		return [
-			self::CONTEXT_DOCUMENTS,
-			self::CONTEXT_USER,
-			self::CONTEXT_TRANSACTION,
-			self::CONTEXT_CONFIG,
-			self::CONTEXT_WEB,
-			self::CONTEXT_SKELETON,
-			self::CONTEXT_FILE,
-		];
-	}
-
 	public function delete(): bool
 	{
 		Files::callStorage('checkLock');
+
+		// Delete linked files
+		Files::deleteLinkedFiles(self::CONTEXT_FILE, $this->id());
+
+		// Delete actual file content
 		Files::callStorage('delete', $this);
 
+		// Delete metadata
 		$return = parent::delete();
 
-		// clean up thumbs
+		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
 		{
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->id(), $size));
@@ -568,6 +571,39 @@ class File extends Entity
 		// Only users with right to access documents can read documents
 		else if ($context == self::CONTEXT_DOCUMENTS && $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)) {
 			return true;
+		}
+
+		return false;
+	}
+
+	public function checkWriteAccess(?Session $session): bool
+	{
+		$context = $this->context;
+		$ref = $this->context_ref;
+
+		if (null === $session) {
+			return false;
+		}
+
+		// If it's linked to a file, then we want to know what the parent file is linked to
+		if ($context == self::CONTEXT_FILE) {
+			return $this->parent()->checkReadAccess($session);
+		}
+
+		switch ($context) {
+			case self::CONTEXT_WEB:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+			case self::CONTEXT_DOCUMENTS:
+				// Only admins can delete files
+				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
+			case self::CONTEXT_CONFIG:
+				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+			case self::CONTEXT_TRANSACTION:
+				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+			case self::CONTEXT_SKELETON:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+			case self::CONTEXT_USER:
+				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
 
 		return false;
