@@ -435,12 +435,20 @@ class Plugin
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
-	static public function listMenu($user)
+	static public function listMenu(Session $session)
 	{
 		self::checkAndInstallSystemPlugins();
 
 		$db = DB::getInstance();
 		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
+
+		$user = $session->getUser();
+		$permissions = [
+			'{ACCESS_NONE}'  => $session::ACCESS_NONE,
+			'{ACCESS_READ}'  => $session::ACCESS_READ,
+			'{ACCESS_WRITE}' => $session::ACCESS_WRITE,
+			'{ACCESS_ADMIN}' => $session::ACCESS_ADMIN,
+		];
 
 		foreach ($list as $id => &$row)
 		{
@@ -457,12 +465,7 @@ class Plugin
 				continue;
 			}
 
-			$condition = strtr($row->menu_condition, [
-				'{Membres::DROIT_AUCUN}' => Membres::DROIT_AUCUN,
-				'{Membres::DROIT_ACCES}' => Membres::DROIT_ACCES,
-				'{Membres::DROIT_ECRITURE}' => Membres::DROIT_ECRITURE,
-				'{Membres::DROIT_ADMIN}' => Membres::DROIT_ADMIN,
-			]);
+			$condition = strtr($row->menu_condition, $permissions);
 
 			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
 			$query = 'SELECT 1 WHERE ' . $condition . ';';

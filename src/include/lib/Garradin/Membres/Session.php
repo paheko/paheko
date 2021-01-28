@@ -107,7 +107,7 @@ class Session extends \KD2\UserSession
 			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
-		$query = sprintf($query, $champ_id, Membres::DROIT_ACCES);
+		$query = sprintf($query, $champ_id, self::ACCESS_READ);
 
 		return $this->db->first($query, $login);
 	}
@@ -173,7 +173,7 @@ class Session extends \KD2\UserSession
 			if (-1 === $login_id) {
 				$login_id = $this->db->firstColumn('SELECT id FROM membres
 					WHERE category_id IN (SELECT id FROM users_categories WHERE perm_config = ?)
-					LIMIT 1', Membres::DROIT_ADMIN);
+					LIMIT 1', self::ACCESS_ADMIN);
 			}
 
 			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))

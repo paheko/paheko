@@ -9,7 +9,7 @@
 	<ul>
 		<li class="current"><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
 		<li><a href="{$admin_url}acc/reports/trial_balance.php?year={$current_year.id}">Balance générale (tous les comptes)</a></li>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			<li><a href="{$admin_url}acc/charts/accounts/?id={$chart_id}">Modifier les comptes</a></li>
 			<li><a href="{$admin_url}acc/charts/accounts/all.php?id={$chart_id}">Plan comptable complet</a></li>
 		{/if}
@@ -60,7 +60,7 @@
 					</td>
 					<td class="actions">
 						{linkbutton label="Journal" shape="menu" href="journal.php?id=%d&year=%d"|args:$account.id,$current_year.id}
-						{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 							{if $account.type == Entities\Accounting\Account::TYPE_BANK}
 								{linkbutton label="Rapprochement" shape="check" href="reconcile.php?id=%d"|args:$account.id}
 							{elseif $account.type == Entities\Accounting\Account::TYPE_OUTSTANDING}

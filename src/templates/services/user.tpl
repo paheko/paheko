@@ -27,7 +27,7 @@
 	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
-		{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			{linkbutton href="?export=csv" shape="export" label="Export CSV"}
 			{linkbutton href="?export=ods" shape="export" label="Export tableur"}
 		{/if}
@@ -45,7 +45,7 @@
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td>{$row.amount|raw|money_currency}</td>
 			<td class="actions">
-				{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{if $row.paid}
 						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
 					{else}
@@ -53,10 +53,10 @@
 					{/if}
 					{linkbutton shape="delete" label="Supprimer" href="user_delete.php?id=%d"|args:$row.id}
 				{/if}
-				{if $session->canAccess('compta', Membres::DROIT_ACCES) && $row.id_account}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ) && $row.id_account}
 					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
 				{/if}
-				{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $row.id_account}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 			</td>

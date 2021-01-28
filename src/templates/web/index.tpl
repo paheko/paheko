@@ -7,7 +7,7 @@
 	</aside>
 	<ul>
 		<li class="current"><a href="./">Gestion du site web</a></li>
-		{if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 			{*<li><a href="theme.php">Thèmes</a></li>*}
 			<li><a href="config.php">Configuration</a></li>
 		{/if}

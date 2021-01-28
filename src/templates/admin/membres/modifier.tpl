@@ -4,7 +4,7 @@
     <ul>
         <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
         <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-        {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user.id != $membre.id}
             <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
         {/if}
     </ul>
@@ -64,7 +64,7 @@
     </fieldset>
     {/if}
 
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+    {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user.id != $membre.id}
     <fieldset>
         <legend>Général</legend>
         <dl>

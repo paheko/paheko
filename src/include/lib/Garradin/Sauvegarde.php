@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+
 class Sauvegarde
 {
 	const NEED_UPGRADE = 0x01 << 2;
@@ -448,10 +450,10 @@ class Sauvegarde
 		if ($user_id)
 		{
 			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories
-				WHERE id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
-				AND droit_config >= ' . Membres::DROIT_ADMIN . '
-				AND droit_connexion >= ' . Membres::DROIT_ACCES);
+			$is_still_admin = $db->querySingle('SELECT 1 FROM users_categories
+				WHERE id = (SELECT category_id FROM membres WHERE id = ' . (int) $user_id . ')
+				AND perm_config >= ' . Session::ACCESS_ADMIN . '
+				AND perm_connect >= ' . Session::ACCESS_READ);
 
 			if (!$is_still_admin)
 			{
@@ -483,9 +485,9 @@ class Sauvegarde
 		{
 			// Forcer toutes les catégories à pouvoir gérer les droits
 			$db = DB::getInstance();
-			$db->update('membres_categories', [
-				'droit_membres' => Membres::DROIT_ADMIN,
-				'droit_connexion' => Membres::DROIT_ACCES
+			$db->update('users_categories', [
+				'perm_users' => Session::ACCESS_ADMIN,
+				'perm_connect' => Session::ACCESS_READ
 			]);
 		}
 

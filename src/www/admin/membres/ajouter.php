@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 $cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
@@ -19,7 +19,7 @@ if (f('save'))
     {
         try
         {
-            if ($session->canAccess('membres', Membres::DROIT_ADMIN))
+            if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN))
             {
                 $id_categorie = f('id_categorie');
             }

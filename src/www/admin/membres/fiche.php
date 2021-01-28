@@ -27,7 +27,7 @@ $tpl->assign('categorie', $categorie);
 
 $tpl->assign('services', Services_User::listDistinctForUser($membre->id));
 
-if ($session->canAccess('compta', Membres::DROIT_ACCES)) {
+if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 	$tpl->assign('transactions_linked', Transactions::countForUser($membre->id));
 	$tpl->assign('transactions_created', Transactions::countForCreator($membre->id));
 }

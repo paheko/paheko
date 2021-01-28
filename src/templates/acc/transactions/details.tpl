@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
-{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$transaction->validated && !$tr_year->closed}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
 <nav class="tabs">
 	<ul>
 		<li><a href="edit.php?id={$transaction.id}">Modifier cette écriture</a></li>
@@ -9,7 +9,7 @@
 </nav>
 {/if}
 
-{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction.status & $transaction::STATUS_WAITING}
 <div class="block alert">
 	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
@@ -62,7 +62,7 @@
 	<dt>Écriture créée par</dt>
 	<dd>
 		{if $transaction.id_creator}
-			{if $session->canAccess('compta', Membres::DROIT_ACCES)}
+			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
 				<a href="{$admin_url}membres/fiche.php?id={$transaction.id_creator}">{$creator_name}</a>
 			{else}
 				{$creator_name}

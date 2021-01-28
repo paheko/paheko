@@ -37,7 +37,7 @@ if ($account->id_chart != $year->id_chart) {
 	Utils::redirect(ADMIN_URL . 'acc/accounts/?chart_change');
 }
 
-$can_edit = $session->canAccess('compta', Membres::DROIT_ADMIN) && !$year->closed;
+$can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
 $simple = qg('simple');
 
 // Use simplified view for favourite accounts

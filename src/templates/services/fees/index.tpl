@@ -30,7 +30,7 @@
 					<td class="num"><a href="details.php?id={$row.id}&amp;type=unpaid">{$row.nb_users_unpaid}</td>
 					<td class="actions">
 						{linkbutton shape="users" label="Liste des inscrits" href="!services/fees/details.php?id=%d"|args:$row.id}
-						{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+						{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!services/fees/edit.php?id=%d"|args:$row.id}
 							{linkbutton shape="delete" label="Supprimer" href="!services/fees/delete.php?id=%d"|args:$row.id}
 						{/if}
@@ -45,7 +45,7 @@
 	</p>
 {/if}
 
-{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 	{include file="services/fees/_fee_form.tpl" legend="Ajouter un tarif" submit_label="Ajouter" csrf_key="fee_add" fee=null amount_type=0 account=null}
 {/if}
 
