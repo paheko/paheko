@@ -48,14 +48,10 @@ class Install
 	{
 		$db = DB::getInstance(true);
 
-		// Taille de la page de DB, on force à 4096 (défaut dans les dernières
-		// versions de SQLite mais pas les vieilles)
-		$db->exec('PRAGMA page_size = 4096;');
-		$db->exec('VACUUM;');
-
 		// Création de la base de données
 		$db->begin();
 		$db->exec('PRAGMA application_id = ' . DB::APPID . ';');
+		$db->setVersion(garradin_version());
 		$db->exec(file_get_contents(DB_SCHEMA));
 		$db->commit();
 
@@ -67,7 +63,6 @@ class Install
 		$config->set('site_asso', WWW_URL);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
-		$config->setVersion(garradin_version());
 
 		$champs = Membres\Champs::importInstall();
 		$champs->save(false); // Pas de copie car pas de table membres existante
