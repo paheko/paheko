@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
@@ -21,14 +23,13 @@ if ($membre->id == $user->id) {
     throw new UserException("Vous ne pouvez pas modifier votre propre profil, la modification doit être faite par un autre membre.");
 }
 
-$cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
-$membre_cat = $cats->get($membre->id_categorie);
+$membre_cat = Categories::get($membre->category_id);
 
-if (($membre_cat->droit_membres == $session::ACCESS_ADMIN)
-    && ($user->droit_membres < $session::ACCESS_ADMIN))
+if (($membre_cat->perm_users == $session::ACCESS_ADMIN)
+    && ($user->perm_users < $session::ACCESS_ADMIN))
 {
     throw new UserException("Seul un membre admin peut modifier un autre membre admin.");
 }
@@ -52,7 +53,7 @@ if (f('save'))
 
             if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user->id != $membre->id)
             {
-                $data['id_categorie'] = f('id_categorie');
+                $data['category_id'] = f('category_id');
                 $data['id'] = f('id');
             }
 
@@ -85,8 +86,8 @@ $tpl->assign('id_field_name', $config->get('champ_identifiant'));
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
-$tpl->assign('membres_cats', $cats->listSimple());
-$tpl->assign('current_cat', f('id_categorie') ?: $membre->id_categorie);
+$tpl->assign('membres_cats', Categories::listSimple());
+$tpl->assign('current_cat', f('category_id') ?: $membre->category_id);
 
 $tpl->assign('can_change_id', $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN));
 

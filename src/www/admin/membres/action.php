@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
@@ -52,12 +54,12 @@ if ($action == 'move' && f('confirm'))
 {
     $form->check('membres_action', [
         'selected' => 'required|array',
-        'id_categorie' => 'required|numeric',
+        'category_id' => 'required|numeric',
     ]);
 
     if (!$form->hasErrors())
     {
-        $membres->changeCategorie(f('id_categorie'), f('selected'));
+        $membres->changeCategorie(f('category_id'), f('selected'));
         Utils::redirect(ADMIN_URL . 'membres/');
     }
 }
@@ -79,9 +81,7 @@ $tpl->assign('nb_selected', count($list));
 
 if ($action == 'move')
 {
-    $cats = new Membres\Categories;
-
-    $tpl->assign('membres_cats', $cats->listSimple());
+    $tpl->assign('membres_cats', Categories::listSimple());
 }
 
 $tpl->assign('action', $action);

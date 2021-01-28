@@ -4,7 +4,7 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
-use Garradin\Membres\Categories;
+use Garradin\Users\Categories;
 use Garradin\Entities\Services\Service;
 use KD2\DB\EntityManager;
 
@@ -59,7 +59,7 @@ class Services
 
 		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) su2 ON su2.id = su.id
-			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_service = s.id AND m.id_categorie NOT IN (%s)',
+			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_service = s.id AND m.category_id NOT IN (%s)',
 			implode(',', $hidden_cats));
 
 		$sql = sprintf('SELECT s.*,

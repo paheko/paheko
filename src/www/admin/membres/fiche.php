@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Transactions;
 use Garradin\Services\Services_User;
+use Garradin\Users\Categories;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -20,9 +21,7 @@ if (!$membre)
 $champs = $config->get('champs_membres');
 $tpl->assign('champs', $champs->getList());
 
-$cats = new Membres\Categories;
-
-$categorie = $cats->get($membre->id_categorie);
+$categorie = Categories::get($membre->category_id);
 $tpl->assign('categorie', $categorie);
 
 $tpl->assign('services', Services_User::listDistinctForUser($membre->id));

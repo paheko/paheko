@@ -19,7 +19,7 @@ class Champs
         'clef_pgp',
         'secret_otp',
         'id',
-        'id_categorie',
+        'category_id',
     ];
 
 	protected $types = [
