@@ -1,1 +1,1 @@
-1.0.0_schema.sql
+1.1.0_schema.sql

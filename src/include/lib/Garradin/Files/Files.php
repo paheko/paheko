@@ -139,7 +139,7 @@ class Files
 			case File::CONTEXT_FILE:
 				return 'files c ON c.id = f.context_ref';
 			case File::CONTEXT_CONFIG:
-				return 'config c ON c.cle = f.context_ref AND c.valeur = f.id';
+				return 'config c ON c.key = f.context_ref AND c.value = f.id';
 			case File::CONTEXT_WEB:
 			case File::CONTEXT_DOCUMENTS:
 			case File::CONTEXT_SKELETON:
@@ -159,7 +159,7 @@ class Files
 		$em = EM::getInstance(File::class);
 
 		foreach ($contexts as $context) {
-			$sql = sprintf('SELECT f.* FROM files f LEFT JOIN %s WHERE f.context = %d AND %s IS NULL;', self::getContextJoinClause($context), $context, $context == File::CONTEXT_CONFIG ? 'c.cle' : 'c.id');
+			$sql = sprintf('SELECT f.* FROM files f LEFT JOIN %s WHERE f.context = %d AND %s IS NULL;', self::getContextJoinClause($context), $context, $context == File::CONTEXT_CONFIG ? 'c.key' : 'c.id');
 
 			foreach ($em->iterate($sql) as $file) {
 				$file->delete();

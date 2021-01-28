@@ -61,9 +61,9 @@
                 </ul>
             {/if}
         </li>
-        {if $session->canAccess('membres', Membres::DROIT_ACCES)}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
             <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_USERS, Membres::DROIT_ECRITURE)}
             <ul>
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
                 <li class="{if $current == 'membres/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
@@ -72,29 +72,29 @@
             {/if}
             </li>
         {/if}
-        {if $session->canAccess('compta', Membres::DROIT_ACCES)}
+        {if $session->canAccess($session::SECTION_ACCOUNTING, Membres::DROIT_ACCES)}
             <li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><a href="{$admin_url}acc/"><b>€</b><i> Comptabilité</i></a>
             <ul>
-            {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_ACCOUNTING, Membres::DROIT_ECRITURE)}
                 <li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
             {/if}
                 <li class="{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_url}acc/accounts/">Comptes</a></li>
                 <li class="{if $current == 'acc/simple'} current{/if}"><a href="{$admin_url}acc/accounts/simple.php">Suivi des écritures</a></li>
                 <li class="{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
-            {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_ACCOUNTING, Membres::DROIT_ECRITURE)}
                 <li class="{if $current == 'acc/charts'} current{/if}"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
             {/if}
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('documents', Membres::DROIT_ACCES)}
+        {if $session->canAccess($session::SECTION_DOCUMENTS, Membres::DROIT_ACCES)}
             <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Fichiers</i></a>
             <ul>
                 <li class="{if $current == 'docs/recent'} current{/if}"><a href="{$admin_url}docs/recent.php">Récents</a></li>
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('web', Membres::DROIT_ACCES)}
+        {if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ACCES)}
             <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
             {* TODO
             <ul>
@@ -103,7 +103,7 @@
             *}
             </li>
         {/if}
-        {if $session->canAccess('config', Membres::DROIT_ADMIN)}
+        {if $session->canAccess($session::SECTION_CONFIG, Membres::DROIT_ADMIN)}
             <li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
         <li class="{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}">

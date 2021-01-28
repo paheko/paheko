@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Membres\Session;
+use Garradin\Membres\Champs;
 
 class Upgrade
 {
@@ -57,8 +58,23 @@ class Upgrade
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
+				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
 				$db->createFunction('sha1', 'sha1');
 				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
+
+				// Rename membres table
+				$champs->createTable($champs::TABLE  .'_tmp');
+
+				$fields = $champs->getCopyFields();
+				unset($fields['category_id']);
+				$fields['id_categorie'] = 'category_id';
+				$champs->copy($champs::TABLE, $champs::TABLE . '_tmp', $fields);
+
+				$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $champs::TABLE));
+				$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $champs::TABLE));
+
+				$champs->createIndexes($champs::TABLE);
+
 				$db->commitSchemaUpdate();
 			}
 

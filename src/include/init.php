@@ -331,7 +331,7 @@ if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS')
 		Utils::redirect(ADMIN_URL . 'install.php');
 	}
 
-	$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
+	$v = DB::getInstance()->version();
 
 	if (version_compare($v, garradin_version(), '<'))
 	{

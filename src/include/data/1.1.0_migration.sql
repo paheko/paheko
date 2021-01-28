@@ -1,12 +1,24 @@
+-- Remove triggers in case they interact with the migration
+DROP TRIGGER IF EXISTS wiki_recherche_delete;
+DROP TRIGGER IF EXISTS wiki_recherche_update;
+DROP TRIGGER IF EXISTS wiki_recherche_contenu_insert;
+DROP TRIGGER IF EXISTS wiki_recherche_contenu_chiffre;
+
 ALTER TABLE membres_categories RENAME TO membres_categories_old;
+ALTER TABLE config RENAME TO config_old;
 
 .read 1.1.0_schema.sql
 
+INSERT INTO config SELECT * FROM config_old;
+DROP TABLE config_old;
+
+DELETE FROM config WHERE key = 'version';
+
 -- Copy droit_wiki value to droit_web and droit_documents
-INSERT INTO membres_categories
+INSERT INTO users_categories
 	SELECT id, nom,
-		droit_wiki, -- droit_web
-		droit_wiki, -- droit_documents
+		droit_wiki, -- perm_web
+		droit_wiki, -- perm_documents
 		droit_membres,
 		droit_compta,
 		droit_inscription,
@@ -118,27 +130,21 @@ INSERT INTO web_pages
 	SELECT new_id, new_parent, type, 1, uri, title FROM wiki_as_files WHERE public = 1;
 
 -- Link background image file to config
-UPDATE files SET context = 'config', context_ref = 'image_fond' WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond' AND valeur > 0);
+UPDATE files SET context = 'config', context_ref = 'image_fond' WHERE id = (SELECT value FROM config WHERE key = 'image_fond' AND value > 0);
 
 -- Copy connection page as a single file
 INSERT INTO files (hash, context, context_ref, name, type, created, author_id)
 	SELECT hash, 'config', 'admin_homepage', 'Accueil_connexion.skriv', type, created, author_id
-	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
+	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT value FROM config WHERE key = 'accueil_connexion'));
 
-UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE cle = 'accueil_connexion';
-UPDATE config SET cle = 'admin_homepage' WHERE cle = 'accueil_connexion';
+UPDATE config SET value = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE key = 'accueil_connexion';
+UPDATE config SET key = 'admin_homepage' WHERE key = 'accueil_connexion';
 
 -- This is not used anymore
-DELETE FROM config WHERE cle = 'accueil_wiki';
+DELETE FROM config WHERE key = 'accueil_wiki';
 
 -- New config key
-INSERT INTO config (cle, valeur) VALUES ('telephone_asso', NULL);
-
--- Delete stuff that is now useless
-DROP TRIGGER wiki_recherche_delete;
-DROP TRIGGER wiki_recherche_update;
-DROP TRIGGER wiki_recherche_contenu_insert;
-DROP TRIGGER wiki_recherche_contenu_chiffre;
+INSERT INTO config (key, value) VALUES ('telephone_asso', NULL);
 
 DROP TABLE wiki_recherche;
 

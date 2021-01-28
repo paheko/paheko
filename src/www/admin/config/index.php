@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
 $config = Config::getInstance();
@@ -18,10 +20,11 @@ $tpl->assign([
 	'server_time'      => time(),
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
-	'membres_cats'     => (new Membres\Categories)->listSimple(),
+	'membres_cats'     => Categories::listSimple(),
 	'champs'           => $config->get('champs_membres')->listAssocNames(),
 	'color1'           => ADMIN_COLOR1,
 	'color2'           => ADMIN_COLOR2,
+	'garradin_website' => WEBSITE,
 ]);
 
 $image_fond = $config->get('image_fond') ? $config->get('image_fond')->url() : null;
