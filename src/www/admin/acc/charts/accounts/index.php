@@ -22,5 +22,5 @@ if (!$chart) {
 $accounts = $chart->accounts();
 
 $tpl->assign('chart', $chart);
-$tpl->assign('accounts_grouped', $accounts->listCommonGrouped());
+$tpl->assign('accounts_grouped', $accounts->listCommonGrouped(null, true));
 $tpl->display('acc/charts/accounts/index.tpl');

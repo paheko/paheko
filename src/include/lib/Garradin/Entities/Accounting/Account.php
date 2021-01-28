@@ -213,7 +213,7 @@ class Account extends Entity
 		$list->orderBy('date', false);
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null);
-		$list->setModifier(function (&$row) use (&$sum, $reverse) {
+		$list->setModifier(function (&$row) use (&$sum) {
 			if (property_exists($row, 'sum')) {
 				$sum += isset($row->change) ? $row->change : ($row->credit - $row->debit);
 				$row->sum = $sum;
@@ -295,7 +295,7 @@ class Account extends Entity
 		foreach ($csv as $k => &$line) {
 			try {
 				$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
-				$line->amount = ($line->amount < 0 ? -1 : 1) * Utils::moneyToInteger($line->amount);
+				$line->amount = (substr($line->amount, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->amount);
 
 				if (!$date) {
 					throw new UserException('Date invalide : ' . $line->date);
@@ -319,8 +319,11 @@ class Account extends Entity
 					if (!isset($line->date)) {
 						 continue;
 					}
+
+					// Match date, amount and label
 					if ($j->date->format('Ymd') == $line->date->format('Ymd')
-						&& ($j->credit == abs($line->amount) || $j->debit == abs($line->amount))) {
+						&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)
+						&& strtolower($j->label) == strtolower($line->label)) {
 						$row->csv = $line;
 						$line = null;
 						break;
@@ -331,8 +334,33 @@ class Account extends Entity
 			$lines[$id] = $row;
 		}
 
+		unset($line, $row, $j);
+
+		// Second round to match only amount and label
+		foreach ($lines as $row) {
+			if ($row->csv || !isset($row->journal->debit)) {
+				continue;
+			}
+
+			$j = $row->journal;
+
+			foreach ($csv as &$line) {
+				if (!isset($line->date)) {
+					 continue;
+				}
+
+				if ($j->date->format('Ymd') == $line->date->format('Ymd')
+					&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)) {
+					$row->csv = $line;
+					$line = null;
+					break;
+				}
+			}
+		}
+
 		unset($j);
 
+		// Then add CSV lines on the right
 		foreach ($csv as $line) {
 			if (null == $line) {
 				continue;
@@ -500,7 +528,9 @@ class Account extends Entity
 
 	public function save(): bool
 	{
-		Config::getInstance()->set('last_chart_change', time());
+		$c = Config::getInstance();
+		$c->set('last_chart_change', time());
+
 		return parent::save();
 	}
 }

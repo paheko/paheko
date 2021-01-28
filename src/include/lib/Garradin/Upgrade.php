@@ -54,6 +54,22 @@ class Upgrade
 		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
 
 		try {
+			if (version_compare($v, '1.0.1', '<'))
+			{
+				// Missing trigger
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.0.1_migration.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.0.3', '<'))
+			{
+				// Missing trigger
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.0.3_migration.sql');
+				$db->commit();
+			}
+
 			if (version_compare($v, '1.1.0', '<='))
 			{
 				// Missing trigger

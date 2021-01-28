@@ -16,6 +16,12 @@ if (!$count_all) {
 	Utils::redirect(ADMIN_URL . 'services/?CREATE');
 }
 
+$count_all = Services::count();
+
+if (!$count_all) {
+	Utils::redirect(ADMIN_URL . 'services/?CREATE');
+}
+
 $user_id = qg('user');
 
 if (!$user_id && ($user_id = f('user'))) {
