@@ -28,7 +28,7 @@
 			<dd class="help">
 				Version PHP&nbsp;: {$php_version}<br />
 				Version SQLite&nbsp;: {$sqlite_version}<br />
-				Heure du serveur&nbsp;: {$server_time|date_fr}<br />
+				Heure du serveur&nbsp;: {$server_time|date}<br />
 				Chiffrement GnuPG&nbsp;: {if $has_gpg_support}disponible, module activé{else}non, module PHP gnupg non installé&nbsp;?{/if}<br />
 			</dd>
 			{/if}

@@ -30,7 +30,7 @@
 				{if isset($line.sum)}
 				<tr>
 					<td colspan="5"></td>
-					<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>
+					<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|money:false}</td>
 					<th>Solde au {$line.date|date_short}</th>
 					<td colspan="2"></td>
 				</tr>
@@ -44,8 +44,8 @@
 					<td>{$line.reference}</td>
 					<td>{$line.line_reference}</td>
 					<th>{$line.label}</th>
-					<td class="money">{$line.debit|raw|html_money}</td>
-					<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|html_money:false}</td>
+					<td class="money">{$line.debit|raw|money}</td>
+					<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
 				</tr>
 				{/if}
 			{/foreach}

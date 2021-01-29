@@ -46,19 +46,13 @@ class Modifiers
 			$t->registerModifier([self::class, $name], $callback);
 		}
 
-		foreach ($external as $key => $callback) {
-			if (is_int($key)) {
-				$key = $callback[1];
-			}
-
-			$t->registerModifier($callback, $key);
+		foreach (CommonModifiers::LIST as $key => $name) {
+			$t->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
 		foreach ($php as $name) {
 			$t->registerModifier($name, $name);
 		}
-
-		$t->registerFunction('pagination', [Utils::class, 'html_pagination']);
 	}
 
 	static public function replace($str, $find, $replace): string
@@ -132,5 +126,12 @@ class Modifiers
 	static public function xml_escape($str)
 	{
 		return htmlspecialchars($str, ENT_XML1);
+	}
+
+	static public function typo($str, $locale = 'fr')
+	{
+		$str = preg_replace('/(?:[\h]|&nbsp;)*([?!:»])(\s+|$)/u', $space.'\\1\\2', $str);
+		$str = preg_replace('/(^|\s+)([«])(?:[\h]|&nbsp;)*/u', '\\1\\2'.$space, $str);
+		return $str;
 	}
 }

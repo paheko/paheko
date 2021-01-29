@@ -35,12 +35,12 @@
 
 		{foreach from=$reports item=report}
 		<article class="event">
-			<h2 class="ruler">Occurence du {$report.context.date|date_fr}</h2>
+			<h2 class="ruler">Occurence du {$report.context.date|date}</h2>
 			<table class="list">
 				{foreach from=$report.context key="k" item="v"}
 				<tr>
 					<th>{$k}</th>
-					<td>{if $k == 'date'}{$v|date_fr}{else}{$v}{/if}</td>
+					<td>{if $k == 'date'}{$v|date}{else}{$v}{/if}</td>
 				</tr>
 				{/foreach}
 			</table>
@@ -75,7 +75,7 @@
 						<tt>{$error.source}</tt>
 					</td>
 					<td>{$error.count}</td>
-					<td>{$error.last_seen|date_fr}</td>
+					<td>{$error.last_seen|date}</td>
 					<td class="actions">
 						{linkbutton shape="menu" label="Voir les détails" href="%s?type=errors&id=%s"|args:$self_url_no_qs,$ref}
 					</td>
