@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use Garradin\Web;
+use Garradin\Web\Web;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use KD2\SimpleDiff;

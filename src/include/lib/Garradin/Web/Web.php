@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Web;
 
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Skeleton;

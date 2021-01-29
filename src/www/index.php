@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use Garradin\Web;
+use Garradin\Web\Web;
 
 require __DIR__ . '/_inc.php';
 
