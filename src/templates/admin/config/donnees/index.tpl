@@ -31,7 +31,7 @@
 <fieldset>
     <legend>Téléchargement d'une sauvegarde</legend>
 	<p class="help">
-		Info : la base de données fait actuellement {$db_size|format_bytes} (dont {$files_size|format_bytes} pour les documents et images).
+		Info : la base de données fait actuellement {$db_size|size_in_bytes} (dont {$files_size|size_in_bytes} pour les documents et images).
 	</p>
     <p class="submit">
         {csrf_field key="backup_download"}
@@ -57,7 +57,7 @@
         {csrf_field key="backup_restore"}
         <input type="hidden" name="MAX_FILE_SIZE" value="{$max_file_size}" />
         <input type="file" name="file" id="f_file" required="required" />
-        (maximum {$max_file_size|format_bytes})
+        (maximum {$max_file_size|size_in_bytes})
     </p>
     <p class="submit">
         {button type="submit" name="restore_file" label="Restaurer depuis le fichier sélectionné" shape="upload" class="main"}

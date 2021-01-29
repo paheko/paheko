@@ -54,7 +54,7 @@
 		<dt>Inscription</dt>
 		<dd>{$membre.date_inscription|date_short}</dd>
 		<dt>Dernière connexion</dt>
-		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_long}{/if}</dd>
+		<dd>{if empty($membre.date_connexion)}Jamais{else}{$membre.date_connexion|date_short:true}{/if}</dd>
 		<dt>Mot de passe</dt>
 		<dd>
 			{if empty($membre.passe)}

@@ -6,13 +6,70 @@ use Garradin\Utils;
 
 class Modifiers
 {
-	const DEFAULTS = [
-		'relative_date'   => [Utils::class, 'relative_date'],
-		'truncate'        => [self::class, 'truncate'],
-		'protect_contact' => [self::class, 'protect_contact'],
-		'atom_date'       => [self::class, 'atom_date'],
-		'xml_escape'      => [self::class, 'xml_escape'],
-	];
+	static public function registerAll(UserTemplate $t): void
+	{
+		static $self = [
+			'truncate',
+			'protect_contact',
+			'atom_date',
+			'xml_escape',
+			'replace',
+			'regexp_replace',
+		];
+
+		static $php = [
+			'strtolower',
+			'strtoupper',
+			'ucfirst',
+			'ucwords',
+			'htmlentities',
+			'htmlspecialchars',
+			'trim',
+			'ltrim',
+			'rtrim',
+			'lcfirst',
+			'md5',
+			'sha1',
+			'metaphone',
+			'nl2br',
+			'soundex',
+			'str_split',
+			'str_word_count',
+			'strrev',
+			'strlen',
+			'wordwrap',
+			'strip_tags',
+			'strlen',
+		];
+
+		foreach ($self as $name) {
+			$t->registerModifier([self::class, $name], $callback);
+		}
+
+		foreach ($external as $key => $callback) {
+			if (is_int($key)) {
+				$key = $callback[1];
+			}
+
+			$t->registerModifier($callback, $key);
+		}
+
+		foreach ($php as $name) {
+			$t->registerModifier($name, $name);
+		}
+
+		$t->registerFunction('pagination', [Utils::class, 'html_pagination']);
+	}
+
+	static public function replace($str, $find, $replace): string
+	{
+		return str_replace($find, $replace, $str);
+	}
+
+	static public function regexp_replace($str, $pattern, $replace)
+	{
+		return preg_replace($pattern, $replace, $str);
+	}
 
 	/**
 	 * UTF-8 aware intelligent substr

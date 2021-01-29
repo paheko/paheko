@@ -22,7 +22,7 @@ if (f('save'))
                 }
             }
 
-            if (isset($data[$config->get('champ_identifiant')]) && !trim($data[$config->get('champ_identifiant')]) && $session->canAccess('config', $session::ACCESS_ADMIN)) {
+            if (isset($data[$config->get('champ_identifiant')]) && !trim($data[$config->get('champ_identifiant')]) && $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
                 throw new UserException("Le champ identifiant ne peut être vide pour un administrateur, sinon vous ne pourriez plus vous connecter.");
             }
 
