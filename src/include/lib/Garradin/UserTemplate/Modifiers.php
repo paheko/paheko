@@ -43,7 +43,7 @@ class Modifiers
 		];
 
 		foreach ($self as $name) {
-			$t->registerModifier([self::class, $name], $callback);
+			$t->registerModifier($name, [self::class, $name]);
 		}
 
 		foreach (CommonModifiers::LIST as $key => $name) {
@@ -126,12 +126,5 @@ class Modifiers
 	static public function xml_escape($str)
 	{
 		return htmlspecialchars($str, ENT_XML1);
-	}
-
-	static public function typo($str, $locale = 'fr')
-	{
-		$str = preg_replace('/(?:[\h]|&nbsp;)*([?!:»])(\s+|$)/u', $space.'\\1\\2', $str);
-		$str = preg_replace('/(^|\s+)([«])(?:[\h]|&nbsp;)*/u', '\\1\\2'.$space, $str);
-		return $str;
 	}
 }
