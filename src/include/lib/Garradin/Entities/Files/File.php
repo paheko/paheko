@@ -587,7 +587,7 @@ class File extends Entity
 
 		// If it's linked to a file, then we want to know what the parent file is linked to
 		if ($context == self::CONTEXT_FILE) {
-			return $this->parent()->checkReadAccess($session);
+			return $this->parent()->checkWriteAccess($session);
 		}
 
 		switch ($context) {
