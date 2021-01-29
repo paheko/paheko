@@ -113,6 +113,8 @@ class UserTemplate extends Brindille
 		});
 
 		$this->registerModifier('format_file_size', [Utils::class, 'format_bytes']);
+
+		Plugin::fireSignal('usertemplate.init', ['template' => $this]);
 	}
 
 	public function setSource(string $path)

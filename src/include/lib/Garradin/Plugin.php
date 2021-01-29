@@ -444,6 +444,18 @@ class Plugin
 		$db = DB::getInstance();
 		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
 
+		// FIXME deprecated
+		$fix_legacy = [
+			'{Membres::DROIT_AUCUN}' => '{ACCESS_NONE}',
+			'{Membres::DROIT_ACCES}' => '{ACCESS_READ}',
+			'{Membres::DROIT_ECRITURE}' => '{ACCESS_WRITE}',
+			'{Membres::DROIT_ADMIN}' => '{ACCESS_ADMIN}',
+			'{$user.droit_compta}' => '{$user.perm_accounting}',
+			'{$user.droit_membres}' => '{$user.perm_users}',
+			'{$user.droit_config}' => '{$user.perm_config}',
+			'{$user.droit_wiki}' => '{$user.perm_documents}',
+		];
+
 		$user = $session->getUser();
 		$permissions = [
 			'{ACCESS_NONE}'  => $session::ACCESS_NONE,
@@ -467,9 +479,20 @@ class Plugin
 				continue;
 			}
 
+			$new_condition = strtr($row->menu_condition, $fix_legacy);
+
+			// FIXME: legacy
+			if ($new_condition != $row->menu_condition) {
+				$db->update('plugins', ['menu_condition' => $new_condition], 'id = :id', ['id' => $id]);
+				$row->menu_condition = $new_condition;
+			}
+
 			$condition = strtr($row->menu_condition, $permissions);
 
-			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
+			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user, $db) {
+				return property_exists($user, $m[1]) ? $db->quote($user->{$m[1]}) : 'NULL';
+			}, $condition);
+
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
 
 			$res = $db->protectSelect(['membres' => []], $query);

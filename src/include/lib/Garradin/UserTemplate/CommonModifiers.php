@@ -10,7 +10,7 @@ use Garradin\Utils;
  */
 class CommonModifiers
 {
-	const LIST = [
+	const MODIFIERS_LIST = [
 		'money',
 		'money_currency',
 		'relative_date',
@@ -18,9 +18,12 @@ class CommonModifiers
 		'date_long',
 		'date',
 		'strftime',
-		'pagination',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'typo',
+	];
+
+	const FUNCTIONS_LIST = [
+		'pagination',
 	];
 
 	static public function money($number, bool $hide_empty = true): string
@@ -68,10 +71,14 @@ class CommonModifiers
 		return strftime($format, $ts);
 	}
 
-	static public function date($ts, string $format, string $locale = 'fr'): string
+	static public function date($ts, string $format = null, string $locale = 'fr'): string
 	{
 		if (preg_match('/^DATE_[\w\d]+$/', $format)) {
 			$format = constant('DateTime::' . $format);
+		}
+
+		if (null === $format) {
+			$format = 'd/m/Y à H:i';
 		}
 
 		if ($locale == 'fr') {
@@ -124,8 +131,8 @@ class CommonModifiers
 
 	static public function typo($str, $locale = 'fr')
 	{
-		$str = preg_replace('/(?:[\h]|&nbsp;)*([?!:»])(\s+|$)/u', '$nbsp;\\1\\2', $str);
-		$str = preg_replace('/(^|\s+)([«])(?:[\h]|&nbsp;)*/u', '\\1\\2&nbsp;', $str);
+		$str = preg_replace('/[\h]*([?!:»])(\s+|$)/u', '&nbsp;\\1\\2', $str);
+		$str = preg_replace('/(^|\s+)([«])[\h]*/u', '\\1\\2&nbsp;', $str);
 		return $str;
 	}
 

@@ -20,14 +20,14 @@
 		<dl class="permissions">
 		{foreach from=$permissions key="type" item="perm"}
 			<dt><label for="f_perm_{$type}_0">{$perm.label}</label></dt>
-			{if $perm.readonly}
+			{if $perm.disabled}
 				<dd class="help">
 					Il n'est pas possible de désactiver ce droit pour votre propre catégorie.
 				</dd>
 			{/if}
 			{foreach from=$perm.options key="level" item="label"}
 			<dd>
-				<input type="radio" name="perm_{$type}" value="{$level}" id="f_perm_{$type}_{$level}" {if $cat->{'perm_' . $type} == $level}checked="checked"{/if} {if $perm.readonly}readonly="readonly"{/if} />
+				<input type="radio" name="perm_{$type}" value="{$level}" id="f_perm_{$type}_{$level}" {if $cat->{'perm_' . $type} == $level}checked="checked"{/if} {if $perm.disabled}disabled="disabled"{/if} />
 				<label for="f_perm_{$type}_{$level}"><b class="access_{$level}">{$perm.shape}</b> {$label}</label>
 			</dd>
 			{/foreach}
