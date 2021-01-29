@@ -47,8 +47,8 @@
                 <tr>
                     <td class="check">{input type="radio" name="selected" value=$backup.filename}</td>
                     <th><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
-                    <td>{$backup.size|format_bytes}</td>
-                    <td>{$backup.date|date_long}</td>
+                    <td>{$backup.size|size_in_bytes}</td>
+                    <td>{$backup.date|date_short:true}</td>
                     <td>{if !$backup.can_restore}<span class="alert">Version {$backup.version} trop ancienne pour pouvoir être restaurée</span>{/if}</td>
                     <td class="actions">
                         {linkbutton href="?download=%s"|args:$backup.filename label="Télécharger" shape="download"}

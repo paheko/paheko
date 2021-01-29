@@ -61,7 +61,7 @@
 	{foreach from=$files item="file"}
 		<tr>
 			<th>{$file.name}</th>
-			<td>{$file.type}, {$file.size|format_bytes}</td>
+			<td>{$file.type}, {$file.size|size_in_bytes}</td>
 			<td class="actions">
 				<form class="actions" method="post" action="{$self_url}">
 					{linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}

@@ -76,46 +76,6 @@ class Utils
         return $date;
     }
 
-    static public function relative_date($ts, bool $with_hour = false): string
-    {
-        $day = null;
-
-        if (null === $ts) {
-            return '';
-        }
-
-        $date = self::get_datetime($ts);
-
-        if ($date->format('Ymd') == date('Ymd'))
-        {
-            $day = 'aujourd\'hui';
-        }
-        elseif ($date->format('Ymd') == date('Ymd', strtotime('yesterday')))
-        {
-            $day = 'hier';
-        }
-        elseif ($date->format('Ymd') == date('Ymd', strtotime('tomorrow')))
-        {
-            $day = 'demain';
-        }
-        elseif ($date->format('Y') == date('Y'))
-        {
-            $day = strtolower(self::strftime_fr($date, '%A %e %B'));
-        }
-        else
-        {
-            $day = strtolower(self::strftime_fr($date, '%e %B %Y'));
-        }
-
-        if ($with_hour)
-        {
-            $hour = $date->format('H\hi');
-            return sprintf('%s, %s', $day, $hour);
-        }
-
-        return $day;
-    }
-
     /**
      * @deprecated
      */
@@ -305,78 +265,6 @@ class Utils
             return false;
 
         return $list[$code];
-    }
-
-    /**
-     * Génération pagination à partir de la page courante ($current),
-     * du nombre d'items total ($total), et du nombre d'items par page ($bypage).
-     * $listLength représente la longueur d'items de la pagination à génerer
-     *
-     * @param int $current
-     * @param int $total
-     * @param int $bypage
-     * @param int $listLength
-     * @param bool $showLast Toggle l'affichage du dernier élément de la pagination
-     * @return array|null
-     */
-    public static function getGenericPagination($current, $total, $bypage, $listLength=11, $showLast = true)
-    {
-        if ($total <= $bypage)
-            return null;
-
-        $total = ceil($total / $bypage);
-
-        if ($total < $current)
-            return null;
-
-        $length = ($listLength / 2);
-
-        $begin = $current - ceil($length);
-        if ($begin < 1)
-        {
-            $begin = 1;
-        }
-
-        $end = $begin + $listLength;
-        if($end > $total)
-        {
-            $begin -= ($end - $total);
-            $end = $total;
-        }
-        if ($begin < 1)
-        {
-            $begin = 1;
-        }
-        if($end==($total-1)) {
-            $end = $total;
-        }
-        if($begin == 2) {
-            $begin = 1;
-        }
-        $out = [];
-
-        if ($current > 1) {
-            $out[] = ['id' => $current - 1, 'label' =>  '« ' . 'Page précédente', 'class' => 'prev', 'accesskey' => 'a'];
-        }
-
-        if ($begin > 1) {
-            $out[] = ['id' => 1, 'label' => '1 ...', 'class' => 'first'];
-        }
-
-        for ($i = $begin; $i <= $end; $i++)
-        {
-            $out[] = ['id' => $i, 'label' => $i, 'class' => ($i == $current) ? 'current' : ''];
-        }
-
-        if ($showLast && $end < $total) {
-            $out[] = ['id' => $total, 'label' => '... ' . $total, 'class' => 'last'];
-        }
-
-        if ($current < $total) {
-            $out[] = ['id' => $current + 1, 'label' => 'Page suivante' . ' »', 'class' => 'next', 'accesskey' => 'z'];
-        }
-
-        return $out;
     }
 
     static public function transliterateToAscii($str, $charset='UTF-8')

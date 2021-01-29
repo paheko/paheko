@@ -8,6 +8,7 @@ use KD2\Translate;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
+use Garradin\UserTemplate\CommonModifiers;
 
 class Template extends \KD2\Smartyer
 {
@@ -68,7 +69,6 @@ class Template extends \KD2\Smartyer
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 		$this->register_function('diff', [$this, 'diff']);
-		$this->register_function('pagination', [$this, 'pagination']);
 		$this->register_function('display_permissions', [$this, 'displayPermissions']);
 
 		$this->register_function('csrf_field', function ($params) {
@@ -86,41 +86,13 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
-		$this->register_modifier('strftime_fr', [Utils::class, 'strftime_fr']);
-		$this->register_modifier('date_fr', [Utils::class, 'date_fr']);
-		$this->register_modifier('date_long', [Utils::class, 'date_fr']);
-		$this->register_modifier('relative_date', [Utils::class, 'relative_date']);
-
-		$this->register_modifier('date_short', function ($dt) {
-			return Utils::date_fr($dt, 'd/m/Y');
-		});
-
-		$this->register_modifier('html_money', [$this, 'htmlMoney']);
-		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
+		foreach (CommonModifiers::LIST as $key => $name) {
+			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		}
 
 		$this->register_modifier('local_url', [Utils::class, 'getLocalURL']);
 	}
 
-	protected function htmlMoney($number, bool $hide_empty = true): string
-	{
-		if ($hide_empty && !$number) {
-			return '';
-		}
-
-		return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
-	}
-
-	protected function htmlMoneyCurrency($number, bool $hide_empty = true): string
-	{
-		$out = $this->htmlMoney($number, $hide_empty);
-
-		if ($out !== '') {
-			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');
-		}
-
-		return $out;
-	}
 
 	protected function formErrors($params)
 	{
@@ -819,47 +791,6 @@ class Template extends \KD2\Smartyer
 		}
 
 		$out .= '</table>';
-		return $out;
-	}
-
-	protected function pagination(array $params)
-	{
-		if (!isset($params['url']) || !isset($params['page']) || !isset($params['bypage']) || !isset($params['total']))
-			throw new \BadFunctionCallException("Paramètre manquant pour pagination");
-
-		if ($params['total'] == -1)
-			return '';
-
-		$pagination = Utils::getGenericPagination($params['page'], $params['total'], $params['bypage']);
-
-		if (empty($pagination))
-			return '';
-
-		$out = '<ul class="pagination">';
-		$encoded_url = rawurlencode('[ID]');
-
-		foreach ($pagination as &$page)
-		{
-			$attributes = '';
-
-			if (!empty($page['class']))
-				$attributes .= ' class="' . htmlspecialchars($page['class']) . '" ';
-
-			$out .= '<li'.$attributes.'>';
-
-			$attributes = '';
-
-			if (!empty($page['accesskey']))
-				$attributes .= ' accesskey="' . htmlspecialchars($page['accesskey']) . '" ';
-
-			$out .= '<a' . $attributes . ' href="' . str_replace(['[ID]', $encoded_url], htmlspecialchars($page['id']), $params['url']) . '">';
-			$out .= htmlspecialchars($page['label']);
-			$out .= '</a>';
-			$out .= '</li>' . "\n";
-		}
-
-		$out .= '</ul>';
-
 		return $out;
 	}
 

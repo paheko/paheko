@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\UserTemplate;
 
 use KD2\Brindille;
 use KD2\Brindille_Exception;
@@ -77,9 +77,7 @@ class UserTemplate extends Brindille
 
 		$this->registerDefaults();
 
-		foreach (Modifiers::DEFAULTS as $name => $callback) {
-			$this->registerModifier($name, $callback);
-		}
+		Modifiers::registerAll($this);
 
 		$params = [
 			'template' => $this,

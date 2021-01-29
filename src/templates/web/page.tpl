@@ -86,7 +86,7 @@
 				{foreach from=$files item="file"}
 					<li>
 						<aside class="fichier" class="internal-file"><a href="{$file.url}">{$file.nom}</a>
-						<small>({$file.type}, {$file.taille|format_bytes})</small></aside>
+						<small>({$file.type}, {$file.taille|size_in_bytes})</small></aside>
 				   </li>
 				{/foreach}
 			</ul>

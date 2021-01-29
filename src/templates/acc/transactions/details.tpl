@@ -92,7 +92,7 @@
 	<dd>
 		<aside class="file">
 			<a target="_blank" href="{$file.url}">{$file.name}</a>
-			<small>({$file.type}, {$file.size|format_bytes})</small>
+			<small>({$file.type}, {$file.size|size_in_bytes})</small>
 			{linkbutton shape="download" href=$file->url() target="_blank" label="Télécharger"}
 			{linkbutton shape="delete" href="!acc/transactions/delete_file.php?id=%d&from=%d"|args:$file.id,$transaction.id label="Supprimer"}
 		</aside>

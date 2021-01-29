@@ -5,7 +5,7 @@ namespace Garradin\Web;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\UserException;
-use Garradin\UserTemplate;
+use Garradin\UserTemplate\UserTemplate;
 
 use KD2\Brindille_Exception;
 use KD2\DB\EntityManager as EM;
