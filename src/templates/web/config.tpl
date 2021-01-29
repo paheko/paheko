@@ -97,7 +97,7 @@
 				<tr>
 					<td>{if $local.modified}<input type="checkbox" name="select[]" value="{$source}" id="f_source_{$iteration}" /><label for="f_source_{$iteration}"></label>{/if}</td>
 					<th><a href="?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
-					<td>{if $local.modified}{$local.modified|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
+					<td>{if $local.modified}{$local.modified|date}{else}<em>(fichier non modifié)</em>{/if}</td>
 					<td class="actions">
 						{linkbutton shape="edit" label="Éditer" href="?edit=%s"|args:$source}
 					</td>

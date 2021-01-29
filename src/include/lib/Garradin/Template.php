@@ -9,6 +9,7 @@ use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
 use Garradin\UserTemplate\CommonModifiers;
+use Garradin\Web\Render\Skriv;
 
 class Template extends \KD2\Smartyer
 {
@@ -86,8 +87,16 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		foreach (CommonModifiers::LIST as $key => $name) {
+		$this->register_modifier('format_skriv', function ($str) {
+			return Skriv::render(null, $str);
+		});
+
+		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
 			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		}
+
+		foreach (CommonModifiers::FUNCTIONS_LIST as $key => $name) {
+			$this->register_function(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
 		$this->register_modifier('local_url', [Utils::class, 'getLocalURL']);

@@ -9,6 +9,8 @@ if (empty($target) || !in_array($target, Recherche::TARGETS)) {
 	throw new UserException('Cible inconnue');
 }
 
+$access_section = $target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+
 $recherche = new Recherche;
 
 $query = (object) [
@@ -58,7 +60,7 @@ elseif ($id && empty($query->query))
 // Recherche SQL
 if (f('sql_query')) {
 	// Only admins can run custom queries, others can only run saved queries
-	$session->requireAccess($target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS, $session::ACCESS_ADMIN);
+	$session->requireAccess($access_section, $session::ACCESS_ADMIN);
 	$sql_query = f('sql_query');
 
 	if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
@@ -186,7 +188,7 @@ elseif ($target === 'compta')
 }
 
 $columns = $recherche->getColumns($target);
-$is_admin = $session->canAccess($target, $session::ACCESS_ADMIN);
+$is_admin = $session->canAccess($access_section, $session::ACCESS_ADMIN);
 $schema = $recherche->schema($target);
 
 $tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search', 'target', 'is_unprotected'));

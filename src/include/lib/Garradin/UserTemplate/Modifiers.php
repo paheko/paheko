@@ -46,8 +46,12 @@ class Modifiers
 			$t->registerModifier($name, [self::class, $name]);
 		}
 
-		foreach (CommonModifiers::LIST as $key => $name) {
+		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
 			$t->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
+		}
+
+		foreach (CommonModifiers::FUNCTIONS_LIST as $key => $name) {
+			$t->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
 		foreach ($php as $name) {
