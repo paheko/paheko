@@ -335,12 +335,13 @@ class Session extends \KD2\UserSession
 
 	public function canAccess($category, $permission)
 	{
-		if (!$this->user)
+		if (!$this->getUser())
 		{
 			return false;
 		}
 
-		return ($this->user->{'perm_' . $category} >= $permission);
+
+		return ($this->getUser()->{'perm_' . $category} >= $permission);
 	}
 
 	public function requireAccess($category, $permission)
