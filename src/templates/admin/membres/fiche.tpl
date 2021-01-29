@@ -93,7 +93,7 @@
         {elseif $c_config.type == 'date'}
             {$membre->$c|date_short}
         {elseif $c_config.type == 'datetime'}
-            {$membre->$c|date_fr}
+            {$membre->$c|date}
         {elseif $c_config.type == 'password'}
             *******
         {elseif $c_config.type == 'multiple'}

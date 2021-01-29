@@ -37,7 +37,7 @@
 						{else}
 						<td>
 							{if $key == 'credit' || $key == 'debit'}
-								{$value|raw|html_money:false}
+								{$value|raw|money:false}
 							{elseif $key == 'date'}
 								{$value|date_short}
 							{elseif null == $value}

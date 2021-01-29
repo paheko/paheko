@@ -33,9 +33,9 @@
 				<td>{$line.line_reference}</td>
 				<td>{$line.date|date_short}</td>
 				<th>{$line.label}{if $line.line_label} <em>({$line.line_label})</em>{/if}</th>
-				<td class="money">{$line.debit|raw|html_money}</td>
-				<td class="money">{$line.credit|raw|html_money}</td>
-				<td class="money">{$line.running_sum|raw|html_money:false}</td>
+				<td class="money">{$line.debit|raw|money}</td>
+				<td class="money">{$line.credit|raw|money}</td>
+				<td class="money">{$line.running_sum|raw|money:false}</td>
 			</tr>
 		{/foreach}
 		</tbody>
@@ -43,9 +43,9 @@
 			<tr>
 				<td colspan="4"></td>
 				<th>Solde final</th>
-				<td class="money">{$account.debit|raw|html_money}</td>
-				<td class="money">{$account.credit|raw|html_money}</td>
-				<td class="money">{$account.sum|raw|html_money:false}</td>
+				<td class="money">{$account.debit|raw|money}</td>
+				<td class="money">{$account.credit|raw|money}</td>
+				<td class="money">{$account.sum|raw|money:false}</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -63,8 +63,8 @@
 		<tfoot>
 			<tr>
 				<td><strong>Totaux</strong></td>
-				<td class="money">{$account.all_debit|raw|html_money:false}</td>
-				<td class="money">{$account.all_credit|raw|html_money:false}</td>
+				<td class="money">{$account.all_debit|raw|money:false}</td>
+				<td class="money">{$account.all_credit|raw|money:false}</td>
 				<td></td>
 			</tr>
 		</tfoot>

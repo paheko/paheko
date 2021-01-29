@@ -48,7 +48,7 @@
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label}</h2></dd>
 	<dt>Date</dt>
-	<dd>{$transaction.date|date_fr:'l j F Y (d/m/Y)'}</dd>
+	<dd>{$transaction.date|date:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
 	<dd>{if trim($transaction.reference)}{$transaction.reference}{else}-{/if}</dd>
 
@@ -119,8 +119,8 @@
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>
-			<td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
-			<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+			<td class="money">{if $line.debit}{$line.debit|escape|money}{/if}</td>
+			<td class="money">{if $line.credit}{$line.credit|escape|money}{/if}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 			<td>

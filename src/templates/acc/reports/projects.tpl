@@ -65,11 +65,11 @@
 						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$item.id_account}&year={$item.id_year}">Bilan</a>
 					</span>
 					</td>
-					<td class="money">{$item.sum_expense|raw|html_money}</td>
-					<td class="money">{$item.sum_revenue|raw|html_money}</td>
-					<td class="money">{$item.debit|raw|html_money:false}</td>
-					<td class="money">{$item.credit|raw|html_money:false}</td>
-					<td class="money">{$item.sum|raw|html_money:false}</td>
+					<td class="money">{$item.sum_expense|raw|money}</td>
+					<td class="money">{$item.sum_revenue|raw|money}</td>
+					<td class="money">{$item.debit|raw|money:false}</td>
+					<td class="money">{$item.credit|raw|money:false}</td>
+					<td class="money">{$item.sum|raw|money:false}</td>
 				</tr>
 			{/foreach}
 			</tbody>
