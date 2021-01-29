@@ -6,11 +6,18 @@ use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Plugin;
+use Garradin\Utils;
+
 use Garradin\Files\Files;
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modifiers;
+
+use const Garradin\{WWW_URL, ADMIN_URL, CACHE_ROOT, DATA_ROOT};
 
 class UserTemplate extends Brindille
 {

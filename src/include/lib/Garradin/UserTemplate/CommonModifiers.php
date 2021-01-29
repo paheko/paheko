@@ -20,6 +20,7 @@ class CommonModifiers
 		'strftime',
 		'pagination',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
+		'typo',
 	];
 
 	static public function money($number, bool $hide_empty = true): string
@@ -119,6 +120,13 @@ class CommonModifiers
 		}
 
 		return $day;
+	}
+
+	static public function typo($str, $locale = 'fr')
+	{
+		$str = preg_replace('/(?:[\h]|&nbsp;)*([?!:»])(\s+|$)/u', '$nbsp;\\1\\2', $str);
+		$str = preg_replace('/(^|\s+)([«])(?:[\h]|&nbsp;)*/u', '\\1\\2&nbsp;', $str);
+		return $str;
 	}
 
 	static public function pagination(array $params): string
