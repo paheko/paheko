@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-use Garradin\Web;
+use Garradin\Web\Web;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
