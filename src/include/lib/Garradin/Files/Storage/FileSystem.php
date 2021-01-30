@@ -70,6 +70,7 @@ class FileSystem implements StorageInterface
 		$list = [];
 
 		foreach ($files as $file) {
+			throw new \Exception('FIXME');
 		}
 
 		return $list;

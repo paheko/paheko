@@ -37,9 +37,18 @@ class Files
 		return EM::findOne(File::class, 'SELECT * FROM files WHERE name = ? AND context = ?;', $name, $context);
 	}
 
-	static public function listNamesForContext(int $context): array
+	static public function listNamesForContext(string $context): array
 	{
 		return EM::getInstance(File::class)->DB()->getAssoc('SELECT id, name FROM files WHERE context = ? ORDER BY name;', $context);
+	}
+
+	static public function list(string $context, ?string $ref): array
+	{
+		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
+			throw new \InvalidArgumentException('Invalid context');
+		}
+
+		return self::callStorage('list', $context, $ref);
 	}
 
 	static public function callStorage(string $function, ...$args)

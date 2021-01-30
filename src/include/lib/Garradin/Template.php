@@ -61,6 +61,13 @@ class Template extends \KD2\Smartyer
 			}
 		});
 
+		$this->register_compile_function('use', function ($pos, $block, $name, $raw_args) {
+			if ($name == 'use')
+			{
+				return sprintf('use %s;', $raw_args);
+			}
+		});
+
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('form_field', [$this, 'formField']);
