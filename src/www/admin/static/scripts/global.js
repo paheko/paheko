@@ -161,10 +161,7 @@
 		window.onkeyup = g.dialog = null;
 
 		window.setTimeout(() => { d.parentNode.removeChild(d); }, 500);
-	}
-
-	// From KD2fw/js/xhr.js
-	g.load = function(b,d,f,e){var a=new XMLHttpRequest();if(!a||!b)return false;if(a.overrideMimeType)a.overrideMimeType('text/xml');b+=(b.indexOf('?')+1?'&':'?')+(+(new Date));a.onreadystatechange=function(){if(a.readyState!=4)return;if((s=a.status)==200){if(!d)return true;var c=a.responseText;if(f=='json'){return((j=window.JSON)&&j.parse)?j.parse(c):eval('('+c.replace(/[\n\r]/g,'')+')')}d(c)}else if(e){e(s)}};a.open('GET',b,true);a.send(null)};
+	};
 
 	g.checkUncheck = function()
 	{
