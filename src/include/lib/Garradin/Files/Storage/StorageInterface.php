@@ -18,10 +18,9 @@ interface StorageInterface
 
 	/**
 	 * List files contained in a path, this must return an array of File instances
-	 * @param  string $path
-	 * @return array[File...]
+	 * @return array[string, File...]
 	 */
-	static public function list(string $path): array;
+	static public function list(string $context, ?string $context_ref): array;
 
 	/**
 	 * Should return full local file access path.

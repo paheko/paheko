@@ -7,6 +7,8 @@ use Garradin\Entities\Files\File;
 use Garradin\Static_Cache;
 use Garradin\DB;
 
+use KD2\DB\EntityManager as EM;
+
 use const Garradin\DB_FILE;
 
 class SQLite implements StorageInterface
@@ -67,14 +69,35 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
-	static public function list(string $path): array
+	static public function list(string $context, ?string $context_ref): array
 	{
-		$level = substr_count($path, '/');
-		$directories = $db->getAssoc('SELECT path, path FROM files
-			WHERE path LIKE ? AND LEN(path) - LEN(REPLACE(path, \'/\', \'\')) = ? GROUP BY path ORDER BY path COLLATE NOCASE;',
-			$path . '/%', $level);
+		$db = DB::getInstance();
+		$path = $context;
 
-		$files = EM::getInstance(File::class)->all('SELECT * FROM files WHERE path = ? ORDER BY name COLLATE NOCASE;', $path);
+		if (null !== $context_ref) {
+			$path .= '/' . $context_ref;
+		}
+
+		File::validatePath($path);
+
+		$level = substr_count($context_ref, '/');
+
+		$context = sprintf('context = %s', $db->quote($context));
+
+		$where_level = sprintf('LENGTH(context_ref) - LENGTH(REPLACE(context_ref, \'/\', \'\')) = %d', $level);
+
+		if ($context_ref) {
+			$where = sprintf('context_ref LIKE %s', $db->quote($context_ref . '/%'), $level);
+		}
+		else {
+			$where = 'context_ref IS NOT NULL';
+		}
+
+		$sql = sprintf('SELECT context_ref, context_ref FROM files WHERE %s AND %s AND %s GROUP BY context_ref ORDER BY context_ref COLLATE NOCASE;', $context, $where, $where_level);
+		$directories = $db->getAssoc($sql);
+
+		$where = sprintf('context_ref %s',  $context_ref ? '= ' . $db->quote($context_ref) : 'IS NULL');
+		$files = EM::getInstance(File::class)->all(sprintf('SELECT * FROM files WHERE %s AND %s ORDER BY name COLLATE NOCASE;', $context, $where));
 		return $directories + $files;
 	}
 

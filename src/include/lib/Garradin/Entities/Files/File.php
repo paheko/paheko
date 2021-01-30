@@ -671,4 +671,19 @@ class File extends Entity
 
 		return false;
 	}
+
+	static public function validatePath(string $path)
+	{
+		$path = explode('/', $path);
+
+		if (!array_key_exists($path[0], self::CONTEXTS_NAMES)) {
+			throw new ValidationException('Chemin invalide');
+		}
+
+		foreach ($path as $part) {
+			if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $part)) {
+				throw new ValidationException('Chemin invalide');
+			}
+		}
+	}
 }

@@ -71,7 +71,7 @@ class CommonModifiers
 		return strftime($format, $ts);
 	}
 
-	static public function date($ts, string $format = null, string $locale = 'fr'): string
+	static public function date($ts, string $format = null, string $locale = 'fr'): ?string
 	{
 		if (preg_match('/^DATE_[\w\d]+$/', $format)) {
 			$format = constant('DateTime::' . $format);
