@@ -82,12 +82,12 @@ namespace Garradin;
 
 /**
  * Répertoire où sont situées les données de Garradin
- * (incluant la base de données SQLite, les sauvegardes, le cache et les fichiers locaux)
+ * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
  *
- * Défaut : identique à ROOT
+ * Défaut : sous-répertoire "data" de la racine
  */
 
-//const DATA_ROOT = ROOT;
+//const DATA_ROOT = ROOT . '/data';
 
 /**
  * Répertoire où est situé le cache (fichiers temporaires utilisés pour accélérer le chargement des pages)
@@ -95,7 +95,7 @@ namespace Garradin;
  * Défaut : sous-répertoire 'cache' de DATA_ROOT
  */
 
-//const CACHE_ROOT = ROOT . '/cache';
+//const CACHE_ROOT = DATA_ROOT . '/cache';
 
 /**
  * Emplacement du fichier de base de données de Garradin
