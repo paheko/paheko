@@ -8,6 +8,8 @@ use Garradin\Config;
 
 use KD2\DB\EntityManager as EM;
 
+use const Garradin\{WWW_URI, ADMIN_URL};
+
 class Web
 {
 	static public function search(string $search, bool $online_only = true): array

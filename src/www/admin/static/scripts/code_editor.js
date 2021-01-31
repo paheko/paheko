@@ -78,7 +78,7 @@
 			}
 
 			window.parent.g.dialog.preventClose = () => {
-				if (code.textarea.value == code.origValue) {
+				if (code.textarea.value == code.textarea.defaultValue) {
 					return false;
 				}
 
