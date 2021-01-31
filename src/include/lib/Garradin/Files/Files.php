@@ -249,7 +249,7 @@ class Files
 			$file->serveThumbnail($session, $size);
 		}
 		else {
-			$file->serve($session);
+			$file->serve($session, isset($_GET['download']) ? true : false);
 		}
 	}
 }

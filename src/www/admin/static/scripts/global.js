@@ -156,6 +156,10 @@
 			return;
 		}
 
+		if (g.dialog.preventClose && g.dialog.preventClose()) {
+			return false;
+		}
+
 		var d = g.dialog;
 		d.style.opacity = 0;
 		window.onkeyup = g.dialog = null;

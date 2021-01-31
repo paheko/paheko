@@ -5,6 +5,7 @@ use Garradin\Entities\Files\File;
 
 <nav class="tabs">
 	<aside>
+		{linkbutton shape="search" label="Rechercher" href="search.php"}
 		{linkbutton shape="plus" label="Nouveau répertoire" href="new_dir.php?c=%s&parent=%s"|args:$context,$parent}
 	</aside>
 	<ul>
@@ -48,14 +49,19 @@ use Garradin\Entities\Files\File;
 				{input type="checkbox" name="check[]" value=$file.id}
 			</td>
 			{/if}
-			<th>{$file.name}</th>
+			<th><a href="{if $file->canPreview()}{$admin_url}common/files/preview.php?id={$file.id}{else}{$file->url(true)}{/if}" target="_dialog">{$file.name}</th>
 			<td>{$file.modified|date}</td>
 			<td>{$file.type}</td>
 			<td>{$file.size|size_in_bytes}</td>
 			<td class="actions">
-				{linkbutton href="!docs/preview.php?id=%d"|args:$file.id label="Ouvrir" shape="eye"}
-				{linkbutton href="!docs/download.php?id=%d"|args:$file.id label="Télécharger" shape="download"}
-				{linkbutton href="!docs/delete.php?id=%d"|args:$file.id label="Supprimer" shape="delete"}
+				{if $file->canPreview()}
+					{linkbutton href="!common/files/preview.php?id=%d"|args:$file.id label="Voir" shape="eye" target="_dialog"}
+				{/if}
+				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
+				{if $can_write && $file->getEditor()}
+					{linkbutton href="!common/files/edit.php?id=%d"|args:$file.id label="Modifier" shape="edit" target="_dialog"}
+				{/if}
+				{linkbutton href="!docs/delete.php?id=%d"|args:$file.id label="Supprimer" shape="delete" target="_dialog"}
 			</td>
 		</tr>
 		{/if}
@@ -82,5 +88,14 @@ use Garradin\Entities\Files\File;
 		</tr>
 	</tfoot>
 </table>
+
+{literal}
+<script type="text/javascript">
+// Open preview in dialog
+$('[target="_dialog"]').forEach((e) => {
+	e.onclick = () => { g.openFrameDialog(e.href + '&dialog'); return false; };
+});
+</script>
+{/literal}
 
 {include file="admin/_foot.tpl"}

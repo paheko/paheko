@@ -57,9 +57,12 @@ class File extends Entity
 	 */
 	const ALLOWED_THUMB_SIZES = [200, 500, 1200];
 
-	const FILE_TYPE_HTML = 'text/html';
+	const FILE_TYPE_HTML = 'text/vnd.paheko.web';
 	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
 	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
+
+	const EDITOR_WEB = 'code';
+	const EDITOR_CODE = 'code';
 
 	const CONTEXT_DOCUMENTS = 'documents';
 	const CONTEXT_USER = 'user';
@@ -327,14 +330,15 @@ class File extends Entity
 		}
 	}
 
-	public function url(?int $size = null): string
+	public function url($download = false): string
 	{
-		return self::getFileURL($this->id, $this->name, $this->hash, $size);
+		return self::getFileURL($this->id, $this->name, $this->hash, null, $download);
 	}
 
-	public function thumb_url(): string
+	public function thumb_url(?int $size = null): string
 	{
-		return $this->url(min(self::ALLOWED_THUMB_SIZES));
+		$size = $size ?? min(self::ALLOWED_THUMB_SIZES);
+		return self::getFileURL($this->id, $this->name, $this->hash, $size);
 	}
 
 	/**
@@ -344,7 +348,7 @@ class File extends Entity
 	 * @param  integer $size Taille de la miniature désirée (pour les images)
 	 * @return string        URL du fichier
 	 */
-	static public function getFileURL(int $id, string $name, string $hash, ?int $size = null): string
+	static public function getFileURL(int $id, string $name, string $hash, ?int $size = null, bool $download = false): string
 	{
 		$url = sprintf('%sf/%s/%s?', WWW_URL, base_convert((int)$id, 10, 36), $name);
 
@@ -354,6 +358,10 @@ class File extends Entity
 		}
 
 		$url .= substr($hash, 0, 10);
+
+		if ($download) {
+			$url .= '&download';
+		}
 
 		return $url;
 	}
@@ -392,7 +400,7 @@ class File extends Entity
 	/**
 	 * Envoie le fichier au client HTTP
 	 */
-	public function serve(?Session $session = null): void
+	public function serve(?Session $session = null, bool $download = false): void
 	{
 		if (!$this->checkReadAccess($session)) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
@@ -403,7 +411,7 @@ class File extends Entity
 		$path = Files::callStorage('getPath', $this);
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
-		$this->_serve($path, $content);
+		$this->_serve($path, $content, $download);
 	}
 
 	/**
@@ -462,7 +470,7 @@ class File extends Entity
 	 * @param  integer $size Taille du fichier en octets (facultatif)
 	 * @return boolean TRUE en cas de succès
 	 */
-	protected function _serve(?string $path, ?string $content): void
+	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
 		if ($this->isPublic()) {
 			Utils::HTTPCache($this->hash, $this->created->getTimestamp());
@@ -475,7 +483,7 @@ class File extends Entity
 		}
 
 		header(sprintf('Content-Type: %s', $this->type));
-		header(sprintf('Content-Disposition: inline; filename="%s"', $this->name));
+		header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', $this->name));
 
 		// Utilisation de XSendFile si disponible
 		if (null !== $path && ENABLE_XSENDFILE && isset($_SERVER['SERVER_SOFTWARE']))
@@ -595,6 +603,39 @@ class File extends Entity
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
 				// Only admins can delete files
+				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
+			case self::CONTEXT_CONFIG:
+				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+			case self::CONTEXT_TRANSACTION:
+				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
+			case self::CONTEXT_SKELETON:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+			case self::CONTEXT_USER:
+				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
+		}
+
+		return false;
+	}
+
+	public function checkDeleteAccess(?Session $session): bool
+	{
+		$context = $this->context;
+		$ref = $this->context_ref;
+
+		if (null === $session) {
+			return false;
+		}
+
+		// If it's linked to a file, then we want to know what the parent file is linked to
+		if ($context == self::CONTEXT_FILE) {
+			return $this->parent()->checkDeleteAccess($session);
+		}
+
+		switch ($context) {
+			case self::CONTEXT_WEB:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+			case self::CONTEXT_DOCUMENTS:
+				// Only admins can delete files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
 			case self::CONTEXT_CONFIG:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
@@ -670,6 +711,47 @@ class File extends Entity
 		}
 
 		return false;
+	}
+
+	public function getEditor(): ?string
+	{
+		if (in_array($this->type, [self::FILE_TYPE_SKRIV, self::FILE_TYPE_ENCRYPTED])) {
+			return self::EDITOR_WEB;
+		}
+
+		if (substr($this->type, 0, 5) == 'text/') {
+			return self::EDITOR_CODE;
+		}
+
+		return null;
+	}
+
+	public function canPreview(): bool
+	{
+		static $types = [
+			'application/pdf',
+			'audio/mpeg',
+			'audio/ogg',
+			'audio/wave',
+			'audio/wav',
+			'audio/x-wav',
+			'audio/x-pn-wav',
+			'audio/webm',
+			'video/webm',
+			'video/ogg',
+			'application/ogg',
+			'video/mp4',
+			'text/plain',
+			'image/png',
+			'image/gif',
+			'image/webp',
+			'image/svg+xml',
+			self::FILE_TYPE_SKRIV,
+			self::FILE_TYPE_ENCRYPTED,
+			self::FILE_TYPE_HTML,
+		];
+
+		return in_array($this->type, $types);
 	}
 
 	static public function validatePath(string $path)
