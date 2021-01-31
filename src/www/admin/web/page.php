@@ -37,6 +37,6 @@ $type_category = Page::TYPE_CATEGORY;
 $tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category'));
 
 $tpl->assign('custom_js', ['wiki_gallery.js']);
-$tpl->assign('custom_css', ['!static/wiki.css', '!web/css.php']);
+$tpl->assign('custom_css', ['wiki.css', '!web/css.php']);
 
 $tpl->display('web/page.tpl');

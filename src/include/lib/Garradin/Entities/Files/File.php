@@ -61,7 +61,8 @@ class File extends Entity
 	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
 	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
 
-	const EDITOR_WEB = 'code';
+	const EDITOR_WEB = 'web';
+	const EDITOR_ENCRYPTED = 'encrypted';
 	const EDITOR_CODE = 'code';
 
 	const CONTEXT_DOCUMENTS = 'documents';
@@ -715,11 +716,13 @@ class File extends Entity
 
 	public function getEditor(): ?string
 	{
-		if (in_array($this->type, [self::FILE_TYPE_SKRIV, self::FILE_TYPE_ENCRYPTED])) {
+		if ($this->type == self::FILE_TYPE_SKRIV) {
 			return self::EDITOR_WEB;
 		}
-
-		if (substr($this->type, 0, 5) == 'text/') {
+		elseif ($this->type == self::FILE_TYPE_ENCRYPTED) {
+			return self::EDITOR_ENCRYPTED;
+		}
+		elseif (substr($this->type, 0, 5) == 'text/') {
 			return self::EDITOR_CODE;
 		}
 

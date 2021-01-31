@@ -2,7 +2,7 @@
 
 <form method="post" action="{$self_url}">
 	<p>
-		<textarea name="content" cols="90" rows="50" id="f_content">{form_field name=content data=$content}</textarea>
+		{input type="textarea" name="content" cols="90" rows="50" default=$content}
 	</p>
 
 	<p class="submit">
