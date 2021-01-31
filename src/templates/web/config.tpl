@@ -48,10 +48,7 @@
 	</form>
 
 	<script type="text/javascript">
-	var doc_url = "{$admin_url}doc/skel/";
-	var skel_list = {$sources|escape:json};
-	var skel_current = "{$edit.file|escape:'js'}";
-	g.script("scripts/skel_editor.js");
+	g.script("scripts/code_editor.js");
 	</script>
 {else}
 

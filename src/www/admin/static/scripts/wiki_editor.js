@@ -22,7 +22,7 @@
 			}, 3000);
 		}
 
-		g.script('scripts/text_editor.min.js', function () {
+		g.script('scripts/lib/text_editor.min.js', function () {
 			var t = new textEditor('f_content');
 			t.parent = t.textarea.parentNode;
 
