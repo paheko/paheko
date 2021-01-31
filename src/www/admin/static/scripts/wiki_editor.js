@@ -26,29 +26,45 @@
 			var t = new textEditor('f_content');
 			t.parent = t.textarea.parentNode;
 
+			var config = {
+				fullscreen: t.textarea.getAttribute('data-fullscreen'),
+				attachments: t.textarea.getAttribute('data-attachments')
+			};
+
+			// Cancel Escape to close.value
+			if (window.parent && window.parent.g.dialog) {
+				// Always fullscreen in dialogs
+				config.fullscreen = true;
+
+				window.parent.g.dialog.preventClose = () => {
+					if (t.textarea.value == t.textarea.defaultValue) {
+						return false;
+					}
+
+					console.log(t.textarea.value == t.origValue);
+
+					if (window.confirm('Sauvegarder avant de fermer ?')) {
+						save();
+						return false;
+					}
+
+					return true;
+				};
+			}
+
 			var toolbar = document.createElement('nav');
 			toolbar.className = 'te';
 
 			var toggleFullscreen = function (e)
 			{
-				var classes = t.parent.className.split(' ');
-
-				for (var i = 0; i < classes.length; i++)
-				{
-					if (classes[i] == 'fullscreen')
-					{
-						classes.splice(i, 1);
-						t.parent.className = classes.join(' ');
-						t.fullscreen = false;
-						return true;
-					}
-				}
-
-				classes.push('fullscreen');
-				t.parent.className = classes.join(' ');
+				t.parent.classList.toggle('fullscreen');
 				t.fullscreen = true;
 				return true;
 			};
+
+			if (config.fullscreen) {
+				toggleFullscreen();
+			}
 
 			var openPreview = function ()
 			{
@@ -199,10 +215,17 @@
 			appendButton('link', "[[lien|http://]]", insertURL);
 			appendButton('file', "📎", openFileInsert, 'Insérer fichier / image');
 
-			appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
+			if (config.attachments) {
+				appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
+				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
+			}
 
 			appendButton('ext help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
-			appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
+
+			if (!config.fullscreen) {
+				appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
+			}
+
 			appendButton('ext close', 'Fermer', closeIFrame);
 
 			t.parent.insertBefore(toolbar, t.parent.firstChild);
@@ -214,7 +237,6 @@
 			t.shortcuts.push({ctrl: true, key: 't', callback: function () { return wrapTags("\n== ", "\n"); } });
 			t.shortcuts.push({ctrl: true, key: 'l', callback: insertURL});
 			t.shortcuts.push({ctrl: true, key: 's', callback: save});
-			t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
 			t.shortcuts.push({ctrl: true, shift: true, key: 'p', callback: openPreview});
 			t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
 
