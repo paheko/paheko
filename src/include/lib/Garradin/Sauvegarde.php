@@ -60,12 +60,6 @@ class Sauvegarde
 			$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
 			$version = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
 
-			// Delete SHM and WAL files
-			if ($db->querySingle('PRAGMA journal_mode;') == 'wal') {
-				$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READWRITE);
-				$db->exec('PRAGMA journal_mode = DELETE;');
-			}
-
 			$db->close();
 
 			$out[$file] = (object) [
