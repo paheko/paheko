@@ -4,6 +4,7 @@ namespace Garradin\Web;
 
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Skeleton;
+use Garradin\Config;
 
 use KD2\DB\EntityManager as EM;
 
@@ -106,14 +107,6 @@ class Web
 		}
 
 		if (Config::getInstance()->get('desactiver_site')) {
-
-			// Specific rule for content.css, should always be available, even if website is disabled
-			if ($uri == '/content.css') {
-				header('Content-Type: text/css; charset=utf-8', true);
-				readfile(ROOT . '/www/skel-dist/content.css');
-				exit;
-			}
-
 			Utils::redirect(ADMIN_URL);
 		}
 

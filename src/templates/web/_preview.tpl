@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Web" current="web" is_popup=1 body_id="transparent"}
+{include file="admin/_head.tpl" title="Web" is_popup=1 body_id="popup" custom_css=['/content.css']}
 
 <div class="web-content">
 	{$content|raw}

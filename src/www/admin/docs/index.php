@@ -12,8 +12,15 @@ $context = qg('c') ?: File::CONTEXT_DOCUMENTS;
 
 $files = Files::list($context, $parent);
 
-$can_delete = $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
+// We consider that the first file has the same rights as the others
+if (count($files)) {
+	$can_delete = current($files)->checkDeleteAccess($session);
+	$can_write = current($files)->checkWriteAccess($session);
+}
+else {
+	$can_delete = $can_write = false;
+}
 
-$tpl->assign(compact('context', 'parent', 'files', 'can_delete'));
+$tpl->assign(compact('context', 'parent', 'files', 'can_write', 'can_delete'));
 
 $tpl->display('docs/index.tpl');
