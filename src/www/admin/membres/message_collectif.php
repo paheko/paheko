@@ -23,7 +23,7 @@ if (f('send'))
         else
         {
             try {
-                $recipients = $recherche->search($match[2], ['id', 'email'], true);
+                $recipients = $recherche->search($match[2], ['membres.id', 'membres.email'], true);
             }
             catch (UserException $e) {
                 $form->addError($e->getMessage());
