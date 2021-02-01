@@ -229,7 +229,7 @@ class File extends Entity
 		return $file;
 	}
 
-	static protected function create(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
+	static public function create(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
 	{
 		if (isset($source_path, $source_content)) {
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
@@ -651,42 +651,44 @@ class File extends Entity
 		return false;
 	}
 
-	public function getPathForContext(string $context, $value): string
+	static public function getPath(string $context, ?string $ref, ?string $name = null): string
 	{
-		return rtrim($context . '/' . $value, '/');
+		$path = $context;
+
+		if ($ref) {
+			$path .= '/' . $ref;
+		}
+
+		if ($name) {
+			$path .= '/' . $name;
+		}
+
+		return $path;
 	}
 
 	public function path(): string
 	{
-		return self::getPathForContext($this->context, $this->context_ref) . '/' . $this->name;
+		return self::getPath($this->context, $this->context_ref, $this->name);
 	}
 
 	/**
 	 * Create a file in DB from an existing file in the local filesysteme
 	 */
-	static public function createFromExisting(string $path, string $root): File
+	static public function createFromExisting(string $path, string $root, ?\SplFileInfo $info = null): File
 	{
-		$ctx = self::getContextFromPath($path);
-		$fullpath = $root . '/' . $path;
+		list($context, $ref, $name) = self::validatePath($path);
+		$fullpath = $root . DIRECTORY_SEPARATOR . $path;
 
-		$file = File::create($name, $ctx[0], $ctx[1], $fullpath);
+		$file = File::create($name, $context, $ref, $fullpath);
 
 		$file->set('hash', sha1_file($fullpath));
-		$file->set('size', filesize($fullpath));
-		$file->set('modified', filemtime($fullpath));
-		$file->set('created', filemtime($fullpath));
+		$file->set('size', $info ? $info->getSize() : filesize($fullpath));
+		$file->set('modified', new \DateTime('@' . ($info ? $info->getMTime() : filemtime($fullpath))));
+		$file->set('created', $file->get('modified'));
 
 		$file->save();
 
 		return $file;
-	}
-
-	static public function getContextFromPath(string $path): array
-	{
-		$context = strtok($this->path, '/');
-		$value = strtok('');
-
-		return [$context, $value];
 	}
 
 	public function checkContext(string $context, $ref): bool
@@ -762,18 +764,28 @@ class File extends Entity
 		return in_array($this->type, $types);
 	}
 
-	static public function validatePath(string $path)
+	static public function validatePath(string $path): array
 	{
 		$path = explode('/', $path);
+
+		if (count($path) < 2) {
+			throw new ValidationException('Invalid file path');
+		}
 
 		if (!array_key_exists($path[0], self::CONTEXTS_NAMES)) {
 			throw new ValidationException('Chemin invalide');
 		}
+
+		$context = array_shift($path);
 
 		foreach ($path as $part) {
 			if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $part)) {
 				throw new ValidationException('Chemin invalide');
 			}
 		}
+
+		$name = array_pop($path);
+		$ref = implode('/', $path);
+		return [$context, $ref ?: null, $name];
 	}
 }

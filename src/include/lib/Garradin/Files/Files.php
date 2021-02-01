@@ -32,17 +32,7 @@ class Files
 		return null;
 	}
 
-	static public function getWithNameAndContext(string $name, string $context): ?File
-	{
-		return EM::findOne(File::class, 'SELECT * FROM files WHERE name = ? AND context = ?;', $name, $context);
-	}
-
-	static public function listNamesForContext(string $context): array
-	{
-		return EM::getInstance(File::class)->DB()->getAssoc('SELECT id, name FROM files WHERE context = ? ORDER BY name;', $context);
-	}
-
-	static public function list(string $context, ?string $ref): array
+	static public function list(string $context, ?string $ref = null): array
 	{
 		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
 			throw new \InvalidArgumentException('Invalid context');
@@ -213,6 +203,35 @@ class Files
 	static public function get(int $id): ?File
 	{
 		return EM::findOneById(File::class, $id);
+	}
+
+	static public function getFromPath(string $path): ?File
+	{
+		list($context, $ref, $name) = File::validatePath($path);
+		return self::getFromContext($context, $ref, $name);
+	}
+
+	static public function getFromContext(string $context, ?string $context_ref, ?string $name): ?File
+	{
+		$conditions = ['context = ?'];
+		$params = [$context];
+
+		if (null === $context_ref) {
+			$conditions[] = 'context_ref IS NULL';
+		}
+		else {
+			$conditions[] = 'context_ref = ?';
+			$params[] = $context;
+		}
+
+		if (null !== $name) {
+			$conditions[] = 'name = ?';
+			$params[] = $name;
+		}
+
+		$conditions = implode(' AND ', $conditions);
+
+		return EM::findOne(File::class, sprintf('SELECT * FROM @TABLE WHERE %s', $conditions), ...$params);
 	}
 
 	static public function serveFromQueryString(): void
