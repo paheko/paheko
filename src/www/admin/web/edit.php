@@ -54,6 +54,6 @@ $created = $page->created();
 $tpl->assign(compact('created', 'page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
 
 $tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
-$tpl->assign('custom_css', ['wiki.css', '!static/scripts/wiki_editor.css']);
+$tpl->assign('custom_css', ['wiki.css']);
 
 $tpl->display('web/edit.tpl');

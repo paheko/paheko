@@ -46,22 +46,22 @@ class CommonModifiers
 		return $out;
 	}
 
-	static public function date_long($ts, bool $with_hour = false): string
+	static public function date_long($ts, bool $with_hour = false): ?string
 	{
 		return Utils::strftime_fr($ts, '%A %e %B %Y' . ($with_hour ? ' à %Hh%M' : ''));
 	}
 
-	static public function date_short($ts, bool $with_hour = false): string
+	static public function date_short($ts, bool $with_hour = false): ?string
 	{
 		return Utils::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
 	}
 
-	static public function date_hour($ts): string
+	static public function date_hour($ts): ?string
 	{
 		return Utils::date_fr($ts, 'H\hi');
 	}
 
-	static public function strftime($ts, string $format, string $locale = 'fr'): string
+	static public function strftime($ts, string $format, string $locale = 'fr'): ?string
 	{
 		if ($locale == 'fr') {
 			return Utils::strftime_fr($ts, $format);

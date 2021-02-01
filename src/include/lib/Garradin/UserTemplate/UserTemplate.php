@@ -392,7 +392,7 @@ class UserTemplate extends Brindille
 		}
 
 		if (isset($params['parent'])) {
-			$params['where'] .= sprintf(' AND f.context = %d AND f.context_ref = :parent_id', File::CONTEXT_FILE);
+			$params['where'] .= sprintf(' AND f.context = \'%s\' AND f.context_ref = :parent_id', File::CONTEXT_FILE);
 			$params[':parent_id'] = $params['parent'];
 			unset($params['parent']);
 		}

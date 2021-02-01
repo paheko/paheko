@@ -1,5 +1,20 @@
 {{:include file="_head.html"}}
 
+{{if $config.adresse_asso || $config.telephone_asso || $config.email_asso}}
+	<aside class="contacts">
+		{{if $config.adresse_asso}}
+			<h4>{{$config.adresse_asso|escape|nl2br}}</h4>
+		{{/if}}
+		{{if $config.telephone_asso}}
+			<h5>{{$config.telephone_asso|raw|protect_contact}}</h5>
+		{{/if}}
+		{{if $config.email_asso}}
+			<h5>{{$config.email_asso|raw|protect_contact}}</h5>
+		{{/if}}
+	</aside>
+{{/if}}
+
+
 {{#articles order="created DESC" future=false limit=1}}
 <section class="articles main">
 	<article>

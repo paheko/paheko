@@ -23,7 +23,7 @@ $csrf_key = 'attach_' . $page->id();
 $form->runIf('delete', function () use ($page) {
 	$file = Files::get((int) f('delete'));
 
-	if (!$file->getLinkedId($file::LINK_FILE) == $page->id()) {
+	if (!$file->checkContext($file::CONTEXT_FILE, $page->id())) {
 		throw new UserException('Ce fichier n\'est pas lié à cette page');
 	}
 
@@ -68,6 +68,7 @@ $max_size = Utils::getMaxUploadSize();
 $tpl->assign(compact('page', 'files', 'images', 'max_size', 'csrf_key'));
 $tpl->assign('sent', (bool)qg('sent'));
 
-$tpl->assign('custom_js', ['upload_helper.js', 'wiki_fichiers.js']);
+$tpl->assign('custom_js', ['upload_helper.min.js', 'wiki_fichiers.js']);
+$tpl->assign('custom_css', ['!static/scripts/wiki_editor.css']);
 
 $tpl->display('web/_attach.tpl');

@@ -61,9 +61,9 @@ class Install
 		$config = Config::getInstance();
 		$config->set('nom_asso', $nom_asso);
 		$config->set('email_asso', $email_membre);
-		$config->set('site_asso', WWW_URL);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
+		$confog->set('desactiver_site', true);
 
 		$champs = Membres\Champs::importInstall();
 		$champs->create(); // Pas de copie car pas de table membres existante

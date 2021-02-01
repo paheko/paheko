@@ -395,7 +395,7 @@ class File extends Entity
 	public function listLinked(): array
 	{
 		return EM::getInstance(self::class)->all('SELECT * FROM files WHERE context = ? AND context_ref = ? ORDER BY name;',
-			$this->context, $this->id());
+			self::CONTEXT_FILE, $this->id());
 	}
 
 	/**
@@ -687,6 +687,11 @@ class File extends Entity
 		$value = strtok('');
 
 		return [$context, $value];
+	}
+
+	public function checkContext(string $context, $ref): bool
+	{
+		return ($this->context === $context) && ($this->context_ref == $ref);
 	}
 
 	public function parent(): ?File

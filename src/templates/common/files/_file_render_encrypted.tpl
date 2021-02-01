@@ -9,6 +9,6 @@
 		<input type="button" onclick="return wikiDecrypt(false);" value="Entrer le mot de passe" />
 	</p>
 </div>
-<div class="wikiContent" style="display: none;" id="wikiEncryptedContent">
-	{$page.contenu.contenu}
+<div class="web-content" style="display: none;" id="wikiEncryptedContent">
+	{$content}
 </div>

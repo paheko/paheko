@@ -1,6 +1,8 @@
 (function () {
 	var wiki_id = window.location.search.match(/id=(\d+)/)[1];
 
+	g.style('scripts/wiki_editor.css');
+
 	g.onload(function () {
 		if (location.hash == '#saved') {
 			location.hash = '';
@@ -20,6 +22,10 @@
 			window.setTimeout(() => {
 				c.style.opacity = 0;
 			}, 3000);
+
+			window.setTimeout(() => {
+				c.remove();
+			}, 5000);
 		}
 
 		g.script('scripts/lib/text_editor.min.js', function () {
@@ -213,14 +219,13 @@
 			appendButton('bold', '**gras**', function () { wrapTags('**', '**'); } );
 			appendButton('italic', "''italique''", function () { wrapTags("''", "''"); } );
 			appendButton('link', "[[lien|http://]]", insertURL);
-			appendButton('file', "📎", openFileInsert, 'Insérer fichier / image');
+			appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
+			appendButton('ext help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
 
 			if (config.attachments) {
-				appendButton('ext preview', '👁', openPreview, 'Prévisualiser');
+				appendButton('file', "📎 Fichiers", openFileInsert, 'Insérer fichier / image');
 				t.shortcuts.push({ctrl: true, shift: true, key: 'i', callback: openFileInsert});
 			}
-
-			appendButton('ext help', '❓', openSyntaxHelp, 'Aide sur la syntaxe');
 
 			if (!config.fullscreen) {
 				appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
