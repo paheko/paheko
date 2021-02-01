@@ -142,13 +142,13 @@ class Utils
         return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
 
-    static public function getLocalURL(string $url, ?string $default_prefix = null): string
+    static public function getLocalURL(string $url = '', ?string $default_prefix = null): string
     {
         if ($url[0] == '!') {
             return ADMIN_URL . substr($url, 1);
         }
-        elseif ($url[0] == '/') {
-            return WWW_URL . ltrim($url, '/');
+        elseif ($url[0] == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
+            return WWW_URL . substr($url, strlen(WWW_URI));
         }
         elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
             return $url;
