@@ -16,6 +16,7 @@ class CommonModifiers
 		'relative_date',
 		'date_short',
 		'date_long',
+		'date_hour',
 		'date',
 		'strftime',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],

@@ -85,12 +85,8 @@ class FileSystem implements StorageInterface
 			if (!$file_object) {
 				$file_object = File::createFromExisting($relative_path, self::_getRoot(), $file);
 			}
-			// Update metadata
-			else if ($file->getMTime() > $file_object->modified->getTimestamp()) {
-				$file_object->modified = new \DateTime('@' . $file->getMTime());
-				$file_object->hash = self::hash($file_object);
-				$file_object->size = $file->getSize();
-				$file_object->save();
+			else {
+				$file_object->updateIfNeeded($file);
 			}
 
 			$files[] = $file_object;
@@ -144,6 +140,11 @@ class FileSystem implements StorageInterface
 	static public function hash(File $file): ?string
 	{
 		return sha1_file(self::getPath($file));
+	}
+
+	static public function size(File $file): ?int
+	{
+		return filesize(self::getPath($file)) ?: null;
 	}
 
 	static public function getTotalSize(): int

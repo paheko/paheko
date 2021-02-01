@@ -65,6 +65,11 @@ interface StorageInterface
 	static public function hash(File $file): ?string;
 
 	/**
+	 * Returns size the file content
+	 */
+	static public function size(File $file): ?int;
+
+	/**
 	 * Return total size of used space by files stored in this backed
 	 */
 	static public function getTotalSize(): int;
