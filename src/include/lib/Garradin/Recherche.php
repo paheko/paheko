@@ -629,7 +629,7 @@ class Recherche
 
 		if (null !== $force_select)
 		{
-			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
+			$query = preg_replace('/^\s*SELECT.*FROM\s+/Uis', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
 		}
 
 		if (!$no_limit && !preg_match('/LIMIT\s+\d+/i', $query))
