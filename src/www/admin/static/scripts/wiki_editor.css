@@ -182,19 +182,19 @@ form#insertImage .align input {
 }
 
 form#insertImage .align input[name=""] {
-    background-image: url("pics/img_flow.png");
+    background-image: url("../pics/img_flow.png");
 }
 
 form#insertImage .align input[name="gauche"] {
-    background-image: url("pics/img_left.png");
+    background-image: url("../pics/img_left.png");
 }
 
 form#insertImage .align input[name="droite"] {
-    background-image: url("pics/img_right.png");
+    background-image: url("../pics/img_right.png");
 }
 
 form#insertImage .align input[name="centre"] {
-    background-image: url("pics/img_center.png");
+    background-image: url("../pics/img_center.png");
 }
 
 form#insertImage .cancel input {

@@ -40,7 +40,7 @@
 
 	<fieldset class="wikiText">
 		<div class="textEditor">
-			{input type="textarea" name="content" cols="70" rows="35" default=$new_content required=true}
+			{input type="textarea" name="content" cols="70" rows="35" default=$new_content required=true data-attachments=1}
 		</div>
 	</fieldset>
 

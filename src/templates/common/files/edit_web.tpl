@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Édition de fichier" is_popup=1 body_id="popup" custom_js=['wiki_editor.js'] custom_css=['!static/scripts/wiki_editor.css']}
+{include file="admin/_head.tpl" title="Édition de fichier" is_popup=1 body_id="popup" custom_js=['wiki_editor.js']}
 
 <form method="post" action="{$self_url}">
 	<p class="textEditor">
