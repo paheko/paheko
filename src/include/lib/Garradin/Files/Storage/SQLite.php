@@ -135,7 +135,23 @@ class SQLite implements StorageInterface
 
 	static public function move(File $old_file, File $new_file): bool
 	{
+		// No need to do anything here
 		return true;
+	}
+
+	static public function exists(string $context, ?string $context_ref, string $name): bool
+	{
+		return true;
+	}
+
+	static public function modified(File $file): ?int
+	{
+		return null;
+	}
+
+	static public function hash(File $file): ?string
+	{
+		return null;
 	}
 
 	static public function getTotalSize(): int
@@ -145,10 +161,10 @@ class SQLite implements StorageInterface
 
 	static public function getQuota(): int
 	{
-		return disk_total_space(dirname(DB_FILE));
+		return disk_total_space(dirname(DATA_ROOT));
 	}
 
-	static public function cleanup(): void
+	static public function sync(): void
 	{
 		$db = DB::getInstance();
 

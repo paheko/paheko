@@ -25,7 +25,7 @@ class Skeleton
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$this->file = Files::getWithNameAndContext($tpl, File::CONTEXT_SKELETON);
+		$this->file = Files::getFromContext(File::CONTEXT_SKELETON, null, $tpl);
 
 		$this->name = $tpl;
 	}
@@ -200,7 +200,7 @@ class Skeleton
 
 	static public function list(): array
 	{
-		$defaults = [];
+		$sources = [];
 
 		$dir = dir(ROOT . '/www/skel-dist/');
 
@@ -209,14 +209,22 @@ class Skeleton
 			if ($file[0] == '.')
 				continue;
 
-			$defaults[$file] = null;
+			$sources[$file] = null;
 		}
 
 		$dir->close();
 
-		$modified_skeletons = EM::getInstance(File::class)->DB()->getGrouped('SELECT name, id, modified FROM files WHERE context = ? ORDER BY name;', File::CONTEXT_SKELETON);
+		$list = Files::list(File::CONTEXT_SKELETON);
 
-		$sources = array_merge($defaults, $modified_skeletons);
+		foreach ($list as $file) {
+			if (!is_object($file)) {
+				// Ignore directories / FIXME: support directories
+				continue;
+			}
+
+			$sources[$file->name] = $file;
+		}
+
 		ksort($sources);
 
 		return $sources;

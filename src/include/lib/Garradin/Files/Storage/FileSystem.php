@@ -2,6 +2,7 @@
 
 namespace Garradin\Files\Storage;
 
+use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 use Garradin\Utils;
 
@@ -63,17 +64,43 @@ class FileSystem implements StorageInterface
 		}
 	}
 
-	static public function list(string $path): array
+	static public function list(string $context, ?string $context_ref): array
 	{
-		$path = self::_getRoot() . ($path ? DIRECTORY_SEPARATOR . $path : '') . DIRECTORY_SEPARATOR . '*';
-		$files = glob($path);
-		$list = [];
+		$path = File::getPath($context, $context_ref);
+		$path = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
 
-		foreach ($files as $file) {
-			throw new \Exception('FIXME');
+		$directories = $files = [];
+
+		foreach (new \FilesystemIterator($path, \FilesystemIterator::SKIP_DOTS) as $file) {
+			if ($file->isDir()) {
+				$directories[] = $file->getFilename();
+				continue;
+			}
+
+			$relative_path = str_replace(self::_getRoot() . DIRECTORY_SEPARATOR, '', $file->getPathname());
+			$relative_path = str_replace(DIRECTORY_SEPARATOR, '/', $relative_path);
+
+			$file_object = Files::getFromPath($relative_path);
+
+			if (!$file_object) {
+				$file_object = File::createFromExisting($relative_path, self::_getRoot(), $file);
+			}
+			// Update metadata
+			else if ($file->getMTime() > $file_object->modified->getTimestamp()) {
+				$file_object->modified = new \DateTime('@' . $file->getMTime());
+				$file_object->hash = self::hash($file_object);
+				$file_object->size = $file->getSize();
+				$file_object->save();
+			}
+
+			$files[] = $file_object;
 		}
 
-		return $list;
+		usort($files, function ($a, $b) {
+			return strnatcasecmp($a->name, $b->name) > 0 ? 1 : -1;
+		});
+
+		return $directories + $files;
 	}
 
 	static public function getPath(File $file): ?string
@@ -104,6 +131,21 @@ class FileSystem implements StorageInterface
 		return rename(self::getPath($old_file), $target);
 	}
 
+	static public function exists(string $context, ?string $context_ref, string $name): bool
+	{
+		return (bool) file_exists(File::getPath($context, $context_ref, $name));
+	}
+
+	static public function modified(File $file): ?int
+	{
+		return filemtime(self::getPath($file)) ?: null;
+	}
+
+	static public function hash(File $file): ?string
+	{
+		return sha1_file(self::getPath($file));
+	}
+
 	static public function getTotalSize(): int
 	{
 		if (null !== self::$_size) {
@@ -128,7 +170,7 @@ class FileSystem implements StorageInterface
 		return disk_total_space(self::_getRoot());
 	}
 
-	static public function cleanup(): void
+	static public function sync(): void
 	{
 		// FIXME
 	}

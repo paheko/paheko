@@ -50,6 +50,21 @@ interface StorageInterface
 	static public function move(File $old_file, File $new_file): bool;
 
 	/**
+	 * Returns TRUE if the file exists
+	 */
+	static public function exists(string $context, ?string $context_ref, string $name): bool;
+
+	/**
+	 * Returns file modification time as UNIX timestamp
+	 */
+	static public function modified(File $file): ?int;
+
+	/**
+	 * Returns SHA1 hash of the file content
+	 */
+	static public function hash(File $file): ?string;
+
+	/**
 	 * Return total size of used space by files stored in this backed
 	 */
 	static public function getTotalSize(): int;
@@ -61,10 +76,9 @@ interface StorageInterface
 	static public function getQuota(): int;
 
 	/**
-	 * This is called periodically to:
-	 * - delete files from the storage that are no longer in the DB
+	 * This is called periodically to sync between stored metadata and file storage
 	 */
-	static public function cleanup(): void;
+	static public function sync(): void;
 
 	/**
 	 * Delete all stored content in this backend
