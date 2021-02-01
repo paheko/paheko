@@ -529,6 +529,7 @@ class File extends Entity
 
 	public function fetch()
 	{
+		$this->updateIfNeeded();
 		return Files::callStorage('fetch', $this);
 	}
 
@@ -669,6 +670,22 @@ class File extends Entity
 	public function path(): string
 	{
 		return self::getPath($this->context, $this->context_ref, $this->name);
+	}
+
+	public function updateIfNeeded(?\SplFileInfo $info = null): void
+	{
+		// Update metadata
+		if ($info && $info->getMTime() <= $this->modified->getTimestamp()) {
+			return;
+		}
+		elseif (($modified = Files::callStorage('modified', $this)) && $modified <= $this->modified->getTimestamp()) {
+			return;
+		}
+
+		$this->set('modified', new \DateTime('@' . ($info ? $info->getMTime() : $modified)));
+		$this->set('hash', Files::callStorage('hash', $this));
+		$this->set('size', $info ? $info->getSize() : Files::callStorage('size', $this));
+		$this->save();
 	}
 
 	/**
