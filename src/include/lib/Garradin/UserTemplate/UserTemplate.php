@@ -34,7 +34,7 @@ class UserTemplate extends Brindille
 			return self::$root_variables;
 		}
 
-		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'champs_membres', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso'];
+		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso'];
 
 		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
@@ -56,9 +56,8 @@ class UserTemplate extends Brindille
 		}
 
 		$config = Config::getInstance();
-		$image_fond = $config->get('image_fond') ? $config->get('image_fond')->url() : null;
 
-		$config = array_intersect_key($config->asArray(), array_flip($keys)) + ['image_fond' => $image_fond];
+		$config = array_intersect_key($config->asArray(), array_flip($keys));
 
 		self::$root_variables = [
 			'root_url'     => WWW_URL,

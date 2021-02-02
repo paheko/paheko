@@ -6,11 +6,10 @@ use Garradin\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
-try {
-	$file = Files::get((int) qg('id'));
-}
-catch (\InvalidArgumentException $e) {
-	throw new UserException($e->getMessage());
+$file = Files::get(qg('p'));
+
+if (!$file) {
+	throw new UserException('Fichier inconnu');
 }
 
 if (!$file->checkWriteAccess($session)) {
@@ -18,7 +17,7 @@ if (!$file->checkWriteAccess($session)) {
 }
 
 $editor = $file->getEditor();
-$csrf_key = 'edit_file_' . $file->id();
+$csrf_key = 'edit_file_' . $file->pathHash();
 
 if (!$editor) {
 	$tpl->assign('file', $file);

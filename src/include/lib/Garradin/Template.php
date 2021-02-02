@@ -493,10 +493,10 @@ class Template extends \KD2\Smartyer
 
 		$couleur1 = $config->get('couleur1') ?: ADMIN_COLOR1;
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
-		$image_fond = ADMIN_BACKGROUND_IMAGE;
+		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if ($f = $config->get('image_fond')) {
-			$image_fond = $f->url();
+		if ($f = $config->get('admin_background')) {
+			$admin_background = $f->url();
 		}
 
 		// Transformation Hexa vers décimal
@@ -512,7 +512,7 @@ class Template extends \KD2\Smartyer
 		}
 		</style>';
 
-		return sprintf($out, $couleur1, $couleur2, $image_fond);
+		return sprintf($out, $couleur1, $couleur2, $admin_background);
 	}
 
 	protected function displayChampMembre($v, $config = null)

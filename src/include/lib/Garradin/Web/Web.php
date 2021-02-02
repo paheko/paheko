@@ -4,7 +4,10 @@ namespace Garradin\Web;
 
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Skeleton;
+use Garradin\Files\Files;
 use Garradin\Config;
+use Garradin\UserException;
+use Garradin\Membres\Session;
 
 use KD2\DB\EntityManager as EM;
 
@@ -46,9 +49,9 @@ class Web
 
 	static public function listPages(?int $parent, bool $order_by_date = true): array
 	{
-		$where = $parent ? sprintf('w.parent_id = %d', $parent) : 'w.parent_id IS NULL';
-		$order = $order_by_date ? 'f.modified DESC' : 'w.title COLLATE NOCASE';
-		$sql = sprintf('SELECT w.* FROM @TABLE w INNER JOIN files f USING (id) WHERE %s AND w.type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
+		$where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
+		$order = $order_by_date ? 'created DESC' : 'title COLLATE NOCASE';
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
 		return EM::getInstance(Page::class)->all($sql);
 	}
 
@@ -129,6 +132,34 @@ class Web
 		elseif (preg_match('!^/admin/!', $uri)) {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
+		}
+		// Files
+		elseif (false !== strpos($uri, '/', 1)) {
+			$file = Files::get(substr($uri, 1));
+
+			if ($file) {
+				$size = null;
+
+				foreach ($_GET as $key => $value) {
+					if (substr($key, -2) == 'px') {
+						$size = (int)substr($key, 0, -2);
+						break;
+					}
+				}
+
+				$session = Session::getInstance();
+
+				if ($size) {
+					$file->serveThumbnail($session, $size);
+				}
+				else {
+					$file->serve($session, isset($_GET['download']) ? true : false);
+				}
+
+				exit;
+			}
+
+			$skel = '404.html';
 		}
 		else {
 			$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);

@@ -18,21 +18,23 @@ class Page extends Entity
 
 	protected $id;
 	protected $parent_id;
+	protected $path;
 	protected $type;
 	protected $status;
 	protected $title;
 	protected $uri;
+	protected $created;
 
 	protected $_types = [
 		'id'        => 'int',
 		'parent_id' => '?int',
+		'path'      => 'string',
 		'type'      => 'int',
 		'status'    => 'int',
 		'uri'       => 'string',
 		'title'     => 'string',
+		'created'   => 'DateTime',
 	];
-
-	protected $_file;
 
 	const STATUS_ONLINE = 1;
 	const STATUS_DRAFT = 0;
@@ -40,6 +42,7 @@ class Page extends Entity
 	const TYPE_CATEGORY = 1;
 	const TYPE_PAGE = 2;
 
+	protected $_file;
 	protected $_attachments;
 
 	static public function create(int $type, ?int $parent_id, string $title, int $status = self::STATUS_ONLINE): self
@@ -68,16 +71,6 @@ class Page extends Entity
 	public function raw(): string
 	{
 		return $this->file()->fetch();
-	}
-
-	public function created(): \DateTime
-	{
-		return $this->file()->created;
-	}
-
-	public function modified(): \DateTime
-	{
-		return $this->file()->modified;
 	}
 
 	public function render(array $options = []): string
@@ -109,12 +102,11 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$file = $this->file();
+		$this->file->touch();
 
-		$file->set('modified', new \DateTime);
-		$file->save();
-
-		$this->id($file->id());
+		if (isset($this->_modified['path']) && $this->exists()) {
+			$this->file()->rename($this->get('path'));
+		}
 
 		return parent::save();
 	}
@@ -125,7 +117,7 @@ class Page extends Entity
 		$this->assert($this->status === self::STATUS_DRAFT || $this->status === self::STATUS_ONLINE, 'Unknown page status');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
-		$this->assert((bool) $this->_file, 'Fichier manquant');
+		$this->assert((bool) $this->file(), 'Fichier manquant');
 
 		$db = DB::getInstance();
 		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
@@ -142,20 +134,29 @@ class Page extends Entity
 			$source['parent_id'] = key($source['parent_id']);
 		}
 
+		if (isset($source['date']) && isset($source['date_time'])) {
+			$source['created'] = $source['date'] . ' ' . $source['date_time'];
+		}
+
 		$file = $this->file();
 
-		if (isset($source['date']) && isset($source['date_time'])) {
-			$file->importForm(['created' => sprintf('%s %s', $source['date'], $source['date_time'])]);
+		if (isset($source['uri'])) {
+			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+			$file->set('name', $source['uri'] . '.skriv');
 		}
+
+		parent::importForm($source);
+
 
 		if (!empty($source['encrypted']) ) {
-			$file->set('type', File::FILE_TYPE_ENCRYPTED);
+			$file->setCustomType(File::FILE_EXT_ENCRYPTED);
 		}
 		else {
-			$file->set('type', File::FILE_TYPE_SKRIV);
+			$file->setCustomType(File::FILE_EXT_SKRIV);
 		}
 
-		if (!empty($source['uri'])) {
+		if (isset($this->_modified['uri'])) {
+			$this->set('path', $file->path());
 			$source['uri'] = Utils::transformTitleToURI($source['uri']);
 			$file->set('name', $source['uri'] . '.skriv');
 		}

@@ -1,6 +1,4 @@
 (function () {
-	var wiki_id = window.location.search.match(/id=(\d+)/)[1];
-
 	g.style('scripts/wiki_editor.css');
 
 	g.onload(function () {
@@ -96,6 +94,7 @@
 
 			var openFileInsert = function ()
 			{
+				var wiki_id = window.location.search.match(/id=(\d+)/)[1];
 				openIFrame(g.admin_url + 'web/_attach.php?page=' + wiki_id);
 				return true;
 			};

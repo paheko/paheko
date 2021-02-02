@@ -21,17 +21,18 @@ class SQLite implements StorageInterface
 	 * Renvoie le chemin vers le fichier local en cache, et le crée s'il n'existe pas
 	 * @return string Chemin local
 	 */
-	static protected function _getFilePathFromCache(File $file): string
+	static protected function _getFilePathFromCache(string $path): string
 	{
-		$cache_id = 'files.' . $file->hash;
+		$cache_id = 'files.' . sha1($path);
 
 		if (!Static_Cache::exists($cache_id))
 		{
 			$db = DB::getInstance();
-			$id = $db->firstColumn('SELECT rowid FROM files_contents WHERE hash = ?;', $file->hash);
+			$id = $db->firstColumn('SELECT c.rowid FROM files_contents c INNER JOIN files_meta f ON f.content_id = c.id
+				WHERE f.path = ? AND f.name = ?;', dirname($path), basename($path));
 
 			if (!$id) {
-				throw new \LogicException('There is no file with hash = ' . $file->hash);
+				throw new \LogicException('There is no file with content_id = ' . $id);
 			}
 
 			$blob = $db->openBlob('files_contents', 'content', (int)$id);
@@ -42,85 +43,90 @@ class SQLite implements StorageInterface
 		return Static_Cache::getPath($cache_id);
 	}
 
-	static public function store(File $file, ?string $path, ?string $content): bool
+	static public function store(string $destination, ?string $source_path, ?string $source_content): bool
 	{
+		if (!isset($_source_path) && !isset($_source_content)) {
+			throw new \InvalidArgumentException('Either source_path or source_content must be supplied');
+		}
+
 		$db = DB::getInstance();
 
-		if ($db->test('files_contents', 'hash = ?', $file->hash)) {
-			return true;
+		$hash = $source_path ? sha1_file($source_path) : sha1($source_content);
+
+		$content_id = $db->firstColumn('SELECT id FROM files_contents WHERE hash = ?;', $hash);
+
+		if (!$content_id) {
+			$db->preparedQuery('INSERT OR IGNORE INTO files_contents (hash, content, size) VALUES (?, zeroblob(?), ?);',
+				$file->hash, $file->size, $file->size);
+
+			$content_id = (int) $db->lastInsertId();
+
+			$blob = $db->openBlob('files_contents', 'content', $content_id, 'main', SQLITE3_OPEN_READWRITE);
+
+			if (null !== $content) {
+				fwrite($blob, $content);
+			}
+			else {
+				fwrite($blob, file_get_contents($path));
+			}
+
+			fclose($blob);
 		}
 
-		$db->preparedQuery('INSERT OR IGNORE INTO files_contents (hash, content, size) VALUES (?, zeroblob(?), ?);',
-			$file->hash, $file->size, $file->size);
-
-		$id = (int) $db->lastInsertId();
-
-		$blob = $db->openBlob('files_contents', 'content', $id, 'main', SQLITE3_OPEN_READWRITE);
-
-		if (null !== $content) {
-			fwrite($blob, $content);
-		}
-		else {
-			fwrite($blob, file_get_contents($path));
-		}
-
-		fclose($blob);
+		$db->insert('files_meta', [
+			'content_id' => $content_id,
+			'type'       => $type,
+			'name'       => basename($destination),
+			'path'       => dirname($destination),
+			'modified'   => new \DateTime,
+			'image'      => $is_image,
+		]);
 
 		return true;
 	}
 
-	static public function list(string $context, ?string $context_ref): array
+	static public function list(string $path): array
 	{
-		$db = DB::getInstance();
-		$path = $context;
-
-		if (null !== $context_ref) {
-			$path .= '/' . $context_ref;
-		}
-
 		File::validatePath($path);
+		$db = DB::getInstance();
 
-		$level = substr_count($context_ref, '/');
+		$level = substr_count($path, '/');
 
-		$context = sprintf('context = %s', $db->quote($context));
-
-		$where_level = sprintf('LENGTH(context_ref) - LENGTH(REPLACE(context_ref, \'/\', \'\')) = %d', $level);
-
-		if ($context_ref) {
-			$where = sprintf('context_ref LIKE %s', $db->quote($context_ref . '/%'), $level);
-		}
-		else {
-			$where = 'context_ref IS NOT NULL';
-		}
-
-		$sql = sprintf('SELECT context_ref, context_ref FROM files WHERE %s AND %s AND %s GROUP BY context_ref ORDER BY context_ref COLLATE NOCASE;', $context, $where, $where_level);
-		$directories = $db->getAssoc($sql);
-
-		$where = sprintf('context_ref %s',  $context_ref ? '= ' . $db->quote($context_ref) : 'IS NULL');
-		$files = EM::getInstance(File::class)->all(sprintf('SELECT * FROM files WHERE %s AND %s ORDER BY name COLLATE NOCASE;', $context, $where));
-		return $directories + $files;
+		return DB::getInstance()->get('SELECT f.name, f.modified, f.type, f.path, c.size
+			FROM files_meta f LEFT JOIN files_contents c ON f.content_id = c.id
+			WHERE path = ?
+			ORDER BY type = ? DESC, name COLLATE NOCASE;',
+			$path, File::TYPE_DIRECTORY);
 	}
 
-	static public function getPath(File $file): ?string
+	static public function getPath(string $path): ?string
 	{
-		return self::_getFilePathFromCache($file);
+		return self::_getFilePathFromCache($path);
 	}
 
-	static public function display(File $file): void
+	static public function display(string $path): void
 	{
-		readfile(self::getFilePathFromCache($file));
+		readfile(self::getFilePathFromCache($path));
 	}
 
-	static public function fetch(File $file): string
+	static public function fetch(string $path): string
 	{
-		return file_get_contents(self::_getFilePathFromCache($file));
+		return file_get_contents(self::_getFilePathFromCache($path));
 	}
 
-	static public function delete(File $file): bool
+	static public function delete(string $path): bool
 	{
 		$db = DB::getInstance();
 
-		$is_used_by_others = $db->firstColumn('SELECT 1 FROM files WHERE id != ? AND hash = ?;', $file->id(), $file->hash);
+		$file = $db->first('SELECT f.id, c.hash, f.type
+			FROM files_meta f INNER JOIN files_contents c ON c.id = f.content_id
+			WHERE f.path = ? AND f.name = ?;', dirname($path), basename($path));
+
+		if ($file->type == File::TYPE_DIRECTORY) {
+			return self::_recursiveDelete($path);
+		}
+
+		$is_used_by_others = $db->firstColumn('SELECT 1 FROM files_meta WHERE id != ? AND hash = ?;', $file->id, $file->hash);
 
 		// Don't delete yet, if this hash is still used by other files
 		if ($is_used_by_others) {
@@ -133,35 +139,87 @@ class SQLite implements StorageInterface
 		return $db->delete('files_contents', 'hash = ?', (int)$file->hash);
 	}
 
-	static public function move(File $old_file, File $new_file): bool
+	static public function move(string $old_path, string $new_path): bool
 	{
-		// No need to do anything here
+		$db = DB::getInstance();
+
+		// Rename/move single file/directory
+		$db->preparedQuery('UPDATE files_meta SET path = ?, name = ? WHERE path = ? AND name = ?;',
+			dirname($new_path), basename($new_path), dirname($old_path), basename($old_path));
+
+		$is_dir = $db->test('files_meta', 'type = ? AND path = ? AND name = ?',
+			File::TYPE_DIRECTORY, dirname($old_path), basename($old_path));
+
+		if (!$is_dir) {
+			return true;
+		}
+
+		// Rename any sub-directories and files
+		$db->preparedQuery('UPDATE files_meta SET path = ? || SUBSTR(path, 1, ?) WHERE path LIKE ? AND path != AND name != ?;',
+			dirname($new_path), strlen(dirname($old_path)),
+			dirname($old_path) . '/%', basename($old_path), dirname($old_path));
+
 		return true;
 	}
 
-	static public function exists(string $context, ?string $context_ref, string $name): bool
+	static public function exists(string $path): bool
 	{
-		return true;
+		return DB::getInstance()->test('files_meta', 'path = ? AND name = ?', dirname($path), basename($path));
 	}
 
-	static public function modified(File $file): ?int
+	static public function size(string $path): ?int
 	{
-		return null;
+		 $size = DB::getInstance()->firstColumn('SELECT c.size
+		 	FROM files_meta f INNER JOIN files_contents c ON c.id = f.content_id
+		 	WHERE f.path = ? ANd f.name = ?;', dirname($path), basename($path));
+		 return (int) $size ?: null;
 	}
 
-	static public function hash(File $file): ?string
+	static public function stat(string $path): ?array
 	{
-		return null;
+		$result = DB::getInstance()->first('SELECT c.size, f.modified, f.type
+			FROM files_meta f INNER JOIN files_contents c ON c.id = f.content_id
+			WHERE f.path = ? AND f.name = ?;', dirname($path), basename($path));
+
+		return $result ? (array) $result : null;
+	}
+
+	static public function mkdir(string $path): bool
+	{
+		$db = DB::getInstance();
+
+		// Recursive mkdir of parent directories
+		while ($test_path = dirname($path)) {
+			if (!$db->test('files_meta', 'path = ? AND name = ?', dirname($test_path), basename($test_path))) {
+				self::mkdir($test_path);
+			}
+		}
+
+		return $db->insert('files_meta', [
+			'content_id' => null,
+			'modified'   => null,
+			'type'       => File::TYPE_DIRECTORY,
+			'path'       => dirname($path),
+			'name'       => basename($path),
+		]);
+	}
+
+	static public function modified(string $path): ?int
+	{
+		$result = DB::getInstance()->firstColumn('SELECT strftime(\'%s\', modified) FROM files_meta WHERE path = ? AND name = ?;',
+			dirname($path), basename($path));
+
+		return (int) $result ?: null;
 	}
 
 	static public function getTotalSize(): int
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files_contents;');
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(LENGTH(content)) FROM files_contents;');
 	}
 
 	static public function getQuota(): int
 	{
-		return disk_total_space(dirname(DATA_ROOT));
+		return disk_total_space(DATA_ROOT);
 	}
 
 	static public function sync(): void
