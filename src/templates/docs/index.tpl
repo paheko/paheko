@@ -6,15 +6,15 @@ use Garradin\Entities\Files\File;
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" href="search.php"}
-		{linkbutton shape="plus" label="Nouveau répertoire" href="new_dir.php?c=%s&parent=%s"|args:$context,$parent}
+		{linkbutton shape="plus" label="Nouveau répertoire" href="new_dir.php?parent=%s"|args:$path}
 	</aside>
 	<ul>
 		<li class="current"><a href="./">Documents</a></li>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<li><a href="./?c=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
+			<li><a href="./?p=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			<li><a href="./?c=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
+			<li><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
 		{/if}
 	</ul>
 </nav>
@@ -34,12 +34,12 @@ use Garradin\Entities\Files\File;
 	<tbody>
 
 	{foreach from=$files item="file"}
-		{if !is_object($file)}
+		{if $file.type == $file::TYPE_DIRECTORY}
 		<tr>
 			{if $can_delete}
 			<td class="check"></td>
 			{/if}
-			<th><a href="?c={$context}&amp;p={$file}">{$file}</a></th>
+			<th><a href="?p={$file->path()}">{$file.name}</a></th>
 			<td colspan="4"></td>
 		</tr>
 		{else}
@@ -49,19 +49,19 @@ use Garradin\Entities\Files\File;
 				{input type="checkbox" name="check[]" value=$file.id}
 			</td>
 			{/if}
-			<th><a href="{if $file->canPreview()}{$admin_url}common/files/preview.php?id={$file.id}{else}{$file->url(true)}{/if}" target="_dialog">{$file.name}</th>
+			<th><a href="{if $file->canPreview()}{$admin_url}common/files/preview.php?p={$file->path()}{else}{$file->url(true)}{/if}" target="_dialog">{$file.name}</th>
 			<td>{$file.modified|date}</td>
 			<td>{$file.type}</td>
 			<td>{$file.size|size_in_bytes}</td>
 			<td class="actions">
 				{if $file->canPreview()}
-					{linkbutton href="!common/files/preview.php?id=%d"|args:$file.id label="Voir" shape="eye" target="_dialog"}
+					{linkbutton href="!common/files/preview.php?p=%s"|args:$file->path() label="Voir" shape="eye" target="_dialog"}
 				{/if}
 				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
 				{if $can_write && $file->getEditor()}
-					{linkbutton href="!common/files/edit.php?id=%d"|args:$file.id label="Modifier" shape="edit" target="_dialog"}
+					{linkbutton href="!common/files/edit.php?p=%s"|args:$file->path() label="Modifier" shape="edit" target="_dialog"}
 				{/if}
-				{linkbutton href="!docs/delete.php?id=%d"|args:$file.id label="Supprimer" shape="delete" target="_dialog"}
+				{linkbutton href="!common/files/delete.php?p=%s"|args:$file->path() label="Supprimer" shape="delete" target="_dialog"}
 			</td>
 		</tr>
 		{/if}

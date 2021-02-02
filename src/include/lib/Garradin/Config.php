@@ -36,7 +36,7 @@ class Config extends Entity
 	protected $couleur1;
 	protected $couleur2;
 
-	protected $image_fond;
+	protected $admin_background;
 
 	protected $desactiver_site;
 
@@ -67,7 +67,7 @@ class Config extends Entity
 
 		'couleur1'              => '?string',
 		'couleur2'              => '?string',
-		'image_fond'            => '?Garradin\Entities\Files\File',
+		'admin_background'      => '?Garradin\Entities\Files\File',
 
 		'desactiver_site'       => 'bool',
 	];
@@ -197,8 +197,6 @@ class Config extends Entity
 			$file->delete();
 		}
 
-		Files::deleteOrphanFiles();
-
 		$db->commit();
 
 		$this->_modified = [];
@@ -225,19 +223,19 @@ class Config extends Entity
 			$source['couleur2'] = null;
 		}
 
-		if (isset($source['image_fond']) && trim($source['image_fond']) == 'RESET') {
-			$source['image_fond'] = null;
+		if (isset($source['admin_background']) && trim($source['admin_background']) == 'RESET') {
+			$source['admin_background'] = null;
 		}
-		elseif (isset($source['image_fond']) && strlen($source['image_fond'])) {
-			if ($this->image_fond) {
-				$this->image_fond->storeFromBase64($source['image_fond']);
-				$this->image_fond->save();
+		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
+			if ($this->admin_background) {
+				$this->admin_background->storeFromBase64($source['admin_background']);
+				$this->admin_background->save();
 			}
 			else {
-				$this->set('image_fond', File::createFromBase64('image_fond.png', File::CONTEXT_CONFIG, 'image_fond', $source['image_fond']));
+				$this->set('admin_background', File::createFromBase64(File::CONTEXT_CONFIG, 'admin_background.png', $source['admin_background']));
 			}
 
-			unset($source['image_fond']);
+			unset($source['admin_background']);
 		}
 
 		parent::importForm($source);

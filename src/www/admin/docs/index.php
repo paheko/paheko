@@ -7,20 +7,25 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = trim(qg('p')) ?: null;
-$context = qg('c') ?: File::CONTEXT_DOCUMENTS;
+$path = trim(qg('p')) ?: File::CONTEXT_DOCUMENTS;
 
-$files = Files::list($context, $parent);
+$files = Files::list($path);
 
 // We consider that the first file has the same rights as the others
 if (count($files)) {
-	$can_delete = current($files)->checkDeleteAccess($session);
-	$can_write = current($files)->checkWriteAccess($session);
+	$first = current($files);
+
+	if (!$first->checkReadAccess($session)) {
+		throw new UserException('Vous n\'avez pas accès à ce répertoire');
+	}
+
+	$can_delete = $first->checkDeleteAccess($session);
+	$can_write = $first->checkWriteAccess($session);
 }
 else {
 	$can_delete = $can_write = false;
 }
 
-$tpl->assign(compact('context', 'parent', 'files', 'can_write', 'can_delete'));
+$tpl->assign(compact('path', 'files', 'can_write', 'can_delete'));
 
 $tpl->display('docs/index.tpl');

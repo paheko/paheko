@@ -32,13 +32,19 @@ class Files
 		return null;
 	}
 
-	static public function list(string $context, ?string $ref = null): array
+	static public function list(string $path = null): array
 	{
-		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
-			throw new \InvalidArgumentException('Invalid context');
+		File::validatePath($path);
+
+		$list = self::callStorage('list', $path);
+
+		foreach ($list as &$item) {
+			$file = new File;
+			$file->import((array) $item);
+			$item = $file;
 		}
 
-		return self::callStorage('list', $context, $ref);
+		return $list;
 	}
 
 	static public function callStorage(string $function, ...$args)
@@ -147,29 +153,7 @@ class Files
 		}
 	}
 
-	/**
-	 * Remove any files from a specific context where the linked context reference is not valid anymore
-	 * This is when eg. a transaction has been deleted but not its linked files
-	 */
-	static public function deleteOrphanFiles(): void
-	{
-		static $contexts = [File::CONTEXT_FILE, File::CONTEXT_USER, File::CONTEXT_TRANSACTION, File::CONTEXT_CONFIG];
-
-		$em = EM::getInstance(File::class);
-
-		foreach ($contexts as $context) {
-			$sql = sprintf('SELECT f.* FROM files f LEFT JOIN %s WHERE f.context = %d AND %s IS NULL;', self::getContextJoinClause($context), $context, $context == File::CONTEXT_CONFIG ? 'c.key' : 'c.id');
-
-			foreach ($em->iterate($sql) as $file) {
-				$file->delete();
-			}
-		}
-
-		// Remove any left-overs
-		DB::getInstance()->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
-	}
-
-	static public function deleteLinkedFiles(string $context, $value): void
+	static public function deletePath(string $context, $value): void
 	{
 		if (null === $value) {
 			throw new \InvalidArgumentException('value argument cannot be null');
@@ -178,8 +162,6 @@ class Files
 		foreach (self::iterateLinkedTo($context, $value) as $file) {
 			$file->delete();
 		}
-
-		self::deleteOrphanFiles();
 	}
 
 	static public function iterateLinkedTo(string $context, $value = null): \Generator
@@ -200,76 +182,23 @@ class Files
 		return iterator_to_array(self::iterateLinkedTo($context, $value));
 	}
 
-	static public function get(int $id): ?File
+	static public function get(string $path, ?string $name = null): ?File
 	{
-		return EM::findOneById(File::class, $id);
-	}
-
-	static public function getFromPath(string $path): ?File
-	{
-		list($context, $ref, $name) = File::validatePath($path);
-		return self::getFromContext($context, $ref, $name);
-	}
-
-	static public function getFromContext(string $context, ?string $context_ref, ?string $name): ?File
-	{
-		$conditions = ['context = ?'];
-		$params = [$context];
-
-		if (null === $context_ref) {
-			$conditions[] = 'context_ref IS NULL';
-		}
-		else {
-			$conditions[] = 'context_ref = ?';
-			$params[] = $context;
+		if ($name) {
+			$path .= '/' . $name;
 		}
 
-		if (null !== $name) {
-			$conditions[] = 'name = ?';
-			$params[] = $name;
+		$info = self::callStorage('stat', $path);
+
+		if (!$info) {
+			return null;
 		}
 
-		$conditions = implode(' AND ', $conditions);
+		$file = new File;
+		$file->path = dirname($path);
+		$file->name = basename($path);
+		$file->import($info);
 
-		return EM::findOne(File::class, sprintf('SELECT * FROM @TABLE WHERE %s', $conditions), ...$params);
-	}
-
-	static public function serveFromQueryString(): void
-	{
-		$id = isset($_GET['id']) ? $_GET['id'] : null;
-		$filename = !empty($_GET['file']) ? $_GET['file'] : null;
-
-		$size = null;
-
-		if (empty($id)) {
-			header('HTTP/1.1 404 Not Found', true, 404);
-			throw new UserException('Fichier inconnu.');
-		}
-
-		foreach ($_GET as $key => $value) {
-			if (substr($key, -2) == 'px') {
-				$size = (int)substr($key, 0, -2);
-				break;
-			}
-		}
-
-		$id = base_convert($id, 36, 10);
-
-		$file = self::get((int) $id);
-
-		if (!$file) {
-			header('HTTP/1.1 404 Not Found', true, 404);
-			throw new UserException('Ce fichier n\'existe pas.');
-		}
-
-		$session = Session::getInstance();
-
-		if ($size) {
-			$file->serveThumbnail($session, $size);
-		}
-		else {
-			$file->serve($session, isset($_GET['download']) ? true : false);
-		}
+		return $file;
 	}
 }
-

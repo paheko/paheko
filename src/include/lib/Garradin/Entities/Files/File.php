@@ -21,35 +21,24 @@ class File extends Entity
 {
 	const TABLE = 'files';
 
-	protected $id;
-	protected $context;
-	protected $context_ref;
+	protected $path;
 	protected $name;
 	protected $type;
-	protected $image;
 	protected $size;
-	protected $hash;
 
-	protected $created;
 	protected $modified;
 
-	protected $author_id;
+	protected $context;
 
 	protected $_types = [
-		'id'           => 'int',
-		'context'      => 'string',
-		'context_ref'  => '?int|string',
-		'name'         => 'string',
-		'type'         => '?string',
-		'image'        => 'int',
-		'size'         => 'int',
-		'hash'         => 'string',
-		'created'      => 'DateTime',
-		'modified'     => 'DateTime',
-		'author_id'    => '?int',
+		'path'     => 'string',
+		'name'     => 'string',
+		'type'     => 'string',
+		'size'     => '?int',
+		'modified' => '?int',
 	];
 
-	protected $_parent;
+	const TYPE_DIRECTORY = 'inode/directory';
 
 	/**
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
@@ -57,9 +46,8 @@ class File extends Entity
 	 */
 	const ALLOWED_THUMB_SIZES = [200, 500, 1200];
 
-	const FILE_TYPE_HTML = 'text/vnd.paheko.web';
-	const FILE_TYPE_ENCRYPTED = 'text/vnd.skriv.encrypted';
-	const FILE_TYPE_SKRIV = 'text/vnd.skriv';
+	const FILE_EXT_ENCRYPTED = '.skriv.enc';
+	const FILE_EXT_SKRIV = '.skriv';
 
 	const EDITOR_WEB = 'web';
 	const EDITOR_ENCRYPTED = 'encrypted';
@@ -87,33 +75,15 @@ class File extends Entity
 
 	public function __construct()
 	{
-		parent::__construct();
-		$this->created = new \DateTime;
-		$this->modified = new \DateTime;
 	}
 
-	public function selfCheck(): void
+	public function import(?array $source = null): self
 	{
-		parent::selfCheck();
-		$this->assert($this->image === 0 || $this->image === 1);
+		parent::import($source);
 
-		// Check file path uniqueness
-		if (isset($this->_modified['name'])) {
-			$db = DB::getInstance();
-			$clause = 'context = ? AND name = ? AND context_ref';
-			$args = [$this->context, $this->name];
-
-			if (null === $this->context_ref) {
-				$clause .= ' IS NULL';
-			}
-			else {
-				$clause .= ' = ?';
-				$args[] = $this->context_ref;
-			}
-
-			$this->assert($this->exists() || !$db->test(self::TABLE, $clause, $args), 'Un fichier avec ce nom existe déjà');
-			$this->assert(!$this->exists() || $db->test(self::TABLE, $clause . ' AND id != ?', $args + [$this->id()]), 'Un fichier avec ce nom existe déjà');
-		}
+		$this->modified = new \DateTime($source['modified']);
+		$this->context = substr($this->path, 0, strpos($this->path, '/') ?: strlen($this->path));
+		return $this;
 	}
 
 	public function delete(): bool
@@ -121,21 +91,30 @@ class File extends Entity
 		Files::callStorage('checkLock');
 
 		// Delete linked files
-		Files::deleteLinkedFiles(self::CONTEXT_FILE, $this->id());
+		Files::deletePath($this->path . '_files');
 
 		// Delete actual file content
-		Files::callStorage('delete', $this);
-
-		// Delete metadata
-		$return = parent::delete();
+		Files::callStorage('delete', $this->path);
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
 		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->id(), $size));
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->path, $size));
 		}
 
 		return $return;
+	}
+
+	public function nameEndsWith(string $needle): bool
+	{
+		$haystack = $this->name;
+		$length = strlen($needle);
+
+		if (!$length) {
+			return true;
+		}
+
+		return substr($haystack, -$length) === $needle;
 	}
 
 	public function save(): bool
@@ -148,21 +127,18 @@ class File extends Entity
 			$this->set('type', 'text/javascript');
 		}
 
-		$return = parent::save();
-
 		// Store content in search table
 		if ($return && substr($this->type, 0, 5) == 'text/') {
 			$content = Files::callStorage('fetch', $this);
 
-			if ($this->type == self::FILE_TYPE_HTML) {
+			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
+				$content = 'Contenu chiffré';
+			}
+			else if ($this->type === 'text/html') {
 				$content = strip_tags($content);
 			}
 
-			if ($this->type == self::FILE_TYPE_ENCRYPTED) {
-				$content = 'Contenu chiffré';
-			}
-
-			DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (id, content) VALUES (?, ?);', $this->id(), $content);
+			DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, content) VALUES (?, ?);', $this->path, $content);
 		}
 
 		return $return;
@@ -172,12 +148,10 @@ class File extends Entity
 	{
 		if ($source_path && !$source_content)
 		{
-			$this->set('hash', sha1_file($source_path));
 			$this->set('size', filesize($source_path));
 		}
 		else
 		{
-			$this->set('hash', sha1($source_content));
 			$this->set('size', strlen($source_content));
 		}
 
@@ -219,9 +193,9 @@ class File extends Entity
 		return $this;
 	}
 
-	static public function createAndStore(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
+	static public function createAndStore(string $path, string $name, string $source_path = null, string $source_content = null): self
 	{
-		$file = self::create($name, $context, $context_ref, $source_path, $source_content);
+		$file = self::create($name, $source_path, $source_content);
 
 		$file->store($source_path, $source_content);
 		$file->save();
@@ -229,7 +203,7 @@ class File extends Entity
 		return $file;
 	}
 
-	static public function create(string $name, string $context, ?string $context_ref, string $source_path = null, string $source_content = null): self
+	static public function create(string $path, string $name, string $source_path = null, string $source_content = null): self
 	{
 		if (isset($source_path, $source_content)) {
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
@@ -238,8 +212,7 @@ class File extends Entity
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		$file = new self;
 		$file->set('name', $name);
-		$file->set('context', $context);
-		$file->set('context_ref', $context_ref);
+		$file->set('path', $path);
 
 		$db = DB::getInstance();
 
@@ -261,10 +234,10 @@ class File extends Entity
 	 * @param  string $content
 	 * @return File
 	 */
-	static public function createFromBase64(string $name, string $context, ?string $context_ref, string $encoded_content): self
+	static public function createFromBase64(string $path, string $name, string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
-		return self::createAndStore($name, $context, $context_ref, null, $content);
+		return self::createAndStore($path, $name, null, $content);
 	}
 
 	public function storeFromBase64(string $encoded_content): self
@@ -276,7 +249,7 @@ class File extends Entity
 	/**
 	 * Upload du fichier par POST
 	 */
-	static public function upload(string $key, string $context, ?string $context_ref): self
+	static public function upload(string $path, string $key): self
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -299,7 +272,7 @@ class File extends Entity
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		return self::createAndStore($name, $context, $context_ref, $file['tmp_name']);
+		return self::createAndStore($path, $name, $file['tmp_name']);
 	}
 
 
@@ -333,13 +306,13 @@ class File extends Entity
 
 	public function url($download = false): string
 	{
-		return self::getFileURL($this->id, $this->name, $this->hash, null, $download);
+		return self::getFileURL($this->path, $this->name, null, $download);
 	}
 
 	public function thumb_url(?int $size = null): string
 	{
 		$size = $size ?? min(self::ALLOWED_THUMB_SIZES);
-		return self::getFileURL($this->id, $this->name, $this->hash, $size);
+		return self::getFileURL($this->path, $this->name, $size);
 	}
 
 	/**
@@ -349,16 +322,13 @@ class File extends Entity
 	 * @param  integer $size Taille de la miniature désirée (pour les images)
 	 * @return string        URL du fichier
 	 */
-	static public function getFileURL(int $id, string $name, string $hash, ?int $size = null, bool $download = false): string
+	static public function getFileURL(string $path, string $name, ?int $size = null, bool $download = false): string
 	{
-		$url = sprintf('%sf/%s/%s?', WWW_URL, base_convert((int)$id, 10, 36), $name);
+		$url = sprintf('%s%s/%s?', WWW_URL, $path, $name);
 
-		if ($size)
-		{
+		if ($size) {
 			$url .= self::_findNearestThumbSize($size) . 'px&';
 		}
-
-		$url .= substr($hash, 0, 10);
 
 		if ($download) {
 			$url .= '&download';
@@ -394,8 +364,7 @@ class File extends Entity
 
 	public function listLinked(): array
 	{
-		return EM::getInstance(self::class)->all('SELECT * FROM files WHERE context = ? AND context_ref = ? ORDER BY name;',
-			self::CONTEXT_FILE, $this->id());
+		return Files::callStorage('list', $this->path() . '_files');
 	}
 
 	/**
@@ -404,12 +373,13 @@ class File extends Entity
 	public function serve(?Session $session = null, bool $download = false): void
 	{
 		if (!$this->checkReadAccess($session)) {
+		var_dump($this); exit;
 			header('HTTP/1.1 403 Forbidden', true, 403);
 			throw new UserException('Vous n\'avez pas accès à ce fichier.');
 			return;
 		}
 
-		$path = Files::callStorage('getPath', $this);
+		$path = Files::callStorage('getPath', $this->path());
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
 		$this->_serve($path, $content, $download);
@@ -483,7 +453,13 @@ class File extends Entity
 			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
 		}
 
-		header(sprintf('Content-Type: %s', $this->type));
+		$type = $this->type;
+
+		if (substr($type, 0, 5) == 'text/') {
+			$type .= ';charset=utf-8';
+		}
+
+		header(sprintf('Content-Type: %s', $type));
 		header(sprintf('Content-Disposition: %s; filename="%s"', $download ? 'attachment' : 'inline', $this->name));
 
 		// Utilisation de XSendFile si disponible
@@ -529,20 +505,21 @@ class File extends Entity
 
 	public function fetch()
 	{
-		$this->updateIfNeeded();
-		return Files::callStorage('fetch', $this);
+		return Files::callStorage('fetch', $this->path());
 	}
 
 	public function render(array $options = [])
 	{
-		$type = $this->type;
-		if ($type == self::FILE_TYPE_HTML) {
+		$type = $this->customType();
+		/*
+		if (substr($this->name, -strlen(self::FILE_EXT_HTML)) == self::FILE_EXT_HTML) {
 			return \Garradin\Web\Render\HTML::render($this, null, $options);
-		}
-		elseif ($type == self::FILE_TYPE_SKRIV) {
+		}*/
+
+		if ($type == self::FILE_EXT_SKRIV) {
 			return \Garradin\Web\Render\Skriv::render($this, null, $options);
 		}
-		elseif ($type == self::FILE_TYPE_ENCRYPTED) {
+		else if ($type == self::FILE_EXT_ENCRYPTED) {
 			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
 		}
 
@@ -552,7 +529,6 @@ class File extends Entity
 	public function checkReadAccess(?Session $session): bool
 	{
 		$context = $this->context;
-		$ref = $this->context_ref;
 
 		// If it's linked to a file, then we want to know what the parent file is linked to
 		if ($context == self::CONTEXT_FILE) {
@@ -588,19 +564,11 @@ class File extends Entity
 
 	public function checkWriteAccess(?Session $session): bool
 	{
-		$context = $this->context;
-		$ref = $this->context_ref;
-
 		if (null === $session) {
 			return false;
 		}
 
-		// If it's linked to a file, then we want to know what the parent file is linked to
-		if ($context == self::CONTEXT_FILE) {
-			return $this->parent()->checkWriteAccess($session);
-		}
-
-		switch ($context) {
+		switch ($this->context) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -621,19 +589,11 @@ class File extends Entity
 
 	public function checkDeleteAccess(?Session $session): bool
 	{
-		$context = $this->context;
-		$ref = $this->context_ref;
-
 		if (null === $session) {
 			return false;
 		}
 
-		// If it's linked to a file, then we want to know what the parent file is linked to
-		if ($context == self::CONTEXT_FILE) {
-			return $this->parent()->checkDeleteAccess($session);
-		}
-
-		switch ($context) {
+		switch ($this->context) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -652,86 +612,30 @@ class File extends Entity
 		return false;
 	}
 
-	static public function getPath(string $context, ?string $ref, ?string $name = null): string
-	{
-		$path = $context;
-
-		if ($ref) {
-			$path .= '/' . $ref;
-		}
-
-		if ($name) {
-			$path .= '/' . $name;
-		}
-
-		return $path;
-	}
-
 	public function path(): string
 	{
-		return self::getPath($this->context, $this->context_ref, $this->name);
+		return $this->path . '/' . $this->name;
 	}
 
-	public function updateIfNeeded(?\SplFileInfo $info = null): void
+	public function pathHash(): string
 	{
-		// Update metadata
-		if ($info && $info->getMTime() <= $this->modified->getTimestamp()) {
-			return;
-		}
-		elseif (($modified = Files::callStorage('modified', $this)) && $modified <= $this->modified->getTimestamp()) {
-			return;
-		}
-
-		$this->set('modified', new \DateTime('@' . ($info ? $info->getMTime() : $modified)));
-		$this->set('hash', Files::callStorage('hash', $this));
-		$this->set('size', $info ? $info->getSize() : Files::callStorage('size', $this));
-		$this->save();
-	}
-
-	/**
-	 * Create a file in DB from an existing file in the local filesysteme
-	 */
-	static public function createFromExisting(string $path, string $root, ?\SplFileInfo $info = null): File
-	{
-		list($context, $ref, $name) = self::validatePath($path);
-		$fullpath = $root . DIRECTORY_SEPARATOR . $path;
-
-		$file = File::create($name, $context, $ref, $fullpath);
-
-		$file->set('hash', sha1_file($fullpath));
-		$file->set('size', $info ? $info->getSize() : filesize($fullpath));
-		$file->set('modified', new \DateTime('@' . ($info ? $info->getMTime() : filemtime($fullpath))));
-		$file->set('created', $file->get('modified'));
-
-		$file->save();
-
-		return $file;
+		return sha1($this->path());
 	}
 
 	public function checkContext(string $context, $ref): bool
 	{
-		return ($this->context === $context) && ($this->context_ref == $ref);
-	}
+		$path = explode('/', $this->path);
+		array_shift($path);
+		$file_ref = array_shift($path);
 
-	public function parent(): ?File
-	{
-		if (null === $this->_parent && $this->context == self::CONTEXT_FILE) {
-			$this->_parent = Files::get((int) $this->context_ref);
-		}
-
-		return $this->_parent;
+		return ($this->context === $context) && ($file_ref == $ref);
 	}
 
 	public function isPublic(): bool
 	{
-		if ($this->context == self::CONTEXT_FILE) {
-			$context = $this->parent()->context;
-		}
-		else {
-			$context = $this->context;
-		}
+		$context = $this->context;
 
-		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
+		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB || $context == self::CONTEXT_SKELETON) {
 			return true;
 		}
 
@@ -773,9 +677,6 @@ class File extends Entity
 			'image/gif',
 			'image/webp',
 			'image/svg+xml',
-			self::FILE_TYPE_SKRIV,
-			self::FILE_TYPE_ENCRYPTED,
-			self::FILE_TYPE_HTML,
 		];
 
 		return in_array($this->type, $types);
@@ -785,7 +686,7 @@ class File extends Entity
 	{
 		$path = explode('/', $path);
 
-		if (count($path) < 2) {
+		if (count($path) < 1) {
 			throw new ValidationException('Invalid file path');
 		}
 
@@ -804,5 +705,18 @@ class File extends Entity
 		$name = array_pop($path);
 		$ref = implode('/', $path);
 		return [$context, $ref ?: null, $name];
+	}
+
+	public function customType(): ?string
+	{
+		static $extensions = [self::FILE_EXT_ENCRYPTED, self::FILE_EXT_SKRIV];
+
+		foreach ($extensions as $ext) {
+			if (substr($this->name, -strlen($ext)) == $ext) {
+				return $ext;
+			}
+		}
+
+		return null;
 	}
 }

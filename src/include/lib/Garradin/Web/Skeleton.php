@@ -25,7 +25,7 @@ class Skeleton
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$this->file = Files::getFromContext(File::CONTEXT_SKELETON, null, $tpl);
+		$this->file = Files::get(File::CONTEXT_SKELETON, $tpl);
 
 		$this->name = $tpl;
 	}

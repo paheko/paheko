@@ -260,32 +260,25 @@ CREATE TABLE IF NOT EXISTS plugins_signaux
 
 ---------- FILES ----------------
 
-CREATE TABLE IF NOT EXISTS files
+CREATE TABLE IF NOT EXISTS files_meta
 -- Files metadata
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    context INTEGER NOT NULL, -- File context (0 = documents, 1 = user-specific file, etc.)
-    context_ref INTEGER NULL, -- Context reference (eg. user ID)
+    path TEXT NOT NULL,
     name TEXT NOT NULL, -- File name
     type TEXT NULL, -- MIME type
-    image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
-    size INTEGER NOT NULL DEFAULT 0,
-    hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
+    modified TEXT NULL CHECK (modified IS NULL OR datetime(modified) = modified),
 
-    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
-    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified),
+    -- rowid of files_contents pointing to the contents
+    -- NULL is for directories only
+    content_id INTEGER NULL REFERENCES files_contents (id),
 
-    author_id INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL
+    CHECK (content_id IS NOT NULL OR type = 'inode/directory')
 );
 
 -- Unique index as this is used to make up a file path
-CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (context, IFNULL(context_ref, ''), name);
-CREATE INDEX IF NOT EXISTS files_date ON files (created);
-CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
-CREATE INDEX IF NOT EXISTS files_name ON files (name);
-CREATE INDEX IF NOT EXISTS files_hash ON files (hash);
-CREATE INDEX IF NOT EXISTS files_context ON files (context, context_ref);
-CREATE INDEX IF NOT EXISTS files_author ON files (author_id);
+CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files_meta (path, name);
+CREATE INDEX IF NOT EXISTS files_modified ON files_meta (modified);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (if storage backend is SQLite)
@@ -293,6 +286,7 @@ CREATE TABLE IF NOT EXISTS files_contents
     id INTEGER NOT NULL PRIMARY KEY,
     hash TEXT NOT NULL,
     size INT NOT NULL,
+    compressed INT NOT NULL DEFAULT 0,
     content BLOB NULL
 );
 
@@ -302,18 +296,21 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
     tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
-    id INT PRIMARY KEY NOT NULL REFERENCES files(id),
+    id INTEGER PRIMARY KEY NOT NULL,
+    path TEXT NOT NULL,
     title TEXT NULL,
     content TEXT NOT NULL -- Text content
 );
 
 CREATE TABLE IF NOT EXISTS web_pages
 (
-    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
+    id INTEGER NOT NULL PRIMARY KEY,
     parent_id INTEGER NULL REFERENCES web_pages(id) ON DELETE SET NULL,
+    path TEXT NOT NULL,
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status INTEGER NOT NULL DEFAULT 0, -- 0 = draft, 1 = online
     uri TEXT NOT NULL,
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
     title TEXT NOT NULL
 );
 

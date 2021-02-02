@@ -12,7 +12,12 @@ ALTER TABLE config RENAME TO config_old;
 INSERT INTO config SELECT * FROM config_old;
 DROP TABLE config_old;
 
+-- This is not used anymore
 DELETE FROM config WHERE key = 'version';
+DELETE FROM config WHERE key = 'accueil_wiki';
+
+-- New config key
+INSERT INTO config (key, value) VALUES ('telephone_asso', NULL);
 
 -- Copy droit_wiki value to droit_web and droit_documents
 INSERT INTO users_categories
@@ -35,118 +40,82 @@ UPDATE recherches SET contenu = REPLACE(contenu, 'id_categorie', 'category_id') 
 INSERT INTO files_contents (id, hash, content, size)
 	SELECT id, hash, contenu, taille FROM fichiers_contenu;
 
--- Copy existing file metadata, including context
-INSERT INTO files (id, hash, name, type, created, author_id, image, context, context_ref)
-	SELECT f.id, c.hash, nom, type, datetime, NULL, image,
-		CASE WHEN t.id THEN 'transaction' ELSE 'file' END, -- context
-		CASE WHEN t.id THEN t.fichier ELSE 10000 + w.id END
+-- Copy existing file metadata for transactions
+INSERT INTO files_meta (id, path, name, type, modified, content_id)
+	SELECT f.id, 'transaction/' || t.id, nom, type, datetime, id_contenu
 	FROM fichiers f
-		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
-		LEFT JOIN fichiers_acc_transactions t ON t.fichier = f.id
-		LEFT JOIN fichiers_wiki_pages w ON w.fichier = f.id;
+		INNER JOIN fichiers_acc_transactions t ON t.fichier = f.id;
 
 -- Copy wiki pages content
-CREATE TEMP TABLE wiki_as_files (old_id, new_id, hash, size, content, name, title, uri, path, old_parent, new_parent, created, modified, author_id, encrypted, image, content_id, type, public);
+CREATE TEMP TABLE wiki_as_files (old_id, new_id, hash, size, content, name, title, uri,
+	old_parent, new_parent, created, modified, author_id, encrypted, content_id, type, public);
 
 INSERT INTO wiki_as_files
 	SELECT
-		id, NULL, sha1(contenu), LENGTH(contenu), contenu,
-		uri || '.skriv', titre, uri, NULL, parent, parent,
-		date_creation, date_modification, id_auteur, chiffrement, 0, NULL,
+		id, NULL, sha1(contenu), LENGTH(contenu), contenu, uri || '.skriv', titre, uri,
+		parent, NULL, date_creation, date_modification, id_auteur, chiffrement, 0,
 		CASE WHEN (SELECT 1 FROM wiki_pages pp WHERE pp.parent = p.id LIMIT 1) THEN 1 ELSE 2 END, -- Type, 1 = category, 2 = page
 		CASE WHEN droit_lecture = -1 THEN 1 ELSE 0 END -- public
 	FROM wiki_pages p
 	INNER JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
 
--- Build back path, up to ten levels
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-
-UPDATE wiki_as_files SET new_parent = NULL;
-
+-- Copy into files_contents
 INSERT INTO files_contents (hash, content, size) SELECT hash, content, size FROM wiki_as_files;
 UPDATE wiki_as_files SET content_id = (SELECT fc.id FROM files_contents fc WHERE fc.hash = wiki_as_files.hash);
 
-INSERT INTO files (id, hash, name, type, created, modified, author_id, image, context, context_ref)
+-- Copy into files_meta
+INSERT INTO files_meta (path, name, type, modified, content_id)
 	SELECT
-		old_id + 10000,
-		hash,
+		CASE WHEN public = 1 THEN 'web' ELSE 'documents/wiki' END, -- path
 		name,
 		CASE WHEN encrypted THEN 'text/vnd.skriv.encrypted' ELSE 'text/vnd.skriv' END,
-		created,
 		modified,
-		author_id,
-		image,
-		CASE WHEN public = 0 THEN 'documents' ELSE 'web' END, -- private wiki page = documents, public wiki page = public website
-		CASE WHEN public = 0 THEN path ELSE NULL END -- private wiki page has a path
+		content_id
 	FROM wiki_as_files;
 
-INSERT INTO files_search (id, content) SELECT new_id, content FROM wiki_as_files WHERE encrypted = 0;
-
-UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE hash = wiki_as_files.hash);
+UPDATE wiki_as_files SET new_id = (SELECT id FROM files_meta WHERE name = wiki_as_files.name);
 UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
 
-INSERT INTO web_pages
-	SELECT new_id, new_parent, type, 1, uri, title FROM wiki_as_files WHERE public = 1;
+-- Copy to search
+INSERT INTO files_search (id, title, content)
+	SELECT new_id, title, content FROM wiki_as_files WHERE encrypted = 0;
 
--- Link background image file to config
-UPDATE files SET context = 'config', context_ref = 'image_fond' WHERE id = (SELECT value FROM config WHERE key = 'image_fond' AND value > 0);
+-- Copy to web_pages
+INSERT INTO web_pages (id, parent_id, path, type, status, uri, title, created)
+	SELECT new_id, new_parent, 'web/' || name, type, 1, uri, title, created
+	FROM wiki_as_files WHERE public = 1;
+
+-- Copy files linked to wiki pages
+INSERT INTO files_meta (path, name, type, modified, content_id)
+	SELECT
+		(CASE WHEN waf.public = 1 THEN 'web/' ELSE 'wiki/' END) || waf.name || '_files',
+		f.nom,
+		f.type,
+		f.datetime,
+		f.id_contenu
+	FROM fichiers f
+		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
+		INNER JOIN wiki_as_files waf ON w.id = waf.old_id;
+
+-- Copy existing config files
+INSERT INTO files_meta (path, name, type, modified, content_id)
+	SELECT 'config', 'admin_bg.png', type, datetime, id_contenu
+	FROM fichiers f WHERE id = (SELECT id FROM config WHERE key = 'image_fond') LIMIT 1;
+
+-- Rename
+UPDATE config SET key = 'admin_background', value = 'config/admin_bg.png' WHERE key = 'image_fond';
 
 -- Copy connection page as a single file
-INSERT INTO files (hash, context, context_ref, name, type, created, author_id)
-	SELECT hash, 'config', 'admin_homepage', 'Accueil_connexion.skriv', type, created, author_id
-	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT value FROM config WHERE key = 'accueil_connexion'));
+INSERT INTO files_meta (path, name, type, modified, content_id)
+	SELECT 'config', 'admin_homepage.skriv', type, modified, content_id
+	FROM files_meta WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT value FROM config WHERE key = 'accueil_connexion'));
 
-UPDATE config SET value = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE key = 'accueil_connexion';
-UPDATE config SET key = 'admin_homepage' WHERE key = 'accueil_connexion';
+-- Rename
+UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' WHERE key = 'accueil_connexion';
 
--- This is not used anymore
-DELETE FROM config WHERE key = 'accueil_wiki';
-
--- New config key
-INSERT INTO config (key, value) VALUES ('telephone_asso', NULL);
+-- Create directories
+INSERT INTO files_meta (path, name, type) VALUES ('documents', 'wiki', 'inode/directory');
+INSERT INTO files_meta (path, name, type) SELECT 'transaction', DISTINCT id, 'inode/directory' FROM fichiers_acc_transactions;
 
 DROP TABLE wiki_recherche;
 

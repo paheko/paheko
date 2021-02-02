@@ -56,7 +56,7 @@
 			<tr>
 				<th>{$p.title}</th>
 				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
-				<td>{$p->created()|date_short}</td>
+				<td>{$p.created|date_short}</td>
 				<td>Modifié {$p.modified|relative_date:true}</td>
 				<td class="actions">
 					{if $p.status == $p::STATUS_ONLINE}

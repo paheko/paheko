@@ -6,15 +6,14 @@ use Garradin\Files\Files;
 
 require __DIR__ . '/../../_inc.php';
 
-try {
-	$file = Files::get((int) qg('id'));
-}
-catch (\InvalidArgumentException $e) {
-	throw new UserException($e->getMessage());
+$file = Files::get(qg('p'));
+
+if (!$file) {
+	throw new UserException('Fichier inconnu');
 }
 
 if (!$file->checkReadAccess($session)) {
-    throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
+	throw new UserException('Vous n\'avez pas le droit de lire ce fichier.');
 }
 
 try {
