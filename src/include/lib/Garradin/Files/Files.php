@@ -47,6 +47,30 @@ class Files
 		return $list;
 	}
 
+	/**
+	 * Creates a new temporary table files_tmp containg all files from the path argument
+	 */
+	static public function listToSQL(string $path): int
+	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		$columns = File::getColumns();
+		$db->exec(sprintf('CREATE TEMP TABLE IF NOT EXISTS files_tmp (%s);', implode(',', $columns)));
+
+		$i = 0;
+
+		foreach (self::list($path) as $file) {
+			$file = $file->asArray();
+			unset($file['id']);
+			$db->insert('files_tmp', $file);
+			$i++;
+		}
+
+		$db->commit();
+		return $i;
+	}
+
 	static public function callStorage(string $function, ...$args)
 	{
 		$storage = FILE_STORAGE_BACKEND ?? 'SQLite';

@@ -7,6 +7,7 @@ use Garradin\Entity;
 use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 
 use KD2\DB\EntityManager as EM;
 
@@ -82,7 +83,7 @@ class Page extends Entity
 	{
 		if (null === $this->_file) {
 			if ($this->exists()) {
-				$this->_file = EM::findOneById(File::class, $this->id());
+				$this->_file = Files::get($this->path);
 			}
 			else {
 				$file = $this->_file = new File;
@@ -93,6 +94,11 @@ class Page extends Entity
 		}
 
 		return $this->_file;
+	}
+
+	public function subpath(): string
+	{
+		return $this->file()->subpath();
 	}
 
 	public function setFile(File $file)
