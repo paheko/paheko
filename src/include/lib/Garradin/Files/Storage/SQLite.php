@@ -92,7 +92,7 @@ class SQLite implements StorageInterface
 
 		$level = substr_count($path, '/');
 
-		return DB::getInstance()->get('SELECT f.name, f.modified, f.type, f.path, c.size
+		return DB::getInstance()->get('SELECT f.name, CAST(strftime(\'%s\', f.modified) AS int) AS modified, f.type, f.path, c.size
 			FROM files_meta f LEFT JOIN files_contents c ON f.content_id = c.id
 			WHERE path = ?
 			ORDER BY type = ? DESC, name COLLATE NOCASE;',
@@ -177,7 +177,7 @@ class SQLite implements StorageInterface
 
 	static public function stat(string $path): ?array
 	{
-		$result = DB::getInstance()->first('SELECT c.size, f.modified, f.type
+		$result = DB::getInstance()->first('SELECT path, name, c.size, CAST(strftime(\'%s\', f.modified) AS int) AS modified, f.type
 			FROM files_meta f INNER JOIN files_contents c ON c.id = f.content_id
 			WHERE f.path = ? AND f.name = ?;', dirname($path), basename($path));
 

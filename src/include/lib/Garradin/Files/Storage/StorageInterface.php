@@ -64,6 +64,9 @@ interface StorageInterface
 	 */
 	static public function size(string $path): ?int;
 
+	/**
+	 * Returns info on file: type, path, name, size, modified
+	 */
 	static public function stat(string $path): ?array;
 
 	static public function mkdir(string $path): bool;

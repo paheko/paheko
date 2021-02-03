@@ -40,7 +40,7 @@ class Files
 
 		foreach ($list as &$item) {
 			$file = new File;
-			$file->import((array) $item);
+			$file->load((array) $item);
 			$item = $file;
 		}
 
@@ -219,9 +219,7 @@ class Files
 		}
 
 		$file = new File;
-		$file->path = dirname($path);
-		$file->name = basename($path);
-		$file->import($info);
+		$file->load($info);
 
 		return $file;
 	}
