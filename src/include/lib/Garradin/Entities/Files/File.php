@@ -17,25 +17,60 @@ use Garradin\Files\Files;
 
 use const Garradin\{WWW_URL, ENABLE_XSENDFILE};
 
+/**
+ * This is a virtual entity, it cannot be saved to a SQL table
+ */
 class File extends Entity
 {
 	const TABLE = 'files';
 
+	/**
+	 * Parent directory of file
+	 */
 	protected $path;
+
+	/**
+	 * File name
+	 */
 	protected $name;
 	protected $type;
 	protected $size;
-
 	protected $modified;
+	protected $image;
 
+	/**
+	 * Context, as from the first part of the path
+	 */
 	protected $context;
 
+	/**
+	 * Can this file be previewed in a web browser?
+	 */
+	protected $preview;
+
+	/**
+	 * File URL
+	 */
+	protected $url;
+	protected $thumb_url;
+
+	/**
+	 * Returns either skriv or encrypted
+	 */
+	protected $custom_type;
+
 	protected $_types = [
-		'path'     => 'string',
-		'name'     => 'string',
-		'type'     => 'string',
-		'size'     => '?int',
-		'modified' => '?int',
+		'path'        => 'string',
+		'name'        => 'string',
+		'type'        => 'string',
+		'size'        => '?int',
+		'modified'    => '?int',
+		'image'       => '?bool',
+		'context'     => 'string',
+		'preview'     => 'bool',
+		'url'         => '?string',
+		'thumb_url'   => '?string',
+		'custom_type' => '?string',
 	];
 
 	const TYPE_DIRECTORY = 'inode/directory';
@@ -71,19 +106,52 @@ class File extends Entity
 		self::CONTEXT_FILE => 'Fichier',
 	];
 
-	const THUMB_CACHE_ID = 'file.thumb.%d.%d';
+	const IMAGE_TYPES = [
+		'image/png',
+		'image/gif',
+		'image/jpeg',
+	];
 
-	public function __construct()
+	const PREVIEW_TYPES = [
+		'application/pdf',
+		'audio/mpeg',
+		'audio/ogg',
+		'audio/wave',
+		'audio/wav',
+		'audio/x-wav',
+		'audio/x-pn-wav',
+		'audio/webm',
+		'video/webm',
+		'video/ogg',
+		'application/ogg',
+		'video/mp4',
+		'image/png',
+		'image/gif',
+		'image/webp',
+		'image/svg+xml',
+		'text/plain',
+		'text/html',
+	];
+
+	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
+
+	static public function getColumns(): array
 	{
+		return array_keys((new self)->_types);
 	}
 
-	public function import(?array $source = null): self
+	public function load(?array $data = null): void
 	{
-		parent::import($source);
+		if (!isset($data['modified'], $data['size'], $data['type'], $data['path'], $data['name'])) {
+			throw new \InvalidArgumentException('Missing mandatory parameter');
+		}
 
-		$this->modified = new \DateTime($source['modified']);
+		$this->modified = new \DateTime($data['modified']);
 		$this->context = substr($this->path, 0, strpos($this->path, '/') ?: strlen($this->path));
-		return $this;
+		$this->image = in_array($this->type, self::IMAGE_TYPES);
+		$this->preview = $this->canPreview();
+		$this->url = $this->url();
+		$this->thumb_url = $this->image ? $this->thumb_url() : null;
 	}
 
 	public function delete(): bool
@@ -364,7 +432,12 @@ class File extends Entity
 
 	public function listLinked(): array
 	{
-		return Files::callStorage('list', $this->path() . '_files');
+		return Files::callStorage('list', $this->subpath());
+	}
+
+	public function subpath(): string
+	{
+		return $this->path() . '_files';
 	}
 
 	/**
@@ -655,31 +728,6 @@ class File extends Entity
 		}
 
 		return null;
-	}
-
-	public function canPreview(): bool
-	{
-		static $types = [
-			'application/pdf',
-			'audio/mpeg',
-			'audio/ogg',
-			'audio/wave',
-			'audio/wav',
-			'audio/x-wav',
-			'audio/x-pn-wav',
-			'audio/webm',
-			'video/webm',
-			'video/ogg',
-			'application/ogg',
-			'video/mp4',
-			'text/plain',
-			'image/png',
-			'image/gif',
-			'image/webp',
-			'image/svg+xml',
-		];
-
-		return in_array($this->type, $types);
 	}
 
 	static public function validatePath(string $path): array

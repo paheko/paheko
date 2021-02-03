@@ -14,6 +14,7 @@ use Garradin\Utils;
 use Garradin\Files\Files;
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Web\Page;
+use Garradin\Web\Web;
 use Garradin\Entities\Files\File;
 use Garradin\UserTemplate\Modifiers;
 
@@ -27,6 +28,17 @@ class UserTemplate extends Brindille
 	protected $file;
 
 	static protected $root_variables;
+
+	static protected $_cache = [];
+
+	static public function cache(string $id, callable $callback)
+	{
+		if (!array_key_exists($id, self::$_cache)) {
+			self::$_cache[$id] = $callback();
+		}
+
+		return self::$_cache[$id];
+	}
 
 	static public function getRootVariables()
 	{
@@ -299,10 +311,10 @@ class UserTemplate extends Brindille
 		}
 
 		$params['select'] = 'w.*';
-		$params['tables'] = 'web_pages w INNER JOIN files f USING (id)';
+		$params['tables'] = 'web_pages w';
 
 		if (isset($params['search'])) {
-			$params['tables'] .= ' INNER JOIN files_search s USING (id)';
+			$params['tables'] .= ' INNER JOIN files_search s USING (path)';
 			$params['select'] .= ', rank(matchinfo(s), 0, 1.0, 1.0) AS points';
 			$params['where'] .= ' AND s MATCH :search';
 
@@ -329,7 +341,7 @@ class UserTemplate extends Brindille
 
 		if (isset($params['future'])) {
 			if (!$params['future']) {
-				$params['where'] .= ' AND f.created <= datetime()';
+				$params['where'] .= ' AND w.created <= datetime()';
 			}
 
 			unset($params['future']);
@@ -345,10 +357,7 @@ class UserTemplate extends Brindille
 
 			$row = array_merge($row, $page->asArray());
 			$row['url'] = $page->url();
-			$row['raw'] = $page->raw();
 			$row['html'] = $page->render();
-			$row['created'] = $page->created();
-			$row['modified'] = $page->modified();
 
 			yield $row;
 		}
@@ -373,38 +382,69 @@ class UserTemplate extends Brindille
 		$params['where'] .= ' AND f.image = 0';
 		return $this->sectionFiles($params, $tpl, $line);
 	}
-
 	public function sectionFiles(array $params, self $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
 			$params['where'] = '';
 		}
 
-		$params['select'] = 'f.*';
-		$params['tables'] = 'files f INNER JOIN files f2 ON f2.id = f.context_ref';
-		$params['where'] .= sprintf(' AND f2.context = \'%s\'', File::CONTEXT_WEB);
-
-		if (isset($params['except_in_text'])) {
-			$found = Page::findTaggedAttachments($params['except_in_text']);
-			$found = array_map('intval', $found);
-			$params['where'] .= sprintf(' AND f.id NOT IN (%s)', implode(', ', $found));
+		if (empty($params['parent'])) {
+			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "parent"');
 		}
 
-		if (isset($params['parent'])) {
-			$params['where'] .= sprintf(' AND f.context = \'%s\' AND f.context_ref = :parent_id', File::CONTEXT_FILE);
-			$params[':parent_id'] = $params['parent'];
-			unset($params['parent']);
+		$parent = (int) $params['parent'];
+
+		// Fetch page
+		$page = self::cache('page_' . $parent, function () use ($parent) {
+			return Web::get($parent);
+		});
+
+		if (!$page) {
+			return;
+		}
+
+		// Fetch files for this page
+		$count = self::cache('page_files_' . $parent, function () use ($page) {
+			$subpath = $page->subpath();
+			return Files::listToSQL($subpath);
+		});
+
+		if (!$count) {
+			return;
+		}
+
+		$params['select'] = 'f.*';
+		$params['tables'] = 'files_tmp f';
+		$params['where'] .= ' AND f.path = :path';
+		$params[':path'] = $page->subpath();
+		unset($params['parent']);
+
+		// Generate a temporary table containing the list of files included in the text
+		if (isset($params['except_in_text'])) {
+			// Don't regenerate that table for each section called in the page,
+			// we assume the content and list of files will not change between sections
+			self::cache('page_files_text_' . $parent, function () use ($page) {
+				$db = DB::getInstance();
+				$db->begin();
+
+				// Put files mentioned in the text in a temporary table
+				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, name);');
+
+				foreach (Page::findTaggedAttachments($page->raw()) as $name) {
+					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'name' => $name]);
+				}
+
+				$db->commit();
+			});
+
+			$params['where'] .= sprintf(' AND f.name NOT IN (SELECT name FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
+		}
+
+		if (isset($params['order']) && $params['order'] == 'name') {
+			$params['order'] .= ' COLLATE NOCASE';
 		}
 
 		foreach ($this->sectionSQL($params, $tpl, $line) as $row) {
-			$file = new File;
-			$file->load($row);
-			$file->exists(true);
-
-			$row = $file->asArray();
-			$row['url'] = $file->url();
-			$row['thumb_url'] = $file->image ? $file->thumb_url() : null;
-
 			yield $row;
 		}
 	}

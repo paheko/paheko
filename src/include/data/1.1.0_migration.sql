@@ -117,6 +117,8 @@ UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' 
 INSERT INTO files_meta (path, name, type) VALUES ('documents', 'wiki', 'inode/directory');
 INSERT INTO files_meta (path, name, type) SELECT 'transaction', DISTINCT id, 'inode/directory' FROM fichiers_acc_transactions;
 
+-- FIXME: need to update Skriv pages with files/images links
+
 DROP TABLE wiki_recherche;
 
 DROP TABLE wiki_pages;
