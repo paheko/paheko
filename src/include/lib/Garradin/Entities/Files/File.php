@@ -53,24 +53,28 @@ class File extends Entity
 	 */
 	protected $url;
 	protected $thumb_url;
+	protected $download_url;
 
 	/**
 	 * Returns either skriv or encrypted
 	 */
 	protected $custom_type;
+	protected $pathname;
 
 	protected $_types = [
-		'path'        => 'string',
-		'name'        => 'string',
-		'type'        => 'string',
-		'size'        => '?int',
-		'modified'    => '?int',
-		'image'       => '?bool',
-		'context'     => 'string',
-		'preview'     => 'bool',
-		'url'         => '?string',
-		'thumb_url'   => '?string',
-		'custom_type' => '?string',
+		'path'         => 'string',
+		'name'         => 'string',
+		'type'         => 'string',
+		'size'         => '?int',
+		'modified'     => '?int',
+		'image'        => '?bool',
+		'context'      => 'string',
+		'preview'      => 'bool',
+		'url'          => '?string',
+		'download_url' => '?string',
+		'thumb_url'    => '?string',
+		'custom_type'  => '?string',
+		'pathname'     => 'string',
 	];
 
 	const TYPE_DIRECTORY = 'inode/directory';
@@ -142,16 +146,22 @@ class File extends Entity
 
 	public function load(?array $data = null): void
 	{
-		if (!isset($data['modified'], $data['size'], $data['type'], $data['path'], $data['name'])) {
+		$mandatory = ['modified', 'size', 'type', 'path', 'name'];
+		if (!empty(array_diff($mandatory, array_keys($data)))) {
 			throw new \InvalidArgumentException('Missing mandatory parameter');
 		}
 
-		$this->modified = new \DateTime($data['modified']);
+		foreach ($data as $key => $value) {
+			$this->set($key, $value);
+		}
+
 		$this->context = substr($this->path, 0, strpos($this->path, '/') ?: strlen($this->path));
 		$this->image = in_array($this->type, self::IMAGE_TYPES);
-		$this->preview = $this->canPreview();
+		$this->preview = in_array($this->type, self::PREVIEW_TYPES);
 		$this->url = $this->url();
+		$this->download_url = $this->url(true);
 		$this->thumb_url = $this->image ? $this->thumb_url() : null;
+		$this->pathname = $this->path . '/' . $this->name;
 	}
 
 	public function delete(): bool
@@ -608,7 +618,7 @@ class File extends Entity
 			return $this->parent()->checkReadAccess($session);
 		}
 		// Web pages and config files are always public
-		else if ($context == self::CONTEXT_WEB || $context == self::CONTEXT_CONFIG || $context == self::CONTEXT_SKELETON) {
+		else if ($this->isPublic()) {
 			return true;
 		}
 
@@ -717,10 +727,10 @@ class File extends Entity
 
 	public function getEditor(): ?string
 	{
-		if ($this->type == self::FILE_TYPE_SKRIV) {
+		if ($this->customType() == self::FILE_EXT_SKRIV) {
 			return self::EDITOR_WEB;
 		}
-		elseif ($this->type == self::FILE_TYPE_ENCRYPTED) {
+		elseif ($this->customType() == self::FILE_EXT_ENCRYPTED) {
 			return self::EDITOR_ENCRYPTED;
 		}
 		elseif (substr($this->type, 0, 5) == 'text/') {

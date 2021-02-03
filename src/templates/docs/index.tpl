@@ -49,15 +49,15 @@ use Garradin\Entities\Files\File;
 				{input type="checkbox" name="check[]" value=$file.id}
 			</td>
 			{/if}
-			<th><a href="{if $file->canPreview()}{$admin_url}common/files/preview.php?p={$file->path()}{else}{$file->url(true)}{/if}" target="_dialog">{$file.name}</th>
+			<th><a href="{if $file.preview}{$admin_url}common/files/preview.php?p={$file.pathname}{else}{$file->url(true)}{/if}" target="_dialog">{$file.name}</th>
 			<td>{$file.modified|date}</td>
 			<td>{$file.type}</td>
 			<td>{$file.size|size_in_bytes}</td>
 			<td class="actions">
-				{if $file->canPreview()}
-					{linkbutton href="!common/files/preview.php?p=%s"|args:$file->path() label="Voir" shape="eye" target="_dialog"}
+				{if $file.preview}
+					{linkbutton href="!common/files/preview.php?p=%s"|args:$file.pathname label="Voir" shape="eye" target="_dialog"}
 				{/if}
-				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
+				{linkbutton href=$file.download_url label="Télécharger" shape="download"}
 				{if $can_write && $file->getEditor()}
 					{linkbutton href="!common/files/edit.php?p=%s"|args:$file->path() label="Modifier" shape="edit" target="_dialog"}
 				{/if}
