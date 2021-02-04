@@ -205,11 +205,6 @@ class Skeleton
 		$list = Files::list(File::CONTEXT_SKELETON);
 
 		foreach ($list as $file) {
-			if (!is_object($file)) {
-				// Ignore directories / FIXME: support directories
-				continue;
-			}
-
 			$sources[$file->name] = $file;
 		}
 
