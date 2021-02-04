@@ -14,6 +14,12 @@
 	</ul>
 </nav>
 
+{if $config.desactiver_site}
+	<p class="block alert">
+		Le site public est désactivé. <a href="{"!web/config.php"|local_url}">Réactiver le site dans la configuration.</a>
+	</p>
+{/if}
+
 {if count($categories)}
 	<h2 class="ruler">Catégories</h2>
 	<table class="list">

@@ -6,6 +6,7 @@ use Garradin\Entities\Web\Page;
 use Garradin\Web\Skeleton;
 use Garradin\Files\Files;
 use Garradin\Config;
+use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Membres\Session;
 

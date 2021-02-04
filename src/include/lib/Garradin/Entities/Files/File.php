@@ -196,21 +196,14 @@ class File extends Entity
 		return $return;
 	}
 
-	public function nameEndsWith(string $needle): bool
-	{
-		$haystack = $this->name;
-		$length = strlen($needle);
-
-		if (!$length) {
-			return true;
-		}
-
-		return substr($haystack, -$length) === $needle;
-	}
-
 	public function save(): bool
 	{
 		throw new \LogicException('File cannot be saved, as its metadata cannot be changed');
+	}
+
+	public function rename(string $new_path, string $new_name): bool
+	{
+		return Files::callStorage('move', $this->path(), $new_path . '/' . $new_name);
 	}
 
 	public function setContent(string $content): self
@@ -784,6 +777,23 @@ class File extends Entity
 		$name = array_pop($path);
 		$ref = implode('/', $path);
 		return [$context, $ref ?: null, $name];
+	}
+
+	public function setCustomType(string $type): void
+	{
+		if (!in_array($type, [self::FILE_EXT_SKRIV, self::FILE_EXT_ENCRYPTED])) {
+			throw new \InvalidArgumentException('Invalid custom type');
+		}
+
+		$ext = $this->customType();
+		$name = $this->name;
+
+		if ($ext) {
+			$name = substr($name, 0, -strlen($ext));
+		}
+
+		$name .= $type;
+		$this->name = $name;
 	}
 
 	public function customType(): ?string

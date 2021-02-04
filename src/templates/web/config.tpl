@@ -12,18 +12,7 @@
 
 {form_errors}
 
-{if $config.desactiver_site}
-	<div class="block alert">
-		<h3>Site public désactivé</h3>
-		<p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
-		<form method="post" action="{$self_url}">
-			<p class="submit">
-				{csrf_field key="config_site"}
-				{button type="submit" name="activer_site" label="Réactiver le site public" shape="right" class="main"}
-			</p>
-		</form>
-	</div>
-{elseif isset($edit)}
+{if isset($edit)}
 	<form method="post" action="{$self_url}">
 		<h3>Éditer un squelette</h3>
 
@@ -52,6 +41,22 @@
 	</script>
 {else}
 
+
+	{if $config.desactiver_site}
+
+	<div class="block alert">
+		<h3>Site public désactivé</h3>
+		<p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
+		<form method="post" action="{$self_url}">
+			<p class="submit">
+				{csrf_field key="config_site"}
+				{button type="submit" name="activer_site" label="Réactiver le site public" shape="right" class="main"}
+			</p>
+		</form>
+	</div>
+
+	{else}
+
 	<fieldset>
 		<legend>Activation du site public</legend>
 		<dl>
@@ -69,6 +74,8 @@
 			</dd>
 		</dl>
 	</fieldset>
+
+	{/if}
 
 	<form method="post" action="{$self_url}">
 	<fieldset class="templatesList">

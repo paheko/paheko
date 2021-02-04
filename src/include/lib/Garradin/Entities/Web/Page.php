@@ -45,6 +45,9 @@ class Page extends Entity
 
 	protected $_file;
 	protected $_attachments;
+	protected $_content;
+	protected $_content_modified = false;
+	protected $_content_type;
 
 	static public function create(int $type, ?int $parent_id, string $title, int $status = self::STATUS_ONLINE): self
 	{
@@ -69,9 +72,18 @@ class Page extends Entity
 		return $url;
 	}
 
+	public function modified(): \DateTime
+	{
+		return new \DateTime('@' . $this->file()->modified);
+	}
+
 	public function raw(): string
 	{
-		return $this->file()->fetch();
+		if (null == $this->_content) {
+			$this->_content = $this->file()->fetch();
+		}
+
+		return $this->_content;
 	}
 
 	public function render(array $options = []): string
@@ -106,13 +118,29 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$this->file->touch();
+		if (isset($this->_modified['uri'])) {
+			$type = $this->_content_type;
+			$this->set('path', File::CONTEXT_WEB . '/' . $this->uri . $type);
+		}
+
+		$exists = $this->exists();
 
 		parent::save();
 
-		if (isset($this->_modified['path']) && $this->exists()) {
-			$this->file()->rename($this->get('path'));
+		if (isset($this->_modified['path'])) {
+			if ($exists) {
+				$this->file()->rename($this->get('path'));
+			}
+			else {
+				$this->_file = File::createAndStore(dirname($this->path), basename($this->path), null, $this->_content);
+			}
 		}
+
+		if (isset($this->_content_modified) && $exists) {
+			$this->file()->setContent((string)$this->_content);
+		}
+
+		return true;
 	}
 
 	public function selfCheck(): void
@@ -142,34 +170,23 @@ class Page extends Entity
 			$source['created'] = $source['date'] . ' ' . $source['date_time'];
 		}
 
-		$file = $this->file();
-
 		if (isset($source['uri'])) {
 			$source['uri'] = Utils::transformTitleToURI($source['uri']);
-			$file->set('name', $source['uri'] . '.skriv');
 		}
-
-		parent::importForm($source);
-
 
 		if (!empty($source['encrypted']) ) {
-			$file->setCustomType(File::FILE_EXT_ENCRYPTED);
+			$this->_content_type = File::FILE_EXT_ENCRYPTED;
 		}
 		else {
-			$file->setCustomType(File::FILE_EXT_SKRIV);
+			$this->_content_type = File::FILE_EXT_SKRIV;
 		}
 
-		if (isset($this->_modified['uri'])) {
-			$this->set('path', $file->path());
-			$source['uri'] = Utils::transformTitleToURI($source['uri']);
-			$file->set('name', $source['uri'] . '.skriv');
+		if (isset($source['content']) && $source['content'] != $this->_content) {
+			$this->_content = $source['content'];
+			$this->_content_modified = true;
 		}
 
-		if (isset($source['content']) && sha1($source['content']) != $file->hash) {
-			$file->store(null, $source['content']);
-		}
-
-		return $this->import($source);
+		return parent::importForm($source);
 	}
 
 	public function getBreadcrumbs()
