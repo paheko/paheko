@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un fichier" current=null}
+{include file="admin/_head.tpl" title="Supprimer un fichier" current=null is_popup=1 body_id="popup"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer ce fichier ?"

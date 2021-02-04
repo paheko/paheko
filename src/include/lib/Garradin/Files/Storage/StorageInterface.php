@@ -14,7 +14,7 @@ interface StorageInterface
 	/**
 	 * Stores a file in this backend, the file can come from a local $path, or directly as a $content string
 	 */
-	static public function store(string $destination, ?string $source_path, ?string $source_content): bool;
+	static public function store(File $file, ?string $source_path, ?string $source_content): bool;
 
 	/**
 	 * List files contained in a path, this must return an array of File instances
@@ -27,7 +27,7 @@ interface StorageInterface
 	 * If storage backend cannot store the file locally, return NULL.
 	 * In that case a subsequent call to fetch() will be done.
 	 */
-	static public function getPath(string $path): ?string;
+	static public function getFullPath(string $path): ?string;
 
 	/**
 	 * Returns the binary of a content to php://output
@@ -81,11 +81,6 @@ interface StorageInterface
 	 * This will only be called if FILE_STORAGE_QUOTA constant is null
 	 */
 	static public function getQuota(): int;
-
-	/**
-	 * This is called periodically to sync between stored metadata and file storage
-	 */
-	static public function sync(): void;
 
 	/**
 	 * Delete all stored content in this backend

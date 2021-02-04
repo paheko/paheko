@@ -8,6 +8,7 @@ use KD2\DB\EntityManager as EM;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
+use Garradin\ValidationException;
 use Garradin\Membres\Session;
 use Garradin\Static_Cache;
 use Garradin\Utils;
@@ -98,7 +99,6 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_SKELETON = 'skel';
-	const CONTEXT_FILE = 'file';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -107,7 +107,6 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_SKELETON => 'Squelettes',
-		self::CONTEXT_FILE => 'Fichier',
 	];
 
 	const IMAGE_TYPES = [
@@ -131,6 +130,7 @@ class File extends Entity
 		'video/mp4',
 		'image/png',
 		'image/gif',
+		'image/jpeg',
 		'image/webp',
 		'image/svg+xml',
 		'text/plain',
@@ -157,7 +157,8 @@ class File extends Entity
 
 		$this->context = substr($this->path, 0, strpos($this->path, '/') ?: strlen($this->path));
 		$this->image = in_array($this->type, self::IMAGE_TYPES);
-		$this->preview = in_array($this->type, self::PREVIEW_TYPES);
+		$this->custom_type = $this->customType();
+		$this->preview = in_array($this->type, self::PREVIEW_TYPES) || $this->custom_type;
 		$this->url = $this->url();
 		$this->download_url = $this->url(true);
 		$this->thumb_url = $this->image ? $this->thumb_url() : null;
@@ -169,15 +170,17 @@ class File extends Entity
 		Files::callStorage('checkLock');
 
 		// Delete linked files
-		Files::deletePath($this->path . '_files');
+		if ($sub = Files::get($this->subpath())) {
+			$sub->delete();
+		}
 
 		// Delete actual file content
-		Files::callStorage('delete', $this->path);
+		$return = Files::callStorage('delete', $this->pathname);
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
 		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->path, $size));
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, md5($this->pathname), $size));
 		}
 
 		return $return;
@@ -197,32 +200,15 @@ class File extends Entity
 
 	public function save(): bool
 	{
-		// Force CSS mimetype
-		if (substr($this->name, -4) == '.css') {
-			$this->set('type', 'text/css');
-		}
-		elseif (substr($this->name, -3) == '.js') {
-			$this->set('type', 'text/javascript');
-		}
-
-		// Store content in search table
-		if ($return && substr($this->type, 0, 5) == 'text/') {
-			$content = Files::callStorage('fetch', $this);
-
-			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
-				$content = 'Contenu chiffré';
-			}
-			else if ($this->type === 'text/html') {
-				$content = strip_tags($content);
-			}
-
-			DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, content) VALUES (?, ?);', $this->path, $content);
-		}
-
-		return $return;
+		throw new \LogicException('File cannot be saved, as its metadata cannot be changed');
 	}
 
-	public function store(string $source_path = null, $source_content = null): self
+	public function setContent(string $content): self
+	{
+		return $this->store(null, rtrim($content));
+	}
+
+	protected function store(string $source_path = null, $source_content = null): self
 	{
 		if ($source_path && !$source_content)
 		{
@@ -247,7 +233,6 @@ class File extends Entity
 				// from JS canvas which doesn't know how to gzip (d'oh!)
 				if ($i->format() == 'png' && null !== $source_content) {
 					$source_content = $i->output('png', true);
-					$this->set('hash', sha1($source_content));
 					$this->set('size', strlen($source_content));
 				}
 
@@ -268,15 +253,31 @@ class File extends Entity
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
 
+		// Store content in search table
+		if (substr($this->type, 0, 5) == 'text/') {
+			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->pathname);
+
+			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
+				$content = 'Contenu chiffré';
+			}
+			else if ($this->type === 'text/html' || $this->type == 'text/xml') {
+				$content = strip_tags($content);
+			}
+
+			// Only index contents up to 150KB and valid UTF-8
+			if (strlen($content) <= 150*1024 && preg_match('//u', $content)) {
+				DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, content) VALUES (?, ?);', $this->pathname, $content);
+			}
+		}
+
 		return $this;
 	}
 
 	static public function createAndStore(string $path, string $name, string $source_path = null, string $source_content = null): self
 	{
-		$file = self::create($name, $source_path, $source_content);
+		$file = self::create($path, $name, $source_path, $source_content);
 
 		$file->store($source_path, $source_content);
-		$file->save();
 
 		return $file;
 	}
@@ -301,7 +302,7 @@ class File extends Entity
 			$file->set('type', finfo_buffer($finfo, $source_content));
 		}
 
-		$file->set('image', preg_match('/^image\/(?:png|jpe?g|gif)$/', $file->type));
+		$file->set('image', in_array($file->type, self::IMAGE_TYPES));
 
 		return $file;
 	}
@@ -462,7 +463,7 @@ class File extends Entity
 			return;
 		}
 
-		$path = Files::callStorage('getPath', $this->path());
+		$path = Files::callStorage('getFullPath', $this->path());
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
 		$this->_serve($path, $content, $download);
@@ -498,7 +499,7 @@ class File extends Entity
 		if (!Static_Cache::exists($cache_id))
 		{
 			try {
-				if ($path = Files::callStorage('getPath', $this)) {
+				if ($path = Files::callStorage('getFullPath', $this)) {
 					(new Image($path))->resize($width)->save($destination);
 				}
 				elseif ($content = Files::callStorage('fetch', $this)) {
@@ -537,6 +538,14 @@ class File extends Entity
 		}
 
 		$type = $this->type;
+
+		// Force CSS mimetype
+		if (substr($this->name, -4) == '.css') {
+			$type = 'text/css';
+		}
+		elseif (substr($this->name, -3) == '.js') {
+			$type = 'text/javascript';
+		}
 
 		if (substr($type, 0, 5) == 'text/') {
 			$type .= ';charset=utf-8';

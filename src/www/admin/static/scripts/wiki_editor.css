@@ -59,6 +59,12 @@ nav.te .file {
     margin-left: 2em;
 }
 
+nav.te .save {
+    float: right;
+    font-weight: bold;
+    margin-right: 2em;
+}
+
 nav.te .fullscreen {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABMTFFOTlBOTlCQ1uMHAAAAA3RSTlMAOcKBmOr4AAAAQUlEQVQI12P4/4D7P8N/B0Yo8XsC23+GZw+4pzM4TmBzYsAGgBKODNcecM9m+D+B7T3DPwfG/Qz/G5iABlzg+g8ANzMax/3kkQoAAAAASUVORK5CYII=");
     float: right;
@@ -212,4 +218,12 @@ form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
     cursor: pointer;
     background-color: #eee;
     color: darkred;
+}
+
+#confirm_saved {
+    position: absolute;
+    top: .5em;
+    right: 10em;
+    text-align: center;
+    transition: all .5s, opacity 2s;
 }

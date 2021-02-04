@@ -87,9 +87,7 @@ class Page extends Entity
 			}
 			else {
 				$file = $this->_file = new File;
-				$file->type = File::FILE_TYPE_SKRIV;
-				$file->context = File::CONTEXT_WEB;
-				$file->image = 0;
+				$file->type = 'text/plain';
 			}
 		}
 
@@ -110,11 +108,11 @@ class Page extends Entity
 	{
 		$this->file->touch();
 
+		parent::save();
+
 		if (isset($this->_modified['path']) && $this->exists()) {
 			$this->file()->rename($this->get('path'));
 		}
-
-		return parent::save();
 	}
 
 	public function selfCheck(): void

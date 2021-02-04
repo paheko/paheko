@@ -118,27 +118,39 @@ class Files
 			call_user_func([$from, 'checkLock']);
 			call_user_func([$to, 'checkLock']);
 
-			call_user_func([$from, 'lock']);
-			call_user_func([$to, 'lock']);
+			//call_user_func([$from, 'lock']);
+			//call_user_func([$to, 'lock']);
 
 			$db = DB::getInstance();
 			$db->begin();
-			$res = EM::getInstance(File::class)->iterate('SELECT * FROM @TABLE;');
 
-			foreach ($res as $file) {
-				$from_path = call_user_func([$from, 'getPath'], $file);
-				call_user_func([$to, 'store'], $file, $from_path, null);
-
-				if (null !== $callback) {
-					$callback($file);
-				}
-			}
+			self::migrateDirectory($from, $to, '', $callback);
 
 			$db->commit();
 		}
 		finally {
 			call_user_func([$from, 'unlock']);
 			call_user_func([$to, 'unlock']);
+		}
+	}
+
+	static protected function migrateDirectory(string $from, string $to, string $path, callable $callback)
+	{
+		foreach (call_user_func([$from, 'list'], $path) as $file) {
+			if ($file['type'] == File::TYPE_DIRECTORY) {
+				self::migrateDirectory($from, $to, ($path ? $path . '/' : '') . $file['name'], $callback);
+				continue;
+			}
+
+			$f = new File;
+			$f->load($file);
+
+			$from_path = call_user_func([$from, 'getFullPath'], $f->path());
+			call_user_func([$to, 'store'], $f, $from_path, null);
+
+			if (null !== $callback) {
+				$callback($file);
+			}
 		}
 	}
 
@@ -177,17 +189,6 @@ class Files
 		}
 	}
 
-	static public function deletePath(string $context, $value): void
-	{
-		if (null === $value) {
-			throw new \InvalidArgumentException('value argument cannot be null');
-		}
-
-		foreach (self::iterateLinkedTo($context, $value) as $file) {
-			$file->delete();
-		}
-	}
-
 	static public function iterateLinkedTo(string $context, $value = null): \Generator
 	{
 		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
@@ -206,8 +207,12 @@ class Files
 		return iterator_to_array(self::iterateLinkedTo($context, $value));
 	}
 
-	static public function get(string $path, ?string $name = null): ?File
+	static public function get(?string $path, ?string $name = null): ?File
 	{
+		if (null === $path) {
+			return null;
+		}
+
 		if ($name) {
 			$path .= '/' . $name;
 		}

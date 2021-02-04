@@ -161,14 +161,6 @@ form#f_upload fieldset {
     position: relative;
 }
 
-#confirm_saved {
-    position: absolute;
-    top: .5em;
-    right: 4em;
-    text-align: center;
-    transition: all .5s, opacity 3s;
-}
-
 .diff {
     margin: 1em;
 }

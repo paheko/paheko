@@ -144,19 +144,7 @@ class Skeleton
 
 	public function edit(string $content)
 	{
-		if (!$this->file) {
-			$this->file = new File;
-			$this->file->import([
-				'type' => $this->type(),
-				'name' => $this->name,
-				'image' => 0,
-				'public' => 0,
-				'context' => File::CONTEXT_SKELETON,
-			]);
-		}
-
-		$this->file->store(null, $content);
-		$this->file->save();
+		File::createAndStore(File::CONTEXT_SKELETON, $this->name, null, $content);
 	}
 
 	public function type(): string

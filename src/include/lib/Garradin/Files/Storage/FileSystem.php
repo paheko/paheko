@@ -23,7 +23,7 @@ class FileSystem implements StorageInterface
 			throw new \RuntimeException('Le stockage de fichier n\'a pas été configuré (FILE_STORAGE_CONFIG est vide).');
 		}
 
-		if (!is_writable($config)) {
+		if (!is_writable($config) && !Utils::safe_mkdir($config)) {
 			throw new \RuntimeException('Le répertoire de stockage des fichiers est protégé contre l\'écriture.');
 		}
 
@@ -53,7 +53,7 @@ class FileSystem implements StorageInterface
 
 	static public function store(File $file, ?string $path, ?string $content): bool
 	{
-		$target = self::getPath($file);
+		$target = self::getFullPath($file->path());
 		self::ensureDirectoryExists(dirname($target));
 
 		if (null !== $path) {
@@ -64,87 +64,110 @@ class FileSystem implements StorageInterface
 		}
 	}
 
-	static public function list(string $context, ?string $context_ref): array
+	static public function list(string $path): array
 	{
-		$path = File::getPath($context, $context_ref);
-		$path = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
 
-		$directories = $files = [];
-
-		foreach (new \FilesystemIterator($path, \FilesystemIterator::SKIP_DOTS) as $file) {
-			if ($file->isDir()) {
-				$directories[] = $file->getFilename();
-				continue;
-			}
-
-			$relative_path = str_replace(self::_getRoot() . DIRECTORY_SEPARATOR, '', $file->getPathname());
-			$relative_path = str_replace(DIRECTORY_SEPARATOR, '/', $relative_path);
-
-			$file_object = Files::getFromPath($relative_path);
-
-			if (!$file_object) {
-				$file_object = File::createFromExisting($relative_path, self::_getRoot(), $file);
-			}
-			else {
-				$file_object->updateIfNeeded($file);
-			}
-
-			$files[] = $file_object;
+		if (!file_exists($path)) {
+			return [];
 		}
 
-		usort($files, function ($a, $b) {
-			return strnatcasecmp($a->name, $b->name) > 0 ? 1 : -1;
+		$files = [];
+
+		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			$data = [
+				'path' => $path,
+				'name' => $file->getFilename(),
+			];
+
+			if ($file->isDir()) {
+				$data['type'] = File::TYPE_DIRECTORY;
+			}
+			else {
+				$data['modified'] = $file->getMTime();
+				$data['size'] = $file->getSize();
+				$data['type'] = mime_content_type($file->getRealpath());
+			}
+
+			// Used to make sorting easier
+			// directory_blabla
+			// file_image.jpeg
+			$files[$file->getType() . '_' .$file->getFilename()] = $data;
+		}
+
+		uksort($files, function ($a, $b) {
+			return strnatcasecmp($a, $b) > 0 ? 1 : -1;
 		});
 
-		return $directories + $files;
+		return $files;
 	}
 
-	static public function getPath(File $file): ?string
+	static public function getFullPath(string $path): ?string
 	{
-		return self::_getRoot() . DIRECTORY_SEPARATOR . $file->path();
+		return self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
 	}
 
-	static public function display(File $file): void
+	static public function display(string $path): void
 	{
-		readfile(self::getPath($file));
+		readfile(self::getFullPath($path));
 	}
 
-	static public function fetch(File $file): string
+	static public function fetch(string $path): string
 	{
-		return file_get_contents(self::getPath($file));
+		return file_get_contents(self::getFullPath($path));
 	}
 
-	static public function delete(File $file): bool
+	static public function delete(string $path): bool
 	{
-		return unlink(self::getPath($file));
+		return unlink(self::getFullPath($path));
 	}
 
-	static public function move(File $old_file, File $new_file): bool
+	static public function move(string $old_path, string $new_path): bool
 	{
-		$target = self::getPath($new_file);
+		$target = self::getFullPath($new_file);
 		self::ensureDirectoryExists(dirname($target));
 
-		return rename(self::getPath($old_file), $target);
+		return rename(self::getFullPath($old_file), $target);
 	}
 
-	static public function exists(string $context, ?string $context_ref, string $name): bool
+	static public function exists(string $path): bool
 	{
-		return (bool) file_exists(File::getPath($context, $context_ref, $name));
+		return (bool) file_exists(self::getFullPath($path));
 	}
 
-	static public function modified(File $file): ?int
+	static public function modified(string $path): ?int
 	{
-		return filemtime(self::getPath($file)) ?: null;
+		return filemtime(self::getFullPath($path)) ?: null;
 	}
 
-	static public function hash(File $file): ?string
+	static public function size(string $path): ?int
 	{
-		return sha1_file(self::getPath($file));
+		return filesize(self::getFullPath($path)) ?: null;
 	}
 
-	static public function size(File $file): ?int
+	static public function stat(string $path): ?array
 	{
-		return filesize(self::getPath($file)) ?: null;
+		$fullpath = self::getFullPath($path);
+
+		if (!file_exists($fullpath)) {
+			return null;
+		}
+
+		$file = new \SplFileInfo($fullpath);
+
+		return [
+			'modified' => $file->getMTime(),
+			'size'     => $file->getSize(),
+			'type'     => $file->isDir() ? File::TYPE_DIRECTORY : mime_content_type($file->getRealPath()),
+			'path'     => dirname($path),
+			'name'     => basename($path),
+		];
+	}
+
+	static public function mkdir(string $path): bool
+	{
+		return Utils::safe_mkdir(self::getFullPath($path));
 	}
 
 	static public function getTotalSize(): int
@@ -170,57 +193,6 @@ class FileSystem implements StorageInterface
 	{
 		return disk_total_space(self::_getRoot());
 	}
-
-	static public function sync(): void
-	{
-		// FIXME
-	}
-
-/*
-	static public function sync(): void
-	{
-		$db = DB::getInstance();
-
-		self::lock();
-
-		$db->exec('CREATE TEMP TABLE tmp_files (path, name, modified, size); BEGIN;');
-		$insert = $db->prepare('INSERT INTO tmp_files_paths VALUES (?, ?, ?, ?);');
-		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
-		$root = self::_getRoot();
-
-		foreach ($iterator as $f) {
-			$path = str_replace($root, '', $f->getPath());
-			$insert->bindValue('1', $path);
-			$insert->bindValue('2', $f->getName());
-			$insert->bindValue('3', $f->getMTime());
-			$insert->bindValue('4', $f->getSize());
-			$insert->execute();
-			$insert->reset();
-		}
-
-		$db->exec('COMMIT; BEGIN;');
-
-		// Process files missing in DB
-		$res = $db->iterate('SELECT t.path, t.name FROM tmp_files_paths t INNER JOIN files f ON f.path = t.path AND f.name = t.name WHERE f.id IS NULL;');
-
-		foreach ($res as $row) {
-			File::createFromExisting($row->path . '/' . $row->name, $root);
-		}
-
-		$db->exec('COMMIT; BEGIN;');
-
-		// Delete local files that have been removed from database
-		$res = EM::getInstance(File::class)->iterate('SELECT f.* FROM files f INNER JOIN tmp_files_paths t ON f.path = t.path AND f.name = t.name WHERE t.path IS NULL;');
-
-		foreach ($res as $file) {
-			$file->delete();
-		}
-
-		$db->exec('COMMIT; DROP TABLE tmp_files_paths;');
-
-		self::unlock();
-	}
-*/
 
 	static public function reset(): void
 	{

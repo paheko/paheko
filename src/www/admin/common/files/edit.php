@@ -19,6 +19,15 @@ if (!$file->checkWriteAccess($session)) {
 $editor = $file->getEditor();
 $csrf_key = 'edit_file_' . $file->pathHash();
 
+$form->runIf('content', function () use ($file) {
+	$file->setContent(f('content'));
+
+	if (qg('js') !== null) {
+		die('{"success":true}');
+	}
+
+}, $csrf_key, Utils::getSelfURI());
+
 if (!$editor) {
 	$tpl->assign('file', $file);
 	$tpl->display('common/file_upload.tpl');
