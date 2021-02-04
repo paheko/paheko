@@ -56,8 +56,8 @@ class Config extends Entity
 
 		'admin_homepage'        => '?Garradin\Entities\Files\File',
 
-		'frequence_sauvegardes' => 'int',
-		'nombre_sauvegardes'    => 'int',
+		'frequence_sauvegardes' => '?int',
+		'nombre_sauvegardes'    => '?int',
 
 		'champ_identifiant'     => 'string',
 		'champ_identite'        => 'string',
@@ -98,6 +98,10 @@ class Config extends Entity
 		$db = DB::getInstance();
 
 		$config = $db->getAssoc('SELECT key, value FROM config ORDER BY key;');
+
+		if (empty($config)) {
+			return;
+		}
 
 		$default = array_fill_keys(array_keys($this->_types), null);
 		$config = array_merge($default, $config);
@@ -147,12 +151,16 @@ class Config extends Entity
 
 		foreach ($this->_modified as $key => $modified) {
 			$value = $this->$key;
+			$type = ltrim($this->_types[$key], '?');
 
-			if ($this->_types[$key] == File::class && null !== $value) {
-				$value = $value->id();
+			if ($type == File::class && null !== $value) {
+				$value = $value->path();
 			}
-			else if ($this->_types[$key] == Champs::class) {
+			else if ($type == Champs::class) {
 				$value = $value->toString();
+			}
+			elseif (is_object($value)) {
+				throw new \UnexpectedValueException('Unexpected object as value: ' . get_class($value));
 			}
 
 			$values[$key] = $value;
@@ -162,27 +170,12 @@ class Config extends Entity
 
 		$db->begin();
 
-		foreach ($this->_modified as $key=>$modified)
+		foreach ($values as $key => $value)
 		{
-			$value = $this->get($key);
-
-			if (is_array($value)) {
-				$value = implode(',', $value);
-			}
-			elseif (is_object($value)) {
-				if ($value instanceof File) {
-					$value = $value->id();
-				}
-				else {
-					$value = (string) $value;
-				}
-			}
-
-			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);',
-				[$key, $value]);
+			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
 		}
 
-		if (!empty($this->_modified['champ_identifiant']))
+		if (!empty($values['champ_identifiant']))
 		{
 			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
 			$db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL

@@ -78,7 +78,7 @@ class Session extends \KD2\UserSession
 		$session->http = new HTTP;
 
 		if ($session->isPasswordCompromised($password)) {
-			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
+			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis, il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 		}
 	}
 

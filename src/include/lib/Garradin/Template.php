@@ -73,6 +73,7 @@ class Template extends \KD2\Smartyer
 		$this->register_function('form_field', [$this, 'formField']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
 		$this->register_function('input', [$this, 'formInput']);
+		$this->register_function('password_change', [$this, 'passwordChangeInput']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
@@ -200,6 +201,32 @@ class Template extends \KD2\Smartyer
 		$params = implode(' ', $params);
 
 		return sprintf('<a data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+	}
+
+	protected function passwordChangeInput(array $params)
+	{
+		$out = $this->formInput(array_merge($params, [
+			'type' => 'password',
+			'help' => sprintf('(Minimum %d caractères)', Session::MINIMUM_PASSWORD_LENGTH),
+			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
+		]));
+
+		$out.= '<dd class="help">Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr et plus simple à retenir qu\'un mot de passe composé de 10 lettres et chiffres.</dd>';
+
+		$suggestion = Utils::suggestPassword();
+
+		$out .= sprintf('<dd class="help">Pas d\'idée&nbsp;? Voici une suggestion choisie au hasard&nbsp;:
+                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="f_%s_suggest" value="%s" autocomplete="off" size="%d" /></dd>', $params['name'], $suggestion, strlen($suggestion));
+
+		$out .= $this->formInput([
+			'type' => 'password',
+			'label' => 'Répéter le mot de passe',
+			'required' => true,
+			'name' => $params['name'] . '_confirm',
+			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
+		]);
+
+		return $out;
 	}
 
 	protected function formInput(array $params)

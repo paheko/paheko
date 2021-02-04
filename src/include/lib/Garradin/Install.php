@@ -6,6 +6,8 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Chart;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Entities\Users\Category;
+use Garradin\Entities\Files\File;
+use Garradin\Membres\Session;
 
 /**
  * Pour procéder à l'installation de l'instance Garradin
@@ -45,7 +47,39 @@ class Install
 		return $ok;
 	}
 
-	static public function install($nom_asso, $nom_membre, $email_membre, $passe_membre)
+	static protected function assert(bool $assertion, string $message)
+	{
+		if (!$assertion) {
+			throw new ValidationException($message);
+		}
+	}
+
+	static public function installFromForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		self::assert(isset($source['name']) && trim($source['name']) !== '', 'Le nom de l\'association n\'est pas renseigné');
+		self::assert(isset($source['user_name']) && trim($source['user_name']) !== '', 'Le nom du membre n\'est pas renseigné');
+		self::assert(isset($source['user_email']) && trim($source['user_email']) !== '', 'L\'adresse email du membre n\'est pas renseignée');
+		self::assert(isset($source['user_password']) && isset($source['user_password_confirm']) && trim($source['user_password']) !== '', 'Le mot de passe n\'est pas renseigné');
+
+		self::assert((bool)filter_var($source['user_email'], FILTER_VALIDATE_EMAIL), 'Adresse email invalide');
+
+		self::assert(strlen($source['user_password']) >= Session::MINIMUM_PASSWORD_LENGTH, 'Le mot de passe est trop court');
+		self::assert($source['user_password'] === $source['user_password_confirm'], 'La vérification du mot de passe ne correspond pas');
+
+		try {
+			return self::install($source['name'], $source['user_name'], $source['user_email'], $source['user_password']);
+		}
+		catch (\Exception $e) {
+			@unlink(DB_FILE);
+			throw $e;
+		}
+	}
+
+	static public function install(string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null)
 	{
 		$db = DB::getInstance(true);
 
@@ -59,25 +93,31 @@ class Install
 		// Configuration de base
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
 		$config = Config::getInstance();
-		$config->set('nom_asso', $nom_asso);
-		$config->set('email_asso', $email_membre);
+		$config->set('nom_asso', $name);
+		$config->set('email_asso', $user_email);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
-		$confog->set('desactiver_site', true);
+		$config->set('desactiver_site', true);
 
 		$champs = Membres\Champs::importInstall();
 		$champs->create(); // Pas de copie car pas de table membres existante
+		$config->set('champs_membres', $champs);
 
 		$config->set('champ_identifiant', 'email');
 		$config->set('champ_identite', 'nom');
 
-		// Création catégories
+		// Create default category for common users
 		$cat = new Category;
-		$cat->importForm(['name' => 'Membres actifs']);
+		$cat->setAllPermissions(Session::ACCESS_NONE);
+		$cat->importForm([
+			'name' => 'Membres actifs',
+			'perm_connect' => Session::ACCESS_READ,
+		]);
 		$cat->save();
 
 		$config->set('categorie_membres', $cat->id());
 
+		// Create default category for ancient users
 		$cat = new Category;
 		$cat->importForm([
 			'name' => 'Anciens membres',
@@ -86,6 +126,7 @@ class Install
 		$cat->setAllPermissions(Session::ACCESS_NONE);
 		$cat->save();
 
+		// Create default category for admins
 		$cat = new Category;
 		$cat->importForm([
 			'name' => 'Administrateurs',
@@ -93,45 +134,22 @@ class Install
 		$cat->setAllPermissions(Session::ACCESS_ADMIN);
 		$cat->save();
 
-		// Création premier membre
+		// Create first user
 		$membres = new Membres;
 		$id_membre = $membres->add([
-			'category_id'  =>  $cat->id(),
-			'nom'           =>  $nom_membre,
-			'email'         =>  $email_membre,
-			'passe'         =>  $passe_membre,
-			'pays'          =>  'FR',
+			'category_id' => $cat->id(),
+			'nom'         => $user_name,
+			'email'       => $user_email,
+			'passe'       => $user_password,
+			'pays'        => 'FR',
 		]);
 
-		// Création wiki
-		$page = Wiki::transformTitleToURI($nom_asso);
-		$wiki = new Wiki;
-		$id_page = $wiki->create([
-			'titre' =>  $nom_asso,
-			'uri'   =>  $page,
-		]);
+		$welcome_text = $welcome_text ?? sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.", $name);
 
-		$wiki->editRevision($id_page, 0, [
-			'id_auteur' =>  $id_membre,
-			'contenu'   =>  "Bienvenue dans le wiki de ".$nom_asso." !\n\nCliquez sur le bouton « éditer » pour modifier cette page.",
-		]);
+		$file = File::createAndStore(File::CONTEXT_CONFIG, 'admin_homepage.skriv', null, $welcome_text);
+		$config->set('admin_homepage', $file);
 
-		// Création page wiki connexion
-		$page = Wiki::transformTitleToURI('Bienvenue');
-		$id_page = $wiki->create([
-			'titre' =>  'Bienvenue',
-			'uri'   =>  $page,
-		]);
-		$config->set('accueil_wiki', $page);
-
-		$wiki->editRevision($id_page, 0, [
-			'id_auteur' =>  $id_membre,
-			'contenu'   =>  "Bienvenue dans l'administration de ".$nom_asso." !\n\n"
-				.   "Utilisez le menu à gauche pour accéder aux différentes rubriques.",
-		]);
-		$config->set('accueil_connexion', $page);
-
-        // Import plan comptable
+        // Import accounting chart
         $chart = new Chart;
         $chart->label = 'Plan comptable associatif 2020 (Règlement ANC n°2018-06)';
         $chart->country = 'FR';
@@ -139,7 +157,7 @@ class Install
         $chart->save();
         $chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
 
-        // Premier exercice
+        // Create first accounting year
         $year = new Year;
         $year->label = sprintf('Exercice %d', date('Y'));
         $year->start_date = new \DateTime('January 1st');
@@ -147,7 +165,7 @@ class Install
         $year->id_chart = $chart->id();
         $year->save();
 
-        // Compte bancaire
+        // Create a first bank account
         $account = new Account;
         $account->import([
         	'label' => 'Compte courant',
@@ -159,7 +177,7 @@ class Install
         ]);
         $account->save();
 
-		// Ajout d'une recherche avancée en exemple (membres)
+		// Create an example saved search (users)
 		$query = (object) [
 			'query' => [[
 				'operator' => 'AND',
@@ -177,9 +195,9 @@ class Install
 		];
 
 		$recherche = new Recherche;
-		$recherche->add('Membres inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
+		$recherche->add('Inscrits à la lettre d\'information', null, $recherche::TYPE_JSON, 'membres', $query);
 
-		// Ajout d'une recherche avancée en exemple (compta)
+		// Create an example saved search (accounting)
 		$query = (object) [
 			'query' => [[
 				'operator' => 'AND',

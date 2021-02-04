@@ -15,16 +15,16 @@ class Category extends Entity
 	protected $id;
 	protected $name;
 
-	protected $hidden;
+	protected $hidden = 0;
 
-	protected $perm_web;
-	protected $perm_documents;
-	protected $perm_users;
-	protected $perm_accounting;
+	protected $perm_web = 0;
+	protected $perm_documents = 0;
+	protected $perm_users = 0;
+	protected $perm_accounting = 0;
 
-	protected $perm_subscribe;
-	protected $perm_connect;
-	protected $perm_config;
+	protected $perm_subscribe = 0;
+	protected $perm_connect = 0;
+	protected $perm_config = 0;
 
 	protected $_types = [
 		'id'              => 'int',
@@ -34,7 +34,6 @@ class Category extends Entity
 		'perm_documents'  => 'int',
 		'perm_users'      => 'int',
 		'perm_accounting' => 'int',
-		'perm_subscribe'  => 'int',
 		'perm_subscribe'  => 'int',
 		'perm_connect'    => 'int',
 		'perm_config'     => 'int',
@@ -106,14 +105,8 @@ class Category extends Entity
 		$this->assert(trim($this->name) !== '', 'Le nom de catégorie ne peut rester vide.');
 		$this->assert($this->hidden === 0 || $this->hidden === 1, 'Wrong value for hidden');
 
-		static $permissions = [Session::ACCESS_NONE, Session::ACCESS_READ, Session::ACCESS_WRITE, Session::ACCESS_ADMIN];
-
-		foreach ($this->_types as $key => $type) {
-			if (substr($key, 0, 5) != 'perm_') {
-				continue;
-			}
-
-			$this->assert(in_array($this->$key, $permissions, true), 'Invalid value for ' . $key);
+		foreach (self::PERMISSIONS as $key => $perm) {
+			$this->assert(array_key_exists($this->{'perm_' . $key}, $perm['options']), 'Invalid value for perm_' . $key);
 		}
 	}
 
@@ -135,12 +128,10 @@ class Category extends Entity
 
 	public function setAllPermissions(int $access): void
 	{
-		foreach ($this->_types as $key => $type) {
-			if (substr($key, 0, 5) != 'perm_') {
-				continue;
-			}
-
-			$this->set($key, $access);
+		foreach (self::PERMISSIONS as $key => $perm) {
+			// Restrict to the maximum access level, as some permissions only allow up to READ
+			$perm_access = min($access, max(array_keys($perm['options'])));
+			$this->set('perm_' . $key, $perm_access);
 		}
 	}
 }
