@@ -24,6 +24,7 @@
 		{{#articles parent=$id order="created DESC" future=false}}
 		<article>
 			<h3><a href="{{$url}}">{{$title}}</a></h3>
+			<h5>{{$created|date_long}}</h5>
 			<p>{{$html|raw|strip_tags|truncate:200}}</p>
 		</article>
 		{{/articles}}

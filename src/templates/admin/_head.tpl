@@ -39,6 +39,7 @@
 {if empty($is_popup)}
 <header class="header">
     <nav class="menu">
+    {if !isset($menu) || $menu !== false}
     <ul>
     {if !$is_logged}
         <li><a href="{$www_url}">&larr; Retour au site</a></li>
@@ -109,6 +110,7 @@
         {/if}
     {/if}
     </ul>
+    {/if}
     </nav>
 
     <h1>{$title}</h1>
