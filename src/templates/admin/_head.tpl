@@ -63,13 +63,15 @@
         </li>
         {if $session->canAccess('membres', Membres::DROIT_ACCES)}
             <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
             <ul>
+            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
-                <li class="{if $current == 'membres/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
-                <li class="member message{if $current == 'membres/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
-            </ul>
             {/if}
+                <li class="{if $current == 'membres/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
+            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+                <li class="member message{if $current == 'membres/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
+            {/if}
+            </ul>
             </li>
         {/if}
         {if $session->canAccess('compta', Membres::DROIT_ACCES)}
