@@ -8,7 +8,6 @@ use Garradin\Utils;
 use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
-use KD2\DB\EntityManager as EM;
 
 use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG};
 
@@ -23,10 +22,10 @@ class Files
 			Utils::redirect(ADMIN_URL . 'web/page.php?uri=' . $uri);
 		}
 
-		$id = $db->firstColumn('SELECT id FROM files WHERE name = ? AND context != ?;', $uri . '.skriv', File::CONTEXT_WEB);
+		$file = self::get('documents/wiki/' . $uri . '.skriv');
 
-		if ($id) {
-			Utils::redirect(ADMIN_URL . 'files/file.php?id=' . $id);
+		if ($file) {
+			Utils::redirect(ADMIN_URL . 'documents/?p=' . $file->path);
 		}
 
 		return null;
@@ -189,24 +188,6 @@ class Files
 		}
 	}
 
-	static public function iterateLinkedTo(string $context, $value = null): \Generator
-	{
-		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
-			throw new \InvalidArgumentException('Invalid context');
-		}
-
-		$db = DB::getInstance();
-		$where = $value !== null ? sprintf(' AND f.context_ref = %s', $db->quote($value)) : '';
-		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN %s WHERE 1 %s;', self::getContextJoinClause($context), $where);
-
-		return EM::getInstance(File::class)->iterate($sql);
-	}
-
-	static public function listLinkedFiles(string $context, $value = null): array
-	{
-		return iterator_to_array(self::iterateLinkedTo($context, $value));
-	}
-
 	static public function get(?string $path, ?string $name = null): ?File
 	{
 		if (null === $path) {
@@ -227,5 +208,20 @@ class Files
 		$file->load($info);
 
 		return $file;
+	}
+
+	static public function getFromURI(string $uri): ?File
+	{
+		$uri = trim($uri, '/');
+		$uri = rawurldecode($uri);
+
+		$parts = explode('/', $uri);
+
+		// Use alias for web files
+		if (count($parts) == 2 && !in_array($parts[0], File::CONTEXTS_NAMES)) {
+			$uri = sprintf('%s/%s_files/%s', File::CONTEXT_WEB, $parts[0], $parts[1]);
+		}
+
+		return self::get($uri);
 	}
 }

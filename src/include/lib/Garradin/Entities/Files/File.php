@@ -174,13 +174,20 @@ class File extends Entity
 			$sub->delete();
 		}
 
+		// Delete recursively
+		if ($this->type == self::TYPE_DIRECTORY) {
+			foreach (Files::callStorage('list', $this->path()) as $file) {
+				$file->delete();
+			}
+		}
+
 		// Delete actual file content
-		$return = Files::callStorage('delete', $this->pathname);
+		$return = Files::callStorage('delete', $this->path());
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
 		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, md5($this->pathname), $size));
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size));
 		}
 
 		return $return;
@@ -255,7 +262,7 @@ class File extends Entity
 
 		// Store content in search table
 		if (substr($this->type, 0, 5) == 'text/') {
-			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->pathname);
+			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path());
 
 			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
 				$content = 'Contenu chiffré';
@@ -266,7 +273,7 @@ class File extends Entity
 
 			// Only index contents up to 150KB and valid UTF-8
 			if (strlen($content) <= 150*1024 && preg_match('//u', $content)) {
-				DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, content) VALUES (?, ?);', $this->pathname, $content);
+				DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, content) VALUES (?, ?);', $this->path(), $content);
 			}
 		}
 
@@ -385,35 +392,30 @@ class File extends Entity
 
 	public function url($download = false): string
 	{
-		return self::getFileURL($this->path, $this->name, null, $download);
+		if ($this->context == self::CONTEXT_WEB) {
+			$path = substr($this->path, strlen(self::CONTEXT_WEB . '/'));
+
+			if (substr($path, -6) == '_files') {
+				$path = substr($path, 0, -6);
+			}
+		}
+		else {
+			$path = $this->path;
+		}
+
+		$url = WWW_URL . $path . '/' . $this->name;
+
+		if ($download) {
+			$url .= '?download';
+		}
+
+		return $url;
 	}
 
 	public function thumb_url(?int $size = null): string
 	{
-		$size = $size ?? min(self::ALLOWED_THUMB_SIZES);
-		return self::getFileURL($this->path, $this->name, $size);
-	}
-
-	/**
-	 * Renvoie l'URL vers un fichier
-	 * @param  integer $id   Numéro du fichier
-	 * @param  string  $name  Nom de fichier avec extension
-	 * @param  integer $size Taille de la miniature désirée (pour les images)
-	 * @return string        URL du fichier
-	 */
-	static public function getFileURL(string $path, string $name, ?int $size = null, bool $download = false): string
-	{
-		$url = sprintf('%s%s/%s?', WWW_URL, $path, $name);
-
-		if ($size) {
-			$url .= self::_findNearestThumbSize($size) . 'px&';
-		}
-
-		if ($download) {
-			$url .= '&download';
-		}
-
-		return $url;
+		$size = $size ? self::_findNearestThumbSize($size) : min(self::ALLOWED_THUMB_SIZES);
+		return sprintf('%s?%dpx', $this->url(), $size);
 	}
 
 	/**
@@ -441,14 +443,25 @@ class File extends Entity
 		return max(self::ALLOWED_THUMB_SIZES);
 	}
 
-	public function listLinked(): array
+	public function listSubFiles(): array
 	{
-		return Files::callStorage('list', $this->subpath());
+		return Files::list($this->subpath());
 	}
 
 	public function subpath(): string
 	{
-		return $this->path() . '_files';
+		$custom = $this->customType();
+
+		if (!$custom) {
+			return null;
+		}
+
+		return substr($this->path(), 0, -strlen($custom)) . '_files';
+	}
+
+	public function getSubFile(string $name): ?File
+	{
+		return Files::get($this->subpath() . '/' . $name);
 	}
 
 	/**
@@ -492,17 +505,17 @@ class File extends Entity
 			throw new UserException('Cette taille de miniature n\'est pas autorisée.');
 		}
 
-		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->id(), $width);
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $width);
 		$destination = Static_Cache::getPath($cache_id);
 
 		// La miniature n'existe pas dans le cache statique, on la crée
 		if (!Static_Cache::exists($cache_id))
 		{
 			try {
-				if ($path = Files::callStorage('getFullPath', $this)) {
+				if ($path = Files::callStorage('getFullPath', $this->path())) {
 					(new Image($path))->resize($width)->save($destination);
 				}
-				elseif ($content = Files::callStorage('fetch', $this)) {
+				elseif ($content = Files::callStorage('fetch', $this->path())) {
 					Image::createFromBlob($content)->resize($width)->save($destination);
 				}
 				else {
@@ -528,7 +541,7 @@ class File extends Entity
 	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
 		if ($this->isPublic()) {
-			Utils::HTTPCache($this->hash, $this->created->getTimestamp());
+			Utils::HTTPCache(null, $this->modified);
 		}
 		else {
 			// Disable browser cache
@@ -620,16 +633,12 @@ class File extends Entity
 
 	public function checkReadAccess(?Session $session): bool
 	{
-		$context = $this->context;
-
-		// If it's linked to a file, then we want to know what the parent file is linked to
-		if ($context == self::CONTEXT_FILE) {
-			return $this->parent()->checkReadAccess($session);
-		}
 		// Web pages and config files are always public
-		else if ($this->isPublic()) {
+		if ($this->isPublic()) {
 			return true;
 		}
+
+		$context = $this->context;
 
 		if (null === $session) {
 			return false;

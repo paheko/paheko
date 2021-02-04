@@ -94,7 +94,6 @@
 
 		<p class="wikiFooter">
 			Dernière modification le {$page.modified|date_long}
-			par {$auteur}
 		</p>
 	{/if}
 {/if}

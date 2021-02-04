@@ -45,11 +45,11 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 }, $csrf_key, Utils::getSelfURI() . '#saved');
 
 $parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
-$encrypted = f('encrypted') || $page->file()->type == File::FILE_TYPE_ENCRYPTED;
+$encrypted = f('encrypted') || $page->file()->customType() == File::FILE_EXT_ENCRYPTED;
 
 $old_content = f('content');
 $new_content = $page->raw();
-$created = $page->created();
+$created = $page->created;
 
 $tpl->assign(compact('created', 'page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
 

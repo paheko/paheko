@@ -15,15 +15,15 @@
     list-style-type: decimal;
 }
 
-aside.fichier {
+aside.file {
     margin: 1em;
 }
 
-aside.fichier small {
+aside.file small {
     opacity: 0.7;
 }
 
-aside.fichier a {
+aside.file a {
     display: inline-block;
     margin-right: 1em;
     padding: .5em;
@@ -37,7 +37,7 @@ aside.fichier a {
     transition: background-color .2s, color .2s;
 }
 
-aside.fichier a:hover {
+aside.file a:hover {
     background-color: #ccc;
     color: darkred;
 }
@@ -52,26 +52,26 @@ aside.fichier a:hover {
     margin-top: 2pt;
 }
 
-.web-content figure.image.centre {
+.web-content figure.image.img-center {
     max-width: 500px;
     margin: 0 auto 8pt auto;
 }
 
-.web-content figure.image.gauche {
+.web-content figure.image.img-left {
     max-width: 200px;
     float: left;
     margin: 0 8pt 4pt 0;
     clear: left;
 }
 
-.web-content figure.image.droite {
+.web-content figure.image.img-right {
     max-width: 200px;
     float: right;
     margin: 0 0 4pt 8pt;
     clear: right;
 }
 
-.web-content figure.image.gauche figcaption, .web-content figure.image.droite figcaption {
+.web-content figure.image.img-left figcaption, .web-content figure.image.img-right figcaption {
     font-size: .8em;
 }
 
