@@ -69,7 +69,7 @@ class FileSystem implements StorageInterface
 		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
 		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
 
-		if (!file_exists($path)) {
+		if (!file_exists($fullpath)) {
 			return [];
 		}
 
@@ -77,8 +77,10 @@ class FileSystem implements StorageInterface
 
 		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
 			$data = [
-				'path' => $path,
-				'name' => $file->getFilename(),
+				'path'     => $path,
+				'name'     => $file->getFilename(),
+				'modified' => null,
+				'size'     => null,
 			];
 
 			if ($file->isDir()) {

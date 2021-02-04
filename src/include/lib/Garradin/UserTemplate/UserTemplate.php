@@ -96,12 +96,6 @@ class UserTemplate extends Brindille
 
 		Modifiers::registerAll($this);
 
-		$params = [
-			'template' => $this,
-		];
-
-		Plugin::fireSignal('usertemplate.init', $params);
-
 		$this->registerSection('pages', [$this, 'sectionPages']);
 		$this->registerSection('articles', [$this, 'sectionArticles']);
 		$this->registerSection('categories', [$this, 'sectionCategories']);
@@ -438,7 +432,11 @@ class UserTemplate extends Brindille
 			$params['where'] .= sprintf(' AND f.name NOT IN (SELECT name FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
 		}
 
-		if (isset($params['order']) && $params['order'] == 'name') {
+		if (empty($params['order'])) {
+			$params['order'] = 'name';
+		}
+
+		if ($params['order'] == 'name') {
 			$params['order'] .= ' COLLATE NOCASE';
 		}
 

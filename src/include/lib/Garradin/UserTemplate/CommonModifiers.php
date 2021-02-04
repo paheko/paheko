@@ -69,7 +69,12 @@ class CommonModifiers
 		}
 
 		$ts = Utils::get_datetime($ts);
-		return strftime($format, $ts);
+
+		if (!$ts) {
+			return $ts;
+		}
+
+		return strftime($format, $ts->getTimestamp());
 	}
 
 	static public function date($ts, string $format = null, string $locale = 'fr'): ?string

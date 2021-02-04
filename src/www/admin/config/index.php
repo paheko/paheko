@@ -27,9 +27,9 @@ $tpl->assign([
 	'garradin_website' => WEBSITE,
 ]);
 
-$image_fond = $config->get('image_fond') ? $config->get('image_fond')->url() : null;
+$admin_background = $config->get('admin_background') ? $config->get('admin_background')->url() : null;
 
-$tpl->assign('background_image_current', $image_fond);
+$tpl->assign('background_image_current', $admin_background);
 $tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
 
 $tpl->assign('custom_js', ['color_helper.js']);

@@ -130,8 +130,10 @@ INSERT INTO files (path, name, type, modified, size, content)
 -- Rename
 UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' WHERE key = 'accueil_connexion';
 
--- Create directories
+-- Create transaction directories
 INSERT INTO files (path, name, type) SELECT 'transaction', id, 'inode/directory' FROM fichiers_acc_transactions GROUP BY id;
+
+DELETE FROM plugins_signaux WHERE signal LIKE 'boucle.%';
 
 DROP TABLE wiki_recherche;
 

@@ -43,6 +43,7 @@ class Files
 			$item = $file;
 		}
 
+
 		return $list;
 	}
 
@@ -148,7 +149,7 @@ class Files
 			call_user_func([$to, 'store'], $f, $from_path, null);
 
 			if (null !== $callback) {
-				$callback($file);
+				$callback($f);
 			}
 		}
 	}
