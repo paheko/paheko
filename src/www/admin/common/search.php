@@ -121,7 +121,7 @@ if (null !== $result)
 			$id = $recherche->add($label, $user->id, $type, $target, $sql_query ?: $query);
 		}
 
-		$url = $target == 'compta' ? '/admin/acc/saved_searches.php?id=' : '/admin/membres/recherches.php?id=';
+		$url = $target == 'compta' ? '!acc/saved_searches.php?id=' : '!membres/recherches.php?id=';
 		Utils::redirect($url . $id);
 	}
 

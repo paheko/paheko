@@ -18,7 +18,7 @@ if (trim(qg('c')))
         {
             try {
                 $session->recoverPasswordChange(qg('c'), f('passe'), f('passe_confirmed'));
-                Utils::redirect('/admin/login.php?changed');
+                Utils::redirect('!login.php?changed');
             }
             catch (UserException $e) {
                 $form->addError($e->getMessage());
