@@ -127,10 +127,10 @@ class FileSystem implements StorageInterface
 
 	static public function move(string $old_path, string $new_path): bool
 	{
-		$target = self::getFullPath($new_file);
+		$target = self::getFullPath($new_path);
 		self::ensureDirectoryExists(dirname($target));
 
-		return rename(self::getFullPath($old_file), $target);
+		return rename(self::getFullPath($old_path), $target);
 	}
 
 	static public function exists(string $path): bool
