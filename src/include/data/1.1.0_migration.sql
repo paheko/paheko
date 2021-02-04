@@ -91,7 +91,7 @@ INSERT INTO web_pages (id, parent_id, path, type, status, uri, title, created)
 -- Copy files linked to wiki pages
 INSERT INTO files (path, name, type, modified, size, content)
 	SELECT
-		(CASE WHEN waf.public = 1 THEN 'web/' ELSE 'wiki/' END) || waf.name || '_files',
+		(CASE WHEN waf.public = 1 THEN 'web/' ELSE 'documents/wiki/' END) || waf.uri || '_files',
 		f.nom,
 		f.type,
 		f.datetime,
@@ -101,6 +101,16 @@ INSERT INTO files (path, name, type, modified, size, content)
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
 		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
 		INNER JOIN wiki_as_files waf ON w.id = waf.old_id;
+
+-- Create parent directories
+INSERT INTO files (type, path, name)
+	SELECT 'inode/directory',
+		CASE WHEN waf.public = 1 THEN 'web' ELSE 'documents/wiki' END,
+		waf.uri || '_files'
+	FROM fichiers f
+		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
+		INNER JOIN wiki_as_files waf ON w.id = waf.old_id
+	GROUP BY waf.old_id;
 
 -- Copy existing config files
 INSERT INTO files (path, name, type, modified, size, content)
@@ -122,8 +132,6 @@ UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' 
 
 -- Create directories
 INSERT INTO files (path, name, type) SELECT 'transaction', id, 'inode/directory' FROM fichiers_acc_transactions GROUP BY id;
-
--- FIXME: need to update Skriv pages with files/images links
 
 DROP TABLE wiki_recherche;
 

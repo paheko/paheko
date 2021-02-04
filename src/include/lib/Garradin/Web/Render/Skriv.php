@@ -27,7 +27,7 @@ class Skriv
 		if (!self::$skriv)
 		{
 			self::$skriv = new \KD2\SkrivLite;
-			self::$skriv->registerExtension('fichier', [self::class, 'SkrivFichier']);
+			self::$skriv->registerExtension('file', [self::class, 'SkrivFile']);
 			self::$skriv->registerExtension('image', [self::class, 'SkrivImage']);
 
 			// Enregistrer d'autres extensions éventuellement
@@ -35,10 +35,11 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
+		$skriv->_currentFile = $file;
 		$str = $content ?? $file->fetch();
 
-		$str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
-			$file = Files::get((int)$match[2]);
+		$str = preg_replace_callback('/#page:\[([^\]\h]+)\]/', function ($match) use ($skriv) {
+			$file = Files::get($match[1]);
 
 			if (!$file) {
 				return $skriv->parseError('/!\ Lien fichier invalide');
@@ -59,37 +60,25 @@ class Skriv
 	}
 
 	/**
-	 * Callback utilisé pour l'extension <<fichier>> dans le wiki-texte
+	 * Callback utilisé pour l'extension <<file>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension
 	 * @param string $content Contenu éventuel (en mode bloc)
 	 * @param object $skriv   Objet SkrivLite
 	 */
-	static public function SkrivFichier(array $args, ?string $content, SkrivLite $skriv): string
+	static public function SkrivFile(array $args, ?string $content, SkrivLite $skriv): string
 	{
-		$id = $caption = null;
+		$name = $args[0] ?? null;
+		$caption = $args[1] ?? null;
 
-		foreach ($args as $value)
+		if (!$name || !$skriv->_currentFile)
 		{
-			if (preg_match('/^\d+$/', $value) && !$id)
-			{
-				$id = (int)$value;
-				break;
-			}
-			else
-			{
-				$caption = trim($value);
-			}
+			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
 		}
 
-		if (empty($id))
-		{
-			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
-		}
-
-		$file = Files::get((int)$id);
+		$file = $skriv->_currentFile->getSubFile($name);
 
 		if (!$file) {
-			return $skriv->parseError('/!\ Tag fichier invalide');
+			return $skriv->parseError('/!\ Tag fichier invalide: fichier non trouvé');
 		}
 
 		if (empty($caption))
@@ -97,8 +86,8 @@ class Skriv
 			$caption = $file->name;
 		}
 
-		$out = '<aside class="fichier" data-type="'.$skriv->escape($file->type).'">';
-		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($caption).'</a> ';
+		$out = '<aside class="file" data-type="'.$skriv->escape($file->type).'">';
+		$out.= '<a href="'.$file->url().'" class="internal-file">'.$skriv->escape($caption).'</a> ';
 		$out.= '<small>('.$skriv->escape(($file->type ? $file->type . ', ' : '') . Utils::format_bytes($file->size)).')</small>';
 		$out.= '</aside>';
 		return $out;
@@ -112,45 +101,31 @@ class Skriv
 	 */
 	static public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
 	{
-		static $align_values = ['droite', 'gauche', 'centre'];
+		static $align_values = ['left', 'right', 'center'];
 
-		$align = '';
-		$id = $caption = null;
+		$name = $args[0] ?? null;
+		$align = $args[1] ?? null;
+		$caption = $args[2] ?? null;
 
-		foreach ($args as $value)
+		if (!$name)
 		{
-			if (preg_match('/^\d+$/', $value) && !$id)
-			{
-				$id = (int)$value;
-			}
-			else if (in_array($value, $align_values) && !$align)
-			{
-				$align = $value;
-			}
-			else
-			{
-				$caption = $value;
-			}
+			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}
 
-		if (!$id)
-		{
-			return $skriv->parseError('/!\ Tag image : aucun numéro de fichier indiqué.');
-		}
-
-		$file = Files::get((int)$id);
+		$file = $skriv->_currentFile->getSubFile($name);
 
 		if (!$file) {
-			return $skriv->parseError('/!\ Tag image invalide');
+			return $skriv->parseError('/!\ Tag image invalide: fichier non trouvé');
 		}
+
 
 		if (!$file->image)
 		{
 			return $skriv->parseError('/!\ Tag image : ce fichier n\'est pas une image.');
 		}
 
-		$out = '<a href="'.$file->url().'" class="internal-image">';
-		$out .= '<img src="'.$file->url($align == 'centre' ? 500 : 200).'" alt="';
+		$out = '<a href="'.$file->url.'" class="internal-image">';
+		$out .= '<img src="'.$file->thumb_url($align == 'center' ? 500 : 200).'" alt="';
 
 		if ($caption)
 		{
@@ -161,7 +136,7 @@ class Skriv
 
 		if (!empty($align))
 		{
-			$out = '<figure class="image ' . $align . '">' . $out;
+			$out = '<figure class="image img-' . $align . '">' . $out;
 
 			if ($caption)
 			{

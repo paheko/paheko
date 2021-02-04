@@ -24,7 +24,6 @@ if (!$page) {
 $membres = new Membres;
 
 $tpl->assign('breadcrumbs', $page->getBreadcrumbs());
-$tpl->assign('auteur', $page->file()->author_id ? $membres->getNom($page->file()->author_id) : null);
 
 $images = $page->getImageGallery(false);
 $files = $page->getAttachmentsGallery(false);

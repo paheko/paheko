@@ -135,7 +135,7 @@ class Web
 		}
 		// Files
 		elseif (false !== strpos($uri, '/', 1)) {
-			$file = Files::get(substr($uri, 1));
+			$file = Files::getFromURI($uri);
 
 			if ($file) {
 				$size = null;

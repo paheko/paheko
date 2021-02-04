@@ -727,7 +727,7 @@ class Utils
         return array($h * 360, $s, $v);
     }
 
-    static public function HTTPCache(string $hash, int $last_change): bool
+    static public function HTTPCache(?string $hash, int $last_change): bool
     {
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
@@ -738,7 +738,11 @@ class Utils
         }
 
         header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-        header(sprintf('Etag: %s', $hash));
+
+        if ($etag) {
+            header(sprintf('Etag: %s', $hash));
+        }
+
         header('Cache-Control: private');
 
         return false;

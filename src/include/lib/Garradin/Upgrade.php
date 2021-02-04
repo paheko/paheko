@@ -74,8 +74,29 @@ class Upgrade
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
-				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
 				$db->createFunction('sha1', 'sha1');
+
+				$attachments = $db->getAssoc('SELECT id, nom FROM fichiers;');
+
+				// Update Skriv content for attachments
+				foreach ($db->iterate('SELECT rowid, contenu FROM wiki_revisions;') as $r) {
+					$content = preg_replace_callback('!<<(image|fichier)\|(\d+)\|(gauche|droite|centre)>>!', function ($match) use ($attachments) {
+						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
+						$align = ($match[3] == 'centre' ? 'center' : ($match[3] == 'gauche' ? 'left' : 'right'));
+						return sprintf('<<%s|%s|%s>>', $match[1] == 'fichier' ? 'file' : 'image', $name, $align);
+					}, $r->contenu);
+
+					$content = preg_replace_callback('!(image|fichier)://(\d+)!', function ($match) use ($attachments) {
+						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
+						return sprintf('#page:[%s]', $name);
+					}, $content);
+
+					if ($content != $r->contenu) {
+						$db->update('wiki_revisions', ['contenu' => $content], 'rowid = :id', ['id' => $r->rowid]);
+					}
+				}
+
+				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
 				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
 
 				// Rename membres table

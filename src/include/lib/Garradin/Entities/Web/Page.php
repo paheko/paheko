@@ -189,7 +189,7 @@ class Page extends Entity
 	public function listAttachments(): array
 	{
 		if (null === $this->_attachments) {
-			$this->_attachments = $this->file()->listLinked();
+			$this->_attachments = $this->file()->listSubFiles();
 		}
 
 		return $this->_attachments;
