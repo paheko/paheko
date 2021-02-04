@@ -54,6 +54,7 @@ class File extends Entity
 	 */
 	protected $url;
 	protected $thumb_url;
+	protected $small_url;
 	protected $download_url;
 
 	/**
@@ -74,6 +75,7 @@ class File extends Entity
 		'url'          => '?string',
 		'download_url' => '?string',
 		'thumb_url'    => '?string',
+		'small_url'    => '?string',
 		'custom_type'  => '?string',
 		'pathname'     => 'string',
 	];
@@ -84,7 +86,7 @@ class File extends Entity
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
 	 * @var array
 	 */
-	const ALLOWED_THUMB_SIZES = [200, 500, 1200];
+	const ALLOWED_THUMB_SIZES = [200, 500];
 
 	const FILE_EXT_ENCRYPTED = '.skriv.enc';
 	const FILE_EXT_SKRIV = '.skriv';
@@ -161,7 +163,8 @@ class File extends Entity
 		$this->preview = in_array($this->type, self::PREVIEW_TYPES) || $this->custom_type;
 		$this->url = $this->url();
 		$this->download_url = $this->url(true);
-		$this->thumb_url = $this->image ? $this->thumb_url() : null;
+		$this->thumb_url = $this->image ? $this->thumb_url(200) : null;
+		$this->small_url = $this->image ? $this->thumb_url(500) : null;
 		$this->pathname = $this->path . '/' . $this->name;
 	}
 
