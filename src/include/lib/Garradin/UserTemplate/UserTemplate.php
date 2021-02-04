@@ -87,8 +87,7 @@ class UserTemplate extends Brindille
 	{
 		if ($file) {
 			$this->file = $file;
-			$this->hash = sha1(DATA_ROOT . $file->id);
-			$this->modified = $file->modified->getTimestamp();
+			$this->modified = $file->modified;
 		}
 
 		$this->assignArray(self::getRootVariables());
@@ -131,13 +130,12 @@ class UserTemplate extends Brindille
 	public function setSource(string $path)
 	{
 		$this->path = $path;
-		$this->hash = sha1($path);
 		$this->modified = filemtime($path);
 	}
 
 	public function display(): void
 	{
-		$compiled_path = CACHE_ROOT . '/compiled/s_' . $this->hash . '.php';
+		$compiled_path = CACHE_ROOT . '/compiled/s_' . sha1($this->file ? $this->file->path() : $this->path) . '.php';
 
 		if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
 			require $compiled_path;

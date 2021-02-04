@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS plugins_signaux
 
 ---------- FILES ----------------
 
-CREATE TABLE IF NOT EXISTS files_meta
+CREATE TABLE IF NOT EXISTS files
 -- Files metadata
 (
     id INTEGER NOT NULL PRIMARY KEY,
@@ -268,29 +268,16 @@ CREATE TABLE IF NOT EXISTS files_meta
     name TEXT NOT NULL, -- File name
     type TEXT NULL, -- MIME type
     modified TEXT NULL CHECK (modified IS NULL OR datetime(modified) = modified),
+    size INT NULL,
+    compressed INT NOT NULL DEFAULT 0,
+    content BLOB NULL, -- Null for directories
 
-    -- rowid of files_contents pointing to the contents
-    -- NULL is for directories only
-    content_id INTEGER NULL REFERENCES files_contents (id),
-
-    CHECK (content_id IS NOT NULL OR type = 'inode/directory')
+    CHECK ((type IS NOT NULL AND modified IS NOT NULL AND size IS NOT NULL AND content IS NOT NULL) OR type = 'inode/directory')
 );
 
 -- Unique index as this is used to make up a file path
-CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files_meta (path, name);
-CREATE INDEX IF NOT EXISTS files_modified ON files_meta (modified);
-
-CREATE TABLE IF NOT EXISTS files_contents
--- Files contents (if storage backend is SQLite)
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-    hash TEXT NOT NULL,
-    size INT NOT NULL,
-    compressed INT NOT NULL DEFAULT 0,
-    content BLOB NULL
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS files_contents_hash ON files_contents (hash);
+CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path, name);
+CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content

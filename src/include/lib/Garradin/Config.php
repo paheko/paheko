@@ -112,7 +112,7 @@ class Config extends Entity
 			}
 
 			if ($type == File::class || substr($type, 1) == File::class) {
-				$config[$key] = Files::get((int) $value);
+				$config[$key] = Files::get($value);
 			}
 		}
 
