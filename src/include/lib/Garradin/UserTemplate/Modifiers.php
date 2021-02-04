@@ -6,58 +6,40 @@ use Garradin\Utils;
 
 class Modifiers
 {
-	static public function registerAll(UserTemplate $t): void
-	{
-		static $self = [
-			'truncate',
-			'protect_contact',
-			'atom_date',
-			'xml_escape',
-			'replace',
-			'regexp_replace',
-		];
+	const PHP_MODIFIERS_LIST = [
+		'strtolower',
+		'strtoupper',
+		'ucfirst',
+		'ucwords',
+		'htmlentities',
+		'htmlspecialchars',
+		'trim',
+		'ltrim',
+		'rtrim',
+		'lcfirst',
+		'md5',
+		'sha1',
+		'metaphone',
+		'nl2br',
+		'soundex',
+		'str_split',
+		'str_word_count',
+		'strrev',
+		'strlen',
+		'wordwrap',
+		'strip_tags',
+		'strlen',
+	];
 
-		static $php = [
-			'strtolower',
-			'strtoupper',
-			'ucfirst',
-			'ucwords',
-			'htmlentities',
-			'htmlspecialchars',
-			'trim',
-			'ltrim',
-			'rtrim',
-			'lcfirst',
-			'md5',
-			'sha1',
-			'metaphone',
-			'nl2br',
-			'soundex',
-			'str_split',
-			'str_word_count',
-			'strrev',
-			'strlen',
-			'wordwrap',
-			'strip_tags',
-			'strlen',
-		];
-
-		foreach ($self as $name) {
-			$t->registerModifier($name, [self::class, $name]);
-		}
-
-		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
-			$t->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
-		}
-
-		foreach (CommonModifiers::FUNCTIONS_LIST as $key => $name) {
-			$t->registerFunction(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
-		}
-
-		foreach ($php as $name) {
-			$t->registerModifier($name, $name);
-		}
-	}
+	const MODIFIERS_LIST = [
+		'truncate',
+		'excerpt',
+		'protect_contact',
+		'atom_date',
+		'xml_escape',
+		'replace',
+		'regexp_replace',
+	];
 
 	static public function replace($str, $find, $replace): string
 	{
@@ -99,9 +81,19 @@ class Modifiers
 			if (trim($cut) == '') {
 				$cut = $str;
 			}
+
+			$str = $cut;
 		}
 
 		return trim($str) . $placeholder;
+	}
+
+	static public function excerpt($str, $length = 600): string
+	{
+		$str = strip_tags($str);
+		$str = self::truncate($str, $length);
+		$str = preg_replace("/\n{2,}/", '</p><p>', $str);
+		return '<p>' . $str . '</p>';
 	}
 
 	static public function protect_contact(string $contact): string

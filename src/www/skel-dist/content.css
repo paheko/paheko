@@ -115,5 +115,5 @@ img {
     max-height: 90%;
     max-width: 90%;
     border-radius: .5em;
-    cursor: e-resize;
+    cursor: pointer;
 }

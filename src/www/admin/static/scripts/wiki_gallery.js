@@ -75,7 +75,7 @@
         };
 
         newImg.src = items[img.pos].href;
-        return false;   
+        return false;
     }
 
 }());
