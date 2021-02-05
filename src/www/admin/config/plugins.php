@@ -56,4 +56,6 @@ else
     $tpl->assign('liste_installes', Plugin::listInstalled());
 }
 
+$tpl->assign('garradin_website', WEBSITE);
+
 $tpl->display('admin/config/plugins.tpl');

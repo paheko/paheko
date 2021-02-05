@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Membres\Session;
+
 const INSTALL_PROCESS = true;
 
 require_once __DIR__ . '/../../include/test_required.php';
@@ -32,6 +34,7 @@ $tpl->assign_by_ref('form', $form);
 
 $form->runIf('save', function () {
     Install::installFromForm();
+    Session::getInstance()->forceLogin(1);
 }, 'install', ADMIN_URL);
 
 $tpl->display('admin/install.tpl');
