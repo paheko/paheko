@@ -605,7 +605,7 @@ class File extends Entity
 
 		@ini_set('zlib.output_compression', 'Off');
 
-		header(sprintf('Content-Length: %d', $this->size));
+		header(sprintf('Content-Length: %d', $path ? filesize($path) : strlen($content)));
 
 		if (@ob_get_length()) {
 			@ob_clean();
