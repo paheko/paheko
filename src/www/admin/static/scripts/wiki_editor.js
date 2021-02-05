@@ -30,7 +30,7 @@
 		var config = {
 			fullscreen: t.textarea.getAttribute('data-fullscreen') == 1,
 			attachments: t.textarea.getAttribute('data-attachments') == 1,
-			savebtn: t.textarea.getAttribute('data-savebtn') == 1
+			savebtn: t.textarea.getAttribute('data-savebtn')
 		};
 
 		// Cancel Escape to close.value
@@ -71,16 +71,16 @@
 		var openPreview = function ()
 		{
 			openIFrame('');
+			var wiki_id = window.location.search.match(/id=(\d+)/)[1];
 			var form = document.createElement('form');
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
 			form.target = 'editorFrame';
-			form.action = g.admin_url + 'web/_preview.php';
+			form.action = g.admin_url + 'web/_preview.php?id=' + wiki_id;
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);
 			form.submit();
-			//document.body.removeChild(form);
 			return true;
 		};
 
@@ -212,6 +212,8 @@
 				data.append(pair[0], pair[1]);
 			}
 
+			data.append('save', 1);
+
 			fetch(t.textarea.form.action + '&js', {
 				method: 'post',
 				body: data,
@@ -238,8 +240,11 @@
 			appendButton('ext fullscreen', 'Plein écran', toggleFullscreen, 'Plein écran');
 		}
 
-		if (config.savebtn) {
+		if (config.savebtn == 1) {
 			appendButton('ext save', 'Enregistrer', save, 'Enregistrer');
+		}
+		else if (config.savebtn == 2) {
+			appendButton('ext save', '⇑', save, 'Enregistrer sans fermer');
 		}
 
 		appendButton('ext close', 'Fermer', closeIFrame);

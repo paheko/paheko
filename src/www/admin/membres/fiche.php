@@ -21,8 +21,8 @@ if (!$membre)
 $champs = $config->get('champs_membres');
 $tpl->assign('champs', $champs->getList());
 
-$categorie = Categories::get($membre->category_id);
-$tpl->assign('categorie', $categorie);
+$category = Categories::get($membre->category_id);
+$tpl->assign('category', $category);
 
 $tpl->assign('services', Services_User::listDistinctForUser($membre->id));
 

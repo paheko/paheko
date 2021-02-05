@@ -122,7 +122,14 @@ class FileSystem implements StorageInterface
 
 	static public function delete(string $path): bool
 	{
-		return unlink(self::getFullPath($path));
+		$path = self::getFullPath($path);
+
+		if (is_dir($path)) {
+			return rmdir($path);
+		}
+		else {
+			return unlink($path);
+		}
 	}
 
 	static public function move(string $old_path, string $new_path): bool

@@ -173,13 +173,13 @@ class File extends Entity
 		Files::callStorage('checkLock');
 
 		// Delete linked files
-		if ($sub = Files::get($this->subpath())) {
+		if (($subpath = $this->subpath()) && ($sub = Files::get($this->subpath()))) {
 			$sub->delete();
 		}
 
 		// Delete recursively
 		if ($this->type == self::TYPE_DIRECTORY) {
-			foreach (Files::callStorage('list', $this->path()) as $file) {
+			foreach (Files::list($this->path()) as $file) {
 				$file->delete();
 			}
 		}
@@ -201,9 +201,22 @@ class File extends Entity
 		throw new \LogicException('File cannot be saved, as its metadata cannot be changed');
 	}
 
-	public function rename(string $new_path, string $new_name): bool
+	public function rename(string $new_path): bool
 	{
-		return Files::callStorage('move', $this->path(), $new_path . '/' . $new_name);
+		self::validatePath($new_path);
+		$current_path = $this->path();
+		$current_subpath = $this->subpath();
+
+		$return = Files::callStorage('move', $current_path, $new_path);
+
+		$this->path = dirname($new_path);
+		$this->name = basename($new_path);
+
+		if ($current_subpath && Files::callStorage('exists', $current_subpath)) {
+			$return = Files::callStorage('move', $current_subpath, $this->subpath());
+		}
+
+		return $return;
 	}
 
 	public function setContent(string $content): self
@@ -444,7 +457,7 @@ class File extends Entity
 		return Files::list($this->subpath());
 	}
 
-	public function subpath(): string
+	public function subpath(?string $name = null): ?string
 	{
 		$custom = $this->customType();
 
@@ -452,7 +465,11 @@ class File extends Entity
 			return null;
 		}
 
-		return substr($this->path(), 0, -strlen($custom)) . '_files';
+		if ($name) {
+			$name = '/' . $name;
+		}
+
+		return substr($this->path(), 0, -strlen($custom)) . '_files' . $name;
 	}
 
 	public function getSubFile(string $name): ?File
@@ -719,15 +736,6 @@ class File extends Entity
 		return sha1($this->path());
 	}
 
-	public function checkContext(string $context, $ref): bool
-	{
-		$path = explode('/', $this->path);
-		array_shift($path);
-		$file_ref = array_shift($path);
-
-		return ($this->context === $context) && ($file_ref == $ref);
-	}
-
 	public function isPublic(): bool
 	{
 		$context = $this->context;
@@ -769,7 +777,7 @@ class File extends Entity
 		$context = array_shift($path);
 
 		foreach ($path as $part) {
-			if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $part)) {
+			if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!iu', $part)) {
 				throw new ValidationException('Chemin invalide');
 			}
 		}

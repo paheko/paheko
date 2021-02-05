@@ -26,9 +26,9 @@
 			</dd>
 			<dt>Alignement&nbsp;:</dt>
 			<dd class="align">
-				<input type="button" name="gauche" value="À gauche" />
-				<input type="button" name="centre" value="Au centre" />
-				<input type="button" name="droite" value="À droite" />
+				<input type="button" name="left" value="À gauche" />
+				<input type="button" name="center" value="Au centre" />
+				<input type="button" name="right" value="À droite" />
 			</dd>
 			<dd class="cancel">
 				<input type="reset" value="Annuler" />
@@ -42,11 +42,11 @@
 {foreach from=$images item="file"}
 	<li>
 		<figure>
-			<a href="{$file->url()}" data-id="{$file.id}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
+			<a href="{$file->url()}" data-name="{$file.name}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
 			<form class="actions" method="post" action="{$self_url}">
 				{linkbutton shape="download" label="Télécharger" href=$file->url() target="_blank"}
 				{csrf_field key=$csrf_key}
-				<input type="hidden" name="delete" value="{$file.id}" />
+				<input type="hidden" name="delete" value="{$file.name}" />
 				<noscript><input type="submit" value="Supprimer" /></noscript>
 			</form>
 		</figure>
@@ -66,7 +66,7 @@
 				<form class="actions" method="post" action="{$self_url}">
 					{linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
 					{csrf_field key=$csrf_key}
-					<input type="hidden" name="delete" value="{$file.id}" />
+					<input type="hidden" name="delete" value="{$file.name}" />
 					<noscript><input type="submit" value="Supprimer" /></noscript>
 				</form>
 			</td>

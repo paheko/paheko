@@ -199,6 +199,8 @@ class Files
 			$path .= '/' . $name;
 		}
 
+		File::validatePath($path);
+
 		$info = self::callStorage('stat', $path);
 
 		if (!$info) {

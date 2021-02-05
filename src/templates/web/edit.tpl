@@ -40,15 +40,14 @@
 
 	<fieldset class="wikiText">
 		<div class="textEditor">
-			{input type="textarea" name="content" cols="70" rows="35" default=$new_content data-attachments=1}
+			{input type="textarea" name="content" cols="70" rows="35" default=$new_content data-attachments=1 data-savebtn=2}
 		</div>
 	</fieldset>
 
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		<input type="hidden" name="editing_started" value="{$editing_started}" />
-		{button type="submit" name="save" label="Enregistrer" shape="upload" class="main"}
-		{linkbutton href="!web/?parent=%d"|args:$page.parent_id label="Retourner à la liste" shape="reset"}
+		{button type="submit" name="save" label="Enregistrer et fermer" shape="upload" class="main"}
 	</p>
 
 </form>

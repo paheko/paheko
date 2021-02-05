@@ -1,5 +1,5 @@
-<section class="galerie">
-{{#images order="name" parent=$parent except_in_text=$text}}
+<section class="gallery">
+{{#images order="name" parent=$parent except_in_text=true}}
 	<figure>
 		<a href="{{$url}}" class="internal-image"><img src="{{$thumb_url}}" alt="{{$name}}" /></a>
 	</figure>
