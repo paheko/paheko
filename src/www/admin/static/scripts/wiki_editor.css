@@ -191,15 +191,15 @@ form#insertImage .align input[name=""] {
     background-image: url("../pics/img_flow.png");
 }
 
-form#insertImage .align input[name="gauche"] {
+form#insertImage .align input[name="left"] {
     background-image: url("../pics/img_left.png");
 }
 
-form#insertImage .align input[name="droite"] {
+form#insertImage .align input[name="right"] {
     background-image: url("../pics/img_right.png");
 }
 
-form#insertImage .align input[name="centre"] {
+form#insertImage .align input[name="center"] {
     background-image: url("../pics/img_center.png");
 }
 

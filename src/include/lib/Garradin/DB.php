@@ -84,11 +84,21 @@ class DB extends SQLite3
             if ($type == 0) {
                 $type = '';
             }
+            // Corrective release: 1.2.3.1
+            elseif ($type > 75) {
+                $type = '.' . ($type - 75);
+            }
+            // RC release
             elseif ($type > 50) {
                 $type = '-rc' . ($type - 50);
             }
+            // Beta
+            elseif ($type > 25) {
+                $type = '-beta' . ($type - 25);
+            }
+            // Alpha
             else {
-                $type = '-beta' . $type;
+                $type = '-alpha' . $type;
             }
 
             $v = sprintf('%d.%d.%d%s', $major, $minor, $release, $type);
@@ -99,22 +109,34 @@ class DB extends SQLite3
 
     /**
      * Save version to database
-     * Only rc and beta strings are allowed, others will throw an error
+     * rc, alpha, beta and corrective release (4th number) are limited to 24 versions each
      * @param string $version Version string, eg. 1.2.3-rc2
      */
     public function setVersion(string $version): void
     {
-        if (!preg_match('/^(\d+)\.(\d+)\.(\d+)(?:-(beta|rc)(\d+))?$/', $version, $match)) {
+        if (!preg_match('/^(\d+)\.(\d+)\.(\d+)(?:(?:-(alpha|beta|rc)|\.)(\d+)|)?$/', $version, $match)) {
             throw new \InvalidArgumentException('Invalid version number: ' . $version);
         }
 
         $version = ($match[1] * 100 * 100 * 100) + ($match[2] * 100 * 100) + ($match[3] * 100);
 
-        if (isset($match[4]) && $match[4] == 'beta') {
-            $version += $match[5];
-        }
-        elseif (isset($match[4]) && $match[4] == 'rc') {
-            $version += $match[5] + 50;
+        if (isset($match[5])) {
+            if ($match[5] > 24) {
+                throw new \InvalidArgumentException('Invalid version number: cannot have a 4th component larger than 24: ' . $version);
+            }
+
+            if ($match[4] == 'rc') {
+                $version += $match[5] + 50;
+            }
+            elseif ($match[4] == 'beta') {
+                $version += $match[5] + 25;
+            }
+            elseif ($match[4] == 'alpha') {
+                $version += $match[5];
+            }
+            else {
+                $version += $match[5] + 75;
+            }
         }
 
         $this->db->exec(sprintf('PRAGMA user_version = %d;', $version));

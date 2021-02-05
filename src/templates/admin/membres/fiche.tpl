@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s (%s)"|args:$membre.identite:$categorie.nom current="membres"}
+{include file="admin/_head.tpl" title="%s (%s)"|args:$membre.identite:$category.name current="membres"}
 
 <nav class="tabs">
     <ul>
@@ -50,7 +50,7 @@
 <aside class="describe">
 	<dl class="describe">
 		<dt>Catégorie</dt>
-		<dd>{$categorie.nom} <span class="permissions">{display_permissions permissions=$categorie}</span></dd>
+		<dd>{$category.name} <span class="permissions">{display_permissions permissions=$category}</span></dd>
 		<dt>Inscription</dt>
 		<dd>{$membre.date_inscription|date_short}</dd>
 		<dt>Dernière connexion</dt>

@@ -42,7 +42,13 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	$page->importForm();
 
 	$page->save();
-}, $csrf_key, Utils::getSelfURI() . '#saved');
+
+	if (qg('js') !== null) {
+		die('{"success":true}');
+	}
+
+	Utils::redirect('!web/?parent=' . $page->parent_id);
+}, $csrf_key);
 
 $parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
 $encrypted = f('encrypted') || $page->file()->customType() == File::FILE_EXT_ENCRYPTED;

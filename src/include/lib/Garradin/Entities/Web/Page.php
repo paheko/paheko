@@ -8,6 +8,7 @@ use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
+use Garradin\Web\Render\Skriv;
 
 use KD2\DB\EntityManager as EM;
 
@@ -91,11 +92,20 @@ class Page extends Entity
 		return $this->file()->render($options);
 	}
 
+	public function preview(string $content): string
+	{
+		return Skriv::render($this->file(), $content, ['prefix' => '#']);
+	}
+
 	public function file(): File
 	{
 		if (null === $this->_file) {
 			if ($this->exists()) {
 				$this->_file = Files::get($this->path);
+
+				if (!$this->_file) {
+					throw new \LogicException('Content file is missing for page #' . $this->id() . ': ' . $this->path);
+				}
 			}
 			else {
 				$file = $this->_file = new File;
@@ -106,9 +116,9 @@ class Page extends Entity
 		return $this->_file;
 	}
 
-	public function subpath(): string
+	public function subpath(?string $name = null): string
 	{
-		return $this->file()->subpath();
+		return $this->file()->subpath($name);
 	}
 
 	public function setFile(File $file)
@@ -118,6 +128,8 @@ class Page extends Entity
 
 	public function save(): bool
 	{
+		$file = $this->file();
+
 		if (isset($this->_modified['uri'])) {
 			$type = $this->_content_type;
 			$this->set('path', File::CONTEXT_WEB . '/' . $this->uri . $type);
@@ -129,7 +141,7 @@ class Page extends Entity
 
 		if (isset($this->_modified['path'])) {
 			if ($exists) {
-				$this->file()->rename($this->get('path'));
+				$file->rename($this->get('path'));
 			}
 			else {
 				$this->_file = File::createAndStore(dirname($this->path), basename($this->path), null, $this->_content);
@@ -137,10 +149,16 @@ class Page extends Entity
 		}
 
 		if (isset($this->_content_modified) && $exists) {
-			$this->file()->setContent((string)$this->_content);
+			$file->setContent((string)$this->_content);
 		}
 
 		return true;
+	}
+
+	public function delete(): bool
+	{
+		$this->file()->delete();
+		return parent::delete();
 	}
 
 	public function selfCheck(): void
@@ -214,8 +232,8 @@ class Page extends Entity
 
 	static public function findTaggedAttachments(string $text): array
 	{
-		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?(\d+)/', $text, $match, PREG_PATTERN_ORDER);
-		preg_match_all('/(?:fichier|image):\/\/(\d+)/', $text, $match2, PREG_PATTERN_ORDER);
+		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?([\w\d_.-]+)/ui', $text, $match, PREG_PATTERN_ORDER);
+		preg_match_all('/(?:fichier|image):\/\/([\w\d_.-]+)/ui', $text, $match2, PREG_PATTERN_ORDER);
 
 		return array_merge($match[1], $match2[1]);
 	}

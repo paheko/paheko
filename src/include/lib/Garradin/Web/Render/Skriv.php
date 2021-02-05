@@ -18,7 +18,7 @@ class Skriv
 {
 	static protected $skriv;
 
-	static public function render(?File $file, ?string $content = null, array $options = []): string
+	static public function render(File $file, ?string $content = null, array $options = []): string
 	{
 		if (!isset($options['prefix'])) {
 			$options['prefix'] = WWW_URL;

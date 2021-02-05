@@ -93,7 +93,7 @@
 		{/if}
 
 		<p class="wikiFooter">
-			Dernière modification le {$page.modified|date_long}
+			Dernière modification le {$page->modified()|date_long:true}
 		</p>
 	{/if}
 {/if}

@@ -11,7 +11,7 @@
         function insertImageHelper(file, from_upload) {
             if (!document.querySelectorAll)
             {
-                window.parent.te_insertImage(file.id, 'centre');
+                window.parent.te_insertImage(file.name, 'center');
                 return true;
             }
 
@@ -23,7 +23,7 @@
             for (var i = 0; i < inputs.length; i++)
             {
                 inputs[i].onclick = function(e) {
-                    window.parent.te_insertImage(file.id, e.target.name, f.f_caption.value);
+                    window.parent.te_insertImage(file.name, e.target.name, f.f_caption.value);
                 };
             }
 
@@ -52,7 +52,7 @@
             }
             else
             {
-                window.parent.te_insertFile(data.file.id);
+                window.parent.te_insertFile(data.file.name);
             }
 
             return true;
@@ -69,7 +69,7 @@
                 var a = items[i].querySelector('figure > a');
                 a.onclick= function (e) {
                     insertImageHelper({
-                        id: this.getAttribute('data-id'),
+                        name: this.getAttribute('data-name'),
                         thumb: this.firstChild.src
                     });
                     return false;

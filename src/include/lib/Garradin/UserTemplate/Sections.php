@@ -59,6 +59,7 @@ class Sections
 
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
+		$params['where'] .= ' AND status = ' . Page::STATUS_ONLINE;
 
 		if (isset($params['search'])) {
 			$params['tables'] .= ' INNER JOIN files_search s USING (path)';
@@ -167,7 +168,7 @@ class Sections
 		unset($params['parent']);
 
 		// Generate a temporary table containing the list of files included in the text
-		if (isset($params['except_in_text'])) {
+		if (!empty($params['except_in_text'])) {
 			// Don't regenerate that table for each section called in the page,
 			// we assume the content and list of files will not change between sections
 			self::cache('page_files_text_' . $parent, function () use ($page) {
