@@ -185,6 +185,11 @@ class Session extends \KD2\UserSession
 		return $logged;
 	}
 
+	public function forceLogin(int $id)
+	{
+		return $this->create($id);
+	}
+
 	// Ici checkOTP utilise NTP en second recours
 	public function checkOTP($secret, $code)
 	{
