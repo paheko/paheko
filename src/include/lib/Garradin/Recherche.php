@@ -81,12 +81,6 @@ class Recherche
 		return $query;
 	}
 
-	public function duplicate(int $id)
-	{
-		DB::getInstance()->preparedQuery('INSERT INTO recherches (id_membre, intitule, cible, type, contenu)
-			SELECT id_membre, \'Copie de : \' || intitule, cible, type, contenu FROM recherches WHERE id = ?;', [$id]);
-	}
-
 	public function edit($id, $data)
 	{
 		$allowed = ['intitule', 'id_membre', 'type', 'cible', 'contenu'];

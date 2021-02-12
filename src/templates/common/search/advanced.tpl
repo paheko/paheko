@@ -33,6 +33,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
 				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
@@ -60,6 +61,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
 				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
