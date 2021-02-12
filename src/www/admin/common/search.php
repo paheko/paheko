@@ -96,7 +96,7 @@ if (null !== $result)
 		Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->_user_id);
 	}
 
-	if (f('save') && !$form->hasErrors())
+	if ((f('save_new') || f('save')) && !$form->hasErrors())
 	{
 		if (!$sql_query) {
 			$type = Recherche::TYPE_JSON;
@@ -108,7 +108,7 @@ if (null !== $result)
 			$type = Recherche::TYPE_SQL;
 		}
 
-		if ($id) {
+		if ($id && !f('save_new')) {
 			$recherche->edit($id, [
 				'type'    => $type,
 				'contenu' => $sql_query ?: $query,
@@ -121,7 +121,7 @@ if (null !== $result)
 			$id = $recherche->add($label, $user->id, $type, $target, $sql_query ?: $query);
 		}
 
-		$url = $target == 'compta' ? '!acc/saved_searches.php?id=' : '!membres/recherches.php?id=';
+		$url = $target == 'compta' ? '!acc/saved_searches.php?edit=' : '!membres/recherches.php?edit=';
 		Utils::redirect($url . $id);
 	}
 

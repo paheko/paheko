@@ -10,9 +10,9 @@ if (empty($target) || !in_array($target, Recherche::TARGETS)) {
 $recherche = new Recherche;
 $mode = null;
 
-if (qg('edit') || qg('delete') || qg('duplicate'))
+if (qg('edit') || qg('delete'))
 {
-	$r = $recherche->get(qg('edit') ?: (qg('delete') ?: qg('duplicate')));
+	$r = $recherche->get(qg('edit') ?: qg('delete'));
 
 	if (!$r)
 	{
@@ -22,11 +22,6 @@ if (qg('edit') || qg('delete') || qg('duplicate'))
 	if ($r->id_membre !== null && $r->id_membre != $user->id)
 	{
 		throw new UserException('Recherche privée appartenant à un autre membre.');
-	}
-
-	if (qg('duplicate')) {
-		$recherche->duplicate($r->id);
-		Utils::redirect(Utils::getSelfURI(false));
 	}
 
 	$tpl->assign('recherche', $r);
