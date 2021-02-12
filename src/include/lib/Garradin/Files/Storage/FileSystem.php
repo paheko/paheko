@@ -198,9 +198,13 @@ class FileSystem implements StorageInterface
 		return self::$_size;
 	}
 
+	/**
+	 * @see https://www.crazyws.fr/dev/fonctions-php/fonction-disk-free-space-et-disk-total-space-pour-ovh-2JMH9.html
+	 * @see https://github.com/jdel/sspks/commit/a890e347f32e9e3e50a0dd82398947633872bf38
+	 */
 	static public function getQuota(): int
 	{
-		return disk_total_space(self::_getRoot());
+		return @disk_total_space(self::_getRoot()) ?: \PHP_INT_MAX;
 	}
 
 	static public function reset(): void
