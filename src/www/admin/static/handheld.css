@@ -148,7 +148,7 @@ nav.tabs .sub {
 	float: none;
 }
 
-pre.sql_schema, .wikiChildren, fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
+.wikiChildren, fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
 	float: none;
 	width: auto;
 }
