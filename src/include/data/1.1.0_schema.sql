@@ -293,15 +293,18 @@ CREATE TABLE IF NOT EXISTS web_pages
 (
     id INTEGER NOT NULL PRIMARY KEY,
     parent_id INTEGER NULL REFERENCES web_pages(id) ON DELETE SET NULL,
+    uri TEXT NOT NULL,
     path TEXT NOT NULL,
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
-    status INTEGER NOT NULL DEFAULT 0, -- 0 = draft, 1 = online
-    uri TEXT NOT NULL,
-    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
-    title TEXT NOT NULL
+    status TEXT NOT NULL,
+    format TEXT NOT NULL,
+    published TEXT NOT NULL CHECK (datetime(published) = published),
+    modified TEXT NOT NULL CHECK (datetime(modified) = modified),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX web_pages_uri ON web_pages (uri);
+CREATE UNIQUE INDEX web_pages_path ON web_pages (path);
 
 -- FIXME: rename to english
 CREATE TABLE IF NOT EXISTS recherches

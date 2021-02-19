@@ -403,10 +403,6 @@ class File extends Entity
 	{
 		if ($this->context == self::CONTEXT_WEB) {
 			$path = substr($this->path, strlen(self::CONTEXT_WEB . '/'));
-
-			if (substr($path, -6) == '_files') {
-				$path = substr($path, 0, -6);
-			}
 		}
 		else {
 			$path = $this->path;
@@ -450,31 +446,6 @@ class File extends Entity
 		}
 
 		return max(self::ALLOWED_THUMB_SIZES);
-	}
-
-	public function listSubFiles(): array
-	{
-		return Files::list($this->subpath());
-	}
-
-	public function subpath(?string $name = null): ?string
-	{
-		$custom = $this->customType();
-
-		if (!$custom) {
-			return null;
-		}
-
-		if ($name) {
-			$name = '/' . $name;
-		}
-
-		return substr($this->path(), 0, -strlen($custom)) . '_files' . $name;
-	}
-
-	public function getSubFile(string $name): ?File
-	{
-		return Files::get($this->subpath() . '/' . $name);
 	}
 
 	/**
@@ -785,23 +756,6 @@ class File extends Entity
 		$name = array_pop($path);
 		$ref = implode('/', $path);
 		return [$context, $ref ?: null, $name];
-	}
-
-	public function setCustomType(string $type): void
-	{
-		if (!in_array($type, [self::FILE_EXT_SKRIV, self::FILE_EXT_ENCRYPTED])) {
-			throw new \InvalidArgumentException('Invalid custom type');
-		}
-
-		$ext = $this->customType();
-		$name = $this->name;
-
-		if ($ext) {
-			$name = substr($name, 0, -strlen($ext));
-		}
-
-		$name .= $type;
-		$this->name = $name;
 	}
 
 	public function customType(): ?string
