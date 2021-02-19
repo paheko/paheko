@@ -51,7 +51,7 @@ class Web
 	static public function listPages(?int $parent, bool $order_by_date = true): array
 	{
 		$where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
-		$order = $order_by_date ? 'created DESC' : 'title COLLATE NOCASE';
+		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';
 		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
 		return EM::getInstance(Page::class)->all($sql);
 	}

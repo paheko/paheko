@@ -74,7 +74,6 @@ class Upgrade
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
-				$db->createFunction('sha1', 'sha1');
 
 				$attachments = $db->getAssoc('SELECT id, nom FROM fichiers;');
 
