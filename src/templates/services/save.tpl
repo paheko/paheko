@@ -29,7 +29,7 @@
 
 		{foreach from=$grouped_services item="service"}
 			<dd class="radio-btn">
-				{input type="radio" name="id_service" value=$service.id data-expiry=$service.expiry_date|date_short label=null}
+				{input type="radio" name="id_service" value=$service.id data-duration=$service.duration data-expiry=$service.expiry_date|date_short label=null}
 				<label for="f_id_service_{$service.id}">
 					<div>
 						<h3>{$service.label}</h3>
@@ -131,6 +131,7 @@ function selectService(elm, first_load) {
 	let expiry = $('#f_expiry_date');
 
 	if (!first_load || !expiry.value) {
+		// Set the expiry date
 		expiry.value = elm.dataset.expiry;
 	}
 
@@ -177,6 +178,21 @@ let checkbox = $('#f_create_payment_1');
 checkbox.onchange = (e) => {
 	g.toggle('.accounting dl', checkbox.checked);
 	//$('#f_amount').required = checkbox.checked;
+};
+
+// Automatically increase expiry date when date is changed
+let date_input = $('#f_date');
+let expiry_input = $('#f_expiry_date');
+
+date_input.onchange = (e) => {
+	if (!selected.dataset.duration) {
+		return;
+	}
+
+	let d = date_input.value.split('/').reverse();
+	d = new Date(d[0], d[1]-1, d[2], 12);
+	d.setDate(d.getDate() + parseInt(selected.dataset.duration, 10));
+	expiry_input.value = d.toISOString().split('T')[0].split('-').reverse().join('/');
 };
 </script>
 {/literal}
