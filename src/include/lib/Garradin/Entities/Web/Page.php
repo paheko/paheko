@@ -65,7 +65,6 @@ class Page extends Entity
 
 	protected $_file;
 	protected $_attachments;
-	protected $_content_modified = false;
 
 	static public function create(int $type, ?int $parent_id, string $title, int $status = self::STATUS_ONLINE): self
 	{
@@ -135,9 +134,7 @@ class Page extends Entity
 			}
 		}
 
-		if (isset($this->_content_modified) && $exists) {
-			$file->setContent((string)$this->content);
-		}
+		$file->setContent((string)$this->export());
 
 		return true;
 	}
@@ -181,15 +178,10 @@ class Page extends Entity
 		}
 
 		if (!empty($source['encrypted']) ) {
-			$this->_content_type = File::FILE_EXT_ENCRYPTED;
+			$this->format = self::FORMAT_ENCRYPTED;
 		}
 		else {
-			$this->_content_type = File::FILE_EXT_SKRIV;
-		}
-
-		if (isset($source['content']) && $source['content'] != $this->_content) {
-			$this->_content = $source['content'];
-			$this->_content_modified = true;
+			$this->format = self::FORMAT_SKRIV;
 		}
 
 		return parent::importForm($source);

@@ -51,13 +51,12 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 }, $csrf_key);
 
 $parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
-$encrypted = f('encrypted') || $page->file()->customType() == File::FILE_EXT_ENCRYPTED;
+$encrypted = f('encrypted') || $page->format == Page::FORMAT_ENCRYPTED;
 
 $old_content = f('content');
 $new_content = $page->raw();
-$created = $page->created;
 
-$tpl->assign(compact('created', 'page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
+$tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
 
 $tpl->assign('custom_js', ['wiki_editor.js', 'wiki-encryption.js']);
 $tpl->assign('custom_css', ['wiki.css']);

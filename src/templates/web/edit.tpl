@@ -15,7 +15,7 @@
 			{input type="text" name="title" source=$page required=true label="Titre"}
 			{input type="text" name="uri" source=$page required=true label="Adresse unique URI" help="Utilisée pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas." pattern="[A-Za-z0-9_-]+"}
 			{input type="list" name="parent_id" label="Catégorie" default=$parent target="web/_selector.php?parent=%d"|args:$page.parent_id required=true}
-			{input type="datetime" name="date" label="Date" required=true default=$created}
+			{input type="datetime" name="date" label="Date" required=true default=$page.published}
 			<dt>Statut</dt>
 			{input type="radio" name="status" value=$page::STATUS_ONLINE label="En ligne" source=$page}
 			{input type="radio" name="status" value=$page::STATUS_DRAFT label="Brouillon" source=$page help="ne sera pas visible sur le site"}
