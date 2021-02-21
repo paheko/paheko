@@ -127,6 +127,10 @@ class Year extends Entity
 			throw new \LogicException('L\'exercice cible est déjà clôturé');
 		}
 
+		if ($target->id_chart != $this->id_chart) {
+			throw new UserException('Il n\'est pas possible de déplacer les écritures dans un exercices dont le plan comptable est différent');
+		}
+
 		DB::getInstance()->preparedQuery('UPDATE acc_transactions SET id_year = ? WHERE id_year = ? AND date > ?;',
 			$target->id(), $this->id(), $date->format('Y-m-d'));
 	}
