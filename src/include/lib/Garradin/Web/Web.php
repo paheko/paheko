@@ -159,49 +159,38 @@ class Web
 		elseif ($uri == '/feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
-		// URLs with an ending slash are categories
-		elseif (substr($uri, -1) == '/') {
-			$skel = 'category.html';
-			$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1, -1);
-		}
 		elseif (preg_match('!^/admin/!', $uri)) {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		// Files
-		elseif (false !== strpos($uri, '/', 1)) {
-			$file = Files::getFromURI($uri);
+		elseif ($page = self::getByURI(substr($uri, 1))) {
+			$skel = $page->template();
+		}
+		elseif ($file = Files::getFromURI(substr($uri, 1))) {
+			$size = null;
 
-			if ($file) {
-				$size = null;
-
-				foreach ($_GET as $key => $value) {
-					if (substr($key, -2) == 'px') {
-						$size = (int)substr($key, 0, -2);
-						break;
-					}
+			foreach ($_GET as $key => $value) {
+				if (substr($key, -2) == 'px') {
+					$size = (int)substr($key, 0, -2);
+					break;
 				}
-
-				$session = Session::getInstance();
-
-				if ($size) {
-					$file->serveThumbnail($session, $size);
-				}
-				else {
-					$file->serve($session, isset($_GET['download']) ? true : false);
-				}
-
-				exit;
 			}
 
-			$skel = '404.html';
+			$session = Session::getInstance();
+
+			if ($size) {
+				$file->serveThumbnail($session, $size);
+			}
+			else {
+				$file->serve($session, isset($_GET['download']) ? true : false);
+			}
+
+			return;
 		}
 		else {
-			$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
-
-			// Custom templates
-			if (preg_match('!^[\w\d_.-]+$!i', $_GET['uri'])) {
-				$s = new Skeleton($_GET['uri']);
+			// Trying to see if a custom template with this name exists
+			if (preg_match('!^[\w\d_.-]+$!i', substr($uri, 1))) {
+				$s = new Skeleton(substr($uri, 1));
 
 				if ($s->exists()) {
 					$s->serve();
@@ -209,9 +198,10 @@ class Web
 				}
 			}
 
-			// Fallback to article.html
-			$skel = 'article.html';
+			$skel = '404.html';
 		}
+
+		$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
 
 		$s = new Skeleton($skel);
 		$s->serve();

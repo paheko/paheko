@@ -12,7 +12,7 @@ require_once __DIR__ . '/_inc.php';
 $csrf_key = 'web_page_new';
 
 $form->runIf('create', function () {
-	$page = Page::create((int) qg('type'), (int) qg('parent') ?: null, f('title'), Page::STATUS_DRAFT);
+	$page = Page::create((int) qg('type'), qg('parent') ?: null, f('title'), Page::STATUS_DRAFT);
 	$page->save();
 	Utils::redirect(ADMIN_URL . 'web/edit.php?new&id=' . $page->id());
 }, $csrf_key);

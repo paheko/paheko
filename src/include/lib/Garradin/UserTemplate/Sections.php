@@ -59,7 +59,8 @@ class Sections
 
 		$params['select'] = 'w.*';
 		$params['tables'] = 'web_pages w';
-		$params['where'] .= ' AND status = ' . Page::STATUS_ONLINE;
+		$params['where'] .= ' AND status = :status';
+		$params[':status'] = Page::STATUS_ONLINE;
 
 		if (isset($params['search'])) {
 			$params['tables'] .= ' INNER JOIN files_search s USING (path)';
@@ -81,19 +82,27 @@ class Sections
 			unset($params['uri']);
 		}
 
-		if (isset($params['parent'])) {
-			$params['where'] .= ' AND w.parent_id = :parent_id';
-			$params[':parent_id'] = $params['parent'];
+		if (array_key_exists('parent', $params)) {
+			if (null === $params['parent']) {
+				$params['where'] .= ' AND w.parent IS NULL';
+			}
+			else {
+				$params['where'] .= ' AND w.parent = :parent';
+				$params[':parent'] = $params['parent'];
+			}
+
 			unset($params['parent']);
 		}
 
 		if (isset($params['future'])) {
 			if (!$params['future']) {
-				$params['where'] .= ' AND w.created <= datetime()';
+				$params['where'] .= ' AND w.published <= datetime()';
 			}
 
 			unset($params['future']);
 		}
+
+		//var_dump($params); exit;
 
 		foreach (self::sql($params, $tpl, $line) as $row) {
 			$data = $row;
@@ -130,6 +139,7 @@ class Sections
 		$params['where'] .= ' AND f.image = 0';
 		return self::files($params, $tpl, $line);
 	}
+
 	static public function files(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		if (!array_key_exists('where', $params)) {
@@ -151,20 +161,10 @@ class Sections
 			return;
 		}
 
-		// Fetch files for this page
-		$count = self::cache('page_files_' . $parent, function () use ($page) {
-			$subpath = $page->subpath();
-			return Files::listToSQL($subpath);
-		});
-
-		if (!$count) {
-			return;
-		}
-
 		$params['select'] = 'f.*';
-		$params['tables'] = 'files_tmp f';
+		$params['tables'] = 'files f';
 		$params['where'] .= ' AND f.path = :path';
-		$params[':path'] = $page->subpath();
+		$params[':path'] = $page->path();
 		unset($params['parent']);
 
 		// Generate a temporary table containing the list of files included in the text

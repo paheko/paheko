@@ -272,7 +272,7 @@ CREATE TABLE IF NOT EXISTS files
     modified TEXT NULL CHECK (modified IS NULL OR datetime(modified) = modified),
     image INT NOT NULL DEFAULT 0,
 
-    CHECK ((type IS NOT NULL AND modified IS NOT NULL AND size IS NOT NULL) OR type = 2)
+    CHECK ((mime IS NOT NULL AND modified IS NOT NULL AND size IS NOT NULL) OR type = 2)
 );
 
 -- Unique index as this is used to make up a file path

@@ -63,10 +63,15 @@ class Page extends Entity
 	const TYPE_CATEGORY = 1;
 	const TYPE_PAGE = 2;
 
+	const TEMPLATES = [
+		self::TYPE_PAGE => 'article.html',
+		self::TYPE_CATEGORY => 'category.html',
+	];
+
 	protected $_file;
 	protected $_attachments;
 
-	static public function create(int $type, ?string $parent, string $title, int $status = self::STATUS_ONLINE): self
+	static public function create(int $type, ?string $parent, string $title, string $status = self::STATUS_ONLINE): self
 	{
 		$page = new self;
 		$data = compact('type', 'parent', 'title', 'status');
@@ -74,13 +79,39 @@ class Page extends Entity
 		$data['content'] = '';
 
 		$page->importForm($data);
+		$page->published = new \DateTime;
+		$page->name = 'index.txt';;
+		$page->modified = new \DateTime;
 
 		return $page;
+	}
+
+	public function file()
+	{
+		if (null === $this->_file) {
+			$this->_file = Files::get($this->filepath());
+		}
+
+		return $this->_file;
+	}
+
+	public function load(array $data): void
+	{
+		parent::load($data);
+
+		if ($this->file()->modified != $this->modified) {
+
+		}
 	}
 
 	public function url(): string
 	{
 		return WWW_URL . $this->path();
+	}
+
+	public function template(): string
+	{
+		return self::TEMPLATES[$this->type];
 	}
 
 	public function raw(): string
@@ -91,10 +122,10 @@ class Page extends Entity
 	public function render(array $options = []): string
 	{
 		if ($this->format == self::FORMAT_SKRIV) {
-			return \Garradin\Web\Render\Skriv::render($this, null, $options);
+			return \Garradin\Web\Render\Skriv::render($this->file(), $this->content, $options);
 		}
 		else if ($this->format == self::FORMAT_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
+			return \Garradin\Web\Render\EncryptedSkriv::render($this->file(), $this->content, $options);
 		}
 	}
 
@@ -135,18 +166,20 @@ class Page extends Entity
 		$file = $this->file();
 
 		$exists = $this->exists();
+		$realpath = $this->filepath();
+
+		if (!$exists && !$file) {
+			$this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
+		}
 
 		parent::save();
 
-		if (isset($this->_modified['parent'])) {
-			$realpath = $this->filepath();
+		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['name']) || isset($this->_modified['uri']))) {
+			// Rename directory
+			$dir = Files::get($file->path);
+			$dir->rename(dirname($realpath));
 
-			if ($exists) {
-				$file->rename($realpath);
-			}
-			else {
-				$this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
-			}
+			$file->rename($realpath);
 		}
 
 		$file->setContent($this->export());
@@ -171,7 +204,7 @@ class Page extends Entity
 
 		$db = DB::getInstance();
 		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
-		$this->assert(!$db->test(self::TABLE, 'path = ?' . $where, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre');
+		$this->assert(!$db->test(self::TABLE, 'parent = ? AND uri = ?' . $where, $this->parent, $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre');
 	}
 
 	public function importForm(array $source = null)
@@ -280,7 +313,7 @@ class Page extends Entity
 
 		$out = '';
 
-		foreach ($metas as $key => $value) {
+		foreach ($meta as $key => $value) {
 			$out .= sprintf("%s: %s\n", $key, $value);
 		}
 
@@ -289,13 +322,8 @@ class Page extends Entity
 		return $out;
 	}
 
-	static public function fromFile(File $file, array $files, string $str, ?int $parent_id = null): self
+	static public function importFromRaw(string $str): void
 	{
-		$page = new self;
-
-		// Path is relative to web root
-		$page->parent = substr(dirname($file->path()), strlen(File::CONTEXT_WEB . '/'));
-
 		$str = preg_replace("/\r\n|\r|\n/", "\n", $str);
 		$str = explode("\n\n----\n\n", $str, 2);
 
@@ -313,10 +341,10 @@ class Page extends Entity
 			$value = trim(strtok(''));
 
 			if ($key == 'title') {
-				$page->title = $value;
+				$this->title = $value;
 			}
 			elseif ($key == 'published') {
-				$page->published = new \DateTime($value);
+				$this->published = new \DateTime($value);
 			}
 			elseif ($key == 'format') {
 				$value = strtolower($value);
@@ -325,7 +353,7 @@ class Page extends Entity
 					throw new \LogicException('Unknown format: ' . $value);
 				}
 
-				$page->format = $value;
+				$this->format = $value;
 			}
 			elseif ($key == 'status') {
 				$value = strtolower($value);
@@ -334,15 +362,25 @@ class Page extends Entity
 					throw new \LogicException('Unknown status: ' . $value);
 				}
 
-				$page->status = $value;
+				$this->status = $value;
 			}
 			else {
 				// Ignore other metadata
 			}
 		}
 
-		$page->content = trim($content, "\n\r");
-		$page->type = self::TYPE_PAGE;
+		$this->content = trim($content, "\n\r");
+	}
+
+	static public function fromFile(File $file, array $files, string $str, ?int $parent_id = null): self
+	{
+		$page = new self;
+
+		// Path is relative to web root
+		$page->parent = substr(dirname($file->path()), strlen(File::CONTEXT_WEB . '/'));
+
+		$page->importFromRaw($str);
+		$page->type = self::TYPE_PAGE; // FIXME
 		$page->modified = $file->modified;
 
 		foreach ($files as $subfile) {
