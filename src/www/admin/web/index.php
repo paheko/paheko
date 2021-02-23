@@ -7,10 +7,11 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = (int) qg('parent') ?: null;
+$parent = qg('parent') ?: null;
+$cat = null;
 
 if ($parent) {
-	$cat = Web::get($parent);
+	$cat = Web::getByURI($parent);
 
 	if (!$cat) {
 		throw new UserException('Catégorie inconnue');
@@ -19,8 +20,8 @@ if ($parent) {
 
 $order_date = qg('order_title') === null;
 
-$categories = Web::listCategories($parent);
-$pages = Web::listPages($parent, $order_date);
+$categories = Web::listCategories($cat);
+$pages = Web::listPages($cat, $order_date);
 $title = $parent ? sprintf('Gestion du site web : %s', $cat->title) : 'Gestion du site web';
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;

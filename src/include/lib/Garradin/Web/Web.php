@@ -41,19 +41,37 @@ class Web
 		return DB::getInstance()->get($query, $search);
 	}
 
-	static public function listCategories(?int $parent): array
+	static public function listCategories(?Page $parent): array
 	{
-		$where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
+		$params = [];
+
+		if (null === $parent) {
+			$where = 'parent IS NULL';
+		}
+		else {
+			$where = 'parent = ?';
+			$params[] = $parent->path();
+		}
+
 		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE NOCASE;', $where, Page::TYPE_CATEGORY);
-		return EM::getInstance(Page::class)->all($sql);
+		return EM::getInstance(Page::class)->all($sql, ...$params);
 	}
 
-	static public function listPages(?int $parent, bool $order_by_date = true): array
+	static public function listPages(?Page $parent, bool $order_by_date = true): array
 	{
-		$where = $parent ? sprintf('parent_id = %d', $parent) : 'parent_id IS NULL';
+		$params = [];
+
+		if (null === $parent) {
+			$where = 'parent IS NULL';
+		}
+		else {
+			$where = 'parent = ?';
+			$params[] = $parent->path();
+		}
+
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';
 		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
-		return EM::getInstance(Page::class)->all($sql);
+		return EM::getInstance(Page::class)->all($sql, ...$params);
 	}
 
 	static public function listCategoriesTree(?int $current = null): array
@@ -92,7 +110,23 @@ class Web
 
 	static public function getByURI(string $uri): ?Page
 	{
-		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
+		$parent = dirname($uri);
+		$params = [];
+
+		if ($parent != '.') {
+			$params[] = $parent;
+			$where = 'parent = ?';
+		}
+		else {
+			$where = 'parent IS NULL';
+			$parent = null;
+		}
+
+		$params[] = basename($uri);
+
+		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND uri = ?;', $where);
+
+		return EM::findOne(Page::class, $sql, ...$params);
 	}
 
 	static public function get(int $id): ?Page

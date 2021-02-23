@@ -26,13 +26,13 @@
 		<tbody>
 			{foreach from=$categories item="p"}
 			<tr>
-				<th><a href="?parent={$p.id}">{$p.title}</a></th>
+				<th><a href="?parent={$p->path()}">{$p.title}</a></th>
 				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
 				<td class="actions">
 					{if $p.status == $p::STATUS_ONLINE && !$config.desactiver_site}
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
-					{linkbutton shape="menu" label="Sous-catégories et pages" href="?parent=%d"|args:$p.id}
+					{linkbutton shape="menu" label="Sous-catégories et pages" href="?parent=%s"|args:$p->path()}
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?id=%d"|args:$p.id}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$p.id}
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$p.id}

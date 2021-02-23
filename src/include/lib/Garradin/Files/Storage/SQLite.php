@@ -50,12 +50,10 @@ class SQLite implements StorageInterface
 
 		$db = DB::getInstance();
 
-		$st = $db->preparedQuery('INSERT OR REPLACE INTO files (path, name, type, modified, size, content) VALUES (?, ?, ?, ?, ?, zeroblob(?));',
-			$file->path, $file->name, $file->type, new \DateTime, $file->size, $file->size);
+		$st = $db->preparedQuery('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));',
+			$file->id(), $file->size);
 
-		$rowid = $db->firstColumn('SELECT rowid FROM files WHERE path = ? AND name = ?;', $file->path, $file->name);
-
-		$blob = $db->openBlob('files', 'content', $rowid, 'main', \SQLITE3_OPEN_READWRITE);
+		$blob = $db->openBlob('files', 'content', $file->id(), 'main', \SQLITE3_OPEN_READWRITE);
 
 		if (null !== $source_content) {
 			fwrite($blob, $source_content);
@@ -66,85 +64,40 @@ class SQLite implements StorageInterface
 
 		fclose($blob);
 
-		$cache_id = 'files.' . md5($file->path());
+		$cache_id = 'files.' . md5($file->pathname());
 		Static_Cache::remove($cache_id);
 
 		return true;
 	}
 
-	static public function list(string $path): array
+	static public function getFullPath(File $file): ?string
+	{
+		return self::_getFilePathFromCache($file->pathname());
+	}
+
+	static public function display(File $file): void
+	{
+		readfile(self::getFullPath($file));
+	}
+
+	static public function fetch(File $file): string
+	{
+		return file_get_contents(self::getFullPath($file));
+	}
+
+	static public function delete(File $file): bool
 	{
 		$db = DB::getInstance();
 
-		$st = DB::getInstance()->preparedQuery('SELECT name, CAST(strftime(\'%s\', modified) AS int) AS modified, type, path, size
-			FROM files
-			WHERE path = ?
-			ORDER BY type = ? DESC, name COLLATE NOCASE;',
-			$path, File::TYPE_DIRECTORY);
-
-		$out = [];
-
-		while ($row = $st->fetchArray(\SQLITE3_ASSOC)) {
-			$out[] = $row;
-		}
-
-		return $out;
-	}
-
-	static public function getFullPath(string $path): ?string
-	{
-		return self::_getFilePathFromCache($path);
-	}
-
-	static public function display(string $path): void
-	{
-		readfile(self::getFilePathFromCache($path));
-	}
-
-	static public function fetch(string $path): string
-	{
-		return file_get_contents(self::_getFilePathFromCache($path));
-	}
-
-	static public function delete(string $path): bool
-	{
-		$db = DB::getInstance();
-
-		$cache_id = 'files.' . md5($path);
+		$cache_id = 'files.' . md5($file->pathname());
 		Static_Cache::remove($cache_id);
 
-		return $db->delete('files', 'path = ? AND name = ?;', dirname($path), basename($path));
+		return $db->delete('files_contents', 'id = ?', $file->id());
 	}
 
-	static public function move(string $old_path, string $new_path): bool
+	static public function move(File $file, string $new_path): bool
 	{
-		$db = DB::getInstance();
-
-		// Rename/move single file/directory
-		$db->preparedQuery('UPDATE files SET path = ?, name = ? WHERE path = ? AND name = ?;',
-			dirname($new_path), basename($new_path), dirname($old_path), basename($old_path));
-
 		return true;
-	}
-
-	static public function exists(string $path): bool
-	{
-		return DB::getInstance()->test('files', 'path = ? AND name = ?', dirname($path), basename($path));
-	}
-
-	static public function size(string $path): ?int
-	{
-		 $size = DB::getInstance()->firstColumn('SELECT size FROM files WHERE path = ? AND name = ?;', dirname($path), basename($path));
-		 return (int) $size ?: null;
-	}
-
-	static public function stat(string $path): ?array
-	{
-		$result = DB::getInstance()->first('SELECT path, name, size, CAST(strftime(\'%s\', modified) AS int) AS modified, type
-			FROM files
-			WHERE path = ? AND name = ?;', dirname($path), basename($path));
-
-		return $result ? (array) $result : null;
 	}
 
 	static public function mkdir(string $path): bool
@@ -165,16 +118,9 @@ class SQLite implements StorageInterface
 		]);
 	}
 
-	static public function modified(string $path): ?int
-	{
-		$result = DB::getInstance()->firstColumn('SELECT strftime(\'%s\', modified) FROM files WHERE path = ? AND name = ?;', dirname($path), basename($path));
-
-		return (int) $result ?: null;
-	}
-
 	static public function getTotalSize(): int
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(LENGTH(content)) FROM files_contents;');
 	}
 
 	/**
@@ -186,10 +132,10 @@ class SQLite implements StorageInterface
 		return @disk_total_space(self::_getRoot()) ?: \PHP_INT_MAX;
 	}
 
-	static public function reset(): void
+	static public function truncate(): void
 	{
 		$db = DB::getInstance();
-		$db->exec('DELETE FROM files; VACUUM;');
+		$db->exec('DELETE FROM files_contents; VACUUM;');
 	}
 
 	static public function lock(): void
@@ -209,5 +155,18 @@ class SQLite implements StorageInterface
 		if ($lock) {
 			throw new \RuntimeException('File storage is locked');
 		}
+	}
+
+	/**
+	 * We don't need to do anything there as everything is already in DB
+	 */
+	static public function sync(?string $path): void
+	{
+		return;
+	}
+
+	static public function update(File $file): File
+	{
+		return $file;
 	}
 }

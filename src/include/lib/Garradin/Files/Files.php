@@ -9,6 +9,8 @@ use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
 
+use KD2\DB\EntityManager as EM;
+
 use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG};
 
 class Files
@@ -35,16 +37,10 @@ class Files
 	{
 		File::validatePath($path);
 
-		$list = self::callStorage('list', $path);
+		// Update this path
+		self::callStorage('sync', $path);
 
-		foreach ($list as &$item) {
-			$file = new File;
-			$file->load((array) $item);
-			$item = $file;
-		}
-
-
-		return $list;
+		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path = ? ORDER BY type = ?, name ASC;', $path, File::TYPE_DIRECTORY);
 	}
 
 	/**
@@ -195,20 +191,22 @@ class Files
 			return null;
 		}
 
+		$fullpath = $path;
+
 		if ($name) {
-			$path .= '/' . $name;
+			$fullpath .= '/' . $name;
 		}
 
-		File::validatePath($path);
+		File::validatePath($fullpath);
 
-		$info = self::callStorage('stat', $path);
+		$path = dirname($fullpath);
+		$name = basename($fullpath);
 
-		if (!$info) {
-			return null;
+		$file = EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE path = ? AND name = ? LIMIT 1;', $path, $name);
+
+		if (null !== $file) {
+			$file = self::callStorage('update', $file);
 		}
-
-		$file = new File;
-		$file->load($info);
 
 		return $file;
 	}

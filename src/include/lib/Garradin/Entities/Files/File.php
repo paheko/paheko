@@ -25,6 +25,8 @@ class File extends Entity
 {
 	const TABLE = 'files';
 
+	protected $id;
+
 	/**
 	 * Parent directory of file
 	 */
@@ -35,52 +37,25 @@ class File extends Entity
 	 */
 	protected $name;
 	protected $type;
+	protected $mime;
 	protected $size;
 	protected $modified;
 	protected $image;
 
-	/**
-	 * Context, as from the first part of the path
-	 */
-	protected $context;
-
-	/**
-	 * Can this file be previewed in a web browser?
-	 */
-	protected $preview;
-
-	/**
-	 * File URL
-	 */
-	protected $url;
-	protected $thumb_url;
-	protected $small_url;
-	protected $download_url;
-
-	/**
-	 * Returns either skriv or encrypted
-	 */
-	protected $custom_type;
-	protected $pathname;
-
 	protected $_types = [
+		'id'           => 'int',
 		'path'         => 'string',
 		'name'         => 'string',
-		'type'         => 'string',
+		'type'         => 'int',
+		'mime'         => '?string',
 		'size'         => '?int',
-		'modified'     => '?int',
-		'image'        => '?bool',
-		'context'      => 'string',
-		'preview'      => 'bool',
-		'url'          => '?string',
-		'download_url' => '?string',
-		'thumb_url'    => '?string',
-		'small_url'    => '?string',
-		'custom_type'  => '?string',
-		'pathname'     => 'string',
+		'modified'     => '?DateTime',
+		'image'        => 'int',
 	];
 
-	const TYPE_DIRECTORY = 'inode/directory';
+	const TYPE_FILE = 1;
+	const TYPE_DIRECTORY = 2;
+	const TYPE_LINK = 3;
 
 	/**
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
@@ -146,36 +121,30 @@ class File extends Entity
 		return array_keys((new self)->_types);
 	}
 
-	public function load(?array $data = null): void
+	public function pathname(): string
 	{
-		$mandatory = ['modified', 'size', 'type', 'path', 'name'];
-		if (!empty(array_diff($mandatory, array_keys($data)))) {
-			throw new \InvalidArgumentException('Missing mandatory parameter');
+		$path = $this->path;
+
+		if ($path) {
+			$path .= '/';
 		}
 
-		foreach ($data as $key => $value) {
-			$this->set($key, $value);
-		}
+		return $path . $this->name;
+	}
 
-		$this->context = substr($this->path, 0, strpos($this->path, '/') ?: strlen($this->path));
-		$this->image = in_array($this->type, self::IMAGE_TYPES);
-		$this->custom_type = $this->customType();
-		$this->preview = in_array($this->type, self::PREVIEW_TYPES) || $this->custom_type;
-		$this->url = $this->url();
-		$this->download_url = $this->url(true);
-		$this->thumb_url = $this->image ? $this->thumb_url(200) : null;
-		$this->small_url = $this->image ? $this->thumb_url(500) : null;
-		$this->pathname = $this->path . '/' . $this->name;
+	public function context(): string
+	{
+		return strtok($this->path, '/');
+	}
+
+	public function canPreview(): bool
+	{
+		return in_array($this->mime, self::PREVIEW_TYPES);
 	}
 
 	public function delete(): bool
 	{
 		Files::callStorage('checkLock');
-
-		// Delete linked files
-		if (($subpath = $this->subpath()) && ($sub = Files::get($this->subpath()))) {
-			$sub->delete();
-		}
 
 		// Delete recursively
 		if ($this->type == self::TYPE_DIRECTORY) {
@@ -185,7 +154,7 @@ class File extends Entity
 		}
 
 		// Delete actual file content
-		$return = Files::callStorage('delete', $this->path());
+		$return = Files::callStorage('delete', $this);
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
@@ -193,28 +162,18 @@ class File extends Entity
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size));
 		}
 
-		return $return;
-	}
-
-	public function save(): bool
-	{
-		throw new \LogicException('File cannot be saved, as its metadata cannot be changed');
+		return parent::delete();
 	}
 
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
 		$current_path = $this->path();
-		$current_subpath = $this->subpath();
 
 		$return = Files::callStorage('move', $current_path, $new_path);
 
 		$this->path = dirname($new_path);
 		$this->name = basename($new_path);
-
-		if ($current_subpath && Files::callStorage('exists', $current_subpath)) {
-			$return = Files::callStorage('move', $current_subpath, $this->subpath());
-		}
 
 		return $return;
 	}
@@ -401,7 +360,7 @@ class File extends Entity
 
 	public function url($download = false): string
 	{
-		if ($this->context == self::CONTEXT_WEB) {
+		if ($this->context() == self::CONTEXT_WEB) {
 			$path = substr($this->path, strlen(self::CONTEXT_WEB . '/'));
 		}
 		else {
@@ -622,7 +581,7 @@ class File extends Entity
 			return true;
 		}
 
-		$context = $this->context;
+		$context = $this->context();
 
 		if (null === $session) {
 			return false;
@@ -653,7 +612,7 @@ class File extends Entity
 			return false;
 		}
 
-		switch ($this->context) {
+		switch ($this->context()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -678,7 +637,7 @@ class File extends Entity
 			return false;
 		}
 
-		switch ($this->context) {
+		switch ($this->context()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -709,7 +668,7 @@ class File extends Entity
 
 	public function isPublic(): bool
 	{
-		$context = $this->context;
+		$context = $this->context();
 
 		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB || $context == self::CONTEXT_SKELETON) {
 			return true;

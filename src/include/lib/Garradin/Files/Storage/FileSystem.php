@@ -105,19 +105,19 @@ class FileSystem implements StorageInterface
 		return $files;
 	}
 
-	static public function getFullPath(string $path): ?string
+	static public function getFullPath(File $file): ?string
 	{
-		return self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		return self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $file->pathname());
 	}
 
-	static public function display(string $path): void
+	static public function display(File $file): void
 	{
-		readfile(self::getFullPath($path));
+		readfile(self::getFullPath($file));
 	}
 
-	static public function fetch(string $path): string
+	static public function fetch(File $file): string
 	{
-		return file_get_contents(self::getFullPath($path));
+		return file_get_contents(self::getFullPath($file));
 	}
 
 	static public function delete(string $path): bool
@@ -132,7 +132,7 @@ class FileSystem implements StorageInterface
 		}
 	}
 
-	static public function move(string $old_path, string $new_path): bool
+	static public function move(File $file, string $new_path): bool
 	{
 		$target = self::getFullPath($new_path);
 		self::ensureDirectoryExists(dirname($target));
@@ -207,7 +207,7 @@ class FileSystem implements StorageInterface
 		return @disk_total_space(self::_getRoot()) ?: \PHP_INT_MAX;
 	}
 
-	static public function reset(): void
+	static public function truncate(): void
 	{
 		Utils::deleteRecursive(self::_getRoot());
 	}
@@ -228,6 +228,77 @@ class FileSystem implements StorageInterface
 
 		if ($lock) {
 			throw new \RuntimeException('File storage is locked');
+		}
+	}
+
+	static public function sync(?string $path): void
+	{
+		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
+
+		if (!file_exists($fullpath)) {
+			return;
+		}
+
+		$db = DB::getInstance();
+
+		$saved_files = $db->getGrouped('SELECT name, size, modified, type FROM files WHERE path = ?;', $path);
+		$added = [];
+		$deleted = [];
+		$modified = [];
+		$exists = [];
+
+		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			$name = $file->getFilename();
+
+			$data = [
+				'path'     => $path,
+				'name'     => $name,
+				'modified' => null,
+				'size'     => null,
+			];
+
+			if ($file->isDir()) {
+				$data['type'] = File::TYPE_DIRECTORY;
+			}
+			else {
+				$data['type'] = File::TYPE_FILE;
+				$data['modified'] = $file->getMTime();
+				$data['size'] = $file->getSize();
+				$data['mime'] = mime_content_type($file->getRealpath());
+			}
+
+			$exists[$name] = null;
+
+			if (!array_key_exists($name, $saved_files)) {
+				$added[] = $data;
+			}
+			elseif (($saved_files[$name]->size != $data['size'] || $saved_files[$name]->modified != $data['modified'])) {
+				$modified[] = $data;
+			}
+		}
+
+		foreach ($modified as $file) {
+			Files::update($file['path'], $file['name'])
+		}
+
+		$deleted = array_diff_key($saved_files, $exists);
+
+		foreach ($deleted as $file) {
+			$type = $saved_files[$file['name']]->type;
+
+			if ($type == File::TYPE_DIRECTORY) {
+				$sql = 'DELETE FROM files WHERE '
+			}
+		}
+	}
+
+	static public function update(File $file): File
+	{
+		$modified = filemtime(self::getFullPath($file->pathname()));
+
+		if ($modified != $file->modified->getTimestamp()) {
+			$file->modified = new \DateTime('@' . $modified);
 		}
 	}
 }
