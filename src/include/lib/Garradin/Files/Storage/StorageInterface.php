@@ -39,6 +39,11 @@ interface StorageInterface
 	static public function delete(File $file): bool;
 
 	/**
+	 * Gets modified timestamp
+	 */
+	static public function modified(File $file): ?int;
+
+	/**
 	 * Moves a file to a new path, when its name or path has changed
 	 */
 	static public function move(File $file, string $new_path): bool;

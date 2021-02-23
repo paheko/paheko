@@ -15,21 +15,21 @@
 {{/if}}
 
 
-{{#articles order="created DESC" future=false limit=1}}
+{{#articles order="published DESC" future=false limit=1}}
 <section class="articles main">
 	<article>
 		<h1><a href="{{ $url }}">{{ $title }}</a></h1>
-		<h5>Posté : {{ $created|relative_date }}</h5>
+		<h5>Posté : {{ $published|relative_date }}</h5>
 		<p>{{ $html|raw|strip_tags|truncate:600 }}</p>
 	</article>
 </section>
 {{/articles}}
 
-{{#articles order="created DESC" future=false begin=1 limit=9}}
+{{#articles order="published DESC" future=false begin=1 limit=9}}
 <section class="articles">
 	<article>
 		<h3><a href="{{ $url }}">{{ $title }}</a></h3>
-		<h5>Posté : {{ $created|relative_date }}</h5>
+		<h5>Posté : {{ $published|relative_date }}</h5>
 		<p>{{ $html|raw|strip_tags|truncate:200 }}</p>
 	</article>
 </section>

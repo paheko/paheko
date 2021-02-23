@@ -36,7 +36,7 @@ class File extends Entity
 	 * File name
 	 */
 	protected $name;
-	protected $type;
+	protected $type = self::TYPE_FILE;
 	protected $mime;
 	protected $size;
 	protected $modified;
@@ -224,18 +224,23 @@ class File extends Entity
 
 		Files::callStorage('checkLock');
 
+		if (!$this->exists()) {
+			$this->set('modified', new \DateTime);
+			$this->save();
+		}
+
 		if (!Files::callStorage('store', $this, $source_path, $source_content)) {
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
 
 		// Store content in search table
-		if (substr($this->type, 0, 5) == 'text/') {
+		if (substr($this->mime, 0, 5) == 'text/') {
 			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path());
 
 			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
 				$content = 'Contenu chiffré';
 			}
-			else if ($this->type === 'text/html' || $this->type == 'text/xml') {
+			else if ($this->mime === 'text/html' || $this->mime == 'text/xml') {
 				$content = strip_tags($content);
 			}
 
@@ -271,13 +276,13 @@ class File extends Entity
 		$db = DB::getInstance();
 
 		if ($source_path && !$source_content) {
-			$file->set('type', finfo_file($finfo, $source_path));
+			$file->set('mime', finfo_file($finfo, $source_path));
 		}
 		else {
-			$file->set('type', finfo_buffer($finfo, $source_content));
+			$file->set('mime', finfo_buffer($finfo, $source_content));
 		}
 
-		$file->set('image', in_array($file->type, self::IMAGE_TYPES));
+		$file->set('image', (int) in_array($file->mime, self::IMAGE_TYPES));
 
 		return $file;
 	}
@@ -419,7 +424,7 @@ class File extends Entity
 			return;
 		}
 
-		$path = Files::callStorage('getFullPath', $this->path());
+		$path = Files::callStorage('getFullPath', $this);
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
 		$this->_serve($path, $content, $download);
@@ -455,10 +460,10 @@ class File extends Entity
 		if (!Static_Cache::exists($cache_id))
 		{
 			try {
-				if ($path = Files::callStorage('getFullPath', $this->path())) {
+				if ($path = Files::callStorage('getFullPath', $this)) {
 					(new Image($path))->resize($width)->save($destination);
 				}
-				elseif ($content = Files::callStorage('fetch', $this->path())) {
+				elseif ($content = Files::callStorage('fetch', $this)) {
 					Image::createFromBlob($content)->resize($width)->save($destination);
 				}
 				else {
@@ -484,7 +489,7 @@ class File extends Entity
 	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
 		if ($this->isPublic()) {
-			Utils::HTTPCache(null, $this->modified);
+			Utils::HTTPCache(null, $this->modified->getTimestamp());
 		}
 		else {
 			// Disable browser cache
@@ -493,7 +498,7 @@ class File extends Entity
 			header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0');
 		}
 
-		$type = $this->type;
+		$type = $this->mime;
 
 		// Force CSS mimetype
 		if (substr($this->name, -4) == '.css') {
@@ -553,7 +558,7 @@ class File extends Entity
 
 	public function fetch()
 	{
-		return Files::callStorage('fetch', $this->path());
+		return Files::callStorage('fetch', $this);
 	}
 
 	public function render(array $options = [])
@@ -685,7 +690,7 @@ class File extends Entity
 		elseif ($this->customType() == self::FILE_EXT_ENCRYPTED) {
 			return self::EDITOR_ENCRYPTED;
 		}
-		elseif (substr($this->type, 0, 5) == 'text/') {
+		elseif (substr($this->mime, 0, 5) == 'text/') {
 			return self::EDITOR_CODE;
 		}
 

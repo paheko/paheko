@@ -5,6 +5,7 @@ namespace Garradin\Files;
 use Garradin\Static_Cache;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\ValidationException;
 use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
@@ -197,7 +198,12 @@ class Files
 			$fullpath .= '/' . $name;
 		}
 
-		File::validatePath($fullpath);
+		try {
+			File::validatePath($fullpath);
+		}
+		catch (ValidationException $e) {
+			return null;
+		}
 
 		$path = dirname($fullpath);
 		$name = basename($fullpath);

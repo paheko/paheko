@@ -87,7 +87,7 @@ class Upgrade
 
 					$content = preg_replace_callback('!(image|fichier)://(\d+)!', function ($match) use ($attachments) {
 						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
-						return sprintf('#page:[%s]', $name);
+						return sprintf('#file:[%s]', $name);
 					}, $content);
 
 					if ($content != $r->contenu) {

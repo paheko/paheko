@@ -34,7 +34,7 @@ $show_diff = false;
 $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	$editing_started = new \DateTime($editing_started);
 
-	if ($editing_started < $page->modified()) {
+	if ($editing_started < $page->modified) {
 		$show_diff = true;
 		throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
 	}

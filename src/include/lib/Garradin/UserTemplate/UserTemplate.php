@@ -73,7 +73,7 @@ class UserTemplate extends Brindille
 	{
 		if ($file) {
 			$this->file = $file;
-			$this->modified = $file->modified;
+			$this->modified = $file->modified->getTimestamp();
 		}
 
 		$this->assignArray(self::getRootVariables());

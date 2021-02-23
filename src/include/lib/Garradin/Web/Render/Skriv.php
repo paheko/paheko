@@ -35,17 +35,11 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		$skriv->_currentFile = $file;
+		$skriv->_currentPath = $file->path;
 		$str = $content ?? $file->fetch();
 
-		$str = preg_replace_callback('/#page:\[([^\]\h]+)\]/', function ($match) use ($skriv) {
-			$file = Files::get($match[1]);
-
-			if (!$file) {
-				return $skriv->parseError('/!\ Lien fichier invalide');
-			}
-
-			return $file->url();
+		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) use ($skriv) {
+			return WWW_URL . $skriv->_currentPath . '/' . $match[1];
 		}, $str);
 
 		$str = self::$skriv->render($str);
@@ -70,27 +64,23 @@ class Skriv
 		$name = $args[0] ?? null;
 		$caption = $args[1] ?? null;
 
-		if (!$name || !$skriv->_currentFile)
+		if (!$name || !$skriv->_currentPath)
 		{
 			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
 		}
 
-		$file = $skriv->_currentFile->getSubFile($name);
-
-		if (!$file) {
-			return $skriv->parseError('/!\ Tag fichier invalide: fichier non trouvé');
-		}
-
 		if (empty($caption))
 		{
-			$caption = $file->name;
+			$caption = $name;
 		}
 
-		$out = '<aside class="file" data-type="'.$skriv->escape($file->type).'">';
-		$out.= '<a href="'.$file->url().'" class="internal-file">'.$skriv->escape($caption).'</a> ';
-		$out.= '<small>('.$skriv->escape(($file->type ? $file->type . ', ' : '') . Utils::format_bytes($file->size)).')</small>';
-		$out.= '</aside>';
-		return $out;
+		$url = WWW_URL . $skriv->_currentPath . '/' . $name;
+		$ext = substr($name, strrpos($name, '.')+1);
+
+		return sprintf(
+			'<aside class="file" data-type="%s"><a href="%s" class="internal-file">%s</a> <small>(%s)</small></aside>',
+			htmlspecialchars($ext), htmlspecialchars($url), htmlspecialchars($caption), htmlspecialchars(strtoupper($ext))
+		);
 	}
 
 	/**
@@ -107,43 +97,27 @@ class Skriv
 		$align = $args[1] ?? null;
 		$caption = $args[2] ?? null;
 
-		if (!$name)
+		if (!$name || !$skriv->_currentPath)
 		{
 			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$file = $skriv->_currentFile->getSubFile($name);
+		$url = WWW_URL . $skriv->_currentPath . '/' . $name;
+		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
 
-		if (!$file) {
-			return $skriv->parseError('/!\ Tag image invalide: fichier non trouvé');
-		}
-
-
-		if (!$file->image)
-		{
-			return $skriv->parseError('/!\ Tag image : ce fichier n\'est pas une image.');
-		}
-
-		$out = '<a href="'.$file->url.'" class="internal-image">';
-		$out .= '<img src="'.$file->thumb_url($align == 'center' ? 500 : 200).'" alt="';
-
-		if ($caption)
-		{
-			$out .= htmlspecialchars($caption);
-		}
-
-		$out .= '" /></a>';
+		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" /></a>',
+			htmlspecialchars($url),
+			htmlspecialchars($thumb_url),
+			htmlspecialchars($caption ?? $name)
+		);
 
 		if (!empty($align))
 		{
-			$out = '<figure class="image img-' . $align . '">' . $out;
-
-			if ($caption)
-			{
-				$out .= '<figcaption>' . htmlspecialchars($caption) . '</figcaption>';
+			if ($caption) {
+				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($caption));
 			}
 
-			$out .= '</figure>';
+			$out = sprintf('<figure class="image img-%s">%s%s</figure>', $align, $out, $caption);
 		}
 
 		return $out;

@@ -34,7 +34,7 @@ class SQLite implements StorageInterface
 				throw new \LogicException('There is no file with path = ' . $path);
 			}
 
-			$blob = $db->openBlob('files', 'content', (int)$id);
+			$blob = $db->openBlob('files_contents', 'content', (int)$id);
 			Static_Cache::storeFromPointer($cache_id, $blob);
 			fclose($blob);
 		}
@@ -53,7 +53,7 @@ class SQLite implements StorageInterface
 		$st = $db->preparedQuery('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));',
 			$file->id(), $file->size);
 
-		$blob = $db->openBlob('files', 'content', $file->id(), 'main', \SQLITE3_OPEN_READWRITE);
+		$blob = $db->openBlob('files_contents', 'content', $file->id(), 'main', \SQLITE3_OPEN_READWRITE);
 
 		if (null !== $source_content) {
 			fwrite($blob, $source_content);
@@ -83,6 +83,11 @@ class SQLite implements StorageInterface
 	static public function fetch(File $file): string
 	{
 		return file_get_contents(self::getFullPath($file));
+	}
+
+	static public function modified(File $file): ?int
+	{
+		return $file->modified ?? time();
 	}
 
 	static public function delete(File $file): bool
@@ -129,7 +134,7 @@ class SQLite implements StorageInterface
 	 */
 	static public function getQuota(): int
 	{
-		return @disk_total_space(self::_getRoot()) ?: \PHP_INT_MAX;
+		return @disk_total_space(DATA_ROOT) ?: \PHP_INT_MAX;
 	}
 
 	static public function truncate(): void

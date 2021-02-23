@@ -2,7 +2,6 @@
 
 	{{:include file="_head.html" title=$title}}
 
-
 	<section class="subcategories">
 		{{#categories parent=$id order="title"}}
 		<article>
@@ -21,10 +20,10 @@
 	</article>
 
 	<section class="articles">
-		{{#articles parent=$id order="created DESC" future=false}}
+		{{#articles parent=$id order="published DESC" future=false}}
 		<article>
 			<h3><a href="{{$url}}">{{$title}}</a></h3>
-			<h5>{{$created|date_long}}</h5>
+			<h5>{{$published|date_long}}</h5>
 			<p>{{$html|raw|strip_tags|truncate:200}}</p>
 		</article>
 		{{/articles}}
