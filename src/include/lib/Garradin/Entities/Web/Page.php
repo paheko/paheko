@@ -19,26 +19,26 @@ class Page extends Entity
 	const TABLE = 'web_pages';
 
 	protected $id;
-	protected $parent_id;
-	protected $path;
+	protected $parent;
 	protected $uri;
+	protected $name;
+	protected $title;
 	protected $type;
 	protected $status;
 	protected $format;
-	protected $title;
 	protected $published;
 	protected $modified;
 	protected $content;
 
 	protected $_types = [
 		'id'        => 'int',
-		'parent_id' => '?int',
-		'path'      => 'string',
+		'parent'    => '?string',
 		'uri'       => 'string',
+		'name'      => 'string',
+		'title'     => 'string',
 		'type'      => 'int',
 		'status'    => 'string',
 		'format'    => 'string',
-		'title'     => 'string',
 		'published' => 'DateTime',
 		'modified'  => 'DateTime',
 		'content'   => 'string',
@@ -66,10 +66,10 @@ class Page extends Entity
 	protected $_file;
 	protected $_attachments;
 
-	static public function create(int $type, ?int $parent_id, string $title, int $status = self::STATUS_ONLINE): self
+	static public function create(int $type, ?string $parent, string $title, int $status = self::STATUS_ONLINE): self
 	{
 		$page = new self;
-		$data = compact('type', 'parent_id', 'title', 'status');
+		$data = compact('type', 'parent', 'title', 'status');
 		$data['uri'] = $title;
 		$data['content'] = '';
 
@@ -80,7 +80,7 @@ class Page extends Entity
 
 	public function url(): string
 	{
-		return WWW_URL . $this->path;
+		return WWW_URL . $this->path();
 	}
 
 	public function raw(): string
@@ -103,38 +103,53 @@ class Page extends Entity
 		return Skriv::render($this->file(), $content, ['prefix' => '#']);
 	}
 
+	public function filepath(): string
+	{
+		$parts = [
+			File::CONTEXT_WEB,
+			$this->parent,
+			$this->uri,
+			$this->name,
+		];
+
+		$parts = array_filter($parts);
+
+		return implode('/', $parts);
+	}
+
+	public function path(): string
+	{
+		$path = '';
+
+		if ($this->parent) {
+			$path .= $this->parent . '/';
+		}
+
+		$path .= $this->uri;
+
+		return $path;
+	}
+
 	public function save(): bool
 	{
 		$file = $this->file();
-
-		if (isset($this->_modified['uri'])) {
-			$path = dirname($this->path);
-
-			if ($path) {
-				$path .= '/';
-			}
-
-			$path .= $this->uri;
-
-			$this->set('path', $path);
-		}
 
 		$exists = $this->exists();
 
 		parent::save();
 
-		if (isset($this->_modified['path'])) {
-			$realpath = File::CONTEXT_WEB . '/' . $this->get('path') . '/index.txt';
+		if (isset($this->_modified['parent'])) {
+			$realpath = $this->filepath();
 
 			if ($exists) {
 				$file->rename($realpath);
 			}
 			else {
-				$this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->content);
+				$this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
 			}
 		}
 
-		$file->setContent((string)$this->export());
+		$file->setContent($this->export());
 
 		return true;
 	}
@@ -165,10 +180,6 @@ class Page extends Entity
 			$source = $_POST;
 		}
 
-		if (isset($source['parent_id']) && is_array($source['parent_id'])) {
-			$source['parent_id'] = key($source['parent_id']);
-		}
-
 		if (isset($source['date']) && isset($source['date_time'])) {
 			$source['created'] = $source['date'] . ' ' . $source['date_time'];
 		}
@@ -190,14 +201,14 @@ class Page extends Entity
 	public function getBreadcrumbs()
 	{
 		$sql = '
-			WITH RECURSIVE parents(id, name, parent_id, level) AS (
-				SELECT id, title, parent_id, 1 FROM web_pages WHERE id = ?
+			WITH RECURSIVE parents(title, parent, uri, level) AS (
+				SELECT title, parent, uri, 1 FROM web_pages WHERE id = ?
 				UNION ALL
-				SELECT p.id, p.title, p.parent_id, level + 1
+				SELECT p.title, p.parent, p.uri, level + 1
 				FROM web_pages p
-					JOIN parents ON p.id = parents.parent_id
+					JOIN parents ON p.parent = parents.parent
 			)
-			SELECT id, name FROM parents ORDER BY level DESC;';
+			SELECT TRIM(parent || \'/\' || uri, \'/\'), title FROM parents ORDER BY level DESC;';
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 
@@ -283,7 +294,7 @@ class Page extends Entity
 		$page = new self;
 
 		// Path is relative to web root
-		$page->path = substr(dirname($file->path()), strlen(File::CONTEXT_WEB . '/'));
+		$page->parent = substr(dirname($file->path()), strlen(File::CONTEXT_WEB . '/'));
 
 		$str = preg_replace("/\r\n|\r|\n/", "\n", $str);
 		$str = explode("\n\n----\n\n", $str, 2);

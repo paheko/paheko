@@ -266,18 +266,26 @@ CREATE TABLE IF NOT EXISTS files
     id INTEGER NOT NULL PRIMARY KEY,
     path TEXT NOT NULL,
     name TEXT NOT NULL, -- File name
-    type TEXT NULL, -- MIME type
-    modified TEXT NULL CHECK (modified IS NULL OR datetime(modified) = modified),
+    type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
+    mime TEXT NULL,
     size INT NULL,
-    compressed INT NOT NULL DEFAULT 0,
-    content BLOB NULL, -- Null for directories
+    modified TEXT NULL CHECK (modified IS NULL OR datetime(modified) = modified),
+    image INT NOT NULL DEFAULT 0,
 
-    CHECK ((type IS NOT NULL AND modified IS NOT NULL AND size IS NOT NULL AND content IS NOT NULL) OR type = 'inode/directory')
+    CHECK ((type IS NOT NULL AND modified IS NOT NULL AND size IS NOT NULL) OR type = 2)
 );
 
 -- Unique index as this is used to make up a file path
 CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path, name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
+
+CREATE TABLE IF NOT EXISTS files_contents
+-- Files contents (empty if using another storage backend)
+(
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
+    compressed INT NOT NULL DEFAULT 0,
+    content BLOB NOT NULL
+);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
@@ -292,9 +300,9 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 CREATE TABLE IF NOT EXISTS web_pages
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    parent_id INTEGER NULL REFERENCES web_pages(id) ON DELETE SET NULL,
-    uri TEXT NOT NULL,
-    path TEXT NOT NULL,
+    parent TEXT NULL, -- Parent path, NULL = web root
+    uri TEXT NOT NULL, -- Page directory name
+    name TEXT NOT NULL, -- File name
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status TEXT NOT NULL,
     format TEXT NOT NULL,
@@ -304,7 +312,15 @@ CREATE TABLE IF NOT EXISTS web_pages
     content TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX web_pages_path ON web_pages (path);
+CREATE UNIQUE INDEX web_pages_path ON web_pages (parent, uri);
+
+CREATE TABLE IF NOT EXISTS web_attachments
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    page_id INTEGER NOT NULL REFERENCES web_pages(id),
+    name TEXT NOT NULL, -- File name
+    image INTEGER NOT NULL DEFAULT 0
+);
 
 -- FIXME: rename to english
 CREATE TABLE IF NOT EXISTS recherches

@@ -26,7 +26,7 @@ $csrf_key = 'web_edit_' . $page->id();
 $editing_started = f('editing_started') ?: date('Y-m-d H:i:s');
 
 if (f('cancel')) {
-	Utils::redirect(ADMIN_URL . 'web/?parent=' . $page->parent_id);
+	Utils::redirect(ADMIN_URL . 'web/?parent=' . $page->parent);
 }
 
 $show_diff = false;
@@ -47,10 +47,10 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 		die('{"success":true}');
 	}
 
-	Utils::redirect('!web/?parent=' . $page->parent_id);
+	Utils::redirect('!web/?parent=' . $page->parent);
 }, $csrf_key);
 
-$parent = $page->parent_id ? [$page->parent_id => Web::get($page->parent_id)->title] : null;
+$parent = $page->parent ? [$page->parent => Web::getByURI($page->parent)->title] : null;
 $encrypted = f('encrypted') || $page->format == Page::FORMAT_ENCRYPTED;
 
 $old_content = f('content');
