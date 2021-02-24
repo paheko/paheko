@@ -394,7 +394,9 @@ namespace Garradin;
  *
  * Valeurs possibles :
  * - SQLite : aucune configuration possible
- * - FileSystem : 'string' = chemin du répertoire où doivent être stockés les fichiers
+ * - FileSystem : [
+ * 	'path' => (string) chemin du répertoire où doivent être stockés les fichiers
+ * 	'scan' => (bool) chemin
  *
  * Défaut : null
  */
@@ -432,4 +434,4 @@ namespace Garradin;
  * et de lancer le script "scripts/watch_filesystem.sh" qui utilise inotify
  * pour ne mettre à jour que si un fichier a été modifié/ajouté/supprimé.
  */
-const FILE_STORAGE_SYNC_AUTO = true;
+//const FILE_STORAGE_SYNC_AUTO = true;

@@ -335,6 +335,15 @@
 		multiples.forEach((btn) => {
 			btn.onclick = () => btn.parentNode.parentNode.removeChild(btn.parentNode);
 		});
+
+		// Open links in dialog
+		$('a[target="_dialog"]').forEach((e) => {
+			e.onclick = () => {
+				let url = e.href + (e.href.indexOf('?') ? '&' : '?') + 'dialog';
+				g.openFrameDialog(url);
+				return false;
+			};
+		});
 	});
 
 	g.onload(() => {

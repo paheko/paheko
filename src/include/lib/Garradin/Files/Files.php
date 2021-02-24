@@ -225,7 +225,7 @@ class Files
 		$context = substr($uri, 0, strpos($uri, '/'));
 
 		// Use alias for web files
-		if (!in_array($context, File::CONTEXTS_NAMES)) {
+		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
 			$uri = File::CONTEXT_WEB . '/' . $uri;
 		}
 
