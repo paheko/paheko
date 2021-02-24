@@ -24,6 +24,8 @@ $tpl->assign('files', $transaction->listFiles());
 $tpl->assign('tr_year', $transaction->year());
 $tpl->assign('creator_name', $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null);
 
+$tpl->assign('can_upload', $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE));
+$tpl->assign('file_parent', $transaction->getAttachementsDirectory());
 $tpl->assign('related_users', $transaction->listLinkedUsers());
 
 $tpl->display('acc/transactions/details.tpl');

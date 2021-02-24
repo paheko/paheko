@@ -18,8 +18,13 @@ if (!$file->checkDeleteAccess($session)) {
 
 $csrf_key = 'file_delete_' . $file->pathHash();
 
-$form->runIf('delete', function () use ($file) {
+$form->runIf('delete', function () use ($file, $tpl) {
 	$file->delete();
+
+	if (null !== qg('dialog')) {
+		$tpl->display('common/_reload_parent.tpl');
+		exit;
+	}
 }, $csrf_key, Utils::getSelfURI(['deleted' => 1]));
 
 $tpl->assign(compact('file', 'csrf_key'));

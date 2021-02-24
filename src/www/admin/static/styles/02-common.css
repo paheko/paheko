@@ -105,14 +105,14 @@ dd.help li {
     list-style: disc;
 }
 
-h2.ruler {
+.ruler {
     margin: .5em;
     text-align: center;
     color: #333;
     overflow: hidden;
 }
 
-h2.ruler:before, h2.ruler:after {
+.ruler:before, .ruler:after {
     background-color: #000;
     content: "";
     display: inline-block;
@@ -122,12 +122,12 @@ h2.ruler:before, h2.ruler:after {
     width: 50%;
 }
 
-h2.ruler:before {
+.ruler:before {
     right: 0.5em;
     margin-left: -50%;
 }
 
-h2.ruler:after {
+.ruler:after {
     left: 0.5em;
     margin-right: -50%;
 }
@@ -288,7 +288,7 @@ dl.describe > dt {
     margin: .2rem .5rem;
     text-align: right;
     color: #666;
-    align-self: center;
+    align-self: start;
 }
 
 dl.describe > dd {
@@ -411,4 +411,23 @@ details summary.block {
 details summary.block::after {
     right: 0;
     left: inherit;
+}
+
+.files-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.files-list aside.file {
+    border-radius: .5rem;
+    background: rgba(var(--gSecondColor), 0.1);
+    text-align: center;
+    padding: .5rem;
+    margin: .5rem;
+}
+
+.files-list aside small {
+    display: block;
+    color: #666;
 }

@@ -86,20 +86,6 @@
 
 	<dt>Remarques</dt>
 	<dd>{if trim($transaction.notes)}{$transaction.notes|escape|nl2br}{else}-{/if}</dd>
-
-	<dt>Fichiers joints</dt>
-	{foreach from=$files item="file"}
-	<dd>
-		<aside class="file">
-			<a target="_blank" href="{$file.url}">{$file.name}</a>
-			<small>({$file.type}, {$file.size|size_in_bytes})</small>
-			{linkbutton shape="download" href=$file->url() target="_blank" label="Télécharger"}
-			{linkbutton shape="delete" href="!acc/transactions/delete_file.php?id=%d&from=%d"|args:$file.id,$transaction.id label="Supprimer"}
-		</aside>
-	</dd>
-	{foreachelse}
-	<dd>-</dd>
-	{/foreach}
 </dl>
 
 <table class="list">
@@ -132,5 +118,10 @@
 		{/foreach}
 	</tbody>
 </table>
+
+{if $can_upload || count($files)}
+	<h3 class="ruler">Fichiers joints</h3>
+	{include file="common/files/_context_list.tpl" files=$files can_upload=$can_upload parent_path=$file_parent}
+{/if}
 
 {include file="admin/_foot.tpl"}

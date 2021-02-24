@@ -41,11 +41,6 @@ if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 		$transaction->importFromEditForm();
 		$transaction->save();
 
-		// Append file
-		if (!empty($_FILES['file']['name'])) {
-			File::upload('file', File::CONTEXT_TRANSACTION, $transaction->id());
-		}
-
 		// Link members
 		if (null !== f('users') && is_array(f('users'))) {
 			$transaction->updateLinkedUsers(array_keys(f('users')));

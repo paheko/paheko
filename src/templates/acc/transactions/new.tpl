@@ -2,7 +2,7 @@
 
 {include file="acc/_year_select.tpl"}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
+<form method="post" action="{$self_url}" data-focus="1">
 	{form_errors}
 
 	{if $ok}
@@ -84,8 +84,6 @@
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
-
-			{input type="file" name="file" label="Fichier joint"}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}
