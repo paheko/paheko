@@ -25,8 +25,8 @@ $membres = new Membres;
 
 $tpl->assign('breadcrumbs', $page->getBreadcrumbs());
 
-$images = $page->getImageGallery(false);
-$files = $page->getAttachmentsGallery(false);
+$images = $page->getImageGallery(true);
+$files = $page->getAttachmentsGallery(true);
 
 $content = $page->render(['prefix' => ADMIN_URL . 'web/page.php?uri=']);
 

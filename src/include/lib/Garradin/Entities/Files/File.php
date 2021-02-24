@@ -331,7 +331,7 @@ class File extends Entity
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		return self::createAndStore($path, $name, $file['tmp_name']);
+		return self::createAndStore($path, strtolower($name), $file['tmp_name']);
 	}
 
 

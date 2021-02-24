@@ -41,7 +41,7 @@ class Skeleton
 		return null;
 	}
 
-	public function serve(): bool
+	public function serve(array $params = []): bool
 	{
 		header('Content-Type: text/html;charset=utf-8', true);
 
@@ -64,6 +64,7 @@ class Skeleton
 			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
 
 			try {
+				$ut->assignArray($params);
 				$ut->display();
 			}
 			catch (Brindille_Exception $e) {

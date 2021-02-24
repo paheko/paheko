@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 (
     id INTEGER NOT NULL PRIMARY KEY,
     parent TEXT NULL, -- Parent path, NULL = web root
-    uri TEXT NOT NULL, -- Page directory name
+    path TEXT NOT NULL, -- Full page directory name
     name TEXT NOT NULL, -- File name
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status TEXT NOT NULL,
@@ -312,7 +312,8 @@ CREATE TABLE IF NOT EXISTS web_pages
     content TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX web_pages_path ON web_pages (parent, uri);
+CREATE UNIQUE INDEX web_pages_path ON web_pages (path);
+CREATE INDEX web_pages_parent ON web_pages (parent);
 
 CREATE TABLE IF NOT EXISTS web_attachments
 (

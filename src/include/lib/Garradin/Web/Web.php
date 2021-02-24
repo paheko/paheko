@@ -110,23 +110,7 @@ class Web
 
 	static public function getByURI(string $uri): ?Page
 	{
-		$parent = dirname($uri);
-		$params = [];
-
-		if ($parent != '.') {
-			$params[] = $parent;
-			$where = 'parent = ?';
-		}
-		else {
-			$where = 'parent IS NULL';
-			$parent = null;
-		}
-
-		$params[] = basename($uri);
-
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND uri = ?;', $where);
-
-		return EM::findOne(Page::class, $sql, ...$params);
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $uri);
 	}
 
 	static public function get(int $id): ?Page
@@ -152,21 +136,26 @@ class Web
 
 		header('HTTP/1.1 200 OK', 200, true);
 
-		if ($uri == '/') {
+		$skel = null;
+		$page = null;
+		$uri = substr($uri, 1);
+
+		if ($uri == '') {
 			$skel = 'index.html';
 		}
 		// Redirect old URLs (pre-1.1)
-		elseif ($uri == '/feed/atom/') {
+		elseif ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
-		elseif (preg_match('!^/admin/!', $uri)) {
+		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		elseif ($page = self::getByURI(substr($uri, 1))) {
+		elseif ($page = self::getByURI($uri, 1)) {
 			$skel = $page->template();
+			$page = $page->asTemplateArray();
 		}
-		elseif ($file = Files::getFromURI(substr($uri, 1))) {
+		elseif ($file = Files::getFromURI($uri)) {
 			$size = null;
 
 			foreach ($_GET as $key => $value) {
@@ -189,8 +178,8 @@ class Web
 		}
 		else {
 			// Trying to see if a custom template with this name exists
-			if (preg_match('!^[\w\d_.-]+$!i', substr($uri, 1))) {
-				$s = new Skeleton(substr($uri, 1));
+			if (preg_match('!^[\w\d_.-]+$!i', $uri)) {
+				$s = new Skeleton($uri);
 
 				if ($s->exists()) {
 					$s->serve();
@@ -201,9 +190,7 @@ class Web
 			$skel = '404.html';
 		}
 
-		$_GET['uri'] = $_REQUEST['uri'] = substr($uri, 1);
-
 		$s = new Skeleton($skel);
-		$s->serve();
+		$s->serve(compact('uri', 'page', 'skel'));
 	}
 }

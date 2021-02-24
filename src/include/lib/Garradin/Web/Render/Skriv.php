@@ -35,7 +35,7 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		$skriv->_currentPath = $file->path;
+		$skriv->_currentPath = str_replace(File::CONTEXT_WEB . '/', '', $file->path);
 		$str = $content ?? $file->fetch();
 
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) use ($skriv) {
@@ -105,7 +105,7 @@ class Skriv
 		$url = WWW_URL . $skriv->_currentPath . '/' . $name;
 		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
 
-		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" /></a>',
+		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
 			htmlspecialchars($url),
 			htmlspecialchars($thumb_url),
 			htmlspecialchars($caption ?? $name)

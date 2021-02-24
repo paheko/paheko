@@ -54,7 +54,7 @@ $parent = $page->parent ? [$page->parent => Web::getByURI($page->parent)->title]
 $encrypted = f('encrypted') || $page->format == Page::FORMAT_ENCRYPTED;
 
 $old_content = f('content');
-$new_content = $page->raw();
+$new_content = $page->content;
 
 $tpl->assign(compact('page', 'parent', 'editing_started', 'encrypted', 'csrf_key', 'old_content', 'new_content', 'show_diff'));
 
