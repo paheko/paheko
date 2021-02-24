@@ -231,4 +231,15 @@ class Files
 
 		return self::get($uri);
 	}
+
+	static public function getContext(string $path): ?string
+	{
+		$context = strtok($path, '/');
+
+		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
+			return null;
+		}
+
+		return $context;
+	}
 }

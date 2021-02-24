@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Inclure un fichier" current="web" body_id="transparent" is_popup=true}
+{include file="admin/_head.tpl" title="Inclure un fichier"}
 
 {form_errors}
 

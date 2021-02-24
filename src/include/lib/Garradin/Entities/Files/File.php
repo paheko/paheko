@@ -589,7 +589,7 @@ class File extends Entity
 			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
 		}
 
-		return $this->fetch();
+		throw new \LogicException('Cannot render file of this type');
 	}
 
 	public function checkReadAccess(?Session $session): bool

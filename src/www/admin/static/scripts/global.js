@@ -139,16 +139,19 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url) {
+	g.openFrameDialog = function (url, classname) {
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
+		iframe.id = 'frameDialog';
+		iframe.className = classname;
 		iframe.frameborder = '0';
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
 		iframe.onload = () => { iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };}
 
 		g.openDialog(iframe);
+		return iframe;
 	};
 
 	g.closeDialog = function () {
@@ -339,8 +342,8 @@
 		// Open links in dialog
 		$('a[target="_dialog"]').forEach((e) => {
 			e.onclick = () => {
-				let url = e.href + (e.href.indexOf('?') ? '&' : '?') + 'dialog';
-				g.openFrameDialog(url);
+				let url = e.href + (e.href.indexOf('?') ? '&' : '?') + '_dialog';
+				g.openFrameDialog(url, e.getAttribute('data-dialog-class'));
 				return false;
 			};
 		});

@@ -75,7 +75,7 @@
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
 			form.target = 'editorFrame';
-			form.action = g.admin_url + 'common/files/_preview.php?p=' + wiki_id;
+			form.action = g.admin_url + 'common/files/_preview.php?_dialog&p=' + wiki_id;
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);
@@ -92,7 +92,7 @@
 		var openFileInsert = function ()
 		{
 			var wiki_id = window.location.search.match(/id=(\d+)/)[1];
-			openIFrame(g.admin_url + 'web/_attach.php?page=' + wiki_id);
+			g.openFrameDialog(g.admin_url + 'web/_attach.php?_dialog&page=' + wiki_id);
 			return true;
 		};
 
@@ -102,7 +102,7 @@
 
 			t.insertAtPosition(t.getSelection().start, tag);
 
-			closeIFrame();
+			g.closeDialog();
 		};
 
 		window.te_insertImage = function (file, position, caption)
@@ -119,7 +119,7 @@
 
 			t.insertAtPosition(t.getSelection().start, tag);
 
-			closeIFrame();
+			g.closeDialog();
 		};
 
 		var EscapeEvent = function (e) {

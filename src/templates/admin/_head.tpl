@@ -34,9 +34,9 @@
     {/if}
 </head>
 
-<body{if !empty($body_id)} id="{$body_id}"{/if}>
+<body{if array_key_exists('_dialog', $_GET)} class="dialog"{/if}>
 
-{if empty($is_popup)}
+{if !array_key_exists('_dialog', $_GET)}
 <header class="header">
     <nav class="menu">
     {if !isset($menu) || $menu !== false}

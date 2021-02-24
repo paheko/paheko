@@ -208,6 +208,27 @@ class Utils
         return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
+    static public function reloadParentFrame(string $destination): void
+    {
+        $destination = self::getLocalURL($destination);
+
+        echo '
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <script type="text/javascript">
+                    window.parent.location.reload();
+                </script>
+            </head>
+
+            <body>
+            <p><a href="' . htmlspecialchars($destination) . '">Cliquer ici pour continuer</a>
+            </body>
+            </html>';
+
+        exit;
+    }
+
     public static function redirect($destination = '', $exit=true)
     {
         $destination = self::getLocalURL($destination);

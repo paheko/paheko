@@ -26,6 +26,8 @@ else {
 	$can_delete = $can_write = false;
 }
 
-$tpl->assign(compact('path', 'files', 'can_write', 'can_delete'));
+$context = Files::getContext($path);
+
+$tpl->assign(compact('path', 'files', 'can_write', 'can_delete', 'context'));
 
 $tpl->display('docs/index.tpl');

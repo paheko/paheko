@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Choisir la page parent" current="web" body_id="popup" is_popup=true}
+{include file="admin/_head.tpl" title="Choisir la page parent" current="web"}
 
 <table class="web-tree list">
 	<tbody>

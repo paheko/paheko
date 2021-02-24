@@ -6,19 +6,23 @@ use Garradin\Entities\Files\File;
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" href="search.php"}
-		{linkbutton shape="plus" label="Nouveau répertoire" href="new_dir.php?parent=%s"|args:$path}
+	{if $context == File::CONTEXT_DOCUMENTS}
+		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" data-dialog-class="small" href="!docs/new_dir.php?parent=%s"|args:$path}
+		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" data-dialog-class="small" href="!common/files/upload.php?p=%s"|args:$path}
+	{/if}
 	</aside>
 	<ul>
-		<li class="current"><a href="./">Documents</a></li>
+		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<li><a href="./?p=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
+			<li{if $context == File::CONTEXT_TRANSACTION} class="current"{/if}><a href="./?p=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			<li><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
+			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
 		{/if}
 	</ul>
 </nav>
 
+{if count($files)}
 <table class="list">
 	<thead>
 		<tr>
@@ -77,7 +81,7 @@ use Garradin\Entities\Files\File;
 					{csrf_field key="files"}
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						<option value="move">Déplacer</option>
+						{*<option value="move">Déplacer</option>*}
 						<option value="delete">Supprimer</option>
 					</select>
 					<noscript>
@@ -88,5 +92,6 @@ use Garradin\Entities\Files\File;
 		</tr>
 	</tfoot>
 </table>
+{/if}
 
 {include file="admin/_foot.tpl"}
