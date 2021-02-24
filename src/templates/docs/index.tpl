@@ -89,13 +89,4 @@ use Garradin\Entities\Files\File;
 	</tfoot>
 </table>
 
-{literal}
-<script type="text/javascript">
-// Open preview in dialog
-$('[target="_dialog"]').forEach((e) => {
-	e.onclick = () => { g.openFrameDialog(e.href + '&dialog'); return false; };
-});
-</script>
-{/literal}
-
 {include file="admin/_foot.tpl"}

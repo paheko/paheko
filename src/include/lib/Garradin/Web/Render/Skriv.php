@@ -46,8 +46,8 @@ class Skriv
 
 		$str = CommonModifiers::typo($str);
 
-		$str = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($options) {
-			return sprintf('<a href="%s%s">', $options['prefix'], Utils::transformTitleToURI($matches[1]));
+		$str = preg_replace_callback('!<a href="/(.+)">!i', function ($matches) use ($options) {
+			return sprintf('<a href="%s">', $options['prefix'], Utils::transformTitleToURI($matches[1]));
 		}, $str);
 
 		return sprintf('<div class="web-content">%s</div>', $str);

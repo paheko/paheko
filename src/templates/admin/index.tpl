@@ -34,8 +34,8 @@
 </aside>
 
 {if $homepage}
-	<article class="web">
-		{$homepage->render(['prefix' => ADMIN_URL . '?uri='])|raw}
+	<article class="web-content">
+		{$homepage|raw}
 	</article>
 {/if}
 

@@ -43,8 +43,6 @@
 					return false;
 				}
 
-				console.log(t.textarea.value == t.origValue);
-
 				if (window.confirm('Sauvegarder avant de fermer ?')) {
 					save();
 					return false;
@@ -71,12 +69,13 @@
 		var openPreview = function ()
 		{
 			openIFrame('');
-			var wiki_id = window.location.search.match(/id=(\d+)/)[1];
+			let args = new URLSearchParams(window.location.search);
+			var wiki_id = args.get('p');
 			var form = document.createElement('form');
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
 			form.target = 'editorFrame';
-			form.action = g.admin_url + 'web/_preview.php?id=' + wiki_id;
+			form.action = g.admin_url + 'common/files/_preview.php?p=' + wiki_id;
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);

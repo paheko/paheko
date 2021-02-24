@@ -16,7 +16,13 @@ $homepage = Config::getInstance()->get('admin_homepage');
 $banner = null;
 Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session], $banner);
 
+if ($homepage) {
+	$homepage = $homepage->render(['prefix' => ADMIN_URL . '?uri=']);
+}
+
 $tpl->assign(compact('homepage', 'banner'));
+
+$tpl->assign('custom_css', ['!web/css.php']);
 
 $tpl->display('admin/index.tpl');
 flush();

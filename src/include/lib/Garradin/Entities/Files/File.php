@@ -170,10 +170,16 @@ class File extends Entity
 		self::validatePath($new_path);
 		$current_path = $this->path();
 
-		$return = Files::callStorage('move', $current_path, $new_path);
+		$return = Files::callStorage('move', $this, $new_path);
 
-		$this->path = dirname($new_path);
-		$this->name = basename($new_path);
+		$this->set('path', dirname($new_path));
+		$this->set('name', basename($new_path));
+		$this->save();
+
+		if ($this->type == self::TYPE_DIRECTORY) {
+			// Move sub-directories and sub-files
+			DB::getInstance()->preparedQuery('UPDATE files SET path = ? WHERE path = ?;', $new_path, $current_path);
+		}
 
 		return $return;
 	}
@@ -576,7 +582,7 @@ class File extends Entity
 			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
 		}
 
-		throw new \LogicException('Unknown render type: ' . $type);
+		return $this->fetch();
 	}
 
 	public function checkReadAccess(?Session $session): bool

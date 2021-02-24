@@ -85,9 +85,9 @@ class Page extends Entity
 		return $page;
 	}
 
-	public function file()
+	public function file(bool $force_reload = false)
 	{
-		if (null === $this->_file) {
+		if (null === $this->_file || $force_reload) {
 			$this->_file = Files::get($this->filepath());
 		}
 
@@ -106,6 +106,11 @@ class Page extends Entity
 	public function url(): string
 	{
 		return WWW_URL . $this->path();
+	}
+
+	public function uri(): string
+	{
+		return basename($this->path);
 	}
 
 	public function template(): string
@@ -169,11 +174,11 @@ class Page extends Entity
 		parent::save();
 
 		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['name']) || isset($this->_modified['path']))) {
-			// Rename directory
+			// Rename parent directory
 			$dir = Files::get($file->path);
 			$dir->rename(dirname($realpath));
 
-			$file->rename($realpath);
+			$file = $this->file(true);
 		}
 
 		$file->setContent($this->export());
@@ -213,6 +218,10 @@ class Page extends Entity
 
 		if (isset($source['title']) && is_null($this->path)) {
 			$source['path'] = $this->parent . '/' . Utils::transformTitleToURI($source['title']);
+		}
+
+		if (isset($source['uri'])) {
+			$source['path'] = $this->parent . '/' . Utils::transformTitleToURI($source['uri']);
 		}
 
 		if (!empty($source['encrypted']) ) {

@@ -211,13 +211,14 @@ UPDATE config SET key = 'admin_background', value = 'config/admin_bg.png' WHERE 
 
 -- Copy connection page as a single file
 INSERT INTO files (path, name, type, mime, modified, size, image)
-	SELECT 'config', 'admin_homepage.skriv', 1, type, modified, size, 0
-	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT value FROM config WHERE key = 'accueil_connexion'));
+	SELECT 'config', 'admin_homepage.skriv', 1, 'text/plain', datetime(), LENGTH(content), 0
+	FROM wiki_as_files
+	WHERE uri = (SELECT value FROM config WHERE key = 'accueil_connexion');
 
 INSERT INTO files_contents (id, compressed, content)
-	SELECT f.id, 0, c.content
-	FROM files_contents c
-		INNER JOIN files f ON c.id = f.id
+	SELECT f.id, 0, waf.content
+	FROM files f
+		INNER JOIN wiki_as_files waf ON waf.uri = (SELECT value FROM config WHERE key = 'accueil_connexion')
 	WHERE f.path = 'config' AND f.name = 'admin_homepage.skriv';
 
 -- Rename
