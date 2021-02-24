@@ -64,11 +64,6 @@ if (f('save') && $form->check('acc_transaction_new')) {
 		$transaction->id_creator = $session->getUser()->id;
 		$transaction->save();
 
-		// Append fileTYPE_ANALYTICAL
-		if (!empty($_FILES['file']['name'])) {
-			File::upload('file', File::CONTEXT_TRANSACTION, $transaction->id());
-		}
-
 		 // Link members
 		if (null !== f('users') && is_array(f('users'))) {
 			$transaction->updateLinkedUsers(array_keys(f('users')));

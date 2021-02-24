@@ -578,7 +578,12 @@ class Transaction extends Entity
 
 	public function listFiles()
 	{
-		return Files::listLinkedFiles(File::CONTEXT_TRANSACTION, $this->id());
+		return Files::list($this->getAttachementsDirectory());
+	}
+
+	public function getAttachementsDirectory(): string
+	{
+		return File::CONTEXT_TRANSACTION . '/' . $this->id();
 	}
 
 	public function linkToUser(int $user_id, ?int $service_id = null)
