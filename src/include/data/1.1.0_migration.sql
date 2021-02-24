@@ -197,14 +197,14 @@ INSERT INTO files (path, name, type, mime, modified, size, image)
 	SELECT 'config', 'admin_bg.png', 1, type, datetime, c.taille, image
 	FROM fichiers f
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
-	WHERE f.id = (SELECT c.id FROM config c WHERE key = 'image_fond') LIMIT 1;
+	WHERE f.id = (SELECT c.value FROM config c WHERE key = 'image_fond') LIMIT 1;
 
 INSERT INTO files_contents (id, compressed, content)
 	SELECT f2.id, 0, c.contenu
 	FROM files AS f2
 		INNER JOIN fichiers f ON f2.name = 'admin_bg.png' AND f2.path = 'config'
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
-		WHERE f.id = (SELECT c.id FROM config c WHERE key = 'image_fond') LIMIT 1;
+		WHERE f.id = (SELECT c.value FROM config c WHERE key = 'image_fond') LIMIT 1;
 
 -- Rename
 UPDATE config SET key = 'admin_background', value = 'config/admin_bg.png' WHERE key = 'image_fond';
