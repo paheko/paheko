@@ -13,7 +13,7 @@ if (!$file) {
 }
 
 if (!$file->checkWriteAccess($session)) {
-    throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
+	throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 
 $editor = $file->getEditor();

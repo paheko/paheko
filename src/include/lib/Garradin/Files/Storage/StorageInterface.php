@@ -44,6 +44,11 @@ interface StorageInterface
 	static public function modified(File $file): ?int;
 
 	/**
+	 * Return TRUE if file exists
+	 */
+	static public function exists(string $path): bool;
+
+	/**
 	 * Moves a file to a new path, when its name or path has changed
 	 */
 	static public function move(File $file, string $new_path): bool;

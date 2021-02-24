@@ -230,6 +230,13 @@ class File extends Entity
 
 		Files::callStorage('checkLock');
 
+		// If a file of the same name already exists, define a new name
+		if (Files::callStorage('exists', $this->pathname()) && !$this->exists()) {
+			$pos = strrpos($this->name, '.');
+			$new_name = substr($this->name, 0, $pos) . '.' . substr(sha1(random_bytes(16)), 0, 10) . substr($this->name, $pos);
+			$this->set('name', $new_name);
+		}
+
 		if (!$this->exists()) {
 			$this->set('modified', new \DateTime);
 			$this->save();
@@ -658,6 +665,32 @@ class File extends Entity
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
+			case self::CONTEXT_SKELETON:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+			case self::CONTEXT_USER:
+				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
+		}
+
+		return false;
+	}
+
+	static public function checkUploadAccess(string $path, ?Session $session): bool
+	{
+		if (null === $session) {
+			return false;
+		}
+
+		$context = strtok($path, '/');
+
+		switch ($context) {
+			case self::CONTEXT_WEB:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+			case self::CONTEXT_DOCUMENTS:
+				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
+			case self::CONTEXT_CONFIG:
+				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+			case self::CONTEXT_TRANSACTION:
+				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 			case self::CONTEXT_SKELETON:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 			case self::CONTEXT_USER:
