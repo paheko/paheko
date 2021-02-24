@@ -20,8 +20,12 @@ if (!$page) {
 
 $csrf_key = 'attach_' . $page->id();
 
-$form->runIf('delete', function () use ($page) {
-	$file = Files::get($page->subpath(f('delete')));
+$form->runIf('delete', function () use ($session) {
+	$file = Files::get(f('delete'));
+
+	if (!$file || !$file->checkDeleteAccess($session)) {
+		throw new UserException('Vous ne pouvez pas supprimer ce fichier');
+	}
 
 	$file->delete();
 }, $csrf_key, Utils::getSelfURI());
@@ -32,7 +36,7 @@ $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
 		throw new UserException('Un seul fichier peut être envoyé en même temps.');
 	}
 
-	$new_file = File::upload($page->subpath(), 'file');
+	$new_file = File::upload($page->path, 'file');
 
 	if (f('uploadHelper_status') !== null)
 	{

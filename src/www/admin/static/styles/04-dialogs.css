@@ -1,18 +1,12 @@
-body#popup {
-    background-position: -170px 0px;
-}
-
-body#transparent {
+body.dialog {
     background: transparent;
 }
 
-body#popup main {
-    margin: 1em 1em 1em 2.5em;
-}
-
-body#transparent main {
-    margin: 0;
-    padding: .2em;
+body.dialog main {
+    background: #fff;
+    border-radius: .5em;
+    padding: .5em;
+    box-shadow: 0px 0px 5px #000;
 }
 
 /** Dialogs pop-ins */
@@ -41,7 +35,12 @@ body#transparent main {
     width: 90%;
     height: 90%;
     border: none;
-    box-shadow: 0px 0px 5px #000;
+    background: transparent;
+}
+
+#dialog > iframe.small {
+    width: 50%;
+    height: 50%;
 }
 
 #dialog > button.closeBtn {

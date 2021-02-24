@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Sélectionner un compte" body_id="popup" is_popup=true}
+{include file="admin/_head.tpl" title="Sélectionner un compte"}
 
 <form method="get" action="{$self_url_no_qs}">
 	<h2 class="ruler">

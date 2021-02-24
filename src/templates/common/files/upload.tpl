@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Envoi de fichier" is_popup=1 body_id="popup"}
+{include file="admin/_head.tpl" title="Envoi de fichier"}
 
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 	<fieldset>
