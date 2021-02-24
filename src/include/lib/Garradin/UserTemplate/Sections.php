@@ -112,9 +112,7 @@ class Sections
 			$page->load($data);
 			$page->exists(true);
 
-			$row = array_merge($row, $page->asArray());
-			$row['url'] = $page->url();
-			$row['html'] = $page->render();
+			$row = array_merge($row, $page->asTemplateArray());
 
 			yield $row;
 		}

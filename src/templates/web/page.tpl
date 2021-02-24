@@ -63,28 +63,28 @@
 	{else}
 		{$content|raw}
 
-		{if !empty($images) || !empty($files)}
+		{if count($images) || count($files)}
 		<div class="wikiFiles">
 			<h3>Fichiers liés à cette page</h3>
 
-			{if !empty($images)}
+			{if count($images)}
 			<ul class="gallery">
 				{foreach from=$images item="file"}
 					<li>
 						<figure>
-							<a class="internal-image" href="{$file.url}"><img src="{$file.thumb}" alt="" title="{$file.nom}" /></a>
+							<a class="internal-image" href="{$file->url()}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
 						</figure>
 					</li>
 				{/foreach}
 			</ul>
 			{/if}
 
-			{if !empty($files)}
+			{if count($files)}
 			<ul class="files">
 				{foreach from=$files item="file"}
 					<li>
-						<aside class="fichier" class="internal-file"><a href="{$file.url}">{$file.nom}</a>
-						<small>({$file.type}, {$file.taille|size_in_bytes})</small></aside>
+						<aside class="fichier" class="internal-file"><a href="{$file->url()}">{$file.name}</a>
+						<small>({$file.mime}, {$file.size|size_in_bytes})</small></aside>
 				   </li>
 				{/foreach}
 			</ul>
@@ -93,7 +93,7 @@
 		{/if}
 
 		<p class="wikiFooter">
-			Dernière modification le {$page->modified()|date_long:true}
+			Dernière modification le {$page.modified|date_long:true}
 		</p>
 	{/if}
 {/if}

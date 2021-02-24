@@ -1,21 +1,12 @@
-{{#articles uri=$_GET.uri}}
+{{:include file="_head.html" title=$page.title}}
 
-	{{:include file="_head.html" title=$title}}
+<article class="single">
+	<h1>{{$page.title}}</h1>
 
-	<article class="single">
-		<h1>{{$title}}</h1>
+	{{$page.html|raw}}
 
-		{{$html|raw}}
+	{{:include file="gallery.html" parent=$page.path}}
+	{{:include file="documents.html" parent=$page.path}}
+</article>
 
-		{{:include file="gallery.html" parent=$id}}
-		{{:include file="documents.html" parent=$id}}
-	</article>
-
-	{{:include file="_foot.html"}}
-
-{{else}}
-
-	{{:include file="404.html"}}
-
-{{/articles}}
-
+{{:include file="_foot.html"}}

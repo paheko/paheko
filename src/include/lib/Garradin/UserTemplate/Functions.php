@@ -13,6 +13,7 @@ class Functions
 	const FUNCTIONS_LIST = [
 		'include',
 		'http',
+		'dump',
 	];
 
 	static public function dump(array $params, Brindille $tpl)

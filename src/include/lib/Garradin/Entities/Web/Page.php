@@ -20,7 +20,7 @@ class Page extends Entity
 
 	protected $id;
 	protected $parent;
-	protected $uri;
+	protected $path;
 	protected $name;
 	protected $title;
 	protected $type;
@@ -33,7 +33,7 @@ class Page extends Entity
 	protected $_types = [
 		'id'        => 'int',
 		'parent'    => '?string',
-		'uri'       => 'string',
+		'path'       => 'string',
 		'name'      => 'string',
 		'title'     => 'string',
 		'type'      => 'int',
@@ -75,7 +75,6 @@ class Page extends Entity
 	{
 		$page = new self;
 		$data = compact('type', 'parent', 'title', 'status');
-		$data['uri'] = $title;
 		$data['content'] = '';
 
 		$page->importForm($data);
@@ -100,7 +99,7 @@ class Page extends Entity
 		parent::load($data);
 
 		if ($this->file()->modified != $this->modified) {
-
+			// FIXME reload
 		}
 	}
 
@@ -114,9 +113,13 @@ class Page extends Entity
 		return self::TEMPLATES[$this->type];
 	}
 
-	public function raw(): string
+	public function asTemplateArray(): array
 	{
-		return $this->content;
+		$out = $this->asArray();
+		$out['url'] = $this->url();
+		$out['html'] = $this->render();
+		$out['uri'] = $this->uri();
+		return $out;
 	}
 
 	public function render(array $options = []): string
@@ -138,8 +141,7 @@ class Page extends Entity
 	{
 		$parts = [
 			File::CONTEXT_WEB,
-			$this->parent,
-			$this->uri,
+			$this->path,
 			$this->name,
 		];
 
@@ -150,15 +152,7 @@ class Page extends Entity
 
 	public function path(): string
 	{
-		$path = '';
-
-		if ($this->parent) {
-			$path .= $this->parent . '/';
-		}
-
-		$path .= $this->uri;
-
-		return $path;
+		return $this->path;
 	}
 
 	public function save(): bool
@@ -174,7 +168,7 @@ class Page extends Entity
 
 		parent::save();
 
-		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['name']) || isset($this->_modified['uri']))) {
+		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['name']) || isset($this->_modified['path']))) {
 			// Rename directory
 			$dir = Files::get($file->path);
 			$dir->rename(dirname($realpath));
@@ -199,12 +193,12 @@ class Page extends Entity
 		$this->assert(array_key_exists($this->status, self::STATUS_LIST), 'Unknown page status');
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
-		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
+		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
 		$this->assert((bool) $this->file(), 'Fichier manquant');
 
 		$db = DB::getInstance();
 		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
-		$this->assert(!$db->test(self::TABLE, 'parent = ? AND uri = ?' . $where, $this->parent, $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre');
+		$this->assert(!$db->test(self::TABLE, 'path = ?' . $where, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre');
 	}
 
 	public function importForm(array $source = null)
@@ -217,8 +211,8 @@ class Page extends Entity
 			$source['created'] = $source['date'] . ' ' . $source['date_time'];
 		}
 
-		if (isset($source['uri'])) {
-			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+		if (isset($source['title']) && is_null($this->path)) {
+			$source['path'] = $this->parent . '/' . Utils::transformTitleToURI($source['title']);
 		}
 
 		if (!empty($source['encrypted']) ) {
@@ -231,24 +225,31 @@ class Page extends Entity
 		return parent::importForm($source);
 	}
 
-	public function getBreadcrumbs()
+	public function getBreadcrumbs(): array
 	{
 		$sql = '
-			WITH RECURSIVE parents(title, parent, uri, level) AS (
-				SELECT title, parent, uri, 1 FROM web_pages WHERE id = ?
+			WITH RECURSIVE parents(title, parent, path, level) AS (
+				SELECT title, parent, path, 1 FROM web_pages WHERE id = ?
 				UNION ALL
-				SELECT p.title, p.parent, p.uri, level + 1
+				SELECT p.title, p.parent, p.path, level + 1
 				FROM web_pages p
-					JOIN parents ON p.parent = parents.parent
+					JOIN parents ON parents.parent = p.path
 			)
-			SELECT TRIM(parent || \'/\' || uri, \'/\'), title FROM parents ORDER BY level DESC;';
+			SELECT path, title FROM parents ORDER BY level DESC;';
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 
 	public function listAttachments(): array
 	{
 		if (null === $this->_attachments) {
-			$this->_attachments = $this->file()->listSubFiles();
+			$list = Files::list(dirname($this->filepath()));
+
+			// Remove the page itself
+			$list = array_filter($list, function ($a) {
+				return $a->name != $this->name && $a->type != $a::TYPE_DIRECTORY;
+			});
+
+			$this->_attachments = $list;
 		}
 
 		return $this->_attachments;
@@ -280,7 +281,7 @@ class Page extends Entity
 		$out = [];
 
 		if (!$all) {
-			$tagged = $this->findTaggedAttachments($this->raw());
+			$tagged = $this->findTaggedAttachments($this->content);
 		}
 
 		foreach ($this->listAttachments() as $a) {
@@ -292,7 +293,7 @@ class Page extends Entity
 			}
 
 			// Skip
-			if (!$all && in_array($a->id, $tagged)) {
+			if (!$all && in_array($a->name, $tagged)) {
 				continue;
 			}
 
@@ -317,7 +318,7 @@ class Page extends Entity
 			$out .= sprintf("%s: %s\n", $key, $value);
 		}
 
-		$out .= "\n----\n\n" . $this->raw();
+		$out .= "\n----\n\n" . $this->content;
 
 		return $out;
 	}

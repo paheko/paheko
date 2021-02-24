@@ -1,38 +1,30 @@
-{{#categories uri=$_GET.uri}}
+{{:include file="_head.html" title=$page.title}}
 
-	{{:include file="_head.html" title=$title}}
-
-	<section class="subcategories">
-		{{#categories parent=$id order="title"}}
-		<article>
-			<h2><a href="{{$url}}">{{$title}}</a></h2>
-		</article>
-		{{/categories}}
-	</section>
-
-	<article class="single">
-		<h1>{{$title}}</h1>
-
-		{{$html|raw}}
-
-		{{:include file="gallery.html" parent=$id}}
-		{{:include file="documents.html" parent=$id}}
+<section class="subcategories">
+	{{#categories parent=$page.path order="title"}}
+	<article>
+		<h2><a href="{{$page.url}}">{{$page.title}}</a></h2>
 	</article>
+	{{/categories}}
+</section>
 
-	<section class="articles">
-		{{#articles parent=$id order="published DESC" future=false}}
-		<article>
-			<h3><a href="{{$url}}">{{$title}}</a></h3>
-			<h5>{{$published|date_long}}</h5>
-			<p>{{$html|raw|strip_tags|truncate:200}}</p>
-		</article>
-		{{/articles}}
-	</section>
+<article class="single">
+	<h1>{{$page.title}}</h1>
 
-	{{:include file="_foot.html"}}
+	{{$page.html|raw}}
 
-{{else}}
+	{{:include file="gallery.html" parent=$page.path}}
+	{{:include file="documents.html" parent=$page.path}}
+</article>
 
-	{{:include file="404.html"}}
+<section class="articles">
+	{{#articles parent=$page.path order="published DESC" future=false}}
+	<article>
+		<h3><a href="{{$url}}">{{$title}}</a></h3>
+		<h5>{{$published|date_long}}</h5>
+		<p>{{$html|raw|strip_tags|truncate:200}}</p>
+	</article>
+	{{/articles}}
+</section>
 
-{{/categories}}
+{{:include file="_foot.html"}}

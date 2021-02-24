@@ -222,11 +222,11 @@ class Files
 		$uri = trim($uri, '/');
 		$uri = rawurldecode($uri);
 
-		$parts = explode('/', $uri);
+		$context = substr($uri, 0, strpos($uri, '/'));
 
 		// Use alias for web files
-		if (count($parts) == 2 && !in_array($parts[0], File::CONTEXTS_NAMES)) {
-			$uri = sprintf('%s/%s_files/%s', File::CONTEXT_WEB, $parts[0], $parts[1]);
+		if (!in_array($context, File::CONTEXTS_NAMES)) {
+			$uri = File::CONTEXT_WEB . '/' . $uri;
 		}
 
 		return self::get($uri);
