@@ -1,12 +1,14 @@
-body.dialog {
+html.dialog body {
     background: transparent;
+    overflow: auto;
 }
 
-body.dialog main {
+html.dialog main {
     background: #fff;
     border-radius: .5em;
     padding: .5em;
     box-shadow: 0px 0px 5px #000;
+    margin: 0;
 }
 
 /** Dialogs pop-ins */
@@ -36,6 +38,7 @@ body.dialog main {
     height: 90%;
     border: none;
     background: transparent;
+    overflow: hidden;
 }
 
 #dialog > iframe.small {

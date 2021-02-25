@@ -168,7 +168,7 @@ class Page extends Entity
 		$realpath = $this->filepath();
 
 		if (!$exists && !$file) {
-			$this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
+			$file = $this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
 		}
 
 		parent::save();

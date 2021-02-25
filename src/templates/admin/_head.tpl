@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if}>
 <head>
     <meta charset="utf-8" />
     <title>{$title}</title>
@@ -34,7 +34,7 @@
     {/if}
 </head>
 
-<body{if array_key_exists('_dialog', $_GET)} class="dialog"{/if}>
+<body>
 
 {if !array_key_exists('_dialog', $_GET)}
 <header class="header">
