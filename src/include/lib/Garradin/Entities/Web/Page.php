@@ -217,11 +217,11 @@ class Page extends Entity
 		}
 
 		if (isset($source['title']) && is_null($this->path)) {
-			$source['path'] = $this->parent . '/' . Utils::transformTitleToURI($source['title']);
+			$source['path'] = trim($this->parent . '/' . Utils::transformTitleToURI($source['title']), '/');
 		}
 
 		if (isset($source['uri'])) {
-			$source['path'] = $this->parent . '/' . Utils::transformTitleToURI($source['uri']);
+			$source['path'] = trim($this->parent . '/' . Utils::transformTitleToURI($source['uri']), '/');
 		}
 
 		if (!empty($source['encrypted']) ) {
