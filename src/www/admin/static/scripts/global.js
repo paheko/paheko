@@ -328,7 +328,8 @@
 		inputs.forEach((i) => {
 			i.onclick = () => {
 				g.current_list_input = i.parentNode;
-				g.openFrameDialog(i.value);
+				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+				g.openFrameDialog(url);
 				return false;
 			};
 		});
@@ -342,7 +343,7 @@
 		// Open links in dialog
 		$('a[target="_dialog"]').forEach((e) => {
 			e.onclick = () => {
-				let url = e.href + (e.href.indexOf('?') ? '&' : '?') + '_dialog';
+				let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				g.openFrameDialog(url, e.getAttribute('data-dialog-class'));
 				return false;
 			};
