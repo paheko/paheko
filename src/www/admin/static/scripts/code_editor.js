@@ -19,9 +19,8 @@
 		code.origValue = code.textarea.value;
 		code.saved = true;
 
-		code.saveFile = function (e)
+		code.saveFile = function ()
 		{
-			e.preventDefault();
 			this.textarea.form.submit();
 		};
 

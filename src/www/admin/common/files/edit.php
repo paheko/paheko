@@ -19,8 +19,9 @@ if (!$file->checkWriteAccess($session)) {
 $editor = $file->getEditor();
 $csrf_key = 'edit_file_' . $file->pathHash();
 
-$form->runIf('save', function () use ($file) {
+$form->runIf('content', function () use ($file) {
 	$file->setContent(f('content'));
+	$file->save();
 
 	if (qg('js') !== null) {
 		die('{"success":true}');

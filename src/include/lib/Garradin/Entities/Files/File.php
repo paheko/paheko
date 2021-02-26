@@ -285,6 +285,7 @@ class File extends Entity
 		$file->set('path', $path);
 		$file->set('type', self::TYPE_DIRECTORY);
 		$file->set('image', 0);
+		$file->save();
 		return $file;
 	}
 
@@ -600,6 +601,9 @@ class File extends Entity
 		}
 		else if ($type == self::FILE_EXT_ENCRYPTED) {
 			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
+		}
+		else if (substr($this->mime, 0, 5) == 'text/') {
+			return $this->fetch();
 		}
 
 		throw new \LogicException('Cannot render file of this type');

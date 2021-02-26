@@ -385,7 +385,8 @@
 					i.src = e.href;
 				}
 				else {
-					g.openFrameDialog(e.href, '90%');
+					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+					g.openFrameDialog(url, '90%');
 					return false;
 				}
 
