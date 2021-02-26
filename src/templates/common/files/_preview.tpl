@@ -1,5 +1,9 @@
-{include file="admin/_head.tpl" title="Web" custom_css=['/content.css']}
+{include file="admin/_head.tpl" title=$file.name custom_css=['/content.css']}
 
-{$content|raw}
+{if $file->customType()}
+	{$content|raw}
+{else}
+	<pre>{$content}</pre>
+{/if}
 
 {include file="admin/_foot.tpl"}

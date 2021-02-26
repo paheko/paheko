@@ -8,6 +8,7 @@ use Garradin\Entities\Files\File;
 		{linkbutton shape="search" label="Rechercher" href="search.php"}
 	{if $context == File::CONTEXT_DOCUMENTS}
 		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?parent=%s"|args:$path}
+		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?parent=%s"|args:$path}
 		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 	{/if}
 	</aside>
@@ -69,13 +70,13 @@ use Garradin\Entities\Files\File;
 			<td>{$file.mime}</td>
 			<td>{$file.size|size_in_bytes}</td>
 			<td class="actions">
+				{if $can_write && $file->getEditor()}
+					{linkbutton href="!common/files/edit.php?p=%s"|args:$file->pathname() label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
+				{/if}
 				{if $file->canPreview()}
 					{linkbutton href="!common/files/preview.php?p=%s"|args:$file->pathname() label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 				{/if}
 				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
-				{if $can_write && $file->getEditor()}
-					{linkbutton href="!common/files/edit.php?p=%s"|args:$file->pathname() label="Modifier" shape="edit" target="_dialog"}
-				{/if}
 				{linkbutton href="!common/files/delete.php?p=%s"|args:$file->pathname() label="Supprimer" shape="delete" target="_dialog"}
 			</td>
 		</tr>

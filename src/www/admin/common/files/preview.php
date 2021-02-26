@@ -18,7 +18,8 @@ if (!$file->checkReadAccess($session)) {
 
 try {
 	$tpl->assign('content', $file->render());
-	$tpl->display('web/_preview.tpl');
+	$tpl->assign('file', $file);
+	$tpl->display('common/files/_preview.tpl');
 }
 catch (\LogicException $e) {
 	$file->serve($session);
