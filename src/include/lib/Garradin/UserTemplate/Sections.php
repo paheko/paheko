@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Web;
 use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 class Sections
 {
@@ -148,11 +149,11 @@ class Sections
 			throw new Brindille_Exception('La section "files" doit obligatoirement comporter un paramètre "parent"');
 		}
 
-		$parent = (int) $params['parent'];
+		$parent = $params['parent'];
 
 		// Fetch page
-		$page = self::cache('page_' . $parent, function () use ($parent) {
-			return Web::get($parent);
+		$page = self::cache('page_' . md5($parent), function () use ($parent) {
+			return Web::getByURI($parent);
 		});
 
 		if (!$page) {
@@ -161,8 +162,9 @@ class Sections
 
 		$params['select'] = 'f.*';
 		$params['tables'] = 'files f';
-		$params['where'] .= ' AND f.path = :path';
-		$params[':path'] = $page->path();
+		$params['where'] .= ' AND f.path = :path AND f.name != :p_name AND f.type = ' . File::TYPE_FILE;
+		$params[':path'] = dirname($page->filepath());
+		$params[':p_name'] = basename($page->filepath());
 		unset($params['parent']);
 
 		// Generate a temporary table containing the list of files included in the text
@@ -176,7 +178,7 @@ class Sections
 				// Put files mentioned in the text in a temporary table
 				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, name);');
 
-				foreach (Page::findTaggedAttachments($page->raw()) as $name) {
+				foreach (Page::findTaggedAttachments($page->content) as $name) {
 					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'name' => $name]);
 				}
 
@@ -195,6 +197,12 @@ class Sections
 		}
 
 		foreach (self::sql($params, $tpl, $line) as $row) {
+			$file = new File;
+			$file->load($row);
+			$row['url'] = $file->url();
+			$row['download_url'] = $file->url(true);
+			$row['thumb_url'] = $file->thumb_url();
+			$row['small_url'] = $file->thumb_url(File::THUMB_SIZE_SMALL);
 			yield $row;
 		}
 	}

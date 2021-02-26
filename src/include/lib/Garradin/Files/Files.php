@@ -41,7 +41,7 @@ class Files
 		// Update this path
 		self::callStorage('sync', $path);
 
-		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path = ? ORDER BY type DESC, name ASC;', $path);
+		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $path);
 	}
 
 	/**
