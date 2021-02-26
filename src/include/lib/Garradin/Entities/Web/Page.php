@@ -224,11 +224,11 @@ class Page extends Entity
 			$source['path'] = trim($this->parent . '/' . Utils::transformTitleToURI($source['uri']), '/');
 		}
 
-		if (!empty($source['encrypted']) ) {
-			$this->format = self::FORMAT_ENCRYPTED;
+		if (!empty($source['encryption']) ) {
+			$this->set('format', self::FORMAT_ENCRYPTED);
 		}
 		else {
-			$this->format = self::FORMAT_SKRIV;
+			$this->set('format', self::FORMAT_SKRIV);
 		}
 
 		return parent::importForm($source);

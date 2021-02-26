@@ -142,6 +142,16 @@ footer.main a#garradin {
     color: #900;
 }
 
+.alert {
+    border-bottom: .2em solid #cc0;
+    border-radius: .5em;
+    background: #ffc;
+    padding: .5em;
+    margin-bottom: 1em;
+    font-size: 1.2em;
+    color: #990;
+}
+
 section.articles article {
     border-left: .2em solid #ccc;
     border-radius: .5em;
