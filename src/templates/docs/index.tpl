@@ -41,10 +41,13 @@ use Garradin\Entities\Files\File;
 		{if $file.type == $file::TYPE_DIRECTORY}
 		<tr>
 			{if $can_delete}
-			<td class="check"></td>
+			<td class="check">
+				{input type="checkbox" name="check[]" value=$file.id}
+			</td>
 			{/if}
 			<th><a href="?p={$file->path()}">{$file.name}</a></th>
-			<td colspan="4"></td>
+			<td colspan="3"></td>
+			<td class="actions">{linkbutton href="!common/files/delete.php?p=%s"|args:$file->pathname() label="Supprimer" shape="delete" target="_dialog"}</td>
 		</tr>
 		{else}
 		</tr>
