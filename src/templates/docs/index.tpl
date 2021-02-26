@@ -7,8 +7,8 @@ use Garradin\Entities\Files\File;
 	<aside>
 		{linkbutton shape="search" label="Rechercher" href="search.php"}
 	{if $context == File::CONTEXT_DOCUMENTS}
-		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" data-dialog-class="small" href="!docs/new_dir.php?parent=%s"|args:$path}
-		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" data-dialog-class="small" href="!common/files/upload.php?p=%s"|args:$path}
+		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?parent=%s"|args:$path}
+		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 	{/if}
 	</aside>
 	<ul>
@@ -46,7 +46,9 @@ use Garradin\Entities\Files\File;
 			</td>
 			{/if}
 			<th><a href="?p={$file->path()}">{$file.name}</a></th>
-			<td colspan="3"></td>
+			<td></td>
+			<td>Répertoire</td>
+			<td></td>
 			<td class="actions">{linkbutton href="!common/files/delete.php?p=%s"|args:$file->pathname() label="Supprimer" shape="delete" target="_dialog"}</td>
 		</tr>
 		{else}
@@ -56,13 +58,19 @@ use Garradin\Entities\Files\File;
 				{input type="checkbox" name="check[]" value=$file.id}
 			</td>
 			{/if}
-			<th><a href="{if $file->canPreview()}{$admin_url}common/files/preview.php?p={$file->pathname()}{else}{$file->url(true)}{/if}" target="_dialog">{$file.name}</th>
+			<th>
+				{if $file->canPreview()}
+					<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file->pathname()}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
+				{else}
+					<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
+				{/if}
+			</th>
 			<td>{$file.modified|date}</td>
-			<td>{$file.type}</td>
+			<td>{$file.mime}</td>
 			<td>{$file.size|size_in_bytes}</td>
 			<td class="actions">
 				{if $file->canPreview()}
-					{linkbutton href="!common/files/preview.php?p=%s"|args:$file->pathname() label="Voir" shape="eye" target="_dialog"}
+					{linkbutton href="!common/files/preview.php?p=%s"|args:$file->pathname() label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 				{/if}
 				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
 				{if $can_write && $file->getEditor()}

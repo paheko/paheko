@@ -11,6 +11,9 @@ html.dialog main {
     margin: 0;
 }
 
+#dialog > img {
+}
+
 /** Dialogs pop-ins */
 #dialog {
     width: 100%;
@@ -21,7 +24,8 @@ html.dialog main {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: transparent url("data:image/svg+xml;base64,PCEtLSBCeSBTYW0gSGVyYmVydCAoQHNoZXJiKSwgZm9yIGV2ZXJ5b25lLiBNb3JlIEAgaHR0cDovL2dvby5nbC83QUp6YkwgLS0+Cjxzdmcgd2lkdGg9IjM4IiBoZWlnaHQ9IjM4IiB2aWV3Qm94PSIwIDAgMzggMzgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjZmZmIj4KICAgIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+CiAgICAgICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMSAxKSIgc3Ryb2tlLXdpZHRoPSIyIj4KICAgICAgICAgICAgPGNpcmNsZSBzdHJva2Utb3BhY2l0eT0iLjUiIGN4PSIxOCIgY3k9IjE4IiByPSIxOCIvPgogICAgICAgICAgICA8cGF0aCBkPSJNMzYgMThjMC05Ljk0LTguMDYtMTgtMTgtMTgiPgogICAgICAgICAgICAgICAgPGFuaW1hdGVUcmFuc2Zvcm0gYXR0cmlidXRlTmFtZT0idHJhbnNmb3JtIiB0eXBlPSJyb3RhdGUiIGZyb209IjAgMTggMTgiIHRvPSIzNjAgMTggMTgiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIi8+CiAgICAgICAgICAgIDwvcGF0aD4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg==") no-repeat center center;
+    background-color: rgba(0, 0, 0, 0.7);
     position: fixed;
     opacity: 1;
     transition: opacity .5s;
@@ -33,17 +37,28 @@ html.dialog main {
     border: none;
 }
 
-#dialog > iframe {
-    width: 90%;
-    height: 90%;
-    border: none;
-    background: transparent;
-    overflow: hidden;
+#dialog.loaded {
+    background-image: none;
 }
 
-#dialog > iframe.small {
-    width: 50%;
-    height: 50%;
+#dialog > iframe, #dialog > img, #dialog > audio, #dialog > video {
+    max-width: 90%;
+    max-height: 90%;
+    min-height: 3em;
+    height: 90%;
+    transition: opacity .2s, height .2s;
+    border: none;
+    opacity: 0;
+}
+
+#dialog.loaded > img, #dialog.loaded > audio, #dialog.loaded > video {
+    opacity: 1;
+    height: initial;
+}
+
+#dialog.loaded > iframe {
+    width: 90%;
+    opacity: 1;
 }
 
 #dialog > button.closeBtn {
