@@ -29,7 +29,7 @@
 
 		{foreach from=$grouped_services item="service"}
 			<dd class="radio-btn">
-				{input type="radio" name="id_service" value=$service.id data-expiry=$service.expiry_date|date_short label=null}
+				{input type="radio" name="id_service" value=$service.id data-duration=$service.duration data-expiry=$service.expiry_date|date_short label=null}
 				<label for="f_id_service_{$service.id}">
 					<div>
 						<h3>{$service.label}</h3>
@@ -103,7 +103,7 @@
 
 		<dl>
 			{input type="money" name="amount" label="Montant réglé par le membre" fake_required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
-			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
+			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" fake_required=1}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 		</dl>
@@ -131,6 +131,7 @@ function selectService(elm, first_load) {
 	let expiry = $('#f_expiry_date');
 
 	if (!first_load || !expiry.value) {
+		// Set the expiry date
 		expiry.value = elm.dataset.expiry;
 	}
 
@@ -148,7 +149,10 @@ function selectFee(elm, first_load) {
 	// Toggle accounting part of the form
 	var accounting = elm.getAttribute('data-account') ? true : false;
 	g.toggle('.accounting', accounting);
-	$('#f_amount').required = accounting;
+
+	if (accounting) {
+		$('#f_create_payment_1').checked = true;
+	}
 
 	// Fill the amount paid by the user
 	if (amount && !first_load) {
@@ -170,8 +174,25 @@ selected.checked = true;
 g.toggle('.accounting', false);
 selectService(selected, true);
 
-$('#f_create_payment_1').onchange = (e) => {
-	g.toggle('.accounting dl', $('#f_create_payment_1').checked);
+let checkbox = $('#f_create_payment_1');
+checkbox.onchange = (e) => {
+	g.toggle('.accounting dl', checkbox.checked);
+	//$('#f_amount').required = checkbox.checked;
+};
+
+// Automatically increase expiry date when date is changed
+let date_input = $('#f_date');
+let expiry_input = $('#f_expiry_date');
+
+date_input.onchange = (e) => {
+	if (!selected.dataset.duration) {
+		return;
+	}
+
+	let d = date_input.value.split('/').reverse();
+	d = new Date(d[0], d[1]-1, d[2], 12);
+	d.setDate(d.getDate() + parseInt(selected.dataset.duration, 10));
+	expiry_input.value = d.toISOString().split('T')[0].split('-').reverse().join('/');
 };
 </script>
 {/literal}

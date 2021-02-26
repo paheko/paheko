@@ -107,7 +107,7 @@ fetch('/garradin/juvlist?'+(+(new Date))).then((r) => {
 		list.forEach((file) => {
 			var v = file.name.match(/^garradin-(.*)\.tar\.bz2/);
 
-			if (!v) {
+			if (!v || v[1].match(/-(alpha|rc|beta)/)) {
 				return;
 			}
 

@@ -498,7 +498,7 @@ fieldset.memberMessage {
     max-width: 30em;
 }
 
-fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.memberMessage select {
+fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.memberMessage select, #queryBuilderForm textarea {
     width: calc(100% - 2em);
 }
 

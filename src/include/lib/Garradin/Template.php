@@ -565,7 +565,9 @@ class Template extends \KD2\Smartyer
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
-				return Utils::date_fr($v);
+				return Utils::date_fr($v, 'd/m/Y');
+			case 'datetime':
+				return Utils::date_fr($v, 'd/m/Y à H:i');
 			case 'multiple':
 				// Useful for search results, if a value is not a number
 				if (!is_numeric($v)) {

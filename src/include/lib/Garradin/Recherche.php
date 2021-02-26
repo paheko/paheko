@@ -81,12 +81,6 @@ class Recherche
 		return $query;
 	}
 
-	public function duplicate(int $id)
-	{
-		DB::getInstance()->preparedQuery('INSERT INTO recherches (id_membre, intitule, cible, type, contenu)
-			SELECT id_membre, \'Copie de : \' || intitule, cible, type, contenu FROM recherches WHERE id = ?;', [$id]);
-	}
-
 	public function edit($id, $data)
 	{
 		$allowed = ['intitule', 'id_membre', 'type', 'cible', 'contenu'];
@@ -629,7 +623,7 @@ class Recherche
 
 		if (null !== $force_select)
 		{
-			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
+			$query = preg_replace('/^\s*SELECT.*FROM\s+/Uis', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
 		}
 
 		if (!$no_limit && !preg_match('/LIMIT\s+\d+/i', $query))

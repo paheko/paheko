@@ -1,7 +1,9 @@
 <nav class="tabs">
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
-		<li{if $current == 'save'} class="current"{/if}><a href="{$admin_url}services/save.php">Inscrire à une activité</a></li>
+		{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+			<li{if $current == 'save'} class="current"{/if}><a href="{$admin_url}services/save.php">Inscrire à une activité</a></li>
+		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Gestion des rappels automatiques</a></li>
 		{/if}
@@ -19,7 +21,7 @@
 				ponctuelle
 			{/if}
 		</li>
-		<li{if $service_page == 'index'} class="current"{/if}><a href="{$admin_url}services/fees/?id={$current_service.id}"><strong>Gestion des tarifs</strong></a></li>
+		<li{if $service_page == 'index'} class="current"{/if}><a href="{$admin_url}services/fees/?id={$current_service.id}"><strong>Tarifs</strong></a></li>
 		<li{if $service_page == 'paid'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}">À jour et payés</a></li>
 		<li{if $service_page == 'expired'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=expired">Inscription expirée</a></li>
 		<li{if $service_page == 'unpaid'} class="current"{/if}><a href="{$admin_url}services/details.php?id={$current_service.id}&amp;type=unpaid">En attente de règlement</a></li>
