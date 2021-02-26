@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Envoi de fichier"}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data">
+<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
 	<fieldset>
 		<legend>Téléverser un fichier</legend>
 		<dl>

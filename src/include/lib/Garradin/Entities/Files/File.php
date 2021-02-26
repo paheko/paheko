@@ -275,6 +275,16 @@ class File extends Entity
 		return $file;
 	}
 
+	static public function createDirectory(string $path, string $name): self
+	{
+		$file = new self;
+		$file->set('name', $name);
+		$file->set('path', $path);
+		$file->set('type', self::TYPE_DIRECTORY);
+		$file->set('image', 0);
+		return $file;
+	}
+
 	static public function create(string $path, string $name, string $source_path = null, string $source_content = null): self
 	{
 		if (isset($source_path, $source_content)) {
@@ -674,7 +684,7 @@ class File extends Entity
 		return false;
 	}
 
-	static public function checkUploadAccess(string $path, ?Session $session): bool
+	static public function checkCreateAccess(string $path, ?Session $session): bool
 	{
 		if (null === $session) {
 			return false;
