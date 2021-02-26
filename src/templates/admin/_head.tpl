@@ -39,7 +39,6 @@
 {if !array_key_exists('_dialog', $_GET)}
 <header class="header">
     <nav class="menu">
-    {if !isset($menu) || $menu !== false}
     <ul>
     {if !$is_logged}
         <li><a href="{$www_url}">&larr; Retour au site</a></li>
@@ -64,13 +63,12 @@
         </li>
         {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
             <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
-            {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
             <ul>
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
             {/if}
                 <li class="{if $current == 'membres/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
                 <li class="member message{if $current == 'membres/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
             {/if}
             </ul>
@@ -91,29 +89,33 @@
             </ul>
             </li>
         {/if}
+
         {if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
             <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Documents</i></a>
             </li>
         {/if}
+
         {if $session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)}
             <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
             </li>
         {/if}
+
         {if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
             <li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
+
         <li class="{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}">
             <a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
             <ul>
                 <li{if $current == 'my_services'}  class="current"{/if}><a href="{$admin_url}my_services.php">Mes activités &amp; cotisations</a></li>
             </ul>
         </li>
+
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
-        <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
+            <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
     {/if}
     </ul>
-    {/if}
     </nav>
 
     <h1>{$title}</h1>

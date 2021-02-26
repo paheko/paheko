@@ -126,29 +126,46 @@
 
 		g.dialog.appendChild(content);
 
-		content.style.opacity = g.dialog.style.opacity = 0;
+		g.dialog.style.opacity = 0;
 		g.dialog.onclick = (e) => { if (e.target == g.dialog) g.closeDialog(); };
 		window.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+
+		let tag = content.tagName.toLowerCase();
+
+		if (tag == 'img' || tag == 'iframe') {
+			event = 'load';
+		}
+		else if (tag == 'audio' || tag == 'video') {
+			event = 'canplaythrough';
+		}
+
+		if (event) {
+			content.addEventListener(event, () => g.dialog.classList.add('loaded'));
+		}
+		else {
+			g.dialog.classList.add('loaded');
+		}
 
 		document.body.appendChild(g.dialog);
 
 		// Restore CSS defaults
 		window.setTimeout(() => { g.dialog.style.opacity = ''; }, 50);
-		window.setTimeout(() => { content.style.opacity = ''; }, 100);
 
 		return content;
 	}
 
-	g.openFrameDialog = function (url, classname) {
+	g.openFrameDialog = function (url, height = '90%') {
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
 		iframe.id = 'frameDialog';
-		iframe.className = classname;
 		iframe.frameborder = '0';
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
-		iframe.onload = () => { iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };}
+		iframe.onload = () => {
+			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
+			iframe.style.height = height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : height;
+		};
 
 		g.openDialog(iframe);
 		return iframe;
@@ -343,8 +360,37 @@
 		// Open links in dialog
 		$('a[target="_dialog"]').forEach((e) => {
 			e.onclick = () => {
-				let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
-				g.openFrameDialog(url, e.getAttribute('data-dialog-class'));
+				let type = e.getAttribute('data-mime');
+
+				if (!type) {
+					let url = e.href + (e.href.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+					g.openFrameDialog(url, e.getAttribute('data-dialog-height') ? '90%' : 'auto');
+					return false;
+				}
+
+				if (type.match(/^image\//)) {
+					var i = document.createElement('img');
+					i.src = e.href;
+				}
+				else if (type.match(/^audio\//)) {
+					var i = document.createElement('audio');
+					i.autoplay = true;
+					i.controls = true;
+					i.src = e.href;
+				}
+				else if (type.match(/^video\/|^application\/ogg$/)) {
+					var i = document.createElement('video');
+					i.autoplay = true;
+					i.controls = true;
+					i.src = e.href;
+				}
+				else {
+					g.openFrameDialog(e.href, '90%');
+					return false;
+				}
+
+				g.openDialog(i);
+
 				return false;
 			};
 		});
