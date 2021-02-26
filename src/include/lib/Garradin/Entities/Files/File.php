@@ -63,6 +63,11 @@ class File extends Entity
 	 */
 	const ALLOWED_THUMB_SIZES = [200, 500];
 
+	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
+
+	const THUMB_SIZE_TINY = 200;
+	const THUMB_SIZE_SMALL = 500;
+
 	const FILE_EXT_ENCRYPTED = '.skriv.enc';
 	const FILE_EXT_SKRIV = '.skriv';
 
@@ -113,8 +118,6 @@ class File extends Entity
 		'text/plain',
 		'text/html',
 	];
-
-	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
 
 	static public function getColumns(): array
 	{

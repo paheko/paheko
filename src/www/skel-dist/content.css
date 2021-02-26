@@ -90,33 +90,31 @@ img {
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.75);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     transition: opacity .5s;
     cursor: zoom-out;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .imageBrowser figure {
-    position: fixed;
-    top: 1em;
-    left: 1em;
-    right: 1em;
-    bottom: 1em;
+    max-height: 90%;
+    max-width: 90%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all .5s;
 }
 
 .imageBrowser figure img {
-    top: 50%;
-    transform: translateY(-50%);
-    position: relative;
-    max-width: 100%;
-    width: auto;
-    height: auto;
-    background: #fff;
-    padding: 1em;
-    max-height: 90%;
-    max-width: 90%;
+    background: #000;
+    padding: .5rem;
+    max-height: 95%;
+    max-width: 95%;
     border-radius: .5em;
     cursor: pointer;
 }
