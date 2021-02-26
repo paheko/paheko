@@ -2,7 +2,7 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
     <!-- This is to avoid chrome autofill, Chrome developers you suck -->
     <input type="text" style="display: none;" name="email" />
     {if $id_field_name != 'email'}<input type="text" style="display: none;" name="{$id_field_name}" />{/if}

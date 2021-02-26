@@ -601,6 +601,11 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
+		// Files are managed out of the form
+		if ($config->type == 'file') {
+			return '';
+		}
+
 		$options = [];
 
 		if ($type == 'select' || $type == 'multiple')
