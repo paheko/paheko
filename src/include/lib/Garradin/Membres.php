@@ -345,6 +345,10 @@ class Membres
 
         foreach ($recipients as $recipient)
         {
+            if (!isset($recipient->email, $recipient->id)) {
+                throw new UserException('Il manque l\'identifiant ou l\'email dans le résultat');
+            }
+
             Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
         }
 
