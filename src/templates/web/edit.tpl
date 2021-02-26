@@ -32,8 +32,8 @@
 			<dd>Nécessite JavaScript activé pour fonctionner !</dd>
 			</noscript>
 			<dd>Mot de passe : <i id="encryptPasswordDisplay" title="Chiffrement désactivé">désactivé</i></dd>
-			<dd class="help">Le mot de passe n'est ni transmis ni enregistré, vous seul le connaissez,
-				il n'est pas possible de retrouver le contenu si vous l'oubliez.</dd>
+			<dd class="help">Le mot de passe n'est ni transmis ni enregistré,
+				il n'est pas possible de retrouver le contenu si vous perdez le mot de passe.</dd>
 		</dl>
 	</fieldset>
 
@@ -51,6 +51,5 @@
 	</p>
 
 </form>
-
 
 {include file="admin/_foot.tpl"}
