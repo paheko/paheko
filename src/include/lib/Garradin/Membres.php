@@ -439,6 +439,11 @@ class Membres
         return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
     }
 
+    public function getFilesPath(int $id)
+    {
+        return File::CONTEXT_USER . '/' . $id;
+    }
+
     static public function changeCategorie($id_cat, $membres)
     {
         foreach ($membres as &$id)

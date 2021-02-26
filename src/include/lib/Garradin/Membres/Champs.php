@@ -28,7 +28,7 @@ class Champs
 		'checkbox'	=>	'Case à cocher',
 		'date'		=>	'Date',
 		'datetime'	=>	'Date et heure',
-		//'file'		=>	'Fichier',
+        'file'      =>  'Fichier',
         'password'  =>  'Mot de passe',
 		'number'	=>	'Numéro',
 		'tel'		=>	'Numéro de téléphone',
