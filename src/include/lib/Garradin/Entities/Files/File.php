@@ -669,6 +669,7 @@ class File extends Entity
 		}
 
 		$context = $this->context();
+		$ref = strtok(substr($this->pathname(), strpos($this->pathname(), '/')), '/');
 
 		if (null === $session) {
 			return false;

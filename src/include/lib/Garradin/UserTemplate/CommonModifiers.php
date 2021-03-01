@@ -38,7 +38,7 @@ class CommonModifiers
 
 	static public function money_currency($number, bool $hide_empty = true): string
 	{
-		$out = $this->htmlMoney($number, $hide_empty);
+		$out = self::money($number, $hide_empty);
 
 		if ($out !== '') {
 			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');

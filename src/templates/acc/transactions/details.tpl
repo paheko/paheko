@@ -122,7 +122,7 @@
 {if $can_upload || count($files)}
 <div class="attachments">
 	<h3 class="ruler">Fichiers joints</h3>
-	{include file="common/files/_context_list.tpl" files=$files can_upload=$can_upload parent_path=$file_parent}
+	{include file="common/files/_context_list.tpl" files=$files can_upload=$can_upload path=$file_parent}
 </div>
 {/if}
 

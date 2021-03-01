@@ -269,7 +269,7 @@ class Config extends Entity
 		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
 		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
-		$this->assert(null === $this->admin_homepage || $this->admin_homepage instanceof File, 'Page d\'accueil invalide');
+		$this->assert(strlen($this->admin_homepage) > 0, 'Page d\'accueil invalide');
 		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');
 
 		$champs = $this->champs_membres;
@@ -284,10 +284,5 @@ class Config extends Entity
 		$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
 
 		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
-	}
-
-	public function getConfig()
-	{
-		return $this->asArray();
 	}
 }

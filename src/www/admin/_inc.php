@@ -49,7 +49,7 @@ $session = Session::getInstance();
 $config = Config::getInstance();
 
 $tpl->assign('session', $session);
-$tpl->assign('config', $config->getConfig());
+$tpl->assign('config', $config);
 
 if (!defined('Garradin\LOGIN_PROCESS'))
 {
