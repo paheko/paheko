@@ -78,11 +78,7 @@
         {if $c_config.type == 'checkbox'}
             {if $membre->$c}Oui{else}Non{/if}
         {elseif $c_config.type == 'file'}
-            <?php
-            $files = $membre->$c ? [$membre->$c] : [];
-            $can_upload = !count($files) && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
-            ?>
-            {include file="common/files/_context_list.tpl" files=$files can_upload=$can_upload parent_path="%s/%s"|args:$user_files_path,$c}
+            {include file="common/files/_context_list.tpl" limit=1 path="%s/%s"|args:$user_files_path,$c}
         {elseif empty($membre->$c)}
             <em>(Non renseigné)</em>
         {elseif $c == $c_config.champ_identite}

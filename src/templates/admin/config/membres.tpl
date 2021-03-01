@@ -8,7 +8,7 @@
     </p>
 {elseif isset($status) && $status == 'ADDED'}
     <p class="block alert">
-        Le champ a été ajouté à la fin de la liste. Pour sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Enregistrer&nbsp;» en base de page.
+        Le champ a été ajouté à la fin de la liste. Pour vérifier et sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Vérifier les changements&nbsp;» en base de page.
     </p>
 {/if}
 

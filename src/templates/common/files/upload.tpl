@@ -1,5 +1,7 @@
 {include file="admin/_head.tpl" title="Envoi de fichier"}
 
+{form_errors}
+
 <form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
 	<fieldset>
 		<legend>Téléverser un fichier</legend>

@@ -1,11 +1,23 @@
-{if !empty($can_upload) && !empty($parent_path)}
+<?php
+assert(isset($path) || isset($can_upload, $files, $path));
+
+if (!isset($files, $can_upload)) {
+	$files = Files\Files::list($path);
+	$can_upload = (!isset($limit) || count($files) < $limit) && Entities\Files\File::checkCreateAccess($path, $session);
+}
+?>
+
+{if $can_upload}
 <p class="actions">
-	{linkbutton shape="upload" href="!common/files/upload.php?p=%s"|args:$parent_path target="_dialog" label="Ajouter un fichier"}
+	{linkbutton shape="upload" href="!common/files/upload.php?p=%s"|args:$path target="_dialog" label="Ajouter un fichier"}
 </p>
 {/if}
 
 <div class="files-list">
-	{foreach from=$files item="file"}
+{foreach from=$files item="file"}
+	{if !$file->checkReadAccess($session)}
+		<?php break; ?>
+	{/if}
 	<aside class="file">
 		{if $file.image}
 			<figure>
@@ -24,5 +36,5 @@
 			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file->path() label="Supprimer"}
 		{/if}
 	</aside>
-	{/foreach}
+{/foreach}
 </div>
