@@ -130,9 +130,13 @@ INSERT INTO files (path, name, type, mime, modified, size)
 
 UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE path = 'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri);
 
+-- x'0a' == \n
 INSERT INTO files_contents (id, compressed, content)
 	SELECT new_id, 0,
-		'Title: ' || title || '\nPublished: ' || created || '\nStatus: ' || (CASE WHEN public THEN 'Online' ELSE 'Draft' END) || '\nFormat: ' || (CASE WHEN encrypted THEN 'Skriv/Encrypted' ELSE 'Skriv' END) || '\n\n----\n\n' || content
+		'Title: ' || title || x'0a' || 'Published: ' || created || x'0a' || 'Status: '
+		|| (CASE WHEN public THEN 'Online' ELSE 'Draft' END)
+		|| x'0a' || 'Format: ' || (CASE WHEN encrypted THEN 'Skriv/Encrypted' ELSE 'Skriv' END) 
+		|| x'0a' || x'0a' || '----' || x'0a' || x'0a' || content
 	FROM wiki_as_files;
 
 -- Set file size
