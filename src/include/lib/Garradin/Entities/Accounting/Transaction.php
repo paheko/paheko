@@ -458,7 +458,10 @@ class Transaction extends Entity
 				throw new ValidationException('Type d\'écriture inconnu');
 			}
 
-			if (!$this->exists() && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
+			if (!empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
+				$this->set('type', self::TYPE_ADVANCED);
+			}
+			elseif (!$this->exists() && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
 				$this->addStatus(self::STATUS_WAITING);
 			}
 
