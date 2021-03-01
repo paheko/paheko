@@ -222,7 +222,7 @@ class Utils
             </head>
 
             <body>
-            <p><a href="' . htmlspecialchars($destination) . '">Cliquer ici pour continuer</a>
+            <p style="visibility: hidden;"><a href="' . htmlspecialchars($destination) . '">Cliquer ici pour continuer</a>
             </body>
             </html>';
 

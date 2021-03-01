@@ -110,8 +110,8 @@ class Sections
 			unset($data['points']);
 
 			$page = new Page;
-			$page->load($data);
 			$page->exists(true);
+			$page->load($data);
 
 			$row = array_merge($row, $page->asTemplateArray());
 
@@ -198,6 +198,7 @@ class Sections
 
 		foreach (self::sql($params, $tpl, $line) as $row) {
 			$file = new File;
+			$file->exists(true);
 			$file->load($row);
 			$row['url'] = $file->url();
 			$row['download_url'] = $file->url(true);

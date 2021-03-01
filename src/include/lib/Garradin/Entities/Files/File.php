@@ -124,6 +124,14 @@ class File extends Entity
 		return array_keys((new self)->_types);
 	}
 
+	public function selfCheck(): void
+	{
+		$this->assert($this->type === self::TYPE_DIRECTORY || $this->type === self::TYPE_FILE, 'Unknown file type');
+		$this->assert($this->image === 0 || $this->image === 1, 'Unknown image value');
+		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
+		$this->assert(strlen($this->path) || null === $this->path, 'Le chemin ne peut rester vide');
+	}
+
 	public function pathname(): string
 	{
 		$path = $this->path;
@@ -285,8 +293,18 @@ class File extends Entity
 		return $file;
 	}
 
-	static public function createDirectory(string $path, string $name): self
+	static public function createDirectory(string $path, string $name, bool $create_parent = true): self
 	{
+		$fullpath = trim($path . '/' . $name, '/');
+
+		if (Files::callStorage('exists', $fullpath)) {
+			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $fullpath);
+		}
+
+		if ($path !== '' && $create_parent) {
+			self::ensureDirectoryExists($path);
+		}
+
 		$file = new self;
 		$file->set('name', $name);
 		$file->set('path', $path);
@@ -299,11 +317,36 @@ class File extends Entity
 		return $file;
 	}
 
+	static public function ensureDirectoryExists(string $path): void
+	{
+		$db = DB::getInstance();
+		$parts = explode('/', $path);
+		$tree = '';
+
+		foreach ($parts as $part) {
+			$tree .= trim($tree . '/' . $part, '/');
+			$tree_path = dirname($tree) == '.' ? '' : dirname($tree);
+			$tree_name = basename($tree);
+			$exists = $db->test(File::TABLE, 'type = ? AND path = ? AND name = ?', self::TYPE_DIRECTORY, $tree_path, $tree_name);
+
+			if (!$exists) {
+				try {
+					self::createDirectory($tree_path, $tree_name, false);
+				}
+				catch (ValidationException $e) {
+					// Ignore when directory already exists
+				}
+			}
+		}
+	}
+
 	static public function create(string $path, string $name, string $source_path = null, string $source_content = null): self
 	{
 		if (isset($source_path, $source_content)) {
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
 		}
+
+		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		$file = new self;
@@ -777,7 +820,7 @@ class File extends Entity
 		$context = array_shift($path);
 
 		foreach ($path as $part) {
-			if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!iu', $part)) {
+			if (!preg_match('!^[\w\d _-]+(?:\.[\w\d _-]+)*$!iu', $part)) {
 				throw new ValidationException('Chemin invalide');
 			}
 		}
