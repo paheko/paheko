@@ -54,7 +54,7 @@ class Config extends Entity
 
 		'categorie_membres'     => 'int',
 
-		'admin_homepage'        => '?Garradin\Entities\Files\File',
+		'admin_homepage'        => '?string',
 
 		'frequence_sauvegardes' => '?int',
 		'nombre_sauvegardes'    => '?int',
@@ -67,9 +67,14 @@ class Config extends Entity
 
 		'couleur1'              => '?string',
 		'couleur2'              => '?string',
-		'admin_background'      => '?Garradin\Entities\Files\File',
+		'admin_background'      => '?string',
 
 		'desactiver_site'       => 'bool',
+	];
+
+	protected $_special_types = [
+		'admin_homepage'        => 'Garradin\Entities\Files\File',
+		'admin_background'      => 'Garradin\Entities\Files\File',
 	];
 
 	protected $_deleted_files = [];
@@ -114,10 +119,6 @@ class Config extends Entity
 			if ($type[0] == '?' && $value === null) {
 				continue;
 			}
-
-			if ($type == File::class || substr($type, 1) == File::class) {
-				$config[$key] = Files::get($value);
-			}
 		}
 
 		$this->load($config);
@@ -125,13 +126,23 @@ class Config extends Entity
 		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
 	}
 
+	public function get(string $key)
+	{
+		$type = $this->_special_types[$key] ?? null;
+
+		if ($type == File::class && is_string($this->$key)) {
+			return Files::get($this->$key);
+		}
+
+		return parent::get($key);
+	}
+
 	public function set(string $key, $value, bool $loose = false, bool $check_for_changes = true)
 	{
+		$type = $this->_special_types[$key] ?? null;
+
 		// Append to deleted files queue if it's set to null
-		if (isset($this->_types[$key])
-			&& substr($this->_types[$key], -strlen(File::class)) == File::class
-			&& $value === null
-			&& $this->$key !== null) {
+		if ($type == File::class && null === $value && null !== $this->$key) {
 			$this->_deleted_files[] = $this->$key;
 		}
 
@@ -153,10 +164,7 @@ class Config extends Entity
 			$value = $this->$key;
 			$type = ltrim($this->_types[$key], '?');
 
-			if ($type == File::class && null !== $value) {
-				$value = $value->path();
-			}
-			else if ($type == Champs::class) {
+			if ($type == Champs::class) {
 				$value = $value->toString();
 			}
 			elseif (is_object($value)) {
@@ -225,7 +233,8 @@ class Config extends Entity
 				$this->admin_background->save();
 			}
 			else {
-				$this->set('admin_background', File::createFromBase64(File::CONTEXT_CONFIG, 'admin_background.png', $source['admin_background']));
+				$file = File::createFromBase64(File::CONTEXT_CONFIG, 'admin_background.png', $source['admin_background']);
+				$this->set('admin_background', $file->pathname());
 			}
 
 			unset($source['admin_background']);
@@ -243,7 +252,6 @@ class Config extends Entity
 				return (bool) $value;
 			case 'string':
 				return (string) $value;
-			case File::class:
 			case Champs::class:
 				if (!is_object($value) || !($value instanceof $this->_types[$key])) {
 					throw new \InvalidArgumentException(sprintf('"%s" is not of type "%s"', $key, $this->_types[$key]));
