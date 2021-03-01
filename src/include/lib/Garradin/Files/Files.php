@@ -121,7 +121,22 @@ class Files
 			$db = DB::getInstance();
 			$db->begin();
 
-			self::migrateDirectory($from, $to, '', $callback);
+			foreach ($db->iterate('SELECT * FROM files ORDER BY type DESC, path ASC, name ASC;') as $file) {
+				$f = new File;
+				$f->load((array) $file);
+
+				if ($f->type == File::TYPE_DIRECTORY) {
+					call_user_func([$to, 'mkdir'], $f);
+				}
+				else {
+					$from_path = call_user_func([$from, 'getFullPath'], $f);
+					call_user_func([$to, 'storePath'], $f, $from_path);
+				}
+
+				if (null !== $callback) {
+					$callback($f);
+				}
+			}
 
 			$db->commit();
 		}
@@ -131,30 +146,10 @@ class Files
 		}
 	}
 
-	static protected function migrateDirectory(string $from, string $to, string $path, callable $callback)
-	{
-		foreach (call_user_func([$from, 'list'], $path) as $file) {
-			if ($file['type'] == File::TYPE_DIRECTORY) {
-				self::migrateDirectory($from, $to, ($path ? $path . '/' : '') . $file['name'], $callback);
-				continue;
-			}
-
-			$f = new File;
-			$f->load($file);
-
-			$from_path = call_user_func([$from, 'getFullPath'], $f->path());
-			call_user_func([$to, 'store'], $f, $from_path, null);
-
-			if (null !== $callback) {
-				$callback($f);
-			}
-		}
-	}
-
 	/**
 	 * Delete all files from a storage backend
 	 */
-	static public function resetStorage(string $backend, $config = null): void
+	static public function truncateStorage(string $backend, $config = null): void
 	{
 		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
 
@@ -164,7 +159,7 @@ class Files
 			throw new \InvalidArgumentException('Invalid storage: ' . $from);
 		}
 
-		call_user_func([$backend, 'reset']);
+		call_user_func([$backend, 'truncate']);
 	}
 
 	static public function getContextJoinClause(string $context): ?string

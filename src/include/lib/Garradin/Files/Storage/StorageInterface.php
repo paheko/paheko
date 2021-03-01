@@ -12,9 +12,19 @@ interface StorageInterface
 	static public function configure(?string $config): void;
 
 	/**
-	 * Stores a file in this backend, the file can come from a local $path, or directly as a $content string
+	 * Stores a file in this backend from a local path
 	 */
-	static public function store(File $file, ?string $source_path, ?string $source_content): bool;
+	static public function storePath(File $file, string $source_path): bool;
+
+	/**
+	 * Stores a file from a content binary string
+	 */
+	static public function storeContent(File $file, string $source_content): bool;
+
+	/**
+	 * Create an empty directory
+	 */
+	static public function mkdir(File $file): bool;
 
 	/**
 	 * Should return full local file access path.
@@ -97,5 +107,13 @@ interface StorageInterface
 	 */
 	static public function sync(?string $path): void;
 
-	static public function update(File $file): File;
+	/**
+	 * Update metadata of a file if needed, before getting it
+	 *
+	 * This is called before getting any metadata of a file
+	 *
+	 * @param  File $file
+	 * @return File modified File object, or NULL if the file no longer exists
+	 */
+	static public function update(File $file): ?File;
 }

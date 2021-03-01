@@ -79,8 +79,8 @@ class Page extends Entity
 
 		$page->importForm($data);
 		$page->published = new \DateTime;
-		$page->name = 'index.txt';;
 		$page->modified = new \DateTime;
+		$page->name = 'index.txt';
 
 		return $page;
 	}
@@ -89,6 +89,10 @@ class Page extends Entity
 	{
 		if (null === $this->_file || $force_reload) {
 			$this->_file = Files::get($this->filepath());
+
+			if (null === $this->_file) {
+				throw new \LogicException('This file does not exist: ' . $this->filepath());
+			}
 		}
 
 		return $this->_file;
@@ -98,8 +102,9 @@ class Page extends Entity
 	{
 		parent::load($data);
 
-		if ($this->file()->modified != $this->modified) {
-			// FIXME reload
+		if ($this->file()->modified > $this->modified) {
+			$this->loadFromFile($this->file());
+			$this->save();
 		}
 	}
 
@@ -171,6 +176,12 @@ class Page extends Entity
 			$file = $this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
 		}
 
+		$edit_file = (bool) count(array_intersect(['title', 'status', 'published', 'format', 'content'], array_keys($this->_modified)));
+
+		if ($edit_file) {
+			$this->set('modified', new \DateTime);
+		}
+
 		parent::save();
 
 		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['name']) || isset($this->_modified['path']))) {
@@ -181,7 +192,10 @@ class Page extends Entity
 			$file = $this->file(true);
 		}
 
-		$file->setContent($this->export());
+
+		if ($edit_file) {
+			$file->setContent($this->export());
+		}
 
 		return true;
 	}
@@ -213,7 +227,7 @@ class Page extends Entity
 		}
 
 		if (isset($source['date']) && isset($source['date_time'])) {
-			$source['created'] = $source['date'] . ' ' . $source['date_time'];
+			$source['published'] = $source['date'] . ' ' . $source['date_time'];
 		}
 
 		if (isset($source['title']) && is_null($this->path)) {
@@ -332,14 +346,13 @@ class Page extends Entity
 		return $out;
 	}
 
-	static public function importFromRaw(string $str): void
+	public function importFromRaw(string $str): bool
 	{
 		$str = preg_replace("/\r\n|\r|\n/", "\n", $str);
 		$str = explode("\n\n----\n\n", $str, 2);
 
 		if (count($str) !== 2) {
-			// FIXME: handle this case with more subtlety
-			throw new \LogicException('Invalid page');
+			return false;
 		}
 
 		list($meta, $content) = $str;
@@ -351,10 +364,10 @@ class Page extends Entity
 			$value = trim(strtok(''));
 
 			if ($key == 'title') {
-				$this->title = $value;
+				$this->set('title', $value);
 			}
 			elseif ($key == 'published') {
-				$this->published = new \DateTime($value);
+				$this->set('published', new \DateTime($value));
 			}
 			elseif ($key == 'format') {
 				$value = strtolower($value);
@@ -363,7 +376,7 @@ class Page extends Entity
 					throw new \LogicException('Unknown format: ' . $value);
 				}
 
-				$this->format = $value;
+				$this->set('format', $value);
 			}
 			elseif ($key == 'status') {
 				$value = strtolower($value);
@@ -372,33 +385,35 @@ class Page extends Entity
 					throw new \LogicException('Unknown status: ' . $value);
 				}
 
-				$this->status = $value;
+				$this->set('status', $value);
 			}
 			else {
 				// Ignore other metadata
 			}
 		}
 
-		$this->content = trim($content, "\n\r");
+		$this->set('content', trim($content, "\n\r"));
+
+		return true;
 	}
 
-	static public function fromFile(File $file, array $files, string $str, ?int $parent_id = null): self
+	public function loadFromFile(File $file): void
 	{
-		$page = new self;
-
 		// Path is relative to web root
-		$page->parent = substr(dirname($file->path()), strlen(File::CONTEXT_WEB . '/'));
+		$this->set('parent', substr(dirname($file->path), strlen(File::CONTEXT_WEB . '/')) ?: null);
 
-		$page->importFromRaw($str);
-		$page->type = self::TYPE_PAGE; // FIXME
-		$page->modified = $file->modified;
-
-		foreach ($files as $subfile) {
-			if ($subfile->type == File::TYPE_DIRECTORY) {
-				$page->type = self::TYPE_CATEGORY;
-			}
+		if (!$this->importFromRaw($file->fetch())) {
+			throw new \LogicException('Invalid page content: ' . $file->pathname());
 		}
 
-		return $page;
+		$this->set('modified', $file->modified);
+		$this->set('type', self::TYPE_PAGE); // Default
+
+		foreach (Files::list($file->path) as $subfile) {
+			if ($subfile->type == File::TYPE_DIRECTORY) {
+				$this->set('type', self::TYPE_CATEGORY);
+				break;
+			}
+		}
 	}
 }

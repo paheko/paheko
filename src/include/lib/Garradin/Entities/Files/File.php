@@ -245,7 +245,14 @@ class File extends Entity
 			$this->save();
 		}
 
-		if (!Files::callStorage('store', $this, $source_path, $source_content)) {
+		if (null !== $source_path) {
+			$return = Files::callStorage('storePath', $this, $source_path);
+		}
+		else {
+			$return = Files::callStorage('storeContent', $this, $source_content);
+		}
+
+		if (!$return) {
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
 
@@ -286,6 +293,9 @@ class File extends Entity
 		$file->set('type', self::TYPE_DIRECTORY);
 		$file->set('image', 0);
 		$file->save();
+
+		Files::callStorage('mkdir', $file);
+
 		return $file;
 	}
 
@@ -445,7 +455,6 @@ class File extends Entity
 	public function serve(?Session $session = null, bool $download = false): void
 	{
 		if (!$this->checkReadAccess($session)) {
-		var_dump($this); exit;
 			header('HTTP/1.1 403 Forbidden', true, 403);
 			throw new UserException('Vous n\'avez pas accès à ce fichier.');
 			return;
