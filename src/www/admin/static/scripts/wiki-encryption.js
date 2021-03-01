@@ -33,7 +33,7 @@
 				callback();
 			}
 		};
-		
+
 		document.head.appendChild(s);
 	}
 
@@ -236,13 +236,13 @@
 			d.innerHTML = 'désactivé';
 			d.title = 'Chiffrement désactivé';
 			d.onclick = null;
-			document.getElementById('f_form').onsubmit = null;
+			elm.form.onsubmit = null;
 		}
 	};
 
 	document.addEventListener('DOMContentLoaded', () => {
 		if (e = document.getElementById('f_encryption')) {
-			wikiDecrypt();
+			checkEncryption(e);
 		}
 	});
 } ());
