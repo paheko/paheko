@@ -217,7 +217,7 @@ class Page extends Entity
 
 		$db = DB::getInstance();
 		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
-		$this->assert(!$db->test(self::TABLE, 'path = ?' . $where, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre');
+		$this->assert(!$db->test(self::TABLE, 'path = ?' . $where, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->path);
 	}
 
 	public function importForm(array $source = null)
