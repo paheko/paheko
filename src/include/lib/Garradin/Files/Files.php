@@ -34,7 +34,7 @@ class Files
 		return null;
 	}
 
-	static public function list(string $path = null): array
+	static public function list(string $path = ''): array
 	{
 		File::validatePath($path);
 

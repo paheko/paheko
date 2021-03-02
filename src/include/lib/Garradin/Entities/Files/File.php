@@ -324,7 +324,7 @@ class File extends Entity
 		$tree = '';
 
 		foreach ($parts as $part) {
-			$tree .= trim($tree . '/' . $part, '/');
+			$tree = trim($tree . '/' . $part, '/');
 			$tree_path = dirname($tree) == '.' ? '' : dirname($tree);
 			$tree_name = basename($tree);
 			$exists = $db->test(File::TABLE, 'type = ? AND path = ? AND name = ?', self::TYPE_DIRECTORY, $tree_path, $tree_name);

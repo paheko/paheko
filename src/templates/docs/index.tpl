@@ -6,9 +6,9 @@ use Garradin\Entities\Files\File;
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" href="search.php"}
-	{if $context == File::CONTEXT_DOCUMENTS}
-		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?parent=%s"|args:$path}
-		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?parent=%s"|args:$path}
+	{if $context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON}
+		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$path}
+		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?p=%s"|args:$path}
 		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 	{/if}
 	</aside>
@@ -19,6 +19,9 @@ use Garradin\Entities\Files\File;
 		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
+		{/if}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
+			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?p=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
 		{/if}
 	</ul>
 </nav>
@@ -104,6 +107,8 @@ use Garradin\Entities\Files\File;
 		</tr>
 	</tfoot>
 </table>
+{else}
+	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}
 
 {include file="admin/_foot.tpl"}

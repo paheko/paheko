@@ -24,10 +24,6 @@ $form->runIf('reset', function () {
 	Skeleton::resetSelected(f('select'));
 }, 'squelettes', Utils::getSelfURI('reset_ok'));
 
-$form->runIf('upload', function () {
-	Skeleton::upload(f('name'), 'file');
-}, 'skel_upload', Utils::getSelfURI());
-
 if (qg('edit')) {
 	$source = trim(qg('edit'));
 	$csrf_key = 'edit_skel_' . md5($source);

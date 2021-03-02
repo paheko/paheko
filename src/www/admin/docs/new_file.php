@@ -22,10 +22,9 @@ $form->runIf('create', function () use ($parent) {
 		$name .= '.txt';
 	}
 
-	$path = trim(File::CONTEXT_DOCUMENTS . '/' . $parent, '/');
-	File::validatePath($path . '/' . $name);
+	File::validatePath($parent . '/' . $name);
 
-	$file = File::createAndStore($path, $name, null, '');
+	$file = File::createAndStore($parent, $name, null, '');
 	$file->set('mime', 'text/plain');
 	$file->save();
 }, $csrf_key, '!docs/?p=' . $parent);
