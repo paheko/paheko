@@ -81,6 +81,7 @@ class Page extends Entity
 		$page->published = new \DateTime;
 		$page->modified = new \DateTime;
 		$page->name = 'index.txt';
+		$page->type = $type;
 
 		return $page;
 	}
@@ -89,10 +90,6 @@ class Page extends Entity
 	{
 		if (null === $this->_file || $force_reload) {
 			$this->_file = Files::get($this->filepath());
-
-			if (null === $this->_file) {
-				throw new \LogicException('This file does not exist: ' . $this->filepath());
-			}
 		}
 
 		return $this->_file;

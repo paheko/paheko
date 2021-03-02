@@ -394,9 +394,7 @@ namespace Garradin;
  *
  * Valeurs possibles :
  * - SQLite : aucune configuration possible
- * - FileSystem : [
- * 	'path' => (string) chemin du répertoire où doivent être stockés les fichiers
- * 	'scan' => (bool) chemin
+ * - FileSystem : (string) chemin du répertoire où doivent être stockés les fichiers
  *
  * Défaut : null
  */
@@ -414,24 +412,3 @@ namespace Garradin;
  */
 
 //const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
-
-/**
- * Mise à jour automatique des métadonnées du système de fichier
- *
- * Si activé (true) Garradin effectuera un scan intégral
- * des fichiers pour détecter les modifications lors de l'ouverture
- * d'une page qui utilise des fichiers.
- *
- * Exemples :
- * - page de détails d'une écriture n°42 = scan du répertoire "transaction/42"
- * - liste des pages web = scan du répertoire "web"
- * etc.
- *
- * Si activé, ce réglage peut avoir un impact sur les performances avec le backend
- * "FileSystem" (aucune différence avec le backend "SQLite").
- *
- * Dans ce cas il est recommandé de désactiver la mise à jour automatique (false)
- * et de lancer le script "scripts/watch_filesystem.sh" qui utilise inotify
- * pour ne mettre à jour que si un fichier a été modifié/ajouté/supprimé.
- */
-//const FILE_STORAGE_SYNC_AUTO = true;

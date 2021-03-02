@@ -97,7 +97,7 @@ class Sections
 
 		if (isset($params['future'])) {
 			if (!$params['future']) {
-				$params['where'] .= ' AND w.published <= datetime()';
+				$params['where'] .= ' AND w.published <= datetime(\'now\', \'localtime\')';
 			}
 
 			unset($params['future']);
