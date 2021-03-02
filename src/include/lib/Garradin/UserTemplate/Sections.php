@@ -83,6 +83,13 @@ class Sections
 			unset($params['uri']);
 		}
 
+		if (isset($params['path'])) {
+			$params['where'] .= ' AND w.path = :path';
+			$params['limit'] = 1;
+			$params[':path'] = $params['path'];
+			unset($params['path']);
+		}
+
 		if (array_key_exists('parent', $params)) {
 			if (null === $params['parent']) {
 				$params['where'] .= ' AND w.parent IS NULL';
