@@ -127,21 +127,7 @@ class SQLite implements StorageInterface
 
 	static public function mkdir(File $file): bool
 	{
-		$db = DB::getInstance();
-		$path = $file->pathname();
-
-		// Recursive mkdir of parent directories
-		while ($test_path = dirname($path)) {
-			if (!$db->test('files', 'path = ? AND name = ?', dirname($test_path), basename($test_path))) {
-				self::mkdir($test_path);
-			}
-		}
-
-		return $db->insert('files', [
-			'type'       => File::TYPE_DIRECTORY,
-			'path'       => dirname($path),
-			'name'       => basename($path),
-		]);
+		return true;
 	}
 
 	static public function getTotalSize(): int
