@@ -127,6 +127,7 @@ class File extends Entity
 	public function selfCheck(): void
 	{
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->type === self::TYPE_FILE, 'Unknown file type');
+		$this->assert($this->type === self::TYPE_DIRECTORY || $this->size !== null, 'File size must be set');
 		$this->assert($this->image === 0 || $this->image === 1, 'Unknown image value');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path) || null === $this->path, 'Le chemin ne peut rester vide');
@@ -342,7 +343,7 @@ class File extends Entity
 
 	static public function create(string $path, string $name, string $source_path = null, string $source_content = null): self
 	{
-		if (isset($source_path, $source_content)) {
+		if (!isset($source_path) && !isset($source_content)) {
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
 		}
 
@@ -357,9 +358,11 @@ class File extends Entity
 
 		if ($source_path && !$source_content) {
 			$file->set('mime', finfo_file($finfo, $source_path));
+			$file->set('size', filesize($source_path));
 		}
 		else {
 			$file->set('mime', finfo_buffer($finfo, $source_content));
+			$file->set('size', strlen($source_content));
 		}
 
 		$file->set('image', (int) in_array($file->mime, self::IMAGE_TYPES));

@@ -142,8 +142,13 @@ class Config extends Entity
 		$type = $this->_special_types[$key] ?? null;
 
 		// Append to deleted files queue if it's set to null
-		if ($type == File::class && null === $value && null !== $this->$key) {
-			$this->_deleted_files[] = $this->$key;
+		if ($type == File::class) {
+			if (null === $value && null !== $this->$key) {
+				$this->_deleted_files[] = $this->$key;
+			}
+			elseif ($value instanceof File) {
+				$value = $value->pathname();
+			}
 		}
 
 		parent::set($key, $value, $loose, $check_for_changes);
