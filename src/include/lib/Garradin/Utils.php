@@ -219,7 +219,7 @@ class Utils
             <html>
             <head>
                 <script type="text/javascript">
-                    window.parent.location.reload();
+                    window.parent.location.href = '. json_encode($destination) . ';
                 </script>
             </head>
 

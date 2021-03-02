@@ -2,8 +2,8 @@
 
 <nav class="tabs">
 	<aside>
-		{linkbutton shape="plus" label="Nouvelle page" href="new.php?type=%d&parent=%s"|args:$type_page,$parent}
-		{linkbutton shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%s"|args:$type_category,$parent}
+		{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$parent}
+		{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$parent}
 	</aside>
 	<ul>
 		<li class="current"><a href="./">Gestion du site web</a></li>
@@ -35,7 +35,7 @@
 					{linkbutton shape="menu" label="Sous-catégories et pages" href="?parent=%s"|args:$p->path()}
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?id=%d"|args:$p.id}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$p.id}
-					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$p.id}
+					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?id=%d"|args:$p.id}
 				</td>
 			</tr>
 			{/foreach}
@@ -66,7 +66,7 @@
 					{/if}
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?id=%d"|args:$p.id}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$p.id}
-					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$p.id}
+					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?id=%d"|args:$p.id}
 				</td>
 			</tr>
 			{/foreach}

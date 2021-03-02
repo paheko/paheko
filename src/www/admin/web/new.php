@@ -11,10 +11,20 @@ require_once __DIR__ . '/_inc.php';
 
 $csrf_key = 'web_page_new';
 
-$form->runIf('create', function () {
-	$page = Page::create((int) qg('type'), qg('parent') ?: null, f('title'), Page::STATUS_DRAFT);
+$parent = qg('parent') ?: null;
+
+$form->runIf('create', function () use ($parent) {
+	$page = Page::create((int) qg('type'), $parent, f('title'), Page::STATUS_DRAFT);
 	$page->save();
-	Utils::redirect(ADMIN_URL . 'web/edit.php?new&id=' . $page->id());
+
+	$url = ADMIN_URL . 'web/edit.php?new&id=' . $page->id();
+
+	if (null !== qg('_dialog')) {
+		Utils::reloadParentFrame($url);
+	}
+	else {
+		Utils::redirect(ADMIN_URL . 'web/edit.php?new&id=' . $page->id());
+	}
 }, $csrf_key);
 
 $title = qg('type') == Page::TYPE_CATEGORY ? 'Nouvelle catégorie' : 'Nouvelle page';
