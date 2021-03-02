@@ -6,11 +6,14 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = (int)qg('parent');
+// Force dialog mode
+$_GET['_dialog'] = true;
+
+$parent = qg('parent') ?: null;
 $breadcrumbs = [];
 
 if ($parent) {
-	$page = Web::get($parent);
+	$page = Web::getByURI($parent);
 
 	if (!$page) {
 		throw new UserException('Page inconnue');
