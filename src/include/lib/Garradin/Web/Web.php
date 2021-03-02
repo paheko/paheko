@@ -130,30 +130,17 @@ class Web
 			$uri = substr($uri, strlen(WWW_URI) - 1);
 		}
 
-		if (Config::getInstance()->get('desactiver_site')) {
-			Utils::redirect(ADMIN_URL);
-		}
+		http_response_code(200);
 
-		header('HTTP/1.1 200 OK', 200, true);
-
-		$skel = null;
-		$page = null;
 		$uri = substr($uri, 1);
 
-		if ($uri == '') {
-			$skel = 'index.html';
-		}
 		// Redirect old URLs (pre-1.1)
-		elseif ($uri == 'feed/atom/') {
+		if ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
 		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
-		}
-		elseif ($page = self::getByURI($uri, 1)) {
-			$skel = $page->template();
-			$page = $page->asTemplateArray();
 		}
 		elseif ($file = Files::getFromURI($uri)) {
 			$size = null;
@@ -175,6 +162,21 @@ class Web
 			}
 
 			return;
+		}
+
+		if (Config::getInstance()->get('desactiver_site')) {
+			Utils::redirect(ADMIN_URL);
+		}
+
+		$skel = null;
+		$page = null;
+
+		if ($uri == '') {
+			$skel = 'index.html';
+		}
+		elseif ($page = self::getByURI($uri, 1)) {
+			$skel = $page->template();
+			$page = $page->asTemplateArray();
 		}
 		else {
 			// Trying to see if a custom template with this name exists

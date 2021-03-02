@@ -198,10 +198,8 @@ class FileSystem implements StorageInterface
 			$name = $file->getFilename();
 
 			$data = [
-				'path'     => $path,
 				'name'     => $name,
 				'modified' => null,
-				'size'     => null,
 			];
 
 			if ($file->isDir()) {
@@ -209,12 +207,10 @@ class FileSystem implements StorageInterface
 			}
 			else {
 				$data['type'] = File::TYPE_FILE;
-				$data['modified'] = $file->getMTime();
-				$data['size'] = $file->getSize();
-				$data['mime'] = mime_content_type($file->getRealpath());
+				$data['modified'] = date('Y-m-d H:i:s', $file->getMTime());
 			}
 
-			$exists[$name] = null;
+			$exists[$name] = true;
 
 			if (!array_key_exists($name, $saved_files)) {
 				$added[] = $data;
@@ -226,25 +222,30 @@ class FileSystem implements StorageInterface
 
 		foreach ($modified as $file) {
 			// This will call 'update' method
-			Files::get($file['path'], $file['name']);
+			Files::get($path, $file['name']);
+		}
+
+		foreach ($added as $file) {
+			$f = File::create($path, $file['name'], $fullpath . DIRECTORY_SEPARATOR . $file['name']);
+			$f->import($data);
+			$f->save();
 		}
 
 		$deleted = array_diff_key($saved_files, $exists);
 
 		foreach ($deleted as $file) {
-			$type = $saved_files[$file['name']]->type;
+			if ($file->type == File::TYPE_DIRECTORY) {
 
-			if ($type == File::TYPE_DIRECTORY) {
 				$sql = 'DELETE FROM files WHERE path = ? OR path LIKE ? OR (path = ? AND name = ?);';
-				$path = $file['path'] . '/' . $file['name'];
-				$params = [$path, $path . '/%', $file['path'], $file['name']];
+				$file_path = $path . '/' . $file->name;
+				$params = [$file_path, $file_path . '/%', $path, $file->name];
 			}
 			else {
 				$sql = 'DELETE FROM files WHERE path = ? AND name = ?;';
-				$params = [$file['path'], $file['name']];
+				$params = [$path, $file->name];
 			}
 
-			$db->exec($sql);
+			$db->preparedQuery($sql, ... $params);
 		}
 	}
 
