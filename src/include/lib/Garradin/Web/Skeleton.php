@@ -145,7 +145,14 @@ class Skeleton
 
 	public function edit(string $content)
 	{
-		File::createAndStore(File::CONTEXT_SKELETON, $this->name, null, $content);
+		$file = Files::get(File::CONTEXT_SKELETON, $this->name);
+
+		if ($file) {
+			$file->setContent($content);
+		}
+		else {
+			File::createAndStore(File::CONTEXT_SKELETON, $this->name, null, $content);
+		}
 	}
 
 	public function type(): string
@@ -165,7 +172,7 @@ class Skeleton
 
 		if ($this->file) {
 			return $this->file->type;
-		}
+  		}
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		return finfo_file($finfo, $this->defaultPath());
@@ -206,26 +213,15 @@ class Skeleton
 		$list = Files::list(File::CONTEXT_SKELETON);
 
 		foreach ($list as $file) {
+			if ($file->type != $file::TYPE_FILE) {
+				continue;
+			}
+
 			$sources[$file->name] = $file;
 		}
 
 		ksort($sources);
 
 		return $sources;
-	}
-
-	static public function upload(string $name, ?string $file): void
-	{
-		if (empty($_FILES[$file]['tmp_name'])) {
-			File::createAndStore($name, File::CONTEXT_SKELETON, null, null, 'À modifier…');
-		}
-		else {
-			$f = File::upload($file, File::CONTEXT_SKELETON, null);
-
-			if ($f->name != $name) {
-				$f->importForm(['name' => $name]);
-				$f->save();
-			}
-		}
 	}
 }

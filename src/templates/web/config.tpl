@@ -115,36 +115,13 @@
 			<input type="submit" name="reset" value="Réinitialiser" onclick="return confirm('Effacer toute modification locale et restaurer les squelettes d\'installation ?');" />
 			{csrf_field key="squelettes"}
 		</p>
+
+		<p>
+			{linkbutton href="!docs/?p=skel" label="Gérer les fichiers de squelettes" shape="folder"}
+		</p>
 	</fieldset>
 	</form>
 
-	<form method="post" enctype="multipart/form-data">
-		<fieldset>
-			<legend>Ajouter un nouveau squelette</legend>
-			<dl>
-				{input type="text" name="name" label="Nom de fichier" required=true}
-				{input type="file" name="file" label="Fichier" help="Si aucun fichier n'est sélectionné, un fichier texte vide sera créé"}
-			</dl>
-			<p class="submit">
-				{csrf_field key="skel_upload"}
-				{button type="submit" name="upload" label="Ajouter" shape="upload"}
-			</p>
-		</fieldset>
-	</form>
-
-	{literal}
-	<script type="text/javascript">
-	let f = $('#f_file');
-	let n = $('#f_name');
-	f.onchange = () => {
-		if (!f.files.length) {
-			return;
-		}
-
-		n.value = f.files[0].name.split(/(\\|\/)/g).pop();
-	}
-	</script>
-	{/literal}
 {/if}
 
 {include file="admin/_foot.tpl"}

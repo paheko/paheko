@@ -16,6 +16,10 @@ if (!$file->checkDeleteAccess($session)) {
     throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
+if ($file->context() == File::CONTEXT_CONFIG) {
+	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
+}
+
 $csrf_key = 'file_delete_' . $file->pathHash();
 
 $form->runIf('delete', function () use ($file) {
