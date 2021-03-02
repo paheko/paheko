@@ -50,7 +50,7 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	Utils::redirect('!web/?parent=' . $page->parent);
 }, $csrf_key);
 
-$parent = $page->parent ? [$page->parent => Web::getByURI($page->parent)->title] : null;
+$parent = $page->parent ? [$page->parent => Web::getByURI($page->parent)->title] : [null => 'Racine du site'];
 $encrypted = f('encrypted') || $page->format == Page::FORMAT_ENCRYPTED;
 
 $old_content = f('content');

@@ -41,7 +41,7 @@ class Web
 		return DB::getInstance()->get($query, $search);
 	}
 
-	static public function listCategories(?Page $parent): array
+	static public function listCategories(?string $parent): array
 	{
 		$params = [];
 
@@ -50,14 +50,14 @@ class Web
 		}
 		else {
 			$where = 'parent = ?';
-			$params[] = $parent->path();
+			$params[] = $parent;
 		}
 
 		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE NOCASE;', $where, Page::TYPE_CATEGORY);
 		return EM::getInstance(Page::class)->all($sql, ...$params);
 	}
 
-	static public function listPages(?Page $parent, bool $order_by_date = true): array
+	static public function listPages(?string $parent, bool $order_by_date = true): array
 	{
 		$params = [];
 
@@ -66,7 +66,7 @@ class Web
 		}
 		else {
 			$where = 'parent = ?';
-			$params[] = $parent->path();
+			$params[] = $parent;
 		}
 
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';

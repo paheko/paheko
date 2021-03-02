@@ -227,12 +227,23 @@ class Page extends Entity
 			$source['published'] = $source['date'] . ' ' . $source['date_time'];
 		}
 
+		$parent = $this->parent;
+
+		if (array_key_exists('parent', $source)) {
+			if (is_array($source['parent'])) {
+				$source['parent'] = key($source['parent']);
+			}
+
+			$parent = $source['parent'];
+			$source['path'] = trim($parent . '/' . basename($this->path), '/');
+		}
+
 		if (isset($source['title']) && is_null($this->path)) {
-			$source['path'] = trim($this->parent . '/' . Utils::transformTitleToURI($source['title']), '/');
+			$source['path'] = trim($parent . '/' . Utils::transformTitleToURI($source['title']), '/');
 		}
 
 		if (isset($source['uri'])) {
-			$source['path'] = trim($this->parent . '/' . Utils::transformTitleToURI($source['uri']), '/');
+			$source['path'] = trim($parent . '/' . Utils::transformTitleToURI($source['uri']), '/');
 		}
 
 		if (!empty($source['encryption']) ) {

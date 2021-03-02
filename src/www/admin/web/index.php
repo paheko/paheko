@@ -20,8 +20,8 @@ if ($parent) {
 
 $order_date = qg('order_title') === null;
 
-$categories = Web::listCategories($cat);
-$pages = Web::listPages($cat, $order_date);
+$categories = Web::listCategories($cat ? $cat->path : null);
+$pages = Web::listPages($cat ? $cat->path : null, $order_date);
 $title = $parent ? sprintf('Gestion du site web : %s', $cat->title) : 'Gestion du site web';
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
