@@ -56,18 +56,23 @@ class DB extends SQLite3
     {
         if (-1 === $this->_version) {
             $this->connect();
-            $v = (int) $this->db->querySingle('PRAGMA user_version;');
-            $v = self::parseVersion($v);
-
-            if (null === $v) {
-                // For legacy version before 1.1.0
-                $v = $this->db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
-            }
-
-            $this->_version = $v ?: null;
+            $this->_version = self::getVersion($this->db);
         }
 
         return $this->_version;
+    }
+
+    static public function getVersion($db)
+    {
+        $v = (int) $db->querySingle('PRAGMA user_version;');
+        $v = self::parseVersion($v);
+
+        if (null === $v) {
+            // For legacy version before 1.1.0
+            $v = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
+        }
+
+        return $v ?: null;
     }
 
     static public function parseVersion(int $v): ?string
