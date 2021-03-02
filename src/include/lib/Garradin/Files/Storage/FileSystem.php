@@ -227,7 +227,7 @@ class FileSystem implements StorageInterface
 
 		foreach ($added as $file) {
 			$f = File::create($path, $file['name'], $fullpath . DIRECTORY_SEPARATOR . $file['name']);
-			$f->import($data);
+			$f->import($file);
 			$f->save();
 		}
 

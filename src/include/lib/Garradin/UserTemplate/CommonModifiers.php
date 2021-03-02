@@ -57,9 +57,16 @@ class CommonModifiers
 		return Utils::date_fr($ts, 'd/m/Y' . ($with_hour ? ' à H\hi' : ''));
 	}
 
-	static public function date_hour($ts): ?string
+	static public function date_hour($ts, bool $minutes_only_if_required = false): ?string
 	{
-		return Utils::date_fr($ts, 'H\hi');
+		$ts = Utils::get_datetime($ts);
+
+		if ($minutes_only_if_required && $ts->format('i') == '00') {
+			return $ts->format('H\h');
+		}
+		else {
+			return $ts->format('H\hi');
+		}
 	}
 
 	static public function strftime($ts, string $format, string $locale = 'fr'): ?string

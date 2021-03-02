@@ -28,7 +28,9 @@ class Utils
             return $ts;
         }
         elseif (is_numeric($ts)) {
-            return new \DateTime('@' . $ts);
+            $ts = new \DateTime('@' . $ts);
+            $ts->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+            return $ts;
         }
         elseif (strlen($ts) == 10) {
             return \DateTime::createFromFormat('!Y-m-d', $ts);
