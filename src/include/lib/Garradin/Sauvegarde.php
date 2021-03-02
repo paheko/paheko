@@ -60,13 +60,7 @@ class Sauvegarde
 			}
 
 			$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
-			$version = DB::parseVersion($db->querySingle('PRAGMA user_version;'));
-
-			if (null === $version) {
-				// for versions prior to 1.1.0
-				$version = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
-			}
-
+			$version = DB::getVersion($db);
 			$db->close();
 
 			$out[$file] = (object) [
@@ -425,7 +419,7 @@ class Sauvegarde
 		}
 
 		// On récupère la version
-		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
+		$version = DB::getVersion($db);
 
 		// On ne permet pas de restaurer une vieille version
 		if (version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<'))
