@@ -181,7 +181,7 @@ class Files
 		}
 	}
 
-	static public function get(?string $path, ?string $name = null): ?File
+	static public function get(?string $path, ?string $name = null, int $type = null): ?File
 	{
 		if (null === $path) {
 			return null;
@@ -202,8 +202,15 @@ class Files
 
 		$path = dirname($fullpath);
 		$name = basename($fullpath);
+		$where = '';
 
-		$file = EM::findOne(File::class, 'SELECT * FROM @TABLE WHERE path = ? AND name = ? LIMIT 1;', $path, $name);
+		if (null !== $type) {
+			$where = ' AND type = ' . $type;
+		}
+
+		$sql = sprintf('SELECT * FROM @TABLE WHERE path = ? AND name = ? %s LIMIT 1;', $where);
+
+		$file = EM::findOne(File::class, $sql, $path, $name);
 
 		if (null !== $file) {
 			$file = self::callStorage('update', $file);
@@ -224,7 +231,7 @@ class Files
 			$uri = File::CONTEXT_WEB . '/' . $uri;
 		}
 
-		return self::get($uri);
+		return self::get($uri, null, File::TYPE_FILE);
 	}
 
 	static public function getContext(string $path): ?string
