@@ -228,4 +228,10 @@ class Files
 
 		return $context;
 	}
+
+	static public function getContextRef(string $path): ?string
+	{
+		$context = strtok($path, '/');
+		return strtok('/') ?: null;
+	}
 }
