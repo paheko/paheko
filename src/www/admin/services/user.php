@@ -12,7 +12,7 @@ if (!$user) {
 	throw new UserException("Cet utilisateur est introuvable");
 }
 
-$form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && null !== qg('paid') && qg('su_id'), function () use ($user) {
+$form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && null !== qg('paid') && qg('su_id'), function () {
 	$su = Services_User::get((int) qg('su_id'));
 
 	if (!$su) {

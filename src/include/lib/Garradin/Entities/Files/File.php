@@ -166,7 +166,7 @@ class File extends Entity
 		}
 
 		// Delete actual file content
-		$return = Files::callStorage('delete', $this);
+		Files::callStorage('delete', $this);
 
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
@@ -354,8 +354,6 @@ class File extends Entity
 		$file->set('name', $name);
 		$file->set('path', $path);
 
-		$db = DB::getInstance();
-
 		if ($source_path && !$source_content) {
 			$file->set('mime', finfo_file($finfo, $source_path));
 			$file->set('size', filesize($source_path));
@@ -371,10 +369,7 @@ class File extends Entity
 	}
 
 	/**
-	 * Upload de fichier à partir d'une chaîne en base64
-	 * @param  string $name
-	 * @param  string $content
-	 * @return File
+	 * Create a file from an encoded base64 string
 	 */
 	static public function createFromBase64(string $path, string $name, string $encoded_content): self
 	{
@@ -382,6 +377,9 @@ class File extends Entity
 		return self::createAndStore($path, $name, null, $content);
 	}
 
+	/**
+	 * Modify a file from an encoded base64 string
+	 */
 	public function storeFromBase64(string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
@@ -566,7 +564,6 @@ class File extends Entity
 	 * @param  string $type Type MIME du fichier
 	 * @param  string $name Nom du fichier avec extension
 	 * @param  integer $size Taille du fichier en octets (facultatif)
-	 * @return boolean TRUE en cas de succès
 	 */
 	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
@@ -655,7 +652,7 @@ class File extends Entity
 			return \Garradin\Web\Render\Skriv::render($this, null, $options);
 		}
 		else if ($type == self::FILE_EXT_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($this, null, $options);
+			return \Garradin\Web\Render\EncryptedSkriv::render($this, null);
 		}
 		else if (substr($this->mime, 0, 5) == 'text/') {
 			return $this->fetch();

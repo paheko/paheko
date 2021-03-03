@@ -250,8 +250,9 @@ class Sections
 			$params['limit']
 		);
 
+		$db = DB::getInstance();
+
 		try {
-			$db = DB::getInstance();
 			$statement = $db->protectSelect(null, $sql);
 
 			$args = [];
@@ -269,8 +270,6 @@ class Sections
 			if (!empty($params['debug'])) {
 				echo sprintf('<pre style="padding: 5px; background: yellow;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
 			}
-
-			unset($params, $sql);
 
 			$result = $statement->execute();
 		}

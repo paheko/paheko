@@ -47,25 +47,25 @@ class FileSystem implements StorageInterface
 			return;
 		}
 
-		$permissions = fileperms(self::_getRoot(null));
+		$permissions = fileperms(self::_getRoot());
 
 		Utils::safe_mkdir($path, $permissions & 0777, true);
 	}
 
-	static public function storePath(File $file, string $path): bool
+	static public function storePath(File $file, string $source_path): bool
 	{
 		$target = self::getFullPath($file);
 		self::ensureDirectoryExists(dirname($target));
 
-		return copy($path, $target);
+		return copy($source_path, $target);
 	}
 
-	static public function storeContent(File $file, string $content): bool
+	static public function storeContent(File $file, string $source_content): bool
 	{
 		$target = self::getFullPath($file);
 		self::ensureDirectoryExists(dirname($target));
 
-		return file_put_contents($target, $content) === false ? false : true;
+		return file_put_contents($target, $source_content) === false ? false : true;
 	}
 
 	static public function mkdir(File $file): bool
@@ -117,12 +117,12 @@ class FileSystem implements StorageInterface
 
 	static public function exists(string $path): bool
 	{
-		return (bool) file_exists(self::_getRealPath($path));
+		return file_exists(self::_getRealPath($path));
 	}
 
 	static public function modified(File $file): ?int
 	{
-		return filemtime(self::getFullPath($path)) ?: null;
+		return filemtime(self::getFullPath($file)) ?: null;
 	}
 
 	static public function getTotalSize(): int
@@ -150,7 +150,8 @@ class FileSystem implements StorageInterface
 	 */
 	static public function getQuota(): int
 	{
-		return @disk_total_space(self::_getRoot()) ?: \PHP_INT_MAX;
+		$quota = @disk_total_space(self::_getRoot());
+		return $quota === false ? \PHP_INT_MAX : (int) $quota;
 	}
 
 	static public function truncate(): void
@@ -190,7 +191,6 @@ class FileSystem implements StorageInterface
 
 		$saved_files = $db->getGrouped('SELECT name, size, modified, type FROM files WHERE path = ?;', $path);
 		$added = [];
-		$deleted = [];
 		$modified = [];
 		$exists = [];
 

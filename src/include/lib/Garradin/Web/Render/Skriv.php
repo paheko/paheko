@@ -18,6 +18,8 @@ class Skriv
 {
 	static protected $skriv;
 
+	static protected $current_path;
+
 	static public function render(File $file, ?string $content = null, array $options = []): string
 	{
 		if (!isset($options['prefix'])) {
@@ -35,11 +37,11 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		$skriv->_currentPath = str_replace(File::CONTEXT_WEB . '/', '', $file->path);
+		self::$current_path = str_replace(File::CONTEXT_WEB . '/', '', $file->path);
 		$str = $content ?? $file->fetch();
 
-		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) use ($skriv) {
-			return WWW_URL . $skriv->_currentPath . '/' . $match[1];
+		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
+			return WWW_URL . self::$current_path . '/' . $match[1];
 		}, $str);
 
 		$str = self::$skriv->render($str);
@@ -47,7 +49,7 @@ class Skriv
 		$str = CommonModifiers::typo($str);
 
 		$str = preg_replace_callback('!<a href="/(.+)">!i', function ($matches) use ($options) {
-			return sprintf('<a href="%s">', $options['prefix'], Utils::transformTitleToURI($matches[1]));
+			return sprintf('<a href="%s">%s</a>', $options['prefix'], Utils::transformTitleToURI($matches[1]));
 		}, $str);
 
 		return sprintf('<div class="web-content">%s</div>', $str);
@@ -57,14 +59,14 @@ class Skriv
 	 * Callback utilisé pour l'extension <<file>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension
 	 * @param string $content Contenu éventuel (en mode bloc)
-	 * @param object $skriv   Objet SkrivLite
+	 * @param SkrivLite $skriv   Objet SkrivLite
 	 */
 	static public function SkrivFile(array $args, ?string $content, SkrivLite $skriv): string
 	{
 		$name = $args[0] ?? null;
 		$caption = $args[1] ?? null;
 
-		if (!$name || !$skriv->_currentPath)
+		if (!$name || !self::$current_path)
 		{
 			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
 		}
@@ -74,7 +76,7 @@ class Skriv
 			$caption = $name;
 		}
 
-		$url = WWW_URL . $skriv->_currentPath . '/' . $name;
+		$url = WWW_URL . self::$current_path . '/' . $name;
 		$ext = substr($name, strrpos($name, '.')+1);
 
 		return sprintf(
@@ -87,7 +89,7 @@ class Skriv
 	 * Callback utilisé pour l'extension <<image>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension
 	 * @param string $content Contenu éventuel (en mode bloc)
-	 * @param object $skriv   Objet SkrivLite
+	 * @param SkrivLite $skriv   Objet SkrivLite
 	 */
 	static public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
 	{
@@ -97,12 +99,12 @@ class Skriv
 		$align = $args[1] ?? null;
 		$caption = $args[2] ?? null;
 
-		if (!$name || !$skriv->_currentPath)
+		if (!$name || !self::$current_path)
 		{
 			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$url = WWW_URL . $skriv->_currentPath . '/' . $name;
+		$url = WWW_URL . self::$current_path . '/' . $name;
 		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
 
 		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',

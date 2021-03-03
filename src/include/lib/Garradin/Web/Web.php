@@ -6,6 +6,7 @@ use Garradin\Entities\Web\Page;
 use Garradin\Web\Skeleton;
 use Garradin\Files\Files;
 use Garradin\Config;
+use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Membres\Session;
@@ -74,40 +75,6 @@ class Web
 		return EM::getInstance(Page::class)->all($sql, ...$params);
 	}
 
-	static public function listCategoriesTree(?int $current = null): array
-	{
-		$db = DB::getInstance();
-		$flat = $db->get('SELECT id, parent_id, title FROM web_pages ORDER BY title COLLATE NOCASE;');
-
-		$parents = [];
-
-		foreach ($flat as $node) {
-			if (!isset($parents[$node->parent_id])) {
-				$parents[$node->parent_id] = [];
-			}
-
-			$parents[(int) $node->parent_id][] = $node;
-		}
-
-		$build_tree = function (int $parent_id, int $level) use ($build_tree, $parents): array {
-			$nodes = [];
-
-			if (!isset($parents[$parent_id])) {
-				return $nodes;
-			}
-
-			foreach ($parents[$parent_id] as $node) {
-				$node->level = $level;
-				$node->children = $build_tree($node->id, $level + 1);
-				$nodes[] = $node;
-			}
-
-			return $nodes;
-		};
-
-		return $build_tree(0, 0);
-	}
-
 	static public function getByURI(string $uri): ?Page
 	{
 		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $uri);
@@ -168,13 +135,12 @@ class Web
 			Utils::redirect(ADMIN_URL);
 		}
 
-		$skel = null;
 		$page = null;
 
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
-		elseif ($page = self::getByURI($uri, 1)) {
+		elseif ($page = self::getByURI($uri)) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
 		}

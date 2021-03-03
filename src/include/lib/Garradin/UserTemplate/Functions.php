@@ -8,6 +8,8 @@ use KD2\ErrorManager;
 
 use Garradin\Web\Skeleton;
 
+use const Garradin\WWW_URL;
+
 class Functions
 {
 	const FUNCTIONS_LIST = [

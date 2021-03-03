@@ -91,6 +91,9 @@ class Transaction extends Entity
 	protected $_lines;
 	protected $_old_lines = [];
 
+	/**
+	 * @var Transaction
+	 */
 	protected $_related;
 
 	static public function getTypeFromAccountType(int $account_type)
@@ -355,7 +358,7 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
 		}
 
-		Files::deleteLinkedFiles(File::CONTEXT_TRANSACTION, $this->id());
+		Files::delete($this->getAttachementsDirectory());
 
 		return parent::delete();
 	}
@@ -365,7 +368,6 @@ class Transaction extends Entity
 		parent::selfCheck();
 
 		$db = DB::getInstance();
-		$config = Config::getInstance();
 
 		// ID d'exercice obligatoire
 		if (null === $this->id_year) {
@@ -448,7 +450,7 @@ class Transaction extends Entity
 				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 
 				if (!$line['id_account']) {
-					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
+					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ((int) $i+1));
 				}
 
 				$line = (new Line)->import($line);

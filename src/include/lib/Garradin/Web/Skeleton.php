@@ -101,7 +101,7 @@ class Skeleton
 			return $ut->fetch();
 		}
 		elseif ($this->file) {
-			$this->file->fetch();
+			return $this->file->fetch();
 		}
 		else {
 			return file_get_contents($this->defaultPath());

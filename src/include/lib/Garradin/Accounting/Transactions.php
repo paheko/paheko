@@ -367,7 +367,7 @@ class Transactions
 		}
 
 		if (isset($transactions, $lines) || ($transactions === null && $lines === null)) {
-			throw new BadMethodCallException('Only one of transactions or lines should be set');
+			throw new \BadMethodCallException('Only one of transactions or lines should be set');
 		}
 
 		$selection = array_map('intval', $transactions ?? $lines);

@@ -16,22 +16,14 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 
 class Files
 {
-	static public function redirectOldWikiPage(string $uri): ?File {
+	static public function redirectOldWikiPage(string $uri): void {
 		$uri = Utils::transformTitleToURI($uri);
 
 		$db = DB::getInstance();
 
 		if ($db->test(Page::TABLE, 'uri = ?')) {
-			Utils::redirect(ADMIN_URL . 'web/page.php?uri=' . $uri);
+			Utils::redirect('!web/page.php?uri=' . $uri);
 		}
-
-		$file = self::get('documents/wiki/' . $uri . '.skriv');
-
-		if ($file) {
-			Utils::redirect(ADMIN_URL . 'documents/?p=' . $file->path);
-		}
-
-		return null;
 	}
 
 	static public function list(string $path = ''): array
@@ -42,6 +34,17 @@ class Files
 		self::callStorage('sync', $path);
 
 		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $path);
+	}
+
+	static public function delete(string $path): void
+	{
+		$file = self::get($path);
+
+		if (!$file) {
+			return;
+		}
+
+		$file->delete();
 	}
 
 	/**
@@ -156,29 +159,10 @@ class Files
 		call_user_func([$backend, 'configure'], $config);
 
 		if (!class_exists($backend)) {
-			throw new \InvalidArgumentException('Invalid storage: ' . $from);
+			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
 		}
 
 		call_user_func([$backend, 'truncate']);
-	}
-
-	static public function getContextJoinClause(string $context): ?string
-	{
-		switch ($context) {
-			case File::CONTEXT_TRANSACTION:
-				return 'acc_transactions c ON c.id = f.context_ref';
-			case File::CONTEXT_USER:
-				return 'membres c ON c.id = f.context_ref';
-			case File::CONTEXT_FILE:
-				return 'files c ON c.id = f.context_ref';
-			case File::CONTEXT_CONFIG:
-				return 'config c ON c.key = f.context_ref AND c.value = f.id';
-			case File::CONTEXT_WEB:
-			case File::CONTEXT_DOCUMENTS:
-			case File::CONTEXT_SKELETON:
-			default:
-				return null;
-		}
 	}
 
 	static public function get(?string $path, ?string $name = null, int $type = null): ?File
