@@ -27,7 +27,13 @@ else {
 }
 
 $context = Files::getContext($path);
+$context_ref = Files::getContextRef($path);
 
-$tpl->assign(compact('path', 'files', 'can_write', 'can_delete', 'context'));
+$can_create = File::checkCreateAccess($path, $session);
+$can_upload = $can_create && (($context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON)
+	|| (($context == File::CONTEXT_USER || $context == File::CONTEXT_TRANSACTION) && $context_ref));
+$can_mkdir = $can_create && ($context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON);
+
+$tpl->assign(compact('path', 'files', 'can_write', 'can_delete', 'can_mkdir', 'can_upload', 'context', 'context_ref'));
 
 $tpl->display('docs/index.tpl');

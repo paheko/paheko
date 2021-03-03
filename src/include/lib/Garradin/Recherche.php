@@ -711,7 +711,7 @@ class Recherche
 		if ($target == 'membres') {
 			$tables = [
 				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'users_categories\';'),
+				'users_categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'users_categories\';'),
 			];
 		}
 		elseif ($target == 'compta') {

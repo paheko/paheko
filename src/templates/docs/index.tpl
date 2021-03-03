@@ -6,8 +6,10 @@ use Garradin\Entities\Files\File;
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" href="search.php"}
-	{if $context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON}
+	{if $can_mkdir}
 		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$path}
+	{/if}
+	{if $can_upload}
 		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?p=%s"|args:$path}
 		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 	{/if}
@@ -25,6 +27,23 @@ use Garradin\Entities\Files\File;
 		{/if}
 	</ul>
 </nav>
+
+{if !$can_mkdir && !$context_ref}
+<p class="block alert">
+	Il n'est pas possible de créer de répertoire ici.
+	{if $context == File::CONTEXT_USER}
+		Utiliser le <a href="{"!membres/ajouter.php"|local_url}">formulaire de création</a> pour enregistrer un membre.
+	{else}
+		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
+	{/if}
+</p>
+{/if}
+
+{if $context == File::CONTEXT_USER && $context_ref}
+	<p class="block">{linkbutton href="!membres/fiche.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}</p>
+{elseif $context == File::CONTEXT_TRANSACTION && $context_ref}
+	<p class="block">{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}</p>
+{/if}
 
 {if count($files)}
 <table class="list">
