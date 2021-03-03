@@ -386,6 +386,8 @@ class Transactions
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
+		$columns['code_analytical']['select'] = 'GROUP_CONCAT(b.code, \',\')';
+		$columns['id_analytical']['select'] = 'GROUP_CONCAT(l.id_analytical, \',\')';
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
@@ -401,6 +403,7 @@ class Transactions
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+			$row->analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
