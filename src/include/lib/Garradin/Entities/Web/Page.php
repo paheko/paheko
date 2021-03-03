@@ -236,6 +236,10 @@ class Page extends Entity
 				$source['parent'] = key($source['parent']);
 			}
 
+			if (empty($source['parent'])) {
+				$source['parent'] = null;
+			}
+
 			$parent = $source['parent'];
 			$source['path'] = trim($parent . '/' . basename($this->path), '/');
 		}
