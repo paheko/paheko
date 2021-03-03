@@ -9,6 +9,7 @@ require_once __DIR__ . '/../_inc.php';
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $current_year_id = $session->get('acc_year');
+$current_year = null;
 
 if ($current_year_id) {
 	// Check that the year is still valid

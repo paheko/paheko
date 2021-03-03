@@ -274,7 +274,7 @@ class Membres
             }
         }
 
-        return self::_deleteMembres($ids);
+        return $this->_deleteMembres($ids);
     }
 
     public function getNom($id)
@@ -439,7 +439,7 @@ class Membres
         return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
     }
 
-    public function getFilesPath(int $id)
+    public function getAttachementsDirectory(int $id)
     {
         return File::CONTEXT_USER . '/' . $id;
     }
@@ -458,13 +458,13 @@ class Membres
         );
     }
 
-    static protected function _deleteMembres($membres)
+    protected function _deleteMembres(array $membres)
     {
         foreach ($membres as &$id)
         {
             $id = (int) $id;
 
-            Files::deleteLinkedFiles(File::CONTEXT_USER, $id);
+            Files::delete($this->getAttachementsDirectory($id));
         }
 
         Plugin::fireSignal('membre.suppression', $membres);

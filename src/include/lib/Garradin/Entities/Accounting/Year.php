@@ -8,6 +8,7 @@ use Garradin\Entity;
 use Garradin\UserException;
 use Garradin\Accounting\Accounts;
 use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 class Year extends Entity
 {
@@ -133,11 +134,17 @@ class Year extends Entity
 
 	public function delete(): bool
 	{
-		// Manual delete of transactions, as there is a voluntary safeguard in SQL: no cascade
-		DB::getInstance()->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
+		$db = DB::getInstance();
+		$ids = $db->getAssoc('SELECT id, id FROM acc_transactions WHERE id_year = ?;', $this->id());
 
-		// Clean up files
-		Files::deleteUnlinkedFiles();
+
+		// Delete all files
+		foreach ($ids as $id) {
+			Files::delete(File::CONTEXT_TRANSACTION . '/' . $id);
+		}
+
+		// Manual delete of transactions, as there is a voluntary safeguard in SQL: no cascade
+		$db->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
 
 		return parent::delete();
 	}

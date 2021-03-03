@@ -220,6 +220,7 @@ class Sauvegarde
 	public function dump(?string $file = null): void
 	{
 		$config = Config::getInstance();
+		$tmp_file = null;
 
 		if (null === $file) {
 			$file = DB_FILE;
@@ -254,7 +255,9 @@ class Sauvegarde
 		// Add integrity hash
 		echo sha1_file($file);
 
-		@unlink($tmp_file);
+		if (null !== $tmp_file) {
+			@unlink($tmp_file);
+		}
 	}
 
 	/**

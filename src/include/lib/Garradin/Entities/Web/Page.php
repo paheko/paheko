@@ -135,8 +135,10 @@ class Page extends Entity
 			return \Garradin\Web\Render\Skriv::render($this->file(), $this->content, $options);
 		}
 		else if ($this->format == self::FORMAT_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($this->file(), $this->content, $options);
+			return \Garradin\Web\Render\EncryptedSkriv::render($this->file(), $this->content);
 		}
+
+		throw new \LogicException('Invalid format: ' . $this->format);
 	}
 
 	public function preview(string $content): string
@@ -310,6 +312,7 @@ class Page extends Entity
 	public function getAttachmentsGallery(bool $all = true, bool $images = false): array
 	{
 		$out = [];
+		$tagged = [];
 
 		if (!$all) {
 			$tagged = $this->findTaggedAttachments($this->content);

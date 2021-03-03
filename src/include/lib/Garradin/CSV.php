@@ -154,7 +154,7 @@ class CSV
 			fputs($fp, self::row($header));
 		}
 
-		if ($iterator->valid()) {
+		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
 			foreach ($iterator as $row) {
 				foreach ($row as $key => &$v) {
 					if (is_object($v)&& $v instanceof \DateTimeInterface) {
@@ -189,7 +189,7 @@ class CSV
 			$ods->add((array) $header);
 		}
 
-		if ($iterator->valid()) {
+		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
 			foreach ($iterator as $row) {
 				$row = self::rowToArray($row, $row_map_callback);
 

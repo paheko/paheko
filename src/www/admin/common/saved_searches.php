@@ -7,6 +7,10 @@ if (empty($target) || !in_array($target, Recherche::TARGETS)) {
     throw new UserException('Cible inconnue');
 }
 
+if (empty($search_url)) {
+	throw new \LogicException('Missing $search_url');
+}
+
 $access_section = $target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
 
 $recherche = new Recherche;

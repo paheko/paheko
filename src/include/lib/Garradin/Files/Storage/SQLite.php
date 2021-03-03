@@ -65,7 +65,7 @@ class SQLite implements StorageInterface
 
 		$db = DB::getInstance();
 
-		$st = $db->preparedQuery('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));',
+		$db->preparedQuery('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));',
 			$file->id(), $file->size);
 
 		$blob = $db->openBlob('files_contents', 'content', $file->id(), 'main', \SQLITE3_OPEN_READWRITE);
@@ -141,7 +141,8 @@ class SQLite implements StorageInterface
 	 */
 	static public function getQuota(): int
 	{
-		return @disk_total_space(DATA_ROOT) ?: \PHP_INT_MAX;
+		$quota = @disk_total_space(DATA_ROOT);
+		return $quota === false ? \PHP_INT_MAX : (int) $quota;
 	}
 
 	static public function truncate(): void
