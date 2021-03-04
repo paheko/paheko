@@ -40,7 +40,7 @@ class Form
 
 			if (null !== $redirect) {
 				if (array_key_exists('_dialog', $_GET)) {
-					Utils::reloadParentFrame($redirect);
+					Utils::reloadParentFrame();
 				}
 
 				Utils::redirect($redirect);

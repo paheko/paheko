@@ -16,11 +16,6 @@ $csrf_key = 'upload_file_' . md5($parent);
 
 $form->runIf('upload', function () use ($parent, $tpl) {
 	File::upload($parent, 'file');
-
-	if (null !== qg('dialog')) {
-		$tpl->display('common/_reload_parent.tpl');
-		exit;
-	}
 }, $csrf_key, Utils::getSelfURI());
 
 $tpl->assign(compact('parent', 'csrf_key'));

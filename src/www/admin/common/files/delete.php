@@ -16,7 +16,9 @@ if (!$file->checkDeleteAccess($session)) {
     throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
-if ($file->context() == File::CONTEXT_CONFIG) {
+$context = $file->context();
+
+if ($context == File::CONTEXT_CONFIG || $context == File::CONTEXT_WEB) {
 	throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
 }
 
