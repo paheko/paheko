@@ -35,6 +35,13 @@ use Garradin\Entities\Files\File;
 		<li><a href="?p={$bc_path}">{$name}</a></li>
 	{/foreach}
 	</ul>
+
+	{if $context == File::CONTEXT_USER && $context_ref}
+		{linkbutton href="!membres/fiche.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}
+	{elseif $context == File::CONTEXT_TRANSACTION && $context_ref}
+		{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}
+	{/if}
+
 	{if count($breadcrumbs) > 1}
 		{linkbutton href="?p=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
 	{/if}
@@ -49,12 +56,6 @@ use Garradin\Entities\Files\File;
 		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
 	{/if}
 </p>
-{/if}
-
-{if $context == File::CONTEXT_USER && $context_ref}
-	<p class="block">{linkbutton href="!membres/fiche.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}</p>
-{elseif $context == File::CONTEXT_TRANSACTION && $context_ref}
-	<p class="block">{linkbutton href="!acc/transactions/details.php?id=%d"|args:$context_ref|local_url label="Détails de l'écriture" shape="menu"}</p>
 {/if}
 
 {if count($files)}
