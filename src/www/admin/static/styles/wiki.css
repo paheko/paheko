@@ -120,29 +120,6 @@ fieldset.wikiMain #f_uri {
     margin-bottom: 1em;
 }
 
-.breadCrumbs {
-    margin-bottom: .8em;
-    font-size: .9em;
-    color: #999;
-}
-
-.breadCrumbs ul, .breadCrumbs li {
-    list-style-type: none;
-    display: inline;
-}
-
-.breadCrumbs li:before {
-    content: "> ";
-}
-
-.breadCrumbs li a {
-    color: #333;
-}
-
-.wikiSearch fieldset {
-    padding: .3em;
-}
-
 .wikiSearch input[type=text] {
     padding: .3em;
 }

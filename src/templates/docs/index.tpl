@@ -26,6 +26,18 @@ use Garradin\Entities\Files\File;
 			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?p=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
 		{/if}
 	</ul>
+
+</nav>
+
+<nav class="breadcrumbs">
+	<ul>
+	{foreach from=$breadcrumbs item="name" key="bc_path"}
+		<li><a href="?p={$bc_path}">{$name}</a></li>
+	{/foreach}
+	</ul>
+	{if count($breadcrumbs) > 1}
+		{linkbutton href="?p=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
+	{/if}
 </nav>
 
 {if !$can_mkdir && !$context_ref}

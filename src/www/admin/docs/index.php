@@ -34,6 +34,10 @@ $can_upload = $can_create && (($context == File::CONTEXT_DOCUMENTS || $context =
 	|| (($context == File::CONTEXT_USER || $context == File::CONTEXT_TRANSACTION) && $context_ref));
 $can_mkdir = $can_create && ($context == File::CONTEXT_DOCUMENTS || $context == File::CONTEXT_SKELETON);
 
-$tpl->assign(compact('path', 'files', 'can_write', 'can_delete', 'can_mkdir', 'can_upload', 'context', 'context_ref'));
+$breadcrumbs = Files::getBreadcrumbs($path);
+
+$parent_path = dirname($path);
+
+$tpl->assign(compact('path', 'files', 'can_write', 'can_delete', 'can_mkdir', 'can_upload', 'context', 'context_ref', 'breadcrumbs', 'parent_path'));
 
 $tpl->display('docs/index.tpl');

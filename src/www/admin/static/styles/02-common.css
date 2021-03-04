@@ -422,3 +422,26 @@ details summary.block::after {
     display: block;
     color: #666;
 }
+
+nav.breadcrumbs {
+    margin: .5em;
+    color: #999;
+}
+
+nav.breadcrumbs a {
+    color: #333;
+}
+
+
+nav.breadcrumbs ul, nav.breadcrumbs li {
+    list-style-type: none;
+    display: inline;
+}
+
+nav.breadcrumbs li:before {
+    content: "> ";
+}
+
+nav.breadcrumbs li:last-child a {
+    font-weight: bold;
+}

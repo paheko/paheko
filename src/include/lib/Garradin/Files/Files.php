@@ -234,4 +234,17 @@ class Files
 		$context = strtok($path, '/');
 		return strtok('/') ?: null;
 	}
+
+	static public function getBreadcrumbs(string $path): array
+	{
+		$parts = explode('/', $path);
+		$breadcrumbs = [];
+
+		foreach ($parts as $part) {
+			$path = trim(key($breadcrumbs) . '/' . $part, '/');
+			$breadcrumbs[$path] = $part;
+		}
+
+		return $breadcrumbs;
+	}
 }

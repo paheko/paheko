@@ -22,13 +22,13 @@
 </nav>
 
 {if !empty($breadcrumbs)}
-<div class="breadCrumbs">
+<nav class="breadcrumbs">
 	<ul>
 		{foreach from=$breadcrumbs key="id" item="title"}
 			<li><a href="?id={$id}">{$title}</a></li>
 		{/foreach}
 	</ul>
-</div>
+</nav>
 {/if}
 
 {if !$page}
