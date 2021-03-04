@@ -210,21 +210,29 @@ class Utils
         return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
-    static public function reloadParentFrame(string $destination): void
+    static public function reloadParentFrame(?string $destination = null): void
     {
-        $destination = self::getLocalURL($destination);
+        $url = self::getLocalURL($destination ?? '!');
 
         echo '
             <!DOCTYPE html>
             <html>
             <head>
-                <script type="text/javascript">
-                    window.parent.location.href = '. json_encode($destination) . ';
+                <script type="text/javascript">';
+
+        if (null === $destination) {
+            echo 'window.parent.location.reload();';
+        }
+        else {
+            printf('window.parent.location.href = %s;', json_encode($url));
+        }
+
+        echo '
                 </script>
             </head>
 
             <body>
-            <p style="visibility: hidden;"><a href="' . htmlspecialchars($destination) . '">Cliquer ici pour continuer</a>
+            <p style="visibility: hidden;"><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
             </body>
             </html>';
 
