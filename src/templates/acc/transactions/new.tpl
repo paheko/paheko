@@ -48,7 +48,7 @@
 	<fieldset>
 		<legend>Informations</legend>
 		<dl>
-			{input type="date" name="date" default=$date label="Date" required=1 source=$transaction}
+			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 		</dl>
