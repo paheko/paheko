@@ -403,7 +403,13 @@ class Transactions
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
-			$row->analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
+
+			if (isset($row->id_analytical, $row->code_analytical)) {
+				$row->analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
+			}
+			else {
+				$row->analytical = [];
+			}
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
