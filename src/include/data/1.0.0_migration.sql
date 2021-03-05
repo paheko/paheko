@@ -132,6 +132,9 @@ UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT
 -- A edge-case where the end date is after the start date, let's fix it…
 UPDATE cotisations SET fin = debut WHERE fin < debut;
 
+-- Another edge-case
+UPDATE cotisations SET duree = NULL WHERE duree = 0;
+
 INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
 
 INSERT INTO services_fees (id, label, amount, id_service, id_account, id_year)
