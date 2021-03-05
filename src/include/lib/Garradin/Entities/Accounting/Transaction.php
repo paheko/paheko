@@ -296,6 +296,8 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
+		$exists = $this->exists();
+
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
@@ -318,7 +320,7 @@ class Transaction extends Entity
 		}
 
 		// Remove flag
-		if ((self::TYPE_DEBT == $this->type || self::TYPE_CREDIT == $this->type) && $this->_related) {
+		if (!$exists && $this->_related) {
 			$this->_related->markPaid();
 			$this->_related->save();
 		}
