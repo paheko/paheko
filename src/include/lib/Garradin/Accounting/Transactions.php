@@ -413,6 +413,7 @@ class Transactions
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
+			$row->analytical = implode(', ', $row->analytical);
 		});
 
 		return $list;
