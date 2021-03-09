@@ -405,15 +405,15 @@ class Transactions
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 
 			if (isset($row->id_analytical, $row->code_analytical)) {
-				$row->analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
+				$row->code_analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
 			}
 			else {
-				$row->analytical = [];
+				$row->code_analytical = [];
 			}
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
-			$row->analytical = implode(', ', $row->analytical);
+			$row->code_analytical = implode(', ', $row->code_analytical);
 		});
 
 		return $list;
