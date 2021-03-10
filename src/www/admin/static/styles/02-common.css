@@ -424,14 +424,13 @@ details summary.block::after {
 }
 
 nav.breadcrumbs {
-    margin: .5em;
+    margin: .5em 0;
     color: #999;
 }
 
 nav.breadcrumbs a {
     color: #333;
 }
-
 
 nav.breadcrumbs ul, nav.breadcrumbs li {
     list-style-type: none;
@@ -444,4 +443,19 @@ nav.breadcrumbs li:before {
 
 nav.breadcrumbs li:last-child a {
     font-weight: bold;
+}
+
+.search-results article {
+    margin: 2em 1em;
+}
+
+.search-results h4 nav a {
+    font-weight: normal;
+    color: #999;
+}
+
+.search-results h3 {
+    color: darkblue;
+    font-weight: normal;
+    margin: .3em 0;
 }

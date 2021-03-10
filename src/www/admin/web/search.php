@@ -1,24 +1,26 @@
 <?php
 namespace Garradin;
 
+use Garradin\Web\Web;
+use Garradin\Entities\Web\Page;
+
 require_once __DIR__ . '/_inc.php';
 
-$q = trim(qg('q'));
+$q = trim(f('q'));
 
-$tpl->assign('recherche', $q);
+$tpl->assign('query', $q);
 
-if ($q)
-{
-    $r = $wiki->search($q);
-    $tpl->assign('resultats', $r);
-    $tpl->assign('nb_resultats', count($r));
+if ($q) {
+	$r = Web::search($q);
+	$tpl->assign('results', $r);
+	$tpl->assign('results_count', count($r));
 }
 
-function tpl_clean_snippet($str)
-{
-    return preg_replace('!&lt;(/?b)&gt;!', '<$1>', $str);
+function tpl_clean_snippet($str) {
+	return preg_replace('!&lt;(/?b)&gt;!', '<$1>', $str);
 }
 
+$tpl->assign('custom_css', ['wiki.css']);
 $tpl->register_modifier('clean_snippet', 'Garradin\tpl_clean_snippet');
 
-$tpl->display('admin/wiki/chercher.tpl');
+$tpl->display('web/search.tpl');

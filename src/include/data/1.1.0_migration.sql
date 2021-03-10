@@ -144,12 +144,12 @@ UPDATE files SET size = (SELECT LENGTH(content) FROM files_contents WHERE id = f
 UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
 
 -- Copy to search
-INSERT INTO files_search (id, title, content)
-	SELECT new_id, title, content FROM wiki_as_files WHERE encrypted = 0;
-
--- Copy to search
-INSERT INTO files_search (id, title, content)
-	SELECT new_id, title, 'Contenu chiffré' FROM wiki_as_files WHERE encrypted = 1;
+INSERT INTO files_search (path, title, content)
+	SELECT
+		'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri || '/index.txt',
+		title,
+		CASE WHEN encrypted THEN NULL ELSE content END
+	FROM wiki_as_files WHERE encrypted = 0;
 
 -- Copy to web_pages
 INSERT INTO web_pages (id, parent, path, name, type, status, title, published, modified, format, content)

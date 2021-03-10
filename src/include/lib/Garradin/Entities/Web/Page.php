@@ -170,15 +170,22 @@ class Page extends Entity
 
 		$exists = $this->exists();
 		$realpath = $this->filepath();
+		$edit_file = false;
 
 		if (!$exists && !$file) {
-			$file = $this->_file = File::createAndStore(dirname($realpath), basename($realpath), null, $this->export());
-		}
+			$content = $this->export();
+			$file = $this->_file = File::create(dirname($realpath), basename($realpath), null, $content);
+			$file->store(null, $content);
+			$file->indexForSearch($content, $this->title);
 
-		$edit_file = (bool) count(array_intersect(['title', 'status', 'published', 'format', 'content'], array_keys($this->_modified)));
-
-		if ($edit_file) {
 			$this->set('modified', new \DateTime);
+		}
+		else {
+			$edit_file = (bool) count(array_intersect(['title', 'status', 'published', 'format', 'content'], array_keys($this->_modified)));
+
+			if ($edit_file) {
+				$this->set('modified', new \DateTime);
+			}
 		}
 
 		parent::save();
@@ -191,9 +198,11 @@ class Page extends Entity
 			$file = $this->file(true);
 		}
 
-
-		if ($edit_file) {
-			$file->setContent($this->export());
+		// File exists and content has been modified
+		if ($edit_file && $exists) {
+			$content = $this->export();
+			$file->store(null, $content, false);
+			$file->indexForSearch($content, $this->title);
 		}
 
 		return true;

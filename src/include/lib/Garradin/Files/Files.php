@@ -26,6 +26,32 @@ class Files
 		}
 	}
 
+	static public function search(string $search, string $path = null): array
+	{
+		if (strlen($search) > 100) {
+			throw new UserException('Recherche trop longue : maximum 100 caractères');
+		}
+
+		$where = '';
+		$params = [trim($search)];
+
+		if (null !== $path) {
+			$where = ' AND path LIKE ?';
+			$params[] = $path;
+		}
+
+		$query = sprintf('SELECT
+			*,
+			snippet(files_search, \'<b>\', \'</b>\', \'…\', 2) AS snippet,
+			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
+			FROM files_search
+			WHERE files_search MATCH ? %s
+			ORDER BY points DESC
+			LIMIT 0,50;', $where);
+
+		return DB::getInstance()->get($query, ...$params);
+	}
+
 	static public function list(string $path = ''): array
 	{
 		File::validatePath($path);

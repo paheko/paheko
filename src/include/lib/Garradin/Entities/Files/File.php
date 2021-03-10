@@ -201,7 +201,7 @@ class File extends Entity
 		return $this->store(null, rtrim($content));
 	}
 
-	protected function store(string $source_path = null, $source_content = null): self
+	public function store(?string $source_path, ?string $source_content, bool $index_search = true): self
 	{
 		if ($source_path && !$source_content)
 		{
@@ -265,27 +265,43 @@ class File extends Entity
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
 
-		// Store content in search table
-		if (substr($this->mime, 0, 5) == 'text/') {
-			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path());
-
-			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
-				$content = 'Contenu chiffré';
-			}
-			else if ($this->mime === 'text/html' || $this->mime == 'text/xml') {
-				$content = strip_tags($content);
-			}
-
-			// Only index contents up to 150KB and valid UTF-8
-			if (strlen($content) <= 150*1024 && preg_match('//u', $content)) {
-				DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, content) VALUES (?, ?);', $this->path(), $content);
-			}
+		if (!$index_search) {
+			$this->indexForSearch($source_path, $source_content);
 		}
 
 		return $this;
 	}
 
-	static public function createAndStore(string $path, string $name, string $source_path = null, string $source_content = null): self
+	public function indexForSearch(?string $source_path, ?string $source_content, ?string $title = null): void
+	{
+		// Store content in search table
+		if (substr($this->mime, 0, 5) == 'text/') {
+			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path());
+
+			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
+				$content = null;
+			}
+			else if ($this->mime === 'text/html' || $this->mime == 'text/xml') {
+				$content = strip_tags($content);
+			}
+		}
+		else {
+			$content = null;
+		}
+
+		// Only index valid UTF-8
+		if (isset($content) && preg_match('//u', $content)) {
+			// Truncate content at 150KB
+			$content = substr(trim($content), 0, 150*1024);
+		}
+		else {
+			$content = null;
+		}
+
+		DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path(), $this->name, $content);
+	}
+
+	static public function createAndStore(string $path, string $name, ?string $source_path, ?string $source_content): self
 	{
 		$file = self::create($path, $name, $source_path, $source_content);
 
@@ -341,7 +357,7 @@ class File extends Entity
 		}
 	}
 
-	static public function create(string $path, string $name, string $source_path = null, string $source_content = null): self
+	static public function create(string $path, string $name, ?string $source_path, ?string $source_content): self
 	{
 		if (!isset($source_path) && !isset($source_content)) {
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');

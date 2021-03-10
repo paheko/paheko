@@ -2,6 +2,7 @@
 
 <nav class="tabs">
 	<aside>
+		{linkbutton shape="search" label="Rechercher" target="_dialog" href="search.php"}
 		{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$parent}
 		{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$parent}
 	</aside>
