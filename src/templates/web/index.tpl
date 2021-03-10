@@ -18,7 +18,7 @@
 	<ul>
 		<li><a href="?parent=">Racine du site</a></li>
 		{foreach from=$breadcrumbs key="id" item="title"}
-			<li><a href="?id={$id}">{$title}</a></li>
+			<li><a href="?parent={$id}">{$title}</a></li>
 		{/foreach}
 	</ul>
 </nav>
