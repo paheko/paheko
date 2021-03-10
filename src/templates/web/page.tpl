@@ -13,7 +13,7 @@
 			<li><a href="{$admin_url}web/edit.php?id={$page.id}">Modifier</a></li>
 		{/if}
 		{if $page.status == $page::STATUS_ONLINE && !$config.desactiver_site}
-			<li><a href="{$page->url()}">Voir sur le site</a></li>
+			<li><a href="{$page->url()}" target="_blank">Voir sur le site</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 			<li><a href="{$admin_url}web/delete.php?id={$page.id}">Supprimer</a></li>
@@ -24,8 +24,9 @@
 {if !empty($breadcrumbs)}
 <nav class="breadcrumbs">
 	<ul>
+		<li><a href="{"!web/"|local_url}">Racine du site</a></li>
 		{foreach from=$breadcrumbs key="id" item="title"}
-			<li><a href="?id={$id}">{$title}</a></li>
+			<li><a href="?uri={$id}">{$title}</a></li>
 		{/foreach}
 	</ul>
 </nav>
