@@ -42,6 +42,7 @@ class Files
 
 		$query = sprintf('SELECT
 			*,
+			dirname(path) AS parent,
 			snippet(files_search, \'<b>\', \'</b>\', \'…\', 2) AS snippet,
 			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
 			FROM files_search
