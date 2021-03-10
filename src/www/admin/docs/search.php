@@ -1,8 +1,8 @@
 <?php
 namespace Garradin;
 
-use Garradin\Web\Web;
-use Garradin\Entities\Web\Page;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -11,7 +11,7 @@ $q = trim(f('q'));
 $tpl->assign('query', $q);
 
 if ($q) {
-	$r = Web::search($q);
+	$r = Files::search($q, File::CONTEXT_DOCUMENTS . '%');
 	$tpl->assign('results', $r);
 	$tpl->assign('results_count', count($r));
 }
@@ -22,4 +22,4 @@ function tpl_clean_snippet($str) {
 
 $tpl->register_modifier('clean_snippet', 'Garradin\tpl_clean_snippet');
 
-$tpl->display('web/search.tpl');
+$tpl->display('docs/search.tpl');

@@ -5,7 +5,9 @@ use Garradin\Entities\Files\File;
 
 <nav class="tabs">
 	<aside>
-		{linkbutton shape="search" label="Rechercher" href="search.php"}
+	{if $context == File::CONTEXT_DOCUMENTS}
+		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
+	{/if}
 	{if $can_mkdir}
 		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$path}
 	{/if}

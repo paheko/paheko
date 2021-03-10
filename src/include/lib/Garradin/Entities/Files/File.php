@@ -198,7 +198,9 @@ class File extends Entity
 
 	public function setContent(string $content): self
 	{
-		return $this->store(null, rtrim($content));
+		$this->store(null, rtrim($content));
+		$this->indexForSearch(null, $content);
+		return $this;
 	}
 
 	public function store(?string $source_path, ?string $source_content, bool $index_search = true): self
@@ -298,7 +300,7 @@ class File extends Entity
 			$content = null;
 		}
 
-		DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path(), $this->name, $content);
+		DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path(), $title ?? $this->name, $content);
 	}
 
 	static public function createAndStore(string $path, string $name, ?string $source_path, ?string $source_content): self

@@ -449,13 +449,17 @@ nav.breadcrumbs li:last-child a {
     margin: 2em 1em;
 }
 
-.search-results h4 nav a {
-    font-weight: normal;
+.search-results h4 a {
+    font-weight: normal !important;
+    font-size: .9em;
     color: #999;
 }
 
 .search-results h3 {
+    margin: .3em 0;
+}
+
+.search-results h3 a {
     color: darkblue;
     font-weight: normal;
-    margin: .3em 0;
 }

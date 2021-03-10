@@ -50,6 +50,7 @@ class DB extends SQLite3
         $this->exec(sprintf('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;', 32 * 1024 * 1024));
 
         $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
+        $this->db->createFunction('dirname', 'dirname');
     }
 
     public function version(): ?string
