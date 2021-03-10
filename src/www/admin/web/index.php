@@ -25,7 +25,8 @@ $pages = Web::listPages($cat ? $cat->path : null, $order_date);
 $title = $parent ? sprintf('Gestion du site web : %s', $cat->title) : 'Gestion du site web';
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
+$breadcrumbs = $cat ? $cat->getBreadcrumbs() : [];
 
-$tpl->assign(compact('categories', 'pages', 'title', 'parent', 'type_page', 'type_category', 'order_date'));
+$tpl->assign(compact('categories', 'pages', 'title', 'parent', 'type_page', 'type_category', 'order_date', 'breadcrumbs'));
 
 $tpl->display('web/index.tpl');
