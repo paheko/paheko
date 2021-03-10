@@ -1,7 +1,7 @@
 <nav class="tabs">
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
-		{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 			<li{if $current == 'save'} class="current"{/if}><a href="{$admin_url}services/save.php">Inscrire à une activité</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
