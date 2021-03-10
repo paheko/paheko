@@ -19,14 +19,12 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 			{/if}
 
-			{if !ENABLE_TECH_DETAILS && !$session->canAccess('config', Membres::DROIT_ADMIN)}
 			<dd class="help">
 				<details>
 					<summary class="block help">Schéma SQL des tables</summary>
 					<pre class="block help">{foreach from=$schema item="table"}{$table}<br />{/foreach}</pre>
 				</details>
 			</dd>
-			{/if}
 		</dl>
 		<p class="submit">
 			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
@@ -37,8 +35,8 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
-			{if ENABLE_TECH_DETAILS && $session->canAccess('config', Membres::DROIT_ADMIN)}
-				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL"}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
 			{/if}
 		</p>
 	{elseif !$sql_query}

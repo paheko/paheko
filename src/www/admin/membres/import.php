@@ -42,7 +42,7 @@ if (f('cancel')) {
 }
 
 $form->runIf(f('import') && $csv->loaded(), function () use ($csv, $import, $user) {
-    $csv->setTranslationTable(f('translation_table'));
+    $csv->setTranslationTable(f('translation_table') ?? []);
     $csv->skip((int)f('skip_first_line'));
     $import->fromCustomCSV($csv, $user->id);
     $csv->clear();

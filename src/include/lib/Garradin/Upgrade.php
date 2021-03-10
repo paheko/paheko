@@ -70,6 +70,14 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.0.6', '<'))
+			{
+				// Missing trigger
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.0.6_migration.sql');
+				$db->commit();
+			}
+
 			if (version_compare($v, '1.1.0', '<='))
 			{
 				// Missing trigger

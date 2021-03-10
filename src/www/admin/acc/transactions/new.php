@@ -22,6 +22,18 @@ $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
 
+$date = new \DateTime;
+
+if ($session->get('acc_last_date')) {
+	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+}
+
+if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
+	$date = $current_year->start_date;
+}
+
+$transaction->date = $date;
+
 // Quick pay-off for debts and credits, directly from a debt/credit details page
 if ($id = $payoff_for) {
 	$payoff_for = $transaction->payOffFrom($id);
@@ -78,17 +90,6 @@ if (f('save') && $form->check('acc_transaction_new')) {
 	}
 }
 
-$date = new \DateTime;
-
-if ($session->get('acc_last_date')) {
-	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
-}
-
-if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
-	$date = $current_year->start_date;
-}
-
-$tpl->assign('date', $date->format('d/m/Y'));
 $tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
