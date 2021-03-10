@@ -14,6 +14,15 @@
 	</ul>
 </nav>
 
+<nav class="breadcrumbs">
+	<ul>
+		<li><a href="?parent=">Racine du site</a></li>
+		{foreach from=$breadcrumbs key="id" item="title"}
+			<li><a href="?id={$id}">{$title}</a></li>
+		{/foreach}
+	</ul>
+</nav>
+
 {if $config.desactiver_site}
 	<p class="block alert">
 		Le site public est désactivé. <a href="{"!web/config.php"|local_url}">Réactiver le site dans la configuration.</a>
