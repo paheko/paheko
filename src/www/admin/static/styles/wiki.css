@@ -120,20 +120,6 @@ fieldset.wikiMain #f_uri {
     margin-bottom: 1em;
 }
 
-.wikiSearch input[type=text] {
-    padding: .3em;
-}
-
-.wikiResults h3 {
-    font-weight: normal;
-    margin-bottom: .3em;
-}
-
-.wikiResults p {
-    margin-bottom: .8em;
-    font-size: .9em;
-}
-
 form#f_upload fieldset {
     position: relative;
 }

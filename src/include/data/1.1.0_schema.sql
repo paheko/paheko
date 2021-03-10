@@ -292,8 +292,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
     tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
-    id INTEGER PRIMARY KEY NOT NULL,
-    path TEXT NOT NULL,
+    path TEXT PRIMARY KEY NOT NULL,
     title TEXT NULL,
     content TEXT NOT NULL -- Text content
 );
