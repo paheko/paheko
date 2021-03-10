@@ -39,7 +39,7 @@
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>
-				<td class="num">{if $line.id_analytical}<a href="{$admin_url}acc/reports/statement.php?analytical={$line.id_analytical}">{$line.code_analytical}</a>{/if}</td>
+				<td class="num">{foreach from=$line.code_analytical item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?analytical={$id}">{$code}</a> {/foreach}</td>
 				<td class="actions">
 					{if $line.type == Entities\Accounting\Transaction::TYPE_DEBT && ($line.status & Entities\Accounting\Transaction::STATUS_WAITING)}
 						{linkbutton shape="check" label="Régler cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$line.id}

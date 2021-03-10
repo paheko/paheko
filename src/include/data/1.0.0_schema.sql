@@ -266,7 +266,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
 CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
-CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type);
+CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
@@ -291,6 +291,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
     CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
 );
 
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transactions_lines (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_analytical ON acc_transactions_lines (id_analytical);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);

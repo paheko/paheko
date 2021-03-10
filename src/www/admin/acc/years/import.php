@@ -15,10 +15,10 @@ if ($year_id === CURRENT_YEAR_ID) {
 }
 else {
 	$year = Years::get($year_id);
+}
 
-	if (!$year) {
-		throw new UserException("L'exercice demandé n'existe pas.");
-	}
+if (!$year) {
+	throw new UserException("L'exercice demandé n'existe pas.");
 }
 
 if (qg('export')) {
