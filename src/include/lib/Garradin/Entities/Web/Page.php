@@ -307,8 +307,8 @@ class Page extends Entity
 
 	static public function findTaggedAttachments(string $text): array
 	{
-		preg_match_all('/<<?(?:fichier|image)\s*(?:\|\s*)?([\w\d_.-]+)/ui', $text, $match, PREG_PATTERN_ORDER);
-		preg_match_all('/(?:fichier|image):\/\/([\w\d_.-]+)/ui', $text, $match2, PREG_PATTERN_ORDER);
+		preg_match_all('/<<?(?:file|image)\s*(?:\|\s*)?([\w\d_.-]+)/ui', $text, $match, PREG_PATTERN_ORDER);
+		preg_match_all('/#(?:file|image):\[([\w\d_.-]+)\]/ui', $text, $match2, PREG_PATTERN_ORDER);
 
 		return array_merge($match[1], $match2[1]);
 	}
