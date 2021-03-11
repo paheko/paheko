@@ -39,7 +39,7 @@ $form->runIf('move', function () use ($check, $session) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
-		if (!$file || !$file->checkWriteAccess($session)) {
+		if (!$file || !$file->checkWriteAccess($session) || $file->context() != File::CONTEXT_DOCUMENTS) {
 			throw new UserException('Impossible de déplacer un fichier car vous n\'avez pas le droit de le modifier');
 		}
 	}

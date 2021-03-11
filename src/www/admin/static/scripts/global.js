@@ -154,7 +154,7 @@
 		return content;
 	}
 
-	g.openFrameDialog = function (url, height = '90%') {
+	g.openFrameDialog = function (url, height = '90%', callback) {
 		var iframe = document.createElement('iframe');
 		iframe.src = url;
 		iframe.name = 'dialog';
@@ -162,12 +162,12 @@
 		iframe.frameborder = '0';
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
-		iframe.onload = () => {
+		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 			iframe.style.height = height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : height;
-		};
+		});
 
-		g.openDialog(iframe);
+		g.openDialog(iframe, callback);
 		return iframe;
 	};
 
@@ -395,6 +395,19 @@
 				return false;
 			};
 		});
+
+		$('form[target="_dialog"]').forEach((e) => {
+			e.onsubmit = () => {
+				let url = e.getAttribute('action');
+				url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+				e.setAttribute('action', url);
+				e.target = 'dialog';
+
+				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? '90%' : 'auto');
+				e.submit();
+				return false;
+			};
+		});
 	});
 
 	g.onload(() => {
@@ -415,7 +428,7 @@
 					return !window.alert("Aucune ligne sélectionnée !");
 				}
 
-				this.form.submit();
+				this.form.dispatchEvent(new Event('submit'));
 			};
 		}
 
