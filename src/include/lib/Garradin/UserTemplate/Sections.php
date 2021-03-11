@@ -92,17 +92,20 @@ class Sections
 		$params['where'] .= ' AND status = :status';
 		$params[':status'] = Page::STATUS_ONLINE;
 
-		if (isset($params['search'])) {
-			$params['tables'] .= ' INNER JOIN files_search s USING (path)';
-			$params['select'] .= ', rank(matchinfo(s), 0, 1.0, 1.0) AS points';
-			$params['where'] .= ' AND s MATCH :search';
-
-			if (!isset($params['order'])) {
-				$params['order'] = 'points DESC';
+		if (array_key_exists('search', $params)) {
+			if (trim($params['search']) === '') {
+				return;
 			}
 
-			$params[':search'] = $params['search'];
+			$params[':search'] = substr(trim($params['search']), 0, 100);
 			unset($params['search']);
+
+			$params['tables'] .= ' INNER JOIN files_search ON files_search.path = w.file_path';
+			$params['select'] .= ', rank(matchinfo(files_search), 0, 1.0, 1.0) AS points, snippet(files_search, \'<b>\', \'</b>\', \'…\', 2) AS snippet';
+			$params['where'] .= ' AND files_search MATCH :search';
+
+			$params['order'] = 'points DESC';
+			$params['limit'] = '30';
 		}
 
 		if (isset($params['uri'])) {
@@ -139,17 +142,17 @@ class Sections
 			unset($params['future']);
 		}
 
-		//var_dump($params); exit;
-
 		foreach (self::sql($params, $tpl, $line) as $row) {
-			$data = $row;
-			unset($data['points']);
+			if (empty($params['count'])) {
+				$data = $row;
+				unset($data['points'], $data['snippet']);
 
-			$page = new Page;
-			$page->exists(true);
-			$page->load($data);
+				$page = new Page;
+				$page->exists(true);
+				$page->load($data);
 
-			$row = array_merge($row, $page->asTemplateArray());
+				$row = array_merge($row, $page->asTemplateArray());
+			}
 
 			yield $row;
 		}
@@ -250,7 +253,7 @@ class Sections
 			'select' => '*',
 			'order' => '1',
 			'begin' => 0,
-			'limit' => 1000,
+			'limit' => 100,
 			'where' => '',
 		];
 
@@ -265,8 +268,9 @@ class Sections
 		}
 
 		// Allow for count=true, count=1 and also count="DISTINCT user_id" count="id"
-		if (isset($params['count'])) {
+		if (!empty($params['count'])) {
 			$params['select'] = sprintf('COUNT(%s) AS count', $params['count'] == 1 ? '*' : $params['count']);
+			$params['order'] = '1';
 		}
 
 		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
@@ -297,7 +301,7 @@ class Sections
 			}
 
 			if (!empty($params['debug'])) {
-				echo sprintf('<pre style="padding: 5px; background: yellow;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
+				echo sprintf('<pre style="padding: 5px; background: yellow; white-space: normal;">%s</pre>', htmlspecialchars($statement->getSQL(true)));
 			}
 
 			$result = $statement->execute();

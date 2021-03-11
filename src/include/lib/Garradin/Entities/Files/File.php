@@ -300,7 +300,9 @@ class File extends Entity
 			$content = null;
 		}
 
-		DB::getInstance()->preparedQuery('INSERT OR REPLACE INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path(), $title ?? $this->name, $content);
+		$db = DB::getInstance();
+		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path());
+		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path(), $title ?? $this->name, $content);
 	}
 
 	static public function createAndStore(string $path, string $name, ?string $source_path, ?string $source_content): self

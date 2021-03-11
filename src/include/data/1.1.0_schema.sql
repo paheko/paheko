@@ -292,9 +292,10 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
     tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
-    path TEXT PRIMARY KEY NOT NULL,
+    path TEXT NOT NULL,
     title TEXT NULL,
-    content TEXT NOT NULL -- Text content
+    content TEXT NOT NULL, -- Text content
+    notindexed=path
 );
 
 CREATE TABLE IF NOT EXISTS web_pages
@@ -302,7 +303,7 @@ CREATE TABLE IF NOT EXISTS web_pages
     id INTEGER NOT NULL PRIMARY KEY,
     parent TEXT NULL, -- Parent path, NULL = web root
     path TEXT NOT NULL, -- Full page directory name
-    name TEXT NOT NULL, -- File name
+    file_path TEXT NOT NULL, -- Full file path for contents
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status TEXT NOT NULL,
     format TEXT NOT NULL,
@@ -313,7 +314,10 @@ CREATE TABLE IF NOT EXISTS web_pages
 );
 
 CREATE UNIQUE INDEX web_pages_path ON web_pages (path);
+CREATE UNIQUE INDEX web_pages_file_path ON web_pages (file_path);
 CREATE INDEX web_pages_parent ON web_pages (parent);
+CREATE INDEX web_pages_published ON web_pages (published);
+CREATE INDEX web_pages_title ON web_pages (title);
 
 CREATE TABLE IF NOT EXISTS web_attachments
 (

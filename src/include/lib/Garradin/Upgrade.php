@@ -119,6 +119,14 @@ class Upgrade
 
 				$champs->createIndexes($champs::TABLE);
 
+				$pages = $db->iterate('SELECT * FROM web_pages;');
+
+				foreach ($pages as $data) {
+					$page = new \Garradin\Entities\Web\Page;
+					$page->load((array) $data);
+					$page->syncSearch();
+				}
+
 				$db->commitSchemaUpdate();
 			}
 
