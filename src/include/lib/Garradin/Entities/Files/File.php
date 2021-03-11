@@ -177,6 +177,11 @@ class File extends Entity
 		return parent::delete();
 	}
 
+	public function move(string $target): bool
+	{
+		return $this->rename($target . '/' . $this->name);
+	}
+
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
@@ -432,7 +437,7 @@ class File extends Entity
 		$name = preg_replace('/\s+/', '_', $file['name']);
 		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
 
-		return self::createAndStore($path, strtolower($name), $file['tmp_name']);
+		return self::createAndStore($path, $name, $file['tmp_name'], null);
 	}
 
 

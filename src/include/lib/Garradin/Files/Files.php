@@ -63,6 +63,14 @@ class Files
 		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $path);
 	}
 
+	static public function listAllDirectoriesAssoc(string $context): array
+	{
+		return DB::getInstance()->getAssoc('SELECT
+			TRIM(path || \'/\' || name, \'/\'),
+			TRIM(REPLACE(path, ?, \'\') || \'/\' || name, \'/\')
+			FROM files WHERE (path = ? OR path LIKE ?) AND type = ? ORDER BY path COLLATE NOCASE, name COLLATE NOCASE;', $context, $context, $context . '/%', File::TYPE_DIRECTORY);
+	}
+
 	static public function delete(string $path): void
 	{
 		$file = self::get($path);
