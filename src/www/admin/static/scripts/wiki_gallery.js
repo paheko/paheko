@@ -47,6 +47,7 @@
 
         img.onclick = function (e) {
             e.stopPropagation();
+            img.pos++;
             openImage(img, items);
         };
 
@@ -65,7 +66,7 @@
 
         var pos = img.pos;
 
-        if (pos++ == items.length)
+        if (pos >= items.length)
         {
             var div = img.parentNode.parentNode;
             div.style.opacity = 0;

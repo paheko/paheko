@@ -251,6 +251,24 @@ aside.contacts {
     margin-top: -5em;
 }
 
+.breadcrumbs {
+    margin: 1em 0;
+}
+
+.breadcrumbs ul li {
+    display: inline-block;
+}
+
+.breadcrumbs ul li::before {
+    content: "»";
+    color: #ccc;
+    margin: .5em;
+}
+
+.breadcrumbs a {
+    color: #999;
+}
+
 @media handheld, screen and (max-width: 980px) {
     body {
         padding: 0;

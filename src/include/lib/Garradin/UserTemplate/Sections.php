@@ -9,6 +9,8 @@ use Garradin\Web\Web;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
+use const Garradin\WWW_URL;
+
 class Sections
 {
 	const SECTIONS_LIST = [
@@ -16,6 +18,7 @@ class Sections
 		'articles',
 		'pages',
 		'images',
+		'breadcrumbs',
 		'documents',
 		'files',
 		'sql',
@@ -30,6 +33,32 @@ class Sections
 		}
 
 		return self::$_cache[$id];
+	}
+
+	static public function breadcrumbs(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!isset($params['path'])) {
+			throw new Brindille_Exception('"path" parameter is mandatory and is missing');
+		}
+
+		$paths = [];
+		$path = '';
+
+		foreach (explode('/', $params['path']) as $part) {
+			$path = trim($path . '/' . $part, '/');
+			$paths[$path] = null;
+		}
+
+		$db = DB::getInstance();
+		$sql = sprintf('SELECT path, title FROM web_pages WHERE %s ORDER BY path ASC;', $db->where('path', array_keys($paths)));
+
+		$result = $db->preparedQuery($sql);
+
+		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
+		{
+			$row['url'] = WWW_URL . $row['path'];
+			yield $row;
+		}
 	}
 
 	static public function categories(array $params, UserTemplate $tpl, int $line): \Generator
