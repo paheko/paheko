@@ -24,7 +24,7 @@ header.nav {
     border-top: .3em solid #666;
     text-align: center;
     padding-top: .3em;
-    font-size: 1.1em;
+    font-size: .8em;
 }
 
 header.nav li {
@@ -37,14 +37,15 @@ header.nav li a {
     padding: .3em .5em;
     text-transform: uppercase;
     color: #666;
+    text-decoration: none;
 }
 
 header.nav li.current a {
     background: #fff;
     border: .1em solid #999;
     border-bottom: none;
-    border-top-left-radius: .5em;
-    border-top-right-radius: .5em;
+    border-top-left-radius: .3em;
+    border-top-right-radius: .3em;
 }
 
 header.nav li a:hover {
@@ -146,6 +147,7 @@ footer.main a#garradin {
 }
 
 section.articles article {
+    clear: both;
     border-left: .2em solid #ccc;
     border-radius: .5em;
     padding-left: 1em;
@@ -175,6 +177,11 @@ section.articles article h5 {
     font-weight: normal;
     font-size: .8em;
     margin-bottom: .3em;
+}
+
+section.articles.main aside {
+    float: right;
+    margin: 1em;
 }
 
 section.page article {
@@ -292,6 +299,7 @@ input:focus {
 
 .search-widget {
     float: right;
+    margin-top: -1rem;
 }
 
 .search-widget input {

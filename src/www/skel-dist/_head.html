@@ -37,18 +37,19 @@
 	</article>
 {{/if}}
 
+	<form method="get" action="{{ $root_url }}search.html" class="search-widget">
+		<p>
+			<input type="search" name="search" placeholder="Rechercher…" />
+			<input type="submit" value="»" />
+		</p>
+	</form>
+
 	<nav>
 		<ul>
 		{{#categories parent=null order="title"}}
 			<li><a href="{{$url}}">{{ $title }}</a></li>
 		{{/categories}}
 		</ul>
-		<form method="get" action="{{ $root_url }}search.html" class="search-widget">
-			<p>
-				<input type="search" name="search" placeholder="Rechercher…" />
-				<input type="submit" value="»" />
-			</p>
-		</form>
 	</nav>
 </header>
 
