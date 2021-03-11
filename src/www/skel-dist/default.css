@@ -24,7 +24,6 @@ header.nav {
     border-top: .3em solid #666;
     text-align: center;
     padding-top: .3em;
-    font-size: .8em;
 }
 
 header.nav li {
@@ -78,29 +77,30 @@ header.main {
 header.main nav {
     font-size: 1.2em;
     margin: 1em 0;
-    padding: 0 1em;
     background: #ddd;
     border-radius: .5em;
+    padding: .3rem;
 }
 
 header.main nav ul li {
     display: inline-block;
-    margin: -.3em .2em;
+    margin: .1rem .2rem;
+    padding: 0;
 }
 
 header.main nav ul li a {
     display: inline-block;
-    border-radius: 25%;
-    padding: .5em .5em .4em .5em;
+    margin: 0;
+    padding: .2em .5em;
     color: #006;
     text-decoration: none;
-    background: #ddd;
-    border-bottom: .1em solid #ddd;
+    background: #eee;
+    border-radius: .5rem;
 }
 
 header.main nav ul li a:hover {
-    color: #00f;
-    background: #ccf;
+    color: darkred;
+    background: #fff;
 }
 
 footer.main {
@@ -340,13 +340,25 @@ input:focus {
         font-size: 2em;
     }
 
-    header.main h4 {
-        margin-bottom: 1em;
+    header.main .contacts {
+        text-align: center;
+        margin: .5em 0;
+    }
+
+    header.main .contacts * {
+        font-size: .8em;
+        display: block;
+        margin: 0;
+    }
+
+    .search-widget {
+        float: none;
+        margin: .5em;
     }
 
     header.main nav {
         font-size: 1em;
-        padding: 0;
+        background: none;
     }
 
     section.page {

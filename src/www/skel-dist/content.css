@@ -75,6 +75,10 @@ aside.file a:hover {
     font-size: .8em;
 }
 
+a.internal-image {
+    cursor: zoom-in;
+}
+
 img {
     max-width: 100%;
 }
@@ -108,13 +112,19 @@ img {
     align-items: center;
     justify-content: center;
     transition: all .5s;
+    margin: 0;
 }
 
 .imageBrowser figure img {
     background: #000;
     padding: .5rem;
-    max-height: 95%;
-    max-width: 95%;
     border-radius: .5em;
     cursor: pointer;
+}
+
+@media handheld, screen and (max-width: 980px) {
+    .imageBrowser figure {
+        max-width: 100%;
+        max-height: 100%;
+    }
 }
