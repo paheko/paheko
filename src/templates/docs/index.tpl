@@ -61,7 +61,7 @@ use Garradin\Entities\Files\File;
 {/if}
 
 {if count($files)}
-<form method="post" action="{"!docs/action.php"|local_url}">
+<form method="post" action="{"!docs/action.php"|local_url}" target="_dialog">
 <table class="list">
 	<thead>
 		<tr>
@@ -131,7 +131,9 @@ use Garradin\Entities\Files\File;
 					<input type="hidden" name="parent" value="{$path}" />
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
+						{if $context == File::CONTEXT_DOCUMENTS}
 						<option value="move">Déplacer</option>
+						{/if}
 						<option value="delete">Supprimer</option>
 					</select>
 					<noscript>
