@@ -37,7 +37,7 @@
 
         var img = document.createElement('img');
         img.title = 'Cliquer sur l\'image pour aller à la suivante, ou à côté pour fermer';
-        img.pos = 0;
+        img.pos = pos || 0;
 
         img.onload = function () {
             fig.style.opacity = 1;
@@ -64,6 +64,7 @@
         var fig = img.parentNode;
         fig.style.opacity = 0;
 
+        console.log(img);
         var pos = img.pos;
 
         if (pos >= items.length)
