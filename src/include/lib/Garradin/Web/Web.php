@@ -28,7 +28,7 @@ class Web
 			$path = '';
 
 			foreach (explode('/', $result->uri) as $part) {
-				$path = trim($part . '/', '/');
+				$path = trim($path . '/' . $part, '/');
 				$result->breadcrumbs[$path] = $part;
 			}
 		}
