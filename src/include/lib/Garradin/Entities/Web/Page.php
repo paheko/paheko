@@ -21,7 +21,8 @@ class Page extends Entity
 	protected $id;
 	protected $parent;
 	protected $path;
-	protected $name;
+	protected $_name = 'index.txt';
+	protected $file_path;
 	protected $title;
 	protected $type;
 	protected $status;
@@ -33,8 +34,8 @@ class Page extends Entity
 	protected $_types = [
 		'id'        => 'int',
 		'parent'    => '?string',
-		'path'       => 'string',
-		'name'      => 'string',
+		'path'      => 'string',
+		'file_path' => 'string',
 		'title'     => 'string',
 		'type'      => 'int',
 		'status'    => 'string',
@@ -80,7 +81,7 @@ class Page extends Entity
 		$page->importForm($data);
 		$page->published = new \DateTime;
 		$page->modified = new \DateTime;
-		$page->name = 'index.txt';
+		$page->file_path = $page->filepath();
 		$page->type = $type;
 
 		return $page;
@@ -90,6 +91,10 @@ class Page extends Entity
 	{
 		if (null === $this->_file || $force_reload) {
 			$this->_file = Files::get($this->filepath());
+
+			if (null === $this->_file) {
+				throw new \RuntimeException('File not found: ' . $this->filepath());
+			}
 		}
 
 		return $this->_file;
@@ -148,15 +153,7 @@ class Page extends Entity
 
 	public function filepath(): string
 	{
-		$parts = [
-			File::CONTEXT_WEB,
-			$this->path,
-			$this->name,
-		];
-
-		$parts = array_filter($parts);
-
-		return implode('/', $parts);
+		return $this->file_path ?? File::CONTEXT_WEB . '/' . $this->path . '/' . $this->_name;
 	}
 
 	public function path(): string
@@ -164,33 +161,42 @@ class Page extends Entity
 		return $this->path;
 	}
 
+	public function syncFileContent(): void
+	{
+		$this->file()->store(null, $this->export());
+		$this->syncSearch();
+	}
+
+	public function syncSearch(): void
+	{
+		$content = $this->format == self::FORMAT_ENCRYPTED ? null : strip_tags($this->render());
+		$this->file()->indexForSearch(null, $content, $this->title);
+	}
+
 	public function save(): bool
 	{
-		$file = $this->file();
-
 		$exists = $this->exists();
+		$file = $exists ? $this->file() : null;
+
 		$realpath = $this->filepath();
 		$edit_file = false;
 
 		if (!$exists && !$file) {
-			$content = $this->export();
-			$file = $this->_file = File::create(dirname($realpath), basename($realpath), null, $content);
-			$file->store(null, $content);
-			$file->indexForSearch($content, $this->title);
-
-			$this->set('modified', new \DateTime);
+			$file = $this->_file = File::create(dirname($realpath), basename($realpath), null, '');
+			$file->set('mime', 'text/plain');
+			$edit_file = true;
 		}
 		else {
 			$edit_file = (bool) count(array_intersect(['title', 'status', 'published', 'format', 'content'], array_keys($this->_modified)));
+		}
 
-			if ($edit_file) {
-				$this->set('modified', new \DateTime);
-			}
+		if ($edit_file) {
+			$this->set('modified', new \DateTime);
 		}
 
 		parent::save();
 
-		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['name']) || isset($this->_modified['path']))) {
+		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['file_path']) || isset($this->_modified['path']))) {
 			// Rename parent directory
 			$dir = Files::get($file->path);
 			$dir->rename(dirname($realpath));
@@ -198,11 +204,9 @@ class Page extends Entity
 			$file = $this->file(true);
 		}
 
-		// File exists and content has been modified
-		if ($edit_file && $exists) {
-			$content = $this->export();
-			$file->store(null, $content, false);
-			$file->indexForSearch($content, $this->title);
+		// File content has been modified
+		if ($edit_file) {
+			$this->syncFileContent();
 		}
 
 		return true;
@@ -292,7 +296,7 @@ class Page extends Entity
 
 			// Remove the page itself
 			$list = array_filter($list, function ($a) {
-				return $a->name != $this->name && $a->type != $a::TYPE_DIRECTORY;
+				return $a->name != $this->_name && $a->type != $a::TYPE_DIRECTORY;
 			});
 
 			$this->_attachments = $list;

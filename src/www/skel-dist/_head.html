@@ -23,12 +23,32 @@
 <header class="main">
 	<h1><a href="{{$root_url}}">{{$config.nom_asso}}</a></h1>
 
+{{if $config.adresse_asso || $config.telephone_asso || $config.email_asso}}
+	<article class="contacts">
+		{{if $config.adresse_asso}}
+			<h4>{{$config.adresse_asso|escape}}</h4>
+		{{/if}}
+		{{if $config.telephone_asso}}
+			<h5>{{$config.telephone_asso|raw|protect_contact}}</h5>
+		{{/if}}
+		{{if $config.email_asso}}
+			<h5>{{$config.email_asso|raw|protect_contact}}</h5>
+		{{/if}}
+	</article>
+{{/if}}
+
 	<nav>
 		<ul>
 		{{#categories parent=null order="title"}}
 			<li><a href="{{$url}}">{{ $title }}</a></li>
 		{{/categories}}
 		</ul>
+		<form method="get" action="{{ $root_url }}search.html" class="search-widget">
+			<p>
+				<input type="search" name="search" placeholder="Rechercher…" />
+				<input type="submit" value="»" />
+			</p>
+		</form>
 	</nav>
 </header>
 
