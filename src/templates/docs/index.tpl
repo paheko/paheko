@@ -61,6 +61,7 @@ use Garradin\Entities\Files\File;
 {/if}
 
 {if count($files)}
+<form method="post" action="{"!docs/action.php"|local_url}">
 <table class="list">
 	<thead>
 		<tr>
@@ -80,7 +81,7 @@ use Garradin\Entities\Files\File;
 		<tr>
 			{if $can_delete}
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$file.id}
+				{input type="checkbox" name="check[]" value=$file->path()}
 			</td>
 			{/if}
 			<th><a href="?p={$file->path()}">{$file.name}</a></th>
@@ -93,7 +94,7 @@ use Garradin\Entities\Files\File;
 		</tr>
 			{if $can_delete}
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$file.id}
+				{input type="checkbox" name="check[]" value=$file->path()}
 			</td>
 			{/if}
 			<th>
@@ -127,10 +128,10 @@ use Garradin\Entities\Files\File;
 			<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 			<td class="actions" colspan="5">
 				<em>Pour les fichiers cochés :</em>
-					{csrf_field key="files"}
+					<input type="hidden" name="parent" value="{$path}" />
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
-						{*<option value="move">Déplacer</option>*}
+						<option value="move">Déplacer</option>
 						<option value="delete">Supprimer</option>
 					</select>
 					<noscript>
@@ -141,6 +142,7 @@ use Garradin\Entities\Files\File;
 		</tr>
 	</tfoot>
 </table>
+</form>
 {else}
 	<p class="alert block">Il n'y a aucun fichier dans ce répertoire.</p>
 {/if}
