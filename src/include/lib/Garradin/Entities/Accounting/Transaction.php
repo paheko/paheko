@@ -391,6 +391,9 @@ class Transaction extends Entity
 		if (!array_key_exists($this->type, self::TYPES_NAMES)) {
 			throw new ValidationException('Type d\'écriture inconnu : ' . $this->type);
 		}
+
+		$this->assert($db->test('acc_years', 'id = ?', $this->id_year), 'L\'exercice sélectionné n\'existe pas');
+		$this->assert($this->id_creator === null || $db->test('membres', 'id = ?', $this->id_creator), 'Le compte membre créateur de l\'écriture n\'existe pas');
 	}
 
 	public function importFromDepositForm(?array $source = null): void
