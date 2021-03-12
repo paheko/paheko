@@ -837,7 +837,7 @@ class File extends Entity
 
 	static public function filterName(string $name): string
 	{
-		return preg_replace('/[^\w_. -]+/iU', '-', $name);
+		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', $name);
 	}
 
 	static public function validatePath(string $path): array
@@ -855,7 +855,7 @@ class File extends Entity
 		$context = array_shift($path);
 
 		foreach ($path as $part) {
-			if (!preg_match('!^[\w\d _-]+(?:\.[\w\d _-]+)*$!iu', $part)) {
+			if (!preg_match('!^[\w\d\p{L} _-]+(?:\.[\w\d\p{L} _-]+)*$!iu', $part)) {
 				throw new ValidationException('Chemin invalide');
 			}
 		}
