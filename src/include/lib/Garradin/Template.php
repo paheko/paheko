@@ -260,7 +260,7 @@ class Template extends \KD2\Smartyer
 			$current_value = $_POST[$name];
 			$current_value_from_user = true;
 		}
-		elseif (isset($source) && is_object($source) && isset($source->$name)) {
+		elseif (isset($source) && is_object($source) && isset($source->$name) && !is_null($source->$name)) {
 			$current_value = $source->$name;
 		}
 		elseif (isset($source) && is_array($source) && isset($source[$name])) {
@@ -281,6 +281,7 @@ class Template extends \KD2\Smartyer
 				$current_value = $v->format('d/m/Y');
 			}
 		}
+
 
 		$attributes['id'] = 'f_' . $name;
 		$attributes['name'] = $name;
