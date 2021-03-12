@@ -5,6 +5,8 @@ DROP TRIGGER IF EXISTS wiki_recherche_contenu_insert;
 DROP TRIGGER IF EXISTS wiki_recherche_contenu_chiffre;
 
 ALTER TABLE membres_categories RENAME TO membres_categories_old;
+
+INSERT OR IGNORE INTO config (cle, valeur) VALUES ('desactiver_site', '0');
 ALTER TABLE config RENAME TO config_old;
 
 .read 1.1.0_schema.sql
