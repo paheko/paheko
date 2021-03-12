@@ -15,11 +15,19 @@ $form->runIf('create', function () use ($s) {
 }, 'backup_create', Utils::getSelfURI(['ok' => 'create']));
 
 $form->runIf('restore', function () use ($s) {
+	if (!f('selected')) {
+		throw new UserException('Aucune sauvegarde sélectionnée');
+	}
+
 	$r = $s->restoreFromLocal(f('selected'));
 	Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
 }, 'backup_manage');
 
 $form->runIf('remove', function () use ($s) {
+	if (!f('selected')) {
+		throw new UserException('Aucune sauvegarde sélectionnée');
+	}
+
 	$s->remove(f('selected'));
 }, 'backup_manage', Utils::getSelfURI(['ok' => 'remove']));
 
