@@ -321,6 +321,8 @@ class File extends Entity
 
 	static public function createDirectory(string $path, string $name, bool $create_parent = true): self
 	{
+		$name = self::filterName($name);
+
 		$fullpath = trim($path . '/' . $name, '/');
 
 		if (Files::callStorage('exists', $fullpath)) {
@@ -371,6 +373,8 @@ class File extends Entity
 		if (!isset($source_path) && !isset($source_content)) {
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
 		}
+
+		$name = self::filterName($name);
 
 		self::ensureDirectoryExists($path);
 
@@ -829,6 +833,11 @@ class File extends Entity
 		}
 
 		return null;
+	}
+
+	static public function filterName(string $name): string
+	{
+		return preg_replace('/[^\w_. -]+/iU', '-', $name);
 	}
 
 	static public function validatePath(string $path): array
