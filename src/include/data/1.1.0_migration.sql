@@ -128,19 +128,17 @@ INSERT INTO files (path, name, type, mime, modified, size)
 		0 -- size will be set after
 	FROM wiki_as_files;
 
-UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE path = 'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri);
+UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE files.path = 'web/' || (CASE WHEN wiki_as_files.path IS NOT NULL THEN wiki_as_files.path || '/' ELSE '' END) || wiki_as_files.uri AND files.name = 'index.txt');
 
 -- x'0a' == \n
 INSERT INTO files_contents (id, compressed, content)
 	SELECT new_id, 0,
 		'Title: ' || title || x'0a' || 'Published: ' || created || x'0a' || 'Status: '
 		|| (CASE WHEN public THEN 'Online' ELSE 'Draft' END)
-		|| x'0a' || 'Format: ' || (CASE WHEN encrypted THEN 'Skriv/Encrypted' ELSE 'Skriv' END) 
+		|| x'0a' || 'Format: ' || (CASE WHEN encrypted THEN 'Skriv/Encrypted' ELSE 'Skriv' END)
 		|| x'0a' || x'0a' || '----' || x'0a' || x'0a' || content
 	FROM wiki_as_files;
 
--- Set file size
-UPDATE files SET size = (SELECT LENGTH(content) FROM files_contents WHERE id = files.id);
 UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
 
 -- Copy to search
@@ -230,6 +228,9 @@ UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' 
 
 -- Create transaction directories
 INSERT INTO files (path, name, type) SELECT 'transaction', id, 2 FROM fichiers_acc_transactions GROUP BY id;
+
+-- Set file size
+UPDATE files SET size = (SELECT LENGTH(content) FROM files_contents WHERE id = files.id) WHERE type = 1;
 
 DELETE FROM plugins_signaux WHERE signal LIKE 'boucle.%';
 
