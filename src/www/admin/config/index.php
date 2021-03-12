@@ -27,7 +27,11 @@ $tpl->assign([
 	'garradin_website' => WEBSITE,
 ]);
 
-$admin_background = $config->get('admin_background') ? $config->get('admin_background')->url() : null;
+$admin_background = $config->get('admin_background');
+
+if ($admin_background) {
+	$admin_background = $config->get('admin_background')->url();
+}
 
 $tpl->assign('background_image_current', $admin_background);
 $tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
