@@ -81,25 +81,25 @@ use Garradin\Entities\Files\File;
 		<tr>
 			{if $can_delete}
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$file->path()}
+				{input type="checkbox" name="check[]" value=$file.path}
 			</td>
 			{/if}
-			<th><a href="?p={$file->path()}">{$file.name}</a></th>
+			<th><a href="?p={$file.path}">{$file.name}</a></th>
 			<td></td>
 			<td>Répertoire</td>
 			<td></td>
-			<td class="actions">{linkbutton href="!common/files/delete.php?p=%s"|args:$file->pathname() label="Supprimer" shape="delete" target="_dialog"}</td>
+			<td class="actions">{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}</td>
 		</tr>
 		{else}
 		</tr>
 			{if $can_delete}
 			<td class="check">
-				{input type="checkbox" name="check[]" value=$file->path()}
+				{input type="checkbox" name="check[]" value=$file.path}
 			</td>
 			{/if}
 			<th>
 				{if $file->canPreview()}
-					<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file->pathname()}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
+					<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
 				{else}
 					<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
 				{/if}
@@ -109,13 +109,13 @@ use Garradin\Entities\Files\File;
 			<td>{$file.size|size_in_bytes}</td>
 			<td class="actions">
 				{if $can_write && $file->getEditor()}
-					{linkbutton href="!common/files/edit.php?p=%s"|args:$file->pathname() label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
+					{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
 				{/if}
 				{if $file->canPreview()}
-					{linkbutton href="!common/files/preview.php?p=%s"|args:$file->pathname() label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
+					{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 				{/if}
 				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
-				{linkbutton href="!common/files/delete.php?p=%s"|args:$file->pathname() label="Supprimer" shape="delete" target="_dialog"}
+				{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
 			</td>
 		</tr>
 		{/if}

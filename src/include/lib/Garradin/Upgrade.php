@@ -123,6 +123,7 @@ class Upgrade
 
 				foreach ($pages as $data) {
 					$page = new \Garradin\Entities\Web\Page;
+					$page->exists(true);
 					$page->load((array) $data);
 					$page->syncSearch();
 				}

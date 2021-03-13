@@ -68,7 +68,7 @@
 		<dl>
 			<dt>Texte de la page d'accueil</dt>
 			<dd>
-				{linkbutton href="!common/files/edit.php?p=%s"|args:$config.admin_homepage->path() label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
+				{linkbutton href="!common/files/edit.php?p=%s"|args:$config.admin_homepage.path label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
 			</dd>
 			<dd class="help">
 				Ce contenu sera affiché à la connexion d'un membre, ou en cliquant sur l'onglet 'Accueil' du menu de gauche.

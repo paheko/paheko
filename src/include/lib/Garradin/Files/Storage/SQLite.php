@@ -37,7 +37,7 @@ class SQLite implements StorageInterface
 					throw $e;
 				}
 
-				throw new \RuntimeException('File does not exist in DB: ' . $file->pathname());
+				throw new \RuntimeException('File does not exist in DB: ' . $file->path);
 			}
 
 			Static_Cache::storeFromPointer($cache_id, $blob);

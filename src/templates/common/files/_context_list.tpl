@@ -33,7 +33,7 @@ if (!isset($files, $can_upload)) {
 		{/if}
 		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
 		{if $file->checkDeleteAccess($session)}
-			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file->path() label="Supprimer"}
+			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
 		{/if}
 	</aside>
 {/foreach}

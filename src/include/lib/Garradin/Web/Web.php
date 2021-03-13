@@ -36,37 +36,37 @@ class Web
 		return $results;
 	}
 
-	static public function listCategories(?string $parent): array
+	static public function sync(?string $parent)
 	{
-		$params = [];
+		$path = trim(File::CONTEXT_WEB . '/' . $parent, '/');
+		Files::callStorage('sync', $path);
 
-		if (null === $parent) {
-			$where = 'parent IS NULL';
-		}
-		else {
-			$where = 'parent = ?';
-			$params[] = $parent;
-		}
+		$db = DB::getInstance();
+		$db->exec('DELETE FROM web_pages WHERE id IN (SELECT w.id FROM web_pages w LEFT JOIN files f ON w.file_path = f.path WHERE f.id IS NULL);');
 
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY title COLLATE NOCASE;', $where, Page::TYPE_CATEGORY);
-		return EM::getInstance(Page::class)->all($sql, ...$params);
+		$sql = 'SELECT path FROM files
+			WHERE parent = ?
+				AND type = ?
+				AND name NOT IN (SELECT basename(path) FROM web_pages WHERE parent = ?);';
+
+		foreach ($db->iterate($sql, trim(File::CONTEXT_WEB . '/' . $parent, '/'), File::TYPE_DIRECTORY, $parent) as $file) {
+			Files::callStorage('sync', $file->path);
+			$f = Files::get($file->path . '/index.txt');
+			Page::fromFile($f)->save();
+		}
 	}
 
-	static public function listPages(?string $parent, bool $order_by_date = true): array
+	static public function listCategories(string $parent): array
 	{
-		$params = [];
+		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE NOCASE;';
+		return EM::getInstance(Page::class)->all($sql, $parent, Page::TYPE_CATEGORY);
+	}
 
-		if (null === $parent) {
-			$where = 'parent IS NULL';
-		}
-		else {
-			$where = 'parent = ?';
-			$params[] = $parent;
-		}
-
+	static public function listPages(string $parent, bool $order_by_date = true): array
+	{
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';
-		$sql = sprintf('SELECT * FROM @TABLE WHERE %s AND type = %d ORDER BY %s;', $where, Page::TYPE_PAGE, $order);
-		return EM::getInstance(Page::class)->all($sql, ...$params);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE parent = ? AND type = %d ORDER BY %s;', Page::TYPE_PAGE, $order);
+		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
 	static public function getByURI(string $uri): ?Page

@@ -30,12 +30,14 @@ class File extends Entity
 	/**
 	 * Parent directory of file
 	 */
-	protected $path;
+	protected $parent;
 
 	/**
 	 * File name
 	 */
 	protected $name;
+
+	protected $path;
 	protected $type = self::TYPE_FILE;
 	protected $mime;
 	protected $size;
@@ -45,6 +47,7 @@ class File extends Entity
 	protected $_types = [
 		'id'           => 'int',
 		'path'         => 'string',
+		'parent'       => '?string',
 		'name'         => 'string',
 		'type'         => 'int',
 		'mime'         => '?string',
@@ -130,18 +133,8 @@ class File extends Entity
 		$this->assert($this->type === self::TYPE_DIRECTORY || $this->size !== null, 'File size must be set');
 		$this->assert($this->image === 0 || $this->image === 1, 'Unknown image value');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
-		$this->assert(strlen($this->path) || null === $this->path, 'Le chemin ne peut rester vide');
-	}
-
-	public function pathname(): string
-	{
-		$path = $this->path;
-
-		if ($path) {
-			$path .= '/';
-		}
-
-		return $path . $this->name;
+		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
+		$this->assert(strlen($this->parent) || null === $this->parent, 'Le chemin ne peut rester vide');
 	}
 
 	public function context(): string
@@ -160,7 +153,7 @@ class File extends Entity
 
 		// Delete recursively
 		if ($this->type == self::TYPE_DIRECTORY) {
-			foreach (Files::list($this->path()) as $file) {
+			foreach (Files::list($this->parent) as $file) {
 				$file->delete();
 			}
 		}
@@ -185,7 +178,7 @@ class File extends Entity
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
-		$current_path = $this->path();
+		$current_path = $this->path;
 
 		$return = Files::callStorage('move', $this, $new_path);
 
@@ -250,7 +243,7 @@ class File extends Entity
 		Files::callStorage('checkLock');
 
 		// If a file of the same name already exists, define a new name
-		if (Files::callStorage('exists', $this->pathname()) && !$this->exists()) {
+		if (Files::callStorage('exists', $this->path) && !$this->exists()) {
 			$pos = strrpos($this->name, '.');
 			$new_name = substr($this->name, 0, $pos) . '.' . substr(sha1(random_bytes(16)), 0, 10) . substr($this->name, $pos);
 			$this->set('name', $new_name);
@@ -283,7 +276,7 @@ class File extends Entity
 	{
 		// Store content in search table
 		if (substr($this->mime, 0, 5) == 'text/') {
-			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path());
+			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path);
 
 			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
 				$content = null;
@@ -306,8 +299,8 @@ class File extends Entity
 		}
 
 		$db = DB::getInstance();
-		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path());
-		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path(), $title ?? $this->name, $content);
+		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
+		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path, $title ?? $this->name, $content);
 	}
 
 	static public function createAndStore(string $path, string $name, ?string $source_path, ?string $source_content): self
@@ -325,6 +318,8 @@ class File extends Entity
 
 		$fullpath = trim($path . '/' . $name, '/');
 
+		self::validatePath($fullpath);
+
 		if (Files::callStorage('exists', $fullpath)) {
 			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $fullpath);
 		}
@@ -334,8 +329,9 @@ class File extends Entity
 		}
 
 		$file = new self;
+		$file->set('path', $fullpath);
 		$file->set('name', $name);
-		$file->set('path', $path);
+		$file->set('parent', $path);
 		$file->set('type', self::TYPE_DIRECTORY);
 		$file->set('image', 0);
 		$file->save();
@@ -380,8 +376,9 @@ class File extends Entity
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
 		$file = new self;
+		$file->set('path', $path . '/' . $name);
+		$file->set('parent', $path);
 		$file->set('name', $name);
-		$file->set('path', $path);
 
 		if ($source_path && !$source_content) {
 			$file->set('mime', finfo_file($finfo, $source_path));
@@ -473,7 +470,7 @@ class File extends Entity
 		}
 	}
 
-	public function url($download = false): string
+	public function url(bool $download = false): string
 	{
 		if ($this->context() == self::CONTEXT_WEB) {
 			$path = substr($this->path, strlen(self::CONTEXT_WEB . '/'));
@@ -482,7 +479,7 @@ class File extends Entity
 			$path = $this->path;
 		}
 
-		$url = WWW_URL . $path . '/' . $this->name;
+		$url = WWW_URL . $path;
 
 		if ($download) {
 			$url .= '?download';
@@ -698,7 +695,7 @@ class File extends Entity
 		}
 
 		$context = $this->context();
-		$ref = strtok(substr($this->pathname(), strpos($this->pathname(), '/')), '/');
+		$ref = strtok(substr($this->path, strpos($this->path, '/')), '/');
 
 		if (null === $session) {
 			return false;
@@ -799,14 +796,9 @@ class File extends Entity
 		return false;
 	}
 
-	public function path(): string
-	{
-		return $this->path . '/' . $this->name;
-	}
-
 	public function pathHash(): string
 	{
-		return sha1($this->path());
+		return sha1($this->path);
 	}
 
 	public function isPublic(): bool

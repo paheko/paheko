@@ -25,7 +25,7 @@ class Skeleton
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$this->file = Files::get(File::CONTEXT_SKELETON, $tpl);
+		$this->file = Files::get(File::CONTEXT_SKELETON . '/' . $tpl);
 
 		$this->name = $tpl;
 	}
@@ -145,7 +145,7 @@ class Skeleton
 
 	public function edit(string $content)
 	{
-		$file = Files::get(File::CONTEXT_SKELETON, $this->name);
+		$file = Files::get(File::CONTEXT_SKELETON . '/' . $this->name);
 
 		if ($file) {
 			$file->setContent($content);

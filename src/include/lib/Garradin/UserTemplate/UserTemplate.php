@@ -126,7 +126,7 @@ class UserTemplate extends Brindille
 
 	public function display(): void
 	{
-		$compiled_path = CACHE_ROOT . '/compiled/s_' . sha1($this->file ? $this->file->path() : $this->path) . '.php';
+		$compiled_path = CACHE_ROOT . '/compiled/s_' . sha1($this->file ? $this->file->path : $this->path) . '.php';
 
 		if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
 			require $compiled_path;

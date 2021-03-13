@@ -80,7 +80,7 @@ class FileSystem implements StorageInterface
 
 	static public function getFullPath(File $file): ?string
 	{
-		return self::_getRealPath($file->pathname());
+		return self::_getRealPath($file->path);
 	}
 
 	static public function display(File $file): void
@@ -189,7 +189,7 @@ class FileSystem implements StorageInterface
 
 		$db = DB::getInstance();
 
-		$saved_files = $db->getGrouped('SELECT name, size, modified, type FROM files WHERE path = ?;', $path);
+		$saved_files = $db->getGrouped('SELECT name, size, modified, type FROM files WHERE parent = ?;', $path);
 		$added = [];
 		$modified = [];
 		$exists = [];
@@ -222,11 +222,11 @@ class FileSystem implements StorageInterface
 
 		foreach ($modified as $file) {
 			// This will call 'update' method
-			Files::get($path, $file['name']);
+			Files::get($path . '/' . $file['name']);
 		}
 
 		foreach ($added as $file) {
-			$f = File::create($path, $file['name'], $fullpath . DIRECTORY_SEPARATOR . $file['name']);
+			$f = File::create($path, $file['name'], $fullpath . DIRECTORY_SEPARATOR . $file['name'], null);
 			$f->import($file);
 			$f->save();
 		}

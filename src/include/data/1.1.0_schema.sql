@@ -266,6 +266,7 @@ CREATE TABLE IF NOT EXISTS files
 (
     id INTEGER NOT NULL PRIMARY KEY,
     path TEXT NOT NULL,
+    parent TEXT NOT NULL,
     name TEXT NOT NULL, -- File name
     type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
     mime TEXT NULL,
@@ -277,13 +278,15 @@ CREATE TABLE IF NOT EXISTS files
 );
 
 -- Unique index as this is used to make up a file path
-CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path, name);
+CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
+CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
+CREATE INDEX IF NOT EXISTS files_name ON files (name);
 CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 
 CREATE TABLE IF NOT EXISTS files_contents
 -- Files contents (empty if using another storage backend)
 (
-    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id),
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
     compressed INT NOT NULL DEFAULT 0,
     content BLOB NOT NULL
 );
@@ -292,18 +295,23 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
     tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
-    path TEXT NOT NULL,
+    path TEXT NOT NULL REFERENCES files(path) ON DELETE CASCADE,
     title TEXT NULL,
     content TEXT NOT NULL, -- Text content
     notindexed=path
 );
 
+CREATE TRIGGER files_search_delete AFTER DELETE ON files
+BEGIN
+    DELETE FROM files_search WHERE path = OLD.path;
+END;
+
 CREATE TABLE IF NOT EXISTS web_pages
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    parent TEXT NULL, -- Parent path, NULL = web root
+    parent TEXT NOT NULL, -- Parent path, empty = web root
     path TEXT NOT NULL, -- Full page directory name
-    file_path TEXT NOT NULL, -- Full file path for contents
+    file_path TEXT NOT NULL REFERENCES files(path) ON DELETE CASCADE, -- Full file path for contents
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status TEXT NOT NULL,
     format TEXT NOT NULL,
