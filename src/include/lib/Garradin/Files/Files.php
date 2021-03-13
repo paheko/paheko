@@ -53,22 +53,22 @@ class Files
 		return DB::getInstance()->get($query, ...$params);
 	}
 
-	static public function list(string $path = ''): array
+	static public function list(string $parent = ''): array
 	{
-		File::validatePath($path);
+		File::validatePath($parent);
 
 		// Update this path
-		self::callStorage('sync', $path);
+		self::callStorage('sync', $parent);
 
-		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $path);
+		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $parent);
 	}
 
 	static public function listAllDirectoriesAssoc(string $context): array
 	{
 		return DB::getInstance()->getAssoc('SELECT
-			TRIM(path || \'/\' || name, \'/\'),
-			TRIM(REPLACE(path, ?, \'\') || \'/\' || name, \'/\')
-			FROM files WHERE (path = ? OR path LIKE ?) AND type = ? ORDER BY path COLLATE NOCASE, name COLLATE NOCASE;', $context, $context, $context . '/%', File::TYPE_DIRECTORY);
+			path,
+			REPLACE(path || \'/\', ?, \'\')
+			FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ? ORDER BY path COLLATE NOCASE, name COLLATE NOCASE;', $context, $context, $context . '/%', File::TYPE_DIRECTORY);
 	}
 
 	static public function delete(string $path): void
@@ -80,30 +80,6 @@ class Files
 		}
 
 		$file->delete();
-	}
-
-	/**
-	 * Creates a new temporary table files_tmp containg all files from the path argument
-	 */
-	static public function listToSQL(string $path): int
-	{
-		$db = DB::getInstance();
-		$db->begin();
-
-		$columns = File::getColumns();
-		$db->exec(sprintf('CREATE TEMP TABLE IF NOT EXISTS files_tmp (%s);', implode(',', $columns)));
-
-		$i = 0;
-
-		foreach (self::list($path) as $file) {
-			$file = $file->asArray();
-			unset($file['id']);
-			$db->insert('files_tmp', $file);
-			$i++;
-		}
-
-		$db->commit();
-		return $i;
 	}
 
 	static public function callStorage(string $function, ...$args)
@@ -159,7 +135,7 @@ class Files
 			$db = DB::getInstance();
 			$db->begin();
 
-			foreach ($db->iterate('SELECT * FROM files ORDER BY type DESC, path ASC, name ASC;') as $file) {
+			foreach ($db->iterate('SELECT * FROM files ORDER BY type DESC, path ASC;') as $file) {
 				$f = new File;
 				$f->load((array) $file);
 
@@ -200,36 +176,24 @@ class Files
 		call_user_func([$backend, 'truncate']);
 	}
 
-	static public function get(?string $path, ?string $name = null, int $type = null): ?File
+	static public function get(string $path, int $type = null): ?File
 	{
-		if (null === $path) {
-			return null;
-		}
-
-		$fullpath = $path;
-
-		if ($name) {
-			$fullpath .= '/' . $name;
-		}
-
 		try {
-			File::validatePath($fullpath);
+			File::validatePath($path);
 		}
 		catch (ValidationException $e) {
 			return null;
 		}
 
-		$path = dirname($fullpath);
-		$name = basename($fullpath);
 		$where = '';
 
 		if (null !== $type) {
 			$where = ' AND type = ' . $type;
 		}
 
-		$sql = sprintf('SELECT * FROM @TABLE WHERE path = ? AND name = ? %s LIMIT 1;', $where);
+		$sql = sprintf('SELECT * FROM @TABLE WHERE path = ? %s LIMIT 1;', $where);
 
-		$file = EM::findOne(File::class, $sql, $path, $name);
+		$file = EM::findOne(File::class, $sql, $path);
 
 		if (null !== $file) {
 			$file = self::callStorage('update', $file);

@@ -33,7 +33,7 @@ class Page extends Entity
 
 	protected $_types = [
 		'id'        => 'int',
-		'parent'    => '?string',
+		'parent'    => 'string',
 		'path'      => 'string',
 		'file_path' => 'string',
 		'title'     => 'string',
@@ -163,7 +163,12 @@ class Page extends Entity
 
 	public function syncFileContent(): void
 	{
-		$this->file()->store(null, $this->export());
+		$export = $this->export();
+
+		if ($this->file()->fetch() !== $export) {
+			$this->file()->store(null, $this->export());
+		}
+
 		$this->syncSearch();
 	}
 
@@ -198,7 +203,7 @@ class Page extends Entity
 
 		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['file_path']) || isset($this->_modified['path']))) {
 			// Rename parent directory
-			$dir = Files::get($file->path);
+			$dir = Files::get($file->parent);
 			$dir->rename(dirname($realpath));
 
 			$file = $this->file(true);
@@ -224,6 +229,7 @@ class Page extends Entity
 		$this->assert(array_key_exists($this->status, self::STATUS_LIST), 'Unknown page status');
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
+		$this->assert(trim($this->file_path) !== '', 'Le chemin de fichier ne peut rester vide');
 		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
 		$this->assert((bool) $this->file(), 'Fichier manquant');
 
@@ -247,10 +253,6 @@ class Page extends Entity
 		if (array_key_exists('parent', $source)) {
 			if (is_array($source['parent'])) {
 				$source['parent'] = key($source['parent']);
-			}
-
-			if (empty($source['parent'])) {
-				$source['parent'] = null;
 			}
 
 			$parent = $source['parent'];
@@ -427,21 +429,31 @@ class Page extends Entity
 
 	public function loadFromFile(File $file): void
 	{
-		// Path is relative to web root
-		$this->set('parent', substr(dirname($file->path), strlen(File::CONTEXT_WEB . '/')) ?: null);
-
 		if (!$this->importFromRaw($file->fetch())) {
-			throw new \LogicException('Invalid page content: ' . $file->pathname());
+			throw new \LogicException('Invalid page content: ' . $file->parent);
 		}
 
 		$this->set('modified', $file->modified);
 		$this->set('type', self::TYPE_PAGE); // Default
 
-		foreach (Files::list($file->path) as $subfile) {
+		foreach (Files::list($file->parent) as $subfile) {
 			if ($subfile->type == File::TYPE_DIRECTORY) {
 				$this->set('type', self::TYPE_CATEGORY);
 				break;
 			}
 		}
+	}
+
+	static public function fromFile(File $file): self
+	{
+		$page = new self;
+
+		// Path is relative to web root
+		$page->set('file_path', $file->path);
+		$page->set('path', substr(dirname($file->path), strlen(File::CONTEXT_WEB . '/')));
+		$page->set('parent', dirname($page->path) == '.' ? '' : dirname($page->path));
+
+		$page->loadFromFile($file);
+		return $page;
 	}
 }

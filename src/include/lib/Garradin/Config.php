@@ -147,7 +147,7 @@ class Config extends Entity
 				$this->_deleted_files[] = $this->$key;
 			}
 			elseif ($value instanceof File) {
-				$value = $value->pathname();
+				$value = $value->path;
 			}
 		}
 
@@ -239,7 +239,7 @@ class Config extends Entity
 			}
 			else {
 				$file = File::createFromBase64(File::CONTEXT_CONFIG, 'admin_background.png', $source['admin_background']);
-				$this->set('admin_background', $file->pathname());
+				$this->set('admin_background', $file->path);
 			}
 
 			unset($source['admin_background']);

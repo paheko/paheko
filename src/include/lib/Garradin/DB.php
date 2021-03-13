@@ -51,6 +51,7 @@ class DB extends SQLite3
 
         $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
         $this->db->createFunction('dirname', 'dirname');
+        $this->db->createFunction('basename', 'basename');
     }
 
     public function version(): ?string
