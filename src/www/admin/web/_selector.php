@@ -9,11 +9,11 @@ require_once __DIR__ . '/_inc.php';
 // Force dialog mode
 $_GET['_dialog'] = true;
 
-$parent = qg('parent') ?: null;
+$parent = qg('parent') ?: '';
 $breadcrumbs = [];
 
 if ($parent) {
-	$page = Web::getByURI($parent);
+	$page = Web::get($parent);
 
 	if (!$page) {
 		throw new UserException('Page inconnue');

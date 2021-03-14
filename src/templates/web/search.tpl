@@ -22,12 +22,12 @@
 				<nav class="breadcrumbs">
 					<ul>
 						{foreach from=$result.breadcrumbs key="id" item="title"}
-							<li><a href="{"!web/page.php?uri=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
+							<li><a href="{"!web/page.php?p=%s"|local_url|args:$id}" target="_parent">{$title}</a></li>
 						{/foreach}
 					</ul>
 				</nav>
 			</h4>
-			<h3><a href="{"!web/page.php?uri=%s"|local_url|args:$result.uri}" target="_parent">{$result.title}</a></h3>
+			<h3><a href="{"!web/page.php?p=%s"|local_url|args:$result.path}" target="_parent">{$result.title}</a></h3>
 			<p>{$result.snippet|escape|clean_snippet}</p>
 		</article>
 	{/foreach}

@@ -9,9 +9,7 @@ use KD2\SimpleDiff;
 
 require_once __DIR__ . '/_inc.php';
 
-$id = (int) qg('id');
-
-$page = Web::get($id);
+$page = Web::get(qg('p'));
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -47,10 +45,10 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 		die('{"success":true}');
 	}
 
-	Utils::redirect('!web/?parent=' . $page->parent);
+	Utils::redirect('!web/?p=' . $page->parent);
 }, $csrf_key);
 
-$parent = $page->parent ? [$page->parent => Web::getByURI($page->parent)->title] : [null => 'Racine du site'];
+$parent = $page->parent ? [$page->parent => Web::get($page->parent)->title] : ['' => 'Racine du site'];
 $encrypted = f('encrypted') || $page->format == Page::FORMAT_ENCRYPTED;
 
 $old_content = f('content');

@@ -3,7 +3,7 @@
 <table class="web-tree list">
 	<tbody>
 		<tr{if !$parent} class="focused"{/if}>
-			<td><input type="button" value="Choisir" data-id="0" data-label="Racine du site" /></td>
+			<td><input type="button" value="Choisir" data-path="" data-label="Racine du site" /></td>
 			<th><h3><a href="?">Racine du site</a></h3></th>
 		</tr>
 		<?php $last = 1; ?>

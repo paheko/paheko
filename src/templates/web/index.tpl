@@ -20,9 +20,9 @@
 
 <nav class="breadcrumbs">
 	<ul>
-		<li><a href="?parent=">Racine du site</a></li>
+		<li><a href="?p=">Racine du site</a></li>
 		{foreach from=$breadcrumbs key="id" item="title"}
-			<li><a href="?parent={$id}">{$title}</a></li>
+			<li><a href="?p={$id}">{$title}</a></li>
 		{/foreach}
 	</ul>
 </nav>
@@ -39,16 +39,16 @@
 		<tbody>
 			{foreach from=$categories item="p"}
 			<tr>
-				<th><a href="?parent={$p->path()}">{$p.title}</a></th>
+				<th><a href="?p={$p.path}">{$p.title}</a></th>
 				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
 				<td class="actions">
 					{if $p.status == $p::STATUS_ONLINE && !$config.site_disabled}
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
-					{linkbutton shape="menu" label="Sous-catégories et pages" href="?parent=%s"|args:$p->path()}
-					{linkbutton shape="image" label="Prévisualiser" href="page.php?id=%d"|args:$p.id}
-					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$p.id}
-					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?id=%d"|args:$p.id}
+					{linkbutton shape="menu" label="Sous-catégories et pages" href="?p=%s"|args:$p.path}
+					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
+					{linkbutton shape="edit" label="Modifier" href="edit.php?p=%s"|args:$p.path}
+					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
 				</td>
 			</tr>
 			{/foreach}
@@ -60,9 +60,9 @@
 	<h2 class="ruler">Pages</h2>
 	<p>
 		{if !$order_date}
-			{linkbutton shape="down" label="Trier par date" href="?parent=%s"|args:$parent}
+			{linkbutton shape="down" label="Trier par date" href="?p=%s"|args:$parent}
 		{else}
-			{linkbutton shape="up" label="Trier par titre" href="?parent=%s&order_title"|args:$parent}
+			{linkbutton shape="up" label="Trier par titre" href="?p=%s&order_title"|args:$parent}
 		{/if}
 	</p>
 	<table class="list">
@@ -77,9 +77,9 @@
 					{if $p.status == $p::STATUS_ONLINE}
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
-					{linkbutton shape="image" label="Prévisualiser" href="page.php?id=%d"|args:$p.id}
-					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$p.id}
-					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?id=%d"|args:$p.id}
+					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
+					{linkbutton shape="edit" label="Modifier" href="edit.php?p=%s"|args:$p.path}
+					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
 				</td>
 			</tr>
 			{/foreach}
