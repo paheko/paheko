@@ -48,7 +48,7 @@ if (f('save'))
     }
 }
 
-$tpl->assign('categorie', Categories::get($membre->category_id));
+$tpl->assign('categorie', Categories::get($membre->id_category));
 $tpl->assign('membre', $membre);
 
 $tpl->display('admin/membres/message.tpl');

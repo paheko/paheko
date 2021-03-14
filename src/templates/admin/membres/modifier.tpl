@@ -70,7 +70,7 @@
         <dl>
             <dt><label for="f_cat">Catégorie du membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="category_id" id="f_cat">
+                <select name="id_category" id="f_cat">
                 {foreach from=$membres_cats key="id" item="nom"}
                     <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
                 {/foreach}

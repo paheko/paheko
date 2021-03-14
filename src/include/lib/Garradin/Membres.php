@@ -167,9 +167,9 @@ class Membres
             unset($data['passe']);
         }
 
-        if (empty($data['category_id']))
+        if (empty($data['id_category']))
         {
-            $data['category_id'] = Config::getInstance()->get('categorie_membres');
+            $data['id_category'] = Config::getInstance()->get('categorie_membres');
         }
 
         $db->insert('membres', $data);
@@ -223,9 +223,9 @@ class Membres
             unset($data['passe']);
         }
 
-        if (isset($data['category_id']) && empty($data['category_id']))
+        if (isset($data['id_category']) && empty($data['id_category']))
         {
-            $data['category_id'] = Config::getInstance()->get('categorie_membres');
+            $data['id_category'] = Config::getInstance()->get('categorie_membres');
         }
 
         if (empty($data))
@@ -360,13 +360,13 @@ class Membres
         return true;
     }
 
-    public function listAllByCategory($category_id, $only_with_email = false)
+    public function listAllByCategory($id_category, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';
-        return DB::getInstance()->get('SELECT id, email FROM membres WHERE category_id = ?' . $where, (int)$category_id);
+        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_category = ?' . $where, (int)$id_category);
     }
 
-    public function listByCategory(?int $category_id): DynamicList
+    public function listByCategory(?int $id_category): DynamicList
     {
         $config = Config::getInstance();
         $db = DB::getInstance();
@@ -395,7 +395,7 @@ class Membres
         }
 
         $tables = 'membres';
-        $conditions = $category_id ? sprintf('category_id = %d', $category_id) : sprintf('category_id IN (SELECT id FROM users_categories WHERE hidden = 0)');
+        $conditions = $id_category ? sprintf('id_category = %d', $id_category) : sprintf('id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
 
         $order = $identity;
 
@@ -416,11 +416,11 @@ class Membres
 
         if (is_int($cat) && $cat)
         {
-            $query .= sprintf('WHERE category_id = %d', $cat);
+            $query .= sprintf('WHERE id_category = %d', $cat);
         }
         elseif (is_array($cat))
         {
-            $query .= sprintf('WHERE category_id IN (%s)', implode(',', $cat));
+            $query .= sprintf('WHERE id_category IN (%s)', implode(',', $cat));
         }
 
         $query .= ';';
@@ -431,7 +431,7 @@ class Membres
     public function countAllButHidden()
     {
         $db = DB::getInstance();
-        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
+        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
     }
 
     public function getAttachementsDirectory(int $id)
@@ -448,7 +448,7 @@ class Membres
 
         $db = DB::getInstance();
         return $db->update('membres',
-            ['category_id' => (int)$id_cat],
+            ['id_category' => (int)$id_cat],
             sprintf('id IN (%s)', implode(',', $membres))
         );
     }

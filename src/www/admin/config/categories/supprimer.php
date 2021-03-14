@@ -15,7 +15,7 @@ $user = $session->getUser();
 
 $csrf_key = 'cat_delete_' . $cat->id();
 
-if ($cat->id() == $user->category_id) {
+if ($cat->id() == $user->id_category) {
 	throw new UserException("Vous ne pouvez pas supprimer votre catégorie.");
 }
 

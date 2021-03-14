@@ -19,7 +19,7 @@ class Champs
         'clef_pgp',
         'secret_otp',
         'id',
-        'category_id',
+        'id_category',
     ];
 
 	protected $types = [
@@ -561,7 +561,7 @@ class Champs
         // Champs à créer
         $create = [
             'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
-            'category_id INTEGER NOT NULL REFERENCES users_categories(id),',
+            'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
             'date_connexion TEXT NULL CHECK (date_connexion IS NULL OR datetime(date_connexion) = date_connexion), -- Date de dernière connexion',
             'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date_inscription) IS NOT NULL AND date(date_inscription) = date_inscription), -- Date d\'inscription',
             'secret_otp TEXT NULL, -- Code secret pour TOTP',
@@ -605,7 +605,7 @@ class Champs
         // Champs à recopier
         $copy = [
             'id'               => 'id',
-            'category_id'      => 'category_id',
+            'id_category'      => 'id_category',
             'date_connexion'   => 'date_connexion',
             'date_inscription' => 'date_inscription',
             'secret_otp'       => 'secret_otp',
@@ -679,16 +679,16 @@ class Champs
         }
 
         $db->exec(sprintf('CREATE UNIQUE INDEX user_number ON %s (numero);', $table_name));
-        $db->exec(sprintf('CREATE INDEX users_category ON %s (category_id);', $table_name));
+        $db->exec(sprintf('CREATE INDEX users_category ON %s (id_category);', $table_name));
 
         // Create index on listed columns
         // FIXME: these indexes are currently unused by SQLite in the default user list
         // when there is more than one non-hidden category, as this makes SQLite merge multiple results
         // and so the index is not useful in that case sadly.
-        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "category_id" IN (3) ORDER BY "nom" ASC LIMIT 0,100;
-        // --> SEARCH TABLE membres USING INDEX users_list_nom (category_id=?)
-        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "category_id" IN (3, 7) ORDER BY "nom" ASC LIMIT 0,100;
-        // --> SEARCH TABLE membres USING INDEX user_category (category_id=?)
+        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "id_category" IN (3) ORDER BY "nom" ASC LIMIT 0,100;
+        // --> SEARCH TABLE membres USING INDEX users_list_nom (id_category=?)
+        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "id_category" IN (3, 7) ORDER BY "nom" ASC LIMIT 0,100;
+        // --> SEARCH TABLE membres USING INDEX user_category (id_category=?)
         // USE TEMP B-TREE FOR ORDER BY
         $listed_fields = array_keys((array) $this->getListedFields());
         foreach ($listed_fields as $field) {
@@ -703,7 +703,7 @@ class Champs
                 $collation = ' COLLATE NOCASE';
             }
 
-            $db->exec(sprintf('CREATE INDEX users_list_%s ON %s (category_id, %1$s%s);', $field, $table_name, $collation));
+            $db->exec(sprintf('CREATE INDEX users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
         }
     }
 

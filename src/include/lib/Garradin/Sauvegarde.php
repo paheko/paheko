@@ -442,7 +442,7 @@ class Sauvegarde
 		{
 			// Empêchons l'admin de se tirer une balle dans le pied
 			$is_still_admin = $db->querySingle('SELECT 1 FROM users_categories
-				WHERE id = (SELECT category_id FROM membres WHERE id = ' . (int) $user_id . ')
+				WHERE id = (SELECT id_category FROM membres WHERE id = ' . (int) $user_id . ')
 				AND perm_config >= ' . Session::ACCESS_ADMIN . '
 				AND perm_connect >= ' . Session::ACCESS_READ);
 

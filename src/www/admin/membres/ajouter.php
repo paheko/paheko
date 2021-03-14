@@ -22,14 +22,14 @@ if (f('save'))
         {
             if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN))
             {
-                $category_id = f('category_id');
+                $id_category = f('id_category');
             }
             else
             {
-                $category_id = $config->get('categorie_membres');
+                $id_category = $config->get('categorie_membres');
             }
 
-            $data = ['category_id' => $category_id];
+            $data = ['id_category' => $id_category];
 
             foreach ($champs->getAll() as $key=>$dismiss)
             {
@@ -55,6 +55,6 @@ $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', Categories::listSimple());
-$tpl->assign('current_cat', f('category_id') ?: $config->get('categorie_membres'));
+$tpl->assign('current_cat', f('id_category') ?: $config->get('categorie_membres'));
 
 $tpl->display('admin/membres/ajouter.tpl');

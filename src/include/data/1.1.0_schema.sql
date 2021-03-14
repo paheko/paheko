@@ -329,14 +329,6 @@ CREATE INDEX web_pages_parent ON web_pages (parent);
 CREATE INDEX web_pages_published ON web_pages (published);
 CREATE INDEX web_pages_title ON web_pages (title);
 
-CREATE TABLE IF NOT EXISTS web_attachments
-(
-    id INTEGER NOT NULL PRIMARY KEY,
-    page_id INTEGER NOT NULL REFERENCES web_pages(id),
-    name TEXT NOT NULL, -- File name
-    image INTEGER NOT NULL DEFAULT 0
-);
-
 -- FIXME: rename to english
 CREATE TABLE IF NOT EXISTS recherches
 -- Recherches enregistrées

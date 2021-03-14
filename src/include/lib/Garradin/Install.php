@@ -137,7 +137,7 @@ class Install
 		// Create first user
 		$membres = new Membres;
 		$id_membre = $membres->add([
-			'category_id' => $cat->id(),
+			'id_category' => $cat->id(),
 			'nom'         => $user_name,
 			'email'       => $user_email,
 			'passe'       => $user_password,

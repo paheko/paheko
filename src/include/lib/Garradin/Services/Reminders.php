@@ -131,7 +131,7 @@ class Reminders
 			-- Join with users, but not ones part of a hidden category
 			INNER JOIN membres m ON su.id_user = m.id
 				AND m.email IS NOT NULL
-				AND (m.category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1))
+				AND (m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1))
 			-- Join with sent reminders to exclude users that already have received this reminder
 			LEFT JOIN services_reminders_sent srs ON srs.id_reminder = sr.id AND srs.id_user = su.id_user
 			WHERE

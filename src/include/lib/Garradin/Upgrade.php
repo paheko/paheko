@@ -110,8 +110,8 @@ class Upgrade
 				$champs->createTable($champs::TABLE  .'_tmp');
 
 				$fields = $champs->getCopyFields();
-				unset($fields['category_id']);
-				$fields['id_categorie'] = 'category_id';
+				unset($fields['id_category']);
+				$fields['id_categorie'] = 'id_category';
 				$champs->copy($champs::TABLE, $champs::TABLE . '_tmp', $fields);
 
 				$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $champs::TABLE));

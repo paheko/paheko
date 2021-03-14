@@ -26,7 +26,7 @@ if ($membre->id == $user->id) {
 $champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
-$membre_cat = Categories::get($membre->category_id);
+$membre_cat = Categories::get($membre->id_category);
 
 if (($membre_cat->perm_users == $session::ACCESS_ADMIN)
     && ($user->perm_users < $session::ACCESS_ADMIN))
@@ -53,7 +53,7 @@ if (f('save'))
 
             if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user->id != $membre->id)
             {
-                $data['category_id'] = f('category_id');
+                $data['id_category'] = f('id_category');
                 $data['id'] = f('id');
             }
 
@@ -87,7 +87,7 @@ $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
 $tpl->assign('membres_cats', Categories::listSimple());
-$tpl->assign('current_cat', f('category_id') ?: $membre->category_id);
+$tpl->assign('current_cat', f('id_category') ?: $membre->id_category);
 
 $tpl->assign('can_change_id', $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN));
 
