@@ -333,7 +333,7 @@
 				return;
 			}
 
-			var i = form.querySelector(form.dataset.focus == 1 ? '[name]' : form.dataset.focus);
+			var i = form.querySelector(form.dataset.focus == 1 ? '[name]:not([type="hidden"])' : form.dataset.focus);
 			i.focus();
 		}
 	}, 'dom');
