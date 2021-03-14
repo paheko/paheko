@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS users_categories
     hidden INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE INDEX users_categories_hidden ON users_categories (hidden);
+
 -- Membres de l'asso
 -- Table dynamique générée par l'application
 -- voir Garradin\Membres\Champs.php
