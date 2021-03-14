@@ -103,7 +103,7 @@ class Session extends \KD2\UserSession
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
-			INNER JOIN users_categories AS c ON c.id = m.category_id
+			INNER JOIN users_categories AS c ON c.id = m.id_category
 			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
@@ -122,7 +122,7 @@ class Session extends \KD2\UserSession
 			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
 			c.perm_subscribe, c.perm_accounting, c.perm_config
 			FROM membres AS m
-			INNER JOIN users_categories AS c ON m.category_id = c.id
+			INNER JOIN users_categories AS c ON m.id_category = c.id
 			WHERE m.id = ? LIMIT 1;', $id);
 	}
 
@@ -172,7 +172,7 @@ class Session extends \KD2\UserSession
 			// On va chercher le premier membre avec le droit de gérer la config
 			if (-1 === $login_id) {
 				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE category_id IN (SELECT id FROM users_categories WHERE perm_config = ?)
+					WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 					LIMIT 1', self::ACCESS_ADMIN);
 			}
 

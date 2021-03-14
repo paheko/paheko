@@ -226,7 +226,7 @@ class Recherche
 		{
 			$champs = Config::getInstance()->get('champs_membres');
 
-			$columns['category_id'] = (object) [
+			$columns['id_category'] = (object) [
 					'textMatch'=> false,
 					'label'    => 'Catégorie',
 					'type'     => 'enum',

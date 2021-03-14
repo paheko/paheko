@@ -24,14 +24,14 @@ $form->runIf('save', function () use ($cat, $session) {
 	// Ne pas permettre de modifier la connexion, l'accès à la config et à la gestion des membres
 	// pour la catégorie du membre qui édite les catégories, sinon il pourrait s'empêcher
 	// de se connecter ou n'avoir aucune catégorie avec le droit de modifier les catégories !
-	if ($cat->id() == $user->category_id) {
+	if ($cat->id() == $user->id_category) {
 		$cat->set('perm_connect', Session::ACCESS_READ);
 		$cat->set('perm_config', Session::ACCESS_ADMIN);
 	}
 
 	$cat->save();
 
-	if ($cat->id() == $user->category_id) {
+	if ($cat->id() == $user->id_category) {
 		$session->refresh();
 	}
 }, $csrf_key, '!config/categories/');
@@ -40,7 +40,7 @@ $form->runIf('save', function () use ($cat, $session) {
 $permissions = Category::PERMISSIONS;
 
 foreach ($permissions as $key => &$config) {
-	if ($cat->id() == $user->category_id && in_array($key, [Session::SECTION_CONFIG, Session::SECTION_CONNECT])) {
+	if ($cat->id() == $user->id_category && in_array($key, [Session::SECTION_CONFIG, Session::SECTION_CONNECT])) {
 		$config['disabled'] = true;
 	}
 }

@@ -54,12 +54,12 @@ if ($action == 'move' && f('confirm'))
 {
     $form->check('membres_action', [
         'selected' => 'required|array',
-        'category_id' => 'required|numeric',
+        'id_category' => 'required|numeric',
     ]);
 
     if (!$form->hasErrors())
     {
-        $membres->changeCategorie(f('category_id'), f('selected'));
+        $membres->changeCategorie(f('id_category'), f('selected'));
         Utils::redirect(ADMIN_URL . 'membres/');
     }
 }

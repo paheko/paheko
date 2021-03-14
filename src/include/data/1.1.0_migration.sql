@@ -44,7 +44,7 @@ INSERT INTO users_categories
 
 DROP TABLE membres_categories_old;
 
-UPDATE recherches SET contenu = REPLACE(contenu, 'id_categorie', 'category_id') WHERE cible = 'membres' AND contenu LIKE '%id_categorie%';
+UPDATE recherches SET contenu = REPLACE(contenu, 'id_categorie', 'id_category') WHERE cible = 'membres' AND contenu LIKE '%id_categorie%';
 
 -- Copy existing files for transactions
 INSERT INTO files (path, parent, name, type, mime, modified, size, image)

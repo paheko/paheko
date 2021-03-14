@@ -108,7 +108,7 @@ class Service extends Entity
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
 		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
-			AND m.category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
@@ -120,7 +120,7 @@ class Service extends Entity
 	public function unpaidUsersList(): DynamicList
 	{
 		$list = $this->paidUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.paid = 0 AND m.category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.paid = 0 AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}
@@ -128,7 +128,7 @@ class Service extends Entity
 	public function expiredUsersList(): DynamicList
 	{
 		$list = $this->paidUsersList();
-		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND m.category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
+		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}

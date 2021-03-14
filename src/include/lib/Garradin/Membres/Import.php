@@ -217,7 +217,7 @@ class Import
 		}
 
 		$sql = sprintf('SELECT %s, c.name AS "Catégorie membre" FROM membres AS m
-			INNER JOIN users_categories AS c ON m.category_id = c.id
+			INNER JOIN users_categories AS c ON m.id_category = c.id
 			%s ORDER BY c.id;', $fields, $where);
 
 		$res = $db->iterate($sql);

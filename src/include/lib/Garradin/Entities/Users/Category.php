@@ -119,7 +119,7 @@ class Category extends Entity
 			throw new UserException('Il est interdit de supprimer la catégorie définie par défaut dans la configuration.');
 		}
 
-		if ($db->test('membres', 'category_id = ?', $this->id())) {
+		if ($db->test('membres', 'id_category = ?', $this->id())) {
 			throw new UserException('La catégorie contient encore des membres, il n\'est pas possible de la supprimer.');
 		}
 
