@@ -233,9 +233,11 @@ class Config extends Entity
 			$source['admin_background'] = null;
 		}
 		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
-			if ($this->admin_background) {
-				$this->admin_background->storeFromBase64($source['admin_background']);
-				$this->admin_background->save();
+			$file = $this->get('admin_background');
+
+			if ($file) {
+				$file->storeFromBase64($source['admin_background']);
+				$file->save();
 			}
 			else {
 				$file = File::createFromBase64(File::CONTEXT_CONFIG, 'admin_background.png', $source['admin_background']);
