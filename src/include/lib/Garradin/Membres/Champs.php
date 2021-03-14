@@ -578,7 +578,7 @@ class Champs
             elseif ($cfg->type == 'file')
                 $type = 'BLOB';
             else
-                $type = 'TEXT';
+                $type = 'TEXT COLLATE NOCASE';
 
             $line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
@@ -663,20 +663,33 @@ class Champs
         $db = DB::getInstance();
         $config = Config::getInstance();
 
-        $db->exec(sprintf('CREATE INDEX users_category ON %s (category_id);', $table_name)); // Index
-
-        if ($config->get('champ_identifiant')) {
+        if ($id_field = $config->get('champ_identifiant')) {
             // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
             $db->exec(sprintf('UPDATE %s SET %s = NULL WHERE %2$s = \'\';',
-                $table_name, $config->get('champ_identifiant')));
+                $table_name, $id_field));
+
+            $collation = '';
+
+            if ($this->isText($id_field)) {
+                $collation = ' COLLATE NOCASE';
+            }
 
             // Création de l'index unique
-            $db->exec(sprintf('CREATE UNIQUE INDEX users_id_field ON %s (%s);', $table_name, $config->get('champ_identifiant')));
+            $db->exec(sprintf('CREATE UNIQUE INDEX users_id_field ON %s (%s%s);', $table_name, $id_field, $collation));
         }
 
         $db->exec(sprintf('CREATE UNIQUE INDEX user_number ON %s (numero);', $table_name));
+        $db->exec(sprintf('CREATE INDEX users_category ON %s (category_id);', $table_name));
 
-        // Création des index pour les champs affichés dans la liste des membres
+        // Create index on listed columns
+        // FIXME: these indexes are currently unused by SQLite in the default user list
+        // when there is more than one non-hidden category, as this makes SQLite merge multiple results
+        // and so the index is not useful in that case sadly.
+        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "category_id" IN (3) ORDER BY "nom" ASC LIMIT 0,100;
+        // --> SEARCH TABLE membres USING INDEX users_list_nom (category_id=?)
+        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "category_id" IN (3, 7) ORDER BY "nom" ASC LIMIT 0,100;
+        // --> SEARCH TABLE membres USING INDEX user_category (category_id=?)
+        // USE TEMP B-TREE FOR ORDER BY
         $listed_fields = array_keys((array) $this->getListedFields());
         foreach ($listed_fields as $field) {
             if ($field === $config->get('champ_identifiant')) {
@@ -684,7 +697,13 @@ class Champs
                 continue;
             }
 
-            $db->exec(sprintf('CREATE INDEX users_list_%s ON %s (%1$s);', $field, $table_name));
+            $collation = '';
+
+            if ($this->isText($field)) {
+                $collation = ' COLLATE NOCASE';
+            }
+
+            $db->exec(sprintf('CREATE INDEX users_list_%s ON %s (category_id, %1$s%s);', $field, $table_name, $collation));
         }
     }
 
