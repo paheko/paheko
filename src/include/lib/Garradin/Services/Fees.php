@@ -86,7 +86,7 @@ class Fees
 			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services_fees f
 			WHERE id_service = ?
-			ORDER BY amount, transliterate_to_ascii(label) COLLATE NOCASE;', $condition);
+			ORDER BY amount, label COLLATE NOCASE;', $condition);
 
 		return $db->get($sql, $this->service_id);
 	}

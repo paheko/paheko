@@ -67,7 +67,7 @@ class Services
 			(%1$s AND expiry_date < date()) AS nb_users_expired,
 			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services s
-			ORDER BY transliterate_to_ascii(s.label) COLLATE NOCASE;', $condition);
+			ORDER BY s.label COLLATE NOCASE;', $condition);
 
 		return $db->get($sql);
 	}
