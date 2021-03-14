@@ -142,7 +142,6 @@ class Fee extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => 'm.' . $identity,
-				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE %%s', $identity),
 			],
 			'paid' => [
 				'label' => 'Payé ?',

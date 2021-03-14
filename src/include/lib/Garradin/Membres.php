@@ -392,15 +392,10 @@ class Membres
             $columns[$key] = [
                 'label' => $config->title
             ];
-
-            if ($champs->isText($key)) {
-                $columns[$key]['order'] = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %%s', $db->quoteIdentifier($key));
-            }
-
         }
 
         $tables = 'membres';
-        $conditions = $category_id ? sprintf('category_id = %d', $category_id) : sprintf('category_id NOT IN (SELECT id FROM users_categories WHERE hidden = 1)');
+        $conditions = $category_id ? sprintf('category_id = %d', $category_id) : sprintf('category_id IN (SELECT id FROM users_categories WHERE hidden = 0)');
 
         $order = $identity;
 

@@ -452,7 +452,7 @@ class File extends Entity
 		switch ($error)
 		{
 			case UPLOAD_ERR_INI_SIZE:
-				return 'Le fichier excède la taille permise par la configuration du serveur.';
+				return 'Le fichier excède la taille permise par la configuration.';
 			case UPLOAD_ERR_FORM_SIZE:
 				return 'Le fichier excède la taille permise par le formulaire.';
 			case UPLOAD_ERR_PARTIAL:

@@ -454,18 +454,9 @@ class Recherche
 				$query_columns[] = $condition['column'];
 				$column = $target_columns[$condition['column']];
 
-				if ($column->textMatch == 'text' && !in_array($condition['operator'], $no_transform_operators))
-				{
-					$query = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
-				}
-				else
-				{
-					$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
-				}
+				$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
-
-				$values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
 
 				if (!empty($column->originalType)) {
 					if ($column->originalType == 'tel') {
@@ -549,7 +540,7 @@ class Recherche
 
 		if ($target_columns[$order]->textMatch)
 		{
-			$order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $db->quoteIdentifier($order));
+			$order = sprintf('%s COLLATE NOCASE', $db->quoteIdentifier($order));
 		}
 		else
 		{
