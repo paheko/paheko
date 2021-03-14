@@ -69,7 +69,7 @@
 
 			// Prévisualisation
 			document.documentElement.style.setProperty('--gBgImage', 'url("' + i + '")');
-			$('#f_image_fond').value = i.substr(i.indexOf(',')+1);
+			$('#f_admin_background').value = i.substr(i.indexOf(',')+1);
 
 			delete canvas2;
 			delete canvas;
@@ -77,7 +77,7 @@
 			delete img;
 		};
 
-		var bg = $('#f_image_fond');
+		var bg = $('#f_admin_background');
 
 		if (bg.value == 'RESET' && default_colors) {
 			document.documentElement.style.setProperty('--gBgImage', 'url("' + bg.dataset.default + '")');
@@ -147,7 +147,7 @@
 
 			var i = canvas.toDataURL('image/png');
 
-			$('#f_image_fond').value = i.substr(i.indexOf(',')+1);
+			$('#f_admin_background').value = i.substr(i.indexOf(',')+1);
 
 			delete canvas2;
 			delete canvas;
@@ -209,8 +209,8 @@
 		reset_btn.innerHTML = 'RàZ';
 
 		reset_btn.onclick = () => {
-			$('#f_image_fond').dataset.current = '';
-			$('#f_image_fond').value = 'RESET';
+			$('#f_admin_background').dataset.current = '';
+			$('#f_admin_background').value = 'RESET';
 			bg.disabled = false;
 
 			applyColors();

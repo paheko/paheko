@@ -77,7 +77,7 @@
 			{input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$color2 source=$config name="couleur2" label="Couleur secondaire" placeholder=$color2}
 			{input type="file" label="Image de fond" name="background" help="Il est conseillé d'utiliser une image en noir et blanc avec un fond blanc pour un meilleur rendu. Dimensions recommandées : 380x200" accept="image/*,*.jpeg,*.jpg,*.png,*.gif"}
 		</dl>
-		<input type="hidden" name="image_fond" id="f_image_fond" data-current="{$background_image_current}" data-default="{$background_image_default}" value="{$_POST.image_fond}" />
+		<input type="hidden" name="admin_background" id="f_admin_background" data-current="{$background_image_current}" data-default="{$background_image_default}" value="{$_POST.admin_background}" />
 	</fieldset>
 
 	<p class="submit">
