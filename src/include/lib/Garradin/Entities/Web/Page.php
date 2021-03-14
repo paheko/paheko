@@ -151,9 +151,9 @@ class Page extends Entity
 		return Skriv::render($this->file(), $content, ['prefix' => '#']);
 	}
 
-	public function filepath(): string
+	public function filepath(bool $stored = true): string
 	{
-		return $this->file_path ?? File::CONTEXT_WEB . '/' . $this->path . '/' . $this->_name;
+		return $stored && isset($this->file_path) ? $this->file_path : File::CONTEXT_WEB . '/' . $this->path . '/' . $this->_name;
 	}
 
 	public function path(): string
@@ -183,7 +183,13 @@ class Page extends Entity
 		$exists = $this->exists();
 		$file = $exists ? $this->file() : null;
 
-		$realpath = $this->filepath();
+		// Reset filepath
+		$source = $this->filepath();
+
+		// Move file if required
+		$this->set('file_path', $this->filepath(false));
+		$target = $this->filepath();
+
 		$edit_file = false;
 
 		if (!$exists && !$file) {
@@ -199,13 +205,27 @@ class Page extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
-		parent::save();
+		try {
+			if ($target !== $source) {
+				// Rename parent directory
+				$dir = Files::get(dirname($source));
+				$dir->rename(dirname($target));
+			}
 
-		if ($exists && (isset($this->_modified['parent']) || isset($this->_modified['file_path']) || isset($this->_modified['path']))) {
-			// Rename parent directory
-			$dir = Files::get($file->parent);
-			$dir->rename(dirname($realpath));
+			parent::save();
+		}
+		catch (\Exception $e) {
+			// Cancel rename
+			if ($target !== $source) {
+				$dir = Files::get(dirname($target));
+				$dir->rename(dirname($source));
+			}
 
+			throw $e;
+		}
+
+		// Reload linked file
+		if ($target !== $source) {
 			$file = $this->file(true);
 		}
 
@@ -219,21 +239,23 @@ class Page extends Entity
 
 	public function delete(): bool
 	{
-		$this->file()->delete();
+		Files::get(dirname($this->file_path))->delete();
 		return parent::delete();
 	}
 
 	public function selfCheck(): void
 	{
+		$db = DB::getInstance();
 		$this->assert($this->type === self::TYPE_CATEGORY || $this->type === self::TYPE_PAGE, 'Unknown page type');
 		$this->assert(array_key_exists($this->status, self::STATUS_LIST), 'Unknown page status');
 		$this->assert(array_key_exists($this->format, self::FORMATS_LIST), 'Unknown page format');
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(trim($this->file_path) !== '', 'Le chemin de fichier ne peut rester vide');
 		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
+		$this->assert($this->path !== $this->parent, 'Invalid parent page');
 		$this->assert((bool) $this->file(), 'Fichier manquant');
+		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
-		$db = DB::getInstance();
 		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
 		$this->assert(!$db->test(self::TABLE, 'path = ?' . $where, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->path);
 	}
@@ -254,6 +276,11 @@ class Page extends Entity
 			if (is_array($source['parent'])) {
 				$source['parent'] = key($source['parent']);
 			}
+
+			if (empty($source['parent'])) {
+				$source['parent'] = '';
+			}
+
 
 			$parent = $source['parent'];
 			$source['path'] = trim($parent . '/' . basename($this->path), '/');

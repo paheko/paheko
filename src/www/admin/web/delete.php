@@ -6,7 +6,7 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$page = Web::get((int) qg('id'));
+$page = Web::get(qg('p'));
 
 if (!$page) {
 	throw new UserException('Page inconnue');

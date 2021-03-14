@@ -153,7 +153,7 @@ class File extends Entity
 
 		// Delete recursively
 		if ($this->type == self::TYPE_DIRECTORY) {
-			foreach (Files::list($this->parent) as $file) {
+			foreach (Files::list($this->path) as $file) {
 				$file->delete();
 			}
 		}
@@ -182,13 +182,14 @@ class File extends Entity
 
 		$return = Files::callStorage('move', $this, $new_path);
 
-		$this->set('path', dirname($new_path));
+		$this->set('path', $new_path);
+		$this->set('parent', dirname($new_path));
 		$this->set('name', basename($new_path));
 		$this->save();
 
 		if ($this->type == self::TYPE_DIRECTORY) {
 			// Move sub-directories and sub-files
-			DB::getInstance()->preparedQuery('UPDATE files SET path = ? WHERE path = ?;', $new_path, $current_path);
+			DB::getInstance()->preparedQuery('UPDATE files SET parent = ?, path = TRIM(? || \'/\' || name, \'/\') WHERE parent = ?;', $new_path, $new_path, $current_path);
 		}
 
 		return $return;

@@ -7,11 +7,11 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = qg('parent') ?: '';
+$parent = qg('p') ?: '';
 $cat = null;
 
 if ($parent) {
-	$cat = Web::getByURI($parent);
+	$cat = Web::get($parent);
 
 	if (!$cat) {
 		throw new UserException('Catégorie inconnue');

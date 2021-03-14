@@ -17,13 +17,13 @@ $form->runIf('create', function () use ($parent) {
 	$page = Page::create((int) qg('type'), $parent, f('title'), Page::STATUS_DRAFT);
 	$page->save();
 
-	$url = ADMIN_URL . 'web/edit.php?new&id=' . $page->id();
+	$url = ADMIN_URL . 'web/edit.php?new&p=' . $page->path;
 
 	if (null !== qg('_dialog')) {
 		Utils::reloadParentFrame($url);
 	}
 	else {
-		Utils::redirect(ADMIN_URL . 'web/edit.php?new&id=' . $page->id());
+		Utils::redirect($url);
 	}
 }, $csrf_key);
 

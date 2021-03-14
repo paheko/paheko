@@ -52,6 +52,11 @@ class Web
 		foreach ($db->iterate($sql, trim(File::CONTEXT_WEB . '/' . $parent, '/'), File::TYPE_DIRECTORY, $parent) as $file) {
 			Files::callStorage('sync', $file->path);
 			$f = Files::get($file->path . '/index.txt');
+
+			if (!$f) {
+				continue;
+			}
+
 			Page::fromFile($f)->save();
 		}
 	}
@@ -69,14 +74,9 @@ class Web
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
-	static public function getByURI(string $uri): ?Page
+	static public function get(string $path): ?Page
 	{
-		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $uri);
-	}
-
-	static public function get(int $id): ?Page
-	{
-		return EM::findOneById(Page::class, $id);
+		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
 	}
 
 	static public function dispatchURI()
@@ -134,7 +134,7 @@ class Web
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
-		elseif ($page = self::getByURI($uri)) {
+		elseif ($page = self::get($uri)) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
 		}
