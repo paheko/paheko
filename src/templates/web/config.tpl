@@ -42,7 +42,7 @@
 {else}
 
 
-	{if $config.desactiver_site}
+	{if $config.site_disabled}
 
 	<div class="block alert">
 		<h3>Site public désactivé</h3>
@@ -50,7 +50,7 @@
 		<form method="post" action="{$self_url}">
 			<p class="submit">
 				{csrf_field key="config_site"}
-				{button type="submit" name="activer_site" label="Réactiver le site public" shape="right" class="main"}
+				{button type="submit" name="enable_site" label="Réactiver le site public" shape="right" class="main"}
 			</p>
 		</form>
 	</div>
@@ -63,7 +63,7 @@
 			<dt>
 				<form method="post" action="{$self_url}">
 					<p class="submit">
-						{button type="submit" name="desactiver_site" label="Désactiver le site public" shape="right" class="main"}
+						{button type="submit" name="disable_site" label="Désactiver le site public" shape="right" class="main"}
 						{csrf_field key="config_site"}
 					</p>
 				</form>

@@ -97,7 +97,7 @@ class Install
 		$config->set('email_asso', $user_email);
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
-		$config->set('desactiver_site', true);
+		$config->set('site_disabled', true);
 
 		$champs = Membres\Champs::importInstall();
 		$champs->create(); // Pas de copie car pas de table membres existante

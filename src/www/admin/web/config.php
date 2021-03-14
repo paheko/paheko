@@ -7,15 +7,15 @@ require_once __DIR__ . '/_inc.php';
 
 $config = Config::getInstance();
 
-if (f('desactiver_site') && $form->check('config_site'))
+if (f('disable_site') && $form->check('config_site'))
 {
-	$config->set('desactiver_site', true);
+	$config->set('site_disabled', true);
 	$config->save();
 	Utils::redirect(Utils::getSelfURI());
 }
-elseif (f('activer_site') && $form->check('config_site'))
+elseif (f('enable_site') && $form->check('config_site'))
 {
-	$config->set('desactiver_site', false);
+	$config->set('site_disabled', false);
 	$config->save();
 	Utils::redirect(Utils::getSelfURI());
 }

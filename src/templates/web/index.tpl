@@ -12,6 +12,9 @@
 			{*<li><a href="theme.php">Thèmes</a></li>*}
 			<li><a href="config.php">Configuration</a></li>
 		{/if}
+		{if !$config.site_disabled}
+			<li><a href="{$www_url}" target="_blank">Voir le site en ligne</a></li>
+		{/if}
 	</ul>
 </nav>
 
@@ -24,7 +27,7 @@
 	</ul>
 </nav>
 
-{if $config.desactiver_site}
+{if $config.site_disabled}
 	<p class="block alert">
 		Le site public est désactivé. <a href="{"!web/config.php"|local_url}">Réactiver le site dans la configuration.</a>
 	</p>
@@ -39,7 +42,7 @@
 				<th><a href="?parent={$p->path()}">{$p.title}</a></th>
 				<td>{if $p.status == $p::STATUS_ONLINE}En ligne{else}<em>Brouillon</em>{/if}</td>
 				<td class="actions">
-					{if $p.status == $p::STATUS_ONLINE && !$config.desactiver_site}
+					{if $p.status == $p::STATUS_ONLINE && !$config.site_disabled}
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
 					{linkbutton shape="menu" label="Sous-catégories et pages" href="?parent=%s"|args:$p->path()}
