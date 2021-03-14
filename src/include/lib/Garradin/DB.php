@@ -49,9 +49,23 @@ class DB extends SQLite3
         // https://ericdraken.com/sqlite-performance-testing/
         $this->exec(sprintf('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;', 32 * 1024 * 1024));
 
-        $this->db->createFunction('transliterate_to_ascii', ['Garradin\Utils', 'transliterateToAscii']);
         $this->db->createFunction('dirname', 'dirname');
         $this->db->createFunction('basename', 'basename');
+        $this->db->createCollation('NOCASE', [static::class, 'unicodeCaseComparison']);
+    }
+
+    static public function unicodeCaseComparison($a, $b): int
+    {
+        if (function_exists('mb_strtoupper')) {
+            $a = mb_strtoupper($a);
+            $b = mb_strtoupper($b);
+        }
+        else {
+            $a = strtoupper(Utils::transliterateToAscii($a));
+            $b = strtoupper(Utils::transliterateToAscii($b));
+        }
+
+        return strcmp($a, $b);
     }
 
     public function version(): ?string
