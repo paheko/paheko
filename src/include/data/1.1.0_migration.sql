@@ -230,6 +230,7 @@ INSERT INTO files_contents (id, compressed, content)
 
 -- Rename
 UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' WHERE key = 'accueil_connexion';
+UPDATE config SET key = 'site_disabled' WHERE key = 'desactiver_site';
 
 -- Create transaction directories
 INSERT INTO files (path, parent, name, type) SELECT 'transaction/' || id, 'transaction', id, 2 FROM fichiers_acc_transactions GROUP BY id;

@@ -125,7 +125,7 @@ class Web
 			return;
 		}
 
-		if (Config::getInstance()->get('desactiver_site')) {
+		if (Config::getInstance()->get('site_disabled')) {
 			Utils::redirect(ADMIN_URL);
 		}
 

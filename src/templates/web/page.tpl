@@ -12,7 +12,7 @@
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 			<li><a href="{$admin_url}web/edit.php?id={$page.id}">Modifier</a></li>
 		{/if}
-		{if $page.status == $page::STATUS_ONLINE && !$config.desactiver_site}
+		{if $page.status == $page::STATUS_ONLINE && !$config.site_disabled}
 			<li><a href="{$page->url()}" target="_blank">Voir sur le site</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}

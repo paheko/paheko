@@ -38,7 +38,7 @@ class Config extends Entity
 
 	protected $admin_background;
 
-	protected $desactiver_site;
+	protected $site_disabled;
 
 	protected $_types = [
 		'nom_asso'              => 'string',
@@ -69,7 +69,7 @@ class Config extends Entity
 		'couleur2'              => '?string',
 		'admin_background'      => '?string',
 
-		'desactiver_site'       => 'bool',
+		'site_disabled'         => 'bool',
 	];
 
 	protected $_special_types = [
