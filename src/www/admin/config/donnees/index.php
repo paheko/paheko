@@ -12,6 +12,11 @@ $form->runIf('download', function () use ($s) {
     exit;
 }, 'backup_download');
 
+$form->runIf('download_files', function () use ($s) {
+    $s->dumpFilesZip();
+    exit;
+}, 'files_download');
+
 $form->runIf('restore_file', function () use ($s, $tpl, $session) {
     // Ignorer la vérification d'intégrité si autorisé et demandé
     $check = (ALLOW_MODIFIED_IMPORT && f('force_import')) ? false : true;

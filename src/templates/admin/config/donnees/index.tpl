@@ -30,12 +30,24 @@
 
 <fieldset>
     <legend>Téléchargement d'une sauvegarde</legend>
-	<p class="help">
-		Info : la base de données fait actuellement {$db_size|size_in_bytes} (dont {$files_size|size_in_bytes} pour les documents et images).
-	</p>
+    <p class="help">
+        Info : la base de données fait actuellement {$db_size|size_in_bytes}.
+        {if FILE_STORAGE_BACKEND == 'SQLite'} (Dont {$files_size|size_in_bytes} pour les documents.){/if}
+    </p>
     <p class="submit">
         {csrf_field key="backup_download"}
         {button type="submit" name="download" label="Télécharger une copie de la base de données sur mon ordinateur" shape="download" class="main"}
+    </p>
+</fieldset>
+
+<fieldset>
+    <legend>Téléchargement des fichiers</legend>
+	<p class="help">
+		Les documents font {$files_size|size_in_bytes}.
+	</p>
+    <p class="submit">
+        {csrf_field key="files_download"}
+        {button type="submit" name="download_files" label="Télécharger une archive ZIP des documents sur mon ordinateur" shape="download" class="main"}
     </p>
 </fieldset>
 
