@@ -148,6 +148,7 @@ if (!defined('Garradin\WWW_URL')) {
 
 static $default_config = [
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
+	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
@@ -191,6 +192,11 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+
+const USER_TEMPLATES_CACHE_ROOT = CACHE_ROOT . '/utemplates';
+const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
+const SHARED_USER_TEMPLATES_CACHE_ROOT = SHARED_CACHE_ROOT . '/utemplates';
+const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour

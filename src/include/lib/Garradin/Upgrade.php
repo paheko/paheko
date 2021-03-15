@@ -134,8 +134,19 @@ class Upgrade
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
-			Utils::clearCaches();
+			// Delete local cached files
+			Utils::deleteRecursive(USER_TEMPLATES_CACHE_ROOT);
+			Utils::deleteRecursive(STATIC_CACHE_ROOT);
 
+			$cache_version_file = SHARED_CACHE_ROOT . '/version';
+			$cache_version = file_exists($cache_version_file) ? trim(file_get_contents($cache_version_file)) : null;
+
+			// Only delete system cache when it's required
+			if (garradin_version() !== $cache_version) {
+				Utils::deleteRecursive(SMARTYER_CACHE_ROOT);
+			}
+
+			file_put_contents($cache_version_file, garradin_version());
 			$db->setVersion(garradin_version());
 
 			// reset last version check

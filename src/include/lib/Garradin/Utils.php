@@ -337,30 +337,6 @@ class Utils
         return $str;
     }
 
-    static public function clearCaches($path = false)
-    {
-        if (!$path)
-        {
-            self::clearCaches('compiled');
-            self::clearCaches('static');
-            return true;
-        }
-
-        $path = CACHE_ROOT . '/' . $path;
-        $dir = dir($path);
-
-        while ($file = $dir->read())
-        {
-            if ($file[0] != '.')
-            {
-                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
-            }
-        }
-
-        $dir->close();
-        return true;
-    }
-
     static public function safe_unlink($path)
     {
         if (!@unlink($path))

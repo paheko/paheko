@@ -90,6 +90,8 @@ class Install
 		$db->exec(file_get_contents(DB_SCHEMA));
 		$db->commit();
 
+		file_put_contents(SHARED_CACHE_ROOT . '/version', garradin_version());
+
 		// Configuration de base
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
 		$config = Config::getInstance();
@@ -230,11 +232,20 @@ class Install
 	static public function checkAndCreateDirectories()
 	{
 		// Vérifier que les répertoires vides existent, sinon les créer
-		$paths = [DATA_ROOT, PLUGINS_ROOT, CACHE_ROOT, CACHE_ROOT . '/static', CACHE_ROOT . '/compiled'];
+		$paths = [
+			DATA_ROOT,
+			PLUGINS_ROOT,
+			CACHE_ROOT,
+			SHARED_CACHE_ROOT,
+			USER_TEMPLATES_CACHE_ROOT,
+			STATIC_CACHE_ROOT,
+			SMARTYER_CACHE_ROOT,
+			SHARED_USER_TEMPLATES_CACHE_ROOT,
+		];
 
 		foreach ($paths as $path)
 		{
-			Utils::safe_mkdir($path);
+			Utils::safe_mkdir($path, 0777, true);
 
 			if (!is_dir($path))
 			{
@@ -246,6 +257,9 @@ class Install
 			{
 				throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
 			}
+
+			// Some basic safety against misconfigured hosts
+			file_put_contents($path . '/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
 		}
 
 		return true;

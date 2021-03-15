@@ -28,13 +28,14 @@ class Template extends \KD2\Smartyer
 	{
 		parent::__construct();
 
-		if (!file_exists(CACHE_ROOT . '/compiled'))
-		{
-			Utils::safe_mkdir(CACHE_ROOT . '/compiled', 0777, true);
+		$cache_dir = SMARTYER_CACHE_ROOT;
+
+		if (!file_exists($cache_dir)) {
+			Utils::safe_mkdir($cache_dir, 0777, true);
 		}
 
 		$this->setTemplatesDir(ROOT . '/templates');
-		$this->setCompiledDir(CACHE_ROOT . '/compiled');
+		$this->setCompiledDir($cache_dir);
 		$this->setNamespace('Garradin');
 
 		// Hash de la version pour les éléments statiques (cache)
