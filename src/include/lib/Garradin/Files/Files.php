@@ -89,18 +89,6 @@ class Files
 
 		call_user_func([$class_name, 'configure'], FILE_STORAGE_CONFIG);
 
-		// Check that we can store this data
-		if ($function == 'store') {
-			$quota = self::getQuota();
-			$used = self::callStorage('getTotalSize');
-
-			$size = $args[0] ? filesize($args[1]) : strlen($args[2]);
-
-			if (($used + $size) >= $quota) {
-				throw new \OutOfBoundsException('File quota has been exhausted');
-			}
-		}
-
 		return call_user_func_array([$class_name, $function], $args);
 	}
 
@@ -255,5 +243,15 @@ class Files
 	static public function getUsedQuota(): int
 	{
 		return self::callStorage('getTotalSize');
+	}
+
+	static public function checkQuota(int $size = 0): void
+	{
+		$quota = self::getQuota();
+		$used = self::callStorage('getTotalSize');
+
+		if (($used + $size) >= $quota) {
+			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
+		}
 	}
 }

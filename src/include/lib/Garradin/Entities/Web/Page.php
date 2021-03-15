@@ -165,7 +165,7 @@ class Page extends Entity
 	{
 		$export = $this->export();
 
-		if ($this->file()->fetch() !== $export) {
+		if (!$this->file()->exists() || $this->file()->fetch() !== $export) {
 			$this->file()->store(null, $this->export());
 		}
 
@@ -193,7 +193,7 @@ class Page extends Entity
 		$edit_file = false;
 
 		if (!$exists && !$file) {
-			$file = $this->_file = File::create(dirname($realpath), basename($realpath), null, '');
+			$file = $this->_file = File::create(dirname($target), basename($target), null, '');
 			$file->set('mime', 'text/plain');
 			$edit_file = true;
 		}
@@ -206,7 +206,7 @@ class Page extends Entity
 		}
 
 		try {
-			if ($target !== $source) {
+			if ($target !== $source && $exists) {
 				// Rename parent directory
 				$dir = Files::get(dirname($source));
 				$dir->rename(dirname($target));
@@ -216,7 +216,7 @@ class Page extends Entity
 		}
 		catch (\Exception $e) {
 			// Cancel rename
-			if ($target !== $source) {
+			if ($target !== $source && $exists) {
 				$dir = Files::get(dirname($target));
 				$dir->rename(dirname($source));
 			}
