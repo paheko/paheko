@@ -18,8 +18,8 @@
 	</p>
 {/if}
 
-{if count($closed_years)}
 <form method="post" action="{$self_url_no_qs}">
+{if count($closed_years)}
 
 <fieldset>
 	<legend>Réouvrir un exercice clôturé</legend>
@@ -37,8 +37,37 @@
 		{button type="submit" name="reopen_ok" label="Réouvrir l'exercice sélectionné" shape="reset"}
 	</p>
 </fieldset>
-</form>
 {/if}
+
+{if ENABLE_TECH_DETAILS && $storage_backend != 'SQLite'}
+	<h2 class="ruler">Stockage des fichiers</h2>
+	{if !$quota_used}
+	<fieldset>
+		<legend>Migration de stockage de fichiers</legend>
+		<p class="alert block">
+			Les fichiers seront <strong>supprimés</strong> de la base de données après avoir été recopiés vers '{$storage_backend}'.
+		</p>
+		<p class="help">Cette opération peut prendre quelques minutes.</p>
+		<p>
+			{csrf_field key="migrate_backend"}
+			{button type="submit" name="migrate_backend_ok" label="Copier tous les fichiers vers %s"|args:$storage_backend shape="right"}
+		</p>
+	</fieldset>
+	{else}
+	<fieldset>
+		<legend>Recopier les fichiers dans la base de données</legend>
+		<p class="alert block">
+			Les fichiers ne seront pas effacés de {$storage_backend} mais simplement recopiés dans la base de données.
+		</p>
+		<p class="help">Cette opération peut prendre quelques minutes.</p>
+		<p>
+			{csrf_field key="migrate_back"}
+			{button type="submit" name="migrate_back_ok" label="Copier tous les fichiers de %s vers la base de données"|args:$storage_backend shape="right"}
+		</p>
+	</fieldset>
+	{/if}
+{/if}
+</form>
 
 <h2 class="ruler">Actions destructrices</h2>
 
