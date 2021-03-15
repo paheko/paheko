@@ -525,7 +525,7 @@ class Template extends \KD2\Smartyer
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
 		if ($f = $config->get('admin_background')) {
-			$admin_background = $f->url();
+			$admin_background = WWW_URL . $f;
 		}
 
 		// Transformation Hexa vers décimal

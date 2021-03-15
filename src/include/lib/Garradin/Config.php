@@ -10,6 +10,8 @@ use KD2\SMTP;
 
 class Config extends Entity
 {
+	const ADMIN_BACKGROUND_FILENAME = File::CONTEXT_CONFIG . '/admin_bg.png';
+
 	protected $nom_asso;
 	protected $adresse_asso;
 	protected $email_asso;
@@ -72,13 +74,6 @@ class Config extends Entity
 		'site_disabled'         => 'bool',
 	];
 
-	protected $_special_types = [
-		'admin_homepage'        => 'Garradin\Entities\Files\File',
-		'admin_background'      => 'Garradin\Entities\Files\File',
-	];
-
-	protected $_deleted_files = [];
-
 	static protected $_instance = null;
 
 	static public function getInstance()
@@ -126,34 +121,6 @@ class Config extends Entity
 		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
 	}
 
-	public function get(string $key)
-	{
-		$type = $this->_special_types[$key] ?? null;
-
-		if ($type == File::class && is_string($this->$key)) {
-			return Files::get($this->$key);
-		}
-
-		return parent::get($key);
-	}
-
-	public function set(string $key, $value, bool $loose = false, bool $check_for_changes = true)
-	{
-		$type = $this->_special_types[$key] ?? null;
-
-		// Append to deleted files queue if it's set to null
-		if ($type == File::class) {
-			if (null === $value && null !== $this->$key) {
-				$this->_deleted_files[] = $this->$key;
-			}
-			elseif ($value instanceof File) {
-				$value = $value->path;
-			}
-		}
-
-		parent::set($key, $value, $loose, $check_for_changes);
-	}
-
 	public function save(): bool
 	{
 		if (!count($this->_modified)) {
@@ -199,10 +166,6 @@ class Config extends Entity
 			$db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
 		}
 
-		foreach ($this->_deleted_files as $file) {
-			$file->delete();
-		}
-
 		$db->commit();
 
 		$this->_modified = [];
@@ -233,15 +196,14 @@ class Config extends Entity
 			$source['admin_background'] = null;
 		}
 		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
-			$file = $this->get('admin_background');
+			$file = Files::get(self::ADMIN_BACKGROUND_FILENAME);
 
 			if ($file) {
 				$file->storeFromBase64($source['admin_background']);
 				$file->save();
 			}
 			else {
-				$file = File::createFromBase64(File::CONTEXT_CONFIG, 'admin_background.png', $source['admin_background']);
-				$this->set('admin_background', $file->path);
+				$file = File::createFromBase64(dirname(self::ADMIN_BACKGROUND_FILENAME), basename(self::ADMIN_BACKGROUND_FILENAME), $source['admin_background']);
 			}
 
 			unset($source['admin_background']);

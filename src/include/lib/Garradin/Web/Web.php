@@ -76,7 +76,13 @@ class Web
 
 	static public function get(string $path): ?Page
 	{
-		return EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
+		$page = EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE path = ?;', $path);
+
+		if ($page && !$page->file()) {
+			return null;
+		}
+
+		return $page;
 	}
 
 	static public function dispatchURI()
