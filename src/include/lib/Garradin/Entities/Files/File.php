@@ -213,6 +213,8 @@ class File extends Entity
 			$this->set('size', strlen($source_content));
 		}
 
+		Files::checkQuota($this->size);
+
 		// Check that it's a real image
 		if ($this->image) {
 			try {
@@ -321,6 +323,7 @@ class File extends Entity
 		$fullpath = trim($path . '/' . $name, '/');
 
 		self::validatePath($fullpath);
+		Files::checkQuota();
 
 		if (Files::callStorage('exists', $fullpath)) {
 			throw new ValidationException('Le nom de répertoire choisi existe déjà: ' . $fullpath);
