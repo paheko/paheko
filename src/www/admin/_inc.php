@@ -81,3 +81,8 @@ if (!defined('Garradin\LOGIN_PROCESS'))
 
     $tpl->assign('plugins_menu', $session->get('plugins_menu'));
 }
+
+// Make sure we allow frames to work
+if (array_key_exists('_dialog', $_GET)) {
+    header('X-Frame-Options: SAMEORIGIN', true);
+}

@@ -8,8 +8,6 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../../_inc.php';
 
-header('X-Frame-Options: SAMEORIGIN', true);
-
 $targets = qg('targets');
 $chart = qg('chart');
 
