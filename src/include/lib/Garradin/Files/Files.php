@@ -86,8 +86,7 @@ class Files
 
 	static public function callStorage(string $function, ...$args)
 	{
-		$storage = FILE_STORAGE_BACKEND ?? 'SQLite';
-		$class_name = __NAMESPACE__ . '\\Storage\\' . $storage;
+		$class_name = __NAMESPACE__ . '\\Storage\\' . FILE_STORAGE_BACKEND;
 
 		call_user_func([$class_name, 'configure'], FILE_STORAGE_CONFIG);
 
