@@ -85,9 +85,9 @@ class FileSystem implements StorageInterface
 		return Utils::safe_mkdir(self::getFullPath($file));
 	}
 
-	static protected function _getRealPath(string $path)
+	static protected function _getRealPath(string $path): ?string
 	{
-		return self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		return realpath(self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path)) ?: null;
 	}
 
 	static public function getFullPath(File $file): ?string
