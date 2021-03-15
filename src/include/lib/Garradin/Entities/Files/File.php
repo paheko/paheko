@@ -367,13 +367,11 @@ class File extends Entity
 
 		foreach ($parts as $part) {
 			$tree = trim($tree . '/' . $part, '/');
-			$tree_path = dirname($tree) == '.' ? '' : dirname($tree);
-			$tree_name = basename($tree);
-			$exists = $db->test(File::TABLE, 'type = ? AND path = ? AND name = ?', self::TYPE_DIRECTORY, $tree_path, $tree_name);
+			$exists = $db->test(File::TABLE, 'type = ? AND path = ?', self::TYPE_DIRECTORY, $tree);
 
 			if (!$exists) {
 				try {
-					self::createDirectory($tree_path, $tree_name, false);
+					self::createDirectory(dirname($tree) == '.' ? '' : dirname($tree), basename($tree), false);
 				}
 				catch (ValidationException $e) {
 					// Ignore when directory already exists
