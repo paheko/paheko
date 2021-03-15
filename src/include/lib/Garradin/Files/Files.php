@@ -123,29 +123,48 @@ class Files
 
 			$db = DB::getInstance();
 			$db->begin();
+			$i = 0;
 
-			foreach ($db->iterate('SELECT * FROM files ORDER BY type DESC, path ASC;') as $file) {
-				$f = new File;
-				$f->load((array) $file);
-
-				if ($f->type == File::TYPE_DIRECTORY) {
-					call_user_func([$to, 'mkdir'], $f);
-				}
-				else {
-					$from_path = call_user_func([$from, 'getFullPath'], $f);
-					call_user_func([$to, 'storePath'], $f, $from_path);
-				}
-
-				if (null !== $callback) {
-					$callback($f);
-				}
-			}
+			self::migrateDirectory($from, $to, '', $i, $callback);
 
 			$db->commit();
 		}
 		finally {
 			call_user_func([$from, 'unlock']);
 			call_user_func([$to, 'unlock']);
+		}
+	}
+
+	static protected function migrateDirectory(string $from, string $to, string $path, int &$i, ?callable $callback)
+	{
+		$db = DB::getInstance();
+		call_user_func([$from, 'sync'], $path);
+
+		foreach ($db->iterate('SELECT * FROM files WHERE parent = ?;', $path) as $file) {
+			if (++$i >= 50) {
+				$db->commit();
+				$db->begin();
+				$i = 0;
+			}
+
+			$f = new File;
+			$f->load((array) $file);
+			$f->exists(true);
+
+			if ($f->type == File::TYPE_DIRECTORY) {
+				call_user_func([$to, 'mkdir'], $f);
+				self::migrateDirectory($from, $to, trim($path . '/' . $f->name, '/'), $i, $callback);
+			}
+			else {
+				$from_path = call_user_func([$from, 'getFullPath'], $f);
+				call_user_func([$to, 'storePath'], $f, $from_path);
+			}
+
+			if (null !== $callback) {
+				$callback($f);
+			}
+
+			unset($f);
 		}
 	}
 
