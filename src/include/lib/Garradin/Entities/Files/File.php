@@ -144,7 +144,13 @@ class File extends Entity
 
 	public function fullpath(): string
 	{
-		return Files::callStorage('getFullPath', $this);
+		$path = Files::callStorage('getFullPath', $this);
+
+		if (null === $path) {
+			throw new \RuntimeException('File does not exist: ' . $this->path);
+		}
+
+		return $path;
 	}
 
 	public function canPreview(): bool
@@ -382,8 +388,6 @@ class File extends Entity
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
 		}
 
-		$name = self::filterName($name);
-
 		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
@@ -448,7 +452,7 @@ class File extends Entity
 		}
 
 		$name = preg_replace('/\s+/', '_', $file['name']);
-		$name = preg_replace('/[^\d\w._-]/ui', '', $name);
+		$name = self::filterName($name);
 
 		return self::createAndStore($path, $name, $file['tmp_name'], null);
 	}
@@ -859,7 +863,7 @@ class File extends Entity
 		$context = array_shift($path);
 
 		foreach ($path as $part) {
-			if (!preg_match('!^[\w\d\p{L} _-]+(?:\.[\w\d\p{L} _-]+)*$!iu', $part)) {
+			if (substr($part, 0, 1) == '.') {
 				throw new ValidationException('Chemin invalide');
 			}
 		}
