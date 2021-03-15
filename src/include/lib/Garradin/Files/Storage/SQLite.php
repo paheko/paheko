@@ -80,7 +80,9 @@ class SQLite implements StorageInterface
 			fwrite($blob, $source_content);
 		}
 		else {
-			fwrite($blob, file_get_contents($source_path));
+			$in = fopen($source_path, 'r');
+			stream_copy_to_stream($in, $blob);
+			fclose($in);
 		}
 
 		fclose($blob);
