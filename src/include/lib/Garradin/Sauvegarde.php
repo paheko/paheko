@@ -3,6 +3,9 @@
 namespace Garradin;
 
 use Garradin\Membres\Session;
+use Garradin\Files\Files;
+
+use KD2\ZipWriter;
 
 class Sauvegarde
 {
@@ -258,6 +261,30 @@ class Sauvegarde
 		if (null !== $tmp_file) {
 			@unlink($tmp_file);
 		}
+	}
+
+	public function dumpFilesZip(): void
+	{
+		$name = Config::getInstance()->get('nom_asso') . ' - Documents.zip';
+		header('Content-type: application/zip');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+
+		$zip = new ZipWriter('php://output');
+		$zip->setCompression(0);
+
+		$add_directory = function ($path) use ($zip, &$add_directory) {
+			foreach (Files::list($path) as $file) {
+				if ($file->type == $file::TYPE_DIRECTORY) {
+					$add_directory($file->path);
+				}
+				else {
+					$zip->add($file->path, null, $file->fullpath());
+				}
+			}
+		};
+
+		$add_directory('');
+		$zip->close();
 	}
 
 	/**

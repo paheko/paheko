@@ -142,6 +142,11 @@ class File extends Entity
 		return strtok($this->path, '/');
 	}
 
+	public function fullpath(): string
+	{
+		return Files::callStorage('getFullPath', $this);
+	}
+
 	public function canPreview(): bool
 	{
 		return in_array($this->mime, self::PREVIEW_TYPES);

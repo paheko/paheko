@@ -55,7 +55,9 @@ class Files
 
 	static public function list(string $parent = ''): array
 	{
-		File::validatePath($parent);
+		if ($parent !== '') {
+			File::validatePath($parent);
+		}
 
 		// Update this path
 		self::callStorage('sync', $parent);
