@@ -65,8 +65,14 @@ class SQLite implements StorageInterface
 
 		$db = DB::getInstance();
 
+		$size = $source_content !== null ? strlen($source_content) : filesize($source_path);
+
+		if ($size != $file->size) {
+			// FIXME weird case
+		}
+
 		$db->preparedQuery('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));',
-			$file->id(), $file->size);
+			$file->id(), $size);
 
 		$blob = $db->openBlob('files_contents', 'content', $file->id(), 'main', \SQLITE3_OPEN_READWRITE);
 
