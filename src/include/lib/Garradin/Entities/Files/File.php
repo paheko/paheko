@@ -257,7 +257,9 @@ class File extends Entity
 			$this->set('name', $new_name);
 		}
 
-		$this->set('modified', new \DateTime);
+		if (!$this->modified) {
+			$this->set('modified', new \DateTime);
+		}
 
 		if (!$this->exists()) {
 			$this->save();
