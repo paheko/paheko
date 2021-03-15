@@ -52,30 +52,22 @@
             }
             else
             {
-                window.parent.te_insertFile(data.file.name);
+                window.parent.te_insertFile(file.name);
             }
 
             return true;
         }
 
-        var gallery = document.getElementsByClassName('gallery');
-
-        if (gallery.length == 1 && document.querySelector)
-        {
-            var items = gallery[0].getElementsByTagName('li');
-
-            for (var i = 0; i < items.length; i++)
-            {
-                var a = items[i].querySelector('figure > a');
-                a.onclick= function (e) {
-                    insertImageHelper({
-                        name: this.getAttribute('data-name'),
-                        thumb: this.firstChild.src
-                    });
-                    return false;
-                };
-            }
-        }
+        document.querySelectorAll('a[data-insert]').forEach((a) => {
+            a.onclick = function (e) {
+               insertHelper({
+                    name: this.dataset.name,
+                    image: this.dataset.insert == 'image',
+                    thumb: this.dataset.thumb
+                });
+                return false;
+            };
+        });
 
         var a = document.createElement('button');
         a.className = 'icn-btn';

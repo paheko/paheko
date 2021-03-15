@@ -42,9 +42,10 @@
 {foreach from=$images item="file"}
 	<li>
 		<figure>
-			<a href="{$file->url()}" data-name="{$file.name}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
+			<a href="{$file->url()}" data-name="{$file.name}" data-insert="image" data-thumb="{$file->thumb_url()}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
 			<form class="actions" method="post" action="{$self_url}">
 				{linkbutton shape="download" label="Télécharger" href=$file->url() target="_blank"}
+				{linkbutton shape="plus" label="Insérer" href=$file->url() data-name=$file.name data-insert="image" data-thumb=$file->thumb_url()}
 				{csrf_field key=$csrf_key}
 				<input type="hidden" name="delete" value="{$file.name}" />
 				<noscript><input type="submit" value="Supprimer" /></noscript>
@@ -64,7 +65,8 @@
 			<td>{$file.type}, {$file.size|size_in_bytes}</td>
 			<td class="actions">
 				<form class="actions" method="post" action="{$self_url}">
-					{linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
+					{linkbutton shape="plus" label="Insérer" href=$file->url() data-name=$file.name data-insert="file"}
+					{linkbutton shape="download" label="Télécharger" href=$file->url() target="_blank"}
 					{csrf_field key=$csrf_key}
 					<input type="hidden" name="delete" value="{$file.name}" />
 					<noscript><input type="submit" value="Supprimer" /></noscript>
