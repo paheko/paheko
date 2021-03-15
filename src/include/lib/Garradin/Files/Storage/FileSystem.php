@@ -87,7 +87,17 @@ class FileSystem implements StorageInterface
 
 	static protected function _getRealPath(string $path): ?string
 	{
-		return realpath(self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path)) ?: null;
+		$path = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+
+		$parts = explode(DIRECTORY_SEPARATOR, $path);
+
+		foreach ($parts as $part) {
+			if (substr($part, 0, 1) === '.') {
+				return null;
+			}
+		}
+
+		return $path;
 	}
 
 	static public function getFullPath(File $file): ?string
@@ -113,7 +123,7 @@ class FileSystem implements StorageInterface
 			return rmdir($path);
 		}
 		else {
-			return unlink($path);
+			return Utils::safe_unlink($path);
 		}
 	}
 
@@ -267,6 +277,7 @@ class FileSystem implements StorageInterface
 
 		// File has disappeared
 		if (!file_exists($path)) {
+			$file->delete();
 			return null;
 		}
 
