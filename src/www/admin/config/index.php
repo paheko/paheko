@@ -2,6 +2,8 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -27,13 +29,15 @@ $tpl->assign([
 	'garradin_website' => WEBSITE,
 ]);
 
-$admin_background = $config->get('admin_background');
+$homepage = $config->admin_homepage;
 
-if ($admin_background) {
-	$admin_background = $config->get('admin_background')->url();
+if ($homepage && !Files::get($homepage)) {
+	File::createAndStore(dirname($homepage), basename($homepage), null, '');
 }
 
-$tpl->assign('background_image_current', $admin_background);
+$admin_background = $config->get('admin_background');
+
+$tpl->assign('background_image_current', $admin_background ? WWW_URL . $admin_background : null);
 $tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
 
 $tpl->assign('custom_js', ['color_helper.js']);

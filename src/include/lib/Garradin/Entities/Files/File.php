@@ -267,7 +267,7 @@ class File extends Entity
 			$this->set('modified', new \DateTime);
 		}
 
-		if (!$this->exists()) {
+		if (count($this->_modified)) {
 			$this->save();
 		}
 

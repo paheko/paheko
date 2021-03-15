@@ -91,10 +91,6 @@ class Page extends Entity
 	{
 		if (null === $this->_file || $force_reload) {
 			$this->_file = Files::get($this->filepath());
-
-			if (null === $this->_file) {
-				throw new \RuntimeException('File not found: ' . $this->filepath());
-			}
 		}
 
 		return $this->_file;
@@ -104,7 +100,7 @@ class Page extends Entity
 	{
 		parent::load($data);
 
-		if ($this->file()->modified > $this->modified) {
+		if ($this->file() && $this->file()->modified > $this->modified) {
 			$this->loadFromFile($this->file());
 			$this->save();
 		}
