@@ -475,10 +475,19 @@ class Utils
 
     static public function format_bytes($size)
     {
-        if ($size > (1024 * 1024))
-            return number_format(round($size / 1024 / 1024, 2), 2, ',', '') . ' Mo';
-        elseif ($size > 1024)
+        if ($size > (1024 * 1024 * 1024)) {
+            $size = round($size / 1024 / 1024 / 1024, 2);
+            $decimals = $size == (int) $size ? 0 : 2;
+            return number_format($size, $decimals, ',', '') . ' Go';
+        }
+        elseif ($size > (1024 * 1024)) {
+            $size = round($size / 1024 / 1024, 2);
+            $decimals = $size == (int) $size ? 0 : 2;
+            return number_format($size, $decimals, ',', '') . ' Mo';
+        }
+        elseif ($size > 1024) {
             return round($size / 1024) . ' Ko';
+        }
         else
             return $size . ' o';
     }

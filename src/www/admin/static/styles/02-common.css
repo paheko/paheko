@@ -445,6 +445,44 @@ nav.breadcrumbs li:last-child a {
     font-weight: bold;
 }
 
+nav.breadcrumbs aside {
+    float: right;
+}
+
+aside.quota {
+    background: rgba(var(--gMainColor), 0.1);
+    border-radius: .5rem;
+    padding: .2rem .5rem;
+    color: #000;
+}
+
+aside.quota i {
+    font-style: normal;
+}
+
+aside.quota h4 {
+    display: inline-block;
+}
+
+.meter {
+    min-width: 20rem;
+    height: 1rem;
+    background: rgba(var(--gSecondColor), 0.5);
+    border-radius: .2rem;
+    display: inline-flex;
+    padding: 0;
+    vertical-align: middle;
+    margin-left: 1rem;
+}
+
+.meter span {
+    border-radius: .2rem;
+    background: rgb(var(--gMainColor));
+    display: inline-block;
+    height: 1rem;
+    vertical-align: middle;
+}
+
 .search-results article {
     margin: 2em 1em;
 }

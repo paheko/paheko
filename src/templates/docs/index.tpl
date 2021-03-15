@@ -47,6 +47,11 @@ use Garradin\Entities\Files\File;
 	{if count($breadcrumbs) > 1}
 		{linkbutton href="?p=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
 	{/if}
+
+	<aside class="quota">
+		<h4><b>{$quota_left|size_in_bytes}</b> libres sur <i>{$quota_max|size_in_bytes}</i></h4>
+		<span class="meter"><span style="width: {$quota_percent}%"></span></span>
+	</aside>
 </nav>
 
 {if !$can_mkdir && !$context_ref}
