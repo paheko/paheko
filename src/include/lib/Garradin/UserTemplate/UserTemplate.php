@@ -16,7 +16,7 @@ use Garradin\UserTemplate\Modifiers;
 use Garradin\UserTemplate\Functions;
 use Garradin\UserTemplate\Sections;
 
-use const Garradin\{WWW_URL, ADMIN_URL, CACHE_ROOT, DATA_ROOT};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT};
 
 class UserTemplate extends Brindille
 {
@@ -126,7 +126,14 @@ class UserTemplate extends Brindille
 
 	public function display(): void
 	{
-		$compiled_path = CACHE_ROOT . '/compiled/s_' . sha1($this->file ? $this->file->path : $this->path) . '.php';
+		// Use custom cache for user templates
+		if ($this->file) {
+			$compiled_path = sprintf('%s/%s.php', USER_TEMPLATES_CACHE_ROOT, sha1($this->file->path));
+		}
+		// Use shared cache for default templates
+		else {
+			$compiled_path = sprintf('%s/%s.php', SHARED_USER_TEMPLATES_CACHE_ROOT, sha1($this->path));
+		}
 
 		if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
 			require $compiled_path;

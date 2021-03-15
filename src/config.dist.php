@@ -90,12 +90,23 @@ namespace Garradin;
 //const DATA_ROOT = ROOT . '/data';
 
 /**
- * Répertoire où est situé le cache (fichiers temporaires utilisés pour accélérer le chargement des pages)
+ * Répertoire où est situé le cache,
+ * exemples : graphiques de statistiques, templates Brindille, etc.
  *
  * Défaut : sous-répertoire 'cache' de DATA_ROOT
  */
 
 //const CACHE_ROOT = DATA_ROOT . '/cache';
+
+/**
+ * Répertoire où est situé le cache partagé entre instances
+ * Garradin utilisera ce répertoire pour stocker le cache susceptible d'être partagé entre instances, comme
+ * le code PHP généré à partir des templates Smartyer.
+ *
+ * Défaut : sous-répertoire 'shared' de CACHE_ROOT
+ */
+
+//const SHARED_CACHE_ROOT = CACHE_ROOT . '/shared';
 
 /**
  * Emplacement du fichier de base de données de Garradin
