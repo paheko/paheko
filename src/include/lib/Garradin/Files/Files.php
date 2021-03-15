@@ -91,7 +91,7 @@ class Files
 
 		// Check that we can store this data
 		if ($function == 'store') {
-			$quota = FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
+			$quota = self::getQuota();
 			$used = self::callStorage('getTotalSize');
 
 			$size = $args[0] ? filesize($args[1]) : strlen($args[2]);
@@ -245,5 +245,15 @@ class Files
 		}
 
 		return $breadcrumbs;
+	}
+
+	static public function getQuota(): int
+	{
+		return FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
+	}
+
+	static public function getUsedQuota(): int
+	{
+		return self::callStorage('getTotalSize');
 	}
 }
