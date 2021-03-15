@@ -47,10 +47,13 @@
 		<p class="alert block">
 			Les fichiers seront <strong>supprimés</strong> de la base de données après avoir été recopiés vers '{$storage_backend}'.
 		</p>
+		<p class="error block">
+			Sauvegarde fortement recommandée avant de procéder à cette opération !
+		</p>
 		<p class="help">Cette opération peut prendre quelques minutes.</p>
 		<p>
 			{csrf_field key="migrate_backend"}
-			{button type="submit" name="migrate_backend_ok" label="Copier tous les fichiers vers %s"|args:$storage_backend shape="right"}
+			{button type="submit" name="migrate_backend_ok" label="Copier tous les fichiers vers %s et les supprimer de la base de données"|args:$storage_backend shape="right"}
 		</p>
 	</fieldset>
 	{else}
@@ -59,7 +62,7 @@
 		<p class="alert block">
 			Les fichiers ne seront pas effacés de {$storage_backend} mais simplement recopiés dans la base de données.
 		</p>
-		<p class="help">Cette opération peut prendre quelques minutes.</p>
+		<p class="help">Cette opération peut prendre quelques minutes. Elle est utile pour migrer entre deux systèmes de fichiers différents.</p>
 		<p>
 			{csrf_field key="migrate_back"}
 			{button type="submit" name="migrate_back_ok" label="Copier tous les fichiers de %s vers la base de données"|args:$storage_backend shape="right"}

@@ -23,6 +23,7 @@ $form->runIf('create', function () use ($parent) {
 	}
 
 	File::validatePath($parent . '/' . $name);
+	$name = File::filterName($name);
 
 	$file = File::createAndStore($parent, $name, null, '');
 	$file->set('mime', 'text/plain');

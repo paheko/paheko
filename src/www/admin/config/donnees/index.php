@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Files\Files;
+
 require_once __DIR__ . '/../_inc.php';
 
 $s = new Sauvegarde;
@@ -30,7 +32,7 @@ $form->runIf('restore_file', function () use ($s, $tpl, $session) {
 }, 'backup_restore');
 
 $tpl->assign('db_size', $s->getDBSize());
-$tpl->assign('files_size', $s->getDBFilesSize());
+$tpl->assign('files_size', Files::getUsedQuota());
 
 $tpl->assign('ok_code', qg('code'));
 $tpl->assign('ok', qg('ok'));
