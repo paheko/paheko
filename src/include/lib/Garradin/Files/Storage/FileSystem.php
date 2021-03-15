@@ -57,7 +57,13 @@ class FileSystem implements StorageInterface
 		$target = self::getFullPath($file);
 		self::ensureDirectoryExists(dirname($target));
 
-		return copy($source_path, $target);
+		$return = copy($source_path, $target);
+
+		if ($return) {
+			touch($target, $file->modified->getTimestamp());
+		}
+
+		return $return;
 	}
 
 	static public function storeContent(File $file, string $source_content): bool
@@ -65,7 +71,13 @@ class FileSystem implements StorageInterface
 		$target = self::getFullPath($file);
 		self::ensureDirectoryExists(dirname($target));
 
-		return file_put_contents($target, $source_content) === false ? false : true;
+		$return = file_put_contents($target, $source_content) === false ? false : true;
+
+		if ($return) {
+			touch($target, $file->modified->getTimestamp());
+		}
+
+		return $return;
 	}
 
 	static public function mkdir(File $file): bool
