@@ -5,6 +5,8 @@ namespace Garradin;
 use Garradin\Membres\Session;
 use Garradin\Membres\Champs;
 
+use Garradin\Files\Files;
+
 class Upgrade
 {
 	const MIN_REQUIRED_VERSION = '1.0.0';
