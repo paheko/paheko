@@ -25,6 +25,7 @@
 {include file="acc/_simple_help.tpl" link="../reports/trial_balance.php?year=%d"|args:$current_year.id type=null}
 
 {if !empty($grouped_accounts)}
+	<?php $has_accounts = false; ?>
 	<table class="list">
 		<thead>
 			<tr>
@@ -71,8 +72,18 @@
 				</tr>
 			{/foreach}
 		</tbody>
+		<?php $has_accounts = true; ?>
 		{/foreach}
 	</table>
+
+	{if !$has_accounts}
+	<div class="alert block">
+		<p>Aucun compte favori ne comporte d'écriture sur cet exercice.</p>
+		<p>
+			{linkbutton href="!acc/transactions/new.php" label="Saisir une écriture" shape="plus"}
+		</p>
+	</div>
+	{/if}
 {/if}
 
 <p class="help">
