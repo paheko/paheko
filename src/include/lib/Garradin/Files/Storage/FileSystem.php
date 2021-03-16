@@ -7,8 +7,6 @@ use Garradin\Entities\Files\File;
 use Garradin\DB;
 use Garradin\Utils;
 
-use const Garradin\FILE_STORAGE_CONFIG;
-
 /**
  * This class provides storage in the file system
  * You need to configure FILE_STORAGE_CONFIG to give a file path

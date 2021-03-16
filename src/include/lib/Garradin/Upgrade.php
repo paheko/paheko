@@ -119,6 +119,12 @@ class Upgrade
 
 				$champs->createIndexes($champs::TABLE);
 
+				// Migrate to a different storage
+				if (FILE_STORAGE_BACKEND != 'SQLite') {
+					Files::migrateStorage('SQLite', FILE_STORAGE_BACKEND, null, FILE_STORAGE_CONFIG);
+					Files::truncateStorage('SQLite', null);
+				}
+
 				$pages = $db->iterate('SELECT * FROM web_pages;');
 
 				foreach ($pages as $data) {
