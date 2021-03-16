@@ -121,6 +121,8 @@ class Upgrade
 
 				$champs->createIndexes($champs::TABLE);
 
+				$db->commitSchemaUpdate();
+
 				// Migrate to a different storage
 				if (FILE_STORAGE_BACKEND != 'SQLite') {
 					Files::migrateStorage('SQLite', FILE_STORAGE_BACKEND, null, FILE_STORAGE_CONFIG);
@@ -135,8 +137,6 @@ class Upgrade
 					$page->load((array) $data);
 					$page->syncSearch();
 				}
-
-				$db->commitSchemaUpdate();
 			}
 
 			// Vérification de la cohérence des clés étrangères
