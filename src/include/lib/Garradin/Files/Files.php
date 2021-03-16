@@ -265,6 +265,15 @@ class Files
 		return self::callStorage('getTotalSize');
 	}
 
+	static public function getRemainingQuota(): int
+	{
+		if (FILE_STORAGE_QUOTA) {
+			return FILE_STORAGE_QUOTA - self::getUsedQuota();
+		}
+
+		return self::callStorage('getRemainingQuota');
+	}
+
 	static public function checkQuota(int $size = 0): void
 	{
 		$quota = self::getQuota();

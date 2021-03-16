@@ -176,6 +176,12 @@ class FileSystem implements StorageInterface
 		return $quota === false ? \PHP_INT_MAX : (int) $quota;
 	}
 
+	static public function getRemainingQuota(): int
+	{
+		$quota = @disk_free_space(self::_getRoot());
+		return $quota === false ? \PHP_INT_MAX : (int) $quota;
+	}
+
 	static public function truncate(): void
 	{
 		Utils::deleteRecursive(self::_getRoot());

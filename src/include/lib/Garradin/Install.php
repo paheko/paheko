@@ -81,6 +81,7 @@ class Install
 
 	static public function install(string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null)
 	{
+		self::checkAndCreateDirectories();
 		$db = DB::getInstance(true);
 
 		// Création de la base de données

@@ -216,7 +216,8 @@ namespace Garradin;
  * Activation des détails techniques (utile en auto-hébergement) :
  * - version de PHP
  * - page permettant de visualiser les erreurs présentes dans le error.log
- * - vérification de nouvelle version
+ * - permettre de migrer d'un stockage de fichiers à l'autre
+ * - vérification de nouvelle version (sur la page configuration)
  *
  * Ces infos ne sont visibles que par les membres ayant accès à la configuration.
  *
@@ -407,6 +408,9 @@ namespace Garradin;
  * - SQLite : aucune configuration possible
  * - FileSystem : (string) chemin du répertoire où doivent être stockés les fichiers
  *
+ * Pour migrer d'un stockage de fichiers à l'autre,
+ * voir Configuration > Avancé (accessible uniquement si ENABLE_TECH_DETAILS est à true)
+ *
  * Défaut : null
  */
 
@@ -419,7 +423,7 @@ namespace Garradin;
  * pas possible de stocker plus que cette valeur.
  * Tout envoi de fichier sera refusé.
  *
- * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible)
+ * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible, donc généralement l'espace dispo sur le disque dur !)
  */
 
 //const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage

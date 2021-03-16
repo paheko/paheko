@@ -151,6 +151,10 @@ class Sections
 				$page->exists(true);
 				$page->load($data);
 
+				if (!$page->file()) {
+					continue;
+				}
+
 				$row = array_merge($row, $page->asTemplateArray());
 			}
 

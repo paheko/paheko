@@ -69,10 +69,16 @@ interface StorageInterface
 	static public function getTotalSize(): int;
 
 	/**
-	 * Return available disk space
+	 * Return total disk space
 	 * This will only be called if FILE_STORAGE_QUOTA constant is null
 	 */
 	static public function getQuota(): int;
+
+	/**
+	 * Return available free disk space
+	 * This will only be called if FILE_STORAGE_QUOTA constant is null
+	 */
+	static public function getRemainingQuota(): int;
 
 	/**
 	 * Delete all stored content in this backend
