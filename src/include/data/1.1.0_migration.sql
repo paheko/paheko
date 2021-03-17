@@ -48,7 +48,7 @@ UPDATE recherches SET contenu = REPLACE(contenu, 'id_categorie', 'id_category') 
 
 CREATE TEMP TABLE files_transactions (old_id, old_transaction, old_name, new_path, new_id, same_name);
 
--- Adding an extra step as some file names can be the same!
+-- Adding an extra step as some file names can have the same name
 INSERT INTO files_transactions
 	SELECT f.id, t.id, f.nom, NULL, NULL, NULL
 	FROM fichiers f
@@ -156,12 +156,27 @@ INSERT INTO web_pages (id, parent, path, file_path, type, status, title, publish
 	content
 	FROM wiki_as_files;
 
+CREATE TEMP TABLE files_wiki (old_id, wiki_id, web_path, old_name, new_path, new_id, same_name);
+
+-- Adding an extra step as some file names can have the same name
+INSERT INTO files_wiki
+	SELECT f.id, w.id, waf.path, f.nom, NULL, NULL, NULL
+	FROM fichiers f
+		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
+		INNER JOIN wiki_as_files waf ON w.id = waf.old_id;
+
+UPDATE files_wiki SET same_name = old_id || '_'
+	WHERE old_id IN (SELECT old_id FROM files_wiki GROUP BY wiki_id, old_name HAVING COUNT(*) > 1);
+
+-- Avoid duplicates
+UPDATE files_wiki SET new_path = 'web/' || web_path || '/' || COALESCE(same_name, '') || old_name;
+
 -- Copy files linked to wiki pages
 INSERT INTO files (path, parent, name, type, mime, modified, size, image)
 	SELECT
-		'web/' || waf.path || '/' || f.nom,
-		'web/' || waf.path,
-		f.nom,
+		fw.new_path,
+		dirname(fw.new_path),
+		basename(fw.new_path),
 		1,
 		f.type,
 		f.datetime,
@@ -169,17 +184,16 @@ INSERT INTO files (path, parent, name, type, mime, modified, size, image)
 		f.image
 	FROM fichiers f
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
-		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
-		INNER JOIN wiki_as_files waf ON w.id = waf.old_id;
+		INNER JOIN files_wiki fw ON fw.old_id = f.id;
+
+UPDATE files_wiki SET new_id = (SELECT id FROM files WHERE path = new_path);
 
 INSERT INTO files_contents (id, compressed, content)
 	SELECT
-		f2.id, 0, c.contenu
-	FROM fichiers f
-		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
-		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
-		INNER JOIN wiki_as_files waf ON w.id = waf.old_id
-		INNER JOIN files AS f2 ON f2.path = 'web/' || waf.path || '/' || f.nom;
+		fw.new_id, 0, c.contenu
+	FROM files_wiki fw
+		INNER JOIN fichiers f ON f.id = fw.old_id
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
 
 -- Create parent directories
 INSERT INTO files (type, path, parent, name)
