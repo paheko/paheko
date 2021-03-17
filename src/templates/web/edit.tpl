@@ -14,7 +14,7 @@
 		<dl>
 			{input type="text" name="title" source=$page required=true label="Titre"}
 			{input type="text" name="uri" default=$page->uri() required=true label="Adresse unique URI" help="Utilisée pour désigner l'adresse de la page sur le site. Ne peut comporter que des lettres, des chiffres, des tirets et des tirets bas." pattern="[A-Za-z0-9_-]+"}
-			{input type="list" name="parent" label="Catégorie" default=$parent target="web/_selector.php?parent=%s"|args:$page.parent required=true}
+			{input type="list" name="parent" label="Catégorie" default=$parent target="web/_selector.php?current=%s"|args:$page.path required=true}
 			{input type="datetime" name="date" label="Date" required=true default=$page.published}
 			<dt>Statut</dt>
 			{input type="radio" name="status" value=$page::STATUS_ONLINE label="En ligne" source=$page}
