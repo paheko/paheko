@@ -37,7 +37,7 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		self::$current_path = str_replace(File::CONTEXT_WEB . '/', '', $file->parent);
+		self::$current_path = str_replace(File::CONTEXT_WEB . '/', '', dirname($file->path));
 		$str = $content ?? $file->fetch();
 
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
