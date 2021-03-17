@@ -294,7 +294,7 @@ class File extends Entity
 	{
 		// Store content in search table
 		if (substr($this->mime, 0, 5) == 'text/') {
-			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this->path);
+			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this);
 
 			if ($this->customType() == self::FILE_EXT_ENCRYPTED) {
 				$content = null;
