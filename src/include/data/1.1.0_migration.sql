@@ -156,20 +156,14 @@ INSERT INTO web_pages (id, parent, path, file_path, type, status, title, publish
 	content
 	FROM wiki_as_files;
 
-CREATE TEMP TABLE files_wiki (old_id, wiki_id, web_path, old_name, new_path, new_id, same_name);
+CREATE TEMP TABLE files_wiki (old_id, wiki_id, web_path, old_name, new_path, new_id);
 
 -- Adding an extra step as some file names can have the same name
 INSERT INTO files_wiki
-	SELECT f.id, w.id, waf.path, f.nom, NULL, NULL, NULL
+	SELECT f.id, w.id, waf.path, f.nom, 'web/' || waf.path || '/' || f.id || '_' || f.nom, NULL
 	FROM fichiers f
 		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
 		INNER JOIN wiki_as_files waf ON w.id = waf.old_id;
-
-UPDATE files_wiki SET same_name = old_id || '_'
-	WHERE old_id IN (SELECT old_id FROM files_wiki GROUP BY wiki_id, old_name HAVING COUNT(*) > 1);
-
--- Avoid duplicates
-UPDATE files_wiki SET new_path = 'web/' || web_path || '/' || COALESCE(same_name, '') || old_name;
 
 -- Copy files linked to wiki pages
 INSERT INTO files (path, parent, name, type, mime, modified, size, image)
