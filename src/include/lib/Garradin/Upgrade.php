@@ -89,10 +89,19 @@ class Upgrade
 
 				// Update Skriv content for attachments
 				foreach ($db->iterate('SELECT rowid, contenu FROM wiki_revisions;') as $r) {
-					$content = preg_replace_callback('!<<(image|fichier)\|(\d+)\|(gauche|droite|centre)>>!', function ($match) use ($attachments) {
+					$content = preg_replace_callback('!<<(image|fichier)\s*\|\s*(\d+)\s*(?:\|\s*(gauche|droite|centre))?\s*(?:\|\s*(.+)\s*)?>>!', function ($match) use ($attachments) {
 						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
-						$align = ($match[3] == 'centre' ? 'center' : ($match[3] == 'gauche' ? 'left' : 'right'));
-						return sprintf('<<%s|%s|%s>>', $match[1] == 'fichier' ? 'file' : 'image', $name, $align);
+
+						if (isset($match[3])) {
+							$align = '|' . ($match[3] == 'centre' ? 'center' : ($match[3] == 'gauche' ? 'left' : 'right'));
+						}
+						else {
+							$align = '';
+						}
+
+						$caption = isset($match[4]) ? '|' . $match[4] : '';
+
+						return sprintf('<<%s|%s%s%s>>', $match[1] == 'fichier' ? 'file' : 'image', $name, $align, $caption);
 					}, $r->contenu);
 
 					$content = preg_replace_callback('!(image|fichier)://(\d+)!', function ($match) use ($attachments) {
