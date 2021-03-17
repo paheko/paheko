@@ -208,6 +208,7 @@ class File extends Entity
 
 	public function setContent(string $content): self
 	{
+		$this->set('modified', new \DateTime);
 		$this->store(null, rtrim($content));
 		$this->indexForSearch(null, $content);
 		return $this;
@@ -700,7 +701,7 @@ class File extends Entity
 			return \Garradin\Web\Render\EncryptedSkriv::render($this, null);
 		}
 		else if (substr($this->mime, 0, 5) == 'text/') {
-			return $this->fetch();
+			return sprintf('<pre>%s</pre>', htmlspecialchars($this->fetch()));
 		}
 
 		throw new \LogicException('Cannot render file of this type');
