@@ -54,11 +54,11 @@ INSERT INTO files_transactions
 	FROM fichiers f
 		INNER JOIN fichiers_acc_transactions t ON t.fichier = f.id;
 
-UPDATE files_transactions SET same_name = 1
+UPDATE files_transactions SET same_name = old_id || '_'
 	WHERE old_id IN (SELECT old_id FROM files_transactions GROUP BY old_transaction, old_name HAVING COUNT(*) > 1);
 
 -- Make file name is unique!
-UPDATE files_transactions SET new_path = 'transaction/' || old_transaction || '/' || COALESCE(same_name, (old_id || '_'), '') || old_name;
+UPDATE files_transactions SET new_path = 'transaction/' || old_transaction || '/' || COALESCE(old_id || '_', '') || old_name;
 
 -- Copy existing files for transactions
 INSERT INTO files (path, parent, name, type, mime, modified, size, image)
