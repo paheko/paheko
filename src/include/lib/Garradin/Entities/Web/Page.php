@@ -132,6 +132,9 @@ class Page extends Entity
 
 	public function render(array $options = []): string
 	{
+		if (!$this->file()) {
+			throw new \LogicException('File does not exist: '  . $this->file_path);
+		}
 		if ($this->format == self::FORMAT_SKRIV) {
 			return \Garradin\Web\Render\Skriv::render($this->file(), $this->content, $options);
 		}
