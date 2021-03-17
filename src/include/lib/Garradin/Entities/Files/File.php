@@ -717,11 +717,14 @@ class File extends Entity
 		$context = $this->context();
 		$ref = strtok(substr($this->path, strpos($this->path, '/')), '/');
 
-		if (null === $session) {
+		if (null === $session || !$session->isLogged()) {
 			return false;
 		}
 
-		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
+		if ($context == self::CONTEXT_SKELETON && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
+			return true;
+		}
+		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 			return true;
 		}
 		// The user can access his own profile files
@@ -825,7 +828,7 @@ class File extends Entity
 	{
 		$context = $this->context();
 
-		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB || $context == self::CONTEXT_SKELETON) {
+		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
 			return true;
 		}
 
