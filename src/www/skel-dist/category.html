@@ -4,9 +4,9 @@
 
 <section class="subcategories">
 	{{#categories parent=$page.path order="title"}}
-	<article>
-		<h2><a href="{{$page.url}}">{{$page.title}}</a></h2>
-	</article>
+	<ul>
+		<li><a href="{{$url}}">{{$title}}</a></li>
+	</ul>
 	{{/categories}}
 </section>
 
