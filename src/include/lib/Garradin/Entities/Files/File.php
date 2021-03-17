@@ -607,8 +607,13 @@ class File extends Entity
 	 */
 	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
+		if ($this->type != self::TYPE_FILE) {
+			header('HTTP/1.1 404 Not Found', true, 404);
+			throw new UserException('Page non trouvée');
+		}
+
 		if ($this->isPublic()) {
-			Utils::HTTPCache(null, $this->modified->getTimestamp());
+			Utils::HTTPCache(md5($this->path . $this->size . $this->modified->getTimestamp()), $this->modified->getTimestamp());
 		}
 		else {
 			// Disable browser cache
