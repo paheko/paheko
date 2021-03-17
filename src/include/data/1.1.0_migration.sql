@@ -4,6 +4,13 @@ DROP TRIGGER IF EXISTS wiki_recherche_update;
 DROP TRIGGER IF EXISTS wiki_recherche_contenu_insert;
 DROP TRIGGER IF EXISTS wiki_recherche_contenu_chiffre;
 
+-- Fix some rare edge cases where date_inscription is incorrect
+UPDATE membres SET date_inscription = date() WHERE date(date_inscription) IS NULL;
+
+-- Uh, force another login id if email is not correct
+UPDATE config SET valeur = 'numero' WHERE cle = 'champ_identifiant' AND valeur = 'email'
+	AND (SELECT COUNT(*) FROM membres GROUP BY LOWER(email) HAVING COUNT(*) > 1 LIMIT 1);
+
 ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 INSERT OR IGNORE INTO config (cle, valeur) VALUES ('desactiver_site', '0');
