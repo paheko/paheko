@@ -174,7 +174,7 @@ class Page extends Entity
 			$this->_file = null;
 		}
 
-		if (!$this->file()->exists()) {
+		if (!$this->file()) {
 			$file = $this->_file = File::createAndStore(dirname($target), basename($target), null, $export);
 		}
 		elseif ($this->file()->fetch() !== $export) {
@@ -216,7 +216,6 @@ class Page extends Entity
 		$this->assert(trim($this->file_path) !== '', 'Le chemin de fichier ne peut rester vide');
 		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
-		$this->assert((bool) $this->file(), 'Fichier manquant');
 		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
 		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
