@@ -92,57 +92,30 @@ INSERT INTO wiki_as_files
 	FROM wiki_pages p
 	INNER JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
 
--- Build back path, up to ten levels
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-UPDATE wiki_as_files AS waf SET
-	path = (SELECT uri FROM wiki_as_files WHERE old_id = waf.new_parent) || '/' || path,
-	new_parent = (SELECT new_parent FROM wiki_as_files WHERE old_id = waf.new_parent)
-	WHERE new_parent > 0;
-
-UPDATE wiki_as_files SET path = TRIM(path, '/');
-
-UPDATE wiki_as_files SET path = NULL WHERE path = '';
+-- Build path
+WITH RECURSIVE path(level, uri, parent, id) AS (
+	SELECT 0, uri, old_parent, old_id
+	FROM wiki_as_files
+	UNION ALL
+	SELECT path.level + 1,
+	wiki_as_files.uri,
+	wiki_as_files.old_parent,
+	path.id
+	FROM wiki_as_files
+	JOIN path ON wiki_as_files.old_id = path.parent
+),
+path_from_root AS (
+	SELECT group_concat(uri, '/') AS path, id
+	FROM (SELECT id, uri FROM path ORDER BY level DESC)
+	GROUP BY id
+)
+UPDATE wiki_as_files SET path = (SELECT path FROM path_from_root WHERE id = wiki_as_files.old_id);
 
 -- Copy into files
 INSERT INTO files (path, parent, name, type, mime, modified, size)
 	SELECT
-		'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri || '/index.txt',
-		'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri,
+		'web/' || path || '/index.txt',
+		dirname('web/' || path),
 		'index.txt',
 		1,
 		'text/plain',
@@ -154,19 +127,18 @@ UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE files.path = 'web/
 
 -- x'0a' == \n
 INSERT INTO files_contents (id, compressed, content)
-	SELECT new_id, 0,
+	SELECT f.id, 0,
 		'Title: ' || title || x'0a' || 'Published: ' || created || x'0a' || 'Status: '
 		|| (CASE WHEN public THEN 'Online' ELSE 'Draft' END)
 		|| x'0a' || 'Format: ' || (CASE WHEN encrypted THEN 'Skriv/Encrypted' ELSE 'Skriv' END)
 		|| x'0a' || x'0a' || '----' || x'0a' || x'0a' || content
-	FROM wiki_as_files;
-
-UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
+	FROM wiki_as_files waf
+	INNER JOIN files f ON f.path = 'web/' || waf.path || '/index.txt';
 
 -- Copy to search
 INSERT INTO files_search (path, title, content)
 	SELECT
-		'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri || '/index.txt',
+		'web/' || path || '/index.txt',
 		title,
 		CASE WHEN encrypted THEN NULL ELSE content END
 	FROM wiki_as_files WHERE encrypted = 0;
@@ -174,9 +146,9 @@ INSERT INTO files_search (path, title, content)
 -- Copy to web_pages
 INSERT INTO web_pages (id, parent, path, file_path, type, status, title, published, modified, format, content)
 	SELECT new_id,
-	CASE WHEN path IS NULL THEN '' ELSE path END,
-	(CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri,
-	'web/' || (CASE WHEN path IS NOT NULL THEN path || '/' ELSE '' END) || uri || '/index.txt',
+	CASE WHEN dirname(path) = '.' THEN '' ELSE dirname(path) END,
+	path,
+	'web/' || path || '/index.txt',
 	type,
 	CASE WHEN public THEN 'online' ELSE 'draft' END,
 	title, created, modified,
@@ -187,8 +159,8 @@ INSERT INTO web_pages (id, parent, path, file_path, type, status, title, publish
 -- Copy files linked to wiki pages
 INSERT INTO files (path, parent, name, type, mime, modified, size, image)
 	SELECT
-		'web/' || (CASE WHEN waf.path IS NOT NULL THEN waf.path || '/' ELSE '' END) || uri || '/' || f.nom,
-		'web/' || (CASE WHEN waf.path IS NOT NULL THEN waf.path || '/' ELSE '' END) || uri,
+		'web/' || waf.path || '/' || f.nom,
+		'web/' || waf.path,
 		f.nom,
 		1,
 		f.type,
@@ -207,16 +179,26 @@ INSERT INTO files_contents (id, compressed, content)
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
 		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
 		INNER JOIN wiki_as_files waf ON w.id = waf.old_id
-		INNER JOIN files AS f2 ON f2.path = 'web/' || (CASE WHEN waf.path IS NOT NULL THEN waf.path || '/' ELSE '' END) || waf.uri || '/' || f.nom;
+		INNER JOIN files AS f2 ON f2.path = 'web/' || waf.path || '/' || f.nom;
 
 -- Create parent directories
 INSERT INTO files (type, path, parent, name)
 	SELECT 2,
-		CASE WHEN waf.path IS NOT NULL THEN 'web/' || waf.path ELSE 'web' END || '/' || waf.uri,
-		CASE WHEN waf.path IS NOT NULL THEN 'web/' || waf.path ELSE 'web' END,
+		'web/' || waf.path,
+		dirname('web/' || waf.path),
 		waf.uri
-	FROM wiki_as_files waf
-	GROUP BY waf.old_id;
+	FROM wiki_as_files waf;
+
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
 
 -- Copy existing config files
 INSERT INTO files (path, parent, name, type, mime, modified, size, image)
