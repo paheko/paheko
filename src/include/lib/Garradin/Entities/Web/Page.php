@@ -160,11 +160,24 @@ class Page extends Entity
 		return $this->path;
 	}
 
-	public function syncFileContent(): void
+	public function syncFile(): void
 	{
 		$export = $this->export();
+		$path = $this->filepath();
+		$target = $this->filepath(false);
 
-		if (!$this->file()->exists() || $this->file()->fetch() !== $export) {
+		// Move parent directory if needed
+		if ($path !== $target) {
+			$dir = Files::get(dirname($path));
+			$dir->rename(dirname($target));
+			$this->set('file_path', $target);
+			$this->_file = null;
+		}
+
+		if (!$this->file()->exists()) {
+			$file = $this->_file = File::createAndStore(dirname($target), basename($target), null, $export);
+		}
+		elseif ($this->file()->fetch() !== $export) {
 			$this->file()->store(null, $this->export());
 		}
 
@@ -179,59 +192,10 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$exists = $this->exists();
-		$file = $exists ? $this->file() : null;
+		$this->set('modified', new \DateTime);
 
-		// Reset filepath
-		$source = $this->filepath();
-
-		// Move file if required
-		$this->set('file_path', $this->filepath(false));
-		$target = $this->filepath();
-
-		$edit_file = false;
-
-		if (!$exists && !$file) {
-			$file = $this->_file = File::create(dirname($target), basename($target), null, '');
-			$file->set('mime', 'text/plain');
-			$edit_file = true;
-		}
-		else {
-			$edit_file = (bool) count(array_intersect(['title', 'status', 'published', 'format', 'content'], array_keys($this->_modified)));
-		}
-
-		if ($edit_file) {
-			$this->set('modified', new \DateTime);
-		}
-
-		try {
-			if ($target !== $source && $exists) {
-				// Rename parent directory
-				$dir = Files::get(dirname($source));
-				$dir->rename(dirname($target));
-			}
-
-			parent::save();
-		}
-		catch (\Exception $e) {
-			// Cancel rename
-			if ($target !== $source && $exists) {
-				$dir = Files::get(dirname($target));
-				$dir->rename(dirname($source));
-			}
-
-			throw $e;
-		}
-
-		// Reload linked file
-		if ($target !== $source) {
-			$file = $this->file(true);
-		}
-
-		// File content has been modified
-		if ($edit_file) {
-			$this->syncFileContent();
-		}
+		parent::save();
+		$this->syncFile();
 
 		return true;
 	}
