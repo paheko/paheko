@@ -11,6 +11,10 @@ UPDATE membres SET date_inscription = date() WHERE date(date_inscription) IS NUL
 UPDATE config SET valeur = 'numero' WHERE cle = 'champ_identifiant' AND valeur = 'email'
 	AND (SELECT COUNT(*) FROM membres GROUP BY LOWER(email) HAVING COUNT(*) > 1 LIMIT 1);
 
+-- Other weird things to fix before migration
+UPDATE wiki_pages SET uri = 'page_' || id WHERE uri = '' OR uri IS NULL;
+DELETE FROM config WHERE cle = 'connexion' OR cle = 'wiki';
+
 ALTER TABLE membres_categories RENAME TO membres_categories_old;
 
 INSERT OR IGNORE INTO config (cle, valeur) VALUES ('desactiver_site', '0');
