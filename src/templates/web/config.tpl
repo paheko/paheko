@@ -7,6 +7,9 @@
 			{*<li><a href="theme.php">Thèmes</a></li>*}
 			<li class="current"><a href="config.php">Configuration</a></li>
 		{/if}
+		{if !$config.site_disabled}
+			<li><a href="{$www_url}" target="_blank">Voir le site en ligne</a></li>
+		{/if}
 	</ul>
 </nav>
 
