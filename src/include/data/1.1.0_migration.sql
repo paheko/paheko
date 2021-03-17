@@ -114,6 +114,7 @@ WITH RECURSIVE path(level, uri, parent, id) AS (
 	path.id
 	FROM wiki_as_files
 	JOIN path ON wiki_as_files.old_id = path.parent
+	WHERE level <= 8 -- max level = 8 to avoid recursion
 ),
 path_from_root AS (
 	SELECT group_concat(uri, '/') AS path, id
@@ -121,6 +122,9 @@ path_from_root AS (
 	GROUP BY id
 )
 UPDATE wiki_as_files SET path = (SELECT path FROM path_from_root WHERE id = wiki_as_files.old_id);
+
+-- remove recursion
+UPDATE wiki_as_files SET path = uri WHERE path IS NULL OR LENGTH(path) - LENGTH(REPLACE(path, '/', '')) >= 8;
 
 -- Copy into files
 INSERT INTO files (path, parent, name, type, mime, modified, size)
