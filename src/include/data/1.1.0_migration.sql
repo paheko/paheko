@@ -46,19 +46,38 @@ DROP TABLE membres_categories_old;
 
 UPDATE recherches SET contenu = REPLACE(contenu, 'id_categorie', 'id_category') WHERE cible = 'membres' AND contenu LIKE '%id_categorie%';
 
--- Copy existing files for transactions
-INSERT INTO files (path, parent, name, type, mime, modified, size, image)
-	SELECT 'transaction/' || t.id || '/' || f.nom, 'transaction/' || t.id, f.nom, 1, f.type, f.datetime, c.taille, f.image
+CREATE TEMP TABLE files_transactions (old_id, old_transaction, old_name, new_path, new_id, same_name);
+
+-- Adding an extra step as some file names can be the same!
+INSERT INTO files_transactions
+	SELECT f.id, t.id, f.nom, NULL, NULL, NULL
 	FROM fichiers f
-		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
 		INNER JOIN fichiers_acc_transactions t ON t.fichier = f.id;
 
+UPDATE files_transactions SET same_name = 1
+	WHERE old_id IN (SELECT old_id FROM files_transactions GROUP BY old_transaction, old_name HAVING COUNT(*) > 1);
+
+-- Make file name is unique!
+UPDATE files_transactions SET new_path = 'transaction/' || old_transaction || '/' || COALESCE(same_name, (old_id || '_'), '') || old_name;
+
+-- Copy existing files for transactions
+INSERT INTO files (path, parent, name, type, mime, modified, size, image)
+	SELECT
+		ft.new_path,
+		dirname(ft.new_path),
+		basename(ft.new_path),
+		1, f.type, f.datetime, c.taille, f.image
+	FROM files_transactions ft
+		INNER JOIN fichiers f ON f.id = ft.old_id
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+
+UPDATE files_transactions SET new_id = (SELECT id FROM files WHERE path = new_path);
+
 INSERT INTO files_contents (id, compressed, content)
-	SELECT f2.id, 0, c.contenu
+	SELECT ft.new_id, 0, c.contenu
 	FROM fichiers f
-		INNER JOIN files f2 ON f2.name = f.nom AND f2.parent = 'transaction/' || t.id
-		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
-		INNER JOIN fichiers_acc_transactions t ON t.fichier = f.id;
+		INNER JOIN files_transactions ft ON ft.old_id = f.id
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
 
 -- Copy wiki pages content
 CREATE TEMP TABLE wiki_as_files (old_id, new_id, path, content, title, uri,
