@@ -155,7 +155,7 @@ class SQLite implements StorageInterface
 
 	static public function getRemainingQuota(): int
 	{
-		$quota = @disk_free_space(self::_getRoot());
+		$quota = @disk_free_space(DATA_ROOT);
 		return $quota === false ? \PHP_INT_MAX : (int) $quota;
 	}
 
