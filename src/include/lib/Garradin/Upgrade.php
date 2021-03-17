@@ -85,7 +85,7 @@ class Upgrade
 				// Missing trigger
 				$db->beginSchemaUpdate();
 
-				$attachments = $db->getAssoc('SELECT id, nom FROM fichiers;');
+				$attachments = $db->getAssoc('SELECT id, id || \'_\' || nom FROM fichiers;');
 
 				// Update Skriv content for attachments
 				foreach ($db->iterate('SELECT rowid, contenu FROM wiki_revisions;') as $r) {
