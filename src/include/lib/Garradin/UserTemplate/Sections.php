@@ -123,13 +123,8 @@ class Sections
 		}
 
 		if (array_key_exists('parent', $params)) {
-			if (null === $params['parent']) {
-				$params['where'] .= ' AND w.parent IS NULL';
-			}
-			else {
-				$params['where'] .= ' AND w.parent = :parent';
-				$params[':parent'] = $params['parent'];
-			}
+			$params['where'] .= ' AND w.parent = :parent';
+			$params[':parent'] = trim($params['parent']);
 
 			unset($params['parent']);
 		}
@@ -196,7 +191,7 @@ class Sections
 
 		// Fetch page
 		$page = self::cache('page_' . md5($parent), function () use ($parent) {
-			return Web::getByURI($parent);
+			return Web::get($parent);
 		});
 
 		if (!$page) {

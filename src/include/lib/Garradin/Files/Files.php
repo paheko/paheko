@@ -141,9 +141,10 @@ class Files
 		call_user_func([$from, 'sync'], $path);
 
 		foreach ($db->iterate('SELECT * FROM files WHERE parent = ?;', $path) as $file) {
-			if (++$i >= 50) {
+			if (++$i >= 500) {
 				$db->commit();
 				$db->begin();
+				throw new \Exception('loop');
 				$i = 0;
 			}
 
@@ -153,7 +154,7 @@ class Files
 
 			if ($f->type == File::TYPE_DIRECTORY) {
 				call_user_func([$to, 'mkdir'], $f);
-				self::migrateDirectory($from, $to, trim($path . '/' . $f->name, '/'), $i, $callback);
+				self::migrateDirectory($from, $to, $f->path, $i, $callback);
 			}
 			else {
 				$from_path = call_user_func([$from, 'getFullPath'], $f);
@@ -222,7 +223,7 @@ class Files
 			$uri = File::CONTEXT_WEB . '/' . $uri;
 		}
 
-		return self::get($uri, null, File::TYPE_FILE);
+		return self::get($uri, File::TYPE_FILE);
 	}
 
 	static public function getContext(string $path): ?string
