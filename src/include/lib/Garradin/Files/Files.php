@@ -21,8 +21,10 @@ class Files
 
 		$db = DB::getInstance();
 
-		if ($db->test(Page::TABLE, 'uri = ?')) {
-			Utils::redirect('!web/page.php?uri=' . $uri);
+		$sql = sprintf('SELECT path FROM %s WHERE basename(path) = ?;', Page::TABLE);
+
+		if ($path = $db->firstColumn($sql, $uri)) {
+			Utils::redirect('!web/page.php?p=' . $path);
 		}
 	}
 
@@ -141,10 +143,9 @@ class Files
 		call_user_func([$from, 'sync'], $path);
 
 		foreach ($db->iterate('SELECT * FROM files WHERE parent = ?;', $path) as $file) {
-			if (++$i >= 500) {
+			if (++$i >= 100) {
 				$db->commit();
 				$db->begin();
-				throw new \Exception('loop');
 				$i = 0;
 			}
 

@@ -631,10 +631,12 @@ class Champs
             $fields = $this->getCopyFields();
         }
 
+        $db = DB::getInstance();
+
         return sprintf('INSERT INTO %s (%s) SELECT %s FROM %s;',
             $new_table_name,
-            implode(', ', $fields),
-            implode(', ', array_keys($fields)),
+            implode(', ', array_map([$db, 'quoteIdentifier'], $fields)),
+            implode(', ', array_map([$db, 'quoteIdentifier'], array_keys($fields))),
             $old_table_name
         );
     }
