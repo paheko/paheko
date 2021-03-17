@@ -85,12 +85,12 @@ CREATE TEMP TABLE wiki_as_files (old_id, new_id, path, content, title, uri,
 
 INSERT INTO wiki_as_files
 	SELECT
-		id, NULL, '', contenu, titre, uri,
+		id, NULL, '', CASE WHEN contenu IS NULL THEN '' ELSE contenu END, titre, uri,
 		parent, parent, date_creation, date_modification, id_auteur, chiffrement,
 		CASE WHEN (SELECT 1 FROM wiki_pages pp WHERE pp.parent = p.id LIMIT 1) THEN 1 ELSE 2 END, -- Type, 1 = category, 2 = page
 		CASE WHEN droit_lecture = -1 THEN 1 ELSE 0 END -- public
 	FROM wiki_pages p
-	INNER JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
+	LEFT JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
 
 -- Build path
 WITH RECURSIVE path(level, uri, parent, id) AS (
@@ -115,7 +115,7 @@ UPDATE wiki_as_files SET path = (SELECT path FROM path_from_root WHERE id = wiki
 INSERT INTO files (path, parent, name, type, mime, modified, size)
 	SELECT
 		'web/' || path || '/index.txt',
-		dirname('web/' || path),
+		'web/' || path,
 		'index.txt',
 		1,
 		'text/plain',
