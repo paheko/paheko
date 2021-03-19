@@ -545,6 +545,12 @@ class File extends Entity
 			return;
 		}
 
+		// Only simple files can be served, not directories
+		if ($this->type != self::TYPE_FILE) {
+			header('HTTP/1.1 404 Not Found', true, 404);
+			throw new UserException('Page non trouvée');
+		}
+
 		$path = Files::callStorage('getFullPath', $this);
 		$content = null === $path ? Files::callStorage('fetch', $this) : null;
 
@@ -608,11 +614,6 @@ class File extends Entity
 	 */
 	protected function _serve(?string $path, ?string $content, bool $download = false): void
 	{
-		if ($this->type != self::TYPE_FILE) {
-			header('HTTP/1.1 404 Not Found', true, 404);
-			throw new UserException('Page non trouvée');
-		}
-
 		if ($this->isPublic()) {
 			Utils::HTTPCache(md5($this->path . $this->size . $this->modified->getTimestamp()), $this->modified->getTimestamp());
 		}
@@ -721,10 +722,7 @@ class File extends Entity
 			return false;
 		}
 
-		if ($context == self::CONTEXT_SKELETON && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
-			return true;
-		}
-		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
+		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 			return true;
 		}
 		// The user can access his own profile files
@@ -828,7 +826,7 @@ class File extends Entity
 	{
 		$context = $this->context();
 
-		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
+		if ($context == self::CONTEXT_SKELETON || $context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
 			return true;
 		}
 

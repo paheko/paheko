@@ -140,6 +140,9 @@ class Web
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
+		elseif (substr($uri, 0, strlen(File::CONTEXT_SKELETON)) == File::CONTEXT_SKELETON) {
+			$skel = '404.html';
+		}
 		elseif ($page = self::get($uri)) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
