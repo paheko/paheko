@@ -174,6 +174,8 @@ static $default_config = [
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
 	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
+	'API_USER'              => null,
+	'API_PASSWORD'          => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -224,6 +226,10 @@ class UserException extends \LogicException
 }
 
 class ValidationException extends UserException
+{
+}
+
+class APIException extends \LogicException
 {
 }
 
