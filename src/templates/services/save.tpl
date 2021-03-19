@@ -62,7 +62,7 @@
 			<dt><label for="f_fee">Tarif</label> <b>(obligatoire)</b></dt>
 			{foreach from=$service.fees key="service_id" item="fee"}
 			<dd class="radio-btn">
-				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account label=null}
+				{input type="radio" name="id_fee" value=$fee.id data-user-amount=$fee.user_amount data-account=$fee.id_account data-year=$fee.id_year label=null}
 				<label for="f_id_fee_{$fee.id}">
 					<div>
 						<h3>{$fee.label}</h3>
@@ -152,6 +152,8 @@ function selectFee(elm, first_load) {
 
 	if (accounting) {
 		$('#f_create_payment_1').checked = true;
+		let btn = $('#f_account_container').firstElementChild;
+		btn.value = btn.value.replace(/&year=\d+/, '') + '&year=' + elm.getAttribute('data-year');
 	}
 
 	// Fill the amount paid by the user
