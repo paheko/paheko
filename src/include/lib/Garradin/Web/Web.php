@@ -6,6 +6,7 @@ use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Web\Skeleton;
 use Garradin\Files\Files;
+use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
@@ -104,6 +105,10 @@ class Web
 		// Redirect old URLs (pre-1.1)
 		if ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
+		}
+		elseif (substr($uri, 0, 4) == 'api/') {
+			API::dispatchURI(substr($uri, 4));
+			exit;
 		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
