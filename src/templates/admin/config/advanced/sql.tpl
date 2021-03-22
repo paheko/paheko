@@ -36,7 +36,7 @@
 					<tr>
 						{foreach from=$row key="key" item="value"}
 							<td>
-								{if null == $value}
+								{if null === $value}
 									<em>NULL</em>
 								{else}
 									{$value}
