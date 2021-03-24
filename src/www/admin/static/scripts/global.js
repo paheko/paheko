@@ -397,7 +397,7 @@
 		});
 
 		$('form[target="_dialog"]').forEach((e) => {
-			e.onsubmit = () => {
+			e.addEventListener('submit', () => {
 				let url = e.getAttribute('action');
 				url = url + (url.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				e.setAttribute('action', url);
@@ -406,7 +406,7 @@
 				g.openFrameDialog('about:blank', e.getAttribute('data-dialog-height') ? '90%' : 'auto');
 				e.submit();
 				return false;
-			};
+			});
 		});
 	});
 
@@ -429,6 +429,7 @@
 				}
 
 				this.form.dispatchEvent(new Event('submit'));
+				this.form.submit();
 			};
 		}
 
