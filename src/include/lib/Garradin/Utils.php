@@ -468,7 +468,46 @@ class Utils
             return $size . ' o';
     }
 
-    static public function deleteRecursive(string $path): bool
+    static public function createEmptyDirectory(string $path)
+    {
+        Utils::safe_mkdir($path, 0777, true);
+
+        if (!is_dir($path))
+        {
+            throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+        }
+
+        // On en profite pour vérifier qu'on peut y lire et écrire
+        if (!is_writable($path) || !is_readable($path))
+        {
+            throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+        }
+
+        // Some basic safety against misconfigured hosts
+        file_put_contents($path . '/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
+    }
+
+    static public function resetCache(string $path): void
+    {
+        if (!file_exists($path)) {
+            self::createEmptyDirectory($path);
+            return;
+        }
+
+        $dir = dir($path);
+
+        while ($file = $dir->read()) {
+            if (substr($file, 0, 1) == '.' || is_dir($path . DIRECTORY_SEPARATOR . $file)) {
+                continue;
+            }
+
+            self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
+        }
+
+        $dir->close();
+    }
+
+    static public function deleteRecursive(string $path, bool $delete_self = false): bool
     {
         if (!file_exists($path))
             return false;
@@ -481,14 +520,14 @@ class Utils
             if ($file == '.' || $file == '..')
                 continue;
 
-            if (is_dir($path . '/' . $file))
+            if (is_dir($path . DIRECTORY_SEPARATOR . $file))
             {
-                if (!self::deleteRecursive($path . '/' . $file))
+                if (!self::deleteRecursive($path . DIRECTORY_SEPARATOR . $file))
                     return false;
             }
             else
             {
-                self::safe_unlink($path . '/' . $file);
+                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
             }
         }
 
