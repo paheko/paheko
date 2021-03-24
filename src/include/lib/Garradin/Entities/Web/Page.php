@@ -21,6 +21,7 @@ class Page extends Entity
 	protected $id;
 	protected $parent;
 	protected $path;
+	protected $uri;
 	protected $_name = 'index.txt';
 	protected $file_path;
 	protected $title;
@@ -35,6 +36,7 @@ class Page extends Entity
 		'id'        => 'int',
 		'parent'    => 'string',
 		'path'      => 'string',
+		'uri'       => 'string',
 		'file_path' => 'string',
 		'title'     => 'string',
 		'type'      => 'int',
@@ -108,12 +110,7 @@ class Page extends Entity
 
 	public function url(): string
 	{
-		return WWW_URL . $this->path();
-	}
-
-	public function uri(): string
-	{
-		return basename($this->path);
+		return WWW_URL . $this->uri;
 	}
 
 	public function template(): string
@@ -126,7 +123,6 @@ class Page extends Entity
 		$out = $this->asArray();
 		$out['url'] = $this->url();
 		$out['html'] = $this->render();
-		$out['uri'] = $this->uri();
 		return $out;
 	}
 
@@ -215,11 +211,11 @@ class Page extends Entity
 		$this->assert(trim($this->title) !== '', 'Le titre ne peut rester vide');
 		$this->assert(trim($this->file_path) !== '', 'Le chemin de fichier ne peut rester vide');
 		$this->assert(trim($this->path) !== '', 'Le chemin ne peut rester vide');
+		$this->assert(trim($this->uri) !== '', 'L\'URI ne peut rester vide');
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
 		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
-		$where = $this->exists() ? sprintf(' AND id != %d', $this->id()) : '';
-		$this->assert(!$db->test(self::TABLE, 'path = ?' . $where, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->path);
+		$this->assert(!$db->test(self::TABLE, 'uri = ? AND path != ?', $this->uri, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri);
 	}
 
 	public function importForm(array $source = null)
@@ -234,6 +230,17 @@ class Page extends Entity
 
 		$parent = $this->parent;
 
+		if (isset($source['title']) && is_null($this->path)) {
+			$source['uri'] = $source['title'];
+		}
+
+		if (isset($source['uri'])) {
+			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+			$source['path'] = trim($parent . '/' . $source['uri'], '/');
+		}
+
+		$uri = $source['uri'] ?? $this->uri;
+
 		if (array_key_exists('parent', $source)) {
 			if (is_array($source['parent'])) {
 				$source['parent'] = key($source['parent']);
@@ -243,17 +250,8 @@ class Page extends Entity
 				$source['parent'] = '';
 			}
 
-
 			$parent = $source['parent'];
-			$source['path'] = trim($parent . '/' . basename($this->path), '/');
-		}
-
-		if (isset($source['title']) && is_null($this->path)) {
-			$source['path'] = trim($parent . '/' . Utils::transformTitleToURI($source['title']), '/');
-		}
-
-		if (isset($source['uri'])) {
-			$source['path'] = trim($parent . '/' . Utils::transformTitleToURI($source['uri']), '/');
+			$source['path'] = trim($parent . '/' . $uri, '/');
 		}
 
 		if (!empty($source['encryption']) ) {
@@ -440,6 +438,7 @@ class Page extends Entity
 		// Path is relative to web root
 		$page->set('file_path', $file->path);
 		$page->set('path', substr(dirname($file->path), strlen(File::CONTEXT_WEB . '/')));
+		$page->set('uri', basename($page->path));
 		$page->set('parent', dirname($page->path) == '.' ? '' : dirname($page->path));
 
 		$page->loadFromFile($file);

@@ -9,7 +9,7 @@ require __DIR__ . '/../../_inc.php';
 $file = Files::get(qg('p'));
 
 if (!$file) {
-	throw new UserException('Fichier inconnu');
+	throw new UserException('Ce fichier est introuvable.');
 }
 
 if (!$file->checkReadAccess($session)) {

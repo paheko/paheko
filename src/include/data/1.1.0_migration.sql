@@ -159,10 +159,11 @@ INSERT INTO files_search (path, title, content)
 	FROM wiki_as_files WHERE encrypted = 0;
 
 -- Copy to web_pages
-INSERT INTO web_pages (id, parent, path, file_path, type, status, title, published, modified, format, content)
+INSERT INTO web_pages (id, parent, path, uri, file_path, type, status, title, published, modified, format, content)
 	SELECT new_id,
 	CASE WHEN dirname(path) = '.' THEN '' ELSE dirname(path) END,
 	path,
+	uri,
 	'web/' || path || '/index.txt',
 	type,
 	CASE WHEN public THEN 'online' ELSE 'draft' END,

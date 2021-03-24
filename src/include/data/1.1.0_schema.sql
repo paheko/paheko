@@ -313,6 +313,7 @@ CREATE TABLE IF NOT EXISTS web_pages
     id INTEGER NOT NULL PRIMARY KEY,
     parent TEXT NOT NULL, -- Parent path, empty = web root
     path TEXT NOT NULL, -- Full page directory name
+    uri TEXT NOT NULL, -- Page identifier
     file_path TEXT NOT NULL, -- Full file path for contents
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status TEXT NOT NULL,

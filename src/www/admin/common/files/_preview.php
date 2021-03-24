@@ -8,6 +8,8 @@ use Garradin\Web\Web;
 
 require_once __DIR__ . '/../../_inc.php';
 
+$page = null;
+
 if ($path = qg('p')) {
 	$file = Files::get($path);
 
@@ -25,7 +27,11 @@ elseif ($web = qg('w')) {
 	$file = $page->file();
 }
 
-$content = Skriv::render($file, f('content'));
+$prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=' . File::CONTEXT_DOCUMENTS . '/';
+
+$content = Skriv::render($file, f('content'), ['prefix' => ADMIN_URL . $prefix]);
+
+var_dump($content); exit;
 
 $tpl->assign(compact('file', 'content'));
 
