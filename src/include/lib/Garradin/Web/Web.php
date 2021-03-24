@@ -57,7 +57,6 @@ class Web
 			if (!$f) {
 				continue;
 			}
-
 			Page::fromFile($f)->save();
 		}
 	}
@@ -84,6 +83,32 @@ class Web
 		}
 
 		return $page;
+	}
+
+	static public function getByURI(string $uri): ?Page
+	{
+		$page = EM::findOne(Page::class, 'SELECT * FROM @TABLE WHERE uri = ?;', $uri);
+
+		if ($page && !$page->file()) {
+			return null;
+		}
+
+		return $page;
+	}
+
+	static public function getAttachmentFromURI(string $uri): ?File
+	{
+		if (strpos($uri, '/') === false) {
+			return null;
+		}
+
+		$path = DB::getInstance()->firstColumn('SELECT path FROM web_pages WHERE uri = ?;', dirname($uri));
+
+		if (!$path) {
+			return null;
+		}
+
+		return Files::getFromURI(File::CONTEXT_WEB . '/' . $path . '/' . basename($uri));
 	}
 
 	static public function dispatchURI()
@@ -114,7 +139,8 @@ class Web
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		elseif ($file = Files::getFromURI($uri)) {
+		elseif (($file = Files::getFromURI($uri)) 
+			|| ($file = self::getAttachmentFromURI($uri))) {
 			$size = null;
 
 			foreach ($_GET as $key => $value) {
@@ -145,7 +171,7 @@ class Web
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
-		elseif ($page = self::get($uri)) {
+		elseif ($page = self::getByURI($uri)) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
 		}
@@ -166,4 +192,17 @@ class Web
 		$s = new Skeleton($skel);
 		$s->serve(compact('uri', 'page', 'skel'));
 	}
+
+	static public function redirectOldWikiPage(string $uri): void {
+		$uri = Utils::transformTitleToURI($uri);
+
+		$db = DB::getInstance();
+
+		$sql = sprintf('SELECT path FROM %s WHERE uri = ?;', Page::TABLE);
+
+		if ($path = $db->firstColumn($sql, $uri)) {
+			Utils::redirect('!web/page.php?p=' . $path);
+		}
+	}
+
 }

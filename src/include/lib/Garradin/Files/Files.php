@@ -16,18 +16,6 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 
 class Files
 {
-	static public function redirectOldWikiPage(string $uri): void {
-		$uri = Utils::transformTitleToURI($uri);
-
-		$db = DB::getInstance();
-
-		$sql = sprintf('SELECT path FROM %s WHERE basename(path) = ?;', Page::TABLE);
-
-		if ($path = $db->firstColumn($sql, $uri)) {
-			Utils::redirect('!web/page.php?p=' . $path);
-		}
-	}
-
 	static public function search(string $search, string $path = null): array
 	{
 		if (strlen($search) > 100) {
@@ -216,13 +204,6 @@ class Files
 	{
 		$uri = trim($uri, '/');
 		$uri = rawurldecode($uri);
-
-		$context = substr($uri, 0, strpos($uri, '/'));
-
-		// Use alias for web files
-		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
-			$uri = File::CONTEXT_WEB . '/' . $uri;
-		}
 
 		return self::get($uri, File::TYPE_FILE);
 	}

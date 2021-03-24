@@ -12,20 +12,45 @@ use Garradin\UserTemplate\CommonModifiers;
 
 use KD2\SkrivLite;
 
-use const Garradin\WWW_URL;
+use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Skriv
 {
 	static protected $skriv;
 
 	static protected $current_path;
+	static protected $context;
+	static protected $link_prefix;
+	static protected $link_suffix;
+
+	static protected function resolveAttachment(string $uri) {
+		$prefix = self::$current_path;
+		$pos = strpos($uri, '/');
+
+		// "Image.jpg"
+		if ($pos === false) {
+			return WWW_URL . $prefix . '/' . $uri;
+		}
+		// "bla/Image.jpg" outside of web context
+		elseif (self::$context !== File::CONTEXT_WEB && $pos !== 0) {
+			return WWW_URL . '/' . self::$context . '/' . $uri;
+		}
+		// "bla/Image.jpg" in web context or absolute link, eg. "/transactions/2442/42.jpg"
+		else {
+			return WWW_URL . '/' . ltrim($uri, '/');
+		}
+	}
+
+	static public function resolveLink(string $uri) {
+		if (strpos(basename($uri), '.') === false) {
+			$uri .= self::$link_suffix;
+		}
+
+		return self::$link_prefix . $uri;
+	}
 
 	static public function render(File $file, ?string $content = null, array $options = []): string
 	{
-		if (!isset($options['prefix'])) {
-			$options['prefix'] = WWW_URL;
-		}
-
 		if (!self::$skriv)
 		{
 			self::$skriv = new \KD2\SkrivLite;
@@ -37,19 +62,31 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		self::$current_path = str_replace(File::CONTEXT_WEB . '/', '', dirname($file->path));
+		self::$current_path = dirname($file->path);
+		self::$context = strtok(self::$current_path, '/');
+		self::$link_suffix = '';
+
+		if (self::$context === File::CONTEXT_WEB) {
+			self::$link_prefix = WWW_URL . '/';
+			self::$current_path = basename(dirname($file->path));
+		}
+		else {
+			self::$link_prefix = $options['prefix'] ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', self::$context);
+			self::$link_suffix = '.skriv';
+		}
+
 		$str = $content ?? $file->fetch();
 
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
-			return WWW_URL . self::$current_path . '/' . $match[1];
+			return self::resolveAttachment($match[1]);
 		}, $str);
 
 		$str = self::$skriv->render($str);
 
 		$str = CommonModifiers::typo($str);
 
-		$str = preg_replace_callback(';<a href="((?!https?://|/).+)">;i', function ($matches) use ($options) {
-			return sprintf('<a href="%s">', $options['prefix'] . $matches[1]);
+		$str = preg_replace_callback(';<a href="((?!https?://|/).+)">;i', function ($matches) {
+			return sprintf('<a href="%s" target="_parent">', self::resolveLink($matches[1]));
 		}, $str);
 
 		return sprintf('<div class="web-content">%s</div>', $str);
@@ -76,7 +113,7 @@ class Skriv
 			$caption = $name;
 		}
 
-		$url = WWW_URL . self::$current_path . '/' . $name;
+		$url = self::resolveAttachment($name);
 		$ext = substr($name, strrpos($name, '.')+1);
 
 		return sprintf(
@@ -104,7 +141,7 @@ class Skriv
 			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}
 
-		$url = WWW_URL . self::$current_path . '/' . $name;
+		$url = self::resolveAttachment($name);
 		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
 
 		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',

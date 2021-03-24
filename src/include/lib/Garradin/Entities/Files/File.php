@@ -488,7 +488,7 @@ class File extends Entity
 	public function url(bool $download = false): string
 	{
 		if ($this->context() == self::CONTEXT_WEB) {
-			$path = substr($this->path, strlen(self::CONTEXT_WEB . '/'));
+			$path = basename(dirname($this->path));
 		}
 		else {
 			$path = $this->path;
