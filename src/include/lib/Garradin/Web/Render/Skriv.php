@@ -85,7 +85,7 @@ class Skriv
 
 		$str = CommonModifiers::typo($str);
 
-		$str = preg_replace_callback(';<a href="((?!https?://|/).+)">;i', function ($matches) {
+		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+)">;i', function ($matches) {
 			return sprintf('<a href="%s" target="_parent">', self::resolveLink($matches[1]));
 		}, $str);
 
