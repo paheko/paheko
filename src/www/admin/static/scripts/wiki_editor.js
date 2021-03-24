@@ -218,9 +218,12 @@
 				method: 'post',
 				body: data,
 			}).then(() => {
+				if (!response.ok) {
+					throw response;
+				}
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
-			}).catch((e) => alert('Enregistrement impossible : ' + e.message) );
+			}).catch(e => t.textarea.form.querySelector('[type=submit]').click() );
 			return true;
 		};
 

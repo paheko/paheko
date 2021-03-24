@@ -21,7 +21,7 @@ if (qg('new') !== null && empty($_POST)) {
 
 $csrf_key = 'web_edit_' . $page->id();
 
-$editing_started = f('editing_started') ?: date('Y-m-d H:i:s');
+$editing_started = f('editing_started') ?: $page->modified->getTimestamp();
 
 if (f('cancel')) {
 	Utils::redirect(ADMIN_URL . 'web/?parent=' . $page->parent);
@@ -30,10 +30,9 @@ if (f('cancel')) {
 $show_diff = false;
 
 $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
-	$editing_started = new \DateTime($editing_started);
-
-	if ($editing_started < $page->modified) {
+	if ($editing_started < $page->modified->getTimestamp()) {
 		$show_diff = true;
+		http_response_code(400);
 		throw new UserException('La page a été modifiée par quelqu\'un d\'autre pendant que vous éditiez le contenu.');
 	}
 

@@ -15,6 +15,21 @@
     list-style-type: decimal;
 }
 
+.web-content table {
+    border-collapse: collapse;
+}
+
+.web-content table th, .web-content table td {
+    border: 1px solid #999;
+    padding: .5rem;
+    text-align: center;
+}
+
+.web-content table th {
+    background: #eee;
+    font-weight: bold;
+}
+
 aside.file {
     margin: 1em;
 }
