@@ -118,10 +118,9 @@ class Web
 		if ($pos = strpos($uri, '?')) {
 			$uri = substr($uri, 0, $pos);
 		}
-		else {
-			// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
-			$uri = substr($uri, strlen(WWW_URI) - 1);
-		}
+
+		// WWW_URI inclus toujours le slash final, mais on veut le conserver ici
+		$uri = substr($uri, strlen(WWW_URI) - 1);
 
 		http_response_code(200);
 
@@ -139,7 +138,7 @@ class Web
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
-		elseif (($file = Files::getFromURI($uri)) 
+		elseif (($file = Files::getFromURI($uri))
 			|| ($file = self::getAttachmentFromURI($uri))) {
 			$size = null;
 
@@ -192,17 +191,4 @@ class Web
 		$s = new Skeleton($skel);
 		$s->serve(compact('uri', 'page', 'skel'));
 	}
-
-	static public function redirectOldWikiPage(string $uri): void {
-		$uri = Utils::transformTitleToURI($uri);
-
-		$db = DB::getInstance();
-
-		$sql = sprintf('SELECT path FROM %s WHERE uri = ?;', Page::TABLE);
-
-		if ($path = $db->firstColumn($sql, $uri)) {
-			Utils::redirect('!web/page.php?p=' . $path);
-		}
-	}
-
 }
