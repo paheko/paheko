@@ -37,7 +37,7 @@
 				{else}
 				<tr>
 					<td class="check">
-						{input type="checkbox" name="deposit[%d]"|args:$line.id value="1" data-debit=$line.debit|abs data-credit=$line.credit default=$line.checked}
+						{input type="checkbox" name="deposit[%d]"|args:$line.id_line value="1" data-debit=$line.debit|abs data-credit=$line.credit default=$line.checked}
 					</td>
 					<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 					<td>{$line.date|date_short}</td>
