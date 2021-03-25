@@ -184,6 +184,10 @@ class Web
 					return;
 				}
 			}
+			elseif ($file = Files::getFromURI(File::CONTEXT_SKELETON . '/' . $uri)) {
+				$file->serve();
+				return;
+			}
 
 			$skel = '404.html';
 		}
