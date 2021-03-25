@@ -130,10 +130,7 @@ class Sections
 		}
 
 		if (isset($params['future'])) {
-			if (!$params['future']) {
-				$params['where'] .= ' AND w.published <= datetime(\'now\', \'localtime\')';
-			}
-
+			$params['where'] .= sprintf(' AND w.published %s datetime(\'now\', \'localtime\')', $params['future'] ? '>' : '<=');
 			unset($params['future']);
 		}
 
