@@ -53,7 +53,7 @@ class Upgrade
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
 		// Créer une sauvegarde automatique
-		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
+		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
 
 		try {
 			if (version_compare($v, '1.0.1', '<'))

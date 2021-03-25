@@ -93,9 +93,9 @@ class Sauvegarde
 	 * sinon le nom sera basé sur la date (sauvegarde manuelle)
 	 * @return string Le nom de fichier de la sauvegarde ainsi créée
 	 */
-	public function create(bool $auto = false, ?string $dest = null): string
+	public function create(bool $auto = false, ?string $name = null): string
 	{
-		$suffix = is_string($auto) ? $auto : ($auto ? 'auto.1' : date('Y-m-d-His'));
+		$suffix = $name ?? ($auto ? 'auto.1' : date('Y-m-d-His'));
 
 		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
 
