@@ -45,7 +45,7 @@ class File extends Entity
 	protected $image;
 
 	protected $_types = [
-		'id'           => 'int',
+		'id'           => '?int',
 		'path'         => 'string',
 		'parent'       => '?string',
 		'name'         => 'string',
@@ -162,13 +162,6 @@ class File extends Entity
 	{
 		Files::callStorage('checkLock');
 
-		// Delete recursively
-		if ($this->type == self::TYPE_DIRECTORY) {
-			foreach (Files::list($this->path) as $file) {
-				$file->delete();
-			}
-		}
-
 		// Delete actual file content
 		Files::callStorage('delete', $this);
 
@@ -178,7 +171,11 @@ class File extends Entity
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size));
 		}
 
-		return parent::delete();
+		if ($this->exists()) {
+			return parent::delete();
+		}
+
+		return true;
 	}
 
 	public function move(string $target): bool
@@ -189,21 +186,7 @@ class File extends Entity
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
-		$current_path = $this->path;
-
-		$return = Files::callStorage('move', $this, $new_path);
-
-		$this->set('path', $new_path);
-		$this->set('parent', dirname($new_path));
-		$this->set('name', basename($new_path));
-		$this->save();
-
-		if ($this->type == self::TYPE_DIRECTORY) {
-			// Move sub-directories and sub-files
-			DB::getInstance()->preparedQuery('UPDATE files SET parent = ?, path = TRIM(? || \'/\' || name, \'/\') WHERE parent = ?;', $new_path, $new_path, $current_path);
-		}
-
-		return $return;
+		return Files::callStorage('move', $this, $new_path);
 	}
 
 	public function setContent(string $content): self
@@ -266,10 +249,6 @@ class File extends Entity
 
 		if (!$this->modified) {
 			$this->set('modified', new \DateTime);
-		}
-
-		if (count($this->_modified)) {
-			$this->save();
 		}
 
 		if (null !== $source_path) {
@@ -353,7 +332,6 @@ class File extends Entity
 		$file->set('parent', $path);
 		$file->set('type', self::TYPE_DIRECTORY);
 		$file->set('image', 0);
-		$file->save();
 
 		Files::callStorage('mkdir', $file);
 
@@ -488,11 +466,12 @@ class File extends Entity
 	public function url(bool $download = false): string
 	{
 		if ($this->context() == self::CONTEXT_WEB) {
-			$path = basename(dirname($this->path));
+			$path = basename(dirname($this->path)) . '/' . basename($this->path);
 		}
 		else {
 			$path = $this->path;
 		}
+
 
 		$url = WWW_URL . $path;
 

@@ -40,23 +40,36 @@ class Web
 	static public function sync(?string $parent)
 	{
 		$path = trim(File::CONTEXT_WEB . '/' . $parent, '/');
-		Files::callStorage('sync', $path);
+
+		$exists = [];
+
+		foreach (Files::callStorage('list', $path) as $file) {
+			if ($file->type != File::TYPE_DIRECTORY) {
+				continue;
+			}
+
+			$exists[] = $file->path;
+		}
 
 		$db = DB::getInstance();
-		$db->exec('DELETE FROM web_pages WHERE id IN (SELECT w.id FROM web_pages w LEFT JOIN files f ON w.file_path = f.path WHERE f.id IS NULL);');
 
-		$sql = 'SELECT path FROM files
-			WHERE parent = ?
-				AND type = ?
-				AND name NOT IN (SELECT basename(path) FROM web_pages WHERE parent = ?);';
+		$in_db = $db->getAssoc('SELECT path, 1 FROM web_pages WHERE parent = ?;', $parent);
+		$in_db = array_keys($in_db);
 
-		foreach ($db->iterate($sql, trim(File::CONTEXT_WEB . '/' . $parent, '/'), File::TYPE_DIRECTORY, $parent) as $file) {
-			Files::callStorage('sync', $file->path);
-			$f = Files::get($file->path . '/index.txt');
+		$deleted = array_diff($in_db, $exists);
+		$new = array_diff($exists, $in_db);
+
+		if ($deleted) {
+			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
+		}
+
+		foreach ($new as $file) {
+			$f = Files::get($file . '/index.txt');
 
 			if (!$f) {
 				continue;
 			}
+
 			Page::fromFile($f)->save();
 		}
 	}

@@ -65,16 +65,16 @@ class SQLite implements StorageInterface
 
 		$db = DB::getInstance();
 
-		$size = $source_content !== null ? strlen($source_content) : filesize($source_path);
+		$file->size = $source_content !== null ? strlen($source_content) : filesize($source_path);
 
-		if ($size != $file->size) {
-			// FIXME weird case
-		}
+		$file->save();
+
+		$id = $file->id();
 
 		$db->preparedQuery('INSERT OR REPLACE INTO files_contents (id, content) VALUES (?, zeroblob(?));',
-			$file->id(), $size);
+			$id, $file->size);
 
-		$blob = $db->openBlob('files_contents', 'content', $file->id(), 'main', \SQLITE3_OPEN_READWRITE);
+		$blob = $db->openBlob('files_contents', 'content', $id, 'main', \SQLITE3_OPEN_READWRITE);
 
 		if (null !== $source_content) {
 			fwrite($blob, $source_content);
@@ -108,9 +108,15 @@ class SQLite implements StorageInterface
 		return file_get_contents(self::getFullPath($file));
 	}
 
-	static public function modified(File $file): ?int
+	static public function get(string $path): ?File
 	{
-		return $file->modified ?? time();
+		$sql = 'SELECT * FROM @TABLE WHERE path = ? LIMIT 1;';
+		return EM::findOne(File::class, $sql, $path);
+	}
+
+	static public function list(string $path): array
+	{
+		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $path);
 	}
 
 	static public function exists(string $path): bool
@@ -125,16 +131,37 @@ class SQLite implements StorageInterface
 		$cache_id = 'files.' . $file->pathHash();
 		Static_Cache::remove($cache_id);
 
-		return $db->delete('files_contents', 'id = ?', $file->id());
+		$db->delete('files_contents', 'id = ?', $file->id());
+
+		// Delete recursively
+		if ($file->type == self::TYPE_DIRECTORY) {
+			foreach (Files::list($file->path) as $subfile) {
+				$subfile->delete();
+			}
+		}
+
+		return true;
 	}
 
 	static public function move(File $file, string $new_path): bool
 	{
+		$current_path = $file->path;
+		$file->set('path', $new_path);
+		$file->set('parent', dirname($new_path));
+		$file->set('name', basename($new_path));
+		$file->save();
+
+		if ($file->type == self::TYPE_DIRECTORY) {
+			// Move sub-directories and sub-files
+			DB::getInstance()->preparedQuery('UPDATE files SET parent = ?, path = TRIM(? || \'/\' || name, \'/\') WHERE parent = ?;', $new_path, $new_path, $current_path);
+		}
+
 		return true;
 	}
 
 	static public function mkdir(File $file): bool
 	{
+		$file->save();
 		return true;
 	}
 
@@ -162,12 +189,12 @@ class SQLite implements StorageInterface
 	static public function truncate(): void
 	{
 		$db = DB::getInstance();
-		$db->exec('DELETE FROM files_contents; VACUUM;');
+		$db->exec('DELETE FROM files_contents; DELETE FROM files; VACUUM;');
 	}
 
 	static public function lock(): void
 	{
-		DB::getInstance()->exec('INSERT INTO files (name, path) VALUES (\'.lock\', \'.lock\');');
+		DB::getInstance()->exec('INSERT INTO files (name, path, parent, type) VALUES (\'.lock\', \'.lock\', \'\', 2);');
 	}
 
 	static public function unlock(): void
@@ -182,18 +209,5 @@ class SQLite implements StorageInterface
 		if ($lock) {
 			throw new \RuntimeException('File storage is locked');
 		}
-	}
-
-	/**
-	 * We don't need to do anything there as everything is already in DB
-	 */
-	static public function sync(?string $path): void
-	{
-		return;
-	}
-
-	static public function update(File $file): ?File
-	{
-		return $file;
 	}
 }

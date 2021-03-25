@@ -21,7 +21,6 @@ $csrf_key = 'edit_file_' . $file->pathHash();
 
 $form->runIf('content', function () use ($file) {
 	$file->setContent(f('content'));
-	$file->save();
 
 	if (qg('js') !== null) {
 		die('{"success":true}');

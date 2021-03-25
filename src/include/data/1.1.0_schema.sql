@@ -297,16 +297,11 @@ CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
 -- Search inside files content
 (
     tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
-    path TEXT NOT NULL REFERENCES files(path) ON DELETE CASCADE,
+    path TEXT NOT NULL,
     title TEXT NULL,
     content TEXT NOT NULL, -- Text content
     notindexed=path
 );
-
-CREATE TRIGGER files_search_delete AFTER DELETE ON files
-BEGIN
-    DELETE FROM files_search WHERE path = OLD.path;
-END;
 
 CREATE TABLE IF NOT EXISTS web_pages
 (

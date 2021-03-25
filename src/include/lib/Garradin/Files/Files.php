@@ -50,9 +50,7 @@ class Files
 		}
 
 		// Update this path
-		self::callStorage('sync', $parent);
-
-		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $parent);
+		return self::callStorage('list', $parent);
 	}
 
 	static public function listAllDirectoriesAssoc(string $context): array
@@ -108,8 +106,8 @@ class Files
 			call_user_func([$from, 'checkLock']);
 			call_user_func([$to, 'checkLock']);
 
-			//call_user_func([$from, 'lock']);
-			//call_user_func([$to, 'lock']);
+			call_user_func([$from, 'lock']);
+			call_user_func([$to, 'lock']);
 
 			$db = DB::getInstance();
 			$db->begin();
@@ -128,33 +126,28 @@ class Files
 	static protected function migrateDirectory(string $from, string $to, string $path, int &$i, ?callable $callback)
 	{
 		$db = DB::getInstance();
-		call_user_func([$from, 'sync'], $path);
 
-		foreach ($db->iterate('SELECT * FROM files WHERE parent = ?;', $path) as $file) {
+		foreach (call_user_func([$from, 'list'], $path) as $file) {
 			if (++$i >= 100) {
 				$db->commit();
 				$db->begin();
 				$i = 0;
 			}
 
-			$f = new File;
-			$f->load((array) $file);
-			$f->exists(true);
-
-			if ($f->type == File::TYPE_DIRECTORY) {
-				call_user_func([$to, 'mkdir'], $f);
-				self::migrateDirectory($from, $to, $f->path, $i, $callback);
+			if ($file->type == File::TYPE_DIRECTORY) {
+				call_user_func([$to, 'mkdir'], $file);
+				self::migrateDirectory($from, $to, $file->path, $i, $callback);
 			}
 			else {
-				$from_path = call_user_func([$from, 'getFullPath'], $f);
-				call_user_func([$to, 'storePath'], $f, $from_path);
+				$from_path = call_user_func([$from, 'getFullPath'], $file);
+				call_user_func([$to, 'storePath'], $file, $from_path);
 			}
 
 			if (null !== $callback) {
-				$callback($f);
+				$callback($file);
 			}
 
-			unset($f);
+			unset($file);
 		}
 	}
 
@@ -183,18 +176,10 @@ class Files
 			return null;
 		}
 
-		$where = '';
+		$file = self::callStorage('get', $path);
 
-		if (null !== $type) {
-			$where = ' AND type = ' . $type;
-		}
-
-		$sql = sprintf('SELECT * FROM @TABLE WHERE path = ? %s LIMIT 1;', $where);
-
-		$file = EM::findOne(File::class, $sql, $path);
-
-		if (null !== $file) {
-			$file = self::callStorage('update', $file);
+		if (!$file || ($type && $file->type != $type)) {
+			return null;
 		}
 
 		return $file;
@@ -240,7 +225,7 @@ class Files
 
 	static public function getQuota(): int
 	{
-		return FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
+		return FILE_STORAGE_QUOTA ?? self::callStorage('getQuota');
 	}
 
 	static public function getUsedQuota(): int
@@ -250,7 +235,7 @@ class Files
 
 	static public function getRemainingQuota(): int
 	{
-		if (FILE_STORAGE_QUOTA) {
+		if (FILE_STORAGE_QUOTA !== null) {
 			return FILE_STORAGE_QUOTA - self::getUsedQuota();
 		}
 

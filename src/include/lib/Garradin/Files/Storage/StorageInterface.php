@@ -49,14 +49,19 @@ interface StorageInterface
 	static public function delete(File $file): bool;
 
 	/**
-	 * Gets modified timestamp
-	 */
-	static public function modified(File $file): ?int;
-
-	/**
 	 * Return TRUE if file exists
 	 */
 	static public function exists(string $path): bool;
+
+	/**
+	 * Return a File object from a given path or NULL if the file doesn't exist
+	 */
+	static public function get(string $path): ?File;
+
+	/**
+	 * Return an array of File objects for a given path
+	 */
+	static public function list(string $path): array;
 
 	/**
 	 * Moves a file to a new path, when its name or path has changed
@@ -100,26 +105,4 @@ interface StorageInterface
 	 * Throw a \RuntimeException if the lock is active
 	 */
 	static public function checkLock(): void;
-
-	/**
-	 * Update metadata in database from local directory
-	 * This is called before listing a directory
-	 *
-	 * The backend must list files for this path and update/add/delete them
-	 * using File entities.
-	 *
-	 * @param  string $path Parent path
-	 * @return void
-	 */
-	static public function sync(?string $path): void;
-
-	/**
-	 * Update metadata of a file if needed, before getting it
-	 *
-	 * This is called before getting any metadata of a file
-	 *
-	 * @param  File $file
-	 * @return File modified File object, or NULL if the file no longer exists
-	 */
-	static public function update(File $file): ?File;
 }
