@@ -117,12 +117,11 @@ class FileSystem implements StorageInterface
 	{
 		$path = self::getFullPath($file);
 
-		if (is_dir($path)) {
-			return rmdir($path);
+		if ($file->type == File::TYPE_DIRECTORY) {
+			return Utils::deleteRecursive($path);
 		}
-		else {
-			return Utils::safe_unlink($path);
-		}
+
+		return Utils::safe_unlink($path);
 	}
 
 	static public function move(File $file, string $new_path): bool
@@ -140,9 +139,69 @@ class FileSystem implements StorageInterface
 		return file_exists(self::_getRealPath($path));
 	}
 
-	static public function modified(File $file): ?int
+	static public function get(string $path): ?File
 	{
-		return filemtime(self::getFullPath($file)) ?: null;
+		$file = new \SplFileInfo(self::_getRealPath($path));
+
+		if (!$file->getRealPath()) {
+			return null;
+		}
+
+		return self::_SplToFile($file);
+	}
+
+	static protected function _SplToFile(\SplFileInfo $spl): File
+	{
+		$path = str_replace(self::_getRoot() . DIRECTORY_SEPARATOR, '', $spl->getPathname());
+		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+		$parent = dirname($path);
+
+		if ($parent == '.' || !$parent) {
+			$parent = '';
+		}
+
+		$data = [
+			'id'       => null,
+			'name'     => $spl->getBasename(),
+			'path'     => $path,
+			'parent'   => $parent,
+			'modified' => new \DateTime('@' . $spl->getMTime()),
+			'size'     => $spl->getSize(),
+			'type'     => $spl->isDir() ? File::TYPE_DIRECTORY : File::TYPE_FILE,
+			'mime'     => mime_content_type($spl->getRealPath()),
+		];
+
+		$data['image'] = (int) in_array($data['mime'], File::IMAGE_TYPES);
+
+		$file = new File;
+		$file->load($data);
+
+		return $file;
+	}
+
+	static public function list(string $path): array
+	{
+		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
+
+		if (!file_exists($fullpath)) {
+			return [];
+		}
+
+		$files = [];
+
+		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			// Used to make sorting easier
+			// directory_blabla
+			// file_image.jpeg
+			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($file);
+		}
+
+		uksort($files, function ($a, $b) {
+			return strnatcasecmp($a, $b) > 0 ? 1 : -1;
+		});
+
+		return $files;
 	}
 
 	static public function getTotalSize(): int
@@ -202,123 +261,5 @@ class FileSystem implements StorageInterface
 		if ($lock) {
 			throw new \RuntimeException('File storage is locked');
 		}
-	}
-
-	static public function sync(?string $path): void
-	{
-		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
-
-		if (!file_exists($fullpath)) {
-			return;
-		}
-
-		$db = DB::getInstance();
-
-		$saved_files = $db->getGrouped('SELECT name, size, modified, type FROM files WHERE parent = ?;', $path);
-		$added = [];
-		$modified = [];
-		$exists = [];
-
-		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
-			$name = $file->getFilename();
-
-			$data = [
-				'name'     => $name,
-				'modified' => null,
-			];
-
-			if ($file->isDir()) {
-				$data['type'] = File::TYPE_DIRECTORY;
-			}
-			else {
-				$data['type'] = File::TYPE_FILE;
-				$data['modified'] = date('Y-m-d H:i:s', $file->getMTime());
-			}
-
-			$exists[$name] = true;
-
-			if (!array_key_exists($name, $saved_files)) {
-				$added[] = $data;
-			}
-			elseif ($saved_files[$name]->modified < $data['modified']) {
-				$modified[] = $data;
-			}
-		}
-
-		foreach ($modified as $file) {
-			// This will call 'update' method
-			Files::get($path . '/' . $file['name']);
-		}
-
-		foreach ($added as $file) {
-			$f = File::create($path, $file['name'], $fullpath . DIRECTORY_SEPARATOR . $file['name'], null);
-			$f->import($file);
-			$f->save();
-		}
-
-		$deleted = array_diff_key($saved_files, $exists);
-
-		foreach ($deleted as $file) {
-			if ($file->type == File::TYPE_DIRECTORY) {
-
-				$sql = 'DELETE FROM files WHERE path = ? OR path LIKE ? OR (path = ? AND name = ?);';
-				$file_path = $path . '/' . $file->name;
-				$params = [$file_path, $file_path . '/%', $path, $file->name];
-			}
-			else {
-				$sql = 'DELETE FROM files WHERE path = ? AND name = ?;';
-				$params = [$path, $file->name];
-			}
-
-			$db->preparedQuery($sql, ... $params);
-		}
-	}
-
-	static public function update(File $file): ?File
-	{
-		$path = self::getFullPath($file);
-
-		// File has disappeared
-		if (!file_exists($path)) {
-			$file->delete();
-			return null;
-		}
-
-		$type = is_dir($path) ? File::TYPE_DIRECTORY : File::TYPE_FILE;
-
-		// Directories don't have a modified time here
-		if ($type == File::TYPE_DIRECTORY && $file->type == File::TYPE_DIRECTORY) {
-			return $file;
-		}
-
-		$modified = filemtime($path);
-
-		if ($modified <= $file->modified->getTimestamp()) {
-			return $file;
-		}
-
-		if ($type == File::TYPE_DIRECTORY) {
-			$file->modified = null;
-			$file->size = null;
-			$file->mime = null;
-			$file->image = null;
-		}
-		else {
-			// Short trick to return a local timezone date time
-			$file->modified = \DateTime::createFromFormat('!Y-m-d H:i:s', date('Y-m-d H:i:s', $modified));
-			$file->size = filesize($path);
-
-			$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-			$file->mime = finfo_file($finfo, $path);
-
-			if ($type != $file->type) {
-				$file->type = $type;
-			}
-		}
-
-		$file->save();
-
-		return $file;
 	}
 }

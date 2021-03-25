@@ -160,7 +160,7 @@ class Sections
 			$params['where'] = '';
 		}
 
-		$params['where'] .= ' AND f.image = 1';
+		$params['where'] .= ' AND image = 1';
 		return self::files($params, $tpl, $line);
 	}
 
@@ -170,7 +170,7 @@ class Sections
 			$params['where'] = '';
 		}
 
-		$params['where'] .= ' AND f.image = 0';
+		$params['where'] .= ' AND image = 0';
 		return self::files($params, $tpl, $line);
 	}
 
@@ -188,18 +188,40 @@ class Sections
 
 		// Fetch page
 		$page = self::cache('page_' . md5($parent), function () use ($parent) {
-			return Web::get($parent);
+			$page = Web::get($parent);
+
+			if (!$page) {
+				return null;
+			}
+
+			// Store attachments in temp table
+			$db = DB::getInstance();
+			$db->begin();
+			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, path, name, modified, image);');
+			$page_file_name = basename($page->file_path);
+
+			foreach ($page->listAttachments() as $file) {
+				if ($file->name == $page_file_name || $file->type != File::TYPE_FILE) {
+					continue;
+				}
+
+				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?);',
+					$page->id(), $file->path, $file->name, $file->modified, $file->image);
+			}
+
+			$db->commit();
+
+			return $page;
 		});
 
 		if (!$page) {
 			return;
 		}
 
-		$params['select'] = 'f.*';
-		$params['tables'] = 'files f';
-		$params['where'] .= ' AND f.path = :path AND f.name != :p_name AND f.type = ' . File::TYPE_FILE;
-		$params[':path'] = dirname($page->filepath());
-		$params[':p_name'] = basename($page->filepath());
+		$params['select'] = 'path';
+		$params['tables'] = 'web_pages_attachments';
+		$params['where'] .= ' AND page_id = :page';
+		$params[':page'] = $page->id();
 		unset($params['parent']);
 
 		// Generate a temporary table containing the list of files included in the text
@@ -220,7 +242,7 @@ class Sections
 				$db->commit();
 			});
 
-			$params['where'] .= sprintf(' AND f.name NOT IN (SELECT name FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
+			$params['where'] .= sprintf(' AND name NOT IN (SELECT name FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
 		}
 
 		if (empty($params['order'])) {
@@ -232,9 +254,13 @@ class Sections
 		}
 
 		foreach (self::sql($params, $tpl, $line) as $row) {
-			$file = new File;
-			$file->exists(true);
-			$file->load($row);
+			$file = Files::get($row['path']);
+
+			if (null === $file) {
+				continue;
+			}
+
+			$row = $file->asArray();
 			$row['url'] = $file->url();
 			$row['download_url'] = $file->url(true);
 			$row['thumb_url'] = $file->thumb_url();
