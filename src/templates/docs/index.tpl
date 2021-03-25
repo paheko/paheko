@@ -102,13 +102,13 @@ use Garradin\Entities\Files\File;
 				{input type="checkbox" name="check[]" value=$file.path}
 			</td>
 			{/if}
-			<th>
+			<td>
 				{if $file->canPreview()}
 					<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
 				{else}
 					<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
 				{/if}
-			</th>
+			</td>
 			<td>{$file.modified|date}</td>
 			<td>{$file.mime}</td>
 			<td>{$file.size|size_in_bytes}</td>
