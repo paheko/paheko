@@ -407,7 +407,7 @@ class Transaction extends Entity
 			throw new UserException('Montant non précisé');
 		}
 
-		$this->type = self::TYPE_TRANSFER;
+		$this->type = self::TYPE_ADVANCED;
 		$amount = $source['amount'];
 
 		$key = 'account_transfer';

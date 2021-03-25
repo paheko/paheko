@@ -72,7 +72,7 @@ class Transactions
 		try {
 			$ids = [];
 			foreach ($journal as $row) {
-				if (!array_key_exists($row->id, $checked)) {
+				if (!array_key_exists($row->id_line, $checked)) {
 					continue;
 				}
 
@@ -83,6 +83,7 @@ class Transactions
 					'reference'  => $row->line_reference,
 					'id_account' => $row->id_account,
 				]);
+
 				$line->credit = $row->debit;
 
 				$transaction->addLine($line);
