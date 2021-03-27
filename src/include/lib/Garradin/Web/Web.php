@@ -57,7 +57,6 @@ class Web
 
 		$deleted = array_diff_key($in_db, $exists);
 		$new = array_diff_key($exists, $in_db);
-		$intersection = array_intersect_key($in_db, $exists);
 
 		if ($deleted) {
 			$deleted = array_map(function ($page) {
@@ -77,6 +76,9 @@ class Web
 			Page::fromFile($f)->save();
 		}
 
+		/*
+		// There's no need for that sync as it is triggered when loading a Page entity!
+		$intersection = array_intersect_key($in_db, $exists);
 		foreach ($intersection as $page) {
 			$file = Files::get($page->file_path);
 
@@ -90,6 +92,7 @@ class Web
 			$page->loadFromFile($file);
 			$page->save();
 		}
+		 */
 	}
 
 	static public function listCategories(string $parent): array
@@ -201,7 +204,7 @@ class Web
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
-		elseif ($page = self::getByURI($uri)) {
+		elseif (($page = self::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
 		}
