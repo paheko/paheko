@@ -86,6 +86,11 @@ class Page extends Entity
 		$page->file_path = $page->filepath();
 		$page->type = $type;
 
+		$db = DB::getInstance();
+		if ($db->test(self::TABLE, 'uri = ?', $page->uri)) {
+			$page->importForm(['uri' => $page->uri . date('-Y-m-d-His')]);
+		}
+
 		return $page;
 	}
 
@@ -172,9 +177,11 @@ class Page extends Entity
 
 		if (!$this->file()) {
 			$file = $this->_file = File::createAndStore(dirname($target), basename($target), null, $export);
+			$this->set('modified', new \DateTime);
 		}
 		elseif ($this->file()->fetch() !== $export) {
 			$this->file()->store(null, $this->export());
+			$this->set('modified', $this->file()->modified);
 		}
 
 		$this->syncSearch();
@@ -188,10 +195,8 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$this->set('modified', new \DateTime);
-
-		parent::save();
 		$this->syncFile();
+		parent::save();
 
 		return true;
 	}
@@ -215,7 +220,8 @@ class Page extends Entity
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
 		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
-		$this->assert(!$db->test(self::TABLE, 'uri = ? AND path != ?', $this->uri, $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri);
+		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'path = ? AND id != ?', $this->path, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri);
+		$this->assert($this->exists() || !$db->test(self::TABLE, 'path = ?', $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->path);
 	}
 
 	public function importForm(array $source = null)
@@ -421,14 +427,15 @@ class Page extends Entity
 		}
 
 		$this->set('modified', $file->modified);
-		$this->set('type', self::TYPE_PAGE); // Default
 
 		foreach (Files::list($file->parent) as $subfile) {
 			if ($subfile->type == File::TYPE_DIRECTORY) {
 				$this->set('type', self::TYPE_CATEGORY);
-				break;
+				return;
 			}
 		}
+
+		$this->set('type', self::TYPE_PAGE); // Default
 	}
 
 	static public function fromFile(File $file): self
