@@ -31,8 +31,6 @@ $prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=' . File::C
 
 $content = Skriv::render($file, f('content'), ['prefix' => ADMIN_URL . $prefix]);
 
-var_dump($content); exit;
-
 $tpl->assign(compact('file', 'content'));
 
 $tpl->assign('custom_css', ['!web/css.php']);
