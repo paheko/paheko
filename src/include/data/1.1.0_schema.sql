@@ -273,10 +273,10 @@ CREATE TABLE IF NOT EXISTS files
     type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
     mime TEXT NULL,
     size INT NULL,
-    modified TEXT NULL CHECK (modified IS NULL OR datetime(modified) = modified),
+    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified),
     image INT NOT NULL DEFAULT 0,
 
-    CHECK (type = 2 OR (mime IS NOT NULL AND modified IS NOT NULL AND size IS NOT NULL))
+    CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))
 );
 
 -- Unique index as this is used to make up a file path

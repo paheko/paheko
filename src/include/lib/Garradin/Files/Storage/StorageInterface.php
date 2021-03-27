@@ -49,6 +49,11 @@ interface StorageInterface
 	static public function delete(File $file): bool;
 
 	/**
+	 * Change file mtime
+	 */
+	static public function touch(string $path): bool;
+
+	/**
 	 * Return TRUE if file exists
 	 */
 	static public function exists(string $path): bool;

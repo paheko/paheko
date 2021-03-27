@@ -52,7 +52,7 @@ class File extends Entity
 		'type'         => 'int',
 		'mime'         => '?string',
 		'size'         => '?int',
-		'modified'     => '?DateTime',
+		'modified'     => 'DateTime',
 		'image'        => 'int',
 	];
 
@@ -332,6 +332,7 @@ class File extends Entity
 		$file->set('parent', $path);
 		$file->set('type', self::TYPE_DIRECTORY);
 		$file->set('image', 0);
+		$file->set('modified', new \DateTime);
 
 		Files::callStorage('mkdir', $file);
 
