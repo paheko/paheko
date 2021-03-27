@@ -90,6 +90,10 @@ class SQLite implements StorageInterface
 		$cache_id = 'files.' . $file->pathHash();
 		Static_Cache::remove($cache_id);
 
+		if ($file->parent) {
+			self::touch($file->parent);
+		}
+
 		return true;
 	}
 
@@ -134,10 +138,14 @@ class SQLite implements StorageInterface
 		$db->delete('files_contents', 'id = ?', $file->id());
 
 		// Delete recursively
-		if ($file->type == self::TYPE_DIRECTORY) {
+		if ($file->type == File::TYPE_DIRECTORY) {
 			foreach (Files::list($file->path) as $subfile) {
 				$subfile->delete();
 			}
+		}
+
+		if ($file->parent) {
+			self::touch($file->parent);
 		}
 
 		return true;
@@ -151,17 +159,31 @@ class SQLite implements StorageInterface
 		$file->set('name', basename($new_path));
 		$file->save();
 
-		if ($file->type == self::TYPE_DIRECTORY) {
+		if ($file->type == File::TYPE_DIRECTORY) {
 			// Move sub-directories and sub-files
 			DB::getInstance()->preparedQuery('UPDATE files SET parent = ?, path = TRIM(? || \'/\' || name, \'/\') WHERE parent = ?;', $new_path, $new_path, $current_path);
+		}
+
+		if ($file->parent) {
+			self::touch($file->parent);
 		}
 
 		return true;
 	}
 
+	static public function touch(string $path): bool
+	{
+		return DB::getInstance()->preparedQuery('UPDATE files SET modified = ? WHERE path = ?;', new \DateTime, $path);
+	}
+
 	static public function mkdir(File $file): bool
 	{
 		$file->save();
+
+		if ($file->parent) {
+			self::touch($file->parent);
+		}
+
 		return true;
 	}
 

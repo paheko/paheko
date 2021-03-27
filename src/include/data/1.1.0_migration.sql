@@ -206,11 +206,12 @@ INSERT INTO files_contents (id, compressed, content)
 		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
 
 -- Create parent directories
-INSERT INTO files (type, path, parent, name)
+INSERT INTO files (type, path, parent, name, modified)
 	SELECT 2,
 		'web/' || waf.path,
 		dirname('web/' || waf.path),
-		waf.uri
+		waf.uri,
+		modified
 	FROM wiki_as_files waf;
 
 INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;

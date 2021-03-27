@@ -53,14 +53,6 @@ class Files
 		return self::callStorage('list', $parent);
 	}
 
-	static public function listAllDirectoriesAssoc(string $context): array
-	{
-		return DB::getInstance()->getAssoc('SELECT
-			path,
-			REPLACE(path || \'/\', ?, \'\')
-			FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ? ORDER BY path COLLATE NOCASE, name COLLATE NOCASE;', $context, $context, $context . '/%', File::TYPE_DIRECTORY);
-	}
-
 	static public function delete(string $path): void
 	{
 		$file = self::get($path);
