@@ -48,18 +48,22 @@ class Web
 				continue;
 			}
 
-			$exists[] = $file->path;
+			$exists[$file->path] = null;
 		}
 
 		$db = DB::getInstance();
 
-		$in_db = $db->getAssoc('SELECT path, 1 FROM web_pages WHERE parent = ?;', $parent);
-		$in_db = array_keys($in_db);
+		$in_db = $db->getGrouped('SELECT dirname(file_path), file_path, path, modified FROM web_pages WHERE parent = ?;', $parent);
 
-		$deleted = array_diff($in_db, $exists);
-		$new = array_diff($exists, $in_db);
+		$deleted = array_diff_key($in_db, $exists);
+		$new = array_diff_key($exists, $in_db);
+		$intersection = array_intersect_key($in_db, $exists);
 
 		if ($deleted) {
+			$deleted = array_map(function ($page) {
+				return $page->path;
+			}, $deleted);
+
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
 		}
 
@@ -71,6 +75,20 @@ class Web
 			}
 
 			Page::fromFile($f)->save();
+		}
+
+		foreach ($intersection as $page) {
+			$file = Files::get($page->file_path);
+
+			$modified = new \DateTime($page->modified);
+
+			if ($modified == $file->modified) {
+				continue;
+			}
+
+			$page = Web::get($page->path);
+			$page->loadFromFile($file);
+			$page->save();
 		}
 	}
 
