@@ -284,7 +284,7 @@ class Template extends \KD2\Smartyer
 		}
 
 
-		$attributes['id'] = 'f_' . $name;
+		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
 		$attributes['name'] = $name;
 
 		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
