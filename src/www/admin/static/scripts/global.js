@@ -1,9 +1,11 @@
 (function () {
+	let s = document.head.querySelector('script');
+
 	window.g = window.garradin = {
 		url: window.location.href.replace(/\/admin\/.*?$/, ''),
 		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
 		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: document.head.querySelector('script').src.match(/\?(.*)$/)[1],
+		version: s ? s.src.match(/\?(.*)$/)[1] : null,
 		loaded: {}
 	};
 

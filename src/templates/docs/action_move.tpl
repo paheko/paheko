@@ -3,12 +3,35 @@
 {form_errors}
 
 <form method="post" action="{$self_url}">
-
 	<fieldset>
-		<legend>Déplacer {$count} fichiers</legend>
-		<dl>
-			{input type="select" name="move_target" options=$directories label="Répertoire de destination"}
-		</dl>
+		<legend>Déplacer {$count} fichiers vers…</legend>
+
+		<table class="tree-selector list">
+			<tbody>
+				<?php $last = 0; ?>
+				{foreach from=$breadcrumbs item="_title" key="_path"}
+				<tr>
+					<td class="check">{input type="radio" name="select" value=$_path}</td>
+					<th><?=str_repeat('<i>&nbsp;</i>', $last)?> <b class="icn">&rarr;</b>
+						<button type="submit" name="current" value="{$_path}">{$_title}</button></th>
+					<?php $last = $iteration; ?>
+				</tr>
+				{/foreach}
+				{foreach from=$directories item="dir"}
+				<tr>
+					<td class="check">{input type="radio" name="select" value=$dir.path}</td>
+					<th><?=str_repeat('<i>&nbsp;</i>', $last)?> <b class="icn">&rarr;</b>
+						<button type="submit" name="current" value="{$dir.path}">{$dir.name}</button></th>
+				</tr>
+				{foreachelse}
+				<tr>
+					<td class="check"></td>
+					<th><?=str_repeat('<i>&nbsp;</i>', $last+1)?> <b class="icn">&rarr;</b> <em>Pas de sous-répertoire</em></th>
+				</tr>
+				{/foreach}
+			</tbody>
+		</table>
+
 	</fieldset>
 
 	<p class="submit">

@@ -186,6 +186,11 @@ class File extends Entity
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
+
+		if ($new_path == $this->path || 0 === strpos($new_path, $this->path)) {
+			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
+		}
+
 		return Files::callStorage('move', $this, $new_path);
 	}
 
