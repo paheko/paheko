@@ -200,7 +200,6 @@ class Config extends Entity
 
 			if ($file) {
 				$file->storeFromBase64($source['admin_background']);
-				$file->save();
 			}
 			else {
 				$file = File::createFromBase64(dirname(self::ADMIN_BACKGROUND_FILENAME), basename(self::ADMIN_BACKGROUND_FILENAME), $source['admin_background']);
