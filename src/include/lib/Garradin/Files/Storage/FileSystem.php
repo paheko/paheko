@@ -176,6 +176,8 @@ class FileSystem implements StorageInterface
 			'mime'     => mime_content_type($spl->getRealPath()),
 		];
 
+		$data['modified']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
+
 		$data['image'] = (int) in_array($data['mime'], File::IMAGE_TYPES);
 
 		$file = new File;
