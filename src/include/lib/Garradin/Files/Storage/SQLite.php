@@ -3,6 +3,7 @@
 namespace Garradin\Files\Storage;
 
 use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
