@@ -107,7 +107,7 @@ class Page extends Entity
 	{
 		parent::load($data);
 
-		if ($this->file() && $this->file()->modified > $this->modified) {
+		if ($this->file() && $this->file()->modified != $this->modified) {
 			$this->loadFromFile($this->file());
 			$this->save();
 		}
