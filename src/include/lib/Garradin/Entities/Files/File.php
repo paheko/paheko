@@ -98,6 +98,7 @@ class File extends Entity
 		'image/png',
 		'image/gif',
 		'image/jpeg',
+		'image/webp',
 	];
 
 	const PREVIEW_TYPES = [
@@ -235,11 +236,7 @@ class File extends Entity
 				unset($i);
 			}
 			catch (\RuntimeException $e) {
-				if (strstr($e->getMessage(), 'No suitable image library found')) {
-					throw new \RuntimeException('Le serveur n\'a aucune bibliothèque de gestion d\'image installée, et ne peut donc pas accepter les images. Installez Imagick ou GD.');
-				}
-
-				throw new UserException('Fichier image invalide');
+				$this->set('image', 0);
 			}
 		}
 
@@ -389,6 +386,11 @@ class File extends Entity
 		}
 
 		$file->set('image', (int) in_array($file->mime, self::IMAGE_TYPES));
+
+		// Force empty files as text/plain
+		if ($file->mime == 'application/x-empty' && !$file->size) {
+			$file->set('mime', 'text/plain');
+		}
 
 		return $file;
 	}

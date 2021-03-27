@@ -26,8 +26,6 @@ $form->runIf('create', function () use ($parent) {
 	$name = File::filterName($name);
 
 	$file = File::createAndStore($parent, $name, null, '');
-	$file->set('mime', 'text/plain');
-	$file->save();
 }, $csrf_key, '!docs/?p=' . $parent);
 
 $tpl->assign(compact('csrf_key'));
