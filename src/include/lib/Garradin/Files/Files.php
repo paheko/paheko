@@ -206,9 +206,10 @@ class Files
 	{
 		$parts = explode('/', $path);
 		$breadcrumbs = [];
+		$path = '';
 
 		foreach ($parts as $part) {
-			$path = trim(key($breadcrumbs) . '/' . $part, '/');
+			$path = trim($path . '/' . $part, '/');
 			$breadcrumbs[$path] = $part;
 		}
 

@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Choisir la page parent" current="web"}
 
-<table class="web-tree list">
+<table class="tree-selector list">
 	<tbody>
 		<tr{if !$parent} class="focused"{/if}>
 			<td><input type="button" value="Choisir" data-path="" data-label="Racine du site" /></td>

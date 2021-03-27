@@ -78,48 +78,6 @@ fieldset.wikiMain #f_uri {
     margin-left: 1em;
 }
 
-.web-tree ul {
-    margin-left: 1em;
-    list-style-type: none;
-}
-
-.web-tree a {
-    color: #666;
-}
-
-.web-tree td {
-    width: 15%;
-}
-
-.web-tree i {
-    display: inline-block;
-    padding: 0 .5em;
-}
-
-.web-tree b {
-    display: inline-block;
-    padding: 0 .5em;
-    color: #999;
-}
-
-.web-tree em {
-    font-weight: normal;
-}
-
-.web-tree h3 {
-    display: inline-block;
-}
-
-.web-tree .current > a {
-    font-weight: bold;
-    color: #000;
-}
-
-.web-tree .choice {
-    text-align: center;
-    margin-bottom: 1em;
-}
-
 form#f_upload fieldset {
     position: relative;
 }

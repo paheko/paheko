@@ -35,7 +35,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	}
 }, $csrf_key, '!docs/?p=' . $parent);
 
-$form->runIf('move', function () use ($check, $session) {
+$form->runIf(f('move') && f('select'), function () use ($check, $session) {
 	foreach ($check as &$file) {
 		$file = Files::get($file);
 
@@ -44,7 +44,7 @@ $form->runIf('move', function () use ($check, $session) {
 		}
 	}
 
-	$target = f('move_target') ?: $file->context();
+	$target = f('select');
 	unset($file);
 
 	foreach ($check as $file) {
@@ -61,13 +61,26 @@ if ($action == 'delete') {
 	$tpl->display('docs/action_delete.tpl');
 }
 else {
-	$first_file = Files::get(current($check));
+	$parent = f('current') ?? f('parent');
 
-	if (!$first_file) {
-		throw new UserException('Fichier introuvable');
+	if (!$parent) {
+		$first_file = Files::get(current($check));
+
+		if (!$first_file) {
+			throw new UserException('Fichier introuvable');
+		}
+
+		$parent = $first_file->parent;
 	}
 
-	$tpl->assign('directories', [null => '— Racine'] + Files::listAllDirectoriesAssoc($first_file->context()));
+	$directories = Files::list($parent);
+	$directories = array_filter($directories, function (File $file) {
+		return $file->type == File::TYPE_DIRECTORY;
+	});
+
+	$breadcrumbs = Files::getBreadcrumbs($parent);
+
+	$tpl->assign(compact('directories', 'breadcrumbs', 'parent'));
 
 	$tpl->display('docs/action_move.tpl');
 }
