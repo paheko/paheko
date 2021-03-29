@@ -7,6 +7,7 @@ use KD2\DB\EntityManager as EM;
 
 use Garradin\DB;
 use Garradin\Entity;
+use Garradin\Plugin;
 use Garradin\UserException;
 use Garradin\ValidationException;
 use Garradin\Membres\Session;
@@ -166,6 +167,8 @@ class File extends Entity
 		// Delete actual file content
 		Files::callStorage('delete', $this);
 
+		Plugin::fireSignal('files.delete', ['file' => $this]);
+
 		// clean up thumbnails
 		foreach (self::ALLOWED_THUMB_SIZES as $size)
 		{
@@ -192,7 +195,11 @@ class File extends Entity
 			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
 		}
 
-		return Files::callStorage('move', $this, $new_path);
+		$return = Files::callStorage('move', $this, $new_path);
+
+		Plugin::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
+
+		return $return;
 	}
 
 	public function setContent(string $content): self
@@ -263,6 +270,8 @@ class File extends Entity
 		if (!$return) {
 			throw new UserException('Le fichier n\'a pas pu être enregistré.');
 		}
+
+		Plugin::fireSignal('files.store', ['file' => $this]);
 
 		if (!$index_search) {
 			$this->indexForSearch($source_path, $source_content);
@@ -337,6 +346,8 @@ class File extends Entity
 		$file->set('modified', new \DateTime);
 
 		Files::callStorage('mkdir', $file);
+
+		Plugin::fireSignal('files.mkdir', ['file' => $file]);
 
 		return $file;
 	}
