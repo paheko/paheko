@@ -30,7 +30,8 @@
 		var config = {
 			fullscreen: t.textarea.getAttribute('data-fullscreen') == 1,
 			attachments: t.textarea.getAttribute('data-attachments') == 1,
-			savebtn: t.textarea.getAttribute('data-savebtn')
+			savebtn: t.textarea.getAttribute('data-savebtn'),
+			preview_url: t.textarea.getAttribute('data-preview-url')
 		};
 
 		// Cancel Escape to close.value
@@ -69,13 +70,11 @@
 		var openPreview = function ()
 		{
 			openIFrame('');
-			let args = new URLSearchParams(window.location.search);
-			var wiki_id = args.get('p');
 			var form = document.createElement('form');
 			form.appendChild(t.textarea.cloneNode(true));
 			form.firstChild.value = t.textarea.value;
 			form.target = 'editorFrame';
-			form.action = g.admin_url + 'common/files/_preview.php?_dialog&w=' + wiki_id;
+			form.action = config.preview_url;
 			form.style.display = 'none';
 			form.method = 'post';
 			document.body.appendChild(form);
@@ -217,7 +216,7 @@
 			fetch(t.textarea.form.action + '&js', {
 				method: 'post',
 				body: data,
-			}).then(() => {
+			}).then((response) => {
 				if (!response.ok) {
 					throw response;
 				}

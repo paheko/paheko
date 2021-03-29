@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 use Garradin\Web\Render\Skriv;
 use Garradin\Web\Web;
 
@@ -10,7 +11,7 @@ require_once __DIR__ . '/../../_inc.php';
 
 $page = null;
 
-if ($path = qg('p')) {
+if ($path = qg('f')) {
 	$file = Files::get($path);
 
 	if (!$file || !$file->checkReadAccess($session)) {

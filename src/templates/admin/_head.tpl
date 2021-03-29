@@ -34,9 +34,9 @@
     {/if}
 </head>
 
-<body>
+<body{if isset($transparent)} class="transparent"{/if}>
 
-{if !array_key_exists('_dialog', $_GET)}
+{if !array_key_exists('_dialog', $_GET) && !isset($transparent)}
 <header class="header">
     <nav class="menu">
     <ul>

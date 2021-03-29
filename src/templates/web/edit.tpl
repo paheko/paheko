@@ -40,7 +40,7 @@
 
 	<fieldset class="wikiText">
 		<div class="textEditor">
-			{input type="textarea" name="content" cols="70" rows="35" default=$new_content data-attachments=1 data-savebtn=2}
+			{input type="textarea" name="content" cols="70" rows="35" default=$new_content data-attachments=1 data-savebtn=2 data-preview-url="!common/files/_preview.php?w=%s"|local_url|args:$page.path}
 		</div>
 	</fieldset>
 
