@@ -74,4 +74,37 @@ class Entity extends AbstractEntity
 			throw new ValidationException($message);
 		}
 	}
+
+	// Add plugin signals to save/delete
+	public function save(): bool
+	{
+		$name = get_class($this);
+		$name = str_replace('Garradin\Entities', '', $name);
+		$name = 'entity.' . $name . '.save';
+
+		if (Plugin::fireSignal($name . '.before', ['entity' => $this])) {
+			return true;
+		}
+
+		$return = parent::save();
+		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
+
+		return $return;
+	}
+
+	public function delete(): bool
+	{
+		$name = get_class($this);
+		$name = str_replace('Garradin\Entities', '', $name);
+		$name = 'entity.' . $name . '.delete';
+
+		if (Plugin::fireSignal($name . '.before', ['entity' => $this])) {
+			return true;
+		}
+
+		$return = parent::delete();
+		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
+
+		return $return;
+	}
 }
