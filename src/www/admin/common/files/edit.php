@@ -28,6 +28,8 @@ $form->runIf('content', function () use ($file) {
 
 }, $csrf_key, Utils::getSelfURI());
 
+$tpl->assign('file', $file);
+
 if (!$editor) {
 	$tpl->assign('file', $file);
 	$tpl->display('common/file_upload.tpl');
