@@ -7,6 +7,7 @@ use Garradin\Files\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
+use Garradin\Utils;
 
 use KD2\DB\EntityManager as EM;
 

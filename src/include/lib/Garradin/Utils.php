@@ -14,6 +14,8 @@ class Utils
     const EMAIL_CONTEXT_PRIVATE = 'private';
     const EMAIL_CONTEXT_SYSTEM = 'system';
 
+    static protected $collator;
+
     const FRENCH_DATE_NAMES = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
         'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
@@ -883,5 +885,28 @@ class Utils
         $str = substr($str, strrpos($str, '/'));
         $str = trim($str, '/');
         return $str;
+    }
+
+    static public function unicodeCaseComparison($a, $b): int
+    {
+        if (!isset(self::$collator) && function_exists('collator_create')) {
+            self::$collator = \Collator::create('fr_FR');
+            self::$collator->setAttribute(\Collator::NUMERIC_COLLATION, \Collator::ON);
+        }
+
+        if (isset(self::$collator)) {
+            return self::$collator->compare($a, $b);
+        }
+
+        $a = strtoupper(self::transliterateToAscii($a));
+        $b = strtoupper(self::transliterateToAscii($b));
+
+        return strcmp($a, $b);
+    }
+
+    static public function knatcasesort(array $array)
+    {
+        uksort($array, [self::class, 'unicodeCaseComparison']);
+        return $array;
     }
 }
