@@ -191,7 +191,7 @@ class SQLite implements StorageInterface
 
 	static public function getTotalSize(): int
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(LENGTH(content)) FROM files_contents;');
+		return (int) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
 	/**
