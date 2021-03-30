@@ -338,6 +338,19 @@ class Session extends \KD2\UserSession
 		return true;
 	}
 
+	public function getUser()
+	{
+		$user = parent::getUser();
+
+		// Force refresh of session when it's too old (FIXME: remove at version 1.2+)
+		if (!property_exists($this->user, 'perm_users')) {
+			$this->refresh();
+			$user = $this->getUser();
+		}
+
+		return $user;
+	}
+
 	public function canAccess($category, $permission)
 	{
 		if (!$this->getUser())
