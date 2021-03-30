@@ -29,7 +29,7 @@ if (!isset($files, $can_upload)) {
 			</figure>
 		{else}
 			<a target="_blank" href="{$file->url()}">{$file.name}</a>
-			<small>({$file.type}, {$file.size|size_in_bytes})</small>
+			<small>({$file.mime}, {$file.size|size_in_bytes})</small>
 		{/if}
 		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
 		{if $file->checkDeleteAccess($session)}
