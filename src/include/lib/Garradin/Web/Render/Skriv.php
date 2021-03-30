@@ -49,7 +49,7 @@ class Skriv
 		return self::$link_prefix . $uri;
 	}
 
-	static public function render(File $file, ?string $content = null, array $options = []): string
+	static public function render(?File $file, ?string $content = null, array $options = []): string
 	{
 		if (!self::$skriv)
 		{
@@ -62,17 +62,20 @@ class Skriv
 		}
 
 		$skriv =& self::$skriv;
-		self::$current_path = dirname($file->path);
-		self::$context = strtok(self::$current_path, '/');
-		self::$link_suffix = '';
 
-		if (self::$context === File::CONTEXT_WEB) {
-			self::$link_prefix = WWW_URL . '/';
-			self::$current_path = basename(dirname($file->path));
-		}
-		else {
-			self::$link_prefix = $options['prefix'] ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', self::$context);
-			self::$link_suffix = '.skriv';
+		if ($file) {
+			self::$current_path = dirname($file->path);
+			self::$context = strtok(self::$current_path, '/');
+			self::$link_suffix = '';
+
+			if (self::$context === File::CONTEXT_WEB) {
+				self::$link_prefix = WWW_URL . '/';
+				self::$current_path = basename(dirname($file->path));
+			}
+			else {
+				self::$link_prefix = $options['prefix'] ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', self::$context);
+				self::$link_suffix = '.skriv';
+			}
 		}
 
 		$str = $content ?? $file->fetch();
