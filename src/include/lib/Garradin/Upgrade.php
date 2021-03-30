@@ -35,10 +35,6 @@ class Upgrade
 				. PHP_EOL . $path);
 		}
 
-		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
-		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
-		$session = Session::getInstance();
-		$user_is_logged = $session->isLogged(true);
 		return true;
 	}
 
