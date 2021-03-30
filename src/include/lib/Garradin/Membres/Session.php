@@ -345,8 +345,10 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
+		$perm_name = 'perm_' . $category;
+		$perm = $this->getUser()->$perm_name;
 
-		return ($this->getUser()->{'perm_' . $category} >= $permission);
+		return ($perm >= $permission);
 	}
 
 	public function requireAccess($category, $permission)
