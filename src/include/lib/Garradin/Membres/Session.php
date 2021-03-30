@@ -161,7 +161,7 @@ class Session extends \KD2\UserSession
 	}
 
 	// Ajout de la gestion de LOCAL_LOGIN
-	public function isLogged($disable_local_login = false)
+	public function isLogged(bool $disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
