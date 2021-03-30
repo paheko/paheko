@@ -221,15 +221,23 @@ class Files
 		return FILE_STORAGE_QUOTA ?? self::callStorage('getQuota');
 	}
 
-	static public function getUsedQuota(): int
+	static public function getUsedQuota(bool $force_refresh = false): int
 	{
-		return self::callStorage('getTotalSize');
+		if ($force_refresh || Static_Cache::expired('used_quota', 3600)) {
+			$quota = self::callStorage('getTotalSize');
+			Static_Cache::store('used_quota', $quota);
+		}
+		else {
+			$quota = (int) Static_Cache::get('used_quota');
+		}
+
+		return $quota;
 	}
 
-	static public function getRemainingQuota(): int
+	static public function getRemainingQuota(bool $force_refresh = false): int
 	{
 		if (FILE_STORAGE_QUOTA !== null) {
-			return FILE_STORAGE_QUOTA - self::getUsedQuota();
+			return FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
 		}
 
 		return self::callStorage('getRemainingQuota');
@@ -237,10 +245,9 @@ class Files
 
 	static public function checkQuota(int $size = 0): void
 	{
-		$quota = self::getQuota();
-		$used = self::callStorage('getTotalSize');
+		$remaining = self::getRemainingQuota(true);
 
-		if (($used + $size) >= $quota) {
+		if (($remaining - $size) < 0) {
 			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
 		}
 	}
