@@ -198,7 +198,7 @@ class Sections
 			$db = DB::getInstance();
 			$db->begin();
 			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, path, name, modified, image);');
-			$page_file_name = basename($page->file_path);
+			$page_file_name = Utils::basename($page->file_path);
 
 			foreach ($page->listAttachments() as $file) {
 				if ($file->name == $page_file_name || $file->type != File::TYPE_FILE) {

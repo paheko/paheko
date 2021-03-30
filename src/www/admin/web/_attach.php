@@ -36,7 +36,7 @@ $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
 		throw new UserException('Un seul fichier peut être envoyé en même temps.');
 	}
 
-	$new_file = File::upload(dirname($page->file_path), 'file');
+	$new_file = File::upload(Utils::dirname($page->file_path), 'file');
 
 	if (f('uploadHelper_status') !== null)
 	{

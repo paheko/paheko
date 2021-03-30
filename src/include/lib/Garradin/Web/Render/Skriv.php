@@ -42,7 +42,7 @@ class Skriv
 	}
 
 	static public function resolveLink(string $uri) {
-		if (strpos(basename($uri), '.') === false) {
+		if (strpos(Utils::basename($uri), '.') === false) {
 			$uri .= self::$link_suffix;
 		}
 
@@ -64,13 +64,13 @@ class Skriv
 		$skriv =& self::$skriv;
 
 		if ($file) {
-			self::$current_path = dirname($file->path);
+			self::$current_path = Utils::dirname($file->path);
 			self::$context = strtok(self::$current_path, '/');
 			self::$link_suffix = '';
 
 			if (self::$context === File::CONTEXT_WEB) {
 				self::$link_prefix = WWW_URL . '/';
-				self::$current_path = basename(dirname($file->path));
+				self::$current_path = Utils::basename(Utils::dirname($file->path));
 			}
 			else {
 				self::$link_prefix = $options['prefix'] ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', self::$context);

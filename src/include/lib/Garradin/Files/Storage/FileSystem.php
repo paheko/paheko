@@ -159,7 +159,7 @@ class FileSystem implements StorageInterface
 	{
 		$path = str_replace(self::_getRoot() . DIRECTORY_SEPARATOR, '', $spl->getPathname());
 		$path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
-		$parent = dirname($path);
+		$parent = Utils::dirname($path);
 
 		if ($parent == '.' || !$parent) {
 			$parent = '';
@@ -167,7 +167,10 @@ class FileSystem implements StorageInterface
 
 		$data = [
 			'id'       => null,
-			'name'     => $spl->getBasename(),
+			// may return slash
+			// see comments https://www.php.net/manual/fr/splfileinfo.getfilename.php
+			// don't use getBasename as it is locale-dependent!
+			'name'     => trim($spl->getFilename(), '/'),
 			'path'     => $path,
 			'parent'   => $parent,
 			'modified' => new \DateTime('@' . $spl->getMTime()),

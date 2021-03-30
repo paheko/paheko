@@ -863,4 +863,25 @@ class Utils
 
         return $str;
     }
+
+    /**
+     * dirname may have undefined behaviour depending on the locale!
+     */
+    static public function dirname(string $str): string
+    {
+        $str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
+        return substr($str, 0, strrpos($str, '/'));
+    }
+
+    /**
+     * basename may have undefined behaviour depending on the locale!
+     */
+    static public function basename(string $str): string
+    {
+        $str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
+        $str = trim($str, '/');
+        $str = substr($str, strrpos($str, '/'));
+        $str = trim($str, '/');
+        return $str;
+    }
 }

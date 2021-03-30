@@ -364,7 +364,7 @@ class File extends Entity
 
 			if (!$exists) {
 				try {
-					self::createDirectory(dirname($tree) == '.' ? '' : dirname($tree), basename($tree), false);
+					self::createDirectory(Utils::dirname($tree), Utils::basename($tree), false);
 				}
 				catch (ValidationException $e) {
 					// Ignore when directory already exists
@@ -485,7 +485,7 @@ class File extends Entity
 	public function url(bool $download = false): string
 	{
 		if ($this->context() == self::CONTEXT_WEB) {
-			$path = basename(dirname($this->path)) . '/' . basename($this->path);
+			$path = Utils::basename(Utils::dirname($this->path)) . '/' . Utils::basename($this->path);
 		}
 		else {
 			$path = $this->path;
