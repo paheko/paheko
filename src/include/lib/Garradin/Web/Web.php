@@ -24,7 +24,7 @@ class Web
 		$results = Files::search($search, File::CONTEXT_WEB . '%');
 
 		foreach ($results as &$result) {
-			$result->uri = dirname(substr($result->path, strlen(File::CONTEXT_WEB) + 1));
+			$result->uri = Utils::dirname(substr($result->path, strlen(File::CONTEXT_WEB) + 1));
 			$result->breadcrumbs = [];
 			$path = '';
 
@@ -136,13 +136,13 @@ class Web
 			return null;
 		}
 
-		$path = DB::getInstance()->firstColumn('SELECT path FROM web_pages WHERE uri = ?;', dirname($uri));
+		$path = DB::getInstance()->firstColumn('SELECT path FROM web_pages WHERE uri = ?;', Utils::dirname($uri));
 
 		if (!$path) {
 			return null;
 		}
 
-		return Files::getFromURI(File::CONTEXT_WEB . '/' . $path . '/' . basename($uri));
+		return Files::getFromURI(File::CONTEXT_WEB . '/' . $path . '/' . Utils::basename($uri));
 	}
 
 	static public function dispatchURI()

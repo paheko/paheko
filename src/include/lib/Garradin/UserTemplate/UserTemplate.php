@@ -152,7 +152,7 @@ class UserTemplate extends Brindille
 		}
 		catch (Brindille_Exception $e) {
 			throw new Brindille_Exception(sprintf("Erreur de syntaxe dans '%s' : %s",
-				$this->file ? $this->file->name : basename($this->path),
+				$this->file ? $this->file->name : Utils::basename($this->path),
 				$e->getMessage()), 0, $e);
 		}
 		catch (\Throwable $e) {
@@ -160,8 +160,8 @@ class UserTemplate extends Brindille
 			throw $e;
 		}
 
-		if (!file_exists(dirname($compiled_path))) {
-			Utils::safe_mkdir(dirname($compiled_path), 0777, true);
+		if (!file_exists(Utils::dirname($compiled_path))) {
+			Utils::safe_mkdir(Utils::dirname($compiled_path), 0777, true);
 		}
 
 		rename($tmp_path, $compiled_path);

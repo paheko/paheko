@@ -36,7 +36,7 @@ $can_mkdir = $can_create && ($context == File::CONTEXT_DOCUMENTS || $context == 
 
 $breadcrumbs = Files::getBreadcrumbs($path);
 
-$parent_path = dirname($path);
+$parent_path = Utils::dirname($path);
 
 $quota_used = Files::getUsedQuota();
 $quota_max = Files::getQuota();

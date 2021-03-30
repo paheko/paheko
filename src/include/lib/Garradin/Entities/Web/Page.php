@@ -169,14 +169,14 @@ class Page extends Entity
 
 		// Move parent directory if needed
 		if ($path !== $target) {
-			$dir = Files::get(dirname($path));
-			$dir->rename(dirname($target));
+			$dir = Files::get(Utils::dirname($path));
+			$dir->rename(Utils::dirname($target));
 			$this->set('file_path', $target);
 			$this->_file = null;
 		}
 
 		if (!$this->file()) {
-			$file = $this->_file = File::createAndStore(dirname($target), basename($target), null, $export);
+			$file = $this->_file = File::createAndStore(Utils::dirname($target), Utils::basename($target), null, $export);
 			$this->set('modified', new \DateTime);
 		}
 		elseif ($this->file()->fetch() !== $export) {
@@ -203,7 +203,7 @@ class Page extends Entity
 
 	public function delete(): bool
 	{
-		Files::get(dirname($this->file_path))->delete();
+		Files::get(Utils::dirname($this->file_path))->delete();
 		return parent::delete();
 	}
 
@@ -287,7 +287,7 @@ class Page extends Entity
 	public function listAttachments(): array
 	{
 		if (null === $this->_attachments) {
-			$list = Files::list(dirname($this->filepath()));
+			$list = Files::list(Utils::dirname($this->filepath()));
 
 			// Remove the page itself
 			$list = array_filter($list, function ($a) {
@@ -444,9 +444,9 @@ class Page extends Entity
 
 		// Path is relative to web root
 		$page->set('file_path', $file->path);
-		$page->set('path', substr(dirname($file->path), strlen(File::CONTEXT_WEB . '/')));
-		$page->set('uri', basename($page->path));
-		$page->set('parent', dirname($page->path) == '.' ? '' : dirname($page->path));
+		$page->set('path', substr(Utils::dirname($file->path), strlen(File::CONTEXT_WEB . '/')));
+		$page->set('uri', Utils::basename($page->path));
+		$page->set('parent', Utils::dirname($page->path) == '.' ? '' : Utils::dirname($page->path));
 
 		$page->loadFromFile($file);
 		return $page;

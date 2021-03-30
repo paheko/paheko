@@ -49,8 +49,8 @@ class DB extends SQLite3
         // https://ericdraken.com/sqlite-performance-testing/
         $this->exec(sprintf('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA journal_size_limit = %d;', 32 * 1024 * 1024));
 
-        $this->db->createFunction('dirname', 'dirname');
-        $this->db->createFunction('basename', 'basename');
+        $this->db->createFunction('dirname', [Utils::class, 'dirname']);
+        $this->db->createFunction('basename', [Utils::class, 'basename']);
         $this->db->createCollation('NOCASE', [static::class, 'unicodeCaseComparison']);
     }
 

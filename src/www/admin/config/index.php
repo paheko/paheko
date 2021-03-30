@@ -32,7 +32,7 @@ $tpl->assign([
 $homepage = $config->admin_homepage;
 
 if ($homepage && !Files::get($homepage)) {
-	File::createAndStore(dirname($homepage), basename($homepage), null, '');
+	File::createAndStore(Utils::dirname($homepage), Utils::basename($homepage), null, '');
 }
 
 $admin_background = $config->get('admin_background');
