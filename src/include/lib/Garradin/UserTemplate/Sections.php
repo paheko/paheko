@@ -4,6 +4,7 @@ namespace Garradin\UserTemplate;
 
 use KD2\Brindille_Exception;
 use Garradin\DB;
+use Garradin\Utils;
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Web;
 use Garradin\Files\Files;

@@ -51,21 +51,7 @@ class DB extends SQLite3
 
         $this->db->createFunction('dirname', [Utils::class, 'dirname']);
         $this->db->createFunction('basename', [Utils::class, 'basename']);
-        $this->db->createCollation('NOCASE', [static::class, 'unicodeCaseComparison']);
-    }
-
-    static public function unicodeCaseComparison($a, $b): int
-    {
-        if (function_exists('mb_strtoupper')) {
-            $a = mb_strtoupper($a);
-            $b = mb_strtoupper($b);
-        }
-        else {
-            $a = strtoupper(Utils::transliterateToAscii($a));
-            $b = strtoupper(Utils::transliterateToAscii($b));
-        }
-
-        return strcmp($a, $b);
+        $this->db->createCollation('NOCASE', [Utils::class, 'unicodeCaseComparison']);
     }
 
     public function version(): ?string

@@ -207,11 +207,7 @@ class FileSystem implements StorageInterface
 			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($file);
 		}
 
-		uksort($files, function ($a, $b) {
-			return strnatcasecmp($a, $b) > 0 ? 1 : -1;
-		});
-
-		return $files;
+		return Utils::knatcasesort($files);
 	}
 
 	static public function getTotalSize(): int
