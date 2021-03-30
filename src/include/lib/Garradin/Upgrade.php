@@ -35,6 +35,10 @@ class Upgrade
 				. PHP_EOL . $path);
 		}
 
+		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
+		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
+		$session = Session::getInstance();
+		$session->start();
 		return true;
 	}
 
@@ -42,9 +46,6 @@ class Upgrade
 	{
 		$db = DB::getInstance();
 		$v = $db->version();
-
-		$session = Session::getInstance();
-		$user_is_logged = $session->isLogged(true);
 
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
@@ -76,7 +77,7 @@ class Upgrade
 				$db->commit();
 			}
 
-			if (version_compare($v, '1.1.0', '<='))
+			if (version_compare($v, '1.1.0-beta1', '<='))
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
@@ -180,6 +181,10 @@ class Upgrade
 			Static_Cache::remove('upgrade');
 			throw $e;
 		}
+
+
+		$session = Session::getInstance();
+		$user_is_logged = $session->isLogged(true);
 
 		// Forcer à rafraîchir les données de la session si elle existe
 		if ($user_is_logged)
