@@ -27,6 +27,9 @@ elseif ($web = qg('w')) {
 
 	$file = $page->file();
 }
+else {
+	throw new UserException('Fichier inconnu');
+}
 
 $prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=' . File::CONTEXT_DOCUMENTS . '/';
 
