@@ -31,6 +31,6 @@ $breadcrumbs = $cat ? $cat->getBreadcrumbs() : [];
 
 $parent = $cat ? $cat->parent : null;
 
-$tpl->assign(compact('categories', 'pages', 'title', 'current_path', 'parent', 'type_page', 'type_category', 'order_date', 'breadcrumbs'));
+$tpl->assign(compact('categories', 'pages', 'title', 'current_path', 'parent', 'type_page', 'type_category', 'order_date', 'breadcrumbs', 'cat'));
 
 $tpl->display('web/index.tpl');
