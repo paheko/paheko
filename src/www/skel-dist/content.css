@@ -30,15 +30,15 @@
     font-weight: bold;
 }
 
-aside.file {
+.web-content aside.file {
     margin: 1em;
 }
 
-aside.file small {
+.web-content aside.file small {
     opacity: 0.7;
 }
 
-aside.file a {
+.web-content aside.file a {
     display: inline-block;
     margin-right: 1em;
     padding: .5em;
@@ -52,7 +52,7 @@ aside.file a {
     transition: background-color .2s, color .2s;
 }
 
-aside.file a:hover {
+.web-content aside.file a:hover {
     background-color: #ccc;
     color: darkred;
 }
@@ -90,11 +90,11 @@ aside.file a:hover {
     font-size: .8em;
 }
 
-a.internal-image {
+.web-content a.internal-image {
     cursor: zoom-in;
 }
 
-img {
+.web-content img {
     max-width: 100%;
 }
 
