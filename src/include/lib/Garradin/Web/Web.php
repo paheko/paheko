@@ -210,7 +210,7 @@ class Web
 		}
 		else {
 			// Trying to see if a custom template with this name exists
-			if (preg_match('!^[\w\d_.-]+$!i', $uri)) {
+			if (preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $uri)) {
 				$s = new Skeleton($uri);
 
 				if ($s->exists()) {
