@@ -19,7 +19,7 @@ class Files
 	static public function search(string $search, string $path = null): array
 	{
 		if (strlen($search) > 100) {
-			throw new UserException('Recherche trop longue : maximum 100 caractères');
+			throw new ValidationException('Recherche trop longue : maximum 100 caractères');
 		}
 
 		$where = '';
