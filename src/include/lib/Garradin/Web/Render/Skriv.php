@@ -42,12 +42,12 @@ class Skriv
 	}
 
 	static public function resolveLink(string $uri) {
-		if (strpos(Utils::basename($uri), '.') === false) {
-			$uri .= self::$link_suffix;
-		}
-
 		if (substr($uri, 0, 1) == '/') {
 			return WWW_URL . ltrim($uri, '/');
+		}
+
+		if (strpos(Utils::basename($uri), '.') === false) {
+			$uri .= self::$link_suffix;
 		}
 
 		return self::$link_prefix . $uri;
