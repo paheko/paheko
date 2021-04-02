@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Import & export" current="config"}
+{include file="admin/_head.tpl" title="Sauvegardes" current="config"}
 
 {include file="admin/config/_menu.tpl" current="backup"}
 
