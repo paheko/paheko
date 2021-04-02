@@ -46,6 +46,10 @@ class Skriv
 			$uri .= self::$link_suffix;
 		}
 
+		if (substr($uri, 0, 1) == '/') {
+			return WWW_URL . ltrim($uri, '/');
+		}
+
 		return self::$link_prefix . $uri;
 	}
 
