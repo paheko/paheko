@@ -82,7 +82,7 @@ span.alert, b.alert {
     color: #666;
 }
 
-p.help {
+p.help:not(.block) {
     margin: 1em;
 }
 

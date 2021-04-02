@@ -9,7 +9,7 @@ use Garradin\Files\Files;
 
 class Upgrade
 {
-	const MIN_REQUIRED_VERSION = '1.0.0';
+	const MIN_REQUIRED_VERSION = '0.9.8';
 
 	static public function preCheck(): bool
 	{
@@ -53,6 +53,21 @@ class Upgrade
 		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
 
 		try {
+			if (version_compare($v, '1.0.0', '<'))
+			{
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
+				$db->commitSchemaUpdate();
+
+				// Import nouveau plan comptable
+				$chart = new \Garradin\Entities\Accounting\Chart;
+				$chart->label = 'Plan comptable associatif 2018';
+				$chart->country = 'FR';
+				$chart->code = 'PCA2018';
+				$chart->save();
+				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
+			}
+
 			if (version_compare($v, '1.0.1', '<'))
 			{
 				// Missing trigger
