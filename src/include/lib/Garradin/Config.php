@@ -205,7 +205,7 @@ class Config extends Entity
 				$file = File::createFromBase64(Utils::dirname(self::ADMIN_BACKGROUND_FILENAME), Utils::basename(self::ADMIN_BACKGROUND_FILENAME), $source['admin_background']);
 			}
 
-			unset($source['admin_background']);
+			$source['admin_background'] = $file->path;
 		}
 
 		parent::importForm($source);

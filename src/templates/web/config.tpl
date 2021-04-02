@@ -53,7 +53,7 @@
 		<form method="post" action="{$self_url}">
 			<p class="submit">
 				{csrf_field key="config_site"}
-				{button type="submit" name="enable_site" label="Réactiver le site public" shape="right" class="main"}
+				{button type="submit" name="enable_site" label="Activer le site public" shape="right" class="main"}
 			</p>
 		</form>
 	</div>
