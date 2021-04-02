@@ -48,7 +48,8 @@
 <fieldset>
 	<legend>Sauvegarde manuelle de la base de données</legend>
 	<p class="help">
-		Cette sauvegarde sera enregistrée sur le serveur et pourra être restaurée plus tard.
+		Cette sauvegarde sera enregistrée sur le serveur et pourra être restaurée plus tard.<br />
+		Cette sauvegarde ne concerne que la base de données, mais pas les documents, fichiers joints aux écritures ou aux membres, ni le contenu du site web.
 	</p>
 	<p class="submit">
 		{csrf_field key="backup_create"}
@@ -69,7 +70,8 @@
 		ou que personne ne s'est connecté.
 	</p>
 	<p class="alert block">
-		Attention, la sauvegarde automatique permet uniquement de revenir à un état antérieur, mais ne prévient pas de la perte des données&nbsp;! Pour cela, il est recommandé de faire des sauvegardes manuelles en téléchargeant une copie des données sur votre ordinateur.
+		Attention, la sauvegarde automatique permet uniquement de revenir à un état antérieur, mais ne prévient pas de la perte des données&nbsp;! Pour cela, il est recommandé de faire des sauvegardes manuelles en téléchargeant une copie des données sur votre ordinateur.<br /><br />
+		La sauvegarde automatique ne concerne que la base de données, mais pas les documents, fichiers joints aux écritures ou aux membres, ni le contenu du site web.
 	</p>
 	<dl>
 		<dt><label for="f_frequency">Intervalle de sauvegarde</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
