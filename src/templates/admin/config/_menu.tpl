@@ -3,7 +3,7 @@
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}config/">Général</a></li>
 		<li{if $current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories de membres</a></li>
 		<li{if $current == 'fiches_membres'} class="current"{/if}><a href="{$admin_url}config/membres.php">Fiche des membres</a></li>
-		<li{if $current == 'donnees'} class="current"{/if}><a href="{$admin_url}config/donnees/">Sauvegardes</a></li>
+		<li{if $current == 'backup'} class="current"{/if}><a href="{$admin_url}config/backup/">Sauvegardes</a></li>
 		<li{if $current == 'plugins'} class="current"{/if}><a href="{$admin_url}config/plugins.php">Extensions</a></li>
 		<li{if $current == 'advanced'} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
 	</ul>
