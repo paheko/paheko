@@ -180,8 +180,10 @@ class Page extends Entity
 			$this->set('modified', new \DateTime);
 		}
 		elseif ($this->file()->fetch() !== $export) {
-			$this->file()->store(null, $this->export());
-			$this->set('modified', $this->file()->modified);
+			$file = $this->file();
+			$file->set('modified', new \DateTime);
+			$this->set('modified', clone $file->modified);
+			$file->store(null, $this->export());
 		}
 
 		$this->syncSearch();
