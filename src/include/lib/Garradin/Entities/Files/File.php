@@ -867,7 +867,7 @@ class File extends Entity
 
 		$extension = strtolower(substr($name, strrpos($name, '.')));
 
-		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension))
+		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension)) {
 			throw new ValidationException('Extension de fichier non autorisée, merci de renommer le fichier avant envoi.');
 		}
 	}
