@@ -199,6 +199,12 @@ class Web
 			Utils::redirect(ADMIN_URL);
 		}
 
+		// Redirect old categories
+		if (substr($uri, -1) == '/') {
+			http_response_code(301);
+			Utils::redirect('/' . rtrim($uri, '/'));
+		}
+
 		$page = null;
 
 		if ($uri == '') {
