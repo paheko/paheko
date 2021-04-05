@@ -92,7 +92,7 @@ class Upgrade
 				$db->commit();
 			}
 
-			if (version_compare($v, '1.1.0-beta1', '<='))
+			if (version_compare($v, '1.1.0-beta1', '<'))
 			{
 				// Missing trigger
 				$db->beginSchemaUpdate();
