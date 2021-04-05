@@ -135,6 +135,11 @@ class UserTemplate extends Brindille
 			$compiled_path = sprintf('%s/%s.php', SHARED_USER_TEMPLATES_CACHE_ROOT, sha1($this->path));
 		}
 
+		if (!is_dir(dirname($compiled_path))) {
+			// Force cache directory mkdir
+			Utils::safe_mkdir(dirname($compiled_path), 0777, true);
+		}
+
 		if (file_exists($compiled_path) && filemtime($compiled_path) >= $this->modified) {
 			require $compiled_path;
 			return;
