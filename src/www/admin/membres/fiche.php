@@ -32,6 +32,5 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 }
 
 $tpl->assign('membre', $membre);
-$tpl->assign('user_files_path', $membres->getAttachementsDirectory($membre->id));
 
 $tpl->display('admin/membres/fiche.tpl');

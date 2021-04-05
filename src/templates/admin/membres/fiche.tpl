@@ -71,46 +71,6 @@
 	</dl>
 </aside>
 
-<dl class="describe">
-    {foreach from=$champs key="c" item="c_config"}
-    <dt>{$c_config.title}</dt>
-    <dd>
-        {if $c_config.type == 'checkbox'}
-            {if $membre->$c}Oui{else}Non{/if}
-        {elseif $c_config.type == 'file'}
-            {include file="common/files/_context_list.tpl" limit=1 path="%s/%s"|args:$user_files_path,$c}
-        {elseif empty($membre->$c)}
-            <em>(Non renseigné)</em>
-        {elseif $c == $c_config.champ_identite}
-            <strong>{$membre->$c}</strong>
-        {elseif $c_config.type == 'email'}
-            <a href="mailto:{$membre->$c|escape:'url'}">{$membre->$c}</a>
-            {if $c == 'email'}
-                {linkbutton href="!membres/message.php?id=%d"|args:$membre.id label="Envoyer un message" shape="mail"}
-            {/if}
-        {elseif $c_config.type == 'tel'}
-            <a href="tel:{$membre->$c}">{$membre->$c|format_tel}</a>
-        {elseif $c_config.type == 'country'}
-            {$membre->$c|get_country_name}
-        {elseif $c_config.type == 'date'}
-            {$membre->$c|date_short}
-        {elseif $c_config.type == 'datetime'}
-            {$membre->$c|date}
-        {elseif $c_config.type == 'password'}
-            *******
-        {elseif $c_config.type == 'multiple'}
-            <ul>
-            {foreach from=$c_config.options key="b" item="name"}
-                {if $membre->$c & (0x01 << $b)}
-                    <li>{$name}</li>
-                {/if}
-            {/foreach}
-            </ul>
-        {else}
-            {$membre->$c|escape|rtrim|nl2br}
-        {/if}
-    </dd>
-    {/foreach}
-</dl>
+{include file="admin/membres/_details.tpl" champs=$champs data=$membre show_message_button=true mode="edit"}
 
 {include file="admin/_foot.tpl"}

@@ -1,10 +1,18 @@
 <?php
-assert(isset($path) || isset($can_upload, $files, $path));
+assert(isset($path, $edit));
 
-if (!isset($files, $can_upload)) {
+if (!isset($files)) {
 	$files = Files\Files::list($path);
-	$can_upload = (!isset($limit) || count($files) < $limit) && Entities\Files\File::checkCreateAccess($path, $session);
 }
+
+$can_upload = false;
+
+if ($edit
+	&& Entities\Files\File::checkCreateAccess($path, $session)
+	&& (!isset($limit) || count($files) < $limit)) {
+	$can_upload = true;
+}
+
 ?>
 
 {if $can_upload}
@@ -32,9 +40,13 @@ if (!isset($files, $can_upload)) {
 			<small>({$file.mime}, {$file.size|size_in_bytes})</small>
 		{/if}
 		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
-		{if $file->checkDeleteAccess($session)}
+		{if $edit && $file->checkDeleteAccess($session)}
 			{linkbutton shape="delete" target="_dialog" href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer"}
 		{/if}
 	</aside>
+{foreachelse}
+	{if !$can_upload}
+		<em>--</em>
+	{/if}
 {/foreach}
 </div>

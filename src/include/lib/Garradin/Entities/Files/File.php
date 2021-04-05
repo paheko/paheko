@@ -857,7 +857,7 @@ class File extends Entity
 
 	static public function validateFileName(string $name): void
 	{
-		if (substr($name[0], 0, 1)) {
+		if (substr($name[0], 0, 1) === '.') {
 			throw new ValidationException('Le nom de fichier ne peut commencer par un point');
 		}
 
