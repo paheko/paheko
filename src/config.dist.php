@@ -393,6 +393,10 @@ namespace Garradin;
  * - SQLite : enregistre dans la base de données (défaut)
  * - FileSystem : enregistrement des fichiers dans le système de fichier
  *
+ * ATTENTION : activer FileSystem ET ne pas utiliser de sous-domaine (vhost dédié)
+ * ferait courir de graves risques de piratage à votre serveur web si vous ne protégez
+ * pas correctement le répertoire de stockage des fichiers !
+ *
  * Défaut : null
  */
 

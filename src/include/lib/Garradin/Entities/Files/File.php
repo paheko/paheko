@@ -124,6 +124,9 @@ class File extends Entity
 		'text/html',
 	];
 
+	// https://book.hacktricks.xyz/pentesting-web/file-upload
+	const FORBIDDEN_EXTENSIONS = '!cgi|exe|sh|bash|com|pif|jspx?|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so!i';
+
 	static public function getColumns(): array
 	{
 		return array_keys((new self)->_types);
@@ -379,6 +382,7 @@ class File extends Entity
 			throw new \InvalidArgumentException('Either source path or source content should be set but not both');
 		}
 
+		self::validateFileName($name);
 		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
@@ -851,12 +855,29 @@ class File extends Entity
 		return preg_replace('/[^\w\d\p{L}_. -]+/iu', '-', $name);
 	}
 
+	static public function validateFileName(string $name): void
+	{
+		if (substr($name[0], 0, 1)) {
+			throw new ValidationException('Le nom de fichier ne peut commencer par un point');
+		}
+
+		if (strpos($name, "\0") !== false) {
+			throw new ValidationException('Nom de fichier invalide');
+		}
+
+		$extension = strtolower(substr($name, strrpos($name, '.')));
+
+		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension))
+			throw new ValidationException('Extension de fichier non autorisée, merci de renommer le fichier avant envoi.');
+		}
+	}
+
 	static public function validatePath(string $path): array
 	{
 		$path = explode('/', $path);
 
 		if (count($path) < 1) {
-			throw new ValidationException('Invalid file path');
+			throw new ValidationException('Chemin invalide');
 		}
 
 		if (!array_key_exists($path[0], self::CONTEXTS_NAMES)) {
