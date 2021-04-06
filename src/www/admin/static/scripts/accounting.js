@@ -101,7 +101,8 @@ function initTransactionForm(is_new) {
 		var b = n.querySelector('.input-list button');
 		b.onclick = () => {
 			g.current_list_input = b.parentNode;
-			g.openFrameDialog(b.value);
+			let url = b.value + (b.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
+			g.openFrameDialog(url);
 			return false;
 		};
 		line.parentNode.appendChild(n);
