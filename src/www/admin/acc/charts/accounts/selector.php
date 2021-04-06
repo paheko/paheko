@@ -40,7 +40,13 @@ $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart', 'targets'));
 
-$all = (bool) qg('all');
+$all = qg('all');
+
+if (null !== $all) {
+	$session->set('account_selector_all', (bool) $all);
+}
+
+$all = (bool) $session->get('account_selector_all');
 
 if (!$targets) {
 	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());
