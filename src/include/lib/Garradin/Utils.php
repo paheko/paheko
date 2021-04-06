@@ -891,7 +891,9 @@ class Utils
     {
         if (!isset(self::$collator) && function_exists('collator_create')) {
             self::$collator = \Collator::create('fr_FR');
-            self::$collator->setAttribute(\Collator::NUMERIC_COLLATION, \Collator::ON);
+            // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
+            // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
+            // without: 1, 10, 101, 11, 2
         }
 
         if (isset(self::$collator)) {
