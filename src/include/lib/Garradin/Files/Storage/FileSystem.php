@@ -220,7 +220,7 @@ class FileSystem implements StorageInterface
 
 		$path = self::_getRoot();
 
-		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS,), \RecursiveIteratorIterator::CATCH_GET_CHILD) as $p) {
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD) as $p) {
 			$total += $p->getSize();
 		}
 
