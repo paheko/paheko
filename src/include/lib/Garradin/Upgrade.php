@@ -97,12 +97,27 @@ class Upgrade
 				// Missing trigger
 				$db->beginSchemaUpdate();
 
-				$attachments = $db->getAssoc('SELECT id, id || \'_\' || nom FROM fichiers;');
+				$attachments = $db->getAssoc('SELECT f.id, w.uri || \'/\' || f.id || \'_\' || f.nom FROM fichiers f
+					INNER JOIN fichiers_wiki_pages fw ON fw.fichier = f.id
+					INNER JOIN wiki_pages w ON w.id = fw.id;');
 
 				// Update Skriv content for attachments
-				foreach ($db->iterate('SELECT rowid, contenu FROM wiki_revisions;') as $r) {
-					$content = preg_replace_callback('!<<(image|fichier)\s*\|\s*(\d+)\s*(?:\|\s*(gauche|droite|centre))?\s*(?:\|\s*(.+)\s*)?>>!', function ($match) use ($attachments) {
-						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
+				foreach ($db->iterate('SELECT r.rowid, r.contenu, p.uri FROM wiki_revisions r INNER JOIN wiki_pages p ON p.revision = r.revision AND p.id = r.id_page;') as $r) {
+					$uri = $r->uri;
+					$content = preg_replace_callback('!<<(image|fichier)\s*\|\s*(\d+)\s*(?:\|\s*(gauche|droite|centre))?\s*(?:\|\s*(.+)\s*)?>>!', function ($match) use ($attachments, $uri) {
+						if (isset($attachments[$match[2]])) {
+							$name = $attachments[$match[2]];
+
+							if (dirname($name) == $uri) {
+								$name = basename($name);
+							}
+							else {
+								$name = '../' . $name;
+							}
+						}
+						else {
+							$name = '_ERREUR_fichier_inconnu_' . $match[2];
+						}
 
 						if (isset($match[3])) {
 							$align = '|' . ($match[3] == 'centre' ? 'center' : ($match[3] == 'gauche' ? 'left' : 'right'));
