@@ -9,7 +9,7 @@ UPDATE membres SET date_inscription = date() WHERE date(date_inscription) IS NUL
 
 -- Uh, force another login id if email is not correct
 UPDATE config SET valeur = 'numero' WHERE cle = 'champ_identifiant' AND valeur = 'email'
-	AND (SELECT COUNT(*) FROM membres GROUP BY LOWER(email) HAVING COUNT(*) > 1 LIMIT 1);
+	AND (SELECT COUNT(*) FROM membres WHERE email IS NOT NULL GROUP BY LOWER(email) HAVING COUNT(*) > 1 LIMIT 1);
 
 -- Other weird things to fix before migration
 UPDATE wiki_pages SET uri = 'page_' || id WHERE uri = '' OR uri IS NULL;
