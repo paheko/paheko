@@ -532,6 +532,43 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     width: 4em;
 }
 
+.tree-selector a {
+    color: #666;
+}
+
+.tree-selector td {
+    width: 15%;
+    text-align: right;
+}
+
+.tree-selector th {
+    width: 85%;
+}
+
+.tree-selector i {
+    display: inline-block;
+    padding: 0 .5em;
+}
+
+.tree-selector b {
+    display: inline-block;
+    padding: 0 .5em;
+    color: #999;
+}
+
+.tree-selector em {
+    font-weight: normal;
+}
+
+.tree-selector h3 {
+    display: inline-block;
+}
+
+.tree-selector .current > a {
+    font-weight: bold;
+    color: #000;
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder table tr {
         display: flex;

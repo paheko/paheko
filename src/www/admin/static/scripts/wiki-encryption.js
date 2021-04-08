@@ -1,18 +1,40 @@
 (function () {
-	var aesEnabled = false;
+	var aes_loaded = false;
 	var iteration = 0;
+	var self_path_match = /static\/scripts\/wiki-encryption\.js/;
+	var www_url;
 	var encryptPassword = null;
-	var www_url = location.href.replace(/admin\/.*$/, 'admin/');
 
-	function loadAESlib()
+	var scripts = document.getElementsByTagName('script');
+
+	for (var i = 0; i < scripts.length; i++) {
+		if (scripts[i].src.match(self_path_match)) {
+			www_url = scripts[i].src.replace(/\/admin\/.*$/, '/');
+			break;
+		}
+	}
+
+	function load_aes(callback)
 	{
-		if (aesEnabled)
-		{
+		if (aes_loaded) {
+			if (callback) {
+				callback();
+			}
 			return;
 		}
 
-		g.script('scripts/gibberish-aes.min.js');
-		aesEnabled = true;
+		var url = www_url + 'admin/static/scripts/gibberish-aes.min.js';
+		var s = document.createElement('script');
+		s.src = url;
+		s.type = 'text/javascript';
+		s.onload = function () {
+			aes_loaded = true;
+			if (callback) {
+				callback();
+			}
+		};
+
+		document.head.appendChild(s);
 	}
 
 	function formatContent(content)
@@ -66,7 +88,7 @@
 
 	window.wikiDecrypt = function ()
 	{
-		loadAESlib();
+		load_aes();
 
 		encryptPassword = window.prompt('Mot de passe ?');
 
@@ -74,13 +96,13 @@
 		{
 			encryptPassword = null;
 
-			if (document.getElementById('f_contenu'))
+			if (document.getElementById('f_content'))
 			{
 				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
 				{
-					document.getElementById('f_contenu').value = '';
-					document.getElementById('f_chiffrement').checked = false;
-					checkEncryption(document.getElementById('f_chiffrement'));
+					document.getElementById('f_content').value = '';
+					document.getElementById('f_encryption').checked = false;
+					checkEncryption(document.getElementById('f_encryption'));
 				}
 				else
 				{
@@ -112,7 +134,7 @@
 			return;
 		}
 
-		var content = document.getElementById('f_contenu');
+		var content = document.getElementById('f_content');
 		var edit = true;
 
 		if (!content) {
@@ -148,7 +170,7 @@
 		else
 		{
 			content.value = wikiContent;
-			checkEncryption(document.getElementById('f_chiffrement'));
+			checkEncryption(document.getElementById('f_encryption'));
 		}
 	};
 
@@ -173,39 +195,39 @@
 				return;
 			}
 
-			loadAESlib();
+			load_aes(function () {
+				var hidden = true;
+				var d = document.getElementById('encryptPasswordDisplay');
+				d.innerHTML = '&bull;'.repeat(encryptPassword.length);
+				d.title = 'Cliquer pour voir le mot de passe';
+				d.onclick = function () {
+					if (hidden)
+					{
+						this.innerHTML = encryptPassword;
+						this.title = 'Cliquer pour cacher le mot de passe.';
+					}
+					else
+					{
+						this.innerHTML = '&bull;'.repeat(encryptPassword.length);
+						this.title = 'Cliquer pour voir le mot de passe';
+					}
+					hidden = !hidden;
+				};
 
-			var hidden = true;
-			var d = document.getElementById('encryptPasswordDisplay');
-			d.innerHTML = '&bull;'.repeat(encryptPassword.length);
-			d.title = 'Cliquer pour voir le mot de passe';
-			d.onclick = function () {
-				if (hidden)
+				elm.form.onsubmit = function ()
 				{
-					this.innerHTML = encryptPassword;
-					this.title = 'Cliquer pour cacher le mot de passe.';
-				}
-				else
-				{
-					this.innerHTML = '&bull;'.repeat(encryptPassword.length);
-					this.title = 'Cliquer pour voir le mot de passe';
-				}
-				hidden = !hidden;
-			};
+					if (typeof GibberishAES == 'undefined')
+					{
+						alert("Le chargement de la bibliothèque AES n'est pas terminé.\nLe chiffrement est impossible pour le moment, recommencez dans quelques instants ou désactivez le chiffrement.");
+						return false;
+					}
 
-			document.getElementById('f_form').onsubmit = function ()
-			{
-				if (typeof GibberishAES == 'undefined')
-				{
-					alert("Le chargement de la bibliothèque AES n'est pas terminé.\nLe chiffrement est impossible pour le moment, recommencez dans quelques instants ou désactivez le chiffrement.");
-					return false;
-				}
-
-				var content = document.getElementById('f_contenu');
-				content.value = GibberishAES.enc(content.value, encryptPassword);
-				content.readOnly = true;
-				return true;
-			};
+					var content = document.getElementById('f_content');
+					content.value = GibberishAES.enc(content.value, encryptPassword);
+					content.readOnly = true;
+					return true;
+				};
+			});
 		}
 		else
 		{
@@ -214,7 +236,13 @@
 			d.innerHTML = 'désactivé';
 			d.title = 'Chiffrement désactivé';
 			d.onclick = null;
-			document.getElementById('f_form').onsubmit = null;
+			elm.form.onsubmit = null;
 		}
 	};
+
+	document.addEventListener('DOMContentLoaded', () => {
+		if (e = document.getElementById('f_encryption')) {
+			checkEncryption(e);
+		}
+	});
 } ());

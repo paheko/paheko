@@ -8,10 +8,15 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../../_inc.php';
 
-header('X-Frame-Options: SAMEORIGIN', true);
-
 $targets = qg('targets');
 $chart = qg('chart');
+
+// Cache the page until the charts have changed
+$hash = sha1($targets . $chart);
+$last_change = Config::getInstance()->get('last_chart_change') ?: time();
+
+// Exit if there's no need to reload
+Utils::HTTPCache($hash, $last_change);
 
 if ($chart) {
 	$chart = Charts::get((int)qg('chart'));
@@ -31,18 +36,17 @@ if (!$chart) {
 	throw new UserException('Aucun exercice ouvert disponible');
 }
 
-// Cache the page until the charts have changed
-$hash = sha1($targets . $chart->id());
-$last_change = Config::getInstance()->get('last_chart_change') ?: time();
-
-// Exit if there's no need to reload
-Utils::HTTPCache($hash, $last_change);
-
 $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart', 'targets'));
 
-$all = (bool) qg('all');
+$all = qg('all');
+
+if (null !== $all) {
+	$session->set('account_selector_all', (bool) $all);
+}
+
+$all = (bool) $session->get('account_selector_all');
 
 if (!$targets) {
 	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());

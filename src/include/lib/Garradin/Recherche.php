@@ -226,12 +226,12 @@ class Recherche
 		{
 			$champs = Config::getInstance()->get('champs_membres');
 
-			$columns['id_categorie'] = (object) [
+			$columns['id_category'] = (object) [
 					'textMatch'=> false,
 					'label'    => 'Catégorie',
 					'type'     => 'enum',
 					'null'     => false,
-					'values'   => $db->getAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;'),
+					'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE NOCASE;'),
 				];
 
 			foreach ($champs->getList() as $champ => $config)
@@ -454,18 +454,9 @@ class Recherche
 				$query_columns[] = $condition['column'];
 				$column = $target_columns[$condition['column']];
 
-				if ($column->textMatch == 'text' && !in_array($condition['operator'], $no_transform_operators))
-				{
-					$query = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
-				}
-				else
-				{
-					$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
-				}
+				$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
-
-				$values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
 
 				if (!empty($column->originalType)) {
 					if ($column->originalType == 'tel') {
@@ -549,7 +540,7 @@ class Recherche
 
 		if ($target_columns[$order]->textMatch)
 		{
-			$order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $db->quoteIdentifier($order));
+			$order = sprintf('%s COLLATE NOCASE', $db->quoteIdentifier($order));
 		}
 		else
 		{
@@ -636,7 +627,7 @@ class Recherche
 			$db = DB::getInstance();
 			static $allowed = [
 				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null],
-				'membres' => ['membres' => null, 'membres_categories' => null],
+				'membres' => ['membres' => null, 'users_categories' => null],
 			];
 
 			if ($unprotected) {
@@ -711,7 +702,7 @@ class Recherche
 		if ($target == 'membres') {
 			$tables = [
 				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+				'users_categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'users_categories\';'),
 			];
 		}
 		elseif ($target == 'compta') {

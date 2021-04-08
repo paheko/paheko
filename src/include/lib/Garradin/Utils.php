@@ -14,7 +14,7 @@ class Utils
     const EMAIL_CONTEXT_PRIVATE = 'private';
     const EMAIL_CONTEXT_SYSTEM = 'system';
 
-    static protected $skriv = null;
+    static protected $collator;
 
     const FRENCH_DATE_NAMES = [
         'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
@@ -30,7 +30,9 @@ class Utils
             return $ts;
         }
         elseif (is_numeric($ts)) {
-            return new \DateTime('@' . $ts);
+            $ts = new \DateTime('@' . $ts);
+            $ts->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+            return $ts;
         }
         elseif (strlen($ts) == 10) {
             return \DateTime::createFromFormat('!Y-m-d', $ts);
@@ -210,7 +212,36 @@ class Utils
         return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
-    public static function redirect($destination=false, $exit=true)
+    static public function reloadParentFrame(?string $destination = null): void
+    {
+        $url = self::getLocalURL($destination ?? '!');
+
+        echo '
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <script type="text/javascript">';
+
+        if (null === $destination) {
+            echo 'window.parent.location.reload();';
+        }
+        else {
+            printf('window.parent.location.href = %s;', json_encode($url));
+        }
+
+        echo '
+                </script>
+            </head>
+
+            <body>
+            <p style="visibility: hidden;"><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
+            </body>
+            </html>';
+
+        exit;
+    }
+
+    public static function redirect($destination = '', $exit=true)
     {
         $destination = self::getLocalURL($destination);
 
@@ -269,78 +300,6 @@ class Utils
         return $list[$code];
     }
 
-    /**
-     * Génération pagination à partir de la page courante ($current),
-     * du nombre d'items total ($total), et du nombre d'items par page ($bypage).
-     * $listLength représente la longueur d'items de la pagination à génerer
-     *
-     * @param int $current
-     * @param int $total
-     * @param int $bypage
-     * @param int $listLength
-     * @param bool $showLast Toggle l'affichage du dernier élément de la pagination
-     * @return array|null
-     */
-    public static function getGenericPagination($current, $total, $bypage, $listLength=11, $showLast = true)
-    {
-        if ($total <= $bypage)
-            return null;
-
-        $total = ceil($total / $bypage);
-
-        if ($total < $current)
-            return null;
-
-        $length = ($listLength / 2);
-
-        $begin = $current - ceil($length);
-        if ($begin < 1)
-        {
-            $begin = 1;
-        }
-
-        $end = $begin + $listLength;
-        if($end > $total)
-        {
-            $begin -= ($end - $total);
-            $end = $total;
-        }
-        if ($begin < 1)
-        {
-            $begin = 1;
-        }
-        if($end==($total-1)) {
-            $end = $total;
-        }
-        if($begin == 2) {
-            $begin = 1;
-        }
-        $out = [];
-
-        if ($current > 1) {
-            $out[] = ['id' => $current - 1, 'label' =>  '« ' . 'Page précédente', 'class' => 'prev', 'accesskey' => 'a'];
-        }
-
-        if ($begin > 1) {
-            $out[] = ['id' => 1, 'label' => '1 ...', 'class' => 'first'];
-        }
-
-        for ($i = $begin; $i <= $end; $i++)
-        {
-            $out[] = ['id' => $i, 'label' => $i, 'class' => ($i == $current) ? 'current' : ''];
-        }
-
-        if ($showLast && $end < $total) {
-            $out[] = ['id' => $total, 'label' => '... ' . $total, 'class' => 'last'];
-        }
-
-        if ($current < $total) {
-            $out[] = ['id' => $current + 1, 'label' => 'Page suivante' . ' »', 'class' => 'next', 'accesskey' => 'z'];
-        }
-
-        return $out;
-    }
-
     static public function transliterateToAscii($str, $charset='UTF-8')
     {
         // Don't process empty strings
@@ -363,57 +322,6 @@ class Utils
     }
 
     /**
-     * Transforme un texte SkrivML en HTML
-     * @param  string $str Texte SkrivML
-     * @return string      Texte HTML
-     */
-    static public function SkrivToHTML($str)
-    {
-        if (!self::$skriv)
-        {
-            self::$skriv = new \KD2\SkrivLite;
-            self::$skriv->registerExtension('fichier', ['\\Garradin\\Fichiers', 'SkrivFichier']);
-            self::$skriv->registerExtension('image', ['\\Garradin\\Fichiers', 'SkrivImage']);
-
-            // Enregistrer d'autres extensions éventuellement
-            Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
-        }
-
-        $skriv =& self::$skriv;
-
-        $str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
-            try {
-                $file = new Fichiers((int)$match[2]);
-            }
-            catch (\InvalidArgumentException $e)
-            {
-                return $skriv->parseError('/!\ Lien fichier : ' . $e->getMessage());
-            }
-
-            return $file->getURL();
-        }, $str);
-
-        $str = self::$skriv->render($str);
-
-        return $str;
-    }
-
-    /**
-     * Transforme les tags de base SPIP en tags SkrivML
-     * @param  string $str Texte d'entrée
-     * @return string      Texte transformé
-     */
-    static public function SpipToSkriv($str)
-    {
-        $str = preg_replace('/(?<!\\\\)\{{3}(\V*)\}{3}/', '=== $1 ===', $str);
-        $str = preg_replace('/(?<!\\\\)\{{2}(\V*)\}{2}/', '**$1**', $str);
-        $str = preg_replace('/(?<!\\\\)\{(\V*)\}/', '\'\'$1\'\'', $str);
-        $str = preg_replace('/(?<!\\\\)\[(.+?)->(.+?)\]/', '[[$1 | $2]]', $str);
-        $str = preg_replace('/(?<!\[)\[([^\[\]]+?)\]/', '[[$1]]', $str);
-        return $str;
-    }
-
-    /**
      * Transforme les tags HTML basiques en tags SkrivML
      * @param  string $str Texte d'entrée
      * @return string      Texte transformé
@@ -429,30 +337,6 @@ class Utils
         $str = preg_replace('/<ul>|<\/ul>/', '', $str);
         $str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
         return $str;
-    }
-
-    static public function clearCaches($path = false)
-    {
-        if (!$path)
-        {
-            self::clearCaches('compiled');
-            self::clearCaches('static');
-            return true;
-        }
-
-        $path = CACHE_ROOT . '/' . $path;
-        $dir = dir($path);
-
-        while ($file = $dir->read())
-        {
-            if ($file[0] != '.')
-            {
-                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
-            }
-        }
-
-        $dir->close();
-        return true;
     }
 
     static public function safe_unlink($path)
@@ -569,15 +453,63 @@ class Utils
 
     static public function format_bytes($size)
     {
-        if ($size > (1024 * 1024))
-            return number_format(round($size / 1024 / 1024, 2), 2, ',', '') . ' Mo';
-        elseif ($size > 1024)
+        if ($size > (1024 * 1024 * 1024)) {
+            $size = round($size / 1024 / 1024 / 1024, 2);
+            $decimals = $size == (int) $size ? 0 : 2;
+            return number_format($size, $decimals, ',', '') . ' Go';
+        }
+        elseif ($size > (1024 * 1024)) {
+            $size = round($size / 1024 / 1024, 2);
+            $decimals = $size == (int) $size ? 0 : 2;
+            return number_format($size, $decimals, ',', '') . ' Mo';
+        }
+        elseif ($size > 1024) {
             return round($size / 1024) . ' Ko';
+        }
         else
             return $size . ' o';
     }
 
-    static public function deleteRecursive($path)
+    static public function createEmptyDirectory(string $path)
+    {
+        Utils::safe_mkdir($path, 0777, true);
+
+        if (!is_dir($path))
+        {
+            throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+        }
+
+        // On en profite pour vérifier qu'on peut y lire et écrire
+        if (!is_writable($path) || !is_readable($path))
+        {
+            throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+        }
+
+        // Some basic safety against misconfigured hosts
+        file_put_contents($path . '/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
+    }
+
+    static public function resetCache(string $path): void
+    {
+        if (!file_exists($path)) {
+            self::createEmptyDirectory($path);
+            return;
+        }
+
+        $dir = dir($path);
+
+        while ($file = $dir->read()) {
+            if (substr($file, 0, 1) == '.' || is_dir($path . DIRECTORY_SEPARATOR . $file)) {
+                continue;
+            }
+
+            self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
+        }
+
+        $dir->close();
+    }
+
+    static public function deleteRecursive(string $path, bool $delete_self = false): bool
     {
         if (!file_exists($path))
             return false;
@@ -590,14 +522,14 @@ class Utils
             if ($file == '.' || $file == '..')
                 continue;
 
-            if (is_dir($path . '/' . $file))
+            if (is_dir($path . DIRECTORY_SEPARATOR . $file))
             {
-                if (!self::deleteRecursive($path . '/' . $file))
+                if (!self::deleteRecursive($path . DIRECTORY_SEPARATOR . $file))
                     return false;
             }
             else
             {
-                self::safe_unlink($path . '/' . $file);
+                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
             }
         }
 
@@ -852,7 +784,7 @@ class Utils
         return array($h * 360, $s, $v);
     }
 
-    static public function HTTPCache(string $hash, int $last_change): bool
+    static public function HTTPCache(?string $hash, int $last_change): bool
     {
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
@@ -863,7 +795,11 @@ class Utils
         }
 
         header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-        header(sprintf('Etag: %s', $hash));
+
+        if ($etag) {
+            header(sprintf('Etag: %s', $hash));
+        }
+
         header('Cache-Control: private');
 
         return false;
@@ -917,5 +853,62 @@ class Utils
         $config->save();
 
         return $last->version;
+    }
+
+    static public function transformTitleToURI($str)
+    {
+        $str = Utils::transliterateToAscii($str);
+
+        $str = preg_replace('![^\w\d_-]!i', '-', $str);
+        $str = preg_replace('!-{2,}!', '-', $str);
+        $str = trim($str, '-');
+
+        return $str;
+    }
+
+    /**
+     * dirname may have undefined behaviour depending on the locale!
+     */
+    static public function dirname(string $str): string
+    {
+        $str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
+        return substr($str, 0, strrpos($str, '/'));
+    }
+
+    /**
+     * basename may have undefined behaviour depending on the locale!
+     */
+    static public function basename(string $str): string
+    {
+        $str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
+        $str = trim($str, '/');
+        $str = substr($str, strrpos($str, '/'));
+        $str = trim($str, '/');
+        return $str;
+    }
+
+    static public function unicodeCaseComparison($a, $b): int
+    {
+        if (!isset(self::$collator) && function_exists('collator_create')) {
+            self::$collator = \Collator::create('fr_FR');
+            // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
+            // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
+            // without: 1, 10, 101, 11, 2
+        }
+
+        if (isset(self::$collator)) {
+            return self::$collator->compare($a, $b);
+        }
+
+        $a = strtoupper(self::transliterateToAscii($a));
+        $b = strtoupper(self::transliterateToAscii($b));
+
+        return strcmp($a, $b);
+    }
+
+    static public function knatcasesort(array $array)
+    {
+        uksort($array, [self::class, 'unicodeCaseComparison']);
+        return $array;
     }
 }

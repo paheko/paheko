@@ -2,365 +2,255 @@
 
 namespace Garradin;
 
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+use Garradin\Membres\Champs;
+
 use KD2\SMTP;
 
-class Config
+class Config extends Entity
 {
-    protected $fields_types = null;
-    protected $config = null;
-    protected $modified = [];
+	const ADMIN_BACKGROUND_FILENAME = File::CONTEXT_CONFIG . '/admin_bg.png';
 
-    static protected $_instance = null;
+	protected $nom_asso;
+	protected $adresse_asso;
+	protected $email_asso;
+	protected $telephone_asso;
+	protected $site_asso;
 
-    /**
-     * Singleton simple
-     * @return Config
-     */
-    static public function getInstance()
-    {
-        return self::$_instance ?: self::$_instance = new Config;
-    }
+	protected $monnaie;
+	protected $pays;
 
-    static public function deleteInstance()
-    {
-        self::$_instance = null;
-    }
+	protected $champs_membres;
+	protected $categorie_membres;
 
-    /**
-     * Empêche de cloner l'objet
-     * @return void
-     */
-    private function __clone()
-    {
-    }
+	protected $admin_homepage;
 
-    protected function __construct()
-    {
-        // Définition des types de données stockées
-        $string = '';
-        $int = 0;
-        $float = 0.0;
-        $array = [];
-        $bool = false;
-        $object = new \stdClass;
+	protected $frequence_sauvegardes;
+	protected $nombre_sauvegardes;
 
-        $this->fields_types = [
-            'nom_asso'                =>  $string,
-            'adresse_asso'            =>  $string,
-            'email_asso'              =>  $string,
-            'site_asso'               =>  $string,
+	protected $champ_identifiant;
+	protected $champ_identite;
 
-            'monnaie'                 =>  $string,
-            'pays'                    =>  $string,
+	protected $last_chart_change;
+	protected $last_version_check;
 
-            'champs_membres'          =>  $object,
+	protected $couleur1;
+	protected $couleur2;
 
-            'categorie_membres'       =>  $int,
+	protected $admin_background;
 
-            'accueil_wiki'            =>  $string,
-            'accueil_connexion'       =>  $string,
+	protected $site_disabled;
 
-            'frequence_sauvegardes'   =>  $int,
-            'nombre_sauvegardes'      =>  $int,
+	protected $_types = [
+		'nom_asso'              => 'string',
+		'adresse_asso'          => '?string',
+		'email_asso'            => 'string',
+		'telephone_asso'        => '?string',
+		'site_asso'             => '?string',
 
-            'champ_identifiant'       =>  $string,
-            'champ_identite'          =>  $string,
+		'monnaie'               => 'string',
+		'pays'                  => 'string',
 
-            'version'                 =>  $string,
-            'last_chart_change'       =>  $int,
-            'last_version_check'      =>  $string,
+		'champs_membres'        => Champs::class,
 
-            'couleur1'                =>  $string,
-            'couleur2'                =>  $string,
-            'image_fond'              =>  $string,
+		'categorie_membres'     => 'int',
 
-            'desactiver_site'         =>  $bool,
-        ];
+		'admin_homepage'        => '?string',
 
-        $db = DB::getInstance();
+		'frequence_sauvegardes' => '?int',
+		'nombre_sauvegardes'    => '?int',
 
-        $this->config = $db->getAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
+		'champ_identifiant'     => 'string',
+		'champ_identite'        => 'string',
 
-        foreach ($this->config as $key=>&$value)
-        {
-            if (!array_key_exists($key, $this->fields_types))
-            {
-                // Ancienne clé de config qui n'est plus utilisée
-                continue;
-            }
+		'last_chart_change'     => '?int',
+		'last_version_check'    => '?string',
 
-            if (is_array($this->fields_types[$key]))
-            {
-                $value = explode(',', $value);
-            }
-            elseif ($key == 'champs_membres')
-            {
-                $value = new Membres\Champs((string)$value);
-            }
-            else
-            {
-                settype($value, gettype($this->fields_types[$key]));
-            }
-        }
-    }
+		'couleur1'              => '?string',
+		'couleur2'              => '?string',
+		'admin_background'      => '?string',
 
-    public function __destruct()
-    {
-        if (!empty($this->modified))
-        {
-            $this->save();
-        }
-    }
+		'site_disabled'         => 'bool',
+	];
 
-    public function save()
-    {
-        if (empty($this->modified))
-            return true;
+	static protected $_instance = null;
 
-        $values = [];
-        $db = DB::getInstance();
+	static public function getInstance()
+	{
+		return self::$_instance ?: self::$_instance = new self;
+	}
 
-        // Image files
-        if (isset($this->modified['image_fond'])) {
-            $key = 'image_fond';
-            $value =& $this->config[$key];
+	static public function deleteInstance()
+	{
+		self::$_instance = null;
+	}
 
-            if ($current = $db->firstColumn('SELECT valeur FROM config WHERE cle = ?;', $key))
-            {
-                try {
-                    $f = new Fichiers($current);
-                    $f->remove();
-                }
-                catch (\InvalidArgumentException $e) {
-                    // Ignore: the file has already been deleted
-                }
-            }
+	public function __clone()
+	{
+		throw new \LogicException('Cannot clone config');
+	}
 
-            if (strlen($value) > 0)
-            {
-                $content = $value;
-                $value = null;
-                $f = Fichiers::storeFromBase64($key . '.png', $content);
-                $value = $f->id;
-                unset($f);
-            }
-        }
+	protected function __construct()
+	{
+		parent::__construct();
 
-        unset($value, $key);
+		$db = DB::getInstance();
 
-        $db->begin();
+		$config = $db->getAssoc('SELECT key, value FROM config ORDER BY key;');
 
-        foreach ($this->modified as $key=>$modified)
-        {
-            $value = $this->config[$key];
+		if (empty($config)) {
+			return;
+		}
 
-            if (is_array($value))
-            {
-                $value = implode(',', $value);
-            }
-            elseif (is_object($value))
-            {
-                $value = (string) $value;
-            }
+		$default = array_fill_keys(array_keys($this->_types), null);
+		$config = array_merge($default, $config);
 
-            $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                [$key, $value]);
-        }
+		$config['champs_membres'] = new Champs($config['champs_membres']);
 
-        if (!empty($this->modified['champ_identifiant']))
-        {
-            // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-            $db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
-                WHERE '.$this->get('champ_identifiant').' = "";');
+		foreach ($this->_types as $key => $type) {
+			$value = $config[$key];
 
-            // Création de l'index unique
-            $db->exec('DROP INDEX IF EXISTS membres_identifiant;');
-            $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
-        }
+			if ($type[0] == '?' && $value === null) {
+				continue;
+			}
+		}
 
-        $db->commit();
+		$this->load($config);
 
-        $this->modified = [];
+		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
+	}
 
-        return true;
-    }
+	public function save(): bool
+	{
+		if (!count($this->_modified)) {
+			return true;
+		}
 
-    public function get($key)
-    {
-        if (!array_key_exists($key, $this->fields_types))
-        {
-            throw new \OutOfBoundsException('Ce champ est inconnu.');
-        }
+		$this->selfCheck();
 
-        if (!array_key_exists($key, $this->config))
-        {
-            return null;
-        }
+		$values = [];
+		$db = DB::getInstance();
 
-        return $this->config[$key];
-    }
+		foreach ($this->_modified as $key => $modified) {
+			$value = $this->$key;
+			$type = ltrim($this->_types[$key], '?');
 
-    public function getVersion()
-    {
-        if (!array_key_exists('version', $this->config))
-        {
-            return '0';
-        }
+			if ($type == Champs::class) {
+				$value = $value->toString();
+			}
+			elseif (is_object($value)) {
+				throw new \UnexpectedValueException('Unexpected object as value: ' . get_class($value));
+			}
 
-        return $this->config['version'];
-    }
+			$values[$key] = $value;
+		}
 
-    public function setVersion($version)
-    {
-        $this->config['version'] = $version;
+		unset($value, $key, $modified);
 
-        $db = DB::getInstance();
-        $db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-                ['version', $version]);
+		$db->begin();
 
-        return true;
-    }
+		foreach ($values as $key => $value)
+		{
+			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
+		}
 
-    public function set($key, $value)
-    {
-        if (!array_key_exists($key, $this->fields_types))
-        {
-            throw new \OutOfBoundsException('Ce champ est inconnu.');
-        }
+		if (!empty($values['champ_identifiant']))
+		{
+			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
+			$db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
+				WHERE '.$this->get('champ_identifiant').' = "";');
 
-        if (is_array($this->fields_types[$key]))
-        {
-            $value = !empty($value) ? (array) $value : [];
-        }
-        elseif (is_int($this->fields_types[$key]))
-        {
-            $value = (int) $value;
-        }
-        elseif (is_float($this->fields_types[$key]))
-        {
-            $value = (float) $value;
-        }
-        elseif (is_bool($this->fields_types[$key]))
-        {
-            $value = (bool) $value;
-        }
-        elseif (is_string($this->fields_types[$key]))
-        {
-            $value = (string) $value;
-        }
+			// Création de l'index unique / FIXME move to Champs
+			$db->exec('DROP INDEX IF EXISTS users_id_field;');
+			$db->exec('CREATE UNIQUE INDEX users_id_field ON membres ('.$this->get('champ_identifiant').');');
+		}
 
-        switch ($key)
-        {
-            case 'nom_asso':
-            {
-                if (!trim($value))
-                {
-                    throw new UserException('Le nom de l\'association ne peut rester vide.');
-                }
-                break;
-            }
-            case 'accueil_wiki':
-            case 'accueil_connexion':
-            {
-                $value = trim($value);
-                $name = str_replace('accueil_', '', $key);
+		$db->commit();
 
-                if ($value === '')
-                {
-                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne peut rester vide.', $name));
-                }
+		$this->_modified = [];
 
-                $db = DB::getInstance();
+		return true;
+	}
 
-                if (!$db->test('wiki_pages', $db->where('uri', $value))) {
-                    throw new UserException(sprintf('Le nom de la page d\'accueil %s ne correspond à aucune page existante, merci de la créer auparavant.', $name));
-                }
-                break;
-            }
-            case 'email_asso':
-            {
-                if (!SMTP::checkEmailIsValid($value, false))
-                {
-                    throw new UserException('Adresse e-mail invalide.');
-                }
-                break;
-            }
-            case 'champs_membres':
-            {
-                if (!($value instanceOf Membres\Champs))
-                {
-                    throw new \UnexpectedValueException('$value doit être de type Membres\Champs');
-                }
-                break;
-            }
-            case 'champ_identite':
-            case 'champ_identifiant':
-            {
-                $champs = $this->get('champs_membres');
-                $db = DB::getInstance();
+	public function delete(): bool
+	{
+		throw new \LogicException('Cannot delete config');
+	}
 
-                // Vérification que le champ existe bien
-                if (!$champs->get($value))
-                {
-                    throw new UserException('Le champ '.$value.' n\'existe pas pour la configuration de '.$key);
-                }
+	public function importForm($source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
 
-                // Vérification que le champ est unique pour l'identifiant
-                if ($key == 'champ_identifiant'
-                    && !$db->firstColumn('SELECT (COUNT(DISTINCT lower('.$value.')) = COUNT(*))
-                        FROM membres WHERE '.$value.' IS NOT NULL AND '.$value.' != \'\';'))
-                {
-                    throw new UserException('Le champ '.$value.' comporte des doublons et ne peut donc pas servir comme identifiant pour la connexion.');
-                }
-                break;
-            }
-            case 'categorie_membres':
-            {
-                $db = DB::getInstance();
-                if (!$db->firstColumn('SELECT 1 FROM membres_categories WHERE id = ?;', $value))
-                {
-                    throw new UserException('La catégorie de membres par défaut numéro \''.$value.'\' ne semble pas exister.');
-                }
-                break;
-            }
-            case 'monnaie':
-            {
-                if (!trim($value))
-                {
-                    throw new UserException('La monnaie doit être renseignée.');
-                }
+		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
+		if (!isset($source['couleur1'], $source['couleur2'])
+			|| ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
+		{
+			$source['couleur1'] = null;
+			$source['couleur2'] = null;
+		}
 
-                break;
-            }
-            case 'pays':
-            {
-                if (!trim($value) || !Utils::getCountryName($value))
-                {
-                    throw new UserException('Le pays renseigné est invalide.');
-                }
+		if (isset($source['admin_background']) && trim($source['admin_background']) == 'RESET') {
+			$source['admin_background'] = null;
+		}
+		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
+			$file = Files::get(self::ADMIN_BACKGROUND_FILENAME);
 
-                break;
-            }
-            default:
-                break;
-        }
+			if ($file) {
+				$file->storeFromBase64($source['admin_background']);
+			}
+			else {
+				$file = File::createFromBase64(Utils::dirname(self::ADMIN_BACKGROUND_FILENAME), Utils::basename(self::ADMIN_BACKGROUND_FILENAME), $source['admin_background']);
+			}
 
-        if (!isset($this->config[$key]) || $value !== $this->config[$key])
-        {
-            $this->config[$key] = $value;
-            $this->modified[$key] = true;
-        }
+			$source['admin_background'] = $file->path;
+		}
 
-        return true;
-    }
+		parent::importForm($source);
+	}
 
-    public function getFieldsTypes()
-    {
-        return $this->fields_types;
-    }
+	protected function _filterType(string $key, $value)
+	{
+		switch ($this->_types[$key]) {
+			case 'int':
+				return (int) $value;
+			case 'bool':
+				return (bool) $value;
+			case 'string':
+				return (string) $value;
+			case Champs::class:
+				if (!is_object($value) || !($value instanceof $this->_types[$key])) {
+					throw new \InvalidArgumentException(sprintf('"%s" is not of type "%s"', $key, $this->_types[$key]));
+				}
+				return $value;
+			default:
+				throw new \InvalidArgumentException(sprintf('"%s" has unknown type "%s"', $key, $this->_types[$key]));
+		}
+	}
 
-    public function getConfig()
-    {
-        return $this->config;
-    }
+	public function selfCheck(): void
+	{
+		$this->assert(trim($this->nom_asso) != '', 'Le nom de l\'association ne peut rester vide.');
+		$this->assert(trim($this->monnaie) != '', 'La monnaie ne peut rester vide.');
+		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
+		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
+		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
+		$this->assert(strlen($this->admin_homepage) > 0, 'Page d\'accueil invalide');
+		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');
+
+		$champs = $this->champs_membres;
+
+		$this->assert(!empty($champs->get($this->champ_identite)), sprintf('Le champ spécifié pour identité, "%s" n\'existe pas', $this->champ_identite));
+		$this->assert(!empty($champs->get($this->champ_identifiant)), sprintf('Le champ spécifié pour identifiant, "%s" n\'existe pas', $this->champ_identifiant));
+
+		$db = DB::getInstance();
+		$sql = sprintf('SELECT (COUNT(DISTINCT LOWER(%s)) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
+		$is_unique = $db->firstColumn($sql);
+
+		$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
+
+		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
+	}
 }

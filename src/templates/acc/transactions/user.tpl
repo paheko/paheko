@@ -37,8 +37,8 @@
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}">{$account.code}</a></td>
 			<th>{$account.label}</th>
-			<td class="money">{if $account.sum < 0}{$account.sum|raw|html_money}{/if}</td>
-			<td class="money">{if $account.sum > 0}{$account.sum|raw|html_money}{/if}</td>
+			<td class="money">{if $account.sum < 0}{$account.sum|raw|money}{/if}</td>
+			<td class="money">{if $account.sum > 0}{$account.sum|raw|money}{/if}</td>
 		</tr>
 	{/foreach}
 	</tbody>

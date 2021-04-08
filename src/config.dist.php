@@ -82,20 +82,31 @@ namespace Garradin;
 
 /**
  * Répertoire où sont situées les données de Garradin
- * (incluant la base de données SQLite, les sauvegardes, le cache et les fichiers locaux)
+ * (incluant la base de données SQLite, les sauvegardes, le cache, les fichiers locaux et les plugins)
  *
- * Défaut : identique à ROOT
+ * Défaut : sous-répertoire "data" de la racine
  */
 
-//const DATA_ROOT = ROOT;
+//const DATA_ROOT = ROOT . '/data';
 
 /**
- * Répertoire où est situé le cache (fichiers temporaires utilisés pour accélérer le chargement des pages)
+ * Répertoire où est situé le cache,
+ * exemples : graphiques de statistiques, templates Brindille, etc.
  *
  * Défaut : sous-répertoire 'cache' de DATA_ROOT
  */
 
-//const CACHE_ROOT = ROOT . '/cache';
+//const CACHE_ROOT = DATA_ROOT . '/cache';
+
+/**
+ * Répertoire où est situé le cache partagé entre instances
+ * Garradin utilisera ce répertoire pour stocker le cache susceptible d'être partagé entre instances, comme
+ * le code PHP généré à partir des templates Smartyer.
+ *
+ * Défaut : sous-répertoire 'shared' de CACHE_ROOT
+ */
+
+//const SHARED_CACHE_ROOT = CACHE_ROOT . '/shared';
 
 /**
  * Emplacement du fichier de base de données de Garradin
@@ -205,7 +216,8 @@ namespace Garradin;
  * Activation des détails techniques (utile en auto-hébergement) :
  * - version de PHP
  * - page permettant de visualiser les erreurs présentes dans le error.log
- * - vérification de nouvelle version
+ * - permettre de migrer d'un stockage de fichiers à l'autre
+ * - vérification de nouvelle version (sur la page configuration)
  *
  * Ces infos ne sont visibles que par les membres ayant accès à la configuration.
  *
@@ -366,3 +378,56 @@ namespace Garradin;
  */
 
 //const ADMIN_BACKGROUND_IMAGE = 'http://mon-asso.fr/fond_garradin.png';
+
+
+/**
+ * Stockage des fichiers
+ *
+ * Indiquer ici le nom d'une classe de stockage de fichiers
+ * (parmis celles disponibles dans lib/Garradin/Files/Backend)
+ *
+ * Indiquer NULL si vous souhaitez stocker les fichier dans la base
+ * de données SQLite (valeur par défaut).
+ *
+ * Classes de stockage possibles :
+ * - SQLite : enregistre dans la base de données (défaut)
+ * - FileSystem : enregistrement des fichiers dans le système de fichier
+ *
+ * ATTENTION : activer FileSystem ET ne pas utiliser de sous-domaine (vhost dédié)
+ * ferait courir de graves risques de piratage à votre serveur web si vous ne protégez
+ * pas correctement le répertoire de stockage des fichiers !
+ *
+ * Défaut : null
+ */
+
+//const FILE_STORAGE_BACKEND = null;
+
+/**
+ * Configuration du stockage des fichiers
+ *
+ * Indiquer dans cette constante la configuration de la classe de stockage
+ * des fichiers.
+ *
+ * Valeurs possibles :
+ * - SQLite : aucune configuration possible
+ * - FileSystem : (string) chemin du répertoire où doivent être stockés les fichiers
+ *
+ * Pour migrer d'un stockage de fichiers à l'autre,
+ * voir Configuration > Avancé (accessible uniquement si ENABLE_TECH_DETAILS est à true)
+ *
+ * Défaut : null
+ */
+
+//const FILE_STORAGE_CONFIG = null;
+
+/**
+ * Forcer le quota disponible pour les fichiers
+ *
+ * Si cette constante est renseignée (en octets) alors il ne sera
+ * pas possible de stocker plus que cette valeur.
+ * Tout envoi de fichier sera refusé.
+ *
+ * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible, donc généralement l'espace dispo sur le disque dur !)
+ */
+
+//const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage

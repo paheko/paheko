@@ -2,6 +2,11 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+use Garradin\Files\Files;
+
+use KD2\ZipWriter;
+
 class Sauvegarde
 {
 	const NEED_UPGRADE = 0x01 << 2;
@@ -58,8 +63,7 @@ class Sauvegarde
 			}
 
 			$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
-			$version = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
-
+			$version = DB::getVersion($db);
 			$db->close();
 
 			$out[$file] = (object) [
@@ -89,9 +93,9 @@ class Sauvegarde
 	 * sinon le nom sera basé sur la date (sauvegarde manuelle)
 	 * @return string Le nom de fichier de la sauvegarde ainsi créée
 	 */
-	public function create(bool $auto = false, ?string $dest = null): string
+	public function create(bool $auto = false, ?string $name = null): string
 	{
-		$suffix = is_string($auto) ? $auto : ($auto ? 'auto.1' : date('Y-m-d-His'));
+		$suffix = $name ?? ($auto ? 'auto.1' : date('Y-m-d-His'));
 
 		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
 
@@ -219,6 +223,7 @@ class Sauvegarde
 	public function dump(?string $file = null): void
 	{
 		$config = Config::getInstance();
+		$tmp_file = null;
 
 		if (null === $file) {
 			$file = DB_FILE;
@@ -253,7 +258,33 @@ class Sauvegarde
 		// Add integrity hash
 		echo sha1_file($file);
 
-		@unlink($tmp_file);
+		if (null !== $tmp_file) {
+			@unlink($tmp_file);
+		}
+	}
+
+	public function dumpFilesZip(): void
+	{
+		$name = Config::getInstance()->get('nom_asso') . ' - Documents.zip';
+		header('Content-type: application/zip');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+
+		$zip = new ZipWriter('php://output');
+		$zip->setCompression(0);
+
+		$add_directory = function ($path) use ($zip, &$add_directory) {
+			foreach (Files::list($path) as $file) {
+				if ($file->type == $file::TYPE_DIRECTORY) {
+					$add_directory($file->path);
+				}
+				else {
+					$zip->add($file->path, null, $file->fullpath());
+				}
+			}
+		};
+
+		$add_directory('');
+		$zip->close();
 	}
 
 	/**
@@ -418,7 +449,7 @@ class Sauvegarde
 		}
 
 		// On récupère la version
-		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
+		$version = DB::getVersion($db);
 
 		// On ne permet pas de restaurer une vieille version
 		if (version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<'))
@@ -437,10 +468,10 @@ class Sauvegarde
 		if ($user_id)
 		{
 			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories
-				WHERE id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
-				AND droit_config >= ' . Membres::DROIT_ADMIN . '
-				AND droit_connexion >= ' . Membres::DROIT_ACCES);
+			$is_still_admin = $db->querySingle('SELECT 1 FROM users_categories
+				WHERE id = (SELECT id_category FROM membres WHERE id = ' . (int) $user_id . ')
+				AND perm_config >= ' . Session::ACCESS_ADMIN . '
+				AND perm_connect >= ' . Session::ACCESS_READ);
 
 			if (!$is_still_admin)
 			{
@@ -472,9 +503,9 @@ class Sauvegarde
 		{
 			// Forcer toutes les catégories à pouvoir gérer les droits
 			$db = DB::getInstance();
-			$db->update('membres_categories', [
-				'droit_membres' => Membres::DROIT_ADMIN,
-				'droit_connexion' => Membres::DROIT_ACCES
+			$db->update('users_categories', [
+				'perm_users' => Session::ACCESS_ADMIN,
+				'perm_connect' => Session::ACCESS_READ
 			]);
 		}
 
@@ -509,6 +540,6 @@ class Sauvegarde
 	public function getDBFilesSize()
 	{
 		$db = DB::getInstance();
-		return (int) $db->firstColumn('SELECT SUM(taille) FROM fichiers_contenu;');
+		return (int) $db->firstColumn('SELECT SUM(size) FROM files;');
 	}
 }

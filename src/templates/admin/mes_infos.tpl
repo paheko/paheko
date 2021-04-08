@@ -7,31 +7,12 @@
     </ul>
 </nav>
 
-{form_errors membre=1}
+<dl class="describe">
+    <dd>
+        {linkbutton href="mes_infos_modifier.php" label="Modifier mes informations" shape="edit"}
+    </dd>
+</dl>
 
-<form method="post" action="{$self_url}">
-
-    <fieldset>
-        <legend>Informations personnelles</legend>
-        <dl>
-            {foreach from=$champs item="champ" key="nom"}
-            {if empty($champ.private) && $nom != 'passe'}
-                {html_champ_membre config=$champ name=$nom data=$membre user_mode=true}
-            {/if}
-            {/foreach}
-        </dl>
-    </fieldset>
-
-    <fieldset>
-        <legend>Changer mon mot de passe</legend>
-            <p><a href="{$admin_url}mes_infos_securite.php">Modifier mon mot de passe ou autres informations de sécurité.</a></p>
-    </fieldset>
-
-    <p class="submit">
-        {csrf_field key="edit_me"}
-        {button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
-    </p>
-
-</form>
+{include file="admin/membres/_details.tpl" champs=$champs data=$data show_message_button=false mode="user"}
 
 {include file="admin/_foot.tpl"}

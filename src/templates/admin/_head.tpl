@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if}>
 <head>
     <meta charset="utf-8" />
     <title>{$title}</title>
@@ -13,8 +13,8 @@
         {/foreach}
     {/if}
     {if isset($custom_css)}
-        {foreach from=$custom_css item="css"}
-            <link rel="stylesheet" type="text/css" href="{$admin_url}static/{$css}?{$version_hash}" media="all" />
+        {foreach from=$custom_css item="css_url"}
+            <link rel="stylesheet" type="text/css" href="{$css_url|local_url:"!static/styles/"}?{$version_hash}" media="all" />
         {/foreach}
     {/if}
     {if isset($plugin_css)}
@@ -34,9 +34,9 @@
     {/if}
 </head>
 
-<body{if !empty($body_id)} id="{$body_id}"{/if}>
+<body{if isset($transparent)} class="transparent"{/if}>
 
-{if empty($is_popup)}
+{if !array_key_exists('_dialog', $_GET) && !isset($transparent)}
 <header class="header">
     <nav class="menu">
     <ul>
@@ -61,53 +61,58 @@
                 </ul>
             {/if}
         </li>
-        {if $session->canAccess('membres', Membres::DROIT_ACCES)}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
             <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
             <ul>
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
                 <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
             {/if}
                 <li class="{if $current == 'membres/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
                 <li class="member message{if $current == 'membres/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
             {/if}
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('compta', Membres::DROIT_ACCES)}
+        {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
             <li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><a href="{$admin_url}acc/"><b>€</b><i> Comptabilité</i></a>
             <ul>
-            {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
                 <li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
             {/if}
                 <li class="{if $current == 'acc/accounts'} current{/if}"><a href="{$admin_url}acc/accounts/">Comptes</a></li>
                 <li class="{if $current == 'acc/simple'} current{/if}"><a href="{$admin_url}acc/accounts/simple.php">Suivi des écritures</a></li>
                 <li class="{if $current == 'acc/years'} current{/if}"><a href="{$admin_url}acc/years/">Exercices &amp; rapports</a></li>
-            {if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
+            {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
                 <li class="{if $current == 'acc/charts'} current{/if}"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
             {/if}
             </ul>
             </li>
         {/if}
-        {if $session->canAccess('wiki', Membres::DROIT_ACCES)}
-            <li class="wiki{if $current == 'wiki'} current{elseif $current_parent == 'wiki'} current_parent{/if}"><a href="{$admin_url}wiki/"><b class="icn">✎</b><i> Wiki</i></a>
-            <ul>
-                <li class="wiki list{if $current == 'wiki/recent'} current{/if}"><a href="{$admin_url}wiki/recent.php">Dernières modifications</a>
-                <li class="wiki search{if $current == 'wiki/chercher'} current{/if}"><a href="{$admin_url}wiki/chercher.php">Recherche</a>
-            </ul>
+
+        {if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
+            <li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Documents</i></a>
             </li>
         {/if}
-        {if $session->canAccess('config', Membres::DROIT_ADMIN)}
+
+        {if $session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)}
+            <li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
+            </li>
+        {/if}
+
+        {if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
             <li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
         {/if}
+
         <li class="{if $current == 'mes_infos'} current{elseif $current_parent == 'mes_infos'} current_parent{/if}">
             <a href="{$admin_url}mes_infos.php"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
             <ul>
                 <li{if $current == 'my_services'}  class="current"{/if}><a href="{$admin_url}my_services.php">Mes activités &amp; cotisations</a></li>
             </ul>
         </li>
+
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
-        <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
+            <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
     {/if}
     </ul>

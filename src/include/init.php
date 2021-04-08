@@ -93,9 +93,13 @@ if (!defined('Garradin\ROOT'))
 	}
 }, true);
 
-if (!defined('Garradin\DATA_ROOT'))
-{
-	define('Garradin\DATA_ROOT', ROOT);
+if (!defined('Garradin\DATA_ROOT')) {
+	// Migrate plugins, cache and SQLite to data/ subdirectory (version 1.1)
+	if (!file_exists(ROOT . '/data/association.sqlite') && file_exists(ROOT . '/association.sqlite')) {
+		Upgrade::moveDataRoot();
+	}
+
+	define('Garradin\DATA_ROOT', ROOT . '/data');
 }
 
 if (!defined('Garradin\WWW_URI'))
@@ -144,6 +148,7 @@ if (!defined('Garradin\WWW_URL')) {
 
 static $default_config = [
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
+	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
@@ -166,6 +171,11 @@ static $default_config = [
 	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
+	'FILE_STORAGE_BACKEND'  => 'SQLite',
+	'FILE_STORAGE_CONFIG'   => null,
+	'FILE_STORAGE_QUOTA'    => null,
+	'API_USER'              => null,
+	'API_PASSWORD'          => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -184,6 +194,11 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+
+const USER_TEMPLATES_CACHE_ROOT = CACHE_ROOT . '/utemplates';
+const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
+const SHARED_USER_TEMPLATES_CACHE_ROOT = SHARED_CACHE_ROOT . '/utemplates';
+const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
@@ -211,6 +226,10 @@ class UserException extends \LogicException
 }
 
 class ValidationException extends UserException
+{
+}
+
+class APIException extends \LogicException
 {
 }
 
@@ -324,9 +343,9 @@ if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS')
 		Utils::redirect(ADMIN_URL . 'install.php');
 	}
 
-	$config = Config::getInstance();
+	$v = DB::getInstance()->version();
 
-	if (version_compare($config->getVersion(), garradin_version(), '<'))
+	if (version_compare($v, garradin_version(), '<'))
 	{
 		Utils::redirect(ADMIN_URL . 'upgrade.php');
 	}

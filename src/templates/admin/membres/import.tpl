@@ -30,7 +30,7 @@
         <legend>Importer depuis un fichier</legend>
         <dl>
             <dt><label for="f_file">Fichier à importer</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd class="help">La taille maximale du fichier est de {$max_upload_size|format_bytes}.</dd>
+            <dd class="help">La taille maximale du fichier est de {$max_upload_size|size_in_bytes}.</dd>
             <dd><input type="file" name="upload" id="f_file" required="required" /></dd>
             <dt><label for="f_type">Type de fichier</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>

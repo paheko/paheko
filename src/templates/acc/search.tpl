@@ -10,7 +10,7 @@
 {include file="common/search/advanced.tpl" action_url=$self_url}
 
 {if !empty($result)}
-	{*if $session->canAccess('compta', Membres::DROIT_ECRITURE)}
+	{*if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 		<form method="post" action="{$admin_url}membres/action.php" class="memberList">
 	{/if*}
 
@@ -18,7 +18,7 @@
 	<table class="list search">
 		<thead>
 			<tr>
-				{*if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" /></td>{/if*}
+				{*if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" /></td>{/if*}
 				{foreach from=$result_header item="label"}
 					<td>{$label}</td>
 				{/foreach}
@@ -28,7 +28,7 @@
 		<tbody>
 			{foreach from=$result item="row"}
 				<tr>
-					{*if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if*}
+					{*if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}<td class="check"><input type="checkbox" name="selected[]" value="{$row.id}" /></td>{/if*}
 					{foreach from=$row key="key" item="value"}
 						{if $key == 'transaction_id'}
 						<td class="num">
@@ -37,7 +37,7 @@
 						{else}
 						<td>
 							{if $key == 'credit' || $key == 'debit'}
-								{$value|raw|html_money:false}
+								{$value|raw|money:false}
 							{elseif $key == 'date'}
 								{$value|date_short}
 							{elseif null === $value}
@@ -56,12 +56,12 @@
 				</tr>
 			{/foreach}
 		</tbody>
-	{*if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+	{*if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 		{include file="admin/membres/_list_actions.tpl" colspan=count($result_header)+1}
 	{/if*}
 	</table>
 
-	{*if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+	{*if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 		</form>
 	{/if*}
 

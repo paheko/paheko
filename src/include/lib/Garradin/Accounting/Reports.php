@@ -88,11 +88,11 @@ class Reports
 
 		if ($by_year) {
 			$group = 'y.id, a.id';
-			$order = 'y.start_date DESC, a.label COLLATE NOCASE';
+			$order = 'y.start_date DESC, a.code COLLATE NOCASE';
 		}
 		else {
 			$group = 'a.id, y.id';
-			$order = 'a.label COLLATE NOCASE, y.id';
+			$order = 'a.code COLLATE NOCASE, y.id';
 		}
 
 		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);

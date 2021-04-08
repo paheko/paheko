@@ -4,7 +4,7 @@ use Garradin\Services\Services_User;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ACCES);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_READ);
 
 $user = (new Membres)->get((int) qg('id'));
 
@@ -12,7 +12,7 @@ if (!$user) {
 	throw new UserException("Cet utilisateur est introuvable");
 }
 
-$form->runIf($session->canAccess('membres', Membres::DROIT_ECRITURE) && null !== qg('paid') && qg('su_id'), function () use ($user) {
+$form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && null !== qg('paid') && qg('su_id'), function () {
 	$su = Services_User::get((int) qg('su_id'));
 
 	if (!$su) {

@@ -3,12 +3,13 @@
 namespace Garradin;
 
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Files\File;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $transaction = Transactions::get((int) qg('id'));
 
@@ -39,12 +40,6 @@ if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
 	try {
 		$transaction->importFromEditForm();
 		$transaction->save();
-
-		// Append file
-		if (!empty($_FILES['file']['name'])) {
-			$file = Fichiers::upload($_FILES['file']);
-			$file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
-		}
 
 		// Link members
 		if (null !== f('users') && is_array(f('users'))) {

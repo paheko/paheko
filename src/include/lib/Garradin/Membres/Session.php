@@ -20,12 +20,52 @@ use KD2\HTTP;
 
 class Session extends \KD2\UserSession
 {
+	const SECTION_WEB = 'web';
+	const SECTION_DOCUMENTS = 'documents';
+	const SECTION_USERS = 'users';
+	const SECTION_ACCOUNTING = 'accounting';
+	const SECTION_CONNECT = 'connect';
+	const SECTION_CONFIG = 'config';
+	const SECTION_SUBSCRIBE = 'subscribe';
+
+	const ACCESS_NONE = 0;
+	const ACCESS_READ = 1;
+	const ACCESS_WRITE = 2;
+	const ACCESS_ADMIN = 9;
+
 	// Personalisation de la config de UserSession
 	protected $cookie_name = 'gdin';
 	protected $remember_me_cookie_name = 'gdinp';
 	protected $remember_me_expiry = '+3 months';
 
 	const MINIMUM_PASSWORD_LENGTH = 8;
+
+	static protected $_instance = null;
+
+	static public function getInstance()
+	{
+		return self::$_instance ?: self::$_instance = new self;
+	}
+
+	public function __clone()
+	{
+		throw new \LogicException('Cannot clone');
+	}
+
+	public function __construct()
+	{
+		if (self::$_instance !== null) {
+			throw new \LogicException('Wrong call, use getInstance');
+		}
+
+		$url = parse_url(ADMIN_URL);
+
+		parent::__construct(DB::getInstance(), [
+			'cookie_domain' => $url['host'],
+			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
+			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
+		]);
+	}
 
 	static public function checkPasswordValidity($password)
 	{
@@ -34,11 +74,11 @@ class Session extends \KD2\UserSession
 			throw new UserException(sprintf('Le mot de passe doit faire au moins %d caractères.', self::MINIMUM_PASSWORD_LENGTH));
 		}
 
-		$session = new Session();
+		$session = self::getInstance();
 		$session->http = new HTTP;
 
 		if ($session->isPasswordCompromised($password)) {
-			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
+			throw new UserException('Ce mot de passe figure dans une liste de mots de passe compromis, il ne peut donc être utilisé ici. Si vous l\'avez utilisé sur d\'autres sites il est recommandé de le changer sur ces autres sites également.');
 		}
 	}
 
@@ -56,30 +96,19 @@ class Session extends \KD2\UserSession
 		return parent::isPasswordCompromised($password);
 	}
 
-	// Extension des méthodes de UserSession
-	public function __construct()
-	{
-		$url = parse_url(ADMIN_URL);
-
-		parent::__construct(DB::getInstance(), [
-			'cookie_domain' => $url['host'],
-			'cookie_path'   => preg_replace('!/admin/$!', '/', $url['path']),
-			'cookie_secure' => (\Garradin\PREFER_HTTPS >= 2) ? true : false,
-		]);
-	}
-
 	protected function getUserForLogin($login)
 	{
 		$champ_id = Config::getInstance()->get('champ_identifiant');
+		$login = strtolower($login);
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
-			INNER JOIN membres_categories AS mc ON mc.id = m.id_categorie
-			WHERE m.%1$s = ? COLLATE NOCASE AND mc.droit_connexion >= %2$d
+			INNER JOIN users_categories AS c ON c.id = m.id_category
+			WHERE m.%1$s = ? AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
-		$query = sprintf($query, $champ_id, Membres::DROIT_ACCES);
+		$query = sprintf($query, $champ_id, self::ACCESS_READ);
 
 		return $this->db->first($query, $login);
 	}
@@ -91,10 +120,10 @@ class Session extends \KD2\UserSession
 		$config = Config::getInstance();
 
 		return $this->db->first('SELECT m.*, m.'.$config->get('champ_identite').' AS identite,
-			c.droit_connexion, c.droit_wiki, 
-			c.droit_membres, c.droit_compta, c.droit_config, c.droit_membres
+			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
+			c.perm_subscribe, c.perm_accounting, c.perm_config
 			FROM membres AS m
-			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
+			INNER JOIN users_categories AS c ON m.id_category = c.id
 			WHERE m.id = ? LIMIT 1;', $id);
 	}
 
@@ -133,7 +162,7 @@ class Session extends \KD2\UserSession
 	}
 
 	// Ajout de la gestion de LOCAL_LOGIN
-	public function isLogged($disable_local_login = false)
+	public function isLogged(bool $disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
@@ -144,8 +173,8 @@ class Session extends \KD2\UserSession
 			// On va chercher le premier membre avec le droit de gérer la config
 			if (-1 === $login_id) {
 				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_categorie IN (SELECT id FROM membres_categories WHERE droit_config = ?)
-					LIMIT 1', Membres::DROIT_ADMIN);
+					WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
+					LIMIT 1', self::ACCESS_ADMIN);
 			}
 
 			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
@@ -155,6 +184,11 @@ class Session extends \KD2\UserSession
 		}
 
 		return $logged;
+	}
+
+	public function forceLogin(int $id)
+	{
+		return $this->create($id);
 	}
 
 	// Ici checkOTP utilise NTP en second recours
@@ -305,14 +339,30 @@ class Session extends \KD2\UserSession
 		return true;
 	}
 
+	public function getUser()
+	{
+		$user = parent::getUser();
+
+		// Force refresh of session when it's too old (FIXME: remove at version 1.2+)
+		if (!property_exists($this->user, 'perm_users')) {
+			$this->refresh();
+			$user = $this->getUser();
+		}
+
+		return $user;
+	}
+
 	public function canAccess($category, $permission)
 	{
-		if (!$this->user)
+		if (!$this->getUser())
 		{
 			return false;
 		}
 
-		return ($this->user->{'droit_' . $category} >= $permission);
+		$perm_name = 'perm_' . $category;
+		$perm = $this->getUser()->$perm_name;
+
+		return ($perm >= $permission);
 	}
 
 	public function requireAccess($category, $permission)

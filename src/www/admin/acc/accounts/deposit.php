@@ -7,7 +7,7 @@ use Garradin\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
@@ -26,7 +26,7 @@ $transaction = new Transaction;
 $transaction->id_year = CURRENT_YEAR_ID;
 $transaction->id_creator = $session->getUser()->id;
 
-$form->runIf('save', function () use ($account, $checked, $transaction, $journal) {
+$form->runIf('save', function () use ($checked, $transaction, $journal) {
 	if (!count($checked)) {
 		throw new UserException('Aucune ligne n\'a été cochée, impossible de créer un dépôt. Peut-être vouliez-vous saisir un virement ?');
 	}

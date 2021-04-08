@@ -92,7 +92,7 @@
 				{if isset($line->journal->sum)}
 				<tr>
 					<td colspan="4"></td>
-					<td class="money">{if $line.journal.sum > 0}-{/if}{$line.journal.sum|abs|raw|html_money:false}</td>
+					<td class="money">{if $line.journal.sum > 0}-{/if}{$line.journal.sum|abs|raw|money:false}</td>
 					<th style="text-align: right">Solde au {$line.journal.date|date_short}</th>
 					<td class="separator"></td>
 					<td class="separator"></td>
@@ -109,12 +109,12 @@
 						<td class="money">
 							{if $line.journal.credit}
 								{* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
-								-{$line.journal.credit|raw|html_money}
+								-{$line.journal.credit|raw|money}
 							{else}
-								{$line.journal.debit|raw|html_money}
+								{$line.journal.debit|raw|money}
 							{/if}
 						</td>
-						<td class="money">{if $line.journal.running_sum > 0}-{/if}{$line.journal.running_sum|abs|raw|html_money:false}</td>
+						<td class="money">{if $line.journal.running_sum > 0}-{/if}{$line.journal.running_sum|abs|raw|money:false}</td>
 						<th style="text-align: right">{$line.journal.label}</th>
 					{else}
 						<td colspan="5"></td>
@@ -136,9 +136,9 @@
 					{if isset($line->csv)}
 						<th class="separator">{$line.csv.label}</th>
 						<td class="money">
-							{$line.csv.amount|raw|html_money}
+							{$line.csv.amount|raw|money}
 						</td>
-						<td class="money">{$line.csv.running_sum|raw|html_money}</td>
+						<td class="money">{$line.csv.running_sum|raw|money}</td>
 						<td>{$line.csv.date|date_short}</td>
 					{else}
 						<td colspan="4" class="separator"></td>

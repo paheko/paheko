@@ -52,7 +52,7 @@
 
 	<nav class="tabs">
 		<aside>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
 			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
 		{/if}
@@ -82,13 +82,13 @@
 			<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 			<td>{$line.date|date_short}</td>
 			{if $simple}
-			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|html_money}</td>
+			<td class="money">{if $line.change > 0}+{else}-{/if}{$line.change|abs|raw|money}</td>
 			{else}
-			<td class="money">{$line.debit|raw|html_money}</td>
-			<td class="money">{$line.credit|raw|html_money}</td>
+			<td class="money">{$line.debit|raw|money}</td>
+			<td class="money">{$line.credit|raw|money}</td>
 			{/if}
 			{if isset($line->sum)}
-				<td class="money">{$line.sum|raw|html_money:false}</td>
+				<td class="money">{$line.sum|raw|money:false}</td>
 			{/if}
 			<td>{$line.reference}</td>
 			<th>{$line.label}</th>
@@ -116,7 +116,7 @@
 			{/if}
 			{if !$simple}<td></td>{/if}
 			<td colspan="3">Solde</td>
-			<td class="money">{$sum|raw|html_money:false}</td>
+			<td class="money">{$sum|raw|money:false}</td>
 			{if !$simple}<td></td>{/if}
 			<td class="actions" colspan="5">
 				{if $can_edit}

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="SQL" current="config" custom_css=["styles/config.css"]}
+{include file="admin/_head.tpl" title="SQL" current="config" custom_css=["config.css"]}
 
 {include file="admin/config/_menu.tpl" current="advanced" sub_current="sql"}
 

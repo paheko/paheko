@@ -1,0 +1,142 @@
+.web-edit {
+    display: grid;
+    grid-template-columns: 1fr 30%;
+    grid-template-rows: .3fr .3fr .3fr;
+    grid-gap: 2em;
+}
+
+fieldset.wikiText {
+    grid-column: 1;
+    grid-row: 1/3;
+    border: none;
+    padding: 0;
+}
+
+.web-edit input[type=text] {
+    min-width: 0;
+}
+
+@media screen and (max-width: 980px) {
+    .web-edit {
+        display: block;
+    }
+}
+
+#encryptPasswordDisplay {
+    cursor: help;
+    background: #ddd;
+}
+
+fieldset.wikiEncrypt, fieldset.wikiMain, .web-edit p.submit {
+    grid-column: 2;
+}
+
+.web-edit dd.help {
+    font-size: .9em;
+}
+
+fieldset.wikiMain #f_title {
+    width: 90%;
+    font-size: 14pt;
+}
+
+fieldset.wikiMain #f_uri {
+    width: 90%;
+}
+
+
+.wikiFiles {
+    text-align: center;
+}
+
+.wikiFooter, .wikiFiles {
+    font-size: 0.8em;
+    color: #666;
+    border-top: 0.1em solid #ccc;
+    clear: both;
+}
+
+.wikiMain samp {
+    background: #eee;
+    padding: 0.2em 0.3em;
+}
+
+.wikiChildren {
+    margin: 1em 0 1em 1em;
+    border: .1em solid #999;
+    border-radius: .5em;
+    padding: 1em;
+    background: rgba(255, 255, 255, 0.5);
+    float: right;
+    clear: right;
+    width: 25%;
+}
+
+.wikiChildren ul {
+    color: #ccc;
+    list-style-type: square;
+    margin-left: 1em;
+}
+
+form#f_upload fieldset {
+    position: relative;
+}
+
+.diff {
+    margin: 1em;
+}
+
+.diff .ins {diff
+    background: #cfc;
+    width: 45%;
+}
+
+.diff .del {
+    background: #fcc;
+    width: 45%;
+}
+
+.diff .line {
+    width: 2%;
+    padding: 0.2em;
+    text-align: right;
+    font-family: Mono;
+    font-size: 90%;
+    color: #666;
+}
+
+.diff .leftChange, .diff .rightChange {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.diff ins { background: #9f9; }
+.diff del { background: #f99; }
+
+.diff hr {
+    background: none;
+    border: none;
+    border-top: 5px dotted #fff;
+    color: #fff;
+    margin: .2em .4em;
+}
+
+.diff .separator {
+    background: #ccc;
+}
+
+.diff {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.diff tr {
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.diff .leftChange b, .diff .rightChange b {
+    text-shadow: 1px 1px 1px #ccc;
+    color: #666;
+}

@@ -90,9 +90,6 @@ class Import
 		$champs_multiples = $champs_membres->getMultiples();
 		$champs = $champs_membres->getKeys();
 		$champs[] = 'date_inscription';
-		//$champs[] = 'date_connexion';
-		//$champs[] = 'id';
-		//$champs[] = 'id_categorie';
 
 		$line = 0;
 		$delim = CSV::findDelimiter($fp);
@@ -219,8 +216,8 @@ class Import
 			$where = '';
 		}
 
-		$sql = sprintf('SELECT %s, c.nom AS "Catégorie membre" FROM membres AS m
-			INNER JOIN membres_categories AS c ON m.id_categorie = c.id
+		$sql = sprintf('SELECT %s, c.name AS "Catégorie membre" FROM membres AS m
+			INNER JOIN users_categories AS c ON m.id_category = c.id
 			%s ORDER BY c.id;', $fields, $where);
 
 		$res = $db->iterate($sql);

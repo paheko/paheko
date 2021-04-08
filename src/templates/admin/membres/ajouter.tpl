@@ -2,7 +2,7 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}">
+<form method="post" action="{$self_url}" enctype="multipart/form-data">
     <!-- This is to avoid chrome autofill, Chrome developers you suck -->
     <input type="text" style="display: none;" name="email" />
     {if $id_field_name != 'email'}<input type="text" style="display: none;" name="{$id_field_name}" />{/if}
@@ -35,13 +35,13 @@
         </dl>
     </fieldset>
 
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+    {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
     <fieldset>
         <legend>Général</legend>
         <dl>
             <dt><label for="f_cat">Catégorie du membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="id_categorie" id="f_cat">
+                <select name="id_category" id="f_cat">
                 {foreach from=$membres_cats key="id" item="nom"}
                     <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
                 {/foreach}

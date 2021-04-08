@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+
 class Plugin
 {
 	const PLUGIN_ID_SYNTAX = '[a-z]+(?:_[a-z]+)*';
@@ -435,12 +437,32 @@ class Plugin
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
-	static public function listMenu($user)
+	static public function listMenu(Session $session)
 	{
 		self::checkAndInstallSystemPlugins();
 
 		$db = DB::getInstance();
 		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
+
+		// FIXME deprecated
+		$fix_legacy = [
+			'{Membres::DROIT_AUCUN}' => '{ACCESS_NONE}',
+			'{Membres::DROIT_ACCES}' => '{ACCESS_READ}',
+			'{Membres::DROIT_ECRITURE}' => '{ACCESS_WRITE}',
+			'{Membres::DROIT_ADMIN}' => '{ACCESS_ADMIN}',
+			'{$user.droit_compta}' => '{$user.perm_accounting}',
+			'{$user.droit_membres}' => '{$user.perm_users}',
+			'{$user.droit_config}' => '{$user.perm_config}',
+			'{$user.droit_wiki}' => '{$user.perm_documents}',
+		];
+
+		$user = $session->getUser();
+		$permissions = [
+			'{ACCESS_NONE}'  => $session::ACCESS_NONE,
+			'{ACCESS_READ}'  => $session::ACCESS_READ,
+			'{ACCESS_WRITE}' => $session::ACCESS_WRITE,
+			'{ACCESS_ADMIN}' => $session::ACCESS_ADMIN,
+		];
 
 		foreach ($list as $id => &$row)
 		{
@@ -457,14 +479,20 @@ class Plugin
 				continue;
 			}
 
-			$condition = strtr($row->menu_condition, [
-				'{Membres::DROIT_AUCUN}' => Membres::DROIT_AUCUN,
-				'{Membres::DROIT_ACCES}' => Membres::DROIT_ACCES,
-				'{Membres::DROIT_ECRITURE}' => Membres::DROIT_ECRITURE,
-				'{Membres::DROIT_ADMIN}' => Membres::DROIT_ADMIN,
-			]);
+			$new_condition = strtr($row->menu_condition, $fix_legacy);
 
-			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user) { return $user->{$m[1]}; }, $condition);
+			// FIXME: legacy
+			if ($new_condition != $row->menu_condition) {
+				$db->update('plugins', ['menu_condition' => $new_condition], 'id = :id', ['id' => $id]);
+				$row->menu_condition = $new_condition;
+			}
+
+			$condition = strtr($row->menu_condition, $permissions);
+
+			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user, $db) {
+				return property_exists($user, $m[1]) ? $db->quote($user->{$m[1]}) : 'NULL';
+			}, $condition);
+
 			$query = 'SELECT 1 WHERE ' . $condition . ';';
 
 			$res = $db->protectSelect(['membres' => []], $query);

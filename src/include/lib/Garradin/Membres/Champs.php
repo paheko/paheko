@@ -9,6 +9,8 @@ use Garradin\UserException;
 
 class Champs
 {
+    const TABLE = 'membres';
+
 	protected $champs = null;
 
     protected $system_fields = [
@@ -17,7 +19,7 @@ class Champs
         'clef_pgp',
         'secret_otp',
         'id',
-        'id_categorie',
+        'id_category',
     ];
 
 	protected $types = [
@@ -26,7 +28,7 @@ class Champs
 		'checkbox'	=>	'Case à cocher',
 		'date'		=>	'Date',
 		'datetime'	=>	'Date et heure',
-		//'file'		=>	'Fichier',
+        'file'      =>  'Fichier',
         'password'  =>  'Mot de passe',
 		'number'	=>	'Numéro',
 		'tel'		=>	'Numéro de téléphone',
@@ -178,6 +180,21 @@ class Champs
         return $champs;
     }
 
+    public function listAssocNames()
+    {
+        $out = [];
+
+        foreach ($this->champs as $key => $config) {
+            if ($key == 'passe') {
+                continue;
+            }
+
+            $out[$key] = $config->title;
+        }
+
+        return $out;
+    }
+
     public function getMultiples()
     {
         $out = [];
@@ -220,71 +237,6 @@ class Champs
 
             return $key;
         }
-    }
-
-    public function getValidationRules($mode = 'edit')
-    {
-        assert(in_array($mode, ['edit', 'create', 'user_edit']));
-
-        $all_rules = [];
-
-        foreach ($this->champs as $name => $config)
-        {
-            if (empty($config->editable) && $mode == 'user_edit')
-            {
-                $all_rules[$name] = 'absent';
-                break;
-            }
-
-            $rules = [];
-
-            if (!empty($config->mandatory) && !($name == 'passe' && $mode != 'create'))
-            {
-                $rules[] = 'required';
-            }
-
-            if ($config->type == 'email')
-            {
-                $rules[] = 'email';
-            }
-            elseif ($config->type == 'url')
-            {
-                $rules[] = 'url';
-            }
-            elseif ($config->type == 'date')
-            {
-                $rules[] = 'date_format:Y-m-d';
-            }
-            elseif ($config->type == 'date')
-            {
-                $rules[] = 'date_format:Y-m-d H\:i';
-            }
-            elseif ($config->type == 'number' || $config->type == 'multiple')
-            {
-                $rules[] = 'numeric';
-            }
-            elseif ($config->type == 'checkbox')
-            {
-                $rules[] = 'boolean';
-            }
-
-            if ($name == 'passe')
-            {
-                $rules[] = 'min:6';
-            }
-
-            if (isset($config->rules))
-            {
-                $rules[] = $config->rules;
-            }
-
-            if (count($rules))
-            {
-                $all_rules[$name] = implode('|', $rules);
-            }
-        }
-
-        return $all_rules;
     }
 
     /**
@@ -536,58 +488,38 @@ class Champs
         return true;
     }
 
-    /**
-     * Enregistre les changements de champs en base de données
-     * @param  boolean $enable_copy Recopier les anciennes champs dans les nouveaux ?
-     * @return boolean true
-     */
-    public function save($enable_copy = true)
+    public function getSQLSchema(string $table_name = self::TABLE): string
     {
-        $db = DB::getInstance();
         $config = Config::getInstance();
+        $db = DB::getInstance();
 
         // Champs à créer
         $create = [
             'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
-            'id_categorie INTEGER NOT NULL,',
+            'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
             'date_connexion TEXT NULL CHECK (date_connexion IS NULL OR datetime(date_connexion) = date_connexion), -- Date de dernière connexion',
             'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date_inscription) IS NOT NULL AND date(date_inscription) = date_inscription), -- Date d\'inscription',
             'secret_otp TEXT NULL, -- Code secret pour TOTP',
             'clef_pgp TEXT NULL, -- Clé publique PGP'
         ];
 
-        // Clés à créer, permet aussi de clôturer la syntaxe du tableau, noter l'absence de virgule dans cette ligne
-        $create_keys = [
-            'FOREIGN KEY (id_categorie) REFERENCES membres_categories (id)'
-        ];
+        end($this->champs);
+        $last_one = key($this->champs);
 
-    	// Champs à recopier
-    	$copy = [
-    		'id' => 'id',
-    		'id_categorie' => 'id_categorie',
-            'date_connexion' => 'date_connexion',
-            'date_inscription' => 'date_inscription',
-    	];
-
-        $anciens_champs = $config->get('champs_membres');
-    	$anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
-
-        if (property_exists($anciens_champs, 'secret_otp'))
+        foreach ($this->champs as $key=>$cfg)
         {
-            $copy['secret_otp'] = 'secret_otp';
-            $copy['clef_pgp'] = 'clef_pgp';
-        }
+            if ($cfg->type == 'number' || $cfg->type == 'multiple' || $cfg->type == 'checkbox')
+                $type = 'INTEGER';
+            elseif ($cfg->type == 'file')
+                $type = 'BLOB';
+            else
+                $type = 'TEXT COLLATE NOCASE';
 
-    	foreach ($this->champs as $key=>$cfg)
-    	{
-    		if ($cfg->type == 'number' || $cfg->type == 'multiple' || $cfg->type == 'checkbox')
-    			$type = 'INTEGER';
-    		elseif ($cfg->type == 'file')
-    			$type = 'BLOB';
-    		else
-    			$type = 'TEXT';
+            $line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
-    		$line = sprintf('"%s" %s,', $key, $type);
+            if ($last_one != $key) {
+                $line .= ',';
+            }
 
             if (!empty($cfg->title))
             {
@@ -595,62 +527,141 @@ class Champs
             }
 
             $create[] = $line;
+        }
 
-    		if (property_exists($anciens_champs, $key))
-    		{
-    			$copy[$key] = $key;
-    		}
-            elseif ($key == 'numero')
-            {
-                // Copie des numéros de membre à partir du champ ID
-                $copy[$key] = 'id';
-            }
-    	}
+        $sql = sprintf("CREATE TABLE %s\n(\n\t%s\n);", $table_name, implode("\n\t", $create));
+        return $sql;
+    }
 
-    	$create = array_merge($create, $create_keys);
+    public function getCopyFields(): array
+    {
+        $config = Config::getInstance();
 
-    	$create = 'CREATE TABLE membres_tmp (' . "\n\t" . implode("\n\t", $create) . "\n);";
-    	$copy = 'INSERT INTO membres_tmp (' . implode(', ', array_keys($copy)) . ') SELECT ' . implode(', ', $copy) . ' FROM membres;';
+        // Champs à recopier
+        $copy = [
+            'id'               => 'id',
+            'id_category'      => 'id_category',
+            'date_connexion'   => 'date_connexion',
+            'date_inscription' => 'date_inscription',
+            'secret_otp'       => 'secret_otp',
+            'clef_pgp'         => 'clef_pgp',
+        ];
 
-    	$db->exec('PRAGMA foreign_keys = OFF;');
-    	$db->begin();
-    	$db->exec($create);
-    	
-    	if ($enable_copy) {
-    		$db->exec($copy);
-    	}
-    	
-        $db->exec('DROP TABLE IF EXISTS membres;');
-    	$db->exec('ALTER TABLE membres_tmp RENAME TO membres;');
-        $db->exec('CREATE INDEX membres_id_categorie ON membres (id_categorie);'); // Index
+        $anciens_champs = $config->get('champs_membres');
+        $anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
 
-        if ($config->get('champ_identifiant'))
+        foreach ($this->champs as $key=>$cfg)
         {
+            if (property_exists($anciens_champs, $key)) {
+                $copy[$key] = $key;
+            }
+        }
+
+        return $copy;
+    }
+
+    public function getSQLCopy(string $old_table_name, string $new_table_name = self::TABLE, array $fields = null): string
+    {
+        if (null === $fields) {
+            $fields = $this->getCopyFields();
+        }
+
+        $db = DB::getInstance();
+
+        return sprintf('INSERT INTO %s (%s) SELECT %s FROM %s;',
+            $new_table_name,
+            implode(', ', array_map([$db, 'quoteIdentifier'], $fields)),
+            implode(', ', array_map([$db, 'quoteIdentifier'], array_keys($fields))),
+            $old_table_name
+        );
+    }
+
+    public function copy(string $old_table_name, string $new_table_name = self::TABLE, array $fields = null): void
+    {
+        DB::getInstance()->exec($this->getSQLCopy($old_table_name, $new_table_name, $fields));
+    }
+
+    public function create(string $table_name = self::TABLE)
+    {
+        $db = DB::getInstance();
+        $db->begin();
+        $this->createTable($table_name);
+        $this->createIndexes($table_name);
+        $db->commit();
+    }
+
+    public function createTable(string $table_name = self::TABLE): void
+    {
+        DB::getInstance()->exec($this->getSQLSchema($table_name));
+    }
+
+    public function createIndexes(string $table_name = self::TABLE): void
+    {
+        $db = DB::getInstance();
+        $config = Config::getInstance();
+
+        if ($id_field = $config->get('champ_identifiant')) {
             // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-            $db->exec('UPDATE membres SET '.$config->get('champ_identifiant').' = NULL 
-                WHERE '.$config->get('champ_identifiant').' = "";');
+            $db->exec(sprintf('UPDATE %s SET %s = NULL WHERE %2$s = \'\';',
+                $table_name, $id_field));
+
+            $collation = '';
+
+            if ($this->isText($id_field)) {
+                $collation = ' COLLATE NOCASE';
+            }
 
             // Création de l'index unique
-            $db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$config->get('champ_identifiant').');');
+            $db->exec(sprintf('CREATE UNIQUE INDEX users_id_field ON %s (%s%s);', $table_name, $id_field, $collation));
         }
 
-        if (isset($this->champs->numero))
-        {
-            $db->exec('CREATE UNIQUE INDEX membres_numero ON membres (numero);');
-        }
+        $db->exec(sprintf('CREATE UNIQUE INDEX user_number ON %s (numero);', $table_name));
+        $db->exec(sprintf('CREATE INDEX users_category ON %s (id_category);', $table_name));
 
-        // Création des index pour les champs affichés dans la liste des membres
+        // Create index on listed columns
+        // FIXME: these indexes are currently unused by SQLite in the default user list
+        // when there is more than one non-hidden category, as this makes SQLite merge multiple results
+        // and so the index is not useful in that case sadly.
+        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "id_category" IN (3) ORDER BY "nom" ASC LIMIT 0,100;
+        // --> SEARCH TABLE membres USING INDEX users_list_nom (id_category=?)
+        // EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "id_category" IN (3, 7) ORDER BY "nom" ASC LIMIT 0,100;
+        // --> SEARCH TABLE membres USING INDEX user_category (id_category=?)
+        // USE TEMP B-TREE FOR ORDER BY
         $listed_fields = array_keys((array) $this->getListedFields());
-        foreach ($listed_fields as $field)
-        {
-            if ($field === $config->get('champ_identifiant'))
-            {
+        foreach ($listed_fields as $field) {
+            if ($field === $config->get('champ_identifiant')) {
                 // Il y a déjà un index
                 continue;
             }
 
-            $db->exec('CREATE INDEX membres_liste_' . $field . ' ON membres (' . $field . ');');
+            $collation = '';
+
+            if ($this->isText($field)) {
+                $collation = ' COLLATE NOCASE';
+            }
+
+            $db->exec(sprintf('CREATE INDEX users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
         }
+    }
+
+    /**
+     * Enregistre les changements de champs en base de données
+     * @return boolean true
+     */
+    public function save()
+    {
+        $db = DB::getInstance();
+        $config = Config::getInstance();
+
+    	$db->exec('PRAGMA foreign_keys = OFF;');
+
+        $db->begin();
+        $this->createTable(self::TABLE . '_tmp');
+        $this->copy(self::TABLE, self::TABLE . '_tmp');
+        $db->exec(sprintf('DROP TABLE IF EXISTS %s;', self::TABLE));
+    	$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', self::TABLE));
+
+        $this->createIndexes(self::TABLE);
 
     	$db->commit();
     	$db->exec('PRAGMA foreign_keys = ON;');

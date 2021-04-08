@@ -41,18 +41,6 @@ elseif (preg_match('!/admin/plugin/(.+?)/(.*)!', $uri, $match))
 	$_GET['_u'] = $match[2];
 	require __DIR__ . '/admin/plugin.php';
 }
-elseif (preg_match('!/f/([\d\w]+)/(.+)!', $uri, $match))
-{
-	$_GET['id'] = $match[1];
-	$_GET['file'] = $match[2];
-	require __DIR__ . '/file.php';
-}
-elseif (preg_match('!/admin/!', $uri, $match))
-{
-	require __DIR__ . '/_inc.php';
-	http_response_code(404);
-	throw new UserException('Cette page n\'existe pas.');
-}
 else
 {
 	require __DIR__ . '/index.php';

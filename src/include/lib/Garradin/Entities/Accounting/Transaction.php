@@ -3,14 +3,18 @@
 namespace Garradin\Entities\Accounting;
 
 use KD2\DB\EntityManager;
+
 use Garradin\Entity;
-use Garradin\Fichiers;
-use Garradin\Accounting\Accounts;
-use Garradin\ValidationException;
 use Garradin\DB;
 use Garradin\Config;
 use Garradin\Utils;
 use Garradin\UserException;
+
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
+use Garradin\Accounting\Accounts;
+use Garradin\ValidationException;
 
 class Transaction extends Entity
 {
@@ -87,6 +91,9 @@ class Transaction extends Entity
 	protected $_lines;
 	protected $_old_lines = [];
 
+	/**
+	 * @var Transaction
+	 */
 	protected $_related;
 
 	static public function getTypeFromAccountType(int $account_type)
@@ -296,8 +303,6 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
-		$exists = $this->exists();
-
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
@@ -320,7 +325,7 @@ class Transaction extends Entity
 		}
 
 		// Remove flag
-		if (!$exists && $this->_related) {
+		if ((self::TYPE_DEBT == $this->type || self::TYPE_CREDIT == $this->type) && $this->_related) {
 			$this->_related->markPaid();
 			$this->_related->save();
 		}
@@ -353,7 +358,7 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de supprimer une écriture qui fait partie d\'un exercice clôturé');
 		}
 
-		Fichiers::deleteLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
+		Files::delete($this->getAttachementsDirectory());
 
 		return parent::delete();
 	}
@@ -363,7 +368,6 @@ class Transaction extends Entity
 		parent::selfCheck();
 
 		$db = DB::getInstance();
-		$config = Config::getInstance();
 
 		// ID d'exercice obligatoire
 		if (null === $this->id_year) {
@@ -391,9 +395,6 @@ class Transaction extends Entity
 		if (!array_key_exists($this->type, self::TYPES_NAMES)) {
 			throw new ValidationException('Type d\'écriture inconnu : ' . $this->type);
 		}
-
-		$this->assert($db->test('acc_years', 'id = ?', $this->id_year), 'L\'exercice sélectionné n\'existe pas');
-		$this->assert($this->id_creator === null || $db->test('membres', 'id = ?', $this->id_creator), 'Le compte membre créateur de l\'écriture n\'existe pas');
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -406,7 +407,7 @@ class Transaction extends Entity
 			throw new UserException('Montant non précisé');
 		}
 
-		$this->type = self::TYPE_TRANSFER;
+		$this->type = self::TYPE_ADVANCED;
 		$amount = $source['amount'];
 
 		$key = 'account_transfer';
@@ -449,7 +450,7 @@ class Transaction extends Entity
 				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
 
 				if (!$line['id_account']) {
-					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ($i+1));
+					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ((int) $i+1));
 				}
 
 				$line = (new Line)->import($line);
@@ -463,11 +464,11 @@ class Transaction extends Entity
 				throw new ValidationException('Type d\'écriture inconnu');
 			}
 
-			if (!empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
-				$this->set('type', self::TYPE_ADVANCED);
-			}
-			elseif (!$this->exists() && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
+			if (empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
 				$this->addStatus(self::STATUS_WAITING);
+			}
+			else {
+				$this->removeStatus(self::STATUS_WAITING);
 			}
 
 			if (empty($source['amount'])) {
@@ -579,7 +580,12 @@ class Transaction extends Entity
 
 	public function listFiles()
 	{
-		return Fichiers::listLinkedFiles(Fichiers::LIEN_COMPTA, $this->id());
+		return Files::list($this->getAttachementsDirectory());
+	}
+
+	public function getAttachementsDirectory(): string
+	{
+		return File::CONTEXT_TRANSACTION . '/' . $this->id();
 	}
 
 	public function linkToUser(int $user_id, ?int $service_id = null)

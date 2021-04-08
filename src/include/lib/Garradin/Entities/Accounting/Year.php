@@ -5,9 +5,10 @@ namespace Garradin\Entities\Accounting;
 use KD2\DB\EntityManager;
 use Garradin\DB;
 use Garradin\Entity;
-use Garradin\Fichiers;
 use Garradin\UserException;
 use Garradin\Accounting\Accounts;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 class Year extends Entity
 {
@@ -127,21 +128,23 @@ class Year extends Entity
 			throw new \LogicException('L\'exercice cible est déjà clôturé');
 		}
 
-		if ($target->id_chart != $this->id_chart) {
-			throw new UserException('Il n\'est pas possible de déplacer les écritures dans un exercices dont le plan comptable est différent');
-		}
-
 		DB::getInstance()->preparedQuery('UPDATE acc_transactions SET id_year = ? WHERE id_year = ? AND date > ?;',
 			$target->id(), $this->id(), $date->format('Y-m-d'));
 	}
 
 	public function delete(): bool
 	{
-		// Manual delete of transactions, as there is a voluntary safeguard in SQL: no cascade
-		DB::getInstance()->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
+		$db = DB::getInstance();
+		$ids = $db->getAssoc('SELECT id, id FROM acc_transactions WHERE id_year = ?;', $this->id());
 
-		// Clean up files
-		Fichiers::deleteUnlinkedFiles();
+
+		// Delete all files
+		foreach ($ids as $id) {
+			Files::delete(File::CONTEXT_TRANSACTION . '/' . $id);
+		}
+
+		// Manual delete of transactions, as there is a voluntary safeguard in SQL: no cascade
+		$db->preparedQuery('DELETE FROM acc_transactions WHERE id_year = ?;', $this->id());
 
 		return parent::delete();
 	}
