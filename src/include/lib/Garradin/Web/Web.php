@@ -66,7 +66,7 @@ class Web
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
 		}
 
-		foreach ($new as $file) {
+		foreach (array_keys($new) as $file) {
 			$f = Files::get($file . '/index.txt');
 
 			if (!$f) {
