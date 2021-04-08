@@ -247,7 +247,7 @@ class Config extends Entity
 
 		$db = DB::getInstance();
 		$sql = sprintf('SELECT (COUNT(DISTINCT LOWER(%s)) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
-		$is_unique = $db->firstColumn($sql);
+		$is_unique = !$db->firstColumn($sql);
 
 		$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
 
