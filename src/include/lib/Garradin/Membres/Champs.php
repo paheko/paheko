@@ -612,11 +612,11 @@ class Champs
             }
 
             // Création de l'index unique
-            $db->exec(sprintf('CREATE UNIQUE INDEX users_id_field ON %s (%s%s);', $table_name, $id_field, $collation));
+            $db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS users_id_field ON %s (%s%s);', $table_name, $id_field, $collation));
         }
 
-        $db->exec(sprintf('CREATE UNIQUE INDEX user_number ON %s (numero);', $table_name));
-        $db->exec(sprintf('CREATE INDEX users_category ON %s (id_category);', $table_name));
+        $db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS user_number ON %s (numero);', $table_name));
+        $db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_category ON %s (id_category);', $table_name));
 
         // Create index on listed columns
         // FIXME: these indexes are currently unused by SQLite in the default user list
@@ -640,7 +640,7 @@ class Champs
                 $collation = ' COLLATE NOCASE';
             }
 
-            $db->exec(sprintf('CREATE INDEX users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
+            $db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
         }
     }
 
