@@ -183,6 +183,19 @@ class Upgrade
 				}
 			}
 
+			if (version_compare($v, '1.1.1', '<')) {
+				// Reset admin_background if the file does not exist
+				$bg = $db->firstColumn('SELECT value FROM config WHERE key = \'admin_background\';');
+
+				if ($bg) {
+					$file = Files::get($bg);
+
+					if (!$file) {
+						$db->exec('UPDATE config SET value = NULL WHERE key = \'admin_background\';');
+					}
+				}
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
