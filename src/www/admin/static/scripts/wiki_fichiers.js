@@ -1,6 +1,6 @@
 (function () {
     g.onload(function () {
-        uploadHelper($('#f_fichier'), {
+        uploadHelper($('#f_file'), {
             width: 1920,
             height: null,
             resize: true,
@@ -11,7 +11,7 @@
         function insertImageHelper(file, from_upload) {
             if (!document.querySelectorAll)
             {
-                window.parent.te_insertImage(file.id, 'centre');
+                window.parent.te_insertImage(file.name, 'center');
                 return true;
             }
 
@@ -23,7 +23,7 @@
             for (var i = 0; i < inputs.length; i++)
             {
                 inputs[i].onclick = function(e) {
-                    window.parent.te_insertImage(file.id, e.target.name, f.f_caption.value);
+                    window.parent.te_insertImage(file.name, e.target.name, f.f_caption.value);
                 };
             }
 
@@ -52,30 +52,22 @@
             }
             else
             {
-                window.parent.te_insertFile(data.file.id);
+                window.parent.te_insertFile(file.name);
             }
 
             return true;
         }
 
-        var gallery = document.getElementsByClassName('gallery');
-
-        if (gallery.length == 1 && document.querySelector)
-        {
-            var items = gallery[0].getElementsByTagName('li');
-
-            for (var i = 0; i < items.length; i++)
-            {
-                var a = items[i].querySelector('figure > a');
-                a.onclick= function (e) {
-                    insertImageHelper({
-                        id: this.getAttribute('data-id'),
-                        thumb: this.firstChild.src
-                    });
-                    return false;
-                };
-            }
-        }
+        document.querySelectorAll('a[data-insert]').forEach((a) => {
+            a.onclick = function (e) {
+               insertHelper({
+                    name: this.dataset.name,
+                    image: this.dataset.insert == 'image',
+                    thumb: this.dataset.thumb
+                });
+                return false;
+            };
+        });
 
         var a = document.createElement('button');
         a.className = 'icn-btn';

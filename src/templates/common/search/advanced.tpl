@@ -3,7 +3,7 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($query));
 assert(isset($is_admin));
-$sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADMIN) && $is_unprotected);
+$sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
@@ -14,7 +14,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 		<legend>Recherche SQL</legend>
 		<dl>
 			{input type="textarea" name="sql_query" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
-			{if $session->canAccess('config', Membres::DROIT_ADMIN)}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
 				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 			{/if}
@@ -35,7 +35,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
-			{if $session->canAccess('config', Membres::DROIT_ADMIN)}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
 			{/if}
 		</p>

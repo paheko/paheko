@@ -72,7 +72,7 @@ class Transactions
 		try {
 			$ids = [];
 			foreach ($journal as $row) {
-				if (!array_key_exists($row->id, $checked)) {
+				if (!array_key_exists($row->id_line, $checked)) {
 					continue;
 				}
 
@@ -83,6 +83,7 @@ class Transactions
 					'reference'  => $row->line_reference,
 					'id_account' => $row->id_account,
 				]);
+
 				$line->credit = $row->debit;
 
 				$transaction->addLine($line);
@@ -367,7 +368,7 @@ class Transactions
 		}
 
 		if (isset($transactions, $lines) || ($transactions === null && $lines === null)) {
-			throw new BadMethodCallException('Only one of transactions or lines should be set');
+			throw new \BadMethodCallException('Only one of transactions or lines should be set');
 		}
 
 		$selection = array_map('intval', $transactions ?? $lines);

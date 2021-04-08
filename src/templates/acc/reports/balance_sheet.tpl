@@ -31,7 +31,7 @@
 					<tfoot>
 						<tr>
 							<th>Total actif</th>
-							<td class="money">{$asset_sum|raw|html_money:false}</td>
+							<td class="money">{$asset_sum|raw|money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -41,7 +41,7 @@
 					<tfoot>
 						<tr>
 							<th>Total passif</th>
-							<td class="money">{$liability_sum|raw|html_money:false}</td>
+							<td class="money">{$liability_sum|raw|money:false}</td>
 						</tr>
 					</tfoot>
 				</table>

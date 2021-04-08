@@ -8,7 +8,13 @@ use Garradin\Entities\Accounting\Transaction;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
+
+$count_all = Services::count();
+
+if (!$count_all) {
+	Utils::redirect(ADMIN_URL . 'services/?CREATE');
+}
 
 $count_all = Services::count();
 

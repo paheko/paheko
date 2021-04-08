@@ -5,7 +5,7 @@ use Garradin\Services\Fees;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 $fee = Fees::get((int) qg('id'));
 

@@ -6,13 +6,11 @@ use KD2\Security;
 use KD2\SMTP;
 use Garradin\Membres\Session;
 
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
 class Membres
 {
-    const DROIT_AUCUN = 0;
-    const DROIT_ACCES = 1;
-    const DROIT_ECRITURE = 2;
-    const DROIT_ADMIN = 9;
-
     const ITEMS_PER_PAGE = 50;
 
     // Gestion des données ///////////////////////////////////////////////////////
@@ -169,9 +167,9 @@ class Membres
             unset($data['passe']);
         }
 
-        if (empty($data['id_categorie']))
+        if (empty($data['id_category']))
         {
-            $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
+            $data['id_category'] = Config::getInstance()->get('categorie_membres');
         }
 
         $db->insert('membres', $data);
@@ -225,9 +223,9 @@ class Membres
             unset($data['passe']);
         }
 
-        if (isset($data['id_categorie']) && empty($data['id_categorie']))
+        if (isset($data['id_category']) && empty($data['id_category']))
         {
-            $data['id_categorie'] = Config::getInstance()->get('categorie_membres');
+            $data['id_category'] = Config::getInstance()->get('categorie_membres');
         }
 
         if (empty($data))
@@ -261,7 +259,7 @@ class Membres
             $ids = [(int)$ids];
         }
 
-        $session = new Session;
+        $session = Session::getInstance();
 
         if ($session->isLogged())
         {
@@ -276,7 +274,7 @@ class Membres
             }
         }
 
-        return self::_deleteMembres($ids);
+        return $this->_deleteMembres($ids);
     }
 
     public function getNom($id)
@@ -362,13 +360,13 @@ class Membres
         return true;
     }
 
-    public function listAllByCategory($id_categorie, $only_with_email = false)
+    public function listAllByCategory($id_category, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';
-        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_categorie = ?' . $where, (int)$id_categorie);
+        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_category = ?' . $where, (int)$id_category);
     }
 
-    public function listByCategory(?int $category_id): DynamicList
+    public function listByCategory(?int $id_category): DynamicList
     {
         $config = Config::getInstance();
         $db = DB::getInstance();
@@ -394,15 +392,10 @@ class Membres
             $columns[$key] = [
                 'label' => $config->title
             ];
-
-            if ($champs->isText($key)) {
-                $columns[$key]['order'] = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %%s', $db->quoteIdentifier($key));
-            }
-
         }
 
         $tables = 'membres';
-        $conditions = $category_id ? sprintf('id_categorie = %d', $category_id) : sprintf('id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)');
+        $conditions = $id_category ? sprintf('id_category = %d', $id_category) : sprintf('id_category IN (SELECT id FROM users_categories WHERE hidden = 0)');
 
         $order = $identity;
 
@@ -423,11 +416,11 @@ class Membres
 
         if (is_int($cat) && $cat)
         {
-            $query .= sprintf('WHERE id_categorie = %d', $cat);
+            $query .= sprintf('WHERE id_category = %d', $cat);
         }
         elseif (is_array($cat))
         {
-            $query .= sprintf('WHERE id_categorie IN (%s)', implode(',', $cat));
+            $query .= sprintf('WHERE id_category IN (%s)', implode(',', $cat));
         }
 
         $query .= ';';
@@ -438,7 +431,12 @@ class Membres
     public function countAllButHidden()
     {
         $db = DB::getInstance();
-        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1);');
+        return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
+    }
+
+    public function getAttachementsDirectory(int $id)
+    {
+        return File::CONTEXT_USER . '/' . $id;
     }
 
     static public function changeCategorie($id_cat, $membres)
@@ -450,25 +448,18 @@ class Membres
 
         $db = DB::getInstance();
         return $db->update('membres',
-            ['id_categorie' => (int)$id_cat],
+            ['id_category' => (int)$id_cat],
             sprintf('id IN (%s)', implode(',', $membres))
         );
     }
 
-    static protected function _deleteMembres($membres)
+    protected function _deleteMembres(array $membres)
     {
         foreach ($membres as &$id)
         {
             $id = (int) $id;
 
-            // Suppression des fichiers liés
-            $files = Fichiers::listLinkedFiles(Fichiers::LIEN_MEMBRES, $id, null);
-
-            foreach ($files as $file)
-            {
-                $file = new Fichiers($file->id, $file);
-                $file->remove();
-            }
+            Files::delete($this->getAttachementsDirectory($id));
         }
 
         Plugin::fireSignal('membre.suppression', $membres);

@@ -3,6 +3,7 @@ KD2/DB/AbstractEntity.php
 KD2/DB/DB.php
 KD2/DB/EntityManager.php
 KD2/DB/SQLite3.php
+KD2/Brindille.php
 KD2/ErrorManager.php
 KD2/FileInfo.php
 KD2/Form.php
@@ -11,7 +12,6 @@ KD2/Graphics/Image.php
 KD2/Graphics/QRCode.php
 KD2/Graphics/SVG/Pie.php
 KD2/Graphics/SVG/Plot.php
-KD2/MiniSkel.php
 KD2/Office/Calc/Writer.php
 KD2/Security.php
 KD2/Security_OTP.php

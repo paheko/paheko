@@ -1,0 +1,32 @@
+{{:include file="_head.html" title=$page.title}}
+
+{{:include file="_breadcrumbs.html" parent=$page.path}}
+
+<section class="subcategories">
+	{{#categories parent=$page.path order="title"}}
+	<ul>
+		<li><a href="{{$url}}">{{$title}}</a></li>
+	</ul>
+	{{/categories}}
+</section>
+
+<article class="single">
+	<h1>{{$page.title}}</h1>
+
+	{{$page.html|raw}}
+
+	{{:include file="gallery.html" parent=$page.path}}
+	{{:include file="documents.html" parent=$page.path}}
+</article>
+
+<section class="articles">
+	{{#articles parent=$page.path order="published DESC" future=false}}
+	<article>
+		<h3><a href="{{$url}}">{{$title}}</a></h3>
+		<h5>{{$published|date_long}}</h5>
+		<p>{{$html|raw|strip_tags|truncate:200}}</p>
+	</article>
+	{{/articles}}
+</section>
+
+{{:include file="_foot.html"}}

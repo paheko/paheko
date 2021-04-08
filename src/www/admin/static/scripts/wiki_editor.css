@@ -59,6 +59,12 @@ nav.te .file {
     margin-left: 2em;
 }
 
+nav.te .save {
+    float: right;
+    font-weight: bold;
+    margin-right: 2em;
+}
+
 nav.te .fullscreen {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAADFBMVEUAAABMTFFOTlBOTlCQ1uMHAAAAA3RSTlMAOcKBmOr4AAAAQUlEQVQI12P4/4D7P8N/B0Yo8XsC23+GZw+4pzM4TmBzYsAGgBKODNcecM9m+D+B7T3DPwfG/Qz/G5iABlzg+g8ANzMax/3kkQoAAAAASUVORK5CYII=");
     float: right;
@@ -125,4 +131,99 @@ nav.te .preview {
     height: 0px;
     position: absolute;
     top: -1000px;
+}
+
+
+form .fileUpload .uploadHelper_progress {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    right: 1em;
+    text-align: center;
+    padding: 1em;
+    background: #ddd;
+    box-shadow: 0px 0px 5px #999;
+    border-radius: .5em;
+}
+
+form .fileUpload progress {
+    width: 50%;
+}
+
+form#insertImage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.75);
+}
+
+form#insertImage fieldset {
+    box-shadow: 5px 5px 10px #000;
+    margin: 1em;
+    padding: 1em;
+    background: #ddd;
+    border-radius: .5em;
+    text-align: center;
+}
+
+form#insertImage dt {
+    margin: .2em 0;
+}
+
+form#insertImage .align input {
+    font-size: 1.2em;
+    line-height: 32px;
+    background: #fff;
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding: 5px;
+    padding-left: 42px;
+    border: 1px solid #999;
+    border-radius: 5px;
+    margin: .5em;
+}
+
+form#insertImage .align input[name=""] {
+    background-image: url("../pics/img_flow.png");
+}
+
+form#insertImage .align input[name="left"] {
+    background-image: url("../pics/img_left.png");
+}
+
+form#insertImage .align input[name="right"] {
+    background-image: url("../pics/img_right.png");
+}
+
+form#insertImage .align input[name="center"] {
+    background-image: url("../pics/img_center.png");
+}
+
+form#insertImage .cancel input {
+    font-size: 0.8em;
+    background: transparent;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: .5em;
+    color: #666;
+    cursor: pointer;
+}
+
+form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
+    cursor: pointer;
+    background-color: #eee;
+    color: darkred;
+}
+
+#confirm_saved {
+    position: absolute;
+    top: .5em;
+    right: 10em;
+    text-align: center;
+    transition: all .5s, opacity 2s;
 }

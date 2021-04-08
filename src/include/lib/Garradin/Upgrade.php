@@ -3,6 +3,9 @@
 namespace Garradin;
 
 use Garradin\Membres\Session;
+use Garradin\Membres\Champs;
+
+use Garradin\Files\Files;
 
 class Upgrade
 {
@@ -10,8 +13,7 @@ class Upgrade
 
 	static public function preCheck(): bool
 	{
-		$config = Config::getInstance();
-		$v = $config->getVersion();
+		$v = DB::getInstance()->version();
 
 		if (version_compare($v, garradin_version(), '>='))
 		{
@@ -35,31 +37,23 @@ class Upgrade
 
 		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
-		$session = new Session;
-		$user_is_logged = $session->isLogged(true);
+		$session = Session::getInstance();
+		$session->start();
 		return true;
 	}
 
 	static public function upgrade()
 	{
-		$config = Config::getInstance();
-		$v = $config->getVersion();
-
-		$session = new Session;
-		$user_is_logged = $session->isLogged(true);
+		$db = DB::getInstance();
+		$v = $db->version();
 
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
-		$db = DB::getInstance();
-
-		// reset last version check
-		$db->exec('UPDATE config SET valeur = NULL WHERE cle = \'last_version_check\';');
-
 		// Créer une sauvegarde automatique
-		$backup_name = (new Sauvegarde)->create('pre-upgrade-' . garradin_version());
+		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
 
 		try {
-			if (version_compare($v, '1.0.0-alpha1', '<'))
+			if (version_compare($v, '1.0.0', '<'))
 			{
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
@@ -72,58 +66,6 @@ class Upgrade
 				$chart->code = 'PCA2018';
 				$chart->save();
 				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-beta6', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-beta6_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta8', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-beta8_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc3', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc3_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-rc10', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc10_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc11', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0_schema.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-rc14', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc14_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-rc16', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc16_migration.sql');
-				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.0.1', '<'))
@@ -158,12 +100,109 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.0-beta1', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+
+				$attachments = $db->getAssoc('SELECT f.id, w.uri || \'/\' || f.id || \'_\' || f.nom FROM fichiers f
+					INNER JOIN fichiers_wiki_pages fw ON fw.fichier = f.id
+					INNER JOIN wiki_pages w ON w.id = fw.id;');
+
+				// Update Skriv content for attachments
+				foreach ($db->iterate('SELECT r.rowid, r.contenu, p.uri FROM wiki_revisions r INNER JOIN wiki_pages p ON p.revision = r.revision AND p.id = r.id_page;') as $r) {
+					$uri = $r->uri;
+					$content = preg_replace_callback('!<<(image|fichier)\s*\|\s*(\d+)\s*(?:\|\s*(gauche|droite|centre))?\s*(?:\|\s*(.+)\s*)?>>!', function ($match) use ($attachments, $uri) {
+						if (isset($attachments[$match[2]])) {
+							$name = $attachments[$match[2]];
+
+							if (dirname($name) == $uri) {
+								$name = basename($name);
+							}
+							else {
+								$name = '../' . $name;
+							}
+						}
+						else {
+							$name = '_ERREUR_fichier_inconnu_' . $match[2];
+						}
+
+						if (isset($match[3])) {
+							$align = '|' . ($match[3] == 'centre' ? 'center' : ($match[3] == 'gauche' ? 'left' : 'right'));
+						}
+						else {
+							$align = '';
+						}
+
+						$caption = isset($match[4]) ? '|' . $match[4] : '';
+
+						return sprintf('<<%s|%s%s%s>>', $match[1] == 'fichier' ? 'file' : 'image', $name, $align, $caption);
+					}, $r->contenu);
+
+					$content = preg_replace_callback('!(image|fichier)://(\d+)!', function ($match) use ($attachments) {
+						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
+						return sprintf('#file:[%s]', $name);
+					}, $content);
+
+					if ($content != $r->contenu) {
+						$db->update('wiki_revisions', ['contenu' => $content], 'rowid = :id', ['id' => $r->rowid]);
+					}
+				}
+
+				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
+				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
+
+				// Rename membres table
+				$champs->createTable($champs::TABLE  .'_tmp');
+
+				$fields = $champs->getCopyFields();
+				unset($fields['id_category']);
+				$fields['id_categorie'] = 'id_category';
+				$champs->copy($champs::TABLE, $champs::TABLE . '_tmp', $fields);
+
+				$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $champs::TABLE));
+				$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $champs::TABLE));
+
+				$champs->createIndexes($champs::TABLE);
+
+				$db->commitSchemaUpdate();
+
+				// Migrate to a different storage
+				if (FILE_STORAGE_BACKEND != 'SQLite') {
+					Files::migrateStorage('SQLite', FILE_STORAGE_BACKEND, null, FILE_STORAGE_CONFIG);
+					Files::truncateStorage('SQLite', null);
+				}
+
+				$pages = $db->iterate('SELECT * FROM web_pages;');
+
+				foreach ($pages as $data) {
+					$page = new \Garradin\Entities\Web\Page;
+					$page->exists(true);
+					$page->load((array) $data);
+					$page->syncSearch();
+				}
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
-			Utils::clearCaches();
+			// Delete local cached files
+			Utils::resetCache(USER_TEMPLATES_CACHE_ROOT);
+			Utils::resetCache(STATIC_CACHE_ROOT);
 
-			$config->setVersion(garradin_version());
+			$cache_version_file = SHARED_CACHE_ROOT . '/version';
+			$cache_version = file_exists($cache_version_file) ? trim(file_get_contents($cache_version_file)) : null;
+
+			// Only delete system cache when it's required
+			if (garradin_version() !== $cache_version) {
+				Utils::resetCache(SMARTYER_CACHE_ROOT);
+			}
+
+			file_put_contents($cache_version_file, garradin_version());
+			$db->setVersion(garradin_version());
+
+			// reset last version check
+			$db->exec('UPDATE config SET value = NULL WHERE key = \'last_version_check\';');
 
 			Static_Cache::remove('upgrade');
 
@@ -181,10 +220,33 @@ class Upgrade
 			throw $e;
 		}
 
+
+		$session = Session::getInstance();
+		$user_is_logged = $session->isLogged(true);
+
 		// Forcer à rafraîchir les données de la session si elle existe
 		if ($user_is_logged)
 		{
 			$session->refresh();
+		}
+	}
+
+	/**
+	 * Move data from root to data/ subdirectory
+	 * (migration from 1.0 to 1.1 version)
+	 */
+	static public function moveDataRoot(): void
+	{
+		Utils::safe_mkdir(ROOT . '/data');
+		file_put_contents(ROOT . '/data/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
+
+		rename(ROOT . '/cache', ROOT . '/data/cache');
+		rename(ROOT . '/plugins', ROOT . '/data/plugins');
+
+		$files = glob(ROOT . '/*.sqlite');
+
+		foreach ($files as $file) {
+			rename($file, ROOT . '/data/' . basename($file));
 		}
 	}
 }

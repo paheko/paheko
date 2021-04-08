@@ -4,7 +4,7 @@
 
 <nav class="tabs">
 	<aside>
-	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
 		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
 	{/if}
@@ -35,7 +35,7 @@
 				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_short}</td>
-				<td class="money">{$line.change|abs|raw|html_money}</td>
+				<td class="money">{$line.change|abs|raw|money}</td>
 				<td>{$line.reference}</td>
 				<th>{$line.label}</th>
 				<td>{$line.line_reference}</td>

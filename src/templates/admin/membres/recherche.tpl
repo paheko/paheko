@@ -5,7 +5,7 @@
 {include file="common/search/advanced.tpl" action_url=$self_url}
 
 {if !empty($result)}
-	{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 		<form method="post" action="{$admin_url}membres/action.php" class="memberList">
 	{/if}
 
@@ -13,7 +13,7 @@
 	<table class="list search">
 		<thead>
 			<tr>
-				{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>{/if}
+				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>{/if}
 				{foreach from=$result_header item="label"}
 					<td>{$label}</td>
 				{/foreach}
@@ -23,7 +23,7 @@
 		<tbody>
 			{foreach from=$result item="row"}
 				<tr>
-					{if $session->canAccess('membres', Membres::DROIT_ADMIN)}<td class="check">{if $row._user_id}{input type="checkbox" name="selected[]" value=$row._user_id}{/if}</td>{/if}
+					{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}<td class="check">{if $row._user_id}{input type="checkbox" name="selected[]" value=$row._user_id}{/if}</td>{/if}
 					{foreach from=$row key="key" item="value"}
 						<?php $link = false; ?>
 						{if isset($result_header[$key])}
@@ -46,7 +46,7 @@
 					<td class="actions">
 						{if $row._user_id}
 							{linkbutton shape="user" label="Fiche membre" href="!membres/fiche.php?id=%d"|args:$row._user_id}
-							{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+							{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 								{linkbutton shape="edit" label="Modifier" href="!membres/modifier.php?id=%d"|args:$row._user_id}
 							{/if}
 						{/if}
@@ -54,12 +54,12 @@
 				</tr>
 			{/foreach}
 		</tbody>
-	{if $session->canAccess('membres', Membres::DROIT_ADMIN) && $row._user_id}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $row._user_id}
 		{include file="admin/membres/_list_actions.tpl" colspan=count($result_header)+1}
 	{/if}
 	</table>
 
-	{if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 		</form>
 	{/if}
 

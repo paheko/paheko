@@ -7,6 +7,9 @@ use KD2\HTTP;
 use KD2\Translate;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Users\Category;
+use Garradin\UserTemplate\CommonModifiers;
+use Garradin\Web\Render\Skriv;
 
 class Template extends \KD2\Smartyer
 {
@@ -25,13 +28,14 @@ class Template extends \KD2\Smartyer
 	{
 		parent::__construct();
 
-		if (!file_exists(CACHE_ROOT . '/compiled'))
-		{
-			Utils::safe_mkdir(CACHE_ROOT . '/compiled', 0777, true);
+		$cache_dir = SMARTYER_CACHE_ROOT;
+
+		if (!file_exists($cache_dir)) {
+			Utils::safe_mkdir($cache_dir, 0777, true);
 		}
 
 		$this->setTemplatesDir(ROOT . '/templates');
-		$this->setCompiledDir(CACHE_ROOT . '/compiled');
+		$this->setCompiledDir($cache_dir);
 		$this->setNamespace('Garradin');
 
 		// Hash de la version pour les éléments statiques (cache)
@@ -58,17 +62,24 @@ class Template extends \KD2\Smartyer
 			}
 		});
 
+		$this->register_compile_function('use', function ($pos, $block, $name, $raw_args) {
+			if ($name == 'use')
+			{
+				return sprintf('use %s;', $raw_args);
+			}
+		});
+
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('form_field', [$this, 'formField']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
 		$this->register_function('input', [$this, 'formInput']);
+		$this->register_function('password_change', [$this, 'passwordChangeInput']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 		$this->register_function('diff', [$this, 'diff']);
-		$this->register_function('pagination', [$this, 'pagination']);
-		$this->register_function('format_droits', [$this, 'formatDroits']);
+		$this->register_function('display_permissions', [$this, 'displayPermissions']);
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
@@ -85,51 +96,21 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', 'abs');
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
-		$this->register_modifier('format_bytes', ['Garradin\Utils', 'format_bytes']);
-		$this->register_modifier('strftime_fr', [Utils::class, 'strftime_fr']);
-		$this->register_modifier('date_fr', [Utils::class, 'date_fr']);
-		$this->register_modifier('date_long', [Utils::class, 'date_fr']);
-
-		$this->register_modifier('date_short', function ($dt) {
-			return Utils::date_fr($dt, 'd/m/Y');
+		$this->register_modifier('format_skriv', function ($str) {
+			return Skriv::render(null, (string) $str);
 		});
 
-		$this->register_modifier('html_money', [$this, 'htmlMoney']);
-		$this->register_modifier('money_currency', [$this, 'htmlMoneyCurrency']);
-
-		$this->register_modifier('format_wiki', function ($str) {
-			$str = Utils::SkrivToHTML($str);
-			$str = Squelette_Filtres::typo_fr($str);
-			return $str;
-		});
-
-		$this->register_modifier('liens_wiki', function ($str, $prefix) {
-			return preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($prefix) {
-				return '<a href="' . $prefix . Wiki::transformTitleToURI($matches[1]) . '">';
-			}, $str);
-		});
-
-	}
-
-	protected function htmlMoney($number, bool $hide_empty = true): string
-	{
-		if ($hide_empty && !$number) {
-			return '';
+		foreach (CommonModifiers::MODIFIERS_LIST as $key => $name) {
+			$this->register_modifier(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
-		return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
-	}
-
-	protected function htmlMoneyCurrency($number, bool $hide_empty = true): string
-	{
-		$out = $this->htmlMoney($number, $hide_empty);
-
-		if ($out !== '') {
-			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');
+		foreach (CommonModifiers::FUNCTIONS_LIST as $key => $name) {
+			$this->register_function(is_int($key) ? $name : $key, is_int($key) ? [CommonModifiers::class, $name] : $name);
 		}
 
-		return $out;
+		$this->register_modifier('local_url', [Utils::class, 'getLocalURL']);
 	}
+
 
 	protected function formErrors($params)
 	{
@@ -206,6 +187,12 @@ class Template extends \KD2\Smartyer
 			$href = ADMIN_URL . substr($params['href'], 1);
 		}
 
+		if (!isset($params['class'])) {
+			$params['class'] = '';
+		}
+
+		$params['class'] .= ' icn-btn';
+
 		unset($params['href'], $params['shape'], $params['label']);
 
 		array_walk($params, function (&$v, $k) {
@@ -214,7 +201,33 @@ class Template extends \KD2\Smartyer
 
 		$params = implode(' ', $params);
 
-		return sprintf('<a class="icn-btn" data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+		return sprintf('<a data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+	}
+
+	protected function passwordChangeInput(array $params)
+	{
+		$out = $this->formInput(array_merge($params, [
+			'type' => 'password',
+			'help' => sprintf('(Minimum %d caractères)', Session::MINIMUM_PASSWORD_LENGTH),
+			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
+		]));
+
+		$out.= '<dd class="help">Astuce : un mot de passe de quatre mots choisis au hasard dans le dictionnaire est plus sûr et plus simple à retenir qu\'un mot de passe composé de 10 lettres et chiffres.</dd>';
+
+		$suggestion = Utils::suggestPassword();
+
+		$out .= sprintf('<dd class="help">Pas d\'idée&nbsp;? Voici une suggestion choisie au hasard&nbsp;:
+                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="f_%s_suggest" value="%s" autocomplete="off" size="%d" /></dd>', $params['name'], $suggestion, strlen($suggestion));
+
+		$out .= $this->formInput([
+			'type' => 'password',
+			'label' => 'Répéter le mot de passe',
+			'required' => true,
+			'name' => $params['name'] . '_confirm',
+			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
+		]);
+
+		return $out;
 	}
 
 	protected function formInput(array $params)
@@ -230,6 +243,17 @@ class Template extends \KD2\Smartyer
 			throw new \InvalidArgumentException('Missing name or type');
 		}
 
+		$suffix = null;
+
+		if ($type == 'datetime') {
+			$type = 'date';
+			$tparams = func_get_arg(0);
+			$tparams['type'] = 'time';
+			$tparams['name'] = sprintf('%s_time', $name);
+			unset($tparams['label']);
+			$suffix = self::formInput($tparams);
+		}
+
 		$current_value = null;
 		$current_value_from_user = false;
 
@@ -237,7 +261,7 @@ class Template extends \KD2\Smartyer
 			$current_value = $_POST[$name];
 			$current_value_from_user = true;
 		}
-		elseif (isset($source) && is_object($source) && isset($source->$name)) {
+		elseif (isset($source) && is_object($source) && isset($source->$name) && !is_null($source->$name)) {
 			$current_value = $source->$name;
 		}
 		elseif (isset($source) && is_array($source) && isset($source[$name])) {
@@ -250,13 +274,17 @@ class Template extends \KD2\Smartyer
 		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
 			$current_value = $current_value->format('d/m/Y');
 		}
+		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
+			$current_value = $current_value->format('H:i');
+		}
 		elseif ($type == 'date' && is_string($current_value)) {
 			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
 				$current_value = $v->format('d/m/Y');
 			}
 		}
 
-		$attributes['id'] = 'f_' . $name;
+
+		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
 		$attributes['name'] = $name;
 
 		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
@@ -279,6 +307,14 @@ class Template extends \KD2\Smartyer
 			$attributes['size'] = 12;
 			$attributes['maxlength'] = 10;
 			$attributes['pattern'] = '\d\d?/\d\d?/\d{4}';
+		}
+		elseif ($type == 'time') {
+			$type = 'text';
+			$attributes['placeholder'] = 'HH:MM';
+			$attributes['data-input'] = 'time';
+			$attributes['size'] = 8;
+			$attributes['maxlength'] = 5;
+			$attributes['pattern'] = '\d\d?:\d\d?';
 		}
 
 		// Create attributes string
@@ -387,6 +423,8 @@ class Template extends \KD2\Smartyer
 			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
 		}
 
+		$input .= $suffix;
+
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $this->escape($label));
 
 		if ($type == 'radio' || $type == 'checkbox') {
@@ -413,6 +451,9 @@ class Template extends \KD2\Smartyer
 		return $out;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	protected function formField(array $params, $escape = true)
 	{
 		if (!isset($params['name']))
@@ -481,18 +522,10 @@ class Template extends \KD2\Smartyer
 
 		$couleur1 = $config->get('couleur1') ?: ADMIN_COLOR1;
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
-		$image_fond = ADMIN_BACKGROUND_IMAGE;
+		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if ($config->get('image_fond'))
-		{
-			try {
-				$f = new Fichiers($config->get('image_fond'));
-				$image_fond = $f->getURL();
-			}
-			catch (\InvalidArgumentException $e)
-			{
-				// Fichier qui n'existe pas/plus
-			}
+		if ($f = $config->get('admin_background')) {
+			$admin_background = WWW_URL . $f;
 		}
 
 		// Transformation Hexa vers décimal
@@ -508,7 +541,7 @@ class Template extends \KD2\Smartyer
 		}
 		</style>';
 
-		return sprintf($out, $couleur1, $couleur2, $image_fond);
+		return sprintf($out, $couleur1, $couleur2, $admin_background);
 	}
 
 	protected function displayChampMembre($v, $config = null)
@@ -567,6 +600,11 @@ class Template extends \KD2\Smartyer
 
 		if ($params['name'] == 'passe' || (!empty($params['user_mode']) && !empty($config->private)))
 		{
+			return '';
+		}
+
+		// Files are managed out of the form
+		if ($config->type == 'file') {
 			return '';
 		}
 
@@ -808,119 +846,16 @@ class Template extends \KD2\Smartyer
 		return $out;
 	}
 
-	protected function pagination(array $params)
+	protected function displayPermissions(array $params): string
 	{
-		if (!isset($params['url']) || !isset($params['page']) || !isset($params['bypage']) || !isset($params['total']))
-			throw new \BadFunctionCallException("Paramètre manquant pour pagination");
+		$perms = $params['permissions'];
 
-		if ($params['total'] == -1)
-			return '';
+		$out = [];
 
-		$pagination = Utils::getGenericPagination($params['page'], $params['total'], $params['bypage']);
-
-		if (empty($pagination))
-			return '';
-
-		$out = '<ul class="pagination">';
-		$encoded_url = rawurlencode('[ID]');
-
-		foreach ($pagination as &$page)
-		{
-			$attributes = '';
-
-			if (!empty($page['class']))
-				$attributes .= ' class="' . htmlspecialchars($page['class']) . '" ';
-
-			$out .= '<li'.$attributes.'>';
-
-			$attributes = '';
-
-			if (!empty($page['accesskey']))
-				$attributes .= ' accesskey="' . htmlspecialchars($page['accesskey']) . '" ';
-
-			$out .= '<a' . $attributes . ' href="' . str_replace(['[ID]', $encoded_url], htmlspecialchars($page['id']), $params['url']) . '">';
-			$out .= htmlspecialchars($page['label']);
-			$out .= '</a>';
-			$out .= '</li>' . "\n";
-		}
-
-		$out .= '</ul>';
-
-		return $out;
-	}
-
-	protected function formatDroits(array $params)
-	{
-		$droits = $params['droits'];
-
-		$out = ['connexion' => '', 'inscription' => '', 'membres' => '', 'compta' => '',
-			'wiki' => '', 'config' => ''];
-		$classes = [
-			Membres::DROIT_AUCUN   =>  'aucun',
-			Membres::DROIT_ACCES   =>  'acces',
-			Membres::DROIT_ECRITURE=>  'ecriture',
-			Membres::DROIT_ADMIN   =>  'admin',
-		];
-
-		foreach ($droits as $cle=>$droit)
-		{
-			$cle = str_replace('droit_', '', $cle);
-
-			if (array_key_exists($cle, $out))
-			{
-
-				$class = $classes[$droit];
-				$desc = false;
-				$s = false;
-
-				if ($cle == 'connexion')
-				{
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc = 'N\'a pas le droit de se connecter';
-					else
-						$desc = 'A le droit de se connecter';
-				}
-				elseif ($cle == 'inscription')
-				{
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc = 'N\'a pas le droit de s\'inscrire seul';
-					else
-						$desc = 'A le droit de s\'inscrire seul';
-				}
-				elseif ($cle == 'config')
-				{
-					$s = '&#x2611;';
-
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc = 'Ne peut modifier la configuration';
-					else
-						$desc = 'Peut modifier la configuration';
-				}
-				elseif ($cle == 'compta')
-				{
-					$s = '&euro;';
-				}
-
-				if (!$s)
-					$s = strtoupper($cle[0]);
-
-				if (!$desc)
-				{
-					$desc = ucfirst($cle). ' : ';
-
-					if ($droit == Membres::DROIT_AUCUN)
-						$desc .= 'Pas accès';
-					elseif ($droit == Membres::DROIT_ACCES)
-						$desc .= 'Lecture uniquement';
-					elseif ($droit == Membres::DROIT_ECRITURE)
-						$desc .= 'Lecture & écriture';
-					else
-						$desc .= 'Administration';
-				}
-
-				$out[$cle] = '<b class="'.$class.' '.$cle.'" title="'
-					.htmlspecialchars($desc, ENT_QUOTES, 'UTF-8').'">'.$s.'</b>';
-			}
+		foreach (Category::PERMISSIONS as $name => $config) {
+			$access = $perms->{'perm_' . $name};
+			$label = $config['options'][$access];
+			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $access, $name, htmlspecialchars($label), $config['shape']);
 		}
 
 		return implode(' ', $out);

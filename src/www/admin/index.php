@@ -2,22 +2,27 @@
 
 namespace Garradin;
 
+use Garradin\Web\Web;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
 require_once __DIR__ . '/_inc.php';
 
-$cats = new Membres\Categories;
-$categorie = $cats->get($user->id_categorie);
-
-$tpl->assign('categorie', $categorie);
-
-$wiki = new Wiki;
-$page = $wiki->getByURI($config->get('accueil_connexion'));
-$tpl->assign('page', $page);
-
-$tpl->assign('custom_css', ['wiki.css']);
+$homepage = Config::getInstance()->get('admin_homepage');
 
 $banner = null;
 Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session], $banner);
-$tpl->assign('banniere', $banner);
+
+if ($homepage && ($file = Files::get($homepage))) {
+	$homepage = $file->render(['prefix' => ADMIN_URL . 'common/files/preview.php?p=' . File::CONTEXT_DOCUMENTS . '/']);
+}
+else {
+	$homepage = null;
+}
+
+$tpl->assign(compact('homepage', 'banner'));
+
+$tpl->assign('custom_css', ['!web/css.php']);
 
 $tpl->display('admin/index.tpl');
 flush();

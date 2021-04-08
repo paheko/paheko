@@ -39,6 +39,10 @@ class Form
 			call_user_func($fn);
 
 			if (null !== $redirect) {
+				if (array_key_exists('_dialog', $_GET)) {
+					Utils::reloadParentFrame();
+				}
+
 				Utils::redirect($redirect);
 			}
 
