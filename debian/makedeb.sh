@@ -127,9 +127,9 @@ Section: web
 Priority: optional
 Maintainer: Garradin <garradin@kd2.org>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php-cli (>=7.2), php-sqlite3
+Depends: dash | bash, php-cli (>=7.4), php-sqlite3
 Version: ${PACKAGE_DEB_VERSION}
-Suggests: www-browser, php-gd
+Suggests: www-browser, php-gd, php-imagick, php-intl
 Homepage: http://dev.kd2.org/garradin/
 Description: Garradin is a tool to manage non-profit organizations.
  It's only available in french.
