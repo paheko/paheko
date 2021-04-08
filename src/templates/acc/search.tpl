@@ -40,7 +40,7 @@
 								{$value|raw|money:false}
 							{elseif $key == 'date'}
 								{$value|date_short}
-							{elseif null == $value}
+							{elseif null === $value}
 								<em>(nul)</em>
 							{else}
 								{$value}
