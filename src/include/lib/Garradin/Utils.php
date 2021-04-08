@@ -900,8 +900,14 @@ class Utils
             return self::$collator->compare($a, $b);
         }
 
-        $a = strtoupper(self::transliterateToAscii($a));
-        $b = strtoupper(self::transliterateToAscii($b));
+        if (function_exists('\mb_convert_case')) {
+            $a = \mb_convert_case($a, \MB_CASE_LOWER);
+            $b = \mb_convert_case($b, \MB_CASE_LOWER);
+        }
+        else {
+            $a = strtoupper(self::transliterateToAscii($a));
+            $b = strtoupper(self::transliterateToAscii($b));
+        }
 
         return strcmp($a, $b);
     }

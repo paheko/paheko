@@ -98,14 +98,13 @@ class Session extends \KD2\UserSession
 
 	protected function getUserForLogin($login)
 	{
-		$champ_id = Config::getInstance()->get('champ_identifiant');
-		$login = strtolower($login);
+		$champ_id = $config->get('champ_identifiant');
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
 			INNER JOIN users_categories AS c ON c.id = m.id_category
-			WHERE m.%1$s = ? AND c.perm_connect >= %2$d
+			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, self::ACCESS_READ);
