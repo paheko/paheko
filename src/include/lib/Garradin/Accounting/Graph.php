@@ -48,8 +48,8 @@ class Graph
 	];
 
 	const PIE_TYPES = [
-		'revenue' => ['position' => Account::REVENUE],
-		'expense' => ['position' => Account::EXPENSE],
+		'revenue' => ['position' => Account::REVENUE, 'exclude_type' => Account::TYPE_VOLUNTEERING],
+		'expense' => ['position' => Account::EXPENSE, 'exclude_type' => Account::TYPE_VOLUNTEERING],
 		'assets' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
 	];
 
