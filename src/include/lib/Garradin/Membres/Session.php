@@ -98,7 +98,7 @@ class Session extends \KD2\UserSession
 
 	protected function getUserForLogin($login)
 	{
-		$champ_id = $config->get('champ_identifiant');
+		$champ_id = Config::getInstance()->get('champ_identifiant');
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
