@@ -155,15 +155,12 @@ class Config extends Entity
 			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
 		}
 
-		if (!empty($values['champ_identifiant']))
-		{
-			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-			$db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
-				WHERE '.$this->get('champ_identifiant').' = "";');
-
-			// Création de l'index unique / FIXME move to Champs
+		if (!empty($values['champ_identifiant'])) {
+			// Regenerate login index
 			$db->exec('DROP INDEX IF EXISTS users_id_field;');
-			$db->exec('CREATE UNIQUE INDEX users_id_field ON membres ('.$this->get('champ_identifiant').');');
+			$config = Config::getInstance();
+			$champs = $config->get('champs_membres');
+			$champs->createIndexes();
 		}
 
 		$db->commit();
@@ -246,10 +243,14 @@ class Config extends Entity
 		$this->assert(!empty($champs->get($this->champ_identifiant)), sprintf('Le champ spécifié pour identifiant, "%s" n\'existe pas', $this->champ_identifiant));
 
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT (COUNT(DISTINCT LOWER(%s)) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
-		$is_unique = !$db->firstColumn($sql);
 
-		$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
+		// Check that this field is actually unique
+		if (isset($this->_modified['champ_identifiant'])) {
+			$sql = sprintf('SELECT (COUNT(DISTINCT %s COLLATE NOCASE) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
+			$is_unique = (bool) $db->firstColumn($sql);
+
+			$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
+		}
 
 		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
 	}
