@@ -70,8 +70,9 @@
 		ou que personne ne s'est connecté.
 	</p>
 	<p class="alert block">
-		Attention, la sauvegarde automatique permet uniquement de revenir à un état antérieur, mais ne prévient pas de la perte des données&nbsp;! Pour cela, il est recommandé de faire des sauvegardes manuelles en téléchargeant une copie des données sur votre ordinateur.<br /><br />
-		La sauvegarde automatique ne concerne que la base de données, mais pas les documents, fichiers joints aux écritures ou aux membres, ni le contenu du site web.
+		Attention, la sauvegarde automatique permet uniquement de revenir à un état antérieur, mais ne prévient pas de la perte des données&nbsp;! Pour cela, il est recommandé de faire des sauvegardes manuelles en téléchargeant une copie des données sur votre ordinateur.
+		{if FILE_STORAGE_BACKEND != 'SQLite'}<br /><br />
+		La sauvegarde automatique ne concerne que la base de données, mais pas les documents, fichiers joints aux écritures ou aux membres, ni le contenu du site web.{/if}
 	</p>
 	<dl>
 		<dt><label for="f_frequency">Intervalle de sauvegarde</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
