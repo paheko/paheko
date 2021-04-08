@@ -194,7 +194,7 @@ class File extends Entity
 	{
 		self::validatePath($new_path);
 
-		if ($new_path == $this->path || 0 === strpos($new_path, $this->path)) {
+		if ($new_path == $this->path || 0 === strpos($new_path . '/', $this->path . '/')) {
 			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
 		}
 

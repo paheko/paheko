@@ -168,7 +168,7 @@ class Page extends Entity
 		$target = $this->filepath(false);
 
 		// Move parent directory if needed
-		if ($path !== $target) {
+		if ($path && $path !== $target) {
 			$dir = Files::get(Utils::dirname($path));
 			$dir->rename(Utils::dirname($target));
 			$this->set('file_path', $target);
