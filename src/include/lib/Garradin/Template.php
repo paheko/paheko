@@ -10,6 +10,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
 use Garradin\UserTemplate\CommonModifiers;
 use Garradin\Web\Render\Skriv;
+use Garradin\Files\Files;
 
 class Template extends \KD2\Smartyer
 {
@@ -524,8 +525,8 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if ($f = $config->get('admin_background')) {
-			$admin_background = WWW_URL . $f;
+		if (($f = $config->get('admin_background')) && ($file = Files::get($f))) {
+			$admin_background = $file->url() . '?' . $file->modified->getTimestamp();
 		}
 
 		// Transformation Hexa vers décimal
