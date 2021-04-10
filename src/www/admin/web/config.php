@@ -21,6 +21,10 @@ elseif (f('enable_site') && $form->check('config_site'))
 }
 
 $form->runIf('reset', function () {
+	if (!f('select')) {
+		return;
+	}
+
 	Skeleton::resetSelected(f('select'));
 }, 'squelettes', Utils::getSelfURI('reset_ok'));
 
