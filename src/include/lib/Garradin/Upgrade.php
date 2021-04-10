@@ -38,7 +38,7 @@ class Upgrade
 		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
 		$session = Session::getInstance();
-		$session->start();
+		$session->start(true);
 		return true;
 	}
 
