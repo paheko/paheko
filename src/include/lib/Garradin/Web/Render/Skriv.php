@@ -33,11 +33,11 @@ class Skriv
 		}
 		// "bla/Image.jpg" outside of web context
 		elseif (self::$context !== File::CONTEXT_WEB && $pos !== 0) {
-			return WWW_URL . '/' . self::$context . '/' . $uri;
+			return WWW_URL . self::$context . '/' . $uri;
 		}
 		// "bla/Image.jpg" in web context or absolute link, eg. "/transactions/2442/42.jpg"
 		else {
-			return WWW_URL . '/' . ltrim($uri, '/');
+			return WWW_URL . ltrim($uri, '/');
 		}
 	}
 
