@@ -221,6 +221,7 @@ class Upgrade
 						}, $content);
 
 						if ($new_content != $content) {
+							Files::disableQuota();
 							$file->setContent($new_content);
 						}
 					}

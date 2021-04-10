@@ -16,6 +16,11 @@ use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFI
 
 class Files
 {
+	/**
+	 * To enable or disable quota check
+	 */
+	static protected $quota = true;
+
 	static public function search(string $search, string $path = null): array
 	{
 		if (strlen($search) > 100) {
@@ -245,10 +250,24 @@ class Files
 
 	static public function checkQuota(int $size = 0): void
 	{
+		if (!self::$quota) {
+			return;
+		}
+
 		$remaining = self::getRemainingQuota(true);
 
 		if (($remaining - $size) < 0) {
 			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
 		}
+	}
+
+	static public function enableQuota(): void
+	{
+		self::$quota = true;
+	}
+
+	static public function disableQuota(): void
+	{
+		self::$quota = false;
 	}
 }
