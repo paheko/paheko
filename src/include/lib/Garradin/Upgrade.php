@@ -194,6 +194,37 @@ class Upgrade
 						$db->exec('UPDATE config SET value = NULL WHERE key = \'admin_background\';');
 					}
 				}
+
+				// Fix links of admin homepage
+				$homepage = $db->firstColumn('SELECT value FROM config WHERE key = \'admin_homepage\';');
+
+				if ($homepage) {
+					$file = Files::get($homepage);
+
+					if ($file) {
+						$content = $file->fetch();
+						$new_content = preg_replace_callback(';\[\[((?!\]\]).*)\]\];', function ($match) {
+							$link = explode('|', $match[1]);
+							if (count($link) == 2) {
+								list($label, $link) = $link;
+							}
+							else {
+								$label = $link = $link[0];
+							}
+
+							if (strpos(trim($link), '/') !== false) {
+								return $match[0];
+							}
+
+							$link = sprintf('!web/page.php?p=%s', trim($link));
+							return sprintf('[[%s|%s]]', $label, $link);
+						}, $content);
+
+						if ($new_content != $content) {
+							$file->setContent($new_content);
+						}
+					}
+				}
 			}
 
 			// Vérification de la cohérence des clés étrangères

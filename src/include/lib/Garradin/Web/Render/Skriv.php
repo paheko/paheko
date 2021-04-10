@@ -42,8 +42,9 @@ class Skriv
 	}
 
 	static public function resolveLink(string $uri) {
-		if (substr($uri, 0, 1) == '/') {
-			return WWW_URL . ltrim($uri, '/');
+		$first = substr($uri, 0, 1);
+		if ($first == '/' || $first == '!') {
+			return Utils::getLocalURL($uri);
 		}
 
 		if (strpos(Utils::basename($uri), '.') === false) {
