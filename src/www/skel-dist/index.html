@@ -11,7 +11,7 @@
 
 		<h1><a href="{{ $url }}">{{ $title }}</a></h1>
 		<h5>Posté : {{ $published|relative_date }}</h5>
-		<p>{{ $html|raw|strip_tags|truncate:600 }}</p>
+		<p>{{ $html|raw }}</p>
 	</article>
 </section>
 {{/articles}}
