@@ -204,6 +204,9 @@ class Config extends Entity
 
 			$source['admin_background'] = $file->path;
 		}
+		else {
+			unset($source['admin_background']);
+		}
 
 		parent::importForm($source);
 	}
