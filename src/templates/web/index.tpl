@@ -34,7 +34,7 @@
 
 </nav>
 
-{if $config.site_disabled}
+{if $config.site_disabled && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 	<p class="block alert">
 		Le site public est désactivé. <a href="{"!web/config.php"|local_url}">Activer le site dans la configuration.</a>
 	</p>
