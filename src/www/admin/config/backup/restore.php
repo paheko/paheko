@@ -30,7 +30,7 @@ $form->runIf('restore_file', function () use ($s, &$code, $session) {
 
 	try {
 		$r = $s->restoreFromUpload($_FILES['file'], $session->getUser()->id, $check);
-		Utils::redirect(ADMIN_URL . 'config/donnees/?ok=restore&code=' . (int)$r);
+		Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
 	} catch (UserException $e) {
 		$code = $e->getCode();
 	}
