@@ -7,6 +7,10 @@ require_once __DIR__ . '/_inc.php';
 
 $config = Config::getInstance();
 
+if (!$session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
+	throw new UserException('Accès interdit');
+}
+
 if (f('disable_site') && $form->check('config_site'))
 {
 	$config->set('site_disabled', true);
