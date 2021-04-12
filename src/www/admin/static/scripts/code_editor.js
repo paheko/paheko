@@ -83,10 +83,9 @@
 
 				if (window.confirm('Sauvegarder avant de fermer ?')) {
 					code.saveFile();
-					return false;
 				}
 
-				return true;
+				return false;
 			};
 		}
 		else {
