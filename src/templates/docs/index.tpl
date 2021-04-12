@@ -18,10 +18,10 @@ use Garradin\Entities\Files\File;
 	</aside>
 	<ul>
 		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
 			<li{if $context == File::CONTEXT_TRANSACTION} class="current"{/if}><a href="./?p=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
 		{/if}
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
 			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
