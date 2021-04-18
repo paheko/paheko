@@ -9,6 +9,8 @@ use KD2\SimpleDiff;
 
 require_once __DIR__ . '/_inc.php';
 
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+
 $csrf_key = 'web_page_new';
 
 $parent = qg('parent') ?: null;
