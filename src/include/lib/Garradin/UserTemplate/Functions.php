@@ -126,7 +126,7 @@ class Functions
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
 		}
 		elseif (isset($params['redirect'])) {
-			header('Location: ' . WWW_URL . $params['redirect'], true);
+			Utils::redirect($params['redirect']);
 		}
 		elseif (isset($params['type'])) {
 			header('Content-Type: ' . $params['type'], true);
