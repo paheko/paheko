@@ -96,7 +96,7 @@ class Modifiers
 		return '<p>' . $str . '</p>';
 	}
 
-	static public function protect_contact(string $contact): string
+	static public function protect_contact(?string $contact): string
 	{
 		if (!trim($contact))
 			return '';
