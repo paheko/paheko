@@ -17,7 +17,7 @@ class Install
 {
 	static public function reset(Membres\Session $session, $password, array $options = [])
 	{
-		$config = (object) Config::getInstance()->getConfig();
+		$config = (object) Config::getInstance()->asArray();
 		$user = $session->getUser();
 
 		if (!$session->checkPassword($password, $user->passe))
