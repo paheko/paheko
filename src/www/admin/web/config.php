@@ -41,7 +41,14 @@ if (qg('edit')) {
 		Utils::redirect(Utils::getSelfURI(sprintf('edit=%s&ok%s', rawurlencode($source), $fullscreen)));
 	}, $csrf_key);
 
-	$tpl->assign('edit', ['file' => $source, 'content' => (new Skeleton($source))->raw()]);
+	try {
+		$skel = new Skeleton($source);
+	}
+	catch (\InvalidArgumentException $e) {
+		throw new UserException('Nom de squelette invalide');
+	}
+
+	$tpl->assign('edit', ['file' => $source, 'content' => $skel->raw()]);
 	$tpl->assign('csrf_key', $csrf_key);
 }
 
