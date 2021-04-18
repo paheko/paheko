@@ -20,6 +20,7 @@ $csrf_key = 'cat_edit_' . $cat->id();
 $form->runIf('save', function () use ($cat, $session) {
 	$user = $session->getUser();
 	$cat->importForm();
+	$cat->hidden = (int) f('hidden');
 
 	// Ne pas permettre de modifier la connexion, l'accès à la config et à la gestion des membres
 	// pour la catégorie du membre qui édite les catégories, sinon il pourrait s'empêcher
