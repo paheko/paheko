@@ -39,7 +39,7 @@ class Upgrade
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
 		$session = Session::getInstance();
 		$session->start(true);
-		$session->isLogged();
+		$session->isLogged(true);
 		return true;
 	}
 
