@@ -140,6 +140,10 @@ class Skeleton
 
 	public function raw(): string
 	{
+		if (!$this->exists()) {
+			throw new UserException('Ce fichier n\'existe pas');
+		}
+
 		return $this->file ? $this->file->fetch() : file_get_contents($this->defaultPath());
 	}
 
