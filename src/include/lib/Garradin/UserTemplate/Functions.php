@@ -6,6 +6,7 @@ use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 
+use Garradin\Utils;
 use Garradin\Web\Skeleton;
 
 use const Garradin\WWW_URL;
