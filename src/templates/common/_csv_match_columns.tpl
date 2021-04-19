@@ -6,6 +6,12 @@
 		<dt><label>Correspondance des colonnes</label></dt>
 		<dd>
 			<table class="list auto">
+				<thead>
+					<tr>
+						<th>Colonne du CSV à importer</th>
+						<th>Importer cette colonne comme…</th>
+					</tr>
+				</thead>
 				<tbody>
 				{foreach from=$csv->getFirstLine() key="index" item="csv_field"}
 					<tr>
