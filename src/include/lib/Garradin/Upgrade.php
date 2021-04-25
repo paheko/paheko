@@ -69,6 +69,38 @@ class Upgrade
 				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
 			}
 
+
+			if (version_compare($v, '1.0.0-rc10', '<'))
+			{
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-rc10_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc11', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0_schema.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.0.0-rc14', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-rc14_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.0.0-rc16', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-rc16_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
 			if (version_compare($v, '1.0.1', '<'))
 			{
 				// Missing trigger
