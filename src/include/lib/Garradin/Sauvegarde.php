@@ -465,13 +465,18 @@ class Sauvegarde
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
+		// Empêchons l'admin de se tirer une balle dans le pied
 		if ($user_id)
 		{
-			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM users_categories
-				WHERE id = (SELECT id_category FROM membres WHERE id = ' . (int) $user_id . ')
-				AND perm_config >= ' . Session::ACCESS_ADMIN . '
-				AND perm_connect >= ' . Session::ACCESS_READ);
+			if (version_compare($version, '1.1', '<')) {
+				$sql = 'SELECT 1 FROM membres_categories WHERE id = (SELECT id_categorie FROM membres WHERE id = %d) AND droit_connexion >= %d AND droit_config >= %d';
+			}
+			else {
+				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
+			}
+
+			$sql = sprintf($sql, $user_id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
+			$is_still_admin = $db->querySingle($sql);
 
 			if (!$is_still_admin)
 			{
