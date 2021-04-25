@@ -96,6 +96,9 @@ use Garradin\Entities\Files\File;
 			<td>Répertoire</td>
 			<td></td>
 			<td class="actions">
+			{if $can_write}
+				{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+			{/if}
 			{if $can_delete}
 				{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
 			{/if}
@@ -126,6 +129,9 @@ use Garradin\Entities\Files\File;
 					{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 				{/if}
 				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
+				{if $can_write}
+					{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+				{/if}
 				{if $can_delete}
 					{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
 				{/if}
