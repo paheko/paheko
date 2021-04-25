@@ -7,8 +7,10 @@
 					<select name="action">
 						<option value="">— Choisir une action à effectuer —</option>
 						<option value="move">Changer de catégorie</option>
+						{if !isset($export) || $export != false}
 						<option value="csv">Exporter en tableau CSV</option>
 						<option value="ods">Exporter en classeur Office</option>
+						{/if}
 						<option value="delete">Supprimer</option>
 					</select>
 					<noscript>
