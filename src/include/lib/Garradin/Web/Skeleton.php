@@ -202,22 +202,24 @@ class Skeleton
 	{
 		$sources = [];
 
-		$dir = dir(ROOT . '/www/skel-dist/');
+		$path = ROOT . '/www/skel-dist/';
+		$i = new \DirectoryIterator($path);
+		$i = new \RegexIterator($i, '/\.(html|css|xml|txt)$/', \RegexIterator::MATCH);
 
-		while ($file = $dir->read())
-		{
-			if ($file[0] == '.')
+		foreach ($i as $file) {
+			if ($file->isDot() || $file->isDir()) {
 				continue;
+			}
 
-			$sources[$file] = null;
+			$sources[$file->getFilename()] = null;
 		}
 
-		$dir->close();
+		unset($i);
 
 		$list = Files::list(File::CONTEXT_SKELETON);
 
 		foreach ($list as $file) {
-			if ($file->type != $file::TYPE_FILE) {
+			if ($file->type != $file::TYPE_FILE || substr($file->mime, 0, 5) != 'text/') {
 				continue;
 			}
 
