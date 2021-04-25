@@ -100,13 +100,15 @@
 				</tr>
 			</thead>
 			<tbody>
-			{foreach from=$sources key="source" item="local"}
+			{foreach from=$sources key="source" item="props"}
 				<tr>
-					<td>{if $local.modified}<input type="checkbox" name="select[]" value="{$source}" id="f_source_{$iteration}" /><label for="f_source_{$iteration}"></label>{/if}</td>
+					<td>{if $props.changed}<input type="checkbox" name="select[]" value="{$source}" id="f_source_{$iteration}" /><label for="f_source_{$iteration}"></label>{/if}</td>
 					<th><a href="?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
-					<td>{if $local.modified}{$local.modified|date}{else}<em>(fichier non modifié)</em>{/if}</td>
+					<td>{if $props.changed}{$props.changed|date}{else}<em>(fichier non modifié)</em>{/if}</td>
 					<td class="actions">
+						{if $props.is_text}
 						{linkbutton shape="edit" label="Éditer" href="?edit=%s"|args:$source}
+						{/if}
 					</td>
 				</tr>
 			{/foreach}

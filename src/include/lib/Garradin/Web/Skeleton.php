@@ -204,14 +204,15 @@ class Skeleton
 
 		$path = ROOT . '/www/skel-dist/';
 		$i = new \DirectoryIterator($path);
-		$i = new \RegexIterator($i, '/\.(html|css|xml|txt)$/', \RegexIterator::MATCH);
 
 		foreach ($i as $file) {
 			if ($file->isDot() || $file->isDir()) {
 				continue;
 			}
 
-			$sources[$file->getFilename()] = null;
+			$mime = mime_content_type($file->getRealPath());
+
+			$sources[$file->getFilename()] = ['is_text' => substr($mime, 0, 5) == 'text/', 'changed' => null];
 		}
 
 		unset($i);
@@ -219,11 +220,11 @@ class Skeleton
 		$list = Files::list(File::CONTEXT_SKELETON);
 
 		foreach ($list as $file) {
-			if ($file->type != $file::TYPE_FILE || substr($file->mime, 0, 5) != 'text/') {
+			if ($file->type != $file::TYPE_FILE) {
 				continue;
 			}
 
-			$sources[$file->name] = $file;
+			$sources[$file->name] = ['is_text' => substr($file->mime, 0, 5) == 'text/', 'changed' => $file->modified];
 		}
 
 		ksort($sources);
