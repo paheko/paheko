@@ -54,7 +54,7 @@ class Upgrade
 		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
 
 		try {
-			if (version_compare($v, '1.0.0', '<'))
+			if (version_compare($v, '1.0.0-rc1', '<'))
 			{
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
