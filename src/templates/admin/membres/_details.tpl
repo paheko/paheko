@@ -5,44 +5,47 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 
 <dl class="describe">
 	{foreach from=$champs key="c" item="c_config"}
+	<?php
+	$value = $data->$c ?? null;
+	?>
 	<dt>{$c_config.title}</dt>
 	<dd>
 		{if $c_config.type == 'checkbox'}
-			{if $data->$c}Oui{else}Non{/if}
+			{if $value}Oui{else}Non{/if}
 		{elseif $c_config.type == 'file'}
 			<?php
 			$edit = ($c_config->editable || $mode == 'edit');
 			?>
 			{include file="common/files/_context_list.tpl" limit=1 path="%s/%s"|args:$user_files_path,$c}
-		{elseif empty($data->$c)}
+		{elseif empty($value)}
 			<em>(Non renseigné)</em>
 		{elseif $c == $c_config.champ_identite}
-			<strong>{$data->$c}</strong>
+			<strong>{$value}</strong>
 		{elseif $c_config.type == 'email'}
-			<a href="mailto:{$data->$c|escape:'url'}">{$data->$c}</a>
+			<a href="mailto:{$value|escape:'url'}">{$value}</a>
 			{if $c == 'email' && $show_message_button}
 				{linkbutton href="!membres/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
 		{elseif $c_config.type == 'tel'}
-			<a href="tel:{$data->$c}">{$data->$c|format_tel}</a>
+			<a href="tel:{$value}">{$value|format_tel}</a>
 		{elseif $c_config.type == 'country'}
-			{$data->$c|get_country_name}
+			{$value|get_country_name}
 		{elseif $c_config.type == 'date'}
-			{$data->$c|date_short}
+			{$value|date_short}
 		{elseif $c_config.type == 'datetime'}
-			{$data->$c|date}
+			{$value|date}
 		{elseif $c_config.type == 'password'}
 			*******
 		{elseif $c_config.type == 'multiple'}
 			<ul>
 			{foreach from=$c_config.options key="b" item="name"}
-				{if $data->$c & (0x01 << $b)}
+				{if $value & (0x01 << $b)}
 					<li>{$name}</li>
 				{/if}
 			{/foreach}
 			</ul>
 		{else}
-			{$data->$c|escape|rtrim|nl2br}
+			{$value|escape|rtrim|nl2br}
 		{/if}
 	</dd>
 	{/foreach}
