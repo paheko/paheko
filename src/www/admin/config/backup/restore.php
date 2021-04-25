@@ -6,6 +6,11 @@ require_once __DIR__ . '/../_inc.php';
 $s = new Sauvegarde;
 $code = null; // error code
 
+if (qg('download')) {
+	$s->dump(qg('download'));
+	exit;
+}
+
 $form->runIf('restore', function () use ($s) {
 	if (!f('selected')) {
 		throw new UserException('Aucune sauvegarde sélectionnée');
