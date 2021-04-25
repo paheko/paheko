@@ -14,10 +14,21 @@
 	</dd>
 </dl>
 
-{include file="common/dynamic_list_head.tpl"}
+<?php
+$can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
+?>
+
+{if $can_action}
+	<form method="post" action="{"!membres/action.php"|local_url}">
+{/if}
+
+{include file="common/dynamic_list_head.tpl" check=$can_action}
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
+			{if $can_action}
+			<td class="check">{input type="checkbox" name="selected[]" value=$row.id_user}</td>
+			{/if}
 			<th><a href="../../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td class="money">{$row.paid_amount|raw|money_currency}</td>
@@ -30,7 +41,16 @@
 	{/foreach}
 
 	</tbody>
+
+	{if $can_action}
+		{include file="admin/membres/_list_actions.tpl" colspan=5 export=false}
+	{/if}
+
 </table>
+
+{if $can_action}
+</form>
+{/if}
 
 {pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
 
