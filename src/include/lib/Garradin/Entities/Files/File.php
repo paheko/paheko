@@ -432,7 +432,9 @@ class File extends Entity
 	public function storeFromBase64(string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
-		return $this->store(null, $content);
+		$this->set('modified', new \DateTime);
+		$this->store(null, $content);
+		return $this;
 	}
 
 	/**

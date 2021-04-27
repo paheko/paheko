@@ -555,6 +555,10 @@ class Template extends \KD2\Smartyer
 		}
 		</style>';
 
+		if (($f = $config->get('admin_css')) && ($file = Files::get($f))) {
+			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $file->url() . '?' . $file->modified->getTimestamp());
+		}
+
 		return sprintf($out, $couleur1, $couleur2, $admin_background);
 	}
 
