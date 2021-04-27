@@ -203,6 +203,17 @@ class Transaction extends Entity
 		return $sum;
 	}
 
+	public function getLinesDebitSum()
+	{
+		$sum = 0;
+
+		foreach ($this->getLines() as $line) {
+			$sum += $line->debit;
+		}
+
+		return $sum;
+	}
+
 	public function getAnalyticalId(): ?int
 	{
 		$lines = $this->getLines();
@@ -757,5 +768,24 @@ class Transaction extends Entity
 	public function getTypeName(): string
 	{
 		return self::TYPES_NAMES[$this->type];
+	}
+
+	public function asDetailsArray(): array
+	{
+		$lines = [];
+
+		foreach ($this->getLines() as $line) {
+			$lines[] = $line->asDetailsArray();
+		}
+
+		return [
+			'Libellé'         => $this->label,
+			'Date'            => $this->date,
+			'Pièce comptable' => $this->reference,
+			'Remarques'       => $this->notes,
+			'Total crédit'    => Utils::money_format($this->getLinesCreditSum()),
+			'Total débit'     => Utils::money_format($this->getLinesDebitSum()),
+			'Lignes'          => $lines,
+		];
 	}
 }

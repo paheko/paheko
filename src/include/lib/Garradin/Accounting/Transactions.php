@@ -273,7 +273,13 @@ class Transactions
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			if (null !== $transaction) {
+				$e->setDetails($transaction->asDetailsArray());
+			}
+
+			throw $e;
 		}
 
 		$db->commit();
@@ -353,7 +359,14 @@ class Transactions
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			if (null !== $transaction) {
+				$e->setDetails($transaction->asDetailsArray());
+			}
+
+			throw $e;
 		}
 
 		$db->commit();

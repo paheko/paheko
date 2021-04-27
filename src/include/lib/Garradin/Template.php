@@ -123,8 +123,21 @@ class Template extends \KD2\Smartyer
 		}
 
 		$errors = $form->getErrorMessages(!empty($params['membre']) ? true : false);
-		$errors = array_map([$this, 'escape'], $errors);
-		$errors = array_map('nl2br', $errors);
+
+		foreach ($errors as &$error) {
+			if ($error instanceof UserException) {
+				$message = nl2br($this->escape($error->getMessage()));
+
+				if ($error->hasDetails()) {
+					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();
+				}
+
+				$error = $message;
+			}
+			else {
+				$error = nl2br($this->escape($error));
+			}
+		}
 
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}

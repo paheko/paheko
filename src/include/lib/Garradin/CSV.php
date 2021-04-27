@@ -227,7 +227,7 @@ class CSV
 		$delim = self::findDelimiter($fp);
 		self::skipBOM($fp);
 
-		$line = 1;
+		$line = 0;
 
 		$columns = fgetcsv($fp, 4096, $delim);
 		$columns = array_map('trim', $columns);
