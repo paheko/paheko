@@ -268,6 +268,19 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.4', '<')) {
+				// Set config file names
+				$config = Config::getInstance();
+
+				$file = Files::get(Config::DEFAULT_FILES['admin_background']);
+				$config->set('admin_background', $file ? Config::DEFAULT_FILES['admin_background'] : null);
+
+				$file = Files::get(Config::DEFAULT_FILES['admin_homepage']);
+				$config->set('admin_homepage', $file ? Config::DEFAULT_FILES['admin_homepage'] : null);
+
+				$config->save();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 

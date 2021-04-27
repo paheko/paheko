@@ -10,7 +10,11 @@ use KD2\SMTP;
 
 class Config extends Entity
 {
-	const ADMIN_BACKGROUND_FILENAME = File::CONTEXT_CONFIG . '/admin_bg.png';
+	const DEFAULT_FILES = [
+		'admin_background' => File::CONTEXT_CONFIG . '/admin_bg.png',
+		'admin_homepage' => File::CONTEXT_CONFIG . '/admin_homepage.skriv',
+		'admin_css' => File::CONTEXT_CONFIG . '/admin.css',
+	];
 
 	protected $nom_asso;
 	protected $adresse_asso;
@@ -23,8 +27,6 @@ class Config extends Entity
 
 	protected $champs_membres;
 	protected $categorie_membres;
-
-	protected $admin_homepage;
 
 	protected $frequence_sauvegardes;
 	protected $nombre_sauvegardes;
@@ -39,6 +41,8 @@ class Config extends Entity
 	protected $couleur2;
 
 	protected $admin_background;
+	protected $admin_homepage = 'config/admin_homepage.skriv';
+	protected $admin_css = 'config/admin.css';
 
 	protected $site_disabled;
 
@@ -56,8 +60,6 @@ class Config extends Entity
 
 		'categorie_membres'     => 'int',
 
-		'admin_homepage'        => '?string',
-
 		'frequence_sauvegardes' => '?int',
 		'nombre_sauvegardes'    => '?int',
 
@@ -70,6 +72,8 @@ class Config extends Entity
 		'couleur1'              => '?string',
 		'couleur2'              => '?string',
 		'admin_background'      => '?string',
+		'admin_homepage'        => '?string',
+		'admin_css'             => '?string',
 
 		'site_disabled'         => 'bool',
 	];
@@ -191,15 +195,22 @@ class Config extends Entity
 
 		if (isset($source['admin_background']) && trim($source['admin_background']) == 'RESET') {
 			$source['admin_background'] = null;
+
+			$file = Files::get(self::DEFAULT_FILES['admin_background']);
+
+			if ($file) {
+				$file->delete();
+			}
 		}
 		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
-			$file = Files::get(self::ADMIN_BACKGROUND_FILENAME);
+			$file = Files::get(self::DEFAULT_FILES['admin_background']);
 
 			if ($file) {
 				$file->storeFromBase64($source['admin_background']);
 			}
 			else {
-				$file = File::createFromBase64(Utils::dirname(self::ADMIN_BACKGROUND_FILENAME), Utils::basename(self::ADMIN_BACKGROUND_FILENAME), $source['admin_background']);
+				$path = self::DEFAULT_FILES['admin_background'];
+				$file = File::createFromBase64(Utils::dirname($path), Utils::basename($path), $source['admin_background']);
 			}
 
 			$source['admin_background'] = $file->path;
@@ -237,8 +248,12 @@ class Config extends Entity
 		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
 		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
-		$this->assert(strlen($this->admin_homepage) > 0, 'Page d\'accueil invalide');
 		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');
+
+		// Files can only have one value: their name
+		$this->assert($this->admin_background === null || $this->admin_background === self::DEFAULT_FILES['admin_background']);
+		$this->assert($this->admin_homepage === null || $this->admin_homepage === self::DEFAULT_FILES['admin_homepage']);
+		$this->assert($this->admin_css === null || $this->admin_css === self::DEFAULT_FILES['admin_css']);
 
 		$champs = $this->champs_membres;
 

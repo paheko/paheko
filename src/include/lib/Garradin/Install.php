@@ -149,7 +149,9 @@ class Install
 
 		$welcome_text = $welcome_text ?? sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nCe message peut être modifié dans la 'Configuration'.", $name);
 
-		$file = File::createAndStore(File::CONTEXT_CONFIG, 'admin_homepage.skriv', null, $welcome_text);
+		$path = Config::DEFAULT_FILES['admin_homepage'];
+
+		$file = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $welcome_text);
 		$config->set('admin_homepage', $file->path);
 
         // Import accounting chart

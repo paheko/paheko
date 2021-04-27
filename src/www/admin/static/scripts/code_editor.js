@@ -3,8 +3,6 @@
 	g.script('scripts/lib/code_editor.min.js', function ()
 	{
 		var save_btn = document.querySelector('[name=save]');
-		save_btn.type = 'hidden';
-
 		var code = new codeEditor('f_content');
 
 		code.params.lang = {
@@ -21,7 +19,7 @@
 
 		code.saveFile = function ()
 		{
-			this.textarea.form.submit();
+			save_btn.click();
 		};
 
 		code.resetFile = function (e)
