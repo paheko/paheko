@@ -49,7 +49,7 @@ class Form
 			return true;
 		}
 		catch (UserException $e) {
-			$this->addError($e->getMessage());
+			$this->addError($e);
 			return false;
 		}
 	}
