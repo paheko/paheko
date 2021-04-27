@@ -41,7 +41,7 @@ $parent_path = Utils::dirname($path);
 $quota_used = Files::getUsedQuota();
 $quota_max = Files::getQuota();
 $quota_left = Files::getRemainingQuota();
-$quota_percent = round(($quota_used / $quota_max) * 100);
+$quota_percent = $quota_max ? round(($quota_used / $quota_max) * 100) : 100;
 
 $tpl->assign(compact('path', 'files', 'can_write', 'can_delete', 'can_mkdir', 'can_upload', 'context', 'context_ref', 'breadcrumbs', 'parent_path', 'quota_used', 'quota_max', 'quota_percent', 'quota_left'));
 
