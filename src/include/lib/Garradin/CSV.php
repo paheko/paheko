@@ -157,7 +157,7 @@ class CSV
 		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
 			foreach ($iterator as $row) {
 				foreach ($row as $key => &$v) {
-					if (is_object($v)&& $v instanceof \DateTimeInterface) {
+					if (is_object($v) && $v instanceof \DateTimeInterface) {
 						$v = $v->format('d/m/Y');
 					}
 				}
