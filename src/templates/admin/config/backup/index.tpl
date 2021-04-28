@@ -31,8 +31,7 @@
 		<dd><a href="{$admin_url}membres/import.php?export=csv">Export de la liste des membres au format CSV</a></dd>
 		<dt><strong>Comptabilité</strong> (pour l'exercice courant)</dt>
 		<dd><a href="{$admin_url}acc/years/import.php">Import des données comptables</a></dd>
-		<dd><a href="{$admin_url}acc/years/import.php?export=ods">Export des données comptables au format tableur LibreOffice Calc / Excel</a></dd>
-		<dd><a href="{$admin_url}acc/years/import.php?export=csv">Export des données comptables au format CSV</a></dd>
+		<dd><a href="{$admin_url}acc/years/export.php">Export des données comptables</a></dd>
 	</dl>
 </fieldset>
 
