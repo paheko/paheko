@@ -65,8 +65,7 @@
 				<td><em>{if $year.closed}Clôturé{else}En cours{/if}</em></td>
 				<td>
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-					{linkbutton label="Export CSV" shape="export" href="import.php?id=%d&export=csv"|args:$year.id}
-					{linkbutton label="Export tableur" shape="export" href="import.php?id=%d&export=ods"|args:$year.id}
+					{linkbutton label="Export" shape="export" href="export.php?id=%d"|args:$year.id}
 					{if !$year.closed}
 						{linkbutton label="Import" shape="upload" href="import.php?id=%d"|args:$year.id}
 						{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
