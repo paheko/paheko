@@ -31,6 +31,7 @@
 </fieldset>
 
 <p class="submit">
+	<input type="hidden" name="id" value="{$year.id}" />
 	{button type="submit" name="load" label="Télécharger" shape="download" class="main"}
 </p>
 
