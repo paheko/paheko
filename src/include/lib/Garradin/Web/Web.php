@@ -66,7 +66,7 @@ class Web
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
 		}
 
-		foreach ($new as $file) {
+		foreach (array_keys($new) as $file) {
 			$f = Files::get($file . '/index.txt');
 
 			if (!$f) {
@@ -195,9 +195,7 @@ class Web
 			return;
 		}
 
-		if (Config::getInstance()->get('site_disabled')) {
-			Utils::redirect(ADMIN_URL);
-		}
+		$site_disabled = Config::getInstance()->get('site_disabled');
 
 		// Redirect old categories
 		if (substr($uri, -1) == '/') {
@@ -210,7 +208,7 @@ class Web
 		if ($uri == '') {
 			$skel = 'index.html';
 		}
-		elseif (($page = self::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
+		elseif (!$site_disabled && ($page = self::getByURI($uri)) && $page->status == Page::STATUS_ONLINE) {
 			$skel = $page->template();
 			$page = $page->asTemplateArray();
 		}
@@ -230,6 +228,10 @@ class Web
 			}
 
 			$skel = '404.html';
+		}
+
+		if ($site_disabled && ($skel == '404.html' || $uri == '')) {
+			Utils::redirect(ADMIN_URL);
 		}
 
 		$s = new Skeleton($skel);

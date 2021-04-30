@@ -8,8 +8,7 @@
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$admin_url}acc/years/import.php?id={$year.id}">Import</a></li>
-		<li><a href="{$admin_url}acc/years/import.php?id={$year.id}&amp;export=csv">Export journal général - CSV</a></li>
-		<li><a href="{$admin_url}acc/years/import.php?id={$year.id}&amp;export=ods">Export journal général - tableur</a></li>
+		<li><a href="{$admin_url}acc/years/export.php?id={$year.id}">Export</a></li>
 	</ul>
 </nav>
 
@@ -33,9 +32,11 @@
 		<legend>Import d'écritures</legend>
 		<dl>
 			<dt><label for="f_type_garradin">Format de fichier</label></dt>
-			{input type="radio" name="type" value="garradin" label="Journal général au format CSV Garradin" default="garradin"}
-			{input type="radio" name="type" value="csv" label="Journal au format CSV libre"}
+			{input type="radio" name="type" value="csv" label="Journal au format CSV libre"  default="csv"}
+			<dd class="help">Ce format ne permet d'importer que des écritures simples (un débit et un crédit par écriture) mais convient à la plupart des utilisations.</dd>
 			{include file="common/_csv_help.tpl"}
+			{input type="radio" name="type" value="garradin" label="Journal général au format CSV Garradin"}
+			<dd class="help">Ce format permet d'importer des écritures comportant plusieurs lignes. Le format attendu est identique à l'export de journal général qui peut servir d'exemple.</dd>
 			{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
 			<dd class="help block">
 				- Les lignes comportant un numéro d'écriture existant mettront à jour les écritures correspondant à ces numéros.<br />

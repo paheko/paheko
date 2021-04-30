@@ -106,21 +106,26 @@ class Sauvegarde
 
 	protected function make(string $dest)
 	{
-		// Acquire lock // FIXME use ::backup PHP 7.4.0+ is required
-		// FIXME: use VACUUM INTO instead when SQLite 3.27+ is required
-
+		// Acquire lock
+		$version = \SQLite3::version();
 		$db = DB::getInstance();
-		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
 
-		copy(DB_FILE, $dest);
+		Utils::safe_unlink($dest);
 
-		$db->exec('END TRANSACTION;');
-		unset($db);
+		if ($version['versionNumber'] >= 3027000) {
+			// use VACUUM INTO instead when SQLite 3.27+ is required
+			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($dest)));
+		}
+		else {
+			// use ::backup since PHP 7.4.0+
+			// https://www.php.net/manual/en/sqlite3.backup.php
+			$dest_db = new \SQLite3($dest);
 
-		$db = new \SQLite3($dest, \SQLITE3_OPEN_READWRITE);
-		$db->exec('PRAGMA journal_mode = DELETE;');
-		$db->exec('VACUUM;');
-		$db->close();
+			$db->backup($dest_db);
+			$dest_db->exec('PRAGMA journal_mode = DELETE;');
+			$dest_db->exec('VACUUM;');
+			$db->close();
+		}
 	}
 
 	/**
@@ -465,13 +470,18 @@ class Sauvegarde
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
+		// Empêchons l'admin de se tirer une balle dans le pied
 		if ($user_id)
 		{
-			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM users_categories
-				WHERE id = (SELECT id_category FROM membres WHERE id = ' . (int) $user_id . ')
-				AND perm_config >= ' . Session::ACCESS_ADMIN . '
-				AND perm_connect >= ' . Session::ACCESS_READ);
+			if (version_compare($version, '1.1', '<')) {
+				$sql = 'SELECT 1 FROM membres_categories WHERE id = (SELECT id_categorie FROM membres WHERE id = %d) AND droit_connexion >= %d AND droit_config >= %d';
+			}
+			else {
+				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
+			}
+
+			$sql = sprintf($sql, $user_id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
+			$is_still_admin = $db->querySingle($sql);
 
 			if (!$is_still_admin)
 			{

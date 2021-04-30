@@ -7,6 +7,7 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
+use Garradin\Config;
 use Garradin\CSV;
 use Garradin\CSV_Custom;
 use Garradin\DB;
@@ -16,6 +17,9 @@ use Garradin\UserException;
 
 class Transactions
 {
+	const EXPORT_RAW = 'raw';
+	const EXPORT_FULL = 'full';
+
 	const EXPECTED_CSV_COLUMNS_SELF = ['id', 'type', 'status', 'label', 'date', 'notes', 'reference',
 		'line_id', 'account', 'credit', 'debit', 'line_reference', 'line_label', 'reconciled'];
 
@@ -113,7 +117,23 @@ class Transactions
 	/**
 	 * Return all transactions from year
 	 */
-	static public function export(int $year_id): \Generator
+	static public function export(Year $year, string $format, string $type = self::EXPORT_RAW): void
+	{
+		$header = null;
+
+		if (self::EXPORT_FULL == $type) {
+			$header = ['Numéro', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique'];
+		}
+
+		CSV::export(
+			$format,
+			sprintf('Export comptable - %s - %s', Config::getInstance()->get('nom_asso'), $year->label),
+			self::iterateExport($year->id(), $type),
+			$header
+		);
+	}
+
+	static protected function iterateExport(int $year_id, string $type): \Generator
 	{
 		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
 			l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
@@ -130,7 +150,7 @@ class Transactions
 		$previous_id = null;
 
 		foreach ($res as $row) {
-			if ($previous_id === $row->id) {
+			if ($previous_id === $row->id && $type == self::EXPORT_RAW) {
 				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = null;
 			}
 			else {
@@ -273,7 +293,13 @@ class Transactions
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			if (null !== $transaction) {
+				$e->setDetails($transaction->asDetailsArray());
+			}
+
+			throw $e;
 		}
 
 		$db->commit();
@@ -353,7 +379,14 @@ class Transactions
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			if (null !== $transaction) {
+				$e->setDetails($transaction->asDetailsArray());
+			}
+
+			throw $e;
 		}
 
 		$db->commit();

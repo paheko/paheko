@@ -387,6 +387,7 @@ dialog[open] {
 }
 
 dialog.datepicker {
+    user-select: none;
     position: absolute;
     left: 0;
     margin: 0;

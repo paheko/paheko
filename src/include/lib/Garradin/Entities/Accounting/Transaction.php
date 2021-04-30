@@ -203,6 +203,17 @@ class Transaction extends Entity
 		return $sum;
 	}
 
+	public function getLinesDebitSum()
+	{
+		$sum = 0;
+
+		foreach ($this->getLines() as $line) {
+			$sum += $line->debit;
+		}
+
+		return $sum;
+	}
+
 	public function getAnalyticalId(): ?int
 	{
 		$lines = $this->getLines();
@@ -366,18 +377,15 @@ class Transaction extends Entity
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
-
 		$db = DB::getInstance();
 
-		// ID d'exercice obligatoire
-		if (null === $this->id_year) {
-			throw new \LogicException('Aucun exercice spécifié.');
-		}
+		$this->assert(null !== $this->id_year, 'Aucun exercice spécifié.');
+		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type d\'écriture inconnu : ' . $this->type);
+		$this->assert(null === $this->id_creator || $db->test('membres', 'id = ?', $this->id_creator), 'Le membre créateur de l\'écriture n\'existe pas ou plus');
 
-		if (!$db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?;', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d')))
-		{
-			throw new ValidationException('La date ne correspond pas à l\'exercice sélectionné : ' . $this->date->format('d/m/Y'));
-		}
+		$is_in_year = $db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d'));
+
+		$this->assert($is_in_year, 'La date ne correspond pas à l\'exercice sélectionné : ' . $this->date->format('d/m/Y'));
 
 		$total = 0;
 
@@ -388,13 +396,7 @@ class Transaction extends Entity
 			$total -= $line->debit;
 		}
 
-		if (0 !== $total) {
-			throw new ValidationException(sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
-		}
-
-		if (!array_key_exists($this->type, self::TYPES_NAMES)) {
-			throw new ValidationException('Type d\'écriture inconnu : ' . $this->type);
-		}
+		$this->assert(0 === $total, sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -766,5 +768,24 @@ class Transaction extends Entity
 	public function getTypeName(): string
 	{
 		return self::TYPES_NAMES[$this->type];
+	}
+
+	public function asDetailsArray(): array
+	{
+		$lines = [];
+
+		foreach ($this->getLines() as $line) {
+			$lines[] = $line->asDetailsArray();
+		}
+
+		return [
+			'Libellé'         => $this->label,
+			'Date'            => $this->date,
+			'Pièce comptable' => $this->reference,
+			'Remarques'       => $this->notes,
+			'Total crédit'    => Utils::money_format($this->getLinesCreditSum()),
+			'Total débit'     => Utils::money_format($this->getLinesDebitSum()),
+			'Lignes'          => $lines,
+		];
 	}
 }

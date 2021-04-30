@@ -6,7 +6,7 @@ use Garradin\Files\Files;
 
 require_once __DIR__ . '/../_inc.php';
 
-$quota_used = Files::getUsedQuota();
+$quota_used = Files::getUsedQuota(true);
 
 $form->runIf('reset_ok', function () use ($session) {
 	Install::reset($session, f('passe_verif'));

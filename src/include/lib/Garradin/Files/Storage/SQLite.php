@@ -127,7 +127,7 @@ class SQLite implements StorageInterface
 
 	static public function exists(string $path): bool
 	{
-		return DB::getInstance()->test('files', 'path = ? AND name = ?', Utils::dirname($path), Utils::basename($path));
+		return DB::getInstance()->test('files', 'path = ?', $path);
 	}
 
 	static public function delete(File $file): bool

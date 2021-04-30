@@ -38,7 +38,8 @@ class Upgrade
 		// Voir si l'utilisateur est loggé, on le fait ici pour le cas où
 		// il y aurait déjà eu des entêtes envoyés au navigateur plus bas
 		$session = Session::getInstance();
-		$session->start();
+		$session->start(true);
+		$session->isLogged(true);
 		return true;
 	}
 
@@ -53,7 +54,7 @@ class Upgrade
 		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
 
 		try {
-			if (version_compare($v, '1.0.0', '<'))
+			if (version_compare($v, '1.0.0-rc1', '<'))
 			{
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
@@ -66,6 +67,38 @@ class Upgrade
 				$chart->code = 'PCA2018';
 				$chart->save();
 				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
+			}
+
+
+			if (version_compare($v, '1.0.0-rc10', '<'))
+			{
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-rc10_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc11', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0_schema.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.0.0-rc14', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-rc14_migration.sql');
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.0.0-rc16', '<'))
+			{
+				// Missing trigger
+				$db->beginSchemaUpdate();
+				$db->import(ROOT . '/include/data/1.0.0-rc16_migration.sql');
+				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.0.1', '<'))
@@ -181,6 +214,71 @@ class Upgrade
 					$page->load((array) $data);
 					$page->syncSearch();
 				}
+			}
+
+			if (version_compare($v, '1.1.1', '<')) {
+				// Reset admin_background if the file does not exist
+				$bg = $db->firstColumn('SELECT value FROM config WHERE key = \'admin_background\';');
+
+				if ($bg) {
+					$file = Files::get($bg);
+
+					if (!$file) {
+						$db->exec('UPDATE config SET value = NULL WHERE key = \'admin_background\';');
+					}
+				}
+
+				// Fix links of admin homepage
+				$homepage = $db->firstColumn('SELECT value FROM config WHERE key = \'admin_homepage\';');
+
+				if ($homepage) {
+					$file = Files::get($homepage);
+
+					if ($file) {
+						$content = $file->fetch();
+						$new_content = preg_replace_callback(';\[\[((?!\]\]).*)\]\];', function ($match) {
+							$link = explode('|', $match[1]);
+							if (count($link) == 2) {
+								list($label, $link) = $link;
+							}
+							else {
+								$label = $link = $link[0];
+							}
+
+							if (strpos(trim($link), '/') !== false) {
+								return $match[0];
+							}
+
+							$link = sprintf('!web/page.php?p=%s', trim($link));
+							return sprintf('[[%s|%s]]', $label, $link);
+						}, $content);
+
+						if ($new_content != $content) {
+							Files::disableQuota();
+							$file->setContent($new_content);
+						}
+					}
+				}
+			}
+
+			if (version_compare($v, '1.1.3', '<')) {
+				// Missing trigger
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.1.3_migration.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.4', '<')) {
+				// Set config file names
+				$config = Config::getInstance();
+
+				$file = Files::get(Config::DEFAULT_FILES['admin_background']);
+				$config->set('admin_background', $file ? Config::DEFAULT_FILES['admin_background'] : null);
+
+				$file = Files::get(Config::DEFAULT_FILES['admin_homepage']);
+				$config->set('admin_homepage', $file ? Config::DEFAULT_FILES['admin_homepage'] : null);
+
+				$config->save();
 			}
 
 			// Vérification de la cohérence des clés étrangères

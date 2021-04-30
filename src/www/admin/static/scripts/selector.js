@@ -39,50 +39,56 @@ rows.forEach((e, k) => {
 
 document.addEventListener('keydown', (evt) => {
 	let current = document.querySelector('tbody tr.focused:not(.hidden)') || document.querySelector('tbody tr');
+	let available = [];
+	let idx = 0;
+
+	for (var i = 0; i < rows.length; i++) {
+		if (rows[i].classList.contains('hidden')) {
+			continue;
+		}
+
+		available.push(rows[i]);
+
+		if (rows[i] === current) {
+			idx = available.length - 1;
+		}
+	}
+
+	if (!available.length) {
+		return false;
+	}
 
 	if (evt.key == 'ArrowUp') { // Previous item
-		while (current && (current = current.previousElementSibling)) {
-			if (!current.classList.contains('hidden')) {
-				break;
-			}
-		}
+		idx--;
 	}
 	else if (evt.key == 'ArrowDown') {
-		while (current && (current = current.nextElementSibling)) {
-			if (!current.classList.contains('hidden')) {
-				break;
-			}
-		}
+		idx++;
 	}
 	else if (evt.key == 'PageUp') {
-		let i = 0;
-		while (current && (current = current.previousElementSibling)) {
-			if (i++ < 10) {
-				continue;
-			}
-			if (!current.classList.contains('hidden')) {
-				break;
-			}
-		}
+		idx-=10;
 	}
 	else if (evt.key == 'PageDown') {
-		let i = 0;
-		while (current && (current = current.nextElementSibling)) {
-			if (i++ < 10) {
-				continue;
-			}
-			if (!current.classList.contains('hidden')) {
-				break;
-			}
-		}
+		idx+=10;
+	}
+	else if (evt.key == 'Home') {
+		idx = 0;
+	}
+	else if (evt.key == 'End') {
+		idx = available.length;
 	}
 	else {
 		return true;
 	}
 
-	if (current) {
-		current.querySelector('button').focus();
+	if (idx < 0) {
+		idx = 0;
 	}
+	else if (idx >= available.length - 1) {
+		idx = available.length - 1;
+	}
+
+	current = available[idx];
+	current.querySelector('button').focus();
 
 	evt.preventDefault();
 	return false;

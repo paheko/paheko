@@ -140,6 +140,10 @@ class Skeleton
 
 	public function raw(): string
 	{
+		if (!$this->exists()) {
+			throw new UserException('Ce fichier n\'existe pas');
+		}
+
 		return $this->file ? $this->file->fetch() : file_get_contents($this->defaultPath());
 	}
 
@@ -198,17 +202,20 @@ class Skeleton
 	{
 		$sources = [];
 
-		$dir = dir(ROOT . '/www/skel-dist/');
+		$path = ROOT . '/www/skel-dist/';
+		$i = new \DirectoryIterator($path);
 
-		while ($file = $dir->read())
-		{
-			if ($file[0] == '.')
+		foreach ($i as $file) {
+			if ($file->isDot() || $file->isDir()) {
 				continue;
+			}
 
-			$sources[$file] = null;
+			$mime = mime_content_type($file->getRealPath());
+
+			$sources[$file->getFilename()] = ['is_text' => substr($mime, 0, 5) == 'text/', 'changed' => null];
 		}
 
-		$dir->close();
+		unset($i);
 
 		$list = Files::list(File::CONTEXT_SKELETON);
 
@@ -217,7 +224,7 @@ class Skeleton
 				continue;
 			}
 
-			$sources[$file->name] = $file;
+			$sources[$file->name] = ['is_text' => substr($file->mime, 0, 5) == 'text/', 'changed' => $file->modified];
 		}
 
 		ksort($sources);

@@ -20,15 +20,18 @@ if (!$page) {
 
 $csrf_key = 'attach_' . $page->id();
 
-$form->runIf('delete', function () use ($session) {
-	$file = Files::get(f('delete'));
+$form->runIf('delete', function () use ($page, $session) {
+	$path = Utils::dirname($page->file_path) . '/' . f('delete');
+	$file = Files::get($path);
 
 	if (!$file || !$file->checkDeleteAccess($session)) {
 		throw new UserException('Vous ne pouvez pas supprimer ce fichier');
 	}
 
 	$file->delete();
-}, $csrf_key, Utils::getSelfURI());
+
+	Utils::redirect(Utils::getSelfURI());
+}, $csrf_key);
 
 
 $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {

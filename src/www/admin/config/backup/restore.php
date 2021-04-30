@@ -6,6 +6,11 @@ require_once __DIR__ . '/../_inc.php';
 $s = new Sauvegarde;
 $code = null; // error code
 
+if (qg('download')) {
+	$s->dump(qg('download'));
+	exit;
+}
+
 $form->runIf('restore', function () use ($s) {
 	if (!f('selected')) {
 		throw new UserException('Aucune sauvegarde sélectionnée');
@@ -30,7 +35,7 @@ $form->runIf('restore_file', function () use ($s, &$code, $session) {
 
 	try {
 		$r = $s->restoreFromUpload($_FILES['file'], $session->getUser()->id, $check);
-		Utils::redirect(ADMIN_URL . 'config/donnees/?ok=restore&code=' . (int)$r);
+		Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
 	} catch (UserException $e) {
 		$code = $e->getCode();
 	}

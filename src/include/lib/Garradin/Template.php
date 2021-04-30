@@ -10,6 +10,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
 use Garradin\UserTemplate\CommonModifiers;
 use Garradin\Web\Render\Skriv;
+use Garradin\Files\Files;
 
 class Template extends \KD2\Smartyer
 {
@@ -122,8 +123,21 @@ class Template extends \KD2\Smartyer
 		}
 
 		$errors = $form->getErrorMessages(!empty($params['membre']) ? true : false);
-		$errors = array_map([$this, 'escape'], $errors);
-		$errors = array_map('nl2br', $errors);
+
+		foreach ($errors as &$error) {
+			if ($error instanceof UserException) {
+				$message = nl2br($this->escape($error->getMessage()));
+
+				if ($error->hasDetails()) {
+					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();
+				}
+
+				$error = $message;
+			}
+			else {
+				$error = nl2br($this->escape($error));
+			}
+		}
 
 		return '<div class="block error"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
 	}
@@ -524,8 +538,8 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if ($f = $config->get('admin_background')) {
-			$admin_background = WWW_URL . $f;
+		if (($f = $config->get('admin_background')) && ($file = Files::get($f))) {
+			$admin_background = $file->url() . '?' . $file->modified->getTimestamp();
 		}
 
 		// Transformation Hexa vers décimal
@@ -540,6 +554,10 @@ class Template extends \KD2\Smartyer
 			--gBgImage: url("%s");
 		}
 		</style>';
+
+		if (($f = $config->get('admin_css')) && ($file = Files::get($f))) {
+			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $file->url() . '?' . $file->modified->getTimestamp());
+		}
 
 		return sprintf($out, $couleur1, $couleur2, $admin_background);
 	}

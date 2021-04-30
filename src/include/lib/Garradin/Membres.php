@@ -213,7 +213,11 @@ class Membres
             }
         }
 
-        if (!empty($data['passe']) && trim($data['passe']))
+        if (isset($data['delete_password'])) {
+            $data['passe'] = null;
+            unset($data['delete_password']);
+        }
+        elseif (!empty($data['passe']) && trim($data['passe']))
         {
             Session::checkPasswordValidity($data['passe']);
             $data['passe'] = Session::hashPassword($data['passe']);

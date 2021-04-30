@@ -18,10 +18,10 @@ use Garradin\Entities\Files\File;
 	</aside>
 	<ul>
 		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
 			<li{if $context == File::CONTEXT_TRANSACTION} class="current"{/if}><a href="./?p=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
 		{/if}
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
 			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
@@ -70,7 +70,9 @@ use Garradin\Entities\Files\File;
 <table class="list">
 	<thead>
 		<tr>
-			<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+			{if $can_delete}
+				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
+			{/if}
 			<th>Nom</th>
 			<td>Modifié</td>
 			<td>Type</td>
@@ -93,7 +95,14 @@ use Garradin\Entities\Files\File;
 			<td></td>
 			<td>Répertoire</td>
 			<td></td>
-			<td class="actions">{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}</td>
+			<td class="actions">
+			{if $can_write}
+				{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+			{/if}
+			{if $can_delete}
+				{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+			{/if}
+			</td>
 		</tr>
 		{else}
 		</tr>
@@ -120,7 +129,12 @@ use Garradin\Entities\Files\File;
 					{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 				{/if}
 				{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
-				{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+				{if $can_write}
+					{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
+				{/if}
+				{if $can_delete}
+					{linkbutton href="!common/files/delete.php?p=%s"|args:$file.path label="Supprimer" shape="delete" target="_dialog"}
+				{/if}
 			</td>
 		</tr>
 		{/if}

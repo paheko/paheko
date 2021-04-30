@@ -190,11 +190,18 @@ class File extends Entity
 		return $this->rename($target . '/' . $this->name);
 	}
 
+	public function changeFileName(string $new_name): bool
+	{
+		$new_name = self::filterName($new_name);
+		return $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
+	}
+
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
+		self::validateFileName(Utils::basename($new_path));
 
-		if ($new_path == $this->path || 0 === strpos($new_path, $this->path)) {
+		if ($new_path == $this->path || 0 === strpos($new_path . '/', $this->path . '/')) {
 			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
 		}
 
@@ -425,7 +432,9 @@ class File extends Entity
 	public function storeFromBase64(string $encoded_content): self
 	{
 		$content = base64_decode($encoded_content);
-		return $this->store(null, $content);
+		$this->set('modified', new \DateTime);
+		$this->store(null, $content);
+		return $this;
 	}
 
 	/**

@@ -83,13 +83,14 @@ class Page extends Entity
 		$page->importForm($data);
 		$page->published = new \DateTime;
 		$page->modified = new \DateTime;
-		$page->file_path = $page->filepath();
 		$page->type = $type;
 
 		$db = DB::getInstance();
 		if ($db->test(self::TABLE, 'uri = ?', $page->uri)) {
 			$page->importForm(['uri' => $page->uri . date('-Y-m-d-His')]);
 		}
+
+		$page->file_path = $page->filepath(false);
 
 		return $page;
 	}
@@ -161,29 +162,32 @@ class Page extends Entity
 		return $this->path;
 	}
 
-	public function syncFile(): void
+	public function syncFile(string $path): void
 	{
 		$export = $this->export();
-		$path = $this->filepath();
-		$target = $this->filepath(false);
 
-		// Move parent directory if needed
-		if ($path !== $target) {
-			$dir = Files::get(Utils::dirname($path));
-			$dir->rename(Utils::dirname($target));
-			$this->set('file_path', $target);
-			$this->_file = null;
-		}
+		$exists = Files::callStorage('exists', $path);
 
-		if (!$this->file()) {
-			$file = $this->_file = File::createAndStore(Utils::dirname($target), Utils::basename($target), null, $export);
-			$this->set('modified', new \DateTime);
+		// Create file if required
+		if (!$exists) {
+			$file = $this->_file = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $export);
 		}
-		elseif ($this->file()->fetch() !== $export) {
+		else {
+			$target = $this->filepath(false);
+
+			// Move parent directory if needed
+			if ($path !== $target) {
+				$dir = Files::get(Utils::dirname($path));
+				$dir->rename(Utils::dirname($target));
+				$this->_file = null;
+			}
+
 			$file = $this->file();
-			$file->set('modified', new \DateTime);
-			$this->set('modified', clone $file->modified);
-			$file->store(null, $this->export());
+
+			// Or update file
+			if ($file->fetch() !== $export) {
+				$file->store(null, $export);
+			}
 		}
 
 		$this->syncSearch();
@@ -197,8 +201,13 @@ class Page extends Entity
 
 	public function save(): bool
 	{
-		$this->syncFile();
+		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
+			$this->set('file_path', $this->filepath(false));
+		}
+
+		$current_path = $this->_modified['file_path'] ?? $this->file_path;
 		parent::save();
+		$this->syncFile($current_path);
 
 		return true;
 	}

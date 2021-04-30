@@ -7,6 +7,8 @@ require_once __DIR__ . '/_inc.php';
 
 $config = Config::getInstance();
 
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+
 if (f('disable_site') && $form->check('config_site'))
 {
 	$config->set('site_disabled', true);
@@ -21,6 +23,10 @@ elseif (f('enable_site') && $form->check('config_site'))
 }
 
 $form->runIf('reset', function () {
+	if (!f('select')) {
+		return;
+	}
+
 	Skeleton::resetSelected(f('select'));
 }, 'squelettes', Utils::getSelfURI('reset_ok'));
 
@@ -35,7 +41,14 @@ if (qg('edit')) {
 		Utils::redirect(Utils::getSelfURI(sprintf('edit=%s&ok%s', rawurlencode($source), $fullscreen)));
 	}, $csrf_key);
 
-	$tpl->assign('edit', ['file' => $source, 'content' => (new Skeleton($source))->raw()]);
+	try {
+		$skel = new Skeleton($source);
+	}
+	catch (\InvalidArgumentException $e) {
+		throw new UserException('Nom de squelette invalide');
+	}
+
+	$tpl->assign('edit', ['file' => $source, 'content' => $skel->raw()]);
 	$tpl->assign('csrf_key', $csrf_key);
 }
 

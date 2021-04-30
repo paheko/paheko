@@ -3,8 +3,10 @@
 <nav class="tabs">
 	<aside>
 		{linkbutton shape="search" label="Rechercher" target="_dialog" href="search.php"}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 		{linkbutton shape="plus" label="Nouvelle page" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_page,$current_path}
 		{linkbutton shape="plus" label="Nouvelle catégorie" target="_dialog" href="new.php?type=%d&parent=%s"|args:$type_category,$current_path}
+		{/if}
 	</aside>
 	<ul>
 		<li class="current"><a href="./">Gestion du site web</a></li>
@@ -29,12 +31,14 @@
 	{if $current_path}
 		{linkbutton href="?p=%s"|args:$parent label="Retour à la catégorie parente" shape="left"}
 		{linkbutton href="page.php?p=%s"|args:$current_path label="Prévisualiser cette catégorie" shape="image"}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 		{linkbutton href="edit.php?p=%s"|args:$current_path label="Éditer cette catégorie" shape="edit"}
+		{/if}
 	{/if}
 
 </nav>
 
-{if $config.site_disabled}
+{if $config.site_disabled && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 	<p class="block alert">
 		Le site public est désactivé. <a href="{"!web/config.php"|local_url}">Activer le site dans la configuration.</a>
 	</p>
@@ -54,8 +58,10 @@
 					{/if}
 					{linkbutton shape="menu" label="Sous-catégories et pages" href="?p=%s"|args:$p.path}
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
+					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
 					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
+					{/if}
 				</td>
 			</tr>
 			{/foreach}
@@ -85,8 +91,10 @@
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
+					{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 					{linkbutton shape="edit" label="Éditer" href="edit.php?p=%s"|args:$p.path}
 					{linkbutton shape="delete" label="Supprimer" target="_dialog" href="delete.php?p=%s"|args:$p.path}
+					{/if}
 				</td>
 			</tr>
 			{/foreach}

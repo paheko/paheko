@@ -891,6 +891,11 @@ class Utils
     {
         if (!isset(self::$collator) && function_exists('collator_create')) {
             self::$collator = \Collator::create('fr_FR');
+
+            // This is what makes the comparison case insensitive
+            // https://www.php.net/manual/en/collator.setstrength.php
+            self::$collator->setAttribute(\Collator::STRENGTH, \Collator::SECONDARY);
+
             // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
             // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
             // without: 1, 10, 101, 11, 2
@@ -900,8 +905,14 @@ class Utils
             return self::$collator->compare($a, $b);
         }
 
-        $a = strtoupper(self::transliterateToAscii($a));
-        $b = strtoupper(self::transliterateToAscii($b));
+        if (function_exists('\mb_convert_case')) {
+            $a = \mb_convert_case($a, \MB_CASE_LOWER);
+            $b = \mb_convert_case($b, \MB_CASE_LOWER);
+        }
+        else {
+            $a = strtoupper(self::transliterateToAscii($a));
+            $b = strtoupper(self::transliterateToAscii($b));
+        }
 
         return strcmp($a, $b);
     }

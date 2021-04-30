@@ -46,10 +46,9 @@
 
 				if (window.confirm('Sauvegarder avant de fermer ?')) {
 					save();
-					return false;
 				}
 
-				return true;
+				return false;
 			};
 		}
 

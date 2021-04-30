@@ -51,6 +51,10 @@ if (f('save'))
                 $data[$key] = f($key);
             }
 
+            if (f('delete_password')) {
+                $data['delete_password'] = true;
+            }
+
             if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user->id != $membre->id)
             {
                 $data['id_category'] = f('id_category');

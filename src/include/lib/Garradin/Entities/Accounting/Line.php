@@ -6,6 +6,7 @@ use Garradin\DB;
 use Garradin\Entity;
 use Garradin\ValidationException;
 use Garradin\Utils;
+use Garradin\Accounting\Accounts;
 
 class Line extends Entity
 {
@@ -68,5 +69,16 @@ class Line extends Entity
 			INNER JOIN acc_transactions t ON t.id = ?
 			INNER JOIN acc_years y ON y.id = t.id_year
 			WHERE a.id = ? AND a.id_chart = y.id_chart;', $this->id_transaction, $this->id_account), 'Le compte sélectionné ne correspond pas à l\'exercice');
+	}
+
+	public function asDetailsArray(): array
+	{
+		return [
+			'Compte'    => $this->id_account ? Accounts::getSelectorLabel($this->id_account) : null,
+			'Libellé'   => $this->label,
+			'Référence' => $this->reference,
+			'Crédit'    => Utils::money_format($this->credit),
+			'Débit'     => Utils::money_format($this->debit),
+		];
 	}
 }

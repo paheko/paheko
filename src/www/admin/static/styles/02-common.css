@@ -20,6 +20,16 @@ span.alert, b.alert {
     margin-bottom: .8em;
 }
 
+.block table {
+    margin: 1rem 0;
+}
+
+.block table th, .block table td {
+    vertical-align: top;
+    padding: .2rem .4rem;
+    border: 1px solid #666;
+}
+
 .alert.block, .error.block, .confirm.block, .help.block {
     border: 1px solid #ccc;
     padding: .5em;

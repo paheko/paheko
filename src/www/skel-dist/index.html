@@ -3,15 +3,9 @@
 {{#articles order="published DESC" future=false limit=1}}
 <section class="articles main">
 	<article>
-		{{#images parent=$path limit=1}}
-		<aside>
-			<a href="{{$.url}}"><img src="{{$thumb_url}}" alt="" /></a>
-		</aside>
-		{{/images}}
-
 		<h1><a href="{{ $url }}">{{ $title }}</a></h1>
 		<h5>Posté : {{ $published|relative_date }}</h5>
-		<p>{{ $html|raw|strip_tags|truncate:600 }}</p>
+		<p>{{ $html|raw }}</p>
 	</article>
 </section>
 {{/articles}}
