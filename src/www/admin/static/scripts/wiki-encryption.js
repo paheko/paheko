@@ -185,7 +185,7 @@
 		{
 			if (!encryptPassword)
 			{
-				encryptPassword = window.prompt('Mot de passe à utiliser ?');
+				wikiDecrypt();
 			}
 
 			if (!encryptPassword)
