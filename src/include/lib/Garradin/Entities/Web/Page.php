@@ -49,10 +49,12 @@ class Page extends Entity
 
 	const FORMAT_SKRIV = 'skriv';
 	const FORMAT_ENCRYPTED = 'skriv/encrypted';
+	const FORMAT_MARKDOWN = 'markdown';
 
 	const FORMATS_LIST = [
 		self::FORMAT_SKRIV => 'SkrivML',
 		self::FORMAT_ENCRYPTED => 'Chiffré',
+		self::FORMAT_MARKDOWN => 'Markdown',
 	];
 
 	const STATUS_ONLINE = 'online';
