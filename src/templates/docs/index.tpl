@@ -136,7 +136,7 @@ use Garradin\Entities\Files\File;
 							{linkbutton href="!common/files/preview.php?p=%s"|args:$file.path label="Voir" shape="eye" target="_dialog" data-mime=$file.mime}
 						{/if}
 						{linkbutton href=$file->url(true) label="Télécharger" shape="download"}
-						{if $can_write && ($context == File::CONTEXT_SKELETON || $context == File::CONTEXT_DOCUMENTS)}
+						{if $can_write}
 							{linkbutton href="!common/files/rename.php?p=%s"|args:$file.path label="Renommer" shape="minus" target="_dialog"}
 						{/if}
 						{if $can_delete}
