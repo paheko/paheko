@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-class DynamicList
+class DynamicList implements \Countable
 {
 	protected $columns;
 	protected $tables;
@@ -73,14 +73,14 @@ class DynamicList
 		$this->group = $value;
 	}
 
-	public function count()
+	public function count(): int
 	{
 		if (null === $this->count_result) {
 			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->tables, $this->conditions);
 			$this->count_result = DB::getInstance()->firstColumn($sql);
 		}
 
-		return $this->count_result;
+		return (int) $this->count_result;
 	}
 
 	public function export(string $name, string $format = 'csv')

@@ -270,4 +270,31 @@ class Files
 	{
 		self::$quota = false;
 	}
+
+	static public function getVirtualTableName(): string
+	{
+		if (FILE_STORAGE_BACKEND == 'SQLite') {
+			return 'files';
+		}
+
+		return 'tmp_files';
+	}
+
+	static public function syncVirtualTable(string $parent = '')
+	{
+		if (FILE_STORAGE_BACKEND == 'SQLite') {
+			// No need to create a virtual table, use the real one
+			return;
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
+
+		foreach (Files::list(File::CONTEXT_TRANSACTION) as $file) {
+			$db->insert('tmp_files', $file->asArray(true));
+		}
+
+		$db->commit();
+	}
 }
