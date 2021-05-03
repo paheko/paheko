@@ -7,6 +7,8 @@ use Garradin\Entities\Files\File;
 use Garradin\DB;
 use Garradin\Utils;
 
+use const Garradin\DATA_ROOT;
+
 /**
  * This class provides storage in the file system
  * You need to configure FILE_STORAGE_CONFIG to give a file path
@@ -235,14 +237,14 @@ class FileSystem implements StorageInterface
 	 */
 	static public function getQuota(): float
 	{
-		$quota = @disk_total_space(DATA_ROOT);
-		return $quota === false ? \PHP_FLOAT_MAX : (float) $quota;
+		$quota = disk_total_space(self::_getRoot());
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
 	static public function getRemainingQuota(): float
 	{
-		$quota = @disk_free_space(DATA_ROOT);
-		return $quota === false ? \PHP_FLOAT_MAX : (float) $quota;
+		$quota = @disk_free_space(self::_getRoot());
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
 	static public function truncate(): void

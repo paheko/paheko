@@ -201,13 +201,13 @@ class SQLite implements StorageInterface
 	static public function getQuota(): float
 	{
 		$quota = @disk_total_space(DATA_ROOT);
-		return $quota === false ? \PHP_FLOAT_MAX : (float) $quota;
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
 	static public function getRemainingQuota(): float
 	{
 		$quota = @disk_free_space(DATA_ROOT);
-		return $quota === false ? \PHP_FLOAT_MAX : (float) $quota;
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
 	static public function truncate(): void
