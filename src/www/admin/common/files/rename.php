@@ -18,10 +18,6 @@ if (!$file->checkWriteAccess($session)) {
 
 $context = $file->context();
 
-if ($context != File::CONTEXT_DOCUMENTS && $context != File::CONTEXT_SKELETON) {
-	throw new UserException('Vous n\'avez pas le droit de renommer ce fichier.');
-}
-
 $csrf_key = 'file_rename_' . $file->pathHash();
 
 $form->runIf('rename', function () use ($file) {
