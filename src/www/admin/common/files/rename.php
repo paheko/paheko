@@ -13,12 +13,12 @@ if (!$file) {
 }
 
 if (!$file->checkWriteAccess($session)) {
-    throw new UserException('Vous n\'avez pas le droit de supprimer ce fichier.');
+    throw new UserException('Vous n\'avez pas le droit de modifier ce fichier.');
 }
 
 $context = $file->context();
 
-if ($context == File::CONTEXT_CONFIG || $context == File::CONTEXT_WEB) {
+if ($context != File::CONTEXT_DOCUMENTS && $context != File::CONTEXT_SKELETON) {
 	throw new UserException('Vous n\'avez pas le droit de renommer ce fichier.');
 }
 
