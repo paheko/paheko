@@ -60,4 +60,4 @@ $tpl->assign('garradin_website', WEBSITE);
 
 $tpl->display('admin/config/plugins.tpl');
 
-Plugins::upgradeAllIfRequired();
+Plugin::upgradeAllIfRequired();
