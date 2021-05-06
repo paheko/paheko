@@ -24,11 +24,11 @@ class Web
 		$results = Files::search($search, File::CONTEXT_WEB . '%');
 
 		foreach ($results as &$result) {
-			$result->uri = Utils::dirname(substr($result->path, strlen(File::CONTEXT_WEB) + 1));
+			$result->path = Utils::dirname(substr($result->path, strlen(File::CONTEXT_WEB) + 1));
 			$result->breadcrumbs = [];
 			$path = '';
 
-			foreach (explode('/', $result->uri) as $part) {
+			foreach (explode('/', $result->path) as $part) {
 				$path = trim($path . '/' . $part, '/');
 				$result->breadcrumbs[$path] = $part;
 			}
