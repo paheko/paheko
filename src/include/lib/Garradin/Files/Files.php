@@ -221,25 +221,25 @@ class Files
 		return $breadcrumbs;
 	}
 
-	static public function getQuota(): int
+	static public function getQuota(): float
 	{
 		return FILE_STORAGE_QUOTA ?? self::callStorage('getQuota');
 	}
 
-	static public function getUsedQuota(bool $force_refresh = false): int
+	static public function getUsedQuota(bool $force_refresh = false): float
 	{
 		if ($force_refresh || Static_Cache::expired('used_quota', 3600)) {
 			$quota = self::callStorage('getTotalSize');
 			Static_Cache::store('used_quota', $quota);
 		}
 		else {
-			$quota = (int) Static_Cache::get('used_quota');
+			$quota = (float) Static_Cache::get('used_quota');
 		}
 
 		return $quota;
 	}
 
-	static public function getRemainingQuota(bool $force_refresh = false): int
+	static public function getRemainingQuota(bool $force_refresh = false): float
 	{
 		if (FILE_STORAGE_QUOTA !== null) {
 			return FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
@@ -256,7 +256,7 @@ class Files
 
 		$remaining = self::getRemainingQuota(true);
 
-		if (($remaining - $size) < 0) {
+		if (($remaining - (float) $size) < 0) {
 			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
 		}
 	}
@@ -269,5 +269,32 @@ class Files
 	static public function disableQuota(): void
 	{
 		self::$quota = false;
+	}
+
+	static public function getVirtualTableName(): string
+	{
+		if (FILE_STORAGE_BACKEND == 'SQLite') {
+			return 'files';
+		}
+
+		return 'tmp_files';
+	}
+
+	static public function syncVirtualTable(string $parent = '')
+	{
+		if (FILE_STORAGE_BACKEND == 'SQLite') {
+			// No need to create a virtual table, use the real one
+			return;
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
+
+		foreach (Files::list(File::CONTEXT_TRANSACTION) as $file) {
+			$db->insert('tmp_files', $file->asArray(true));
+		}
+
+		$db->commit();
 	}
 }

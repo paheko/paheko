@@ -38,7 +38,7 @@ release: test minify
 		rm -f font/*.css font/*.json
 	cd /tmp/garradin-build/garradin/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
-	cd /tmp/garradin-build/garradin/src/plugins; \
+	cd /tmp/garradin-build/garradin/src/data; mkdir plugins && cd plugins; \
 		wget https://fossil.kd2.org/garradin-plugins/uv/welcome.tar.gz
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};

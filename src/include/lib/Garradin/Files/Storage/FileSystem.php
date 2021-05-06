@@ -7,6 +7,8 @@ use Garradin\Entities\Files\File;
 use Garradin\DB;
 use Garradin\Utils;
 
+use const Garradin\DATA_ROOT;
+
 /**
  * This class provides storage in the file system
  * You need to configure FILE_STORAGE_CONFIG to give a file path
@@ -210,7 +212,7 @@ class FileSystem implements StorageInterface
 		return Utils::knatcasesort($files);
 	}
 
-	static public function getTotalSize(): int
+	static public function getTotalSize(): float
 	{
 		if (null !== self::$_size) {
 			return self::$_size;
@@ -224,7 +226,7 @@ class FileSystem implements StorageInterface
 			$total += $p->getSize();
 		}
 
-		self::$_size = (int) $total;
+		self::$_size = (float) $total;
 
 		return self::$_size;
 	}
@@ -233,16 +235,16 @@ class FileSystem implements StorageInterface
 	 * @see https://www.crazyws.fr/dev/fonctions-php/fonction-disk-free-space-et-disk-total-space-pour-ovh-2JMH9.html
 	 * @see https://github.com/jdel/sspks/commit/a890e347f32e9e3e50a0dd82398947633872bf38
 	 */
-	static public function getQuota(): int
+	static public function getQuota(): float
 	{
-		$quota = @disk_total_space(self::_getRoot());
-		return $quota === false ? \PHP_INT_MAX : (int) $quota;
+		$quota = disk_total_space(self::_getRoot());
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
-	static public function getRemainingQuota(): int
+	static public function getRemainingQuota(): float
 	{
 		$quota = @disk_free_space(self::_getRoot());
-		return $quota === false ? \PHP_INT_MAX : (int) $quota;
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
 	static public function truncate(): void

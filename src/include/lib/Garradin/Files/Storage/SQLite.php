@@ -189,25 +189,25 @@ class SQLite implements StorageInterface
 		return true;
 	}
 
-	static public function getTotalSize(): int
+	static public function getTotalSize(): float
 	{
-		return (int) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
+		return (float) DB::getInstance()->firstColumn('SELECT SUM(size) FROM files;');
 	}
 
 	/**
 	 * @see https://www.crazyws.fr/dev/fonctions-php/fonction-disk-free-space-et-disk-total-space-pour-ovh-2JMH9.html
 	 * @see https://github.com/jdel/sspks/commit/a890e347f32e9e3e50a0dd82398947633872bf38
 	 */
-	static public function getQuota(): int
+	static public function getQuota(): float
 	{
 		$quota = @disk_total_space(DATA_ROOT);
-		return $quota === false ? \PHP_INT_MAX : (int) $quota;
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
-	static public function getRemainingQuota(): int
+	static public function getRemainingQuota(): float
 	{
 		$quota = @disk_free_space(DATA_ROOT);
-		return $quota === false ? \PHP_INT_MAX : (int) $quota;
+		return $quota === false ? (float) \PHP_INT_MAX : (float) $quota;
 	}
 
 	static public function truncate(): void

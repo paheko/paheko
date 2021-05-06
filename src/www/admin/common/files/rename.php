@@ -18,7 +18,7 @@ if (!$file->checkWriteAccess($session)) {
 
 $context = $file->context();
 
-if ($context != File::CONTEXT_DOCUMENTS && $context != File::CONTEXT_SKELETON) {
+if ($context == File::CONTEXT_CONFIG || $context == File::CONTEXT_WEB) {
 	throw new UserException('Vous n\'avez pas le droit de renommer ce fichier.');
 }
 
