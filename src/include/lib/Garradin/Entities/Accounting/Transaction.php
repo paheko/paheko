@@ -314,6 +314,8 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
+		$exists = $this->exists();
+
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
@@ -336,7 +338,7 @@ class Transaction extends Entity
 		}
 
 		// Remove flag
-		if ((self::TYPE_DEBT == $this->type || self::TYPE_CREDIT == $this->type) && $this->_related) {
+		if (!$exists && $this->_related) {
 			$this->_related->markPaid();
 			$this->_related->save();
 		}
@@ -397,6 +399,9 @@ class Transaction extends Entity
 		}
 
 		$this->assert(0 === $total, sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
+
+		$this->assert($db->test('acc_years', 'id = ?', $this->id_year), 'L\'exercice sélectionné n\'existe pas');
+		$this->assert($this->id_creator === null || $db->test('membres', 'id = ?', $this->id_creator), 'Le compte membre créateur de l\'écriture n\'existe pas');
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -466,11 +471,11 @@ class Transaction extends Entity
 				throw new ValidationException('Type d\'écriture inconnu');
 			}
 
-			if (empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
-				$this->addStatus(self::STATUS_WAITING);
+			if (!empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
+				$this->set('type', self::TYPE_ADVANCED);
 			}
-			else {
-				$this->removeStatus(self::STATUS_WAITING);
+			elseif (!$this->exists() && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
+				$this->addStatus(self::STATUS_WAITING);
 			}
 
 			if (empty($source['amount'])) {
