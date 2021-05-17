@@ -291,7 +291,7 @@ class Files
 		$db->begin();
 		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
 
-		foreach (Files::list(File::CONTEXT_TRANSACTION) as $file) {
+		foreach (Files::list($parent) as $file) {
 			$db->insert('tmp_files', $file->asArray(true));
 		}
 
