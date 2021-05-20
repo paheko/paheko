@@ -104,12 +104,7 @@
 
 		window.te_insertFile = function (file)
 		{
-			if (config.format == 'markdown') {
-				var tag = '[' + file + '](#file:' + file + ')';
-			}
-			else {
-				var tag = '<<file|'+file+'>>';
-			}
+			var tag = '<<file|'+file+'>>';
 
 			t.insertAtPosition(t.getSelection().start, tag);
 
@@ -118,20 +113,15 @@
 
 		window.te_insertImage = function (file, position, caption)
 		{
-			if (config.format == 'markdown') {
-				var tag = '![' + caption + '](#file:' + file + '?500px)';
-			}
-			else {
-				var tag = '<<image|' + file;
+			var tag = '<<image|' + file;
 
-				if (position)
-					tag += '|' + position;
+			if (position)
+				tag += '|' + position;
 
-				if (caption)
-					tag += '|' + caption;
+			if (caption)
+				tag += '|' + caption;
 
-				tag += '>>';
-			}
+			tag += '>>';
 
 			t.insertAtPosition(t.getSelection().start, tag);
 
