@@ -129,7 +129,7 @@ use Garradin\Entities\Files\File;
 					<td>{$file.mime}</td>
 					<td>{$file.size|size_in_bytes}</td>
 					<td class="actions">
-						{if $can_write && $file->getEditor()}
+						{if $can_write && $file->editorType()}
 							{linkbutton href="!common/files/edit.php?p=%s"|args:$file.path label="Modifier" shape="edit" target="_dialog" data-dialog-height="90%"}
 						{/if}
 						{if $file->canPreview()}
