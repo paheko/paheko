@@ -25,11 +25,7 @@ class Parsedown extends ParsedownExtra
 		$this->BlockTypes['['][]= 'TOC';
 
 		parent::__construct();
-		$this->skriv = new Skriv;
-
-		if ($file) {
-			$this->skriv->isRelativeTo($file);
-		}
+		$this->skriv = new Skriv($file);
 	}
 
 	protected function blockSkrivExtension(array $line): ?array

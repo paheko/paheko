@@ -2,17 +2,30 @@
 
 namespace Garradin\Web\Render;
 
-use Garradin\Utils;
 use Garradin\Entities\Files\File;
+use Garradin\Utils;
 
 use const Garradin\{WWW_URL, ADMIN_URL};
 
-trait AttachmentAwareTrait
+abstract class AbstractRender
 {
 	protected $current_path;
 	protected $context;
 	protected $link_prefix;
 	protected $link_suffix;
+
+	protected $file;
+
+	public function __construct(?File $file)
+	{
+		$this->file = $file;
+
+		if ($file) {
+			$this->isRelativeTo($file);
+		}
+	}
+
+	abstract public function render(?string $content = null, array $options = []): string;
 
 	protected function resolveAttachment(string $uri) {
 		$prefix = $this->current_path;
@@ -51,7 +64,7 @@ trait AttachmentAwareTrait
 		$this->link_suffix = '';
 
 		if ($this->context === File::CONTEXT_WEB) {
-			$this->link_prefix = WWW_URL . '/';
+			$this->link_prefix = WWW_URL;
 			$this->current_path = Utils::basename(Utils::dirname($file->path));
 		}
 		else {

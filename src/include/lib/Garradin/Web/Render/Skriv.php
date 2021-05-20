@@ -11,35 +11,28 @@ use KD2\SkrivLite;
 
 use const Garradin\{ADMIN_URL, WWW_URL};
 
-class Skriv
+class Skriv extends AbstractRender
 {
-	use AttachmentAwareTrait;
+	protected $skriv;
 
-	static protected $skriv;
-
-	public function __construct()
+	public function __construct(?File $file)
 	{
-		if (!self::$skriv)
-		{
-			self::$skriv = new \KD2\SkrivLite;
-			self::$skriv->registerExtension('file', [$this, 'SkrivFile']);
-			self::$skriv->registerExtension('fichier', [$this, 'SkrivFile']);
-			self::$skriv->registerExtension('image', [$this, 'SkrivImage']);
+		parent::__construct($file);
 
-			// Enregistrer d'autres extensions éventuellement
-			Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
-		}
+		$this->skriv = new SkrivLite;
+		$this->skriv->registerExtension('file', [$this, 'SkrivFile']);
+		$this->skriv->registerExtension('fichier', [$this, 'SkrivFile']);
+		$this->skriv->registerExtension('image', [$this, 'SkrivImage']);
+
+		// Enregistrer d'autres extensions éventuellement
+		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
 	}
 
-	public function render(?File $file, ?string $content = null, array $options = []): string
+	public function render(?string $content = null, array $options = []): string
 	{
-		$skriv =& self::$skriv;
+		$skriv =& $this->skriv;
 
-		if ($file) {
-			$this->isRelativeTo($file);
-		}
-
-		$str = $content ?? $file->fetch();
+		$str = $content ?? $this->file->fetch();
 
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
 			return $this->resolveAttachment($match[1]);
@@ -58,9 +51,9 @@ class Skriv
 
 	public function callExtension(array $match)
 	{
-		$method = new \ReflectionMethod(self::$skriv, '_callExtension');
+		$method = new \ReflectionMethod($this->skriv, '_callExtension');
 		$method->setAccessible(true);
-		return $method->invoke(self::$skriv, $match);
+		return $method->invoke($this->skriv, $match);
 	}
 
 	/**
