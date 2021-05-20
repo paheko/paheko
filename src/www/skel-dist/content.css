@@ -47,20 +47,20 @@
     font-weight: bold;
 }
 
-.web-content #toc {
+.web-content .toc {
     border: 1px solid rgba(0, 0, 0, 0.2);
     background: rgba(0, 0, 0, 0.1);
     padding: .3rem;
     width: max-content;
 }
 
-.web-content #toc ul {
+.web-content .toc ol {
     list-style: none;
     counter-reset: item;
     margin: .5rem 0 .5rem .5rem;
 }
 
-.web-content #toc ul li:before {
+.web-content .toc ol li:before {
     content: counters(item, ".") " ";
     counter-increment: item;
     color: #666;

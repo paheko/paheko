@@ -28,10 +28,6 @@ class Markdown
 
 		$str = $content ?? $file->fetch();
 
-		$str = preg_replace_callback('/\(#file:([^\]\h]+)\)/', function ($match) {
-			return sprintf('(%s)', $this->resolveAttachment($match[1]));
-		}, $str);
-
 		$str = $parsedown->text($str);
 
 		$str = CommonModifiers::typo($str);
