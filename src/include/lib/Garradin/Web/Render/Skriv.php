@@ -17,7 +17,7 @@ class Skriv
 
 	static protected $skriv;
 
-	public function render(?File $file, ?string $content = null, array $options = []): string
+	public function __construct()
 	{
 		if (!self::$skriv)
 		{
@@ -28,7 +28,10 @@ class Skriv
 			// Enregistrer d'autres extensions éventuellement
 			Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
 		}
+	}
 
+	public function render(?File $file, ?string $content = null, array $options = []): string
+	{
 		$skriv =& self::$skriv;
 
 		if ($file) {
@@ -50,6 +53,13 @@ class Skriv
 		}, $str);
 
 		return sprintf('<div class="web-content">%s</div>', $str);
+	}
+
+	public function callExtension(array $match)
+	{
+		$method = new \ReflectionMethod(self::$skriv, '_callExtension');
+		$method->setAccessible(true);
+		return $method->invoke(self::$skriv, $match);
 	}
 
 	/**

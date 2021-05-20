@@ -9,27 +9,18 @@ use Garradin\Utils;
 use Garradin\Files\Files;
 use Garradin\UserTemplate\CommonModifiers;
 
-use Parsedown;
-use ParsedownExtra;
-use ParsedownToc;
-
 use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Markdown
 {
 	use AttachmentAwareTrait;
 
-	static protected $parsedown;
-
 	public function render(?File $file, ?string $content = null, array $options = []): string
 	{
-		if (!self::$parsedown)
-		{
-			self::$parsedown = new ParsedownToc;
-			self::$parsedown->setBreaksEnabled(true);
-			self::$parsedown->setUrlsLinked(true);
-			self::$parsedown->setSafeMode(true);
-		}
+		$parsedown = new Parsedown($file);
+		$parsedown->setBreaksEnabled(true);
+		$parsedown->setUrlsLinked(true);
+		$parsedown->setSafeMode(true);
 
 		if ($file) {
 			$this->isRelativeTo($file);
@@ -41,7 +32,7 @@ class Markdown
 			return sprintf('(%s)', $this->resolveAttachment($match[1]));
 		}, $str);
 
-		$str = self::$parsedown->text($str);
+		$str = $parsedown->text($str);
 
 		$str = CommonModifiers::typo($str);
 
