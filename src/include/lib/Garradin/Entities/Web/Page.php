@@ -8,7 +8,7 @@ use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
-use Garradin\Web\Render\Skriv;
+use Garradin\Web\Render\Render;
 
 use KD2\DB\EntityManager as EM;
 
@@ -49,9 +49,11 @@ class Page extends Entity
 
 	const FORMAT_SKRIV = 'skriv';
 	const FORMAT_ENCRYPTED = 'skriv/encrypted';
+	const FORMAT_MARKDOWN = 'markdown';
 
 	const FORMATS_LIST = [
 		self::FORMAT_SKRIV => 'SkrivML',
+		self::FORMAT_MARKDOWN => 'MarkDown',
 		self::FORMAT_ENCRYPTED => 'Chiffré',
 	];
 
@@ -137,19 +139,13 @@ class Page extends Entity
 		if (!$this->file()) {
 			throw new \LogicException('File does not exist: '  . $this->file_path);
 		}
-		if ($this->format == self::FORMAT_SKRIV) {
-			return \Garradin\Web\Render\Skriv::render($this->file(), $this->content, $options);
-		}
-		else if ($this->format == self::FORMAT_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($this->file(), $this->content);
-		}
 
-		throw new \LogicException('Invalid format: ' . $this->format);
+		return Render::render($this->format, $this->file(), $this->content, $options);
 	}
 
 	public function preview(string $content): string
 	{
-		return Skriv::render($this->file(), $content, ['prefix' => '#']);
+		return Render::render($this->format, $this->file(), $content, ['prefix' => '#']);
 	}
 
 	public function filepath(bool $stored = true): string

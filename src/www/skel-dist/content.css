@@ -1,6 +1,6 @@
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
-.web-content ul, .web-content ol, .web-content table, .web-content blockquote {
-    margin-bottom: .8em;
+.web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
+    margin: .8em 0;
 }
 
 .web-content ul, .web-content ol, .web-content dd {
@@ -13,6 +13,23 @@
 
 .web-content ol {
     list-style-type: decimal;
+}
+
+.web-content blockquote::before {
+    content: "”";
+    color: #999;
+    display: block;
+    position: absolute;
+    font-style: italic;
+    font-size: 3rem;
+    line-height: 2rem;
+    margin-left: -3rem;
+}
+
+.web-content blockquote {
+    font-size: 1.1em;
+    padding-left: 3rem;
+    margin: 1rem 0;
 }
 
 .web-content table {
@@ -28,6 +45,25 @@
 .web-content table th {
     background: #eee;
     font-weight: bold;
+}
+
+.web-content #toc {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    padding: .3rem;
+    width: max-content;
+}
+
+.web-content #toc ul {
+    list-style: none;
+    counter-reset: item;
+    margin: .5rem 0 .5rem .5rem;
+}
+
+.web-content #toc ul li:before {
+    content: counters(item, ".") " ";
+    counter-increment: item;
+    color: #666;
 }
 
 .web-content aside.file {

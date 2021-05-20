@@ -14,6 +14,7 @@ use Garradin\Membres\Session;
 use Garradin\Static_Cache;
 use Garradin\Utils;
 use Garradin\Entities\Web\Page;
+use Garradin\Web\Render\Render;
 
 use Garradin\Files\Files;
 
@@ -701,22 +702,30 @@ class File extends Entity
 	public function render(array $options = [])
 	{
 		$type = $this->customType();
+		$content = $this->fetch();
+
 		/*
 		if (substr($this->name, -strlen(self::FILE_EXT_HTML)) == self::FILE_EXT_HTML) {
 			return \Garradin\Web\Render\HTML::render($this, null, $options);
 		}*/
 
 		if ($type == self::FILE_EXT_SKRIV) {
-			return \Garradin\Web\Render\Skriv::render($this, null, $options);
+			$format = Render::FORMAT_SKRIV;
 		}
 		else if ($type == self::FILE_EXT_ENCRYPTED) {
-			return \Garradin\Web\Render\EncryptedSkriv::render($this, null);
+			$format = Render::FORMAT_ENCRYPTED;
+		}
+		else if ($type == self::FILE_EXT_MARKDOWN) {
+			$format = Render::FORMAT_MARKDOWN;
 		}
 		else if (substr($this->mime, 0, 5) == 'text/') {
 			return sprintf('<pre>%s</pre>', htmlspecialchars($this->fetch()));
 		}
+		else {
+			throw new \LogicException('Cannot render file of this type');
+		}
 
-		throw new \LogicException('Cannot render file of this type');
+		return Render::render($format, $this, $this->fetch(), $options);
 	}
 
 	public function checkReadAccess(?Session $session): bool
