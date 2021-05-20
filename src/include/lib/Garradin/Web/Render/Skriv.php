@@ -23,6 +23,7 @@ class Skriv
 		{
 			self::$skriv = new \KD2\SkrivLite;
 			self::$skriv->registerExtension('file', [$this, 'SkrivFile']);
+			self::$skriv->registerExtension('fichier', [$this, 'SkrivFile']);
 			self::$skriv->registerExtension('image', [$this, 'SkrivImage']);
 
 			// Enregistrer d'autres extensions éventuellement
@@ -100,11 +101,13 @@ class Skriv
 	 */
 	public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
 	{
-		static $align_values = ['left', 'right', 'center'];
+		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
 
 		$name = $args[0] ?? null;
 		$align = $args[1] ?? null;
 		$caption = $args[2] ?? null;
+
+		$align = strtr($align, $align_replace);
 
 		if (!$name || !$this->current_path)
 		{
