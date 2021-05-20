@@ -2,8 +2,7 @@
 
 namespace Garradin\Web\Render;
 
-//use Parsedown;
-use ParsedownExtra;
+use Parsedown as Parent_Parsedown;
 
 use Garradin\Entities\Files\File;
 
@@ -12,19 +11,26 @@ use Garradin\Utils;
 /**
  * Custom Parsedown extension to enable the use of Skriv extensions inside Markdown markup
  *
+ * Also adds support for footnotes and Table of Contents
+ *
  * @see https://github.com/erusev/parsedown/wiki/Tutorial:-Create-Extensions
  */
-class Parsedown extends ParsedownExtra
+class Parsedown extends Parent_Parsedown
 {
 	protected $skriv;
-	protected $rawTextTOC;
+	protected $toc = [];
 
 	function __construct(?File $file)
 	{
 		$this->BlockTypes['<'][] = 'SkrivExtension';
 		$this->BlockTypes['['][]= 'TOC';
 
-		parent::__construct();
+		# identify footnote definitions before reference definitions
+		array_unshift($this->BlockTypes['['], 'Footnote');
+
+		# identify footnote markers before before links
+		array_unshift($this->InlineTypes['['], 'FootnoteMarker');
+
 		$this->skriv = new Skriv($file);
 	}
 
@@ -116,6 +122,98 @@ class Parsedown extends ParsedownExtra
 
 		return $out;
 	}
+
+	/**
+	 * Footnotes implementation, inspired by ParsedownExtra
+	 * We're not using ParsedownExtra as it's buggy and unmaintained
+	 */
+	protected function blockFootnote(array $line): ?array
+	{
+		if (preg_match('/^\[\^(.+?)\]:[ ]?(.*)$/', $line['text'], $matches))
+		{
+			$block = array(
+				'footnotes' => [$matches[1] => $matches[2]],
+			);
+
+			return $block;
+		}
+
+		return null;
+	}
+
+	protected function blockFootnoteContinue(array $line, array $block): ?array
+	{
+		if ($line['text'][0] === '[' && preg_match('/^\[\^(.+?)\]: ?(.*)$/', $line['text'], $matches))
+		{
+			$block['footnotes'][$matches[1]] = $matches[2];
+			return $block;
+		}
+
+		end($block['footnotes']);
+		$last = key($block['footnotes']);
+
+		if (isset($block['interrupted']))
+		{
+			if ($line['indent'] >= 4)
+			{
+				$block['footnotes'][$last] .= "\n\n" . $line['text'];
+
+				return $block;
+			}
+		}
+		else
+		{
+			$block['footnotes'][$last] .= "\n" . $line['text'];
+
+			return $block;
+		}
+	}
+
+	protected function blockFootnoteComplete(array $in)
+	{
+		$html = '';
+
+		foreach ($in['footnotes'] as $name => $value) {
+			$html .= sprintf('<dt id="fn-%s"><a href="#fn-ref-%1$s">%1$s</a></dt><dd>%s</dd>', htmlspecialchars($name), $this->text($value));
+		}
+
+		$out = [
+			'element' => [
+				'name'                   => 'dl',
+				'attributes'             => ['class' => 'footnotes'],
+				'rawHtml'                => $html,
+				'allowRawHtmlInSafeMode' => true,
+			],
+		];
+
+		return $out;
+	}
+
+
+	protected function inlineFootnoteMarker($Excerpt)
+	{
+		if (preg_match('/^\[\^(.+?)\]/', $Excerpt['text'], $matches))
+		{
+			$name = htmlspecialchars($matches[1]);
+
+			$Element = array(
+				'name' => 'sup',
+				'attributes' => ['id' => 'fn-ref-'.$name],
+				'handler' => 'element',
+				'text' => array(
+					'name' => 'a',
+					'attributes' => array('href' => '#fn-'.$name, 'class' => 'footnote-ref'),
+					'text' => $name,
+				),
+			);
+
+			return [
+				'extent' => strlen($matches[0]),
+				'element' => $Element,
+			];
+		}
+	}
+
 
 	public function text($text)
 	{
