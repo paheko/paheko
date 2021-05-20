@@ -14,18 +14,18 @@ class Render
 	static public function render(string $format, File $file, string $content = null, array $options = [])
 	{
 		if ($format == self::FORMAT_SKRIV) {
-			$r = new Skriv;
+			$r = new Skriv($file);
 		}
 		else if ($format == self::FORMAT_ENCRYPTED) {
-			$r = new EncryptedSkriv;
+			$r = new EncryptedSkriv($file);
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
-			$r = new Markdown;
+			$r = new Markdown($file);
 		}
 		else {
 			throw new \LogicException('Invalid format: ' . $format);
 		}
 
-		return $r->render($file, $content, $options);
+		return $r->render($content, $options);
 	}
 }
