@@ -74,7 +74,7 @@ class Parsedown extends ParsedownExtra
 
 	protected function blockTOC(array $line): ?array
 	{
-		if (false === strpos($line['text'], '[toc]')) {
+		if (!preg_match('/^\[(?:toc|sommaire)\]$/', trim($line['text']))) {
 			return null;
 		}
 
