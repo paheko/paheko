@@ -8,7 +8,7 @@ use const Garradin\ADMIN_URL;
 
 class EncryptedSkriv
 {
-	static public function render(File $file, ?string $content = null): string
+	public function render(File $file, ?string $content = null): string
 	{
 		$tpl = Template::getInstance();
 		$content = $content ?? $file->fetch();
