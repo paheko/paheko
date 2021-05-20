@@ -32,6 +32,40 @@
     margin: 1rem 0;
 }
 
+.web-content a.footnote-ref, .web-content .footnotes dt a {
+    color: blue;
+}
+
+.web-content a.footnote-ref::before, .web-content .footnotes dt a::before {
+    content: "[";
+}
+
+.web-content a.footnote-ref::after, .web-content .footnotes dt a::after {
+    content: "]";
+}
+
+.web-content dl.footnotes {
+    display: grid;
+    grid-template-columns: .1fr .9fr;
+    border-top: 2px solid #999;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.web-content code {
+    background: rgba(100, 100, 100, 0.2);
+    padding: .2rem;
+}
+
+.web-content dl.footnotes dd {
+    margin: 0;
+    margin-bottom: 1rem;
+}
+
+.web-content dl.footnotes dd p {
+    margin: 0;
+    margin-bottom: 1rem;
+
 .web-content table {
     border-collapse: collapse;
 }
