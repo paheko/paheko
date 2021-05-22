@@ -926,7 +926,7 @@ class Utils
     static public function unicodeCaseFold(string $str): string
     {
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
-            self::$transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC; Lower');
+            self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();');
         }
 
         if (isset(self::$transliterator)) {

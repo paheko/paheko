@@ -204,7 +204,7 @@ class DB extends SQLite3
      * @see https://sqlite.org/src/file?name=ext/icu/icu.c&ci=trunk
      */
     static public function unicodeLike($pattern, $value, $escape = null) {
-        $id = $pattern . $escape;
+        $id = md5($pattern . $escape);
 
         if (!array_key_exists($id, self::$unicode_patterns_cache)) {
             $pattern = Utils::unicodeCaseFold($pattern);
@@ -212,7 +212,7 @@ class DB extends SQLite3
             $pattern = preg_quote($pattern, '/');
             $pattern = preg_replace('/' . $escape . '%/', '.*', $pattern);
             $pattern = preg_replace('/' . $escape . '_/', '.', $pattern);
-            $pattern = '/^' . $pattern . '$/';
+            $pattern = '/' . $pattern . '/';
             self::$unicode_patterns_cache[$id] = $pattern;
         }
 
