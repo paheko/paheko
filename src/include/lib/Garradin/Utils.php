@@ -923,8 +923,12 @@ class Utils
      *
      * @see https://www.matthecat.com/supprimer-les-accents-d-une-chaine-avec-php.html
      */
-    static public function unicodeCaseFold(string $str): string
+    static public function unicodeCaseFold(?string $str): string
     {
+        if (null === $str || trim($str) === '') {
+            return '';
+        }
+
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
             self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();');
         }
