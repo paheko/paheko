@@ -16,6 +16,8 @@ class DB extends SQLite3
 
     protected $_version = -1;
 
+    static protected $unicode_patterns_cache = [];
+
     static public function getInstance($create = false, $readonly = false)
     {
         if (null === self::$_instance) {
@@ -51,6 +53,7 @@ class DB extends SQLite3
 
         $this->db->createFunction('dirname', [Utils::class, 'dirname']);
         $this->db->createFunction('basename', [Utils::class, 'basename']);
+        $this->db->createFunction('like', [self::class, 'unicodeLike']);
         $this->db->createCollation('NOCASE', [Utils::class, 'unicodeCaseComparison']);
     }
 
@@ -187,5 +190,34 @@ class DB extends SQLite3
             $this->db->exec('PRAGMA legacy_alter_table = OFF;');
             $this->db->exec('PRAGMA foreign_keys = ON;');
         }
+    }
+
+    /**
+     * This is a rewrite of SQLite LIKE function that is transforming
+     * the pattern and the value to lowercase ascii, so that we can match
+     * "émilie" with "emilie".
+     *
+     * This is probably not the best way to do that, but we have to resort to that
+     * as ICU extension is rarely available.
+     *
+     * @see https://www.sqlite.org/c3ref/strlike.html
+     * @see https://sqlite.org/src/file?name=ext/icu/icu.c&ci=trunk
+     */
+    static public function unicodeLike($pattern, $value, $escape = null) {
+        $id = $pattern . $escape;
+
+        if (!array_key_exists($id, self::$unicode_patterns_cache)) {
+            $pattern = Utils::unicodeCaseFold($pattern);
+            $escape = $escape ? '(?!' . preg_quote($escape, '/') . ')' : '';
+            $pattern = preg_quote($pattern, '/');
+            $pattern = preg_replace('/' . $escape . '%/', '.*', $pattern);
+            $pattern = preg_replace('/' . $escape . '_/', '.', $pattern);
+            $pattern = '/^' . $pattern . '$/';
+            self::$unicode_patterns_cache[$id] = $pattern;
+        }
+
+        $value = Utils::unicodeCaseFold($value);
+
+        return (bool) preg_match(self::$unicode_patterns_cache[$id], $value);
     }
 }
