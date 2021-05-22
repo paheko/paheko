@@ -154,7 +154,7 @@ class Import
 						$v = trim($v);
 						$found = array_search($v, $champs_multiples[$name]->options);
 
-						if ($found) {
+						if ($found !== false) {
 							$data[$name] |= 0x01 << $found;
 						}
 					}
