@@ -119,7 +119,7 @@ class File extends Entity
 	];
 
 	// https://book.hacktricks.xyz/pentesting-web/file-upload
-	const FORBIDDEN_EXTENSIONS = '!cgi|exe|sh|bash|com|pif|jspx?|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so!i';
+	const FORBIDDEN_EXTENSIONS = '!^(?:cgi|exe|sh|bash|com|pif|jspx?|js[wxv]|action|do|php(?:s|\d+)?|pht|phtml?|shtml|phar|htaccess|inc|cfml?|cfc|dbm|swf|pl|perl|py|pyc|asp|so)$!i';
 
 	static public function getColumns(): array
 	{
