@@ -126,7 +126,7 @@ class Skeleton
 			$ut->display();
 		}
 		elseif ($this->file) {
-			$this->file->display();
+			echo $this->file->fetch();
 		}
 		else {
 			readfile($this->defaultPath());
