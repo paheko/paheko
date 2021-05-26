@@ -102,5 +102,9 @@
 	</table>
 {/if}
 
+{if !count($categories) && !count($pages)}
+	<p class="alert block">Il n'y a aucune page ou sous-catégorie dans cette catégorie.</p>
+{/if}
+
 
 {include file="admin/_foot.tpl"}
