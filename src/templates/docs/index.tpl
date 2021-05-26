@@ -153,7 +153,7 @@ use Garradin\Entities\Files\File;
 				<tr>
 					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 					<td class="actions" colspan="5">
-						<em>Pour les fichiers cochés :</em>
+						<em>Pour les fichiers sélectionnés&nbsp;:</em>
 							<input type="hidden" name="parent" value="{$path}" />
 							<select name="action">
 								<option value="">— Choisir une action à effectuer —</option>
@@ -165,10 +165,10 @@ use Garradin\Entities\Files\File;
 							<noscript>
 								{button type="submit" value="OK" shape="right" label="Valider"}
 							</noscript>
-						{/if}
 					</td>
 				</tr>
 			</tfoot>
+			{/if}
 		</table>
 	{elseif $list instanceof \Garradin\DynamicList}
 
@@ -202,6 +202,9 @@ use Garradin\Entities\Files\File;
 
 	{/if}
 
+	<p class="actions">
+		{linkbutton href="!docs/zip.php?p=%s"|args:$path label="Télécharger ce répertoire (ZIP)" shape="download"}
+	</p>
 
 </form>
 {else}
