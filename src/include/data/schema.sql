@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS services_fees
     formula TEXT NULL, -- Formule de calcul du montant de la cotisation, si cotisation dynamique (exemple : membres.revenu_imposable * 0.01)
 
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL si le type n'est pas associé automatiquement à la compta
-    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL si le type n'est pas associé automatiquement à la compta
+    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL if fee is not linked to accounting, this is reset using a trigger if the year is deleted
+    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL if fee is not linked to accounting
 );
 
 CREATE TABLE IF NOT EXISTS services_users
@@ -168,6 +168,11 @@ CREATE TABLE IF NOT EXISTS acc_years
 );
 
 CREATE INDEX IF NOT EXISTS acc_years_closed ON acc_years (closed);
+
+-- Make sure id_account is reset when a year is deleted
+CREATE TRIGGER IF NOT EXISTS acc_years_delete BEFORE DELETE ON acc_years BEGIN
+    UPDATE services_fees SET id_account = NULL, id_year = NULL WHERE id_year = OLD.id;
+END;
 
 CREATE TABLE IF NOT EXISTS acc_transactions
 -- Opérations comptables
