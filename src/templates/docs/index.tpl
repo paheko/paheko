@@ -58,7 +58,7 @@ use Garradin\Entities\Files\File;
 	</aside>
 </nav>
 
-{if !$can_mkdir && !$context_ref}
+{if !$can_mkdir && !$context_ref && $can_upload}
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
