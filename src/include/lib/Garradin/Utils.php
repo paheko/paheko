@@ -903,17 +903,11 @@ class Utils
         }
 
         if (isset(self::$collator)) {
-            return self::$collator->compare($a, $b);
+            return (int) self::$collator->compare($a, $b);
         }
 
-        if (function_exists('\mb_convert_case')) {
-            $a = \mb_convert_case($a, \MB_CASE_LOWER);
-            $b = \mb_convert_case($b, \MB_CASE_LOWER);
-        }
-        else {
-            $a = strtoupper(self::transliterateToAscii($a));
-            $b = strtoupper(self::transliterateToAscii($b));
-        }
+        $a = strtoupper(self::transliterateToAscii($a));
+        $b = strtoupper(self::transliterateToAscii($b));
 
         return strcmp($a, $b);
     }
