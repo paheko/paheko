@@ -4,6 +4,7 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\Utils;
 use Garradin\Entities\Services\Reminder;
@@ -27,11 +28,29 @@ class Reminders
 
 	static public function listSentForUser(int $user_id)
 	{
-		return DB::getInstance()->get('SELECT rs.date AS sent_date, r.delay, s.label, rs.id AS sent_id, s.id AS service_id
-			FROM services_reminders_sent rs
-			INNER JOIN services_reminders r ON r.id = rs.id_reminder
-			INNER JOIN services s ON s.id = rs.id_service
-			WHERE rs.id_user = ?;', $user_id);
+		$columns = [
+			'label' => [
+				'label' => 'Activité',
+				'select' => 's.label',
+			],
+			'delay' => [
+				'label' => 'Délai du rappel',
+				'select' => 'r.delay',
+			],
+			'date' => [
+				'label' => 'Date d\'envoi',
+				'select' => 'srs.date',
+			],
+		];
+
+		$tables = 'services_reminders_sent srs
+			INNER JOIN services_reminders r ON r.id = srs.id_reminder
+			INNER JOIN services s ON s.id = srs.id_service';
+		$conditions = sprintf('srs.id_user = %d', $user_id);
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('date', true);
+		return $list;
 	}
 
 	static public function listSentForReminder(int $reminder_id)
