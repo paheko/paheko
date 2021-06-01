@@ -82,6 +82,7 @@ class Reminder extends Entity
 			'date' => [
 				'label' => 'Date d\'envoi',
 				'select' => 'srs.sent_date',
+				'order' => 'srs.sent_date %s, srs.id %1$s',
 			],
 		];
 
