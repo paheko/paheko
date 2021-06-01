@@ -38,8 +38,8 @@ class Reminders
 				'select' => 'r.delay',
 			],
 			'date' => [
-				'label' => 'Date d\'envoi',
-				'select' => 'srs.date',
+				'label' => 'Date d\'envoi du message',
+				'select' => 'srs.sent_date',
 			],
 		];
 
@@ -55,10 +55,10 @@ class Reminders
 
 	static public function listSentForReminder(int $reminder_id)
 	{
-		return DB::getInstance()->get('SELECT rs.date AS sent_date, r.delay, s.label, rs.id AS sent_id, s.id AS service_id
-			FROM services_reminders_sent rs
-			INNER JOIN services_reminders r ON r.id = rs.id_reminder
-			INNER JOIN services s ON s.id = rs.id_service
+		return DB::getInstance()->get('SELECT srs.sent_date, r.delay, s.label, rs.id AS sent_id, s.id AS service_id
+			FROM services_reminders_sent srs
+			INNER JOIN services_reminders r ON r.id = srs.id_reminder
+			INNER JOIN services s ON s.id = srs.id_service
 			WHERE rs.id_reminder = ?;', $reminder_id);
 	}
 
@@ -122,6 +122,7 @@ class Reminders
 			'id_service'  => $reminder->id_service,
 			'id_user'     => $reminder->id_user,
 			'id_reminder' => $reminder->id_reminder,
+			'due_date'    => $reminder->reminder_date,
 		]);
 
 		Plugin::fireSignal('rappels.auto', $reminder);
@@ -143,10 +144,11 @@ class Reminders
 			ABS(julianday(date()) - julianday(expiry_date)) AS nb_days,
 			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
 			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
-			m.email, m.%s AS identity
-			FROM services_users su
-			INNER JOIN services s ON s.id = su.id_service
-			INNER JOIN services_reminders sr ON sr.id_service = su.id_service
+			m.email, m.%s AS identity,
+			FROM services_reminders sr
+			INNER JOIN services s ON s.id = sr.id_service
+			-- Select latest subscription to a service (MAX) only
+			INNER JOIN (SELECT MAX(expiry_date) AS expiry_date, id_user, id_service FROM services_users GROUP BY id_user, id_service) AS su ON s.id = su.id_service
 			-- Join with users, but not ones part of a hidden category
 			INNER JOIN membres m ON su.id_user = m.id
 				AND m.email IS NOT NULL
@@ -155,8 +157,8 @@ class Reminders
 			LEFT JOIN services_reminders_sent srs ON srs.id_reminder = sr.id AND srs.id_user = su.id_user
 			WHERE
 				date() > date(su.expiry_date, sr.delay || \' days\')
-				AND srs.id IS NULL
-			GROUP BY su.id_user, s.id
+				AND (srs.id IS NULL OR srs.due_date < date(su.expiry_date, sr.delay || \' days\'))
+			GROUP BY su.id_user, sr.id_service
 			ORDER BY su.id_user;';
 
 		$sql = sprintf($sql, $config->get('champ_identite'));
