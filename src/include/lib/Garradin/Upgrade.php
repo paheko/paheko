@@ -282,9 +282,8 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.7', '<')) {
-				// Missing trigger, again, because of missing symlink
 				$db->begin();
-				$db->import(ROOT . '/include/data/1.1.3_migration.sql');
+				$db->import(ROOT . '/include/data/1.1.7_migration.sql');
 				$db->commit();
 			}
 
