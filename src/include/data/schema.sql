@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS services_reminders_sent
     due_date TEXT NOT NULL CHECK (date(due_date) IS NOT NULL AND date(due_date) = due_date)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS srs_index ON services_reminders_sent (id_user, id_service, id_reminder, date);
+CREATE UNIQUE INDEX IF NOT EXISTS srs_index ON services_reminders_sent (id_user, id_service, id_reminder, due_date);
 
 CREATE INDEX IF NOT EXISTS srs_reminder ON services_reminders_sent (id_reminder);
 CREATE INDEX IF NOT EXISTS srs_user ON services_reminders_sent (id_user);
