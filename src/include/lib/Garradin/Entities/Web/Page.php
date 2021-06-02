@@ -435,14 +435,33 @@ class Page extends Entity
 
 		$this->set('modified', $file->modified);
 
-		foreach (Files::list($file->parent) as $subfile) {
+		$this->set('type', $this->checkRealType());
+	}
+
+	public function checkRealType(): int
+	{
+		foreach (Files::list(Utils::dirname($this->filepath())) as $subfile) {
 			if ($subfile->type == File::TYPE_DIRECTORY) {
-				$this->set('type', self::TYPE_CATEGORY);
-				return;
+				return self::TYPE_CATEGORY;
 			}
 		}
 
-		$this->set('type', self::TYPE_PAGE); // Default
+		return self::TYPE_PAGE;
+	}
+
+	public function toggleType(): void
+	{
+		$real_type = $this->checkRealType();
+
+		if ($real_type == self::TYPE_CATEGORY) {
+			$this->set('type', $real_type);
+		}
+		elseif ($this->type == self::TYPE_CATEGORY) {
+			$this->set('type', self::TYPE_PAGE);
+		}
+		else {
+			$this->set('type', self::TYPE_CATEGORY);
+		}
 	}
 
 	static public function fromFile(File $file): self
