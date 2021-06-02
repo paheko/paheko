@@ -6,3 +6,4 @@ ALTER TABLE services_reminders_sent RENAME TO srs_old;
 .read schema.sql
 
 INSERT INTO services_reminders_sent SELECT id, id_user, id_service, id_reminder, date, date FROM srs_old;
+DROP TABLE srs_old;
