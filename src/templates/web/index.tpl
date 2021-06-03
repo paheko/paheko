@@ -87,7 +87,7 @@
 				<td>{$p.created|date_short}</td>
 				<td>Modifié {$p.modified|relative_date:true}</td>
 				<td class="actions">
-					{if $p.status == $p::STATUS_ONLINE}
+					{if $p.status == $p::STATUS_ONLINE && !$config.site_disabled}
 						{linkbutton shape="eye" label="Voir sur le site" href=$p->url() target="_blank"}
 					{/if}
 					{linkbutton shape="image" label="Prévisualiser" href="page.php?p=%s"|args:$p.path}
