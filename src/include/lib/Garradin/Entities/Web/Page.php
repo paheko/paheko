@@ -197,13 +197,26 @@ class Page extends Entity
 
 	public function save(): bool
 	{
+		$change_parent = null;
+
 		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
 			$this->set('file_path', $this->filepath(false));
+			$change_parent = $this->_modified['path'];
 		}
 
 		$current_path = $this->_modified['file_path'] ?? $this->file_path;
 		parent::save();
 		$this->syncFile($current_path);
+
+		// Rename/move children
+		if ($change_parent) {
+			$db = DB::getInstance();
+			$sql = sprintf('UPDATE web_pages
+				SET path = %s || substr(path, %d), parent = %1$s || substr(parent, %2$d)
+				WHERE parent LIKE %s;',
+				$db->quote($this->path), strlen($change_parent) + 1, $db->quote($change_parent . '/%'));
+			$db->exec($sql);
+		}
 
 		return true;
 	}
