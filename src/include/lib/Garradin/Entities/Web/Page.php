@@ -73,6 +73,8 @@ class Page extends Entity
 		self::TYPE_CATEGORY => 'category.html',
 	];
 
+	const DUPLICATE_URI_ERROR = 42;
+
 	protected $_file;
 	protected $_attachments;
 
@@ -240,8 +242,8 @@ class Page extends Entity
 		$this->assert($this->path !== $this->parent, 'Invalid parent page');
 		$this->assert($this->parent === '' || $db->test(self::TABLE, 'path = ?', $this->parent), 'Page parent inexistante');
 
-		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'path = ? AND id != ?', $this->path, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri);
-		$this->assert($this->exists() || !$db->test(self::TABLE, 'path = ?', $this->path), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->path);
+		$this->assert(!$this->exists() || !$db->test(self::TABLE, 'uri = ? AND id != ?', $this->uri, $this->id()), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
+		$this->assert($this->exists() || !$db->test(self::TABLE, 'uri = ?', $this->uri), 'Cette adresse URI est déjà utilisée par une autre page, merci d\'en choisir une autre : ' . $this->uri, self::DUPLICATE_URI_ERROR);
 	}
 
 	public function importForm(array $source = null)

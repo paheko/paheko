@@ -11,6 +11,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
+use Garradin\ValidationException;
 use Garradin\Membres\Session;
 
 use KD2\DB\EntityManager as EM;
@@ -37,23 +38,19 @@ class Web
 		return $results;
 	}
 
-	static public function sync(?string $parent)
+	/**
+	 * This syncs the whole website between the actual files and the web_pages table
+	 */
+	static public function sync(): array
 	{
-		$path = trim(File::CONTEXT_WEB . '/' . $parent, '/');
+		$path = File::CONTEXT_WEB;
+		$errors = [];
 
-		$exists = [];
-
-		foreach (Files::callStorage('list', $path) as $file) {
-			if ($file->type != File::TYPE_DIRECTORY) {
-				continue;
-			}
-
-			$exists[$file->path] = null;
-		}
+		$exists = array_flip(Files::callStorage('listDirectoriesRecursively', $path));
 
 		$db = DB::getInstance();
 
-		$in_db = $db->getGrouped('SELECT dirname(file_path), file_path, path, modified FROM web_pages WHERE parent = ?;', $parent);
+		$in_db = $db->getGrouped('SELECT path, file_path, modified FROM web_pages;');
 
 		$deleted = array_diff_key($in_db, $exists);
 		$new = array_diff_key($exists, $in_db);
@@ -66,15 +63,24 @@ class Web
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
 		}
 
-		foreach (array_keys($new) as $file) {
-			$f = Files::get($file . '/index.txt');
+		foreach (array_keys($new) as $path) {
+			$f = Files::get(File::CONTEXT_WEB . '/' . $path . '/index.txt');
 
 			if (!$f) {
+				// This is a directory without content, ignore
 				continue;
 			}
 
-			Page::fromFile($f)->save();
+			try {
+				Page::fromFile($f)->save();
+			}
+			catch (ValidationException $e) {
+				// Ignore validation errors, just don't add pages to index
+				$errors[] = sprintf('Erreur à l\'import, page "%s": %s', str_replace(File::CONTEXT_WEB . '/', '', $f->parent), $e->getMessage());
+			}
 		}
+
+		return $errors;
 
 		/*
 		// There's no need for that sync as it is triggered when loading a Page entity!
@@ -105,6 +111,12 @@ class Web
 	{
 		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';
 		$sql = sprintf('SELECT * FROM @TABLE WHERE parent = ? AND type = %d ORDER BY %s;', Page::TYPE_PAGE, $order);
+		return EM::getInstance(Page::class)->all($sql, $parent);
+	}
+
+	static public function listAll(string $parent): array
+	{
+		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE NOCASE;';
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
