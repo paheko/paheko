@@ -192,7 +192,7 @@ use Garradin\Entities\Files\File;
 					<th><a href="?p={$item.path}">{$item.identity}</a></th>
 					<td class="actions">
 						{linkbutton href="!docs/?p=%s"|args:$item.path label="Fichiers" shape="menu"}
-						{linkbutton href="!membres/fiche.php?id=%d"|args:$item.number label="Fiche membre" shape="user"}
+						{linkbutton href="!membres/fiche.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
 					</td>
 				{/if}
 			</tr>
