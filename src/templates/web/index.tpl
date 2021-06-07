@@ -44,6 +44,8 @@
 	</p>
 {/if}
 
+{form_errors}
+
 {if count($categories)}
 	<h2 class="ruler">Catégories</h2>
 	<table class="list">

@@ -326,6 +326,7 @@ CREATE TABLE IF NOT EXISTS web_pages
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_path ON web_pages (path);
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
 CREATE UNIQUE INDEX IF NOT EXISTS web_pages_file_path ON web_pages (file_path);
 CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
 CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
