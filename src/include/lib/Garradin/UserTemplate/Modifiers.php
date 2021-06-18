@@ -116,7 +116,7 @@ class Modifiers
 
 	static public function atom_date($date)
 	{
-		return Utils::date_fr(DATE_ATOM, $date);
+		return Utils::date_fr($date, DATE_ATOM);
 	}
 
 	static public function xml_escape($str)
