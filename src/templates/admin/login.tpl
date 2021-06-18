@@ -44,7 +44,7 @@
                     {/if}
                 {/if}
             </dd>
-            {input type="checkbox" name="permanent" value="1" label="Rester connecté‑e" help="recommandé seulement sur ordinateur personnel"}
+            {input type="checkbox" name="permanent" value="1" label="Rester connecté⋅e" help="recommandé seulement sur ordinateur personnel"}
         </dl>
     </fieldset>
 
