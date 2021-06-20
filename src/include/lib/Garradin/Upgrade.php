@@ -323,6 +323,11 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.8', '==')) {
+				// Force sync to add missing pages if you had the buggy 1.1.8 version
+				\Garradin\Web\Web::sync(true);
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
