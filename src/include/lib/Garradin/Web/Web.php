@@ -16,7 +16,7 @@ use Garradin\Membres\Session;
 
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\{WWW_URI, ADMIN_URL};
+use const Garradin\{WWW_URI, ADMIN_URL, FILE_STORAGE_BACKEND};
 
 class Web
 {
@@ -41,8 +41,13 @@ class Web
 	/**
 	 * This syncs the whole website between the actual files and the web_pages table
 	 */
-	static public function sync(): array
+	static public function sync(bool $force = false): array
 	{
+		// This is only useful if web pages are stored outside of the database
+		if (FILE_STORAGE_BACKEND == 'SQLite' && !$force) {
+			return [];
+		}
+
 		$path = File::CONTEXT_WEB;
 		$errors = [];
 
