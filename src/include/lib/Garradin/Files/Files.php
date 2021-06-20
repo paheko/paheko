@@ -5,6 +5,7 @@ namespace Garradin\Files;
 use Garradin\Static_Cache;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\ValidationException;
 use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
@@ -155,10 +156,12 @@ class Files
 			$i = 0;
 
 			self::migrateDirectory($from, $to, '', $i, $callback);
-
-			$db->commit();
+		}
+		catch (UserException $e) {
+			throw new \RuntimeException('Migration failed', 0, $e);
 		}
 		finally {
+			$db->commit();
 			call_user_func([$from, 'unlock']);
 			call_user_func([$to, 'unlock']);
 		}
@@ -169,6 +172,11 @@ class Files
 		$db = DB::getInstance();
 
 		foreach (call_user_func([$from, 'list'], $path) as $file) {
+			if (!$file->parent && $file->name == '.lock') {
+				// Ignore lock file
+				continue;
+			}
+
 			if (++$i >= 100) {
 				$db->commit();
 				$db->begin();
