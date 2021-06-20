@@ -133,7 +133,7 @@ class File extends Entity
 		$this->assert($this->image === 0 || $this->image === 1, 'Unknown image value');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
-		$this->assert(strlen($this->parent) || null === $this->parent, 'Le chemin ne peut rester vide');
+		$this->assert(strlen($this->parent) || '' === $this->parent, 'Le chemin ne peut rester vide');
 	}
 
 	public function context(): string

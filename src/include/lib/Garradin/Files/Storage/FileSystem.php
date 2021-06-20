@@ -187,6 +187,7 @@ class FileSystem implements StorageInterface
 
 		$file = new File;
 		$file->load($data);
+		$file->parent = $parent; // Force empty parent to be empty, not null
 
 		return $file;
 	}
@@ -305,7 +306,7 @@ class FileSystem implements StorageInterface
 		$lock = file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
 
 		if ($lock) {
-			throw new \RuntimeException('File storage is locked');
+			throw new \RuntimeException('FileSystem storage is locked');
 		}
 	}
 }
