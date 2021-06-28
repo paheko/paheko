@@ -176,3 +176,39 @@ DROP TABLE membres_operations_old;
 DROP TABLE compta_projets;
 DROP TABLE compta_comptes_bancaires;
 DROP TABLE compta_moyens_paiement;
+
+INSERT INTO acc_charts (country, code, label) VALUES ('FR', 'PCA2018', 'Plan comptable associatif 2018');
+
+CREATE TEMP TABLE tmp_accounts (code,label,description,position,type);
+
+.import charts/fr_2018.csv tmp_accounts
+
+INSERT INTO acc_accounts (id_chart, code, label, description, position, type) SELECT
+	(SELECT id FROM acc_charts WHERE code = 'PCA2018'),
+	code, label, description,
+	CASE position
+		WHEN 'Actif' THEN 1
+		WHEN 'Passif' THEN 2
+		WHEN 'Actif ou passif' THEN 3
+		WHEN 'Charge' THEN 4
+		WHEN 'Produit' THEN 5
+		ELSE 0
+	END,
+	CASE type
+		WHEN 'Banque' THEN 1
+		WHEN 'Caisse' THEN 2
+		WHEN 'Attente d''encaissement' THEN 3
+		WHEN 'Tiers' THEN 4
+		WHEN 'Dépenses' THEN 5
+		WHEN 'Recettes' THEN 6
+		WHEN 'Analytique' THEN 7
+		WHEN 'Bénévolat' THEN 8
+		WHEN 'Ouverture' THEN 9
+		WHEN 'Clôture' THEN 10
+		WHEN 'Résultat excédentaire' THEN 11
+		WHEN 'Résultat déficitaire' THEN 12
+		ELSE 0
+	END
+	FROM tmp_accounts;
+
+DROP TABLE tmp_accounts;
