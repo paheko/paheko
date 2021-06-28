@@ -59,14 +59,6 @@ class Upgrade
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
 				$db->commitSchemaUpdate();
-
-				// Import nouveau plan comptable
-				$chart = new \Garradin\Entities\Accounting\Chart;
-				$chart->label = 'Plan comptable associatif 2018';
-				$chart->country = 'FR';
-				$chart->code = 'PCA2018';
-				$chart->save();
-				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
 			}
 
 
