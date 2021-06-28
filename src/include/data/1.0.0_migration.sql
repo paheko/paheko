@@ -110,10 +110,6 @@ UPDATE acc_accounts SET type = 5, description = (SELECT description FROM compta_
 UPDATE acc_accounts SET type = 4, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte LIKE '4%');
 
--- Recopie des opérations, mais le nom a changé pour acc_transactions_users
-INSERT INTO acc_transactions_users
-	SELECT * FROM membres_operations_old;
-
 -- Recopie des exercices, mais la date de fin ne peut être nulle
 INSERT INTO acc_years (id, label, start_date, end_date, closed, id_chart)
 	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture, 1 FROM compta_exercices;
@@ -131,6 +127,7 @@ UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT
 
 -- A edge-case where the end date is after the start date, let's fix it…
 UPDATE cotisations SET fin = debut WHERE fin < debut;
+UPDATE cotisations SET duree = NULL WHERE duree = 0;
 
 INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
 
@@ -159,6 +156,12 @@ INSERT INTO services_reminders_sent SELECT id, id_membre, id_cotisation,
 	FROM rappels_envoyes
 	WHERE id_rappel IS NOT NULL
 	GROUP BY id_membre, id_cotisation, id_rappel;
+
+-- Recopie des opérations par membre, mais le nom a changé pour acc_transactions_users, et il faut valider l'existence du membre ET du service
+INSERT INTO acc_transactions_users
+	SELECT a.* FROM membres_operations_old a
+	INNER JOIN membres b ON b.id = a.id_membre
+	INNER JOIN services_users c ON c.id = a.id_cotisation;
 
 DROP TABLE cotisations;
 DROP TABLE cotisations_membres;
