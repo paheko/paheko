@@ -345,6 +345,11 @@ class Files
 		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
 
 		foreach (Files::list($parent) as $file) {
+			// Ignore additional directories
+			if ($parent == '' && !array_key_exists($file->name, File::CONTEXTS_NAMES)) {
+				continue;
+			}
+
 			$db->insert('tmp_files', $file->asArray(true));
 
 			if ($recursive && $file->type === $file::TYPE_DIRECTORY) {
