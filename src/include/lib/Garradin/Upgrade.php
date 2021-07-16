@@ -320,6 +320,15 @@ class Upgrade
 				\Garradin\Web\Web::sync(true);
 			}
 
+			if (version_compare($v, '1.1.10', '<')) {
+				\Garradin\Web\Web::sync(true); // Force sync of web pages
+				Files::syncVirtualTable('', true);
+
+				$db->begin();
+				$db->exec(sprintf('DELETE FROM files_search WHERE path NOT IN (SELECT path FROM %s);', Files::getVirtualTableName()));
+				$db->commit();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
