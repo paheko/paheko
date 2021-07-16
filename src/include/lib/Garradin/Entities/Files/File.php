@@ -172,6 +172,8 @@ class File extends Entity
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size));
 		}
 
+		DB::getInstance()->delete('files_search', 'path = ? OR path LIKE ?', $this->path, $this->path . '/%');
+
 		if ($this->exists()) {
 			return parent::delete();
 		}

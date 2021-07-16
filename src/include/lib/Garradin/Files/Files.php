@@ -332,7 +332,7 @@ class Files
 		return 'tmp_files';
 	}
 
-	static public function syncVirtualTable(string $parent = '')
+	static public function syncVirtualTable(string $parent = '', bool $recursive = false)
 	{
 		if (FILE_STORAGE_BACKEND == 'SQLite') {
 			// No need to create a virtual table, use the real one
@@ -341,10 +341,15 @@ class Files
 
 		$db = DB::getInstance();
 		$db->begin();
+
 		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
 
 		foreach (Files::list($parent) as $file) {
 			$db->insert('tmp_files', $file->asArray(true));
+
+			if ($recursive && $file->type === $file::TYPE_DIRECTORY) {
+				self::syncVirtualTable($file->path, $recursive);
+			}
 		}
 
 		$db->commit();
