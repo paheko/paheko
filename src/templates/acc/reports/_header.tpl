@@ -19,8 +19,8 @@
 		<h3>Projet&nbsp;: {$analytical.label}</h3>
 	{/if}
 	{if isset($year)}
-		<p>Exercice comptable {if $year.closed}clôturé{else}en cours{/if} du
-			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short}</p>
+		<p>Exercice&nbsp;: {$year.label} ({if $year.closed}clôturé{else}en cours{/if}, du
+			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short})</p>
 	{/if}
 
 	<p class="noprint print-btn">
