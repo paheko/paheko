@@ -204,6 +204,11 @@ class FileSystem implements StorageInterface
 		$files = [];
 
 		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			// Seems that SKIP_DOTS does not work all the time?
+			if ($file->getFilename()[0] == '.') {
+				continue;
+			}
+
 			// Used to make sorting easier
 			// directory_blabla
 			// file_image.jpeg
