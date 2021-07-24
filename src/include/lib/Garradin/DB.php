@@ -212,12 +212,26 @@ class DB extends SQLite3
         $id = md5($pattern . $escape);
 
         if (!array_key_exists($id, self::$unicode_patterns_cache)) {
-            $pattern = Utils::unicodeCaseFold($pattern);
             $escape = $escape ? '(?!' . preg_quote($escape, '/') . ')' : '';
-            $pattern = preg_quote($pattern, '/');
-            $pattern = preg_replace('/' . $escape . '%/', '.*', $pattern);
-            $pattern = preg_replace('/' . $escape . '_/', '.', $pattern);
-            $pattern = '/' . $pattern . '/';
+            preg_match_all('/('.$escape.'[%_])|(\w+)|(.+?)/iu', $pattern, $parts, PREG_SET_ORDER);
+            $pattern = '';
+
+            foreach ($parts as $part) {
+                if (isset($part[3])) {
+                    $pattern .= preg_quote($part[0], '/');
+                }
+                elseif (isset($part[2])) {
+                    $pattern .= Utils::unicodeCaseFold($part[2]);
+                }
+                elseif ($part[1] == '%') {
+                    $pattern .= '.*';
+                }
+                elseif ($part[1] == '_') {
+                    $pattern .= '.';
+                }
+            }
+
+            $pattern = '/^' . $pattern . '$/i';
             self::$unicode_patterns_cache[$id] = $pattern;
         }
 
