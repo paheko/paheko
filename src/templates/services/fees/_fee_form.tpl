@@ -28,7 +28,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 				<dl>
 					{input name="formula" type="textarea" label="Formule de calcul" source=$fee fake_required=1}
 					<dd class="help">
-						<a href="https://fossil.kd2.org/garradin/wiki?name=Formule_calcul_activit%C3%A9">Aide sur les formules de calcul</a>
+						<a href="https://garradin.eu/Formule-calcul-activite">Aide sur les formules de calcul</a>
 					</dd>
 				</dl>
 			</dd>
