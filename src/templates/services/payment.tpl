@@ -12,6 +12,7 @@
 			<dd><h3>{$user_name}</h3></dd>
 			<dt><strong>Inscription</strong></dt>
 			{input type="checkbox" name="paid" value="1" default=$su.paid label="Marquer cette inscription comme payée"}
+			{input type="date" name="date" label="Date" required=1 source=$su}
 			{input type="money" name="amount" label="Montant réglé par le membre" required=1}
 			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=1}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
