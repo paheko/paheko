@@ -175,7 +175,7 @@ class Skeleton
 		}
 
 		if ($this->file) {
-			return $this->file->type;
+			return $this->file->mime;
   		}
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
