@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Importer des écritures" current="acc/years"}
+{include file="admin/_head.tpl" title="Export d'exercice" current="acc/years"}
 
 <nav class="acc-year">
 	<h4>Exercice sélectionné&nbsp;:</h4>
