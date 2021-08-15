@@ -924,7 +924,7 @@ class Utils
         }
 
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
-            self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();');
+            self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();');
         }
 
         if (isset(self::$transliterator)) {
