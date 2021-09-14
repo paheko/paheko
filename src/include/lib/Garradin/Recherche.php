@@ -448,7 +448,7 @@ class Recherche
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
-					throw new UserException('Cette recherche fait référence à une colonne qui n\'existe pas : ' . $condition['column']);
+					continue;
 				}
 
 				$query_columns[] = $condition['column'];
@@ -522,7 +522,7 @@ class Recherche
 
 		if (!count($query_groups))
 		{
-			throw new UserException('Aucune clause trouvée dans la recherche.');
+			throw new UserException('Aucune clause trouvée dans la recherche : elle contenait peut-être des clauses qui correspondent à des champs qui ont été supprimés ?');
 		}
 
 		// Ajout du champ identité si pas présent
