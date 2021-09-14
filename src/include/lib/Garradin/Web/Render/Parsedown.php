@@ -152,14 +152,11 @@ class Parsedown extends Parent_Parsedown
 		end($block['footnotes']);
 		$last = key($block['footnotes']);
 
-		if (isset($block['interrupted']))
+		if (isset($block['interrupted']) && $line['indent'] >= 4)
 		{
-			if ($line['indent'] >= 4)
-			{
-				$block['footnotes'][$last] .= "\n\n" . $line['text'];
+			$block['footnotes'][$last] .= "\n\n" . $line['text'];
 
-				return $block;
-			}
+			return $block;
 		}
 		else
 		{
