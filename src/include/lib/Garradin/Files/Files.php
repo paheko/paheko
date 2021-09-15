@@ -294,10 +294,13 @@ class Files
 	static public function getRemainingQuota(bool $force_refresh = false): float
 	{
 		if (FILE_STORAGE_QUOTA !== null) {
-			return FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
+			$quota = FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
+		}
+		else {
+			$quota = self::callStorage('getRemainingQuota');
 		}
 
-		return self::callStorage('getRemainingQuota');
+		return max(0, $quota);
 	}
 
 	static public function checkQuota(int $size = 0): void
