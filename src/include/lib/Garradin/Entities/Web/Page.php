@@ -184,6 +184,7 @@ class Page extends Entity
 
 			// Or update file
 			if ($file->fetch() !== $export) {
+				$file->set('modified', new \DateTime);
 				$file->store(null, $export);
 			}
 		}
