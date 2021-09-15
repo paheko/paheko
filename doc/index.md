@@ -146,7 +146,7 @@ Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son 
 *  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), etc.
 *  la publication d'un __site web__ pour l'association, simple mais suffisamment flexible pour pouvoir adapter le fonctionnement à la plupart des besoins
 *  l'__autonomisation des adhérents__ : possibilité de mettre à jour leurs informations par eux-même, ou de s'inscrire seul depuis un ordinateur ou un smartphone
-*  la possibilité d'adapter aux besoins spécifiques de chaque association via des __extensions__.
+*  la possibilité d'adapter aux besoins spécifiques de chaque association via des [__extensions__](/wiki/?name=Extensions).
 
 Tous ces objectifs ne sont pas encore réalisés, voir :
 
