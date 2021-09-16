@@ -13,9 +13,9 @@ use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Markdown extends AbstractRender
 {
-	public function render(?string $content = null, array $options = []): string
+	public function render(?string $content = null): string
 	{
-		$parsedown = new Parsedown($this->file);
+		$parsedown = new Parsedown($this->file, $this->user_prefix);
 		$parsedown->setBreaksEnabled(true);
 		$parsedown->setUrlsLinked(true);
 		$parsedown->setSafeMode(true);
