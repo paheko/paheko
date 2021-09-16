@@ -98,7 +98,7 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
 		$this->register_modifier('format_skriv', function ($str) {
-			$skriv = new Skriv(null);
+			$skriv = new Skriv;
 			return $skriv->render((string) $str);
 		});
 

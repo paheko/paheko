@@ -15,7 +15,7 @@ class Skriv extends AbstractRender
 {
 	protected $skriv;
 
-	public function __construct(?File $file, ?string $user_prefix)
+	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
 		parent::__construct($file, $user_prefix);
 

@@ -17,7 +17,7 @@ abstract class AbstractRender
 
 	protected $file;
 
-	public function __construct(?File $file, ?string $user_prefix)
+	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
 		$this->file = $file;
 
