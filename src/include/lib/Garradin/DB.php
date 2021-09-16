@@ -231,7 +231,7 @@ class DB extends SQLite3
                 }
             }
 
-            $pattern = '/^' . $pattern . '$/i';
+            $pattern = '/^' . $pattern . '$/im';
             self::$unicode_patterns_cache[$id] = $pattern;
         }
 
