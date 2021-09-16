@@ -7,7 +7,7 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = trim(qg('p'));
+$parent = trim(qg('path'));
 
 if (!File::checkCreateAccess(File::CONTEXT_DOCUMENTS, $session)) {
 	throw new UserException('Vous n\'avez pas le droit de créer de répertoire ici.');
@@ -26,7 +26,7 @@ $form->runIf('create', function () use ($parent) {
 	$name = File::filterName($name);
 
 	$file = File::createAndStore($parent, $name, null, '');
-}, $csrf_key, '!docs/?p=' . $parent);
+}, $csrf_key, '!docs/?path=' . $parent);
 
 $tpl->assign(compact('csrf_key'));
 

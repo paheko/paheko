@@ -10,6 +10,11 @@ use Garradin\Web\Web;
 require_once __DIR__ . '/../../_inc.php';
 
 $page = null;
+$content = f('content');
+
+if (null == $content) {
+	throw new UserException('Aucun contenu à prévisualiser');
+}
 
 if ($path = qg('f')) {
 	$file = Files::get($path);
