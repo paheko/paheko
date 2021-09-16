@@ -9,7 +9,7 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$path = trim(qg('p')) ?: File::CONTEXT_DOCUMENTS;
+$path = trim(qg('path')) ?: File::CONTEXT_DOCUMENTS;
 
 $name = preg_replace('/[^\p{L}_-]+/i', '_', $path);
 $name = sprintf('%s - Fichiers - %s.zip', Config::getInstance()->get('nom_asso'), $name);

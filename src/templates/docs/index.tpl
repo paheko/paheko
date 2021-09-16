@@ -9,23 +9,23 @@ use Garradin\Entities\Files\File;
 		{linkbutton shape="search" label="Rechercher" href="search.php" target="_dialog"}
 	{/if}
 	{if $can_mkdir}
-		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?p=%s"|args:$path}
+		{linkbutton shape="plus" label="Nouveau répertoire" target="_dialog" href="!docs/new_dir.php?path=%s"|args:$path}
 	{/if}
 	{if $can_upload}
-		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?p=%s"|args:$path}
+		{linkbutton shape="plus" label="Nouveau fichier texte" target="_dialog" href="!docs/new_file.php?path=%s"|args:$path}
 		{linkbutton shape="upload" label="Ajouter un fichier" target="_dialog" href="!common/files/upload.php?p=%s"|args:$path}
 	{/if}
 	</aside>
 	<ul>
 		<li{if $context == File::CONTEXT_DOCUMENTS} class="current"{/if}><a href="./">Documents</a></li>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-			<li{if $context == File::CONTEXT_TRANSACTION} class="current"{/if}><a href="./?p=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
+			<li{if $context == File::CONTEXT_TRANSACTION} class="current"{/if}><a href="./?path=<?=File::CONTEXT_TRANSACTION?>">Fichiers des écritures</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
-			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?p=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
+			<li{if $context == File::CONTEXT_USER} class="current"{/if}><a href="./?path=<?=File::CONTEXT_USER?>">Fichiers des membres</a></li>
 		{/if}
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
-			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?p=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
+			<li{if $context == File::CONTEXT_SKELETON} class="current"{/if}><a href="./?path=<?=File::CONTEXT_SKELETON?>">Squelettes du site web</a></li>
 		{/if}
 	</ul>
 
@@ -33,7 +33,7 @@ use Garradin\Entities\Files\File;
 
 <nav class="breadcrumbs">
 	{if count($breadcrumbs) > 1}
-		{linkbutton href="?p=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
+		{linkbutton href="?path=%s"|args:$parent_path label="Retour au répertoire parent" shape="left"}
 	{/if}
 
 {if $context == File::CONTEXT_TRANSACTION}
@@ -47,7 +47,7 @@ use Garradin\Entities\Files\File;
 {else}
 	<ul>
 	{foreach from=$breadcrumbs item="name" key="bc_path"}
-		<li><a href="?p={$bc_path}">{$name}</a></li>
+		<li><a href="?path={$bc_path}">{$name}</a></li>
 	{/foreach}
 	</ul>
 {/if}
@@ -98,7 +98,7 @@ use Garradin\Entities\Files\File;
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<th><a href="?p={$file.path}">{$file.name}</a></th>
+					<th><a href="?path={$file.path}">{$file.name}</a></th>
 					<td></td>
 					<td>Répertoire</td>
 					<td></td>
@@ -179,19 +179,19 @@ use Garradin\Entities\Files\File;
 			<tr>
 				{if $context == File::CONTEXT_TRANSACTION}
 					<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$item.id}">#{$item.id}</a></td>
-					<th><a href="?p={$item.path}">{$item.label}</a></th>
+					<th><a href="?path={$item.path}">{$item.label}</a></th>
 					<td>{$item.date|date_short}</td>
 					<td>{$item.reference}</td>
 					<td>{$item.year}</td>
 					<td class="actions">
-						{linkbutton href="!docs/?p=%s"|args:$item.path label="Fichiers" shape="menu"}
+						{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
 						{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
 					</td>
 				{else}
 					<td class="num"><a href="{$admin_url}membres/fiche.php?id={$item.id}">#{$item.number}</a></td>
-					<th><a href="?p={$item.path}">{$item.identity}</a></th>
+					<th><a href="?path={$item.path}">{$item.identity}</a></th>
 					<td class="actions">
-						{linkbutton href="!docs/?p=%s"|args:$item.path label="Fichiers" shape="menu"}
+						{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
 						{linkbutton href="!membres/fiche.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
 					</td>
 				{/if}
@@ -200,10 +200,12 @@ use Garradin\Entities\Files\File;
 		</tbody>
 		</table>
 
+		{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+
 	{/if}
 
 	<p class="actions">
-		{linkbutton href="!docs/zip.php?p=%s"|args:$path label="Télécharger ce répertoire (ZIP)" shape="download"}
+		{linkbutton href="!docs/zip.php?path=%s"|args:$path label="Télécharger ce répertoire (ZIP)" shape="download"}
 	</p>
 
 </form>
