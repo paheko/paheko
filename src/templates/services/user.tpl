@@ -28,8 +28,8 @@
 	<dd>
 		{$list->count()}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{linkbutton href="?export=csv" shape="export" label="Export CSV"}
-			{linkbutton href="?export=ods" shape="export" label="Export tableur"}
+			{linkbutton href="?id=%d&export=csv"|args:$user.id shape="export" label="Export CSV"}
+			{linkbutton href="?id=%d&export=ods"|args:$user.id shape="export" label="Export tableur"}
 		{/if}
 	</dd>
 </dl>
