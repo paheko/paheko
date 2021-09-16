@@ -691,7 +691,7 @@ class File extends Entity
 		return Files::callStorage('fetch', $this);
 	}
 
-	public function render(array $options = [])
+	public function render(?string $user_prefix = null)
 	{
 		$editor_type = $this->renderFormat();
 
@@ -702,7 +702,7 @@ class File extends Entity
 			throw new \LogicException('Cannot render file of this type');
 		}
 		else {
-			return Render::render($editor_type, $this, $this->fetch(), $options);
+			return Render::render($editor_type, $this, $this->fetch(), $user_prefix);
 		}
 	}
 

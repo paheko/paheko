@@ -15,9 +15,9 @@ class Skriv extends AbstractRender
 {
 	protected $skriv;
 
-	public function __construct(?File $file)
+	public function __construct(?File $file, ?string $user_prefix)
 	{
-		parent::__construct($file);
+		parent::__construct($file, $user_prefix);
 
 		$this->skriv = new SkrivLite;
 		$this->skriv->registerExtension('file', [$this, 'SkrivFile']);
@@ -28,7 +28,7 @@ class Skriv extends AbstractRender
 		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
 	}
 
-	public function render(?string $content = null, array $options = []): string
+	public function render(?string $content = null): string
 	{
 		$skriv =& $this->skriv;
 
@@ -67,7 +67,7 @@ class Skriv extends AbstractRender
 		$name = $args[0] ?? null;
 		$caption = $args[1] ?? null;
 
-		if (!$name || !$this->current_path)
+		if (!$name || null === $this->current_path)
 		{
 			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
 		}
@@ -102,7 +102,7 @@ class Skriv extends AbstractRender
 
 		$align = strtr($align, $align_replace);
 
-		if (!$name || !$this->current_path)
+		if (!$name || null === $this->current_path)
 		{
 			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}

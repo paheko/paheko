@@ -17,7 +17,7 @@ if (!$file->checkReadAccess($session)) {
 }
 
 try {
-	$tpl->assign('content', $file->render());
+	$tpl->assign('content', $file->render('common/files/_preview.php?p='));
 	$tpl->assign('file', $file);
 	$tpl->display('common/files/_preview.tpl');
 }
