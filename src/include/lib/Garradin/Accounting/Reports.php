@@ -55,6 +55,10 @@ class Reports
 			$where[] = sprintf('l.id_analytical = %d', $criterias['analytical']);
 		}
 
+		if (!empty($criterias['analytical_only'])) {
+			$where[] = 'l.id_analytical IS NOT NULL';
+		}
+
 		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}
@@ -70,7 +74,7 @@ class Reports
 	{
 		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
 			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
-			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit, 0 AS total,
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
 				INNER JOIN acc_transactions t2 ON t2.id = l2.id_transaction
 				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
@@ -107,6 +111,7 @@ class Reports
 				'label' => 'Total',
 				'id_account' => $by_year ? null : $current->id,
 				'id_year' => $by_year ? $current->id : null,
+				'total' => 1,
 			];
 
 			foreach ($sums as $s) {
@@ -366,15 +371,22 @@ class Reports
 
 		$db = DB::getInstance();
 
+		if (!empty($criterias['analytical_only'])) {
+			$join = 'acc_accounts a ON a.id = l.id_analytical';
+		}
+		else {
+			$join = 'acc_accounts a ON a.id = l.id_account';
+		}
+
 		$sql = sprintf('SELECT
-			t.id_year, l.id_account, t.id, t.date, t.reference,
+			t.id_year, a.id AS id_account, t.id, t.date, t.reference,
 			l.debit, l.credit, l.reference AS line_reference, t.label, l.label AS line_label,
 			a.label AS account_label, a.code AS account_code
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
-			INNER JOIN acc_accounts a ON a.id = l.id_account
+			INNER JOIN %s
 			WHERE %s
-			ORDER BY a.code COLLATE NOCASE, t.date, t.id;', $where);
+			ORDER BY a.code COLLATE NOCASE, t.date, t.id;', $join, $where);
 
 		$account = null;
 		$debit = $credit = 0;

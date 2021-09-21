@@ -36,9 +36,14 @@ if (qg('year'))
 	$tpl->assign('close_date', $year->closed ? $year->end_date : time());
 }
 
+if (qg('analytical_only')) {
+	$criterias['analytical_only'] = true;
+}
+
 if (!count($criterias))
 {
 	throw new UserException('Critère de rapport inconnu.');
 }
 
+$tpl->assign('criterias', $criterias);
 $tpl->assign('criterias_query', http_build_query($criterias));
