@@ -178,11 +178,6 @@ class Web
 
 		$uri = substr($uri, 1);
 
-		if (Plugin::fireSignal('http.request', compact('uri'))) {
-			// If a plugin handled the request, let's stop here
-			return;
-		}
-
 		// Redirect old URLs (pre-1.1)
 		if ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
@@ -208,7 +203,8 @@ class Web
 
 			$session = Session::getInstance();
 
-			if (Plugin::fireSignal('http.request.before', compact('file', 'uri', 'session'))) {
+			if (Plugin::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
+				// If a plugin handled the request, let's stop here
 				return;
 			}
 
@@ -219,7 +215,7 @@ class Web
 				$file->serve($session, isset($_GET['download']) ? true : false);
 			}
 
-			Plugin::fireSignal('http.request.after', compact('file', 'uri', 'session'));
+			Plugin::fireSignal('http.request.file.after', compact('file', 'uri', 'session'));
 
 			return;
 		}
