@@ -9,6 +9,7 @@ use Garradin\Files\Files;
 use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Plugin;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -177,6 +178,11 @@ class Web
 
 		$uri = substr($uri, 1);
 
+		if (Plugin::fireSignal('http.request', compact('uri'))) {
+			// If a plugin handled the request, let's stop here
+			return;
+		}
+
 		// Redirect old URLs (pre-1.1)
 		if ($uri == 'feed/atom/') {
 			Utils::redirect('/atom.xml');
@@ -202,12 +208,18 @@ class Web
 
 			$session = Session::getInstance();
 
+			if (Plugin::fireSignal('http.request.before', compact('file', 'uri', 'session'))) {
+				return;
+			}
+
 			if ($size) {
 				$file->serveThumbnail($session, $size);
 			}
 			else {
 				$file->serve($session, isset($_GET['download']) ? true : false);
 			}
+
+			Plugin::fireSignal('http.request.after', compact('file', 'uri', 'session'));
 
 			return;
 		}
@@ -251,7 +263,13 @@ class Web
 			Utils::redirect(ADMIN_URL);
 		}
 
+		if (Plugin::fireSignal('http.request.skeleton.before', compact('page', 'skel', 'uri'))) {
+			return;
+		}
+
 		$s = new Skeleton($skel);
 		$s->serve(compact('uri', 'page', 'skel'));
+
+		Plugin::fireSignal('http.request.skeleton.after', compact('page', 'skel', 'uri'));
 	}
 }
