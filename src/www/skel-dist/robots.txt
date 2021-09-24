@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin/
+
+Sitemap: {{$root_url}}sitemap.xml
