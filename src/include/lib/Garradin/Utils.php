@@ -18,12 +18,44 @@ class Utils
     static protected $transliterator;
 
     const FRENCH_DATE_NAMES = [
-        'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
-        'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
-        'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
-        'Thursday'=>'Jeudi','Friday'=>'Vendredi','Saturday'=>'Samedi','Sunday'=>'Dimanche',
-        'Feb'=>'Fév','Apr'=>'Avr','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
-        'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
+        'January'   => 'janvier',
+        'February'  => 'février',
+        'March'     => 'mars',
+        'April'     => 'avril',
+        'May'       => 'mai',
+        'June'      => 'juin',
+        'July'      => 'juillet',
+        'August'    => 'août',
+        'September' => 'septembre',
+        'October'   => 'octobre',
+        'November'  => 'novembre',
+        'December'  => 'décembre',
+        'Monday'    => 'lundi',
+        'Tuesday'   => 'mardi',
+        'Wednesday' => 'mercredi',
+        'Thursday'  => 'jeudi',
+        'Friday'    => 'vendredi',
+        'Saturday'  => 'samedi',
+        'Sunday'    => 'dimanche',
+        'Jan' => 'jan',
+        'Feb' => 'fév',
+        'Mar' => 'mar',
+        'Apr' => 'avr',
+        'Jun' => 'juin',
+        'Jul' => 'juil',
+        'Aug' => 'août',
+        'Sep' => 'sep',
+        'Oct' => 'oct',
+        'Nov' => 'nov',
+        'Dec' => 'déc',
+        'Mon' => 'lun',
+        'Tue' => 'mar',
+        'Wed' => 'mer',
+        'Thu' => 'jeu',
+        'Fri' => 'ven',
+        'Sat' => 'sam',
+        'Sun' => 'dim',
+    ];
 
     static public function get_datetime($ts)
     {
@@ -57,7 +89,6 @@ class Utils
         $date = strftime($format, $ts->getTimestamp());
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
-        $date = strtolower($date);
         return $date;
     }
 
@@ -77,7 +108,6 @@ class Utils
         $date = $ts->format($format);
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
-        $date = strtolower($date);
         return $date;
     }
 
