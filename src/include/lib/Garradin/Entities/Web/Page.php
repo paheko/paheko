@@ -184,7 +184,7 @@ class Page extends Entity
 
 			// Or update file
 			if ($file->fetch() !== $export) {
-				$file->set('modified', new \DateTime);
+				$file->set('modified', $this->modified);
 				$file->store(null, $export);
 			}
 		}
@@ -206,6 +206,8 @@ class Page extends Entity
 			$this->set('file_path', $this->filepath(false));
 			$change_parent = $this->_modified['path'];
 		}
+
+		$this->set('modified', new \DateTime);
 
 		$current_path = $this->_modified['file_path'] ?? $this->file_path;
 		parent::save();
