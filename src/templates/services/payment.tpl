@@ -23,6 +23,7 @@
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
+		{button type="submit" name="save_and_add_payment" label="Enregistrer et ajouter un autre règlement" shape="plus"}
 	</p>
 
 </form>

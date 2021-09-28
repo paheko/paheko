@@ -19,7 +19,7 @@ $user_name = (new Membres)->getNom($su->id_user);
 
 $csrf_key = 'service_pay';
 
-$form->runIf('save', function () use ($su, $session) {
+$form->runIf(f('save') || f('save_and_add_payment'), function () use ($su, $session) {
 	$su->addPayment($session->getUser()->id);
 
 	if ($su->paid != (bool) f('paid')) {
