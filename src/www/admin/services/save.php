@@ -51,10 +51,17 @@ $has_past_services = count($grouped_services) != $count_all;
 
 $csrf_key = 'service_save';
 
-$form->runIf('save', function () use ($session) {
+$form->runIf(f('save') || f('save_and_add_payment'), function () use ($session) {
 	$su = Service_User::saveFromForm($session->getUser()->id);
 
-	Utils::redirect(ADMIN_URL . 'services/user.php?id=' . $su->id_user);
+	if (f('save_and_add_payment')) {
+		$url = ADMIN_URL . 'services/payment.php?id=' . $su->id;
+	}
+	else {
+		$url = ADMIN_URL . 'services/user.php?id=' . $su->id_user;
+	}
+
+	Utils::redirect($url);
 }, $csrf_key);
 
 $selected_user = $user_name ? [$user_id => $user_name] : null;
