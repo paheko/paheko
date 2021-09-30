@@ -91,6 +91,8 @@ class Transaction extends Entity
 	protected $_lines;
 	protected $_old_lines = [];
 
+	protected $_accounts = [];
+
 	/**
 	 * @var Transaction
 	 */
@@ -117,25 +119,59 @@ class Transaction extends Entity
 	/**
 	 * @param  bool $restrict_year Set to TRUE to only return lines linked to the correct chart, or FALSE (deprecated/legacy) to return all lines even if they are linked to accounts in the wrong chart!
 	 */
-	public function getLinesWithAccounts(bool $restrict_year = true)
+	public function getLinesWithAccounts(bool $restrict_year = true): array
 	{
-		$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
+		$db = EntityManager::getInstance(Line::class)->DB();
 
-		$sql = sprintf('SELECT
-			l.*, a.label AS account_name, a.code AS account_code,
-			b.label AS analytical_name
-			FROM acc_transactions_lines l
-			INNER JOIN acc_accounts a ON a.id = l.id_account %s
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			INNER JOIN acc_years y ON y.id = t.id_year
-			LEFT JOIN acc_accounts b ON b.id = l.id_analytical
-			WHERE l.id_transaction = ? ORDER BY l.id;', $restrict);
+		if (null === $this->_lines || $restrict_year === false) {
+			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
+			$sql = sprintf('SELECT
+				l.*, a.label AS account_name, a.code AS account_code,
+				b.label AS analytical_name
+				FROM acc_transactions_lines l
+				INNER JOIN acc_accounts a ON a.id = l.id_account %s
+				INNER JOIN acc_transactions t ON t.id = l.id_transaction
+				INNER JOIN acc_years y ON y.id = t.id_year
+				LEFT JOIN acc_accounts b ON b.id = l.id_analytical
+				WHERE l.id_transaction = %d ORDER BY l.id;', $restrict, $this->id());
 
-		$em = EntityManager::getInstance(Line::class);
-		return $em->DB()->get($sql, $this->id);
+			return $db->get($sql);
+		}
+		else {
+			// Merge data from accounts with lines
+			$accounts = [];
+			$lines_with_accounts = [];
+
+			foreach ($this->getLines() as $line) {
+				if (!array_key_exists($line->id_account, $this->_accounts)) {
+					$accounts[] = $line->id_account;
+				}
+
+				if ($line->id_analytical && !array_key_exists($line->id_analytical, $this->_accounts)) {
+					$accounts[] = $line->id_analytical;
+				}
+			}
+
+			if (count($accounts)) {
+				$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
+				$this->_accounts += $db->getGrouped($sql);
+			}
+
+			foreach ($this->getLines() as $line) {
+				$account = [
+					'account_code' => $this->_accounts[$line->id_account]->code,
+					'account_name' => $this->_accounts[$line->id_account]->label,
+					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
+				];
+
+				$lines_with_accounts[] = (object) ($line->asArray() + $account);
+			}
+
+			return $lines_with_accounts;
+		}
 	}
 
-	public function getLines($with_accounts = false)
+	public function getLines(): array
 	{
 		if (null === $this->_lines && $this->exists()) {
 			$em = EntityManager::getInstance(Line::class);
@@ -255,6 +291,47 @@ class Transaction extends Entity
 		];
 	}
 
+	/**
+	 * Creates a new Transaction entity (not saved) from an existing one,
+	 * trying to adapt to a different chart if possible
+	 * @param  int    $id
+	 * @param  Year   $year Target year
+	 * @return Transaction
+	 */
+	public function duplicate(Year $year): Transaction
+	{
+		$new = new Transaction;
+
+		$copy = ['type', 'status', 'label', 'notes', 'reference', 'date'];
+
+		foreach ($copy as $field) {
+			$new->$field = $this->$field;
+		}
+
+		$copy = ['credit', 'debit', 'id_account', 'label', 'reference'];
+		$lines = DB::getInstance()->get('SELECT
+				l.credit, l.debit, l.label, l.reference, b.id AS id_account
+			FROM acc_transactions_lines l
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			LEFT JOIN acc_accounts b ON b.code = a.code AND b.id_chart = ?
+			WHERE l.id_transaction = ?;',
+			$year->chart()->id,
+			$this->id()
+		);
+
+		foreach ($lines as $l) {
+			$line = new Line;
+			foreach ($copy as $field) {
+				$line->$field = $l->$field;
+			}
+
+			$new->addLine($line);
+		}
+
+		return $new;
+	}
+
+
 /*
 	public function getHash()
 	{
@@ -334,7 +411,9 @@ class Transaction extends Entity
 
 		foreach ($this->_old_lines as $line)
 		{
-			$line->delete();
+			if ($line->exists()) {
+				$line->delete();
+			}
 		}
 
 		// Remove flag
