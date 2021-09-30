@@ -112,7 +112,7 @@ class Page extends Entity
 	{
 		parent::load($data);
 
-		if ($this->file() && $this->file()->modified != $this->modified) {
+		if ($this->file() && $this->file()->modified > $this->modified) {
 			$this->loadFromFile($this->file());
 			$this->save();
 		}
@@ -207,7 +207,10 @@ class Page extends Entity
 			$change_parent = $this->_modified['path'];
 		}
 
-		$this->set('modified', new \DateTime);
+		// Update modified date if required
+		if (count($this->_modified) && !isset($this->_modified['modified'])) {
+			$this->set('modified', new \DateTime);
+		}
 
 		$current_path = $this->_modified['file_path'] ?? $this->file_path;
 		parent::save();
