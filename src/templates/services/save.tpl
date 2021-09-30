@@ -115,7 +115,7 @@
 		{csrf_field key=$csrf_key}
 		{if $user_id}
 			{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
-			{button type="submit" name="save_and_add_payment" label="Enregistrer et ajouter un autre règlement" shape="plus"}
+			{button type="submit" name="save_and_add_payment" class="accounting" label="Enregistrer et ajouter un autre règlement" shape="plus"}
 		{else}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 		{/if}
