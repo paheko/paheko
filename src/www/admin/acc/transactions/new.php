@@ -4,6 +4,7 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
@@ -21,6 +22,24 @@ $transaction = new Transaction;
 $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
+$types_accounts = null;
+
+// Duplicate transaction
+if (qg('copy')) {
+	$old = Transactions::get((int)qg('copy'));
+	$transaction = $old->duplicate($current_year);
+	$lines = $transaction->getLinesWithAccounts();
+	$payoff_for = null;
+	$amount = $transaction->getLinesCreditSum();
+	$types_accounts = $transaction->getTypesAccounts();
+	$transaction->resetLines();
+
+	foreach ($lines as $k => &$line) {
+		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+	}
+
+	unset($line);
+}
 
 $date = new \DateTime;
 
@@ -90,7 +109,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 	}
 }
 
-$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines'));
+$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines', 'types_accounts'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
 
