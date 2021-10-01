@@ -105,3 +105,11 @@ a {
 table tfoot{
     display:table-row-group;
 }
+
+details summary::after {
+    display: none;
+}
+
+.ruler::after, .ruler::before {
+    display: none;
+}

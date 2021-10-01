@@ -178,4 +178,15 @@ class UserTemplate extends Brindille
 		$this->display();
 		return ob_get_clean();
 	}
+
+	public function displayPDF(?string $filename = null): void
+	{
+		header('Content-type: application/pdf');
+
+		if ($filename) {
+			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($filename)));
+		}
+
+		Utils::streamPDF($this->fetch());
+	}
 }
