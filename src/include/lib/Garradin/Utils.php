@@ -1022,7 +1022,7 @@ class Utils
         // 0 => writeable handle connected to child stdin
         // 1 => readable handle connected to child stdout
 
-        fwrite($pipes[0], $result);
+        fwrite($pipes[0], $str);
         fclose($pipes[0]);
 
         echo stream_get_contents($pipes[1]);
