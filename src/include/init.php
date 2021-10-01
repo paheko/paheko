@@ -176,6 +176,7 @@ static $default_config = [
 	'FILE_STORAGE_QUOTA'    => null,
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
+	'PDF_COMMAND'           => null,
 ];
 
 foreach ($default_config as $const => $value)

@@ -29,5 +29,6 @@
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
+		{linkbutton shape="download" href="%s&_pdf"|args:$self_url label="Télécharger en PDF"}
 	</p>
 </div>
