@@ -82,12 +82,20 @@ class Entity extends AbstractEntity
 		$name = str_replace('Garradin\Entities', '', $name);
 		$name = 'entity.' . $name . '.save';
 
+		// Specific entity signal
 		if (Plugin::fireSignal($name . '.before', ['entity' => $this])) {
+			return true;
+		}
+
+		// Generic entity signal
+		if (Plugin::fireSignal('entity.save.before', ['entity' => $this])) {
 			return true;
 		}
 
 		$return = parent::save();
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
+
+		Plugin::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return]);
 
 		return $return;
 	}
@@ -102,8 +110,14 @@ class Entity extends AbstractEntity
 			return true;
 		}
 
+		// Generic entity signal
+		if (Plugin::fireSignal('entity.delete.before', ['entity' => $this])) {
+			return true;
+		}
+
 		$return = parent::delete();
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
+		Plugin::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return]);
 
 		return $return;
 	}
