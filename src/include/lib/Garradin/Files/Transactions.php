@@ -44,8 +44,6 @@ class Transactions
 			INNER JOIN acc_transactions t ON t.id = f.name
 			INNER JOIN acc_years y ON t.id_year = y.id', Files::getVirtualTableName());
 
-		$sum = 0;
-
 		// Only fetch directories with an ID as the name
 		$conditions = sprintf('f.parent = \'%s\' AND f.type = %d AND printf("%%d", f.name) = name', File::CONTEXT_TRANSACTION, File::TYPE_DIRECTORY);
 
