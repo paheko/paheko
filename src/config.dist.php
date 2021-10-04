@@ -431,3 +431,18 @@ namespace Garradin;
  */
 
 //const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
+
+/**
+ * Commande de création de PDF
+ *
+ * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
+ * Si laissé non spécifié (ou NULL), Garradin essaiera de détecter une solution entre
+ * PrinceXML, Chromium, wkhtmltopdf ou weasyprint.
+ *
+ * %1$s sera remplacé par le chemin du fichier HTML, et %2$s par le chemin du fichier PDF.
+ *
+ * Exemple : chromium --headless --print-to-pdf=%2$s %1$s
+ *
+ * Défaut : null
+ */
+//const PDF_COMMAND = 'wkhtmltopdf %2$s %1$s';

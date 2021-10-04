@@ -3,6 +3,10 @@
     margin: 0;
 }
 
+html {
+    height: auto;
+}
+
 body {
     background: #fff;
     padding: 0;
@@ -100,4 +104,12 @@ a {
 /* Don't repeat the table footer on every printed page */
 table tfoot{
     display:table-row-group;
+}
+
+details summary::after {
+    display: none;
+}
+
+.ruler::after, .ruler::before {
+    display: none;
 }

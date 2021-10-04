@@ -33,7 +33,7 @@ $form->runIf('confirm_delete', function () use ($check, $session) {
 	foreach ($check as $file) {
 		$file->delete();
 	}
-}, $csrf_key, '!docs/?p=' . $parent);
+}, $csrf_key, '!docs/?path=' . $parent);
 
 $form->runIf(f('move') && f('select'), function () use ($check, $session) {
 	foreach ($check as &$file) {
@@ -50,7 +50,7 @@ $form->runIf(f('move') && f('select'), function () use ($check, $session) {
 	foreach ($check as $file) {
 		$file->move($target);
 	}
-}, $csrf_key, '!docs/?p=' . $parent);
+}, $csrf_key, '!docs/?path=' . $parent);
 
 $count = count($check);
 

@@ -133,7 +133,7 @@ class File extends Entity
 		$this->assert($this->image === 0 || $this->image === 1, 'Unknown image value');
 		$this->assert(trim($this->name) !== '', 'Le nom de fichier ne peut rester vide');
 		$this->assert(strlen($this->path), 'Le chemin ne peut rester vide');
-		$this->assert(strlen($this->parent) || null === $this->parent, 'Le chemin ne peut rester vide');
+		$this->assert(strlen($this->parent) || '' === $this->parent, 'Le chemin ne peut rester vide');
 	}
 
 	public function context(): string
@@ -171,6 +171,8 @@ class File extends Entity
 		{
 			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size));
 		}
+
+		DB::getInstance()->delete('files_search', 'path = ? OR path LIKE ?', $this->path, $this->path . '/%');
 
 		if ($this->exists()) {
 			return parent::delete();
@@ -689,7 +691,7 @@ class File extends Entity
 		return Files::callStorage('fetch', $this);
 	}
 
-	public function render(array $options = [])
+	public function render(?string $user_prefix = null)
 	{
 		$editor_type = $this->renderFormat();
 
@@ -700,7 +702,7 @@ class File extends Entity
 			throw new \LogicException('Cannot render file of this type');
 		}
 		else {
-			return Render::render($editor_type, $this, $this->fetch(), $options);
+			return Render::render($editor_type, $this, $this->fetch(), $user_prefix);
 		}
 	}
 

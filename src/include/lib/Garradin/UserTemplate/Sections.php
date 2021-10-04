@@ -296,6 +296,10 @@ class Sections
 			$params['order'] = '1';
 		}
 
+		if (!empty($params['where']) && !preg_match('/^\s*AND\s+/i', $params['where'])) {
+			$params['where'] = ' AND ' . $params['where'];
+		}
+
 		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
 			$params['select'],
 			$params['tables'],

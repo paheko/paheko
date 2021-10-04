@@ -427,6 +427,7 @@
 			tableActions[i].onchange = function () {
 				if (!this.form.querySelector('table tbody input[type=checkbox]:checked'))
 				{
+					this.selectedIndex = 0;
 					return !window.alert("Aucune ligne sélectionnée !");
 				}
 

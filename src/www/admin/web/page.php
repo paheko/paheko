@@ -26,7 +26,7 @@ $tpl->assign('breadcrumbs', $page->getBreadcrumbs());
 $images = $page->getImageGallery(true);
 $files = $page->getAttachmentsGallery(true);
 
-$content = $page->render(['prefix' => ADMIN_URL . 'web/page.php?p=']);
+$content = $page->render(ADMIN_URL . 'web/page.php?p=');
 
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;

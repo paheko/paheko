@@ -18,12 +18,44 @@ class Utils
     static protected $transliterator;
 
     const FRENCH_DATE_NAMES = [
-        'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
-        'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
-        'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
-        'Thursday'=>'Jeudi','Friday'=>'Vendredi','Saturday'=>'Samedi','Sunday'=>'Dimanche',
-        'Feb'=>'Fév','Apr'=>'Avr','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
-        'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
+        'January'   => 'janvier',
+        'February'  => 'février',
+        'March'     => 'mars',
+        'April'     => 'avril',
+        'May'       => 'mai',
+        'June'      => 'juin',
+        'July'      => 'juillet',
+        'August'    => 'août',
+        'September' => 'septembre',
+        'October'   => 'octobre',
+        'November'  => 'novembre',
+        'December'  => 'décembre',
+        'Monday'    => 'lundi',
+        'Tuesday'   => 'mardi',
+        'Wednesday' => 'mercredi',
+        'Thursday'  => 'jeudi',
+        'Friday'    => 'vendredi',
+        'Saturday'  => 'samedi',
+        'Sunday'    => 'dimanche',
+        'Jan' => 'jan',
+        'Feb' => 'fév',
+        'Mar' => 'mar',
+        'Apr' => 'avr',
+        'Jun' => 'juin',
+        'Jul' => 'juil',
+        'Aug' => 'août',
+        'Sep' => 'sep',
+        'Oct' => 'oct',
+        'Nov' => 'nov',
+        'Dec' => 'déc',
+        'Mon' => 'lun',
+        'Tue' => 'mar',
+        'Wed' => 'mer',
+        'Thu' => 'jeu',
+        'Fri' => 'ven',
+        'Sat' => 'sam',
+        'Sun' => 'dim',
+    ];
 
     static public function get_datetime($ts)
     {
@@ -57,7 +89,6 @@ class Utils
         $date = strftime($format, $ts->getTimestamp());
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
-        $date = strtolower($date);
         return $date;
     }
 
@@ -77,7 +108,6 @@ class Utils
         $date = $ts->format($format);
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
-        $date = strtolower($date);
         return $date;
     }
 
@@ -867,6 +897,15 @@ class Utils
         return $str;
     }
 
+    static public function safeFileName(string $str): string
+    {
+        $str = Utils::transliterateToAscii($str);
+        $str = preg_replace('![^\w\d_ -]!i', '.', $str);
+        $str = preg_replace('!\.{2,}!', '.', $str);
+        $str = trim($str, '.');
+        return $str;
+    }
+
     /**
      * dirname may have undefined behaviour depending on the locale!
      */
@@ -924,7 +963,7 @@ class Utils
         }
 
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
-            self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();');
+            self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();');
         }
 
         if (isset(self::$transliterator)) {
@@ -938,5 +977,127 @@ class Utils
     {
         uksort($array, [self::class, 'unicodeCaseComparison']);
         return $array;
+    }
+
+    /**
+     * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
+     * @param  string $str HTML string
+     * @return void
+     */
+    static public function streamPDF(string $str): void
+    {
+        if (!PDF_COMMAND) {
+            // Try to see if there's a plugin
+            $in = ['string' => $str];
+
+            if (Plugin::fireSignal('pdf.stream', $in)) {
+                return;
+            }
+
+            unset($in);
+        }
+
+        // Only Prince handles using STDIN and STDOUT
+        if (PDF_COMMAND != 'prince') {
+            $file = self::filePDF($str);
+            readfile($file);
+            unlink($file);
+            return;
+        }
+
+        $descriptorspec = [
+            0 => ["pipe", "r"], // stdin is a pipe that the child will read from
+            1 => ["pipe", "w"], // stdout is a pipe that the child will write to
+            2 => ['pipe', 'w'], // stderr
+        ];
+
+        $cmd = 'prince -o - -';
+        $process = proc_open($cmd, $descriptorspec, $pipes);
+
+        if (!is_resource($process)) {
+            throw new \RuntimeException('Cannot execute Prince XML');
+        }
+
+        // $pipes now looks like this:
+        // 0 => writeable handle connected to child stdin
+        // 1 => readable handle connected to child stdout
+
+        fwrite($pipes[0], $str);
+        fclose($pipes[0]);
+
+        echo stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        // It is important that you close any pipes before calling
+        // proc_close in order to avoid a deadlock
+        proc_close($process);
+    }
+
+    /**
+     * Creates a PDF file from a HTML string
+     * @param  string $str HTML string
+     * @return string File path of the PDF file (temporary), you must delete or move it
+     */
+    static public function filePDF(string $str): ?string
+    {
+        $source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
+        $target = str_replace('.html', '.pdf', $source);
+
+        file_put_contents($source, $str);
+
+        $cmd = PDF_COMMAND;
+
+        if (!$cmd) {
+            // Try to see if there's a plugin
+            $in = ['source' => $source, 'target' => $target];
+
+            if (Plugin::fireSignal('pdf.create', $in)) {
+                return $target;
+            }
+
+            unset($in);
+
+            // Try to find a local executable
+            $list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+
+            foreach ($list as $program) {
+                if (shell_exec('which ' . $program)) {
+                    $cmd = $program;
+                    break;
+                }
+            }
+
+            // We still haven't found anything
+            if (!$cmd) {
+                throw new \LogicException('No PDF creation executable found. Please install or configure one.');
+            }
+        }
+
+        switch ($cmd) {
+            case 'prince':
+                $cmd = 'prince -o %2$s %1$s';
+                break;
+            case 'chromium':
+                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
+                break;
+            case 'wkhtmltopdf':
+                $cmd = 'wkhtmltopdf %1$s %2$s';
+                break;
+            case 'weasyprint':
+                $cmd = 'weasyprint %1$s %2$s';
+                break;
+            default:
+                break;
+        }
+
+        exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+
+        if (!file_exists($target)) {
+            throw new \RuntimeException('PDF command failed');
+        }
+
+        unlink($source);
+
+        return $target;
     }
 }

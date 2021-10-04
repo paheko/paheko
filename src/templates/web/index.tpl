@@ -75,9 +75,9 @@
 	<h2 class="ruler">Pages</h2>
 	<p>
 		{if !$order_date}
-			{linkbutton shape="down" label="Trier par date" href="?p=%s"|args:$current_path}
+			{linkbutton shape="down" label="Trier par date" href="?p=%s&order_date"|args:$current_path}
 		{else}
-			{linkbutton shape="up" label="Trier par titre" href="?p=%s&order_title"|args:$current_path}
+			{linkbutton shape="up" label="Trier par titre" href="?p=%s"|args:$current_path}
 		{/if}
 	</p>
 	<table class="list">

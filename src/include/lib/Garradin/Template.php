@@ -21,6 +21,26 @@ class Template extends \KD2\Smartyer
 		return self::$_instance ?: self::$_instance = new Template;
 	}
 
+	public function display($template = null)
+	{
+		if (isset($_GET['_pdf'])) {
+			$out = $this->fetch($template);
+
+			$filename = 'Print.pdf';
+
+			if (preg_match('!<title>(.*)</title>!U', $out, $match)) {
+				$filename = trim($match[1]) . '.pdf';
+			}
+
+			header('Content-type: application/pdf');
+			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($filename)));
+			Utils::streamPDF($out);
+			return $this;
+		}
+
+		return parent::display($template);
+	}
+
 	private function __clone()
 	{
 	}
@@ -98,7 +118,7 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
 		$this->register_modifier('format_skriv', function ($str) {
-			$skriv = new Skriv(null);
+			$skriv = new Skriv;
 			return $skriv->render((string) $str);
 		});
 

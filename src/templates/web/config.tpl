@@ -122,7 +122,7 @@
 		</p>
 
 		<p>
-			{linkbutton href="!docs/?p=skel" label="Gérer les fichiers de squelettes" shape="folder"}
+			{linkbutton href="!docs/?path=skel" label="Gérer les fichiers de squelettes" shape="folder"}
 		</p>
 	</fieldset>
 	</form>

@@ -20,7 +20,7 @@ class Parsedown extends Parent_Parsedown
 	protected $skriv;
 	protected $toc = [];
 
-	function __construct(?File $file)
+	function __construct(?File $file, ?string $user_prefix)
 	{
 		$this->BlockTypes['<'][] = 'SkrivExtension';
 		$this->BlockTypes['['][]= 'TOC';
@@ -31,7 +31,7 @@ class Parsedown extends Parent_Parsedown
 		# identify footnote markers before before links
 		array_unshift($this->InlineTypes['['], 'FootnoteMarker');
 
-		$this->skriv = new Skriv($file);
+		$this->skriv = new Skriv($file, $user_prefix);
 	}
 
 	protected function blockSkrivExtension(array $line): ?array
@@ -152,14 +152,11 @@ class Parsedown extends Parent_Parsedown
 		end($block['footnotes']);
 		$last = key($block['footnotes']);
 
-		if (isset($block['interrupted']))
+		if (isset($block['interrupted']) && $line['indent'] >= 4)
 		{
-			if ($line['indent'] >= 4)
-			{
-				$block['footnotes'][$last] .= "\n\n" . $line['text'];
+			$block['footnotes'][$last] .= "\n\n" . $line['text'];
 
-				return $block;
-			}
+			return $block;
 		}
 		else
 		{

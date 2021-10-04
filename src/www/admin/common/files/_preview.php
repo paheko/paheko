@@ -10,6 +10,11 @@ use Garradin\Web\Web;
 require_once __DIR__ . '/../../_inc.php';
 
 $page = null;
+$content = f('content');
+
+if (null == $content) {
+	throw new UserException('Aucun contenu à prévisualiser');
+}
 
 if ($path = qg('f')) {
 	$file = Files::get($path);
@@ -31,9 +36,9 @@ else {
 	throw new UserException('Fichier inconnu');
 }
 
-$prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=' . File::CONTEXT_DOCUMENTS . '/';
+$prefix = $page ? 'web/page.php?uri=' : 'common/files/_preview.php?p=';
 
-$content = Render::render(f('format'), $file, f('content'), ['prefix' => ADMIN_URL . $prefix]);
+$content = Render::render(f('format'), $file, f('content'), ADMIN_URL . $prefix);
 
 $tpl->assign(compact('file', 'content'));
 

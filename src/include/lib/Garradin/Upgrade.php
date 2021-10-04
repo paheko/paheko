@@ -59,14 +59,6 @@ class Upgrade
 				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
 				$db->commitSchemaUpdate();
-
-				// Import nouveau plan comptable
-				$chart = new \Garradin\Entities\Accounting\Chart;
-				$chart->label = 'Plan comptable associatif 2018';
-				$chart->country = 'FR';
-				$chart->code = 'PCA2018';
-				$chart->save();
-				$chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
 			}
 
 
@@ -320,6 +312,20 @@ class Upgrade
 				// Add UNIQUE index
 				$db->import(ROOT . '/include/data/1.1.8_migration.sql');
 
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.8', '==')) {
+				// Force sync to add missing pages if you had the buggy 1.1.8 version
+				\Garradin\Web\Web::sync(true);
+			}
+
+			if (version_compare($v, '1.1.10', '<')) {
+				\Garradin\Web\Web::sync(true); // Force sync of web pages
+				Files::syncVirtualTable('', true);
+
+				$db->begin();
+				$db->exec(sprintf('DELETE FROM files_search WHERE path NOT IN (SELECT path FROM %s);', Files::getVirtualTableName()));
 				$db->commit();
 			}
 

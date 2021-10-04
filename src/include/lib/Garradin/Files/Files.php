@@ -5,6 +5,7 @@ namespace Garradin\Files;
 use Garradin\Static_Cache;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\ValidationException;
 use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
@@ -155,10 +156,12 @@ class Files
 			$i = 0;
 
 			self::migrateDirectory($from, $to, '', $i, $callback);
-
-			$db->commit();
+		}
+		catch (UserException $e) {
+			throw new \RuntimeException('Migration failed', 0, $e);
 		}
 		finally {
+			$db->commit();
 			call_user_func([$from, 'unlock']);
 			call_user_func([$to, 'unlock']);
 		}
@@ -169,6 +172,11 @@ class Files
 		$db = DB::getInstance();
 
 		foreach (call_user_func([$from, 'list'], $path) as $file) {
+			if (!$file->parent && $file->name == '.lock') {
+				// Ignore lock file
+				continue;
+			}
+
 			if (++$i >= 100) {
 				$db->commit();
 				$db->begin();
@@ -286,10 +294,13 @@ class Files
 	static public function getRemainingQuota(bool $force_refresh = false): float
 	{
 		if (FILE_STORAGE_QUOTA !== null) {
-			return FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
+			$quota = FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
+		}
+		else {
+			$quota = self::callStorage('getRemainingQuota');
 		}
 
-		return self::callStorage('getRemainingQuota');
+		return max(0, $quota);
 	}
 
 	static public function checkQuota(int $size = 0): void
@@ -324,7 +335,7 @@ class Files
 		return 'tmp_files';
 	}
 
-	static public function syncVirtualTable(string $parent = '')
+	static public function syncVirtualTable(string $parent = '', bool $recursive = false)
 	{
 		if (FILE_STORAGE_BACKEND == 'SQLite') {
 			// No need to create a virtual table, use the real one
@@ -333,10 +344,20 @@ class Files
 
 		$db = DB::getInstance();
 		$db->begin();
+
 		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
 
 		foreach (Files::list($parent) as $file) {
+			// Ignore additional directories
+			if ($parent == '' && !array_key_exists($file->name, File::CONTEXTS_NAMES)) {
+				continue;
+			}
+
 			$db->insert('tmp_files', $file->asArray(true));
+
+			if ($recursive && $file->type === $file::TYPE_DIRECTORY) {
+				self::syncVirtualTable($file->path, $recursive);
+			}
 		}
 
 		$db->commit();

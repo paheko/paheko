@@ -131,7 +131,7 @@ class SQLite implements StorageInterface
 		$it = DB::getInstance()->iterate('SELECT path FROM files WHERE parent LIKE ? ORDER BY path;', $path . '/%');
 
 		foreach ($it as $file) {
-			$files[] = $file->path;
+			$files[] = substr($file->path, strlen($path) + 1);
 		}
 
 		return $files;

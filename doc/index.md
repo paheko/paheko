@@ -146,7 +146,7 @@ Garradin est un logiciel de gestion d'association (loi 1901 / ASBL / etc.). Son 
 *  la __simplification administrative__ : prise de notes en réunion, archivage et partage de fichiers (afin d'éliminer le besoin d'archiver les documents papier), etc.
 *  la publication d'un __site web__ pour l'association, simple mais suffisamment flexible pour pouvoir adapter le fonctionnement à la plupart des besoins
 *  l'__autonomisation des adhérents__ : possibilité de mettre à jour leurs informations par eux-même, ou de s'inscrire seul depuis un ordinateur ou un smartphone
-*  la possibilité d'adapter aux besoins spécifiques de chaque association via des __extensions__.
+*  la possibilité d'adapter aux besoins spécifiques de chaque association via des [__extensions__](/wiki/?name=Extensions).
 
 Tous ces objectifs ne sont pas encore réalisés, voir :
 
@@ -159,9 +159,8 @@ Garradin signifie *argent* en *Wagiman*, un dialecte aborigène du nord de l'Aus
 
 ## Documentation et entraide
 
-*  D'abord lire la [documentation](/wiki/?name=Documentation) et notamment la [foire aux questions](/wiki/?name=FAQ)
-*  La [liste de discussion d'entraide entre utilisateurs](https://admin.kd2.org/lists/aide@garradin.eu) est le meilleur moyen de vous faire aider :)
-*  [Chat d'entraide en direct](https://kiwiirc.com/nextclient/#irc://irc.libera.chat/#garradin?nick=garradin%7C?), ou via IRC : salon `#garradin` sur `irc.libera.chat` (port `6697` avec TLS)
+* D'abord lire la [documentation](/wiki/?name=Documentation) et notamment la [foire aux questions](/wiki/?name=FAQ)
+* Voir la page [Entraide](/wiki/?name=Entraide) pour accéder aux listes de discussion et au salon de discussion IRC
 
 ## Participer
 

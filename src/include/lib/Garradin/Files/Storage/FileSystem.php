@@ -187,6 +187,7 @@ class FileSystem implements StorageInterface
 
 		$file = new File;
 		$file->load($data);
+		$file->parent = $parent; // Force empty parent to be empty, not null
 
 		return $file;
 	}
@@ -203,6 +204,11 @@ class FileSystem implements StorageInterface
 		$files = [];
 
 		foreach (new \FilesystemIterator($fullpath, \FilesystemIterator::SKIP_DOTS) as $file) {
+			// Seems that SKIP_DOTS does not work all the time?
+			if ($file->getFilename()[0] == '.') {
+				continue;
+			}
+
 			// Used to make sorting easier
 			// directory_blabla
 			// file_image.jpeg
@@ -305,7 +311,7 @@ class FileSystem implements StorageInterface
 		$lock = file_exists(self::_getRoot() . DIRECTORY_SEPARATOR . '.lock');
 
 		if ($lock) {
-			throw new \RuntimeException('File storage is locked');
+			throw new \RuntimeException('FileSystem storage is locked');
 		}
 	}
 }

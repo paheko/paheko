@@ -1,6 +1,10 @@
-{include file="admin/_head.tpl" title="Grand livre" current="acc/years"}
-
-{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre"}
+{if !empty($criterias.analytical_only)}
+	{include file="admin/_head.tpl" title="Grand livre analytique" current="acc/years"}
+	{include file="acc/reports/_header.tpl" current="analytical_ledger" title="Grand livre analytique"}
+{else}
+	{include file="admin/_head.tpl" title="Grand livre" current="acc/years"}
+	{include file="acc/reports/_header.tpl" current="ledger" title="Grand livre"}
+{/if}
 
 <div class="year-header noprint">
 	<button type="button" data-icon="↓" class="icn-btn" id="open_details">Déplier tous les comptes</button>
@@ -10,7 +14,14 @@
 {foreach from=$ledger item="account"}
 
 <details open="open">
-	<summary><h2 class="ruler"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$account.id_year}">{$account.code} — {$account.label}</a></h2></summary>
+	<summary><h2 class="ruler">
+		{if !empty($criterias.analytical_only)}
+			<?php $link = sprintf('%sacc/reports/trial_balance.php?analytical=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+		{else}
+			<?php $link = sprintf('%sacc/reports/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+		{/if}
+			<a href="{$link}">{$account.code} — {$account.label}</a>
+	</h2></summary>
 
 	<table class="list">
 		<thead>

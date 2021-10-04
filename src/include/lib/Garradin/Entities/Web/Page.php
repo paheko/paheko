@@ -113,7 +113,7 @@ class Page extends Entity
 	{
 		parent::load($data);
 
-		if ($this->file() && $this->file()->modified != $this->modified) {
+		if ($this->file() && $this->file()->modified > $this->modified) {
 			$this->loadFromFile($this->file());
 			$this->save();
 		}
@@ -137,18 +137,18 @@ class Page extends Entity
 		return $out;
 	}
 
-	public function render(array $options = []): string
+	public function render(?string $user_prefix = null): string
 	{
 		if (!$this->file()) {
 			throw new \LogicException('File does not exist: '  . $this->file_path);
 		}
 
-		return Render::render($this->format, $this->file(), $this->content, $options);
+		return Render::render($this->format, $this->file(), $this->content, $user_prefix);
 	}
 
 	public function preview(string $content): string
 	{
-		return Render::render($this->format, $this->file(), $content, ['prefix' => '#']);
+		return Render::render($this->format, $this->file(), $content, '#');
 	}
 
 	public function filepath(bool $stored = true): string
@@ -185,6 +185,7 @@ class Page extends Entity
 
 			// Or update file
 			if ($file->fetch() !== $export) {
+				$file->set('modified', $this->modified);
 				$file->store(null, $export);
 			}
 		}
@@ -205,6 +206,11 @@ class Page extends Entity
 		if (isset($this->_modified['uri']) || isset($this->_modified['path'])) {
 			$this->set('file_path', $this->filepath(false));
 			$change_parent = $this->_modified['path'];
+		}
+
+		// Update modified date if required
+		if (count($this->_modified) && !isset($this->_modified['modified'])) {
+			$this->set('modified', new \DateTime);
 		}
 
 		$current_path = $this->_modified['file_path'] ?? $this->file_path;

@@ -13,36 +13,34 @@ abstract class AbstractRender
 	protected $context;
 	protected $link_prefix;
 	protected $link_suffix;
+	protected $user_prefix;
 
 	protected $file;
 
-	public function __construct(?File $file)
+	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
 		$this->file = $file;
 
 		if ($file) {
 			$this->isRelativeTo($file);
 		}
+
+		$this->user_prefix = $user_prefix;
 	}
 
-	abstract public function render(?string $content = null, array $options = []): string;
+	abstract public function render(?string $content = null): string;
 
 	protected function resolveAttachment(string $uri) {
 		$prefix = $this->current_path;
 		$pos = strpos($uri, '/');
 
-		// "Image.jpg"
-		if ($pos === false) {
-			return WWW_URL . $prefix . '/' . $uri;
-		}
-		// "bla/Image.jpg" outside of web context
-		elseif ($this->context !== File::CONTEXT_WEB && $pos !== 0) {
-			return WWW_URL . $this->context . '/' . $uri;
-		}
-		// "bla/Image.jpg" in web context or absolute link, eg. "/transactions/2442/42.jpg"
-		else {
+		// Absolute URL: treat it as absolute!
+		if ($pos === 0) {
 			return WWW_URL . ltrim($uri, '/');
 		}
+
+		// Handle relative URIs
+		return WWW_URL . $prefix . '/' . $uri;
 	}
 
 	protected function resolveLink(string $uri) {
@@ -59,16 +57,16 @@ abstract class AbstractRender
 	}
 
 	public function isRelativeTo(File $file) {
-		$this->current_path = Utils::dirname($file->path);
-		$this->context = strtok($this->current_path, '/');
+		$this->current_path = $file->parent;
+		$this->context = $file->context();
 		$this->link_suffix = '';
 
 		if ($this->context === File::CONTEXT_WEB) {
-			$this->link_prefix = WWW_URL;
+			$this->link_prefix = $this->user_prefix ?? WWW_URL;
 			$this->current_path = Utils::basename(Utils::dirname($file->path));
 		}
 		else {
-			$this->link_prefix = $options['prefix'] ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', $this->context);
+			$this->link_prefix = $this->user_prefix ?? sprintf(ADMIN_URL . 'common/files/preview.php?p=%s/', $this->context);
 			$this->link_suffix = '.skriv';
 		}
 	}

@@ -19,7 +19,7 @@ $user_name = (new Membres)->getNom($su->id_user);
 
 $csrf_key = 'service_pay';
 
-$form->runIf('save', function () use ($su, $session) {
+$form->runIf(f('save') || f('save_and_add_payment'), function () use ($su, $session) {
 	$su->addPayment($session->getUser()->id);
 
 	if ($su->paid != (bool) f('paid')) {
@@ -27,7 +27,14 @@ $form->runIf('save', function () use ($su, $session) {
 		$su->save();
 	}
 
-	Utils::redirect(ADMIN_URL . 'services/user.php?id=' . $su->id_user);
+	if (f('save_and_add_payment')) {
+		$url = ADMIN_URL . 'services/payment.php?id=' . $su->id;
+	}
+	else {
+		$url = ADMIN_URL . 'services/user.php?id=' . $su->id_user;
+	}
+
+	Utils::redirect($url);
 }, $csrf_key);
 
 $types_details = Transaction::getTypesDetails();

@@ -35,7 +35,7 @@ class Transactions
 		'amount'         => 'Montant',
 	];
 
-	const MANDATORY_CSV_COLUMNS = ['id', 'label', 'date', 'credit_account', 'debit_account', 'amount'];
+	const MANDATORY_CSV_COLUMNS = ['label', 'date', 'credit_account', 'debit_account', 'amount'];
 
 	static public function get(int $id)
 	{

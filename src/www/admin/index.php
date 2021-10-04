@@ -14,7 +14,7 @@ $banner = null;
 Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session], $banner);
 
 if ($homepage && ($file = Files::get($homepage))) {
-	$homepage = $file->render(['prefix' => ADMIN_URL . 'common/files/preview.php?p=' . File::CONTEXT_DOCUMENTS . '/']);
+	$homepage = $file->render(ADMIN_URL . 'common/files/preview.php?p=' . File::CONTEXT_DOCUMENTS . '/');
 }
 else {
 	$homepage = null;

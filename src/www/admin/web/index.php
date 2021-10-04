@@ -23,7 +23,7 @@ else {
 	}
 }
 
-$order_date = qg('order_title') === null;
+$order_date = qg('order_date') !== null;
 
 $categories = Web::listCategories($cat ? $cat->path : '');
 $pages = Web::listPages($cat ? $cat->path : '', $order_date);
