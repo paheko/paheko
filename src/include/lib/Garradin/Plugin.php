@@ -12,6 +12,12 @@ class Plugin
 	protected $plugin = null;
 	protected $config_changed = false;
 
+	/**
+	 * Set to false to disable signal firing
+	 * @var boolean
+	 */
+	static protected $signals = true;
+
 	protected $mimes = [
 		'css' => 'text/css',
 		'gif' => 'image/gif',
@@ -28,6 +34,10 @@ class Plugin
 		'xml' => 'text/xml',
 		'svg' => 'image/svg+xml',
 	];
+
+	static public function toggleSignals(bool $enabled) {
+		self::$signals = $enabled;
+	}
 
 	static public function getPath($id, $fail_with_exception = true)
 	{
@@ -64,7 +74,7 @@ class Plugin
 		}
 
 		$this->plugin->config = json_decode($this->plugin->config);
-		
+
 		if (!is_object($this->plugin->config))
 		{
 			$this->plugin->config = new \stdClass;
@@ -260,7 +270,7 @@ class Plugin
 		}
 
 		$db = DB::getInstance();
-		$db->delete('plugins_signaux', 'plugin = ?', $this->id);
+		$db->delete('plugins_signals', 'plugin = ?', $this->id);
 		return $db->delete('plugins', 'id = ?', $this->id);
 	}
 
@@ -295,9 +305,9 @@ class Plugin
 		$infos = (object) parse_ini_file($this->path() . '/garradin_plugin.ini', false);
 
 		$data = [
-			'nom'		=>	$infos->nom,
+			'name'		=>	$infos->name ?? $infos->nom,
 			'description'=>	$infos->description,
-			'auteur'	=>	$infos->auteur,
+			'author'	=>	$infos->author ?? $infos->auteur,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
@@ -337,7 +347,7 @@ class Plugin
 		// Signaux exclusifs, qui ne peuvent être attribués qu'à un seul plugin
 		if (strpos($signal, 'boucle.') === 0)
 		{
-			$registered = $db->firstColumn('SELECT plugin FROM plugins_signaux WHERE signal = ? AND plugin != ?;', $signal, $this->id);
+			$registered = $db->firstColumn('SELECT plugin FROM plugins_signals WHERE signal = ? AND plugin != ?;', $signal, $this->id);
 
 			if ($registered)
 			{
@@ -347,7 +357,7 @@ class Plugin
 
 		$callable_name = str_replace('Garradin\\Plugin\\', '', $callable_name);
 
-		$st = $db->prepare('INSERT OR REPLACE INTO plugins_signaux VALUES (:signal, :plugin, :callback);');
+		$st = $db->prepare('INSERT OR REPLACE INTO plugins_signals VALUES (:signal, :plugin, :callback);');
 		$st->bindValue(':signal', $signal);
 		$st->bindValue(':plugin', $this->id);
 		$st->bindValue(':callback', $callable_name);
@@ -361,7 +371,7 @@ class Plugin
 	static public function listInstalled()
 	{
 		$db = DB::getInstance();
-		$plugins = $db->getGrouped('SELECT id, * FROM plugins ORDER BY nom;');
+		$plugins = $db->getGrouped('SELECT id, * FROM plugins ORDER BY name;');
 		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($plugins as &$row)
@@ -442,7 +452,7 @@ class Plugin
 		self::checkAndInstallSystemPlugins();
 
 		$db = DB::getInstance();
-		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
+		$list = $db->getGrouped('SELECT id, name, menu_condition FROM plugins WHERE menu = 1 ORDER BY name;');
 
 		// FIXME deprecated
 		$fix_legacy = [
@@ -475,7 +485,7 @@ class Plugin
 
 			if (!$row->menu_condition)
 			{
-				$row = $row->nom;
+				$row = $row->name;
 				continue;
 			}
 
@@ -512,7 +522,7 @@ class Plugin
 				continue;
 			}
 
-			$row = $row->nom;
+			$row = $row->name;
 		}
 
 		unset($row);
@@ -717,7 +727,7 @@ class Plugin
 
 		$infos = (object) parse_ini_file($path . '/garradin_plugin.ini', false);
 
-		$required = ['nom', 'description', 'auteur', 'url', 'version', 'menu', 'config'];
+		$required = ['name', 'description', 'author', 'url', 'version', 'menu', 'config'];
 
 		foreach ($required as $key)
 		{
@@ -771,9 +781,9 @@ class Plugin
 		$data = [
 			'id' 		=> 	$id,
 			'officiel' 	=> 	(int)(bool)$official,
-			'nom'		=>	$infos->nom,
+			'name'		=>	$infos->name,
 			'description'=>	$infos->description,
-			'auteur'	=>	$infos->auteur,
+			'author'	=>	$infos->author,
 			'url'		=>	$infos->url,
 			'version'	=>	$infos->version,
 			'menu'		=>	(int)(bool)$infos->menu,
@@ -820,7 +830,11 @@ class Plugin
 	 */
 	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
-		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
+		if (!self::$signals) {
+			return null;
+		}
+
+		$list = DB::getInstance()->get('SELECT * FROM plugins_signals WHERE signal = ?;', $signal);
 
 		if (!count($list)) {
 			return null;
