@@ -101,8 +101,8 @@ class Session extends \KD2\UserSession
 		$champ_id = Config::getInstance()->get('champ_identifiant');
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
-		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
-			FROM membres AS m
+		$query = 'SELECT u.id, m.%1$s AS login, m.password, m.secret_otp AS otp_secret
+			FROM users AS u
 			INNER JOIN users_categories AS c ON c.id = m.id_category
 			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';

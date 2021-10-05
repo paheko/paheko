@@ -48,6 +48,8 @@ class Upgrade
 		$db = DB::getInstance();
 		$v = $db->version();
 
+		Plugin::toggleSignals(false);
+
 		Static_Cache::store('upgrade', 'Mise à jour en cours.');
 
 		// Créer une sauvegarde automatique
@@ -262,15 +264,11 @@ class Upgrade
 
 			if (version_compare($v, '1.1.4', '<')) {
 				// Set config file names
-				$config = Config::getInstance();
-
 				$file = Files::get(Config::DEFAULT_FILES['admin_background']);
-				$config->set('admin_background', $file ? Config::DEFAULT_FILES['admin_background'] : null);
+				$db->update('config', ['value' => $file ? Config::DEFAULT_FILES['admin_background'] : null], 'key = \'admin_background\'');
 
 				$file = Files::get(Config::DEFAULT_FILES['admin_homepage']);
-				$config->set('admin_homepage', $file ? Config::DEFAULT_FILES['admin_homepage'] : null);
-
-				$config->save();
+				$db->update('config', ['value' => $file ? Config::DEFAULT_FILES['admin_homepage'] : null], 'key = \'admin_homepage\'');
 			}
 
 			if (version_compare($v, '1.1.7', '<')) {
@@ -321,6 +319,12 @@ class Upgrade
 
 				$db->begin();
 				$db->exec(sprintf('DELETE FROM files_search WHERE path NOT IN (SELECT path FROM %s);', Files::getVirtualTableName()));
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.2.0', '<')) {
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
 				$db->commit();
 			}
 

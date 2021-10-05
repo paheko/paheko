@@ -14,10 +14,10 @@ class Champs
 	protected $champs = null;
 
     protected $system_fields = [
-        'date_connexion',
-        'date_inscription',
-        'clef_pgp',
-        'secret_otp',
+        'date_login',
+        'date_created',
+        'pgp_key',
+        'otp_secret',
         'id',
         'id_category',
     ];
@@ -496,10 +496,10 @@ class Champs
         $create = [
             'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
             'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
-            'date_connexion TEXT NULL CHECK (date_connexion IS NULL OR datetime(date_connexion) = date_connexion), -- Date de dernière connexion',
-            'date_inscription TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date_inscription) IS NOT NULL AND date(date_inscription) = date_inscription), -- Date d\'inscription',
-            'secret_otp TEXT NULL, -- Code secret pour TOTP',
-            'clef_pgp TEXT NULL, -- Clé publique PGP'
+            'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login), -- Date de dernière connexion',
+            'date_created TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date_created) = date_created), -- Date d\'inscription',
+            'otp_secret TEXT NULL, -- Code secret pour TOTP',
+            'pgp_key TEXT NULL, -- Clé publique PGP'
         ];
 
         end($this->champs);
@@ -535,15 +535,7 @@ class Champs
     public function getCopyFields(): array
     {
         // Champs à recopier
-        $copy = [
-            'id'               => 'id',
-            'id_category'      => 'id_category',
-            'date_connexion'   => 'date_connexion',
-            'date_inscription' => 'date_inscription',
-            'secret_otp'       => 'secret_otp',
-            'clef_pgp'         => 'clef_pgp',
-        ];
-
+        $copy = $this->system_fields;
         $db = DB::getInstance();
         $anciens_champs = new Champs($db->firstColumn('SELECT value FROM config WHERE key = ?;', 'champs_membres'));
         $anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
