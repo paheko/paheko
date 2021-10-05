@@ -368,3 +368,17 @@ CREATE UNIQUE INDEX web_pages_file_path ON web_pages (file_path);
 CREATE INDEX web_pages_parent ON web_pages (parent);
 CREATE INDEX web_pages_published ON web_pages (published);
 CREATE INDEX web_pages_title ON web_pages (title);
+
+CREATE TABLE IF NOT EXISTS logs
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_user INTEGER NULL REFERENCES users (id),
+    type INTEGER NOT NULL,
+    details TEXT NULL,
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
+    ip_address TEXT NULL
+);
+
+CREATE INDEX logs_ip ON logs (ip, created);
+CREATE INDEX logs_user ON logs (id_user, created);
+CREATE INDEX logs_created ON logs (created);

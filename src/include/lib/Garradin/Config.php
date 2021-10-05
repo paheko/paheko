@@ -46,6 +46,9 @@ class Config extends Entity
 
 	protected $site_disabled;
 
+	protected $log_retention;
+	protected $log_anonymize;
+
 	protected $_types = [
 		'nom_asso'              => 'string',
 		'adresse_asso'          => '?string',
@@ -76,6 +79,9 @@ class Config extends Entity
 		'admin_css'             => '?string',
 
 		'site_disabled'         => 'bool',
+
+		'log_retention'         => 'int',
+		'log_anonymize'         => 'int',
 	];
 
 	static protected $_instance = null;

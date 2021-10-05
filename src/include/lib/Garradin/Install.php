@@ -101,6 +101,8 @@ class Install
 		$config->set('monnaie', '€');
 		$config->set('pays', 'FR');
 		$config->set('site_disabled', true);
+		$config->set('log_retention', 720);
+		$config->set('log_anonymize', 365);
 
 		$champs = Membres\Champs::importInstall();
 		$champs->create(); // Pas de copie car pas de table membres existante
