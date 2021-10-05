@@ -22,11 +22,6 @@ else {
 		$form->addError($error);
 	}
 }
-else {
-	foreach (Web::sync() as $error) {
-		$form->addError($error);
-	}
-}
 
 $order_date = qg('order_date') !== null;
 

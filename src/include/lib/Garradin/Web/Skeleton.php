@@ -126,7 +126,7 @@ class Skeleton
 			$ut->display();
 		}
 		elseif ($this->file) {
-			$this->file->display();
+			echo $this->file->fetch();
 		}
 		else {
 			readfile($this->defaultPath());
@@ -175,7 +175,7 @@ class Skeleton
 		}
 
 		if ($this->file) {
-			return $this->file->type;
+			return $this->file->mime;
   		}
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);

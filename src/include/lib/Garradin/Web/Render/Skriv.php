@@ -11,31 +11,28 @@ use KD2\SkrivLite;
 
 use const Garradin\{ADMIN_URL, WWW_URL};
 
-class Skriv
+class Skriv extends AbstractRender
 {
-	use AttachmentAwareTrait;
+	protected $skriv;
 
-	static protected $skriv;
-
-	public function render(?File $file, ?string $content = null, array $options = []): string
+	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
-		if (!self::$skriv)
-		{
-			self::$skriv = new \KD2\SkrivLite;
-			self::$skriv->registerExtension('file', [self::class, 'SkrivFile']);
-			self::$skriv->registerExtension('image', [self::class, 'SkrivImage']);
+		parent::__construct($file, $user_prefix);
 
-			// Enregistrer d'autres extensions éventuellement
-			Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
-		}
+		$this->skriv = new SkrivLite;
+		$this->skriv->registerExtension('file', [$this, 'SkrivFile']);
+		$this->skriv->registerExtension('fichier', [$this, 'SkrivFile']);
+		$this->skriv->registerExtension('image', [$this, 'SkrivImage']);
 
-		$skriv =& self::$skriv;
+		// Enregistrer d'autres extensions éventuellement
+		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
+	}
 
-		if ($file) {
-			$this->isRelativeTo($file);
-		}
+	public function render(?string $content = null): string
+	{
+		$skriv =& $this->skriv;
 
-		$str = $content ?? $file->fetch();
+		$str = $content ?? $this->file->fetch();
 
 		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
 			return $this->resolveAttachment($match[1]);
@@ -52,18 +49,25 @@ class Skriv
 		return sprintf('<div class="web-content">%s</div>', $str);
 	}
 
+	public function callExtension(array $match)
+	{
+		$method = new \ReflectionMethod($this->skriv, '_callExtension');
+		$method->setAccessible(true);
+		return $method->invoke($this->skriv, $match);
+	}
+
 	/**
 	 * Callback utilisé pour l'extension <<file>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension
 	 * @param string $content Contenu éventuel (en mode bloc)
 	 * @param SkrivLite $skriv   Objet SkrivLite
 	 */
-	static public function SkrivFile(array $args, ?string $content, SkrivLite $skriv): string
+	public function SkrivFile(array $args, ?string $content, SkrivLite $skriv): string
 	{
 		$name = $args[0] ?? null;
 		$caption = $args[1] ?? null;
 
-		if (!$name || !$this->current_path)
+		if (!$name || null === $this->current_path)
 		{
 			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
 		}
@@ -88,15 +92,17 @@ class Skriv
 	 * @param string $content Contenu éventuel (en mode bloc)
 	 * @param SkrivLite $skriv   Objet SkrivLite
 	 */
-	static public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
+	public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
 	{
-		static $align_values = ['left', 'right', 'center'];
+		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
 
 		$name = $args[0] ?? null;
 		$align = $args[1] ?? null;
 		$caption = $args[2] ?? null;
 
-		if (!$name || !$this->current_path)
+		$align = strtr($align, $align_replace);
+
+		if (!$name || null === $this->current_path)
 		{
 			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}
