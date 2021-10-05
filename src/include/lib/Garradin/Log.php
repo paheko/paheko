@@ -95,7 +95,7 @@ class Log
 		$ip = Utils::getIP();
 
 		// is IP locked out?
-		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
+		$sql = sprintf('SELECT COUNT(*) FROM logs WHERE type = ? AND ip_address = ? AND created > datetime(\'now\', \'-%d seconds\');', self::LOCKOUT_DELAY);
 		$count = $db->firstColumn($sql, self::LOGIN_FAIL, $ip);
 
 		if (($count / self::LOCKOUT_DELAY) > self::LOCKOUT_RATE) {
