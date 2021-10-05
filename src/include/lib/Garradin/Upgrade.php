@@ -315,11 +315,6 @@ class Upgrade
 				$db->commit();
 			}
 
-			if (version_compare($v, '1.1.8', '==')) {
-				// Force sync to add missing pages if you had the buggy 1.1.8 version
-				\Garradin\Web\Web::sync(true);
-			}
-
 			if (version_compare($v, '1.1.10', '<')) {
 				\Garradin\Web\Web::sync(true); // Force sync of web pages
 				Files::syncVirtualTable('', true);

@@ -30,3 +30,6 @@ UPDATE searches SET target = 'accounting' WHERE target = 'compta';
 UPDATE searches SET target = 'users' WHERE target = 'membres';
 
 DROP TABLE recherches;
+
+INSERT INTO config VALUES ('log_retention', 720);
+INSERT INTO config VALUES ('log_anonymize', 365);
