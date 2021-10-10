@@ -187,6 +187,8 @@ class DB extends SQLite3
     {
         assert(is_bool($enable));
 
+        $this->connect();
+
         if (!$enable) {
             $this->db->exec('PRAGMA legacy_alter_table = ON;');
             $this->db->exec('PRAGMA foreign_keys = OFF;');
