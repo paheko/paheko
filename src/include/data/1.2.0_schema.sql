@@ -8,6 +8,20 @@ CREATE TABLE IF NOT EXISTS config (
     value TEXT NULL
 );
 
+CREATE TABLE IF NOT EXISTS config_users_fields (
+    name TEXT PRIMARY KEY NOT NULL,
+    order INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    label TEXT NOT NULL,
+    help TEXT NULL
+    mandatory INTEGER NOT NULL DEFAULT 0,
+    private INTEGER NOT NULL DEFAULT 0,
+    user_editable INTEGER NOT NULL DEFAULT 1,
+    list_row INTEGER NULL,
+    options TEXT,
+    system TEXT NULL
+);
+
 CREATE TABLE IF NOT EXISTS plugins
 (
     id TEXT NOT NULL PRIMARY KEY,
@@ -62,7 +76,7 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
 ---
 
 -- CREATE TABLE users (...);
--- Organization users table, dynamically created
+-- Organization users table, dynamically created, see config_users_fields table
 
 CREATE TABLE IF NOT EXISTS users_categories
 -- Users categories, mainly used to manage rights
@@ -102,7 +116,7 @@ CREATE TABLE IF NOT EXISTS logs
     id_user INTEGER NULL REFERENCES users (id),
     type INTEGER NOT NULL,
     details TEXT NULL,
-    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) = created),
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(created) IS NOT NULL AND datetime(created) = created),
     ip_address TEXT NULL
 );
 
@@ -332,7 +346,7 @@ CREATE TABLE IF NOT EXISTS files
     type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
     mime TEXT NULL,
     size INT NULL,
-    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified),
+    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (ddatetime(modified) IS NOT NULL AND atetime(modified) = modified),
     image INT NOT NULL DEFAULT 0,
 
     CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))
@@ -372,8 +386,8 @@ CREATE TABLE IF NOT EXISTS web_pages
     type INTEGER NOT NULL, -- 1 = Category, 2 = Page
     status TEXT NOT NULL,
     format TEXT NOT NULL,
-    published TEXT NOT NULL CHECK (datetime(published) = published),
-    modified TEXT NOT NULL CHECK (datetime(modified) = modified),
+    published TEXT NOT NULL CHECK (datetime(published) IS NOT NULL AND datetime(published) = published),
+    modified TEXT NOT NULL CHECK (datetime(modified) IS NOT NULL AND datetime(modified) = modified),
     title TEXT NOT NULL,
     content TEXT NOT NULL
 );

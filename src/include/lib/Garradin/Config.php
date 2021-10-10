@@ -4,7 +4,6 @@ namespace Garradin;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
-use Garradin\Membres\Champs;
 
 use KD2\SMTP;
 
@@ -25,7 +24,6 @@ class Config extends Entity
 	protected $monnaie;
 	protected $pays;
 
-	protected $champs_membres;
 	protected $categorie_membres;
 
 	protected $frequence_sauvegardes;
@@ -49,6 +47,8 @@ class Config extends Entity
 	protected $log_retention;
 	protected $log_anonymize;
 
+	protected $field_user_number;
+
 	protected $_types = [
 		'nom_asso'              => 'string',
 		'adresse_asso'          => '?string',
@@ -58,8 +58,6 @@ class Config extends Entity
 
 		'monnaie'               => 'string',
 		'pays'                  => 'string',
-
-		'champs_membres'        => Champs::class,
 
 		'categorie_membres'     => 'int',
 
@@ -116,8 +114,6 @@ class Config extends Entity
 		$default = array_fill_keys(array_keys($this->_types), null);
 		$config = array_merge($default, $config);
 
-		$config['champs_membres'] = new Champs($config['champs_membres']);
-
 		foreach ($this->_types as $key => $type) {
 			$value = $config[$key];
 
@@ -127,8 +123,6 @@ class Config extends Entity
 		}
 
 		$this->load($config);
-
-		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
 	}
 
 	public function save(): bool
@@ -146,10 +140,7 @@ class Config extends Entity
 			$value = $this->$key;
 			$type = ltrim($this->_types[$key], '?');
 
-			if ($type == Champs::class) {
-				$value = $value->toString();
-			}
-			elseif (is_object($value)) {
+			if (is_object($value)) {
 				throw new \UnexpectedValueException('Unexpected object as value: ' . get_class($value));
 			}
 
@@ -166,11 +157,7 @@ class Config extends Entity
 		}
 
 		if (!empty($values['champ_identifiant'])) {
-			// Regenerate login index
-			$db->exec('DROP INDEX IF EXISTS users_id_field;');
-			$config = Config::getInstance();
-			$champs = $config->get('champs_membres');
-			$champs->createIndexes();
+			DynamicFields::changeLoginField($values['champ_identifiant']);
 		}
 
 		$db->commit();
@@ -237,11 +224,6 @@ class Config extends Entity
 				return (bool) $value;
 			case 'string':
 				return (string) $value;
-			case Champs::class:
-				if (!is_object($value) || !($value instanceof $this->_types[$key])) {
-					throw new \InvalidArgumentException(sprintf('"%s" is not of type "%s"', $key, $this->_types[$key]));
-				}
-				return $value;
 			default:
 				throw new \InvalidArgumentException(sprintf('"%s" has unknown type "%s"', $key, $this->_types[$key]));
 		}
@@ -254,7 +236,6 @@ class Config extends Entity
 		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
 		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
-		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');
 
 		// Files can only have one value: their name
 		$this->assert($this->admin_background === null || $this->admin_background === self::DEFAULT_FILES['admin_background']);

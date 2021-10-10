@@ -3,13 +3,12 @@
 namespace Garradin;
 
 use Garradin\Membres\Session;
-use Garradin\Membres\Champs;
 
 use Garradin\Files\Files;
 
 class Upgrade
 {
-	const MIN_REQUIRED_VERSION = '0.9.8';
+	const MIN_REQUIRED_VERSION = '1.1.0';
 
 	static public function preCheck(): bool
 	{
@@ -56,160 +55,6 @@ class Upgrade
 		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
 
 		try {
-			if (version_compare($v, '1.0.0-rc1', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-
-			if (version_compare($v, '1.0.0-rc10', '<'))
-			{
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc10_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-beta1', '>=') && version_compare($v, '1.0.0-rc11', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0_schema.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-rc14', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc14_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.0-rc16', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-				$db->import(ROOT . '/include/data/1.0.0-rc16_migration.sql');
-				$db->commitSchemaUpdate();
-			}
-
-			if (version_compare($v, '1.0.1', '<'))
-			{
-				// Missing trigger
-				$db->begin();
-				$db->import(ROOT . '/include/data/1.0.1_migration.sql');
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.0.3', '<'))
-			{
-				// Missing trigger
-				$db->begin();
-				$db->import(ROOT . '/include/data/1.0.3_migration.sql');
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.0.6', '<'))
-			{
-				// Missing trigger
-				$db->begin();
-				$db->import(ROOT . '/include/data/1.0.6_migration.sql');
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.0.7', '<'))
-			{
-				// Missing trigger
-				$db->begin();
-				$db->import(ROOT . '/include/data/1.0.7_migration.sql');
-				$db->commit();
-			}
-
-			if (version_compare($v, '1.1.0-beta1', '<'))
-			{
-				// Missing trigger
-				$db->beginSchemaUpdate();
-
-				$attachments = $db->getAssoc('SELECT f.id, w.uri || \'/\' || f.id || \'_\' || f.nom FROM fichiers f
-					INNER JOIN fichiers_wiki_pages fw ON fw.fichier = f.id
-					INNER JOIN wiki_pages w ON w.id = fw.id;');
-
-				// Update Skriv content for attachments
-				foreach ($db->iterate('SELECT r.rowid, r.contenu, p.uri FROM wiki_revisions r INNER JOIN wiki_pages p ON p.revision = r.revision AND p.id = r.id_page;') as $r) {
-					$uri = $r->uri;
-					$content = preg_replace_callback('!<<(image|fichier)\s*\|\s*(\d+)\s*(?:\|\s*(gauche|droite|centre))?\s*(?:\|\s*(.+)\s*)?>>!', function ($match) use ($attachments, $uri) {
-						if (isset($attachments[$match[2]])) {
-							$name = $attachments[$match[2]];
-
-							if (dirname($name) == $uri) {
-								$name = basename($name);
-							}
-							else {
-								$name = '../' . $name;
-							}
-						}
-						else {
-							$name = '_ERREUR_fichier_inconnu_' . $match[2];
-						}
-
-						if (isset($match[3])) {
-							$align = '|' . ($match[3] == 'centre' ? 'center' : ($match[3] == 'gauche' ? 'left' : 'right'));
-						}
-						else {
-							$align = '';
-						}
-
-						$caption = isset($match[4]) ? '|' . $match[4] : '';
-
-						return sprintf('<<%s|%s%s%s>>', $match[1] == 'fichier' ? 'file' : 'image', $name, $align, $caption);
-					}, $r->contenu);
-
-					$content = preg_replace_callback('!(image|fichier)://(\d+)!', function ($match) use ($attachments) {
-						$name = $attachments[$match[2]] ?? '_ERREUR_fichier_inconnu_' . $match[2];
-						return sprintf('#file:[%s]', $name);
-					}, $content);
-
-					if ($content != $r->contenu) {
-						$db->update('wiki_revisions', ['contenu' => $content], 'rowid = :id', ['id' => $r->rowid]);
-					}
-				}
-
-				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
-				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
-
-				// Rename membres table
-				$champs->createTable($champs::TABLE  .'_tmp');
-
-				$fields = $champs->getCopyFields();
-				unset($fields['id_category']);
-				$fields['id_categorie'] = 'id_category';
-				$champs->copy($champs::TABLE, $champs::TABLE . '_tmp', $fields);
-
-				$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $champs::TABLE));
-				$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $champs::TABLE));
-
-				$champs->createIndexes($champs::TABLE);
-
-				$db->commitSchemaUpdate();
-
-				// Migrate to a different storage
-				if (FILE_STORAGE_BACKEND != 'SQLite') {
-					Files::migrateStorage('SQLite', FILE_STORAGE_BACKEND, null, FILE_STORAGE_CONFIG);
-					Files::truncateStorage('SQLite', null);
-				}
-
-				$pages = $db->iterate('SELECT * FROM web_pages;');
-
-				foreach ($pages as $data) {
-					$page = new \Garradin\Entities\Web\Page;
-					$page->exists(true);
-					$page->load((array) $data);
-					$page->syncSearch();
-				}
-			}
-
 			if (version_compare($v, '1.1.1', '<')) {
 				// Reset admin_background if the file does not exist
 				$bg = $db->firstColumn('SELECT value FROM config WHERE key = \'admin_background\';');
@@ -326,6 +171,8 @@ class Upgrade
 				$db->begin();
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
 				$db->commit();
+
+				$db->exec('DELETE FROM config WHERE key = \'champs_membres\';');
 			}
 
 			// Vérification de la cohérence des clés étrangères

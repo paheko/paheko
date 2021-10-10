@@ -190,29 +190,6 @@ class Membres
         $this->_checkFields($data, $check_editable, false);
         $champ_id = $config->get('champ_identifiant');
 
-        if (!empty($data[$champ_id])
-            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE AND id != ? LIMIT 1;', $data[$champ_id], (int)$id))
-        {
-            throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, or ce champ doit être unique à chaque membre.');
-        }
-
-        if (isset($data['numero']))
-        {
-            if (!preg_match('/^\d+$/', $data['numero']))
-            {
-                throw new UserException('Le numéro de membre ne doit contenir que des chiffres.');
-            }
-            elseif ($data['numero'] == 0)
-            {
-                throw new UserException('Le numéro de membre ne peut être vide.');
-            }
-
-            if ($db->test('membres', 'numero = ? AND id != ?', (int)$data['numero'], $id))
-            {
-                throw new UserException('Ce numéro est déjà attribué à un autre membre.');
-            }
-        }
-
         if (isset($data['delete_password'])) {
             $data['passe'] = null;
             unset($data['delete_password']);
@@ -254,31 +231,6 @@ class Membres
             strftime(\'%s\', date_inscription) AS date_inscription,
             strftime(\'%s\', date_connexion) AS date_connexion
             FROM membres WHERE id = ? LIMIT 1;', (int)$id);
-    }
-
-    public function delete($ids)
-    {
-        if (!is_array($ids))
-        {
-            $ids = [(int)$ids];
-        }
-
-        $session = Session::getInstance();
-
-        if ($session->isLogged())
-        {
-            $user = $session->getUser();
-
-            foreach ($ids as $id)
-            {
-                if ($user->id == $id)
-                {
-                    throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
-                }
-            }
-        }
-
-        return $this->_deleteMembres($ids);
     }
 
     public function getNom($id)
@@ -436,41 +388,5 @@ class Membres
     {
         $db = DB::getInstance();
         return $db->firstColumn('SELECT COUNT(*) FROM membres WHERE id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1);');
-    }
-
-    public function getAttachementsDirectory(int $id)
-    {
-        return File::CONTEXT_USER . '/' . $id;
-    }
-
-    static public function changeCategorie($id_cat, $membres)
-    {
-        foreach ($membres as &$id)
-        {
-            $id = (int) $id;
-        }
-
-        $db = DB::getInstance();
-        return $db->update('membres',
-            ['id_category' => (int)$id_cat],
-            sprintf('id IN (%s)', implode(',', $membres))
-        );
-    }
-
-    protected function _deleteMembres(array $membres)
-    {
-        foreach ($membres as &$id)
-        {
-            $id = (int) $id;
-
-            Files::delete($this->getAttachementsDirectory($id));
-        }
-
-        Plugin::fireSignal('membre.suppression', $membres);
-
-        $db = DB::getInstance();
-
-        // Suppression du membre
-        return $db->delete('membres', $db->where('id', $membres));
     }
 }
