@@ -16,6 +16,10 @@ if (!$service) {
 $csrf_key = 'service_delete_' . $service->id();
 
 $form->runIf('delete', function () use ($service) {
+	if (!f('confirm_delete')) {
+		throw new UserException('Merci de cocher la case pour confirmer la suppression.');
+	}
+
 	$service->delete();
 }, $csrf_key, ADMIN_URL . 'services/');
 
