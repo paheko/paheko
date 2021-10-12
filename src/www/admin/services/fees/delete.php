@@ -16,6 +16,10 @@ if (!$fee) {
 $csrf_key = 'fee_delete_' . $fee->id();
 
 $form->runIf('delete', function () use ($fee) {
+	if (!f('confirm_delete')) {
+		throw new UserException('Merci de cocher la case pour confirmer la suppression.');
+	}
+
 	$fee->delete();
 }, $csrf_key, ADMIN_URL . 'services/fees/?id=' . $fee->id_service);
 
