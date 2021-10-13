@@ -53,6 +53,45 @@ class API
 		}
 	}
 
+	protected function user(string $uri): ?array
+	{
+		$fn = strtok($uri, '/');
+
+		// CSV import
+		if ($fn == 'import') {
+			if ($this->method != 'PUT') {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			$admin_user_id = 1; // FIXME: should be NULL here
+
+			$file = tempnam(CACHE_ROOT, 'tmp-import-api');
+
+			try {
+				$stdin = fopen('php://input', 'r');
+				$fp = fopen($file, 'w');
+				stream_copy_to_stream($stdin, $fp);
+				fclose($fp);
+				fclose($stdin);
+
+				if (!filesize($file)) {
+					throw new APIException('Empty CSV file', 400);
+				}
+
+				$import = new Membres\Import;
+				$import->fromGarradinCSV($file, $admin_user_id);
+			}
+			finally {
+				Utils::safe_unlink($file);
+			}
+
+			return null;
+		}
+		else {
+			throw new APIException('Unknown user action', 404);
+		}
+	}
+
 	protected function web(string $uri): ?array
 	{
 		if ($this->method != 'GET') {
@@ -122,6 +161,8 @@ class API
 				return $this->download();
 			case 'web':
 				return $this->web($uri);
+			case 'user':
+				return $this->user($uri);
 			default:
 				throw new APIException('Unknown path', 404);
 		}
