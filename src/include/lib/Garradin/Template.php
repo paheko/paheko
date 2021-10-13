@@ -26,14 +26,14 @@ class Template extends \KD2\Smartyer
 		if (isset($_GET['_pdf'])) {
 			$out = $this->fetch($template);
 
-			$filename = 'Print.pdf';
+			$filename = 'Print';
 
 			if (preg_match('!<title>(.*)</title>!U', $out, $match)) {
-				$filename = trim($match[1]) . '.pdf';
+				$filename = trim($match[1]);
 			}
 
 			header('Content-type: application/pdf');
-			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($filename)));
+			header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($filename)));
 			Utils::streamPDF($out);
 			return $this;
 		}
