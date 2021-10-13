@@ -159,7 +159,7 @@ function selectFee(elm, first_load) {
 	}
 
 	// Fill the amount paid by the user
-	if (amount && !first_load) {
+	if (amount) {
 		$('#f_amount').value = g.formatMoney(amount);
 	}
 }
