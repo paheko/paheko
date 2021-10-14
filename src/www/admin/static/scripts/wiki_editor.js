@@ -185,7 +185,7 @@
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.title = altTitle ? altTitle : title;
-			if (title.length == 1) {
+			if ([...title].length == 1) {
 				btn.dataset.icon = title;
 			}
 			else {
