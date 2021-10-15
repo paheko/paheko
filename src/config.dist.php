@@ -446,3 +446,21 @@ namespace Garradin;
  * Défaut : null
  */
 //const PDF_COMMAND = 'wkhtmltopdf %2$s %1$s';
+
+/**
+ * Clé de licence
+ *
+ * Cette clé permet de débloquer certaines fonctionnalités dans des extensions officielles.
+ *
+ * Pour l'obtenir il faut se créer un compte sur Garradin.eu
+ * et faire une contribution financière.
+ * La clé apparaîtra ensuite en dessous des informations
+ * de l'association dans la page "Mon abonnement Garradin.eu".
+ *
+ * Il faut recopier cette clé dans le fichier config.local.php
+ * dans la constante CONTRIBUTOR_LICENSE.
+ *
+ * Merci de ne pas essayer de contourner cette licence et de contribuer au
+ * financement de notre travail :-)
+ */
+//const CONTRIBUTOR_LICENSE = 'XXXXX';

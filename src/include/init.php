@@ -47,6 +47,34 @@ function garradin_manifest()
 	return false;
 }
 
+/**
+ * Le code de Garradin ne s'écrit pas tout seul comme par magie,
+ * merci de soutenir notre travail en faisant une contribution :)
+ */
+function garradin_contributor_license(): ?int
+{
+	static $level = null;
+
+	if (null !== $level) {
+		return $level;
+	}
+
+	if (!CONTRIBUTOR_LICENSE) {
+		return null;
+	}
+
+	$key = CONTRIBUTOR_LICENSE;
+	$key = gzinflate(base64_decode($key));
+	list($email, $level, $hash) = explode('==', $key);
+	$level = (int)hexdec($level);
+
+	if (substr(sha1($email . $level), 0, 10) != $hash) {
+		return null;
+	}
+
+	return $level;
+}
+
 if (!defined('\SQLITE3_OPEN_READWRITE')) {
 	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
 	exit(1);
@@ -177,6 +205,7 @@ static $default_config = [
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => null,
+	'CONTRIBUTOR_LICENSE'   => null,
 ];
 
 foreach ($default_config as $const => $value)
