@@ -18,3 +18,5 @@ if (ENABLE_AUTOMATIC_BACKUPS && $config->get('frequence_sauvegardes') && $config
 
 // Exécution des rappels automatiques
 Reminders::sendPending();
+
+Plugin::fireSignal('cron');
