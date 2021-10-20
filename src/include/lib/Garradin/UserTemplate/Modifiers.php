@@ -121,6 +121,6 @@ class Modifiers
 
 	static public function xml_escape($str)
 	{
-		return htmlspecialchars($str, ENT_XML1);
+		return htmlspecialchars($str, ENT_XML1 | ENT_QUOTES);
 	}
 }
