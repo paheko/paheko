@@ -59,6 +59,7 @@ class UserTemplate extends Brindille
 
 		self::$root_variables = [
 			'root_url'     => WWW_URL,
+			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,

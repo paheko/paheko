@@ -2,11 +2,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="fr">
 
+	<link rel="self" href="{{$request_url}}" />
 	<title type="html">{{$config.nom_asso|xml_escape}}</title>
 	<link href="{{$root_url|xml_escape}}" rel="alternate" type="text/html" title="{{$config.nom_asso|xml_escape}}" />
 
 	{{#articles order="published DESC" limit=1}}
-	<updated>{{$created|atom_date}}</updated>
+	<updated>{{$published|atom_date}}</updated>
 	{{/articles}}
 
 	<author>
@@ -21,10 +22,12 @@
 		<title>{{$title|xml_escape}}</title>
 		<link href="{{$url|xml_escape}}" rel="alternate" type="text/html" title="{{$title|xml_escape}}" />
 		<id>{{$url|xml_escape}}</id>
-		<updated>{{$modified|atom_date}}</updated>
+		<updated>{{$published|atom_date}}</updated>
 		<author><name>{{$config.nom_asso|xml_escape}}</name></author>
 		<content type="html">
-			{{$html|raw|xml_escape}}
+			<![CDATA[
+			{{$html|raw}}
+			]]>
 		</content>
 	</entry>
 	{{/articles}}
