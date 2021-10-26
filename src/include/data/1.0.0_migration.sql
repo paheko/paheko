@@ -134,7 +134,7 @@ INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM co
 INSERT INTO services_fees (id, label, amount, id_service, id_account, id_year)
 	SELECT id, intitule, CASE WHEN montant IS NOT NULL THEN CAST(montant*100 AS integer) ELSE NULL END, id,
 		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta)),
-		(SELECT MAX(id) FROM acc_years WHERE closed = 0)
+		(SELECT MAX(id) FROM acc_years GROUP BY closed ORDER BY closed LIMIT 1)
 	FROM cotisations;
 
 INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
