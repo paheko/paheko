@@ -2,7 +2,7 @@
 
 <nav class="tabs">
 	{linkbutton href="!membres/fiche.php?id=%d"|args:$user_id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="!services/payment.php?id=%d"|args:$service_user_id label="Nouveau règlement" shape="plus"}
+	{linkbutton href="!services/user/payment.php?id=%d"|args:$service_user_id label="Nouveau règlement" shape="plus"}
 </nav>
 
 {include file="acc/reports/_journal.tpl"}
