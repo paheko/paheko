@@ -2,7 +2,7 @@
 namespace Garradin;
 use Garradin\Services\Services_User;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_READ);
 
@@ -21,7 +21,7 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE
 
 	$su->paid = (bool)qg('paid');
 	$su->save();
-}, null, ADMIN_URL . 'services/user.php?id=' . $user->id);
+}, null, ADMIN_URL . 'services/user/?id=' . $user->id);
 
 $list = Services_User::perUserList($user->id);
 $list->setTitle(sprintf('Inscriptions — %s', $user->identite));
@@ -30,4 +30,4 @@ $list->loadFromQueryString();
 $tpl->assign('services', Services_User::listDistinctForUser($user->id));
 $tpl->assign(compact('list', 'user'));
 
-$tpl->display('services/user.tpl');
+$tpl->display('services/user/index.tpl');

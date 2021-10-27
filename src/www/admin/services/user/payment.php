@@ -5,7 +5,7 @@ use Garradin\Services\Services_User;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
@@ -28,10 +28,10 @@ $form->runIf(f('save') || f('save_and_add_payment'), function () use ($su, $sess
 	}
 
 	if (f('save_and_add_payment')) {
-		$url = ADMIN_URL . 'services/payment.php?id=' . $su->id;
+		$url = ADMIN_URL . 'services/user/payment.php?id=' . $su->id;
 	}
 	else {
-		$url = ADMIN_URL . 'services/user.php?id=' . $su->id_user;
+		$url = ADMIN_URL . 'services/user/?id=' . $su->id_user;
 	}
 
 	Utils::redirect($url);
@@ -42,4 +42,4 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su'));
 
-$tpl->display('services/payment.tpl');
+$tpl->display('services/user/payment.tpl');
