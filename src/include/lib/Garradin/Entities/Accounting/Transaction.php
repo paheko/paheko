@@ -308,13 +308,15 @@ class Transaction extends Entity
 			$new->$field = $this->$field;
 		}
 
-		$copy = ['credit', 'debit', 'id_account', 'label', 'reference'];
+		$copy = ['credit', 'debit', 'id_account', 'label', 'reference', 'id_analytical'];
 		$lines = DB::getInstance()->get('SELECT
-				l.credit, l.debit, l.label, l.reference, b.id AS id_account
+				l.credit, l.debit, l.label, l.reference, b.id AS id_account, c.id AS id_analytical
 			FROM acc_transactions_lines l
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			LEFT JOIN acc_accounts b ON b.code = a.code AND b.id_chart = ?
+			LEFT JOIN acc_accounts c ON c.id = l.id_analytical AND c.id_chart = ?
 			WHERE l.id_transaction = ?;',
+			$year->chart()->id,
 			$year->chart()->id,
 			$this->id()
 		);
