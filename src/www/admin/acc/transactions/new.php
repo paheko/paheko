@@ -23,6 +23,7 @@ $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
 $types_accounts = null;
+$id_analytical = null;
 
 // Duplicate transaction
 if (qg('copy')) {
@@ -30,6 +31,7 @@ if (qg('copy')) {
 	$transaction = $old->duplicate($current_year);
 	$lines = $transaction->getLinesWithAccounts();
 	$payoff_for = null;
+	$id_analytical = $old->getAnalyticalId();
 	$amount = $transaction->getLinesCreditSum();
 	$types_accounts = $transaction->getTypesAccounts();
 	$transaction->resetLines();
@@ -109,7 +111,7 @@ if (f('save') && $form->check('acc_transaction_new')) {
 	}
 }
 
-$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines', 'types_accounts'));
+$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines', 'types_accounts', 'id_analytical'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
 
