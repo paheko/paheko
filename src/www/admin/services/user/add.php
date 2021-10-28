@@ -10,6 +10,10 @@ require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
+// This controller allows to either select a user if none has been provided in the query string
+// or subscribe a user to an activity (create a new Service_User entity)
+// If $user_id is null then the form is just a select to choose a user
+
 $count_all = Services::count();
 
 if (!$count_all) {
@@ -36,7 +40,10 @@ if (!$user_name) {
 $form_url  = sprintf('?user=%d&', $user_id);
 $csrf_key = 'service_save';
 
-require __DIR__ . '/_form.php';
+// Only load the form if a user has been selected
+if ($user_id) {
+	require __DIR__ . '/_form.php';
+}
 
 $form->runIf(f('save') || f('save_and_add_payment'), function () use ($session) {
 	$su = Service_User::saveFromForm($session->getUser()->id);
@@ -58,6 +65,6 @@ $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targe
 
 $service_user = null;
 
-$tpl->assign(compact('csrf_key', 'selected_user', 'account_targets', 'service_user'));
+$tpl->assign(compact('csrf_key', 'selected_user', 'account_targets', 'service_user', 'user_id'));
 
 $tpl->display('services/user/add.tpl');

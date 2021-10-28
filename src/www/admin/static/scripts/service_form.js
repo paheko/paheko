@@ -13,9 +13,10 @@ function selectService(elm, first_load) {
 		expiry.value = elm.dataset.expiry;
 	}
 
-	var first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
+	let first = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]');
+	let selected = document.querySelector('[data-service="s' + elm.value + '"] input[name=id_fee]:checked');
 
-	if (first) {
+	if (first && !selected) {
 		first.checked = true;
 		selectFee(first);
 	}
