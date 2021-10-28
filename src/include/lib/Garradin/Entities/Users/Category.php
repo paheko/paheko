@@ -2,7 +2,7 @@
 
 namespace Garradin\Entities\Users;
 
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\UserException;

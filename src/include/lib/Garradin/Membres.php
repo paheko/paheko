@@ -4,7 +4,7 @@ namespace Garradin;
 
 use KD2\Security;
 use KD2\SMTP;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;

@@ -1,11 +1,11 @@
 <?php
 
-namespace Garradin\Membres;
+namespace Garradin\Users;
 
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
-use Garradin\Membres;
+use Garradin\Users\Users;
 use Garradin\UserException;
 use Garradin\Plugin;
 
@@ -115,20 +115,23 @@ class Session extends \KD2\UserSession
 	protected function getUserDataForSession($id)
 	{
 		// Mettre à jour la date de connexion
-		$this->db->preparedQuery('UPDATE membres SET date_connexion = datetime() WHERE id = ?;', [$id]);
+		$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$id]);
 		$config = Config::getInstance();
 
-		return $this->db->first('SELECT m.*, m.'.$config->get('champ_identite').' AS identite,
+		$sql = sprintf('SELECT u.*, u.%s AS identite,
 			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
 			c.perm_subscribe, c.perm_accounting, c.perm_config
-			FROM membres AS m
-			INNER JOIN users_categories AS c ON m.id_category = c.id
-			WHERE m.id = ? LIMIT 1;', $id);
+			FROM users AS u
+			INNER JOIN users_categories AS c ON u.id_category = c.id
+			WHERE u.id = ? LIMIT 1;',
+			$this->db->quoteIdentifier($config->get('champ_identite')));
+
+		return $this->db->first($sql, $id);
 	}
 
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
 	{
-		return $this->db->insert('membres_sessions', [
+		return $this->db->insert('users_sessions', [
 			'selecteur' => $selector,
 			'hash'      => $hash,
 			'expire'    => $expiry,
@@ -138,26 +141,26 @@ class Session extends \KD2\UserSession
 
 	protected function expireRememberMeSelectors()
 	{
-		return $this->db->delete('membres_sessions', $this->db->where('expire', '<', time()));
+		return $this->db->delete('users_sessions', $this->db->where('expire', '<', time()));
 	}
 
 	protected function getRememberMeSelector($selector)
 	{
-		return $this->db->first('SELECT selecteur AS selector, hash,
-			s.id_membre AS user_id, m.passe AS user_password, expire AS expiry
-			FROM membres_sessions AS s
-			INNER JOIN membres AS m ON m.id = s.id_membre
-			WHERE s.selecteur = ? LIMIT 1;', $selector);
+		return $this->db->first('SELECT selector, hash,
+			s.id_user AS user_id, u.password AS user_password, expire AS expiry
+			FROM users_sessions AS s
+			INNER JOIN users AS u ON u.id = s.id_user
+			WHERE s.selector = ? LIMIT 1;', $selector);
 	}
 
 	protected function deleteRememberMeSelector($selector)
 	{
-		return $this->db->delete('membres_sessions', $this->db->where('selecteur', $selector));
+		return $this->db->delete('users_sessions', $this->db->where('selector', $selector));
 	}
 
 	protected function deleteAllRememberMeSelectors($user_id)
 	{
-		return $this->db->delete('membres_sessions', $this->db->where('id_membre', $user_id));
+		return $this->db->delete('users_sessions', $this->db->where('id_user', $user_id));
 	}
 
 	// Ajout de la gestion de LOCAL_LOGIN
@@ -171,9 +174,9 @@ class Session extends \KD2\UserSession
 
 			// On va chercher le premier membre avec le droit de gérer la config
 			if (-1 === $login_id) {
-				$login_id = $this->db->firstColumn('SELECT id FROM membres
+				$login_id = $this->db->firstColumn('SELECT id FROM users
 					WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
-					LIMIT 1', self::ACCESS_ADMIN);
+					LIMIT 1;', self::ACCESS_ADMIN);
 			}
 
 			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
@@ -228,47 +231,71 @@ class Session extends \KD2\UserSession
 		return $out;
 	}
 
-	public function recoverPasswordSend($id)
+	public function recoverPasswordSend(int $id)
 	{
-		$db = DB::getInstance();
-		$config = Config::getInstance();
+		$user = $this->fetchUserForPasswordRecovery($id);
 
-		$champ_id = $config->get('champ_identifiant');
-
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE LIMIT 1;', trim($id));
-
-		if (!$membre || trim($membre->email) == '')
-		{
+		if (!$user) {
 			return false;
 		}
 
-		// valide pour 1 heure minimum
-		$expire = ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
-
-		$hash = hash_hmac('sha256', $membre->email . $membre->id . $membre->passe . $expire, SECRET_KEY, true);
-		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
-
-		$id = base_convert($membre->id, 10, 36);
-		$expire = base_convert($expire, 10, 36);
-
-		$query = sprintf('%s.%s.%s', $id, $expire, $hash);
+		$query = $this->makePasswordRecoveryQuery($user);
 
 		$message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
 		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $user->email, 'Mot de passe perdu ?', $message, $user->id, $user->pgp_key);
 	}
 
-	public function recoverPasswordCheck($code, &$membre = null)
+	protected function fetchUserForPasswordRecovery(int $id): ?\stdClass
 	{
-		if (substr_count($code, '.') !== 2)
-		{
-			return false;
+		$db = DB::getInstance();
+
+		$id_field = DynamicFields::getLoginField();
+		$email_field = DynamicFields::getFirstEmailField();
+
+		// Fetch user, must have an email
+		$sql = sprintf('SELECT id, %s AS email, password, pgp_key
+			FROM users
+			WHERE %s = ? COLLATE NOCASE
+				AND %1$s IS NOT NULL
+			LIMIT 1;',
+			$db->quoteIdentifier($email_field),
+			$db->quoteIdentifier($id_field));
+
+		return $db->first($sql, trim($id));
+	}
+
+	protected function makePasswordRecoveryHash(\stdClass $user, ?int $expire = null): string
+	{
+		// valide pour 1 heure minimum
+		$expire = $expire ?? ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
+
+		$hash = hash_hmac('sha256', $user->email . $user->id . $user->password . $expire, SECRET_KEY, true);
+		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
+		return $hash;
+	}
+
+	protected function makePasswordRecoveryQuery(\stdClass $user): string
+	{
+		$id = base_convert($user->id, 10, 36);
+		$expire = base_convert($expire, 10, 36);
+		return sprintf('%s.%s.%s', $id, $expire, $hash);
+	}
+
+	/**
+	 * Check that the supplied query is valid, if so, return the user information
+	 * @param  string $query User-supplied query
+	 */
+	public function checkRecoveryPasswordQuery(string $query): ?\stdClass
+	{
+		if (substr_count($query, '.') !== 2) {
+			return null;
 		}
 
-		list($id, $expire, $email_hash) = explode('.', $code);
+		list($id, $expire, $email_hash) = explode('.', $query);
 
 		$config = Config::getInstance();
 		$db = DB::getInstance();
@@ -278,41 +305,40 @@ class Session extends \KD2\UserSession
 
 		$expire_timestamp = ($expire * 3600) + strtotime('2017-01-01');
 
-		if (time() / 3600 > $expire_timestamp)
-		{
-			return false;
+		// Check that the query has not expired yet
+		if (time() / 3600 > $expire_timestamp) {
+			return null;
 		}
 
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE id = ? LIMIT 1;', (int)$id);
+		// Fetch user info
+		$user = $this->fetchUserForPasswordRecovery($id);
 
-		if (!$membre || trim($membre->email) == '')
-		{
-			return false;
+		if (!$user) {
+			return null;
 		}
 
-		$hash = hash_hmac('sha256', $membre->email . $membre->id . $membre->passe . $expire, SECRET_KEY, true);
-		$hash = substr(Security::base64_encode_url_safe($hash), 0, 16);
+		// Check hash using secret data from the user
+		$hash = $this->makePasswordRecoveryHash($user, $expire);
 
-		if (!hash_equals($hash, $email_hash))
-		{
-			return false;
+		if (!hash_equals($hash, $email_hash)) {
+			return null;
 		}
 
-		return true;
+		return $user;
 	}
 
-	public function recoverPasswordChange($code, $password, $password_confirm)
+	public function recoverPasswordChange(string $query, string $password, string $password_confirm)
 	{
-		if (!$this->recoverPasswordCheck($code, $membre))
-		{
+		$user = $this->checkRecoveryPasswordQuery($code);
+
+		if (null === $user) {
 			throw new UserException('Le code permettant de changer le mot de passe a expiré. Merci de bien vouloir recommencer la procédure.');
 		}
 
 		$password = trim($password);
 		$password_confirm = trim($password_confirm);
 
-		if (!hash_equals($password, $password_confirm))
-		{
+		if (!hash_equals($password, $password_confirm)) {
 			throw new UserException('Le mot de passe et sa vérification ne sont pas identiques.');
 		}
 
@@ -321,16 +347,16 @@ class Session extends \KD2\UserSession
 		$password = self::hashPassword($password);
 
 		$message = "Bonjour,\n\nLe mot de passe de votre compte a bien été modifié.\n\n";
-		$message.= "Votre adresse email : ".$membre->email."\n";
+		$message.= "Votre adresse email : ".$user->email."\n";
 		$message.= "La demande émanait de l'adresse IP : ".Utils::getIP()."\n\n";
 		$message.= "Si vous n'avez pas demandé à changer votre mot de passe, merci de nous le signaler.";
 
-		DB::getInstance()->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$membre->id]);
+		DB::getInstance()->update('users', ['password' => $password], 'id = :id', ['id' => (int)$user->id]);
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe changé', $message, $membre->id, $membre->clef_pgp);
+		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $user->email, 'Mot de passe changé', $message, $user->id, $user->pgp_key);
 	}
 
-	public function editUser($data)
+	public function editUser($data) // FIXME update
 	{
 		(new Membres)->edit($this->user->id, $data, false);
 		$this->refresh(false);
@@ -402,45 +428,36 @@ class Session extends \KD2\UserSession
 		return Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $dest, $sujet, $content);
 	}
 
-	public function editSecurity(Array $data = [])
+	/**
+	 * Change self security data
+	 * @param  \stdClass $data Security data, eg. password, pgp_key or otp_secret
+	 */
+	public function editSecurity(\stdClass $data): void
 	{
-		$allowed_fields = ['passe', 'clef_pgp', 'secret_otp'];
+		$user = Users::get($this->user->id);
 
-		foreach ($data as $key=>$value)
-		{
-			if (!in_array($key, $allowed_fields))
-			{
-				throw new \RuntimeException(sprintf('Le champ %s n\'est pas autorisé dans cette méthode.', $key));
-			}
+		$allowed_fields = ['password', 'pgp_key', 'otp_secret'];
+		$data = array_intersect_key($data, array_flip($allowed_fields));
+
+		if (isset($data->password) && trim($data->password) !== '') {
+			self::checkPasswordValidity($data->password);
+			$user->set('password', self::hashPassword($data->password));
 		}
 
-		if (isset($data['passe']) && trim($data['passe']) !== '')
-		{
-			$data['passe'] = trim($data['passe']);
+		if (isset($data->pgp_key) && trim($data->pgp_key) !== '') {
+			$data->pgp_key = trim($data->pgp_key);
 
-			self::checkPasswordValidity($data['passe']);
-
-			$data['passe'] = self::hashPassword($data['passe']);
-		}
-		else
-		{
-			unset($data['passe']);
-		}
-
-		if (isset($data['clef_pgp']) && trim($data['clef_pgp']) !== '')
-		{
-			$data['clef_pgp'] = trim($data['clef_pgp']);
-
-			if (!$this->getPGPFingerprint($data['clef_pgp']))
-			{
+			if (!$this->getPGPFingerprint($data->pgp_key)) {
 				throw new UserException('Clé PGP invalide : impossible d\'extraire l\'empreinte.');
 			}
+
+			$user->set('pgp_key', $data->pgp_key);
 		}
 
-		$db = DB::getInstance();
-		$db->update('membres', $data, $db->where('id', (int)$this->user->id));
-		$this->refresh(false);
+		if (!empty($data->otp_secret)) {
+			$user->set('otp_secret', $otp_secret);
+		}
 
-		return true;
+		$this->refresh(false);
 	}
 }

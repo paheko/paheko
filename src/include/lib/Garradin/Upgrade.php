@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 use Garradin\Files\Files;
 

@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS config (
 
 CREATE TABLE IF NOT EXISTS config_users_fields (
     name TEXT PRIMARY KEY NOT NULL,
-    order INTEGER NOT NULL,
+    sort_order INTEGER NOT NULL,
     type TEXT NOT NULL,
     label TEXT NOT NULL,
-    help TEXT NULL
+    help TEXT NULL,
     mandatory INTEGER NOT NULL DEFAULT 0,
     private INTEGER NOT NULL DEFAULT 0,
     user_editable INTEGER NOT NULL DEFAULT 1,

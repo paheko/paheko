@@ -1,4 +1,4 @@
-ALTER TABLE membres RENAME TO users;
+-- The new users table has already been created and copied
 ALTER TABLE plugins RENAME TO plugins_old;
 
 -- References old membres table
@@ -19,8 +19,8 @@ DROP TABLE acc_transactions_users_old;
 DROP TABLE acc_transactions_old;
 DROP TABLE services_users_old;
 
-INSERT INTO plugins_signals SELECT * FROM plugins_signaux;
 INSERT INTO plugins SELECT * FROM plugins_old;
+INSERT INTO plugins_signals SELECT * FROM plugins_signaux;
 
 DROP TABLE plugins_signaux;
 DROP TABLE plugins_old;

@@ -7,7 +7,7 @@ use Garradin\Entities\Accounting\Chart;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Files\File;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 /**
  * Pour procéder à l'installation de l'instance Garradin
@@ -15,7 +15,7 @@ use Garradin\Membres\Session;
  */
 class Install
 {
-	static public function reset(Membres\Session $session, $password, array $options = [])
+	static public function reset(Users\Session $session, $password, array $options = [])
 	{
 		$config = (object) Config::getInstance()->asArray();
 		$user = $session->getUser();

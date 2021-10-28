@@ -5,7 +5,7 @@ namespace Garradin;
 use KD2\Form;
 use KD2\HTTP;
 use KD2\Translate;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
 use Garradin\UserTemplate\CommonModifiers;

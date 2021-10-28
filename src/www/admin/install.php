@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 const INSTALL_PROCESS = true;
 

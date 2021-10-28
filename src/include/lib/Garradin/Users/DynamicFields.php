@@ -40,6 +40,11 @@ class DynamicFields
 		return array_keys(self::getInstance()->fieldsByType('email'));
 	}
 
+	static public function getFirstEmailField(): array
+	{
+		return key(self::getInstance()->fieldsByType('email'));
+	}
+
 	static public function getNumberField(): string
 	{
 		return key(self::getInstance()->fieldsBySystemUse('number'));
@@ -97,7 +102,7 @@ class DynamicFields
 	protected function reload()
 	{
 		$db = DB::getInstance();
-		$this->_fields = $db->getGrouped('SELECT key, * FROM config_users_fields ORDER BY "order";');
+		$this->_fields = $db->getGrouped('SELECT key, * FROM config_users_fields ORDER BY sort_order;');
 		$this->reloadCache();
 	}
 

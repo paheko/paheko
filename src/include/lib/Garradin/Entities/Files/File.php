@@ -10,7 +10,7 @@ use Garradin\Entity;
 use Garradin\Plugin;
 use Garradin\UserException;
 use Garradin\ValidationException;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Static_Cache;
 use Garradin\Utils;
 use Garradin\Entities\Web\Page;

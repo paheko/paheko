@@ -7,7 +7,7 @@ use Garradin\DB;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 use Garradin\Entities\Web\Page;
 

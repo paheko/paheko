@@ -13,7 +13,7 @@ use Garradin\Plugin;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 use KD2\DB\EntityManager as EM;
 

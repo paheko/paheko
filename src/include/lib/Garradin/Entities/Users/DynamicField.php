@@ -13,7 +13,14 @@ class DynamicField extends Entity
 	const TABLE = 'config_users_fields';
 
 	protected $name;
-	protected $order;
+
+	/**
+	 * Order of field in form
+	 * @var int
+	 */
+	protected $sort_order;
+
+
 	protected $type;
 	protected $label;
 	protected $help;
@@ -26,7 +33,7 @@ class DynamicField extends Entity
 
 	protected $_types = [
 		'name'          => 'string',
-		'order'         => 'int',
+		'sort_order'    => 'int',
 		'type'          => 'string',
 		'label'         => 'string',
 		'help'          => '?string',
