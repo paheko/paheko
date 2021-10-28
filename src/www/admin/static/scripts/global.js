@@ -142,7 +142,7 @@
 		}
 
 		if (event) {
-			content.addEventListener(event, () => g.dialog.classList.add('loaded'));
+			content.addEventListener(event, () => { if (g.dialog) g.dialog.classList.add('loaded'); });
 		}
 		else {
 			g.dialog.classList.add('loaded');
