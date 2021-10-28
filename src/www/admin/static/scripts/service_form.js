@@ -52,6 +52,9 @@ function initForm() {
 	var selected = document.querySelector('input[name="id_service"]:checked') || document.querySelector('input[name="id_service"]');
 	selected.checked = true;
 
+	let date_input = $('#f_date');
+	create = date_input.form.dataset.create == 'true';
+
 	g.toggle('.accounting', false);
 	selectService(selected, true);
 
@@ -64,7 +67,6 @@ function initForm() {
 	}
 
 	// Automatically increase expiry date when date is changed
-	let date_input = $('#f_date');
 	let expiry_input = $('#f_expiry_date');
 
 	date_input.onchange = (e) => {
@@ -77,8 +79,6 @@ function initForm() {
 		d.setDate(d.getDate() + parseInt(selected.dataset.duration, 10));
 		expiry_input.value = d.toISOString().split('T')[0].split('-').reverse().join('/');
 	};
-
-	create = date_input.form.dataset.create == 'true';
 }
 
 g.onload(initForm);
