@@ -22,10 +22,10 @@
 				{/if}
 			</td>
 			<th>{$account.label}</th>
-			<td class="money">{$account.debit|raw|html_money}</td>
-			<td class="money">{$account.credit|raw|html_money}</td>
-			<td class="money">{if $account.sum < 0}{$account.sum|abs|escape|html_money}{/if}</td>
-			<td class="money">{if $account.sum > 0}{$account.sum|abs|escape|html_money}{/if}</td>
+			<td class="money">{$account.debit|raw|money}</td>
+			<td class="money">{$account.credit|raw|money}</td>
+			<td class="money">{if $account.sum < 0}{$account.sum|abs|escape|money}{/if}</td>
+			<td class="money">{if $account.sum > 0}{$account.sum|abs|escape|money}{/if}</td>
 		</tr>
 	{/foreach}
 	</tbody>

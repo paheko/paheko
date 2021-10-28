@@ -3,27 +3,19 @@
 <nav class="tabs">
 	<ul>
 		<li><a href="./">Gestion du site web</a></li>
-		{if $session->canAccess($session::SECTION_WEB, Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 			{*<li><a href="theme.php">Thèmes</a></li>*}
 			<li class="current"><a href="config.php">Configuration</a></li>
+		{/if}
+		{if !$config.site_disabled}
+			<li><a href="{$www_url}" target="_blank">Voir le site en ligne</a></li>
 		{/if}
 	</ul>
 </nav>
 
 {form_errors}
 
-{if $config.desactiver_site}
-	<div class="block alert">
-		<h3>Site public désactivé</h3>
-		<p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
-		<form method="post" action="{$self_url}">
-			<p class="submit">
-				{csrf_field key="config_site"}
-				{button type="submit" name="activer_site" label="Réactiver le site public" shape="right" class="main"}
-			</p>
-		</form>
-	</div>
-{elseif isset($edit)}
+{if isset($edit)}
 	<form method="post" action="{$self_url}">
 		<h3>Éditer un squelette</h3>
 
@@ -48,12 +40,25 @@
 	</form>
 
 	<script type="text/javascript">
-	var doc_url = "{$admin_url}doc/skel/";
-	var skel_list = {$sources|escape:json};
-	var skel_current = "{$edit.file|escape:'js'}";
-	g.script("scripts/skel_editor.js");
+	g.script("scripts/code_editor.js");
 	</script>
 {else}
+
+
+	{if $config.site_disabled}
+
+	<div class="block alert">
+		<h3>Site public désactivé</h3>
+		<p>Le site public est désactivé, les visiteurs sont redirigés automatiquement vers la page de connexion.</p>
+		<form method="post" action="{$self_url}">
+			<p class="submit">
+				{csrf_field key="config_site"}
+				{button type="submit" name="enable_site" label="Activer le site public" shape="right" class="main"}
+			</p>
+		</form>
+	</div>
+
+	{else}
 
 	<fieldset>
 		<legend>Activation du site public</legend>
@@ -61,7 +66,7 @@
 			<dt>
 				<form method="post" action="{$self_url}">
 					<p class="submit">
-						{button type="submit" name="desactiver_site" label="Désactiver le site public" shape="right" class="main"}
+						{button type="submit" name="disable_site" label="Désactiver le site public" shape="right" class="main"}
 						{csrf_field key="config_site"}
 					</p>
 				</form>
@@ -72,6 +77,8 @@
 			</dd>
 		</dl>
 	</fieldset>
+
+	{/if}
 
 	<form method="post" action="{$self_url}">
 	<fieldset class="templatesList">
@@ -93,13 +100,15 @@
 				</tr>
 			</thead>
 			<tbody>
-			{foreach from=$sources key="source" item="local"}
+			{foreach from=$sources key="source" item="props"}
 				<tr>
-					<td>{if $local && $local.dist}<input type="checkbox" name="select[]" value="{$source}" id="f_source_{$iteration}" /><label for="f_source_{$iteration}"></label>{/if}</td>
+					<td>{if $props.changed}<input type="checkbox" name="select[]" value="{$source}" id="f_source_{$iteration}" /><label for="f_source_{$iteration}"></label>{/if}</td>
 					<th><a href="?edit={$source|escape:'url'}" title="Éditer">{$source}</a></th>
-					<td>{if $local}{$local.mtime|date_fr:'d/m/Y à H:i:s'}{else}<em>(fichier non modifié)</em>{/if}</td>
+					<td>{if $props.changed}{$props.changed|date}{else}<em>(fichier non modifié)</em>{/if}</td>
 					<td class="actions">
+						{if $props.is_text}
 						{linkbutton shape="edit" label="Éditer" href="?edit=%s"|args:$source}
+						{/if}
 					</td>
 				</tr>
 			{/foreach}
@@ -111,8 +120,13 @@
 			<input type="submit" name="reset" value="Réinitialiser" onclick="return confirm('Effacer toute modification locale et restaurer les squelettes d\'installation ?');" />
 			{csrf_field key="squelettes"}
 		</p>
+
+		<p>
+			{linkbutton href="!docs/?path=skel" label="Gérer les fichiers de squelettes" shape="folder"}
+		</p>
 	</fieldset>
 	</form>
+
 {/if}
 
 {include file="admin/_foot.tpl"}

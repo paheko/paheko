@@ -6,7 +6,7 @@
 	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
 		{/if}
 		<li><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
@@ -16,9 +16,16 @@
 {if $_GET.msg == 'OPEN'}
 <p class="block error">
 	Il n'existe aucun exercice ouvert.
-	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
 	{/if}
+</p>
+{/if}
+
+{if $_GET.msg == 'UPDATE_FEES'}
+<p class="block error">
+	Des tarifs d'activité étaient associés à l'ancien exercice clôturé.
+	Ces tarifs ont été déconnectés de la comptabilité à cause du changement de plan comptable, il vous faudra les reconnecter manuellement au nouvel exercice.
 </p>
 {/if}
 
@@ -57,9 +64,8 @@
 			<tr>
 				<td><em>{if $year.closed}Clôturé{else}En cours{/if}</em></td>
 				<td>
-				{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
-					{linkbutton label="Export CSV" shape="export" href="import.php?id=%d&export=csv"|args:$year.id}
-					{linkbutton label="Export tableur" shape="export" href="import.php?id=%d&export=ods"|args:$year.id}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+					{linkbutton label="Export" shape="export" href="export.php?id=%d"|args:$year.id}
 					{if !$year.closed}
 						{linkbutton label="Import" shape="upload" href="import.php?id=%d"|args:$year.id}
 						{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}

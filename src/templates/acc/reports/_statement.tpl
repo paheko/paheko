@@ -20,7 +20,7 @@
 					<tfoot>
 						<tr>
 							<th>Total</th>
-							<td class="money">{$statement.expense_sum|raw|html_money:false}</td>
+							<td class="money">{$statement.expense_sum|raw|money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -30,7 +30,7 @@
 					<tfoot>
 						<tr>
 							<th>Total</th>
-							<td class="money">{$statement.revenue_sum|raw|html_money:false}</td>
+							<td class="money">{$statement.revenue_sum|raw|money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -44,7 +44,7 @@
 					<tfoot>
 						<tr>
 							<th>Résultat (perte)</th>
-							<td class="money">{$statement.result|raw|html_money:false}</td>
+							<td class="money">{$statement.result|raw|money:false}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -56,7 +56,7 @@
 					<tfoot>
 						<tr>
 							<th>Résultat (excédent)</th>
-							<td class="money">{$statement.result|raw|html_money:false}</td>
+							<td class="money">{$statement.result|raw|money:false}</td>
 						</tr>
 					</tfoot>
 				</table>

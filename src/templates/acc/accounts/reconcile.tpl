@@ -15,10 +15,10 @@
 		<legend>Rapprochement par mois</legend>
 		<p>
 			{if $prev}
-				{linkbutton shape="left" href=$prev.url label=$prev.date|date_fr:'F Y'}
+				{linkbutton shape="left" href=$prev.url label=$prev.date|date:'F Y'}
 			{/if}
 			{if $next}
-				{linkbutton shape="right" href=$next.url label=$next.date|date_fr:'F Y'}
+				{linkbutton shape="right" href=$next.url label=$next.date|date:'F Y'}
 			{/if}
 		</p>
 	</fieldset>
@@ -66,8 +66,8 @@
 			{if isset($line->sum)}
 			<tr>
 				<td colspan="5"></td>
-				<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|html_money:false}</td>
-				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|html_money}</td>
+				<td class="money">{if $line.sum > 0}-{/if}{$line.sum|abs|raw|money:false}</td>
+				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|money}</td>
 				<th>Solde au {$line.date|date_short}</th>
 				<td colspan="2"></td>
 			</tr>
@@ -78,10 +78,10 @@
 				</td>
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_short}</td>
-				<td class="money">{$line.credit|raw|html_money}</td>
-				<td class="money">{$line.debit|raw|html_money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
-				<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|html_money:false}</td>
-				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|html_money:false}</td>
+				<td class="money">{$line.credit|raw|money}</td>
+				<td class="money">{$line.debit|raw|money}</td> {* Not a bug! Credit/debit is reversed here to reflect the bank statement *}
+				<td class="money">{if $line.running_sum > 0}-{/if}{$line.running_sum|abs|raw|money:false}</td>
+				<td class="money">{if $line.reconciled_sum > 0}-{/if}{$line.reconciled_sum|abs|raw|money:false}</td>
 				<th>{$line.label}</th>
 				<td>{$line.reference}</td>
 				<td>{$line.line_reference}</td>

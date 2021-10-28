@@ -1,43 +1,28 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/../_inc.php';
 
-$cats = new Membres\Categories;
+$cat = Categories::get((int) qg('id'));
 
-qv(['id' => 'required|numeric']);
-
-$id = (int) qg('id');
-
-$cat = $cats->get($id);
-
-if (!$cat)
-{
-    throw new UserException("Cette catégorie n'existe pas.");
+if (!$cat) {
+	throw new UserException("Cette catégorie n'existe pas.");
 }
 
-if ($cat->id == $user->id_categorie)
-{
-    throw new UserException("Vous ne pouvez pas supprimer votre catégorie.");
+$user = $session->getUser();
+
+$csrf_key = 'cat_delete_' . $cat->id();
+
+if ($cat->id() == $user->id_category) {
+	throw new UserException("Vous ne pouvez pas supprimer votre catégorie.");
 }
 
-if (f('delete'))
-{
-    $form->check('delete_cat_' . $id);
+$form->runIf('delete', function () use($cat) {
+	$cat->delete();
+}, $csrf_key, '!config/categories/');
 
-    if (!$form->hasErrors())
-    {
-        try {
-            $cats->remove($id);
-            Utils::redirect(ADMIN_URL . 'config/categories/');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
-
-$tpl->assign('cat', $cat);
+$tpl->assign(compact('cat', 'csrf_key'));
 
 $tpl->display('admin/config/categories/supprimer.tpl');

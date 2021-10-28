@@ -1,23 +1,28 @@
 CREATE TABLE IF NOT EXISTS config (
--- Configuration de Garradin
-    cle TEXT PRIMARY KEY NOT NULL,
-    valeur TEXT
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NULL
 );
 
-CREATE TABLE IF NOT EXISTS membres_categories
--- Catégories de membres
+CREATE TABLE IF NOT EXISTS users_categories
+-- Users categories, mainly used to manage rights
 (
     id INTEGER PRIMARY KEY NOT NULL,
-    nom TEXT NOT NULL,
+    name TEXT NOT NULL,
 
-    droit_wiki INTEGER NOT NULL DEFAULT 1,
-    droit_membres INTEGER NOT NULL DEFAULT 1,
-    droit_compta INTEGER NOT NULL DEFAULT 1,
-    droit_inscription INTEGER NOT NULL DEFAULT 0,
-    droit_connexion INTEGER NOT NULL DEFAULT 1,
-    droit_config INTEGER NOT NULL DEFAULT 0,
-    cacher INTEGER NOT NULL DEFAULT 0
+    -- Permissions, 0 = no access, 1 = read-only, 2 = read-write, 9 = admin
+    perm_web INTEGER NOT NULL DEFAULT 1,
+    perm_documents INTEGER NOT NULL DEFAULT 1,
+    perm_users INTEGER NOT NULL DEFAULT 1,
+    perm_accounting INTEGER NOT NULL DEFAULT 1,
+
+    perm_subscribe INTEGER NOT NULL DEFAULT 0,
+    perm_connect INTEGER NOT NULL DEFAULT 1,
+    perm_config INTEGER NOT NULL DEFAULT 0,
+
+    hidden INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE INDEX IF NOT EXISTS users_categories_hidden ON users_categories (hidden);
 
 -- Membres de l'asso
 -- Table dynamique générée par l'application
@@ -58,8 +63,8 @@ CREATE TABLE IF NOT EXISTS services_fees
     formula TEXT NULL, -- Formule de calcul du montant de la cotisation, si cotisation dynamique (exemple : membres.revenu_imposable * 0.01)
 
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL si le type n'est pas associé automatiquement à la compta
-    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL si le type n'est pas associé automatiquement à la compta
+    id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL if fee is not linked to accounting, this is reset using a trigger if the year is deleted
+    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL if fee is not linked to accounting
 );
 
 CREATE TABLE IF NOT EXISTS services_users
@@ -105,84 +110,14 @@ CREATE TABLE IF NOT EXISTS services_reminders_sent
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
     id_reminder INTEGER NOT NULL REFERENCES services_reminders (id) ON DELETE CASCADE,
 
-    date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date) IS NOT NULL AND date(date) = date)
+    sent_date TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(sent_date) IS NOT NULL AND date(sent_date) = sent_date),
+    due_date TEXT NOT NULL CHECK (date(due_date) IS NOT NULL AND date(due_date) = due_date)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS srs_index ON services_reminders_sent (id_user, id_service, id_reminder, date);
+CREATE UNIQUE INDEX IF NOT EXISTS srs_index ON services_reminders_sent (id_user, id_service, id_reminder, due_date);
 
 CREATE INDEX IF NOT EXISTS srs_reminder ON services_reminders_sent (id_reminder);
 CREATE INDEX IF NOT EXISTS srs_user ON services_reminders_sent (id_user);
-
---
--- WIKI
---
-
-CREATE TABLE IF NOT EXISTS wiki_pages
--- Pages du wiki
-(
-    id INTEGER PRIMARY KEY NOT NULL,
-    uri TEXT NOT NULL, -- URI unique (équivalent NomPageWiki)
-    titre TEXT NOT NULL,
-    date_creation TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date_creation) IS NOT NULL AND datetime(date_creation) = date_creation),
-    date_modification TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date_modification) IS NOT NULL AND datetime(date_modification) = date_modification),
-    parent INTEGER NOT NULL DEFAULT 0, -- ID de la page parent
-    revision INTEGER NOT NULL DEFAULT 0, -- Numéro de révision (commence à 0 si pas de texte, +1 à chaque changement du texte)
-    droit_lecture INTEGER NOT NULL DEFAULT 0, -- Accès en lecture (-1 = public [site web], 0 = tous ceux qui ont accès en lecture au wiki, 1+ = ID de groupe)
-    droit_ecriture INTEGER NOT NULL DEFAULT 0 -- Accès en écriture (0 = tous ceux qui ont droit d'écriture sur le wiki, 1+ = ID de groupe)
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS wiki_uri ON wiki_pages (uri);
-
-CREATE VIRTUAL TABLE IF NOT EXISTS wiki_recherche USING fts4
--- Table dupliquée pour chercher une page
-(
-    id INT PRIMARY KEY NOT NULL, -- Clé externe obligatoire
-    titre TEXT NOT NULL,
-    contenu TEXT NULL, -- Contenu de la dernière révision
-    FOREIGN KEY (id) REFERENCES wiki_pages(id)
-);
-
-CREATE TABLE IF NOT EXISTS wiki_revisions
--- Révisions du contenu des pages
-(
-    id_page INTEGER NOT NULL REFERENCES wiki_pages (id) ON DELETE CASCADE,
-    revision INTEGER NULL,
-
-    id_auteur INTEGER NULL REFERENCES membres (id) ON DELETE SET NULL,
-
-    contenu TEXT NOT NULL,
-    modification TEXT NULL, -- Description des modifications effectuées
-    chiffrement INTEGER NOT NULL DEFAULT 0, -- 1 si le contenu est chiffré, 0 sinon
-    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(date) IS NOT NULL AND datetime(date) = date),
-
-    PRIMARY KEY(id_page, revision)
-);
-
-CREATE INDEX IF NOT EXISTS wiki_revisions_id_page ON wiki_revisions (id_page);
-CREATE INDEX IF NOT EXISTS wiki_revisions_id_auteur ON wiki_revisions (id_auteur);
-
--- Triggers pour synchro avec table wiki_pages
-CREATE TRIGGER IF NOT EXISTS wiki_recherche_delete AFTER DELETE ON wiki_pages
-    BEGIN
-        DELETE FROM wiki_recherche WHERE id = old.id;
-    END;
-
-CREATE TRIGGER IF NOT EXISTS wiki_recherche_update AFTER UPDATE OF id, titre ON wiki_pages
-    BEGIN
-        UPDATE wiki_recherche SET id = new.id, titre = new.titre WHERE id = old.id;
-    END;
-
--- Trigger pour mettre à jour le contenu de la table de recherche lors d'une nouvelle révision
-CREATE TRIGGER IF NOT EXISTS wiki_recherche_contenu_insert AFTER INSERT ON wiki_revisions WHEN new.chiffrement != 1
-    BEGIN
-        UPDATE wiki_recherche SET contenu = new.contenu WHERE id = new.id_page;
-    END;
-
--- Si le contenu est chiffré, la recherche n'affiche pas de contenu
-CREATE TRIGGER IF NOT EXISTS wiki_recherche_contenu_chiffre AFTER INSERT ON wiki_revisions WHEN new.chiffrement = 1
-    BEGIN
-        UPDATE wiki_recherche SET contenu = '' WHERE id = new.id_page;
-    END;
 
 --
 -- COMPTA
@@ -235,6 +170,11 @@ CREATE TABLE IF NOT EXISTS acc_years
 
 CREATE INDEX IF NOT EXISTS acc_years_closed ON acc_years (closed);
 
+-- Make sure id_account is reset when a year is deleted
+CREATE TRIGGER IF NOT EXISTS acc_years_delete BEFORE DELETE ON acc_years BEGIN
+    UPDATE services_fees SET id_account = NULL, id_year = NULL WHERE id_year = OLD.id;
+END;
+
 CREATE TABLE IF NOT EXISTS acc_transactions
 -- Opérations comptables
 (
@@ -262,7 +202,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions
 CREATE INDEX IF NOT EXISTS acc_transactions_year ON acc_transactions (id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_date ON acc_transactions (date);
 CREATE INDEX IF NOT EXISTS acc_transactions_related ON acc_transactions (id_related);
-CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type);
+CREATE INDEX IF NOT EXISTS acc_transactions_type ON acc_transactions (type, id_year);
 CREATE INDEX IF NOT EXISTS acc_transactions_status ON acc_transactions (status);
 
 CREATE TABLE IF NOT EXISTS acc_transactions_lines
@@ -287,6 +227,7 @@ CREATE TABLE IF NOT EXISTS acc_transactions_lines
     CONSTRAINT line_check2 CHECK ((credit + debit) > 0)
 );
 
+CREATE INDEX IF NOT EXISTS acc_transactions_lines_transaction ON acc_transactions_lines (id_transaction);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_account ON acc_transactions_lines (id_account);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_analytical ON acc_transactions_lines (id_analytical);
 CREATE INDEX IF NOT EXISTS acc_transactions_lines_reconciled ON acc_transactions_lines (reconciled);
@@ -326,54 +267,72 @@ CREATE TABLE IF NOT EXISTS plugins_signaux
     PRIMARY KEY (signal, plugin)
 );
 
-CREATE TABLE IF NOT EXISTS fichiers
--- Données sur les fichiers
+---------- FILES ----------------
+
+CREATE TABLE IF NOT EXISTS files
+-- Files metadata
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    nom TEXT NOT NULL, -- nom de fichier (par exemple image1234.jpeg)
-    type TEXT NULL, -- Type MIME
-    image INTEGER NOT NULL DEFAULT 0, -- 1 = image reconnue
-    datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(datetime) IS NOT NULL AND datetime(datetime) = datetime), -- Date d'ajout ou mise à jour du fichier
-    id_contenu INTEGER NOT NULL REFERENCES fichiers_contenu (id) ON DELETE CASCADE
+    path TEXT NOT NULL,
+    parent TEXT NOT NULL,
+    name TEXT NOT NULL, -- File name
+    type INTEGER NOT NULL, -- File type, 1 = file, 2 = directory
+    mime TEXT NULL,
+    size INT NULL,
+    modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(modified) = modified),
+    image INT NOT NULL DEFAULT 0,
+
+    CHECK (type = 2 OR (mime IS NOT NULL AND size IS NOT NULL))
 );
 
-CREATE INDEX IF NOT EXISTS fichiers_date ON fichiers (datetime);
+-- Unique index as this is used to make up a file path
+CREATE UNIQUE INDEX IF NOT EXISTS files_unique ON files (path);
+CREATE INDEX IF NOT EXISTS files_parent ON files (parent);
+CREATE INDEX IF NOT EXISTS files_name ON files (name);
+CREATE INDEX IF NOT EXISTS files_modified ON files (modified);
 
-CREATE TABLE IF NOT EXISTS fichiers_contenu
--- Contenu des fichiers
+CREATE TABLE IF NOT EXISTS files_contents
+-- Files contents (empty if using another storage backend)
+(
+    id INTEGER NOT NULL PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+    compressed INT NOT NULL DEFAULT 0,
+    content BLOB NOT NULL
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS files_search USING fts4
+-- Search inside files content
+(
+    tokenize=unicode61, -- Available from SQLITE 3.7.13 (2012)
+    path TEXT NOT NULL,
+    title TEXT NULL,
+    content TEXT NOT NULL, -- Text content
+    notindexed=path
+);
+
+CREATE TABLE IF NOT EXISTS web_pages
 (
     id INTEGER NOT NULL PRIMARY KEY,
-    hash TEXT NOT NULL, -- Hash SHA1 du contenu du fichier
-    taille INTEGER NOT NULL, -- Taille en octets
-    contenu BLOB NULL
+    parent TEXT NOT NULL, -- Parent path, empty = web root
+    path TEXT NOT NULL, -- Full page directory name
+    uri TEXT NOT NULL, -- Page identifier
+    file_path TEXT NOT NULL, -- Full file path for contents
+    type INTEGER NOT NULL, -- 1 = Category, 2 = Page
+    status TEXT NOT NULL,
+    format TEXT NOT NULL,
+    published TEXT NOT NULL CHECK (datetime(published) = published),
+    modified TEXT NOT NULL CHECK (datetime(modified) = modified),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS fichiers_hash ON fichiers_contenu (hash);
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_path ON web_pages (path);
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_uri ON web_pages (uri);
+CREATE UNIQUE INDEX IF NOT EXISTS web_pages_file_path ON web_pages (file_path);
+CREATE INDEX IF NOT EXISTS web_pages_parent ON web_pages (parent);
+CREATE INDEX IF NOT EXISTS web_pages_published ON web_pages (published);
+CREATE INDEX IF NOT EXISTS web_pages_title ON web_pages (title);
 
-CREATE TABLE IF NOT EXISTS fichiers_membres
--- Associations entre fichiers et membres (photo de profil par exemple)
-(
-    fichier INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
-    id INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
-    PRIMARY KEY(fichier, id)
-);
-
-CREATE TABLE IF NOT EXISTS fichiers_wiki_pages
--- Associations entre fichiers et pages du wiki
-(
-    fichier INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
-    id INTEGER NOT NULL REFERENCES wiki_pages (id) ON DELETE CASCADE,
-    PRIMARY KEY(fichier, id)
-);
-
-CREATE TABLE IF NOT EXISTS fichiers_acc_transactions
--- Associations entre fichiers et journal de compta (pièce comptable par exemple)
-(
-    fichier INTEGER NOT NULL REFERENCES fichiers (id) ON DELETE CASCADE,
-    id INTEGER NOT NULL REFERENCES acc_transactions (id) ON DELETE CASCADE,
-    PRIMARY KEY(fichier, id)
-);
-
+-- FIXME: rename to english
 CREATE TABLE IF NOT EXISTS recherches
 -- Recherches enregistrées
 (

@@ -10,6 +10,12 @@ use KD2\SMTP;
 
 class Config extends Entity
 {
+	const DEFAULT_FILES = [
+		'admin_background' => File::CONTEXT_CONFIG . '/admin_bg.png',
+		'admin_homepage' => File::CONTEXT_CONFIG . '/admin_homepage.skriv',
+		'admin_css' => File::CONTEXT_CONFIG . '/admin.css',
+	];
+
 	protected $nom_asso;
 	protected $adresse_asso;
 	protected $email_asso;
@@ -22,24 +28,23 @@ class Config extends Entity
 	protected $champs_membres;
 	protected $categorie_membres;
 
-	protected $admin_homepage;
-
 	protected $frequence_sauvegardes;
 	protected $nombre_sauvegardes;
 
 	protected $champ_identifiant;
 	protected $champ_identite;
 
-	protected $version;
 	protected $last_chart_change;
 	protected $last_version_check;
 
 	protected $couleur1;
 	protected $couleur2;
 
-	protected $image_fond;
+	protected $admin_background;
+	protected $admin_homepage = 'config/admin_homepage.skriv';
+	protected $admin_css = 'config/admin.css';
 
-	protected $desactiver_site;
+	protected $site_disabled;
 
 	protected $_types = [
 		'nom_asso'              => 'string',
@@ -55,26 +60,23 @@ class Config extends Entity
 
 		'categorie_membres'     => 'int',
 
-		'admin_homepage'        => '?Garradin\Entities\Files\File',
-
-		'frequence_sauvegardes' => 'int',
-		'nombre_sauvegardes'    => 'int',
+		'frequence_sauvegardes' => '?int',
+		'nombre_sauvegardes'    => '?int',
 
 		'champ_identifiant'     => 'string',
 		'champ_identite'        => 'string',
 
-		'version'               => 'string',
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',
 
 		'couleur1'              => '?string',
 		'couleur2'              => '?string',
-		'image_fond'            => '?Garradin\Entities\Files\File',
+		'admin_background'      => '?string',
+		'admin_homepage'        => '?string',
+		'admin_css'             => '?string',
 
-		'desactiver_site'       => 'bool',
+		'site_disabled'         => 'bool',
 	];
-
-	protected $_modified;
 
 	static protected $_instance = null;
 
@@ -99,7 +101,11 @@ class Config extends Entity
 
 		$db = DB::getInstance();
 
-		$config = $db->getAssoc('SELECT cle, valeur FROM config ORDER BY cle;');
+		$config = $db->getAssoc('SELECT key, value FROM config ORDER BY key;');
+
+		if (empty($config)) {
+			return;
+		}
 
 		$default = array_fill_keys(array_keys($this->_types), null);
 		$config = array_merge($default, $config);
@@ -111,10 +117,6 @@ class Config extends Entity
 
 			if ($type[0] == '?' && $value === null) {
 				continue;
-			}
-
-			if ($type == File::class || substr($type, 1) == File::class) {
-				$config[$key] = Files::get((int) $value);
 			}
 		}
 
@@ -129,20 +131,20 @@ class Config extends Entity
 			return true;
 		}
 
+		$this->selfCheck();
+
 		$values = [];
 		$db = DB::getInstance();
 
 		foreach ($this->_modified as $key => $modified) {
 			$value = $this->$key;
+			$type = ltrim($this->_types[$key], '?');
 
-			if ($this->_types[$key] == File::class && null === $value && $this->$key !== null) {
-				$this->$key->delete();
-			}
-			elseif ($this->_types[$key] == File::class && null !== $value) {
-				$value = $value->id();
-			}
-			else if ($this->_types[$key] == Champs::class) {
+			if ($type == Champs::class) {
 				$value = $value->toString();
+			}
+			elseif (is_object($value)) {
+				throw new \UnexpectedValueException('Unexpected object as value: ' . get_class($value));
 			}
 
 			$values[$key] = $value;
@@ -152,32 +154,17 @@ class Config extends Entity
 
 		$db->begin();
 
-		foreach ($this->_modified as $key=>$modified)
+		foreach ($values as $key => $value)
 		{
-			$value = $this->get($key);
-
-			if (is_array($value))
-			{
-				$value = implode(',', $value);
-			}
-			elseif (is_object($value))
-			{
-				$value = (string) $value;
-			}
-
-			$db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-				[$key, $value]);
+			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
 		}
 
-		if (!empty($this->_modified['champ_identifiant']))
-		{
-			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
-			$db->exec('UPDATE membres SET '.$this->get('champ_identifiant').' = NULL
-				WHERE '.$this->get('champ_identifiant').' = "";');
-
-			// Création de l'index unique
-			$db->exec('DROP INDEX IF EXISTS membres_identifiant;');
-			$db->exec('CREATE UNIQUE INDEX membres_identifiant ON membres ('.$this->get('champ_identifiant').');');
+		if (!empty($values['champ_identifiant'])) {
+			// Regenerate login index
+			$db->exec('DROP INDEX IF EXISTS users_id_field;');
+			$config = Config::getInstance();
+			$champs = $config->get('champs_membres');
+			$champs->createIndexes();
 		}
 
 		$db->commit();
@@ -192,18 +179,47 @@ class Config extends Entity
 		throw new \LogicException('Cannot delete config');
 	}
 
-	public function getVersion(): string
+	public function importForm($source = null): void
 	{
-		return $this->get('version');
-	}
+		if (null === $source) {
+			$source = $_POST;
+		}
 
-	public function setVersion(string $version): void
-	{
-		$this->config->version = $version;
+		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
+		if (!isset($source['couleur1'], $source['couleur2'])
+			|| ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
+		{
+			$source['couleur1'] = null;
+			$source['couleur2'] = null;
+		}
 
-		$db = DB::getInstance();
-		$db->preparedQuery('INSERT OR REPLACE INTO config (cle, valeur) VALUES (?, ?);',
-			['version', $version]);
+		if (isset($source['admin_background']) && trim($source['admin_background']) == 'RESET') {
+			$source['admin_background'] = null;
+
+			$file = Files::get(self::DEFAULT_FILES['admin_background']);
+
+			if ($file) {
+				$file->delete();
+			}
+		}
+		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
+			$file = Files::get(self::DEFAULT_FILES['admin_background']);
+
+			if ($file) {
+				$file->storeFromBase64($source['admin_background']);
+			}
+			else {
+				$path = self::DEFAULT_FILES['admin_background'];
+				$file = File::createFromBase64(Utils::dirname($path), Utils::basename($path), $source['admin_background']);
+			}
+
+			$source['admin_background'] = $file->path;
+		}
+		else {
+			unset($source['admin_background']);
+		}
+
+		parent::importForm($source);
 	}
 
 	protected function _filterType(string $key, $value)
@@ -215,7 +231,6 @@ class Config extends Entity
 				return (bool) $value;
 			case 'string':
 				return (string) $value;
-			case File::class:
 			case Champs::class:
 				if (!is_object($value) || !($value instanceof $this->_types[$key])) {
 					throw new \InvalidArgumentException(sprintf('"%s" is not of type "%s"', $key, $this->_types[$key]));
@@ -231,9 +246,14 @@ class Config extends Entity
 		$this->assert(trim($this->nom_asso) != '', 'Le nom de l\'association ne peut rester vide.');
 		$this->assert(trim($this->monnaie) != '', 'La monnaie ne peut rester vide.');
 		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
+		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
-		$this->assert(null === $this->admin_homepage || $this->admin_homepage instanceof File, 'Page d\'accueil invalide');
 		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');
+
+		// Files can only have one value: their name
+		$this->assert($this->admin_background === null || $this->admin_background === self::DEFAULT_FILES['admin_background']);
+		$this->assert($this->admin_homepage === null || $this->admin_homepage === self::DEFAULT_FILES['admin_homepage']);
+		$this->assert($this->admin_css === null || $this->admin_css === self::DEFAULT_FILES['admin_css']);
 
 		$champs = $this->champs_membres;
 
@@ -241,16 +261,15 @@ class Config extends Entity
 		$this->assert(!empty($champs->get($this->champ_identifiant)), sprintf('Le champ spécifié pour identifiant, "%s" n\'existe pas', $this->champ_identifiant));
 
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT (COUNT(DISTINCT %s) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
-		$is_unique = $db->firstColumn($sql);
 
-		$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
+		// Check that this field is actually unique
+		if (isset($this->_modified['champ_identifiant'])) {
+			$sql = sprintf('SELECT (COUNT(DISTINCT %s COLLATE NOCASE) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
+			$is_unique = (bool) $db->firstColumn($sql);
 
-		$this->assert($db->test('membres_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
-	}
+			$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
+		}
 
-	public function getConfig()
-	{
-		return $this->asArray();
+		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
 	}
 }

@@ -21,7 +21,7 @@
 				{if $account.user}<em>Ajouté</em>{/if}
 			</td>
 			<td class="actions">
-				{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$chart.archived}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$chart.archived}
 					{if $account.user || !$chart.code}
 						{linkbutton shape="delete" label="Supprimer" href="!acc/charts/accounts/delete.php?id=%d"|args:$account.id}
 					{/if}

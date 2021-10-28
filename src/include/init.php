@@ -47,6 +47,34 @@ function garradin_manifest()
 	return false;
 }
 
+/**
+ * Le code de Garradin ne s'écrit pas tout seul comme par magie,
+ * merci de soutenir notre travail en faisant une contribution :)
+ */
+function garradin_contributor_license(): ?int
+{
+	static $level = null;
+
+	if (null !== $level) {
+		return $level;
+	}
+
+	if (!CONTRIBUTOR_LICENSE) {
+		return null;
+	}
+
+	$key = CONTRIBUTOR_LICENSE;
+	$key = gzinflate(base64_decode($key));
+	list($email, $level, $hash) = explode('==', $key);
+	$level = (int)hexdec($level);
+
+	if (substr(sha1($email . $level), 0, 10) != $hash) {
+		return null;
+	}
+
+	return $level;
+}
+
 if (!defined('\SQLITE3_OPEN_READWRITE')) {
 	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
 	exit(1);
@@ -93,9 +121,13 @@ if (!defined('Garradin\ROOT'))
 	}
 }, true);
 
-if (!defined('Garradin\DATA_ROOT'))
-{
-	define('Garradin\DATA_ROOT', ROOT);
+if (!defined('Garradin\DATA_ROOT')) {
+	// Migrate plugins, cache and SQLite to data/ subdirectory (version 1.1)
+	if (!file_exists(ROOT . '/data/association.sqlite') && file_exists(ROOT . '/association.sqlite')) {
+		Upgrade::moveDataRoot();
+	}
+
+	define('Garradin\DATA_ROOT', ROOT . '/data');
 }
 
 if (!defined('Garradin\WWW_URI'))
@@ -144,6 +176,7 @@ if (!defined('Garradin\WWW_URL')) {
 
 static $default_config = [
 	'CACHE_ROOT'            => DATA_ROOT . '/cache',
+	'SHARED_CACHE_ROOT'     => DATA_ROOT . '/cache/shared',
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
@@ -166,9 +199,13 @@ static $default_config = [
 	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
-	'FILE_STORAGE_BACKEND'  => null,
-	'FILE_STORAGE_CONFIG'   => [],
+	'FILE_STORAGE_BACKEND'  => 'SQLite',
+	'FILE_STORAGE_CONFIG'   => null,
 	'FILE_STORAGE_QUOTA'    => null,
+	'API_USER'              => null,
+	'API_PASSWORD'          => null,
+	'PDF_COMMAND'           => null,
+	'CONTRIBUTOR_LICENSE'   => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -187,6 +224,11 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
+
+const USER_TEMPLATES_CACHE_ROOT = CACHE_ROOT . '/utemplates';
+const STATIC_CACHE_ROOT = CACHE_ROOT . '/static';
+const SHARED_USER_TEMPLATES_CACHE_ROOT = SHARED_CACHE_ROOT . '/utemplates';
+const SMARTYER_CACHE_ROOT = SHARED_CACHE_ROOT . '/compiled';
 
 // PHP devrait être assez intelligent pour chopper la TZ système mais nan
 // il sait pas faire (sauf sur Debian qui a le bon patch pour ça), donc pour
@@ -211,9 +253,61 @@ if (!ini_get('date.timezone'))
 
 class UserException extends \LogicException
 {
+	protected $details;
+
+	public function setMessage(string $message) {
+		$this->message = $message;
+	}
+
+	public function setDetails($details) {
+		$this->details = $details;
+	}
+
+	public function getDetails() {
+		return $this->details;
+	}
+
+	public function hasDetails(): bool {
+		return $this->details !== null;
+	}
+
+	public function getDetailsHTML() {
+		if (func_num_args() == 1) {
+			$details = func_get_arg(0);
+		}
+		else {
+			$details = $this->details;
+		}
+
+		if (null === $details) {
+			return '<em>(nul)</em>';
+		}
+
+		if ($details instanceof \DateTimeInterface) {
+			return $details->format('d/m/Y');
+		}
+
+		if (!is_array($details)) {
+			return nl2br(htmlspecialchars($details));
+		}
+
+		$out = '<table>';
+
+		foreach ($details as $key => $value) {
+			$out .= sprintf('<tr><th>%s</th><td>%s</td></tr>', htmlspecialchars($key), $this->getDetailsHTML($value));
+		}
+
+		$out .= '</table>';
+
+		return $out;
+	}
 }
 
 class ValidationException extends UserException
+{
+}
+
+class APIException extends \LogicException
 {
 }
 
@@ -319,12 +413,15 @@ EntityManager::setGlobalDB(DB::getInstance());
 
 if (!defined('Garradin\INSTALL_PROCESS') && !defined('Garradin\UPGRADE_PROCESS'))
 {
-	if (!file_exists(DB_FILE))
-	{
+	if (!file_exists(DB_FILE)) {
+		if (in_array('install.php', get_included_files())) {
+			die('Erreur de redirection en boucle : problème de configuration ?');
+		}
+
 		Utils::redirect(ADMIN_URL . 'install.php');
 	}
 
-	$v = DB::getInstance()->firstColumn('SELECT valeur FROM config WHERE cle = \'version\';');
+	$v = DB::getInstance()->version();
 
 	if (version_compare($v, garradin_version(), '<'))
 	{

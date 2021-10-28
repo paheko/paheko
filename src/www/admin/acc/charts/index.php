@@ -6,11 +6,11 @@ use Garradin\Accounting\Charts;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ACCES);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $tpl->assign('list', Charts::list());
 
-if ($session->canAccess('compta', Membres::DROIT_ADMIN)) {
+if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)) {
 	if (f('new') && $form->check('acc_charts_new')) {
 		try {
 			$chart = new Chart;

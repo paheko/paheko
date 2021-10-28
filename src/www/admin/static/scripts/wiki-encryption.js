@@ -1,18 +1,40 @@
 (function () {
-	var aesEnabled = false;
+	var aes_loaded = false;
 	var iteration = 0;
+	var self_path_match = /static\/scripts\/wiki-encryption\.js/;
+	var www_url;
 	var encryptPassword = null;
-	var www_url = location.href.replace(/admin\/.*$/, 'admin/');
 
-	function loadAESlib()
+	var scripts = document.getElementsByTagName('script');
+
+	for (var i = 0; i < scripts.length; i++) {
+		if (scripts[i].src.match(self_path_match)) {
+			www_url = scripts[i].src.replace(/\/admin\/.*$/, '/');
+			break;
+		}
+	}
+
+	function load_aes(callback)
 	{
-		if (aesEnabled)
-		{
+		if (aes_loaded) {
+			if (callback) {
+				callback();
+			}
 			return;
 		}
 
-		g.script('scripts/gibberish-aes.min.js');
-		aesEnabled = true;
+		var url = www_url + 'admin/static/scripts/gibberish-aes.min.js';
+		var s = document.createElement('script');
+		s.src = url;
+		s.type = 'text/javascript';
+		s.onload = function () {
+			aes_loaded = true;
+			if (callback) {
+				callback();
+			}
+		};
+
+		document.head.appendChild(s);
 	}
 
 	function formatContent(content)
@@ -64,116 +86,33 @@
 		return content;
 	}
 
-	window.wikiDecrypt = function ()
-	{
-		loadAESlib();
+	let edit = document.getElementById('f_content') ? true : false;
 
-		encryptPassword = window.prompt('Mot de passe ?');
-
-		if (!encryptPassword)
-		{
-			encryptPassword = null;
-
-			if (document.getElementById('f_content'))
-			{
-				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
-				{
-					document.getElementById('f_content').value = '';
-					document.getElementById('f_encrypted').checked = false;
-					checkEncryption(document.getElementById('f_encrypted'));
-				}
-				else
-				{
-					wikiDecrypt();
-				}
-			}
-
-			return;
+	let disableEncryption = (reset) => {
+		if (reset) {
+			document.getElementById('f_content').value = '';
+			document.getElementById('f_format').selectedIndex = 0;
 		}
 
-		iteration = 0;
-		decrypt();
+		document.getElementById('f_content').disabled = false;
+		encryptPassword = null;
 	};
 
-	var decrypt = function ()
-	{
-		if (typeof GibberishAES == 'undefined')
-		{
-			if (iteration >= 10)
-			{
-				iteration = 0;
-				encryptPassword = null;
-				window.alert("Impossible de charger la bibliothèque AES, empêchant le déchiffrement de la page.\nAttendez quelques instants avant de recommencer ou rechargez la page.");
-				return;
-			}
+	let enableEncryption = (form, do_decrypt) => {
+		document.getElementById('f_content').disabled = true;
 
-			iteration++;
-			window.setTimeout(decrypt, 500);
-			return;
-		}
-
-		var content = document.getElementById('f_content');
-		var edit = true;
-
-		if (!content) {
-		 	content = document.getElementById('wikiEncryptedContent');
-		 	edit = false;
-		}
-
-		var wikiContent = content.value || content.innerText;
-		wikiContent = wikiContent.replace(/\s+/g, '');
-
-		try {
-			wikiContent = GibberishAES.dec(wikiContent, encryptPassword);
-		}
-		catch (e)
-		{
-			encryptPassword = null;
-			window.alert('Impossible de déchiffrer. Mauvais mot de passe ?');
-
-			if (edit)
-			{
-				// Redemander le mot de passe
-				wikiDecrypt();
-			}
-			return false;
-		}
-
-		if (!edit)
-		{
-			content.style.display = 'block';
-			document.getElementById('wikiEncryptedMessage').style.display = 'none';
-			content.innerHTML = formatContent(wikiContent);
-		}
-		else
-		{
-			content.value = wikiContent;
-			checkEncryption(document.getElementById('f_encrypted'));
-		}
-	};
-
-	window.checkEncryption = function(elm)
-	{
 		String.prototype.repeat = function(num)
 		{
 			return new Array(num + 1).join(this);
 		};
 
-		if (elm.checked)
-		{
-			if (!encryptPassword)
-			{
-				encryptPassword = window.prompt('Mot de passe à utiliser ?');
-			}
+		load_aes(function () {
+			askPassword();
+			document.getElementById('f_content').disabled = false;
 
-			if (!encryptPassword)
-			{
-				elm.checked = false;
-				encryptPassword = null;
-				return;
+			if (do_decrypt) {
+				decrypt();
 			}
-
-			loadAESlib();
 
 			var hidden = true;
 			var d = document.getElementById('encryptPasswordDisplay');
@@ -193,7 +132,7 @@
 				hidden = !hidden;
 			};
 
-			document.getElementById('f_form').onsubmit = function ()
+			form.onsubmit = function ()
 			{
 				if (typeof GibberishAES == 'undefined')
 				{
@@ -201,20 +140,122 @@
 					return false;
 				}
 
+				if (!encryptPassword) {
+					return;
+				}
+
 				var content = document.getElementById('f_content');
 				content.value = GibberishAES.enc(content.value, encryptPassword);
 				content.readOnly = true;
 				return true;
 			};
+		});
+	};
+
+	let askPassword = () => {
+		load_aes();
+
+		encryptPassword = window.prompt('Mot de passe ?');
+
+		if (!encryptPassword)
+		{
+			encryptPassword = null;
+
+			if (edit)
+			{
+				if (window.confirm("Aucun mot de passe entré.\nDésactiver le chiffrement et effacer le contenu ?"))
+				{
+					disableEncryption(true);
+				}
+			}
+
+			return;
+		}
+
+		iteration = 0;
+	};
+
+	window.pleaseDecrypt = () => {
+		askPassword();
+		decrypt();
+	};
+
+	var decrypt = function ()
+	{
+		if (!encryptPassword) {
+			return;
+		}
+
+		if (typeof GibberishAES == 'undefined')
+		{
+			if (iteration >= 10)
+			{
+				iteration = 0;
+				encryptPassword = null;
+				window.alert("Impossible de charger la bibliothèque AES, empêchant le déchiffrement de la page.\nAttendez quelques instants avant de recommencer ou rechargez la page.");
+				return;
+			}
+
+			iteration++;
+			window.setTimeout(decrypt, 500);
+			return;
+		}
+
+		if (edit) {
+			var content = document.getElementById('f_content');
+		}
+		else {
+		 	var content = document.getElementById('wikiEncryptedContent');
+		}
+
+		var wikiContent = content.value || content.innerText;
+		wikiContent = wikiContent.replace(/\s+/g, '');
+
+		try {
+			wikiContent = GibberishAES.dec(wikiContent, encryptPassword);
+		}
+		catch (e)
+		{
+			encryptPassword = null;
+			window.alert('Impossible de déchiffrer. Mauvais mot de passe ?');
+
+			if (edit)
+			{
+				// Redemander le mot de passe
+				askPassword();
+				decrypt();
+			}
+			return false;
+		}
+
+		if (!edit)
+		{
+			content.style.display = 'block';
+			document.getElementById('wikiEncryptedMessage').style.display = 'none';
+			content.innerHTML = formatContent(wikiContent);
 		}
 		else
 		{
-			encryptPassword = null;
-			var d = document.getElementById('encryptPasswordDisplay');
-			d.innerHTML = 'désactivé';
-			d.title = 'Chiffrement désactivé';
-			d.onclick = null;
-			document.getElementById('f_form').onsubmit = null;
+			content.value = wikiContent;
 		}
 	};
+
+	document.addEventListener('DOMContentLoaded', () => {
+		if (e = document.getElementById('f_format')) {
+			edit = true;
+
+			if (e.value == "skriv/encrypted") {
+				enableEncryption(e.form, true);
+			}
+
+			e.addEventListener('change', () => {
+				if (e.value == 'skriv/encrypted') {
+					enableEncryption(e.form);
+				}
+				else if (encryptPassword) {
+					disableEncryption(false);
+				}
+			})
+		}
+	});
 } ());

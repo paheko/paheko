@@ -3,7 +3,7 @@
 <nav class="tabs">
 	<ul>
 		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 			<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
 		{/if}
 	</ul>
@@ -12,7 +12,7 @@
 {if $_GET.msg == 'OPEN'}
 <p class="block alert">
 	Il n'existe aucun exercice ouvert.
-	{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		Merci d'en <a href="{$admin_url}acc/years/new.php">créer un nouveau</a> pour pouvoir saisir des écritures.
 	{/if}
 </p>
@@ -37,7 +37,7 @@
 					<td class="actions">
 						{linkbutton shape="star" label="Comptes favoris" href="!acc/charts/accounts/?id=%d"|args:$item.id}
 						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
-						{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id}
 							{linkbutton shape="export" label="Export CSV" href="!acc/charts/export.php?id=%d"|args:$item.id}
 							{linkbutton shape="export" label="Export tableur" href="!acc/charts/export.php?id=%d&ods"|args:$item.id}
@@ -52,7 +52,7 @@
 	</table>
 {/if}
 
-{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<form method="post" action="{$self_url_no_qs}">
 		<fieldset>
 			<legend>Créer un nouveau plan comptable</legend>

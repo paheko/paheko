@@ -1,61 +1,58 @@
 <?php
 namespace Garradin;
 
+use Garradin\Web\Skeleton;
+
 require_once __DIR__ . '/_inc.php';
 
 $config = Config::getInstance();
 
-if (f('desactiver_site') && $form->check('config_site'))
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+
+if (f('disable_site') && $form->check('config_site'))
 {
-	$config->set('desactiver_site', true);
+	$config->set('site_disabled', true);
 	$config->save();
 	Utils::redirect(Utils::getSelfURI());
 }
-elseif (f('activer_site') && $form->check('config_site'))
+elseif (f('enable_site') && $form->check('config_site'))
 {
-	$config->set('desactiver_site', false);
+	$config->set('site_disabled', false);
 	$config->save();
 	Utils::redirect(Utils::getSelfURI());
 }
 
 $form->runIf('reset', function () {
-	foreach (f('select') as $source)
-	{
-		if (!Squelette::resetSource($source))
-		{
-			throw new UserException('Impossible de réinitialiser le squelette.');
-		}
+	if (!f('select')) {
+		return;
 	}
+
+	Skeleton::resetSelected(f('select'));
 }, 'squelettes', Utils::getSelfURI('reset_ok'));
 
-
 if (qg('edit')) {
-	$source = Squelette::getSource(qg('edit'));
+	$source = trim(qg('edit'));
+	$csrf_key = 'edit_skel_' . md5($source);
 
-	if (null === $source)
-	{
-		throw new UserException("Ce squelette n'existe pas.");
-	}
-
-	$csrf_key = 'edit_skel_' . md5(qg('edit'));
-
-	$form->runIf('save', function () {
-		if (Squelette::editSource(qg('edit'), f('content')))
-		{
-			$fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
-			Utils::redirect(Utils::getSelfURI(sprintf('edit=%s&ok%s', rawurlencode(qg('edit')), $fullscreen)));
-		}
-		else
-		{
-			throw new UserException("Impossible d'enregistrer le squelette.");
-		}
+	$form->runIf('save', function () use ($source) {
+		$tpl = new Skeleton($source);
+		$tpl->edit(f('content'));
+		$fullscreen = null !== qg('fullscreen') ? '#fullscreen' : '';
+		Utils::redirect(Utils::getSelfURI(sprintf('edit=%s&ok%s', rawurlencode($source), $fullscreen)));
 	}, $csrf_key);
 
-	$tpl->assign('edit', ['file' => trim(qg('edit')), 'content' => $source]);
+	try {
+		$skel = new Skeleton($source);
+	}
+	catch (\InvalidArgumentException $e) {
+		throw new UserException('Nom de squelette invalide');
+	}
+
+	$tpl->assign('edit', ['file' => $source, 'content' => $skel->raw()]);
 	$tpl->assign('csrf_key', $csrf_key);
 }
 
-$tpl->assign('sources', Squelette::listSources());
+$tpl->assign('sources', Skeleton::list());
 
 $tpl->assign('reset_ok', qg('reset_ok') !== null);
 $tpl->assign('ok', qg('ok') !== null);

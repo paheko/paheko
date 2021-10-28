@@ -3,7 +3,7 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 $import = new Membres\Import;
 
@@ -38,11 +38,11 @@ $csv->setColumns($columns);
 
 if (f('cancel')) {
     $csv->clear();
-    Utils::redirect(Utils::getSelfURL(false));
+    Utils::redirect(Utils::getSelfURI(false));
 }
 
 $form->runIf(f('import') && $csv->loaded(), function () use ($csv, $import, $user) {
-    $csv->setTranslationTable(f('translation_table'));
+    $csv->setTranslationTable(f('translation_table') ?? []);
     $csv->skip((int)f('skip_first_line'));
     $import->fromCustomCSV($csv, $user->id);
     $csv->clear();

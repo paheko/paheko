@@ -1,15 +1,18 @@
 {include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
-{if $session->canAccess('compta', Membres::DROIT_ADMIN) && !$transaction->validated && !$tr_year->closed}
 <nav class="tabs">
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+	<aside>{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}</aside>
+{/if}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
 	<ul>
 		<li><a href="edit.php?id={$transaction.id}">Modifier cette écriture</a></li>
 		<li><a href="delete.php?id={$transaction.id}">Supprimer cette écriture</a></li>
 	</ul>
-</nav>
 {/if}
+</nav>
 
-{if $session->canAccess('compta', Membres::DROIT_ECRITURE) && $transaction.status & $transaction::STATUS_WAITING}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $transaction.status & $transaction::STATUS_WAITING}
 <div class="block alert">
 	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
@@ -48,7 +51,7 @@
 	<dt>Libellé</dt>
 	<dd><h2>{$transaction.label}</h2></dd>
 	<dt>Date</dt>
-	<dd>{$transaction.date|date_fr:'l j F Y (d/m/Y)'}</dd>
+	<dd>{$transaction.date|date:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
 	<dd>{if trim($transaction.reference)}{$transaction.reference}{else}-{/if}</dd>
 
@@ -62,7 +65,7 @@
 	<dt>Écriture créée par</dt>
 	<dd>
 		{if $transaction.id_creator}
-			{if $session->canAccess('compta', Membres::DROIT_ACCES)}
+			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
 				<a href="{$admin_url}membres/fiche.php?id={$transaction.id_creator}">{$creator_name}</a>
 			{else}
 				{$creator_name}
@@ -79,27 +82,13 @@
 		{foreach from=$related_users item="u"}
 			<dd>
 				<a href="{$admin_url}membres/fiche.php?id={$u.id}">{$u.identity}</a>
-				{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user.php?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
+				{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user/?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
 			</dd>
 		{/foreach}
 	{/if}
 
 	<dt>Remarques</dt>
 	<dd>{if trim($transaction.notes)}{$transaction.notes|escape|nl2br}{else}-{/if}</dd>
-
-	<dt>Fichiers joints</dt>
-	{foreach from=$files item="file"}
-	<dd>
-		<aside class="file">
-			<a target="_blank" href="{$file.url}">{$file.nom}</a>
-			<small>({$file.type}, {$file.taille|format_bytes})</small>
-			{linkbutton shape="download" href=$file.url target="_blank" label="Télécharger"}
-			{linkbutton shape="delete" href="!acc/transactions/delete_file.php?id=%d&from=%d"|args:$file.id,$transaction.id label="Supprimer"}
-		</aside>
-	</dd>
-	{foreachelse}
-	<dd>-</dd>
-	{/foreach}
 </dl>
 
 <table class="list">
@@ -119,8 +108,8 @@
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_name}</td>
-			<td class="money">{if $line.debit}{$line.debit|escape|html_money}{/if}</td>
-			<td class="money">{if $line.credit}{$line.credit|escape|html_money}{/if}</td>
+			<td class="money">{if $line.debit}{$line.debit|escape|money}{/if}</td>
+			<td class="money">{if $line.credit}{$line.credit|escape|money}{/if}</td>
 			<td>{$line.label}</td>
 			<td>{$line.reference}</td>
 			<td>
@@ -132,5 +121,12 @@
 		{/foreach}
 	</tbody>
 </table>
+
+{if $files_edit || count($files)}
+<div class="attachments">
+	<h3 class="ruler">Fichiers joints</h3>
+	{include file="common/files/_context_list.tpl" files=$files edit=$files_edit path=$file_parent}
+</div>
+{/if}
 
 {include file="admin/_foot.tpl"}

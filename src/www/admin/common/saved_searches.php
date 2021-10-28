@@ -7,12 +7,18 @@ if (empty($target) || !in_array($target, Recherche::TARGETS)) {
     throw new UserException('Cible inconnue');
 }
 
+if (empty($search_url)) {
+	throw new \LogicException('Missing $search_url');
+}
+
+$access_section = $target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+
 $recherche = new Recherche;
 $mode = null;
 
-if (qg('edit') || qg('delete') || qg('duplicate'))
+if (qg('edit') || qg('delete'))
 {
-	$r = $recherche->get(qg('edit') ?: (qg('delete') ?: qg('duplicate')));
+	$r = $recherche->get(qg('edit') ?: qg('delete'));
 
 	if (!$r)
 	{
@@ -22,11 +28,6 @@ if (qg('edit') || qg('delete') || qg('duplicate'))
 	if ($r->id_membre !== null && $r->id_membre != $user->id)
 	{
 		throw new UserException('Recherche privée appartenant à un autre membre.');
-	}
-
-	if (qg('duplicate')) {
-		$recherche->duplicate($r->id);
-		Utils::redirect(Utils::getSelfURI(false));
 	}
 
 	$tpl->assign('recherche', $r);
@@ -59,6 +60,6 @@ if (!$mode)
 	$tpl->assign('liste', $recherche->getList($user->id, $target));
 }
 
-$tpl->assign(compact('mode', 'target', 'search_url'));
+$tpl->assign(compact('mode', 'target', 'search_url', 'access_section'));
 
 $tpl->display('common/search/saved_searches.tpl');

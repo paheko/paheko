@@ -22,14 +22,9 @@ rows.forEach((e, k) => {
 	e.setAttribute('data-search-label', normalizeString(l));
 
 	e.querySelector('button').onfocus = () => {
-		rows.forEach((r) => {
-			if (r == e) {
-				return;
-			}
-
-			r.classList.remove('focused');
-		});
-
+		if (f = document.querySelector('tr.focused')) {
+			f.classList.remove('focused');
+		}
 		e.classList.add('focused');
 	};
 
@@ -42,64 +37,95 @@ rows.forEach((e, k) => {
 	};
 });
 
-document.onkeydown = (evt) => {
-	let focus = document.activeElement;
-	let new_focus;
+document.addEventListener('keydown', (evt) => {
+	let current = document.querySelector('tbody tr.focused:not(.hidden)') || document.querySelector('tbody tr');
+	let available = [];
+	let idx = 0;
 
-	// Get first element
-	if (focus.tagName != 'BUTTON') {
-		new_focus = document.querySelector('table tr');
-	}
-
-	if (evt.key == 'ArrowUp' && !new_focus) {
-		let idx = focus.parentNode.parentNode.dataset.idx - 1;
-
-		if (idx == 0) {
-			return true;
+	for (var i = 0; i < rows.length; i++) {
+		if (rows[i].classList.contains('hidden')) {
+			continue;
 		}
 
-		new_focus = rows[idx - 1];
-	}
-	else if (evt.key == 'ArrowDown' && !new_focus) {
-		let idx = focus.parentNode.parentNode.dataset.idx - 1;
+		available.push(rows[i]);
 
-		if (idx >= rows.length - 1) {
-			return true;
+		if (rows[i] === current) {
+			idx = available.length - 1;
 		}
+	}
 
-		new_focus = rows[idx + 1];
+	if (!available.length) {
+		return false;
+	}
+
+	if (evt.key == 'ArrowUp') { // Previous item
+		idx--;
+	}
+	else if (evt.key == 'ArrowDown') {
+		idx++;
+	}
+	else if (evt.key == 'PageUp') {
+		idx-=10;
+	}
+	else if (evt.key == 'PageDown') {
+		idx+=10;
+	}
+	else if (evt.key == 'Home') {
+		idx = 0;
+	}
+	else if (evt.key == 'End') {
+		idx = available.length;
 	}
 	else {
-		new_focus = null;
-	}
-
-	if (!new_focus) {
 		return true;
 	}
 
-	new_focus.querySelector('button').focus();
+	if (idx < 0) {
+		idx = 0;
+	}
+	else if (idx >= available.length - 1) {
+		idx = available.length - 1;
+	}
+
+	current = available[idx];
+	current.querySelector('button').focus();
+
+	evt.preventDefault();
 	return false;
-};
+});
 
 buttons[0].focus();
 
 var q = document.getElementById('lookup');
 
 if (q) {
-	q.onkeyup = (e) => {
+	q.addEventListener('keyup', (e) => {
 		var query = new RegExp(RegExp.escape(normalizeString(q.value)), 'i');
 
 		rows.forEach((elm) => {
 			if (elm.getAttribute('data-search-label').match(query)) {
-				elm.style.display = null;
+				g.toggle(elm, true);
 			}
 			else {
-				elm.style.display = 'none';
+				g.toggle(elm, false);
 			}
 		});
 
+		if (first = document.querySelector('tbody tr:not(.hidden)')) {
+			if (f = document.querySelector('tr.focused')) {
+				f.classList.remove('focused');
+			}
+			first.classList.add('focused');
+		}
+
+		if (e.key == 'Enter') {
+			if (first = document.querySelector('tbody tr.focused:not(.hidden) button')) {
+				first.click();
+			}
+		}
+
 		return false;
-	};
+	});
 
 	q.focus();
 }

@@ -3,8 +3,10 @@
 <head>
 	<meta charset="utf-8" />
 	<title>{{if $title}}{{$title}} — {{/if}}{{$config.nom_asso}}</title>
+	<link rel="icon" type="image/png" href="{{$root_url}}favicon.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
 	<link rel="stylesheet" type="text/css" href="{{$root_url}}default.css" media="screen,projection,handheld" />
+	<link rel="stylesheet" type="text/css" href="{{$root_url}}content.css" media="all" />
 	<link rel="alternate" type="application/atom+xml" title="{{$config.nom_asso}}" href="{{$root_url}}atom.xml" />
 </head>
 
@@ -21,7 +23,27 @@
 
 <header class="main">
 	<h1><a href="{{$root_url}}">{{$config.nom_asso}}</a></h1>
-	{{if $config.adresse_asso}}<h4>{{$config.adresse_asso}}</h4>{{/if}}
+
+{{if $config.adresse_asso || $config.telephone_asso || $config.email_asso}}
+	<article class="contacts">
+		{{if $config.adresse_asso}}
+			<h4>{{$config.adresse_asso|escape}}</h4>
+		{{/if}}
+		{{if $config.telephone_asso}}
+			<h5>{{$config.telephone_asso|raw|protect_contact}}</h5>
+		{{/if}}
+		{{if $config.email_asso}}
+			<h5>{{$config.email_asso|raw|protect_contact}}</h5>
+		{{/if}}
+	</article>
+{{/if}}
+
+	<form method="get" action="{{ $root_url }}search.html" class="search-widget">
+		<p>
+			<input type="search" name="search" placeholder="Rechercher…" />
+			<input type="submit" value="»" />
+		</p>
+	</form>
 
 	<nav>
 		<ul>

@@ -3,14 +3,18 @@
 namespace Garradin;
 
 if (empty($_SERVER['REQUEST_URI'])) {
+	http_response_code(500);
 	die('Appel non supporté');
 }
 
 $uri = $_SERVER['REQUEST_URI'];
 
 if ('_route.php' === basename($uri)) {
+	http_response_code(403);
 	die('Appel interdit');
 }
+
+http_response_code(200);
 
 if ('favicon.ico' === basename($uri)) {
 	die('');
@@ -24,6 +28,7 @@ if (($pos = strpos($uri, '?')) !== false)
 if (file_exists(__DIR__ . $uri))
 {
 	if (PHP_SAPI != 'cli-server') {
+		http_response_code(500);
 		die('Erreur de configuration du serveur web: cette URL ne devrait pas être traitée par Garradin');
 	}
 
@@ -40,18 +45,6 @@ elseif (preg_match('!/admin/plugin/(.+?)/(.*)!', $uri, $match))
 	$_GET['_p'] = $match[1];
 	$_GET['_u'] = $match[2];
 	require __DIR__ . '/admin/plugin.php';
-}
-elseif (preg_match('!/f/([\d\w]+)/(.+)!', $uri, $match))
-{
-	$_GET['id'] = $match[1];
-	$_GET['file'] = $match[2];
-	require __DIR__ . '/file.php';
-}
-elseif (preg_match('!/admin/!', $uri, $match))
-{
-	require __DIR__ . '/_inc.php';
-	http_response_code(404);
-	throw new UserException('Cette page n\'existe pas.');
 }
 else
 {

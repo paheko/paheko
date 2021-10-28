@@ -1,17 +1,50 @@
+-- Remove triggers in case they interact with the migration
+DROP TRIGGER IF EXISTS wiki_recherche_delete;
+DROP TRIGGER IF EXISTS wiki_recherche_update;
+DROP TRIGGER IF EXISTS wiki_recherche_contenu_insert;
+DROP TRIGGER IF EXISTS wiki_recherche_contenu_chiffre;
+
+-- Fix some rare edge cases where date_inscription is incorrect
+UPDATE membres SET date_inscription = date() WHERE date(date_inscription) IS NULL;
+
+-- Uh, force another login id if email is not correct
+UPDATE config SET valeur = 'numero' WHERE cle = 'champ_identifiant' AND valeur = 'email'
+	AND (SELECT COUNT(*) FROM membres WHERE email IS NOT NULL GROUP BY LOWER(email) HAVING COUNT(*) > 1 LIMIT 1);
+
+-- Other weird things to fix before migration
+UPDATE wiki_pages SET uri = 'page_' || id WHERE uri = '' OR uri IS NULL;
+DELETE FROM config WHERE cle = 'connexion' OR cle = 'wiki';
+
 ALTER TABLE membres_categories RENAME TO membres_categories_old;
+
+INSERT OR IGNORE INTO config (cle, valeur) VALUES ('desactiver_site', '0');
+ALTER TABLE config RENAME TO config_old;
 
 .read 1.1.0_schema.sql
 
-INSERT INTO files_contents (id, hash, content, size)
-	SELECT id, hash, contenu, taille FROM fichiers_contenu;
+INSERT INTO config SELECT * FROM config_old;
+DROP TABLE config_old;
 
-INSERT INTO files (id, hash, folder_id, name, type, created, author_id, public, image)
-	SELECT f.id, c.hash, NULL, nom, type, datetime, NULL, 0, image FROM fichiers f INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+-- This is not used anymore
+DELETE FROM config WHERE key = 'version';
+DELETE FROM config WHERE key = 'accueil_wiki';
 
-INSERT INTO membres_categories
+-- New config key
+INSERT INTO config (key, value) VALUES ('telephone_asso', NULL);
+
+-- Create directories
+INSERT INTO files (parent, name, path, type) VALUES ('', 'documents', 'documents', 2);
+INSERT INTO files (parent, name, path, type) VALUES ('', 'config', 'config', 2);
+INSERT INTO files (parent, name, path, type) VALUES ('', 'transaction', 'transaction', 2);
+INSERT INTO files (parent, name, path, type) VALUES ('', 'skel', 'skel', 2);
+INSERT INTO files (parent, name, path, type) VALUES ('', 'user', 'user', 2);
+INSERT INTO files (parent, name, path, type) VALUES ('', 'web', 'web', 2);
+
+-- Copy droit_wiki value to droit_web and droit_documents
+INSERT INTO users_categories
 	SELECT id, nom,
-		droit_wiki, -- droit_web
-		droit_wiki, -- droit_documents
+		droit_wiki, -- perm_web
+		droit_wiki, -- perm_documents
 		droit_membres,
 		droit_compta,
 		droit_inscription,
@@ -22,95 +55,216 @@ INSERT INTO membres_categories
 
 DROP TABLE membres_categories_old;
 
+UPDATE recherches SET contenu = REPLACE(contenu, 'id_categorie', 'id_category') WHERE cible = 'membres' AND contenu LIKE '%id_categorie%';
+
+CREATE TEMP TABLE files_transactions (old_id, old_transaction, old_name, new_path, new_id, same_name);
+
+-- Adding an extra step as some file names can have the same name
+INSERT INTO files_transactions
+	SELECT f.id, t.id, f.nom, NULL, NULL, NULL
+	FROM fichiers f
+		INNER JOIN fichiers_acc_transactions t ON t.fichier = f.id;
+
+UPDATE files_transactions SET same_name = old_id || '_'
+	WHERE old_id IN (SELECT old_id FROM files_transactions GROUP BY old_transaction, old_name HAVING COUNT(*) > 1);
+
+-- Make file name is unique!
+UPDATE files_transactions SET new_path = 'transaction/' || old_transaction || '/' || COALESCE(old_id || '_', '') || old_name;
+
+-- Copy existing files for transactions
+INSERT INTO files (path, parent, name, type, mime, modified, size, image)
+	SELECT
+		ft.new_path,
+		dirname(ft.new_path),
+		basename(ft.new_path),
+		1, f.type, f.datetime, c.taille, f.image
+	FROM files_transactions ft
+		INNER JOIN fichiers f ON f.id = ft.old_id
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+
+UPDATE files_transactions SET new_id = (SELECT id FROM files WHERE path = new_path);
+
+INSERT INTO files_contents (id, compressed, content)
+	SELECT ft.new_id, 0, c.contenu
+	FROM fichiers f
+		INNER JOIN files_transactions ft ON ft.old_id = f.id
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
+
 -- Copy wiki pages content
-CREATE TEMP TABLE wiki_as_files (old_id, new_id, hash, size, content, name, title, uri, old_parent, new_parent, created, modified, author_id, encrypted, image, content_id, type, public);
+CREATE TEMP TABLE wiki_as_files (old_id, new_id, path, content, title, uri,
+	old_parent, new_parent, created, modified, author_id, encrypted, type, public);
 
 INSERT INTO wiki_as_files
 	SELECT
-		id, NULL, sha1(contenu), LENGTH(contenu), contenu,
-		uri || '.skriv', titre, uri, parent, NULL,
-		date_creation, date_modification, id_auteur, chiffrement, 0, NULL,
+		id, NULL, '', CASE WHEN contenu IS NULL THEN '' ELSE contenu END, titre, uri,
+		parent, parent, date_creation, date_modification, id_auteur, chiffrement,
 		CASE WHEN (SELECT 1 FROM wiki_pages pp WHERE pp.parent = p.id LIMIT 1) THEN 1 ELSE 2 END, -- Type, 1 = category, 2 = page
 		CASE WHEN droit_lecture = -1 THEN 1 ELSE 0 END -- public
 	FROM wiki_pages p
-	INNER JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
+	LEFT JOIN wiki_revisions r ON r.id_page = p.id AND r.revision = p.revision;
 
-UPDATE wiki_as_files SET name = 'index.skriv' WHERE type = 1;
+-- Build path
+WITH RECURSIVE path(level, uri, parent, id) AS (
+	SELECT 0, uri, old_parent, old_id
+	FROM wiki_as_files
+	UNION ALL
+	SELECT path.level + 1,
+	wiki_as_files.uri,
+	wiki_as_files.old_parent,
+	path.id
+	FROM wiki_as_files
+	JOIN path ON wiki_as_files.old_id = path.parent
+	WHERE level <= 8 -- max level = 8 to avoid recursion
+),
+path_from_root AS (
+	SELECT group_concat(uri, '/') AS path, id
+	FROM (SELECT id, uri FROM path ORDER BY level DESC)
+	GROUP BY id
+)
+UPDATE wiki_as_files SET path = (SELECT path FROM path_from_root WHERE id = wiki_as_files.old_id);
 
--- Build back path, up to ten levels
---UPDATE wiki_as_files waf SET
---	path = (SELECT uri FROM wiki_as_files WHERE id = waf.parent) || '/' || path,
---	parent = (SELECT parent FROM wiki_as_files WHERE id = waf.parent)
---	WHERE parent > 0;
+-- remove recursion
+UPDATE wiki_as_files SET path = uri WHERE path IS NULL OR LENGTH(path) - LENGTH(REPLACE(path, '/', '')) >= 8;
 
--- Create private folders
-INSERT INTO files_folders (id, parent_id, name, system)
-	SELECT old_id, old_parent, uri, 0 FROM wiki_as_files WHERE type = 1;
-
--- Create web folders
-INSERT INTO files_folders (id, parent_id, name, system)
-	SELECT old_id + 10000, old_parent + 10000, uri, 1 FROM wiki_as_files WHERE type = 1;
-
-UPDATE files_folders SET parent_id = (SELECT CASE WHEN f.system = 0 THEN f.id ELSE f.id + 10000 END FROM files_folders f WHERE f.id = parent_id);
-
-INSERT INTO files_contents (hash, content, size) SELECT hash, content, size FROM wiki_as_files;
-UPDATE wiki_as_files SET content_id = (SELECT fc.id FROM files_contents fc WHERE fc.hash = wiki_as_files.hash);
-
-INSERT INTO files (hash, folder_id, name, type, created, author_id, public, image)
+-- Copy into files
+INSERT INTO files (path, parent, name, type, mime, modified, size)
 	SELECT
-		hash,
-		(SELECT CASE WHEN public = 0 THEN f.id ELSE f.id + 10000 END FROM files_folders f WHERE f.id = old_parent),
-		name,
-		CASE WHEN encrypted THEN 'text/vnd.skriv.encrypted' ELSE 'text/vnd.skriv' END,
-		created,
-		author_id,
-		public,
-		image
+		'web/' || path || '/index.txt',
+		'web/' || path,
+		'index.txt',
+		1,
+		'text/plain',
+		modified,
+		0 -- size will be set after
 	FROM wiki_as_files;
 
-INSERT INTO files_search (id, content) SELECT new_id, content FROM wiki_as_files WHERE encrypted = 0;
+UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE files.path = 'web/' || (CASE WHEN wiki_as_files.path IS NOT NULL THEN wiki_as_files.path || '/' ELSE '' END) || wiki_as_files.uri || '/index.txt');
 
-UPDATE wiki_as_files SET new_id = (SELECT id FROM files WHERE hash = wiki_as_files.hash);
-UPDATE wiki_as_files SET new_parent = (SELECT w.new_id FROM wiki_as_files w WHERE w.old_id = wiki_as_files.old_parent);
+-- x'0a' == \n
+INSERT INTO files_contents (id, compressed, content)
+	SELECT f.id, 0,
+		'Title: ' || title || x'0a' || 'Published: ' || created || x'0a' || 'Status: '
+		|| (CASE WHEN public THEN 'Online' ELSE 'Draft' END)
+		|| x'0a' || 'Format: ' || (CASE WHEN encrypted THEN 'Skriv/Encrypted' ELSE 'Skriv' END)
+		|| x'0a' || x'0a' || '----' || x'0a' || x'0a' || content
+	FROM wiki_as_files waf
+	INNER JOIN files f ON f.path = 'web/' || waf.path || '/index.txt';
 
-INSERT INTO web_pages
-	SELECT new_id, new_parent, type, 1, uri, title, modified FROM wiki_as_files WHERE public = 1;
-
-INSERT INTO files_links (id, web_page_id)
+-- Copy to search
+INSERT INTO files_search (path, title, content)
 	SELECT
-		id,
-		id
-	FROM web_pages
-	WHERE status = 1;
+		'web/' || path || '/index.txt',
+		title,
+		CASE WHEN encrypted THEN NULL ELSE content END
+	FROM wiki_as_files WHERE encrypted = 0;
 
-INSERT INTO files_links (id, file_id)
-	SELECT w.fichier, waf.new_id
-		FROM fichiers_wiki_pages w
-		INNER JOIN wiki_as_files waf ON waf.old_id = w.id
-		INNER JOIN files f ON f.hash = waf.hash;
+-- Copy to web_pages
+INSERT INTO web_pages (id, parent, path, uri, file_path, type, status, title, published, modified, format, content)
+	SELECT new_id,
+	CASE WHEN dirname(path) = '.' THEN '' ELSE dirname(path) END,
+	path,
+	uri,
+	'web/' || path || '/index.txt',
+	type,
+	CASE WHEN public THEN 'online' ELSE 'draft' END,
+	title, created, modified,
+	CASE WHEN encrypted THEN 'skriv/encrypted' ELSE 'skriv' END,
+	content
+	FROM wiki_as_files;
 
-INSERT INTO files_links (id, transaction_id)
-	SELECT fichier, id FROM fichiers_acc_transactions;
+CREATE TEMP TABLE files_wiki (old_id, wiki_id, web_path, old_name, new_path, new_id);
 
-INSERT INTO files_links (id, config)
-	SELECT valeur, cle FROM config WHERE cle = 'image_fond' AND valeur > 0;
+-- Adding an extra step as some file names can have the same name
+INSERT INTO files_wiki
+	SELECT f.id, w.id, waf.path, f.nom, 'web/' || waf.path || '/' || f.id || '_' || f.nom, NULL
+	FROM fichiers f
+		INNER JOIN fichiers_wiki_pages w ON w.fichier = f.id
+		INNER JOIN wiki_as_files waf ON w.id = waf.old_id;
 
-UPDATE files SET public = 1 WHERE id = (SELECT valeur FROM config WHERE cle = 'image_fond');
+-- Copy files linked to wiki pages
+INSERT INTO files (path, parent, name, type, mime, modified, size, image)
+	SELECT
+		fw.new_path,
+		dirname(fw.new_path),
+		basename(fw.new_path),
+		1,
+		f.type,
+		f.datetime,
+		c.taille,
+		f.image
+	FROM fichiers f
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
+		INNER JOIN files_wiki fw ON fw.old_id = f.id;
 
--- Copy connection page
-INSERT INTO files (hash, folder_id, name, type, created, author_id, public)
-	SELECT hash, NULL, 'Accueil_connexion.skriv', type, created, author_id, 0
-	FROM files WHERE id = (SELECT new_id FROM wiki_as_files WHERE uri = (SELECT valeur FROM config WHERE cle = 'accueil_connexion'));
+UPDATE files_wiki SET new_id = (SELECT id FROM files WHERE path = new_path);
 
-UPDATE config SET valeur = (SELECT id FROM files WHERE name = 'Accueil_connexion.skriv') WHERE cle = 'accueil_connexion';
-UPDATE config SET cle = 'admin_homepage' WHERE cle = 'accueil_connexion';
-DELETE FROM config WHERE cle = 'accueil_wiki';
-INSERT INTO config (cle, valeur) VALUES ('telephone_asso', NULL);
+INSERT INTO files_contents (id, compressed, content)
+	SELECT
+		fw.new_id, 0, c.contenu
+	FROM files_wiki fw
+		INNER JOIN fichiers f ON f.id = fw.old_id
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu;
 
-DROP TRIGGER wiki_recherche_delete;
-DROP TRIGGER wiki_recherche_update;
-DROP TRIGGER wiki_recherche_contenu_insert;
-DROP TRIGGER wiki_recherche_contenu_chiffre;
+-- Create parent directories
+INSERT INTO files (type, path, parent, name, modified)
+	SELECT 2,
+		'web/' || waf.path,
+		dirname('web/' || waf.path),
+		waf.uri,
+		modified
+	FROM wiki_as_files waf;
+
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+INSERT OR IGNORE INTO files (type, path, parent, name) SELECT 2, parent, dirname(parent), basename(parent) FROM files WHERE type = 2 AND dirname(parent) != '.' AND dirname(parent) != '' AND (SELECT 1 FROM files f2 WHERE f2.path = dirname(files.parent) LIMIT 1) IS NULL;
+
+-- Copy existing config files
+INSERT INTO files (path, parent, name, type, mime, modified, size, image)
+	SELECT 'config/admin_bg.png', 'config', 'admin_bg.png', 1, type, datetime, c.taille, image
+	FROM fichiers f
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
+	WHERE f.id = (SELECT c.value FROM config c WHERE key = 'image_fond') LIMIT 1;
+
+INSERT INTO files_contents (id, compressed, content)
+	SELECT f2.id, 0, c.contenu
+	FROM files AS f2
+		INNER JOIN fichiers f ON f2.path = 'config/admin_bg.png'
+		INNER JOIN fichiers_contenu c ON c.id = f.id_contenu
+		WHERE f.id = (SELECT c.value FROM config c WHERE key = 'image_fond') LIMIT 1;
+
+-- Rename
+UPDATE config SET key = 'admin_background', value = 'config/admin_bg.png' WHERE key = 'image_fond';
+
+-- Copy connection page as a single file
+INSERT INTO files (path, parent, name, type, mime, modified, size, image)
+	SELECT 'config/admin_homepage.skriv', 'config', 'admin_homepage.skriv', 1, 'text/plain', datetime(), LENGTH(content), 0
+	FROM wiki_as_files
+	WHERE uri = (SELECT value FROM config WHERE key = 'accueil_connexion');
+
+INSERT INTO files_contents (id, compressed, content)
+	SELECT f.id, 0, waf.content
+	FROM files f
+		INNER JOIN wiki_as_files waf ON waf.uri = (SELECT value FROM config WHERE key = 'accueil_connexion')
+	WHERE f.path = 'config/admin_homepage.skriv';
+
+-- Rename
+UPDATE config SET key = 'admin_homepage', value = 'config/admin_homepage.skriv' WHERE key = 'accueil_connexion';
+UPDATE config SET key = 'site_disabled' WHERE key = 'desactiver_site';
+
+-- Create transaction directories
+INSERT INTO files (path, parent, name, type) SELECT 'transaction/' || id, 'transaction', id, 2 FROM fichiers_acc_transactions GROUP BY id;
+
+-- Set file size
+UPDATE files SET size = (SELECT LENGTH(content) FROM files_contents WHERE id = files.id) WHERE type = 1;
+
+DELETE FROM plugins_signaux WHERE signal LIKE 'boucle.%';
 
 DROP TABLE wiki_recherche;
 

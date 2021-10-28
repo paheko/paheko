@@ -19,7 +19,7 @@
         <dl>
             <dt><label for="f_cat">Nouvelle catégorie</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="id_categorie" id="f_cat">
+                <select name="id_category" id="f_cat">
                 {foreach from=$membres_cats key="id" item="nom"}
                     <option value="{$id}">{$nom}</option>
                 {/foreach}

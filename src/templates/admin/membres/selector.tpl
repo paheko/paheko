@@ -1,6 +1,6 @@
-{include file="admin/_head.tpl" title="Sélectionner un compte" body_id="popup" is_popup=true}
+{include file="admin/_head.tpl" title="Sélectionner un compte"}
 
-<form method="get" action="{$self_url_no_qs}">
+<form method="post" action="{$self_url}">
 	<h2 class="ruler">
 		<input type="text" placeholder="Recherche rapide de membre" value="{$query}" name="q" />
 		<input type="submit" value="Chercher &rarr;" />

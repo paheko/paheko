@@ -9,7 +9,7 @@
 
 	<ul>
 		<li><a href="{$admin_url}acc/years/">Exercices</a></li>
-		{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
 		{/if}
 		<li class="current"><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
@@ -57,19 +57,22 @@
 					<th>{$item.label}</th>
 					<td>
 					<span class="noprint">
-						<a href="{$admin_url}acc/reports/graphs.php?analytical={$item.id_account}&year={$item.id_year}">Graphiques</a>
-						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$item.id_account}&year={$item.id_year}">Balance générale</a>
-						| <a href="{$admin_url}acc/reports/journal.php?analytical={$item.id_account}&year={$item.id_year}">Journal général</a>
-						| <a href="{$admin_url}acc/reports/ledger.php?analytical={$item.id_account}&year={$item.id_year}">Grand livre</a>
-						| <a href="{$admin_url}acc/reports/statement.php?analytical={$item.id_account}&year={$item.id_year}">Compte de résultat</a>
-						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$item.id_account}&year={$item.id_year}">Bilan</a>
+						<a href="{$admin_url}acc/reports/graphs.php?analytical={$item.id_account}&amp;year={$item.id_year}">Graphiques</a>
+						| <a href="{$admin_url}acc/reports/trial_balance.php?analytical={$item.id_account}&amp;year={$item.id_year}">Balance générale</a>
+						| <a href="{$admin_url}acc/reports/journal.php?analytical={$item.id_account}&amp;year={$item.id_year}">Journal général</a>
+						| <a href="{$admin_url}acc/reports/ledger.php?analytical={$item.id_account}&amp;year={$item.id_year}">Grand livre</a>
+						| <a href="{$admin_url}acc/reports/statement.php?analytical={$item.id_account}&amp;year={$item.id_year}">Compte de résultat</a>
+						| <a href="{$admin_url}acc/reports/balance_sheet.php?analytical={$item.id_account}&amp;year={$item.id_year}">Bilan</a>
+						{if $item.total && $by_year}
+						| <a href="{$admin_url}acc/reports/ledger.php?analytical_only=1&amp;year={$item.id_year}">Grand livre analytique</a>
+						{/if}
 					</span>
 					</td>
-					<td class="money">{$item.sum_expense|raw|html_money}</td>
-					<td class="money">{$item.sum_revenue|raw|html_money}</td>
-					<td class="money">{$item.debit|raw|html_money:false}</td>
-					<td class="money">{$item.credit|raw|html_money:false}</td>
-					<td class="money">{$item.sum|raw|html_money:false}</td>
+					<td class="money">{$item.sum_expense|raw|money}</td>
+					<td class="money">{$item.sum_revenue|raw|money}</td>
+					<td class="money">{$item.debit|raw|money:false}</td>
+					<td class="money">{$item.credit|raw|money:false}</td>
+					<td class="money">{$item.sum|raw|money:false}</td>
 				</tr>
 			{/foreach}
 			</tbody>

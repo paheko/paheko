@@ -2,7 +2,7 @@
 
 {include file="acc/_year_select.tpl"}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="1">
+<form method="post" action="{$self_url}" data-focus="1">
 	{form_errors}
 
 	{if $ok}
@@ -48,7 +48,7 @@
 	<fieldset>
 		<legend>Informations</legend>
 		<dl>
-			{input type="date" name="date" default=$date label="Date" required=1 source=$transaction}
+			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 		</dl>
@@ -68,7 +68,8 @@
 				{else}
 					<dl>
 					{foreach from=$type.accounts key="key" item="account"}
-						{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1}
+						<?php $selected = $types_accounts[$key] ?? null; ?>
+						{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
 					{/foreach}
 					</dl>
 				{/if}
@@ -84,8 +85,6 @@
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
-
-			{input type="file" name="file" label="Fichier joint"}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}

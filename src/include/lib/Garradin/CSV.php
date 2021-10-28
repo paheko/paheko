@@ -154,15 +154,20 @@ class CSV
 			fputs($fp, self::row($header));
 		}
 
-		if ($iterator->valid()) {
+		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
 			foreach ($iterator as $row) {
+				$row = self::rowToArray($row, $row_map_callback);
+
 				foreach ($row as $key => &$v) {
-					if (is_object($v)&& $v instanceof \DateTimeInterface) {
-						$v = $v->format('d/m/Y');
+					if (is_object($v) && $v instanceof \DateTimeInterface) {
+						if ($v->format('His') == '000000') {
+							$v = $v->format('d/m/Y');
+						}
+						else {
+							$v = $v->format('d/m/Y H:i:s');
+						}
 					}
 				}
-
-				$row = self::rowToArray($row, $row_map_callback);
 
 				if (!$header)
 				{
@@ -189,7 +194,7 @@ class CSV
 			$ods->add((array) $header);
 		}
 
-		if ($iterator->valid()) {
+		if (!($iterator instanceof \Iterator) || $iterator->valid()) {
 			foreach ($iterator as $row) {
 				$row = self::rowToArray($row, $row_map_callback);
 
@@ -227,7 +232,7 @@ class CSV
 		$delim = self::findDelimiter($fp);
 		self::skipBOM($fp);
 
-		$line = 1;
+		$line = 0;
 
 		$columns = fgetcsv($fp, 4096, $delim);
 		$columns = array_map('trim', $columns);

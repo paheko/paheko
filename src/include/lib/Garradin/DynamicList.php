@@ -2,7 +2,7 @@
 
 namespace Garradin;
 
-class DynamicList
+class DynamicList implements \Countable
 {
 	protected $columns;
 	protected $tables;
@@ -19,12 +19,17 @@ class DynamicList
 
 	private $count_result;
 
-	public function __construct(array $columns, string $tables, string $conditions)
+	public function __construct(array $columns, string $tables, string $conditions = '1')
 	{
 		$this->columns = $columns;
 		$this->tables = $tables;
 		$this->conditions = $conditions;
 		$this->order = key($columns);
+	}
+
+	public function __isset($key)
+	{
+		return property_exists($this, $key);
 	}
 
 	public function __get($key)
@@ -68,14 +73,14 @@ class DynamicList
 		$this->group = $value;
 	}
 
-	public function count()
+	public function count(): int
 	{
 		if (null === $this->count_result) {
 			$sql = sprintf('SELECT %s FROM %s WHERE %s;', $this->count, $this->tables, $this->conditions);
 			$this->count_result = DB::getInstance()->firstColumn($sql);
 		}
 
-		return $this->count_result;
+		return (int) $this->count_result;
 	}
 
 	public function export(string $name, string $format = 'csv')
@@ -103,6 +108,17 @@ class DynamicList
 		}
 	}
 
+	public function asArray(): array
+	{
+		$out = [];
+
+		foreach ($this->iterate(true) as $row) {
+			$out[] = $row;
+		}
+
+		return $out;
+	}
+
 	public function paginationURL()
 	{
 		return Utils::getModifiedURL('?p=[ID]');
@@ -111,7 +127,7 @@ class DynamicList
 	public function orderURL(string $order, bool $desc)
 	{
 		$query = array_merge($_GET, ['o' => $order, 'd' => (int) $desc]);
-		$url = Utils::getSelfURL($query);
+		$url = Utils::getSelfURI($query);
 		return $url;
 	}
 

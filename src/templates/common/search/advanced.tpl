@@ -3,7 +3,7 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($query));
 assert(isset($is_admin));
-$sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADMIN) && $is_unprotected);
+$sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
 {form_errors}
@@ -11,22 +11,32 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 <form method="post" action="{$action_url}" id="queryBuilderForm">
 	<fieldset>
 	{if $sql_query && !$sql_disabled}
-		<legend>Schéma des tables SQL</legend>
-		<pre class="sql_schema">{foreach from=$schema item="table"}{$table}<br />{/foreach}</pre>
+		<legend>Recherche SQL</legend>
 		<dl>
-			{input type="textarea" name="sql_query" cols="100" rows="7" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
-			{if $session->canAccess('config', Membres::DROIT_ADMIN)}
+			{input type="textarea" name="sql_query" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$sql_query}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
 				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 			{/if}
+
+			<dd class="help">
+				<details>
+					<summary class="block help">Schéma SQL des tables</summary>
+					<pre class="block help">{foreach from=$schema item="table"}{$table}<br />{/foreach}</pre>
+				</details>
+			</dd>
 		</dl>
 		<p class="submit">
 			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
 				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
+			{/if}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
 			{/if}
 		</p>
 	{elseif !$sql_query}
@@ -49,6 +59,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess('config', Membres::DROIT_ADM
 			<input type="hidden" name="id" value="{$search.id}" />
 			{if $search.id}
 				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$search.intitule|truncate:40:"…":true shape="upload"}
+				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}

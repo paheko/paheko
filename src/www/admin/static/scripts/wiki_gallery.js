@@ -1,7 +1,11 @@
 (function () {
-    var enableGallery = function () {
-        if (!document.querySelectorAll)
-        {
+    var div, fig;
+
+    document.addEventListener('DOMContentLoaded', enableGallery, false);
+
+    function enableGallery()
+    {
+        if (!document.querySelectorAll) {
             return false;
         }
 
@@ -11,7 +15,7 @@
         {
             var a = items[i];
             a.setAttribute('data-pos', i);
-            a.onclick= function (e) {
+            a.onclick = function (e) {
                 e.preventDefault();
                 openImageBrowser(items, this.getAttribute('data-pos'));
                 return false;
@@ -19,45 +23,51 @@
         }
     };
 
-    if (document.addEventListener)
-        document.addEventListener('DOMContentLoaded', enableGallery, false);
-    else
-        document.attachEvent('onDOMContentLoaded', callback);
-
     function openImageBrowser(items, pos)
     {
-        var div = document.createElement('div');
+        div = document.createElement('div');
         div.className = 'imageBrowser';
 
-        var img = document.createElement('img');
-        img.pos = pos-1;
-
-        img.onclick = function (e) {
-            e.stopPropagation();
-            openImage(img, items);
-        };
-
         var fig = document.createElement('figure');
-        fig.style.opacity = 0;
 
         div.onclick = function (e) {
             div.style.opacity = 0;
             window.setTimeout(function() { div.parentNode.removeChild(div); }, 500);
         };
 
+        var img = document.createElement('img');
+        img.title = 'Cliquer sur l\'image pour aller à la suivante, ou à côté pour fermer';
+        img.pos = pos || 0;
+
+        img.onload = function () {
+            fig.style.opacity = 1;
+            img.style.width = 'initial';
+            img.style.height = 'initial';
+        };
+
+        img.onclick = function (e) {
+            e.stopPropagation();
+            img.pos++;
+            openImage(img, items);
+        };
+
         fig.appendChild(img);
         div.appendChild(fig);
         document.body.appendChild(div);
 
-        openImage(img, items);
+        openImage(img, items, div);
     }
 
     function openImage(img, items)
     {
         // Pour animation
-        img.parentNode.style.opacity = 0;
+        var fig = img.parentNode;
+        fig.style.opacity = 0;
 
-        if (++img.pos == items.length)
+        console.log(img);
+        var pos = img.pos;
+
+        if (pos >= items.length)
         {
             var div = img.parentNode.parentNode;
             div.style.opacity = 0;
@@ -65,17 +75,10 @@
             return;
         }
 
-        var newImg = new Image;
-        newImg.onload = function (e) {
-            var new_src = e.target.src;
-            window.setTimeout(function() {
-                img.src = new_src;
-                img.parentNode.style.opacity = 1;
-            }, img.src ? 250 : 0);
-        };
-
-        newImg.src = items[img.pos].href;
-        return false;   
+        img.style.width = 0;
+        img.style.height = 0;
+        img.src = items[pos].href;
+        img.pos = pos;
     }
 
 }());

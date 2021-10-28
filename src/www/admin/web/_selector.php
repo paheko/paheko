@@ -1,12 +1,17 @@
 <?php
 namespace Garradin;
 
-use Garradin\Web;
+use Garradin\Web\Web;
 use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$parent = (int)qg('parent');
+// Force dialog mode
+$_GET['_dialog'] = true;
+
+$current = qg('current') ?? '';
+$parent = qg('parent') ?? '';
+
 $breadcrumbs = [];
 
 if ($parent) {
@@ -20,8 +25,13 @@ if ($parent) {
 	$breadcrumbs = $page->getBreadcrumbs();
 }
 
-$tpl->assign(compact('breadcrumbs', 'parent'));
+$categories = Web::listCategories($parent);
 
-$tpl->assign('categories', Web::listCategories($parent));
+$categories = array_filter($categories, function ($cat) use ($current) {
+	return ($cat->path == $current) ? false : true;
+});
+
+$tpl->assign('selected', $current);
+$tpl->assign(compact('breadcrumbs', 'parent', 'categories'));
 
 $tpl->display('web/_selector.tpl');

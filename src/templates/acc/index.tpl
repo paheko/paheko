@@ -7,7 +7,7 @@
 
 	<nav class="tabs">
 		<aside>
-			{if $session->canAccess('compta', Membres::DROIT_ADMIN)}
+			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 				{linkbutton shape="upload" href="!acc/years/import.php?id=%d"|args:$year.id label="Import & export"}
 			{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}

@@ -19,14 +19,16 @@ INSERT INTO acc_charts (id, country, code, label) VALUES (1, 'FR', 'PCGA1999', '
 -- Inversement valeurs actif/passif et produit/charge
 INSERT INTO acc_accounts (id, id_chart, code, label, position, user)
 	SELECT NULL, 1, id, libelle,
-	CASE position
-		WHEN 1 THEN 2
-		WHEN 2 THEN 1
-		WHEN 3 THEN 3
-		WHEN 4 THEN 5
-		WHEN 8 THEN 4
+	CASE
+		WHEN position = 1 THEN 2
+		WHEN position = 2 THEN 1
+		WHEN position = 3 THEN 3
+		WHEN position = 4 THEN 5
+		WHEN position = 8 THEN 4
 		-- Suppression de la position "charge ou produit" qui n'a aucun sens
-		WHEN 12 THEN 0
+		WHEN position = 12 AND id LIKE '6%' THEN 4
+		WHEN position = 12 AND id LIKE '7%' THEN 5
+		WHEN position = 12 THEN 0
 		ELSE 0
 	END,
 	CASE WHEN plan_comptable = 1 THEN 0 ELSE 1 END
@@ -108,10 +110,6 @@ UPDATE acc_accounts SET type = 5, description = (SELECT description FROM compta_
 UPDATE acc_accounts SET type = 4, description = (SELECT description FROM compta_categories WHERE compte = acc_accounts.code)
 	WHERE id IN (SELECT a.id FROM acc_accounts a INNER JOIN compta_categories c ON c.compte = a.code AND c.type = -1 AND c.compte LIKE '4%');
 
--- Recopie des opérations, mais le nom a changé pour acc_transactions_users
-INSERT INTO acc_transactions_users
-	SELECT * FROM membres_operations_old;
-
 -- Recopie des exercices, mais la date de fin ne peut être nulle
 INSERT INTO acc_years (id, label, start_date, end_date, closed, id_chart)
 	SELECT id, libelle, debut, CASE WHEN fin IS NULL THEN date(debut, '+1 year') ELSE fin END, cloture, 1 FROM compta_exercices;
@@ -129,13 +127,14 @@ UPDATE acc_transactions_lines SET reconciled = 1 WHERE id_transaction IN (SELECT
 
 -- A edge-case where the end date is after the start date, let's fix it…
 UPDATE cotisations SET fin = debut WHERE fin < debut;
+UPDATE cotisations SET duree = NULL WHERE duree = 0;
 
 INSERT INTO services SELECT id, intitule, description, duree, debut, fin FROM cotisations;
 
 INSERT INTO services_fees (id, label, amount, id_service, id_account, id_year)
 	SELECT id, intitule, CASE WHEN montant IS NOT NULL THEN CAST(montant*100 AS integer) ELSE NULL END, id,
 		(SELECT id FROM acc_accounts WHERE code = (SELECT compte FROM compta_categories WHERE id = id_categorie_compta)),
-		(SELECT MAX(id) FROM acc_years WHERE closed = 0)
+		(SELECT MAX(id) FROM acc_years GROUP BY closed ORDER BY closed LIMIT 1)
 	FROM cotisations;
 
 INSERT INTO services_users SELECT cm.id, cm.id_membre, cm.id_cotisation,
@@ -158,6 +157,12 @@ INSERT INTO services_reminders_sent SELECT id, id_membre, id_cotisation,
 	WHERE id_rappel IS NOT NULL
 	GROUP BY id_membre, id_cotisation, id_rappel;
 
+-- Recopie des opérations par membre, mais le nom a changé pour acc_transactions_users, et il faut valider l'existence du membre ET du service
+INSERT INTO acc_transactions_users
+	SELECT a.* FROM membres_operations_old a
+	INNER JOIN membres b ON b.id = a.id_membre
+	INNER JOIN services_users c ON c.id = a.id_cotisation;
+
 DROP TABLE cotisations;
 DROP TABLE cotisations_membres;
 DROP TABLE rappels;
@@ -174,3 +179,39 @@ DROP TABLE membres_operations_old;
 DROP TABLE compta_projets;
 DROP TABLE compta_comptes_bancaires;
 DROP TABLE compta_moyens_paiement;
+
+INSERT INTO acc_charts (country, code, label) VALUES ('FR', 'PCA2018', 'Plan comptable associatif 2018');
+
+CREATE TEMP TABLE tmp_accounts (code,label,description,position,type);
+
+.import charts/fr_2018.csv tmp_accounts
+
+INSERT INTO acc_accounts (id_chart, code, label, description, position, type) SELECT
+	(SELECT id FROM acc_charts WHERE code = 'PCA2018'),
+	code, label, description,
+	CASE position
+		WHEN 'Actif' THEN 1
+		WHEN 'Passif' THEN 2
+		WHEN 'Actif ou passif' THEN 3
+		WHEN 'Charge' THEN 4
+		WHEN 'Produit' THEN 5
+		ELSE 0
+	END,
+	CASE type
+		WHEN 'Banque' THEN 1
+		WHEN 'Caisse' THEN 2
+		WHEN 'Attente d''encaissement' THEN 3
+		WHEN 'Tiers' THEN 4
+		WHEN 'Dépenses' THEN 5
+		WHEN 'Recettes' THEN 6
+		WHEN 'Analytique' THEN 7
+		WHEN 'Bénévolat' THEN 8
+		WHEN 'Ouverture' THEN 9
+		WHEN 'Clôture' THEN 10
+		WHEN 'Résultat excédentaire' THEN 11
+		WHEN 'Résultat déficitaire' THEN 12
+		ELSE 0
+	END
+	FROM tmp_accounts;
+
+DROP TABLE tmp_accounts;

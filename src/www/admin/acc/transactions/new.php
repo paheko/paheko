@@ -3,11 +3,13 @@ namespace Garradin;
 
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Files\File;
+use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 
 if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
@@ -20,6 +22,36 @@ $transaction = new Transaction;
 $lines = [[], []];
 $amount = 0;
 $payoff_for = qg('payoff_for') ?: f('payoff_for');
+$types_accounts = null;
+
+// Duplicate transaction
+if (qg('copy')) {
+	$old = Transactions::get((int)qg('copy'));
+	$transaction = $old->duplicate($current_year);
+	$lines = $transaction->getLinesWithAccounts();
+	$payoff_for = null;
+	$amount = $transaction->getLinesCreditSum();
+	$types_accounts = $transaction->getTypesAccounts();
+	$transaction->resetLines();
+
+	foreach ($lines as $k => &$line) {
+		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+	}
+
+	unset($line);
+}
+
+$date = new \DateTime;
+
+if ($session->get('acc_last_date')) {
+	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+}
+
+if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
+	$date = $current_year->start_date;
+}
+
+$transaction->date = $date;
 
 // Quick pay-off for debts and credits, directly from a debt/credit details page
 if ($id = $payoff_for) {
@@ -63,12 +95,6 @@ if (f('save') && $form->check('acc_transaction_new')) {
 		$transaction->id_creator = $session->getUser()->id;
 		$transaction->save();
 
-		// Append fileTYPE_ANALYTICAL
-		if (!empty($_FILES['file']['name'])) {
-			$file = Fichiers::upload($_FILES['file']);
-			$file->linkTo(Fichiers::LIEN_COMPTA, $transaction->id());
-		}
-
 		 // Link members
 		if (null !== f('users') && is_array(f('users'))) {
 			$transaction->updateLinkedUsers(array_keys(f('users')));
@@ -76,25 +102,14 @@ if (f('save') && $form->check('acc_transaction_new')) {
 
 		$session->set('acc_last_date', f('date'));
 
-		Utils::redirect(Utils::getSelfURL(false) . '?ok=' . $transaction->id());
+		Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());
 	}
 }
 
-$date = new \DateTime;
-
-if ($session->get('acc_last_date')) {
-	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
-}
-
-if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
-	$date = $current_year->start_date;
-}
-
-$tpl->assign('date', $date->format('d/m/Y'));
-$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines'));
+$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines', 'types_accounts'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 $tpl->assign('ok', (int) qg('ok'));
 

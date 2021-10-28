@@ -5,7 +5,7 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $year = Years::get((int)qg('id'));
 
@@ -23,7 +23,7 @@ $form->runIf('close', function () use ($year, $user, $session) {
 	$year->close($user->id);
 	$year->save();
 	$session->set('acc_year', null);
-}, $csrf_key, ADMIN_URL . 'acc/years/');
+}, $csrf_key, ADMIN_URL . 'acc/years/new.php?from=' . $year->id());
 
 $tpl->assign(compact('year', 'csrf_key'));
 

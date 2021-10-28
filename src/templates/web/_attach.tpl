@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Inclure un fichier" current="web" body_id="transparent" is_popup=true}
+{include file="admin/_head.tpl" title="Inclure un fichier"}
 
 {form_errors}
 
@@ -26,9 +26,9 @@
 			</dd>
 			<dt>Alignement&nbsp;:</dt>
 			<dd class="align">
-				<input type="button" name="gauche" value="À gauche" />
-				<input type="button" name="centre" value="Au centre" />
-				<input type="button" name="droite" value="À droite" />
+				<input type="button" name="left" value="À gauche" />
+				<input type="button" name="center" value="Au centre" />
+				<input type="button" name="right" value="À droite" />
 			</dd>
 			<dd class="cancel">
 				<input type="reset" value="Annuler" />
@@ -42,11 +42,15 @@
 {foreach from=$images item="file"}
 	<li>
 		<figure>
-			<a href="{$file->url()}" data-id="{$file.id}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
+			<a href="{$file->url()}" data-name="{$file.name}" data-insert="image" data-thumb="{$file->thumb_url()}"><img src="{$file->thumb_url()}" alt="" title="{$file.name}" /></a>
+			<figcaption>
+				<a href="{$file->url()}" data-name="{$file.name}" data-insert="image" data-thumb="{$file->thumb_url()}">{$file.name}</a>
+			</figcaption>
 			<form class="actions" method="post" action="{$self_url}">
 				{linkbutton shape="download" label="Télécharger" href=$file->url() target="_blank"}
+				{linkbutton shape="plus" label="Insérer" href=$file->url() data-name=$file.name data-insert="image" data-thumb=$file->thumb_url()}
 				{csrf_field key=$csrf_key}
-				<input type="hidden" name="delete" value="{$file.id}" />
+				<input type="hidden" name="delete" value="{$file.name}" />
 				<noscript><input type="submit" value="Supprimer" /></noscript>
 			</form>
 		</figure>
@@ -55,18 +59,19 @@
 </ul>
 {/if}
 
-{if !empty($fichiers)}
+{if !empty($files)}
 <table class="list">
 	<tbody>
-	{foreach from=$fichiers item="file"}
+	{foreach from=$files item="file"}
 		<tr>
-			<th>{$file.nom}</th>
-			<td>{if $file.type}{$file.type}{/if}</td>
+			<th>{$file.name}</th>
+			<td>{$file.type}, {$file.size|size_in_bytes}</td>
 			<td class="actions">
 				<form class="actions" method="post" action="{$self_url}">
-					{linkbutton shape="download" label="Télécharger" href=$file.url target="_blank"}
+					{linkbutton shape="plus" label="Insérer" href=$file->url() data-name=$file.name data-insert="file"}
+					{linkbutton shape="download" label="Télécharger" href=$file->url() target="_blank"}
 					{csrf_field key=$csrf_key}
-					<input type="hidden" name="delete" value="{$file.id}" />
+					<input type="hidden" name="delete" value="{$file.name}" />
 					<noscript><input type="submit" value="Supprimer" /></noscript>
 				</form>
 			</td>

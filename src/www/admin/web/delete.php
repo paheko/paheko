@@ -1,12 +1,14 @@
 <?php
 namespace Garradin;
 
-use Garradin\Web;
+use Garradin\Web\Web;
 use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$page = Web::get((int) qg('id'));
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+
+$page = Web::get(qg('p'));
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -16,7 +18,7 @@ $csrf_key = 'web_delete_' . $page->id();
 
 $form->runIf('delete', function () use ($page) {
 	$page->delete();
-}, $csrf_key, ADMIN_URL . 'web/?parent=' . $page->parent_id);
+}, $csrf_key, ADMIN_URL . 'web/?parent=' . $page->parent);
 
 $tpl->assign(compact('page', 'csrf_key'));
 $tpl->assign('title', $page->type == Page::TYPE_CATEGORY ? 'Supprimer une catégorie' : 'Supprimer une page');

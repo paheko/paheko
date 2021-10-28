@@ -4,7 +4,7 @@
     <ul>
         <li><a href="{$admin_url}membres/fiche.php?id={$membre.id}">{$membre.identite}</a></li>
         <li class="current"><a href="{$admin_url}membres/modifier.php?id={$membre.id}">Modifier</a></li>
-        {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+        {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user.id != $membre.id}
             <li><a href="{$admin_url}membres/supprimer.php?id={$membre.id}">Supprimer</a></li>
         {/if}
     </ul>
@@ -47,6 +47,11 @@
             <dd><input type="password" name="passe" id="f_passe" value="{form_field name=passe}" pattern="{$password_pattern}" autocomplete="off" /></dd>
             <dt><label for="f_repasse">Encore le mot de passe</label> (vérification){if $champs.passe.mandatory} <b title="(Champ obligatoire)">obligatoire</b>{/if}</dt>
             <dd><input type="password" name="passe_confirmed" id="f_repasse" value="{form_field name=passe_confirmed}" pattern="{$password_pattern}" autocomplete="off" /></dd>
+        {if $membre.passe}
+            <dd>
+                {input type="checkbox" name="delete_password" label="Supprimer le mot de passe de ce membre" value=1}
+            </dd>
+        {/if}
         </dl>
     </fieldset>
 
@@ -64,13 +69,13 @@
     </fieldset>
     {/if}
 
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN) && $user.id != $membre.id}
+    {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user.id != $membre.id}
     <fieldset>
         <legend>Général</legend>
         <dl>
             <dt><label for="f_cat">Catégorie du membre</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd>
-                <select name="id_categorie" id="f_cat">
+                <select name="id_category" id="f_cat">
                 {foreach from=$membres_cats key="id" item="nom"}
                     <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
                 {/foreach}

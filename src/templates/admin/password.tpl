@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Mot de passe oublié ou pas de mot de passe ?"}
+{include file="admin/_head.tpl" title="Mot de passe oublié ou première connexion ?"}
 
 
 {if !empty($sent)}
@@ -19,9 +19,8 @@
         <fieldset>
             <legend>Recevoir un e-mail avec un nouveau mot de passe</legend>
             <p class="help">
-                Inscrivez ici votre {$champ.title}.
-                Nous vous enverrons un message vous indiquant un lien permettant de recevoir un
-                nouveau mot de passe.
+                Inscrivez ici votre identifiant.
+                Nous vous enverrons un e-mail avec un lien vous permettant de créer ou changer le mot de passe.
             </p>
             <dl>
                 <dt><label for="f_id">{$champ.title}</label></dt>

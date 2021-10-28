@@ -2,6 +2,11 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+use Garradin\Files\Files;
+
+use KD2\ZipWriter;
+
 class Sauvegarde
 {
 	const NEED_UPGRADE = 0x01 << 2;
@@ -16,25 +21,68 @@ class Sauvegarde
 	 * @param  boolean $auto Si true ne renvoie que la liste des sauvegardes automatiques
 	 * @return array 		 Liste des fichiers
 	 */
-	public function getList($auto = false)
+	public function getList(bool $auto_only = false): array
 	{
-		$ext = $auto ? 'auto\.\d+\.sqlite' : 'sqlite';
+		$ext = $auto_only ? 'auto\.\d+\.sqlite' : 'sqlite';
 
 		$out = [];
 		$dir = dir(DATA_ROOT);
 
 		while ($file = $dir->read())
 		{
-			if ($file[0] != '.' && is_file(DATA_ROOT . '/' . $file) 
-				&& preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(DB_FILE))
-			{
-				$out[$file] = filemtime(DATA_ROOT . '/' . $file);
+			// Keep only backup files
+			if ($file[0] == '.' || !is_file(DATA_ROOT . '/' . $file)
+				|| !preg_match('![\w\d._-]+\.' . $ext . '$!i', $file) && $file != basename(DB_FILE)) {
+				continue;
 			}
+
+			if ($file == basename(DB_FILE)) {
+				continue;
+			}
+
+			$name = preg_replace('/^association\.(.*)\.sqlite$/', '$1', $file);
+			$auto = null;
+
+			if (substr($name, 0, 5) == 'auto.') {
+				$auto = (int) substr($name, 5);
+				$name = sprintf('Automatique n°%d', $auto);
+			}
+			elseif (0 === strpos($name, 'pre-upgrade-')) {
+				$name = sprintf('Avant mise à jour %s', substr($name, strlen('pre-upgrade-')));
+			}
+			elseif (preg_match('/^\d{4}-/', $name)) {
+				$name = 'Sauvegarde manuelle';
+			}
+			else {
+				$name = str_replace('.sqlite', '', $file);
+			}
+
+			// Skip non-auto files
+			if ($auto_only && !$auto) {
+				continue;
+			}
+
+			$db = new \SQLite3(DATA_ROOT . '/' . $file, \SQLITE3_OPEN_READONLY);
+			$version = DB::getVersion($db);
+			$db->close();
+
+			$out[$file] = (object) [
+				'filename'    => $file,
+				'date'        => filemtime(DATA_ROOT . '/' . $file),
+				'name'        => $name != $file ? $name : null,
+				'version'     => $version,
+				'can_restore' => version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '>='),
+				'auto'        => $auto,
+				'size'        => filesize(DATA_ROOT . '/' . $file),
+			];
 		}
 
 		$dir->close();
 
-		ksort($out);
+		// Reverse date order
+		uasort($out, function ($a, $b) {
+			return $a->date > $b->date ? -1 : 1;
+		});
 
 		return $out;
 	}
@@ -45,51 +93,76 @@ class Sauvegarde
 	 * sinon le nom sera basé sur la date (sauvegarde manuelle)
 	 * @return string Le nom de fichier de la sauvegarde ainsi créée
 	 */
-	public function create($auto = false)
+	public function create(bool $auto = false, ?string $name = null): string
 	{
-		$suffix = is_string($auto) ? $auto : ($auto ? 'auto.1' : date('Y-m-d-His'));
+		$suffix = $name ?? ($auto ? 'auto.1' : date('Y-m-d-His'));
 
 		$backup = str_replace('.sqlite', sprintf('.%s.sqlite', $suffix), DB_FILE);
 
-		// Acquire a shared lock before copying
-		$db = DB::getInstance();
-		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
+		$this->make($backup);
 
-		copy(DB_FILE, $backup);
-
-		$db->exec('END TRANSACTION;');
 		return basename($backup);
+	}
+
+	protected function make(string $dest)
+	{
+		// Acquire lock
+		$version = \SQLite3::version();
+		$db = DB::getInstance();
+
+		Utils::safe_unlink($dest);
+
+		if ($version['versionNumber'] >= 3027000) {
+			// use VACUUM INTO instead when SQLite 3.27+ is required
+			$db->exec(sprintf('VACUUM INTO %s;', $db->quote($dest)));
+		}
+		else {
+			// use ::backup since PHP 7.4.0+
+			// https://www.php.net/manual/en/sqlite3.backup.php
+			$dest_db = new \SQLite3($dest);
+
+			$db->backup($dest_db);
+			$dest_db->exec('PRAGMA journal_mode = DELETE;');
+			$dest_db->exec('VACUUM;');
+			$db->close();
+		}
 	}
 
 	/**
 	 * Effectue une rotation des sauvegardes automatiques
 	 * association.auto.1.sqlite deviendra association.auto.2.sqlite par exemple
-	 * @return boolean true
 	 */
-	public function rotate()
+	public function rotate(): void
 	{
 		$config = Config::getInstance();
 		$nb = $config->get('nombre_sauvegardes');
 
 		$list = $this->getList(true);
-		krsort($list);
 
-		if (count($list) >= $nb)
-		{
-			$this->remove(key($list));
-			array_shift($list);
+		// Sort backups from oldest to newest
+		usort($list, function ($a, $b) {
+			return $a->auto > $b->auto ? -1 : 1;
+		});
+
+		// Delete oldest backups + 1 as we are about to create a new one
+		$delete = count($list) - ($nb - 1);
+
+		for ($i = 0; $i < $delete; $i++) {
+			$backup = array_shift($list);
+			$this->remove($backup->filename);
 		}
 
-		foreach ($list as $f=>$d)
-		{
-			$new = preg_replace_callback('!\.auto\.(\d+)\.sqlite$!', function ($m) {
-				return '.auto.' . ((int) $m[1] + 1) . '.sqlite';
-			}, $f);
+		$i = count($list) + 1;
 
-			rename(DATA_ROOT . '/' . $f, DATA_ROOT . '/' . $new);
+		// Rotate old backups
+		foreach ($list as $file) {
+			$old = DATA_ROOT . DIRECTORY_SEPARATOR . $file->filename;
+			$new = sprintf('%s/association.auto.%d.sqlite', DATA_ROOT, $i--);
+
+			if ($old !== $new) {
+				rename($old, $new);
+			}
 		}
-
-		return true;
 	}
 
 	/**
@@ -106,9 +179,9 @@ class Sauvegarde
 
 		$list = $this->getList(true);
 
-		if (count($list) > 0)
+		if (count($list))
 		{
-			$last = current($list);
+			$last = current($list)->date;
 		}
 		else
 		{
@@ -150,32 +223,73 @@ class Sauvegarde
 	}
 
 	/**
-	 * Renvoie sur la sortie courante le contenu du fichier de base de données courant
-	 * @return boolean true
+	 * Renvoie sur la sortie courante le contenu du fichier de base de données sélectionné ou courant
 	 */
-	public function dump()
+	public function dump(?string $file = null): void
 	{
-		// Acquire a shared lock before copying
-		$db = DB::getInstance();
-		$db->exec('BEGIN IMMEDIATE TRANSACTION;');
+		$config = Config::getInstance();
+		$tmp_file = null;
 
-		$in = fopen(DB_FILE, 'r');
-        $out = fopen('php://output', 'w');
+		if (null === $file) {
+			$file = DB_FILE;
+			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('nom_asso'), date('Y-m-d'));
 
-        while (!feof($in))
-        {
-        	fwrite($out, fread($in, 8192));
-        }
+			$tmp_file = tempnam(sys_get_temp_dir(), 'gdin');
+			$this->make($tmp_file);
 
-        fclose($in);
+			$file = $tmp_file;
+		}
+		else {
+			if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file)) {
+				throw new UserException('Nom de fichier non valide.');
+			}
 
-        $db->exec('END TRANSACTION;');
+			$name = sprintf('%s - %s', $config->get('nom_asso'), str_replace('association.', '', $file));
+			$file = DATA_ROOT . '/' . $file;
 
-        // Ajout du hash pour vérification intégrité
-        fwrite($out, sha1_file(DB_FILE));
+			if (!file_exists($file)) {
+				throw new UserException('Le fichier fourni n\'existe pas.');
+			}
+		}
 
-        fclose($out);
-        return true;
+		$hash_length = strlen(sha1(''));
+
+		header('Content-type: application/octet-stream');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+		header(sprintf('Content-Length: %d', filesize($file) + $hash_length));
+
+		readfile($file);
+
+		// Add integrity hash
+		echo sha1_file($file);
+
+		if (null !== $tmp_file) {
+			@unlink($tmp_file);
+		}
+	}
+
+	public function dumpFilesZip(): void
+	{
+		$name = Config::getInstance()->get('nom_asso') . ' - Documents.zip';
+		header('Content-type: application/zip');
+		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
+
+		$zip = new ZipWriter('php://output');
+		$zip->setCompression(0);
+
+		$add_directory = function ($path) use ($zip, &$add_directory) {
+			foreach (Files::list($path) as $file) {
+				if ($file->type == $file::TYPE_DIRECTORY) {
+					$add_directory($file->path);
+				}
+				else {
+					$zip->add($file->path, null, $file->fullpath());
+				}
+			}
+		};
+
+		$add_directory('');
+		$zip->close();
 	}
 
 	/**
@@ -183,7 +297,7 @@ class Sauvegarde
 	 * @param  string $file Le nom de fichier à utiliser comme point de restauration
 	 * @return boolean true si la restauration a fonctionné, false sinon
 	 */
-	public function restoreFromLocal($file, bool $do_backup = true)
+	public function restoreFromLocal(string $file)
 	{
 		if (preg_match('!\.\.+!', $file) || !preg_match('!^[\w\d._ -]+$!iu', $file))
 		{
@@ -195,7 +309,7 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni n\'existe pas.');
 		}
 
-		return $this->restoreDB(DATA_ROOT . '/' . $file, false, false, false);
+		return $this->restoreDB(DATA_ROOT . '/' . $file, false, false);
 	}
 
 	/**
@@ -289,7 +403,7 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false, $do_backup = true)
+	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false)
 	{
 		$return = 1;
 
@@ -302,6 +416,8 @@ class Sauvegarde
 			throw new UserException('Le fichier fourni n\'est pas une base de données valide. ' .
 				'Message d\'erreur de SQLite : ' . $e->getMessage(), self::NOT_A_DB);
 		}
+
+		DB::registerCustomFunctions($db);
 
 		try {
 			// Regardons ensuite si la base de données n'est pas corrompue
@@ -316,7 +432,7 @@ class Sauvegarde
 
 		if (strtolower(trim($check)) != 'ok')
 		{
-			throw new UserException('Le fichier fourni est corrompu. SQLite a trouvé ' . $check . ' erreurs.');
+			throw new UserException('Le fichier fourni est corrompu. Erreur SQLite : ' . $check);
 		}
 
 		if ($check_foreign_keys)
@@ -340,15 +456,15 @@ class Sauvegarde
 		}
 
 		// On récupère la version
-		$version = $db->querySingle('SELECT valeur FROM config WHERE cle=\'version\';');
+		$version = DB::getVersion($db);
 
 		// On ne permet pas de restaurer une vieille version
-		if (version_compare($version, '0.9.8', '<'))
+		if (version_compare($version, Upgrade::MIN_REQUIRED_VERSION, '<'))
 		{
 			throw new UserException(sprintf('Ce fichier a été créé avec une version trop ancienne (%s), il n\'est pas possible de le restaurer.', $version));
 		}
 
-		// Vérification de l'AppID pour les versions récentes
+		// Vérification de l'AppID
 		$appid = $db->querySingle('PRAGMA application_id;', false);
 
 		if ($appid !== DB::APPID)
@@ -356,13 +472,18 @@ class Sauvegarde
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
+		// Empêchons l'admin de se tirer une balle dans le pied
 		if ($user_id)
 		{
-			// Empêchons l'admin de se tirer une balle dans le pied
-			$is_still_admin = $db->querySingle('SELECT 1 FROM membres_categories
-				WHERE id = (SELECT id_categorie FROM membres WHERE id = ' . (int) $user_id . ')
-				AND droit_config >= ' . Membres::DROIT_ADMIN . '
-				AND droit_connexion >= ' . Membres::DROIT_ACCES);
+			if (version_compare($version, '1.1', '<')) {
+				$sql = 'SELECT 1 FROM membres_categories WHERE id = (SELECT id_categorie FROM membres WHERE id = %d) AND droit_connexion >= %d AND droit_config >= %d';
+			}
+			else {
+				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
+			}
+
+			$sql = sprintf($sql, $user_id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
+			$is_still_admin = $db->querySingle($sql);
 
 			if (!$is_still_admin)
 			{
@@ -388,17 +509,15 @@ class Sauvegarde
 			throw new \RuntimeException('Unable to copy backup DB to main location.');
 		}
 
-		if (!$do_backup) {
-			unlink($backup);
-		}
+		unlink($backup);
 
 		if ($return & self::NOT_AN_ADMIN)
 		{
 			// Forcer toutes les catégories à pouvoir gérer les droits
 			$db = DB::getInstance();
-			$db->update('membres_categories', [
-				'droit_membres' => Membres::DROIT_ADMIN,
-				'droit_connexion' => Membres::DROIT_ACCES
+			$db->update('users_categories', [
+				'perm_users' => Session::ACCESS_ADMIN,
+				'perm_connect' => Session::ACCESS_READ
 			]);
 		}
 
@@ -433,6 +552,6 @@ class Sauvegarde
 	public function getDBFilesSize()
 	{
 		$db = DB::getInstance();
-		return (int) $db->firstColumn('SELECT SUM(taille) FROM fichiers_contenu;');
+		return (int) $db->firstColumn('SELECT SUM(size) FROM files;');
 	}
 }

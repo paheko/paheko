@@ -81,12 +81,6 @@ class Recherche
 		return $query;
 	}
 
-	public function duplicate(int $id)
-	{
-		DB::getInstance()->preparedQuery('INSERT INTO recherches (id_membre, intitule, cible, type, contenu)
-			SELECT id_membre, \'Copie de : \' || intitule, cible, type, contenu FROM recherches WHERE id = ?;', [$id]);
-	}
-
 	public function edit($id, $data)
 	{
 		$allowed = ['intitule', 'id_membre', 'type', 'cible', 'contenu'];
@@ -200,6 +194,26 @@ class Recherche
 		return $out;
 	}
 
+	public function getDefaultOrder(string $target): string
+	{
+		if ($target == 'compta') {
+			return 't.date';
+		}
+		else {
+			return Config::getInstance()->get('champ_identite');
+		}
+	}
+
+	public function getDefaultDesc(string $target): bool
+	{
+		if ($target == 'compta') {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	/**
 	 * Renvoie la liste des colonnes d'une cible
 	 */
@@ -212,12 +226,12 @@ class Recherche
 		{
 			$champs = Config::getInstance()->get('champs_membres');
 
-			$columns['id_categorie'] = (object) [
+			$columns['id_category'] = (object) [
 					'textMatch'=> false,
 					'label'    => 'Catégorie',
 					'type'     => 'enum',
 					'null'     => false,
-					'values'   => $db->getAssoc('SELECT id, nom FROM membres_categories ORDER BY nom;'),
+					'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE NOCASE;'),
 				];
 
 			foreach ($champs->getList() as $champ => $config)
@@ -311,7 +325,7 @@ class Recherche
 			$columns['l.debit'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Débit',
-				'type'     => 'integer',
+				'type'     => 'text',
 				'null'     => false,
 				'alias'    => 'debit',
 				'originalType' => 'money',
@@ -320,7 +334,7 @@ class Recherche
 			$columns['l.credit'] = (object) [
 				'textMatch'=> false,
 				'label'    => 'Crédit',
-				'type'     => 'integer',
+				'type'     => 'text',
 				'null'     => false,
 				'alias'    => 'credit',
 				'originalType' => 'money',
@@ -434,24 +448,15 @@ class Recherche
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
-					throw new UserException('Cette recherche fait référence à une colonne qui n\'existe pas : ' . $condition['column']);
+					continue;
 				}
 
 				$query_columns[] = $condition['column'];
 				$column = $target_columns[$condition['column']];
 
-				if ($column->textMatch == 'text' && !in_array($condition['operator'], $no_transform_operators))
-				{
-					$query = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
-				}
-				else
-				{
-					$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
-				}
+				$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
-
-				$values = array_map(['Garradin\Utils', 'transliterateToAscii'], $values);
 
 				if (!empty($column->originalType)) {
 					if ($column->originalType == 'tel') {
@@ -517,7 +522,7 @@ class Recherche
 
 		if (!count($query_groups))
 		{
-			throw new UserException('Aucune clause trouvée dans la recherche.');
+			throw new UserException('Aucune clause trouvée dans la recherche : elle contenait peut-être des clauses qui correspondent à des champs qui ont été supprimés ?');
 		}
 
 		// Ajout du champ identité si pas présent
@@ -535,7 +540,7 @@ class Recherche
 
 		if ($target_columns[$order]->textMatch)
 		{
-			$order = sprintf('transliterate_to_ascii(%s) COLLATE NOCASE', $db->quoteIdentifier($order));
+			$order = sprintf('%s COLLATE NOCASE', $db->quoteIdentifier($order));
 		}
 		else
 		{
@@ -578,6 +583,25 @@ class Recherche
 		return $sql_query;
 	}
 
+	static public function rawSQL(string $query, array $allowed_tables = null, bool $no_limit = false): array
+	{
+		if (!$no_limit && !preg_match('/LIMIT\s+\d+/i', $query))
+		{
+			$query = preg_replace('/;?\s*$/', '', $query);
+			$query .= ' LIMIT 100';
+		}
+
+		$st = DB::getInstance()->protectSelect($allowed_tables, $query);
+		$res = $st->execute();
+		$out = [];
+
+		while ($row = $res->fetchArray(\SQLITE3_ASSOC)) {
+			$out[] = (object) $row;
+		}
+
+		return $out;
+	}
+
 	/**
 	 * Lancer une recherche SQL
 	 */
@@ -590,7 +614,7 @@ class Recherche
 
 		if (null !== $force_select)
 		{
-			$query = preg_replace('/^\s*SELECT.*FROM\s+/Ui', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
+			$query = preg_replace('/^\s*SELECT.*FROM\s+/Uis', 'SELECT ' . implode(', ', $force_select) . ' FROM ', $query);
 		}
 
 		if (!$no_limit && !preg_match('/LIMIT\s+\d+/i', $query))
@@ -603,7 +627,7 @@ class Recherche
 			$db = DB::getInstance();
 			static $allowed = [
 				'compta' => ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null],
-				'membres' => ['membres' => null, 'membres_categories' => null],
+				'membres' => ['membres' => null, 'users_categories' => null],
 			];
 
 			if ($unprotected) {
@@ -678,7 +702,7 @@ class Recherche
 		if ($target == 'membres') {
 			$tables = [
 				'membres'    => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres\';'),
-				'categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'membres_categories\';'),
+				'users_categories' => $db->firstColumn('SELECT sql FROM sqlite_master WHERE type = \'table\' AND name = \'users_categories\';'),
 			];
 		}
 		elseif ($target == 'compta') {

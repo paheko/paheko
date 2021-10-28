@@ -9,14 +9,14 @@ class Static_Cache
 
 	protected static function _getCacheDir()
 	{
-		$dir = CACHE_ROOT . '/static';
+		$dir = STATIC_CACHE_ROOT;
 
 		if (!file_exists($dir))
 		{
-			Utils::safe_mkdir(CACHE_ROOT . '/static', 0777, true);
+			Utils::safe_mkdir($dir, 0777, true);
 		}
 
-		return CACHE_ROOT . '/static';
+		return $dir;
 	}
 
 	protected static function _getCachePath($id)

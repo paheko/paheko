@@ -12,6 +12,8 @@ deps:
 
 	rm -rf ${TMP_KD2}
 
+	wget -O "include/lib/Parsedown.php" "https://raw.githubusercontent.com/erusev/parsedown/1.7.x/Parsedown.php"
+
 dev-server:
 	php -S localhost:8082 -t www www/_route.php
 
@@ -35,7 +37,7 @@ release: test minify
 		rm -f font/*.css font/*.json
 	cd /tmp/garradin-build/garradin/src; \
 		rm -f Makefile include/lib/KD2/data/countries.en.json
-	cd /tmp/garradin-build/garradin/src/plugins; \
+	cd /tmp/garradin-build/garradin/src/data; mkdir plugins && cd plugins; \
 		wget https://fossil.kd2.org/garradin-plugins/uv/welcome.tar.gz
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
@@ -47,9 +49,11 @@ deb:
 
 publish: release deb
 	$(eval VERSION=$(shell cat VERSION))
+	gpg --armor --detach-sign garradin-${VERSION}.tar.bz2
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
 	fossil uv add garradin-${VERSION}.tar.bz2
+	fossil uv add garradin-${VERSION}.tar.bz2.asc
 	cd ../debian && fossil uv add garradin-${VERSION}-*.deb
 	fossil uv sync
 

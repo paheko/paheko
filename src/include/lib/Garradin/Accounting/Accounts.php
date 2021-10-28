@@ -232,11 +232,11 @@ class Accounts
 		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
-/* FIXME: implement closing of accounts
 	public function getClosingAccountId()
 	{
 		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
 	}
+/* FIXME: implement closing of accounts
 
 	public function closeRevenueExpenseAccounts(Year $year, int $user_id)
 	{

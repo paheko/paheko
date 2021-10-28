@@ -4,130 +4,362 @@ namespace Garradin\Files;
 
 use Garradin\Static_Cache;
 use Garradin\DB;
+use Garradin\Utils;
+use Garradin\UserException;
+use Garradin\ValidationException;
 use Garradin\Membres\Session;
 use Garradin\Entities\Files\File;
-use KD2\DB\EntityManager as EM;
+use Garradin\Entities\Web\Page;
 
-use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA};
+use KD2\DB\EntityManager as EM;
+use KD2\ZipWriter;
+
+use const Garradin\{FILE_STORAGE_BACKEND, FILE_STORAGE_QUOTA, FILE_STORAGE_CONFIG};
 
 class Files
 {
-	static public function getSystemFile(string $file, string $folder, ?string $subfolder = null): ?File
+	/**
+	 * To enable or disable quota check
+	 */
+	static protected $quota = true;
+
+	static public function search(string $search, string $path = null): array
 	{
-		$where = Folders::getFolderClause(true, $folder, $subfolder);
-		return EM::findOne(File::class, sprintf('SELECT * FROM files WHERE name = ? AND folder_id = (%s) LIMIT 1;', $where), $file);
+		if (strlen($search) > 100) {
+			throw new ValidationException('Recherche trop longue : maximum 100 caractères');
+		}
+
+		$where = '';
+		$params = [trim($search)];
+
+		if (null !== $path) {
+			$where = ' AND path LIKE ?';
+			$params[] = $path;
+		}
+
+		$query = sprintf('SELECT
+			*,
+			dirname(path) AS parent,
+			snippet(files_search, \'<b>\', \'</b>\', \'…\', 2) AS snippet,
+			rank(matchinfo(files_search), 0, 1.0, 1.0) AS points
+			FROM files_search
+			WHERE files_search MATCH ? %s
+			ORDER BY points DESC
+			LIMIT 0,50;', $where);
+
+		return DB::getInstance()->get($query, ...$params);
 	}
 
-	static public function listSystemFiles(string $folder, ?string $subfolder = null): array
+	static public function list(string $parent = ''): array
 	{
-		$where = Folders::getFolderClause(true, $folder, $subfolder);
-		return EM::get(sprintf('SELECT * FROM files WHERE folder_id = (%s) ORDER BY name;', $where));
+		if ($parent !== '') {
+			File::validatePath($parent);
+		}
+
+		// Update this path
+		return self::callStorage('list', $parent);
+	}
+
+	static public function zip(string $parent, ?Session $session)
+	{
+		$file = Files::get($parent);
+
+		if (!$file) {
+			throw new UserException('Ce répertoire n\'existe pas.');
+		}
+
+		if ($session && !$file->checkReadAccess($session)) {
+			throw new UserException('Vous n\'avez pas accès à ce répertoire');
+		}
+
+		$zip = new ZipWriter('php://output');
+		$zip->setCompression(0);
+
+		$add_file = function ($subpath) use ($zip, $parent, &$add_file) {
+			foreach (self::list($subpath) as $file) {
+				if ($file->type == $file::TYPE_DIRECTORY) {
+					$add_file($file->path);
+					continue;
+				}
+
+				$dest_path = substr($file->path, strlen($parent . '/'));
+				$zip->add($dest_path, null, $file->fullpath());
+			}
+		};
+
+		$add_file($parent);
+
+		$zip->close();
+	}
+
+	static public function listForContext(string $context, ?string $ref = null)
+	{
+		$path = $context;
+
+		if ($ref) {
+			$path .= '/' . $ref;
+		}
+
+		return self::list($path);
+	}
+
+	static public function delete(string $path): void
+	{
+		$file = self::get($path);
+
+		if (!$file) {
+			return;
+		}
+
+		$file->delete();
 	}
 
 	static public function callStorage(string $function, ...$args)
 	{
-		// Check that we can store this data
-		if ($function == 'store') {
-			$quota = FILE_STORAGE_QUOTA ?: self::callStorage('getQuota');
-			$used = self::callStorage('getTotalSize');
+		$class_name = __NAMESPACE__ . '\\Storage\\' . FILE_STORAGE_BACKEND;
 
-			$size = $args[0] ? filesize($args[1]) : strlen($args[2]);
+		call_user_func([$class_name, 'configure'], FILE_STORAGE_CONFIG);
 
-			if (($used + $size) >= $quota) {
-				throw new \OutOfBoundsException('File quota has been exhausted');
-			}
-		}
-
-		$storage = FILE_STORAGE_BACKEND ?? 'SQLite';
-		$class_name = __NAMESPACE__ . '\\Storage\\' . $storage;
 		return call_user_func_array([$class_name, $function], $args);
 	}
 
-	static public function migrateStorage(string $from, string $to): void
+	/**
+	 * Copy all files from a storage backend to another one
+	 * This can be used to move from SQLite to FileSystem for example
+	 * Note that this only copies files, and is not removing them from the source storage backend.
+	 */
+	static public function migrateStorage(string $from, string $to, $from_config = null, $to_config = null, ?callable $callback = null): void
 	{
-		$res = EM::getInstance(File::class)->iterate('SELECT * FROM @TABLE;');
+		$from = __NAMESPACE__ . '\\Storage\\' . $from;
+		$to = __NAMESPACE__ . '\\Storage\\' . $to;
 
-		$from = get_class(__NAMESPACE__ . '\\Backend\\' . $from);
-		$to = get_class(__NAMESPACE__ . '\\Backend\\' . $to);
+		if (!class_exists($from)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $from);
+		}
 
-		foreach ($res as $file) {
-			$from_path = call_user_func([$from, 'path'], $file);
-			call_user_func([$to, 'store'], $file, $from_path);
+		if (!class_exists($to)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $to);
+		}
+
+		call_user_func([$from, 'configure'], $from_config);
+		call_user_func([$to, 'configure'], $to_config);
+
+		try {
+			call_user_func([$from, 'checkLock']);
+			call_user_func([$to, 'checkLock']);
+
+			call_user_func([$from, 'lock']);
+			call_user_func([$to, 'lock']);
+
+			$db = DB::getInstance();
+			$db->begin();
+			$i = 0;
+
+			self::migrateDirectory($from, $to, '', $i, $callback);
+		}
+		catch (UserException $e) {
+			throw new \RuntimeException('Migration failed', 0, $e);
+		}
+		finally {
+			$db->commit();
+			call_user_func([$from, 'unlock']);
+			call_user_func([$to, 'unlock']);
 		}
 	}
 
-	static public function deleteOrphanFiles()
+	static protected function migrateDirectory(string $from, string $to, string $path, int &$i, ?callable $callback)
 	{
 		$db = DB::getInstance();
-		$sql = 'SELECT f.* FROM files f LEFT JOIN files_links l ON f.id = l.id WHERE l.id IS NULL;';
 
-		foreach ($db->iterate($sql) as $file) {
-			$f = new Fichiers($file->id, (array) $file);
-			$f->remove();
+		foreach (call_user_func([$from, 'list'], $path) as $file) {
+			if (!$file->parent && $file->name == '.lock') {
+				// Ignore lock file
+				continue;
+			}
+
+			if (++$i >= 100) {
+				$db->commit();
+				$db->begin();
+				$i = 0;
+			}
+
+			if ($file->type == File::TYPE_DIRECTORY) {
+				call_user_func([$to, 'mkdir'], $file);
+				self::migrateDirectory($from, $to, $file->path, $i, $callback);
+			}
+			else {
+				$from_path = call_user_func([$from, 'getFullPath'], $file);
+				call_user_func([$to, 'storePath'], $file, $from_path);
+			}
+
+			if (null !== $callback) {
+				$callback($file);
+			}
+
+			unset($file);
+		}
+	}
+
+	/**
+	 * Delete all files from a storage backend
+	 */
+	static public function truncateStorage(string $backend, $config = null): void
+	{
+		$backend = __NAMESPACE__ . '\\Storage\\' . $backend;
+
+		call_user_func([$backend, 'configure'], $config);
+
+		if (!class_exists($backend)) {
+			throw new \InvalidArgumentException('Invalid storage: ' . $backend);
 		}
 
-		// Remove any left-overs
-		$db->exec('DELETE FROM files_contents WHERE hash NOT IN (SELECT DISTINCT hash FROM files);');
+		call_user_func([$backend, 'truncate']);
 	}
 
-	static public function deleteLinkedFiles(string $type, ?int $value = null)
+	static public function get(string $path, int $type = null): ?File
 	{
-		foreach (self::iterateLinkedTo($type, $value) as $file) {
-			$file->delete();
+		try {
+			File::validatePath($path);
+		}
+		catch (ValidationException $e) {
+			return null;
 		}
 
-		self::deleteOrphanFiles();
-	}
+		$file = self::callStorage('get', $path);
 
-	static public function iterateLinkedTo(string $type, ?int $value = null)
-	{
-		$where = $value ? sprintf('l.%s = %d', $value) : sprintf('l.%s IS NOT NULL');
-		$sql = sprintf('SELECT f.* FROM @TABLE f INNER JOIN files_links l ON l.id = f.id WHERE %s;', $where);
-
-		return EM::getInstance(File::class)->iterate($sql);
-	}
-
-	static public function get(int $id): ?File
-	{
-		return EM::findOneById(File::class, $id);
-	}
-
-	static public function serveFromQueryString(): void
-	{
-		$id = isset($_GET['id']) ? $_GET['id'] : null;
-		$filename = !empty($_GET['file']) ? $_GET['file'] : null;
-
-		$size = null;
-
-		if (empty($id)) {
-			header('HTTP/1.1 404 Not Found', true, 404);
-			throw new UserException('Fichier inconnu.');
+		if (!$file || ($type && $file->type != $type)) {
+			return null;
 		}
 
-		foreach ($_GET as $key => $value) {
-			if (substr($key, -2) == 'px') {
-				$size = (int)substr($key, 0, -2);
-				break;
+		return $file;
+	}
+
+	static public function getFromURI(string $uri): ?File
+	{
+		$uri = trim($uri, '/');
+		$uri = rawurldecode($uri);
+
+		return self::get($uri, File::TYPE_FILE);
+	}
+
+	static public function getContext(string $path): ?string
+	{
+		$context = strtok($path, '/');
+
+		if (!array_key_exists($context, File::CONTEXTS_NAMES)) {
+			return null;
+		}
+
+		return $context;
+	}
+
+	static public function getContextRef(string $path): ?string
+	{
+		$context = strtok($path, '/');
+		return strtok('/') ?: null;
+	}
+
+	static public function getBreadcrumbs(string $path): array
+	{
+		$parts = explode('/', $path);
+		$breadcrumbs = [];
+		$path = '';
+
+		foreach ($parts as $part) {
+			$path = trim($path . '/' . $part, '/');
+			$breadcrumbs[$path] = $part;
+		}
+
+		return $breadcrumbs;
+	}
+
+	static public function getQuota(): float
+	{
+		return FILE_STORAGE_QUOTA ?? self::callStorage('getQuota');
+	}
+
+	static public function getUsedQuota(bool $force_refresh = false): float
+	{
+		if ($force_refresh || Static_Cache::expired('used_quota', 3600)) {
+			$quota = self::callStorage('getTotalSize');
+			Static_Cache::store('used_quota', $quota);
+		}
+		else {
+			$quota = (float) Static_Cache::get('used_quota');
+		}
+
+		return $quota;
+	}
+
+	static public function getRemainingQuota(bool $force_refresh = false): float
+	{
+		if (FILE_STORAGE_QUOTA !== null) {
+			$quota = FILE_STORAGE_QUOTA - self::getUsedQuota($force_refresh);
+		}
+		else {
+			$quota = self::callStorage('getRemainingQuota');
+		}
+
+		return max(0, $quota);
+	}
+
+	static public function checkQuota(int $size = 0): void
+	{
+		if (!self::$quota) {
+			return;
+		}
+
+		$remaining = self::getRemainingQuota(true);
+
+		if (($remaining - (float) $size) < 0) {
+			throw new ValidationException('L\'espace disque est insuffisant pour réaliser cette opération');
+		}
+	}
+
+	static public function enableQuota(): void
+	{
+		self::$quota = true;
+	}
+
+	static public function disableQuota(): void
+	{
+		self::$quota = false;
+	}
+
+	static public function getVirtualTableName(): string
+	{
+		if (FILE_STORAGE_BACKEND == 'SQLite') {
+			return 'files';
+		}
+
+		return 'tmp_files';
+	}
+
+	static public function syncVirtualTable(string $parent = '', bool $recursive = false)
+	{
+		if (FILE_STORAGE_BACKEND == 'SQLite') {
+			// No need to create a virtual table, use the real one
+			return;
+		}
+
+		$db = DB::getInstance();
+		$db->begin();
+
+		$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_files AS SELECT * FROM files WHERE 0;');
+
+		foreach (Files::list($parent) as $file) {
+			// Ignore additional directories
+			if ($parent == '' && !array_key_exists($file->name, File::CONTEXTS_NAMES)) {
+				continue;
+			}
+
+			$db->insert('tmp_files', $file->asArray(true));
+
+			if ($recursive && $file->type === $file::TYPE_DIRECTORY) {
+				self::syncVirtualTable($file->path, $recursive);
 			}
 		}
 
-		$id = base_convert($id, 36, 10);
-
-		$file = self::get((int) $id);
-
-		if (!$file) {
-			header('HTTP/1.1 404 Not Found', true, 404);
-			throw new UserException('Ce fichier n\'existe pas.');
-		}
-
-		$session = Session::getInstance();
-
-		if ($size) {
-			$file->serveThumbnail($session, $size);
-		}
-		else {
-			$file->serve($session);
-		}
+		$db->commit();
 	}
 }
-

@@ -14,13 +14,48 @@ class Utils
     const EMAIL_CONTEXT_PRIVATE = 'private';
     const EMAIL_CONTEXT_SYSTEM = 'system';
 
+    static protected $collator;
+    static protected $transliterator;
+
     const FRENCH_DATE_NAMES = [
-        'January'=>'Janvier', 'February'=>'Février', 'March'=>'Mars', 'April'=>'Avril', 'May'=>'Mai',
-        'June'=>'Juin', 'July'=>'Juillet', 'August'=>'Août', 'September'=>'Septembre', 'October'=>'Octobre',
-        'November'=>'Novembre', 'December'=>'Décembre', 'Monday'=>'Lundi', 'Tuesday'=>'Mardi', 'Wednesday'=>'Mercredi',
-        'Thursday'=>'Jeudi','Friday'=>'Vendredi','Saturday'=>'Samedi','Sunday'=>'Dimanche',
-        'Feb'=>'Fév','Apr'=>'Avr','Jun'=>'Juin', 'Jul'=>'Juil','Aug'=>'Aout','Dec'=>'Déc',
-        'Mon'=>'Lun','Tue'=>'Mar','Wed'=>'Mer','Thu'=>'Jeu','Fri'=>'Ven','Sat'=>'Sam','Sun'=>'Dim'];
+        'January'   => 'janvier',
+        'February'  => 'février',
+        'March'     => 'mars',
+        'April'     => 'avril',
+        'May'       => 'mai',
+        'June'      => 'juin',
+        'July'      => 'juillet',
+        'August'    => 'août',
+        'September' => 'septembre',
+        'October'   => 'octobre',
+        'November'  => 'novembre',
+        'December'  => 'décembre',
+        'Monday'    => 'lundi',
+        'Tuesday'   => 'mardi',
+        'Wednesday' => 'mercredi',
+        'Thursday'  => 'jeudi',
+        'Friday'    => 'vendredi',
+        'Saturday'  => 'samedi',
+        'Sunday'    => 'dimanche',
+        'Jan' => 'jan',
+        'Feb' => 'fév',
+        'Mar' => 'mar',
+        'Apr' => 'avr',
+        'Jun' => 'juin',
+        'Jul' => 'juil',
+        'Aug' => 'août',
+        'Sep' => 'sep',
+        'Oct' => 'oct',
+        'Nov' => 'nov',
+        'Dec' => 'déc',
+        'Mon' => 'lun',
+        'Tue' => 'mar',
+        'Wed' => 'mer',
+        'Thu' => 'jeu',
+        'Fri' => 'ven',
+        'Sat' => 'sam',
+        'Sun' => 'dim',
+    ];
 
     static public function get_datetime($ts)
     {
@@ -28,7 +63,9 @@ class Utils
             return $ts;
         }
         elseif (is_numeric($ts)) {
-            return new \DateTime('@' . $ts);
+            $ts = new \DateTime('@' . $ts);
+            $ts->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+            return $ts;
         }
         elseif (strlen($ts) == 10) {
             return \DateTime::createFromFormat('!Y-m-d', $ts);
@@ -52,7 +89,6 @@ class Utils
         $date = strftime($format, $ts->getTimestamp());
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
-        $date = strtolower($date);
         return $date;
     }
 
@@ -72,48 +108,7 @@ class Utils
         $date = $ts->format($format);
 
         $date = strtr($date, self::FRENCH_DATE_NAMES);
-        $date = strtolower($date);
         return $date;
-    }
-
-    static public function relative_date($ts, bool $with_hour = false): string
-    {
-        $day = null;
-
-        if (null === $ts) {
-            return '';
-        }
-
-        $date = self::get_datetime($ts);
-
-        if ($date->format('Ymd') == date('Ymd'))
-        {
-            $day = 'aujourd\'hui';
-        }
-        elseif ($date->format('Ymd') == date('Ymd', strtotime('yesterday')))
-        {
-            $day = 'hier';
-        }
-        elseif ($date->format('Ymd') == date('Ymd', strtotime('tomorrow')))
-        {
-            $day = 'demain';
-        }
-        elseif ($date->format('Y') == date('Y'))
-        {
-            $day = strtolower(self::strftime_fr($date, '%A %e %B'));
-        }
-        else
-        {
-            $day = strtolower(self::strftime_fr($date, '%e %B %Y'));
-        }
-
-        if ($with_hour)
-        {
-            $hour = $date->format('H\hi');
-            return sprintf('%s, %s', $day, $hour);
-        }
-
-        return $day;
     }
 
     /**
@@ -182,6 +177,29 @@ class Utils
         return sprintf('%s%s%s%s', $sign, number_format($number, 0, $dec_point, $thousands_sep), $dec_point, $decimals);
     }
 
+    static public function getLocalURL(string $url = '', ?string $default_prefix = null): string
+    {
+        if ($url[0] == '!') {
+            return ADMIN_URL . substr($url, 1);
+        }
+        elseif ($url[0] == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
+            return WWW_URL . substr($url, strlen(WWW_URI));
+        }
+        elseif (substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:') {
+            return $url;
+        }
+        elseif ($url == '') {
+            return ADMIN_URL;
+        }
+        else {
+            if (null !== $default_prefix) {
+                $default_prefix = self::getLocalURL($default_prefix);
+            }
+
+            return $default_prefix . $url;
+        }
+    }
+
     static public function getRequestURI()
     {
         if (!empty($_SERVER['REQUEST_URI']))
@@ -192,12 +210,20 @@ class Utils
 
     static public function getSelfURL($qs = true)
     {
-        $uri = self::getRequestUri();
+        $uri = self::getSelfURI($qs);
 
-        if (strpos($uri, WWW_URI) === 0)
+        // Make absolute URI relative to parent URI
+        if (strpos($uri, WWW_URI . 'admin/') === 0)
         {
-            $uri = substr($uri, strlen(WWW_URI));
+            $uri = substr($uri, strlen(WWW_URI . 'admin/'));
         }
+
+        return ADMIN_URL . $uri;
+    }
+
+    static public function getSelfURI($qs = true)
+    {
+        $uri = self::getRequestURI();
 
         if ($qs !== true && (strpos($uri, '?') !== false))
         {
@@ -209,12 +235,7 @@ class Utils
             $uri .= '?' . http_build_query($qs);
         }
 
-        return str_replace('/admin', '', ADMIN_URL) . $uri;
-    }
-
-    static public function getSelfURI($qs = true)
-    {
-        return str_replace(substr(WWW_URL, 0, -1), '', self::getSelfURL($qs));
+        return $uri;
     }
 
     static public function getModifiedURL(string $new)
@@ -222,15 +243,38 @@ class Utils
         return HTTP::mergeURLs(self::getSelfURL(), $new);
     }
 
-    public static function redirect($destination=false, $exit=true)
+    static public function reloadParentFrame(?string $destination = null): void
     {
-        if (empty($destination) || !preg_match('/^https?:\/\//', $destination))
-        {
-            if (empty($destination))
-                $destination = WWW_URL;
-            else
-                $destination = WWW_URL . preg_replace('/^\//', '', $destination);
+        $url = self::getLocalURL($destination ?? '!');
+
+        echo '
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <script type="text/javascript">';
+
+        if (null === $destination) {
+            echo 'window.parent.location.reload();';
         }
+        else {
+            printf('window.parent.location.href = %s;', json_encode($url));
+        }
+
+        echo '
+                </script>
+            </head>
+
+            <body>
+            <p style="visibility: hidden;"><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
+            </body>
+            </html>';
+
+        exit;
+    }
+
+    public static function redirect($destination = '', $exit=true)
+    {
+        $destination = self::getLocalURL($destination);
 
         if (PHP_SAPI == 'cli') {
             echo 'Please visit ' . $destination . PHP_EOL;
@@ -287,78 +331,6 @@ class Utils
         return $list[$code];
     }
 
-    /**
-     * Génération pagination à partir de la page courante ($current),
-     * du nombre d'items total ($total), et du nombre d'items par page ($bypage).
-     * $listLength représente la longueur d'items de la pagination à génerer
-     *
-     * @param int $current
-     * @param int $total
-     * @param int $bypage
-     * @param int $listLength
-     * @param bool $showLast Toggle l'affichage du dernier élément de la pagination
-     * @return array|null
-     */
-    public static function getGenericPagination($current, $total, $bypage, $listLength=11, $showLast = true)
-    {
-        if ($total <= $bypage)
-            return null;
-
-        $total = ceil($total / $bypage);
-
-        if ($total < $current)
-            return null;
-
-        $length = ($listLength / 2);
-
-        $begin = $current - ceil($length);
-        if ($begin < 1)
-        {
-            $begin = 1;
-        }
-
-        $end = $begin + $listLength;
-        if($end > $total)
-        {
-            $begin -= ($end - $total);
-            $end = $total;
-        }
-        if ($begin < 1)
-        {
-            $begin = 1;
-        }
-        if($end==($total-1)) {
-            $end = $total;
-        }
-        if($begin == 2) {
-            $begin = 1;
-        }
-        $out = [];
-
-        if ($current > 1) {
-            $out[] = ['id' => $current - 1, 'label' =>  '« ' . 'Page précédente', 'class' => 'prev', 'accesskey' => 'a'];
-        }
-
-        if ($begin > 1) {
-            $out[] = ['id' => 1, 'label' => '1 ...', 'class' => 'first'];
-        }
-
-        for ($i = $begin; $i <= $end; $i++)
-        {
-            $out[] = ['id' => $i, 'label' => $i, 'class' => ($i == $current) ? 'current' : ''];
-        }
-
-        if ($showLast && $end < $total) {
-            $out[] = ['id' => $total, 'label' => '... ' . $total, 'class' => 'last'];
-        }
-
-        if ($current < $total) {
-            $out[] = ['id' => $current + 1, 'label' => 'Page suivante' . ' »', 'class' => 'next', 'accesskey' => 'z'];
-        }
-
-        return $out;
-    }
-
     static public function transliterateToAscii($str, $charset='UTF-8')
     {
         // Don't process empty strings
@@ -396,30 +368,6 @@ class Utils
         $str = preg_replace('/<ul>|<\/ul>/', '', $str);
         $str = preg_replace('/<a href="([^"]*?)">(\V*?)<\/a>/', '[[$2 | $1]]', $str);
         return $str;
-    }
-
-    static public function clearCaches($path = false)
-    {
-        if (!$path)
-        {
-            self::clearCaches('compiled');
-            self::clearCaches('static');
-            return true;
-        }
-
-        $path = CACHE_ROOT . '/' . $path;
-        $dir = dir($path);
-
-        while ($file = $dir->read())
-        {
-            if ($file[0] != '.')
-            {
-                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
-            }
-        }
-
-        $dir->close();
-        return true;
     }
 
     static public function safe_unlink($path)
@@ -536,15 +484,63 @@ class Utils
 
     static public function format_bytes($size)
     {
-        if ($size > (1024 * 1024))
-            return number_format(round($size / 1024 / 1024, 2), 2, ',', '') . ' Mo';
-        elseif ($size > 1024)
+        if ($size > (1024 * 1024 * 1024)) {
+            $size = round($size / 1024 / 1024 / 1024, 2);
+            $decimals = $size == (int) $size ? 0 : 2;
+            return number_format($size, $decimals, ',', '') . ' Go';
+        }
+        elseif ($size > (1024 * 1024)) {
+            $size = round($size / 1024 / 1024, 2);
+            $decimals = $size == (int) $size ? 0 : 2;
+            return number_format($size, $decimals, ',', '') . ' Mo';
+        }
+        elseif ($size > 1024) {
             return round($size / 1024) . ' Ko';
+        }
         else
             return $size . ' o';
     }
 
-    static public function deleteRecursive($path)
+    static public function createEmptyDirectory(string $path)
+    {
+        Utils::safe_mkdir($path, 0777, true);
+
+        if (!is_dir($path))
+        {
+            throw new UserException('Le répertoire '.$path.' n\'existe pas ou n\'est pas un répertoire.');
+        }
+
+        // On en profite pour vérifier qu'on peut y lire et écrire
+        if (!is_writable($path) || !is_readable($path))
+        {
+            throw new UserException('Le répertoire '.$path.' n\'est pas accessible en lecture/écriture.');
+        }
+
+        // Some basic safety against misconfigured hosts
+        file_put_contents($path . '/index.html', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>');
+    }
+
+    static public function resetCache(string $path): void
+    {
+        if (!file_exists($path)) {
+            self::createEmptyDirectory($path);
+            return;
+        }
+
+        $dir = dir($path);
+
+        while ($file = $dir->read()) {
+            if (substr($file, 0, 1) == '.' || is_dir($path . DIRECTORY_SEPARATOR . $file)) {
+                continue;
+            }
+
+            self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
+        }
+
+        $dir->close();
+    }
+
+    static public function deleteRecursive(string $path, bool $delete_self = false): bool
     {
         if (!file_exists($path))
             return false;
@@ -557,14 +553,14 @@ class Utils
             if ($file == '.' || $file == '..')
                 continue;
 
-            if (is_dir($path . '/' . $file))
+            if (is_dir($path . DIRECTORY_SEPARATOR . $file))
             {
-                if (!self::deleteRecursive($path . '/' . $file))
+                if (!self::deleteRecursive($path . DIRECTORY_SEPARATOR . $file))
                     return false;
             }
             else
             {
-                self::safe_unlink($path . '/' . $file);
+                self::safe_unlink($path . DIRECTORY_SEPARATOR . $file);
             }
         }
 
@@ -819,7 +815,7 @@ class Utils
         return array($h * 360, $s, $v);
     }
 
-    static public function HTTPCache(string $hash, int $last_change): bool
+    static public function HTTPCache(?string $hash, int $last_change): bool
     {
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
@@ -830,7 +826,11 @@ class Utils
         }
 
         header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-        header(sprintf('Etag: %s', $hash));
+
+        if ($etag) {
+            header(sprintf('Etag: %s', $hash));
+        }
+
         header('Cache-Control: private');
 
         return false;
@@ -895,5 +895,209 @@ class Utils
         $str = trim($str, '-');
 
         return $str;
+    }
+
+    static public function safeFileName(string $str): string
+    {
+        $str = Utils::transliterateToAscii($str);
+        $str = preg_replace('![^\w\d_ -]!i', '.', $str);
+        $str = preg_replace('!\.{2,}!', '.', $str);
+        $str = trim($str, '.');
+        return $str;
+    }
+
+    /**
+     * dirname may have undefined behaviour depending on the locale!
+     */
+    static public function dirname(string $str): string
+    {
+        $str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
+        return substr($str, 0, strrpos($str, '/'));
+    }
+
+    /**
+     * basename may have undefined behaviour depending on the locale!
+     */
+    static public function basename(string $str): string
+    {
+        $str = str_replace(DIRECTORY_SEPARATOR, '/', $str);
+        $str = trim($str, '/');
+        $str = substr($str, strrpos($str, '/'));
+        $str = trim($str, '/');
+        return $str;
+    }
+
+    static public function unicodeCaseComparison($a, $b): int
+    {
+        if (!isset(self::$collator) && function_exists('collator_create')) {
+            self::$collator = \Collator::create('fr_FR');
+
+            // This is what makes the comparison case insensitive
+            // https://www.php.net/manual/en/collator.setstrength.php
+            self::$collator->setAttribute(\Collator::STRENGTH, \Collator::SECONDARY);
+
+            // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
+            // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
+            // without: 1, 10, 101, 11, 2
+        }
+
+        if (isset(self::$collator)) {
+            return (int) self::$collator->compare($a, $b);
+        }
+
+        $a = strtoupper(self::transliterateToAscii($a));
+        $b = strtoupper(self::transliterateToAscii($b));
+
+        return strcmp($a, $b);
+    }
+
+    /**
+     * Transforms a unicode string to lowercase AND removes all diacritics
+     *
+     * @see https://www.matthecat.com/supprimer-les-accents-d-une-chaine-avec-php.html
+     */
+    static public function unicodeCaseFold(?string $str): string
+    {
+        if (null === $str || trim($str) === '') {
+            return '';
+        }
+
+        if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
+            self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();');
+        }
+
+        if (isset(self::$transliterator)) {
+            return self::$transliterator->transliterate($str);
+        }
+
+        return strtoupper(self::transliterateToAscii($str));
+    }
+
+    static public function knatcasesort(array $array)
+    {
+        uksort($array, [self::class, 'unicodeCaseComparison']);
+        return $array;
+    }
+
+    /**
+     * Displays a PDF from a string, only works when PDF_COMMAND constant is set to "prince"
+     * @param  string $str HTML string
+     * @return void
+     */
+    static public function streamPDF(string $str): void
+    {
+        if (!PDF_COMMAND) {
+            // Try to see if there's a plugin
+            $in = ['string' => $str];
+
+            if (Plugin::fireSignal('pdf.stream', $in)) {
+                return;
+            }
+
+            unset($in);
+        }
+
+        // Only Prince handles using STDIN and STDOUT
+        if (PDF_COMMAND != 'prince') {
+            $file = self::filePDF($str);
+            readfile($file);
+            unlink($file);
+            return;
+        }
+
+        $descriptorspec = [
+            0 => ["pipe", "r"], // stdin is a pipe that the child will read from
+            1 => ["pipe", "w"], // stdout is a pipe that the child will write to
+            2 => ['pipe', 'w'], // stderr
+        ];
+
+        $cmd = 'prince -o - -';
+        $process = proc_open($cmd, $descriptorspec, $pipes);
+
+        if (!is_resource($process)) {
+            throw new \RuntimeException('Cannot execute Prince XML');
+        }
+
+        // $pipes now looks like this:
+        // 0 => writeable handle connected to child stdin
+        // 1 => readable handle connected to child stdout
+
+        fwrite($pipes[0], $str);
+        fclose($pipes[0]);
+
+        echo stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        // It is important that you close any pipes before calling
+        // proc_close in order to avoid a deadlock
+        proc_close($process);
+    }
+
+    /**
+     * Creates a PDF file from a HTML string
+     * @param  string $str HTML string
+     * @return string File path of the PDF file (temporary), you must delete or move it
+     */
+    static public function filePDF(string $str): ?string
+    {
+        $source = sprintf('%s/print-%s.html', CACHE_ROOT, md5(random_bytes(16)));
+        $target = str_replace('.html', '.pdf', $source);
+
+        file_put_contents($source, $str);
+
+        $cmd = PDF_COMMAND;
+
+        if (!$cmd) {
+            // Try to see if there's a plugin
+            $in = ['source' => $source, 'target' => $target];
+
+            if (Plugin::fireSignal('pdf.create', $in)) {
+                return $target;
+            }
+
+            unset($in);
+
+            // Try to find a local executable
+            $list = ['prince', 'chromium', 'wkhtmltopdf', 'weasyprint'];
+
+            foreach ($list as $program) {
+                if (shell_exec('which ' . $program)) {
+                    $cmd = $program;
+                    break;
+                }
+            }
+
+            // We still haven't found anything
+            if (!$cmd) {
+                throw new \LogicException('No PDF creation executable found. Please install or configure one.');
+            }
+        }
+
+        switch ($cmd) {
+            case 'prince':
+                $cmd = 'prince -o %2$s %1$s';
+                break;
+            case 'chromium':
+                $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
+                break;
+            case 'wkhtmltopdf':
+                $cmd = 'wkhtmltopdf %1$s %2$s';
+                break;
+            case 'weasyprint':
+                $cmd = 'weasyprint %1$s %2$s';
+                break;
+            default:
+                break;
+        }
+
+        exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+
+        if (!file_exists($target)) {
+            throw new \RuntimeException('PDF command failed');
+        }
+
+        unlink($source);
+
+        return $target;
     }
 }

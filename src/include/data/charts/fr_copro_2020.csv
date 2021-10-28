@@ -1,0 +1,113 @@
+code,label,description,position,type
+1,"Classe 1 — Provisions, avances, subventions et emprunts",,Passif,
+10,PROVISIONS ET AVANCES,,Passif,
+103,Avances,,Passif,
+106,Provisions pour travaux,Provisions pour travaux au titre de la délégation de pouvoirs accordée au conseil syndical,Passif,
+11,REPORT À NOUVEAU (SOLDE CRÉDITEUR OU DÉBITEUR),,Passif,
+110,Report à nouveau (solde créditeur),,Passif,Résultat excédentaire 
+119,Report à nouveau (solde débiteur),,Passif,Résultat déficitaire 
+12,Solde en attente sur travaux et opérations exceptionnelles,,Passif,
+121,Travaux décidés par l'assemblée générale,,Passif,
+122,Travaux délégués au conseil syndical ,,Passif,
+13,SUBVENTIONS,,Passif,
+131, Subventions accordées en instance de versement,,Passif,
+138,Autres subventions d’investissement ,,Passif,
+139,Subventions d’investissement inscrites au compte de résultat,,Passif,
+4,Classe 4 — COPROPRIÉTAIRES ET TIERS,,Actif ou passif,
+40,Fournisseurs,,Actif ou passif,
+42,Personnel,,Actif ou passif,
+43,SÉCURITÉ SOCIALE &  AUTRES ORGANISMES SOCIAUX,,Passif,
+431,Sécurité sociale,,Passif,
+432,Autres organismes sociaux,,Passif,
+44,ÉTAT ET COLLECTIVITÉS TERRITORIALES ,,Actif,
+441,État et autres organismes - subventions à recevoir,,Actif,Tiers
+442,État - impôts et versements assimilés,,Actif ou passif,Tiers
+443,Collectivités territoriales – aides,,Actif ou passif,
+45,COLLECTIVITÉ DES COPROPRIÉTAIRES,,Actif ou passif,
+46,DÉBITEURS ET CRÉDITEUR DIVERS,,Actif ou passif,
+47,COMPTES D'ATTENTE,,Actif ou passif,
+471,Compte en attente d’imputation débiteur,,Actif ou passif,
+472,Compte en attente d’imputation créditeur,,Actif ou passif,
+48,COMPTES DE RÉGULARISATION,,Actif ou passif,
+486,Charges payées d'avance,,Actif,Tiers
+487,Produits encaissés d’avance,,Passif,Tiers
+49,DÉPRÉCIATIONS DES COMPTES DE TIERS,,Actif ou passif,
+491,Copropriétaires,,Passif,Tiers
+496,Personnes autres que les copropriétaires,,Passif,Tiers
+5,Classe 5 — Comptes financiers,,Actif,
+50,FONDS PLACÉS,,Actif,
+51,"Banques, ou fonds disponibles en banque pour le syndicat",,Actif,
+5112,Chèques à encaisser,,Actif ou passif,Attente d'encaissement
+5115,Paiements par carte à encaisser,,Actif ou passif,
+512,Banques,,Actif ou passif,
+53,Caisses,,Actif ou passif,
+530,Caisse,,Actif ou passif,Caisse
+6,Classe 6 — Comptes de charges,,Charge,
+60,ACHATS DE MATIÈRES ET FOURNITURES,,Charge,
+601,Eau,,Charge,Dépenses
+602,Électricité,,Charge,Dépenses
+603,"Chauffage, énergie et combustibles",,Charge,Dépenses
+604,Achats produits d'entretien et petits équipements,,Charge,Dépenses
+605,Matériel,,Charge,Dépenses
+606,Fournitures,,Charge,Dépenses
+61,SERVICES EXTÉRIEURS,,Charge,
+611,Nettoyage des locaux,,Charge,Dépenses
+612,Locations immobilières,,Charge,Dépenses
+613,Locations mobilières,,Charge,
+614,Contrats de maintenance,,Charge,Dépenses
+615,Entretien et petites réparations,,Charge,Dépenses
+616,Primes d'assurance,,Charge,Dépenses
+62,FRAIS D’ADMINISTRATION ET HONORAIRES,,Charge,
+621,Rémunération du syndic sur gestion copropriété,,Charge,
+6211,Rémunération du syndic,,Charge,
+6212,Débours,,Charge,
+6213,Frais postaux,,Charge,Dépenses
+622,Autres honoraires du syndic,,Charge,
+6221,Honoraires travaux,,Charge,Dépenses
+6222,Prestations particulières,,Charge,
+6223,Autres honoraires,,Charge,
+623,Rémunérations de tiers intervenants,,Charge,
+624,Frais du conseil syndical,,Charge,
+63,"IMPÔTS, TAXES ET VERSEMENTS ASSIMILÉS",,Charge,
+632,Taxe de balayage,,Charge,Dépenses
+633,Taxe foncière,,Charge,Dépenses
+634,Autre impôt et taxe,,Charge,Dépenses
+64,FRAIS DE PERSONNEL,,Charge,
+641,Salaires,,Charge,Dépenses
+642,Charges sociales et organismes sociaux,,Charge,Dépenses
+644,"Autres (médecine du travail, mutuelle, etc.)",,Charge,Dépenses
+65,MONTANT SPÉCIFIQUE ALLOUÉ AU CONSEIL SYNDICAL,"Montant spécifique alloué au conseil syndical, au sein du budget prévisionnel, pour l'exercice de sa délégation de pouvoirs",Charge,
+66,"CHARGES FINANCIÈRES DES EMPRUNTS, AGIOS OU AUTRES",,Charge,
+661,Remboursements d'annuités d'emprunt,,Charge,Dépenses
+662,Autres charges financières et agios,,Charge,
+67,CHARGES POUR TRAVAUX ET OPÉRATIONS EXCEPTIONNELLES,,Charge,
+671,Travaux décidés par l’assemblée générale,,Charge,Dépenses
+672,Travaux urgents,,Charge,Dépenses
+673,"Études techniques, diagnostic, consultation",,Charge,
+677,Pertes sur créances irrécouvrables,,Charge,
+678,Charges exceptionnelles,,Charge,
+68,DOTATIONS AUX DÉPRÉCIATIONS SUR CRÉANCES DOUTEUSES,,Charge,
+7,Classe 7 — Comptes de produits,,Produit,
+70,APPELS DE FONDS,,Produit,
+701,Provisions sur opérations courantes,,Produit,Recettes
+702,Provisions sur travaux de l’article 14-2 et opérations exceptionnelles,,Produit,
+703,Avances,,Produit,Recettes
+704,Remboursements d’annuités d’emprunts,,Produit,
+705,Études,,Produit,
+706,Provisions au titre de la délégation de pouvoirs accordée au conseil syndical,,Produit,Recettes
+7061,Provisions sur opérations courantes,,Produit,Recettes
+7062,Provisions sur travaux et opérations exceptionnelles,,Produit,
+71,AUTRES PRODUITS,,Produit,
+711,Subventions,,Produit,Recettes
+712,Emprunts,,Produit,Recettes
+713,Indemnités d’assurance,,Produit,
+714,Produits divers (dont intérêts légaux dus par les copropriétaires),,Produit,
+716,Produits financiers,,Produit,Recettes
+718,Produits exceptionnels,,Produit,
+78,REPRISES DE DÉPRÉCIATIONS SUR CRÉANCES DOUTEUSES,Reprises de dépréciations sur créances douteuses,Produit,
+8,Classe 8 ­— Comptes spéciaux,,,
+89,COMPTES DE BILAN,,,
+890,Bilan d'ouverture,,Actif ou passif,Ouverture
+891,Bilan de clôture,,Actif ou passif,Clôture
+9,Classe 9 — Comptes analytiques,,,
+99,Projets,,,Analytique

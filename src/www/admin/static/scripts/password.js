@@ -7,6 +7,12 @@
 
 	window.initPasswordField = function(suggest, password, password2)
 	{
+		if (typeof password == 'undefined') {
+			password = 'f_' + suggest;
+			password2 = password + '_confirm';
+			suggest = password + '_suggest';
+		}
+
 		pw_elm = (typeof password == 'string') ? document.getElementById(password) : password;
 		pw2_elm = (typeof password2 == 'string') ? document.getElementById(password2) : password2;
 		suggest_elm = (typeof suggest == 'string') ? document.getElementById(suggest) : suggest;
@@ -123,7 +129,13 @@
 	        return true;
 	    }
 
-	    if (!pw_elm.value.match(new RegExp(pw_elm.getAttribute('pattern'))))
+	    if (pw_elm.hasAttribute('pattern') && !pw_elm.value.match(new RegExp(pw_elm.getAttribute('pattern')))) // FIXME deprecated
+	    {
+	    	strength_elm.className = strength_elm.className.split(' ')[0] + ' fail';
+	        strength_elm.innerHTML = 'Trop court&nbsp;!';
+	        return true;
+	    }
+	    else if (pw_elm.hasAttribute('minlength') && pw_elm.value.length < pw_elm.getAttribute('minlength'))
 	    {
 	    	strength_elm.className = strength_elm.className.split(' ')[0] + ' fail';
 	        strength_elm.innerHTML = 'Trop court&nbsp;!';

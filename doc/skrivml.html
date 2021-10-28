@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Skriv Markup Language</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/css/bootstrap.min.css" />
+	<style type="text/css">
+	/* text colors */
+.red {
+	color: brown;
+}
+.blue {
+	color: blue;
+}
+
+/* titles */
+h2 {
+	margin-top: 2em;
+	border-bottom: 1px solid #ddd;
+}
+
+/* grey alert box */
+.alert-grey {
+	border-color: #ccc;
+	background-color: #eee;
+	color: #888;
+}
+
+/* footer */
+.footer {
+	background-color: #F5F5F5;
+	border-top: 1px solid #E5E5E5;
+	margin-top: 70px;
+	padding: 30px 0;
+	text-align: center;
+}
+.footer p {
+	color: #777;
+	margin-bottom: 0;
+}
+</style>
+</head>
+<body style="padding-top: 50px;" >
+
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<div class="container">
+			<a class="brand" href="https://markup.skriv.org/">Skriv Markup Language</a>
+		</div>
+	</div>
+</div>
+
+
+<div class="container">
+	<div class="row">
+		<div class="span3">
+			<div class="well" style="padding: 0; position: fixed;">
+				<ul class="nav nav-list">
+											<li><a href="https://markup.skriv.org/">Home</a></li>
+						<li class="divider"></li>
+										<li class="nav-header">Skriv Markup Language</li>
+					<li ><a href="https://markup.skriv.org/language/intro">Introduction &amp; Rationale</a></li>
+					<li class="active"><a href="https://markup.skriv.org/language/syntax">Official Syntax</a></li>
+					<li ><a href="https://markup.skriv.org/language/extensions">Official Extensions</a></li>
+					<li ><a href="https://markup.skriv.org/proposal/list">Extension Proposals</a></li>
+					<li class="divider"></li>
+					<li class="nav-header">Associated Services</li>
+					<li ><a href="https://markup.skriv.org/online/try">Try Skriv<sup>ML</sup> Online</a></li>
+					<li><a href="http://skriv.io">Webservice API</a></li>
+					<li class="divider"></li>
+					<li class="nav-header">PHP Implementation</li>
+					<li ><a href="https://markup.skriv.org/php/project">Download &amp; Contribute</a></li>
+					<li ><a href="https://markup.skriv.org/php/usage">Usage</a></li>
+					<li ><a href="https://markup.skriv.org/php/configuration">Configuration &amp; Callbacks</a></li>
+					<li class="muted">Extensions</li>
+					<li class="divider"></li>
+										<li ><a href="https://markup.skriv.org/skriv/use">Who uses Skriv Markup?</a></li>
+					<li><a href="mailto:contact@skriv.org">Contact</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="span9" style="min-height: 32em;">
+
+<h1>Official Syntax</h1>
+<hr />
+<div class="alert alert-grey">
+	<ol>
+		<li><a href="#introduction">Introduction</a>
+			<ol>
+				<li><a href="#version">Version</a></li>
+				<li><a href="#escaping">Escaping</a></li>
+				<li><a href="#note-about-spaces">Note about spaces</a></li>
+			</ol>
+		</li>
+		<li><a href="#paragraphs">Paragraphs</a></li>
+		<li><a href="#basic-styles">Basic styles</a>
+			<ol>
+				<li><a href="#italic">Italic</a></li>
+				<li><a href="#strong">Strong</a></li>
+				<li><a href="#underline">Underline</a></li>
+				<li><a href="#strikeout">Strikeout</a></li>
+				<li><a href="#monospace">Monospace</a></li>
+				<li><a href="#superscript">Superscript</a></li>
+				<li><a href="#subscript">Subscript</a></li>
+			</ol>
+		</li>
+		<li><a href="#titles">Titles</a>
+			<ol>
+				<li><a href="#titles-main">Main syntax</a></li>
+				<li><a href="#titles-identifiers">User-defined identifiers</a></li>
+			</ol>
+		</li>
+		<li><a href="#lists">Lists</a>
+			<ol>
+				<li><a href="#unordered-lists">Unordered lists</a></li>
+				<li><a href="#ordered-lists">Ordered lists</a></li>
+				<li><a href="#mixed-lists">Mixed lists</a></li>
+			</ol>
+		</li>
+		<li><a href="#links">Links</a></li>
+		<li><a href="#images">Images</a></li>
+		<li><a href="#tables">Tables</a></li>
+		<li><a href="#horizontal-rules">Horizontal rules</a></li>
+		<li><a href="#quotes">Quotes</a></li>
+		<li><a href="#footnotes">Footnotes</a></li>
+		<li><a href="#abbreviations">Abbreviations</a></li>
+		<li><a href="#preformatted">Preformatted text</a></li>
+		<li><a href="#verbatim">Verbatim text</a></li>
+		<li><a href="#code">Code</a></li>
+		<li><a href="#styled-paragraphs">Styled paragraphs</a></li>
+		<li><a href="#smileys-symbols">Smileys &amp; Symbols</a>
+			<ol>
+				<li><a href="#smileys">Smileys</a></li>
+				<li><a href="#symbols">Symbols</a></li>
+			</ol>
+		</li>
+		<li><a href="#extensions">Extensions</a>
+			<ol>
+				<li><a href="#extensions-inline">Inline</a></li>
+				<li><a href="#extensions-block">Block</a></li>
+			</ol>
+		</li>
+	</ol>
+</div>
+
+
+
+<h2 id="introduction">1. Introduction</h2>
+<p>Here is the official core of <strong>Skriv Markup</strong>'s syntax.</p>
+
+<h3 id="version">1.1 Version</h3>
+<p>The <strong>Skriv Markup</strong> syntax' current version is <b class="blue">alpha</b>.</p>
+
+<h3 id="escaping">1.2 Escaping</h3>
+<p>
+	All special characters are escaped. For instance, less-than (<tt>&lt;</tt>), greatear-than (<tt>&gt;</tt>)
+	and ampersand (<tt>&amp;</tt>) characters are transformed during HTML export (respectively to
+	<tt>&amp;lt;</tt>, <tt>&amp;gt;</tt> and <tt>&amp;amp;</tt>).
+</p>
+<p>
+	Sometimes, it's necessary to prevent some language interpretation, when you want to display something that
+	should be used as a markup. To do so, you just have to put a backslash (<tt>\</tt>) character in front of the markup.
+</p>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	The backslash character is commonly used to escape sequences in text streams, in many programming languages.
+	More, this character is rarely used in normal texts, so in shouldn't conflict with any other typed characters.
+</div>
+
+<h3 id="note-about-spaces">1.3 Note about spaces</h3>
+<p>
+	You'll see that some markups can take several parameters; in this case, the parameters are separated with a
+	pipe character (<b class="red">|</b>). You can add spaces before and/or after any parameter, they will be removed afterward.
+</p>
+<p>For example, these four lines produce the exact same link:</p>
+<pre><b class="red">[[</b>Skriv<b class="red">|</b>http://skriv.org<b class="red">]]</b>
+<b class="red">[[</b> Skriv <b class="red">|</b> http://skriv.org <b class="red">]]</b>
+<b class="red">[[</b>Skriv <b class="red">|</b> http://skriv.org<b class="red">]]</b>
+<b class="red">[[</b>Skriv <b class="red">|</b>http://skriv.org<b class="red">]]</b></pre>
+<p>
+	In fact, spaces are removed when they are obviously optional. These two lists produce the exact same result:
+</p>
+<pre><b class="red">*</b>AAA
+<b class="red">*</b>BBB
+
+<b class="red">*</b> AAA
+<b class="red">*</b> BBB</pre>
+<p>
+	As well as these two titles:
+</p>
+<pre><b class="red">==</b>Level 2 title<b class="red">==</b>
+<b class="red">==</b> Level 2 title <b class="red">==</b></pre>
+<p>
+	And for these tables:
+</p>
+<pre><b class="red">!!</b>Head 1<b class="red">!!</b>Head 2
+<b class="red">||</b>Cell 1<b class="red">||</b>Cell 2
+
+<b class="red">!!</b> Head 1 <b class="red">!!</b> Head 2
+<b class="red">||</b> Cell 1 <b class="red">||</b> Cell 2</pre>
+<p>
+	On the other hand, inline markups without parameters don't remove spaces. So these two lines are different:
+</p>
+<pre><b class="red">**</b>bold text<b class="red">**</b> and <b class="red">''</b>italic text<b class="red">''</b>
+<b class="red">**</b> bold text <b class="red">**</b> and <b class="red">''</b> italic text <b class="red">''</b></pre>
+
+
+
+<h2 id="paragraphs">2. Paragraphs</h2>
+<p>
+Out of special blocks, any text is placed inside a paragraph. Paragraphs are separated by one or more blank line.
+Inside a paragraph, line-breaks are kept as they are typed.
+</p>
+
+<div class="label">Skriv Markup</div>
+<pre>Here is the first paragraph.
+With two lines.
+
+Here is the second paragraph, with
+many
+carriage-returns.</pre>
+
+<div class="label">Result</div>
+<div class="alert alert-grey">
+	<p>
+		Here is the first paragraph.<br />
+		With two lines.
+	</p>
+	<p>
+		Here is the second paragraph, with<br />
+		many<br />
+		carriage-returns.
+	</p>
+</div>
+
+<div class="label">HTML</div>
+<pre>&lt;p&gt;
+    Here is the first paragraph.&lt;br /&gt;
+    With two lines.
+&lt;/p&gt;
+&lt;p&gt;
+    Here is the second paragraph, with&lt;br /&gt;
+    many&lt;br /&gt;
+    carriage-returns.
+&lt;/p&gt;</pre>
+
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		Paragraphs are so common that no explicit markup should be necessary to create them.
+	</p>
+	<p>
+		Keep line-breaks seems the best way to ensure a result as close as possible from what
+		the writer wants. This point of view is shared by <a href="http://github.github.com/github-flavored-markdown/" target="_blank">GitHub Flavored Markdown</a>.
+	</p>
+</div>
+
+
+
+<h2 id="basic-styles">3. Basic styles</h2>
+<p>
+	Inline styles are marked up using tags before and after the affected text. These tags are constituted by two identical characters.<br />
+	These markups can affect full-words only, they are not effective if they are written in the middle of a word.
+</p>
+<div class="label">Skriv Markup</div>
+<pre>works on**ly on full** words</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">works on**ly on full** words</div>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	Most of the time, it's totally pointless to apply a style on a chuck of a word. Usually, that could lead to a misunderstanding of the writer's will.
+	Here again, this point of view is shared by <a href="http://github.github.com/github-flavored-markdown/" target="_blank">GitHub Flavored Markdown</a>.</p>
+</div>
+
+<h3 id="italic">3.1 Italic</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">''</b>single quotes<b class="red">''</b> for italic</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <em>single quotes</em> for italic</div>
+<div class="label">HTML</div>
+<pre>two &lt;em&gt;single quotes&lt;/em&gt; for italic</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	For light emphasis, the doubled-single-quotes markup is widely used (MediaWiki). The doubled-slash characters (<tt>//</tt>),
+	used by Creole, is pretty logical; the shape of the slash character reminds the slanted aspect of italic writing.
+	But the visual impact on the text is overweening compared with the desired result.
+</div>
+
+<h3 id="strong">3.2 Strong</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">**</b>asterisks<b class="red">**</b> for bold</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <strong>asterisks</strong> for bold</div>
+<div class="label">HTML</div>
+<pre>two &lt;strong&gt;asterisks&lt;/strong&gt; for bold</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	Asterisks are commonly used for strong emphasis (Creole, Markdown, txt2tags, DokuWiki). They are also used in emails since the down of time.
+</div>
+
+<h3 id="underline">3.3 Underline</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">__</b>underscores<b class="red">__</b> for underline</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <u>underscores</u> for underline</div>
+<div class="label">HTML</div>
+<pre>two &lt;u&gt;underscores&lt;/u&gt; for underline</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>Adding underscores before and after is the perfect markup for underlining, as they are suggesting the beginning and the end of the under line.</p>
+	<p>This syntax is already used by Creole and DokuWiki.</p>
+</div>
+
+<h3 id="strikeout">3.4 Strikeout</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">--</b>minus signs<b class="red">--</b> for striking out</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <s>minus signs</s> for striking out</div>
+<div class="label">HTML</div>
+<pre>two &lt;s&gt;minus signs&lt;/s&gt; for striking out</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	The minus signs are good for striked out text, for the same reason than the underscores for underlining.
+</div>
+
+<h3 id="monospace">3.5 Monospace</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">##</b>hash signs<b class="red">##</b> for monospace</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <tt>hash signs</tt> for monospace</div>
+<div class="label">HTML</div>
+<pre>two &lt;tt&gt;hash signs&lt;/tt&gt; for monospace</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>Hash signs have a very special shape. Their more-or-less squared look is a valid metaphor for monospaced fonts.</p>
+	<p>This syntax is already used by Creole.</p>
+</div>
+
+<h3 id="superscript">3.6 Superscript</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">^^</b>caret characters<b class="red">^^</b> for exponent</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <sup>caret characters</sup> for exponent</div>
+<div class="label">HTML</div>
+<pre>two &lt;sup&gt;cart characters&lt;/sup&gt; for exponent</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>Caret characters are like little arrowheads indicating upside direction.</p>
+	<p>This syntax is already used by Creole.</p>
+</div>
+
+<h3 id="subscript">3.7 Subscript</h3>
+<div class="label">Skriv Markup</div>
+<pre>two <b class="red">,,</b>commas<b class="red">,,</b> for subscript</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">two <sub>commas</sub> for subscript</div>
+<div class="label">HTML</div>
+<pre>two &lt;sub&gt;commas&lt;/sub&gt; for subscript</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>On the contrary, commas are going under the text's baseline, thus they are suggesting to push down the text.</p>
+	<p>This syntax is already used by Creole.</p>
+</div>
+
+
+
+<h2 id="titles">4. Titles</h2>
+<h3 id="titles-main">4.1 Main syntax</h3>
+<p>
+	Titles are written using one to six equal signs (<tt>=</tt>) at the beginning of the line. One equal sign for a first level heading;
+	six equal signs for a sixth level heading.
+</p>
+<p>
+	For esthetical reasons, it's possible to add as many equal signs at the end of the line than at the beginning. They will be removed.<br />
+	Spaces are allowed between the markups and the title's text.
+</p>
+<p>
+	On HTML output, DOM identifier should be added. It should be possible to prepend a given prefix at the beginning of these identifiers.
+</p>
+
+<div class="label">Skriv Markup</div>
+<pre><b class="red">=</b>Level 1 heading
+<b class="red">==</b> Level 2 heading<b class="red">==</b>
+<b class="red">===</b>Level 3 heading <b class="red">===</b>
+<b class="red">====</b> Level 4 heading</pre>
+
+<div class="label">HTML</div>
+<pre>&lt;h1 id="Level-1-heading"&gt;Level 1 heading&lt;h1&gt;
+&lt;h2 id="Level-2-heading"&gt;Level 2 heading&lt;h2&gt;
+&lt;h3 id="Level-3-heading"&gt;Level 3 heading&lt;h3&gt;
+&lt;h4 id="Level-4-heading"&gt;Level 4 heading&lt;h4&gt;</pre>
+
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>Equals signs are a very widespread mean to write headings among wiki syntaxes (MediaWiki, Creole, txt2tags, DokuWiki).</p>
+	<p>It's a convenient writing, very fast to type. The visual impact is clear; with more equal signs at the beginning of the line, the title is more
+	   indented, indicating a sub-header.</p>
+	<p>Equals signs at the end of the line are optional, because some existing wiki syntaxes made it mandatory, some others avoid them.</p>
+</div>
+
+<h3 id="titles-identifiers">4.2 User-defined identifiers</h3>
+<p>
+	Because two titles may have the same text, two titles may have the same DOM identifier. It could be a real problem when creating
+	links pointing to these titles (even for automatically created table of contents).
+</p>
+<p>
+	To circumvent this problem, it is possible to override a title identifier by writing it at the end of the line, using the balanced markup.
+</p>
+<p>
+	It's always possible to disable this feature, by using the usual escaping character (backslash) before the equal signs, or by using the balanced markup all the time.
+</p>
+
+<div class="label">Skriv Markup</div>
+<pre><b class="red">===</b>Darth Vador
+<b class="red">===</b>Darth Vador<b class="red">===</b>
+<b class="red">===</b>Darth Vador<b class="red">===</b><b class="blue">your father</b>
+<b class="red">=</b>Darth Vador \= your father
+<b class="red">=</b>Darth Vador = your father<b class="red">=</b></pre>
+
+<div class="label">HTML</div>
+<pre>&lt;h3 id="Darth-Vador"&gt;Darth Vador&lt;/h3&gt;
+&lt;h3 id="Darth-Vador"&gt;Darth Vador&lt;/h3&gt;
+&lt;h3 id="your-father"&gt;Darth Vador&lt;/h3&gt;
+&lt;h1 id="Darth-Vador-your-father"&gt;Darth Vador = your father&lt;h1&gt;
+&lt;h1 id="Darth-Vador-your-father"&gt;Darth Vador = your father&lt;h1&gt;</pre>
+
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	This syntax is the simplest way to define special identifiers, without any fancy addition.
+</div>
+
+
+
+<h2 id="lists">5. Lists</h2>
+<h3 id="unordered-lists">5.1 Unordered lists</h3>
+<p>
+	Unordered lists are also known as “bulleted-lists”. They are written using asterisk characters (<tt>*</tt>), placed at the beginning of the lines.
+	There must be no space before the asterisks.
+</p>
+<p>
+	Sub-lists are created by typing more asterisks.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">*</b> Item 1
+<b class="red">*</b> Item 2
+<b class="red">**</b> Sub-item 2.1
+<b class="red">**</b> Sub-item 2.2
+<b class="red">***</b> Sub-item 2.2.1</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<ul>
+		<li>Item 1</li>
+		<li>Item 2
+			<ul>
+				<li>Sub-item 2.1</li>
+				<li>Sub-item 2.2
+					<ul>
+						<li>Sub-item 2.2.1</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+	</ul>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;ul&gt;
+    &lt;li&gt;Item 1&lt;/li&gt;
+    &lt;li&gt;Item 2
+        &lt;ul&gt;
+            &lt;li&gt;Sub-item 2.1&lt;/li&gt;
+            &lt;li&gt;Sub-item 2.2
+                &lt;ul&gt;
+                    &lt;li&gt;Sub-item 2.2.1&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>Asterisks character are commonly used to create lists (MediaWiki, Creole, Markdown, reStructuredText, POD, Asciidoc, Textile, WikiWikiWeb, TWiki, MoinMoin, Redmine, ...).</p>
+	<p>Adding more asterisks at the beginning of the line indent the text as a result. This indentation makes clear where the sublist is.</p>
+</div>
+
+<h3 id="ordered-lists">5.2 Ordered lists</h3>
+<p>
+	Items of ordered lists are displayed with an incremented number in front of them. They are written using hash signs (<tt>#</tt>),
+	placed at the beginning of the lines. There must be no space before the hash signs.
+</p>
+<p>
+	Sub-lists are created by typing more hash signs.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">#</b> Item 1
+<b class="red">#</b> Item 2
+<b class="red">##</b> Sub-item 2.1
+<b class="red">##</b> Sub-item 2.2
+<b class="red">###</b> Sub-item 2.2.1</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<ol>
+		<li>Item 1</li>
+		<li>Item 2
+			<ol>
+				<li>Sub-item 2.1</li>
+				<li>Sub-item 2.2
+					<ol>
+						<li>Sub-item 2.2.1</li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+	</ol>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;ul&gt;
+    &lt;li&gt;Item 1&lt;/li&gt;
+    &lt;li&gt;Item 2
+        &lt;ul&gt;
+            &lt;li&gt;Sub-item 2.1&lt;/li&gt;
+            &lt;li&gt;Sub-item 2.2
+                &lt;ol&gt;
+                    &lt;li&gt;Sub-item 2.2.1&lt;/li&gt;
+                &lt;/ol&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		The hash sign is a character used to represent numbers, so its usage is understandable for numbered lists.
+		It's also used by many other languages (MediaWiki, Creole, Textile, Redmine, ...).
+	</p>
+	<p>The same mechanisms than for unordered lists are applied, to keep a coherent syntax.</p>
+</div>
+
+<h3 id="mixed-lists">5.3 Mixed lists</h3>
+<p>
+	It is possible to mix ordered and unordered lists. The last character used determines the list's type.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">*</b> Item 1
+<b class="red">**</b> Sub-item 1.1
+<b class="red">**#</b> Sub-item 1.1.1
+<b class="red">**#</b> Sub-item 1.1.2
+<b class="red">**</b> Sub-item 1.2
+<b class="red">*#</b> Sub-item 1.3
+<b class="red">*</b> Item 2</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<ul>
+		<li>Item 1
+			<ul>
+				<li>Sub-item 1.1
+					<ol>
+						<li>Sub-item 1.1.1</li>
+						<li>Sub-item 1.1.2</li>
+					</ol>
+				</li>
+				<li>Sub-item 1.2</li>
+			</ul>
+			<ol>
+				<li>Sub-item 1.3</li>
+			</ol>
+		</li>
+		<li>Item 2</li>
+	</ul>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;ul&gt;
+    &lt;li&gt;Item 1
+        &lt;ul&gt;
+            &lt;li&gt;Sub-item 1.1
+                &lt;ol&gt;
+                    &lt;li&gt;Sub-item 1.1.1&lt;/li&gt;
+                    &lt;li&gt;Sub-item 1.1.2&lt;/li&gt;
+                &lt;/ol&gt;
+            &lt;/li&gt;
+            &lt;li&gt;Sub-item 1.2&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;ol&gt;
+            &lt;li&gt;Sub-item 2.2.1&lt;/li&gt;
+        &lt;/ol&gt;
+    &lt;/li&gt;
+    &lt;li&gt;Item 2&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+
+
+<h2 id="links">6. Links</h2>
+<p>
+	Links are explicitely defined using double-square brackets (<tt>[[&nbsp;]]</tt>). There must be at least the link destination, but it is also
+	possible to define its title first, separated from the link address with a pipe character (<tt>|</tt>).
+</p>
+<p>
+	When no title is given, the address is used as the title, shorten to 40 characters.
+</p>
+<p>
+	By default, every outgoing links (those containing "<tt>://</tt>" or starting with "<tt>//</tt>") SHOULD be set with
+	a <tt>target="_blank"</tt> and a <tt>rel="nofollow"</tt> attributes. This behaviour SHOULD be configurable.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">[[</b>/language/intro<b class="red">]]</b>
+<b class="red">[[</b>http://www.site.com/very/long/long/looong/url/as/you/never/saw<b class="red">]]</b>
+<b class="red">[[</b>Skriv Markup <b class="red">|</b> http://markup.skriv.org<b class="red">]]</b>
+<b class="red">[[</b>contact@skriv.org<b class="red">]]</b>
+<b class="red">[[</b>Contact<b class="red">|</b>contact@skriv.org<b class="red">]]</b></pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<a href="https://markup.skriv.org/language/intro">/language/intro</a><br />
+	<a href="http://www.site.com/very/long/long/looong/url/as/you/never/saw" target="_blank" rel="nofollow">http://site.com/very/long/long/looon...</a><br />
+	<a href="http://markup.skriv.org">Skriv Markup</a><br />
+	<a href="mailto:contact@skriv.org">contact@skriv.org</a><br />
+	<a href="mailto:contact@skriv.org">Contact</a>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;a href="https://markup.skriv.org/language/intro"&gt;/language/intro&lt;/a&gt;
+&lt;a href="http://www.site.com/very/long/long/looong/url/as/you/never/saw"
+   target="_blank" rel="nofollow"&gt;http://site.com/very/long/long/looon...&lt;/a&gt;
+&lt;a href="http://markup.skriv.org" target="_blank" rel="nofollow"&gt;Skriv Markup&lt;/a&gt;
+&lt;a href="mailto:contact@skriv.org"&gt;contact@skriv.org&lt;/a&gt;
+&lt;a href="mailto:contact@skriv.org"&gt;Contact&lt;/a&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		Square brackets are commonly used to represent some kind of reference (MediaWiki, Creole, Markdown, Asciidoc, DokuWiki, TWiki, MoinMoin, ...).
+		They are doubled to follow the <a href="https://markup.skriv.org/language/intro#rationale">Skriv rationale</a>.
+	</p>
+	<p>
+		When you read some text, the title of a link contains more direct information than its destination address.
+		That's why the title is written first, before the address, when defined.
+	</p>
+</div>
+
+
+
+<h2 id="images">7. Images</h2>
+<p>
+	Images' syntax follows the links' syntax. Double-curly brackets (<tt>{{&nbsp;}}</tt>) are used instead of double-square brackets,
+	to define the image location. An optional text can be set as the image alternative representation.
+</p>
+<div class="label">Skriv Markup</div>
+
+<pre><b class="red">{{</b>http://skriv.org/logo.png<b class="red">}}</b>
+<b class="red">{{</b>Skriv logo<b class="red">|</b>http://skriv.org/logo.png<b class="red">}}</b></pre>
+
+<div class="label">HTML</div>
+<pre>&lt;img src="http://skriv.org/logo.png" alt="http://skriv.org/logo.png" /&gt;
+&lt;img src="http://skriv.org/logo.png" alt="Skriv logo" /&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		Curly brackets are like square brackets, but with a more “artistic” shape. That's enough to distinguish images from regular links.
+	</p>
+	<p>
+		Double-curly brackets are already used by DokuWiki.
+	</p>
+</div>
+
+
+
+<h2 id="tables">8. Tables</h2>
+<p>
+	Skriv Markup helps you to create simple tables as quickly as possible. It is not intended to
+	generate complex tables with merged cells.
+</p>
+<p>
+	Each table row starts with a cell delimiter. There is two kinds of cell delimiter: double-pipe (<tt>||</tt>) for normal cells,
+	and double-exclamation marks (<tt>!!</tt>) for header cells. Every cell begins with a delimiter.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">!!</b> Header 1 <b class="red">!!</b> Header 2
+<b class="red">||</b> Cell 1   <b class="red">||</b> Cell 2
+<b class="red">||</b> Cell 3   <b class="red">||</b> Cell 4</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<table border="1">
+		<tr>
+			<th>Header 1</th>
+			<th>Header 2</th>
+		</tr>
+		<tr>
+			<td>Cell 1</td>
+			<td>Cell 2</td>
+		</tr>
+		<tr>
+			<td>Cell 3</td>
+			<td>Cell 4</td>
+		</tr>
+	</table>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Header 1&lt;/th&gt;
+        &lt;th&gt;Header 2&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Cell 1&lt;/td&gt;
+        &lt;td&gt;Cell 2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Cell 3&lt;/td&gt;
+        &lt;td&gt;Cell 4&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		The major goal with the table syntax was to provide a convenient way to create tables, without doing
+		<a href="http://en.wikipedia.org/wiki/Ascii_art" target="_blank">ascii-art</a>. That's the reason why there is only two
+		type of cells, no merged cells, and a very simple layout.
+	</p>
+	<p>
+		Pipes are the natural characters to create vertical separations between elements. It's perfect for table representation.
+		Exclamation marks have a similar shape, with a subtle difference to indicate headers.
+	</p>
+</div>
+
+
+
+<h2 id="horizontal-rules">9. Horizontal rules</h2>
+<p>
+	Horizontal rules are done by putting at least four minus signs on the same line, without anything else
+	on the line. There must be no space before the minus signs.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">----</b></pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<hr />
+</div>
+<div class="label">HTML</div>
+<pre>&lt;hr /&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	The four minus signs markup represent a line, like an horizontal separator in the page. It is used by a lot of other systems
+	(Creole, Markdown, reStructuredText, WikiWikiWeb, TWiki,&nbsp;...).
+</div>
+
+
+
+<h2 id="quotes">10. Quotes</h2>
+<p>
+	To write a quote, add a right angle bracket (<tt>&gt;</tt>) at the beginning of each line.
+	If you need many paragraphs inside the quote, just mark blank lines as well.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">&gt;</b> Quotes use right angle brackets.
+<b class="red">&gt;</b>
+<b class="red">&gt;</b> Paragraphs are managed as usual.
+<b class="red">&gt;</b> Line-breaks too.</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<blockquote>
+		<p>Quotes use right angle brackets.</p>
+		<p>
+			Paragraphs are managed as usual.<br />
+			Line-breaks too.
+		</p>
+	</blockquote>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;blockquote&gt;
+    &lt;p&gt;
+        Quotes use right angle brackets.
+    &lt;/p&gt;
+    &lt;p&gt;
+        Paragraphs are managed as usual.&lt;br /&gt;
+        Line-breaks too.
+    &lt;/p&gt;
+&lt;/blockquote&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	The right angle bracket character is a convenient mean to separate a quote from the rest
+	of the text (already used in Markdown).
+</div>
+
+
+
+<h2 id="footnotes">11. Footnotes</h2>
+<p>
+	Footnotes are used to add internal links inside a document, referencing some chunks of text that should
+	be listed at the bottom of the page.
+</p>
+<p>
+	They are defined using double-parenthesis (<tt>(( ))</tt>), where the footnote is referenced. Usually, footnotes
+	are identified by an incremented number; if you want to use a label in place of that number, write it first,
+	separated from the footnote's text by a pipe character (<tt>|</tt>).
+</p>
+<div class="label">Skriv Markup</div>
+<pre>Arthur C. Clarke is one of the best SF author <b class="red">((</b>just after Issac Asimov<b class="red">))</b>.
+
+The Ford T is the car of the century <b class="red">((</b>Source<b class="red">|</b>ahead Mini and Citroën DS, see
+[[Wikipedia|http://en.wikipedia.org/wiki/Car_of_the_Century]]<b class="red">))</b>, but everybody knows
+it should be the VW Beetle <b class="red">((</b>[[Wikipedia<b class="red">|</b>
+http://en.wikipedia.org/wiki/Volkswagen_Beetle]]<b class="red">))</b>.</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<p>
+		Arthur C. Clarke is one of the best SF author <sup><a href="#cite_note-1" id="cite_ref-1">1</a></sup>.
+	</p>
+	<p>
+		The Ford T is the car of the century <sup><a href="#cite_note-2" id="cite_ref-2">Source</a></sup>,
+		but everybody knows it should be the VW Beetle <sup><a href="#cite_note-3" id="cite_ref-3">3</a></sup>.
+	</p>
+</div>
+<div class="alert alert-grey">
+	<div>
+		<p><a href="cite_ref-1" id="cite_note-1">1</a>. juste after Isaac Asimov</p>
+		<p><a href="cite_ref-2" id="cite_note-2">Source</a>. ahead Mini and Citroën DS, see <a href="http://en.wikipedia.org/wiki/Car_of_the_Century">Wikipedia</a></p>
+		<p><a href="cite_ref-3" id="cite_note-3">3</a>. <a href="http://en.wikipedia.org/wiki/Volkswagen_Beetle">Wikipedia</a></p>
+	</div>
+</div>
+<div class="label">HTML</div>
+<pre>Arthur C. Clarke is one of the best SF author &lt;sup&gt;&lt;a href="#cite_note-1"
+id="cite_ref-1"&gt;1&lt;/a&gt;&lt;/sup&gt;.
+
+The Ford T is the car of the century &lt;sup&gt;&lt;a href="#cite_note-2"
+id="cite_ref-2"&gt;Source&lt;/a&gt;&lt;/sup&gt;, but everybody knows it should be the VW Beetle
+&lt;sup&gt;&lt;a href="#cite_note-3" id="cite_ref-3"&gt;3&lt;/a&gt;&lt;/sup&gt;.</pre>
+<pre>&lt;div class="footnotes"&gt;
+    &lt;p class="footnote"&gt;&lt;a href="cite_ref-1" id="cite_note-1"&gt;1&lt;/a&gt;. juste after
+ Isaac Asimov&lt;/p&gt;
+    &lt;p class="footnote"&gt;&lt;a href="cite_ref-2" id="cite_note-2"&gt;Source&lt;/a&gt;. ahead Mini
+ and Citroën DS, see &lt;a href="http://en.wikipedia.org/wiki/Car_of_the_Century"&gt;Wiki
+pedia&lt;/a&gt;&lt;/p&gt;
+    &lt;p class="footnote"&gt;&lt;a href="cite_ref-3" id="cite_note-3"&gt;3&lt;/a&gt;. &lt;a
+ href="http://en.wikipedia.org/wiki/Volkswagen_Beetle"&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		Parenthesis are used to write secondary content that it not crucial to the meaning of a text.
+		Using double-parenthesis indicates that footnotes are like “tertiary content”, even less important
+		so it can be put down at the end of the page.
+	</p>
+	<p>
+		Double-parenthesis are already used by DokuWiki.
+	</p>
+</div>
+
+
+
+<h2 id="abbreviations">12. Abbreviations</h2>
+<p>
+	Abbreviations are written using double-question marks (<tt>??</tt>). The abbreviation and its explaination
+	are separated by a pipe character (<tt>|</tt>).
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">??</b>EFF<b class="red">|</b>Electronic Frontier Foundation<b class="red">??</b></pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<abbr title="Electronic Frontier foundation">EFF</abbr>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;abbr title="Electronic Frontier foundation"&gt;EFF&lt;/abbr&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	Question marks are the symbol for interrogation and help. The purpose of this markup is
+	to provide some explaination about a term, so it fit very well.
+</div>
+
+
+
+<h2 id="preformatted">13. Preformatted text</h2>
+<p>
+	Preformatted texts are blocks of text rendered using monospace font. Line breaks are kept.
+	Skriv syntax is still interpreted.
+</p>
+<p>
+	To create a preformatted text block, just add a space character at the beginning of each line
+	of the block. In fact, once space is enough, but you can put as many spaces as you want.
+</p>
+<div class="label">Skriv Markup</div>
+<pre> At least one space at the beginning of each
+ line is enough to create a preformatted paragraph.
+ 
+ Skriv syntax **works**.</pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<pre style="background-color: #fff;">At least one space at the beginning of each
+line is enough to create a preformatted paragraph.
+
+Skriv syntax <strong>works</strong>.</pre>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;pre&gt;
+At least one space at the beginning of each
+line is enough to create a preformatted paragraph.
+
+Skriv syntax &lt;strong&gt;works&lt;/strong&gt;.
+&lt;/pre&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		Adding space characters at the beginning of the line is the fastest way to define a style
+		on a block of text. By indenting it from regular text, it gives a special meaning to the text.
+	</p>
+	<p>
+		MediaWiki already uses this writing to create preformatted text blocks.
+	</p>
+</div>
+
+
+
+<h2 id="verbatim">14. Verbatim text</h2>
+<p>
+	Verbatim text are preformatted text blocks without any interpretation.
+	They are written using triple-square brackets (<tt>[[[ ]]]</tt>).
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">[[[</b>
+Triple square brackets also create
+preformatted paragraphs.
+
+**Skriv** syntax is __not__ interpreted.
+<b class="red">]]]</b></pre>
+<div class="label">Output</div>
+<div class="alert alert-grey">
+	<pre style="background-color: #fff;">Triple square brackets also create
+preformatted paragraphs.
+
+**Skriv** syntax is __not__ interpreted.</pre>
+</div>
+<div class="label">HTML</div>
+<pre>&lt;pre&gt;
+Triple square brackets also create
+preformatted paragraphs.
+
+**Skriv** syntax is __not__ interpreted.
+&lt;/pre&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	The angular shape of square bracket characters is a good reminder of verbatim
+	texts' aspect (separate block, monospace font). The usage of opening and closing
+	square brackets is perfect to mark the block's boundaries.
+</div>
+
+
+
+<h2 id="code">15. Code</h2>
+<p>
+	As for verbatim text, Skriv syntax is not interpreted inside code blocks.
+	The difference between a verbatim text block and a code block is the presence
+	of the programming language's name after the three opening square brackets
+	(there could be spaces between the brackets and the language's name, but it's
+	not a mandatory).
+</p>
+<p>
+	Syntax highlighting is let to the interpreter will.
+</p>
+<div class="label">Skriv Markup</div>
+
+<pre><b class="red">[[[</b> <b class="blue">php</b>
+class Foo {
+    public function show() {
+        print("bar\n");
+    }
+}
+<b class="red">]]]</b></pre>
+
+<div class="label">Output</div>
+
+<pre class="prettyprint linenums"><code class="language-php">class Foo {
+    public function show() {
+        print("bar\n");
+    }
+}</code></pre>
+
+<div class="label">HTML</div>
+
+<pre>&lt;pre&gt;&lt;code class="language-php"&gt;
+class Foo {
+    public function show() {
+        print("bar\n");
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;</pre>
+
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	<p>
+		Since code blocks content is not interpreted, they are only a special case of verbatim text blocks.
+		So it's logical to keep usage of triple-square brackets.
+	</p>
+	<p>
+		Code blocks are rendered as a <tt>&lt;code&gt;</tt> inside a <tt>&lt;pre&gt;</tt> tag, because it's the
+		<a href="http://dev.w3.org/html5/spec-author-view/the-code-element.html#the-code-element" target="_blank">recommended
+		method in HTML 5</a>. When syntax highlighting is activated, this markup is not a mandatory.
+	</p>
+</div>
+
+
+
+<h2 id="styled-paragraphs">16. Styled paragraphs</h2>
+<p>
+	This syntax is a convenient way to apply some CSS styles to paragraphs. Styled blocks are
+	written between triple-curly brackets (<tt>{{{ }}}</tt>). All paragraphs
+	inside will inherit the specified styles. CSS classes are typed just after the opening brackets.
+</p>
+<p>
+	It is possible to nest styled paragraphs. Just add triple-curly brackets-enclosed blocks inside
+	existing ones. For a better readability, you can add any number of spaces and/or curly brackets
+	before the CSS class names; the sole obligation is to start the lines with three opening curly
+	brackets and three closing curly brackets.
+</p>
+<div class="label">Skriv Markup</div>
+
+<pre><b class="red">{{{</b><b class="blue">css_class1 css_class2</b>
+CSS classes apply to all paragraphs.
+
+Whatever their ''number''.
+
+<b class="red">{{{ {{{</b> <b class="blue">css_class3</b>
+This paragraph has the **3 CSS classes**.
+<b class="red">}}} }}}
+}}}</b></pre>
+
+<div class="label">HTML</div>
+<pre>&lt;div class="css_class1 css_class2"&gt;
+    &lt;p&gt;
+        CSS classes apply to all paragraphs.
+    &lt;/p&gt;
+    &lt;p&gt;
+        Whatever their &lt;em&gt;number&lt;/em&gt;.
+    &lt;/p&gt;
+    &lt;div class="css_class3"&gt;
+        &lt;p&gt;
+            This paragraph has the &lt;strong&gt;3 CSS classes&lt;/strong&gt;.
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+        Curly brackets are undeniably bound to CSS syntax. Every web developers have a mental
+	connection between CSS instructions and curly brackets.
+</div>
+
+
+
+<h2 id="smileys-symbols">17. Smileys &amp; Symbols</h2>
+<p>
+	Skriv Markup provide helper scriptures, for adding special characters that are not easy to write with a regular keyboard.
+	These characters are useful to add small illustrations to the text.
+</p>
+
+<h3 id="smileys">17.1 Smileys</h3>
+<table class="table table-striped table-bordered table-condensed">
+	<tr>
+		<td style="text-align: right;"><tt>:-)</tt></td>
+		<td>☺</td>
+		<td style="text-align: right;"><tt>:-(</tt></td>
+		<td>☹</td>
+		<td style="text-align: right;"><tt>:-D</tt></td>
+		<td>😃</td>
+		<td style="text-align: right;"><tt>:-p</tt></td>
+		<td>😋</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:-|</tt></td>
+		<td>😐</td>
+		<td style="text-align: right;"><tt>;-)</tt></td>
+		<td>😉</td>
+		<td style="text-align: right;"><tt>:-o</tt></td>
+		<td>😲</td>
+		<td style="text-align: right;"><tt>:-x</tt></td>
+		<td>😶</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:'-(</tt></td>
+		<td>😥</td>
+		<td style="text-align: right;"><tt>:-@</tt></td>
+		<td>😠</td>
+		<td style="text-align: right;"><tt>:-*</tt></td>
+		<td>😘</td>
+		<td colspan="2"></td>
+	</tr>
+</table>
+
+<h3 id="symbols">17.2 Symbols</h3>
+<table class="table table-striped table-bordered table-condensed">
+	<tr>
+		<td style="text-align: right;"><tt>:sun:</tt></td>
+		<td>☀</td>
+		<td style="text-align: right;"><tt>:cloud:</tt></td>
+		<td>☁</td>
+		<td style="text-align: right;"><tt>:umbrella:</tt></td>
+		<td>☂</td>
+		<td style="text-align: right;"><tt>:star:</tt></td>
+		<td>★</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:phone:</tt></td>
+		<td>☎</td>
+		<td style="text-align: right;"><tt>:check:</tt></td>
+		<td>✔</td>
+		<td style="text-align: right;"><tt>:mark:</tt></td>
+		<td>✖</td>
+		<td style="text-align: right;"><tt>:cross:</tt></td>
+		<td>✚</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:skull:</tt></td>
+		<td>☠</td>
+		<td style="text-align: right;"><tt>:atom:</tt></td>
+		<td>⚛</td>
+		<td style="text-align: right;"><tt>:radioactive:</tt></td>
+		<td>☢</td>
+		<td style="text-align: right;"><tt>:biohazard:</tt></td>
+		<td>☣</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:moon:</tt></td>
+		<td>☽</td>
+		<td style="text-align: right;"><tt>:square:</tt></td>
+		<td>■</td>
+		<td style="text-align: right;"><tt>:circle:</tt></td>
+		<td>●</td>
+		<td style="text-align: right;"><tt>:triangle:</tt></td>
+		<td>▲</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:arrow:</tt></td>
+		<td>➔</td>
+		<td style="text-align: right;"><tt>:arrowhead:</tt></td>
+		<td>▶</td>
+		<td style="text-align: right;"><tt>:bullet:</tt></td>
+		<td>◉</td>
+		<td style="text-align: right;"><tt>:love:</tt></td>
+		<td>♥</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:heart:</tt></td>
+		<td>♥</td>
+		<td style="text-align: right;"><tt>:spade:</tt></td>
+		<td>♠</td>
+		<td style="text-align: right;"><tt>:diamond:</tt></td>
+		<td>♦</td>
+		<td style="text-align: right;"><tt>:club:</tt></td>
+		<td>♣</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:note:</tt></td>
+		<td>♩</td>
+		<td style="text-align: right;"><tt>:recycle:</tt></td>
+		<td>♻</td>
+		<td style="text-align: right;"><tt>:flag:</tt></td>
+		<td>⚑</td>
+		<td style="text-align: right;"><tt>:scale:</tt></td>
+		<td>⚖</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:warning:</tt></td>
+		<td>⚠</td>
+		<td style="text-align: right;"><tt>/!\</tt></td>
+		<td>⚠</td>
+		<td style="text-align: right;"><tt>:peace:</tt></td>
+		<td>☮</td>
+		<td style="text-align: right;"><tt>:yinyang:</tt></td>
+		<td>☯</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:clock:</tt></td>
+		<td>⌚</td>
+		<td style="text-align: right;"><tt>:hourglass:</tt></td>
+		<td>⌛</td>
+		<td style="text-align: right;"><tt>:command:</tt></td>
+		<td>⌘</td>
+		<td style="text-align: right;"><tt>:enter:</tt></td>
+		<td>⎆</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:infinity:</tt></td>
+		<td>∞</td>
+		<td colspan="6"></td>
+	</tr>
+</table>
+<table class="table table-striped table-bordered table-condensed">
+	<tr>
+		<td style="text-align: right;"><tt>:dice1:</tt></td>
+		<td>⚀</td>
+		<td style="text-align: right;"><tt>:dice2:</tt></td>
+		<td>⚁</td>
+		<td style="text-align: right;"><tt>:dice3:</tt></td>
+		<td>⚂</td>
+		<td style="text-align: right;"><tt>:dice4:</tt></td>
+		<td>⚃</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:dice5:</tt></td>
+		<td>⚄</td>
+		<td style="text-align: right;"><tt>:dice6:</tt></td>
+		<td>⚅</td>
+		<td colspan="4"></td>
+	</tr>
+</table>
+<table class="table table-striped table-bordered table-condensed">
+	<tr>
+		<td style="text-align: right;"><tt>:_1/2_:</tt></td>
+		<td>½</td>
+		<td style="text-align: right;"><tt>:_1/3_:</tt></td>
+		<td>⅓</td>
+		<td style="text-align: right;"><tt>:_2/3_:</tt></td>
+		<td>⅔</td>
+		<td style="text-align: right;"><tt>:_1/4_:</tt></td>
+		<td>¼</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_3/4_:</tt></td>
+		<td>¾</td>
+		<td style="text-align: right;"><tt>:_1/5_:</tt></td>
+		<td>⅕</td>
+		<td style="text-align: right;"><tt>:_2/5_:</tt></td>
+		<td>⅖</td>
+		<td style="text-align: right;"><tt>:_3/5_:</tt></td>
+		<td>⅗</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_4/5_:</tt></td>
+		<td>⅘</td>
+		<td colspan="6"></td>
+	</tr>
+</table>
+<table class="table table-striped table-bordered table-condensed">
+	<tr>
+		<td style="text-align: right;"><tt>:_1_:</tt></td>
+		<td>➊</td>
+		<td style="text-align: right;"><tt>:_2_:</tt></td>
+		<td>➋</td>
+		<td style="text-align: right;"><tt>:_3_:</tt></td>
+		<td>➌</td>
+		<td style="text-align: right;"><tt>:_4_:</tt></td>
+		<td>➍</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_5_:</tt></td>
+		<td>➎</td>
+		<td style="text-align: right;"><tt>:_6_:</tt></td>
+		<td>➏</td>
+		<td style="text-align: right;"><tt>:_7_:</tt></td>
+		<td>➐</td>
+		<td style="text-align: right;"><tt>:_8_:</tt></td>
+		<td>➑</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_9_:</tt></td>
+		<td>➒</td>
+		<td style="text-align: right;"><tt>:_10_:</tt></td>
+		<td>➓</td>
+		<td style="text-align: right;"><tt>:_11_:</tt></td>
+		<td>⓫</td>
+		<td style="text-align: right;"><tt>:_12_:</tt></td>
+		<td>⓬</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_13_:</tt></td>
+		<td>⓭</td>
+		<td style="text-align: right;"><tt>:_14_:</tt></td>
+		<td>⓮</td>
+		<td style="text-align: right;"><tt>:_15_:</tt></td>
+		<td>⓯</td>
+		<td style="text-align: right;"><tt>:_16_:</tt></td>
+		<td>⓰</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_17_:</tt></td>
+		<td>⓱</td>
+		<td style="text-align: right;"><tt>:_18_:</tt></td>
+		<td>⓲</td>
+		<td style="text-align: right;"><tt>:_19_:</tt></td>
+		<td>⓳</td>
+		<td style="text-align: right;"><tt>:_20_:</tt></td>
+		<td>⓴</td>
+	</tr>
+</table>
+<table class="table table-striped table-bordered table-condensed">
+	<tr>
+		<td style="text-align: right;"><tt>:_A_:</tt></td>
+		<td>Ⓐ</td>
+		<td style="text-align: right;"><tt>:_B_:</tt></td>
+		<td>Ⓑ</td>
+		<td style="text-align: right;"><tt>:_C_:</tt></td>
+		<td>Ⓒ</td>
+		<td style="text-align: right;"><tt>:_D_:</tt></td>
+		<td>Ⓓ</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_E_:</tt></td>
+		<td>Ⓔ</td>
+		<td style="text-align: right;"><tt>:_F_:</tt></td>
+		<td>Ⓕ</td>
+		<td style="text-align: right;"><tt>:_G_:</tt></td>
+		<td>Ⓖ</td>
+		<td style="text-align: right;"><tt>:_H_:</tt></td>
+		<td>Ⓗ</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_I_:</tt></td>
+		<td>Ⓘ</td>
+		<td style="text-align: right;"><tt>:_J_:</tt></td>
+		<td>Ⓙ</td>
+		<td style="text-align: right;"><tt>:_K_:</tt></td>
+		<td>Ⓚ</td>
+		<td style="text-align: right;"><tt>:_L_:</tt></td>
+		<td>Ⓛ</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_M_:</tt></td>
+		<td>Ⓜ</td>
+		<td style="text-align: right;"><tt>:_N_:</tt></td>
+		<td>Ⓝ</td>
+		<td style="text-align: right;"><tt>:_O_:</tt></td>
+		<td>Ⓞ</td>
+		<td style="text-align: right;"><tt>:_P_:</tt></td>
+		<td>Ⓟ</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_Q_:</tt></td>
+		<td>Ⓠ</td>
+		<td style="text-align: right;"><tt>:_R_:</tt></td>
+		<td>Ⓡ</td>
+		<td style="text-align: right;"><tt>:_S_:</tt></td>
+		<td>Ⓢ</td>
+		<td style="text-align: right;"><tt>:_T_:</tt></td>
+		<td>Ⓣ</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_U_:</tt></td>
+		<td>Ⓤ</td>
+		<td style="text-align: right;"><tt>:_V_:</tt></td>
+		<td>Ⓥ</td>
+		<td style="text-align: right;"><tt>:_W_:</tt></td>
+		<td>Ⓦ</td>
+		<td style="text-align: right;"><tt>:_X_:</tt></td>
+		<td>Ⓧ</td>
+	</tr>
+	<tr>
+		<td style="text-align: right;"><tt>:_Y_:</tt></td>
+		<td>Ⓨ</td>
+		<td style="text-align: right;"><tt>:_Z_:</tt></td>
+		<td>Ⓩ</td>
+		<td colspan="4"></td>
+	</tr>
+</table>
+
+
+
+<h2 id="extensions">18. Extensions</h2>
+<p>
+	Skriv Markup has an extension mechanism, designed to add new features to the language without
+	modifying its basic syntax. Extensions may also be called “plugins”.
+</p>
+<p>
+	Extensions are validated before becoming a part of the official Skriv Markup syntax. Official extensions
+	SHOULD be available in any Skriv Markup implementation, but they COULD be deactivated at will.<br />
+	Unofficial extensions MAY be activated at will.
+</p>
+<p>
+	Look at the <a href="https://markup.skriv.org/language/extensions">page about extensions</a> to get the list of validated plugins.
+</p>
+
+<h3 id="extensions-inline">18.1 Inline</h3>
+<p>
+	Inline extensions are written using double-angle brackets (<tt>&lt;&lt; &gt;&gt;</tt>). The extension's
+	name must be written just after the opening brackets. If the plugin needs some parameters, they are
+	added just after, separated by pipe (<tt>|</tt>) characters.
+</p>
+<p>
+	Here is an example plugin, which goal is to insert the given number of “lorem ipsum” paragraphs.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">&lt;&lt;</b><b class="blue">lipsum</b><b class="red">|</b>2<b class="red">&gt;&gt;</b></pre>
+<div class="label">HTML</div>
+<pre>&lt;p&gt;
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque leo sem,
+    commodo quis tempus luctus, tempor vel libero. Phasellus rutrum ipsum accumsan
+    mauris gravida nec ultricies ante mattis. Ut et nibh neque.
+&lt;/p&gt;
+&lt;p&gt;
+    Praesent pulvinar rhoncus tincidunt. Ut eleifend sollicitudin nibh sed
+    porttitor. In hac habitasse platea dictumst. Etiam bibendum mi id ligula
+    blandit pulvinar et quis neque. Duis sagittis tempus tellus at rutrum.
+&lt;/p&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	Angle brackets are not used for any other element of the Skriv Markup syntax.
+	However, they are immediately identified as special markup, because of their usage in HTML.
+</div>
+
+
+<h3 id="extensions-block">18.2 Block</h3>
+<p>
+	Block extensions are very similar to inline ones. They are delimited by triple-angle brackets
+	(<tt>&lt;&lt;&lt; &gt;&gt;&gt;</tt>), with the name and possible options just behind the opening
+	brackets.
+</p>
+<p>
+	Here is an example plugin, which translates the given text. The first parameter is the input language,
+	the second parameter is the output language.
+</p>
+<div class="label">Skriv Markup</div>
+<pre><b class="red">&lt;&lt;&lt;</b><b class="blue">translate</b><b class="red">|</b>french<b class="red">|</b>english
+écrire, travailler, organiser
+<b class="red">&gt;&gt;&gt;</b></pre>
+<div class="label">HTML</div>
+<pre>&lt;p&gt;
+    write, work, organize
+&lt;/p&gt;</pre>
+<div class="label label-info">Reasoning</div>
+<div class="alert alert-info">
+	Same reasoning than for inline extensions. Triple-characters are used for blocks as usual.
+</div>
+
+
+			</div>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>
+				© 2013, Amaury Bouchard | <a href="http://skriv.org">Skriv</a> [write/work/organize]
+			</p>
+		</div>
+	</footer>
+
+
+</body>
+</html>

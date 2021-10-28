@@ -1,11 +1,12 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Categories;
+
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-$cats = new Membres\Categories;
 $champs = $config->get('champs_membres');
 
 if (f('save'))
@@ -19,16 +20,16 @@ if (f('save'))
     {
         try
         {
-            if ($session->canAccess('membres', Membres::DROIT_ADMIN))
+            if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN))
             {
-                $id_categorie = f('id_categorie');
+                $id_category = f('id_category');
             }
             else
             {
-                $id_categorie = $config->get('categorie_membres');
+                $id_category = $config->get('categorie_membres');
             }
 
-            $data = ['id_categorie' => $id_categorie];
+            $data = ['id_category' => $id_category];
 
             foreach ($champs->getAll() as $key=>$dismiss)
             {
@@ -48,10 +49,12 @@ if (f('save'))
 
 $tpl->assign('id_field_name', $config->get('champ_identifiant'));
 
+$tpl->assign('id_field_name', $config->get('champ_identifiant'));
+
 $tpl->assign('passphrase', Utils::suggestPassword());
 $tpl->assign('champs', $champs->getAll());
 
-$tpl->assign('membres_cats', $cats->listSimple());
-$tpl->assign('current_cat', f('id_categorie') ?: $config->get('categorie_membres'));
+$tpl->assign('membres_cats', Categories::listSimple());
+$tpl->assign('current_cat', f('id_category') ?: $config->get('categorie_membres'));
 
 $tpl->display('admin/membres/ajouter.tpl');

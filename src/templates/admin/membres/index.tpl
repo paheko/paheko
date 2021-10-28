@@ -13,7 +13,7 @@
         <select name="cat" id="f_cat" onchange="this.form.submit();">
             <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
         {foreach from=$categories key="id" item="nom"}
-            {if $session->canAccess('membres', Membres::DROIT_ECRITURE)
+            {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)
                 || !array_key_exists($id, $hidden_categories)}
             <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
             {/if}
@@ -61,7 +61,7 @@
 
             <td class="actions">
                 {linkbutton label="Fiche membre" shape="user" href="!membres/fiche.php?id=%d"|args:$row._user_id}
-                {if $session->canAccess('membres', Membres::DROIT_ECRITURE)}
+                {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
                     {linkbutton label="Modifier" shape="edit" href="!membres/modifier.php?id=%d"|args:$row._user_id}
                 {/if}
             </td>
@@ -70,7 +70,7 @@
 
     </tbody>
 
-    {if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+    {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
         {include file="admin/membres/_list_actions.tpl" colspan=count($list->getHeaderColumns())+$can_edit+1}
     {/if}
 

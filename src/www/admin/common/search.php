@@ -9,14 +9,18 @@ if (empty($target) || !in_array($target, Recherche::TARGETS)) {
 	throw new UserException('Cible inconnue');
 }
 
+$access_section = $target == 'compta' ? $session::SECTION_ACCOUNTING : $session::SECTION_USERS;
+
 $recherche = new Recherche;
 
 $query = (object) [
 	'query' => f('q') ? json_decode(f('q'), true) : null,
-	'order' => f('order'),
+	'order' => f('order') ?: $recherche->getDefaultOrder($target),
 	'limit' => f('limit') ?: 100,
-	'desc'  => (bool) f('desc'),
+	'desc'  => $recherche->getDefaultDesc($target),
 ];
+
+$query->desc = (bool) f('desc');
 
 $text_query = trim(qg('qt'));
 $result = null;
@@ -56,10 +60,10 @@ elseif ($id && empty($query->query))
 // Recherche SQL
 if (f('sql_query')) {
 	// Only admins can run custom queries, others can only run saved queries
-	$session->requireAccess($target, Membres::DROIT_ADMIN);
+	$session->requireAccess($access_section, $session::ACCESS_ADMIN);
 	$sql_query = f('sql_query');
 
-	if ($session->canAccess('config', Membres::DROIT_ADMIN)) {
+	if ($session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)) {
 		$is_unprotected = (bool) f('unprotected');
 	}
 	else {
@@ -78,13 +82,13 @@ if ($query->query || $sql_query) {
 		}
 
 	   $result = $recherche->searchSQL($target, $sql, null, false, $is_unprotected);
+
+		if (f('to_sql')) {
+			$sql_query = $sql;
+		}
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());
-	}
-
-	if (f('to_sql')) {
-		$sql_query = $sql;
 	}
 }
 
@@ -94,7 +98,7 @@ if (null !== $result)
 		Utils::redirect(ADMIN_URL . 'membres/fiche.php?id=' . (int)$result[0]->_user_id);
 	}
 
-	if (f('save') && !$form->hasErrors())
+	if ((f('save_new') || f('save')) && !$form->hasErrors())
 	{
 		if (!$sql_query) {
 			$type = Recherche::TYPE_JSON;
@@ -106,7 +110,7 @@ if (null !== $result)
 			$type = Recherche::TYPE_SQL;
 		}
 
-		if ($id) {
+		if ($id && !f('save_new')) {
 			$recherche->edit($id, [
 				'type'    => $type,
 				'contenu' => $sql_query ?: $query,
@@ -119,7 +123,7 @@ if (null !== $result)
 			$id = $recherche->add($label, $user->id, $type, $target, $sql_query ?: $query);
 		}
 
-		$url = $target == 'compta' ? '/admin/acc/saved_searches.php?id=' : '/admin/membres/recherches.php?id=';
+		$url = $target == 'compta' ? '!acc/saved_searches.php?edit=' : '!membres/recherches.php?edit=';
 		Utils::redirect($url . $id);
 	}
 
@@ -184,7 +188,7 @@ elseif ($target === 'compta')
 }
 
 $columns = $recherche->getColumns($target);
-$is_admin = $session->canAccess($target, Membres::DROIT_ADMIN);
+$is_admin = $session->canAccess($access_section, $session::ACCESS_ADMIN);
 $schema = $recherche->schema($target);
 
 $tpl->assign(compact('query', 'sql_query', 'result', 'columns', 'is_admin', 'schema', 'search', 'target', 'is_unprotected'));

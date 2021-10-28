@@ -70,8 +70,7 @@
 				<td>{if !$recherche.id_membre}Publique{else}Privée{/if}</td>
 				<td class="actions">
 					{linkbutton href="%s?id=%d"|args:$search_url,$recherche.id shape="search" label="Rechercher"}
-					{if $recherche.id_membre || $session->canAccess($target, Membres::DROIT_ADMIN)}
-						{linkbutton href="?duplicate=%d"|args:$recherche.id shape="export" label="Dupliquer"}
+					{if $recherche.id_membre || $session->canAccess($access_section, $session::ACCESS_ADMIN)}
 						{linkbutton href="?edit=%d"|args:$recherche.id shape="edit" label="Modifier"}
 						{linkbutton href="?delete=%d"|args:$recherche.id shape="delete" label="Supprimer"}
 					{/if}

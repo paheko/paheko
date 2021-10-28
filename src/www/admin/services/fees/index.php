@@ -16,7 +16,7 @@ if (!$service) {
 
 $fees = $service->fees();
 
-$form->runIf($session->canAccess('membres', Membres::DROIT_ADMIN) && f('save'), function () use ($service) {
+$form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && f('save'), function () use ($service) {
 	$fee = new Fee;
 	$fee->id_service = $service->id();
 	$fee->importForm();

@@ -142,7 +142,6 @@ class Fee extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => 'm.' . $identity,
-				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE %%s', $identity),
 			],
 			'paid' => [
 				'label' => 'Payé ?',
@@ -165,19 +164,24 @@ class Fee extends Entity
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
 		$conditions = sprintf('su.id_fee = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
-			AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)', $this->id());
+			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->groupBy('su.id_user');
 		$list->orderBy('date', true);
 		$list->setCount('COUNT(DISTINCT su.id_user)');
+
+		$list->setExportCallback(function (&$row) {
+			$row->paid_amount = $row->paid_amount ? Utils::money_format($row->paid_amount, '.', '', false) : null;
+		});
+
 		return $list;
 	}
 
 	public function unpaidUsersList(): DynamicList
 	{
 		$list = $this->paidUsersList();
-		$conditions = sprintf('su.id_fee = %d AND su.paid = 0 AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)', $this->id());
+		$conditions = sprintf('su.id_fee = %d AND su.paid = 0 AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}
@@ -185,7 +189,7 @@ class Fee extends Entity
 	public function expiredUsersList(): DynamicList
 	{
 		$list = $this->paidUsersList();
-		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date() AND m.id_categorie NOT IN (SELECT id FROM membres_categories WHERE cacher = 1)', $this->id());
+		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
 	}

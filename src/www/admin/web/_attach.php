@@ -3,16 +3,16 @@ namespace Garradin;
 
 require_once __DIR__ . '/_inc.php';
 
-use Garradin\Web;
+use Garradin\Web\Web;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 
 require_once __DIR__ . '/_inc.php';
 
-$session->requireAccess($session::SECTION_WEB, Membres::DROIT_ECRITURE);
+$session->requireAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 
-$page = Web::get((int) qg('page'));
+$page = Web::get(qg('p') ?: '');
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -20,15 +20,18 @@ if (!$page) {
 
 $csrf_key = 'attach_' . $page->id();
 
-$form->runIf('delete', function () use ($page) {
-	$file = Files::get((int) f('delete'));
+$form->runIf('delete', function () use ($page, $session) {
+	$path = Utils::dirname($page->file_path) . '/' . f('delete');
+	$file = Files::get($path);
 
-	if (!$file->getLinkedId($file::LINK_FILE) == $page->id()) {
-		throw new UserException('Ce fichier n\'est pas lié à cette page');
+	if (!$file || !$file->checkDeleteAccess($session)) {
+		throw new UserException('Vous ne pouvez pas supprimer ce fichier');
 	}
 
 	$file->delete();
-}, $csrf_key, Utils::getSelfURI());
+
+	Utils::redirect(Utils::getSelfURI());
+}, $csrf_key);
 
 
 $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
@@ -36,10 +39,7 @@ $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
 		throw new UserException('Un seul fichier peut être envoyé en même temps.');
 	}
 
-	$file = File::upload('file');
-
-	// Lier le fichier à la page wiki
-	$file->linkTo(File::LINK_FILE, $page->id());
+	$new_file = File::upload(Utils::dirname($page->file_path), 'file');
 
 	if (f('uploadHelper_status') !== null)
 	{
@@ -48,10 +48,9 @@ $form->runIf(f('upload') || f('uploadHelper_mode'), function () use ($page) {
 			'redirect'  =>  $uri,
 			'callback'  =>  'insertHelper',
 			'file'      =>  [
-				'image' =>  (int)$file->image,
-				'id'    =>  (int)$file->id(),
-				'nom'   =>  $file->name,
-				'thumb' =>  $file->image ? $file->thumb_url() : false
+				'image' =>  $new_file->image,
+				'name'  =>  $new_file->name,
+				'thumb' =>  $new_file->image ? $new_file->thumb_url() : false
 			],
 		]);
 		exit;
@@ -63,7 +62,6 @@ if (f('uploadHelper_mode') !== null && $form->hasErrors()) {
 	exit;
 }
 
-
 $files = $page->getAttachmentsGallery(true);
 $images = $page->getImageGallery(true);
 $max_size = Utils::getMaxUploadSize();
@@ -71,6 +69,7 @@ $max_size = Utils::getMaxUploadSize();
 $tpl->assign(compact('page', 'files', 'images', 'max_size', 'csrf_key'));
 $tpl->assign('sent', (bool)qg('sent'));
 
-$tpl->assign('custom_js', ['upload_helper.js', 'wiki_fichiers.js']);
+$tpl->assign('custom_js', ['upload_helper.min.js', 'wiki_fichiers.js']);
+$tpl->assign('custom_css', ['!static/scripts/wiki_editor.css']);
 
 $tpl->display('web/_attach.tpl');

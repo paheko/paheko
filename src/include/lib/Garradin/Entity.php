@@ -57,7 +57,7 @@ class Entity extends AbstractEntity
 		return parent::filterUserValue($type, $value, $key);
 	}
 
-	protected function assert(?bool $test, string $message = null): void
+	protected function assert(?bool $test, string $message = null, int $code = 0): void
 	{
 		if ($test) {
 			return;
@@ -71,7 +71,54 @@ class Entity extends AbstractEntity
 			throw new \UnexpectedValueException($message);
 		}
 		else {
-			throw new ValidationException($message);
+			throw new ValidationException($message, $code);
 		}
+	}
+
+	// Add plugin signals to save/delete
+	public function save(): bool
+	{
+		$name = get_class($this);
+		$name = str_replace('Garradin\Entities', '', $name);
+		$name = 'entity.' . $name . '.save';
+
+		// Specific entity signal
+		if (Plugin::fireSignal($name . '.before', ['entity' => $this])) {
+			return true;
+		}
+
+		// Generic entity signal
+		if (Plugin::fireSignal('entity.save.before', ['entity' => $this])) {
+			return true;
+		}
+
+		$return = parent::save();
+		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
+
+		Plugin::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return]);
+
+		return $return;
+	}
+
+	public function delete(): bool
+	{
+		$name = get_class($this);
+		$name = str_replace('Garradin\Entities', '', $name);
+		$name = 'entity.' . $name . '.delete';
+
+		if (Plugin::fireSignal($name . '.before', ['entity' => $this])) {
+			return true;
+		}
+
+		// Generic entity signal
+		if (Plugin::fireSignal('entity.delete.before', ['entity' => $this])) {
+			return true;
+		}
+
+		$return = parent::delete();
+		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
+		Plugin::fireSignal('entity.delete.after', ['entity' => $this, 'success' => $return]);
+
+		return $return;
 	}
 }

@@ -35,7 +35,7 @@
 					<td class="actions">
 						{linkbutton shape="menu" label="Tarifs" href="!services/fees/?id=%d"|args:$row.id}
 						{linkbutton shape="users" label="Liste des inscrits" href="!services/details.php?id=%d"|args:$row.id}
-						{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+						{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!services/edit.php?id=%d"|args:$row.id}
 							{linkbutton shape="delete" label="Supprimer" href="!services/delete.php?id=%d"|args:$row.id}
 						{/if}
@@ -48,7 +48,7 @@
 	<p class="block alert">Il n'y a aucune activité enregistrée.</p>
 {/if}
 
-{if $session->canAccess('membres', Membres::DROIT_ADMIN)}
+{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 	{include file="services/_service_form.tpl" legend="Ajouter une activité" service=null period=0}
 {/if}
 

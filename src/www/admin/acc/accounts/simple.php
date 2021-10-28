@@ -31,7 +31,7 @@ $list = Transactions::listByType(CURRENT_YEAR_ID, $type);
 $list->setTitle(sprintf('Suivi - %s', $types[$type]));
 $list->loadFromQueryString();
 
-$can_edit = $session->canAccess('compta', Membres::DROIT_ADMIN) && !$year->closed;
+$can_edit = $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$year->closed;
 
 $tpl->assign(compact('type', 'list', 'types', 'can_edit', 'year'));
 

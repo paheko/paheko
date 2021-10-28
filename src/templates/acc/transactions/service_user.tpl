@@ -1,8 +1,9 @@
 {include file="admin/_head.tpl" title="Écritures liées à une inscription" current="acc/accounts"}
 
-<p>
+<nav class="tabs">
 	{linkbutton href="!membres/fiche.php?id=%d"|args:$user_id label="Retour à la fiche membre" shape="user"}
-</p>
+	{linkbutton href="!services/user/payment.php?id=%d"|args:$service_user_id label="Nouveau règlement" shape="plus"}
+</nav>
 
 {include file="acc/reports/_journal.tpl"}
 
@@ -22,8 +23,8 @@
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}">{$account.code}</a></td>
 			<th>{$account.label}</th>
-			<td class="money">{if $account.sum < 0}{$account.sum|raw|html_money}{/if}</td>
-			<td class="money">{if $account.sum > 0}{$account.sum|raw|html_money}{/if}</td>
+			<td class="money">{if $account.sum < 0}{$account.sum|raw|money}{/if}</td>
+			<td class="money">{if $account.sum > 0}{$account.sum|raw|money}{/if}</td>
 		</tr>
 	{/foreach}
 	</tbody>

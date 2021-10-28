@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Modification d'une écriture" current="acc/simple"}
 
-<form method="post" action="{$self_url}" enctype="multipart/form-data" data-focus="#f_date">
+<form method="post" action="{$self_url}" data-focus="#f_date">
 	{form_errors}
 
 	{if $has_reconciled_lines}
@@ -65,8 +65,6 @@
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php" default=$linked_users}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
-
-			{input type="file" name="file" label="Ajouter un fichier joint"}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}

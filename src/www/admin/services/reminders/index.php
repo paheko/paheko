@@ -7,7 +7,7 @@ use Garradin\Services\Services;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('membres', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 $services_list = Services::listAssoc();
 
@@ -21,7 +21,7 @@ $form->runIf('save', function () {
 	$reminder = new Reminder;
 	$reminder->importForm();
 	$reminder->save();
-}, $csrf_key, Utils::getSelfURL());
+}, $csrf_key, Utils::getSelfURI());
 
 $list = Reminders::list();
 $services_list = Services::listAssoc();

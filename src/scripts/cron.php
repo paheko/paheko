@@ -8,6 +8,8 @@ require_once __DIR__ . '/../include/init.php';
 
 // Exécution des tâches automatiques
 
+$config = Config::getInstance();
+
 if (ENABLE_AUTOMATIC_BACKUPS && $config->get('frequence_sauvegardes') && $config->get('nombre_sauvegardes'))
 {
 	$s = new Sauvegarde;
@@ -16,3 +18,5 @@ if (ENABLE_AUTOMATIC_BACKUPS && $config->get('frequence_sauvegardes') && $config
 
 // Exécution des rappels automatiques
 Reminders::sendPending();
+
+Plugin::fireSignal('cron');

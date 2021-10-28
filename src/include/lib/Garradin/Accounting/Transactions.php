@@ -7,6 +7,7 @@ use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
+use Garradin\Config;
 use Garradin\CSV;
 use Garradin\CSV_Custom;
 use Garradin\DB;
@@ -16,6 +17,9 @@ use Garradin\UserException;
 
 class Transactions
 {
+	const EXPORT_RAW = 'raw';
+	const EXPORT_FULL = 'full';
+
 	const EXPECTED_CSV_COLUMNS_SELF = ['id', 'type', 'status', 'label', 'date', 'notes', 'reference',
 		'line_id', 'account', 'credit', 'debit', 'line_reference', 'line_label', 'reconciled'];
 
@@ -31,7 +35,7 @@ class Transactions
 		'amount'         => 'Montant',
 	];
 
-	const MANDATORY_CSV_COLUMNS = ['id', 'label', 'date', 'credit_account', 'debit_account', 'amount'];
+	const MANDATORY_CSV_COLUMNS = ['label', 'date', 'credit_account', 'debit_account', 'amount'];
 
 	static public function get(int $id)
 	{
@@ -72,7 +76,7 @@ class Transactions
 		try {
 			$ids = [];
 			foreach ($journal as $row) {
-				if (!array_key_exists($row->id, $checked)) {
+				if (!array_key_exists($row->id_line, $checked)) {
 					continue;
 				}
 
@@ -83,6 +87,7 @@ class Transactions
 					'reference'  => $row->line_reference,
 					'id_account' => $row->id_account,
 				]);
+
 				$line->credit = $row->debit;
 
 				$transaction->addLine($line);
@@ -112,7 +117,23 @@ class Transactions
 	/**
 	 * Return all transactions from year
 	 */
-	static public function export(int $year_id): \Generator
+	static public function export(Year $year, string $format, string $type = self::EXPORT_RAW): void
+	{
+		$header = null;
+
+		if (self::EXPORT_FULL == $type) {
+			$header = ['Numéro', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique'];
+		}
+
+		CSV::export(
+			$format,
+			sprintf('Export comptable - %s - %s', Config::getInstance()->get('nom_asso'), $year->label),
+			self::iterateExport($year->id(), $type),
+			$header
+		);
+	}
+
+	static protected function iterateExport(int $year_id, string $type): \Generator
 	{
 		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
 			l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
@@ -129,7 +150,7 @@ class Transactions
 		$previous_id = null;
 
 		foreach ($res as $row) {
-			if ($previous_id === $row->id) {
+			if ($previous_id === $row->id && $type == self::EXPORT_RAW) {
 				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = null;
 			}
 			else {
@@ -272,7 +293,13 @@ class Transactions
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			if (null !== $transaction) {
+				$e->setDetails($transaction->asDetailsArray());
+			}
+
+			throw $e;
 		}
 
 		$db->commit();
@@ -300,11 +327,11 @@ class Transactions
 					$transaction = self::get((int)$row->id);
 
 					if (!$transaction) {
-						throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est introuvable', $l, $row->id));
+						throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
 					}
 
 					if ($transaction->validated) {
-						throw new UserException(sprintf('Ligne %d : l\'écriture n°%d est validée et ne peut être modifiée', $l, $row->id));
+						throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
 					}
 
 					$transaction->resetLines();
@@ -352,25 +379,36 @@ class Transactions
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			throw new UserException(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+
+			if (null !== $transaction) {
+				$e->setDetails($transaction->asDetailsArray());
+			}
+
+			throw $e;
 		}
 
 		$db->commit();
 	}
 
-	static public function setAnalytical(?int $id_analytical, array $lines)
+	static public function setAnalytical(?int $id_analytical, ?array $transactions = null, ?array $lines = null)
 	{
 		$db = DB::getInstance();
 
-		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = 7 AND id = ?', $id_analytical)) {
+		if (null !== $id_analytical && !$db->test(Account::TABLE, 'type = ? AND id = ?', Account::TYPE_ANALYTICAL, $id_analytical)) {
 			throw new \InvalidArgumentException('Chosen account ID is not analytical');
 		}
 
-		$lines = array_map('intval', $lines);
+		if (isset($transactions, $lines) || ($transactions === null && $lines === null)) {
+			throw new \BadMethodCallException('Only one of transactions or lines should be set');
+		}
 
-		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE id IN (%s);',
-			(int)$id_analytical ?: 'NULL',
-			implode(', ', $lines)));
+		$selection = array_map('intval', $transactions ?? $lines);
+		$where = sprintf($transactions ? 'id_transaction IN (%s)' : 'id IN (%s)', implode(', ', $selection));
+
+		return $db->exec(sprintf('UPDATE acc_transactions_lines SET id_analytical = %s WHERE %s;',
+			(int)$id_analytical ?: 'NULL', $where));
 	}
 
 	static public function listByType(int $year_id, int $type)
@@ -382,6 +420,8 @@ class Transactions
 		$columns['line_reference']['label'] = 'Réf. paiement';
 		$columns['change']['select'] = sprintf('SUM(l.credit) * %d', $reverse);
 		$columns['change']['label'] = 'Montant';
+		$columns['code_analytical']['select'] = 'GROUP_CONCAT(b.code, \',\')';
+		$columns['id_analytical']['select'] = 'GROUP_CONCAT(l.id_analytical, \',\')';
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
@@ -397,9 +437,17 @@ class Transactions
 		$list->groupBy('t.id');
 		$list->setModifier(function (&$row) {
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
+
+			if (isset($row->id_analytical, $row->code_analytical)) {
+				$row->code_analytical = array_combine(explode(',', $row->id_analytical), explode(',', $row->code_analytical));
+			}
+			else {
+				$row->code_analytical = [];
+			}
 		});
 		$list->setExportCallback(function (&$row) {
 			$row->change = Utils::money_format($row->change, '.', '', false);
+			$row->code_analytical = implode(', ', $row->code_analytical);
 		});
 
 		return $list;

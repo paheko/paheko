@@ -6,7 +6,7 @@ use Garradin\Accounting\Transactions;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 if (!CURRENT_YEAR_ID) {
 	Utils::redirect(ADMIN_URL . 'acc/years/?msg=OPEN');
@@ -57,7 +57,7 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $en
 	Transactions::saveReconciled($journal, f('reconcile'));
 
 	if (f('save')) {
-		Utils::redirect(Utils::getSelfURL());
+		Utils::redirect(Utils::getSelfURI());
 	}
 	else {
 		$start->modify('+1 month');

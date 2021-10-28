@@ -20,6 +20,16 @@ span.alert, b.alert {
     margin-bottom: .8em;
 }
 
+.block table {
+    margin: 1rem 0;
+}
+
+.block table th, .block table td {
+    vertical-align: top;
+    padding: .2rem .4rem;
+    border: 1px solid #666;
+}
+
 .alert.block, .error.block, .confirm.block, .help.block {
     border: 1px solid #ccc;
     padding: .5em;
@@ -82,7 +92,7 @@ span.alert, b.alert {
     color: #666;
 }
 
-p.help {
+p.help:not(.block) {
     margin: 1em;
 }
 
@@ -105,14 +115,14 @@ dd.help li {
     list-style: disc;
 }
 
-h2.ruler {
+.ruler {
     margin: .5em;
     text-align: center;
     color: #333;
     overflow: hidden;
 }
 
-h2.ruler:before, h2.ruler:after {
+.ruler:before, .ruler:after {
     background-color: #000;
     content: "";
     display: inline-block;
@@ -122,12 +132,12 @@ h2.ruler:before, h2.ruler:after {
     width: 50%;
 }
 
-h2.ruler:before {
+.ruler:before {
     right: 0.5em;
     margin-left: -50%;
 }
 
-h2.ruler:after {
+.ruler:after {
     left: 0.5em;
     margin-right: -50%;
 }
@@ -143,7 +153,7 @@ h2.ruler:after {
     white-space: pre;
 }
 
-.droits b {
+.permissions b {
     border: 2px solid #999;
     border-radius: 1em;
     color: #000;
@@ -159,25 +169,25 @@ h2.ruler:after {
     font-family: "gicon", "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 
-.droits b.aucun {
+.permissions b.access_0 {
     border-color: #ccc;
     background: #eee;
     color: #999;
 }
 
-.droits b.acces {
+.permissions b.access_1 {
     border-color: #cc9;
     color: #660;
     background: #ffe;
 }
 
-.droits b.ecriture {
+.permissions b.access_2 {
     border-color: #9c9;
     color: #060;
     background: #efe;
 }
 
-.droits b.aucun:before {
+.permissions b.access_0:before {
     content: "X";
     position: absolute;
     left: 0;
@@ -189,7 +199,7 @@ h2.ruler:after {
     overflow: hidden;
 }
 
-.droits b.admin {
+.permissions b.access_9 {
     color: #900;
     border-color: #c99;
     background: #fee;
@@ -288,7 +298,7 @@ dl.describe > dt {
     margin: .2rem .5rem;
     text-align: right;
     color: #666;
-    align-self: center;
+    align-self: start;
 }
 
 dl.describe > dd {
@@ -339,14 +349,6 @@ aside.describe dl.describe dt {
     text-align: left;
     font-weight: bold;
     color: #000;
-}
-
-pre.sql_schema {
-    float: right;
-    color: #666;
-    font-size: .9em;
-    width: 30%;
-    overflow: auto;
 }
 
 .hidden {
@@ -411,4 +413,101 @@ details summary.block {
 details summary.block::after {
     right: 0;
     left: inherit;
+}
+.files-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.files-list aside.file {
+    border-radius: .5rem;
+    background: rgba(var(--gSecondColor), 0.1);
+    text-align: center;
+    padding: .5rem;
+    margin: .5rem;
+}
+
+.files-list aside small {
+    display: block;
+    color: #666;
+}
+
+nav.breadcrumbs {
+    margin: .5em 0;
+    color: #999;
+}
+
+nav.breadcrumbs a {
+    color: #333;
+}
+
+nav.breadcrumbs ul, nav.breadcrumbs li {
+    list-style-type: none;
+    display: inline;
+}
+
+nav.breadcrumbs li:before {
+    content: "> ";
+}
+
+nav.breadcrumbs li:last-child a {
+    font-weight: bold;
+}
+
+nav.breadcrumbs aside {
+    float: right;
+}
+
+aside.quota {
+    background: rgba(var(--gMainColor), 0.1);
+    border-radius: .5rem;
+    padding: .2rem .5rem;
+    color: #000;
+}
+
+aside.quota i {
+    font-style: normal;
+}
+
+aside.quota h4 {
+    display: inline-block;
+}
+
+.meter {
+    min-width: 20rem;
+    height: 1rem;
+    background: rgba(var(--gSecondColor), 0.5);
+    border-radius: .2rem;
+    display: inline-flex;
+    padding: 0;
+    vertical-align: middle;
+    margin-left: 1rem;
+}
+
+.meter span {
+    border-radius: .2rem;
+    background: rgb(var(--gMainColor));
+    display: inline-block;
+    height: 1rem;
+    vertical-align: middle;
+}
+
+.search-results article {
+    margin: 2em 1em;
+}
+
+.search-results h4 a {
+    font-weight: normal !important;
+    font-size: .9em;
+    color: #999;
+}
+
+.search-results h3 {
+    margin: .3em 0;
+}
+
+.search-results h3 a {
+    color: darkblue;
+    font-weight: normal;
 }

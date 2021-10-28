@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" current="config" custom_css=['styles/config.css']}
+{include file="admin/_head.tpl" current="config" custom_css=['config.css']}
 
 {include file="admin/config/_menu.tpl" current="fiches_membres"}
 
@@ -8,7 +8,7 @@
     </p>
 {elseif isset($status) && $status == 'ADDED'}
     <p class="block alert">
-        Le champ a été ajouté à la fin de la liste. Pour sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Enregistrer&nbsp;» en base de page.
+        Le champ a été ajouté à la fin de la liste. Pour vérifier et sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Vérifier les changements&nbsp;» en base de page.
     </p>
 {/if}
 
@@ -131,10 +131,10 @@
                 <dd><input type="text" name="champs[{$nom}][help]" id="f_{$nom}_help" value="{form_field data=$champ name=help}" /></dd>
 
                 <dt><input type="checkbox" name="champs[{$nom}][private]" value="1" {form_field data=$champ name=private checked="1"} id="f_{$nom}_private"/> <label for="f_{$nom}_private">Caché pour les membres</label></dt>
-                <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel.</dd>
+                <dd class="help">Si coché, ce champ ne sera pas visible par les membres dans leur espace personnel. Attention, il apparaîtra quand même sur l'export de données RGPD que le membre peut télécharger, et qui contiendra toutes les données concernant ce membre.</dd>
                 <dt><input type="checkbox" name="champs[{$nom}][editable]" value="1" {form_field data=$champ name=editable checked="1"} id="f_{$nom}_editable" /> <label for="f_{$nom}_editable">Modifiable par les membres</label></dt>
                 <dd class="help">Si coché, les membres pourront changer cette information depuis leur espace personnel.</dd>
-                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champ name=mandatory checked="1"} for="f_{$nom}_mandatory" /> <label for="f_{$nom}_mandatory">Champ obligatoire</label></dt>
+                <dt><label><input type="checkbox" name="champs[{$nom}][mandatory]" value="1" {form_field data=$champ name=mandatory checked="1"} id="f_{$nom}_mandatory" /> <label for="f_{$nom}_mandatory">Champ obligatoire</label></dt>
                 <dd class="help">Si coché, ce champ ne pourra rester vide.</dd>
 
                 {if $champ.type == 'select' || $champ.type == 'multiple'}

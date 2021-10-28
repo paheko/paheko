@@ -141,6 +141,10 @@ class CSV_Custom
 			}
 		}
 
+		if (!count($translation)) {
+			throw new UserException('Aucune colonne n\'a été sélectionnée');
+		}
+
 		$this->translation = $translation;
 
 		$this->session->set($this->key . '_translation', $this->translation);

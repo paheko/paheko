@@ -7,7 +7,7 @@ use Garradin\Accounting\Charts;
 
 require_once __DIR__ . '/../../_inc.php';
 
-$session->requireAccess('compta', Membres::DROIT_ADMIN);
+$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
 $chart = Charts::get((int)qg('id'));
 

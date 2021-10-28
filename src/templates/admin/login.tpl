@@ -44,7 +44,7 @@
                     {/if}
                 {/if}
             </dd>
-            {input type="checkbox" name="permanent" value="1" label="Rester connecté‑e" help="recommandé seulement sur ordinateur personnel"}
+            {input type="checkbox" name="permanent" value="1" label="Rester connecté⋅e" help="recommandé seulement sur ordinateur personnel"}
         </dl>
     </fieldset>
 
@@ -54,7 +54,7 @@
     </p>
 
     <p class="help">
-        <a href="{$admin_url}password.php">Pas de mot de passe ou mot de passe perdu ?</a>
+        <a href="{$admin_url}password.php">Première connexion ou mot de passe perdu ?</a>
     </p>
 
 </form>

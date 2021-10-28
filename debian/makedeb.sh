@@ -127,9 +127,9 @@ Section: web
 Priority: optional
 Maintainer: Garradin <garradin@kd2.org>
 Architecture: ${DEB_ARCH_NAME}
-Depends: dash | bash, php-cli (>=7.2), php-sqlite3
+Depends: dash | bash, php-cli (>=7.4), php-sqlite3
 Version: ${PACKAGE_DEB_VERSION}
-Suggests: www-browser, php-gd
+Suggests: www-browser, php-gd, php-imagick, php-intl
 Homepage: http://dev.kd2.org/garradin/
 Description: Garradin is a tool to manage non-profit organizations.
  It's only available in french.
@@ -145,11 +145,9 @@ Description-fr: Gestionnaire d'association en interface web ou CLI.
  complète digne d'un vrai logiciel de comptabilité : suivi des opérations,
  graphiques, bilan annuel, compte de résultat, exercices, etc.
  .
- Un module wiki permet de prendre des notes de réunion, tenir à jour
- les informations internes à l'association (possibilité de chiffrer le
- contenu des pages) ou de publier des pages sur le site public intégré.
- L'aspect du site public peut être géré simplement avec ses squelettes
- SPIP.
+ Il y a également la possibilité de publier un site web simple,
+ et un gestionnaire de documents permettant de gérer les fichiers de
+ l'association.
 
 EOF
 

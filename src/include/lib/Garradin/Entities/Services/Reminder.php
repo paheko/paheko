@@ -74,15 +74,15 @@ class Reminder extends Entity
 			'identity' => [
 				'label' => 'Membre',
 				'select' => 'm.' . $identity,
-				'order' => sprintf('transliterate_to_ascii(m.%s) COLLATE NOCASE %%s', $identity),
 			],
 			'email' => [
 				'label' => 'Adresse e-mail',
 				'select' => 'm.email',
 			],
 			'date' => [
-				'label' => 'Date',
-				'select' => 'srs.date',
+				'label' => 'Date d\'envoi',
+				'select' => 'srs.sent_date',
+				'order' => 'srs.sent_date %s, srs.id %1$s',
 			],
 		];
 

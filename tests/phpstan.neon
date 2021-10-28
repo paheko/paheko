@@ -14,5 +14,11 @@ parameters:
         - '#Access to protected property Garradin\\Entities#'
         - '#Access to an undefined property KD2\\DB\\AbstractEntity#'
         -
-          message: '#Variable \$(tpl|form|session|user|session|wiki|config|membres) might not be defined#'
+          message: '#Variable \$(tpl|form|session|user|session|wiki|config|membres|current_year) might not be defined#'
           path: ../src/www/*
+        -
+          message: '#Constant CURRENT_YEAR_ID not found#'
+          path: ../src/www/admin/acc/*
+
+includes:
+	- phar://phpstan.phar/conf/bleedingEdge.neon

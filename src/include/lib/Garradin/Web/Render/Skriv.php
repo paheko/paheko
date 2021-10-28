@@ -4,169 +4,125 @@ namespace Garradin\Web\Render;
 
 use Garradin\Entities\Files\File;
 
-use Garradin\Squelette_Filtres;
 use Garradin\Plugin;
-use Garradin\Utils;
-use Garradin\Files\Files;
+use Garradin\UserTemplate\CommonModifiers;
 
 use KD2\SkrivLite;
 
-use const Garradin\WWW_URL;
+use const Garradin\{ADMIN_URL, WWW_URL};
 
-class Skriv
+class Skriv extends AbstractRender
 {
-	static protected $skriv;
+	protected $skriv;
 
-	static public function render(?File $file, string $str, array $options = []): string
+	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
-		if (!isset($options['prefix'])) {
-			$options['prefix'] = WWW_URL;
-		}
+		parent::__construct($file, $user_prefix);
 
-		if (!self::$skriv)
-		{
-			self::$skriv = new \KD2\SkrivLite;
-			self::$skriv->registerExtension('fichier', [self::class, 'SkrivFichier']);
-			self::$skriv->registerExtension('image', [self::class, 'SkrivImage']);
+		$this->skriv = new SkrivLite;
+		$this->skriv->registerExtension('file', [$this, 'SkrivFile']);
+		$this->skriv->registerExtension('fichier', [$this, 'SkrivFile']);
+		$this->skriv->registerExtension('image', [$this, 'SkrivImage']);
 
-			// Enregistrer d'autres extensions éventuellement
-			Plugin::fireSignal('skriv.init', ['skriv' => self::$skriv]);
-		}
+		// Enregistrer d'autres extensions éventuellement
+		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
+	}
 
-		$skriv =& self::$skriv;
+	public function render(?string $content = null): string
+	{
+		$skriv =& $this->skriv;
 
-		$str = preg_replace_callback('/(fichier|image):\/\/(\d+)/', function ($match) use ($skriv) {
-			$file = Files::get((int)$match[2]);
+		$str = $content ?? $this->file->fetch();
 
-			if (!$file) {
-				return $skriv->parseError('/!\ Lien fichier invalide');
-			}
-
-			return $file->url();
+		$str = preg_replace_callback('/#file:\[([^\]\h]+)\]/', function ($match) {
+			return $this->resolveAttachment($match[1]);
 		}, $str);
 
-		$str = self::$skriv->render($str);
+		$str = $skriv->render($str);
 
-		$str = Squelette_Filtres::typo_fr($str);
+		$str = CommonModifiers::typo($str);
 
-		$str = preg_replace_callback('!<a href="([^/.:@]+)">!i', function ($matches) use ($options) {
-			return sprintf('<a href="%s%s">', $options['prefix'], Utils::transformTitleToURI($matches[1]));
+		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+)">;i', function ($matches) {
+			return sprintf('<a href="%s" target="_parent">', $this->resolveLink($matches[1]));
 		}, $str);
 
-		return $str;
+		return sprintf('<div class="web-content">%s</div>', $str);
+	}
+
+	public function callExtension(array $match)
+	{
+		$method = new \ReflectionMethod($this->skriv, '_callExtension');
+		$method->setAccessible(true);
+		return $method->invoke($this->skriv, $match);
 	}
 
 	/**
-	 * Callback utilisé pour l'extension <<fichier>> dans le wiki-texte
+	 * Callback utilisé pour l'extension <<file>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension
 	 * @param string $content Contenu éventuel (en mode bloc)
-	 * @param object $skriv   Objet SkrivLite
+	 * @param SkrivLite $skriv   Objet SkrivLite
 	 */
-	static public function SkrivFichier(array $args, ?string $content, SkrivLite $skriv): string
+	public function SkrivFile(array $args, ?string $content, SkrivLite $skriv): string
 	{
-		$id = $caption = null;
+		$name = $args[0] ?? null;
+		$caption = $args[1] ?? null;
 
-		foreach ($args as $value)
+		if (!$name || null === $this->current_path)
 		{
-			if (preg_match('/^\d+$/', $value) && !$id)
-			{
-				$id = (int)$value;
-				break;
-			}
-			else
-			{
-				$caption = trim($value);
-			}
-		}
-
-		if (empty($id))
-		{
-			return $skriv->parseError('/!\ Tag fichier : aucun numéro de fichier indiqué.');
-		}
-
-		$file = Files::get((int)$id);
-
-		if (!$file) {
-			return $skriv->parseError('/!\ Tag fichier invalide');
+			return $skriv->parseError('/!\ Tag file : aucun nom de fichier indiqué.');
 		}
 
 		if (empty($caption))
 		{
-			$caption = $file->name;
+			$caption = $name;
 		}
 
-		$out = '<aside class="fichier" data-type="'.$skriv->escape($file->type).'">';
-		$out.= '<a href="'.$file->getURL().'" class="internal-file">'.$skriv->escape($caption).'</a> ';
-		$out.= '<small>('.$skriv->escape(($file->type ? $file->type . ', ' : '') . Utils::format_bytes($file->size)).')</small>';
-		$out.= '</aside>';
-		return $out;
+		$url = $this->resolveAttachment($name);
+		$ext = substr($name, strrpos($name, '.')+1);
+
+		return sprintf(
+			'<aside class="file" data-type="%s"><a href="%s" class="internal-file">%s</a> <small>(%s)</small></aside>',
+			htmlspecialchars($ext), htmlspecialchars($url), htmlspecialchars($caption), htmlspecialchars(strtoupper($ext))
+		);
 	}
 
 	/**
 	 * Callback utilisé pour l'extension <<image>> dans le wiki-texte
 	 * @param array $args    Arguments passés à l'extension
 	 * @param string $content Contenu éventuel (en mode bloc)
-	 * @param object $skriv   Objet SkrivLite
+	 * @param SkrivLite $skriv   Objet SkrivLite
 	 */
-	static public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
+	public function SkrivImage(array $args, ?string $content, SkrivLite $skriv): string
 	{
-		static $align_values = ['droite', 'gauche', 'centre'];
+		static $align_replace = ['gauche' => 'left', 'droite' => 'right', 'centre' => 'center'];
 
-		$align = '';
-		$id = $caption = null;
+		$name = $args[0] ?? null;
+		$align = $args[1] ?? null;
+		$caption = $args[2] ?? null;
 
-		foreach ($args as $value)
+		$align = strtr($align, $align_replace);
+
+		if (!$name || null === $this->current_path)
 		{
-			if (preg_match('/^\d+$/', $value) && !$id)
-			{
-				$id = (int)$value;
-			}
-			else if (in_array($value, $align_values) && !$align)
-			{
-				$align = $value;
-			}
-			else
-			{
-				$caption = $value;
-			}
+			return $skriv->parseError('/!\ Tag image : aucun nom de fichier indiqué.');
 		}
 
-		if (!$id)
-		{
-			return $skriv->parseError('/!\ Tag image : aucun numéro de fichier indiqué.');
-		}
+		$url = $this->resolveAttachment($name);
+		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
 
-		$file = Files::get((int)$id);
-
-		if (!$file) {
-			return $skriv->parseError('/!\ Tag image invalide');
-		}
-
-		if (!$file->image)
-		{
-			return $skriv->parseError('/!\ Tag image : ce fichier n\'est pas une image.');
-		}
-
-		$out = '<a href="'.$file->url().'" class="internal-image">';
-		$out .= '<img src="'.$file->url($align == 'centre' ? 500 : 200).'" alt="';
-
-		if ($caption)
-		{
-			$out .= htmlspecialchars($caption);
-		}
-
-		$out .= '" /></a>';
+		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
+			htmlspecialchars($url),
+			htmlspecialchars($thumb_url),
+			htmlspecialchars($caption ?? $name)
+		);
 
 		if (!empty($align))
 		{
-			$out = '<figure class="image ' . $align . '">' . $out;
-
-			if ($caption)
-			{
-				$out .= '<figcaption>' . htmlspecialchars($caption) . '</figcaption>';
+			if ($caption) {
+				$caption = sprintf('<figcaption>%s</figcaption>', htmlspecialchars($caption));
 			}
 
-			$out .= '</figure>';
+			$out = sprintf('<figure class="image img-%s">%s%s</figure>', $align, $out, $caption);
 		}
 
 		return $out;
