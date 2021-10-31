@@ -122,7 +122,7 @@ class Transactions
 		$header = null;
 
 		if (self::EXPORT_FULL == $type) {
-			$header = ['Numéro', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique'];
+			$header = ['Numéro', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique', 'Membres associés'];
 		}
 
 		CSV::export(
@@ -138,12 +138,20 @@ class Transactions
 		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
 			l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
 			l.reference AS line_reference, l.label AS line_label, l.reconciled,
-			a2.code AS analytical
+			a2.code AS analytical,
+			GROUP_CONCAT(u.%s) AS linked_users
 			FROM acc_transactions t
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			LEFT JOIN acc_accounts a2 ON a2.id = l.id_analytical
-			WHERE t.id_year = ? ORDER BY t.date, t.id, l.id;';
+			LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+			LEFT JOIN membres u ON u.id = tu.id_user
+			WHERE t.id_year = ?
+			GROUP BY t.id, l.id
+			ORDER BY t.date, t.id, l.id;';
+
+		$id_field = Config::getInstance()->get('champ_identite');
+		$sql = sprintf($sql, $id_field);
 
 		$res = DB::getInstance()->iterate($sql, $year_id);
 
