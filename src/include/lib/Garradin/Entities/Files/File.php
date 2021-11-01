@@ -386,8 +386,10 @@ class File extends Entity
 		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-		$file = new self;
-		$file->set('path', $path . '/' . $name);
+
+		$fullpath = $path . '/' . $name;
+		$file = Files::callStorage('get', $fullpath) ?: new self;
+		$file->set('path', $fullpath);
 		$file->set('parent', $path);
 		$file->set('name', $name);
 
@@ -887,6 +889,9 @@ class File extends Entity
 			$format = Render::FORMAT_MARKDOWN;
 		}
 		else if (substr($this->mime, 0, 5) == 'text/') {
+			$format = 'text';
+		}
+		else if ($this->size == 0) {
 			$format = 'text';
 		}
 		else {
