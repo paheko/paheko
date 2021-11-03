@@ -490,7 +490,6 @@ class Champs
 
     public function getSQLSchema(string $table_name = self::TABLE): string
     {
-        $config = Config::getInstance();
         $db = DB::getInstance();
 
         // Champs à créer
