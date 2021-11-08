@@ -153,7 +153,7 @@ class Transaction extends Entity
 			}
 
 			// Remove NULL accounts
-			array_filter($accounts);
+			$accounts = array_filter($accounts);
 
 			if (count($accounts)) {
 				$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
@@ -162,8 +162,8 @@ class Transaction extends Entity
 
 			foreach ($this->getLines() as $line) {
 				$account = [
-					'account_code' => $this->_accounts[$line->id_account]->code,
-					'account_name' => $this->_accounts[$line->id_account]->label,
+					'account_code' => $this->_accounts[$line->id_account]->code ?? null,
+					'account_name' => $this->_accounts[$line->id_account]->label ?? null,
 					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
 				];
 
@@ -325,14 +325,14 @@ class Transaction extends Entity
 		);
 
 		foreach ($lines as $l) {
-			// Do not copy lines with NULL accounts (maybe later…)
-			if (!isset($l->id_account)) {
-				continue;
-			}
-
 			$line = new Line;
 
 			foreach ($copy as $field) {
+				// Do not copy id_account when it is null, as it will trigger an error (invalid entity)
+				if ($field == 'id_account' && !isset($l->$field)) {
+					continue;
+				}
+
 				$line->$field = $l->$field;
 			}
 
