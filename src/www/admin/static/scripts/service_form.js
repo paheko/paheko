@@ -18,8 +18,10 @@ function selectService(elm, first_load) {
 
 	if (first && !selected) {
 		first.checked = true;
-		selectFee(first);
+		selected = first;
 	}
+
+	selectFee(selected);
 }
 
 function selectFee(elm) {
@@ -29,7 +31,7 @@ function selectFee(elm) {
 	var accounting = elm.getAttribute('data-account') ? true : false;
 	g.toggle('.accounting', accounting);
 
-	if (accounting) {
+	if (accounting && create) {
 		$('#f_create_payment_1').checked = true;
 		let btn = $('#f_account_container').firstElementChild;
 		btn.value = btn.value.replace(/&year=\d+/, '') + '&year=' + elm.getAttribute('data-year');
