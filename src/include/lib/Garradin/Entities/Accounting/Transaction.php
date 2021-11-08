@@ -325,7 +325,7 @@ class Transaction extends Entity
 			$line = new Line;
 
 			foreach ($copy as $field) {
-				if (null === $l->field && $field === 'id_account') {
+				if (!isset($l->field) && $field === 'id_account') {
 					// Do not copy NULL accounts
 					continue;
 				}
