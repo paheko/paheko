@@ -1,3 +1,10 @@
+/**
+ * Ce fichier contient les styles CSS qui s'appliquent au contenu des articles et catégorie,
+ * que ce soit sur le site public ou dans la prévisualisation de l'administration.
+ *
+ * Généralement il n'est pas nécessaire de le modifier.
+ */
+
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
     margin: .8em 0;
