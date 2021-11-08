@@ -499,7 +499,7 @@ class Transaction extends Entity
 		$amount = $source['amount'];
 
 		$key = 'account_transfer';
-		$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+		$account = @key($source[$key]);
 
 		$line = new Line;
 		$line->importForm([
@@ -535,7 +535,7 @@ class Transaction extends Entity
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
-				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+				$line['id_account'] = @key($line['account']);
 
 				if (!$line['id_account']) {
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ((int) $i+1));
@@ -570,11 +570,11 @@ class Transaction extends Entity
 				$credit = $account->position == 'credit' ? $amount : 0;
 				$debit = $account->position == 'debit' ? $amount : 0;
 				$key = sprintf('account_%d_%d', $type, $k);
-				$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+				$account = @key($source[$key]);
 
 				$line = new Line;
 				$line->importForm([
-					'reference'     => $source['payment_reference'],
+					'reference'     => !empty($source['payment_reference']) ? $source['payment_reference'] : null,
 					'credit'        => $credit,
 					'debit'         => $debit,
 					'id_account'    => $account,
@@ -624,7 +624,7 @@ class Transaction extends Entity
 		$debit = $credit = 0;
 
 		foreach ($lines as $k => $line) {
-			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+			$line['id_account'] = @key($line['account']);
 
 			try {
 				$line = (new Line)->importForm($line);
