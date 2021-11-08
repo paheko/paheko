@@ -152,6 +152,9 @@ class Transaction extends Entity
 				}
 			}
 
+			// Remove NULL accounts
+			array_filter($accounts);
+
 			if (count($accounts)) {
 				$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
 				$this->_accounts += $db->getGrouped($sql);
