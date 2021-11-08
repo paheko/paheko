@@ -123,7 +123,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
 
-		if (null === $this->_lines || $restrict_year === false) {
+		if ($restrict_year === false) {
 			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
 			$sql = sprintf('SELECT
 				l.*, a.label AS account_name, a.code AS account_code,
