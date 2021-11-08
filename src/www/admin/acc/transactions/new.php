@@ -29,7 +29,7 @@ $id_analytical = null;
 if (qg('copy')) {
 	$old = Transactions::get((int)qg('copy'));
 	$transaction = $old->duplicate($current_year);
-	$lines = $transaction->getLinesWithAccounts();
+	$lines = $transaction->getLinesWithAccounts(true);
 	$payoff_for = null;
 	$id_analytical = $old->getAnalyticalId();
 	$amount = $transaction->getLinesCreditSum();
