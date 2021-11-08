@@ -322,14 +322,14 @@ class Transaction extends Entity
 		);
 
 		foreach ($lines as $l) {
+			// Do not copy lines with NULL accounts (maybe later…)
+			if (!isset($l->field)) {
+				continue;
+			}
+
 			$line = new Line;
 
 			foreach ($copy as $field) {
-				if (!isset($l->field) && $field === 'id_account') {
-					// Do not copy NULL accounts
-					continue;
-				}
-
 				$line->$field = $l->$field;
 			}
 
