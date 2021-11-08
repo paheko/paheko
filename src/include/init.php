@@ -322,7 +322,7 @@ if (MAIL_ERRORS)
 }
 
 ErrorManager::setContext([
-	'rootDirectory'      => ROOT,
+	'root_directory'      => ROOT,
 	'garradin_data_root' => DATA_ROOT,
 	'garradin_version'   => garradin_version(),
 ]);
@@ -392,7 +392,6 @@ function user_error(\Exception $e)
 
 // Message d'erreur simple pour les erreurs de l'utilisateur
 ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
-ErrorManager::setCustomExceptionHandler('\KD2\MiniSkelMarkupException', '\Garradin\user_error');
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Garradin\SECRET_KEY'))
