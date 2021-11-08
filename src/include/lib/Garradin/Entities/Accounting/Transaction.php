@@ -323,7 +323,7 @@ class Transaction extends Entity
 
 		foreach ($lines as $l) {
 			// Do not copy lines with NULL accounts (maybe later…)
-			if (!isset($l->field)) {
+			if (!isset($l->id_account)) {
 				continue;
 			}
 
