@@ -65,6 +65,7 @@
 .web-content dl.footnotes dd p {
     margin: 0;
     margin-bottom: 1rem;
+}
 
 .web-content table {
     border-collapse: collapse;
@@ -82,6 +83,7 @@
 }
 
 .web-content .toc {
+    margin: 1rem 0;
     border: 1px solid rgba(0, 0, 0, 0.2);
     background: rgba(0, 0, 0, 0.1);
     padding: .3rem;
