@@ -251,7 +251,10 @@ class Utils
             <!DOCTYPE html>
             <html>
             <head>
-                <script type="text/javascript">';
+                <script type="text/javascript">
+                if (window.top !== window) {
+                    document.write(\'<style type="text/css">p { display: none; }</style>\');
+                    ';
 
         if (null === $destination) {
             echo 'window.parent.location.reload();';
@@ -261,11 +264,12 @@ class Utils
         }
 
         echo '
+                }
                 </script>
             </head>
 
             <body>
-            <p style="visibility: hidden;"><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
+            <p><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
             </body>
             </html>';
 

@@ -1,13 +1,5 @@
 (function () {
     g.onload(function () {
-        uploadHelper($('#f_file'), {
-            width: 1920,
-            height: null,
-            resize: true,
-            bytes: 'o',
-            size_error_msg: 'Le fichier %file fait %size, soit plus que la taille maximale autorisée de %max_size.'
-        });
-
         function insertImageHelper(file, from_upload) {
             if (!document.querySelectorAll)
             {

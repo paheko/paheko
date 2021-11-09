@@ -432,6 +432,42 @@ class File extends Entity
 		return $this;
 	}
 
+	static public function uploadMultiple(string $path, string $key): array
+	{
+		if (!isset($_FILES[$key]['name'][0])) {
+			throw new UserException('Aucun fichier reçu');
+		}
+
+		// Transpose array
+		// see https://www.php.net/manual/en/features.file-upload.multiple.php#53240
+		$files = Utils::array_transpose($_FILES[$key]);
+		$out = [];
+
+		// First check all files
+		foreach ($files as $file) {
+			if (!empty($file['error'])) {
+				throw new UserException(self::getErrorMessage($file['error']));
+			}
+
+			if (empty($file['size']) || empty($file['name'])) {
+				throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
+			}
+
+			if (!is_uploaded_file($file['tmp_name'])) {
+				throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
+			}
+		}
+
+		// Then create files
+		foreach ($files as $file) {
+			$name = self::filterName($file['name']);
+
+			$out[] = self::createAndStore($path, $name, $file['tmp_name'], null);
+		}
+
+		return $out;
+	}
+
 	/**
 	 * Upload du fichier par POST
 	 */
@@ -455,8 +491,7 @@ class File extends Entity
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
-		$name = preg_replace('/\s+/', '_', $file['name']);
-		$name = self::filterName($name);
+		$name = self::filterName($file['name']);
 
 		return self::createAndStore($path, $name, $file['tmp_name'], null);
 	}

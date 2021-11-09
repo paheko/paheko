@@ -4,13 +4,13 @@
 
 <form method="post" enctype="multipart/form-data" action="{$self_url}" id="f_upload">
 	<fieldset>
-		<legend>Téléverser un fichier</legend>
+		<legend>Téléverser des fichiers</legend>
 		<dl>
-			{input type="file" name="file" label="Fichier" required=true}
+			{input type="file" name="file[]" multiple=true required=true label="Fichiers à envoyer" data-enhanced=1}
 		</dl>
 		<p class="submit">
 			{csrf_field key=$csrf_key}
-			{button type="submit" name="upload" label="Envoyer le fichier" shape="upload" class="main" id="f_submit"}
+			{button type="submit" name="upload" label="Envoyer" shape="upload" class="main"}
 		</p>
 	</fieldset>
 </form>

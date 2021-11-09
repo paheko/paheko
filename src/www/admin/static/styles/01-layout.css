@@ -125,3 +125,9 @@ ul.gallery .actions {
     text-align: center;
     z-index: 100;
 }
+
+ul.gallery figcaption {
+    font-size: .8em;
+    overflow: hidden;
+    text-align: center;
+}

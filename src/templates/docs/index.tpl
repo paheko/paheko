@@ -155,7 +155,7 @@ use Garradin\Entities\Files\File;
 			<tfoot>
 				<tr>
 					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
-					<td class="actions" colspan="5">
+					<td class="actions" colspan="6">
 						<em>Pour les fichiers sélectionnés&nbsp;:</em>
 							<input type="hidden" name="parent" value="{$path}" />
 							<select name="action">
