@@ -43,8 +43,6 @@ class Membres
 
             if (isset($data[$key]))
             {
-                $data[$key] = trim($data[$key]);
-
                 if ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
                     $dt = \DateTime::createFromFormat('Y-m-d H:i', $data[$key]);
@@ -91,7 +89,7 @@ class Membres
                 }
                 elseif ($config->type == 'email')
                 {
-                    $data[$key] = strtolower($data[$key]);
+                    $data[$key] = strtolower(trim($data[$key]));
 
                     if (trim($data[$key]) !== '' && !SMTP::checkEmailIsValid($data[$key], false))
                     {
