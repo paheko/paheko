@@ -264,6 +264,11 @@ class Transaction extends Entity
 		return current($lines)->id_analytical;
 	}
 
+	public function related(): ?Transaction
+	{
+		return $this->_related;
+	}
+
 	public function getTypesAccounts()
 	{
 		if ($this->type == self::TYPE_ADVANCED) {
@@ -425,12 +430,6 @@ class Transaction extends Entity
 			if ($line->exists()) {
 				$line->delete();
 			}
-		}
-
-		// Remove flag
-		if (!$exists && $this->_related) {
-			$this->_related->markPaid();
-			$this->_related->save();
 		}
 
 		return true;
@@ -844,6 +843,7 @@ class Transaction extends Entity
 			'id_account' => null,
 			'form_account_name' => sprintf('account_%d_%d', $this->type, 1),
 			'form_target_name' => sprintf('account_%d_%d', $this->type, 0),
+			'id_analytical' => $this->_related->getAnalyticalId(),
 		];
 
 		foreach ($this->_related->getLines() as $line) {
