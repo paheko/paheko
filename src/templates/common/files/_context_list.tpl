@@ -8,8 +8,7 @@ if (!isset($files)) {
 $can_upload = false;
 
 if ($edit
-	&& Entities\Files\File::checkCreateAccess($path, $session)
-	&& (!isset($limit) || count($files) < $limit)) {
+	&& Entities\Files\File::checkCreateAccess($path, $session)) {
 	$can_upload = true;
 }
 
