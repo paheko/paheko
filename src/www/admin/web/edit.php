@@ -43,7 +43,7 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 	$page->save();
 
 	if (qg('js') !== null) {
-		die('{"success":true}');
+		die(json_encode(['success' => true, 'modified' => $page->modified->getTimestamp()]));
 	}
 
 	Utils::redirect('!web/?p=' . $page->parent);

@@ -248,12 +248,11 @@
 			fetch(t.textarea.form.action + '&js', {
 				method: 'post',
 				body: data,
-			}).then((response) => {
-				if (!response.ok) {
-					throw response;
-				}
+			}).then((response) => response.json())
+			.then(data => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
+				t.textarea.form.querySelector('input[name=editing_started]').value = data.modified;
 			}).catch(e => t.textarea.form.querySelector('[type=submit]').click() );
 			return true;
 		};
