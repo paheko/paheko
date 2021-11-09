@@ -43,6 +43,8 @@ class Membres
 
             if (isset($data[$key]))
             {
+                $data[$key] = trim($data[$key]);
+
                 if ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
                     $dt = \DateTime::createFromFormat('Y-m-d H:i', $data[$key]);
@@ -54,8 +56,17 @@ class Membres
                 elseif ($config->type == 'date' && trim($data[$key]) !== '')
                 {
                     $dt = \DateTime::createFromFormat('Y-m-d', $data[$key]);
+
                     if (!$dt) {
-                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ attendu.', $config->title));
+                        $dt = \DateTime::createFromFormat('d/m/y', $data[$key]);
+                    }
+
+                    if (!$dt) {
+                        $dt = \DateTime::createFromFormat('d/m/Y', $data[$key]);
+                    }
+
+                    if (!$dt) {
+                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ ou JJ/MM/AAAA attendu.', $config->title));
                     }
                     $data[$key] = $dt->format('Y-m-d');
                 }
