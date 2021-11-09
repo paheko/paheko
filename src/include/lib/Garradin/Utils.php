@@ -280,6 +280,10 @@ class Utils
     {
         $destination = self::getLocalURL($destination);
 
+        if (isset($_GET['_dialog'])) {
+            $destination .= (strpos($destination, '?') === false ? '?' : '&') . '_dialog';
+        }
+
         if (PHP_SAPI == 'cli') {
             echo 'Please visit ' . $destination . PHP_EOL;
             exit;

@@ -173,6 +173,14 @@
 		return iframe;
 	};
 
+	g.reloadParentDialog = () => {
+		if (!window.parent.g.dialog) {
+			return;
+		}
+
+		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
+	};
+
 	g.resizeParentDialog = () => {
 		if (!window.parent.g.dialog) {
 			return;
