@@ -47,35 +47,26 @@ if ($type = (int)qg('type')) {
 	}
 }
 
-
-if (f('save') && $form->check('acc_accounts_new'))
-{
-	try
-	{
-		if ($simple) {
-			$account->importSimpleForm($translate_type_position, $translate_type_codes);
-		}
-		else {
-			$account->importForm();
-		}
-
-		$account->id_chart = $chart->id();
-		$account->user = 1;
-		$account->save();
-
-		$page = '';
-
-		if (!$account->type) {
-			$page = 'all.php';
-		}
-
-		Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
+$form->runIf('save', function () use ($account, $simple, $translate_type_position, $translate_type_codes, $chart) {
+	if ($simple) {
+		$account->importSimpleForm($translate_type_position, $translate_type_codes);
 	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
+	else {
+		$account->importForm();
 	}
-}
+
+	$account->id_chart = $chart->id();
+	$account->user = 1;
+	$account->save();
+
+	$page = '';
+
+	if (!$account->type) {
+		$page = 'all.php';
+	}
+
+	Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
+}, 'acc_accounts_new');
 
 $tpl->assign(compact('simple', 'types', 'account', 'translate_type_position', 'translate_type_codes', 'chart'));
 
