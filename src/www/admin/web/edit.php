@@ -46,7 +46,7 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 		die(json_encode(['success' => true, 'modified' => $page->modified->getTimestamp()]));
 	}
 
-	Utils::redirect('!web/?p=' . $page->parent);
+	Utils::redirect('!web/page.php?p=' . $page->path);
 }, $csrf_key);
 
 $parent = $page->parent ? [$page->parent => Web::get($page->parent)->title] : ['' => 'Racine du site'];
