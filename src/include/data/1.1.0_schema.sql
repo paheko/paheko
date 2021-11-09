@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
     type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, etc.
-    user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
+    user INTEGER NOT NULL DEFAULT 1 -- 0 = fait partie du plan comptable original, 1 = a été ajouté par l'utilisateur
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
