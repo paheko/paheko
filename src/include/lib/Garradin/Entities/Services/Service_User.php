@@ -78,7 +78,7 @@ class Service_User extends Entity
 		return parent::importForm($source);
 	}
 
-	public function service()
+	public function service(): Service
 	{
 		if (null === $this->_service) {
 			$this->_service = Services::get($this->id_service);
@@ -87,8 +87,17 @@ class Service_User extends Entity
 		return $this->_service;
 	}
 
-	public function fee()
+	/**
+	 * Returns the Fee entity linked to this subscription
+	 * This can be NULL if there was no fee existing at the time of subscription
+	 * (that way you can use subscriptions without fees if you want)
+	 */
+	public function fee(): ?Fee
 	{
+		if (null === $this->id_fee) {
+			return null;
+		}
+
 		if (null === $this->_fee) {
 			$this->_fee = Fees::get($this->id_fee);
 		}
@@ -100,6 +109,10 @@ class Service_User extends Entity
 	{
 		if (null === $source) {
 			$source = $_POST;
+		}
+
+		if (!$this->id_fee) {
+			throw new \RuntimeException('Cannot add a payment to a subscription that is not linked to a fee');
 		}
 
 		$transaction = new Transaction;

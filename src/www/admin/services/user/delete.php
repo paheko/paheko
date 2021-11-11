@@ -23,7 +23,7 @@ $form->runIf('delete', function () use ($su) {
 $user_name = (new Membres)->getNom($user_id);
 
 $service_name = $su->service()->label;
-$fee_name = $su->fee()->label;
+$fee_name = $su->id_fee ? $su->fee()->label : null;
 
 $tpl->assign(compact('csrf_key', 'user_name', 'fee_name', 'service_name'));
 
