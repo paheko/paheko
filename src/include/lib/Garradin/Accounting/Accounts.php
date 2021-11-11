@@ -148,22 +148,32 @@ class Accounts
 	public function getNextCodesForTypes(): array
 	{
 		$db = DB::getInstance();
-		$codes = $db->getAssoc(sprintf('SELECT type, MAX(code) FROM %s WHERE id_chart = ? AND type > 0 GROUP BY type;', Account::TABLE), $this->chart_id);
+		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE type > 0 AND user = 1 AND id_chart = ?;', Account::TABLE), $this->chart_id);
+		$used_codes = array_values($used_codes);
 
-		foreach ($codes as &$code) {
-			if (($letter = substr($code, -1)) && !is_numeric($letter)) {
-				$code = substr($code, 0, -1);
-				$letter = strtoupper($letter);
-				$letter = ($letter == 'Z') ? 'AA' : chr(ord($letter)+1);
-			}
-			else {
-				$letter = 'A';
+		$sql = sprintf('SELECT type, MIN(code) AS code, (SELECT COUNT(*) FROM %s WHERE user = 1 AND type = a.type) AS count
+			FROM %1$s AS a
+			WHERE id_chart = ? AND type > 0
+			GROUP BY type;', Account::TABLE);
+		$codes = $db->getGrouped($sql, $this->chart_id);
+
+		foreach ($codes as &$row) {
+			$code = preg_replace('/[^\d]/', '', $row->code);
+
+			$count = $row->count;
+			$found = null;
+
+			// Make sure we don't reuse an existing code
+			while (!$found || in_array($found, $used_codes)) {
+				// Get new account code, eg. 512A, 99AA, 99BZ etc.
+				$letter = Utils::num2alpha($count++);
+				$found = $code . $letter;
 			}
 
-			$code = $code . $letter;
+			$row = $found;
 		}
 
-		unset($code);
+		unset($row);
 		return $codes;
 	}
 
