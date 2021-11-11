@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS services_users
     id INTEGER NOT NULL PRIMARY KEY,
     id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-    id_fee INTEGER NULL REFERENCES services_fees (id) ON DELETE CASCADE,
+    id_fee INTEGER NULL REFERENCES services_fees (id) ON DELETE CASCADE, -- This can be NULL if there is no fee for the service
 
     paid INTEGER NOT NULL DEFAULT 0,
     expected_amount INTEGER NULL,

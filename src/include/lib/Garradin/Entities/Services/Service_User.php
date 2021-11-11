@@ -17,6 +17,10 @@ class Service_User extends Entity
 	protected $id;
 	protected $id_user;
 	protected $id_service;
+	/**
+	 * This can be NULL if there is no fee for the service
+	 * @var null|int
+	 */
 	protected $id_fee;
 	protected $paid;
 	protected $expected_amount;
