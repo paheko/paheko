@@ -59,20 +59,6 @@ namespace Garradin;
 //const ALLOW_MODIFIED_IMPORT = true;
 
 /**
- * Doit-on suggérer à l'utilisateur d'utiliser la version chiffrée du site ?
- *
- * 1 ou true = affiche un message de suggestion sur l'écran de connexion invitant à utiliser le site chiffré
- * (conseillé si vous avez un certificat auto-signé ou peu connu type CACert)
- * 2 = rediriger automatiquement sur la version chiffrée pour l'administration (mais pas le site public)
- * 3 = rediriger automatiquement sur la version chiffrée pour administration et site public
- * false ou 0 = aucune version chiffrée disponible, donc ne rien proposer ni rediriger
- *
- * Défaut : false
- */
-
-//const PREFER_HTTPS = false;
-
-/**
  * Répertoire où se situe le code source de Garradin
  *
  * Défaut : répertoire racine de Garradin (__DIR__)

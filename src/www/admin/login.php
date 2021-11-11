@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use KD2\HTTP;
+
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
@@ -43,9 +45,7 @@ $form->runIf('login', function () use ($id_field_name, $session) {
     }
 }, 'login', ADMIN_URL);
 
-$tpl->assign('ssl_enabled', empty($_SERVER['HTTPS']) ? false : true);
-$tpl->assign('prefer_ssl', (bool)PREFER_HTTPS);
-$tpl->assign('own_https_url', str_replace('http://', 'https://', Utils::getSelfURI()));
+$tpl->assign('ssl_enabled', HTTP::getScheme() == 'https' ? false : true);
 
 $tpl->assign(compact('id_field_name'));
 $tpl->assign('changed', qg('changed') !== null);

@@ -152,7 +152,6 @@ static $default_config = [
 	'DB_FILE'               => DATA_ROOT . '/association.sqlite',
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
-	'PREFER_HTTPS'          => false,
 	'ALLOW_MODIFIED_IMPORT' => true,
 	'PLUGINS_SYSTEM'        => '',
 	'SHOW_ERRORS'           => true,

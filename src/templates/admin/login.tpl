@@ -9,14 +9,6 @@
     </p>
 {/if}
 
-{if !$ssl_enabled && $prefer_ssl}
-    <p class="block alert">
-        <strong>Message de sécurité</strong><br />
-        Nous vous conseillons de vous connecter sur la version <a href="{$own_https_url}">chiffrée (HTTPS) de cette page</a>
-        pour vous connecter.
-    </p>
-{/if}
-
 <p class="block error" style="display: none;" id="old_browser">
     Le navigateur que vous utilisez n'est pas supporté. Des fonctionnalités peuvent ne pas fonctionner.<br />
     Merci d'utiliser un navigateur web moderne comme <a href="https://www.getfirefox.com/" target="_blank">Firefox</a> ou <a href="https://vivaldi.com/fr/" target="_blank">Vivaldi</a>.
@@ -36,12 +28,7 @@
                     <span class="confirm">Connexion sécurisée</span>
                 {else}
                     <b class="icn error" title="Connexion non chiffrée">&#x1f513;</b>
-                    {if $prefer_ssl}
-                        <span class="error">Connexion non-sécurisée&nbsp;!</span>
-                        <a href="{$own_https_url}">Se connecter en HTTPS (sécurisé)</a>
-                    {else}
-                        <span class="alert">Connexion non-sécurisée</span>
-                    {/if}
+                    <span class="alert">Connexion non-sécurisée</span>
                 {/if}
             </dd>
             {input type="checkbox" name="permanent" value="1" label="Rester connecté⋅e" help="recommandé seulement sur ordinateur personnel"}
