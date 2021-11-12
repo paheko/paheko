@@ -198,7 +198,10 @@
 
 				for (var i = 0; i < items.length; i++) {
 					if (IMAGE_MIME_REGEX.test(items[i].type)) {
-						addItem(items[i].getAsFile());
+						let f = items[i].getAsFile();
+						let name = f.name.replace(/\./, '-' + (+(new Date)) + '.');
+						let f2 = new File([f], name, {type: f.type});
+						addItem(f2);
 						return;
 					}
 				}
