@@ -189,6 +189,23 @@
 
 		input.parentNode.insertBefore(container, input.nextSibling);
 
+		// Support paste events, if there's only one file input in the document
+		if (document.querySelectorAll('input[type=file][data-enhanced]').length == 1) {
+			const IMAGE_MIME_REGEX = /^image\/(p?jpeg|gif|png)$/i;
+
+			document.addEventListener('paste', (e) => {
+				let items = e.clipboardData.items;
+
+				for (var i = 0; i < items.length; i++) {
+					if (IMAGE_MIME_REGEX.test(items[i].type)) {
+						addItem(items[i].getAsFile());
+						return;
+					}
+				}
+
+				e.preventDefault();
+			});
+		}
 	};
 
 	document.querySelectorAll('input[type=file][data-enhanced]').forEach((e) => {
