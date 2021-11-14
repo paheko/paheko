@@ -193,7 +193,7 @@ static $default_config = [
 	'SMTP_USER'             => null,
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
-	'SMTP_SECURITY'         => 'STARTTLS',
+	'SMTP_SECURITY'         => false,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
 	'ENABLE_AUTOMATIC_BACKUPS' => true,
@@ -215,6 +215,15 @@ foreach ($default_config as $const => $value)
 	if (!defined($const))
 	{
 		define($const, $value);
+	}
+}
+
+// Check SMTP_SECURITY value
+if (SMTP_SECURITY) {
+	$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+
+	if (!defined($const)) {
+		throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
 	}
 }
 
