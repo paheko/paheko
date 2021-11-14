@@ -329,6 +329,11 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.2.0', '<')) {
+				// Just add email tables
+				$db->import(ROOT . '/include/data/1.2.0_schema.sql');
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 

@@ -1,7 +1,14 @@
 {include file="admin/_head.tpl" title="Désinscription"}
 
-
-{if $ok}
+{if $verify === true}
+	<p class="block confirm">
+		Votre adresse e-mail a bien été vérifiée, merci !
+	</p>
+{elseif $verify === false}
+	<p class="block error">
+		Erreur de vérification de votre adresse e-mail.
+	</p>
+{elseif $ok}
 	<p class="block confirm">
 		Vous avez été bien désinscrit, vous ne recevrez plus aucun message de notre part.
 	</p>
@@ -25,14 +32,15 @@
 
 		<fieldset>
 			<dl>
+				{input type="email" required=true name="email" label="Adresse e-mail"}
 				{input type="checkbox" name="confirm_resub" value="1" required=true label="Oui, je veux à nouveau recevoir les messages de l'association"}
 			</dl>
-
-			<p class="submit">
-				{csrf_field key="optout"}
-				{button type="submit" name="resub" label="Réinscrire mon adresse e-mail" shape="right" class="main"}
-			</p>
 		</fieldset>
+
+		<p class="submit">
+			{csrf_field key="optout"}
+			{button type="submit" name="resub" label="Réinscrire mon adresse e-mail" shape="right" class="main"}
+		</p>
 	</form>
 {else}
 
