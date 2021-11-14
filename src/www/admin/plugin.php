@@ -13,6 +13,7 @@ define('Garradin\PLUGIN_URL', ADMIN_URL . 'plugin/' . $plugin->id() . '/');
 define('Garradin\PLUGIN_QSP', '?');
 
 $tpl->assign('plugin', $plugin->getInfos());
+$tpl->assign('plugin_url', PLUGIN_URL);
 $tpl->assign('plugin_root', PLUGIN_ROOT);
 
 $plugin->call('admin/' . $page);

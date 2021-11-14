@@ -1,16 +1,24 @@
 <nav class="tabs">
+{if $dialog}
+	{* JS trick to get back to the original iframe URL! *}
+	<aside>{linkbutton shape="left" label="Retour à la sélection de compte" href="#" onclick="g.reloadParentDialog(); return false;"}</aside>
 	<ul>
-		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
+{else}
+	<ul>
+
+		<li class="current">{link href="!acc/charts/" label="Plans comptables"}</li>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
+		<li>{link href="!acc/charts/import.php" label="Importer un plan comptable"}</li>
 		{/if}
 	</ul>
 	<ul class="sub">
 		<li class="title">{$chart.label}</li>
-		<li{if $current == 'favorites'} class="current"{/if}><a href="{$admin_url}acc/charts/accounts/?id={$chart.id}">Comptes favoris</a></li>
-		<li{if $current == 'all'} class="current"{/if}><a href="{$admin_url}acc/charts/accounts/all.php?id={$chart.id}">Tous les comptes</a></li>
+{/if}
+
+		<li{if $current == 'favorites'} class="current"{/if}>{link href="!acc/charts/accounts/?id=%d"|args:$chart.id label="Comptes favoris"}</li>
+		<li{if $current == 'all'} class="current"{/if}>{link href="!acc/charts/accounts/all.php?id=%d"|args:$chart.id label="Tous les comptes"}</li>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<li{if $current == 'new'} class="current"{/if}><a href="{$admin_url}acc/charts/accounts/new.php?id={$chart.id}"><strong>Ajouter un compte</strong></a></li>
+			<li{if $current == 'new'} class="current"{/if}><strong>{link href="!acc/charts/accounts/new.php?id=%d"|args:$chart.id label="Ajouter un compte"}</strong></li>
 		{/if}
 	</ul>
 </nav>

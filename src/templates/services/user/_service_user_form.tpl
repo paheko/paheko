@@ -13,7 +13,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 	{if $has_past_services}
 	<nav class="tabs">
-		<ul class="sub">
+		<ul{if $create} class="sub"{/if}>
 			<li{if $current_only} class="current"{/if}><a href="{$form_url}">Inscrire à une activité courante</a></li>
 			<li{if !$current_only} class="current"{/if}><a href="{$form_url}past_services=1">Inscrire à une activité passée</a></li>
 		</ul>

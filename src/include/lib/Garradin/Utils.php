@@ -251,7 +251,10 @@ class Utils
             <!DOCTYPE html>
             <html>
             <head>
-                <script type="text/javascript">';
+                <script type="text/javascript">
+                if (window.top !== window) {
+                    document.write(\'<style type="text/css">p { display: none; }</style>\');
+                    ';
 
         if (null === $destination) {
             echo 'window.parent.location.reload();';
@@ -261,11 +264,12 @@ class Utils
         }
 
         echo '
+                }
                 </script>
             </head>
 
             <body>
-            <p style="visibility: hidden;"><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
+            <p><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
             </body>
             </html>';
 
@@ -275,6 +279,10 @@ class Utils
     public static function redirect($destination = '', $exit=true)
     {
         $destination = self::getLocalURL($destination);
+
+        if (isset($_GET['_dialog'])) {
+            $destination .= (strpos($destination, '?') === false ? '?' : '&') . '_dialog';
+        }
 
         if (PHP_SAPI == 'cli') {
             echo 'Please visit ' . $destination . PHP_EOL;
@@ -1099,5 +1107,18 @@ class Utils
         unlink($source);
 
         return $target;
+    }
+
+    /**
+     * Integer to A-Z, AA-ZZ, AAA-ZZZ, etc.
+     * @see https://www.php.net/manual/fr/function.base-convert.php#94874
+     */
+    static public function num2alpha(int $n): string {
+        $r = '';
+        for ($i = 1; $n >= 0 && $i < 10; $i++) {
+            $r = chr(0x41 + ($n % pow(26, $i) / pow(26, $i - 1))) . $r;
+            $n -= pow(26, $i);
+        }
+        return $r;
     }
 }

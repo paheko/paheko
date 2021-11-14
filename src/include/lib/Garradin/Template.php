@@ -72,6 +72,7 @@ class Template extends \KD2\Smartyer
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
 		$this->assign('is_logged', false);
+		$this->assign('dialog', isset($_GET['_dialog']));
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
 		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
@@ -108,6 +109,7 @@ class Template extends \KD2\Smartyer
 
 		$this->register_function('icon', [$this, 'widgetIcon']);
 		$this->register_function('button', [$this, 'widgetButton']);
+		$this->register_function('link', [$this, 'widgetLink']);
 		$this->register_function('linkbutton', [$this, 'widgetLinkButton']);
 
 		$this->register_modifier('strlen', 'strlen');
@@ -182,6 +184,36 @@ class Template extends \KD2\Smartyer
 		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
 	}
 
+	protected function widgetLink(array $params): string
+	{
+		$href = $params['href'];
+		$label = $params['label'];
+
+		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
+		if (substr($href, 0, 1) == '!') {
+			$href = ADMIN_URL . substr($params['href'], 1);
+		}
+
+		// propagate _dialog param if we are in an iframe
+		if (isset($_GET['_dialog']) && !isset($params['target'])) {
+			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog';
+		}
+
+		if (!isset($params['class'])) {
+			$params['class'] = '';
+		}
+
+		unset($params['href'], $params['label']);
+
+		array_walk($params, function (&$v, $k) {
+			$v = sprintf('%s="%s"', $k, $this->escape($v));
+		});
+
+		$params = implode(' ', $params);
+
+		return sprintf('<a href="%s" %s>%s</a>', $this->escape($href), $params, $this->escape($label));
+	}
+
 	protected function widgetButton(array $params): string
 	{
 		$icon = Utils::iconUnicode($params['shape']);
@@ -213,14 +245,8 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetLinkButton(array $params): string
 	{
-		$href = $params['href'];
-		$shape = $params['shape'];
-		$label = $params['label'];
-
-		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
-		if (substr($href, 0, 1) == '!') {
-			$href = ADMIN_URL . substr($params['href'], 1);
-		}
+		$params['data-icon'] = Utils::iconUnicode($params['shape']);
+		unset($params['shape']);
 
 		if (!isset($params['class'])) {
 			$params['class'] = '';
@@ -228,15 +254,7 @@ class Template extends \KD2\Smartyer
 
 		$params['class'] .= ' icn-btn';
 
-		unset($params['href'], $params['shape'], $params['label']);
-
-		array_walk($params, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, $this->escape($v));
-		});
-
-		$params = implode(' ', $params);
-
-		return sprintf('<a data-icon="%s" href="%s" %s>%s</a>', Utils::iconUnicode($shape), $this->escape($href), $params, $this->escape($label));
+		return $this->widgetLink($params);
 	}
 
 	protected function passwordChangeInput(array $params)

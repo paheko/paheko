@@ -191,7 +191,7 @@
 		}
 
 		var bg = $('#f_background');
-		bg.onchange = () => {
+		bg.addEventListener('change', () => {
 			if (!bg.files.length) return;
 
 			var reader = new FileReader;
@@ -201,7 +201,7 @@
 				bg.value = '';
 			};
 			reader.readAsDataURL(bg.files[0]);
-		};
+		});
 
 		var reset_btn = document.createElement('button');
 		reset_btn.className = 'resetButton icn-btn';

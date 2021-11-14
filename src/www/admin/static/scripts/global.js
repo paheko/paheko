@@ -83,7 +83,7 @@
 
 		var script = g.loaded[file] = document.createElement('script');
 		script.type = 'text/javascript';
-		script.src = this.static_url + file + '?' + this.version;
+		script.src = this.static_url + file + '?' + g.version;
 		script.onload = callback;
 		document.head.appendChild(script);
 	};
@@ -92,7 +92,7 @@
 		var link = document.createElement('link');
 		link.rel = 'stylesheet';
 		link.type = 'text/css';
-		link.href = this.static_url + file + '?' + this.version;
+		link.href = this.static_url + file + '?' + g.version;
 		return document.head.appendChild(link);
 	};
 
@@ -142,7 +142,7 @@
 		}
 
 		if (event) {
-			content.addEventListener(event, () => g.dialog.classList.add('loaded'));
+			content.addEventListener(event, () => { if (g.dialog) g.dialog.classList.add('loaded'); });
 		}
 		else {
 			g.dialog.classList.add('loaded');
@@ -171,6 +171,32 @@
 
 		g.openDialog(iframe, callback);
 		return iframe;
+	};
+
+	g.reloadParentDialog = () => {
+		if (!window.parent.g.dialog) {
+			return;
+		}
+
+		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
+	};
+
+	g.resizeParentDialog = () => {
+		if (!window.parent.g.dialog) {
+			return;
+		}
+
+		let height = document.body.offsetHeight;
+		let parent_height = window.parent.innerHeight;
+
+		if (height > parent_height * 0.9) {
+			height = '90%';
+		}
+		else {
+			height += 'px';
+		}
+
+		window.parent.g.dialog.childNodes[1].style.height = height;
 	};
 
 	g.closeDialog = function () {
@@ -416,6 +442,12 @@
 		document.querySelectorAll('input[data-input="date"]').forEach((e) => {
 			g.enhanceDateField(e);
 		});
+	});
+
+	g.onload(() => {
+		if (document.querySelector('input[type="file"][data-enhanced]')) {
+			g.script('scripts/file_input.js');
+		}
 	});
 
 	// To be able to select a whole table line just by clicking the row

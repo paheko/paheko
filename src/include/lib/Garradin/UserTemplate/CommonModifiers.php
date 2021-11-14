@@ -61,6 +61,10 @@ class CommonModifiers
 	{
 		$ts = Utils::get_datetime($ts);
 
+		if (null === $ts) {
+			return null;
+		}
+
 		if ($minutes_only_if_required && $ts->format('i') == '00') {
 			return $ts->format('H\h');
 		}

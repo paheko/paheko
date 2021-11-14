@@ -54,8 +54,17 @@ class Membres
                 elseif ($config->type == 'date' && trim($data[$key]) !== '')
                 {
                     $dt = \DateTime::createFromFormat('Y-m-d', $data[$key]);
+
                     if (!$dt) {
-                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ attendu.', $config->title));
+                        $dt = \DateTime::createFromFormat('d/m/y', $data[$key]);
+                    }
+
+                    if (!$dt) {
+                        $dt = \DateTime::createFromFormat('d/m/Y', $data[$key]);
+                    }
+
+                    if (!$dt) {
+                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ ou JJ/MM/AAAA attendu.', $config->title));
                     }
                     $data[$key] = $dt->format('Y-m-d');
                 }
@@ -80,7 +89,7 @@ class Membres
                 }
                 elseif ($config->type == 'email')
                 {
-                    $data[$key] = strtolower($data[$key]);
+                    $data[$key] = strtolower(trim($data[$key]));
 
                     if (trim($data[$key]) !== '' && !SMTP::checkEmailIsValid($data[$key], false))
                     {

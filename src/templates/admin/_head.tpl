@@ -41,7 +41,7 @@
     <nav class="menu">
     <ul>
     {if !$is_logged}
-        <li><a href="{$www_url}">&larr; Retour au site</a></li>
+        <li><a href="{if $config.site_asso}{$config.site_asso}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
         <li><a href="{$admin_url}">Connexion</a>
             <ul>
                 <li><a href="{$admin_url}password.php">Mot de passe perdu</a>

@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS services_users
     id INTEGER NOT NULL PRIMARY KEY,
     id_user INTEGER NOT NULL REFERENCES membres (id) ON DELETE CASCADE,
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-    id_fee INTEGER NULL REFERENCES services_fees (id) ON DELETE CASCADE,
+    id_fee INTEGER NULL REFERENCES services_fees (id) ON DELETE CASCADE, -- This can be NULL if there is no fee for the service
 
     paid INTEGER NOT NULL DEFAULT 0,
     expected_amount INTEGER NULL,
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 
     position INTEGER NOT NULL, -- position actif/passif/charge/produit
     type INTEGER NOT NULL DEFAULT 0, -- Type de compte spécial : banque, caisse, en attente d'encaissement, etc.
-    user INTEGER NOT NULL DEFAULT 1 -- 1 = fait partie du plan comptable original, 0 = a été ajouté par l'utilisateur
+    user INTEGER NOT NULL DEFAULT 1 -- 0 = fait partie du plan comptable original, 1 = a été ajouté par l'utilisateur
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
@@ -358,7 +358,6 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
     prefix TEXT NOT NULL PRIMARY KEY,
     date INTEGER NOT NULL
 );
-
 CREATE TABLE IF NOT EXISTS docs_templates
 -- Dynamic printable document templates
 (

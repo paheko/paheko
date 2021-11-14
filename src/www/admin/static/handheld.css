@@ -169,6 +169,32 @@ fieldset {
 	margin-right: 0;
 }
 
+nav.tabs aside {
+	float: none;
+	text-align: center;
+	max-width: 100%;
+}
+
+table.list tfoot .actions[colspan] {
+	text-align: left;
+}
+
+table.list tbody .actions {
+	text-align: left;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+}
+
+table.list tbody .actions a {
+	flex: 1;
+	align-self: flex-end;
+}
+
+table.list th {
+	font-size: 1.2em;
+}
+
 /* Petits écrans (smartphones) */
 @media screen and (max-width:600px) {
 	table.list tr {
@@ -215,11 +241,6 @@ fieldset {
 	.actions a {
 		margin: .2em;
 		font-size: .9em;
-	}
-
-	nav.tabs aside {
-		float: none;
-		text-align: center;
 	}
 
 	#dialog {
