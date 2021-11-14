@@ -663,34 +663,13 @@ class Utils
         $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
         $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
 
-        if (SMTP_HOST)
-        {
-            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+        $msg = new Mail_Message;
+        $msg->setHeaders($headers);
+        $msg->setBody($content);
+        $msg->setHeader('To', $to);
+        $msg->setHeader('Subject', $subject);
 
-            if (!defined($const))
-            {
-                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
-            }
-
-            $secure = constant($const);
-
-            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-            return $smtp->send($to, $subject, $content, $headers);
-        }
-        else
-        {
-            // Encodage du sujet
-            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
-            $raw_headers = '';
-
-            // Sérialisation des entêtes
-            foreach ($headers as $name=>$value)
-            {
-                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
-            }
-
-            return \mail($to, $subject, $content, $raw_headers);
-        }
+        return Email::send($msg, $context);
     }
 
     static public function iconUnicode(string $shape): string
