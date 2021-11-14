@@ -2,7 +2,12 @@
 declare(strict_types=1);
 
 namespace Garradin\Entities\Users;
+
 use Garradin\Entity;
+use Garradin\UserException;
+use Garradin\Users\Emails;
+
+use const Garradin\{WWW_URL, SECRET_KEY};
 
 class Email extends Entity
 {
@@ -10,7 +15,7 @@ class Email extends Entity
 
 	const COMMON_DOMAINS = ['laposte.net', 'gmail.com', 'hotmail.fr', 'hotmail.com', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'yahoo.fr', 'orange.fr', 'live.fr', 'outlook.fr', 'yahoo.com', 'neuf.fr', 'outlook.com', 'icloud.com', 'riseup.net', 'vivaldi.net', 'aol.com', 'gmx.de', 'lilo.org', 'mailo.com', 'protonmail.com'];
 
-	protected string $email;
+	protected int $id;
 	protected string $hash;
 	protected bool $verified;
 	protected bool $optout;
@@ -32,14 +37,35 @@ class Email extends Entity
 
 		$email = substr($email, 0, strrpos($email, '@')+1) . $host;
 
-		return hash('sha256', $email);
+		return sha1($email);
+	}
+
+	static public function getOptoutURL(string $hash = null): string
+	{
+		$hash = hex2bin($hash);
+		$hash = base64_encode($hash);
+		// Make base64 hash valid for URLs
+		$hash = rtrim(strtr($hash, '+/', '-_'), '=');
+		return sprintf('%s?un=%s', WWW_URL, $hash);
 	}
 
 	public function getVerificationCode(): string
 	{
-		$code = base64_encode($this->hash);
-		$code = preg_replace('/[^\w\d]+/', $code);
+		$code = sha1($this->hash . SECRET_KEY);
 		return substr($code, 0, 10);
+	}
+
+	public function sendVerification(string $email): void
+	{
+		if (self::getHash($email) !== $this->hash) {
+			throw new UserException('Adresse email inconnue');
+		}
+
+		$message = "Bonjour,\n\nPour vérifier votre adresse e-mail pour notre association,\ncliquez sur le lien ci-dessous :\n\n";
+		$message.= self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
+		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le.";
+
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$email], null, 'Confirmez votre adresse e-mail', $message);
 	}
 
 	public function verify(string $code): bool
@@ -48,13 +74,16 @@ class Email extends Entity
 			return false;
 		}
 
-		$this->verified = true;
+		$this->set('verified', true);
+		$this->set('optout', false);
+		$this->set('invalid', false);
+		$this->set('fail_count', 0);
 		return true;
 	}
 
-	public function validate(): void
+	static public function validate(string $email): void
 	{
-		$user = strtok($this->email, '@');
+		$user = strtok($email, '@');
 		$host = strtok('');
 
 		// Ce domaine n'existe pas (MX inexistant), erreur de saisie courante
@@ -62,7 +91,7 @@ class Email extends Entity
 			throw new UserException('L\'adresse e-mail est invalide : est-ce que vous avez voulu écrire "gmail.com" ?');
 		}
 
-		if (!$this->isValid()) {
+		if (!SMTP::checkEmailIsValid($email, true)) {
 			foreach (self::COMMON_DOMAINS as $common_domain) {
 				similar_text($common_domain, $host, $percent);
 
@@ -81,11 +110,6 @@ class Email extends Entity
 		if ($this->invalid) {
 			throw new UserException('Cette adresse e-mail est invalide.');
 		}
-	}
-
-	public function isValid(): bool
-	{
-		return SMTP::checkEmailIsValid($this->email, true);
 	}
 
 	public function canSend(): bool
@@ -111,22 +135,25 @@ class Email extends Entity
 
 	public function incrementSentCount(): void
 	{
-		$this->sent_count++;
+		$this->set('sent_count', $this->sent_count+1);
 	}
 
 	public function setOptout(): void
 	{
-		$this->optout = true;
+		$this->set('optout', true);
 		$this->appendFailLog('Demande de désinscription');
 	}
 
 	public function appendFailLog(string $message): void
 	{
+		$log = $this->fail_log;
+
 		if ($this->fail_log) {
-			$this->fail_log .= "\n";
+			$log .= "\n";
 		}
 
-		$this->fail_log .= date('d/m/Y H:i:s - ') . trim($message);
+		$log .= date('d/m/Y H:i:s - ') . trim($message);
+		$this->set('fail_log', $log);
 	}
 
 	public function hasFailed(array $return): void
@@ -137,16 +164,16 @@ class Email extends Entity
 
 		// Treat complaints as opt-out
 		if ($return['type'] == 'complaint') {
-			$this->optout = true;
+			$this->set('optout', true);
 			$this->appendFailLog("Un signalement de spam a été envoyé par le destinataire.\n: " . $return['message']);
 		}
 		elseif ($return['type'] == 'permanent') {
-			$email->invalid = true;
-			$email->fail_count++;
+			$this->set('invalid', true);
+			$this->set('fail_count', $this->fail_count+1);
 			$this->appendFailLog($return['message']);
 		}
 		elseif ($return['type'] == 'temporary') {
-			$email->fail_count++;
+			$this->set('fail_count', $this->fail_count+1);
 			$this->appendFailLog($return['message']);
 		}
 	}

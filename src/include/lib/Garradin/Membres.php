@@ -9,6 +9,8 @@ use Garradin\Membres\Session;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
+use Garradin\Users\Emails;
+
 class Membres
 {
     const ITEMS_PER_PAGE = 50;
@@ -343,31 +345,23 @@ class Membres
                 unset($recipients[$key]);
                 continue;
             }
-
-            // Refuser d'envoyer un mail à une adresse invalide, sans vérifier le MX
-            // sinon ça serait trop lent
-            if (!SMTP::checkEmailIsValid($recipient->email, false))
-            {
-                throw new UserException(sprintf('Adresse email invalide : "%s". Aucun message n\'a été envoyé.', $recipient->email));
-            }
         }
 
         if (!count($recipients)) {
         	throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
         }
 
-        foreach ($recipients as $recipient)
-        {
-            if (!isset($recipient->email, $recipient->id)) {
-                throw new UserException('Il manque l\'identifiant ou l\'email dans le résultat');
-            }
-
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
+        foreach ($recipients as &$recipient) {
+            $recipient = $recipient->email;
         }
+
+        unset($recipient);
+
+        Emails::queue(Emails::CONTEXT_BULK, $recipients, null, $subject, $message);
 
         if ($send_copy)
         {
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
+            Emails::queue(Emails::CONTEXT_BULK, $config->get('email_asso'), null, $subject, $message);
         }
 
         return true;
@@ -376,7 +370,7 @@ class Membres
     public function listAllByCategory($id_category, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';
-        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_category = ?' . $where, (int)$id_category);
+        return DB::getInstance()->get('SELECT email FROM membres WHERE id_category = ?' . $where, (int)$id_category);
     }
 
     public function listByCategory(?int $id_category): DynamicList

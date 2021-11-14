@@ -2,7 +2,13 @@
 
 namespace Garradin\Users;
 
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Plugin;
 use Garradin\Entities\Users\Email;
+
+use const Garradin\{USE_CRON};
+use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
 
 use KD2\SMTP;
 use KD2\Mail_Message;
@@ -20,7 +26,7 @@ class Emails
 	const FAIL_LIMIT = 5;
 
 	/**
-	 * Add a message to the sending queue
+	 * Add a message to the sending queue using templates
 	 * @param  int          $context
 	 * @param  array        $recipients List of recipients, 'From' email address as the key, and an array as a value, that contains variables to be used in the email template
 	 * @param  string       $sender
@@ -29,7 +35,7 @@ class Emails
 	 * @param  UserTemplate $template_html
 	 * @return void
 	 */
-	static public function queue(int $context, array $recipients, string $sender, string $subject, UserTemplate $template, ?UserTemplate $template_html): void
+	static public function queueTemplate(int $context, array $recipients, string $sender, string $subject, UserTemplate $template, ?UserTemplate $template_html): void
 	{
 		$db = DB::getInstance();
 		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, content, content_html, context)
@@ -53,10 +59,6 @@ class Emails
 			$content = $template->fetch($variables);
 			$content_html = $template_html ? $template_html->fetch($variables) : null;
 
-			$content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
-			$content .= "Pour ne plus jamais recevoir de message de notre part cliquez sur le lien suivant :\n";
-			$content .= self::getOptoutURL(null, $hash);
-
 			$st->bindValue(':recipient', $to);
 			$st->bindValue(':recipient_hash', $hash);
 			$st->bindValue(':content', $content);
@@ -68,22 +70,68 @@ class Emails
 		}
 
 		Plugin::fireSignal('email.queue.added');
+
+		if (!USE_CRON) {
+			self::runQueue();
+		}
 	}
 
-	static public function getOptoutURL(?string $email, ?string $hash = null): string
+	/**
+	 * Add a message to the sending queue
+	 * @param  int          $context
+	 * @param  array        $recipients List of recipients emails
+	 * @param  string       $sender
+	 * @param  string       $subject
+	 * @param  UserTemplate $template
+	 * @param  UserTemplate $template_html
+	 * @return void
+	 */
+	static public function queue(int $context, array $recipients, ?string $sender, string $subject, string $text): void
 	{
-		$hash = $hash ?? Email::getHash($email);
-		$hash = gzdeflate($hash, 9);
-		$hash = base64_encode($hash);
-		// Make base64 hash valid for URLs
-		$hash = rtrim(strtr($hash, '+/', '-_'), '=');
-		return sprintf('%s?un=%s', WWW_URL, $hash);
+		$db = DB::getInstance();
+		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, content, context)
+			VALUES (:sender, :subject, :recipient, :recipient_hash, :content, :context);');
+
+		foreach ($recipients as $to) {
+			// Ignore obviously invalid emails here
+			if (!self::checkAddress($to)) {
+				self::markAddressAsInvalid($to);
+				continue;
+			}
+
+			// We won't try to reject invalid/optout recipients here,
+			// it's done in the queue clearing (more efficient)
+			$hash = Email::getHash($to);
+
+			$st->bindValue(':sender', $sender);
+			$st->bindValue(':subject', $subject);
+			$st->bindValue(':context', $context);
+			$st->bindValue(':recipient', $to);
+			$st->bindValue(':recipient_hash', $hash);
+			$st->bindValue(':content', $text);
+			$st->execute();
+
+			$st->reset();
+			$st->clear();
+		}
+
+		Plugin::fireSignal('email.queue.added');
+
+		// If no crontab is used, then the queue should be run now
+		if (!USE_CRON) {
+			self::runQueue();
+		}
 	}
 
 	static public function getEmailEntityFromOptout(string $code): ?Email
 	{
-		$hash = base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
-		$hash = gzinflate($hash);
+		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
+
+		if (!$hash) {
+			return null;
+		}
+
+		$hash = bin2hex($hash);
 		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
 	}
 
@@ -95,7 +143,7 @@ class Emails
 			return;
 		}
 
-		$e->invalid = true;
+		$e->set('invalid', true);
 		$e->save();
 	}
 
@@ -131,26 +179,36 @@ class Emails
 	{
 		$db = DB::getInstance();
 
-		$queue = $this->listQueueAndMarkAsSending();
+		$queue = self::listQueueAndMarkAsSending();
+		$ids = [];
 
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
 			// Don't send emails to opt-out address, unless it's a password reminder
 			if ($row->context != self::CONTEXT_SYSTEM && $row->optout) {
-				$this->deleteFromQueue($row->id);
+				self::deleteFromQueue($row->id);
 				continue;
 			}
 
-			$msg = new Mail_Message;
-			$msg->setHeader('From', $row->sender);
-			$msg->setHeader('To', $row->recipient);
-			// RFC 8058
-			$msg->setHeader('List-Unsubscribe', sprintf('<%s>', self::getOptoutURL(null, $row->recipient_hash)));
-			$msg->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
-			self::send($row->recipient, $row->from_name, $row->from_email, $row->subject, $row->content);
+			$headers = [
+				'From' => $row->sender,
+				'To' => $row->recipient,
+				'Subject' => $row->subject,
+			];
 
-			$this->deleteFromQueue($row->id);
+			self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html);
+			$ids[] = $row->id;
 		}
+
+		// Update emails list and send count
+		// then delete messages from queue
+		$db->exec(sprintf('
+		BEGIN;
+			UPDATE emails_queue SET sending = 2 WHERE %s;
+			INSERT OR IGNORE INTO %s (hash) SELECT recipient_hash FROM emails_queue WHERE sending = 2;
+			UPDATE %2$s SET sent_count = sent_count + 1 WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
+			DELETE FROM emails_queue WHERE sending = 2;
+		END;', $db->where('id', $ids), Email::TABLE));
 	}
 
 	/**
@@ -159,7 +217,7 @@ class Emails
 	 */
 	static protected function listQueueAndMarkAsSending()
 	{
-		$queue = $this->listQueue();
+		$queue = self::listQueue();
 
 		if (!count($queue)) {
 			return $queue;
@@ -172,7 +230,7 @@ class Emails
 		}
 
 		$db = DB::getInstance();
-		$db->update('emails_queue', ['status' => self::STATUS_SENDING, 'status_changed' => new \DateTime], $db->where('id', $ids));
+		$db->update('emails_queue', ['sending' => 1, 'sending_started' => new \DateTime], $db->where('id', $ids));
 
 		return $queue;
 	}
@@ -185,11 +243,11 @@ class Emails
 	 * qui envoient le même email !
 	 * @return array
 	 */
-	protected function listQueue(): array
+	static protected function listQueue(): array
 	{
 		// Nettoyage de la queue déjà
-		$this->purgeQueueFromRejected();
-		$this->resetFailed();
+		self::purgeQueueFromRejected();
+		self::resetFailed();
 		return DB::getInstance()->get('SELECT q.*, e.optout, e.verified
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash
@@ -202,7 +260,7 @@ class Emails
 	 * ou qui ne souhaitent plus recevoir de message
 	 * @return boolean
 	 */
-	public function purgeQueueFromRejected(): void
+	static protected function purgeQueueFromRejected(): void
 	{
 		DB::getInstance()->delete('emails_queue',
 			'recipient_hash IN (SELECT hash FROM emails WHERE invalid = 1 OR fail_count >= ?)',
@@ -212,7 +270,7 @@ class Emails
 	/**
 	 * If emails have been marked as sending but sending failed, mark them for resend after a while
 	 */
-	public function resetFailed(): void
+	static protected function resetFailed(): void
 	{
 		$sql = 'UPDATE emails_queue SET sending = 0, sending_started = NULL
 			WHERE sending = 1 AND sending_started < datetime(\'now\', \'-3 hours\');';
@@ -224,40 +282,77 @@ class Emails
 	 * @param  integer $id
 	 * @return boolean
 	 */
-	public function deleteFromQueue($id)
+	static protected function deleteFromQueue($id)
 	{
 		return DB::getInstance()->delete('emails_queue', 'id = ?', (int)$id);
 	}
 
-	static public function send(int $context, Mail_Message $message): bool
+	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html): void
 	{
 		$config = Config::getInstance();
+
+		$message = new Mail_Message;
+		$message->setHeaders($headers);
 
 		if (!$message->getFrom()) {
 			$message->setHeader('From', sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso));
 		}
 
-		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message'));
+		$message->setMessageId();
+
+		// Append unsubscribe, except for password reminders
+		if ($context != self::CONTEXT_SYSTEM) {
+			$url = Email::getOptoutURL($recipient_hash);
+
+			// RFC 8058
+			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
+			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
+
+			$optout_text = "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n"
+				. "Pour ne plus jamais recevoir de message de notre part cliquez sur le lien suivant :\n";
+
+			$content .= "\n\n-- \n" . $optout_text . $url;
+
+			if (null !== $content_html) {
+				$optout_text = '<hr /><p style="color: #000; background: #fff">' . nl2br(htmlspecialchars($optout_text));
+				$optout_text.= sprintf('<a href="%s" style="color: blue; text-decoration: underline; padding: 5px; border-radius: 5px; background: #eee;">Me désinscrire</a>', $url);
+
+				if (stripos($content_html, '</body>') !== false) {
+					$content_html = str_ireplace('</body>', $optout_text . '</body>', $content_html);
+				}
+				else {
+					$content_html .= $optout_text;
+				}
+			}
+		}
+
+		$message->setBody($content);
+
+		if (null !== $content_html) {
+			$message->addPart('text/html', $content_html);
+		}
+
+		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message', 'content', 'content_html'));
 
 		if ($email_sent_via_plugin) {
-			return true;
+			return;
 		}
 
 		if (SMTP_HOST) {
 			$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
 			$secure = constant($const);
 
-			$to = $message->getTo();
+			$to = $message->getTo()[0];
 			$from = $message->getFrom()[0];
 
 			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-			return $smtp->rawSend($from, $to, $message->output());
+			$smtp->rawSend($from, $to, $message->output());
 		}
 		else {
 			$message->send();
 		}
 
-		Plugin::fireSignal('email.send.after', compact('context', 'message'));
+		Plugin::fireSignal('email.send.after', compact('context', 'message', 'content', 'content_html'));
 	}
 
 	/**
@@ -266,10 +361,10 @@ class Emails
 	 */
 	static public function handleBounce(string $raw_message): void
 	{
-		$msg = new Mail_Message;
-		$msg->parse($raw_message);
+		$message = new Mail_Message;
+		$message->parse($raw_message);
 
-		$return = $msg->identifyBounce();
+		$return = $message->identifyBounce();
 
 		if ($return['type'] == 'autoreply') {
 			// Ignore auto-responders
@@ -282,19 +377,18 @@ class Emails
 			$new = new Mail_Message;
 			$new->setHeaders([
 				'To'      => $config->email_asso,
-				'From'    => sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso),
 				'Subject' => 'Réponse à un message que vous avez envoyé',
 			]);
 
 			$new->setBody('Veuillez trouver ci-joint une réponse à un message que vous avez envoyé à un de vos membre.');
 
-			$new->attachMessage($msg->output());
+			$new->attachMessage($message->output());
 
 			self::send(self::CONTEXT_SYSTEM, $new->output());
 			return;
 		}
 
-		$email = $this->getEmailEntity($return['recipient']);
+		$email = self::getEmailEntity($return['recipient']);
 
 		if (!$email) {
 			return;
