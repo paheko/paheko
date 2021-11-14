@@ -40,14 +40,7 @@
 <header class="header">
     <nav class="menu">
     <ul>
-    {if !$is_logged}
-        <li><a href="{if $config.site_asso}{$config.site_asso}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
-        <li><a href="{$admin_url}">Connexion</a>
-            <ul>
-                <li><a href="{$admin_url}password.php">Mot de passe perdu</a>
-            </ul>
-        </li>
-    {else}
+    {if $is_logged}
     <?php
     $current_parent = substr($current, 0, strpos($current, '/'));
     ?>
@@ -114,6 +107,13 @@
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
             <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
+    {elseif !defined('Garradin\INSTALL_PROCESS')}
+        <li><a href="{if $config.site_asso}{$config.site_asso}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
+        <li><a href="{$admin_url}">Connexion</a>
+            <ul>
+                <li><a href="{$admin_url}password.php">Mot de passe perdu</a>
+            </ul>
+        </li>
     {/if}
     </ul>
     </nav>
