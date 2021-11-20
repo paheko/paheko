@@ -48,13 +48,11 @@
                 <td class="num">
                     <a href="{$admin_url}membres/fiche.php?id={$row._user_id}">{$value}</a>
                 </td>
+                {elseif $key == $id_field}
+                <th><a href="{$admin_url}membres/fiche.php?id={$row._user_id}">{$value|raw|display_champ_membre:$key}</a></th>
                 {else}
                 <td>
-                    {if $key == $id_field}<a href="{$admin_url}membres/fiche.php?id={$row._user_id}">{/if}
-
                     {$value|raw|display_champ_membre:$key}
-
-                    {if $key == $id_field}</a>{/if}
                 </td>
                 {/if}
             {/foreach}
