@@ -95,7 +95,7 @@ document.head.innerHTML += `<style type="text/css">
 	background: #dfd;
 }
 
-#searchForm {
+.searchForm {
 	border: 1px solid #ccc;
 	border-radius: 5px;
 	padding: .5em;
