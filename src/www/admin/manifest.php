@@ -16,13 +16,11 @@ $manifest = [
 			'src'   => WWW_URL . 'favicon.png',
 			'type'  => 'image/png',
 		],
-/*
 		[
 			'sizes' => '256x256',
 			'src'   => WWW_URL . 'logo.png',
 			'type'  => 'image/png',
 		],
-*/
 	],
 ];
 
