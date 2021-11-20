@@ -19,9 +19,9 @@
 <form method="GET" action="$ROOT/wiki" onsubmit="this.action=this.form.t.dataset.action; this.form.s.name=this.form.t.dataset.name; this.target=this.form.t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
 	<legend>Rechercher</legend>
-	<input type="text" name="s" size="40" value="" />
+	<input type="search" name="s" size="40" value="" />
 	<label><input type="radio" name="t" value="" data-name="s" data-action="$ROOT/wiki/" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
-	<label><input type="radio" name="t" value="1" data-action="https://garradin.eu/search" data-name="search" data-target="_blank" /> Chercher dans la documentation technique</label>
+	<label><input type="radio" name="t" value="1" data-action="https://garradin.eu/search" data-name="search" data-target="_blank" /> Chercher dans l'aide utilisateur</label>
 	<input type="submit" value="Rechercher" />
 </fieldset>
 </form>
@@ -102,6 +102,10 @@ document.head.innerHTML += `<style type="text/css">
 	margin: 1em auto;
 	max-width: 30em;
 	text-align: center;
+}
+
+.searchForm input[type=search] {
+	border-color: #333;
 }
 `;
 
