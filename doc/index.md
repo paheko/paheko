@@ -16,12 +16,14 @@
 
 <p id="give"><a href="https://kd2.org/soutien/" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
 
-<form method="GET" action="$ROOT/wiki">
-<div class="searchForm searchFormWiki">
-	<input type="text" name="s" size="40" value="" />
-	<input type="submit" value="Chercher dans la doc. technique" />
-	<input type="submit" value="Chercher dans l'aide utilisateur" onclick="this.form.action='https://garradin.eu/search?search=membres';" />
-</div>
+<form method="GET" action="$ROOT/wiki" onsubmit="this.action=form.t.dataset.action; this.form.s.name=form.t.dataset.name; this.target=form.t.dataset.target;">
+<fieldset class="searchForm searchFormWiki">
+	<legend>Rechercher</legend>
+	<input type="text" name="s" size="40" value="" /><br />
+	<label><input type="radio" name="t" value="" data-name="s" data-action="$ROOT/wiki/" data-target="" /> Chercher dans la documentation technique</label><br />
+	<label><input type="radio" name="t" value="1" data-action="https://garradin.eu/search" data-name="search" data-target="_blank" /> Chercher dans la documentation technique</label><br />
+	<input type="submit" value="Rechercher" />
+</fieldset>
 </form>
 
 <script type="text/javascript">
