@@ -1,9 +1,12 @@
 <nav class="tabs">
+	<aside>
+		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+		{linkbutton href="!services/user/add.php" label="Inscrire à une activité" shape="plus"}
+		{/if}
+	</aside>
+
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}services/">Activités et cotisations</a></li>
-		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-			<li{if $current == 'save'} class="current"{/if}><a href="{$admin_url}services/user/add.php">Inscrire à une activité</a></li>
-		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
 			<li{if $current == 'reminders'} class="current"{/if}><a href="{$admin_url}services/reminders/">Gestion des rappels automatiques</a></li>
 		{/if}

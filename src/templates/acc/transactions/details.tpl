@@ -1,14 +1,12 @@
 {include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
 <nav class="tabs">
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-	<aside>{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}</aside>
-{/if}
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
-	<ul>
-		<li><a href="edit.php?id={$transaction.id}">Modifier cette écriture</a></li>
-		<li><a href="delete.php?id={$transaction.id}">Supprimer cette écriture</a></li>
-	</ul>
+	{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
+	{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
+{/if}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+	{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
 {/if}
 </nav>
 

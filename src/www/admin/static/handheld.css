@@ -17,6 +17,15 @@ a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
 	padding: .4em .6em;
 }
 
+nav.breadcrumbs .quota {
+	float: none;
+}
+
+nav.breadcrumbs ul {
+	display: block;
+	margin: .8em 0;
+}
+
 .header h1 {
 	margin: 0;
 	text-align: center;
@@ -249,11 +258,6 @@ table.list th {
 
 	.actions, table.list .actions {
 		text-align: center;
-	}
-
-	.actions a {
-		margin: .2em;
-		font-size: .9em;
 	}
 
 	#dialog {
