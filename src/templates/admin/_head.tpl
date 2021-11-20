@@ -30,7 +30,7 @@
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?{$version_hash}" media="print" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
     {if !empty($current) && $current == 'home'}
-    <link rel="manifest" href="{$admin_url}manifest.php" />
+    <link rel="manifest" href="{$admin_url}manifest.php?{$version_hash}" />
     {/if}
     {if isset($config)}
         {custom_colors config=$config}
