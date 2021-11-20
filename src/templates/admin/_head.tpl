@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$www_url}favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
     <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
     {if isset($custom_js)}
