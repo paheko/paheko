@@ -2,10 +2,13 @@
 // Register service worker for add to home screen feature
 if ('serviceWorker' in navigator) {
 	console.log('has service-worker');
-	navigator.serviceWorker.register(g.static_url + 'scripts/homescreen_serviceworker.js').then(() => {
+	// The service worker must be exactly at the start_url specified in the manifest
+	navigator.serviceWorker.register(g.admin_url + '_serviceworker.js').then(() => {
 		console.log('sw registered');
 	});
 }
+
+let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
 	console.log('ok');
