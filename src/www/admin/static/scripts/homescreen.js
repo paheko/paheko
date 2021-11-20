@@ -16,9 +16,14 @@ window.addEventListener('beforeinstallprompt', (e) => {
 	// Update UI to notify the user they can add to home screen
 	g.toggle('#homescreen-btn', true);
 
-	$('#homescreen-btn').addEventListener('click', (e) => {
+	$('#homescreen-btn').addEventListener('click', async (e) => {
 		// hide our user interface that shows our A2HS button
 		g.toggle('#homescreen-btn', false);
+
+		if (!deferredPrompt) {
+			return false;
+		}
+
 		// Show the prompt
 		deferredPrompt.prompt();
 		// Wait for the user to respond to the prompt
