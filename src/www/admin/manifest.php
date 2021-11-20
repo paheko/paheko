@@ -9,7 +9,7 @@ $manifest = [
 	'description'      => 'Gestion de l\'association',
 	'display'          => 'fullscreen',
 	'name'             => $config->nom_asso,
-	'start_url'        => '/',
+	'start_url'        => ADMIN_URL,
 	'icons'            => [
 		[
 			'sizes' => '16x16',
