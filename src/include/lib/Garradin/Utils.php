@@ -1077,7 +1077,7 @@ class Utils
 
             // We still haven't found anything
             if (!$cmd) {
-                throw new \LogicException('No PDF creation executable found. Please install or configure one.');
+                throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/garradin/wiki?name=Configuration');
             }
         }
 
