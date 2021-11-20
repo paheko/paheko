@@ -1,17 +1,14 @@
 // From https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen
 // Register service worker for add to home screen feature
 if ('serviceWorker' in navigator) {
-	console.log('has service-worker');
 	// The service worker must be exactly at the start_url specified in the manifest
 	navigator.serviceWorker.register(g.admin_url + '_serviceworker.js').then(() => {
-		console.log('sw registered');
 	});
 }
 
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
-	console.log('ok');
 	// Prevent Chrome 67 and earlier from automatically showing the prompt
 	e.preventDefault();
 	// Stash the event so it can be triggered later.
@@ -19,7 +16,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 	// Update UI to notify the user they can add to home screen
 	g.toggle('#homescreen-btn', true);
 
-	addBtn.addEventListener('click', (e) => {
+	$('#homescreen-btn').addEventListener('click', (e) => {
 		// hide our user interface that shows our A2HS button
 		g.toggle('#homescreen-btn', false);
 		// Show the prompt
