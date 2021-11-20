@@ -1,7 +1,10 @@
 // From https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen
 // Register service worker for add to home screen feature
 if ('serviceWorker' in navigator) {
-	navigator.serviceWorker.register(g.static_url + 'scripts/homescreen_serviceworker.js');
+	console.log('has service-worker');
+	navigator.serviceWorker.register(g.static_url + 'scripts/homescreen_serviceworker.js').then(() => {
+		console.log('sw registered');
+	});
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
