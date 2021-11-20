@@ -33,10 +33,11 @@ span.alert, b.alert {
 .alert.block, .error.block, .confirm.block, .help.block {
     border: 1px solid #ccc;
     padding: .5em;
-    margin-bottom: 1em;
+    margin: .5em 0;
     border-radius: .3em;
     padding-left: 3em;
     position: relative;
+    clear: both;
 }
 
 .alert.block {
@@ -464,6 +465,7 @@ aside.quota {
     border-radius: .5rem;
     padding: .2rem .5rem;
     color: #000;
+    margin: .5em 0;
 }
 
 aside.quota i {
