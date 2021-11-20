@@ -20,7 +20,7 @@
 <fieldset class="searchForm searchFormWiki">
 	<legend>Rechercher</legend>
 	<input type="search" name="s" size="40" value="" />
-	<label><input type="radio" name="t" value="" data-name="s" data-action="$ROOT/wiki" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
+	<label><input type="radio" name="t" value="" data-name="s" data-action="./wiki" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
 	<label><input type="radio" name="t" value="1" data-action="https://garradin.eu/search" data-name="search" data-target="_blank" /> Chercher dans l'aide utilisateur</label>
 	<input type="submit" value="Rechercher" />
 </fieldset>
