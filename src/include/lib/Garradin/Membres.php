@@ -421,7 +421,9 @@ class Membres
         }
 
         $list = new DynamicList($columns, $tables, $conditions);
-        $list->orderBy($order, false);
+        if ($order) {
+            $list->orderBy($order, false);
+        }
         return $list;
     }
 
