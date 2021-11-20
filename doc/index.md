@@ -14,8 +14,15 @@
 
 </nav>
 
-<p id="give"><a href="http://kd2.org/asso/soutien/" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
+<p id="give"><a href="https://kd2.org/soutien/" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
 
+<form method="GET" action="$ROOT/wiki">
+<div class="searchForm searchFormWiki">
+	<input type="text" name="s" size="40" value="" />
+	<input type="submit" value="Chercher dans la doc. technique" />
+	<input type="submit" value="Chercher dans l'aide utilisateur" onclick="this.form.action='https://garradin.eu/search?search=membres';" />
+</div>
+</form>
 
 <script type="text/javascript">
 document.head.innerHTML += `<style type="text/css">
@@ -30,7 +37,7 @@ document.head.innerHTML += `<style type="text/css">
 	padding-left: 70px;
 	border-radius: .5em;
 	font-size: 1.5em;
-	background: #ffc url("https://kd2.org/asso/soutien/coins.png") no-repeat .5em .5em;
+	background: #ffc url("https://kd2.org/soutien/coins.png") no-repeat .5em .5em;
 	border: 2px solid #990;
 }
 
