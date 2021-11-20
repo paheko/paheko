@@ -16,7 +16,7 @@
 
 <p id="give"><a href="https://kd2.org/soutien/" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
 
-<form method="GET" action="$ROOT/wiki" onsubmit="this.action=form.t.dataset.action; this.form.s.name=form.t.dataset.name; this.target=form.t.dataset.target;">
+<form method="GET" action="$ROOT/wiki" onsubmit="this.action=this.form.t.dataset.action; this.form.s.name=this.form.t.dataset.name; this.target=this.form.t.dataset.target;">
 <fieldset class="searchForm searchFormWiki">
 	<legend>Rechercher</legend>
 	<input type="text" name="s" size="40" value="" /><br />
