@@ -363,11 +363,18 @@ img.qrcode {
     background: #fff;
 }
 
+details {
+    margin-left: 4em;
+    margin-bottom: 1em;
+}
+
 details summary {
     list-style: none;
     padding: 0.2em 0.5em;
     transition: background-color .2s;
     position: relative;
+    padding-left: 4em;
+    margin-left: -4em;
 }
 
 details summary:hover {

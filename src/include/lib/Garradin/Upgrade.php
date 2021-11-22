@@ -7,9 +7,15 @@ use Garradin\Membres\Champs;
 
 use Garradin\Files\Files;
 
+use KD2\HTTP;
+
+use KD2\FossilInstaller;
+
 class Upgrade
 {
 	const MIN_REQUIRED_VERSION = '0.9.8';
+
+	static protected $installer = null;
 
 	static public function preCheck(): bool
 	{
@@ -400,5 +406,51 @@ class Upgrade
 		foreach ($files as $file) {
 			rename($file, ROOT . '/data/' . basename($file));
 		}
+	}
+
+	static public function getLatestVersion(): ?\stdClass
+	{
+		$config = Config::getInstance();
+		$last = $config->get('last_version_check');
+
+		if ($last) {
+			$last = json_decode($last);
+		}
+
+		// Only check once every two weeks
+		if ($last && $last->time > (time() - 3600 * 24 * 15)) {
+			return $last;
+		}
+
+		$current_version = garradin_version();
+		$last = (object) ['time' => time(), 'version' => null];
+		$config->set('last_version_check', json_encode($last));
+		$config->save();
+
+		$last->version = self::getInstaller()->latest();
+
+		if (version_compare($last->version, $current_version, '==')) {
+			$last->version = null;
+		}
+
+		$config->set('last_version_check', json_encode($last));
+		$config->save();
+
+		return $last;
+	}
+
+	static public function getInstaller(): FossilInstaller
+	{
+		if (!isset(self::$installer)) {
+			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^garradin-(.*)\.tar\.gz$!');
+			$i->setPublicKeyFile(ROOT . '/pubkey.asc');
+			$i->addIgnoredPath(CACHE_ROOT);
+			$i->addIgnoredPath(DATA_ROOT);
+			$i->addIgnoredPath(SHARED_CACHE_ROOT);
+			$i->addIgnoredPath(ROOT . '/config.local.php');
+			self::$installer = $i;
+		}
+
+		return self::$installer;
 	}
 }

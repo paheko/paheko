@@ -227,6 +227,24 @@ namespace Garradin;
 
 //const ENABLE_TECH_DETAILS = true;
 
+
+/**
+ * Activer la possibilité de faire une mise à jour semi-automatisée
+ * depuis fossil.kd2.org.
+ *
+ * Si mis à TRUE, alors un bouton sera accessible depuis le menu "Configuration"
+ * pour faire une mise à jour en deux clics.
+ *
+ * Il est conseillé de désactiver cette fonctionnalité si vous ne voulez pas
+ * permettre à un utilisateur de casser l'installation !
+ *
+ * Défaut : true
+ *
+ * @var bool
+ */
+
+//const ENABLE_UPGRADES = true;
+
 /**
  * Utilisation de cron pour les tâches automatiques
  *
