@@ -429,7 +429,7 @@ class Upgrade
 
 		$last->version = self::getInstaller()->latest();
 
-		if (version_compare($last->version, $current_version, '==')) {
+		if (version_compare($last->version, $current_version, '<=')) {
 			$last->version = null;
 		}
 
@@ -444,10 +444,20 @@ class Upgrade
 		if (!isset(self::$installer)) {
 			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^garradin-(.*)\.tar\.gz$!');
 			$i->setPublicKeyFile(ROOT . '/pubkey.asc');
-			$i->addIgnoredPath(CACHE_ROOT);
-			$i->addIgnoredPath(DATA_ROOT);
-			$i->addIgnoredPath(SHARED_CACHE_ROOT);
-			$i->addIgnoredPath(ROOT . '/config.local.php');
+
+			if (0 === ($pos = strpos(CACHE_ROOT, ROOT))) {
+				$i->addIgnoredPath(substr(CACHE_ROOT, strlen(ROOT) + 1));
+			}
+
+			if (0 === ($pos = strpos(DATA_ROOT, ROOT))) {
+				$i->addIgnoredPath(substr(DATA_ROOT, strlen(ROOT) + 1));
+			}
+
+			if (0 === ($pos = strpos(SHARED_CACHE_ROOT, ROOT))) {
+				$i->addIgnoredPath(substr(SHARED_CACHE_ROOT, strlen(ROOT) + 1));
+			}
+
+			$i->addIgnoredPath('config.local.php');
 			self::$installer = $i;
 		}
 
