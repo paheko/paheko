@@ -42,7 +42,7 @@ release: test minify
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
 	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
-	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp/garradin-build garradin-${VERSION}
+	tar czvfh garradin-${VERSION}.tar.gz -C /tmp/garradin-build garradin-${VERSION}
 
 deb:
 	cd ../debian; ./makedeb.sh
