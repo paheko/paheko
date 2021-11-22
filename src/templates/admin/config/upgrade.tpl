@@ -67,7 +67,7 @@
 		<legend>Mise à jour</legend>
 		<dl>
 		{foreach from=$releases key="version" item="release"}
-			{input type="radio" name="download" value=$version label=$version disabled=!$release.can_upgrade}
+			{input type="radio" name="download" value=$version label=$version}
 			{if $version == $latest}
 			<dd class="help">
 				Dernière version stable, conseillée.
