@@ -400,6 +400,39 @@ class Utils
         return @mkdir($path, $mode, $recursive) || is_dir($path);
     }
 
+    /**
+     * Does a recursive list using glob(), this is faster than using Recursive iterators
+     * @param  string $path    Target path
+     * @param  string $pattern Pattern
+     * @param  int    $flags   glob() Flags
+     * @return array
+     */
+    static public function recursiveGlob(string $path, string $pattern = '*', int $flags = 0): array
+    {
+        $target = $path . DIRECTORY_SEPARATOR . $pattern;
+        $list = [];
+
+        // glob is the fastest way to recursely list directories and files apparently
+        // after comparing with opendir(), dir() and filesystem recursive iterators
+        foreach(glob($target, $flags) as $file) {
+            $file = basename($file);
+
+            if ($file[0] == '.') {
+                continue;
+            }
+
+            $list[] = $file;
+
+            if (is_dir($path . DIRECTORY_SEPARATOR . $file)) {
+                foreach (self::recursiveGlob($path . DIRECTORY_SEPARATOR . $file, $pattern, $flags) as $subfile) {
+                    $list[] = $file . DIRECTORY_SEPARATOR . $subfile;
+                }
+            }
+        }
+
+        return $list;
+    }
+
     static public function suggestPassword()
     {
         return Security::getRandomPassphrase(ROOT . '/include/data/dictionary.fr');
@@ -842,56 +875,6 @@ class Utils
         header('Cache-Control: private');
 
         return false;
-    }
-
-    static public function getLatestVersion(): ?string
-    {
-        $config = Config::getInstance();
-        $last = $config->get('last_version_check');
-
-        if ($last) {
-            $last = json_decode($last);
-        }
-
-        // Only check once every two weeks
-        if ($last && $last->time > (time() - 3600 * 24 * 15)) {
-            return $last->version;
-        }
-
-        $current_version = garradin_version();
-        $last = (object) ['time' => time(), 'version' => null];
-        $config->set('last_version_check', json_encode($last));
-        $config->save();
-
-        $list = (new HTTP)->GET(WEBSITE . 'juvlist');
-
-        if (!$list) {
-            return null;
-        }
-
-        $list = json_decode($list);
-
-        if (!$list) {
-            return null;
-        }
-
-        $last->version = $current_version;
-
-        foreach ($list as $item) {
-            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1])
-                && version_compare($last->version, $match[1], '<')) {
-                $last->version = $match[1];
-            }
-        }
-
-        if (version_compare($last->version, $current_version, '==')) {
-            $last->version = null;
-        }
-
-        $config->set('last_version_check', json_encode($last));
-        $config->save();
-
-        return $last->version;
     }
 
     static public function transformTitleToURI($str)

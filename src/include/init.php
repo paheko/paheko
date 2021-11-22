@@ -187,6 +187,7 @@ static $default_config = [
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
 	'ENABLE_TECH_DETAILS'   => true,
+	'ENABLE_UPGRADES'       => true,
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
 	'SMTP_HOST'             => false,

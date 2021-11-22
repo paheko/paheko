@@ -1,0 +1,38 @@
+<?php
+namespace Garradin;
+
+use Garradin\Upgrade;
+use KD2\Security;
+
+require_once __DIR__ . '/_inc.php';
+
+if (!ENABLE_UPGRADES) {
+	Utils::redirect('/admin/');
+	exit;
+}
+
+$i = Upgrade::getInstaller();
+
+$csrf_key = 'upgrade_' . sha1(SECRET_KEY);
+$releases = $i->listReleases();
+$latest = $i->latest();
+$tpl->assign('downloaded', false);
+$tpl->assign('can_verify', Security::canUseEncryption());
+
+$form->runIf('download', function () use ($i, $tpl) {
+	$i->download(f('download'));
+	$tpl->assign('downloaded', true);
+	$tpl->assign('verified', $i->verify(f('download')));
+	$tpl->assign('diff', $i->diff(f('download')));
+	$tpl->assign('version', f('download'));
+}, $csrf_key);
+
+$form->runIf('upgrade', function () use ($i) {
+	$url = ADMIN_URL . 'upgrade.php';
+	$i->install(f('upgrade'));
+	header('Location: ' . $url);
+	exit;
+}, $csrf_key);
+
+$tpl->assign(compact('releases', 'latest', 'csrf_key'));
+$tpl->display('admin/config/upgrade.tpl');
