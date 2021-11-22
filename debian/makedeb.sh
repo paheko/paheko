@@ -9,9 +9,9 @@ DEB_ARCH_NAME=all
 
 PACKAGE_VERSION=`cat ../src/VERSION`
 
-[ ! -f ../src/garradin-${PACKAGE_VERSION}.tar.bz2 ] && (cd ../src; make release)
+[ ! -f ../src/garradin-${PACKAGE_VERSION}.tar.gz ] && (cd ../src; make release)
 
-tar xjvf ../src/garradin-${PACKAGE_VERSION}.tar.bz2 -C /tmp
+tar xzvf ../src/garradin-${PACKAGE_VERSION}.tar.gz -C /tmp
 
 SRCDIR="/tmp/garradin-${PACKAGE_VERSION}"
 
