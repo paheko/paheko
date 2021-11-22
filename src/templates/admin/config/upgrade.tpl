@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Configuration" current="config"}
+{include file="admin/_head.tpl" title="Mise à jour" current="config"}
 
 {include file="admin/config/_menu.tpl" current="index"}
 
@@ -6,7 +6,9 @@
 
 <form method="post" action="{$self_url}">
 
-{if $downloaded && $verified === false}
+{if !count($releases)}
+	<p class="block alert">Aucune mise à jour n'est disponible.</p>
+{elseif $downloaded && $verified === false}
 	<p class="error block">Le fichier d'installation est corrompu.</p>
 {elseif $downloaded}
 	<fieldset>
@@ -51,7 +53,7 @@
 			</p>
 		</details>
 		<dl class="block error">
-			{input type="checkbox" name="upgrade" value="{$version}" label="Je confirme vouloir procéder à la mise à jour" help="Cette action peut casser votre installation !"}
+			{input type="checkbox" name="upgrade" value=$version label="Je confirme vouloir procéder à la mise à jour" help="Cette action peut casser votre installation !"}
 		</dl>
 	</fieldset>
 
@@ -65,7 +67,7 @@
 		<legend>Mise à jour</legend>
 		<dl>
 		{foreach from=$releases key="version" item="release"}
-			{input type="radio" name="download" value=$version label=$version}
+			{input type="radio" name="download" value=$version label=$version disabled=!$release.can_upgrade}
 			{if $version == $latest}
 			<dd class="help">
 				Dernière version stable, conseillée.

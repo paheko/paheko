@@ -15,6 +15,15 @@ $i = Upgrade::getInstaller();
 
 $csrf_key = 'upgrade_' . sha1(SECRET_KEY);
 $releases = $i->listReleases();
+$v = garradin_version();
+
+// Remove releases that are in the past
+foreach ($releases as $rv => $release) {
+	if (!version_compare($rv, $v, '>')) {
+		unset($releases[$rv]);
+	}
+}
+
 $latest = $i->latest();
 $tpl->assign('downloaded', false);
 $tpl->assign('can_verify', Security::canUseEncryption());
@@ -29,7 +38,7 @@ $form->runIf('download', function () use ($i, $tpl) {
 
 $form->runIf('upgrade', function () use ($i) {
 	$url = ADMIN_URL . 'upgrade.php';
-	$i->install(f('upgrade'));
+	$i->upgrade(f('upgrade'));
 	header('Location: ' . $url);
 	exit;
 }, $csrf_key);
