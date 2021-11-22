@@ -15,13 +15,13 @@ $manifest = [
 			'sizes' => '16x16',
 			'src'   => WWW_URL . 'favicon.png',
 			'type'  => 'image/png',
-			'purpose' => 'any maskable',
+			'purpose' => 'maskable',
 		],
 		[
 			'sizes' => '256x256',
 			'src'   => WWW_URL . 'logo.png',
 			'type'  => 'image/png',
-			'purpose' => 'any maskable',
+			'purpose' => 'maskable',
 		],
 	],
 ];
