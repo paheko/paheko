@@ -55,6 +55,7 @@ publish: release deb
 	fossil uv add garradin-${VERSION}.tar.bz2
 	fossil uv add garradin-${VERSION}.tar.bz2.asc
 	cd ../debian && fossil uv add garradin-${VERSION}-*.deb
+	cd ../tools && php make_installer.php > install.php && f uv add install.php && rm install.php
 	fossil uv sync
 
 check-dependencies:
