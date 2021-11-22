@@ -418,7 +418,7 @@ class Upgrade
 		}
 
 		// Only check once every two weeks
-		if ($last && $last->time > (time() - 3600 * 24 * 15)) {
+		if ($last && $last->time > (time() - 3600 * 24 * 5)) {
 			return $last;
 		}
 
