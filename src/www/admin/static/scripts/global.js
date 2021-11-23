@@ -166,7 +166,10 @@
 		iframe.width = iframe.height = 0;
 		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
-			iframe.style.height = height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : height;
+			// We need to wait a bit for the height to be correct, not sure why
+			window.setTimeout(() => {
+				iframe.style.height = height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : height;
+			}, 100);
 		});
 
 		g.openDialog(iframe, callback);

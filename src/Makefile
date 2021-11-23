@@ -42,19 +42,20 @@ release: test minify
 	mv /tmp/garradin-build/garradin/src /tmp/garradin-build/garradin-${VERSION}
 	@#cd /tmp/garradin-build/; zip -r -9 garradin-${VERSION}.zip garradin-${VERSION};
 	@#mv -f /tmp/garradin-build/garradin-${VERSION}.zip ./
-	tar cjvfh garradin-${VERSION}.tar.bz2 -C /tmp/garradin-build garradin-${VERSION}
+	tar czvfh garradin-${VERSION}.tar.gz -C /tmp/garradin-build garradin-${VERSION}
 
 deb:
 	cd ../debian; ./makedeb.sh
 
 publish: release deb
 	$(eval VERSION=$(shell cat VERSION))
-	gpg --armor --detach-sign garradin-${VERSION}.tar.bz2
+	gpg --armor --detach-sign garradin-${VERSION}.tar.gz
 	fossil uv sync
 	#fossil uv ls | fgrep -v 'garradin-0.8.5' | grep '^garradin-.*\.(tar\.bz2|deb)' | xargs fossil uv rm
-	fossil uv add garradin-${VERSION}.tar.bz2
-	fossil uv add garradin-${VERSION}.tar.bz2.asc
+	fossil uv add garradin-${VERSION}.tar.gz
+	fossil uv add garradin-${VERSION}.tar.gz.asc
 	cd ../debian && fossil uv add garradin-${VERSION}-*.deb
+	cd ../tools && php make_installer.php > install.php && fossil uv add install.php && rm install.php
 	fossil uv sync
 
 check-dependencies:

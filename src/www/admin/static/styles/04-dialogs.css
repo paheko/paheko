@@ -7,11 +7,14 @@ html.dialog body {
     overflow: auto;
 }
 
+html.dialog {
+    height: auto;
+    background: white;
+}
+
 html.dialog main {
     background: #fff;
-    border-radius: .5em;
     padding: .5em;
-    box-shadow: 0px 0px 5px #000;
     margin: 0;
 }
 
@@ -55,6 +58,11 @@ html.dialog main {
 #dialog.loaded > img, #dialog.loaded > audio, #dialog.loaded > video {
     opacity: 1;
     height: initial;
+}
+
+#dialog > iframe {
+    border-radius: .5em;
+    box-shadow: 0px 0px 5px #000;
 }
 
 #dialog.loaded > iframe {

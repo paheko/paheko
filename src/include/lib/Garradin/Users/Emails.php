@@ -37,6 +37,10 @@ class Emails
 	 */
 	static public function queueTemplate(int $context, array $recipients, string $sender, string $subject, UserTemplate $template, ?UserTemplate $template_html): void
 	{
+		// Remove duplicates
+		array_walk($recipients, 'strtolower');
+		$recipients = array_unique($recipients);
+
 		$db = DB::getInstance();
 		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, content, content_html, context)
 			VALUES (:sender, :subject, :recipient, :content, :content_html, :context);');
@@ -88,6 +92,10 @@ class Emails
 	 */
 	static public function queue(int $context, array $recipients, ?string $sender, string $subject, string $text): void
 	{
+		// Remove duplicates
+		array_walk($recipients, 'strtolower');
+		$recipients = array_unique($recipients);
+
 		$db = DB::getInstance();
 		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, content, context)
 			VALUES (:sender, :subject, :recipient, :recipient_hash, :content, :context);');

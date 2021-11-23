@@ -4,6 +4,7 @@ namespace Garradin\Services;
 
 use Garradin\DB;
 use Garradin\DynamicList;
+use Garradin\Utils;
 use Garradin\Entities\Services\Service_User;
 use KD2\DB\EntityManager;
 
@@ -74,6 +75,11 @@ class Services_User
 		$conditions = sprintf('su.id_user = %d', $user_id);
 
 		$list = new DynamicList($columns, $tables, $conditions);
+
+		$list->setExportCallback(function (&$row) {
+			$row->amount = $row->amount ? Utils::money_format($row->amount, '.', '', false) : null;
+		});
+
 		$list->orderBy('date', true);
 		$list->groupBy('su.id');
 		$list->setCount('COUNT(DISTINCT su.id)');

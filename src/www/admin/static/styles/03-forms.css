@@ -432,7 +432,7 @@ dialog.datepicker {
 }
 
 .datepicker tbody td {
-    padding: .2rem .4rem;
+    padding: .2em .4em;
     text-align: center;
     width: 14.3%;
 }
@@ -446,6 +446,7 @@ dialog.datepicker {
 .datepicker tbody td.focus {
     background: #339;
     color: #fff;
+    border-radius: .5em;
 }
 
 .datepicker input {

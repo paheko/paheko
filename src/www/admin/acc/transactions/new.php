@@ -27,6 +27,11 @@ $id_analytical = null;
 // Duplicate transaction
 if (qg('copy')) {
 	$old = Transactions::get((int)qg('copy'));
+
+	if (!$old) {
+		throw new UserException('Cette écriture n\'existe pas (ou plus).');
+	}
+
 	$transaction = $old->duplicate($current_year);
 	$lines = $transaction->getLinesWithAccounts(true);
 	$id_analytical = $old->getAnalyticalId();
