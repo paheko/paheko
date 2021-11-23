@@ -777,14 +777,14 @@ class Transaction extends Entity
 			self::TYPE_DEBT => [
 				'accounts' => [
 					[
-						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
-						'position' => 'credit',
-					],
-					[
 						'label' => 'Type de dette (dépense)',
 						'targets' => [Account::TYPE_EXPENSE],
 						'position' => 'debit',
+					],
+					[
+						'label' => 'Compte de tiers',
+						'targets' => [Account::TYPE_THIRD_PARTY],
+						'position' => 'credit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_DEBT],
@@ -793,14 +793,14 @@ class Transaction extends Entity
 			self::TYPE_CREDIT => [
 				'accounts' => [
 					[
-						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
-						'position' => 'debit',
-					],
-					[
 						'label' => 'Type de créance (recette)',
 						'targets' => [Account::TYPE_REVENUE],
 						'position' => 'credit',
+					],
+					[
+						'label' => 'Compte de tiers',
+						'targets' => [Account::TYPE_THIRD_PARTY],
+						'position' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
@@ -841,8 +841,10 @@ class Transaction extends Entity
 			'id' => $this->_related->id,
 			'sum' => $this->_related->sum(),
 			'id_account' => null,
-			'form_account_name' => sprintf('account_%d_%d', $this->type, 1),
-			'form_target_name' => sprintf('account_%d_%d', $this->type, 0),
+			// input name for the input containing the account ID for the expense/revenue from the related transaction
+			'form_account_name' => sprintf('account_%d_%d', $this->type, 0),
+			// input name for the account selector, for selecting a bank/cash account
+			'form_target_name' => sprintf('account_%d_%d', $this->type, 1),
 			'id_analytical' => $this->_related->getAnalyticalId(),
 		];
 

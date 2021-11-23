@@ -337,25 +337,19 @@ class Membres
     {
         $config = Config::getInstance();
 
-        foreach ($recipients as $key => $recipient)
-        {
-            // Ignorer les destinataires avec une adresse email vide
-            if (empty($recipient->email))
-            {
+        foreach ($recipients as $key => &$recipient) {
+            if (empty($recipient->email)) {
                 unset($recipients[$key]);
-                continue;
             }
-        }
 
-        if (!count($recipients)) {
-        	throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
-        }
-
-        foreach ($recipients as &$recipient) {
             $recipient = $recipient->email;
         }
 
         unset($recipient);
+
+        if (!count($recipients)) {
+            throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
+        }
 
         Emails::queue(Emails::CONTEXT_BULK, $recipients, null, $subject, $message);
 
@@ -411,7 +405,9 @@ class Membres
         }
 
         $list = new DynamicList($columns, $tables, $conditions);
-        $list->orderBy($order, false);
+        if ($order) {
+            $list->orderBy($order, false);
+        }
         return $list;
     }
 

@@ -4,9 +4,13 @@
 
 <nav class="tabs">
 	<ul>
-		<li><a href="{$admin_url}me/">Modifier mes informations personnelles</a></li>
+		<li><a href="{$admin_url}me/">Mes informations personnelles</a></li>
 		<li><a href="{$admin_url}me/services.php">Suivi de mes activités et cotisations</a></li>
 	</ul>
+</nav>
+
+<nav class="home-buttons">
+	{button id="homescreen-btn" label="Ajouter comme application à l'écran d'accueil" class="hidden" shape="plus"}
 </nav>
 
 <aside class="describe">
@@ -38,5 +42,7 @@
 		{$homepage|raw}
 	</article>
 {/if}
+
+<script type="text/javascript" src="{$admin_url}static/scripts/homescreen.js" defer="defer"></script>
 
 {include file="admin/_foot.tpl"}

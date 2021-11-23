@@ -20,7 +20,11 @@
 			{if $new_version}
 			<dd><p class="block alert">
 				Une nouvelle version <strong>{$new_version}</strong> est disponible !<br />
-				<a href="{$garradin_website}" target="_blank">Aller télécharger la nouvelle version</a>
+				{if ENABLE_UPGRADES}
+					{linkbutton shape="export" href="upgrade.php" label="Mettre à jour"}
+				{else}
+					{linkbutton shape="export" href=WEBSITE label="Télécharger la mise à jour" target="_blank"}
+				{/if}
 			</p></dd>
 			{/if}
 			{if ENABLE_TECH_DETAILS}

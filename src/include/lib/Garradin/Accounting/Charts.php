@@ -27,7 +27,7 @@ class Charts
 
 	static public function listByCountry()
 	{
-		$sql = sprintf('SELECT id, country, label FROM %s ORDER BY country, label;', Chart::TABLE);
+		$sql = sprintf('SELECT id, country, label FROM %s ORDER BY country, code DESC, label;', Chart::TABLE);
 		$list = DB::getInstance()->getGrouped($sql);
 		$out = [];
 

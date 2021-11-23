@@ -52,7 +52,7 @@ class Services
 		return $out;
 	}
 
-	static public function listWithStats()
+	static public function listWithStats(bool $current_only = true)
 	{
 		$db = DB::getInstance();
 		$hidden_cats = array_keys(Categories::listHidden());
@@ -62,13 +62,21 @@ class Services
 			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_service = s.id AND m.id_category NOT IN (%s)',
 			implode(',', $hidden_cats));
 
+		$current_condition = $current_only ? '(end_date IS NULL OR end_date >= datetime())' : '(end_date IS NOT NULL AND end_date < datetime())';
+
 		$sql = sprintf('SELECT s.*,
 			(%s AND (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1) AS nb_users_ok,
 			(%1$s AND expiry_date < date()) AS nb_users_expired,
 			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services s
-			ORDER BY s.label COLLATE NOCASE;', $condition);
+			WHERE 1 AND %s
+			ORDER BY s.label COLLATE NOCASE;', $condition, $current_condition);
 
 		return $db->get($sql);
+	}
+
+	static public function countOldServices(): int
+	{
+		return DB::getInstance()->count(Service::TABLE, 'end_date IS NOT NULL AND end_date < datetime()');
 	}
 }
