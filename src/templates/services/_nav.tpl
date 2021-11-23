@@ -12,6 +12,13 @@
 		{/if}
 	</ul>
 
+	{if !empty($has_old_services)}
+	<ul class="sub">
+		<li{if !$show_old_services} class="current"{/if}>{link href="!services/" label="Activités courantes"}</li>
+		<li{if $show_old_services} class="current"{/if}>{link href="!services/?old=1" label="Activités passées"}</li>
+	</ul>
+	{/if}
+
 	{if isset($current_service)}
 	<ul class="sub">
 		<li class="title">
