@@ -15,7 +15,10 @@ if (f('send'))
         'recipients' => 'required|string',
     ]);
 
-    if (preg_match('/^(categorie|recherche)_(\d+)$/', f('recipients'), $match))
+    if (f('recipients') == 'all_but_hidden') {
+        $recipients = $membres->listAllEmailsButHidden();
+    }
+    elseif (preg_match('/^(categorie|recherche)_(\d+)$/', f('recipients'), $match))
     {
         if ($match[1] == 'categorie')
         {
@@ -30,15 +33,15 @@ if (f('send'))
                 $form->addError($e->getMessage());
             }
         }
-
-        if (isset($recipients) && !count($recipients))
-        {
-            $form->addError('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
-        }
     }
     else
     {
         $form->addErrror('Destinataires invalides : ' . f('recipients'));
+    }
+
+    if (empty($recipients) || !count($recipients))
+    {
+        $form->addError('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
     }
 
     if (!$form->hasErrors())

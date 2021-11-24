@@ -11,17 +11,22 @@
 			<dt>Destinataires</dt>
 			<dd>
 				<select name="recipients">
+					<option value="all_but_hidden">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
 					<optgroup label="Catégorie de membres">
 						{foreach from=$categories key="id" item="nom"}
 						<option value="categorie_{$id}" {form_field name="recipients" selected="categorie_%d"|args:$id}>{$nom}</option>
 						{/foreach}
 					</optgroup>
-					<optgroup label="Recherche de membres">
+					<optgroup label="Recherches enregistrées">
 						{foreach from=$recherches item="r"}
 						<option value="recherche_{$r.id}" {form_field name="recipients" selected="recherche_%d"|args:$r.qid}>{$r.intitule}</option>
 						{/foreach}
 					</optgroup>
 				</select>
+			</dd>
+			<dd class="help">
+				Vous pouvez cibler précisément des membres en créant une <a href="{$admin_url}membres/recherche.php">recherche enregistrée</a>.
+				Les recherches enregistrées apparaîtront dans ce formulaire.
 			</dd>
 			{* FIXME : pas encore possible, en attente de refonte gestion cotisations
 			<dd>
