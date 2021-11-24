@@ -17,6 +17,10 @@ a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
 	padding: .4em .6em;
 }
 
+a.icn-btn {
+	white-space: normal;
+}
+
 nav.breadcrumbs .quota {
 	float: none;
 }
@@ -36,8 +40,8 @@ nav.breadcrumbs ul {
 .header .menu {
 	background: none !important;
 	position: fixed;
-	bottom: inherit;
 	overflow: visible;
+	bottom: inherit;
 	z-index: 10000;
 	margin: 0;
 	margin-bottom: 3em;
@@ -84,7 +88,7 @@ nav.breadcrumbs ul {
 	color: #fff;
 	width: 20pt;
 	height: 14pt;
-	padding: 10pt;
+	padding: 10pt 0;
 	line-height: 20pt;
 	cursor: pointer;
 }
