@@ -216,6 +216,15 @@ class File extends Entity
 		return $this;
 	}
 
+	/**
+	 * Store contents in file, either from a local path or from a binary string
+	 * If one parameter is supplied, the other must be NULL (you cannot omit one)
+	 *
+	 * @param  string $source_path
+	 * @param  string $source_content
+	 * @param  bool   $index_search Set to FALSE if you don't want the document to be indexed in the file search
+	 * @return self
+	 */
 	public function store(?string $source_path, ?string $source_content, bool $index_search = true): self
 	{
 		if ($source_path && !$source_content)
