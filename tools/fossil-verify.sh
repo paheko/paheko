@@ -11,7 +11,7 @@ fi
 
 gpg --verify "$1/manifest" 2> /dev/null
 
-if [ $? ]
+if [ $? != 0 ]
 then
 	echo "Manifest signature failed to verify"
 	exit 2
@@ -43,8 +43,9 @@ do
 
 	if [ "$HASH" != "$NEW_HASH" ]
 	then
-		echo "Hash mismatch for file: $FILE"
-		echo "Manifest hash: $HASH"
+		echo "Local file has changed"
+		echo "$FILE"
+		echo "Manifest hash:   $HASH"
 		echo "Local file hash: $NEW_HASH"
 		exit 2
 	fi
@@ -59,7 +60,8 @@ do
 done < "$1/manifest"
 
 gpg --verify $TMPFILE 2>/dev/null
-if [ $? ]
+
+if [ $? != 0]
 then
 	echo "Something has changed between manifest and check?!"
 	diff "$1/manifest" $TMPFILE
