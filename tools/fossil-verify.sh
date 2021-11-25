@@ -4,7 +4,8 @@ REPO="$1"
 
 if [ ! -f "$1/manifest" ]
 then
-	echo "Missing manifest"
+	echo "Missing manifest, maybe you didn't specify a repository path,"
+	echo "or you didn't enable the manifest? (fossil settings manifest on)"
 	echo "Usage: $0 FOSSIL_REPOSITORY_PATH"
 	exit 1
 fi
