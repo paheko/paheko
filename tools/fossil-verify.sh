@@ -61,7 +61,7 @@ done < "$1/manifest"
 
 gpg --verify $TMPFILE 2>/dev/null
 
-if [ $? != 0]
+if [ $? != 0 ]
 then
 	echo "Something has changed between manifest and check?!"
 	diff "$1/manifest" $TMPFILE
