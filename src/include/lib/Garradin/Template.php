@@ -434,7 +434,7 @@ class Template extends \KD2\Smartyer
 			$values = '';
 			$delete_btn = $this->widgetButton(['shape' => 'delete']);
 
-			if (null !== $current_value) {
+			if (null !== $current_value && is_iterable($current_value)) {
 				foreach ($current_value as $v => $l) {
 					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
 				}

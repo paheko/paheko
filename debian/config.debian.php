@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+const ENABLE_UPGRADES = false;
+
 if (!empty($_ENV['GARRADIN_STANDALONE']))
 {
 	$home = $_ENV['HOME'];

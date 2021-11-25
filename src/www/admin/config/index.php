@@ -14,9 +14,15 @@ $form->runIf('save', function () use ($config) {
 	$config->save();
 }, 'config', Utils::getSelfURI(['ok' => '']));
 
+$latest = ENABLE_TECH_DETAILS ? Upgrade::getLatestVersion() : null;
+
+if (null !== $latest) {
+	$latest = $latest->version;
+}
+
 $tpl->assign([
 	'garradin_version' => garradin_version() . ' [' . (garradin_manifest() ?: 'release') . ']',
-	'new_version'      => ENABLE_TECH_DETAILS ? Utils::getLatestVersion() : null,
+	'new_version'      => $latest,
 	'php_version'      => phpversion(),
 	'has_gpg_support'  => \KD2\Security::canUseEncryption(),
 	'server_time'      => time(),

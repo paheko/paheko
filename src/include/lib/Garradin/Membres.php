@@ -335,13 +335,18 @@ class Membres
     {
         $config = Config::getInstance();
 
+        $emails = [];
+
         foreach ($recipients as $key => $recipient)
         {
             // Ignorer les destinataires avec une adresse email vide
             if (empty($recipient->email))
             {
-                unset($recipients[$key]);
                 continue;
+            }
+
+            if (!isset($recipient->email, $recipient->id)) {
+                throw new UserException('Il manque l\'identifiant ou l\'email dans le résultat');
             }
 
             // Refuser d'envoyer un mail à une adresse invalide, sans vérifier le MX
@@ -350,19 +355,18 @@ class Membres
             {
                 throw new UserException(sprintf('Adresse email invalide : "%s". Aucun message n\'a été envoyé.', $recipient->email));
             }
+
+            // This is to avoid having duplicate emails
+            $emails[$recipient->email] = $recipient->id;
         }
 
-        if (!count($recipients)) {
+        if (!count($emails)) {
         	throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
         }
 
-        foreach ($recipients as $recipient)
+        foreach ($emails as $email => $id)
         {
-            if (!isset($recipient->email, $recipient->id)) {
-                throw new UserException('Il manque l\'identifiant ou l\'email dans le résultat');
-            }
-
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $recipient->email, $subject, $message, $recipient->id);
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $email, $subject, $message, $id);
         }
 
         if ($send_copy)
@@ -371,6 +375,13 @@ class Membres
         }
 
         return true;
+    }
+
+    public function listAllEmailsButHidden(): array
+    {
+        return DB::getInstance()->get('SELECT id, email FROM membres
+            WHERE id_category IN (SELECT id FROM users_categories WHERE hidden = 0)
+                AND email IS NOT NULL AND email != \'\';');
     }
 
     public function listAllByCategory($id_category, $only_with_email = false)
@@ -417,7 +428,9 @@ class Membres
         }
 
         $list = new DynamicList($columns, $tables, $conditions);
-        $list->orderBy($order, false);
+        if ($order) {
+            $list->orderBy($order, false);
+        }
         return $list;
     }
 
