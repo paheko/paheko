@@ -1043,6 +1043,7 @@ class Utils
             $in = ['source' => $source, 'target' => $target];
 
             if (Plugin::fireSignal('pdf.create', $in)) {
+                Utils::safe_unlink($source);
                 return $target;
             }
 
@@ -1082,12 +1083,11 @@ class Utils
         }
 
         exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+        Utils::safe_unlink($source);
 
         if (!file_exists($target)) {
             throw new \RuntimeException('PDF command failed');
         }
-
-        unlink($source);
 
         return $target;
     }
