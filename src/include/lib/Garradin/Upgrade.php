@@ -327,7 +327,7 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.10', '<')) {
-				\Garradin\Web\Web::sync(true); // Force sync of web pages
+				\Garradin\Web\Web::sync(); // Force sync of web pages
 				Files::syncVirtualTable('', true);
 
 				$db->begin();
