@@ -182,6 +182,9 @@ class Utils
         if ($url[0] == '!') {
             return ADMIN_URL . substr($url, 1);
         }
+        elseif (substr($url, 0, 7) == '/admin/') {
+            return ADMIN_URL . substr($url, 7);
+        }
         elseif ($url[0] == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
         }
