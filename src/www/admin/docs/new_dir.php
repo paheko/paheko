@@ -18,8 +18,16 @@ $csrf_key = 'create_dir';
 $form->runIf('create', function () use ($parent) {
 	$name = trim(f('name'));
 	File::validatePath($parent . '/' . $name);
-	File::createDirectory($parent, $name);
-}, $csrf_key, '!docs/?path=' . $parent);
+	$f = File::createDirectory($parent, $name);
+
+	$url = '!docs/?path=' . $f->path;
+
+	if (null !== qg('_dialog')) {
+		Utils::reloadParentFrame($url);
+	}
+
+	Utils::redirect($url);
+}, $csrf_key);
 
 $tpl->assign(compact('csrf_key'));
 
