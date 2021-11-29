@@ -89,5 +89,7 @@
 		else {
 			appendButton('fullscreen', 'Plein écran', code.toggleFullscreen);
 		}
+
+		g.setParentDialogHeight('90%');
 	});
 }());

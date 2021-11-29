@@ -26,7 +26,9 @@ $form->runIf('create', function () use ($parent) {
 	$name = File::filterName($name);
 
 	$file = File::createAndStore($parent, $name, null, '');
-}, $csrf_key, '!docs/?path=' . $parent);
+
+	Utils::redirect('!common/files/edit.php?p=' . rawurlencode($file->path));
+}, $csrf_key);
 
 $tpl->assign(compact('csrf_key'));
 
