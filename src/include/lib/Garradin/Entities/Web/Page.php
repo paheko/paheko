@@ -222,7 +222,8 @@ class Page extends Entity
 			$sql = sprintf('UPDATE web_pages
 				SET
 					path = %1$s || substr(path, %2$d),
-					parent = %1$s || substr(parent, %2$d)
+					parent = %1$s || substr(parent, %2$d),
+					file_path = \'web/\' || %1$s || substr(file_path, %2$d + 4)
 				WHERE path LIKE %3$s;',
 				$db->quote($this->path), strlen($change_parent) + 1, $db->quote($change_parent . '/%'));
 			$db->exec($sql);
