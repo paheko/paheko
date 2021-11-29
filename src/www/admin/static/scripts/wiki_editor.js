@@ -252,8 +252,14 @@
 			.then(data => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
-				t.textarea.form.querySelector('input[name=editing_started]').value = data.modified;
-			}).catch(e => t.textarea.form.querySelector('[type=submit]').click() );
+
+				let e = t.textarea.form.querySelector('input[name=editing_started]');
+
+				if (e) {
+					e.value = data.modified;
+				}
+
+			}).catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); } );
 			return true;
 		};
 
@@ -314,5 +320,7 @@
 		t.shortcuts.push({ctrl: true, key: 's', callback: save});
 		t.shortcuts.push({ctrl: true, shift: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
+
+		g.setParentDialogHeight('90%');
 	});
 }());
