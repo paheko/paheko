@@ -161,6 +161,21 @@ class Reports
 		yield $current;
 	}
 
+	static public function getSumsPerYear(array $criterias): array
+	{
+		$where = self::getWhereClause($criterias);
+
+		$sql = sprintf('SELECT y.id, y.start_date, y.end_date, y.label, SUM(l.credit) - SUM(l.debit) AS sum
+			FROM acc_transactions t
+			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts a ON a.id = l.id_account
+			INNER JOIN acc_years y ON y.id = t.id_year
+			WHERE %s
+			GROUP BY t.id_year ORDER BY y.end_date;', $where, $where);
+
+		return DB::getInstance()->getGrouped($sql);
+	}
+
 	static public function getSumsByInterval(array $criterias, int $interval)
 	{
 		$where = self::getWhereClause($criterias);

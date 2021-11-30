@@ -20,6 +20,9 @@ use KD2\Graphics\SVG\Plot_Data;
 use KD2\Graphics\SVG\Pie;
 use KD2\Graphics\SVG\Pie_Data;
 
+use KD2\Graphics\SVG\Bar;
+use KD2\Graphics\SVG\Bar_Data_Set;
+
 class Graph
 {
 	const URL_LIST = [
@@ -55,6 +58,23 @@ class Graph
 
 	const WEEKLY_INTERVAL = 604800; // 7 days
 	const MONTHLY_INTERVAL = 2635200; // 1 month
+
+	static public function clearCache(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700): void
+	{
+		if (!array_key_exists($type, self::PLOT_TYPES)) {
+			throw new \InvalidArgumentException('Unknown type');
+		}
+
+		$cache_id = sha1('plot' . json_encode(func_get_args()));
+
+		Static_Cache::remove($cache_id);
+	}
+
+	static public function clearCacheAllYears(): void
+	{
+		self::clearCache('assets', [], Graph::MONTHLY_INTERVAL, 600);
+		self::clearCache('result', [], Graph::MONTHLY_INTERVAL, 600);
+	}
 
 	static public function plot(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700)
 	{
@@ -179,6 +199,71 @@ class Graph
 		$pie->togglePercentage(true);
 
 		$out = $pie->output();
+
+		Static_Cache::store($cache_id, $out);
+
+		return $out;
+	}
+
+	static public function bar(string $type, array $criterias)
+	{
+		if (!array_key_exists($type, self::PLOT_TYPES)) {
+			throw new \InvalidArgumentException('Unknown type');
+		}
+
+		$cache_id = sha1('bar' . json_encode(func_get_args()));
+
+		if (!Static_Cache::expired($cache_id)) {
+			return Static_Cache::get($cache_id);
+		}
+
+		$bar = new Bar(600, 300);
+
+		$lines = self::PLOT_TYPES[$type];
+		$data = [];
+
+		$colors = self::getColors();
+
+		foreach ($lines as $label => $line_criterias) {
+			$color = current($colors);
+			next($colors);
+
+			$line_criterias = array_merge($criterias, $line_criterias);
+			$years = Reports::getSumsPerYear($line_criterias);
+
+			if (count($years) < 1) {
+				continue;
+			}
+
+			// Invert sums for banks, cash, etc.
+			if ('assets' === $type || 'debts' === $type || ('result' === $type && $line_criterias['position'] == Account::EXPENSE)) {
+				array_walk($years, function (&$v) { $v->sum = $v->sum * -1; });
+			}
+
+			array_walk($years, function (&$v) { $v->sum = (int)$v->sum/100; });
+
+			foreach ($years as $year) {
+				$start = Utils::date_fr($year->start_date, 'Y');
+				$end = Utils::date_fr($year->end_date, 'Y');
+				$year_label = $start == $end ? $start : sprintf('%s-%s', $start, substr($end, -2));
+
+				$year_id = $year_label . '-' . $year->id;
+
+				if (!isset($data[$year_id])) {
+					$data[$year_id] = new Bar_Data_Set($year_label);
+				}
+
+				$data[$year_id]->add($year->sum, $label, $color);
+			}
+		}
+
+		ksort($data);
+
+		foreach ($data as $group) {
+			$bar->add($group);
+		}
+
+		$out = $bar->output();
 
 		Static_Cache::store($cache_id, $out);
 

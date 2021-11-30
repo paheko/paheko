@@ -35,9 +35,11 @@
 		<section class="graphs">
 			<figure>
 				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=assets" alt="" />
+				<figcaption>Soldes des banques et caisses par exercice</figcaption>
 			</figure>
 			<figure>
 				<img src="{$admin_url}acc/reports/graph_plot_all.php?type=result" alt="" />
+				<figcaption>Recettes et dépenses par exercice</figcaption>
 			</figure>
 		</section>
 	</section>

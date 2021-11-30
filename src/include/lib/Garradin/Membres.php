@@ -361,6 +361,13 @@ class Membres
         return true;
     }
 
+    public function listAllEmailsButHidden(): array
+    {
+        return DB::getInstance()->get('SELECT id, email FROM membres
+            WHERE id_category IN (SELECT id FROM users_categories WHERE hidden = 0)
+                AND email IS NOT NULL AND email != \'\';');
+    }
+
     public function listAllByCategory($id_category, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';

@@ -232,6 +232,7 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
 
+const HELP_URL = 'https://garradin.eu/aide';
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
 
