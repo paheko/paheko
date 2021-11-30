@@ -44,6 +44,8 @@ class Install
 			Plugin::checkAndInstallSystemPlugins();
 		}
 
+		$session->refresh();
+
 		return $ok;
 	}
 

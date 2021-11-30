@@ -26,7 +26,7 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			<?php
 			$edit = ($c_config->editable || $mode == 'edit');
 			?>
-			{include file="common/files/_context_list.tpl" limit=1 path="%s/%s"|args:$user_files_path,$c}
+			{include file="common/files/_context_list.tpl" path="%s/%s"|args:$user_files_path,$c}
 		{elseif empty($value)}
 			<em>(Non renseigné)</em>
 		{elseif $c == $c_config.champ_identite}

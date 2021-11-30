@@ -97,6 +97,9 @@ class File extends Entity
 	];
 
 	const PREVIEW_TYPES = [
+		// We expect modern browsers to be able to preview a PDF file
+		// even if the user has disabled PDF opening in browser
+		// (something we cannot detect)
 		'application/pdf',
 		'audio/mpeg',
 		'audio/ogg',
@@ -152,6 +155,10 @@ class File extends Entity
 		return $path;
 	}
 
+	/**
+	 * Return TRUE if the file can be previewed natively in a browser
+	 * @return bool
+	 */
 	public function canPreview(): bool
 	{
 		return in_array($this->mime, self::PREVIEW_TYPES);
@@ -181,17 +188,32 @@ class File extends Entity
 		return true;
 	}
 
-	public function move(string $target): bool
-	{
-		return $this->rename($target . '/' . $this->name);
-	}
-
+	/**
+	 * Change ONLY the file name, not the parent path
+	 * @param  string $new_name New file name
+	 * @return bool
+	 */
 	public function changeFileName(string $new_name): bool
 	{
 		$new_name = self::filterName($new_name);
 		return $this->rename(ltrim($this->parent . '/' . $new_name, '/'));
 	}
 
+	/**
+	 * Change ONLY the directory where the file is
+	 * @param  string $target New directory path
+	 * @return bool
+	 */
+	public function move(string $target): bool
+	{
+		return $this->rename($target . '/' . $this->name);
+	}
+
+	/**
+	 * Rename a file, this can include moving it (the UNIX way)
+	 * @param  string $new_path Target path
+	 * @return bool
+	 */
 	public function rename(string $new_path): bool
 	{
 		self::validatePath($new_path);
@@ -216,8 +238,21 @@ class File extends Entity
 		return $this;
 	}
 
+	/**
+	 * Store contents in file, either from a local path or from a binary string
+	 * If one parameter is supplied, the other must be NULL (you cannot omit one)
+	 *
+	 * @param  string $source_path
+	 * @param  string $source_content
+	 * @param  bool   $index_search Set to FALSE if you don't want the document to be indexed in the file search
+	 * @return self
+	 */
 	public function store(?string $source_path, ?string $source_content, bool $index_search = true): self
 	{
+		if (!$this->path || !$this->name) {
+			throw new \LogicException('Cannot store a file that does not have a target path and name');
+		}
+
 		if ($source_path && !$source_content)
 		{
 			$this->set('size', filesize($source_path));
@@ -314,6 +349,15 @@ class File extends Entity
 		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path, $title ?? $this->name, $content);
 	}
 
+	/**
+	 * Create and store a file
+	 * If one parameter is supplied, the other must be NULL (you cannot omit one)
+	 * @param  string $path           Target path
+	 * @param  string $name           Target name
+	 * @param  string $source_path    Source file path
+	 * @param  string $source_content OR source file content (binary string)
+	 * @return self
+	 */
 	static public function createAndStore(string $path, string $name, ?string $source_path, ?string $source_content): self
 	{
 		$file = self::create($path, $name, $source_path, $source_content);
@@ -323,6 +367,13 @@ class File extends Entity
 		return $file;
 	}
 
+	/**
+	 * Create a new directory
+	 * @param  string $path          Target parent path
+	 * @param  string $name          Target name
+	 * @param  bool   $create_parent Create parent directories if they don't exist
+	 * @return self
+	 */
 	static public function createDirectory(string $path, string $name, bool $create_parent = true): self
 	{
 		$name = self::filterName($name);
@@ -386,8 +437,10 @@ class File extends Entity
 		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-		$file = new self;
-		$file->set('path', $path . '/' . $name);
+
+		$fullpath = $path . '/' . $name;
+		$file = Files::callStorage('get', $fullpath) ?: new self;
+		$file->set('path', $fullpath);
 		$file->set('parent', $path);
 		$file->set('name', $name);
 
@@ -421,6 +474,7 @@ class File extends Entity
 
 	/**
 	 * Modify a file from an encoded base64 string
+	 * This is used to upload the modified background image in the admin panel
 	 */
 	public function storeFromBase64(string $encoded_content): self
 	{
@@ -431,7 +485,52 @@ class File extends Entity
 	}
 
 	/**
-	 * Upload du fichier par POST
+	 * Upload multiple files
+	 * @param  string $path Target parent directory (eg. 'documents/Logos')
+	 * @param  string $key  The name of the file input in the HTML form (this MUST have a '[]' at the end of the name)
+	 * @return array list of File objects created
+	 */
+	static public function uploadMultiple(string $path, string $key): array
+	{
+		if (!isset($_FILES[$key]['name'][0])) {
+			throw new UserException('Aucun fichier reçu');
+		}
+
+		// Transpose array
+		// see https://www.php.net/manual/en/features.file-upload.multiple.php#53240
+		$files = Utils::array_transpose($_FILES[$key]);
+		$out = [];
+
+		// First check all files
+		foreach ($files as $file) {
+			if (!empty($file['error'])) {
+				throw new UserException(self::getErrorMessage($file['error']));
+			}
+
+			if (empty($file['size']) || empty($file['name'])) {
+				throw new UserException('Fichier reçu invalide : vide ou sans nom de fichier.');
+			}
+
+			if (!is_uploaded_file($file['tmp_name'])) {
+				throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
+			}
+		}
+
+		// Then create files
+		foreach ($files as $file) {
+			$name = self::filterName($file['name']);
+
+			$out[] = self::createAndStore($path, $name, $file['tmp_name'], null);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Upload a file using POST from a HTML form
+	 * @param  string $path Target parent directory (eg. 'documents/Logos')
+	 * @param  string $key  The name of the file input in the HTML form
+	 * @return self Created file object
 	 */
 	static public function upload(string $path, string $key): self
 	{
@@ -453,8 +552,7 @@ class File extends Entity
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
-		$name = preg_replace('/\s+/', '_', $file['name']);
-		$name = self::filterName($name);
+		$name = self::filterName($file['name']);
 
 		return self::createAndStore($path, $name, $file['tmp_name'], null);
 	}
@@ -887,6 +985,9 @@ class File extends Entity
 			$format = Render::FORMAT_MARKDOWN;
 		}
 		else if (substr($this->mime, 0, 5) == 'text/') {
+			$format = 'text';
+		}
+		else if ($this->size == 0) {
 			$format = 'text';
 		}
 		else {

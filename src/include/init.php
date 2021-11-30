@@ -47,6 +47,34 @@ function garradin_manifest()
 	return false;
 }
 
+/**
+ * Le code de Garradin ne s'écrit pas tout seul comme par magie,
+ * merci de soutenir notre travail en faisant une contribution :)
+ */
+function garradin_contributor_license(): ?int
+{
+	static $level = null;
+
+	if (null !== $level) {
+		return $level;
+	}
+
+	if (!CONTRIBUTOR_LICENSE) {
+		return null;
+	}
+
+	$key = CONTRIBUTOR_LICENSE;
+	$key = gzinflate(base64_decode($key));
+	list($email, $level, $hash) = explode('==', $key);
+	$level = (int)hexdec($level);
+
+	if (substr(sha1($email . $level), 0, 10) != $hash) {
+		return null;
+	}
+
+	return $level;
+}
+
 if (!defined('\SQLITE3_OPEN_READWRITE')) {
 	echo 'Le module de base de données SQLite3 n\'est pas disponible.' . PHP_EOL;
 	exit(1);
@@ -158,6 +186,7 @@ static $default_config = [
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
 	'ENABLE_TECH_DETAILS'   => true,
+	'ENABLE_UPGRADES'       => true,
 	'USE_CRON'              => false,
 	'ENABLE_XSENDFILE'      => false,
 	'SMTP_HOST'             => false,
@@ -176,6 +205,7 @@ static $default_config = [
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => null,
+	'CONTRIBUTOR_LICENSE'   => null,
 ];
 
 foreach ($default_config as $const => $value)
@@ -192,6 +222,7 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
 
+const HELP_URL = 'https://garradin.eu/aide';
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
 
@@ -292,7 +323,7 @@ if (MAIL_ERRORS)
 }
 
 ErrorManager::setContext([
-	'rootDirectory'      => ROOT,
+	'root_directory'      => ROOT,
 	'garradin_data_root' => DATA_ROOT,
 	'garradin_version'   => garradin_version(),
 ]);
@@ -362,7 +393,6 @@ function user_error(\Exception $e)
 
 // Message d'erreur simple pour les erreurs de l'utilisateur
 ErrorManager::setCustomExceptionHandler('\Garradin\UserException', '\Garradin\user_error');
-ErrorManager::setCustomExceptionHandler('\KD2\MiniSkelMarkupException', '\Garradin\user_error');
 
 // Clé secrète utilisée pour chiffrer les tokens CSRF etc.
 if (!defined('Garradin\SECRET_KEY'))

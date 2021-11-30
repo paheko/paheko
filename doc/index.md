@@ -14,8 +14,17 @@
 
 </nav>
 
-<p id="give"><a href="http://kd2.org/asso/soutien/" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
+<p id="give"><a href="https://kd2.org/soutien.html" target="_blank">Soutenir Garradin en effectuant un don :-)</a></p>
 
+<form method="GET" action="$ROOT/wiki" onsubmit="var t = this.querySelector('[type=radio]:checked'); this.querySelector('[name=s]').name=t.dataset.name; this.action=t.dataset.action; this.target=t.dataset.target;">
+<fieldset class="searchForm searchFormWiki">
+	<legend>Rechercher</legend>
+	<input type="search" name="s" size="40" value="" />
+	<label><input type="radio" name="t" value="" data-name="s" data-action="/garradin/wiki" data-target="" checked="checked" /> Chercher dans la documentation technique</label>
+	<label><input type="radio" name="t" value="1" data-action="https://garradin.eu/search" data-name="search" data-target="_blank" /> Chercher dans l'aide utilisateur</label>
+	<input type="submit" value="Rechercher" />
+</fieldset>
+</form>
 
 <script type="text/javascript">
 document.head.innerHTML += `<style type="text/css">
@@ -30,7 +39,7 @@ document.head.innerHTML += `<style type="text/css">
 	padding-left: 70px;
 	border-radius: .5em;
 	font-size: 1.5em;
-	background: #ffc url("https://kd2.org/asso/soutien/coins.png") no-repeat .5em .5em;
+	background: #ffc url("https://kd2.org/soutien/coins.png") no-repeat .5em .5em;
 	border: 2px solid #990;
 }
 
@@ -85,6 +94,19 @@ document.head.innerHTML += `<style type="text/css">
 	border-color: #060;
 	background: #dfd;
 }
+
+.searchForm {
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding: .5em;
+	margin: 1em auto;
+	max-width: 30em;
+	text-align: center;
+}
+
+.searchForm input[type=search] {
+	border-color: #333;
+}
 `;
 
 function isNewerVersion (oldVer, newVer) {
@@ -105,7 +127,7 @@ fetch('/garradin/juvlist?'+(+(new Date))).then((r) => {
 		let selected;
 
 		list.forEach((file) => {
-			var v = file.name.match(/^garradin-(.*)\.tar\.bz2/);
+			var v = file.name.match(/^garradin-(.*)\.tar\./);
 
 			if (!v || v[1].match(/-(alpha|rc|beta)/)) {
 				return;

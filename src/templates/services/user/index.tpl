@@ -2,7 +2,7 @@
 
 <p>
 	{linkbutton href="!membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="!services/save.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
+	{linkbutton href="!services/user/add.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
 </p>
 
 {form_errors}
@@ -51,7 +51,8 @@
 					{else}
 						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
 					{/if}
-					{linkbutton shape="delete" label="Supprimer" href="user_delete.php?id=%d"|args:$row.id}
+					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
+					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
 				{/if}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ) && $row.id_account}
 					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}

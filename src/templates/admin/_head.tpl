@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$www_url}favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
     <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
     {if isset($custom_js)}
@@ -29,6 +29,9 @@
     {/if}
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?{$version_hash}" media="print" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
+    {if !empty($current) && $current == 'home'}
+    <link rel="manifest" href="{$admin_url}manifest.php?{$version_hash}" />
+    {/if}
     {if isset($config)}
         {custom_colors config=$config}
     {/if}
@@ -40,14 +43,7 @@
 <header class="header">
     <nav class="menu">
     <ul>
-    {if !$is_logged}
-        <li><a href="{$www_url}">&larr; Retour au site</a></li>
-        <li><a href="{$admin_url}">Connexion</a>
-            <ul>
-                <li><a href="{$admin_url}password.php">Mot de passe perdu</a>
-            </ul>
-        </li>
-    {else}
+    {if $is_logged}
     <?php
     $current_parent = substr($current, 0, strpos($current, '/'));
     ?>
@@ -114,6 +110,20 @@
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
             <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
+
+        {if $help_url}
+        <li>
+            <a href="{$help_url}" target="_blank"><b class="icn">❓</b><i> Aide</i></a>
+        </li>
+        {/if}
+
+    {elseif !defined('Garradin\INSTALL_PROCESS')}
+        <li><a href="{if $config.site_asso}{$config.site_asso}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
+        <li><a href="{$admin_url}">Connexion</a>
+            <ul>
+                <li><a href="{$admin_url}password.php">Mot de passe perdu</a>
+            </ul>
+        </li>
     {/if}
     </ul>
     </nav>

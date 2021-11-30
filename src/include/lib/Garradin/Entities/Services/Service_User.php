@@ -17,6 +17,10 @@ class Service_User extends Entity
 	protected $id;
 	protected $id_user;
 	protected $id_service;
+	/**
+	 * This can be NULL if there is no fee for the service
+	 * @var null|int
+	 */
 	protected $id_fee;
 	protected $paid;
 	protected $expected_amount;
@@ -41,7 +45,8 @@ class Service_User extends Entity
 		$this->paid = (bool) $this->paid;
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
-		$this->assert($this->id || !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+		$this->assert($this->exists() || !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+		$this->assert(!$this->exists() || !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ? AND id != ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d'), $this->id()), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
 	}
 
 	public function importForm(?array $source = null)
@@ -73,7 +78,7 @@ class Service_User extends Entity
 		return parent::importForm($source);
 	}
 
-	public function service()
+	public function service(): Service
 	{
 		if (null === $this->_service) {
 			$this->_service = Services::get($this->id_service);
@@ -82,8 +87,17 @@ class Service_User extends Entity
 		return $this->_service;
 	}
 
-	public function fee()
+	/**
+	 * Returns the Fee entity linked to this subscription
+	 * This can be NULL if there was no fee existing at the time of subscription
+	 * (that way you can use subscriptions without fees if you want)
+	 */
+	public function fee(): ?Fee
 	{
+		if (null === $this->id_fee) {
+			return null;
+		}
+
 		if (null === $this->_fee) {
 			$this->_fee = Fees::get($this->id_fee);
 		}
@@ -95,6 +109,10 @@ class Service_User extends Entity
 	{
 		if (null === $source) {
 			$source = $_POST;
+		}
+
+		if (!$this->id_fee) {
+			throw new \RuntimeException('Cannot add a payment to a subscription that is not linked to a fee');
 		}
 
 		$transaction = new Transaction;

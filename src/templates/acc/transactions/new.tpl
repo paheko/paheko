@@ -7,43 +7,30 @@
 
 	{if $ok}
 		<p class="block confirm">
-			L'écriture numéro <a href="details.php?id={$ok}">{$ok}</a> a été ajoutée.
-			(<a href="details.php?id={$ok}">Voir l'écriture</a>)
+			L'écriture numéro {link href="details.php?id=%d"|args:$ok class="num" label=$ok} a été ajoutée.
+			{linkbutton shape="menu" href="details.php?id=%d"|args:$ok label="Voir l'écriture"}
+			{linkbutton href="?copy=%d"|args:$ok shape="plus" label="Dupliquer"}
 		</p>
 	{/if}
 
-	{if $payoff_for}
-		<input type="hidden" name="type" value="{$transaction.type}" />
-		<input type="hidden" name="payoff_for" value="{$payoff_for.id}" />
-		<input type="hidden" name="{$payoff_for.form_account_name}[{$payoff_for.id_account}]" value="-" />
-		<fieldset>
-			<legend>{if $payoff_for.type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
-			<dl>
-				<dt>Écriture d'origine</dt>
-				<dd><a class="num" href="{$admin_url}acc/transactions/details.php?id={$payoff_for.id}">#{$payoff_for.id}</a></dd>
-				{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name=$payoff_for.form_target_name label="Compte de règlement" required=1}
-			</dl>
-		</fieldset>
-	{else}
-		<fieldset>
-			<legend>Type d'écriture</legend>
-			<dl>
-			{foreach from=$types_details item="type"}
-				<dd class="radio-btn">
-					{input type="radio" name="type" value=$type.id source=$transaction label=null}
-					<label for="f_type_{$type.id}">
-						<div>
-							<h3>{$type.label}</h3>
-							{if !empty($type.help)}
-								<p>{$type.help}</p>
-							{/if}
-						</div>
-					</label>
-				</dd>
-			{/foreach}
-			</dl>
-		</fieldset>
-	{/if}
+	<fieldset>
+		<legend>Type d'écriture</legend>
+		<dl>
+		{foreach from=$types_details item="type"}
+			<dd class="radio-btn">
+				{input type="radio" name="type" value=$type.id source=$transaction label=null}
+				<label for="f_type_{$type.id}">
+					<div>
+						<h3>{$type.label}</h3>
+						{if !empty($type.help)}
+							<p>{$type.help}</p>
+						{/if}
+					</div>
+				</label>
+			</dd>
+		{/foreach}
+		</dl>
+	</fieldset>
 
 	<fieldset>
 		<legend>Informations</legend>
@@ -57,25 +44,22 @@
 		</dl>
 	</fieldset>
 
-	{if !$payoff_for}
-
-		{foreach from=$types_details item="type"}
-			<fieldset data-types="t{$type.id}">
-				<legend>{$type.label}</legend>
-				{if $type.id == $transaction::TYPE_ADVANCED}
-					{* Saisie avancée *}
-					{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
-				{else}
-					<dl>
-					{foreach from=$type.accounts key="key" item="account"}
-						<?php $selected = $types_accounts[$key] ?? null; ?>
-						{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
-					{/foreach}
-					</dl>
-				{/if}
-			</fieldset>
-		{/foreach}
-	{/if}
+	{foreach from=$types_details item="type"}
+		<fieldset data-types="t{$type.id}">
+			<legend>{$type.label}</legend>
+			{if $type.id == $transaction::TYPE_ADVANCED}
+				{* Saisie avancée *}
+				{include file="acc/transactions/_lines_form.tpl" chart_id=$current_year.id_chart}
+			{else}
+				<dl>
+				{foreach from=$type.accounts key="key" item="account"}
+					<?php $selected = $types_accounts[$key] ?? null; ?>
+					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
+				{/foreach}
+				</dl>
+			{/if}
+		</fieldset>
+	{/foreach}
 
 	<fieldset>
 		<legend>Détails facultatifs</legend>
@@ -88,7 +72,7 @@
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}
-				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts}
+				{input type="select" name="id_analytical" label="Projet (compte analytique)" options=$analytical_accounts default=$id_analytical}
 			{/if}
 		</dl>
 	</fieldset>
@@ -101,7 +85,7 @@
 </form>
 
 <script type="text/javascript" defer="defer" async="async">
-let is_new = {if $payoff_for || null !== $transaction->type}false{else}true{/if};
+let is_new = {if null !== $transaction->type}false{else}true{/if};
 {literal}
 g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
 </script>

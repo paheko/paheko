@@ -182,6 +182,9 @@ class Utils
         if ($url[0] == '!') {
             return ADMIN_URL . substr($url, 1);
         }
+        elseif (substr($url, 0, 7) == '/admin/') {
+            return ADMIN_URL . substr($url, 7);
+        }
         elseif ($url[0] == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
         }
@@ -251,7 +254,10 @@ class Utils
             <!DOCTYPE html>
             <html>
             <head>
-                <script type="text/javascript">';
+                <script type="text/javascript">
+                if (window.top !== window) {
+                    document.write(\'<style type="text/css">p { display: none; }</style>\');
+                    ';
 
         if (null === $destination) {
             echo 'window.parent.location.reload();';
@@ -261,11 +267,12 @@ class Utils
         }
 
         echo '
+                }
                 </script>
             </head>
 
             <body>
-            <p style="visibility: hidden;"><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
+            <p><a href="' . htmlspecialchars($url) . '">Cliquer ici pour continuer</a>
             </body>
             </html>';
 
@@ -275,6 +282,10 @@ class Utils
     public static function redirect($destination = '', $exit=true)
     {
         $destination = self::getLocalURL($destination);
+
+        if (isset($_GET['_dialog'])) {
+            $destination .= (strpos($destination, '?') === false ? '?' : '&') . '_dialog';
+        }
 
         if (PHP_SAPI == 'cli') {
             echo 'Please visit ' . $destination . PHP_EOL;
@@ -390,6 +401,39 @@ class Utils
     static public function safe_mkdir($path, $mode = 0777, $recursive = false)
     {
         return @mkdir($path, $mode, $recursive) || is_dir($path);
+    }
+
+    /**
+     * Does a recursive list using glob(), this is faster than using Recursive iterators
+     * @param  string $path    Target path
+     * @param  string $pattern Pattern
+     * @param  int    $flags   glob() Flags
+     * @return array
+     */
+    static public function recursiveGlob(string $path, string $pattern = '*', int $flags = 0): array
+    {
+        $target = $path . DIRECTORY_SEPARATOR . $pattern;
+        $list = [];
+
+        // glob is the fastest way to recursely list directories and files apparently
+        // after comparing with opendir(), dir() and filesystem recursive iterators
+        foreach(glob($target, $flags) as $file) {
+            $file = basename($file);
+
+            if ($file[0] == '.') {
+                continue;
+            }
+
+            $list[] = $file;
+
+            if (is_dir($path . DIRECTORY_SEPARATOR . $file)) {
+                foreach (self::recursiveGlob($path . DIRECTORY_SEPARATOR . $file, $pattern, $flags) as $subfile) {
+                    $list[] = $file . DIRECTORY_SEPARATOR . $subfile;
+                }
+            }
+        }
+
+        return $list;
     }
 
     static public function suggestPassword()
@@ -836,56 +880,6 @@ class Utils
         return false;
     }
 
-    static public function getLatestVersion(): ?string
-    {
-        $config = Config::getInstance();
-        $last = $config->get('last_version_check');
-
-        if ($last) {
-            $last = json_decode($last);
-        }
-
-        // Only check once every two weeks
-        if ($last && $last->time > (time() - 3600 * 24 * 15)) {
-            return $last->version;
-        }
-
-        $current_version = garradin_version();
-        $last = (object) ['time' => time(), 'version' => null];
-        $config->set('last_version_check', json_encode($last));
-        $config->save();
-
-        $list = (new HTTP)->GET(WEBSITE . 'juvlist');
-
-        if (!$list) {
-            return null;
-        }
-
-        $list = json_decode($list);
-
-        if (!$list) {
-            return null;
-        }
-
-        $last->version = $current_version;
-
-        foreach ($list as $item) {
-            if (preg_match('/^garradin-(.*)\.tar\.bz2$/', $item->name, $match) && !preg_match('/alpha|dev|rc|beta/', $match[1])
-                && version_compare($last->version, $match[1], '<')) {
-                $last->version = $match[1];
-            }
-        }
-
-        if (version_compare($last->version, $current_version, '==')) {
-            $last->version = null;
-        }
-
-        $config->set('last_version_check', json_encode($last));
-        $config->save();
-
-        return $last->version;
-    }
-
     static public function transformTitleToURI($str)
     {
         $str = Utils::transliterateToAscii($str);
@@ -1052,6 +1046,7 @@ class Utils
             $in = ['source' => $source, 'target' => $target];
 
             if (Plugin::fireSignal('pdf.create', $in)) {
+                Utils::safe_unlink($source);
                 return $target;
             }
 
@@ -1069,7 +1064,7 @@ class Utils
 
             // We still haven't found anything
             if (!$cmd) {
-                throw new \LogicException('No PDF creation executable found. Please install or configure one.');
+                throw new \LogicException('Aucun programme de création de PDF trouvé, merci d\'en installer un : https://fossil.kd2.org/garradin/wiki?name=Configuration');
             }
         }
 
@@ -1091,13 +1086,25 @@ class Utils
         }
 
         exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+        Utils::safe_unlink($source);
 
         if (!file_exists($target)) {
             throw new \RuntimeException('PDF command failed');
         }
 
-        unlink($source);
-
         return $target;
+    }
+
+    /**
+     * Integer to A-Z, AA-ZZ, AAA-ZZZ, etc.
+     * @see https://www.php.net/manual/fr/function.base-convert.php#94874
+     */
+    static public function num2alpha(int $n): string {
+        $r = '';
+        for ($i = 1; $n >= 0 && $i < 10; $i++) {
+            $r = chr(0x41 + ($n % pow(26, $i) / pow(26, $i - 1))) . $r;
+            $n -= pow(26, $i);
+        }
+        return $r;
     }
 }

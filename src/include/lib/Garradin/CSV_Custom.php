@@ -48,7 +48,7 @@ class CSV_Custom
 			throw new \LogicException('Missing columns or translation table');
 		}
 
-		$default = array_map(function ($a) { return null; }, $this->columns);
+		$default = array_map(function ($a) { return null; }, array_flip($this->translation));
 
 		$i = 0;
 

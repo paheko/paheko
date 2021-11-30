@@ -80,6 +80,7 @@ use Garradin\Entities\Files\File;
 					{if $can_delete}
 						<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all" /><label for="f_all"></label></td>
 					{/if}
+					<td></td>
 					<th>Nom</th>
 					<td>Modifié</td>
 					<td>Type</td>
@@ -92,12 +93,13 @@ use Garradin\Entities\Files\File;
 
 			{foreach from=$list item="file"}
 				{if $file.type == $file::TYPE_DIRECTORY}
-				<tr>
+				<tr class="folder">
 					{if $can_delete}
 					<td class="check">
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
+					<td class="icon">{icon shape="folder"}</td>
 					<th><a href="?path={$file.path}">{$file.name}</a></th>
 					<td></td>
 					<td>Répertoire</td>
@@ -118,13 +120,14 @@ use Garradin\Entities\Files\File;
 						{input type="checkbox" name="check[]" value=$file.path}
 					</td>
 					{/if}
-					<td>
+					<td class="icon">{if $file->image}{icon shape="image"}{/if}</td>
+					<th>
 						{if $file->canPreview()}
 							<a href="{"!common/files/preview.php?p=%s"|local_url|args:$file.path}" target="_dialog" data-mime="{$file.mime}">{$file.name}</a>
 						{else}
 							<a href="{$file->url(true)}" target="_blank">{$file.name}</a>
 						{/if}
-					</td>
+					</th>
 					<td>{$file.modified|date}</td>
 					<td>{$file.mime}</td>
 					<td>{$file.size|size_in_bytes}</td>
@@ -153,7 +156,7 @@ use Garradin\Entities\Files\File;
 			<tfoot>
 				<tr>
 					<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
-					<td class="actions" colspan="5">
+					<td class="actions" colspan="6">
 						<em>Pour les fichiers sélectionnés&nbsp;:</em>
 							<input type="hidden" name="parent" value="{$path}" />
 							<select name="action">

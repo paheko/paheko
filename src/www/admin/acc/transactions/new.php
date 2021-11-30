@@ -21,15 +21,20 @@ $accounts = $chart->accounts();
 $transaction = new Transaction;
 $lines = [[], []];
 $amount = 0;
-$payoff_for = qg('payoff_for') ?: f('payoff_for');
 $types_accounts = null;
+$id_analytical = null;
 
 // Duplicate transaction
 if (qg('copy')) {
 	$old = Transactions::get((int)qg('copy'));
+
+	if (!$old) {
+		throw new UserException('Cette écriture n\'existe pas (ou plus).');
+	}
+
 	$transaction = $old->duplicate($current_year);
-	$lines = $transaction->getLinesWithAccounts();
-	$payoff_for = null;
+	$lines = $transaction->getLinesWithAccounts(true);
+	$id_analytical = $old->getAnalyticalId();
 	$amount = $transaction->getLinesCreditSum();
 	$types_accounts = $transaction->getTypesAccounts();
 	$transaction->resetLines();
@@ -52,17 +57,6 @@ if (!$date || ($date < $current_year->start_date || $date > $current_year->end_d
 }
 
 $transaction->date = $date;
-
-// Quick pay-off for debts and credits, directly from a debt/credit details page
-if ($id = $payoff_for) {
-	$payoff_for = $transaction->payOffFrom($id);
-
-	if (!$payoff_for) {
-		throw new UserException('Écriture inconnue');
-	}
-
-	$amount = $payoff_for->sum;
-}
 
 // Quick transaction from an account journal page
 if ($id = qg('account')) {
@@ -88,29 +82,23 @@ elseif (!empty($_POST['lines']) && is_array($_POST['lines'])) {
 	}
 }
 
-if (f('save') && $form->check('acc_transaction_new')) {
-	try {
-		$transaction->id_year = $current_year->id();
-		$transaction->importFromNewForm();
-		$transaction->id_creator = $session->getUser()->id;
-		$transaction->save();
+$form->runIf('save', function () use ($transaction, $session, $current_year) {
+	$transaction->importFromNewForm();
+	$transaction->id_year = $current_year->id();
+	$transaction->id_creator = $session->getUser()->id;
+	$transaction->save();
 
-		 // Link members
-		if (null !== f('users') && is_array(f('users'))) {
-			$transaction->updateLinkedUsers(array_keys(f('users')));
-		}
-
-		$session->set('acc_last_date', f('date'));
-
-		Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
+	 // Link members
+	if (null !== f('users') && is_array(f('users'))) {
+		$transaction->updateLinkedUsers(array_keys(f('users')));
 	}
-	catch (UserException $e) {
-		$form->addError($e->getMessage());
-	}
-}
 
-$tpl->assign(compact('transaction', 'payoff_for', 'amount', 'lines', 'types_accounts'));
-$tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
+	$session->set('acc_last_date', f('date'));
+
+	Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
+}, 'acc_transaction_new');
+
+$tpl->assign(compact('transaction', 'amount', 'lines', 'types_accounts', 'id_analytical'));
 $tpl->assign('ok', (int) qg('ok'));
 
 $tpl->assign('types_details', Transaction::getTypesDetails());

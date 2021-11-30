@@ -359,7 +359,7 @@ class Session extends \KD2\UserSession
 	public function editUser($data) // FIXME update
 	{
 		(new Membres)->edit($this->user->id, $data, false);
-		$this->refresh(false);
+		$this->refresh();
 
 		return true;
 	}
@@ -458,6 +458,6 @@ class Session extends \KD2\UserSession
 			$user->set('otp_secret', $otp_secret);
 		}
 
-		$this->refresh(false);
+		$this->refresh();
 	}
 }

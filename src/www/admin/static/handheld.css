@@ -4,27 +4,44 @@ body {
 	font-size: 11pt;
 }
 
-input, select, textarea {
+input[type=number], input[type=color],
+input[type=email], input[type=file], input[type=url], input[type=month],
+input[type=password], input[type=range], input[type=search], input[type=tel],
+textarea, select, .input-list, .file-selector, input[type=text]:not([data-input]) {
     min-width: 0 !important;
     max-width: calc(100% - 2em);
+    width: calc(95% - 2em);
 }
 
-select {
-	width: calc(100% - 3em);
+a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
+	padding: .4em .6em;
+}
+
+a.icn-btn {
+	white-space: normal;
+}
+
+nav.breadcrumbs .quota {
+	float: none;
+}
+
+nav.breadcrumbs ul {
+	display: block;
+	margin: .8em 0;
 }
 
 .header h1 {
 	margin: 0;
 	text-align: center;
 	font-size: 1.2em;
-	margin: 6em 0 .3em 0;
+	margin: 7em 0 .3em 0;
 }
 
 .header .menu {
 	background: none !important;
 	position: fixed;
-	bottom: inherit;
 	overflow: visible;
+	bottom: inherit;
 	z-index: 10000;
 	margin: 0;
 	margin-bottom: 3em;
@@ -71,7 +88,7 @@ select {
 	color: #fff;
 	width: 20pt;
 	height: 14pt;
-	padding: 10pt;
+	padding: 10pt 0;
 	line-height: 20pt;
 	cursor: pointer;
 }
@@ -108,10 +125,10 @@ select {
 .header .menu > ul > li.current > ul a, .header .menu > ul > li.current_parent > ul a {
 	background: rgb(var(--gSecondColor), 0.3);
 	border-radius: .5em;
-	margin: .2rem;
+	margin: .3rem;
 	color: rgb(var(--gMainColor));
-	padding: .3em .5em;
-	font-size: .9em;
+	padding: .4rem .6rem;
+	font-size: 1em;
 	font-weight: normal;
 }
 
@@ -133,8 +150,12 @@ nav.tabs ul {
 }
 
 nav.tabs ul li a, nav.tabs ul li label {
-	margin: .1em;
+	margin: .2em;
 	border-radius: .5em;
+}
+
+nav.tabs ul li a {
+	padding: .4rem .6rem;
 }
 
 nav.tabs .sub {
@@ -167,6 +188,37 @@ fieldset {
 	width: auto;
 	margin-left: 0;
 	margin-right: 0;
+}
+
+nav.tabs aside {
+	float: none;
+	text-align: center;
+	max-width: 100%;
+}
+
+table.list tfoot .actions[colspan] {
+	text-align: left;
+}
+
+table.list tbody .actions {
+	text-align: left;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: flex-end;
+	border: none;
+}
+
+table.list tbody .actions a {
+	align-self: flex-end;
+}
+
+table.list th {
+	font-size: 1.2em;
+}
+
+.datepicker tbody td {
+	font-size: 1.2em;
 }
 
 /* Petits écrans (smartphones) */
@@ -212,16 +264,6 @@ fieldset {
 		text-align: center;
 	}
 
-	.actions a {
-		margin: .2em;
-		font-size: .9em;
-	}
-
-	nav.tabs aside {
-		float: none;
-		text-align: center;
-	}
-
 	#dialog {
 		background: black;
 	}
@@ -230,6 +272,13 @@ fieldset {
 		width: 100%;
 		height: 100%;
 		margin: 0;
+		max-width: 100%;
+    	border-radius: 0;
+    	box-shadow: none;
+	}
+
+	#dialog.loaded > iframe {
+		width: 100%;
 	}
 
 	#dialog > button {

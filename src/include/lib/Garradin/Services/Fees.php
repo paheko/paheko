@@ -45,7 +45,7 @@ class Fees
 		$db = DB::getInstance();
 
 		$sql = 'SELECT *, CASE WHEN amount THEN amount ELSE NULL END AS user_amount
-			FROM services_fees ORDER BY id_service, label COLLATE NOCASE;';
+			FROM services_fees ORDER BY id_service, amount IS NULL, label COLLATE NOCASE;';
 		$result = $db->get($sql);
 
 		if (!$user_id) {
@@ -58,14 +58,6 @@ class Fees
 				$row->user_amount = $db->firstColumn($sql);
 			}
 		}
-
-		usort($result, function ($a, $b) {
-			if ($a->user_amount == $b->user_amount) {
-				return 0;
-			}
-
-			return $a->user_amount > $b->user_amount ? 1 : -1;
-		});
 
 		return $result;
 	}

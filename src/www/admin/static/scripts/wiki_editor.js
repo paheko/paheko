@@ -185,7 +185,7 @@
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.title = altTitle ? altTitle : title;
-			if (title.length == 1) {
+			if ([...title].length == 1) {
 				btn.dataset.icon = title;
 			}
 			else {
@@ -248,13 +248,18 @@
 			fetch(t.textarea.form.action + '&js', {
 				method: 'post',
 				body: data,
-			}).then((response) => {
-				if (!response.ok) {
-					throw response;
-				}
+			}).then((response) => response.json())
+			.then(data => {
 				showSaved();
 				t.textarea.defaultValue = t.textarea.value;
-			}).catch(e => t.textarea.form.querySelector('[type=submit]').click() );
+
+				let e = t.textarea.form.querySelector('input[name=editing_started]');
+
+				if (e) {
+					e.value = data.modified;
+				}
+
+			}).catch(e => { console.log(e); t.textarea.form.querySelector('[type=submit]').click(); } );
 			return true;
 		};
 
@@ -315,5 +320,7 @@
 		t.shortcuts.push({ctrl: true, key: 's', callback: save});
 		t.shortcuts.push({ctrl: true, shift: true, key: 'p', callback: openPreview});
 		t.shortcuts.push({key: 'F1', callback: openSyntaxHelp});
+
+		g.setParentDialogHeight('90%');
 	});
 }());

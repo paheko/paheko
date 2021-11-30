@@ -6,9 +6,15 @@ use Garradin\Users\Session;
 
 use Garradin\Files\Files;
 
+use KD2\HTTP;
+
+use KD2\FossilInstaller;
+
 class Upgrade
 {
 	const MIN_REQUIRED_VERSION = '1.1.0';
+
+	static protected $installer = null;
 
 	static public function preCheck(): bool
 	{
@@ -159,11 +165,17 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.10', '<')) {
-				\Garradin\Web\Web::sync(true); // Force sync of web pages
+				\Garradin\Web\Web::sync(); // Force sync of web pages
 				Files::syncVirtualTable('', true);
 
 				$db->begin();
 				$db->exec(sprintf('DELETE FROM files_search WHERE path NOT IN (SELECT path FROM %s);', Files::getVirtualTableName()));
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.15', '<')) {
+				$db->begin();
+				$db->import(ROOT . '/include/data/1.1.15_migration.sql');
 				$db->commit();
 			}
 
@@ -240,5 +252,61 @@ class Upgrade
 		foreach ($files as $file) {
 			rename($file, ROOT . '/data/' . basename($file));
 		}
+	}
+
+	static public function getLatestVersion(): ?\stdClass
+	{
+		$config = Config::getInstance();
+		$last = $config->get('last_version_check');
+
+		if ($last) {
+			$last = json_decode($last);
+		}
+
+		// Only check once every two weeks
+		if ($last && $last->time > (time() - 3600 * 24 * 5)) {
+			return $last;
+		}
+
+		$current_version = garradin_version();
+		$last = (object) ['time' => time(), 'version' => null];
+		$config->set('last_version_check', json_encode($last));
+		$config->save();
+
+		$last->version = self::getInstaller()->latest();
+
+		if (version_compare($last->version, $current_version, '<=')) {
+			$last->version = null;
+		}
+
+		$config->set('last_version_check', json_encode($last));
+		$config->save();
+
+		return $last;
+	}
+
+	static public function getInstaller(): FossilInstaller
+	{
+		if (!isset(self::$installer)) {
+			$i = new FossilInstaller(WEBSITE, ROOT, CACHE_ROOT, '!^garradin-(.*)\.tar\.gz$!');
+			$i->setPublicKeyFile(ROOT . '/pubkey.asc');
+
+			if (0 === ($pos = strpos(CACHE_ROOT, ROOT))) {
+				$i->addIgnoredPath(substr(CACHE_ROOT, strlen(ROOT) + 1));
+			}
+
+			if (0 === ($pos = strpos(DATA_ROOT, ROOT))) {
+				$i->addIgnoredPath(substr(DATA_ROOT, strlen(ROOT) + 1));
+			}
+
+			if (0 === ($pos = strpos(SHARED_CACHE_ROOT, ROOT))) {
+				$i->addIgnoredPath(substr(SHARED_CACHE_ROOT, strlen(ROOT) + 1));
+			}
+
+			$i->addIgnoredPath('config.local.php');
+			self::$installer = $i;
+		}
+
+		return self::$installer;
 	}
 }

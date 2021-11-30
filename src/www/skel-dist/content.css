@@ -1,3 +1,10 @@
+/**
+ * Ce fichier contient les styles CSS qui s'appliquent au contenu des articles et catégorie,
+ * que ce soit sur le site public ou dans la prévisualisation de l'administration.
+ *
+ * Généralement il n'est pas nécessaire de le modifier.
+ */
+
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
     margin: .8em 0;
@@ -87,7 +94,7 @@
     border: 1px solid rgba(0, 0, 0, 0.2);
     background: rgba(0, 0, 0, 0.1);
     padding: .3rem;
-    width: max-content;
+    display: inline-block;
 }
 
 .web-content .toc ol {
@@ -103,7 +110,7 @@
 }
 
 .web-content aside.file {
-    margin: 1em;
+    margin: .3em;
 }
 
 .web-content aside.file small {
@@ -112,9 +119,8 @@
 
 .web-content aside.file a {
     display: inline-block;
-    margin-right: 1em;
-    padding: .5em;
-    padding-left: 1.8em;
+    margin-right: .5em;
+    padding: .3em .5em .3em 1.8em;
     border: 1px solid #999;
     background: #eee;
     border-radius: .5em;

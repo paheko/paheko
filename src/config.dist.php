@@ -213,6 +213,24 @@ namespace Garradin;
 
 //const ENABLE_TECH_DETAILS = true;
 
+
+/**
+ * Activer la possibilité de faire une mise à jour semi-automatisée
+ * depuis fossil.kd2.org.
+ *
+ * Si mis à TRUE, alors un bouton sera accessible depuis le menu "Configuration"
+ * pour faire une mise à jour en deux clics.
+ *
+ * Il est conseillé de désactiver cette fonctionnalité si vous ne voulez pas
+ * permettre à un utilisateur de casser l'installation !
+ *
+ * Défaut : true
+ *
+ * @var bool
+ */
+
+//const ENABLE_UPGRADES = true;
+
 /**
  * Utilisation de cron pour les tâches automatiques
  *
@@ -432,3 +450,21 @@ namespace Garradin;
  * Défaut : null
  */
 //const PDF_COMMAND = 'wkhtmltopdf %2$s %1$s';
+
+/**
+ * Clé de licence
+ *
+ * Cette clé permet de débloquer certaines fonctionnalités dans des extensions officielles.
+ *
+ * Pour l'obtenir il faut se créer un compte sur Garradin.eu
+ * et faire une contribution financière.
+ * La clé apparaîtra ensuite en dessous des informations
+ * de l'association dans la page "Mon abonnement Garradin.eu".
+ *
+ * Il faut recopier cette clé dans le fichier config.local.php
+ * dans la constante CONTRIBUTOR_LICENSE.
+ *
+ * Merci de ne pas essayer de contourner cette licence et de contribuer au
+ * financement de notre travail :-)
+ */
+//const CONTRIBUTOR_LICENSE = 'XXXXX';

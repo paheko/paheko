@@ -6,15 +6,13 @@ use Garradin\Entities\Services\Service_User;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 
-require_once __DIR__ . '/_inc.php';
+require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-$count_all = Services::count();
-
-if (!$count_all) {
-	Utils::redirect(ADMIN_URL . 'services/?CREATE');
-}
+// This controller allows to either select a user if none has been provided in the query string
+// or subscribe a user to an activity (create a new Service_User entity)
+// If $user_id is null then the form is just a select to choose a user
 
 $count_all = Services::count();
 
@@ -39,26 +37,22 @@ if (!$user_name) {
 	$user_id = null;
 }
 
-$current_only = !qg('past_services');
-
-$grouped_services = Services::listGroupedWithFees($user_id, $current_only);
-
-if (!count($grouped_services)) {
-	Utils::redirect(Utils::getSelfURI(['user' => $user_id, 'past_services' => $current_only]));
-}
-
-$has_past_services = count($grouped_services) != $count_all;
-
+$form_url  = sprintf('?user=%d&', $user_id);
 $csrf_key = 'service_save';
+
+// Only load the form if a user has been selected
+if ($user_id) {
+	require __DIR__ . '/_form.php';
+}
 
 $form->runIf(f('save') || f('save_and_add_payment'), function () use ($session) {
 	$su = Service_User::saveFromForm($session->getUser()->id);
 
 	if (f('save_and_add_payment')) {
-		$url = ADMIN_URL . 'services/payment.php?id=' . $su->id;
+		$url = ADMIN_URL . 'services/user/payment.php?id=' . $su->id;
 	}
 	else {
-		$url = ADMIN_URL . 'services/user.php?id=' . $su->id_user;
+		$url = ADMIN_URL . 'services/user/?id=' . $su->id_user;
 	}
 
 	Utils::redirect($url);
@@ -69,8 +63,8 @@ $selected_user = $user_name ? [$user_id => $user_name] : null;
 $types_details = Transaction::getTypesDetails();
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
-$today = new \DateTime;
+$service_user = null;
 
-$tpl->assign(compact('today', 'grouped_services', 'csrf_key', 'selected_user', 'account_targets', 'user_name', 'user_id', 'current_only', 'has_past_services'));
+$tpl->assign(compact('csrf_key', 'selected_user', 'account_targets', 'service_user', 'user_id'));
 
-$tpl->display('services/save.tpl');
+$tpl->display('services/user/add.tpl');

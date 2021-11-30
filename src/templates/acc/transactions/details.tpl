@@ -1,14 +1,12 @@
 {include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
 <nav class="tabs">
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-	<aside>{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}</aside>
-{/if}
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
-	<ul>
-		<li><a href="edit.php?id={$transaction.id}">Modifier cette écriture</a></li>
-		<li><a href="delete.php?id={$transaction.id}">Supprimer cette écriture</a></li>
-	</ul>
+	{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}
+	{linkbutton href="delete.php?id=%d"|args:$transaction.id shape="delete" label="Supprimer cette écriture"}
+{/if}
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+	{linkbutton href="new.php?copy=%d"|args:$transaction.id shape="plus" label="Dupliquer cette écriture"}
 {/if}
 </nav>
 
@@ -17,10 +15,10 @@
 	<form method="post" action="{$self_url}">
 	{if $transaction.type == $transaction::TYPE_DEBT}
 		<h3>Dette en attente</h3>
-		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
+		{linkbutton shape="check" label="Enregistrer le règlement de cette dette" href="!acc/transactions/payoff.php?for=%d"|args:$transaction.id}
 	{else}
 		<h3>Créance en attente</h3>
-		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="!acc/transactions/new.php?payoff_for=%d"|args:$transaction.id}
+		{linkbutton shape="export" label="Enregistrer le règlement de cette créance" href="!acc/transactions/payoff.php?for=%d"|args:$transaction.id}
 	{/if}
 		{button type="submit" shape="check" label="Marquer manuellement comme réglée" name="mark_paid" value="1"}
 		{csrf_field key=$csrf_key}
@@ -82,7 +80,7 @@
 		{foreach from=$related_users item="u"}
 			<dd>
 				<a href="{$admin_url}membres/fiche.php?id={$u.id}">{$u.identity}</a>
-				{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user.php?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
+				{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user/?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
 			</dd>
 		{/foreach}
 	{/if}

@@ -25,7 +25,6 @@ $form->runIf('content', function () use ($file) {
 	if (qg('js') !== null) {
 		die('{"success":true}');
 	}
-
 }, $csrf_key, Utils::getSelfURI());
 
 $tpl->assign('file', $file);
