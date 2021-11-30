@@ -214,7 +214,7 @@ class Graph
 		$cache_id = sha1('bar' . json_encode(func_get_args()));
 
 		if (!Static_Cache::expired($cache_id)) {
-			//return Static_Cache::get($cache_id);
+			return Static_Cache::get($cache_id);
 		}
 
 		$bar = new Bar(600, 300);
@@ -243,11 +243,17 @@ class Graph
 			array_walk($years, function (&$v) { $v->sum = (int)$v->sum/100; });
 
 			foreach ($years as $year) {
-				if (!isset($data[$year->id])) {
-					$data[$year->id] = new Bar_Data_Set(Utils::date_fr($year->end_date, 'Y'));
+				$start = Utils::date_fr($year->start_date, 'Y');
+				$end = Utils::date_fr($year->end_date, 'Y');
+				$year_label = $start == $end ? $start : sprintf('%s-%s', $start, substr($end, -2));
+
+				$year_id = $year_label . '-' . $year->id;
+
+				if (!isset($data[$year_id])) {
+					$data[$year_id] = new Bar_Data_Set($year_label);
 				}
 
-				$data[$year->id]->add($year->sum, $label, $color);
+				$data[$year_id]->add($year->sum, $label, $color);
 			}
 		}
 
