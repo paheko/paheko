@@ -311,6 +311,8 @@ class Transactions
 		}
 
 		$db->commit();
+
+		Graph::clearCacheAllYears();
 	}
 
 	static public function importCustom(Year $year, CSV_Custom $csv, int $user_id)
@@ -398,6 +400,8 @@ class Transactions
 		}
 
 		$db->commit();
+
+		Graph::clearCacheAllYears();
 	}
 
 	static public function setAnalytical(?int $id_analytical, ?array $transactions = null, ?array $lines = null)

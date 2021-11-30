@@ -178,6 +178,9 @@ class Utils
         if ($url[0] == '!') {
             return ADMIN_URL . substr($url, 1);
         }
+        elseif (substr($url, 0, 7) == '/admin/') {
+            return ADMIN_URL . substr($url, 7);
+        }
         elseif ($url[0] == '/' && ($pos = strpos($url, WWW_URI)) === 0) {
             return WWW_URL . substr($url, strlen(WWW_URI));
         }
@@ -952,6 +955,7 @@ class Utils
             $in = ['source' => $source, 'target' => $target];
 
             if (Plugin::fireSignal('pdf.create', $in)) {
+                Utils::safe_unlink($source);
                 return $target;
             }
 
@@ -991,12 +995,11 @@ class Utils
         }
 
         exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+        Utils::safe_unlink($source);
 
         if (!file_exists($target)) {
             throw new \RuntimeException('PDF command failed');
         }
-
-        unlink($source);
 
         return $target;
     }
