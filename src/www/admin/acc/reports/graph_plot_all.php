@@ -13,5 +13,5 @@ $expiry = time() - 600;
 $hash = sha1('plot_all');
 
 if (!Utils::HTTPCache($hash, $expiry)) {
-	echo Graph::plot(qg('type'), [], Graph::MONTHLY_INTERVAL, 600);
+	echo Graph::bar(qg('type'), []);
 }
