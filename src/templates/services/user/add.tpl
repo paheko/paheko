@@ -5,7 +5,7 @@
 {form_errors}
 
 {if !$user_id}
-<form method="post" action="{$self_url}" data-focus="1">
+<form method="post" action="{$self_url}">
 
 	<fieldset>
 		<legend>Inscrire un membre à une activité</legend>
