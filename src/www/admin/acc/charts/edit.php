@@ -18,6 +18,7 @@ if (f('save') && $form->check('acc_charts_edit_' . $chart->id()))
 	try
 	{
 		$chart->importForm();
+		$chart->set('archived', (int) f('archived'));
 		$chart->save();
 
 		Utils::redirect(sprintf('%sacc/charts/', ADMIN_URL));
