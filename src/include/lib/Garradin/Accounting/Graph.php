@@ -56,6 +56,23 @@ class Graph
 	const WEEKLY_INTERVAL = 604800; // 7 days
 	const MONTHLY_INTERVAL = 2635200; // 1 month
 
+	static public function clearCache(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700): void
+	{
+		if (!array_key_exists($type, self::PLOT_TYPES)) {
+			throw new \InvalidArgumentException('Unknown type');
+		}
+
+		$cache_id = sha1('plot' . json_encode(func_get_args()));
+
+		Static_Cache::remove($cache_id);
+	}
+
+	static public function clearCacheAllYears(): void
+	{
+		self::clearCache('assets', [], Graph::MONTHLY_INTERVAL, 600);
+		self::clearCache('result', [], Graph::MONTHLY_INTERVAL, 600);
+	}
+
 	static public function plot(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700)
 	{
 		if (!array_key_exists($type, self::PLOT_TYPES)) {
