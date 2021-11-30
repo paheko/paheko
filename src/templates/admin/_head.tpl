@@ -110,6 +110,13 @@
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
             <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
+
+        {if $help_url}
+        <li>
+            <a href="{$help_url}" target="_blank"><b class="icn">❓</b><i> Aide</i></a>
+        </li>
+        {/if}
+
     {elseif !defined('Garradin\INSTALL_PROCESS')}
         <li><a href="{if $config.site_asso}{$config.site_asso}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
         <li><a href="{$admin_url}">Connexion</a>

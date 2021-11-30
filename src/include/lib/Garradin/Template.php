@@ -68,6 +68,7 @@ class Template extends \KD2\Smartyer
 		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
+		$this->assign('help_url', HELP_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
