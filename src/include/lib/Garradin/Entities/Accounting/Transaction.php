@@ -123,7 +123,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
 
-		if (null === $this->_lines || $restrict_year === false) {
+		if ($restrict_year === false) {
 			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
 			$sql = sprintf('SELECT
 				l.*, a.label AS account_name, a.code AS account_code,
@@ -152,6 +152,9 @@ class Transaction extends Entity
 				}
 			}
 
+			// Remove NULL accounts
+			$accounts = array_filter($accounts);
+
 			if (count($accounts)) {
 				$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
 				$this->_accounts += $db->getGrouped($sql);
@@ -159,8 +162,8 @@ class Transaction extends Entity
 
 			foreach ($this->getLines() as $line) {
 				$account = [
-					'account_code' => $this->_accounts[$line->id_account]->code,
-					'account_name' => $this->_accounts[$line->id_account]->label,
+					'account_code' => $this->_accounts[$line->id_account]->code ?? null,
+					'account_name' => $this->_accounts[$line->id_account]->label ?? null,
 					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
 				];
 
@@ -261,6 +264,11 @@ class Transaction extends Entity
 		return current($lines)->id_analytical;
 	}
 
+	public function related(): ?Transaction
+	{
+		return $this->_related;
+	}
+
 	public function getTypesAccounts()
 	{
 		if ($this->type == self::TYPE_ADVANCED) {
@@ -308,20 +316,28 @@ class Transaction extends Entity
 			$new->$field = $this->$field;
 		}
 
-		$copy = ['credit', 'debit', 'id_account', 'label', 'reference'];
+		$copy = ['credit', 'debit', 'id_account', 'label', 'reference', 'id_analytical'];
 		$lines = DB::getInstance()->get('SELECT
-				l.credit, l.debit, l.label, l.reference, b.id AS id_account
+				l.credit, l.debit, l.label, l.reference, b.id AS id_account, c.id AS id_analytical
 			FROM acc_transactions_lines l
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			LEFT JOIN acc_accounts b ON b.code = a.code AND b.id_chart = ?
+			LEFT JOIN acc_accounts c ON c.id = l.id_analytical AND c.id_chart = ?
 			WHERE l.id_transaction = ?;',
+			$year->chart()->id,
 			$year->chart()->id,
 			$this->id()
 		);
 
 		foreach ($lines as $l) {
 			$line = new Line;
+
 			foreach ($copy as $field) {
+				// Do not copy id_account when it is null, as it will trigger an error (invalid entity)
+				if ($field == 'id_account' && !isset($l->$field)) {
+					continue;
+				}
+
 				$line->$field = $l->$field;
 			}
 
@@ -416,12 +432,6 @@ class Transaction extends Entity
 			}
 		}
 
-		// Remove flag
-		if (!$exists && $this->_related) {
-			$this->_related->markPaid();
-			$this->_related->save();
-		}
-
 		return true;
 	}
 
@@ -494,7 +504,7 @@ class Transaction extends Entity
 		$amount = $source['amount'];
 
 		$key = 'account_transfer';
-		$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+		$account = @key($source[$key]);
 
 		$line = new Line;
 		$line->importForm([
@@ -530,7 +540,7 @@ class Transaction extends Entity
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
-				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+				$line['id_account'] = @key($line['account']);
 
 				if (!$line['id_account']) {
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ((int) $i+1));
@@ -565,11 +575,11 @@ class Transaction extends Entity
 				$credit = $account->position == 'credit' ? $amount : 0;
 				$debit = $account->position == 'debit' ? $amount : 0;
 				$key = sprintf('account_%d_%d', $type, $k);
-				$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+				$account = @key($source[$key]);
 
 				$line = new Line;
 				$line->importForm([
-					'reference'     => $source['payment_reference'],
+					'reference'     => !empty($source['payment_reference']) ? $source['payment_reference'] : null,
 					'credit'        => $credit,
 					'debit'         => $debit,
 					'id_account'    => $account,
@@ -619,7 +629,7 @@ class Transaction extends Entity
 		$debit = $credit = 0;
 
 		foreach ($lines as $k => $line) {
-			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+			$line['id_account'] = @key($line['account']);
 
 			try {
 				$line = (new Line)->importForm($line);
@@ -764,14 +774,14 @@ class Transaction extends Entity
 			self::TYPE_DEBT => [
 				'accounts' => [
 					[
-						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
-						'position' => 'credit',
-					],
-					[
 						'label' => 'Type de dette (dépense)',
 						'targets' => [Account::TYPE_EXPENSE],
 						'position' => 'debit',
+					],
+					[
+						'label' => 'Compte de tiers',
+						'targets' => [Account::TYPE_THIRD_PARTY],
+						'position' => 'credit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_DEBT],
@@ -780,14 +790,14 @@ class Transaction extends Entity
 			self::TYPE_CREDIT => [
 				'accounts' => [
 					[
-						'label' => 'Compte de tiers',
-						'targets' => [Account::TYPE_THIRD_PARTY],
-						'position' => 'debit',
-					],
-					[
 						'label' => 'Type de créance (recette)',
 						'targets' => [Account::TYPE_REVENUE],
 						'position' => 'credit',
+					],
+					[
+						'label' => 'Compte de tiers',
+						'targets' => [Account::TYPE_THIRD_PARTY],
+						'position' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
@@ -828,8 +838,11 @@ class Transaction extends Entity
 			'id' => $this->_related->id,
 			'sum' => $this->_related->sum(),
 			'id_account' => null,
-			'form_account_name' => sprintf('account_%d_%d', $this->type, 1),
-			'form_target_name' => sprintf('account_%d_%d', $this->type, 0),
+			// input name for the input containing the account ID for the expense/revenue from the related transaction
+			'form_account_name' => sprintf('account_%d_%d', $this->type, 0),
+			// input name for the account selector, for selecting a bank/cash account
+			'form_target_name' => sprintf('account_%d_%d', $this->type, 1),
+			'id_analytical' => $this->_related->getAnalyticalId(),
 		];
 
 		foreach ($this->_related->getLines() as $line) {
