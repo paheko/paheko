@@ -13,6 +13,11 @@ class Email extends Entity
 {
 	const TABLE = 'emails';
 
+	/**
+	 * Antispam services that require to do a manual action to accept emails
+	 */
+	const BLACKLIST_MANUAL_VALIDATION_MX = '/mailinblack\.com|spamenmoins\.com/';
+
 	const COMMON_DOMAINS = ['laposte.net', 'gmail.com', 'hotmail.fr', 'hotmail.com', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'yahoo.fr', 'orange.fr', 'live.fr', 'outlook.fr', 'yahoo.com', 'neuf.fr', 'outlook.com', 'icloud.com', 'riseup.net', 'vivaldi.net', 'aol.com', 'gmx.de', 'lilo.org', 'mailo.com', 'protonmail.com'];
 
 	protected int $id;
@@ -91,7 +96,7 @@ class Email extends Entity
 			throw new UserException('L\'adresse e-mail est invalide : est-ce que vous avez voulu écrire "gmail.com" ?');
 		}
 
-		if (!SMTP::checkEmailIsValid($email, true)) {
+		if (!SMTP::checkEmailIsValid($email, false)) {
 			foreach (self::COMMON_DOMAINS as $common_domain) {
 				similar_text($common_domain, $host, $percent);
 
@@ -103,12 +108,18 @@ class Email extends Entity
 			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
 
-		if ($this->optout) {
-			throw new UserException('Cette adresse e-mail a demandé à ne plus recevoir de messages de notre part.');
+		getmxrr($host, $mx_list);
+
+		if (!count($mx_list)) {
+			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
 
-		if ($this->invalid) {
-			throw new UserException('Cette adresse e-mail est invalide.');
+		$mx_list = array_filter($mx_list,
+  			fn ($mx) => !preg_match(self::BLACKLIST_MANUAL_VALIDATION_MX, $mx)
+  		);
+
+		if (!count($mx_list)) {
+			throw new UserException('Adresse e-mail invalide : impossible d\'envoyer des mails à un service (de type mailinblack ou spamenmoins) qui demande une validation manuelle de l\'expéditeur. Merci de choisir une autre adresse e-mail.');
 		}
 	}
 
