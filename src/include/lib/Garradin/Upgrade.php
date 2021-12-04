@@ -180,11 +180,16 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.2.0', '<')) {
+				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
+				$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
+				$sql = $df->getSQLSchema();
+
 				$db->begin();
+				$db->exec($sql);
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
 				$db->commit();
 
-				$db->exec('DELETE FROM config WHERE key = \'champs_membres\';');
+				$db->exec('DELETE FROM config WHERE key IN (\'champs_membres\', \'champ_identite\', \'champ_identifiant\');');
 			}
 
 			// Vérification de la cohérence des clés étrangères

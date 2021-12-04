@@ -9,11 +9,13 @@ use Garradin\Utils;
 use Garradin\Entities\Users\DynamicField;
 use Garradin\Entities\Users\User;
 
+use const Garradin\ROOT;
+
 class DynamicFields
 {
 	const PRESETS_FILE = ROOT . '/include/data/users_fields_presets.ini';
 
-	const TABLE = DynamicFields::TABLE;
+	const TABLE = DynamicField::TABLE;
 
 	protected $_fields;
 	protected $_fields_by_type;
@@ -94,15 +96,17 @@ class DynamicFields
 		$this->createIndexes();
 	}
 
-	protected function __construct()
+	protected function __construct(bool $load = true)
 	{
-		$this->reload();
+		if ($load) {
+			$this->reload();
+		}
 	}
 
 	protected function reload()
 	{
 		$db = DB::getInstance();
-		$this->_fields = $db->getGrouped('SELECT key, * FROM config_users_fields ORDER BY sort_order;');
+		$this->_fields = $db->getGrouped(sprintf('SELECT name, * FROM %s ORDER BY sort_order;', self::TABLE));
 		$this->reloadCache();
 	}
 
@@ -157,7 +161,7 @@ class DynamicFields
 		{
 			$this->_presets = parse_ini_file(self::PRESETS_FILE, true);
 
-			foreach ($this->_presets as $preset) {
+			foreach ($this->_presets as &$preset) {
 				$preset = (object) $preset;
 			}
 
@@ -174,7 +178,63 @@ class DynamicFields
 
 	public function getInstallPresets()
 	{
-		return array_filter($this->getPresets(), function ($row) { return !$row->install; });
+		return array_filter($this->getPresets(), fn ($row) => !$row->install );
+	}
+
+	/**
+	 * Import from old INI config
+	 */
+	static public function fromOldINI(string $config, string $login_field, string $name_field, string $number_field)
+	{
+		$config = parse_ini_string($config, true);
+
+		$i = 0;
+
+		$self = new self(false);
+
+		$defaults = [
+			'help'      => null,
+			'private'   => false,
+			'editable'  => true,
+			'mandatory' => false,
+			'list_row'  => null,
+		];
+
+		foreach ($config as $name => $data) {
+			$field = new DynamicField;
+
+			if ($name == 'passe') {
+				$name = 'password';
+				$data['title'] = 'Mot de passe';
+				$field->system = 'password';
+			}
+			elseif ($name == $login_field) {
+				$field->system = 'login';
+			}
+			elseif ($name == $name_field) {
+				$field->system = 'name';
+			}
+			elseif ($name == $number_field) {
+				$field->system = 'number';
+			}
+
+			$data = array_merge($defaults, $data);
+
+			$field->set('name', $name);
+			$field->set('label', $data['title']);
+			$field->set('type', $data['type']);
+			$field->set('help', empty($data['help']) ? null : $data['help']);
+			$field->set('read_access', $data['private'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
+			$field->set('write_access', $data['editable'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
+			$field->set('required', (bool) $data['mandatory']);
+			$field->set('list_row', isset($data['list_row']) ? (int)$data['list_row'] : null);
+			$field->set('sort_order', $i++);
+			$self->_fields[$name] = $field;
+		}
+
+		self::$_instance = $self;
+
+		return $self;
 	}
 
 	public function isText(string $field)
@@ -274,7 +334,7 @@ class DynamicFields
 
 		foreach ($this->_fields as $key=>$cfg)
 		{
-			$type = DynamicField::SQL_TYPES[$field->type];
+			$type = DynamicField::SQL_TYPES[$cfg->type];
 
 			if ($type == 'TEXT') {
 				$type = 'TEXT COLLATE NOCASE';

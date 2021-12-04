@@ -1,6 +1,6 @@
 <?php
 
-namespace Garradin\Users;
+namespace Garradin\Entities\Users;
 
 use Garradin\Config;
 use Garradin\DB;
@@ -12,39 +12,59 @@ class DynamicField extends Entity
 {
 	const TABLE = 'config_users_fields';
 
-	protected $name;
+	protected int $id;
+	protected string $name;
 
 	/**
 	 * Order of field in form
 	 * @var int
 	 */
-	protected $sort_order;
+	protected int $sort_order;
 
+	protected string $type;
+	protected string $label;
+	protected ?string $help;
 
-	protected $type;
-	protected $label;
-	protected $help;
-	protected $mandatory;
-	protected $private;
-	protected $user_editable;
-	protected $list_row;
-	protected $options;
-	protected $system;
+	/**
+	 * TRUE if the field is required
+	 */
+	protected bool $required;
 
-	protected $_types = [
-		'name'          => 'string',
-		'sort_order'    => 'int',
-		'type'          => 'string',
-		'label'         => 'string',
-		'help'          => '?string',
-		'mandatory'     => 'bool',
-		'private'       => 'bool',
-		'user_editable' => 'bool',
-		'list_row'      => '?int',
-		'options'       => '?string',
-		'system'        => '?string',
-	];
+	/**
+	 * 0 = only admins can read this field (private)
+	 * 1 = admins + the user themselves can read it
+	 */
+	protected int $read_access;
 
+	/**
+	 * 0 = only admins can write this field
+	 * 1 = admins + the user themselves can change it
+	 */
+	protected int $write_access;
+
+	/**
+	 * Index of row in users list
+	 */
+	protected ?int $list_row;
+
+	/**
+	 * Multiple options (JSON) for select and multiple fields
+	 */
+	protected ?string $options;
+
+	/**
+	 * Default value
+	 */
+	protected ?string $default_value;
+
+	/**
+	 * System use:
+	 * password, number, name, login
+	 */
+	protected ?string $system;
+
+	const ACCESS_ADMIN = 0;
+	const ACCESS_USER = 1;
 
 	const TYPES = [
 		'email'		=>	'Adresse E-Mail',
@@ -124,6 +144,9 @@ class DynamicField extends Entity
 	public function selfCheck(): void
 	{
 		$this->name = strtolower($this->name);
+
+		$this->assert($this->read_access == self::ACCESS_ADMIN || $this->read_access == self::ACCESS_USER);
+		$this->assert($this->write_access == self::ACCESS_ADMIN || $this->write_access == self::ACCESS_USER);
 
 		$this->assert(!array_key_exists($this->name, self::SYSTEM_FIELDS), 'Ce nom de champ est déjà utilisé par un champ système, merci d\'en choisir un autre.');
 		$this->assert(preg_match('!^[a-z][a-z0-9]*(_[a-z0-9]+)*$!', $this->name), 'Le nom du champ est invalide : ne sont acceptés que les lettres minuscules et les chiffres (éventuellement séparés par un underscore).');
