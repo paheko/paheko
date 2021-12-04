@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if}>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if} data-version="{$version_hash}">
 <head>
     <meta charset="utf-8" />
+    <meta name="v" content="{$version_hash}" />
     <title>{$title}</title>
     <link rel="icon" type="image/png" href="{$www_url}favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
