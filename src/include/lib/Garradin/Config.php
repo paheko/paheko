@@ -161,6 +161,11 @@ class Config extends Entity
 
 		$db->commit();
 
+		if (isset($values['couleur1']) || isset($values['couleur2'])) {
+			// Reset graph cache
+			Static_Cache::clean(0);
+		}
+
 		$this->_modified = [];
 
 		return true;
