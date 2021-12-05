@@ -12,14 +12,14 @@ $manifest = [
 	'start_url'        => ADMIN_URL,
 	'icons'            => [
 		[
-			'sizes' => '16x16',
+			'sizes' => '32x32',
 			'src'   => WWW_URL . 'favicon.png',
 			'type'  => 'image/png',
 			'purpose' => 'any maskable',
 		],
 		[
 			'sizes' => '256x256',
-			'src'   => WWW_URL . 'logo.png',
+			'src'   => WWW_URL . 'logo.png?crop-256px',
 			'type'  => 'image/png',
 			'purpose' => 'any maskable',
 		],

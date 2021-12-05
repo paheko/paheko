@@ -35,6 +35,14 @@
 		return new_color;
 	}
 
+	function checkContrast(color1, color2)
+	{
+		let l1 = 0.2126 * color1[0] + 0.7152 * color1[1] + 0.0722 * color1[2];
+		let l2 = 0.2126 * color2[0] + 0.7152 * color2[1] + 0.0722 * color2[2];
+		let ratio = (l1 + 0.05) / (l2 + 0.05);
+		return ratio;
+	}
+
 	function applyColors()
 	{
 		let input = $('#f_couleur2');

@@ -50,6 +50,10 @@ nav.breadcrumbs ul {
 	display: block;
 }
 
+.header .menu .logo {
+	display: none;
+}
+
 .header .menu *, .header .menu a {
 	margin: 0;
 	padding: 0;

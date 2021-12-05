@@ -17,7 +17,7 @@ use Garradin\Membres\Session;
 
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\{WWW_URI, ADMIN_URL, FILE_STORAGE_BACKEND};
+use const Garradin\{WWW_URI, ADMIN_URL, FILE_STORAGE_BACKEND, ROOT};
 
 class Web
 {
@@ -186,21 +186,27 @@ class Web
 			API::dispatchURI(substr($uri, 4));
 			exit;
 		}
+		elseif ($uri == 'favicon.ico' || $uri == 'favicon.png' || $uri == 'logo.png') {
+			$key = $uri == 'logo.png' ? 'logo' : 'favicon';
+
+			if ($f = Config::getInstance()->file($key)) {
+				$f->serve();
+				return;
+			}
+			else {
+				header('Content-Type: image/png');
+				readfile(ROOT . '/www/admin/static/' . $key . '.png');
+				return;
+			}
+		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
 		}
 		elseif (($file = Files::getFromURI($uri))
 			|| ($file = self::getAttachmentFromURI($uri))) {
-			$size = null;
 
-			foreach ($_GET as $key => $value) {
-				if (substr($key, -2) == 'px') {
-					$size = (int)substr($key, 0, -2);
-					break;
-				}
-			}
-
+			$size = $file->image && count($_GET) ? key($_GET) : null;
 			$session = Session::getInstance();
 
 			if (Plugin::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
@@ -208,7 +214,7 @@ class Web
 				return;
 			}
 
-			if ($size) {
+			if ($size && isset($file::ALLOWED_THUMB_SIZES[$size])) {
 				$file->serveThumbnail($session, $size);
 			}
 			else {

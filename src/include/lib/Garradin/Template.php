@@ -578,7 +578,7 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if (($f = $config->get('admin_background')) && ($file = Files::get($f))) {
+		if ($file = $config->file('admin_background')) {
 			$admin_background = $file->url() . '?' . $file->modified->getTimestamp();
 		}
 
@@ -595,7 +595,7 @@ class Template extends \KD2\Smartyer
 		}
 		</style>';
 
-		if (($f = $config->get('admin_css')) && ($file = Files::get($f))) {
+		if ($file = $config->file('admin_css')) {
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $file->url() . '?' . $file->modified->getTimestamp());
 		}
 
