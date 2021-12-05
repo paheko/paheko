@@ -1,0 +1,38 @@
+<?php
+namespace Garradin;
+
+use Garradin\Users\Categories;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
+
+require_once __DIR__ . '/_inc.php';
+
+$config = Config::getInstance();
+
+$form->runIf('save', function () use ($config) {
+	$config->importForm();
+
+	if (f('admin_background') == 'RESET') {
+		$config->setFile('admin_background', null);
+	}
+	elseif (f('admin_background')) {
+		$config->setFile('admin_background', base64_decode(f('admin_background')));
+	}
+
+	$config->save();
+}, 'config_custom', Utils::getSelfURI(['ok' => '']));
+
+$files = $config->allFiles();
+
+$tpl->assign([
+	'color1'           => ADMIN_COLOR1,
+	'color2'           => ADMIN_COLOR2,
+	'garradin_website' => WEBSITE,
+	'files'            => $files,
+]);
+
+$tpl->assign('background_image_current', $files['admin_background'] ? $files['admin_background']->url() : null);
+$tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
+
+$tpl->assign('custom_js', ['color_helper.js']);
+$tpl->display('admin/config/custom.tpl');

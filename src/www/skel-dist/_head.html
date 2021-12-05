@@ -3,7 +3,6 @@
 <head>
 	<meta charset="utf-8" />
 	<title>{{if $title}}{{$title}} — {{/if}}{{$config.nom_asso}}</title>
-	<link rel="icon" type="image/png" href="{{$root_url}}favicon.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
 	<link rel="stylesheet" type="text/css" href="{{$root_url}}default.css" media="screen,projection,handheld" />
 	<link rel="stylesheet" type="text/css" href="{{$root_url}}content.css" media="all" />
@@ -22,7 +21,7 @@
 </header>
 
 <header class="main">
-	<h1><a href="{{$root_url}}">{{$config.nom_asso}}</a></h1>
+	<h1><a href="{{$root_url}}">{{if $config.files.logo}}<img src="{{$config.files.logo}}?150px" alt="" class="logo" />{{/if}} {{$config.nom_asso}}</a></h1>
 
 {{if $config.adresse_asso || $config.telephone_asso || $config.email_asso}}
 	<article class="contacts">

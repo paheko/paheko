@@ -16,10 +16,6 @@ if ('_route.php' === basename($uri)) {
 
 http_response_code(200);
 
-if ('favicon.ico' === basename($uri)) {
-	die('');
-}
-
 if (($pos = strpos($uri, '?')) !== false)
 {
 	$uri = substr($uri, 0, $pos);
