@@ -276,7 +276,9 @@ class Config extends Entity
 			return null;
 		}
 
-		return WWW_URL . self::FILES[$key] . '?' . $params . '&' . $this->files[$key];
+		$params = $params ? $params . '&' : '';
+
+		return WWW_URL . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
 	}
 
 
