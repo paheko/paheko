@@ -55,10 +55,15 @@ class UserTemplate extends Brindille
 
 		$config = Config::getInstance();
 
-		$config = array_intersect_key($config->asArray(), array_flip($keys));
+		$files = $config::FILES;
 
 		// Put URL in files array
-		array_walk($config['files'], fn (&$v, $k) => $v = $v ? WWW_URL . Config::FILES[$k]: null);
+		array_walk($files, function (&$v, $k) use ($config) {
+			$v = $config->fileURL($k);
+		});
+
+		$config = array_intersect_key($config->asArray(), array_flip($keys));
+		$config['files'] = $files;
 
 		self::$root_variables = [
 			'root_url'     => WWW_URL,

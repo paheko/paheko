@@ -75,8 +75,8 @@ class File extends Entity
 
 	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
 
-	const THUMB_SIZE_TINY = 200;
-	const THUMB_SIZE_SMALL = 500;
+	const THUMB_SIZE_TINY = '200px';
+	const THUMB_SIZE_SMALL = '500px';
 
 	const CONTEXT_DOCUMENTS = 'documents';
 	const CONTEXT_USER = 'user';
@@ -606,8 +606,12 @@ class File extends Entity
 		return $url;
 	}
 
-	public function thumb_url(?int $size = null): string
+	public function thumb_url($size = null): string
 	{
+		if (is_int($size)) {
+			$size .= 'px';
+		}
+
 		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
 		return sprintf('%s?%dpx', $this->url(), $size);
 	}

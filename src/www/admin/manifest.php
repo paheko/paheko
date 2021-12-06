@@ -13,13 +13,13 @@ $manifest = [
 	'icons'            => [
 		[
 			'sizes' => '32x32',
-			'src'   => WWW_URL . 'favicon.png',
+			'src'   => $config->fileURL('favicon'),
 			'type'  => 'image/png',
 			'purpose' => 'any maskable',
 		],
 		[
 			'sizes' => '256x256',
-			'src'   => WWW_URL . 'logo.png?crop-256px',
+			'src'   => $config->fileURL('icon'),
 			'type'  => 'image/png',
 			'purpose' => 'any maskable',
 		],

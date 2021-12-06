@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Personnalisation" current="config"}
+{include file="admin/_head.tpl" title="Personnalisation" current="config" custom_css=['config.css']}
 
 {include file="admin/config/_menu.tpl" current="custom"}
 
@@ -14,9 +14,9 @@
 	<legend>Association et site web</legend>
 	<dl>
 		<dt>Logo</dt>
-		{if $files.logo}
+		{if $url = $config->fileURL('logo', '150px')}
 		<dd>
-			<img src="{$files.logo->thumb_url()}" alt="" />
+			<img src="{$url}" alt="" />
 		</dd>
 		{/if}
 		<dd>
@@ -25,17 +25,33 @@
 		<dd class="help">
 			Ce logo sera affiché en haut du menu de l'administration, sur le site web, et comme icône sur l'écran d'accueil des téléphones portables.
 		</dd>
-		<dt>Icône de favori (favicon)</dt>
-		{if $files.favicon}
+		<dt>Petite icône</dt>
+		{if $url = $config->fileURL('favicon')}
 		<dd>
-			<img src="{$files.favicon->url()}" alt="" />
+			<img src="{$url}" alt="" />
 		</dd>
 		{/if}
 		<dd>
 			{linkbutton href="!config/edit_file.php?k=%s"|args:'favicon' label="Modifier" shape="edit" target="_dialog"}
 		</dd>
 		<dd class="help">
-			Cette image sera affichée dans l'onglet du navigateur.
+			Cette image sera affichée dans l'onglet du navigateur (favicon).
+		</dd>
+		<dt>Grande icône</dt>
+		{if $url = $config->fileURL('icon', '150px')}
+		<dd>
+			<img src="{$url}" alt="" />
+			<figure class="masked-icon">
+				<span class="icon"><img src="{$url}" alt="" /></span>
+				<figcaption>{$config.nom_asso|truncate:30}</figcaption>
+			</figure>
+		</dd>
+		{/if}
+		<dd>
+			{linkbutton href="!config/edit_file.php?k=%s"|args:'icon' label="Modifier" shape="edit" target="_dialog"}
+		</dd>
+		<dd class="help">
+			Cette image sera utilisée comme icône de l'application mobile (à installer depuis {link href="!" label="la page d'accueil"} et le bouton «&nbsp;Installer comme application sur l'écran d'accueil&nbsp;»).
 		</dd>
 	</dl>
 </fieldset>
