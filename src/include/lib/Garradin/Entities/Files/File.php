@@ -242,7 +242,7 @@ class File extends Entity
 	 */
 	public function copy(string $target): self
 	{
-		return self::createAndStore(Utils::dirname($target), Utils::basename($target), Files::callStorage('getFullPath', $this));
+		return self::createAndStore(Utils::dirname($target), Utils::basename($target), Files::callStorage('getFullPath', $this), null);
 	}
 
 	public function setContent(string $content): self
