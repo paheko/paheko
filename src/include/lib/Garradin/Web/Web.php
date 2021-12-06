@@ -196,8 +196,17 @@ class Web
 		}
 		elseif (($file = Files::getFromURI($uri))
 			|| ($file = self::getAttachmentFromURI($uri))) {
+			$size = null;
 
-			$size = $file->image && count($_GET) ? key($_GET) : null;
+			if ($file->image) {
+				foreach ($_GET as $key => $v) {
+					if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
+						$size = $key;
+						break;
+					}
+				}
+			}
+
 			$session = Session::getInstance();
 
 			if (Plugin::fireSignal('http.request.file.before', compact('file', 'uri', 'session'))) {
@@ -205,7 +214,7 @@ class Web
 				return;
 			}
 
-			if ($size && isset($file::ALLOWED_THUMB_SIZES[$size])) {
+			if ($size) {
 				$file->serveThumbnail($session, $size);
 			}
 			else {
