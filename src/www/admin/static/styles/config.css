@@ -106,6 +106,10 @@
     vertical-align: middle;
 }
 
+.image-preview img {
+    max-width: 150px;
+}
+
 .masked-icon {
     background: linear-gradient(rgba(var(--gMainColor), 0.9), rgba(0, 0, 0, 0.5));
     border-radius: .5em;
