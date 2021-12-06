@@ -102,12 +102,8 @@
     text-decoration: underline;
 }
 
-.masked-icon img {
-    clip-path: circle(40px at center);
-    background: #fff;
-    width: 100px;
-    height: 100px;
-    box-shadow: 1px 10px 5px #000;
+.image-preview img, .image-preview figure {
+    vertical-align: middle;
 }
 
 .masked-icon {
@@ -129,3 +125,13 @@
     font-size: .9em;
     font-family: "Droid Sans", sans-serif;
 }
+
+.masked-icon img {
+    clip-path: circle(40px at center);
+    background: #fff;
+    width: 100px;
+    height: 100px;
+    box-shadow: 1px 10px 5px #000;
+    display: block;
+}
+

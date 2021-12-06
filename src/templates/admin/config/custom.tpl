@@ -39,7 +39,7 @@
 		</dd>
 		<dt>Grande icône</dt>
 		{if $url = $config->fileURL('icon', '150px')}
-		<dd>
+		<dd class="image-preview">
 			<img src="{$url}" alt="" />
 			<figure class="masked-icon">
 				<span class="icon"><img src="{$url}" alt="" /></span>
