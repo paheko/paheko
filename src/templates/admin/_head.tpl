@@ -29,6 +29,7 @@
     {/if}
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?{$version_hash}" media="print" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
+    <link rel="icon" type="image/png" href="{$config->fileURL('favicon')}" />
     {if !empty($current) && $current == 'home'}
     <link rel="manifest" href="{$admin_url}manifest.php?{$version_hash}" />
     {/if}
@@ -43,8 +44,8 @@
 <header class="header">
     <nav class="menu">
         <figure class="logo">
-        {if $config.files.logo}
-            <a href="{$admin_url}"><img src="{$www_url}config/logo.png?150px" alt="" /></a>
+        {if $url = $config->fileURL('logo', '150px')}
+            <a href="{$admin_url}"><img src="{$url}" alt="" /></a>
         {/if}
         </figure>
     <ul>

@@ -186,18 +186,9 @@ class Web
 			API::dispatchURI(substr($uri, 4));
 			exit;
 		}
-		elseif ($uri == 'favicon.ico' || $uri == 'favicon.png' || $uri == 'logo.png') {
-			$key = $uri == 'logo.png' ? 'logo' : 'favicon';
-
-			if ($f = Config::getInstance()->file($key)) {
-				$f->serve();
-				return;
-			}
-			else {
-				header('Content-Type: image/png');
-				readfile(ROOT . '/www/admin/static/' . $key . '.png');
-				return;
-			}
+		elseif ($uri == 'favicon.ico') {
+			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
+			return;
 		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);

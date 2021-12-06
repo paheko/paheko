@@ -347,7 +347,7 @@ class Upgrade
 
 				foreach ($files as $key => &$set) {
 					$f = Files::get($set);
-					$set = $f !== null ? true : false;
+					$set = $f !== null ? $f->modified->getTimestamp() : null;
 				}
 
 				unset($set);
@@ -355,12 +355,12 @@ class Upgrade
 				// Migrate files
 				if ($f = Files::get(File::CONTEXT_SKELETON . '/favicon.png')) {
 					$f->copy(Config::FILES['favicon']);
-					$files['favicon'] = true;
+					$files['favicon'] = $f->modified->getTimestamp();
 				}
 
 				if ($f = Files::get(File::CONTEXT_SKELETON . '/logo.png')) {
-					$f->copy(Config::FILES['logo']);
-					$files['logo'] = true;
+					$f->copy(Config::FILES['icon']);
+					$files['icon'] = $f->modified->getTimestamp();
 				}
 
 				$db->begin();

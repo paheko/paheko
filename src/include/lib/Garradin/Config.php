@@ -16,6 +16,7 @@ class Config extends Entity
 		'admin_homepage'   => File::CONTEXT_CONFIG . '/admin_homepage.skriv',
 		'admin_css'        => File::CONTEXT_CONFIG . '/admin.css',
 		'logo'             => File::CONTEXT_CONFIG . '/logo.png',
+		'icon'             => File::CONTEXT_CONFIG . '/icon.png',
 		'favicon'          => File::CONTEXT_CONFIG . '/favicon.ico',
 	];
 
@@ -24,6 +25,7 @@ class Config extends Entity
 		'admin_css'        => 'code',
 		'admin_homepage'   => 'web',
 		'logo'             => 'image',
+		'icon'             => 'image',
 		'favicon'          => 'image',
 	];
 
@@ -226,7 +228,7 @@ class Config extends Entity
 
 		foreach ($this->files as $key => $value) {
 			$this->assert(array_key_exists($key, self::FILES));
-			$this->assert(is_bool($value));
+			$this->assert(is_int($value) || is_null($value));
 		}
 
 		$champs = $this->champs_membres;
@@ -260,20 +262,27 @@ class Config extends Entity
 		return Files::get(self::FILES[$key]);
 	}
 
-	public function allFiles(): array
+	public function fileURL(string $key, string $params = ''): ?string
 	{
-		$files = self::FILES;
+		if (empty($this->files[$key])) {
 
-		foreach ($files as $k => &$v) {
-			$v = $this->file($k);
+			if ($key == 'favicon') {
+				return ADMIN_URL . 'static/favicon.png';
+			}
+			elseif ($key == 'icon') {
+				return ADMIN_URL . 'static/icon.png';
+			}
+
+			return null;
 		}
 
-		return $files;
+		return WWW_URL . self::FILES[$key] . '?' . $params . '&' . $this->files[$key];
 	}
+
 
 	public function hasFile(string $key): bool
 	{
-		return $this->files[$key];
+		return $this->files[$key] ? true : false;
 	}
 
 	public function setFile(string $key, ?string $value, bool $upload = false): ?File
@@ -306,6 +315,13 @@ class Config extends Entity
 				$i->cropResize(32, 32);
 				$f->setContent($i->output($format, true));
 			}
+			// Force icon format
+			else if ($key == 'favicon') {
+				$format = 'png';
+				$i = new Image($f->fullpath());
+				$i->cropResize(512, 512);
+				$f->setContent($i->output($format, true));
+			}
 		}
 		elseif ($f) {
 			$f->setContent($value);
@@ -314,7 +330,7 @@ class Config extends Entity
 			$f = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $value);
 		}
 
-		$files[$key] = $f ? true : false;
+		$files[$key] = $f ? $f->modified->getTimestamp() : null;
 		$this->set('files', $files);
 
 		return $f;

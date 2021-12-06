@@ -22,16 +22,12 @@ $form->runIf('save', function () use ($config) {
 	$config->save();
 }, 'config_custom', Utils::getSelfURI(['ok' => '']));
 
-$files = $config->allFiles();
-
 $tpl->assign([
 	'color1'           => ADMIN_COLOR1,
 	'color2'           => ADMIN_COLOR2,
-	'garradin_website' => WEBSITE,
-	'files'            => $files,
 ]);
 
-$tpl->assign('background_image_current', $files['admin_background'] ? $files['admin_background']->url() : null);
+$tpl->assign('background_image_current', $config->fileURL('admin_background'));
 $tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
 
 $tpl->assign('custom_js', ['color_helper.js']);

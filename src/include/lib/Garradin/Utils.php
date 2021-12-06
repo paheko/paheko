@@ -872,7 +872,10 @@ class Utils
         }
 
         header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-        header(sprintf('Etag: %s', $hash));
+
+        if ($etag) {
+            header(sprintf('Etag: %s', $hash));
+        }
 
         header('Cache-Control: private');
 
