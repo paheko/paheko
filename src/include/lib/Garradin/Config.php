@@ -17,7 +17,7 @@ class Config extends Entity
 		'admin_css'        => File::CONTEXT_CONFIG . '/admin.css',
 		'logo'             => File::CONTEXT_CONFIG . '/logo.png',
 		'icon'             => File::CONTEXT_CONFIG . '/icon.png',
-		'favicon'          => File::CONTEXT_CONFIG . '/favicon.ico',
+		'favicon'          => File::CONTEXT_CONFIG . '/favicon.png',
 	];
 
 	const FILES_TYPES = [
