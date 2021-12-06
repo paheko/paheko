@@ -23,7 +23,7 @@
 			{linkbutton href="!config/edit_file.php?k=%s"|args:'logo' label="Modifier" shape="edit" target="_dialog"}
 		</dd>
 		<dd class="help">
-			Ce logo sera affiché en haut du menu de l'administration, sur le site web, et comme icône sur l'écran d'accueil des téléphones portables.
+			Ce logo sera affiché en haut du menu de l'administration, sur le site web et sur les documents imprimés.
 		</dd>
 		<dt>Petite icône</dt>
 		{if $url = $config->fileURL('favicon')}
@@ -41,9 +41,9 @@
 		{if $url = $config->fileURL('icon', '150px')}
 		<dd class="image-preview">
 			<img src="{$url}" alt="" />
-			<figure class="masked-icon">
+			<figure class="masked-icon" title="Aperçu de l'icône sur téléphone">
 				<span class="icon"><img src="{$url}" alt="" /></span>
-				<figcaption>{$config.nom_asso|truncate:30}</figcaption>
+				<figcaption>{$config.nom_asso|truncate:12:'…':true}</figcaption>
 			</figure>
 		</dd>
 		{/if}
