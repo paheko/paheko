@@ -29,7 +29,7 @@ $manifest = [
 
 $body = json_encode($manifest, JSON_PRETTY_PRINT);
 
-Utils::HTTPCache(md5($body), max($config->files['icon'], $config->files['favicon']));
+Utils::HTTPCache(md5($body), max($config->files['icon'], $config->files['favicon'], strtotime('2011-11-11')));
 
 header('Content-Type: text/json; charset=utf-8');
 echo $body;
