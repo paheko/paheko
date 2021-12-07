@@ -841,7 +841,7 @@ class Utils
         $d = $max - $min;
         //$s = ($max == 0) ? 0 : $d / $max;
         $l = ($max + $min) / 2;
-        $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
+        $s = $l > 0.5 ? $d / ((2 - $max - $min) ?: 1) : $d / (($max + $min) ?: 1);
 
         if($max == $min)
         {
