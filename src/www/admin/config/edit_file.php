@@ -14,12 +14,7 @@ if (!isset(Config::FILES[$key])) {
 	throw new UserException('Fichier invalide');
 }
 
-$content = '';
 $file = $config->file($key);
-
-if ($file) {
-	$content = $file->fetch();
-}
 
 $type = Config::FILES_TYPES[$key];
 $csrf_key = 'edit_file_' . $key;
@@ -45,13 +40,15 @@ $form->runIf('save', function () use ($key, $config) {
 
 }, $csrf_key, Utils::getSelfURI());
 
-$tpl->assign('file', $file);
-
-$tpl->assign(compact('csrf_key', 'content'));
+$tpl->assign(compact('csrf_key', 'file'));
 
 if ($type == 'image') {
 	$tpl->display('admin/config/edit_image.tpl');
 }
 else {
+	$content = $file ? $file->fetch() : '';
+	$path = Config::FILES[$key];
+	$format = $file ? $file->renderFormat() : 'skriv';
+	$tpl->assign(compact('content', 'path', 'format'));
 	$tpl->display(sprintf('common/files/edit_%s.tpl', $type));
 }
