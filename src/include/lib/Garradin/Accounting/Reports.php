@@ -283,7 +283,7 @@ class Reports
 				}
 				else {
 					$out[$row->code]->sum2 = $row->sum;
-					$out[$row->code]->change = ($row->sum - $out[$row->code]->sum) * ($reverse ? -1 : 1);
+					$out[$row->code]->change = ($out[$row->code]->sum - $row->sum);
 				}
 			}
 		}
@@ -304,6 +304,8 @@ class Reports
 		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::ASSET_OR_LIABILITY]];
 		$list = self::getClosingSumsWithAccounts($criterias + $position_criteria);
 
+		//var_dump($list); exit;
+
 		foreach ($list as $row) {
 			if ($row->sum == 0) {
 				// Ignore empty accounts
@@ -315,12 +317,13 @@ class Reports
 			if ($position == Account::ASSET_OR_LIABILITY) {
 				$position = $row->sum < 0 ? 'asset' : 'liability';
 				$row->sum = abs($row->sum);
-				$row->sum2 = abs($row->sum2 ?? 0);
+				$row->sum2 = isset($row->sum2) ? abs($row->sum2) : 0;
+				$row->change = isset($row->change) ? $row->change * -1 : 0;
 			}
 			elseif ($position == Account::ASSET) {
 				// reverse number for assets
 				$row->sum *= -1;
-				$row->sum2 *= -1;
+				$row->sum2 = isset($row->sum2) ? $row->sum2 * -1 : 0;
 				$position = 'asset';
 			}
 			else {
