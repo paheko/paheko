@@ -27,7 +27,7 @@
 			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short})</p>
 	{/if}
 
-	{if !empty($allow_compare)}
+	{if !empty($allow_compare) && !empty($other_years)}
 	<form method="get" action="" class="noprint">
 		<fieldset>
 			<legend>Comparer avec un autre exercice</legend>
