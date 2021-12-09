@@ -554,7 +554,7 @@ class Reports
 			$expense_sum2 = $get_sum($expense, 'sum2');
 			$expense_change = $expense_sum - $expense_sum2;
 			$result2 = $revenue_sum2 - $expense_sum2;
-			$result_change = $result2 - $result;
+			$result_change = $result < 0 ? $result2 - $result : $result - $result2;
 		}
 
 		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result',
