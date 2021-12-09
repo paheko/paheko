@@ -41,6 +41,10 @@ table.list tfoot {
     border-top: double .3rem #000;
 }
 
+table.statement tfoot tr {
+    color: #000;
+}
+
 table.list tfoot tr td, table.list tfoot th {
     background: #fff;
     color: #000;

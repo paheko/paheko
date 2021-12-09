@@ -253,8 +253,7 @@ class Reports
 		$reverse = $reverse ? '* -1' : '';
 		$remove_zero = $remove_zero ? 'HAVING sum != 0' : '';
 
-		// Find sums, link them to accounts
-		$sql = sprintf('SELECT a.id, a.code, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+		$query = 'SELECT a.code, a.id, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
 			SUM(l.credit - l.debit) %s AS sum
 			FROM %s l
 			INNER JOIN %s t ON t.id = l.id_transaction
@@ -262,9 +261,34 @@ class Reports
 			WHERE %s
 			GROUP BY l.id_account
 			%s
-			ORDER BY %s;',
-			$reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
-		return DB::getInstance()->getGrouped($sql);
+			ORDER BY %s';
+
+		// Find sums, link them to accounts
+		$sql = sprintf($query, $reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
+
+		$db = DB::getInstance();
+		$out = $db->getGrouped($sql);
+
+		// SQLite does not support OUTER JOIN yet :(
+		if (isset($criterias['compare_year'])) {
+			$where = self::getWhereClause(array_merge($criterias, ['year' => (int)$criterias['compare_year']]));
+			$sql = sprintf($query, $reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
+
+			foreach ($db->iterate($sql) as $row) {
+				if (!isset($out[$row->code])) {
+					$row->sum2 = $row->sum;
+					$row->sum = 0;
+					$row->change = null;
+					$out[$row->code] = $row;
+				}
+				else {
+					$out[$row->code]->sum2 = $row->sum;
+					$out[$row->code]->change = ($row->sum - $out[$row->code]->sum) * ($reverse ? -1 : 1);
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	static public function getTrialBalance(array $criterias): array
@@ -274,14 +298,8 @@ class Reports
 
 	static public function getBalanceSheet(array $criterias): array
 	{
-		$out = [
-			Account::ASSET => [],
-			Account::LIABILITY => [],
-			'sums' => [
-				Account::ASSET => 0,
-				Account::LIABILITY => 0,
-			],
-		];
+		$accounts = ['asset' => [], 'liability' => []];
+		$sums = $sums2 = $change = ['asset' => 0, 'liability' => 0];
 
 		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::ASSET_OR_LIABILITY]];
 		$list = self::getClosingSumsWithAccounts($criterias + $position_criteria);
@@ -295,21 +313,27 @@ class Reports
 			$position = $row->position;
 
 			if ($position == Account::ASSET_OR_LIABILITY) {
-				$position = $row->sum < 0 ? Account::ASSET : Account::LIABILITY;
+				$position = $row->sum < 0 ? 'asset' : 'liability';
 				$row->sum = abs($row->sum);
+				$row->sum2 = abs($row->sum2 ?? 0);
 			}
 			elseif ($position == Account::ASSET) {
 				// reverse number for assets
 				$row->sum *= -1;
+				$row->sum2 *= -1;
+				$position = 'asset';
+			}
+			else {
+				$position = 'liability';
 			}
 
-			$out[$position][] = $row;
+			$accounts[$position][] = $row;
 		}
 
 		$result = self::getResult($criterias);
 
 		if ($result != 0) {
-			$out[Account::LIABILITY][] = (object) [
+			$accounts['liability'][] = (object) [
 				'id' => null,
 				'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
 				'sum' => $result,
@@ -317,20 +341,20 @@ class Reports
 		}
 
 		// Calculate the total sum for assets and liabilities
-		foreach ($out as $position => $rows) {
-			if ($position == 'sums') {
-				continue;
-			}
-
+		foreach ($accounts as $position => $rows) {
 			$sum = 0;
+			$sum2 = 0;
 			foreach ($rows as $row) {
 				$sum += $row->sum;
+				$sum2 += $row->sum2 ?? 0;
 			}
 
-			$out['sums'][$position] = $sum;
+			$sums[$position] = $sum;
+			$sums2[$position] = $sum2;
+			$change[$position] = $sum - $sum2;
 		}
 
-		return $out;
+		return compact('sums', 'sums2', 'change', 'accounts');
 	}
 
 	/**
@@ -505,11 +529,11 @@ class Reports
 		$revenue = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::REVENUE]);
 		$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE], null, true);
 
-		$get_sum = function (array $in): int {
+		$get_sum = function (array $in, string $key = 'sum'): int {
 			$sum = 0;
 
 			foreach ($in as $row) {
-				$sum += $row->sum;
+				$sum += $row->$key ?? 0;
 			}
 
 			return $sum;
@@ -519,6 +543,18 @@ class Reports
 		$expense_sum = $get_sum($expense);
 		$result = $revenue_sum - $expense_sum;
 
-		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result');
+		$revenue_sum2 = $expense_sum2 = $result2 = $revenue_change = $expense_change = $result_change = null;
+
+		if (isset($criterias['compare_year'])) {
+			$revenue_sum2 = $get_sum($revenue, 'sum2');
+			$revenue_change = $revenue_sum - $revenue_sum2;
+			$expense_sum2 = $get_sum($expense, 'sum2');
+			$expense_change = $expense_sum - $expense_sum2;
+			$result2 = $revenue_sum2 - $expense_sum2;
+			$result_change = $result2 - $result;
+		}
+
+		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result',
+			'revenue_sum2', 'expense_sum2', 'result2', 'revenue_change', 'expense_change', 'result_change');
 	}
 }
