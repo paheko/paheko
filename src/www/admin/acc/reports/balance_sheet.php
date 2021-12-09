@@ -11,7 +11,8 @@ require_once __DIR__ . '/_inc.php';
 $tpl->assign('balance', Reports::getBalanceSheet($criterias));
 
 if (!empty($criterias['year'])) {
-	$tpl->assign('other_years', [null => '-- Ne pas comparer'] + Years::listClosedAssocExcept($criterias['year']));
+	$years = Years::listClosedAssocExcept($criterias['year']);
+	$tpl->assign('other_years', count($years) ? [null => '-- Ne pas comparer'] + $years : $years);
 }
 
 $tpl->display('acc/reports/balance_sheet.tpl');

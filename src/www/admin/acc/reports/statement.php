@@ -12,7 +12,8 @@ $tpl->assign('general', Reports::getStatement($criterias + ['exclude_type' => Ac
 $tpl->assign('volunteering', Reports::getStatement($criterias + ['type' => Account::TYPE_VOLUNTEERING]));
 
 if (!empty($criterias['year'])) {
-	$tpl->assign('other_years', [null => '-- Ne pas comparer'] + Years::listClosedAssocExcept($criterias['year']));
+	$years = Years::listClosedAssocExcept($criterias['year']);
+	$tpl->assign('other_years', count($years) ? [null => '-- Ne pas comparer'] + $years : $years);
 }
 
 $tpl->display('acc/reports/statement.tpl');
