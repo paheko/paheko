@@ -6,6 +6,7 @@ use KD2\DB\EntityManager;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\UserException;
+use Garradin\Utils;
 use Garradin\Accounting\Accounts;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
@@ -163,5 +164,12 @@ class Year extends Entity
 	public function accounts()
 	{
 		return new Accounts($this->id_chart);
+	}
+
+	public function label_years()
+	{
+		$start = Utils::date_fr($this->start_date, 'Y');
+		$end = Utils::date_fr($this->end_date, 'Y');
+		return $start == $end ? $start : sprintf('%s-%s', $start, substr($end, -2));
 	}
 }
