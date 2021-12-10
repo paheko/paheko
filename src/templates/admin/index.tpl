@@ -10,7 +10,7 @@
 </nav>
 
 <nav class="home-buttons">
-	{button id="homescreen-btn" label="Ajouter comme application à l'écran d'accueil" class="hidden" shape="plus"}
+	{button id="homescreen-btn" label="Installer comme application sur l'écran d'accueil" class="hidden" shape="plus"}
 </nav>
 
 <aside class="describe">

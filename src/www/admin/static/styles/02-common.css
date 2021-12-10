@@ -364,7 +364,6 @@ img.qrcode {
 }
 
 details {
-    margin-left: 4em;
     margin-bottom: 1em;
 }
 
@@ -374,7 +373,6 @@ details summary {
     transition: background-color .2s;
     position: relative;
     padding-left: 4em;
-    margin-left: -4em;
 }
 
 details summary:hover {
@@ -391,18 +389,24 @@ details summary::after {
     position: absolute;
     left: 0;
     top: 0;
+    bottom: 0;
     /* From .icn-btn */
+    cursor: pointer;
+    color: #003;
+    border: 1px solid rgba(var(--gMainColor), 0.5);
+    background-color: rgba(var(--gSecondColor), 0.1);
+    user-select: none;
     display: inline-block;
-    color: rgb(var(--gMainColor));
-    border: 1px solid rgba(var(--gSecondColor), 0.5);
-    background: #fff;
-    font-size: 1.5em;
+    font-size: inherit;
     border-radius: .2em;
     padding: .2em .4em;
-    margin: .2em .5em;
+    margin: auto .5em;
+    height: 1em;
+    white-space: pre;
     transition: color .3s, background-color .3s;
     font-family: "gicon", sans-serif;
     text-shadow: 1px 1px 1px #999;
+    font-size: 1.2em;
 }
 
 details[open] summary::after {

@@ -453,7 +453,7 @@ dialog.datepicker {
     font-family: gicon;
 }
 
-[data-icon]:before, summary::after, .main[data-icon]:after {
+[data-icon]:before, .main[data-icon]:after {
     display: inline-block;
     font-family: "gicon", sans-serif;
     text-shadow: 1px 1px 1px #ccc;

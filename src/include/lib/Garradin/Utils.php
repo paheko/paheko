@@ -839,7 +839,9 @@ class Utils
         $h = $s = $v = $max;
 
         $d = $max - $min;
-        $s = ($max == 0) ? 0 : $d / $max;
+        //$s = ($max == 0) ? 0 : $d / $max;
+        $l = ($max + $min) / 2;
+        $s = $l > 0.5 ? $d / ((2 - $max - $min) ?: 1) : $d / (($max + $min) ?: 1);
 
         if($max == $min)
         {
@@ -856,7 +858,7 @@ class Utils
             $h /= 6;
         }
 
-        return array($h * 360, $s, $v);
+        return array($h * 360, $s, $l);
     }
 
     static public function HTTPCache(?string $hash, int $last_change): bool

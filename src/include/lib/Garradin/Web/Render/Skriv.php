@@ -108,7 +108,7 @@ class Skriv extends AbstractRender
 		}
 
 		$url = $this->resolveAttachment($name);
-		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
+		$thumb_url = sprintf('%s?%s', $url, $align == 'center' ? '500px' : '200px');
 
 		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
 			htmlspecialchars($url),

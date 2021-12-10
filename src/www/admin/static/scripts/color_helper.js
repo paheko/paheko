@@ -26,13 +26,37 @@
 
 	function changeColor(element, color)
 	{
-		var new_color = colorToRGB(color, element).join(',');
+		let new_color = colorToRGB(color, element);
+
+		let text_color = element == 'gMainColor' ? [255, 255, 255] : [0, 0, 0];
+		let change = element == 'gMainColor' ? -5 : 5;
+
+		while (!checkContrast(new_color, text_color)) {
+			new_color[0] += change;
+			new_color[1] += change;
+			new_color[2] += change;
+		}
 
 		// Mise à jour variable CSS
-		document.documentElement.style.setProperty('--' + element, new_color);
+		document.documentElement.style.setProperty('--' + element, new_color.join(','));
 
 		applyColors();
-		return new_color;
+		return new_color.join(',');
+	}
+
+	/**
+	 * Return true if contrast is OK (W3C AA-level), false if not
+	 * @see https://dev.to/alvaromontoro/building-your-own-color-contrast-checker-4j7o
+	 */
+	function checkContrast(color1, color2)
+	{
+		let l1 = 0.2126 * color1[0] + 0.7152 * color1[1] + 0.0722 * color1[2];
+		let l2 = 0.2126 * color2[0] + 0.7152 * color2[1] + 0.0722 * color2[2];
+		let ratio = l1 > l2
+			? ((l2 + 0.05) / (l1 + 0.05))
+			: ((l1 + 0.05) / (l2 + 0.05));
+
+		return ratio < 1/3 ? true : false;
 	}
 
 	function applyColors()

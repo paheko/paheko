@@ -1,11 +1,9 @@
 (function () {
-	let s = document.head.querySelector('script');
-
 	window.g = window.garradin = {
 		url: window.location.href.replace(/\/admin\/.*?$/, ''),
 		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
 		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: s ? s.src.match(/\?(.*)$/)[1] : null,
+		version: document.documentElement.getAttribute('data-version'),
 		loaded: {}
 	};
 
@@ -175,6 +173,14 @@
 
 		g.openDialog(iframe, callback);
 		return iframe;
+	};
+
+	g.reloadParentDialog = () => {
+		if (!window.parent.g.dialog) {
+			return;
+		}
+
+		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
 	};
 
 	g.reloadParentDialog = () => {
