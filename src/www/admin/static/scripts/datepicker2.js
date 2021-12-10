@@ -18,8 +18,7 @@
 			Object.assign(this, {
 				format: 0, // 0 = Y-m-d, 1 = d/m/Y
 				lang: 'fr',
-				class: 'datepicker',
-				onchange: null
+				class: 'datepicker'
 			}, config);
 
 			var c = document.createElement('dialog');
@@ -187,9 +186,10 @@
 
 			this.close();
 
-			if (this.onchange) {
-				this.onchange(v, this);
-			}
+			event = document.createEvent('HTMLEvents');
+			event.initEvent('change', true, true);
+			event.eventName = 'change';
+			this.input.dispatchEvent(event);
 		}
 
 		focus()
