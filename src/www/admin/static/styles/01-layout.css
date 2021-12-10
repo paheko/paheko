@@ -40,6 +40,24 @@ main img {
     margin-bottom: 0.4em;
 }
 
+.header .menu .logo {
+    padding: 0;
+    min-height: 100px;
+}
+
+.header .menu .logo img {
+    transition: opacity .2s;
+}
+
+.header .menu .logo a {
+    padding: 10px;
+    padding-bottom: 0;
+    display: inline-block;
+    text-align: center;
+    color: inherit;
+    width: 150px;
+}
+
 .header .menu {
     position: fixed;
     overflow: auto;
@@ -47,7 +65,6 @@ main img {
     width: 170px;
     top: 0;
     bottom: 0;
-    padding-top: 100px;
     background: rgb(var(--gMainColor)) var(--gBgImage) no-repeat 0px 0px;
 }
 

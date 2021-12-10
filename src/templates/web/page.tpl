@@ -12,7 +12,7 @@
 	</aside>
 	{/if}
 	<ul>
-		<li><a href="{$admin_url}web/?p={$page.parent}">Retour à la liste</a></li>
+		<li><a href="{$admin_url}web/?p={if $page.type == $page::TYPE_CATEGORY}{$page.path}{else}{$page.parent}{/if}">Retour à la liste</a></li>
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 			<li><a href="{$admin_url}web/edit.php?p={$page.path}">Modifier</a></li>
 		{/if}

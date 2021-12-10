@@ -13,6 +13,7 @@ KD2/Graphics/Image.php
 KD2/Graphics/QRCode.php
 KD2/Graphics/SVG/Pie.php
 KD2/Graphics/SVG/Plot.php
+KD2/Graphics/SVG/Bar.php
 KD2/Office/Calc/Writer.php
 KD2/Security.php
 KD2/Security_OTP.php

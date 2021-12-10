@@ -1,11 +1,9 @@
 (function () {
-	let s = document.head.querySelector('script');
-
 	window.g = window.garradin = {
 		url: window.location.href.replace(/\/admin\/.*?$/, ''),
 		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
 		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: s ? s.src.match(/\?(.*)$/)[1] : null,
+		version: document.documentElement.getAttribute('data-version'),
 		loaded: {}
 	};
 
@@ -164,11 +162,12 @@
 		iframe.frameborder = '0';
 		iframe.scrolling = 'yes';
 		iframe.width = iframe.height = 0;
+		iframe.setAttribute('data-height', height);
 		iframe.addEventListener('load', () => {
 			iframe.contentWindow.onkeyup = (e) => { if (e.key == 'Escape') g.closeDialog(); };
 			// We need to wait a bit for the height to be correct, not sure why
 			window.setTimeout(() => {
-				iframe.style.height = height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : height;
+				iframe.style.height = iframe.dataset.height == 'auto' ? iframe.contentWindow.document.body.offsetHeight + 'px' : iframe.dataset.height;
 			}, 100);
 		});
 
@@ -184,19 +183,35 @@
 		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
 	};
 
-	g.resizeParentDialog = () => {
+	g.setParentDialogHeight = (height) => {
 		if (!window.parent.g.dialog) {
 			return;
 		}
 
-		let height = document.body.offsetHeight;
-		let parent_height = window.parent.innerHeight;
+		window.parent.g.dialog.querySelector('iframe').setAttribute('data-height', height);
+		g.resizeParentDialog(height);
+	};
 
-		if (height > parent_height * 0.9) {
-			height = '90%';
+	g.resizeParentDialog = (forced_height) => {
+		if (!window.parent.g.dialog) {
+			return;
+		}
+
+		let height;
+
+		if (forced_height) {
+			height = forced_height;
 		}
 		else {
-			height += 'px';
+			let body_height = document.body.offsetHeight;
+			let parent_height = window.parent.innerHeight;
+
+			if (body_height > parent_height * 0.9) {
+				height = '90%';
+			}
+			else {
+				height = body_height + 'px';
+			}
 		}
 
 		window.parent.g.dialog.childNodes[1].style.height = height;

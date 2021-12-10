@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Compte de résultat" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat"}
+{include file="acc/reports/_header.tpl" current="statement" title="Compte de résultat" allow_compare=true}
 
 {include file="acc/reports/_statement.tpl" statement=$general caption1="Charges" caption2="Produits"}
 

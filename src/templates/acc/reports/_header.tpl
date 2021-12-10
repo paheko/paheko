@@ -27,6 +27,19 @@
 			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short})</p>
 	{/if}
 
+	{if !empty($allow_compare) && !empty($other_years)}
+	<form method="get" action="" class="noprint">
+		<fieldset>
+			<legend>Comparer avec un autre exercice</legend>
+			<p>
+				{input type="select" name="compare_year" options=$other_years default=$criterias.compare_year}
+				{button type="submit" label="Comparer" shape="right"}
+			</p>
+			<input type="hidden" name="year" value="{$year.id}" />
+		</fieldset>
+	</form>
+	{/if}
+
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
 		{linkbutton shape="download" href="%s&_pdf"|args:$self_url label="Télécharger en PDF"}

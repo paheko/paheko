@@ -39,7 +39,11 @@ class Modifiers
 		'xml_escape',
 		'replace',
 		'regexp_replace',
+		'remove_leading_number',
+		'get_leading_number',
 	];
+
+	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
 
 	static public function replace($str, $find, $replace): string
 	{
@@ -122,5 +126,16 @@ class Modifiers
 	static public function xml_escape($str)
 	{
 		return htmlspecialchars($str, ENT_XML1 | ENT_QUOTES);
+	}
+
+	static public function remove_leading_number($str): string
+	{
+		return preg_replace(self::LEADING_NUMBER_REGEXP, '', trim($str));
+	}
+
+	static public function get_leading_number($str): ?string
+	{
+		$match = preg_match(self::LEADING_NUMBER_REGEXP, $str);
+		return $match[1] ?? null;
 	}
 }

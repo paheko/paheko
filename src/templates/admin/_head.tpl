@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if}>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if} data-version="{$version_hash}">
 <head>
     <meta charset="utf-8" />
+    <meta name="v" content="{$version_hash}" />
     <title>{$title}</title>
-    <link rel="icon" type="image/png" href="{$www_url}favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/admin.css?{$version_hash}" media="all" />
     <script type="text/javascript" src="{$admin_url}static/scripts/global.js?{$version_hash}"></script>
@@ -29,10 +29,9 @@
     {/if}
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/print.css?{$version_hash}" media="print" />
     <link rel="stylesheet" type="text/css" href="{$admin_url}static/handheld.css?{$version_hash}" media="handheld,screen and (max-width:981px)" />
-    {if !empty($current) && $current == 'home'}
-    <link rel="manifest" href="{$admin_url}manifest.php?{$version_hash}" />
-    {/if}
+    <link rel="manifest" href="{$admin_url}manifest.php" />
     {if isset($config)}
+        <link rel="icon" type="image/png" href="{$config->fileURL('favicon')}" />
         {custom_colors config=$config}
     {/if}
 </head>
@@ -42,6 +41,13 @@
 {if !array_key_exists('_dialog', $_GET) && !isset($transparent)}
 <header class="header">
     <nav class="menu">
+        {if isset($config)}
+        <figure class="logo">
+        {if $url = $config->fileURL('logo', '150px')}
+            <a href="{$admin_url}"><img src="{$url}" alt="" /></a>
+        {/if}
+        </figure>
+        {/if}
     <ul>
     {if $is_logged}
     <?php
@@ -110,6 +116,13 @@
         {if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
             <li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
         {/if}
+
+        {if $help_url}
+        <li>
+            <a href="{$help_url}" target="_blank"><b class="icn">❓</b><i> Aide</i></a>
+        </li>
+        {/if}
+
     {elseif !defined('Garradin\INSTALL_PROCESS')}
         <li><a href="{if $config.site_asso}{$config.site_asso}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
         <li><a href="{$admin_url}">Connexion</a>

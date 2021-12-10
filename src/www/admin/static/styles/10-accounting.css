@@ -80,6 +80,11 @@ td.money, th.money {
     font-size: 1.3rem;
 }
 
+.year-header form {
+    max-width: 30em;
+    margin: 1em auto;
+}
+
 .year-infos {
     text-align: center;
 }

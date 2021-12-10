@@ -7,13 +7,26 @@ use Garradin\Entities\Files\File;
 use Garradin\Membres\Champs;
 
 use KD2\SMTP;
+use KD2\Graphics\Image;
 
 class Config extends Entity
 {
-	const DEFAULT_FILES = [
+	const FILES = [
 		'admin_background' => File::CONTEXT_CONFIG . '/admin_bg.png',
-		'admin_homepage' => File::CONTEXT_CONFIG . '/admin_homepage.skriv',
-		'admin_css' => File::CONTEXT_CONFIG . '/admin.css',
+		'admin_homepage'   => File::CONTEXT_CONFIG . '/admin_homepage.skriv',
+		'admin_css'        => File::CONTEXT_CONFIG . '/admin.css',
+		'logo'             => File::CONTEXT_CONFIG . '/logo.png',
+		'icon'             => File::CONTEXT_CONFIG . '/icon.png',
+		'favicon'          => File::CONTEXT_CONFIG . '/favicon.png',
+	];
+
+	const FILES_TYPES = [
+		'admin_background' => 'image',
+		'admin_css'        => 'code',
+		'admin_homepage'   => 'web',
+		'logo'             => 'image',
+		'icon'             => 'image',
+		'favicon'          => 'image',
 	];
 
 	protected $nom_asso;
@@ -40,9 +53,7 @@ class Config extends Entity
 	protected $couleur1;
 	protected $couleur2;
 
-	protected $admin_background;
-	protected $admin_homepage = 'config/admin_homepage.skriv';
-	protected $admin_css = 'config/admin.css';
+	protected $files = [];
 
 	protected $site_disabled;
 
@@ -71,9 +82,8 @@ class Config extends Entity
 
 		'couleur1'              => '?string',
 		'couleur2'              => '?string',
-		'admin_background'      => '?string',
-		'admin_homepage'        => '?string',
-		'admin_css'             => '?string',
+
+		'files'                 => 'array',
 
 		'site_disabled'         => 'bool',
 	];
@@ -133,25 +143,9 @@ class Config extends Entity
 
 		$this->selfCheck();
 
-		$values = [];
+		$values = $this->modifiedProperties(true);
+
 		$db = DB::getInstance();
-
-		foreach ($this->_modified as $key => $modified) {
-			$value = $this->$key;
-			$type = ltrim($this->_types[$key], '?');
-
-			if ($type == Champs::class) {
-				$value = $value->toString();
-			}
-			elseif (is_object($value)) {
-				throw new \UnexpectedValueException('Unexpected object as value: ' . get_class($value));
-			}
-
-			$values[$key] = $value;
-		}
-
-		unset($value, $key, $modified);
-
 		$db->begin();
 
 		foreach ($values as $key => $value)
@@ -168,6 +162,11 @@ class Config extends Entity
 		}
 
 		$db->commit();
+
+		if (isset($values['couleur1']) || isset($values['couleur2'])) {
+			// Reset graph cache
+			Static_Cache::clean(0);
+		}
 
 		$this->_modified = [];
 
@@ -191,32 +190,6 @@ class Config extends Entity
 		{
 			$source['couleur1'] = null;
 			$source['couleur2'] = null;
-		}
-
-		if (isset($source['admin_background']) && trim($source['admin_background']) == 'RESET') {
-			$source['admin_background'] = null;
-
-			$file = Files::get(self::DEFAULT_FILES['admin_background']);
-
-			if ($file) {
-				$file->delete();
-			}
-		}
-		elseif (isset($source['admin_background']) && strlen($source['admin_background'])) {
-			$file = Files::get(self::DEFAULT_FILES['admin_background']);
-
-			if ($file) {
-				$file->storeFromBase64($source['admin_background']);
-			}
-			else {
-				$path = self::DEFAULT_FILES['admin_background'];
-				$file = File::createFromBase64(Utils::dirname($path), Utils::basename($path), $source['admin_background']);
-			}
-
-			$source['admin_background'] = $file->path;
-		}
-		else {
-			unset($source['admin_background']);
 		}
 
 		parent::importForm($source);
@@ -250,10 +223,13 @@ class Config extends Entity
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
 		$this->assert($this->champs_membres instanceof Champs, 'Objet champs membres invalide');
 
-		// Files can only have one value: their name
-		$this->assert($this->admin_background === null || $this->admin_background === self::DEFAULT_FILES['admin_background']);
-		$this->assert($this->admin_homepage === null || $this->admin_homepage === self::DEFAULT_FILES['admin_homepage']);
-		$this->assert($this->admin_css === null || $this->admin_css === self::DEFAULT_FILES['admin_css']);
+		// Files
+		$this->assert(count($this->files) == count(self::FILES));
+
+		foreach ($this->files as $key => $value) {
+			$this->assert(array_key_exists($key, self::FILES));
+			$this->assert(is_int($value) || is_null($value));
+		}
 
 		$champs = $this->champs_membres;
 
@@ -271,5 +247,94 @@ class Config extends Entity
 		}
 
 		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
+	}
+
+	public function file(string $key): ?File
+	{
+		if (!isset(self::FILES[$key])) {
+			throw new \InvalidArgumentException('Invalid file key: ' . $key);
+		}
+
+		if (empty($this->files[$key])) {
+			return null;
+		}
+
+		return Files::get(self::FILES[$key]);
+	}
+
+	public function fileURL(string $key, string $params = ''): ?string
+	{
+		if (empty($this->files[$key])) {
+
+			if ($key == 'favicon') {
+				return ADMIN_URL . 'static/favicon.png';
+			}
+			elseif ($key == 'icon') {
+				return ADMIN_URL . 'static/icon.png';
+			}
+
+			return null;
+		}
+
+		$params = $params ? $params . '&' : '';
+
+		return WWW_URL . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
+	}
+
+
+	public function hasFile(string $key): bool
+	{
+		return $this->files[$key] ? true : false;
+	}
+
+	public function setFile(string $key, ?string $value, bool $upload = false): ?File
+	{
+		$f = Files::get(self::FILES[$key]);
+		$files = $this->files;
+		$type = self::FILES_TYPES[$key];
+		$path = self::FILES[$key];
+
+		// NULL = delete file
+		if (null === $value) {
+			if ($f) {
+				$f->delete();
+			}
+
+			$f = null;
+		}
+		elseif ($upload) {
+			$f = File::upload(Utils::dirname($path), $value, Utils::basename($path));
+
+			if ($type == 'image' && !$f->image) {
+				$this->setFile($key, null);
+				throw new UserException('Le fichier n\'est pas une image.');
+			}
+
+			// Force favicon format
+			if ($key == 'favicon') {
+				$format = 'png';
+				$i = new Image($f->fullpath());
+				$i->cropResize(32, 32);
+				$f->setContent($i->output($format, true));
+			}
+			// Force icon format
+			else if ($key == 'favicon') {
+				$format = 'png';
+				$i = new Image($f->fullpath());
+				$i->cropResize(512, 512);
+				$f->setContent($i->output($format, true));
+			}
+		}
+		elseif ($f) {
+			$f->setContent($value);
+		}
+		else {
+			$f = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $value);
+		}
+
+		$files[$key] = $f ? $f->modified->getTimestamp() : null;
+		$this->set('files', $files);
+
+		return $f;
 	}
 }

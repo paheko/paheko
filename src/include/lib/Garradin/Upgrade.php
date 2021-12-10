@@ -6,6 +6,7 @@ use Garradin\Membres\Session;
 use Garradin\Membres\Champs;
 
 use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 use KD2\HTTP;
 
@@ -327,7 +328,7 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.10', '<')) {
-				\Garradin\Web\Web::sync(true); // Force sync of web pages
+				\Garradin\Web\Web::sync(); // Force sync of web pages
 				Files::syncVirtualTable('', true);
 
 				$db->begin();
@@ -338,6 +339,33 @@ class Upgrade
 			if (version_compare($v, '1.1.15', '<')) {
 				$db->begin();
 				$db->import(ROOT . '/include/data/1.1.15_migration.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.16', '<')) {
+				$files = Config::FILES;
+
+				foreach ($files as $key => &$set) {
+					$f = Files::get($set);
+					$set = $f !== null ? $f->modified->getTimestamp() : null;
+				}
+
+				unset($set);
+
+				// Migrate files
+				if ($f = Files::get(File::CONTEXT_SKELETON . '/favicon.png')) {
+					$f->copy(Config::FILES['favicon']);
+					$files['favicon'] = $f->modified->getTimestamp();
+				}
+
+				if ($f = Files::get(File::CONTEXT_SKELETON . '/logo.png')) {
+					$f->copy(Config::FILES['icon']);
+					$files['icon'] = $f->modified->getTimestamp();
+				}
+
+				$db->begin();
+				$db->exec('DELETE FROM config WHERE key IN (\'admin_background\', \'admin_css\', \'admin_homepage\');');
+				$db->exec(sprintf('INSERT INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
 				$db->commit();
 			}
 

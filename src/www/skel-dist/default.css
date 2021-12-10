@@ -73,8 +73,16 @@ header.main h1 {
 }
 
 header.main h1 a {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
     color: #9c4f15;
     text-decoration: none;
+}
+
+header.main h1 a span {
+    margin-right: auto;
 }
 
 header.main {
@@ -155,6 +163,10 @@ footer.main a#garradin {
     content: "»";
     color: #ccc;
     margin: .5em;
+}
+
+.breadcrumbs ul li:nth-child(1)::before {
+    content: "";
 }
 
 .breadcrumbs a {

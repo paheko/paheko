@@ -68,6 +68,7 @@ class Template extends \KD2\Smartyer
 		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
+		$this->assign('help_url', HELP_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
@@ -577,8 +578,8 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if (($f = $config->get('admin_background')) && ($file = Files::get($f))) {
-			$admin_background = $file->url() . '?' . $file->modified->getTimestamp();
+		if ($url = $config->fileURL('admin_background')) {
+			$admin_background = $url;
 		}
 
 		// Transformation Hexa vers décimal
@@ -594,8 +595,8 @@ class Template extends \KD2\Smartyer
 		}
 		</style>';
 
-		if (($f = $config->get('admin_css')) && ($file = Files::get($f))) {
-			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $file->url() . '?' . $file->modified->getTimestamp());
+		if ($url = $config->fileURL('admin_css')) {
+			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
 		return sprintf($out, $couleur1, $couleur2, $admin_background);

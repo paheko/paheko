@@ -32,7 +32,7 @@ class UserTemplate extends Brindille
 			return self::$root_variables;
 		}
 
-		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso'];
+		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso', 'files'];
 
 		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
@@ -55,7 +55,15 @@ class UserTemplate extends Brindille
 
 		$config = Config::getInstance();
 
+		$files = $config::FILES;
+
+		// Put URL in files array
+		array_walk($files, function (&$v, $k) use ($config) {
+			$v = $config->fileURL($k);
+		});
+
 		$config = array_intersect_key($config->asArray(), array_flip($keys));
+		$config['files'] = $files;
 
 		self::$root_variables = [
 			'root_url'     => WWW_URL,
