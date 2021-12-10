@@ -84,6 +84,7 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_SKELETON = 'skel';
+	const CONTEXT_TEMPLATE = 'template';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -92,6 +93,7 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_TEMPLATE => 'Modèles',
 	];
 
 	const IMAGE_TYPES = [
@@ -147,6 +149,18 @@ class File extends Entity
 	public function context(): string
 	{
 		return strtok($this->path, '/');
+	}
+
+	public function accessContext(): string
+	{
+		$part1 = strtok($this->path, '/');
+
+		// For templates, each subdirectory has different access permissions
+		if ($part1 == self::CONTEXT_TEMPLATE) {
+			return strtok('/');
+		}
+
+		return $part1;
 	}
 
 	public function fullpath(): string
@@ -801,7 +815,7 @@ class File extends Entity
 			return true;
 		}
 
-		$context = $this->context();
+		$context = $this->accessContext();
 		$ref = strtok(substr($this->path, strpos($this->path, '/')), '/');
 
 		if (null === $session || !$session->isLogged()) {
@@ -833,7 +847,7 @@ class File extends Entity
 			return false;
 		}
 
-		switch ($this->context()) {
+		switch ($this->accessContext()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -858,7 +872,7 @@ class File extends Entity
 			return false;
 		}
 
-		switch ($this->context()) {
+		switch ($this->accessContext()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
@@ -884,6 +898,10 @@ class File extends Entity
 		}
 
 		$context = strtok($path, '/');
+
+		if ($context == self::CONTEXT_TEMPLATE) {
+			$context = strtok('/');
+		}
 
 		switch ($context) {
 			case self::CONTEXT_WEB:

@@ -270,6 +270,33 @@ class Sections
 		}
 	}
 
+	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$parent = $params['parent'];
+
+		$config = Config::getInstance();
+
+		$params['select'] = sprintf('*, %s AS user_name, %s AS user_login, %s AS user_number',
+			$config->champ_identite, $config->champ_identifiant, 'numero');
+		$params['tables'] = 'membres';
+
+		if (isset($params['id'])) {
+			$params['where'] = ' AND id = :id';
+			$params[':id'] = (int) $params['id'];
+			unset($params['id']);
+		}
+
+		if (empty($params['order'])) {
+			$params['order'] = 'id';
+		}
+
+		return self::sql($params, $tpl, $line);
+	}
+
 	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		static $defaults = [

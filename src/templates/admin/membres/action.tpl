@@ -34,6 +34,23 @@
         {button type="submit" name="confirm" label="Enregistrer" shape="right" class="main"}
     </p>
 
+    {elseif $action == 'template'}
+    <fieldset>
+        <legend>Générer des documents pour les {$nb_selected} membres sélectionnés</legend>
+        <dl>
+            {input type="select" options="template_list" required=true label="Modèle de document à utiliser"}
+        </dl>
+        <p class="help">
+            Si plusieurs documents sont créés, un fichier ZIP sera généré.
+        </p>
+    </fieldset>
+
+    <p class="submit">
+        {csrf_field key="membres_action"}
+        <input type="hidden" name="action" value="template" />
+        {button type="submit" name="confirm" label="Générer" shape="right" class="main"}
+    </p>
+
     {elseif $action == 'delete'}
     <fieldset>
         <legend>Supprimer les membres sélectionnés ?</legend>
