@@ -191,6 +191,13 @@ class DynamicFields
 		$i = 0;
 
 		$self = new self(false);
+		$fields = [
+			'date_connexion'   => 'date_login',
+			'date_inscription' => 'date_created',
+			'clef_pgp'         => 'pgp_key',
+			'secret_otp'       => 'otp_secret',
+			'id_category'      => 'id_category',
+		];
 
 		$defaults = [
 			'help'      => null,
@@ -203,10 +210,13 @@ class DynamicFields
 		foreach ($config as $name => $data) {
 			$field = new DynamicField;
 
+			$fields[$name] = $name;
+
 			if ($name == 'passe') {
 				$name = 'password';
 				$data['title'] = 'Mot de passe';
 				$field->system = 'password';
+				$fields['passe'] = 'password';
 			}
 			elseif ($name == $login_field) {
 				$field->system = 'login';
@@ -233,6 +243,9 @@ class DynamicFields
 		}
 
 		self::$_instance = $self;
+
+		$self->createTable();
+		$self->copy('membres', User::TABLE, $fields);
 
 		return $self;
 	}
@@ -332,15 +345,14 @@ class DynamicFields
 		end($this->_fields);
 		$last_one = key($this->_fields);
 
-		foreach ($this->_fields as $key=>$cfg)
+		foreach ($this->_fields as $key => $cfg)
 		{
 			$type = DynamicField::SQL_TYPES[$cfg->type];
-
-			if ($type == 'TEXT') {
-				$type = 'TEXT COLLATE NOCASE';
-			}
-
 			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
+
+			if ($type == 'TEXT' && $cfg->type != 'password') {
+				$line .= sprintf(",\n%s %s", $db->quoteIdentifier($key . '_search'), 'TEXT COLLATE NOCASE');
+			}
 
 			if ($last_one != $key) {
 				$line .= ',';
