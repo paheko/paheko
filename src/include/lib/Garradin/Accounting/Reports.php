@@ -288,6 +288,8 @@ class Reports
 			}
 		}
 
+		ksort($out);
+
 		return $out;
 	}
 
