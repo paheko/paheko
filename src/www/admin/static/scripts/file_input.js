@@ -37,7 +37,7 @@
 				return false;
 			}
 
-			container.classList.add('uploading');
+			input.form.firstElementChild.classList.add('progressing');
 		};
 
 		const updateLabel = () => {
