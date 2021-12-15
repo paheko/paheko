@@ -286,7 +286,7 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -493,7 +493,7 @@ class Template extends \KD2\Smartyer
 		else {
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
-			if ($type == 'file') {
+			if ($type == 'file' && empty($params['no_size_limit'])) {
 				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
 			}
 

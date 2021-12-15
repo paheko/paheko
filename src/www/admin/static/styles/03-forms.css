@@ -604,11 +604,19 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     text-align: right;
 }
 
-.file-selector.uploading {
-    opacity: 0.3;
+/**
+ * Progress spinner
+ */
+.progressing {
+    position: relative;
 }
 
-.file-selector.uploading::after {
+fieldset.progressing > dl, fieldset.progressing > p {
+    opacity: 0.5;
+    filter: blur(3px);
+}
+
+.progressing::after {
     display: inline-block;
     content: " ";
     position: absolute;
@@ -619,10 +627,31 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     margin: auto;
     width: 50px;
     height: 50px;
-    border: 5px solid #000;
+    border: 5px solid #666;
     border-radius: 50%;
-    border-top-color: #999;
+    border-top-color: #ccc;
     animation: spin 1s ease-in-out infinite;
+    filter: none;
+}
+
+.progress-status {
+    display: none;
+}
+
+.progressing .progress-status {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    padding-top: 80px;
+    text-align: center;
+    width: 100%;
+    height: 1em;
+    filter: none !important;
+    color: #000;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }

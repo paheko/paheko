@@ -128,7 +128,7 @@ class SQLite implements StorageInterface
 	static public function listDirectoriesRecursively(string $path): array
 	{
 		$files = [];
-		$it = DB::getInstance()->iterate('SELECT path FROM files WHERE parent LIKE ? ORDER BY path;', $path . '/%');
+		$it = DB::getInstance()->iterate('SELECT path FROM files WHERE (parent = ? OR parent LIKE ?) AND type = ? ORDER BY path;', $path, $path . '/%', File::TYPE_DIRECTORY);
 
 		foreach ($it as $file) {
 			$files[] = substr($file->path, strlen($path) + 1);

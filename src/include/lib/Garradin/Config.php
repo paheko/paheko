@@ -287,6 +287,22 @@ class Config extends Entity
 		return $this->files[$key] ? true : false;
 	}
 
+	public function updateFiles(): void
+	{
+		$files = $this->files;
+
+		foreach (self::FILES as $key => $path) {
+			if ($f = Files::get($path)) {
+				$files[$key] = $f->modified->getTimestamp();
+			}
+			else {
+				$files[$key] = null;
+			}
+		}
+
+		$this->set('files', $files);
+	}
+
 	public function setFile(string $key, ?string $value, bool $upload = false): ?File
 	{
 		$f = Files::get(self::FILES[$key]);

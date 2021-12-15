@@ -54,8 +54,6 @@
 
 </form>
 
-{if ENABLE_AUTOMATIC_BACKUPS}
-
 <form method="post" action="{$self_url_no_qs}">
 
 <fieldset>
@@ -101,7 +99,5 @@
 </fieldset>
 
 </form>
-
-{/if}
 
 {include file="admin/_foot.tpl"}
