@@ -188,19 +188,66 @@ a.icn-btn {
     text-decoration: underline;
 }
 
-.submit .main {
+[data-icon]:before, .main[data-icon]:after {
+    display: inline-block;
+    font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px #ccc;
+    padding-right: .5em;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    content: attr(data-icon);
+}
+
+[data-icon]:empty:before {
+    padding: 0;
+}
+
+.icn, .icnl {
+    font-family: "gicon", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    font-variant: normal;
+    text-transform: none;
+    position: relative;
+}
+
+.actions .icn, .icn.action {
+    text-decoration: none;
+    border-radius: 1em;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    padding: .2em;
+    font-family: "gicon", sans-serif;
+    color: #9c4f15;
+    color: rgb(var(--gMainColor));
+    text-shadow: 1px 1px 1px #999;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 200;
+}
+
+
+button.main, .icn-btn.main {
     color: #000;
     font-size: 1.2em;
     border-radius: 1em;
     padding: .5em 1em;
 }
 
-.submit .main[data-icon]:before {
+button.main[data-icon]:before, .icn-btn.main:before {
     display: none;
 }
 
-p.submit .main[data-icon]:after {
-    padding: 0 0 0 .5rem;
+button.main[data-icon]:after, .icn-btn[data-icon]:after {
+    padding: 0;
+    padding-left: .5em;
+    padding-right: 0;
     color: rgba(var(--gSecondColor));
     font-size: 1.5rem;
     line-height: .2em;
@@ -451,50 +498,6 @@ dialog.datepicker {
 
 .datepicker input {
     font-family: gicon;
-}
-
-[data-icon]:before, .main[data-icon]:after {
-    display: inline-block;
-    font-family: "gicon", sans-serif;
-    text-shadow: 1px 1px 1px #ccc;
-    padding-right: .5em;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    content: attr(data-icon);
-}
-
-[data-icon]:empty:before {
-    padding: 0;
-}
-
-.icn, .icnl {
-    font-family: "gicon", sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    speak: none;
-    font-variant: normal;
-    text-transform: none;
-    position: relative;
-}
-
-.actions .icn, .icn.action {
-    text-decoration: none;
-    border-radius: 1em;
-    display: inline-block;
-    text-align: center;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    padding: .2em;
-    font-family: "gicon", sans-serif;
-    color: #9c4f15;
-    color: rgb(var(--gMainColor));
-    text-shadow: 1px 1px 1px #999;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 200;
 }
 
 fieldset.memberMessage {
