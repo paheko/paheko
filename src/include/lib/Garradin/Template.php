@@ -178,11 +178,13 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetIcon(array $params): string
 	{
-		if (empty($params['href'])) {
-			return sprintf('<b class="icn">%s</b>', Utils::iconUnicode($params['shape']));
-		}
+		$attributes = array_diff_key($params, ['shape']);
+		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, $this->escape($v)),
+			$attributes, array_keys($attributes));
 
-		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
+		$attributes = implode(' ', $attributes);
+
+		return sprintf('<b class="icn" %s>%s</b>', $attributes, Utils::iconUnicode($params['shape']));
 	}
 
 	protected function widgetLink(array $params): string
