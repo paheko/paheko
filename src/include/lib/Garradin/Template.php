@@ -374,8 +374,11 @@ class Template extends \KD2\Smartyer
 		}
 
 		// Create attributes string
-		if (array_key_exists('required', $attributes)) {
+		if (!empty($attributes['required'])) {
 			$attributes['required'] = 'required';
+		}
+		else {
+			unset($attributes['required']);
 		}
 
 		if (!empty($attributes['disabled'])) {

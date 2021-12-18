@@ -70,9 +70,10 @@ class Reports
 	 * Return account sums per year or per account
 	 * @param  bool $by_year If true will return accounts grouped by year, if false it will return years grouped by account
 	 */
-	static public function getAnalyticalSums(bool $by_year = false): \Generator
+	static public function getAnalyticalSums(bool $by_year = false, bool $order_code = false): \Generator
 	{
 		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
+			a.code AS account_code,
 			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit, 0 AS total,
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
@@ -90,13 +91,15 @@ class Reports
 			GROUP BY %s
 			ORDER BY %s;';
 
+		$order = $order_code ? 'a.code COLLATE NOCASE' : 'a.label COLLATE NOCASE';
+
 		if ($by_year) {
 			$group = 'y.id, a.id';
-			$order = 'y.start_date DESC, a.code COLLATE NOCASE';
+			$order = 'y.start_date DESC, ' . $order;
 		}
 		else {
 			$group = 'a.id, y.id';
-			$order = 'a.code COLLATE NOCASE, y.id';
+			$order = $order . ', y.id';
 		}
 
 		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);
@@ -134,7 +137,7 @@ class Reports
 			if (null === $current) {
 				$current = (object) [
 					'id' => $by_year ? $row->id_year : $row->id_account,
-					'label' => $by_year ? $row->year_label : $row->account_label,
+					'label' => $by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label,
 					'description' => !$by_year ? $row->account_description : null,
 					'items' => []
 				];
@@ -144,7 +147,7 @@ class Reports
 				}
 			}
 
-			$row->label = !$by_year ? $row->year_label : $row->account_label;
+			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label;
 			$current->items[] = $row;
 
 			foreach ($sums as $s) {
