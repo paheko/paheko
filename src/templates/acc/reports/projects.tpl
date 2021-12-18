@@ -15,9 +15,17 @@
 		<li class="current"><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
 	</ul>
 
+	<aside>
+	{if $order_code}
+		{linkbutton href="%s?by_year=%d"|args:$self_url_no_qs,$by_year label="Trier les projets par libellé" shape="menu"}
+	{else}
+		{linkbutton href="%s?by_year=%d&order_code=1"|args:$self_url_no_qs,$by_year label="Trier les projets par code" shape="menu"}
+	{/if}
+	</aside>
+
 	<ul class="sub">
-		<li{if !$by_year} class="current"{/if}><a href="{$self_url_no_qs}">Par projet</a></li>
-		<li{if $by_year} class="current"{/if}><a href="{$self_url_no_qs}?by_year=1">Par exercice</a></li>
+		<li{if !$by_year} class="current"{/if}><a href="{$self_url_no_qs}?order_code={$order_code}">Par projet</a></li>
+		<li{if $by_year} class="current"{/if}><a href="{$self_url_no_qs}?by_year=1&order_code={$order_code}">Par exercice</a></li>
 	</ul>
 </nav>
 
