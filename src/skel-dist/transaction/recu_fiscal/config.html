@@ -30,7 +30,7 @@
 <fieldset>
 	<legend>Configuration du modèle de reçu fiscal</legend>
 	<dl>
-		{{:input required=true name="objet" type="textarea" label="Objet de l'association" source=$cerfa_config}}
+		{{:input required=true name="objet" type="textarea" label="Objet de l'association" source=$cerfa_config cols="70" rows="4"}}
 		{{:input required=true name="compte_especes" type="text" label="Code du compte de caisse" help="par exemple 530" source=$cerfa_config default="530"}}
 		{{:input required=true name="compte_cheques" type="text" label="Code du compte pour les chèques" help="par exemple 5112" source=$cerfa_config default="5112"}}
 		<dd class="help">Ces comptes sont utilisés pour déterminer le type de versement utilisé.</dd>

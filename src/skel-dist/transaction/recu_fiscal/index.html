@@ -27,10 +27,32 @@
 <head>
 	<title>Reçu fiscal n°{{$id}} - {{$users_names}}</title>
 	<style type="text/css">
-	@page {
-		size: A4 portrait;
-		margin: 0;
-		padding: 0;
+	@media print {
+		@page {
+			size: A4 portrait;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			margin: 0;
+		}
+	}
+
+	@media screen {
+		html {
+			background: #666;
+		}
+		body {
+			margin: 0 auto;
+			padding: 0;
+			background: #fff;
+			width: 210mm;
+			height: 297mm;
+		}
+		.page {
+			margin: 1em 0;
+		}
 	}
 
 	body {
@@ -38,7 +60,6 @@
 		font-size: 10pt;
 		background: white;
 		padding: 0;
-		margin: 0;
 	}
 
 	.page div {
@@ -47,7 +68,6 @@
 
 	.page {
 		padding: 0;
-		margin: 0;
 		break-after: always;
 		width: 210mm;
 		height: 297mm;
