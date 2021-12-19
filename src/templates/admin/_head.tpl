@@ -1,3 +1,8 @@
+<?php
+if (!isset($current)) {
+    $current = null;
+}
+?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if} data-version="{$version_hash}">
 <head>
@@ -49,7 +54,7 @@
         </figure>
         {/if}
     <ul>
-    {if $is_logged}
+    {if $session->isLogged()}
     <?php
     $current_parent = substr($current, 0, strpos($current, '/'));
     ?>

@@ -26,6 +26,8 @@ class Modifiers
 		'str_word_count',
 		'strrev',
 		'strlen',
+		'strpos',
+		'strrpos',
 		'wordwrap',
 		'strip_tags',
 		'strlen',
@@ -41,6 +43,7 @@ class Modifiers
 		'regexp_replace',
 		'remove_leading_number',
 		'get_leading_number',
+		'spell_out_number',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -137,5 +140,10 @@ class Modifiers
 	{
 		$match = preg_match(self::LEADING_NUMBER_REGEXP, $str);
 		return $match[1] ?? null;
+	}
+
+	static public function spell_out_number($number, string $locale = 'fr_FR'): string
+	{
+		return numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
 	}
 }

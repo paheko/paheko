@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Accounting\Transactions;
+use Garradin\UserTemplate\Document;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -27,5 +28,7 @@ $tpl->assign('creator_name', $transaction->id_creator ? (new Membres)->getNom($t
 $tpl->assign('files_edit', $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE));
 $tpl->assign('file_parent', $transaction->getAttachementsDirectory());
 $tpl->assign('related_users', $transaction->listLinkedUsers());
+$tpl->assign('documents', Document::list(Document::CONTEXT_TRANSACTION));
+$tpl->assign('doc_params', ['id_transaction' => $transaction->id()]);
 
 $tpl->display('acc/transactions/details.tpl');

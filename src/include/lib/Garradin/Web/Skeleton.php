@@ -19,14 +19,49 @@ class Skeleton
 	protected $name;
 	protected $file;
 
+	static public function list(): array
+	{
+		$sources = [];
+
+		$path = ROOT . '/skel-dist/web';
+		$i = new \DirectoryIterator($path);
+
+		foreach ($i as $file) {
+			if ($file->isDot() || $file->isDir()) {
+				continue;
+			}
+
+			$mime = mime_content_type($file->getRealPath());
+
+			$sources[$file->getFilename()] = ['is_text' => substr($mime, 0, 5) == 'text/', 'changed' => null];
+		}
+
+		unset($i);
+
+		$list = Files::list(File::CONTEXT_SKELETON . '/web');
+
+		foreach ($list as $file) {
+			if ($file->type != $file::TYPE_FILE) {
+				continue;
+			}
+
+			$sources[$file->name] = ['is_text' => substr($file->mime, 0, 5) == 'text/', 'changed' => $file->modified];
+		}
+
+		ksort($sources);
+
+		return $sources;
+	}
+
 	public function __construct(string $tpl)
 	{
+		$path = File::CONTEXT_SKELETON . '/web';
+
 		if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $tpl)) {
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$this->file = Files::get(File::CONTEXT_SKELETON . '/' . $tpl);
-
+		$this->file = Files::get($path . $tpl);
 		$this->name = $tpl;
 	}
 
@@ -196,39 +231,5 @@ class Skeleton
 			$f = new self($file);
 			$f->reset();
 		}
-	}
-
-	static public function list(): array
-	{
-		$sources = [];
-
-		$path = ROOT . '/www/skel-dist/';
-		$i = new \DirectoryIterator($path);
-
-		foreach ($i as $file) {
-			if ($file->isDot() || $file->isDir()) {
-				continue;
-			}
-
-			$mime = mime_content_type($file->getRealPath());
-
-			$sources[$file->getFilename()] = ['is_text' => substr($mime, 0, 5) == 'text/', 'changed' => null];
-		}
-
-		unset($i);
-
-		$list = Files::list(File::CONTEXT_SKELETON);
-
-		foreach ($list as $file) {
-			if ($file->type != $file::TYPE_FILE) {
-				continue;
-			}
-
-			$sources[$file->name] = ['is_text' => substr($file->mime, 0, 5) == 'text/', 'changed' => $file->modified];
-		}
-
-		ksort($sources);
-
-		return $sources;
 	}
 }

@@ -1,0 +1,33 @@
+{{if !$_GET.id_transaction}}
+	{{:error message="Aucun numéro d'écriture n'a été fourni"}}
+{{/if}}
+{{if $logged_user.perm_accounting < $access_level.write}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+{{/if}}
+{{#transactions id=$_GET.id_transaction}}
+
+{{:include file="_doc_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
+
+	<h1>Reçu de don</h1>
+
+	<h4>Référence n°{{$id}} — {{$date|date_short}}</h4>
+
+	<p>L'association «&nbsp;{{$config.nom_asso}}&nbsp;» atteste avoir reçu de la part de&nbsp;:</p>
+
+	<h3>{{$users_names}}</h3>
+
+	<p>un don d'un montant de&nbsp;:</p>
+
+	<h2>{{$credit|raw|money_currency:false}}</h2>
+	<h4>le {{$date|date_short}}</h4>
+
+	<p>
+		<em>Ce reçu n'est pas un reçu fiscal et ne donne pas droit à une réduction d'impôt au bénéfice des dispositions des articles 200, 238 bis et 885-0 V bis A du code général des impôts.</em>
+	</p>
+
+	<figure class="signature">
+		<img src="{{:signature_url}}" alt="Signature" />
+	</figure>
+
+{{:include file="_doc_footer.html"}}
+{{/transactions}}

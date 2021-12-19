@@ -6,10 +6,16 @@ use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 
+use Garradin\Config;
+use Garradin\DB;
+use Garradin\Template;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\Web\Skeleton;
+use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
-use const Garradin\WWW_URL;
+use const Garradin\{ROOT, WWW_URL};
 
 class Functions
 {
@@ -17,7 +23,47 @@ class Functions
 		'include',
 		'http',
 		'dump',
+		'error',
+		'read',
+		'save',
+		'admin_header',
+		'admin_footer',
+		'signature_url',
 	];
+
+	static public function admin_header(array $params): string
+	{
+		$tpl = Template::getInstance();
+		$tpl->assign($params);
+		return $tpl->fetch('admin/_head.tpl');
+	}
+
+	static public function admin_footer(array $params): string
+	{
+		$tpl = Template::getInstance();
+		$tpl->assign($params);
+		return $tpl->fetch('admin/_foot.tpl');
+	}
+
+	static public function save(array $params, Brindille $tpl): void
+	{
+		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$id) {
+			throw new Brindille_Exception('Unique document name could not be found');
+		}
+
+		if (empty($params['key'])) {
+			throw new Brindille_Exception('Saving key is empty but is mandatory');
+		}
+
+		$key = $params['key'];
+		unset($params['key']);
+		$params = json_encode($params);
+
+		$db = DB::getInstance();
+		$db->preparedQuery('REPLACE INTO documents_data (document, key, value) VALUES (?, ?, ?);', $id, $key, $params);
+	}
 
 	static public function dump(array $params, Brindille $tpl)
 	{
@@ -31,10 +77,64 @@ class Functions
 		return sprintf('<pre style="background: yellow; padding: 5px; overflow: auto">%s</pre>', $dump);
 	}
 
+	static public function error(array $params, Brindille $tpl)
+	{
+		throw new UserException($params['message']);
+	}
+
+	static public function read(array $params, UserTemplate $ut, int $line): string
+	{
+		if (empty($params['file'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
+		}
+
+		if (strpos($params['file'], '..') !== false) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" invalide', $line));
+		}
+
+		if (substr($params['file'], 0, 2) == './') {
+			$params['file'] = Utils::dirname($ut->_tpl_path) . substr($params['file'], 1);
+		}
+
+		$file = Files::get(File::CONTEXT_SKELETON . '/' . $params['file']);
+
+		if ($file) {
+			$content = $file->fetch();
+		}
+		else {
+			$content = file_get_contents(ROOT . '/skel-dist/' . $params['file']);
+		}
+
+		if (!empty($params['base64'])) {
+			return base64_encode($content);
+		}
+
+		return $content;
+	}
+
+	static public function signature_url(): string
+	{
+		$file = Config::getInstance()->file('signature');
+
+		if (!$file) {
+			return '';
+		}
+
+		return 'data:image/png;base64,' . base64_encode($file->fetch());
+	}
+
 	static public function include(array $params, UserTemplate $ut, int $line): void
 	{
 		if (empty($params['file'])) {
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
+		}
+
+		if (strpos($params['file'], '..') !== false) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" invalide', $line));
+		}
+
+		if (substr($params['file'], 0, 1) == './') {
+			$params['file'] = Utils::dirname($ut->_tpl_path) . substr($params['file'], 1);
 		}
 
 		// Avoid recursive loops
@@ -44,15 +144,17 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
 		}
 
-		$s = new Skeleton($params['file']);
-
-		if (!$s->exists()) {
+		try {
+			$include = new UserTemplate($params['file']);
+		}
+		catch (\InvalidArgumentException $e) {
 			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
 		}
 
 		$params['included_from'] = array_merge($from, [$params['file']]);
 
-		$s->display($params);
+		$include->assignArray($params);
+		$include->display();
 	}
 
 	static public function http(array $params): void

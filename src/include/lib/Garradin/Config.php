@@ -18,6 +18,7 @@ class Config extends Entity
 		'logo'             => File::CONTEXT_CONFIG . '/logo.png',
 		'icon'             => File::CONTEXT_CONFIG . '/icon.png',
 		'favicon'          => File::CONTEXT_CONFIG . '/favicon.png',
+		'signature'        => File::CONTEXT_CONFIG . '/signature.png',
 	];
 
 	const FILES_TYPES = [
@@ -27,6 +28,11 @@ class Config extends Entity
 		'logo'             => 'image',
 		'icon'             => 'image',
 		'favicon'          => 'image',
+		'signature'        => 'image',
+	];
+
+	const FILES_PUBLIC = [
+		'logo', 'icon', 'favicon',
 	];
 
 	protected $nom_asso;
@@ -338,6 +344,13 @@ class Config extends Entity
 				$format = 'png';
 				$i = new Image($f->fullpath());
 				$i->cropResize(512, 512);
+				$f->setContent($i->output($format, true));
+			}
+			// Force signature size
+			else if ($key == 'signature') {
+				$format = 'png';
+				$i = new Image($f->fullpath());
+				$i->resize(200, 200);
 				$f->setContent($i->output($format, true));
 			}
 		}

@@ -234,6 +234,11 @@ class Files
 		return $file;
 	}
 
+	static public function exists(string $path): bool
+	{
+		return self::callStorage('exists', $path);
+	}
+
 	static public function getFromURI(string $uri): ?File
 	{
 		$uri = trim($uri, '/');

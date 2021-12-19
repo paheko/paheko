@@ -8,21 +8,24 @@ use KD2\Brindille_Exception;
 use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
+use Garradin\Membres\Session;
 
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 
 use Garradin\UserTemplate\Modifiers;
 use Garradin\UserTemplate\Functions;
 use Garradin\UserTemplate\Sections;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, ROOT};
 
-class UserTemplate extends Brindille
+class UserTemplate extends \KD2\Brindille
 {
-	protected $path;
+	public $_tpl_path;
 	protected $modified;
 	protected $file;
+	protected $path;
 
 	static protected $root_variables;
 
@@ -73,16 +76,33 @@ class UserTemplate extends Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => $lang,
 			'config'       => $config,
+			'now'          => new \DateTime,
+			'logged_user'  => Session::getInstance()->getUser(),
+			'access_level'=> [
+				'none'  => Session::ACCESS_NONE,
+				'read'  => Session::ACCESS_READ,
+				'write' => Session::ACCESS_WRITE,
+				'admin' => Session::ACCESS_ADMIN,
+			],
 		];
 
 		return self::$root_variables;
 	}
 
-	public function __construct(?File $file = null)
+	public function __construct(string $path)
 	{
-		if ($file) {
+		$this->_tpl_path = $path;
+
+		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
 			$this->file = $file;
 			$this->modified = $file->modified->getTimestamp();
+		}
+		else {
+			$this->path = ROOT . '/skel-dist/' . $path;
+
+			if (!($this->modified = filemtime($this->path))) {
+				throw new \InvalidArgumentException('File not found: ' . $this->path);
+			}
 		}
 
 		$this->assignArray(self::getRootVariables());
@@ -125,12 +145,6 @@ class UserTemplate extends Brindille
 		foreach (Sections::SECTIONS_LIST as $name) {
 			$this->registerSection($name, [Sections::class, $name]);
 		}
-	}
-
-	public function setSource(string $path)
-	{
-		$this->path = $path;
-		$this->modified = filemtime($path);
 	}
 
 	public function display(): void
@@ -190,12 +204,21 @@ class UserTemplate extends Brindille
 
 	public function displayPDF(?string $filename = null): void
 	{
-		header('Content-type: application/pdf');
+		$html = $this->fetch();
+
+		if (!$filename && preg_match('!<title>([^<]+)</title>!', $html, $match)) {
+			$title = trim(strip_tags(html_entity_decode($match[1])));
+
+			if ($title !== '') {
+				$filename = $title . '.pdf';
+			}
+		}
 
 		if ($filename) {
 			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($filename)));
 		}
 
-		Utils::streamPDF($this->fetch());
+		header('Content-type: application/pdf');
+		Utils::streamPDF($html);
 	}
 }

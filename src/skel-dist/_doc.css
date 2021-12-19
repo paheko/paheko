@@ -1,0 +1,75 @@
+@media print {
+		@page {
+		size: {{if $page_size}}{{$page_size}}{{else}}A4{{/if}};
+		margin: 1.5cm;
+		@bottom {
+			content: "Page " counter(page) " / " counter(pages);
+			font-size: 8pt;
+			margin-bottom: 10mm;
+			text-align: center;
+		}
+	}
+}
+
+@media screen {
+	html {
+		background: #666;
+	}
+	body {
+		margin: 0 auto;
+		padding: .5cm;
+		background: #fff;
+		{{if $page_size == 'A5'}}
+		width: 148mm;
+		height: 210mm;
+		{{else}}
+		width: 210mm;
+		height: 297mm;
+		{{/if}}
+	}
+}
+
+body {
+	background: #fff;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #000;
+	font-size: 10pt;
+}
+
+main {
+	font-size: 1.1em;
+}
+
+header.organization {
+	border: 2px solid #999;
+	padding: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+header.organization * {
+	margin: 0;
+	padding: 0;
+}
+
+header.organization .logo img {
+	margin-right: 1em;
+	max-height: 100px;
+}
+
+header.organization h1, header.organization h2 {
+	margin-bottom: .5rem;
+}
+
+header.organization h1 {
+	font-size: 1.2rem;
+}
+header.organization h2 {
+	font-size: 1rem;
+	font-weight: normal;
+}
+header.organization h3 {
+	font-size: .8rem;
+	font-weight: normal;
+}

@@ -1,0 +1,48 @@
+{{if $logged_user.perm_accounting < $access_level.write}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+{{/if}}
+{{:admin_header title="Configuration du reçu fiscal"}}
+
+{{if $_POST.save}}
+	{{if !$_POST.compte_especes}}
+		<p class="error block">Le code du compte d'espèces n'a pas été renseigné.</p>
+	{{elseif !$_POST.compte_cheques}}
+		<p class="error block">Le code du compte d'espèces n'a pas été renseigné.</p>
+	{{else}}
+		{{:save key="config"
+			objet=$_POST.objet
+			compte_especes=$_POST.compte_especes
+			compte_cheques=$_POST.compte_cheques
+			art200=$_POST.art200
+			art238=$_POST.art238
+			art885=$_POST.art885
+		}}
+		<p class="block confirm">Configuration enregistrée.</p>
+	{{/if}}
+{{/if}}
+
+{{#load key="config"}}
+	{{:assign .="cerfa_config"}}
+{{/load}}
+
+<form method="post" action="">
+
+<fieldset>
+	<legend>Configuration du modèle de reçu fiscal</legend>
+	<dl>
+		{{:input required=true name="objet" type="textarea" label="Objet de l'association" source=$cerfa_config}}
+		{{:input required=true name="compte_especes" type="text" label="Code du compte de caisse" help="par exemple 530" source=$cerfa_config default="530"}}
+		{{:input required=true name="compte_cheques" type="text" label="Code du compte pour les chèques" help="par exemple 5112" source=$cerfa_config default="5112"}}
+		<dd class="help">Ces comptes sont utilisés pour déterminer le type de versement utilisé.</dd>
+		<dt>Réduction d'impôt éligibles&nbsp;:</dt>
+		{{:input type="checkbox" name="art200" value="1" source=$cerfa_config label="Article 200"}}
+		{{:input type="checkbox" name="art238" value="1" source=$cerfa_config label="Article 238 bis"}}
+		{{:input type="checkbox" name="art885" value="1" source=$cerfa_config label="Article 885-0V bis A"}}
+	</dl>
+</fieldset>
+
+<p class="submit">
+	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}
+</p>
+
+{{:admin_footer}}

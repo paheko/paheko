@@ -53,6 +53,19 @@
 		<dd class="help">
 			Cette image sera utilisée comme icône de l'application mobile (à installer depuis {link href="!" label="la page d'accueil"} et le bouton «&nbsp;Installer comme application sur l'écran d'accueil&nbsp;»).
 		</dd>
+		<dt>Signature ou tampon de l'association</dt>
+		{if $url = $config->fileURL('signature', '150px')}
+		<dd>
+			<img src="{$url}" alt="" />
+		</dd>
+		{/if}
+		<dd>
+			{linkbutton href="!config/edit_file.php?k=%s"|args:'signature' label="Modifier" shape="edit" target="_dialog"}
+		</dd>
+		<dd class="help">
+			Cette image sera utilisée dans les documents générés pour l'association.<br />
+			<strong>Attention&nbsp;:</strong> il est conseillé de <strong>ne pas mettre la vraie signature d'une personne</strong> mais de créer une signature ou un tampon spécifique. En effet n'importe quel membre connecté à la gestion de l'association peut recopier cette image.
+		</dd>
 	</dl>
 </fieldset>
 

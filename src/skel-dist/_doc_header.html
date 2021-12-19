@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{$title}}</title>
+	<style type="text/css">
+	{{:include file="_doc.css" page_size=$page_size}}
+	</style>
+</head>
+
+<body>
+
+<header class="organization">
+	{{if $config.files.logo}}
+	<figure class="logo">
+		<img src="{{$config.files.logo}}&150px" />
+	</figure>
+	{{/if}}
+	<section>
+		<h1>{{$config.nom_asso}}</h1>
+		<h2>Association « loi 1901 » à but non lucratif</h2>
+		<h3>{{$config.adresse_asso}}
+			{{if $config.telephone_asso}} — {{$config.telephone_asso}}{{/if}}
+			{{if $config.email_asso}} — {{$config.email_asso}}{{/if}}
+			{{if $config.site_asso}} — {{$config.site_asso}}{{/if}}</h3>
+	</section>
+</header>
+
+<main>

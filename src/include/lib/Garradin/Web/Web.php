@@ -5,6 +5,7 @@ namespace Garradin\Web;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Web\Skeleton;
+use Garradin\UserTemplate\Document;
 use Garradin\Files\Files;
 use Garradin\API;
 use Garradin\Config;
@@ -196,6 +197,20 @@ class Web
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
+		}
+		elseif (substr($uri, 0, 4) === 'doc/') {
+			$uri = substr($uri, 4);
+			$path = substr($uri, 0, strrpos($uri, '/'));
+			$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
+
+			$doc = Document::fromURI($path);
+			if (isset($_GET['pdf'])) {
+				$doc->PDF($file);
+			}
+			else {
+				$doc->display($file);
+			}
+			return;
 		}
 		elseif (($file = Files::getFromURI($uri))
 			|| ($file = self::getAttachmentFromURI($uri))) {

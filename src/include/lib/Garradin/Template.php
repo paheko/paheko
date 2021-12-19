@@ -68,11 +68,16 @@ class Template extends \KD2\Smartyer
 		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
+		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('help_url', HELP_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
-		$this->assign('is_logged', false);
+		$session = Session::getInstance();
+		$this->assign('config', Config::getInstance());
+		$this->assign('session', $session);
+
+		$this->assign('is_logged', $session->isLogged());
 		$this->assign('dialog', isset($_GET['_dialog']));
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
@@ -96,7 +101,6 @@ class Template extends \KD2\Smartyer
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('form_field', [$this, 'formField']);
 		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
-		$this->register_function('input', [$this, 'formInput']);
 		$this->register_function('password_change', [$this, 'passwordChangeInput']);
 
 		$this->register_function('custom_colors', [$this, 'customColors']);
@@ -107,11 +111,6 @@ class Template extends \KD2\Smartyer
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
 		});
-
-		$this->register_function('icon', [$this, 'widgetIcon']);
-		$this->register_function('button', [$this, 'widgetButton']);
-		$this->register_function('link', [$this, 'widgetLink']);
-		$this->register_function('linkbutton', [$this, 'widgetLinkButton']);
 
 		$this->register_modifier('strlen', 'strlen');
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
@@ -176,90 +175,6 @@ class Template extends \KD2\Smartyer
 		return '<p class="block error">' . $this->escape($params['message']) . '</p>';
 	}
 
-	protected function widgetIcon(array $params): string
-	{
-		$attributes = array_diff_key($params, ['shape']);
-		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, $this->escape($v)),
-			$attributes, array_keys($attributes));
-
-		$attributes = implode(' ', $attributes);
-
-		return sprintf('<b class="icn" %s>%s</b>', $attributes, Utils::iconUnicode($params['shape']));
-	}
-
-	protected function widgetLink(array $params): string
-	{
-		$href = $params['href'];
-		$label = $params['label'];
-
-		// href can be prefixed with '!' to make the URL relative to ADMIN_URL
-		if (substr($href, 0, 1) == '!') {
-			$href = ADMIN_URL . substr($params['href'], 1);
-		}
-
-		// propagate _dialog param if we are in an iframe
-		if (isset($_GET['_dialog']) && !isset($params['target'])) {
-			$href .= (strpos($href, '?') === false ? '?' : '&') . '_dialog';
-		}
-
-		if (!isset($params['class'])) {
-			$params['class'] = '';
-		}
-
-		unset($params['href'], $params['label']);
-
-		array_walk($params, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, $this->escape($v));
-		});
-
-		$params = implode(' ', $params);
-
-		return sprintf('<a href="%s" %s>%s</a>', $this->escape($href), $params, $this->escape($label));
-	}
-
-	protected function widgetButton(array $params): string
-	{
-		$icon = Utils::iconUnicode($params['shape']);
-		$label = isset($params['label']) ? $this->escape($params['label']) : '';
-		unset($params['label'], $params['shape']);
-
-		if (!isset($params['type'])) {
-			$params['type'] = 'button';
-		}
-
-		if (!isset($params['class'])) {
-			$params['class'] = '';
-		}
-
-		if (isset($params['name']) && !isset($params['value'])) {
-			$params['value'] = 1;
-		}
-
-		$params['class'] .= ' icn-btn';
-
-		array_walk($params, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, $this->escape($v));
-		});
-
-		$params = implode(' ', $params);
-
-		return sprintf('<button %s data-icon="%s">%s</button>', $params, $icon, $label);
-	}
-
-	protected function widgetLinkButton(array $params): string
-	{
-		$params['data-icon'] = Utils::iconUnicode($params['shape']);
-		unset($params['shape']);
-
-		if (!isset($params['class'])) {
-			$params['class'] = '';
-		}
-
-		$params['class'] .= ' icn-btn';
-
-		return $this->widgetLink($params);
-	}
-
 	protected function passwordChangeInput(array $params)
 	{
 		$out = $this->formInput(array_merge($params, [
@@ -282,230 +197,6 @@ class Template extends \KD2\Smartyer
 			'name' => $params['name'] . '_confirm',
 			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
 		]);
-
-		return $out;
-	}
-
-	protected function formInput(array $params)
-	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
-
-		// Extract params and keep attributes separated
-		$attributes = array_diff_key($params, array_flip($params_list));
-		$params = array_intersect_key($params, array_flip($params_list));
-		extract($params, \EXTR_SKIP);
-
-		if (!isset($name, $type)) {
-			throw new \InvalidArgumentException('Missing name or type');
-		}
-
-		$suffix = null;
-
-		if ($type == 'datetime') {
-			$type = 'date';
-			$tparams = func_get_arg(0);
-			$tparams['type'] = 'time';
-			$tparams['name'] = sprintf('%s_time', $name);
-			unset($tparams['label']);
-			$suffix = self::formInput($tparams);
-		}
-
-		$current_value = null;
-		$current_value_from_user = false;
-
-		if (isset($_POST[$name])) {
-			$current_value = $_POST[$name];
-			$current_value_from_user = true;
-		}
-		elseif (isset($source) && is_object($source) && isset($source->$name) && !is_null($source->$name)) {
-			$current_value = $source->$name;
-		}
-		elseif (isset($source) && is_array($source) && isset($source[$name])) {
-			$current_value = $source[$name];
-		}
-		elseif (isset($default) && ($type != 'checkbox' || empty($_POST))) {
-			$current_value = $default;
-		}
-
-		if ($type == 'date' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-			$current_value = $current_value->format('d/m/Y');
-		}
-		elseif ($type == 'time' && is_object($current_value) && $current_value instanceof \DateTimeInterface) {
-			$current_value = $current_value->format('H:i');
-		}
-		elseif ($type == 'date' && is_string($current_value)) {
-			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
-				$current_value = $v->format('d/m/Y');
-			}
-		}
-
-
-		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
-		$attributes['name'] = $name;
-
-		if (!isset($attributes['autocomplete']) && ($type == 'money' || $type == 'password')) {
-			$attributes['autocomplete'] = 'off';
-		}
-
-		if ($type == 'radio' || $type == 'checkbox') {
-			$attributes['id'] .= '_' . $value;
-
-			if ($current_value == $value && $current_value !== null) {
-				$attributes['checked'] = 'checked';
-			}
-
-			$attributes['value'] = $value;
-		}
-		elseif ($type == 'date') {
-			$type = 'text';
-			$attributes['placeholder'] = 'JJ/MM/AAAA';
-			$attributes['data-input'] = 'date';
-			$attributes['size'] = 12;
-			$attributes['maxlength'] = 10;
-			$attributes['pattern'] = '\d\d?/\d\d?/\d{4}';
-		}
-		elseif ($type == 'time') {
-			$type = 'text';
-			$attributes['placeholder'] = 'HH:MM';
-			$attributes['data-input'] = 'time';
-			$attributes['size'] = 8;
-			$attributes['maxlength'] = 5;
-			$attributes['pattern'] = '\d\d?:\d\d?';
-		}
-
-		// Create attributes string
-		if (!empty($attributes['required'])) {
-			$attributes['required'] = 'required';
-		}
-		else {
-			unset($attributes['required']);
-		}
-
-		if (!empty($attributes['disabled'])) {
-			$attributes['disabled'] = 'disabled';
-			unset($attributes['required']);
-		}
-		else {
-			unset($attributes['disabled']);
-		}
-
-		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
-			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
-		}
-		else {
-			$required_label =  ' <i>(facultatif)</i>';
-		}
-
-		// Fake required: doesn't set the required attribute, just the label
-		// (useful for form elements that are hidden by JS)
-		unset($attributes['fake_required']);
-
-		$attributes_string = $attributes;
-
-		array_walk($attributes_string, function (&$v, $k) {
-			$v = sprintf('%s="%s"', $k, $v);
-		});
-
-		$attributes_string = implode(' ', $attributes_string);
-
-		if ($type == 'select') {
-			$input = sprintf('<select %s>', $attributes_string);
-
-			foreach ($options as $_key => $_value) {
-				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
-			}
-
-			$input .= '</select>';
-		}
-		elseif ($type == 'select_groups') {
-			$input = sprintf('<select %s>', $attributes_string);
-
-			foreach ($options as $optgroup => $suboptions) {
-				$input .= sprintf('<optgroup label="%s">', $this->escape($optgroup));
-
-				foreach ($suboptions as $_key => $_value) {
-					$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', $this->escape($_value));
-				}
-
-				$input .= '</optgroup>';
-			}
-
-			$input .= '</select>';
-		}
-		elseif ($type == 'textarea') {
-			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, $this->escape($current_value));
-		}
-		elseif ($type == 'list') {
-			$multiple = !empty($attributes['multiple']);
-			$values = '';
-			$delete_btn = $this->widgetButton(['shape' => 'delete']);
-
-			if (null !== $current_value && is_iterable($current_value)) {
-				foreach ($current_value as $v => $l) {
-					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
-				}
-			}
-
-			$button = $this->widgetButton([
-				'shape' => $multiple ? 'plus' : 'menu',
-				'value' => (substr($attributes['target'], 0, 4) === 'http') ? $attributes['target'] : ADMIN_URL . $attributes['target'],
-				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
-				'data-multiple' => $multiple ? '1' : '0',
-				'data-name' => $name,
-			]);
-
-			$input = sprintf('<span id="%s_container" class="input-list">%s%s</span>', $this->escape($attributes['id']), $button, $values);
-		}
-		elseif ($type == 'money') {
-			if (null !== $current_value && !$current_value_from_user) {
-				$current_value = Utils::money_format($current_value, ',', '');
-			}
-
-			$currency = Config::getInstance()->get('monnaie');
-			$input = sprintf('<nobr><input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, $this->escape($current_value), $currency);
-		}
-		else {
-			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', $this->escape($current_value));
-			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
-		}
-
-		// No label? then we only want the input without the widget
-		if (empty($label)) {
-			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
-				$input .= sprintf('<label for="%s"></label>', $attributes['id']);
-			}
-
-			return $input;
-		}
-
-		if ($type == 'file') {
-			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
-		}
-
-		$input .= $suffix;
-
-		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $this->escape($label));
-
-		if ($type == 'radio' || $type == 'checkbox') {
-			$out = sprintf('<dd>%s %s', $input, $label);
-
-			if (isset($help)) {
-				$out .= sprintf(' <em class="help">(%s)</em>', $this->escape($help));
-			}
-
-			$out .= '</dd>';
-		}
-		else {
-			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
-
-			if ($type == 'file' && empty($params['no_size_limit'])) {
-				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
-			}
-
-			if (isset($help)) {
-				$out .= sprintf('<dd class="help">%s</dd>', $this->escape($help));
-			}
-		}
 
 		return $out;
 	}

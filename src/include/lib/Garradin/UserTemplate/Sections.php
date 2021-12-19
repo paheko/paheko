@@ -3,6 +3,7 @@
 namespace Garradin\UserTemplate;
 
 use KD2\Brindille_Exception;
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
 use Garradin\Entities\Web\Page;
@@ -15,6 +16,7 @@ use const Garradin\WWW_URL;
 class Sections
 {
 	const SECTIONS_LIST = [
+		'load',
 		'categories',
 		'articles',
 		'pages',
@@ -22,6 +24,9 @@ class Sections
 		'breadcrumbs',
 		'documents',
 		'files',
+		'users',
+		'transactions',
+		'transaction_users',
 		'sql',
 	];
 
@@ -34,6 +39,112 @@ class Sections
 		}
 
 		return self::$_cache[$id];
+	}
+
+	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$id) {
+			throw new Brindille_Exception('Unique document name could not be found');
+		}
+
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = 'document = :document';
+		}
+		else {
+			$params['where'] = 'document = :document AND ' . $params['where'];
+		}
+
+		$params[':document'] = $id;
+
+		if (isset($params['key'])) {
+			$params['where'] .= ' AND key = :key';
+			$params['limit'] = 1;
+			$params[':key'] = $params['key'];
+			unset($params['key']);
+		}
+
+		$params['select'] = isset($params['select']) ? $params['select'] . ' AS value' : 'value';
+		$params['tables'] = 'documents_data';
+
+		foreach (self::sql($params, $tpl, $line) as $row) {
+			yield json_decode($row['value'], true);
+		}
+	}
+
+
+	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$config = Config::getInstance();
+
+		$params['select'] = sprintf('*, %s AS user_name, %s AS user_login, %s AS user_number',
+			$config->champ_identite, $config->champ_identifiant, 'numero');
+		$params['tables'] = 'membres';
+
+		if (isset($params['id'])) {
+			$params['where'] = ' AND id = :id';
+			$params[':id'] = (int) $params['id'];
+			unset($params['id']);
+		}
+
+		if (empty($params['order'])) {
+			$params['order'] = 'id';
+		}
+
+		return self::sql($params, $tpl, $line);
+	}
+
+	static public function transactions(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		if (isset($params['id'])) {
+			$params['where'] = ' AND t.id = :id';
+			$params[':id'] = (int) $params['id'];
+			unset($params['id']);
+		}
+
+		$config = Config::getInstance();
+
+		$params['select'] = sprintf('t.*, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+			GROUP_CONCAT(DISTINCT a.code) AS accounts_codes,
+			GROUP_CONCAT(DISTINCT u.%s) AS users_names', $config->champ_identite);
+		$params['tables'] = 'acc_transactions AS t
+			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
+			INNER JOIN acc_accounts AS a ON l.id_account = a.id
+			LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+			LEFT JOIN membres u ON u.id = tu.id_user';
+		$params['group'] = 't.id';
+
+		return self::sql($params, $tpl, $line);
+	}
+
+	static public function transaction_users(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		if (isset($params['id_transaction'])) {
+			$params['where'] = ' AND tu.id_transaction = :id_transaction';
+			$params[':id_transaction'] = (int) $params['id_transaction'];
+			unset($params['id_transaction']);
+		}
+
+		$config = Config::getInstance();
+
+		$params['select'] = sprintf('tu.*, u.%s AS name, u.*', $config->champ_identite);
+		$params['tables'] = 'acc_transactions_users tu
+			INNER JOIN membres u ON u.id = tu.id_user';
+
+		return self::sql($params, $tpl, $line);
 	}
 
 	static public function breadcrumbs(array $params, UserTemplate $tpl, int $line): \Generator
@@ -270,33 +381,6 @@ class Sections
 		}
 	}
 
-	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
-	{
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = '';
-		}
-
-		$parent = $params['parent'];
-
-		$config = Config::getInstance();
-
-		$params['select'] = sprintf('*, %s AS user_name, %s AS user_login, %s AS user_number',
-			$config->champ_identite, $config->champ_identifiant, 'numero');
-		$params['tables'] = 'membres';
-
-		if (isset($params['id'])) {
-			$params['where'] = ' AND id = :id';
-			$params[':id'] = (int) $params['id'];
-			unset($params['id']);
-		}
-
-		if (empty($params['order'])) {
-			$params['order'] = 'id';
-		}
-
-		return self::sql($params, $tpl, $line);
-	}
-
 	static public function sql(array $params, UserTemplate $tpl, int $line): \Generator
 	{
 		static $defaults = [
@@ -361,7 +445,7 @@ class Sections
 			$result = $statement->execute();
 		}
 		catch (\Exception $e) {
-			throw new Brindille_Exception(sprintf("Erreur SQL à la ligne %d : %s\nRequête exécutée : %s", $line, $db->lastErrorMsg(), $sql));
+			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
 		}
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))

@@ -5,6 +5,7 @@ namespace Garradin\Entities\Files;
 use KD2\Graphics\Image;
 use KD2\DB\EntityManager as EM;
 
+use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Plugin;
@@ -823,7 +824,11 @@ class File extends Entity
 			return false;
 		}
 
-		if ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
+		// All config files can be accessed by all users
+		if ($context == self::CONTEXT_CONFIG) {
+			return true;
+		}
+		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 			return true;
 		}
 		// The user can access his own profile files
@@ -931,8 +936,16 @@ class File extends Entity
 	{
 		$context = $this->context();
 
-		if ($context == self::CONTEXT_SKELETON || $context == self::CONTEXT_CONFIG || $context == self::CONTEXT_WEB) {
+		if ($context == self::CONTEXT_SKELETON || $context == self::CONTEXT_WEB) {
 			return true;
+		}
+
+		if ($context == self::CONTEXT_CONFIG) {
+			$file = array_search($this->path, Config::FILES);
+
+			if ($file && in_array($file, Config::FILES_PUBLIC)) {
+				return true;
+			}
 		}
 
 		return false;
