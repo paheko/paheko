@@ -1,8 +1,6 @@
 <?php
 namespace Garradin;
 
-use Garradin\Files\Files;
-
 require_once __DIR__ . '/../_inc.php';
 
 $s = new Sauvegarde;
@@ -12,12 +10,6 @@ $form->runIf('download', function () use ($s) {
 	$s->dump();
 	exit;
 }, 'backup_download');
-
-// Download all files as ZIP
-$form->runIf('download_files', function () use ($s) {
-	$s->dumpFilesZip();
-	exit;
-}, 'files_download');
 
 // Create local backup
 $form->runIf('create', function () use ($s) {
@@ -48,10 +40,9 @@ $form->runIf('config', function () {
 }, 'backup_config', Utils::getSelfURI(['ok' => 'config']));
 
 $db_size = $s->getDBSize();
-$files_size = Files::getUsedQuota();
 
 $ok = qg('ok'); // return message
 
-$tpl->assign(compact('ok', 'db_size', 'files_size'));
+$tpl->assign(compact('ok', 'db_size'));
 
 $tpl->display('admin/config/backup/save.tpl');

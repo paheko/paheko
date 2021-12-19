@@ -178,11 +178,13 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetIcon(array $params): string
 	{
-		if (empty($params['href'])) {
-			return sprintf('<b class="icn">%s</b>', Utils::iconUnicode($params['shape']));
-		}
+		$attributes = array_diff_key($params, ['shape']);
+		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, $this->escape($v)),
+			$attributes, array_keys($attributes));
 
-		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
+		$attributes = implode(' ', $attributes);
+
+		return sprintf('<b class="icn" %s>%s</b>', $attributes, Utils::iconUnicode($params['shape']));
 	}
 
 	protected function widgetLink(array $params): string
@@ -286,7 +288,7 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -372,8 +374,11 @@ class Template extends \KD2\Smartyer
 		}
 
 		// Create attributes string
-		if (array_key_exists('required', $attributes)) {
+		if (!empty($attributes['required'])) {
 			$attributes['required'] = 'required';
+		}
+		else {
+			unset($attributes['required']);
 		}
 
 		if (!empty($attributes['disabled'])) {
@@ -493,7 +498,7 @@ class Template extends \KD2\Smartyer
 		else {
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
-			if ($type == 'file') {
+			if ($type == 'file' && empty($params['no_size_limit'])) {
 				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
 			}
 

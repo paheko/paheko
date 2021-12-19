@@ -176,10 +176,6 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			if (!isset($properties['label']) && !$include_hidden) {
-				continue;
-			}
-
 			$select = array_key_exists('select', $properties) ? $properties['select'] : $alias;
 
 			if (null === $select) {
@@ -214,6 +210,12 @@ class DynamicList implements \Countable
 		foreach (DB::getInstance()->iterate($sql) as $row) {
 			if ($this->modifier) {
 				call_user_func_array($this->modifier, [&$row]);
+			}
+
+			foreach ($this->columns as $key => $config) {
+				if (empty($config['label']) && !$include_hidden) {
+					unset($row->$key);
+				}
 			}
 
 			yield $row;

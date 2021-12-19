@@ -5,10 +5,10 @@ const LOGIN_PROCESS = true;
 require_once __DIR__ . '/_inc.php';
 
 $manifest = [
-	'background_color' => $config->couleur2,
-	'theme_color'      => $config->couleur1,
+	'background_color' => $config->couleur2 ?? ADMIN_COLOR2,
+	'theme_color'      => $config->couleur1 ?? ADMIN_COLOR1,
 	'description'      => 'Gestion de l\'association',
-	'display'          => 'fullscreen',
+	'display'          => 'standalone',
 	'name'             => $config->nom_asso,
 	'start_url'        => ADMIN_URL,
 	'icons'            => [

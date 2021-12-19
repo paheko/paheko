@@ -87,6 +87,10 @@ textarea, select, .input-list, .file-selector {
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
+textarea.full-width {
+    width: calc(100% - 1rem);
+}
+
 input:not(:placeholder-shown):focus:invalid {
     border-color: #f33;
 }
@@ -188,19 +192,66 @@ a.icn-btn {
     text-decoration: underline;
 }
 
-.submit .main {
+[data-icon]:before, .main[data-icon]:after {
+    display: inline-block;
+    font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px #ccc;
+    padding-right: .5em;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    content: attr(data-icon);
+}
+
+[data-icon]:empty:before {
+    padding: 0;
+}
+
+.icn, .icnl {
+    font-family: "gicon", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    font-variant: normal;
+    text-transform: none;
+    position: relative;
+}
+
+.actions .icn, .icn.action {
+    text-decoration: none;
+    border-radius: 1em;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    padding: .2em;
+    font-family: "gicon", sans-serif;
+    color: #9c4f15;
+    color: rgb(var(--gMainColor));
+    text-shadow: 1px 1px 1px #999;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 200;
+}
+
+
+button.main, .icn-btn.main {
     color: #000;
     font-size: 1.2em;
     border-radius: 1em;
     padding: .5em 1em;
 }
 
-.submit .main[data-icon]:before {
+button.main[data-icon]:before, .icn-btn.main:before {
     display: none;
 }
 
-p.submit .main[data-icon]:after {
-    padding: 0 0 0 .5rem;
+button.main[data-icon]:after, .icn-btn[data-icon]:after {
+    padding: 0;
+    padding-left: .5em;
+    padding-right: 0;
     color: rgba(var(--gSecondColor));
     font-size: 1.5rem;
     line-height: .2em;
@@ -453,50 +504,6 @@ dialog.datepicker {
     font-family: gicon;
 }
 
-[data-icon]:before, .main[data-icon]:after {
-    display: inline-block;
-    font-family: "gicon", sans-serif;
-    text-shadow: 1px 1px 1px #ccc;
-    padding-right: .5em;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    content: attr(data-icon);
-}
-
-[data-icon]:empty:before {
-    padding: 0;
-}
-
-.icn, .icnl {
-    font-family: "gicon", sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    speak: none;
-    font-variant: normal;
-    text-transform: none;
-    position: relative;
-}
-
-.actions .icn, .icn.action {
-    text-decoration: none;
-    border-radius: 1em;
-    display: inline-block;
-    text-align: center;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    padding: .2em;
-    font-family: "gicon", sans-serif;
-    color: #9c4f15;
-    color: rgb(var(--gMainColor));
-    text-shadow: 1px 1px 1px #999;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 200;
-}
-
 fieldset.memberMessage {
     max-width: 30em;
 }
@@ -604,11 +611,19 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     text-align: right;
 }
 
-.file-selector.uploading {
-    opacity: 0.3;
+/**
+ * Progress spinner
+ */
+.progressing {
+    position: relative;
 }
 
-.file-selector.uploading::after {
+fieldset.progressing > dl, fieldset.progressing > p {
+    opacity: 0.5;
+    filter: blur(3px);
+}
+
+.progressing::after {
     display: inline-block;
     content: " ";
     position: absolute;
@@ -619,10 +634,31 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     margin: auto;
     width: 50px;
     height: 50px;
-    border: 5px solid #000;
+    border: 5px solid #666;
     border-radius: 50%;
-    border-top-color: #999;
+    border-top-color: #ccc;
     animation: spin 1s ease-in-out infinite;
+    filter: none;
+}
+
+.progress-status {
+    display: none;
+}
+
+.progressing .progress-status {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    padding-top: 80px;
+    text-align: center;
+    width: 100%;
+    height: 1em;
+    filter: none !important;
+    color: #000;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
