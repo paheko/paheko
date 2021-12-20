@@ -24,7 +24,7 @@ class UserTemplate extends \KD2\Brindille
 {
 	public $_tpl_path;
 	protected $modified;
-	protected $file;
+	public $file;
 	protected $path;
 
 	static protected $root_variables;
@@ -100,7 +100,7 @@ class UserTemplate extends \KD2\Brindille
 		else {
 			$this->path = ROOT . '/skel-dist/' . $path;
 
-			if (!($this->modified = filemtime($this->path))) {
+			if (!($this->modified = @filemtime($this->path))) {
 				throw new \InvalidArgumentException('File not found: ' . $this->path);
 			}
 		}
@@ -132,8 +132,8 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		// Local modifiers
-		foreach (Modifiers::MODIFIERS_LIST as $name) {
-			$this->registerModifier($name, [Modifiers::class, $name]);
+		foreach (Modifiers::MODIFIERS_LIST as $key => $name) {
+			$this->registerModifier(is_int($key) ? $name : $key, is_int($key) ? [Modifiers::class, $name] : $name);
 		}
 
 		// Local functions

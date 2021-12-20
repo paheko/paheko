@@ -1,0 +1,171 @@
+{{if $logged_user.perm_accounting < $access_level.write}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+{{/if}}
+{{:admin_header title="Document" current="acc"}}
+
+{{if $_GET.key}}
+	{{#load key=$_GET.key}}
+		{{:assign .="doc"}}
+	{{/load}}
+{{/if}}
+
+{{if $doc.archived}}
+	{{:error message="Ce document est archivé et ne peut plus être modifié"}}
+{{/if}}
+
+{{if !$doc}}
+	{{#load select="COUNT(*) + 1 AS count" where="key LIKE \'doc_%\'"}}
+		{{:assign last_number=$count}}
+	{{/load}}
+	{{if !$last_number}}
+		{{:assign last_number=1}}
+	{{/if}}
+{{/if}}
+
+{{if $_POST.save}}
+	{{if !$_POST.date|trim|parse_date}}
+		<p class="error block">Date d'émission invalide ou vide.</p>
+	{{elseif $_POST.date_required|trim|parse_date === false}}
+		<p class="error block">Date d'échance invalide ou vide.</p>
+	{{else}}
+		{{:assign number=$_POST.number|trim}}
+
+		{{if $doc.paid_date}}
+			{{:assign date_paid=$doc.paid_date}}
+		{{elseif $_POST.paid && !$doc.paid}}
+			{{:assign date_paid=$now}}
+		{{else}}
+			{{:assign date_paid=null}}
+		{{/if}}
+
+		{{if $doc.type}}
+			{{:assign type=$doc.type}}
+		{{else}}
+			{{:assign type=$_POST.type}}
+		{{/if}}
+
+		{{:assign total=0}}
+
+		{{#foreach from=$_POST.rows}}
+			{{:assign amount=$value.amount|money_int}}
+			{{:assign total=$total|math:'+':$amount}}
+			{{:assign var="rows[]" label=$value.label|trim amount=$amount}}
+		{{/foreach}}
+
+		{{:save key="doc_%s"|args:$number
+			validate_schema="./document.schema.json"
+			number=$number
+			date=$_POST.date|parse_date
+			date_paid=$date_paid|parse_date
+			date_required=$date_required|parse_date
+			type=$type
+			archived=$_POST.archived|boolval
+			id_transaction=$doc.id_transaction
+			total=$total
+			rows=$rows
+		}}
+		<p class="block confirm">Document enregistré.</p>
+	{{/if}}
+{{/if}}
+
+<form method="post" action="" id="docForm" data-type="{{$doc.type}}">
+
+<fieldset>
+	<legend>Document</legend>
+	<dl>
+	{{if !$doc}}
+		<dt>Type</dt>
+		{{:input type="radio" name="type" value="quote" label="Devis" default="quote"}}
+		{{:input type="radio" name="type" value="invoice" label="Facture"}}
+	{{/if}}
+		{{:input required=true name="number" type="text" label="Numéro" help="Ce numéro doit être unique." source=$doc data-last-number=$last_number}}
+		{{:input required=true name="date" type="date" label="Date d'émission" source=$doc default=$now}}
+	</dl>
+	<dl class="invoice-only">
+		{{:input required=false name="date_required" type="date" label="Date d'échéance" source=$doc}}
+		{{:input type="checkbox" name="paid" value="1" label="Facture payée"}}
+	</dl>
+	<dl>
+		{{:input type="checkbox" name="archived" value="1" label="Archivé"}}
+		<dt><label for="f_client">Client</label></dt>
+		<dd>
+			<select name="client" id="f_client">
+				<option value="user">-- Membre de l'association</option>
+			</select>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>Lignes</legend>
+	<table class="list">
+		<thead>
+			<tr>
+				<th>Désignation</th>
+				<td>Montant</td>
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+		{{if !$rows && $doc.rows}}
+			{{:assign rows=$doc.rows}}
+		{{/if}}
+
+		{{if !$rows}}
+			<tr>
+				<th><textarea cols="50" rows="2" name="rows[0][label]" class="full-width"></textarea></th>
+				<td>{{:input type="money" name="rows[0][amount]"}}</td>
+				<td></td>
+			</tr>
+			<tr>
+				<th><textarea cols="50" rows="2" name="rows[1][label]" class="full-width"></textarea></th>
+				<td>{{:input type="money" name="rows[1][amount]"}}</td>
+				<td></td>
+			</tr>
+		{{else}}
+			{{#foreach from=$rows}}
+				<tr>
+					<th><textarea cols="50" rows="2" name="rows[{{$key}}][label]" class="full-width">{{$value.label}}</textarea></th>
+					<td>{{:input type="money" name="rows[%d][amount]"|args:$key default=$value.amount}}</td>
+					<td></td>
+				</tr>
+			{{/foreach}}
+		{{/if}}
+		</tbody>
+	</table>
+</fieldset>
+
+<p class="submit">
+	{{:button type="submit" name="save" label="Enregistrer" shape="right" class="main"}}
+</p>
+
+</form>
+
+<script type="text/javascript">
+(function () {
+	const form = $('#docForm');
+
+	$('#f_type_invoice, #f_type_quote').forEach((e) => {
+		e.onchange = () => typeChanged(e.value, true);
+	});
+
+	function typeChanged(t, change_number) {
+		if (change_number) {
+			let num = t == 'quote' ? 'D' : 'F';
+			num += $('#f_number').dataset.lastNumber;
+			$('#f_number').value = num;
+		}
+
+		g.toggle('.invoice-only', t == 'quote' ? false : true);
+	}
+
+	if (e = $('#f_type_invoice')) {
+		typeChanged(e.selected ? 'invoice' : 'quote', true);
+	}
+	else if (form.dataset.type) {
+		typeChanged(form.dataset.type, false);
+	}
+})();
+</script>
+
+{{:admin_footer}}

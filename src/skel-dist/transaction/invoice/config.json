@@ -1,0 +1,7 @@
+{
+	"name": "Devis",
+	"pdf": false,
+	"preview": false,
+	"config": "config.html",
+	"standalone": true
+}

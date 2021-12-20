@@ -4,6 +4,8 @@ namespace Garradin\UserTemplate;
 
 use Garradin\Utils;
 
+use KD2\Brindille_Exception;
+
 class Modifiers
 {
 	const PHP_MODIFIERS_LIST = [
@@ -31,6 +33,9 @@ class Modifiers
 		'wordwrap',
 		'strip_tags',
 		'strlen',
+		'boolval',
+		'intval',
+		'floatval',
 	];
 
 	const MODIFIERS_LIST = [
@@ -44,6 +49,9 @@ class Modifiers
 		'remove_leading_number',
 		'get_leading_number',
 		'spell_out_number',
+		'parse_date',
+		'math',
+		'money_int' => [Utils::class, 'moneyToInteger'],
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -145,5 +153,63 @@ class Modifiers
 	static public function spell_out_number($number, string $locale = 'fr_FR'): string
 	{
 		return numfmt_create($locale, \NumberFormatter::SPELLOUT)->format((float) $number);
+	}
+
+	static public function parse_date($value)
+	{
+		if ($value instanceof \DateTimeInterface) {
+			return $value->format('Y-m-d');
+		}
+
+		if (empty($value) || !is_string($value)) {
+			return null;
+		}
+
+		if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
+			return \DateTime::createFromFormat('!d/m/y', $value)->format('Y-m-d');
+		}
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
+			return \DateTime::createFromFormat('!d/m/Y', $value)->format('Y-m-d');
+		}
+		elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $value)) {
+			return $value;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static public function math($start, ... $params)
+	{
+		$tuples = array_chunk($params, 2);
+		foreach ($tuples as $tuple) {
+			if (count($tuple) !== 2) {
+				continue;
+			}
+
+			list($sign, $value) = $tuple;
+
+			if (!is_numeric($value) && !is_null($value)) {
+				throw new Brindille_Exception('Invalid numeric value for math modifier');
+			}
+
+			if ($sign == '+') {
+				$start += $value;
+			}
+			elseif ($sign == '-') {
+				$start -= $value;
+			}
+			elseif ($sign == '*') {
+				$start *= $value;
+			}
+			elseif ($sign == '/') {
+				$start /= $value;
+			}
+			else {
+				throw new Brindille_Exception('Invalid math operator, only + - * / are supported');
+			}
+		}
+
+		return $start;
 	}
 }

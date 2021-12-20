@@ -200,16 +200,7 @@ class Web
 		}
 		elseif (substr($uri, 0, 4) === 'doc/') {
 			$uri = substr($uri, 4);
-			$path = substr($uri, 0, strrpos($uri, '/'));
-			$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
-
-			$doc = Document::fromURI($path);
-			if (isset($_GET['pdf'])) {
-				$doc->PDF($file);
-			}
-			else {
-				$doc->display($file);
-			}
+			Document::serve($uri);
 			return;
 		}
 		elseif (($file = Files::getFromURI($uri))

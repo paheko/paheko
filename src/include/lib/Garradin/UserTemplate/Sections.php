@@ -65,11 +65,20 @@ class Sections
 			unset($params['key']);
 		}
 
-		$params['select'] = isset($params['select']) ? $params['select'] . ' AS value' : 'value';
+		$params['select'] = isset($params['select']) ? $params['select'] : 'value AS json';
 		$params['tables'] = 'documents_data';
 
 		foreach (self::sql($params, $tpl, $line) as $row) {
-			yield json_decode($row['value'], true);
+			if (isset($row['json'])) {
+				$json = json_decode($row['json'], true);
+
+				if (is_array($json)) {
+					unset($row['json']);
+					$row = array_merge($row, $json);
+				}
+			}
+
+			yield $row;
 		}
 	}
 

@@ -1,0 +1,71 @@
+{{if $logged_user.perm_accounting < $access_level.write}}
+	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
+{{/if}}
+{{:admin_header title="Devis et factures" current="acc"}}
+
+<nav class="tabs">
+	<aside>
+		{{:linkbutton href="edit.html" label="Nouveau document" shape="plus" target="_dialog"}}
+	</aside>
+
+	<ul>
+		<li{{if !$_GET.show}} class="current"{{/if}}><a href="./">Tous les documents</a></li>
+		<li{{if $_GET.show == 'quote'}} class="current"{{/if}}><a href="./?show=quote">Devis</a></li>
+		<li{{if $_GET.show == 'unpaid'}} class="current"{{/if}}><a href="./?show=unpaid">Factures en souffrance</a></li>
+		<li{{if $_GET.show == 'paid'}} class="current"{{/if}}><a href="./?show=paid">Factures réglées</a></li>
+		<li><a href="clients.html">Clients</a></li>
+	</ul>
+</nav>
+
+{{if $_GET.show == 'quote'}}
+	{{:assign filter="json_extract(value, '$.type') = 'quote'"}}
+{{elseif $_GET.show == 'paid'}}
+	{{:assign filter="json_extract(value, '$.type') = 'invoice' AND json_extract(value, '$.date_paid') IS NOT NULL"}}
+{{elseif $_GET.show == 'unpaid'}}
+	{{:assign filter="json_extract(value, '$.type') = 'invoice' AND json_extract(value, '$.date_paid') IS NULL"}}
+{{else}}
+	{{:assign filter="1"}}
+{{/if}}
+
+<table class="list">
+	<thead>
+		<tr>
+			<th>Numéro</th>
+			<td>Émission</td>
+			<td>Échéance</td>
+			<td>Tiers</td>
+			<td class="money">Montant</td>
+			<td>Statut</td>
+			<td></td>
+		</tr>
+	</thead>
+	<tbody>
+{{#load where="key != 'config' AND %s"|args:$filter select="value AS json, key, datetime(json_extract(value, '$.date')) AS date" order="date DESC"}}
+		<tr>
+			<th>{{$number}}</th>
+			<td>{{$date|date_short}}</td>
+			<td>{{$date_required|date_short}}</td>
+			<td></td>
+			<td class="money">{{$total|raw|money_currency}}</td>
+			<td>
+				{{if $archived}}
+					Archivé
+				{{elseif $date_paid}}
+					Payé le {{$date_paid|date_short}}
+				{{elseif $type == 'invoice'}}
+					En attente
+				{{/if}}
+			</td>
+			<td class="actions">
+				{{if !$archived}}
+				{{:linkbutton shape="edit" label="Modifier" href="edit.html?key=%s"|args:$key}}
+				{{/if}}
+			</td>
+		</tr>
+{{else}}
+		<tr><td colspan="6">Aucun document</td></tr>
+{{/load}}
+</tbody>
+</table>
+
+{{:admin_footer}}

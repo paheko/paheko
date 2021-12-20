@@ -5,6 +5,7 @@ namespace Garradin\UserTemplate;
 use KD2\Brindille;
 use KD2\Brindille_Exception;
 use KD2\ErrorManager;
+use KD2\JSONSchema;
 
 use Garradin\Config;
 use Garradin\DB;
@@ -45,7 +46,7 @@ class Functions
 		return $tpl->fetch('admin/_foot.tpl');
 	}
 
-	static public function save(array $params, Brindille $tpl): void
+	static public function save(array $params, Brindille $tpl, int $line): void
 	{
 		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
 
@@ -59,6 +60,21 @@ class Functions
 
 		$key = $params['key'];
 		unset($params['key']);
+
+		if (isset($params['validate_schema'])) {
+			$schema = self::read(['file' => $params['validate_schema']], $tpl, $line);
+			unset($params['validate_schema']);
+
+			try {
+				$s = JSONSchema::fromString($schema);
+				$s->validate($params);
+			}
+			catch (\RuntimeException $e) {
+				throw new Brindille_Exception(sprintf("line %d: error in validating data:\n%s\n\n%s",
+					$line, $e->getMessage(), json_encode($params, JSON_PRETTY_PRINT)));
+			}
+		}
+
 		$params = json_encode($params);
 
 		$db = DB::getInstance();
@@ -82,27 +98,36 @@ class Functions
 		throw new UserException($params['message']);
 	}
 
+	static protected function getFilePath(array $params, string $arg_name, UserTemplate $ut, int $line)
+	{
+		if (empty($params[$arg_name])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant pour la fonction "include"', $arg_name, $line));
+		}
+
+		if (strpos($params[$arg_name], '..') !== false) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" invalide', $line, $arg_name));
+		}
+
+		$path = $params[$arg_name];
+
+		if (substr($path, 0, 2) == './') {
+			$path = Utils::dirname($ut->_tpl_path) . substr($path, 1);
+		}
+
+		return $path;
+	}
+
 	static public function read(array $params, UserTemplate $ut, int $line): string
 	{
-		if (empty($params['file'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
-		}
+		$path = self::getFilePath($params, 'file', $ut, $line);
 
-		if (strpos($params['file'], '..') !== false) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" invalide', $line));
-		}
-
-		if (substr($params['file'], 0, 2) == './') {
-			$params['file'] = Utils::dirname($ut->_tpl_path) . substr($params['file'], 1);
-		}
-
-		$file = Files::get(File::CONTEXT_SKELETON . '/' . $params['file']);
+		$file = Files::get(File::CONTEXT_SKELETON . '/' . $path);
 
 		if ($file) {
 			$content = $file->fetch();
 		}
 		else {
-			$content = file_get_contents(ROOT . '/skel-dist/' . $params['file']);
+			$content = file_get_contents(ROOT . '/skel-dist/' . $path);
 		}
 
 		if (!empty($params['base64'])) {
@@ -125,33 +150,23 @@ class Functions
 
 	static public function include(array $params, UserTemplate $ut, int $line): void
 	{
-		if (empty($params['file'])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" manquant pour la fonction "include"', $line));
-		}
-
-		if (strpos($params['file'], '..') !== false) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "file" invalide', $line));
-		}
-
-		if (substr($params['file'], 0, 1) == './') {
-			$params['file'] = Utils::dirname($ut->_tpl_path) . substr($params['file'], 1);
-		}
+		$path = self::getFilePath($params, 'file', $ut, $line);
 
 		// Avoid recursive loops
 		$from = $ut->get('included_from') ?? [];
 
-		if (in_array($params['file'], $from)) {
-			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $params['file']));
+		if (in_array($path, $from)) {
+			throw new Brindille_Exception(sprintf('Ligne %d : boucle infinie d\'inclusion détectée : %s', $line, $path));
 		}
 
 		try {
-			$include = new UserTemplate($params['file']);
+			$include = new UserTemplate($path);
 		}
 		catch (\InvalidArgumentException $e) {
-			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $params['file']));
+			throw new Brindille_Exception(sprintf('Ligne %d : fonction "include" : le fichier à inclure "%s" n\'existe pas', $line, $path));
 		}
 
-		$params['included_from'] = array_merge($from, [$params['file']]);
+		$params['included_from'] = array_merge($from, [$path]);
 
 		$include->assignArray($params);
 		$include->display();

@@ -2,6 +2,7 @@
 
 namespace Garradin\UserTemplate;
 
+use Garradin\Membres\Session;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Files\Files;
@@ -38,6 +39,34 @@ class Document
 		return new self(strtok($uri, '/'), strtok(''));
 	}
 
+	static public function serve(string $uri): void
+	{
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			http_response_code(403);
+			throw new UserException('Merci de vous connecter pour accéder à ce document.');
+		}
+
+		$path = substr($uri, 0, strrpos($uri, '/'));
+		$file = substr($uri, strrpos($uri, '/') + 1) ?: 'index.html';
+
+		$doc = self::fromURI($path);
+
+		try {
+			if (isset($_GET['pdf'])) {
+				$doc->PDF($file);
+			}
+			else {
+				$doc->display($file);
+			}
+		}
+		catch (\InvalidArgumentException $e) {
+			http_response_code(404);
+			throw new UserException('Cette page de document n\'existe pas');
+		}
+	}
+
 	public function __construct(string $context, string $id)
 	{
 		if (!array_key_exists($context, self::CONTEXTS)) {
@@ -61,7 +90,14 @@ class Document
 			$this->dist = false;
 		}
 		else {
-			$config = file_get_contents(ROOT . '/skel-dist/' . $path . '/' . self::CONFIG_FILE);
+			$config_path = ROOT . '/skel-dist/' . $path . '/' . self::CONFIG_FILE;
+
+			$config = @file_get_contents($config_path);
+
+			if (!$config) {
+				throw new UserException(sprintf('Fichier "%s" manquant dans "skel-dist/%s"', self::CONFIG_FILE, $path));
+			}
+
 			$this->dist = true;
 		}
 
