@@ -254,7 +254,7 @@ class Session extends \KD2\UserSession
 		$query = sprintf('%s.%s.%s', $id, $expire, $hash);
 
 		$message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
-		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
+		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour modifier votre mot de passe.\n\n";
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
