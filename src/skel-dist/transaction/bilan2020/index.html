@@ -1,0 +1,570 @@
+{{:assign y1=3 y2=2}}
+{{*
+	Bilan comptable à la française. Oui c'est un peu le bordel !
+
+	Inspiré en partie de Odoo :
+	https://github.com/OCA/l10n-france/blob/14.0/l10n_fr_mis_reports/data/mis_report_pl.xml
+
+	https://github.com/OCA/l10n-france/blob/14.0/l10n_fr_mis_reports/data/mis_report_bs.xml
+
+	https://readthedocs.org/projects/oca-mis-builder/downloads/pdf/9.0/
+
+	https://www.plancomptable.com/titre-IV/titre-IV_chapitre-III_section-2.htm
+
+	Exemple : https://www.actioncontrelafaim.org/wp-content/uploads/2017/12/rapport_financier_2016_vdef.pdf
+
+	Mais sauf que bon ben ça n'existe pas pour le plan comptable associatif.
+*}}
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		border: 1px solid #000;
+		margin-bottom: 1em;
+		page-break-inside: avoid;
+	}
+	table th, table td {
+		padding: .2em .5em;
+		border-left: 1px solid #000;
+		border-right: 1px solid #000;
+	}
+	table thead th, table tfoot th, table thead td, table tfoot td {
+		border: 1px solid #000;
+	}
+	table thead {
+		background: #ccc;
+		text-align: center;
+		font-weight: bold;
+	}
+	table tbody th, b.money {
+		font-weight: normal;
+		text-align: left;
+	}
+	table tbody td {
+		width: 15%;
+		text-align: center;
+	}
+
+	table tbody .level2 th {
+		padding-left: 2em;
+	}
+
+	.total th, .total td, .total b.money {
+		font-weight: bold;
+	}
+
+	.total {
+		border-top: 1px solid #000;
+		border-bottom: 1px solid #000;
+	}
+
+	.italic {
+		font-style: italic;
+	}
+	</style>
+</head>
+
+<body>
+
+<table>
+	<thead>
+		<tr>
+			<th rowspan="2">ACTIF</th>
+			<td colspan="3">Exercice N</td>
+			<td>Exercice N-1</td>
+		</tr>
+		<tr>
+			<td>Brut</td>
+			<td>Amortissement et dépréciations (à déduire)</td>
+			<td>Net</td>
+			<td>Net</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>ACTIF IMMOBILISÉ</th>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	{{* On liste tous les comptes quelle que soit l'année, on récupérera les soldes par année ensuite *}}
+	{{:assign parent=null}}
+	{{#accounts_sums
+		codes="20%,21%,23%,24%,25%,26%,27%"
+		where="(id_year = %d OR id_year = %d)"|args:$y1:$y2
+		group="SUBSTR(code, 1, 3)"
+		having="SUM(balance) != 0"
+		order="code"}}
+		{{if $parent !== $code|substr:0:2}}
+			{{#accounts_sums
+				select="label, code"
+				limit=1
+				codes=$code|substr:0:2}}
+				{{:assign parent=$code}}
+				<tr>
+					<th>{{$label}}</th>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			{{/accounts_sums}}
+		{{/if}}
+
+		{{#accounts_sums codes="%s%%"|args:$code year=$y1 assign="c1"}}{{/accounts_sums}}
+
+		{{* On obtient le code de compte 28XX ou 29XX correspondant au compte 2XX *}}
+		{{:assign c1_end=$code|substr:1:2}}
+		{{:assign c2_codes="28%02d%%,29%1$02d%%"|args:$c1_end}}
+
+		{{#accounts_sums codes=$c2_codes year=$y1 assign="c2"}}{{/accounts_sums}}
+
+		{{:assign c3=$c1.balance|math:'-':$c2.balance}}
+
+		{{#accounts_sums codes="%s%%,%s"|args:$code:$c2_codes year=$y2 assign="c4"}}{{/accounts_sums}}
+		<tr class="level2">
+			<th>{{$label}}</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money:false}}</td>
+			<td>{{$c3|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+	{{/accounts_sums}}
+		<tr class="total">
+			<th>Total I</th>
+			<td>
+				{{#accounts_sums codes="20%,21%,23%,24%,25%,26%,27%" year=$y1 assign="t11"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{#accounts_sums codes="28%,29%" year=$y1 assign="t12"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{:assign t13=$t11.balance|math:'-':$t12.balance}
+				{{$t13|raw|money}}
+			</td>
+			<td>
+				{{#accounts_sums codes="2%" year=$y2 assign="t14"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+		</tr>
+		<tr>
+			<th>ACTIF CIRCULANT</th>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		{{#accounts_sums where="code LIKE '3%' AND code NOT LIKE '39%'" year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums where="code LIKE '39%'" year=$y1 assign="c2"}}{{/accounts_sums}}
+		{{:assign c3=$c1.balance|math:'-':$c2.balance}}
+		{{#accounts_sums where="code LIKE '3%'" year=$y2 assign="c4"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t22=$t22|math:"+":$c2.balance}}
+		{{:assign t23=$t23|math:"+":$c3}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr>
+			<th>Stocks et en-cours</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+			<td>{{$c3|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+		<tr>
+			<th>Créances</th>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		{{#accounts_sums codes="41%" year=$y1 assign="c1" where="balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="491%" year=$y1 assign="c2"}}{{/accounts_sums}}
+		{{:assign c3=$c1.balance|math:'-':$c2.balance}}
+		{{#accounts_sums codes="41%" year=$y2 assign="c4" where="balance > 0"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t22=$t22|math:"+":$c2.balance}}
+		{{:assign t23=$t23|math:"+":$c3}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr class="level2">
+			<th>Créances clients, usagers et comptes rattachés</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+			<td>{{$c3|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+		{{#accounts_sums codes="461%" year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="461%" year=$y2 assign="c4"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t23=$t23|math:"+":$c1.balance}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr class="level2">
+			<th>Créances reçues par legs ou donations</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td></td>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+		{{#accounts_sums codes="40%,42%,43%,44%,45%,461%,4671%,4687%" where="balance > 0" year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="496%" year=$y1 assign="c2"}}{{/accounts_sums}}
+		{{:assign c3=$c1.balance|math:'-':$c2.balance}}
+		{{#accounts_sums codes="40%,42%,43%,44%,45%,461%,4671%,4687%" where="balance > 0" year=$y2 assign="c4"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t22=$t22|math:"+":$c2.balance}}
+		{{:assign t23=$t23|math:"+":$c3}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr class="level2">
+			<th>Autres</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+			<td>{{$c3|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+		{{#accounts_sums codes="501%,502%,503%,504%,505%,506%,507%,508%" year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="59%" year=$y1 assign="c2"}}{{/accounts_sums}}
+		{{:assign c3=$c1.balance|math:'-':$c2.balance}}
+		{{#accounts_sums codes="501%,502%,503%,504%,505%,506%,507%,508%,59%" year=$y2 assign="c4"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t22=$t22|math:"+":$c2.balance}}
+		{{:assign t23=$t23|math:"+":$c3}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr>
+			<th>Valeurs mobilières de placement</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+			<td>{{$c3|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+		{{#accounts_sums codes="51%,53%" where="code NOT LIKE '5186%' AND balance < 0" year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="51%,53%" where="code NOT LIKE '5186%' AND balance < 0" year=$y2 assign="c4"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t23=$t23|math:"+":$c1.balance}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr>
+			<th>Disponibilités</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td></td>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+
+		{{#accounts_sums codes="486%" year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="486%" year=$y2 assign="c4"}}{{/accounts_sums}}
+		{{:assign t21=$t21|math:"+":$c1.balance}}
+		{{:assign t23=$t23|math:"+":$c1.balance}}
+		{{:assign t24=$t24|math:"+":$c4.balance}}
+		<tr>
+			<th>Charges constatées d'avance</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td></td>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c4.balance|raw|money}}</td>
+		</tr>
+
+		<tr class="total">
+			<th>Total II</th>
+			<td>
+				{{$t21|raw|money}}
+			</td>
+			<td>
+				{{$t22|raw|money}}
+			</td>
+			<td>
+				{{$t23|raw|money}}
+			</td>
+			<td>
+				{{$t24|raw|money}}
+			</td>
+		</tr>
+
+		<tr>
+			<th>Frais d'émission des emprunts (III)</th>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+		<tr>
+			<th>Primes de remboursement des emprunts (IV)<br />
+				Écarts de conversion Actif (V)</th>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+		<tr class="total">
+			<th>TOTAL GÉNÉRAL (I + II + III + IV + V)</th>
+			<td>
+				{{$t21|math:"+":$t11.balance|raw|money}}
+			</td>
+			<td>
+				{{$t22|math:"+":$t12.balance|raw|money}}
+			</td>
+			<td>
+				{{$t23|math:"+":$t13|raw|money}}
+			</td>
+			<td>
+				{{$t24|math:"+":$t14.balance|raw|money}}
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+
+<table>
+	<thead>
+		<tr>
+			<th>PASSIF</th>
+			<td>Exercice N</td>
+			<td>Exercice N-1</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>FONDS PROPRES</th>
+			<td></td>
+			<td></td>
+		</tr>
+	{{:assign parent=null}}
+	{{#accounts_sums
+		codes="10%,11%,12%,13%,14%"
+		where="(id_year = %d OR id_year = %d)"|args:$y1:$y2
+		group="SUBSTR(code, 1, 3)"
+		order="code"}}
+		{{if $parent !== $code|substr:0:2}}
+			{{#accounts_sums
+				select="label, code"
+				limit=1
+				codes=$code|substr:0:2}}
+				{{:assign parent=$code}}
+				<tr>
+					<th>{{$label}}</th>
+					<td></td>
+					<td></td>
+				</tr>
+			{{/accounts_sums}}
+		{{/if}}
+
+		{{#accounts_sums codes="%s%%"|args:$code year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="%s%%"|args:$code year=$y2 assign="c2"}}{{/accounts_sums}}
+		<tr class="level2">
+			<th>{{$label}}</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+	{{/accounts_sums}}
+		<tr class="total">
+			<th>Total I</th>
+			<td>
+				{{#accounts_sums codes="10%,11%,12%,13%,14%" year=$y1 assign="t11"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{#accounts_sums codes="10%,11%,12%,13%,14%" year=$y2 assign="t12"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+		</tr>
+
+		<tr>
+			<th>FONDS REPORTES ET DEDIES</th>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr class="italic">
+			<th>Fonds reportés liés aux legs ou donations</th>
+			<td>
+				{{#accounts_sums codes="191%" year=$y1}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{#accounts_sums codes="191%" year=$y2}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+		</tr>
+		<tr class="italic">
+			<th>Fonds dédiés</th>
+			<td>
+				{{#accounts_sums codes="19%" where="code NOT LIKE '191%'" year=$y1}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{#accounts_sums codes="19%" where="code NOT LIKE '191%'" year=$y2}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+		</tr>
+		<tr class="total">
+			<th>Total II</th>
+			<td>
+				{{#accounts_sums codes="19%" year=$y1 assign="t21"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{#accounts_sums codes="19%" year=$y2 assign="t22"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+		</tr>
+
+		<tr>
+			<th>PROVISIONS</th>
+			<td></td>
+			<td></td>
+		</tr>
+	{{:assign parent=null}}
+	{{#accounts_sums
+		codes="15%"
+		where="(id_year = %d OR id_year = %d)"|args:$y1:$y2
+		group="SUBSTR(code, 1, 3)"
+		order="code"}}
+		{{if $parent !== $code|substr:0:2}}
+			{{#accounts_sums
+				select="label, code"
+				limit=1
+				codes=$code|substr:0:2}}
+				{{:assign parent=$code}}
+				<tr>
+					<th>{{$label}}</th>
+					<td></td>
+					<td></td>
+				</tr>
+			{{/accounts_sums}}
+		{{/if}}
+
+		{{#accounts_sums codes="%s%%"|args:$code year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="%s%%"|args:$code year=$y2 assign="c2"}}{{/accounts_sums}}
+		<tr class="level2">
+			<th>{{$label}}</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+	{{/accounts_sums}}
+
+		<tr class="total">
+			<th>Total III</th>
+			<td>
+				{{#accounts_sums codes="15%" year=$y1 assign="t31"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+			<td>
+				{{#accounts_sums codes="15%" year=$y2 assign="t32"}}{{$balance|raw|money}}{{/accounts_sums}}
+			</td>
+		</tr>
+
+		<tr>
+			<th>DETTES</th>
+			<td></td>
+			<td></td>
+		</tr>
+	{{:assign parent=null t41=0 t42=0}}
+	{{#accounts_sums
+		codes="16%"
+		where="(id_year = %d OR id_year = %d)"|args:$y1:$y2
+		group="SUBSTR(code, 1, 3)"
+		order="code"}}
+		{{if $parent !== $code|substr:0:2}}
+			{{#accounts_sums
+				select="label, code"
+				limit=1
+				codes=$code|substr:0:2}}
+				{{:assign parent=$code}}
+				<tr>
+					<th>{{$label}}</th>
+					<td></td>
+					<td></td>
+				</tr>
+			{{/accounts_sums}}
+		{{/if}}
+
+		{{#accounts_sums codes="%s%%"|args:$code year=$y1 assign="c1"}}{{/accounts_sums}}
+		{{#accounts_sums codes="%s%%"|args:$code year=$y2 assign="c2"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>{{$label}}</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+	{{/accounts_sums}}
+
+		{{#accounts_sums codes="40%" year=$y1 assign="c1" where="code NOT LIKE '404%' AND code NOT LIKE '405%' AND balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="40%" year=$y2 assign="c2" where="code NOT LIKE '404%' AND code NOT LIKE '405%' AND balance > 0"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>Dettes Fournisseurs et Comptes rattachés</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+
+		{{#accounts_sums codes="466%" year=$y1 assign="c1" where="balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="466%" year=$y2 assign="c2" where="balance > 0"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>Dettes des legs ou donations</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+
+		{{#accounts_sums codes="43%,44%" year=$y1 assign="c1" where="code NOT LIKE '4487%' AND balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="43%,44%" year=$y2 assign="c2" where="code NOT LIKE '4487%' AND balance > 0"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>Dettes fiscales et sociales</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+
+
+		{{#accounts_sums codes="404%,405%" year=$y1 assign="c1" where="balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="404%,405%" year=$y2 assign="c2" where="balance > 0"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>Dettes sur immobilisations et comptes rattachés</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+
+		{{#accounts_sums codes="41%,42%,45%,405%,4672%,4686%" year=$y1 assign="c1" where="balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="41%,42%,45%,405%,4672%,4686%" year=$y2 assign="c2" where="balance > 0"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>Autres dettes</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+
+		{{* Instruments de trésorerie (52XX) ne concerne pas les associations ? *}}
+
+		{{#accounts_sums codes="487%" year=$y1 assign="c1" where="balance > 0"}}{{/accounts_sums}}
+		{{#accounts_sums codes="487%" year=$y2 assign="c2" where="balance > 0"}}{{/accounts_sums}}
+		{{:assign t41=$t41|math:"+":$c1.balance}}
+		{{:assign t42=$t42|math:"+":$c2.balance}}
+		<tr class="level2">
+			<th>Produits constatés d’avance</th>
+			<td>{{$c1.balance|raw|money}}</td>
+			<td>{{$c2.balance|raw|money}}</td>
+		</tr>
+
+		<tr class="total">
+			<th>Total IV</th>
+			<td>
+				{{$t41|raw|money}}
+			</td>
+			<td>
+				{{$t42|raw|money}}
+			</td>
+		</tr>
+
+		<tr>
+			<th>Ecarts de conversion Passif (V)</th>
+			<td></td>
+			<td></td>
+		</tr>
+
+		<tr class="total">
+			<th>TOTAL GÉNÉRAL (I + II + III + IV + V)</th>
+			<td>{{$t11.balance|math:'+':$t21.balance:'+':$t31.balance:'+':$t41.balance|raw|money}}</td>
+			<td>{{$t12.balance|math:'+':$t22.balance:'+':$t32.balance:'+':$t42.balance|raw|money}}</td>
+		</tr>
+	</tbody>
+</table>
+
+</body>
+</html>

@@ -373,6 +373,18 @@ class Upgrade
 				$db->begin();
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
 				$db->commit();
+
+				// Move skeletons from skel/ to skel/web/
+				Files::rename(File::CONTEXT_SKELETON, File::CONTEXT_SKELETON . '/web');
+
+				// Prepend "./" to includes functions file parameter
+				foreach (Files::list(File::CONTEXT_SKELETON . '/web') as $file) {
+					if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
+						continue;
+					}
+
+					$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
+				}
 			}
 
 			// Vérification de la cohérence des clés étrangères

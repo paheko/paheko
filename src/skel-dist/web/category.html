@@ -1,6 +1,6 @@
-{{:include file="_head.html" title=$page.title}}
+{{:include file="./_head.html" title=$page.title}}
 
-{{:include file="_breadcrumbs.html" parent=$page.path}}
+{{:include file="./_breadcrumbs.html" parent=$page.path}}
 
 <section class="subcategories">
 	{{#categories parent=$page.path order="title"}}
@@ -15,8 +15,8 @@
 
 	{{$page.html|raw}}
 
-	{{:include file="gallery.html" parent=$page.path}}
-	{{:include file="documents.html" parent=$page.path}}
+	{{:include file="./gallery.html" parent=$page.path}}
+	{{:include file="./documents.html" parent=$page.path}}
 </article>
 
 <section class="articles">
@@ -29,4 +29,4 @@
 	{{/articles}}
 </section>
 
-{{:include file="_foot.html"}}
+{{:include file="./_foot.html"}}
