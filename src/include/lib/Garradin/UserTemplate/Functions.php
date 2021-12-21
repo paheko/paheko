@@ -75,7 +75,7 @@ class Functions
 		}
 
 		if (empty($params['key'])) {
-			throw new Brindille_Exception('Saving key is empty but is mandatory');
+			$params['key'] = Utils::uuid();
 		}
 
 		$key = $params['key'];
