@@ -380,4 +380,4 @@ CREATE TABLE IF NOT EXISTS documents_data
     value TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX documents_data_key ON documents_data (document, key);
+CREATE UNIQUE INDEX IF NOT EXISTS documents_data_key ON documents_data (document, key);

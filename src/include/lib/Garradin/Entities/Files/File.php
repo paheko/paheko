@@ -152,14 +152,7 @@ class File extends Entity
 
 	public function accessContext(): string
 	{
-		$part1 = strtok($this->path, '/');
-
-		// For templates, each subdirectory has different access permissions
-		if ($part1 == self::CONTEXT_TEMPLATE) {
-			return strtok('/');
-		}
-
-		return $part1;
+		return strtok($this->path, '/');
 	}
 
 	public function fullpath(): string
@@ -903,10 +896,6 @@ class File extends Entity
 		}
 
 		$context = strtok($path, '/');
-
-		if ($context == self::CONTEXT_TEMPLATE) {
-			$context = strtok('/');
-		}
 
 		switch ($context) {
 			case self::CONTEXT_WEB:

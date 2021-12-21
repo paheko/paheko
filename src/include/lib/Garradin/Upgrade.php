@@ -372,18 +372,27 @@ class Upgrade
 			if (version_compare($v, '1.2.0', '<')) {
 				$db->begin();
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
+				$files = $db->firstColumn('SELECT value FROM config WHERE key = \'files\';');
+				$files = json_decode($files);
+				$files->signature = null;
+				$db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
 				$db->commit();
 
 				// Move skeletons from skel/ to skel/web/
-				Files::rename(File::CONTEXT_SKELETON, File::CONTEXT_SKELETON . '/web');
+				// Don't use Files::get to get around validatePath security
+				$file = Files::callStorage('get', File::CONTEXT_SKELETON);
 
-				// Prepend "./" to includes functions file parameter
-				foreach (Files::list(File::CONTEXT_SKELETON . '/web') as $file) {
-					if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
-						continue;
+				if ($file) {
+					$file->rename(File::CONTEXT_SKELETON . '/web');
+
+					// Prepend "./" to includes functions file parameter
+					foreach (Files::list(File::CONTEXT_SKELETON . '/web') as $file) {
+						if ($file->type != File::TYPE_FILE || !preg_match('/\.(?:txt|css|js|html|htm)$/', $file->name)) {
+							continue;
+						}
+
+						$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
 					}
-
-					$file->setContent(preg_replace('/(\s+file=")(\w+)/', '$1./$2', $file->fetch()));
 				}
 			}
 
