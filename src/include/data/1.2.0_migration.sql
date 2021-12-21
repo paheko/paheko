@@ -15,7 +15,7 @@ AS
     SELECT t.id_year, a.id, a.label, a.code, a.position,
         SUM(l.credit) AS credit,
         SUM(l.debit) AS debit,
-        SUM(l.credit - l.debit) AS balance
+        CASE WHEN a.position IN (4, 1) THEN SUM (l.debit - l.credit) ELSE SUM(l.credit - l.debit)  END AS balance
     FROM acc_accounts a
     LEFT JOIN acc_transactions_lines l ON l.id_account = a.id
     LEFT JOIN acc_transactions t ON t.id = l.id_transaction
