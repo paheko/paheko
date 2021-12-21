@@ -46,6 +46,26 @@ class Functions
 		return $tpl->fetch('admin/_foot.tpl');
 	}
 
+	static public function create_index(array $params, Brindille $tpl, int $line): void
+	{
+		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
+
+		if (!$id) {
+			throw new Brindille_Exception('Unique document name could not be found');
+		}
+
+		if (empty($params['name']) || !ctype_alnum($params['name'])) {
+			throw new Brindille_Exception('Missing or invalid index name');
+		}
+
+		if (empty($params['columns'])) {
+			throw new Brindille_Exception('Missing or invalid index columns');
+		}
+
+		$db = DB::getInstance();
+		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS documents_%s_%s ON documents_data (document, %s);', $id, $params['name'], $params['columns']));
+	}
+
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
 		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
