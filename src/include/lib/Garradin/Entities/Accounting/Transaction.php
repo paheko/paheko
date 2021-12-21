@@ -123,7 +123,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
 
-		if (null === $this->_lines || $restrict_year === false) {
+		if ($restrict_year === false) {
 			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
 			$sql = sprintf('SELECT
 				l.*, a.label AS account_name, a.code AS account_code,
@@ -152,6 +152,9 @@ class Transaction extends Entity
 				}
 			}
 
+			// Remove NULL accounts
+			$accounts = array_filter($accounts);
+
 			if (count($accounts)) {
 				$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
 				$this->_accounts += $db->getGrouped($sql);
@@ -159,8 +162,8 @@ class Transaction extends Entity
 
 			foreach ($this->getLines() as $line) {
 				$account = [
-					'account_code' => $this->_accounts[$line->id_account]->code,
-					'account_name' => $this->_accounts[$line->id_account]->label,
+					'account_code' => $this->_accounts[$line->id_account]->code ?? null,
+					'account_name' => $this->_accounts[$line->id_account]->label ?? null,
 					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
 				];
 
@@ -261,6 +264,11 @@ class Transaction extends Entity
 		return current($lines)->id_analytical;
 	}
 
+	public function related(): ?Transaction
+	{
+		return $this->_related;
+	}
+
 	public function getTypesAccounts()
 	{
 		if ($this->type == self::TYPE_ADVANCED) {
@@ -322,6 +330,11 @@ class Transaction extends Entity
 		foreach ($lines as $l) {
 			$line = new Line;
 			foreach ($copy as $field) {
+				// Do not copy id_account when it is null, as it will trigger an error (invalid entity)
+				if ($field == 'id_account' && !isset($l->$field)) {
+					continue;
+				}
+
 				$line->$field = $l->$field;
 			}
 
@@ -414,12 +427,6 @@ class Transaction extends Entity
 			if ($line->exists()) {
 				$line->delete();
 			}
-		}
-
-		// Remove flag
-		if (!$exists && $this->_related) {
-			$this->_related->markPaid();
-			$this->_related->save();
 		}
 
 		return true;
@@ -835,6 +842,7 @@ class Transaction extends Entity
 			'form_account_name' => sprintf('account_%d_%d', $this->type, 0),
 			// input name for the account selector, for selecting a bank/cash account
 			'form_target_name' => sprintf('account_%d_%d', $this->type, 1),
+			'id_analytical' => $this->_related->getAnalyticalId(),
 		];
 
 		foreach ($this->_related->getLines() as $line) {
