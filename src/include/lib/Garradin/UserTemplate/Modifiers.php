@@ -36,6 +36,7 @@ class Modifiers
 		'boolval',
 		'intval',
 		'floatval',
+		'substr',
 	];
 
 	const MODIFIERS_LIST = [
