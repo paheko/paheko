@@ -316,13 +316,15 @@ class Transaction extends Entity
 			$new->$field = $this->$field;
 		}
 
-		$copy = ['credit', 'debit', 'id_account', 'label', 'reference'];
+		$copy = ['credit', 'debit', 'id_account', 'label', 'reference', 'id_analytical'];
 		$lines = DB::getInstance()->get('SELECT
-				l.credit, l.debit, l.label, l.reference, b.id AS id_account
+				l.credit, l.debit, l.label, l.reference, b.id AS id_account, c.id AS id_analytical
 			FROM acc_transactions_lines l
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			LEFT JOIN acc_accounts b ON b.code = a.code AND b.id_chart = ?
+			LEFT JOIN acc_accounts c ON c.id = l.id_analytical AND c.id_chart = ?
 			WHERE l.id_transaction = ?;',
+			$year->chart()->id,
 			$year->chart()->id,
 			$this->id()
 		);
@@ -504,7 +506,7 @@ class Transaction extends Entity
 		$amount = $source['amount'];
 
 		$key = 'account_transfer';
-		$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+		$account = @key($source[$key]);
 
 		$line = new Line;
 		$line->importForm([
@@ -540,7 +542,7 @@ class Transaction extends Entity
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
-				$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+				$line['id_account'] = @key($line['account']);
 
 				if (!$line['id_account']) {
 					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ((int) $i+1));
@@ -575,11 +577,11 @@ class Transaction extends Entity
 				$credit = $account->position == 'credit' ? $amount : 0;
 				$debit = $account->position == 'debit' ? $amount : 0;
 				$key = sprintf('account_%d_%d', $type, $k);
-				$account = isset($source[$key]) && @count($source[$key]) ? key($source[$key]) : null;
+				$account = @key($source[$key]);
 
 				$line = new Line;
 				$line->importForm([
-					'reference'     => $source['payment_reference'],
+					'reference'     => !empty($source['payment_reference']) ? $source['payment_reference'] : null,
 					'credit'        => $credit,
 					'debit'         => $debit,
 					'id_account'    => $account,
@@ -629,7 +631,7 @@ class Transaction extends Entity
 		$debit = $credit = 0;
 
 		foreach ($lines as $k => $line) {
-			$line['id_account'] = @count($line['account']) ? key($line['account']) : null;
+			$line['id_account'] = @key($line['account']);
 
 			try {
 				$line = (new Line)->importForm($line);
