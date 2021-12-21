@@ -27,6 +27,7 @@ class Sections
 		'users',
 		'transactions',
 		'transaction_users',
+		'accounts_sums',
 		'sql',
 	];
 
@@ -82,6 +83,46 @@ class Sections
 		}
 	}
 
+	static public function accounts_sums(array $params, UserTemplate $tpl, int $line): \Generator
+	{
+		$db = DB::getInstance();
+
+		$table = self::cache('accounts_sums', function () use ($db) {
+			$db->exec('CREATE TEMP TABLE IF NOT EXISTS tmp_acc_sums AS SELECT * FROM acc_accounts_sums WHERE 0;
+				INSERT INTO tmp_acc_sums SELECT * FROM acc_accounts_sums;');
+			return 'tmp_acc_sums';
+		});
+
+		if (!array_key_exists('where', $params)) {
+			$params['where'] = '';
+		}
+
+		$params['tables'] = $table;
+
+		if (isset($params['codes'])) {
+			$params['codes'] = explode(',', $params['codes']);
+
+			foreach ($params['codes'] as &$code) {
+				$code = 'code LIKE ' . $db->quote($code);
+			}
+
+			$params['where'] .= sprintf(' AND (%s)', implode(' OR ', $params['codes']));
+
+			unset($code, $params['codes']);
+		}
+
+		if (isset($params['year'])) {
+			$params['where'] .= ' AND id_year = :year';
+			$params[':year'] = $params['year'];
+			unset($params['year']);
+		}
+
+		$params['select'] = $params['select'] ?? 'SUM(credit) AS credit, SUM(debit) AS debit, SUM(balance) AS balance, label, code';
+
+		foreach (self::sql($params, $tpl, $line) as $row) {
+			yield $row;
+		}
+	}
 
 	static public function users(array $params, UserTemplate $tpl, int $line): \Generator
 	{
@@ -420,11 +461,12 @@ class Sections
 			$params['where'] = ' AND ' . $params['where'];
 		}
 
-		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s ORDER BY %s LIMIT %d,%d;',
+		$sql = sprintf('SELECT %s FROM %s WHERE 1 %s %s %s ORDER BY %s LIMIT %d,%d;',
 			$params['select'],
 			$params['tables'],
 			$params['where'] ?? '',
 			isset($params['group']) ? 'GROUP BY ' . $params['group'] : '',
+			isset($params['having']) ? 'HAVING ' . $params['having'] : '',
 			$params['order'],
 			$params['begin'],
 			$params['limit']
@@ -459,6 +501,10 @@ class Sections
 
 		while ($row = $result->fetchArray(\SQLITE3_ASSOC))
 		{
+			if (isset($params['assign'])) {
+				$tpl->assign($params['assign'], $row, 0);
+			}
+
 			yield $row;
 		}
 	}

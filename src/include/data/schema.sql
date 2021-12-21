@@ -149,6 +149,18 @@ CREATE TABLE IF NOT EXISTS acc_accounts
     user INTEGER NOT NULL DEFAULT 1 -- 0 = fait partie du plan comptable original, 1 = a été ajouté par l'utilisateur
 );
 
+-- Balance des comptes par exercice
+CREATE VIEW IF NOT EXISTS acc_accounts_sums
+AS
+    SELECT t.id_year, a.id, a.label, a.code, a.position,
+        SUM(l.credit) AS credit,
+        SUM(l.debit) AS debit,
+        CASE WHEN a.position IN (4, 1) THEN SUM (l.debit - l.credit) ELSE SUM(l.credit - l.debit)  END AS balance
+    FROM acc_accounts a
+    LEFT JOIN acc_transactions_lines l ON l.id_account = a.id
+    LEFT JOIN acc_transactions t ON t.id = l.id_transaction
+    GROUP BY t.id_year, a.id;
+
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
 CREATE INDEX IF NOT EXISTS acc_accounts_type ON acc_accounts (type);
 CREATE INDEX IF NOT EXISTS acc_accounts_position ON acc_accounts (position);
