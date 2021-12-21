@@ -183,6 +183,14 @@
 		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
 	};
 
+	g.reloadParentDialog = () => {
+		if (!window.parent.g.dialog) {
+			return;
+		}
+
+		location.href = window.parent.g.dialog.querySelector('iframe').getAttribute('src');
+	};
+
 	g.setParentDialogHeight = (height) => {
 		if (!window.parent.g.dialog) {
 			return;

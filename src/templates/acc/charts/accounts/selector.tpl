@@ -5,6 +5,13 @@
 
 {else}
 
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+	<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
+	<nav class="tabs">
+		<aside>{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside>
+	</nav>
+{/if}
+
 	<h2 class="ruler">
 		<input type="text" placeholder="Recherche rapide" id="lookup" />
 		{if !isset($grouped_accounts)}
