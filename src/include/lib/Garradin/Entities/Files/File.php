@@ -85,7 +85,6 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_SKELETON = 'skel';
-	const CONTEXT_TEMPLATE = 'template';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -94,7 +93,6 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_SKELETON => 'Squelettes',
-		self::CONTEXT_TEMPLATE => 'Modèles',
 	];
 
 	const IMAGE_TYPES = [
@@ -243,6 +241,7 @@ class File extends Entity
 			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
 		}
 
+		self::ensureDirectoryExists(Utils::dirname($new_path));
 		$return = Files::callStorage('move', $this, $new_path);
 
 		Plugin::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
