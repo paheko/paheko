@@ -53,5 +53,6 @@ nav.tabs li a:hover {
 nav.tabs aside {
     float: right;
     max-width: 50%;
-    text-align: right
+    text-align: right;
+    clear: right;
 }
