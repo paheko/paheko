@@ -198,15 +198,17 @@ class Account extends Entity
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
+		$sum = 0;
+
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
+			$sum = $this->getSumAtDate($year_id, $start);
 		}
 
 		if ($end) {
 			$conditions .= sprintf(' AND t.date <= %s', $db->quote($end->format('Y-m-d')));
 		}
 
-		$sum = 0;
 		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
 
 		if ($simple) {
