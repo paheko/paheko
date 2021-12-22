@@ -134,9 +134,10 @@ class Service extends Entity
 		return $list;
 	}
 
-	public function getUsersIds(bool $paid_only = false) {
+	public function getUsers(bool $paid_only = false) {
 		$where = $paid_only ? 'AND paid = 1' : '';
-		$sql = sprintf('SELECT id_user, id_user FROM services_users WHERE id_service = ? %s;', $where);
+		$id_field = Config::getInstance()->champ_identite;
+		$sql = sprintf('SELECT su.id_user, u.%s FROM services_users su INNER JOIN membres u ON u.id = su.id_user WHERE su.id_service = ? %s;', $id_field, $where);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 }
