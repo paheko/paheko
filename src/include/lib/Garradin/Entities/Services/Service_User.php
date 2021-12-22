@@ -45,8 +45,28 @@ class Service_User extends Entity
 		$this->paid = (bool) $this->paid;
 		$this->assert($this->id_service, 'Aucune activité spécifiée');
 		$this->assert($this->id_user, 'Aucun membre spécifié');
-		$this->assert($this->exists() || !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d')), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
-		$this->assert(!$this->exists() || !DB::getInstance()->test(self::TABLE, 'id_user = ? AND id_service = ? AND date = ? AND id != ?', $this->id_user, $this->id_service, $this->date->format('Y-m-d'), $this->id()), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+		$this->assert(!$this->isDuplicate(), 'Cette activité a déjà été enregistrée pour ce membre et cette date');
+	}
+
+	public function isDuplicate(bool $using_date = true): bool
+	{
+		$params = [
+			'id_user' => $this->id_user,
+			'id_service' => $this->id_service,
+		];
+
+		if ($using_date) {
+			$params['date'] = $this->date->format('Y-m-d');
+		}
+
+		if ($this->exists()) {
+			$params['id'] = $this->id();
+		}
+
+		$where = array_map(fn($k) => sprintf('%s = ?', $k), array_keys($params));
+		$where = implode(' AND ', $where);
+
+		return DB::getInstance()->test(self::TABLE, $where, array_values($params));
 	}
 
 	public function importForm(?array $source = null)
@@ -141,7 +161,7 @@ class Service_User extends Entity
 		return $transaction;
 	}
 
-	static public function saveFromForm(int $user_id, ?array $source = null)
+	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -150,28 +170,40 @@ class Service_User extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		$su = new self;
-		$su->date = new \DateTime;
-		$su->importForm($source);
+		foreach ($users as $id => $name) {
+			$su = new self;
+			$su->date = new \DateTime;
+			$su->importForm($source);
+			$su->id_user = (int) $id;
 
-		if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
-			$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
-		}
-
-		$su->save();
-
-		if ($su->id_fee && $su->fee()->id_account
-			&& !empty($source['amount'])
-			&& !empty($source['create_payment'])) {
-			try {
-				$su->addPayment($user_id, $source);
+			if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
+				$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 			}
-			catch (ValidationException $e) {
-				if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {
-					throw new ValidationException('Impossible d\'enregistrer l\'inscription : ce tarif d\'activité est lié à un exercice clôturé. Merci de modifier le tarif et choisir un autre exercice.', 0, $e);
+
+			if ($su->isDuplicate($from_copy ? false : true)) {
+				if ($from_copy) {
+					continue;
 				}
 				else {
-					throw $e;
+					throw new ValidationException(sprintf('%s : Cette activité a déjà été enregistrée pour ce membre et cette date', $name));
+				}
+			}
+
+			$su->save();
+
+			if ($su->id_fee && $su->fee()->id_account
+				&& !empty($source['amount'])
+				&& !empty($source['create_payment'])) {
+				try {
+					$su->addPayment($creator_id, $source);
+				}
+				catch (ValidationException $e) {
+					if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {
+						throw new ValidationException('Impossible d\'enregistrer l\'inscription : ce tarif d\'activité est lié à un exercice clôturé. Merci de modifier le tarif et choisir un autre exercice.', 0, $e);
+					}
+					else {
+						throw $e;
+					}
 				}
 			}
 		}

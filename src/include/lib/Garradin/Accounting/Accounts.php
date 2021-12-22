@@ -85,7 +85,7 @@ class Accounts
 	 */
 	public function listAnalytical(): array
 	{
-		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY label COLLATE NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
 	/**

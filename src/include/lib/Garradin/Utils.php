@@ -59,6 +59,10 @@ class Utils
 
     static public function get_datetime($ts)
     {
+        if (null === $ts) {
+            return null;
+        }
+
         if (is_object($ts) && $ts instanceof \DateTimeInterface) {
             return $ts;
         }
@@ -66,6 +70,9 @@ class Utils
             $ts = new \DateTime('@' . $ts);
             $ts->setTimezone(new \DateTimeZone(date_default_timezone_get()));
             return $ts;
+        }
+        elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $ts)) {
+            return \DateTime::createFromFormat('!d/m/Y', $ts);
         }
         elseif (strlen($ts) == 10) {
             return \DateTime::createFromFormat('!Y-m-d', $ts);

@@ -58,12 +58,22 @@ class Functions
 			throw new Brindille_Exception('Missing or invalid index name');
 		}
 
-		if (empty($params['columns'])) {
+		$indexes = ['document'];
+		$db = DB::getInstance();
+
+		if (empty($params['column'])) {
+			$indexes[] = sprintf('json_extract(value, %s)', $db->quote($params['column']));
+		}
+
+		if (empty($params['expression'])) {
+			$indexes[] = $params['expression'];
+		}
+
+		if (count($indexes) == 1) {
 			throw new Brindille_Exception('Missing or invalid index columns');
 		}
 
-		$db = DB::getInstance();
-		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS documents_%s_%s ON documents_data (document, %s);', $id, $params['name'], $params['columns']));
+		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS documents_%s_%s ON documents_data (%s);', $id, implode(',', $indexes)));
 	}
 
 	static public function save(array $params, Brindille $tpl, int $line): void
@@ -162,7 +172,7 @@ class Functions
 		$file = Config::getInstance()->file('signature');
 
 		if (!$file) {
-			return '';
+			return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 		}
 
 		return 'data:image/png;base64,' . base64_encode($file->fetch());

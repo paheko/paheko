@@ -65,8 +65,31 @@
 			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
 			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
 		</ul>
+
+	{if !$filter.start && !$filter.end}
+	<aside>
+		{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+	</aside>
+	{/if}
+
 	</nav>
 {/if}
+
+<form method="get" action="{$self_url}"{if !$filter.start && !$filter.end} class="hidden"{/if} id="filterForm">
+	<fieldset>
+		<legend>Filtrer par date</legend>
+		<p>
+			Du
+			{input type="date" name="start" source=$filter default=$year.start_date}
+			au
+			{input type="date" name="end" source=$filter default=$year.end_date}
+			<input type="hidden" name="id" value="{$account.id}" />
+			<input type="hidden" name="year" value="{$year.id}" />
+			<input type="hidden" name="simple" value="{$simple}" />
+			<input type="submit" value="Filtrer" />
+		</p>
+	</fieldset>
+</form>
 
 <form method="post" action="{$admin_url}acc/transactions/actions.php">
 
@@ -115,8 +138,12 @@
 				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td colspan="3">Solde</td>
-			<td class="money">{$sum|raw|money:false}</td>
+			{if null !== $sum}
+				<td colspan="3">Solde</td>
+				<td class="money">{$sum|raw|money:false}</td>
+			{else}
+				<td colspan="4"></td>
+			{/if}
 			{if !$simple}<td></td>{/if}
 			<td class="actions" colspan="5">
 				{if $can_edit}

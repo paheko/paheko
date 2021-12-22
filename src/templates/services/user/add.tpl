@@ -4,25 +4,48 @@
 
 {form_errors}
 
-{if !$user_id}
-<form method="post" action="{$self_url}">
+<form method="post" action="subscribe.php" data-focus="button">
 
 	<fieldset>
-		<legend>Inscrire un membre à une activité</legend>
+		<legend>Inscrire à une activité</legend>
 		<dl>
-			{input type="list" name="user" required=1 label="Sélectionner un membre" default=$selected_user target="membres/selector.php"}
+			{input type="radio-btn" name="choice" value="1" label="Sélectionner des membres" default=1}
+			{input type="radio-btn" name="choice" value="2" label="Recopier depuis une activité" help="Utile si vous avez une cotisation par année civile par exemple : copie les membres inscrits l'année précédente dans la nouvelle année."}
+		</dl>
+	</fieldset>
+
+	<fieldset class="c1">
+		<legend>Inscrire des membres</legend>
+		<dl>
+			{input type="list" name="users" required=true label="Membres à inscrire" target="membres/selector.php" multiple=true}
+		</dl>
+	</fieldset>
+
+	<fieldset class="c2">
+		<legend>Recopier depuis une activité</legend>
+		<dl>
+			{input type="select" name="copy_service" label="Activité à recopier" options=$services required=true}
+			{input type="checkbox" name="copy_service_only_paid" value="1" label="Ne recopier que les membres dont l'inscription est payée"}
 		</dl>
 	</fieldset>
 
 	<p class="submit">
-		{csrf_field key=$csrf_key}
 		{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 	</p>
 </form>
-{else}
 
-	{include file="services/user/_service_user_form.tpl" create=true}
+<script type="text/javascript">
+{literal}
+function selectChoice() {
+	let choice = $('#f_choice_1').form.choice.value;
+	g.toggle('.c1', choice == 1);
+	g.toggle('.c2', choice == 2);
+}
 
-{/if}
+selectChoice();
+$('#f_choice_1').onchange = selectChoice;
+$('#f_choice_2').onchange = selectChoice;
+{/literal}
+</script>
 
 {include file="admin/_foot.tpl"}

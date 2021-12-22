@@ -405,7 +405,14 @@ class CommonModifiers
 
 		$attributes_string = implode(' ', $attributes_string);
 
-		if ($type == 'select') {
+		if ($type == 'radio-btn') {
+			$radio = self::formInput(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
+			$out = sprintf('<dd class="radio-btn">%s
+				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
+			</dd>', $radio, htmlspecialchars($name), htmlspecialchars($value), htmlspecialchars($label), isset($params['help']) ? '<p>' . htmlspecialchars($params['help']) . '</p>' : '');
+			return $out;
+		}
+		elseif ($type == 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $_key => $_value) {

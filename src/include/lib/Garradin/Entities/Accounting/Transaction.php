@@ -824,12 +824,12 @@ class Transaction extends Entity
 		return $details;
 	}
 
-	public function payOffFrom(int $id): \stdClass
+	public function payOffFrom(int $id): ?\stdClass
 	{
 		$this->_related = EntityManager::findOneById(self::class, $id);
 
 		if (!$this->_related) {
-			throw new \LogicException('Écriture d\'origine invalide');
+			return null;
 		}
 
 		$this->id_related = $this->_related->id();

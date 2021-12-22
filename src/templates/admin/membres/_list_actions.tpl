@@ -12,7 +12,7 @@
 						<option value="csv">Exporter en tableau CSV</option>
 						<option value="ods">Exporter en classeur Office</option>
 						{/if}
-						<option value="delete">Supprimer</option>
+						<option value="delete">Supprimer le membre</option>
 					</select>
 					<noscript>
 						<input type="submit" value="OK" />
