@@ -199,17 +199,16 @@ class Account extends Entity
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = 0;
+		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
 
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
-			$sum = $this->getSumAtDate($year_id, $start);
+			$sum = $this->getSumAtDate($year_id, $start) * $reverse;
 		}
 
 		if ($end) {
 			$conditions .= sprintf(' AND t.date <= %s', $db->quote($end->format('Y-m-d')));
 		}
-
-		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
 
 		if ($simple) {
 			unset($columns['debit']['label'], $columns['credit']['label'], $columns['line_label']);
@@ -459,7 +458,7 @@ class Account extends Entity
 		$sql = sprintf('SELECT SUM(l.credit) - SUM(l.debit)
 			FROM acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			wHERE l.id_account = ? AND t.id_year = ? AND t.date < ? %s;',
+			WHERE l.id_account = ? AND t.id_year = ? AND t.date < ? %s;',
 			$reconciled_only ? 'AND l.reconciled = 1' : '');
 		return (int) DB::getInstance()->firstColumn($sql, $this->id(), $year_id, $date->format('Y-m-d'));
 	}
