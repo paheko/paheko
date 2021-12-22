@@ -48,13 +48,10 @@ require __DIR__ . '/_form.php';
 
 $form->runIf(f('save') || f('save_and_add_payment'), function () use ($session, $users, $copy_service, $copy_service_only_paid) {
 	if ($copy_service) {
-		$users = $copy_service->getUsersIds($copy_service_only_paid);
-	}
-	else {
-		$users = array_keys($users);
+		$users = $copy_service->getUsers($copy_service_only_paid);
 	}
 
-	$su = Service_User::createFromForm($users, $session->getUser()->id);
+	$su = Service_User::createFromForm($users, $session->getUser()->id, $copy_service ? true : false);
 
 	if (count($users) > 1) {
 		$url = ADMIN_URL . 'services/details.php?id=' . $su->id_service;
