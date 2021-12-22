@@ -188,14 +188,23 @@ class Account extends Entity
 		parent::selfCheck();
 	}
 
-	public function listJournal(int $year_id, bool $simple = false)
+	public function listJournal(int $year_id, bool $simple = false, ?DateTimeInterface $start = null, ?DateTimeInterface $end = null)
 	{
+		$db = DB::getInstance();
 		$columns = self::LIST_COLUMNS;
 
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
+
+		if ($start) {
+			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
+		}
+
+		if ($end) {
+			$conditions .= sprintf(' AND t.date <= %s', $db->quote($end->format('Y-m-d')));
+		}
 
 		$sum = 0;
 		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
