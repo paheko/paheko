@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Services;
 
 use Garradin\Config;
+use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
 use Garradin\ValidationException;
@@ -131,5 +132,11 @@ class Service extends Entity
 		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
+	}
+
+	public function getUsersIds(bool $paid_only = false) {
+		$where = $paid_only ? 'AND paid = 1' : '';
+		$sql = sprintf('SELECT id_user, id_user FROM services_users WHERE id_service = ? %s;', $where);
+		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 }
