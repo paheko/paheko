@@ -2,7 +2,7 @@
 
 <p>
 	{linkbutton href="!membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="!services/user/add.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
+	{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
 </p>
 
 {form_errors}
