@@ -85,6 +85,7 @@
 			{input type="date" name="end" source=$filter default=$year.end_date}
 			<input type="hidden" name="id" value="{$account.id}" />
 			<input type="hidden" name="year" value="{$year.id}" />
+			<input type="hidden" name="simple" value="{$simple}" />
 			<input type="submit" value="Filtrer" />
 		</p>
 	</fieldset>
