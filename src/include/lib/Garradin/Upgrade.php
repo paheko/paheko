@@ -438,6 +438,10 @@ class Upgrade
 
 	static public function getLatestVersion(): ?\stdClass
 	{
+		if (!ENABLE_TECH_DETAILS && !ENABLE_UPGRADES) {
+			return null;
+		}
+
 		$config = Config::getInstance();
 		$last = $config->get('last_version_check');
 
@@ -447,6 +451,27 @@ class Upgrade
 
 		// Only check once every two weeks
 		if ($last && $last->time > (time() - 3600 * 24 * 5)) {
+			return $last;
+		}
+
+		return null;
+	}
+
+	static public function fetchLatestVersion(): ?\stdClass
+	{
+		if (!ENABLE_TECH_DETAILS && !ENABLE_UPGRADES) {
+			return null;
+		}
+
+		$config = Config::getInstance();
+		$last = $config->get('last_version_check');
+
+		if ($last) {
+			$last = json_decode($last);
+		}
+
+		// Only check once every two weeks
+		if ($last && $last->time > (time() - 3600 * 24 * 2)) {
 			return $last;
 		}
 

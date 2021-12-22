@@ -57,7 +57,7 @@
 		</dl>
 	</fieldset>
 
-	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:WEBSITE target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
+	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:$website target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="next" label="Effectuer la mise à jour" shape="right" class="main"}
@@ -77,7 +77,7 @@
 		</dl>
 	</fieldset>
 
-	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:WEBSITE target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
+	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:$website target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="next" label="Télécharger" shape="right" class="main"}
