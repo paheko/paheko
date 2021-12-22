@@ -141,7 +141,7 @@ class Service_User extends Entity
 		return $transaction;
 	}
 
-	static public function saveFromForm(int $user_id, ?array $source = null)
+	static public function createFromForm(array $users, int $creator_id, ?array $source = null)
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -150,28 +150,31 @@ class Service_User extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
-		$su = new self;
-		$su->date = new \DateTime;
-		$su->importForm($source);
+		foreach ($users as $id) {
+			$su = new self;
+			$su->date = new \DateTime;
+			$su->importForm($source);
+			$su->id_user = (int) $id;
 
-		if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
-			$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
-		}
-
-		$su->save();
-
-		if ($su->id_fee && $su->fee()->id_account
-			&& !empty($source['amount'])
-			&& !empty($source['create_payment'])) {
-			try {
-				$su->addPayment($user_id, $source);
+			if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
+				$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 			}
-			catch (ValidationException $e) {
-				if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {
-					throw new ValidationException('Impossible d\'enregistrer l\'inscription : ce tarif d\'activité est lié à un exercice clôturé. Merci de modifier le tarif et choisir un autre exercice.', 0, $e);
+
+			$su->save();
+
+			if ($su->id_fee && $su->fee()->id_account
+				&& !empty($source['amount'])
+				&& !empty($source['create_payment'])) {
+				try {
+					$su->addPayment($creator_id, $source);
 				}
-				else {
-					throw $e;
+				catch (ValidationException $e) {
+					if ($e->getMessage() == 'Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé') {
+						throw new ValidationException('Impossible d\'enregistrer l\'inscription : ce tarif d\'activité est lié à un exercice clôturé. Merci de modifier le tarif et choisir un autre exercice.', 0, $e);
+					}
+					else {
+						throw $e;
+					}
 				}
 			}
 		}
