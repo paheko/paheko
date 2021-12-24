@@ -26,6 +26,10 @@
 			"description": "Archivé",
 			"type": "bool"
 		},
+		"draft": {
+			"description": "Brouillon",
+			"type": "bool"
+		},
 		"total": {
 			"description": "Montant total",
 			"type": "integer",
@@ -63,5 +67,5 @@
 			"type": ["null", "integer"]
 		}
 	},
-	"required": [ "type", "date", "date_required", "date_paid", "archived", "total", "rows", "id_transaction"]
+	"required": [ "type", "date", "date_required", "date_paid", "archived", "draft", "total", "rows", "id_transaction1", "id_transaction2"]
 }
