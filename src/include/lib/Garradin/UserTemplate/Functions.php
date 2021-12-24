@@ -92,8 +92,19 @@ class Functions
 		unset($params['key']);
 
 		if (isset($params['validate_schema'])) {
-			$schema = self::read(['file' => $params['validate_schema']], $tpl, $line);
+			$validate = $params['validate_schema'];
 			unset($params['validate_schema']);
+		}
+
+		$exists = $db->first('SELECT value FROM documents_data WHERE key = ? AND document = ?;', $key, $id);
+
+		// Merge before update
+		if ($exists) {
+			$params = array_merge(json_decode($exists, true), $params);
+		}
+
+		if ($validate) {
+			$schema = self::read(['file' => $validate_schema], $tpl, $line);
 
 			try {
 				$s = JSONSchema::fromString($schema);
