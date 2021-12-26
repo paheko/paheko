@@ -17,7 +17,7 @@
 	{foreach from=$accounts item="account"}
 		<tr class="compte{if isset($year2) && !$account.sum} disabled{/if}">
 			<td class="num">
-				{if !empty($year)}<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a>
+				{if !empty($year) && $account.id}<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a>
 				{else}{$account.code}
 				{/if}
 			</td>

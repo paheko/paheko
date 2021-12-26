@@ -280,7 +280,8 @@ class Reports
 			foreach ($db->iterate($sql) as $row) {
 				if (!isset($out[$row->code])) {
 					$row->sum2 = $row->sum;
-					$row->sum = 0;
+					$row->sum = null;
+					$row->id = null;
 					$row->change = null;
 					$out[$row->code] = $row;
 				}
