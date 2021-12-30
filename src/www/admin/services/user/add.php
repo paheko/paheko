@@ -17,7 +17,7 @@ if (!$count_all) {
 	Utils::redirect(ADMIN_URL . 'services/?CREATE');
 }
 
-$services = Services::listAssoc();
+$services = array_merge([0 => '-- Sélectionner une activité'], Services::listAssoc());
 
 $tpl->assign(compact('services'));
 
