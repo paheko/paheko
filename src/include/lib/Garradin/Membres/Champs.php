@@ -532,10 +532,8 @@ class Champs
         return $sql;
     }
 
-    public function getCopyFields(): array
+    public function getCopyFields(bool $same = false): array
     {
-        $config = Config::getInstance();
-
         // Champs à recopier
         $copy = [
             'id'               => 'id',
@@ -546,7 +544,7 @@ class Champs
             'clef_pgp'         => 'clef_pgp',
         ];
 
-        $anciens_champs = $config->get('champs_membres');
+        $anciens_champs = $same ? null : Config::getInstance()->get('champs_membres');
         $anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
 
         foreach ($this->champs as $key=>$cfg)
@@ -594,12 +592,12 @@ class Champs
         DB::getInstance()->exec($this->getSQLSchema($table_name));
     }
 
-    public function createIndexes(string $table_name = self::TABLE): void
+    public function createIndexes(string $table_name = self::TABLE, string $id_field = null): void
     {
         $db = DB::getInstance();
-        $config = Config::getInstance();
+        $id_field ??= Config::getInstance()->champ_identifiant;
 
-        if ($id_field = $config->get('champ_identifiant')) {
+        if ($id_field) {
             // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
             $db->exec(sprintf('UPDATE %s SET %s = NULL WHERE %2$s = \'\';',
                 $table_name, $id_field));
@@ -628,7 +626,7 @@ class Champs
         // USE TEMP B-TREE FOR ORDER BY
         $listed_fields = array_keys((array) $this->getListedFields());
         foreach ($listed_fields as $field) {
-            if ($field === $config->get('champ_identifiant')) {
+            if ($field === $id_field) {
                 // Il y a déjà un index
                 continue;
             }
