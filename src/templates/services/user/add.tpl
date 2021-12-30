@@ -24,7 +24,7 @@
 	<fieldset class="c2">
 		<legend>Recopier depuis une activité</legend>
 		<dl>
-			{input type="select" name="copy_service" label="Activité à recopier" options=$services required=true}
+			{input type="select" name="copy_service" label="Activité à recopier" options=$services required=true default=0}
 			{input type="checkbox" name="copy_service_only_paid" value="1" label="Ne recopier que les membres dont l'inscription est payée"}
 		</dl>
 	</fieldset>
