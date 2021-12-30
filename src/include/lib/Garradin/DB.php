@@ -78,8 +78,13 @@ class DB extends SQLite3
         $v = self::parseVersion($v);
 
         if (null === $v) {
-            // For legacy version before 1.1.0
-            $v = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
+            try {
+                // For legacy version before 1.1.0
+                $v = $db->querySingle('SELECT valeur FROM config WHERE cle = \'version\';');
+            }
+            catch (\Exception $e) {
+                throw new \RuntimeException('Cannot find application version', 0, $e);
+            }
         }
 
         return $v ?: null;

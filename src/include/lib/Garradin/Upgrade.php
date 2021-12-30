@@ -181,13 +181,14 @@ class Upgrade
 					}
 				}
 
+				$id_field = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'champ_identifiant\';');
 				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
 				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
 
 				// Rename membres table
 				$champs->createTable($champs::TABLE  .'_tmp');
 
-				$fields = $champs->getCopyFields();
+				$fields = $champs->getCopyFields(true);
 				unset($fields['id_category']);
 				$fields['id_categorie'] = 'id_category';
 				$champs->copy($champs::TABLE, $champs::TABLE . '_tmp', $fields);
@@ -195,7 +196,7 @@ class Upgrade
 				$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $champs::TABLE));
 				$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $champs::TABLE));
 
-				$champs->createIndexes($champs::TABLE);
+				$champs->createIndexes($champs::TABLE, $id_field);
 
 				$db->commitSchemaUpdate();
 
@@ -269,15 +270,11 @@ class Upgrade
 
 			if (version_compare($v, '1.1.4', '<')) {
 				// Set config file names
-				$config = Config::getInstance();
+				$file = Files::get(Config::FILES['admin_background']);
+				$db->update('config', ['value' => $file ? Config::FILES['admin_background'] : null], 'key = :key', ['key' => 'admin_background']);
 
-				$file = Files::get(Config::DEFAULT_FILES['admin_background']);
-				$config->set('admin_background', $file ? Config::DEFAULT_FILES['admin_background'] : null);
-
-				$file = Files::get(Config::DEFAULT_FILES['admin_homepage']);
-				$config->set('admin_homepage', $file ? Config::DEFAULT_FILES['admin_homepage'] : null);
-
-				$config->save();
+				$file = Files::get(Config::FILES['admin_homepage']);
+				$db->update('config', ['value' => $file ? Config::FILES['admin_homepage'] : null], 'key = :key', ['key' => 'admin_homepage']);
 			}
 
 			if (version_compare($v, '1.1.7', '<')) {
