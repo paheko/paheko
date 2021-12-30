@@ -308,10 +308,9 @@ class Reports
 		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::ASSET_OR_LIABILITY]];
 		$list = self::getClosingSumsWithAccounts($criterias + $position_criteria);
 
-		//var_dump($list); exit;
 
 		foreach ($list as $row) {
-			if ($row->sum == 0) {
+			if ($row->sum == 0 && $row->sum2 == 0) {
 				// Ignore empty accounts
 				continue;
 			}
