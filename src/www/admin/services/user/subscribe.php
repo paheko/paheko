@@ -27,7 +27,7 @@ $copy_service_only_paid = null;
 if (qg('user') && ($name = (new Membres)->getNom((int)qg('user')))) {
 	$users = [(int)qg('user') => $name];
 }
-elseif (f('users') && is_array(f('users'))) {
+elseif (f('users') && is_array(f('users')) && count(f('users'))) {
 	$users = f('users');
 	$users = array_filter($users, 'intval', \ARRAY_FILTER_USE_KEY);
 }
