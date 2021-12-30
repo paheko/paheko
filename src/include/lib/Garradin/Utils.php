@@ -1085,7 +1085,7 @@ class Utils
                 $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
                 break;
             case 'wkhtmltopdf':
-                $cmd = 'wkhtmltopdf --print-media-type %1$s %2$s';
+                $cmd = 'wkhtmltopdf -q --print-media-type %s %s';
                 break;
             case 'weasyprint':
                 $cmd = 'weasyprint %1$s %2$s';
@@ -1094,11 +1094,14 @@ class Utils
                 break;
         }
 
-        exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+        $cmd .= ' 2>&1';
+
+        $cmd = sprintf($cmd, escapeshellarg($source), escapeshellarg($target));
+        $output = shell_exec($cmd);
         Utils::safe_unlink($source);
 
         if (!file_exists($target)) {
-            throw new \RuntimeException('PDF command failed');
+            throw new \RuntimeException('PDF command failed: ' . $output);
         }
 
         return $target;
