@@ -161,7 +161,7 @@ class Service_User extends Entity
 		return $transaction;
 	}
 
-	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null)
+	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null): ?self
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -169,6 +169,8 @@ class Service_User extends Entity
 
 		$db = DB::getInstance();
 		$db->begin();
+
+		$su = null;
 
 		foreach ($users as $id => $name) {
 			$su = new self;
