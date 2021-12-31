@@ -338,7 +338,7 @@ aside.describe {
     border: 2px solid rgba(var(--gSecondColor), 0.5);
     padding: .5em;
     z-index: 200;
-    color: var(--gLightBorderColor);
+    color: var(--gBorderColor);
 }
 
 aside.describe dl.describe {
