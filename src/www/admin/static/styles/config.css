@@ -1,3 +1,8 @@
+.error {
+    background: #fff;
+    color: #000;
+}
+
 .error .trace {
 	border: 1px solid #ccc;
 	margin: 1em;

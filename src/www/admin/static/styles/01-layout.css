@@ -3,11 +3,30 @@
     orange : #d98628 rgb(217, 134, 40)
 */
 
+/* Light colors */
 :root {
     --gBgColor: 255, 255, 255;
+    --gTextColor: 0, 0, 0;
+    --gBorderColor: #666;
+    --gLightBorderColor: #ccc;
+    --gLightBackgroundColor: #eee;
+    --gLinkColor: blue;
+    --gHoverLinkColor: 127, 0, 0;
+
     --gMainColor: 156, 79, 21;
     --gSecondColor: 217, 134, 40;
     --gBgImage: url("../gdin_bg.png");
+}
+
+/* Dark colors */
+body.dark {
+    --gBgColor: 30, 30, 30;
+    --gTextColor: 225, 225, 225;
+    --gBorderColor: #999;
+    --gLightBorderColor: #333;
+    --gLightBackgroundColor: #222;
+    --gLinkColor: #99f;
+    --gHoverLinkColor: 250, 127, 127;
 }
 
 html {
@@ -17,7 +36,7 @@ html {
 
 body {
     font-size: 100%;
-    color: #000;
+    color: rgb(var(--gTextColor));
     font-family: "Trebuchet MS", Arial, Helvetica, Sans-serif;
     padding-bottom: 1em;
     background: rgb(var(--gBgColor)) var(--gBgImage) no-repeat 0px 0px fixed;
@@ -32,7 +51,13 @@ main img {
     max-width: 100%;
 }
 
+a {
+    color: var(--gLinkColor);
+}
 
+a:hover {
+    color: rgb(var(--gHoverLinkColor));
+}
 
 .header h1 {
     color: rgb(var(--gMainColor));
@@ -70,12 +95,12 @@ main img {
 
 .header .menu::-webkit-scrollbar {
     width: 8px;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(var(--gBgColor), 0.25);
     box-shadow: inset 0px 0px 10px #666;
 }
 
 .header .menu::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(var(--gBgColor), 0.5);
     border-radius: 10px;
 }
 
@@ -114,7 +139,7 @@ main img {
     text-decoration: none;
     margin-top: -.2em;
     font-size: 20pt;
-    color: rgba(255, 255, 255, .5);
+    color: rgba(var(--gBgColor), .5);
 }
 
 .header .menu li.current > a b {

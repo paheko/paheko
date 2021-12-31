@@ -10,7 +10,7 @@ table.list caption {
 
 table.list tbody td.desc {
     font-size: .9em;
-    color: #666;
+    color: var(--gBorderColor);
 }
 
 table.list.auto {
@@ -47,10 +47,6 @@ table.list tr:nth-child(even), table.multi tbody:nth-child(even) {
     background: rgba(var(--gSecondColor), 0.2);
 }
 
-table.list tr.disabled {
-    color: #666;
-}
-
 table.multi tr {
     background: inherit !important;
 }
@@ -83,14 +79,12 @@ table.list .check {
 }
 
 table.search th {
-    background: rgb(217, 134, 40);
-    background: rgba(217, 134, 40, 0.5);
     background: rgba(var(--gSecondColor), 0.5);
 }
 
 table.list .disabled {
-    background: #eee;
-    color: #999;
+    color: var(--gBorderColor);
+    background: var(--gLightBorderColor);
 }
 
 .userOrder .cur {
@@ -107,7 +101,7 @@ table.list .disabled {
 }
 
 .userOrder a:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(var(--gBgColor), 0.5);
 }
 
 table.list .userOrder td, table.list .userOrder th {
@@ -130,7 +124,7 @@ table.list .userOrder .check {
 }
 
 thead .cur .icn {
-    color: #fff;
+    color: rgb(var(--gBgColor));
 }
 
 table.list .actions {
@@ -143,9 +137,9 @@ table.list .separator {
 
 table.list .icon {
     width: 1.5em;
-    color: rgba(0, 0, 0, 0.3);
+    color: rgba(var(--gTextColor), 0.3);
 }
 
 table.list .folder .icon {
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(var(--gTextColor), 0.5);
 }

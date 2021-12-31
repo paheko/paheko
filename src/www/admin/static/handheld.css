@@ -173,7 +173,7 @@ nav.tabs .sub {
 	float: none;
 }
 
-.wikiChildren, fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
+fieldset.wikiMain, fieldset.wikiRights, fieldset.wikiEncrypt {
 	float: none;
 	width: auto;
 }
