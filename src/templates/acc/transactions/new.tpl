@@ -23,7 +23,7 @@
 					<div>
 						<h3>{$type.label}</h3>
 						{if !empty($type.help)}
-							<p>{$type.help}</p>
+							<p class="help">{$type.help}</p>
 						{/if}
 					</div>
 				</label>
