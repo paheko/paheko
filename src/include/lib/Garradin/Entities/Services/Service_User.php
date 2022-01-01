@@ -59,12 +59,12 @@ class Service_User extends Entity
 			$params['date'] = $this->date->format('Y-m-d');
 		}
 
-		if ($this->exists()) {
-			$params['id'] = $this->id();
-		}
-
 		$where = array_map(fn($k) => sprintf('%s = ?', $k), array_keys($params));
 		$where = implode(' AND ', $where);
+
+		if ($this->exists()) {
+			$where .= sprintf(' AND id != %d', $this->id());
+		}
 
 		return DB::getInstance()->test(self::TABLE, $where, array_values($params));
 	}
