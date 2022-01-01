@@ -22,7 +22,8 @@ $users ??= null;
 $grouped_services = Services::listGroupedWithFees($single_user_id, $current_only);
 
 if (!count($grouped_services)) {
-	Utils::redirect($form_url . 'past_services=' . (int) $current_only);
+	$current_only = false;
+	$grouped_services = Services::listGroupedWithFees($single_user_id, $current_only);
 }
 
 if (!isset($count_all)) {
