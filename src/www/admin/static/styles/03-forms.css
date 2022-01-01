@@ -19,6 +19,10 @@ table tr.clickable:hover, table tr.clickable:nth-child(even):hover {
     background: #ffc;
 }
 
+table tr.clickable:hover button, table tr.focused button {
+    color: rgb(var(--gHoverLinkColor));
+}
+
 table tr.focused {
     color: #633;
     background: #ffc !important;
@@ -403,6 +407,7 @@ form span.password_check {
     margin-left: 1em;
     padding: .1em .3em;
     border-radius: .5em;
+    color: #000;
 }
 
 form span.password_check.fail { background-color: #f99; }

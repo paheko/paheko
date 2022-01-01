@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr"{if array_key_exists('_dialog', $_GET)} class="dialog"{/if} data-version="{$version_hash}">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" class="{if $dialog}dialog{/if}" data-version="{$version_hash}">
 <head>
     <meta charset="utf-8" />
     <meta name="v" content="{$version_hash}" />

@@ -19,7 +19,7 @@
 }
 
 /* Dark colors */
-body.dark {
+html.dark {
     --gBgColor: 30, 30, 30;
     --gTextColor: 225, 225, 225;
     --gBorderColor: #999;
