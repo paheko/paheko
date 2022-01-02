@@ -183,6 +183,7 @@ class DynamicFields
 
 	/**
 	 * Import from old INI config
+	 * @deprecated Only use when migrating from an old version
 	 */
 	static public function fromOldINI(string $config, string $login_field, string $name_field, string $number_field)
 	{
@@ -240,6 +241,11 @@ class DynamicFields
 			$field->set('list_row', isset($data['list_row']) ? (int)$data['list_row'] : null);
 			$field->set('sort_order', $i++);
 			$self->_fields[$name] = $field;
+
+			if ($field->type == 'checkbox' || $field->type == 'multiple') {
+				// A checkbox/multiple checkbox can either be 0 or 1, not NULL
+				$db->exec(sprintf('UPDATE membres SET %s = 0 WHERE %1$s IS NULL;', $field->name));
+			}
 		}
 
 		self::$_instance = $self;
@@ -422,7 +428,8 @@ class DynamicFields
 
 	public function createTable(string $table_name = User::TABLE): void
 	{
-		DB::getInstance()->exec($this->getSQLSchema($table_name));
+		$schema = $this->getSQLSchema($table_name);
+		DB::getInstance()->exec($schema);
 	}
 
 	public function createIndexes(string $table_name = User::TABLE): void
