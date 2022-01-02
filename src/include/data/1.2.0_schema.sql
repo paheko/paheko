@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS config (
 );
 
 CREATE TABLE IF NOT EXISTS config_users_fields (
-    name TEXT PRIMARY KEY NOT NULL,
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
     sort_order INTEGER NOT NULL,
     type TEXT NOT NULL,
     label TEXT NOT NULL,
@@ -22,6 +23,8 @@ CREATE TABLE IF NOT EXISTS config_users_fields (
     default_value TEXT NULL,
     system TEXT NULL
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS config_users_fields_name ON config_users_fields (name);
 
 CREATE TABLE IF NOT EXISTS plugins
 (
