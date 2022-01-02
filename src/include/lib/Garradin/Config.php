@@ -42,9 +42,6 @@ class Config extends Entity
 	protected $frequence_sauvegardes;
 	protected $nombre_sauvegardes;
 
-	protected $champ_identifiant;
-	protected $champ_identite;
-
 	protected $last_chart_change;
 	protected $last_version_check;
 
@@ -74,9 +71,6 @@ class Config extends Entity
 
 		'frequence_sauvegardes' => '?int',
 		'nombre_sauvegardes'    => '?int',
-
-		'champ_identifiant'     => 'string',
-		'champ_identite'        => 'string',
 
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',
