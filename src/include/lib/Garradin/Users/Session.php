@@ -98,13 +98,13 @@ class Session extends \KD2\UserSession
 
 	protected function getUserForLogin($login)
 	{
-		$champ_id = Config::getInstance()->get('champ_identifiant');
+		$champ_id = DynamicFields::getLoginField();
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
 		$query = 'SELECT u.id, m.%1$s AS login, m.password, m.secret_otp AS otp_secret
 			FROM users AS u
 			INNER JOIN users_categories AS c ON c.id = m.id_category
-			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
+			WHERE u.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, self::ACCESS_READ);
@@ -116,7 +116,6 @@ class Session extends \KD2\UserSession
 	{
 		// Mettre à jour la date de connexion
 		$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$id]);
-		$config = Config::getInstance();
 
 		$sql = sprintf('SELECT u.*, u.%s AS identite,
 			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
@@ -124,7 +123,7 @@ class Session extends \KD2\UserSession
 			FROM users AS u
 			INNER JOIN users_categories AS c ON u.id_category = c.id
 			WHERE u.id = ? LIMIT 1;',
-			$this->db->quoteIdentifier($config->get('champ_identite')));
+			$this->db->quoteIdentifier(DynamicFields::getLoginField()));
 
 		return $this->db->first($sql, $id);
 	}
@@ -296,9 +295,6 @@ class Session extends \KD2\UserSession
 		}
 
 		list($id, $expire, $email_hash) = explode('.', $query);
-
-		$config = Config::getInstance();
-		$db = DB::getInstance();
 
 		$id = base_convert($id, 36, 10);
 		$expire = base_convert($expire, 36, 10);
