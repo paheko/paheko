@@ -5,9 +5,12 @@ namespace Garradin\Users;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\ValidationException;
 
 use Garradin\Entities\Users\DynamicField;
 use Garradin\Entities\Users\User;
+
+use KD2\DB\EntityManager as EM;
 
 use const Garradin\ROOT;
 
@@ -17,10 +20,16 @@ class DynamicFields
 
 	const TABLE = DynamicField::TABLE;
 
-	protected $_fields;
-	protected $_fields_by_type;
-	protected $_fields_by_system_use;
-	protected $_presets;
+	protected $_fields = [];
+	protected $_fields_by_type = [];
+	protected $_fields_by_system_use = [
+		'login' => [],
+		'password' => [],
+		'name' => [],
+		'number' => [],
+	];
+
+	protected $_presets = [];
 
 	static protected $_instance;
 
@@ -47,6 +56,9 @@ class DynamicFields
 		return key(self::getInstance()->fieldsByType('email'));
 	}
 
+	/**
+	 * FIXME use generated columns instead https://www.sqlite.org/gencol.html
+	 */
 	static public function getNumberField(): string
 	{
 		return key(self::getInstance()->fieldsBySystemUse('number'));
@@ -106,31 +118,50 @@ class DynamicFields
 	protected function reload()
 	{
 		$db = DB::getInstance();
-		$this->_fields = $db->getGrouped(sprintf('SELECT name, * FROM %s ORDER BY sort_order;', self::TABLE));
+		$i = EM::getInstance(DynamicField::class)->iterate('SELECT * FROM @TABLE ORDER BY sort_order;');
+
+		foreach ($i as $field) {
+			$this->_fields[$field->name] = $field;
+		}
+
 		$this->reloadCache();
 	}
 
 	protected function reloadCache()
 	{
 		$this->_fields_by_type = [];
-		$this->_fields_by_system_use = [];
 
-		foreach ($this->_fields as $key => &$field) {
+		foreach ($this->_fields_by_system_use as &$list) {
+			$list = [];
+		}
+		unset($list);
+
+		foreach ($this->_fields as $key => $field) {
 			if (!isset($this->_fields_by_type[$field->type])) {
 				$this->_fields_by_type[$field->type] = [];
 			}
 
-			$this->_fields_by_type[$field->type][$key] =& $field;
+			$this->_fields_by_type[$field->type][$key] = $field;
 
 			if (!$field->system) {
 				continue;
 			}
 
-			if (!isset($this->_fields_by_system_use[$field->system])) {
-				$this->_fields_by_system_use[$field->system] = [];
+			if ($field->system & $field::PASSWORD) {
+				$this->_fields_by_system_use['password'][$key] = $field;
 			}
 
-			$this->_fields_by_system_use[$field->system][$key] =& $field;
+			if ($field->system & $field::NAME) {
+				$this->_fields_by_system_use['name'][$key] = $field;
+			}
+
+			if ($field->system & $field::NUMBER) {
+				$this->_fields_by_system_use['number'][$key] = $field;
+			}
+
+			if ($field->system & $field::LOGIN) {
+				$this->_fields_by_system_use['login'][$key] = $field;
+			}
 		}
 	}
 
@@ -187,6 +218,7 @@ class DynamicFields
 	 */
 	static public function fromOldINI(string $config, string $login_field, string $name_field, string $number_field)
 	{
+		$db = DB::getInstance();
 		$config = parse_ini_string($config, true);
 
 		$i = 0;
@@ -216,17 +248,20 @@ class DynamicFields
 			if ($name == 'passe') {
 				$name = 'password';
 				$data['title'] = 'Mot de passe';
-				$field->system = 'password';
+				$field->system |= $field::PASSWORD;
 				$fields['passe'] = 'password';
 			}
-			elseif ($name == $login_field) {
-				$field->system = 'login';
+
+			if ($name == $login_field) {
+				$field->system |= $field::LOGIN;
 			}
-			elseif ($name == $name_field) {
-				$field->system = 'name';
+
+			if ($name == $name_field) {
+				$field->system |= $field::NAME;
 			}
-			elseif ($name == $number_field) {
-				$field->system = 'number';
+
+			if ($name == $number_field) {
+				$field->system |= $field::NUMBER;
 			}
 
 			$data = array_merge($defaults, $data);
@@ -240,7 +275,7 @@ class DynamicFields
 			$field->set('required', (bool) $data['mandatory']);
 			$field->set('list_row', isset($data['list_row']) ? (int)$data['list_row'] : null);
 			$field->set('sort_order', $i++);
-			$self->_fields[$name] = $field;
+			$self->add($field);
 
 			if ($field->type == 'checkbox' || $field->type == 'multiple') {
 				// A checkbox/multiple checkbox can either be 0 or 1, not NULL
@@ -275,7 +310,7 @@ class DynamicFields
 	public function allExceptPassword()
 	{
 		return array_filter($this->_fields, function ($a) {
-			return $a->system != 'password';
+			return !($a->system & DynamicField::PASSWORD);
 		});
 	}
 
@@ -284,7 +319,7 @@ class DynamicFields
 		$out = [];
 
 		foreach ($this->_fields as $key => $field) {
-			if ($field->system == 'password') {
+			if ($field->system & $field::PASSWORD) {
 				continue;
 			}
 
@@ -303,7 +338,7 @@ class DynamicFields
 
 	public function getListedFields()
 	{
-		$champs = (array) $this->champs;
+		$champs = $this->_fields;
 
 		$champs = array_filter($champs, function ($a) {
 			return empty($a->list_row) ? false : true;
@@ -357,14 +392,14 @@ class DynamicFields
 			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
 			if ($type == 'TEXT' && $cfg->type != 'password') {
-				$line .= sprintf(",\n%s %s", $db->quoteIdentifier($key . '_search'), 'TEXT COLLATE NOCASE');
+				$line .= ' COLLATE NOCASE';
 			}
 
 			if ($last_one != $key) {
 				$line .= ',';
 			}
 
-			if (!empty($cfg->title))
+			if (!empty($cfg->label))
 			{
 				$line .= ' -- ' . str_replace(["\n", "\r"], '', $cfg->label);
 			}
@@ -373,6 +408,67 @@ class DynamicFields
 		}
 
 		$sql = sprintf("CREATE TABLE %s\n(\n\t%s\n);", $table_name, implode("\n\t", $create));
+		return $sql;
+	}
+
+	/**
+	 * Returns the SQL query used to create the search table and triggers
+	 * This table is useful to make LIKE searches on unicode columns
+	 */
+	public function getSQLSchemaSearch(string $table_name = User::TABLE): ?string
+	{
+		$search_table = $table_name . '_search';
+		$create = [
+			sprintf('id INTEGER NOT NULL PRIMARY KEY REFERENCES %s (id) ON DELETE CASCADE', $table_name),
+		];
+
+		$columns = [];
+
+		foreach ($this->_fields as $key => $cfg) {
+			if ($cfg->type == 'text' || $cfg->list_row) {
+				$create[] = sprintf('%s %s%s', $key, DynamicField::SQL_TYPES[$cfg->type], $cfg->type == 'text' ? ' COLLATE NOCASE' : '');
+				$columns[] = $key;
+			}
+		}
+
+		if (!count($columns)) {
+			return null;
+		}
+
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\t%s\n);", $search_table, implode(",\n\t", $create));
+		$sql .= "\n";
+		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_i AFTER INSERT ON %s BEGIN\n\t", $search_table, $table_name);
+
+		$columns_insert = array_map(fn ($v) => sprintf('unicode_case_fold(NEW.%s)', $v), $columns);
+		$sql .= sprintf("INSERT INTO %s (%s) VALUES (%s);\n", $search_table, implode(', ', $columns), implode(', ', $columns_insert));
+		$sql .= "END;\n";
+
+		$columns_update = array_map(fn ($v) => sprintf('%s = unicode_case_fold(NEW.%1$s)', $v), $columns);
+		$sql .= sprintf("\nCREATE TRIGGER IF NOT EXISTS %s_u AFTER UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
+		$sql .= sprintf("UPDATE %s SET %s WHERE id = NEW.id;\n", $search_table, implode(', ', $columns_update));
+		$sql .= "END;\n";
+
+		foreach ($this->getListedFields() as $field) {
+			if (!in_array($field->name, $columns)) {
+				continue;
+			}
+
+			$sql .= sprintf('CREATE INDEX IF NOT EXISTS %s_%s ON %1$s (%2$s);', $search_table, $field->name) . "\n";
+		}
+
+		return $sql;
+	}
+
+	/**
+	 * Returns the SQL query used to delete the search table and triggers
+	 */
+	public function getSQLDropSearch(string $table_name = User::TABLE): string
+	{
+		$search_table = $table_name . '_search';
+		$sql = sprintf('
+			DROP TABLE IF EXISTS %s;
+			DROP TRIGGER IF EXISTS %1$s_i;
+			DROP TRIGGER IF EXISTS %1$s_u;', $search_table);
 		return $sql;
 	}
 
@@ -428,16 +524,22 @@ class DynamicFields
 
 	public function createTable(string $table_name = User::TABLE): void
 	{
+		$db = DB::getInstance();
 		$schema = $this->getSQLSchema($table_name);
-		DB::getInstance()->exec($schema);
+		$db->exec($schema);
+
+		$schema = $this->getSQLSchemaSearch($table_name);
+
+		if ($schema) {
+			$db->exec($schema);
+		}
 	}
 
 	public function createIndexes(string $table_name = User::TABLE): void
 	{
-		$db = DB::getInstance();
-		$id_field = $db->firstColumn('SELECT value FROM config WHERE key = ?;', 'champ_identifiant');
+		$id_field = null;
 
-		if ($id_field) {
+		if ($id_field = $this->getLoginField()) {
 			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
 			$db->exec(sprintf('UPDATE %s SET %s = NULL WHERE %2$s = \'\';',
 				$table_name, $id_field));
@@ -452,33 +554,8 @@ class DynamicFields
 			$db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS users_id_field ON %s (%s%s);', $table_name, $id_field, $collation));
 		}
 
-		$db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS user_number ON %s (numero);', $table_name));
+		$db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS users_number ON %s (%s);', $table_name, $this->getNumberField()));
 		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_category ON %s (id_category);', $table_name));
-
-		// Create index on listed columns
-		// FIXME: these indexes are currently unused by SQLite in the default user list
-		// when there is more than one non-hidden category, as this makes SQLite merge multiple results
-		// and so the index is not useful in that case sadly.
-		// EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "id_category" IN (3) ORDER BY "nom" ASC LIMIT 0,100;
-		// --> SEARCH TABLE membres USING INDEX users_list_nom (id_category=?)
-		// EXPLAIN QUERY PLAN SELECT * FROM membres WHERE "id_category" IN (3, 7) ORDER BY "nom" ASC LIMIT 0,100;
-		// --> SEARCH TABLE membres USING INDEX user_category (id_category=?)
-		// USE TEMP B-TREE FOR ORDER BY
-		$listed_fields = array_keys((array) $this->getListedFields());
-		foreach ($listed_fields as $field) {
-			if ($field === $id_field) {
-				// Il y a déjà un index
-				continue;
-			}
-
-			$collation = '';
-
-			if ($this->isText($field)) {
-				$collation = ' COLLATE NOCASE';
-			}
-
-			$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
-		}
 	}
 
 	/**
@@ -509,15 +586,49 @@ class DynamicFields
 	{
 	}
 
-	public function save(array $fields)
+	public function add(DynamicField $df)
 	{
-		foreach ($this->_fields_by_system_use as $key => $field) {
-			if (!array_key_exists($key, $fields)) {
-				throw new UserException(sprintf('Le champ "%s" ne peut être supprimé des fiches membres car il est utilisé dans la configuration.'));
-			}
+		$this->_fields[$df->name] = $df;
+		$this->reloadCache();
+	}
+
+	public function delete(string $name)
+	{
+		unset($this->_fields[$name]);
+		$this->reloadCache();
+	}
+
+	public function save()
+	{
+		if (empty($this->_fields_by_system_use['number'])) {
+			throw new ValidationException('Aucun champ de numéro de membre n\'existe');
 		}
 
-		foreach ($fields as $field) {
+		if (count($this->_fields_by_system_use['number']) != 1) {
+			throw new ValidationException('Un seul champ peut être défini comme numéro');
+		}
+
+		if (empty($this->_fields_by_system_use['name'])) {
+			throw new ValidationException('Aucun champ de nom de membre n\'existe');
+		}
+
+		if (empty($this->_fields_by_system_use['login'])) {
+			throw new ValidationException('Aucun champ d\'identifiant de connexion n\'existe');
+		}
+
+		if (count($this->_fields_by_system_use['login']) != 1) {
+			throw new ValidationException('Un seul champ peut être défini comme identifiant');
+		}
+
+		if (empty($this->_fields_by_system_use['password'])) {
+			throw new ValidationException('Aucun champ de mot de passe n\'existe');
+		}
+
+		if (count($this->_fields_by_system_use['password']) != 1) {
+			throw new ValidationException('Un seul champ peut être défini comme mot de passe');
+		}
+
+		foreach ($this->_fields as $field) {
 			$field->save();
 		}
 	}

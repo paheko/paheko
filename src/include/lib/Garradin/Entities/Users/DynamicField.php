@@ -58,10 +58,15 @@ class DynamicField extends Entity
 	protected ?string $default_value;
 
 	/**
-	 * System use:
-	 * password, number, name, login
+	 * System use
 	 */
-	protected ?string $system;
+	protected int $system = 0;
+
+	const PASSWORD = 0x01;
+	const LOGIN = 0x02;
+	const NUMBER = 0x04;
+	const NAME = 0x08;
+	const PRESET = 0x16;
 
 	const ACCESS_ADMIN = 0;
 	const ACCESS_USER = 1;
@@ -153,14 +158,22 @@ class DynamicField extends Entity
 
 		$this->assert(trim($this->label) != '', 'Le libellé est obligatoire.');
 		$this->assert($this->type && array_key_exists($this->type, self::TYPES), 'Type de champ invalide.');
-		$this->assert($this->system != 'password' || $this->type == 'password', 'Le champ mot de passe ne peut être d\'un type différent de mot de passe.');
+
+		if ($this->system & self::PASSWORD) {
+			$this->assert($this->type == 'password', 'Le champ mot de passe ne peut être d\'un type différent de mot de passe.');
+		}
 
 		$this->assert(!($this->type == 'multiple' || $this->type == 'select') || !empty($this->options), 'Le champ nécessite de comporter au moins une option possible.');
 
 		$db = DB::getInstance();
 
-		$this->asserts($this->exists() || $this->system == 'preset' || !array_key_exists($this->name, $this->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
-		$this->asserts(!$this->exists() && !$db->test(self::TABLE, 'name = ?', $this->name), 'Ce nom de champ est déjà utilisé par un autre champ.');
-		$this->asserts($this->exists() && !$db->test(self::TABLE, 'name = ? AND id != ?', $this->name, $this->id()), 'Ce nom de champ est déjà utilisé par un autre champ.');
+		if (!$this->exists()) {
+			$this->assert(!$db->test(self::TABLE, 'name = ?', $this->name), 'Ce nom de champ est déjà utilisé par un autre champ: ' . $this->name);
+		}
+		else {
+			$this->assert(!$db->test(self::TABLE, 'name = ? AND id != ?', $this->name, $this->id()), 'Ce nom de champ est déjà utilisé par un autre champ.');
+		}
+
+		$this->assert($this->exists() || $this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
 	}
 }

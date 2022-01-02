@@ -203,7 +203,7 @@ class Upgrade
 
 				$db->begin();
 				$db->exec('DELETE FROM config WHERE key IN (\'admin_background\', \'admin_css\', \'admin_homepage\');');
-				$db->exec(sprintf('INSERT INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
+				$db->exec(sprintf('REPLACE INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
 				$db->commit();
 			}
 
@@ -215,9 +215,9 @@ class Upgrade
 				$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
 
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
-				$db->commit();
-
+				$df->save();
 				$db->exec('DELETE FROM config WHERE key IN (\'champs_membres\', \'champ_identite\', \'champ_identifiant\');');
+				$db->commit();
 			}
 
 			// Vérification de la cohérence des clés étrangères
