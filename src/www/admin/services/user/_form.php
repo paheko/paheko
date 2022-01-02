@@ -9,14 +9,21 @@ if (!defined('\Garradin\ROOT')) {
 	die();
 }
 
-assert(isset($tpl, $form_url));
+assert(isset($tpl, $form_url, $create));
 
 $current_only = !qg('past_services');
 
-$grouped_services = Services::listGroupedWithFees($user_id, $current_only);
+// If there is only one user selected we can calculate the amount
+$single_user_id = isset($users) && count($users) == 1 ? key($users) : null;
+$copy_service ??= null;
+$copy_service_only_paid ??= null;
+$users ??= null;
+
+$grouped_services = Services::listGroupedWithFees($single_user_id, $current_only);
 
 if (!count($grouped_services)) {
-	Utils::redirect($form_url . 'past_services=' . (int) $current_only);
+	$current_only = false;
+	$grouped_services = Services::listGroupedWithFees($single_user_id, $current_only);
 }
 
 if (!isset($count_all)) {
@@ -31,4 +38,5 @@ $tpl->assign([
 	'custom_js' => ['service_form.js'],
 ]);
 
-$tpl->assign(compact('form_url', 'today', 'grouped_services', 'user_name', 'user_id', 'current_only', 'has_past_services'));
+$tpl->assign(compact('form_url', 'today', 'grouped_services', 'current_only', 'has_past_services',
+	'create', 'copy_service', 'copy_service_only_paid', 'users'));

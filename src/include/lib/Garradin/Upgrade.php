@@ -116,11 +116,11 @@ class Upgrade
 
 			if (version_compare($v, '1.1.4', '<')) {
 				// Set config file names
-				$file = Files::get(Config::DEFAULT_FILES['admin_background']);
-				$db->update('config', ['value' => $file ? Config::DEFAULT_FILES['admin_background'] : null], 'key = \'admin_background\'');
+				$file = Files::get(Config::FILES['admin_background']);
+				$db->update('config', ['value' => $file ? Config::FILES['admin_background'] : null], 'key = :key', ['key' => 'admin_background']);
 
-				$file = Files::get(Config::DEFAULT_FILES['admin_homepage']);
-				$db->update('config', ['value' => $file ? Config::DEFAULT_FILES['admin_homepage'] : null], 'key = \'admin_homepage\'');
+				$file = Files::get(Config::FILES['admin_homepage']);
+				$db->update('config', ['value' => $file ? Config::FILES['admin_homepage'] : null], 'key = :key', ['key' => 'admin_homepage']);
 			}
 
 			if (version_compare($v, '1.1.7', '<')) {
@@ -289,6 +289,10 @@ class Upgrade
 
 	static public function getLatestVersion(): ?\stdClass
 	{
+		if (!ENABLE_TECH_DETAILS && !ENABLE_UPGRADES) {
+			return null;
+		}
+
 		$config = Config::getInstance();
 		$last = $config->get('last_version_check');
 
@@ -298,6 +302,27 @@ class Upgrade
 
 		// Only check once every two weeks
 		if ($last && $last->time > (time() - 3600 * 24 * 5)) {
+			return $last;
+		}
+
+		return null;
+	}
+
+	static public function fetchLatestVersion(): ?\stdClass
+	{
+		if (!ENABLE_TECH_DETAILS && !ENABLE_UPGRADES) {
+			return null;
+		}
+
+		$config = Config::getInstance();
+		$last = $config->get('last_version_check');
+
+		if ($last) {
+			$last = json_decode($last);
+		}
+
+		// Only check once every two weeks
+		if ($last && $last->time > (time() - 3600 * 24 * 2)) {
 			return $last;
 		}
 

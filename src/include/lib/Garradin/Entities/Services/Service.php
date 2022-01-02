@@ -3,6 +3,7 @@
 namespace Garradin\Entities\Services;
 
 use Garradin\Config;
+use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
 use Garradin\ValidationException;
@@ -105,7 +106,7 @@ class Service extends Entity
 		$tables = 'services_users su
 			INNER JOIN membres m ON m.id = su.id_user
 			INNER JOIN services s ON s.id = su.id_service
-			INNER JOIN services_fees sf ON sf.id = su.id_fee
+			LEFT JOIN services_fees sf ON sf.id = su.id_fee
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) AS su2 ON su2.id = su.id';
 		$conditions = sprintf('su.id_service = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
 			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
@@ -131,5 +132,12 @@ class Service extends Entity
 		$conditions = sprintf('su.id_service = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
+	}
+
+	public function getUsers(bool $paid_only = false) {
+		$where = $paid_only ? 'AND paid = 1' : '';
+		$id_field = Config::getInstance()->champ_identite;
+		$sql = sprintf('SELECT su.id_user, u.%s FROM services_users su INNER JOIN membres u ON u.id = su.id_user WHERE su.id_service = ? %s;', $id_field, $where);
+		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
 }

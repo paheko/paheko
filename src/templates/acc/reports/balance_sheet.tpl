@@ -10,16 +10,12 @@
 {/if}
 
 <table class="statement">
-	<colgroup>
-		<col width="50%" />
-		<col width="50%" />
-	</colgroup>
 	<tbody>
 		<tr>
-			<td>
+			<td width="50%">
 				{include file="acc/reports/_statement_table.tpl" accounts=$balance.accounts.asset caption="Actif"}
 			</td>
-			<td>
+			<td width="50%">
 				{include file="acc/reports/_statement_table.tpl" accounts=$balance.accounts.liability caption="Passif"}
 			</td>
 		</tr>

@@ -2,7 +2,6 @@
 assert(isset($create) && is_bool($create));
 assert(isset($has_past_services) && is_bool($has_past_services));
 assert(isset($current_only) && is_bool($current_only));
-assert(!empty($user_name) && !empty($user_id));
 assert(isset($form_url) && is_string($form_url));
 assert(isset($today) && $today instanceof \DateTimeInterface);
 assert($create === false || isset($account_targets));
@@ -24,8 +23,20 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		<legend>Inscrire un membre à une activité</legend>
 
 		<dl>
-			<dt>Membre sélectionné</dt>
-			<dd><h3>{$user_name}</h3><input type="hidden" name="id_user" value="{$user_id}" /></dd>
+		{if $create && $users}
+			<dt>Membres inscrits</dt>
+			{if count($users) <= 10}
+				{foreach from=$users key="id" item="name"}
+				<dd>{$name}<input type="hidden" name="users[{$id}]" value="{$name}" /></dd>
+				{/foreach}
+			{else}
+				<dd>{$users|count} membres sélectionnés</dd>
+			{/if}
+		{elseif $create && $copy_service}
+			<dt>Recopier depuis l'activité</dt>
+			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy_service" value="{$copy_service.id}" /></dd>
+			<dd><em>{if $copy_service_only_paid}(seulement les inscriptions marquées comme payées){else}(toutes les inscriptions){/if}</em><input type="hidden" name="copy_service_only_paid" value="{$copy_service_only_paid}" /></dd>
+		{/if}
 
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
 
@@ -69,12 +80,14 @@ assert(isset($grouped_services) && is_array($grouped_services));
 					<div>
 						<h3>{$fee.label}</h3>
 						<p>
-							{if !$fee.user_amount}
-								prix libre ou gratuit
-							{elseif $fee.user_amount && $fee.formula}
+							{if $fee.user_amount && $fee.formula}
 								<strong>{$fee.user_amount|raw|money_currency}</strong> (montant calculé)
+							{elseif $fee.formula}
+								montant calculé, variable selon les membres
 							{elseif $fee.user_amount}
 								<strong>{$fee.user_amount|raw|money_currency}</strong>
+							{else}
+								prix libre ou gratuit
 							{/if}
 						</p>
 						{if $fee.description}
@@ -122,7 +135,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 
-		{if $create}
+		{if $create && $users && count($users) == 1}
 			{button type="submit" name="save_and_add_payment" class="accounting" label="Enregistrer et ajouter un autre règlement" shape="plus"}
 		{/if}
 	</p>

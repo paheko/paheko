@@ -28,19 +28,6 @@
 	</p>
 </fieldset>
 
-<fieldset>
-	<legend>Téléchargement des fichiers</legend>
-	<p class="help">
-		Les documents font {$files_size|size_in_bytes}.
-	</p>
-	{if $files_size > 0}
-	<p class="submit">
-		{csrf_field key="files_download"}
-		{button type="submit" name="download_files" label="Télécharger une archive ZIP des documents sur mon ordinateur" shape="download" class="main"}
-	</p>
-	{/if}
-</fieldset>
-
 </form>
 
 <form method="post" action="{$self_url_no_qs}">

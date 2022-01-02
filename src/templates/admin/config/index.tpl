@@ -74,4 +74,10 @@
 
 </form>
 
+{if ENABLE_TECH_DETAILS}
+	<script type="text/javascript" async="async">
+	fetch(g.admin_url + 'config/?check_version');
+	</script>
+{/if}
+
 {include file="admin/_foot.tpl"}

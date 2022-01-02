@@ -51,11 +51,20 @@ if (null === $simple) {
 	$simple = (bool) $account->type;
 }
 
-$list = $account->listJournal($year_id, $simple);
+$filter = new \stdClass;
+$filter->start = Utils::get_datetime(qg('start'));
+$filter->end = Utils::get_datetime(qg('end'));
+
+$list = $account->listJournal($year_id, $simple, $filter->start, $filter->end);
 $list->setTitle(sprintf('Journal - %s - %s', $account->code, $account->label));
 $list->loadFromQueryString();
 
-$sum = $account->getSum($year_id, $simple);
-$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_edit'));
+$sum = null;
+
+if (!$filter->start && !$filter->end) {
+	$sum = $account->getSum($year_id, $simple);
+}
+
+$tpl->assign(compact('simple', 'year', 'account', 'list', 'sum', 'can_edit', 'filter'));
 
 $tpl->display('acc/accounts/journal.tpl');

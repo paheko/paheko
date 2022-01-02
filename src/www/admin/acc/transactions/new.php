@@ -67,7 +67,8 @@ if ($id = qg('account')) {
 	}
 
 	$transaction->type = Transaction::getTypeFromAccountType($account->type);
-	$key = sprintf('account_%d_%d', $transaction->type, 0);
+	$index = $transaction->type == Transaction::TYPE_DEBT || $transaction->type == Transaction::TYPE_CREDIT ? 1 : 0;
+	$key = sprintf('account_%d_%d', $transaction->type, $index);
 
 	if (!isset($_POST[$key])) {
 		$lines[0]['account'] = $_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];

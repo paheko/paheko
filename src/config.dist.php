@@ -224,6 +224,11 @@ namespace Garradin;
  * Il est conseillé de désactiver cette fonctionnalité si vous ne voulez pas
  * permettre à un utilisateur de casser l'installation !
  *
+ * Si cette constante est désactivée, mais que ENABLE_TECH_DETAILS est activé,
+ * la vérification de nouvelle version se fera quand même, mais plutôt que de proposer
+ * la mise à jour, Garradin proposera de se rendre sur le site officiel pour
+ * télécharger la mise à jour.
+ *
  * Défaut : true
  *
  * @var bool
@@ -449,7 +454,7 @@ namespace Garradin;
  *
  * Défaut : null
  */
-//const PDF_COMMAND = 'wkhtmltopdf %2$s %1$s';
+//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type %s %s';
 
 /**
  * Clé de licence

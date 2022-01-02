@@ -32,7 +32,7 @@
             {linkbutton href="!services/user/?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
         {/if}
         {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-            {linkbutton href="!services/user/add.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
+            {linkbutton href="!services/user/subscribe.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
         {/if}
     </dd>
     {if count($services)}

@@ -455,6 +455,7 @@ class File extends Entity
 		}
 
 		self::validateFileName($name);
+		self::validatePath($path);
 		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
@@ -943,26 +944,26 @@ class File extends Entity
 
 	static public function validatePath(string $path): array
 	{
-		$path = explode('/', $path);
+		$parts = explode('/', $path);
 
-		if (count($path) < 1) {
-			throw new ValidationException('Chemin invalide');
+		if (count($parts) < 1) {
+			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
-		if (!array_key_exists($path[0], self::CONTEXTS_NAMES)) {
-			throw new ValidationException('Chemin invalide');
+		$context = array_shift($parts);
+
+		if (!array_key_exists($context, self::CONTEXTS_NAMES)) {
+			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
-		$context = array_shift($path);
-
-		foreach ($path as $part) {
+		foreach ($parts as $part) {
 			if (substr($part, 0, 1) == '.') {
-				throw new ValidationException('Chemin invalide');
+				throw new ValidationException('Chemin invalide: ' . $path);
 			}
 		}
 
-		$name = array_pop($path);
-		$ref = implode('/', $path);
+		$name = array_pop($parts);
+		$ref = implode('/', $parts);
 		return [$context, $ref ?: null, $name];
 	}
 

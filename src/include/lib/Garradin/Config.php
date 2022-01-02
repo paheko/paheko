@@ -181,8 +181,8 @@ class Config extends Entity
 		}
 
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
-		if (!isset($source['couleur1'], $source['couleur2'])
-			|| ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
+		if (isset($source['couleur1'], $source['couleur2'])
+			&& ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
 		{
 			$source['couleur1'] = null;
 			$source['couleur2'] = null;
@@ -275,6 +275,22 @@ class Config extends Entity
 	public function hasFile(string $key): bool
 	{
 		return $this->files[$key] ? true : false;
+	}
+
+	public function updateFiles(): void
+	{
+		$files = $this->files;
+
+		foreach (self::FILES as $key => $path) {
+			if ($f = Files::get($path)) {
+				$files[$key] = $f->modified->getTimestamp();
+			}
+			else {
+				$files[$key] = null;
+			}
+		}
+
+		$this->set('files', $files);
 	}
 
 	public function setFile(string $key, ?string $value, bool $upload = false): ?File

@@ -4,6 +4,7 @@ namespace Garradin;
 
 use Garradin\Users\Session;
 use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 use KD2\ZipWriter;
 
@@ -278,7 +279,15 @@ class Sauvegarde
 		$zip->setCompression(0);
 
 		$add_directory = function ($path) use ($zip, &$add_directory) {
-			foreach (Files::list($path) as $file) {
+			try {
+				$list = Files::list($path);
+			}
+			catch (ValidationException $e) {
+				// Ignore invalid paths
+				return;
+			}
+
+			foreach ($list as $file) {
 				if ($file->type == $file::TYPE_DIRECTORY) {
 					$add_directory($file->path);
 				}
