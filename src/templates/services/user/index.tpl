@@ -49,6 +49,15 @@
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td>{$row.amount|raw|money_currency}</td>
 			<td class="actions">
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
+					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
+				{/if}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ) && $row.id_account}
+					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+				{/if}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && !$row.id_account}
+					{linkbutton shape="check" label="Lier des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+				{/if}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{if $row.paid}
 						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
@@ -57,12 +66,6 @@
 					{/if}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
-				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ) && $row.id_account}
-					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
-				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
-					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
 		</tr>
