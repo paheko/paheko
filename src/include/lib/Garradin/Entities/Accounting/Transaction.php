@@ -698,7 +698,7 @@ class Transaction extends Entity
 
 		$db->begin();
 
-		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND id_service_user IS NULL AND %s;', $db->where('id_user', 'NOT IN', $users));
+		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s;', $db->where('id_user', 'NOT IN', $users));
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
