@@ -41,6 +41,11 @@ class Accounts
 		return $this->em->col('SELECT id FROM @TABLE WHERE code = ? AND id_chart = ?;', $code, $this->chart_id);
 	}
 
+	static public function getCodeFromId(string $id): string
+	{
+		return EntityManager::getInstance(Account::class)->col('SELECT code FROM @TABLE WHERE id = ?;', $id);
+	}
+
 	/**
 	 * Return common accounting accounts from current chart
 	 * (will not return analytical and volunteering accounts)
