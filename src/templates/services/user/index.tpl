@@ -53,10 +53,10 @@
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-					{if $row.id_account}
+					{if $row.has_transactions}
 						{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
 					{else}
-						{linkbutton shape="check" label="Lier des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+						{linkbutton shape="check" label="Lier à une écriture" href="link.php?id=%d"|args:$row.id target="_dialog"}
 					{/if}
 				{/if}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}

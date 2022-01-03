@@ -26,7 +26,7 @@ $form->runIf('save', function () use ($su) {
 	}
 
 	$transaction->linkToUser($su->id_user, $su->id);
-}, $csrf_key, '!acc/transactions/service_user.php?id=' . $su->id);
+}, $csrf_key, '!acc/transactions/service_user.php?id=' . $su->id . '&user=' . $su->id_user);
 
 $tpl->assign(compact('csrf_key'));
 
