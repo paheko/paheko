@@ -22,7 +22,7 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	{foreach from=$lines key="k" item="line"}
 		<tr>
 			<td>
-				{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account][]" default=$line.account}
+				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account][]" default=$line.account}
 			</td>
 			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
