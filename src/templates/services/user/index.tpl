@@ -52,11 +52,12 @@
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
 					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ) && $row.id_account}
-					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
-				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && !$row.id_account}
-					{linkbutton shape="check" label="Lier des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
+					{if $row.id_account}
+						{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+					{else}
+						{linkbutton shape="check" label="Lier des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+					{/if}
 				{/if}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{if $row.paid}
