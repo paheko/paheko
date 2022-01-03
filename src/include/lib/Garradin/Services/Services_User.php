@@ -41,6 +41,9 @@ class Services_User
 			'id_account' => [
 				'select' => 'sf.id_account',
 			],
+			'has_transactions' => [
+				'select' => 'tu.id_user',
+			],
 			'label' => [
 				'select' => 's.label',
 				'label' => 'Activité',
