@@ -63,6 +63,10 @@ function garradin_contributor_license(): ?int
 		return null;
 	}
 
+	if (is_int(CONTRIBUTOR_LICENSE)) {
+		return CONTRIBUTOR_LICENSE;
+	}
+
 	$key = CONTRIBUTOR_LICENSE;
 	$key = gzinflate(base64_decode($key));
 	list($email, $level, $hash) = explode('==', $key);
