@@ -30,7 +30,14 @@
 
 		open()
 		{
-			var d = this.input ? this.input.value : '';
+			var d = '';
+
+			if (this.input) {
+				d = this.input.value;
+			}
+			else if (this.button.dataset && this.button.dataset.date) {
+				d = this.button.dataset.date;
+			}
 
 			if (d == '') {
 				d = new CalendarDate;
@@ -184,12 +191,16 @@
 				this.input.value = v;
 			}
 
+			if (this.button.dataset && this.button.dataset.date) {
+				this.button.dataset.date = v;
+			}
+
 			this.close();
 
-			event = document.createEvent('HTMLEvents');
+			var event = document.createEvent('HTMLEvents');
 			event.initEvent('change', true, true);
 			event.eventName = 'change';
-			this.input.dispatchEvent(event);
+			(this.input || this.button).dispatchEvent(event);
 		}
 
 		focus()
