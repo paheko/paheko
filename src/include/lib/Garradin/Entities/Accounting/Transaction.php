@@ -720,7 +720,10 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = Config::getInstance()->get('champ_identite');
-		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user
+			FROM membres m
+			INNER JOIN acc_transactions_users l ON l.id_user = m.id
+			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
 	}
 

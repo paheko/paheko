@@ -34,6 +34,10 @@
 	</dd>
 </dl>
 
+{if $only}
+	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à une écriture. {link href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}</p>
+{/if}
+
 {include file="common/dynamic_list_head.tpl"}
 
 	{foreach from=$list->iterate() item="row"}

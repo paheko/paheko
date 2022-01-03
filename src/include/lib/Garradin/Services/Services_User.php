@@ -32,7 +32,7 @@ class Services_User
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
-	static public function perUserList(int $user_id): DynamicList
+	static public function perUserList(int $user_id, ?int $only_id = null): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -73,6 +73,10 @@ class Services_User
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
 		$conditions = sprintf('su.id_user = %d', $user_id);
+
+		if ($only_id) {
+			$conditions .= sprintf(' AND su.id = %d', $only_id);
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 
