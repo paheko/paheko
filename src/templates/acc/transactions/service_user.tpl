@@ -3,7 +3,7 @@
 <nav class="tabs">
 	{linkbutton href="!membres/fiche.php?id=%d"|args:$user_id label="Retour à la fiche membre" shape="left"}
 	{linkbutton href="!services/user/payment.php?id=%d"|args:$service_user_id label="Nouveau règlement" shape="plus" target="_dialog"}
-	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 	{linkbutton href="!services/user/link.php?id=%d"|args:$service_user_id label="Lier à une écriture" shape="check" target="_dialog"}
 	{/if}
 </nav>
