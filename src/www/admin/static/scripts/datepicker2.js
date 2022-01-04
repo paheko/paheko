@@ -6,7 +6,13 @@
 	};
 	DATEPICKER_L10N.fr = {
 		weekdays: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-		months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+		months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+		labels: {
+			"Previous month": "Mois précédent",
+			"Next month": "Mois suivant",
+			"Change year": "Choisir l'année",
+			"Change month": "Choisir le mois",
+		}
 	};
 
 	window.DatePicker = class {
@@ -14,6 +20,8 @@
 			this.button = button;
 			this.input = input;
 			this.date = null;
+			this.nav = [];
+			this.header = null;
 
 			Object.assign(this, {
 				format: 0, // 0 = Y-m-d, 1 = d/m/Y
@@ -25,7 +33,7 @@
 			c.className = this.class;
 			this.container = button.parentNode.insertBefore(c, button.nextSibling);
 
-			button.onclick = () => { this.container.hasAttribute('open') ? this.close() : this.open() };
+			button.addEventListener('click', () => this.container.hasAttribute('open') ? this.close() : this.open(), false);
 		}
 
 		open()
@@ -50,8 +58,13 @@
 				d = new CalendarDate(d);
 			}
 
+			if (isNaN(d.getTime())) {
+				d = new CalendarDate;
+			}
+
 			this.date = d;
 
+			this.buildHeader();
 			this.refresh();
 
 			this.focus();
@@ -59,6 +72,20 @@
 			this.container.setAttribute('open', 'open');
 
 			this.keyEvent = (e) => {
+				// Ignore modifiers
+				if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) {
+					return true;
+				}
+
+				if (e.key == 'Escape') {
+					return !!this.close();
+				}
+
+				if (this.header.contains(e.target)) {
+					return true;
+				}
+
+
 				var r = this.key(e.key);
 
 				if (!r) {
@@ -68,20 +95,28 @@
 				return r;
 			};
 
-			document.addEventListener('keydown', this.keyEvent);
+			this.clickEvent = (e) => {
+				if (this.container.contains(e.target)) {
+					return true;
+				}
+
+				this.close();
+			};
+
+			document.addEventListener('keydown', this.keyEvent, true);
+			document.addEventListener('click', this.clickEvent, true);
 		}
 
 		key(key)
 		{
 			switch (key) {
 				case 'Enter': return !!this.select();
-				case 'Escape': return !!this.close();
 				case 'ArrowLeft': return !!this.day(-1);
 				case 'ArrowRight': return !!this.day(1);
 				case 'ArrowUp': return !!this.day(-7);
 				case 'ArrowDown': return !!this.day(7);
-				case 'PageDown': return !!this.month(1);
-				case 'PageUp': return !!this.month(-1);
+				case 'PageDown': return !!this.month(1, true);
+				case 'PageUp': return !!this.month(-1, true);
 			}
 
 			return true;
@@ -91,8 +126,10 @@
 		{
 			this.container.innerHTML = '';
 			this.container.removeAttribute('open');
+			this.input ? this.input.select() : null;
 
-			document.removeEventListener('keydown', this.keyEvent);
+			document.removeEventListener('keydown', this.keyEvent, true);
+			document.removeEventListener('click', this.clickEvent, true);
 		}
 
 		generateTable()
@@ -119,8 +156,13 @@
 
 				week.forEach((day) => {
 					var cell = c('td');
-					cell.innerHTML = day ? day.getDate() : '';
-					cell.onclick = (e) => { this.select(e); };
+
+					if (day) {
+						cell.innerHTML = `<input type="button" value="${day.getDate()}" />`;
+						cell.firstChild.onclick = (e) => this.select(e.target.value);
+						cell.firstChild.onfocus = (e) => this.date.setDate(e.target.value) && this.focus(false);
+					}
+
 					row.appendChild(cell);
 				});
 
@@ -132,35 +174,56 @@
 			return table;
 		}
 
+		buildHeader()
+		{
+			let labels = ["Previous month", "Next month", "Change month", "Change year"];
+			labels = labels.map((l) => DATEPICKER_L10N[this.lang].labels[l] || l);
+
+			let j = 0;
+			let options = DATEPICKER_L10N[this.lang].months.map((m) => `<option value="${j++}">${m}</option>`);
+			let year = this.date.getFullYear();
+
+			this.header = document.createElement('nav');
+			this.header.innerHTML = `<input type="button" value="←" title="${labels[0]}" />
+				<span><select title="${labels[2]}">${options}</select> <input type="number" size="4" step="1" min="1" max="2500" title="${labels[3]}" value="${year}"></span>
+				<input type="button" value="→" title="${labels[1]}" />`;
+
+			this.nav = this.header.querySelectorAll('input, select');
+			this.nav[0].onclick = () => { this.month(-1, true); return false; };
+			this.nav[3].onclick = () => { this.month(1, true); return false; };
+			this.nav[1].value = this.date.getMonth();
+			this.nav[1].onchange = () => this.month(this.nav[1].value, false);
+			this.nav[2].onchange = () => this.year(this.nav[2].value);
+			this.nav[2].onclick = (e) => e.target.select();
+			this.nav[2].onkeyup = () => { let y = this.nav[2].value; y.length == 4 ? this.year(y) : null; };
+
+			this.container.appendChild(this.header);
+		}
+
 		refresh()
 		{
-			this.container.innerHTML = '';
-			var header = document.createElement('nav');
-
-			var p = document.createElement('input');
-			p.type = 'button';
-			p.value = '←';
-			p.onclick = () => { this.month(-1); return false; };
-			header.appendChild(p);
-
-			var t = document.createElement('h3');
-			t.innerHTML = DATEPICKER_L10N[this.lang].months[this.date.getMonth()] + ' ' + this.date.getFullYear();
-			header.appendChild(t);
-
-			var n = p.cloneNode(true);
-			n.value = '→';
-			n.onclick = () => { this.month(1); return false; };
-			header.appendChild(n);
-
-			this.container.appendChild(header);
+			this.nav[1].value = this.date.getMonth();
+			this.nav[2].value = this.date.getFullYear();
+			let c = this.container.childNodes;
+			c.length == 2 ? c[1].remove() : null;
 			this.container.appendChild(this.generateTable());
 		}
 
-		month(change)
+		year(y)
 		{
-			this.date.setMonth(this.date.getMonth() + change);
+			if (this.date.getFullYear() == y) {
+				return;
+			}
+
+			this.date.setYear(y);
 			this.refresh();
-			this.focus();
+		}
+
+		month(change, relative)
+		{
+			this.date.setMonth(relative ? this.date.getMonth() + change : change);
+			this.refresh();
+			this.focus(false);
 		}
 
 		day(change)
@@ -175,10 +238,10 @@
 			this.focus();
 		}
 
-		select(e)
+		select(s)
 		{
-			if (e && e.target.textContent.match(/\d+/)) {
-				this.date.setDate(parseInt(e.target.textContent, 10));
+			if (s) {
+				this.date.setDate(parseInt(s, 10));
 			}
 
 			var y = this.date.getFullYear(),
@@ -203,20 +266,25 @@
 			(this.input || this.button).dispatchEvent(event);
 		}
 
-		focus()
+		focus(nofocus)
 		{
 			this.container.querySelectorAll('tbody td').forEach((cell) => {
-				var v = parseInt(cell.innerHTML, 10);
+				if (!cell.firstChild) {
+					return;
+				}
+
+				var v = parseInt(cell.firstChild.value, 10);
 
 				if (v === this.date.getDate()) {
+					if (nofocus !== false) {
+						cell.firstChild.focus();
+					}
 					cell.className = 'focus';
 				}
 				else {
 					cell.className = '';
 				}
 			});
-
-			this.container.focus();
 		}
 	}
 

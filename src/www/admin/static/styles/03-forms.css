@@ -151,11 +151,6 @@ input:checked + label::before {
     opacity: unset;
 }
 
-input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
-    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
-    outline: 0;
-}
-
 /* buttons */
 
 input[type=submit], input[type=button], button, input[type=file] {
@@ -173,6 +168,11 @@ input[type=submit], input[type=button], button, input[type=file] {
     text-decoration: none;
     transition: color .3s, background-color .3s;
     color: rgb(var(--gTextColor));
+}
+
+input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
+    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
+    outline: 0;
 }
 
 a.icn-btn {
@@ -452,12 +452,24 @@ dialog.datepicker {
 .datepicker nav {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     text-align: center;
 }
 
-.datepicker h3 {
-    font-size: inherit;
-    margin: 0 .5rem;
+
+.datepicker nav input[type=button] {
+    font-family: gicon;
+    height: 2em;
+    width: 2em;
+}
+
+.datepicker span * {
+    font-size: 1rem;
+    font-family: inherit;
+    margin: .1rem;
+    padding: .1rem;
+    border: 1px solid #ccc;
+    text-align: center;
 }
 
 .datepicker table {
@@ -468,39 +480,43 @@ dialog.datepicker {
 .datepicker thead td {
     font-size: 80%;
     color: #999;
+    text-align: center;
 }
 
 .datepicker tbody tr:nth-child(even) {
     background-color: #eee;
 }
 
-.datepicker tbody td:nth-child(6) {
-    color: #666;
+.datepicker tbody td:nth-child(6) input {
+    color: #333;
 }
-.datepicker tbody td:nth-child(7) {
-    color: #999;
+.datepicker tbody td:nth-child(7) input {
+    color: #666;
 }
 
 .datepicker tbody td {
-    padding: .2em .4em;
     text-align: center;
     width: 14.3%;
+    padding: 0;
 }
 
-.datepicker tbody td:not(:empty):hover {
-    cursor: pointer;
-    background: #fcc;
-    text-decoration: underline;
+.datepicker tbody td input {
+    padding: .4rem .7rem;
+    border: none;
+    background: none;
+    box-shadow: none;
+    border-radius: .2rem;
+    margin: 0;
 }
 
-.datepicker tbody td.focus {
+.datepicker tbody td.focus input {
     background: #339;
     color: #fff;
-    border-radius: .5em;
 }
 
-.datepicker input {
-    font-family: gicon;
+.datepicker tbody input:hover {
+    background: #ccf;
+    color: darkred;
 }
 
 fieldset.memberMessage {
