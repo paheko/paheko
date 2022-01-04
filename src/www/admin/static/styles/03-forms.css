@@ -463,6 +463,10 @@ dialog.datepicker {
     width: 2em;
 }
 
+.datepicker span {
+    white-space: nowrap;
+}
+
 .datepicker span * {
     font-size: 1rem;
     font-family: inherit;

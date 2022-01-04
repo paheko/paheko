@@ -13,6 +13,10 @@ textarea, select, .input-list, .file-selector, input[type=text]:not([data-input]
     width: calc(95% - 2em);
 }
 
+input[size] {
+	width: auto;
+}
+
 a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
 	padding: .4em .6em;
 }
@@ -328,5 +332,8 @@ table.list th {
 
 	dialog.datepicker {
 		margin: auto;
+		left: 0;
+		right: 0;
+		width: 95%;
 	}
 }
