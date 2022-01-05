@@ -736,6 +736,12 @@ class Recherche
 				],
 			];
 		}
+		// Match account number
+		elseif ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
+			&& ($year = Years::get($id_year))
+			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
+			return sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year);
+		}
 		// Match date
 		elseif ($d = Utils::get_datetime($text))
 		{
@@ -749,12 +755,6 @@ class Recherche
 					],
 				],
 			];
-		}
-		// Match account number
-		elseif ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
-			&& ($year = Years::get($id_year))
-			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
-			return sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year);
 		}
 		// Match transaction ID
 		elseif (preg_match('/^#[0-9]+$/', $text)) {
