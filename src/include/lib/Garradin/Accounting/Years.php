@@ -81,6 +81,7 @@ class Years
 		foreach ($years as $year) {
 			$out[$year->id] = Transactions::listByType($year->id, null);
 			$out[$year->id]->setPageSize($count);
+			$out[$year->id]->orderBy('id', true);
 		}
 
 		return $out;
