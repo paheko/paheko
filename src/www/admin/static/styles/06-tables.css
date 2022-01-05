@@ -82,9 +82,12 @@ table.search th {
     background: rgba(var(--gSecondColor), 0.5);
 }
 
-table.list .disabled {
+table.list tr.disabled {
     color: var(--gBorderColor);
-    background: var(--gLightBorderColor);
+}
+
+table.list tr:nth-child(even).disabled {
+    background: var(--gLightBackgroundColor);
 }
 
 .userOrder .cur {
