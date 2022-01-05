@@ -1,11 +1,8 @@
 {include file="admin/_head.tpl" title="Commencer un exercice" current="acc/years"}
 
-<nav class="tabs">
-	<ul>
-		<li><a href="./">Exercices</a></li>
-		<li class="current"><a href="new.php">Nouvel exercice</a></li>
-	</ul>
-</nav>
+{if isset($_GET.from)}
+	<p class="confirm block">L'exercice a bien été clôturé.</p>
+{/if}
 
 {form_errors}
 
@@ -15,8 +12,11 @@
 		<legend>Commencer un nouvel exercice</legend>
 		<dl>
 			{input type="select_groups" options=$charts name="id_chart" label="Plan comptable" required=true source=$year}
-			<dd class="help">Il ne sera pas possible de modifier ou supprimer un compte du plan comptable si le compte est utilisé dans un exercice clôturé.<br />
-				Si vous souhaitez modifier le plan comptable pour ce nouvel exercice, il est recommandé de créer un nouveau plan comptable, recopié à partir de l'ancien plan comptable. Ainsi tous les comptes seront modifiables et supprimables.</dd>
+			<dd class="help">
+				Il ne sera pas possible de changer le plan comptable une fois l'exercice ouvert.<br />
+				Il ne sera également pas possible de modifier ou supprimer un compte du plan comptable si le compte est utilisé dans un autre exercice déjà clôturé.<br />
+				Si vous souhaitez modifier le plan comptable pour ce nouvel exercice, il est recommandé de créer un nouveau plan comptable, recopié à partir de l'ancien plan comptable. Ainsi tous les comptes seront modifiables et supprimables.
+			</dd>
 			<dd class="help">{linkbutton shape="settings" label="Gestion des plans comptables" href="!acc/charts/"}</dd>
 			{input type="text" name="label" label="Libellé" required=true source=$year}
 			{input type="date" label="Début de l'exercice" name="start_date" required=true  source=$year}
