@@ -2,6 +2,12 @@
 
 {form_errors}
 
+{if !empty($_GET.from)}
+<p class="block confirm">
+	L'exercice a bien été créé.
+</p>
+{/if}
+
 {if $year->countTransactions()}
 <p class="block alert">
 	<strong>Attention&nbsp;!</strong>
@@ -16,12 +22,13 @@
 
 		{if !$year_selected}
 		<dl>
-			<dt><label for="f_from_year">Reprendre les soldes de fermeture d'un exercice clôturé</label></dt>
+			<dt><label for="f_from_year">Reporter les soldes de fermeture d'un exercice clôturé</label></dt>
+			<dd class="help">Pour reprendre les soldes des comptes de l'exercice précédent.</dd>
 			<dd>
 				<select id="f_from_year" name="from_year">
 					<option value="">-- Aucun</option>
 					{foreach from=$years item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
+					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if}>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
 					{/foreach}
 				</select>
 			</dd>
@@ -30,6 +37,12 @@
 		<p class="help">
 			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
 		</p>
+		{if !empty($_GET.from)}
+		<p class="help">
+			Normalement il suffit de valider ce formulaire pour faire le report des soldes de comptes.<br />
+			N'oubliez pas d'affecter le résultat de l'exercice (par exemple au compte 1068) après l'AG.
+		</p>
+		{/if}
 		<table class="list transaction-lines">
 			<thead>
 				<tr>

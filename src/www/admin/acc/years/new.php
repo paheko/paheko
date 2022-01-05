@@ -16,7 +16,9 @@ $form->runIf('new', function () use ($year) {
 	$year->importForm();
 	$year->save();
 
-	if ($old_id = qg('from')) {
+	$old_id = qg('from');
+
+	if ($old_id) {
 		$old = Years::get((int) $old_id);
 		$changed = Fees::updateYear($old, $year);
 
@@ -26,7 +28,7 @@ $form->runIf('new', function () use ($year) {
 	}
 
 	if (Years::countClosed()) {
-		Utils::redirect(ADMIN_URL . 'acc/years/balance.php?id=' . $year->id());
+		Utils::redirect(ADMIN_URL . 'acc/years/balance.php?from=' . $old_id . '&id=' . $year->id());
 	}
 }, 'acc_years_new', '!acc/years/');
 
