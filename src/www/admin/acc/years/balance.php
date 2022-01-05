@@ -40,7 +40,7 @@ $previous_year = null;
 $year_selected = f('from_year') !== null;
 $chart_change = false;
 $lines = [[]];
-$years = Years::listClosed();
+$years = Years::list(true);
 
 // Empty balance
 if (!count($years) || f('from_year') === '') {

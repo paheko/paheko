@@ -22,17 +22,31 @@
 
 		{if !$year_selected}
 		<dl>
-			<dt><label for="f_from_year">Reporter les soldes de fermeture d'un exercice clôturé</label></dt>
+			<dt><label for="f_from_year">Reporter les soldes de fermeture d'un exercice</label></dt>
 			<dd class="help">Pour reprendre les soldes des comptes de l'exercice précédent.</dd>
 			<dd>
 				<select id="f_from_year" name="from_year">
 					<option value="">-- Aucun</option>
 					{foreach from=$years item="year"}
-					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if}>{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
+					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-closed="{$year.closed}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short} ({if $year.closed}clôturé{else}en cours{/if})</option>
 					{/foreach}
 				</select>
 			</dd>
+			<dd class="hidden warn-not-closed">
+				<p class="alert block">Attention l'exercice sélectionné n'est pas clôturé&nbsp;!<br />Si vous modifiez cet exercice après avoir validé cette balance d'ouverture, celle-ci pourrait ne plus correspondre au bilan de l'exercice précédent&nbsp;!</p>
+			</dd>
 		</dl>
+		{literal}
+		<script type="text/javascript" async="async">
+		let s = document.querySelector('#f_from_year');
+		const checkOpen = function() {
+			let v = s.options[s.selectedIndex].dataset.closed;
+			g.toggle('.warn-not-closed', v === '0' ? true : false);
+		};
+		s.onchange = checkOpen;
+		checkOpen();
+		</script>
+		{/literal}
 		{else}
 		<p class="help">
 			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
