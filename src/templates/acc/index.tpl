@@ -1,5 +1,19 @@
 {include file="admin/_head.tpl" title="Comptabilité" current="acc"}
 
+<form method="get" action="{$admin_url}acc/search.php" class="shortForm">
+	<fieldset>
+		<legend>Recherche rapide</legend>
+		<p>
+			<input type="search" name="qt" value="" />
+			{input type="select" name="year" options=$all_years default=$first_year}
+			{button type="submit" shape="search" label="Chercher"}
+		</p>
+		<p class="help">
+			Indiquer un numéro de compte, un montant précédé par le signe égal (<code>=62,41</code>) ou une date (<code>JJ/MM/AAAA</code>), sinon la recherche sera effectuée dans le libellé ou la pièce comptable.
+		</p>
+	</fieldset>
+</form>
+
 {foreach from=$years item="year"}
 <section class="year-infos">
 	<h2 class="ruler">{$year.label} —

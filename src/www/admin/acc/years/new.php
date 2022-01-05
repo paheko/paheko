@@ -10,8 +10,9 @@ require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
 
-$form->runIf('new', function () {
-	$year = new Year;
+$year = new Year;
+
+$form->runIf('new', function () use ($year) {
 	$year->importForm();
 	$year->save();
 
@@ -30,9 +31,12 @@ $form->runIf('new', function () {
 }, 'acc_years_new', '!acc/years/');
 
 $new_dates = Years::getNewYearDates();
-$tpl->assign('start_date', $new_dates[0]);
-$tpl->assign('end_date', $new_dates[1]);
-$tpl->assign('label', sprintf('Exercice %d', $new_dates[0]->format('Y')));
-$tpl->assign('charts', Charts::listByCountry());
+$year->start_date = $new_dates[0];
+$year->end_date = $new_dates[1];
+$year->label = $year->label_years();
+
+$tpl->assign(compact('year'));
+
+$tpl->assign('charts', Charts::listByCountry(true));
 
 $tpl->display('acc/years/new.tpl');
