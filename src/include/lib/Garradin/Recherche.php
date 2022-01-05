@@ -743,7 +743,7 @@ class Recherche
 			return sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year);
 		}
 		// Match date
-		elseif ($d = Utils::get_datetime($text))
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::get_datetime($text)))
 		{
 			$query[] = [
 				'operator' => 'OR',
