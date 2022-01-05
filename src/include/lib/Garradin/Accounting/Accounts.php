@@ -18,7 +18,7 @@ class Accounts
 	protected $chart_id;
 	protected $em;
 
-	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'type'];
+	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'type', 'added'];
 
 	public function __construct(int $chart_id)
 	{
@@ -224,6 +224,8 @@ class Accounts
 
 					$row['position'] = $positions[$row['position']];
 					$row['type'] = $types[$row['type']];
+					$row['user'] = empty($row['added']) ? 0 : 1;
+
 					$account->importForm($row);
 					$account->save();
 				}
