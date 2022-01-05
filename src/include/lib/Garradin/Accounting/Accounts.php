@@ -75,12 +75,15 @@ class Accounts
 	 */
 	public function export(): \Generator
 	{
-		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT code, label, description, position, type FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
+		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT
+			code, label, description, position, type, user AS added
+			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
 			$this->chart_id);
 
 		foreach ($res as $row) {
 			$row->type = Account::TYPES_NAMES[$row->type];
 			$row->position = Account::POSITIONS_NAMES[$row->position];
+			$row->added = $row->added ? 'Ajouté' : '';
 			yield $row;
 		}
 	}
