@@ -11,7 +11,7 @@ if (!defined('\Garradin\ROOT')) {
 
 assert(isset($tpl, $form_url, $create));
 
-$current_only = !qg('past_services');
+$current_only = !f('past_services');
 
 // If there is only one user selected we can calculate the amount
 $single_user_id = isset($users) && count($users) == 1 ? key($users) : null;
