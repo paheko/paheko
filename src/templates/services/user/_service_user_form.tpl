@@ -125,6 +125,10 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	<fieldset class="accounting">
 		<legend>{input type="checkbox" name="create_payment" value=1 default=1 label="Enregistrer en comptabilité"}</legend>
 
+		{if count($users) > 1}
+		<p class="help">Une écriture sera créée pour chaque membre inscrit.</p>
+		{/if}
+
 		<dl>
 			{input type="money" name="amount" label="Montant réglé par le membre" fake_required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" fake_required=1}
