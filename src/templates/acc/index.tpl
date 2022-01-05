@@ -1,5 +1,6 @@
 {include file="admin/_head.tpl" title="Comptabilité" current="acc"}
 
+{if !empty($all_years)}
 <form method="get" action="{$admin_url}acc/search.php" class="shortForm">
 	<fieldset>
 		<legend>Recherche rapide</legend>
@@ -13,6 +14,7 @@
 		</p>
 	</fieldset>
 </form>
+{/if}
 
 {foreach from=$years item="year"}
 <section class="year-infos">
