@@ -30,6 +30,7 @@
 	</fieldset>
 
 	<p class="submit">
+		<input type="hidden" name="paid" value="1" />
 		{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 	</p>
 </form>
