@@ -39,7 +39,7 @@
 	</nav>
 
 	{if $year.nb_transactions > 3}
-		<section class="graphs">
+		<section class="graphs small">
 			{foreach from=$graphs key="url" item="label"}
 			<figure>
 				<img src="{$url|args:'year='|cat:$year.id}" alt="" />
@@ -50,6 +50,37 @@
 	{else}
 		<p class="help block">Il n'y a pas encore suffisamment d'écritures dans cet exercice pour pouvoir afficher les statistiques.</p>
 		<p>{linkbutton label="Saisir une nouvelle écriture" shape="plus" href="transactions/new.php"}</p>
+	{/if}
+
+	{if $year.nb_transactions}
+	<?php $list = $last_transactions[$year->id]; ?>
+	<table class="list">
+		<caption>Dernières écritures</caption>
+		<thead>
+			<tr>
+			{foreach from=$list->getHeaderColumns() item="column"}
+				<td>{$column.label}</td>
+			{/foreach}
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+			{foreach from=$list->iterate() item="line"}
+			<tr>
+				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
+				<td>{$line.date|date_short}</td>
+				<td class="money">{$line.change|abs|raw|money}</td>
+				<td>{$line.reference}</td>
+				<th>{$line.label}</th>
+				<td>{$line.line_reference}</td>
+				<td class="num">{foreach from=$line.code_analytical item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?analytical={$id}">{$code}</a> {/foreach}</td>
+				<td class="actions">
+					{linkbutton href="!acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
+				</td>
+			</tr>
+			{/foreach}
+		</tbody>
+	</table>
 	{/if}
 </section>
 
