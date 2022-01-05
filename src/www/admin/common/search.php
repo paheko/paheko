@@ -35,6 +35,13 @@ if ($text_query !== '' && $target === 'membres' && empty($query->query))
 {
 	$query = $recherche->buildSimpleMemberQuery($text_query);
 }
+elseif ($text_query !== '' && $target == 'compta' && empty($query->query)) {
+	$query = $recherche->buildSimpleAccountingQuery($text_query, (int) qg('year'));
+
+	if (is_string($query)) {
+		Utils::redirect($query);
+	}
+}
 // Recherche existante
 elseif ($id && empty($query->query))
 {

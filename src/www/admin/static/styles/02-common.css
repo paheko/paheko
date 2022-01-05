@@ -227,6 +227,15 @@ dd.help li {
     margin: 0.2em 1em;
 }
 
+.shortForm {
+    text-align: center;
+}
+
+.shortForm p.help {
+    margin: .5em 0;
+    font-size: .9em;
+}
+
 .shortFormRight {
     width: 30em;
     float: right;

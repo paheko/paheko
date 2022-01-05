@@ -10,6 +10,9 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $tpl->assign('graphs', Graph::URL_LIST);
 
-$tpl->assign('years', Years::listOpen(true));
+$years = Years::listOpen(true);
+$tpl->assign('years', $years);
+$tpl->assign('first_year', count($years) ? current($years)->id : null);
+$tpl->assign('all_years', [null => '-- Tous les exercices'] + Years::listAssoc());
 
 $tpl->display('acc/index.tpl');
