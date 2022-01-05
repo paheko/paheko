@@ -35,7 +35,7 @@ $form->runIf('new', function () use ($year) {
 $new_dates = Years::getNewYearDates();
 $year->start_date = $new_dates[0];
 $year->end_date = $new_dates[1];
-$year->label = $year->label_years();
+$year->label = sprintf('Exercice %s', $year->label_years());
 
 $tpl->assign(compact('year'));
 
