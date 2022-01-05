@@ -36,6 +36,9 @@
 				{button type="submit" label="Comparer" shape="right"}
 			</p>
 			<input type="hidden" name="year" value="{$year.id}" />
+			{if isset($analytical)}
+				<input type="hidden" name="analytical" value="{$analytical.id}" />
+			{/if}
 		</fieldset>
 	</form>
 	{/if}
