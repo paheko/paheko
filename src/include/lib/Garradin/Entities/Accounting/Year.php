@@ -94,6 +94,7 @@ class Year extends Entity
 			'date'       => $this->end_date->format('d/m/Y'),
 			'id_creator' => $user_id,
 			'validated'  => 1,
+			'notes'      => 'Écriture automatique créée lors de la réouverture, à des fins de transparence. Cette écriture ne peut pas être supprimée ni modifiée.',
 		]);
 
 		$line = new Line;

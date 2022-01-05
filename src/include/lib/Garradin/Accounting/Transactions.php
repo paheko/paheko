@@ -423,7 +423,7 @@ class Transactions
 			(int)$id_analytical ?: 'NULL', $where));
 	}
 
-	static public function listByType(int $year_id, int $type)
+	static public function listByType(int $year_id, ?int $type)
 	{
 		$reverse = 1;
 
@@ -439,7 +439,11 @@ class Transactions
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
-		$conditions = sprintf('t.type = %s AND t.id_year = %d', $type, $year_id);
+		$conditions = sprintf('t.id_year = %d', $year_id);
+
+		if (null !== $type) {
+			$conditions .= sprintf(' AND t.type = %s', $type);
+		}
 
 		$sum = 0;
 
