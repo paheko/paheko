@@ -18,7 +18,7 @@ class Accounts
 	protected $chart_id;
 	protected $em;
 
-	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'type', 'added'];
+	const EXPECTED_CSV_COLUMNS = ['code', 'label', 'description', 'position', 'type'];
 
 	public function __construct(int $chart_id)
 	{
