@@ -2,13 +2,13 @@
 
 <nav class="tabs">
 	<aside>
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			{linkbutton shape="plus" href="!acc/years/new.php" label="Nouvel exercice"}
+		{/if}
 		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
 	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
-		{/if}
 		<li><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
 	</ul>
 </nav>
