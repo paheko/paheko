@@ -10,7 +10,7 @@
 			{button type="submit" shape="search" label="Chercher"}
 		</p>
 		<p class="help">
-			Indiquer un numéro de compte, un montant précédé par le signe égal (<code>=62,41</code>) ou une date (<code>JJ/MM/AAAA</code>), sinon la recherche sera effectuée dans le libellé ou la pièce comptable.
+			Indiquer un numéro de compte, un numéro d'écriture précédé par le signe hash (<code>#1234</code>), un montant précédé par le signe égal (<code>=62,41</code>) ou une date (<code>JJ/MM/AAAA</code>), sinon la recherche sera effectuée sur le libellé ou la pièce comptable.
 		</p>
 	</fieldset>
 </form>
