@@ -3,6 +3,10 @@ table.list {
     width: 100%;
 }
 
+table.list.auto {
+    width: auto;
+}
+
 table.list caption {
     text-align: center;
     font-size: 1.2em;
