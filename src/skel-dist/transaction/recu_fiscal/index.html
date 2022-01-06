@@ -124,7 +124,13 @@
 	<div style="top: 96mm; left: 153.0mm;">{{if $cerfa_config.art885}}X{{/if}}</div>
 
 	<div style="top: 113mm; left: 115mm;">X</div>
+
+{{* Abandon de frais par bénévoles *}}
+{{if $accounts_codes|strpos:'75412'}}
+	<div style="top: 136mm; left: 115mm;">X</div>
+{{else}}
 	<div style="top: 136mm; left: 15mm;">X</div>
+{{/if}}
 
 	{{* Moyen de paiement *}}
 	{{if $accounts_codes|strpos:$cerfa_config.compte_especes !== false}}
