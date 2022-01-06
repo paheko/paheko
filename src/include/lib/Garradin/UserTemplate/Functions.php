@@ -91,11 +91,14 @@ class Functions
 		$key = $params['key'];
 		unset($params['key']);
 
+		$validate = null;
+
 		if (isset($params['validate_schema'])) {
 			$validate = $params['validate_schema'];
 			unset($params['validate_schema']);
 		}
 
+		$db = DB::getInstance();
 		$exists = $db->first('SELECT value FROM documents_data WHERE key = ? AND document = ?;', $key, $id);
 
 		// Merge before update

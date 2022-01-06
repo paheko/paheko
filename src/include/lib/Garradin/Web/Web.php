@@ -10,6 +10,7 @@ use Garradin\Files\Files;
 use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\Plugin;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
