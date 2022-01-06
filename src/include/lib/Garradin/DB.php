@@ -220,7 +220,7 @@ class DB extends SQLite3
 
         if (!array_key_exists($id, self::$unicode_patterns_cache)) {
             $escape = $escape ? '(?!' . preg_quote($escape, '/') . ')' : '';
-            preg_match_all('/('.$escape.'[%_])|(\w+)|(.+?)/iu', $pattern, $parts, PREG_SET_ORDER);
+            preg_match_all('/('.$escape.'[%_])|([[:alnum:] .,:!-]+)|(.+?)/i', $pattern, $parts, PREG_SET_ORDER);
             $pattern = '';
 
             foreach ($parts as $part) {
