@@ -688,7 +688,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 
-		return $db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, ?);',
+		return $db->preparedQuery('REPLACE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, ?);',
 			$this->id(), $user_id, $service_id);
 	}
 
