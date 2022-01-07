@@ -431,6 +431,8 @@ form p.actions {
 
 dialog {
     display: none;
+    background: rgb(var(--gBgColor));
+    color: rgb(var(--gTextColor));
 }
 
 dialog[open] {
@@ -472,7 +474,7 @@ dialog.datepicker {
     font-family: inherit;
     margin: .1rem;
     padding: .1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--gLightBorderColor);
     text-align: center;
 }
 
@@ -483,19 +485,19 @@ dialog.datepicker {
 
 .datepicker thead td {
     font-size: 80%;
-    color: #999;
+    color: var(--gBorderColor);
     text-align: center;
 }
 
 .datepicker tbody tr:nth-child(even) {
-    background-color: #eee;
+    background-color: var(--gLightBackgroundColor);
 }
 
 .datepicker tbody td:nth-child(6) input {
-    color: #333;
+    color: var(--gBorderColor);
 }
 .datepicker tbody td:nth-child(7) input {
-    color: #666;
+    color: var(--gLightBorderColor);
 }
 
 .datepicker tbody td {
