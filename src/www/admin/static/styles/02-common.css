@@ -62,6 +62,10 @@ span.alert, b.alert {
     background-color: var(--gLightBackgroundColor);
 }
 
+.confirm.block a.icn-btn, .alert.block a.icn-btn, .error.block a.icn-btn {
+    color: #000;
+}
+
 .confirm.block::before, .alert.block::before, .error.block::before, .help.block::before {
     font-family: "gicon";
     left: .5em;
