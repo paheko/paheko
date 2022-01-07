@@ -307,6 +307,7 @@
 		btn.onclick = () => {
 			g.script('scripts/datepicker2.js', () => {
 				if (null == cal) {
+					btn.onclick = null;
 					cal = new DatePicker(btn, input, {lang: 'fr', format: 1});
 					cal.open();
 				}

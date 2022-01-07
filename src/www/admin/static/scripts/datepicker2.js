@@ -100,6 +100,10 @@
 					return true;
 				}
 
+				if (this.button.contains(e.target)) {
+					return true;
+				}
+
 				this.close();
 			};
 
@@ -221,7 +225,16 @@
 
 		month(change, relative)
 		{
-			this.date.setMonth(relative ? this.date.getMonth() + change : change);
+			let m = relative ? this.date.getMonth() + change : change;
+			this.date.setMonth(m);
+
+			// When the date of the day is > number of days in month, it switches to following month
+			// so we change the current date as well
+			if (this.date.getMonth() != m) {
+				this.date.setDate(0);
+				this.date.setMonth(m);
+			}
+
 			this.refresh();
 			this.focus(false);
 		}
