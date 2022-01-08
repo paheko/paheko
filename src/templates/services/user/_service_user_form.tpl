@@ -125,7 +125,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	<fieldset class="accounting">
 		<legend>{input type="checkbox" name="create_payment" value=1 default=1 label="Enregistrer en comptabilité"}</legend>
 
-		{if count($users) > 1}
+		{if !empty($users)}
 		<p class="help">Une écriture sera créée pour chaque membre inscrit.</p>
 		{/if}
 
