@@ -6,12 +6,12 @@
 			<li><strong><a href="{$admin_url}acc/reports/projects.php">Projets</a></strong></li>
 		{/if}
 		{if $current == 'analytical_ledger'}
-				<li class="current"><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query}">Grand livre analytique</a></li>
+				<li class="current"><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query_no_compare}">Grand livre analytique</a></li>
 		{else}
-			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?{$criterias_query}">Graphiques</a></li>
-			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?{$criterias_query}">Balance générale</a></li>
-			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?{$criterias_query}">Journal général</a></li>
-			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query}">Grand livre</a></li>
+			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?{$criterias_query_no_compare}">Graphiques</a></li>
+			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?{$criterias_query_no_compare}">Balance générale</a></li>
+			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?{$criterias_query_no_compare}">Journal général</a></li>
+			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query_no_compare}">Grand livre</a></li>
 			<li{if $current == "statement"} class="current"{/if}><a href="{$admin_url}acc/reports/statement.php?{$criterias_query}">Compte de résultat</a></li>
 			<li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?{$criterias_query}">Bilan</a></li>
 		{/if}
