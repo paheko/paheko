@@ -297,6 +297,7 @@ class Reports
 
 	static public function getTrialBalance(array $criterias): array
 	{
+		unset($criterias['compare_year']);
 		return self::getClosingSumsWithAccounts($criterias, null, false, false);
 	}
 
