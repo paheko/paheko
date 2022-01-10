@@ -207,23 +207,27 @@ class Upgrade
 				$db->commit();
 			}
 
-			if (version_compare($v, '1.2.0', '<')) {
-				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
-				$db->begin();
-
-				// Migrate users table
-				$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
-
-				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
-				$df->save();
-				$db->exec('DELETE FROM config WHERE key IN (\'champs_membres\', \'champ_identite\', \'champ_identifiant\');');
-				$db->commit();
-			}
-
 			if (version_compare($v, '1.1.18', '<')) {
 				$db->begin();
 				// Re-do the 1.1.15 migration as the LIKE did not work and accounts were not updated
 				$db->import(ROOT . '/include/data/1.1.15_migration.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.2.0', '<')) {
+				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
+				$db->begin();
+
+				// Create config_users_fields table
+				$db->import(ROOT . '/include/data/1.2.0_schema.sql');
+
+
+				// Migrate users table
+				$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
+				$df->save();
+
+				// Migrate other stuff
+				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
 				$db->commit();
 			}
 

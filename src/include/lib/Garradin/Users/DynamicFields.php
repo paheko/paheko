@@ -286,6 +286,7 @@ class DynamicFields
 		self::$_instance = $self;
 
 		$self->createTable();
+		$self->createIndexes();
 		$self->copy('membres', User::TABLE, $fields);
 
 		return $self;
@@ -294,7 +295,7 @@ class DynamicFields
 	public function isText(string $field)
 	{
 		$type = $this->_fields[$field]->type;
-		return self::TYPES[$type] == 'string';
+		return DynamicField::SQL_TYPES[$type] == 'TEXT';
 	}
 
 	public function getKeys()
@@ -415,18 +416,14 @@ class DynamicFields
 	 * Returns the SQL query used to create the search table and triggers
 	 * This table is useful to make LIKE searches on unicode columns
 	 */
-	public function getSQLSchemaSearch(string $table_name = User::TABLE): ?string
+	public function getSQLSearchSchema(string $table_name = User::TABLE): ?string
 	{
 		$search_table = $table_name . '_search';
-		$create = [
-			sprintf('id INTEGER NOT NULL PRIMARY KEY REFERENCES %s (id) ON DELETE CASCADE', $table_name),
-		];
 
 		$columns = [];
 
 		foreach ($this->_fields as $key => $cfg) {
 			if ($cfg->type == 'text' || $cfg->list_row) {
-				$create[] = sprintf('%s %s%s', $key, DynamicField::SQL_TYPES[$cfg->type], $cfg->type == 'text' ? ' COLLATE NOCASE' : '');
 				$columns[] = $key;
 			}
 		}
@@ -435,60 +432,32 @@ class DynamicFields
 			return null;
 		}
 
-		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\t%s\n);", $search_table, implode(",\n\t", $create));
+		$new_columns = array_map(fn ($v) => sprintf('NEW.%s', $v), $columns);
+
+		$sql = sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS %s USING fts4\n(\n\tcontent=%s,\n\ttokenize = unicode61 \"remove_diacritics=2\",\n\t%s\n);", $search_table, $table_name, implode(",\n\t", $columns));
 		$sql .= "\n";
-		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_i AFTER INSERT ON %s BEGIN\n\t", $search_table, $table_name);
 
-		$columns_insert = array_map(fn ($v) => sprintf('unicode_case_fold(NEW.%s)', $v), $columns);
-		$sql .= sprintf("INSERT INTO %s (%s) VALUES (%s);\n", $search_table, implode(', ', $columns), implode(', ', $columns_insert));
+		// Triggers
+		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_ai AFTER INSERT ON %s BEGIN\n\t", $search_table, $table_name);
+		$sql .= sprintf("INSERT INTO %s (docid, %s) VALUES (NEW.rowid, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
+		$sql .= "END;\n";
+		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_au AFTER UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
+		$sql .= sprintf("INSERT INTO %s (docid, %s) VALUES (NEW.rowid, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
+		$sql .= "END;\n";
+		$sql .= sprintf("\nCREATE TRIGGER IF NOT EXISTS %s_bu BEFORE UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
+		$sql .= sprintf("DELETE FROM %s WHERE docid = OLD.rowid;\n", $search_table);
+		$sql .= "END;\n";
+		$sql .= sprintf("\nCREATE TRIGGER IF NOT EXISTS %s_bd BEFORE DELETE ON %s BEGIN\n\t", $search_table, $table_name);
+		$sql .= sprintf("DELETE FROM %s WHERE docid = OLD.rowid;\n", $search_table);
 		$sql .= "END;\n";
 
-		$columns_update = array_map(fn ($v) => sprintf('%s = unicode_case_fold(NEW.%1$s)', $v), $columns);
-		$sql .= sprintf("\nCREATE TRIGGER IF NOT EXISTS %s_u AFTER UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("UPDATE %s SET %s WHERE id = NEW.id;\n", $search_table, implode(', ', $columns_update));
-		$sql .= "END;\n";
-
-		foreach ($this->getListedFields() as $field) {
-			if (!in_array($field->name, $columns)) {
-				continue;
-			}
-
-			$sql .= sprintf('CREATE INDEX IF NOT EXISTS %s_%s ON %1$s (%2$s);', $search_table, $field->name) . "\n";
-		}
-
-		return $sql;
-	}
-
-	/**
-	 * Returns the SQL query used to delete the search table and triggers
-	 */
-	public function getSQLDropSearch(string $table_name = User::TABLE): string
-	{
-		$search_table = $table_name . '_search';
-		$sql = sprintf('
-			DROP TABLE IF EXISTS %s;
-			DROP TRIGGER IF EXISTS %1$s_i;
-			DROP TRIGGER IF EXISTS %1$s_u;', $search_table);
 		return $sql;
 	}
 
 	public function getCopyFields(): array
 	{
 		// Champs à recopier
-		$copy = array_keys(DynamicField::SYSTEM_FIELDS);
-
-		$db = DB::getInstance();
-		// FIXME
-		$anciens_champs = new Champs($db->firstColumn('SELECT value FROM config WHERE key = ?;', 'champs_membres'));
-		$anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
-
-		foreach ($this->champs as $key=>$cfg)
-		{
-			if (property_exists($anciens_champs, $key)) {
-				$copy[$key] = $key;
-			}
-		}
-
+		$copy = array_keys(DynamicField::SYSTEM_FIELDS) + array_keys($this->_fields);
 		return $copy;
 	}
 
@@ -500,7 +469,7 @@ class DynamicFields
 
 		$db = DB::getInstance();
 
-		return sprintf('INSERT INTO %s (%s) SELECT %s FROM %s;',
+		return sprintf('INSERT INTO %s (id, %s) SELECT id, %s FROM %s;',
 			$new_table_name,
 			implode(', ', array_map([$db, 'quoteIdentifier'], $fields)),
 			implode(', ', array_map([$db, 'quoteIdentifier'], array_keys($fields))),
@@ -528,7 +497,7 @@ class DynamicFields
 		$schema = $this->getSQLSchema($table_name);
 		$db->exec($schema);
 
-		$schema = $this->getSQLSchemaSearch($table_name);
+		$schema = $this->getSQLSearchSchema($table_name);
 
 		if ($schema) {
 			$db->exec($schema);
@@ -538,6 +507,7 @@ class DynamicFields
 	public function createIndexes(string $table_name = User::TABLE): void
 	{
 		$id_field = null;
+		$db = DB::getInstance();
 
 		if ($id_field = $this->getLoginField()) {
 			// Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
