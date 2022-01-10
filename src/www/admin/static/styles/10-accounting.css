@@ -86,11 +86,8 @@ td.money, th.money {
     margin: 1em auto;
 }
 
-.year-infos {
-    text-align: center;
-}
-
 .year-infos .graphs {
+    text-align: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -98,6 +95,10 @@ td.money, th.money {
 
 .year-infos .graphs figure {
     margin: 1rem;
+}
+
+.year-infos .graphs.small figure img {
+    max-width: 500px;
 }
 
 table.accounts { width: 100%; }

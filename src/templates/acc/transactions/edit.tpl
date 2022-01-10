@@ -50,7 +50,7 @@
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
 					<?php $selected = $types_accounts[$key] ?? null; ?>
-					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
+					{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
 				{/foreach}
 				</dl>
 			{/if}
@@ -63,7 +63,7 @@
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$first_line.reference}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php" default=$linked_users}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php" default=$linked_users}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">

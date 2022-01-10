@@ -10,24 +10,15 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 <form method="post" action="{$self_url}" data-focus="1" data-create="{$create|escape:json}">
 
-	{if $has_past_services}
-	<nav class="tabs">
-		<ul{if $create} class="sub"{/if}>
-			<li{if $current_only} class="current"{/if}><a href="{$form_url}">Inscrire à une activité courante</a></li>
-			<li{if !$current_only} class="current"{/if}><a href="{$form_url}past_services=1">Inscrire à une activité passée</a></li>
-		</ul>
-	</nav>
-	{/if}
-
 	<fieldset>
-		<legend>Inscrire un membre à une activité</legend>
+		<legend>Inscrire à une activité</legend>
 
 		<dl>
 		{if $create && $users}
-			<dt>Membres inscrits</dt>
+			<dt>Membres à inscrire</dt>
 			{if count($users) <= 10}
 				{foreach from=$users key="id" item="name"}
-				<dd>{$name}<input type="hidden" name="users[{$id}]" value="{$name}" /></dd>
+				<dd><h3>{$name}</h3><input type="hidden" name="users[{$id}]" value="{$name}" /></dd>
 				{/foreach}
 			{else}
 				<dd>{$users|count} membres sélectionnés</dd>
@@ -39,6 +30,19 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{/if}
 
 			<dt><label for="f_service_ID">Activité</label> <b>(obligatoire)</b></dt>
+
+			{if $has_past_services}
+			<dd>
+				{if $current_only}
+					Seules les activités courantes sont affichées.
+					{button name="past_services" value="1" shape="reset" type="submit" label="Inscrire à une activité passée"}
+				{else}
+					Seules les activités passées sont affichées.
+					{button name="past_services" value="0" shape="left" type="submit" label="Inscrire à une activité courante"}
+				{/if}
+			</dd>
+			{/if}
+
 
 			{foreach from=$grouped_services item="service"}
 				<dd class="radio-btn">
@@ -121,9 +125,13 @@ assert(isset($grouped_services) && is_array($grouped_services));
 	<fieldset class="accounting">
 		<legend>{input type="checkbox" name="create_payment" value=1 default=1 label="Enregistrer en comptabilité"}</legend>
 
+		{if !empty($users)}
+		<p class="help">Une écriture sera créée pour chaque membre inscrit.</p>
+		{/if}
+
 		<dl>
 			{input type="money" name="amount" label="Montant réglé par le membre" fake_required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
-			{input type="list" target="acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" fake_required=1}
+			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" fake_required=1}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}

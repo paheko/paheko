@@ -220,6 +220,13 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.18', '<')) {
+				$db->begin();
+				// Re-do the 1.1.15 migration as the LIKE did not work and accounts were not updated
+				$db->import(ROOT . '/include/data/1.1.15_migration.sql');
+				$db->commit();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 

@@ -47,8 +47,8 @@ class Reports
 			$where[] = sprintf('t.id_creator = %d', $criterias['creator']);
 		}
 
-		if (!empty($criterias['service_user'])) {
-			$where[] = sprintf('t.id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['service_user']);
+		if (!empty($criterias['subscription'])) {
+			$where[] = sprintf('t.id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['subscription']);
 		}
 
 		if (!empty($criterias['analytical'])) {
@@ -297,6 +297,7 @@ class Reports
 
 	static public function getTrialBalance(array $criterias): array
 	{
+		unset($criterias['compare_year']);
 		return self::getClosingSumsWithAccounts($criterias, null, false, false);
 	}
 

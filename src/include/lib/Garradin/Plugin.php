@@ -772,7 +772,7 @@ class Plugin
 
 			if (is_null($config))
 			{
-				throw new \RuntimeException('config.json invalide. Code erreur JSON: ' . json_last_error());
+				throw new \RuntimeException('config.json invalide. Erreur JSON: ' . json_last_error_msg());
 			}
 
 			$config = json_encode($config);

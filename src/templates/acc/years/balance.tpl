@@ -2,6 +2,12 @@
 
 {form_errors}
 
+{if !empty($_GET.from)}
+<p class="block confirm">
+	L'exercice a bien été créé.
+</p>
+{/if}
+
 {if $year->countTransactions()}
 <p class="block alert">
 	<strong>Attention&nbsp;!</strong>
@@ -16,20 +22,41 @@
 
 		{if !$year_selected}
 		<dl>
-			<dt><label for="f_from_year">Reprendre les soldes de fermeture d'un exercice clôturé</label></dt>
+			<dt><label for="f_from_year">Reporter les soldes de fermeture d'un exercice</label></dt>
+			<dd class="help">Pour reprendre les soldes des comptes de l'exercice précédent.</dd>
 			<dd>
 				<select id="f_from_year" name="from_year">
 					<option value="">-- Aucun</option>
 					{foreach from=$years item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
+					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-closed="{$year.closed}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short} ({if $year.closed}clôturé{else}en cours{/if})</option>
 					{/foreach}
 				</select>
 			</dd>
+			<dd class="hidden warn-not-closed">
+				<p class="alert block">Attention l'exercice sélectionné n'est pas clôturé&nbsp;!<br />Si vous modifiez cet exercice après avoir validé cette balance d'ouverture, celle-ci pourrait ne plus correspondre au bilan de l'exercice précédent&nbsp;!</p>
+			</dd>
 		</dl>
+		{literal}
+		<script type="text/javascript" async="async">
+		let s = document.querySelector('#f_from_year');
+		const checkOpen = function() {
+			let v = s.options[s.selectedIndex].dataset.closed;
+			g.toggle('.warn-not-closed', v === '0' ? true : false);
+		};
+		s.onchange = checkOpen;
+		checkOpen();
+		</script>
+		{/literal}
 		{else}
 		<p class="help">
 			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
 		</p>
+		{if !empty($_GET.from)}
+		<p class="help">
+			Normalement il suffit de valider ce formulaire pour faire le report des soldes de comptes.<br />
+			N'oubliez pas d'affecter le résultat de l'exercice (par exemple au compte 1068) après l'AG.
+		</p>
+		{/if}
 		<table class="list transaction-lines">
 			<thead>
 				<tr>
@@ -55,7 +82,7 @@
 						</td>
 					{/if}
 					<th>
-						{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account][]" default=$line.account}
+						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account][]" default=$line.account}
 						{if !empty($line.message)}<span class="alert">{$line.message}</span>{/if}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>

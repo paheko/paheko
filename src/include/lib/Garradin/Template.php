@@ -455,7 +455,7 @@ class Template extends \KD2\Smartyer
 
 			$button = $this->widgetButton([
 				'shape' => $multiple ? 'plus' : 'menu',
-				'value' => (substr($attributes['target'], 0, 4) === 'http') ? $attributes['target'] : ADMIN_URL . $attributes['target'],
+				'value' => Utils::getLocalURL($attributes['target']),
 				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
 				'data-multiple' => $multiple ? '1' : '0',
 				'data-name' => $name,
@@ -777,6 +777,9 @@ class Template extends \KD2\Smartyer
 		elseif ($type == 'textarea')
 		{
 			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
+		}
+		elseif ($type == 'date') {
+			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
 		}
 		else
 		{

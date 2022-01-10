@@ -41,6 +41,11 @@ class Accounts
 		return $this->em->col('SELECT id FROM @TABLE WHERE code = ? AND id_chart = ?;', $code, $this->chart_id);
 	}
 
+	static public function getCodeFromId(string $id): string
+	{
+		return EntityManager::getInstance(Account::class)->col('SELECT code FROM @TABLE WHERE id = ?;', $id);
+	}
+
 	/**
 	 * Return common accounting accounts from current chart
 	 * (will not return analytical and volunteering accounts)
@@ -70,12 +75,15 @@ class Accounts
 	 */
 	public function export(): \Generator
 	{
-		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT code, label, description, position, type FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
+		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT
+			code, label, description, position, type, user AS added
+			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
 			$this->chart_id);
 
 		foreach ($res as $row) {
 			$row->type = Account::TYPES_NAMES[$row->type];
 			$row->position = Account::POSITIONS_NAMES[$row->position];
+			$row->added = $row->added ? 'Ajouté' : '';
 			yield $row;
 		}
 	}
@@ -216,6 +224,8 @@ class Accounts
 
 					$row['position'] = $positions[$row['position']];
 					$row['type'] = $types[$row['type']];
+					$row['user'] = empty($row['added']) ? 0 : 1;
+
 					$account->importForm($row);
 					$account->save();
 				}

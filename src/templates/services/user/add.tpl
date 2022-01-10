@@ -17,7 +17,7 @@
 	<fieldset class="c1">
 		<legend>Inscrire des membres</legend>
 		<dl>
-			{input type="list" name="users" required=true label="Membres à inscrire" target="membres/selector.php" multiple=true}
+			{input type="list" name="users" required=true label="Membres à inscrire" target="!membres/selector.php" multiple=true}
 		</dl>
 	</fieldset>
 
@@ -30,6 +30,7 @@
 	</fieldset>
 
 	<p class="submit">
+		<input type="hidden" name="paid" value="1" />
 		{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 	</p>
 </form>

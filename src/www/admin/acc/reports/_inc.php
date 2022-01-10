@@ -50,5 +50,9 @@ if ($y2 = Years::get((int)qg('compare_year'))) {
 	$criterias['compare_year'] = $y2->id;
 }
 
+$criterias_query = $criterias;
+unset($criterias_query['compare_year']);
+
 $tpl->assign('criterias', $criterias);
 $tpl->assign('criterias_query', http_build_query($criterias));
+$tpl->assign('criterias_query_no_compare', http_build_query($criterias_query));

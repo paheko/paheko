@@ -74,6 +74,19 @@ class Years
 			ORDER BY end_date %s;', $desc));
 	}
 
+	static public function listLastTransactions(int $count, array $years): array
+	{
+		$out = [];
+
+		foreach ($years as $year) {
+			$out[$year->id] = Transactions::listByType($year->id, null);
+			$out[$year->id]->setPageSize($count);
+			$out[$year->id]->orderBy('id', true);
+		}
+
+		return $out;
+	}
+
 	static public function getNewYearDates(): array
 	{
 		$last_year = EntityManager::findOne(Year::class, 'SELECT * FROM @TABLE ORDER BY end_date DESC LIMIT 1;');

@@ -54,7 +54,7 @@ $targets = Entities\Accounting\Account::TYPE_REVENUE;
 					{/foreach}
 				</select>
 			</dd>
-			{input type="list" target="acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$targets,$fee.id_year name="account" label="Compte à utiliser" default=$account required=1}
+			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&year=%d"|args:$targets,$fee.id_year name="account" label="Compte à utiliser" default=$account required=1}
 		</dl>
 		{/if}
 	</fieldset>

@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../_inc.php';
 
 $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
-$criterias = ['service_user' => (int)qg('id')];
+$criterias = ['subscription' => (int)qg('id')];
 
 $tpl->assign('balance', Reports::getClosingSumsWithAccounts($criterias));
 $tpl->assign('journal', Reports::getJournal($criterias));

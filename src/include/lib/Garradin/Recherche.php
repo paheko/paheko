@@ -3,6 +3,8 @@
 namespace Garradin;
 
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Years;
 
 class Recherche
 {
@@ -654,45 +656,142 @@ class Recherche
 
 	public function searchQuery(string $table, $query, $order, $desc = false, $limit = 100)
 	{
-        $sql_query = $this->buildQuery($table, $query, $order, $desc, $limit);
-        return $this->searchSQL($table, $sql_query);
+		$sql_query = $this->buildQuery($table, $query, $order, $desc, $limit);
+		return $this->searchSQL($table, $sql_query);
 	}
 
 	public function buildSimpleMemberQuery(string $query)
 	{
-	    $operator = 'LIKE %?%';
+		$operator = 'LIKE %?%';
 
-	    if (is_numeric(trim($query)))
-	    {
-	        $column = 'numero';
-	        $operator = '= ?';
-	    }
-	    elseif (strpos($query, '@') !== false)
-	    {
-	        $column = 'email';
-	    }
-	    else
-	    {
-	        $column = Config::getInstance()->get('champ_identite');
-	    }
+		if (is_numeric(trim($query)))
+		{
+			$column = 'numero';
+			$operator = '= ?';
+		}
+		elseif (strpos($query, '@') !== false)
+		{
+			$column = 'email';
+		}
+		else
+		{
+			$column = Config::getInstance()->get('champ_identite');
+		}
 
-	    $query = [[
-	        'operator' => 'AND',
-	        'conditions' => [
-	            [
-	                'column'   => $column,
-	                'operator' => $operator,
-	                'values'   => [$query],
-	            ],
-	        ],
-	    ]];
+		$query = [[
+			'operator' => 'AND',
+			'conditions' => [
+				[
+					'column'   => $column,
+					'operator' => $operator,
+					'values'   => [$query],
+				],
+			],
+		]];
 
-	    return (object) [
-	    	'query' => $query,
-	    	'order' => $column,
-	    	'desc' => false,
-	    	'limit' => 50,
-	    ];
+		return (object) [
+			'query' => $query,
+			'order' => $column,
+			'desc' => false,
+			'limit' => 50,
+		];
+	}
+
+	public function buildSimpleAccountingQuery(string $text, ?int $id_year = null)
+	{
+		$query = [];
+
+		$text = trim($text);
+
+		if ($id_year) {
+			$query[] = [
+				'operator' => 'AND',
+				'conditions' => [
+					[
+						'column'   => 't.id_year',
+						'operator' => '= ?',
+						'values'   => [$id_year],
+					],
+				],
+			];
+		}
+
+		// Match number: find transactions per credit or debit
+		if (preg_match('/^=\s*\d+([.,]\d+)?$/', $text))
+		{
+			$text = ltrim($text, "\n\t =");
+			$query[] = [
+				'operator' => 'OR',
+				'conditions' => [
+					[
+						'column'   => 'l.debit',
+						'operator' => '= ?',
+						'values'   => [$text],
+					],
+					[
+						'column'   => 'l.credit',
+						'operator' => '= ?',
+						'values'   => [$text],
+					],
+				],
+			];
+		}
+		// Match account number
+		elseif ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
+			&& ($year = Years::get($id_year))
+			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
+			return sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year);
+		}
+		// Match date
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::get_datetime($text)))
+		{
+			$query[] = [
+				'operator' => 'OR',
+				'conditions' => [
+					[
+						'column'   => 't.date',
+						'operator' => '= ?',
+						'values'   => [$d->format('Y-m-d')],
+					],
+				],
+			];
+		}
+		// Match transaction ID
+		elseif (preg_match('/^#[0-9]+$/', $text)) {
+			return sprintf('!acc/transactions/details.php?id=%d', (int)substr($text, 1));
+		}
+		// Or search in label or reference
+		else
+		{
+			$operator = 'LIKE %?%';
+			$query[] = [
+				'operator' => 'OR',
+				'conditions' => [
+					[
+						'column'   => 't.label',
+						'operator' => $operator,
+						'values'   => [$text],
+					],
+					[
+						'column'   => 't.reference',
+						'operator' => $operator,
+						'values'   => [$text],
+					],
+					[
+						'column'   => 'l.reference',
+						'operator' => $operator,
+						'values'   => [$text],
+					],
+				],
+			];
+		}
+
+		return (object) [
+			'query' => $query,
+			'order' => 't.id',
+			'desc' => true,
+			'limit' => 50,
+		];
 	}
 
 	public function schema(string $target)

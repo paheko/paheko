@@ -25,9 +25,10 @@ class Charts
 		return DB::getInstance()->getAssoc(sprintf('SELECT id, country || \' - \' || label FROM %s ORDER BY country, label;', Chart::TABLE));
 	}
 
-	static public function listByCountry()
+	static public function listByCountry(bool $filter_archived = false)
 	{
-		$sql = sprintf('SELECT id, country, label FROM %s ORDER BY country, code DESC, label;', Chart::TABLE);
+		$where = $filter_archived ? ' AND archived = 0' : '';
+		$sql = sprintf('SELECT id, country, label FROM %s WHERE 1 %s ORDER BY country, code DESC, label;', Chart::TABLE, $where);
 		$list = DB::getInstance()->getGrouped($sql);
 		$out = [];
 
