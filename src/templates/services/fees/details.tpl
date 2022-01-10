@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Tarif : %s — Liste des membres inscrits"|args:$fee.label current="membres/services"}
+{include file="admin/_head.tpl" title="Tarif : %s — Liste des membres inscrits"|args:$fee.label current="users/services"}
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page="index" current_fee=$fee fee_page=$type}
 

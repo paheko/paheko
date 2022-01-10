@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s — Liste des membres inscrits"|args:$service.label current="membres/services"}
+{include file="admin/_head.tpl" title="%s — Liste des membres inscrits"|args:$service.label current="users/services"}
 
 {include file="services/_nav.tpl" current="index" current_service=$service service_page=$type}
 

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un tarif" current="membres/services"}
+{include file="admin/_head.tpl" title="Supprimer un tarif" current="users/services"}
 
 {include file="services/_nav.tpl" current="index"}
 

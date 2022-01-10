@@ -2,26 +2,35 @@
 
 <nav class="tabs">
 	<ul>
-		<li><a href="{$admin_url}membres/fiche.php?id={$user_id}">Fiche membre</a></li>
-		<li class="current"><a href="{$self_url}">Liste des rappels envoyés</a></li>
+		<li>{link href="!users/details.php?id=%d"|args:$user_id label="Fiche membre"}</li>
+		<li>{link href="!services/user/?id=%d"|args:$user_id label="Inscriptions aux activités"}</li>
+		<li class="current">{link href="!services/reminders/user.php?id=%d"|args:$user_id label="Rappels envoyés"}</li>
 	</ul>
 </nav>
 
-{include file="common/dynamic_list_head.tpl"}
+{if $list->count()}
 
-	{foreach from=$list->iterate() item="row"}
-		<tr>
-			<th>{$row.label}</th>
-			<td>{if $row.delay > 0}{$row.delay} jours après l'expiration{elseif $row.delay < 0}{$row.delay|abs} jours avant l'expiration{else}le jour de l'expiration{/if}</td>
-			<td>{$row.date|date_short}</td>
-			<td></td>
-		</tr>
-	{/foreach}
+	{include file="common/dynamic_list_head.tpl"}
 
-	</tbody>
-</table>
+		{foreach from=$list->iterate() item="row"}
+			<tr>
+				<th>{$row.label}</th>
+				<td>{if $row.delay > 0}{$row.delay} jours après l'expiration{elseif $row.delay < 0}{$row.delay|abs} jours avant l'expiration{else}le jour de l'expiration{/if}</td>
+				<td>{$row.date|date_short}</td>
+				<td></td>
+			</tr>
+		{/foreach}
 
-{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+		</tbody>
+	</table>
 
+	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count()}
+
+
+{else}
+
+	<p class="alert block">Aucun rappel n'a été envoyé à ce membre.</p>
+
+{/if}
 
 {include file="admin/_foot.tpl"}
