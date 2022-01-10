@@ -1,9 +1,16 @@
-{include file="admin/_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user.identite current="membres/services"}
+{include file="admin/_head.tpl" title="%s — Inscriptions aux activités et cotisations"|args:$user_name current="users/services"}
 
-<p>
-	{linkbutton href="!membres/fiche.php?id=%d"|args:$user.id label="Retour à la fiche membre" shape="user"}
-	{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
-</p>
+
+<nav class="tabs">
+	<aside>
+		{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user_id label="Inscrire à une activité" shape="plus"}
+	</aside>
+	<ul>
+		<li>{link href="!users/details.php?id=%d"|args:$user_id label="Fiche membre"}</li>
+		<li class="current">{link href="!services/user/?id=%d"|args:$user_id label="Inscriptions aux activités"}</li>
+		<li>{link href="!services/reminders/user.php?id=%d"|args:$user_id label="Rappels envoyés"}</li>
+	</ul>
+</nav>
 
 {form_errors}
 
@@ -28,14 +35,14 @@
 	<dd>
 		{$list->count()}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{linkbutton href="?id=%d&export=csv"|args:$user.id shape="export" label="Export CSV"}
-			{linkbutton href="?id=%d&export=ods"|args:$user.id shape="export" label="Export tableur"}
+			{linkbutton href="?id=%d&export=csv"|args:$user_id shape="export" label="Export CSV"}
+			{linkbutton href="?id=%d&export=ods"|args:$user_id shape="export" label="Export tableur"}
 		{/if}
 	</dd>
 </dl>
 
 {if $only}
-	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à une écriture. {link href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}</p>
+	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à une écriture. {link href="?id=%d"|args:$user_id label="Voir toutes les inscriptions"}</p>
 {/if}
 
 {include file="common/dynamic_list_head.tpl"}
@@ -54,16 +61,16 @@
 				{/if}
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
 					{if $row.has_transactions}
-						{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+						{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user_id}
 					{else}
 						{linkbutton shape="check" label="Lier à une écriture" href="link.php?id=%d"|args:$row.id target="_dialog"}
 					{/if}
 				{/if}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{if $row.paid}
-						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
+						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user_id,$row.id}
 					{else}
-						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user.id,$row.id}
+						{linkbutton shape="check" label="Marquer comme payé" href="?id=%d&su_id=%d&paid=1"|args:$user_id,$row.id}
 					{/if}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}

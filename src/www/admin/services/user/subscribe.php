@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Services\Services;
+use Garradin\Users\Users;
 use Garradin\Entities\Services\Service_User;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
@@ -24,7 +25,7 @@ $users = null;
 $copy_service = null;
 $copy_service_only_paid = null;
 
-if (qg('user') && ($name = (new Membres)->getNom((int)qg('user')))) {
+if (qg('user') && ($name = Users::getName((int)qg('user')))) {
 	$users = [(int)qg('user') => $name];
 }
 elseif (f('users') && is_array(f('users')) && count(f('users'))) {

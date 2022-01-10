@@ -10,7 +10,7 @@
 	{/if}
 	</aside>
 	<ul>
-		<li class="current"><a href="details.php?id={$user.id}">Fiche membre</a></li>
+		<li class="current">{link href="!users/details.php?id=%d"|args:$user.id label="Fiche membre"}</li>
 		<li>{link href="!services/user/?id=%d"|args:$user.id label="Inscriptions aux activités"}</li>
 		<li>{link href="!services/reminders/user.php?id=%d"|args:$user.id label="Rappels envoyés"}</li>
 	</ul>
@@ -34,18 +34,10 @@
 	</dd>
 	{/foreach}
 	<dd>
-		{if count($services)}
-			{linkbutton href="!services/user/?id=%d"|args:$user.id label="Liste des inscriptions aux activités" shape="menu"}
-		{/if}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 			{linkbutton href="!services/user/subscribe.php?user=%d"|args:$user.id label="Inscrire à une activité" shape="plus"}
 		{/if}
 	</dd>
-	{if count($services)}
-	<dd>
-		{linkbutton shape="alert" label="Liste des rappels envoyés" href="!services/reminders/user.php?id=%d"|args:$user.id}
-	</dd>
-	{/if}
 	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
 		{if !empty($transactions_linked)}
 			<dt>Écritures comptables liées</dt>

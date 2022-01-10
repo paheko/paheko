@@ -79,6 +79,18 @@ class DynamicFields
 		return array_keys(self::getInstance()->fieldsBySystemUse('name'));
 	}
 
+	static public function getNameLabel(): string
+	{
+		$list = self::getInstance()->fieldsBySystemUse('name');
+		$labels = [];
+
+		foreach ($list as $field) {
+			$labels[] = $field->label;
+		}
+
+		return implode(', ', $labels);
+	}
+
 	static public function getNameFieldsSQL(): string
 	{
 		return implode(' || \' \' ', array_keys(self::getInstance()->fieldsBySystemUse('name')));

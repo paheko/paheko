@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="%s : Supprimer une inscription"|args:$user_name current="membres/services"}
+{include file="admin/_head.tpl" title="%s : Supprimer une inscription"|args:$user_name current="users/services"}
 
 {include file="common/delete_form.tpl"
 	legend="Supprimer l'inscription ?"

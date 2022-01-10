@@ -1,41 +1,28 @@
 <?php
 namespace Garradin;
 
+use Garradin\Users\Users;
+
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
-qv(['id' => 'required|numeric']);
+$user = Users::get((int) qg('id'));
 
-$membre = $membres->get(qg('id'));
-
-if (!$membre)
-{
-    throw new UserException("Ce membre n'existe pas.");
+if (!$user) {
+	throw new UserException("Ce membre n'existe pas.");
 }
 
-if ($membre->id == $user->id)
-{
-    throw new UserException("Il n'est pas possible de supprimer votre propre compte.");
+if ($user->id == $session->getUser()->id) {
+	throw new UserException("Il n'est pas possible de supprimer votre propre compte, merci de demander à un administrateur de le faire.");
 }
 
-if (f('delete'))
-{
-    $form->check('delete_membre_'.$membre->id);
+$csrf_key = 'delete_user_' . $user->id;
 
-    if (!$form->hasErrors())
-    {
-        try {
-            $membres->delete($membre->id);
-            Utils::redirect(ADMIN_URL . 'membres/');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
+$form->runIf('delete', function () use ($user) {
+	$user->delete();
+}, $csrf_key, '!users/');
 
-$tpl->assign('membre', $membre);
+$tpl->assign(compact('user', 'csrf_key'));
 
-$tpl->display('admin/membres/supprimer.tpl');
+$tpl->display('users/delete.tpl');

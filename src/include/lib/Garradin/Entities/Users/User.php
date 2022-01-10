@@ -13,6 +13,7 @@ use Garradin\ValidationException;
 
 use Garradin\Users\Categories;
 use Garradin\Users\DynamicFields;
+use Garradin\Users\Session;
 
 use Garradin\Entities\Files\File;
 
@@ -87,7 +88,7 @@ class User extends Entity
 			$user = $session->getUser();
 
 			if ($user->id == $this->id) {
-				throw new UserException('Il n\'est pas possible de supprimer son propre compte.');
+				throw new UserException('Il n\'est pas possible de supprimer son propre compte. Merci de demander à un administrateur de le faire.');
 			}
 		}
 

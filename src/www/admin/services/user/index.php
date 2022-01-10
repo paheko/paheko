@@ -1,15 +1,19 @@
 <?php
+
 namespace Garradin;
+
 use Garradin\Services\Services_User;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/../_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_READ);
 
-$user = (new Membres)->get((int) qg('id'));
+$user_id = (int) qg('id');
+$user_name = Users::getName($user_id);
 
-if (!$user) {
-	throw new UserException("Cet utilisateur est introuvable");
+if (!$user_name) {
+	throw new UserException("Ce membre est introuvable");
 }
 
 $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE) && null !== qg('paid') && qg('su_id'), function () {
@@ -21,15 +25,15 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE
 
 	$su->paid = (bool)qg('paid');
 	$su->save();
-}, null, ADMIN_URL . 'services/user/?id=' . $user->id);
+}, null, ADMIN_URL . 'services/user/?id=' . $user_id);
 
 $only = (int)qg('only') ?: null;
 
-$list = Services_User::perUserList($user->id, $only);
-$list->setTitle(sprintf('Inscriptions — %s', $user->identite));
+$list = Services_User::perUserList($user_id, $only);
+$list->setTitle(sprintf('Inscriptions — %s', $user_name));
 $list->loadFromQueryString();
 
-$tpl->assign('services', Services_User::listDistinctForUser($user->id));
-$tpl->assign(compact('list', 'user', 'only'));
+$tpl->assign('services', Services_User::listDistinctForUser($user_id));
+$tpl->assign(compact('list', 'user_id', 'user_name', 'only'));
 
 $tpl->display('services/user/index.tpl');

@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Modifier une inscription" current="membres/services"}
+{include file="admin/_head.tpl" title="Modifier une inscription" current="users/services"}
 
 {form_errors}
 

@@ -79,6 +79,7 @@ class Template extends \KD2\Smartyer
 		$this->assign('is_logged', $session->isLogged());
 		$this->assign('logged_user', $session->getUser());
 		$this->assign('session', $session);
+		$this->assign('config', Config::getInstance());
 		$this->assign('dialog', isset($_GET['_dialog']));
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
