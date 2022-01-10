@@ -6,6 +6,7 @@ use KD2\Form;
 use KD2\HTTP;
 use KD2\Translate;
 use Garradin\Users\Session;
+use Garradin\Users\DynamicFields;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
 use Garradin\UserTemplate\CommonModifiers;
@@ -69,10 +70,15 @@ class Template extends \KD2\Smartyer
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('help_url', HELP_URL);
+		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
-		$this->assign('is_logged', false);
+		$session = Session::getInstance();
+
+		$this->assign('is_logged', $session->isLogged());
+		$this->assign('logged_user', $session->getUser());
+		$this->assign('session', $session);
 		$this->assign('dialog', isset($_GET['_dialog']));
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
@@ -103,6 +109,7 @@ class Template extends \KD2\Smartyer
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 		$this->register_function('diff', [$this, 'diff']);
 		$this->register_function('display_permissions', [$this, 'displayPermissions']);
+		$this->register_function('display_dynamic_field', [$this, 'dynamicField']);
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
@@ -118,7 +125,6 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', 'abs');
-		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
@@ -273,7 +279,7 @@ class Template extends \KD2\Smartyer
 		$suggestion = Utils::suggestPassword();
 
 		$out .= sprintf('<dd class="help">Pas d\'idée&nbsp;? Voici une suggestion choisie au hasard&nbsp;:
-                <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="f_%s_suggest" value="%s" autocomplete="off" size="%d" /></dd>', $params['name'], $suggestion, strlen($suggestion));
+				<input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="f_%s_suggest" value="%s" autocomplete="off" size="%d" /></dd>', $params['name'], $suggestion, strlen($suggestion));
 
 		$out .= $this->formInput([
 			'type' => 'password',
@@ -614,17 +620,12 @@ class Template extends \KD2\Smartyer
 		return sprintf($out, $couleur1, $couleur2, $admin_background);
 	}
 
-	protected function displayChampMembre($v, $config = null)
+	protected function dynamicField(array $params)
 	{
-		if (is_string($config)) {
-			$config = Config::getInstance()->get('champs_membres')->get($config);
-		}
+		$field = DynamicFields::get($params['key']);
+		$v = $params['value'];
 
-		if (null === $config) {
-			return htmlspecialchars($v);
-		}
-
-		switch ($config->type)
+		switch ($field->type)
 		{
 			case 'checkbox':
 				return $v ? 'Oui' : 'Non';
@@ -633,7 +634,7 @@ class Template extends \KD2\Smartyer
 			case 'tel':
 				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'url':
-				return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
@@ -648,7 +649,7 @@ class Template extends \KD2\Smartyer
 
 				$out = [];
 
-				foreach ($config->options as $b => $name)
+				foreach ($field->options as $b => $name)
 				{
 					if ($v & (0x01 << $b))
 						$out[] = $name;

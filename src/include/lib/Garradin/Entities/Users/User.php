@@ -11,24 +11,48 @@ use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
 
+use Garradin\Users\Categories;
 use Garradin\Users\DynamicFields;
+
+use Garradin\Entities\Files\File;
 
 use KD2\SMTP;
 
+#[AllowDynamicProperties]
 class User extends Entity
 {
 	const TABLE = 'users';
 
-	protected function __construct()
-	{
-		$fields = DynamicFields::all();
+	protected bool $_construct = false;
 
-		foreach ($fields as $key => $config) {
+	public function __construct()
+	{
+		$this->_construct = true;
+
+		foreach (DynamicField::SYSTEM_FIELDS as $key => $type) {
+			$this->_types[$key] = $type;
 			$this->$key = null;
-			$this->_types[$key] = $config->type;
 		}
 
+		$fields = DynamicFields::getInstance()->all();
+
+		foreach ($fields as $key => $config) {
+			$this->_types[$key] = DynamicField::PHP_TYPES[$config->type];
+			$this->$key = null;
+		}
+
+		$this->_construct = false;
+
 		parent::__construct();
+	}
+
+	public function set(string $key, $value, bool $loose = false, bool $check_for_changes = true) {
+		if ($this->_construct && $value === null) {
+			$this->$key = $value;
+			return;
+		}
+
+		return parent::set($key, $value, $loose, $check_for_changes);
 	}
 
 	public function selfCheck(): void
@@ -68,5 +92,26 @@ class User extends Entity
 		}
 
 		return parent::delete();
+	}
+
+	public function category(): Category
+	{
+		return Categories::get($this->id_category);
+	}
+
+	public function attachementsDirectory(): string
+	{
+		return File::CONTEXT_USER . '/' . $this->id();
+	}
+
+	public function name(): string
+	{
+		$out = [];
+
+		foreach (DynamicFields::getNameFields() as $key) {
+			$out[] = $this->$key;
+		}
+
+		return implode(' ', $out);
 	}
 }

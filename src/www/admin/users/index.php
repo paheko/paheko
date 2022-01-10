@@ -25,4 +25,4 @@ $tpl->assign('sent', null !== qg('sent'));
 
 $tpl->assign(compact('can_edit', 'list', 'current_cat', 'hidden_categories', 'categories'));
 
-$tpl->display('admin/membres/index.tpl');
+$tpl->display('users/index.tpl');

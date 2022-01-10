@@ -42,6 +42,11 @@ class DynamicFields
 		return self::$_instance;
 	}
 
+	static public function get(string $key)
+	{
+		return self::getInstance()->fieldByKey($key);
+	}
+
 	/**
 	 * Returns the list of columns containing an email address (there might be more than one)
 	 * @return array
@@ -168,6 +173,11 @@ class DynamicFields
 	protected function fieldsByType(string $type): array
 	{
 		return $this->_fields_by_type[$type] ?? [];
+	}
+
+	protected function fieldByKey(string $key): ?DynamicField
+	{
+		return $this->_fields[$key] ?? null;
 	}
 
 	protected function fieldsBySystemUse(string $use): array

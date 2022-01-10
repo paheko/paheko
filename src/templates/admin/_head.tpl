@@ -53,7 +53,7 @@
     <?php
     $current_parent = substr($current, 0, strpos($current, '/'));
     ?>
-        <li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}">
+        <li class="{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}">
             <a href="{$admin_url}"><b class="icn">⌂</b><i> Accueil</i></a>
             {if !empty($plugins_menu)}
                 <ul>
@@ -64,14 +64,14 @@
             {/if}
         </li>
         {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
-            <li class="member list{if $current == 'membres'} current{elseif $current_parent == 'membres'} current_parent{/if}"><a href="{$admin_url}membres/"><b class="icn">👪</b><i> Membres</i></a>
+            <li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><a href="{$admin_url}users/"><b class="icn">👪</b><i> Membres</i></a>
             <ul>
             {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-                <li class="member new{if $current == 'membres/ajouter'} current{/if}"><a href="{$admin_url}membres/ajouter.php">Ajouter</a></li>
+                <li class="member new{if $current == 'users/add'} current{/if}"><a href="{$admin_url}users/new.php">Ajouter</a></li>
             {/if}
-                <li class="{if $current == 'membres/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
+                <li class="{if $current == 'users/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
             {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-                <li class="member message{if $current == 'membres/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
+                <li class="member message{if $current == 'users/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
             {/if}
             </ul>
             </li>

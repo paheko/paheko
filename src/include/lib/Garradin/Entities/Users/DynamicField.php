@@ -93,7 +93,7 @@ class DynamicField extends Entity
 		'url'      => '?string',
 		'checkbox' => 'int',
 		'date'     => '?date',
-		'datetime' => '?datetime',
+		'datetime' => '?DateTime',
 		'file'     => '?string',
 		'password' => '?string',
 		'number'   => '?string',
@@ -129,12 +129,12 @@ class DynamicField extends Entity
 	];
 
 	const SYSTEM_FIELDS = [
-		'id'           => 'int',
+		'id'           => '?int',
 		'id_category'  => 'int',
 		'pgp_key'      => '?string',
 		'otp_secret'   => '?string',
 		'date_login'   => '?DateTime',
-		'date_created' => '?DateTime',
+		'date_created' => '?date',
 	];
 
 	public function delete(): bool
