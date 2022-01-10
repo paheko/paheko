@@ -27,6 +27,11 @@
 				{/if}
 			</p></dd>
 			{/if}
+			{if PDF_COMMAND == 'prince'}
+			<dd class="help">
+				Les PDF sont générés à l'aide du génial logiciel <a href="https://www.princexml.com/" target="_blank">Prince</a>. Merci à eux.
+			</dd>
+			{/if}
 			{if ENABLE_TECH_DETAILS}
 			<dt>Informations système</dt>
 			<dd class="help">

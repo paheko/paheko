@@ -452,6 +452,13 @@ namespace Garradin;
  *
  * Exemple : chromium --headless --print-to-pdf=%2$s %1$s
  *
+ * Il est aussi possible de simplement spécifier le nom du programme à utiliser,
+ * et Garradin placera les arguments automatiquement : prince, chromium, wkhtmltopdf ou weasyprint.
+ *
+ * Si vous utilisez Prince, un message mentionnant l'utilisation de Prince
+ * sera joint aux e-mails utilisant des fichiers PDF, conformément à la licence :
+ * https://www.princexml.com/purchase/license_faq/#non-commercial
+ *
  * Défaut : null
  */
 //const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type %s %s';
