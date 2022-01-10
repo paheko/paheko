@@ -337,38 +337,32 @@ class DynamicFields
 		});
 	}
 
-	public function getListedFields()
+	public function getListedFields(): array
 	{
-		$champs = $this->_fields;
+		$name_fields = self::getNameFields();
+		$name_fields[] = self::getNumberField();
 
-		$champs = array_filter($champs, function ($a) {
-			return empty($a->list_row) ? false : true;
-		});
+		$fields = array_filter(
+			$this->_fields,
+			function ($a, $b) use ($name_fields) {
+				if (in_array($b, $name_fields)) {
+					return false;
+				}
 
-		uasort($champs, function ($a, $b) {
+				return empty($a->list_row) ? false : true;
+			},
+			ARRAY_FILTER_USE_BOTH
+		);
+
+		uasort($fields, function ($a, $b) {
 			if ($a->list_row == $b->list_row)
 				return 0;
 
 			return ($a->list_row > $b->list_row) ? 1 : -1;
 		});
 
-		return (object) $champs;
+		return $fields;
 	}
-
-	public function getFirstListed()
-	{
-		foreach ($this->champs as $key=>$config)
-		{
-			if (empty($config->list_row))
-			{
-				continue;
-			}
-
-			return $key;
-		}
-	}
-
-
 
 	public function getSQLSchema(string $table_name = User::TABLE): string
 	{

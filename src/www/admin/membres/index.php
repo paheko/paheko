@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
@@ -17,13 +18,11 @@ if ($current_cat && !$session->canAccess($session::SECTION_USERS, $session::ACCE
 
 $can_edit = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
-$list = $membres->listByCategory($current_cat);
+$list = Users::listByCategory($current_cat);
 $list->loadFromQueryString();
 
 $tpl->assign('sent', null !== qg('sent'));
 
-$id_field = Config::getInstance()->get('champ_identite');
-
-$tpl->assign(compact('can_edit', 'list', 'current_cat', 'hidden_categories', 'categories', 'id_field'));
+$tpl->assign(compact('can_edit', 'list', 'current_cat', 'hidden_categories', 'categories'));
 
 $tpl->display('admin/membres/index.tpl');

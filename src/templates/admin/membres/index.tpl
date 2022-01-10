@@ -12,10 +12,10 @@
         <legend>Filtrer par catégorie</legend>
         <select name="cat" id="f_cat" onchange="this.form.submit();">
             <option value="0" {if $current_cat == 0} selected="selected"{/if}>-- Toutes</option>
-        {foreach from=$categories key="id" item="nom"}
+        {foreach from=$categories key="id" item="name"}
             {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)
                 || !array_key_exists($id, $hidden_categories)}
-            <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$nom}</option>
+            <option value="{$id}"{if $current_cat == $id} selected="selected"{/if}>{$name}</option>
             {/if}
         {/foreach}
         </select>
@@ -46,16 +46,16 @@
             {/if}
             {foreach from=$list->getHeaderColumns() key="key" item="value"}
                 <?php $value = $row->$key; ?>
-                {if $key == 'numero'}
-                <td class="num">
-                    <a href="{$admin_url}membres/fiche.php?id={$row._user_id}">{$value}</a>
-                </td>
-                {elseif $key == $id_field}
-                <th><a href="{$admin_url}membres/fiche.php?id={$row._user_id}">{$value|raw|display_champ_membre:$key}</a></th>
+                {if $key == 'number'}
+                    <td class="num">
+                        {link href="details.php?id=%d"|args:$row._user_id label=$value}
+                    </td>
+                {elseif $key == 'identity'}
+                    <th>{link href="details.php?id=%d"|args:$row._user_id label=$value}</th>
                 {else}
-                <td>
-                    {$value|raw|display_champ_membre:$key}
-                </td>
+                    <td>
+                        {$value|raw|display_champ_membre:$key}
+                    </td>
                 {/if}
             {/foreach}
 
