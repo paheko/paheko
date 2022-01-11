@@ -45,7 +45,7 @@ class Fees
 		$db = DB::getInstance();
 
 		$sql = 'SELECT *, CASE WHEN amount THEN amount ELSE NULL END AS user_amount
-			FROM services_fees ORDER BY id_service, amount IS NULL, label COLLATE NOCASE;';
+			FROM services_fees ORDER BY id_service, amount IS NULL, label COLLATE U_NOCASE;';
 		$result = $db->get($sql);
 
 		if (!$user_id) {
@@ -78,7 +78,7 @@ class Fees
 			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services_fees f
 			WHERE id_service = ?
-			ORDER BY amount, label COLLATE NOCASE;', $condition);
+			ORDER BY amount, label COLLATE U_NOCASE;', $condition);
 
 		return $db->get($sql, $this->service_id);
 	}

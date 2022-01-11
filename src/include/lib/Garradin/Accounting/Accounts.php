@@ -52,7 +52,7 @@ class Accounts
 	 */
 	public function listCommonTypes(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?) ORDER BY code COLLATE NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?) ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
@@ -61,7 +61,7 @@ class Accounts
 	 */
 	public function listAll(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id);
 	}
 
@@ -77,7 +77,7 @@ class Accounts
 	{
 		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT
 			code, label, description, position, type, user AS added
-			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
+			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE U_NOCASE;'),
 			$this->chart_id);
 
 		foreach ($res as $row) {
@@ -93,7 +93,7 @@ class Accounts
 	 */
 	public function listAnalytical(): array
 	{
-		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY label COLLATE NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY label COLLATE U_NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class Accounts
 	 */
 	public function listVolunteering(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id, Account::TYPE_VOLUNTEERING);
 	}
 
@@ -135,7 +135,7 @@ class Accounts
 			}
 		}
 
-		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE NOCASE;',
+		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE U_NOCASE;',
 			$this->chart_id);
 
 		foreach ($query as $row) {
