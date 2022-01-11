@@ -930,6 +930,11 @@ class Utils
         return $str;
     }
 
+    static public function unicodeTransliterate($str): string
+    {
+        return transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $str);
+    }
+
     static public function unicodeCaseComparison($a, $b): int
     {
         if (!isset(self::$collator) && function_exists('collator_create')) {

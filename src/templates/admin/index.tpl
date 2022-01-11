@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Bonjour %s !"|args:$user.identite current="home"}
+{include file="admin/_head.tpl" title="Bonjour %s !"|args:$logged_user._name current="home"}
 
 {$banner|raw}
 

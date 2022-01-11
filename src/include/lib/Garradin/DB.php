@@ -59,7 +59,7 @@ class DB extends SQLite3
         $db->createFunction('dirname', [Utils::class, 'dirname']);
         $db->createFunction('basename', [Utils::class, 'basename']);
         $db->createFunction('unicode_like', [self::class, 'unicodeLike']);
-        $db->createFunction('unicode_case_fold', [Utils::class, 'unicodeCaseFold']);
+        $db->createFunction('transliterate_to_ascii', [Utils::class, 'unicodeTransliterate']);
     }
 
     public function version(): ?string

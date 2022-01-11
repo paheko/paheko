@@ -117,13 +117,13 @@ class Session extends \KD2\UserSession
 		// Mettre à jour la date de connexion
 		$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$id]);
 
-		$sql = sprintf('SELECT u.*, u.%s AS identite,
+		$sql = sprintf('SELECT u.*, %s AS _name,
 			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
 			c.perm_subscribe, c.perm_accounting, c.perm_config
 			FROM users AS u
 			INNER JOIN users_categories AS c ON u.id_category = c.id
 			WHERE u.id = ? LIMIT 1;',
-			$this->db->quoteIdentifier(DynamicFields::getLoginField()));
+			$this->db->quoteIdentifier(DynamicFields::getLoginField('u')));
 
 		return $this->db->first($sql, $id);
 	}

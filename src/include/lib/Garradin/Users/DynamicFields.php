@@ -91,9 +91,15 @@ class DynamicFields
 		return implode(', ', $labels);
 	}
 
-	static public function getNameFieldsSQL(): string
+	static public function getNameFieldsSQL(?string $prefix = null): string
 	{
-		return implode(' || \' \' ', array_keys(self::getInstance()->fieldsBySystemUse('name')));
+		$fields = self::getNameFields();
+
+		if ($prefix) {
+			$fields = array_map(fn($v) => $prefix . '.' . $v, $fields);
+		}
+
+		return implode(' || \' \' ', $fields);
 	}
 
 	static public function getEntityProperties(): array
@@ -451,24 +457,22 @@ class DynamicFields
 			return null;
 		}
 
-		$new_columns = array_map(fn ($v) => sprintf('NEW.%s', $v), $columns);
+		$new_columns = array_map(fn ($v) => sprintf('transliterate_to_ascii(NEW.%s)', $v), $columns);
 
-		$sql = sprintf("CREATE VIRTUAL TABLE IF NOT EXISTS %s USING fts4\n(\n\tcontent=%s,\n\ttokenize = unicode61 \"remove_diacritics=2\",\n\t%s\n);", $search_table, $table_name, implode(",\n\t", $columns));
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table, $table_name, implode(",\n\t", $columns));
 		$sql .= "\n";
 
 		// Triggers
 		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_ai AFTER INSERT ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("INSERT INTO %s (docid, %s) VALUES (NEW.rowid, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
+		$sql .= sprintf("REPLACE INTO %s (id, %s) VALUES (NEW.id, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
 		$sql .= "END;\n";
 		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_au AFTER UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("INSERT INTO %s (docid, %s) VALUES (NEW.rowid, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
+		$sql .= sprintf("REPLACE INTO %s (id, %s) VALUES (NEW.id, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
 		$sql .= "END;\n";
-		$sql .= sprintf("\nCREATE TRIGGER IF NOT EXISTS %s_bu BEFORE UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("DELETE FROM %s WHERE docid = OLD.rowid;\n", $search_table);
-		$sql .= "END;\n";
-		$sql .= sprintf("\nCREATE TRIGGER IF NOT EXISTS %s_bd BEFORE DELETE ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("DELETE FROM %s WHERE docid = OLD.rowid;\n", $search_table);
-		$sql .= "END;\n";
+
+		foreach ($columns as $column) {
+			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s_%s ON %1\$s (%2\$s);\n", $search_table, $column);
+		}
 
 		return $sql;
 	}
