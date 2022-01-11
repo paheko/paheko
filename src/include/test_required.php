@@ -59,3 +59,15 @@ test_requis(
     file_exists(__DIR__ . '/lib/KD2'),
     'Librairie KD2 non disponible.'
 );
+
+$db = new \SQLite3(':memory:');
+$r = $db->query('PRAGMA compile_options;');
+$options = [];
+while ($row = $r->fetchArray(\SQLITE3_NUM)) {
+    $options[] = $row[0];
+}
+
+test_requis(
+    in_array('ENABLE_FTS4', $options),
+    'Le module SQLite3 FTS4 (permettant de faire des recherches) n\'est pas installé ou activé.'
+);
