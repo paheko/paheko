@@ -373,6 +373,31 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.19', '<')) {
+				// Some people were able to insert invalid charsets in the database, this messes up the indexes
+				// Let's try to fix that
+				$db->begin();
+				$db->createFunction('utf8_encode', [Utils::class, 'utf8_encode']);
+
+				$db->exec('END; VACUUM; BEGIN;'); // This will rebuild the index correctly, fixing the corrupted DB
+
+				// Now let's fix the content itself
+				$res = $db->first('SELECT * FROM membres WHERE 1;');
+
+				$columns = array_keys((array) $res);
+				$columns = array_map(fn($c) => sprintf('%s = utf8_encode(%1$s)', $c), $columns);
+				$db->exec(sprintf('UPDATE membres SET %s;', implode(', ', $columns)));
+
+				// Let's re-create users table with the correct index
+				$champs = Config::getInstance()->champs_membres;
+				$db->exec('ALTER TABLE membres RENAME TO membres_old;');
+				$champs->create('membres');
+				$champs->copy('membres_old', 'membres');
+				$db->exec('DROP TABLE membres_old;');
+
+				$db->commit();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
