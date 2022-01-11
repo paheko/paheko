@@ -940,9 +940,16 @@ class Utils
             self::$collator->setAttribute(\Collator::STRENGTH, \Collator::SECONDARY);
 
             // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
+            // for account ordering
             // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
             // without: 1, 10, 101, 11, 2
         }
+
+        // Make sure we have UTF-8
+        // If we don't, we may end up with malformed database, eg. "row X missing from index" errors
+        // when doing an integrity check
+        $a = self::utf8_encode($a);
+        $b = self::utf8_encode($b);
 
         if (isset(self::$collator)) {
             return (int) self::$collator->compare($a, $b);
@@ -952,6 +959,12 @@ class Utils
         $b = strtoupper(self::transliterateToAscii($b));
 
         return strcmp($a, $b);
+    }
+
+    static public function utf8_encode($str)
+    {
+        // Check if string is already UTF-8 encoded or not
+        return !preg_match('//u', $str) ? utf8_encode($str) : $str;
     }
 
     /**
