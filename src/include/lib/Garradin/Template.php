@@ -9,6 +9,7 @@ use Garradin\Users\Session;
 use Garradin\Users\DynamicFields;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
+use Garradin\Entities\Users\User;
 use Garradin\UserTemplate\CommonModifiers;
 use Garradin\Web\Render\Skriv;
 use Garradin\Files\Files;
@@ -102,7 +103,6 @@ class Template extends \KD2\Smartyer
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
 		$this->register_function('form_field', [$this, 'formField']);
-		$this->register_function('html_champ_membre', [$this, 'formChampMembre']);
 		$this->register_function('input', [$this, 'formInput']);
 		$this->register_function('password_change', [$this, 'passwordChangeInput']);
 
@@ -110,7 +110,8 @@ class Template extends \KD2\Smartyer
 		$this->register_function('plugin_url', ['Garradin\Utils', 'plugin_url']);
 		$this->register_function('diff', [$this, 'diff']);
 		$this->register_function('display_permissions', [$this, 'displayPermissions']);
-		$this->register_function('display_dynamic_field', [$this, 'dynamicField']);
+		$this->register_function('display_dynamic_field', [$this, 'displayDynamicField']);
+		$this->register_function('edit_dynamic_field', [$this, 'editDynamicField']);
 
 		$this->register_function('csrf_field', function ($params) {
 			return Form::tokenHTML($params['key']);
@@ -621,7 +622,7 @@ class Template extends \KD2\Smartyer
 		return sprintf($out, $couleur1, $couleur2, $admin_background);
 	}
 
-	protected function dynamicField(array $params)
+	protected function displayDynamicField(array $params): string
 	{
 		$field = DynamicFields::get($params['key']);
 		$v = $params['value'];
@@ -662,176 +663,115 @@ class Template extends \KD2\Smartyer
 		}
 	}
 
-	protected function formChampMembre($params)
+	protected function editDynamicField(array $params): string
 	{
-		if (empty($params['config']) || empty($params['name']))
-			throw new \BadFunctionCallException('Paramètres type et name obligatoires.');
+		assert(isset($params['field'], $params['user'], $params['context']));
+		extract($params);
+		$key = $field->name;
+		$type = $field->type;
 
-		$config = $params['config'];
-		$type = $config->type;
-
-		if ($params['name'] == 'passe' || (!empty($params['user_mode']) && !empty($config->private)))
-		{
+		// The password must be changed using a specific field
+		if ($field->system & $field::PASSWORD) {
 			return '';
 		}
 
 		// Files are managed out of the form
-		if ($config->type == 'file') {
+		if ($type == 'file') {
 			return '';
 		}
 
-		$options = [];
-
-		if ($type == 'select' || $type == 'multiple')
-		{
-			if (empty($config->options))
-			{
-				throw new \BadFunctionCallException('Paramètre options obligatoire pour champ de type ' . $type);
-			}
-
-			$options = (array) $config->options;
-		}
-		elseif ($type == 'country')
-		{
-			$type = 'select';
-			$options = Utils::getCountryList();
-			$params['default'] = Config::getInstance()->get('pays');
-		}
-		elseif ($type == 'date')
-		{
-			$params['pattern'] = '\d{4}-\d{2}-\d{2}';
+		if ($context == 'user_edit' && !$field->read_access) {
+			return '';
 		}
 
-		$field = '';
-		$value = $this->formField($params, false);
-		$attributes = 'name="' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
-		$attributes .= 'id="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '" ';
-
-		if ($params['name'] == 'numero' && $config->type == 'number' && !$value)
-		{
-			$value = DB::getInstance()->firstColumn('SELECT MAX(numero) + 1 FROM membres;');
+		if ($context == 'user_edit' && !$field->write_access) {
+			$v = $this->displayDynamicField(['key' => $key, 'value' => $user->$key]);
+			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
 		}
 
-		if (!empty($params['disabled']))
-		{
-			$attributes .= 'disabled="disabled" ';
-		}
+		$params = [
+			'type'     => $type,
+			'name'     => $key,
+			'label'    => $field->label,
+			'required' => $field->required,
+			'source'   => $user,
+			'disabled' => !empty($disabled),
+			'required' => $field->required && $type != 'checkbox',
+			'help'     => $field->help,
+			// Fix for autocomplete, lpignore is for Lastpass
+			'autocomplete' => 'off',
+			'data-lpignore' => 'true',
+		];
 
-		if (!empty($config->mandatory) && $type != 'checkbox' && $type != 'multiple')
-		{
-			$attributes .= 'required="required" ';
-		}
+		// Multiple choice checkboxes is a specific thingy
+		if ($type == 'multiple') {
+			$options = $field->options;
 
-		// Fix for autocomplete, lpignore is for Lastpass
-		$attributes .= 'autocomplete="off" data-lpignore="true" ';
+			if (isset($_POST[$key]) && is_array($_POST[$key])) {
+				$value = 0;
 
-		if (!empty($params['user_mode']) && empty($config->editable))
-		{
-			$out = '<dt>' . htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</dt>';
-			$out .= '<dd>' . (trim($value) === '' ? 'Non renseigné' : $this->displayChampMembre($value, $config)) . '</dd>';
-			return $out;
-		}
-
-		if ($type == 'select')
-		{
-			$field .= '<select '.$attributes.'>';
-			foreach ($options as $k=>$v)
-			{
-				if (is_int($k))
-					$k = $v;
-
-				$field .= '<option value="' . htmlspecialchars($k, ENT_QUOTES, 'UTF-8') . '"';
-
-				if ($value == $k || empty($value) && !empty($params['default']))
-					$field .= ' selected="selected"';
-
-				$field .= '>' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</option>';
-			}
-			$field .= '</select>';
-		}
-		elseif ($type == 'multiple')
-		{
-			if (is_array($value))
-			{
-				$binary = 0;
-
-				foreach ($value as $k => $v)
-				{
-					if (array_key_exists($k, $options) && !empty($v))
-					{
-						$binary |= 0x01 << $k;
+				foreach ($_POST[$key] as $k => $v) {
+					if (array_key_exists($k, $options) && !empty($v)) {
+						$value |= 0x01 << $k;
 					}
 				}
-
-				$value = $binary;
+			}
+			else {
+				$value = $user->$key;
 			}
 
 			// Forcer la valeur à être un entier (depuis PHP 7.1)
 			$value = (int)$value;
+			$params['required'] = false;
+			$out  = '';
 
 			foreach ($options as $k=>$v)
 			{
 				$b = 0x01 << (int)$k;
-				$field .= sprintf('<input type="checkbox" name="%s[%d]" id="f_%1$s_%2$d" value="1" %s %s /> <label for="f_%1$s_%2$d">%s</label><br />',
-					htmlspecialchars($params['name']), $k, ($value & $b) ? 'checked="checked"' : '', $attributes, htmlspecialchars($v));
-			}
-		}
-		elseif ($type == 'textarea')
-		{
-			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
-		}
-		elseif ($type == 'date') {
-			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
-		}
-		else
-		{
-			if ($type == 'checkbox')
-			{
-				if (!empty($value))
-				{
-					$attributes .= 'checked="checked" ';
+
+				$params['name'] = sprintf('%s[%d]', $key, $k);
+				$params['value'] = 1;
+				$params['default'] = $value & $b;
+
+				if ($k > 0) {
+					unset($params['label']);
 				}
 
-				$value = '1';
+				$out .= self::formInput($params);
 			}
 
-			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars($value, ENT_QUOTES) . '" />';
+			return $out;
+		}
+		elseif ($type == 'select') {
+			$params['options'] = (array) $config->options;
+		}
+		elseif ($type == 'country') {
+			$params['type'] = 'select';
+			$params['options'] = Utils::getCountryList();
+			$params['default'] = Config::getInstance()->get('pays');
+		}
+		elseif ($type == 'checkbox') {
+			$params['required'] = false;
+			$params['value'] = 1;
+			unset($params['label']);
+			return sprintf('<dt><label>%s %s</label></dt>', self::formInput($params), htmlspecialchars($field->label));
+		}
+		elseif ($field->system & $field::NUMBER && $context == 'user_create') {
+			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));
+			$params['required'] = false;
 		}
 
-		$out = '
-		<dt>';
+		$out = self::formInput($params);
 
-		if ($type == 'checkbox')
-		{
-			$out .= $field . ' ';
-		}
-
-		$out .= '<label for="f_' . htmlspecialchars($params['name'], ENT_QUOTES, 'UTF-8') . '">'
-			. htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</label>';
-
-		if (!empty($config->mandatory))
-		{
-			$out .= ' <b title="(Champ obligatoire)">obligatoire</b>';
-		}
-
-		$out .= '</dt>';
-
-		if (!empty($config->help))
-		{
-			$out .= '
-		<dd class="help">' . htmlspecialchars($config->help, ENT_QUOTES, 'UTF-8') . '</dd>';
-		}
-
-		$id_field = Config::getInstance()->get('champ_identifiant');
-
-		if ($params['name'] == $id_field && empty($params['user_mode'])) {
+		if ($context != 'edit' && $field->system & $field::LOGIN) {
 			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
 		}
 
-		if ($type != 'checkbox')
-		{
-			$out .= '
-		<dd>' . $field . '</dd>';
+		if ($context == 'create' && $field->system & $field::NUMBER) {
+			$out .= '<dd class="help"><small>Doit être unique, laisser vide pour que le numéro soit attribué automatiquement.</small></dd>';
+		}
+		elseif ($context == 'edit' && $field->system & $field::NUMBER) {
+			$out .= '<dd class="help"><small>Doit être unique pour chaque membre.</small></dd>';
 		}
 
 		return $out;

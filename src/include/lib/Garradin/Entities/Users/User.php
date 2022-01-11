@@ -60,6 +60,12 @@ class User extends Entity
 	{
 		$df = DynamicFields::getInstance();
 
+		foreach ($df->all() as $field) {
+			if ($field->required) {
+				$this->assert(null !== $this->{$field->name}, sprintf('"%s" : ce champ est requis', $field->label));
+			}
+		}
+
 		// Check email addresses
 		foreach (DynamicFields::getEmailFields() as $field) {
 			$this->assert($this->$field === null || SMTP::checkEmailIsValid($this->$field, false), 'Cette adresse email n\'est pas valide.');
@@ -70,13 +76,26 @@ class User extends Entity
 		$this->assert($this->$field !== null && ctype_alnum($this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres et des lettres.');
 
 		$db = DB::getInstance();
-		$this->assert(!$this->exists() && !$db->test(self::TABLE, sprintf('%s = ?', $db->quoteIdentifier($field)), $this->$field), 'Ce numéro de membre est déjà utilisé par un autre membre.');
-		$this->assert($this->exists() && !$db->test(self::TABLE, sprintf('%s = ? AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id()), 'Ce numéro de membre est déjà utilisé par un autre membre.');
+
+		if (!$this->exists()) {
+			$number_exists = $db->test(self::TABLE, sprintf('%s = ?', $db->quoteIdentifier($field)), $this->$field);
+		}
+		else {
+			$number_exists = $db->test(self::TABLE, sprintf('%s = ? AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id());
+		}
+
+		$this->assert(!$number_exists, 'Ce numéro de membre est déjà attribué à un autre membre.');
 
 		$field = DynamicFields::getLoginField();
 		if ($this->$field !== null) {
-			$this->assert(!$this->exists() && !$db->test(self::TABLE, sprintf('%s = ? COLLATE NOCASE ', $db->quoteIdentifier($field)), $this->$field), sprintf('Le champ %s utilisé comme identifiant est déjà utilisé par un autre membre. Il doit être unique pour chaque membre.', $field_name));
-			$this->assert($this->exists() && !$db->test(self::TABLE, sprintf('%s = ? COLLATE NOCASE AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id()), sprintf('Le champ %s utilisé comme identifiant est déjà utilisé par un autre membre. Il doit être unique pour chaque membre.', $field_name));
+			if (!$this->exists()) {
+				$login_exists = $db->test(self::TABLE, sprintf('%s = ? COLLATE NOCASE', $db->quoteIdentifier($field)), $this->$field);
+			}
+			else {
+				$login_exists = $db->test(self::TABLE, sprintf('%s = ? COLLATE NOCASE AND id != ?', $db->quoteIdentifier($field)), $this->$field, $this->id());
+			}
+
+			$this->assert(!$login_exists, sprintf('Le champ "%s" (utilisé comme identifiant de connexion) est déjà utilisé par un autre membre. Il doit être unique pour chaque membre.', $df->fieldByKey($field)->label));
 		}
 	}
 
@@ -114,5 +133,18 @@ class User extends Entity
 		}
 
 		return implode(' ', $out);
+	}
+
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (isset($source['password'])) {
+			$this->assert($source['password'] == ($source['password_confirmed'] ?? null), 'La confirmation de mot de passe doit être identique au mot de passe.');
+		}
+
+		return parent::importForm($source);
 	}
 }

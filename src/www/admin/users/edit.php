@@ -1,100 +1,66 @@
 <?php
+
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Users\DynamicFields as DF;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-qv(['id' => 'required|numeric']);
+$user = Users::get((int) qg('id'));
 
-$id = (int) qg('id');
-
-$membre = $membres->get($id);
-
-if (!$membre)
-{
-    throw new UserException("Ce membre n'existe pas.");
+if (!$user) {
+	throw new UserException("Ce membre n'existe pas.");
 }
+
+$logged_user_id = $session->getUser()->id;
 
 // Ne pas modifier le membre courant, on risque de se tirer une balle dans le pied
-if ($membre->id == $user->id) {
-    throw new UserException("Vous ne pouvez pas modifier votre propre profil, la modification doit être faite par un autre membre, pour éviter de vous empêcher de vous reconnecter.\nUtilisez la page 'Mes infos personnelles' pour modifier vos informations.");
+if ($user->id == $logged_user_id) {
+	throw new UserException("Vous ne pouvez pas modifier votre propre profil, la modification doit être faite par un autre membre, pour éviter de vous empêcher de vous reconnecter.\nUtilisez la page 'Mes infos personnelles' pour modifier vos informations.");
 }
-
-$champs = $config->get('champs_membres');
 
 // Protection contre la modification des admins par des membres moins puissants
-$membre_cat = Categories::get($membre->id_category);
+$category = $user->category();
 
-if (($membre_cat->perm_users == $session::ACCESS_ADMIN)
-    && ($user->perm_users < $session::ACCESS_ADMIN))
-{
-    throw new UserException("Seul un membre admin peut modifier un autre membre admin.");
+if (($category->perm_users == $session::ACCESS_ADMIN)
+	&& ($session->getUser()->perm_users < $session::ACCESS_ADMIN)) {
+	throw new UserException("Seul un membre administrateur peut modifier un autre membre administrateur.");
 }
 
-if (f('save'))
-{
-    $form->check('edit_member_' . $id, [
-        'passe' => 'confirmed',
-        // FIXME: ajouter les règles pour les champs membres
-    ]);
+$csrf_key = 'user_edit_' . $user->id;
 
-    if (!$form->hasErrors())
-    {
-        try {
-            $data = [];
+$form->runIf('save', function () use ($user, $logged_user_id, $session) {
+	$user->importForm();
 
-            foreach ($champs->getAll() as $key=>$config)
-            {
-                $data[$key] = f($key);
-            }
+	// Only admins can set a category
+	if (f('id_category') && $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+		$user->id_category = f('id_category');
+	}
 
-            if (f('delete_password')) {
-                $data['delete_password'] = true;
-            }
+	if (!empty(f('delete_password'))) {
+		$user->password = null;
+		$user->otp_secret = null;
+		$user->pgp_key = null;
+	}
+	elseif (f('clear_otp')) {
+		$user->otp_secret = null;
+	}
+	elseif (f('clear_pgp')) {
+		$user->pgp_key = null;
+	}
 
-            if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $user->id != $membre->id)
-            {
-                $data['id_category'] = f('id_category');
-                $data['id'] = f('id');
-            }
+	$user->save();
+}, $csrf_key, '!users/details.php?id=' . $user->id);
 
-            if (f('clear_otp')) {
-                $data['secret_otp'] = null;
-            }
+$login_field = DF::getLoginField();
+$categories = Categories::listSimple();
 
-            if (f('clear_pgp')) {
-                $data['clef_pgp'] = null;
-            }
+$fields = DF::getInstance()->all();
 
-            $membres->edit($id, $data);
+$tpl->assign(compact('user', 'login_field', 'categories', 'fields', 'csrf_key'));
 
-            if (isset($data['id']) && $data['id'] != $id)
-            {
-                $id = (int)$data['id'];
-            }
-
-            Utils::redirect(ADMIN_URL . 'membres/fiche.php?id='.(int)$id);
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
-
-$config = Config::getInstance();
-$tpl->assign('id_field_name', $config->get('champ_identifiant'));
-$tpl->assign('passphrase', Utils::suggestPassword());
-$tpl->assign('champs', $champs->getAll());
-
-$tpl->assign('membres_cats', Categories::listSimple());
-$tpl->assign('current_cat', f('id_category') ?: $membre->id_category);
-
-$tpl->assign('can_change_id', $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN));
-
-$tpl->assign('membre', $membre);
-
-$tpl->display('admin/membres/modifier.tpl');
+$tpl->display('users/edit.tpl');

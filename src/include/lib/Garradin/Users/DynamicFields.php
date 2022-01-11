@@ -182,17 +182,17 @@ class DynamicFields
 		}
 	}
 
-	protected function fieldsByType(string $type): array
+	public function fieldsByType(string $type): array
 	{
 		return $this->_fields_by_type[$type] ?? [];
 	}
 
-	protected function fieldByKey(string $key): ?DynamicField
+	public function fieldByKey(string $key): ?DynamicField
 	{
 		return $this->_fields[$key] ?? null;
 	}
 
-	protected function fieldsBySystemUse(string $use): array
+	public function fieldsBySystemUse(string $use): array
 	{
 		return $this->_fields_by_system_use[$use] ?? [];
 	}
@@ -284,6 +284,9 @@ class DynamicFields
 
 			if ($name == $number_field) {
 				$field->system |= $field::NUMBER;
+				$data['help'] = null;
+				$data['mandatory'] = true;
+				$data['editable'] = false;
 			}
 
 			$data = array_merge($defaults, $data);

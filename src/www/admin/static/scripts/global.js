@@ -414,8 +414,12 @@
 				return;
 			}
 
-			var i = form.querySelector(form.dataset.focus == 1 ? '[name]:not([type="hidden"])' : form.dataset.focus);
-			i.focus();
+			let f = form.dataset.focus;
+			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : 0;
+			let i = form.querySelectorAll(n ? '[name]:not([type="hidden"])' : f);
+			if(i.length >= n) {
+				i[n].focus();
+			}
 		}
 	}, 'dom');
 
