@@ -47,6 +47,9 @@ class CSV
 				throw new UserException('Erreur sur la ligne ' . $line . ' : incohérence dans le nombre de colonnes avec la première ligne.');
 			}
 
+			// Make sure the data is UTF-8 encoded
+			$row = array_map($row, fn ($a) => Utils::utf8_encode(trim($a)));
+
 			$out[$line] = $row;
 		}
 
@@ -235,7 +238,9 @@ class CSV
 		$line = 0;
 
 		$columns = fgetcsv($fp, 4096, $delim);
-		$columns = array_map('trim', $columns);
+
+		// Make sure the data is UTF-8 encoded
+		$columns = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $columns);
 
 		// Check for required columns
 		foreach ($expected_columns as $column) {
@@ -258,6 +263,9 @@ class CSV
 			{
 				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
 			}
+
+			// Make sure the data is UTF-8 encoded
+			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
 
 			$row = array_combine($columns, $row);
 
