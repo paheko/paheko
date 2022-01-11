@@ -59,7 +59,7 @@ class DB extends SQLite3
         $db->createFunction('dirname', [Utils::class, 'dirname']);
         $db->createFunction('basename', [Utils::class, 'basename']);
         $db->createFunction('like', [self::class, 'unicodeLike']);
-        $db->createCollation('NOCASE', [Utils::class, 'unicodeCaseComparison']);
+        $db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
     }
 
     public function version(): ?string

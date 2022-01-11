@@ -512,7 +512,7 @@ class Champs
             elseif ($cfg->type == 'file')
                 $type = 'BLOB';
             else
-                $type = 'TEXT COLLATE NOCASE';
+                $type = 'TEXT COLLATE U_NOCASE';
 
             $line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
@@ -605,7 +605,7 @@ class Champs
             $collation = '';
 
             if ($this->isText($id_field)) {
-                $collation = ' COLLATE NOCASE';
+                $collation = ' COLLATE U_NOCASE';
             }
 
             // Création de l'index unique
@@ -634,7 +634,7 @@ class Champs
             $collation = '';
 
             if ($this->isText($field)) {
-                $collation = ' COLLATE NOCASE';
+                $collation = ' COLLATE U_NOCASE';
             }
 
             $db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
