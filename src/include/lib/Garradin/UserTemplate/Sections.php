@@ -251,7 +251,7 @@ class Sections
 		}
 
 		if ($params['order'] == 'name') {
-			$params['order'] .= ' COLLATE NOCASE';
+			$params['order'] .= ' COLLATE U_NOCASE';
 		}
 
 		foreach (self::sql($params, $tpl, $line) as $row) {

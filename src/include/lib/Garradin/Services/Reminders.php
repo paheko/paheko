@@ -18,7 +18,7 @@ class Reminders
 	static public function list()
 	{
 		return DB::getInstance()->get('SELECT s.label AS service_label, sr.* FROM services_reminders sr INNER JOIN services s ON s.id = sr.id_service
-			ORDER BY s.label COLLATE NOCASE;');
+			ORDER BY s.label COLLATE U_NOCASE;');
 	}
 
 	static public function get(int $id)

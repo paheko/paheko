@@ -233,7 +233,7 @@ class Recherche
 					'label'    => 'Catégorie',
 					'type'     => 'enum',
 					'null'     => false,
-					'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE NOCASE;'),
+					'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
 				];
 
 			foreach ($champs->getList() as $champ => $config)
@@ -542,7 +542,7 @@ class Recherche
 
 		if ($target_columns[$order]->textMatch)
 		{
-			$order = sprintf('%s COLLATE NOCASE', $db->quoteIdentifier($order));
+			$order = sprintf('%s COLLATE U_NOCASE', $db->quoteIdentifier($order));
 		}
 		else
 		{

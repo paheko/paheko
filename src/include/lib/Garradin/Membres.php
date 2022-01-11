@@ -161,7 +161,7 @@ class Membres
 
         $this->_checkFields($data, true, $require_password);
 
-        if (isset($data[$id]) && $db->test('membres', $id . ' = ? COLLATE NOCASE', $data[$id]))
+        if (isset($data[$id]) && $db->test('membres', $id . ' = ? COLLATE U_NOCASE', $data[$id]))
         {
             throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, or ce champ doit être unique à chaque membre.');
         }
@@ -200,7 +200,7 @@ class Membres
         $champ_id = $config->get('champ_identifiant');
 
         if (!empty($data[$champ_id])
-            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE AND id != ? LIMIT 1;', $data[$champ_id], (int)$id))
+            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$champ_id.' = ? COLLATE U_NOCASE AND id != ? LIMIT 1;', $data[$champ_id], (int)$id))
         {
             throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, or ce champ doit être unique à chaque membre.');
         }

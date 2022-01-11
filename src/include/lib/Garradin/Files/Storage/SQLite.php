@@ -122,7 +122,7 @@ class SQLite implements StorageInterface
 
 	static public function list(string $path): array
 	{
-		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE NOCASE ASC;', $path);
+		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $path);
 	}
 
 	static public function listDirectoriesRecursively(string $path): array

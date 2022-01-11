@@ -91,7 +91,7 @@ class Reports
 			GROUP BY %s
 			ORDER BY %s;';
 
-		$order = $order_code ? 'a.code COLLATE NOCASE' : 'a.label COLLATE NOCASE';
+		$order = $order_code ? 'a.code COLLATE U_NOCASE' : 'a.label COLLATE U_NOCASE';
 
 		if ($by_year) {
 			$group = 'y.id, a.id';
@@ -252,7 +252,7 @@ class Reports
 	{
 		$where = self::getWhereClause($criterias);
 
-		$order = $order ?: 'a.code COLLATE NOCASE';
+		$order = $order ?: 'a.code COLLATE U_NOCASE';
 		$reverse = $reverse ? '* -1' : '';
 		$remove_zero = $remove_zero ? 'HAVING sum != 0' : '';
 
@@ -379,7 +379,7 @@ class Reports
 			INNER JOIN %s l ON a.id = l.id_account
 			WHERE a.type != 0 AND %s
 			GROUP BY l.id_account
-			ORDER BY a.type, a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $where);
+			ORDER BY a.type, a.code COLLATE U_NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $where);
 
 		$group = null;
 
@@ -432,7 +432,7 @@ class Reports
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN %s
 			WHERE %s
-			ORDER BY a.code COLLATE NOCASE, t.date, t.id;', $join, $where);
+			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $join, $where);
 
 		$account = null;
 		$debit = $credit = 0;

@@ -104,7 +104,7 @@ class Session extends \KD2\UserSession
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
 			INNER JOIN users_categories AS c ON c.id = m.id_category
-			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
+			WHERE m.%1$s = ? COLLATE U_NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, self::ACCESS_READ);
@@ -235,7 +235,7 @@ class Session extends \KD2\UserSession
 
 		$champ_id = $config->get('champ_identifiant');
 
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE LIMIT 1;', trim($id));
+		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE U_NOCASE LIMIT 1;', trim($id));
 
 		if (!$membre || trim($membre->email) == '')
 		{
