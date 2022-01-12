@@ -395,6 +395,9 @@ class Upgrade
 				$champs->copy('membres_old', 'membres');
 				$db->exec('DROP TABLE membres_old;');
 
+				// Set new types for accounts
+				$db->import(ROOT . '/include/data/1.1.19_migration.sql');
+
 				$db->commitSchemaUpdate();
 			}
 
