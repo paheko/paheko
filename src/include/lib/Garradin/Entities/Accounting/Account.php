@@ -63,6 +63,11 @@ class Account extends Entity
 	const TYPE_POSITIVE_RESULT = 11;
 	const TYPE_NEGATIVE_RESULT = 12;
 
+	const TYPE_APPROPRIATION_RESULT = 13;
+
+	const TYPE_CREDIT_REPORT = 14;
+	const TYPE_DEBIT_REPORT = 15;
+
 	const TYPES_NAMES = [
 		'',
 		'Banque',
@@ -77,6 +82,9 @@ class Account extends Entity
 		'Clôture',
 		'Résultat excédentaire',
 		'Résultat déficitaire',
+		'Affectation du résultat',
+		'Report de solde créditeur',
+		'Report de solde débiteur',
 	];
 
 	const LIST_COLUMNS = [

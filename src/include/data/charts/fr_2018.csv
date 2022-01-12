@@ -18,13 +18,13 @@ code,label,description,position,type
 1062,Réserves indisponibles,,Passif,
 1063,Réserves statutaires,,Passif,
 1064,Réserves réglementées,,Passif,
-1068,Réserves pour projet de l’entité,,Passif,
+1068,Réserves pour projet de l’entité,,Passif,Affectation du résultat
 108,Dotations consomptibles,,Passif,
 1081,Dotations consomptibles,,Passif,
 1089,Dot. consomptibles inscrites au cpte de résul,,Passif,
 11,REPORT à NOUVEAU,,Passif,
-110,Report à nouveau (Solde créditeur),,Passif,
-119,Report à nouveau (Solde débiteur),,Passif,
+110,Report à nouveau (Solde créditeur),,Passif,Report à nouveau créditeur
+119,Report à nouveau (Solde débiteur),,Passif,Report à nouveau débiteur
 12,RÉSULTAT NET DE L'EXERCICE,,Passif,
 120,Résultat de l'exercice (excédent),,Passif,Résultat excédentaire
 129,Résultat de l'exercice (déficit),,Passif,Résultat déficitaire
