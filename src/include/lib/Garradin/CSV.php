@@ -48,7 +48,7 @@ class CSV
 			}
 
 			// Make sure the data is UTF-8 encoded
-			$row = array_map($row, fn ($a) => Utils::utf8_encode(trim($a)));
+			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
 
 			$out[$line] = $row;
 		}
