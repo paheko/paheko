@@ -385,7 +385,7 @@ class Upgrade
 				$res = $db->first('SELECT * FROM membres WHERE 1;');
 
 				$columns = array_keys((array) $res);
-				$columns = array_map(fn($c) => sprintf('%s = utf8_encode(%1$s)', $c), $columns);
+				$columns = array_map(fn($c) => sprintf('"%s" = utf8_encode("%1$s")', $c), $columns);
 				$db->exec(sprintf('UPDATE membres SET %s;', implode(', ', $columns)));
 
 				// Let's re-create users table with the correct index
