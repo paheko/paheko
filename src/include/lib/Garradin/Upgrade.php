@@ -376,7 +376,7 @@ class Upgrade
 			if (version_compare($v, '1.1.19', '<')) {
 				// Some people were able to insert invalid charsets in the database, this messes up the indexes
 				// Let's try to fix that
-				$db->begin();
+				$db->beginSchemaUpdate();
 				$db->createFunction('utf8_encode', [Utils::class, 'utf8_encode']);
 
 				$db->exec('END; VACUUM; BEGIN;'); // This will rebuild the index correctly, fixing the corrupted DB
@@ -395,7 +395,7 @@ class Upgrade
 				$champs->copy('membres_old', 'membres');
 				$db->exec('DROP TABLE membres_old;');
 
-				$db->commit();
+				$db->commitSchemaUpdate();
 			}
 
 			// Vérification de la cohérence des clés étrangères
