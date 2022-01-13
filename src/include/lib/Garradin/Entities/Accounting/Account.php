@@ -83,8 +83,8 @@ class Account extends Entity
 		'Résultat excédentaire',
 		'Résultat déficitaire',
 		'Affectation du résultat',
-		'Report de solde créditeur',
-		'Report de solde débiteur',
+		'Report à nouveau créditeur',
+		'Report à nouveau débiteur',
 	];
 
 	const LIST_COLUMNS = [
