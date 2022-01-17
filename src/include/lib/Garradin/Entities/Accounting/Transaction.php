@@ -347,6 +347,17 @@ class Transaction extends Entity
 		return $new;
 	}
 
+	public function payment_reference(): ?string
+	{
+		$line = current($this->getLines());
+
+		if (!$line) {
+			return null;
+		}
+
+		return $line->reference;
+	}
+
 
 /*
 	public function getHash()
