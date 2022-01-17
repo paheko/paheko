@@ -6,8 +6,10 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
+use Garradin\Config;
 use Garradin\CSV;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -256,6 +258,54 @@ class Accounts
 	{
 		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
 	}
+
+	public function listUserAccounts(int $year_id): DynamicList
+	{
+		$id_field = Config::getInstance()->champ_identite;
+
+		$columns = [
+			'id' => [
+				'select' => 'u.id',
+			],
+			'user_number' => [
+				'select' => 'u.numero',
+				'label' => 'N° membre',
+			],
+			'user_identity' => [
+				'select' => 'u.' . $id_field,
+				'label' => 'Membre',
+			],
+			'balance' => [
+				'select' => 'SUM(l.credit - l.debit)',
+				'label'  => 'Solde',
+				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
+			],
+			'status' => [
+				'select' => null,
+				'label' => 'Statut',
+			],
+		];
+
+		$tables = 'acc_transactions_users tu
+			INNER JOIN membres u ON u.id = tu.id_user
+			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
+			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account';
+
+		$conditions = 'a.type = ' . Account::TYPE_THIRD_PARTY . ' AND t.id_year = ' . $year_id;
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('balance', false);
+		$list->groupBy('u.id');
+		$list->setCount('COUNT(*)');
+		$list->setPageSize(null);
+		$list->setExportCallback(function (&$row) {
+			$row->balance = Utils::money_format($row->balance, '.', '', false);
+		});
+
+		return $list;
+	}
+
 /* FIXME: implement closing of accounts
 
 	public function closeRevenueExpenseAccounts(Year $year, int $user_id)
