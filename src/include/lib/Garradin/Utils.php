@@ -876,7 +876,7 @@ class Utils
         $etag = $etag ? str_replace('-gzip', '', $etag) : null;
 
         header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
-        header(sprintf('Expires: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
+        header(sprintf('Expires: %s GMT', gmdate('D, d M Y H:i:s', $last_change + 3600)), true);
         header('Cache-Control: private', true);
         header_remove('Pragma');
 
