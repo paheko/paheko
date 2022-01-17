@@ -870,21 +870,23 @@ class Utils
 
     static public function HTTPCache(?string $hash, int $last_change): bool
     {
-        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
+        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
+
+        $etag = $etag ? str_replace('-gzip', '', $etag) : null;
+
+        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
+
+        if ($hash) {
+            header(sprintf('Etag: "%s"', $hash));
+        }
+
+        header('Cache-Control: private');
 
         if ($etag === $hash && $last_modified >= $last_change) {
             header('HTTP/1.1 304 Not Modified', true, 304);
             exit;
         }
-
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-
-        if ($etag) {
-            header(sprintf('Etag: %s', $hash));
-        }
-
-        header('Cache-Control: private');
 
         return false;
     }
