@@ -37,7 +37,7 @@
 		<dl>
 			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc." source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}
@@ -64,7 +64,7 @@
 	<fieldset>
 		<legend>Détails facultatifs</legend>
 		<dl data-types="t{$transaction::TYPE_REVENUE} t{$transaction::TYPE_EXPENSE} t{$transaction::TYPE_TRANSFER}">
-			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->payment_reference()}
 		</dl>
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php"}
