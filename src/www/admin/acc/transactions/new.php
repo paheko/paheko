@@ -23,6 +23,7 @@ $lines = [[], []];
 $amount = 0;
 $types_accounts = null;
 $id_analytical = null;
+$transaction->date = new \DateTime;
 
 // Duplicate transaction
 if (qg('copy')) {
@@ -45,18 +46,13 @@ if (qg('copy')) {
 
 	unset($line);
 }
-
-$date = new \DateTime;
-
-if ($session->get('acc_last_date')) {
-	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+elseif ($session->get('acc_last_date')) {
+	$transaction->date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
 }
 
-if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
-	$date = $current_year->start_date;
+if ($transaction->date < $current_year->start_date || $transaction->date > $current_year->end_date) {
+	$transaction->date = $current_year->start_date;
 }
-
-$transaction->date = $date;
 
 // Quick transaction from an account journal page
 if ($id = qg('account')) {
