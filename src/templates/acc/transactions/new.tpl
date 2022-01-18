@@ -84,10 +84,12 @@
 
 </form>
 
-<script type="text/javascript" defer="defer" async="async">
+<script type="text/javascript" async="async">
 let is_new = {if null !== $transaction->type}false{else}true{/if};
 {literal}
-g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
+window.addEventListener('load', () => {
+	g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
+});
 </script>
 {/literal}
 
