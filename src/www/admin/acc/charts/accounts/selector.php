@@ -12,11 +12,11 @@ $targets = qg('targets');
 $chart = qg('chart');
 
 // Cache the page until the charts have changed
-$hash = sha1($targets . $chart);
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
+$hash = sha1($targets . $chart . $last_change);
 
 // Exit if there's no need to reload
-Utils::HTTPCache($hash, $last_change);
+Utils::HTTPCache($hash, null, 10);
 
 if ($chart) {
 	$chart = Charts::get((int)qg('chart'));
