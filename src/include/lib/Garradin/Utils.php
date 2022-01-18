@@ -868,24 +868,26 @@ class Utils
         return array($h * 360, $s, $l);
     }
 
-    static public function HTTPCache(?string $hash, int $last_change): bool
+    static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600): bool
     {
-        return false; // FIXME
         $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
         $etag = $etag ? str_replace('-gzip', '', $etag) : null;
 
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
-        header('Cache-Control: private', true);
+        header(sprintf('Cache-Control: private, max-age=%d', $max_age), true);
         header_remove('Expires');
+
+        if ($last_change) {
+            header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
+        }
 
         if ($hash) {
             header(sprintf('Etag: "%s"', $hash), true);
         }
 
-        if ($etag === $hash && $last_modified >= $last_change) {
-            header('HTTP/1.1 304 Not Modified', true, 304);
+        if (($etag && $etag === $hash) || ($last_modified && $last_modified >= $last_change)) {
+            http_response_code(304);
             exit;
         }
 
