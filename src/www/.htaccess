@@ -21,10 +21,5 @@ FallbackResource /_route.php
 # This is to avoid caching mismatch when using mod_deflate
 # see https://github.com/symfony/symfony-docs/issues/12644
 <IfModule mod_deflate.c>
-	<IfModule mod_headers.c>
-		RequestHeader edit "If-None-Match" '^"((.*)-(gzip|br))"$' '"$1", "$2"'
-	</IfModule>
-	<IfModule !mod_headers.c>
-		FileETag None
-	</IfModule>
+	FileETag None
 </IfModule>
