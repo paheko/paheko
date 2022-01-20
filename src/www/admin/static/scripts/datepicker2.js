@@ -225,14 +225,14 @@
 
 		month(change, relative)
 		{
+			let d = this.date.getDate();
 			let m = relative ? this.date.getMonth() + change : change;
 			this.date.setMonth(m);
 
 			// When the date of the day is > number of days in month, it switches to following month
 			// so we change the current date as well
-			if (this.date.getMonth() != m) {
+			if (this.date.getDate() != d) {
 				this.date.setDate(0);
-				this.date.setMonth(m);
 			}
 
 			this.refresh();
