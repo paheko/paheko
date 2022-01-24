@@ -15,13 +15,20 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 		<dl>
 		{if $create && $users}
-			<dt>Membres à inscrire</dt>
+			<dt>
+				Membres à inscrire
+				{foreach from=$users key="id" item="name"}
+				<input type="hidden" name="users[{$id}]" value="{$name}" />
+				{/foreach}
+			</dt>
 			{if count($users) <= 10}
 				{foreach from=$users key="id" item="name"}
-				<dd><h3>{$name}</h3><input type="hidden" name="users[{$id}]" value="{$name}" /></dd>
+				<dd><h3>{$name}</h3></dd>
 				{/foreach}
 			{else}
-				<dd>{$users|count} membres sélectionnés</dd>
+				<dd>
+					{$users|count} membres sélectionnés
+				</dd>
 			{/if}
 		{elseif $create && $copy_service}
 			<dt>Recopier depuis l'activité</dt>
