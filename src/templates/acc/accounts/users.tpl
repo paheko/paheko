@@ -7,7 +7,7 @@
 
 <p class="help">
 	Ce tableau présente une liste de comptes «&nbsp;virtuels&nbsp;» représentant les membres liés aux écritures.
-	Seules les écritures liées à des comptes de tiers sont comptabilisées.<br />
+	Seules les écritures liées à des comptes de tiers (en favori) sont comptabilisées.<br />
 	Les membres qui n'ont aucune écriture associée n'apparaissent pas dans ce tableau.
 </p>
 
