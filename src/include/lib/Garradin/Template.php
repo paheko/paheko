@@ -24,21 +24,24 @@ class Template extends \KD2\Smartyer
 	public function display($template = null)
 	{
 		if (isset($_GET['_pdf'])) {
-			$out = $this->fetch($template);
-
-			$filename = 'Print';
-
-			if (preg_match('!<title>(.*)</title>!U', $out, $match)) {
-				$filename = trim($match[1]);
-			}
-
-			header('Content-type: application/pdf');
-			header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($filename)));
-			Utils::streamPDF($out);
-			return $this;
+			return $this->PDF($template);
 		}
 
 		return parent::display($template);
+	}
+
+	public function PDF(?string $template = null, ?string $title = null)
+	{
+		$out = $this->fetch($template);
+
+		if (!$title && preg_match('!<title>(.*)</title>!U', $out, $match)) {
+			$title = trim($match[1]);
+		}
+
+		header('Content-type: application/pdf');
+		header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($title ?: 'Page')));
+		Utils::streamPDF($out);
+		return $this;
 	}
 
 	private function __clone()
