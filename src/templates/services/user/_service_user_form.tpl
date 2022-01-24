@@ -17,19 +17,22 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		{if $create && $users}
 			<dt>
 				Membres à inscrire
-				{foreach from=$users key="id" item="name"}
-				<input type="hidden" name="users[{$id}]" value="{$name}" />
-				{/foreach}
 			</dt>
-			{if count($users) <= 10}
-				{foreach from=$users key="id" item="name"}
-				<dd><h3>{$name}</h3></dd>
-				{/foreach}
-			{else}
-				<dd>
-					{$users|count} membres sélectionnés
-				</dd>
-			{/if}
+			<dd>
+				<table>
+					{foreach from=$users key="id" item="name"}
+					<tr>
+						<td>
+							<input type="hidden" name="users[{$id}]" value="{$name}" />
+							{button shape="delete" onclick="this.parentNode.parentNode.remove();" title="Supprimer de la liste"}
+						</td>
+						<th>
+							{$name}
+						</th>
+					</tr>
+					{/foreach}
+				</table>
+			</dd>
 		{elseif $create && $copy_service}
 			<dt>Recopier depuis l'activité</dt>
 			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy_service" value="{$copy_service.id}" /></dd>
