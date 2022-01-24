@@ -374,12 +374,12 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.19', '<')) {
+				$db->exec('VACUUM;'); // This will rebuild the index correctly, fixing the corrupted DB
+
 				// Some people were able to insert invalid charsets in the database, this messes up the indexes
 				// Let's try to fix that
-				$db->beginSchemaUpdate();
 				$db->createFunction('utf8_encode', [Utils::class, 'utf8_encode']);
-
-				$db->exec('END; VACUUM; BEGIN;'); // This will rebuild the index correctly, fixing the corrupted DB
+				$db->beginSchemaUpdate();
 
 				// Now let's fix the content itself
 				$res = $db->first('SELECT * FROM membres WHERE 1;');
@@ -391,6 +391,10 @@ class Upgrade
 				// Let's re-create users table with the correct index
 				$champs = Config::getInstance()->champs_membres;
 				$db->exec('ALTER TABLE membres RENAME TO membres_old;');
+				$db->commit();
+				$db->close();
+				$db->connect();
+				$db->beginSchemaUpdate();
 				$champs->create('membres');
 				$champs->copy('membres_old', 'membres');
 				$db->exec('DROP TABLE membres_old;');
@@ -431,6 +435,10 @@ class Upgrade
 		}
 		catch (\Exception $e)
 		{
+			if ($db->inTransaction()) {
+				$db->rollback();
+			}
+
 			$s = new Sauvegarde;
 			$s->restoreFromLocal($backup_name);
 			$s->remove($backup_name);
