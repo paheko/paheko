@@ -121,6 +121,7 @@ class Sauvegarde
 			// use ::backup since PHP 7.4.0+
 			// https://www.php.net/manual/en/sqlite3.backup.php
 			$dest_db = new \SQLite3($dest);
+			$dest_db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 
 			$db->backup($dest_db);
 			$dest_db->exec('PRAGMA journal_mode = DELETE;');
