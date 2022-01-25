@@ -43,7 +43,7 @@ class Years
 	static public function listOpenAssoc()
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
-		return $db->getAssoc('SELECT id, label FROM acc_years WHERE closed = 0 ORDER BY end_date;');
+		return $db->getAssoc('SELECT id, label FROM acc_years WHERE closed = 0 ORDER BY end_date DESC;');
 	}
 
 	static public function listAssoc()
