@@ -33,6 +33,7 @@ class Transactions
 		'debit_account'  => 'Compte de débit',
 		'credit_account' => 'Compte de crédit',
 		'amount'         => 'Montant',
+		'analytical'     => 'Compte analytique',
 	];
 
 	const MANDATORY_CSV_COLUMNS = ['label', 'date', 'credit_account', 'debit_account', 'amount'];
@@ -122,7 +123,7 @@ class Transactions
 		$header = null;
 
 		if (self::EXPORT_FULL == $type) {
-			$header = ['Numéro', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique', 'Membres associés'];
+			$header = ['Numéro d\'écriture', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Numéro pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique', 'Membres associés'];
 		}
 
 		CSV::export(
@@ -366,6 +367,20 @@ class Transactions
 				if (!$debit_account) {
 					throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
 				}
+
+				if (!empty($row->analytical)) {
+					$id_analytical = $accounts->getIdFromCode($row->analytical);
+
+					if (!$id_analytical) {
+						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
+					}
+
+					$transaction->id_analytical = $id_analytical;
+				}
+				elseif (property_exists($row, 'analytical')) {
+					$transaction->id_analytical = null;
+				}
+
 
 				$line = new Line;
 				$line->importForm([
