@@ -38,6 +38,9 @@ $form->runIf('restore_file', function () use ($s, &$code, $session) {
 		Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
 	} catch (UserException $e) {
 		$code = $e->getCode();
+		if ($code == 0) {
+			throw $e;
+		}
 	}
 }, 'backup_restore');
 
