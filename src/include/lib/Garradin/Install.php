@@ -74,7 +74,7 @@ class Install
 			Plugin::checkAndInstallSystemPlugins();
 		}
 
-		if (!LOCAL_LOGIN) {
+		if (!constant('\Garradin\LOCAL_LOGIN')) {
 			Session::getInstance()->refresh();
 		}
 
