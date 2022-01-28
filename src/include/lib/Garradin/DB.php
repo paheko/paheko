@@ -18,13 +18,18 @@ class DB extends SQLite3
 
     static protected $unicode_patterns_cache = [];
 
-    static public function getInstance($create = false, $readonly = false)
+    static public function getInstance()
     {
         if (null === self::$_instance) {
             self::$_instance = new DB('sqlite', ['file' => DB_FILE]);
         }
 
         return self::$_instance;
+    }
+
+    static public function deleteInstance()
+    {
+        self::$_instance = null;
     }
 
     private function __clone()
