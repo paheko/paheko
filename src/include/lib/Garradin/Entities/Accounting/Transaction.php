@@ -493,7 +493,11 @@ class Transaction extends Entity
 
 		$lines = $this->getLines();
 
-		foreach ($lines as $line) {
+		foreach ($lines as $k => $line) {
+			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
+			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
+			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
+
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
