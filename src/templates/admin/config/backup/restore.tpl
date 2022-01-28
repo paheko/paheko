@@ -39,7 +39,7 @@
 		en cas de besoin d'annuler cette restauration.
 	</p>
 	<dl>
-		{input type="file" name="file" required=true}
+		{input type="file" name="file" label="Fichier de sauvegarde à restaurer" required=true}
 	</dl>
 	<p class="submit">
 		{csrf_field key="backup_restore"}
