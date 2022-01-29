@@ -368,19 +368,15 @@ class Transactions
 					throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
 				}
 
+				$id_analytical = null;
+
 				if (!empty($row->analytical)) {
 					$id_analytical = $accounts->getIdFromCode($row->analytical);
 
 					if (!$id_analytical) {
 						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
 					}
-
-					$transaction->id_analytical = $id_analytical;
 				}
-				elseif (property_exists($row, 'analytical')) {
-					$transaction->id_analytical = null;
-				}
-
 
 				$line = new Line;
 				$line->importForm([
@@ -388,6 +384,7 @@ class Transactions
 					'debit'      => 0,
 					'id_account' => $credit_account,
 					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
+					'id_analytical' => $id_analytical,
 				]);
 				$transaction->addLine($line);
 
@@ -397,6 +394,7 @@ class Transactions
 					'debit'      => $row->amount,
 					'id_account' => $debit_account,
 					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
+					'id_analytical' => $id_analytical,
 				]);
 				$transaction->addLine($line);
 				$transaction->save();
