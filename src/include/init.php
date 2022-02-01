@@ -155,6 +155,8 @@ if (!defined('Garradin\WWW_URI'))
 	unset($uri);
 }
 
+$host = null;
+
 if (!defined('Garradin\WWW_URL')) {
 	$host = \KD2\HTTP::getHost();
 }
@@ -174,7 +176,7 @@ if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
 	exit(1);
 }
 
-if (!defined('Garradin\WWW_URL')) {
+if (!defined('Garradin\WWW_URL') && $host !== null) {
 	define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
 }
 
