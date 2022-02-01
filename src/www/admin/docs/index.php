@@ -9,7 +9,7 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
-$path = trim(qg('path')) ?: File::CONTEXT_DOCUMENTS;
+$path = qg('path') ?: File::CONTEXT_DOCUMENTS;
 
 $context = Files::getContext($path);
 $context_ref = Files::getContextRef($path);

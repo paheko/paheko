@@ -92,12 +92,11 @@ class CommonModifiers
 
 	static public function date($ts, string $format = null, string $locale = 'fr'): ?string
 	{
-		if (preg_match('/^DATE_[\w\d]+$/', $format)) {
-			$format = constant('DateTime::' . $format);
-		}
-
 		if (null === $format) {
 			$format = 'd/m/Y à H:i';
+		}
+		elseif (preg_match('/^DATE_[\w\d]+$/', $format)) {
+			$format = constant('DateTime::' . $format);
 		}
 
 		if ($locale == 'fr') {
