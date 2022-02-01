@@ -174,7 +174,7 @@ class Reports
 			INNER JOIN acc_accounts a ON a.id = l.id_account
 			INNER JOIN acc_years y ON y.id = t.id_year
 			WHERE %s
-			GROUP BY t.id_year ORDER BY y.end_date;', $where, $where);
+			GROUP BY t.id_year ORDER BY y.end_date;', $where);
 
 		return DB::getInstance()->getGrouped($sql);
 	}

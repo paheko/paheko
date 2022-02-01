@@ -108,7 +108,7 @@ class CSV
 		$row = (array) $row;
 
 		array_walk($row, function (&$field) {
-			$field = strtr($field, ['"' => '""', "\r\n" => "\n"]);
+			$field = strtr((string) $field, ['"' => '""', "\r\n" => "\n"]);
 		});
 
 		return sprintf("\"%s\"\r\n", implode('","', $row));

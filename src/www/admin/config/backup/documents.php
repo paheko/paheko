@@ -36,6 +36,7 @@ $failed = (int) qg('failed');
 
 if ($ok) {
 	// Reset
+	$config = Config::getInstance();
 	$config->updateFiles();
 	$config->save();
 	$tpl->assign(compact('config'));
