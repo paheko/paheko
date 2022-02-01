@@ -22,7 +22,7 @@ $query = (object) [
 
 $query->desc = (bool) f('desc');
 
-$text_query = trim(qg('qt'));
+$text_query = trim((string) qg('qt'));
 $result = null;
 $sql_query = null;
 $search = null;
