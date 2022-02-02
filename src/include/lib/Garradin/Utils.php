@@ -93,9 +93,7 @@ class Utils
             return $ts;
         }
 
-        $date = strftime($format, $ts->getTimestamp());
-
-        $date = strtr($date, self::FRENCH_DATE_NAMES);
+        $date = Translate::strftime($format, $ts, 'fr_FR');
         return $date;
     }
 
