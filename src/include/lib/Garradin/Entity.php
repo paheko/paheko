@@ -34,7 +34,7 @@ class Entity extends AbstractEntity
 	protected function filterUserValue(string $type, $value, string $key)
 	{
 		if ($type == 'date') {
-			if (!trim($value)) {
+			if (!trim((string) $value)) {
 				return null;
 			}
 

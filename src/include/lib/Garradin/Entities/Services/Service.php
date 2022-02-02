@@ -33,9 +33,9 @@ class Service extends Entity
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
-		$this->assert(trim($this->label) !== '', 'Le libellé doit être renseigné');
-		$this->assert(strlen($this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
-		$this->assert(strlen($this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
+		$this->assert(trim((string) $this->label) !== '', 'Le libellé doit être renseigné');
+		$this->assert(strlen((string) $this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
+		$this->assert(strlen((string) $this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
 		$this->assert(!isset($this->duration, $this->start_date, $this->end_date) || $this->duration || ($this->start_date && $this->end_date), 'Seulement une option doit être choisie : durée ou dates de début et de fin de validité');
 		$this->assert(null === $this->start_date || $this->start_date instanceof \DateTimeInterface);
 		$this->assert(null === $this->end_date || $this->end_date instanceof \DateTimeInterface);
