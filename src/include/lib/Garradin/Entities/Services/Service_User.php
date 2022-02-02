@@ -135,6 +135,10 @@ class Service_User extends Entity
 			throw new \RuntimeException('Cannot add a payment to a subscription that is not linked to a fee');
 		}
 
+		if (!$this->fee()->id_year) {
+			throw new ValidationException('Le tarif indiqué ne possède pas d\'exercice lié');
+		}
+
 		$transaction = new Transaction;
 		$transaction->id_creator = $user_id;
 		$transaction->id_year = $this->fee()->id_year;
