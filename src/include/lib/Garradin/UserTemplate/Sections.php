@@ -94,7 +94,7 @@ class Sections
 		$params[':status'] = Page::STATUS_ONLINE;
 
 		if (array_key_exists('search', $params)) {
-			if (trim($params['search']) === '') {
+			if (trim((string) $params['search']) === '') {
 				return;
 			}
 
@@ -123,7 +123,7 @@ class Sections
 			unset($params['path']);
 		}
 
-		if (array_key_exists('parent', $params)) {
+		if (!empty($params['parent'])) {
 			$params['where'] .= ' AND w.parent = :parent';
 			$params[':parent'] = trim($params['parent']);
 
