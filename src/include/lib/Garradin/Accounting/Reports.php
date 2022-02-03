@@ -316,12 +316,13 @@ class Reports
 				continue;
 			}
 
+			$row = clone $row;
 			$position = $row->position;
 
 			if ($position == Account::ASSET_OR_LIABILITY) {
 				$position = $row->sum < 0 ? 'asset' : 'liability';
 				$row->sum = abs($row->sum);
-				$row->sum2 = isset($row->sum2) ? abs($row->sum2) : 0;
+				$row->sum2 = 0;
 				$row->change = isset($row->change) ? $row->change * -1 : 0;
 			}
 			elseif ($position == Account::ASSET) {
@@ -334,18 +335,57 @@ class Reports
 				$position = 'liability';
 			}
 
-			$accounts[$position][] = $row;
+			$accounts[$position][$row->code] = $row;
 		}
 
+		// Add asset/liability accounts when comparing
+		if (!empty($criterias['compare_year'])) {
+			foreach ($list as $row) {
+				if (!isset($row->sum2) || $row->position != Account::ASSET_OR_LIABILITY) {
+					continue;
+				}
+
+				$position = $row->sum2 < 0 ? 'asset' : 'liability';
+				$sum2 = abs($row->sum2);
+
+				if (isset($accounts[$position][$row->code])) {
+					$accounts[$position][$row->code]->sum2 = $sum2;
+				}
+				else {
+					$row = clone $row;
+					$row->sum = null;
+					$row->sum2 = $sum2;
+					$accounts[$position][$row->code] = $row;
+
+					$other = $position == 'asset' ? 'liability' : 'asset';
+
+					// Remove empty lines
+					if (empty($accounts[$other][$row->code]->sum)) {
+						unset($accounts[$other][$row->code]);
+					}
+				}
+			}
+		}
+
+		// Append result to end of table
 		$result = self::getResult($criterias);
+		$result2 = null;
+		$label = $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)';
 
-		if ($result != 0) {
-			$accounts['liability'][] = (object) [
-				'id' => null,
-				'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
-				'sum' => $result,
-			];
+		if (!empty($criterias['compare_year'])) {
+			$result2 = self::getResult(array_merge($criterias, ['year' => $criterias['compare_year']]));
 		}
+
+		if (!empty($criterias['compare_year']) || $result == 0) {
+			$label = 'Résultat de l\'exercice';
+		}
+
+		$accounts['liability'][] = (object) [
+			'id' => null,
+			'label' => $label,
+			'sum' => $result,
+			'sum2' => $result2,
+		];
 
 		// Calculate the total sum for assets and liabilities
 		foreach ($accounts as $position => $rows) {
