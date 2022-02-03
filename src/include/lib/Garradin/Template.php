@@ -471,6 +471,10 @@ class Template extends \KD2\Smartyer
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
+			if ($current_value == 0) {
+				$current_value = '';
+			}
+
 			$currency = Config::getInstance()->get('monnaie');
 			$input = sprintf('<nobr><input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, $this->escape($current_value), $currency);
 		}
