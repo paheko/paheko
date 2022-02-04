@@ -123,9 +123,9 @@ class Sections
 			unset($params['path']);
 		}
 
-		if (!empty($params['parent'])) {
+		if (isset($params['parent'])) {
 			$params['where'] .= ' AND w.parent = :parent';
-			$params[':parent'] = trim($params['parent']);
+			$params[':parent'] = is_string($params['parent']) ? trim($params['parent']) : $params['parent'];
 
 			unset($params['parent']);
 		}
