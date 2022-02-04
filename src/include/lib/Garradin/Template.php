@@ -471,7 +471,7 @@ class Template extends \KD2\Smartyer
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
-			if ($current_value == 0) {
+			if ((string) $current_value === '0') {
 				$current_value = '';
 			}
 
