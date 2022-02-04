@@ -163,7 +163,7 @@ class Utils
             throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
         }
 
-        $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
+        $value = $match[1] . str_pad($match[2] ?? '', 2, '0', STR_PAD_RIGHT);
         $value = (int) $value;
         return $value;
     }
