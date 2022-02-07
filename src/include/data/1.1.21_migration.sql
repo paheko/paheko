@@ -1,0 +1,1 @@
+ALTER TABLE services_fees ADD COLUMN id_analytical INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL;

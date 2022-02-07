@@ -157,6 +157,7 @@ class Service_User extends Entity
 		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
 
 		$source['label'] = $label;
+		$source['id_analytical'] = $this->fee()->id_analytical;
 
 		$transaction->importFromNewForm($source);
 		$transaction->save();

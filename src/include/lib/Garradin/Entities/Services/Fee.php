@@ -16,25 +16,15 @@ class Fee extends Entity
 {
 	const TABLE = 'services_fees';
 
-	protected $id;
-	protected $label;
-	protected $description;
-	protected $amount;
-	protected $formula;
-	protected $id_service;
-	protected $id_account;
-	protected $id_year;
-
-	protected $_types = [
-		'id'          => 'int',
-		'label'       => 'string',
-		'description' => '?string',
-		'amount'      => '?int',
-		'formula'     => '?string',
-		'id_service'  => 'int',
-		'id_account'  => '?int',
-		'id_year'     => '?int',
-	];
+	protected int $id;
+	protected string $label;
+	protected ?string $description;
+	protected ?int $amount;
+	protected ?string $formula;
+	protected int $id_service;
+	protected ?int $id_account;
+	protected ?int $id_year;
+	protected ?int $id_analytical;
 
 	public function filterUserValue(string $type, $value, string $key)
 	{
@@ -53,6 +43,10 @@ class Fee extends Entity
 
 		if (isset($source['account']) && is_array($source['account'])) {
 			$source['id_account'] = (int)key($source['account']);
+		}
+
+		if (isset($source['analytical']) && is_array($source['analytical'])) {
+			$source['id_analytical'] = (int)key($source['analytical']);
 		}
 
 		if (isset($source['amount_type'])) {
@@ -92,6 +86,7 @@ class Fee extends Entity
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte indiqué n\'existe pas');
 		$this->assert(null === $this->id_year || $db->test(Year::TABLE, 'id = ?', $this->id_year), 'L\'exercice indiqué n\'existe pas');
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_account, $this->id_year), 'Le compte sélectionné ne correspond pas à l\'exercice');
+		$this->assert(null === $this->id_analytical || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_analytical, $this->id_year), 'Le projet sélectionné ne correspond pas à l\'exercice');
 		$this->assert(null === $this->formula || $this->checkFormula(), 'Formule de calcul invalide');
 		$this->assert(null === $this->amount || null === $this->formula, 'Il n\'est pas possible de spécifier à la fois une formule et un montant');
 	}
