@@ -964,8 +964,12 @@ class Utils
         return strcmp($a, $b);
     }
 
-    static public function utf8_encode(string $str)
+    static public function utf8_encode(?string $str): ?string
     {
+        if (null === $str) {
+            return null;
+        }
+
         // Check if string is already UTF-8 encoded or not
         return !preg_match('//u', $str) ? utf8_encode($str) : $str;
     }

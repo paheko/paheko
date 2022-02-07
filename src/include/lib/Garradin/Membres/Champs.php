@@ -502,8 +502,7 @@ class Champs
             'clef_pgp TEXT NULL, -- Clé publique PGP'
         ];
 
-        end($this->champs);
-        $last_one = key($this->champs);
+        $last_one = array_key_last((array)$this->champs);
 
         foreach ($this->champs as $key=>$cfg)
         {
