@@ -405,6 +405,13 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.1.21', '<')) {
+				$db->begin();
+				// Add id_analytical column to services_fees
+				$db->import(ROOT . '/include/data/1.1.21_migration.sql');
+				$db->commit();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
