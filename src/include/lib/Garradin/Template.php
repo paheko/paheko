@@ -663,7 +663,7 @@ class Template extends \KD2\Smartyer
 
 				return htmlspecialchars(implode(', ', $out));
 			default:
-				return htmlspecialchars($v);
+				return htmlspecialchars((string) $v);
 		}
 	}
 
