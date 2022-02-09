@@ -783,7 +783,7 @@ class Template extends \KD2\Smartyer
 		}
 		elseif ($type == 'textarea')
 		{
-			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
+			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars((string) $value, ENT_QUOTES) . '</textarea>';
 		}
 		elseif ($type == 'date') {
 			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
@@ -800,7 +800,7 @@ class Template extends \KD2\Smartyer
 				$value = '1';
 			}
 
-			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars($value, ENT_QUOTES) . '" />';
+			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars((string) $value, ENT_QUOTES) . '" />';
 		}
 
 		$out = '

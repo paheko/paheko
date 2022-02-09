@@ -85,13 +85,13 @@ class Service_User extends Entity
 			if ($service->duration) {
 				$dt = new \DateTime;
 				$dt->modify(sprintf('+%d days', $service->duration));
-				$this->expiry_date = $dt;
+				$this->set('expiry_date', $dt);
 			}
 			elseif ($service->end_date) {
-				$this->expiry_date = $service->end_date;
+				$this->set('expiry_date', $service->end_date);
 			}
 			else {
-				$this->expiry_date = null;
+				$this->set('expiry_date', null);
 			}
 		}
 
