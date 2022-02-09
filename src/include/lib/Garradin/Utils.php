@@ -339,6 +339,8 @@ class Utils
 
     static public function getCountryName($code)
     {
+        $code = strtoupper($code);
+
         $list = self::getCountryList();
 
         if (!isset($list[$code]))

@@ -194,12 +194,7 @@ class Install
 		$config->setFile('admin_homepage', $welcome_text);
 
         // Import accounting chart
-        $chart = new Chart;
-        $chart->label = 'Plan comptable associatif 2020 (Règlement ANC n°2018-06)';
-        $chart->country = 'FR';
-        $chart->code = 'PCA2018';
-        $chart->save();
-        $chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
+        $chart = Charts::install('fr_pca_2018');
 
         // Create first accounting year
         $year = new Year;
