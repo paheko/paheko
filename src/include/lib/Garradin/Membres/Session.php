@@ -160,26 +160,13 @@ class Session extends \KD2\UserSession
 		return $this->db->delete('membres_sessions', $this->db->where('id_membre', $user_id));
 	}
 
-	// Ajout de la gestion de LOCAL_LOGIN
 	public function isLogged(bool $disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
-		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN'))
-		{
-			$login_id = \Garradin\LOCAL_LOGIN;
-
-			// On va chercher le premier membre avec le droit de gérer la config
-			if (-1 === $login_id) {
-				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
-					LIMIT 1', self::ACCESS_ADMIN);
-			}
-
-			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
-			{
-				$logged = $this->create($login_id);
-			}
+		// Ajout de la gestion de LOCAL_LOGIN
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')) {
+			$logged = $this->forceLogin(\Garradin\LOCAL_LOGIN);
 		}
 
 		return $logged;
@@ -187,7 +174,21 @@ class Session extends \KD2\UserSession
 
 	public function forceLogin(int $id)
 	{
-		return $this->create($id);
+		// On va chercher le premier membre avec le droit de gérer la config
+		if (-1 === $id) {
+			$id = $this->db->firstColumn('SELECT id FROM membres
+				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
+				LIMIT 1', self::ACCESS_ADMIN);
+		}
+
+		$logged = parent::isLogged();
+
+		// Only login if required
+		if ($id > 0 && (!$logged || ($logged && $this->user->id != $id))) {
+			return $this->create($id);
+		}
+
+		return $logged;
 	}
 
 	// Ici checkOTP utilise NTP en second recours

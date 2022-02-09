@@ -19,6 +19,11 @@
 			<p class="block alert">
 				<strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
 				Merci de corriger les droits des catégories maintenant.
+			{elseif $ok_code & Sauvegarde::CHANGED_USER}
+			</p>
+			<p class="block alert">
+				<strong>Votre compte membre n'existait pas dans la sauvegarde qui a été restaurée, vous êtes désormais connecté avec le premier compte administrateur.</strong>
+			</p>
 			{/if}
 		{elseif $ok == 'remove'}La sauvegarde a été supprimée.
 		{/if}
