@@ -18,13 +18,13 @@ class Fee extends Entity
 
 	protected int $id;
 	protected string $label;
-	protected ?string $description;
-	protected ?int $amount;
-	protected ?string $formula;
+	protected ?string $description = null;
+	protected ?int $amount = null;
+	protected ?string $formula = null;
 	protected int $id_service;
-	protected ?int $id_account;
-	protected ?int $id_year;
-	protected ?int $id_analytical;
+	protected ?int $id_account = null;
+	protected ?int $id_year = null;
+	protected ?int $id_analytical = null;
 
 	public function filterUserValue(string $type, $value, string $key)
 	{
@@ -77,8 +77,8 @@ class Fee extends Entity
 		parent::selfCheck();
 
 		$this->assert(trim($this->label) !== '', 'Le libellé doit être renseigné');
-		$this->assert(strlen($this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
-		$this->assert(strlen($this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
+		$this->assert(strlen((string) $this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
+		$this->assert(strlen((string) $this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
 		$this->assert(null === $this->amount || $this->amount > 0, 'Le montant est invalide : ' . $this->amount);
 		$this->assert($this->id_service, 'Aucun service n\'a été indiqué pour ce tarif.');
 		$this->assert((null === $this->id_account && null === $this->id_year)
