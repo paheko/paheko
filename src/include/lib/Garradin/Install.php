@@ -2,8 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Accounting\Charts;
 use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Chart;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Files\File;
