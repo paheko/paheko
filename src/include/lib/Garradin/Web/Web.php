@@ -112,20 +112,20 @@ class Web
 
 	static public function listCategories(string $parent): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE NOCASE;';
+		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE U_NOCASE;';
 		return EM::getInstance(Page::class)->all($sql, $parent, Page::TYPE_CATEGORY);
 	}
 
 	static public function listPages(string $parent, bool $order_by_date = true): array
 	{
-		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';
+		$order = $order_by_date ? 'published DESC' : 'title COLLATE U_NOCASE';
 		$sql = sprintf('SELECT * FROM @TABLE WHERE parent = ? AND type = %d ORDER BY %s;', Page::TYPE_PAGE, $order);
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
 	static public function listAll(string $parent): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE NOCASE;';
+		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE U_NOCASE;';
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 

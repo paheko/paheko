@@ -205,6 +205,6 @@ class CSV_Custom
 
 	public function getMandatoryColumns(): array
 	{
-		return array_intersect_key($this->columns, $this->mandatory_columns);
+		return array_intersect_key($this->columns, array_flip($this->mandatory_columns));
 	}
 }

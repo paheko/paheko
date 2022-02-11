@@ -41,6 +41,18 @@ class Line extends Entity
 		'label'          => 'string|max:200',
 	];
 
+	static public function create(int $id_account, int $credit, int $debit, ?string $label = null, ?string $reference = null): Line
+	{
+		$line = new self;
+		$line->id_account = $id_account;
+		$line->credit = $credit;
+		$line->debit = $debit;
+		$line->label = $label;
+		$line->reference = $reference;
+
+		return $line;
+	}
+
 	public function filterUserValue(string $type, $value, string $key)
 	{
 		if ($key == 'credit' || $key == 'debit') {

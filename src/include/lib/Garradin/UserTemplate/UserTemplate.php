@@ -4,6 +4,7 @@ namespace Garradin\UserTemplate;
 
 use KD2\Brindille;
 use KD2\Brindille_Exception;
+use KD2\Translate;
 
 use Garradin\Config;
 use Garradin\Plugin;
@@ -34,25 +35,6 @@ class UserTemplate extends Brindille
 
 		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso', 'files'];
 
-		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
-		{
-			if (function_exists('locale_accept_from_http'))
-			{
-			   $lang = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-			}
-			else
-			{
-				$lang = preg_replace('/[^a-z]/i', '', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-				$lang = strtolower(substr($lang, 0, 2));
-			}
-
-			$lang = strtolower(substr($lang, 0, 2));
-		}
-		else
-		{
-			$lang = '';
-		}
-
 		$config = Config::getInstance();
 
 		$files = $config::FILES;
@@ -71,7 +53,7 @@ class UserTemplate extends Brindille
 			'admin_url'    => ADMIN_URL,
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,
-			'visitor_lang' => $lang,
+			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
 		];
 

@@ -15,6 +15,7 @@ if (file_exists(DB_FILE))
 
 try {
     Install::checkAndCreateDirectories();
+	Install::checkReset();
 }
 catch (UserException $e) {
     echo $e->getMessage();

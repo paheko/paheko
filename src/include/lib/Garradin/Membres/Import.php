@@ -108,6 +108,9 @@ class Import
 				continue;
 			}
 
+			// Make sure the data is UTF-8 encoded
+			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
+
 			if ($line == 1)
 			{
 				if (empty($row[0]) || !is_string($row[0]) || is_numeric($row[0]))

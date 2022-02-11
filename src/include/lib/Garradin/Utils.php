@@ -93,9 +93,7 @@ class Utils
             return $ts;
         }
 
-        $date = strftime($format, $ts->getTimestamp());
-
-        $date = strtr($date, self::FRENCH_DATE_NAMES);
+        $date = Translate::strftime($format, $ts, 'fr_FR');
         return $date;
     }
 
@@ -165,7 +163,7 @@ class Utils
             throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
         }
 
-        $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
+        $value = $match[1] . str_pad($match[2] ?? '', 2, '0', STR_PAD_RIGHT);
         $value = (int) $value;
         return $value;
     }
@@ -341,6 +339,8 @@ class Utils
 
     static public function getCountryName($code)
     {
+        $code = strtoupper($code);
+
         $list = self::getCountryList();
 
         if (!isset($list[$code]))
@@ -868,23 +868,28 @@ class Utils
         return array($h * 360, $s, $l);
     }
 
-    static public function HTTPCache(?string $hash, int $last_change): bool
+    static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600): bool
     {
-        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
+        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
-        if ($etag === $hash && $last_modified >= $last_change) {
-            header('HTTP/1.1 304 Not Modified', true, 304);
+        $etag = $etag ? str_replace('-gzip', '', $etag) : null;
+
+        header(sprintf('Cache-Control: private, max-age=%d', $max_age), true);
+        header_remove('Expires');
+
+        if ($last_change) {
+            header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
+        }
+
+        if ($hash) {
+            header(sprintf('Etag: "%s"', $hash), true);
+        }
+
+        if (($etag && $etag === $hash) || ($last_modified && $last_modified >= $last_change)) {
+            http_response_code(304);
             exit;
         }
-
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-
-        if ($etag) {
-            header(sprintf('Etag: %s', $hash));
-        }
-
-        header('Cache-Control: private');
 
         return false;
     }
@@ -930,8 +935,12 @@ class Utils
         return $str;
     }
 
-    static public function unicodeTransliterate($str): string
+    static public function unicodeTransliterate($str): ?string
     {
+        if ($str === null) {
+            return null;
+        }
+
         return transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $str);
     }
 
@@ -945,9 +954,16 @@ class Utils
             self::$collator->setAttribute(\Collator::STRENGTH, \Collator::SECONDARY);
 
             // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
+            // for account ordering
             // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
             // without: 1, 10, 101, 11, 2
         }
+
+        // Make sure we have UTF-8
+        // If we don't, we may end up with malformed database, eg. "row X missing from index" errors
+        // when doing an integrity check
+        $a = self::utf8_encode($a);
+        $b = self::utf8_encode($b);
 
         if (isset(self::$collator)) {
             return (int) self::$collator->compare($a, $b);
@@ -957,6 +973,16 @@ class Utils
         $b = strtoupper(self::transliterateToAscii($b));
 
         return strcmp($a, $b);
+    }
+
+    static public function utf8_encode(?string $str): ?string
+    {
+        if (null === $str) {
+            return null;
+        }
+
+        // Check if string is already UTF-8 encoded or not
+        return !preg_match('//u', $str) ? utf8_encode($str) : $str;
     }
 
     /**

@@ -273,7 +273,7 @@ class Page extends Entity
 		}
 
 		if (isset($source['uri'])) {
-			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+			$source['uri'] = strtolower(Utils::transformTitleToURI($source['uri']));
 			$source['path'] = trim($parent . '/' . $source['uri'], '/');
 		}
 

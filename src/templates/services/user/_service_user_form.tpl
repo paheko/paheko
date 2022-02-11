@@ -15,14 +15,24 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 		<dl>
 		{if $create && $users}
-			<dt>Membres à inscrire</dt>
-			{if count($users) <= 10}
-				{foreach from=$users key="id" item="name"}
-				<dd><h3>{$name}</h3><input type="hidden" name="users[{$id}]" value="{$name}" /></dd>
-				{/foreach}
-			{else}
-				<dd>{$users|count} membres sélectionnés</dd>
-			{/if}
+			<dt>
+				Membres à inscrire
+			</dt>
+			<dd>
+				<table>
+					{foreach from=$users key="id" item="name"}
+					<tr>
+						<td>
+							<input type="hidden" name="users[{$id}]" value="{$name}" />
+							{button shape="delete" onclick="this.parentNode.parentNode.remove();" title="Supprimer de la liste"}
+						</td>
+						<th>
+							{$name}
+						</th>
+					</tr>
+					{/foreach}
+				</table>
+			</dd>
 		{elseif $create && $copy_service}
 			<dt>Recopier depuis l'activité</dt>
 			<dd><strong>{$copy_service.label}</strong><input type="hidden" name="copy_service" value="{$copy_service.id}" /></dd>
@@ -132,7 +142,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 		<dl>
 			{input type="money" name="amount" label="Montant réglé par le membre" fake_required=1 help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
 			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" fake_required=1}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}
 		</dl>

@@ -75,7 +75,7 @@ if (!empty($_ENV['GARRADIN_STANDALONE']))
 	}
 
 	if (!defined('Garradin\LOCAL_LOGIN')) {
-		define('Garradin\LOCAL_LOGIN', true);
+		define('Garradin\LOCAL_LOGIN', -1);
 	}
 }
 elseif (isset($_SERVER['SERVER_NAME'])) {

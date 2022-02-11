@@ -26,21 +26,24 @@ class Template extends \KD2\Smartyer
 	public function display($template = null)
 	{
 		if (isset($_GET['_pdf'])) {
-			$out = $this->fetch($template);
-
-			$filename = 'Print';
-
-			if (preg_match('!<title>(.*)</title>!U', $out, $match)) {
-				$filename = trim($match[1]);
-			}
-
-			header('Content-type: application/pdf');
-			header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($filename)));
-			Utils::streamPDF($out);
-			return $this;
+			return $this->PDF($template);
 		}
 
 		return parent::display($template);
+	}
+
+	public function PDF(?string $template = null, ?string $title = null)
+	{
+		$out = $this->fetch($template);
+
+		if (!$title && preg_match('!<title>(.*)</title>!U', $out, $match)) {
+			$title = trim($match[1]);
+		}
+
+		header('Content-type: application/pdf');
+		header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($title ?: 'Page')));
+		Utils::streamPDF($out);
+		return $this;
 	}
 
 	private function __clone()
@@ -126,7 +129,7 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
-		$this->register_modifier('abs', 'abs');
+		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
@@ -476,6 +479,10 @@ class Template extends \KD2\Smartyer
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
+			if ((string) $current_value === '0') {
+				$current_value = '';
+			}
+
 			$currency = Config::getInstance()->get('monnaie');
 			$input = sprintf('<nobr><input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, $this->escape($current_value), $currency);
 		}
@@ -659,7 +666,7 @@ class Template extends \KD2\Smartyer
 
 				return htmlspecialchars(implode(', ', $out));
 			default:
-				return htmlspecialchars($v);
+				return htmlspecialchars((string) $v);
 		}
 	}
 
@@ -759,6 +766,7 @@ class Template extends \KD2\Smartyer
 		elseif ($field->system & $field::NUMBER && $context == 'user_create') {
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));
 			$params['required'] = false;
+			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars((string) $value, ENT_QUOTES) . '" />';
 		}
 
 		$out = self::formInput($params);

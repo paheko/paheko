@@ -17,7 +17,7 @@
 		<dl>
 			<dt>Version installée</dt>
 			<dd>{$garradin_version}</dd>
-			{if !CONTRIBUTOR_LICENSE}
+			{if CONTRIBUTOR_LICENSE === null}
 			<dd class="help">
 				Le développement et le support de Garradin ne sont possibles que grâce à votre soutien&nbsp;!<br />
 				{linkbutton href="https://kd2.org/soutien.html" label="Faire un don pour soutenir le développement" target="_blank" shape="export"} :-)
@@ -29,7 +29,7 @@
 				{if ENABLE_UPGRADES}
 					{linkbutton shape="export" href="upgrade.php" label="Mettre à jour"}
 				{else}
-					{linkbutton shape="export" href=WEBSITE label="Télécharger la mise à jour" target="_blank"}
+					{linkbutton shape="export" href=$garradin_website label="Télécharger la mise à jour" target="_blank"}
 				{/if}
 			</p></dd>
 			{/if}

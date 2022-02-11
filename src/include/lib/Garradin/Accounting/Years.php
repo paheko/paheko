@@ -2,6 +2,9 @@
 
 namespace Garradin\Accounting;
 
+use Garradin\Entities\Accounting\Account;
+use Garradin\Entities\Accounting\Line;
+use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Utils;
 use Garradin\DB;
@@ -35,6 +38,12 @@ class Years
 	{
 		$db = EntityManager::getInstance(Year::class)->DB();
 		return $db->getAssoc('SELECT id, label FROM acc_years WHERE closed = 0 AND id != ? ORDER BY end_date;', $id);
+	}
+
+	static public function listOpenAssoc()
+	{
+		$db = EntityManager::getInstance(Year::class)->DB();
+		return $db->getAssoc('SELECT id, label FROM acc_years WHERE closed = 0 ORDER BY end_date DESC;');
 	}
 
 	static public function listAssoc()
@@ -105,5 +114,79 @@ class Years
 		}
 
 		return [$start_date, $end_date];
+	}
+
+	/**
+	 * Crée une écriture d'affectation automatique
+	 * @param  Year   $year
+	 * @return Transaction|null
+	 */
+	static public function makeAppropriation(Year $year): ?Transaction
+	{
+		$balances = DB::getInstance()->getGrouped('SELECT a.type, a.id, SUM(l.credit) - SUM(l.debit) AS balance
+			FROM acc_accounts a
+			INNER JOIN acc_transactions_lines l ON l.id_account = a.id
+			INNER JOIN acc_transactions t ON t.id = l.id_transaction
+			WHERE t.id_year = ? AND (a.type = ? OR a.type = ?) GROUP BY a.type;',
+			$year->id, Account::TYPE_NEGATIVE_RESULT, Account::TYPE_POSITIVE_RESULT
+		);
+
+		if (!count($balances)) {
+			return null;
+		}
+
+		$positive_appropriation = DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;',
+			Account::TYPE_APPROPRIATION_RESULT, $year->id_chart);
+		$negative_appropriation = DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;',
+			Account::TYPE_DEBIT_REPORT, $year->id_chart);
+
+		if (!$positive_appropriation || !$negative_appropriation) {
+			return null;
+		}
+
+		$t = new Transaction;
+		$t->type = $t::TYPE_ADVANCED;
+		$t->id_year = $year->id();
+		$t->label = 'Affectation automatique du résultat';
+		$t->notes = 'Le résultat a été affecté automatiquement lors de l\'ouverture de l\'exercice';
+		$t->date = new \DateTime;
+
+		if ($t->date > $year->end_date) {
+			$t->date = $year->end_date;
+		}
+
+		if ($t->date < $year->start_date) {
+			$t->date = $year->start_date;
+		}
+
+		$sum = 0;
+
+		if (!empty($balances[Account::TYPE_NEGATIVE_RESULT])) {
+			$account = $balances[Account::TYPE_NEGATIVE_RESULT];
+
+			$line = Line::create($account->id, abs($account->balance), 0);
+			$t->addLine($line);
+
+			$sum += $account->balance;
+		}
+
+		if (!empty($balances[Account::TYPE_POSITIVE_RESULT])) {
+			$account = $balances[Account::TYPE_POSITIVE_RESULT];
+
+			$line = Line::create($account->id, 0, abs($account->balance));
+			$t->addLine($line);
+
+			$sum += $account->balance;
+		}
+
+		if ($sum > 0) {
+			$line = Line::create($positive_appropriation, $sum, 0);
+		}
+		else {
+			$line = Line::create($negative_appropriation, 0, abs($sum));
+		}
+
+		$t->addLine($line);
+		return $t;
 	}
 }

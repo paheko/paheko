@@ -342,6 +342,10 @@ dl.cotisation dd {
     margin: .2em 0 .4em 1em;
 }
 
+dl.cotisation dd.disabled {
+    color: var(--gBorderColor);
+}
+
 aside.describe {
     width: 20em;
     float: right;

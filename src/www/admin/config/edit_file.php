@@ -30,7 +30,7 @@ $form->runIf('reset', function () use ($key, $config) {
 }, $csrf_key, Utils::getSelfURI());
 
 $form->runIf('save', function () use ($key, $config) {
-	$content = trim(f('content'));
+	$content = trim((string) f('content'));
 	$config->setFile($key, $content === '' ? null : $content);
 	$config->save();
 

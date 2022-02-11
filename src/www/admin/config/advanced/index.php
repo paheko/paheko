@@ -10,7 +10,7 @@ $quota_used = Files::getUsedQuota(true);
 
 $form->runIf('reset_ok', function () use ($session) {
 	Install::reset($session, f('passe_verif'));
-}, 'reset', Utils::getSelfURI(['msg' => 'RESET']));
+}, 'reset');
 
 $form->runIf('reopen_ok', function () use ($session) {
 	$year = Years::get((int) f('year'));

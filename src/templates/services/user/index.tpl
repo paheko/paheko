@@ -17,9 +17,10 @@
 <dl class="cotisation">
 	<dt>Statut des inscriptions</dt>
 	{foreach from=$services item="service"}
-	<dd>
+	<dd{if $service.archived} class="disabled"{/if}>
 		{$service.label}
-		{if $service.status == -1 && $service.end_date} — terminée
+		{if $service.archived} <em>(activité passée)</em>{/if}
+		{if $service.status == -1 && $service.end_date} — expirée
 		{elseif $service.status == -1} — <b class="error">en retard</b>
 		{elseif $service.status == 1 && $service.end_date} — <b class="confirm">en cours</b>
 		{elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
@@ -28,7 +29,7 @@
 	</dd>
 	{foreachelse}
 	<dd>
-		Aucune inscription.
+		Ce membre n'est inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
 	<dt>Nombre d'inscriptions pour ce membre</dt>

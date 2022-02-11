@@ -97,25 +97,32 @@ class Parsedown extends Parent_Parsedown
 			return '';
 		}
 
-		$out = '<div class="toc">';
+		$out = '<div class="toc">' . PHP_EOL;
 
 		$level = 0;
 
-		foreach ($this->toc as $h) {
-			if ($h['level'] > $level) {
-				$out .= str_repeat('<ol>', $h['level'] - $level);
+		foreach ($this->toc as $k => $h) {
+			if ($h['level'] < $level) {
+				$out .= "\n" . str_repeat("\t", $level);
+				$out .= str_repeat("</ol></li>\n", $level - $h['level']);
 				$level = $h['level'];
 			}
-			elseif ($h['level'] < $level) {
-				$out .= str_repeat('</ol>', $level - $h['level']);
+			elseif ($h['level'] > $level) {
+				$out .= "\n" . str_repeat("\t", $h['level']);
+				$out .= str_repeat("<ol>\n", $h['level'] - $level);
 				$level = $h['level'];
+			}
+			elseif ($k) {
+				$out .= "</li>\n";
 			}
 
-			$out .= sprintf('<li><a href="#%s">%s</a></li>', $h['id'], $h['label']);
+			$out .= str_repeat("\t", $level + 1);
+			$out .= sprintf('<li><a href="#%s">%s</a>', $h['id'], $h['label']);
 		}
 
 		if ($level > 0) {
-			$out .= str_repeat('</ol>', $level);
+			$out .= "\n";
+			$out .= str_repeat('</li></ol>', $level);
 		}
 
 		$out .= '</div>';

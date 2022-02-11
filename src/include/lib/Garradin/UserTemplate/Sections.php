@@ -94,7 +94,7 @@ class Sections
 		$params[':status'] = Page::STATUS_ONLINE;
 
 		if (array_key_exists('search', $params)) {
-			if (trim($params['search']) === '') {
+			if (trim((string) $params['search']) === '') {
 				return;
 			}
 
@@ -125,7 +125,7 @@ class Sections
 
 		if (array_key_exists('parent', $params)) {
 			$params['where'] .= ' AND w.parent = :parent';
-			$params[':parent'] = trim($params['parent']);
+			$params[':parent'] = trim((string) $params['parent']);
 
 			unset($params['parent']);
 		}
@@ -251,7 +251,7 @@ class Sections
 		}
 
 		if ($params['order'] == 'name') {
-			$params['order'] .= ' COLLATE NOCASE';
+			$params['order'] .= ' COLLATE U_NOCASE';
 		}
 
 		foreach (self::sql($params, $tpl, $line) as $row) {

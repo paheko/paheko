@@ -33,6 +33,7 @@ class Transactions
 		'debit_account'  => 'Compte de débit',
 		'credit_account' => 'Compte de crédit',
 		'amount'         => 'Montant',
+		'analytical'     => 'Compte analytique',
 	];
 
 	const MANDATORY_CSV_COLUMNS = ['label', 'date', 'credit_account', 'debit_account', 'amount'];
@@ -122,7 +123,7 @@ class Transactions
 		$header = null;
 
 		if (self::EXPORT_FULL == $type) {
-			$header = ['Numéro', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique', 'Membres associés'];
+			$header = ['Numéro d\'écriture', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Numéro pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique', 'Membres associés'];
 		}
 
 		CSV::export(
@@ -198,7 +199,7 @@ class Transactions
 		$transaction = null;
 		$types = array_flip(Transaction::TYPES_NAMES);
 
-		$l = 0;
+		$l = 1;
 
 		try {
 			foreach (CSV::importUpload($file, self::EXPECTED_CSV_COLUMNS_SELF) as $l => $row) {
@@ -367,12 +368,23 @@ class Transactions
 					throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
 				}
 
+				$id_analytical = null;
+
+				if (!empty($row->analytical)) {
+					$id_analytical = $accounts->getIdFromCode($row->analytical);
+
+					if (!$id_analytical) {
+						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
+					}
+				}
+
 				$line = new Line;
 				$line->importForm([
 					'credit'     => $row->amount,
 					'debit'      => 0,
 					'id_account' => $credit_account,
 					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
+					'id_analytical' => $id_analytical,
 				]);
 				$transaction->addLine($line);
 
@@ -382,6 +394,7 @@ class Transactions
 					'debit'      => $row->amount,
 					'id_account' => $debit_account,
 					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
+					'id_analytical' => $id_analytical,
 				]);
 				$transaction->addLine($line);
 				$transaction->save();

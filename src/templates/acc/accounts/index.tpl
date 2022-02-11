@@ -2,19 +2,8 @@
 
 {include file="acc/_year_select.tpl"}
 
-<nav class="tabs">
-	<aside>
-		{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$current_year.id label="Recherche"}
-	</aside>
-	<ul>
-		<li class="current"><a href="{$admin_url}acc/accounts/">Comptes favoris</a></li>
-		<li><a href="{$admin_url}acc/reports/trial_balance.php?year={$current_year.id}">Balance générale (tous les comptes)</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<li><a href="{$admin_url}acc/charts/accounts/?id={$chart_id}">Modifier les comptes</a></li>
-			<li><a href="{$admin_url}acc/charts/accounts/all.php?id={$chart_id}">Plan comptable complet</a></li>
-		{/if}
-	</ul>
-</nav>
+{include file="acc/accounts/_nav.tpl" current="index"}
+
 
 {if isset($_GET['chart_change'])}
 <p class="block error">

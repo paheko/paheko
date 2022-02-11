@@ -224,7 +224,7 @@ class Config extends Entity
 
 		// Check that this field is actually unique
 		if (isset($this->_modified['champ_identifiant'])) {
-			$sql = sprintf('SELECT (COUNT(DISTINCT %s COLLATE NOCASE) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
+			$sql = sprintf('SELECT (COUNT(DISTINCT %s COLLATE U_NOCASE) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
 			$is_unique = (bool) $db->firstColumn($sql);
 
 			$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));

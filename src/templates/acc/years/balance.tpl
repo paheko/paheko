@@ -2,7 +2,7 @@
 
 {form_errors}
 
-{if !empty($_GET.from)}
+{if !empty($_GET.from) && empty($_POST)}
 <p class="block confirm">
 	L'exercice a bien été créé.
 </p>
@@ -53,8 +53,7 @@
 		</p>
 		{if !empty($_GET.from)}
 		<p class="help">
-			Normalement il suffit de valider ce formulaire pour faire le report des soldes de comptes.<br />
-			N'oubliez pas d'affecter le résultat de l'exercice (par exemple au compte 1068) après l'AG.
+			Normalement il suffit de valider ce formulaire pour faire le report à nouveau des soldes de comptes.
 		</p>
 		{/if}
 		<table class="list transaction-lines">
@@ -83,7 +82,6 @@
 					{/if}
 					<th>
 						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account][]" default=$line.account}
-						{if !empty($line.message)}<span class="alert">{$line.message}</span>{/if}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
@@ -103,6 +101,8 @@
 				</tr>
 			</tfoot>
 		</table>
+		<dl>
+			{input type="checkbox" name="appropriation" value="1" checked="checked" label="Affecter automatiquement le résultat (conseillé)" help="Si cette case est cochée, le résultat sera automatiquement affecté aux réserves s'il est excédentaire"}
 		{/if}
 	</fieldset>
 
@@ -110,9 +110,14 @@
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 			- ou -
-			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
+			{if $_GET.from}
+				{linkbutton shape="reset" href="!acc/years/appropriation.php?id=%d&from=%d"|args:$year.id,$_GET.from label="Passer cet étape"}
+			{else}
+				{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
+			{/if}
+				<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
-			{csrf_field key="acc_years_balance_%s"|args:$year.id}
+			{csrf_field key=$csrf_key}
 			{if $previous_year}
 				<input type="hidden" name="from_year" value="{$previous_year.id}" />
 			{else}
