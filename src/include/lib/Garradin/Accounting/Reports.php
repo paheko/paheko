@@ -295,10 +295,31 @@ class Reports
 		return $out;
 	}
 
-	static public function getTrialBalance(array $criterias): array
+	static public function getTrialBalance(array $criterias): \Iterator
 	{
 		unset($criterias['compare_year']);
-		return self::getClosingSumsWithAccounts($criterias, null, false, false);
+		$out = self::getClosingSumsWithAccounts($criterias, null, false, false);
+
+		$sums = [
+			'debit'      => 0,
+			'credit'     => 0,
+			'sum_debit'  => 0,
+			'sum_credit' => 0,
+			'label'      => 'Total',
+		];
+
+		foreach ($out as $row) {
+			$row->sum_debit = $row->sum < 0 ? abs($row->sum) : null;
+			$row->sum_credit = $row->sum > 0 ? abs($row->sum) : null;
+
+			$sums['debit'] += $row->debit;
+			$sums['credit'] += $row->credit;
+			$sums['sum_debit'] += $row->sum_debit;
+			$sums['sum_credit'] += $row->sum_credit;
+			yield $row;
+		}
+
+		yield (object) $sums;
 	}
 
 	static public function getBalanceSheet(array $criterias): array
