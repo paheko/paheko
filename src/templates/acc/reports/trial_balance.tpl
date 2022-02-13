@@ -24,8 +24,8 @@
 			<th>{$account.label}</th>
 			<td class="money">{$account.debit|raw|money}</td>
 			<td class="money">{$account.credit|raw|money}</td>
-			<td class="money">{if $account.sum < 0}{$account.sum|abs|escape|money}{/if}</td>
-			<td class="money">{if $account.sum > 0}{$account.sum|abs|escape|money}{/if}</td>
+			<td class="money">{$account.sum_debit|escape|money}</td>
+			<td class="money">{$account.sum_credit|escape|money}</td>
 		</tr>
 	{/foreach}
 	</tbody>
