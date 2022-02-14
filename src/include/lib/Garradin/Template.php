@@ -123,6 +123,15 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
 
+		$this->register_modifier('linkify_transactions', function ($str) {
+			return preg_replace_callback('/#(\d+)/', function ($m) {
+				return sprintf('<a href="%s%d">#%2$d</a>',
+					Utils::getLocalURL('!acc/transactions/details.php?id='),
+					$m[1]
+				);
+			}, $str);
+		});
+
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
 			return $skriv->render((string) $str);
