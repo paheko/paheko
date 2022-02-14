@@ -47,7 +47,7 @@
 		{$transaction->getTypeName()}
 	</dd>
 	<dt>Libellé</dt>
-	<dd><h2>{$transaction.label}</h2></dd>
+	<dd><h2>{$transaction.label|escape|linkify_transactions}</h2></dd>
 	<dt>Date</dt>
 	<dd>{$transaction.date|date:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
@@ -86,7 +86,7 @@
 	{/if}
 
 	<dt>Remarques</dt>
-	<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br}{else}-{/if}</dd>
+	<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}-{/if}</dd>
 </dl>
 
 <table class="list">
