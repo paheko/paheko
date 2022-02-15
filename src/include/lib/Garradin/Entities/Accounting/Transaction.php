@@ -310,7 +310,7 @@ class Transaction extends Entity
 	{
 		$new = new Transaction;
 
-		$copy = ['type', 'status', 'label', 'notes', 'reference', 'date'];
+		$copy = ['type', 'status', 'label', 'notes', 'reference'];
 
 		foreach ($copy as $field) {
 			$new->$field = $this->$field;
@@ -342,6 +342,11 @@ class Transaction extends Entity
 			}
 
 			$new->addLine($line);
+		}
+
+		// Only set date if valid
+		if ($this->date >= $year->start_date && $this->date <= $year->end_date) {
+			$new->date = clone $this->date;
 		}
 
 		return $new;
