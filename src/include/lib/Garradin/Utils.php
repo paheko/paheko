@@ -682,7 +682,7 @@ class Utils
         $content = trim($content);
 
         $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config->get('site_asso'));
-        $content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
+        $content .= "Vous recevez ce message car vous êtes inscrit dans nos contacts.\n";
         $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('email_asso');
 
         $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
