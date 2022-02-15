@@ -401,6 +401,13 @@ class Template extends \KD2\Smartyer
 			unset($attributes['disabled']);
 		}
 
+		if (!empty($attributes['readonly'])) {
+			$attributes['readonly'] = 'readonly';
+		}
+		else {
+			unset($attributes['readonly']);
+		}
+
 		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
