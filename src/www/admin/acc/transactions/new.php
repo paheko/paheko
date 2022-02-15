@@ -47,8 +47,8 @@ if (qg('copy')) {
 }
 
 // Set last used date
-if (empty($transaction->date) && $session->get('acc_last_date')) {
-	$transaction->date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'));
+if (empty($transaction->date) && $session->get('acc_last_date') && $date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+	$transaction->date = $date;
 }
 // Set date of the day if no date was set
 elseif (empty($transaction->date)) {
