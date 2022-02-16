@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\DB\SQLite3;
+use KD2\ErrorManager;
 
 class DB extends SQLite3
 {
@@ -17,6 +18,10 @@ class DB extends SQLite3
     protected $_version = -1;
 
     static protected $unicode_patterns_cache = [];
+
+    protected $_log_last = null;
+    protected $_log_start = null;
+    protected $_log_store = [];
 
     static public function getInstance()
     {
@@ -35,6 +40,147 @@ class DB extends SQLite3
     private function __clone()
     {
         // Désactiver le clonage, car on ne veut qu'une seule instance
+    }
+
+    public function __construct(string $driver, array $params)
+    {
+        if (self::$_instance !== null) {
+            throw new \LogicException('Cannot start instance');
+        }
+
+        parent::__construct($driver, $params);
+
+        // Enable SQL debug log if configured
+        if (SQL_DEBUG) {
+            $this->callback = [$this, 'log'];
+            $this->_log_start = microtime(true);
+        }
+    }
+
+    public function __destruct()
+    {
+        parent::__destruct();
+
+        if (null !== $this->callback) {
+            $this->saveLog();
+        }
+    }
+
+    /**
+     * Disable logging if enabled
+     * useful to disable logging when reloading log page
+     */
+    public function disableLog(): void {
+        $this->callback = null;
+        $this->_log_store = [];
+    }
+
+    /**
+     * Saves the log in a different database at the end of the script
+     */
+    protected function saveLog(): void
+    {
+        if (!count($this->_log_store)) {
+            return;
+        }
+
+        $db = new SQLite3('sqlite', ['file' => SQL_DEBUG]);
+        $db->exec('CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY, date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, script TEXT, user TEXT);
+            CREATE TABLE IF NOT EXISTS log (session INTEGER NOT NULL REFERENCES sessions (id), time INTEGER, duration INTEGER, sql TEXT, trace TEXT);');
+
+        $user = $_SESSION['userSession']->id ?? null;
+
+        $db->insert('sessions', ['script' => str_replace(ROOT, '', $_SERVER['SCRIPT_NAME']), 'user' => $user]);
+        $id = $db->lastInsertId();
+
+        $db->begin();
+
+        foreach ($this->_log_store as $row) {
+            $db->insert('log', array_merge($row, ['session' => $id]));
+        }
+
+        $db->commit();
+        $db->close();
+    }
+
+    /**
+     * Log current SQL query
+     */
+    protected function log(string $method, ?string $timing, $object, ...$params): void
+    {
+        if ($method != 'execute') {
+            return;
+        }
+
+        if ($timing == 'before') {
+            $this->_log_last = microtime(true);
+            return;
+        }
+
+        $now = microtime(true);
+        $duration = round(($now - $this->_log_last) * 1000 * 1000);
+        $time = round(($now - $this->_log_start) * 1000 * 1000);
+
+        $sql = $params[0]->getSQL(true);
+        $sql = preg_replace('/^\s+/m', '  ', $sql);
+
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+        $trace = '';
+
+        foreach ($backtrace as $line) {
+            if (!isset($line['file']) || in_array(basename($line['file']), ['DB.php', 'SQLite3.php']) || strstr($line['file'], 'lib/KD2')) {
+                continue;
+            }
+
+            $file = isset($line['file']) ? str_replace(ROOT . '/', '', $line['file']) : '';
+
+            $trace .= sprintf("%s:%d\n", $file, $line['line']);
+        }
+
+        $this->_log_store[] = compact('duration', 'time', 'sql', 'trace');
+    }
+
+    /**
+     * Return a debug log session using its ID
+     */
+    static public function getDebugSession(int $id): ?\stdClass
+    {
+        $db = new SQLite3('sqlite', ['file' => SQL_DEBUG]);
+        $s = $db->first('SELECT * FROM sessions WHERE id = ?;', $id);
+
+        if ($s) {
+            $s->list = $db->get('SELECT * FROM log WHERE session = ? ORDER BY time;', $id);
+
+            foreach ($s->list as &$row) {
+                $explain = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $row->sql);
+                $row->explain = '';
+
+                foreach ($explain as $e) {
+                    $row->explain .= $e->detail . "\n";
+                }
+            }
+        }
+
+        $db->close();
+
+        return $s;
+    }
+
+    /**
+     * Return the list of all debug sessions
+     */
+    static public function getDebugSessionsList(): array
+    {
+        $db = new SQLite3('sqlite', ['file' => SQL_DEBUG]);
+        $s = $db->get('SELECT s.*, SUM(l.duration) AS duration, COUNT(l.rowid) AS count
+            FROM sessions s
+            INNER JOIN log l ON l.session = s.id
+            GROUP BY s.id
+            ORDER BY s.date DESC;');
+
+        $db->close();
+
+        return $s;
     }
 
     public function connect(): void
@@ -165,12 +311,6 @@ class DB extends SQLite3
         }
 
         $this->db->exec(sprintf('PRAGMA user_version = %d;', $version));
-    }
-
-    public function close(): void
-    {
-        parent::close();
-        self::$_instance = null;
     }
 
     public function beginSchemaUpdate()
