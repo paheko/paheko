@@ -227,6 +227,26 @@ namespace Garradin;
 
 //const ENABLE_TECH_DETAILS = true;
 
+/**
+ * Activation du log SQL (option de développement)
+ *
+ * Si cette constante est renseignée par un chemin de fichier SQLite valide,
+ * alors *TOUTES* les requêtes SQL et leur contenu sera logué dans la base de données indiquée.
+ *
+ * Cette option permet ensuite de parcourir les requêtes via l'interface dans
+ * Configuration -> Fonctions avancées -> Journal SQL pour permettre d'identifier
+ * les requêtes qui mettent trop de temps, et comment elles pourraient
+ * être améliorées. Visualiser les requêtes SQL nécessite d'avoir également activé
+ * ENABLE_TECH_DETAILS.
+ *
+ * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
+ * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
+ * Cette option peut significativement ralentir le chargement des pages.
+ *
+ * Défaut : null (= désactivé)
+ * @var string|null
+ */
+// const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
 /**
  * Activer la possibilité de faire une mise à jour semi-automatisée

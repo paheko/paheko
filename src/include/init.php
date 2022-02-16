@@ -213,6 +213,7 @@ static $default_config = [
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => null,
 	'CONTRIBUTOR_LICENSE'   => null,
+	'SQL_DEBUG'             => false,
 ];
 
 foreach ($default_config as $const => $value)
