@@ -60,7 +60,6 @@ class CSV
 
 	static public function open(string $file)
 	{
-		ini_set('auto_detect_line_endings', true);
 		return fopen($file, 'r');
 	}
 
