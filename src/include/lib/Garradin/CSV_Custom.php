@@ -64,7 +64,7 @@ class CSV_Custom
 					continue;
 				}
 
-				$row[$this->translation[$col]] = $value;
+				$row[$this->translation[$col]] = trim($value);
 			}
 
 			$row = (object) $row;

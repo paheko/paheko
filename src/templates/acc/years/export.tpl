@@ -8,9 +8,9 @@
 <nav class="tabs">
 	<ul>
 		{if !$year.closed}
-		<li><a href="{$admin_url}acc/years/import.php?id={$year.id}">Import</a></li>
+		<li><a href="{$admin_url}acc/years/import.php?year={$year.id}">Import</a></li>
 		{/if}
-		<li class="current"><a href="{$admin_url}acc/years/import.php?id={$year.id}">Export</a></li>
+		<li class="current"><a href="{$admin_url}acc/years/import.php?year={$year.id}">Export</a></li>
 	</ul>
 </nav>
 
@@ -25,8 +25,21 @@
 		{input type="radio" name="format" value="ods" default="ods" label="Tableur" help="pour LibreOffice ou autre tableur"}
 		{input type="radio" name="format" value="csv" label="CSV"}
 		<dt>Type d'export</dt>
-		{input type="radio" name="type" value="full" label="Export comptable complet" default="full" help="conseillé pour transfert vers un autre logiciel"}
-		{input type="radio" name="type" value="raw" label="Export natif Garradin"}
+		{foreach from=$types key="type" item="info"}
+		{input type="radio-btn" name="type" value=$type label=$info.label help=$info.help default="full"}
+		<dd class="help example">
+			Exemple :
+			<table class="list auto">
+				{foreach from=$examples[$type] item="row"}
+				<tr>
+					{foreach from=$row item="v"}
+					<td>{$v}</td>
+					{/foreach}
+				</tr>
+				{/foreach}
+			</table>
+		</dd>
+		{/foreach}
 	</dl>
 </fieldset>
 
