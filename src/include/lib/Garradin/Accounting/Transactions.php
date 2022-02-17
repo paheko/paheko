@@ -411,8 +411,6 @@ class Transactions
 		}
 
 		$db->commit();
-
-		Graph::clearCacheAllYears();
 	}
 
 	static public function setAnalytical(?int $id_analytical, ?array $transactions = null, ?array $lines = null)
