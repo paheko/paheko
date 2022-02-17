@@ -312,8 +312,6 @@ class Transactions
 		}
 
 		$db->commit();
-
-		Graph::clearCacheAllYears();
 	}
 
 	static public function importCustom(Year $year, CSV_Custom $csv, int $user_id)
