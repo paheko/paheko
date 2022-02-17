@@ -420,6 +420,11 @@ dd.help input[type=text] {
     font-family: monospace;
 }
 
+dd.help.example {
+    margin-left: 2.5em;
+    font-size: .9em;
+}
+
 form p.actions {
     float: right;
 }
