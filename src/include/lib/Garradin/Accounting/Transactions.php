@@ -333,7 +333,7 @@ class Transactions
 				}
 				else {
 					if (empty($row->type)) {
-						$row->type = $types[Transaction::TYPE_ADVANCED];
+						$row->type = Transaction::TYPES_NAMES[Transaction::TYPE_ADVANCED];
 					}
 
 					$transaction = null;
