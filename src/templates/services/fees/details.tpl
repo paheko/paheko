@@ -43,7 +43,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 	</tbody>
 
 	{if $can_action}
-		{include file="admin/membres/_list_actions.tpl" colspan=5 export=false}
+		{include file="admin/membres/_list_actions.tpl" colspan=5 export=false hide_delete=true}
 	{/if}
 
 </table>
