@@ -11,7 +11,9 @@
 						<option value="csv">Exporter en tableau CSV</option>
 						<option value="ods">Exporter en classeur Office</option>
 						{/if}
+						{if empty($hide_delete)}
 						<option value="delete">Supprimer le membre</option>
+						{/if}
 					</select>
 					<noscript>
 						<input type="submit" value="OK" />
