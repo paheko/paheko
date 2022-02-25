@@ -488,7 +488,7 @@ namespace Garradin;
  *
  * Défaut : null
  */
-//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type %s %s';
+//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
 
 /**
  * Clé de licence

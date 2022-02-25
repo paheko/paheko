@@ -1107,7 +1107,7 @@ class Utils
                 $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
                 break;
             case 'wkhtmltopdf':
-                $cmd = 'wkhtmltopdf -q --print-media-type %s %s';
+                $cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
                 break;
             case 'weasyprint':
                 $cmd = 'weasyprint %1$s %2$s';
