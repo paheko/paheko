@@ -45,7 +45,7 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{/foreach}
 			</ul>
 		{else}
-			{$value|display_champ_membre:$c_config}
+			{$value|display_champ_membre:$c_config|raw}
 		{/if}
 	</dd>
 	{/foreach}
