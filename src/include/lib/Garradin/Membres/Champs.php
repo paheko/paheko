@@ -30,7 +30,7 @@ class Champs
 		'datetime'	=>	'Date et heure',
         'file'      =>  'Fichier',
         'password'  =>  'Mot de passe',
-		'number'	=>	'Numéro',
+		'number'	=>	'Nombre',
 		'tel'		=>	'Numéro de téléphone',
 		'select'	=>	'Sélecteur à choix unique',
         'multiple'  =>  'Sélecteur à choix multiple',
