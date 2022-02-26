@@ -649,20 +649,24 @@ class Template extends \KD2\Smartyer
 
 		switch ($config->type)
 		{
+			case 'password':
+				return '*****';
 			case 'checkbox':
 				return $v ? 'Oui' : 'Non';
 			case 'email':
 				return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'tel':
-				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
 			case 'url':
-				return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
 				return Utils::date_fr($v, 'd/m/Y');
 			case 'datetime':
 				return Utils::date_fr($v, 'd/m/Y à H:i');
+			case 'number':
+				return str_replace('.', ',', htmlspecialchars($v));
 			case 'multiple':
 				// Useful for search results, if a value is not a number
 				if (!is_numeric($v)) {
@@ -679,7 +683,7 @@ class Template extends \KD2\Smartyer
 
 				return htmlspecialchars(implode(', ', $out));
 			default:
-				return htmlspecialchars((string) $v);
+				return nl2br(htmlspecialchars(rtrim((string) $v)));
 		}
 	}
 
@@ -814,6 +818,9 @@ class Template extends \KD2\Smartyer
 				}
 
 				$value = '1';
+			}
+			elseif ($type == 'number') {
+				$attributes .= 'step="any" ';
 			}
 
 			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars((string) $value, ENT_QUOTES) . '" />';

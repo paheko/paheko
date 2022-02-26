@@ -36,16 +36,6 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{if $c == 'email' && $show_message_button}
 				{linkbutton href="!membres/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
-		{elseif $c_config.type == 'tel'}
-			<a href="tel:{$value}">{$value|format_tel}</a>
-		{elseif $c_config.type == 'country'}
-			{$value|get_country_name}
-		{elseif $c_config.type == 'date'}
-			{$value|date_short}
-		{elseif $c_config.type == 'datetime'}
-			{$value|date}
-		{elseif $c_config.type == 'password'}
-			*******
 		{elseif $c_config.type == 'multiple'}
 			<ul>
 			{foreach from=$c_config.options key="b" item="name"}
@@ -55,7 +45,7 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{/foreach}
 			</ul>
 		{else}
-			{$value|escape|rtrim|nl2br}
+			{$value|display_champ_membre:$c_config}
 		{/if}
 	</dd>
 	{/foreach}
