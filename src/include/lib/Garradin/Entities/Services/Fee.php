@@ -88,7 +88,11 @@ class Fee extends Entity
 		$this->assert(null === $this->id_year || $db->test(Year::TABLE, 'id = ?', $this->id_year), 'L\'exercice indiqué n\'existe pas');
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_account, $this->id_year), 'Le compte sélectionné ne correspond pas à l\'exercice');
 		$this->assert(null === $this->id_analytical || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_analytical, $this->id_year), 'Le projet sélectionné ne correspond pas à l\'exercice');
-		$this->assert(null === $this->formula || null === ($error = $this->checkFormula()), 'Formule de calcul invalide: ' . $error);
+
+		if (null !== $this->formula && ($error = $this->checkFormula()) {
+			throw new ValidationException('Formule de calcul invalide: ' . $error);
+		}
+
 		$this->assert(null === $this->amount || null === $this->formula, 'Il n\'est pas possible de spécifier à la fois une formule et un montant');
 	}
 
