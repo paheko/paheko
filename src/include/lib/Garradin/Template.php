@@ -592,6 +592,10 @@ class Template extends \KD2\Smartyer
 
 	protected function formatPhoneNumber($n)
 	{
+		if (empty($n)) {
+			return '';
+		}
+
 		$country = Config::getInstance()->get('pays');
 
 		if ($country !== 'FR') {
@@ -647,12 +651,18 @@ class Template extends \KD2\Smartyer
 			return htmlspecialchars($v);
 		}
 
+		if ($config->type == 'checkbox') {
+			return $v ? 'Oui' : 'Non';
+		}
+
+		if (empty($v)) {
+			return '';
+		}
+
 		switch ($config->type)
 		{
 			case 'password':
 				return '*****';
-			case 'checkbox':
-				return $v ? 'Oui' : 'Non';
 			case 'email':
 				return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'tel':
