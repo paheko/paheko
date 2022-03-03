@@ -341,7 +341,7 @@ class Transactions
 
 				// Find or create transaction
 				if (null === $transaction) {
-					if ($row->id && !$ignore_ids) {
+					if (!empty($row->id) && !$ignore_ids) {
 						$transaction = self::get((int)$row->id);
 
 						if (!$transaction) {
