@@ -452,9 +452,9 @@ class Transactions
 						'credit'     => $row->credit ?: 0,
 						'debit'      => $row->debit ?: 0,
 						'id_account' => $id_account,
-						'reference'  => $row->line_reference,
-						'label'      => $row->line_label,
-						'reconciled' => $row->reconciled,
+						'reference'  => $row->line_reference ?? null,
+						'label'      => $row->line_label ?? null,
+						'reconciled' => $row->reconciled ?? false,
 					];
 
 					if ($row->line_id && !$ignore_ids) {
