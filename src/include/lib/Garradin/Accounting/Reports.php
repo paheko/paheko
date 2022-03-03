@@ -63,6 +63,10 @@ class Reports
 			$where[] = $lines_alias . 'id_analytical IS NOT NULL';
 		}
 
+		if (!empty($criterias['has_type'])) {
+			$where[] = $accounts_alias . 'type != 0';
+		}
+
 		if (!count($where)) {
 			throw new \LogicException('Unknown criteria');
 		}
@@ -429,20 +433,12 @@ class Reports
 	 */
 	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
 	{
-		$where = self::getWhereClause($criterias);
-
-		$sql = sprintf('SELECT a.id, a.code, a.label, a.description, a.type,
-			SUM(l.credit) - SUM(l.debit) AS sum
-			FROM %s a
-			INNER JOIN %s t ON t.id = l.id_transaction
-			INNER JOIN %s l ON a.id = l.id_account
-			WHERE a.type != 0 AND %s
-			GROUP BY l.id_account
-			ORDER BY a.type, a.code COLLATE U_NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $where);
+		$types = [Account::TYPE_EXPENSE, Account::TYPE_REVENUE, Account::TYPE_BANK, Account::TYPE_OUTSTANDING, Account::TYPE_CASH, Account::TYPE_THIRD_PARTY, Account::TYPE_VOLUNTEERING];
+		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE');
 
 		$group = null;
 
-		foreach (DB::getInstance()->iterate($sql) as $row) {
+		foreach ($accounts as $row) {
 			if (null !== $group && $row->type !== $group->type) {
 				yield $group;
 				$group = null;
@@ -455,9 +451,6 @@ class Reports
 					'accounts' => []
 				];
 			}
-
-			$reverse = Account::isReversed($row->type) ? -1 : 1;
-			$row->sum *= $reverse;
 
 			$group->accounts[] = $row;
 		}

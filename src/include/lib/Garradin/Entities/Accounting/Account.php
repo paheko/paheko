@@ -109,7 +109,7 @@ class Account extends Entity
 			'label' => 'Crédit',
 		],
 		'change' => [
-			'select' => '(l.credit - l.debit) * %d',
+			'select' => '(l.debit - l.credit) * %d',
 			'label' => 'Mouvement',
 		],
 		'sum' => [
@@ -176,6 +176,8 @@ class Account extends Entity
 		'type'        => 'required|numeric|min:0',
 	];
 
+	protected $_reversed = [];
+
 	public function selfCheck(): void
 	{
 		$db = DB::getInstance();
@@ -207,7 +209,7 @@ class Account extends Entity
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = 0;
-		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
+		$reverse = $this->isReversed($simple, $year_id) ? -1 : 1;
 
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
@@ -218,13 +220,14 @@ class Account extends Entity
 			$conditions .= sprintf(' AND t.date <= %s', $db->quote($end->format('Y-m-d')));
 		}
 
+		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
+
 		if ($simple) {
 			unset($columns['debit']['label'], $columns['credit']['label'], $columns['line_label']);
 			$columns['line_reference']['label'] = 'Réf. paiement';
-			$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
 		}
 		else {
-			unset($columns['change']);
+			unset($columns['change']['label']);
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -233,7 +236,7 @@ class Account extends Entity
 		$list->setPageSize(null);
 		$list->setModifier(function (&$row) use (&$sum) {
 			if (property_exists($row, 'sum')) {
-				$sum += isset($row->change) ? $row->change : ($row->credit - $row->debit);
+				$sum += $row->change;
 				$row->sum = $sum;
 			}
 
@@ -251,9 +254,38 @@ class Account extends Entity
 		return $list;
 	}
 
-	static public function isReversed(int $type): bool
+	/**
+	 * Renvoie TRUE si le solde du compte est inversé en vue simplifiée (= crédit - débit, au lieu de débit - crédit)
+	 * @return boolean
+	 */
+	public function isReversed(bool $simple, int $id_year): bool
 	{
-		return in_array($type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY]);
+		if ($simple && in_array($this->type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY])) {
+			return false;
+		}
+		elseif ($simple) {
+			return true;
+		}
+
+		if (isset($this->_reversed[$id_year])) {
+			return $this->_reversed[$id_year];
+		}
+
+		$position = $this->position;
+
+		if ($this->position == self::ASSET_OR_LIABILITY) {
+			$balance = DB::getInstance()->firstColumn('SELECT debit - credit FROM acc_accounts_balances WHERE id = ? AND id_year = ?;', $this->id, $id_year);
+			$position = $balance > 0 ? self::ASSET : self::LIABILITY;
+		}
+
+		if ($position == self::ASSET || $position == self::EXPENSE) {
+			$this->_reversed[$id_year] = false;
+		}
+		else {
+			$this->_reversed[$id_year] = true;
+		}
+
+		return $this->_reversed[$id_year];
 	}
 
 	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled = false)
@@ -446,16 +478,11 @@ class Account extends Entity
 			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
 	}
 
-	public function getSum(int $year_id, bool $simple = false): int
+	public function getSum(int $year_id, bool $simple = false): \stdClass
 	{
-		$sum = (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			wHERE l.id_account = ? AND t.id_year = ?;', $this->id(), $year_id);
-
-		if ($simple && self::isReversed($this->type)) {
-			$sum *= -1;
-		}
+		$sum = DB::getInstance()->first('SELECT balance, credit, debit
+			FROM acc_accounts_balances
+			WHERE id = ? AND id_year = ?;', $this->id(), $year_id);
 
 		return $sum;
 	}

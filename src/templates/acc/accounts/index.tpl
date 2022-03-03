@@ -35,15 +35,15 @@
 					<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.code}</a></td>
 					<th><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
 					<td class="money">
-						{if $account.sum < 0}<strong class="error">{/if}
-						{$account.sum|raw|money_currency:false}
-						{if $account.sum < 0}</strong>{/if}
+						{if $account.balance < 0}<strong class="error">{/if}
+						{$account.balance|raw|money_currency:false}
+						{if $account.balance < 0}</strong>{/if}
 					</td>
 					<td>
 						{if $account.type == Entities\Accounting\Account::TYPE_THIRD_PARTY}
 						<em class="alert">
-							{if $account.sum < 0}(Dette)
-							{elseif $account.sum > 0}(Créance)
+							{if $account.balance < 0}(Dette)
+							{elseif $account.balance > 0}(Créance)
 							{/if}
 						</em>
 						{/if}

@@ -159,13 +159,13 @@ CREATE VIEW IF NOT EXISTS acc_accounts_balances
 AS
     SELECT id_year, id, label, code, type, debit, credit,
         CASE -- 3 = dynamic asset or liability depending on balance
-            WHEN position = 3 AND (credit - debit) < 0 THEN 1 -- 1 = Asset
-            WHEN position = 3 THEN 2 -- 2 = Liability
+            WHEN position = 3 AND (debit - credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
+            WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
             ELSE position
         END AS position,
         CASE
             WHEN position IN (1, 4) -- 1 = asset, 4 = expense
-                OR (position = 3 AND (credit - debit) < 0)
+                OR (position = 3 AND (debit - credit) > 0)
             THEN
                 debit - credit
             ELSE
