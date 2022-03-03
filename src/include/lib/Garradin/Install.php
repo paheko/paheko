@@ -28,12 +28,6 @@ class Install
 			throw new UserException('Le mot de passe ne correspond pas.');
 		}
 
-		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
-
-		Config::deleteInstance();
-		DB::getInstance()->close();
-		DB::deleteInstance();
-
 		if (!trim($config->nom_asso)) {
 			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
 		}
@@ -45,6 +39,12 @@ class Install
 		if (!trim($user->email)) {
 			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
 		}
+
+		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
+
+		Config::deleteInstance();
+		DB::getInstance()->close();
+		DB::deleteInstance();
 
 		file_put_contents(CACHE_ROOT . '/reset', json_encode([
 			'password'     => $session::hashPassword($password),
