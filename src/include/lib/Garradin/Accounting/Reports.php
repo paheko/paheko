@@ -24,13 +24,13 @@ class Reports
 		}
 
 		if (!empty($criterias['position'])) {
-			$db = DB::getInstance();
-			$where[] = $db->where($accounts_alias . 'position', $criterias['position']);
+			$criterias['position'] = array_map('intval', (array)$criterias['position']);
+			$where[] = sprintf($accounts_alias . 'position IN (%s)', implode(',', $criterias['position']));
 		}
 
 		if (!empty($criterias['exclude_position'])) {
-			$db = DB::getInstance();
-			$where[] = $db->where($accounts_alias . 'position', 'NOT IN', $criterias['exclude_position']);
+			$criterias['exclude_position'] = array_map('intval', (array)$criterias['exclude_position']);
+			$where[] = sprintf($accounts_alias . 'position NOT IN (%s)', implode(',', $criterias['exclude_position']));
 		}
 
 		if (!empty($criterias['type'])) {
@@ -172,7 +172,7 @@ class Reports
 	{
 		$where = self::getWhereClause($criterias);
 
-		$sql = sprintf('SELECT y.id, y.start_date, y.end_date, y.label, b.balance
+		$sql = sprintf('SELECT y.id, y.start_date, y.end_date, y.label, SUM(b.balance) AS balance
 			FROM acc_accounts_balances b
 			INNER JOIN acc_years y ON y.id = b.id_year
 			WHERE %s
@@ -251,18 +251,37 @@ class Reports
 	 */
 	static public function getAccountsBalances(array $criterias, ?string $order = null, bool $remove_zero = true)
 	{
-		$where = self::getWhereClause($criterias);
-
 		$order = $order ?: 'code COLLATE NOCASE';
-		$remove_zero = $remove_zero ? 'GROUP BY code HAVING balance != 0' : '';
+		$remove_zero = $remove_zero ? 'code HAVING balance != 0' : '';
 
-		$query = 'SELECT * FROM acc_accounts_balances
-			WHERE %s
-			%s
-			ORDER BY %s';
+		// Specific queries that can't rely on acc_accounts_balances
+		if (!empty($criterias['user']) || !empty($criterias['creator']) || !empty($criterias['subscription'])
+			|| !empty($criterias['analytical']) || !empty($criterias['analytical_only'])) {
+			$where = self::getWhereClause($criterias, 't', 'l', 'a');
+		$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
+			$query = 'SELECT a.code, a.id, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
+				SUM(l.credit - l.debit) AS balance
+				FROM %s l
+				INNER JOIN %s t ON t.id = l.id_transaction
+				INNER JOIN %s a ON a.id = l.id_account
+				WHERE %s
+				GROUP BY l.id_account %s
+				ORDER BY %s';
 
-		// Find sums, link them to accounts
-		$sql = sprintf($query, $where, $remove_zero, $order);
+			$sql = sprintf($query, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
+		}
+		else {
+			$where = self::getWhereClause($criterias);
+			$remove_zero = $remove_zero ? 'GROUP BY ' . $remove_zero : '';
+
+			$query = 'SELECT * FROM acc_accounts_balances
+				WHERE %s
+				%s
+				ORDER BY %s';
+
+			$sql = sprintf($query, $where, $remove_zero, $order);
+		}
+
 
 		$db = DB::getInstance();
 
@@ -284,53 +303,6 @@ class Reports
 		}
 
 		$out = $db->get($sql);
-
-		return $out;
-	}
-
-	static public function getClosingSumsWithAccounts(array $criterias, ?string $order = null, bool $reverse = false, bool $remove_zero = true): array
-	{
-		$where = self::getWhereClause($criterias);
-
-		$order = $order ?: 'a.code COLLATE U_NOCASE';
-		$reverse = $reverse ? '* -1' : '';
-		$remove_zero = $remove_zero ? 'HAVING sum != 0' : '';
-
-		$query = 'SELECT a.code, a.id, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
-			SUM(l.credit - l.debit) %s AS sum
-			FROM %s l
-			INNER JOIN %s t ON t.id = l.id_transaction
-			INNER JOIN %s a ON a.id = l.id_account
-			WHERE %s
-			GROUP BY l.id_account
-			%s
-			ORDER BY %s';
-
-		// Find sums, link them to accounts
-		$sql = sprintf($query, $reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
-
-		$db = DB::getInstance();
-		$out = $db->getGrouped($sql);
-
-		// SQLite does not support OUTER JOIN yet :(
-		if (isset($criterias['compare_year'])) {
-			$where = self::getWhereClause(array_merge($criterias, ['year' => (int)$criterias['compare_year']]));
-			$sql = sprintf($query, $reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
-
-			foreach ($db->iterate($sql) as $row) {
-				if (!isset($out[$row->code])) {
-					$row->sum2 = $row->sum;
-					$row->sum = null;
-					$row->id = null;
-					$row->change = $row->sum2;
-					$out[$row->code] = $row;
-				}
-				else {
-					$out[$row->code]->sum2 = $row->sum;
-					$out[$row->code]->change = ($out[$row->code]->sum - $row->sum);
-				}
-			}
-		}
 
 		return $out;
 	}
@@ -569,7 +541,7 @@ class Reports
 
 	static public function getJournal(array $criterias): \Generator
 	{
-		$where = self::getWhereClause($criterias);
+		$where = self::getWhereClause($criterias, 't', 'l', 'a');
 
 		$sql = sprintf('SELECT
 			t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference,

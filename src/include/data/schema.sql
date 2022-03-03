@@ -170,7 +170,8 @@ AS
                 debit - credit
             ELSE
                 credit - debit
-        END AS balance
+        END AS balance,
+        CASE WHEN debit - credit > 0 THEN 1 ELSE 0 END AS is_debt
     FROM (
         SELECT t.id_year, a.id, a.label, a.code, a.position, a.type,
             SUM(l.credit) AS credit,

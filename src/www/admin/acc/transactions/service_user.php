@@ -10,7 +10,7 @@ $session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
 
 $criterias = ['subscription' => (int)qg('id')];
 
-$tpl->assign('balance', Reports::getClosingSumsWithAccounts($criterias));
+$tpl->assign('balance', Reports::getAccountsBalances($criterias));
 $tpl->assign('journal', Reports::getJournal($criterias));
 $tpl->assign('user_id', qg('user'));
 $tpl->assign('service_user_id', qg('id'));
