@@ -34,6 +34,18 @@ class Install
 		DB::getInstance()->close();
 		DB::deleteInstance();
 
+		if (!trim($config->nom_asso)) {
+			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
+		}
+
+		if (!trim($user->identite)) {
+			throw new UserException('L\'utilisateur connecté ne dispose pas de nom, merci de le renseigner.');
+		}
+
+		if (!trim($user->email)) {
+			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
+		}
+
 		file_put_contents(CACHE_ROOT . '/reset', json_encode([
 			'password'     => $session::hashPassword($password),
 			'name'         => $user->identite,
@@ -63,7 +75,7 @@ class Install
 		}
 
 		// We can't use the real password, as it might not be valid (too short or compromised)
-		$ok = self::install($data->organization, $data->name, $data->email, md5($data->password));
+		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 		// Restore password
 		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
