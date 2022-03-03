@@ -11,41 +11,41 @@
 
 {if $account.type}
 
-	{if $simple && $account::isReversed($account.type)}
+	{if $simple && $account->isReversed($simple, $year.id)}
 		{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
 	{/if}
 
 	{if $simple}
 		{if $account.type == $account::TYPE_THIRD_PARTY}
-			{if $sum < 0}
-				<p class="alert block">Vous devez <strong>{$sum|abs|raw|money_currency}</strong> à ce tiers.</p>
-			{elseif $sum > 0}
-				<p class="alert block">Ce tiers vous doit <strong>{$sum|abs|raw|money_currency}</strong>.</p>
+			{if $sum.balance < 0}
+				<p class="alert block">Vous devez <strong>{$sum.balance|abs|raw|money_currency}</strong> à ce tiers.</p>
+			{elseif $sum.balance > 0}
+				<p class="alert block">Ce tiers vous doit <strong>{$sum.balance|abs|raw|money_currency}</strong>.</p>
 			{else}
 				<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_BANK}
-			{if $sum < 0}
-				<p class="error block">Ce compte est à découvert de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
-			{elseif $sum > 0}
-				<p class="confirm block">Ce compte est créditeur de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
+			{if $sum.balance < 0}
+				<p class="error block">Ce compte est à découvert de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
+			{elseif $sum.balance > 0}
+				<p class="confirm block">Ce compte est créditeur de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_CASH}
-			{if $sum < 0}
-				<p class="error block">Cette caisse est débiteur de <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum > 0}
-				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum|abs|raw|money_currency}</strong>.</p>
+			{if $sum.balance < 0}
+				<p class="error block">Cette caisse est débiteur de <strong>{$sum.balance|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
+			{elseif $sum.balance > 0}
+				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum.balance|abs|raw|money_currency}</strong>.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_OUTSTANDING}
-			{if $sum < 0}
-				<p class="error block">Ce compte est débiteur <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum > 0}
-				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|abs|raw|money_currency}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
+			{if $sum.balance < 0}
+				<p class="error block">Ce compte est débiteur <strong>{$sum.balance|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
+			{elseif $sum.balance > 0}
+				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum.balance|abs|raw|money_currency}</strong>. {if $sum.balance > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
 			{/if}
-		{elseif $account.type == $account::TYPE_REVENUE && $sum < 0}
-			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez dû procéder à des remboursements par exemple, et que ceux-ci couvrent des recettes perçues sur un exercice précédent.</p>
-		{elseif $account.type == $account::TYPE_EXPENSE && $sum < 0}
-			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez reçu des remboursements par exemple, et que ceux-ci couvrent des dépenses réglées sur un exercice précédent.</p>
+		{elseif $account.type == $account::TYPE_REVENUE && $sum.balance < 0}
+			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum.balance|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez dû procéder à des remboursements par exemple, et que ceux-ci couvrent des recettes perçues sur un exercice précédent.</p>
+		{elseif $account.type == $account::TYPE_EXPENSE && $sum.balance < 0}
+			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum.balance|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez reçu des remboursements par exemple, et que ceux-ci couvrent des dépenses réglées sur un exercice précédent.</p>
 		{/if}
 	{/if}
 
@@ -139,8 +139,16 @@
 			{/if}
 			{if !$simple}<td></td>{/if}
 			{if null !== $sum}
-				<td colspan="3">Solde</td>
-				<td class="money">{$sum|raw|money:false}</td>
+				{if !$simple}
+				<td><b>Total</b></td>
+				<td class="money">{$sum.debit|raw|money:false}</td>
+				<td class="money">{$sum.credit|raw|money:false}</td>
+				<td class="money">{$line.sum|raw|money:false}</td>
+				{else}
+				<td></td>
+				<td colspan="2"><b>Total</b></td>
+				<td class="money">{$line.sum|raw|money:false}</td>
+				{/if}
 			{else}
 				<td colspan="4"></td>
 			{/if}
