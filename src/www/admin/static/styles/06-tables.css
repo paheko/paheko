@@ -86,7 +86,7 @@ table.search th {
     background: rgba(var(--gSecondColor), 0.5);
 }
 
-table.list tr.disabled {
+table.list tr.disabled, table.list td.disabled, table.list th.disabled {
     color: var(--gBorderColor);
 }
 
