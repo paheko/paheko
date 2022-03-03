@@ -457,7 +457,7 @@ class Transactions
 						'reconciled' => $row->reconciled ?? false,
 					];
 
-					if ($row->line_id && !$ignore_ids) {
+					if (!empty($row->line_id) && !$ignore_ids) {
 						$line = $transaction->getLine((int)$row->line_id);
 
 						if (!$line) {
@@ -471,7 +471,7 @@ class Transactions
 					$line->importForm($data);
 
 					// If a line_id was supplied, just changing the object is enough, no need to add it to the transaction
-					if (!$row->line_id) {
+					if (empty($row->line_id)) {
 						$transaction->addLine($line);
 					}
 				}
