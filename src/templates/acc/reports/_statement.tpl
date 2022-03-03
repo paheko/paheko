@@ -6,10 +6,10 @@
 	<tbody>
 		<tr>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$statement.expense caption=$caption1}
+				{include file="acc/reports/_statement_table.tpl" accounts=$statement.body_left caption=$statement.caption_left}
 			</td>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$statement.revenue caption=$caption2}
+				{include file="acc/reports/_statement_table.tpl" accounts=$statement.body_right caption=$statement.caption_right}
 			</td>
 		</tr>
 	</tbody>
@@ -18,67 +18,35 @@
 			<td>
 				<table>
 					<tfoot>
+						{foreach from=$statement.foot_left item="row"}
 						<tr>
-							<th>Total</th>
-							<td class="money" width="10%">{$statement.expense_sum|raw|money:false}</td>
-							{if $statement.expense_sum2}
-							<td class="money" width="10%">{$statement.expense_sum2|raw|money:false}</td>
-							<td class="money" width="10%">{$statement.expense_change|raw|money:true:true}</td>
+							<th>{$row.label}</th>
+							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+							{if $row.balance2 || $row.change}
+							<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+							<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 							{/if}
 						</tr>
+						{/foreach}
 					</tfoot>
 				</table>
 			</td>
 			<td>
 				<table>
 					<tfoot>
+						{foreach from=$statement.foot_right item="row"}
 						<tr>
-							<th>Total</th>
-							<td class="money" width="10%">{$statement.revenue_sum|raw|money:false}</td>
-							{if $statement.revenue_sum2}
-							<td class="money" width="10%">{$statement.revenue_sum2|raw|money:false}</td>
-							<td class="money" width="10%">{$statement.revenue_change|raw|money:true:true}</td>
+							<th>{$row.label}</th>
+							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+							{if $row.balance2 || $row.change}
+							<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+							<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
 							{/if}
 						</tr>
+						{/foreach}
 					</tfoot>
 				</table>
 			</td>
 		</tr>
-		{if $statement.result}
-		<tr>
-			<td>
-			{if ($statement.result < 0)}
-				<table>
-					<tfoot>
-						<tr>
-							<th>Résultat (perte)</th>
-							<td class="money" width="10%">{$statement.result|raw|money:false}</td>
-							{if $statement.result2}
-							<td class="money" width="10%">{$statement.result2|raw|money:false}</td>
-							<td class="money" width="10%">{$statement.result_change|raw|money:true:true}</td>
-							{/if}
-						</tr>
-					</tfoot>
-				</table>
-			{/if}
-			</td>
-			<td>
-			{if ($statement.result >= 0)}
-				<table>
-					<tfoot>
-						<tr>
-							<th>Résultat (excédent)</th>
-							<td class="money" width="10%">{$statement.result|raw|money:false}</td>
-							{if $statement.result2}
-							<td class="money" width="10%">{$statement.result2|raw|money:false}</td>
-							<td class="money" width="10%">{$statement.result_change|raw|money:true:true}</td>
-							{/if}
-						</tr>
-					</tfoot>
-				</table>
-			{/if}
-			</td>
-		</tr>
-		{/if}
 	</tfoot>
 </table>
