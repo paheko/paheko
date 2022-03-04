@@ -202,11 +202,10 @@
 						let name = f.name.replace(/\./, '-' + (+(new Date)) + '.');
 						let f2 = new File([f], name, {type: f.type});
 						addItem(f2);
+						e.preventDefault();
 						return;
 					}
 				}
-
-				e.preventDefault();
 			});
 		}
 	};
