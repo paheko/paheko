@@ -987,6 +987,8 @@ class Utils
             return '';
         }
 
+        $str = str_replace('’', '\'', $str); // Normalize French apostrophe
+
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
             self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();');
         }

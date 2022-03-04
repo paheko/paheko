@@ -361,6 +361,9 @@ class DB extends SQLite3
      * @see https://sqlite.org/src/file?name=ext/icu/icu.c&ci=trunk
      */
     static public function unicodeLike($pattern, $value, $escape = null) {
+        $pattern = str_replace('’', '\'', $pattern); // Normalize French apostrophe
+        $value = str_replace('’', '\'', $value);
+
         $id = md5($pattern . $escape);
 
         if (!array_key_exists($id, self::$unicode_patterns_cache)) {
@@ -373,7 +376,7 @@ class DB extends SQLite3
                     $pattern .= preg_quote(strtolower($part[0]), '/');
                 }
                 elseif (isset($part[2])) {
-                    $pattern .= Utils::unicodeCaseFold($part[2]);
+                    $pattern .= preg_quote(Utils::unicodeCaseFold($part[2]), '/');
                 }
                 elseif ($part[1] == '%') {
                     $pattern .= '.*';
