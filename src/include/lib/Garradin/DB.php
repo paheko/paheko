@@ -365,12 +365,12 @@ class DB extends SQLite3
 
         if (!array_key_exists($id, self::$unicode_patterns_cache)) {
             $escape = $escape ? '(?!' . preg_quote($escape, '/') . ')' : '';
-            preg_match_all('/('.$escape.'[%_])|([[:alnum:] .,:!-]+)|(.+?)/i', $pattern, $parts, PREG_SET_ORDER);
+            preg_match_all('/('.$escape.'[%_])|(\pL+)|(.+?)/iu', $pattern, $parts, PREG_SET_ORDER);
             $pattern = '';
 
             foreach ($parts as $part) {
                 if (isset($part[3])) {
-                    $pattern .= preg_quote($part[0], '/');
+                    $pattern .= preg_quote(strtolower($part[0]), '/');
                 }
                 elseif (isset($part[2])) {
                     $pattern .= Utils::unicodeCaseFold($part[2]);
