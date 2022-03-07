@@ -497,12 +497,14 @@ class Transaction extends Entity
 		$total = 0;
 
 		$lines = $this->getLines();
+		$accounts_ids = [];
 
 		foreach ($lines as $k => $line) {
 			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
 			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
 
+			$accounts_ids = [$line->id_account];
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
@@ -511,6 +513,11 @@ class Transaction extends Entity
 
 		$this->assert($db->test('acc_years', 'id = ?', $this->id_year), 'L\'exercice sélectionné n\'existe pas');
 		$this->assert($this->id_creator === null || $db->test('membres', 'id = ?', $this->id_creator), 'Le compte membre créateur de l\'écriture n\'existe pas');
+
+		$found_accounts = $db->getAssoc(sprintf('SELECT id, id FROM acc_accounts WHERE %s AND id_chart = (SELECT id_chart FROM acc_years WHERE id = %d);', $db->where('id', $accounts_ids), $this->id_year));
+
+		$diff = array_diff($accounts_ids, $found_accounts);
+		$this->assert(count($diff) == 0, sprintf('Certains comptes (%s) ne sont pas liés au bon plan comptable', implode(', ', $diff)));
 	}
 
 	public function importFromDepositForm(?array $source = null): void
