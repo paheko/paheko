@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS services_fees
 
     id_service INTEGER NOT NULL REFERENCES services (id) ON DELETE CASCADE,
     id_account INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL CHECK (id_account IS NULL OR id_year IS NOT NULL), -- NULL if fee is not linked to accounting, this is reset using a trigger if the year is deleted
-    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL -- NULL if fee is not linked to accounting
+    id_year INTEGER NULL REFERENCES acc_years (id) ON DELETE SET NULL, -- NULL if fee is not linked to accounting
+    id_analytical INTEGER NULL REFERENCES acc_accounts (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS services_users
@@ -152,6 +153,34 @@ CREATE TABLE IF NOT EXISTS acc_accounts
 CREATE UNIQUE INDEX IF NOT EXISTS acc_accounts_codes ON acc_accounts (code, id_chart);
 CREATE INDEX IF NOT EXISTS acc_accounts_type ON acc_accounts (type);
 CREATE INDEX IF NOT EXISTS acc_accounts_position ON acc_accounts (position);
+
+-- Balance des comptes par exercice
+CREATE VIEW IF NOT EXISTS acc_accounts_balances
+AS
+    SELECT id_year, id, label, code, type, debit, credit,
+        CASE -- 3 = dynamic asset or liability depending on balance
+            WHEN position = 3 AND (debit - credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
+            WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
+            ELSE position
+        END AS position,
+        CASE
+            WHEN position IN (1, 4) -- 1 = asset, 4 = expense
+                OR (position = 3 AND (debit - credit) > 0)
+            THEN
+                debit - credit
+            ELSE
+                credit - debit
+        END AS balance,
+        CASE WHEN debit - credit > 0 THEN 1 ELSE 0 END AS is_debt
+    FROM (
+        SELECT t.id_year, a.id, a.label, a.code, a.position, a.type,
+            SUM(l.credit) AS credit,
+            SUM(l.debit) AS debit
+        FROM acc_accounts a
+        INNER JOIN acc_transactions_lines l ON l.id_account = a.id
+        INNER JOIN acc_transactions t ON t.id = l.id_transaction
+        GROUP BY t.id_year, a.id
+    );
 
 CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
