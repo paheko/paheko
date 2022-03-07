@@ -17,6 +17,8 @@ class Account extends Entity
 {
 	const TABLE = 'acc_accounts';
 
+	const NONE = 0;
+
 	// Actif
 	const ASSET = 1;
 
@@ -172,11 +174,9 @@ class Account extends Entity
 		'code'        => 'required|string|alpha_num|max:10',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
-		'position'    => 'required|numeric|min:0',
-		'type'        => 'required|numeric|min:0',
 	];
 
-	protected $_reversed = [];
+	protected $_position = [];
 
 	public function selfCheck(): void
 	{
@@ -263,29 +263,28 @@ class Account extends Entity
 		if ($simple && in_array($this->type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY])) {
 			return false;
 		}
-		elseif ($simple) {
-			return true;
+
+		$position = $this->getPosition($id_year);
+
+		if ($position == self::ASSET || $position == self::EXPENSE) {
+			return false;
 		}
 
-		if (isset($this->_reversed[$id_year])) {
-			return $this->_reversed[$id_year];
-		}
+		return true;
+	}
 
-		$position = $this->position;
+	public function getPosition(int $id_year): int
+	{
+		$position = $this->_position[$id_year] ?? $this->position;
 
-		if ($this->position == self::ASSET_OR_LIABILITY) {
+		if ($position == self::ASSET_OR_LIABILITY) {
 			$balance = DB::getInstance()->firstColumn('SELECT debit - credit FROM acc_accounts_balances WHERE id = ? AND id_year = ?;', $this->id, $id_year);
 			$position = $balance > 0 ? self::ASSET : self::LIABILITY;
 		}
 
-		if ($position == self::ASSET || $position == self::EXPENSE) {
-			$this->_reversed[$id_year] = false;
-		}
-		else {
-			$this->_reversed[$id_year] = true;
-		}
+		$this->_position[$id_year] = $position;
 
-		return $this->_reversed[$id_year];
+		return $position;
 	}
 
 	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled = false)
@@ -496,32 +495,6 @@ class Account extends Entity
 			WHERE l.id_account = ? AND t.id_year = ? AND t.date < ? %s;',
 			$reconciled_only ? 'AND l.reconciled = 1' : '');
 		return (int) DB::getInstance()->firstColumn($sql, $this->id(), $year_id, $date->format('Y-m-d'));
-	}
-
-	public function importSimpleForm(array $translate_type_position, array $translate_type_codes, ?array $source = null)
-	{
-		if (null === $source) {
-			$source = $_POST;
-		}
-
-		if (empty($source['type'])) {
-			throw new UserException('Le type est obligatoire dans ce formulaire');
-		}
-
-		$type = (int) $source['type'];
-
-		if (array_key_exists($type, $translate_type_position)) {
-			$source['position'] = $translate_type_position[$type];
-		}
-		else {
-			$source['position'] = self::ASSET_OR_LIABILITY;
-		}
-
-		if (array_key_exists($type, $translate_type_codes)) {
-			$source['code'] = $translate_type_codes[$type];
-		}
-
-		$this->importForm($source);
 	}
 
 	public function importLimitedForm(?array $source = null)

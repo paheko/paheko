@@ -155,36 +155,51 @@ class Accounts
 		return $out;
 	}
 
-	public function getNextCodesForTypes(): array
+	public function getNextCodeForType(int $type): string
 	{
 		$db = DB::getInstance();
-		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE type > 0 AND user = 1 AND id_chart = ?;', Account::TABLE), $this->chart_id);
+		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE type = ? AND user = 1 AND id_chart = ?;', Account::TABLE), $this->chart_id, $type);
 		$used_codes = array_values($used_codes);
 
 		$sql = sprintf('SELECT type, MIN(code) AS code, (SELECT COUNT(*) FROM %s WHERE user = 1 AND type = a.type) AS count
 			FROM %1$s AS a
-			WHERE id_chart = ? AND type > 0
+			WHERE id_chart = ? AND type = ?
 			GROUP BY type;', Account::TABLE);
-		$codes = $db->getGrouped($sql, $this->chart_id);
+		$r = $db->first($sql, $this->chart_id, $type);
 
-		foreach ($codes as &$row) {
-			$code = preg_replace('/[^\d]/', '', $row->code);
-
-			$count = $row->count;
-			$found = null;
-
-			// Make sure we don't reuse an existing code
-			while (!$found || in_array($found, $used_codes)) {
-				// Get new account code, eg. 512A, 99AA, 99BZ etc.
-				$letter = Utils::num2alpha($count++);
-				$found = $code . $letter;
-			}
-
-			$row = $found;
+		if (!$r) {
+			return '';
 		}
 
-		unset($row);
-		return $codes;
+		$code = preg_replace('/[^\d]/', '', $r->code);
+
+		$count = $r->count;
+		$found = null;
+
+		// Make sure we don't reuse an existing code
+		while (!$found || in_array($found, $used_codes)) {
+			// Get new account code, eg. 512A, 99AA, 99BZ etc.
+			$letter = Utils::num2alpha($count++);
+			$found = $code . $letter;
+		}
+
+		return $found;
+	}
+
+	static public function getPositionFromType(int $type): int
+	{
+		switch ($type) {
+			case Account::TYPE_ANALYTICAL:
+				return Account::NONE;
+			case Account::TYPE_REVENUE;
+				return Account::REVENUE;
+			case Account::TYPE_EXPENSE;
+				return Account::EXPENSE;
+			case Account::TYPE_VOLUNTEERING:
+				return null;
+			default:
+				return Account::ASSET_OR_LIABILITY;
+		}
 	}
 
 	public function copyFrom(int $id)
@@ -252,6 +267,11 @@ class Accounts
 	public function getSingleAccountForType(int $type)
 	{
 		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
+	}
+
+	public function getOpeningAccountId(): ?int
+	{
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_OPENING, $this->chart_id) ?: null;
 	}
 
 	public function getClosingAccountId()

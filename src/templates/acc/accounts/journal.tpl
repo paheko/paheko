@@ -11,24 +11,22 @@
 
 {if $account.type}
 
-	{if $simple && $account->isReversed($simple, $year.id)}
+	{if $simple && !$account->isReversed($simple, $year.id)}
 		{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
 	{/if}
 
 	{if $simple}
 		{if $account.type == $account::TYPE_THIRD_PARTY}
-			{if $sum.balance < 0}
-				<p class="alert block">Vous devez <strong>{$sum.balance|abs|raw|money_currency}</strong> à ce tiers.</p>
-			{elseif $sum.balance > 0}
+			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
 				<p class="alert block">Ce tiers vous doit <strong>{$sum.balance|abs|raw|money_currency}</strong>.</p>
-			{else}
-				<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
+			{elseif $account->getPosition($year->id) == $account::LIABILITY && $sum.balance > 0}
+				<p class="alert block">Vous devez <strong>{$sum.balance|abs|raw|money_currency}</strong> à ce tiers.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_BANK}
-			{if $sum.balance < 0}
-				<p class="error block">Ce compte est à découvert de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
-			{elseif $sum.balance > 0}
+			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
 				<p class="confirm block">Ce compte est créditeur de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
+			{elseif $account->getPosition($year->id) == $account::LIABILITY && $sum.balance > 0}
+				<p class="error block">Ce compte est à découvert de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_CASH}
 			{if $sum.balance < 0}
