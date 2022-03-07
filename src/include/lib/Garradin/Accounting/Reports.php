@@ -311,7 +311,7 @@ class Reports
 		return $out;
 	}
 
-	static public function getTrialBalance(array $criterias): \Iterator
+	static public function getTrialBalance(array $criterias, bool $simple = false): \Iterator
 	{
 		unset($criterias['compare_year']);
 		$out = self::getAccountsBalances($criterias, null, false);
@@ -324,7 +324,9 @@ class Reports
 		];
 
 		foreach ($out as $row) {
-			$row->balance = $row->debit - $row->credit;
+			if (!$simple) {
+				$row->balance = $row->debit - $row->credit;
+			}
 
 			$sums['debit'] += $row->debit;
 			$sums['credit'] += $row->credit;
@@ -434,7 +436,7 @@ class Reports
 	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
 	{
 		$types = [Account::TYPE_EXPENSE, Account::TYPE_REVENUE, Account::TYPE_BANK, Account::TYPE_OUTSTANDING, Account::TYPE_CASH, Account::TYPE_THIRD_PARTY, Account::TYPE_VOLUNTEERING];
-		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE');
+		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE', false);
 
 		$group = null;
 
