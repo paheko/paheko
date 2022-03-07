@@ -1,9 +1,14 @@
 <dl>
-	{input type="select" label="Type de compte favori" name="type" source=$account required=true options=$types}
-	<dd class="help">Le statut de compte favori est utilisé pour les écritures <em>«&nbsp;simplifiées&nbsp;»</em> (recettes, dépenses, dettes, créances, virements), pour la liste des comptes, et également pour proposer certaines fonctionnalités (rapprochement pour les comptes bancaires, règlement rapide de dette et créance, dépôt de chèques).</dd>
-	<dd class="help">Un compte qui n'a pas de type favori ne pourra être utilisé que dans une saisie avancée, et ne sera visible que dans les rapports de l'exercice.</dd>
+	{if !$account.type}
+		{input type="select" label="Type de compte favori" name="type" source=$account required=true options=$types}
+		<dd class="help">Le statut de compte favori est utilisé pour les écritures <em>«&nbsp;simplifiées&nbsp;»</em> (recettes, dépenses, dettes, créances, virements), pour la liste des comptes, et également pour proposer certaines fonctionnalités (rapprochement pour les comptes bancaires, règlement rapide de dette et créance, dépôt de chèques).</dd>
+		<dd class="help">Un compte qui n'a pas de type favori ne pourra être utilisé que dans une saisie avancée, et ne sera visible que dans les rapports de l'exercice.</dd>
+	{else}
+	<dt>Type de compte</dt>
+	<dd><?php $t = $types[$account->type]; ?> {$t}</dd>
+	{/if}
 
-	{if !$simple}
+	{if !$account.type}
 		<dt><label for="f_position_0">Position au bilan ou résultat</label>{if !$edit_disabled} <b>(obligatoire)</b>{/if}</dt>
 		<dd class="help">La position permet d'indiquer dans quelle partie du bilan ou du résultat doit figurer le compte.</dd>
 		<dd class="help">Les comptes inscrits en actif ou passif figureront dans le bilan, alors que ceux inscrits en produit ou charge figureront au compte de résultat.</dd>
@@ -14,53 +19,12 @@
 		{input type="radio" label="Résultat : charge" name="position" value=Entities\Accounting\Account::EXPENSE source=$account help="dépenses" disabled=$edit_disabled}
 		{input type="radio" label="Résultat : produit" name="position" value=Entities\Accounting\Account::REVENUE source=$account help="recettes" disabled=$edit_disabled}
 	{/if}
-</dl>
 
-<dl id="code_container">
 	{input type="text" label="Code" maxlength="10" name="code" source=$account required=true help="Le code du compte sert à trier le compte dans le plan comptable, attention à choisir un code qui correspond au plan comptable." disabled=$edit_disabled}
-</dl>
-
-<dl>
 	{input type="text" label="Libellé" name="label" source=$account required=true disabled=$edit_disabled}
 	{input type="textarea" label="Description" name="description" source=$account}
+
+	{if $create && in_array($account.type, [$account::TYPE_BANK, $account::TYPE_CASH, $account::TYPE_OUTSTANDING, $account::TYPE_THIRD_PARTY]) && !empty($current_year)}
+		{input type="money" name="opening_amount" label="Solde d'ouverture" help="Si renseigné, ce solde sera inscrit dans l'exercice « %s »."|args:$current_year.label}
+	{/if}
 </dl>
-
-{if isset($translate_type_position, $translate_type_codes)}
-<script type="text/javascript">
-var types_positions = {$translate_type_position|escape:json};
-var types_codes = {$translate_type_codes|escape:json};
-var simple = {$simple|escape:json};
-
-{literal}
-$('#f_type').onchange = changeType;
-function changeType() {
-	var v = $('#f_type').value;
-
-	if ($('#f_position_0')) {
-		if (v in types_positions) {
-			$('#f_position_' + types_positions[v]).checked = true;
-		}
-		else {
-			$('#f_position_3').checked = true;
-		}
-	}
-
-	var code = $('#f_code');
-	if (types_codes[v]) {
-		code.value = types_codes[v];
-	}
-	else {
-		code.value = '';
-	}
-
-	if (simple && !(v in types_codes)) {
-		g.toggle('#code_container', true);
-	}
-	else if (simple) {
-		g.toggle('#code_container', false);
-	}
-}
-changeType();
-{/literal}
-</script>
-{/if}
