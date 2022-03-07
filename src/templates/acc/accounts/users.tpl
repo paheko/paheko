@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Comptes favoris" current="acc/accounts"}
+{include file="admin/_head.tpl" title="Comptes de membres" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 
