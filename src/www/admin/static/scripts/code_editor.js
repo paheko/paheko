@@ -1,5 +1,6 @@
 (function (){
 	g.style('scripts/code_editor.css');
+	g.script('scripts/lib/text_editor.min.js', () => {
 	g.script('scripts/lib/code_editor.min.js', function ()
 	{
 		var save_btn = document.querySelector('[name=save]');
@@ -91,5 +92,5 @@
 		}
 
 		g.setParentDialogHeight('90%');
-	});
+	})});
 }());
