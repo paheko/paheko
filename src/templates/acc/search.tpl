@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Recherche" current="acc" custom_js=['query_builder.min.js']}
+{include file="admin/_head.tpl" title="Recherche" current="acc" custom_js=['lib/query_builder.min.js']}
 
 <nav class="tabs">
 	<ul>
