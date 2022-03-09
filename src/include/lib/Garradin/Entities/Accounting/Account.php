@@ -483,7 +483,7 @@ class Account extends Entity
 			FROM acc_accounts_balances
 			WHERE id = ? AND id_year = ?;', $this->id(), $year_id);
 
-		return $sum;
+		return (int) $sum;
 	}
 
 
