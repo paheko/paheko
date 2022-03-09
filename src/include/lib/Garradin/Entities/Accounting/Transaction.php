@@ -518,6 +518,9 @@ class Transaction extends Entity
 
 		$diff = array_diff($accounts_ids, $found_accounts);
 		$this->assert(count($diff) == 0, sprintf('Certains comptes (%s) ne sont pas liés au bon plan comptable', implode(', ', $diff)));
+
+		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
+		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -767,6 +770,11 @@ class Transaction extends Entity
 			INNER JOIN acc_transactions_users l ON l.id_user = m.id
 			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
+	}
+
+	public function listRelatedTransactions()
+	{
+		return EntityManager::getInstance(self::class)->all('SELECT * FROM @TABLE WHERE id_related = ?;', $this->id);
 	}
 
 	static public function getTypesDetails()

@@ -64,7 +64,8 @@
 		</dl>
 		<dl>
 			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php" default=$linked_users}
-			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
+			{input type="textarea" name="notes" label="Remarques" rows=2 cols=30 source=$transaction}
+			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}
