@@ -8,18 +8,21 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../../_inc.php';
 
-$targets = qg('targets');
-$chart = qg('chart');
+$targets = explode(':', (string) qg('targets'));
+$chart = (int) qg('chart') ?: null;
+
+$targets = array_map('intval', $targets);
+$targets_str = implode(':', $targets);
 
 // Cache the page until the charts have changed
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
-$hash = sha1($targets . $chart . $last_change);
+$hash = sha1($targets_str . $chart . $last_change);
 
 // Exit if there's no need to reload
 Utils::HTTPCache($hash, null, 10);
 
 if ($chart) {
-	$chart = Charts::get((int)qg('chart'));
+	$chart = Charts::get($chart);
 }
 elseif (qg('year')) {
 	$year = Years::get((int)qg('year'));
@@ -38,7 +41,7 @@ if (!$chart) {
 
 $accounts = $chart->accounts();
 
-$tpl->assign(compact('chart', 'targets'));
+$tpl->assign(compact('chart', 'targets', 'targets_str'));
 
 $all = qg('all');
 
@@ -52,7 +55,7 @@ if (!$targets) {
 	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());
 }
 else {
-	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped(explode(':', $targets)));
+	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($targets));
 }
 
 $tpl->assign('all', $all);
