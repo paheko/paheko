@@ -477,13 +477,13 @@ class Account extends Entity
 			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
 	}
 
-	public function getSum(int $year_id, bool $simple = false): \stdClass
+	public function getSum(int $year_id, bool $simple = false): ?\stdClass
 	{
 		$sum = DB::getInstance()->first('SELECT balance, credit, debit
 			FROM acc_accounts_balances
 			WHERE id = ? AND id_year = ?;', $this->id(), $year_id);
 
-		return (int) $sum;
+		return $sum ?: null;
 	}
 
 
