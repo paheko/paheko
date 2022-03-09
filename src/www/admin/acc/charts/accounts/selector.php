@@ -8,7 +8,8 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../../_inc.php';
 
-$targets = explode(':', (string) qg('targets'));
+$targets = qg('targets');
+$targets = $targets ? explode(':', $targets) : [];
 $chart = (int) qg('chart') ?: null;
 
 $targets = array_map('intval', $targets);
@@ -51,7 +52,7 @@ if (null !== $all) {
 
 $all = (bool) $session->get('account_selector_all');
 
-if (!$targets) {
+if (!count($targets)) {
 	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());
 }
 else {
