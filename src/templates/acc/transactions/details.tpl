@@ -46,7 +46,7 @@
 	<dt>Statut</dt>
 	<dd>
 		{if $transaction.status & $transaction::STATUS_PAID}
-			<span class="confirm">{icon shape="check"}</span> Payé
+			<span class="confirm">{icon shape="check"}</span> Réglée
 		{elseif $transaction.status & $transaction::STATUS_WAITING}
 			<span class="alert">{icon shape="alert"}</span> En attente de règlement
 		{/if}
