@@ -36,18 +36,36 @@
 {/if}
 
 <dl class="describe">
-	{if $transaction.id_related}
-	<dt>Écriture liée à</dt>
-	<dd><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id_related}">#{$transaction.id_related}</a>
-		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
-	</dd>
-	{/if}
+	<dt>Libellé</dt>
+	<dd><h2>{$transaction.label|escape|linkify_transactions}</h2></dd>
 	<dt>Type</dt>
 	<dd>
 		{$transaction->getTypeName()}
 	</dd>
-	<dt>Libellé</dt>
-	<dd><h2>{$transaction.label|escape|linkify_transactions}</h2></dd>
+	{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}
+	<dt>Statut</dt>
+	<dd>
+		{if $transaction.status & $transaction::STATUS_PAID}
+			<span class="confirm">{icon shape="check"}</span> Payé
+		{elseif $transaction.status & $transaction::STATUS_WAITING}
+			<span class="alert">{icon shape="alert"}</span> En attente de règlement
+		{/if}
+	</dd>
+	{/if}
+	{if $transaction.id_related}
+	<dt>Écriture liée à</dt>
+	<dd><a class="num" href="?id={$transaction.id_related}">#{$transaction.id_related}</a>
+		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
+	</dd>
+	{/if}
+	{if count($related_transactions)}
+	<dt>Écritures liées</dt>
+	{foreach from=$related_transactions item="related"}
+		<dd><a href="?id={$related.id}" class="num">#{$related.id}</a>
+		du {$related.date|date_short}
+		</dd>
+	{/foreach}
+	{/if}
 	<dt>Date</dt>
 	<dd>{$transaction.date|date:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
