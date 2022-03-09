@@ -239,9 +239,16 @@ class Reports
 
 	static public function getResult(array $criterias): int
 	{
-		$where = self::getWhereClause($criterias);
-		$sql = sprintf('SELECT IFNULL((SELECT SUM(balance) FROM acc_accounts_balances WHERE %1$s AND position = ?), 0)
-			- IFNULL((SELECT SUM(balance) FROM acc_accounts_balances WHERE %1$s AND position = ?), 0);', $where);
+		if (!empty($criterias['analytical']) || !empty($criterias['analytical_only'])) {
+			$where = self::getWhereClause($criterias, 't', 'l', 'a');
+			$sum_sql = sprintf('SELECT SUM(l.credit - l.debit) FROM acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction INNER JOIN acc_accounts a ON a.id = l.id_account WHERE a.position = ? AND %s', $where);
+			$sql = sprintf('SELECT IFNULL((%1$s), 0) - IFNULL((%1$s)* - 1, 0);', $sum_sql);
+		}
+		else {
+			$where = self::getWhereClause($criterias);
+			$sql = sprintf('SELECT IFNULL((SELECT SUM(balance) FROM acc_accounts_balances WHERE %1$s AND position = ?), 0)
+				- IFNULL((SELECT SUM(balance) FROM acc_accounts_balances WHERE %1$s AND position = ?), 0);', $where);
+		}
 
 		$db = DB::getInstance();
 		return $db->firstColumn($sql, Account::REVENUE, Account::EXPENSE);
@@ -264,7 +271,12 @@ class Reports
 			$where = self::getWhereClause($criterias, 't', 'l', 'a');
 		$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
 			$query = 'SELECT a.code, a.id, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
-				SUM(l.credit - l.debit) AS balance
+				CASE WHEN position IN (1, 4) -- 1 = asset, 4 = expense
+                	OR (position = 3 AND (debit - credit) > 0)
+					THEN SUM(l.debit - l.credit)
+				ELSE
+					SUM(l.credit - l.debit)
+				END AS balance
 				FROM %s l
 				INNER JOIN %s t ON t.id = l.id_transaction
 				INNER JOIN %s a ON a.id = l.id_account
