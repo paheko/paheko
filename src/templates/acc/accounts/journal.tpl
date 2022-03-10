@@ -51,8 +51,16 @@
 	<nav class="tabs">
 		<aside>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
-			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
+		<nav class="menu">
+			<b data-icon="↷" class="btn">Export</b>
+			<span>
+				{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
+				{linkbutton href="%s&export=ods"|args:$self_url label="Export LibreOffice" shape="export"}
+				{if CALC_CONVERT_COMMAND}
+					{linkbutton href="%s&export=xlsx"|args:$self_url label="Export Excel" shape="export"}
+				{/if}
+			</span>
+		</nav>
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}

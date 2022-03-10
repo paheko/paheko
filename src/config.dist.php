@@ -476,11 +476,13 @@ namespace Garradin;
 //const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
+ * PDF_COMMAND
  * Commande de création de PDF
  *
  * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
  * Si laissé non spécifié (ou NULL), Garradin essaiera de détecter une solution entre
- * PrinceXML, Chromium, wkhtmltopdf ou weasyprint.
+ * PrinceXML, Chromium, wkhtmltopdf ou weasyprint. Si aucune solution n'est disponible,
+ * une erreur sera levée.
  *
  * %1$s sera remplacé par le chemin du fichier HTML, et %2$s par le chemin du fichier PDF.
  *
@@ -489,6 +491,32 @@ namespace Garradin;
  * Défaut : null
  */
 //const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
+
+/**
+ * CALC_CONVERT_COMMAND
+ * Outil de conversion de formats de tableur vers un format propriétaire
+ *
+ * Garradin gère nativement les exports en ODS (OpenDocument : LibreOffice)
+ * et CSV, et imports en CSV.
+ *
+ * En indiquant ici le nom d'un outil, Garradin autorisera aussi
+ * l'import en XLSX, XLS et ODS, et l'export en XLSX.
+ *
+ * Pour cela il procédera simplement à une conversion entre les formats natifs
+ * ODS/CSV et XLSX ou XLS.
+ *
+ * Noter qu'installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ *
+ * Les outils supportés sont :
+ * - ssconvert (apt install gnumeric) (plus rapide)
+ * - unoconv (apt install unoconv) (utilise LibreOffice)
+ * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
+ *
+ * Défault : null (= fonctionnalité désactivée)
+ */
+//const CALC_CONVERT_COMMAND = 'unoconv';
+//const CALC_CONVERT_COMMAND = 'ssconvert';
+//const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
 
 /**
  * Clé de licence

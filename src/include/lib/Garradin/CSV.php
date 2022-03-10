@@ -6,6 +6,88 @@ use KD2\Office\Calc\Writer as ODSWriter;
 
 class CSV
 {
+	/**
+	 * Convert a file to CSV if required (and if CALC_CONVERT_COMMAND is set)
+	 */
+	static public function convertUploadIfRequired(string $path): string
+	{
+		if (!CALC_CONVERT_COMMAND) {
+			return $path;
+		}
+
+		$mime = @mime_content_type($path);
+
+		// XLSX
+		if ($mime == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+			$ext = 'xlsx';
+		}
+		elseif ($mime == 'application/vnd.ms-excel') {
+			$ext = 'xls';
+		}
+		elseif ($mime == 'application/vnd.oasis.opendocument.spreadsheet') {
+			$ext = 'ods';
+		}
+		// Assume raw CSV
+		else {
+			return $path;
+		}
+
+		$r = md5(random_bytes(10));
+		$a = sprintf('%s/convert_%s.%s', CACHE_ROOT, $r, $ext);
+		$b = sprintf('%s/convert_%s.csv', CACHE_ROOT, $r);
+		$is_upload = is_uploaded_file($path);
+
+		try {
+			if ($is_upload) {
+				move_uploaded_file($path, $a);
+			}
+			else {
+				copy($path, $a);
+			}
+
+			self::convertXLSX($a, $b);
+
+			return $b;
+		}
+		finally {
+			@unlink($a);
+		}
+	}
+
+	static public function convertXLSX(string $from, string $to): string
+	{
+		$tool = substr(CALC_CONVERT_COMMAND, 0, strpos(CALC_CONVERT_COMMAND, ' ') ?: strlen(CALC_CONVERT_COMMAND));
+
+		if ($tool == 'unoconv') {
+			$cmd = CALC_CONVERT_COMMAND . ' -i FilterOptions=44,34,76 -o %2$s %1$s';
+		}
+		elseif ($tool == 'ssconvert') {
+			$cmd = CALC_CONVERT_COMMAND . ' %1$s %2$s';
+		}
+		elseif ($tool == 'unoconvert') {
+			$cmd = CALC_CONVERT_COMMAND . ' %1$s %2$s';
+		}
+		else {
+			throw new \LogicException(sprintf('Conversion tool "%s" is not supported', $tool));
+		}
+
+		$cmd = sprintf($cmd, escapeshellarg($from), escapeshellarg($to));
+		$cmd .= ' 2>&1';
+		$return = shell_exec($cmd);
+			//var_dump($cmd, $return); exit;
+
+		if (!file_exists($to)) {
+			throw new UserException('Impossible de convertir le fichier. Vérifier que le fichier est un format supporté.');
+		}
+
+		return $to;
+	}
+
+	static public function supportsXLSExport(): bool
+	{
+		return CALC_CONVERT_COMMAND ? true : false;
+	}
+
 	static public function readAsArray(string $path)
 	{
 		if (!file_exists($path) || !is_readable($path))
@@ -118,8 +200,14 @@ class CSV
 		if ('csv' == $format) {
 			self::toCSV(... array_slice(func_get_args(), 1));
 		}
-		else {
+		elseif ('xlsx' == $format && CALC_CONVERT_COMMAND) {
+			self::toXLSX(... array_slice(func_get_args(), 1));
+		}
+		elseif ('ods' == $format) {
 			self::toODS(... array_slice(func_get_args(), 1));
+		}
+		else {
+			throw new \InvalidArgumentException('Unknown export format');
 		}
 	}
 
@@ -145,12 +233,17 @@ class CSV
 		return $row;
 	}
 
-	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
+	static public function toCSV(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
 	{
-		header('Content-type: application/csv');
-		header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
+		if (null === $output) {
+			header('Content-type: application/csv');
+			header(sprintf('Content-Disposition: attachment; filename="%s.csv"', $name));
 
-		$fp = fopen('php://output', 'w');
+			$fp = fopen('php://output', 'w');
+		}
+		else {
+			$fp = fopen($output, 'w');
+		}
 
 		if ($header) {
 			fputs($fp, self::row($header));
@@ -184,10 +277,12 @@ class CSV
 		fclose($fp);
 	}
 
-	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
+	static public function toODS(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null, string $output = null): void
 	{
-		header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
-		header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
+		if (null === $output) {
+			header('Content-type: application/vnd.oasis.opendocument.spreadsheet');
+			header(sprintf('Content-Disposition: attachment; filename="%s.ods"', $name));
+		}
 
 		$ods = new ODSWriter;
 		$ods->table_name = $name;
@@ -210,7 +305,32 @@ class CSV
 			}
 		}
 
-		$ods->output();
+		$ods->output($output);
+	}
+
+	static public function toXLSX(string $name, iterable $iterator, ?array $header = null, ?callable $row_map_callback = null): void
+	{
+		if (!CALC_CONVERT_COMMAND) {
+			throw new \LogicException('CALC_CONVERT_COMMAND is not set');
+		}
+
+		$tmpfile1 = sprintf('%s/export_%s.ods', STATIC_CACHE_ROOT, md5(random_bytes(10)));
+		$tmpfile2 = substr($tmpfile1, 0, -3) . 'xlsx';
+
+		try {
+			self::toODS($name, $iterator, $header, $row_map_callback, $tmpfile1);
+
+			self::convertXLSX($tmpfile1, $tmpfile2);
+
+			header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			header(sprintf('Content-Disposition: attachment; filename="%s.xlsx"', $name));
+
+			readfile($tmpfile2);
+		}
+		finally {
+			@unlink($tmpfile1);
+			@unlink($tmpfile2);
+		}
 	}
 
 	static public function importUpload(array $file, array $expected_columns): \Generator

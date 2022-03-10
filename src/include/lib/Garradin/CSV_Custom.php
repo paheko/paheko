@@ -25,11 +25,17 @@ class CSV_Custom
 
 	public function load(array $file)
 	{
-		if (empty($file['size']) || empty($file['tmp_name'])) {
+		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
 			throw new UserException('Fichier invalide');
 		}
 
-		$csv = CSV::readAsArray($file['tmp_name']);
+		$path = $file['tmp_name'];
+
+		if (CALC_CONVERT_COMMAND && strtolower(substr($file['name'], -4)) != '.csv') {
+			$path = CSV::convertUploadIfRequired($path);
+		}
+
+		$csv = CSV::readAsArray($path);
 
 		if (!count($csv)) {
 			throw new UserException('Ce fichier est vide (aucune ligne trouvée).');
