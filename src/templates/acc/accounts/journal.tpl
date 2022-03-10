@@ -29,10 +29,10 @@
 				<p class="error block">Ce compte est à découvert de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_CASH}
-			{if $sum.balance < 0}
-				<p class="error block">Cette caisse est débiteur de <strong>{$sum.balance|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum.balance > 0}
+			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
 				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum.balance|abs|raw|money_currency}</strong>.</p>
+			{elseif $account->getPosition($year->id) == $account::LIABILITY && $sum.balance > 0}
+				<p class="error block">Cette caisse est débiteur de <strong>{$sum.balance|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_OUTSTANDING}
 			{if $sum.balance < 0}

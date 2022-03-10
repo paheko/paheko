@@ -39,8 +39,8 @@ use Garradin\Entities\Accounting\Account;
 					<th><a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$current_year.id}">{$account.label}</a></th>
 					<td class="money">
 						{if $account.balance < 0
-							|| ($account.balance > 0 && $account.position == Account::LIABILITY && ($account.type == Account::TYPE_BANK || $account.type == Account::TYPE_THIRD_PARTY))}
-							<strong class="error">{$account.balance|raw|money_currency:false}</strong>
+							|| ($account.balance > 0 && $account.position == Account::LIABILITY && ($account.type == Account::TYPE_BANK || $account.type == Account::TYPE_THIRD_PARTY || $account.type == Account::TYPE_CASH))}
+							<strong class="error">-{$account.balance|raw|money_currency:false}</strong>
 						{else}
 							{$account.balance|raw|money_currency:false}
 						{/if}
@@ -52,6 +52,8 @@ use Garradin\Entities\Accounting\Account;
 							{/if}
 						{elseif $account.type == Account::TYPE_BANK && $account.balance > 0 && $account.position == Account::LIABILITY}
 							<em class="alert">(Découvert)</em>
+						{elseif $account.type == Account::TYPE_CASH && $account.balance > 0 && $account.position == Account::LIABILITY}
+							<em class="alert">(Anomalie)</em>
 						{/if}
 					</td>
 					<td class="actions">
