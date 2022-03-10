@@ -97,15 +97,7 @@ class DynamicList implements \Countable
 			$columns[] = $column['label'];
 		}
 
-		if ('csv' == $format) {
-			CSV::toCSV($name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
-		}
-		else if ('ods' == $format) {
-			CSV::toODS($name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
-		}
-		else {
-			throw new UserException('Invalid export format');
-		}
+		CSV::export($format, $name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
 	}
 
 	public function asArray(): array

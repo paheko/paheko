@@ -5,8 +5,16 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
-		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
+	<nav class="menu">
+		<b data-icon="↷" class="btn">Export</b>
+		<span>
+			{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
+			{linkbutton href="?type=%d&export=ods"|args:$type label="Export LibreOffice" shape="export"}
+			{if CALC_CONVERT_COMMAND}
+				{linkbutton href="?type=%d&export=xlsx"|args:$type label="Export Excel" shape="export"}
+			{/if}
+		</span>
+	</nav>
 	{/if}
 		{linkbutton shape="search" href="!acc/search.php?year=%d&type=%d"|args:$year.id,$type label="Recherche"}
 	</aside>

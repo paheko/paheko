@@ -56,3 +56,28 @@ nav.tabs aside {
     text-align: right;
     clear: right;
 }
+
+nav.menu > b {
+    font-weight: normal;
+}
+
+nav.menu {
+    display: inline-block;
+    position: relative;
+}
+
+nav.menu span {
+    display: none;
+}
+
+nav.menu:hover span, nav.menu:active span {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    text-align: left;
+    background: rgb(var(--gBgColor));
+    border-radius: .3em;
+    padding: .3em;
+    z-index: 1000;
+    box-shadow: 2px 2px 5px var(--gLightBorderColor);
+}

@@ -37,7 +37,11 @@
 			<dd>
 				{$type_name}
 			</dd>
-			{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=true}
+			{if CALC_CONVERT_COMMAND}
+				{input type="file" name="file" label="Fichier à importer" accept=".ods,application/vnd.oasis.opendocument.spreadsheet,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,application/csv" required=true help="Formats acceptés : CSV, LibreOffice Calc, ou Excel"}
+			{else}
+				{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=true}
+			{/if}
 			{include file="common/_csv_help.tpl" csv=$csv}
 			{input type="checkbox" name="ignore_ids" value="1" label="Ne pas tenir compte des numéros d'écritures" help="Si coché, les écritures importées seront créées, même si un numéro d'écriture est fourni et qu'il existe déjà. Cela peut mener à avoir des écritures en doublon."}
 		</dl>
