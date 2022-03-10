@@ -1,16 +1,18 @@
 {include file="admin/_head.tpl" title="Sélectionner un compte"}
 
-{if empty($grouped_accounts) && empty($accounts)}
-	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type. Pour afficher des comptes ici, les <a href="{$www_url}admin/acc/charts/accounts/all.php?id={$chart.id}" target="_blank">modifier dans le plan comptable</a> en sélectionnant le type de compte favori voulu.</td>
-
-{else}
-
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 	<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
 	<nav class="tabs">
 		<aside>{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside>
 	</nav>
 {/if}
+
+{if empty($grouped_accounts) && empty($accounts)}
+	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type.<br />
+		{linkbutton href="!acc/charts/accounts/new.php?id=%s&type=%s"|args:$chart.id,$targets[0] label="Créer un compte" shape="plus"}
+	</p>
+
+{else}
 
 	<h2 class="ruler">
 		<input type="text" placeholder="Recherche rapide" id="lookup" />

@@ -28,6 +28,18 @@ class Install
 			throw new UserException('Le mot de passe ne correspond pas.');
 		}
 
+		if (!trim($config->nom_asso)) {
+			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
+		}
+
+		if (!trim($user->identite)) {
+			throw new UserException('L\'utilisateur connecté ne dispose pas de nom, merci de le renseigner.');
+		}
+
+		if (!trim($user->email)) {
+			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
+		}
+
 		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
 
 		Config::deleteInstance();
@@ -63,7 +75,7 @@ class Install
 		}
 
 		// We can't use the real password, as it might not be valid (too short or compromised)
-		$ok = self::install($data->organization, $data->name, $data->email, md5($data->password));
+		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 		// Restore password
 		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);

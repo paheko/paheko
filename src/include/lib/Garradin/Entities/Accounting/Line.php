@@ -75,12 +75,6 @@ class Line extends Entity
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
 		$this->assert($this->id_transaction, 'Aucun mouvement n\'a été indiqué pour cette ligne.');
 		$this->assert($this->reconciled === 0 || $this->reconciled === 1);
-
-		$db = DB::getInstance();
-		$this->assert($db->firstColumn('SELECT 1 FROM acc_accounts a
-			INNER JOIN acc_transactions t ON t.id = ?
-			INNER JOIN acc_years y ON y.id = t.id_year
-			WHERE a.id = ? AND a.id_chart = y.id_chart;', $this->id_transaction, $this->id_account), 'Le compte sélectionné ne correspond pas à l\'exercice');
 	}
 
 	public function asDetailsArray(): array

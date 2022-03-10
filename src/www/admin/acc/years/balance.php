@@ -65,7 +65,7 @@ elseif (null !== f('from_year')) {
 }
 
 if ($previous_year) {
-	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
+	$lines = Reports::getAccountsBalances(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
 
 	if ($previous_year->id_chart != $year->id_chart) {
 		$chart_change = true;
@@ -97,15 +97,16 @@ if ($previous_year) {
 	}
 
 	$lines[] = (object) [
-		'sum'   => $result,
+		'balance'   => $result,
 		'id'    => $account->id,
 		'code'  => $account->code,
 		'label' => $account->label,
+		'is_debt' => $result < 0,
 	];
 
 	foreach ($lines as $k => &$line) {
-		$line->credit = $line->sum > 0 ? $line->sum : 0;
-		$line->debit = $line->sum < 0 ? abs($line->sum) : 0;
+		$line->credit = !$line->is_debt ? abs($line->balance) : 0;
+		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 
 		if ($chart_change) {
 			if (array_key_exists($line->code, $matching_accounts)) {

@@ -17,26 +17,74 @@ use Garradin\UserException;
 
 class Transactions
 {
-	const EXPORT_RAW = 'raw';
 	const EXPORT_FULL = 'full';
+	const EXPORT_GROUPED = 'grouped';
+	const EXPORT_SIMPLE = 'simple';
 
-	const EXPECTED_CSV_COLUMNS_SELF = ['id', 'type', 'status', 'label', 'date', 'notes', 'reference',
-		'line_id', 'account', 'credit', 'debit', 'line_reference', 'line_label', 'reconciled'];
-
-	const POSSIBLE_CSV_COLUMNS = [
-		'id'             => 'Numéro d\'écriture',
-		'label'          => 'Libellé',
-		'date'           => 'Date',
-		'notes'          => 'Remarques',
-		'reference'      => 'Numéro pièce comptable',
-		'p_reference'    => 'Référence paiement',
-		'debit_account'  => 'Compte de débit',
-		'credit_account' => 'Compte de crédit',
-		'amount'         => 'Montant',
-		'analytical'     => 'Compte analytique',
+	const EXPORT_NAMES = [
+		self::EXPORT_FULL => 'Complet',
+		self::EXPORT_GROUPED => 'Groupé',
+		self::EXPORT_SIMPLE => 'Simplifié',
 	];
 
-	const MANDATORY_CSV_COLUMNS = ['label', 'date', 'credit_account', 'debit_account', 'amount'];
+	const EXPORT_COLUMNS_FULL = [
+		'id'        => 'Numéro d\'écriture',
+		'type'      => 'Type',
+		'status'    => 'Statut',
+		'label'     => 'Libellé',
+		'date'      => 'Date',
+		'notes'     => 'Remarques',
+		'reference' => 'Numéro pièce comptable',
+
+		// Lines
+		'line_id'        => 'Numéro ligne',
+		'account'        => 'Compte',
+		'credit'         => 'Crédit',
+		'debit'          => 'Débit',
+		'line_reference' => 'Référence ligne',
+		'line_label'     => 'Libellé ligne',
+		'reconciled'     => 'Rapprochement',
+		'analytical'     => 'Compte analytique',
+		'linked_users'   => 'Membres associés',
+	];
+
+	const EXPORT_COLUMNS = [
+		self::EXPORT_GROUPED => self::EXPORT_COLUMNS_FULL,
+		self::EXPORT_FULL => self::EXPORT_COLUMNS_FULL,
+		self::EXPORT_SIMPLE => [
+			'id'             => 'Numéro d\'écriture',
+			'type'           => 'Type',
+			'status'         => 'Statut',
+			'label'          => 'Libellé',
+			'date'           => 'Date',
+			'notes'          => 'Remarques',
+			'reference'      => 'Numéro pièce comptable',
+			'p_reference'    => 'Référence paiement',
+			'debit_account'  => 'Compte de débit',
+			'credit_account' => 'Compte de crédit',
+			'amount'         => 'Montant',
+			'analytical'     => 'Compte analytique',
+			'linked_users'   => 'Membres associés',
+		],
+	];
+
+	const MANDATORY_COLUMNS = [
+		self::EXPORT_GROUPED => [
+			'type',
+			'label',
+			'date',
+			'account',
+			'credit',
+			'debit',
+		],
+		self::EXPORT_SIMPLE => [
+			'label',
+			'date',
+			'credit_account',
+			'debit_account',
+			'amount'
+		],
+	];
 
 	static public function get(int $id)
 	{
@@ -118,48 +166,95 @@ class Transactions
 	/**
 	 * Return all transactions from year
 	 */
-	static public function export(Year $year, string $format, string $type = self::EXPORT_RAW): void
+	static public function export(Year $year, string $format, string $type): void
 	{
 		$header = null;
 
-		if (self::EXPORT_FULL == $type) {
-			$header = ['Numéro d\'écriture', 'Type', 'Statut', 'Libellé', 'Date', 'Remarques', 'Numéro pièce comptable', 'Numéro ligne', 'Compte', 'Débit', 'Crédit', 'Référence ligne', 'Libellé ligne', 'Rapprochement', 'Compte analytique', 'Membres associés'];
+		if (!array_key_exists($type, self::EXPORT_COLUMNS)) {
+			throw new \InvalidArgumentException('Unknown type: ' . $type);
 		}
 
 		CSV::export(
 			$format,
-			sprintf('Export comptable - %s - %s', Config::getInstance()->get('nom_asso'), $year->label),
+			sprintf('Export comptable %s - %s - %s', strtolower(self::EXPORT_NAMES[$type]), Config::getInstance()->get('nom_asso'), $year->label),
 			self::iterateExport($year->id(), $type),
-			$header
+			array_values(self::EXPORT_COLUMNS[$type])
 		);
+	}
+
+	static public function getExportExamples(Year $year)
+	{
+		$out = [];
+
+		foreach (self::EXPORT_NAMES as $type => $label) {
+			$i = 0;
+			$out[$type] = [self::EXPORT_COLUMNS[$type]];
+
+			foreach (self::iterateExport($year->id(), $type) as $row) {
+				$out[$type][] = $row;
+
+				if (++$i > 1) {
+					break;
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	static protected function iterateExport(int $year_id, string $type): \Generator
 	{
-		$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
-			l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
-			l.reference AS line_reference, l.label AS line_label, l.reconciled,
-			a2.code AS analytical,
-			GROUP_CONCAT(u.%s) AS linked_users
-			FROM acc_transactions t
-			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
-			INNER JOIN acc_accounts a ON a.id = l.id_account
-			LEFT JOIN acc_accounts a2 ON a2.id = l.id_analytical
-			LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
-			LEFT JOIN membres u ON u.id = tu.id_user
-			WHERE t.id_year = ?
-			GROUP BY t.id, l.id
-			ORDER BY t.date, t.id, l.id;';
-
 		$id_field = Config::getInstance()->get('champ_identite');
-		$sql = sprintf($sql, $id_field);
+
+		if (self::EXPORT_SIMPLE == $type) {
+			$sql =  'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
+				l1.reference AS p_reference,
+				a1.code AS debit_account,
+				a2.code AS credit_account,
+				l1.debit AS amount,
+				a3.code AS analytical,
+				GROUP_CONCAT(u.%s) AS linked_users
+				FROM acc_transactions t
+				INNER JOIN acc_transactions_lines l1 ON l1.id_transaction = t.id AND l1.debit != 0
+				INNER JOIN acc_transactions_lines l2 ON l2.id_transaction = t.id AND l2.credit != 0
+				INNER JOIN acc_accounts a1 ON a1.id = l1.id_account
+				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
+				LEFT JOIN acc_accounts a3 ON a3.id = l1.id_analytical
+				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+				LEFT JOIN membres u ON u.id = tu.id_user
+				WHERE t.id_year = ?
+					AND t.type != %d
+				GROUP BY t.id
+				ORDER BY t.date, t.id;';
+
+			$sql = sprintf($sql, $id_field, Transaction::TYPE_ADVANCED);
+		}
+		else {
+			$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
+				l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
+				l.reference AS line_reference, l.label AS line_label, l.reconciled,
+				a2.code AS analytical,
+				GROUP_CONCAT(u.%s) AS linked_users
+				FROM acc_transactions t
+				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+				INNER JOIN acc_accounts a ON a.id = l.id_account
+				LEFT JOIN acc_accounts a2 ON a2.id = l.id_analytical
+				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
+				LEFT JOIN membres u ON u.id = tu.id_user
+				WHERE t.id_year = ?
+				GROUP BY t.id, l.id
+				ORDER BY t.date, t.id, l.id;';
+
+			$sql = sprintf($sql, $id_field);
+		}
 
 		$res = DB::getInstance()->iterate($sql, $year_id);
 
 		$previous_id = null;
 
 		foreach ($res as $row) {
-			if ($previous_id === $row->id && $type == self::EXPORT_RAW) {
+			if ($previous_id === $row->id && $type == self::EXPORT_GROUPED) {
+				// Remove transaction data to differentiate lines and transactions
 				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = null;
 			}
 			else {
@@ -179,15 +274,24 @@ class Transactions
 				$previous_id = $row->id;
 			}
 
-			$row->credit = Utils::money_format($row->credit, ',', '');
-			$row->debit = Utils::money_format($row->debit, ',', '');
+			if ($type == self::EXPORT_SIMPLE) {
+				$row->amount = Utils::money_format($row->amount, ',', '');
+			}
+			else {
+				$row->credit = Utils::money_format($row->credit, ',', '');
+				$row->debit = Utils::money_format($row->debit, ',', '');
+			}
 
 			yield $row;
 		}
 	}
 
-	static public function importCSV(Year $year, array $file, int $user_id)
+	static public function import(string $type, Year $year, CSV_Custom $csv, int $user_id, bool $ignore_ids = false)
 	{
+		if ($type != self::EXPORT_GROUPED && $type != self::EXPORT_SIMPLE) {
+			throw new \InvalidArgumentException('Invalid type value');
+		}
+
 		if ($year->closed) {
 			throw new \InvalidArgumentException('Closed year');
 		}
@@ -202,22 +306,42 @@ class Transactions
 		$l = 1;
 
 		try {
-			foreach (CSV::importUpload($file, self::EXPECTED_CSV_COLUMNS_SELF) as $l => $row) {
+			foreach ($csv->iterate() as $l => $row) {
 				$row = (object) $row;
 
-				$has_transaction = !empty($row->id) || !empty($row->type) || !empty($row->status) || !empty($row->label) || !empty($row->date) || !empty($row->notes) || !empty($row->reference);
+				// Import grouped transactions
+				if ($type == self::EXPORT_GROUPED) {
+					// If a line doesn't have any transaction info: this is a line following the previous transaction
+					$has_transaction = !(empty($row->id)
+						&& empty($row->type)
+						&& empty($row->status)
+						&& empty($row->label)
+						&& empty($row->date)
+						&& empty($row->notes)
+						&& empty($row->reference)
+					);
 
-				if (null !== $transaction && $has_transaction) {
-					$transaction->save();
+					// New transaction, save previous one
+					if (null !== $transaction && $has_transaction) {
+						$transaction->save();
+						$transaction = null;
+					}
+
+					if (!$has_transaction && null === $transaction) {
+						throw new UserException('cette ligne n\'est reliée à aucune écriture');
+					}
+				}
+				else {
+					if (empty($row->type)) {
+						$row->type = Transaction::TYPES_NAMES[Transaction::TYPE_ADVANCED];
+					}
+
 					$transaction = null;
 				}
 
+				// Find or create transaction
 				if (null === $transaction) {
-					if (!$has_transaction) {
-						throw new UserException('cette ligne n\'est reliée à aucune écriture');
-					}
-
-					if ($row->id) {
+					if (!empty($row->id) && !$ignore_ids) {
 						$transaction = self::get((int)$row->id);
 
 						if (!$transaction) {
@@ -248,22 +372,7 @@ class Transactions
 					$transaction->importForm($fields);
 				}
 
-				$id_account = $accounts->getIdFromCode($row->account);
-
-				if (!$id_account) {
-					throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
-				}
-
-				$row->line_id = trim($row->line_id);
-				$id_analytical = null;
-				$data = [
-					'credit'     => $row->credit ?: 0,
-					'debit'      => $row->debit ?: 0,
-					'id_account' => $id_account,
-					'reference'  => $row->line_reference,
-					'label'      => $row->line_label,
-					'reconciled' => $row->reconciled,
-				];
+				$data = [];
 
 				if (!empty($row->analytical)) {
 					$id_analytical = $accounts->getIdFromCode($row->analytical);
@@ -278,21 +387,93 @@ class Transactions
 					$data['id_analytical'] = null;
 				}
 
-				if ($row->line_id) {
-					$line = $transaction->getLine((int)$row->line_id);
+				// Add two transaction lines for each CSV line
+				if ($type == self::EXPORT_SIMPLE) {
+					$credit_account = $accounts->getIdFromCode($row->credit_account);
+					$debit_account = $accounts->getIdFromCode($row->debit_account);
 
-					if (!$line) {
-						throw new UserException(sprintf('le numéro de ligne "%s" n\'existe pas dans l\'écriture "%s"', $row->line_id, $transaction->id ?: 'à créer'));
+					if (!$credit_account) {
+						throw new UserException(sprintf('Compte de crédit "%s" inconnu dans le plan comptable', $row->credit_account));
 					}
+
+					if (!$debit_account) {
+						throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
+					}
+
+					$data['reference'] = isset($row->p_reference) ? $row->p_reference : null;
+
+					if (!$transaction->exists()) {
+						$l1 = new Line;
+						$l2 = new Line;
+						$transaction->addLine($l1);
+						$transaction->addLine($l2);
+					}
+					else {
+						$lines = $transaction->getLines();
+
+						if (count($lines) != 2) {
+							throw new UserException('cette écriture comporte plus de deux lignes et ne peut donc être modifiée par un import simplifié');
+						}
+
+						// Find correct debit/credit lines
+						if ($lines[0]->credit != 0) {
+							$l1 = $lines[0];
+							$l2 = $lines[1];
+						}
+						else {
+							$l1 = $lines[1];
+							$l2 = $lines[0];
+						}
+					}
+
+					$l1->importForm($data + [
+						'credit'     => $row->amount,
+						'debit'      => 0,
+						'id_account' => $credit_account,
+					]);
+
+					$l2->importForm($data + [
+						'credit'     => 0,
+						'debit'      => $row->amount,
+						'id_account' => $debit_account,
+					]);
+
+					$transaction->save();
+					$transaction = null;
 				}
 				else {
-					$line = new Line;
-				}
+					$id_account = $accounts->getIdFromCode($row->account);
 
-				$line->importForm($data);
+					if (!$id_account) {
+						throw new UserException(sprintf('le compte "%s" n\'existe pas dans le plan comptable', $row->account));
+					}
 
-				if (!$row->line_id) {
-					$transaction->addLine($line);
+					$data = $data + [
+						'credit'     => $row->credit ?: 0,
+						'debit'      => $row->debit ?: 0,
+						'id_account' => $id_account,
+						'reference'  => $row->line_reference ?? null,
+						'label'      => $row->line_label ?? null,
+						'reconciled' => $row->reconciled ?? false,
+					];
+
+					if (!empty($row->line_id) && !$ignore_ids) {
+						$line = $transaction->getLine((int)$row->line_id);
+
+						if (!$line) {
+							throw new UserException(sprintf('le numéro de ligne "%s" n\'existe pas dans l\'écriture "%s"', $row->line_id, $transaction->id ?: 'à créer'));
+						}
+					}
+					else {
+						$line = new Line;
+					}
+
+					$line->importForm($data);
+
+					// If a line_id was supplied, just changing the object is enough, no need to add it to the transaction
+					if (empty($row->line_id)) {
+						$transaction->addLine($line);
+					}
 				}
 			}
 
@@ -310,111 +491,7 @@ class Transactions
 
 			throw $e;
 		}
-
 		$db->commit();
-
-		Graph::clearCacheAllYears();
-	}
-
-	static public function importCustom(Year $year, CSV_Custom $csv, int $user_id)
-	{
-		if ($year->closed) {
-			throw new \InvalidArgumentException('Closed year');
-		}
-
-		$db = DB::getInstance();
-		$db->begin();
-
-		$accounts = $year->accounts();
-		$l = 0;
-
-		try {
-			foreach ($csv->iterate() as $l => $row) {
-				if (!isset($row->credit_account, $row->debit_account, $row->amount)) {
-					throw new UserException('Une des colonnes compte de crédit, compte de débit ou montant est manquante.');
-				}
-
-				if (!empty($row->id)) {
-					$transaction = self::get((int)$row->id);
-
-					if (!$transaction) {
-						throw new UserException(sprintf('l\'écriture n°%d est introuvable', $row->id));
-					}
-
-					if ($transaction->validated) {
-						throw new UserException(sprintf('l\'écriture n°%d est validée et ne peut être modifiée', $row->id));
-					}
-
-					$transaction->resetLines();
-				}
-				else {
-					$transaction = new Transaction;
-					$transaction->type = Transaction::TYPE_ADVANCED;
-					$transaction->id_creator = $user_id;
-					$transaction->id_year = $year->id();
-				}
-
-				$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
-				$transaction->importForm($fields);
-
-				$credit_account = $accounts->getIdFromCode($row->credit_account);
-				$debit_account = $accounts->getIdFromCode($row->debit_account);
-
-				if (!$credit_account) {
-					throw new UserException(sprintf('Compte de crédit "%s" inconnu dans le plan comptable', $row->credit_account));
-				}
-
-				if (!$debit_account) {
-					throw new UserException(sprintf('Compte de débit "%s" inconnu dans le plan comptable', $row->debit_account));
-				}
-
-				$id_analytical = null;
-
-				if (!empty($row->analytical)) {
-					$id_analytical = $accounts->getIdFromCode($row->analytical);
-
-					if (!$id_analytical) {
-						throw new UserException(sprintf('le compte analytique "%s" n\'existe pas dans le plan comptable', $row->analytical));
-					}
-				}
-
-				$line = new Line;
-				$line->importForm([
-					'credit'     => $row->amount,
-					'debit'      => 0,
-					'id_account' => $credit_account,
-					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
-					'id_analytical' => $id_analytical,
-				]);
-				$transaction->addLine($line);
-
-				$line = new Line;
-				$line->importForm([
-					'credit'     => 0,
-					'debit'      => $row->amount,
-					'id_account' => $debit_account,
-					'reference'  => isset($row->p_reference) ? $row->p_reference : null,
-					'id_analytical' => $id_analytical,
-				]);
-				$transaction->addLine($line);
-				$transaction->save();
-			}
-		}
-		catch (UserException $e) {
-			$db->rollback();
-
-			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
-
-			if (null !== $transaction) {
-				$e->setDetails($transaction->asDetailsArray());
-			}
-
-			throw $e;
-		}
-
-		$db->commit();
-
-		Graph::clearCacheAllYears();
 	}
 
 	static public function setAnalytical(?int $id_analytical, ?array $transactions = null, ?array $lines = null)

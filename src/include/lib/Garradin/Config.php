@@ -262,7 +262,12 @@ class Config extends Entity
 
 		$params = $params ? $params . '&' : '';
 
-		return WWW_URL . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
+		// Make sure we use the ADMIN_URL as base instead of WWW_URL
+		// as WWW_URL can be configured to something that does not work in the admin
+		// (for CORS reasons, or maybe the domain is misconfigured)
+		$base = str_replace('admin/', '', ADMIN_URL);
+
+		return $base . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
 	}
 
 

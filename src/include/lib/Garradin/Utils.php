@@ -682,7 +682,7 @@ class Utils
         $content = trim($content);
 
         $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config->get('site_asso'));
-        $content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
+        $content .= "Vous recevez ce message car vous êtes inscrit dans nos contacts.\n";
         $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('email_asso');
 
         $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
@@ -996,6 +996,8 @@ class Utils
             return '';
         }
 
+        $str = str_replace('’', '\'', $str); // Normalize French apostrophe
+
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
             self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();');
         }
@@ -1116,7 +1118,7 @@ class Utils
                 $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
                 break;
             case 'wkhtmltopdf':
-                $cmd = 'wkhtmltopdf -q --print-media-type %s %s';
+                $cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
                 break;
             case 'weasyprint':
                 $cmd = 'weasyprint %1$s %2$s';
@@ -1145,7 +1147,7 @@ class Utils
     static public function num2alpha(int $n): string {
         $r = '';
         for ($i = 1; $n >= 0 && $i < 10; $i++) {
-            $r = chr(0x41 + ($n % pow(26, $i) / pow(26, $i - 1))) . $r;
+            $r = chr(0x41 + intval($n % pow(26, $i) / pow(26, $i - 1))) . $r;
             $n -= pow(26, $i);
         }
         return $r;

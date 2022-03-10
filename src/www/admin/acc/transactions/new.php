@@ -23,7 +23,6 @@ $lines = [[], []];
 $amount = 0;
 $types_accounts = null;
 $id_analytical = null;
-$transaction->date = new \DateTime;
 
 // Duplicate transaction
 if (qg('copy')) {
@@ -46,10 +45,17 @@ if (qg('copy')) {
 
 	unset($line);
 }
-elseif ($session->get('acc_last_date')) {
-	$transaction->date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+
+// Set last used date
+if (empty($transaction->date) && $session->get('acc_last_date') && $date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+	$transaction->date = $date;
+}
+// Set date of the day if no date was set
+elseif (empty($transaction->date)) {
+	$transaction->date = new \DateTime;
 }
 
+// Make sure the date cannot be outside of the current year
 if ($transaction->date < $current_year->start_date || $transaction->date > $current_year->end_date) {
 	$transaction->date = $current_year->start_date;
 }
@@ -90,7 +96,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 		$transaction->updateLinkedUsers(array_keys(f('users')));
 	}
 
-	$session->set('acc_last_date', f('date'));
+	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 
 	Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
 }, 'acc_transaction_new');

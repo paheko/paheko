@@ -321,7 +321,7 @@
 		btn.setAttribute('data-icon', '📅');
 		btn.type = 'button';
 		btn.onclick = () => {
-			g.script('scripts/datepicker2.js', () => {
+			g.script('scripts/lib/datepicker2.min.js', () => {
 				if (null == cal) {
 					btn.onclick = null;
 					cal = new DatePicker(btn, input, {lang: 'fr', format: 1});

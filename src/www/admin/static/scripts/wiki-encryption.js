@@ -23,7 +23,7 @@
 			return;
 		}
 
-		var url = www_url + 'admin/static/scripts/gibberish-aes.min.js';
+		var url = www_url + 'admin/static/scripts/lib/gibberish-aes.min.js';
 		var s = document.createElement('script');
 		s.src = url;
 		s.type = 'text/javascript';

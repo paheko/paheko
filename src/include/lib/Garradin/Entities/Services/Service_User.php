@@ -185,7 +185,7 @@ class Service_User extends Entity
 			$su->importForm($source);
 			$su->id_user = (int) $id;
 
-			if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
+			if ($su->id_fee && $su->fee() && $su->fee()->id_account && $su->id_user) {
 				$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 			}
 

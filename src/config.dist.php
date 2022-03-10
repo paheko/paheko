@@ -213,6 +213,26 @@ namespace Garradin;
 
 //const ENABLE_TECH_DETAILS = true;
 
+/**
+ * Activation du log SQL (option de développement)
+ *
+ * Si cette constante est renseignée par un chemin de fichier SQLite valide,
+ * alors *TOUTES* les requêtes SQL et leur contenu sera logué dans la base de données indiquée.
+ *
+ * Cette option permet ensuite de parcourir les requêtes via l'interface dans
+ * Configuration -> Fonctions avancées -> Journal SQL pour permettre d'identifier
+ * les requêtes qui mettent trop de temps, et comment elles pourraient
+ * être améliorées. Visualiser les requêtes SQL nécessite d'avoir également activé
+ * ENABLE_TECH_DETAILS.
+ *
+ * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
+ * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
+ * Cette option peut significativement ralentir le chargement des pages.
+ *
+ * Défaut : null (= désactivé)
+ * @var string|null
+ */
+// const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
 /**
  * Activer la possibilité de faire une mise à jour semi-automatisée
@@ -442,11 +462,13 @@ namespace Garradin;
 //const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
+ * PDF_COMMAND
  * Commande de création de PDF
  *
  * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
  * Si laissé non spécifié (ou NULL), Garradin essaiera de détecter une solution entre
- * PrinceXML, Chromium, wkhtmltopdf ou weasyprint.
+ * PrinceXML, Chromium, wkhtmltopdf ou weasyprint. Si aucune solution n'est disponible,
+ * une erreur sera levée.
  *
  * %1$s sera remplacé par le chemin du fichier HTML, et %2$s par le chemin du fichier PDF.
  *
@@ -461,7 +483,33 @@ namespace Garradin;
  *
  * Défaut : null
  */
-//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type %s %s';
+//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
+
+/**
+ * CALC_CONVERT_COMMAND
+ * Outil de conversion de formats de tableur vers un format propriétaire
+ *
+ * Garradin gère nativement les exports en ODS (OpenDocument : LibreOffice)
+ * et CSV, et imports en CSV.
+ *
+ * En indiquant ici le nom d'un outil, Garradin autorisera aussi
+ * l'import en XLSX, XLS et ODS, et l'export en XLSX.
+ *
+ * Pour cela il procédera simplement à une conversion entre les formats natifs
+ * ODS/CSV et XLSX ou XLS.
+ *
+ * Noter qu'installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ *
+ * Les outils supportés sont :
+ * - ssconvert (apt install gnumeric) (plus rapide)
+ * - unoconv (apt install unoconv) (utilise LibreOffice)
+ * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
+ *
+ * Défault : null (= fonctionnalité désactivée)
+ */
+//const CALC_CONVERT_COMMAND = 'unoconv';
+//const CALC_CONVERT_COMMAND = 'ssconvert';
+//const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
 
 /**
  * Clé de licence

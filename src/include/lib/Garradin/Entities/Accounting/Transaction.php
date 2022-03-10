@@ -310,7 +310,7 @@ class Transaction extends Entity
 	{
 		$new = new Transaction;
 
-		$copy = ['type', 'status', 'label', 'notes', 'reference', 'date'];
+		$copy = ['type', 'status', 'label', 'notes', 'reference'];
 
 		foreach ($copy as $field) {
 			$new->$field = $this->$field;
@@ -342,6 +342,11 @@ class Transaction extends Entity
 			}
 
 			$new->addLine($line);
+		}
+
+		// Only set date if valid
+		if ($this->date >= $year->start_date && $this->date <= $year->end_date) {
+			$new->date = clone $this->date;
 		}
 
 		return $new;
@@ -492,17 +497,27 @@ class Transaction extends Entity
 		$total = 0;
 
 		$lines = $this->getLines();
+		$accounts_ids = [];
 
 		foreach ($lines as $k => $line) {
 			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
 			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
 
+			$accounts_ids = [$line->id_account];
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
 
 		$this->assert(0 === $total, sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
+
+		$found_accounts = $db->getAssoc(sprintf('SELECT id, id FROM acc_accounts WHERE %s AND id_chart = (SELECT id_chart FROM acc_years WHERE id = %d);', $db->where('id', $accounts_ids), $this->id_year));
+
+		$diff = array_diff($accounts_ids, $found_accounts);
+		$this->assert(count($diff) == 0, sprintf('Certains comptes (%s) ne sont pas liés au bon plan comptable', implode(', ', $diff)));
+
+		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
+		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -752,6 +767,11 @@ class Transaction extends Entity
 			INNER JOIN acc_transactions_users l ON l.id_user = m.id
 			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
+	}
+
+	public function listRelatedTransactions()
+	{
+		return EntityManager::getInstance(self::class)->all('SELECT * FROM @TABLE WHERE id_related = ?;', $this->id);
 	}
 
 	static public function getTypesDetails()

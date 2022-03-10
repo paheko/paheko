@@ -42,16 +42,6 @@ $fields = DF::getInstance()->all();
 			{if $show_message_button && !$email_button++}
 				{linkbutton href="!membres/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
-		{elseif $field.type == 'tel'}
-			<a href="tel:{$value}">{$value|format_tel}</a>
-		{elseif $field.type == 'country'}
-			{$value|get_country_name}
-		{elseif $field.type == 'date'}
-			{$value|date_short}
-		{elseif $field.type == 'datetime'}
-			{$value|date}
-		{elseif $field.type == 'password'}
-			*******
 		{elseif $field.type == 'multiple'}
 			<ul>
 			{foreach from=$field.options key="b" item="name"}
@@ -61,7 +51,7 @@ $fields = DF::getInstance()->all();
 			{/foreach}
 			</ul>
 		{else}
-			{$value|escape|rtrim|nl2br}
+			{$value|display_champ_membre:$c_config|raw}
 		{/if}
 	</dd>
 	{/foreach}

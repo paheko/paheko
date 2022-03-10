@@ -15,17 +15,17 @@
 	{/if}
 	<tbody>
 	{foreach from=$accounts item="account"}
-		<tr class="compte{if isset($year2) && !$account.sum} disabled{/if}">
+		<tr class="compte{if isset($year2) && !$account.balance} disabled{/if}">
 			<td class="num">
 				{if !empty($year) && $account.id}<a href="{$admin_url}acc/accounts/journal.php?id={$account.id}&amp;year={$year.id}">{$account.code}</a>
 				{else}{$account.code}
 				{/if}
 			</td>
 			<th>{$account.label}</th>
-			<td class="money">{$account.sum|raw|money:false}</td>
+			<td class="money">{$account.balance|raw|money:false}</td>
 			{if isset($year2)}
-				<td class="money">{$account.sum2|raw|money:false}</td>
-				<td class="money">{$account.change|raw|money:true:true}</td>
+				<td class="money">{$account.balance2|raw|money:false}</td>
+				<td class="money">{$account.change|raw|money:false:true}</td>
 			{/if}
 		</tr>
 	{/foreach}

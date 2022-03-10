@@ -252,6 +252,10 @@ class Import
 		}
 
 		foreach ($this->champs as $id => $config) {
+			if (!isset($row->$id)) {
+				continue;
+			}
+
 			if ($config->type == 'date') {
 				$row->$id = \DateTime::createFromFormat('!Y-m-d', $row->$id);
 			}

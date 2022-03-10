@@ -131,6 +131,15 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
 		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 
+		$this->register_modifier('linkify_transactions', function ($str) {
+			return preg_replace_callback('/#(\d+)/', function ($m) {
+				return sprintf('<a href="%s%d">#%2$d</a>',
+					Utils::getLocalURL('!acc/transactions/details.php?id='),
+					$m[1]
+				);
+			}, $str);
+		});
+
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
 			return $skriv->render((string) $str);
@@ -400,6 +409,13 @@ class Template extends \KD2\Smartyer
 			unset($attributes['disabled']);
 		}
 
+		if (!empty($attributes['readonly'])) {
+			$attributes['readonly'] = 'readonly';
+		}
+		else {
+			unset($attributes['readonly']);
+		}
+
 		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
@@ -584,6 +600,10 @@ class Template extends \KD2\Smartyer
 
 	protected function formatPhoneNumber($n)
 	{
+		if (empty($n)) {
+			return '';
+		}
+
 		$country = Config::getInstance()->get('pays');
 
 		if ($country !== 'FR') {
@@ -634,14 +654,26 @@ class Template extends \KD2\Smartyer
 		$field = DynamicFields::get($params['key']);
 		$v = $params['value'];
 
-		switch ($field->type)
+		if (null === $config) {
+			return htmlspecialchars($v);
+		}
+
+		if ($config->type == 'checkbox') {
+			return $v ? 'Oui' : 'Non';
+		}
+
+		if (empty($v)) {
+			return '';
+		}
+
+		switch ($config->type)
 		{
-			case 'checkbox':
-				return $v ? 'Oui' : 'Non';
+			case 'password':
+				return '*****';
 			case 'email':
 				return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'tel':
-				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
 			case 'url':
 				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 			case 'country':
@@ -650,6 +682,8 @@ class Template extends \KD2\Smartyer
 				return Utils::date_fr($v, 'd/m/Y');
 			case 'datetime':
 				return Utils::date_fr($v, 'd/m/Y à H:i');
+			case 'number':
+				return str_replace('.', ',', htmlspecialchars($v));
 			case 'multiple':
 				// Useful for search results, if a value is not a number
 				if (!is_numeric($v)) {
@@ -666,7 +700,7 @@ class Template extends \KD2\Smartyer
 
 				return htmlspecialchars(implode(', ', $out));
 			default:
-				return htmlspecialchars((string) $v);
+				return nl2br(htmlspecialchars(rtrim((string) $v)));
 		}
 	}
 
@@ -748,6 +782,9 @@ class Template extends \KD2\Smartyer
 			}
 
 			return $out;
+		}
+		elseif ($type == 'number') {
+			$params['step'] = 'any';
 		}
 		elseif ($type == 'select') {
 			$params['options'] = (array) $config->options;
