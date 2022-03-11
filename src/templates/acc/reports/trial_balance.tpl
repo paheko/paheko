@@ -4,7 +4,7 @@
 
 <p class="help block noprint">
 	Attention&nbsp;: cette vue présente le solde selon les normes comptables.<br />
-	Si le montant est <strong>positif</strong> c'est que le compte est <strong>créditeur</strong>.<br />Si le montant est <strong>négatif</strong> c'est que le compte est <strong>débiteur</strong>.
+	Si le montant est <strong>positif</strong> c'est que le compte est <strong>débiteur</strong>.<br />Si le montant est <strong>négatif</strong> c'est que le compte est <strong>créditeur</strong>.
 </p>
 
 <table class="list">
