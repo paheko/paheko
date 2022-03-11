@@ -511,6 +511,8 @@ class Transaction extends Entity
 
 		$this->assert(0 === $total, sprintf('Écriture non équilibrée : déséquilibre (%s) entre débits et crédits', Utils::money_format($total)));
 
+		// Foreign keys constraints will check for validity of id_creator and id_year
+
 		$found_accounts = $db->getAssoc(sprintf('SELECT id, id FROM acc_accounts WHERE %s AND id_chart = (SELECT id_chart FROM acc_years WHERE id = %d);', $db->where('id', $accounts_ids), $this->id_year));
 
 		$diff = array_diff($accounts_ids, $found_accounts);

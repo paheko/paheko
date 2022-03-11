@@ -2,59 +2,38 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Users\DynamicFields;
+use Garradin\Entities\Users\User;
 
 require_once __DIR__ . '/_inc.php';
 
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
-$champs = $config->get('champs_membres');
+$csrf_key = 'users_new';
+$default_category = Config::getInstance()->categorie_membres;
+$user = new User;
 
-if (f('save'))
-{
-    $form->check('new_member', [
-        'passe' => 'confirmed',
-        // FIXME: ajouter les règles pour les champs membres
-    ]);
+$form->runIf('save', function () use ($default_category, $user, $session) {
+    $user->importForm();
 
-    if (!$form->hasErrors())
-    {
-        try
-        {
-            if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN))
-            {
-                $id_category = f('id_category');
-            }
-            else
-            {
-                $id_category = $config->get('categorie_membres');
-            }
-
-            $data = ['id_category' => $id_category];
-
-            foreach ($champs->getAll() as $key=>$dismiss)
-            {
-                $data[$key] = f($key);
-            }
-
-            $id = $membres->add($data);
-
-            Utils::redirect(ADMIN_URL . 'membres/fiche.php?id='.(int)$id);
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
+    if ($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)) {
+        $user->id_category = $default_category;
     }
-}
 
-$tpl->assign('id_field_name', $config->get('champ_identifiant'));
+    $user->save();
+    Utils::redirect('!users/details.php?id=' . $user->id());
+}, $csrf_key);
 
-$tpl->assign('id_field_name', $config->get('champ_identifiant'));
+
+
+$tpl->assign('id_field_name', DynamicFields::getLoginField());
 
 $tpl->assign('passphrase', Utils::suggestPassword());
-$tpl->assign('champs', $champs->getAll());
+$tpl->assign('fields', DynamicFields::getInstance()->all());
 
-$tpl->assign('membres_cats', Categories::listSimple());
-$tpl->assign('current_cat', f('id_category') ?: $config->get('categorie_membres'));
+$tpl->assign('categories', Categories::listSimple());
+$tpl->assign('current_cat', f('id_category') ?: $default_category);
 
-$tpl->display('admin/membres/ajouter.tpl');
+$tpl->assign(compact('user', 'default_category', 'csrf_key'));
+
+$tpl->display('users/new.tpl');

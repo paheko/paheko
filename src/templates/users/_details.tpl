@@ -51,7 +51,7 @@ $fields = DF::getInstance()->all();
 			{/foreach}
 			</ul>
 		{else}
-			{$value|display_champ_membre:$c_config|raw}
+			{display_dynamic_field field=$field value=$value}
 		{/if}
 	</dd>
 	{/foreach}

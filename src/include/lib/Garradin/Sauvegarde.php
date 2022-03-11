@@ -532,16 +532,17 @@ class Sauvegarde
 			]);
 		}
 
-		if (!$session->refresh()) {
-			$session->forceLogin(-1);
-			$return |= self::CHANGED_USER;
-		}
-
 		if ($version != garradin_version())
 		{
 			$return |= self::NEED_UPGRADE;
 		}
 		else {
+			// If logged-in user no longer exists, then login to first admin account
+			if (!$session->refresh()) {
+				$session->forceLogin(-1);
+				$return |= self::CHANGED_USER;
+			}
+
 			// Force l'installation de plugin système si non existant dans la sauvegarde existante
 			Plugin::checkAndInstallSystemPlugins();
 

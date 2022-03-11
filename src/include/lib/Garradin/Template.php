@@ -651,14 +651,10 @@ class Template extends \KD2\Smartyer
 
 	protected function displayDynamicField(array $params): string
 	{
-		$field = DynamicFields::get($params['key']);
+		$field = $params['field'] ?? DynamicFields::get($params['key']);
 		$v = $params['value'];
 
-		if (null === $config) {
-			return htmlspecialchars($v);
-		}
-
-		if ($config->type == 'checkbox') {
+		if ($field->type == 'checkbox') {
 			return $v ? 'Oui' : 'Non';
 		}
 
@@ -666,7 +662,7 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		switch ($config->type)
+		switch ($field->type)
 		{
 			case 'password':
 				return '*****';
@@ -706,6 +702,7 @@ class Template extends \KD2\Smartyer
 
 	protected function editDynamicField(array $params): string
 	{
+		// context = user_edit/new/edit
 		assert(isset($params['field'], $params['user'], $params['context']));
 		extract($params);
 		$key = $field->name;
@@ -726,7 +723,7 @@ class Template extends \KD2\Smartyer
 		}
 
 		if ($context == 'user_edit' && !$field->write_access) {
-			$v = $this->displayDynamicField(['key' => $key, 'value' => $user->$key]);
+			$v = $this->displayDynamicField(['key' => $key, 'value' => $params['user']->$key]);
 			return sprintf('<dt>%s</dt><dd>%s</dd>', $field->label, $v ?: '<em>Non renseigné</em>');
 		}
 
@@ -735,7 +732,7 @@ class Template extends \KD2\Smartyer
 			'name'     => $key,
 			'label'    => $field->label,
 			'required' => $field->required,
-			'source'   => $user,
+			'source'   => $params['user'],
 			'disabled' => !empty($disabled),
 			'required' => $field->required && $type != 'checkbox',
 			'help'     => $field->help,
@@ -758,7 +755,7 @@ class Template extends \KD2\Smartyer
 				}
 			}
 			else {
-				$value = $user->$key;
+				$value = $params['user']->$key;
 			}
 
 			// Forcer la valeur à être un entier (depuis PHP 7.1)
@@ -783,9 +780,6 @@ class Template extends \KD2\Smartyer
 
 			return $out;
 		}
-		elseif ($type == 'number') {
-			$params['step'] = 'any';
-		}
 		elseif ($type == 'select') {
 			$params['options'] = (array) $config->options;
 		}
@@ -800,10 +794,12 @@ class Template extends \KD2\Smartyer
 			unset($params['label']);
 			return sprintf('<dt><label>%s %s</label></dt>', self::formInput($params), htmlspecialchars($field->label));
 		}
-		elseif ($field->system & $field::NUMBER && $context == 'user_create') {
+		elseif ($field->system & $field::NUMBER && $context == 'new') {
 			$params['default'] = DB::getInstance()->firstColumn(sprintf('SELECT MAX(%s) + 1 FROM %s;', $key, User::TABLE));
 			$params['required'] = false;
-			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars((string) $value, ENT_QUOTES) . '" />';
+		}
+		elseif ($type == 'number') {
+			$params['step'] = 'any';
 		}
 
 		$out = self::formInput($params);
@@ -812,7 +808,7 @@ class Template extends \KD2\Smartyer
 			$out .= '<dd class="help"><small>(Sera utilisé comme identifiant de connexion si le membre a le droit de se connecter.)</small></dd>';
 		}
 
-		if ($context == 'create' && $field->system & $field::NUMBER) {
+		if ($context == 'new' && $field->system & $field::NUMBER) {
 			$out .= '<dd class="help"><small>Doit être unique, laisser vide pour que le numéro soit attribué automatiquement.</small></dd>';
 		}
 		elseif ($context == 'edit' && $field->system & $field::NUMBER) {

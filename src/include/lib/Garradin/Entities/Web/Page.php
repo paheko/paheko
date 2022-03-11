@@ -55,7 +55,6 @@ class Page extends Entity
 		self::FORMAT_SKRIV => 'SkrivML',
 		self::FORMAT_MARKDOWN => 'MarkDown',
 		self::FORMAT_ENCRYPTED => 'Chiffré',
-		self::FORMAT_MARKDOWN => 'Markdown',
 	];
 
 	const STATUS_ONLINE = 'online';

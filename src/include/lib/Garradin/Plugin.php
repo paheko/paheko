@@ -73,10 +73,10 @@ class Plugin
 			throw new UserException(sprintf('Le plugin "%s" n\'existe pas ou n\'est pas installé correctement.', $id));
 		}
 
-		$this->plugin->config = json_decode($this->plugin->config);
-
-		if (!is_object($this->plugin->config))
-		{
+		if (null !== $this->plugin->config) {
+			$this->plugin->config = json_decode($this->plugin->config);
+		}
+		else {
 			$this->plugin->config = new \stdClass;
 		}
 

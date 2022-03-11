@@ -941,6 +941,8 @@ class Utils
             return null;
         }
 
+        $str = str_replace('’', '\'', $str); // Normalize French apostrophe
+
         return transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $str);
     }
 
