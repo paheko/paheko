@@ -2,6 +2,7 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Users\DynamicFields;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -34,8 +35,9 @@ $tpl->assign([
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
 	'membres_cats'     => Categories::listSimple(),
-	'champs'           => $config->get('champs_membres')->listAssocNames(),
 	'garradin_website' => WEBSITE,
+	'login_field'      => DynamicFields::getLoginField(),
+	'name_field'       => DynamicFields::getNameFields()[0],
 ]);
 
 $tpl->display('admin/config/index.tpl');

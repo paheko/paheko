@@ -150,3 +150,22 @@ table.list .icon {
 table.list .folder .icon {
     color: rgba(var(--gTextColor), 0.5);
 }
+
+/** Draggable table rows */
+table .draggable {
+    cursor: move;
+    user-select: none;
+}
+
+table tr.placeholder {
+    outline: 4px solid rgb(var(--gSecondColor)); !important;
+}
+
+table tr.dragging {
+    opacity: 0.5;
+    outline: 4px solid var(--gBorderColor) !important;
+}
+
+table.dragging td {
+    opacity: 0;
+}

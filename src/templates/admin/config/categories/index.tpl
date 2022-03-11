@@ -18,7 +18,7 @@
 					{display_permissions permissions=$cat}
 				</td>
 				<td class="actions">
-					{if $cat.id != $user.id_category}
+					{if $cat.id != $logged_user.id_category}
 						{linkbutton shape="delete" label="Supprimer" href="supprimer.php?id=%d"|args:$cat.id}
 					{/if}
 					{linkbutton shape="edit" label="Modifier" href="modifier.php?id=%d"|args:$cat.id}
