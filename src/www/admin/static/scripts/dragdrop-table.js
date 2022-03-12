@@ -5,23 +5,26 @@ window.enableTableDragAndDrop = function (table) {
 		const btn = row.querySelector('button');
 		row.draggable = true;
 		btn.classList.add('draggable');
+		addDragEvents(row);
+	});
 
-		row.dataset.label = row.querySelector('th').textContent;
+	var dragSrcEl = null;
+	var dragTargetEl = null;
 
+	function addDragEvents(row) {
 		row.addEventListener('dragstart', handleDragStart, false);
 		row.addEventListener('dragenter', handleDragEnter, false);
 		row.addEventListener('dragover', handleDragOver, false);
 		row.addEventListener('dragleave', handleDragLeave, false);
 		row.addEventListener('drop', handleDrop, false);
 		row.addEventListener('dragend', handleDragEnd, false);
-	});
-
-	var dragSrcEl = null;
+	}
 
 	function handleDragStart(e) {
 		this.parentNode.parentNode.classList.add('dragging');
 		this.classList.add('dragging');
 
+		dragTargetEl = null;
 		dragSrcEl = this;
 
 		e.dataTransfer.effectAllowed = 'move';
@@ -45,24 +48,18 @@ window.enableTableDragAndDrop = function (table) {
 
 	function handleDragEnter(e) {
 		if (this == dragSrcEl) {
-			dragSrcEl.querySelector('th').textContent = dragSrcEl.dataset.label;
 			return;
 		}
-
-		changeLabel(this);
 
 		this.classList.add('placeholder');
 	}
 
 	function handleDragLeave(e) {
+		this.classList.remove('placeholder');
+
 		if (this == dragSrcEl) {
 			return;
 		}
-
-		// Restore label, but only of current element
-		this.querySelector('th').textContent = this.dataset.label;
-
-		this.classList.remove('placeholder');
 	}
 
 	function handleDrop(e) {
@@ -71,31 +68,35 @@ window.enableTableDragAndDrop = function (table) {
 		}
 
 		if (dragSrcEl != this) {
-			var src_label = dragSrcEl.dataset.label;
-			var target_label = this.dataset.label;
-
-			dragSrcEl.innerHTML = this.innerHTML;
-			dragSrcEl.querySelector('th').textContent = target_label;
-			dragSrcEl.dataset.label = target_label;
-
-			this.dataset.label = src_label;
-			this.innerHTML = e.dataTransfer.getData('text/html');
+			dragTargetEl = this;
 		}
 
 		return false;
-	}
-
-	function changeLabel(elm) {
-		dragSrcEl.querySelector('th').textContent = elm.dataset.label;
-		elm.querySelector('th').textContent = dragSrcEl.dataset.label;
 	}
 
 	function handleDragEnd(e) {
 		this.classList.remove('dragging');
 		this.parentNode.parentNode.classList.remove('dragging');
 
+		if (dragTargetEl) {
+			// Clone source row
+			var new_row = dragSrcEl.cloneNode(true);
+			// Remove source row
+			this.remove();
+			// Re-add events
+			addDragEvents(new_row);
+
+			// Insert new cloned row where it's supposed to go
+			dragTargetEl.parentNode.insertBefore(new_row, dragTargetEl.nextSibling);
+		}
+
+		// Items list has changed
+		items = table.querySelectorAll('tbody tr');
+
 		items.forEach(function (item) {
 			item.classList.remove('placeholder');
 		});
 	}
 };
+
+enableTableDragAndDrop(document.querySelector('table'));

@@ -625,4 +625,15 @@ class DynamicFields
 			$field->save();
 		}
 	}
+
+	public function setOrderAll(array $order)
+	{
+		foreach (array_values($order) as $sort => $key) {
+			if (!array_key_exists($key, $this->_fields)) {
+				throw new \InvalidArgumentException('Unknown field name: ' . $key);
+			}
+
+			$this->_fields[$key]->set('sort_order', $sort);
+		}
+	}
 }

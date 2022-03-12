@@ -5,5 +5,15 @@ use Garradin\Users\DynamicFields;
 
 require_once __DIR__ . '/../_inc.php';
 
-$tpl->assign('fields', DynamicFields::getInstance()->all());
+$csrf_key = 'change_fields_order';
+$fields = DynamicFields::getInstance();
+
+$form->runIf('save', function () use ($fields) {
+    $fields->setOrderAll(f('sort_order'));
+    $fields->save();
+}, $csrf_key, '!config/fields/?msg=SAVED');
+
+$tpl->assign('fields', $fields->all());
+$tpl->assign(compact('csrf_key'));
+
 $tpl->display('admin/config/fields/index.tpl');

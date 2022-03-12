@@ -3,14 +3,12 @@
 {include file="admin/config/_menu.tpl" current="fields"}
 
 <nav class="tabs">
-	<aside>
-		{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}
-	</aside>
+	{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}
 </nav>
 
-{if isset($status) && $status == 'OK'}
+{if $_GET.msg == 'SAVED'}
 	<p class="block confirm">
-		La configuration a bien été enregistrée.
+		L'ordre a bien été enregistré.
 	</p>
 {elseif isset($status) && $status == 'ADDED'}
 	<p class="block alert">
@@ -35,7 +33,7 @@
 			<tr>
 				<td>
 					{button shape="menu" title="Cliquer, glisser et déposer pour modifier l'ordre"}
-					<input type="hidden" name="sort_order[]" value="{$field.id}" />
+					<input type="hidden" name="sort_order[]" value="{$field.name}" />
 				</td>
 				<th>{$field.label}</th>
 				<td>{if $field.list_row}Oui{else}Non{/if}</td>
@@ -49,13 +47,17 @@
 		{/foreach}
 		</tbody>
 	</table>
+
+	<p class="submit">
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
+	</p>
 </form>
 
+<p class="help">
+	Cliquer et glisser-déposer sur une ligne pour en changer l'ordre.
+</p>
+
 <script type="text/javascript" src="{$admin_url}static/scripts/dragdrop-table.js"></script>
-<script type="text/javascript">
-{literal}
-enableTableDragAndDrop(document.querySelector('table'));
-{/literal}
-</script>
 
 {include file="admin/_foot.tpl"}

@@ -158,8 +158,9 @@ table .draggable {
 }
 
 table tr.placeholder {
-    outline: 4px solid rgb(var(--gSecondColor)); !important;
+    box-shadow: 0 10px 0px rgb(var(--gSecondColor));
 }
+
 
 table tr.dragging {
     opacity: 0.5;
