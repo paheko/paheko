@@ -50,7 +50,7 @@ class DynamicField extends Entity
 	/**
 	 * Multiple options (JSON) for select and multiple fields
 	 */
-	protected ?string $options;
+	protected ?array $options = [];
 
 	/**
 	 * Default value
@@ -77,6 +77,7 @@ class DynamicField extends Entity
 		'checkbox'	=>	'Case à cocher',
 		'date'		=>	'Date',
 		'datetime'	=>	'Date et heure',
+		'month'     =>  'Mois et année',
 		'file'      =>  'Fichier',
 		'password'  =>  'Mot de passe',
 		'number'	=>	'Nombre',
@@ -126,6 +127,7 @@ class DynamicField extends Entity
 		'checkbox' => '%1s = 1 OR %1s = 0',
 		'date'     => '%1s IS NULL OR (date(%1$s) IS NOT NULL AND date(%1s) = %1$s)',
 		'datetime' => '%1s IS NULL OR (date(%1$s) IS NOT NULL AND date(%1s) = %1$s)',
+		'month'    => '%1s IS NULL OR (date(%1s || \'-03\') = %1$s || \'-03\')', // Use 3rd day to avoid any potential issue with timezones
 	];
 
 	const SYSTEM_FIELDS = [
@@ -141,6 +143,12 @@ class DynamicField extends Entity
 	{
 		if ($this->system) {
 			throw new ValidationException('Ce champ est utilisé en interne, il n\'est pas possible de le supprimer');
+		}
+
+		if ($this->type == 'file') {
+			foreach (Files::glob(File::CONTEXT_USER . '/*/' . $this->name) as $file) {
+				$file->delete();
+			}
 		}
 
 		return parent::delete();

@@ -3,16 +3,20 @@
 {include file="admin/config/_menu.tpl" current="fields"}
 
 <nav class="tabs">
-	{linkbutton shape="plus" label="Ajouter un champ" href="new.php"}
+	{linkbutton shape="plus" label="Ajouter un champ" href="edit.php"}
 </nav>
 
-{if $_GET.msg == 'SAVED'}
+{if $_GET.msg == 'ORDER_SAVED'}
 	<p class="block confirm">
 		L'ordre a bien été enregistré.
 	</p>
-{elseif isset($status) && $status == 'ADDED'}
-	<p class="block alert">
-		Le champ a été ajouté à la fin de la liste. Pour vérifier et sauvegarder les modifications de la fiche membre cliquer sur le bouton «&nbsp;Vérifier les changements&nbsp;» en base de page.
+{elseif $_GET.msg == 'SAVED'}
+	<p class="block confirm">
+		Les modifications ont bien été enregistrées.
+	</p>
+{elseif $_GET.msg == 'DELETED'}
+	<p class="block confirm">
+		Le champ a bien été supprimé.
 	</p>
 {/if}
 
@@ -48,15 +52,15 @@
 		</tbody>
 	</table>
 
+	<p class="help">
+		Cliquer et glisser-déposer sur une ligne pour en changer l'ordre.
+	</p>
+
 	<p class="submit">
 		{csrf_field key=$csrf_key}
-		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
+		{button type="submit" name="save" label="Enregistrer l'ordre" shape="right"}
 	</p>
 </form>
-
-<p class="help">
-	Cliquer et glisser-déposer sur une ligne pour en changer l'ordre.
-</p>
 
 <script type="text/javascript" src="{$admin_url}static/scripts/dragdrop-table.js"></script>
 

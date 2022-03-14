@@ -1,3 +1,4 @@
+{if !$dialog}
 <nav class="tabs">
 	<ul>
 		<li{if $current == 'index'} class="current"{/if}><a href="{$admin_url}config/">Général</a></li>
@@ -22,3 +23,4 @@
 	</ul>
 	{/if}
 </nav>
+{/if}

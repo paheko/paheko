@@ -111,6 +111,8 @@ class User extends Entity
 			}
 		}
 
+		Files::delete($this->attachementsDirectory());
+
 		return parent::delete();
 	}
 

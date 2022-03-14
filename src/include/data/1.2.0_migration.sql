@@ -54,8 +54,3 @@ DROP TABLE IF EXISTS srs_old;
 
 -- Drop membres
 DROP TABLE IF EXISTS membres;
-
--- Manually update foreign keys
-PRAGMA writable_schema = 1;
-UPDATE sqlite_master SET sql = REPLACE(sql, 'REFERENCES membres', 'REFERENCES users') WHERE sql LIKE '%REFERENCES users' AND type = 'table';
-PRAGMA writable_schema = 0;

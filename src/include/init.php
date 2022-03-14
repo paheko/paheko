@@ -343,7 +343,7 @@ if (ERRORS_REPORT_URL)
 
 ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && ERRORS_TEMPLATE ? ERRORS_TEMPLATE : '<!DOCTYPE html><html><head><title>Erreur interne</title>
 	<style type="text/css">
-	body {font-family: sans-serif; }
+	body {font-family: sans-serif; background: #fff; }
 	code, p, h1 { max-width: 400px; margin: 1em auto; display: block; }
 	code { text-align: right; color: #666; }
 	a { color: blue; }
@@ -359,7 +359,7 @@ ErrorManager::setProductionErrorTemplate(defined('Garradin\ERRORS_TEMPLATE') && 
 	</body></html>');
 
 ErrorManager::setHtmlHeader('<!DOCTYPE html><meta charset="utf-8" /><style type="text/css">
-	body { font-family: sans-serif; } * { margin: 0; padding: 0; }
+	body { font-family: sans-serif; background: #fff; } * { margin: 0; padding: 0; }
 	u, code b, i, h3 { font-style: normal; font-weight: normal; text-decoration: none; }
 	#icn { color: #fff; font-size: 2em; float: right; margin: 1em; padding: 1em; background: #900; border-radius: 50%; }
 	section header { background: #fdd; padding: 1em; }

@@ -274,11 +274,6 @@ class Upgrade
 				$df->save();
 
 				// Migrate other stuff
-				$db->commitSchemaUpdate();
-				$db->close();
-
-				ini_set('sqlite3.defensive', 0);
-				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
 				$db->commitSchemaUpdate();
 			}
