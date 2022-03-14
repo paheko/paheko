@@ -218,6 +218,25 @@ class FileSystem implements StorageInterface
 		return Utils::knatcasesort($files);
 	}
 
+	static public function glob(string $path)
+	{
+		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+		$fullpath = rtrim($fullpath, DIRECTORY_SEPARATOR);
+
+		if (!file_exists($fullpath)) {
+			return [];
+		}
+
+		$files = [];
+
+		foreach (glob($fullpath) as $file) {
+			$file = new \SplFileInfo($file);
+			$files[$file->getType() . '_' .$file->getFilename()] = self::_SplToFile($file);
+		}
+
+		return Utils::knatcasesort($files);
+	}
+
 	static public function listDirectoriesRecursively(string $path): array
 	{
 		$fullpath = self::_getRoot() . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);

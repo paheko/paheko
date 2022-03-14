@@ -50,6 +50,11 @@ class Files
 		return DB::getInstance()->get($query, ...$params);
 	}
 
+	/**
+	 * Returns a list of files and directories inside a parent path
+	 * This is not recursive and will only return files and directories
+	 * directly in the specified $parent path.
+	 */
 	static public function list(string $parent = ''): array
 	{
 		if ($parent !== '') {
@@ -60,7 +65,22 @@ class Files
 		return self::callStorage('list', $parent);
 	}
 
-	static public function zip(string $parent, ?Session $session)
+	/**
+	 * Returns a list of files or directories matching a glob pattern
+	 * only * and ? characters are supported in pattern
+	 */
+	static public function glob(string $pattern): array
+	{
+		return self::callStorage('glob', $parent);
+	}
+
+	/**
+	 * Creates a ZIP file archive from a $parent path
+	 * @param  string  $parent  Parent path
+	 * @param  Session $session Logged-in user session, if set access rights to the path will be checked,
+	 * if left NULL, then no check will be made (!).
+	 */
+	static public function zip(string $parent, ?Session $session): void
 	{
 		$file = Files::get($parent);
 
@@ -92,7 +112,10 @@ class Files
 		$zip->close();
 	}
 
-	static public function listForContext(string $context, ?string $ref = null)
+	/**
+	 * List files and directories inside a context (first-level directory)
+	 */
+	static public function listForContext(string $context, ?string $ref = null): array
 	{
 		$path = $context;
 
@@ -103,6 +126,9 @@ class Files
 		return self::list($path);
 	}
 
+	/**
+	 * Delete a specified file/directory path
+	 */
 	static public function delete(string $path): void
 	{
 		$file = self::get($path);

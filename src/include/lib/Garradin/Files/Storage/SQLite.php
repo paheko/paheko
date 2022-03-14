@@ -120,6 +120,11 @@ class SQLite implements StorageInterface
 		return EM::findOne(File::class, $sql, $path);
 	}
 
+	static public function glob(string $pattern): array
+	{
+		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE path GLOB ? AND path NOT GLOB ? ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $pattern, $pattern . '/*');
+	}
+
 	static public function list(string $path): array
 	{
 		return EM::getInstance(File::class)->all('SELECT * FROM @TABLE WHERE parent = ? ORDER BY type DESC, name COLLATE U_NOCASE ASC;', $path);
