@@ -21,7 +21,7 @@ class Categories
 	static public function listWithStats(): array
 	{
 		return DB::getInstance()->getGrouped(sprintf('SELECT c.id, c.*,
-			(SELECT COUNT(*) FROM membres WHERE id_category = c.id) AS count
+			(SELECT COUNT(*) FROM users WHERE id_category = c.id) AS count
 			FROM %s c ORDER BY c.name COLLATE U_NOCASE;', Category::TABLE));
 	}
 
