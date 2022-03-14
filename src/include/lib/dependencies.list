@@ -9,6 +9,7 @@ KD2/FileInfo.php
 KD2/Form.php
 KD2/FossilInstaller.php
 KD2/HTTP.php
+KD2/Garbage2xhtml.php
 KD2/Graphics/Image.php
 KD2/Graphics/QRCode.php
 KD2/Graphics/SVG/Pie.php
