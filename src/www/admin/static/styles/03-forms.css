@@ -645,13 +645,19 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
 /**
  * Progress spinner
  */
-.progressing {
+form.progressing {
     position: relative;
 }
 
-fieldset.progressing > dl, fieldset.progressing > p {
+form fieldset, form p.submit {
+    transition: .5s filter linear;
+}
+
+form.progressing fieldset, form.progressing p.submit {
+    pointer-events: none;
     opacity: 0.5;
     filter: blur(3px);
+    filter: grayscale(100%) blur(3px);
 }
 
 .progressing::after {
@@ -665,9 +671,9 @@ fieldset.progressing > dl, fieldset.progressing > p {
     margin: auto;
     width: 50px;
     height: 50px;
-    border: 5px solid #666;
+    border: 5px solid var(--gBorderColor);
     border-radius: 50%;
-    border-top-color: #ccc;
+    border-top-color: var(--gLightBackgroundColor);
     animation: spin 1s ease-in-out infinite;
     filter: none;
 }

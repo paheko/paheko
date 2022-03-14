@@ -11,7 +11,12 @@ ALTER TABLE services_reminders_sent RENAME TO services_reminders_sent_old;
 ALTER TABLE acc_transactions RENAME TO acc_transactions_old;
 ALTER TABLE acc_transactions_users RENAME TO acc_transactions_users_old;
 
+DROP VIEW acc_accounts_balances;
+
 .read 1.2.0_schema.sql
+
+INSERT INTO users_sessions SELECT * FROM membres_sessions;
+DROP TABLE membres_sessions;
 
 INSERT INTO services_users SELECT * FROM services_users_old;
 
@@ -43,3 +48,14 @@ INSERT INTO config VALUES ('log_anonymize', 365);
 
 -- This is now part of the config_users_fields table
 DELETE FROM config WHERE key IN ('champs_membres', 'champ_identite', 'champ_identifiant');
+
+-- Seems that some installations had this leftover? Let's just drop it.
+DROP TABLE IF EXISTS srs_old;
+
+-- Drop membres
+DROP TABLE IF EXISTS membres;
+
+-- Manually update foreign keys
+PRAGMA writable_schema = 1;
+UPDATE sqlite_master SET sql = REPLACE(sql, 'REFERENCES membres', 'REFERENCES users') WHERE sql LIKE '%REFERENCES users' AND type = 'table';
+PRAGMA writable_schema = 0;

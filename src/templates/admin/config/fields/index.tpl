@@ -39,9 +39,9 @@
 				<td>{if $field.list_row}Oui{else}Non{/if}</td>
 				<td class="actions">
 					{if !$field.system || ($field.system && !($field.system | $field::PRESET))}
-						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$field.id}
+						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$field.id target="_dialog"}
 					{/if}
-					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$field.id}
+					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$field.id target="_dialog"}
 				</td>
 			</tr>
 		{/foreach}

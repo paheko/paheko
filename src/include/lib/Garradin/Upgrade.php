@@ -13,7 +13,7 @@ use KD2\FossilInstaller;
 
 class Upgrade
 {
-	const MIN_REQUIRED_VERSION = '1.1.0';
+	const MIN_REQUIRED_VERSION = '1.1.19';
 
 	static protected $installer = null;
 
@@ -52,14 +52,16 @@ class Upgrade
 	static public function upgrade()
 	{
 		$db = DB::getInstance();
+		$backup = new Sauvegarde;
 		$v = $db->version();
 
 		Plugin::toggleSignals(false);
 
-		Static_Cache::store('upgrade', 'Mise à jour en cours.');
+		Static_Cache::store('upgrade', 'Updating');
 
 		// Créer une sauvegarde automatique
-		$backup_name = (new Sauvegarde)->create(false, 'pre-upgrade-' . garradin_version());
+		$backup_file = sprintf(DATA_ROOT . '/association.pre_upgrade-%s.sqlite', garradin_version());
+		$backup->make($backup_file);
 
 		try {
 			if (version_compare($v, '1.1.1', '<')) {
@@ -247,35 +249,44 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.21', '<')) {
-				$db->begin();
+				$db->beginSchemaUpdate();
 				// Add id_analytical column to services_fees
 				$db->import(ROOT . '/include/data/1.1.21_migration.sql');
-				$db->commit();
+				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.1.22', '<')) {
-				$db->begin();
+				$db->beginSchemaUpdate();
 				// Create acc_accounts_balances view
 				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
-				$db->commit();
+				$db->commitSchemaUpdate();
 			}
 
 			if (version_compare($v, '1.2.0', '<')) {
 				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
-				$db->begin();
+				$db->beginSchemaUpdate();
 
 				// Create config_users_fields table
 				$db->import(ROOT . '/include/data/1.2.0_schema.sql');
-
 
 				// Migrate users table
 				$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
 				$df->save();
 
 				// Migrate other stuff
+				$db->commitSchemaUpdate();
+				$db->close();
+
+				ini_set('sqlite3.defensive', 0);
+				$db->beginSchemaUpdate();
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
-				$db->commit();
+				$db->commitSchemaUpdate();
 			}
+
+			// Réinstaller les plugins système si nécessaire
+			Plugin::checkAndInstallSystemPlugins();
+
+			Plugin::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
@@ -299,11 +310,6 @@ class Upgrade
 			$db->exec('UPDATE config SET value = NULL WHERE key = \'last_version_check\';');
 
 			Static_Cache::remove('upgrade');
-
-			// Réinstaller les plugins système si nécessaire
-			Plugin::checkAndInstallSystemPlugins();
-
-			Plugin::upgradeAllIfRequired();
 		}
 		catch (\Exception $e)
 		{
@@ -311,13 +317,12 @@ class Upgrade
 				$db->rollback();
 			}
 
-			$s = new Sauvegarde;
-			$s->restoreFromLocal($backup_name);
-			$s->remove($backup_name);
+			$db->close();
+			rename($backup_file, DB_FILE);
+
 			Static_Cache::remove('upgrade');
 			throw $e;
 		}
-
 
 		$session = Session::getInstance();
 		$user_is_logged = $session->isLogged(true);

@@ -388,5 +388,7 @@ class Install
 		<div class="spinner">
 			<h2>%s</h2>
 		</div>', $next, htmlspecialchars($message));
+
+		flush();
 	}
 }

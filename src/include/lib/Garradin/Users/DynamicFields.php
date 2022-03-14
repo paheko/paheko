@@ -198,6 +198,17 @@ class DynamicFields
 		return $this->_fields[$key] ?? null;
 	}
 
+	public function fieldById(int $id): ?DynamicField
+	{
+		foreach ($this->_fields as $field) {
+			if ($field->id === $id) {
+				return $field;
+			}
+		}
+
+		return null;
+	}
+
 	public function fieldsBySystemUse(string $use): array
 	{
 		return $this->_fields_by_system_use[$use] ?? [];
@@ -481,7 +492,7 @@ class DynamicFields
 	{
 		// Champs à recopier
 		$copy = array_keys(DynamicField::SYSTEM_FIELDS) + array_keys($this->_fields);
-		return $copy;
+		return array_combine($copy, $copy);
 	}
 
 	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null): string
@@ -502,6 +513,7 @@ class DynamicFields
 
 	public function copy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null): void
 	{
+		//var_dump($this->getSQLCopy($old_table_name, $new_table_name, $fields)); exit;
 		DB::getInstance()->exec($this->getSQLCopy($old_table_name, $new_table_name, $fields));
 	}
 
@@ -559,9 +571,7 @@ class DynamicFields
 	{
 		$db = DB::getInstance();
 
-		$db->exec('PRAGMA foreign_keys = OFF;');
-
-		$db->begin();
+		$db->beginSchemaUpdate();
 		$this->createTable(User::TABLE . '_tmp');
 		$this->copy(User::TABLE, User::TABLE . '_tmp');
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', User::TABLE));
@@ -569,8 +579,7 @@ class DynamicFields
 
 		$this->createIndexes(User::TABLE);
 
-		$db->commit();
-		$db->exec('PRAGMA foreign_keys = ON;');
+		$db->commitSchemaUpdate();
 
 		return true;
 	}
@@ -587,8 +596,18 @@ class DynamicFields
 
 	public function delete(string $name)
 	{
+		$db = DB::getInstance();
+
+		$db->begin();
+
+		$this->_fields[$name]->delete();
 		unset($this->_fields[$name]);
-		$this->reloadCache();
+
+		$this->reload();
+		// FIXME/TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
+		$this->rebuildUsersTable();
+
+		$db->commit();
 	}
 
 	public function save()

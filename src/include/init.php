@@ -389,11 +389,13 @@ function user_error(\Exception $e)
 	}
 	else
 	{
-		$tpl = Template::getInstance();
+		// Don't use Template class as there might be an error there due do the context (eg. install/upgrade)
+		$tpl = new \KD2\Smartyer(ROOT . '/templates/error.tpl');
+		$tpl->setCompiledDir(SMARTYER_CACHE_ROOT);
 
 		$tpl->assign('error', $e->getMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
-		$tpl->display('error.tpl');
+		$tpl->display();
 	}
 
 	exit;

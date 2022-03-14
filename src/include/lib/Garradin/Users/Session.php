@@ -178,7 +178,7 @@ class Session extends \KD2\UserSession
 	{
 		// On va chercher le premier membre avec le droit de gérer la config
 		if (-1 === $id) {
-			$id = $this->db->firstColumn('SELECT id FROM membres
+			$id = $this->db->firstColumn('SELECT id FROM users
 				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
 				LIMIT 1', self::ACCESS_ADMIN);
 		}

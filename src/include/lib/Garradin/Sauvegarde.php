@@ -106,7 +106,7 @@ class Sauvegarde
 		return basename($backup);
 	}
 
-	protected function make(string $dest)
+	public function make(string $dest)
 	{
 		// Acquire lock
 		$version = \SQLite3::version();
@@ -484,13 +484,13 @@ class Sauvegarde
 		$session = Session::getInstance();
 
 		// Empêchons l'admin de se tirer une balle dans le pied
-		if ($session->isLogged())
+		if ($session->isLogged(true))
 		{
-			if (version_compare($version, '1.1', '<')) { // FIXME remove in 1.2
-				$sql = 'SELECT 1 FROM membres_categories WHERE id = (SELECT id_categorie FROM membres WHERE id = %d) AND droit_connexion >= %d AND droit_config >= %d';
+			if (version_compare($version, '1.2', '<')) { // FIXME remove in 1.3
+				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 			}
 			else {
-				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
+				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM users WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 			}
 
 			$sql = sprintf($sql, $session->getUser()->id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
@@ -551,6 +551,12 @@ class Sauvegarde
 		}
 
 		return $return;
+	}
+
+	public function restore(string $file)
+	{
+		DB::getInstance()->close();
+		return copy($file, DB_FILE);
 	}
 
 	/**

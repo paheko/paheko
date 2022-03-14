@@ -507,6 +507,16 @@
 		}
 	});
 
+	g.onload(() => {
+		let forms = document.forms;
+
+		if (forms.length != 1) return;
+
+		forms[0].addEventListener('submit', () => {
+			forms[0].classList.add('progressing');
+		})
+	});
+
 	// To be able to select a whole table line just by clicking the row
 	g.onload(function () {
 		var tableActions = document.querySelectorAll('form table tfoot .actions select');

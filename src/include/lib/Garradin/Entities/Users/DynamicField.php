@@ -143,7 +143,7 @@ class DynamicField extends Entity
 			throw new ValidationException('Ce champ est utilisé en interne, il n\'est pas possible de le supprimer');
 		}
 
-		parent::delete();
+		return parent::delete();
 	}
 
 	public function selfCheck(): void

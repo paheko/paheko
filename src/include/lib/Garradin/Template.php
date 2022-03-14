@@ -79,9 +79,10 @@ class Template extends \KD2\Smartyer
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
 		$session = Session::getInstance();
+		$logged = $session->isLogged(true);
 
-		$this->assign('is_logged', $session->isLogged());
-		$this->assign('logged_user', $session->getUser());
+		$this->assign('is_logged', $logged);
+		$this->assign('logged_user', $logged ? $session->getUser() : null);
 		$this->assign('session', $session);
 		$this->assign('config', Config::getInstance());
 		$this->assign('dialog', isset($_GET['_dialog']));
