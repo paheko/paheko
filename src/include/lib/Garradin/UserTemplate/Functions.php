@@ -17,7 +17,25 @@ class Functions
 		'include',
 		'http',
 		'dump',
+		'mail',
 	];
+
+	static public function mail(array $params, Brindille $tpl, int $line)
+	{
+		if (empty($params['to'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "to" manquant pour la fonction "mail"', $line));
+		}
+
+		if (empty($params['subject'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "subject" manquant pour la fonction "mail"', $line));
+		}
+
+		if (empty($params['body'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
+		}
+
+		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $params['to'], $params['subject'], $params['body']);
+	}
 
 	static public function dump(array $params, Brindille $tpl)
 	{
