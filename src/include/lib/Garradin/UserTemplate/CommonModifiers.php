@@ -43,7 +43,7 @@ class CommonModifiers
 		$out = self::money($number, $hide_empty);
 
 		if ($out !== '') {
-			$out .= '&nbsp;' . Config::getInstance()->get('monnaie');
+			$out .= '&nbsp;' . Config::getInstance()->get('currency');
 		}
 
 		return $out;

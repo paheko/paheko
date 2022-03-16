@@ -9,6 +9,6 @@
 	{include file="acc/reports/_statement.tpl" statement=$volunteering header=false caption1="Emplois des contributions volontaires en nature" caption2="Contributions volontaires en nature"}
 {/if}
 
-<p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
+<p class="help">Toutes les écritures sont libellées en {$config.currency}.</p>
 
 {include file="admin/_foot.tpl"}

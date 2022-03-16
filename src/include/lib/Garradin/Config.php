@@ -34,7 +34,7 @@ class Config extends Entity
 	protected $telephone_asso;
 	protected $site_asso;
 
-	protected $monnaie;
+	protected $currency;
 	protected $pays;
 
 	protected $default_category;
@@ -62,7 +62,7 @@ class Config extends Entity
 		'telephone_asso'        => '?string',
 		'site_asso'             => '?string',
 
-		'monnaie'               => 'string',
+		'currency'              => 'string',
 		'pays'                  => 'string',
 
 		'default_category'      => 'int',
@@ -191,7 +191,7 @@ class Config extends Entity
 	public function selfCheck(): void
 	{
 		$this->assert(trim($this->nom_asso) != '', 'Le nom de l\'association ne peut rester vide.');
-		$this->assert(trim($this->monnaie) != '', 'La monnaie ne peut rester vide.');
+		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
 		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
 		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
