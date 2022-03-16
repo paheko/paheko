@@ -43,7 +43,7 @@
 			<img src="{$url}" alt="" />
 			<figure class="masked-icon" title="Aperçu de l'icône sur téléphone">
 				<span class="icon"><img src="{$url}" alt="" /></span>
-				<figcaption>{$config.nom_asso|truncate:12:'…':true}</figcaption>
+				<figcaption>{$config.org_name|truncate:12:'…':true}</figcaption>
 			</figure>
 		</dd>
 		{/if}

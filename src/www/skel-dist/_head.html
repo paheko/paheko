@@ -2,11 +2,11 @@
 <html lang="fr">
 <head>
 	<meta charset="utf-8" />
-	<title>{{if $title}}{{$title}} — {{/if}}{{$config.nom_asso}}</title>
+	<title>{{if $title}}{{$title}} — {{/if}}{{$config.org_name}}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
 	<link rel="stylesheet" type="text/css" href="{{$root_url}}default.css" media="screen,projection,handheld" />
 	<link rel="stylesheet" type="text/css" href="{{$root_url}}content.css" media="all" />
-	<link rel="alternate" type="application/atom+xml" title="{{$config.nom_asso}}" href="{{$root_url}}atom.xml" />
+	<link rel="alternate" type="application/atom+xml" title="{{$config.org_name}}" href="{{$root_url}}atom.xml" />
 	<link rel="icon" type="image/png" href="{{$config.files.favicon}}" />
 </head>
 
@@ -22,18 +22,18 @@
 </header>
 
 <header class="main">
-	<h1><a href="{{$root_url}}">{{if $config.files.logo}}<img src="{{$config.files.logo}}&150px" alt="" class="logo" />{{/if}} <span>{{$config.nom_asso}}</span></a></h1>
+	<h1><a href="{{$root_url}}">{{if $config.files.logo}}<img src="{{$config.files.logo}}&150px" alt="" class="logo" />{{/if}} <span>{{$config.org_name}}</span></a></h1>
 
-{{if $config.adresse_asso || $config.telephone_asso || $config.email_asso}}
+{{if $config.org_address || $config.org_phone || $config.org_email}}
 	<article class="contacts">
-		{{if $config.adresse_asso}}
-			<h4>{{$config.adresse_asso|escape}}</h4>
+		{{if $config.org_address}}
+			<h4>{{$config.org_address|escape}}</h4>
 		{{/if}}
-		{{if $config.telephone_asso}}
-			<h5>{{$config.telephone_asso|raw|protect_contact}}</h5>
+		{{if $config.org_phone}}
+			<h5>{{$config.org_phone|raw|protect_contact}}</h5>
 		{{/if}}
-		{{if $config.email_asso}}
-			<h5>{{$config.email_asso|raw|protect_contact}}</h5>
+		{{if $config.org_email}}
+			<h5>{{$config.org_email|raw|protect_contact}}</h5>
 		{{/if}}
 	</article>
 {{/if}}

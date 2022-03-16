@@ -28,7 +28,7 @@ class Install
 			throw new UserException('Le mot de passe ne correspond pas.');
 		}
 
-		if (!trim($config->nom_asso)) {
+		if (!trim($config->org_name)) {
 			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
 		}
 
@@ -50,7 +50,7 @@ class Install
 			'password'     => $session::hashPassword($password),
 			'name'         => $user->identite,
 			'email'        => $user->email,
-			'organization' => $config->nom_asso,
+			'organization' => $config->org_name,
 		]));
 
 		rename(DB_FILE, sprintf(DATA_ROOT . '/association.%s.sqlite', date('Y-m-d-His-') . 'avant-remise-a-zero'));
@@ -148,8 +148,8 @@ class Install
 		// Configuration de base
 		// c'est dans Config::set que sont vérifiées les données utilisateur (renvoie UserException)
 		$config = Config::getInstance();
-		$config->set('nom_asso', $name);
-		$config->set('email_asso', $user_email);
+		$config->set('org_name', $name);
+		$config->set('org_email', $user_email);
 		$config->set('currency', '€');
 		$config->set('country', 'FR');
 		$config->set('site_disabled', true);

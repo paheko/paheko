@@ -28,11 +28,11 @@ class Config extends Entity
 		'favicon'          => 'image',
 	];
 
-	protected $nom_asso;
-	protected $adresse_asso;
-	protected $email_asso;
-	protected $telephone_asso;
-	protected $site_asso;
+	protected $org_name;
+	protected $org_address;
+	protected $org_email;
+	protected $org_phone;
+	protected $org_web;
 
 	protected $currency;
 	protected $country;
@@ -56,11 +56,11 @@ class Config extends Entity
 	protected $log_anonymize;
 
 	protected $_types = [
-		'nom_asso'              => 'string',
-		'adresse_asso'          => '?string',
-		'email_asso'            => 'string',
-		'telephone_asso'        => '?string',
-		'site_asso'             => '?string',
+		'org_name'              => 'string',
+		'org_address'           => '?string',
+		'org_email'             => 'string',
+		'org_phone'             => '?string',
+		'org_web'               => '?string',
 
 		'currency'              => 'string',
 		'country'               => 'string',
@@ -190,11 +190,11 @@ class Config extends Entity
 
 	public function selfCheck(): void
 	{
-		$this->assert(trim($this->nom_asso) != '', 'Le nom de l\'association ne peut rester vide.');
+		$this->assert(trim($this->org_name) != '', 'Le nom de l\'association ne peut rester vide.');
 		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
 		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
-		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
-		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
+		$this->assert(null === $this->org_web || filter_var($this->org_web, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
+		$this->assert(trim($this->org_email) != '' && SMTP::checkEmailIsValid($this->org_email, false), 'L\'adresse e-mail de l\'association est  invalide.');
 
 		// Files
 		$this->assert(count($this->files) == count(self::FILES));

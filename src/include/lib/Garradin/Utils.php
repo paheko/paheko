@@ -658,7 +658,7 @@ class Utils
         }
 
         $config = Config::getInstance();
-        $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
+        $subject = sprintf('[%s] %s', $config->get('org_name'), $subject);
 
         // Tentative d'envoi du message en utilisant un plugin
         $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('context', 'recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
@@ -681,9 +681,9 @@ class Utils
         $content = wordwrap($content);
         $content = trim($content);
 
-        $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config->get('site_asso'));
+        $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('org_name'), $config->get('org_web'));
         $content .= "Vous recevez ce message car vous êtes inscrit dans nos contacts.\n";
-        $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('email_asso');
+        $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('org_email');
 
         $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
 
@@ -692,8 +692,8 @@ class Utils
             $content = Security::encryptWithPublicKey($pgp_key, $content);
         }
 
-        $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
-        $headers['Return-Path'] = $config->get('email_asso');
+        $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('org_name'))), $config->get('org_email'));
+        $headers['Return-Path'] = $config->get('org_email');
 
         $headers['MIME-Version'] = '1.0';
         $headers['Content-type'] = 'text/plain; charset=UTF-8';

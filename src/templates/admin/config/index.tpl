@@ -53,11 +53,11 @@
 	<fieldset>
 		<legend>Informations sur l'association</legend>
 		<dl>
-			{input type="text" name="nom_asso" required=true source=$config label="Nom"}
-			{input type="email" name="email_asso" required=true source=$config label="Adresse e-mail de contact"}
-			{input type="textarea" name="adresse_asso" source=$config label="Adresse postale"}
-			{input type="tel" name="telephone_asso" source=$config label="Numéro de téléphone"}
-			{input type="url" name="site_asso" source=$config label="Site web" help="Si vous n'utilisez pas la fonctionnalité site web de Garradin"}
+			{input type="text" name="org_name" required=true source=$config label="Nom"}
+			{input type="email" name="org_email" required=true source=$config label="Adresse e-mail de contact"}
+			{input type="textarea" name="org_address" source=$config label="Adresse postale"}
+			{input type="tel" name="org_phone" source=$config label="Numéro de téléphone"}
+			{input type="url" name="org_web" source=$config label="Site web" help="Si vous n'utilisez pas la fonctionnalité site web de Garradin"}
 		</dl>
 	</fieldset>
 

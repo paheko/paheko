@@ -3,15 +3,15 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="fr">
 
 	<link rel="self" href="{{$request_url}}" />
-	<title type="html">{{$config.nom_asso|xml_escape}}</title>
-	<link href="{{$root_url|xml_escape}}" rel="alternate" type="text/html" title="{{$config.nom_asso|xml_escape}}" />
+	<title type="html">{{$config.org_name|xml_escape}}</title>
+	<link href="{{$root_url|xml_escape}}" rel="alternate" type="text/html" title="{{$config.org_name|xml_escape}}" />
 
 	{{#articles order="published DESC" limit=1}}
 	<updated>{{$published|atom_date}}</updated>
 	{{/articles}}
 
 	<author>
-		<name>{{$config.nom_asso|xml_escape}}</name>
+		<name>{{$config.org_name|xml_escape}}</name>
 	</author>
 
 	<id>{{$root_url|xml_escape}}</id>
@@ -23,7 +23,7 @@
 		<link href="{{$url|xml_escape}}" rel="alternate" type="text/html" title="{{$title|xml_escape}}" />
 		<id>{{$url|xml_escape}}</id>
 		<updated>{{$published|atom_date}}</updated>
-		<author><name>{{$config.nom_asso|xml_escape}}</name></author>
+		<author><name>{{$config.org_name|xml_escape}}</name></author>
 		<content type="html">
 			<![CDATA[
 			{{$html|raw}}

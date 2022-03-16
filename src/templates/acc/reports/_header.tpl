@@ -18,7 +18,7 @@
 		</ul>
 	</nav>
 
-	<h2>{$config.nom_asso} — {$title}</h2>
+	<h2>{$config.org_name} — {$title}</h2>
 	{if isset($analytical)}
 		<h3>Projet&nbsp;: {$analytical.label}</h3>
 	{/if}

@@ -14,25 +14,25 @@
 </nav>
 
 <aside class="describe">
-	<h3>{$config.nom_asso}</h3>
-	{if !empty($config.adresse_asso)}
+	<h3>{$config.org_name}</h3>
+	{if !empty($config.org_address)}
 	<p>
-		{$config.adresse_asso|escape|nl2br}
+		{$config.org_address|escape|nl2br}
 	</p>
 	{/if}
-	{if !empty($config.telephone_asso)}
+	{if !empty($config.org_phone)}
 	<p>
-		Tél. : <a href="tel:{$config.telephone_asso}">{$config.telephone_asso}</a>
+		Tél. : <a href="tel:{$config.org_phone}">{$config.org_phone}</a>
 	</p>
 	{/if}
-	{if !empty($config.email_asso)}
+	{if !empty($config.org_email)}
 	<p>
-		E-Mail : <a href="mailto:{$config.email_asso}">{$config.email_asso}</a>
+		E-Mail : <a href="mailto:{$config.org_email}">{$config.org_email}</a>
 	</p>
 	{/if}
-	{if !empty($config.site_asso)}
+	{if !empty($config.org_web)}
 	<p>
-		Web : <a href="{$config.site_asso}" target="_blank">{$config.site_asso}</a>
+		Web : <a href="{$config.org_web}" target="_blank">{$config.org_web}</a>
 	</p>
 	{/if}
 </aside>

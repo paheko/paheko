@@ -9,7 +9,7 @@ $manifest = [
 	'theme_color'      => $config->color1 ?? ADMIN_COLOR1,
 	'description'      => 'Gestion de l\'association',
 	'display'          => 'standalone',
-	'name'             => $config->nom_asso,
+	'name'             => $config->org_name,
 	'start_url'        => ADMIN_URL,
 	'icons'            => [
 		[

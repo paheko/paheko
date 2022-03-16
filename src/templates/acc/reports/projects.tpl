@@ -30,7 +30,7 @@
 </nav>
 
 <div class="year-header">
-	<h2>{$config.nom_asso} — Projets</h2>
+	<h2>{$config.org_name} — Projets</h2>
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>

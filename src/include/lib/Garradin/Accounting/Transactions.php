@@ -176,7 +176,7 @@ class Transactions
 
 		CSV::export(
 			$format,
-			sprintf('Export comptable %s - %s - %s', strtolower(self::EXPORT_NAMES[$type]), Config::getInstance()->get('nom_asso'), $year->label),
+			sprintf('Export comptable %s - %s - %s', strtolower(self::EXPORT_NAMES[$type]), Config::getInstance()->get('org_name'), $year->label),
 			self::iterateExport($year->id(), $type),
 			array_values(self::EXPORT_COLUMNS[$type])
 		);

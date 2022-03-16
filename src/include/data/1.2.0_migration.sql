@@ -55,6 +55,12 @@ UPDATE config SET key = 'currency' WHERE key = 'monnaie';
 UPDATE config SET key = 'backup_frequency' WHERE key = 'frequence_sauvegardes';
 UPDATE config SET key = 'backup_limit' WHERE key = 'nombre_sauvegardes';
 
+UPDATE config SET key = 'org_name' WHERE key = 'nom_asso';
+UPDATE config SET key = 'org_address' WHERE key = 'adresse_asso';
+UPDATE config SET key = 'org_email' WHERE key = 'email_asso';
+UPDATE config SET key = 'org_phone' WHERE key = 'telephone_asso';
+UPDATE config SET key = 'org_web' WHERE key = 'site_asso';
+
 -- This is now part of the config_users_fields table
 DELETE FROM config WHERE key IN ('champs_membres', 'champ_identite', 'champ_identifiant');
 

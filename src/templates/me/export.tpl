@@ -6,7 +6,7 @@
 
 <body>
 <h1>Données utilisateur</h1>
-<p>Ce document contient une copie de toutes les données détenues sur vous par {$config.nom_asso}, conformément à la réglementation.</p>
+<p>Ce document contient une copie de toutes les données détenues sur vous par {$config.org_name}, conformément à la réglementation.</p>
 
 <hr />
 

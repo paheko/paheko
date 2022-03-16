@@ -223,7 +223,7 @@ class Session extends \KD2\UserSession
 		$out = [];
 		$out['secret'] = $secret;
 		$out['secret_display'] = implode(' ', str_split($secret, 4));
-		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $secret);
+		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('org_name'), $secret);
 
 		$qrcode = new QRCode($out['url']);
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
@@ -400,7 +400,7 @@ class Session extends \KD2\UserSession
 		$out = [];
 		$out['secret'] = Security_OTP::getRandomSecret();
 		$out['secret_display'] = implode(' ', str_split($out['secret'], 4));
-		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('nom_asso'), $out['secret']);
+		$out['url'] = Security_OTP::getOTPAuthURL(Config::getInstance()->get('org_name'), $out['secret']);
 
 		$qrcode = new QRCode($out['url']);
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());

@@ -23,7 +23,7 @@ $export_data = [
 
 $tpl->assign(compact('champs_list', 'data', 'services_list'));
 
-$name = sprintf('%s - Donnees - %s.zip', Config::getInstance()->get('nom_asso'), $data->identite);
+$name = sprintf('%s - Donnees - %s.zip', Config::getInstance()->get('org_name'), $data->identite);
 header('Content-type: application/zip');
 header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
 

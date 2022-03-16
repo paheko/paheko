@@ -77,10 +77,10 @@ class Reminders
 	{
 		$config = Config::getInstance();
 		$tags = [
-			'#NOM_ASSO'		=>	$config->get('nom_asso'),
-			'#ADRESSE_ASSO'	=>	$config->get('adresse_asso'),
-			'#EMAIL_ASSO'	=>	$config->get('email_asso'),
-			'#SITE_ASSO'	=>	$config->get('site_asso'),
+			'#NOM_ASSO'		=>	$config->get('org_name'),
+			'#ADRESSE_ASSO'	=>	$config->get('org_address'),
+			'#EMAIL_ASSO'	=>	$config->get('org_email'),
+			'#SITE_ASSO'	=>	$config->get('org_web'),
 			'#URL_RACINE'	=>	WWW_URL,
 			'#URL_SITE'		=>	WWW_URL,
 			'#URL_ADMIN'	=>	ADMIN_URL,

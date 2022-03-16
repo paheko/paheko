@@ -33,7 +33,7 @@ class UserTemplate extends Brindille
 			return self::$root_variables;
 		}
 
-		static $keys = ['adresse_asso', 'color1', 'color2', 'email_asso', 'currency', 'nom_asso', 'country', 'site_asso', 'telephone_asso', 'files'];
+		static $keys = ['color1', 'color2', 'org_name', 'org_address', 'org_email', 'org_phone', 'org_web', 'currency', 'country', 'files'];
 
 		$config = Config::getInstance();
 
@@ -46,6 +46,14 @@ class UserTemplate extends Brindille
 
 		$config = array_intersect_key($config->asArray(), array_flip($keys));
 		$config['files'] = $files;
+
+		// @deprecated
+		// FIXME: remove in a future version
+		$config['nom_asso'] = $config['org_name'];
+		$config['adresse_asso'] = $config['org_address'];
+		$config['email_asso'] = $config['org_email'];
+		$config['telephone_asso'] = $config['org_phone'];
+		$config['site_asso'] = $config['org_web'];
 
 		self::$root_variables = [
 			'root_url'     => WWW_URL,

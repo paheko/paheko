@@ -235,7 +235,7 @@ class Sauvegarde
 
 		if (null === $file) {
 			$file = DB_FILE;
-			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('nom_asso'), date('Y-m-d'));
+			$name = sprintf('%s - Sauvegarde données - %s.sqlite', $config->get('org_name'), date('Y-m-d'));
 
 			$tmp_file = tempnam(sys_get_temp_dir(), 'gdin');
 			$this->make($tmp_file);
@@ -247,7 +247,7 @@ class Sauvegarde
 				throw new UserException('Nom de fichier non valide.');
 			}
 
-			$name = sprintf('%s - %s', $config->get('nom_asso'), str_replace('association.', '', $file));
+			$name = sprintf('%s - %s', $config->get('org_name'), str_replace('association.', '', $file));
 			$file = DATA_ROOT . '/' . $file;
 
 			if (!file_exists($file)) {
@@ -273,7 +273,7 @@ class Sauvegarde
 
 	public function dumpFilesZip(): void
 	{
-		$name = Config::getInstance()->get('nom_asso') . ' - Documents.zip';
+		$name = Config::getInstance()->get('org_name') . ' - Documents.zip';
 		header('Content-type: application/zip');
 		header(sprintf('Content-Disposition: attachment; filename="%s"', $name));
 
