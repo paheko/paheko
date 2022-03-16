@@ -49,8 +49,6 @@
 			new_color[i] = Math.min(new_color[i], 255);
 		}
 
-		console.log(new_color, contrast_color, change);
-
 		// Mise à jour variable CSS
 		document.documentElement.style.setProperty('--' + element, new_color.join(','));
 
@@ -75,9 +73,9 @@
 
 	function applyColors()
 	{
-		let input = $('#f_couleur2');
+		let input = $('#f_color2');
 		let color = colorToRGB(input.value, 'gSecondColor');
-		let color1 = $('#f_couleur1'), color2 = $('#f_couleur2');
+		let color1 = $('#f_color1'), color2 = $('#f_color2');
 		let default_colors = color1.value == color1.placeholder && color2.value == color2.placeholder;
 
 		var img = new Image;
@@ -199,16 +197,16 @@
 	}
 
 	garradin.onload(function () {
-		var couleurs = {'couleur1': 'gMainColor', 'couleur2': 'gSecondColor'};
+		var colors = {'color1': 'gMainColor', 'color2': 'gSecondColor'};
 
-		for (var couleur in couleurs)
+		for (var color in colors)
 		{
-			if (!couleurs.hasOwnProperty(couleur)) continue;
+			if (!colors.hasOwnProperty(color)) continue;
 
-			var input = document.getElementById('f_' + couleur);
+			var input = document.getElementById('f_' + color);
 
 			input.oninput = function () {
-				var c = changeColor(couleurs[this.name], this.value);
+				var c = changeColor(colors[this.name], this.value);
 				this.value = RGBToHex(c);
 			};
 
@@ -221,7 +219,7 @@
 			reset_btn.onclick = function() {
 				var input = this.previousSibling;
 				input.value = input.getAttribute('placeholder');
-				changeColor(couleurs[input.name], input.value);
+				changeColor(colors[input.name], input.value);
 				return false;
 			};
 

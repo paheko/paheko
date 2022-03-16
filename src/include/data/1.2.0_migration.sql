@@ -46,6 +46,11 @@ DROP TABLE recherches;
 INSERT INTO config VALUES ('log_retention', 720);
 INSERT INTO config VALUES ('log_anonymize', 365);
 
+-- Rename config keys to english
+UPDATE config SET key = 'default_category' WHERE key = 'categorie_membres';
+UPDATE config SET key = 'color1' WHERE key = 'couleur1';
+UPDATE config SET key = 'color2' WHERE key = 'couleur2';
+
 -- This is now part of the config_users_fields table
 DELETE FROM config WHERE key IN ('champs_membres', 'champ_identite', 'champ_identifiant');
 

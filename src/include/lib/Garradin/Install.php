@@ -172,7 +172,7 @@ class Install
 		]);
 		$cat->save();
 
-		$config->set('categorie_membres', $cat->id());
+		$config->set('default_category', $cat->id());
 
 		// Create default category for ancient users
 		$cat = new Category;

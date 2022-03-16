@@ -622,8 +622,8 @@ class Template extends \KD2\Smartyer
 	{
 		$config = Config::getInstance();
 
-		$couleur1 = $config->get('couleur1') ?: ADMIN_COLOR1;
-		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
+		$color1 = $config->get('color1') ?: ADMIN_COLOR1;
+		$color2 = $config->get('color2') ?: ADMIN_COLOR2;
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
 		if ($url = $config->fileURL('admin_background')) {
@@ -631,8 +631,8 @@ class Template extends \KD2\Smartyer
 		}
 
 		// Transformation Hexa vers décimal
-		$couleur1 = implode(', ', sscanf($couleur1, '#%02x%02x%02x'));
-		$couleur2 = implode(', ', sscanf($couleur2, '#%02x%02x%02x'));
+		$color1 = implode(', ', sscanf($color1, '#%02x%02x%02x'));
+		$color2 = implode(', ', sscanf($color2, '#%02x%02x%02x'));
 
 		$out = '
 		<style type="text/css">
@@ -647,7 +647,7 @@ class Template extends \KD2\Smartyer
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
-		return sprintf($out, $couleur1, $couleur2, $admin_background);
+		return sprintf($out, $color1, $color2, $admin_background);
 	}
 
 	protected function displayDynamicField(array $params): string

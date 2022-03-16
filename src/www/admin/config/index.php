@@ -34,7 +34,7 @@ $tpl->assign([
 	'server_time'      => time(),
 	'sqlite_version'   => \SQLite3::version()['versionString'],
 	'countries'        => Utils::getCountryList(),
-	'membres_cats'     => Categories::listSimple(),
+	'users_categories' => Categories::listSimple(),
 	'garradin_website' => WEBSITE,
 	'login_field'      => DynamicFields::getLoginField(),
 	'name_field'       => DynamicFields::getNameFields()[0],

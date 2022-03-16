@@ -115,7 +115,7 @@ class Category extends Entity
 		$db = DB::getInstance();
 		$config = Config::getInstance();
 
-		if ($this->id() == $config->get('categorie_membres')) {
+		if ($this->id() == $config->get('default_category')) {
 			throw new UserException('Il est interdit de supprimer la catégorie définie par défaut dans la configuration.');
 		}
 

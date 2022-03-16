@@ -223,8 +223,8 @@ class Graph
 	static protected function getColors()
 	{
 		$config = Config::getInstance();
-		$c1 = $config->get('couleur1') ?: ADMIN_COLOR1;
-		$c2 = $config->get('couleur2') ?: ADMIN_COLOR2;
+		$c1 = $config->get('color1') ?: ADMIN_COLOR1;
+		$c2 = $config->get('color2') ?: ADMIN_COLOR2;
 		list($h, $s, $v) = Utils::rgbToHsv($c1);
 		list($h1, $s, $v) = Utils::rgbToHsv($c2);
 

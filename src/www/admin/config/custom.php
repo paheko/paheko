@@ -23,8 +23,8 @@ $form->runIf('save', function () use ($config) {
 }, 'config_custom', Utils::getSelfURI(['ok' => '']));
 
 $tpl->assign([
-	'color1'           => ADMIN_COLOR1,
-	'color2'           => ADMIN_COLOR2,
+	'color1' => ADMIN_COLOR1,
+	'color2' => ADMIN_COLOR2,
 ]);
 
 $tpl->assign('background_image_current', $config->fileURL('admin_background'));

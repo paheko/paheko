@@ -72,7 +72,7 @@
 	<fieldset>
 		<legend>Membres</legend>
 		<dl>
-			{input type="select" name="categorie_membres" source=$config options=$membres_cats required=true label="Catégorie par défaut des nouveaux membres"}
+			{input type="select" name="default_category" source=$config options=$users_categories required=true label="Catégorie par défaut des nouveaux membres"}
 		</dl>
 	</fieldset>
 

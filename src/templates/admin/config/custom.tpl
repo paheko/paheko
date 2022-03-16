@@ -60,8 +60,8 @@
 	<fieldset>
 		<legend>Interface d'administration</legend>
 		<dl>
-			{input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$color1 source=$config name="couleur1" label="Couleur primaire" placeholder=$color1}
-			{input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$color2 source=$config name="couleur2" label="Couleur secondaire" placeholder=$color2}
+			{input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$color1 source=$config name="color1" label="Couleur primaire" placeholder=$color1}
+			{input type="color" pattern="#[a-f0-9]{6}" title="Couleur au format hexadécimal" default=$color2 source=$config name="color2" label="Couleur secondaire" placeholder=$color2}
 			{input type="file" label="Image de fond" name="background" help="Il est conseillé d'utiliser une image en noir et blanc avec un fond blanc pour un meilleur rendu. Dimensions recommandées : 380x200" accept="image/*,*.jpeg,*.jpg,*.png,*.gif"}
 			<dt>Texte de la page d'accueil</dt>
 			<dd>

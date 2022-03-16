@@ -37,7 +37,7 @@ class Config extends Entity
 	protected $monnaie;
 	protected $pays;
 
-	protected $categorie_membres;
+	protected $default_category;
 
 	protected $frequence_sauvegardes;
 	protected $nombre_sauvegardes;
@@ -45,8 +45,8 @@ class Config extends Entity
 	protected $last_chart_change;
 	protected $last_version_check;
 
-	protected $couleur1;
-	protected $couleur2;
+	protected $color1;
+	protected $color2;
 
 	protected $files = [];
 
@@ -54,8 +54,6 @@ class Config extends Entity
 
 	protected $log_retention;
 	protected $log_anonymize;
-
-	protected $field_user_number;
 
 	protected $_types = [
 		'nom_asso'              => 'string',
@@ -67,7 +65,7 @@ class Config extends Entity
 		'monnaie'               => 'string',
 		'pays'                  => 'string',
 
-		'categorie_membres'     => 'int',
+		'default_category'      => 'int',
 
 		'frequence_sauvegardes' => '?int',
 		'nombre_sauvegardes'    => '?int',
@@ -75,8 +73,8 @@ class Config extends Entity
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',
 
-		'couleur1'              => '?string',
-		'couleur2'              => '?string',
+		'color1'              => '?string',
+		'color2'              => '?string',
 
 		'files'                 => 'array',
 
@@ -147,16 +145,7 @@ class Config extends Entity
 			$db->preparedQuery('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?);', $key, $value);
 		}
 
-		if (!empty($values['champ_identifiant'])) {
-			DynamicFields::changeLoginField($values['champ_identifiant']);
-		}
-
 		$db->commit();
-
-		if (isset($values['couleur1']) || isset($values['couleur2'])) {
-			// Reset graph cache
-			Static_Cache::clean(0);
-		}
 
 		$this->_modified = [];
 
@@ -175,11 +164,11 @@ class Config extends Entity
 		}
 
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
-		if (isset($source['couleur1'], $source['couleur2'])
-			&& ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
+		if (isset($source['color1'], $source['color2'])
+			&& ($source['color1'] == ADMIN_COLOR1 && $source['color2'] == ADMIN_COLOR2))
 		{
-			$source['couleur1'] = null;
-			$source['couleur2'] = null;
+			$source['color1'] = null;
+			$source['color2'] = null;
 		}
 
 		parent::importForm($source);
@@ -215,10 +204,6 @@ class Config extends Entity
 			$this->assert(is_int($value) || is_null($value));
 		}
 
-		$champs = $this->champs_membres;
-
-		$this->assert(!empty($champs->get($this->champ_identite)), sprintf('Le champ spécifié pour identité, "%s" n\'existe pas', $this->champ_identite));
-		$this->assert(!empty($champs->get($this->champ_identifiant)), sprintf('Le champ spécifié pour identifiant, "%s" n\'existe pas', $this->champ_identifiant));
 
 		$db = DB::getInstance();
 
@@ -230,7 +215,7 @@ class Config extends Entity
 			$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
 		}
 
-		$this->assert($db->test('users_categories', 'id = ?', $this->categorie_membres), 'Catégorie de membres inconnue');
+		$this->assert($db->test('users_categories', 'id = ?', $this->default_category), 'Catégorie de membres inconnue');
 	}
 
 	public function file(string $key): ?File

@@ -10,7 +10,7 @@ require_once __DIR__ . '/_inc.php';
 $session->requireAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 
 $csrf_key = 'users_new';
-$default_category = Config::getInstance()->categorie_membres;
+$default_category = Config::getInstance()->default_category;
 $user = new User;
 
 $form->runIf('save', function () use ($default_category, $user, $session) {
