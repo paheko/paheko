@@ -43,9 +43,9 @@ class DynamicField extends Entity
 	protected int $write_access;
 
 	/**
-	 * Index of row in users list
+	 * Use in users list table?
 	 */
-	protected ?int $list_row;
+	protected bool $list_table;
 
 	/**
 	 * Multiple options (JSON) for select and multiple fields
@@ -183,5 +183,22 @@ class DynamicField extends Entity
 		}
 
 		$this->assert($this->exists() || $this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
+
+		if ($this->exists()) {
+			$this->assert(!isset($this->_modified['type']));
+			$this->assert(!isset($this->_modified['name']));
+		}
+	}
+
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		$source['required'] = !empty($source['required']) ? true : false;
+		$source['list_table'] = !empty($source['list_table']) ? true : false;
+
+		return parent::importForm($source);
 	}
 }

@@ -29,6 +29,9 @@
 				<td>Ordre</td>
 				<th>Libellé</th>
 				<td>Liste des membres</td>
+				<td>Obligatoire&nbsp;?</td>
+				<td>Visibilité</td>
+				<td>Modification</td>
 				<td></td>
 			</tr>
 		</thead>
@@ -40,7 +43,10 @@
 					<input type="hidden" name="sort_order[]" value="{$field.name}" />
 				</td>
 				<th>{$field.label}</th>
-				<td>{if $field.list_row}Oui{else}Non{/if}</td>
+				<td>{if $field.list_table}Oui{/if}</td>
+				<td>{if $field.required}Obligatoire{/if}</td>
+				<td>{if $field.read_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
+				<td>{if $field.write_access == $field::ACCESS_USER}Membre{else}Gestionnaires{/if}</td>
 				<td class="actions">
 					{if !$field.system || ($field.system && !($field.system | $field::PRESET))}
 						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$field.id target="_dialog"}

@@ -20,9 +20,15 @@ if (!$field) {
 	throw new UserException('Le champ indiqué n\'existe pas.');
 }
 
-$form->runIf('save', function () use ($field) {
+$form->runIf('save', function () use ($field, $fields) {
 	$field->importForm();
-	$field->save();
+
+	if (!$field->exists()) {
+		$field->sort_order = $fields->getLastOrderIndex();
+		$fields->add($field);
+	}
+
+	$fields->save();
 }, $csrf_key, '!config/fields/?msg=SAVED');
 
 $tpl->assign(compact('csrf_key', 'field'));

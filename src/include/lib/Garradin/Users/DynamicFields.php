@@ -29,7 +29,9 @@ class DynamicFields
 		'number' => [],
 	];
 
-	protected $_presets = [];
+	protected array $_presets = [];
+
+	protected array $_deleted = [];
 
 	static protected $_instance;
 
@@ -315,7 +317,7 @@ class DynamicFields
 			$field->set('read_access', $data['private'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
 			$field->set('write_access', $data['editable'] ? $field::ACCESS_ADMIN : $field::ACCESS_USER);
 			$field->set('required', (bool) $data['mandatory']);
-			$field->set('list_row', isset($data['list_row']) ? (int)$data['list_row'] : null);
+			$field->set('list_table', (bool) $data['list_row']);
 			$field->set('sort_order', $i++);
 			$self->add($field);
 
@@ -391,16 +393,16 @@ class DynamicFields
 					return false;
 				}
 
-				return empty($a->list_row) ? false : true;
+				return empty($a->list_table) ? false : true;
 			},
 			ARRAY_FILTER_USE_BOTH
 		);
 
 		uasort($fields, function ($a, $b) {
-			if ($a->list_row == $b->list_row)
+			if ($a->sort_order == $b->sort_order)
 				return 0;
 
-			return ($a->list_row > $b->list_row) ? 1 : -1;
+			return ($a->sort_order > $b->sort_order) ? 1 : -1;
 		});
 
 		return $fields;
@@ -459,7 +461,7 @@ class DynamicFields
 		$columns = [];
 
 		foreach ($this->_fields as $key => $cfg) {
-			if ($cfg->type == 'text' || $cfg->list_row) {
+			if ($cfg->type == 'text' || $cfg->list_table) {
 				$columns[] = $key;
 			}
 		}
@@ -596,21 +598,13 @@ class DynamicFields
 
 	public function delete(string $name)
 	{
-		$db = DB::getInstance();
-
-		$db->begin();
-
-		$this->_fields[$name]->delete();
+		$this->_deleted[] = $this->_fields[$name];
 		unset($this->_fields[$name]);
 
-		$this->reload();
-		// FIXME/TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
-		$this->rebuildUsersTable();
-
-		$db->commit();
+		$this->reloadCache();
 	}
 
-	public function save()
+	public function save(bool $allow_rebuild = true)
 	{
 		if (empty($this->_fields_by_system_use['number'])) {
 			throw new ValidationException('Aucun champ de numéro de membre n\'existe');
@@ -640,8 +634,38 @@ class DynamicFields
 			throw new ValidationException('Un seul champ peut être défini comme mot de passe');
 		}
 
+		$rebuild = false;
+
 		foreach ($this->_fields as $field) {
-			$field->save();
+			if (!$field->exists()) {
+				$rebuild = true;
+			}
+
+			if ($field->isModified()) {
+				$field->save();
+			}
+		}
+
+
+		foreach ($this->_deleted as $f) {
+			$f->delete();
+			$rebuild = true;
+		}
+
+		$this->_deleted = [];
+
+		if ($rebuild && $allow_rebuild) {
+			$db = DB::getInstance();
+
+			$db->begin();
+
+			// FIXME/TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
+			// some conditions apply
+			// https://www.sqlite.org/lang_altertable.html#altertabdropcol
+			$this->rebuildUsersTable();
+
+			$db->commit();
+			$this->reload();
 		}
 	}
 
@@ -654,5 +678,10 @@ class DynamicFields
 
 			$this->_fields[$key]->set('sort_order', $sort);
 		}
+	}
+
+	public function getLastOrderIndex()
+	{
+		return count($this->_fields);
 	}
 }

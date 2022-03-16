@@ -20,6 +20,7 @@ $form->runIf('delete', function () use ($field, $fields) {
 	}
 
 	$fields->delete($field->name);
+	$fields->save();
 }, $csrf_key, '!config/fields/?msg=DELETED');
 
 $tpl->assign(compact('csrf_key', 'field'));

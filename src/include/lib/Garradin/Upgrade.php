@@ -271,7 +271,7 @@ class Upgrade
 
 				// Migrate users table
 				$df = \Garradin\Users\DynamicFields::fromOldINI($config->champs_membres, $config->champ_identifiant, $config->champ_identite, 'numero');
-				$df->save();
+				$df->save(false);
 
 				// Migrate other stuff
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
