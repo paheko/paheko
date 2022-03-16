@@ -605,7 +605,7 @@ class Template extends \KD2\Smartyer
 			return '';
 		}
 
-		$country = Config::getInstance()->get('pays');
+		$country = Config::getInstance()->get('country');
 
 		if ($country !== 'FR') {
 			return $n;
@@ -787,7 +787,7 @@ class Template extends \KD2\Smartyer
 		elseif ($type == 'country') {
 			$params['type'] = 'select';
 			$params['options'] = Utils::getCountryList();
-			$params['default'] = Config::getInstance()->get('pays');
+			$params['default'] = Config::getInstance()->get('country');
 		}
 		elseif ($type == 'checkbox') {
 			$params['required'] = false;

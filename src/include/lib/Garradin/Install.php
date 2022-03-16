@@ -151,7 +151,7 @@ class Install
 		$config->set('nom_asso', $name);
 		$config->set('email_asso', $user_email);
 		$config->set('currency', '€');
-		$config->set('pays', 'FR');
+		$config->set('country', 'FR');
 		$config->set('site_disabled', true);
 		$config->set('log_retention', 720);
 		$config->set('log_anonymize', 365);

@@ -35,7 +35,7 @@ class Config extends Entity
 	protected $site_asso;
 
 	protected $currency;
-	protected $pays;
+	protected $country;
 
 	protected $default_category;
 
@@ -63,7 +63,7 @@ class Config extends Entity
 		'site_asso'             => '?string',
 
 		'currency'              => 'string',
-		'pays'                  => 'string',
+		'country'               => 'string',
 
 		'default_category'      => 'int',
 
@@ -73,8 +73,8 @@ class Config extends Entity
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',
 
-		'color1'              => '?string',
-		'color2'              => '?string',
+		'color1'                => '?string',
+		'color2'                => '?string',
 
 		'files'                 => 'array',
 
@@ -192,7 +192,7 @@ class Config extends Entity
 	{
 		$this->assert(trim($this->nom_asso) != '', 'Le nom de l\'association ne peut rester vide.');
 		$this->assert(trim($this->currency) != '', 'La monnaie ne peut rester vide.');
-		$this->assert(trim($this->pays) != '' && Utils::getCountryName($this->pays), 'Le pays ne peut rester vide.');
+		$this->assert(trim($this->country) != '' && Utils::getCountryName($this->country), 'Le pays ne peut rester vide.');
 		$this->assert(null === $this->site_asso || filter_var($this->site_asso, FILTER_VALIDATE_URL), 'L\'adresse URL du site web est invalide.');
 		$this->assert(trim($this->email_asso) != '' && SMTP::checkEmailIsValid($this->email_asso, false), 'L\'adresse e-mail de l\'association est  invalide.');
 

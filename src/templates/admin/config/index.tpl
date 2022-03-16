@@ -65,7 +65,7 @@
 		<legend>Localisation</legend>
 		<dl>
 			{input type="text" name="currency" required=true source=$config label="Monnaie" help="Inscrire ici la devise utilisée : €, CHF, XPF, etc." size="3"}
-			{input type="select" name="pays" required=true source=$config label="Pays" options=$countries}
+			{input type="select" name="country" required=true source=$config label="Pays" options=$countries}
 		</dl>
 	</fieldset>
 

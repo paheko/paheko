@@ -33,7 +33,7 @@ class UserTemplate extends Brindille
 			return self::$root_variables;
 		}
 
-		static $keys = ['adresse_asso', 'color1', 'color2', 'email_asso', 'currency', 'nom_asso', 'pays', 'site_asso', 'telephone_asso', 'files'];
+		static $keys = ['adresse_asso', 'color1', 'color2', 'email_asso', 'currency', 'nom_asso', 'country', 'site_asso', 'telephone_asso', 'files'];
 
 		$config = Config::getInstance();
 
