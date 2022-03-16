@@ -50,6 +50,10 @@ INSERT INTO config VALUES ('log_anonymize', 365);
 UPDATE config SET key = 'default_category' WHERE key = 'categorie_membres';
 UPDATE config SET key = 'color1' WHERE key = 'couleur1';
 UPDATE config SET key = 'color2' WHERE key = 'couleur2';
+UPDATE config SET key = 'country' WHERE key = 'pays';
+UPDATE config SET key = 'currency' WHERE key = 'monnaie';
+UPDATE config SET key = 'backup_frequency' WHERE key = 'frequence_sauvegardes';
+UPDATE config SET key = 'backup_limit' WHERE key = 'nombre_sauvegardes';
 
 -- This is now part of the config_users_fields table
 DELETE FROM config WHERE key IN ('champs_membres', 'champ_identite', 'champ_identifiant');

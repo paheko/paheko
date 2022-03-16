@@ -138,7 +138,7 @@ class Sauvegarde
 	public function rotate(): void
 	{
 		$config = Config::getInstance();
-		$nb = $config->get('nombre_sauvegardes');
+		$nb = $config->get('backup_limit');
 
 		$list = $this->getList(true);
 
@@ -177,7 +177,7 @@ class Sauvegarde
 		$config = Config::getInstance();
 
 		// Pas besoin d'aller plus loin si on ne fait pas de sauvegarde auto
-		if ($config->get('frequence_sauvegardes') == 0 || $config->get('nombre_sauvegardes') == 0)
+		if ($config->get('backup_frequency') == 0 || $config->get('backup_limit') == 0)
 			return true;
 
 		$list = $this->getList(true);
@@ -192,7 +192,7 @@ class Sauvegarde
 		}
 
 		// Test de la date de création de la dernière sauvegarde
-		if ($last >= (time() - ($config->get('frequence_sauvegardes') * 3600 * 24)))
+		if ($last >= (time() - ($config->get('backup_frequency') * 3600 * 24)))
 		{
 			return true;
 		}

@@ -39,8 +39,8 @@ class Config extends Entity
 
 	protected $default_category;
 
-	protected $frequence_sauvegardes;
-	protected $nombre_sauvegardes;
+	protected $backup_frequency;
+	protected $backup_limit;
 
 	protected $last_chart_change;
 	protected $last_version_check;
@@ -67,8 +67,8 @@ class Config extends Entity
 
 		'default_category'      => 'int',
 
-		'frequence_sauvegardes' => '?int',
-		'nombre_sauvegardes'    => '?int',
+		'backup_frequency'      => '?int',
+		'backup_limit'          => '?int',
 
 		'last_chart_change'     => '?int',
 		'last_version_check'    => '?string',

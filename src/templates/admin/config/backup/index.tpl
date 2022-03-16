@@ -6,7 +6,7 @@
 
 <fieldset>
 	<legend>Politique de sauvegardes</legend>
-	{if ENABLE_AUTOMATIC_BACKUPS && !$config.frequence_sauvegardes}
+	{if ENABLE_AUTOMATIC_BACKUPS && !$config.backup_frequency}
 	<p class="help block">
 		Les <a href="save.php">sauvegardes automatiques</a> sont désactivées. Il est recommandé de les activer pour pouvoir revenir en arrière en cas de problème majeur. Attention, cela ne dispense pas de réaliser des sauvegardes régulières sur votre ordinateur.
 	</p>

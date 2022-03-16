@@ -62,28 +62,12 @@
 		La sauvegarde automatique ne concerne que la base de données, mais pas les documents, fichiers joints aux écritures ou aux membres, ni le contenu du site web.{/if}
 	</p>
 	<dl>
-		<dt><label for="f_frequency">Intervalle de sauvegarde</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-		<dd>
-			<select name="frequence_sauvegardes" required="required" id="f_frequency">
-				<option value="0"{form_field name=frequence_sauvegardes data=$config selected=0}>Aucun — les sauvegardes automatiques sont désactivées</option>
-				<option value="1"{form_field name=frequence_sauvegardes data=$config selected=1}>Quotidien, tous les jours</option>
-				<option value="7"{form_field name=frequence_sauvegardes data=$config selected=7}>Hebdomadaire, tous les 7 jours</option>
-				<option value="15"{form_field name=frequence_sauvegardes data=$config selected=15}>Bimensuel, tous les 15 jours</option>
-				<option value="30"{form_field name=frequence_sauvegardes data=$config selected=30}>Mensuel</option>
-				<option value="90"{form_field name=frequence_sauvegardes data=$config selected=90}>Trimestriel</option>
-				<option value="365{form_field name=frequence_sauvegardes data=$config selected=365}">Annuel</option>
-			</select>
-		</dd>
-		<dt><label for="f_max_backups">Nombre de sauvegardes conservées</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-		<dd class="help">
-			Par exemple avec l'intervalle mensuel, en indiquant de conserver 12 sauvegardes,
-			vous pourrez garder un an d'historique de sauvegardes.
-		</dd>
+		{input type="select" name="backup_frequency" source=$config label="Fréquence de sauvegarde" required=true options=$frequencies}
+		{input type="number" step="1" min="0" max="50" name="backup_limit" source=$config label="Nombre de sauvegardes conservées" required=true options=$frequencies help="Par exemple avec une fréquence mensuelle, en indiquant de conserver 12 sauvegardes, vous pourrez garder un an d'historique de sauvegardes."}
 		<dd class="help">
 			<strong>Attention :</strong> si vous choisissez un nombre important et un intervalle réduit,
 			l'espace disque occupé par vos sauvegardes va rapidement augmenter.
 		</dd>
-		<dd><input type="number" name="nombre_sauvegardes" value="{form_field name=nombre_sauvegardes data=$config}" if="f_max_backups" min="1" max="50" required="required" /></dd>
 	</dl>
 	<p class="submit">
 		{csrf_field key="backup_config"}

@@ -14,7 +14,7 @@ require_once __DIR__ . '/../include/init.php';
 
 $config = Config::getInstance();
 
-if (ENABLE_AUTOMATIC_BACKUPS && $config->get('frequence_sauvegardes') && $config->get('nombre_sauvegardes'))
+if (ENABLE_AUTOMATIC_BACKUPS && $config->backup_frequency && $config->backup_limit)
 {
 	$s = new Sauvegarde;
 	$s->auto();
