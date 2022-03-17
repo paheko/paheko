@@ -196,7 +196,7 @@ class Accounts
 			case Account::TYPE_EXPENSE;
 				return Account::EXPENSE;
 			case Account::TYPE_VOLUNTEERING:
-				return null;
+				return Account::NONE;
 			default:
 				return Account::ASSET_OR_LIABILITY;
 		}
