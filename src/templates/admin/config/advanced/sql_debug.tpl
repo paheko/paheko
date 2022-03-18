@@ -27,7 +27,7 @@
 				<td><pre>{$row.trace}</pre></td>
 			</tr>
 			<tr>
-				<td colspan="3"><h4>Query:</h4><pre>{$row.sql}</pre></td>
+				<td colspan="3"><h4>Query <a href="sql.php?query={$row.sql|escape:'url'}">[replay]</a></h4><pre>{$row.sql}</pre></td>
 			</tr>
 			<tr>
 				<td colspan="3"><h4>EXPLAIN:</h4><pre>{$row.explain}</pre></td>
