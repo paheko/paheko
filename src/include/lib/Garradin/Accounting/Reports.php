@@ -59,6 +59,10 @@ class Reports
 			$where[] = sprintf($lines_alias . 'id_analytical = %d', $criterias['analytical']);
 		}
 
+		if (!empty($criterias['account'])) {
+			$where[] = sprintf($accounts_alias . 'id = %d', $criterias['account']);
+		}
+
 		if (!empty($criterias['analytical_only'])) {
 			$where[] = $lines_alias . 'id_analytical IS NOT NULL';
 		}
@@ -240,15 +244,15 @@ class Reports
 	static public function getResult(array $criterias): int
 	{
 		if (!empty($criterias['analytical']) || !empty($criterias['analytical_only'])) {
-			$where = self::getWhereClause($criterias, 't', 'l', 'a');
-			$sum_sql = sprintf('SELECT SUM(l.credit - l.debit) FROM acc_transactions_lines l INNER JOIN acc_transactions t ON t.id = l.id_transaction INNER JOIN acc_accounts a ON a.id = l.id_account WHERE a.position = ? AND %s', $where);
-			$sql = sprintf('SELECT IFNULL((%1$s), 0) - IFNULL((%1$s)* - 1, 0);', $sum_sql);
+			$table = 'acc_accounts_projects_balances';
 		}
 		else {
-			$where = self::getWhereClause($criterias);
-			$sql = sprintf('SELECT IFNULL((SELECT SUM(balance) FROM acc_accounts_balances WHERE %1$s AND position = ?), 0)
-				- IFNULL((SELECT SUM(balance) FROM acc_accounts_balances WHERE %1$s AND position = ?), 0);', $where);
+			$table = 'acc_accounts_balances';
 		}
+
+		$where = self::getWhereClause($criterias);
+		$sql = sprintf('SELECT IFNULL((SELECT SUM(balance) FROM %1$s WHERE %2$s AND position = ?), 0)
+			- IFNULL((SELECT SUM(balance) FROM %1$s WHERE %2$s AND position = ?), 0);', $table, $where);
 
 		$db = DB::getInstance();
 		return $db->firstColumn($sql, Account::REVENUE, Account::EXPENSE);
@@ -264,15 +268,24 @@ class Reports
 	{
 		$order = $order ?: 'code COLLATE NOCASE';
 		$remove_zero = $remove_zero ? 'code HAVING balance != 0' : '';
+		$table = null;
+
+		if (!empty($criterias['analytical'])) {
+			$table = 'acc_accounts_projects_balances';
+		}
+		elseif (empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])) {
+			$table = 'acc_accounts_balances';
+		}
 
 		// Specific queries that can't rely on acc_accounts_balances
-		if (!empty($criterias['user']) || !empty($criterias['creator']) || !empty($criterias['subscription'])
-			|| !empty($criterias['analytical']) || !empty($criterias['analytical_only'])) {
+		if (!$table)
+		{
 			$where = self::getWhereClause($criterias, 't', 'l', 'a');
-		$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
+			$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
+
 			$query = 'SELECT a.code, a.id, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
 				CASE WHEN position IN (1, 4) -- 1 = asset, 4 = expense
-                	OR (position = 3 AND (debit - credit) > 0)
+					OR (position = 3 AND (debit - credit) > 0)
 					THEN SUM(l.debit - l.credit)
 				ELSE
 					SUM(l.credit - l.debit)
@@ -290,12 +303,12 @@ class Reports
 			$where = self::getWhereClause($criterias);
 			$remove_zero = $remove_zero ? 'GROUP BY ' . $remove_zero : '';
 
-			$query = 'SELECT * FROM acc_accounts_balances
+			$query = 'SELECT * FROM %s
 				WHERE %s
 				%s
 				ORDER BY %s';
 
-			$sql = sprintf($query, $where, $remove_zero, $order);
+			$sql = sprintf($query, $table, $where, $remove_zero, $order);
 		}
 
 
@@ -305,17 +318,17 @@ class Reports
 		if (isset($criterias['compare_year'])) {
 			$sql2 = 'SELECT a.id, a.code AS code, a.label, a.position, a.type, a.debit, a.credit, a.balance, IFNULL(b.balance, 0) AS balance2, IFNULL(a.balance - b.balance, a.balance) AS change
 				FROM (%s) AS a
-				LEFT JOIN acc_accounts_balances b ON b.code = a.code AND a.position = b.position AND b.id_year = %3$d
+				LEFT JOIN %s b ON b.code = a.code AND a.position = b.position AND b.id_year = %4$d
 				UNION ALL
 				-- Select balances of second year accounts that are =zero in first year
 				SELECT
 					NULL AS id, c.code AS code, c.label, c.position, c.type, c.debit, c.credit, 0 AS balance, c.balance AS balance2, c.balance * -1 AS change
-				FROM acc_accounts_balances c
-				LEFT JOIN acc_accounts_balances d ON d.code = c.code AND d.id_year = %2$d AND d.balance != 0 AND d.position = c.position
-				WHERE d.id IS NULL AND c.id_year = %3$d AND c.position = %4$d AND c.balance != 0
+				FROM %2$s c
+				LEFT JOIN %2$s d ON d.code = c.code AND d.id_year = %3$d AND d.balance != 0 AND d.position = c.position
+				WHERE d.id IS NULL AND c.id_year = %4$d AND c.position = %5$d AND c.balance != 0
 				ORDER BY code COLLATE NOCASE;';
 
-			$sql = sprintf($sql2, $sql, $criterias['year'], $criterias['compare_year'], $criterias['position']);
+			$sql = sprintf($sql2, $sql, $table, $criterias['year'], $criterias['compare_year'], $criterias['position']);
 		}
 
 		$out = $db->get($sql);
