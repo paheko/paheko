@@ -132,7 +132,7 @@ class Fee extends Entity
 		return EntityManager::findOneById(Service::class, $this->id_service);
 	}
 
-	public function paidUsersList(): DynamicList
+	public function activeUsersList(): DynamicList
 	{
 		$identity = Config::getInstance()->get('champ_identite');
 		$columns = [
@@ -163,7 +163,7 @@ class Fee extends Entity
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) AS su2 ON su2.id = su.id
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
-		$conditions = sprintf('su.id_fee = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
+		$conditions = sprintf('su.id_fee = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
 			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -180,7 +180,7 @@ class Fee extends Entity
 
 	public function unpaidUsersList(): DynamicList
 	{
-		$list = $this->paidUsersList();
+		$list = $this->activeUsersList();
 		$conditions = sprintf('su.id_fee = %d AND su.paid = 0 AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
@@ -188,7 +188,7 @@ class Fee extends Entity
 
 	public function expiredUsersList(): DynamicList
 	{
-		$list = $this->paidUsersList();
+		$list = $this->activeUsersList();
 		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
