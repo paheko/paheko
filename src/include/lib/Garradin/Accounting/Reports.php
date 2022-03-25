@@ -266,8 +266,14 @@ class Reports
 	 */
 	static public function getAccountsBalances(array $criterias, ?string $order = null, bool $remove_zero = true)
 	{
+		$group = 'code';
+		$having = '';
 		$order = $order ?: 'code COLLATE NOCASE';
-		$remove_zero = $remove_zero ? 'code HAVING balance != 0' : '';
+
+		if ($remove_zero) {
+			$having = 'HAVING balance != 0';
+		}
+
 		$table = null;
 
 		if (!empty($criterias['analytical'])) {
@@ -294,21 +300,20 @@ class Reports
 				INNER JOIN %s t ON t.id = l.id_transaction
 				INNER JOIN %s a ON a.id = l.id_account
 				WHERE %s
-				GROUP BY l.id_account %s
+				GROUP BY l.id_account AND %s %s
 				ORDER BY %s';
 
-			$sql = sprintf($query, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
+			$sql = sprintf($query, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $group, $having, $order);
 		}
 		else {
 			$where = self::getWhereClause($criterias);
-			$remove_zero = $remove_zero ? 'GROUP BY ' . $remove_zero : '';
 
-			$query = 'SELECT * FROM %s
+			$query = 'SELECT *, SUM(credit) AS credit, SUM(debit) AS debit, SUM(balance) AS balance FROM %s
 				WHERE %s
-				%s
+				GROUP BY %s %s
 				ORDER BY %s';
 
-			$sql = sprintf($query, $table, $where, $remove_zero, $order);
+			$sql = sprintf($query, $table, $where, $group, $having, $order);
 		}
 
 

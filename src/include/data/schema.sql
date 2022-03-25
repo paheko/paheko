@@ -207,7 +207,7 @@ AS
         FROM acc_accounts a
         INNER JOIN acc_transactions_lines l ON l.id_account = a.id
         INNER JOIN acc_transactions t ON t.id = l.id_transaction
-        GROUP BY t.id_year, l.id_analytical, a.id
+        GROUP BY l.id_analytical, a.id
     );
 
 CREATE TABLE IF NOT EXISTS acc_years
