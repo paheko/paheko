@@ -643,6 +643,9 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
+		if (empty($source['id_related'])) {
+			unset($source['id_related']);
+		}
 
 		$this->resetLines();
 		$this->importFromNewForm($source);
