@@ -40,7 +40,7 @@ use Garradin\Entities\Accounting\Account;
 					<td class="money">
 						{if $account.balance < 0
 							|| ($account.balance > 0 && $account.position == Account::LIABILITY && ($account.type == Account::TYPE_BANK || $account.type == Account::TYPE_THIRD_PARTY || $account.type == Account::TYPE_CASH))}
-							<strong class="error">-{$account.balance|raw|money_currency:false}</strong>
+							<strong class="error">-{$account.balance|raw|abs|money_currency:false}</strong>
 						{else}
 							{$account.balance|raw|money_currency:false}
 						{/if}
