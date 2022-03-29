@@ -1,5 +1,5 @@
 <dl>
-	{if !$account.type}
+	{if !$account.type || !$create}
 		{input type="select" label="Type de compte favori" name="type" source=$account required=true options=$types}
 		<dd class="help">Le statut de compte favori est utilisé pour les écritures <em>«&nbsp;simplifiées&nbsp;»</em> (recettes, dépenses, dettes, créances, virements), pour la liste des comptes, et également pour proposer certaines fonctionnalités (rapprochement pour les comptes bancaires, règlement rapide de dette et créance, dépôt de chèques).</dd>
 		<dd class="help">Un compte qui n'a pas de type favori ne pourra être utilisé que dans une saisie avancée, et ne sera visible que dans les rapports de l'exercice.</dd>
