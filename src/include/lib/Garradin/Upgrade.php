@@ -419,6 +419,13 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.23', '<')) {
+				$db->begin();
+				// Create acc_accounts_projects_balances view
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+				$db->commit();
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
