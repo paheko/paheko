@@ -197,7 +197,7 @@ class Plugin
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file))
 		{
-			throw new \RuntimeException('Chemin de fichier incorrect.');
+			throw new \UnexpectedValueException('Chemin de fichier incorrect.');
 		}
 
 		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];

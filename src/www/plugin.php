@@ -12,4 +12,10 @@ define('Garradin\PLUGIN_ROOT', $plugin->path());
 define('Garradin\PLUGIN_URL', WWW_URL . 'p/' . $plugin->id() . '/');
 define('Garradin\PLUGIN_QSP', '?');
 
-$plugin->call('public/' . $page);
+try {
+	$plugin->call('public/' . $page);
+}
+catch (\UnexpectedValueException $e) {
+	http_response_code(404);
+	throw new UserException($e->getMessage());
+}
