@@ -2,7 +2,6 @@
 
 namespace Garradin\Services;
 
-use Garradin\Config;
 use Garradin\DB;
 use Garradin\UserException;
 use Garradin\Users\Categories;
@@ -60,7 +59,7 @@ class Fees
 			}
 
 			try {
-				$sql = sprintf('SELECT %s FROM membres WHERE id = %d;', $row->formula, $user_id);
+				$sql = sprintf('SELECT %s FROM users WHERE id = %d;', $row->formula, $user_id);
 				$row->user_amount = $db->firstColumn($sql);
 			}
 			catch (DB_Exception $e) {
@@ -80,7 +79,7 @@ class Fees
 
 		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) su2 ON su2.id = su.id
-			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_fee = f.id AND m.id_category NOT IN (%s)',
+			INNER JOIN users u ON u.id = su.id_user WHERE su.id_fee = f.id AND u.id_category NOT IN (%s)',
 			implode(',', $hidden_cats));
 
 		$sql = sprintf('SELECT f.*,

@@ -78,7 +78,7 @@ class Install
 		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
 
 		// Restore password
-		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
+		DB::getInstance()->preparedQuery('UPDATE users SET password = ? WHERE id = 1;', [$data->password]);
 
 		// Force l'installation de plugin système
 		Plugin::checkAndInstallSystemPlugins();

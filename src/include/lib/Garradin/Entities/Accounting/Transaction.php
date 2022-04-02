@@ -6,7 +6,7 @@ use KD2\DB\EntityManager;
 
 use Garradin\Entity;
 use Garradin\DB;
-use Garradin\Config;
+use Garradin\Users\DynamicFields;
 use Garradin\Utils;
 use Garradin\UserException;
 
@@ -488,7 +488,7 @@ class Transaction extends Entity
 
 		$this->assert(null !== $this->id_year, 'Aucun exercice spécifié.');
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type d\'écriture inconnu : ' . $this->type);
-		$this->assert(null === $this->id_creator || $db->test('membres', 'id = ?', $this->id_creator), 'Le membre créateur de l\'écriture n\'existe pas ou plus');
+		$this->assert(null === $this->id_creator || $db->test('users', 'id = ?', $this->id_creator), 'Le membre créateur de l\'écriture n\'existe pas ou plus');
 
 		$is_in_year = $db->test(Year::TABLE, 'id = ? AND start_date <= ? AND end_date >= ?', $this->id_year, $this->date->format('Y-m-d'), $this->date->format('Y-m-d'));
 
@@ -758,18 +758,18 @@ class Transaction extends Entity
 	public function listLinkedUsers()
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$identity_column = Config::getInstance()->get('champ_identite');
-		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		$identity_column = DynamicFields::getNameFieldsSQL('u');
+		$sql = sprintf('SELECT u.id, %s AS identity, l.id_service_user FROM users u INNER JOIN acc_transactions_users l ON l.id_user = u.id WHERE l.id_transaction = ?;', $identity_column);
 		return $db->get($sql, $this->id());
 	}
 
 	public function listLinkedUsersAssoc()
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
-		$identity_column = Config::getInstance()->get('champ_identite');
-		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user
-			FROM membres m
-			INNER JOIN acc_transactions_users l ON l.id_user = m.id
+		$identity_column = DynamicFields::getNameFieldsSQL('u');
+		$sql = sprintf('SELECT u.id, %s AS identity, l.id_service_user
+			FROM users u
+			INNER JOIN acc_transactions_users l ON l.id_user = u.id
 			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
 	}

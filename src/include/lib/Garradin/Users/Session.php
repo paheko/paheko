@@ -131,22 +131,22 @@ class Session extends \KD2\UserSession
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
 	{
 		return $this->db->insert('users_sessions', [
-			'selecteur' => $selector,
+			'selector'  => $selector,
 			'hash'      => $hash,
-			'expire'    => $expiry,
-			'id_membre' => $user_id,
+			'expiry'    => $expiry,
+			'id_user'   => $user_id,
 		]);
 	}
 
 	protected function expireRememberMeSelectors()
 	{
-		return $this->db->delete('users_sessions', $this->db->where('expire', '<', time()));
+		return $this->db->delete('users_sessions', $this->db->where('expiry', '<', time()));
 	}
 
 	protected function getRememberMeSelector($selector)
 	{
 		return $this->db->first('SELECT selector, hash,
-			s.id_user AS user_id, u.password AS user_password, expire AS expiry
+			s.id_user AS user_id, u.password AS user_password, expiry
 			FROM users_sessions AS s
 			INNER JOIN users AS u ON u.id = s.id_user
 			WHERE s.selector = ? LIMIT 1;', $selector);

@@ -7,6 +7,7 @@ use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\Utils;
+use Garradin\Users\DynamicFields;
 use Garradin\Entities\Services\Reminder;
 use KD2\DB\EntityManager;
 
@@ -137,22 +138,21 @@ class Reminders
 	static public function sendPending()
 	{
 		$db = DB::getInstance();
-		$config = Config::getInstance();
 
 		$sql = 'SELECT
 			date(su.expiry_date, sr.delay || \' days\') AS reminder_date,
 			ABS(julianday(date()) - julianday(expiry_date)) AS nb_days,
 			MAX(sr.delay) AS delay, sr.subject, sr.body, s.label, s.description,
 			su.expiry_date, sr.id AS id_reminder, su.id_service, su.id_user,
-			m.email, m.%s AS identity
+			u.%s, %s AS identity
 			FROM services_reminders sr
 			INNER JOIN services s ON s.id = sr.id_service
 			-- Select latest subscription to a service (MAX) only
 			INNER JOIN (SELECT MAX(expiry_date) AS expiry_date, id_user, id_service FROM services_users GROUP BY id_user, id_service) AS su ON s.id = su.id_service
 			-- Join with users, but not ones part of a hidden category
-			INNER JOIN membres m ON su.id_user = m.id
-				AND m.email IS NOT NULL
-				AND (m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1))
+			INNER JOIN users u ON su.id_user = u.id
+				AND u.%1$s IS NOT NULL
+				AND (u.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1))
 			-- Join with sent reminders to exclude users that already have received this reminder
 			LEFT JOIN (SELECT id, MAX(due_date) AS due_date, id_user, id_reminder FROM services_reminders_sent GROUP BY id_user, id_reminder) AS srs ON su.id_user = srs.id_user AND srs.id_reminder = sr.id
 			WHERE
@@ -161,7 +161,7 @@ class Reminders
 			GROUP BY su.id_user, sr.id_service
 			ORDER BY su.id_user;';
 
-		$sql = sprintf($sql, $config->get('champ_identite'));
+		$sql = sprintf($sql, DynamicFields::getFirstEmailField(), DynamicFields::getNameFieldsSQL('u'));
 
 		foreach ($db->iterate($sql) as $row)
 		{

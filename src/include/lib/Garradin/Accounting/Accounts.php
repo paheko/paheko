@@ -6,7 +6,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
-use Garradin\Config;
+use Garradin\Users\DynamicFields;
 use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
@@ -281,8 +281,6 @@ class Accounts
 
 	public function listUserAccounts(int $year_id): DynamicList
 	{
-		$id_field = Config::getInstance()->champ_identite;
-
 		$columns = [
 			'id' => [
 				'select' => 'u.id',
@@ -292,7 +290,7 @@ class Accounts
 				'label' => 'N° membre',
 			],
 			'user_identity' => [
-				'select' => 'u.' . $id_field,
+				'select' => DynamicFields::getNameFieldsSQL('u'),
 				'label' => 'Membre',
 			],
 			'balance' => [
@@ -307,7 +305,7 @@ class Accounts
 		];
 
 		$tables = 'acc_transactions_users tu
-			INNER JOIN membres u ON u.id = tu.id_user
+			INNER JOIN users u ON u.id = tu.id_user
 			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
 			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account';

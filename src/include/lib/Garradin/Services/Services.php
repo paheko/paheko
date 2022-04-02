@@ -59,7 +59,7 @@ class Services
 
 		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) su2 ON su2.id = su.id
-			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_service = s.id AND m.id_category NOT IN (%s)',
+			INNER JOIN users u ON u.id = su.id_user WHERE su.id_service = s.id AND u.id_category NOT IN (%s)',
 			implode(',', $hidden_cats));
 
 		$current_condition = $current_only ? '(end_date IS NULL OR end_date >= datetime())' : '(end_date IS NOT NULL AND end_date < datetime())';

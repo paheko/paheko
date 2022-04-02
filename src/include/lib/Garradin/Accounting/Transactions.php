@@ -204,7 +204,7 @@ class Transactions
 
 	static protected function iterateExport(int $year_id, string $type): \Generator
 	{
-		$id_field = Config::getInstance()->get('champ_identite');
+		$id_field = DynamicFields::getNameFieldsSQL('u');
 
 		if (self::EXPORT_SIMPLE == $type) {
 			$sql =  'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
@@ -213,7 +213,7 @@ class Transactions
 				a2.code AS credit_account,
 				l1.debit AS amount,
 				a3.code AS analytical,
-				GROUP_CONCAT(u.%s) AS linked_users
+				GROUP_CONCAT(%s) AS linked_users
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l1 ON l1.id_transaction = t.id AND l1.debit != 0
 				INNER JOIN acc_transactions_lines l2 ON l2.id_transaction = t.id AND l2.credit != 0
@@ -221,7 +221,7 @@ class Transactions
 				INNER JOIN acc_accounts a2 ON a2.id = l2.id_account
 				LEFT JOIN acc_accounts a3 ON a3.id = l1.id_analytical
 				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
-				LEFT JOIN membres u ON u.id = tu.id_user
+				LEFT JOIN users u ON u.id = tu.id_user
 				WHERE t.id_year = ?
 					AND t.type != %d
 				GROUP BY t.id
@@ -234,13 +234,13 @@ class Transactions
 				l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
 				l.reference AS line_reference, l.label AS line_label, l.reconciled,
 				a2.code AS analytical,
-				GROUP_CONCAT(u.%s) AS linked_users
+				GROUP_CONCAT(%s) AS linked_users
 				FROM acc_transactions t
 				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 				INNER JOIN acc_accounts a ON a.id = l.id_account
 				LEFT JOIN acc_accounts a2 ON a2.id = l.id_analytical
 				LEFT JOIN acc_transactions_users tu ON tu.id_transaction = t.id
-				LEFT JOIN membres u ON u.id = tu.id_user
+				LEFT JOIN users u ON u.id = tu.id_user
 				WHERE t.id_year = ?
 				GROUP BY t.id, l.id
 				ORDER BY t.date, t.id, l.id;';

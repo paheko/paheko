@@ -120,6 +120,13 @@ class DynamicFields
 
 		$db = DB::getInstance();
 
+		// First check that the field can be used as login
+		$sql = sprintf('SELECT (COUNT(DISTINCT transliterate_to_ascii(%s)) = COUNT(*)) FROM users WHERE %1$s IS NOT NULL AND %1$s != \'\';', $new_field);
+
+		if (!$db->firstColumn($sql)) {
+			throw new UserException(sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $new_field));
+		}
+
 		$sql = sprintf('UPDATE %s SET system = NULL WHERE system = \'login\';
 			UPDATE %1$s SET system = \'login\' WHERE key = %s;',
 			self::TABLE,
@@ -286,6 +293,15 @@ class DynamicFields
 
 			$fields[$name] = $name;
 
+			if ($data['type'] == 'checkbox' || $data['type'] == 'multiple') {
+				// A checkbox/multiple checkbox can either be 0 or 1, not NULL
+				$db->exec(sprintf('UPDATE membres SET %s = 0 WHERE %1$s IS NULL OR %1$s = \'\';', $name));
+			}
+			else {
+				// Make sure data is NULL if empty
+				$db->exec(sprintf('UPDATE membres SET %s = NULL WHERE %1$s = \'\';', $name));
+			}
+
 			if ($name == 'passe') {
 				$name = 'password';
 				$data['title'] = 'Mot de passe';
@@ -320,11 +336,6 @@ class DynamicFields
 			$field->set('list_table', (bool) $data['list_row']);
 			$field->set('sort_order', $i++);
 			$self->add($field);
-
-			if ($field->type == 'checkbox' || $field->type == 'multiple') {
-				// A checkbox/multiple checkbox can either be 0 or 1, not NULL
-				$db->exec(sprintf('UPDATE membres SET %s = 0 WHERE %1$s IS NULL;', $field->name));
-			}
 		}
 
 		self::$_instance = $self;
