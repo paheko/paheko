@@ -4,7 +4,7 @@
 
 {include file="acc/reports/_statement.tpl" statement=$general caption1="Charges" caption2="Produits"}
 
-{if !empty($volunteering.expense_sum) || !empty($volunteering.revenue_sum)}
+{if !empty($volunteering.body_left) || !empty($volunteering.body_right)}
 	<h2 class="ruler">Contributions en nature</h2>
 	{include file="acc/reports/_statement.tpl" statement=$volunteering header=false caption1="Emplois des contributions volontaires en nature" caption2="Contributions volontaires en nature"}
 {/if}

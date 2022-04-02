@@ -31,6 +31,11 @@ if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 			$account->importForm();
 		}
 
+		// Force account position from type
+		if ($account->isModified('type') && $account->user) {
+			$account->position = Accounts::getPositionFromType($account->type);
+		}
+
 		$account->save();
 
 		$page = '';

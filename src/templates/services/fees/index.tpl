@@ -7,7 +7,7 @@
 		<thead>
 			<th>Tarif</th>
 			<td>Montant</td>
-			<td>Membres à jour et ayant payé</td>
+			<td>Membres à jour</td>
 			<td>Membres expirés</td>
 			<td>Membres en attente de règlement</td>
 			<td></td>

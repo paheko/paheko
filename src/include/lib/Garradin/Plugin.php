@@ -73,10 +73,10 @@ class Plugin
 			throw new UserException(sprintf('Le plugin "%s" n\'existe pas ou n\'est pas installé correctement.', $id));
 		}
 
-		if (null !== $this->plugin->config) {
-			$this->plugin->config = json_decode($this->plugin->config);
-		}
-		else {
+		$this->plugin->config = json_decode($this->plugin->config ?? '');
+
+		if (!is_object($this->plugin->config))
+		{
 			$this->plugin->config = new \stdClass;
 		}
 
@@ -207,7 +207,7 @@ class Plugin
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file))
 		{
-			throw new \RuntimeException('Chemin de fichier incorrect.');
+			throw new \UnexpectedValueException('Chemin de fichier incorrect.');
 		}
 
 		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];

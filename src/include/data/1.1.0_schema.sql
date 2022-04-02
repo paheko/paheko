@@ -182,6 +182,34 @@ AS
         GROUP BY t.id_year, a.id
     );
 
+-- Balance des comptes par projet, par exercice
+CREATE VIEW IF NOT EXISTS acc_accounts_projects_balances
+AS
+    SELECT id_year, id_analytical, id, label, code, type, debit, credit,
+        CASE -- 3 = dynamic asset or liability depending on balance
+            WHEN position = 3 AND (debit - credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
+            WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
+            ELSE position
+        END AS position,
+        CASE
+            WHEN position IN (1, 4) -- 1 = asset, 4 = expense
+                OR (position = 3 AND (debit - credit) > 0)
+            THEN
+                debit - credit
+            ELSE
+                credit - debit
+        END AS balance,
+        CASE WHEN debit - credit > 0 THEN 1 ELSE 0 END AS is_debt
+    FROM (
+        SELECT t.id_year, l.id_analytical, a.id, a.label, a.code, a.position, a.type,
+            SUM(l.credit) AS credit,
+            SUM(l.debit) AS debit
+        FROM acc_accounts a
+        INNER JOIN acc_transactions_lines l ON l.id_account = a.id
+        INNER JOIN acc_transactions t ON t.id = l.id_transaction
+        GROUP BY l.id_analytical, a.id
+    );
+
 CREATE TABLE IF NOT EXISTS acc_years
 -- Exercices
 (

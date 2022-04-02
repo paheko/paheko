@@ -7,7 +7,7 @@ require_once __DIR__ . '/../_inc.php';
 
 $list = null;
 $table = qg('table');
-$query = f('query');
+$query = f('query') ?? qg('query');
 
 $db = DB::getInstance();
 $tables_list = $db->getGrouped('SELECT name, sql, NULL AS count FROM sqlite_master WHERE type = \'table\' ORDER BY name;');

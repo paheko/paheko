@@ -262,6 +262,13 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
+			if (version_compare($v, '1.1.23', '<')) {
+				$db->begin();
+				// Create acc_accounts_projects_balances view
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+				$db->commit();
+			}
+
 			if (version_compare($v, '1.2.0', '<')) {
 				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 				$db->beginSchemaUpdate();
