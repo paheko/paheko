@@ -3,6 +3,7 @@ assert(isset($columns));
 assert(isset($action_url));
 assert(isset($s));
 assert(isset($is_admin));
+$is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;
 $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN) && $is_unprotected);
 ?>
 
@@ -17,17 +18,19 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 		{else}
 			<legend>Recherche SQL</legend>
 			<dl>
-				{input type="textarea" name="sql_query" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$s.content}
+				{input type="textarea" name="sql" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$s.content}
 				{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
 					{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
 					<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
 				{/if}
 
 				<dd class="help">
+					{foreach from=$schema item="sql" key="table"}
 					<details>
-						<summary class="block help">Schéma SQL des tables</summary>
-						<pre class="block help">{foreach from=$schema item="table"}{$table}<br />{/foreach}</pre>
+						<summary>Schéma de la table <strong>{$table}</strong></summary>
+						<pre class="block help">{$sql}</pre>
 					</details>
+					{/foreach}
 				</dd>
 			</dl>
 			<p class="submit">
@@ -65,6 +68,7 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 	</fieldset>
 </form>
 
+{if $s->type == $s::TYPE_JSON}
 <script type="text/javascript">
 var columns = {$columns|escape:'json'};
 
@@ -135,5 +139,6 @@ $('#queryBuilderForm').onsubmit = function () {
 	$('#jsonQuery').value = JSON.stringify(q.export());
 };
 {/literal}
-q.import({$s.content|raw});
+q.import({$s->getGroups()|escape:'json'});
 </script>
+{/if}

@@ -36,36 +36,33 @@ $json_query = f('q') ? json_decode(f('q'), true) : null;
 $csrf_key = 'search_' . CURRENT_SEARCH_TARGET;
 
 if ($text_query !== '') {
-	$query = $s->getAdvancedSearch()->simple($text_query);
+	$s->content = json_encode($s->getAdvancedSearch()->simple($text_query));
 	$s->type = SE::TYPE_JSON;
 }
 elseif ($sql_query !== '') {
+	// Only admins can run custom queries, others can only run saved queries
+	$session->requireAccess($access_section, $session::ACCESS_ADMIN);
+
 	if (Session::getInstance()->canAccess($access_section, Session::ACCESS_ADMIN) && f('unprotected')) {
 		$s->type = SE::TYPE_SQL_UNPROTECTED;
 	}
 	else {
 		$s->type = SE::TYPE_SQL;
 	}
-}
-elseif ($json_query === null) {
-	$json_query = $s->getAdvancedSearch()->defaults();
-	$s->type = SE::TYPE_JSON;
-}
-else {
-	$s->type = SE::TYPE_JSON;
-}
 
-if ($s->type == SE::TYPE_JSON) {
-	$s->content = json_encode($json_query);
-}
-else {
 	$s->content = $sql_query;
 }
+elseif ($json_query === null) {
+	$s->content = json_encode($s->getAdvancedSearch()->defaults());
+	$s->type = SE::TYPE_JSON;
+}
+else {
+	$s->content = json_encode(['groups' => $json_query]);
+	$s->type = SE::TYPE_JSON;
+}
 
-// Recherche SQL
-if ($sql_query !== '') {
-	// Only admins can run custom queries, others can only run saved queries
-	$session->requireAccess($access_section, $session::ACCESS_ADMIN);
+if (f('to_sql')) {
+	$s->transformToSQL();
 }
 
 $form->runIf(f('save') || f('save_new'), function () use ($s) {

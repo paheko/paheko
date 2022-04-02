@@ -9,6 +9,8 @@ use Garradin\DB;
 use Garradin\Accounting\Years;
 use Garradin\Entities\Accounting\Transaction;
 
+use function Garradin\qg;
+
 class AdvancedSearch extends A_S
 {
 	/**
@@ -19,92 +21,102 @@ class AdvancedSearch extends A_S
 	{
 		$db = DB::getInstance();
 
+		$types = 'CASE t.type ';
+
+		foreach (Transaction::TYPES_NAMES as $num => $name) {
+			$types .= sprintf('WHEN %d THEN %s ', $num, $db->quote($name));
+		}
+
+		$types .= 'END';
+
 		return [
-			'transaction_id' => (object) [
+			'id' => [
 				'label'    => 'Numéro écriture',
 				'type'     => 'integer',
 				'null'     => false,
 				'select'   => 't.id',
 			],
-			'date' => (object) [
+			'date' => [
 				'label'    => 'Date',
 				'type'     => 'date',
 				'null'     => false,
 				'select'   => 't.date',
 			],
-			'label' => (object) [
+			'label' => [
 				'label'    => 'Libellé écriture',
 				'type'     => 'text',
 				'null'     => false,
 				'select'   => 't.label',
 				'order'    => 't.label COLLATE U_NOCASE %s',
 			],
-			'reference' => (object) [
+			'reference' => [
 				'label'    => 'Numéro pièce comptable',
 				'type'     => 'text',
 				'null'     => true,
 				'select'   => 't.reference',
 				'order'    => 't.reference COLLATE U_NOCASE %s',
 			],
-			'notes' => (object) [
+			'notes' => [
 				'label'    => 'Remarques',
 				'type'     => 'text',
 				'null'     => true,
 				'select'   => 't.notes',
 				'order'    => 't.notes COLLATE U_NOCASE %s',
 			],
-			'line_label' => (object) [
-				'label'    => 'Libellé ligne',
-				'type'     => 'text',
-				'null'     => true,
-				'select'   => 'l.label',
-				'order'    => 'l.label COLLATE U_NOCASE %s',
-			],
-			'debit' => (object) [
-				'label'    => 'Débit',
-				'type'     => 'text',
-				'null'     => false,
-				'select'   => 'l.debit',
-				'normalize' => 'money',
-			],
-			'credit' => (object) [
-				'label'    => 'Crédit',
-				'type'     => 'text',
-				'null'     => false,
-				'select'   => 'l.credit',
-				'normalize' => 'money',
-			],
-			'line_reference' => (object) [
-				'textMatch'=> true,
-				'label'    => 'Référence ligne écriture',
-				'type'     => 'text',
-				'null'     => true,
-				'select'   => 'l.reference',
-			],
-			'type' => (object) [
-				'textMatch'=> false,
-				'label'    => 'Type d\'écriture',
-				'type'     => 'enum',
-				'null'     => false,
-				'values'   => Transaction::TYPES_NAMES,
-				'select'   => 't.type',
-			],
-			'account_code' => (object) [
+			'account_code' => [
 				'textMatch'=> true,
 				'label'    => 'Numéro de compte',
 				'type'     => 'text',
 				'null'     => false,
 				'select'   => 'a.code',
 			],
-			'id_year' => (object) [
+			'debit' => [
+				'label'    => 'Débit',
+				'type'     => 'text',
+				'null'     => false,
+				'select'   => 'l.debit',
+				'normalize' => 'money',
+			],
+			'credit' => [
+				'label'    => 'Crédit',
+				'type'     => 'text',
+				'null'     => false,
+				'select'   => 'l.credit',
+				'normalize' => 'money',
+			],
+			'line_label' => [
+				'label'    => 'Libellé ligne',
+				'type'     => 'text',
+				'null'     => true,
+				'select'   => 'l.label',
+				'order'    => 'l.label COLLATE U_NOCASE %s',
+			],
+			'line_reference' => [
+				'textMatch'=> true,
+				'label'    => 'Référence ligne écriture',
+				'type'     => 'text',
+				'null'     => true,
+				'select'   => 'l.reference',
+			],
+			'type' => [
+				'textMatch'=> false,
+				'label'    => 'Type d\'écriture',
+				'type'     => 'enum',
+				'null'     => false,
+				'values'   => Transaction::TYPES_NAMES,
+				'select'   => $types,
+				'where'    => 't.type',
+			],
+			'id_year' => [
 				'textMatch'=> false,
 				'label'    => 'Exercice',
 				'type'     => 'enum',
 				'null'     => false,
 				'values'   => $db->getAssoc('SELECT id, label FROM acc_years ORDER BY end_date;'),
-				'select'   => 't.id_year',
+				'select'   => 'y.label',
+				'where'    => 't.id_year',
 			],
-			'project_code' => (object) [
+			'project_code' => [
 				'textMatch'=> true,
 				'label'    => 'N° de compte projet',
 				'type'     => 'text',
@@ -204,7 +216,7 @@ class AdvancedSearch extends A_S
 		}
 
 		return (object) [
-			'query' => $query,
+			'groups' => $query,
 			'order' => 'id',
 			'desc' => true,
 		];
@@ -213,41 +225,32 @@ class AdvancedSearch extends A_S
 	public function schema(): array
 	{
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s;', $db->where('name', ['acc_transactions', 'acc_transactions_lines', 'acc_accounts', 'acc_years']));
+		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['acc_transactions', 'acc_transactions_lines', 'acc_accounts', 'acc_years']));
 		return $db->getAssoc($sql);
 	}
 
-	public function make(array $groups, string $order = 'transaction_id', bool $desc = true): DynamicList
+	public function make(string $query): DynamicList
 	{
 		$tables = 'acc_transactions AS t
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id
+			INNER JOIN acc_years AS y ON t.id_year = y.id
 			LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id';
-		$conditions = $this->buildConditions($groups);
-
-		$list = new DynamicList($this->columns(), $tables, $conditions);
-		$list->groupBy('t.id');
-		$list->orderBy($order, $desc);
-		return $list;
+		return $this->makeList($query, $tables, 'id', true);
 	}
 
-	public function defaults(): array
+	public function defaults(): \stdClass
 	{
 		$group = [
 			'operator' => 'AND',
 			'conditions' => [
 				[
-					'column'   => 't.id_year',
+					'column'   => 'id_year',
 					'operator' => '= ?',
 					'values'   => [(int)qg('year') ?: Years::getCurrentOpenYearId()],
 				],
 				[
-					'column'   => 't.label',
-					'operator' => 'LIKE %?%',
-					'values'   => [''],
-				],
-				[
-					'column'   => 't.reference',
+					'column'   => 'label',
 					'operator' => 'LIKE %?%',
 					'values'   => [''],
 				],
@@ -256,7 +259,7 @@ class AdvancedSearch extends A_S
 
 		if (null !== qg('type')) {
 			$group['conditions'][] = [
-				'column' => 't.type',
+				'column' => 'type',
 				'operator' => '= ?',
 				'values' => [(int)qg('type')],
 			];
@@ -264,12 +267,12 @@ class AdvancedSearch extends A_S
 
 		if (null !== qg('account')) {
 			$group['conditions'][] = [
-				'column' => 'a.code',
+				'column' => 'account_code',
 				'operator' => '= ?',
 				'values' => [qg('account')],
 			];
 		}
 
-		return [$group];
+		return (object) ['groups' => [$group]];
 	}
 }

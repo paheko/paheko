@@ -44,48 +44,48 @@ class AdvancedSearch extends A_S
 				continue;
 			}
 
-			$column = (object) [
+			$column = [
 				'label'    => $field->label,
 				'type'     => 'text',
 				'null'     => true,
 			];
 
 			if ($fields->isText($name)) {
-				$column->order = sprintf('%s COLLATE U_NOCASE %%s', $name);
+				$column['order'] = sprintf('%s COLLATE U_NOCASE %%s', $name);
 			}
 
 			if ($field->type == 'checkbox')
 			{
-				$column->type = 'boolean';
-				$column->null = false;
+				$column['type'] = 'boolean';
+				$column['null'] = false;
 			}
 			elseif ($field->type == 'select')
 			{
-				$column->type = 'enum';
-				$column->values = array_combine($field->options, $field->options);
+				$column['type'] = 'enum';
+				$column['values'] = array_combine($field->options, $field->options);
 			}
 			elseif ($field->type == 'multiple')
 			{
-				$column->type = 'bitwise';
-				$column->values = $field->options;
+				$column['type'] = 'bitwise';
+				$column['values'] = $field->options;
 			}
 			elseif ($field->type == 'date' || $field->type == 'datetime')
 			{
-				$column->type = $field->type;
+				$column['type'] = $field->type;
 			}
 			elseif ($field->type == 'number')
 			{
-				$column->type = 'integer';
+				$column['type'] = 'integer';
 			}
 
 			if ($field->type == 'tel') {
-				$column->normalize = 'tel';
+				$column['normalize'] = 'tel';
 			}
 
 			$columns[$name] = $column;
 		}
 
-		$columns['id_category'] = (object) [
+		$columns['id_category'] = [
 			'label'    => 'Catégorie',
 			'type'     => 'enum',
 			'null'     => false,
@@ -153,19 +153,15 @@ class AdvancedSearch extends A_S
 		];
 	}
 
-	public function make(array $groups, string $order = 't.id', bool $desc = false): DynamicList
+	public function make(string $query): DynamicList
 	{
 		$tables = 'users u';
-		$conditions = $this->buildConditions($groups);
-
-		$list = new DynamicList($this->columns(), $tables, $conditions);
-		$list->orderBy($order, $desc);
-		return $list;
+		return $this->makeList($query, $tables, current(DynamicFields::getNameFields()), false);
 	}
 
-	public function defaults(): array
+	public function defaults(): \stdClass
 	{
-		return [[
+		return (object) ['groups' => [[
 			'operator' => 'AND',
 			'conditions' => [
 				[
@@ -174,6 +170,6 @@ class AdvancedSearch extends A_S
 					'values'   => [''],
 				],
 			],
-		]];
+		]]];
 	}
 }

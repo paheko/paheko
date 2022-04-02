@@ -30,12 +30,33 @@ abstract class AdvancedSearch
 	/**
 	 * Builds a DynamicList object from the supplied search groups
 	 */
-	abstract public function make(array $groups, string $order, bool $desc): DynamicList;
+	abstract public function make(string $query): DynamicList;
 
 	/**
 	 * Returns default empty search groups
 	 */
-	abstract public function defaults(): array;
+	abstract public function defaults(): \stdClass;
+
+	public function makeList(string $query, string $tables, string $default_order, string $default_desc): DynamicList
+	{
+		$query = json_decode($query, true);
+
+		if (null === $query) {
+			throw new \InvalidArgumentException('Invalid JSON search object');
+		}
+
+		$query = (object) $query;
+
+		if (!isset($query->groups) || !is_array($query->groups)) {
+			throw new \InvalidArgumentException('Invalid JSON search object: missing groups');
+		}
+
+		$conditions = $this->buildConditions($query->groups);
+
+		$list = new DynamicList($this->columns(), $tables, $conditions);
+		$list->orderBy($query->order ?? $default_order, $query->desc ?? $default_desc);
+		return $list;
+	}
 
 	/**
 	 * Redirects to a URL if only one result is found for a simple search
@@ -88,9 +109,10 @@ abstract class AdvancedSearch
 				}
 
 				$query_columns[] = $condition['column'];
-				$column = $target_columns[$condition['column']];
+				$column = $columns[$condition['column']];
+				$name = $column['where'] ?? ($column['select'] ?? $condition['column']);
 
-				$query = sprintf('%s %s', $db->quoteIdentifier($condition['column']), $condition['operator']);
+				$query = sprintf('%s %s', $name, $condition['operator']);
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
 

@@ -11,12 +11,11 @@
 {if $list !== null}
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
 
-	{include file="common/dynamic_list_head.tpl" check=$can_action}
-
+	{include file="common/dynamic_list_head.tpl" check=$is_admin}
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			{if $can_action}
+			{if $is_admin}
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>
 			{/if}
 			{foreach from=$columns key="key" item="column"}
@@ -48,7 +47,7 @@
 	{/if}
 
 {else}
-
+ss
 {/if}
 
 

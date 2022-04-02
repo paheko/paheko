@@ -4,6 +4,7 @@ namespace Garradin\Entities;
 
 use Garradin\AdvancedSearch;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Entity;
 
 use Garradin\Accounting\AdvancedSearch as Accounting_AdvancedSearch;
@@ -70,9 +71,7 @@ class Search extends Entity
 	public function getDynamicList(): DynamicList
 	{
 		if ($this->type == self::TYPE_JSON) {
-			$q = json_decode($this->content, true);
-
-			return $this->getAdvancedSearch()->make($q->query, $q->order, $q->desc);
+			return $this->getAdvancedSearch()->make($this->content);
 		}
 		else {
 			throw new \LogicException('SQL search cannot be used as dynamic list');
@@ -93,6 +92,21 @@ class Search extends Entity
 		}
 
 		return $this->_as;
+	}
+
+	public function transformToSQL()
+	{
+		if ($this->type != self::TYPE_JSON) {
+			throw new \LogicException('Cannot transform a non-JSON search to SQL');
+		}
+
+		$sql = $this->getDynamicList()->SQL();
+
+		// Remove indentation
+		$sql = preg_replace('/^\s*/m', '', $sql);
+
+		$this->set('content', $sql);
+		$this->set('type', self::TYPE_SQL);
 	}
 
 	/**
@@ -132,7 +146,7 @@ class Search extends Entity
 		$allowed_tables = $this->getProtectedTables();
 
 		try {
-			$st = $db->protectSelect($allowed_tables, $sql);
+			$st = DB::getInstance()->protectSelect($allowed_tables, $sql);
 
 			$this->_result = $st->execute();
 			return $this->_result;
@@ -149,7 +163,7 @@ class Search extends Entity
 		}
 	}
 
-	public function getHeader(): string
+	public function getHeader(): array
 	{
 		$r = $this->query();
 		$columns = [];
@@ -182,5 +196,14 @@ class Search extends Entity
 		else {
 			return ['users' => null, 'users_categories' => null];
 		}
+	}
+
+	public function getGroups(): array
+	{
+		if ($this->type != self::TYPE_JSON) {
+			throw new \LogicException('Only JSON searches can use this method');
+		}
+
+		return json_decode($this->content, true)['groups'];
 	}
 }
