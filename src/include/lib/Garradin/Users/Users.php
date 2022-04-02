@@ -122,4 +122,50 @@ class Users
 			$db->where('id', $ids)
 		);
 	}
+
+	public function sendMessage(array $recipients, $subject, $message, $send_copy)
+	{
+		$config = Config::getInstance();
+
+		$emails = [];
+
+		foreach ($recipients as $key => $recipient)
+		{
+			// Ignorer les destinataires avec une adresse email vide
+			if (empty($recipient->email))
+			{
+				continue;
+			}
+
+			if (!isset($recipient->email, $recipient->id)) {
+				throw new UserException('Il manque l\'identifiant ou l\'email dans le résultat');
+			}
+
+			// Refuser d'envoyer un mail à une adresse invalide, sans vérifier le MX
+			// sinon ça serait trop lent
+			if (!SMTP::checkEmailIsValid($recipient->email, false))
+			{
+				throw new UserException(sprintf('Adresse email invalide : "%s". Aucun message n\'a été envoyé.', $recipient->email));
+			}
+
+			// This is to avoid having duplicate emails
+			$emails[$recipient->email] = $recipient->id;
+		}
+
+		if (!count($emails)) {
+			throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
+		}
+
+		foreach ($emails as $email => $id)
+		{
+			Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $email, $subject, $message, $id);
+		}
+
+		if ($send_copy)
+		{
+			Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
+		}
+
+		return true;
+	}
 }

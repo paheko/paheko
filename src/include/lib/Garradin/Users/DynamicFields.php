@@ -250,11 +250,6 @@ class DynamicFields
 		return $this->_presets;
 	}
 
-	public function listUnusedPresets(): array
-	{
-		return array_diff_key(self::getPresets(), (array) $this->_fields);
-	}
-
 	public function getInstallPresets()
 	{
 		return array_filter($this->getPresets(), fn ($row) => !$row->install );

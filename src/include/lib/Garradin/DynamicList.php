@@ -154,6 +154,23 @@ class DynamicList implements \Countable
 
 	public function iterate(bool $include_hidden = true)
 	{
+		foreach (DB::getInstance()->iterate($this->SQL()) as $row) {
+			if ($this->modifier) {
+				call_user_func_array($this->modifier, [&$row]);
+			}
+
+			foreach ($this->columns as $key => $config) {
+				if (empty($config['label']) && !$include_hidden) {
+					unset($row->$key);
+				}
+			}
+
+			yield $row;
+		}
+	}
+
+	public function SQL()
+	{
 		$start = ($this->page - 1) * $this->per_page;
 		$columns = [];
 
@@ -199,19 +216,7 @@ class DynamicList implements \Countable
 			$sql .= sprintf(' LIMIT %d,%d', $start, $this->per_page);
 		}
 
-		foreach (DB::getInstance()->iterate($sql) as $row) {
-			if ($this->modifier) {
-				call_user_func_array($this->modifier, [&$row]);
-			}
-
-			foreach ($this->columns as $key => $config) {
-				if (empty($config['label']) && !$include_hidden) {
-					unset($row->$key);
-				}
-			}
-
-			yield $row;
-		}
+		return $sql;
 	}
 
 	public function loadFromQueryString()
