@@ -2,7 +2,10 @@
 
 namespace Garradin\Users;
 
+use Garradin\DynamicList;
+use Garradin\Users\DynamicFields;
 use Garradin\AdvancedSearch as A_S;
+use Garradin\DB;
 
 class AdvancedSearch extends A_S
 {
@@ -16,12 +19,6 @@ class AdvancedSearch extends A_S
 		$fields = DynamicFields::getInstance();
 
 		$columns = [];
-		$columns['id_category'] = (object) [
-			'label'    => 'Catégorie',
-			'type'     => 'enum',
-			'null'     => false,
-			'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
-		];
 
 		/*
 		$columns['identity'] = (object) [
@@ -87,6 +84,15 @@ class AdvancedSearch extends A_S
 
 			$columns[$name] = $column;
 		}
+
+		$columns['id_category'] = (object) [
+			'label'    => 'Catégorie',
+			'type'     => 'enum',
+			'null'     => false,
+			'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
+		];
+
+		return $columns;
 	}
 
 	public function schema(): array
@@ -99,6 +105,7 @@ class AdvancedSearch extends A_S
 	public function simple(string $query): \stdClass
 	{
 		$operator = 'LIKE %?%';
+		$db = DB::getInstance();
 
 		if (is_numeric(trim($query)))
 		{
@@ -112,6 +119,20 @@ class AdvancedSearch extends A_S
 		else
 		{
 			$column = 'identity';
+		}
+
+		// Try to redirect to user if there is only one user
+		if ($operator == '= ?') {
+			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $column);
+			$single_query = (int) $query;
+		}
+		else {
+			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s LIKE ?;', $column);
+			$single_query = '%' . trim($query) . '%';
+		}
+
+		if (($row = $db->first($sql, $single_query)) && $row->count == 1) {
+			Utils::redirect('!users/details.php?id=' . $id);
 		}
 
 		$query = [[
@@ -140,5 +161,19 @@ class AdvancedSearch extends A_S
 		$list = new DynamicList($this->columns(), $tables, $conditions);
 		$list->orderBy($order, $desc);
 		return $list;
+	}
+
+	public function defaults(): array
+	{
+		return [[
+			'operator' => 'AND',
+			'conditions' => [
+				[
+					'column'   => current(DynamicFields::getNameFields()),
+					'operator' => 'LIKE %?%',
+					'values'   => [''],
+				],
+			],
+		]];
 	}
 }

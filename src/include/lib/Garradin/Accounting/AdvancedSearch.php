@@ -2,7 +2,12 @@
 
 namespace Garradin\Accounting;
 
+use Garradin\DynamicList;
+use Garradin\Users\DynamicFields;
 use Garradin\AdvancedSearch as A_S;
+use Garradin\DB;
+use Garradin\Accounting\Years;
+use Garradin\Entities\Accounting\Transaction;
 
 class AdvancedSearch extends A_S
 {
@@ -152,7 +157,7 @@ class AdvancedSearch extends A_S
 		elseif ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
 			&& ($year = Years::get($id_year))
 			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
-			return sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year);
+			Utils::redirect(sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year));
 		}
 		// Match date
 		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $text) && ($d = Utils::get_datetime($text)))
@@ -212,7 +217,7 @@ class AdvancedSearch extends A_S
 		return $db->getAssoc($sql);
 	}
 
-	public function make(array $groups, string $order = 't.id', bool $desc = false): DynamicList
+	public function make(array $groups, string $order = 'transaction_id', bool $desc = true): DynamicList
 	{
 		$tables = 'acc_transactions AS t
 			INNER JOIN acc_transactions_lines AS l ON l.id_transaction = t.id
@@ -226,4 +231,45 @@ class AdvancedSearch extends A_S
 		return $list;
 	}
 
+	public function defaults(): array
+	{
+		$group = [
+			'operator' => 'AND',
+			'conditions' => [
+				[
+					'column'   => 't.id_year',
+					'operator' => '= ?',
+					'values'   => [(int)qg('year') ?: Years::getCurrentOpenYearId()],
+				],
+				[
+					'column'   => 't.label',
+					'operator' => 'LIKE %?%',
+					'values'   => [''],
+				],
+				[
+					'column'   => 't.reference',
+					'operator' => 'LIKE %?%',
+					'values'   => [''],
+				],
+			],
+		];
+
+		if (null !== qg('type')) {
+			$group['conditions'][] = [
+				'column' => 't.type',
+				'operator' => '= ?',
+				'values' => [(int)qg('type')],
+			];
+		}
+
+		if (null !== qg('account')) {
+			$group['conditions'][] = [
+				'column' => 'a.code',
+				'operator' => '= ?',
+				'values' => [qg('account')],
+			];
+		}
+
+		return [$group];
+	}
 }

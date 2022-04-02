@@ -10,7 +10,7 @@ abstract class AdvancedSearch
 	 * - order
 	 * - desc
 	 */
-	abstract public function simple(string $query): array;
+	abstract public function simple(string $query): \stdClass;
 
 	/**
 	 * Return list of columns. The format is similar to the one accepted in DynamicList.
@@ -31,6 +31,24 @@ abstract class AdvancedSearch
 	 * Builds a DynamicList object from the supplied search groups
 	 */
 	abstract public function make(array $groups, string $order, bool $desc): DynamicList;
+
+	/**
+	 * Returns default empty search groups
+	 */
+	abstract public function defaults(): array;
+
+	/**
+	 * Redirects to a URL if only one result is found for a simple search
+	 */
+	public function redirect(DynamicList $list): void
+	{
+		if ($list->count() != 1) {
+			return;
+		}
+
+		$item = $list->iterate()->current();
+		Utils::redirect($item->id);
+	}
 
 	public function buildConditions(array $groups): string
 	{

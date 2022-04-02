@@ -1,7 +1,8 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\Entities;
 
+use Garradin\AdvancedSearch;
 use Garradin\DB;
 use Garradin\Entity;
 
@@ -28,8 +29,8 @@ class Search extends Entity
 	const TARGET_ACCOUNTING = 'accounting';
 
 	const TARGETS = [
-		TARGET_USERS => 'Membres',
-		TARGET_ACCOUNTING => 'Comptabilité',
+		self::TARGET_USERS => 'Membres',
+		self::TARGET_ACCOUNTING => 'Comptabilité',
 	];
 
 	protected int $id;
@@ -41,8 +42,9 @@ class Search extends Entity
 	protected string $content;
 
 	protected $_result = null;
+	protected $_as = null;
 
-	protected function selfCheck(): void
+	public function selfCheck(): void
 	{
 		parent::selfCheck();
 
@@ -68,20 +70,29 @@ class Search extends Entity
 	public function getDynamicList(): DynamicList
 	{
 		if ($this->type == self::TYPE_JSON) {
-			if ($this->target == self::TARGET_ACCOUNTING) {
-				$as = new Accounting_AdvancedSearch;
-			}
-			else {
-				$as = new Users_AdvancedSearch;
-			}
+			$q = json_decode($this->content, true);
 
-			$q = json_decode($this->content);
-
-			return $as->make($q->query, $q->order, $q->desc);
+			return $this->getAdvancedSearch()->make($q->query, $q->order, $q->desc);
 		}
 		else {
 			throw new \LogicException('SQL search cannot be used as dynamic list');
 		}
+	}
+
+	public function getAdvancedSearch(): AdvancedSearch
+	{
+		if ($this->target == self::TARGET_ACCOUNTING) {
+			$class = 'Garradin\Accounting\AdvancedSearch';
+		}
+		else {
+			$class = 'Garradin\Users\AdvancedSearch';
+		}
+
+		if (null === $this->_as || !is_a($this->_as, $class)) {
+			$this->_as = new $class;
+		}
+
+		return $this->_as;
 	}
 
 	/**
