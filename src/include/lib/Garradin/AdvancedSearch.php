@@ -51,9 +51,13 @@ abstract class AdvancedSearch
 			throw new \InvalidArgumentException('Invalid JSON search object: missing groups');
 		}
 
-		$conditions = $this->buildConditions($query->groups);
+		$conditions = $this->build($query->groups);
+		array_unshift($conditions->select, 'id'); // Always include ID
 
-		$list = new DynamicList($this->columns(), $tables, $conditions);
+		// Only select columns that we want
+		$columns = array_intersect_key($this->columns(), array_flip($conditions->select));
+
+		$list = new DynamicList($columns, $tables, $conditions->where);
 		$list->orderBy($query->order ?? $default_order, $query->desc ?? $default_desc);
 		return $list;
 	}
@@ -71,11 +75,12 @@ abstract class AdvancedSearch
 		Utils::redirect($item->id);
 	}
 
-	public function buildConditions(array $groups): string
+	public function build(array $groups): \stdClass
 	{
 		$db = DB::getInstance();
 		$columns = $this->columns();
 
+		$select_columns = [];
 		$query_columns = [];
 		$query_groups = [];
 
@@ -105,6 +110,13 @@ abstract class AdvancedSearch
 					// Ignorer une condition qui se rapporte à une colonne
 					// qui n'existe pas, cas possible si on reprend une recherche
 					// après avoir modifié les fiches de membres
+					continue;
+				}
+
+				$select_columns[] = $condition['column'];
+
+				// Just append the column to the select
+				if ($condition['operator'] == '1') {
 					continue;
 				}
 
@@ -183,6 +195,6 @@ abstract class AdvancedSearch
 			throw new UserException('Aucune clause trouvée dans la recherche : elle contenait peut-être des clauses qui correspondent à des champs qui ont été supprimés ?');
 		}
 
-		return '(' . implode(') AND (', $query_groups) . ')';
+		return (object) ['select' => $select_columns, 'where' => '(' . implode(') AND (', $query_groups) . ')'];
 	}
 }

@@ -62,7 +62,7 @@
 
 	{* FIXME pagination *}
 
-{else}
+{elseif $results}
 
 	<table class="list">
 		<thead>

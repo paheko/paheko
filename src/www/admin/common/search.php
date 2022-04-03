@@ -34,6 +34,7 @@ $text_query = trim((string) qg('qt'));
 $sql_query = trim((string) f('sql'));
 $json_query = f('q') ? json_decode(f('q'), true) : null;
 $csrf_key = 'search_' . CURRENT_SEARCH_TARGET;
+$default = false;
 
 if ($text_query !== '') {
 	$s->content = json_encode($s->getAdvancedSearch()->simple($text_query));
@@ -52,18 +53,21 @@ elseif ($sql_query !== '') {
 
 	$s->content = $sql_query;
 }
-elseif ($json_query === null) {
-	$s->content = json_encode($s->getAdvancedSearch()->defaults());
+elseif ($json_query !== null) {
+	$s->content = json_encode(['groups' => $json_query]);
 	$s->type = SE::TYPE_JSON;
 }
 else {
-	$s->content = json_encode(['groups' => $json_query]);
+	$s->content = json_encode($s->getAdvancedSearch()->defaults());
 	$s->type = SE::TYPE_JSON;
+	$default = true;
 }
 
 if (f('to_sql')) {
 	$s->transformToSQL();
 }
+
+//echo '<pre>'; var_dump(json_decode($s->content)); exit;
 
 $form->runIf(f('save') || f('save_new'), function () use ($s) {
 	if (f('save_new') || !$s->exists()) {
@@ -80,7 +84,7 @@ $form->runIf(f('save') || f('save_new'), function () use ($s) {
 
 $list = $results = $header = null;
 
-if($s->exists() || !empty($_POST)) {
+if (!$default) {
 	if ($s->type == $s::TYPE_JSON) {
 		$list = $s->getDynamicList();
 		$list->loadFromQueryString();

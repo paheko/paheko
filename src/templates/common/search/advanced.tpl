@@ -99,8 +99,8 @@ var translations = {
 	"is false": "non",
 	"Matches ALL of the following conditions:": "Correspond à TOUS les critères suivants :",
 	"Matches ANY of the following conditions:": "Correspond à UN des critères suivants :",
-	"Add a new set of conditions below this one": "-- Ajouter un groupe de critères",
-	"Remove this set of conditions": "-- Supprimer ce groupe de critères"
+	"Add a new set of conditions below this one": "— Ajouter un groupe de critères",
+	"Remove this set of conditions": "— Supprimer ce groupe de critères"
 };
 
 var q = new SQLQueryBuilder(columns);
@@ -108,6 +108,15 @@ q.__ = function (str) {
 	return translations[str];
 };
 q.loadDefaultOperators();
+q.default_operator = "1";
+
+// Add specific condition just to have the column show up in result
+q.operators["1"] = "afficher cette colonne dans le résultat";
+
+for (var i in q.types_operators) {
+	q.types_operators[i]["1"] = q.operators["1"];
+}
+
 q.buildInput = function (type, label, column) {
 	if (label == '+')
 	{
