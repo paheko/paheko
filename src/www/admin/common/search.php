@@ -1,7 +1,6 @@
 <?php
 namespace Garradin;
 
-use Garradin\Accounting\Years;
 use Garradin\Entities\Search as SE;
 use Garradin\Search;
 use Garradin\Users\Session;

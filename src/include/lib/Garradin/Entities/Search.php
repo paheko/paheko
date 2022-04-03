@@ -34,7 +34,7 @@ class Search extends Entity
 		self::TARGET_ACCOUNTING => 'Comptabilité',
 	];
 
-	protected int $id;
+	protected ?int $id;
 	protected ?int $id_user = null;
 	protected string $label;
 	protected \DateTime $created;

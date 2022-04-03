@@ -4,6 +4,8 @@ namespace Garradin;
 
 use Garradin\Entities\Search as SE;
 
+use KD2\DB\EntityManager as EM;
+
 class Search
 {
 	static public function list(int $id_user, string $target): array

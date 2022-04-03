@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Recherche de membre" current="membres" custom_js=['lib/query_builder.min.js']}
+{include file="admin/_head.tpl" title="Recherche de membre" current="users" custom_js=['lib/query_builder.min.js']}
 
 {include file="users/_nav.tpl" current="search"}
 
