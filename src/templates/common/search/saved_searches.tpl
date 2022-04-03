@@ -14,7 +14,7 @@
 {if $mode == 'edit'}
 	{form_errors}
 
-	<form method="post" action="{$self_url}">
+	<form method="post" action="{$self_url}" data-focus="1">
 		<fieldset>
 			<legend>Modifier une recherche enregistrée</legend>
 			<dl>

@@ -32,7 +32,6 @@ else {
 $text_query = trim((string) qg('qt'));
 $sql_query = trim((string) f('sql'));
 $json_query = f('q') ? json_decode(f('q'), true) : null;
-$csrf_key = 'search_' . CURRENT_SEARCH_TARGET;
 $default = false;
 
 if ($text_query !== '') {
@@ -66,20 +65,19 @@ if (f('to_sql')) {
 	$s->transformToSQL();
 }
 
-//echo '<pre>'; var_dump(json_decode($s->content)); exit;
-
 $form->runIf(f('save') || f('save_new'), function () use ($s) {
 	if (f('save_new') || !$s->exists()) {
 		$s = clone $s;
 		$label = $s->type != $s::TYPE_JSON ? 'Recherche SQL du ' : 'Recherche avancée du ';
 		$label .= date('d/m/Y à H:i');
+		$s->label = $label;
 	}
 
 	$s->save();
 
 	$target = $s->target == $s::TARGET_ACCOUNTING ? 'acc' : 'users';
-	Utils::redirect(sprintf('%s/saved_searches.php?edit=%d', $target, $s->id()));
-}, $csrf_key);
+	Utils::redirect(sprintf('!%s/saved_searches.php?edit=%d', $target, $s->id()));
+});
 
 $list = $results = $header = null;
 
