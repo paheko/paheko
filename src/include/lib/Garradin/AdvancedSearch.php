@@ -127,9 +127,14 @@ abstract class AdvancedSearch
 
 				$query_columns[] = $condition['column'];
 				$column = $columns[$condition['column']];
-				$name = $column['where'] ?? ($column['select'] ?? $condition['column']);
 
-				$query = sprintf('%s %s', $name, $condition['operator']);
+				if (isset($column['where'])) {
+					$query = sprintf($column['where'], $condition['operator']);
+				}
+				else {
+					$name = $column['select'] ?? $condition['column'];
+					$query = sprintf('%s %s', $name, $condition['operator']);
+				}
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
 
@@ -197,7 +202,7 @@ abstract class AdvancedSearch
 
 		if (!count($query_groups))
 		{
-			throw new UserException('Aucune clause trouvée dans la recherche : elle contenait peut-être des clauses qui correspondent à des champs qui ont été supprimés ?');
+			throw new UserException('Aucune clause de recherche trouvée dans la recherche : elle contenait peut-être des clauses qui correspondent à des champs qui ont été supprimés ?');
 		}
 
 		return (object) ['select' => $select_columns, 'where' => '(' . implode(') AND (', $query_groups) . ')'];

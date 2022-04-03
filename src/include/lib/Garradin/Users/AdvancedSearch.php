@@ -86,12 +86,30 @@ class AdvancedSearch extends A_S
 		}
 
 		$columns['id_category'] = [
-			'label'    => 'Catégorie',
-			'type'     => 'enum',
-			'null'     => false,
-			'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
-			'select'   => '(SELECT name FROM users_categories WHERE id = id_category)',
-			'where'    => 'id_category',
+			'label'  => 'Catégorie',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
+			'select' => '(SELECT name FROM users_categories WHERE id = id_category)',
+			'where'  => 'id_category %s',
+		];
+
+		$columns['service'] = [
+			'label'  => 'Inscrit à l\'activité',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
+			'select' => '\'Inscrit\'',
+			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s)',
+		];
+
+		$columns['service_active'] = [
+			'label'  => 'À jour de l\'activité',
+			'type'   => 'enum',
+			'null'   => false,
+			'values' => $db->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;'),
+			'select' => '\'À jour\'',
+			'where'  => 'id IN (SELECT id_user FROM services_users WHERE id_service %s AND (expiry_date IS NULL OR expiry_date > date()))',
 		];
 
 		return $columns;
