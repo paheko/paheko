@@ -98,7 +98,7 @@ class AdvancedSearch extends A_S
 	public function schema(): array
 	{
 		$db = DB::getInstance();
-		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s;', $db->where('name', ['users', 'users_categories']));
+		$sql = sprintf('SELECT name, sql FROM sqlite_master WHERE %s ORDER BY name;', $db->where('name', ['users', 'users_categories']));
 		return $db->getAssoc($sql);
 	}
 

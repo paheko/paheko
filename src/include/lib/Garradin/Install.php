@@ -371,9 +371,9 @@ class Install
 			margin: 1rem auto;
 			width: 50px;
 			height: 50px;
-			border: 5px solid #000;
+			border: 5px solid #ccc;
 			border-radius: 50%%;
-			border-top-color: #999;
+			border-top-color: #000;
 			animation: spin 1s ease-in-out infinite;
 		}
 

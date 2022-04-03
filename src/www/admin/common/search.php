@@ -56,7 +56,7 @@ elseif ($json_query !== null) {
 	$s->content = json_encode(['groups' => $json_query]);
 	$s->type = SE::TYPE_JSON;
 }
-else {
+elseif (!$s->content) {
 	$s->content = json_encode($s->getAdvancedSearch()->defaults());
 	$s->type = SE::TYPE_JSON;
 	$default = true;
@@ -84,13 +84,18 @@ $form->runIf(f('save') || f('save_new'), function () use ($s) {
 $list = $results = $header = null;
 
 if (!$default) {
-	if ($s->type == $s::TYPE_JSON) {
-		$list = $s->getDynamicList();
-		$list->loadFromQueryString();
+	try {
+		if ($s->type == $s::TYPE_JSON) {
+			$list = $s->getDynamicList();
+			$list->loadFromQueryString();
+		}
+		else {
+			$header = $s->getHeader();
+			$results = $s->iterateResults();
+		}
 	}
-	else {
-		$header = $s->getHeader();
-		$results = $s->iterateResults();
+	catch (UserException $e) {
+		$form->addError($e->getMessage());
 	}
 }
 

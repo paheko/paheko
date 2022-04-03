@@ -52,12 +52,14 @@ abstract class AdvancedSearch
 		}
 
 		$conditions = $this->build($query->groups);
+		array_unshift($conditions->select, $default_order); // Always include default order
 		array_unshift($conditions->select, 'id'); // Always include ID
 
 		// Only select columns that we want
-		$columns = array_intersect_key($this->columns(), array_flip($conditions->select));
+		$select_columns = array_intersect_key($this->columns(), array_flip($conditions->select));
 
-		$list = new DynamicList($columns, $tables, $conditions->where);
+		$list = new DynamicList($select_columns, $tables, $conditions->where);
+
 		$list->orderBy($query->order ?? $default_order, $query->desc ?? $default_desc);
 		return $list;
 	}

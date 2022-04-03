@@ -98,6 +98,29 @@ class Upgrade
 
 				// Migrate other stuff
 				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
+
+				// Update searches
+				foreach ($db->iterate('SELECT * FROM searches;') as $row) {
+					if ($row->type == 'json') {
+						$json = json_decode($row->content);
+
+						if (!$json) {
+							$db->delete('searches', 'id = ?', $row->id);
+							continue;
+						}
+
+						$json->groups = $json->query;
+						unset($json->query, $json->limit);
+
+						$content = json_encode($json);
+					}
+					else {
+						$content = preg_replace('/\bmembres\b/', 'users', $row->content);
+					}
+
+					$db->update('searches', ['content' => $content], 'id = ' . (int) $row->id);
+				}
+
 				$db->commitSchemaUpdate();
 			}
 

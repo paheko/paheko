@@ -18,22 +18,22 @@
 			{if $is_admin}
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>
 			{/if}
-			{foreach from=$columns key="key" item="column"}
+			{foreach from=$row key="key" item="value"}
 				<?php
 				if (substr($key, 0, 1) == '_') {
 					continue;
 				}
 				?>
 				<td>
-					{display_dynamic_field field=$key value=$row[$key]}
-				</td>
-				<td class="actions">
-					{linkbutton shape="user" label="Fiche membre" href="!membres/fiche.php?id=%d"|args:$row.id}
-					{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-						{linkbutton shape="edit" label="Modifier" href="!membres/modifier.php?id=%d"|args:$row.id}
-					{/if}
+					{display_dynamic_field key=$key value=$value}
 				</td>
 			{/foreach}
+			<td class="actions">
+				{linkbutton shape="user" label="Fiche membre" href="!membres/fiche.php?id=%d"|args:$row.id}
+				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+					{linkbutton shape="edit" label="Modifier" href="!membres/modifier.php?id=%d"|args:$row.id}
+				{/if}
+			</td>
 		</tr>
 	{/foreach}
 		</tbody>
@@ -46,8 +46,31 @@
 		</form>
 	{/if}
 
-{else}
-ss
+{elseif $results}
+
+	<table class="list">
+		<thead>
+			<tr>
+				{foreach from=$header item="column"}
+				<td>{$column}</td>
+				{/foreach}
+			</tr>
+		</thead>
+		<tbody>
+			{foreach from=$results item="row"}
+			<tr>
+				{foreach from=$row item="column"}
+				<td>{$column}</td>
+				{/foreach}
+			</tr>
+			{foreachelse}
+			<tr>
+				<td colspan="{$header|count}"><p class="alert block">Aucun résultat</p></td>
+			</tr>
+			{/foreach}
+		</tbody>
+	</table>
+
 {/if}
 
 

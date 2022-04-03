@@ -84,6 +84,7 @@
 				<td colspan="{$header|count}"><p class="alert block">Aucun résultat</p></td>
 			</tr>
 			{/foreach}
+		</tbody>
 	</table>
 
 {/if}

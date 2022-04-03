@@ -6,6 +6,7 @@ use Garradin\AdvancedSearch;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
+use Garradin\UserException;
 
 use Garradin\Accounting\AdvancedSearch as Accounting_AdvancedSearch;
 use Garradin\Users\AdvancedSearch as Users_AdvancedSearch;
@@ -154,9 +155,9 @@ class Search extends Entity
 		catch (DB_Exception $e) {
 			$message = 'Erreur dans la requête : ' . $e->getMessage();
 
-			if (null !== $force_select)
+			if (count($columns))
 			{
-				$message .= "\nVérifiez que votre requête sélectionne bien les colonnes suivantes : " . implode(', ', $force_select);
+				$message .= "\nVérifiez que votre requête sélectionne bien les colonnes suivantes : " . implode(', ', $columns);
 			}
 
 			throw new UserException($message);
