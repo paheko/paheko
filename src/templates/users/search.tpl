@@ -11,7 +11,7 @@
 {if $list !== null}
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
 
-	{include file="common/dynamic_list_head.tpl" check=$is_admin}
+	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>

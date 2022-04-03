@@ -512,6 +512,9 @@
 
 		if (forms.length != 1) return;
 
+		// Disable progress on search or the form will stay blurred when clicking export buttons
+		if (forms[0].hasAttribute('data-disable-progress')) return;
+
 		forms[0].addEventListener('submit', () => {
 			forms[0].classList.add('progressing');
 		})

@@ -284,6 +284,16 @@ dd.help li {
     color: #000;
 }
 
+.pagination li button {
+    color: #000;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    text-decoration: underline;
+}
+
 .templatesList ul {
     margin: 1em 2em;
 }

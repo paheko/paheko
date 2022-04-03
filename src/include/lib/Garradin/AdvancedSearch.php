@@ -37,7 +37,7 @@ abstract class AdvancedSearch
 	 */
 	abstract public function defaults(): \stdClass;
 
-	public function makeList(string $query, string $tables, string $default_order, string $default_desc): DynamicList
+	public function makeList(string $query, string $tables, string $default_order, string $default_desc, array $mandatory_columns = ['id']): DynamicList
 	{
 		$query = json_decode($query, true);
 
@@ -53,7 +53,10 @@ abstract class AdvancedSearch
 
 		$conditions = $this->build($query->groups);
 		array_unshift($conditions->select, $default_order); // Always include default order
-		array_unshift($conditions->select, 'id'); // Always include ID
+
+		foreach ($mandatory_columns as $c) {
+			array_unshift($conditions->select, $c); // Always include
+		}
 
 		// Only select columns that we want
 		$select_columns = array_intersect_key($this->columns(), array_flip($conditions->select));

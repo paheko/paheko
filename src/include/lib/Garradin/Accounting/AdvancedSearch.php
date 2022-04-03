@@ -236,7 +236,7 @@ class AdvancedSearch extends A_S
 			INNER JOIN acc_accounts AS a ON l.id_account = a.id
 			INNER JOIN acc_years AS y ON t.id_year = y.id
 			LEFT JOIN acc_accounts AS a2 ON l.id_analytical = a2.id';
-		return $this->makeList($query, $tables, 'id', true);
+		return $this->makeList($query, $tables, 'id', true, ['id', 'account_code', 'debit', 'credit']);
 	}
 
 	public function defaults(): \stdClass

@@ -9,64 +9,62 @@ $sql_disabled = !$is_admin || (!$session->canAccess($session::SECTION_CONFIG, $s
 
 {form_errors}
 
-<form method="post" action="{$action_url}" id="queryBuilderForm">
-	<fieldset>
-	{if $s->type != $s::TYPE_JSON}
-		{if $sql_disabled}
-			<legend>Recherche enregistrée</legend>
-			<h3>{$s.label}</h3>
-		{else}
-			<legend>Recherche SQL</legend>
-			<dl>
-				{input type="textarea" name="sql" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$s.content}
-				{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-					{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
-					<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
-				{/if}
-
-				<dd class="help">
-					{foreach from=$schema item="sql" key="table"}
-					<details>
-						<summary>Schéma de la table <strong>{$table}</strong></summary>
-						<pre class="block help">{$sql}</pre>
-					</details>
-					{/foreach}
-				</dd>
-			</dl>
-			<p class="submit">
-				{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
-				<input type="hidden" name="id" value="{$s.id}" />
-				{if $s->exists()}
-					{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$s.label|truncate:40:"…":true shape="upload"}
-					{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
-				{else}
-					{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
-				{/if}
-				{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-					{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
-				{/if}
-			</p>
-		{/if}
+<fieldset>
+{if $s->type != $s::TYPE_JSON}
+	{if $sql_disabled}
+		<legend>Recherche enregistrée</legend>
+		<h3>{$s.label}</h3>
 	{else}
-		<legend>Rechercher</legend>
-		<div class="queryBuilder" id="queryBuilder"></div>
+		<legend>Recherche SQL</legend>
+		<dl>
+			{input type="textarea" name="sql" cols="100" rows="10" required=1 label="Requête SQL" help="Si aucune limite n'est précisée, une limite de 100 résultats sera appliquée." default=$s.content}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				{input type="checkbox" name="unprotected" value=1 label="Autoriser l'accès à toutes les tables de la base de données" default=$is_unprotected}
+				<dd class="help">Attention : en cochant cette case vous autorisez la requête à lire toutes les données de toutes les tables de la base de données&nbsp;!</dd>
+			{/if}
+
+			<dd class="help">
+				{foreach from=$schema item="sql" key="table"}
+				<details>
+					<summary>Schéma de la table <strong>{$table}</strong></summary>
+					<pre class="block help">{$sql}</pre>
+				</details>
+				{/foreach}
+			</dd>
+		</dl>
 		<p class="submit">
-			{button name="search" value=1 type="submit" label="Chercher" shape="search" id="send" class="main"}
-			<input type="hidden" name="q" id="jsonQuery" />
+			{button type="submit" name="run" label="Exécuter" shape="search" class="main"}
 			<input type="hidden" name="id" value="{$s.id}" />
-			{if $s.id}
+			{if $s->exists()}
 				{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$s.label|truncate:40:"…":true shape="upload"}
 				{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
 			{else}
 				{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
 			{/if}
-			{if $is_admin}
-				{button name="to_sql" value=1 type="submit" label="Recherche SQL" shape="edit"}
+			{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
+				{linkbutton href="!config/advanced/sql.php" target="_blank" shape="menu" label="Voir le schéma SQL complet"}
 			{/if}
 		</p>
 	{/if}
-	</fieldset>
-</form>
+{else}
+	<legend>Rechercher</legend>
+	<div class="queryBuilder" id="queryBuilder"></div>
+	<p class="submit">
+		{button name="search" value=1 type="submit" label="Chercher" shape="search" id="send" class="main"}
+		<input type="hidden" name="q" id="jsonQuery" />
+		<input type="hidden" name="id" value="{$s.id}" />
+		{if $s.id}
+			{button name="save" value=1 type="submit" label="Enregistrer : %s"|args:$s.label|truncate:40:"…":true shape="upload"}
+			{button name="save_new" value=1 type="submit" label="Enregistrer nouvelle recherche" shape="plus"}
+		{else}
+			{button name="save" value=1 type="submit" label="Enregistrer cette recherche" shape="upload"}
+		{/if}
+		{if $is_admin}
+			{button name="to_sql" value=1 type="submit" label="Recherche SQL" shape="edit"}
+		{/if}
+	</p>
+{/if}
+</fieldset>
 
 {if $s->type == $s::TYPE_JSON}
 <script type="text/javascript">

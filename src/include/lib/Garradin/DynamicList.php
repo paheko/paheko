@@ -221,17 +221,29 @@ class DynamicList implements \Countable
 
 	public function loadFromQueryString()
 	{
-		if (!empty($_GET['export'])) {
-			$this->export($this->title, $_GET['export']);
+		$export = $_POST['_dl_export'] ?? ($_GET['export'] ?? null);
+		$page = $_POST['_dl_page'] ?? ($_GET['p'] ?? null);
+
+		if (!empty($_POST['_dl_order'])) {
+			$order = substr($_POST['_dl_order'], 1);
+			$desc = substr($_POST['_dl_order'], 0, 1) == '>' ? true : false;
+		}
+		else {
+			$order = $_GET['o'] ?? null;
+			$desc = !empty($_GET['d']);
+		}
+
+		if ($export) {
+			$this->export($this->title, $export);
 			exit;
 		}
 
-		if (!empty($_GET['o'])) {
-			$this->orderBy($_GET['o'], !empty($_GET['d']));
+		if ($order) {
+			$this->orderBy($order, $desc);
 		}
 
-		if (!empty($_GET['p'])) {
-			$this->page = (int)$_GET['p'];
+		if ($page) {
+			$this->page = (int) $page;
 		}
 	}
 }

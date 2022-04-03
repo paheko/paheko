@@ -7,16 +7,23 @@
 	</ul>
 </nav>
 
-{include file="common/search/advanced.tpl" action_url=$self_url}
+<form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
 
-{*if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
-	<form method="post" action="{$admin_url}membres/action.php" class="memberList">
-{/if*}
+{include file="common/search/advanced.tpl" action_url=$self_url}
 
 {if $list !== null}
 	<p class="help">{$list->count()} écritures trouvées pour cette recherche.</p>
 
-	{include file="common/dynamic_list_head.tpl" check=$is_admin}
+	{if $list->count() > 0 && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+	<p class="actions">
+		{button type="submit" name="_dl_export" value="csv" shape="export" label="Export CSV"}
+		{button type="submit" name="_dl_export" value="ods" shape="export" label="Export LibreOffice"}
+		{button type="submit" name="_dl_export" value="xlsx" shape="export" label="Export Excel"}
+	</p>
+	{/if}
+
+
+	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
 	<?php
 	$prev_id = null;
@@ -56,11 +63,7 @@
 	{/if*}
 	</table>
 
-	{*if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-		</form>
-	{/if*}
-
-	{* FIXME pagination *}
+	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count() use_buttons=true}
 
 {elseif $results}
 
@@ -89,5 +92,6 @@
 
 {/if}
 
+</form>
 
 {include file="admin/_foot.tpl"}

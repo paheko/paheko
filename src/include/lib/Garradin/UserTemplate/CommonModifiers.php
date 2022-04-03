@@ -185,9 +185,14 @@ class CommonModifiers
 			if (!empty($page['accesskey']))
 				$attributes .= ' accesskey="' . htmlspecialchars($page['accesskey']) . '" ';
 
-			$out .= '<a' . $attributes . ' href="' . str_replace(['[ID]', $encoded_url], htmlspecialchars($page['id']), $params['url']) . '">';
-			$out .= htmlspecialchars($page['label']);
-			$out .= '</a>';
+			if (!empty($params['use_buttons'])) {
+				$out .= sprintf('<button type="submit" name="_dl_page" value="%d">%s</button>', $page['id'], htmlspecialchars($page['label']));
+			}
+			else {
+				$url = str_replace(['[ID]', $encoded_url], $page['id'], $params['url']);
+				$out .= sprintf('<a %s href="%s">%s</a>', $attributes, $url, htmlspecialchars($page['label']));
+			}
+
 			$out .= '</li>' . "\n";
 		}
 

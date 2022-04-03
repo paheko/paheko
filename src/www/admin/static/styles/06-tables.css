@@ -99,15 +99,21 @@ table.list tr:nth-child(even).disabled {
     color: rgb(var(--gBgColor));
 }
 
-.userOrder a {
+.userOrder a, .userOrder button {
     text-decoration: none;
     display: block;
+    box-shadow: none;
+    margin: 0;
+    width: 98%;
     color: inherit;
-    padding: .2em;
+    padding: 1%;
+    text-align: left;
     border-radius: .5em;
+    border: none;
+    background: transparent;
 }
 
-.userOrder a:hover {
+.userOrder a:hover, .userOrder button:hover {
     background: rgba(var(--gBgColor), 0.5);
 }
 
