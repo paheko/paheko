@@ -415,8 +415,9 @@
 			}
 
 			let f = form.dataset.focus;
-			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : 0;
-			let i = form.querySelectorAll(n ? '[name]:not([type="hidden"])' : f);
+			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
+			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"])' : f);
+
 			if(i.length >= n) {
 				i[n].focus();
 			}
