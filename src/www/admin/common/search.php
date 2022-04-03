@@ -90,6 +90,11 @@ if (!$default) {
 			$list->loadFromQueryString();
 		}
 		else {
+			if (!empty($_POST['_export'])) {
+				$s->export($_POST['_export']);
+				exit;
+			}
+
 			$header = $s->getHeader();
 			$results = $s->iterateResults();
 		}

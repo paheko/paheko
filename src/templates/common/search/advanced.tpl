@@ -1,6 +1,5 @@
 <?php
 assert(isset($columns));
-assert(isset($action_url));
 assert(isset($s));
 assert(isset($is_admin));
 $is_unprotected = $s->type == $s::TYPE_SQL_UNPROTECTED;

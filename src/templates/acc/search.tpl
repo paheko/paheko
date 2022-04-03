@@ -9,19 +9,18 @@
 
 <form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
 
-{include file="common/search/advanced.tpl" action_url=$self_url}
+{include file="common/search/advanced.tpl"}
 
 {if $list !== null}
 	<p class="help">{$list->count()} écritures trouvées pour cette recherche.</p>
 
-	{if $list->count() > 0 && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+	{if $list->count() > 0 && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 	<p class="actions">
 		{button type="submit" name="_dl_export" value="csv" shape="export" label="Export CSV"}
 		{button type="submit" name="_dl_export" value="ods" shape="export" label="Export LibreOffice"}
 		{button type="submit" name="_dl_export" value="xlsx" shape="export" label="Export Excel"}
 	</p>
 	{/if}
-
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
@@ -66,6 +65,14 @@
 	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count() use_buttons=true}
 
 {elseif $results}
+
+	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+	<p class="actions">
+		{button type="submit" name="_export" value="csv" shape="export" label="Export CSV"}
+		{button type="submit" name="_export" value="ods" shape="export" label="Export LibreOffice"}
+		{button type="submit" name="_export" value="xlsx" shape="export" label="Export Excel"}
+	</p>
+	{/if}
 
 	<table class="list">
 		<thead>

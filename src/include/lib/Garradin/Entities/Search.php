@@ -3,6 +3,7 @@
 namespace Garradin\Entities;
 
 use Garradin\AdvancedSearch;
+use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
@@ -183,6 +184,11 @@ class Search extends Entity
 		while ($row = $r->fetchArray(\SQLITE3_NUM)) {
 			yield $row;
 		}
+	}
+
+	public function export(string $format)
+	{
+		CSV::export($format, 'Recherche', $this->iterateResults(), $this->getHeader());
 	}
 
 	public function getProtectedTables(): ?array

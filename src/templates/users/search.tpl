@@ -2,14 +2,20 @@
 
 {include file="users/_nav.tpl" current="search"}
 
-{include file="common/search/advanced.tpl" action_url=$self_url}
+<form method="post" action="{$self_url}" id="queryBuilderForm" data-disable-progress="1">
 
-{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-	<form method="post" action="{$admin_url}membres/action.php" class="memberList">
-{/if}
+{include file="common/search/advanced.tpl"}
 
 {if $list !== null}
 	<p class="help">{$list->count()} membres trouvés pour cette recherche.</p>
+
+	{if $list->count() > 0 && $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+	<p class="actions">
+		{button type="submit" name="_dl_export" value="csv" shape="export" label="Export CSV"}
+		{button type="submit" name="_dl_export" value="ods" shape="export" label="Export LibreOffice"}
+		{button type="submit" name="_dl_export" value="xlsx" shape="export" label="Export Excel"}
+	</p>
+	{/if}
 
 	{include file="common/dynamic_list_head.tpl" check=$is_admin use_buttons=true}
 
@@ -37,16 +43,22 @@
 		</tr>
 	{/foreach}
 		</tbody>
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN) && $row._user_id}
+	{if $is_admin && $row._user_id}
 		{include file="admin/membres/_list_actions.tpl" colspan=count($result_header)+1}
 	{/if}
 	</table>
 
-	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-		</form>
-	{/if}
+	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count() use_buttons=true}
 
 {elseif $results}
+
+	{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
+	<p class="actions">
+		{button type="submit" name="_export" value="csv" shape="export" label="Export CSV"}
+		{button type="submit" name="_export" value="ods" shape="export" label="Export LibreOffice"}
+		{button type="submit" name="_export" value="xlsx" shape="export" label="Export Excel"}
+	</p>
+	{/if}
 
 	<table class="list">
 		<thead>
@@ -73,5 +85,6 @@
 
 {/if}
 
+</form>
 
 {include file="admin/_foot.tpl"}
