@@ -90,6 +90,8 @@ class AdvancedSearch extends A_S
 			'type'     => 'enum',
 			'null'     => false,
 			'values'   => $db->getAssoc('SELECT id, name FROM users_categories ORDER BY name COLLATE U_NOCASE;'),
+			'select'   => '(SELECT name FROM users_categories WHERE id = id_category)',
+			'where'    => 'id_category',
 		];
 
 		return $columns;

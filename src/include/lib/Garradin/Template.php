@@ -655,6 +655,10 @@ class Template extends \KD2\Smartyer
 		$field = $params['field'] ?? DynamicFields::get($params['key']);
 		$v = $params['value'];
 
+		if (!$field) {
+			return htmlspecialchars($v);
+		}
+
 		if ($field->type == 'checkbox') {
 			return $v ? 'Oui' : 'Non';
 		}
