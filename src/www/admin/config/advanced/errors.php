@@ -46,6 +46,7 @@ else
         }
 
         $errors[$report->context->id]['last_seen'] = $report->context->date;
+        $errors[$report->context->id]['hostname'] = $report->context->hostname ?? null;
         $errors[$report->context->id]['count']++;
     }
 

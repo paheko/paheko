@@ -189,12 +189,20 @@ namespace Garradin;
 //const MAIL_ERRORS = false;
 
 /**
- * Envoi des erreurs à une API compatible AirBrake/Errbit
+ * Envoi des erreurs à une API compatible AirBrake/Errbit/Garradin
  *
  * Si renseigné avec une URL HTTP(S) valide, chaque erreur système sera envoyée
  * automatiquement à cette URL.
  *
  * Si laissé à null, aucun rapport ne sera envoyé.
+ *
+ * Garradin accepte aussi les rapports d'erreur venant d'autres instances.
+ *
+ * Pour cela utiliser l'URL https://login:password@garradin.site.tld/api/errors/report
+ * (voir aussi API_USER et API_PASSWORD)
+ *
+ * Les erreurs seront ensuite visibles dans
+ * Configuration -> Fonctions avancées -> Journal d'erreurs
  *
  * Défaut : null
  */
@@ -517,6 +525,23 @@ namespace Garradin;
 //const CALC_CONVERT_COMMAND = 'unoconv';
 //const CALC_CONVERT_COMMAND = 'ssconvert';
 //const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
+
+/**
+ * API_USER et API_PASSWORD
+ * Login et mot de passe de l'API
+ *
+ * Une API est disponible via l'URL https://login:password@garradin.association.tld/api/...
+ * Voir https://fossil.kd2.org/garradin/wiki?name=API pour la documentation
+ *
+ * Ces deux constantes permettent d'indiquer un nom d'utilisateur
+ * et un mot de passe pour accès à l'API.
+ *
+ * Mettre NULL pour l'un ou l'autre désactive l'API.
+ *
+ * Défaut: null
+ */
+//const API_USER = 'coraline';
+//const API_PASSWORD = 'thisIsASecretPassword42';
 
 /**
  * Clé de licence
