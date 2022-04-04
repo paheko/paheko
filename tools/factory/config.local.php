@@ -1,0 +1,87 @@
+<?php
+
+namespace Garradin;
+
+/**
+ * Ce fichier permet de configurer Garradin pour une utilisation
+ * avec plusieurs associations, mais une seule copie du code source.
+ * (aussi appelé installation multi-sites, ferme ou usine)
+ *
+ * Voir la doc : https://fossil.kd2.org/garradin/wiki?name=Multi-sites
+ *
+ * N'oubliez pas d'installer également le script cron.sh fournit
+ * pour lancer les rappels automatiques et sauvegardes.
+ *
+ * Si cela ne suffit pas à vos besoins, contactez-nous : https://garradin.eu/contact
+ * pour une aide spécifique à votre installation.
+ */
+
+// Nom de domaine parent des associations hébergées
+// Exemple : si vos associations sont hébergées en clubdetennis.garradin.eu,
+// indiquer ici 'garradin.eu'
+const USINE_DOMAIN = 'monsite.tld';
+
+// Répertoire où seront stockées les données des utilisateurs
+// Dans ce répertoire, un sous-répertoire sera créé pour chaque compte
+// Ainsi 'clubdetennis.garradin.eu' sera dans le répertoire courant (__DIR__),
+// sous-répertoire 'users' et dans celui-ci, sous-répertoire 'clubdetennis'
+//
+// Pour chaque utilisateur il faudra créer le sous-répertoire en premier lieu
+// (eg. mkdir .../users/clubdetennis)
+const USINE_USER_DIRECTORY = __DIR__ . '/users';
+
+// Envoyer les erreurs PHP par mail à cette adresse (conseillé)
+const MAIL_ERRORS = 'administrateur@monsite.tld';
+
+// Modifier pour indiquer une valeur aléatoire de plus de 30 caractères
+const SECRET_KEY = 'Indiquer ici une valeur aléatoire !';
+
+////////////////////////////////////////////////////////////////
+// Réglages (plus que) conseillés
+
+// Indiquer que l'on va utiliser cron pour lancer les tâches à exécuter (envoi de rappels de cotisation)
+const USE_CRON = true;
+
+// Cache partagé
+const SHARED_CACHE_ROOT = __DIR__ . '/cache';
+
+// Désactiver le log des erreurs PHP visible dans l'interface (sécurité)
+const ENABLE_TECH_DETAILS = false;
+
+// Désactiver les mises à jour depuis l'interface web
+// Pour être sûr que seul l'admin sys puisse faire des mises à jour
+const ENABLE_UPGRADES = false;
+
+// Ne pas afficher les erreurs de code PHP
+const SHOW_ERRORS = false;
+
+////////////////////////////////////////////////////////////////
+// Code 'magique' qui va configurer Garradin selon les réglages
+
+$login = null;
+
+// Un sous-domaine ne peut pas faire plus de 63 caractères
+$login_regexp = '([a-z0-9_-]{1,63})';
+$domain_regexp = sprintf('/^%s\.%s$/', $login_regexp, preg_quote(USINE_DOMAIN, '/'));
+
+if (isset($_SERVER['SERVER_NAME']) && preg_match($regexp, $_SERVER['SERVER_NAME'], $match)) {
+	$login = $match[1];
+}
+elseif (PHP_SAPI == 'cli' && !empty($_SERVER['GARRADIN_USINE_USER']) && preg_match('/^' . $login_regexp . '$/', $_SERVER['GARRADIN_USINE_USER'])) {
+	$login = $_SERVER['GARRADIN_USINE_USER'];
+}
+else {
+	// Login invalide ou non fourni
+	http_response_code(404);
+	die('<h1>Page non trouvée</h1>');
+}
+
+$user_data_dir = rtrim(USINE_USER_DIRECTORY, '/') . '/' . $login;
+
+if (!is_dir($user_data_dir)) {
+	http_response_code(404);
+	die("<h1>Cette association n'existe pas.</h1>");
+}
+
+// Définir le dossier où sont stockés les données
+define('Garradin\DATA_ROOT', $user_data_dir);
