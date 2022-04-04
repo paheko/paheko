@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use KD2\ErrorManager;
+
 class API
 {
 	protected $body;
@@ -139,6 +141,47 @@ class API
 		}
 	}
 
+	public function errors(string $uri)
+	{
+		$fn = strtok($uri, '/');
+
+		if (!ini_get('error_log')) {
+			throw new APIException('The error log is disabled', 404);
+		}
+
+		if ($uri == 'report') {
+			if ($this->method != 'POST') {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			$body = $this->body();
+			$report = json_decode($body);
+
+			if (!isset($report->context->id)) {
+				throw new APIException('Invalid JSON body', 400);
+			}
+
+			$log = sprintf('=========== Error ref. %s ===========', $report->context->id)
+				. PHP_EOL . PHP_EOL . "Report from API" . PHP_EOL . PHP_EOL
+				. '<errorReport>' . PHP_EOL . json_encode($report, \JSON_PRETTY_PRINT)
+				. PHP_EOL . '</errorReport>' . PHP_EOL;
+
+			error_log($log);
+
+			return null;
+		}
+		elseif ($uri == 'log') {
+			if ($this->method != 'GET') {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			return ErrorManager::getReportsFromLog(null, null);
+		}
+		else {
+			throw new APIException('Unknown errors action', 404);
+		}
+	}
+
 	public function checkAuth(): void
 	{
 		if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
@@ -163,6 +206,8 @@ class API
 				return $this->web($uri);
 			case 'user':
 				return $this->user($uri);
+			case 'errors':
+				return $this->errors($uri);
 			default:
 				throw new APIException('Unknown path', 404);
 		}
@@ -182,7 +227,7 @@ class API
 			$return = $api->dispatch($fn, strtok(''));
 
 			if (null !== $return) {
-				echo json_encode($return);
+				echo json_encode($return, JSON_PRETTY_PRINT);
 			}
 		}
 		catch (\Exception $e) {
