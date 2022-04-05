@@ -481,7 +481,7 @@ namespace Garradin;
  * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible, donc généralement l'espace dispo sur le disque dur !)
  */
 
-//const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
+//const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
  * PDF_COMMAND
