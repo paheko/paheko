@@ -204,10 +204,10 @@ AS
         SELECT t.id_year, l.id_analytical, a.id, a.label, a.code, a.position, a.type,
             SUM(l.credit) AS credit,
             SUM(l.debit) AS debit
-        FROM acc_accounts a
-        INNER JOIN acc_transactions_lines l ON l.id_account = a.id
+        FROM acc_transactions_lines l
         INNER JOIN acc_transactions t ON t.id = l.id_transaction
-        GROUP BY l.id_analytical, a.id
+        INNER JOIN acc_accounts a ON a.id = l.id_account
+        GROUP BY l.id_analytical, a.id, t.id_year
     );
 
 CREATE TABLE IF NOT EXISTS acc_years
