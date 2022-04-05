@@ -9,6 +9,6 @@ GARRADIN_CRON_SCRIPT="scripts/cron.php"
 
 for user in $(cd ${FACTORY_USER_DIRECTORY} && ls -1d */)
 do
-	GARRADIN_FACTORY_USER=$(basename "$user")
-	php $GARRADIN_CRON_SCRIPT
+	GARRADIN_FACTORY_USER=$(basename "$user") php $GARRADIN_CRON_SCRIPT
+	echo $GARRADIN_FACTORY_USER
 done

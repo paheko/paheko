@@ -87,3 +87,7 @@ if (!is_dir($user_data_dir)) {
 
 // Définir le dossier où sont stockés les données
 define('Garradin\DATA_ROOT', $user_data_dir);
+
+// Définir l'URL
+define('Garradin\WWW_URL', 'https://' . $login . FACTORY_USER_DIRECTORY . '/');
+define('Garradin\WWW_URI', '/');
