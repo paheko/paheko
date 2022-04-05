@@ -40,7 +40,7 @@ const SECRET_KEY = 'Indiquer ici une valeur aléatoire !';
 
 // Quota de stockage de documents (en octets)
 // Définit la taille de stockage disponible pour chaque association pour ses documents
-const FILE_STORAGE_QUOTA = 1024 * 1024 * 1024; // 1 Go
+const FILE_STORAGE_QUOTA = 1 * 1024 * 1024 * 1024; // 1 Go
 
 ////////////////////////////////////////////////////////////////
 // Réglages conseillés, normalement il n'y a rien à modifier ici
