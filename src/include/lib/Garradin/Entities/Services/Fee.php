@@ -17,7 +17,7 @@ class Fee extends Entity
 {
 	const TABLE = 'services_fees';
 
-	protected int $id;
+	protected ?int $id;
 	protected string $label;
 	protected ?string $description = null;
 	protected ?int $amount = null;
