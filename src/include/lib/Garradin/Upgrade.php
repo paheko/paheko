@@ -429,9 +429,8 @@ class Upgrade
 			if (version_compare($v, '1.1.24', '<')) {
 				$db->begin();
 
-				// Re-create acc_accounts_projects_balances view
+				// Delete acc_accounts_projects_balances view
 				$db->exec('DROP VIEW IF EXISTS acc_accounts_projects_balances;');
-				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
 
 				$db->commit();
 			}

@@ -30,12 +30,17 @@
 				</em>
 			</td>
 			<td class="actions">
-				{linkbutton label="Journal" shape="menu" href="!acc/transactions/user.php.php?id=%d&year=%d"|args:$row.id,$current_year.id}
+				{linkbutton label="Journal" shape="menu" href="!acc/transactions/user.php?id=%d&year=%d"|args:$row.id,$current_year.id}
 			</td>
 		</tr>
 	{/foreach}
 	</tbody>
 </table>
+
+<p class="help">
+	Dette = l'association doit de l'argent à ce membre<br />
+	Créance = le membre doit de l'argent à l'association
+</p>
 
 
 {include file="admin/_foot.tpl"}
