@@ -296,7 +296,7 @@ class Accounts
 				'label' => 'Membre',
 			],
 			'balance' => [
-				'select' => 'SUM(l.credit - l.debit)',
+				'select' => 'SUM(l.debit - l.credit)',
 				'label'  => 'Solde',
 				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
 			],
