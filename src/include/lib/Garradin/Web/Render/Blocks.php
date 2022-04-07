@@ -15,36 +15,32 @@ use Parsedown_Extra;
 
 use const Garradin\{ADMIN_URL, WWW_URL};
 
-/*
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-			grid-gap: 10px;
-
- */
-
 class Blocks
 {
+	const SEPARATOR = "\n\n----\n\n";
+
 	static protected $parsedown;
 	protected $_stack = [];
 
-	public function render(?File $file, ?string $content = null, array $options = []): string
-	{
-		$str = $content ?? $file->fetch();
+	// Grid columns templates
+	// CSS grid template => Number of columns
+	const COLUMNS_TEMPLATES = [
+		'none' => 1, // No columns
+		'none / 1fr 1fr' => 2,
+		'none / 1fr 1fr 1fr' => 3,
+		'none / 1fr 1fr 1fr 1fr' => 4,
+		'none / .5fr 1fr' => 2,
+		'none / 1fr .5fr' => 2,
+	];
 
+	public function render(?string $content = null): string
+	{
+		$content = preg_replace("/\r\n?/", "\n", $content);
 		$out = '<div class="web-blocks">';
 
-		// Skip page metadata
-		strtok($str, "\n\n----\n\n");
-
-		while ($block = strtok("\n\n----\n\n")) {
+		foreach (explode("\n\n----\n\n", $content) as $block) {
 			$out .= $this->block($block);
 		}
-
-		if ($block = strtok('')) {
-			$out .= $this->block($block);
-		}
-
-		strtok('', ''); // Free memory
 
 		foreach ($this->_stack as $type) {
 			$out .= '</article></section>';
@@ -57,12 +53,23 @@ class Blocks
 
 	protected function block(string $block): string
 	{
-		$header = strtok($block, "\n\n");
-		$content = strtok('');
-		strtok('', ''); // Free memory
+		@list($header, $content) = explode("\n\n", $block, 2);
 		$out  = '';
 
-		$content = trim($content, "\n");
+		$meta = [];
+
+		foreach (explode("\n", $header) as $line) {
+			$key = strtolower(trim(strtok($line, ':')));
+			$value = trim(strtok(''));
+			$meta[$key] = $value;
+		}
+
+		if (empty($meta['type'])) {
+			throw new \InvalidArgumentException('No type specified in block');
+		}
+
+		$type = $meta['type'];
+		$content = trim($content ?? '', "\n");
 		$class = sprintf('web-block-%s', $type);
 
 		switch ($type) {
@@ -71,7 +78,10 @@ class Blocks
 					$out .= '</article></section>';
 				}
 
-				$out .= '<section class="web-columns">';
+				$out .= sprintf('<section class="web-columns" %s>',
+					isset($meta['grid-template'])
+						? sprintf('style="--grid-template: %s"', htmlspecialchars($meta['grid-template']))
+						: '');
 				return $out;
 			case 'column':
 				if (array_pop($this->_stack)) {
@@ -90,9 +100,9 @@ class Blocks
 				$skriv = new Skriv;
 				return sprintf('<div class="web-content %s">%s</div>', $class, $skriv->render($content));
 			case 'image':
-				return sprintf('<div class="%s">%s</div>', $this->image($content));
+				return sprintf('<div class="%s">%s</div>', $class, $this->image($content, $meta));
 			case 'gallery':
-				return sprintf('<div class="%s">%s</div>', $this->gallery($content));
+				return sprintf('<div class="%s">%s</div>', $class, $this->gallery($content, $meta));
 			case 'heading':
 				return sprintf('<h2 class="%s">%s</h2>', $class, htmlspecialchars($content));
 			case 'quote':
@@ -102,5 +112,44 @@ class Blocks
 			default:
 				throw new \LogicException('Unknown type: ' . $type);
 		}
+	}
+
+	public function image(string $content, array $meta): string
+	{
+		$url = WWW_URL . trim($content);
+		$size = intval($meta['size'] ?? 0);
+
+		$caption = !empty($meta['caption']) ? sprintf('<figcaption>%s</figcaption>', htmlspecialchars(trim($meta['caption']))) : '';
+
+		if (!empty($meta['size'])) {
+			return sprintf(
+				'<figure><a href="%s"><img src="%s" alt="%s" /></a>%s</figure>',
+				htmlspecialchars($url),
+				htmlspecialchars(sprintf('%s?%dpx', $url, $size)),
+				htmlspecialchars(trim($meta['caption'] ?? '')),
+				$caption
+			);
+		}
+		else {
+			return sprintf(
+				'<figure><img src="%s" alt="%s" />%s</figure>',
+				$url,
+				htmlspecialchars(trim($meta['caption'] ?? '')),
+				$caption
+			);
+		}
+	}
+
+	public function gallery(string $content, array $meta): string
+	{
+		$images = explode("\n", trim($content));
+		$out = '';
+
+		foreach ($images as $image) {
+			$image = explode('=', $image);
+			$out .= $this->image($image[0], ['size' => 200, 'caption' => $image[1] ?? '']);
+		}
+
+		return $out;
 	}
 }

@@ -217,9 +217,27 @@
     cursor: pointer;
 }
 
+.web-columns {
+    /* Default grid template: just auto sized columns */;
+    --grid-template: none / repeat(auto-fit, minmax(100px, 1fr));
+    grid-gap: 1rem;
+    display: grid;
+}
+
+.web-column {
+    margin-bottom: 1rem;
+}
+
 @media handheld, screen and (max-width: 980px) {
     .imageBrowser figure {
         max-width: 100%;
         max-height: 100%;
+    }
+}
+
+@media screen and (min-width: 60rem) {
+    .web-columns {
+        /* Get template from variable, which is defined style attribute */
+        grid-template: var(--grid-template);
     }
 }
