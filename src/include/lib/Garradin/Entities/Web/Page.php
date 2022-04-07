@@ -47,14 +47,11 @@ class Page extends Entity
 		'content'   => 'string',
 	];
 
-	const FORMAT_SKRIV = 'skriv';
-	const FORMAT_ENCRYPTED = 'skriv/encrypted';
-	const FORMAT_MARKDOWN = 'markdown';
-
 	const FORMATS_LIST = [
-		self::FORMAT_SKRIV => 'SkrivML',
-		self::FORMAT_MARKDOWN => 'MarkDown',
-		self::FORMAT_ENCRYPTED => 'Chiffré',
+		Render::FORMAT_BLOCKS => 'Blocs',
+		Render::FORMAT_SKRIV => 'SkrivML',
+		Render::FORMAT_MARKDOWN => 'MarkDown',
+		Render::FORMAT_ENCRYPTED => 'Chiffré',
 	];
 
 	const STATUS_ONLINE = 'online';
@@ -194,7 +191,7 @@ class Page extends Entity
 
 	public function syncSearch(): void
 	{
-		$content = $this->format == self::FORMAT_ENCRYPTED ? null : strip_tags($this->render());
+		$content = $this->format == Render::FORMAT_ENCRYPTED ? null : strip_tags($this->render());
 		$this->file()->indexForSearch(null, $content, $this->title);
 	}
 
@@ -292,10 +289,10 @@ class Page extends Entity
 		}
 
 		if (!empty($source['encryption']) ) {
-			$this->set('format', self::FORMAT_ENCRYPTED);
+			$this->set('format', Render::FORMAT_ENCRYPTED);
 		}
 		else {
-			$this->set('format', self::FORMAT_SKRIV);
+			$this->set('format', Render::FORMAT_SKRIV);
 		}
 
 		return parent::importForm($source);

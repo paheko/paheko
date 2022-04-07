@@ -6,10 +6,10 @@ use Garradin\Entities\Files\File;
 
 class Render
 {
-
 	const FORMAT_SKRIV = 'skriv';
 	const FORMAT_ENCRYPTED = 'skriv/encrypted';
 	const FORMAT_MARKDOWN = 'markdown';
+	const FORMAT_BLOCKS = 'blocks';
 
 	static public function render(string $format, File $file, string $content = null, string $link_prefix = null)
 	{
@@ -21,6 +21,9 @@ class Render
 		}
 		else if ($format == self::FORMAT_MARKDOWN) {
 			$r = new Markdown($file, $link_prefix);
+		}
+		else if ($format == self::FORMAT_BLOCKS) {
+			$r = new Blocks($file, $link_prefix);
 		}
 		else {
 			throw new \LogicException('Invalid format: ' . $format);
