@@ -114,8 +114,8 @@
 			<th>Compte</th>
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>
-			<td>Libellé</td>
-			<td>Référence</td>
+			<td>Libellé ligne</td>
+			<td>Référence ligne</td>
 			<td>Projet</td>
 		</tr>
 	</thead>
