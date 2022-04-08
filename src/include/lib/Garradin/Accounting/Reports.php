@@ -325,8 +325,9 @@ class Reports
 		{
 			$where = self::getWhereClause($criterias, 't', 'l', 'a');
 			$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
+			$inner_group = empty($criterias['year']) ? 'a.id' : null;
 
-			$sql = self::getBalancesSQL(['group' => 'code ' . $having, 'order' => $order, 'inner_where' => $where]);
+			$sql = self::getBalancesSQL(['group' => 'code ' . $having, 'order' => $order, 'inner_where' => $where, 'inner_group' => $inner_group]);
 		}
 		else {
 			$where = self::getWhereClause($criterias);
