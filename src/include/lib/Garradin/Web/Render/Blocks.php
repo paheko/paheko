@@ -17,7 +17,7 @@ use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Blocks
 {
-	const SEPARATOR = "\n\n----\n\n";
+	const SEPARATOR = "\n\n====\n\n";
 
 	static protected $parsedown;
 	protected $_stack = [];
@@ -38,7 +38,7 @@ class Blocks
 		$content = preg_replace("/\r\n?/", "\n", $content);
 		$out = '<div class="web-blocks">';
 
-		foreach (explode("\n\n----\n\n", $content) as $block) {
+		foreach (explode(self::SEPARATOR, $content) as $block) {
 			$out .= $this->block($block);
 		}
 
