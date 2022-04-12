@@ -371,6 +371,20 @@ class Transactions
 					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 
 					$transaction->importForm($fields);
+
+					// Set status
+					if (!empty($row->status)) {
+						$status_list = array_map('trim', explode(',', $row->status));
+						$status = 0;
+
+						foreach (Transaction::STATUS_NAMES as $k => $v) {
+							if (in_array($v, $status_list)) {
+								$status |= $k;
+							}
+						}
+
+						$transaction->status = $status;
+					}
 				}
 
 				$data = [];
