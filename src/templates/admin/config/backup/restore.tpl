@@ -80,7 +80,7 @@
 				</thead>
 			{foreach from=$list item="backup"}
 				<tr>
-					<td class="check">{input type="radio" name="selected" value=$backup.filename}</td>
+					<td class="check">{if $backup.can_restore}{input type="radio" name="selected" value=$backup.filename}{/if}</td>
 					<th><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
 					<td>{$backup.size|size_in_bytes}</td>
 					<td>{$backup.date|date_short:true}</td>
