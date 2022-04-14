@@ -4,12 +4,88 @@ namespace Garradin\Users;
 
 use Garradin\Entities\Users\User;
 
+use Garradin\Config;
+use Garradin\DB;
 use Garradin\DynamicList;
+use Garradin\Search;
+use Garradin\Utils;
 
+use KD2\SMTP;
 use KD2\DB\EntityManager as EM;
 
 class Users
 {
+	/**
+	 * Return a list of all emails by category
+	 * @param  int|null $id_category If NULL, then all categories except hidden ones will be returned
+	 */
+	static public function getEmailsByCategory(?int $id_category = null): array
+	{
+		$db = DB::getInstance();
+		$fields = DynamicFields::getEmailFields();
+		$sql = [];
+		$where = $id_category ? sprintf('id_category = %d', $id_category) : 'id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
+
+		foreach ($fields as $field) {
+			$sql[] = sprintf('SELECT id, %s AS email FROM users WHERE %s AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $where);
+		}
+
+		$sql = implode(' UNION ALL ', $sql);
+
+		return $db->get($sql);
+	}
+
+	/**
+	 * Return a list of all emails by service (user must be active)
+	 */
+	static public function getEmailsByService(int $id_service): array
+	{
+		$db = DB::getInstance();
+
+		// Create a temporary table
+		$db->exec('DROP TABLE IF EXISTS users_active_services;
+			CREATE TEMPORARY TABLE IF NOT EXISTS users_active_services (id, service);
+			INSERT INTO users_active_services SELECT id_user, id_service FROM (
+				SELECT id_user, id_service, MAX(expiry_date) FROM services_users
+				WHERE expiry_date IS NULL OR expiry_date >= date()
+				GROUP BY id_user, id_service
+			);
+			DELETE FROM users_active_services WHERE id IN (SELECT id FROM users WHERE id_category IN (SELECT id FROM users_categories WHERE hidden =1));');
+
+		$fields = DynamicFields::getEmailFields();
+		$sql = [];
+
+		foreach ($fields as $field) {
+			$sql[] = sprintf('SELECT u.id, u.%s AS email FROM users u INNER JOIN users_active_services s ON s.id = u.id
+				WHERE s.service = %d AND %1$s IS NOT NULL', $field, $id_service);
+		}
+
+		$sql = implode(' UNION ALL ', $sql);
+
+		return DB::getInstance()->get($sql);
+	}
+
+	static public function getEmailsBySearch(int $id_search): array
+	{
+		$fields = DynamicFields::getEmailFields();
+
+		$s = Search::get($id_search);
+		$result = $s->query(array_merge(['id'], $fields));
+		$recipients = [];
+
+		while ($row = $result->fetchArray(\SQLITE3_ASSOC)) {
+			foreach ($fields as $field) {
+				if (!trim($row[$field])) {
+					continue;
+				}
+
+				$recipients[] = ['id' => $row['id'], 'email' => $row[$field]];
+			}
+		}
+
+		return $recipients;
+	}
+
 	static public function listByCategory(?int $id_category = null): DynamicList
 	{
 		$df = DynamicFields::getInstance();
@@ -123,10 +199,8 @@ class Users
 		);
 	}
 
-	public function sendMessage(array $recipients, $subject, $message, $send_copy)
+	static public function sendMessage(array $recipients, $subject, $message, $send_copy)
 	{
-		$config = Config::getInstance();
-
 		$emails = [];
 
 		foreach ($recipients as $key => $recipient)
@@ -163,7 +237,7 @@ class Users
 
 		if ($send_copy)
 		{
-			Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
+			Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, Config::getInstance()->org_email, $subject, $message);
 		}
 
 		return true;

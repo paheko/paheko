@@ -71,7 +71,7 @@
 			{/if}
 				<li class="{if $current == 'users/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-				<li class="member message{if $current == 'users/message'} current{/if}"><a href="{$admin_url}membres/message_collectif.php">Message collectif</a></li>
+				<li class="member message{if $current == 'users/mailing'} current{/if}"><a href="{$admin_url}users/mailing.php">Message collectif</a></li>
 			{/if}
 			</ul>
 			</li>

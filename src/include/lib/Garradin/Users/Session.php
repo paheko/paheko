@@ -374,6 +374,11 @@ class Session extends \KD2\UserSession
 		return $user;
 	}
 
+	static public function getUserId()
+	{
+		return self::getInstance()->getUser()->id;
+	}
+
 	public function canAccess($category, $permission)
 	{
 		if (!$this->getUser())

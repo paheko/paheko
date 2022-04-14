@@ -2,10 +2,6 @@
 
 {include file="users/_nav.tpl" current="index"}
 
-{if $sent}
-	<p class="block confirm">Votre message a été envoyé.</p>
-{/if}
-
 {if !empty($categories)}
 <form method="get" action="{$self_url}" class="shortFormRight">
 	<fieldset>

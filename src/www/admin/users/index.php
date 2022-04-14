@@ -21,8 +21,6 @@ $can_edit = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)
 $list = Users::listByCategory($current_cat);
 $list->loadFromQueryString();
 
-$tpl->assign('sent', null !== qg('sent'));
-
 $tpl->assign(compact('can_edit', 'list', 'current_cat', 'hidden_categories', 'categories'));
 
 $tpl->display('users/index.tpl');
