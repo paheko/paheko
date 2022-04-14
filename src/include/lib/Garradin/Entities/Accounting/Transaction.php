@@ -299,7 +299,7 @@ class Transaction extends Entity
 		];
 	}
 
-	/**
+	/**duplic
 	 * Creates a new Transaction entity (not saved) from an existing one,
 	 * trying to adapt to a different chart if possible
 	 * @param  int    $id
@@ -348,6 +348,8 @@ class Transaction extends Entity
 		if ($this->date >= $year->start_date && $this->date <= $year->end_date) {
 			$new->date = clone $this->date;
 		}
+
+		$new->status = 0;
 
 		return $new;
 	}
