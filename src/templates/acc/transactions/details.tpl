@@ -61,9 +61,7 @@
 	{if count($related_transactions)}
 	<dt>Écritures liées</dt>
 	{foreach from=$related_transactions item="related"}
-		<dd><a href="?id={$related.id}" class="num">#{$related.id}</a>
-		du {$related.date|date_short}
-		</dd>
+		<dd><a href="?id={$related.id}" class="num">#{$related.id}</a> — {$related.label} — {$related.date|date_short}</dd>
 	{/foreach}
 	{/if}
 	<dt>Date</dt>
