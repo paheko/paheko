@@ -39,8 +39,8 @@ class Transactions
 		// Lines
 		'line_id'        => 'Numéro ligne',
 		'account'        => 'Compte',
-		'credit'         => 'Crédit',
 		'debit'          => 'Débit',
+		'credit'         => 'Crédit',
 		'line_reference' => 'Référence ligne',
 		'line_label'     => 'Libellé ligne',
 		'reconciled'     => 'Rapprochement',
