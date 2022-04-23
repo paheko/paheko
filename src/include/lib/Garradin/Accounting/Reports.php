@@ -261,25 +261,26 @@ class Reports
 
 	static public function getBalancesSQL(array $parts = [])
 	{
-		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit,
-				CASE -- 3 = dynamic asset or liability depending on balance
-					WHEN position = 3 AND (debit - credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
-					WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
-					ELSE position
-				END AS position,
-				CASE
-					WHEN position IN (1, 4) -- 1 = asset, 4 = expense
-						OR (position = 3 AND (debit - credit) > 0)
-					THEN
-						debit - credit
-					ELSE
-						credit - debit
-				END AS balance,
-				CASE WHEN debit - credit > 0 THEN 1 ELSE 0 END AS is_debt
+		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit, position, balance, is_debt
 			FROM (
-				SELECT %s t.id_year, a.id, a.label, a.code, a.position, a.type,
+				SELECT %s t.id_year, a.id, a.label, a.code, a.type,
 					SUM(l.credit) AS credit,
-					SUM(l.debit) AS debit
+					SUM(l.debit) AS debit,
+					CASE -- 3 = dynamic asset or liability depending on balance
+						WHEN position = 3 AND SUM(l.debit - l.credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
+						WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
+						ELSE position
+					END AS position,
+					CASE
+						WHEN position IN (1, 4) -- 1 = asset, 4 = expense
+							OR (position = 3 AND SUM(l.debit - l.credit) > 0)
+						THEN
+							SUM(l.debit - l.credit)
+						ELSE
+							SUM(l.credit - l.debit)
+					END AS balance,
+					CASE WHEN SUM(l.debit - l.credit) > 0 THEN 1 ELSE 0 END AS is_debt
+
 				FROM acc_transactions_lines l
 				INNER JOIN acc_transactions t ON t.id = l.id_transaction
 				INNER JOIN acc_accounts a ON a.id = l.id_account
@@ -288,12 +289,14 @@ class Reports
 				GROUP BY %s
 			)
 			%s
+			%s
 			ORDER BY %s',
 			isset($parts['select']) ? $parts['select'] . ',' : '',
 			isset($parts['inner_select']) ? $parts['inner_select'] . ',' : '',
 			$parts['inner_join'] ?? '',
 			isset($parts['inner_where']) ? 'WHERE ' . $parts['inner_where'] : '',
 			$parts['inner_group'] ?? 'a.id, t.id_year',
+			isset($parts['where']) ? 'WHERE ' . $parts['where'] : '',
 			isset($parts['group']) ? 'GROUP BY ' . $parts['group'] : '',
 			$order ?? 'code'
 		);
@@ -324,11 +327,24 @@ class Reports
 		// Specific queries that can't rely on acc_accounts_balances
 		if (!$table)
 		{
-			$where = self::getWhereClause($criterias, 't', 'l', 'a');
+			$where = null;
+
+			// The position
+			if (!empty($criterias['position'])) {
+				$criterias['position'] = (array)$criterias['position'];
+
+				if (in_array(Account::LIABILITY, $criterias['position'])
+					|| in_array(Account::ASSET, $criterias['position'])) {
+					$where = self::getWhereClause(['position' => $criterias['position']]);
+					$criterias['position'][] = Account::ASSET_OR_LIABILITY;
+				}
+			}
+
+			$inner_where = self::getWhereClause($criterias, 't', 'l', 'a');
 			$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
 			$inner_group = empty($criterias['year']) ? 'a.id' : null;
 
-			$sql = self::getBalancesSQL(['group' => 'code ' . $having, 'order' => $order, 'inner_where' => $where, 'inner_group' => $inner_group]);
+			$sql = self::getBalancesSQL(['group' => 'code ' . $having] + compact('order', 'inner_where', 'where', 'inner_group'));
 		}
 		else {
 			$where = self::getWhereClause($criterias);
