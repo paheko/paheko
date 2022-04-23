@@ -106,11 +106,11 @@ class Reports
 		$order = $order_code ? 'a.code COLLATE U_NOCASE' : 'a.label COLLATE U_NOCASE';
 
 		if ($by_year) {
-			$group = 'y.id, a.id';
+			$group = 'y.id, a.code';
 			$order = 'y.start_date DESC, ' . $order;
 		}
 		else {
-			$group = 'a.id, y.id';
+			$group = 'a.code, y.id';
 			$order = $order . ', y.id';
 		}
 
@@ -137,9 +137,9 @@ class Reports
 		};
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
-			$id = $by_year ? $row->id_year : $row->id_account;
+			$id = $by_year ? $row->id_year : $row->account_code;
 
-			if (null !== $current && $current->id !== $id) {
+			if (null !== $current && $current->selector !== $id) {
 				$current->items[] = $total($current, $by_year);
 
 				yield $current;
@@ -148,6 +148,7 @@ class Reports
 
 			if (null === $current) {
 				$current = (object) [
+					'selector' => $id,
 					'id' => $by_year ? $row->id_year : $row->id_account,
 					'label' => $by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label,
 					'description' => !$by_year ? $row->account_description : null,
