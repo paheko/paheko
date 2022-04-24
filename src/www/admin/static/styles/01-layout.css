@@ -140,6 +140,7 @@ a:hover {
     margin-top: -.2em;
     font-size: 20pt;
     color: rgba(var(--gBgColor), .5);
+    font-weight: normal;
 }
 
 .header .menu li.current > a b {
