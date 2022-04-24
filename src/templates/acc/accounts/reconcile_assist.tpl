@@ -124,7 +124,7 @@
 						<td colspan="5"></td>
 						<td class="actions">
 							{if $line.add}
-								{linkbutton label="Créer cette écriture" target="_dialog" href="!acc/transactions/new.php?%s"|args:$line.csv.new_params shape="plus"}
+								{linkbutton label="Saisir cette écriture" target="_dialog" href="!acc/transactions/new.php?%s"|args:$line.csv.new_params shape="plus"}
 							{/if}
 						</td>
 					{/if}
