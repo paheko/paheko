@@ -73,12 +73,12 @@ class Blocks
 		$class = sprintf('web-block-%s', $type);
 
 		switch ($type) {
-			case 'columns':
+			case 'grid':
 				if (array_pop($this->_stack)) {
 					$out .= '</article></section>';
 				}
 
-				$out .= sprintf('<section class="web-columns" %s>',
+				$out .= sprintf('<section class="web-grid" %s>',
 					isset($meta['grid-template'])
 						? sprintf('style="--grid-template: %s"', htmlspecialchars($meta['grid-template']))
 						: '');
