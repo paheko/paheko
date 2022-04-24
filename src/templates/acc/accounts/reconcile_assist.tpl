@@ -17,7 +17,7 @@
 			<legend>Relevé de compte</legend>
 			<p class="help block">
 				Le rapprochement assisté permet de s'aider d'un relevé de compte au format CSV pour trouver les écritures manquantes ou erronées.<br />
-				<a href="https://garradin.eu/Rapprochement_assiste" target="_blank">Aide détaillée</a>
+				<a href="https://garradin.eu/rapprochement_assiste" target="_blank">Aide détaillée</a>
 			</p>
 			<dl>
 				{include file="common/_csv_help.tpl"}
