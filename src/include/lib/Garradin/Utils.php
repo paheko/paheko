@@ -17,6 +17,64 @@ class Utils
     static protected $collator;
     static protected $transliterator;
 
+    const ICONS = [
+        'up'              => '↑',
+        'down'            => '↓',
+        'export'          => '↷',
+        'reset'           => '↺',
+        'upload'          => '⇑',
+        'download'        => '⇓',
+        'home'            => '⌂',
+        'print'           => '⎙',
+        'star'            => '★',
+        'check'           => '☑',
+        'settings'        => '☸',
+        'alert'           => '⚠',
+        'mail'            => '✉',
+        'edit'            => '✎',
+        'delete'          => '✘',
+        'help'            => '❓',
+        'plus'            => '➕',
+        'minus'           => '➖',
+        'logout'          => '⤝',
+        'eye-off'         => '⤫',
+        'menu'            => '𝍢',
+        'eye'             => '👁',
+        'user'            => '👤',
+        'users'           => '👪',
+        'calendar'        => '📅',
+        'attach'          => '📎',
+        'search'          => '🔍',
+        'lock'            => '🔒',
+        'unlock'          => '🔓',
+        'folder'          => '🗀',
+        'document'        => '🗅',
+        'bold'            => 'B',
+        'italic'          => 'I',
+        'header'          => 'H',
+        'paragraph'       => '§',
+        'list-ol'         => '1',
+        'list-ul'         => '•',
+        'table'           => '◫',
+        'radio-unchecked' => '◯',
+        'uncheck'         => '☐',
+        'radio-checked'   => '⬤',
+        'image'           => '🖻',
+        'left'            => '←',
+        'right'           => '→',
+        'column'          => '▚',
+        'del-column'      => '🮔',
+        'reload'          => '🗘',
+        'gallery'         => '🖼',
+        'code'            => '<',
+        'markdown'        => 'M',
+        'skriv'           => 'S',
+        'globe'           => '🌍',
+        'video'           => '▶',
+        'quote'           => '«',
+        'money'           => '€',
+    ];
+
     const FRENCH_DATE_NAMES = [
         'January'   => 'janvier',
         'February'  => 'février',
@@ -738,54 +796,11 @@ class Utils
 
     static public function iconUnicode(string $shape): string
     {
-        switch ($shape) {
-            case 'up': return '↑';
-            case 'down': return '↓';
-            case 'export': return '↷';
-            case 'reset': return '↺';
-            case 'upload': return '⇑';
-            case 'download': return '⇓';
-            case 'home': return '⌂';
-            case 'print': return '⎙';
-            case 'star': return '★';
-            case 'check': return '☑';
-            case 'settings': return '☸';
-            case 'alert': return '⚠';
-            case 'mail': return '✉';
-            case 'edit': return '✎';
-            case 'delete': return '✘';
-            case 'help': return '❓';
-            case 'plus': return '➕';
-            case 'minus': return '➖';
-            case 'logout': return '⤝';
-            case 'eye-off': return '⤫';
-            case 'menu': return '𝍢';
-            case 'eye': return '👁';
-            case 'user': return '👤';
-            case 'users': return '👪';
-            case 'calendar': return '📅';
-            case 'attach': return '📎';
-            case 'search': return '🔍';
-            case 'lock': return '🔒';
-            case 'unlock': return '🔓';
-            case 'folder': return '🗀';
-            case 'document': return '🗅';
-            case 'bold': return 'B';
-            case 'italic': return 'I';
-            case 'header': return 'H';
-            case 'paragraph': return '§';
-            case 'list-ol': return 'ģ';
-            case 'list-ul': return '•';
-            case 'table': return '◫';
-            case 'radio-unchecked': return '◯';
-            case 'uncheck': return '☐';
-            case 'radio-checked': return '⬤';
-            case 'image': return '🖻';
-            case 'left': return '←';
-            case 'right': return '→';
-            default:
-                throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
+        if (!isset(self::ICONS[$shape])) {
+            throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
         }
+
+        return self::ICONS[$shape];
     }
 
     static public function array_transpose(array $array): array
