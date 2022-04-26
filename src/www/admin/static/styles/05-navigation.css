@@ -25,7 +25,7 @@ nav.tabs .sub .title {
 }
 
 nav.tabs li {
-    margin: 0 0.2em;
+    margin: 0 0.2em; 
 }
 
 nav.tabs li a {
@@ -57,20 +57,20 @@ nav.tabs aside {
     clear: right;
 }
 
-nav.menu > b {
+main nav.menu > b {
     font-weight: normal;
 }
 
-nav.menu {
+main nav.menu {
     display: inline-block;
     position: relative;
 }
 
-nav.menu span {
+main nav.menu span {
     display: none;
 }
 
-nav.menu:hover span, nav.menu:active span {
+main nav.menu:hover span, main nav.menu:active span {
     display: flex;
     position: absolute;
     flex-direction: column;
