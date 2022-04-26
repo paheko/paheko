@@ -17,6 +17,10 @@ input[size] {
 	width: auto;
 }
 
+img {
+	max-width: 100% !important;
+}
+
 a.icn-btn, input[type=submit], input[type=button], button, input[type=file] {
 	padding: .4em .6em;
 }
@@ -35,10 +39,9 @@ nav.breadcrumbs ul {
 }
 
 .header h1 {
-	margin: 0;
+	margin: 1em;
 	text-align: center;
 	font-size: 1.2em;
-	margin: 7em 0 .3em 0;
 }
 
 .header .menu {
@@ -48,10 +51,13 @@ nav.breadcrumbs ul {
 	bottom: inherit;
 	z-index: 10000;
 	margin: 0;
-	margin-bottom: 3em;
-	width: 100%;
+	width: 100vw;
 	padding: 0;
 	display: block;
+	bottom: 0;
+	top: inherit;
+	left: 0;
+	right: 0;
 }
 
 .header .menu .logo {
@@ -66,23 +72,16 @@ nav.breadcrumbs ul {
 .header .menu > ul {
 	background: rgb(var(--gMainColor));
 	flex-wrap: nowrap;
-	display: flex;
+    grid-template: none / repeat(auto-fit, minmax(20px, 1fr));
+    display: grid;
 	align-items: center;
 }
 
-.header .menu > ul > li {
-	flex-grow: 1;
-	text-align: center;
-	display: inline-flex;
+.header .menu > ul > li > h3 {
+	display: inline;
 }
 
-.header .menu > ul > li > a {
-	display: inline-block;
-	width: 100%;
-	text-align: center;
-}
-
-.header .menu > ul > li > a i {
+.header .menu > ul > li > h3 a span {
 	display: none;
 }
 
@@ -90,27 +89,32 @@ nav.breadcrumbs ul {
 	display: none;
 }
 
-.header .menu > ul > li > a b {
+.header .menu h3 a {
+	text-align: center;
+	text-decoration: none !important;
+}
+
+.header .menu h3 b[data-icn]::before {
 	float: none;
-	display: inline-block;
-	color: #fff;
-	width: 20pt;
-	height: 14pt;
+	display: block;
+	position: relative;
+	right: 0;
+	margin: 0;
 	padding: 10pt 0;
-	line-height: 20pt;
-	cursor: pointer;
+	line-height: 10pt;
+	color: rgb(var(--gBgColor));
+	font-size: 20pt;
 }
 
-.header .menu li.current_parent > a {
-	background: #fff;
+.header .menu li.current_parent h3 a {
+	background: rgb(var(--gBgColor));
 }
 
-.header .menu > ul > li.current b {
-	color: rgb(var(--gSecondColor));
-}
-
-.header .menu > ul > li.current_parent b {
-	color: rgb(var(--gMainColor));
+.header .menu li.current h3 b[data-icn]::before,
+.header .menu > ul > li.current_parent h3 b[data-icn]::before {
+	background: rgb(var(--gSecondColor));
+	color: rgb(var(--gBgColor));
+	text-shadow: 0px 0px 5px rgb(var(--gTextColor)), 0px 0px 5px rgb(var(--gTextColor));
 }
 
 .header .menu > ul > li.current > ul, .header .menu > ul > li.current_parent > ul {
@@ -118,31 +122,30 @@ nav.breadcrumbs ul {
 	flex-wrap: wrap;
 	justify-content: center;
 	position: absolute;
-	top: 30pt;
+	bottom: 30pt;
 	left: 0;
 	right: 0;
-	background: rgba(255, 255, 255, 0.75);
-	border-bottom: .2rem solid rgba(var(--gMainColor), 0.5);
+	background: rgb(var(--gSecondColor));
 }
 
 .header .menu > ul > li.current > ul li, .header .menu > ul > li.current_parent > ul li {
 	text-align: center;
 	display: block;
+	margin: .3rem;
 }
 
 .header .menu > ul > li.current > ul a, .header .menu > ul > li.current_parent > ul a {
-	background: rgb(var(--gSecondColor), 0.3);
+	background: rgb(var(--gBgColor));
 	border-radius: .5em;
-	margin: .3rem;
 	color: rgb(var(--gMainColor));
-	padding: .4rem .6rem;
+	padding: .3rem .6rem;
 	font-size: 1em;
 	font-weight: normal;
 }
 
 .header .menu > ul > li > ul li.current a {
-	background: rgb(var(--gSecondColor));
-	color: #fff;
+	background: rgb(var(--gMainColor));
+	color: rgb(var(--gBgColor));
 }
 
 main {
@@ -294,8 +297,8 @@ table.list th {
 		background: none;
 	}
 
-	body#popup main {
-		margin: .2em;
+	body main {
+		padding-bottom: 7em;
 	}
 
 	dl.list {
