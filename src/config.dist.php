@@ -528,3 +528,14 @@ namespace Garradin;
  * financement de notre travail :-)
  */
 //const CONTRIBUTOR_LICENSE = 'XXXXX';
+
+/**
+ * Ligne légale sur le pied de page du site public
+ *
+ * Ce texte (HTML) est affiché en bas des pages du site public.
+ * Utile pour indiquer les mentions légales obligatoires
+ * Le %1$s est remplacé par le nom de l'association, %2$s par son adresse.
+ *
+ * Défaut : "Hébergé par nom_association, adresse_association | Propulsé par Garradin"
+ */
+//const LEGAL_LINE = 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association | Hébergé par <strong>%1$s</strong>, %2$s';

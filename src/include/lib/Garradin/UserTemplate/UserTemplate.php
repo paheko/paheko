@@ -17,7 +17,7 @@ use Garradin\UserTemplate\Modifiers;
 use Garradin\UserTemplate\Functions;
 use Garradin\UserTemplate\Sections;
 
-use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT};
+use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_TEMPLATES_CACHE_ROOT, DATA_ROOT, LEGAL_LINE};
 
 class UserTemplate extends Brindille
 {
@@ -63,6 +63,7 @@ class UserTemplate extends Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
+			'legal_line'   => LEGAL_LINE,
 		];
 
 		return self::$root_variables;
