@@ -214,7 +214,7 @@ static $default_config = [
 	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
-	'LEGAL_LINE'            => 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association | Hébergé par <strong>%1$s</strong>, %2$s',
+	'LEGAL_LINE'            => 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association<br />Hébergé par <strong>%1$s</strong>, %2$s',
 ];
 
 foreach ($default_config as $const => $value)
