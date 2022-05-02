@@ -4,6 +4,7 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\AssistedReconciliation;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -23,6 +24,23 @@ $lines = [[], []];
 $amount = 0;
 $types_accounts = null;
 $id_analytical = null;
+
+// Quick-fill transaction from query parameters
+if (qg('a')) {
+	$amount = Utils::moneyToInteger(qg('a'));
+}
+
+if (qg('l')) {
+	$transaction->label = qg('l');
+}
+
+if (qg('d')) {
+	$transaction->date = new \DateTime(qg('d'));
+}
+
+if (qg('t')) {
+	$transaction->type = (int) qg('t');
+}
 
 // Duplicate transaction
 if (qg('copy')) {
