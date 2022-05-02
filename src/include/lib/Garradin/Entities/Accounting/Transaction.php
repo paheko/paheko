@@ -701,10 +701,10 @@ class Transaction extends Entity
 			$line = new Line;
 
 			if ($debit > $credit) {
-				$line->debit = $debit - $credit;
+				$line->credit = $debit - $credit;
 			}
 			else {
-				$line->credit = $credit - $debit;
+				$line->debit = $credit - $debit;
 			}
 
 			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
