@@ -299,7 +299,7 @@ class Transaction extends Entity
 		];
 	}
 
-	/**
+	/**duplic
 	 * Creates a new Transaction entity (not saved) from an existing one,
 	 * trying to adapt to a different chart if possible
 	 * @param  int    $id
@@ -348,6 +348,8 @@ class Transaction extends Entity
 		if ($this->date >= $year->start_date && $this->date <= $year->end_date) {
 			$new->date = clone $this->date;
 		}
+
+		$new->status = 0;
 
 		return $new;
 	}
@@ -699,10 +701,10 @@ class Transaction extends Entity
 			$line = new Line;
 
 			if ($debit > $credit) {
-				$line->debit = $debit - $credit;
+				$line->credit = $debit - $credit;
 			}
 			else {
-				$line->credit = $credit - $debit;
+				$line->debit = $credit - $debit;
 			}
 
 			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
