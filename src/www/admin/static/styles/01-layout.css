@@ -104,8 +104,9 @@ a:hover {
     border-radius: 10px;
 }
 
-.header .menu i {
-    font-style: normal;
+.header .menu h3 {
+    font-weight: bold;
+    font-size: inherit;
 }
 
 .header .menu a {
@@ -128,24 +129,32 @@ a:hover {
     padding-left: 2em;
 }
 
-.header .menu li.current > a {
-    background: #fff;
+.header .menu li.current h3 a, .header .menu ul ul li.current a {
     background: rgb(var(--gBgColor));
     color: rgb(var(--gMainColor));
 }
 
-.header .menu a b {
+.header .menu h3 a {
+    position: relative;
+}
+
+.header .menu h3 b[data-icn]::before {
+    position: absolute;
+    right: .4rem;
+    content: attr(data-icn);
+    display: block;
+    font-family: "gicon";
     float: right;
     text-decoration: none;
     margin-top: -.2em;
     font-size: 20pt;
     color: rgba(var(--gBgColor), .5);
+    font-weight: normal;
 }
 
-.header .menu li.current > a b {
-    color: rgba(var(--gSecondColor), 0.5);
+.header .menu li.current h3 b[data-icn]::before {
+    color: rgba(var(--gMainColor));
 }
-
 
 ul.gallery {
     text-align: center;

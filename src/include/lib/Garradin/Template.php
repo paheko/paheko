@@ -190,6 +190,10 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetIcon(array $params): string
 	{
+		if (isset($params['html']) && $params['html'] == false) {
+			return Utils::iconUnicode($params['shape']);
+		}
+
 		$attributes = array_diff_key($params, ['shape']);
 		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, $this->escape($v)),
 			$attributes, array_keys($attributes));
