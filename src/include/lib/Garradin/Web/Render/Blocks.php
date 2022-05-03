@@ -15,7 +15,7 @@ use Parsedown_Extra;
 
 use const Garradin\{ADMIN_URL, WWW_URL};
 
-class Blocks
+class Blocks extends AbstractRender
 {
 	const SEPARATOR = "\n\n====\n\n";
 
@@ -116,26 +116,28 @@ class Blocks
 
 	public function image(string $content, array $meta): string
 	{
-		$url = WWW_URL . trim($content);
+		$content = explode('|', $content);
+		$url = $this->resolveAttachment(trim($content[0] ?? ''));
 		$size = intval($meta['size'] ?? 0);
 
-		$caption = !empty($meta['caption']) ? sprintf('<figcaption>%s</figcaption>', htmlspecialchars(trim($meta['caption']))) : '';
+		$caption = htmlspecialchars(trim($content[1] ?? ''));
+		$figcaption = $caption ? sprintf('<figcaption>%s</figcaption>', $caption) : '';
 
 		if (!empty($meta['size'])) {
 			return sprintf(
 				'<figure><a href="%s"><img src="%s" alt="%s" /></a>%s</figure>',
 				htmlspecialchars($url),
 				htmlspecialchars(sprintf('%s?%dpx', $url, $size)),
-				htmlspecialchars(trim($meta['caption'] ?? '')),
-				$caption
+				$caption,
+				$figcaption
 			);
 		}
 		else {
 			return sprintf(
 				'<figure><img src="%s" alt="%s" />%s</figure>',
 				$url,
-				htmlspecialchars(trim($meta['caption'] ?? '')),
-				$caption
+				$caption,
+				$figcaption
 			);
 		}
 	}
@@ -146,8 +148,7 @@ class Blocks
 		$out = '';
 
 		foreach ($images as $image) {
-			$image = explode('=', $image);
-			$out .= $this->image($image[0], ['size' => 200, 'caption' => $image[1] ?? '']);
+			$out .= $this->image($image, ['size' => 200]);
 		}
 
 		return $out;
