@@ -222,6 +222,7 @@
     --grid-template: none / repeat(auto-fit, minmax(100px, 1fr));
     grid-gap: 1rem;
     display: grid;
+    grid-template: var(--grid-template);
 }
 
 .web-column {
