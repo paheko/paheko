@@ -339,6 +339,11 @@ class Membres
 
         foreach ($recipients as $key => $recipient)
         {
+            if(isset($recipient->{"#EMAIL"}) && isset($recipient->{"#IDENTITE"})) { //SQL search case, email and id are forced from members table
+              $recipient->email = $recipient->{"#EMAIL"};
+              $recipient->id = $recipient->{"#IDENTITE"};
+            }
+
             // Ignorer les destinataires avec une adresse email vide
             if (empty($recipient->email))
             {
@@ -361,17 +366,31 @@ class Membres
         }
 
         if (!count($emails)) {
-        	throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
+        	throw new UserException("Aucun destinataire de la liste ne possède d'adresse email.");
         }
 
         foreach ($emails as $email => $id)
         {
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $email, $subject, $message, $id);
+            $subjectSend = Utils::translateMessage($subject, $recipient);
+            $messageSend = Utils::translateMessage($message, $recipient);
+
+            $tagsInError = [];
+            if(($tagsMessage = Utils::containsTags($messageSend)) !== false) {
+              $tagsInError = $tagsMessage;
+            }
+            if(($tagsSubject = Utils::containsTags($subjectSend)) !== false) {
+              $tagsInError = array_merge($tagsInError, $tagsSubject);
+            }
+            if(count($tagsInError) > 0) {
+              throw new UserException(sprintf("Certains tags n'ont pu être remplacés : %s",implode(", ",$tagsInError)));
+            }
+
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $email, $subjectSend, $messageSend, $id);
         }
 
         if ($send_copy)
         {
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
+            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subjectSend, $messageSend);
         }
 
         return true;

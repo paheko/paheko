@@ -1158,4 +1158,61 @@ class Utils
         }
         return $r;
     }
+
+    /**
+    * automatically translates fields to #tags for replacement
+    * alphanumerical are kept
+    * spaces (tabs & so on) are replaced by _
+    * other char. are removed
+    */
+    static public function translateMessage($message, $recipient) {
+      $replace = [];
+      foreach($recipient as $key => $value) {
+        if(strpos($key,"#") === 0) {
+          $key = substr($key,1); //added back in replaceTagsInContent
+        }
+        $key = preg_replace("/\W/","",preg_replace("/\s/","_",strtoupper($key))); //remove non alphanumerical and replace spaces by _
+        $replace[$key] = $value;
+      }
+      return self::replaceTagsInContent($message, $replace);
+    }
+
+
+    /**
+    *  returns the list of unset tags regarding the SQL query or selection
+    **/
+    static public function containsTags($message) {
+      preg_match_all("/#(\w+|[_]+)/m",$message,$matchs);
+      return (isset($matchs[0]) ? $matchs[0] : false);
+    }
+
+    /**
+  	 * Remplacer les tags présents dans une chaine de caractères
+  	 * @param  string $content Chaîne à traiter
+  	 * @param  array  $data    Données supplémentaires à utiliser comme tags (tableau associatif)
+  	 * @return string          $content dont les tags ont été remplacés par le contenu correct
+  	 */
+  	static public function replaceTagsInContent(string $content, ?array $data = null){
+  		$config = Config::getInstance();
+  		$tags = [
+  			'#NOM_ASSO'		=>	$config->get('nom_asso'),
+  			'#ADRESSE_ASSO'	=>	$config->get('adresse_asso'),
+  			'#EMAIL_ASSO'	=>	$config->get('email_asso'),
+  			'#SITE_ASSO'	=>	$config->get('site_asso'),
+  			'#URL_RACINE'	=>	WWW_URL,
+  			'#URL_SITE'		=>	WWW_URL,
+  			'#URL_ADMIN'	=>	ADMIN_URL,
+  		];
+
+  		if (!empty($data) && is_array($data))
+  		{
+  			foreach ($data as $key=>$value)
+  			{
+  				$key = '#' . strtoupper($key);
+  				$tags[$key] = $value;
+  			}
+  		}
+
+  		return strtr($content, $tags);
+  	}
 }
