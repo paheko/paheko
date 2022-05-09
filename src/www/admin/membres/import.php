@@ -7,18 +7,7 @@ $session->requireAccess($session::SECTION_USERS, $session::ACCESS_ADMIN);
 
 $import = new Membres\Import;
 
-$tpl->assign('tab', null !== qg('export') ? 'export' : 'import');
-
-if (qg('export') == 'csv')
-{
-    $import->toCSV();
-    exit;
-}
-elseif (qg('export') == 'ods')
-{
-    $import->toODS();
-    exit;
-}
+$tpl->assign('tab', 'import');
 
 $csv = new CSV_Custom($session, 'users_import');
 $champs = $config->get('champs_membres')->getAll();

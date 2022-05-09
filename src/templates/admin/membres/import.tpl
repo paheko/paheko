@@ -2,13 +2,7 @@
 
 {include file="admin/membres/_nav.tpl" current="import"}
 
-<nav class="tabs">
-    <ul class="sub">
-        <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
-        <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
-        <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
-    </ul>
-</nav>
+{include file="admin/membres/import_export_nav.tpl" current="import"}
 
 {form_errors}
 
@@ -58,7 +52,7 @@
     <p class="submit">
         {csrf_field key=$csrf_key}
         {if $csv->loaded()}{button type="submit" name="cancel" value="1" label="Annuler" shape="left"}{/if}
-        {button type="submit" name="import" label="Importer" shape="upload" class="main"}
+        {button type="submit" name="import" label="Importer" shape="download" class="main"}
     </p>
 
 </form>
