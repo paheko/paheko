@@ -17,6 +17,7 @@ class Charts
 		'fr_pcg_2014' => 'Plan comptable général, pour entreprises (Règlement ANC n° 2014-03, consolidé 1er janvier 2019)',
 		'fr_cse_2015' => 'Plan comptable des CSE (Comité Social et Économique) (Règlement ANC n°2015-01)',
 		'fr_pcc_2020' => 'Plan comptable des copropriétés (2005 révisé en 2020)',
+		'be_pcmn_2019' => 'Plan comptable minimum normalisé des associations et fondations 2019',
 	];
 
 	static public function install(string $chart_code): Chart

@@ -39,7 +39,14 @@ class File extends Entity
 	 */
 	protected $name;
 
+	/**
+	 * Complete file path (parent + '/' + name)
+	 */
 	protected $path;
+
+	/**
+	 * Type of file: file or directory
+	 */
 	protected $type = self::TYPE_FILE;
 	protected $mime;
 	protected $size;
@@ -588,23 +595,31 @@ class File extends Entity
 		}
 	}
 
+	/**
+	 * Full URL with https://...
+	 */
 	public function url(bool $download = false): string
 	{
-		if ($this->context() == self::CONTEXT_WEB) {
-			$path = Utils::basename(Utils::dirname($this->path)) . '/' . Utils::basename($this->path);
-		}
-		else {
-			$path = $this->path;
-		}
-
-
-		$url = WWW_URL . $path;
+		$url = WWW_URL . $this->uri();
 
 		if ($download) {
 			$url .= '?download';
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Returns local URI, eg. user/1245/file.jpg
+	 */
+	public function uri(): string
+	{
+		if ($this->context() == self::CONTEXT_WEB) {
+			return Utils::basename(Utils::dirname($this->path)) . '/' . Utils::basename($this->path);
+		}
+		else {
+			return $this->path;
+		}
 	}
 
 	public function thumb_url($size = null): string

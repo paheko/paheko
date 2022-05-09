@@ -85,6 +85,15 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.24', '<')) {
+				$db->begin();
+
+				// Delete acc_accounts_projects_balances view
+				$db->exec('DROP VIEW IF EXISTS acc_accounts_projects_balances;');
+
+				$db->commit();
+			}
+
 			if (version_compare($v, '1.2.0', '<')) {
 				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 				$db->beginSchemaUpdate();

@@ -39,8 +39,8 @@ class Transactions
 		// Lines
 		'line_id'        => 'Numéro ligne',
 		'account'        => 'Compte',
-		'credit'         => 'Crédit',
 		'debit'          => 'Débit',
+		'credit'         => 'Crédit',
 		'line_reference' => 'Référence ligne',
 		'line_label'     => 'Libellé ligne',
 		'reconciled'     => 'Rapprochement',
@@ -134,6 +134,7 @@ class Transactions
 				$line = new Line;
 				$line->importForm([
 					'reference'  => $row->line_reference,
+					'label'      => $row->line_label,
 					'id_account' => $row->id_account,
 				]);
 
@@ -370,6 +371,20 @@ class Transactions
 					$fields = array_intersect_key((array)$row, array_flip(['label', 'date', 'notes', 'reference']));
 
 					$transaction->importForm($fields);
+
+					// Set status
+					if (!empty($row->status)) {
+						$status_list = array_map('trim', explode(',', $row->status));
+						$status = 0;
+
+						foreach (Transaction::STATUS_NAMES as $k => $v) {
+							if (in_array($v, $status_list)) {
+								$status |= $k;
+							}
+						}
+
+						$transaction->status = $status;
+					}
 				}
 
 				$data = [];

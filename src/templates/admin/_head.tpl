@@ -53,8 +53,7 @@
 	<?php
 	$current_parent = substr($current, 0, strpos($current, '/'));
 	?>
-		<li class="{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}">
-			<a href="{$admin_url}"><b class="icn">⌂</b><i> Accueil</i></a>
+		<li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_url}"><b data-icn="{icon html=false shape="home"}"></b><span>Accueil</span></a></h3>
 			{if !empty($plugins_menu)}
 				<ul>
 				{foreach from=$plugins_menu key="plugin_id" item="name"}
@@ -64,20 +63,20 @@
 			{/if}
 		</li>
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_READ)}
-			<li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><a href="{$admin_url}users/"><b class="icn">👪</b><i> Membres</i></a>
+			<li class="{if $current == 'users'} current{elseif $current_parent == 'users'} current_parent{/if}"><h3><a href="{$admin_url}users/"><b data-icn="{icon html=false shape="users"}"></b></b><span>Membres</span></a></h3>
 			<ul>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-				<li class="member new{if $current == 'users/add'} current{/if}"><a href="{$admin_url}users/new.php">Ajouter</a></li>
+				<li{if $current == 'users/new'} class="current"{/if}><a href="{$admin_url}users/new.php">Ajouter</a></li>
 			{/if}
-				<li class="{if $current == 'users/services'} current{/if}"><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
+				<li{if $current == 'users/services'} class="current"{/if}><a href="{$admin_url}services/">Activités &amp; cotisations</a></li>
 			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-				<li class="member message{if $current == 'users/mailing'} current{/if}"><a href="{$admin_url}users/mailing.php">Message collectif</a></li>
+				<li{if $current == 'users/mailing'} class="current"{/if}><a href="{$admin_url}users/mailing.php">Message collectif</a></li>
 			{/if}
 			</ul>
 			</li>
 		{/if}
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-			<li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><a href="{$admin_url}acc/"><b>€</b><i> Comptabilité</i></a>
+			<li class="{if $current == 'acc'} current{elseif $current_parent == 'acc'} current_parent{/if}"><h3><a href="{$admin_url}acc/"><b data-icn="{icon html=false shape="money"}"></b><span>Comptabilité</span></a></h3>
 			<ul>
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
 				<li class="{if $current == 'acc/new'} current{/if}"><a href="{$admin_url}acc/transactions/new.php">Saisie</a></li>
@@ -93,33 +92,32 @@
 		{/if}
 
 		{if $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_READ)}
-			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><a href="{$admin_url}docs/"><b class="icn">🗀</b><i> Documents</i></a>
+			<li class="{if $current == 'docs'} current{elseif $current_parent == 'docs'} current_parent{/if}"><h3><a href="{$admin_url}docs/"><b data-icn="{icon html=false shape="folder"}"></b><span>Documents</span></a></h3>
 			</li>
 		{/if}
 
 		{if $session->canAccess($session::SECTION_WEB, $session::ACCESS_READ)}
-			<li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><a href="{$admin_url}web/"><b class="icn">🖻</b><i> Site web</i></a>
+			<li class="{if $current == 'web'} current{elseif $current_parent == 'web'} current_parent{/if}"><h3><a href="{$admin_url}web/"><b data-icn="{icon html=false shape="globe"}"></b><span>Site web</span></a></h3>
 			</li>
 		{/if}
 
 		{if $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN)}
-			<li class="main config{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><a href="{$admin_url}config/"><b class="icn">☸</b><i> Configuration</i></a>
+			<li class="{if $current == 'config'} current{elseif $current_parent == 'config'} current_parent{/if}"><h3><a href="{$admin_url}config/"><b data-icn="{icon html=false shape="settings"}"></b><span>Configuration</span></a></h3>
 		{/if}
 
-		<li class="{if $current == 'me'} current{elseif $current_parent == 'me'} current_parent{/if}">
-			<a href="{$admin_url}me/"><b class="icn">👤</b><i> Mes infos personnelles</i></a>
+		<li class="{if $current == 'me'} current{elseif $current_parent == 'me'} current_parent{/if}"><h3><a href="{$admin_url}me/"><b data-icn="{icon html=false shape="user"}"></b><span> Mes infos personnelles</span></a></h3>
 			<ul>
 				<li{if $current == 'me/services'}  class="current"{/if}><a href="{$admin_url}me/services.php">Mes activités &amp; cotisations</a></li>
 			</ul>
 		</li>
 
 		{if !defined('Garradin\LOCAL_LOGIN') || !LOCAL_LOGIN}
-			<li class="logout"><a href="{$admin_url}logout.php"><b class="icn">⤝</b><i> Déconnexion</i></a></li>
+			<li><h3><a href="{$admin_url}logout.php"><b data-icn="{icon html=false shape="logout"}"></b><span>Déconnexion</span></a></h3></li>
 		{/if}
 
 		{if $help_url}
 		<li>
-			<a href="{$help_url}" target="_blank"><b class="icn">❓</b><i> Aide</i></a>
+			<h3><a href="{$help_url}" target="_blank"><b data-icn="{icon html=false shape="help"}"></b><span>Aide</span></a></h3>
 		</li>
 		{/if}
 

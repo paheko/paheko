@@ -1,7 +1,7 @@
 <?php
 use Garradin\Entities\Accounting\Account;
 ?>
-{include file="admin/_head.tpl" title="Comptes favoris" current="acc/accounts"}
+{include file="admin/_head.tpl" title="Comptes usuels" current="acc/accounts"}
 
 {include file="acc/_year_select.tpl"}
 

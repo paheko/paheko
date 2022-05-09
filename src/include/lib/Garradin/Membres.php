@@ -124,7 +124,7 @@ class Membres
                     }
                     elseif (!is_numeric($data[$key]) || $data[$key] < 0 || $data[$key] > PHP_INT_MAX)
                     {
-                        throw new UserException('Le champs "%s" ne contient pas une valeur binaire.');
+                        throw new UserException(sprintf('Le champs "%s" ne contient pas une valeur binaire.', $key));
                     }
                 }
 

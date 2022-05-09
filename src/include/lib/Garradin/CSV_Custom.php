@@ -11,8 +11,10 @@ class CSV_Custom
 	protected $csv;
 	protected $translation;
 	protected $columns;
-	protected $mandatory_columns = [];
-	protected $skip = 1;
+	protected array $mandatory_columns = [];
+	protected int $skip = 1;
+	protected $modifier = null;
+	protected array $_default;
 
 	public function __construct(UserSession $session, string $key)
 	{
@@ -54,37 +56,61 @@ class CSV_Custom
 			throw new \LogicException('Missing columns or translation table');
 		}
 
-		$default = array_map(function ($a) { return null; }, array_flip($this->translation));
-
-		$i = 0;
-
-		foreach ($this->csv as $k => $line) {
-			if ($i++ < $this->skip) {
+		for ($i = 0; $i < count($this->csv); $i++) {
+			if ($i <= $this->skip) {
 				continue;
 			}
 
-			$row = $default;
+			yield $i => $this->getLine($i);
+		}
+	}
 
-			foreach ($line as $col => $value) {
-				if (!isset($this->translation[$col])) {
-					continue;
-				}
+	public function getLine(int $i): ?\stdClass
+	{
+		if (!isset($this->csv[$i])) {
+			return null;
+		}
 
-				$row[$this->translation[$col]] = trim($value);
+		if (!isset($this->_default)) {
+			$this->_default = array_map(function ($a) { return null; }, array_flip($this->translation));
+		}
+
+		$row = $this->_default;
+
+		foreach ($this->csv[$i] as $col => $value) {
+			if (!isset($this->translation[$col])) {
+				continue;
 			}
 
-			$row = (object) $row;
-			yield $k => $row;
+			$row[$this->translation[$col]] = trim($value);
 		}
+
+		$row = (object) $row;
+
+		if (null !== $this->modifier) {
+			try {
+				$row = call_user_func($this->modifier, $row);
+			}
+			catch (UserException $e) {
+				throw new UserException(sprintf('Ligne %d : %s', $i, $e->getMessage()));
+			}
+		}
+
+		return $row;
 	}
 
 	public function getFirstLine(): array
 	{
-		if (empty($this->csv)) {
+		if (!$this->loaded()) {
 			throw new \LogicException('No file has been loaded');
 		}
 
-		return reset($this->csv);
+		return current($this->csv);
+	}
+
+	public function setModifier(callable $callback): void
+	{
+		$this->modifier = $callback;
 	}
 
 	public function getSelectedTable(?array $source = null): array
