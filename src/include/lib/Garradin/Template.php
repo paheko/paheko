@@ -162,7 +162,12 @@ class Template extends \KD2\Smartyer
 
 		foreach ($errors as &$error) {
 			if ($error instanceof UserException) {
-				$message = nl2br($this->escape($error->getMessage()));
+				if ($html = $error->getHTMLMessage()) {
+					$message = $html;
+				}
+				else {
+					$message = nl2br($this->escape($error->getMessage()));
+				}
 
 				if ($error->hasDetails()) {
 					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();

@@ -265,10 +265,19 @@ if (!ini_get('date.timezone'))
 
 class UserException extends \LogicException
 {
-	protected $details;
+	protected $details = null;
+	protected ?string $html_message = null;
 
 	public function setMessage(string $message) {
 		$this->message = $message;
+	}
+
+	public function getHTMLMessage(): ?string {
+		return $this->html_message;
+	}
+
+	public function setHTMLMessage(string $html): void {
+		$this->html_message = $html;
 	}
 
 	public function setDetails($details) {
