@@ -215,6 +215,8 @@ static $default_config = [
 	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
+	'SYSTEM_MENU_ITEMS'     => [],
+	'SYSTEM_SIGNALS'        => [],
 ];
 
 foreach ($default_config as $const => $value)

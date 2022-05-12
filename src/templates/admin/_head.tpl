@@ -54,8 +54,11 @@
     $current_parent = substr($current, 0, strpos($current, '/'));
     ?>
         <li class="home{if $current == 'home'} current{elseif $current_parent == 'home'} current_parent{/if}"><h3><a href="{$admin_url}"><b data-icn="{icon html=false shape="home"}"></b><span>Accueil</span></a></h3>
-            {if !empty($plugins_menu)}
+            {if !empty($plugins_menu) || !empty(SYSTEM_MENU_ITEMS)}
                 <ul>
+                {foreach from=SYSTEM_MENU_ITEMS key="key" item="html"}
+                    <li{if $current == $key} class="current"{/if}>{$html|raw}</li>
+                {/foreach}
                 {foreach from=$plugins_menu key="plugin_id" item="name"}
                     <li class="plugins {if $current == sprintf("plugin_%s", $plugin_id)} current{/if}"><a href="{plugin_url id=$plugin_id}">{$name}</a></li>
                 {/foreach}

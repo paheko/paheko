@@ -139,6 +139,32 @@ namespace Garradin;
 //const PLUGINS_SYSTEM = '';
 
 /**
+ * Signaux système
+ *
+ * Permet de déclencher des signaux sans passer par un plugin.
+ * Le fonctionnement des signaux système est strictment identique aux signaux des plugins.
+ * Les signaux système sont exécutés en premier, avant les signaux des plugins.
+ *
+ * Format : pour chaque signal, un tableau comprenant une seule clé et une seule valeur.
+ * La clé est le nom du signal, et la valeur est la fonction.
+ *
+ * Défaut: [] (tableau vide)
+ */
+//const SYSTEM_SIGNALS = [['files.delete' => 'MyNamespace\Signals::deleteFile'], ['entity.Accounting\Transaction.save.before' => 'MyNamespace\Signals::saveTransaction']];
+
+/**
+ * Éléments du menu (sous-menu accueil) système
+ *
+ * Permet de rajouter des éléments au menu, en dessous de l'item "Accueil"
+ *
+ * Format: tableau de chaînes HTML, chaque chaîne sera un élément du sous-menu (tag <li>),
+ * la clé étant l'identifiant "$current" permettant de sélectionner le sous-menu comme actif.
+ *
+ * Défaut: [] (tableau vide)
+ */
+//const SYSTEM_MENU_ITEMS = ['<a '];
+
+/**
  * Adresse URI de la racine du site Garradin
  * (doit se terminer par un slash)
  *
