@@ -816,10 +816,25 @@ class Plugin
 	 * @param  array  $params Paramètres du callback (array ou null)
 	 * @return NULL 		  NULL si aucun plugin n'a été appelé,
 	 * TRUE si un plugin a été appelé et a arrêté l'exécution,
-	 * FALSE si des plugins ont été appelés mais aucun n'a stopé l'exécution
+	 * FALSE si des plugins ont été appelés mais aucun n'a stoppé l'exécution
 	 */
 	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
+		// Process SYSTEM_SIGNALS first
+		foreach (SYSTEM_SIGNALS as $system_signal) {
+			if (key($system_signal) != $signal) {
+				continue;
+			}
+
+			if (!is_callable(current($system_signal))) {
+				throw new \LogicException(sprintf('System signal: cannot call "%s" for signal "%s"', current($system_signal), key($system_signal)));
+			}
+
+			if (true === call_user_func_array(current($system_signal), [&$params, &$callback_return])) {
+				return true;
+			}
+		}
+
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
 
 		if (!count($list)) {
