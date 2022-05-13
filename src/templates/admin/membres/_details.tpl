@@ -48,5 +48,20 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{$value|display_champ_membre:$c_config|raw}
 		{/if}
 	</dd>
+		{if $c_config.type == 'email' && ($email = Users\Emails::getEmail($value))}
+		<dd class="help">
+			{if $email.optout}
+				<b class="alert">A demandé à ne plus recevoir de messages</b>
+			{elseif $email.invalid}
+				<b class="error">Adresse invalide</b> | {$email.fail_log|escape|nl2br}
+			{elseif $email->hasReachedFailLimit()}
+				<b class="error">Trop d'erreurs</b> | {$email.fail_log|escape|nl2br}
+			{elseif $email.verified}
+				Adresse <strong>vérifiée</strong>
+			{else}
+				Adresse non vérifiée
+			{/if}
+		</dd>
+		{/if}
 	{/foreach}
 </dl>

@@ -1,5 +1,12 @@
 {include file="admin/_head.tpl" title="Envoyer un message collectif" current="membres/message"}
 
+<nav class="tabs">
+    <ul>
+    	<li class="current"><a href="{$self_url}">Envoyer</a></li>
+    	<li><a href="emails.php">Adresses rejetées</a></li>
+    </ul>
+</nav>
+
 {form_errors}
 
 <form method="post" action="{$self_url}">

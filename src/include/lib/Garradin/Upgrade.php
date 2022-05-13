@@ -437,7 +437,7 @@ class Upgrade
 
 			if (version_compare($v, '1.1.25', '<')) {
 				// Just add email tables
-				$db->import(ROOT . '/include/data/1.1.25_schema.sql');
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
 			}
 
 			// Vérification de la cohérence des clés étrangères

@@ -93,7 +93,7 @@ class Emails
 	static public function queue(int $context, array $recipients, ?string $sender, string $subject, string $text): void
 	{
 		// Remove duplicates
-		array_walk($recipients, 'strtolower');
+		array_walk($recipients, fn($a) => strtolower($a));
 		$recipients = array_unique($recipients);
 
 		$db = DB::getInstance();
@@ -131,7 +131,7 @@ class Emails
 		}
 	}
 
-	static public function getEmailEntityFromOptout(string $code): ?Email
+	static public function getEmailFromOptout(string $code): ?Email
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
 
@@ -145,7 +145,7 @@ class Emails
 
 	static public function markAddressAsInvalid(string $address): void
 	{
-		$e = self::getEmailEntity($address);
+		$e = self::getEmail($address);
 
 		if (!$e) {
 			return;
@@ -155,7 +155,7 @@ class Emails
 		$e->save();
 	}
 
-	static public function getEmailEntity(string $address): ?Email
+	static public function getEmail(string $address): ?Email
 	{
 		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', Email::getHash($address));
 	}
@@ -262,6 +262,18 @@ class Emails
 			WHERE q.sending = 0;');
 	}
 
+	static public function listRejectedUsers(): array
+	{
+		$sql = sprintf('SELECT e.*, u.email, u.id, u.%s AS identity
+			FROMS emails e
+			LEFT JOIN membres u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)
+			WHERE e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d;',
+			$id_field,
+			self::FAIL_LIMIT
+		);
+
+		return DB::getInstance()->get($sql);
+	}
 
 	/**
 	 * Supprime de la queue les messages liés à des adresses invalides
@@ -396,7 +408,7 @@ class Emails
 			return;
 		}
 
-		$email = self::getEmailEntity($return['recipient']);
+		$email = self::getEmail($return['recipient']);
 
 		if (!$email) {
 			return;
