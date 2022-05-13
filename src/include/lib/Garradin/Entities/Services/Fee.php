@@ -11,30 +11,21 @@ use Garradin\Utils;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
+use KD2\DB\DB_Exception;
 
 class Fee extends Entity
 {
 	const TABLE = 'services_fees';
 
-	protected $id;
-	protected $label;
-	protected $description;
-	protected $amount;
-	protected $formula;
-	protected $id_service;
-	protected $id_account;
-	protected $id_year;
-
-	protected $_types = [
-		'id'          => 'int',
-		'label'       => 'string',
-		'description' => '?string',
-		'amount'      => '?int',
-		'formula'     => '?string',
-		'id_service'  => 'int',
-		'id_account'  => '?int',
-		'id_year'     => '?int',
-	];
+	protected ?int $id;
+	protected string $label;
+	protected ?string $description = null;
+	protected ?int $amount = null;
+	protected ?string $formula = null;
+	protected int $id_service;
+	protected ?int $id_account = null;
+	protected ?int $id_year = null;
+	protected ?int $id_analytical = null;
 
 	public function filterUserValue(string $type, $value, string $key)
 	{
@@ -53,6 +44,10 @@ class Fee extends Entity
 
 		if (isset($source['account']) && is_array($source['account'])) {
 			$source['id_account'] = (int)key($source['account']);
+		}
+
+		if (isset($source['analytical']) && is_array($source['analytical'])) {
+			$source['id_analytical'] = (int)key($source['analytical']);
 		}
 
 		if (isset($source['amount_type'])) {
@@ -83,8 +78,8 @@ class Fee extends Entity
 		parent::selfCheck();
 
 		$this->assert(trim($this->label) !== '', 'Le libellé doit être renseigné');
-		$this->assert(strlen($this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
-		$this->assert(strlen($this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
+		$this->assert(strlen((string) $this->label) <= 200, 'Le libellé doit faire moins de 200 caractères');
+		$this->assert(strlen((string) $this->description) <= 2000, 'La description doit faire moins de 2000 caractères');
 		$this->assert(null === $this->amount || $this->amount > 0, 'Le montant est invalide : ' . $this->amount);
 		$this->assert($this->id_service, 'Aucun service n\'a été indiqué pour ce tarif.');
 		$this->assert((null === $this->id_account && null === $this->id_year)
@@ -92,7 +87,12 @@ class Fee extends Entity
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte indiqué n\'existe pas');
 		$this->assert(null === $this->id_year || $db->test(Year::TABLE, 'id = ?', $this->id_year), 'L\'exercice indiqué n\'existe pas');
 		$this->assert(null === $this->id_account || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_account, $this->id_year), 'Le compte sélectionné ne correspond pas à l\'exercice');
-		$this->assert(null === $this->formula || $this->checkFormula(), 'Formule de calcul invalide');
+		$this->assert(null === $this->id_analytical || $db->test(Account::TABLE, 'id = ? AND id_chart = (SELECT id_chart FROM acc_years WHERE id = ?)', $this->id_analytical, $this->id_year), 'Le projet sélectionné ne correspond pas à l\'exercice');
+
+		if (null !== $this->formula && ($error = $this->checkFormula())) {
+			throw new ValidationException('Formule de calcul invalide: ' . $error);
+		}
+
 		$this->assert(null === $this->amount || null === $this->formula, 'Il n\'est pas possible de spécifier à la fois une formule et un montant');
 	}
 
@@ -114,16 +114,16 @@ class Fee extends Entity
 		return sprintf('SELECT %s FROM membres WHERE id = ?;', $this->formula);
 	}
 
-	protected function checkFormula()
+	protected function checkFormula(): ?string
 	{
 		try {
 			$db = DB::getInstance();
 			$sql = $this->getFormulaSQL();
 			$db->protectSelect(['membres' => null], $sql);
-			return true;
+			return null;
 		}
-		catch (\Exception $e) {
-			return false;
+		catch (DB_Exception $e) {
+			return $e->getMessage();
 		}
 	}
 
@@ -132,7 +132,7 @@ class Fee extends Entity
 		return EntityManager::findOneById(Service::class, $this->id_service);
 	}
 
-	public function paidUsersList(): DynamicList
+	public function activeUsersList(): DynamicList
 	{
 		$identity = Config::getInstance()->get('champ_identite');
 		$columns = [
@@ -163,7 +163,7 @@ class Fee extends Entity
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_fee) AS su2 ON su2.id = su.id
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines l ON l.id_transaction = tu.id_transaction';
-		$conditions = sprintf('su.id_fee = %d AND su.paid = 1 AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
+		$conditions = sprintf('su.id_fee = %d AND (su.expiry_date >= date() OR su.expiry_date IS NULL)
 			AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -180,7 +180,7 @@ class Fee extends Entity
 
 	public function unpaidUsersList(): DynamicList
 	{
-		$list = $this->paidUsersList();
+		$list = $this->activeUsersList();
 		$conditions = sprintf('su.id_fee = %d AND su.paid = 0 AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;
@@ -188,7 +188,7 @@ class Fee extends Entity
 
 	public function expiredUsersList(): DynamicList
 	{
-		$list = $this->paidUsersList();
+		$list = $this->activeUsersList();
 		$conditions = sprintf('su.id_fee = %d AND su.expiry_date < date() AND m.id_category NOT IN (SELECT id FROM users_categories WHERE hidden = 1)', $this->id());
 		$list->setConditions($conditions);
 		return $list;

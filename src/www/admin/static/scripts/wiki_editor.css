@@ -1,6 +1,6 @@
 .textEditor {
     border-radius: .5em;
-    background: #ccc;
+    background: var(--gLightBorderColor);
     padding: 1%;
     overflow: hidden;
     position: relative;
@@ -9,7 +9,7 @@
 .textEditor textarea {
     border: none;
     margin: 0;
-    background: #eee;
+    background: var(--gLightBackgroundColor);
     border-radius: .5em;
     height: 96%;
     width: 98%;
@@ -23,12 +23,12 @@ nav.te {
 nav.te button {
     text-decoration: none;
     cursor: pointer;
-    background: #eee no-repeat center center;
+    background: var(--gLightBackgroundColor) no-repeat center center;
     display: inline-block;
     vertical-align: bottom;
     transition: all .2s;
-    border: 1px solid #999;
-    box-shadow: 2px 2px 5px #999;
+    border: 1px solid var(--gBorderColor);
+    box-shadow: 2px 2px 5px var(--gBorderColor);
 }
 
 nav.te .bold, nav.te .italic, nav.te .title, nav.te .link {
@@ -37,7 +37,7 @@ nav.te .bold, nav.te .italic, nav.te .title, nav.te .link {
 
 nav.te .bold { font-weight: bold; }
 nav.te .italic { font-style: italic; }
-nav.te .link { text-decoration: underline; color: blue; }
+nav.te .link { text-decoration: underline; color: var(--gLinkColor); }
 
 nav.te .fullscreen {
     text-indent: -70em;
@@ -119,7 +119,7 @@ nav.te .preview {
 
 .textEditor iframe {
     border: none;
-    background: #eee;
+    background: rgb(var(--gBgColor));
     border-radius: .5em;
     padding: 1%;
     width: 98%;
@@ -165,7 +165,7 @@ form#insertImage fieldset {
     box-shadow: 5px 5px 10px #000;
     margin: 1em;
     padding: 1em;
-    background: #ddd;
+    background: var(--gLightBackgroundColor);
     border-radius: .5em;
     text-align: center;
 }
@@ -177,12 +177,10 @@ form#insertImage dt {
 form#insertImage .align input {
     font-size: 1.2em;
     line-height: 32px;
-    background: #fff;
     background-position: 5px center;
     background-repeat: no-repeat;
     padding: 5px;
     padding-left: 42px;
-    border: 1px solid #999;
     border-radius: 5px;
     margin: .5em;
 }
@@ -205,19 +203,8 @@ form#insertImage .align input[name="center"] {
 
 form#insertImage .cancel input {
     font-size: 0.8em;
-    background: transparent;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
     margin: .5em;
-    color: #666;
-    cursor: pointer;
-}
-
-form#insertImage .align input:hover, form#insertImage .cancel input:hover  {
-    cursor: pointer;
-    background-color: #eee;
-    color: darkred;
+    opacity: 0.8;
 }
 
 #confirm_saved {

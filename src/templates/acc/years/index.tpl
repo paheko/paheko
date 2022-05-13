@@ -2,16 +2,22 @@
 
 <nav class="tabs">
 	<aside>
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			{linkbutton shape="plus" href="!acc/years/new.php" label="Nouvel exercice"}
+		{/if}
 		{linkbutton shape="search" href="!acc/search.php" label="Recherche"}
 	</aside>
 	<ul>
 		<li class="current"><a href="{$self_url}">Exercices</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		<li><a href="{$admin_url}acc/years/new.php">Nouvel exercice</a></li>
-		{/if}
 		<li><a href="{$admin_url}acc/reports/projects.php">Projets <em>(compta analytique)</em></a></li>
 	</ul>
 </nav>
+
+{if $_GET.msg == 'IMPORT'}
+<p class="block confirm">
+	L'import s'est bien déroulé.
+</p>
+{/if}
 
 {if $_GET.msg == 'OPEN'}
 <p class="block error">
@@ -67,9 +73,9 @@
 				<td><em>{if $year.closed}Clôturé{else}En cours{/if}</em></td>
 				<td>
 				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-					{linkbutton label="Export" shape="export" href="export.php?id=%d"|args:$year.id}
+					{linkbutton label="Export" shape="export" href="export.php?year=%d"|args:$year.id}
 					{if !$year.closed}
-						{linkbutton label="Import" shape="upload" href="import.php?id=%d"|args:$year.id}
+						{linkbutton label="Import" shape="upload" href="import.php?year=%d"|args:$year.id}
 						{linkbutton label="Balance d'ouverture" shape="reset" href="balance.php?id=%d"|args:$year.id}
 						{linkbutton label="Modifier" shape="edit" href="edit.php?id=%d"|args:$year.id}
 						{linkbutton label="Clôturer" shape="lock" href="close.php?id=%d"|args:$year.id}

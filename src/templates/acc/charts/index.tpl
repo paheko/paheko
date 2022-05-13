@@ -1,13 +1,8 @@
 {include file="admin/_head.tpl" title="Gestion des plans comptables" current="acc/charts"}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
-		{/if}
-	</ul>
-</nav>
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+	{include file="./_nav.tpl" current="charts"}
+{/if}
 
 {if $_GET.msg == 'OPEN'}
 <p class="block alert">

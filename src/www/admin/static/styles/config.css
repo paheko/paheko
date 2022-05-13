@@ -1,3 +1,8 @@
+.error {
+    background: #fff;
+    color: #000;
+}
+
 .error .trace {
 	border: 1px solid #ccc;
 	margin: 1em;
@@ -100,4 +105,43 @@
 #orderFields fieldset .interactive:hover {
     cursor: pointer;
     text-decoration: underline;
+}
+
+.image-preview img, .image-preview figure {
+    vertical-align: middle;
+}
+
+.image-preview img {
+    max-width: 150px;
+}
+
+.masked-icon {
+    background: linear-gradient(rgba(var(--gMainColor), 0.9), rgba(0, 0, 0, 0.5));
+    border-radius: .5em;
+    padding: 10px;
+    display: inline-flex;
+    flex-direction: column;
+    text-align: center;
+    margin-left: 2em;
+}
+
+.masked-icon .icon {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5));
+    display: inline-block;
+}
+
+.masked-icon figcaption {
+    font-size: .9em;
+    font-family: "Droid Sans", sans-serif;
+    text-shadow: 0px 0px 5px #000;
+    color: #fff;
+}
+
+.masked-icon img {
+    clip-path: circle(40px at center);
+    background: #fff;
+    width: 100px;
+    height: 100px;
+    box-shadow: 1px 10px 5px #000;
+    display: block;
 }

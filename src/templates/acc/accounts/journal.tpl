@@ -11,41 +11,39 @@
 
 {if $account.type}
 
-	{if $simple && $account::isReversed($account.type)}
+	{if $simple && !$account->isReversed($simple, $year.id)}
 		{include file="acc/_simple_help.tpl" link="?id=%d&simple=0&year=%d"|args:$account.id,$year.id type=$account.type}
 	{/if}
 
 	{if $simple}
 		{if $account.type == $account::TYPE_THIRD_PARTY}
-			{if $sum < 0}
-				<p class="alert block">Vous devez <strong>{$sum|abs|raw|money_currency}</strong> à ce tiers.</p>
-			{elseif $sum > 0}
-				<p class="alert block">Ce tiers vous doit <strong>{$sum|abs|raw|money_currency}</strong>.</p>
-			{else}
-				<p class="confirm block">Vous ne devez pas d'argent à ce tiers, et il ne vous en doit pas non plus.</p>
+			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
+				<p class="alert block">Ce tiers vous doit <strong>{$sum.balance|abs|raw|money_currency}</strong>.</p>
+			{elseif $account->getPosition($year->id) == $account::LIABILITY && $sum.balance > 0}
+				<p class="alert block">Vous devez <strong>{$sum.balance|abs|raw|money_currency}</strong> à ce tiers.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_BANK}
-			{if $sum < 0}
-				<p class="error block">Ce compte est à découvert de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
-			{elseif $sum >= 0}
-				<p class="confirm block">Ce compte est créditeur de <strong>{$sum|abs|raw|money_currency}</strong> à la banque.</p>
+			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
+				<p class="confirm block">Ce compte est créditeur de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
+			{elseif $account->getPosition($year->id) == $account::LIABILITY && $sum.balance > 0}
+				<p class="error block">Ce compte est à découvert de <strong>{$sum.balance|abs|raw|money_currency}</strong> à la banque.</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_CASH}
-			{if $sum < 0}
-				<p class="error block">Cette caisse est débiteur de <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum >= 0}
-				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum|abs|raw|money_currency}</strong>.</p>
+			{if $account->getPosition($year->id) == $account::ASSET && $sum.balance > 0}
+				<p class="confirm block">Cette caisse est créditrice de <strong>{$sum.balance|abs|raw|money_currency}</strong>.</p>
+			{elseif $account->getPosition($year->id) == $account::LIABILITY && $sum.balance > 0}
+				<p class="error block">Cette caisse est débiteur de <strong>{$sum.balance|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
 			{/if}
 		{elseif $account.type == $account::TYPE_OUTSTANDING}
-			{if $sum < 0}
-				<p class="error block">Ce compte est débiteur <strong>{$sum|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
-			{elseif $sum >= 0}
-				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum|abs|raw|money_currency}</strong>. {if $sum > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
+			{if $sum.balance < 0}
+				<p class="error block">Ce compte est débiteur <strong>{$sum.balance|abs|raw|money_currency}</strong>. Est-ce normal&nbsp;? Une vérification est peut-être nécessaire&nbsp;?</p>
+			{elseif $sum.balance > 0}
+				<p class="confirm block">Ce compte d'attente est créditeur de <strong>{$sum.balance|abs|raw|money_currency}</strong>. {if $sum.balance > 200}Un dépôt à la banque serait peut-être une bonne idée&nbsp;?{/if}</p>
 			{/if}
-		{elseif $account.type == $account::TYPE_REVENUE && $sum < 0}
-			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez dû procéder à des remboursements par exemple, et que ceux-ci couvrent des recettes perçues sur un exercice précédent.</p>
-		{elseif $account.type == $account::TYPE_EXPENSE && $sum < 0}
-			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez reçu des remboursements par exemple, et que ceux-ci couvrent des dépenses réglées sur un exercice précédent.</p>
+		{elseif $account.type == $account::TYPE_REVENUE && $sum.balance < 0}
+			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum.balance|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez dû procéder à des remboursements par exemple, et que ceux-ci couvrent des recettes perçues sur un exercice précédent.</p>
+		{elseif $account.type == $account::TYPE_EXPENSE && $sum.balance < 0}
+			<p class="alert block">Ce compte présente un solde négatif de <strong>{$sum.balance|raw|money_currency}</strong>. Est-ce normal&nbsp;? Cette situation ne devrait se produire que si vous avez reçu des remboursements par exemple, et que ceux-ci couvrent des dépenses réglées sur un exercice précédent.</p>
 		{/if}
 	{/if}
 
@@ -53,8 +51,16 @@
 	<nav class="tabs">
 		<aside>
 		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
-			{linkbutton href="%s&export=ods"|args:$self_url label="Export tableur" shape="export"}
+		<nav class="menu">
+			<b data-icon="↷" class="btn">Export</b>
+			<span>
+				{linkbutton href="%s&export=csv"|args:$self_url label="Export CSV" shape="export"}
+				{linkbutton href="%s&export=ods"|args:$self_url label="Export LibreOffice" shape="export"}
+				{if CALC_CONVERT_COMMAND}
+					{linkbutton href="%s&export=xlsx"|args:$self_url label="Export Excel" shape="export"}
+				{/if}
+			</span>
+		</nav>
 		{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d&account=%s"|args:$year.id,$account.code label="Recherche"}
 		{if $year.id == CURRENT_YEAR_ID}
@@ -65,8 +71,31 @@
 			<li{if $simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=1&amp;year={$year.id}">Vue simplifiée</a></li>
 			<li{if !$simple} class="current"{/if}><a href="?id={$account.id}&amp;simple=0&amp;year={$year.id}">Vue comptable</a></li>
 		</ul>
+
+	{if !$filter.start && !$filter.end}
+	<aside>
+		{linkbutton shape="search" href="?start=1" label="Filtrer" onclick="g.toggle('#filterForm', true); this.remove(); return false;"}
+	</aside>
+	{/if}
+
 	</nav>
 {/if}
+
+<form method="get" action="{$self_url}"{if !$filter.start && !$filter.end} class="hidden"{/if} id="filterForm">
+	<fieldset>
+		<legend>Filtrer par date</legend>
+		<p>
+			Du
+			{input type="date" name="start" source=$filter default=$year.start_date}
+			au
+			{input type="date" name="end" source=$filter default=$year.end_date}
+			<input type="hidden" name="id" value="{$account.id}" />
+			<input type="hidden" name="year" value="{$year.id}" />
+			<input type="hidden" name="simple" value="{$simple}" />
+			<input type="submit" value="Filtrer" />
+		</p>
+	</fieldset>
+</form>
 
 <form method="post" action="{$admin_url}acc/transactions/actions.php">
 
@@ -115,8 +144,20 @@
 				<td class="check"><input type="checkbox" value="Tout cocher / décocher" id="f_all2" /><label for="f_all2"></label></td>
 			{/if}
 			{if !$simple}<td></td>{/if}
-			<td colspan="3">Solde</td>
-			<td class="money">{$sum|raw|money:false}</td>
+			{if null !== $sum}
+				{if !$simple}
+				<td><b>Total</b></td>
+				<td class="money">{$sum.debit|raw|money:false}</td>
+				<td class="money">{$sum.credit|raw|money:false}</td>
+				<td class="money">{$line.sum|raw|money:false}</td>
+				{else}
+				<td></td>
+				<td colspan="2"><b>Total</b></td>
+				<td class="money">{$line.sum|raw|money:false}</td>
+				{/if}
+			{else}
+				<td colspan="4"></td>
+			{/if}
 			{if !$simple}<td></td>{/if}
 			<td class="actions" colspan="5">
 				{if $can_edit}

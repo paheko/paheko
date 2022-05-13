@@ -3,6 +3,7 @@ namespace Garradin;
 
 use Garradin\Accounting\Accounts;
 use Garradin\Accounting\Transactions;
+use Garradin\Accounting\AssistedReconciliation;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -19,18 +20,9 @@ if (!$account) {
 }
 
 $csrf_key = 'acc_reconcile_assist_' . $account->id();
-$csv = new CSV_Custom($session, 'acc_reconcile_csv');
 
-$csv->setColumns([
-	'label'          => 'Libellé',
-	'date'           => 'Date',
-	'notes'          => 'Remarques',
-	'reference'      => 'Numéro pièce comptable',
-	'p_reference'    => 'Référence paiement',
-	'amount'         => 'Montant',
-]);
-
-$csv->setMandatoryColumns(['label', 'date', 'amount']);
+$ar = new AssistedReconciliation;
+$csv = $ar->csv();
 
 $form->runIf('cancel', function () use ($csv) {
 	$csv->clear();
@@ -40,32 +32,15 @@ $form->runIf(f('upload') && isset($_FILES['file']['name']), function () use ($cs
 	$csv->load($_FILES['file']);
 }, $csrf_key, Utils::getSelfURI());
 
-$form->runIf('assign', function () use ($csv) {
-	$csv->setTranslationTable(f('translation_table'));
-	$csv->skip((int)f('skip_first_line'));
+$form->runIf('assign', function () use ($ar) {
+	$ar->setSettings(f('translation_table'), (int)f('skip_first_line'));
 }, $csrf_key, Utils::getSelfURI());
 
-$start = null;
-$end = null;
+extract($ar->getStartAndEndDates());
+
 $journal = null;
 
-if ($csv->ready()) {
-	foreach ($csv->iterate() as $line => $row) {
-		$date = \DateTime::createFromFormat('!d/m/Y', $row->date);
-		if (!$date) {
-			$form->addError(sprintf('Ligne %d : format de date invalide (%s)', $line, $row->date));
-			continue;
-		}
-
-		if ($date < $start) {
-			$start = $date;
-		}
-
-		if ($date > $end) {
-			$end = $date;
-		}
-	}
-
+if ($start && $end) {
 	if ($start < $current_year->start_date || $start > $current_year->end_date) {
 		$start = clone $current_year->start_date;
 	}
@@ -73,9 +48,7 @@ if ($csv->ready()) {
 	if ($end < $current_year->start_date || $end > $current_year->end_date) {
 		$end = clone $current_year->end_date;
 	}
-}
 
-if ($start && $end) {
 	$journal = $account->getReconcileJournal(CURRENT_YEAR_ID, $start, $end);
 }
 
@@ -89,7 +62,7 @@ $lines = null;
 
 if ($journal && $csv->ready()) {
 	try {
-		$lines = $account->mergeReconcileJournalAndCSV($journal, $csv);
+		$lines = $ar->mergeJournal($journal);
 	}
 	catch (UserException $e) {
 		$form->addError($e->getMessage());
@@ -101,6 +74,7 @@ $tpl->assign(compact(
 	'start',
 	'end',
 	'lines',
+	'ar',
 	'csv',
 	'csrf_key'
 ));

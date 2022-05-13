@@ -43,5 +43,6 @@ $form->runIf('upgrade', function () use ($i) {
 	exit;
 }, $csrf_key);
 
+$tpl->assign('website', WEBSITE);
 $tpl->assign(compact('releases', 'latest', 'csrf_key'));
 $tpl->display('admin/config/upgrade.tpl');

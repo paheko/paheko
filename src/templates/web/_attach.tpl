@@ -31,7 +31,7 @@
 				<input type="button" name="right" value="À droite" />
 			</dd>
 			<dd class="cancel">
-				<input type="reset" value="Annuler" />
+				<button type="reset">Annuler</button>
 			</dd>
 		</dl>
 	</fieldset>

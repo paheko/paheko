@@ -37,7 +37,7 @@
 				return false;
 			}
 
-			container.classList.add('uploading');
+			input.form.firstElementChild.classList.add('progressing');
 		};
 
 		const updateLabel = () => {
@@ -202,11 +202,10 @@
 						let name = f.name.replace(/\./, '-' + (+(new Date)) + '.');
 						let f2 = new File([f], name, {type: f.type});
 						addItem(f2);
+						e.preventDefault();
 						return;
 					}
 				}
-
-				e.preventDefault();
 			});
 		}
 	};

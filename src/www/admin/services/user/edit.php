@@ -14,16 +14,16 @@ if (!$su) {
 }
 
 $csrf_key = 'su_edit_' . $su->id();
-$user_id = $su->id_user;
-$user_name = (new Membres)->getNom($user_id);
+$users = [$su->id_user => (new Membres)->getNom($su->id_user)];
 $form_url = sprintf('edit.php?id=%d&', $su->id());
+$create = false;
 
 require __DIR__ . '/_form.php';
 
 $form->runIf('save', function () use ($su) {
 	$su->importForm();
 	$su->save();
-}, $csrf_key, ADMIN_URL . 'services/user/?id=' . $user_id);
+}, $csrf_key, ADMIN_URL . 'services/user/?id=' . $su->id_user);
 
 $service_user = $su;
 

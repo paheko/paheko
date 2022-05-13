@@ -1,11 +1,9 @@
 (function () {
-	let s = document.head.querySelector('script');
-
 	window.g = window.garradin = {
 		url: window.location.href.replace(/\/admin\/.*?$/, ''),
 		admin_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/'),
 		static_url: window.location.href.replace(/\/admin\/.*?$/, '/admin/static/'),
-		version: s ? s.src.match(/\?(.*)$/)[1] : null,
+		version: document.documentElement.getAttribute('data-version'),
 		loaded: {}
 	};
 
@@ -303,11 +301,13 @@
 		var btn = document.createElement('button');
 		var cal = null;
 		btn.className = 'icn-btn';
+		btn.title = 'Cliquer pour ouvrir le calendrier. Utiliser les flèches du clavier pour sélectionner une date, et page précédente suivante pour changer de mois.';
 		btn.setAttribute('data-icon', '📅');
 		btn.type = 'button';
 		btn.onclick = () => {
-			g.script('scripts/datepicker2.js', () => {
+			g.script('scripts/lib/datepicker2.min.js', () => {
 				if (null == cal) {
+					btn.onclick = null;
 					cal = new DatePicker(btn, input, {lang: 'fr', format: 1});
 					cal.open();
 				}
@@ -315,6 +315,23 @@
 		};
 		span.appendChild(btn);
 		input.parentNode.insertBefore(span, input.nextSibling);
+
+		const getCaretPosition = e => e && e.selectionStart || -1;
+
+		const inputKeyEvent = (e) => {
+			if (input.value.match(/^\d$|^\d\d?\/\d$/) && e.key.match(/^[0-9]$/)) {
+				input.value += e.key + '/';
+				e.preventDefault();
+				return false;
+			}
+
+			if (e.key == '/' && input.value.slice(-1) == '/') {
+				e.preventDefault();
+				return false;
+			}
+
+		};
+		input.addEventListener('keydown', inputKeyEvent, true);
 	};
 
 	g.current_list_input = null;

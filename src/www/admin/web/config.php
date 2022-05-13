@@ -31,7 +31,7 @@ $form->runIf('reset', function () {
 }, 'squelettes', Utils::getSelfURI('reset_ok'));
 
 if (qg('edit')) {
-	$source = trim(qg('edit'));
+	$source = qg('edit');
 	$csrf_key = 'edit_skel_' . md5($source);
 
 	$form->runIf('save', function () use ($source) {

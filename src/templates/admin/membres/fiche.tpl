@@ -13,9 +13,10 @@
 <dl class="cotisation">
     <dt>Activités et cotisations</dt>
     {foreach from=$services item="service"}
-    <dd>
+    <dd{if $service.archived} class="disabled"{/if}>
         {$service.label}
-        {if $service.status == -1 && $service.end_date} — terminée
+        {if $service.archived} <em>(activité passée)</em>{/if}
+        {if $service.status == -1 && $service.end_date} — expirée
         {elseif $service.status == -1} — <b class="error">en retard</b>
         {elseif $service.status == 1 && $service.end_date} — <b class="confirm">en cours</b>
         {elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
@@ -32,7 +33,7 @@
             {linkbutton href="!services/user/?id=%d"|args:$membre.id label="Liste des inscriptions aux activités" shape="menu"}
         {/if}
         {if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-            {linkbutton href="!services/user/add.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
+            {linkbutton href="!services/user/subscribe.php?user=%d"|args:$membre.id label="Inscrire à une activité" shape="plus"}
         {/if}
     </dd>
     {if count($services)}

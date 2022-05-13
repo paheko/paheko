@@ -125,18 +125,30 @@ namespace Garradin;
 //const PLUGINS_ROOT = DATA_ROOT . '/plugins';
 
 /**
- * Plugins fixes qui ne peuvent être désinstallés par l'utilisateur
- * (séparés par une virgule)
+ * Signaux système
  *
- * Ils seront aussi réinstallés en cas de restauration de sauvegarde,
- * s'ils ne sont pas dans la sauvegarde.
+ * Permet de déclencher des signaux sans passer par un plugin.
+ * Le fonctionnement des signaux système est strictment identique aux signaux des plugins.
+ * Les signaux système sont exécutés en premier, avant les signaux des plugins.
  *
- * Exemple : PLUGINS_SYSTEM = 'gestion_emails,factures'
+ * Format : pour chaque signal, un tableau comprenant une seule clé et une seule valeur.
+ * La clé est le nom du signal, et la valeur est la fonction.
  *
- * Défaut : aucun (chaîne vide)
+ * Défaut: [] (tableau vide)
  */
+//const SYSTEM_SIGNALS = [['files.delete' => 'MyNamespace\Signals::deleteFile'], ['entity.Accounting\Transaction.save.before' => 'MyNamespace\Signals::saveTransaction']];
 
-//const PLUGINS_SYSTEM = '';
+/**
+ * Éléments du menu (sous-menu accueil) système
+ *
+ * Permet de rajouter des éléments au menu, en dessous de l'item "Accueil"
+ *
+ * Format: tableau de chaînes HTML, chaque chaîne sera un élément du sous-menu (tag <li>),
+ * la clé étant l'identifiant "$current" permettant de sélectionner le sous-menu comme actif.
+ *
+ * Défaut: [] (tableau vide)
+ */
+//const SYSTEM_MENU_ITEMS = ['<a '];
 
 /**
  * Adresse URI de la racine du site Garradin
@@ -189,12 +201,20 @@ namespace Garradin;
 //const MAIL_ERRORS = false;
 
 /**
- * Envoi des erreurs à une API compatible AirBrake/Errbit
+ * Envoi des erreurs à une API compatible AirBrake/Errbit/Garradin
  *
  * Si renseigné avec une URL HTTP(S) valide, chaque erreur système sera envoyée
  * automatiquement à cette URL.
  *
  * Si laissé à null, aucun rapport ne sera envoyé.
+ *
+ * Garradin accepte aussi les rapports d'erreur venant d'autres instances.
+ *
+ * Pour cela utiliser l'URL https://login:password@garradin.site.tld/api/errors/report
+ * (voir aussi API_USER et API_PASSWORD)
+ *
+ * Les erreurs seront ensuite visibles dans
+ * Configuration -> Fonctions avancées -> Journal d'erreurs
  *
  * Défaut : null
  */
@@ -227,6 +247,26 @@ namespace Garradin;
 
 //const ENABLE_TECH_DETAILS = true;
 
+/**
+ * Activation du log SQL (option de développement)
+ *
+ * Si cette constante est renseignée par un chemin de fichier SQLite valide,
+ * alors *TOUTES* les requêtes SQL et leur contenu sera logué dans la base de données indiquée.
+ *
+ * Cette option permet ensuite de parcourir les requêtes via l'interface dans
+ * Configuration -> Fonctions avancées -> Journal SQL pour permettre d'identifier
+ * les requêtes qui mettent trop de temps, et comment elles pourraient
+ * être améliorées. Visualiser les requêtes SQL nécessite d'avoir également activé
+ * ENABLE_TECH_DETAILS.
+ *
+ * ATTENTION : cela signifie que des informations personnelles (mot de passe etc.)
+ * peuvent se retrouver dans le log. Ne pas utiliser à moins de tester en développement.
+ * Cette option peut significativement ralentir le chargement des pages.
+ *
+ * Défaut : null (= désactivé)
+ * @var string|null
+ */
+// const SQL_DEBUG = __DIR__ . '/debug_sql.sqlite';
 
 /**
  * Activer la possibilité de faire une mise à jour semi-automatisée
@@ -237,6 +277,11 @@ namespace Garradin;
  *
  * Il est conseillé de désactiver cette fonctionnalité si vous ne voulez pas
  * permettre à un utilisateur de casser l'installation !
+ *
+ * Si cette constante est désactivée, mais que ENABLE_TECH_DETAILS est activé,
+ * la vérification de nouvelle version se fera quand même, mais plutôt que de proposer
+ * la mise à jour, Garradin proposera de se rendre sur le site officiel pour
+ * télécharger la mise à jour.
  *
  * Défaut : true
  *
@@ -448,14 +493,16 @@ namespace Garradin;
  * Défaut : null (dans ce cas c'est le stockage qui détermine la taille disponible, donc généralement l'espace dispo sur le disque dur !)
  */
 
-//const FILE_STORAGE_QUOTA = 10000; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
+//const FILE_STORAGE_QUOTA = 10*1024*1024; // Forcer le quota alloué à 10 Mo, quel que soit le backend de stockage
 
 /**
+ * PDF_COMMAND
  * Commande de création de PDF
  *
  * Commande qui sera exécutée pour créer un fichier PDF à partir d'un HTML.
  * Si laissé non spécifié (ou NULL), Garradin essaiera de détecter une solution entre
- * PrinceXML, Chromium, wkhtmltopdf ou weasyprint.
+ * PrinceXML, Chromium, wkhtmltopdf ou weasyprint. Si aucune solution n'est disponible,
+ * une erreur sera levée.
  *
  * %1$s sera remplacé par le chemin du fichier HTML, et %2$s par le chemin du fichier PDF.
  *
@@ -463,7 +510,50 @@ namespace Garradin;
  *
  * Défaut : null
  */
-//const PDF_COMMAND = 'wkhtmltopdf %2$s %1$s';
+//const PDF_COMMAND = 'wkhtmltopdf -q --print-media-type --enable-local-file-access %s %s';
+
+/**
+ * CALC_CONVERT_COMMAND
+ * Outil de conversion de formats de tableur vers un format propriétaire
+ *
+ * Garradin gère nativement les exports en ODS (OpenDocument : LibreOffice)
+ * et CSV, et imports en CSV.
+ *
+ * En indiquant ici le nom d'un outil, Garradin autorisera aussi
+ * l'import en XLSX, XLS et ODS, et l'export en XLSX.
+ *
+ * Pour cela il procédera simplement à une conversion entre les formats natifs
+ * ODS/CSV et XLSX ou XLS.
+ *
+ * Noter qu'installer ces commandes peut introduire des risques de sécurité sur le serveur.
+ *
+ * Les outils supportés sont :
+ * - ssconvert (apt install gnumeric) (plus rapide)
+ * - unoconv (apt install unoconv) (utilise LibreOffice)
+ * - unoconvert (https://github.com/unoconv/unoserver/) en spécifiant l'interface
+ *
+ * Défault : null (= fonctionnalité désactivée)
+ */
+//const CALC_CONVERT_COMMAND = 'unoconv';
+//const CALC_CONVERT_COMMAND = 'ssconvert';
+//const CALC_CONVERT_COMMAND = 'unoconvert --interface localhost --port 2022';
+
+/**
+ * API_USER et API_PASSWORD
+ * Login et mot de passe de l'API
+ *
+ * Une API est disponible via l'URL https://login:password@garradin.association.tld/api/...
+ * Voir https://fossil.kd2.org/garradin/wiki?name=API pour la documentation
+ *
+ * Ces deux constantes permettent d'indiquer un nom d'utilisateur
+ * et un mot de passe pour accès à l'API.
+ *
+ * Mettre NULL pour l'un ou l'autre désactive l'API.
+ *
+ * Défaut: null
+ */
+//const API_USER = 'coraline';
+//const API_PASSWORD = 'thisIsASecretPassword42';
 
 /**
  * Clé de licence

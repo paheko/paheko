@@ -29,7 +29,7 @@ class Plugin
 		'svg' => 'image/svg+xml',
 	];
 
-	static public function getPath($id, $fail_with_exception = true)
+	static public function getPath($id)
 	{
 		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
 		{
@@ -38,11 +38,6 @@ class Plugin
 		elseif (is_dir(PLUGINS_ROOT . '/' . $id))
 		{
 			return PLUGINS_ROOT . '/' . $id;
-		}
-
-		if ($fail_with_exception)
-		{
-			throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
 		}
 
 		return false;
@@ -63,7 +58,7 @@ class Plugin
 			throw new UserException(sprintf('Le plugin "%s" n\'existe pas ou n\'est pas installé correctement.', $id));
 		}
 
-		$this->plugin->config = json_decode($this->plugin->config);
+		$this->plugin->config = json_decode($this->plugin->config ?? '');
 		
 		if (!is_object($this->plugin->config))
 		{
@@ -197,7 +192,7 @@ class Plugin
 
 		if (preg_match('!(?:\.\.|[/\\\\]\.|\.[/\\\\])!', $file))
 		{
-			throw new \RuntimeException('Chemin de fichier incorrect.');
+			throw new \UnexpectedValueException('Chemin de fichier incorrect.');
 		}
 
 		$forbidden = ['install.php', 'garradin_plugin.ini', 'upgrade.php', 'uninstall.php'];
@@ -362,11 +357,9 @@ class Plugin
 	{
 		$db = DB::getInstance();
 		$plugins = $db->getGrouped('SELECT id, * FROM plugins ORDER BY nom;');
-		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($plugins as &$row)
 		{
-			$row->system = in_array($row->id, $system);
 			$row->disabled = !self::getPath($row->id, false);
 		}
 
@@ -398,49 +391,11 @@ class Plugin
 	}
 
 	/**
-	 * Vérifie que les plugins système sont bien installés et sinon les réinstalle
-	 * @return void
-	 */
-	static public function checkAndInstallSystemPlugins()
-	{
-		if (!PLUGINS_SYSTEM)
-		{
-			return true;
-		}
-
-		$system = explode(',', PLUGINS_SYSTEM);
-
-		if (count($system) == 0)
-		{
-			return true;
-		}
-
-		$db = DB::getInstance();
-		$installed = $db->getAssoc('SELECT id, id FROM plugins WHERE ' . $db->where('id', 'IN', $system));
-
-		$missing = array_diff($system, (array) $installed);
-
-		if (count($missing) == 0)
-		{
-			return true;
-		}
-
-		foreach ($missing as $plugin)
-		{
-			self::install($plugin);
-		}
-
-		return true;
-	}
-
-	/**
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
 	static public function listMenu(Session $session)
 	{
-		self::checkAndInstallSystemPlugins();
-
 		$db = DB::getInstance();
 		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
 
@@ -762,7 +717,7 @@ class Plugin
 
 			if (is_null($config))
 			{
-				throw new \RuntimeException('config.json invalide. Code erreur JSON: ' . json_last_error());
+				throw new \RuntimeException('config.json invalide. Erreur JSON: ' . json_last_error_msg());
 			}
 
 			$config = json_encode($config);
@@ -816,10 +771,25 @@ class Plugin
 	 * @param  array  $params Paramètres du callback (array ou null)
 	 * @return NULL 		  NULL si aucun plugin n'a été appelé,
 	 * TRUE si un plugin a été appelé et a arrêté l'exécution,
-	 * FALSE si des plugins ont été appelés mais aucun n'a stopé l'exécution
+	 * FALSE si des plugins ont été appelés mais aucun n'a stoppé l'exécution
 	 */
 	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
+		// Process SYSTEM_SIGNALS first
+		foreach (SYSTEM_SIGNALS as $system_signal) {
+			if (key($system_signal) != $signal) {
+				continue;
+			}
+
+			if (!is_callable(current($system_signal))) {
+				throw new \LogicException(sprintf('System signal: cannot call "%s" for signal "%s"', current($system_signal), key($system_signal)));
+			}
+
+			if (true === call_user_func_array(current($system_signal), [&$params, &$callback_return])) {
+				return true;
+			}
+		}
+
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signaux WHERE signal = ?;', $signal);
 
 		if (!count($list)) {
@@ -830,14 +800,11 @@ class Plugin
 			$params = [];
 		}
 
-		$system = explode(',', PLUGINS_SYSTEM);
-
 		foreach ($list as $row)
 		{
-			$path = self::getPath($row->plugin, in_array($row->plugin, $system));
+			$path = self::getPath($row->plugin);
 
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
-			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
 			if (!$path)
 			{
 				continue;

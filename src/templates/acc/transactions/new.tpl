@@ -23,7 +23,7 @@
 					<div>
 						<h3>{$type.label}</h3>
 						{if !empty($type.help)}
-							<p>{$type.help}</p>
+							<p class="help">{$type.help}</p>
 						{/if}
 					</div>
 				</label>
@@ -37,7 +37,7 @@
 		<dl>
 			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc." source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}
@@ -54,7 +54,7 @@
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
 					<?php $selected = $types_accounts[$key] ?? null; ?>
-					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
+					{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
 				{/foreach}
 				</dl>
 			{/if}
@@ -64,11 +64,14 @@
 	<fieldset>
 		<legend>Détails facultatifs</legend>
 		<dl data-types="t{$transaction::TYPE_REVENUE} t{$transaction::TYPE_EXPENSE} t{$transaction::TYPE_TRANSFER}">
-			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
+			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->payment_reference()}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
+		</dl>
+		<dl data-types="t{$transaction::TYPE_ADVANCED}">
+			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}
@@ -84,10 +87,12 @@
 
 </form>
 
-<script type="text/javascript" defer="defer" async="async">
+<script type="text/javascript" async="async">
 let is_new = {if null !== $transaction->type}false{else}true{/if};
 {literal}
-g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
+window.addEventListener('load', () => {
+	g.script('scripts/accounting.js', () => { initTransactionForm(is_new && !$('.block').length); });
+});
 </script>
 {/literal}
 

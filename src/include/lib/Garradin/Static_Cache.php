@@ -103,7 +103,7 @@ class Static_Cache
 				continue;
 			}
 
-			if (filemtime($dir . '/' . $file) > $expire)
+			if (filemtime($dir . '/' . $file) < $expire)
 			{
 				Utils::safe_unlink($dir . '/' . $file);
 			}

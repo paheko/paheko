@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Web\Web;
+use Garradin\Web\Render\Render;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use KD2\SimpleDiff;
@@ -50,7 +51,7 @@ $form->runIf('save', function () use ($page, $editing_started, &$show_diff) {
 }, $csrf_key);
 
 $parent = $page->parent ? [$page->parent => Web::get($page->parent)->title] : ['' => 'Racine du site'];
-$encrypted = f('encrypted') || $page->format == Page::FORMAT_ENCRYPTED;
+$encrypted = f('encrypted') || $page->format == Render::FORMAT_ENCRYPTED;
 
 $old_content = f('content');
 $new_content = $page->content;

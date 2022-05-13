@@ -123,7 +123,7 @@ function initTransactionForm(is_new) {
 		g.toggle('[data-types=all-but-advanced]', v != 0);
 		// Disable required form elements, or the form won't be able to be submitted
 		$('[data-types=all-but-advanced] input[required]').forEach((e) => {
-			e.disabled = v == 'advanced' ? true : false;
+			e.disabled = v == 0 ? true : false;
 		});
 
 	}

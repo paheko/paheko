@@ -6,8 +6,10 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Line;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Year;
+use Garradin\Config;
 use Garradin\CSV;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -41,13 +43,18 @@ class Accounts
 		return $this->em->col('SELECT id FROM @TABLE WHERE code = ? AND id_chart = ?;', $code, $this->chart_id);
 	}
 
+	static public function getCodeFromId(string $id): string
+	{
+		return EntityManager::getInstance(Account::class)->col('SELECT code FROM @TABLE WHERE id = ?;', $id);
+	}
+
 	/**
 	 * Return common accounting accounts from current chart
 	 * (will not return analytical and volunteering accounts)
 	 */
 	public function listCommonTypes(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?) ORDER BY code COLLATE NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 AND type NOT IN (?) ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
@@ -56,7 +63,7 @@ class Accounts
 	 */
 	public function listAll(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id);
 	}
 
@@ -70,12 +77,15 @@ class Accounts
 	 */
 	public function export(): \Generator
 	{
-		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT code, label, description, position, type FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE NOCASE;'),
+		$res = $this->em->DB()->iterate($this->em->formatQuery('SELECT
+			code, label, description, position, type, user AS added
+			FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE U_NOCASE;'),
 			$this->chart_id);
 
 		foreach ($res as $row) {
 			$row->type = Account::TYPES_NAMES[$row->type];
 			$row->position = Account::POSITIONS_NAMES[$row->position];
+			$row->added = $row->added ? 'Ajouté' : '';
 			yield $row;
 		}
 	}
@@ -85,7 +95,7 @@ class Accounts
 	 */
 	public function listAnalytical(): array
 	{
-		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
+		return $this->em->DB()->getAssoc($this->em->formatQuery('SELECT id, label FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY label COLLATE U_NOCASE;'), $this->chart_id, Account::TYPE_ANALYTICAL);
 	}
 
 	/**
@@ -93,7 +103,7 @@ class Accounts
 	 */
 	public function listVolunteering(): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE NOCASE;',
+		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? ORDER BY code COLLATE U_NOCASE;',
 			$this->chart_id, Account::TYPE_VOLUNTEERING);
 	}
 
@@ -127,7 +137,7 @@ class Accounts
 			}
 		}
 
-		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE NOCASE;',
+		$query = $this->em->iterate('SELECT * FROM @TABLE WHERE id_chart = ? AND type != 0 ' . $types . ' ORDER BY type, code COLLATE U_NOCASE;',
 			$this->chart_id);
 
 		foreach ($query as $row) {
@@ -145,36 +155,51 @@ class Accounts
 		return $out;
 	}
 
-	public function getNextCodesForTypes(): array
+	public function getNextCodeForType(int $type): string
 	{
 		$db = DB::getInstance();
-		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE type > 0 AND user = 1 AND id_chart = ?;', Account::TABLE), $this->chart_id);
+		$used_codes = $db->getAssoc(sprintf('SELECT code, code FROM %s WHERE type = ? AND user = 1 AND id_chart = ?;', Account::TABLE), $this->chart_id, $type);
 		$used_codes = array_values($used_codes);
 
 		$sql = sprintf('SELECT type, MIN(code) AS code, (SELECT COUNT(*) FROM %s WHERE user = 1 AND type = a.type) AS count
 			FROM %1$s AS a
-			WHERE id_chart = ? AND type > 0
+			WHERE id_chart = ? AND type = ?
 			GROUP BY type;', Account::TABLE);
-		$codes = $db->getGrouped($sql, $this->chart_id);
+		$r = $db->first($sql, $this->chart_id, $type);
 
-		foreach ($codes as &$row) {
-			$code = preg_replace('/[^\d]/', '', $row->code);
-
-			$count = $row->count;
-			$found = null;
-
-			// Make sure we don't reuse an existing code
-			while (!$found || in_array($found, $used_codes)) {
-				// Get new account code, eg. 512A, 99AA, 99BZ etc.
-				$letter = Utils::num2alpha($count++);
-				$found = $code . $letter;
-			}
-
-			$row = $found;
+		if (!$r) {
+			return '';
 		}
 
-		unset($row);
-		return $codes;
+		$code = preg_replace('/[^\d]/', '', $r->code);
+
+		$count = $r->count;
+		$found = null;
+
+		// Make sure we don't reuse an existing code
+		while (!$found || in_array($found, $used_codes)) {
+			// Get new account code, eg. 512A, 99AA, 99BZ etc.
+			$letter = Utils::num2alpha($count++);
+			$found = $code . $letter;
+		}
+
+		return $found;
+	}
+
+	static public function getPositionFromType(int $type): int
+	{
+		switch ($type) {
+			case Account::TYPE_ANALYTICAL:
+				return Account::NONE;
+			case Account::TYPE_REVENUE;
+				return Account::REVENUE;
+			case Account::TYPE_EXPENSE;
+				return Account::EXPENSE;
+			case Account::TYPE_VOLUNTEERING:
+				return Account::NONE;
+			default:
+				return Account::ASSET_OR_LIABILITY;
+		}
 	}
 
 	public function copyFrom(int $id)
@@ -216,6 +241,8 @@ class Accounts
 
 					$row['position'] = $positions[$row['position']];
 					$row['type'] = $types[$row['type']];
+					$row['user'] = empty($row['added']) ? 0 : 1;
+
 					$account->importForm($row);
 					$account->save();
 				}
@@ -242,10 +269,63 @@ class Accounts
 		return DB::getInstance()->first('SELECT * FROM acc_accounts WHERE type = ? AND id_chart = ? LIMIT 1;', $type, $this->chart_id);
 	}
 
+	public function getOpeningAccountId(): ?int
+	{
+		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_OPENING, $this->chart_id) ?: null;
+	}
+
 	public function getClosingAccountId()
 	{
 		return DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE type = ? AND id_chart = ?;', Account::TYPE_CLOSING, $this->chart_id);
 	}
+
+	public function listUserAccounts(int $year_id): DynamicList
+	{
+		$id_field = Config::getInstance()->champ_identite;
+
+		$columns = [
+			'id' => [
+				'select' => 'u.id',
+			],
+			'user_number' => [
+				'select' => 'u.numero',
+				'label' => 'N° membre',
+			],
+			'user_identity' => [
+				'select' => 'u.' . $id_field,
+				'label' => 'Membre',
+			],
+			'balance' => [
+				'select' => 'SUM(l.debit - l.credit)',
+				'label'  => 'Solde',
+				//'order'  => 'balance != 0 %s, balance < 0 %1$s',
+			],
+			'status' => [
+				'select' => null,
+				'label' => 'Statut',
+			],
+		];
+
+		$tables = 'acc_transactions_users tu
+			INNER JOIN membres u ON u.id = tu.id_user
+			INNER JOIN acc_transactions t ON tu.id_transaction = t.id
+			INNER JOIN acc_transactions_lines l ON t.id = l.id_transaction
+			INNER JOIN acc_accounts a ON a.id = l.id_account';
+
+		$conditions = 'a.type = ' . Account::TYPE_THIRD_PARTY . ' AND t.id_year = ' . $year_id;
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('balance', false);
+		$list->groupBy('u.id');
+		$list->setCount('COUNT(*)');
+		$list->setPageSize(null);
+		$list->setExportCallback(function (&$row) {
+			$row->balance = Utils::money_format($row->balance, '.', '', false);
+		});
+
+		return $list;
+	}
+
 /* FIXME: implement closing of accounts
 
 	public function closeRevenueExpenseAccounts(Year $year, int $user_id)

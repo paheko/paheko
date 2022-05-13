@@ -9,11 +9,11 @@ html.dialog body {
 
 html.dialog {
     height: auto;
-    background: white;
+    background: rgb(var(--gBgColor));
 }
 
 html.dialog main {
-    background: #fff;
+    background: rgb(var(--gBgColor));
     padding: .5em;
     margin: 0;
 }
@@ -74,14 +74,14 @@ html.dialog main {
     background: unset;
     border: unset;
     box-shadow: unset;
-    color: #fff;
+    color: #999;
     font-size: 1.3em;
     display: block;
     width: 90%;
 }
 
 #dialog > button.closeBtn:hover {
-    color: #999 !important;
+    color: #fff !important;
 }
 
 .loader {
@@ -97,7 +97,6 @@ html.dialog main {
 
 .loader b {
     text-shadow: 2px 2px 5px #999;
-    background: rgb(255, 255, 255);
     background: rgba(255, 255, 255, 0.5);
     border-radius: .5em;
     font-size: 16px;

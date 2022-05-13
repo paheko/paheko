@@ -8,12 +8,14 @@ use Garradin\Plugin;
 use Garradin\UserTemplate\CommonModifiers;
 
 use KD2\SkrivLite;
+use KD2\Garbage2xhtml;
 
 use const Garradin\{ADMIN_URL, WWW_URL};
 
 class Skriv extends AbstractRender
 {
 	protected $skriv;
+	protected $g2x;
 
 	public function __construct(?File $file = null, ?string $user_prefix = null)
 	{
@@ -23,6 +25,7 @@ class Skriv extends AbstractRender
 		$this->skriv->registerExtension('file', [$this, 'SkrivFile']);
 		$this->skriv->registerExtension('fichier', [$this, 'SkrivFile']);
 		$this->skriv->registerExtension('image', [$this, 'SkrivImage']);
+		$this->skriv->registerExtension('html', [$this, 'SkrivHTML']);
 
 		// Enregistrer d'autres extensions éventuellement
 		Plugin::fireSignal('skriv.init', ['skriv' => $this->skriv]);
@@ -108,7 +111,7 @@ class Skriv extends AbstractRender
 		}
 
 		$url = $this->resolveAttachment($name);
-		$thumb_url = sprintf('%s?%dpx', $url, $align == 'center' ? 500 : 200);
+		$thumb_url = sprintf('%s?%s', $url, $align == 'center' ? '500px' : '200px');
 
 		$out = sprintf('<a href="%s" class="internal-image" target="_image"><img src="%s" alt="%s" loading="lazy" /></a>',
 			htmlspecialchars($url),
@@ -124,6 +127,24 @@ class Skriv extends AbstractRender
 
 			$out = sprintf('<figure class="image img-%s">%s%s</figure>', $align, $out, $caption);
 		}
+
+		return $out;
+	}
+
+	/**
+	 * Callback utilisé pour l'extension <<html>>: permet d'insérer du code HTML protégé contre le XSS
+	 * (enfin, au max de ce qui est possible…)
+	 */
+	public function SkrivHTML(array $args, ?string $content, SkrivLite $skriv): string
+	{
+		if (null == $this->g2x) {
+			$this->g2x = new Garbage2xhtml;
+			$this->g2x->secure = true;
+			$this->g2x->enclose_text = false;
+			$this->g2x->auto_br = false;
+		}
+
+		$out = $this->g2x->process($content);
 
 		return $out;
 	}

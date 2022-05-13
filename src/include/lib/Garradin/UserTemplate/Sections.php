@@ -94,7 +94,7 @@ class Sections
 		$params[':status'] = Page::STATUS_ONLINE;
 
 		if (array_key_exists('search', $params)) {
-			if (trim($params['search']) === '') {
+			if (trim((string) $params['search']) === '') {
 				return;
 			}
 
@@ -125,7 +125,7 @@ class Sections
 
 		if (array_key_exists('parent', $params)) {
 			$params['where'] .= ' AND w.parent = :parent';
-			$params[':parent'] = trim($params['parent']);
+			$params[':parent'] = trim((string) $params['parent']);
 
 			unset($params['parent']);
 		}
@@ -198,7 +198,7 @@ class Sections
 			// Store attachments in temp table
 			$db = DB::getInstance();
 			$db->begin();
-			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, path, name, modified, image);');
+			$db->exec('CREATE TEMP TABLE IF NOT EXISTS web_pages_attachments (page_id, uri, path, name, modified, image);');
 			$page_file_name = Utils::basename($page->file_path);
 
 			foreach ($page->listAttachments() as $file) {
@@ -206,8 +206,8 @@ class Sections
 					continue;
 				}
 
-				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?);',
-					$page->id(), $file->path, $file->name, $file->modified, $file->image);
+				$db->preparedQuery('INSERT OR REPLACE INTO web_pages_attachments VALUES (?, ?, ?, ?, ?, ?);',
+					$page->id(), $file->uri(), $file->path, $file->name, $file->modified, $file->image);
 			}
 
 			$db->commit();
@@ -234,16 +234,16 @@ class Sections
 				$db->begin();
 
 				// Put files mentioned in the text in a temporary table
-				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, name);');
+				$db->exec('CREATE TEMP TABLE IF NOT EXISTS files_tmp_in_text (page_id, uri);');
 
-				foreach (Page::findTaggedAttachments($page->content) as $name) {
-					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'name' => $name]);
+				foreach ($page->listTaggedAttachments() as $uri) {
+					$db->insert('files_tmp_in_text', ['page_id' => $page->id(), 'uri' => $uri]);
 				}
 
 				$db->commit();
 			});
 
-			$params['where'] .= sprintf(' AND name NOT IN (SELECT name FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
+			$params['where'] .= sprintf(' AND uri NOT IN (SELECT uri FROM files_tmp_in_text WHERE page_id = %d)', $page->id());
 		}
 
 		if (empty($params['order'])) {
@@ -251,7 +251,7 @@ class Sections
 		}
 
 		if ($params['order'] == 'name') {
-			$params['order'] .= ' COLLATE NOCASE';
+			$params['order'] .= ' COLLATE U_NOCASE';
 		}
 
 		foreach (self::sql($params, $tpl, $line) as $row) {

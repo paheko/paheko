@@ -1,6 +1,6 @@
 /* Forms */
 fieldset {
-    border: 1px solid #ccc;
+    border: 1px solid var(--gLightBorderColor);
     padding: 0.8em 1em 0 1em;
     margin-bottom: 1em;
     padding: 0.5em;
@@ -9,7 +9,7 @@ fieldset {
 fieldset legend {
     padding: 0 0.5em;
     font-weight: bold;
-    color: #000;
+    color: rgb(var(--gTextColor));
 }
 
 /* Override selector in 06-tables.css */
@@ -17,6 +17,10 @@ table tr.clickable:hover, table tr.clickable:nth-child(even):hover {
     cursor: pointer;
     color: #633;
     background: #ffc;
+}
+
+table tr.clickable:hover button, table tr.focused button {
+    color: rgb(var(--gHoverLinkColor));
 }
 
 table tr.focused {
@@ -30,21 +34,17 @@ dl dt label {
 }
 
 fieldset dl dt b {
-    color: #900;
+    color: rgb(var(--gHoverLinkColor));
     font-size: 0.7em;
     font-weight: normal;
     vertical-align: super;
 }
 
 fieldset dl dt i {
-    color: #999;
+    color: var(--gLightBorderColor);
     font-size: 0.7em;
     font-weight: normal;
     vertical-align: super;
-}
-
-fieldset dl dd.tip {
-    color: #666;
 }
 
 fieldset dl dd {
@@ -61,7 +61,6 @@ fieldset dl dl {
 
 label:hover {
     cursor: pointer;
-    border-bottom: 1px dotted #900;
 }
 
 input[type=checkbox] + label:hover {
@@ -81,14 +80,18 @@ textarea, select, .input-list, .file-selector {
     max-width: 100%;
     border: 1px solid rgb(var(--gMainColor));
     font-size: inherit;
-    background: #fff;
-    color: #000;
+    background: rgb(var(--gBgColor));
+    color: rgb(var(--gTextColor));
     border-radius: .25rem;
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
+textarea.full-width {
+    width: calc(100% - 1rem);
+}
+
 input:not(:placeholder-shown):focus:invalid {
-    border-color: #f33;
+    border-color: rgb(var(--gHoverLinkColor));
 }
 
 input.time {
@@ -108,7 +111,7 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
     height: 1em;
     text-align: center;
     transition: color .2s, box-shadow .2s ease-in-out;
-    text-shadow: 1px 1px 3px #ccc;
+    text-shadow: 1px 1px 3px var(--gLightBorderColor);
     cursor: pointer;
     font-family: gicon;
     font-size: 1.2rem;
@@ -140,7 +143,7 @@ input:hover + label::before {
 }
 
 input:checked + label::before {
-    text-shadow: 1px 1px 5px #ff9;
+    text-shadow: 1px 1px 5px rgba(var(--gSecondColor), 0.5);
 }
 
 #queryBuilder input[type=checkbox] {
@@ -148,20 +151,15 @@ input:checked + label::before {
     opacity: unset;
 }
 
-input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
-    box-shadow: 0 0 5px .2rem rgb(var(--gSecondColor));
-    outline: 0;
-}
-
 /* buttons */
 
 input[type=submit], input[type=button], button, input[type=file] {
     border-radius: 1em;
     border: none;
-    box-shadow: 0px 0px 5px 0 #ccc;
+    box-shadow: 0px 0px 5px 0 var(--gLightBorderColor);
     cursor: pointer;
     border: 2px solid rgba(var(--gMainColor), 0.5);
-    background-color: rgba(var(--gSecondColor), 0.1);
+    background: rgba(var(--gSecondColor), 0.2);
     display: inline-block;
     font-size: inherit;
     border-radius: .2em;
@@ -169,14 +167,19 @@ input[type=submit], input[type=button], button, input[type=file] {
     margin: .2em .5em;
     text-decoration: none;
     transition: color .3s, background-color .3s;
-    color: #000;
+    color: rgb(var(--gTextColor));
 }
 
-a.icn-btn {
+input:focus, button:focus, select:focus, textarea:focus, input[type=radio]:focus + label::before, input[type=checkbox]:focus + label::before {
+    box-shadow: 0 0 5px .2rem rgba(var(--gMainColor), 0.5);
+    outline: 0;
+}
+
+a.icn-btn, b.btn {
     cursor: pointer;
-    color: #003;
+    color: rgb(var(--gTextColor));
     border: 1px solid rgba(var(--gMainColor), 0.5);
-    background-color: rgba(var(--gSecondColor), 0.1);
+    background: rgba(var(--gSecondColor), 0.1);
     user-select: none;
     display: inline-block;
     font-size: inherit;
@@ -188,19 +191,71 @@ a.icn-btn {
     text-decoration: underline;
 }
 
-.submit .main {
-    color: #000;
+b.btn {
+    cursor: unset;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(var(--gMainColor), 0.5);
+}
+
+[data-icon]:before, .main[data-icon]:after {
+    display: inline-block;
+    font-family: "gicon", sans-serif;
+    text-shadow: 1px 1px 1px var(--gLightBorderColor);
+    padding-right: .5em;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    content: attr(data-icon);
+}
+
+[data-icon]:empty:before {
+    padding: 0;
+}
+
+.icn, .icnl {
+    font-family: "gicon", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    font-variant: normal;
+    text-transform: none;
+    position: relative;
+}
+
+.actions .icn, .icn.action {
+    text-decoration: none;
+    border-radius: 1em;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    line-height: .8em;
+    vertical-align: middle;
+    padding: .2em;
+    font-family: "gicon", sans-serif;
+    color: rgb(var(--gMainColor));
+    text-shadow: 1px 1px 1px var(--gBorderColor);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 200;
+}
+
+
+button.main, .icn-btn.main {
+    color: rgb(var(--gTextColor));
     font-size: 1.2em;
     border-radius: 1em;
     padding: .5em 1em;
 }
 
-.submit .main[data-icon]:before {
+button.main[data-icon]:before, .icn-btn.main:before {
     display: none;
 }
 
-p.submit .main[data-icon]:after {
-    padding: 0 0 0 .5rem;
+button.main[data-icon]:after, .icn-btn[data-icon]:after {
+    padding: 0;
+    padding-left: .5em;
+    padding-right: 0;
     color: rgba(var(--gSecondColor));
     font-size: 1.5rem;
     line-height: .2em;
@@ -213,7 +268,7 @@ p.submit .main[data-icon]:after {
 input[type=submit]:hover, input[type=button]:hover, button:hover, a.icn-btn:hover, input[type=file]:hover,
 .radio-btn:hover div, a.num:hover, .num a:hover {
     background-color: rgba(var(--gSecondColor), 0.2);
-    color: darkred !important;
+    color: rgb(var(--gHoverLinkColor)) !important;
     border-color: rgb(var(--gSecondColor));
 }
 
@@ -231,9 +286,9 @@ input.resetButton {
 
 input[readonly], input.disabled, input[disabled], textarea[disabled], select[disabled] {
     cursor: not-allowed;
-    color: #666;
-    background-color: #eee;
-    border-color: #999;
+    color: var(--gBorderColor);
+    background-color: var(--gLightBackgroundColor);
+    border-color: var(--gLightBorderColor);
 }
 
 input[disabled]:hover, input[readonly]:hover {
@@ -243,11 +298,11 @@ input[disabled]:hover, input[readonly]:hover {
 }
 
 input[disabled] + label {
-    color: #666;
+    color: var(--gBorderColor);
 }
 
 input[disabled] + label::before {
-    color: #999;
+    color: var(--gBorderColor);
     cursor: not-allowed;
 }
 
@@ -287,7 +342,7 @@ form .radio-btn div {
     border-radius: .2em;
     padding: .2em .4em;
     transition: color .3s, background-color .3s;
-    color: #333;
+    color: rgb(var(--gTextColor));
 }
 
 form .radio-btn h3 {
@@ -299,8 +354,8 @@ form .radio-btn input {
 }
 
 form .radio-btn .help {
-    margin: .8em 0 0 0;
-    font-size: .8em;
+    margin: 0;
+    font-size: .9em;
 }
 
 form .radio-btn input:checked + label div {
@@ -342,7 +397,7 @@ input.money {
 input.money + b {
     padding: .2rem .6rem;
     line-height: 1.5rem;
-    color: #999;
+    color: var(--gBorderColor);
 }
 
 p.submit {
@@ -358,6 +413,7 @@ form span.password_check {
     margin-left: 1em;
     padding: .1em .3em;
     border-radius: .5em;
+    color: #000;
 }
 
 form span.password_check.fail { background-color: #f99; }
@@ -368,6 +424,11 @@ form span.password_check.ok { background-color: #cfc; }
 dd.help input[type=text] {
     cursor: pointer;
     font-family: monospace;
+}
+
+dd.help.example {
+    margin-left: 2.5em;
+    font-size: .9em;
 }
 
 form p.actions {
@@ -381,6 +442,8 @@ form p.actions {
 
 dialog {
     display: none;
+    background: rgb(var(--gBgColor));
+    color: rgb(var(--gTextColor));
 }
 
 dialog[open] {
@@ -402,12 +465,28 @@ dialog.datepicker {
 .datepicker nav {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     text-align: center;
 }
 
-.datepicker h3 {
-    font-size: inherit;
-    margin: 0 .5rem;
+
+.datepicker nav input[type=button] {
+    font-family: gicon;
+    height: 2em;
+    width: 2em;
+}
+
+.datepicker span {
+    white-space: nowrap;
+}
+
+.datepicker span * {
+    font-size: 1rem;
+    font-family: inherit;
+    margin: .1rem;
+    padding: .1rem;
+    border: 1px solid var(--gLightBorderColor);
+    text-align: center;
 }
 
 .datepicker table {
@@ -417,84 +496,44 @@ dialog.datepicker {
 
 .datepicker thead td {
     font-size: 80%;
-    color: #999;
+    color: var(--gBorderColor);
+    text-align: center;
 }
 
 .datepicker tbody tr:nth-child(even) {
-    background-color: #eee;
+    background-color: var(--gLightBackgroundColor);
 }
 
-.datepicker tbody td:nth-child(6) {
-    color: #666;
+.datepicker tbody td:nth-child(6) input {
+    color: var(--gBorderColor);
 }
-.datepicker tbody td:nth-child(7) {
-    color: #999;
+.datepicker tbody td:nth-child(7) input {
+    color: var(--gLightBorderColor);
 }
 
 .datepicker tbody td {
-    padding: .2em .4em;
     text-align: center;
     width: 14.3%;
-}
-
-.datepicker tbody td:not(:empty):hover {
-    cursor: pointer;
-    background: #fcc;
-    text-decoration: underline;
-}
-
-.datepicker tbody td.focus {
-    background: #339;
-    color: #fff;
-    border-radius: .5em;
-}
-
-.datepicker input {
-    font-family: gicon;
-}
-
-[data-icon]:before, summary::after, .main[data-icon]:after {
-    display: inline-block;
-    font-family: "gicon", sans-serif;
-    text-shadow: 1px 1px 1px #ccc;
-    padding-right: .5em;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    content: attr(data-icon);
-}
-
-[data-icon]:empty:before {
     padding: 0;
 }
 
-.icn, .icnl {
-    font-family: "gicon", sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    speak: none;
-    font-variant: normal;
-    text-transform: none;
-    position: relative;
+.datepicker tbody td input {
+    padding: .4rem .7rem;
+    border: none;
+    background: none;
+    box-shadow: none;
+    border-radius: .2rem;
+    margin: 0;
 }
 
-.actions .icn, .icn.action {
-    text-decoration: none;
-    border-radius: 1em;
-    display: inline-block;
-    text-align: center;
-    font-size: 1.2em;
-    line-height: .8em;
-    vertical-align: middle;
-    padding: .2em;
-    font-family: "gicon", sans-serif;
-    color: #9c4f15;
-    color: rgb(var(--gMainColor));
-    text-shadow: 1px 1px 1px #999;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 200;
+.datepicker tbody td.focus input {
+    background: #339;
+    color: #fff;
+}
+
+.datepicker tbody input:hover {
+    background: #ccf;
+    color: darkred;
 }
 
 fieldset.memberMessage {
@@ -604,11 +643,19 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     text-align: right;
 }
 
-.file-selector.uploading {
-    opacity: 0.3;
+/**
+ * Progress spinner
+ */
+.progressing {
+    position: relative;
 }
 
-.file-selector.uploading::after {
+fieldset.progressing > dl, fieldset.progressing > p {
+    opacity: 0.5;
+    filter: blur(3px);
+}
+
+.progressing::after {
     display: inline-block;
     content: " ";
     position: absolute;
@@ -619,10 +666,31 @@ fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.mem
     margin: auto;
     width: 50px;
     height: 50px;
-    border: 5px solid #000;
+    border: 5px solid #666;
     border-radius: 50%;
-    border-top-color: #999;
+    border-top-color: #ccc;
     animation: spin 1s ease-in-out infinite;
+    filter: none;
+}
+
+.progress-status {
+    display: none;
+}
+
+.progressing .progress-status {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    padding-top: 80px;
+    text-align: center;
+    width: 100%;
+    height: 1em;
+    filter: none !important;
+    color: #000;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }

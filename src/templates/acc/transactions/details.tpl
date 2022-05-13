@@ -36,22 +36,38 @@
 {/if}
 
 <dl class="describe">
-	{if $transaction.id_related}
-	<dt>Écriture liée à</dt>
-	<dd><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id_related}">#{$transaction.id_related}</a>
-		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
-	</dd>
-	{/if}
+	<dt>Libellé</dt>
+	<dd><h2>{$transaction.label|escape|linkify_transactions}</h2></dd>
 	<dt>Type</dt>
 	<dd>
 		{$transaction->getTypeName()}
 	</dd>
-	<dt>Libellé</dt>
-	<dd><h2>{$transaction.label}</h2></dd>
+	{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}
+	<dt>Statut</dt>
+	<dd>
+		{if $transaction.status & $transaction::STATUS_PAID}
+			<span class="confirm">{icon shape="check"}</span> Réglée
+		{elseif $transaction.status & $transaction::STATUS_WAITING}
+			<span class="alert">{icon shape="alert"}</span> En attente de règlement
+		{/if}
+	</dd>
+	{/if}
+	{if $transaction.id_related}
+	<dt>Écriture liée à</dt>
+	<dd><a class="num" href="?id={$transaction.id_related}">#{$transaction.id_related}</a>
+		{if $transaction.type == $transaction::TYPE_DEBT || $transaction.type == $transaction::TYPE_CREDIT}(en règlement de){/if}
+	</dd>
+	{/if}
+	{if count($related_transactions)}
+	<dt>Écritures liées</dt>
+	{foreach from=$related_transactions item="related"}
+		<dd><a href="?id={$related.id}" class="num">#{$related.id}</a> — {$related.label} — {$related.date|date_short}</dd>
+	{/foreach}
+	{/if}
 	<dt>Date</dt>
 	<dd>{$transaction.date|date:'l j F Y (d/m/Y)'}</dd>
 	<dt>Numéro pièce comptable</dt>
-	<dd>{if trim($transaction.reference)}{$transaction.reference}{else}-{/if}</dd>
+	<dd>{if $transaction.reference}{$transaction.reference}{else}-{/if}</dd>
 
 	<dt>Exercice</dt>
 	<dd>
@@ -86,7 +102,7 @@
 	{/if}
 
 	<dt>Remarques</dt>
-	<dd>{if trim($transaction.notes)}{$transaction.notes|escape|nl2br}{else}-{/if}</dd>
+	<dd>{if $transaction.notes}{$transaction.notes|escape|nl2br|linkify_transactions}{else}-{/if}</dd>
 </dl>
 
 <table class="list">
@@ -96,8 +112,8 @@
 			<th>Compte</th>
 			<td class="money">Débit</td>
 			<td class="money">Crédit</td>
-			<td>Libellé</td>
-			<td>Référence</td>
+			<td>Libellé ligne</td>
+			<td>Référence ligne</td>
 			<td>Projet</td>
 		</tr>
 	</thead>

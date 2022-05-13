@@ -17,10 +17,14 @@
 			<legend>Relevé de compte</legend>
 			<p class="help block">
 				Le rapprochement assisté permet de s'aider d'un relevé de compte au format CSV pour trouver les écritures manquantes ou erronées.<br />
-				<a href="https://garradin.eu/Rapprochement_assiste" target="_blank">Aide détaillée</a>
+				<a href="https://garradin.eu/rapprochement_assiste" target="_blank">Aide détaillée</a>
 			</p>
 			<dl>
 				{include file="common/_csv_help.tpl"}
+				<dd class="help">
+					Le fichier doit également disposer soit d'une colonne <strong>Montant</strong>, soit de deux colonnes <strong>Débit</strong>
+					et <strong>Crédit</strong>.
+				</dd>
 				{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
 			</dl>
 			<p class="submit">
@@ -118,11 +122,9 @@
 						<th style="text-align: right">{$line.journal.label}</th>
 					{else}
 						<td colspan="5"></td>
-						<td style="text-align: right">
+						<td class="actions">
 							{if $line.add}
-							{* FIXME later add ability to pre-fill multi-line transactions in new.php
-								{linkbutton label="Créer cette écriture" target="_blank" href="%s&create=%s"|args:$self_url,$line_id shape="plus"}
-							*}
+								{linkbutton label="Saisir cette écriture" target="_dialog" href="!acc/transactions/new.php?%s"|args:$line.csv.new_params shape="plus"}
 							{/if}
 						</td>
 					{/if}
@@ -138,7 +140,7 @@
 						<td class="money">
 							{$line.csv.amount|raw|money}
 						</td>
-						<td class="money">{$line.csv.running_sum|raw|money}</td>
+						<td class="money">{if $line.csv.balance}{$line.csv.balance|raw|money}{else}{$line.csv.running_sum|raw|money}{/if}</td>
 						<td>{$line.csv.date|date_short}</td>
 					{else}
 						<td colspan="4" class="separator"></td>

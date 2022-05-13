@@ -14,6 +14,4 @@
 
 <script type="text/javascript" src="{$admin_url}static/scripts/code_editor.js?{$version_hash}"></script>
 
-<script type="text/javascript">
-
 {include file="admin/_foot.tpl"}

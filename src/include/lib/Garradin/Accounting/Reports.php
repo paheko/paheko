@@ -11,52 +11,64 @@ use KD2\DB\EntityManager;
 
 class Reports
 {
-	static public function getWhereClause(array $criterias): string
+	static public function getWhereClause(array $criterias, string $transactions_alias = '', string $lines_alias = '', string $accounts_alias = ''): string
 	{
 		$where = [];
 
+		$transactions_alias = $transactions_alias ? $transactions_alias . '.' : '';
+		$lines_alias = $lines_alias ? $lines_alias . '.' : '';
+		$accounts_alias = $accounts_alias ? $accounts_alias . '.' : '';
+
 		if (!empty($criterias['year'])) {
-			$where[] = sprintf('t.id_year = %d', $criterias['year']);
+			$where[] = sprintf($transactions_alias . 'id_year = %d', $criterias['year']);
 		}
 
 		if (!empty($criterias['position'])) {
-			$db = DB::getInstance();
-			$where[] = $db->where('position', $criterias['position']);
+			$criterias['position'] = array_map('intval', (array)$criterias['position']);
+			$where[] = sprintf($accounts_alias . 'position IN (%s)', implode(',', $criterias['position']));
 		}
 
 		if (!empty($criterias['exclude_position'])) {
-			$db = DB::getInstance();
-			$where[] = $db->where('position', 'NOT IN', $criterias['exclude_position']);
+			$criterias['exclude_position'] = array_map('intval', (array)$criterias['exclude_position']);
+			$where[] = sprintf($accounts_alias . 'position NOT IN (%s)', implode(',', $criterias['exclude_position']));
 		}
 
 		if (!empty($criterias['type'])) {
 			$criterias['type'] = array_map('intval', (array)$criterias['type']);
-			$where[] = sprintf('a.type IN (%s)', implode(',', $criterias['type']));
+			$where[] = sprintf($accounts_alias . 'type IN (%s)', implode(',', $criterias['type']));
 		}
 
 		if (!empty($criterias['exclude_type'])) {
 			$criterias['exclude_type'] = array_map('intval', (array)$criterias['exclude_type']);
-			$where[] = sprintf('a.type NOT IN (%s)', implode(',', $criterias['exclude_type']));
+			$where[] = sprintf($accounts_alias . 'type NOT IN (%s)', implode(',', $criterias['exclude_type']));
 		}
 
 		if (!empty($criterias['user'])) {
-			$where[] = sprintf('t.id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = %d)', $criterias['user']);
+			$where[] = sprintf($transactions_alias . 'id IN (SELECT id_transaction FROM acc_transactions_users WHERE id_user = %d)', $criterias['user']);
 		}
 
 		if (!empty($criterias['creator'])) {
-			$where[] = sprintf('t.id_creator = %d', $criterias['creator']);
+			$where[] = sprintf($transactions_alias . 'id_creator = %d', $criterias['creator']);
 		}
 
-		if (!empty($criterias['service_user'])) {
-			$where[] = sprintf('t.id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['service_user']);
+		if (!empty($criterias['subscription'])) {
+			$where[] = sprintf($transactions_alias . 'id IN (SELECT tu.id_transaction FROM acc_transactions_users tu WHERE id_service_user = %d)', $criterias['subscription']);
 		}
 
 		if (!empty($criterias['analytical'])) {
-			$where[] = sprintf('l.id_analytical = %d', $criterias['analytical']);
+			$where[] = sprintf($lines_alias . 'id_analytical = %d', $criterias['analytical']);
+		}
+
+		if (!empty($criterias['account'])) {
+			$where[] = sprintf($accounts_alias . 'id = %d', $criterias['account']);
 		}
 
 		if (!empty($criterias['analytical_only'])) {
-			$where[] = 'l.id_analytical IS NOT NULL';
+			$where[] = $lines_alias . 'id_analytical IS NOT NULL';
+		}
+
+		if (!empty($criterias['has_type'])) {
+			$where[] = $accounts_alias . 'type != 0';
 		}
 
 		if (!count($where)) {
@@ -70,9 +82,10 @@ class Reports
 	 * Return account sums per year or per account
 	 * @param  bool $by_year If true will return accounts grouped by year, if false it will return years grouped by account
 	 */
-	static public function getAnalyticalSums(bool $by_year = false): \Generator
+	static public function getAnalyticalSums(bool $by_year = false, bool $order_code = false): \Generator
 	{
 		$sql = 'SELECT a.label AS account_label, a.description AS account_description, a.id AS id_account,
+			a.code AS account_code,
 			y.id AS id_year, y.label AS year_label, y.start_date, y.end_date,
 			SUM(l.credit - l.debit) AS sum, SUM(l.credit) AS credit, SUM(l.debit) AS debit, 0 AS total,
 			(SELECT SUM(l2.credit - l2.debit) FROM acc_transactions_lines l2
@@ -90,13 +103,15 @@ class Reports
 			GROUP BY %s
 			ORDER BY %s;';
 
+		$order = $order_code ? 'a.code COLLATE U_NOCASE' : 'a.label COLLATE U_NOCASE';
+
 		if ($by_year) {
-			$group = 'y.id, a.id';
-			$order = 'y.start_date DESC, a.code COLLATE NOCASE';
+			$group = 'y.id, a.code';
+			$order = 'y.start_date DESC, ' . $order;
 		}
 		else {
-			$group = 'a.id, y.id';
-			$order = 'a.code COLLATE NOCASE, y.id';
+			$group = 'a.code, y.id';
+			$order = $order . ', y.id';
 		}
 
 		$sql = sprintf($sql, Account::EXPENSE, Account::REVENUE, $group, $order);
@@ -122,9 +137,9 @@ class Reports
 		};
 
 		foreach (DB::getInstance()->iterate($sql) as $row) {
-			$id = $by_year ? $row->id_year : $row->id_account;
+			$id = $by_year ? $row->id_year : $row->account_code;
 
-			if (null !== $current && $current->id !== $id) {
+			if (null !== $current && $current->selector !== $id) {
 				$current->items[] = $total($current, $by_year);
 
 				yield $current;
@@ -133,8 +148,9 @@ class Reports
 
 			if (null === $current) {
 				$current = (object) [
+					'selector' => $id,
 					'id' => $by_year ? $row->id_year : $row->id_account,
-					'label' => $by_year ? $row->year_label : $row->account_label,
+					'label' => $by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label,
 					'description' => !$by_year ? $row->account_description : null,
 					'items' => []
 				];
@@ -144,7 +160,7 @@ class Reports
 				}
 			}
 
-			$row->label = !$by_year ? $row->year_label : $row->account_label;
+			$row->label = !$by_year ? $row->year_label : ($order_code ? $row->account_code . ' - ' : '') . $row->account_label;
 			$current->items[] = $row;
 
 			foreach ($sums as $s) {
@@ -165,20 +181,18 @@ class Reports
 	{
 		$where = self::getWhereClause($criterias);
 
-		$sql = sprintf('SELECT y.id, y.start_date, y.end_date, y.label, SUM(l.credit) - SUM(l.debit) AS sum
-			FROM acc_transactions t
-			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
-			INNER JOIN acc_accounts a ON a.id = l.id_account
-			INNER JOIN acc_years y ON y.id = t.id_year
+		$sql = sprintf('SELECT y.id, y.start_date, y.end_date, y.label, SUM(b.balance) AS balance
+			FROM acc_accounts_balances b
+			INNER JOIN acc_years y ON y.id = b.id_year
 			WHERE %s
-			GROUP BY t.id_year ORDER BY y.end_date;', $where, $where);
+			GROUP BY b.id_year ORDER BY y.end_date;', $where);
 
 		return DB::getInstance()->getGrouped($sql);
 	}
 
 	static public function getSumsByInterval(array $criterias, int $interval)
 	{
-		$where = self::getWhereClause($criterias);
+		$where = self::getWhereClause($criterias, 't', 'l', 'a');
 		$where_interval = !empty($criterias['year']) ? sprintf(' WHERE id_year = %d', $criterias['year']) : '';
 
 		$db = DB::getInstance();
@@ -230,105 +244,258 @@ class Reports
 
 	static public function getResult(array $criterias): int
 	{
-		$where = self::getWhereClause($criterias);
-		$sql = sprintf('SELECT SUM(l.credit) - SUM(l.debit)
-			FROM %s l
-			INNER JOIN %s t ON t.id = l.id_transaction
-			INNER JOIN %s a ON a.id = l.id_account
-			WHERE %s AND a.position = ?;',
-			Line::TABLE, Transaction::TABLE, Account::TABLE, $where);
+		if (!empty($criterias['analytical']) || !empty($criterias['analytical_only'])) {
+			$where = self::getWhereClause($criterias, 't', 'l', 'a');
+			$sql = self::getBalancesSQL(['inner_select' => 'l.id_analytical', 'inner_where' => $where]);
+			$sql = sprintf('SELECT position, SUM(balance) FROM (%s) GROUP BY position;', $sql);
+		}
+		else {
+			$where = self::getWhereClause($criterias);
+			$sql = sprintf('SELECT position, SUM(balance) FROM acc_accounts_balances WHERE %s GROUP BY position;', $where);
+		}
+
+		$balances = DB::getInstance()->getAssoc($sql);
+
+		return ($balances[Account::REVENUE] ?? 0) - ($balances[Account::EXPENSE] ?? 0);
+	}
+
+	static public function getBalancesSQL(array $parts = [])
+	{
+		return sprintf('SELECT %s id_year, id, label, code, type, debit, credit, position, balance, is_debt
+			FROM (
+				SELECT %s t.id_year, a.id, a.label, a.code, a.type,
+					SUM(l.credit) AS credit,
+					SUM(l.debit) AS debit,
+					CASE -- 3 = dynamic asset or liability depending on balance
+						WHEN position = 3 AND SUM(l.debit - l.credit) > 0 THEN 1 -- 1 = Asset (actif) comptes fournisseurs, tiers créditeurs
+						WHEN position = 3 THEN 2 -- 2 = Liability (passif), comptes clients, tiers débiteurs
+						ELSE position
+					END AS position,
+					CASE
+						WHEN position IN (1, 4) -- 1 = asset, 4 = expense
+							OR (position = 3 AND SUM(l.debit - l.credit) > 0)
+						THEN
+							SUM(l.debit - l.credit)
+						ELSE
+							SUM(l.credit - l.debit)
+					END AS balance,
+					CASE WHEN SUM(l.debit - l.credit) > 0 THEN 1 ELSE 0 END AS is_debt
+
+				FROM acc_transactions_lines l
+				INNER JOIN acc_transactions t ON t.id = l.id_transaction
+				INNER JOIN acc_accounts a ON a.id = l.id_account
+				%s
+				%s
+				GROUP BY %s
+			)
+			%s
+			%s
+			ORDER BY %s',
+			isset($parts['select']) ? $parts['select'] . ',' : '',
+			isset($parts['inner_select']) ? $parts['inner_select'] . ',' : '',
+			$parts['inner_join'] ?? '',
+			isset($parts['inner_where']) ? 'WHERE ' . $parts['inner_where'] : '',
+			$parts['inner_group'] ?? 'a.id, t.id_year',
+			isset($parts['where']) ? 'WHERE ' . $parts['where'] : '',
+			isset($parts['group']) ? 'GROUP BY ' . $parts['group'] : '',
+			$order ?? 'code'
+		);
+	}
+
+	/**
+	 * Returns accounts balances according to $criterias
+	 * @param  array       $criterias   List of criterias, see self::getWhereClause
+	 * @param  string|null $order       Order of rows (SQL clause), if NULL will order by CODE
+	 * @param  bool        $remove_zero Remove accounts where the balance is zero from the list
+	 */
+	static public function getAccountsBalances(array $criterias, ?string $order = null, bool $remove_zero = true)
+	{
+		$group = 'code';
+		$having = '';
+		$order = $order ?: 'code COLLATE NOCASE';
+
+		if ($remove_zero) {
+			$having = 'HAVING balance != 0';
+		}
+
+		$table = null;
+
+		if (empty($criterias['analytical']) && empty($criterias['user']) && empty($criterias['creator']) && empty($criterias['subscription'])) {
+			$table = 'acc_accounts_balances';
+		}
+
+		// Specific queries that can't rely on acc_accounts_balances
+		if (!$table)
+		{
+			$where = null;
+
+			// The position
+			if (!empty($criterias['position'])) {
+				$criterias['position'] = (array)$criterias['position'];
+
+				if (in_array(Account::LIABILITY, $criterias['position'])
+					|| in_array(Account::ASSET, $criterias['position'])) {
+					$where = self::getWhereClause(['position' => $criterias['position']]);
+					$criterias['position'][] = Account::ASSET_OR_LIABILITY;
+				}
+			}
+
+			$inner_where = self::getWhereClause($criterias, 't', 'l', 'a');
+			$remove_zero = $remove_zero ? ', ' . $remove_zero : '';
+			$inner_group = empty($criterias['year']) ? 'a.id' : null;
+
+			$sql = self::getBalancesSQL(['group' => 'code ' . $having] + compact('order', 'inner_where', 'where', 'inner_group'));
+		}
+		else {
+			$where = self::getWhereClause($criterias);
+
+			$query = 'SELECT *, SUM(credit) AS credit, SUM(debit) AS debit, SUM(balance) AS balance FROM %s
+				WHERE %s
+				GROUP BY %s %s
+				ORDER BY %s';
+
+			$sql = sprintf($query, $table, $where, $group, $having, $order);
+		}
+
 
 		$db = DB::getInstance();
-		$a = $db->firstColumn($sql, Account::REVENUE);
-		$b = $db->firstColumn($sql, Account::EXPENSE);
 
-		return (int)$a - (int)$b * -1;
+		// SQLite does not support OUTER JOIN yet :(
+		if (isset($criterias['compare_year'])) {
+			$sql2 = 'SELECT a.id, a.code AS code, a.label, a.position, a.type, a.debit, a.credit, a.balance, IFNULL(b.balance, 0) AS balance2, IFNULL(a.balance - b.balance, a.balance) AS change
+				FROM (%s) AS a
+				LEFT JOIN %s b ON b.code = a.code AND a.position = b.position AND b.id_year = %4$d
+				UNION ALL
+				-- Select balances of second year accounts that are =zero in first year
+				SELECT
+					NULL AS id, c.code AS code, c.label, c.position, c.type, c.debit, c.credit, 0 AS balance, c.balance AS balance2, c.balance * -1 AS change
+				FROM %2$s c
+				LEFT JOIN %2$s d ON d.code = c.code AND d.id_year = %3$d AND d.balance != 0 AND d.position = c.position
+				WHERE d.id IS NULL AND c.id_year = %4$d AND c.position = %5$d AND c.balance != 0
+				ORDER BY code COLLATE NOCASE;';
+
+			$sql = sprintf($sql2, $sql, $table, $criterias['year'], $criterias['compare_year'], $criterias['position']);
+		}
+
+		$out = $db->get($sql);
+
+		return $out;
 	}
 
-	static public function getClosingSumsWithAccounts(array $criterias, ?string $order = null, bool $reverse = false, bool $remove_zero = true): array
+	static public function getTrialBalance(array $criterias, bool $simple = false): \Iterator
 	{
-		$where = self::getWhereClause($criterias);
+		unset($criterias['compare_year']);
+		$out = self::getAccountsBalances($criterias, null, false);
 
-		$order = $order ?: 'a.code COLLATE NOCASE';
-		$reverse = $reverse ? '* -1' : '';
-		$remove_zero = $remove_zero ? 'HAVING sum != 0' : '';
-
-		// Find sums, link them to accounts
-		$sql = sprintf('SELECT a.id, a.code, a.label, a.position, SUM(l.credit) AS credit, SUM(l.debit) AS debit,
-			SUM(l.credit - l.debit) %s AS sum
-			FROM %s l
-			INNER JOIN %s t ON t.id = l.id_transaction
-			INNER JOIN %s a ON a.id = l.id_account
-			WHERE %s
-			GROUP BY l.id_account
-			%s
-			ORDER BY %s;',
-			$reverse, Line::TABLE, Transaction::TABLE, Account::TABLE, $where, $remove_zero, $order);
-		return DB::getInstance()->getGrouped($sql);
-	}
-
-	static public function getTrialBalance(array $criterias): array
-	{
-		return self::getClosingSumsWithAccounts($criterias, null, false, false);
-	}
-
-	static public function getBalanceSheet(array $criterias): array
-	{
-		$out = [
-			Account::ASSET => [],
-			Account::LIABILITY => [],
-			'sums' => [
-				Account::ASSET => 0,
-				Account::LIABILITY => 0,
-			],
+		$sums = [
+			'debit'      => 0,
+			'credit'     => 0,
+			'balance'    => null,
+			'label'      => 'Total',
 		];
 
-		$position_criteria = ['position' => [Account::ASSET, Account::LIABILITY, Account::ASSET_OR_LIABILITY]];
-		$list = self::getClosingSumsWithAccounts($criterias + $position_criteria);
-
-		foreach ($list as $row) {
-			if ($row->sum == 0) {
-				// Ignore empty accounts
-				continue;
+		foreach ($out as $row) {
+			if (!$simple) {
+				$row->balance = $row->debit - $row->credit;
 			}
 
-			$position = $row->position;
-
-			if ($position == Account::ASSET_OR_LIABILITY) {
-				$position = $row->sum < 0 ? Account::ASSET : Account::LIABILITY;
-				$row->sum = abs($row->sum);
-			}
-			elseif ($position == Account::ASSET) {
-				// reverse number for assets
-				$row->sum *= -1;
-			}
-
-			$out[$position][] = $row;
+			$sums['debit'] += $row->debit;
+			$sums['credit'] += $row->credit;
+			yield $row;
 		}
 
-		$result = self::getResult($criterias);
+		yield (object) $sums;
+	}
 
-		if ($result != 0) {
-			$out[Account::LIABILITY][] = (object) [
-				'id' => null,
-				'label' => $result > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)',
-				'sum' => $result,
-			];
+	/**
+	 * Return a table line with the year result
+	 */
+	static public function getResultLine(array $criterias): \stdClass
+	{
+		$balance = self::getResult($criterias);
+		$balance2 = null;
+		$change = null;
+		$label = $balance > 0 ? 'Résultat de l\'exercice courant (excédent)' : 'Résultat de l\'exercice courant (perte)';
+
+		if (!empty($criterias['compare_year'])) {
+			$balance2 = self::getResult(array_merge($criterias, ['year' => $criterias['compare_year']]));
+			$change = $balance - $balance2;
 		}
+
+		if (!empty($criterias['compare_year']) || $balance == 0) {
+			$label = 'Résultat de l\'exercice';
+		}
+
+		return (object) compact('balance', 'balance2', 'label', 'change');
+	}
+
+	/**
+	 * Return a table line with totals
+	 */
+	static public function getTotalLine(array $rows, string $label = 'Total'): \stdClass
+	{
+		$balance = 0;
+		$balance2 = 0;
+		$change = 0;
+
+		foreach ($rows as $row) {
+			$balance += $row->balance;
+			$balance2 += $row->balance2 ?? 0;
+			$change += $row->change ?? 0;
+		}
+
+		return (object) compact('label', 'balance', 'balance2', 'change');
+	}
+
+	/**
+	 * Statement / Compte de résultat
+	 */
+	static public function getStatement(array $criterias): \stdClass
+	{
+		$out = new \stdClass;
+
+		$out->caption_left = 'Charges';
+		$out->caption_right = 'Produits';
+
+		$out->body_left = self::getAccountsBalances($criterias + ['position' => Account::EXPENSE]);
+		$out->body_right = self::getAccountsBalances($criterias + ['position' => Account::REVENUE]);
+
+		$out->foot_left = [self::getTotalLine($out->body_left, 'Total charges')];
+		$out->foot_right = [self::getTotalLine($out->body_right, 'Total produits')];
+
+		$r = self::getResultLine($criterias);
+
+		if ($r->balance < 0) {
+			// Deficit should go to expense column
+			$out->foot_left[] = $r;
+		}
+		else {
+			$out->foot_right[] = $r;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Bilan / Balance sheet
+	 */
+	static public function getBalanceSheet(array $criterias): \stdClass
+	{
+		$out = new \stdClass;
+
+		$out->caption_left = 'Actif';
+		$out->caption_right = 'Passif';
+
+		$out->body_left = self::getAccountsBalances($criterias + ['position' => Account::ASSET]);
+		$out->body_right = self::getAccountsBalances($criterias + ['position' => Account::LIABILITY]);
+
+		// Append result to liability
+		$r = self::getResultLine($criterias);
+		$out->body_right[] = $r;
 
 		// Calculate the total sum for assets and liabilities
-		foreach ($out as $position => $rows) {
-			if ($position == 'sums') {
-				continue;
-			}
-
-			$sum = 0;
-			foreach ($rows as $row) {
-				$sum += $row->sum;
-			}
-
-			$out['sums'][$position] = $sum;
-		}
+		$out->foot_left = [self::getTotalLine($out->body_left, 'Total actif')];
+		$out->foot_right = [self::getTotalLine($out->body_right, 'Total passif')];
 
 		return $out;
 	}
@@ -339,20 +506,12 @@ class Reports
 	 */
 	static public function getClosingSumsFavoriteAccounts(array $criterias): \Generator
 	{
-		$where = self::getWhereClause($criterias);
-
-		$sql = sprintf('SELECT a.id, a.code, a.label, a.description, a.type,
-			SUM(l.credit) - SUM(l.debit) AS sum
-			FROM %s a
-			INNER JOIN %s t ON t.id = l.id_transaction
-			INNER JOIN %s l ON a.id = l.id_account
-			WHERE a.type != 0 AND %s
-			GROUP BY l.id_account
-			ORDER BY a.type, a.code COLLATE NOCASE;', Account::TABLE, Transaction::TABLE, Line::TABLE, $where);
+		$types = [Account::TYPE_EXPENSE, Account::TYPE_REVENUE, Account::TYPE_BANK, Account::TYPE_OUTSTANDING, Account::TYPE_CASH, Account::TYPE_THIRD_PARTY, Account::TYPE_VOLUNTEERING];
+		$accounts = self::getAccountsBalances($criterias + ['type' => $types], 'type, code COLLATE NOCASE', false);
 
 		$group = null;
 
-		foreach (DB::getInstance()->iterate($sql) as $row) {
+		foreach ($accounts as $row) {
 			if (null !== $group && $row->type !== $group->type) {
 				yield $group;
 				$group = null;
@@ -365,9 +524,6 @@ class Reports
 					'accounts' => []
 				];
 			}
-
-			$reverse = Account::isReversed($row->type) ? -1 : 1;
-			$row->sum *= $reverse;
 
 			$group->accounts[] = $row;
 		}
@@ -401,7 +557,7 @@ class Reports
 			INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
 			INNER JOIN %s
 			WHERE %s
-			ORDER BY a.code COLLATE NOCASE, t.date, t.id;', $join, $where);
+			ORDER BY a.code COLLATE U_NOCASE, t.date, t.id;', $join, $where);
 
 		$account = null;
 		$debit = $credit = 0;
@@ -451,7 +607,7 @@ class Reports
 
 	static public function getJournal(array $criterias): \Generator
 	{
-		$where = self::getWhereClause($criterias);
+		$where = self::getWhereClause($criterias, 't', 'l', 'a');
 
 		$sql = sprintf('SELECT
 			t.id_year, l.id_account, l.debit, l.credit, t.id, t.date, t.reference,
@@ -498,27 +654,5 @@ class Reports
 		}
 
 		yield $transaction;
-	}
-
-	static public function getStatement(array $criterias): array
-	{
-		$revenue = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::REVENUE]);
-		$expense = Reports::getClosingSumsWithAccounts($criterias + ['position' => Account::EXPENSE], null, true);
-
-		$get_sum = function (array $in): int {
-			$sum = 0;
-
-			foreach ($in as $row) {
-				$sum += $row->sum;
-			}
-
-			return $sum;
-		};
-
-		$revenue_sum = $get_sum($revenue);
-		$expense_sum = $get_sum($expense);
-		$result = $revenue_sum - $expense_sum;
-
-		return compact('revenue', 'expense', 'revenue_sum', 'expense_sum', 'result');
 	}
 }

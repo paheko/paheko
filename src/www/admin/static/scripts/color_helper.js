@@ -6,7 +6,13 @@
 		return;
 	}
 
-	var logo_limit_x = 170;
+	const logo_limit_x = 170;
+	const bg_color = getVariable('gBgColor').split(',').map(e => parseInt(e, 10)) || [255, 255, 255];
+	const text_color = getVariable('gTextColor').split(',').map(e => parseInt(e, 10)) || [0, 0, 0];
+
+	function getVariable(var_name) {
+		return getComputedStyle(document.documentElement).getPropertyValue('--' + var_name);
+	}
 
 	function colorToRGB(color, type)
 	{
@@ -26,13 +32,45 @@
 
 	function changeColor(element, color)
 	{
-		var new_color = colorToRGB(color, element).join(',');
+		let new_color = colorToRGB(color, element);
+
+		let contrast_color = element == 'gMainColor' ? bg_color : text_color;
+		let sum = contrast_color.reduce((pv, cv) => pv + cv, 0);
+		let change = sum < (127*3) ? 5 : -5;
+
+		while (!checkContrast(new_color, contrast_color)) {
+			new_color[0] += change;
+			new_color[1] += change;
+			new_color[2] += change;
+		}
+
+		for (i in new_color) {
+			new_color[i] = Math.max(new_color[i], 0);
+			new_color[i] = Math.min(new_color[i], 255);
+		}
+
+		console.log(new_color, contrast_color, change);
 
 		// Mise à jour variable CSS
-		document.documentElement.style.setProperty('--' + element, new_color);
+		document.documentElement.style.setProperty('--' + element, new_color.join(','));
 
 		applyColors();
-		return new_color;
+		return new_color.join(',');
+	}
+
+	/**
+	 * Return true if contrast is OK (W3C AA-level), false if not
+	 * @see https://dev.to/alvaromontoro/building-your-own-color-contrast-checker-4j7o
+	 */
+	function checkContrast(color1, color2)
+	{
+		let l1 = 0.2126 * color1[0] + 0.7152 * color1[1] + 0.0722 * color1[2];
+		let l2 = 0.2126 * color2[0] + 0.7152 * color2[1] + 0.0722 * color2[2];
+		let ratio = l1 > l2
+			? ((l2 + 0.05) / (l1 + 0.05))
+			: ((l1 + 0.05) / (l2 + 0.05));
+
+		return ratio < 1/3 ? true : false;
 	}
 
 	function applyColors()
@@ -138,7 +176,7 @@
 					data[i] = b ? avg : 255; // red
 					data[i+1] = b ? avg : 255; // green
 					data[i+2] = b ? avg : 255; // blue
-					data[i+3] = b ? (x > 170 ? 50 : 150) : 0;
+					data[i+3] = b ? (x >> logo_limit_x ? 50 : 150) : 0;
 					i += 4;
 				}
 			}

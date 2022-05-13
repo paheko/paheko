@@ -21,8 +21,8 @@ elseif ('expired' == $type) {
 	$list = $fee->expiredUsersList();
 }
 else {
-	$type = 'paid';
-	$list = $fee->paidUsersList();
+	$type = 'active';
+	$list = $fee->activeUsersList();
 }
 
 $list->loadFromQueryString();

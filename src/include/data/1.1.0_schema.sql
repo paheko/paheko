@@ -358,3 +358,35 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
     prefix TEXT NOT NULL PRIMARY KEY,
     date INTEGER NOT NULL
 );
+
+CREATE TABLE emails (
+-- List of emails addresses
+-- We are not storing actual email addresses here for privacy reasons
+-- So that we can keep the record (for opt-out reasons) even when the
+-- email address has been removed from the users table
+	id INTEGER NOT NULL PRIMARY KEY,
+    hash TEXT NOT NULL,
+    verified INTEGER NOT NULL DEFAULT 0,
+    optout INTEGER NOT NULL DEFAULT 0,
+    invalid INTEGER NOT NULL DEFAULT 0,
+    fail_count INTEGER NOT NULL DEFAULT 0,
+    sent_count INTEGER NOT NULL DEFAULT 0,
+    fail_log TEXT NULL,
+    added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX emails_hash ON emails (hash);
+
+CREATE TABLE emails_queue (
+-- List of emails waiting to be sent
+    id INTEGER NOT NULL PRIMARY KEY,
+    sender TEXT NULL,
+    recipient TEXT NOT NULL,
+    recipient_hash TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    content TEXT NOT NULL,
+    content_html TEXT NULL,
+    sending INTEGER NOT NULL DEFAULT 0, -- Will be changed to 1 when the queue run will start
+    sending_started TEXT NULL, -- Will be filled with the datetime when the email sending was started
+    context INTEGER NOT NULL
+);

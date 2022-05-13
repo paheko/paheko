@@ -13,7 +13,7 @@
 
 	<fieldset>
 		<legend>Modifier un compte</legend>
-		{include file="acc/charts/accounts/_account_form.tpl" simple=false}
+		{include file="acc/charts/accounts/_account_form.tpl" create=false}
 	</fieldset>
 
 	<p class="submit">

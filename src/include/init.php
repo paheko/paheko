@@ -63,6 +63,10 @@ function garradin_contributor_license(): ?int
 		return null;
 	}
 
+	if (is_int(CONTRIBUTOR_LICENSE)) {
+		return CONTRIBUTOR_LICENSE;
+	}
+
 	$key = CONTRIBUTOR_LICENSE;
 	$key = gzinflate(base64_decode($key));
 	list($email, $level, $hash) = explode('==', $key);
@@ -151,6 +155,8 @@ if (!defined('Garradin\WWW_URI'))
 	unset($uri);
 }
 
+$host = null;
+
 if (!defined('Garradin\WWW_URL')) {
 	$host = \KD2\HTTP::getHost();
 }
@@ -170,7 +176,7 @@ if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
 	exit(1);
 }
 
-if (!defined('Garradin\WWW_URL')) {
+if (!defined('Garradin\WWW_URL') && $host !== null) {
 	define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
 }
 
@@ -182,7 +188,6 @@ static $default_config = [
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
 	'PREFER_HTTPS'          => false,
 	'ALLOW_MODIFIED_IMPORT' => true,
-	'PLUGINS_SYSTEM'        => '',
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
@@ -206,7 +211,11 @@ static $default_config = [
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => null,
+	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
+	'SQL_DEBUG'             => null,
+	'SYSTEM_MENU_ITEMS'     => [],
+	'SYSTEM_SIGNALS'        => [],
 ];
 
 foreach ($default_config as $const => $value)
@@ -264,10 +273,19 @@ if (!ini_get('date.timezone'))
 
 class UserException extends \LogicException
 {
-	protected $details;
+	protected $details = null;
+	protected ?string $html_message = null;
 
 	public function setMessage(string $message) {
 		$this->message = $message;
+	}
+
+	public function getHTMLMessage(): ?string {
+		return $this->html_message;
+	}
+
+	public function setHTMLMessage(string $html): void {
+		$this->html_message = $html;
 	}
 
 	public function setDetails($details) {
@@ -394,6 +412,7 @@ function user_error(\Exception $e)
 		$tpl = Template::getInstance();
 
 		$tpl->assign('error', $e->getMessage());
+		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
 		$tpl->display('error.tpl');
 	}

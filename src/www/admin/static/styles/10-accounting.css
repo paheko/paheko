@@ -26,7 +26,8 @@ b.money {
 }
 
 nav.acc-year {
-    background: white;
+    color: rgb(var(--gTextColor));
+    background: rgb(var(--gBgColor));
     text-align: center;
     border-radius: .5rem;
     border: .2rem solid rgba(var(--gMainColor), 0.5);
@@ -73,18 +74,20 @@ td.money, th.money {
     text-align: center;
     margin-bottom: .8em;
     padding-bottom: .5em;
-    border-bottom: 1pt solid #999;
+    border-bottom: 1pt solid var(--gBorderColor);
 }
 
 .year-header .print-btn button {
     font-size: 1.3rem;
 }
 
-.year-infos {
-    text-align: center;
+.year-header form {
+    max-width: 30em;
+    margin: 1em auto;
 }
 
 .year-infos .graphs {
+    text-align: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -92,6 +95,10 @@ td.money, th.money {
 
 .year-infos .graphs figure {
     margin: 1rem;
+}
+
+.year-infos .graphs.small figure img {
+    max-width: 500px;
 }
 
 table.accounts { width: 100%; }

@@ -6,10 +6,10 @@
 	<tbody>
 		<tr>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$statement.expense caption=$caption1}
+				{include file="acc/reports/_statement_table.tpl" accounts=$statement.body_left caption=$statement.caption_left}
 			</td>
 			<td>
-				{include file="acc/reports/_statement_table.tpl" accounts=$statement.revenue caption=$caption2}
+				{include file="acc/reports/_statement_table.tpl" accounts=$statement.body_right caption=$statement.caption_right}
 			</td>
 		</tr>
 	</tbody>
@@ -18,51 +18,35 @@
 			<td>
 				<table>
 					<tfoot>
+						{foreach from=$statement.foot_left item="row"}
 						<tr>
-							<th>Total</th>
-							<td class="money">{$statement.expense_sum|raw|money:false}</td>
+							<th>{$row.label}</th>
+							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+							{if $row.balance2 || $row.change}
+							<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+							<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
+							{/if}
 						</tr>
+						{/foreach}
 					</tfoot>
 				</table>
 			</td>
 			<td>
 				<table>
 					<tfoot>
+						{foreach from=$statement.foot_right item="row"}
 						<tr>
-							<th>Total</th>
-							<td class="money">{$statement.revenue_sum|raw|money:false}</td>
+							<th>{$row.label}</th>
+							<td class="money" width="10%">{$row.balance|raw|money:false}</td>
+							{if $row.balance2 || $row.change}
+							<td class="money" width="10%">{$row.balance2|raw|money:false}</td>
+							<td class="money" width="10%">{$row.change|raw|money:false:true}</td>
+							{/if}
 						</tr>
+						{/foreach}
 					</tfoot>
 				</table>
 			</td>
 		</tr>
-		{if $statement.result}
-		<tr>
-			<td>
-			{if ($statement.result < 0)}
-				<table>
-					<tfoot>
-						<tr>
-							<th>Résultat (perte)</th>
-							<td class="money">{$statement.result|raw|money:false}</td>
-						</tr>
-					</tfoot>
-				</table>
-			{/if}
-			</td>
-			<td>
-			{if ($statement.result >= 0)}
-				<table>
-					<tfoot>
-						<tr>
-							<th>Résultat (excédent)</th>
-							<td class="money">{$statement.result|raw|money:false}</td>
-						</tr>
-					</tfoot>
-				</table>
-			{/if}
-			</td>
-		</tr>
-		{/if}
 	</tfoot>
 </table>

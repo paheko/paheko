@@ -105,7 +105,7 @@ class Session extends \KD2\UserSession
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
 			INNER JOIN users_categories AS c ON c.id = m.id_category
-			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
+			WHERE m.%1$s = ? COLLATE U_NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, self::ACCESS_READ);
@@ -161,26 +161,13 @@ class Session extends \KD2\UserSession
 		return $this->db->delete('membres_sessions', $this->db->where('id_membre', $user_id));
 	}
 
-	// Ajout de la gestion de LOCAL_LOGIN
 	public function isLogged(bool $disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
-		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN'))
-		{
-			$login_id = \Garradin\LOCAL_LOGIN;
-
-			// On va chercher le premier membre avec le droit de gérer la config
-			if (-1 === $login_id) {
-				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
-					LIMIT 1', self::ACCESS_ADMIN);
-			}
-
-			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
-			{
-				$logged = $this->create($login_id);
-			}
+		// Ajout de la gestion de LOCAL_LOGIN
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')) {
+			$logged = $this->forceLogin(\Garradin\LOCAL_LOGIN);
 		}
 
 		return $logged;
@@ -188,7 +175,21 @@ class Session extends \KD2\UserSession
 
 	public function forceLogin(int $id)
 	{
-		return $this->create($id);
+		// On va chercher le premier membre avec le droit de gérer la config
+		if (-1 === $id) {
+			$id = $this->db->firstColumn('SELECT id FROM membres
+				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
+				LIMIT 1', self::ACCESS_ADMIN);
+		}
+
+		$logged = parent::isLogged();
+
+		// Only login if required
+		if ($id > 0 && (!$logged || ($logged && $this->user->id != $id))) {
+			return $this->create($id);
+		}
+
+		return $logged;
 	}
 
 	// Ici checkOTP utilise NTP en second recours
@@ -236,7 +237,7 @@ class Session extends \KD2\UserSession
 
 		$champ_id = $config->get('champ_identifiant');
 
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE LIMIT 1;', trim($id));
+		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE U_NOCASE LIMIT 1;', trim($id));
 
 		if (!$membre || trim($membre->email) == '')
 		{
@@ -255,7 +256,7 @@ class Session extends \KD2\UserSession
 		$query = sprintf('%s.%s.%s', $id, $expire, $hash);
 
 		$message = "Bonjour,\n\nVous avez oublié votre mot de passe ? Pas de panique !\n\n";
-		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour recevoir un nouveau mot de passe.\n\n";
+		$message.= "Il vous suffit de cliquer sur le lien ci-dessous pour modifier votre mot de passe.\n\n";
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 

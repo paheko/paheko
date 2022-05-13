@@ -39,7 +39,14 @@ class File extends Entity
 	 */
 	protected $name;
 
+	/**
+	 * Complete file path (parent + '/' + name)
+	 */
 	protected $path;
+
+	/**
+	 * Type of file: file or directory
+	 */
 	protected $type = self::TYPE_FILE;
 	protected $mime;
 	protected $size;
@@ -66,12 +73,17 @@ class File extends Entity
 	 * Tailles de miniatures autorisées, pour ne pas avoir 500 fichiers générés avec 500 tailles différentes
 	 * @var array
 	 */
-	const ALLOWED_THUMB_SIZES = [200, 500];
+	const ALLOWED_THUMB_SIZES = [
+		'150px' => [['resize', 150]],
+		'200px' => [['resize', 200]],
+		'500px' => [['resize', 500]],
+		'crop-256px' => [['cropResize', 256, 256]],
+	];
 
 	const THUMB_CACHE_ID = 'file.thumb.%s.%d';
 
-	const THUMB_SIZE_TINY = 200;
-	const THUMB_SIZE_SMALL = 500;
+	const THUMB_SIZE_TINY = '200px';
+	const THUMB_SIZE_SMALL = '500px';
 
 	const CONTEXT_DOCUMENTS = 'documents';
 	const CONTEXT_USER = 'user';
@@ -174,9 +186,9 @@ class File extends Entity
 		Plugin::fireSignal('files.delete', ['file' => $this]);
 
 		// clean up thumbnails
-		foreach (self::ALLOWED_THUMB_SIZES as $size)
+		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
 		{
-			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size));
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
 		}
 
 		DB::getInstance()->delete('files_search', 'path = ? OR path LIKE ?', $this->path, $this->path . '/%');
@@ -228,6 +240,16 @@ class File extends Entity
 		Plugin::fireSignal('files.move', ['file' => $this, 'new_path' => $new_path]);
 
 		return $return;
+	}
+
+	/**
+	 * Copy the current file to a new location
+	 * @param  string $target Target path
+	 * @return self
+	 */
+	public function copy(string $target): self
+	{
+		return self::createAndStore(Utils::dirname($target), Utils::basename($target), Files::callStorage('getFullPath', $this), null);
 	}
 
 	public function setContent(string $content): self
@@ -316,6 +338,12 @@ class File extends Entity
 
 		if (!$index_search) {
 			$this->indexForSearch($source_path, $source_content);
+		}
+
+		// clean up thumbnails
+		foreach (self::ALLOWED_THUMB_SIZES as $key => $operations)
+		{
+			Static_Cache::remove(sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $key));
 		}
 
 		return $this;
@@ -434,6 +462,7 @@ class File extends Entity
 		}
 
 		self::validateFileName($name);
+		self::validatePath($path);
 		self::ensureDirectoryExists($path);
 
 		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
@@ -447,6 +476,7 @@ class File extends Entity
 		if ($source_path && !$source_content) {
 			$file->set('mime', finfo_file($finfo, $source_path));
 			$file->set('size', filesize($source_path));
+			$file->set('modified', new \DateTime('@' . filemtime($source_path)));
 		}
 		else {
 			$file->set('mime', finfo_buffer($finfo, $source_content));
@@ -461,27 +491,6 @@ class File extends Entity
 		}
 
 		return $file;
-	}
-
-	/**
-	 * Create a file from an encoded base64 string
-	 */
-	static public function createFromBase64(string $path, string $name, string $encoded_content): self
-	{
-		$content = base64_decode($encoded_content);
-		return self::createAndStore($path, $name, null, $content);
-	}
-
-	/**
-	 * Modify a file from an encoded base64 string
-	 * This is used to upload the modified background image in the admin panel
-	 */
-	public function storeFromBase64(string $encoded_content): self
-	{
-		$content = base64_decode($encoded_content);
-		$this->set('modified', new \DateTime);
-		$this->store(null, $content);
-		return $this;
 	}
 
 	/**
@@ -532,7 +541,7 @@ class File extends Entity
 	 * @param  string $key  The name of the file input in the HTML form
 	 * @return self Created file object
 	 */
-	static public function upload(string $path, string $key): self
+	static public function upload(string $path, string $key, ?string $name = null): self
 	{
 		if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
 			throw new UserException('Aucun fichier reçu');
@@ -552,7 +561,7 @@ class File extends Entity
 			throw new \RuntimeException('Le fichier n\'a pas été envoyé de manière conventionnelle.');
 		}
 
-		$name = self::filterName($file['name']);
+		$name = self::filterName($name ?? $file['name']);
 
 		return self::createAndStore($path, $name, $file['tmp_name'], null);
 	}
@@ -586,17 +595,12 @@ class File extends Entity
 		}
 	}
 
+	/**
+	 * Full URL with https://...
+	 */
 	public function url(bool $download = false): string
 	{
-		if ($this->context() == self::CONTEXT_WEB) {
-			$path = Utils::basename(Utils::dirname($this->path)) . '/' . Utils::basename($this->path);
-		}
-		else {
-			$path = $this->path;
-		}
-
-
-		$url = WWW_URL . $path;
+		$url = WWW_URL . $this->uri();
 
 		if ($download) {
 			$url .= '?download';
@@ -605,35 +609,27 @@ class File extends Entity
 		return $url;
 	}
 
-	public function thumb_url(?int $size = null): string
+	/**
+	 * Returns local URI, eg. user/1245/file.jpg
+	 */
+	public function uri(): string
 	{
-		$size = $size ? self::_findNearestThumbSize($size) : min(self::ALLOWED_THUMB_SIZES);
-		return sprintf('%s?%dpx', $this->url(), $size);
+		if ($this->context() == self::CONTEXT_WEB) {
+			return Utils::basename(Utils::dirname($this->path)) . '/' . Utils::basename($this->path);
+		}
+		else {
+			return $this->path;
+		}
 	}
 
-	/**
-	 * Renvoie la taille de miniature la plus proche de la taille demandée
-	 * @param  integer $size Taille demandée
-	 * @return integer       Taille possible
-	 */
-	static protected function _findNearestThumbSize($size)
+	public function thumb_url($size = null): string
 	{
-		$size = (int) $size;
-
-		if (in_array($size, self::ALLOWED_THUMB_SIZES))
-		{
-			return $size;
+		if (is_int($size)) {
+			$size .= 'px';
 		}
 
-		foreach (self::ALLOWED_THUMB_SIZES as $s)
-		{
-			if ($s >= $size)
-			{
-				return $s;
-			}
-		}
-
-		return max(self::ALLOWED_THUMB_SIZES);
+		$size = isset(self::ALLOWED_THUMB_SIZES[$size]) ? $size : key(self::ALLOWED_THUMB_SIZES);
+		return sprintf('%s?%dpx', $this->url(), $size);
 	}
 
 	/**
@@ -662,7 +658,7 @@ class File extends Entity
 	/**
 	 * Envoie une miniature à la taille indiquée au client HTTP
 	 */
-	public function serveThumbnail(?Session $session = null, ?int $width = null): void
+	public function serveThumbnail(?Session $session = null, string $size = null): void
 	{
 		if (!$this->checkReadAccess($session)) {
 			header('HTTP/1.1 403 Forbidden', true, 403);
@@ -674,30 +670,40 @@ class File extends Entity
 			throw new UserException('Il n\'est pas possible de fournir une miniature pour un fichier qui n\'est pas une image.');
 		}
 
-		if (!$width) {
-			$width = reset(self::ALLOWED_THUMB_SIZES);
-		}
-
-		if (!in_array($width, self::ALLOWED_THUMB_SIZES)) {
+		if (!array_key_exists($size, self::ALLOWED_THUMB_SIZES)) {
 			throw new UserException('Cette taille de miniature n\'est pas autorisée.');
 		}
 
-		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $width);
+		$cache_id = sprintf(self::THUMB_CACHE_ID, $this->pathHash(), $size);
 		$destination = Static_Cache::getPath($cache_id);
 
-		// La miniature n'existe pas dans le cache statique, on la crée
-		if (!Static_Cache::exists($cache_id))
-		{
+		if (!Static_Cache::exists($cache_id)) {
 			try {
 				if ($path = Files::callStorage('getFullPath', $this)) {
-					(new Image($path))->resize($width)->save($destination);
+					$i = new Image($path);
 				}
 				elseif ($content = Files::callStorage('fetch', $this)) {
-					Image::createFromBlob($content)->resize($width)->save($destination);
+					$i = Image::createFromBlob($content);
 				}
 				else {
 					throw new \RuntimeException('Unable to fetch file');
 				}
+
+				$operations = self::ALLOWED_THUMB_SIZES[$size];
+				$allowed_operations = ['resize', 'cropResize', 'flip', 'rotate', 'autoRotate', 'crop'];
+
+				foreach ($operations as $operation) {
+					$arguments = array_slice($operation, 1);
+					$operation = $operation[0];
+
+					if (!in_array($operation, $allowed_operations)) {
+						throw new \InvalidArgumentException('Opération invalide: ' . $operation);
+					}
+
+					call_user_func_array([$i, $operation], $arguments);
+				}
+
+				$i->save($destination);
 			}
 			catch (\RuntimeException $e) {
 				throw new UserException('Impossible de créer la miniature');
@@ -953,26 +959,26 @@ class File extends Entity
 
 	static public function validatePath(string $path): array
 	{
-		$path = explode('/', $path);
+		$parts = explode('/', $path);
 
-		if (count($path) < 1) {
-			throw new ValidationException('Chemin invalide');
+		if (count($parts) < 1) {
+			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
-		if (!array_key_exists($path[0], self::CONTEXTS_NAMES)) {
-			throw new ValidationException('Chemin invalide');
+		$context = array_shift($parts);
+
+		if (!array_key_exists($context, self::CONTEXTS_NAMES)) {
+			throw new ValidationException('Chemin invalide: ' . $path);
 		}
 
-		$context = array_shift($path);
-
-		foreach ($path as $part) {
+		foreach ($parts as $part) {
 			if (substr($part, 0, 1) == '.') {
-				throw new ValidationException('Chemin invalide');
+				throw new ValidationException('Chemin invalide: ' . $path);
 			}
 		}
 
-		$name = array_pop($path);
-		$ref = implode('/', $path);
+		$name = array_pop($parts);
+		$ref = implode('/', $parts);
 		return [$context, $ref ?: null, $name];
 	}
 
