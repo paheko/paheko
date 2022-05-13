@@ -188,7 +188,6 @@ static $default_config = [
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
 	'PREFER_HTTPS'          => false,
 	'ALLOW_MODIFIED_IMPORT' => true,
-	'PLUGINS_SYSTEM'        => '',
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
