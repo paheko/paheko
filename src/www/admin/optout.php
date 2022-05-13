@@ -12,7 +12,7 @@ if (empty($_GET['un'])) {
 }
 
 $code = $_GET['un'];
-$email = Emails::getEmailEntityFromOptout($code);
+$email = Emails::getEmailFromOptout($code);
 $verify = null;
 
 if (!$email) {

@@ -137,11 +137,16 @@ class Email extends Entity
 			return false;
 		}
 
-		if ($this->fail_count >= Emails::FAIL_LIMIT) {
+		if ($this->hasReachedFailLimit()) {
 			return false;
 		}
 
 		return true;
+	}
+
+	public function hasReachedFailLimit(): bool
+	{
+		return ($this->fail_count >= Emails::FAIL_LIMIT);
 	}
 
 	public function incrementSentCount(): void

@@ -9,7 +9,7 @@
             <dt>Expéditeur</dt>
             <dd>{$user.identite} &lt;{$user.email}&gt;</dd>
             <dt>Destinataire</dt>
-            <dd>{$membre.identite} ({$categorie.nom})</dd>
+            <dd>{$membre.identite} ({$categorie.name})</dd>
             <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" required="required" /></dd>
             <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
