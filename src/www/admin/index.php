@@ -9,7 +9,7 @@ use Garradin\Entities\Files\File;
 require_once __DIR__ . '/_inc.php';
 
 $banner = null;
-Plugin::fireSignal('accueil.banniere', ['user' => $user, 'session' => $session], $banner);
+Plugin::fireSignal('home.banner', ['user' => $user, 'session' => $session], $banner);
 
 $homepage = Config::getInstance()->file('admin_homepage');
 
