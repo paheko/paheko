@@ -404,6 +404,7 @@ function user_error(\Exception $e)
 		$tpl = Template::getInstance();
 
 		$tpl->assign('error', $e->getMessage());
+		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
 		$tpl->display('error.tpl');
 	}
