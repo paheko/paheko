@@ -80,9 +80,6 @@ class Install
 		// Restore password
 		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
 
-		// Force l'installation de plugin système
-		Plugin::checkAndInstallSystemPlugins();
-
 		if (defined('\Garradin\LOCAL_LOGIN') && \Garradin\LOCAL_LOGIN) {
 			Session::getInstance()->refresh();
 		}

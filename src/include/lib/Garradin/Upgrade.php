@@ -458,9 +458,6 @@ class Upgrade
 
 			Static_Cache::remove('upgrade');
 
-			// Réinstaller les plugins système si nécessaire
-			Plugin::checkAndInstallSystemPlugins();
-
 			Plugin::upgradeAllIfRequired();
 		}
 		catch (\Exception $e)

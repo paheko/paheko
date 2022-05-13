@@ -54,13 +54,10 @@
                         {$plugin.version}
                     </td>
                     <td class="actions">
-                        {if empty($plugin.system)}
-                            <a href="{$admin_url}config/plugins.php?delete={$plugin.id}">Désinstaller</a>
-                        {/if}
                         {if !empty($plugin.config)}
-                            {if empty($plugin.system)}|{/if}
-                            <a href="{plugin_url id=$plugin.id file="config.php"}">Configurer</a>
+                            {linkbutton shape="settings" label="Configurer" href="!plugin/%s/config.php"|args:$plugin.id}
                         {/if}
+                        {linkbutton shape="delete" href="!config/plugins.php?delete=%d"|args:$plugin.id label="Désinstaller"}
                     </td>
                     {/if}
                 </tr>
@@ -87,7 +84,7 @@
                     <label for="f_{$id}">
                         {$plugin.nom}
                     </label>
-                    (version {$plugin.version})
+                    <small>(version {$plugin.version})</small>
                 </dt>
                 <dd>[<a href="{$plugin.url}" onclick="return !window.open(this.href);">{$plugin.auteur}</a>] {$plugin.description}</dd>
                 {/foreach}
