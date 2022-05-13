@@ -2,8 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Accounting\Charts;
 use Garradin\Entities\Accounting\Account;
-use Garradin\Entities\Accounting\Chart;
 use Garradin\Entities\Accounting\Year;
 use Garradin\Entities\Users\Category;
 use Garradin\Entities\Files\File;
@@ -15,7 +15,10 @@ use Garradin\Membres\Session;
  */
 class Install
 {
-	static public function reset(Membres\Session $session, $password, array $options = [])
+	/**
+	 * Reset the database to empty and create a new user with the same password
+	 */
+	static public function reset(Session $session, string $password, array $options = [])
 	{
 		$config = (object) Config::getInstance()->asArray();
 		$user = $session->getUser();
@@ -25,28 +28,65 @@ class Install
 			throw new UserException('Le mot de passe ne correspond pas.');
 		}
 
-		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
-
-		DB::getInstance()->close();
-		Config::deleteInstance();
-
-		unlink(DB_FILE);
-
-		// We can't use the real password, as it might not be valid (too short or compromised)
-		$ok = self::install($config->nom_asso, $user->identite, $user->email, md5($password . SECRET_KEY));
-
-		// Restore password
-		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$session::hashPassword($password)]);
-
-		if ($ok)
-		{
-			// Force l'installation de plugin système
-			Plugin::checkAndInstallSystemPlugins();
+		if (!trim($config->nom_asso)) {
+			throw new UserException('Le nom de l\'association est vide, merci de le renseigner dans la configuration.');
 		}
 
-		$session->refresh();
+		if (!trim($user->identite)) {
+			throw new UserException('L\'utilisateur connecté ne dispose pas de nom, merci de le renseigner.');
+		}
 
-		return $ok;
+		if (!trim($user->email)) {
+			throw new UserException('L\'utilisateur connecté ne dispose pas d\'adresse e-mail, merci de la renseigner.');
+		}
+
+		(new Sauvegarde)->create(date('Y-m-d-His-') . 'avant-remise-a-zero');
+
+		Config::deleteInstance();
+		DB::getInstance()->close();
+		DB::deleteInstance();
+
+		file_put_contents(CACHE_ROOT . '/reset', json_encode([
+			'password'     => $session::hashPassword($password),
+			'name'         => $user->identite,
+			'email'        => $user->email,
+			'organization' => $config->nom_asso,
+		]));
+
+		rename(DB_FILE, sprintf(DATA_ROOT . '/association.%s.sqlite', date('Y-m-d-His-') . 'avant-remise-a-zero'));
+
+		self::showProgressSpinner('!install.php', 'Remise à zéro en cours…');
+		exit;
+	}
+
+	/**
+	 * Continues reset after page reload
+	 */
+	static public function checkReset()
+	{
+		if (!file_exists(CACHE_ROOT . '/reset')) {
+			return;
+		}
+
+		$data = json_decode(file_get_contents(CACHE_ROOT . '/reset'));
+
+		if (!$data) {
+			throw new \LogicException('Invalid reset data');
+		}
+
+		// We can't use the real password, as it might not be valid (too short or compromised)
+		$ok = self::install($data->organization ?? 'Association', $data->name, $data->email, md5($data->password));
+
+		// Restore password
+		DB::getInstance()->preparedQuery('UPDATE membres SET passe = ? WHERE id = 1;', [$data->password]);
+
+		if (defined('\Garradin\LOCAL_LOGIN') && \Garradin\LOCAL_LOGIN) {
+			Session::getInstance()->refresh();
+		}
+
+		@unlink(CACHE_ROOT . '/reset');
+
+		Utils::redirect('!config/advanced/?msg=RESET');
 	}
 
 	static protected function assert(bool $assertion, string $message)
@@ -81,10 +121,14 @@ class Install
 		}
 	}
 
-	static public function install(string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null)
+	static public function install(string $name, string $user_name, string $user_email, string $user_password, ?string $welcome_text = null): void
 	{
+		if (file_exists(DB_FILE)) {
+			throw new UserException('La base de données existe déjà.');
+		}
+
 		self::checkAndCreateDirectories();
-		$db = DB::getInstance(true);
+		$db = DB::getInstance();
 
 		// Création de la base de données
 		$db->begin();
@@ -149,20 +193,14 @@ class Install
 			'pays'        => 'FR',
 		]);
 
+		$config->set('files', array_map(fn () => null, $config::FILES));
+
 		$welcome_text = $welcome_text ?? sprintf("Bienvenue dans l'administration de %s !\n\nUtilisez le menu à gauche pour accéder aux différentes sections.\n\nCe message peut être modifié dans la 'Configuration'.", $name);
 
-		$path = Config::DEFAULT_FILES['admin_homepage'];
-
-		$file = File::createAndStore(Utils::dirname($path), Utils::basename($path), null, $welcome_text);
-		$config->set('admin_homepage', $file->path);
+		$config->setFile('admin_homepage', $welcome_text);
 
         // Import accounting chart
-        $chart = new Chart;
-        $chart->label = 'Plan comptable associatif 2020 (Règlement ANC n°2018-06)';
-        $chart->country = 'FR';
-        $chart->code = 'PCA2018';
-        $chart->save();
-        $chart->accounts()->importCSV(ROOT . '/include/data/charts/fr_2018.csv');
+        $chart = Charts::install('fr_pca_2018');
 
         // Create first accounting year
         $year = new Year;
@@ -231,7 +269,7 @@ class Install
 			Plugin::install('welcome', true);
 		}
 
-		return $config->save();
+		$config->save();
 	}
 
 	static public function checkAndCreateDirectories()
@@ -297,5 +335,50 @@ class Install
 		}
 
 		return file_put_contents($path, $config);
+	}
+
+	static public function showProgressSpinner(?string $next = null, string $message = '')
+	{
+		$next = $next ? sprintf('<meta http-equiv="refresh" content="0;url=%s" />', Utils::getLocalURL($next)) : '';
+
+		printf('<!DOCTYPE html>
+		<html>
+		<head>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		body {
+			font-family: sans-serif;
+		}
+		h2, p {
+			margin: 0;
+			margin-bottom: 1rem;
+		}
+		div {
+			position: relative;
+			border: 1px solid #999;
+			max-width: 500px;
+			padding: 1em;
+			border-radius: .5em;
+		}
+		.spinner h2::after {
+			display: block;
+			content: " ";
+			margin: 1rem auto;
+			width: 50px;
+			height: 50px;
+			border: 5px solid #000;
+			border-radius: 50%%;
+			border-top-color: #999;
+			animation: spin 1s ease-in-out infinite;
+		}
+
+		@keyframes spin { to { transform: rotate(360deg); } }
+		</style>
+		%s
+		</head>
+		<body>
+		<div class="spinner">
+			<h2>%s</h2>
+		</div>', $next, htmlspecialchars($message));
 	}
 }

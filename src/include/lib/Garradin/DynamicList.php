@@ -97,15 +97,7 @@ class DynamicList implements \Countable
 			$columns[] = $column['label'];
 		}
 
-		if ('csv' == $format) {
-			CSV::toCSV($name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
-		}
-		else if ('ods' == $format) {
-			CSV::toODS($name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
-		}
-		else {
-			throw new UserException('Invalid export format');
-		}
+		CSV::export($format, $name, $this->iterate(false), $this->getHeaderColumns(true), $this->export_callback);
 	}
 
 	public function asArray(): array
@@ -176,10 +168,6 @@ class DynamicList implements \Countable
 				continue;
 			}
 
-			if (!isset($properties['label']) && !$include_hidden) {
-				continue;
-			}
-
 			$select = array_key_exists('select', $properties) ? $properties['select'] : $alias;
 
 			if (null === $select) {
@@ -214,6 +202,12 @@ class DynamicList implements \Countable
 		foreach (DB::getInstance()->iterate($sql) as $row) {
 			if ($this->modifier) {
 				call_user_func_array($this->modifier, [&$row]);
+			}
+
+			foreach ($this->columns as $key => $config) {
+				if (empty($config['label']) && !$include_hidden) {
+					unset($row->$key);
+				}
 			}
 
 			yield $row;

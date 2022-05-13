@@ -26,7 +26,7 @@ $form->runIf('save', function () {
 $list = Reminders::list();
 $services_list = Services::listAssoc();
 
-$default_subject = '[#NOM_ASSO] Échéance de cotisation';
+$default_subject = 'Échéance de cotisation';
 $default_body = "Bonjour #IDENTITE,\n\nVotre cotisation arrive à échéance dans #NB_JOURS jours.\n\n"
 	.   "Merci de nous contacter pour renouveler votre cotisation.\n\nCordialement.\n\n"
 	.   "--\n#NOM_ASSO\n#ADRESSE_ASSO\nE-Mail : #EMAIL_ASSO\nSite web : #SITE_ASSO";

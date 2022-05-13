@@ -30,11 +30,11 @@ $id_field = (object) $champs->get($config->get('champ_identifiant'));
 $id_field_name = $id_field->title;
 
 $form->runIf('login', function () use ($id_field_name, $session) {
-    if (!trim(f('_id'))) {
+    if (!trim((string) f('_id'))) {
         throw new UserException(sprintf('L\'identifiant (%s) n\'a pas été renseigné.', $id_field_name));
     }
 
-    if (!trim(f('password'))) {
+    if (!trim((string) f('password'))) {
         throw new UserException('Le mot de passe n\'a pas été renseigné.');
     }
 

@@ -29,18 +29,21 @@ $form->runIf('remove', function () use ($s) {
 }, 'backup_manage', Utils::getSelfURI(['ok' => 'remove']));
 
 
-$form->runIf('restore_file', function () use ($s, &$code, $session) {
+$form->runIf('restore_file', function () use ($s, &$code, $session, $form) {
 	// Ignorer la vérification d'intégrité si autorisé et demandé
 	$check = (ALLOW_MODIFIED_IMPORT && f('force_import')) ? false : true;
 
 	try {
-		$r = $s->restoreFromUpload($_FILES['file'], $session->getUser()->id, $check);
+		$r = $s->restoreFromUpload($_FILES['file'], $check);
 		Utils::redirect(Utils::getSelfURI(['ok' => 'restore', 'code' => (int)$r]));
 	} catch (UserException $e) {
 		$code = $e->getCode();
+		if ($code == 0) {
+			throw $e;
+		}
+		$form->addError($e->getMessage());
 	}
 }, 'backup_restore');
-
 
 $ok_code = qg('code'); // return code
 $ok = qg('ok'); // return message

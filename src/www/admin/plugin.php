@@ -6,6 +6,10 @@ require_once __DIR__ . '/_inc.php';
 
 $page = qg('_u') ?: 'index.php';
 
+if (substr($page, -1) == '/') {
+	$page .= 'index.php';
+}
+
 $plugin = new Plugin(qg('_p'));
 
 define('Garradin\PLUGIN_ROOT', $plugin->path());

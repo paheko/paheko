@@ -6,6 +6,7 @@ use Garradin\Membres\Session;
 use Garradin\Membres\Champs;
 
 use Garradin\Files\Files;
+use Garradin\Entities\Files\File;
 
 use KD2\HTTP;
 
@@ -180,13 +181,14 @@ class Upgrade
 					}
 				}
 
+				$id_field = $db->firstColumn('SELECT valeur FROM config WHERE cle = \'champ_identifiant\';');
 				$champs = new Champs($db->firstColumn('SELECT valeur FROM config WHERE cle = \'champs_membres\';'));
 				$db->import(ROOT . '/include/data/1.1.0_migration.sql');
 
 				// Rename membres table
 				$champs->createTable($champs::TABLE  .'_tmp');
 
-				$fields = $champs->getCopyFields();
+				$fields = $champs->getCopyFields(true);
 				unset($fields['id_category']);
 				$fields['id_categorie'] = 'id_category';
 				$champs->copy($champs::TABLE, $champs::TABLE . '_tmp', $fields);
@@ -194,7 +196,7 @@ class Upgrade
 				$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $champs::TABLE));
 				$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $champs::TABLE));
 
-				$champs->createIndexes($champs::TABLE);
+				$champs->createIndexes($champs::TABLE, $id_field);
 
 				$db->commitSchemaUpdate();
 
@@ -268,15 +270,11 @@ class Upgrade
 
 			if (version_compare($v, '1.1.4', '<')) {
 				// Set config file names
-				$config = Config::getInstance();
+				$file = Files::get(Config::FILES['admin_background']);
+				$db->update('config', ['value' => $file ? Config::FILES['admin_background'] : null], 'key = :key', ['key' => 'admin_background']);
 
-				$file = Files::get(Config::DEFAULT_FILES['admin_background']);
-				$config->set('admin_background', $file ? Config::DEFAULT_FILES['admin_background'] : null);
-
-				$file = Files::get(Config::DEFAULT_FILES['admin_homepage']);
-				$config->set('admin_homepage', $file ? Config::DEFAULT_FILES['admin_homepage'] : null);
-
-				$config->save();
+				$file = Files::get(Config::FILES['admin_homepage']);
+				$db->update('config', ['value' => $file ? Config::FILES['admin_homepage'] : null], 'key = :key', ['key' => 'admin_homepage']);
 			}
 
 			if (version_compare($v, '1.1.7', '<')) {
@@ -341,9 +339,105 @@ class Upgrade
 				$db->commit();
 			}
 
-			if (version_compare($v, '1.2.0', '<')) {
+			if (version_compare($v, '1.1.16', '<')) {
+				$files = Config::FILES;
+
+				foreach ($files as $key => &$set) {
+					$f = Files::get($set);
+					$set = $f !== null ? $f->modified->getTimestamp() : null;
+				}
+
+				unset($set);
+
+				// Migrate files
+				if ($f = Files::get(File::CONTEXT_SKELETON . '/favicon.png')) {
+					$f->copy(Config::FILES['favicon']);
+					$files['favicon'] = $f->modified->getTimestamp();
+				}
+
+				if ($f = Files::get(File::CONTEXT_SKELETON . '/logo.png')) {
+					$f->copy(Config::FILES['icon']);
+					$files['icon'] = $f->modified->getTimestamp();
+				}
+
+				$db->begin();
+				$db->exec('DELETE FROM config WHERE key IN (\'admin_background\', \'admin_css\', \'admin_homepage\');');
+				$db->exec(sprintf('INSERT INTO config (key, value) VALUES (\'files\', %s);', $db->quote(json_encode($files))));
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.18', '<')) {
+				$db->begin();
+				// Re-do the 1.1.15 migration as the LIKE did not work and accounts were not updated
+				$db->import(ROOT . '/include/data/1.1.15_migration.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.19', '<')) {
+				$db->exec('VACUUM;'); // This will rebuild the index correctly, fixing the corrupted DB
+
+				// Some people were able to insert invalid charsets in the database, this messes up the indexes
+				// Let's try to fix that
+				$db->createFunction('utf8_encode', [Utils::class, 'utf8_encode']);
+				$db->beginSchemaUpdate();
+
+				// Now let's fix the content itself
+				$res = $db->first('SELECT * FROM membres WHERE 1;');
+
+				$columns = array_keys((array) $res);
+				$columns = array_map(fn($c) => sprintf('"%s" = utf8_encode("%1$s")', $c), $columns);
+				$db->exec(sprintf('UPDATE membres SET %s;', implode(', ', $columns)));
+
+				// Let's re-create users table with the correct index
+				$champs = Config::getInstance()->champs_membres;
+				$db->exec('ALTER TABLE membres RENAME TO membres_old;');
+				$db->commit();
+				$db->close();
+				$db->connect();
+				$db->beginSchemaUpdate();
+				$champs->create('membres');
+				$champs->copy('membres_old', 'membres');
+				$db->exec('DROP TABLE membres_old;');
+
+				// Set new types for accounts
+				$db->import(ROOT . '/include/data/1.1.19_migration.sql');
+
+				$db->commitSchemaUpdate();
+			}
+
+			if (version_compare($v, '1.1.21', '<')) {
+				$db->begin();
+				// Add id_analytical column to services_fees
+				$db->import(ROOT . '/include/data/1.1.21_migration.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.22', '<')) {
+				$db->begin();
+				// Create acc_accounts_balances view
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.23', '<')) {
+				$db->begin();
+				// Create acc_accounts_projects_balances view
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.24', '<')) {
+				$db->begin();
+
+				// Delete acc_accounts_projects_ebalances view
+				$db->exec('DROP VIEW IF EXISTS acc_accounts_projects_balances;');
+
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.25', '<')) {
 				// Just add email tables
-				$db->import(ROOT . '/include/data/1.2.0_schema.sql');
+				$db->import(ROOT . '/include/data/1.1.25_schema.sql');
 			}
 
 			// Vérification de la cohérence des clés étrangères
@@ -369,13 +463,14 @@ class Upgrade
 
 			Static_Cache::remove('upgrade');
 
-			// Réinstaller les plugins système si nécessaire
-			Plugin::checkAndInstallSystemPlugins();
-
 			Plugin::upgradeAllIfRequired();
 		}
 		catch (\Exception $e)
 		{
+			if ($db->inTransaction()) {
+				$db->rollback();
+			}
+
 			$s = new Sauvegarde;
 			$s->restoreFromLocal($backup_name);
 			$s->remove($backup_name);
@@ -415,6 +510,10 @@ class Upgrade
 
 	static public function getLatestVersion(): ?\stdClass
 	{
+		if (!ENABLE_TECH_DETAILS && !ENABLE_UPGRADES) {
+			return null;
+		}
+
 		$config = Config::getInstance();
 		$last = $config->get('last_version_check');
 
@@ -424,6 +523,27 @@ class Upgrade
 
 		// Only check once every two weeks
 		if ($last && $last->time > (time() - 3600 * 24 * 5)) {
+			return $last;
+		}
+
+		return null;
+	}
+
+	static public function fetchLatestVersion(): ?\stdClass
+	{
+		if (!ENABLE_TECH_DETAILS && !ENABLE_UPGRADES) {
+			return null;
+		}
+
+		$config = Config::getInstance();
+		$last = $config->get('last_version_check');
+
+		if ($last) {
+			$last = json_decode($last);
+		}
+
+		// Only check once every two weeks
+		if ($last && $last->time > (time() - 3600 * 24 * 2)) {
 			return $last;
 		}
 

@@ -33,7 +33,7 @@
 		<dl>
 			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc." source=$transaction}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc." source=$transaction}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}
@@ -50,7 +50,7 @@
 				<dl>
 				{foreach from=$type.accounts key="key" item="account"}
 					<?php $selected = $types_accounts[$key] ?? null; ?>
-					{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
+					{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$account.targets_string,$chart_id name="account_%d_%d"|args:$type.id,$key label=$account.label required=1 default=$selected}
 				{/foreach}
 				</dl>
 			{/if}
@@ -63,8 +63,9 @@
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$first_line.reference}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php" default=$linked_users}
-			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php" default=$linked_users}
+			{input type="textarea" name="notes" label="Remarques" rows=2 cols=30 source=$transaction}
+			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{if count($analytical_accounts) > 1}

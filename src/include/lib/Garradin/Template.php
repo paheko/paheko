@@ -24,21 +24,24 @@ class Template extends \KD2\Smartyer
 	public function display($template = null)
 	{
 		if (isset($_GET['_pdf'])) {
-			$out = $this->fetch($template);
-
-			$filename = 'Print';
-
-			if (preg_match('!<title>(.*)</title>!U', $out, $match)) {
-				$filename = trim($match[1]);
-			}
-
-			header('Content-type: application/pdf');
-			header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($filename)));
-			Utils::streamPDF($out);
-			return $this;
+			return $this->PDF($template);
 		}
 
 		return parent::display($template);
+	}
+
+	public function PDF(?string $template = null, ?string $title = null)
+	{
+		$out = $this->fetch($template);
+
+		if (!$title && preg_match('!<title>(.*)</title>!U', $out, $match)) {
+			$title = trim($match[1]);
+		}
+
+		header('Content-type: application/pdf');
+		header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($title ?: 'Page')));
+		Utils::streamPDF($out);
+		return $this;
 	}
 
 	private function __clone()
@@ -68,6 +71,7 @@ class Template extends \KD2\Smartyer
 		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
+		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('help_url', HELP_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
@@ -117,8 +121,17 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
-		$this->register_modifier('abs', 'abs');
+		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
+
+		$this->register_modifier('linkify_transactions', function ($str) {
+			return preg_replace_callback('/(?<=^|\s)#(\d+)(?=\s|$)/', function ($m) {
+				return sprintf('<a href="%s%d">#%2$d</a>',
+					Utils::getLocalURL('!acc/transactions/details.php?id='),
+					$m[1]
+				);
+			}, $str);
+		});
 
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
@@ -150,7 +163,12 @@ class Template extends \KD2\Smartyer
 
 		foreach ($errors as &$error) {
 			if ($error instanceof UserException) {
-				$message = nl2br($this->escape($error->getMessage()));
+				if ($html = $error->getHTMLMessage()) {
+					$message = $html;
+				}
+				else {
+					$message = nl2br($this->escape($error->getMessage()));
+				}
 
 				if ($error->hasDetails()) {
 					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();
@@ -178,11 +196,17 @@ class Template extends \KD2\Smartyer
 
 	protected function widgetIcon(array $params): string
 	{
-		if (empty($params['href'])) {
-			return sprintf('<b class="icn">%s</b>', Utils::iconUnicode($params['shape']));
+		if (isset($params['html']) && $params['html'] == false) {
+			return Utils::iconUnicode($params['shape']);
 		}
 
-		return sprintf('<a href="%s" class="icn" title="%s">%s</a>', $this->escape(ADMIN_URL . $params['href']), $this->escape($params['label']), Utils::iconUnicode($params['shape']));
+		$attributes = array_diff_key($params, ['shape']);
+		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, $this->escape($v)),
+			$attributes, array_keys($attributes));
+
+		$attributes = implode(' ', $attributes);
+
+		return sprintf('<b class="icn" %s>%s</b>', $attributes, Utils::iconUnicode($params['shape']));
 	}
 
 	protected function widgetLink(array $params): string
@@ -286,7 +310,7 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -372,8 +396,11 @@ class Template extends \KD2\Smartyer
 		}
 
 		// Create attributes string
-		if (array_key_exists('required', $attributes)) {
+		if (!empty($attributes['required'])) {
 			$attributes['required'] = 'required';
+		}
+		else {
+			unset($attributes['required']);
 		}
 
 		if (!empty($attributes['disabled'])) {
@@ -382,6 +409,13 @@ class Template extends \KD2\Smartyer
 		}
 		else {
 			unset($attributes['disabled']);
+		}
+
+		if (!empty($attributes['readonly'])) {
+			$attributes['readonly'] = 'readonly';
+		}
+		else {
+			unset($attributes['readonly']);
 		}
 
 		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
@@ -403,6 +437,13 @@ class Template extends \KD2\Smartyer
 
 		$attributes_string = implode(' ', $attributes_string);
 
+		if ($type == 'radio-btn') {
+			$radio = self::formInput(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
+			$out = sprintf('<dd class="radio-btn">%s
+				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
+			</dd>', $radio, htmlspecialchars($name), htmlspecialchars($value), htmlspecialchars($label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
+			return $out;
+		}
 		if ($type == 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
@@ -443,7 +484,7 @@ class Template extends \KD2\Smartyer
 
 			$button = $this->widgetButton([
 				'shape' => $multiple ? 'plus' : 'menu',
-				'value' => (substr($attributes['target'], 0, 4) === 'http') ? $attributes['target'] : ADMIN_URL . $attributes['target'],
+				'value' => Utils::getLocalURL($attributes['target']),
 				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
 				'data-multiple' => $multiple ? '1' : '0',
 				'data-name' => $name,
@@ -454,6 +495,10 @@ class Template extends \KD2\Smartyer
 		elseif ($type == 'money') {
 			if (null !== $current_value && !$current_value_from_user) {
 				$current_value = Utils::money_format($current_value, ',', '');
+			}
+
+			if ((string) $current_value === '0') {
+				$current_value = '';
 			}
 
 			$currency = Config::getInstance()->get('monnaie');
@@ -493,7 +538,7 @@ class Template extends \KD2\Smartyer
 		else {
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
-			if ($type == 'file') {
+			if ($type == 'file' && empty($params['no_size_limit'])) {
 				$out .= sprintf('<dd class="help"><small>Taille maximale : %s</small></dd>', Utils::format_bytes(Utils::getMaxUploadSize()));
 			}
 
@@ -557,6 +602,10 @@ class Template extends \KD2\Smartyer
 
 	protected function formatPhoneNumber($n)
 	{
+		if (empty($n)) {
+			return '';
+		}
+
 		$country = Config::getInstance()->get('pays');
 
 		if ($country !== 'FR') {
@@ -578,8 +627,8 @@ class Template extends \KD2\Smartyer
 		$couleur2 = $config->get('couleur2') ?: ADMIN_COLOR2;
 		$admin_background = ADMIN_BACKGROUND_IMAGE;
 
-		if (($f = $config->get('admin_background')) && ($file = Files::get($f))) {
-			$admin_background = $file->url() . '?' . $file->modified->getTimestamp();
+		if ($url = $config->fileURL('admin_background')) {
+			$admin_background = $url;
 		}
 
 		// Transformation Hexa vers décimal
@@ -595,8 +644,8 @@ class Template extends \KD2\Smartyer
 		}
 		</style>';
 
-		if (($f = $config->get('admin_css')) && ($file = Files::get($f))) {
-			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $file->url() . '?' . $file->modified->getTimestamp());
+		if ($url = $config->fileURL('admin_css')) {
+			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
 		return sprintf($out, $couleur1, $couleur2, $admin_background);
@@ -612,22 +661,32 @@ class Template extends \KD2\Smartyer
 			return htmlspecialchars($v);
 		}
 
+		if ($config->type == 'checkbox') {
+			return $v ? 'Oui' : 'Non';
+		}
+
+		if (empty($v)) {
+			return '';
+		}
+
 		switch ($config->type)
 		{
-			case 'checkbox':
-				return $v ? 'Oui' : 'Non';
+			case 'password':
+				return '*****';
 			case 'email':
 				return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'tel':
-				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
 			case 'url':
-				return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
 				return Utils::date_fr($v, 'd/m/Y');
 			case 'datetime':
 				return Utils::date_fr($v, 'd/m/Y à H:i');
+			case 'number':
+				return str_replace('.', ',', htmlspecialchars($v));
 			case 'multiple':
 				// Useful for search results, if a value is not a number
 				if (!is_numeric($v)) {
@@ -644,7 +703,7 @@ class Template extends \KD2\Smartyer
 
 				return htmlspecialchars(implode(', ', $out));
 			default:
-				return htmlspecialchars($v);
+				return nl2br(htmlspecialchars(rtrim((string) $v)));
 		}
 	}
 
@@ -714,7 +773,7 @@ class Template extends \KD2\Smartyer
 		if (!empty($params['user_mode']) && empty($config->editable))
 		{
 			$out = '<dt>' . htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</dt>';
-			$out .= '<dd>' . (trim($value) === '' ? 'Non renseigné' : $this->displayChampMembre($value, $config)) . '</dd>';
+			$out .= '<dd>' . (trim((string) $value) === '' ? 'Non renseigné' : $this->displayChampMembre($value, $config)) . '</dd>';
 			return $out;
 		}
 
@@ -764,7 +823,10 @@ class Template extends \KD2\Smartyer
 		}
 		elseif ($type == 'textarea')
 		{
-			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
+			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars((string) $value, ENT_QUOTES) . '</textarea>';
+		}
+		elseif ($type == 'date') {
+			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
 		}
 		else
 		{
@@ -777,8 +839,11 @@ class Template extends \KD2\Smartyer
 
 				$value = '1';
 			}
+			elseif ($type == 'number') {
+				$attributes .= 'step="any" ';
+			}
 
-			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars($value, ENT_QUOTES) . '" />';
+			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars((string) $value, ENT_QUOTES) . '" />';
 		}
 
 		$out = '

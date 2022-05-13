@@ -30,17 +30,28 @@ abstract class AbstractRender
 
 	abstract public function render(?string $content = null): string;
 
-	protected function resolveAttachment(string $uri) {
+	public function registerAttachment(string $uri)
+	{
+		Render::registerAttachment($this->file, $uri);
+	}
+
+	protected function resolveAttachment(string $uri)
+	{
 		$prefix = $this->current_path;
 		$pos = strpos($uri, '/');
 
-		// Absolute URL: treat it as absolute!
 		if ($pos === 0) {
-			return WWW_URL . ltrim($uri, '/');
+			// Absolute URL: treat it as absolute!
+			$uri = ltrim($uri, '/');
+		}
+		else {
+			// Handle relative URIs
+			$uri = $prefix . '/' . $uri;
 		}
 
-		// Handle relative URIs
-		return WWW_URL . $prefix . '/' . $uri;
+		$this->registerAttachment($uri);
+
+		return WWW_URL . $uri;
 	}
 
 	protected function resolveLink(string $uri) {

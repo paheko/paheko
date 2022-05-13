@@ -58,7 +58,7 @@
 				{input type="text" name="label" label="Libellé" required=1 default="Dépôt en banque"}
 				{input type="date" name="date" default=$date label="Date" required=1}
 				{input type="money" name="amount" label="Montant" required=1}
-				{input type="list" target="acc/charts/accounts/selector.php?chart=%d&targets=%d"|args:$account.id_chart,$target name="account_transfer" label="Compte de dépôt" required=1}
+				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d&targets=%d"|args:$account.id_chart,$target name="account_transfer" label="Compte de dépôt" required=1}
 				{input type="text" name="reference" label="Numéro de pièce comptable"}
 				{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 			</dl>

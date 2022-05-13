@@ -8,39 +8,31 @@ require __DIR__ . '/_inc.php';
 
 $key = qg('k');
 
-if (!isset(Config::DEFAULT_FILES[$key])) {
+$config = Config::getInstance();
+
+if (!isset(Config::FILES[$key])) {
 	throw new UserException('Fichier invalide');
 }
 
-$file_path = Config::DEFAULT_FILES[$key];
+$file = $config->file($key);
 
-$file = Files::get($file_path);
+$type = Config::FILES_TYPES[$key];
+$csrf_key = 'edit_file_' . $key;
 
-if (!$file) {
-	$file = File::create(Utils::dirname($file_path), Utils::basename($file_path), null, '');
-	$content = '';
-}
-else {
-	$content = $file->fetch();
-}
+$form->runIf('upload', function () use ($key, $config) {
+	$config->setFile($key, 'file', true);
+	$config->save();
+}, $csrf_key, Utils::getSelfURI());
 
-$editor = $file->editorType();
-$csrf_key = 'edit_file_' . $file->pathHash();
+$form->runIf('reset', function () use ($key, $config) {
+	$config->setFile($key, null);
+	$config->save();
+}, $csrf_key, Utils::getSelfURI());
 
-$form->runIf('save', function () use ($file, $key) {
-	// For config files, make sure config value is updated
-	$config = Config::getInstance();
-
-	if (trim(f('content')) === '') {
-		$file->delete();
-		$config->set($key, null);
-		$config->save();
-	}
-	else {
-		$file->setContent(f('content'));
-		$config->set($key, $file->path);
-		$config->save();
-	}
+$form->runIf('save', function () use ($key, $config) {
+	$content = trim((string) f('content'));
+	$config->setFile($key, $content === '' ? null : $content);
+	$config->save();
 
 	if (qg('js') !== null) {
 		die('{"success":true}');
@@ -48,7 +40,15 @@ $form->runIf('save', function () use ($file, $key) {
 
 }, $csrf_key, Utils::getSelfURI());
 
-$tpl->assign('file', $file);
+$tpl->assign(compact('csrf_key', 'file'));
 
-$tpl->assign(compact('csrf_key', 'content'));
-$tpl->display(sprintf('common/files/edit_%s.tpl', $editor));
+if ($type == 'image') {
+	$tpl->display('admin/config/edit_image.tpl');
+}
+else {
+	$content = $file ? $file->fetch() : '';
+	$path = Config::FILES[$key];
+	$format = $file ? $file->renderFormat() : 'skriv';
+	$tpl->assign(compact('content', 'path', 'format'));
+	$tpl->display(sprintf('common/files/edit_%s.tpl', $type));
+}

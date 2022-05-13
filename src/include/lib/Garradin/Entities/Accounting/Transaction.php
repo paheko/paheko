@@ -299,7 +299,7 @@ class Transaction extends Entity
 		];
 	}
 
-	/**
+	/**duplic
 	 * Creates a new Transaction entity (not saved) from an existing one,
 	 * trying to adapt to a different chart if possible
 	 * @param  int    $id
@@ -310,7 +310,7 @@ class Transaction extends Entity
 	{
 		$new = new Transaction;
 
-		$copy = ['type', 'status', 'label', 'notes', 'reference', 'date'];
+		$copy = ['type', 'status', 'label', 'notes', 'reference'];
 
 		foreach ($copy as $field) {
 			$new->$field = $this->$field;
@@ -344,7 +344,25 @@ class Transaction extends Entity
 			$new->addLine($line);
 		}
 
+		// Only set date if valid
+		if ($this->date >= $year->start_date && $this->date <= $year->end_date) {
+			$new->date = clone $this->date;
+		}
+
+		$new->status = 0;
+
 		return $new;
+	}
+
+	public function payment_reference(): ?string
+	{
+		$line = current($this->getLines());
+
+		if (!$line) {
+			return null;
+		}
+
+		return $line->reference;
 	}
 
 
@@ -403,7 +421,7 @@ class Transaction extends Entity
 
 	public function save(): bool
 	{
-		if ($this->validated && empty($this->_modified['validated'])) {
+		if ($this->validated && !(isset($this->_modified['validated']) && $this->_modified['validated'] === 0)) {
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
@@ -481,8 +499,14 @@ class Transaction extends Entity
 		$total = 0;
 
 		$lines = $this->getLines();
+		$accounts_ids = [];
 
-		foreach ($lines as $line) {
+		foreach ($lines as $k => $line) {
+			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
+			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
+			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
+
+			$accounts_ids = [$line->id_account];
 			$total += $line->credit;
 			$total -= $line->debit;
 		}
@@ -491,6 +515,14 @@ class Transaction extends Entity
 
 		$this->assert($db->test('acc_years', 'id = ?', $this->id_year), 'L\'exercice sélectionné n\'existe pas');
 		$this->assert($this->id_creator === null || $db->test('membres', 'id = ?', $this->id_creator), 'Le compte membre créateur de l\'écriture n\'existe pas');
+
+		$found_accounts = $db->getAssoc(sprintf('SELECT id, id FROM acc_accounts WHERE %s AND id_chart = (SELECT id_chart FROM acc_years WHERE id = %d);', $db->where('id', $accounts_ids), $this->id_year));
+
+		$diff = array_diff($accounts_ids, $found_accounts);
+		$this->assert(count($diff) == 0, sprintf('Certains comptes (%s) ne sont pas liés au bon plan comptable', implode(', ', $diff)));
+
+		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
+		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -507,7 +539,12 @@ class Transaction extends Entity
 		$amount = $source['amount'];
 
 		$key = 'account_transfer';
-		$account = @key($source[$key]);
+
+		if (empty($source[$key]) || !count($source[$key])) {
+			throw new ValidationException('Aucun compte de dépôt n\'a été sélectionné');
+		}
+
+		$account = key($source[$key]);
 
 		$line = new Line;
 		$line->importForm([
@@ -543,11 +580,11 @@ class Transaction extends Entity
 			$lines = Utils::array_transpose($source['lines']);
 
 			foreach ($lines as $i => $line) {
-				$line['id_account'] = @key($line['account']);
-
-				if (!$line['id_account']) {
-					throw new ValidationException('Numéro de compte invalide sur la ligne ' . ((int) $i+1));
+				if (empty($line['account']) || !count($line['account'])) {
+					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
 				}
+
+				$line['id_account'] = key($line['account']);
 
 				$line = (new Line)->import($line);
 				$this->addLine($line);
@@ -577,8 +614,14 @@ class Transaction extends Entity
 			foreach ($details[$type]->accounts as $k => $account) {
 				$credit = $account->position == 'credit' ? $amount : 0;
 				$debit = $account->position == 'debit' ? $amount : 0;
+
 				$key = sprintf('account_%d_%d', $type, $k);
-				$account = @key($source[$key]);
+
+				if (empty($source[$key]) || !count($source[$key])) {
+					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $k+1));
+				}
+
+				$account = key($source[$key]);
 
 				$line = new Line;
 				$line->importForm([
@@ -602,6 +645,9 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
+		if (empty($source['id_related'])) {
+			unset($source['id_related']);
+		}
 
 		$this->resetLines();
 		$this->importFromNewForm($source);
@@ -632,7 +678,11 @@ class Transaction extends Entity
 		$debit = $credit = 0;
 
 		foreach ($lines as $k => $line) {
-			$line['id_account'] = @key($line['account']);
+			if (empty($line['account']) || !count($line['account'])) {
+				throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $k+1));
+			}
+
+			$line['id_account'] = key($line['account']);
 
 			try {
 				$line = (new Line)->importForm($line);
@@ -651,10 +701,10 @@ class Transaction extends Entity
 			$line = new Line;
 
 			if ($debit > $credit) {
-				$line->debit = $debit - $credit;
+				$line->credit = $debit - $credit;
 			}
 			else {
-				$line->credit = $credit - $debit;
+				$line->debit = $credit - $debit;
 			}
 
 			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
@@ -688,7 +738,7 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 
-		return $db->preparedQuery('INSERT OR IGNORE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, ?);',
+		return $db->preparedQuery('REPLACE INTO acc_transactions_users (id_transaction, id_user, id_service_user) VALUES (?, ?, ?);',
 			$this->id(), $user_id, $service_id);
 	}
 
@@ -698,7 +748,7 @@ class Transaction extends Entity
 
 		$db->begin();
 
-		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND id_service_user IS NULL AND %s;', $db->where('id_user', 'NOT IN', $users));
+		$sql = sprintf('DELETE FROM acc_transactions_users WHERE id_transaction = ? AND %s;', $db->where('id_user', 'NOT IN', $users));
 		$db->preparedQuery($sql, $this->id());
 
 		foreach ($users as $id) {
@@ -720,8 +770,16 @@ class Transaction extends Entity
 	{
 		$db = EntityManager::getInstance(self::class)->DB();
 		$identity_column = Config::getInstance()->get('champ_identite');
-		$sql = sprintf('SELECT m.id, m.%s AS identity FROM membres m INNER JOIN acc_transactions_users l ON l.id_user = m.id WHERE l.id_transaction = ?;', $identity_column);
+		$sql = sprintf('SELECT m.id, m.%s AS identity, l.id_service_user
+			FROM membres m
+			INNER JOIN acc_transactions_users l ON l.id_user = m.id
+			WHERE l.id_transaction = ?;', $identity_column);
 		return $db->getAssoc($sql, $this->id());
+	}
+
+	public function listRelatedTransactions()
+	{
+		return EntityManager::getInstance(self::class)->all('SELECT * FROM @TABLE WHERE id_related = ?;', $this->id);
 	}
 
 	static public function getTypesDetails()
@@ -825,12 +883,12 @@ class Transaction extends Entity
 		return $details;
 	}
 
-	public function payOffFrom(int $id): \stdClass
+	public function payOffFrom(int $id): ?\stdClass
 	{
 		$this->_related = EntityManager::findOneById(self::class, $id);
 
 		if (!$this->_related) {
-			throw new \LogicException('Écriture d\'origine invalide');
+			return null;
 		}
 
 		$this->id_related = $this->_related->id();

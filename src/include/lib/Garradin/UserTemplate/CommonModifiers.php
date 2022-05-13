@@ -27,13 +27,15 @@ class CommonModifiers
 		'pagination',
 	];
 
-	static public function money($number, bool $hide_empty = true): string
+	static public function money($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
 		if ($hide_empty && !$number) {
 			return '';
 		}
 
-		return sprintf('<b class="money">%s</b>', Utils::money_format($number, ',', '&nbsp;', $hide_empty));
+		$sign = ($force_sign && $number > 0) ? '+' : '';
+
+		return sprintf('<b class="money">%s</b>', $sign . Utils::money_format($number, ',', '&nbsp;', $hide_empty));
 	}
 
 	static public function money_currency($number, bool $hide_empty = true): string
@@ -90,12 +92,11 @@ class CommonModifiers
 
 	static public function date($ts, string $format = null, string $locale = 'fr'): ?string
 	{
-		if (preg_match('/^DATE_[\w\d]+$/', $format)) {
-			$format = constant('DateTime::' . $format);
-		}
-
 		if (null === $format) {
 			$format = 'd/m/Y à H:i';
+		}
+		elseif (preg_match('/^DATE_[\w\d]+$/', $format)) {
+			$format = constant('DateTime::' . $format);
 		}
 
 		if ($locale == 'fr') {

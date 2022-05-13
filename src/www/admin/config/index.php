@@ -7,6 +7,11 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
+if (qg('check_version') !== null) {
+	echo json_encode(Upgrade::fetchLatestVersion());
+	exit;
+}
+
 $config = Config::getInstance();
 
 $form->runIf('save', function () use ($config) {
@@ -14,7 +19,7 @@ $form->runIf('save', function () use ($config) {
 	$config->save();
 }, 'config', Utils::getSelfURI(['ok' => '']));
 
-$latest = ENABLE_TECH_DETAILS ? Upgrade::getLatestVersion() : null;
+$latest = Upgrade::getLatestVersion();
 
 if (null !== $latest) {
 	$latest = $latest->version;
@@ -30,21 +35,7 @@ $tpl->assign([
 	'countries'        => Utils::getCountryList(),
 	'membres_cats'     => Categories::listSimple(),
 	'champs'           => $config->get('champs_membres')->listAssocNames(),
-	'color1'           => ADMIN_COLOR1,
-	'color2'           => ADMIN_COLOR2,
 	'garradin_website' => WEBSITE,
 ]);
 
-$homepage = $config->admin_homepage;
-
-if ($homepage && !Files::get($homepage)) {
-	File::createAndStore(Utils::dirname($homepage), Utils::basename($homepage), null, '');
-}
-
-$admin_background = $config->get('admin_background');
-
-$tpl->assign('background_image_current', $admin_background ? WWW_URL . $admin_background : null);
-$tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
-
-$tpl->assign('custom_js', ['color_helper.js']);
 $tpl->display('admin/config/index.tpl');

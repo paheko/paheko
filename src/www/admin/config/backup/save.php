@@ -13,12 +13,6 @@ $form->runIf('download', function () use ($s) {
 	exit;
 }, 'backup_download');
 
-// Download all files as ZIP
-$form->runIf('download_files', function () use ($s) {
-	$s->dumpFilesZip();
-	exit;
-}, 'files_download');
-
 // Create local backup
 $form->runIf('create', function () use ($s) {
 	$s->create();
@@ -48,7 +42,7 @@ $form->runIf('config', function () {
 }, 'backup_config', Utils::getSelfURI(['ok' => 'config']));
 
 $db_size = $s->getDBSize();
-$files_size = Files::getUsedQuota();
+$files_size = (FILE_STORAGE_BACKEND == 'SQLite') ? Files::getUsedQuota() : null;
 
 $ok = qg('ok'); // return message
 

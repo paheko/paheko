@@ -19,6 +19,11 @@
 			<p class="block alert">
 				<strong>Vous n'êtes pas administrateur dans cette sauvegarde.</strong> Garradin a donné les droits d'administration à toutes les catégories afin d'empêcher de ne plus pouvoir se connecter.
 				Merci de corriger les droits des catégories maintenant.
+			{elseif $ok_code & Sauvegarde::CHANGED_USER}
+			</p>
+			<p class="block alert">
+				<strong>Votre compte membre n'existait pas dans la sauvegarde qui a été restaurée, vous êtes désormais connecté avec le premier compte administrateur.</strong>
+			</p>
 			{/if}
 		{elseif $ok == 'remove'}La sauvegarde a été supprimée.
 		{/if}
@@ -39,7 +44,7 @@
 		en cas de besoin d'annuler cette restauration.
 	</p>
 	<dl>
-		{input type="file" name="file" required=true}
+		{input type="file" name="file" label="Fichier de sauvegarde à restaurer" required=true}
 	</dl>
 	<p class="submit">
 		{csrf_field key="backup_restore"}
@@ -53,8 +58,6 @@
 </fieldset>
 
 </form>
-
-{if ENABLE_AUTOMATIC_BACKUPS}
 
 <form method="post" action="{$self_url_no_qs}">
 
@@ -77,7 +80,7 @@
 				</thead>
 			{foreach from=$list item="backup"}
 				<tr>
-					<td class="check">{input type="radio" name="selected" value=$backup.filename}</td>
+					<td class="check">{if $backup.can_restore}{input type="radio" name="selected" value=$backup.filename}{/if}</td>
 					<th><label for="f_selected_{$backup.filename}">{$backup.name}</label></th>
 					<td>{$backup.size|size_in_bytes}</td>
 					<td>{$backup.date|date_short:true}</td>
@@ -101,7 +104,5 @@
 </fieldset>
 
 </form>
-
-{/if}
 
 {include file="admin/_foot.tpl"}

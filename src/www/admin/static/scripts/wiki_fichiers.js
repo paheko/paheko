@@ -25,7 +25,7 @@
             img.alt = '';
             f.querySelector('dd.image').appendChild(img);
 
-            f.querySelector('dd.cancel input[type=reset]').onclick = function() {
+            f.querySelector('dd.cancel [type=reset]').onclick = function() {
                 f.style.display = 'none';
 
                 if (from_upload)

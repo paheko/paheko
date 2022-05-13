@@ -184,7 +184,7 @@ INSERT INTO acc_charts (country, code, label) VALUES ('FR', 'PCA2018', 'Plan com
 
 CREATE TEMP TABLE tmp_accounts (code,label,description,position,type);
 
-.import charts/fr_2018.csv tmp_accounts
+.import charts/fr_pca_2018.csv tmp_accounts
 
 INSERT INTO acc_accounts (id_chart, code, label, description, position, type) SELECT
 	(SELECT id FROM acc_charts WHERE code = 'PCA2018'),

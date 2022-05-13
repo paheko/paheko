@@ -24,7 +24,7 @@ fieldset.wikiText {
 
 #encryptPasswordDisplay {
     cursor: help;
-    background: #ddd;
+    background: var(--gLightBackgroundColor);
 }
 
 fieldset.wikiEncrypt, fieldset.wikiMain, .web-edit p.submit {
@@ -51,31 +51,9 @@ fieldset.wikiMain #f_uri {
 
 .wikiFooter, .wikiFiles {
     font-size: 0.8em;
-    color: #666;
-    border-top: 0.1em solid #ccc;
+    color: var(--gBorderColor);
+    border-top: 0.1em solid var(--gLightBorderColor);
     clear: both;
-}
-
-.wikiMain samp {
-    background: #eee;
-    padding: 0.2em 0.3em;
-}
-
-.wikiChildren {
-    margin: 1em 0 1em 1em;
-    border: .1em solid #999;
-    border-radius: .5em;
-    padding: 1em;
-    background: rgba(255, 255, 255, 0.5);
-    float: right;
-    clear: right;
-    width: 25%;
-}
-
-.wikiChildren ul {
-    color: #ccc;
-    list-style-type: square;
-    margin-left: 1em;
 }
 
 form#f_upload fieldset {

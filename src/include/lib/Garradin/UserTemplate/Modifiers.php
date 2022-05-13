@@ -4,6 +4,8 @@ namespace Garradin\UserTemplate;
 
 use Garradin\Utils;
 
+use KD2\SMTP;
+
 class Modifiers
 {
 	const PHP_MODIFIERS_LIST = [
@@ -41,6 +43,7 @@ class Modifiers
 		'regexp_replace',
 		'remove_leading_number',
 		'get_leading_number',
+		'check_email',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -53,6 +56,11 @@ class Modifiers
 	static public function regexp_replace($str, $pattern, $replace)
 	{
 		return preg_replace($pattern, $replace, $str);
+	}
+
+	static public function check_email($str)
+	{
+		return SMTP::checkEmailIsValid($str, true);
 	}
 
 	/**
@@ -125,7 +133,7 @@ class Modifiers
 
 	static public function xml_escape($str)
 	{
-		return htmlspecialchars($str, ENT_XML1);
+		return htmlspecialchars($str, ENT_XML1 | ENT_QUOTES);
 	}
 
 	static public function remove_leading_number($str): string

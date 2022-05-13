@@ -24,7 +24,8 @@ class Services_User
 	{
 		return DB::getInstance()->get('SELECT
 			s.label, MAX(su.date) AS last_date, su.expiry_date AS expiry_date, sf.label AS fee_label, su.paid, s.end_date,
-			CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END AS status
+			CASE WHEN su.expiry_date < date() THEN -1 WHEN su.expiry_date >= date() THEN 1 ELSE 0 END AS status,
+			CASE WHEN s.end_date < date() THEN 1 ELSE 0 END AS archived
 			FROM services_users su
 			INNER JOIN services s ON s.id = su.id_service
 			INNER JOIN services_fees sf ON sf.id = su.id_fee
@@ -32,7 +33,7 @@ class Services_User
 			GROUP BY su.id_service ORDER BY expiry_date DESC;', $user_id);
 	}
 
-	static public function perUserList(int $user_id): DynamicList
+	static public function perUserList(int $user_id, ?int $only_id = null): DynamicList
 	{
 		$columns = [
 			'id' => [
@@ -40,6 +41,9 @@ class Services_User
 			],
 			'id_account' => [
 				'select' => 'sf.id_account',
+			],
+			'has_transactions' => [
+				'select' => 'tu.id_user',
 			],
 			'label' => [
 				'select' => 's.label',
@@ -73,6 +77,10 @@ class Services_User
 			LEFT JOIN acc_transactions_users tu ON tu.id_service_user = su.id
 			LEFT JOIN acc_transactions_lines tl ON tl.id_transaction = tu.id_transaction';
 		$conditions = sprintf('su.id_user = %d', $user_id);
+
+		if ($only_id) {
+			$conditions .= sprintf(' AND su.id = %d', $only_id);
+		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
 

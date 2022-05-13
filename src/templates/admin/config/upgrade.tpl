@@ -27,37 +27,37 @@
 		{/if}
 		<details>
 			<summary><h3>{$diff.delete|count} fichiers seront supprimés</h3></summary>
-			<p>
+			<dl>
 			{foreach from=$diff.delete key="file" item="path"}
-				{$file}<br />
+				<dd>{$file}</dd>
 			{/foreach}
-			</p>
+			</dl>
 		</details>
 		<details>
 			<summary><h3>{$diff.create|count} fichiers seront rajoutés</h3></summary>
-			<p>
+			<dl>
 			{foreach from=$diff.create key="file" item="path"}
-				{$file}<br />
+				<dd>{$file}</dd>
 			{/foreach}
-			</p>
+			</dl>
 		</details>
 		<details>
 			<summary><h3>{$diff.update|count} fichiers seront modifiés</h3></summary>
 			<p class="alert block">
 				Si vous aviez bidouillé ces fichiers, les modifications seront écrasées.
 			</p>
-			<p>
+			<dl>
 			{foreach from=$diff.update key="file" item="path"}
-				{$file}<br />
+				<dd>{$file}</dd>
 			{/foreach}
-			</p>
+			</dl>
 		</details>
 		<dl class="block error">
 			{input type="checkbox" name="upgrade" value=$version label="Je confirme vouloir procéder à la mise à jour" help="Cette action peut casser votre installation !"}
 		</dl>
 	</fieldset>
 
-	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:WEBSITE target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
+	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:$website target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="next" label="Effectuer la mise à jour" shape="right" class="main"}
@@ -77,7 +77,7 @@
 		</dl>
 	</fieldset>
 
-	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:WEBSITE target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
+	<p class="alert block">N'oubliez pas d'aller {link href="%swiki/?name=Changelog"|args:$website target="_blank" label="lire le journal des changements"} avant d'effectuer la mise à jour&nbsp;!</p>
 	<p class="submit">
 		{csrf_field key=$csrf_key}
 		{button type="submit" name="next" label="Télécharger" shape="right" class="main"}

@@ -30,7 +30,7 @@ class Champs
 		'datetime'	=>	'Date et heure',
         'file'      =>  'Fichier',
         'password'  =>  'Mot de passe',
-		'number'	=>	'Numéro',
+		'number'	=>	'Nombre',
 		'tel'		=>	'Numéro de téléphone',
 		'select'	=>	'Sélecteur à choix unique',
         'multiple'  =>  'Sélecteur à choix multiple',
@@ -502,8 +502,7 @@ class Champs
             'clef_pgp TEXT NULL, -- Clé publique PGP'
         ];
 
-        end($this->champs);
-        $last_one = key($this->champs);
+        $last_one = array_key_last((array)$this->champs);
 
         foreach ($this->champs as $key=>$cfg)
         {
@@ -512,7 +511,7 @@ class Champs
             elseif ($cfg->type == 'file')
                 $type = 'BLOB';
             else
-                $type = 'TEXT COLLATE NOCASE';
+                $type = 'TEXT COLLATE U_NOCASE';
 
             $line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
@@ -532,10 +531,8 @@ class Champs
         return $sql;
     }
 
-    public function getCopyFields(): array
+    public function getCopyFields(bool $same = false): array
     {
-        $config = Config::getInstance();
-
         // Champs à recopier
         $copy = [
             'id'               => 'id',
@@ -546,7 +543,7 @@ class Champs
             'clef_pgp'         => 'clef_pgp',
         ];
 
-        $anciens_champs = $config->get('champs_membres');
+        $anciens_champs = $same ? null : Config::getInstance()->get('champs_membres');
         $anciens_champs = is_null($anciens_champs) ? $this->champs : $anciens_champs->getAll();
 
         foreach ($this->champs as $key=>$cfg)
@@ -594,12 +591,12 @@ class Champs
         DB::getInstance()->exec($this->getSQLSchema($table_name));
     }
 
-    public function createIndexes(string $table_name = self::TABLE): void
+    public function createIndexes(string $table_name = self::TABLE, string $id_field = null): void
     {
         $db = DB::getInstance();
-        $config = Config::getInstance();
+        $id_field ??= Config::getInstance()->champ_identifiant;
 
-        if ($id_field = $config->get('champ_identifiant')) {
+        if ($id_field) {
             // Mettre les champs identifiant vides à NULL pour pouvoir créer un index unique
             $db->exec(sprintf('UPDATE %s SET %s = NULL WHERE %2$s = \'\';',
                 $table_name, $id_field));
@@ -607,7 +604,7 @@ class Champs
             $collation = '';
 
             if ($this->isText($id_field)) {
-                $collation = ' COLLATE NOCASE';
+                $collation = ' COLLATE U_NOCASE';
             }
 
             // Création de l'index unique
@@ -628,7 +625,7 @@ class Champs
         // USE TEMP B-TREE FOR ORDER BY
         $listed_fields = array_keys((array) $this->getListedFields());
         foreach ($listed_fields as $field) {
-            if ($field === $config->get('champ_identifiant')) {
+            if ($field === $id_field) {
                 // Il y a déjà un index
                 continue;
             }
@@ -636,7 +633,7 @@ class Champs
             $collation = '';
 
             if ($this->isText($field)) {
-                $collation = ' COLLATE NOCASE';
+                $collation = ' COLLATE U_NOCASE';
             }
 
             $db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));

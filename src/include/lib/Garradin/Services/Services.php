@@ -17,7 +17,7 @@ class Services
 
 	static public function listAssoc()
 	{
-		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE NOCASE;');
+		return DB::getInstance()->getAssoc('SELECT id, label FROM services ORDER BY label COLLATE U_NOCASE;');
 	}
 
 	static public function count()
@@ -32,7 +32,7 @@ class Services
 		$sql = sprintf('SELECT
 			id, label, duration, start_date, end_date, description,
 			CASE WHEN end_date IS NOT NULL THEN end_date WHEN duration IS NOT NULL THEN date(\'now\', \'+\'||duration||\' days\') ELSE NULL END AS expiry_date
-			FROM services %s ORDER BY label COLLATE NOCASE;', $where);
+			FROM services %s ORDER BY label COLLATE U_NOCASE;', $where);
 
 		$services = DB::getInstance()->getGrouped($sql);
 		$fees = Fees::listAllByService($user_id);
@@ -70,7 +70,7 @@ class Services
 			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services s
 			WHERE 1 AND %s
-			ORDER BY s.label COLLATE NOCASE;', $condition, $current_condition);
+			ORDER BY s.label COLLATE U_NOCASE;', $condition, $current_condition);
 
 		return $db->get($sql);
 	}

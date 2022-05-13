@@ -1,15 +1,15 @@
 .codeEditor {
 	width: 100%;
 	height: 600px;
-	border: 1px solid #999;
-	background: #eee;
+	border: 1px solid var(--gBorderColor);
+	background: var(--gLightBackgroundColor);
 	position: relative;
 	display: block;
 }
 
 .codeEditor .sk_help {
-	background: #ccc;
-	border-top: 2px solid #999;
+	background: var(--gLightBorderColor);
+	border-top: 2px solid var(--gBorderColor);
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -21,8 +21,8 @@
 }
 
 .codeEditor .sk_toolbar {
-	background: #ccc;
-	border-bottom: 2px solid #999;
+	background: var(--gLightBorderColor);
+	border-bottom: 2px solid var(--gBorderColor);
 	height: 32px;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .codeEditor .sk_toolbar select:hover {
-	background-color: #fff;
+	background-color: var(--gHoverLinkColor);
 }
 
 .codeEditor .sk_toolbar p {
@@ -63,7 +63,7 @@
 	background: transparent no-repeat center center;
 }
 
-.codeEditor .sk_toolbar input:hover { background-color: #fff; }
+.codeEditor .sk_toolbar input:hover { background-color: var(--gLightBackgroundColor); }
 
 .codeEditor .sk_toolbar .save { margin-left: 2em; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEU6XIthfJfOXAD8rz6PpsDe3t7+/v6YrsZhe5NVV1Py8vL09PTMzc6+0upyn88gSod8oq0HAAAAAXRSTlOZyTXzhgAAAGxJREFUCNdj4P+kBAT6Hxj+XjYGAtv7DH+fbQOCfSBGKBDkgRi7gQAschQoAmbsXrVq1ToQIw0IQGregQGQ8bCjo6OvDsQ4czS04jmQ8eLMzJiDUMYZkMj3ilAIg/9h6PEjJ4AMhp8zgeD/BwBY4VdD5HZlvAAAAABJRU5ErkJggg=="); }
 .codeEditor .sk_toolbar .reset { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAABCklEQVR42p2TsUrDUBSGv4RM2qlLXXwBHdoncG3u5tpZx059gojgZAtC3bqqa7cQKH2FWiFZHUSIg5lChi7Xpak312Ma/eHA5Zzz/5fzHw5UMQZ0wxgDOCb5fnQ8Glxe0AR31zdcPW0mpoDOkoDPJKRI41rywdEpRRrTHeZ4drFIY15nh5w/f4jkea/D2aPafeJKTVuyI4Ut7G0NkVDmnbpxXMAHyJJgl1xPW+XT32emC0SA3z75FugO85Ic8Qf0jR33a/p0lgR6PW1pQJtbiPbNK8GzDLPhNBVAKVUphGGIJD7vdWQBi1SBuSGA/P1FFvgNb8vbH7nFaoO5Ja2Uki6Ommt8ME36t4lfRLtlZDAJ4ScAAAAASUVORK5CYII="); }
@@ -86,7 +86,7 @@
 	bottom: 22px;
 	width: 46px;
 	text-align: right;
-	border-right: 2px solid #999;
+	border-right: 2px solid var(--gLightBorderColor);
 	overflow: hidden;
 }
 
@@ -94,7 +94,7 @@
 	display: block;
 	padding-right: 2px;
 	font-weight: normal;
-}	
+}
 
 .codeEditor .lineCount b {
 	display: block;
@@ -103,7 +103,7 @@
 }
 
 .codeEditor .lineCount b.current {
-	background: #ccc;
+	background: var(--gLightBorderColor);
 }
 
 .codeEditor .container {

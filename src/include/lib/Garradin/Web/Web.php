@@ -17,7 +17,7 @@ use Garradin\Membres\Session;
 
 use KD2\DB\EntityManager as EM;
 
-use const Garradin\{WWW_URI, ADMIN_URL, FILE_STORAGE_BACKEND};
+use const Garradin\{WWW_URI, ADMIN_URL, FILE_STORAGE_BACKEND, ROOT};
 
 class Web
 {
@@ -69,7 +69,10 @@ class Web
 			$db->exec(sprintf('DELETE FROM web_pages WHERE %s;', $db->where('path', $deleted)));
 		}
 
-		foreach (array_keys($new) as $path) {
+		$new = array_keys($new);
+		ksort($new);
+
+		foreach ($new as $path) {
 			$f = Files::get(File::CONTEXT_WEB . '/' . $path . '/index.txt');
 
 			if (!$f) {
@@ -109,20 +112,20 @@ class Web
 
 	static public function listCategories(string $parent): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE NOCASE;';
+		$sql = 'SELECT * FROM @TABLE WHERE parent = ? AND type = ? ORDER BY title COLLATE U_NOCASE;';
 		return EM::getInstance(Page::class)->all($sql, $parent, Page::TYPE_CATEGORY);
 	}
 
 	static public function listPages(string $parent, bool $order_by_date = true): array
 	{
-		$order = $order_by_date ? 'published DESC' : 'title COLLATE NOCASE';
+		$order = $order_by_date ? 'published DESC' : 'title COLLATE U_NOCASE';
 		$sql = sprintf('SELECT * FROM @TABLE WHERE parent = ? AND type = %d ORDER BY %s;', Page::TYPE_PAGE, $order);
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
 	static public function listAll(string $parent): array
 	{
-		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE NOCASE;';
+		$sql = 'SELECT * FROM @TABLE WHERE parent = ? ORDER BY title COLLATE U_NOCASE;';
 		return EM::getInstance(Page::class)->all($sql, $parent);
 	}
 
@@ -186,6 +189,10 @@ class Web
 			API::dispatchURI(substr($uri, 4));
 			exit;
 		}
+		elseif ($uri == 'favicon.ico') {
+			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
+			return;
+		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
@@ -194,10 +201,12 @@ class Web
 			|| ($file = self::getAttachmentFromURI($uri))) {
 			$size = null;
 
-			foreach ($_GET as $key => $value) {
-				if (substr($key, -2) == 'px') {
-					$size = (int)substr($key, 0, -2);
-					break;
+			if ($file->image) {
+				foreach ($_GET as $key => $v) {
+					if (array_key_exists($key, File::ALLOWED_THUMB_SIZES)) {
+						$size = $key;
+						break;
+					}
 				}
 			}
 
