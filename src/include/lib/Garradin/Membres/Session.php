@@ -264,7 +264,7 @@ class Session extends \KD2\UserSession
 			$content = Security::encryptWithPublicKey($membre->clef_pgp, $message);
 		}
 
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email], null, 'Mot de passe perdu ?', $message);
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe perdu ?', $message);
 		return true;
 	}
 
@@ -334,7 +334,7 @@ class Session extends \KD2\UserSession
 
 		DB::getInstance()->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$membre->id]);
 
-		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email], null, 'Mot de passe changé', $message);
+		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
 	}
 
 	public function editUser($data)
@@ -401,7 +401,7 @@ class Session extends \KD2\UserSession
 		$content.= str_repeat('=', 70) . "\n\n";
 		$content.= $message;
 
-		$dest = $copie ? [$dest, $user->email] : [$dest];
+		$dest = $copie ? [$dest => null, $user->email => null] : [$dest => null];
 
 		return Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
 	}

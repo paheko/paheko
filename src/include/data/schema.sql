@@ -393,7 +393,7 @@ CREATE TABLE IF NOT EXISTS emails (
 -- We are not storing actual email addresses here for privacy reasons
 -- So that we can keep the record (for opt-out reasons) even when the
 -- email address has been removed from the users table
-	id INTEGER NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL PRIMARY KEY,
     hash TEXT NOT NULL,
     verified INTEGER NOT NULL DEFAULT 0,
     optout INTEGER NOT NULL DEFAULT 0,

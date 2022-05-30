@@ -1,10 +1,10 @@
 {include file="admin/_head.tpl" title="Adresses rejetées" current="membres/message"}
 
 <nav class="tabs">
-    <ul>
-    	<li><a href="message_collectif.php">Envoyer</a></li>
-    	<li class="current"><a href="emails.php">Adresses rejetées</a></li>
-    </ul>
+	<ul>
+		<li><a href="message_collectif.php">Envoyer</a></li>
+		<li class="current"><a href="emails.php">Adresses rejetées</a></li>
+	</ul>
 </nav>
 
 {if isset($_GET['sent'])}
@@ -50,14 +50,16 @@
 	<div class="block help">
 		<h3>Statuts possibles d'une adresse e-mail&nbsp;:</h3>
 		<dl class="cotisation">
+			{*
 			<dt>Vérifiée</dt>
 			<dd>L'adresse a déjà reçu un message et a été vérifiée manuellement par le destinataire.</dd>
+			*}
 			<dt>Désinscription</dt>
 			<dd>Le destinataire a demandé à être désinscrit et ne recevra plus de messages.</dd>
 			<dt>Invalide</dt>
 			<dd>L'adresse n'existe pas ou plus. Il n'est pas possible de lui envoyer des messages.</dd>
 			<dt>Trop de tentatives</dt>
-			<dd>Le service destinataire a répondu une erreur plus de {$max_fail_count} fois. Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
+			<dd>Le service destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois.<br />Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
 		</dl>
 	</div>
 

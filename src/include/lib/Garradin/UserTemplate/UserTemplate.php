@@ -21,9 +21,11 @@ use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_T
 
 class UserTemplate extends Brindille
 {
-	protected $path;
+	protected $path = null;
 	protected $modified;
-	protected $file;
+	protected $file = null;
+	protected $code = null;
+	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
 
 	static protected $root_variables;
 
@@ -111,20 +113,32 @@ class UserTemplate extends Brindille
 
 	public function setSource(string $path)
 	{
+		$this->file = null;
 		$this->path = $path;
 		$this->modified = filemtime($path);
+		// Use shared cache for default templates
+		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
+	}
+
+	public function setCode(string $code)
+	{
+		$this->code = $code;
+		$this->file = null;
+		$this->path = null;
+		$this->modified = time();
+		// Use custom cache for user templates
+		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
+	}
+
+	protected function _getCachePath()
+	{
+		$hash = sha1($this->file ? $this->file->path : ($this->code ?: $this->path));
+		return sprintf('%s/%s.php', $this->cache_path, $hash);
 	}
 
 	public function display(): void
 	{
-		// Use custom cache for user templates
-		if ($this->file) {
-			$compiled_path = sprintf('%s/%s.php', USER_TEMPLATES_CACHE_ROOT, sha1($this->file->path));
-		}
-		// Use shared cache for default templates
-		else {
-			$compiled_path = sprintf('%s/%s.php', SHARED_USER_TEMPLATES_CACHE_ROOT, sha1($this->path));
-		}
+		$compiled_path = $this->_getCachePath(true);
 
 		if (!is_dir(dirname($compiled_path))) {
 			// Force cache directory mkdir
@@ -138,7 +152,15 @@ class UserTemplate extends Brindille
 
 		$tmp_path = $compiled_path . '.tmp';
 
-		$source = $this->file ? $this->file->fetch() : file_get_contents($this->path);
+		if ($this->code) {
+			$source = $this->code;
+		}
+		elseif ($this->file) {
+			$source = $this->file->fetch();
+		}
+		else {
+			$source = file_get_contents($this->path);
+		}
 
 		try {
 			$code = $this->compile($source);

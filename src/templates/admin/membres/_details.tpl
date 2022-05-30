@@ -48,7 +48,7 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{$value|display_champ_membre:$c_config|raw}
 		{/if}
 	</dd>
-		{if $c_config.type == 'email' && ($email = Users\Emails::getEmail($value))}
+		{if $c_config.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
 		<dd class="help">
 			{if $email.optout}
 				<b class="alert">A demandé à ne plus recevoir de messages</b>

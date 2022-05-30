@@ -10,6 +10,7 @@ use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
 use Garradin\Users\Emails;
+use Garradin\UserTemplate\UserTemplate;
 
 class Membres
 {
@@ -333,37 +334,9 @@ class Membres
         return DB::getInstance()->get($sql, $query);
     }
 
-    public function sendMessage(array $recipients, $subject, $message, $send_copy)
+    public function listAllButHidden(): array
     {
-        $config = Config::getInstance();
-
-        foreach ($recipients as $key => &$recipient) {
-            if (empty($recipient->email)) {
-                unset($recipients[$key]);
-            }
-
-            $recipient = $recipient->email;
-        }
-
-        unset($recipient);
-
-        if (!count($recipients)) {
-            throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
-        }
-
-        Emails::queue(Emails::CONTEXT_BULK, $recipients, null, $subject, $message);
-
-        if ($send_copy)
-        {
-            Emails::queue(Emails::CONTEXT_BULK, $config->get('email_asso'), null, $subject, $message);
-        }
-
-        return true;
-    }
-
-    public function listAllEmailsButHidden(): array
-    {
-        return DB::getInstance()->get('SELECT id, email FROM membres
+        return DB::getInstance()->get('SELECT * FROM membres
             WHERE id_category IN (SELECT id FROM users_categories WHERE hidden = 0)
                 AND email IS NOT NULL AND email != \'\';');
     }
@@ -371,7 +344,7 @@ class Membres
     public function listAllByCategory($id_category, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';
-        return DB::getInstance()->get('SELECT email FROM membres WHERE id_category = ?' . $where, (int)$id_category);
+        return DB::getInstance()->get('SELECT * FROM membres WHERE id_category = ?' . $where, (int)$id_category);
     }
 
     public function listByCategory(?int $id_category): DynamicList
