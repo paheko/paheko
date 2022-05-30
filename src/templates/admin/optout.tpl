@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Désinscription"}
+{include file="admin/_head.tpl" title="Désinscription" transparent=true}
 
 {if $verify === true}
 	<p class="block confirm">
