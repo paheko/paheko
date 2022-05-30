@@ -26,12 +26,15 @@ class Emails
 		Render::FORMAT_MARKDOWN => 'MarkDown',
 	];
 
+	/**
+	 * Email sending contexts
+	 */
 	const CONTEXT_BULK = 1;
 	const CONTEXT_PRIVATE = 2;
 	const CONTEXT_SYSTEM = 0;
 
 	/**
-	 * Seuil à partir duquel on n'essaye plus d'envoyer de message à cette adresse
+	 * When we reach that number of fails, the address is treated as permanently invalid, unless reset by a verification.
 	 */
 	const FAIL_LIMIT = 5;
 
@@ -111,6 +114,9 @@ class Emails
 		}
 	}
 
+	/**
+	 * Return an Email entity from the optout code
+	 */
 	static public function getEmailFromOptout(string $code): ?Email
 	{
 		$hash = base64_decode(str_pad(strtr($code, '-_', '+/'), strlen($code) % 4, '=', STR_PAD_RIGHT));
@@ -123,6 +129,9 @@ class Emails
 		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', $hash);
 	}
 
+	/**
+	 * Sets the address as invalid (no email can be sent to this address ever)
+	 */
 	static public function markAddressAsInvalid(string $address): void
 	{
 		$e = self::getEmail($address);
@@ -132,16 +141,25 @@ class Emails
 		}
 
 		$e->set('invalid', true);
+		$e->set('optout', false);
+		$e->set('verified', false);
 		$e->save();
 	}
 
+	/**
+	 * Return an Email entity from an email address
+	 */
 	static public function getEmail(string $address): ?Email
 	{
-		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', Email::getHash($address));
+		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', Email::getHash(strtolower($address)));
 	}
 
+	/**
+	 * Return or create a new email entity
+	 */
 	static public function getOrCreateEmail(string $address): Email
 	{
+		$address = strtolower($address);
 		$e = self::getEmail($address);
 
 		if (!$e) {
@@ -155,7 +173,10 @@ class Emails
 		return $e;
 	}
 
-	static public function runQueue()
+	/**
+	 * Run the queue of emails that are waiting to be sent
+	 */
+	static public function runQueue(): void
 	{
 		$db = DB::getInstance();
 
@@ -165,6 +186,8 @@ class Emails
 		// listQueue nettoie déjà la queue
 		foreach ($queue as $row) {
 			// Don't send emails to opt-out address, unless it's a password reminder
+ 			// Invalid and failed-too-many addresses are purged from the queue before processing, no need to handle them here
+ 			// We still allow emails to be sent to failed or optout addresses if it's a system email
 			if ($row->context != self::CONTEXT_SYSTEM && $row->optout) {
 				self::deleteFromQueue($row->id);
 				continue;
@@ -204,10 +227,10 @@ class Emails
 	}
 
 	/**
-	 * Liste la file d'attente et marque les éléments listés comme "en cours de traitement"
+	 * Lists the queue, marks listed elements as "sending"
 	 * @return array
 	 */
-	static protected function listQueueAndMarkAsSending()
+	static protected function listQueueAndMarkAsSending(): array
 	{
 		$queue = self::listQueue();
 
@@ -228,18 +251,20 @@ class Emails
 	}
 
 	/**
-	 * Renvoie la liste des emails en attente d'envoi dans la queue,
-	 * sauf ceux qui correspondent à des adresses bloquées.
+	 * Returns the lits of emails waiting to be sent, except invalid ones and emails that haved failed too much
 	 *
-	 * Ne pas utiliser pour les envois, sinon risque d'avoir plusieurs tâches
-	 * qui envoient le même email !
+	 * DO NOT USE for sending, use listQueueAndMarkAsSending instead, or there might be multiple processes sending
+	 * the same email over and over.
 	 * @return array
 	 */
 	static protected function listQueue(): array
 	{
-		// Nettoyage de la queue déjà
+		// Clean-up the queue from reject emails
 		self::purgeQueueFromRejected();
+
+		// Reset messages that failed during the queue run
 		self::resetFailed();
+
 		return DB::getInstance()->get('SELECT q.*, e.optout, e.verified, e.hash AS email_hash
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash
@@ -249,6 +274,38 @@ class Emails
 	static public function countQueue(): int
 	{
 		return DB::getInstance()->count('emails_queue');
+	}
+
+	/**
+	 * Supprime de la queue les messages liés à des adresses invalides
+	 * ou qui ne souhaitent plus recevoir de message
+	 * @return boolean
+	 */
+	static protected function purgeQueueFromRejected(): void
+	{
+		DB::getInstance()->delete('emails_queue',
+			'recipient_hash IN (SELECT hash FROM emails WHERE invalid = 1 OR fail_count >= ?)',
+			self::FAIL_LIMIT);
+	}
+
+	/**
+	 * If emails have been marked as sending but sending failed, mark them for resend after a while
+	 */
+	static protected function resetFailed(): void
+	{
+		$sql = 'UPDATE emails_queue SET sending = 0, sending_started = NULL
+			WHERE sending = 1 AND sending_started < datetime(\'now\', \'-3 hours\');';
+		DB::getInstance()->exec($sql);
+	}
+
+	/**
+	 * Supprime un message de la queue d'envoi
+	 * @param  integer $id
+	 * @return boolean
+	 */
+	static protected function deleteFromQueue($id)
+	{
+		return DB::getInstance()->delete('emails_queue', 'id = ?', (int)$id);
 	}
 
 	static public function listRejectedUsers(): DynamicList
@@ -300,38 +357,6 @@ class Emails
 		$list = new DynamicList($columns, $tables, $conditions);
 		$list->orderBy('last_sent', true);
 		return $list;
-	}
-
-	/**
-	 * Supprime de la queue les messages liés à des adresses invalides
-	 * ou qui ne souhaitent plus recevoir de message
-	 * @return boolean
-	 */
-	static protected function purgeQueueFromRejected(): void
-	{
-		DB::getInstance()->delete('emails_queue',
-			'recipient_hash IN (SELECT hash FROM emails WHERE invalid = 1 OR fail_count >= ?)',
-			self::FAIL_LIMIT);
-	}
-
-	/**
-	 * If emails have been marked as sending but sending failed, mark them for resend after a while
-	 */
-	static protected function resetFailed(): void
-	{
-		$sql = 'UPDATE emails_queue SET sending = 0, sending_started = NULL
-			WHERE sending = 1 AND sending_started < datetime(\'now\', \'-3 hours\');';
-		DB::getInstance()->exec($sql);
-	}
-
-	/**
-	 * Supprime un message de la queue d'envoi
-	 * @param  integer $id
-	 * @return boolean
-	 */
-	static protected function deleteFromQueue($id)
-	{
-		return DB::getInstance()->delete('emails_queue', 'id = ?', (int)$id);
 	}
 
 	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html): void
@@ -445,6 +470,9 @@ class Emails
 		$email->save();
 	}
 
+	/**
+	 * Create a mass mailing
+	 */
 	static public function createMailing(array $recipients, string $subject, string $message, bool $send_copy, ?string $render): \stdClass
 	{
 		$config = Config::getInstance();
@@ -495,6 +523,9 @@ class Emails
 		return $message;
 	}
 
+	/**
+	 * Send a mass mailing
+	 */
 	static public function sendMailing(\stdClass $mailing): void
 	{
 		if (!isset($mailing->recipients, $mailing->subject, $mailing->message, $mailing->send_copy)) {
