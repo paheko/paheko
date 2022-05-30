@@ -7,6 +7,8 @@ use Garradin\Entity;
 use Garradin\UserException;
 use Garradin\Users\Emails;
 
+use KD2\SMTP;
+
 use const Garradin\{WWW_URL, SECRET_KEY};
 
 class Email extends Entity
@@ -22,13 +24,14 @@ class Email extends Entity
 
 	protected int $id;
 	protected string $hash;
-	protected bool $verified;
-	protected bool $optout;
-	protected bool $invalid;
-	protected int $sent_count;
-	protected int $fail_count;
+	protected bool $verified = false;
+	protected bool $optout = false;
+	protected bool $invalid = false;
+	protected int $sent_count = 0;
+	protected int $fail_count = 0;
 	protected ?string $fail_log;
 	protected \DateTime $added;
+	protected ?\DateTime $last_sent;
 
 	/**
 	 * Normalize email address and create a hash from this
@@ -86,7 +89,24 @@ class Email extends Entity
 		return true;
 	}
 
-	static public function validate(string $email): void
+	public function validate(string $email): bool
+	{
+		if (!$this->canSend()) {
+			return false;
+		}
+
+		try {
+			self::validateAddress($email);
+		}
+		catch (UserException $e) {
+			$this->hasFailed(['type' => 'permanent', 'message' => $e->getMessage()]);
+			return false;
+		}
+
+		return true;
+	}
+
+	static public function validateAddress(string $email): void
 	{
 		$user = strtok($email, '@');
 		$host = strtok('');
@@ -111,7 +131,7 @@ class Email extends Entity
 		getmxrr($host, $mx_list);
 
 		if (!count($mx_list)) {
-			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
+			throw new UserException('Adresse e-mail invalide (le domaine indiqué n\'a pas de service e-mail) : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
 
 		$mx_list = array_filter($mx_list,
@@ -125,15 +145,11 @@ class Email extends Entity
 
 	public function canSend(): bool
 	{
-		if (!$this->verified) {
+		if (!empty($this->optout)) {
 			return false;
 		}
 
-		if ($this->optout) {
-			return false;
-		}
-
-		if ($this->invalid) {
+		if (!empty($this->invalid)) {
 			return false;
 		}
 
@@ -146,7 +162,7 @@ class Email extends Entity
 
 	public function hasReachedFailLimit(): bool
 	{
-		return ($this->fail_count >= Emails::FAIL_LIMIT);
+		return !empty($this->fail_count) && ($this->fail_count >= Emails::FAIL_LIMIT);
 	}
 
 	public function incrementSentCount(): void

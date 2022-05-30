@@ -4,6 +4,7 @@ namespace Garradin\Users;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\Entities\Users\Email;
 
@@ -50,12 +51,6 @@ class Emails
 		$st->bindValue(':context', $context);
 
 		foreach ($recipients as $to => $variables) {
-			// Ignore obviously invalid emails here
-			if (self::checkAddress($to)) {
-				self::markAddressAsInvalid($to);
-				continue;
-			}
-
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$hash = Email::getHash($to);
@@ -101,12 +96,6 @@ class Emails
 			VALUES (:sender, :subject, :recipient, :recipient_hash, :content, :context);');
 
 		foreach ($recipients as $to) {
-			// Ignore obviously invalid emails here
-			if (!self::checkAddress($to)) {
-				self::markAddressAsInvalid($to);
-				continue;
-			}
-
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$hash = Email::getHash($to);
@@ -160,27 +149,19 @@ class Emails
 		return EM::findOne(Email::class, 'SELECT * FROM @TABLE WHERE hash = ?;', Email::getHash($address));
 	}
 
-	/**
-	 * Vérifie qu'une adresse est valide
-	 * @param  string $address
-	 * @return boolean FALSE si l'adresse est invalide (syntaxe)
-	 */
-	static public function checkAddress(string $address): bool
+	static public function getOrCreateEmail(string $address): Email
 	{
-		$address = strtolower(trim($address));
+		$e = self::getEmail($address);
 
-		// Ce domaine n'existe pas (MX inexistant), erreur de saisie courante
-		if (false !== stristr($address, '@gmail.fr'))
-		{
-			return false;
+		if (!$e) {
+			$e = new Email;
+			$e->added = new \DateTime;
+			$e->hash = $e::getHash($address);
+			$e->validate($address);
+			$e->save();
 		}
 
-		if (!SMTP::checkEmailIsValid($address, true))
-		{
-			return false;
-		}
-
-		return true;
+		return $e;
 	}
 
 	static public function runQueue()
@@ -196,6 +177,17 @@ class Emails
 			if ($row->context != self::CONTEXT_SYSTEM && $row->optout) {
 				self::deleteFromQueue($row->id);
 				continue;
+			}
+
+			// Create email address in database
+			if (!$row->email_hash) {
+				$email = self::getOrCreateEmail($row->recipient);
+
+				if (!$email->canSend()) {
+					// Email address is invalid, skip
+					self::deleteFromQueue($row->id);
+					continue;
+				}
 			}
 
 			$headers = [
@@ -214,7 +206,8 @@ class Emails
 		BEGIN;
 			UPDATE emails_queue SET sending = 2 WHERE %s;
 			INSERT OR IGNORE INTO %s (hash) SELECT recipient_hash FROM emails_queue WHERE sending = 2;
-			UPDATE %2$s SET sent_count = sent_count + 1 WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
+			UPDATE %2$s SET sent_count = sent_count + 1, last_sent = datetime()
+				WHERE hash IN (SELECT recipient_hash FROM emails_queue WHERE sending = 2);
 			DELETE FROM emails_queue WHERE sending = 2;
 		END;', $db->where('id', $ids), Email::TABLE));
 	}
@@ -256,23 +249,66 @@ class Emails
 		// Nettoyage de la queue déjà
 		self::purgeQueueFromRejected();
 		self::resetFailed();
-		return DB::getInstance()->get('SELECT q.*, e.optout, e.verified
+		return DB::getInstance()->get('SELECT q.*, e.optout, e.verified, e.hash AS email_hash
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash
 			WHERE q.sending = 0;');
 	}
 
-	static public function listRejectedUsers(): array
+	static public function countQueue(): int
 	{
-		$sql = sprintf('SELECT e.*, u.email, u.id, u.%s AS identity
-			FROMS emails e
-			LEFT JOIN membres u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)
-			WHERE e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d;',
-			$id_field,
-			self::FAIL_LIMIT
-		);
+		return DB::getInstance()->count('emails_queue');
+	}
 
-		return DB::getInstance()->get($sql);
+	static public function listRejectedUsers(): DynamicList
+	{
+		$db = DB::getInstance();
+
+		$columns = [
+			'identity' => [
+				'label' => 'Membre',
+				'select' => 'u.' . $db->quoteIdentifier(Config::getInstance()->champ_identite),
+			],
+			'email' => [
+				'label' => 'Adresse',
+				'select' => 'u.email',
+			],
+			'user_id' => [
+				'select' => 'u.id',
+			],
+			'hash' => [
+			],
+			'status' => [
+				'label' => 'Statut',
+				'select' => sprintf('CASE
+					WHEN e.optout = 1 THEN \'Désinscription\'
+					WHEN e.invalid = 1 THEN \'Invalide\'
+					WHEN e.fail_count >= %d THEN \'Trop de tentatives\'
+					WHEN e.verified = 1 THEN \'Vérifiée\'
+					ELSE \'\'
+					END', self::FAIL_LIMIT),
+			],
+			'sent_count' => [
+				'label' => 'Messages envoyés',
+			],
+			'fail_log' => [
+				'label' => 'Journal d\'erreurs',
+			],
+			'last_sent' => [
+				'label' => 'Dernière tentative d\'envoi',
+			],
+			'optout' => [],
+			'fail_count' => [],
+		];
+
+		$tables = 'emails e
+			INNER JOIN membres u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)';
+
+		$conditions = sprintf('e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
+
+		$list = new DynamicList($columns, $tables, $conditions);
+		$list->orderBy('last_sent', true);
+		return $list;
 	}
 
 	/**

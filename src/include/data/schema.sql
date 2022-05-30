@@ -387,7 +387,8 @@ CREATE TABLE IF NOT EXISTS compromised_passwords_cache_ranges
     prefix TEXT NOT NULL PRIMARY KEY,
     date INTEGER NOT NULL
 );
-CREATE TABLE emails (
+
+CREATE TABLE IF NOT EXISTS emails (
 -- List of emails addresses
 -- We are not storing actual email addresses here for privacy reasons
 -- So that we can keep the record (for opt-out reasons) even when the
@@ -400,12 +401,13 @@ CREATE TABLE emails (
     fail_count INTEGER NOT NULL DEFAULT 0,
     sent_count INTEGER NOT NULL DEFAULT 0,
     fail_log TEXT NULL,
+    last_sent TEXT NULL,
     added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX emails_hash ON emails (hash);
+CREATE UNIQUE INDEX IF NOT EXISTS emails_hash ON emails (hash);
 
-CREATE TABLE emails_queue (
+CREATE TABLE IF NOT EXISTS emails_queue (
 -- List of emails waiting to be sent
     id INTEGER NOT NULL PRIMARY KEY,
     sender TEXT NULL,
