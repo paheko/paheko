@@ -19,15 +19,6 @@ if (!$email) {
 	throw new UserException('Adresse email introuvable.');
 }
 
-// RFC 8058
-if (!empty($_POST['Unsubscribe']) && $_POST['Unsubscribe'] == 'Yes') {
-	$email->setOptout();
-	$email->save();
-	http_response_code(200);
-	echo 'Unsubscribe successful';
-	exit;
-}
-
 if (!empty($_GET['v'])) {
 	if ($email->verify($_GET['v'])) {
 		$email->save();
