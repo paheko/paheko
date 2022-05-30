@@ -24,7 +24,4 @@ if (ENABLE_AUTOMATIC_BACKUPS && $config->get('frequence_sauvegardes') && $config
 // Exécution des rappels automatiques
 Reminders::sendPending();
 
-// Send messages in queue
-Emails::runQueue();
-
 Plugin::fireSignal('cron');

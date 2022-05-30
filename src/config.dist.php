@@ -294,9 +294,14 @@ namespace Garradin;
  * Utilisation de cron pour les tâches automatiques
  *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
- * le script cron.php dans le répertoire "scripts" toutes les 24 heures.
- * Sinon Garradin effectuera les actions automatiques quand quelqu'un
- * se connecte à l'administration ou visite le site.
+ * les scripts suivants:
+ * - scripts/cron.php toutes les 24 heures (envoi des rappels de cotisation,
+ * création des sauvegardes)
+ * - scripts/emails.php toutes les 5 minutes environ (envoi des emails en attente)
+ *
+ * Si "false", les actions de scripts/cron.php seront effectuées quand une personne
+ * se connecte. Et les emails seront envoyés instantanément (ce qui peut ralentir ou
+ * planter si un message a beaucoup de destinataires).
  *
  * Défaut : false
  */
