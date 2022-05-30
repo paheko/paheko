@@ -23,7 +23,7 @@
 {elseif $email.optout}
 
 	<p class="block alert">
-		Votre adresse e-mail est déjà désinscrite. Pour demander à vous réinscrire, cliquez sur le bouton ci-dessous.
+		Votre adresse e-mail est déjà désinscrite. Pour demander à vous réinscrire, renseignez le formulaire ci-dessous.
 	</p>
 
 	{form_errors}

@@ -79,7 +79,13 @@ class Emails
 
 			if ($render) {
 				$content_html = Render::render($render, null, $content);
-				$content_html = $skel->fetch(['html' => $content_html]);
+				$content_html = $skel->fetch([
+					'html'      => $content_html,
+					'recipient' => $to,
+					'data'      => $variables,
+					'context'   => $context,
+					'from'      => $sender,
+				]);
 			}
 
 			$st->bindValue(':sender', $sender);
@@ -513,5 +519,4 @@ class Emails
 			Emails::queue(Emails::CONTEXT_BULK, [$config->get('email_asso') => null], null, $mailing->subject, $mailing->message);
 		}
 	}
-
 }

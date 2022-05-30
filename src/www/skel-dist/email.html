@@ -35,6 +35,13 @@
 {{* Le contenu du mail est dans la variable $html, ne pas supprimer sinon le message sera vide ! *}}
 {{$html|raw}}
 
+{{* D'autres variables sont disponibles, permettant de personnaliser le message :
+	- $recipient contient l'adresse email du destinataire
+	- $data contient les données disponibles pour le message (par exemple $data.nom contiendra le nom du membre dans un message collectif)
+	- $context contient le contexte du message (0 = changement de mot de passe, 1 = message privé entre membres, 2 = message collectif)
+	- $from contient l'expéditeur (si NULL, l'expéditeur sera l'association)
+*}}
+
 <div class="footer">
 	<h3><a href="{{$config.site_asso}}">{{$config.nom_asso}}</a></h3>
 	{{if $config.adresse_asso}}
