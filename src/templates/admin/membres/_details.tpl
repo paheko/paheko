@@ -49,17 +49,23 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 		{/if}
 	</dd>
 		{if $c_config.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
-		<dd class="help">
+		<dt>Statut e-mail</dt>
+		<dd>
 			{if $email.optout}
-				<b class="alert">A demandé à ne plus recevoir de messages</b>
+				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
+				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi de messages à cette adresse" href="emails.php?verify=%s"|args:$value shape="check"}
 			{elseif $email.invalid}
-				<b class="error">Adresse invalide</b> | {$email.fail_log|escape|nl2br}
+				<b class="error">{icon shape="alert"} Adresse invalide</b>
 			{elseif $email->hasReachedFailLimit()}
-				<b class="error">Trop d'erreurs</b> | {$email.fail_log|escape|nl2br}
+				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
+				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi de messages à cette adresse" href="emails.php?verify=%s"|args:$value shape="check"}
 			{elseif $email.verified}
-				Adresse <strong>vérifiée</strong>
+				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
 			{else}
 				Adresse non vérifiée
+			{/if}
+			{if $email.fail_log}
+				<br /><span class="help">{$email.fail_log|escape|nl2br}</span>
 			{/if}
 		</dd>
 		{/if}
