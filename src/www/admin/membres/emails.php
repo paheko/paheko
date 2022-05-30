@@ -20,7 +20,7 @@ if ($address = qg('verify')) {
         $email->sendVerification($address);
     }, $csrf_key, '!membres/emails.php?sent');
 
-    $tpl->assign(compact('csrf_key'));
+    $tpl->assign(compact('csrf_key', 'email'));
     $tpl->display('admin/membres/emails_verification.tpl');
     exit;
 }

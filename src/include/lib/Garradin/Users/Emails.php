@@ -274,7 +274,7 @@ class Emails
 				'select' => sprintf('CASE
 					WHEN e.optout = 1 THEN \'Désinscription\'
 					WHEN e.invalid = 1 THEN \'Invalide\'
-					WHEN e.fail_count >= %d THEN \'Trop de tentatives\'
+					WHEN e.fail_count >= %d THEN \'Trop d\'\'erreurs\'
 					WHEN e.verified = 1 THEN \'Vérifiée\'
 					ELSE \'\'
 					END', self::FAIL_LIMIT),

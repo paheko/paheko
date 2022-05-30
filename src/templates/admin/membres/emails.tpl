@@ -58,7 +58,7 @@
 			<dd>Le destinataire a demandé à être désinscrit et ne recevra plus de messages.</dd>
 			<dt>Invalide</dt>
 			<dd>L'adresse n'existe pas ou plus. Il n'est pas possible de lui envoyer des messages.</dd>
-			<dt>Trop de tentatives</dt>
+			<dt>Trop d'erreurs</dt>
 			<dd>Le service destinataire a renvoyé une erreur temporaire plus de {$max_fail_count} fois.<br />Cela arrive par exemple si vos messages sont vus comme du spam trop souvent, ou si la boîte mail destinataire est pleine. Cette adresse ne recevra plus de message.</dd>
 		</dl>
 	</div>
