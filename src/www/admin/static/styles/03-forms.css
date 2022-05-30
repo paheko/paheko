@@ -536,11 +536,17 @@ dialog.datepicker {
     color: darkred;
 }
 
-fieldset.memberMessage {
-    max-width: 30em;
+fieldset.mailing {
+    max-width: 40em;
 }
 
-fieldset.memberMessage #f_sujet, fieldset.memberMessage #f_message, fieldset.memberMessage select, #queryBuilderForm textarea {
+fieldset.mailing dd.preview > * {
+    border-radius: .5em;
+    background: var(--gLightBackgroundColor);
+    padding: 1em;
+}
+
+#queryBuilderForm textarea, fieldset.mailing textarea, fieldset.mailing #f_subject, fieldset.mailing #f_target {
     width: calc(100% - 2em);
 }
 

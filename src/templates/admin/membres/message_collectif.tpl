@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Envoyer un message collectif" current="membres/message"}
+{include file="admin/_head.tpl" title="Envoyer un message collectif" current="membres/message" custom_css=["!web/css.php"]}
 
 <nav class="tabs">
     <ul>
@@ -7,26 +7,63 @@
     </ul>
 </nav>
 
+{if $sent}
+	<p class="block confirm">Votre message a été envoyé.</p>
+{/if}
+
 {form_errors}
 
-<form method="post" action="{$self_url}">
-	<fieldset class="memberMessage">
+<form method="post" action="{$self_url_no_qs}">
+	{if $preview}
+		<fieldset class="mailing">
+			<legend>Prévisualisation du message</legend>
+			<p class="help">
+				Ce message sera envoyé à <strong>{$recipients_count}</strong> destinataires.<br />
+				Voici un exemple du message pour un de ces destinataires.
+			</p>
+			<dl>
+				<dt>Expéditeur</dt>
+				<dd>{$preview.from}</dd>
+				<dt>Destinataire</dt>
+				<dd>
+					{$preview.to}
+				</dd>
+				<dt>Sujet</dt>
+				<dd>{$preview.subject}</dd>
+				<dt>Message</dt>
+				<dd class="preview">{$preview.html|raw}</dd>
+			</dl>
+		</fieldset>
+
+		<p class="submit">
+			{input type="hidden" name="subject"}
+			{input type="hidden" name="message"}
+			{input type="hidden" name="target"}
+			{input type="hidden" name="send_copy"}
+			{input type="hidden" name="render"}
+			{csrf_field key=$csrf_key}
+			{button type="submit" name="back" label="Retour à l'édition" shape="left"}
+			{button type="submit" name="send" label="Envoyer" shape="right" class="main"}
+		</p>
+
+	{else}
+	<fieldset class="mailing">
 		<legend>Message</legend>
 		<dl>
 			<dt>Expéditeur</dt>
 			<dd>{$config.nom_asso} &lt;{$config.email_asso}&gt;</dd>
-			<dt>Destinataires</dt>
+			<dt><label for="f_target">Destinataires</label></dt>
 			<dd>
-				<select name="recipients">
-					<option value="all_but_hidden">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
+				<select name="target" id="f_target" required="required">
+					<option value="all_">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
 					<optgroup label="Catégorie de membres">
-						{foreach from=$categories key="id" item="nom"}
-						<option value="categorie_{$id}" {form_field name="recipients" selected="categorie_%d"|args:$id}>{$nom}</option>
+						{foreach from=$categories key="id" item="label"}
+						<option value="category_{$id}" {form_field name="target" selected="category_%d"|args:$id}>{$label}</option>
 						{/foreach}
 					</optgroup>
 					<optgroup label="Recherches enregistrées">
-						{foreach from=$recherches item="r"}
-						<option value="recherche_{$r.id}" {form_field name="recipients" selected="recherche_%d"|args:$r.qid}>{$r.intitule}</option>
+						{foreach from=$search_list item="s"}
+						<option value="search_{$s.id}" {form_field name="target" selected="search_%d"|args:$s.id}>{$s.intitule}</option>
 						{/foreach}
 					</optgroup>
 				</select>
@@ -35,28 +72,18 @@
 				Vous pouvez cibler précisément des membres en créant une <a href="{$admin_url}membres/recherche.php">recherche enregistrée</a>.
 				Les recherches enregistrées apparaîtront dans ce formulaire.
 			</dd>
-			{* FIXME : pas encore possible, en attente de refonte gestion cotisations
-			<dd>
-				<label><input type="checkbox" name="paid_members_only" value="1" {form_field name="paid_members_only" checked=1 default=1} />
-					Seulement les membres à jour de cotisation
-				</label>
-			</dd>
-			*}
-			<dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-			<dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" required="required" /></dd>
-			<dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-			<dd><textarea name="message" id="f_message" cols="35" rows="25" required="required">{form_field name=message}</textarea></dd>
-			<dd>
-				<input type="checkbox" name="copie" id="f_copie" value="1" />
-				<label for="f_copie">Recevoir par e-mail une copie du message envoyé</label>
-			</dd>
+			{input type="text" name="subject" required=true label="Sujet"}
+			{input type="textarea" name="message" cols=35 rows=25 required=true label="Message"}
+			{input type="checkbox" name="send_copy" value=1 label="Recevoir par e-mail une copie du message envoyé"}
+			{input type="select" name="render" label="Format de rendu" options=$render_formats help="Pour enrichir le contenu du mail, inclure des liens, du gras, des titres, etc."}
 		</dl>
 	</fieldset>
 
 	<p class="submit">
-		{csrf_field key="send_message_co"}
-		{button type="submit" name="send" label="Envoyer" shape="right" class="main"}
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="preview" label="Prévisualiser" shape="right" class="main"}
 	</p>
+	{/if}
 </form>
 
 

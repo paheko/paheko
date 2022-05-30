@@ -7,6 +7,9 @@ use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\Entities\Users\Email;
+use Garradin\UserTemplate\UserTemplate;
+use Garradin\Web\Render\Render;
+use Garradin\Web\Skeleton;
 
 use const Garradin\{USE_CRON};
 use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
@@ -17,9 +20,15 @@ use KD2\DB\EntityManager as EM;
 
 class Emails
 {
-    const CONTEXT_BULK = 1;
-    const CONTEXT_PRIVATE = 2;
-    const CONTEXT_SYSTEM = 0;
+	const RENDER_FORMATS = [
+		null => 'Texte brut',
+		Render::FORMAT_SKRIV => 'SkrivML',
+		Render::FORMAT_MARKDOWN => 'MarkDown',
+	];
+
+	const CONTEXT_BULK = 1;
+	const CONTEXT_PRIVATE = 2;
+	const CONTEXT_SYSTEM = 0;
 
 	/**
 	 * Seuil à partir duquel on n'essaye plus d'envoyer de message à cette adresse
@@ -32,32 +41,50 @@ class Emails
 	 * @param  array        $recipients List of recipients, 'From' email address as the key, and an array as a value, that contains variables to be used in the email template
 	 * @param  string       $sender
 	 * @param  string       $subject
-	 * @param  UserTemplate $template
-	 * @param  UserTemplate $template_html
+	 * @param  UserTemplate|string $content
 	 * @return void
 	 */
-	static public function queueTemplate(int $context, array $recipients, string $sender, string $subject, UserTemplate $template, ?UserTemplate $template_html): void
+	static public function queue(int $context, array $recipients, ?string $sender, string $subject, $content, ?string $render = null): void
 	{
-		// Remove duplicates
-		array_walk($recipients, 'strtolower');
-		$recipients = array_unique($recipients);
+		// Remove duplicates due to case changes
+		$recipients = array_change_key_case($recipients, CASE_LOWER);
+
+		$template = ($content instanceof UserTemplate) ? $content : null;
+		$skel = null;
+		$content_html = null;
 
 		$db = DB::getInstance();
-		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, content, content_html, context)
-			VALUES (:sender, :subject, :recipient, :content, :content_html, :context);');
+		$db->begin();
+		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, content, content_html, context)
+			VALUES (:sender, :subject, :recipient, :recipient_hash, :content, :content_html, :context);');
 
-		$st->bindValue(':sender', $sender);
-		$st->bindValue(':subject', $subject);
-		$st->bindValue(':context', $context);
+		if ($render) {
+			$skel = new Skeleton('email.html');
+		}
 
 		foreach ($recipients as $to => $variables) {
+			// Ignore invalid addresses
+			if (!preg_match('/.+@.+\..+$/', $to)) {
+				continue;
+			}
+
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$hash = Email::getHash($to);
 
-			$content = $template->fetch($variables);
-			$content_html = $template_html ? $template_html->fetch($variables) : null;
+			if ($template) {
+				$template->assignArray((array) $variables);
+				$content = $template->fetch();
+			}
 
+			if ($render) {
+				$content_html = Render::render($render, null, $content);
+				$content_html = $skel->fetch(['html' => $content_html]);
+			}
+
+			$st->bindValue(':sender', $sender);
+			$st->bindValue(':subject', $subject);
+			$st->bindValue(':context', $context);
 			$st->bindValue(':recipient', $to);
 			$st->bindValue(':recipient_hash', $hash);
 			$st->bindValue(':content', $content);
@@ -68,49 +95,7 @@ class Emails
 			$st->clear();
 		}
 
-		Plugin::fireSignal('email.queue.added');
-
-		if (!USE_CRON) {
-			self::runQueue();
-		}
-	}
-
-	/**
-	 * Add a message to the sending queue
-	 * @param  int          $context
-	 * @param  array        $recipients List of recipients emails
-	 * @param  string       $sender
-	 * @param  string       $subject
-	 * @param  UserTemplate $template
-	 * @param  UserTemplate $template_html
-	 * @return void
-	 */
-	static public function queue(int $context, array $recipients, ?string $sender, string $subject, string $text): void
-	{
-		// Remove duplicates
-		array_walk($recipients, fn($a) => strtolower($a));
-		$recipients = array_unique($recipients);
-
-		$db = DB::getInstance();
-		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, content, context)
-			VALUES (:sender, :subject, :recipient, :recipient_hash, :content, :context);');
-
-		foreach ($recipients as $to) {
-			// We won't try to reject invalid/optout recipients here,
-			// it's done in the queue clearing (more efficient)
-			$hash = Email::getHash($to);
-
-			$st->bindValue(':sender', $sender);
-			$st->bindValue(':subject', $subject);
-			$st->bindValue(':context', $context);
-			$st->bindValue(':recipient', $to);
-			$st->bindValue(':recipient_hash', $hash);
-			$st->bindValue(':content', $text);
-			$st->execute();
-
-			$st->reset();
-			$st->clear();
-		}
+		$db->commit();
 
 		Plugin::fireSignal('email.queue.added');
 
@@ -364,14 +349,14 @@ class Emails
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
 			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
 
-			$optout_text = "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n"
+			$optout_text = "Vous recevez ce message car vous êtes inscrit comme membre de l'association.\n"
 				. "Pour ne plus jamais recevoir de message de notre part cliquez sur le lien suivant :\n";
 
 			$content .= "\n\n-- \n" . $optout_text . $url;
 
 			if (null !== $content_html) {
-				$optout_text = '<hr /><p style="color: #000; background: #fff">' . nl2br(htmlspecialchars($optout_text));
-				$optout_text.= sprintf('<a href="%s" style="color: blue; text-decoration: underline; padding: 5px; border-radius: 5px; background: #eee;">Me désinscrire</a>', $url);
+				$optout_text = '<hr style="border-top: 2px solid #999; background: none;" /><p style="color: #000; background: #fff; padding: 10px; text-align: center; font-size: 9pt">' . nl2br(htmlspecialchars($optout_text));
+				$optout_text.= sprintf('<br /><a href="%s" style="color: blue; text-decoration: underline; padding: 5px; border-radius: 5px; background: #ddd;">Me désinscrire</a></p>', $url);
 
 				if (stripos($content_html, '</body>') !== false) {
 					$content_html = str_ireplace('</body>', $optout_text . '</body>', $content_html);
@@ -453,4 +438,80 @@ class Emails
 		$email->hasFailed($return);
 		$email->save();
 	}
+
+	static public function createMailing(array $recipients, string $subject, string $message, bool $send_copy, ?string $render): \stdClass
+	{
+		$config = Config::getInstance();
+		$list = [];
+
+		foreach ($recipients as $recipient) {
+			if (empty($recipient->email)) {
+				continue;
+			}
+
+			$list[$recipient->email] = $recipient;
+		}
+
+		if (!count($list)) {
+			throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
+		}
+
+		$html = $message;
+		$tpl = null;
+
+		$random = array_rand($list);
+
+		if (false !== strpos($message, '{{')) {
+			$tpl = new UserTemplate;
+			$tpl->setCode($message);
+			$tpl->assignArray((array)$list[$random]);
+			$html = $tpl->fetch();
+		}
+
+		if ($render) {
+			$html = Render::render($render, null, $html);
+		}
+		else {
+			$html = '<pre>' . htmlspecialchars($html) . '</pre>';
+		}
+
+		$recipients = $list;
+
+		$sender = sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso);
+		$message = (object) compact('recipients', 'subject', 'message', 'sender', 'tpl', 'send_copy', 'render');
+		$message->preview = (object) [
+			'to'      => $random,
+			'from'    => $sender,
+			'subject' => $subject,
+			'html'    => $html,
+		];
+
+		return $message;
+	}
+
+	static public function sendMailing(\stdClass $mailing): void
+	{
+		if (!isset($mailing->recipients, $mailing->subject, $mailing->message, $mailing->send_copy)) {
+			throw new \InvalidArgumentException('Invalid $mailing object');
+		}
+
+		if (!count($mailing->recipients)) {
+			throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
+		}
+
+		Emails::queue(Emails::CONTEXT_BULK,
+			$mailing->recipients,
+			null, // Default sender
+			$mailing->subject,
+			$mailing->tpl ?? $mailing->message,
+			$mailing->render ?? null
+		);
+
+		if ($mailing->send_copy)
+		{
+			$config = Config::getInstance();
+			Emails::queue(Emails::CONTEXT_BULK, [$config->get('email_asso') => null], null, $mailing->subject, $mailing->message);
+		}
+	}
+
 }

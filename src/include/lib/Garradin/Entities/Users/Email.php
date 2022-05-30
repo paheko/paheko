@@ -73,7 +73,7 @@ class Email extends Entity
 		$message.= self::getOptoutURL($this->hash) . '&v=' . $this->getVerificationCode();
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le.";
 
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$email], null, 'Confirmez votre adresse e-mail', $message);
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$email => null], null, 'Confirmez votre adresse e-mail', $message);
 	}
 
 	public function verify(string $code): bool
