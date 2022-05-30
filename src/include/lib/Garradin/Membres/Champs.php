@@ -636,7 +636,7 @@ class Champs
                 $collation = ' COLLATE U_NOCASE';
             }
 
-            $db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_list_%s ON %s (id_category, %1$s%s);', $field, $table_name, $collation));
+            $db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_list_%s ON %s (id_category, %s%s);', $field, $table_name, $db->quoteIdentifier($field), $collation));
         }
     }
 
