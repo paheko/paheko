@@ -457,7 +457,7 @@ class Emails
 	 * Handle a bounce message
 	 * @param  string $raw_message Raw MIME message from SMTP
 	 */
-	static public function handleBounce(string $raw_message): void
+	static public function handleBounce(string $raw_message): ?array
 	{
 		$message = new Mail_Message;
 		$message->parse($raw_message);
@@ -466,7 +466,7 @@ class Emails
 
 		if ($return['type'] == 'autoreply') {
 			// Ignore auto-responders
-			return;
+			return $return;
 		}
 		elseif ($return['type'] == 'genuine') {
 			// Forward emails that are not automatic to the organization email
@@ -483,17 +483,20 @@ class Emails
 			$new->attachMessage($message->output());
 
 			self::sendMessage(self::CONTEXT_SYSTEM, $new);
-			return;
+			return $return;
 		}
 
 		$email = self::getEmail($return['recipient']);
 
 		if (!$email) {
-			return;
+			return null;
 		}
 
+		Plugin::fireSignal('email.bounce', compact('email', 'return'));
 		$email->hasFailed($return);
 		$email->save();
+
+		return $return;
 	}
 
 	/**
