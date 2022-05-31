@@ -53,6 +53,11 @@ class Emails
 		// Remove duplicates due to case changes
 		$recipients = array_change_key_case($recipients, CASE_LOWER);
 
+		if (Plugin::fireSignal('email.queue.before', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
+			// queue handling was done by a plugin
+			return;
+		}
+
 		$template = ($content instanceof UserTemplate) ? $content : null;
 		$skel = null;
 		$content_html = null;
@@ -92,6 +97,11 @@ class Emails
 				]);
 			}
 
+			if (Plugin::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html'))) {
+				// queue insert was done by a plugin
+				continue;
+			}
+
 			$st->bindValue(':sender', $sender);
 			$st->bindValue(':subject', $subject);
 			$st->bindValue(':context', $context);
@@ -107,11 +117,17 @@ class Emails
 
 		$db->commit();
 
-		Plugin::fireSignal('email.queue.added');
+		if (Plugin::fireSignal('email.queue.after', compact('context', 'recipients', 'sender', 'subject', 'content', 'render'))) {
+			return;
+		}
 
 		// If no crontab is used, then the queue should be run now
 		if (!USE_CRON) {
 			self::runQueue();
+		}
+		// Always send system emails right away
+		elseif ($context == self::CONTEXT_SYSTEM) {
+			self::runQueue(self::CONTEXT_SYSTEM);
 		}
 	}
 
@@ -177,11 +193,11 @@ class Emails
 	/**
 	 * Run the queue of emails that are waiting to be sent
 	 */
-	static public function runQueue(): void
+	static public function runQueue(?int $context = null): void
 	{
 		$db = DB::getInstance();
 
-		$queue = self::listQueueAndMarkAsSending();
+		$queue = self::listQueueAndMarkAsSending($context);
 		$ids = [];
 
 		// listQueue nettoie déjà la queue
@@ -231,9 +247,9 @@ class Emails
 	 * Lists the queue, marks listed elements as "sending"
 	 * @return array
 	 */
-	static protected function listQueueAndMarkAsSending(): array
+	static protected function listQueueAndMarkAsSending(?int $context = null): array
 	{
-		$queue = self::listQueue();
+		$queue = self::listQueue($context);
 
 		if (!count($queue)) {
 			return $queue;
@@ -256,9 +272,11 @@ class Emails
 	 *
 	 * DO NOT USE for sending, use listQueueAndMarkAsSending instead, or there might be multiple processes sending
 	 * the same email over and over.
+	 *
+	 * @param int|null $context Context to list, leave NULL to have all contexts
 	 * @return array
 	 */
-	static protected function listQueue(): array
+	static protected function listQueue(?int $context = null): array
 	{
 		// Clean-up the queue from reject emails
 		self::purgeQueueFromRejected();
@@ -266,10 +284,12 @@ class Emails
 		// Reset messages that failed during the queue run
 		self::resetFailed();
 
-		return DB::getInstance()->get('SELECT q.*, e.optout, e.verified, e.hash AS email_hash
+		$condition = null === $context ? '' : sprintf(' AND context = %d', $context);
+
+		return DB::getInstance()->get(sprintf('SELECT q.*, e.optout, e.verified, e.hash AS email_hash
 			FROM emails_queue q
 			LEFT JOIN emails e ON e.hash = q.recipient_hash
-			WHERE q.sending = 0;');
+			WHERE q.sending = 0 %s;', $condition));
 	}
 
 	static public function countQueue(): int
