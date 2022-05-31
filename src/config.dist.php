@@ -399,22 +399,6 @@ namespace Garradin;
 
 //const SMTP_SECURITY = 'STARTTLS';
 
-/**
- * Activer les sauvegardes automatiques
- *
- * Utile à désactiver si vous avez déjà des sauvegardes effectuées
- * automatiquement au niveau du système.
- *
- * Sinon les sauvegardes seront effectuées soit par la tâche cron
- * soit à l'affichage de la page d'accueil (si nécessaire).
- *
- * Voir paramètre USE_CRON aussi
- *
- * Défaut : true
- */
-
-//const ENABLE_AUTOMATIC_BACKUPS = true;
-
 
 /**
  * Couleur primaire de l'interface admin par défaut
