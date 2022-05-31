@@ -508,7 +508,7 @@ dialog.datepicker {
     color: var(--gBorderColor);
 }
 .datepicker tbody td:nth-child(7) input {
-    color: var(--gLightBorderColor);
+    color: var(--gBorderColor);
 }
 
 .datepicker tbody td {
