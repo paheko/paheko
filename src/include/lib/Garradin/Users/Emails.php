@@ -401,8 +401,8 @@ class Emails
 			$message->setHeader('List-Unsubscribe', sprintf('<%s>', $url));
 			$message->setHeader('List-Unsubscribe-Post', 'Unsubscribe=Yes');
 
-			$optout_text = "Vous recevez ce message car vous êtes inscrit comme membre de l'association.\n"
-				. "Pour ne plus jamais recevoir de message de notre part cliquez sur le lien suivant :\n";
+			$optout_text = "Vous recevez ce message car vous êtes dans nos contacts.\n"
+				. "Pour ne plus jamais recevoir de message de notre part cliquez ici :\n";
 
 			$content .= "\n\n-- \n" . $optout_text . $url;
 

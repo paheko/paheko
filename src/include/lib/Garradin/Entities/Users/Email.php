@@ -113,7 +113,7 @@ class Email extends Entity
 
 		// Ce domaine n'existe pas (MX inexistant), erreur de saisie courante
 		if ($host == 'gmail.fr') {
-			throw new UserException('L\'adresse e-mail est invalide : est-ce que vous avez voulu écrire "gmail.com" ?');
+			throw new UserException('Adresse invalide : "gmail.fr" n\'existe pas, il faut utiliser "gmail.com"');
 		}
 
 		if (!SMTP::checkEmailIsValid($email, false)) {
