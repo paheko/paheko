@@ -8,6 +8,7 @@ use Garradin\Membres\Session;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\Users\Email;
 
 use Garradin\Users\Emails;
 use Garradin\UserTemplate\UserTemplate;
@@ -94,9 +95,14 @@ class Membres
                 {
                     $data[$key] = strtolower(trim($data[$key]));
 
-                    if (trim($data[$key]) !== '' && !SMTP::checkEmailIsValid($data[$key], false))
+                    if (trim($data[$key]) !== '')
                     {
-                        throw new UserException(sprintf('Adresse email invalide "%s" pour le champ "%s".', $data[$key], $config->title));
+                        try {
+                            Email::validateAddress($data[$key]);
+                        }
+                        catch (UserException $e) {
+                            throw new UserException(sprintf('Champ "%s" : %s', $config->title, $e->getMessage()));
+                        }
                     }
                 }
                 elseif ($config->type == 'select' && !in_array($data[$key], $config->options))
