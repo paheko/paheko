@@ -399,6 +399,21 @@ namespace Garradin;
 
 //const SMTP_SECURITY = 'STARTTLS';
 
+/**
+ * Adresse e-mail destinée à recevoir les erreurs de mail
+ * (adresses invalides etc.)
+ *
+ * Si laissé NULL, alors l'adresse email de l'association sera utilisée.
+ * En cas d'hébergement de plusieurs associations, il est conseillé
+ * d'utiliser une adresse par association.
+ *
+ * Voir la documentation de configuration sur des exemples de scripts
+ * permettant de traiter les mails reçus à cette adresse.
+ *
+ * Défaut : null
+ */
+
+//const MAIL_RETURN_PATH = 'returns@monserveur.com';
 
 /**
  * Couleur primaire de l'interface admin par défaut
