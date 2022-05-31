@@ -6,6 +6,7 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugin;
+use Garradin\UserException;
 use Garradin\Entities\Users\Email;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
@@ -499,7 +500,12 @@ class Emails
 			$tpl = new UserTemplate;
 			$tpl->setCode($message);
 			$tpl->assignArray((array)$list[$random]);
-			$html = $tpl->fetch();
+			try {
+				$html = $tpl->fetch();
+			}
+			catch (\KD2\Brindille_Exception $e) {
+				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
+			}
 		}
 
 		if ($render) {

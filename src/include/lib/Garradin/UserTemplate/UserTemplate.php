@@ -170,7 +170,7 @@ class UserTemplate extends Brindille
 		}
 		catch (Brindille_Exception $e) {
 			throw new Brindille_Exception(sprintf("Erreur de syntaxe dans '%s' : %s",
-				$this->file ? $this->file->name : Utils::basename($this->path),
+				$this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path)),
 				$e->getMessage()), 0, $e);
 		}
 		catch (\Throwable $e) {
