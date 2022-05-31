@@ -202,7 +202,6 @@ static $default_config = [
 	'SMTP_SECURITY'         => false,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
-	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
