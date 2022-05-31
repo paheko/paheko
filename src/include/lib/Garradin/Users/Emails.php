@@ -12,7 +12,7 @@ use Garradin\UserTemplate\UserTemplate;
 use Garradin\Web\Render\Render;
 use Garradin\Web\Skeleton;
 
-use const Garradin\{USE_CRON};
+use const Garradin\{USE_CRON, MAIL_RETURN_PATH};
 use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
 
 use KD2\SMTP;
