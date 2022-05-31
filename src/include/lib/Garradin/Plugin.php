@@ -396,8 +396,13 @@ class Plugin
 	 */
 	static public function listMenu(Session $session)
 	{
+		$list = [];
+
+		// First let plugins handle
+		self::fireSignal('menu.item', compact('session'), $list);
+
 		$db = DB::getInstance();
-		$list = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
+		$plugins = $db->getGrouped('SELECT id, nom, menu_condition FROM plugins WHERE menu = 1 ORDER BY nom;');
 
 		// FIXME deprecated
 		$fix_legacy = [
@@ -419,7 +424,7 @@ class Plugin
 			'{ACCESS_ADMIN}' => $session::ACCESS_ADMIN,
 		];
 
-		foreach ($list as $id => &$row)
+		foreach ($plugins as $id => $row)
 		{
 			if (!self::getPath($row->id, false))
 			{
@@ -430,7 +435,6 @@ class Plugin
 
 			if (!$row->menu_condition)
 			{
-				$row = $row->nom;
 				continue;
 			}
 
@@ -463,14 +467,16 @@ class Plugin
 
 			if (!$db->firstColumn($query))
 			{
-				unset($list[$id]);
+				unset($plugins[$id]);
 				continue;
 			}
-
-			$row = $row->nom;
 		}
 
-		unset($row);
+		foreach ($plugins as $id => $row) {
+			$list['plugin_' . $id] = sprintf('<a href="%s%s/">%s</a>', Utils::getLocalURL('!plugin/'), $id, $row->nom);
+		}
+
+		ksort($list);
 
 		return $list;
 	}
