@@ -428,7 +428,12 @@ class Emails
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->email_asso);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
-		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message', 'content', 'content_html'));
+		self::sendMessage($context, $message);
+	}
+
+	static public function sendMessage(int $context, Mail_Message $message)
+	{
+		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message'));
 
 		if ($email_sent_via_plugin) {
 			return;
@@ -438,17 +443,14 @@ class Emails
 			$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
 			$secure = constant($const);
 
-			$to = $message->getTo()[0];
-			$from = $message->getFrom()[0];
-
 			$smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-			$smtp->rawSend($from, $to, $message->output());
+			$smtp->send($message);
 		}
 		else {
 			$message->send();
 		}
 
-		Plugin::fireSignal('email.send.after', compact('context', 'message', 'content', 'content_html'));
+		Plugin::fireSignal('email.send.after', compact('context', 'message'));
 	}
 
 	/**
@@ -480,7 +482,7 @@ class Emails
 
 			$new->attachMessage($message->output());
 
-			self::send(self::CONTEXT_SYSTEM, $new->output());
+			self::sendMessage(self::CONTEXT_SYSTEM, $new);
 			return;
 		}
 
