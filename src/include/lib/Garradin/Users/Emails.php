@@ -486,7 +486,7 @@ class Emails
 			return $return;
 		}
 
-		$email = self::getEmail($return['recipient']);
+		$email = self::getOrCreateEmail($return['recipient']);
 
 		if (!$email) {
 			return null;
