@@ -75,7 +75,12 @@
 			{input type="text" name="subject" required=true label="Sujet"}
 			{input type="textarea" name="message" cols=35 rows=25 required=true label="Message"}
 			{input type="checkbox" name="send_copy" value=1 label="Recevoir par e-mail une copie du message envoyé"}
-			{input type="select" name="render" label="Format de rendu" options=$render_formats help="Pour enrichir le contenu du mail, inclure des liens, du gras, des titres, etc."}
+			<dt><label for="f_render">Format de rendu</label></dt>
+			<dd>
+				{input type="select" name="render" options=$render_formats}
+				{linkbutton shape="help" href="!web/_syntax_skriv.html" target="_dialog" label="Aide syntaxe SkrivML"}
+				{linkbutton shape="help" href="!web/_syntax_markdown.html" target="_dialog" label="Aide syntaxe MarkDown"}
+			</dd>
 		</dl>
 	</fieldset>
 
