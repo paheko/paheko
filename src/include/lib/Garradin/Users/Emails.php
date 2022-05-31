@@ -425,6 +425,9 @@ class Emails
 			$message->addPart('text/html', $content_html);
 		}
 
+		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->email_asso);
+		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
+
 		$email_sent_via_plugin = Plugin::fireSignal('email.send.before', compact('context', 'message', 'content', 'content_html'));
 
 		if ($email_sent_via_plugin) {
