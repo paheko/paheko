@@ -404,6 +404,30 @@ namespace Garradin;
 //const MAIL_RETURN_PATH = 'returns@monserveur.com';
 
 /**
+ * Mot de passe pour l'accès à l'API permettant de gérer les mails d'erreur
+ * (voir MAIL_RETURN_PATH)
+ *
+ * Cette adresse HTTP permet de gérer un bounce email reçu en POST.
+ * C'est utile si votre serveur de mail est capable de faire une requête HTTP
+ * à la réception d'un message.
+ *
+ * La requête bounce doit contenir un paramètre "message", contenant l'intégralité
+ * de l'email avec les entêtes.
+ *
+ * Si on définit 'abcd' ici, il faudra faire une requête comme ceci :
+ * curl -F 'message=@/tmp/message.eml' https://bounce:abcd@monasso.com/admin/handle_bounce.php
+ *
+ * En alternative le serveur de mail peut aussi appeler le script
+ * 'scripts/handle_bounce.php'
+ *
+ * Défaut : null (l'API handlebounce est désactivée)
+ *
+ * @type string|null
+ */
+
+//const MAIL_BOUNCE_PASSWORD = null;
+
+/**
  * Couleur primaire de l'interface admin par défaut
  * (peut être personnalisée dans la configuration)
  *
