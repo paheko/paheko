@@ -486,7 +486,7 @@ class Sauvegarde
 		// Empêchons l'admin de se tirer une balle dans le pied
 		if ($session->isLogged())
 		{
-			if (version_compare($version, '1.1', '<')) { // FIXME remove in 1.2
+			if (version_compare($version, '1.1.0', '<')) { // FIXME remove in 1.2
 				$sql = 'SELECT 1 FROM membres_categories WHERE id = (SELECT id_categorie FROM membres WHERE id = %d) AND droit_connexion >= %d AND droit_config >= %d';
 			}
 			else {
@@ -522,7 +522,7 @@ class Sauvegarde
 
 		unlink($backup);
 
-		if ($return & self::NOT_AN_ADMIN)
+		if (($return & self::NOT_AN_ADMIN) && version_compare($version, '1.1.0', '>='))
 		{
 			// Forcer toutes les catégories à pouvoir gérer les droits
 			$db = DB::getInstance();
@@ -532,7 +532,7 @@ class Sauvegarde
 			]);
 		}
 
-		if (!$session->refresh()) {
+		if (version_compare($version, '1.1.0', '>=') && !$session->refresh()) {
 			$session->forceLogin(-1);
 			$return |= self::CHANGED_USER;
 		}
