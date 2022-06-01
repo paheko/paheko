@@ -464,6 +464,10 @@ class Emails
 
 		$return = $message->identifyBounce();
 
+		if (!$return) {
+			return null;
+		}
+
 		if ($return['type'] == 'autoreply') {
 			// Ignore auto-responders
 			return $return;
