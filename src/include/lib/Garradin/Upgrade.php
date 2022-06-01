@@ -490,7 +490,7 @@ class Upgrade
 		$user_is_logged = $session->isLogged(true);
 
 		// Forcer à rafraîchir les données de la session si elle existe
-		if ($user_is_logged)
+		if ($user_is_logged && !headers_sent())
 		{
 			$session->refresh();
 		}
