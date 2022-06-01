@@ -86,6 +86,7 @@ class Email extends Entity
 		$this->set('optout', false);
 		$this->set('invalid', false);
 		$this->set('fail_count', 0);
+		$this->set('fail_log', null);
 		return true;
 	}
 
