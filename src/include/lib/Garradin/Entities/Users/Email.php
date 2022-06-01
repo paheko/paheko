@@ -179,7 +179,7 @@ class Email extends Entity
 
 	public function appendFailLog(string $message): void
 	{
-		$log = $this->fail_log;
+		$log = $this->fail_log ?? '';
 
 		if ($this->fail_log) {
 			$log .= "\n";
