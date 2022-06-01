@@ -3,7 +3,6 @@
 namespace Garradin;
 
 use Garradin\Services\Reminders;
-use Garradin\Users\Emails;
 
 if (PHP_SAPI != 'cli') {
 	die("Wrong call");
