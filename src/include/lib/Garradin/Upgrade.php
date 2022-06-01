@@ -436,8 +436,15 @@ class Upgrade
 			}
 
 			if (version_compare($v, '1.1.25', '<')) {
+				$db->begin();
+
 				// Just add email tables
 				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+
+				// Rename signals
+				$db->import(ROOT . '/include/data/1.1.25_migration.sql');
+
+				$db->commit();
 			}
 
 			// Vérification de la cohérence des clés étrangères
