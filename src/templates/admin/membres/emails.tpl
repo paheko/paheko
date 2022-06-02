@@ -35,7 +35,7 @@
 			<td>{$row.fail_log|escape|nl2br}</td>
 			<td>{$row.last_sent|date}</td>
 			<td>
-				{if $row.email && ($row.optout || $row.fail_count)}
+				{if $row.email && $row.optout}
 					{linkbutton target="_dialog" label="Rétablir" href="?verify=%s"|args:$row.email shape="check"}
 				{/if}
 			</td>
