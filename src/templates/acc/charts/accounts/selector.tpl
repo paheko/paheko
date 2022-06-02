@@ -17,7 +17,7 @@
 	<h2 class="ruler">
 		<input type="text" placeholder="Recherche rapide" id="lookup" />
 		{if !isset($grouped_accounts)}
-		<label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes favoris</label>
+		<label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes usuels</label>
 		{/if}
 	</h2>
 
