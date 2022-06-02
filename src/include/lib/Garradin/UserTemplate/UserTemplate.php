@@ -76,6 +76,40 @@ class UserTemplate extends Brindille
 		Plugin::fireSignal('usertemplate.init', ['template' => $this]);
 	}
 
+	/**
+	 * Toggle safe mode
+	 *
+	 * If set to TRUE, then all functions and sections are removed, except foreach.
+	 * Only modifiers can be used.
+	 * Useful for templates where you don't want the user to be able to do SQL queries etc.
+	 *
+	 * @param  bool   $enable
+	 * @return void
+	 */
+	public function toggleSafeMode(bool $safe_mode): void
+	{
+		if ($safe_mode) {
+			$this->_functions = [];
+			$this->_sections = [];
+
+			// Register default Brindille modifiers
+			$this->registerDefaults();
+		}
+		else {
+			$this->registerAll();
+		}
+	}
+
+	public function setEscapeDefault(?string $default): void
+	{
+		if (null === $default) {
+			$this->registerModifier('escape', fn($str) => $str);
+		}
+		else {
+			$this->registerModifier('escape', fn ($str) => htmlspecialchars((string)$str) );
+		}
+	}
+
 	public function registerAll()
 	{
 		// Register default Brindille modifiers

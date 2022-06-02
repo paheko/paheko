@@ -62,6 +62,10 @@ class Emails
 		$skel = null;
 		$content_html = null;
 
+		if ($template) {
+			$template->toggleSafeMode(true);
+		}
+
 		$db = DB::getInstance();
 		$db->begin();
 		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, content, content_html, context)
@@ -81,13 +85,27 @@ class Emails
 			// it's done in the queue clearing (more efficient)
 			$hash = Email::getHash($to);
 
+			$content_html = null;
+
 			if ($template) {
 				$template->assignArray((array) $variables);
-				$content = $template->fetch();
+
+				if ($render) {
+					$content_html = $template->fetch();
+				}
+				else {
+					// Disable HTML escaping for plaintext emails
+					$template->setEscapeDefault(null);
+					$content = $template->fetch();
+				}
 			}
 
 			if ($render) {
-				$content_html = Render::render($render, null, $content);
+				$content_html = Render::render($render, null, $content_html);
+			}
+
+			if ($content_html) {
+				// Wrap HTML content in the email skeleton
 				$content_html = $skel->fetch([
 					'html'      => $content_html,
 					'recipient' => $to,
@@ -523,7 +541,7 @@ class Emails
 			throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
 		}
 
-		$html = $message;
+		$html = null;
 		$tpl = null;
 
 		$random = array_rand($list);
@@ -531,9 +549,18 @@ class Emails
 		if (false !== strpos($message, '{{')) {
 			$tpl = new UserTemplate;
 			$tpl->setCode($message);
+			$tpl->toggleSafeMode(true);
 			$tpl->assignArray((array)$list[$random]);
+
 			try {
-				$html = $tpl->fetch();
+				if (!$render) {
+					// Disable HTML escaping for plaintext emails
+					$tpl->setEscapeDefault(null);
+					$message = $tpl->fetch();
+				}
+				else {
+					$html = $tpl->fetch();
+				}
 			}
 			catch (\KD2\Brindille_Exception $e) {
 				throw new UserException('Erreur de syntaxe dans le corps du message :' . PHP_EOL . $e->getPrevious()->getMessage(), 0, $e);
