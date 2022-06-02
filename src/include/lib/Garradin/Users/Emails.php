@@ -543,8 +543,11 @@ class Emails
 		if ($render) {
 			$html = Render::render($render, null, $html);
 		}
+		elseif (null !== $html) {
+			$html = '<pre>' . $html . '</pre>';
+		}
 		else {
-			$html = '<pre>' . htmlspecialchars($html) . '</pre>';
+			$html = '<pre>' . htmlspecialchars($message) . '</pre>';
 		}
 
 		$recipients = $list;
