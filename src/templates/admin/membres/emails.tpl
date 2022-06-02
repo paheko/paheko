@@ -36,7 +36,7 @@
 			<td>{$row.last_sent|date}</td>
 			<td>
 				{if $row.email && ($row.optout || $row.fail_count)}
-					{linkbutton target="_dialog" label="Vérifier l'adresse" href="?verify=%s"|args:$row.email shape="check"}
+					{linkbutton target="_dialog" label="Rétablir" href="?verify=%s"|args:$row.email shape="check"}
 				{/if}
 			</td>
 		</tr>
