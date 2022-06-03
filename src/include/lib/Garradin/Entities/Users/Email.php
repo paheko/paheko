@@ -181,7 +181,7 @@ class Email extends Entity
 	{
 		$log = $this->fail_log ?? '';
 
-		if ($this->fail_log) {
+		if ($log) {
 			$log .= "\n";
 		}
 
