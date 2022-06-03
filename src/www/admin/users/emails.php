@@ -18,10 +18,10 @@ if ($address = qg('verify')) {
 
     $form->runIf('send', function () use ($email, $address) {
         $email->sendVerification($address);
-    }, $csrf_key, '!membres/emails.php?sent');
+    }, $csrf_key, '!users/emails.php?sent');
 
     $tpl->assign(compact('csrf_key', 'email'));
-    $tpl->display('admin/membres/emails_verification.tpl');
+    $tpl->display('users/emails_verification.tpl');
     exit;
 }
 
@@ -32,4 +32,4 @@ $max_fail_count = Emails::FAIL_LIMIT;
 $queue_count = Emails::countQueue();
 $tpl->assign(compact('list', 'max_fail_count', 'queue_count'));
 
-$tpl->display('admin/membres/emails.tpl');
+$tpl->display('users/emails.tpl');

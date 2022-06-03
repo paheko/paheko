@@ -38,4 +38,4 @@ $form->runIf('save', function () {
     Session::getInstance()->forceLogin(1);
 }, 'install', ADMIN_URL);
 
-$tpl->display('admin/install.tpl');
+$tpl->display('install.tpl');

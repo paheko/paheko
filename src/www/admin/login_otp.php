@@ -29,4 +29,4 @@ $tpl->assign('fail', $login === false);
 
 $tpl->assign('time', time());
 
-$tpl->display('admin/login_otp.tpl');
+$tpl->display('login_otp.tpl');

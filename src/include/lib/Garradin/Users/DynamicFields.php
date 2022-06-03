@@ -96,9 +96,10 @@ class DynamicFields
 	static public function getNameFieldsSQL(?string $prefix = null): string
 	{
 		$fields = self::getNameFields();
+		$db= DB::getInstance();
 
 		if ($prefix) {
-			$fields = array_map(fn($v) => $prefix . '.' . $v, $fields);
+			$fields = array_map(fn($v) => $prefix . '.' . $db->quoteIdentifier($v), $fields);
 		}
 
 		return implode(' || \' \' ', $fields);
@@ -157,6 +158,46 @@ class DynamicFields
 		}
 
 		$this->reloadCache();
+	}
+
+	public function install(): void
+	{
+		$presets = $this->getInstallPresets();
+		$i = 0;
+
+		foreach ($presets as $name => $preset) {
+			$field = new DynamicField;
+
+			if ($name == 'password') {
+				$name = 'password';
+				$field->system |= $field::PASSWORD;
+			}
+
+			if ($name == 'email') {
+				$field->system |= $field::LOGIN;
+			}
+
+			if ($name == 'name') {
+				$field->system |= $field::NAME;
+			}
+
+			if ($name == 'numero') {
+				$field->system |= $field::NUMBER;
+			}
+
+			$field->set('name', $name);
+			$field->set('label', $data['label']);
+			$field->set('type', $data['type']);
+			$field->set('help', $data['help'] ?? null);
+			$field->set('read_access', $data['read_access'] ?? 0);
+			$field->set('write_access', $data['write_access'] ?? 0);
+			$field->set('required', $data['required'] ?? false);
+			$field->set('list_table', $data['list_table'] ?? false);
+			$field->set('sort_order', $i++);
+			$self->add($field);
+		}
+
+		$this->save();
 	}
 
 	protected function reloadCache()

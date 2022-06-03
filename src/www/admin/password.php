@@ -26,7 +26,7 @@ if (qg('c'))
         }
 
         $tpl->assign('passphrase', Utils::suggestPassword());
-        $tpl->display('admin/password_change.tpl');
+        $tpl->display('password_change.tpl');
         exit;
     }
 }
@@ -52,10 +52,8 @@ if (!$form->hasErrors() && null !== qg('sent'))
     $tpl->assign('sent', true);
 }
 
-$champs = $config->get('champs_membres');
+$id_field = DynamicFields::get(DynamicFields::getLoginField());
 
-$champ = $champs->get($config->get('champ_identifiant'));
+$tpl->assign('id_field', $id_field);
 
-$tpl->assign('champ', $champ);
-
-$tpl->display('admin/password.tpl');
+$tpl->display('password.tpl');

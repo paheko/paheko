@@ -27,9 +27,8 @@ if ($session->isLogged())
     Utils::redirect(ADMIN_URL . '');
 }
 
-$champs = $config->get('champs_membres');
-$id_field = (object) $champs->get($config->get('champ_identifiant'));
-$id_field_name = $id_field->title;
+$id_field = DynamicFields::get(DynamicFields::getLoginField());
+$id_field_name = $id_field->label;
 
 $form->runIf('login', function () use ($id_field_name, $session) {
     if (!trim((string) f('_id'))) {
@@ -50,4 +49,4 @@ $tpl->assign('ssl_enabled', HTTP::getScheme() == 'https' ? false : true);
 $tpl->assign(compact('id_field_name'));
 $tpl->assign('changed', qg('changed') !== null);
 
-$tpl->display('admin/login.tpl');
+$tpl->display('login.tpl');

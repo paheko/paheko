@@ -26,7 +26,7 @@ $tpl->assign(compact('homepage', 'banner'));
 
 $tpl->assign('custom_css', ['!web/css.php']);
 
-$tpl->display('admin/index.tpl');
+$tpl->display('index.tpl');
 flush();
 
 // Si pas de cron on réalise les tâches automatisées à ce moment-là

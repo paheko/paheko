@@ -99,16 +99,16 @@ class Session extends \KD2\UserSession
 
 	protected function getUserForLogin($login)
 	{
-		$champ_id = DynamicFields::getLoginField();
+		$id_field = DynamicFields::getLoginField();
 
 		// Ne renvoie un membre que si celui-ci a le droit de se connecter
-		$query = 'SELECT u.id, m.%1$s AS login, m.password, m.secret_otp AS otp_secret
+		$query = 'SELECT u.id, u.%1$s AS login, u.password, u.otp_secret
 			FROM users AS u
-			INNER JOIN users_categories AS c ON c.id = m.id_category
+			INNER JOIN users_categories AS c ON c.id = u.id_category
 			WHERE u.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
-		$query = sprintf($query, $champ_id, self::ACCESS_READ);
+		$query = sprintf($query, $id_field, self::ACCESS_READ);
 
 		return $this->db->first($query, $login);
 	}

@@ -354,7 +354,7 @@ class Emails
 		$columns = [
 			'identity' => [
 				'label' => 'Membre',
-				'select' => 'u.' . $db->quoteIdentifier(Config::getInstance()->champ_identite),
+				'select' => DynamicFields::getNameFieldsSQL('u'),
 			],
 			'email' => [
 				'label' => 'Adresse',
@@ -389,7 +389,7 @@ class Emails
 		];
 
 		$tables = 'emails e
-			INNER JOIN membres u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)';
+			INNER JOIN users u ON u.email IS NOT NULL AND u.email != \'\' AND e.hash = email_hash(u.email)';
 
 		$conditions = sprintf('e.optout = 1 OR e.invalid = 1 OR e.fail_count >= %d', self::FAIL_LIMIT);
 
@@ -406,7 +406,7 @@ class Emails
 		$message->setHeaders($headers);
 
 		if (!$message->getFrom()) {
-			$message->setHeader('From', sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso));
+			$message->setHeader('From', sprintf('"%s" <%s>', $config->org_name, $config->org_email));
 		}
 
 		$message->setMessageId();
@@ -443,7 +443,7 @@ class Emails
 			$message->addPart('text/html', $content_html);
 		}
 
-		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->email_asso);
+		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
 		self::sendMessage($context, $message);
@@ -496,7 +496,7 @@ class Emails
 
 			$new = new Mail_Message;
 			$new->setHeaders([
-				'To'      => $config->email_asso,
+				'To'      => $config->org_email,
 				'Subject' => 'Réponse à un message que vous avez envoyé',
 			]);
 
