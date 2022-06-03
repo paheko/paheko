@@ -52,4 +52,4 @@ $list = $s->getList();
 
 $tpl->assign(compact('code', 'list', 'ok', 'ok_code'));
 
-$tpl->display('admin/config/backup/restore.tpl');
+$tpl->display('config/backup/restore.tpl');

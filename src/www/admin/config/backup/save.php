@@ -54,4 +54,4 @@ $frequencies = [
 
 $tpl->assign(compact('ok', 'db_size', 'files_size', 'frequencies'));
 
-$tpl->display('admin/config/backup/save.tpl');
+$tpl->display('config/backup/save.tpl');

@@ -3,7 +3,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 ?>
 {include file="admin/_head.tpl" current="config" title=$title}
 
-{include file="admin/config/_menu.tpl" current="fields"}
+{include file="config/_menu.tpl" current="fields"}
 
 {form_errors}
 

@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Fonctions avancées" current="config" custom_css=["config.css"]}
 
-{include file="admin/config/_menu.tpl" current="advanced" sub_current=null}
+{include file="config/_menu.tpl" current="advanced" sub_current=null}
 
 <p class="help block">
 	Attention, les fonctions avancées peuvent permettre de supprimer des données ou rendre votre instance inutilisable&nbsp;!

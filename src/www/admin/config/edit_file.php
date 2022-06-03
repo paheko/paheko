@@ -43,7 +43,7 @@ $form->runIf('save', function () use ($key, $config) {
 $tpl->assign(compact('csrf_key', 'file'));
 
 if ($type == 'image') {
-	$tpl->display('admin/config/edit_image.tpl');
+	$tpl->display('config/edit_image.tpl');
 }
 else {
 	$content = $file ? $file->fetch() : '';

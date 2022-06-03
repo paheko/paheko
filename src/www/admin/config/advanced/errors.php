@@ -53,4 +53,4 @@ else
     $tpl->assign('errors', $errors);
 }
 
-$tpl->display('admin/config/advanced/errors.tpl');
+$tpl->display('config/advanced/errors.tpl');

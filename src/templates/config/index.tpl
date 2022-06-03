@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Configuration" current="config"}
 
-{include file="admin/config/_menu.tpl" current="index"}
+{include file="config/_menu.tpl" current="index"}
 
 {if isset($_GET['ok']) && !$form->hasErrors()}
 	<p class="block confirm">

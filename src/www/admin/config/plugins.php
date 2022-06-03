@@ -58,6 +58,6 @@ else
 
 $tpl->assign('garradin_website', WEBSITE);
 
-$tpl->display('admin/config/plugins.tpl');
+$tpl->display('config/plugins.tpl');
 
 Plugin::upgradeAllIfRequired();

@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Journal SQL" current="config" custom_css=["config.css"]}
 
-{include file="admin/config/_menu.tpl" current="advanced" sub_current="sql_debug"}
+{include file="config/_menu.tpl" current="advanced" sub_current="sql_debug"}
 
 {if isset($debug)}
 	<table class="list multi">

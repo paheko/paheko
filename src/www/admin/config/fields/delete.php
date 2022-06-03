@@ -25,4 +25,4 @@ $form->runIf('delete', function () use ($field, $fields) {
 
 $tpl->assign(compact('csrf_key', 'field'));
 
-$tpl->display('admin/config/fields/delete.tpl');
+$tpl->display('config/fields/delete.tpl');

@@ -31,4 +31,4 @@ $tpl->assign('background_image_current', $config->fileURL('admin_background'));
 $tpl->assign('background_image_default', ADMIN_BACKGROUND_IMAGE);
 
 $tpl->assign('custom_js', ['color_helper.js']);
-$tpl->display('admin/config/custom.tpl');
+$tpl->display('config/custom.tpl');

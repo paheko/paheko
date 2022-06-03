@@ -1,8 +1,8 @@
 {include file="admin/_head.tpl" title="Sauvegardes" current="config"}
 
-{include file="admin/config/_menu.tpl" current="backup"}
+{include file="config/_menu.tpl" current="backup"}
 
-{include file="admin/config/backup/_menu.tpl" current="index"}
+{include file="config/backup/_menu.tpl" current="index"}
 
 <fieldset>
 	<legend>Politique de sauvegardes</legend>

@@ -57,4 +57,4 @@ else {
 
 $tpl->assign(compact('index_list', 'triggers_list', 'tables_list', 'query', 'table', 'list', 'result', 'result_header'));
 
-$tpl->display('admin/config/advanced/sql.tpl');
+$tpl->display('config/advanced/sql.tpl');

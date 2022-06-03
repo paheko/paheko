@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="SQL" current="config" custom_css=["config.css"]}
 
-{include file="admin/config/_menu.tpl" current="advanced" sub_current="sql"}
+{include file="config/_menu.tpl" current="advanced" sub_current="sql"}
 
 {form_errors}
 

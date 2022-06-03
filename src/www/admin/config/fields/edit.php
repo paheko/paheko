@@ -33,4 +33,4 @@ $form->runIf('save', function () use ($field, $fields) {
 
 $tpl->assign(compact('csrf_key', 'field'));
 
-$tpl->display('admin/config/fields/edit.tpl');
+$tpl->display('config/fields/edit.tpl');

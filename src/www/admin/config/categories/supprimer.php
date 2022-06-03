@@ -25,4 +25,4 @@ $form->runIf('delete', function () use($cat) {
 
 $tpl->assign(compact('cat', 'csrf_key'));
 
-$tpl->display('admin/config/categories/supprimer.tpl');
+$tpl->display('config/categories/supprimer.tpl');

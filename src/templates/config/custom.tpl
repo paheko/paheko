@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Personnalisation" current="config" custom_css=['config.css']}
 
-{include file="admin/config/_menu.tpl" current="custom"}
+{include file="config/_menu.tpl" current="custom"}
 
 {if isset($_GET['ok']) && !$form->hasErrors()}
 	<p class="block confirm">

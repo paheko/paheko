@@ -20,4 +20,4 @@ else
 	$tpl->assign('list', DB::getDebugSessionsList());
 }
 
-$tpl->display('admin/config/advanced/sql_debug.tpl');
+$tpl->display('config/advanced/sql_debug.tpl');

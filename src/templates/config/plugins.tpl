@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Extensions" current="config"}
 
-{include file="admin/config/_menu.tpl" current="plugins"}
+{include file="config/_menu.tpl" current="plugins"}
 
 {form_errors}
 

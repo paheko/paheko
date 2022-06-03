@@ -40,4 +40,4 @@ $tpl->assign([
 	'name_field'       => DynamicFields::getNameFields()[0],
 ]);
 
-$tpl->display('admin/config/index.tpl');
+$tpl->display('config/index.tpl');

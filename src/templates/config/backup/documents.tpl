@@ -1,8 +1,8 @@
 {include file="admin/_head.tpl" title="Documents" current="config"}
 
-{include file="admin/config/_menu.tpl" current="backup"}
+{include file="config/_menu.tpl" current="backup"}
 
-{include file="admin/config/backup/_menu.tpl" current="documents"}
+{include file="config/backup/_menu.tpl" current="documents"}
 
 {if $ok}
 <p class="confirm block">La restauration a été effectuée.</p>

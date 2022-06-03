@@ -25,4 +25,4 @@ $list =  Categories::listWithStats();
 
 $tpl->assign(compact('list', 'csrf_key'));
 
-$tpl->display('admin/config/categories/index.tpl');
+$tpl->display('config/categories/index.tpl');

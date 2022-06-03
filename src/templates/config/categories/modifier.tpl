@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Modifier une catégorie de membre" current="config"}
 
-{include file="admin/config/_menu.tpl" current="categories"}
+{include file="config/_menu.tpl" current="categories"}
 
 {form_errors}
 

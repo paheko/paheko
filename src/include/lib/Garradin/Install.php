@@ -150,12 +150,8 @@ class Install
 		$config->set('log_retention', 720);
 		$config->set('log_anonymize', 365);
 
-		$champs = Membres\Champs::importInstall();
-		$champs->create(); // Pas de copie car pas de table membres existante
-		$config->set('champs_membres', $champs);
-
-		$config->set('champ_identifiant', 'email');
-		$config->set('champ_identite', 'nom');
+		$fields = DynamicFields::getInstance();
+		$fields->install();
 
 		// Create default category for common users
 		$cat = new Category;

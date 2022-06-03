@@ -1,6 +1,6 @@
 {include file="admin/_head.tpl" title="Mise à jour" current="config"}
 
-{include file="admin/config/_menu.tpl" current="index"}
+{include file="config/_menu.tpl" current="index"}
 
 {form_errors}
 

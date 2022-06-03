@@ -32,4 +32,4 @@ $tpl->assign('closed_years', Years::listClosedAssoc());
 $tpl->assign('quota_used', $quota_used);
 $tpl->assign('storage_backend', FILE_STORAGE_BACKEND);
 
-$tpl->display('admin/config/advanced/index.tpl');
+$tpl->display('config/advanced/index.tpl');

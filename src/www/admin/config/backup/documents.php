@@ -50,4 +50,4 @@ $files_size = Files::getUsedQuota();
 
 $tpl->assign(compact('files_size', 'failed', 'ok'));
 
-$tpl->display('admin/config/backup/documents.tpl');
+$tpl->display('config/backup/documents.tpl');

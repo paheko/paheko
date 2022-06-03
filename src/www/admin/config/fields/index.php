@@ -16,4 +16,4 @@ $form->runIf('save', function () use ($fields) {
 $tpl->assign('fields', $fields->all());
 $tpl->assign(compact('csrf_key'));
 
-$tpl->display('admin/config/fields/index.tpl');
+$tpl->display('config/fields/index.tpl');
