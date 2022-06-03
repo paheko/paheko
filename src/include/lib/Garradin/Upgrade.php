@@ -145,9 +145,6 @@ class Upgrade
 				$db->commitSchemaUpdate();
 			}
 
-			// Réinstaller les plugins système si nécessaire
-			Plugin::checkAndInstallSystemPlugins();
-
 			Plugin::upgradeAllIfRequired();
 
 			// Vérification de la cohérence des clés étrangères

@@ -462,6 +462,7 @@ class DynamicFields
 	 */
 	public function getSQLSearchSchema(string $table_name = User::TABLE): ?string
 	{
+		$db = DB::getInstance();
 		$search_table = $table_name . '_search';
 
 		$columns = [];
