@@ -21,9 +21,11 @@ use const Garradin\{WWW_URL, ADMIN_URL, SHARED_USER_TEMPLATES_CACHE_ROOT, USER_T
 
 class UserTemplate extends Brindille
 {
-	protected $path;
+	protected $path = null;
 	protected $modified;
-	protected $file;
+	protected $file = null;
+	protected $code = null;
+	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
 
 	static protected $root_variables;
 
@@ -74,6 +76,40 @@ class UserTemplate extends Brindille
 		Plugin::fireSignal('usertemplate.init', ['template' => $this]);
 	}
 
+	/**
+	 * Toggle safe mode
+	 *
+	 * If set to TRUE, then all functions and sections are removed, except foreach.
+	 * Only modifiers can be used.
+	 * Useful for templates where you don't want the user to be able to do SQL queries etc.
+	 *
+	 * @param  bool   $enable
+	 * @return void
+	 */
+	public function toggleSafeMode(bool $safe_mode): void
+	{
+		if ($safe_mode) {
+			$this->_functions = [];
+			$this->_sections = [];
+
+			// Register default Brindille modifiers
+			$this->registerDefaults();
+		}
+		else {
+			$this->registerAll();
+		}
+	}
+
+	public function setEscapeDefault(?string $default): void
+	{
+		if (null === $default) {
+			$this->registerModifier('escape', fn($str) => $str);
+		}
+		else {
+			$this->registerModifier('escape', fn ($str) => htmlspecialchars((string)$str) );
+		}
+	}
+
 	public function registerAll()
 	{
 		// Register default Brindille modifiers
@@ -111,20 +147,32 @@ class UserTemplate extends Brindille
 
 	public function setSource(string $path)
 	{
+		$this->file = null;
 		$this->path = $path;
 		$this->modified = filemtime($path);
+		// Use shared cache for default templates
+		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
+	}
+
+	public function setCode(string $code)
+	{
+		$this->code = $code;
+		$this->file = null;
+		$this->path = null;
+		$this->modified = time();
+		// Use custom cache for user templates
+		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
+	}
+
+	protected function _getCachePath()
+	{
+		$hash = sha1($this->file ? $this->file->path : ($this->code ?: $this->path));
+		return sprintf('%s/%s.php', $this->cache_path, $hash);
 	}
 
 	public function display(): void
 	{
-		// Use custom cache for user templates
-		if ($this->file) {
-			$compiled_path = sprintf('%s/%s.php', USER_TEMPLATES_CACHE_ROOT, sha1($this->file->path));
-		}
-		// Use shared cache for default templates
-		else {
-			$compiled_path = sprintf('%s/%s.php', SHARED_USER_TEMPLATES_CACHE_ROOT, sha1($this->path));
-		}
+		$compiled_path = $this->_getCachePath(true);
 
 		if (!is_dir(dirname($compiled_path))) {
 			// Force cache directory mkdir
@@ -138,7 +186,15 @@ class UserTemplate extends Brindille
 
 		$tmp_path = $compiled_path . '.tmp';
 
-		$source = $this->file ? $this->file->fetch() : file_get_contents($this->path);
+		if ($this->code) {
+			$source = $this->code;
+		}
+		elseif ($this->file) {
+			$source = $this->file->fetch();
+		}
+		else {
+			$source = file_get_contents($this->path);
+		}
 
 		try {
 			$code = $this->compile($source);
@@ -148,7 +204,7 @@ class UserTemplate extends Brindille
 		}
 		catch (Brindille_Exception $e) {
 			throw new Brindille_Exception(sprintf("Erreur de syntaxe dans '%s' : %s",
-				$this->file ? $this->file->name : Utils::basename($this->path),
+				$this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path)),
 				$e->getMessage()), 0, $e);
 		}
 		catch (\Throwable $e) {
