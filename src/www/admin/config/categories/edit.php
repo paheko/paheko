@@ -50,4 +50,4 @@ unset($config);
 
 $tpl->assign(compact('csrf_key', 'cat', 'permissions'));
 
-$tpl->display('config/categories/modifier.tpl');
+$tpl->display('config/categories/edit.tpl');

@@ -19,10 +19,10 @@
 				</td>
 				<td class="actions">
 					{if $cat.id != $logged_user.id_category}
-						{linkbutton shape="delete" label="Supprimer" href="supprimer.php?id=%d"|args:$cat.id target="_dialog"}
+						{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$cat.id target="_dialog"}
 					{/if}
-					{linkbutton shape="edit" label="Modifier" href="modifier.php?id=%d"|args:$cat.id}
-					{linkbutton shape="users" label="Liste des membres" href="!membres/?cat=%d"|args:$cat.id}
+					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$cat.id}
+					{linkbutton shape="users" label="Liste des membres" href="!users/?cat=%d"|args:$cat.id}
 				</td>
 			</tr>
 		{/foreach}
