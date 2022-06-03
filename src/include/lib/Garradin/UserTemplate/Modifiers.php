@@ -62,8 +62,12 @@ class Modifiers
 
 	static public function check_email($str)
 	{
+		if (!trim((string)$str)) {
+			return false;
+		}
+
 		try {
-			Email::validateAddress($str);
+			Email::validateAddress((string)$str);
 		}
 		catch (UserException $e) {
 			return false;
