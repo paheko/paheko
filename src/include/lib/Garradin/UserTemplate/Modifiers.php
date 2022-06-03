@@ -4,6 +4,8 @@ namespace Garradin\UserTemplate;
 
 use Garradin\Utils;
 
+use Garradin\Entities\Users\Email;
+
 use KD2\SMTP;
 
 class Modifiers
@@ -60,7 +62,14 @@ class Modifiers
 
 	static public function check_email($str)
 	{
-		return SMTP::checkEmailIsValid($str, true);
+		try {
+			Email::validateAddress($str);
+		}
+		catch (UserException $e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

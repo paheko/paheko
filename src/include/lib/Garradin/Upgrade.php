@@ -429,8 +429,20 @@ class Upgrade
 			if (version_compare($v, '1.1.24', '<')) {
 				$db->begin();
 
-				// Delete acc_accounts_projects_balances view
+				// Delete acc_accounts_projects_ebalances view
 				$db->exec('DROP VIEW IF EXISTS acc_accounts_projects_balances;');
+
+				$db->commit();
+			}
+
+			if (version_compare($v, '1.1.25', '<')) {
+				$db->begin();
+
+				// Just add email tables
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+
+				// Rename signals
+				$db->import(ROOT . '/include/data/1.1.25_migration.sql');
 
 				$db->commit();
 			}
@@ -478,7 +490,7 @@ class Upgrade
 		$user_is_logged = $session->isLogged(true);
 
 		// Forcer à rafraîchir les données de la session si elle existe
-		if ($user_is_logged)
+		if ($user_is_logged && !headers_sent())
 		{
 			$session->refresh();
 		}

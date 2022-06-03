@@ -7,7 +7,8 @@
 
 .web-content p, .web-content h1, .web-content h2, .web-content h3, .web-content h4, .web-content h5, .web-content h6,
 .web-content ul, .web-content ol, .web-content table, .web-content blockquote, .web-content pre {
-    margin: .8em 0;
+    margin: 0;
+    margin-bottom: .8em;
 }
 
 .web-content ul, .web-content ol, .web-content dd {
