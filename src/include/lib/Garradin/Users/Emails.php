@@ -508,6 +508,12 @@ class Emails
 			return $return;
 		}
 
+		return self::handleManualBounce($return['recipient'], $return['type'], $return['message']);
+	}
+
+	static public function handleManualBounce(string $recipient, string $type, ?string $message): ?array
+	{
+		$return = compact('recipient', 'type', 'message');
 		$email = self::getOrCreateEmail($return['recipient']);
 
 		if (!$email) {
