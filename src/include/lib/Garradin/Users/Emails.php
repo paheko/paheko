@@ -101,7 +101,7 @@ class Emails
 			}
 
 			if ($render) {
-				$content_html = Render::render($render, null, $content_html);
+				$content_html = Render::render($render, null, $content_html ?? $content);
 			}
 
 			if ($content_html) {
@@ -568,7 +568,7 @@ class Emails
 		}
 
 		if ($render) {
-			$html = Render::render($render, null, $html);
+			$html = Render::render($render, null, $html ?? $message);
 		}
 		elseif (null !== $html) {
 			$html = '<pre>' . $html . '</pre>';
