@@ -40,7 +40,7 @@ $form->runIf(f('send') || f('subject'), function () use ($membres, &$mailing, $r
 		$recipients = $recherche->search($target[1], ['membres.*'], true);
 	}
 
-	if (!count($recipients)) {
+	if (empty($recipients)) {
 		throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
 	}
 
