@@ -12,6 +12,7 @@ use Garradin\UserException;
 use Garradin\ValidationException;
 
 use Garradin\Users\Categories;
+use Garradin\Users\Emails;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
 
@@ -148,5 +149,37 @@ class User extends Entity
 		}
 
 		return parent::importForm($source);
+	}
+
+	public function canEmail(): bool
+	{
+		foreach (DynamicFields::getEmailFields() as $f) {
+			if (!empty($this->$f)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function getNameAndEmail(): string
+	{
+		$email_field = DynamicFields::getFirstEmailField();
+
+		return sprintf('"%s" <%s>', $this->name(), $this->{$email_field});
+	}
+
+	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)
+	{
+		$config = Config::getInstance();
+		$email_field = DynamicFields::getFirstEmailField();
+
+		$from = $from ? $from->getNameAndEmail() : null;
+
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$this->{$email_field} => null], $from, $subject, $message);
+
+		if ($send_copy) {
+			Emails::queue(Emails::CONTEXT_PRIVATE, [$config->org_email => null], null, $subject, $message);
+		}
 	}
 }

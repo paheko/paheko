@@ -621,7 +621,7 @@ class Emails
 		if ($mailing->send_copy)
 		{
 			$config = Config::getInstance();
-			Emails::queue(Emails::CONTEXT_BULK, [$config->get('email_asso') => null], null, $mailing->subject, $mailing->message);
+			Emails::queue(Emails::CONTEXT_BULK, [$config->org_email => null], null, $mailing->subject, $mailing->message);
 		}
 	}
 }

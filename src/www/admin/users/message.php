@@ -2,53 +2,35 @@
 namespace Garradin;
 
 use Garradin\Users\Categories;
+use Garradin\Users\Session;
+use Garradin\Users\Users;
 
 require_once __DIR__ . '/_inc.php';
 
-if (empty($user->email))
-{
-    throw new UserException("Vous devez renseigner l'adresse e-mail dans vos informations pour pouvoir contacter les autres membres.");
+$self = Session::getInstance()->user();
+
+if (!$self->canEmail()) {
+    throw new UserException('Vous devez renseigner une adresse e-mail dans votre fiche membre pour pouvoir envoyer des messages personnels.');
 }
 
-qv(['id' => 'required|numeric']);
+$user = Users::get((int) $_GET['id'] ?? 0);
 
-$id = (int) qg('id');
-
-$membre = $membres->get($id);
-
-if (!$membre)
-{
+if (!$user) {
     throw new UserException("Ce membre n'existe pas.");
 }
 
-if (empty($membre->email))
-{
-    throw new UserException('Ce membre n\'a pas d\'adresse email renseignée.');
+if (!$user->canEmail()) {
+    throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans sa fiche membre.');
 }
 
-if (f('save'))
-{
-    $form->check('send_message_' . $id, [
-        'sujet' => 'required|string',
-        'message' => 'required|string',
-    ]);
+$csrf_key = 'send_message_' . $user->id;
 
-    if (!$form->hasErrors())
-    {
-        try {
-            $session->sendMessage($membre->email, f('sujet'),
-                f('message'), (bool) f('copie'));
+$form->runIf('send', function () use ($user, $self) {
+    $user->sendMessage(f('subject'), f('message'), (bool) f('send_copy'), $self);
+}, $csrf_key, '!users/?sent');
 
-            Utils::redirect(ADMIN_URL . 'membres/?sent');
-        }
-        catch (UserException $e)
-        {
-            $form->addError($e->getMessage());
-        }
-    }
-}
+$tpl->assign('category', Categories::get($user->id_category));
+$tpl->assign('recipient', $user);
+$tpl->assign(compact('self', 'csrf_key'));
 
-$tpl->assign('categorie', Categories::get($membre->id_category));
-$tpl->assign('membre', $membre);
-
-$tpl->display('admin/membres/message.tpl');
+$tpl->display('users/message.tpl');

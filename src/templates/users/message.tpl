@@ -7,23 +7,18 @@
         <legend>Message</legend>
         <dl>
             <dt>Expéditeur</dt>
-            <dd>{$user.identite} &lt;{$user.email}&gt;</dd>
+            <dd>{$self->getNameAndEmail()}</dd>
             <dt>Destinataire</dt>
-            <dd>{$membre.identite} ({$categorie.name})</dd>
-            <dt><label for="f_subject">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="sujet" id="f_subject" value="{form_field name=sujet}" required="required" /></dd>
-            <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><textarea name="message" id="f_message" cols="72" rows="25" required="required">{form_field name=message}</textarea></dd>
-            <dd>
-                <input type="checkbox" name="copie" id="f_copie" value="1" />
-                <label for="f_copie">Recevoir par e-mail une copie du message envoyé</label>
-            </dd>
+            <dd>{$recipient->getNameAndEmail()}</dd>
+            {input type="text" name="subject" required=true label="Sujet"}
+            {input type="textarea" name="message" required=true label="Message" rows=15}
+            {input type="checkbox" name="send_copy" value=1 label="Recevoir par e-mail une copie du message envoyé"}
         </dl>
     </fieldset>
 
     <p class="submit">
-        {csrf_field key="send_message_"|cat:$membre.id}
-        {button type="submit" name="save" label="Envoyer" shape="right" class="main"}
+        {csrf_field key=$csrf_key}
+        {button type="submit" name="send" label="Envoyer" shape="mail" class="main"}
     </p>
 </form>
 

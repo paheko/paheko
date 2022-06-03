@@ -10,6 +10,8 @@ use Garradin\UserException;
 use Garradin\Plugin;
 use Garradin\Users\Emails;
 
+use Garradin\Entities\Users\User;
+
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
 use const Garradin\ADMIN_URL;
@@ -118,7 +120,7 @@ class Session extends \KD2\UserSession
 		// Mettre à jour la date de connexion
 		$this->db->preparedQuery('UPDATE users SET date_login = datetime() WHERE id = ?;', [$id]);
 
-		$sql = sprintf('SELECT u.*, %s AS _name,
+		$sql = sprintf('SELECT u.*,
 			c.perm_connect, c.perm_web, c.perm_users, c.perm_documents,
 			c.perm_subscribe, c.perm_accounting, c.perm_config
 			FROM users AS u
@@ -126,7 +128,24 @@ class Session extends \KD2\UserSession
 			WHERE u.id = ? LIMIT 1;',
 			$this->db->quoteIdentifier(DynamicFields::getLoginField('u')));
 
-		return $this->db->first($sql, $id);
+		$u = $this->db->first($sql, $id);
+
+		if (!$u) {
+			return null;
+		}
+
+		$this->set('permissions', array_filter((array) $u,
+			fn($k) => substr($k, 0, 5) == 'perm_',
+			\ARRAY_FILTER_USE_KEY)
+		);
+
+		$u = array_filter(
+			(array) $u,
+			fn($k) => substr($k, 0, 5) != 'perm_',
+			\ARRAY_FILTER_USE_KEY
+		);
+
+		return (new User)->load($u);
 	}
 
 	protected function storeRememberMeSelector($selector, $hash, $expiry, $user_id)
@@ -359,46 +378,31 @@ class Session extends \KD2\UserSession
 		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
 	}
 
-	public function editUser($data) // FIXME update
+	public function user(): ?User
 	{
-		(new Membres)->edit($this->user->id, $data, false);
-		$this->refresh();
-
-		return true;
+		return $this->getUser();
 	}
 
-	public function getUser()
+	static public function getUserId(): int
 	{
-		$user = parent::getUser();
-
-		// Force refresh of session when it's too old (FIXME: remove at version 1.2+)
-		if (!property_exists($this->user, 'perm_users')) {
-			$this->refresh();
-			$user = $this->getUser();
-		}
-
-		return $user;
+		return self::getInstance()->user()->id;
 	}
 
-	static public function getUserId()
+	public function canAccess(string $category, int $permission): bool
 	{
-		return self::getInstance()->getUser()->id;
-	}
+		$permissions = $this->get('permissions');
 
-	public function canAccess($category, $permission)
-	{
-		if (!$this->getUser())
-		{
+		if (!$permissions) {
 			return false;
 		}
 
 		$perm_name = 'perm_' . $category;
-		$perm = $this->getUser()->$perm_name;
+		$perm = $permissions[$perm_name];
 
 		return ($perm >= $permission);
 	}
 
-	public function requireAccess($category, $permission)
+	public function requireAccess(string $category, int $permission): void
 	{
 		if (!$this->canAccess($category, $permission))
 		{
