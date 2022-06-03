@@ -80,7 +80,7 @@
 	<dd>
 		{if $transaction.id_creator}
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
-				<a href="{$admin_url}membres/fiche.php?id={$transaction.id_creator}">{$creator_name}</a>
+				<a href="{$admin_url}users/details.php?id={$transaction.id_creator}">{$creator_name}</a>
 			{else}
 				{$creator_name}
 			{/if}
@@ -95,7 +95,7 @@
 	{else}
 		{foreach from=$related_users item="u"}
 			<dd>
-				<a href="{$admin_url}membres/fiche.php?id={$u.id}">{$u.identity}</a>
+				<a href="{$admin_url}users/details.php?id={$u.id}">{$u.identity}</a>
 				{if $u.id_service_user}— en règlement d'une <a href="{$admin_url}services/user/?id={$u.id}&amp;only={$u.id_service_user}">activité</a>{/if}
 			</dd>
 		{/foreach}

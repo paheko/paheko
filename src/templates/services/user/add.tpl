@@ -17,7 +17,7 @@
 	<fieldset class="c1">
 		<legend>Inscrire des membres</legend>
 		<dl>
-			{input type="list" name="users" required=true label="Membres à inscrire" target="!membres/selector.php" multiple=true}
+			{input type="list" name="users" required=true label="Membres à inscrire" target="!users/selector.php" multiple=true}
 		</dl>
 	</fieldset>
 

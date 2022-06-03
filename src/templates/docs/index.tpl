@@ -42,7 +42,7 @@ use Garradin\Entities\Files\File;
 	{/if}
 {elseif $context == File::CONTEXT_USER}
 	{if $context_ref}
-		{linkbutton href="!membres/fiche.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}
+		{linkbutton href="!users/details.php?id=%d"|args:$context_ref|local_url label="Fiche du membre" shape="user"}
 	{/if}
 {else}
 	<ul>
@@ -62,7 +62,7 @@ use Garradin\Entities\Files\File;
 <p class="block alert">
 	Il n'est pas possible de créer de répertoire ici.
 	{if $context == File::CONTEXT_USER}
-		Utiliser le <a href="{"!membres/ajouter.php"|local_url}">formulaire de création</a> pour enregistrer un membre.
+		Utiliser le <a href="{"!users/new.php"|local_url}">formulaire de création</a> pour enregistrer un membre.
 	{else}
 		Utiliser le <a href="{"!acc/transactions/new.php"|local_url}">formulaire de saisie</a> pour créer une nouvelle écriture.
 	{/if}
@@ -192,11 +192,11 @@ use Garradin\Entities\Files\File;
 						{linkbutton href="!acc/transactions/details.php?id=%d"|args:$item.id label="Écriture" shape="search"}
 					</td>
 				{else}
-					<td class="num"><a href="{$admin_url}membres/fiche.php?id={$item.id}">#{$item.number}</a></td>
+					<td class="num"><a href="{$admin_url}users/details.php?id={$item.id}">#{$item.number}</a></td>
 					<th><a href="?path={$item.path}">{$item.identity}</a></th>
 					<td class="actions">
 						{linkbutton href="!docs/?path=%s"|args:$item.path label="Fichiers" shape="menu"}
-						{linkbutton href="!membres/fiche.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
+						{linkbutton href="!users/details.php?id=%d"|args:$item.id label="Fiche membre" shape="user"}
 					</td>
 				{/if}
 			</tr>

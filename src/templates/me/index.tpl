@@ -19,7 +19,7 @@
 	</dd>
 </dl>
 
-{include file="admin/membres/_details.tpl" champs=$champs data=$data show_message_button=false mode="user"}
+{include file="users/_details.tpl" champs=$champs data=$data show_message_button=false mode="user"}
 
 <p>
 	{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}

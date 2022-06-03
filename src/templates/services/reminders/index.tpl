@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Gestion des rappels automatiques" current="membres/services"}
+{include file="admin/_head.tpl" title="Gestion des rappels automatiques" current="users/services"}
 
 {include file="services/_nav.tpl" current="reminders"}
 

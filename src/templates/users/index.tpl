@@ -2,6 +2,10 @@
 
 {include file="users/_nav.tpl" current="index"}
 
+{if isset($_GET['sent'])}
+<p class="block confirm">Le message a bien été envoyé.</p>
+{/if}
+
 {if !empty($categories)}
 <form method="get" action="{$self_url}" class="shortFormRight">
 	<fieldset>

@@ -35,16 +35,16 @@
 				</td>
 			{/foreach}
 			<td class="actions">
-				{linkbutton shape="user" label="Fiche membre" href="!membres/fiche.php?id=%d"|args:$row.id}
+				{linkbutton shape="user" label="Fiche membre" href="!users/details.php?id=%d"|args:$row.id}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
-					{linkbutton shape="edit" label="Modifier" href="!membres/modifier.php?id=%d"|args:$row.id}
+					{linkbutton shape="edit" label="Modifier" href="!users/edit.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
 		</tr>
 	{/foreach}
 		</tbody>
 	{if $is_admin && $row._user_id}
-		{include file="admin/membres/_list_actions.tpl" colspan=count($result_header)+1}
+		{include file="users/_list_actions.tpl" colspan=count($result_header)+1}
 	{/if}
 	</table>
 

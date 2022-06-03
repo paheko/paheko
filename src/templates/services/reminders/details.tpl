@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Liste des rappels envoyés" current="membres/services"}
+{include file="admin/_head.tpl" title="Liste des rappels envoyés" current="users/services"}
 
 {include file="services/_nav.tpl" current="reminders"}
 
@@ -16,7 +16,7 @@
 
 	{foreach from=$list->iterate() item="row"}
 		<tr>
-			<th><a href="../../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
+			<th>{link href="!users/details.php?id=%d"|args:$row.id_user label=$row.identity}</th>
 			<td>{$row.email}</td>
 			<td>{$row.date|date_short}</td>
 			<td></td>

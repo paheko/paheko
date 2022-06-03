@@ -1,12 +1,12 @@
-{include file="admin/_head.tpl" title="Import & export des membres" current="membres"}
+{include file="admin/_head.tpl" title="Import & export des membres" current="users"}
 
-{include file="admin/membres/_nav.tpl" current="import"}
+{include file="users/_nav.tpl" current="import"}
 
 <nav class="tabs">
     <ul class="sub">
-        <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
-        <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
-        <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
+        <li class="current"><a href="{$admin_url}users/import.php">Importer</a></li>
+        <li><a href="{$admin_url}users/import.php?export=csv">Exporter en CSV</a></li>
+        <li><a href="{$admin_url}users/import.php?export=ods">Exporter en classeur Office</a></li>
     </ul>
 </nav>
 

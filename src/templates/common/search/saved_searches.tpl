@@ -1,7 +1,7 @@
 {include file="admin/_head.tpl" title="Recherches enregistrées" current=$target}
 
 {if $target == 'users'}
-	{include file="users/_nav.tpl" current="searches"}
+	{include file="users/_nav.tpl" current="saved_searches"}
 {else}
 	<nav class="tabs">
 		<ul>

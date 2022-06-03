@@ -67,7 +67,7 @@
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->payment_reference()}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php"}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!users/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 		</dl>
 		<dl data-types="t{$transaction::TYPE_ADVANCED}">

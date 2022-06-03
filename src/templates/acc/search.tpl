@@ -57,9 +57,6 @@
 		<?php $prev_id = $row->id; ?>
 	{/foreach}
 	</tbody>
-	{*if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-		{include file="admin/membres/_list_actions.tpl" colspan=count($result_header)+1}
-	{/if*}
 	</table>
 
 	{pagination url=$list->paginationURL() page=$list.page bypage=$list.per_page total=$list->count() use_buttons=true}

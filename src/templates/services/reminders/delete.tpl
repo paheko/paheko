@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Supprimer un rappel automatique" current="membres/services"}
+{include file="admin/_head.tpl" title="Supprimer un rappel automatique" current="users/services"}
 
 {include file="services/_nav.tpl" current="reminders"}
 

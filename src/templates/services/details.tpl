@@ -27,7 +27,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 ?>
 
 {if $can_action}
-	<form method="post" action="{"!membres/action.php"|local_url}">
+	<form method="post" action="{"!users/action.php"|local_url}">
 {/if}
 
 {include file="common/dynamic_list_head.tpl" check=$can_action}
@@ -38,7 +38,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id_user}</td>
 			{/if}
 
-			<th><a href="../membres/fiche.php?id={$row.id_user}">{$row.identity}</a></th>
+			<th><a href="../users/details.php?id={$row.id_user}">{$row.identity}</a></th>
 			<td>
 				{if $row.status == 1 && $row.end_date}
 					En cours
@@ -65,7 +65,7 @@ $can_action = $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMI
 
 	</tbody>
 	{if $can_action}
-		{include file="admin/membres/_list_actions.tpl" colspan=7 export=false hide_delete=true}
+		{include file="users/_list_actions.tpl" colspan=7 export=false hide_delete=true}
 	{/if}
 
 </table>

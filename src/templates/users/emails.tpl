@@ -1,4 +1,4 @@
-{include file="admin/_head.tpl" title="Adresses rejetées" current="membres/message"}
+{include file="admin/_head.tpl" title="Adresses rejetées" current="users/mailing"}
 
 <nav class="tabs">
 	<ul>

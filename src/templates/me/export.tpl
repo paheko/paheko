@@ -12,7 +12,7 @@
 
 <h2>Profil</h2>
 
-{include file="admin/membres/_details.tpl" champs=$champs_list data=$data show_message_button=false mode="export"}
+{include file="users/_details.tpl" champs=$champs_list data=$data show_message_button=false mode="export"}
 
 <hr />
 
