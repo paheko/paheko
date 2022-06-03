@@ -1,4 +1,11 @@
-{include file="admin/_head.tpl" title="Envoyer un message collectif" current="users/mailing"}
+{include file="admin/_head.tpl" title="Envoyer un message collectif" current="users/mailing" custom_css=["!web/css.php"]}
+
+<nav class="tabs">
+	<ul>
+		<li class="current"><a href="{$self_url}">Envoyer</a></li>
+		<li><a href="emails.php">Adresses rejetées</a></li>
+	</ul>
+</nav>
 
 {if $sent}
 	<p class="block confirm">Votre message a été envoyé.</p>
@@ -6,16 +13,49 @@
 
 {form_errors}
 
-<form method="post" action="{$self_url}">
-	<fieldset class="memberMessage">
+<form method="post" action="{$self_url_no_qs}">
+	{if $preview}
+		<fieldset class="mailing">
+			<legend>Prévisualisation du message</legend>
+			<p class="help">
+				Ce message sera envoyé à <strong>{$recipients_count}</strong> destinataires.<br />
+				Voici un exemple du message pour un de ces destinataires.
+			</p>
+			<dl>
+				<dt>Expéditeur</dt>
+				<dd>{$preview.from}</dd>
+				<dt>Destinataire</dt>
+				<dd>
+					{$preview.to}
+				</dd>
+				<dt>Sujet</dt>
+				<dd>{$preview.subject}</dd>
+				<dt>Message</dt>
+				<dd class="preview">{$preview.html|raw}</dd>
+			</dl>
+		</fieldset>
+
+		<p class="submit">
+			{input type="hidden" name="subject"}
+			{input type="hidden" name="message"}
+			{input type="hidden" name="target"}
+			{input type="hidden" name="send_copy"}
+			{input type="hidden" name="render"}
+			{csrf_field key=$csrf_key}
+			{button type="submit" name="back" label="Retour à l'édition" shape="left"}
+			{button type="submit" name="send" label="Envoyer" shape="right" class="main"}
+		</p>
+
+	{else}
+	<fieldset class="mailing">
 		<legend>Message</legend>
 		<dl>
 			<dt>Expéditeur</dt>
 			<dd>{$config.org_name} &lt;{$config.org_email}&gt;</dd>
-			<dt>Destinataires</dt>
+			<dt><label for="f_target">Destinataires</label></dt>
 			<dd>
-				<select name="target" required="required">
-					<option value="all_">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
+				<select name="target" id="f_target" required="required">
+					<option value="all_but_hidden">Tous les membres (sauf ceux appartenant à une catégorie cachée)</option>
 					<optgroup label="Catégorie de membres">
 						{foreach from=$categories key="id" item="label"}
 						<option value="category_{$id}" {form_field name="target" selected="category_%d"|args:$id}>{$label}</option>
@@ -39,14 +79,21 @@
 			</dd>
 			{input type="text" name="subject" required=true label="Sujet"}
 			{input type="textarea" name="message" cols=35 rows=25 required=true label="Message"}
-			{input type="checkbox" name="copy" value=1 label="Recevoir par e-mail une copie du message envoyé"}
+			{input type="checkbox" name="send_copy" value=1 label="Recevoir par e-mail une copie du message envoyé"}
+			<dt><label for="f_render">Format de rendu</label></dt>
+			<dd>
+				{input type="select" name="render" options=$render_formats}
+				{linkbutton shape="help" href="!web/_syntax_skriv.html" target="_dialog" label="Aide syntaxe SkrivML"}
+				{linkbutton shape="help" href="!web/_syntax_markdown.html" target="_dialog" label="Aide syntaxe MarkDown"}
+			</dd>
 		</dl>
 	</fieldset>
 
 	<p class="submit">
-		{csrf_field key="send_mailing"}
-		{button type="submit" name="send" label="Envoyer" shape="right" class="main"}
+		{csrf_field key=$csrf_key}
+		{button type="submit" name="preview" label="Prévisualiser" shape="right" class="main"}
 	</p>
+	{/if}
 </form>
 
 

@@ -4,12 +4,14 @@ namespace Garradin;
 
 use Garradin\Web\Web;
 use Garradin\Files\Files;
+use Garradin\Users\Session;
 use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
 $banner = null;
-Plugin::fireSignal('accueil.banniere', ['user' => $session->getUser(), 'session' => $session], $banner);
+$session = Session::getInstance();
+Plugin::fireSignal('home.banner', ['user' => $session->getUser(), 'session' => $session], $banner);
 
 $homepage = Config::getInstance()->file('admin_homepage');
 

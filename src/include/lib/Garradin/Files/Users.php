@@ -24,7 +24,7 @@ class Users
 		],
 	];
 
-	static public function list()
+	static public function list(): DynamicList
 	{
 		Files::syncVirtualTable(File::CONTEXT_USER);
 

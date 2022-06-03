@@ -111,39 +111,41 @@ class Search extends Entity
 		$this->set('type', self::TYPE_SQL);
 	}
 
+	public function SQL(?int $force_limit): string
+	{
+		if ($this->type == self::TYPE_JSON) {
+			$sql = $this->getDynamicList()->SQL();
+		}
+		else {
+			$sql = $this->content;
+		}
+
+		$has_limit = preg_match('/LIMIT\s+\d+/i', $sql);
+
+		// force LIMIT
+		if ($force_limit && !$has_limit) {
+			$sql = preg_replace('/;?\s*$/', '', $sql);
+			$sql .= ' LIMIT ' . (int) $force_limit;
+		}
+		elseif (!$force_limit && $has_limit) {
+			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);
+		}
+
+		$sql = trim($sql, "\n\r\t; ");
+
+		return $sql;
+	}
+
 	/**
 	 * Returns a SQLite3Result for the current search
-	 * @param  array  $columns If this array is not empty, then the specified columns will be used
 	 */
-	protected function query(array $columns = []): \SQLite3Result
+	protected function query(?int $force_limit = 100): \SQLite3Result
 	{
 		if (null !== $this->_result) {
 			return $this->_result;
 		}
 
-		$limit = 100;
-
-		if ($this->type == self::TYPE_JSON) {
-			$sql = $this->getDynamicList()->SQL();
-		}
-
-		if (count($columns)) {
-			$sql = preg_replace('/^\s*SELECT.*FROM\s+/Uis', 'SELECT ' . implode(', ', $columns) . ' FROM ', $sql);
-			$limit = null;
-		}
-
-		$sql = $this->content;
-
-		$has_limit = preg_match('/LIMIT\s+\d+/i', $sql);
-
-		// force LIMIT
-		if ($limit && !$has_limit) {
-			$sql = preg_replace('/;?\s*$/', '', $sql);
-			$sql .= ' LIMIT ' . (int) $limit;
-		}
-		elseif (!$limit && $has_limit) {
-			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);
-		}
+		$sql = $this->SQL($force_limit);
 
 		$allowed_tables = $this->getProtectedTables();
 
@@ -177,9 +179,9 @@ class Search extends Entity
 		return $columns;
 	}
 
-	public function iterateResults(array $columns = []): iterable
+	public function iterateResults(): iterable
 	{
-		$r = $this->query($columns);
+		$r = $this->query();
 
 		while ($row = $r->fetchArray(\SQLITE3_NUM)) {
 			yield $row;

@@ -187,7 +187,6 @@ static $default_config = [
 	'DB_SCHEMA'             => ROOT . '/include/data/schema.sql',
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
 	'ALLOW_MODIFIED_IMPORT' => true,
-	'PLUGINS_SYSTEM'        => '',
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
@@ -200,9 +199,10 @@ static $default_config = [
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'STARTTLS',
+	'MAIL_RETURN_PATH'      => null,
+	'MAIL_BOUNCE_PASSWORD'  => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
-	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
@@ -214,6 +214,7 @@ static $default_config = [
 	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
 	'SQL_DEBUG'             => null,
+	'SYSTEM_SIGNALS'        => [],
 	'LEGAL_LINE'            => 'Propulsé par <a href="https://garradin.eu/" id="garradin" target="_blank">Garradin</a> — logiciel libre de gestion d\'association<br />Hébergé par <strong>%1$s</strong>, %2$s',
 ];
 
@@ -224,6 +225,15 @@ foreach ($default_config as $const => $value)
 	if (!defined($const))
 	{
 		define($const, $value);
+	}
+}
+
+// Check SMTP_SECURITY value
+if (SMTP_SECURITY) {
+	$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+
+	if (!defined($const)) {
+		throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
 	}
 }
 
@@ -263,10 +273,19 @@ if (!ini_get('date.timezone'))
 
 class UserException extends \LogicException
 {
-	protected $details;
+	protected $details = null;
+	protected ?string $html_message = null;
 
 	public function setMessage(string $message) {
 		$this->message = $message;
+	}
+
+	public function getHTMLMessage(): ?string {
+		return $this->html_message;
+	}
+
+	public function setHTMLMessage(string $html): void {
+		$this->html_message = $html;
 	}
 
 	public function setDetails($details) {
@@ -395,6 +414,7 @@ function user_error(\Exception $e)
 		$tpl->setCompiledDir(SMARTYER_CACHE_ROOT);
 
 		$tpl->assign('error', $e->getMessage());
+		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
 		$tpl->display();
 	}

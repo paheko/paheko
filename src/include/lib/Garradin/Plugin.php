@@ -39,7 +39,7 @@ class Plugin
 		self::$signals = $enabled;
 	}
 
-	static public function getPath($id, $fail_with_exception = true)
+	static public function getPath($id)
 	{
 		if (file_exists(PLUGINS_ROOT . '/' . $id . '.tar.gz'))
 		{
@@ -48,11 +48,6 @@ class Plugin
 		elseif (is_dir(PLUGINS_ROOT . '/' . $id))
 		{
 			return PLUGINS_ROOT . '/' . $id;
-		}
-
-		if ($fail_with_exception)
-		{
-			throw new \LogicException(sprintf('Le plugin "%s" n\'existe pas dans le répertoire des plugins.', $id));
 		}
 
 		return false;
@@ -372,11 +367,9 @@ class Plugin
 	{
 		$db = DB::getInstance();
 		$plugins = $db->getGrouped('SELECT id, * FROM plugins ORDER BY name;');
-		$system = explode(',', PLUGINS_SYSTEM);
 
 		foreach ($plugins as &$row)
 		{
-			$row->system = in_array($row->id, $system);
 			$row->disabled = !self::getPath($row->id, false);
 		}
 
@@ -408,124 +401,16 @@ class Plugin
 	}
 
 	/**
-	 * Vérifie que les plugins système sont bien installés et sinon les réinstalle
-	 * @return void
-	 */
-	static public function checkAndInstallSystemPlugins()
-	{
-		if (!PLUGINS_SYSTEM)
-		{
-			return true;
-		}
-
-		$system = explode(',', PLUGINS_SYSTEM);
-
-		if (count($system) == 0)
-		{
-			return true;
-		}
-
-		$db = DB::getInstance();
-		$installed = $db->getAssoc('SELECT id, id FROM plugins WHERE ' . $db->where('id', 'IN', $system));
-
-		$missing = array_diff($system, (array) $installed);
-
-		if (count($missing) == 0)
-		{
-			return true;
-		}
-
-		foreach ($missing as $plugin)
-		{
-			self::install($plugin);
-		}
-
-		return true;
-	}
-
-	/**
 	 * Liste les plugins qui doivent être affichés dans le menu
 	 * @return array Tableau associatif id => nom (ou un tableau vide si aucun plugin ne doit être affiché)
 	 */
 	static public function listMenu(Session $session)
 	{
-		self::checkAndInstallSystemPlugins();
+		$list = [];
 
-		$db = DB::getInstance();
-		$list = $db->getGrouped('SELECT id, name, menu_condition FROM plugins WHERE menu = 1 ORDER BY name;');
-
-		// FIXME deprecated
-		$fix_legacy = [
-			'{Membres::DROIT_AUCUN}' => '{ACCESS_NONE}',
-			'{Membres::DROIT_ACCES}' => '{ACCESS_READ}',
-			'{Membres::DROIT_ECRITURE}' => '{ACCESS_WRITE}',
-			'{Membres::DROIT_ADMIN}' => '{ACCESS_ADMIN}',
-			'{$user.droit_compta}' => '{$user.perm_accounting}',
-			'{$user.droit_membres}' => '{$user.perm_users}',
-			'{$user.droit_config}' => '{$user.perm_config}',
-			'{$user.droit_wiki}' => '{$user.perm_documents}',
-		];
-
-		$user = $session->getUser();
-		$permissions = [
-			'{ACCESS_NONE}'  => $session::ACCESS_NONE,
-			'{ACCESS_READ}'  => $session::ACCESS_READ,
-			'{ACCESS_WRITE}' => $session::ACCESS_WRITE,
-			'{ACCESS_ADMIN}' => $session::ACCESS_ADMIN,
-		];
-
-		foreach ($list as $id => &$row)
-		{
-			if (!self::getPath($row->id, false))
-			{
-				// Ne pas lister les plugins dont le code a disparu
-				unset($list[$id]);
-				continue;
-			}
-
-			if (!$row->menu_condition)
-			{
-				$row = $row->name;
-				continue;
-			}
-
-			$new_condition = strtr($row->menu_condition, $fix_legacy);
-
-			// FIXME: legacy
-			if ($new_condition != $row->menu_condition) {
-				$db->update('plugins', ['menu_condition' => $new_condition], 'id = :id', ['id' => $id]);
-				$row->menu_condition = $new_condition;
-			}
-
-			$condition = strtr($row->menu_condition, $permissions);
-
-			$condition = preg_replace_callback('/\{\$user\.(\w+)\}/', function ($m) use ($user, $db) {
-				$prop = $m[1];
-				if (!property_exists($user, $prop)) {
-					return 'NULL';
-				}
-
-				if (substr($prop, 0, 5) == 'perm_') {
-					return (int) $user->$prop;
-				}
-
-				return $db->quote($user->$prop);
-			}, $condition);
-
-			$query = 'SELECT 1 WHERE ' . $condition . ';';
-
-			$res = $db->protectSelect(['membres' => []], $query);
-
-			if (!$db->firstColumn($query))
-			{
-				unset($list[$id]);
-				continue;
-			}
-
-			$row = $row->name;
-		}
-
-		unset($row);
+		// First let plugins handle
+		self::fireSignal('menu.item', compact('session'), $list);
+		ksort($list);
 
 		return $list;
 	}
@@ -826,12 +711,27 @@ class Plugin
 	 * @param  array  $params Paramètres du callback (array ou null)
 	 * @return NULL 		  NULL si aucun plugin n'a été appelé,
 	 * TRUE si un plugin a été appelé et a arrêté l'exécution,
-	 * FALSE si des plugins ont été appelés mais aucun n'a stopé l'exécution
+	 * FALSE si des plugins ont été appelés mais aucun n'a stoppé l'exécution
 	 */
 	static public function fireSignal($signal, $params = null, &$callback_return = null)
 	{
 		if (!self::$signals) {
 			return null;
+		}
+
+		// Process SYSTEM_SIGNALS first
+		foreach (SYSTEM_SIGNALS as $system_signal) {
+			if (key($system_signal) != $signal) {
+				continue;
+			}
+
+			if (!is_callable(current($system_signal))) {
+				throw new \LogicException(sprintf('System signal: cannot call "%s" for signal "%s"', current($system_signal), key($system_signal)));
+			}
+
+			if (true === call_user_func_array(current($system_signal), [&$params, &$callback_return])) {
+				return true;
+			}
 		}
 
 		$list = DB::getInstance()->get('SELECT * FROM plugins_signals WHERE signal = ?;', $signal);
@@ -844,14 +744,11 @@ class Plugin
 			$params = [];
 		}
 
-		$system = explode(',', PLUGINS_SYSTEM);
-
 		foreach ($list as $row)
 		{
-			$path = self::getPath($row->plugin, in_array($row->plugin, $system));
+			$path = self::getPath($row->plugin);
 
 			// Ne pas appeler les plugins dont le code n'existe pas/plus,
-			// SAUF si c'est un plugin système (auquel cas ça fera une erreur)
 			if (!$path)
 			{
 				continue;

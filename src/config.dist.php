@@ -111,18 +111,18 @@ namespace Garradin;
 //const PLUGINS_ROOT = DATA_ROOT . '/plugins';
 
 /**
- * Plugins fixes qui ne peuvent être désinstallés par l'utilisateur
- * (séparés par une virgule)
+ * Signaux système
  *
- * Ils seront aussi réinstallés en cas de restauration de sauvegarde,
- * s'ils ne sont pas dans la sauvegarde.
+ * Permet de déclencher des signaux sans passer par un plugin.
+ * Le fonctionnement des signaux système est strictment identique aux signaux des plugins.
+ * Les signaux système sont exécutés en premier, avant les signaux des plugins.
  *
- * Exemple : PLUGINS_SYSTEM = 'gestion_emails,factures'
+ * Format : pour chaque signal, un tableau comprenant une seule clé et une seule valeur.
+ * La clé est le nom du signal, et la valeur est la fonction.
  *
- * Défaut : aucun (chaîne vide)
+ * Défaut: [] (tableau vide)
  */
-
-//const PLUGINS_SYSTEM = '';
+//const SYSTEM_SIGNALS = [['files.delete' => 'MyNamespace\Signals::deleteFile'], ['entity.Accounting\Transaction.save.before' => 'MyNamespace\Signals::saveTransaction']];
 
 /**
  * Adresse URI de la racine du site Garradin
@@ -268,9 +268,14 @@ namespace Garradin;
  * Utilisation de cron pour les tâches automatiques
  *
  * Si "true" on s'attend à ce qu'une tâche automatisée appelle
- * le script cron.php dans le répertoire "scripts" toutes les 24 heures.
- * Sinon Garradin effectuera les actions automatiques quand quelqu'un
- * se connecte à l'administration ou visite le site.
+ * les scripts suivants:
+ * - scripts/cron.php toutes les 24 heures (envoi des rappels de cotisation,
+ * création des sauvegardes)
+ * - scripts/emails.php toutes les 5 minutes environ (envoi des emails en attente)
+ *
+ * Si "false", les actions de scripts/cron.php seront effectuées quand une personne
+ * se connecte. Et les emails seront envoyés instantanément (ce qui peut ralentir ou
+ * planter si un message a beaucoup de destinataires).
  *
  * Défaut : false
  */
@@ -369,21 +374,44 @@ namespace Garradin;
 //const SMTP_SECURITY = 'STARTTLS';
 
 /**
- * Activer les sauvegardes automatiques
+ * Adresse e-mail destinée à recevoir les erreurs de mail
+ * (adresses invalides etc.)
  *
- * Utile à désactiver si vous avez déjà des sauvegardes effectuées
- * automatiquement au niveau du système.
+ * Si laissé NULL, alors l'adresse email de l'association sera utilisée.
+ * En cas d'hébergement de plusieurs associations, il est conseillé
+ * d'utiliser une adresse par association.
  *
- * Sinon les sauvegardes seront effectuées soit par la tâche cron
- * soit à l'affichage de la page d'accueil (si nécessaire).
+ * Voir la documentation de configuration sur des exemples de scripts
+ * permettant de traiter les mails reçus à cette adresse.
  *
- * Voir paramètre USE_CRON aussi
- *
- * Défaut : true
+ * Défaut : null
  */
 
-//const ENABLE_AUTOMATIC_BACKUPS = true;
+//const MAIL_RETURN_PATH = 'returns@monserveur.com';
 
+/**
+ * Mot de passe pour l'accès à l'API permettant de gérer les mails d'erreur
+ * (voir MAIL_RETURN_PATH)
+ *
+ * Cette adresse HTTP permet de gérer un bounce email reçu en POST.
+ * C'est utile si votre serveur de mail est capable de faire une requête HTTP
+ * à la réception d'un message.
+ *
+ * La requête bounce doit contenir un paramètre "message", contenant l'intégralité
+ * de l'email avec les entêtes.
+ *
+ * Si on définit 'abcd' ici, il faudra faire une requête comme ceci :
+ * curl -F 'message=@/tmp/message.eml' https://bounce:abcd@monasso.com/admin/handle_bounce.php
+ *
+ * En alternative le serveur de mail peut aussi appeler le script
+ * 'scripts/handle_bounce.php'
+ *
+ * Défaut : null (l'API handlebounce est désactivée)
+ *
+ * @type string|null
+ */
+
+//const MAIL_BOUNCE_PASSWORD = null;
 
 /**
  * Couleur primaire de l'interface admin par défaut

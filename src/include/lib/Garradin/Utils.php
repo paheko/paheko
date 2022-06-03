@@ -10,10 +10,6 @@ use KD2\SMTP;
 
 class Utils
 {
-    const EMAIL_CONTEXT_BULK = 'bulk';
-    const EMAIL_CONTEXT_PRIVATE = 'private';
-    const EMAIL_CONTEXT_SYSTEM = 'system';
-
     static protected $collator;
     static protected $transliterator;
 
@@ -699,99 +695,12 @@ class Utils
         if (!empty($params['query']))
         {
             $url .= '?';
-            
+
             if (!(is_numeric($params['query']) && (int)$params['query'] === 1) && $params['query'] !== true)
                 $url .= $params['query'];
         }
 
         return $url;
-    }
-
-    static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
-    {
-        // Ne pas envoyer de mail à des adresses invalides
-        if (!SMTP::checkEmailIsValid($recipient, false))
-        {
-            throw new UserException('Adresse email invalide: ' . $recipient);
-        }
-
-        $config = Config::getInstance();
-        $subject = sprintf('[%s] %s', $config->get('org_name'), $subject);
-
-        // Tentative d'envoi du message en utilisant un plugin
-        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('context', 'recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
-
-        if (!$email_sent_via_plugin)
-        {
-            // L'envoi d'email n'a pas été effectué par un plugin, utilisons l'envoi interne
-            // via mail() ou SMTP donc
-            return self::mail($context, $recipient, $subject, $content, $id_membre, $pgp_key);
-        }
-
-        return true;
-    }
-
-    static public function mail($context, $to, $subject, $content, $id_membre, $pgp_key)
-    {
-        $headers = [];
-        $config = Config::getInstance();
-
-        $content = wordwrap($content);
-        $content = trim($content);
-
-        $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('org_name'), $config->get('org_web'));
-        $content .= "Vous recevez ce message car vous êtes inscrit dans nos contacts.\n";
-        $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('org_email');
-
-        $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
-
-        if ($pgp_key)
-        {
-            $content = Security::encryptWithPublicKey($pgp_key, $content);
-        }
-
-        $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('org_name'))), $config->get('org_email'));
-        $headers['Return-Path'] = $config->get('org_email');
-
-        $headers['MIME-Version'] = '1.0';
-        $headers['Content-type'] = 'text/plain; charset=UTF-8';
-
-        if ($context == self::EMAIL_CONTEXT_BULK)
-        {
-            $headers['Precedence'] = 'bulk';
-        }
-
-        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
-        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
-
-        if (SMTP_HOST)
-        {
-            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-
-            if (!defined($const))
-            {
-                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
-            }
-
-            $secure = constant($const);
-
-            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-            return $smtp->send($to, $subject, $content, $headers);
-        }
-        else
-        {
-            // Encodage du sujet
-            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
-            $raw_headers = '';
-
-            // Sérialisation des entêtes
-            foreach ($headers as $name=>$value)
-            {
-                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
-            }
-
-            return \mail($to, $subject, $content, $raw_headers);
-        }
     }
 
     static public function iconUnicode(string $shape): string

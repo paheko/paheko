@@ -8,6 +8,7 @@ use Garradin\Utils;
 use Garradin\Users\Users;
 use Garradin\UserException;
 use Garradin\Plugin;
+use Garradin\Users\Emails;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
@@ -246,7 +247,12 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $user->email, 'Mot de passe perdu ?', $message, $user->id, $user->pgp_key);
+		if ($membre->clef_pgp) {
+			$content = Security::encryptWithPublicKey($membre->clef_pgp, $message);
+		}
+
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe perdu ?', $message);
+		return true;
 	}
 
 	protected function fetchUserForPasswordRecovery(int $id): ?\stdClass
@@ -350,7 +356,7 @@ class Session extends \KD2\UserSession
 
 		DB::getInstance()->update('users', ['password' => $password], 'id = :id', ['id' => (int)$user->id]);
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $user->email, 'Mot de passe changé', $message, $user->id, $user->pgp_key);
+		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
 	}
 
 	public function editUser($data) // FIXME update
@@ -422,12 +428,9 @@ class Session extends \KD2\UserSession
 		$content.= str_repeat('=', 70) . "\n\n";
 		$content.= $message;
 
-		if ($copie)
-		{
-			Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $user->email, $sujet, $content, $user->id);
-		}
+		$dest = $copie ? [$dest => null, $user->email => null] : [$dest => null];
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $dest, $sujet, $content);
+		return Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
 	}
 
 	/**

@@ -73,6 +73,7 @@ class Template extends \KD2\Smartyer
 		$this->assign('version_hash', substr(sha1(garradin_version() . garradin_manifest() . ROOT . SECRET_KEY), 0, 10));
 
 		$this->assign('www_url', WWW_URL);
+		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('help_url', HELP_URL);
 		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('self_url', Utils::getSelfURI());
@@ -171,7 +172,12 @@ class Template extends \KD2\Smartyer
 
 		foreach ($errors as &$error) {
 			if ($error instanceof UserException) {
-				$message = nl2br($this->escape($error->getMessage()));
+				if ($html = $error->getHTMLMessage()) {
+					$message = $html;
+				}
+				else {
+					$message = nl2br($this->escape($error->getMessage()));
+				}
 
 				if ($error->hasDetails()) {
 					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();

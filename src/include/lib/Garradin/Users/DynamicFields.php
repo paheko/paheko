@@ -490,7 +490,7 @@ class DynamicFields
 		$sql .= "END;\n";
 
 		foreach ($columns as $column) {
-			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s_%s ON %1\$s (%2\$s);\n", $search_table, $column);
+			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);\n", $db->quoteIdentifier($search_table . '_' . $column), $search_table, $db->quoteIdentifier($column));
 		}
 
 		return $sql;

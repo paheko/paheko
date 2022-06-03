@@ -522,7 +522,7 @@ class Sauvegarde
 
 		unlink($backup);
 
-		if ($return & self::NOT_AN_ADMIN)
+		if (($return & self::NOT_AN_ADMIN) && version_compare($version, '1.1.0', '>='))
 		{
 			// Forcer toutes les catégories à pouvoir gérer les droits
 			$db = DB::getInstance();
@@ -530,6 +530,11 @@ class Sauvegarde
 				'perm_users' => Session::ACCESS_ADMIN,
 				'perm_connect' => Session::ACCESS_READ
 			]);
+		}
+
+		if (version_compare($version, '1.1.0', '>=') && !$session->refresh()) {
+			$session->forceLogin(-1);
+			$return |= self::CHANGED_USER;
 		}
 
 		if ($version != garradin_version())
@@ -542,9 +547,6 @@ class Sauvegarde
 				$session->forceLogin(-1);
 				$return |= self::CHANGED_USER;
 			}
-
-			// Force l'installation de plugin système si non existant dans la sauvegarde existante
-			Plugin::checkAndInstallSystemPlugins();
 
 			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
 			Plugin::upgradeAllIfRequired();

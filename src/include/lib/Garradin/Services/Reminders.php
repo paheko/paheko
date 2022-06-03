@@ -8,6 +8,7 @@ use Garradin\DynamicList;
 use Garradin\Plugin;
 use Garradin\Utils;
 use Garradin\Users\DynamicFields;
+use Garradin\Users\Emails;
 use Garradin\Entities\Services\Reminder;
 use KD2\DB\EntityManager;
 
@@ -116,7 +117,7 @@ class Reminders
 		$text = self::replaceTagsInContent($reminder->body, $replace);
 
 		// Envoi du mail
-		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $reminder->email, $subject, $text, $reminder->id_user);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$reminder->email => $reminder], null, $subject, $text);
 
 		$db = DB::getInstance();
 		$db->insert('services_reminders_sent', [
@@ -126,7 +127,7 @@ class Reminders
 			'due_date'    => $reminder->reminder_date,
 		]);
 
-		Plugin::fireSignal('rappels.auto', $reminder);
+		Plugin::fireSignal('reminder.send.after', $reminder);
 
 		return true;
 	}

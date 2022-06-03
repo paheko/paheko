@@ -19,10 +19,6 @@ $form->runIf('create', function () use ($s) {
 }, 'backup_create', Utils::getSelfURI(['ok' => 'create']));
 
 $form->runIf('config', function () {
-	if (!ENABLE_AUTOMATIC_BACKUPS) {
-		return;
-	}
-
 	$frequency = (int) f('backup_frequency');
 
 	if ($frequency < 0 || $frequency > 365) {

@@ -16,10 +16,10 @@ use KD2\DB\EntityManager as EM;
 class Users
 {
 	/**
-	 * Return a list of all emails by category
+	 * Return a list for all emails by category
 	 * @param  int|null $id_category If NULL, then all categories except hidden ones will be returned
 	 */
-	static public function getEmailsByCategory(?int $id_category = null): array
+	static protected function iterateEmailsByCategory(?int $id_category = null): iterable
 	{
 		$db = DB::getInstance();
 		$fields = DynamicFields::getEmailFields();
@@ -27,63 +27,76 @@ class Users
 		$where = $id_category ? sprintf('id_category = %d', $id_category) : 'id_category IN (SELECT id FROM users_categories WHERE hidden = 0)';
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT id, %s AS email FROM users WHERE %s AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $where);
+			$sql[] = sprintf('SELECT *, %s AS email FROM users WHERE %s AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $where);
 		}
 
-		$sql = implode(' UNION ALL ', $sql);
-
-		return $db->get($sql);
+		return $db->iterate(implode(' UNION ALL ', $sql));
 	}
 
 	/**
 	 * Return a list of all emails by service (user must be active)
 	 */
-	static public function getEmailsByService(int $id_service): array
+	static public function iterateEmailsByActiveService(int $id_service): iterable
 	{
 		$db = DB::getInstance();
 
 		// Create a temporary table
-		$db->exec('DROP TABLE IF EXISTS users_active_services;
-			CREATE TEMPORARY TABLE IF NOT EXISTS users_active_services (id, service);
-			INSERT INTO users_active_services SELECT id_user, id_service FROM (
-				SELECT id_user, id_service, MAX(expiry_date) FROM services_users
-				WHERE expiry_date IS NULL OR expiry_date >= date()
-				GROUP BY id_user, id_service
-			);
-			DELETE FROM users_active_services WHERE id IN (SELECT id FROM users WHERE id_category IN (SELECT id FROM users_categories WHERE hidden =1));');
+		if (!$db->test('sqlite_temp_master', 'type = \'table\' AND name=\'users_active_services\'')) {
+			$db->exec('DROP TABLE IF EXISTS users_active_services;
+				CREATE TEMPORARY TABLE IF NOT EXISTS users_active_services (id, service);
+				INSERT INTO users_active_services SELECT id_user, id_service FROM (
+					SELECT id_user, id_service, MAX(expiry_date) FROM services_users
+					WHERE expiry_date IS NULL OR expiry_date >= date()
+					GROUP BY id_user, id_service
+				);
+				DELETE FROM users_active_services WHERE id IN (SELECT id FROM users WHERE id_category IN (SELECT id FROM users_categories WHERE hidden =1));');
+		}
 
 		$fields = DynamicFields::getEmailFields();
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.id, u.%s AS email FROM users u INNER JOIN users_active_services s ON s.id = u.id
-				WHERE s.service = %d AND %1$s IS NOT NULL', $field, $id_service);
+			$sql[] = sprintf('SELECT u.*, u.%s AS email FROM users u INNER JOIN users_active_services s ON s.id = u.id
+				WHERE s.service = %d AND %1$s IS NOT NULL', $db->quoteIdentifier($field), $id_service);
 		}
 
-		$sql = implode(' UNION ALL ', $sql);
-
-		return DB::getInstance()->get($sql);
+		return $db->iterate(implode(' UNION ALL ', $sql));
 	}
 
-	static public function getEmailsBySearch(int $id_search): array
+	static public function iterateEmailsBySearch(int $id_search): iterable
 	{
-		$fields = DynamicFields::getEmailFields();
+		$db = DB::getInstance();
 
 		$s = Search::get($id_search);
-		$result = $s->query(array_merge(['id'], $fields));
-		$recipients = [];
+		// Make sure the query is protected and safe, by doing a protectSelect
+		$s->query(1);
 
-		while ($row = $result->fetchArray(\SQLITE3_ASSOC)) {
-			foreach ($fields as $field) {
-				if (!trim($row[$field])) {
-					continue;
-				}
+		$header = $s->getHeader();
+		$id_column = null;
 
-				$recipients[] = ['id' => $row['id'], 'email' => $row[$field]];
-			}
+		if (in_array('id', $header)) {
+			$id_column = 'id';
+		}
+		elseif (in_array('_user_id', $header)) {
+			$id_column = '_user_id';
+		}
+		else {
+			throw new UserException('La recherche ne comporte pas de colonne "id" ou "_user_id", et donc ne permet pas l\'envoi d\'email.');
 		}
 
-		return $recipients;
+		// We only need the user id, store it in a temporary table for now
+		$db->exec('DROP TABLE IF EXISTS users_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_search (id);');
+		$db->exec(sprintf('INSERT INTO users_search SELECT %s FROM (%s)', $id_column, $s->SQL(null)));
+
+		$fields = DynamicFields::getEmailFields();
+
+		$sql = [];
+
+		foreach ($fields as $field) {
+			$sql[] = sprintf('SELECT u.*, u.%s AS email FROM users u INNER JOIN users_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
+		}
+
+		return $db->iterate(implode(' UNION ALL ', $sql));
 	}
 
 	static public function listByCategory(?int $id_category = null): DynamicList

@@ -54,5 +54,25 @@ $fields = DF::getInstance()->all();
 			{display_dynamic_field field=$field value=$value}
 		{/if}
 	</dd>
+		{if $c_config.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
+		<dt>Statut e-mail</dt>
+		<dd>
+			{if $email.optout}
+				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
+				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi à cette adresse" href="emails.php?verify=%s"|args:$value shape="check"}
+			{elseif $email.invalid}
+				<b class="error">{icon shape="alert"} Adresse invalide</b>
+			{elseif $email->hasReachedFailLimit()}
+				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
+			{elseif $email.verified}
+				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
+			{else}
+				Adresse non vérifiée
+			{/if}
+			{if $email.fail_log}
+				<br /><span class="help">{$email.fail_log|escape|nl2br}</span>
+			{/if}
+		</dd>
+		{/if}
 	{/foreach}
 </dl>
