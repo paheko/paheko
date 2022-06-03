@@ -4,6 +4,10 @@ body {
 	font-size: 11pt;
 }
 
+body main {
+	padding-bottom: 7em;
+}
+
 input[type=number], input[type=color],
 input[type=email], input[type=file], input[type=url], input[type=month],
 input[type=password], input[type=range], input[type=search], input[type=tel],
@@ -295,10 +299,6 @@ table.list th {
 	#dialog > button {
 		border: none;
 		background: none;
-	}
-
-	body main {
-		padding-bottom: 7em;
 	}
 
 	dl.list {
