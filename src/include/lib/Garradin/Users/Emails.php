@@ -90,13 +90,13 @@ class Emails
 			if ($template) {
 				$template->assignArray((array) $variables);
 
+				// Disable HTML escaping for plaintext emails
+				$template->setEscapeDefault(null);
+				$content = $template->fetch();
+
 				if ($render) {
+					$template->setEscapeDefault('html');
 					$content_html = $template->fetch();
-				}
-				else {
-					// Disable HTML escaping for plaintext emails
-					$template->setEscapeDefault(null);
-					$content = $template->fetch();
 				}
 			}
 
