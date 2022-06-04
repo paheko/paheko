@@ -580,7 +580,7 @@ class Emails
 			$html = '<pre>' . $html . '</pre>';
 		}
 		else {
-			$html = '<pre>' . htmlspecialchars($message) . '</pre>';
+			$html = '<pre>' . htmlspecialchars(wordwrap($message)) . '</pre>';
 		}
 
 		$recipients = $list;
