@@ -202,12 +202,18 @@ class Plugin
 			throw new UserException('Le fichier ' . $file . ' ne peut être appelé par cette méthode.');
 		}
 
-		if (!file_exists($this->path() . '/www/' . $file))
+		$path = $this->path();
+
+		if (!$path) {
+			throw new UserException('Cette extension n\'est pas disponible.');
+		}
+
+		if (!file_exists($path . '/www/' . $file))
 		{
 			throw new UserException('Le fichier ' . $file . ' n\'existe pas dans le plugin ' . $this->id);
 		}
 
-		if (is_dir($this->path() . '/www/' . $file))
+		if (is_dir($path . '/www/' . $file))
 		{
 			throw new UserException(sprintf('Sécurité : impossible de lister le répertoire "%s" du plugin "%s".', $file, $this->id));
 		}
