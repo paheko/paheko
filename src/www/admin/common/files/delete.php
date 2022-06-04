@@ -23,10 +23,11 @@ if ($context == File::CONTEXT_CONFIG || $context == File::CONTEXT_WEB) {
 }
 
 $csrf_key = 'file_delete_' . $file->pathHash();
+$parent = $file->parent;
 
 $form->runIf('delete', function () use ($file) {
 	$file->delete();
-}, $csrf_key, '!');
+}, $csrf_key, '!docs/?path=' . $parent);
 
 $tpl->assign(compact('file', 'csrf_key'));
 
