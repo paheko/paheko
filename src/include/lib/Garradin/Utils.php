@@ -318,7 +318,7 @@ class Utils
                     document.write(\'<style type="text/css">p { display: none; }</style>\');
                     ';
 
-        if (null === $destination) {
+        if (null === $destination || '!' === $destination) {
             echo 'window.parent.location.reload();';
         }
         else {
