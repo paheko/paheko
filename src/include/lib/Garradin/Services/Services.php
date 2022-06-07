@@ -4,6 +4,7 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\DynamicList;
 use Garradin\Users\Categories;
 use Garradin\Entities\Services\Service;
 use KD2\DB\EntityManager;
@@ -52,27 +53,58 @@ class Services
 		return $out;
 	}
 
-	static public function listWithStats(bool $current_only = true)
+	static public function listWithStats(bool $current_only = true): DynamicList
 	{
 		$db = DB::getInstance();
 		$hidden_cats = array_keys(Categories::listHidden());
 
-		$condition = sprintf('SELECT COUNT(DISTINCT su.id_user) FROM services_users su
+		$sql = sprintf('DROP TABLE IF EXISTS services_list_stats;
+			CREATE TEMP TABLE IF NOT EXISTS services_list_stats (id_service, id_user, ok, expired, paid);
+			INSERT INTO services_list_stats SELECT
+				id_service, id_user,
+				CASE WHEN (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1 THEN 1 ELSE 0 END,
+				CASE WHEN expiry_date < date() THEN 1 ELSE 0 END,
+				paid
+			FROM services_users su
 			INNER JOIN (SELECT id, MAX(date) FROM services_users GROUP BY id_user, id_service) su2 ON su2.id = su.id
-			INNER JOIN membres m ON m.id = su.id_user WHERE su.id_service = s.id AND m.id_category NOT IN (%s)',
-			implode(',', $hidden_cats));
+			INNER JOIN membres m ON m.id = su.id_user WHERE %s',
+			$db->where('m.id_category', 'NOT IN', $hidden_cats));
+
+		$db->exec($sql);
+
+
+		$columns = [
+			'id' => [],
+			'label' => [
+				'label' => 'Activité',
+			],
+			'date' => [
+				'label' => 'Période',
+				'order' => 'start_date %s, duration %1$s',
+				'select' => 'CASE WHEN start_date IS NULL THEN duration ELSE NULL END',
+			],
+			'nb_users_ok' => [
+				'label' => 'Membres à jour',
+				'order' => null,
+				'select' => '(SELECT COUNT(DISTINCT id_user) FROM services_list_stats WHERE id_service = services.id AND ok = 1)',
+			],
+			'nb_users_expired' => [
+				'label' => 'Membres expirés',
+				'order' => null,
+				'select' => '(SELECT COUNT(DISTINCT id_user) FROM services_list_stats WHERE id_service = services.id AND expired = 1)',
+			],
+			'nb_users_unpaid' => [
+				'label' => 'Membres en attente de règlement',
+				'order' => null,
+				'select' => '(SELECT COUNT(DISTINCT id_user) FROM services_list_stats WHERE id_service = services.id AND paid = 0)',
+			],
+		];
 
 		$current_condition = $current_only ? '(end_date IS NULL OR end_date >= datetime())' : '(end_date IS NOT NULL AND end_date < datetime())';
 
-		$sql = sprintf('SELECT s.*,
-			(%s AND (expiry_date IS NULL OR expiry_date >= date()) AND paid = 1) AS nb_users_ok,
-			(%1$s AND expiry_date < date()) AS nb_users_expired,
-			(%1$s AND paid = 0) AS nb_users_unpaid
-			FROM services s
-			WHERE 1 AND %s
-			ORDER BY s.label COLLATE U_NOCASE;', $condition, $current_condition);
-
-		return $db->get($sql);
+		$list = new DynamicList($columns, 'services', $current_condition);
+		$list->orderBy('label', false);
+		return $list;
 	}
 
 	static public function countOldServices(): int
