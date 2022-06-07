@@ -584,11 +584,12 @@ class Emails
 		$recipients = $list;
 
 		$config = Config::getInstance();
+		$sender = sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso);
 		$message = (object) compact('recipients', 'subject', 'message', 'sender', 'tpl', 'send_copy', 'render');
 		$message->preview = (object) [
 			'to'      => $random,
 			// Not required to be a valid From header, this is just a preview
-			'from'    => sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso),
+			'from'    => $sender,
 			'subject' => $subject,
 			'html'    => $html,
 		];
