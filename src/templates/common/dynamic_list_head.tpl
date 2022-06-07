@@ -6,8 +6,8 @@
 			{/if}
 			{foreach from=$list->getHeaderColumns() key="key" item="column"}
 			<td class="{if $list->order == $key}cur{/if}">
-				{if !array_key_exists('select', $column) || !is_null($column['select'])}
-				<a href="{$list->orderURL($key, $list->order == $key ? !$list->desc : $list->desc)}" title="{if $list->order == $key}Cliquer pour inverser l'ordre{else}Cliquer pour trier avec cette colonne{/if}">
+				{if (!array_key_exists('select', $column) || !is_null($column['select'])) && !(array_key_exists('order', $column) && null === $column['order'])}
+				<a href="{$list->orderURL($key, $list->order == $key ? !$list->desc : $list->desc)}" title="{if $list->order == $key}Cliquer pour inverser l'ordre de tri{else}Cliquer pour trier avec cette colonne{/if}">
 					{if $list.desc}
 						<span class="icn dn">&darr;</span>
 					{else}

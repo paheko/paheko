@@ -18,7 +18,9 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN
 $has_old_services = Services::countOldServices();
 $show_old_services = $_GET['old'] ?? false;
 
-$tpl->assign(compact('csrf_key', 'has_old_services', 'show_old_services'));
-$tpl->assign('list', Services::listWithStats(!$show_old_services));
+$list = Services::listWithStats(!$show_old_services);
+$list->loadFromQueryString();
+
+$tpl->assign(compact('csrf_key', 'has_old_services', 'show_old_services', 'list'));
 
 $tpl->display('services/index.tpl');

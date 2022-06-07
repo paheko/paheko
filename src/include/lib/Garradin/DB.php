@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use KD2\DB\SQLite3;
+use KD2\DB\DB_Exception;
 use KD2\ErrorManager;
 
 class DB extends SQLite3
@@ -108,7 +109,7 @@ class DB extends SQLite3
      */
     protected function log(string $method, ?string $timing, $object, ...$params): void
     {
-        if ($method != 'execute') {
+        if ($method != 'execute' && $method != 'exec') {
             return;
         }
 
@@ -121,7 +122,13 @@ class DB extends SQLite3
         $duration = round(($now - $this->_log_last) * 1000 * 1000);
         $time = round(($now - $this->_log_start) * 1000 * 1000);
 
-        $sql = $params[0]->getSQL(true);
+        if ($method == 'execute') {
+            $sql = $params[0]->getSQL(true);
+        }
+        else {
+            $sql = $params[0];
+        }
+
         $sql = preg_replace('/^\s+/m', '  ', $sql);
 
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
@@ -152,11 +159,16 @@ class DB extends SQLite3
             $s->list = $db->get('SELECT * FROM log WHERE session = ? ORDER BY time;', $id);
 
             foreach ($s->list as &$row) {
-                $explain = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $row->sql);
-                $row->explain = '';
+                try {
+                    $explain = DB::getInstance()->get('EXPLAIN QUERY PLAN ' . $row->sql);
+                    $row->explain = '';
 
-                foreach ($explain as $e) {
-                    $row->explain .= $e->detail . "\n";
+                    foreach ($explain as $e) {
+                        $row->explain .= $e->detail . "\n";
+                    }
+                }
+                catch (DB_Exception $e) {
+                    $row->explain = 'Error: ' . $e->getMessage();
                 }
             }
         }
