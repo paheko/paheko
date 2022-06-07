@@ -103,6 +103,7 @@ class Services
 		$current_condition = $current_only ? '(end_date IS NULL OR end_date >= datetime())' : '(end_date IS NOT NULL AND end_date < datetime())';
 
 		$list = new DynamicList($columns, 'services', $current_condition);
+		$list->setPageSize(null);
 		$list->orderBy('label', false);
 		return $list;
 	}
