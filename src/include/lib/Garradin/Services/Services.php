@@ -75,6 +75,9 @@ class Services
 
 		$columns = [
 			'id' => [],
+			'duration' => [],
+			'start_date' => [],
+			'end_date' => [],
 			'label' => [
 				'label' => 'Activité',
 			],
