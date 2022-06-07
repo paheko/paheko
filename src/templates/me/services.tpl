@@ -1,3 +1,6 @@
+<?php
+use Garradin\Entities\Accounting\Account;
+?>
 {include file="admin/_head.tpl" title="Mes activités & cotisations" current="me/services"}
 
 <dl class="cotisation">
@@ -19,6 +22,35 @@
 	</dd>
 	{/foreach}
 </dl>
+
+<h2 class="ruler">Dettes et créances</h2>
+
+{if !count($accounts)}
+<p class="help">Aucune dette ou créance n'est associée à votre profil.</p>
+{else}
+
+<table class="list">
+	<thead>
+		<tr>
+			<td class="money">Montant</td>
+			<th>Compte</th>
+			<td></td>
+		</tr>
+	</thead>
+	<tbody>
+	{foreach from=$accounts item="account"}
+		<tr>
+			<td class="money">{$account.balance|raw|money_currency}</td>
+			<th>{$account.label}</th>
+			<td>
+				{if $account.position == Account::LIABILITY}<em>Nous vous devons {$account.balance|raw|money_currency}.</em>
+				{else}<strong class="error">Vous nous devez {$account.balance|raw|money_currency}.</strong>{/if}
+			</td>
+		</tr>
+	{/foreach}
+	</tbody>
+</table>
+{/if}
 
 {if $list->count()}
 
