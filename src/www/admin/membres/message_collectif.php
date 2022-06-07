@@ -47,6 +47,11 @@ $form->runIf(f('send') || f('subject'), function () use ($membres, &$mailing, $r
 	$mailing = Emails::createMailing($recipients, f('subject'), f('message'), (bool) f('send_copy'), f('render') ?: null);
 }, $csrf_key);
 
+$form->runIf('export', function() use ($mailing) {
+	Emails::exportMailing(f('export'), $mailing);
+	exit;
+});
+
 $form->runIf('send', function () use ($membres, $mailing) {
 	Emails::sendMailing($mailing);
 }, $csrf_key, '!membres/message_collectif.php?sent');
