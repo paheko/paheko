@@ -11,6 +11,10 @@
 	Les membres qui n'ont aucune écriture associée n'apparaissent pas dans ce tableau.
 </p>
 
+
+{if !$list->count()}
+<p class="alert block">Aucune écriture liée à un membre n'existe sur cet exercice.</p>
+{else}
 	{include file="common/dynamic_list_head.tpl"}
 
 	{foreach from=$list->iterate() item="row"}
@@ -36,6 +40,7 @@
 	{/foreach}
 	</tbody>
 </table>
+{/if}
 
 <p class="help">
 	Dette = l'association doit de l'argent à ce membre<br />
