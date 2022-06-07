@@ -400,13 +400,11 @@ class Emails
 
 	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html): void
 	{
-		$config = Config::getInstance();
-
 		$message = new Mail_Message;
 		$message->setHeaders($headers);
 
 		if (!$message->getFrom()) {
-			$message->setHeader('From', sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso));
+			$message->setHeader('From', self::getFromHeader());
 		}
 
 		$message->setMessageId();
@@ -443,6 +441,7 @@ class Emails
 			$message->addPart('text/html', $content_html);
 		}
 
+		$config = Config::getInstance();
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->email_asso);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
@@ -532,7 +531,6 @@ class Emails
 	 */
 	static public function createMailing(array $recipients, string $subject, string $message, bool $send_copy, ?string $render): \stdClass
 	{
-		$config = Config::getInstance();
 		$list = [];
 
 		foreach ($recipients as $recipient) {
@@ -585,16 +583,33 @@ class Emails
 
 		$recipients = $list;
 
-		$sender = sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso);
+		$config = Config::getInstance();
 		$message = (object) compact('recipients', 'subject', 'message', 'sender', 'tpl', 'send_copy', 'render');
 		$message->preview = (object) [
 			'to'      => $random,
-			'from'    => $sender,
+			// Not required to be a valid From header, this is just a preview
+			'from'    => sprintf('"%s" <%s>', $config->nom_asso, $config->email_asso),
 			'subject' => $subject,
 			'html'    => $html,
 		];
 
 		return $message;
+	}
+
+	static public function getFromHeader(string $name = null, string $email = null): string
+	{
+		$config = Config::getInstance();
+
+		if (null === $name) {
+			$name = $config->nom_asso;
+		}
+		if (null === $email) {
+			$email = $config->email_asso;
+		}
+
+		$name = str_replace('"', '\\"', $name);
+
+		return sprintf('"%s" <%s>', $name, $email);
 	}
 
 	/**
