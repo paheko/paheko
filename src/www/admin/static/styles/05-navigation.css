@@ -81,3 +81,7 @@ main nav.menu:hover span, main nav.menu:active span {
     z-index: 1000;
     box-shadow: 2px 2px 5px var(--gLightBorderColor);
 }
+
+main nav.menu button {
+    text-align: left;
+}

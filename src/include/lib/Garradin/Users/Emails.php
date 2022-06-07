@@ -3,6 +3,7 @@
 namespace Garradin\Users;
 
 use Garradin\Config;
+use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugin;
@@ -609,6 +610,7 @@ class Emails
 		}
 
 		$name = str_replace('"', '\\"', $name);
+		$name = str_replace(',', '', $name); // Remove commas
 
 		return sprintf('"%s" <%s>', $name, $email);
 	}
@@ -639,5 +641,18 @@ class Emails
 			$config = Config::getInstance();
 			Emails::queue(Emails::CONTEXT_BULK, [$config->get('email_asso') => null], null, $mailing->subject, $mailing->message);
 		}
+	}
+
+	static public function exportMailing(string $format, \stdClass $mailing): void
+	{
+		$rows = $mailing->recipients;
+
+		foreach ($rows as $key => &$row) {
+			$row = ['email' => $key];
+		}
+
+		unset($row);
+
+		CSV::export($format, 'Destinataires message collectif', $rows);
 	}
 }
