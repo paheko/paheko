@@ -27,6 +27,8 @@ class UserTemplate extends Brindille
 	protected $code = null;
 	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
 
+	protected $escape_default = 'html';
+
 	static protected $root_variables;
 
 	static public function getRootVariables()
@@ -102,6 +104,8 @@ class UserTemplate extends Brindille
 
 	public function setEscapeDefault(?string $default): void
 	{
+		$this->escape_default = $default;
+
 		if (null === $default) {
 			$this->registerModifier('escape', fn($str) => $str);
 		}
@@ -143,6 +147,33 @@ class UserTemplate extends Brindille
 		foreach (Sections::SECTIONS_LIST as $name) {
 			$this->registerSection($name, [Sections::class, $name]);
 		}
+
+		$this->registerModifier('money', function ($number, bool $hide_empty = true, bool $force_sign = false): string {
+			if ($hide_empty && !$number) {
+				return '';
+			}
+
+			$sign = ($force_sign && $number > 0) ? '+' : '';
+
+			$out = $sign . Utils::money_format($number, ',', '.', $hide_empty);
+
+			if (!$this->escape_default) {
+				return $out;
+			}
+
+			return sprintf('<b class="money">%s</b>', str_replace('.', '&nbsp;', $out));
+		});
+
+		$this->registerModifier('money_currency', function ($number, bool $hide_empty = true): string {
+			$out = $this->_modifiers['money']($number, $hide_empty);
+
+			if ($out !== '') {
+				$out .= $this->escape_default == 'html' ? '&nbsp;' : ' ';
+				$out .= Config::getInstance()->get('monnaie');
+			}
+
+			return $out;
+		});
 	}
 
 	public function setSource(string $path)

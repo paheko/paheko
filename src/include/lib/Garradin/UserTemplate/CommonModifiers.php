@@ -27,6 +27,9 @@ class CommonModifiers
 		'pagination',
 	];
 
+	/**
+	 * See also money/money_currency in UserTemplate (overriden)
+	 */
 	static public function money($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
 		if ($hide_empty && !$number) {
