@@ -658,7 +658,7 @@ class Template extends \KD2\Smartyer
 		}
 
 		if (null === $config) {
-			return htmlspecialchars($v);
+			return htmlspecialchars((string)$v);
 		}
 
 		if ($config->type == 'checkbox') {
