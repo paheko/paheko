@@ -96,7 +96,6 @@ class Emails
 				$content = $template->fetch();
 
 				if ($render) {
-					$template->setEscapeDefault('html');
 					$content_html = $template->fetch();
 				}
 			}
@@ -556,11 +555,11 @@ class Emails
 			$tpl->setCode($message);
 			$tpl->toggleSafeMode(true);
 			$tpl->assignArray((array)$list[$random]);
+			$tpl->setEscapeDefault(null);
 
 			try {
 				if (!$render) {
 					// Disable HTML escaping for plaintext emails
-					$tpl->setEscapeDefault(null);
 					$message = $tpl->fetch();
 				}
 				else {
