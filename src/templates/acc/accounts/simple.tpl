@@ -41,6 +41,9 @@
 					{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
 				</td>
 				{/if}
+				{if $line.type_label}
+				<td>{$line.type_label}</td>
+				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_short}</td>
 				<td class="money">{$line.change|abs|raw|money}</td>
