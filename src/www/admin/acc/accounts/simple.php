@@ -13,6 +13,7 @@ if (!CURRENT_YEAR_ID) {
 $year = $current_year;
 
 $types = [
+	null => 'Toutes',
 	Transaction::TYPE_REVENUE => 'Recettes',
 	Transaction::TYPE_EXPENSE => 'Dépenses',
 	Transaction::TYPE_TRANSFER => 'Virements',
@@ -21,7 +22,7 @@ $types = [
 	Transaction::TYPE_ADVANCED => 'Saisies avancées',
 ];
 
-$type = qg('type') ?? Transaction::TYPE_REVENUE;
+$type = qg('type') ?: null;
 
 if (!array_key_exists($type, $types)) {
 	$type = key($types);
