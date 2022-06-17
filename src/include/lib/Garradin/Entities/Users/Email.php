@@ -118,6 +118,10 @@ class Email extends Entity
 		}
 
 		if (!SMTP::checkEmailIsValid($email, false)) {
+			if (!trim($host)) {
+				throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
+			}
+
 			foreach (self::COMMON_DOMAINS as $common_domain) {
 				similar_text($common_domain, $host, $percent);
 
