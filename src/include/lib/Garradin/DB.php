@@ -374,6 +374,10 @@ class DB extends SQLite3
      * @see https://sqlite.org/src/file?name=ext/icu/icu.c&ci=trunk
      */
     static public function unicodeLike($pattern, $value, $escape = null) {
+        if (null === $pattern || null === $value) {
+            return false;
+        }
+
         $pattern = str_replace('’', '\'', $pattern); // Normalize French apostrophe
         $value = str_replace('’', '\'', $value);
 
