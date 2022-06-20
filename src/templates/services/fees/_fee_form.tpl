@@ -13,7 +13,7 @@ $analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 	<fieldset>
 		<legend>{$legend}</legend>
 		<dl>
-			{input name="label" type="text" required=1 label="Libellé" source=$fee}
+			{input name="label" type="text" required=true label="Libellé" source=$fee}
 			{input name="description" type="textarea" label="Description" source=$fee}
 
 			<dt><label for="f_amount_type">Montant de la cotisation</label></dt>
@@ -21,13 +21,13 @@ $analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 			{input name="amount_type" type="radio" value="1" label="Montant fixe ou prix libre conseillé" default=$amount_type}
 			<dd class="amount_type_1">
 				<dl>
-					{input name="amount" type="money" label="Montant" source=$fee fake_required=1}
+					{input name="amount" type="money" label="Montant" source=$fee required=true}
 				</dl>
 			</dd>
 			{input name="amount_type" type="radio" value="2" label="Montant variable" default=$amount_type}
 			<dd class="amount_type_2">
 				<dl>
-					{input name="formula" type="textarea" label="Formule de calcul" source=$fee fake_required=1}
+					{input name="formula" type="textarea" label="Formule de calcul" source=$fee required=true}
 					<dd class="help">
 						<a href="https://garradin.eu/Formule-calcul-activite">Aide sur les formules de calcul</a>
 					</dd>
@@ -71,6 +71,7 @@ $analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 <script type="text/javascript">
 {literal}
 (function () {
+	console.log('ok');
 	var hide = [];
 	if (!$('#f_amount_type_1').checked)
 		hide.push('.amount_type_1');

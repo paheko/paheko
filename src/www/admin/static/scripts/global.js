@@ -62,12 +62,14 @@
 			var elements = document.querySelectorAll(selector);
 		}
 
-		for (var i = 0; i < elements.length; i++)
-		{
-			if (!visibility)
-				elements[i].classList.add('hidden');
-			else
-				elements[i].classList.remove('hidden');
+		for (var i = 0; i < elements.length; i++) {
+			elements[i].classList.toggle('hidden', visibility ? false : true);
+
+			// Make sure hidden elements are not really required
+			// Avoid Chrome bug "An invalid form control with name='' is not focusable."
+			elements[i].querySelectorAll('input[required], textarea[required], select[required], button[required]').forEach((e) => {
+				e.disabled = !visibility ? true : (e.getAttribute('disabled') ? true : false);
+			});
 		}
 
 		return true;
@@ -409,11 +411,39 @@
 
 		inputs.forEach((i) => {
 			i.onclick = () => {
+				i.setCustomValidity('');
 				g.current_list_input = i.parentNode;
 				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				g.openFrameDialog(url);
 				return false;
 			};
+		});
+
+		// Set custom error message if required list is not selected
+		document.querySelectorAll('form').forEach((form) => {
+			form.addEventListener('submit', (e) => {
+				let inputs = form.querySelectorAll('.input-list > button[required]');
+
+				for (var k = 0; k < inputs.length; k++) {
+					var i2 = inputs[k];
+					i2.type = 'submit'; // Force button to have error message, <button type="button"> cannot show validity message
+
+					// Element is hidden or disabled
+					if (!i2.offsetParent || i2.disabled) {
+						i2.required = false;
+						continue;
+					}
+
+					let v = i2.parentNode.querySelector('input[type="hidden"]');
+
+					if (!v || !v.value) {
+						i2.setCustomValidity('Merci de faire une sélection.');
+						i2.reportValidity();
+						e.preventDefault();
+						return false;
+					}
+				}
+			});
 		});
 
 		var multiples = $('form .input-list span button');
