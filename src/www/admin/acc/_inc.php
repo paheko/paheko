@@ -6,7 +6,9 @@ use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
 
-$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
+if (!defined('Garradin\ALLOW_ACCOUNTS_ACCESS') || !ALLOW_ACCOUNTS_ACCESS) {
+	$session->requireAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ);
+}
 
 $current_year_id = $session->get('acc_year');
 $current_year = null;
