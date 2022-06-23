@@ -33,6 +33,7 @@ class Modifiers
 		'wordwrap',
 		'strip_tags',
 		'strlen',
+		'abs',
 	];
 
 	const MODIFIERS_LIST = [
