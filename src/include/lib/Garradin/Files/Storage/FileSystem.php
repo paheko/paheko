@@ -267,7 +267,17 @@ class FileSystem implements StorageInterface
 		$path = self::_getRoot();
 
 		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD) as $p) {
-			$total += $p->getSize();
+			if (substr($p->getBaseName(), 0, 1) == '.') {
+				// Ignore dot files
+				continue;
+			}
+
+			try {
+				$total += $p->getSize();
+			}
+			catch (\RuntimeException $e) {
+				// Ignore file that vanished
+			}
 		}
 
 		self::$_size = (float) $total;
