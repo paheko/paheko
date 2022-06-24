@@ -1,11 +1,15 @@
 {include file="admin/_head.tpl" title="Balance générale" current="acc/years"}
 
-{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale"}
+{include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple}
 
+<nav class="tabs">
+
+{if !$simple}
 <p class="help block noprint">
 	Attention&nbsp;: cette vue présente le solde selon les normes comptables.<br />
 	Si le montant est <strong>positif</strong> c'est que le compte est <strong>débiteur</strong>.<br />Si le montant est <strong>négatif</strong> c'est que le compte est <strong>créditeur</strong>.
 </p>
+{/if}
 
 <table class="list">
 	<thead>
