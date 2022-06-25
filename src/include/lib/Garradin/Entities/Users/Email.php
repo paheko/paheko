@@ -123,33 +123,6 @@ class Email extends Entity
 			throw new UserException('Adresse invalide : "gmail.fr" n\'existe pas, il faut utiliser "gmail.com"');
 		}
 
-		// Now we try to validate rules for common providers, so that we try to only accept valid address
-
-		// GMail specific validation rules
-		if ($host == 'gmail.com' && !preg_match('/^(?!\.)[a-z0-9\.]{6,30}(?!\.)$/', $user)) {
-			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
-		}
-
-		// Microsoft specific validation rules
-		if (preg_match('/^(?:outlook|hotmail)\.[a-z]+$/', $host) && !preg_match('/^(?![0-9\._-])[a-z0-9\._-]{1,65}(?!\.)$/', $user)) {
-			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
-		}
-
-		// Laposte.net specific validation rules
-		if ($host == 'laposte.net' && !preg_match('/^(?![\._-])[a-z0-9\._-]{1,50}(?![\._-])$/', $user)) {
-			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
-		}
-
-		// Yahoo specific validation rules
-		if (preg_match('/^yahoo\.[a-z]+$/', $host) && !preg_match('/^(?![\.0-9_])[a-z0-9\._]{4,33}(?![\._])$/', $user)) {
-			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
-		}
-
-		// Orange.fr specific validation rules
-		if (preg_match('/^orange\.fr|wanadoo\.fr$/', $host) && !preg_match('/^(?![\.-])[a-z0-9\.-]{1,100}(?![\.-])$/', $user)) {
-			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
-		}
-
 		if (preg_match('![/@]!', $user)) {
 			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
 		}
