@@ -4,7 +4,7 @@ namespace Garradin;
 
 use Garradin\Services\Reminders;
 
-if (PHP_SAPI != 'cli') {
+if (PHP_SAPI != 'cli' && !defined('\Garradin\ROOT')) {
 	die("Wrong call");
 }
 
