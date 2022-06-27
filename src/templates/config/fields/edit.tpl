@@ -56,6 +56,7 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		<dt>Le champ est visible…</dt>
 		{input type="radio" name="read_access" value=$field::ACCESS_ADMIN label="Seulement aux personnes qui gèrent les membres" source=$field}
 		{input type="radio" name="read_access" value=$field::ACCESS_USER label="Au membre lui-même, et aux personnes qui gèrent les membres" source=$field help="Le membre pourra voir cette information en se connectant" default=$field::ACCESS_USER}
+		<dd class="help">Attention&nbsp;: conformément à la réglementation (RGPD), quel que soit votre choix, le membre pourra voir le contenu de ce champ en effectuant un export de ses données personnelles s'il a le droit de se connecter.</dd>
 
 		<dt>Le champ peut être modifié…</dt>
 		{input type="radio" name="write_access" value=$field::ACCESS_ADMIN label="Par les personnes qui gèrent les membres" source=$field}
