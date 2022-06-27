@@ -6,18 +6,9 @@
 	<p class="block error">Vous devez déjà créer une activité pour pouvoir utiliser cette fonction.</p>
 {/if}
 
-{if count($list)}
-	<table class="list">
-		<thead>
-			<th>Activité</th>
-			<td>Période</td>
-			<td>Membres à jour</td>
-			<td>Membres expirés</td>
-			<td>Membres en attente de règlement</td>
-			<td></td>
-		</thead>
-		<tbody>
-			{foreach from=$list item="row"}
+{if $list->count()}
+	{include file="common/dynamic_list_head.tpl"}
+			{foreach from=$list->iterate() item="row"}
 				<tr>
 					<th><a href="fees/?id={$row.id}">{$row.label}</a></th>
 					<td>

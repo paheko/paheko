@@ -13,6 +13,7 @@ if (!CURRENT_YEAR_ID) {
 $year = $current_year;
 
 $types = [
+	-1 => 'Toutes',
 	Transaction::TYPE_REVENUE => 'Recettes',
 	Transaction::TYPE_EXPENSE => 'Dépenses',
 	Transaction::TYPE_TRANSFER => 'Virements',
@@ -21,13 +22,13 @@ $types = [
 	Transaction::TYPE_ADVANCED => 'Saisies avancées',
 ];
 
-$type = qg('type') ?? Transaction::TYPE_REVENUE;
+$type = qg('type');
 
 if (!array_key_exists($type, $types)) {
 	$type = key($types);
 }
 
-$list = Transactions::listByType(CURRENT_YEAR_ID, $type);
+$list = Transactions::listByType(CURRENT_YEAR_ID, $type == -1 ? null : $type);
 $list->setTitle(sprintf('Suivi - %s', $types[$type]));
 $list->loadFromQueryString();
 

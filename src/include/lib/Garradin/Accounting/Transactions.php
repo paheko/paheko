@@ -540,6 +540,14 @@ class Transactions
 		$columns['code_analytical']['select'] = 'GROUP_CONCAT(b.code, \',\')';
 		$columns['id_analytical']['select'] = 'GROUP_CONCAT(l.id_analytical, \',\')';
 
+		if (!$type) {
+			$columns = ['type_label' => [
+					'select' => 't.type',
+					'label' => 'Type d\'écriture',
+				]]
+				+ $columns;
+		}
+
 		$tables = 'acc_transactions_lines l
 			INNER JOIN acc_transactions t ON t.id = l.id_transaction
 			INNER JOIN acc_accounts a ON a.id = l.id_account
@@ -564,6 +572,10 @@ class Transactions
 			}
 			else {
 				$row->code_analytical = [];
+			}
+
+			if (isset($row->type_label)) {
+				$row->type_label = Transaction::TYPES_NAMES[(int)$row->type_label];
 			}
 		});
 		$list->setExportCallback(function (&$row) {

@@ -555,6 +555,19 @@ class Transaction extends Entity
 		$this->importForm($source);
 	}
 
+	public function importForm(array $source = null)
+	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
+		if (isset($source['id_related']) && empty($source['id_related'])) {
+			$source['id_related'] = null;
+		}
+
+		return parent::importForm($source);
+	}
+
 	public function importFromNewForm(?array $source = null): void
 	{
 		if (null === $source) {

@@ -6,6 +6,8 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Accounting\Charts;
 use Garradin\Accounting\Years;
 
+const ALLOW_ACCOUNTS_ACCESS = true;
+
 require_once __DIR__ . '/../../_inc.php';
 
 $targets = qg('targets');

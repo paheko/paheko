@@ -106,7 +106,7 @@ class Page extends Entity
 		return $this->_file;
 	}
 
-	public function load(array $data): void
+	public function load(array $data): self
 	{
 		parent::load($data);
 
@@ -114,6 +114,8 @@ class Page extends Entity
 			$this->loadFromFile($this->file());
 			$this->save();
 		}
+
+		return $this;
 	}
 
 	public function url(): string

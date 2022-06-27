@@ -33,6 +33,7 @@ class Modifiers
 		'wordwrap',
 		'strip_tags',
 		'strlen',
+		'abs',
 	];
 
 	const MODIFIERS_LIST = [
@@ -62,8 +63,12 @@ class Modifiers
 
 	static public function check_email($str)
 	{
+		if (!trim((string)$str)) {
+			return false;
+		}
+
 		try {
-			Email::validateAddress($str);
+			Email::validateAddress((string)$str);
 		}
 		catch (UserException $e) {
 			return false;

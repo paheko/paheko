@@ -29,7 +29,7 @@ class Form
 		}
 	}
 
-	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null): bool
+	public function run(callable $fn, ?string $csrf_key = null, ?string $redirect = null, bool $follow_redirect = false): bool
 	{
 		if (null !== $csrf_key && !$this->check($csrf_key)) {
 			return false;
@@ -40,7 +40,7 @@ class Form
 
 			if (null !== $redirect) {
 				if (array_key_exists('_dialog', $_GET)) {
-					Utils::reloadParentFrame($redirect);
+					Utils::reloadParentFrame($follow_redirect ? $redirect : null);
 				}
 
 				Utils::redirect($redirect);
@@ -54,7 +54,7 @@ class Form
 		}
 	}
 
-	public function runIf($condition, callable $fn, ?string $csrf_key = null, ?string $redirect = null): ?bool
+	public function runIf($condition, callable $fn, ?string $csrf_key = null, ?string $redirect = null, bool $follow_redirect = false): ?bool
 	{
 		if (is_string($condition) && empty($_POST[$condition])) {
 			return null;
@@ -63,7 +63,7 @@ class Form
 			return null;
 		}
 
-		return $this->run($fn, $csrf_key, $redirect);
+		return $this->run($fn, $csrf_key, $redirect, $follow_redirect);
 	}
 
 	public function check($token_action = '', Array $rules = null)

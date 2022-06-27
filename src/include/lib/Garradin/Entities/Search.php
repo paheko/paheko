@@ -111,7 +111,7 @@ class Search extends Entity
 		$this->set('type', self::TYPE_SQL);
 	}
 
-	public function SQL(?int $force_limit): string
+	public function SQL(?int $force_limit, ?string $force_select = null): string
 	{
 		if ($this->type == self::TYPE_JSON) {
 			$sql = $this->getDynamicList()->SQL();
@@ -131,6 +131,10 @@ class Search extends Entity
 			$sql = preg_replace('/LIMIT\s+.*;?\s*$/', '', $sql);
 		}
 
+		if ($force_select) {
+			$query = preg_replace('/^\s*SELECT\s+(.*)\s+FROM\s+/Uis', 'SELECT $1, ' . implode(', ', $force_select) . ' FROM ', $query);
+		}
+
 		$sql = trim($sql, "\n\r\t; ");
 
 		return $sql;
@@ -139,13 +143,13 @@ class Search extends Entity
 	/**
 	 * Returns a SQLite3Result for the current search
 	 */
-	protected function query(?int $force_limit = 100): \SQLite3Result
+	protected function query(?int $force_limit = 100, ?string $force_select = null): \SQLite3Result
 	{
 		if (null !== $this->_result) {
 			return $this->_result;
 		}
 
-		$sql = $this->SQL($force_limit);
+		$sql = $this->SQL($force_limit, $force_select);
 
 		$allowed_tables = $this->getProtectedTables();
 

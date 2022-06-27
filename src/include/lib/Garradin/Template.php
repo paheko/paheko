@@ -268,6 +268,9 @@ class Template extends \KD2\Smartyer
 
 		$params['class'] .= ' icn-btn';
 
+		// Remove NULL params
+		$params = array_filter($params);
+
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, $this->escape($v));
 		});
@@ -427,16 +430,12 @@ class Template extends \KD2\Smartyer
 			unset($attributes['readonly']);
 		}
 
-		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
+		if (array_key_exists('required', $attributes)) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
 		else {
 			$required_label =  ' <i>(facultatif)</i>';
 		}
-
-		// Fake required: doesn't set the required attribute, just the label
-		// (useful for form elements that are hidden by JS)
-		unset($attributes['fake_required']);
 
 		$attributes_string = $attributes;
 
@@ -493,8 +492,9 @@ class Template extends \KD2\Smartyer
 
 			$button = $this->widgetButton([
 				'shape' => $multiple ? 'plus' : 'menu',
-				'value' => Utils::getLocalURL($attributes['target']),
 				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
+				'required' => $attributes['required'] ?? null,
+				'value' => Utils::getLocalURL($attributes['target']),
 				'data-multiple' => $multiple ? '1' : '0',
 				'data-name' => $name,
 			]);
@@ -511,7 +511,7 @@ class Template extends \KD2\Smartyer
 			}
 
 			$currency = Config::getInstance()->get('currency');
-			$input = sprintf('<nobr><input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, $this->escape($current_value), $currency);
+			$input = sprintf('<nobr><input type="text" pattern="-?[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, $this->escape($current_value), $currency);
 		}
 		else {
 			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', $this->escape($current_value));
@@ -666,7 +666,7 @@ class Template extends \KD2\Smartyer
 		$v = $params['value'];
 
 		if (!$field) {
-			return htmlspecialchars($v);
+			return htmlspecialchars((string)$v);
 		}
 
 		if ($field->type == 'checkbox') {

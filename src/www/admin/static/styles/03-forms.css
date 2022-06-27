@@ -90,8 +90,9 @@ textarea.full-width {
     width: calc(100% - 1rem);
 }
 
-input:not(:placeholder-shown):focus:invalid {
+input:not(:placeholder-shown):focus:invalid, textarea:not(:placeholder-shown):focus:invalid {
     border-color: rgb(var(--gHoverLinkColor));
+    box-shadow: 0 0 5px .3rem rgba(var(--gHoverLinkColor), 0.5);
 }
 
 input.time {

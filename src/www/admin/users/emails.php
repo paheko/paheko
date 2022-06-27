@@ -18,7 +18,7 @@ if ($address = qg('verify')) {
 
     $form->runIf('send', function () use ($email, $address) {
         $email->sendVerification($address);
-    }, $csrf_key, '!users/emails.php?sent');
+    }, $csrf_key, '!users/emails.php?sent', true);
 
     $tpl->assign(compact('csrf_key', 'email'));
     $tpl->display('users/emails_verification.tpl');

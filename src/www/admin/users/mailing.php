@@ -50,8 +50,17 @@ $form->runIf(f('send') || f('subject'), function () use (&$mailing) {
 		$recipients = Users::iterateEmailsByActiveService((int)$target[1]);
 	}
 
+	if (empty($recipients)) {
+		throw new UserException('La liste de destinataires sélectionnée ne comporte aucun membre, ou aucun avec une adresse e-mail renseignée.');
+	}
+
 	$mailing = Emails::createMailing($recipients, f('subject'), f('message'), (bool) f('send_copy'), f('render') ?: null);
 }, $csrf_key);
+
+$form->runIf('export', function() use ($mailing) {
+	Emails::exportMailing(f('export'), $mailing);
+	exit;
+});
 
 $form->runIf('send', function () use ($mailing) {
 	Emails::sendMailing($mailing);

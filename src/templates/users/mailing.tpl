@@ -17,6 +17,18 @@
 	{if $preview}
 		<fieldset class="mailing">
 			<legend>Prévisualisation du message</legend>
+			{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
+			<nav class="menu">
+				<b data-icon="↷" class="btn">Exporter la liste des destinataires</b>
+				<span>
+					{button type="submit" name="export" value="csv" shape="export" label="Export CSV"}
+					{button type="submit" name="export" value="ods" shape="export" label="Export LibreOffice"}
+					{if CALC_CONVERT_COMMAND}
+						{button type="submit" name="export" value="xlsx" shape="export" label="Export Excel"}
+					{/if}
+				</span>
+			</nav>
+			{/if}
 			<p class="help">
 				Ce message sera envoyé à <strong>{$recipients_count}</strong> destinataires.<br />
 				Voici un exemple du message pour un de ces destinataires.

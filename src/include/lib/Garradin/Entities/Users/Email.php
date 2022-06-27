@@ -109,15 +109,29 @@ class Email extends Entity
 
 	static public function validateAddress(string $email): void
 	{
-		$user = strtok($email, '@');
-		$host = strtok('');
+		$pos = strrpos($email, '@');
+
+		if ($pos === false) {
+			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
+		}
+
+		$user = substr($email, 0, $pos);
+		$host = substr($email, $pos+1);
 
 		// Ce domaine n'existe pas (MX inexistant), erreur de saisie courante
 		if ($host == 'gmail.fr') {
 			throw new UserException('Adresse invalide : "gmail.fr" n\'existe pas, il faut utiliser "gmail.com"');
 		}
 
+		if (preg_match('![/@]!', $user)) {
+			throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
+		}
+
 		if (!SMTP::checkEmailIsValid($email, false)) {
+			if (!trim($host)) {
+				throw new UserException('Adresse e-mail invalide : vérifiez que vous n\'avez pas fait une faute de frappe.');
+			}
+
 			foreach (self::COMMON_DOMAINS as $common_domain) {
 				similar_text($common_domain, $host, $percent);
 

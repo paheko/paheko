@@ -303,16 +303,15 @@ class Reports
 	}
 
 	/**
-	 * Returns accounts balances according to $criterias
+	 * Returns SQL query for accounts balances according to $criterias
 	 * @param  array       $criterias   List of criterias, see self::getWhereClause
 	 * @param  string|null $order       Order of rows (SQL clause), if NULL will order by CODE
 	 * @param  bool        $remove_zero Remove accounts where the balance is zero from the list
 	 */
-	static public function getAccountsBalances(array $criterias, ?string $order = null, bool $remove_zero = true)
+	static protected function getAccountsBalancesInnerSQL(array $criterias, ?string $order = null, bool $remove_zero = true): string
 	{
 		$group = 'code';
 		$having = '';
-		$order = $order ?: 'code COLLATE NOCASE';
 
 		if ($remove_zero) {
 			$having = 'HAVING balance != 0';
@@ -357,24 +356,40 @@ class Reports
 			$sql = sprintf($query, $table, $where, $group, $having, $order);
 		}
 
+		return $sql;
+	}
 
+	/**
+	 * Returns accounts balances according to $criterias
+	 * @param  array       $criterias   List of criterias, see self::getWhereClause
+	 * @param  string|null $order       Order of rows (SQL clause), if NULL will order by CODE
+	 * @param  bool        $remove_zero Remove accounts where the balance is zero from the list
+	 */
+	static public function getAccountsBalances(array $criterias, ?string $order = null, bool $remove_zero = true): array
+	{
 		$db = DB::getInstance();
+		$order = $order ?: 'code COLLATE NOCASE';
+
+		$sql = self::getAccountsBalancesInnerSQL($criterias, $order, $remove_zero);
 
 		// SQLite does not support OUTER JOIN yet :(
 		if (isset($criterias['compare_year'])) {
-			$sql2 = 'SELECT a.id, a.code AS code, a.label, a.position, a.type, a.debit, a.credit, a.balance, IFNULL(b.balance, 0) AS balance2, IFNULL(a.balance - b.balance, a.balance) AS change
-				FROM (%s) AS a
-				LEFT JOIN %s b ON b.code = a.code AND a.position = b.position AND b.id_year = %4$d
+			$criterias2 = array_merge($criterias, ['year' => $criterias['compare_year']]);
+			$sql2 = self::getAccountsBalancesInnerSQL($criterias2, $order, true);
+
+			$sql_union = 'SELECT a.id, a.code AS code, a.label, a.position, a.type, a.debit, a.credit, a.balance, IFNULL(b.balance, 0) AS balance2, IFNULL(a.balance - b.balance, a.balance) AS change
+				FROM (%1$s) AS a
+				LEFT JOIN %3$s b ON b.code = a.code AND a.position = b.position AND b.id_year = %4$d
 				UNION ALL
 				-- Select balances of second year accounts that are =zero in first year
 				SELECT
 					NULL AS id, c.code AS code, c.label, c.position, c.type, c.debit, c.credit, 0 AS balance, c.balance AS balance2, c.balance * -1 AS change
-				FROM %2$s c
-				LEFT JOIN %2$s d ON d.code = c.code AND d.id_year = %3$d AND d.balance != 0 AND d.position = c.position
-				WHERE d.id IS NULL AND c.id_year = %4$d AND c.position = %5$d AND c.balance != 0
+				FROM (%2$s) AS c
+				LEFT JOIN %3$s d ON d.code = c.code AND d.balance != 0 AND d.position = c.position AND d.id_year = %5$d
+				WHERE d.id IS NULL
 				ORDER BY code COLLATE NOCASE;';
 
-			$sql = sprintf($sql2, $sql, $table, $criterias['year'], $criterias['compare_year'], $criterias['position']);
+			$sql = sprintf($sql_union, $sql, $sql2, 'acc_accounts_balances', $criterias['compare_year'], $criterias['year']);
 		}
 
 		$out = $db->get($sql);

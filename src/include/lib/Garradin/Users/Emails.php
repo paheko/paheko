@@ -3,6 +3,7 @@
 namespace Garradin\Users;
 
 use Garradin\Config;
+use Garradin\CSV;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Plugin;
@@ -90,13 +91,12 @@ class Emails
 			if ($template) {
 				$template->assignArray((array) $variables);
 
+				// Disable HTML escaping for plaintext emails
+				$template->setEscapeDefault(null);
+				$content = $template->fetch();
+
 				if ($render) {
 					$content_html = $template->fetch();
-				}
-				else {
-					// Disable HTML escaping for plaintext emails
-					$template->setEscapeDefault(null);
-					$content = $template->fetch();
 				}
 			}
 
@@ -400,13 +400,11 @@ class Emails
 
 	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html): void
 	{
-		$config = Config::getInstance();
-
 		$message = new Mail_Message;
 		$message->setHeaders($headers);
 
 		if (!$message->getFrom()) {
-			$message->setHeader('From', sprintf('"%s" <%s>', $config->org_name, $config->org_email));
+			$message->setHeader('From', self::getFromHeader());
 		}
 
 		$message->setMessageId();
@@ -443,6 +441,7 @@ class Emails
 			$message->addPart('text/html', $content_html);
 		}
 
+		$config = Config::getInstance();
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
 
@@ -532,7 +531,6 @@ class Emails
 	 */
 	static public function createMailing(iterable $recipients, string $subject, string $message, bool $send_copy, ?string $render): \stdClass
 	{
-		$config = Config::getInstance();
 		$list = [];
 
 		foreach ($recipients as $recipient) {
@@ -557,11 +555,11 @@ class Emails
 			$tpl->setCode($message);
 			$tpl->toggleSafeMode(true);
 			$tpl->assignArray((array)$list[$random]);
+			$tpl->setEscapeDefault(null);
 
 			try {
 				if (!$render) {
 					// Disable HTML escaping for plaintext emails
-					$tpl->setEscapeDefault(null);
 					$message = $tpl->fetch();
 				}
 				else {
@@ -580,21 +578,40 @@ class Emails
 			$html = '<pre>' . $html . '</pre>';
 		}
 		else {
-			$html = '<pre>' . htmlspecialchars($message) . '</pre>';
+			$html = '<pre>' . htmlspecialchars(wordwrap($message)) . '</pre>';
 		}
 
 		$recipients = $list;
 
+		$config = Config::getInstance();
 		$sender = sprintf('"%s" <%s>', $config->org_name, $config->org_email);
 		$message = (object) compact('recipients', 'subject', 'message', 'sender', 'tpl', 'send_copy', 'render');
 		$message->preview = (object) [
 			'to'      => $random,
+			// Not required to be a valid From header, this is just a preview
 			'from'    => $sender,
 			'subject' => $subject,
 			'html'    => $html,
 		];
 
 		return $message;
+	}
+
+	static public function getFromHeader(string $name = null, string $email = null): string
+	{
+		$config = Config::getInstance();
+
+		if (null === $name) {
+			$name = $config->org_name;
+		}
+		if (null === $email) {
+			$email = $config->org_email;
+		}
+
+		$name = str_replace('"', '\\"', $name);
+		$name = str_replace(',', '', $name); // Remove commas
+
+		return sprintf('"%s" <%s>', $name, $email);
 	}
 
 	/**
@@ -623,5 +640,19 @@ class Emails
 			$config = Config::getInstance();
 			Emails::queue(Emails::CONTEXT_BULK, [$config->org_email => null], null, $mailing->subject, $mailing->message);
 		}
+	}
+
+	static public function exportMailing(string $format, \stdClass $mailing): void
+	{
+		$rows = $mailing->recipients;
+		$id_field = Config::getInstance()->get('champ_identite');
+
+		foreach ($rows as $key => &$row) {
+			$row = [$key, $row->$id_field ?? ''];
+		}
+
+		unset($row);
+
+		CSV::export($format, 'Destinataires message collectif', $rows, ['Adresse e-mail', 'Identité']);
 	}
 }
