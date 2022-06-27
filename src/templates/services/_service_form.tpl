@@ -8,7 +8,7 @@
 			{input name="label" type="text" required=1 label="Libellé" source=$service}
 			{input name="description" type="textarea" label="Description" source=$service}
 
-			<dt><label for="f_periodicite_jours">Période de validité</label></dt>
+			<dt><label for="f_periodicite_jours">Période de validité</label> <b title="Champ obligatoire">(obligatoire)</b></dt>
 			<dd class="help">Attention, une modification de la période renseignée ici ne modifie pas la date d'expiration des activités déjà enregistrées.</dd>
 			{input name="period" type="radio" value="0" label="Pas de période (cotisation ponctuelle)" default=$period}
 			{input name="period" type="radio" value="1" label="En nombre de jours" default=$period}
