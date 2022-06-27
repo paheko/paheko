@@ -645,13 +645,14 @@ class Emails
 	static public function exportMailing(string $format, \stdClass $mailing): void
 	{
 		$rows = $mailing->recipients;
+		$id_field = Config::getInstance()->get('champ_identite');
 
 		foreach ($rows as $key => &$row) {
-			$row = ['email' => $key];
+			$row = [$key, $row->$id_field ?? ''];
 		}
 
 		unset($row);
 
-		CSV::export($format, 'Destinataires message collectif', $rows);
+		CSV::export($format, 'Destinataires message collectif', $rows, ['Adresse e-mail', 'Identité']);
 	}
 }
