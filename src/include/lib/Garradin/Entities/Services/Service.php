@@ -140,4 +140,18 @@ class Service extends Entity
 		$sql = sprintf('SELECT su.id_user, u.%s FROM services_users su INNER JOIN membres u ON u.id = su.id_user WHERE su.id_service = ? %s;', $id_field, $where);
 		return DB::getInstance()->getAssoc($sql, $this->id());
 	}
+
+	public function long_label(): string
+	{
+		if ($this->duration) {
+			$duration = sprintf('%d jours', $this->duration);
+		}
+		elseif ($this->start_date)
+			$duration = sprintf('du %s au %s', $this->start_date->format('d/m/Y'), $this->end_date->format('d/m/Y'));
+		else {
+			$duration = 'ponctuelle';
+		}
+
+		return sprintf('%s — %s', $this->label, $duration);
+	}
 }
