@@ -71,7 +71,6 @@ $analytical_targets = Entities\Accounting\Account::TYPE_ANALYTICAL;
 <script type="text/javascript">
 {literal}
 (function () {
-	console.log('ok');
 	var hide = [];
 	if (!$('#f_amount_type_1').checked)
 		hide.push('.amount_type_1');
