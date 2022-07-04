@@ -17,7 +17,7 @@ if (!$page) {
 	throw new UserException('Page inconnue');
 }
 
-if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)) {
+if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
 	$page->toggleType();
 	$page->save();
 	Utils::redirect('!web/page.php?p=' . $page->path);
