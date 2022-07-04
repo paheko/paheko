@@ -14,7 +14,7 @@ use const Garradin\ROOT;
 
 class Skeleton
 {
-	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml)$!';
+	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml|application/pdf)$!';
 
 	protected $name;
 	protected $file;
@@ -61,11 +61,17 @@ class Skeleton
 				$ut->setSource($this->defaultPath());
 			}
 
-			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
+			$type = $this->type();
 
 			try {
 				$ut->assignArray($params);
-				$ut->display();
+				if ($type == 'application/pdf') {
+					$ut->displayPDF();
+				}
+				else {
+					header(sprintf('Content-Type: %s;charset=utf-8', $type));
+					$ut->display();
+				}
 			}
 			catch (Brindille_Exception $e) {
 				if (!headers_sent()) {
@@ -176,6 +182,9 @@ class Skeleton
 		}
 		elseif ($ext == 'js') {
 			return 'text/javascript';
+		}
+		elseif ($ext == 'pdf') {
+			return 'application/pdf';
 		}
 
 		if ($this->file) {
