@@ -151,6 +151,9 @@ class Functions
 			header('Content-Type: ' . $params['type'], true);
 			$tpl->setContentType($params['type']);
 		}
+		elseif (isset($params['download'])) {
+			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
+		}
 		else {
 			throw new Brindille_Exception('No valid parameter found for http function');
 		}
