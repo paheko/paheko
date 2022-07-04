@@ -73,7 +73,7 @@ class Functions
 		$s->display($params);
 	}
 
-	static public function http(array $params): void
+	static public function http(array $params, UserTemplate $tpl): void
 	{
 		if (headers_sent()) {
 			return;
@@ -149,6 +149,7 @@ class Functions
 		}
 		elseif (isset($params['type'])) {
 			header('Content-Type: ' . $params['type'], true);
+			$tpl->setContentType($params['type']);
 		}
 		else {
 			throw new Brindille_Exception('No valid parameter found for http function');
