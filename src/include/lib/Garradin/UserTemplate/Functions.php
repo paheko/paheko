@@ -79,6 +79,10 @@ class Functions
 			return;
 		}
 
+		if (isset($params['redirect'])) {
+			Utils::redirect($params['redirect']);
+		}
+
 		if (isset($params['code'])) {
 			static $codes = [
 				100 => 'Continue',
@@ -144,18 +148,14 @@ class Functions
 
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
 		}
-		elseif (isset($params['redirect'])) {
-			Utils::redirect($params['redirect']);
-		}
-		elseif (isset($params['type'])) {
+
+		if (isset($params['type'])) {
 			header('Content-Type: ' . $params['type'], true);
 			$tpl->setContentType($params['type']);
 		}
-		elseif (isset($params['download'])) {
+
+		if (isset($params['download'])) {
 			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
-		}
-		else {
-			throw new Brindille_Exception('No valid parameter found for http function');
 		}
 	}
 }
