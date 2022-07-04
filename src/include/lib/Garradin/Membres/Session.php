@@ -366,7 +366,7 @@ class Session extends \KD2\UserSession
 		}
 
 		$perm_name = 'perm_' . $category;
-		$perm = $this->getUser()->$perm_name;
+		$perm = $this->getUser()->$perm_name ?? null;
 
 		return ($perm >= $permission);
 	}
