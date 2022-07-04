@@ -447,6 +447,11 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.27', '<')) {
+				// Just add api_credentials tables
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 

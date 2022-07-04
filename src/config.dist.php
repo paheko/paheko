@@ -556,7 +556,7 @@ namespace Garradin;
 
 /**
  * API_USER et API_PASSWORD
- * Login et mot de passe de l'API
+ * Login et mot de passe système de l'API
  *
  * Une API est disponible via l'URL https://login:password@garradin.association.tld/api/...
  * Voir https://fossil.kd2.org/garradin/wiki?name=API pour la documentation
@@ -564,7 +564,8 @@ namespace Garradin;
  * Ces deux constantes permettent d'indiquer un nom d'utilisateur
  * et un mot de passe pour accès à l'API.
  *
- * Mettre NULL pour l'un ou l'autre désactive l'API.
+ * Cet utilisateur est distinct de ceux définis dans la page de gestion des
+ * identifiants d'accès à l'API, et aura accès à TOUT en écriture/administration.
  *
  * Défaut: null
  */

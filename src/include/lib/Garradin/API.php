@@ -2,6 +2,8 @@
 
 namespace Garradin;
 
+use Garradin\Membres\Session;
+
 use KD2\ErrorManager;
 
 class API
@@ -9,6 +11,14 @@ class API
 	protected $body;
 	protected $params;
 	protected $method;
+	protected int $access;
+
+	protected function requireAccess(int $level)
+	{
+		if ($this->access < $level) {
+			throw new APIException('You do not have enough rights to make this request', 403);
+		}
+	}
 
 	protected function body(): string
 	{
@@ -64,6 +74,8 @@ class API
 			if ($this->method != 'PUT') {
 				throw new APIException('Wrong request method', 400);
 			}
+
+			$this->requireAccess(Session::ACCESS_ADMIN);
 
 			$admin_user_id = 1; // FIXME: should be NULL here
 
@@ -154,6 +166,8 @@ class API
 				throw new APIException('Wrong request method', 400);
 			}
 
+			$this->requireAccess(Session::ACCESS_ADMIN);
+
 			$body = $this->body();
 			$report = json_decode($body);
 
@@ -188,7 +202,13 @@ class API
 			throw new APIException('No username or password supplied', 401);
 		}
 
-		if ($_SERVER['PHP_AUTH_USER'] !== API_USER || $_SERVER['PHP_AUTH_PW'] !== API_PASSWORD) {
+		if (API_USER && API_PASSWORD && $_SERVER['PHP_AUTH_USER'] === API_USER && $_SERVER['PHP_AUTH_PW'] === API_PASSWORD) {
+			$this->access = Session::ACCESS_ADMIN;
+		}
+		elseif ($c = API_Credentials::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+			$this->access = $c->access_level;
+		}
+		else {
 			throw new APIException('Invalid username or password', 403);
 		}
 	}
