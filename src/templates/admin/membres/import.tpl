@@ -2,13 +2,10 @@
 
 {include file="admin/membres/_nav.tpl" current="import"}
 
-<nav class="tabs">
-    <ul class="sub">
-        <li class="current"><a href="{$admin_url}membres/import.php">Importer</a></li>
-        <li><a href="{$admin_url}membres/import.php?export=csv">Exporter en CSV</a></li>
-        <li><a href="{$admin_url}membres/import.php?export=ods">Exporter en classeur Office</a></li>
-    </ul>
-</nav>
+<p>
+    {linkbutton shape="export" href="?export=csv" label="Exporter en CSV"}
+    {linkbutton shape="export" href="?export=ods" label="Exporter en classeur LibreOffice/Office"}
+</p>
 
 {form_errors}
 
