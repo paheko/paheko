@@ -313,7 +313,7 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -536,6 +536,10 @@ class Template extends \KD2\Smartyer
 			$out .= '</dd>';
 		}
 		else {
+			if (!empty($copy)) {
+				$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" />', $params['name']);
+			}
+
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
 			if ($type == 'file' && empty($params['no_size_limit'])) {

@@ -532,7 +532,7 @@ class Sauvegarde
 			]);
 		}
 
-		if (version_compare($version, '1.1.0', '>=') && !$session->refresh()) {
+		if (version_compare($version, '1.1.0', '>=') && $session->isLogged(true) && !$session->refresh()) {
 			$session->forceLogin(-1);
 			$return |= self::CHANGED_USER;
 		}
