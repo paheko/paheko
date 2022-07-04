@@ -44,6 +44,8 @@ class Modifiers
 		'xml_escape',
 		'replace',
 		'regexp_replace',
+		'regexp_match',
+		'match',
 		'remove_leading_number',
 		'get_leading_number',
 		'check_email',
@@ -59,6 +61,16 @@ class Modifiers
 	static public function regexp_replace($str, $pattern, $replace)
 	{
 		return preg_replace($pattern, $replace, $str);
+	}
+
+	static public function regexp_match($str, $pattern)
+	{
+		return (int) preg_match($pattern, $str);
+	}
+
+	static public function match($str, $pattern)
+	{
+		return (int) (stripos($str, $pattern) !== false);
 	}
 
 	static public function check_email($str)
