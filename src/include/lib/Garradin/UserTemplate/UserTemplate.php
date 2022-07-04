@@ -33,6 +33,8 @@ class UserTemplate extends Brindille
 
 	static protected $root_variables;
 
+	protected $content_type = null;
+
 	static public function getRootVariables()
 	{
 		if (null !== self::$root_variables) {
@@ -273,5 +275,25 @@ class UserTemplate extends Brindille
 		}
 
 		Utils::streamPDF($this->fetch());
+	}
+
+	public function setContentType(string $type): void
+	{
+		$this->content_type = $type;
+	}
+
+	public function displayWeb(): void
+	{
+		$content = $this->fetch();
+
+		$type = $this->content_type ?: 'text/html';
+		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+
+		if ($type == 'application/pdf') {
+			Utils::streamPDF($content);
+		}
+		else {
+			echo $content;
+		}
 	}
 }
