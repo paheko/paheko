@@ -10,6 +10,8 @@ use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
 
+use Garradin\Membres\Session;
+
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Files\File;
 
@@ -51,6 +53,9 @@ class UserTemplate extends Brindille
 		$config = array_intersect_key($config->asArray(), array_flip($keys));
 		$config['files'] = $files;
 
+		$session = Session::getInstance();
+		$is_logged = $session->isLogged();
+
 		self::$root_variables = [
 			'root_url'     => WWW_URL,
 			'request_url'  => Utils::getRequestURI(),
@@ -59,6 +64,8 @@ class UserTemplate extends Brindille
 			'_POST'        => &$_POST,
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
+			'is_logged'    => $is_logged,
+			'logged_user'  => $is_logged && $session->getUser(),
 		];
 
 		return self::$root_variables;
