@@ -6,7 +6,7 @@
 		{linkbutton shape="plus" label="Nouvelle page" href="new.php?type=%d&parent=%d"|args:$type_page,$page.path}
 		{linkbutton shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%d"|args:$type_category,$page.path}
 	</aside>
-	{else}
+	{elseif $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE)}
 	<aside>
 		{linkbutton href="?p=%s&toggle_type"|args:$page.path label="Transformer en catégorie" shape="reset"}
 	</aside>
