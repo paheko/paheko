@@ -241,6 +241,9 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
 
+// Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
+define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
+
 const HELP_URL = 'https://garradin.eu/aide';
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';

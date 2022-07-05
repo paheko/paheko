@@ -18,7 +18,7 @@ use Garradin\Web\Render\Render;
 
 use Garradin\Files\Files;
 
-use const Garradin\{WWW_URL, ENABLE_XSENDFILE};
+use const Garradin\{WWW_URL, BASE_URL, ENABLE_XSENDFILE};
 
 /**
  * This is a virtual entity, it cannot be saved to a SQL table
@@ -600,7 +600,8 @@ class File extends Entity
 	 */
 	public function url(bool $download = false): string
 	{
-		$url = WWW_URL . $this->uri();
+		$base = ($this->context() == self::CONTEXT_WEB) ? WWW_URL : BASE_URL;
+		$url = $base . $this->uri();
 
 		if ($download) {
 			$url .= '?download';
