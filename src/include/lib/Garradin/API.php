@@ -3,6 +3,7 @@
 namespace Garradin;
 
 use Garradin\Membres\Session;
+use Garradin\Web\Web;
 
 use KD2\ErrorManager;
 
@@ -117,7 +118,10 @@ class API
 
 		switch ($fn) {
 			case 'list':
-				return ['categories' => Web::listCategories($param), 'pages' => Web::listPages($param)];
+				return [
+					'categories' => array_map(fn($p) => $p->asArray(true), Web::listCategories($param)),
+					'pages' => array_map(fn($p) => $p->asArray(true), Web::listPages($param)),
+				];
 			case 'attachment':
 				$attachment = Web::getAttachmentFromURI($param);
 
@@ -136,7 +140,7 @@ class API
 				}
 
 				if ($fn == 'page') {
-					$out = compact('page');
+					$out = $page->asArray(true);
 
 					if ($this->hasParam('html')) {
 						$out['html'] = $page->render();
@@ -159,6 +163,10 @@ class API
 
 		if (!ini_get('error_log')) {
 			throw new APIException('The error log is disabled', 404);
+		}
+
+		if (!ENABLE_TECH_DETAILS) {
+			throw new APIException('Access to error log is disabled.', 403);
 		}
 
 		if ($uri == 'report') {
