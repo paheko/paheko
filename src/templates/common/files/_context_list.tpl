@@ -22,20 +22,25 @@ if ($edit
 
 <div class="files-list">
 {foreach from=$files item="file"}
-	{if !$file->checkReadAccess($session)}
-		<?php break; ?>
-	{/if}
+	<?php
+	if (!$file->checkReadAccess($session)) {
+		break;
+	}
+	$preview = $file->canPreview();
+	$target = $preview ? '_dialog' : '_blank';
+	$url = $preview ? ADMIN_URL . 'common/files/preview.php?p=' . $file->path : $file->url();
+	?>
 	<aside class="file">
 		{if $file.image}
 			<figure>
-				<a target="_blank" href="{$file->url()}"><img src="{$file->thumb_url()}" alt="" /></a>
+				<a target="{$target}" href="{$url}" data-mime="{$file.mime}"><img src="{$file->thumb_url()}" alt="" /></a>
 				<figcaption>
-					<a target="_blank" href="{$file->url()}">{$file.name}</a>
+					<a target="{$target}" href="{$url}" data-mime="{$file.mime}">{$file.name}</a>
 					<small>({$file.mime}, {$file.size|size_in_bytes})</small>
 				</figcaption>
 			</figure>
 		{else}
-			<a target="_blank" href="{$file->url()}">{$file.name}</a>
+			<a target="{$target}" href="{$url}" data-mime="{$file.mime}">{$file.name}</a>
 			<small>({$file.mime}, {$file.size|size_in_bytes})</small>
 		{/if}
 		{linkbutton shape="download" href=$file->url(true) target="_blank" label="Télécharger"}
