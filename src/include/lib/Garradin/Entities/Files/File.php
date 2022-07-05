@@ -600,7 +600,7 @@ class File extends Entity
 	 */
 	public function url(bool $download = false): string
 	{
-		$base = ($this->context() == self::CONTEXT_WEB) ? WWW_URL : BASE_URL;
+		$base = in_array($this->context(), [self::CONTEXT_WEB, self::CONTEXT_SKELETON, self::CONTEXT_CONFIG]) ? WWW_URL : BASE_URL;
 		$url = $base . $this->uri();
 
 		if ($download) {
