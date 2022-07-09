@@ -204,6 +204,10 @@ class Sections
 		$session = Session::getInstance();
 
 		if (!$session->isLogged()) {
+			if (!empty($params['block'])) {
+				throw new UserException('Vous n\'avez pas accès à cette page.');
+			}
+
 			return null;
 		}
 
@@ -224,12 +228,12 @@ class Sections
 
 		$ok = $session->canAccess($params['section'] ?? '', $convert[$params['level']]);
 
-		if (!empty($params['block'])) {
-			throw new UserException('Vous n\'avez pas accès à cette page.');
-		}
-
 		if ($ok) {
 			yield [];
+		}
+
+		if (!empty($params['block'])) {
+			throw new UserException('Vous n\'avez pas accès à cette page.');
 		}
 
 		return null;
