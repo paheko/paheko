@@ -92,6 +92,7 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_SKELETON = 'skel';
+	const CONTEXT_FORM = 'form';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -100,6 +101,7 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_SKELETON => 'Squelettes',
+		self::CONTEXT_FORM => 'Squelettes',
 	];
 
 	const IMAGE_TYPES = [
@@ -832,8 +834,8 @@ class File extends Entity
 			return false;
 		}
 
-		// All config files can be accessed by all users
-		if ($context == self::CONTEXT_CONFIG) {
+		// All config and form files can be accessed by all logged-in users
+		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_FORM) {
 			return true;
 		}
 		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
@@ -865,9 +867,10 @@ class File extends Entity
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
-				// Only admins can delete files
+				// Only managers can change files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
 			case self::CONTEXT_CONFIG:
+			case self::CONTEXT_FORM:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
@@ -889,15 +892,16 @@ class File extends Entity
 		switch ($this->accessContext()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
+			case self::CONTEXT_SKELETON:
+				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 			case self::CONTEXT_DOCUMENTS:
 				// Only admins can delete files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
 			case self::CONTEXT_CONFIG:
+			case self::CONTEXT_FORM:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
-			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
@@ -914,16 +918,16 @@ class File extends Entity
 		$context = strtok($path, '/');
 
 		switch ($context) {
+			case self::CONTEXT_SKELETON:
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
 			case self::CONTEXT_CONFIG:
+			case self::CONTEXT_FORM:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
-			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
