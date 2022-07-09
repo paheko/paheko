@@ -6,7 +6,7 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-$q = trim(f('q'));
+$q = trim((string) f('q'));
 
 $tpl->assign('query', $q);
 

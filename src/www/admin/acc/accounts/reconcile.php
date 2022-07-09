@@ -53,7 +53,7 @@ if ($start > $end) {
 $journal = $account->getReconcileJournal($current_year->id(), $start, $end, $only);
 
 // Enregistrement des cases cochées
-$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $end, $account, $only) {
+$form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $account, $only) {
 	Transactions::saveReconciled($journal, f('reconcile'));
 
 	if (f('save')) {
@@ -61,9 +61,8 @@ $form->runIf(f('save') || f('save_next'), function () use ($journal, $start, $en
 	}
 	else {
 		$start->modify('+1 month');
-		$end->modify('+1 month');
 		$url = sprintf('%sacc/accounts/reconcile.php?id=%s&start=%s&end=%s&only=%d',
-			ADMIN_URL, $account->id(), $start->format('d/m/Y'), $end->format('d/m/Y'), $only);
+			ADMIN_URL, $account->id(), $start->format('01/m/Y'), $start->format('t/m/Y'), $only);
 		Utils::redirect($url);
 	}
 }, 'acc_reconcile_' . $account->id());

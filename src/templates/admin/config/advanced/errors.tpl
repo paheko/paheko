@@ -60,6 +60,7 @@
 			<thead>
 				<tr>
 					<th>Réf.</th>
+					<td>Site</td>
 					<td>Erreur</td>
 					<td>Occurences</td>
 					<td>Dernière fois</td>
@@ -70,6 +71,7 @@
 				{foreach from=$errors item=error key=ref}
 				<tr>
 					<th><a href="?type=errors&id={$ref}">{$ref}</a></th>
+					<td>{$error.hostname}</td>
 					<td>
 						{$error.message}<br />
 						<tt>{$error.source}</tt>

@@ -3,15 +3,15 @@
 {form_errors}
 
 <form method="post" action="{$self_url}">
-    <fieldset class="memberMessage">
+    <fieldset class="mailing">
         <legend>Message</legend>
         <dl>
             <dt>Expéditeur</dt>
             <dd>{$user.identite} &lt;{$user.email}&gt;</dd>
             <dt>Destinataire</dt>
-            <dd>{$membre.identite} ({$categorie.nom})</dd>
-            <dt><label for="f_sujet">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
-            <dd><input type="text" name="sujet" id="f_sujet" value="{form_field name=sujet}" required="required" /></dd>
+            <dd>{$membre.identite} ({$categorie.name})</dd>
+            <dt><label for="f_subject">Sujet</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
+            <dd><input type="text" name="sujet" id="f_subject" value="{form_field name=sujet}" required="required" /></dd>
             <dt><label for="f_message">Message</label> <b title="(Champ obligatoire)">obligatoire</b></dt>
             <dd><textarea name="message" id="f_message" cols="72" rows="25" required="required">{form_field name=message}</textarea></dd>
             <dd>

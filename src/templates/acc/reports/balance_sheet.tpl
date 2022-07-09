@@ -2,6 +2,8 @@
 
 {include file="acc/reports/_header.tpl" current="balance_sheet" title="Bilan" allow_compare=true}
 
+<p class="help noprint">Le bilan représente une image de votre organisation&nbsp;: <strong>l'actif</strong> étant ce que l'organisation possède comme ressources (immeubles, comptes en banque, outillage, etc.), et <strong>le passif</strong> représente comment l'organisation a obtenu ces ressources (dettes, fonds de réserve, résultat…). En gros&nbsp;: à gauche = ce qu'on a, à droite = comment on l'a obtenu.</p>
+
 {if $balance.sums.asset != $balance.sums.liability}
 	<p class="alert block">
 		<strong>Le bilan n'est pas équilibré&nbsp;!</strong><br />
@@ -9,50 +11,7 @@
 	</p>
 {/if}
 
-<table class="statement">
-	<tbody>
-		<tr>
-			<td width="50%">
-				{include file="acc/reports/_statement_table.tpl" accounts=$balance.accounts.asset caption="Actif"}
-			</td>
-			<td width="50%">
-				{include file="acc/reports/_statement_table.tpl" accounts=$balance.accounts.liability caption="Passif"}
-			</td>
-		</tr>
-	</tbody>
-	<tfoot>
-		<tr>
-			<td>
-				<table>
-					<tfoot>
-						<tr>
-							<th>Total actif</th>
-							<td class="money" width="10%">{$balance.sums.asset|raw|money:false}</td>
-							{if isset($year2)}
-							<td class="money" width="10%">{$balance.sums2.asset|raw|money:false}</td>
-							<td class="money" width="10%">{$balance.change.asset|raw|money:true:true}</td>
-							{/if}
-						</tr>
-					</tfoot>
-				</table>
-			</td>
-			<td>
-				<table>
-					<tfoot>
-						<tr>
-							<th>Total passif</th>
-							<td class="money" width="10%">{$balance.sums.liability|raw|money:false}</td>
-							{if isset($year2)}
-							<td class="money" width="10%">{$balance.sums2.liability|raw|money:false}</td>
-							<td class="money" width="10%">{$balance.change.liability|raw|money:true:true}</td>
-							{/if}
-						</tr>
-					</tfoot>
-				</table>
-			</td>
-		</tr>
-	</tfoot>
-</table>
+{include file="acc/reports/_statement.tpl" statement=$balance}
 
 <p class="help">Toutes les écritures sont libellées en {$config.monnaie}.</p>
 

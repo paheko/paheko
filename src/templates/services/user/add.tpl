@@ -17,19 +17,20 @@
 	<fieldset class="c1">
 		<legend>Inscrire des membres</legend>
 		<dl>
-			{input type="list" name="users" required=true label="Membres à inscrire" target="membres/selector.php" multiple=true}
+			{input type="list" name="users" required=true label="Membres à inscrire" target="!membres/selector.php" multiple=true}
 		</dl>
 	</fieldset>
 
 	<fieldset class="c2">
 		<legend>Recopier depuis une activité</legend>
 		<dl>
-			{input type="select" name="copy_service" label="Activité à recopier" options=$services required=true}
+			{input type="select" name="copy_service" label="Activité à recopier" options=$services required=true default=0}
 			{input type="checkbox" name="copy_service_only_paid" value="1" label="Ne recopier que les membres dont l'inscription est payée"}
 		</dl>
 	</fieldset>
 
 	<p class="submit">
+		<input type="hidden" name="paid" value="1" />
 		{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 	</p>
 </form>

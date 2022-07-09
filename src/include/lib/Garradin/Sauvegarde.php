@@ -12,6 +12,7 @@ class Sauvegarde
 {
 	const NEED_UPGRADE = 0x01 << 2;
 	const NOT_AN_ADMIN = 0x01 << 3;
+	const CHANGED_USER = 0x01 << 4;
 
 	const INTEGRITY_FAIL = 41;
 	const NOT_A_DB = 42;
@@ -121,6 +122,7 @@ class Sauvegarde
 			// use ::backup since PHP 7.4.0+
 			// https://www.php.net/manual/en/sqlite3.backup.php
 			$dest_db = new \SQLite3($dest);
+			$dest_db->createCollation('U_NOCASE', [Utils::class, 'unicodeCaseComparison']);
 
 			$db->backup($dest_db);
 			$dest_db->exec('PRAGMA journal_mode = DELETE;');
@@ -324,12 +326,10 @@ class Sauvegarde
 	/**
 	 * Restaure une copie distante (fichier envoyé)
 	 * @param  array   $file    Tableau provenant de $_FILES
-	 * @param  integer $user_id ID du membre actuellement connecté, utilisé pour 
-	 * vérifier qu'il est toujours administrateur dans la sauvegarde
 	 * @param  boolean $check_integrity Vérifier l'intégrité de la sauvegarde avant de restaurer
 	 * @return boolean true
 	 */
-	public function restoreFromUpload($file, $user_id, $check_integrity = true)
+	public function restoreFromUpload($file, $check_integrity = true)
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || !empty($file['error']))
 		{
@@ -350,7 +350,7 @@ class Sauvegarde
 			}
 		}
 
-		$r = $this->restoreDB($file['tmp_name'], $user_id, true);
+		$r = $this->restoreDB($file['tmp_name'], true);
 
 		if ($r)
 		{
@@ -412,7 +412,7 @@ class Sauvegarde
 	 * @return mixed 		true si rien ne va plus, ou self::NEED_UPGRADE si la version de la DB
 	 * ne correspond pas à la version de Garradin (mise à jour nécessaire).
 	 */
-	protected function restoreDB($file, $user_id = false, $check_foreign_keys = false)
+	protected function restoreDB($file, $check_foreign_keys = false)
 	{
 		$return = 1;
 
@@ -481,17 +481,19 @@ class Sauvegarde
 			throw new UserException('Ce fichier n\'est pas une sauvegarde Garradin (application_id ne correspond pas).', self::NO_APP_ID);
 		}
 
+		$session = Session::getInstance();
+
 		// Empêchons l'admin de se tirer une balle dans le pied
-		if ($user_id)
+		if ($session->isLogged())
 		{
-			if (version_compare($version, '1.1', '<')) {
+			if (version_compare($version, '1.1.0', '<')) { // FIXME remove in 1.2
 				$sql = 'SELECT 1 FROM membres_categories WHERE id = (SELECT id_categorie FROM membres WHERE id = %d) AND droit_connexion >= %d AND droit_config >= %d';
 			}
 			else {
 				$sql = 'SELECT 1 FROM users_categories WHERE id = (SELECT id_category FROM membres WHERE id = %d) AND perm_connect >= %d AND perm_config >= %d';
 			}
 
-			$sql = sprintf($sql, $user_id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
+			$sql = sprintf($sql, $session->getUser()->id, Session::ACCESS_READ, Session::ACCESS_ADMIN);
 			$is_still_admin = $db->querySingle($sql);
 
 			if (!$is_still_admin)
@@ -520,7 +522,7 @@ class Sauvegarde
 
 		unlink($backup);
 
-		if ($return & self::NOT_AN_ADMIN)
+		if (($return & self::NOT_AN_ADMIN) && version_compare($version, '1.1.0', '>='))
 		{
 			// Forcer toutes les catégories à pouvoir gérer les droits
 			$db = DB::getInstance();
@@ -530,14 +532,16 @@ class Sauvegarde
 			]);
 		}
 
+		if (version_compare($version, '1.1.0', '>=') && $session->isLogged(true) && !$session->refresh()) {
+			$session->forceLogin(-1);
+			$return |= self::CHANGED_USER;
+		}
+
 		if ($version != garradin_version())
 		{
 			$return |= self::NEED_UPGRADE;
 		}
 		else {
-			// Force l'installation de plugin système si non existant dans la sauvegarde existante
-			Plugin::checkAndInstallSystemPlugins();
-
 			// Check and upgrade plugins, if a software upgrade is necessary, plugins will be upgraded after the upgrade
 			Plugin::upgradeAllIfRequired();
 		}

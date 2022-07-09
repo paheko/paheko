@@ -1,5 +1,21 @@
 {include file="admin/_head.tpl" title="Comptabilité" current="acc"}
 
+{if !empty($all_years)}
+<form method="get" action="{$admin_url}acc/search.php" class="shortForm">
+	<fieldset>
+		<legend>Recherche rapide</legend>
+		<p>
+			<input type="search" name="qt" value="" />
+			{input type="select" name="year" options=$all_years default=$first_year}
+			{button type="submit" shape="search" label="Chercher"}
+		</p>
+		<p class="help">
+			Indiquer un numéro de compte, un numéro d'écriture précédé par le signe hash (<code>#1234</code>), un montant précédé par le signe égal (<code>=62,41</code>) ou une date (<code>JJ/MM/AAAA</code>), sinon la recherche sera effectuée sur le libellé ou la pièce comptable.
+		</p>
+	</fieldset>
+</form>
+{/if}
+
 {foreach from=$years item="year"}
 <section class="year-infos">
 	<h2 class="ruler">{$year.label} —
@@ -8,7 +24,7 @@
 	<nav class="tabs">
 		<aside>
 			{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-				{linkbutton shape="upload" href="!acc/years/import.php?id=%d"|args:$year.id label="Import & export"}
+				{linkbutton shape="upload" href="!acc/years/import.php?year=%d"|args:$year.id label="Import & export"}
 			{/if}
 			{linkbutton shape="search" href="!acc/search.php?year=%d"|args:$year.id label="Recherche"}
 		</aside>
@@ -23,7 +39,7 @@
 	</nav>
 
 	{if $year.nb_transactions > 3}
-		<section class="graphs">
+		<section class="graphs small">
 			{foreach from=$graphs key="url" item="label"}
 			<figure>
 				<img src="{$url|args:'year='|cat:$year.id}" alt="" />
@@ -34,6 +50,37 @@
 	{else}
 		<p class="help block">Il n'y a pas encore suffisamment d'écritures dans cet exercice pour pouvoir afficher les statistiques.</p>
 		<p>{linkbutton label="Saisir une nouvelle écriture" shape="plus" href="transactions/new.php"}</p>
+	{/if}
+
+	{if $year.nb_transactions}
+	<?php $list = $last_transactions[$year->id]; ?>
+	<table class="list">
+		<caption>Dernières écritures</caption>
+		<thead>
+			<tr>
+			{foreach from=$list->getHeaderColumns() item="column"}
+				<td>{$column.label}</td>
+			{/foreach}
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+			{foreach from=$list->iterate() item="line"}
+			<tr>
+				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
+				<td>{$line.date|date_short}</td>
+				<td class="money">{$line.change|abs|raw|money}</td>
+				<td>{$line.reference}</td>
+				<th>{$line.label}</th>
+				<td>{$line.line_reference}</td>
+				<td class="num">{foreach from=$line.code_analytical item="code" key="id"}<a href="{$admin_url}acc/reports/statement.php?analytical={$id}">{$code}</a> {/foreach}</td>
+				<td class="actions">
+					{linkbutton href="!acc/transactions/details.php?id=%d"|args:$line.id label="Détails" shape="search"}
+				</td>
+			</tr>
+			{/foreach}
+		</tbody>
+	</table>
 	{/if}
 </section>
 

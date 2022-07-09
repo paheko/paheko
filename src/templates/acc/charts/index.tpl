@@ -1,13 +1,8 @@
 {include file="admin/_head.tpl" title="Gestion des plans comptables" current="acc/charts"}
 
-<nav class="tabs">
-	<ul>
-		<li class="current"><a href="{$admin_url}acc/charts/">Plans comptables</a></li>
-		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-			<li><a href="{$admin_url}acc/charts/import.php">Importer un plan comptable</a></li>
-		{/if}
-	</ul>
-</nav>
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+	{include file="./_nav.tpl" current="charts"}
+{/if}
 
 {if $_GET.msg == 'OPEN'}
 <p class="block alert">
@@ -35,7 +30,7 @@
 					<td>{if $item.code}Officiel{else}Personnel{/if}</td>
 					<td>{if $item.archived}<em>Archivé</em>{/if}</td>
 					<td class="actions">
-						{linkbutton shape="star" label="Comptes favoris" href="!acc/charts/accounts/?id=%d"|args:$item.id}
+						{linkbutton shape="star" label="Comptes usuels" href="!acc/charts/accounts/?id=%d"|args:$item.id}
 						{linkbutton shape="menu" label="Tous les comptes" href="!acc/charts/accounts/all.php?id=%d"|args:$item.id}
 						{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
 							{linkbutton shape="edit" label="Modifier" href="!acc/charts/edit.php?id=%d"|args:$item.id}

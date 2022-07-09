@@ -23,11 +23,13 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE
 	$su->save();
 }, null, ADMIN_URL . 'services/user/?id=' . $user->id);
 
-$list = Services_User::perUserList($user->id);
+$only = (int)qg('only') ?: null;
+
+$list = Services_User::perUserList($user->id, $only);
 $list->setTitle(sprintf('Inscriptions — %s', $user->identite));
 $list->loadFromQueryString();
 
 $tpl->assign('services', Services_User::listDistinctForUser($user->id));
-$tpl->assign(compact('list', 'user'));
+$tpl->assign(compact('list', 'user', 'only'));
 
 $tpl->display('services/user/index.tpl');

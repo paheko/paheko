@@ -27,17 +27,18 @@ span.alert, b.alert {
 .block table th, .block table td {
     vertical-align: top;
     padding: .2rem .4rem;
-    border: 1px solid #666;
+    border: 1px solid var(--gBorderColor);
 }
 
 .alert.block, .error.block, .confirm.block, .help.block {
-    border: 1px solid #ccc;
+    border: 1px solid var(--gLightBorderColor);
     padding: .5em;
     margin: .5em 0;
     border-radius: .3em;
     padding-left: 3em;
     position: relative;
     clear: both;
+    color: #000;
 }
 
 .alert.block {
@@ -56,8 +57,13 @@ span.alert, b.alert {
 }
 
 .help.block {
-    border-color: #999;
-    background-color: #eee;
+    color: rgb(var(--gTextColor));
+    border-color: var(--gLightBorderColor);
+    background-color: var(--gLightBackgroundColor);
+}
+
+.confirm.block a.icn-btn, .alert.block a.icn-btn, .error.block a.icn-btn {
+    color: #000;
 }
 
 .confirm.block::before, .alert.block::before, .error.block::before, .help.block::before {
@@ -66,7 +72,7 @@ span.alert, b.alert {
     top: .2em;
     position: absolute;
     font-size: 1.5em;
-    text-shadow: 2px 2px 5px #666;
+    text-shadow: 2px 2px 5px var(--gLightBorderColor);
 }
 
 .confirm.block::before {
@@ -86,11 +92,11 @@ span.alert, b.alert {
 
 .help.block::before {
     content: "❓";
-    color: #666;
+    color: var(--gBorderColor);
 }
 
 .help {
-    color: #666;
+    color: var(--gBorderColor);
 }
 
 p.help:not(.block) {
@@ -119,12 +125,11 @@ dd.help li {
 .ruler {
     margin: .5em;
     text-align: center;
-    color: #333;
     overflow: hidden;
 }
 
 .ruler:before, .ruler:after {
-    background-color: #000;
+    background-color: var(--gLightBorderColor);
     content: "";
     display: inline-block;
     height: 1px;
@@ -150,7 +155,7 @@ dd.help li {
     text-align: center;
     padding: 0 .3rem;
     background: rgba(var(--gMainColor), 0.7);
-    color: #fff;
+    color: rgb(var(--gBgColor));
     white-space: pre;
 }
 
@@ -226,6 +231,15 @@ dd.help li {
     margin: 0.2em 1em;
 }
 
+.shortForm {
+    text-align: center;
+}
+
+.shortForm p.help {
+    margin: .5em 0;
+    font-size: .9em;
+}
+
 .shortFormRight {
     width: 30em;
     float: right;
@@ -285,7 +299,7 @@ dl.list dt {
 }
 
 dl.list dd.desc {
-    color: #666;
+    color: var(--gLightBorderColor);
 }
 
 dl.describe {
@@ -298,7 +312,7 @@ dl.describe > dt {
     grid-column: 1;
     margin: .2rem .5rem;
     text-align: right;
-    color: #666;
+    color: var(--gBorderColor);
     align-self: start;
 }
 
@@ -314,8 +328,6 @@ dl.describe ul {
 }
 
 dl.cotisation {
-    background: rgb(255, 174, 80);
-    background: rgba(217, 134, 40, 0.2);
     background: rgba(var(--gSecondColor), 0.2);
     padding: .5em;
     border-radius: .5em;
@@ -330,6 +342,10 @@ dl.cotisation dd {
     margin: .2em 0 .4em 1em;
 }
 
+dl.cotisation dd.disabled {
+    color: var(--gBorderColor);
+}
+
 aside.describe {
     width: 20em;
     float: right;
@@ -339,7 +355,7 @@ aside.describe {
     border: 2px solid rgba(var(--gSecondColor), 0.5);
     padding: .5em;
     z-index: 200;
-    color: #666;
+    color: var(--gBorderColor);
 }
 
 aside.describe dl.describe {
@@ -349,7 +365,7 @@ aside.describe dl.describe {
 aside.describe dl.describe dt {
     text-align: left;
     font-weight: bold;
-    color: #000;
+    color: rgb(var(--gTextColor));
 }
 
 .hidden {
@@ -392,7 +408,6 @@ details summary::after {
     bottom: 0;
     /* From .icn-btn */
     cursor: pointer;
-    color: #003;
     border: 1px solid rgba(var(--gMainColor), 0.5);
     background-color: rgba(var(--gSecondColor), 0.1);
     user-select: none;
@@ -405,7 +420,7 @@ details summary::after {
     white-space: pre;
     transition: color .3s, background-color .3s;
     font-family: "gicon", sans-serif;
-    text-shadow: 1px 1px 1px #999;
+    text-shadow: 1px 1px 1px var(--gLightBorderColor);
     font-size: 1.2em;
 }
 
@@ -442,16 +457,16 @@ details summary.block::after {
 
 .files-list aside small {
     display: block;
-    color: #666;
+    color: var(--gBorderColor);
 }
 
 nav.breadcrumbs {
     margin: .5em 0;
-    color: #999;
+    color: var(--gLightBorderColor);
 }
 
 nav.breadcrumbs a {
-    color: #333;
+    color: var(--gBorderColor);
 }
 
 nav.breadcrumbs ul, nav.breadcrumbs li {
@@ -475,7 +490,7 @@ aside.quota {
     background: rgba(var(--gMainColor), 0.1);
     border-radius: .5rem;
     padding: .2rem .5rem;
-    color: #000;
+    color: rgb(var(--gTextColor));
     margin: .5em 0;
 }
 
@@ -521,6 +536,5 @@ aside.quota h4 {
 }
 
 .search-results h3 a {
-    color: darkblue;
     font-weight: normal;
 }

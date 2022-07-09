@@ -8,6 +8,10 @@ use Garradin\Membres\Session;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\Users\Email;
+
+use Garradin\Users\Emails;
+use Garradin\UserTemplate\UserTemplate;
 
 class Membres
 {
@@ -91,9 +95,14 @@ class Membres
                 {
                     $data[$key] = strtolower(trim($data[$key]));
 
-                    if (trim($data[$key]) !== '' && !SMTP::checkEmailIsValid($data[$key], false))
+                    if (trim($data[$key]) !== '')
                     {
-                        throw new UserException(sprintf('Adresse email invalide "%s" pour le champ "%s".', $data[$key], $config->title));
+                        try {
+                            Email::validateAddress($data[$key]);
+                        }
+                        catch (UserException $e) {
+                            throw new UserException(sprintf('Champ "%s" : %s', $config->title, $e->getMessage()));
+                        }
                     }
                 }
                 elseif ($config->type == 'select' && !in_array($data[$key], $config->options))
@@ -124,7 +133,7 @@ class Membres
                     }
                     elseif (!is_numeric($data[$key]) || $data[$key] < 0 || $data[$key] > PHP_INT_MAX)
                     {
-                        throw new UserException('Le champs "%s" ne contient pas une valeur binaire.');
+                        throw new UserException(sprintf('Le champs "%s" ne contient pas une valeur binaire.', $key));
                     }
                 }
 
@@ -161,7 +170,7 @@ class Membres
 
         $this->_checkFields($data, true, $require_password);
 
-        if (isset($data[$id]) && $db->test('membres', $id . ' = ? COLLATE NOCASE', $data[$id]))
+        if (isset($data[$id]) && $db->test('membres', $id . ' = ? COLLATE U_NOCASE', $data[$id]))
         {
             throw new UserException('La valeur du champ '.$id.' est déjà utilisée par un autre membre, or ce champ doit être unique à chaque membre.');
         }
@@ -200,7 +209,7 @@ class Membres
         $champ_id = $config->get('champ_identifiant');
 
         if (!empty($data[$champ_id])
-            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE AND id != ? LIMIT 1;', $data[$champ_id], (int)$id))
+            && $db->firstColumn('SELECT 1 FROM membres WHERE '.$champ_id.' = ? COLLATE U_NOCASE AND id != ? LIMIT 1;', $data[$champ_id], (int)$id))
         {
             throw new UserException('La valeur du champ '.$champ_id.' est déjà utilisée par un autre membre, or ce champ doit être unique à chaque membre.');
         }
@@ -331,55 +340,9 @@ class Membres
         return DB::getInstance()->get($sql, $query);
     }
 
-    public function sendMessage(array $recipients, $subject, $message, $send_copy)
+    public function listAllButHidden(): array
     {
-        $config = Config::getInstance();
-
-        $emails = [];
-
-        foreach ($recipients as $key => $recipient)
-        {
-            // Ignorer les destinataires avec une adresse email vide
-            if (empty($recipient->email))
-            {
-                continue;
-            }
-
-            if (!isset($recipient->email, $recipient->id)) {
-                throw new UserException('Il manque l\'identifiant ou l\'email dans le résultat');
-            }
-
-            // Refuser d'envoyer un mail à une adresse invalide, sans vérifier le MX
-            // sinon ça serait trop lent
-            if (!SMTP::checkEmailIsValid($recipient->email, false))
-            {
-                throw new UserException(sprintf('Adresse email invalide : "%s". Aucun message n\'a été envoyé.', $recipient->email));
-            }
-
-            // This is to avoid having duplicate emails
-            $emails[$recipient->email] = $recipient->id;
-        }
-
-        if (!count($emails)) {
-        	throw new UserException('Aucun destinataire de la liste ne possède d\'adresse email.');
-        }
-
-        foreach ($emails as $email => $id)
-        {
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $email, $subject, $message, $id);
-        }
-
-        if ($send_copy)
-        {
-            Utils::sendEmail(Utils::EMAIL_CONTEXT_BULK, $config->get('email_asso'), $subject, $message);
-        }
-
-        return true;
-    }
-
-    public function listAllEmailsButHidden(): array
-    {
-        return DB::getInstance()->get('SELECT id, email FROM membres
+        return DB::getInstance()->get('SELECT * FROM membres
             WHERE id_category IN (SELECT id FROM users_categories WHERE hidden = 0)
                 AND email IS NOT NULL AND email != \'\';');
     }
@@ -387,7 +350,7 @@ class Membres
     public function listAllByCategory($id_category, $only_with_email = false)
     {
         $where = $only_with_email ? ' AND email IS NOT NULL' : '';
-        return DB::getInstance()->get('SELECT id, email FROM membres WHERE id_category = ?' . $where, (int)$id_category);
+        return DB::getInstance()->get('SELECT * FROM membres WHERE id_category = ?' . $where, (int)$id_category);
     }
 
     public function listByCategory(?int $id_category): DynamicList

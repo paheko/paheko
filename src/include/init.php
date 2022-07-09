@@ -63,6 +63,10 @@ function garradin_contributor_license(): ?int
 		return null;
 	}
 
+	if (is_int(CONTRIBUTOR_LICENSE)) {
+		return CONTRIBUTOR_LICENSE;
+	}
+
 	$key = CONTRIBUTOR_LICENSE;
 	$key = gzinflate(base64_decode($key));
 	list($email, $level, $hash) = explode('==', $key);
@@ -151,6 +155,8 @@ if (!defined('Garradin\WWW_URI'))
 	unset($uri);
 }
 
+$host = null;
+
 if (!defined('Garradin\WWW_URL')) {
 	$host = \KD2\HTTP::getHost();
 }
@@ -170,7 +176,7 @@ if (WWW_URI === null || (!empty($host) && $host == 'host.unknown')) {
 	exit(1);
 }
 
-if (!defined('Garradin\WWW_URL')) {
+if (!defined('Garradin\WWW_URL') && $host !== null) {
 	define('Garradin\WWW_URL', \KD2\HTTP::getScheme() . '://' . $host . WWW_URI);
 }
 
@@ -182,7 +188,6 @@ static $default_config = [
 	'PLUGINS_ROOT'          => DATA_ROOT . '/plugins',
 	'PREFER_HTTPS'          => false,
 	'ALLOW_MODIFIED_IMPORT' => true,
-	'PLUGINS_SYSTEM'        => '',
 	'SHOW_ERRORS'           => true,
 	'MAIL_ERRORS'           => false,
 	'ERRORS_REPORT_URL'     => null,
@@ -195,9 +200,10 @@ static $default_config = [
 	'SMTP_PASSWORD'         => null,
 	'SMTP_PORT'             => 587,
 	'SMTP_SECURITY'         => 'STARTTLS',
+	'MAIL_RETURN_PATH'      => null,
+	'MAIL_BOUNCE_PASSWORD'  => null,
 	'ADMIN_URL'             => WWW_URL . 'admin/',
 	'NTP_SERVER'            => 'fr.pool.ntp.org',
-	'ENABLE_AUTOMATIC_BACKUPS' => true,
 	'ADMIN_COLOR1'          => '#9c4f15',
 	'ADMIN_COLOR2'          => '#d98628',
 	'FILE_STORAGE_BACKEND'  => 'SQLite',
@@ -206,7 +212,10 @@ static $default_config = [
 	'API_USER'              => null,
 	'API_PASSWORD'          => null,
 	'PDF_COMMAND'           => null,
+	'CALC_CONVERT_COMMAND'  => null,
 	'CONTRIBUTOR_LICENSE'   => null,
+	'SQL_DEBUG'             => null,
+	'SYSTEM_SIGNALS'        => [],
 ];
 
 foreach ($default_config as $const => $value)
@@ -219,9 +228,21 @@ foreach ($default_config as $const => $value)
 	}
 }
 
+// Check SMTP_SECURITY value
+if (SMTP_SECURITY) {
+	$const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
+
+	if (!defined($const)) {
+		throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
+	}
+}
+
 if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 	define('Garradin\ADMIN_BACKGROUND_IMAGE', ADMIN_URL . 'static/gdin_bg.png');
 }
+
+// Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
+define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
 
 const HELP_URL = 'https://garradin.eu/aide';
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
@@ -246,62 +267,6 @@ if (!ini_get('date.timezone'))
 	else
 	{
 		ini_set('date.timezone', 'Europe/Paris');
-	}
-}
-
-/*
- * Gestion des erreurs et exceptions
- */
-
-class UserException extends \LogicException
-{
-	protected $details;
-
-	public function setMessage(string $message) {
-		$this->message = $message;
-	}
-
-	public function setDetails($details) {
-		$this->details = $details;
-	}
-
-	public function getDetails() {
-		return $this->details;
-	}
-
-	public function hasDetails(): bool {
-		return $this->details !== null;
-	}
-
-	public function getDetailsHTML() {
-		if (func_num_args() == 1) {
-			$details = func_get_arg(0);
-		}
-		else {
-			$details = $this->details;
-		}
-
-		if (null === $details) {
-			return '<em>(nul)</em>';
-		}
-
-		if ($details instanceof \DateTimeInterface) {
-			return $details->format('d/m/Y');
-		}
-
-		if (!is_array($details)) {
-			return nl2br(htmlspecialchars($details));
-		}
-
-		$out = '<table>';
-
-		foreach ($details as $key => $value) {
-			$out .= sprintf('<tr><th>%s</th><td>%s</td></tr>', htmlspecialchars($key), $this->getDetailsHTML($value));
-		}
-
-		$out .= '</table>';
-
-		return $out;
 	}
 }
 
@@ -385,6 +350,7 @@ function user_error(\Exception $e)
 		$tpl = Template::getInstance();
 
 		$tpl->assign('error', $e->getMessage());
+		$tpl->assign('html_error', $e->getHTMLMessage());
 		$tpl->assign('admin_url', ADMIN_URL);
 		$tpl->display('error.tpl');
 	}

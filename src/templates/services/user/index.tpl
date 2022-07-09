@@ -10,9 +10,10 @@
 <dl class="cotisation">
 	<dt>Statut des inscriptions</dt>
 	{foreach from=$services item="service"}
-	<dd>
+	<dd{if $service.archived} class="disabled"{/if}>
 		{$service.label}
-		{if $service.status == -1 && $service.end_date} — terminée
+		{if $service.archived} <em>(activité passée)</em>{/if}
+		{if $service.status == -1 && $service.end_date} — expirée
 		{elseif $service.status == -1} — <b class="error">en retard</b>
 		{elseif $service.status == 1 && $service.end_date} — <b class="confirm">en cours</b>
 		{elseif $service.status == 1} — <b class="confirm">à jour</b>{/if}
@@ -21,18 +22,30 @@
 	</dd>
 	{foreachelse}
 	<dd>
-		Aucune inscription.
+		Ce membre n'est inscrit à aucune activité ou cotisation.
 	</dd>
 	{/foreach}
 	<dt>Nombre d'inscriptions pour ce membre</dt>
 	<dd>
 		{$list->count()}
 		{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN)}
-			{linkbutton href="?id=%d&export=csv"|args:$user.id shape="export" label="Export CSV"}
-			{linkbutton href="?id=%d&export=ods"|args:$user.id shape="export" label="Export tableur"}
+		<nav class="menu">
+			<b data-icon="↷" class="btn">Export</b>
+			<span>
+				{linkbutton href="?id=%d&export=csv"|args:$user.id shape="export" label="Export CSV"}
+				{linkbutton href="?id=%d&export=ods"|args:$user.id shape="export" label="Export LibreOffice"}
+				{if CALC_CONVERT_COMMAND}
+					{linkbutton href="?id=%d&export=xlsx"|args:$user.id shape="export" label="Export Excel"}
+				{/if}
+			</span>
+		</nav>
 		{/if}
 	</dd>
 </dl>
+
+{if $only}
+	<p class="alert block">Cette liste ne montre qu'une seule inscription, liée à une écriture. {link href="?id=%d"|args:$user.id label="Voir toutes les inscriptions"}</p>
+{/if}
 
 {include file="common/dynamic_list_head.tpl"}
 
@@ -45,6 +58,16 @@
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td>{$row.amount|raw|money_currency}</td>
 			<td class="actions">
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
+					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
+				{/if}
+				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)}
+					{if $row.has_transactions}
+						{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
+					{else}
+						{linkbutton shape="check" label="Lier à une écriture" href="link.php?id=%d"|args:$row.id target="_dialog"}
+					{/if}
+				{/if}
 				{if $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE)}
 					{if $row.paid}
 						{linkbutton shape="reset" label="Marquer comme non payé" href="?id=%d&su_id=%d&paid=0"|args:$user.id,$row.id}
@@ -53,12 +76,6 @@
 					{/if}
 					{linkbutton shape="edit" label="Modifier" href="edit.php?id=%d"|args:$row.id}
 					{linkbutton shape="delete" label="Supprimer" href="delete.php?id=%d"|args:$row.id}
-				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ) && $row.id_account}
-					{linkbutton shape="menu" label="Liste des écritures" href="!acc/transactions/service_user.php?id=%d&user=%d"|args:$row.id,$user.id}
-				{/if}
-				{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE) && $row.id_account}
-					{linkbutton shape="plus" label="Nouveau règlement" href="payment.php?id=%d"|args:$row.id}
 				{/if}
 			</td>
 		</tr>

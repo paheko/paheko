@@ -24,21 +24,24 @@ class Template extends \KD2\Smartyer
 	public function display($template = null)
 	{
 		if (isset($_GET['_pdf'])) {
-			$out = $this->fetch($template);
-
-			$filename = 'Print';
-
-			if (preg_match('!<title>(.*)</title>!U', $out, $match)) {
-				$filename = trim($match[1]);
-			}
-
-			header('Content-type: application/pdf');
-			header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($filename)));
-			Utils::streamPDF($out);
-			return $this;
+			return $this->PDF($template);
 		}
 
 		return parent::display($template);
+	}
+
+	public function PDF(?string $template = null, ?string $title = null)
+	{
+		$out = $this->fetch($template);
+
+		if (!$title && preg_match('!<title>(.*)</title>!U', $out, $match)) {
+			$title = trim($match[1]);
+		}
+
+		header('Content-type: application/pdf');
+		header(sprintf('Content-Disposition: attachment; filename="%s.pdf"', Utils::safeFileName($title ?: 'Page')));
+		Utils::streamPDF($out);
+		return $this;
 	}
 
 	private function __clone()
@@ -116,8 +119,17 @@ class Template extends \KD2\Smartyer
 		$this->register_modifier('dump', ['KD2\ErrorManager', 'dump']);
 		$this->register_modifier('get_country_name', ['Garradin\Utils', 'getCountryName']);
 		$this->register_modifier('format_tel', [$this, 'formatPhoneNumber']);
-		$this->register_modifier('abs', 'abs');
+		$this->register_modifier('abs', function($a) { return abs($a ?? 0); });
 		$this->register_modifier('display_champ_membre', [$this, 'displayChampMembre']);
+
+		$this->register_modifier('linkify_transactions', function ($str) {
+			return preg_replace_callback('/(?<=^|\s)#(\d+)(?=\s|$)/', function ($m) {
+				return sprintf('<a href="%s%d">#%2$d</a>',
+					Utils::getLocalURL('!acc/transactions/details.php?id='),
+					$m[1]
+				);
+			}, $str);
+		});
 
 		$this->register_modifier('format_skriv', function ($str) {
 			$skriv = new Skriv;
@@ -149,7 +161,12 @@ class Template extends \KD2\Smartyer
 
 		foreach ($errors as &$error) {
 			if ($error instanceof UserException) {
-				$message = nl2br($this->escape($error->getMessage()));
+				if ($html = $error->getHTMLMessage()) {
+					$message = $html;
+				}
+				else {
+					$message = nl2br($this->escape($error->getMessage()));
+				}
 
 				if ($error->hasDetails()) {
 					$message = '<h3>' . $message . '</h3>' . $error->getDetailsHTML();
@@ -253,6 +270,10 @@ class Template extends \KD2\Smartyer
 
 	protected function formatPhoneNumber($n)
 	{
+		if (empty($n)) {
+			return '';
+		}
+
 		$country = Config::getInstance()->get('pays');
 
 		if ($country !== 'FR') {
@@ -305,25 +326,35 @@ class Template extends \KD2\Smartyer
 		}
 
 		if (null === $config) {
-			return htmlspecialchars($v);
+			return htmlspecialchars((string)$v);
+		}
+
+		if ($config->type == 'checkbox') {
+			return $v ? 'Oui' : 'Non';
+		}
+
+		if (empty($v)) {
+			return '';
 		}
 
 		switch ($config->type)
 		{
-			case 'checkbox':
-				return $v ? 'Oui' : 'Non';
+			case 'password':
+				return '*****';
 			case 'email':
 				return '<a href="mailto:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
 			case 'tel':
-				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="tel:' . rawurlencode($v) . '">' . htmlspecialchars($this->formatPhoneNumber($v)) . '</a>';
 			case 'url':
-				return '<a href="' . htmlspecialchars($v) . '">' . htmlspecialchars($v) . '</a>';
+				return '<a href="' . htmlspecialchars($v) . '" target="_blank">' . htmlspecialchars($v) . '</a>';
 			case 'country':
 				return Utils::getCountryName($v);
 			case 'date':
 				return Utils::date_fr($v, 'd/m/Y');
 			case 'datetime':
 				return Utils::date_fr($v, 'd/m/Y à H:i');
+			case 'number':
+				return str_replace('.', ',', htmlspecialchars($v));
 			case 'multiple':
 				// Useful for search results, if a value is not a number
 				if (!is_numeric($v)) {
@@ -340,7 +371,7 @@ class Template extends \KD2\Smartyer
 
 				return htmlspecialchars(implode(', ', $out));
 			default:
-				return htmlspecialchars($v);
+				return nl2br(htmlspecialchars(rtrim((string) $v)));
 		}
 	}
 
@@ -410,7 +441,7 @@ class Template extends \KD2\Smartyer
 		if (!empty($params['user_mode']) && empty($config->editable))
 		{
 			$out = '<dt>' . htmlspecialchars($config->title, ENT_QUOTES, 'UTF-8') . '</dt>';
-			$out .= '<dd>' . (trim($value) === '' ? 'Non renseigné' : $this->displayChampMembre($value, $config)) . '</dd>';
+			$out .= '<dd>' . (trim((string) $value) === '' ? 'Non renseigné' : $this->displayChampMembre($value, $config)) . '</dd>';
 			return $out;
 		}
 
@@ -460,7 +491,10 @@ class Template extends \KD2\Smartyer
 		}
 		elseif ($type == 'textarea')
 		{
-			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
+			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars((string) $value, ENT_QUOTES) . '</textarea>';
+		}
+		elseif ($type == 'date') {
+			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
 		}
 		else
 		{
@@ -473,8 +507,11 @@ class Template extends \KD2\Smartyer
 
 				$value = '1';
 			}
+			elseif ($type == 'number') {
+				$attributes .= 'step="any" ';
+			}
 
-			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars($value, ENT_QUOTES) . '" />';
+			$field .= '<input type="' . $type . '" ' . $attributes . ' value="' . htmlspecialchars((string) $value, ENT_QUOTES) . '" />';
 		}
 
 		$out = '

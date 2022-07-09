@@ -59,12 +59,12 @@ class Service_User extends Entity
 			$params['date'] = $this->date->format('Y-m-d');
 		}
 
-		if ($this->exists()) {
-			$params['id'] = $this->id();
-		}
-
 		$where = array_map(fn($k) => sprintf('%s = ?', $k), array_keys($params));
 		$where = implode(' AND ', $where);
+
+		if ($this->exists()) {
+			$where .= sprintf(' AND id != %d', $this->id());
+		}
 
 		return DB::getInstance()->test(self::TABLE, $where, array_values($params));
 	}
@@ -85,13 +85,13 @@ class Service_User extends Entity
 			if ($service->duration) {
 				$dt = new \DateTime;
 				$dt->modify(sprintf('+%d days', $service->duration));
-				$this->expiry_date = $dt;
+				$this->set('expiry_date', $dt);
 			}
 			elseif ($service->end_date) {
-				$this->expiry_date = $service->end_date;
+				$this->set('expiry_date', $service->end_date);
 			}
 			else {
-				$this->expiry_date = null;
+				$this->set('expiry_date', null);
 			}
 		}
 
@@ -135,6 +135,10 @@ class Service_User extends Entity
 			throw new \RuntimeException('Cannot add a payment to a subscription that is not linked to a fee');
 		}
 
+		if (!$this->fee()->id_year) {
+			throw new ValidationException('Le tarif indiqué ne possède pas d\'exercice lié');
+		}
+
 		$transaction = new Transaction;
 		$transaction->id_creator = $user_id;
 		$transaction->id_year = $this->fee()->id_year;
@@ -153,6 +157,7 @@ class Service_User extends Entity
 		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
 
 		$source['label'] = $label;
+		$source['id_analytical'] = $this->fee()->id_analytical;
 
 		$transaction->importFromNewForm($source);
 		$transaction->save();
@@ -161,7 +166,7 @@ class Service_User extends Entity
 		return $transaction;
 	}
 
-	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null)
+	static public function createFromForm(array $users, int $creator_id, bool $from_copy = false, ?array $source = null): self
 	{
 		if (null === $source) {
 			$source = $_POST;
@@ -170,13 +175,17 @@ class Service_User extends Entity
 		$db = DB::getInstance();
 		$db->begin();
 
+		if (!count($users)) {
+			throw new ValidationException('Aucun membre n\'a été sélectionné.');
+		}
+
 		foreach ($users as $id => $name) {
 			$su = new self;
 			$su->date = new \DateTime;
 			$su->importForm($source);
 			$su->id_user = (int) $id;
 
-			if ($su->id_fee && $su->fee()->id_account && $su->id_user) {
+			if ($su->id_fee && $su->fee() && $su->fee()->id_account && $su->id_user) {
 				$su->expected_amount = $su->fee()->getAmountForUser($su->id_user);
 			}
 

@@ -37,11 +37,13 @@ $form->runIf('download', function () use ($i, $tpl) {
 }, $csrf_key);
 
 $form->runIf('upgrade', function () use ($i) {
-	$url = ADMIN_URL . 'upgrade.php';
 	$i->upgrade(f('upgrade'));
-	header('Location: ' . $url);
+	sleep(2);
+	$url = ADMIN_URL . 'upgrade.php';
+	printf('<h2>Cliquez ici pour terminer la mise a jour&nbsp;:</h2><form method="get" action="%s"><button type="submit">Continuer</button></form>', $url);
 	exit;
 }, $csrf_key);
 
+$tpl->assign('website', WEBSITE);
 $tpl->assign(compact('releases', 'latest', 'csrf_key'));
 $tpl->display('admin/config/upgrade.tpl');

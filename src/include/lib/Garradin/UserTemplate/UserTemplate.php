@@ -4,6 +4,7 @@ namespace Garradin\UserTemplate;
 
 use KD2\Brindille;
 use KD2\Brindille_Exception;
+use KD2\Translate;
 
 use Garradin\Config;
 use Garradin\Plugin;
@@ -24,10 +25,15 @@ class UserTemplate extends \KD2\Brindille
 {
 	public $_tpl_path;
 	protected $modified;
-	public $file;
-	protected $path;
+	protected $file = null;
+	protected $code = null;
+	protected $cache_path = USER_TEMPLATES_CACHE_ROOT;
+
+	protected $escape_default = 'html';
 
 	static protected $root_variables;
+
+	protected $content_type = null;
 
 	static public function getRootVariables()
 	{
@@ -36,25 +42,6 @@ class UserTemplate extends \KD2\Brindille
 		}
 
 		static $keys = ['adresse_asso', 'champ_identifiant', 'champ_identite', 'couleur1', 'couleur2', 'email_asso', 'monnaie', 'nom_asso', 'pays', 'site_asso', 'telephone_asso', 'files'];
-
-		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
-		{
-			if (function_exists('locale_accept_from_http'))
-			{
-			   $lang = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-			}
-			else
-			{
-				$lang = preg_replace('/[^a-z]/i', '', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-				$lang = strtolower(substr($lang, 0, 2));
-			}
-
-			$lang = strtolower(substr($lang, 0, 2));
-		}
-		else
-		{
-			$lang = '';
-		}
 
 		$config = Config::getInstance();
 
@@ -68,22 +55,20 @@ class UserTemplate extends \KD2\Brindille
 		$config = array_intersect_key($config->asArray(), array_flip($keys));
 		$config['files'] = $files;
 
+		$session = Session::getInstance();
+		$is_logged = $session->isLogged();
+
 		self::$root_variables = [
 			'root_url'     => WWW_URL,
 			'request_url'  => Utils::getRequestURI(),
 			'admin_url'    => ADMIN_URL,
 			'_GET'         => &$_GET,
 			'_POST'        => &$_POST,
-			'visitor_lang' => $lang,
+			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
 			'now'          => new \DateTime,
-			'logged_user'  => Session::getInstance()->getUser(),
-			'access_level'=> [
-				'none'  => Session::ACCESS_NONE,
-				'read'  => Session::ACCESS_READ,
-				'write' => Session::ACCESS_WRITE,
-				'admin' => Session::ACCESS_ADMIN,
-			],
+			'is_logged'    => $is_logged,
+			'logged_user'  => $is_logged ? $session->getUser() : null,
 		];
 
 		return self::$root_variables;
@@ -110,6 +95,42 @@ class UserTemplate extends \KD2\Brindille
 		$this->registerAll();
 
 		Plugin::fireSignal('usertemplate.init', ['template' => $this]);
+	}
+
+	/**
+	 * Toggle safe mode
+	 *
+	 * If set to TRUE, then all functions and sections are removed, except foreach.
+	 * Only modifiers can be used.
+	 * Useful for templates where you don't want the user to be able to do SQL queries etc.
+	 *
+	 * @param  bool   $enable
+	 * @return void
+	 */
+	public function toggleSafeMode(bool $safe_mode): void
+	{
+		if ($safe_mode) {
+			$this->_functions = [];
+			$this->_sections = [];
+
+			// Register default Brindille modifiers
+			$this->registerDefaults();
+		}
+		else {
+			$this->registerAll();
+		}
+	}
+
+	public function setEscapeDefault(?string $default): void
+	{
+		$this->escape_default = $default;
+
+		if (null === $default) {
+			$this->registerModifier('escape', fn($str) => $str);
+		}
+		else {
+			$this->registerModifier('escape', fn ($str) => htmlspecialchars((string)$str) );
+		}
 	}
 
 	public function registerAll()
@@ -145,18 +166,63 @@ class UserTemplate extends \KD2\Brindille
 		foreach (Sections::SECTIONS_LIST as $name) {
 			$this->registerSection($name, [Sections::class, $name]);
 		}
+
+		$this->registerModifier('money', function ($number, bool $hide_empty = true, bool $force_sign = false): string {
+			if ($hide_empty && !$number) {
+				return '';
+			}
+
+			$sign = ($force_sign && $number > 0) ? '+' : '';
+
+			$out = $sign . Utils::money_format($number, ',', '.', $hide_empty);
+
+			if (!$this->escape_default) {
+				return $out;
+			}
+
+			return sprintf('<b class="money">%s</b>', str_replace('.', '&nbsp;', $out));
+		});
+
+		$this->registerModifier('money_currency', function ($number, bool $hide_empty = true): string {
+			$out = $this->_modifiers['money']($number, $hide_empty);
+
+			if ($out !== '') {
+				$out .= $this->escape_default == 'html' ? '&nbsp;' : ' ';
+				$out .= Config::getInstance()->get('monnaie');
+			}
+
+			return $out;
+		});
+	}
+
+	public function setSource(string $path)
+	{
+		$this->file = null;
+		$this->path = $path;
+		$this->modified = filemtime($path);
+		// Use shared cache for default templates
+		$this->cache_path = SHARED_USER_TEMPLATES_CACHE_ROOT;
+	}
+
+	public function setCode(string $code)
+	{
+		$this->code = $code;
+		$this->file = null;
+		$this->path = null;
+		$this->modified = time();
+		// Use custom cache for user templates
+		$this->cache_path = USER_TEMPLATES_CACHE_ROOT;
+	}
+
+	protected function _getCachePath()
+	{
+		$hash = sha1($this->file ? $this->file->path : ($this->code ?: $this->path));
+		return sprintf('%s/%s.php', $this->cache_path, $hash);
 	}
 
 	public function display(): void
 	{
-		// Use custom cache for user templates
-		if ($this->file) {
-			$compiled_path = sprintf('%s/%s.php', USER_TEMPLATES_CACHE_ROOT, sha1($this->file->path));
-		}
-		// Use shared cache for default templates
-		else {
-			$compiled_path = sprintf('%s/%s.php', SHARED_USER_TEMPLATES_CACHE_ROOT, sha1($this->path));
-		}
+		$compiled_path = $this->_getCachePath(true);
 
 		if (!is_dir(dirname($compiled_path))) {
 			// Force cache directory mkdir
@@ -170,7 +236,15 @@ class UserTemplate extends \KD2\Brindille
 
 		$tmp_path = $compiled_path . '.tmp';
 
-		$source = $this->file ? $this->file->fetch() : file_get_contents($this->path);
+		if ($this->code) {
+			$source = $this->code;
+		}
+		elseif ($this->file) {
+			$source = $this->file->fetch();
+		}
+		else {
+			$source = file_get_contents($this->path);
+		}
 
 		try {
 			$code = $this->compile($source);
@@ -180,7 +254,7 @@ class UserTemplate extends \KD2\Brindille
 		}
 		catch (Brindille_Exception $e) {
 			throw new Brindille_Exception(sprintf("Erreur de syntaxe dans '%s' : %s",
-				$this->file ? $this->file->name : Utils::basename($this->path),
+				$this->file ? $this->file->name : ($this->code ? 'code' : Utils::basename($this->path)),
 				$e->getMessage()), 0, $e);
 		}
 		catch (\Throwable $e) {
@@ -220,5 +294,25 @@ class UserTemplate extends \KD2\Brindille
 
 		header('Content-type: application/pdf');
 		Utils::streamPDF($html);
+	}
+
+	public function setContentType(string $type): void
+	{
+		$this->content_type = $type;
+	}
+
+	public function displayWeb(): void
+	{
+		$content = $this->fetch();
+
+		$type = $this->content_type ?: 'text/html';
+		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+
+		if ($type == 'application/pdf') {
+			Utils::streamPDF($content);
+		}
+		else {
+			echo $content;
+		}
 	}
 }

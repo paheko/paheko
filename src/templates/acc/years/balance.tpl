@@ -2,6 +2,12 @@
 
 {form_errors}
 
+{if !empty($_GET.from) && empty($_POST)}
+<p class="block confirm">
+	L'exercice a bien été créé.
+</p>
+{/if}
+
 {if $year->countTransactions()}
 <p class="block alert">
 	<strong>Attention&nbsp;!</strong>
@@ -16,20 +22,40 @@
 
 		{if !$year_selected}
 		<dl>
-			<dt><label for="f_from_year">Reprendre les soldes de fermeture d'un exercice clôturé</label></dt>
+			<dt><label for="f_from_year">Reporter les soldes de fermeture d'un exercice</label></dt>
+			<dd class="help">Pour reprendre les soldes des comptes de l'exercice précédent.</dd>
 			<dd>
 				<select id="f_from_year" name="from_year">
 					<option value="">-- Aucun</option>
 					{foreach from=$years item="year"}
-					<option value="{$year.id}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short}</option>
+					<option value="{$year.id}"{if $year.id == $_GET.from} selected="selected"{/if} data-closed="{$year.closed}">{$year.label} — {$year.start_date|date_short} au {$year.end_date|date_short} ({if $year.closed}clôturé{else}en cours{/if})</option>
 					{/foreach}
 				</select>
 			</dd>
+			<dd class="hidden warn-not-closed">
+				<p class="alert block">Attention l'exercice sélectionné n'est pas clôturé&nbsp;!<br />Si vous modifiez cet exercice après avoir validé cette balance d'ouverture, celle-ci pourrait ne plus correspondre au bilan de l'exercice précédent&nbsp;!</p>
+			</dd>
 		</dl>
+		{literal}
+		<script type="text/javascript" async="async">
+		let s = document.querySelector('#f_from_year');
+		const checkOpen = function() {
+			let v = s.options[s.selectedIndex].dataset.closed;
+			g.toggle('.warn-not-closed', v === '0' ? true : false);
+		};
+		s.onchange = checkOpen;
+		checkOpen();
+		</script>
+		{/literal}
 		{else}
 		<p class="help">
 			Renseigner ici les soldes d'ouverture (débiteur ou créditeur) des comptes.
 		</p>
+		{if !empty($_GET.from)}
+		<p class="help">
+			Normalement il suffit de valider ce formulaire pour faire le report à nouveau des soldes de comptes.
+		</p>
+		{/if}
 		<table class="list transaction-lines">
 			<thead>
 				<tr>
@@ -55,8 +81,7 @@
 						</td>
 					{/if}
 					<th>
-						{input type="list" target="acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account][]" default=$line.account}
-						{if !empty($line.message)}<span class="alert">{$line.message}</span>{/if}
+						{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$year.id_chart name="lines[account][]" default=$line.account}
 					</th>
 					<td>{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 					<td>{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
@@ -76,6 +101,8 @@
 				</tr>
 			</tfoot>
 		</table>
+		<dl>
+			{input type="checkbox" name="appropriation" value="1" checked="checked" label="Affecter automatiquement le résultat (conseillé)" help="Si cette case est cochée, le résultat sera automatiquement affecté aux réserves s'il est excédentaire"}
 		{/if}
 	</fieldset>
 
@@ -83,9 +110,14 @@
 		{if null === $previous_year}
 			{button type="submit" name="next" label="Continuer" shape="right" class="main"}
 			- ou -
-			{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"} <i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
+			{if $_GET.from}
+				{linkbutton shape="reset" href="!acc/years/appropriation.php?id=%d&from=%d"|args:$year.id,$_GET.from label="Passer cet étape"}
+			{else}
+				{linkbutton shape="reset" href="!acc/years/" label="Passer cet étape"}
+			{/if}
+				<i class="help">(Il sera toujours possible de reprendre la balance d'ouverture plus tard.)</i>
 		{else}
-			{csrf_field key="acc_years_balance_%s"|args:$year.id}
+			{csrf_field key=$csrf_key}
 			{if $previous_year}
 				<input type="hidden" name="from_year" value="{$previous_year.id}" />
 			{else}

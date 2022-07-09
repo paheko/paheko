@@ -18,7 +18,7 @@
 		{if !empty($criterias.analytical_only)}
 			<?php $link = sprintf('%sacc/reports/trial_balance.php?analytical=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
 		{else}
-			<?php $link = sprintf('%sacc/reports/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
+			<?php $link = sprintf('%sacc/accounts/journal.php?id=%d&year=%d', $admin_url, $account->id, $account->id_year); ?>
 		{/if}
 			<a href="{$link}">{$account.code} — {$account.label}</a>
 	</h2></summary>

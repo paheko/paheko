@@ -566,5 +566,15 @@
 	</tbody>
 </table>
 
+{{#foreach from=$csv}}
+<tr>
+<th>{{$value.0}}</th>
+<td>{{#accounts_sums codes=$value.1 year=$n}}{{$balance|raw|money}}{{/accounts_sums}}</td>
+<td>{{#accounts_sums codes=$value.2 year=$n}}{{$balance|raw|money}}{{/accounts_sums}}</td>
+<td>{{#accounts_sums codes=$value.3 year=$n}}{{$balance|raw|money}}{{/accounts_sums}}</td>
+<td>{{#accounts_sums codes=$value.4 year=$n1}}{{$balance|raw|money}}{{/accounts_sums}}</td>
+</tr>
+{{/foreach}}
+
 </body>
 </html>

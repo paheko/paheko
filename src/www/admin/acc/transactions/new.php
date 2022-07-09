@@ -4,6 +4,7 @@ namespace Garradin;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Files\File;
+use Garradin\Accounting\AssistedReconciliation;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -23,6 +24,23 @@ $lines = [[], []];
 $amount = 0;
 $types_accounts = null;
 $id_analytical = null;
+
+// Quick-fill transaction from query parameters
+if (qg('a')) {
+	$amount = Utils::moneyToInteger(qg('a'));
+}
+
+if (qg('l')) {
+	$transaction->label = qg('l');
+}
+
+if (qg('d')) {
+	$transaction->date = new \DateTime(qg('d'));
+}
+
+if (qg('t')) {
+	$transaction->type = (int) qg('t');
+}
 
 // Duplicate transaction
 if (qg('copy')) {
@@ -46,17 +64,19 @@ if (qg('copy')) {
 	unset($line);
 }
 
-$date = new \DateTime;
-
-if ($session->get('acc_last_date')) {
-	$date = \DateTime::createFromFormat('!d/m/Y', $session->get('acc_last_date'));
+// Set last used date
+if (empty($transaction->date) && $session->get('acc_last_date') && $date = \DateTime::createFromFormat('!Y-m-d', $session->get('acc_last_date'))) {
+	$transaction->date = $date;
+}
+// Set date of the day if no date was set
+elseif (empty($transaction->date)) {
+	$transaction->date = new \DateTime;
 }
 
-if (!$date || ($date < $current_year->start_date || $date > $current_year->end_date)) {
-	$date = $current_year->start_date;
+// Make sure the date cannot be outside of the current year
+if ($transaction->date < $current_year->start_date || $transaction->date > $current_year->end_date) {
+	$transaction->date = $current_year->start_date;
 }
-
-$transaction->date = $date;
 
 // Quick transaction from an account journal page
 if ($id = qg('account')) {
@@ -94,7 +114,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 		$transaction->updateLinkedUsers(array_keys(f('users')));
 	}
 
-	$session->set('acc_last_date', f('date'));
+	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 
 	Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
 }, 'acc_transaction_new');

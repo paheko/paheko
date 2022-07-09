@@ -5,8 +5,16 @@
 <nav class="tabs">
 	<aside>
 	{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-		{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
-		{linkbutton href="?type=%d&export=ods"|args:$type label="Export tableur" shape="export"}
+	<nav class="menu">
+		<b data-icon="↷" class="btn">Export</b>
+		<span>
+			{linkbutton href="?type=%d&export=csv"|args:$type label="Export CSV" shape="export"}
+			{linkbutton href="?type=%d&export=ods"|args:$type label="Export LibreOffice" shape="export"}
+			{if CALC_CONVERT_COMMAND}
+				{linkbutton href="?type=%d&export=xlsx"|args:$type label="Export Excel" shape="export"}
+			{/if}
+		</span>
+	</nav>
 	{/if}
 		{linkbutton shape="search" href="!acc/search.php?year=%d&type=%d"|args:$year.id,$type label="Recherche"}
 	</aside>
@@ -32,6 +40,9 @@
 				<td class="check">
 					{input type="checkbox" name="check[%s]"|args:$line.id_line value=$line.id default=0}
 				</td>
+				{/if}
+				{if $line.type_label}
+				<td>{$line.type_label}</td>
 				{/if}
 				<td class="num"><a href="{$admin_url}acc/transactions/details.php?id={$line.id}">#{$line.id}</a></td>
 				<td>{$line.date|date_short}</td>

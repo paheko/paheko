@@ -25,7 +25,7 @@ nav.tabs .sub .title {
 }
 
 nav.tabs li {
-    margin: 0 0.2em;
+    margin: 0 0.2em; 
 }
 
 nav.tabs li a {
@@ -33,7 +33,7 @@ nav.tabs li a {
     background: rgba(var(--gSecondColor), .5);
     border-radius: .5em .5em 0 0;
     padding: .1em .5em;
-    color: #000;
+    color: rgb(var(--gTextColor));
     text-decoration: none;
     transition: background-color .2s, color .2s;
 }
@@ -55,4 +55,33 @@ nav.tabs aside {
     max-width: 50%;
     text-align: right;
     clear: right;
+}
+
+main nav.menu > b {
+    font-weight: normal;
+}
+
+main nav.menu {
+    display: inline-block;
+    position: relative;
+}
+
+main nav.menu span {
+    display: none;
+}
+
+main nav.menu:hover span, main nav.menu:active span {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    text-align: left;
+    background: rgb(var(--gBgColor));
+    border-radius: .3em;
+    padding: .3em;
+    z-index: 1000;
+    box-shadow: 2px 2px 5px var(--gLightBorderColor);
+}
+
+main nav.menu button {
+    text-align: left;
 }

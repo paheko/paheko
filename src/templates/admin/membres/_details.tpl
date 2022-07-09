@@ -36,16 +36,6 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{if $c == 'email' && $show_message_button}
 				{linkbutton href="!membres/message.php?id=%d"|args:$data.id label="Envoyer un message" shape="mail"}
 			{/if}
-		{elseif $c_config.type == 'tel'}
-			<a href="tel:{$value}">{$value|format_tel}</a>
-		{elseif $c_config.type == 'country'}
-			{$value|get_country_name}
-		{elseif $c_config.type == 'date'}
-			{$value|date_short}
-		{elseif $c_config.type == 'datetime'}
-			{$value|date}
-		{elseif $c_config.type == 'password'}
-			*******
 		{elseif $c_config.type == 'multiple'}
 			<ul>
 			{foreach from=$c_config.options key="b" item="name"}
@@ -55,8 +45,28 @@ $user_files_path = (new Membres)->getAttachementsDirectory($data->id);
 			{/foreach}
 			</ul>
 		{else}
-			{$value|escape|rtrim|nl2br}
+			{$value|display_champ_membre:$c_config|raw}
 		{/if}
 	</dd>
+		{if $c_config.type == 'email' && $value && ($email = Users\Emails::getEmail($value))}
+		<dt>Statut e-mail</dt>
+		<dd>
+			{if $email.optout}
+				<b class="alert">{icon shape="alert"}</b> Ne souhaite plus recevoir de messages
+				<br/>{linkbutton target="_dialog" label="Rétablir l'envoi à cette adresse" href="emails.php?verify=%s"|args:$value shape="check"}
+			{elseif $email.invalid}
+				<b class="error">{icon shape="alert"} Adresse invalide</b>
+			{elseif $email->hasReachedFailLimit()}
+				<b class="error">{icon shape="alert"} Trop d'erreurs</b>
+			{elseif $email.verified}
+				<b class="confirm">{icon shape="check" class="confirm"}</b> Adresse vérifiée
+			{else}
+				Adresse non vérifiée
+			{/if}
+			{if $email.fail_log}
+				<br /><span class="help">{$email.fail_log|escape|nl2br}</span>
+			{/if}
+		</dd>
+		{/if}
 	{/foreach}
 </dl>

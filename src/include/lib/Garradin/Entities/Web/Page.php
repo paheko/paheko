@@ -47,14 +47,11 @@ class Page extends Entity
 		'content'   => 'string',
 	];
 
-	const FORMAT_SKRIV = 'skriv';
-	const FORMAT_ENCRYPTED = 'skriv/encrypted';
-	const FORMAT_MARKDOWN = 'markdown';
-
 	const FORMATS_LIST = [
-		self::FORMAT_SKRIV => 'SkrivML',
-		self::FORMAT_MARKDOWN => 'MarkDown',
-		self::FORMAT_ENCRYPTED => 'Chiffré',
+		//Render::FORMAT_BLOCKS => 'Blocs (beta)',
+		Render::FORMAT_SKRIV => 'SkrivML',
+		Render::FORMAT_MARKDOWN => 'MarkDown',
+		Render::FORMAT_ENCRYPTED => 'Chiffré',
 	];
 
 	const STATUS_ONLINE = 'online';
@@ -77,6 +74,7 @@ class Page extends Entity
 
 	protected $_file;
 	protected $_attachments;
+	protected $_tagged_attachments;
 
 	static public function create(int $type, ?string $parent, string $title, string $status = self::STATUS_ONLINE): self
 	{
@@ -108,7 +106,7 @@ class Page extends Entity
 		return $this->_file;
 	}
 
-	public function load(array $data): void
+	public function load(array $data): self
 	{
 		parent::load($data);
 
@@ -116,6 +114,8 @@ class Page extends Entity
 			$this->loadFromFile($this->file());
 			$this->save();
 		}
+
+		return $this;
 	}
 
 	public function url(): string
@@ -194,7 +194,7 @@ class Page extends Entity
 
 	public function syncSearch(): void
 	{
-		$content = $this->format == self::FORMAT_ENCRYPTED ? null : strip_tags($this->render());
+		$content = $this->format == Render::FORMAT_ENCRYPTED ? null : strip_tags($this->render());
 		$this->file()->indexForSearch(null, $content, $this->title);
 	}
 
@@ -272,7 +272,7 @@ class Page extends Entity
 		}
 
 		if (isset($source['uri'])) {
-			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+			$source['uri'] = strtolower(Utils::transformTitleToURI($source['uri']));
 			$source['path'] = trim($parent . '/' . $source['uri'], '/');
 		}
 
@@ -292,10 +292,10 @@ class Page extends Entity
 		}
 
 		if (!empty($source['encryption']) ) {
-			$this->set('format', self::FORMAT_ENCRYPTED);
+			$this->set('format', Render::FORMAT_ENCRYPTED);
 		}
 		else {
-			$this->set('format', self::FORMAT_SKRIV);
+			$this->set('format', Render::FORMAT_SKRIV);
 		}
 
 		return parent::importForm($source);
@@ -331,12 +331,34 @@ class Page extends Entity
 		return $this->_attachments;
 	}
 
-	static public function findTaggedAttachments(string $text): array
+	/**
+	 * List attachments that are cited in the text content
+	 */
+	public function listTaggedAttachments(): array
 	{
-		preg_match_all('/<<?(?:file|image)\s*(?:\|\s*)?([\w\d_.-]+)/ui', $text, $match, PREG_PATTERN_ORDER);
-		preg_match_all('/#(?:file|image):\[([\w\d_.-]+)\]/ui', $text, $match2, PREG_PATTERN_ORDER);
+		if (null === $this->_tagged_attachments) {
+			$this->render();
+			$this->_tagged_attachments = Render::listAttachments($this->file());
+		}
 
-		return array_merge($match[1], $match2[1]);
+		return $this->_tagged_attachments;
+	}
+
+	/**
+	 * List attachments that are *NOT* cited in the text content
+	 */
+	public function listOrphanAttachments(): array
+	{
+		$used = $this->listTaggedAttachements();
+		$orphans = [];
+
+		foreach ($this->listAttachments() as $file) {
+			if (!in_array($file->uri(), $used)) {
+				$orphans[] = $file->uri();
+			}
+		}
+
+		return $orphans;
 	}
 
 	/**
@@ -358,7 +380,7 @@ class Page extends Entity
 		$tagged = [];
 
 		if (!$all) {
-			$tagged = $this->findTaggedAttachments($this->content);
+			$tagged = $this->listTaggedAttachments($this->content);
 		}
 
 		foreach ($this->listAttachments() as $a) {
@@ -395,14 +417,15 @@ class Page extends Entity
 			$out .= sprintf("%s: %s\n", $key, $value);
 		}
 
-		$out .= "\n----\n\n" . $this->content;
+		$content = preg_replace("/\r\n?/", "\n", $this->content);
+		$out .= "\n----\n\n" . $content;
 
 		return $out;
 	}
 
 	public function importFromRaw(string $str): bool
 	{
-		$str = preg_replace("/\r\n|\r|\n/", "\n", $str);
+		$str = preg_replace("/\r\n?/", "\n", $str);
 		$str = explode("\n\n----\n\n", $str, 2);
 
 		if (count($str) !== 2) {

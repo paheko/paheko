@@ -13,7 +13,7 @@
 			<dt>Écriture d'origine</dt>
 			<dd>{link class="num" href="!acc/transactions/details.php?id=%d"|args:$payoff_for.id label="#%d"|args:$payoff_for.id}</dd>
 			{input type="checkbox" name="mark_paid" value="1" default="1" label="Marquer comme payée"}
-			{input type="list" target="acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name=$payoff_for.form_target_name label="Compte de règlement" required=1}
+			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name=$payoff_for.form_target_name label="Compte de règlement" required=1}
 		</dl>
 	</fieldset>
 
@@ -22,7 +22,7 @@
 		<dl>
 			{input type="date" name="date" label="Date" required=1 source=$transaction}
 			{input type="text" name="label" label="Libellé" required=1 source=$transaction}
-			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de note de frais, etc."}
+			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 		</dl>
 		<dl data-types="all-but-advanced">
 			{input type="money" name="amount" label="Montant" required=1 default=$amount}
@@ -35,7 +35,7 @@
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." source=$transaction}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="membres/selector.php"}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php"}
 			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
 		</dl>
 		<dl data-types="all-but-advanced">

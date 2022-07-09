@@ -5,6 +5,7 @@ use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Accounting\Reports;
 use Garradin\Accounting\Years;
+use Garradin\Membres\Session;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -20,27 +21,35 @@ if ($year->closed) {
 	throw new UserException('Impossible de modifier un exercice clôturé.');
 }
 
-if (f('save') && $form->check('acc_years_balance_' . $year->id()))
-{
-	try {
-		$transaction = new Transaction;
-		$transaction->id_creator = $session->getUser()->id;
-		$transaction->importFromBalanceForm($year);
-		$transaction->save();
+$csrf_key = 'acc_years_balance_' . $year->id();
 
-		Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
+$form->runIf('save', function () use ($year) {
+	$transaction = new Transaction;
+	$transaction->id_creator = Session::getInstance()->getUser()->id;
+	$transaction->importFromBalanceForm($year);
+	$transaction->save();
+
+	if (f('appropriation')) {
+		// (affectation du résultat)
+		$t2 = Years::makeAppropriation($year);
+
+		if ($t2) {
+			$t2->id_creator = $transaction->id_creator;
+			$t2->save();
+		}
+
+		Utils::redirect('!acc/reports/journal.php?year=' . $year->id());
 	}
-	catch (UserException $e)
-	{
-		$form->addError($e->getMessage());
-	}
-}
+
+	Utils::redirect('!acc/transactions/details.php?id=' . $transaction->id());
+}, $csrf_key);
+
 
 $previous_year = null;
 $year_selected = f('from_year') !== null;
 $chart_change = false;
 $lines = [[]];
-$years = Years::listClosed();
+$years = Years::list(true);
 
 // Empty balance
 if (!count($years) || f('from_year') === '') {
@@ -56,7 +65,7 @@ elseif (null !== f('from_year')) {
 }
 
 if ($previous_year) {
-	$lines = Reports::getClosingSumsWithAccounts(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
+	$lines = Reports::getAccountsBalances(['year' => $previous_year->id(), 'exclude_position' => [Account::EXPENSE, Account::REVENUE]]);
 
 	if ($previous_year->id_chart != $year->id_chart) {
 		$chart_change = true;
@@ -88,16 +97,16 @@ if ($previous_year) {
 	}
 
 	$lines[] = (object) [
-		'sum'   => $result,
+		'balance'   => $result,
 		'id'    => $account->id,
 		'code'  => $account->code,
 		'label' => $account->label,
-		'message' => 'Résultat de l\'exercice précédent, à affecter',
+		'is_debt' => $result < 0,
 	];
 
 	foreach ($lines as $k => &$line) {
-		$line->credit = $line->sum > 0 ? $line->sum : 0;
-		$line->debit = $line->sum < 0 ? abs($line->sum) : 0;
+		$line->credit = !$line->is_debt ? abs($line->balance) : 0;
+		$line->debit = $line->is_debt ? abs($line->balance) : 0;
 
 		if ($chart_change) {
 			if (array_key_exists($line->code, $matching_accounts)) {
@@ -124,7 +133,6 @@ if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
 	}
 }
 
-
-$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year'));
+$tpl->assign(compact('lines', 'years', 'chart_change', 'previous_year', 'year_selected', 'year', 'csrf_key'));
 
 $tpl->display('acc/years/balance.tpl');

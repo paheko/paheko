@@ -10,12 +10,66 @@ use KD2\SMTP;
 
 class Utils
 {
-    const EMAIL_CONTEXT_BULK = 'bulk';
-    const EMAIL_CONTEXT_PRIVATE = 'private';
-    const EMAIL_CONTEXT_SYSTEM = 'system';
-
     static protected $collator;
     static protected $transliterator;
+
+    const ICONS = [
+        'up'              => '↑',
+        'down'            => '↓',
+        'export'          => '↷',
+        'reset'           => '↺',
+        'upload'          => '⇑',
+        'download'        => '⇓',
+        'home'            => '⌂',
+        'print'           => '⎙',
+        'star'            => '★',
+        'check'           => '☑',
+        'settings'        => '☸',
+        'alert'           => '⚠',
+        'mail'            => '✉',
+        'edit'            => '✎',
+        'delete'          => '✘',
+        'help'            => '❓',
+        'plus'            => '➕',
+        'minus'           => '➖',
+        'logout'          => '⤝',
+        'eye-off'         => '⤫',
+        'menu'            => '𝍢',
+        'eye'             => '👁',
+        'user'            => '👤',
+        'users'           => '👪',
+        'calendar'        => '📅',
+        'attach'          => '📎',
+        'search'          => '🔍',
+        'lock'            => '🔒',
+        'unlock'          => '🔓',
+        'folder'          => '🗀',
+        'document'        => '🗅',
+        'bold'            => 'B',
+        'italic'          => 'I',
+        'header'          => 'H',
+        'paragraph'       => '§',
+        'list-ol'         => '1',
+        'list-ul'         => '•',
+        'table'           => '◫',
+        'radio-unchecked' => '◯',
+        'uncheck'         => '☐',
+        'radio-checked'   => '⬤',
+        'image'           => '🖻',
+        'left'            => '←',
+        'right'           => '→',
+        'column'          => '▚',
+        'del-column'      => '🮔',
+        'reload'          => '🗘',
+        'gallery'         => '🖼',
+        'code'            => '<',
+        'markdown'        => 'M',
+        'skriv'           => 'S',
+        'globe'           => '🌍',
+        'video'           => '▶',
+        'quote'           => '«',
+        'money'           => '€',
+    ];
 
     const FRENCH_DATE_NAMES = [
         'January'   => 'janvier',
@@ -93,9 +147,7 @@ class Utils
             return $ts;
         }
 
-        $date = strftime($format, $ts->getTimestamp());
-
-        $date = strtr($date, self::FRENCH_DATE_NAMES);
+        $date = Translate::strftime($format, $ts, 'fr_FR');
         return $date;
     }
 
@@ -161,11 +213,11 @@ class Utils
             return 0;
         }
 
-        if (!preg_match('/^-?(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
+        if (!preg_match('/^(-?)(\d+)(?:[,.](\d{1,2}))?$/', $value, $match)) {
             throw new UserException(sprintf('Le montant est invalide : %s. Exemple de format accepté : 142,02', $value));
         }
 
-        $value = $match[1] . str_pad(@$match[2], 2, '0', STR_PAD_RIGHT);
+        $value = $match[1] . $match[2] . str_pad($match[3] ?? '', 2, '0', STR_PAD_RIGHT);
         $value = (int) $value;
         return $value;
     }
@@ -341,6 +393,8 @@ class Utils
 
     static public function getCountryName($code)
     {
+        $code = strtoupper($code);
+
         $list = self::getCountryList();
 
         if (!isset($list[$code]))
@@ -641,7 +695,7 @@ class Utils
         if (!empty($params['query']))
         {
             $url .= '?';
-            
+
             if (!(is_numeric($params['query']) && (int)$params['query'] === 1) && $params['query'] !== true)
                 $url .= $params['query'];
         }
@@ -649,143 +703,13 @@ class Utils
         return $url;
     }
 
-    static public function sendEmail($context, $recipient, $subject, $content, $id_membre = null, $pgp_key = null)
-    {
-        // Ne pas envoyer de mail à des adresses invalides
-        if (!SMTP::checkEmailIsValid($recipient, false))
-        {
-            throw new UserException('Adresse email invalide: ' . $recipient);
-        }
-
-        $config = Config::getInstance();
-        $subject = sprintf('[%s] %s', $config->get('nom_asso'), $subject);
-
-        // Tentative d'envoi du message en utilisant un plugin
-        $email_sent_via_plugin = Plugin::fireSignal('email.envoi', compact('context', 'recipient', 'subject', 'content', 'id_membre', 'pgp_key'));
-
-        if (!$email_sent_via_plugin)
-        {
-            // L'envoi d'email n'a pas été effectué par un plugin, utilisons l'envoi interne
-            // via mail() ou SMTP donc
-            return self::mail($context, $recipient, $subject, $content, $id_membre, $pgp_key);
-        }
-
-        return true;
-    }
-
-    static public function mail($context, $to, $subject, $content, $id_membre, $pgp_key)
-    {
-        $headers = [];
-        $config = Config::getInstance();
-
-        $content = wordwrap($content);
-        $content = trim($content);
-
-        $content .= sprintf("\n\n-- \n%s\n%s\n\n", $config->get('nom_asso'), $config->get('site_asso'));
-        $content .= "Vous recevez ce message car vous êtes inscrit comme membre de\nl'association.\n";
-        $content .= "Pour ne plus recevoir de message de notre part merci de nous contacter :\n" . $config->get('email_asso');
-
-        $content = preg_replace("#(?<!\r)\n#si", "\r\n", $content);
-
-        if ($pgp_key)
-        {
-            $content = Security::encryptWithPublicKey($pgp_key, $content);
-        }
-
-        $headers['From'] = sprintf('"%s" <%s>', sprintf('=?UTF-8?B?%s?=', base64_encode($config->get('nom_asso'))), $config->get('email_asso'));
-        $headers['Return-Path'] = $config->get('email_asso');
-
-        $headers['MIME-Version'] = '1.0';
-        $headers['Content-type'] = 'text/plain; charset=UTF-8';
-
-        if ($context == self::EMAIL_CONTEXT_BULK)
-        {
-            $headers['Precedence'] = 'bulk';
-        }
-
-        $hash = sha1(uniqid() . var_export([$headers, $to, $subject, $content], true));
-        $headers['Message-ID'] = sprintf('%s@%s', $hash, isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : gethostname());
-
-        if (SMTP_HOST)
-        {
-            $const = '\KD2\SMTP::' . strtoupper(SMTP_SECURITY);
-
-            if (!defined($const))
-            {
-                throw new \LogicException('Configuration: SMTP_SECURITY n\'a pas une valeur reconnue. Valeurs acceptées: STARTTLS, TLS, SSL, NONE.');
-            }
-
-            $secure = constant($const);
-
-            $smtp = new SMTP(SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, $secure);
-            return $smtp->send($to, $subject, $content, $headers);
-        }
-        else
-        {
-            // Encodage du sujet
-            $subject = sprintf('=?UTF-8?B?%s?=', base64_encode($subject));
-            $raw_headers = '';
-
-            // Sérialisation des entêtes
-            foreach ($headers as $name=>$value)
-            {
-                $raw_headers .= sprintf("%s: %s\r\n", $name, $value);
-            }
-
-            return \mail($to, $subject, $content, $raw_headers);
-        }
-    }
-
     static public function iconUnicode(string $shape): string
     {
-        switch ($shape) {
-            case 'up': return '↑';
-            case 'down': return '↓';
-            case 'export': return '↷';
-            case 'reset': return '↺';
-            case 'upload': return '⇑';
-            case 'download': return '⇓';
-            case 'home': return '⌂';
-            case 'print': return '⎙';
-            case 'star': return '★';
-            case 'check': return '☑';
-            case 'settings': return '☸';
-            case 'alert': return '⚠';
-            case 'mail': return '✉';
-            case 'edit': return '✎';
-            case 'delete': return '✘';
-            case 'help': return '❓';
-            case 'plus': return '➕';
-            case 'minus': return '➖';
-            case 'logout': return '⤝';
-            case 'eye-off': return '⤫';
-            case 'menu': return '𝍢';
-            case 'eye': return '👁';
-            case 'user': return '👤';
-            case 'users': return '👪';
-            case 'calendar': return '📅';
-            case 'attach': return '📎';
-            case 'search': return '🔍';
-            case 'lock': return '🔒';
-            case 'unlock': return '🔓';
-            case 'folder': return '🗀';
-            case 'document': return '🗅';
-            case 'bold': return 'B';
-            case 'italic': return 'I';
-            case 'header': return 'H';
-            case 'paragraph': return '§';
-            case 'list-ol': return 'ģ';
-            case 'list-ul': return '•';
-            case 'table': return '◫';
-            case 'radio-unchecked': return '◯';
-            case 'uncheck': return '☐';
-            case 'radio-checked': return '⬤';
-            case 'image': return '🖻';
-            case 'left': return '←';
-            case 'right': return '→';
-            default:
-                throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
+        if (!isset(self::ICONS[$shape])) {
+            throw new \InvalidArgumentException('Unknown icon shape: ' . $shape);
         }
+
+        return self::ICONS[$shape];
     }
 
     static public function array_transpose(array $array): array
@@ -868,23 +792,28 @@ class Utils
         return array($h * 360, $s, $l);
     }
 
-    static public function HTTPCache(?string $hash, int $last_change): bool
+    static public function HTTPCache(?string $hash, ?int $last_change, int $max_age = 3600): bool
     {
-        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : null;
+        $etag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH'], '"\' ') : null;
         $last_modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
 
-        if ($etag === $hash && $last_modified >= $last_change) {
-            header('HTTP/1.1 304 Not Modified', true, 304);
+        $etag = $etag ? str_replace('-gzip', '', $etag) : null;
+
+        header(sprintf('Cache-Control: private, max-age=%d', $max_age), true);
+        header_remove('Expires');
+
+        if ($last_change) {
+            header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)), true);
+        }
+
+        if ($hash) {
+            header(sprintf('Etag: "%s"', $hash), true);
+        }
+
+        if (($etag && $etag === $hash) || ($last_modified && $last_modified >= $last_change)) {
+            http_response_code(304);
             exit;
         }
-
-        header(sprintf('Last-Modified: %s GMT', gmdate('D, d M Y H:i:s', $last_change)));
-
-        if ($etag) {
-            header(sprintf('Etag: %s', $hash));
-        }
-
-        header('Cache-Control: private');
 
         return false;
     }
@@ -940,9 +869,16 @@ class Utils
             self::$collator->setAttribute(\Collator::STRENGTH, \Collator::SECONDARY);
 
             // Don't use \Collator::NUMERIC_COLLATION here as it goes against what would feel logic
+            // for account ordering
             // with NUMERIC_COLLATION: 1, 2, 10, 11, 101
             // without: 1, 10, 101, 11, 2
         }
+
+        // Make sure we have UTF-8
+        // If we don't, we may end up with malformed database, eg. "row X missing from index" errors
+        // when doing an integrity check
+        $a = self::utf8_encode($a);
+        $b = self::utf8_encode($b);
 
         if (isset(self::$collator)) {
             return (int) self::$collator->compare($a, $b);
@@ -952,6 +888,16 @@ class Utils
         $b = strtoupper(self::transliterateToAscii($b));
 
         return strcmp($a, $b);
+    }
+
+    static public function utf8_encode(?string $str): ?string
+    {
+        if (null === $str) {
+            return null;
+        }
+
+        // Check if string is already UTF-8 encoded or not
+        return !preg_match('//u', $str) ? utf8_encode($str) : $str;
     }
 
     /**
@@ -964,6 +910,8 @@ class Utils
         if (null === $str || trim($str) === '') {
             return '';
         }
+
+        $str = str_replace('’', '\'', $str); // Normalize French apostrophe
 
         if (!isset(self::$transliterator) && function_exists('transliterator_create')) {
             self::$transliterator = \Transliterator::create('Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Lower();');
@@ -1085,7 +1033,7 @@ class Utils
                 $cmd = 'chromium --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf=%s %s';
                 break;
             case 'wkhtmltopdf':
-                $cmd = 'wkhtmltopdf %1$s %2$s';
+                $cmd = 'wkhtmltopdf -q --print-media-type --enable-local-file-access --disable-smart-shrinking %s %s';
                 break;
             case 'weasyprint':
                 $cmd = 'weasyprint %1$s %2$s';
@@ -1094,11 +1042,14 @@ class Utils
                 break;
         }
 
-        exec(sprintf($cmd, escapeshellarg($source), escapeshellarg($target)));
+        $cmd .= ' 2>&1';
+
+        $cmd = sprintf($cmd, escapeshellarg($source), escapeshellarg($target));
+        $output = shell_exec($cmd);
         Utils::safe_unlink($source);
 
         if (!file_exists($target)) {
-            throw new \RuntimeException('PDF command failed');
+            throw new \RuntimeException('PDF command failed: ' . $output);
         }
 
         return $target;
@@ -1111,7 +1062,7 @@ class Utils
     static public function num2alpha(int $n): string {
         $r = '';
         for ($i = 1; $n >= 0 && $i < 10; $i++) {
-            $r = chr(0x41 + ($n % pow(26, $i) / pow(26, $i - 1))) . $r;
+            $r = chr(0x41 + intval($n % pow(26, $i) / pow(26, $i - 1))) . $r;
             $n -= pow(26, $i);
         }
         return $r;

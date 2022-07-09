@@ -8,6 +8,7 @@ use Garradin\Utils;
 use Garradin\Membres;
 use Garradin\UserException;
 use Garradin\Plugin;
+use Garradin\Users\Emails;
 
 use const Garradin\SECRET_KEY;
 use const Garradin\WWW_URL;
@@ -104,7 +105,7 @@ class Session extends \KD2\UserSession
 		$query = 'SELECT m.id, m.%1$s AS login, m.passe AS password, m.secret_otp AS otp_secret
 			FROM membres AS m
 			INNER JOIN users_categories AS c ON c.id = m.id_category
-			WHERE m.%1$s = ? COLLATE NOCASE AND c.perm_connect >= %2$d
+			WHERE m.%1$s = ? COLLATE U_NOCASE AND c.perm_connect >= %2$d
 			LIMIT 1;';
 
 		$query = sprintf($query, $champ_id, self::ACCESS_READ);
@@ -160,26 +161,13 @@ class Session extends \KD2\UserSession
 		return $this->db->delete('membres_sessions', $this->db->where('id_membre', $user_id));
 	}
 
-	// Ajout de la gestion de LOCAL_LOGIN
 	public function isLogged(bool $disable_local_login = false)
 	{
 		$logged = parent::isLogged();
 
-		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN'))
-		{
-			$login_id = \Garradin\LOCAL_LOGIN;
-
-			// On va chercher le premier membre avec le droit de gérer la config
-			if (-1 === $login_id) {
-				$login_id = $this->db->firstColumn('SELECT id FROM membres
-					WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
-					LIMIT 1', self::ACCESS_ADMIN);
-			}
-
-			if ($login_id > 0 && (!$logged || ($logged && $this->user->id != $login_id)))
-			{
-				$logged = $this->create($login_id);
-			}
+		// Ajout de la gestion de LOCAL_LOGIN
+		if (!$disable_local_login && defined('\Garradin\LOCAL_LOGIN')) {
+			$logged = $this->forceLogin(\Garradin\LOCAL_LOGIN);
 		}
 
 		return $logged;
@@ -187,7 +175,21 @@ class Session extends \KD2\UserSession
 
 	public function forceLogin(int $id)
 	{
-		return $this->create($id);
+		// On va chercher le premier membre avec le droit de gérer la config
+		if (-1 === $id) {
+			$id = $this->db->firstColumn('SELECT id FROM membres
+				WHERE id_category IN (SELECT id FROM users_categories WHERE perm_config = ?)
+				LIMIT 1', self::ACCESS_ADMIN);
+		}
+
+		$logged = parent::isLogged();
+
+		// Only login if required
+		if ($id > 0 && (!$logged || ($logged && $this->user->id != $id))) {
+			return $this->create($id);
+		}
+
+		return $logged;
 	}
 
 	// Ici checkOTP utilise NTP en second recours
@@ -235,7 +237,7 @@ class Session extends \KD2\UserSession
 
 		$champ_id = $config->get('champ_identifiant');
 
-		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE NOCASE LIMIT 1;', trim($id));
+		$membre = $db->first('SELECT id, email, passe, clef_pgp FROM membres WHERE '.$champ_id.' = ? COLLATE U_NOCASE LIMIT 1;', trim($id));
 
 		if (!$membre || trim($membre->email) == '')
 		{
@@ -258,7 +260,12 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe perdu ?', $message, $membre->id, $membre->clef_pgp);
+		if ($membre->clef_pgp) {
+			$content = Security::encryptWithPublicKey($membre->clef_pgp, $message);
+		}
+
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe perdu ?', $message);
+		return true;
 	}
 
 	public function recoverPasswordCheck($code, &$membre = null)
@@ -327,7 +334,7 @@ class Session extends \KD2\UserSession
 
 		DB::getInstance()->update('membres', ['passe' => $password], 'id = :id', ['id' => (int)$membre->id]);
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_SYSTEM, $membre->email, 'Mot de passe changé', $message, $membre->id, $membre->clef_pgp);
+		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
 	}
 
 	public function editUser($data)
@@ -359,7 +366,7 @@ class Session extends \KD2\UserSession
 		}
 
 		$perm_name = 'perm_' . $category;
-		$perm = $this->getUser()->$perm_name;
+		$perm = $this->getUser()->$perm_name ?? null;
 
 		return ($perm >= $permission);
 	}
@@ -394,12 +401,9 @@ class Session extends \KD2\UserSession
 		$content.= str_repeat('=', 70) . "\n\n";
 		$content.= $message;
 
-		if ($copie)
-		{
-			Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $user->email, $sujet, $content, $user->id);
-		}
+		$dest = $copie ? [$dest => null, $user->email => null] : [$dest => null];
 
-		return Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $dest, $sujet, $content);
+		return Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
 	}
 
 	public function editSecurity(Array $data = [])

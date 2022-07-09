@@ -8,7 +8,6 @@ use Garradin\Entities\Accounting\Transaction;
 use Garradin\Utils;
 use Garradin\Config;
 use Garradin\DB;
-use Garradin\Static_Cache;
 use const Garradin\ADMIN_COLOR1;
 use const Garradin\ADMIN_COLOR2;
 use const Garradin\ADMIN_URL;
@@ -36,10 +35,10 @@ class Graph
 
 	const PLOT_TYPES = [
 		'assets' => [
-			'Total' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]],
+			'Total' => ['type' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING], 'exclude_position' => [Account::LIABILITY]],
 			'Banques' => ['type' => Account::TYPE_BANK],
 			'Caisses' => ['type' => Account::TYPE_CASH],
-			'En attente' => ['type' => Account::TYPE_OUTSTANDING],
+			'En attente' => ['type' => Account::TYPE_OUTSTANDING, 'exclude_position' => [Account::LIABILITY]],
 		],
 		'result' => [
 			'Recettes' => ['position' => Account::REVENUE],
@@ -59,33 +58,10 @@ class Graph
 	const WEEKLY_INTERVAL = 604800; // 7 days
 	const MONTHLY_INTERVAL = 2635200; // 1 month
 
-	static public function clearCache(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700): void
-	{
-		if (!array_key_exists($type, self::PLOT_TYPES)) {
-			throw new \InvalidArgumentException('Unknown type');
-		}
-
-		$cache_id = sha1('plot' . json_encode(func_get_args()));
-
-		Static_Cache::remove($cache_id);
-	}
-
-	static public function clearCacheAllYears(): void
-	{
-		self::clearCache('assets', [], Graph::MONTHLY_INTERVAL, 600);
-		self::clearCache('result', [], Graph::MONTHLY_INTERVAL, 600);
-	}
-
 	static public function plot(string $type, array $criterias, int $interval = self::WEEKLY_INTERVAL, int $width = 700)
 	{
 		if (!array_key_exists($type, self::PLOT_TYPES)) {
 			throw new \InvalidArgumentException('Unknown type');
-		}
-
-		$cache_id = sha1('plot' . json_encode(func_get_args()));
-
-		if (!Static_Cache::expired($cache_id)) {
-			return Static_Cache::get($cache_id);
 		}
 
 		$plot = new Plot($width, 300);
@@ -142,8 +118,6 @@ class Graph
 
 		$out = $plot->output();
 
-		Static_Cache::store($cache_id, $out);
-
 		return $out;
 	}
 
@@ -153,16 +127,10 @@ class Graph
 			throw new \InvalidArgumentException('Unknown type');
 		}
 
-		$cache_id = sha1('pie' . json_encode(func_get_args()));
-
-		if (!Static_Cache::expired($cache_id)) {
-			return Static_Cache::get($cache_id);
-		}
-
 		$pie = new Pie(700, 300);
 
 		$pie_criterias = self::PIE_TYPES[$type];
-		$data = Reports::getClosingSumsWithAccounts(array_merge($criterias, $pie_criterias), 'ABS(sum) DESC');
+		$data = Reports::getAccountsBalances(array_merge($criterias, $pie_criterias), 'balance DESC');
 
 		$others = 0;
 		$colors = self::getColors();
@@ -172,23 +140,22 @@ class Graph
 		$i = 0;
 
 		foreach ($data as $row) {
-			$row->sum = abs($row->sum);
-			$total += $row->sum;
+			$total += $row->balance;
 		}
 
 		foreach ($data as $row)
 		{
 			if ($i++ >= $max || $count > $total*0.95)
 			{
-				$others += $row->sum;
+				$others += $row->balance;
 			}
 			else
 			{
 				$label = strlen($row->label) > 40 ? substr($row->label, 0, 38) . '…' : $row->label;
-				$pie->add(new Pie_Data(abs($row->sum) / 100, $label, $colors[$i-1]));
+				$pie->add(new Pie_Data(abs($row->balance) / 100, $label, $colors[$i-1]));
 			}
 
-			$count += $row->sum;
+			$count += $row->balance;
 		}
 
 		if ($others != 0)
@@ -200,8 +167,6 @@ class Graph
 
 		$out = $pie->output();
 
-		Static_Cache::store($cache_id, $out);
-
 		return $out;
 	}
 
@@ -209,12 +174,6 @@ class Graph
 	{
 		if (!array_key_exists($type, self::PLOT_TYPES)) {
 			throw new \InvalidArgumentException('Unknown type');
-		}
-
-		$cache_id = sha1('bar' . json_encode(func_get_args()));
-
-		if (!Static_Cache::expired($cache_id)) {
-			return Static_Cache::get($cache_id);
 		}
 
 		$bar = new Bar(600, 300);
@@ -235,13 +194,6 @@ class Graph
 				continue;
 			}
 
-			// Invert sums for banks, cash, etc.
-			if ('assets' === $type || 'debts' === $type || ('result' === $type && $line_criterias['position'] == Account::EXPENSE)) {
-				array_walk($years, function (&$v) { $v->sum = $v->sum * -1; });
-			}
-
-			array_walk($years, function (&$v) { $v->sum = (int)$v->sum/100; });
-
 			foreach ($years as $year) {
 				$start = Utils::date_fr($year->start_date, 'Y');
 				$end = Utils::date_fr($year->end_date, 'Y');
@@ -253,7 +205,7 @@ class Graph
 					$data[$year_id] = new Bar_Data_Set($year_label);
 				}
 
-				$data[$year_id]->add($year->sum, $label, $color);
+				$data[$year_id]->add((int) $year->balance / 100, $label, $color);
 			}
 		}
 
@@ -264,8 +216,6 @@ class Graph
 		}
 
 		$out = $bar->output();
-
-		Static_Cache::store($cache_id, $out);
 
 		return $out;
 	}

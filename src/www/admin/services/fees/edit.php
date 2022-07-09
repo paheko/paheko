@@ -38,7 +38,8 @@ $accounting_enabled = (bool) $fee->id_account;
 $years = Years::listOpen();
 
 $account = $fee->id_account ? [$fee->id_account => Accounts::getSelectorLabel($fee->id_account)] : null;
+$analytical_account = $fee->id_analytical ? [$fee->id_analytical => Accounts::getSelectorLabel($fee->id_analytical)] : null;
 
-$tpl->assign(compact('service', 'amount_type', 'fee', 'csrf_key', 'account', 'accounting_enabled', 'years'));
+$tpl->assign(compact('service', 'amount_type', 'fee', 'csrf_key', 'account', 'accounting_enabled', 'years', 'analytical_account'));
 
 $tpl->display('services/fees/edit.tpl');

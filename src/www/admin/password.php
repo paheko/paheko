@@ -6,7 +6,7 @@ const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
 
-if (trim(qg('c')))
+if (qg('c'))
 {
     if (!$session->recoverPasswordCheck(qg('c')))
     {
@@ -38,7 +38,7 @@ elseif (f('recover'))
 
     if (!$form->hasErrors())
     {
-        if (trim(f('id')) && $session->recoverPasswordSend(f('id')))
+        if (f('id') && $session->recoverPasswordSend(f('id')))
         {
             Utils::redirect(ADMIN_URL . 'password.php?sent');
         }

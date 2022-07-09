@@ -35,6 +35,9 @@ class CommonModifiers
 		'linkbutton',
 	];
 
+	/**
+	 * See also money/money_currency in UserTemplate (overriden)
+	 */
 	static public function money($number, bool $hide_empty = true, bool $force_sign = false): string
 	{
 		if ($hide_empty && !$number) {
@@ -105,12 +108,11 @@ class CommonModifiers
 
 	static public function date($ts, string $format = null, string $locale = 'fr'): ?string
 	{
-		if (preg_match('/^DATE_[\w\d]+$/', $format)) {
-			$format = constant('DateTime::' . $format);
-		}
-
 		if (null === $format) {
 			$format = 'd/m/Y à H:i';
+		}
+		elseif (preg_match('/^DATE_[\w\d]+$/', $format)) {
+			$format = constant('DateTime::' . $format);
 		}
 
 		if ($locale == 'fr') {
@@ -282,10 +284,9 @@ class CommonModifiers
 		return $out;
 	}
 
-
 	static public function input(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -304,7 +305,7 @@ class CommonModifiers
 			$tparams['type'] = 'time';
 			$tparams['name'] = sprintf('%s_time', $name);
 			unset($tparams['label']);
-			$suffix = self::input($tparams);
+			$suffix = self::formInput($tparams);
 		}
 
 		$current_value = null;
@@ -386,16 +387,19 @@ class CommonModifiers
 			unset($attributes['disabled']);
 		}
 
-		if (array_key_exists('required', $attributes) || array_key_exists('fake_required', $attributes)) {
+		if (!empty($attributes['readonly'])) {
+			$attributes['readonly'] = 'readonly';
+		}
+		else {
+			unset($attributes['readonly']);
+		}
+
+		if (array_key_exists('required', $attributes)) {
 			$required_label =  ' <b title="Champ obligatoire">(obligatoire)</b>';
 		}
 		else {
 			$required_label =  ' <i>(facultatif)</i>';
 		}
-
-		// Fake required: doesn't set the required attribute, just the label
-		// (useful for form elements that are hidden by JS)
-		unset($attributes['fake_required']);
 
 		$attributes_string = $attributes;
 
@@ -409,10 +413,10 @@ class CommonModifiers
 			$radio = self::formInput(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
 			$out = sprintf('<dd class="radio-btn">%s
 				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $radio, htmlspecialchars($name), htmlspecialchars($value), htmlspecialchars($label), isset($params['help']) ? '<p>' . htmlspecialchars($params['help']) . '</p>' : '');
+			</dd>', $radio, htmlspecialchars($name), htmlspecialchars($value), htmlspecialchars($label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
 			return $out;
 		}
-		elseif ($type == 'select') {
+		if ($type == 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $_key => $_value) {
@@ -437,7 +441,7 @@ class CommonModifiers
 			$input .= '</select>';
 		}
 		elseif ($type == 'textarea') {
-			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, htmlspecialchars($current_value));
+			$input = sprintf('<textarea %s>%s</textarea>', $attributes_string, htmlspecialchars((string)$current_value));
 		}
 		elseif ($type == 'list') {
 			$multiple = !empty($attributes['multiple']);
@@ -452,8 +456,9 @@ class CommonModifiers
 
 			$button = self::button([
 				'shape' => $multiple ? 'plus' : 'menu',
-				'value' => (substr($attributes['target'], 0, 4) === 'http') ? $attributes['target'] : ADMIN_URL . $attributes['target'],
 				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
+				'required' => $attributes['required'] ?? null,
+				'value' => Utils::getLocalURL($attributes['target']),
 				'data-multiple' => $multiple ? '1' : '0',
 				'data-name' => $name,
 			]);
@@ -465,8 +470,12 @@ class CommonModifiers
 				$current_value = Utils::money_format($current_value, ',', '');
 			}
 
+			if ((string) $current_value === '0') {
+				$current_value = '';
+			}
+
 			$currency = Config::getInstance()->get('monnaie');
-			$input = sprintf('<nobr><input type="text" pattern="[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars($current_value), $currency);
+			$input = sprintf('<nobr><input type="text" pattern="-?[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars($current_value), $currency);
 		}
 		else {
 			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars($current_value));
@@ -500,6 +509,10 @@ class CommonModifiers
 			$out .= '</dd>';
 		}
 		else {
+			if (!empty($copy)) {
+				$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" />', $params['name']);
+			}
+
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
 			if ($type == 'file' && empty($params['no_size_limit'])) {
@@ -514,9 +527,12 @@ class CommonModifiers
 		return $out;
 	}
 
-
 	static public function icon(array $params): string
 	{
+		if (isset($params['html']) && $params['html'] == false) {
+			return Utils::iconUnicode($params['shape']);
+		}
+
 		$attributes = array_diff_key($params, ['shape']);
 		$attributes = array_map(fn($v, $k) => sprintf('%s="%s"', $k, htmlspecialchars($v)),
 			$attributes, array_keys($attributes));
@@ -575,6 +591,9 @@ class CommonModifiers
 		}
 
 		$params['class'] .= ' icn-btn';
+
+		// Remove NULL params
+		$params = array_filter($params);
 
 		array_walk($params, function (&$v, $k) {
 			$v = sprintf('%s="%s"', $k, htmlspecialchars($v));

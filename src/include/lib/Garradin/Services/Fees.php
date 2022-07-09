@@ -4,10 +4,12 @@ namespace Garradin\Services;
 
 use Garradin\Config;
 use Garradin\DB;
+use Garradin\UserException;
 use Garradin\Users\Categories;
 use Garradin\Entities\Services\Fee;
 use Garradin\Entities\Accounting\Year;
 use KD2\DB\EntityManager;
+use KD2\DB\DB_Exception;
 
 class Fees
 {
@@ -45,7 +47,7 @@ class Fees
 		$db = DB::getInstance();
 
 		$sql = 'SELECT *, CASE WHEN amount THEN amount ELSE NULL END AS user_amount
-			FROM services_fees ORDER BY id_service, amount IS NULL, label COLLATE NOCASE;';
+			FROM services_fees ORDER BY id_service, amount IS NULL, label COLLATE U_NOCASE;';
 		$result = $db->get($sql);
 
 		if (!$user_id) {
@@ -53,9 +55,18 @@ class Fees
 		}
 
 		foreach ($result as &$row) {
-			if ($row->formula) {
+			if (!$row->formula) {
+				continue;
+			}
+
+			try {
 				$sql = sprintf('SELECT %s FROM membres WHERE id = %d;', $row->formula, $user_id);
 				$row->user_amount = $db->firstColumn($sql);
+			}
+			catch (DB_Exception $e) {
+				$row->label .= sprintf(' (**FORMULE DE CALCUL INVALIDE: %s**)', $e->getMessage());
+				$row->description .= "\n\n**MERCI DE CORRIGER LA FORMULE**";
+				$row->user_amount = -1;
 			}
 		}
 
@@ -78,7 +89,7 @@ class Fees
 			(%1$s AND paid = 0) AS nb_users_unpaid
 			FROM services_fees f
 			WHERE id_service = ?
-			ORDER BY amount, label COLLATE NOCASE;', $condition);
+			ORDER BY amount, label COLLATE U_NOCASE;', $condition);
 
 		return $db->get($sql, $this->service_id);
 	}

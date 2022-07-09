@@ -23,12 +23,11 @@ $form->runIf($session->canAccess($session::SECTION_USERS, $session::ACCESS_ADMIN
 	$fee->save();
 }, 'fee_add', ADMIN_URL . 'services/fees/?id=' . $service->id());
 
-$targets = Account::TYPE_REVENUE;
-
 $accounting_enabled = false;
 $years = Years::listOpen();
+$analytical_account = null;
 
-$tpl->assign(compact('service', 'targets', 'accounting_enabled', 'years'));
+$tpl->assign(compact('service', 'accounting_enabled', 'years', 'analytical_account'));
 $tpl->assign('list', $fees->listWithStats());
 
 $tpl->display('services/fees/index.tpl');

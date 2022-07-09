@@ -30,6 +30,7 @@ class Functions
 		'admin_header',
 		'admin_footer',
 		'signature_url',
+		'mail',
 	];
 
 	static public function admin_header(array $params): string
@@ -125,6 +126,23 @@ class Functions
 		$db->preparedQuery('REPLACE INTO documents_data (document, key, value) VALUES (?, ?, ?);', $id, $key, $params);
 	}
 
+	static public function mail(array $params, Brindille $tpl, int $line)
+	{
+		if (empty($params['to'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "to" manquant pour la fonction "mail"', $line));
+		}
+
+		if (empty($params['subject'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "subject" manquant pour la fonction "mail"', $line));
+		}
+
+		if (empty($params['body'])) {
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
+		}
+
+		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $params['to'], $params['subject'], $params['body']);
+	}
+
 	static public function dump(array $params, Brindille $tpl)
 	{
 		if (!count($params)) {
@@ -216,10 +234,14 @@ class Functions
 		$include->display();
 	}
 
-	static public function http(array $params): void
+	static public function http(array $params, UserTemplate $tpl): void
 	{
 		if (headers_sent()) {
 			return;
+		}
+
+		if (isset($params['redirect'])) {
+			Utils::redirect($params['redirect']);
 		}
 
 		if (isset($params['code'])) {
@@ -287,14 +309,14 @@ class Functions
 
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
 		}
-		elseif (isset($params['redirect'])) {
-			Utils::redirect($params['redirect']);
-		}
-		elseif (isset($params['type'])) {
+
+		if (isset($params['type'])) {
 			header('Content-Type: ' . $params['type'], true);
+			$tpl->setContentType($params['type']);
 		}
-		else {
-			throw new Brindille_Exception('No valid parameter found for http function');
+
+		if (isset($params['download'])) {
+			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
 		}
 	}
 }

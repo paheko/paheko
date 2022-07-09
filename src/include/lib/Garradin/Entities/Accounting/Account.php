@@ -17,6 +17,8 @@ class Account extends Entity
 {
 	const TABLE = 'acc_accounts';
 
+	const NONE = 0;
+
 	// Actif
 	const ASSET = 1;
 
@@ -63,6 +65,11 @@ class Account extends Entity
 	const TYPE_POSITIVE_RESULT = 11;
 	const TYPE_NEGATIVE_RESULT = 12;
 
+	const TYPE_APPROPRIATION_RESULT = 13;
+
+	const TYPE_CREDIT_REPORT = 14;
+	const TYPE_DEBIT_REPORT = 15;
+
 	const TYPES_NAMES = [
 		'',
 		'Banque',
@@ -77,6 +84,9 @@ class Account extends Entity
 		'Clôture',
 		'Résultat excédentaire',
 		'Résultat déficitaire',
+		'Affectation du résultat',
+		'Report à nouveau créditeur',
+		'Report à nouveau débiteur',
 	];
 
 	const LIST_COLUMNS = [
@@ -101,7 +111,7 @@ class Account extends Entity
 			'label' => 'Crédit',
 		],
 		'change' => [
-			'select' => '(l.credit - l.debit) * %d',
+			'select' => '(l.debit - l.credit) * %d',
 			'label' => 'Mouvement',
 		],
 		'sum' => [
@@ -164,9 +174,9 @@ class Account extends Entity
 		'code'        => 'required|string|alpha_num|max:10',
 		'label'       => 'required|string|max:200',
 		'description' => 'string|max:2000',
-		'position'    => 'required|numeric|min:0',
-		'type'        => 'required|numeric|min:0',
 	];
+
+	protected $_position = [];
 
 	public function selfCheck(): void
 	{
@@ -199,7 +209,7 @@ class Account extends Entity
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
 		$sum = 0;
-		$reverse = $simple && self::isReversed($this->type) ? -1 : 1;
+		$reverse = $this->isReversed($simple, $year_id) ? -1 : 1;
 
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
@@ -210,13 +220,14 @@ class Account extends Entity
 			$conditions .= sprintf(' AND t.date <= %s', $db->quote($end->format('Y-m-d')));
 		}
 
+		$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
+
 		if ($simple) {
 			unset($columns['debit']['label'], $columns['credit']['label'], $columns['line_label']);
 			$columns['line_reference']['label'] = 'Réf. paiement';
-			$columns['change']['select'] = sprintf($columns['change']['select'], $reverse);
 		}
 		else {
-			unset($columns['change']);
+			unset($columns['change']['label']);
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
@@ -225,7 +236,7 @@ class Account extends Entity
 		$list->setPageSize(null);
 		$list->setModifier(function (&$row) use (&$sum) {
 			if (property_exists($row, 'sum')) {
-				$sum += isset($row->change) ? $row->change : ($row->credit - $row->debit);
+				$sum += $row->change;
 				$row->sum = $sum;
 			}
 
@@ -243,9 +254,37 @@ class Account extends Entity
 		return $list;
 	}
 
-	static public function isReversed(int $type): bool
+	/**
+	 * Renvoie TRUE si le solde du compte est inversé en vue simplifiée (= crédit - débit, au lieu de débit - crédit)
+	 * @return boolean
+	 */
+	public function isReversed(bool $simple, int $id_year): bool
 	{
-		return in_array($type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY]);
+		if ($simple && in_array($this->type, [self::TYPE_BANK, self::TYPE_CASH, self::TYPE_OUTSTANDING, self::TYPE_EXPENSE, self::TYPE_THIRD_PARTY])) {
+			return false;
+		}
+
+		$position = $this->getPosition($id_year);
+
+		if ($position == self::ASSET || $position == self::EXPENSE) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function getPosition(int $id_year): int
+	{
+		$position = $this->_position[$id_year] ?? $this->position;
+
+		if ($position == self::ASSET_OR_LIABILITY) {
+			$balance = DB::getInstance()->firstColumn('SELECT debit - credit FROM acc_accounts_balances WHERE id = ? AND id_year = ?;', $this->id, $id_year);
+			$position = $balance > 0 ? self::ASSET : self::LIABILITY;
+		}
+
+		$this->_position[$id_year] = $position;
+
+		return $position;
 	}
 
 	public function getReconcileJournal(int $year_id, DateTimeInterface $start_date, DateTimeInterface $end_date, bool $only_non_reconciled = false)
@@ -293,121 +332,6 @@ class Account extends Entity
 		}
 	}
 
-	public function mergeReconcileJournalAndCSV(\Generator $journal, CSV_Custom $csv)
-	{
-		$lines = [];
-
-		$csv = iterator_to_array($csv->iterate());
-		$journal = iterator_to_array($journal);
-		$i = 0;
-		$sum = 0;
-
-		foreach ($csv as $k => &$line) {
-			try {
-				$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
-				$line->amount = (substr($line->amount, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->amount);
-
-				if (!$date) {
-					throw new UserException('Date invalide : ' . $line->date);
-				}
-
-				$line->date = $date;
-			}
-			catch (UserException $e) {
-				throw new UserException(sprintf('Ligne %d : %s', $k, $e->getMessage()));
-			}
-		}
-		unset($line);
-
-		foreach ($journal as $j) {
-			$id = $j->date->format('Ymd') . '.' . $i++;
-
-			$row = (object) ['csv' => null, 'journal' => $j];
-
-			if (isset($j->debit)) {
-				foreach ($csv as &$line) {
-					if (!isset($line->date)) {
-						 continue;
-					}
-
-					// Match date, amount and label
-					if ($j->date->format('Ymd') == $line->date->format('Ymd')
-						&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)
-						&& strtolower($j->label) == strtolower($line->label)) {
-						$row->csv = $line;
-						$line = null;
-						break;
-					}
-				}
-			}
-
-			$lines[$id] = $row;
-		}
-
-		unset($line, $row, $j);
-
-		// Second round to match only amount and label
-		foreach ($lines as $row) {
-			if ($row->csv || !isset($row->journal->debit)) {
-				continue;
-			}
-
-			$j = $row->journal;
-
-			foreach ($csv as &$line) {
-				if (!isset($line->date)) {
-					 continue;
-				}
-
-				if ($j->date->format('Ymd') == $line->date->format('Ymd')
-					&& ($j->credit * -1 == $line->amount || $j->debit == $line->amount)) {
-					$row->csv = $line;
-					$line = null;
-					break;
-				}
-			}
-		}
-
-		unset($j);
-
-		// Then add CSV lines on the right
-		foreach ($csv as $line) {
-			if (null == $line) {
-				continue;
-			}
-
-			$id = $line->date->format('Ymd') . '.' . ($i++);
-			$lines[$id] = (object) ['csv' => $line, 'journal' => null];
-		}
-
-		ksort($lines);
-		$prev = null;
-
-		foreach ($lines as &$line) {
-			$line->add = false;
-
-			if (isset($line->csv)) {
-				$sum += $line->csv->amount;
-				$line->csv->running_sum = $sum;
-
-				if ($prev && ($prev->date->format('Ymd') != $line->csv->date->format('Ymd') || $prev->label != $line->csv->label)) {
-					$prev = null;
-				}
-			}
-
-			if (isset($line->csv) && isset($line->journal)) {
-				$prev = null;
-			}
-
-			if (isset($line->csv) && !isset($line->journal) && !$prev) {
-				$line->add = true;
-				$prev = $line->csv;
-			}
-		}
-
-		return $lines;
-	}
-
 	public function getDepositJournal(int $year_id, array $checked = []): \Generator
 	{
 		$res = DB::getInstance()->iterate('SELECT l.debit, l.credit, t.id, t.date, t.reference, l.reference AS line_reference, t.label, l.label AS line_label, l.reconciled, l.id AS id_line, l.id_account
@@ -438,18 +362,13 @@ class Account extends Entity
 			$year_id, $this->id(), Transaction::STATUS_DEPOSIT);
 	}
 
-	public function getSum(int $year_id, bool $simple = false): int
+	public function getSum(int $year_id, bool $simple = false): ?\stdClass
 	{
-		$sum = (int) DB::getInstance()->firstColumn('SELECT SUM(l.credit) - SUM(l.debit)
-			FROM acc_transactions_lines l
-			INNER JOIN acc_transactions t ON t.id = l.id_transaction
-			wHERE l.id_account = ? AND t.id_year = ?;', $this->id(), $year_id);
+		$sum = DB::getInstance()->first('SELECT balance, credit, debit
+			FROM acc_accounts_balances
+			WHERE id = ? AND id_year = ?;', $this->id(), $year_id);
 
-		if ($simple && self::isReversed($this->type)) {
-			$sum *= -1;
-		}
-
-		return $sum;
+		return $sum ?: null;
 	}
 
 
@@ -461,32 +380,6 @@ class Account extends Entity
 			WHERE l.id_account = ? AND t.id_year = ? AND t.date < ? %s;',
 			$reconciled_only ? 'AND l.reconciled = 1' : '');
 		return (int) DB::getInstance()->firstColumn($sql, $this->id(), $year_id, $date->format('Y-m-d'));
-	}
-
-	public function importSimpleForm(array $translate_type_position, array $translate_type_codes, ?array $source = null)
-	{
-		if (null === $source) {
-			$source = $_POST;
-		}
-
-		if (empty($source['type'])) {
-			throw new UserException('Le type est obligatoire dans ce formulaire');
-		}
-
-		$type = (int) $source['type'];
-
-		if (array_key_exists($type, $translate_type_position)) {
-			$source['position'] = $translate_type_position[$type];
-		}
-		else {
-			$source['position'] = self::ASSET_OR_LIABILITY;
-		}
-
-		if (array_key_exists($type, $translate_type_codes)) {
-			$source['code'] = $translate_type_codes[$type];
-		}
-
-		$this->importForm($source);
 	}
 
 	public function importLimitedForm(?array $source = null)
@@ -540,6 +433,7 @@ class Account extends Entity
 	{
 		$c = Config::getInstance();
 		$c->set('last_chart_change', time());
+		$c->save();
 
 		return parent::save();
 	}

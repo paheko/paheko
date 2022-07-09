@@ -34,7 +34,7 @@ class Entity extends AbstractEntity
 	protected function filterUserValue(string $type, $value, string $key)
 	{
 		if ($type == 'date') {
-			if (!trim($value)) {
+			if (!trim((string) $value)) {
 				return null;
 			}
 
@@ -79,7 +79,7 @@ class Entity extends AbstractEntity
 	public function save(): bool
 	{
 		$name = get_class($this);
-		$name = str_replace('Garradin\Entities', '', $name);
+		$name = str_replace('Garradin\Entities\\', '', $name);
 		$name = 'entity.' . $name . '.save';
 
 		// Specific entity signal
@@ -103,7 +103,7 @@ class Entity extends AbstractEntity
 	public function delete(): bool
 	{
 		$name = get_class($this);
-		$name = str_replace('Garradin\Entities', '', $name);
+		$name = str_replace('Garradin\Entities\\', '', $name);
 		$name = 'entity.' . $name . '.delete';
 
 		if (Plugin::fireSignal($name . '.before', ['entity' => $this])) {

@@ -4,6 +4,10 @@ namespace Garradin\UserTemplate;
 
 use Garradin\Utils;
 
+use Garradin\Entities\Users\Email;
+
+use KD2\SMTP;
+
 use KD2\Brindille_Exception;
 
 class Modifiers
@@ -37,6 +41,7 @@ class Modifiers
 		'intval',
 		'floatval',
 		'substr',
+		'abs',
 	];
 
 	const MODIFIERS_LIST = [
@@ -47,12 +52,15 @@ class Modifiers
 		'xml_escape',
 		'replace',
 		'regexp_replace',
+		'regexp_match',
+		'match',
 		'remove_leading_number',
 		'get_leading_number',
 		'spell_out_number',
 		'parse_date',
 		'math',
 		'money_int' => [Utils::class, 'moneyToInteger'],
+		'check_email',
 	];
 
 	const LEADING_NUMBER_REGEXP = '/^([\d.]+)\s*[.\)]\s*/';
@@ -65,6 +73,32 @@ class Modifiers
 	static public function regexp_replace($str, $pattern, $replace)
 	{
 		return preg_replace($pattern, $replace, $str);
+	}
+
+	static public function regexp_match($str, $pattern)
+	{
+		return (int) preg_match($pattern, $str);
+	}
+
+	static public function match($str, $pattern)
+	{
+		return (int) (stripos($str, $pattern) !== false);
+	}
+
+	static public function check_email($str)
+	{
+		if (!trim((string)$str)) {
+			return false;
+		}
+
+		try {
+			Email::validateAddress((string)$str);
+		}
+		catch (UserException $e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

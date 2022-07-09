@@ -191,8 +191,8 @@ class Config extends Entity
 		}
 
 		// N'enregistrer les couleurs que si ce ne sont pas les couleurs par défaut
-		if (!isset($source['couleur1'], $source['couleur2'])
-			|| ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
+		if (isset($source['couleur1'], $source['couleur2'])
+			&& ($source['couleur1'] == ADMIN_COLOR1 && $source['couleur2'] == ADMIN_COLOR2))
 		{
 			$source['couleur1'] = null;
 			$source['couleur2'] = null;
@@ -246,7 +246,7 @@ class Config extends Entity
 
 		// Check that this field is actually unique
 		if (isset($this->_modified['champ_identifiant'])) {
-			$sql = sprintf('SELECT (COUNT(DISTINCT %s COLLATE NOCASE) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
+			$sql = sprintf('SELECT (COUNT(DISTINCT %s COLLATE U_NOCASE) = COUNT(*)) FROM membres WHERE %1$s IS NOT NULL AND %1$s != \'\';', $this->champ_identifiant);
 			$is_unique = (bool) $db->firstColumn($sql);
 
 			$this->assert($is_unique, sprintf('Le champ "%s" comporte des doublons et ne peut donc pas servir comme identifiant unique de connexion.', $this->champ_identifiant));
@@ -284,7 +284,7 @@ class Config extends Entity
 
 		$params = $params ? $params . '&' : '';
 
-		return WWW_URL . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
+		return BASE_URL . self::FILES[$key] . '?' . $params . substr(md5($this->files[$key]), 0, 10);
 	}
 
 

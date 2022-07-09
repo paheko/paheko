@@ -7,6 +7,11 @@ use Garradin\Entities\Files\File;
 
 require_once __DIR__ . '/_inc.php';
 
+if (qg('check_version') !== null) {
+	echo json_encode(Upgrade::fetchLatestVersion());
+	exit;
+}
+
 $config = Config::getInstance();
 
 $form->runIf('save', function () use ($config) {
@@ -14,7 +19,7 @@ $form->runIf('save', function () use ($config) {
 	$config->save();
 }, 'config', Utils::getSelfURI(['ok' => '']));
 
-$latest = ENABLE_TECH_DETAILS ? Upgrade::getLatestVersion() : null;
+$latest = Upgrade::getLatestVersion();
 
 if (null !== $latest) {
 	$latest = $latest->version;

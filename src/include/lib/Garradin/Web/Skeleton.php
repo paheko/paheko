@@ -97,16 +97,20 @@ class Skeleton
 				header('HTTP/1.1 404 Not Found', true);
 
 				// Fallback to 404
-				$ut = new UserTemplate('web/404.html');;
+				$ut = new UserTemplate('web/404.html');
 				$ut->assignArray($params);
 				$ut->display();
 			}
 
 			try {
 				$ut->assignArray($params);
-				$ut->display();
+				$ut->displayWeb();
 			}
 			catch (Brindille_Exception $e) {
+				if (!headers_sent()) {
+					header('Content-Type: text/html; charset=utf-8', true);
+				}
+
 				printf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le squelette</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
 			}
 		}

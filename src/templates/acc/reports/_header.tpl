@@ -6,16 +6,23 @@
 			<li><strong><a href="{$admin_url}acc/reports/projects.php">Projets</a></strong></li>
 		{/if}
 		{if $current == 'analytical_ledger'}
-				<li class="current"><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query}">Grand livre analytique</a></li>
+				<li class="current"><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query_no_compare}">Grand livre analytique</a></li>
 		{else}
-			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?{$criterias_query}">Graphiques</a></li>
-			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?{$criterias_query}">Balance générale</a></li>
-			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?{$criterias_query}">Journal général</a></li>
-			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query}">Grand livre</a></li>
+			<li{if $current == "graphs"} class="current"{/if}><a href="{$admin_url}acc/reports/graphs.php?{$criterias_query_no_compare}">Graphiques</a></li>
+			<li{if $current == "trial_balance"} class="current"{/if}><a href="{$admin_url}acc/reports/trial_balance.php?{$criterias_query_no_compare}">Balance générale</a></li>
+			<li{if $current == "journal"} class="current"{/if}><a href="{$admin_url}acc/reports/journal.php?{$criterias_query_no_compare}">Journal général</a></li>
+			<li{if $current == "ledger"} class="current"{/if}><a href="{$admin_url}acc/reports/ledger.php?{$criterias_query_no_compare}">Grand livre</a></li>
 			<li{if $current == "statement"} class="current"{/if}><a href="{$admin_url}acc/reports/statement.php?{$criterias_query}">Compte de résultat</a></li>
 			<li{if $current == "balance_sheet"} class="current"{/if}><a href="{$admin_url}acc/reports/balance_sheet.php?{$criterias_query}">Bilan</a></li>
 		{/if}
 		</ul>
+
+		{if $current == 'trial_balance'}
+		<ul class="sub">
+			<li{if $sub_current == 'simple'} class="current"{/if}>{link href="?%s"|args:$criterias_query_no_compare label="Vue simplifiée"}</li>
+			<li{if $sub_current != 'simple'} class="current"{/if}>{link href="?%s&simple=0"|args:$criterias_query_no_compare label="Vue comptable"}</li>
+		</ul>
+		{/if}
 	</nav>
 
 	<h2>{$config.nom_asso} — {$title}</h2>
@@ -27,7 +34,7 @@
 			{$year.start_date|date_short} au {$year.end_date|date_short}, généré le {$close_date|date_short})</p>
 	{/if}
 
-	{if !empty($allow_compare) && !empty($other_years)}
+	{if !empty($allow_compare) && !empty($other_years) && empty($criterias['analytical'])}
 	<form method="get" action="" class="noprint">
 		<fieldset>
 			<legend>Comparer avec un autre exercice</legend>
@@ -36,12 +43,17 @@
 				{button type="submit" label="Comparer" shape="right"}
 			</p>
 			<input type="hidden" name="year" value="{$year.id}" />
+			{if isset($analytical)}
+				<input type="hidden" name="analytical" value="{$analytical.id}" />
+			{/if}
 		</fieldset>
 	</form>
 	{/if}
 
 	<p class="noprint print-btn">
 		<button onclick="window.print(); return false;" class="icn-btn" data-icon="⎙">Imprimer</button>
+		{if $current != 'graphs'}
 		{linkbutton shape="download" href="%s&_pdf"|args:$self_url label="Télécharger en PDF"}
+		{/if}
 	</p>
 </div>

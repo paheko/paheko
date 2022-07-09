@@ -62,12 +62,14 @@
 			var elements = document.querySelectorAll(selector);
 		}
 
-		for (var i = 0; i < elements.length; i++)
-		{
-			if (!visibility)
-				elements[i].classList.add('hidden');
-			else
-				elements[i].classList.remove('hidden');
+		for (var i = 0; i < elements.length; i++) {
+			elements[i].classList.toggle('hidden', visibility ? false : true);
+
+			// Make sure hidden elements are not really required
+			// Avoid Chrome bug "An invalid form control with name='' is not focusable."
+			elements[i].querySelectorAll('input[required], textarea[required], select[required], button[required]').forEach((e) => {
+				e.disabled = !visibility ? true : (e.getAttribute('disabled') ? true : false);
+			});
 		}
 
 		return true;
@@ -301,11 +303,13 @@
 		var btn = document.createElement('button');
 		var cal = null;
 		btn.className = 'icn-btn';
+		btn.title = 'Cliquer pour ouvrir le calendrier. Utiliser les flèches du clavier pour sélectionner une date, et page précédente suivante pour changer de mois.';
 		btn.setAttribute('data-icon', '📅');
 		btn.type = 'button';
 		btn.onclick = () => {
-			g.script('scripts/datepicker2.js', () => {
+			g.script('scripts/lib/datepicker2.min.js', () => {
 				if (null == cal) {
+					btn.onclick = null;
 					cal = new DatePicker(btn, input, {lang: 'fr', format: 1});
 					cal.open();
 				}
@@ -313,6 +317,23 @@
 		};
 		span.appendChild(btn);
 		input.parentNode.insertBefore(span, input.nextSibling);
+
+		const getCaretPosition = e => e && e.selectionStart || -1;
+
+		const inputKeyEvent = (e) => {
+			if (input.value.match(/^\d$|^\d\d?\/\d$/) && e.key.match(/^[0-9]$/)) {
+				input.value += e.key + '/';
+				e.preventDefault();
+				return false;
+			}
+
+			if (e.key == '/' && input.value.slice(-1) == '/') {
+				e.preventDefault();
+				return false;
+			}
+
+		};
+		input.addEventListener('keydown', inputKeyEvent, true);
 	};
 
 	g.current_list_input = null;
@@ -390,11 +411,39 @@
 
 		inputs.forEach((i) => {
 			i.onclick = () => {
+				i.setCustomValidity('');
 				g.current_list_input = i.parentNode;
 				let url = i.value + (i.value.indexOf('?') > 0 ? '&' : '?') + '_dialog';
 				g.openFrameDialog(url);
 				return false;
 			};
+		});
+
+		// Set custom error message if required list is not selected
+		document.querySelectorAll('form').forEach((form) => {
+			form.addEventListener('submit', (e) => {
+				let inputs = form.querySelectorAll('.input-list > button[required]');
+
+				for (var k = 0; k < inputs.length; k++) {
+					var i2 = inputs[k];
+					i2.type = 'submit'; // Force button to have error message, <button type="button"> cannot show validity message
+
+					// Element is hidden or disabled
+					if (!i2.offsetParent || i2.disabled) {
+						i2.required = false;
+						continue;
+					}
+
+					let v = i2.parentNode.querySelector('input[type="hidden"]');
+
+					if (!v || !v.value) {
+						i2.setCustomValidity('Merci de faire une sélection.');
+						i2.reportValidity();
+						e.preventDefault();
+						return false;
+					}
+				}
+			});
 		});
 
 		var multiples = $('form .input-list span button');
