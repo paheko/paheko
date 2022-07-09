@@ -413,14 +413,14 @@ class CommonModifiers
 			$radio = self::formInput(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
 			$out = sprintf('<dd class="radio-btn">%s
 				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
-			</dd>', $radio, htmlspecialchars($name), htmlspecialchars($value), htmlspecialchars($label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
+			</dd>', $radio, htmlspecialchars((string)$name), htmlspecialchars((string)$value), htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
 			return $out;
 		}
 		if ($type == 'select') {
 			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $_key => $_value) {
-				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars($_value));
+				$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 			}
 
 			$input .= '</select>';
@@ -429,10 +429,10 @@ class CommonModifiers
 			$input = sprintf('<select %s>', $attributes_string);
 
 			foreach ($options as $optgroup => $suboptions) {
-				$input .= sprintf('<optgroup label="%s">', htmlspecialchars($optgroup));
+				$input .= sprintf('<optgroup label="%s">', htmlspecialchars((string)$optgroup));
 
 				foreach ($suboptions as $_key => $_value) {
-					$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars($_value));
+					$input .= sprintf('<option value="%s"%s>%s</option>', $_key, $current_value == $_key ? ' selected="selected"' : '', htmlspecialchars((string)$_value));
 				}
 
 				$input .= '</optgroup>';
@@ -450,7 +450,7 @@ class CommonModifiers
 
 			if (null !== $current_value && is_iterable($current_value)) {
 				foreach ($current_value as $v => $l) {
-					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', htmlspecialchars($name), htmlspecialchars($v), htmlspecialchars($l), $multiple ? $delete_btn : '');
+					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', htmlspecialchars((string)$name), htmlspecialchars((string)$v), htmlspecialchars((string)$l), $multiple ? $delete_btn : '');
 				}
 			}
 
@@ -478,7 +478,7 @@ class CommonModifiers
 			$input = sprintf('<nobr><input type="text" pattern="-?[0-9]*([.,][0-9]{1,2})?" inputmode="decimal" size="8" class="money" %s value="%s" /><b>%s</b></nobr>', $attributes_string, htmlspecialchars($current_value), $currency);
 		}
 		else {
-			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars($current_value));
+			$value = isset($attributes['value']) ? '' : sprintf(' value="%s"', htmlspecialchars((string)$current_value));
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
@@ -497,7 +497,7 @@ class CommonModifiers
 
 		$input .= $suffix;
 
-		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], htmlspecialchars($label));
+		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], htmlspecialchars((string)$label));
 
 		if ($type == 'radio' || $type == 'checkbox') {
 			$out = sprintf('<dd>%s %s', $input, $label);
