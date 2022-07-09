@@ -64,7 +64,7 @@
 		</dd>
 		<dd class="help">
 			Cette image sera utilisée dans les documents générés pour l'association.<br />
-			<strong>Attention&nbsp;:</strong> il est conseillé de <strong>ne pas mettre la vraie signature d'une personne</strong> mais de créer une signature ou un tampon spécifique. En effet n'importe quel membre connecté à la gestion de l'association peut recopier cette image.
+			<strong>Attention&nbsp;:</strong> ne pas mettre la vraie signature d'une personne physique, car <strong>tous les membres connectés</strong> ont accès à cette image. Il est conseillé de créer une signature ou un tampon spécifique à l'association.
 		</dd>
 	</dl>
 </fieldset>
