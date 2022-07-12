@@ -34,7 +34,7 @@ $breadcrumbs = $cat ? $cat->getBreadcrumbs() : [];
 
 $parent = $cat ? $cat->parent : null;
 
-$links_errors = $parent ? [] : Web::checkAllInternalLinks();
+$links_errors = $cat !== null ? [] : Web::checkAllInternalLinks();
 
 $tpl->assign(compact('categories', 'pages', 'title', 'current_path', 'parent', 'type_page', 'type_category', 'order_date', 'breadcrumbs', 'cat', 'links_errors'));
 
