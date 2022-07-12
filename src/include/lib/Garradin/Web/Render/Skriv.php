@@ -46,7 +46,7 @@ class Skriv extends AbstractRender
 		$str = CommonModifiers::typo($str);
 
 		$str = preg_replace_callback(';<a href="((?!https?://|\w+:).+)">;i', function ($matches) {
-			return sprintf('<a href="%s" target="_parent">', $this->resolveLink($matches[1]));
+			return sprintf('<a href="%s" target="_parent">', htmlspecialchars($this->resolveLink($matches[1])));
 		}, $str);
 
 		return sprintf('<div class="web-content">%s</div>', $str);
