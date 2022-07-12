@@ -185,7 +185,7 @@ class Page extends Entity
 			// Or update file
 			if ($file->fetch() !== $export) {
 				$file->set('modified', $this->modified);
-				$file->store(null, $export);
+				$file->store(null, $export, false);
 			}
 		}
 
@@ -277,7 +277,12 @@ class Page extends Entity
 		}
 
 		if (isset($source['uri'])) {
-			$source['uri'] = strtolower(Utils::transformTitleToURI($source['uri']));
+			$source['uri'] = Utils::transformTitleToURI($source['uri']);
+
+			if (!$this->exists()) {
+				$source['uri'] = strtolower($source['uri']);
+			}
+
 			$source['path'] = trim($parent . '/' . $source['uri'], '/');
 		}
 
@@ -405,6 +410,39 @@ class Page extends Entity
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Return list of internal links in page that link to non-existing pages
+	 */
+	public function checkInternalLinks(): array
+	{
+		if ($this->format == Render::FORMAT_ENCRYPTED) {
+			return [];
+		}
+
+		$html = $this->render();
+		preg_match_all('/<a[^>]+href=["\']([^"\']+)["\']/', $html, $match, PREG_PATTERN_ORDER);
+		$errors = [];
+
+		foreach ($match[1] as $link) {
+			if (strpos($link, WWW_URL) === 0) {
+				$link = substr($link, strlen(WWW_URL));
+			}
+
+			$link = trim($link, '/');
+
+			// Link is not internal
+			if (preg_match('!https?:|\w+:|/!', $link)) {
+				continue;
+			}
+
+			if (!Web::getByURI($link)) {
+				$errors[] = $link;
+			}
+		}
+
+		return array_unique($errors);
 	}
 
 	public function export(): string
