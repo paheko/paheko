@@ -335,7 +335,7 @@ class Template extends \KD2\Smartyer
 			$suffix = self::formInput($tparams);
 		}
 
-		if ($type == 'file' && $attributes['accept'] ?? null == 'csv') {
+		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
 			if (CALC_CONVERT_COMMAND) {
 				$help = ($help ?? '') . PHP_EOL . 'Formats acceptés : CSV, LibreOffice Calc (ODS), ou Excel (XLSX)';
 				$attributes['accept'] = '.ods,application/vnd.oasis.opendocument.spreadsheet,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,application/csv';
