@@ -256,7 +256,7 @@ class File extends Entity
 	{
 		$this->set('modified', new \DateTime);
 		$this->store(null, rtrim($content));
-		$this->indexForSearch(null, $content);
+		$this->indexForSearch($content);
 		return $this;
 	}
 
@@ -336,8 +336,11 @@ class File extends Entity
 
 		Plugin::fireSignal('files.store', ['file' => $this]);
 
-		if (!$index_search) {
-			$this->indexForSearch($source_path, $source_content);
+		if ($index_search) {
+			$this->indexForSearch($source_content);
+		}
+		else {
+			$this->removeFromSearch();
 		}
 
 		// clean up thumbnails
@@ -349,14 +352,16 @@ class File extends Entity
 		return $this;
 	}
 
-	public function indexForSearch(?string $source_path, ?string $source_content, ?string $title = null): void
+	public function indexForSearch(?string $source_content, ?string $title = null, ?string $forced_mime = null): void
 	{
-		// Store content in search table
-		if (substr($this->mime, 0, 5) == 'text/') {
-			$content = $source_content !== null ? $source_content : Files::callStorage('fetch', $this);
+		$mime = $forced_mime ?? $this->mime;
 
-			if ($this->mime === 'text/html' || $this->mime == 'text/xml') {
-				$content = strip_tags($content);
+		// Store content in search table
+		if (substr($mime, 0, 5) == 'text/') {
+			$content = $source_content !== null ? $source_content : ($source_path !== null ? Files::callStorage('fetch', $this) : null);
+
+			if ($mime === 'text/html' || $mime == 'text/xml') {
+				$content = htmlspecialchars_decode(strip_tags($content));
 			}
 		}
 		else {
@@ -375,6 +380,12 @@ class File extends Entity
 		$db = DB::getInstance();
 		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
 		$db->preparedQuery('INSERT INTO files_search (path, title, content) VALUES (?, ?, ?);', $this->path, $title ?? $this->name, $content);
+	}
+
+	public function removeFromSearch(): void
+	{
+		$db = DB::getInstance();
+		$db->preparedQuery('DELETE FROM files_search WHERE path = ?;', $this->path);
 	}
 
 	/**
