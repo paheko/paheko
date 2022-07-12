@@ -1,5 +1,12 @@
 {include file="admin/_head.tpl" title="Écriture n°%d"|args:$transaction.id current="acc"}
 
+
+{if isset($_GET['created'])}
+	<p class="block confirm">
+		L'écriture a bien été créée.
+	</p>
+{/if}
+
 <nav class="tabs">
 {if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN) && !$transaction->validated && !$tr_year->closed}
 	{linkbutton href="edit.php?id=%d"|args:$transaction.id shape="edit" label="Modifier cette écriture"}

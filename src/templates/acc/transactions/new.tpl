@@ -5,14 +5,6 @@
 <form method="post" action="{$self_url}" data-focus="1">
 	{form_errors}
 
-	{if $ok}
-		<p class="block confirm">
-			L'écriture numéro {link href="details.php?id=%d"|args:$ok class="num" label=$ok} a été ajoutée.
-			{linkbutton shape="menu" href="details.php?id=%d"|args:$ok label="Voir l'écriture"}
-			{linkbutton href="?copy=%d"|args:$ok shape="plus" label="Dupliquer"}
-		</p>
-	{/if}
-
 	<fieldset>
 		<legend>Type d'écriture</legend>
 		<dl>
