@@ -1,5 +1,5 @@
 <dd class="help">
-	Règles à suivre pour créer le fichier CSV&nbsp;:
+	Règles à suivre pour créer le fichier&nbsp;:
 	<ul>
 	{if !CALC_CONVERT_COMMAND}
 		<li>Il est recommandé d'utiliser LibreOffice pour créer le fichier CSV</li>
