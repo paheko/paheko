@@ -18,6 +18,7 @@
 	<section class="search-results">
 	{foreach from=$results item="result"}
 		<article>
+			<h3><a href="{"!web/page.php?p=%s"|local_url|args:$result.path}" target="_parent">{$result.title}</a></h3>
 			<h4>
 				<nav class="breadcrumbs">
 					<ul>
@@ -27,7 +28,6 @@
 					</ul>
 				</nav>
 			</h4>
-			<h3><a href="{"!web/page.php?p=%s"|local_url|args:$result.path}" target="_parent">{$result.title}</a></h3>
 			<p>{$result.snippet|escape|clean_snippet}</p>
 		</article>
 	{/foreach}
