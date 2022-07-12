@@ -21,11 +21,11 @@ abstract class AbstractRender
 	{
 		$this->file = $file;
 
+		$this->user_prefix = $user_prefix;
+
 		if ($file) {
 			$this->isRelativeTo($file);
 		}
-
-		$this->user_prefix = $user_prefix;
 	}
 
 	abstract public function render(?string $content = null): string;
