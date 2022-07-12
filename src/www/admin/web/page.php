@@ -7,11 +7,18 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!qg('p')) {
-	throw new UserException('Page inconnue');
+$page = null;
+
+if (qg('p')) {
+	$page = Web::get(qg('p'));
+}
+elseif (qg('uri')) {
+	$page = Web::getByURI(qg('uri'));
 }
 
-$page = Web::get(qg('p'));
+if (!$page) {
+	throw new UserException('Page inconnue');
+}
 
 if (!$page) {
 	throw new UserException('Page inconnue');
@@ -30,12 +37,13 @@ $tpl->assign('breadcrumbs', $page->getBreadcrumbs());
 $images = $page->getImageGallery(true);
 $files = $page->getAttachmentsGallery(true);
 
-$content = $page->render(ADMIN_URL . 'web/page.php?p=');
+$content = $page->render(ADMIN_URL . 'web/page.php?uri=');
 
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
+$links_errors = $page->checkInternalLinks();
 
-$tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category'));
+$tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category', 'links_errors'));
 
 $tpl->assign('custom_js', ['wiki_gallery.js']);
 $tpl->assign('custom_css', ['wiki.css', '!web/css.php']);

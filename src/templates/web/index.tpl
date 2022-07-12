@@ -44,6 +44,18 @@
 	</p>
 {/if}
 
+{if count($links_errors)}
+<div class="block alert">
+	Des pages contiennent des liens qui mènent à des pages qui n'existent pas&nbsp;:
+	<ul>
+		{foreach from=$links_errors item="page"}
+		<li>{link href="page.php?p=%s"|args:$page.path label=$page.title}</li>
+		{/foreach}
+	</ul>
+</div>
+{/if}
+
+
 {form_errors}
 
 {if count($categories)}

@@ -9,6 +9,7 @@ use Garradin\Utils;
 use Garradin\Entities\Files\File;
 use Garradin\Files\Files;
 use Garradin\Web\Render\Render;
+use Garradin\Web\Web;
 
 use KD2\DB\EntityManager as EM;
 
@@ -415,7 +416,7 @@ class Page extends Entity
 	/**
 	 * Return list of internal links in page that link to non-existing pages
 	 */
-	public function checkInternalLinks(): array
+	public function checkInternalLinks(?array &$pages = null): array
 	{
 		if ($this->format == Render::FORMAT_ENCRYPTED) {
 			return [];
@@ -433,11 +434,14 @@ class Page extends Entity
 			$link = trim($link, '/');
 
 			// Link is not internal
-			if (preg_match('!https?:|\w+:|/!', $link)) {
+			if (preg_match('!https?:|\w+:|/|#!', $link)) {
 				continue;
 			}
 
-			if (!Web::getByURI($link)) {
+			if (null !== $pages && !array_key_exists($link, $pages)) {
+				$errors[] = $link;
+			}
+			elseif (null === $pages && !Web::getByURI($link)) {
 				$errors[] = $link;
 			}
 		}
