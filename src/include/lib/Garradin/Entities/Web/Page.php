@@ -194,8 +194,13 @@ class Page extends Entity
 
 	public function syncSearch(): void
 	{
-		$content = $this->format == Render::FORMAT_ENCRYPTED ? null : strip_tags($this->render());
-		$this->file()->indexForSearch(null, $content, $this->title);
+		if ($this->format == Render::FORMAT_ENCRYPTED) {
+			$this->file()->removeFromSearch();
+		}
+		else {
+			$content = $this->render();
+			$this->file()->indexForSearch($content, $this->title, 'text/html');
+		}
 	}
 
 	public function save(): bool
