@@ -85,6 +85,12 @@
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 	</p>
 
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+	<p class="submit help">
+		Vous pourrez ajouter des fichiers à cette écriture une fois qu'elle aura été enregistrée.
+	</p>
+{/if}
+
 </form>
 
 <script type="text/javascript" async="async">
