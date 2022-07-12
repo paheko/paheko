@@ -16,7 +16,7 @@
 		<fieldset>
 			<legend>Relevé de compte</legend>
 			<p class="help block">
-				Le rapprochement assisté permet de s'aider d'un relevé de compte au format CSV pour trouver les écritures manquantes ou erronées.<br />
+				Le rapprochement assisté permet de s'aider d'un relevé de compte pour trouver les écritures manquantes ou erronées.<br />
 				<a href="https://garradin.eu/rapprochement_assiste" target="_blank">Aide détaillée</a>
 			</p>
 			<dl>
@@ -25,7 +25,7 @@
 					Le fichier doit également disposer soit d'une colonne <strong>Montant</strong>, soit de deux colonnes <strong>Débit</strong>
 					et <strong>Crédit</strong>.
 				</dd>
-				{input type="file" name="file" label="Fichier CSV" accept=".csv,text/csv" required=1}
+				{input type="file" name="file" label="Fichier à importer" accept="csv" required=1}
 			</dl>
 			<p class="submit">
 				{csrf_field key=$csrf_key}

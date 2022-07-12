@@ -335,6 +335,17 @@ class Template extends \KD2\Smartyer
 			$suffix = self::formInput($tparams);
 		}
 
+		if ($type == 'file' && $attributes['accept'] ?? null == 'csv') {
+			if (CALC_CONVERT_COMMAND) {
+				$help = ($help ?? '') . PHP_EOL . 'Formats acceptés : CSV, LibreOffice Calc (ODS), ou Excel (XLSX)';
+				$attributes['accept'] = '.ods,application/vnd.oasis.opendocument.spreadsheet,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,application/csv';
+			}
+			else {
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+				$attributes['accept'] = '.csv,text/csv,application/csv';
+			}
+		}
+
 		$current_value = null;
 		$current_value_from_user = false;
 
