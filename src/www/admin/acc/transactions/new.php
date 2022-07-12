@@ -116,11 +116,10 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 
-	Utils::redirect(Utils::getSelfURI(false) . '?ok=' . $transaction->id());
+	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, 'acc_transaction_new');
 
 $tpl->assign(compact('transaction', 'amount', 'lines', 'types_accounts', 'id_analytical'));
-$tpl->assign('ok', (int) qg('ok'));
 
 $tpl->assign('types_details', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
