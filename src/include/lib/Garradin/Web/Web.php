@@ -166,6 +166,30 @@ class Web
 		return Files::getFromURI(File::CONTEXT_WEB . '/' . $path . '/' . Utils::basename($uri));
 	}
 
+	static public function checkAllInternalLinks(): array
+	{
+		$sql = 'SELECT * FROM @TABLE ORDER BY title COLLATE U_NOCASE;';
+		$list = [];
+
+		foreach (EM::getInstance(Page::class)->iterate($sql) as $page) {
+			if (!$page->file()) {
+				continue;
+			}
+
+			$list[$page->uri] = $page;
+		}
+
+		$errors = [];
+
+		foreach ($list as $page) {
+			if (count($page->checkInternalLinks($list))) {
+				$errors[] = $page;
+			}
+		}
+
+		return $errors;
+	}
+
 	static public function dispatchURI()
 	{
 		$uri = !empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';

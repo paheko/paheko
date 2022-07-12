@@ -36,6 +36,17 @@
 </nav>
 {/if}
 
+{if count($links_errors)}
+<div class="block alert">
+	Cette page contient des liens qui mènent à des pages qui n'existent pas ou ont été renommées&nbsp;:
+	<ul>
+		{foreach from=$links_errors item="link"}
+		<li>{$link}</li>
+		{/foreach}
+	</ul>
+	Il est conseillé de modifier la page pour corriger les liens.
+</div>
+{/if}
 
 {if !$content}
 	<p class="block alert">Cette page est vide, cliquez sur « Modifier » pour commencer à rédiger son contenu.</p>
