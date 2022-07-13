@@ -358,7 +358,7 @@ class File extends Entity
 
 		// Store content in search table
 		if (substr($mime, 0, 5) == 'text/') {
-			$content = $source_content !== null ? $source_content : ($source_path !== null ? Files::callStorage('fetch', $this) : null);
+			$content = $source_content ?? Files::callStorage('fetch', $this);
 
 			if ($mime === 'text/html' || $mime == 'text/xml') {
 				$content = htmlspecialchars_decode(strip_tags($content));
