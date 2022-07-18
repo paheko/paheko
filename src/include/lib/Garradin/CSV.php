@@ -74,7 +74,6 @@ class CSV
 		$cmd = sprintf($cmd, escapeshellarg($from), escapeshellarg($to));
 		$cmd .= ' 2>&1';
 		$return = shell_exec($cmd);
-			//var_dump($cmd, $return); exit;
 
 		if (!file_exists($to)) {
 			throw new UserException('Impossible de convertir le fichier. Vérifier que le fichier est un format supporté.');
