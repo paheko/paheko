@@ -187,6 +187,11 @@ class Transaction extends Entity
 		return $this->_lines;
 	}
 
+	public function countLines(): int
+	{
+		return count($this->getLines());
+	}
+
 	public function removeLine(Line $remove)
 	{
 		$new = [];
@@ -431,6 +436,15 @@ class Transaction extends Entity
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
 			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
+		}
+
+		// Avoid saving transactions with zero lines
+		if (!count($this->getLines())) {
+			throw new ValidationException('Cette écriture ne comporte aucune ligne.');
+		}
+
+		if (count($this->getLines()) < 2) {
+			throw new ValidationException('Cette écriture comporte moins de deux lignes.');
 		}
 
 		if (!parent::save()) {
