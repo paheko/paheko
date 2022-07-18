@@ -485,8 +485,9 @@ class Transactions
 
 					$line->importForm($data);
 
-					// If a line_id was supplied, just changing the object is enough, no need to add it to the transaction
-					if (empty($row->line_id)) {
+					// If a line_id was supplied, then we already have a Line object.
+					// Just changing it is enough, no need to add it to the transaction
+					if (!$line->exists()) {
 						$transaction->addLine($line);
 					}
 				}
