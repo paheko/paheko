@@ -175,6 +175,9 @@ class Skeleton
 		elseif ($ext == 'js') {
 			return 'text/javascript';
 		}
+		elseif ($ext == 'txt') {
+			return 'text/plain';
+		}
 
 		if ($this->file) {
 			return $this->file->mime;
