@@ -65,6 +65,10 @@
     padding: .2rem;
 }
 
+.web-content pre code {
+    display: block;
+}
+
 .web-content dl.footnotes dd {
     margin: 0;
     margin-bottom: 1rem;
