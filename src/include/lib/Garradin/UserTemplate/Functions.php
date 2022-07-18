@@ -7,6 +7,7 @@ use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 
 use Garradin\Utils;
+use Garradin\Users\Emails;
 use Garradin\Web\Skeleton;
 
 use const Garradin\WWW_URL;
@@ -34,7 +35,7 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
 		}
 
-		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $params['to'], $params['subject'], $params['body']);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$params['to'] => []], null, $params['subject'], $params['body']);
 	}
 
 	static public function dump(array $params, Brindille $tpl)
