@@ -57,11 +57,11 @@ class CSV_Custom
 		}
 
 		for ($i = 0; $i < count($this->csv); $i++) {
-			if ($i <= $this->skip) {
+			if ($i < $this->skip) {
 				continue;
 			}
 
-			yield $i => $this->getLine($i);
+			yield $i => $this->getLine($i + 1);
 		}
 	}
 
