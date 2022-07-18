@@ -69,6 +69,10 @@
     display: block;
 }
 
+.web-content pre, .web-content table {
+    overflow-x: auto;
+}
+
 .web-content dl.footnotes dd {
     margin: 0;
     margin-bottom: 1rem;
