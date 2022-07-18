@@ -41,21 +41,33 @@ class Skeleton
 		return null;
 	}
 
-	public function serve(array $params = []): bool
+	public function error_404(): void
 	{
 		header('Content-Type: text/html;charset=utf-8', true);
+		header('HTTP/1.1 404 Not Found', true);
+		$tpl = new self('404.html');
 
+		if (!$tpl->serve()) {
+			throw new UserException('Cette page n\'existe pas.');
+		}
+	}
+
+	public function serve(array $params = []): bool
+	{
 		if (!$this->exists()) {
-			header('HTTP/1.1 404 Not Found', true);
-			$tpl = new self('404.html');
-
-			if (!$tpl->serve()) {
-				throw new UserException('Cette page n\'existe pas.');
-			}
+			$this->error_404();
 		}
 
-		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
+		$type = $this->type();
+
+		if (null === $type) {
+			$this->error_404();
+		}
+
+		// Serve a template
+		if (preg_match(self::TEMPLATE_TYPES, $type)) {
 			$ut = new UserTemplate($this->file);
+			$ut->setContentType($type);
 
 			if (!$this->file) {
 				$ut->setSource($this->defaultPath());
@@ -73,14 +85,15 @@ class Skeleton
 				printf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le squelette</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
 			}
 		}
+		// Serve a static file
 		elseif ($this->file) {
 			$this->file->serve();
 		}
+		// Serve a static skeleton file (from skel-dist)
 		else {
-			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
+			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 			readfile($this->defaultPath());
 		}
-
 
 		return true;
 	}
@@ -161,22 +174,42 @@ class Skeleton
 		}
 	}
 
-	public function type(): string
+	public function type(): ?string
 	{
 		$name = $this->file->name ?? $this->defaultPath();
-		$ext = substr($name, strrpos($name, '.')+1);
+		$dot = strrpos($name, '.');
 
-		if ($ext == 'css') {
-			return 'text/css';
-		}
-		elseif ($ext == 'html') {
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
 			return 'text/html';
 		}
-		elseif ($ext == 'js') {
-			return 'text/javascript';
+
+		$ext = substr($name, $dot+1);
+
+		switch ($ext) {
+			case 'txt':
+				return 'text/plain';
+			case 'css':
+				return 'text/css';
+			case 'html':
+			case 'htm':
+				return 'text/html';
+			case 'xml':
+				return 'text/xml';
+			case 'js':
+				return 'text/javascript';
+			case 'png':
+			case 'gif':
+			case 'webp':
+				return 'image/' . $ext;
+			case 'jpeg':
+			case 'jpg':
+				return 'image/jpeg';
 		}
-		elseif ($ext == 'txt') {
-			return 'text/plain';
+
+		if (preg_match('/php\d*/i', $ext)) {
+			return null;
 		}
 
 		if ($this->file) {
