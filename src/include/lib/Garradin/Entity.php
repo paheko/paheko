@@ -31,25 +31,30 @@ class Entity extends AbstractEntity
 		return $this->import($source);
 	}
 
+	static public function filterUserDateValue(?string $value): ?\DateTime
+	{
+		if (!trim((string) $value)) {
+			return null;
+		}
+
+		if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
+			return \DateTime::createFromFormat('d/m/y', $value);
+		}
+		elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
+			return \DateTime::createFromFormat('d/m/Y', $value);
+		}
+		elseif (preg_match('!^\d{4}/\d{2}/\d{2}$!', $value)) {
+			return \DateTime::createFromFormat('Y/m/d', $value);
+		}
+		elseif (null !== $value) {
+			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
+		}
+	}
+
 	protected function filterUserValue(string $type, $value, string $key)
 	{
 		if ($type == 'date') {
-			if (!trim((string) $value)) {
-				return null;
-			}
-
-			if (preg_match('!^\d{2}/\d{2}/\d{2}$!', $value)) {
-				return \DateTime::createFromFormat('d/m/y', $value);
-			}
-			elseif (preg_match('!^\d{2}/\d{2}/\d{4}$!', $value)) {
-				return \DateTime::createFromFormat('d/m/Y', $value);
-			}
-			elseif (preg_match('!^\d{4}/\d{2}/\d{2}$!', $value)) {
-				return \DateTime::createFromFormat('Y/m/d', $value);
-			}
-			elseif (null !== $value) {
-				throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
-			}
+			return self::filterUserDateValue($value);
 		}
 		elseif ($type == 'DateTime') {
 			if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}$!', $value)) {
