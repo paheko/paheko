@@ -199,19 +199,19 @@
 		};
 
 		let applyHeader = () => {
-			wrapTags(config.format == 'markdown' ? '## ' : '== ', '');
+			return wrapTags(config.format == 'markdown' ? '## ' : '== ', '');
 		};
 
 		let applyBold = () => {
-			wrapTags('**', '**');
+			return wrapTags('**', '**');
 		};
 
 		let applyItalic = () => {
 			if (config.format == 'markdown') {
-				wrapTags("_", "_");
+				return wrapTags("_", "_");
 			}
 			else {
-				wrapTags("''", "''");
+				return wrapTags("''", "''");
 			}
 		};
 
@@ -229,10 +229,10 @@
 			}
 
 			if (config.format == 'markdown') {
-				wrapTags("[", "](" + url + ')');
+				return wrapTags("[", "](" + url + ')');
 			}
 			else {
-				wrapTags("[[", "|" + url + ']]');
+				return wrapTags("[[", "|" + url + ']]');
 			}
 		};
 
