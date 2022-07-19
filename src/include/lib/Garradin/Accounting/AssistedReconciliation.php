@@ -7,6 +7,7 @@ use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entity;
 
 /**
  * Provides assisted reconciliation
@@ -33,11 +34,7 @@ class AssistedReconciliation
 		$this->csv->setColumns(self::COLUMNS);
 		$this->csv->setMandatoryColumns(['label', 'date']);
 		$this->csv->setModifier(function (\stdClass $line): \stdClass {
-			$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
-
-			if (!$date) {
-				throw new UserException(sprintf('Date invalide : %s (format attendu : JJ/MM/AAAA)', $line->date));
-			}
+			$date = Entity::filterUserDateValue($line->date);
 
 			$line->date = $date;
 
