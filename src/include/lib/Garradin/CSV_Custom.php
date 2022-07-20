@@ -61,7 +61,7 @@ class CSV_Custom
 				continue;
 			}
 
-			yield $i => $this->getLine($i + 1);
+			yield $i+1 => $this->getLine($i + 1);
 		}
 	}
 

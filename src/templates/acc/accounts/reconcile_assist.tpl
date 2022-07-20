@@ -138,7 +138,7 @@
 					{if isset($line->csv)}
 						<th class="separator">{$line.csv.label}</th>
 						<td class="money">
-							{$line.csv.amount|raw|money}
+							{$line.csv.amount|raw|money:true:true}
 						</td>
 						<td class="money">{if $line.csv.balance}{$line.csv.balance|raw|money}{else}{$line.csv.running_sum|raw|money}{/if}</td>
 						<td>{$line.csv.date|date_short}</td>
