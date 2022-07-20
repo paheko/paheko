@@ -48,7 +48,7 @@ class AssistedReconciliation
 				$line->amount = $line->credit ?: '-' . ltrim($line->debit, '- \t\r\n');
 			}
 
-			$line->amount = (substr($line->amount, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->amount);
+			$line->amount = Utils::moneyToInteger($line->amount);
 
 			if (!empty($line->balance)) {
 				$line->balance = (substr($line->balance, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->balance);
@@ -160,7 +160,7 @@ class AssistedReconciliation
 			}
 		}
 
-		unset($j);
+		unset($j, $line);
 
 		// Then add CSV lines on the right
 		foreach ($csv as $line) {
