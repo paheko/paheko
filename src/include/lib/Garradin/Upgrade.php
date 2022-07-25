@@ -452,6 +452,11 @@ class Upgrade
 				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
 			}
 
+			if (version_compare($v, '1.1.28', '<')) {
+				$db->createFunction('html_decode', 'htmlspecialchars_decode');
+				$db->exec('UPDATE files_search SET content = html_decode(content);');
+			}
+
 			// Vérification de la cohérence des clés étrangères
 			$db->foreignKeyCheck();
 
