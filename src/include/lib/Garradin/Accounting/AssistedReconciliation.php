@@ -44,7 +44,7 @@ class AssistedReconciliation
 				$has_amount = in_array('amount', $this->csv->getTranslationTable());
 			}
 
-			if (!$has_amount) {
+			if (!$has_amount && isset($line->credit) && isset($line->debit)) {
 				$line->amount = $line->credit ?: '-' . ltrim($line->debit, '- \t\r\n');
 			}
 
