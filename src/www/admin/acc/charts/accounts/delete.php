@@ -20,7 +20,7 @@ if ($chart->archived) {
 }
 
 if (($chart->code && !$account->user) || !$account->canDelete()) {
-	throw new UserException("Ce compte ne peut être supprimé car des écritures y sont liées (peut-être sur l'exercice courant ou sur un exercice clôt).\nSi vous souhaitez faire du ménage dans la liste des comptes il est recommandé de créer un nouveau comptable.");
+	throw new UserException("Ce compte ne peut être supprimé car des écritures y sont liées (sur l'exercice courant ou sur un exercice déjà clôturé).\nSi vous souhaitez faire du ménage dans la liste des comptes il est recommandé de créer un nouveau plan comptable. Attention, il n'est pas possible de modifier le plan comptable d'un exercice ouvert.");
 }
 
 if (f('delete') && $form->check('acc_accounts_delete_' . $account->id()))
