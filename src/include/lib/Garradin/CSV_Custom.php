@@ -187,6 +187,7 @@ class CSV_Custom
 		$this->session->set($this->key, null);
 		$this->session->set($this->key . '_translation', null);
 		$this->session->set($this->key . '_skip', null);
+		$this->csv = null;
 		$this->translation = null;
 	}
 

@@ -51,12 +51,16 @@ if ($type && $type_name) {
 	$csv->setColumns($columns);
 	$csv->setMandatoryColumns(Transactions::MANDATORY_COLUMNS[$type]);
 
-	$form->runIf(f('assign') && $csv->loaded(), function () use ($type, $csv, $year, $user, $ignore_ids) {
+	$form->runIf(f('assign') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids) {
 		$csv->skip((int)f('skip_first_line'));
 		$csv->setTranslationTable(f('translation_table'));
 
-		Transactions::import($type, $year, $csv, $user->id, (bool) $ignore_ids);
-		$csv->clear();
+		try {
+			Transactions::import($type, $year, $csv, $user->id, (bool) $ignore_ids);
+		}
+		finally {
+			$csv->clear();
+		}
 	}, $csrf_key, ADMIN_URL . 'acc/years/?msg=IMPORT');
 
 	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($type, $csv, $year, $params) {
