@@ -343,53 +343,59 @@ class CSV
 
 	static public function import(string $file, array $expected_columns): \Generator
 	{
-		$fp = fopen($file, 'r');
+		$file = self::convertUploadIfRequired($file);
+		try {
+			$fp = fopen($file, 'r');
 
-		if (!$fp) {
-			throw new UserException('Le fichier ne peut être ouvert');
-		}
-
-		// Find the delimiter
-		$delim = self::findDelimiter($fp);
-		self::skipBOM($fp);
-
-		$line = 0;
-
-		$columns = fgetcsv($fp, 4096, $delim);
-
-		// Make sure the data is UTF-8 encoded
-		$columns = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $columns);
-
-		// Check for required columns
-		foreach ($expected_columns as $column) {
-			if (!in_array($column, $columns, true)) {
-				throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $column));
-			}
-		}
-
-		while (!feof($fp))
-		{
-			$row = fgetcsv($fp, 4096, $delim);
-			$line++;
-
-			// Empty line, skip
-			if (empty($row)) {
-				continue;
+			if (!$fp) {
+				throw new UserException('Le fichier ne peut être ouvert');
 			}
 
-			if (count($row) != count($columns))
-			{
-				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
-			}
+			// Find the delimiter
+			$delim = self::findDelimiter($fp);
+			self::skipBOM($fp);
+
+			$line = 0;
+
+			$columns = fgetcsv($fp, 4096, $delim);
 
 			// Make sure the data is UTF-8 encoded
-			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
+			$columns = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $columns);
 
-			$row = array_combine($columns, $row);
+			// Check for required columns
+			foreach ($expected_columns as $column) {
+				if (!in_array($column, $columns, true)) {
+					throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $column));
+				}
+			}
 
-			yield $line => $row;
+			while (!feof($fp))
+			{
+				$row = fgetcsv($fp, 4096, $delim);
+				$line++;
+
+				// Empty line, skip
+				if (empty($row)) {
+					continue;
+				}
+
+				if (count($row) != count($columns))
+				{
+					throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
+				}
+
+				// Make sure the data is UTF-8 encoded
+				$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
+
+				$row = array_combine($columns, $row);
+
+				yield $line => $row;
+			}
+
+			fclose($fp);
 		}
-
-		fclose($fp);
+		finally {
+			@unlink($file);
+		}
 	}
 }
