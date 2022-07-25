@@ -737,7 +737,7 @@ class Transaction extends Entity
 			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
 
 			if (!$open_account) {
-				throw new ValidationException('Aucun compte favori de bilan d\'ouverture n\'existe dans le plan comptable');
+				throw new ValidationException('Aucun compte usuel de bilan d\'ouverture n\'existe dans le plan comptable');
 			}
 
 			$line->id_account = $open_account->id();

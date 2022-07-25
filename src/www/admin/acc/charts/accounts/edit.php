@@ -53,7 +53,7 @@ if (f('edit') && $form->check('acc_accounts_edit_' . $account->id()))
 }
 
 $types = $account::TYPES_NAMES;
-$types[0] = '-- Pas un compte favori';
+$types[0] = '-- Pas un compte usuel';
 
 $tpl->assign(compact('types', 'account', 'edit_disabled'));
 
