@@ -275,6 +275,10 @@ class File extends Entity
 			throw new \LogicException('Cannot store a file that does not have a target path and name');
 		}
 
+		if ($this->type == self::TYPE_DIRECTORY) {
+			throw new \LogicException('Cannot store a directory');
+		}
+
 		if ($source_path && !$source_content)
 		{
 			$this->set('size', filesize($source_path));
@@ -804,6 +808,10 @@ class File extends Entity
 
 	public function fetch()
 	{
+		if ($this->type == self::TYPE_DIRECTORY) {
+			throw new \LogicException('Cannot fetch a directory');
+		}
+
 		return Files::callStorage('fetch', $this);
 	}
 
