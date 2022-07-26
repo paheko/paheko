@@ -20,51 +20,75 @@ class Transactions
 	const EXPORT_FULL = 'full';
 	const EXPORT_GROUPED = 'grouped';
 	const EXPORT_SIMPLE = 'simple';
+	const EXPORT_EBP = 'ebp';
+	const EXPORT_FEC = 'fec';
 
 	const EXPORT_NAMES = [
 		self::EXPORT_FULL => 'Complet',
 		self::EXPORT_GROUPED => 'Groupé',
 		self::EXPORT_SIMPLE => 'Simplifié',
+		//self::EXPORT_EBP => 'EBP 2012',
+		self::EXPORT_FEC => 'FEC (Fichier des Écritures Comptables)',
 	];
 
 	const EXPORT_COLUMNS_FULL = [
-		'id'        => 'Numéro d\'écriture',
-		'type'      => 'Type',
-		'status'    => 'Statut',
-		'label'     => 'Libellé',
-		'date'      => 'Date',
-		'notes'     => 'Remarques',
-		'reference' => 'Numéro pièce comptable',
+		'Numéro d\'écriture'     => 'id',
+		'Type'                   => 'type',
+		'Statut'                 => 'status',
+		'Libellé'                => 'label',
+		'Date'                   => 'date',
+		'Remarques'              => 'notes',
+		'Numéro pièce comptable' => 'reference',
 
 		// Lines
-		'line_id'        => 'Numéro ligne',
-		'account'        => 'Compte',
-		'debit'          => 'Débit',
-		'credit'         => 'Crédit',
-		'line_reference' => 'Référence ligne',
-		'line_label'     => 'Libellé ligne',
-		'reconciled'     => 'Rapprochement',
-		'analytical'     => 'Compte analytique',
-		'linked_users'   => 'Membres associés',
+		'Numéro ligne'      => 'line_id',
+		'Compte'            =>'account',
+		'Débit'             => 'debit',
+		'Crédit'            => 'credit',
+		'Référence ligne'   => 'line_reference',
+		'Libellé ligne'     =>'line_label',
+		'Rapprochement'     => 'reconciled',
+		'Compte analytique' => 'analytical',
+		'Membres associés'  => 'linked_users',
 	];
 
 	const EXPORT_COLUMNS = [
 		self::EXPORT_GROUPED => self::EXPORT_COLUMNS_FULL,
 		self::EXPORT_FULL => self::EXPORT_COLUMNS_FULL,
 		self::EXPORT_SIMPLE => [
-			'id'             => 'Numéro d\'écriture',
-			'type'           => 'Type',
-			'status'         => 'Statut',
-			'label'          => 'Libellé',
-			'date'           => 'Date',
-			'notes'          => 'Remarques',
-			'reference'      => 'Numéro pièce comptable',
-			'p_reference'    => 'Référence paiement',
-			'debit_account'  => 'Compte de débit',
-			'credit_account' => 'Compte de crédit',
-			'amount'         => 'Montant',
-			'analytical'     => 'Compte analytique',
-			'linked_users'   => 'Membres associés',
+			'Numéro d\'écriture'     => 'id',
+			'Type'                   => 'type',
+			'Statut'                 => 'status',
+			'Libellé'                => 'label',
+			'Date'                   => 'date',
+			'Remarques'              => 'notes',
+			'Numéro pièce comptable' => 'reference',
+			'Référence paiement'     => 'p_reference',
+			'Compte de débit'        => 'debit_account',
+			'Compte de crédit'       => 'credit_account',
+			'Montant'                => 'amount',
+			'Compte analytique'      => 'analytical',
+			'Membres associés'       => 'linked_users',
+		],
+		self::EXPORT_FEC => [
+			'JournalCode' => null,
+			'JournalLib' => null,
+			'EcritureNum' => 'id',
+			'EcritureDate' => 'date',
+			'CompteNum' => 'account',
+			'CompteLib' => 'account_label',
+			'CompAuxNum' => null,
+			'CompAuxLib' => null,
+			'PieceRef' => 'reference',
+			'PieceDate' => 'date',
+			'EcritureLib' => 'label',
+			'Debit' => 'debit',
+			'Credit' => 'credit',
+			'EcritureLet' => null,
+			'DateLet' => null,
+			'ValidDate' => null,
+			'MontantDevise' => null,
+			'Idevise' => null,
 		],
 	];
 
@@ -83,6 +107,14 @@ class Transactions
 			'credit_account',
 			'debit_account',
 			'amount'
+		],
+		self::EXPORT_FEC => [
+			'label',
+			'date',
+			'account',
+			'label',
+			'debit',
+			'credit',
 		],
 	];
 
@@ -179,7 +211,7 @@ class Transactions
 			$format,
 			sprintf('Export comptable %s - %s - %s', strtolower(self::EXPORT_NAMES[$type]), Config::getInstance()->get('nom_asso'), $year->label),
 			self::iterateExport($year->id(), $type),
-			array_values(self::EXPORT_COLUMNS[$type])
+			array_keys(self::EXPORT_COLUMNS[$type])
 		);
 	}
 
@@ -189,7 +221,7 @@ class Transactions
 
 		foreach (self::EXPORT_NAMES as $type => $label) {
 			$i = 0;
-			$out[$type] = [self::EXPORT_COLUMNS[$type]];
+			$out[$type] = [array_keys(self::EXPORT_COLUMNS[$type])];
 
 			foreach (self::iterateExport($year->id(), $type) as $row) {
 				$out[$type][] = $row;
@@ -230,9 +262,35 @@ class Transactions
 
 			$sql = sprintf($sql, $id_field, Transaction::TYPE_ADVANCED);
 		}
-		else {
+		elseif (self::EXPORT_FEC == $type) {
+			// JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib
+			// |CompAuxNum|CompAuxLib|PieceRef|PieceDate|EcritureLib|Debit|Credit
+			// |EcritureLet|DateLet|ValidDate|MontantDevise|Idevise
+
+			$sql = 'SELECT
+				printf(\'%02d\', t.type) AS type_id, t.type,
+				t.id, t.date,
+				a.code AS account, a.label AS account_label,
+				NULL AS CompAuxNum, NULL AS CompAuxLib,
+				IFNULL(t.reference, \'--\'),
+				strftime(\'%Y%m%d\', t.date) AS ref_date,
+				t.label,
+				l.debit, l.credit,
+				NULL AS EcritureLet,
+				NULL AS DateLet,
+				NULL AS ValidDate,
+				NULL AS MontantDevise,
+				NULL AS Idevise
+				FROM acc_transactions t
+				INNER JOIN acc_transactions_lines l ON l.id_transaction = t.id
+				INNER JOIN acc_accounts a ON a.id = l.id_account
+				WHERE t.id_year = ?
+				GROUP BY t.id, l.id
+				ORDER BY t.date, t.id, l.id;';
+		}
+		elseif (self::EXPORT_FULL == $type || self::EXPORT_GROUPED == $type) {
 			$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
-				l.id AS line_id, a.code AS account, l.debit AS debit, l.credit AS credit,
+				l.id AS line_id, a.code AS account, a.label AS account_label, l.debit AS debit, l.credit AS credit,
 				l.reference AS line_reference, l.label AS line_label, l.reconciled,
 				a2.code AS analytical,
 				GROUP_CONCAT(u.%s) AS linked_users
@@ -248,30 +306,36 @@ class Transactions
 
 			$sql = sprintf($sql, $id_field);
 		}
+		else {
+			throw new \LogicException('Unknown export type: ' . $type);
+		}
 
 		$res = DB::getInstance()->iterate($sql, $year_id);
 
 		$previous_id = null;
 
 		foreach ($res as $row) {
-			if ($previous_id === $row->id && $type == self::EXPORT_GROUPED) {
+			if ($type == self::EXPORT_GROUPED && $previous_id === $row->id) {
 				// Remove transaction data to differentiate lines and transactions
 				$row->id = $row->type = $row->status = $row->label = $row->date = $row->notes = $row->reference = null;
 			}
 			else {
 				$row->type = Transaction::TYPES_NAMES[$row->type];
 
-				$status = [];
+				if (property_exists($row, 'status')) {
+					$status = [];
 
-				foreach (Transaction::STATUS_NAMES as $k => $v) {
-					if ($row->status & $k) {
-						$status[] = $v;
+					foreach (Transaction::STATUS_NAMES as $k => $v) {
+						if ($row->status & $k) {
+							$status[] = $v;
+						}
 					}
+
+					$row->status = implode(', ', $status);
 				}
 
-				$row->status = implode(', ', $status);
 				$row->date = \DateTime::createFromFormat('Y-m-d', $row->date);
-				$row->date = $row->date->format('d/m/Y');
+				$row->date = $row->date->format($type == self::EXPORT_FEC ? 'Ymd' : 'd/m/Y');
 				$previous_id = $row->id;
 			}
 

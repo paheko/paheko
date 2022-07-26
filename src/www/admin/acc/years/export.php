@@ -44,6 +44,10 @@ $types = [
 		'label' => 'Simplifié (comptabilité de trésorerie)',
 		'help' => 'Les écritures avancées ne sont pas inclues dans cet export.',
 	],
+	Transactions::EXPORT_FEC => [
+		'label' => 'FEC (Fichier des Écritures Standard)',
+		'help' => 'Format standard de l\'administration française.',
+	],
 ];
 
 $tpl->assign(compact('year', 'examples', 'types'));
