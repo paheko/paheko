@@ -128,7 +128,7 @@
 		{foreach from=$transaction->getLinesWithAccounts(false) item="line"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
-			<td>{$line.account_name}</td>
+			<td>{$line.account_label}</td>
 			<td class="money">{if $line.debit}{$line.debit|escape|money}{/if}</td>
 			<td class="money">{if $line.credit}{$line.credit|escape|money}{/if}</td>
 			<td>{$line.label}</td>
