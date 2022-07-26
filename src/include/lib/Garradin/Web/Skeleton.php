@@ -43,16 +43,18 @@ class Skeleton
 
 	public function error_404(): void
 	{
+		// Detect loop if 404.html does not exist
+		if ($this->name == '404.html') {
+			throw new UserException('Cette page n\'existe pas.');
+		}
+
 		header('Content-Type: text/html;charset=utf-8', true);
 		header('HTTP/1.1 404 Not Found', true);
 		$tpl = new self('404.html');
-
-		if (!$tpl->serve()) {
-			throw new UserException('Cette page n\'existe pas.');
-		}
+		$tpl->serve();
 	}
 
-	public function serve(array $params = []): bool
+	public function serve(array $params = []): void
 	{
 		if (!$this->exists()) {
 			$this->error_404();
@@ -60,8 +62,16 @@ class Skeleton
 
 		$type = $this->type();
 
+		// Unknown type
 		if (null === $type) {
 			$this->error_404();
+			return;
+		}
+
+		// We can't serve directories
+		if ($this->file && $this->file->type == $this->file::TYPE_DIRECTORY) {
+			$this->error_404();
+			return;
 		}
 
 		// Serve a template
@@ -94,8 +104,6 @@ class Skeleton
 			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 			readfile($this->defaultPath());
 		}
-
-		return true;
 	}
 
 	public function fetch(array $params = []): string
