@@ -85,7 +85,7 @@ class Transaction extends Entity
 		'label'     => 'required|string|max:200',
 		'notes'     => 'string|max:20000',
 		'reference' => 'string|max:200',
-		'date'      => 'required|date_format:d/m/Y',
+		'date'      => 'required',
 	];
 
 	protected $_lines;
@@ -126,7 +126,7 @@ class Transaction extends Entity
 		if ($restrict_year === false) {
 			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
 			$sql = sprintf('SELECT
-				l.*, a.label AS account_name, a.code AS account_code,
+				l.*, a.label AS account_label, a.code AS account_code,
 				b.label AS analytical_name
 				FROM acc_transactions_lines l
 				INNER JOIN acc_accounts a ON a.id = l.id_account %s
@@ -163,7 +163,7 @@ class Transaction extends Entity
 			foreach ($this->getLines() as $line) {
 				$account = [
 					'account_code' => $this->_accounts[$line->id_account]->code ?? null,
-					'account_name' => $this->_accounts[$line->id_account]->label ?? null,
+					'account_label' => $this->_accounts[$line->id_account]->label ?? null,
 					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
 				];
 
@@ -286,7 +286,7 @@ class Transaction extends Entity
 		$lines = $this->getLinesWithAccounts();
 
 		foreach ($lines as $line) {
-			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_label)];
 
 			if ($line->debit) {
 				$debit = $account;
@@ -969,5 +969,12 @@ class Transaction extends Entity
 			'Total débit'     => Utils::money_format($this->getLinesDebitSum()),
 			'Lignes'          => $lines,
 		];
+	}
+
+	public function asJournalArray(): array
+	{
+		$out = $this->asArray();
+		$out['lines'] = $this->getLinesWithAccounts();
+		return $out;
 	}
 }

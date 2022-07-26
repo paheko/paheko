@@ -58,7 +58,7 @@ if (qg('copy')) {
 	$transaction->resetLines();
 
 	foreach ($lines as $k => &$line) {
-		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_label)];
 	}
 
 	unset($line);
