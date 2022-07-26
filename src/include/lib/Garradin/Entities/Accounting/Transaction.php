@@ -439,12 +439,18 @@ class Transaction extends Entity
 		}
 
 		// Avoid saving transactions with zero lines
-		if (!count($this->getLines())) {
+		$count = $this->countLines();
+
+		if (!$count) {
 			throw new ValidationException('Cette écriture ne comporte aucune ligne.');
 		}
 
-		if (count($this->getLines()) < 2) {
+		if ($count < 2) {
 			throw new ValidationException('Cette écriture comporte moins de deux lignes.');
+		}
+
+		if ($count > 2 && $this->type != self::TYPE_ADVANCED) {
+			throw new ValidationException('Une écriture avec plus de deux lignes ne peut être qu\'une écriture avancée.');
 		}
 
 		if (!parent::save()) {
