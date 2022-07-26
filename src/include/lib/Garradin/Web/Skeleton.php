@@ -58,6 +58,7 @@ class Skeleton
 	{
 		if (!$this->exists()) {
 			$this->error_404();
+			return;
 		}
 
 		$type = $this->type();
@@ -69,7 +70,7 @@ class Skeleton
 		}
 
 		// We can't serve directories
-		if ($this->file && $this->file->type == $this->file::TYPE_DIRECTORY) {
+		if ($this->file && $this->file->type != $this->file::TYPE_FILE) {
 			$this->error_404();
 			return;
 		}

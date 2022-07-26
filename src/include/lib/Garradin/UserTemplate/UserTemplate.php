@@ -76,7 +76,7 @@ class UserTemplate extends Brindille
 	public function __construct(?File $file = null)
 	{
 		if ($file) {
-			if ($this->type == self::TYPE_DIRECTORY) {
+			if ($file->type != $file::TYPE_FILE) {
 				throw new \LogicException('Cannot construct a UserTemplate with a directory');
 			}
 
