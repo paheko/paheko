@@ -430,28 +430,13 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
-		$exists = $this->exists();
-
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
 			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
 		}
 
-		// Avoid saving transactions with zero lines
-		$count = $this->countLines();
-
-		if (!$count) {
-			throw new ValidationException('Cette écriture ne comporte aucune ligne.');
-		}
-
-		if ($count < 2) {
-			throw new ValidationException('Cette écriture comporte moins de deux lignes.');
-		}
-
-		if ($count > 2 && $this->type != self::TYPE_ADVANCED) {
-			throw new ValidationException('Une écriture avec plus de deux lignes ne peut être qu\'une écriture avancée.');
-		}
+//		echo '<pre>'; var_dump($this->asDetailsArray(), count($this->getLines()), \Garradin\Accounting\Transactions::get($this->id())->asDetailsArray()); exit;
 
 		if (!parent::save()) {
 			return false;
@@ -519,6 +504,12 @@ class Transaction extends Entity
 		$total = 0;
 
 		$lines = $this->getLines();
+		$count = count($lines);
+
+		$this->assert($count > 0, 'Cette écriture ne comporte aucune ligne.');
+		$this->assert($count >= 2, 'Cette écriture comporte moins de deux lignes.');
+		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
+
 		$accounts_ids = [];
 
 		foreach ($lines as $k => $line) {
@@ -967,7 +958,8 @@ class Transaction extends Entity
 		}
 
 		return [
-			'Numéro' => $this->id ?? '--',
+			'Numéro'          => $this->id ?? '--',
+			'Type'            => self::TYPES_NAMES[$this->type],
 			'Libellé'         => $this->label,
 			'Date'            => $this->date,
 			'Pièce comptable' => $this->reference,
