@@ -4,6 +4,10 @@ namespace Garradin;
 
 use Garradin\Membres\Session;
 use Garradin\Web\Web;
+use Garradin\Accounting\Reports;
+use Garradin\Accounting\Transactions;
+use Garradin\Accounting\Years;
+use Garradin\Entities\Accounting\Transaction;
 
 use KD2\ErrorManager;
 
@@ -157,6 +161,71 @@ class API
 		}
 	}
 
+	protected function accounting(string $uri): ?array
+	{
+		$fn = strtok($uri, '/');
+		$param = strtok('');
+
+		if ($fn == 'transactions') {
+			if ($param == '') {
+				if ($this->method != 'GET') {
+					throw new APIException('Wrong request method', 400);
+				}
+
+				try {
+					return iterator_to_array(Reports::getJournal($_GET));
+				}
+				catch (\LogicException $e) {
+					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
+				}
+			}
+			elseif (is_numeric($param)) {
+				$transaction = Transactions::get((int)$param);
+
+				if (!$transaction) {
+					throw new APIException(sprintf('Transaction #%d not found', $param), 404);
+				}
+
+				if ($this->method == 'GET') {
+					return $transaction->asJournalArray();
+				}
+				/*
+				elseif ($this->method == 'POST') {
+					$this->requireAccess(Session::ACCESS_WRITE);
+					$transaction->importFromEditForm();
+					$transaction->save();
+					return $transaction->asJournalArray();
+				}
+				*/
+				else {
+					throw new APIException('Wrong request method', 400);
+				}
+			}
+			/*
+			elseif ($param == 'new') {
+				$this->requireAccess(Session::ACCESS_WRITE);
+				$transaction = new Transaction;
+				$transaction->importFromNewForm();
+				$transaction->save();
+				return $transaction->asJournalArray();
+			}
+			*/
+			else {
+				throw new APIException('Unknown transactions action', 404);
+			}
+		}
+		elseif ($fn == 'years' && $param == '') {
+			if ($this->method != 'GET') {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			return Years::list();
+		}
+		else {
+			throw new APIException('Unknown accounting action', 404);
+		}
+	}
+
 	public function errors(string $uri)
 	{
 		$fn = strtok($uri, '/');
@@ -236,6 +305,8 @@ class API
 				return $this->user($uri);
 			case 'errors':
 				return $this->errors($uri);
+			case 'accounting':
+				return $this->accounting($uri);
 			default:
 				throw new APIException('Unknown path', 404);
 		}
