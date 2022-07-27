@@ -52,14 +52,7 @@ class Import
 			$report = null;
 		}
 
-		$save_transaction = function (Transaction &$transaction) use ($o, &$report, &$lines) {
-			// Remove deleted lines
-			foreach ($transaction->getLines() as $line) {
-				if (!in_array($line, $lines)) {
-					$transaction->removeLine($line);
-				}
-			}
-
+		$save_transaction = function (Transaction &$transaction) use ($o, &$report) {
 			if (!is_null($report)) {
 				if (!$transaction->isModified()) {
 					$target = 'unchanged';
@@ -74,15 +67,19 @@ class Import
 				$report[$target][] = $transaction->asJournalArray();
 			}
 
-			if (!$o->dry_run) {
-				if ($transaction->countLines() > 2) {
-					$transaction->type = Transaction::TYPE_ADVANCED;
-				}
-
-				$transaction->save();
+			if ($transaction->countLines() > 2) {
+				$transaction->type = Transaction::TYPE_ADVANCED;
 			}
 
-			$lines = [];
+			if (!$o->dry_run) {
+				if ($transaction->isModified()) {
+					$transaction->save();
+				}
+			}
+			else {
+				$transaction->selfcheck();
+			}
+
 			$transaction = null;
 		};
 
@@ -90,7 +87,6 @@ class Import
 
 		try {
 			$current_id = null;
-			$lines = [];
 
 			foreach ($csv->iterate() as $l => $row) {
 				$row = (object) $row;
@@ -118,11 +114,11 @@ class Import
 				}
 				else {
 					if (!empty($row->id) && $row->id != $current_id) {
-						$current_id = (int) $row->id;
-
 						if (null !== $transaction) {
 							$save_transaction($transaction);
 						}
+
+						$current_id = (int) $row->id;
 					}
 
 					if (empty($row->type)) {
@@ -146,6 +142,8 @@ class Import
 						if ($transaction->validated) {
 							throw new UserException(sprintf('l\'écriture #%d est validée et ne peut être modifiée', $row->id));
 						}
+
+						$transaction->resetLines();
 					}
 					else {
 						$transaction = new Transaction;
@@ -158,7 +156,7 @@ class Import
 					}
 
 					// FEC does not define type, so don't change it
-					if (!$transaction->exists() || $type != Export::FEC) {
+					if (isset($row->type)) {
 						$transaction->type = $types[$row->type];
 					}
 
@@ -211,29 +209,8 @@ class Import
 
 					$data['reference'] = isset($row->p_reference) ? $row->p_reference : null;
 
-					if (!$transaction->exists()) {
-						$l1 = new Line;
-						$l2 = new Line;
-						$transaction->addLine($l1);
-						$transaction->addLine($l2);
-					}
-					else {
-						$lines = $transaction->getLines();
-
-						if (count($lines) != 2) {
-							throw new UserException('cette écriture comporte plus de deux lignes et ne peut donc être modifiée par un import simplifié');
-						}
-
-						// Find correct debit/credit lines
-						if ($lines[0]->credit != 0) {
-							$l1 = $lines[0];
-							$l2 = $lines[1];
-						}
-						else {
-							$l1 = $lines[1];
-							$l2 = $lines[0];
-						}
-					}
+					$l1 = new Line;
+					$l2 = new Line;
 
 					$l1->importForm($data + [
 						'credit'     => $row->amount,
@@ -247,7 +224,9 @@ class Import
 						'id_account' => $debit_account,
 					]);
 
-					array_push($lines, $l1, $l2);
+					$transaction->addLine($l1);
+					$transaction->addLine($l2);
+
 					$save_transaction($transaction);
 					$transaction = null;
 				}
@@ -267,25 +246,9 @@ class Import
 						'reconciled' => $row->reconciled ?? false,
 					];
 
-					if (!empty($row->line_id) && !$o->ignore_ids) {
-						$line = $transaction->getLine((int)$row->line_id);
-
-						if (!$line) {
-							throw new UserException(sprintf('le numéro de ligne "%s" n\'existe pas dans l\'écriture "%s"', $row->line_id, $transaction->id ?: 'à créer'));
-						}
-					}
-					else {
-						$line = new Line;
-					}
-
+					$line = new Line;
 					$line->importForm($data);
-					array_push($lines, $line);
-
-					// If a line_id was supplied, then we already have a Line object.
-					// Just changing it is enough, no need to add it to the transaction
-					if (!$line->exists()) {
-						$transaction->addLine($line);
-					}
+					$transaction->addLine($line);
 				}
 			}
 
@@ -295,7 +258,7 @@ class Import
 		}
 		catch (UserException $e) {
 			$db->rollback();
-			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l, $e->getMessage()));
+			$e->setMessage(sprintf('Erreur sur la ligne %d : %s', $l - 1, $e->getMessage()));
 
 			if (null !== $transaction) {
 				$e->setDetails($transaction->asDetailsArray());

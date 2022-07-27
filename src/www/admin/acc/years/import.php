@@ -56,7 +56,16 @@ if ($type && $type_name) {
 		unset($columns[$found]);
 	}
 
-	$csv->setColumns(array_flip(array_filter($columns)), $columns);
+	// Remove NULLs
+	$columns = array_filter($columns);
+	$columns_table = $columns = array_flip($columns);
+
+	if ($type == Export::FEC) {
+		// Fill with labels
+		$columns_table = array_intersect_key(array_flip(Export::COLUMNS_FULL), $columns);
+	}
+
+	$csv->setColumns($columns_table, $columns);
 	$csv->setMandatoryColumns(Export::MANDATORY_COLUMNS[$type]);
 
 	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($type, $csv, $year, $params) {
