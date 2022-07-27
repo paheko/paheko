@@ -104,12 +104,12 @@ use Garradin\Accounting\Export;
 	<fieldset>
 		<legend>Configuration de l'import</legend>
 		<dl>
-			<dt>Mode d'import</dt>
+			<dt><label for="f_ignore_ids_1">Mode d'import</label> <b>(obligatoire)</b></dt>
 
-			{input type="radio" name="ignore_ids" value="1" label="Créer toutes les écritures" default=1}
+			{input type="radio" name="ignore_ids" value="1" label="Créer toutes les écritures" required=true}
 			<dd class="help">Toutes les écritures du fichier seront créées, sans tenir compte du numéro s'il est fourni.<br />Cela peut amener à avoir des écritures en doublon si on réalise plusieurs imports du même fichier.</dd>
 
-			{input type="radio" name="ignore_ids" value="0" label="Mettre à jour en utilisant le numéro d'écriture"}
+			{input type="radio" name="ignore_ids" value="0" label="Mettre à jour en utilisant le numéro d'écriture" required=true}
 			<dd class="help">
 				Les écritures dans le fichier qui mentionnent un numéro d'écriture seront mises à jour en utilisant ce numéro.<br/>
 				Si une ligne du fichier mentionne un numéro d'écriture qui n'existe pas, l'import échouera.<br />

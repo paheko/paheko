@@ -436,8 +436,6 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
 		}
 
-//		echo '<pre>'; var_dump($this->asDetailsArray(), count($this->getLines()), \Garradin\Accounting\Transactions::get($this->id())->asDetailsArray()); exit;
-
 		if (!parent::save()) {
 			return false;
 		}

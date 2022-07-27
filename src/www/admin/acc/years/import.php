@@ -82,7 +82,7 @@ if ($type && $type_name) {
 		try {
 			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids') + ['dry_run' => true, 'return_report' => true]);
 		}
-		catch (\Exception $e) {
+		catch (UserException $e) {
 			$csv->clear();
 			$form->addError($e);
 		}
