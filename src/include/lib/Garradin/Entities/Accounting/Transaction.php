@@ -962,11 +962,12 @@ class Transaction extends Entity
 	{
 		$lines = [];
 
-		foreach ($this->getLines() as $line) {
-			$lines[] = $line->asDetailsArray();
+		foreach ($this->getLines() as $i => $line) {
+			$lines[$i+1] = $line->asDetailsArray();
 		}
 
 		return [
+			'Numéro' => $this->id ?? '--',
 			'Libellé'         => $this->label,
 			'Date'            => $this->date,
 			'Pièce comptable' => $this->reference,

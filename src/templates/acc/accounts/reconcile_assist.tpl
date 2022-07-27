@@ -11,21 +11,17 @@
 
 {form_errors}
 
+<p class="help">
+	Le rapprochement assisté permet de s'aider d'un relevé de compte pour trouver les écritures manquantes ou erronées.<br />
+	<a href="https://garradin.eu/rapprochement_assiste" target="_blank">Aide détaillée</a>
+</p>
 <form method="post" action="{$self_url}" enctype="multipart/form-data">
 	{if !$csv->loaded()}
 		<fieldset>
 			<legend>Relevé de compte</legend>
-			<p class="help block">
-				Le rapprochement assisté permet de s'aider d'un relevé de compte pour trouver les écritures manquantes ou erronées.<br />
-				<a href="https://garradin.eu/rapprochement_assiste" target="_blank">Aide détaillée</a>
-			</p>
 			<dl>
-				{include file="common/_csv_help.tpl"}
-				<dd class="help">
-					Le fichier doit également disposer soit d'une colonne <strong>Montant</strong>, soit de deux colonnes <strong>Débit</strong>
-					et <strong>Crédit</strong>.
-				</dd>
 				{input type="file" name="file" label="Fichier à importer" accept="csv" required=1}
+				{include file="common/_csv_help.tpl" more_text="Le fichier doit obligatoirement disposer, soit d'une colonne 'Montant', soit de deux colonnes 'Débit' et 'Crédit'."}
 			</dl>
 			<p class="submit">
 				{csrf_field key=$csrf_key}
