@@ -23,7 +23,7 @@ class CSV_Custom
 		$this->key = $key;
 		$this->csv = $this->session->get($this->key);
 		$this->translation = $this->session->get($this->key . '_translation') ?: [];
-		$this->skip = $this->session->get($this->key . '_skip') ?: 1;
+		$this->skip = $this->session->get($this->key . '_skip') ?? 1;
 	}
 
 	public function load(array $file)
