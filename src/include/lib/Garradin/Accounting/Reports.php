@@ -72,7 +72,7 @@ class Reports
 		}
 
 		if (!count($where)) {
-			throw new \LogicException('Unknown criteria');
+			throw new \LogicException('No criteria was provided.');
 		}
 
 		return implode(' AND ', $where);
