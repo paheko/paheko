@@ -1,5 +1,5 @@
 <fieldset>
-	<legend>Importer depuis un fichier CSV</legend>
+	<legend>Importer depuis un tableau</legend>
 	<dl>
 		<dd class="help">{$csv->count()} lignes trouvées dans le fichier</dd>
 		<dt>{input type="checkbox" name="skip_first_line" value="1" label="Ne pas importer la première ligne" help="Décocher cette case si la première ligne ne contient pas l'intitulé des colonnes, mais des données" default=1}
@@ -8,20 +8,22 @@
 			<table class="list auto">
 				<thead>
 					<tr>
-						<th>Colonne du CSV à importer</th>
+						<th>Colonne du fichier à importer</th>
+						<td></td>
 						<th>Importer cette colonne comme…</th>
 					</tr>
 				</thead>
 				<tbody>
+				<?php $selected = $csv->getSelectedTable(); ?>
 				{foreach from=$csv->getFirstLine() key="index" item="csv_field"}
 					<tr>
 						<th>{$csv_field}</th>
+						<td class="help">{icon shape="right"}</td>
 						<td>
 							<select name="translation_table[{$index}]">
-							<?php $selected = $csv->getSelectedTable(); ?>
 								<option value="">-- Ne pas importer cette colonne</option>
-								{foreach from=$csv->getColumns() item="label" key="key"}
-									<option value="{$key}" {if $selected[$index] == $key}selected="selected"{/if}>{$label}</option>
+								{foreach from=$csv->getColumnsWithDefaults() item="column"}
+									<option value="{$column.key}" {if $csv_field == $column.match}selected="selected"{/if}>{$column.label}</option>
 								{/foreach}
 							</select>
 						</td>

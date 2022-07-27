@@ -11,6 +11,7 @@ class CSV_Custom
 	protected $csv;
 	protected $translation;
 	protected $columns;
+	protected $columns_defaults;
 	protected array $mandatory_columns = [];
 	protected int $skip = 1;
 	protected $modifier = null;
@@ -161,7 +162,7 @@ class CSV_Custom
 			}
 
 			if (!array_key_exists($target, $this->columns)) {
-				throw new UserException('Colonne inconnue');
+				throw new UserException('Colonne inconnue: ' . $target);
 			}
 
 			$translation[(int)$csv] = $target;
@@ -212,9 +213,10 @@ class CSV_Custom
 		$this->session->set($this->key . '_skip', $count);
 	}
 
-	public function setColumns(array $columns): void
+	public function setColumns(array $columns, array $defaults = []): void
 	{
-		$this->columns = $columns;
+		$this->columns = array_filter($columns);
+		$this->columns_defaults = array_filter($defaults);
 	}
 
 	public function setMandatoryColumns(array $columns): void
@@ -229,7 +231,7 @@ class CSV_Custom
 
 	public function getMandatoryColumnsString(): string
 	{
-		return implode(', ', $this->getMandatoryColumns());
+		return implode(', ', array_intersect_key($this->getColumns(), array_flip($this->getMandatoryColumns())));
 	}
 
 	public function getColumns(): array
@@ -237,8 +239,19 @@ class CSV_Custom
 		return $this->columns;
 	}
 
+	public function getColumnsWithDefaults(): array
+	{
+		$out = [];
+
+		foreach ($this->columns as $key => $label) {
+			$out[] = compact('key', 'label') + ['match' => $this->columns_defaults[$key] ?? $label];
+		}
+
+		return $out;
+	}
+
 	public function getMandatoryColumns(): array
 	{
-		return array_intersect_key($this->columns, array_flip($this->mandatory_columns));
+		return array_intersect($this->columns, $this->mandatory_columns);
 	}
 }
