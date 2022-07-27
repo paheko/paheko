@@ -156,6 +156,11 @@ use Garradin\Accounting\Export;
 		</dl>
 	</fieldset>
 
+	<p class="help">
+		Il est conseillé de procéder à une <a href="../../config/backup/save.php">sauvegarde</a> avant de faire un import,
+		cela vous permettra de revenir en arrière en cas d'erreur.
+	</p>
+
 	<p class="submit">
 		<input type="hidden" name="year" value="{$year.id}" />
 		{button type="submit" label="Continuer" shape="right" class="main"}
