@@ -52,6 +52,8 @@ class Template extends \KD2\Smartyer
 	{
 		parent::__construct();
 
+		Translate::extendSmartyer($this);
+
 		$cache_dir = SMARTYER_CACHE_ROOT;
 
 		if (!file_exists($cache_dir)) {
