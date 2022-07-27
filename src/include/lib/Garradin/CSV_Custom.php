@@ -226,12 +226,26 @@ class CSV_Custom
 
 	public function getColumnsString(): string
 	{
-		return implode(', ', $this->getColumns());
+		if (!empty($this->columns_defaults)) {
+			$c = array_intersect_key($this->columns_defaults, $this->columns);
+		}
+		else {
+			$c = $this->columns;
+		}
+
+		return implode(', ', $c);
 	}
 
 	public function getMandatoryColumnsString(): string
 	{
-		return implode(', ', array_intersect_key($this->getColumns(), array_flip($this->getMandatoryColumns())));
+	if (!empty($this->columns_defaults)) {
+			$c = array_intersect_key($this->columns_defaults, $this->columns);
+		}
+		else {
+			$c = $this->columns;
+		}
+
+		return implode(', ', array_intersect_key($c, array_flip($this->getMandatoryColumns())));
 	}
 
 	public function getColumns(): array
@@ -252,6 +266,6 @@ class CSV_Custom
 
 	public function getMandatoryColumns(): array
 	{
-		return array_intersect($this->columns, $this->mandatory_columns);
+		return $this->mandatory_columns;
 	}
 }

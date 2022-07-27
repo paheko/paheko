@@ -34,7 +34,6 @@ class Export
 		'Numéro pièce comptable' => 'reference',
 
 		// Lines
-		'Numéro ligne'      => 'line_id',
 		'Numéro compte'     => 'account',
 		'Libellé compte'    => 'account_label',
 		'Débit'             => 'debit',
@@ -65,24 +64,24 @@ class Export
 			'Membres associés'       => 'linked_users',
 		],
 		self::FEC => [
-			'JournalCode' => null,
-			'JournalLib' => null,
-			'EcritureNum' => 'id',
-			'EcritureDate' => 'date',
-			'CompteNum' => 'account',
-			'CompteLib' => 'account_label',
-			'CompAuxNum' => null,
-			'CompAuxLib' => null,
-			'PieceRef' => 'reference',
-			'PieceDate' => null,
-			'EcritureLib' => 'label',
-			'Debit' => 'debit',
-			'Credit' => 'credit',
-			'EcritureLet' => null,
-			'DateLet' => null,
-			'ValidDate' => null,
+			'JournalCode'   => null,
+			'JournalLib'    => 'type',
+			'EcritureNum'   => 'id',
+			'EcritureDate'  => 'date',
+			'CompteNum'     => 'account',
+			'CompteLib'     => 'account_label',
+			'CompAuxNum'    => null,
+			'CompAuxLib'    => null,
+			'PieceRef'      => 'reference',
+			'PieceDate'     => null,
+			'EcritureLib'   => 'label',
+			'Debit'         => 'debit',
+			'Credit'        => 'credit',
+			'EcritureLet'   => null,
+			'DateLet'       => null,
+			'ValidDate'     => null,
 			'MontantDevise' => null,
-			'Idevise' => null,
+			'Idevise'       => null,
 		],
 	];
 
@@ -206,7 +205,7 @@ class Export
 		}
 		elseif (self::FULL == $type || self::GROUPED == $type) {
 			$sql = 'SELECT t.id, t.type, t.status, t.label, t.date, t.notes, t.reference,
-				l.id AS line_id, a.code AS account, a.label AS account_label, l.debit AS debit, l.credit AS credit,
+				a.code AS account, a.label AS account_label, l.debit AS debit, l.credit AS credit,
 				l.reference AS line_reference, l.label AS line_label, l.reconciled,
 				a2.code AS analytical,
 				GROUP_CONCAT(u.%s) AS linked_users

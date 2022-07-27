@@ -104,10 +104,19 @@ use Garradin\Accounting\Export;
 			<dt>Mode d'import</dt>
 
 			{input type="radio" name="ignore_ids" value="1" label="Créer toutes les écritures" default=1}
-			<dd class="help">Toutes les écritures du fichier seront créées.<br />Cela peut amener à avoir des écritures en doublon si on réalise plusieurs imports du même fichier.</dd>
+			<dd class="help">Toutes les écritures du fichier seront créées, sans tenir compte du numéro s'il est fourni.<br />Cela peut amener à avoir des écritures en doublon si on réalise plusieurs imports du même fichier.</dd>
 
 			{input type="radio" name="ignore_ids" value="0" label="Mettre à jour en utilisant le numéro d'écriture"}
-			<dd class="help">Les écritures dans le fichier qui mentionnent un numéro d'écriture seront mises à jour en utilisant ce numéro.<br/>Si une ligne du fichier mentionne un numéro d'écriture qui n'existe pas, l'import échouera.</dd>
+			<dd class="help">
+				Les écritures dans le fichier qui mentionnent un numéro d'écriture seront mises à jour en utilisant ce numéro.<br/>
+				Si une ligne du fichier mentionne un numéro d'écriture qui n'existe pas, l'import échouera.<br />
+				Les écritures qui ne mentionnent pas de numéro seront créées.
+			</dd>
+
+			{if $type == Export::FEC}
+				<dd><p class="alert block">Avec le format FEC, cette option effacera certaines données des écritures mises à jour : référence du paiement et projet analytique.</p></dd>
+			{/if}
+
 		</dl>
 	</fieldset>
 
