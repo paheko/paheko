@@ -81,13 +81,6 @@ class Transaction extends Entity
 		'id_related' => '?int',
 	];
 
-	protected $_form_rules = [
-		'label'     => 'required|string|max:200',
-		'notes'     => 'string|max:20000',
-		'reference' => 'string|max:200',
-		'date'      => 'required',
-	];
-
 	protected $_lines;
 	protected $_old_lines = [];
 
@@ -488,8 +481,15 @@ class Transaction extends Entity
 
 	public function selfCheck(): void
 	{
-		parent::selfCheck();
 		$db = DB::getInstance();
+
+		$this->assert(!empty($this->id_year), 'L\'ID de l\'exercice doit être renseigné.');
+
+		$this->assert(trim((string)$this->label) !== '', 'Le champ libellé ne peut rester vide.');
+		$this->assert(strlen($this->label) <= 200, 'Le champ libellé ne peut faire plus de 200 caractères.');
+		$this->assert(!isset($this->reference) || strlen($this->reference) <= 200, 'Le champ numéro de pièce comptable ne peut faire plus de 200 caractères.');
+		$this->assert(!isset($this->notes) || strlen($this->notes) <= 2000, 'Le champ remarques ne peut faire plus de 2000 caractères.');
+		$this->assert(!empty($this->date), 'Le champ date ne peut rester vide.');
 
 		$this->assert(null !== $this->id_year, 'Aucun exercice spécifié.');
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type d\'écriture inconnu : ' . $this->type);
@@ -532,6 +532,8 @@ class Transaction extends Entity
 
 		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
 		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
+
+		parent::selfCheck();
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -586,23 +588,31 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (!isset($source['type'])) {
-			throw new ValidationException('Type d\'écriture inconnu');
+		if (!isset($this->type) && !isset($source['type'])) {
+			$source['type'] = self::TYPE_ADVANCED;
 		}
 
 		$type = $source['type'];
 
 		$this->importForm($source);
 
+		// Remove error status when changed
+		$this->removeStatus(self::STATUS_ERROR);
+
+		if (!isset($source['lines']) || !is_array($source['lines'])) {
+			return;
+		}
+
 		if (self::TYPE_ADVANCED == $type) {
-			if (!isset($source['lines']) || !is_array($source['lines'])) {
-				throw new ValidationException('Aucune ligne dans la saisie');
+			try {
+				$lines = Utils::array_transpose($source['lines']);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
 			}
 
-			$lines = Utils::array_transpose($source['lines']);
-
 			foreach ($lines as $i => $line) {
-				if (empty($line['account']) || !count($line['account'])) {
+				if (empty($line['account']) || !is_array($line['account']) || !count($line['account'])) {
 					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
 				}
 
@@ -656,9 +666,6 @@ class Transaction extends Entity
 				$this->addLine($line);
 			}
 		}
-
-		// Remove error status when changed
-		$this->removeStatus(self::STATUS_ERROR);
 	}
 
 	public function importFromEditForm(?array $source = null): void
@@ -671,7 +678,10 @@ class Transaction extends Entity
 			unset($source['id_related']);
 		}
 
-		$this->resetLines();
+		if (isset($source['lines'])) {
+			$this->resetLines();
+		}
+
 		$this->importFromNewForm($source);
 	}
 
@@ -693,7 +703,7 @@ class Transaction extends Entity
 		try {
 			$lines = Utils::array_transpose($source['lines']);
 		}
-		catch (\LogicException $e) {
+		catch (\InvalidArgumentException $e) {
 			throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
 		}
 
