@@ -84,14 +84,14 @@ class Template extends \KD2\Smartyer
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
 		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
 
-		$this->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
+		$this->register_compile_function('continue', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($block == 'continue')
 			{
 				return 'continue;';
 			}
 		});
 
-		$this->register_compile_function('use', function ($pos, $block, $name, $raw_args) {
+		$this->register_compile_function('use', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($name == 'use')
 			{
 				return sprintf('use %s;', $raw_args);
