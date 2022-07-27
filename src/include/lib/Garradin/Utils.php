@@ -718,6 +718,10 @@ class Utils
         $max = 0;
 
         foreach ($array as $rows) {
+            if (!is_array($rows)) {
+                throw new \InvalidArgumentException('Invalid multi-dimensional array: not an array: ' . gettype($rows));
+            }
+
             $max = max($max, count($rows));
         }
 
