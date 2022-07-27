@@ -5,6 +5,7 @@ namespace Garradin;
 use KD2\ErrorManager;
 use KD2\Security;
 use KD2\Form;
+use KD2\Translate;
 use KD2\DB\EntityManager;
 
 error_reporting(-1);
@@ -373,6 +374,8 @@ if (!defined('Garradin\SECRET_KEY'))
 Form::tokenSetSecret(SECRET_KEY);
 
 EntityManager::setGlobalDB(DB::getInstance());
+
+Translate::setLocale('fr_FR');
 
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour

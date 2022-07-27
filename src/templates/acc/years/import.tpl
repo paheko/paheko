@@ -27,8 +27,9 @@ use Garradin\Accounting\Export;
 	{if $report.created_count}
 	<details>
 		<summary>
-			<h2>{"%d écritures seront créées"|args:$report.created_count}</h2>
+			<h2>{{%n écriture sera créée}{%n écritures seront créées} n=$report.created_count}</h2>
 		</summary>
+		<p class="help">Les écritures suivantes mentionnées dans le fichier seront ajoutées.</p>
 		{include file="acc/reports/_journal.tpl" journal=$report.created}
 	</details>
 	{/if}
@@ -36,8 +37,9 @@ use Garradin\Accounting\Export;
 	{if $report.modified_count}
 	<details>
 		<summary>
-			<h2>{"%d écritures seront modifiées"|args:$report.modified_count}</h2>
+			<h2>{{%n écriture sera modifiée}{%n écritures seront modifiées} n=$report.modified_count}</h2>
 		</summary>
+		<p class="help">Les écritures suivantes mentionnées dans le fichier seront modifiées.</p>
 		{include file="acc/reports/_journal.tpl" journal=$report.modified}
 	</details>
 	{/if}
@@ -45,8 +47,9 @@ use Garradin\Accounting\Export;
 	{if $report.unchanged_count}
 	<details>
 		<summary>
-			<h2>{"%d écritures ne seront pas affectées"|args:$report.unchanged_count}</h2>
+			<h2>{{%n écriture ne sera pas affectée}{%n écritures ne seront pas affectées} n=$report.unchanged_count}</h2>
 		</summary>
+		<p class="help">Les écritures suivantes mentionnées dans le fichier ne seront pas modifiées.</p>
 		{include file="acc/reports/_journal.tpl" journal=$report.unchanged}
 	</details>
 	{/if}
