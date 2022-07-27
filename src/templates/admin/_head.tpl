@@ -117,7 +117,7 @@
 
         {if $help_url}
         <li>
-            <h3><a href="{$help_url}" target="_blank"><b data-icn="{icon html=false shape="help"}"></b><span>Aide</span></a></h3>
+            <h3><a href="{$help_url}" target="_dialog"><b data-icn="{icon html=false shape="help"}"></b><span>Aide</span></a></h3>
         </li>
         {/if}
 
