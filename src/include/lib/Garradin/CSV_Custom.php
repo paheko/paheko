@@ -26,7 +26,7 @@ class CSV_Custom
 		$this->skip = $this->session->get($this->key . '_skip') ?? 1;
 	}
 
-	public function load(array $file)
+	public function load(array $file): void
 	{
 		if (empty($file['size']) || empty($file['tmp_name']) || empty($file['name'])) {
 			throw new UserException('Fichier invalide');
@@ -35,7 +35,7 @@ class CSV_Custom
 		$path = $file['tmp_name'];
 
 		if (CALC_CONVERT_COMMAND && strtolower(substr($file['name'], -4)) != '.csv') {
-			$path = CSV::convertUploadIfRequired($path);
+			$path = CSV::convertUploadIfRequired($path, true);
 		}
 
 		$csv = CSV::readAsArray($path);
@@ -45,6 +45,8 @@ class CSV_Custom
 		}
 
 		$this->session->set($this->key, $csv);
+
+		@unlink($path);
 	}
 
 	public function iterate(): \Generator
