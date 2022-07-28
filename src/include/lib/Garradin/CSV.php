@@ -9,7 +9,7 @@ class CSV
 	/**
 	 * Convert a file to CSV if required (and if CALC_CONVERT_COMMAND is set)
 	 */
-	static public function convertUploadIfRequired(string $path): string
+	static public function convertUploadIfRequired(string $path, bool $delete_original = false): string
 	{
 		if (!CALC_CONVERT_COMMAND) {
 			return $path;
@@ -50,7 +50,9 @@ class CSV
 			return $b;
 		}
 		finally {
-			@unlink($a);
+			if ($delete_original) {
+				@unlink($a);
+			}
 		}
 	}
 
@@ -343,7 +345,9 @@ class CSV
 
 	static public function import(string $file, array $expected_columns): \Generator
 	{
-		$file = self::convertUploadIfRequired($file);
+		$delete_after = is_uploaded_file($file);
+		$file = self::convertUploadIfRequired($file, $delete_after);
+
 		try {
 			$fp = fopen($file, 'r');
 
@@ -395,7 +399,9 @@ class CSV
 			fclose($fp);
 		}
 		finally {
-			@unlink($file);
+			if ($delete_after) {
+				@unlink($file);
+			}
 		}
 	}
 }
