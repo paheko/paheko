@@ -12,8 +12,6 @@ deps:
 
 	rm -rf ${TMP_KD2}
 
-	wget -O "include/lib/Parsedown.php" "https://raw.githubusercontent.com/erusev/parsedown/1.7.x/Parsedown.php"
-
 dev-server:
 	php -S localhost:8082 -t www www/_route.php
 
