@@ -433,3 +433,15 @@ CREATE TABLE IF NOT EXISTS emails_queue (
     sending_started TEXT NULL, -- Will be filled with the datetime when the email sending was started
     context INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS user_forms
+-- List of user forms
+(
+	id INTEGER NOT NULL PRIMARY KEY,
+	name TEXT NOT NULL,
+	label TEXT NOT NULL,
+	description TEXT NULL,
+	templates TEXT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS user_forms_name ON user_forms (name);
