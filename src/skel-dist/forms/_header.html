@@ -1,13 +1,25 @@
+{{if $_GET.print == 'pdf'}}
+	{{:http type="pdf" download="%s.pdf"|args:$title}}
+{{/if}}
 <!DOCTYPE html>
 <html>
 <head>
 	<title>{{$title}}</title>
 	<style type="text/css">
-	{{:include file="_doc.css" page_size=$page_size}}
+	{{:include file="_forms/form.css" page_size=$page_size}}
 	</style>
 </head>
 
 <body>
+
+{{if !$_GET.print}}
+<div id="buttons">
+	{{:linkbutton href="%s&print=yes"|args:$self_url label="Imprimer" shape="print"}}
+	{{:linkbutton href="%s&print=pdf"|args:$self_url label="Télécharger en PDF" shape="download"}}
+</div>
+{{/if}}
+
+<div id="page">
 
 <header class="organization">
 	{{if $config.files.logo}}

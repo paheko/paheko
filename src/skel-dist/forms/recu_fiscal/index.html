@@ -1,18 +1,13 @@
+{{#restrict block=true section="accounting" level="read"}}
+{{/restrict}}
+
 {{if !$_GET.id_transaction}}
 	{{:error message="Aucun numéro d'écriture n'a été fourni"}}
 {{/if}}
 
-{{if $logged_user.perm_accounting < $access_level.write}}
-	{{:error message="Seuls les membres avec accès en écriture à la comptabilité peuvent générer ce document"}}
-{{/if}}
-
-{{#load key="config"}}
-	{{:assign .="cerfa_config"}}
-{{/load}}
-
-{{if !$cerfa_config}}
+{{if !$form.config}}
 	{{* Valeurs par défaut *}}
-	{{:assign var="cerfa_config"
+	{{:assign var="form[config]"
 		objet=""
 		compte_especes="530"
 		compte_cheques="5112"
@@ -21,7 +16,7 @@
 		art885=0}}
 {{/if}}
 
-{{#transactions id=$_GET.id_transaction}}
+{{#transactions id=$_GET.id}}
 <!DOCTYPE html>
 <html>
 <head>

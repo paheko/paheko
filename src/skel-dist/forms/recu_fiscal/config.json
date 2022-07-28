@@ -1,7 +1,0 @@
-{
-	"name": "Reçu fiscal (CERFA)",
-	"dialog": false,
-	"pdf": true,
-	"preview": true,
-	"config": "config.html"
-}

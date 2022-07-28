@@ -1,31 +1,50 @@
-{{#restrict block=true section="accounting" level="write"}}
+{{#restrict block=true section="accounting" level="read"}}
 {{/restrict}}
+{{if !$_GET.id}}
 
-{{if !$_GET.id_transaction}}
+	{{:admin_header title="Reçu de don" current="acc"}}
+
 	{{:error message="Aucun numéro d'écriture n'a été fourni"}}
+
+	<form method="get" action="">
+		<fieldset>
+			<legend>Créer un reçu de don</legend>
+			<dl>
+				{{:input type="number" name="id" label="Numéro d'écriture" required=true}}
+			</dl>
+		</fieldset>
+
+		<p class="submit">
+			{{:button type="submit" name="save" label="Voir le reçu (PDF)" shape="right" class="main"}}
+	</form>
+
+	{{:admin_footer}}
+
+{{else}}
+	{{#transactions id=$_GET}}
+		{{:include file="forms/_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
+
+			<h1>Reçu de don</h1>
+
+			<h4>Référence n°{{$id}} — {{$date|date_short}}</h4>
+
+			<p>L'association «&nbsp;{{$config.nom_asso}}&nbsp;» atteste avoir reçu de la part de&nbsp;:</p>
+
+			<h3>{{$users_names}}</h3>
+
+			<p>un don d'un montant de&nbsp;:</p>
+
+			<h2>{{$credit|raw|money_currency:false}}</h2>
+			<h4>le {{$date|date_short}}</h4>
+
+			<p>
+				<em>Ce reçu n'est pas un reçu fiscal et ne donne pas droit à une réduction d'impôt au bénéfice des dispositions des articles 200, 238 bis et 885-0 V bis A du code général des impôts.</em>
+			</p>
+
+			{{:signature}}
+
+		{{:include file="forms/_footer.html"}}
+	{{else}}
+		{{:error message="Le numéro d'écriture fourni n'existe pas."}}
+	{{/transactions}}
 {{/if}}
-{{#transactions id=$_GET.id_transaction}}
-
-{{:include file="forms/_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
-
-	<h1>Reçu de don</h1>
-
-	<h4>Référence n°{{$id}} — {{$date|date_short}}</h4>
-
-	<p>L'association «&nbsp;{{$config.nom_asso}}&nbsp;» atteste avoir reçu de la part de&nbsp;:</p>
-
-	<h3>{{$users_names}}</h3>
-
-	<p>un don d'un montant de&nbsp;:</p>
-
-	<h2>{{$credit|raw|money_currency:false}}</h2>
-	<h4>le {{$date|date_short}}</h4>
-
-	<p>
-		<em>Ce reçu n'est pas un reçu fiscal et ne donne pas droit à une réduction d'impôt au bénéfice des dispositions des articles 200, 238 bis et 885-0 V bis A du code général des impôts.</em>
-	</p>
-
-	{{:signature}}
-
-{{:include file="forms/_footer.html"}}
-{{/transactions}}

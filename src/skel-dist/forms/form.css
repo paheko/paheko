@@ -1,5 +1,5 @@
 @media print {
-		@page {
+	@page {
 		size: {{if $page_size}}{{$page_size}}{{else}}A4{{/if}};
 		margin: 1.5cm;
 		@bottom {
@@ -9,13 +9,17 @@
 			text-align: center;
 		}
 	}
+
+	#buttons {
+		display: none;
+	}
 }
 
 @media screen {
-	html {
+	body {
 		background: #666;
 	}
-	body {
+	#page {
 		margin: 0 auto;
 		padding: .5cm;
 		background: #fff;
@@ -72,4 +76,13 @@ header.organization h2 {
 header.organization h3 {
 	font-size: .8rem;
 	font-weight: normal;
+}
+
+#buttons {
+	text-align: center;
+}
+
+#buttons a {
+	margin: 1em;
+	font-size: 1.2em;
 }
