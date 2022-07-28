@@ -78,15 +78,46 @@ class Skeleton
 		return null;
 	}
 
+	public function error_404(): void
+	{
+		// Detect loop if 404.html does not exist
+		if ($this->name == '404.html') {
+			throw new UserException('Cette page n\'existe pas.');
+		}
+
+		header('Content-Type: text/html;charset=utf-8', true);
+		header('HTTP/1.1 404 Not Found', true);
+		$tpl = new self('404.html');
+		$tpl->serve();
+	}
+
 	public function serve(array $params = []): void
 	{
-		header('Content-Type: text/html;charset=utf-8', true);
-
 		if (Plugin::fireSignal('http.request.skeleton.before', $params)) {
 			return;
 		}
 
-		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
+		if (!$this->exists()) {
+			$this->error_404();
+			return;
+		}
+
+		$type = $this->type();
+
+		// Unknown type
+		if (null === $type) {
+			$this->error_404();
+			return;
+		}
+
+		// We can't serve directories
+		if ($this->file && $this->file->type != $this->file::TYPE_FILE) {
+			$this->error_404();
+			return;
+		}
+
+		// Serve a template
+		if (preg_match(self::TEMPLATE_TYPES, $type)) {
 
 			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
 
@@ -95,6 +126,7 @@ class Skeleton
 			}
 			catch (\InvalidArgumentException $e) {
 				header('HTTP/1.1 404 Not Found', true);
+			$ut->setContentType($type);
 
 				// Fallback to 404
 				$ut = new UserTemplate('web/404.html');
@@ -114,11 +146,13 @@ class Skeleton
 				printf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le squelette</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
 			}
 		}
+		// Serve a static file
 		elseif ($file = $this->file()) {
 			$file->serve();
 		}
+		// Serve a static skeleton file (from skel-dist)
 		else {
-			header(sprintf('Content-Type: %s;charset=utf-8', $this->type()));
+			header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 			readfile($this->defaultPath());
 		}
 
@@ -128,6 +162,61 @@ class Skeleton
 	public function file(): ?File
 	{
 		return Files::get(File::CONTEXT_SKELETON . '/web/' . $this->path);
+	}
+
+	public function fetch(array $params = []): string
+	{
+		if (!$this->exists()) {
+			return '';
+		}
+
+		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
+			$ut = new UserTemplate($this->file);
+
+			if (!$this->file) {
+				$ut->setSource($this->defaultPath());
+			}
+
+			$ut->assignArray($params);
+
+			return $ut->fetch();
+		}
+		elseif ($this->file) {
+			return $this->file->fetch();
+		}
+		else {
+			return file_get_contents($this->defaultPath());
+		}
+	}
+
+	public function display(array $params = []): void
+	{
+		if (!$this->exists()) {
+			return;
+		}
+
+		if (preg_match(self::TEMPLATE_TYPES, $this->type())) {
+			$ut = new UserTemplate($this->file);
+
+			if (!$this->file) {
+				$ut->setSource($this->defaultPath());
+			}
+
+			$ut->assignArray($params);
+
+			$ut->display();
+		}
+		elseif ($this->file) {
+			echo $this->file->fetch();
+		}
+		else {
+			readfile($this->defaultPath());
+		}
+	}
+
+	public function exists()
+	{
+		return $this->file ? true : ($this->defaultPath() ? true : false);
 	}
 
 	public function raw(): string
@@ -149,11 +238,22 @@ class Skeleton
 		}
 	}
 
-	public function type(): string
+	public function type(): ?string
 	{
-		$ext = substr($this->path, strrpos($this->path, '.')+1);
+		$name = $this->file->name ?? $this->defaultPath();
+		$dot = strrpos($name, '.');
+
+		// Templates with no extension are returned as HTML by default
+		// unless {{:http type=...}} is used
+		if ($dot === false) {
+			return 'text/html';
+		}
+
+		$ext = substr($name, $dot+1);
 
 		switch ($ext) {
+			case 'txt':
+				return 'text/plain';
 			case 'css':
 				return 'text/css';
 			case 'html':
@@ -171,6 +271,17 @@ class Skeleton
 			case 'jpg':
 				return 'image/jpeg';
 		}
+
+		if (preg_match('/php\d*/i', $ext)) {
+			return null;
+		}
+
+		if ($this->file) {
+			return $this->file->mime;
+  		}
+
+		$finfo = \finfo_open(\FILEINFO_MIME_TYPE);
+		return finfo_file($finfo, $this->defaultPath());
 	}
 
 	public function reset()

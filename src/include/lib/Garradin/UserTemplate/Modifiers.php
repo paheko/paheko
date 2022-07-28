@@ -3,6 +3,7 @@
 namespace Garradin\UserTemplate;
 
 use Garradin\Utils;
+use Garradin\UserException;
 
 use Garradin\Entities\Users\Email;
 

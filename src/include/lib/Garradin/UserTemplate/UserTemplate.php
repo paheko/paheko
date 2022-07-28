@@ -79,6 +79,10 @@ class UserTemplate extends \KD2\Brindille
 		$this->_tpl_path = $path;
 
 		if ($file = Files::get(File::CONTEXT_SKELETON . '/' . $path)) {
+			if ($file->type != $file::TYPE_FILE) {
+				throw new \LogicException('Cannot construct a UserTemplate with a directory');
+			}
+
 			$this->file = $file;
 			$this->modified = $file->modified->getTimestamp();
 		}

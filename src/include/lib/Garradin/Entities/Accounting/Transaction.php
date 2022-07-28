@@ -81,13 +81,6 @@ class Transaction extends Entity
 		'id_related' => '?int',
 	];
 
-	protected $_form_rules = [
-		'label'     => 'required|string|max:200',
-		'notes'     => 'string|max:20000',
-		'reference' => 'string|max:200',
-		'date'      => 'required|date_format:d/m/Y',
-	];
-
 	protected $_lines;
 	protected $_old_lines = [];
 
@@ -126,7 +119,7 @@ class Transaction extends Entity
 		if ($restrict_year === false) {
 			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
 			$sql = sprintf('SELECT
-				l.*, a.label AS account_name, a.code AS account_code,
+				l.*, a.label AS account_label, a.code AS account_code,
 				b.label AS analytical_name
 				FROM acc_transactions_lines l
 				INNER JOIN acc_accounts a ON a.id = l.id_account %s
@@ -163,7 +156,7 @@ class Transaction extends Entity
 			foreach ($this->getLines() as $line) {
 				$account = [
 					'account_code' => $this->_accounts[$line->id_account]->code ?? null,
-					'account_name' => $this->_accounts[$line->id_account]->label ?? null,
+					'account_label' => $this->_accounts[$line->id_account]->label ?? null,
 					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
 				];
 
@@ -185,6 +178,11 @@ class Transaction extends Entity
 		}
 
 		return $this->_lines;
+	}
+
+	public function countLines(): int
+	{
+		return count($this->getLines());
 	}
 
 	public function removeLine(Line $remove)
@@ -281,7 +279,7 @@ class Transaction extends Entity
 		$lines = $this->getLinesWithAccounts();
 
 		foreach ($lines as $line) {
-			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
+			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_label)];
 
 			if ($line->debit) {
 				$debit = $account;
@@ -424,8 +422,6 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
 
-		$exists = $this->exists();
-
 		$db = DB::getInstance();
 
 		if ($db->test(Year::TABLE, 'id = ? AND closed = 1', $this->id_year)) {
@@ -484,8 +480,15 @@ class Transaction extends Entity
 
 	public function selfCheck(): void
 	{
-		parent::selfCheck();
 		$db = DB::getInstance();
+
+		$this->assert(!empty($this->id_year), 'L\'ID de l\'exercice doit être renseigné.');
+
+		$this->assert(trim((string)$this->label) !== '', 'Le champ libellé ne peut rester vide.');
+		$this->assert(strlen($this->label) <= 200, 'Le champ libellé ne peut faire plus de 200 caractères.');
+		$this->assert(!isset($this->reference) || strlen($this->reference) <= 200, 'Le champ numéro de pièce comptable ne peut faire plus de 200 caractères.');
+		$this->assert(!isset($this->notes) || strlen($this->notes) <= 2000, 'Le champ remarques ne peut faire plus de 2000 caractères.');
+		$this->assert(!empty($this->date), 'Le champ date ne peut rester vide.');
 
 		$this->assert(null !== $this->id_year, 'Aucun exercice spécifié.');
 		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type d\'écriture inconnu : ' . $this->type);
@@ -498,6 +501,12 @@ class Transaction extends Entity
 		$total = 0;
 
 		$lines = $this->getLines();
+		$count = count($lines);
+
+		$this->assert($count > 0, 'Cette écriture ne comporte aucune ligne.');
+		$this->assert($count >= 2, 'Cette écriture comporte moins de deux lignes.');
+		$this->assert($count == 2 ||  $this->type == self::TYPE_ADVANCED, sprintf('Une écriture de type "%s" ne peut comporter que deux lignes au maximum.', self::TYPES_NAMES[$this->type]));
+
 		$accounts_ids = [];
 
 		foreach ($lines as $k => $line) {
@@ -522,6 +531,8 @@ class Transaction extends Entity
 
 		$this->assert(!$this->id_related || $db->test('acc_transactions', 'id = ?', $this->id_related), 'L\'écriture liée indiquée n\'existe pas');
 		$this->assert(!$this->id_related || !$this->exists() || $this->id_related != $this->id, 'Il n\'est pas possible de lier une écriture à elle-même');
+
+		parent::selfCheck();
 	}
 
 	public function importFromDepositForm(?array $source = null): void
@@ -576,23 +587,31 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (!isset($source['type'])) {
-			throw new ValidationException('Type d\'écriture inconnu');
+		if (!isset($this->type) && !isset($source['type'])) {
+			$source['type'] = self::TYPE_ADVANCED;
 		}
 
 		$type = $source['type'];
 
 		$this->importForm($source);
 
+		// Remove error status when changed
+		$this->removeStatus(self::STATUS_ERROR);
+
+		if (!isset($source['lines']) || !is_array($source['lines'])) {
+			return;
+		}
+
 		if (self::TYPE_ADVANCED == $type) {
-			if (!isset($source['lines']) || !is_array($source['lines'])) {
-				throw new ValidationException('Aucune ligne dans la saisie');
+			try {
+				$lines = Utils::array_transpose($source['lines']);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
 			}
 
-			$lines = Utils::array_transpose($source['lines']);
-
 			foreach ($lines as $i => $line) {
-				if (empty($line['account']) || !count($line['account'])) {
+				if (empty($line['account']) || !is_array($line['account']) || !count($line['account'])) {
 					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
 				}
 
@@ -646,9 +665,6 @@ class Transaction extends Entity
 				$this->addLine($line);
 			}
 		}
-
-		// Remove error status when changed
-		$this->removeStatus(self::STATUS_ERROR);
 	}
 
 	public function importFromEditForm(?array $source = null): void
@@ -661,7 +677,10 @@ class Transaction extends Entity
 			unset($source['id_related']);
 		}
 
-		$this->resetLines();
+		if (isset($source['lines'])) {
+			$this->resetLines();
+		}
+
 		$this->importFromNewForm($source);
 	}
 
@@ -683,7 +702,7 @@ class Transaction extends Entity
 		try {
 			$lines = Utils::array_transpose($source['lines']);
 		}
-		catch (\LogicException $e) {
+		catch (\InvalidArgumentException $e) {
 			throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
 		}
 
@@ -722,7 +741,7 @@ class Transaction extends Entity
 			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
 
 			if (!$open_account) {
-				throw new ValidationException('Aucun compte favori de bilan d\'ouverture n\'existe dans le plan comptable');
+				throw new ValidationException('Aucun compte usuel de bilan d\'ouverture n\'existe dans le plan comptable');
 			}
 
 			$line->id_account = $open_account->id();
@@ -941,11 +960,13 @@ class Transaction extends Entity
 	{
 		$lines = [];
 
-		foreach ($this->getLines() as $line) {
-			$lines[] = $line->asDetailsArray();
+		foreach ($this->getLines() as $i => $line) {
+			$lines[$i+1] = $line->asDetailsArray();
 		}
 
 		return [
+			'Numéro'          => $this->id ?? '--',
+			'Type'            => self::TYPES_NAMES[$this->type ?? self::TYPE_ADVANCED],
 			'Libellé'         => $this->label,
 			'Date'            => $this->date,
 			'Pièce comptable' => $this->reference,
@@ -954,5 +975,12 @@ class Transaction extends Entity
 			'Total débit'     => Utils::money_format($this->getLinesDebitSum()),
 			'Lignes'          => $lines,
 		];
+	}
+
+	public function asJournalArray(): array
+	{
+		$out = $this->asArray();
+		$out['lines'] = $this->getLinesWithAccounts();
+		return $out;
 	}
 }

@@ -15,7 +15,7 @@
 	{foreach from=$journal item="transaction"}
 	<tbody>
 		<tr>
-			<td rowspan="{$transaction.lines|count}" class="num"><a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a></td>
+			<td rowspan="{$transaction.lines|count}" class="num">{if $transaction.id}<a href="{$admin_url}acc/transactions/details.php?id={$transaction.id}">#{$transaction.id}</a>{/if}</td>
 			<td rowspan="{$transaction.lines|count}">{$transaction.reference}</td>
 			<td rowspan="{$transaction.lines|count}">{$transaction.date|date_short}</td>
 			<th rowspan="{$transaction.lines|count}">{$transaction.label}</th>

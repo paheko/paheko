@@ -1,7 +1,7 @@
 <?php
 namespace Garradin;
 
-use Garradin\Accounting\Transactions;
+use Garradin\Accounting\Export;
 use Garradin\Accounting\Years;
 
 require_once __DIR__ . '/../_inc.php';
@@ -25,24 +25,28 @@ $format = qg('format');
 $type = qg('type');
 
 if (null !== $format && null !== $type) {
-	Transactions::export($year, $format, $type);
+	Export::export($year, $format, $type);
 	exit;
 }
 
-$examples = Transactions::getExportExamples($year);
+$examples = Export::getExamples($year);
 
 $types = [
-	Transactions::EXPORT_FULL => [
+	Export::FULL => [
 		'label' => 'Complet (comptabilité d\'engagement)',
 		'help' => '(Conseillé pour transfert vers un autre logiciel) Chaque ligne reprend toutes les informations de la ligne et de l\'écriture.',
 	],
-	Transactions::EXPORT_GROUPED => [
+	Export::GROUPED => [
 		'label' => 'Complet groupé',
 		'help' => 'Idem, sauf que les lignes suivantes ne mentionnent pas les informations de l\'écriture.',
 	],
-	Transactions::EXPORT_SIMPLE => [
+	Export::SIMPLE => [
 		'label' => 'Simplifié (comptabilité de trésorerie)',
 		'help' => 'Les écritures avancées ne sont pas inclues dans cet export.',
+	],
+	Export::FEC => [
+		'label' => 'FEC (Fichier des Écritures Comptables)',
+		'help' => 'Format standard de l\'administration française.',
 	],
 ];
 

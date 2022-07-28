@@ -5,14 +5,6 @@
 <form method="post" action="{$self_url}" data-focus="1">
 	{form_errors}
 
-	{if $ok}
-		<p class="block confirm">
-			L'écriture numéro {link href="details.php?id=%d"|args:$ok class="num" label=$ok} a été ajoutée.
-			{linkbutton shape="menu" href="details.php?id=%d"|args:$ok label="Voir l'écriture"}
-			{linkbutton href="?copy=%d"|args:$ok shape="plus" label="Dupliquer"}
-		</p>
-	{/if}
-
 	<fieldset>
 		<legend>Type d'écriture</legend>
 		<dl>
@@ -84,6 +76,12 @@
 		{csrf_field key="acc_transaction_new"}
 		{button type="submit" name="save" label="Enregistrer" shape="right" class="main"}
 	</p>
+
+{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE)}
+	<p class="submit help">
+		Vous pourrez ajouter des fichiers à cette écriture une fois qu'elle aura été enregistrée.
+	</p>
+{/if}
 
 </form>
 

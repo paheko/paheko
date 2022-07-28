@@ -79,6 +79,4 @@ if (!defined('Garradin\LOGIN_PROCESS'))
 }
 
 // Make sure we allow frames to work
-if (array_key_exists('_dialog', $_GET)) {
-    header('X-Frame-Options: SAMEORIGIN', true);
-}
+header('X-Frame-Options: SAMEORIGIN', true);

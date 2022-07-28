@@ -296,7 +296,7 @@ fieldset legend {
     padding: 0 1em;
 }
 
-fieldset input {
+fieldset input, fieldset textarea, fieldset select {
     padding: .5rem;
     border: 1px solid #999;
     border-radius: .3rem;
@@ -309,9 +309,13 @@ fieldset input[type=submit] {
     cursor: pointer;
 }
 
-input:focus {
+input:focus, textarea:focus, select:focus, button:focus {
     outline: none;
     box-shadow: 0px 0px 5px 2px orange;
+}
+
+fieldset dl dd {
+    margin: .5em 1em;
 }
 
 /* Formulaire de recherche */

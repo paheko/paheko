@@ -52,6 +52,8 @@ class Template extends \KD2\Smartyer
 	{
 		parent::__construct();
 
+		Translate::extendSmartyer($this);
+
 		$cache_dir = SMARTYER_CACHE_ROOT;
 
 		if (!file_exists($cache_dir)) {
@@ -72,7 +74,7 @@ class Template extends \KD2\Smartyer
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('admin_url', ADMIN_URL);
-		$this->assign('help_url', HELP_URL);
+		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
@@ -86,14 +88,14 @@ class Template extends \KD2\Smartyer
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
 		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
 
-		$this->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
+		$this->register_compile_function('continue', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($block == 'continue')
 			{
 				return 'continue;';
 			}
 		});
 
-		$this->register_compile_function('use', function ($pos, $block, $name, $raw_args) {
+		$this->register_compile_function('use', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($name == 'use')
 			{
 				return sprintf('use %s;', $raw_args);

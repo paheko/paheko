@@ -28,7 +28,7 @@ $account = new Account;
 $account->position = Account::ASSET_OR_LIABILITY;
 
 $types = $account::TYPES_NAMES;
-$types[0] = '-- Pas un compte favori';
+$types[0] = '-- Pas un compte usuel';
 
 // Simple creation with pre-determined account type
 if (qg('type') !== null) {

@@ -5,6 +5,7 @@ namespace Garradin;
 use KD2\ErrorManager;
 use KD2\Security;
 use KD2\Form;
+use KD2\Translate;
 use KD2\DB\EntityManager;
 
 error_reporting(-1);
@@ -244,7 +245,7 @@ if (!defined('Garradin\ADMIN_BACKGROUND_IMAGE')) {
 // Used for private files, just in case WWW_URL is not the same domain as ADMIN_URL
 define('Garradin\BASE_URL', str_replace('/admin/', '/', ADMIN_URL));
 
-const HELP_URL = 'https://garradin.eu/aide';
+const HELP_URL = 'https://garradin.eu/aide?from=%s';
 const WEBSITE = 'https://fossil.kd2.org/garradin/';
 const PLUGINS_URL = 'https://garradin.eu/plugins/list.json';
 
@@ -373,6 +374,8 @@ if (!defined('Garradin\SECRET_KEY'))
 Form::tokenSetSecret(SECRET_KEY);
 
 EntityManager::setGlobalDB(DB::getInstance());
+
+Translate::setLocale('fr_FR');
 
 /*
  * Vérifications pour enclencher le processus d'installation ou de mise à jour

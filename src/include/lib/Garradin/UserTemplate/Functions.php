@@ -13,6 +13,7 @@ use Garradin\Template;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\Web\Skeleton;
+use Garradin\Users\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
 
@@ -140,7 +141,7 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
 		}
 
-		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $params['to'], $params['subject'], $params['body']);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$params['to'] => []], null, $params['subject'], $params['body']);
 	}
 
 	static public function dump(array $params, Brindille $tpl)

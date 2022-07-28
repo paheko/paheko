@@ -7,6 +7,7 @@ use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entity;
 
 /**
  * Provides assisted reconciliation
@@ -33,11 +34,7 @@ class AssistedReconciliation
 		$this->csv->setColumns(self::COLUMNS);
 		$this->csv->setMandatoryColumns(['label', 'date']);
 		$this->csv->setModifier(function (\stdClass $line): \stdClass {
-			$date = \DateTime::createFromFormat('!d/m/Y', $line->date);
-
-			if (!$date) {
-				throw new UserException(sprintf('Date invalide : %s (format attendu : JJ/MM/AAAA)', $line->date));
-			}
+			$date = Entity::filterUserDateValue($line->date);
 
 			$line->date = $date;
 
@@ -47,11 +44,11 @@ class AssistedReconciliation
 				$has_amount = in_array('amount', $this->csv->getTranslationTable());
 			}
 
-			if (!$has_amount) {
+			if (!$has_amount && isset($line->credit) && isset($line->debit)) {
 				$line->amount = $line->credit ?: '-' . ltrim($line->debit, '- \t\r\n');
 			}
 
-			$line->amount = (substr($line->amount, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->amount);
+			$line->amount = Utils::moneyToInteger($line->amount);
 
 			if (!empty($line->balance)) {
 				$line->balance = (substr($line->balance, 0, 1) == '-' ? -1 : 1) * Utils::moneyToInteger($line->balance);
@@ -163,7 +160,7 @@ class AssistedReconciliation
 			}
 		}
 
-		unset($j);
+		unset($j, $line);
 
 		// Then add CSV lines on the right
 		foreach ($csv as $line) {
