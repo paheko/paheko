@@ -967,7 +967,7 @@ class Transaction extends Entity
 
 		return [
 			'Numéro'          => $this->id ?? '--',
-			'Type'            => self::TYPES_NAMES[$this->type],
+			'Type'            => self::TYPES_NAMES[$this->type ?? self::TYPE_ADVANCED],
 			'Libellé'         => $this->label,
 			'Date'            => $this->date,
 			'Pièce comptable' => $this->reference,
