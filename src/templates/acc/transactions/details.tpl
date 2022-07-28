@@ -150,31 +150,4 @@
 </div>
 {/if}
 
-{if count($documents)}
-<div class="templates">
-	<h3>Modèles de documents</h3>
-	<table>
-	{foreach from=$documents item="doc"}
-		<tr>
-			<th>{link href="%s?id_transaction=%d"|args:$doc->url(),$transaction.id label=$doc.name target="_blank"}</th>
-			<td>
-			{if $doc.config.preview}
-				{linkbutton shape="eye" href="%s?id_transaction=%d"|args:$doc->url(),$transaction.id label="Prévisualiser" target="_dialog"}
-			{/if}
-			</td>
-			<td>
-			{if $doc.config.pdf}
-				{linkbutton shape="download" href="%s?id_transaction=%d&pdf"|args:$doc->url(),$transaction.id label="Télécharger"}
-			{/if}
-			</td>
-			<td>
-			{if $doc.config.config}
-				{linkbutton shape="settings" href="%s?id_transaction=%d"|args:$doc->url($doc.config.config),$transaction.id label="Configurer" target="_dialog"}
-			{/if}
-			</td>
-		</tr>
-	{/foreach}
-</div>
-{/if}
-
 {include file="admin/_foot.tpl"}

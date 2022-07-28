@@ -441,7 +441,17 @@ CREATE TABLE IF NOT EXISTS user_forms
 	name TEXT NOT NULL,
 	label TEXT NOT NULL,
 	description TEXT NULL,
-	templates TEXT NULL
+	config TEXT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS user_forms_name ON user_forms (name);
+
+CREATE TABLE IF NOT EXISTS user_forms_templates
+-- List of forms special templates
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    id_form INTEGER NOT NULL REFERENCES user_forms (id) ON DELETE CASCADE,
+    name TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS user_forms_templates ON user_forms_templates (id_form, name);

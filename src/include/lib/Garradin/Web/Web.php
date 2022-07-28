@@ -5,12 +5,12 @@ namespace Garradin\Web;
 use Garradin\Entities\Web\Page;
 use Garradin\Entities\Files\File;
 use Garradin\Web\Skeleton;
-use Garradin\UserTemplate\Document;
 use Garradin\Files\Files;
 use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Plugin;
+use Garradin\UserForms;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -219,14 +219,14 @@ class Web
 			header('Location: ' . Config::getInstance()->fileURL('favicon'), true);
 			return;
 		}
+		elseif (substr($uri, 0, 5) === 'form/') {
+			$uri = substr($uri, 5);
+			UserForms::serve($uri);
+			return;
+		}
 		elseif (substr($uri, 0, 6) === 'admin/') {
 			http_response_code(404);
 			throw new UserException('Cette page n\'existe pas.');
-		}
-		elseif (substr($uri, 0, 4) === 'doc/') {
-			$uri = substr($uri, 4);
-			Document::serve($uri);
-			return;
 		}
 		elseif (($file = Files::getFromURI($uri))
 			|| ($file = self::getAttachmentFromURI($uri))) {

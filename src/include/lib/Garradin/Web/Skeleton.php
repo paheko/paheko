@@ -17,7 +17,8 @@ class Skeleton
 {
 	const TEMPLATE_TYPES = '!^(?:text/(?:html|plain)|\w+/(?:\w+\+)?xml)$!';
 
-	protected $path;
+	protected ?string $path;
+	protected ?File $file = null;
 
 	static public function isValidPath(string $path)
 	{

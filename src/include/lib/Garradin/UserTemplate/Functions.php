@@ -30,7 +30,7 @@ class Functions
 		'save',
 		'admin_header',
 		'admin_footer',
-		'signature_url',
+		'signature',
 		'mail',
 	];
 
@@ -200,15 +200,18 @@ class Functions
 		return $content;
 	}
 
-	static public function signature_url(): string
+	static public function signature(): string
 	{
 		$file = Config::getInstance()->file('signature');
 
 		if (!$file) {
-			return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+			return '';
 		}
 
-		return 'data:image/png;base64,' . base64_encode($file->fetch());
+		// We can't just use the image URL as it would not be accessible by PDF programs
+		$url = 'data:image/png;base64,' . base64_encode($file->fetch());
+
+		return sprintf('<figure class="signature"><img src="%s" alt="Signature" /></figure>', $url);
 	}
 
 	static public function include(array $params, UserTemplate $ut, int $line): void
@@ -312,6 +315,10 @@ class Functions
 		}
 
 		if (isset($params['type'])) {
+			if ($params['type'] == 'pdf') {
+				$params['type'] = 'application/pdf';
+			}
+
 			header('Content-Type: ' . $params['type'], true);
 			$tpl->setContentType($params['type']);
 		}

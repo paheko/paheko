@@ -92,7 +92,6 @@ class File extends Entity
 	const CONTEXT_CONFIG = 'config';
 	const CONTEXT_WEB = 'web';
 	const CONTEXT_SKELETON = 'skel';
-	const CONTEXT_FORM = 'form';
 
 	const CONTEXTS_NAMES = [
 		self::CONTEXT_DOCUMENTS => 'Documents',
@@ -101,7 +100,6 @@ class File extends Entity
 		self::CONTEXT_CONFIG => 'Configuration',
 		self::CONTEXT_WEB => 'Site web',
 		self::CONTEXT_SKELETON => 'Squelettes',
-		self::CONTEXT_FORM => 'Squelettes',
 	];
 
 	const IMAGE_TYPES = [
@@ -155,11 +153,6 @@ class File extends Entity
 	}
 
 	public function context(): string
-	{
-		return strtok($this->path, '/');
-	}
-
-	public function accessContext(): string
 	{
 		return strtok($this->path, '/');
 	}
@@ -846,15 +839,15 @@ class File extends Entity
 			return true;
 		}
 
-		$context = $this->accessContext();
+		$context = $this->context();
 		$ref = strtok(substr($this->path, strpos($this->path, '/')), '/');
 
 		if (null === $session || !$session->isLogged()) {
 			return false;
 		}
 
-		// All config and form files can be accessed by all logged-in users
-		if ($context == self::CONTEXT_CONFIG || $context == self::CONTEXT_FORM) {
+		// All config files can be accessed by all logged-in users
+		if ($context == self::CONTEXT_CONFIG) {
 			return true;
 		}
 		elseif ($context == self::CONTEXT_TRANSACTION && $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
@@ -876,25 +869,33 @@ class File extends Entity
 		return false;
 	}
 
+	public function checkSkeletonWriteAccess(?Session $session): bool
+	{
+		if (strpos($this->path, self::CONTEXT_SKELETON . '/web') === 0) {
+			return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+		}
+
+		return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
+	}
+
 	public function checkWriteAccess(?Session $session): bool
 	{
 		if (null === $session) {
 			return false;
 		}
 
-		switch ($this->accessContext()) {
+		switch ($this->context()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
 				// Only managers can change files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
 			case self::CONTEXT_CONFIG:
-			case self::CONTEXT_FORM:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+				return $this->checkSkeletonWriteAccess($session);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
@@ -908,16 +909,15 @@ class File extends Entity
 			return false;
 		}
 
-		switch ($this->accessContext()) {
+		switch ($this->context()) {
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_SKELETON:
-				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
+				return $this->checkSkeletonWriteAccess($session);
 			case self::CONTEXT_DOCUMENTS:
 				// Only admins can delete files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
 			case self::CONTEXT_CONFIG:
-			case self::CONTEXT_FORM:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN);
@@ -938,12 +938,12 @@ class File extends Entity
 
 		switch ($context) {
 			case self::CONTEXT_SKELETON:
+				return $this->checkSkeletonWriteAccess($session);
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_WRITE);
 			case self::CONTEXT_CONFIG:
-			case self::CONTEXT_FORM:
 				return $session->canAccess($session::SECTION_CONFIG, $session::ACCESS_ADMIN);
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
