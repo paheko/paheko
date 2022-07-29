@@ -9,6 +9,7 @@ use Garradin\ValidationException;
 use Garradin\Services\Fees;
 use Garradin\Services\Services;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Accounting\Line;
 
 class Service_User extends Entity
 {
@@ -139,14 +140,18 @@ class Service_User extends Entity
 			throw new ValidationException('Le tarif indiqué ne possède pas d\'exercice lié');
 		}
 
+		if (empty($source['amount'])) {
+			throw new ValidationException('Montant non précisé');
+		}
+
+		if (empty($source['account']) || !is_array($source['account']) || !key($source['account'])) {
+			throw new ValidationException('Aucune compte n\'a été sélectionné.');
+		}
+
 		$transaction = new Transaction;
 		$transaction->id_creator = $user_id;
 		$transaction->id_year = $this->fee()->id_year;
-
-		$source['type'] = Transaction::TYPE_REVENUE;
-		$key = sprintf('account_%d_', $source['type']);
-		$source[$key . '0'] = [$this->fee()->id_account => ''];
-		$source[$key . '1'] = isset($source['account']) ? $source['account'] : null;
+		$transaction->type = Transaction::TYPE_REVENUE;
 
 		$label = $this->service()->label;
 
@@ -156,10 +161,30 @@ class Service_User extends Entity
 
 		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
 
-		$source['label'] = $label;
-		$source['id_analytical'] = $this->fee()->id_analytical;
+		$transaction->importForm([
+			'reference' => $source['reference'] ?? null,
+			'label'     => $label,
+			'date'      => $source['date'] ?? null,
+		]);
 
-		$transaction->importFromNewForm($source);
+		$l1 = new Line;
+		$l2 = new Line;
+		$l1->importForm([
+			'id_account' => $this->fee()->id_account,
+			'credit' => $source['amount'],
+			'id_analytical' => $this->fee()->id_analytical,
+			'reference' => $source['payment_reference'] ?? null,
+		]);
+		$l2->importForm([
+			'id_account' => key($source['account']),
+			'debit' => $source['amount'],
+			'id_analytical' => $this->fee()->id_analytical,
+			'reference' => $source['payment_reference'] ?? null,
+		]);
+
+		$transaction->addLine($l1);
+		$transaction->addLine($l2);
+
 		$transaction->save();
 		$transaction->linkToUser($this->id_user, $this->id());
 
