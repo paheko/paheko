@@ -54,7 +54,7 @@ if (!isset($current)) {
         </figure>
         {/if}
     <ul>
-    {if $session->isLogged()}
+    {if $session && $session->isLogged()}
     <?php
     $current_parent = substr($current, 0, strpos($current, '/'));
     ?>

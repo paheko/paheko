@@ -5,7 +5,7 @@
 		<li{if $current == 'categories'} class="current"{/if}><a href="{$admin_url}config/categories/">Catégories de membres</a></li>
 		<li{if $current == 'fiches_membres'} class="current"{/if}><a href="{$admin_url}config/membres.php">Fiche des membres</a></li>
 		<li{if $current == 'backup'} class="current"{/if}><a href="{$admin_url}config/backup/">Sauvegardes</a></li>
-		<li{if $current == 'plugins'} class="current"{/if}><a href="{$admin_url}config/forms/">Formulaires &amp; modèles</a></li>
+		<li{if $current == 'forms'} class="current"{/if}><a href="{$admin_url}config/forms/">Formulaires &amp; modèles</a></li>
 		<li{if $current == 'plugins'} class="current"{/if}><a href="{$admin_url}config/plugins.php">Extensions</a></li>
 		<li{if $current == 'advanced'} class="current"{/if}><a href="{$admin_url}config/advanced/">Fonctions avancées</a></li>
 	</ul>

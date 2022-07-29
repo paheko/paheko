@@ -78,11 +78,16 @@ class Template extends \KD2\Smartyer
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
-		$session = Session::getInstance();
-		$this->assign('config', Config::getInstance());
-		$this->assign('session', $session);
+		$session = null;
 
-		$this->assign('is_logged', $session->isLogged());
+		if (!defined('Garradin\INSTALL_PROCESS')) {
+			$session = Session::getInstance();
+			$this->assign('config', Config::getInstance());
+		}
+
+		$this->assign('session', $session);
+		$this->assign('is_logged', $session ? $session->isLogged() : null);
+
 		$this->assign('dialog', isset($_GET['_dialog']));
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
@@ -196,7 +201,7 @@ class Template extends \KD2\Smartyer
 
 	protected function passwordChangeInput(array $params)
 	{
-		$out = $this->formInput(array_merge($params, [
+		$out = CommonModifiers::input(array_merge($params, [
 			'type' => 'password',
 			'help' => sprintf('(Minimum %d caractères)', Session::MINIMUM_PASSWORD_LENGTH),
 			'minlength' => Session::MINIMUM_PASSWORD_LENGTH,
@@ -209,7 +214,7 @@ class Template extends \KD2\Smartyer
 		$out .= sprintf('<dd class="help">Pas d\'idée&nbsp;? Voici une suggestion choisie au hasard&nbsp;:
                 <input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="f_%s_suggest" value="%s" autocomplete="off" size="%d" /></dd>', $params['name'], $suggestion, strlen($suggestion));
 
-		$out .= $this->formInput([
+		$out .= CommonModifiers::input([
 			'type' => 'password',
 			'label' => 'Répéter le mot de passe',
 			'required' => true,

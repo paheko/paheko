@@ -45,8 +45,6 @@ class UserForms
 		$delete = array_diff($existing, $list);
 		$existing = array_diff($list, $create);
 
-		//echo '<pre>'; var_dump(compact('create', 'delete', 'existing', 'list')); exit;
-
 		foreach ($create as $name) {
 			self::create($name);
 		}
