@@ -10,7 +10,7 @@ use Garradin\API;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Plugin;
-use Garradin\UserForms;
+use Garradin\UserTemplate\UserForms;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;

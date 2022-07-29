@@ -21,7 +21,7 @@
 	{{:admin_footer}}
 
 {{else}}
-	{{#transactions id=$_GET}}
+	{{#transactions id=$_GET.id}}
 		{{:include file="forms/_header.html" page_size="A5" title="Reçu de don %d - %s"|args:$id:$users_names}}
 
 			<h1>Reçu de don</h1>

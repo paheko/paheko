@@ -2,6 +2,8 @@
 namespace Garradin;
 
 use Garradin\Accounting\Transactions;
+use Garradin\UserTemplate\UserForms;
+use Garradin\Entities\UserForm;
 
 require_once __DIR__ . '/../_inc.php';
 
@@ -18,15 +20,18 @@ $form->runIf('mark_paid', function () use ($transaction) {
 	$transaction->save();
 }, $csrf_key, Utils::getSelfURI());
 
-$tpl->assign(compact('transaction', 'csrf_key'));
+$variables = compact('csrf_key', 'transaction') + [
+	'transaction_lines'    => $transaction->getLinesWithAccounts(false),
+	'transaction_year'     => $transaction->year(),
+	'files'                => $transaction->listFiles(),
+	'creator_name'         => $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null,
+	'files_edit'           => $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE),
+	'file_parent'          => $transaction->getAttachementsDirectory(),
+	'related_users'        => $transaction->listLinkedUsers(),
+	'related_transactions' => $transaction->listRelatedTransactions()
+];
 
-$tpl->assign('files', $transaction->listFiles());
-$tpl->assign('tr_year', $transaction->year());
-$tpl->assign('creator_name', $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null);
-
-$tpl->assign('files_edit', $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE));
-$tpl->assign('file_parent', $transaction->getAttachementsDirectory());
-$tpl->assign('related_users', $transaction->listLinkedUsers());
-$tpl->assign('related_transactions', $transaction->listRelatedTransactions());
+$tpl->assign($variables);
+$tpl->assign('snippets', UserForms::getSnippets(UserForm::SNIPPET_TRANSACTION, $variables));
 
 $tpl->display('acc/transactions/details.tpl');

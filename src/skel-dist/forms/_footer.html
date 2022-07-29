@@ -2,10 +2,10 @@
 
 </div>
 
-{{if $_GET.print == 'print'}}
+{{if $_GET.print == 'yes'}}
 <script type="text/javascript">
+window.onafterprint = window.close;
 window.print();
-window.close();
 </script>
 {{/if}}
 

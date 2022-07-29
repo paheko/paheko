@@ -1,26 +1,31 @@
 {{#restrict block=true section="accounting" level="read"}}
 {{/restrict}}
 
-{{if !$_GET.id_transaction}}
+{{if !$_GET.id}}
 	{{:error message="Aucun numéro d'écriture n'a été fourni"}}
 {{/if}}
 
 {{if !$form.config}}
 	{{* Valeurs par défaut *}}
-	{{:assign var="form[config]"
-		objet=""
-		compte_especes="530"
-		compte_cheques="5112"
+	{{:assign var="form.config"
+		topic=""
+		accounts="756"
+		accounts_cash="530"
+		accounts_cheques="5112"
 		art200=0
 		art238=0
 		art885=0}}
 {{/if}}
 
 {{#transactions id=$_GET.id}}
+{{:assign title="Reçu fiscal %d - %s"|args:$id:$users_names}}
+{{if $_GET.print == 'pdf'}}
+	{{:http type="pdf" download="%s.pdf"|args:$title}}
+{{/if}}
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Reçu fiscal n°{{$id}} - {{$users_names}}</title>
+	<title>{{$title}}</title>
 	<style type="text/css">
 	@media print {
 		@page {
@@ -82,6 +87,11 @@
 	b {
 		font-weight: normal;
 	}
+
+	.signature img {
+		max-width: 50mm;
+		max-height: 17mm;
+	}
 	</style>
 </head>
 
@@ -93,7 +103,7 @@
 	<div style="top: 35mm; left: 20mm;">{{$config.nom_asso}}</div>
 	<div style="top: 46mm; left: 14mm; height: 11mm; width: 180mm; background: #fff;">{{$config.adresse_asso}}</div>
 
-	<div style="top: 64mm; left: 14mm; background: white; width: 180mm; height: 17mm; overflow: hidden;">{{$cerfa_config.objet|escape|nl2br}}</div>
+	<div style="top: 64mm; left: 14mm; background: white; width: 180mm; height: 17mm; overflow: hidden;">{{$form.config.topic|escape|nl2br}}</div>
 
 	<div style="top: 128.5mm; left: 15mm;">X</div>
 </div>
@@ -114,9 +124,9 @@
 	<div style="top: 82mm; left: 82mm;">{{$date|date:'m'}}</div>
 	<div style="top: 82mm; left: 99mm;">{{$date|date:'Y'}}</div>
 
-	<div style="top: 96mm; left: 53mm;">{{if $cerfa_config.art200}}X{{/if}}</div>
-	<div style="top: 96mm; left: 103mm;">{{if $cerfa_config.art238}}X{{/if}}</div>
-	<div style="top: 96mm; left: 153.0mm;">{{if $cerfa_config.art885}}X{{/if}}</div>
+	<div style="top: 96mm; left: 53mm;">{{if $form.config.art200}}X{{/if}}</div>
+	<div style="top: 96mm; left: 103mm;">{{if $form.config.art238}}X{{/if}}</div>
+	<div style="top: 96mm; left: 153.0mm;">{{if $form.config.art885}}X{{/if}}</div>
 
 	<div style="top: 113mm; left: 115mm;">X</div>
 
@@ -128,9 +138,9 @@
 {{/if}}
 
 	{{* Moyen de paiement *}}
-	{{if $accounts_codes|strpos:$cerfa_config.compte_especes !== false}}
+	{{if $accounts_codes|strpos:$form.config.accounts_cash !== false}}
 	<div style="top: 158.2mm; left: 15mm;">X</div>
-	{{elseif $accounts_codes|strpos:$cerfa_config.compte_cheques !== false}}
+	{{elseif $accounts_codes|strpos:$form.config.accounts_cheques !== false}}
 	<div style="top: 158.2mm; left: 57.3mm;">X</div>
 	{{else}}
 	<div style="top: 158.2mm; left: 115.2mm;">X</div>
@@ -141,7 +151,7 @@
 	<div style="top: 239mm; left: 148mm;">{{$now|date:'m'}}</div>
 	<div style="top: 239mm; left: 156mm;">{{$now|date:'Y'}}</div>
 
-	<div style="top: 243mm; left: 137mm;"><img src="{{:signature_url}}" alt="Signature" style="max-width: 50mm; max-height: 17mm;" /></div>
+	<div style="top: 243mm; left: 137mm;">{{:signature}}</div>
 </div>
 
 {{/transactions}}

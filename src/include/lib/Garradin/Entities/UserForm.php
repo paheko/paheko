@@ -2,12 +2,21 @@
 
 namespace Garradin\Entities;
 
-use \Garradin\Entity;
+use Garradin\Entity;
+use Garradin\DB;
+use Garradin\Files\Files;
+use Garradin\UserTemplate\UserTemplate;
+use Garradin\Membres\Session;
+
+use Garradin\Entities\Files\File;
+
+use const Garradin\{ROOT, WWW_URL};
 
 class UserForm extends Entity
 {
 	const ROOT = File::CONTEXT_SKELETON . '/forms';
-	const CONFIG_FILE = 'form.json';
+	const DIST_ROOT = ROOT . '/skel-dist/forms';
+	const META_FILE = 'form.json';
 
 	const CONFIG_TEMPLATE = 'config.html';
 
@@ -32,17 +41,11 @@ class UserForm extends Entity
 
 	protected string $label;
 	protected ?string $description;
-
-	/**
-	 * List of snippets/special template files
-	 */
-	protected array $templates;
-
-	protected \stdClass $config;
+	protected ?\stdClass $config;
 
 	public function selfCheck(): void
 	{
-		$this->assert(preg_match('/^[a-z]+(?:_[a-z0-9])*$/', $this->name), 'Nom unique de formulaire invalide');
+		$this->assert(preg_match('/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/', $this->name), 'Nom unique de formulaire invalide: ' . $this->name);
 		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide');
 	}
 
@@ -51,25 +54,31 @@ class UserForm extends Entity
 	 */
 	public function updateFromJSON(): bool
 	{
-		if ($file = Files::get($this->path())) {
+		if ($file = Files::get($this->path(self::META_FILE))) {
 			$json = $file->fetch();
 		}
-		elseif (file_exists($this->distPath())) {
-			$json = file_get_contents($this->distPath());
+		elseif (file_exists($this->distPath(self::META_FILE))) {
+			$json = file_get_contents($this->distPath(self::META_FILE));
 		}
 		else {
 			return false;
 		}
 
+		$json = json_decode($json);
+
+		if (!isset($json->label)) {
+			return false;
+		}
+
 		$this->label = $json->label;
-		$this->description = $json->description;
+		$this->description = $json->description ?? null;
 
 		return true;
 	}
 
 	public function updateTemplates(): void
 	{
-		$check = self::SNIPPETS + [self::CONFIG_TEMPLATE];
+		$check = self::SNIPPETS + [self::CONFIG_TEMPLATE => 'Config'];
 		$templates = [];
 		$db = DB::getInstance();
 
@@ -93,12 +102,17 @@ class UserForm extends Entity
 
 	public function distPath(string $file = null): string
 	{
-		return ROOT . '/skel-dist/' . $this->name . ($file ? '/' . $file : '');
+		return ROOT . '/skel-dist/forms/' . $this->name . ($file ? '/' . $file : '');
 	}
 
 	public function dir(): ?File
 	{
 		return Files::get(self::ROOT . $this->name);
+	}
+
+	public function hasDist(): bool
+	{
+		return file_exists($this->distPath());
 	}
 
 	public function hasConfig(): bool
@@ -130,7 +144,7 @@ class UserForm extends Entity
 			$params = '?' . http_build_query($params);
 		}
 
-		return sprintf('%sform/%s/%s/%s%s', WWW_URL, $this->context, $this->id, $file, $params);
+		return sprintf('%sform/%s/%s%s', WWW_URL, $this->name, $file, $params);
 	}
 
 	public function displayWeb(string $file)
@@ -143,10 +157,12 @@ class UserForm extends Entity
 		}
 	}
 
-	public function fetch(string $file)
+	public function fetch(string $file, array $variables = [])
 	{
 		try {
-			return $this->template($file)->fetch();
+			$t = $this->template($file);
+			$t->assignArray($variables);
+			return $t->fetch();
 		}
 		catch (Brindille_Exception $e) {
 			return sprintf('<div style="border: 5px solid orange; padding: 10px; background: yellow;"><h2>Erreur dans le code du document</h2><p>%s</p></div>', nl2br(htmlspecialchars($e->getMessage())));
@@ -155,11 +171,16 @@ class UserForm extends Entity
 
 	public function template(string $file)
 	{
-		if (!preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $file)) {
+		if ($file == self::CONFIG_TEMPLATE) {
+			Session::getInstance()->requireAccess(Session::SECTION_CONFIG, Session::ACCESS_ADMIN);
+		}
+
+		if (!preg_match('!^(?:snippets/)?[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $file)) {
 			throw new \InvalidArgumentException('Invalid skeleton name');
 		}
 
-		$ut = new UserTemplate(self::ROOT . '/' . $this->name . '/' . $file);
+		$ut = new UserTemplate('forms/' . $this->name . '/' . $file);
+		$ut->assign('form', $this->asArray(false) + ['url' => $this->url()]);
 
 		return $ut;
 	}

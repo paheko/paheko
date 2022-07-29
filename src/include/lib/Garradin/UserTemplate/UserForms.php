@@ -1,8 +1,16 @@
 <?php
 
-namespace Garradin;
+namespace Garradin\UserTemplate;
 
 use Garradin\Entities\UserForm;
+
+use Garradin\Files\Files;
+use Garradin\DB;
+use Garradin\Utils;
+
+use const Garradin\ROOT;
+
+use \KD2\DB\EntityManager as EM;
 
 class UserForms
 {
@@ -22,7 +30,7 @@ class UserForms
 			$list[] = $file->name;
 		}
 
-		foreach (glob(self::DIST_SKEL_ROOT . '/*') as $file) {
+		foreach (glob(UserForm::DIST_ROOT . '/*') as $file) {
 			if (!is_dir($file)) {
 				continue;
 			}
@@ -36,6 +44,8 @@ class UserForms
 		$create = array_diff($list, $existing);
 		$delete = array_diff($existing, $list);
 		$existing = array_diff($list, $create);
+
+		//echo '<pre>'; var_dump(compact('create', 'delete', 'existing', 'list')); exit;
 
 		foreach ($create as $name) {
 			self::create($name);
@@ -72,11 +82,24 @@ class UserForms
 		return EM::getInstance(UserForm::class)->all('SELECT * FROM @TABLE ORDER BY label COLLATE NOCASE ASC;');
 	}
 
+	static public function getSnippets(string $snippet, array $variables = []): string
+	{
+		$out = '';
+
+		foreach (self::listForSnippet($snippet) as $form) {
+			$out .= $form->fetch($snippet, $variables);
+			$out .= PHP_EOL;
+		}
+
+		return $out;
+	}
+
 	static public function listForSnippet(string $snippet): array
 	{
-		return EM::getInstance(UserForm::class)->all('SELECT * FROM @TABLE
-			WHERE templates LIKE ?
-			ORDER BY label COLLATE NOCASE ASC;', sprintf('%%"%s%"%', $snippet));
+		return EM::getInstance(UserForm::class)->all('SELECT f.* FROM @TABLE f
+			INNER JOIN user_forms_templates t ON t.id_form = f.id
+			WHERE t.name = ?
+			ORDER BY f.label COLLATE NOCASE ASC;', $snippet);
 	}
 
 	static public function get(string $name): ?UserForm

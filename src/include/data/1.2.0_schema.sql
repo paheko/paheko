@@ -454,4 +454,4 @@ CREATE TABLE IF NOT EXISTS user_forms_templates
     name TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS user_forms_templates ON user_forms_templates (id_form, name);
+CREATE UNIQUE INDEX IF NOT EXISTS user_forms_templates_name ON user_forms_templates (id_form, name);

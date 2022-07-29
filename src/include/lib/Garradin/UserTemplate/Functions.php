@@ -16,6 +16,7 @@ use Garradin\Web\Skeleton;
 use Garradin\Users\Emails;
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
+use Garradin\Entities\UserForm;
 
 use const Garradin\{ROOT, WWW_URL};
 
@@ -80,18 +81,33 @@ class Functions
 
 	static public function save(array $params, Brindille $tpl, int $line): void
 	{
-		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
 
-		if (!$id) {
+		if (!$name) {
 			throw new Brindille_Exception('Unique document name could not be found');
 		}
 
-		if (empty($params['key'])) {
-			$params['key'] = Utils::uuid();
+		$table = 'user_forms_' . $name;
+
+		if (!empty($params['key'])) {
+			if ($params['key'] == 'uuid') {
+				$params['key'] = Utils::uuid();
+			}
+
+			$where = 'key = ?';
+			$where_value = $params['key'];
+		}
+		elseif (!empty($params['id'])) {
+			$where = 'id = ?';
+			$where_value = $params['id'];
+		}
+		else {
+			throw new Brindille_Exception('Aucun paramètre "id" ou "key" n\'a été renseigné');
 		}
 
-		$key = $params['key'];
-		unset($params['key']);
+		$key = $params['key'] ?? null;
+
+		unset($params['key'], $params['id']);
 
 		$validate = null;
 
@@ -101,11 +117,27 @@ class Functions
 		}
 
 		$db = DB::getInstance();
-		$exists = $db->first('SELECT value FROM documents_data WHERE key = ? AND document = ?;', $key, $id);
+
+		if ($key == 'config') {
+			$exists = $db->firstColumn(sprintf('SELECT config FROM %s WHERE name = ?;', UserForm::TABLE), $name);
+		}
+		else {
+			$db->exec(sprintf('
+				CREATE TABLE IF NOT EXISTS %s (
+					id INTEGER NOT NULL PRIMARY KEY,
+					key TEXT NULL,
+					value TEXT NOT NULL
+				);
+				CREATE UNIQUE INDEX IF NOT EXISTS %1$s_key ON %1$s (key);', $table));
+
+			$exists = $db->first(sprintf('SELECT value FROM %s WHERE %s AND document = ?;', $table, $where), $where_value, $id);
+		}
+
+		$exists = json_decode((string) $exists, true);
 
 		// Merge before update
 		if ($exists) {
-			$params = array_merge(json_decode($exists, true), $params);
+			$params = array_merge($exists, $params);
 		}
 
 		if ($validate) {
@@ -121,10 +153,19 @@ class Functions
 			}
 		}
 
-		$params = json_encode($params);
+		$value = json_encode($params);
 
-		$db = DB::getInstance();
-		$db->preparedQuery('REPLACE INTO documents_data (document, key, value) VALUES (?, ?, ?);', $id, $key, $params);
+		if ($key == 'config') {
+			$db->update(UserForm::TABLE, ['config' => $value], 'name = :name', compact('name'));
+			return;
+		}
+
+		if (!$exists) {
+			$db->insert($table, compact('value', 'key'));
+		}
+		else {
+			$db->update($table, compact('value'), sprintf('%s = :match', $where), ['match' => $where_value]);
+		}
 	}
 
 	static public function mail(array $params, Brindille $tpl, int $line)
@@ -164,7 +205,7 @@ class Functions
 	static protected function getFilePath(array $params, string $arg_name, UserTemplate $ut, int $line)
 	{
 		if (empty($params[$arg_name])) {
-			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant pour la fonction "include"', $arg_name, $line));
+			throw new Brindille_Exception(sprintf('Ligne %d: argument "%s" manquant', $arg_name, $line));
 		}
 
 		if (strpos($params[$arg_name], '..') !== false) {
@@ -234,7 +275,7 @@ class Functions
 
 		$params['included_from'] = array_merge($from, [$path]);
 
-		$include->assignArray($params);
+		$include->assignArray(array_merge($ut->getAllVariables(), $params));
 		$include->display();
 	}
 
@@ -314,13 +355,12 @@ class Functions
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
 		}
 
-		if (isset($params['type'])) {
+		if (!empty($params['type'])) {
 			if ($params['type'] == 'pdf') {
 				$params['type'] = 'application/pdf';
 			}
 
 			header('Content-Type: ' . $params['type'], true);
-			$tpl->setContentType($params['type']);
 		}
 
 		if (isset($params['download'])) {

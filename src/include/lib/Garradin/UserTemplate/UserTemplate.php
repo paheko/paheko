@@ -33,8 +33,6 @@ class UserTemplate extends \KD2\Brindille
 
 	static protected $root_variables;
 
-	protected $content_type = null;
-
 	static public function getRootVariables()
 	{
 		if (null !== self::$root_variables) {
@@ -300,16 +298,19 @@ class UserTemplate extends \KD2\Brindille
 		Utils::streamPDF($html);
 	}
 
-	public function setContentType(string $type): void
-	{
-		$this->content_type = $type;
-	}
 
 	public function displayWeb(): void
 	{
 		$content = $this->fetch();
 
-		$type = $this->content_type ?: 'text/html';
+		foreach (headers_list() as $header) {
+			if (preg_match('/^Content-Type: (.*)$/', $header, $match)) {
+				$type = $match[1];
+				break;
+			}
+		}
+
+		$type = $type ?? 'text/html';
 		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
 
 		if ($type == 'application/pdf') {

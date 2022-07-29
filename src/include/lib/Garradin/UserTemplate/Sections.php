@@ -6,6 +6,7 @@ use KD2\Brindille_Exception;
 use Garradin\Config;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\UserException;
 use Garradin\Membres\Session;
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Web;
@@ -46,20 +47,15 @@ class Sections
 
 	static public function load(array $params, UserTemplate $tpl, int $line): \Generator
 	{
-		$id = Utils::basename(Utils::dirname($tpl->_tpl_path));
+		$name = Utils::basename(Utils::dirname($tpl->_tpl_path));
 
-		if (!$id) {
+		if (!$name) {
 			throw new Brindille_Exception('Unique document name could not be found');
 		}
 
-		if (!array_key_exists('where', $params)) {
-			$params['where'] = 'document = :document';
+		if (!isset($params['where'])) {
+			$params['where'] = '1';
 		}
-		else {
-			$params['where'] = 'document = :document AND ' . $params['where'];
-		}
-
-		$params[':document'] = $id;
 
 		if (isset($params['key'])) {
 			$params['where'] .= ' AND key = :key';
@@ -67,21 +63,39 @@ class Sections
 			$params[':key'] = $params['key'];
 			unset($params['key']);
 		}
+		elseif (isset($params['id'])) {
+			$params['where'] .= ' AND id = :id';
+			$params['limit'] = 1;
+			$params[':id'] = $params['id'];
+			unset($params['id']);
+		}
 
 		$params['select'] = isset($params['select']) ? $params['select'] : 'value AS json';
-		$params['tables'] = 'documents_data';
+		$params['tables'] = 'user_forms_' . $name;
 
-		foreach (self::sql($params, $tpl, $line) as $row) {
-			if (isset($row['json'])) {
-				$json = json_decode($row['json'], true);
+		try {
+			$query = self::sql($params, $tpl, $line);
 
-				if (is_array($json)) {
-					unset($row['json']);
-					$row = array_merge($row, $json);
+			foreach ($query as $row) {
+				if (isset($row['json'])) {
+					$json = json_decode($row['json'], true);
+
+					if (is_array($json)) {
+						unset($row['json']);
+						$row = array_merge($row, $json);
+					}
 				}
+
+				yield $row;
+			}
+		}
+		catch (Brindille_Exception $e) {
+			// Table does not exists: return nothing
+			if (false !== strpos($e->getMessage(), 'no such table: ' . $params['tables'])) {
+				return;
 			}
 
-			yield $row;
+			throw $e;
 		}
 	}
 
@@ -229,7 +243,7 @@ class Sections
 		$ok = $session->canAccess($params['section'] ?? '', $convert[$params['level']]);
 
 		if ($ok) {
-			yield [];
+			return null;
 		}
 
 		if (!empty($params['block'])) {
@@ -537,7 +551,7 @@ class Sections
 
 			$result = $statement->execute();
 		}
-		catch (\Exception $e) {
+		catch (\KD2\DB\DB_Exception $e) {
 			throw new Brindille_Exception(sprintf("à la ligne %d erreur SQL :\n%s\n\nRequête exécutée :\n%s", $line, $db->lastErrorMsg(), $sql));
 		}
 

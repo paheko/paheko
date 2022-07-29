@@ -459,7 +459,8 @@ class Upgrade
 
 			if (version_compare($v, '1.2.0', '<')) {
 				$db->begin();
-				$db->import(ROOT . '/include/data/1.2.0_migration.sql');
+				$db->import(ROOT . '/include/data/1.2.0_schema.sql');
+
 				$files = $db->firstColumn('SELECT value FROM config WHERE key = \'files\';');
 				$files = json_decode($files);
 				$files->signature = null;

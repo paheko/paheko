@@ -1,6 +1,6 @@
 <?php
 if (!isset($current)) {
-    $current = null;
+    $current = '';
 }
 ?>
 <!DOCTYPE html>

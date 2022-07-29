@@ -16,7 +16,7 @@
 }
 
 @media screen {
-	body {
+	html, body {
 		background: #666;
 	}
 	#page {
@@ -34,7 +34,6 @@
 }
 
 body {
-	background: #fff;
 	font-family: Arial, Helvetica, sans-serif;
 	color: #000;
 	font-size: 10pt;
@@ -85,4 +84,26 @@ header.organization h3 {
 #buttons a {
 	margin: 1em;
 	font-size: 1.2em;
+}
+
+
+a.icn-btn {
+    cursor: pointer;
+    color: #fff;
+    border: 1px solid #ccc;
+    background: #333;
+    user-select: none;
+    display: inline-block;
+    font-size: inherit;
+    border-radius: .2em;
+    padding: .2em .4em;
+    margin: .2em .5em;
+    white-space: pre;
+    transition: box-shadow .3s;
+    text-decoration: underline;
+}
+
+a.icn-btn:hover {
+	text-decoration: none;
+	box-shadow: 0px 0px 5px orange;
 }
