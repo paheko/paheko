@@ -8,7 +8,7 @@
 		<tr>
 			<td><h3>{$form.label}</h3>{$form.description|escape|nl2br}</td>
 			<td class="actions">
-				{linkbutton label="Modifier" href="edit.php?form=%s"|args:$form.name shape="edit" target="_dialog"}
+				{*{linkbutton label="Modifier" href="edit.php?form=%s"|args:$form.name shape="edit" target="_dialog"}*}
 				{if $form->hasConfig()}
 					<br />{linkbutton label="Configurer" href=$form->url($form::CONFIG_TEMPLATE) shape="settings" target="_dialog"}
 				{/if}
