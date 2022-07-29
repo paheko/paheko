@@ -20,45 +20,6 @@ class Skeleton
 	protected ?string $path;
 	protected ?File $file = null;
 
-	static public function isValidPath(string $path)
-	{
-		return (bool) preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
-	}
-
-	static public function list(): array
-	{
-		$sources = [];
-
-		$path = ROOT . '/skel-dist/web';
-		$i = new \DirectoryIterator($path);
-
-		foreach ($i as $file) {
-			if ($file->isDot() || $file->isDir()) {
-				continue;
-			}
-
-			$mime = mime_content_type($file->getRealPath());
-
-			$sources[$file->getFilename()] = ['is_text' => substr($mime, 0, 5) == 'text/', 'changed' => null];
-		}
-
-		unset($i);
-
-		$list = Files::list(File::CONTEXT_SKELETON . '/web');
-
-		foreach ($list as $file) {
-			if ($file->type != $file::TYPE_FILE) {
-				continue;
-			}
-
-			$sources[$file->name] = ['is_text' => substr($file->mime, 0, 5) == 'text/', 'changed' => $file->modified];
-		}
-
-		ksort($sources);
-
-		return $sources;
-	}
-
 	public function __construct(string $path)
 	{
 		if (!self::isValidPath($path)) {
@@ -66,6 +27,11 @@ class Skeleton
 		}
 
 		$this->path = $path;
+	}
+
+	static public function isValidPath(string $path)
+	{
+		return (bool) preg_match('!^[\w\d_-]+(?:\.[\w\d_-]+)*$!i', $path);
 	}
 
 	public function defaultPath(): ?string
@@ -298,5 +264,39 @@ class Skeleton
 			$f = new self($file);
 			$f->reset();
 		}
+	}
+
+	static public function list(): array
+	{
+		$sources = [];
+
+		$path = ROOT . '/skel-dist/web';
+		$i = new \DirectoryIterator($path);
+
+		foreach ($i as $file) {
+			if ($file->isDot() || $file->isDir()) {
+				continue;
+			}
+
+			$mime = mime_content_type($file->getRealPath());
+
+			$sources[$file->getFilename()] = ['is_text' => substr($mime, 0, 5) == 'text/', 'changed' => null];
+		}
+
+		unset($i);
+
+		$list = Files::list(File::CONTEXT_SKELETON . '/web');
+
+		foreach ($list as $file) {
+			if ($file->type != $file::TYPE_FILE) {
+				continue;
+			}
+
+			$sources[$file->name] = ['is_text' => substr($file->mime, 0, 5) == 'text/', 'changed' => $file->modified];
+		}
+
+		ksort($sources);
+
+		return $sources;
 	}
 }
