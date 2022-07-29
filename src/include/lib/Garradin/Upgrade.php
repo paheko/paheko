@@ -454,7 +454,7 @@ class Upgrade
 
 			if (version_compare($v, '1.1.28', '<')) {
 				$db->createFunction('html_decode', 'htmlspecialchars_decode');
-				$db->exec('UPDATE files_search SET content = html_decode(content);');
+				$db->exec('UPDATE files_search SET content = html_decode(content) WHERE content IS NOT NULL;');
 			}
 
 			if (version_compare($v, '1.2.0', '<')) {
