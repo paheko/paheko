@@ -38,7 +38,7 @@ class Accounts
 		return EntityManager::getInstance(Account::class)->col('SELECT code || \' — \' || label FROM @TABLE WHERE id = ?;', $id);
 	}
 
-	static public function getIdFromCode(string $code): int
+	public function getIdFromCode(string $code): int
 	{
 		return $this->em->col('SELECT id FROM @TABLE WHERE code = ? AND id_chart = ?;', $code, $this->chart_id);
 	}

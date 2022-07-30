@@ -62,6 +62,9 @@ class Line extends Entity
 
 	public function selfCheck(): void
 	{
+		// We don't check that the account exists here
+		// The fact that the account is in the right chart is checked in Transaction::selfCheck
+
 		$this->assert($this->reference === null || strlen($this->reference) < 200, 'La référence doit faire moins de 200 caractères.');
 		$this->assert($this->label === null || strlen($this->label) < 200, 'La référence doit faire moins de 200 caractères.');
 		$this->assert($this->id_account !== null, 'Aucun compte n\'a été indiqué.');
@@ -69,8 +72,7 @@ class Line extends Entity
 		$this->assert($this->credit >= 0 && $this->debit >= 0, 'Le montant ne peut être négatif');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
 		$this->assert($this->reconciled === 0 || $this->reconciled === 1);
-		$this->assert(DB::getInstance()->test(Account::TABLE, 'id = ?', $this->id_account), 'Le compte indiqué n\'existe pas.');
-		// The fact that the account is in the right chart is checked in Transaction::selfCheck
+
 		$this->assert(null === $this->id_analytical || DB::getInstance()->test(Account::TABLE, 'id = ?', $this->id_analytical), 'Le projet analytique indiqué n\'existe pas.');
 		$this->assert(!empty($this->id_transaction), 'Aucune écriture n\'a été indiquée pour cette ligne.');
 		parent::selfCheck();
@@ -114,7 +116,10 @@ class Line extends Entity
 				throw new ValidationException('Aucun compte n\'a été choisi.');
 			}
 
-			$source['account'] = Accounts::getIdFromCode($source['account']);
+			// Find id from code
+			// We don't check that the account belongs to the correct chart for the year of the linked transaction here
+			// It is done in Transaction->selfCheck()
+			$source['account'] = DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE code = ?;', $source['account']);
 
 			if (empty($source['account'])) {
 				throw new ValidationException('Le compte choisi n\'existe pas.');
