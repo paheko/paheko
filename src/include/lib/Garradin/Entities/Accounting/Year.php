@@ -31,21 +31,20 @@ class Year extends Entity
 		'id_chart'   => 'int',
 	];
 
-	protected $_form_rules = [
-		'label'      => 'required|string|max:200',
-		'start_date' => 'required|date_format:d/m/Y',
-		'end_date'   => 'required|date_format:d/m/Y',
-	];
-
 	public function selfCheck(): void
 	{
-		parent::selfCheck();
+		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide.');
+		$this->assert(strlen($this->label) <= 200, 'Le libellé ne peut faire plus de 200 caractères.');
+		$this->assert($this->start_date instanceof \DateTime, 'La date de début de l\'exercice n\'est pas définie.');
+		$this->assert($this->end_date instanceof \DateTime, 'La date de début de l\'exercice n\'est pas définie.');
+
 		$this->assert($this->start_date < $this->end_date, 'La date de fin doit être postérieure à la date de début');
 		$this->assert($this->closed === 0 || $this->closed === 1);
 
 		$db = DB::getInstance();
 
 		$this->assert($this->id_chart !== null);
+		parent::selfCheck();
 
 		if ($this->exists()) {
 			$this->assert(
