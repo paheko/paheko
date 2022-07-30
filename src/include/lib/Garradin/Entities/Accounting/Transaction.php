@@ -766,7 +766,7 @@ class Transaction extends Entity
 
 		$id_account = null;
 		// Reverse direction (compared with debt/credit transaction)
-		$d1 = ($this->_related->type == self::TYPE_DEBT) ? 'credit' : 'debit';
+		$d1 = ($this->_related->type == self::TYPE_CREDIT) ? 'credit' : 'debit';
 		$d2 = ($d1 == 'credit') ? 'debit' : 'credit';
 
 		foreach ($this->_related->getLines() as $line) {
