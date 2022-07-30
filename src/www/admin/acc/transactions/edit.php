@@ -35,7 +35,7 @@ $csrf_key = 'acc_transaction_edit_' . $transaction->id();
 $tpl->assign('chart', $chart);
 
 $form->runIf('save', function() use ($transaction, $session) {
-	$transaction->importFromEditForm();
+	$transaction->importFromNewForm();
 	$transaction->save();
 
 	// Link members

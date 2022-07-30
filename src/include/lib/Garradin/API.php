@@ -4,6 +4,8 @@ namespace Garradin;
 
 use Garradin\Membres\Session;
 use Garradin\Web\Web;
+use Garradin\Accounting\Accounts;
+use Garradin\Accounting\Charts;
 use Garradin\Accounting\Reports;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
@@ -166,18 +168,17 @@ class API
 		$fn = strtok($uri, '/');
 		$param = strtok('');
 
-		if ($fn == 'transactions') {
+		if ($fn == 'transaction') {
 			if ($param == '') {
-				if ($this->method != 'GET') {
+				if ($this->method != 'POST') {
 					throw new APIException('Wrong request method', 400);
 				}
 
-				try {
-					return iterator_to_array(Reports::getJournal($_GET));
-				}
-				catch (\LogicException $e) {
-					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
-				}
+				$this->requireAccess(Session::ACCESS_WRITE);
+				$transaction = new Transaction;
+				$transaction->importFromAPI();
+				$transaction->save();
+				return $transaction->asJournalArray();
 			}
 			elseif (is_numeric($param)) {
 				$transaction = Transactions::get((int)$param);
@@ -189,37 +190,55 @@ class API
 				if ($this->method == 'GET') {
 					return $transaction->asJournalArray();
 				}
-				/*
 				elseif ($this->method == 'POST') {
 					$this->requireAccess(Session::ACCESS_WRITE);
-					$transaction->importFromEditForm();
+					$transaction->importFromNewForm();
 					$transaction->save();
 					return $transaction->asJournalArray();
 				}
-				*/
 				else {
 					throw new APIException('Wrong request method', 400);
 				}
 			}
-			/*
-			elseif ($param == 'new') {
-				$this->requireAccess(Session::ACCESS_WRITE);
-				$transaction = new Transaction;
-				$transaction->importFromNewForm();
-				$transaction->save();
-				return $transaction->asJournalArray();
-			}
-			*/
 			else {
 				throw new APIException('Unknown transactions action', 404);
 			}
 		}
-		elseif ($fn == 'years' && $param == '') {
+		elseif ($fn == 'years') {
 			if ($this->method != 'GET') {
 				throw new APIException('Wrong request method', 400);
 			}
 
-			return Years::list();
+			if (preg_match('!^(\d+)/journal!', $param, $match)) {
+				try {
+					return iterator_to_array(Reports::getJournal(['year' => $match[1]]));
+				}
+				catch (\LogicException $e) {
+					throw new APIException('Missing parameter for journal: ' . $e->getMessage(), 400, $e);
+				}
+			}
+			elseif ($param == '') {
+				return Years::list();
+			}
+			else {
+				throw new APIException('Unknown years action', 404);
+			}
+		}
+		elseif ($fn == 'charts') {
+			if ($this->method != 'GET') {
+				throw new APIException('Wrong request method', 400);
+			}
+
+			if (preg_match('!^(\d+)/accounts$!', $param, $match)) {
+				$a = new Accounts((int)$match[1]);
+				return array_map(fn($c) => $c->asArray(), $a->listAll());
+			}
+			elseif ($param == '') {
+				return array_map(fn($c) => $c->asArray(), Charts::list());
+			}
+			else {
+				throw new APIException('Unknown charts action', 404);
+			}
 		}
 		else {
 			throw new APIException('Unknown accounting action', 404);

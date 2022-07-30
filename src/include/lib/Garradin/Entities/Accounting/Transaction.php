@@ -548,6 +548,8 @@ class Transaction extends Entity
 		$accounts_ids = [];
 
 		foreach ($lines as $k => $line) {
+			$k = $k+1;
+			$this->assert(!empty($line->id_account), sprintf('Ligne %d: aucun compte n\'est défini', $k));
 			$this->assert($line->credit || $line->debit, sprintf('Ligne %d: Aucun montant au débit ou au crédit', $k));
 			$this->assert($line->credit >= 0 && $line->debit >= 0, sprintf('Ligne %d: Le montant ne peut être négatif', $k));
 			$this->assert(($line->credit * $line->debit) === 0 && ($line->credit + $line->debit) > 0, sprintf('Ligne %d: non équilibrée, crédit ou débit doit valoir zéro.', $k));
@@ -640,9 +642,11 @@ class Transaction extends Entity
 
 			$accounts = $this->getTypesDetails($source)[$this->type]->accounts;
 
-			foreach ($accounts as $account) {
-				if (empty($account->selector_value)) {
-					throw new ValidationException(sprintf('%s : aucun compte n\'a été sélectionné', $account->label));
+			if (!isset($source['debit'], $source['credit'])) {
+				foreach ($accounts as $account) {
+					if (empty($account->selector_value)) {
+						throw new ValidationException(sprintf('%s : aucun compte n\'a été sélectionné', $account->label));
+					}
 				}
 			}
 
@@ -652,8 +656,16 @@ class Transaction extends Entity
 			];
 
 			$source['lines'] = [
-				$line + [$accounts[0]->direction => $source['amount'], 'account_selector' => $accounts[0]->selector_value],
-				$line + [$accounts[1]->direction => $source['amount'], 'account_selector' => $accounts[1]->selector_value],
+				$line + [
+					$accounts[0]->direction => $source['amount'],
+					'account_selector' => $accounts[0]->selector_value,
+					'account' => $source[$accounts[0]->direction] ?? null,
+				],
+				$line + [
+					$accounts[1]->direction => $source['amount'],
+					'account_selector' => $accounts[1]->selector_value,
+					'account' => $source[$accounts[1]->direction] ?? null,
+				],
 			];
 
 			unset($line, $accounts, $account, $source['simple']);
@@ -662,10 +674,30 @@ class Transaction extends Entity
 		// Add lines
 		if (isset($source['lines']) && is_array($source['lines'])) {
 			$this->resetLines();
+			$db = DB::getInstance();
 
 			foreach ($source['lines'] as $i => $line) {
-				if (empty($line['account']) && empty($line['id_account']) && empty($line['account_selector'])) {
+				if (empty($line['account'])
+					&& empty($line['id_account'])
+					&& (empty($line['account_selector'])
+						|| !is_array($line['account_selector']) || empty(key($line['account_selector'])))) {
 					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
+				}
+
+				if (isset($line['account_selector'])) {
+					$line['id_account'] = (int)key($line['account_selector']);
+				}
+				elseif (isset($line['account'])) {
+					if (empty($this->id_year) && empty($source['id_year'])) {
+						throw new ValidationException('L\'identifiant de l\'exercice comptable n\'est pas précisé.');
+					}
+
+					$id_chart = $id_chart ?? $db->firstColumn('SELECT id_chart FROM acc_years WHERE id = ?;', $source['id_year'] ?? $this->id_year);
+					$line['id_account'] = $db->firstColumn('SELECT id FROM acc_accounts WHERE code = ? AND id_chart = ?;', $line['account'], $id_chart);
+
+					if (empty($line['id_account'])) {
+						throw new ValidationException('Le compte choisi n\'existe pas.');
+					}
 				}
 
 				$l = new Line;
@@ -683,6 +715,10 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
+		if (empty($source['id_related'])) {
+			unset($source['id_related']);
+		}
+
 		$type = $source['type'] ?? ($this->type ?? self::TYPE_ADVANCED);
 
 		if (self::TYPE_ADVANCED != $type) {
@@ -694,14 +730,14 @@ class Transaction extends Entity
 		$this->importForm($source);
 	}
 
-	public function importFromEditForm(?array $source = null): void
+	public function importFromAPI(?array $source = null): void
 	{
 		if (null === $source) {
 			$source = $_POST;
 		}
 
-		if (empty($source['id_related'])) {
-			unset($source['id_related']);
+		if (isset($source['type']) && ctype_alpha($source['type']) && defined(self::class . '::TYPE_' . strtoupper($source['type']))) {
+			$source['type'] = constant(self::class . '::TYPE_' . strtoupper($source['type']));
 		}
 
 		$this->importFromNewForm($source);
@@ -1056,7 +1092,17 @@ class Transaction extends Entity
 	public function asJournalArray(): array
 	{
 		$out = $this->asArray();
+		$out['url'] = $this->url();
 		$out['lines'] = $this->getLinesWithAccounts();
+		foreach ($out['lines'] as &$line) {
+			unset($line->line);
+		}
+		unset($line);
 		return $out;
+	}
+
+	public function url(): string
+	{
+		return Utils::getLocalURL('!acc/transactions/details.php?id=' . $this->id());
 	}
 }

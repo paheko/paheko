@@ -89,43 +89,4 @@ class Line extends Entity
 		];
 	}
 
-	/**
-	 * Import form data into object
-	 *
-	 * There are 3 ways to pass account information.
-	 *
-	 * 1. Use the account ID: [id_account] => 1234
-	 * 2. Use the account code: [account] => 512A
-	 * 3. Use an interactive selector (input type=list): [account_selector] => [1234 => "512A - Compte courant"]
-	 */
-	public function importForm(?array $source = null)
-	{
-		if (null === $source) {
-			$source = $_POST;
-		}
-
-		if (isset($source['account_selector'])) {
-			if (empty($source['account_selector']) || !is_array($source['account_selector']) || empty(key($source['account_selector']))) {
-				throw new ValidationException('Aucun compte n\'a été choisi.');
-			}
-
-			$source['id_account'] = (int)key($source['account_selector']);
-		}
-		elseif (isset($source['account'])) {
-			if (empty($source['account']) || is_array($source['account'])) {
-				throw new ValidationException('Aucun compte n\'a été choisi.');
-			}
-
-			// Find id from code
-			// We don't check that the account belongs to the correct chart for the year of the linked transaction here
-			// It is done in Transaction->selfCheck()
-			$source['account'] = DB::getInstance()->firstColumn('SELECT id FROM acc_accounts WHERE code = ?;', $source['account']);
-
-			if (empty($source['account'])) {
-				throw new ValidationException('Le compte choisi n\'existe pas.');
-			}
-		}
-
-		return parent::importForm($source);
-	}
 }
