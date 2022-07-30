@@ -429,12 +429,12 @@ class Account extends Entity
 		return Charts::get($this->id_chart);
 	}
 
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		$c = Config::getInstance();
 		$c->set('last_chart_change', time());
 		$c->save();
 
-		return parent::save();
+		return parent::save($selfcheck);
 	}
 }

@@ -87,7 +87,7 @@ class Entity extends AbstractEntity
 	}
 
 	// Add plugin signals to save/delete
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		$name = get_class($this);
 		$name = str_replace('Garradin\Entities\\', '', $name);
@@ -103,7 +103,7 @@ class Entity extends AbstractEntity
 			return true;
 		}
 
-		$return = parent::save();
+		$return = parent::save($selfcheck);
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
 
 		Plugin::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return]);
