@@ -48,7 +48,7 @@ class Transaction extends Entity
 	];
 
 	protected $id;
-	protected $type;
+	protected $type = null;
 	protected $status = 0;
 	protected $label;
 	protected $notes;
@@ -109,62 +109,42 @@ class Transaction extends Entity
 		}
 	}
 
-	/**
-	 * @param  bool $restrict_year Set to TRUE to only return lines linked to the correct chart, or FALSE (deprecated/legacy) to return all lines even if they are linked to accounts in the wrong chart!
-	 */
-	public function getLinesWithAccounts(bool $restrict_year = true): array
+	public function getLinesWithAccounts(): array
 	{
 		$db = EntityManager::getInstance(Line::class)->DB();
 
-		if ($restrict_year === false) {
-			$restrict = $restrict_year ? 'AND a.id_chart = y.id_chart' : '';
-			$sql = sprintf('SELECT
-				l.*, a.label AS account_label, a.code AS account_code,
-				b.label AS analytical_name
-				FROM acc_transactions_lines l
-				INNER JOIN acc_accounts a ON a.id = l.id_account %s
-				INNER JOIN acc_transactions t ON t.id = l.id_transaction
-				INNER JOIN acc_years y ON y.id = t.id_year
-				LEFT JOIN acc_accounts b ON b.id = l.id_analytical
-				WHERE l.id_transaction = %d ORDER BY l.id;', $restrict, $this->id());
+		// Merge data from accounts with lines
+		$accounts = [];
+		$lines_with_accounts = [];
 
-			return $db->get($sql);
+		foreach ($this->getLines() as $line) {
+			if (!array_key_exists($line->id_account, $this->_accounts)) {
+				$accounts[] = $line->id_account;
+			}
+
+			if ($line->id_analytical && !array_key_exists($line->id_analytical, $this->_accounts)) {
+				$accounts[] = $line->id_analytical;
+			}
 		}
-		else {
-			// Merge data from accounts with lines
-			$accounts = [];
-			$lines_with_accounts = [];
 
-			foreach ($this->getLines() as $line) {
-				if (!array_key_exists($line->id_account, $this->_accounts)) {
-					$accounts[] = $line->id_account;
-				}
+		// Remove NULL accounts
+		$accounts = array_filter($accounts);
 
-				if ($line->id_analytical && !array_key_exists($line->id_analytical, $this->_accounts)) {
-					$accounts[] = $line->id_analytical;
-				}
-			}
-
-			// Remove NULL accounts
-			$accounts = array_filter($accounts);
-
-			if (count($accounts)) {
-				$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
-				$this->_accounts += $db->getGrouped($sql);
-			}
-
-			foreach ($this->getLines() as $line) {
-				$account = [
-					'account_code' => $this->_accounts[$line->id_account]->code ?? null,
-					'account_label' => $this->_accounts[$line->id_account]->label ?? null,
-					'analytical_name' => $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null,
-				];
-
-				$lines_with_accounts[] = (object) ($line->asArray() + $account);
-			}
-
-			return $lines_with_accounts;
+		if (count($accounts)) {
+			$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
+			$this->_accounts += $db->getGrouped($sql);
 		}
+
+		foreach ($this->getLines() as $line) {
+			$account_code = $this->_accounts[$line->id_account]->code ?? null;
+			$account_label = $this->_accounts[$line->id_account]->label ?? null;
+			$analytical_name = $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null;
+			$account_selector = [$line->id_account => sprintf('%s — %s', $account_code, $account_label)];
+
+			$lines_with_accounts[] = (object) ($line->asArray() + compact('account_code', 'account_label', 'analytical_name', 'account_selector'));
+		}
+
+		return $lines_with_accounts;
 	}
 
 	public function getLines(): array
@@ -251,6 +231,43 @@ class Transaction extends Entity
 		return $sum;
 	}
 
+	static public function getFormLines(?array $source = null): array
+	{
+		if (null === $source) {
+			$source = $_POST['lines'] ?? [];
+		}
+
+		if (empty($source) || !is_array($source)) {
+			return [];
+		}
+
+		$lines = Utils::array_transpose($source);
+
+		foreach ($lines as &$line) {
+			if (isset($line['credit'])) {
+				$line['credit'] = Utils::moneyToInteger($line['credit']);
+			}
+			if (isset($line['debit'])) {
+				$line['debit'] = Utils::moneyToInteger($line['debit']);
+			}
+		}
+
+		unset($line);
+
+		return $lines;
+	}
+
+	public function hasReconciledLines(): bool
+	{
+		foreach ($this->getLines() as $line) {
+			if (!empty($line->reconciled)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public function getAnalyticalId(): ?int
 	{
 		$lines = $this->getLines();
@@ -267,37 +284,7 @@ class Transaction extends Entity
 		return $this->_related;
 	}
 
-	public function getTypesAccounts()
-	{
-		if ($this->type == self::TYPE_ADVANCED) {
-			return [];
-		}
-
-		$debit = null;
-		$credit = null;
-
-		$lines = $this->getLinesWithAccounts();
-
-		foreach ($lines as $line) {
-			$account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_label)];
-
-			if ($line->debit) {
-				$debit = $account;
-			}
-			else {
-				$credit = $account;
-			}
-		}
-
-		$type = $this->getTypesDetails()[$this->type];
-
-		return [
-			$type->accounts[0]->position == 'credit' ? $credit : $debit,
-			$type->accounts[1]->position == 'credit' ? $credit : $debit,
-		];
-	}
-
-	/**duplic
+	/**
 	 * Creates a new Transaction entity (not saved) from an existing one,
 	 * trying to adapt to a different chart if possible
 	 * @param  int    $id
@@ -417,8 +404,15 @@ class Transaction extends Entity
 		return $sum;
 	}
 
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
+		if ($this->type == self::TYPE_DEBT || $this->type == self::TYPE_CREDIT) {
+			// Debts and credits add a waiting status
+			if (!$this->exists()) {
+				$this->addStatus(self::STATUS_WAITING);
+			}
+		}
+
 		if ($this->validated && !(isset($this->_modified['validated']) && $this->_modified['validated'] === 0)) {
 			throw new ValidationException('Il n\'est pas possible de modifier une écriture qui a été validée');
 		}
@@ -429,14 +423,37 @@ class Transaction extends Entity
 			throw new ValidationException('Il n\'est pas possible de créer ou modifier une écriture dans un exercice clôturé');
 		}
 
+		$this->selfCheck();
+
+		$lines = $this->getLines();
+
+		// Self check lines before saving Transaction
+		foreach ($lines as $l => $line) {
+			$line->id_transaction = -1; // Get around validation of id_transaction being not null
+
+			try {
+				$line->selfCheck();
+			}
+			catch (ValidationException $e) {
+				// Add line number to message
+				throw new ValidationException(sprintf('Ligne %d : %s', $l+1, $e->getMessage()), 0, $e);
+			}
+		}
+
+		if ($this->exists() && $this->status & self::STATUS_ERROR) {
+			// Remove error status when changed
+			$this->removeStatus(self::STATUS_ERROR);
+		}
+
+		$db->begin();
+
 		if (!parent::save()) {
 			return false;
 		}
 
-		foreach ($this->getLines() as $line)
-		{
+		foreach ($lines as $line) {
 			$line->id_transaction = $this->id();
-			$line->save();
+			$line->save(false);
 		}
 
 		foreach ($this->_old_lines as $line)
@@ -445,6 +462,8 @@ class Transaction extends Entity
 				$line->delete();
 			}
 		}
+
+		$db->commit();
 
 		return true;
 	}
@@ -579,6 +598,62 @@ class Transaction extends Entity
 			$source['id_related'] = null;
 		}
 
+		// Transpose lines (HTML transaction forms)
+		if (!empty($source['lines']) && is_array($source['lines']) && is_string(key($source['lines']))) {
+			try {
+				$source['lines'] = Utils::array_transpose($source['lines']);
+			}
+			catch (\InvalidArgumentException $e) {
+				throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
+			}
+
+			unset($source['_lines']);
+		}
+
+		$type = $source['type'] ?? ($this->type ?? null);
+
+		// Simple two-lines transaction
+		if (isset($source['amount']) && $type != self::TYPE_ADVANCED && $type !== null) {
+			if (empty($source['amount'])) {
+				throw new ValidationException('Montant non précisé');
+			}
+
+			$accounts = $this->getTypesDetails($source)[$type]->accounts;
+
+			foreach ($accounts as $account) {
+				if (empty($account->selector_value)) {
+					throw new ValidationException(sprintf('%s : aucun compte n\'a été sélectionné', $account->label));
+				}
+			}
+
+			$line = [
+				'id_analytical' => $source['id_analytical'] ?? null,
+				'reference' => $source['payment_reference'] ?? null,
+			];
+
+			$source['lines'] = [
+				$line + [$accounts[0]->direction => $amount, 'account_selector' => $accounts[0]->selector_value],
+				$line + [$accounts[1]->direction => $amount, 'account_selector' => $accounts[1]->selector_value],
+			];
+
+			unset($line, $accounts, $account, $source['simple']);
+		}
+
+		// Add lines
+		if (isset($source['lines']) && is_array($source['lines'])) {
+			$this->resetLines();
+
+			foreach ($source['lines'] as $i => $line) {
+				if (empty($line['account']) && empty($line['id_account']) && empty($line['account_selector'])) {
+					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
+				}
+
+				$l = new Line;
+				$l->importForm($line);
+				$this->addLine($l);
+			}
+		}
+
 		return parent::importForm($source);
 	}
 
@@ -588,84 +663,15 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (!isset($this->type) && !isset($source['type'])) {
-			$source['type'] = self::TYPE_ADVANCED;
-		}
+		$type = $source['type'] ?? ($this->type ?? self::TYPE_ADVANCED);
 
-		$type = $source['type'];
-
-		$this->importForm($source);
-
-		// Remove error status when changed
-		$this->removeStatus(self::STATUS_ERROR);
-
-		if (!isset($source['lines']) || !is_array($source['lines'])) {
-			return;
-		}
-
-		if (self::TYPE_ADVANCED == $type) {
-			try {
-				$lines = Utils::array_transpose($source['lines']);
-			}
-			catch (\InvalidArgumentException $e) {
-				throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
-			}
-
-			foreach ($lines as $i => $line) {
-				if (empty($line['account']) || !is_array($line['account']) || !count($line['account'])) {
-					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
-				}
-
-				$line['id_account'] = key($line['account']);
-
-				$line = (new Line)->import($line);
-				$this->addLine($line);
-			}
-		}
-		else {
-			$details = self::getTypesDetails();
-
-			if (!array_key_exists($type, $details)) {
-				throw new ValidationException('Type d\'écriture inconnu');
-			}
-
-			if (!empty($this->_related) && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
-				$this->set('type', self::TYPE_ADVANCED);
-			}
-			elseif (!$this->exists() && ($type == self::TYPE_DEBT || $type == self::TYPE_CREDIT)) {
-				$this->addStatus(self::STATUS_WAITING);
-			}
-
-			if (empty($source['amount'])) {
+		if (self::TYPE_ADVANCED != $type) {
+			if (!isset($source['amount'])) {
 				throw new UserException('Montant non précisé');
 			}
-
-			$amount = $source['amount'];
-
-			// Fill lines using a pre-defined setup obtained from getTypesDetails
-			foreach ($details[$type]->accounts as $k => $account) {
-				$credit = $account->position == 'credit' ? $amount : 0;
-				$debit = $account->position == 'debit' ? $amount : 0;
-
-				$key = sprintf('account_%d_%d', $type, $k);
-
-				if (empty($source[$key]) || !count($source[$key])) {
-					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $k+1));
-				}
-
-				$account = key($source[$key]);
-
-				$line = new Line;
-				$line->importForm([
-					'reference'     => !empty($source['payment_reference']) ? $source['payment_reference'] : null,
-					'credit'        => $credit,
-					'debit'         => $debit,
-					'id_account'    => $account,
-					'id_analytical' => !empty($source['id_analytical']) ? $source['id_analytical'] : null,
-				]);
-				$this->addLine($line);
-			}
 		}
+
+		$this->importForm($source);
 	}
 
 	public function importFromEditForm(?array $source = null): void
@@ -678,9 +684,61 @@ class Transaction extends Entity
 			unset($source['id_related']);
 		}
 
-		if (isset($source['lines'])) {
-			$this->resetLines();
+		$this->importFromNewForm($source);
+	}
+
+	public function importFromPayoffForm(?array $source = null): void
+	{
+		if (null === $source) {
+			$source = $_POST;
 		}
+
+		if (empty($this->_related)) {
+			throw new \LogicException('Cannot import pay-off if no related transaction is set');
+		}
+
+		// Just make sure we can't trigger importFromNewForm
+		unset($source['type'], $source['lines']);
+
+		if (empty($source['amount'])) {
+			throw new ValidationException('Montant non précisé');
+		}
+
+		if (empty($source['account']) || !is_array($source['account'])) {
+			throw new ValidationException('Aucun compte de règlement sélectionné.');
+		}
+
+		$id_account = null;
+		// Reverse direction (compared with debt/credit transaction)
+		$d1 = ($this->_related->type == self::TYPE_DEBT) ? 'credit' : 'debit';
+		$d2 = ($d1 == 'credit') ? 'debit' : 'credit';
+
+		foreach ($this->_related->getLines() as $line) {
+			if (($this->_related->type == self::TYPE_DEBT && $line->debit)
+				|| ($this->_related->type == self::TYPE_CREDIT && $line->credit)) {
+				// Skip the type of debt/credit, just keep the thirdparty account
+				continue;
+			}
+
+			$id_account = $line->id_account;
+			break;
+		}
+
+		if (!$id_account) {
+			throw new \LogicException('Cannot find account ID of related transaction');
+		}
+
+		$line = [
+			'id_analytical' => $source['id_analytical'] ?? null,
+			'reference' => $source['payment_reference'] ?? null,
+		];
+
+		$source['lines'] = [
+			// First line is third-party account
+			$line + compact('id_account') + [$d1 => $source['amount']],
+			// Second line is payment account
+			$line + ['account_selector' => $source['account'], $d2 => $source['amount']],
+		];
 
 		$this->importFromNewForm($source);
 	}
@@ -814,7 +872,10 @@ class Transaction extends Entity
 		return EntityManager::getInstance(self::class)->all('SELECT * FROM @TABLE WHERE id_related = ?;', $this->id);
 	}
 
-	static public function getTypesDetails()
+	/**
+	 * Return tuples of accounts selectors according to each "simplified" type
+	 */
+	public function getTypesDetails()
 	{
 		$details = [
 			self::TYPE_REVENUE => [
@@ -822,12 +883,12 @@ class Transaction extends Entity
 					[
 						'label' => 'Type de recette',
 						'targets' => [Account::TYPE_REVENUE],
-						'position' => 'credit',
+						'direction' => 'credit',
 					],
 					[
 						'label' => 'Compte d\'encaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'debit',
+						'direction' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_REVENUE],
@@ -837,12 +898,12 @@ class Transaction extends Entity
 					[
 						'label' => 'Type de dépense',
 						'targets' => [Account::TYPE_EXPENSE],
-						'position' => 'debit',
+						'direction' => 'debit',
 					],
 					[
 						'label' => 'Compte de décaissement',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'credit',
+						'direction' => 'credit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_EXPENSE],
@@ -853,12 +914,12 @@ class Transaction extends Entity
 					[
 						'label' => 'De',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'credit',
+						'direction' => 'credit',
 					],
 					[
 						'label' => 'Vers',
 						'targets' => [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING],
-						'position' => 'debit',
+						'direction' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_TRANSFER],
@@ -869,12 +930,12 @@ class Transaction extends Entity
 					[
 						'label' => 'Type de dette (dépense)',
 						'targets' => [Account::TYPE_EXPENSE],
-						'position' => 'debit',
+						'direction' => 'debit',
 					],
 					[
 						'label' => 'Compte de tiers',
 						'targets' => [Account::TYPE_THIRD_PARTY],
-						'position' => 'credit',
+						'direction' => 'credit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_DEBT],
@@ -885,12 +946,12 @@ class Transaction extends Entity
 					[
 						'label' => 'Type de créance (recette)',
 						'targets' => [Account::TYPE_REVENUE],
-						'position' => 'credit',
+						'direction' => 'credit',
 					],
 					[
 						'label' => 'Compte de tiers',
 						'targets' => [Account::TYPE_THIRD_PARTY],
-						'position' => 'debit',
+						'direction' => 'debit',
 					],
 				],
 				'label' => self::TYPES_NAMES[self::TYPE_CREDIT],
@@ -903,14 +964,42 @@ class Transaction extends Entity
 			],
 		];
 
+		// Find out which lines are credit and debit
+		$current_accounts = [];
+
+		foreach ($this->getLinesWithAccounts() as $i => $l) {
+			if ($l->debit) {
+				$current_accounts[] = $l->account_selector;
+			}
+			elseif ($l->credit) {
+				$current_accounts[] = $l->account_selector;
+			}
+
+			if (count($current_accounts) == 2) {
+				break;
+			}
+		}
+
 		foreach ($details as $key => &$type) {
 			$type = (object) $type;
 			$type->id = $key;
-			foreach ($type->accounts as &$account) {
+			foreach ($type->accounts as $i => &$account) {
 				$account = (object) $account;
 				$account->targets_string = implode(':', $account->targets);
+				$account->selector_name = sprintf('simple[%s][%d]', $key, $i);
+
+				// Try to find out if we can replicate the value
+				// debt and credit can have same values, but not others
+				// as it can lead to weird stuff
+				if (($type->id == $this->type)
+					|| ($type->id == self::TYPE_CREDIT && $this->type == self::TYPE_DEBT)
+					|| ($type->id == self::TYPE_DEBT && $this->type == self::TYPE_CREDIT)) {
+					$account->selector_value = $_POST['simple'][$key][$i] ?? ($current_accounts[$i] ?? null);
+				}
 			}
 		}
+
+		unset($account, $type);
 
 		return $details;
 	}
@@ -925,29 +1014,13 @@ class Transaction extends Entity
 
 		$this->id_related = $this->_related->id();
 		$this->label = ($this->_related->type == Transaction::TYPE_DEBT ? 'Règlement de dette : ' : 'Règlement de créance : ') . $this->_related->label;
-		$this->type = $this->_related->type;
+		$this->type = self::TYPE_ADVANCED;
 
 		$out = (object) [
-			'id' => $this->_related->id,
-			'sum' => $this->_related->sum(),
-			'id_account' => null,
-			// input name for the input containing the account ID for the expense/revenue from the related transaction
-			'form_account_name' => sprintf('account_%d_%d', $this->type, 0),
-			// input name for the account selector, for selecting a bank/cash account
-			'form_target_name' => sprintf('account_%d_%d', $this->type, 1),
+			'id'            => $this->_related->id,
+			'amount'        => $this->_related->sum(),
 			'id_analytical' => $this->_related->getAnalyticalId(),
 		];
-
-		foreach ($this->_related->getLines() as $line) {
-			if (($this->_related->type == self::TYPE_DEBT && $line->debit)
-				|| ($this->_related->type == self::TYPE_CREDIT && $line->credit)) {
-				// Skip the type of debt/credit, just keep the thirdparty account
-				continue;
-			}
-
-			$out->id_account = $line->id_account;
-			break;
-		}
 
 		return $out;
 	}

@@ -8,6 +8,7 @@ use Garradin\Membres;
 use Garradin\ValidationException;
 use Garradin\Services\Fees;
 use Garradin\Services\Services;
+use Garradin\Accounting\Transactions;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Line;
 
@@ -144,14 +145,9 @@ class Service_User extends Entity
 			throw new ValidationException('Montant non précisé');
 		}
 
-		if (empty($source['account']) || !is_array($source['account']) || !key($source['account'])) {
+		if (empty($source['account_selector']) || !is_array($source['account_selector']) || !key($source['account_selector'])) {
 			throw new ValidationException('Aucune compte n\'a été sélectionné.');
 		}
-
-		$transaction = new Transaction;
-		$transaction->id_creator = $user_id;
-		$transaction->id_year = $this->fee()->id_year;
-		$transaction->type = Transaction::TYPE_REVENUE;
 
 		$label = $this->service()->label;
 
@@ -161,29 +157,28 @@ class Service_User extends Entity
 
 		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
 
-		$transaction->importForm([
-			'reference' => $source['reference'] ?? null,
-			'label'     => $label,
-			'date'      => $source['date'] ?? null,
-		]);
+		$transaction = Transactions::create(array_merge($source, [
+			'label' => $label,
+			'lines' => [
+				[
+					'id_account'    => $this->fee()->id_account,
+					'credit'        => $source['amount'],
+					'id_analytical' => $this->fee()->id_analytical,
+					'reference'     => $source['payment_reference'] ?? null,
+				],
+				[
+					'account_selector' => $source['account_selector'],
+					'debit'            => $source['amount'],
+					'id_analytical'    => $this->fee()->id_analytical,
+					'reference'        => $source['payment_reference'] ?? null,
 
-		$l1 = new Line;
-		$l2 = new Line;
-		$l1->importForm([
-			'id_account' => $this->fee()->id_account,
-			'credit' => $source['amount'],
-			'id_analytical' => $this->fee()->id_analytical,
-			'reference' => $source['payment_reference'] ?? null,
-		]);
-		$l2->importForm([
-			'id_account' => key($source['account']),
-			'debit' => $source['amount'],
-			'id_analytical' => $this->fee()->id_analytical,
-			'reference' => $source['payment_reference'] ?? null,
-		]);
+				],
+			],
+		]));
 
-		$transaction->addLine($l1);
-		$transaction->addLine($l2);
+		$transaction->id_creator = $user_id;
+		$transaction->id_year = $this->fee()->id_year;
+		$transaction->type = Transaction::TYPE_REVENUE;
 
 		$transaction->save();
 		$transaction->linkToUser($this->id_user, $this->id());

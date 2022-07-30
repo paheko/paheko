@@ -5,15 +5,13 @@
 <form method="post" action="{$self_url}" data-focus="1">
 	{form_errors}
 
-	<input type="hidden" name="type" value="{$transaction.type}" />
-	<input type="hidden" name="{$payoff_for.form_account_name}[{$payoff_for.id_account}]" value="-" />
 	<fieldset>
 		<legend>{if $payoff_for.type == $transaction::TYPE_DEBT}Règlement de dette{else}Règlement de créance{/if}</legend>
 		<dl>
 			<dt>Écriture d'origine</dt>
 			<dd>{link class="num" href="!acc/transactions/details.php?id=%d"|args:$payoff_for.id label="#%d"|args:$payoff_for.id}</dd>
 			{input type="checkbox" name="mark_paid" value="1" default="1" label="Marquer comme payée"}
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name=$payoff_for.form_target_name label="Compte de règlement" required=1}
+			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s&chart=%d"|args:$payoff_targets,$chart_id name="account" label="Compte de règlement" required=1}
 		</dl>
 	</fieldset>
 

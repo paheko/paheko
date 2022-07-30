@@ -125,7 +125,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{foreach from=$transaction->getLinesWithAccounts(false) item="line"}
+		{foreach from=$transaction->getLinesWithAccounts() item="line"}
 		<tr>
 			<td class="num"><a href="{$admin_url}acc/accounts/journal.php?id={$line.id_account}&amp;year={$transaction.id_year}">{$line.account_code}</a></td>
 			<td>{$line.account_label}</td>
