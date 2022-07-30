@@ -131,18 +131,23 @@ class Transaction extends Entity
 		$accounts = array_filter($accounts);
 
 		if (count($accounts)) {
-			$sql = sprintf('SELECT id, label, code FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
-			$this->_accounts += $db->getGrouped($sql);
+			$sql = sprintf('SELECT id, label, code, position FROM acc_accounts WHERE %s;', $db->where('id', 'IN', $accounts));
+			$this->_accounts = $this->_accounts + $db->getGrouped($sql);
 		}
 
-		foreach ($this->getLines() as $line) {
-			$account_code = $this->_accounts[$line->id_account]->code ?? null;
-			$account_label = $this->_accounts[$line->id_account]->label ?? null;
-			$analytical_name = $line->id_analytical ? $this->_accounts[$line->id_analytical]->label : null;
-			$account_selector = [$line->id_account => sprintf('%s — %s', $account_code, $account_label)];
+		foreach ($this->getLines() as &$line) {
+			$l = (object) $line->asArray();
+			$l->account_code = $this->_accounts[$line->id_account]->code ?? null;
+			$l->account_label = $this->_accounts[$line->id_account]->label ?? null;
+			$l->account_position = $this->_accounts[$line->id_account]->position ?? null;
+			$l->analytical_name = $this->_accounts[$line->id_analytical]->label ?? null;
+			$l->account_selector = [$line->id_account => sprintf('%s — %s', $l->account_code, $l->account_label)];
+			$l->line =& $line;
 
-			$lines_with_accounts[] = (object) ($line->asArray() + compact('account_code', 'account_label', 'analytical_name', 'account_selector'));
+			$lines_with_accounts[] = $l;
 		}
+
+		unset($line);
 
 		return $lines_with_accounts;
 	}
@@ -425,18 +430,27 @@ class Transaction extends Entity
 
 		$this->selfCheck();
 
-		$lines = $this->getLines();
+		$lines = $this->getLinesWithAccounts();
 
 		// Self check lines before saving Transaction
-		foreach ($lines as $l => $line) {
+		foreach ($lines as $i => $l) {
+			$line = $l->line;
 			$line->id_transaction = -1; // Get around validation of id_transaction being not null
+
+			if ($this->type == self::TYPE_EXPENSE && $l->account_position == Account::REVENUE) {
+				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de produit à une dépense');
+			}
+
+			if ($this->type == self::TYPE_REVENUE && $l->account_position == Account::EXPENSE) {
+				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de dépense à une recette');
+			}
 
 			try {
 				$line->selfCheck();
 			}
 			catch (ValidationException $e) {
 				// Add line number to message
-				throw new ValidationException(sprintf('Ligne %d : %s', $l+1, $e->getMessage()), 0, $e);
+				throw new ValidationException(sprintf('Ligne %d : %s', $i+1, $e->getMessage()), 0, $e);
 			}
 		}
 
@@ -452,12 +466,12 @@ class Transaction extends Entity
 		}
 
 		foreach ($lines as $line) {
+			$line = $line->line; // Fetch real object
 			$line->id_transaction = $this->id();
 			$line->save(false);
 		}
 
-		foreach ($this->_old_lines as $line)
-		{
+		foreach ($this->_old_lines as $line) {
 			if ($line->exists()) {
 				$line->delete();
 			}
@@ -610,15 +624,17 @@ class Transaction extends Entity
 			unset($source['_lines']);
 		}
 
-		$type = $source['type'] ?? ($this->type ?? null);
+		if (isset($source['type'])) {
+			$this->set('type', (int)$source['type']);
+		}
 
 		// Simple two-lines transaction
-		if (isset($source['amount']) && $type != self::TYPE_ADVANCED && $type !== null) {
+		if (isset($source['amount']) && $this->type != self::TYPE_ADVANCED && isset($this->type)) {
 			if (empty($source['amount'])) {
 				throw new ValidationException('Montant non précisé');
 			}
 
-			$accounts = $this->getTypesDetails($source)[$type]->accounts;
+			$accounts = $this->getTypesDetails($source)[$this->type]->accounts;
 
 			foreach ($accounts as $account) {
 				if (empty($account->selector_value)) {
@@ -632,8 +648,8 @@ class Transaction extends Entity
 			];
 
 			$source['lines'] = [
-				$line + [$accounts[0]->direction => $amount, 'account_selector' => $accounts[0]->selector_value],
-				$line + [$accounts[1]->direction => $amount, 'account_selector' => $accounts[1]->selector_value],
+				$line + [$accounts[0]->direction => $source['amount'], 'account_selector' => $accounts[0]->selector_value],
+				$line + [$accounts[1]->direction => $source['amount'], 'account_selector' => $accounts[1]->selector_value],
 			];
 
 			unset($line, $accounts, $account, $source['simple']);
@@ -749,64 +765,38 @@ class Transaction extends Entity
 			$source = $_POST;
 		}
 
-		if (!isset($source['lines']) || !is_array($source['lines'])) {
-			throw new ValidationException('Aucun contenu trouvé dans le formulaire.');
-		}
-
 		$this->label = 'Balance d\'ouverture';
 		$this->date = $year->start_date;
 		$this->id_year = $year->id();
 		$this->type = self::TYPE_ADVANCED;
 
-		try {
-			$lines = Utils::array_transpose($source['lines']);
-		}
-		catch (\InvalidArgumentException $e) {
-			throw new ValidationException('Aucun compte sélectionné pour certaines lignes.');
-		}
+		$this->importFromNewForm($source);
 
-		$debit = $credit = 0;
+		$diff = $this->getLinesCreditSum() - $this->getLinesDebitSum();
 
-		foreach ($lines as $k => $line) {
-			if (empty($line['account']) || !count($line['account'])) {
-				throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $k+1));
-			}
-
-			$line['id_account'] = key($line['account']);
-
-			try {
-				$line = (new Line)->importForm($line);
-				$this->addLine($line);
-			}
-			catch (ValidationException $e) {
-				throw new ValidationException(sprintf('Ligne %d : %s', $k+1, $e->getMessage()), 0, $e);
-			}
-
-			$debit += $line->debit;
-			$credit += $line->credit;
+		if (!$diff) {
+			return;
 		}
 
-		if ($debit != $credit) {
-			// Add final balance line
-			$line = new Line;
+		// Add final balance line
+		$line = new Line;
 
-			if ($debit > $credit) {
-				$line->credit = $debit - $credit;
-			}
-			else {
-				$line->debit = $credit - $debit;
-			}
-
-			$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
-
-			if (!$open_account) {
-				throw new ValidationException('Aucun compte usuel de bilan d\'ouverture n\'existe dans le plan comptable');
-			}
-
-			$line->id_account = $open_account->id();
-
-			$this->addLine($line);
+		if ($diff > 0) {
+			$line->debit = $diff;
 		}
+		else {
+			$line->credit = abs($diff);
+		}
+
+		$open_account = EntityManager::findOne(Account::class, 'SELECT * FROM @TABLE WHERE id_chart = ? AND type = ? LIMIT 1;', $year->id_chart, Account::TYPE_OPENING);
+
+		if (!$open_account) {
+			throw new ValidationException('Aucun compte usuel de bilan d\'ouverture n\'existe dans le plan comptable');
+		}
+
+		$line->id_account = $open_account->id();
+
+		$this->addLine($line);
 	}
 
 	public function year()
@@ -875,8 +865,12 @@ class Transaction extends Entity
 	/**
 	 * Return tuples of accounts selectors according to each "simplified" type
 	 */
-	public function getTypesDetails()
+	public function getTypesDetails(?array $source = null)
 	{
+		if (null === $source) {
+			$source = $_POST;
+		}
+
 		$details = [
 			self::TYPE_REVENUE => [
 				'accounts' => [
@@ -991,10 +985,14 @@ class Transaction extends Entity
 				// Try to find out if we can replicate the value
 				// debt and credit can have same values, but not others
 				// as it can lead to weird stuff
+				// exception: revenue/expense can have the same payment account, no issue
 				if (($type->id == $this->type)
 					|| ($type->id == self::TYPE_CREDIT && $this->type == self::TYPE_DEBT)
-					|| ($type->id == self::TYPE_DEBT && $this->type == self::TYPE_CREDIT)) {
-					$account->selector_value = $_POST['simple'][$key][$i] ?? ($current_accounts[$i] ?? null);
+					|| ($type->id == self::TYPE_DEBT && $this->type == self::TYPE_CREDIT)
+					|| ($type->id == self::TYPE_REVENUE && $this->type == self::TYPE_EXPENSE && $i == 1)
+					|| ($type->id == self::TYPE_EXPENSE && $this->type == self::TYPE_REVENUE && $i == 1)
+				) {
+					$account->selector_value = $source['simple'][$key][$i] ?? ($current_accounts[$i] ?? null);
 				}
 			}
 		}

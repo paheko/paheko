@@ -1,9 +1,10 @@
 <?php
 
-$is_new = empty($_POST) && !$transaction->exists() && !$transaction->label;
+$is_new = empty($_POST) && !isset($transaction->type) && !$transaction->exists() && !$transaction->label;
+$is_quick = count(array_intersect_key($_GET, array_flip(['a', 'l', 'd', 't', 'account']))) > 0;
 
 ?>
-<form method="post" action="{$self_url}" data-focus="{if $is_new}1{else}#f_date{/if}">
+<form method="post" action="{$self_url}" data-focus="{if $is_new || $is_quick}1{else}#f_date{/if}">
 	{form_errors}
 
 	<fieldset>
@@ -59,8 +60,8 @@ $is_new = empty($_POST) && !$transaction->exists() && !$transaction->label;
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc." default=$transaction->payment_reference()}
 		</dl>
 		<dl>
-			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php"}
-			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30}
+			{input type="list" multiple=true name="users" label="Membres associés" target="!membres/selector.php" default=$linked_users}
+			{input type="textarea" name="notes" label="Remarques" rows=4 cols=30 source=$transaction}
 		</dl>
 		<dl data-types="t{$transaction::TYPE_ADVANCED}">
 			{input type="number" name="id_related" label="Lier à l'écriture numéro" source=$transaction help="Indiquer ici un numéro d'écriture pour faire le lien par exemple avec une dette"}

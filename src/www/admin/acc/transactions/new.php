@@ -23,7 +23,9 @@ $csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
 $amount = 0;
 $id_analytical = null;
+$linked_users = null;
 $lines = isset($_POST['lines']) ? Transaction::getFormLines() : [[], []];
+$types_details = $transaction->getTypesDetails();
 
 // Quick-fill transaction from query parameters
 if (qg('a')) {
@@ -58,6 +60,7 @@ if (qg('copy')) {
 
 	$id_analytical = $old->getAnalyticalId();
 	$amount = $transaction->getLinesCreditSum();
+	$linked_users = $old->listLinkedUsersAssoc();
 
 	$tpl->assign('duplicate_from', $old->id());
 }
@@ -86,11 +89,7 @@ if ($id = qg('account')) {
 
 	$transaction->type = Transaction::getTypeFromAccountType($account->type);
 	$index = $transaction->type == Transaction::TYPE_DEBT || $transaction->type == Transaction::TYPE_CREDIT ? 1 : 0;
-	$key = sprintf('account_%d_%d', $transaction->type, $index);
-
-	if (!isset($_POST[$key])) {
-		$lines[0]['account'] = $_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
-	}
+	$types_details[$transaction->type]->accounts[$index]->selector_value = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
 }
 
 $form->runIf('save', function () use ($transaction, $session, $current_year) {
@@ -109,9 +108,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
 }, $csrf_key);
 
-$types_details = $transaction->getTypesDetails();
-
-$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_analytical', 'types_details'));
+$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_analytical', 'types_details', 'linked_users'));
 
 $tpl->assign('chart_id', $chart->id());
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
