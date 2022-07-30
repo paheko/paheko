@@ -58,7 +58,21 @@ document.addEventListener('keydown', (evt) => {
 		return false;
 	}
 
-	if (evt.key == 'ArrowUp') { // Previous item
+	if (evt.key == 'Home') {
+		idx = 0;
+	}
+	else if (evt.key == 'End') {
+		idx = available.length;
+	}
+
+	// Do not intercept home/end inside text input
+	if (document.activeElement.tagName.toLower() == 'input' && document.activeElement.type == 'text') {
+		return;
+	}
+
+	if (evt.key == 'Home' || evt.key == 'End') {
+	}
+	else if (evt.key == 'ArrowUp') { // Previous item
 		idx--;
 	}
 	else if (evt.key == 'ArrowDown') {
@@ -69,12 +83,6 @@ document.addEventListener('keydown', (evt) => {
 	}
 	else if (evt.key == 'PageDown') {
 		idx+=10;
-	}
-	else if (evt.key == 'Home') {
-		idx = 0;
-	}
-	else if (evt.key == 'End') {
-		idx = available.length;
 	}
 	else {
 		return true;
