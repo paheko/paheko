@@ -437,6 +437,10 @@ class Transaction extends Entity
 			$line = $l->line;
 			$line->id_transaction = -1; // Get around validation of id_transaction being not null
 
+			if (empty($l->account_code)) {
+				throw new ValidationException('Le compte spécifié n\'existe pas.');
+			}
+
 			if ($this->type == self::TYPE_EXPENSE && $l->account_position == Account::REVENUE) {
 				throw new ValidationException('Il n\'est pas possible d\'attribuer un compte de produit à une dépense');
 			}
