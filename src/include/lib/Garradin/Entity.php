@@ -38,6 +38,9 @@ class Entity extends AbstractEntity
 		elseif (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
 			return \DateTime::createFromFormat('Ymd', $value);
 		}
+		elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $value)) {
+			return \DateTime::createFromFormat('Y-m-d', $value);
+		}
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
 		}
