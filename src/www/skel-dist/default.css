@@ -118,7 +118,7 @@ header.main .contacts {
     flex-direction: column;
 }
 
-/* NAVIGATION EN HAUT DE LA PAGE */
+/* NAVIGATION EN HAUT DE LA PAGE (ACCUEIL/CONNEXION) */
 header.nav {
     background: #ddd;
     background: rgba(var(--second-color), 0.2);
@@ -131,12 +131,12 @@ header.nav {
 
 header.nav li {
     display: inline-block;
-    padding: .3em .5em;
-    margin-bottom: -1px;
+    padding: .2em .5em;
+    margin-bottom: -3px;
 }
 
 header.nav li a {
-    padding: .3em .5em;
+    padding: .1em .5em;
     text-transform: uppercase;
     color: #666;
     text-decoration: none;
