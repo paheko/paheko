@@ -1,10 +1,10 @@
-{{:include file="_head.html"}}
+{{:include file="_head.html" home=true}}
 
 {{#articles order="published DESC" future=false limit=1}}
 <section class="articles main">
 	<article>
 		<h1><a href="{{ $url }}">{{ $title }}</a></h1>
-		<h5>Posté : {{ $published|relative_date }}</h5>
+		<h5>{{ $published|relative_date }}</h5>
 		<p>{{ $html|raw }}</p>
 	</article>
 </section>
@@ -14,7 +14,7 @@
 <section class="articles">
 	<article>
 		<h3><a href="{{ $url }}">{{ $title }}</a></h3>
-		<h5>Posté : {{ $published|relative_date }}</h5>
+		<h5>{{ $published|relative_date }}</h5>
 		<p>{{ $html|raw|strip_tags|truncate:200 }}</p>
 	</article>
 </section>

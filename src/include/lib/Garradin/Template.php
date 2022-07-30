@@ -650,10 +650,6 @@ class Template extends Smartyer
 			$admin_background = $url;
 		}
 
-		// Transformation Hexa vers décimal
-		$couleur1 = implode(', ', sscanf($couleur1, '#%02x%02x%02x'));
-		$couleur2 = implode(', ', sscanf($couleur2, '#%02x%02x%02x'));
-
 		$out = '
 		<style type="text/css">
 		:root {
@@ -667,7 +663,7 @@ class Template extends Smartyer
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
-		return sprintf($out, $couleur1, $couleur2, $admin_background);
+		return sprintf($out, CommonModifiers::css_hex_to_rgb($couleur1), CommonModifiers::css_hex_to_rgb($couleur2), $admin_background);
 	}
 
 	protected function displayChampMembre($v, $config = null)
