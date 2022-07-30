@@ -204,7 +204,7 @@ class Page extends Entity
 		}
 	}
 
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		$change_parent = null;
 
@@ -219,7 +219,7 @@ class Page extends Entity
 		}
 
 		$current_path = $this->_modified['file_path'] ?? $this->file_path;
-		parent::save();
+		parent::save($selfcheck);
 		$this->syncFile($current_path);
 
 		// Rename/move children
