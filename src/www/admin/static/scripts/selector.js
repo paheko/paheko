@@ -58,19 +58,18 @@ document.addEventListener('keydown', (evt) => {
 		return false;
 	}
 
+	// Do not intercept home/end inside text input
+	if ((evt.key == 'Home' || evt.key == 'End')
+		&& document.activeElement instanceof HTMLInputElement
+		&& document.activeElement.type == 'text') {
+		return;
+	}
+
 	if (evt.key == 'Home') {
 		idx = 0;
 	}
 	else if (evt.key == 'End') {
 		idx = available.length;
-	}
-
-	// Do not intercept home/end inside text input
-	if (document.activeElement.tagName.toLower() == 'input' && document.activeElement.type == 'text') {
-		return;
-	}
-
-	if (evt.key == 'Home' || evt.key == 'End') {
 	}
 	else if (evt.key == 'ArrowUp') { // Previous item
 		idx--;
