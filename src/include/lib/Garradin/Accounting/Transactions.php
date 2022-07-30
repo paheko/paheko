@@ -13,6 +13,13 @@ use Garradin\UserException;
 
 class Transactions
 {
+	static public function create(array $data)
+	{
+		$transaction = new Transaction;
+		$transaction->importForm($data);
+		return $transaction;
+	}
+
 	static public function get(int $id)
 	{
 		return EntityManager::findOneById(Transaction::class, $id);

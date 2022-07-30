@@ -19,11 +19,11 @@ if (!CURRENT_YEAR_ID) {
 $chart = $current_year->chart();
 $accounts = $chart->accounts();
 
+$csrf_key = 'acc_transaction_new';
 $transaction = new Transaction;
-$lines = [[], []];
 $amount = 0;
-$types_accounts = null;
 $id_analytical = null;
+$lines = isset($_POST['lines']) ? Transaction::getFormLines() : [[], []];
 
 // Quick-fill transaction from query parameters
 if (qg('a')) {
@@ -51,17 +51,15 @@ if (qg('copy')) {
 	}
 
 	$transaction = $old->duplicate($current_year);
-	$lines = $transaction->getLinesWithAccounts(true);
-	$id_analytical = $old->getAnalyticalId();
-	$amount = $transaction->getLinesCreditSum();
-	$types_accounts = $transaction->getTypesAccounts();
-	$transaction->resetLines();
 
-	foreach ($lines as $k => &$line) {
-		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_label)];
+	if (empty($_POST)) {
+		$lines = $transaction->getLinesWithAccounts();
 	}
 
-	unset($line);
+	$id_analytical = $old->getAnalyticalId();
+	$amount = $transaction->getLinesCreditSum();
+
+	$tpl->assign('duplicate_from', $old->id());
 }
 
 // Set last used date
@@ -94,14 +92,6 @@ if ($id = qg('account')) {
 		$lines[0]['account'] = $_POST[$key] = [$account->id => sprintf('%s — %s', $account->code, $account->label)];
 	}
 }
-elseif (!empty($_POST['lines']) && is_array($_POST['lines'])) {
-	$lines = Utils::array_transpose($_POST['lines']);
-
-	foreach ($lines as &$line) {
-		$line['credit'] = Utils::moneyToInteger($line['credit']);
-		$line['debit'] = Utils::moneyToInteger($line['debit']);
-	}
-}
 
 $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	$transaction->importFromNewForm();
@@ -117,12 +107,13 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 	$session->set('acc_last_date', $transaction->date->format('Y-m-d'));
 
 	Utils::redirect(sprintf('!acc/transactions/details.php?id=%d&created', $transaction->id()));
-}, 'acc_transaction_new');
+}, $csrf_key);
 
-$tpl->assign(compact('transaction', 'amount', 'lines', 'types_accounts', 'id_analytical'));
+$types_details = $transaction->getTypesDetails();
 
-$tpl->assign('types_details', Transaction::getTypesDetails());
+$tpl->assign(compact('csrf_key', 'transaction', 'amount', 'lines', 'id_analytical', 'types_details'));
+
 $tpl->assign('chart_id', $chart->id());
-
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
+
 $tpl->display('acc/transactions/new.tpl');
