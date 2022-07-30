@@ -4,7 +4,9 @@ namespace Garradin;
 
 use KD2\Form;
 use KD2\HTTP;
+use KD2\Smartyer;
 use KD2\Translate;
+
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
@@ -12,7 +14,7 @@ use Garradin\UserTemplate\CommonModifiers;
 use Garradin\Web\Render\Skriv;
 use Garradin\Files\Files;
 
-class Template extends \KD2\Smartyer
+class Template extends Smartyer
 {
 	static protected $_instance = null;
 
