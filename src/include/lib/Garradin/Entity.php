@@ -7,8 +7,6 @@ use KD2\DB\AbstractEntity;
 
 class Entity extends AbstractEntity
 {
-	protected $_form_rules = [];
-
 	/**
 	 * Valider les champs avant enregistrement
 	 * @throws ValidationException Si une erreur de validation survient
@@ -17,15 +15,6 @@ class Entity extends AbstractEntity
 	{
 		if (null === $source) {
 			$source = $_POST;
-		}
-
-		$form = new Form;
-
-		if (!$form->validate($this->_form_rules, $source))
-		{
-			$messages = $form->getErrorMessages();
-
-			throw new ValidationException(implode("\n", $messages));
 		}
 
 		return $this->import($source);

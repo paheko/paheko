@@ -4,9 +4,9 @@
 
 {form_errors}
 
-{if null === $type}
+{if !isset($account->type)}
 
-<form method="get" action="{$self_url}" data-focus="1">
+<form method="post" action="{$self_url}" data-focus="1">
 	<fieldset>
 		<legend>Créer un nouveau compte</legend>
 		<dl><label for="f_type">Type de compte</label></dl>
