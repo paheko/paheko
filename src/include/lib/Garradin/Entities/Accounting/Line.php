@@ -110,7 +110,7 @@ class Line extends Entity
 			$source['id_account'] = (int)key($source['account_selector']);
 		}
 		elseif (isset($source['account'])) {
-			if (empty($source['account'])) {
+			if (empty($source['account']) || is_array($source['account'])) {
 				throw new ValidationException('Aucun compte n\'a été choisi.');
 			}
 
