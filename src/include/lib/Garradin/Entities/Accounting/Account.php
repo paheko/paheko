@@ -170,17 +170,19 @@ class Account extends Entity
 		'user'        => 'int',
 	];
 
-	protected $_form_rules = [
-		'code'        => 'required|string|alpha_num|max:10',
-		'label'       => 'required|string|max:200',
-		'description' => 'string|max:2000',
-	];
-
 	protected $_position = [];
 
 	public function selfCheck(): void
 	{
 		$db = DB::getInstance();
+
+		$this->assert(trim($this->code) !== '', 'Le numéro de compte ne peut rester vide.');
+		$this->assert(trim($this->label) !== '', 'L\'intitulé de compte ne peut rester vide.');
+
+		$this->assert(strlen($this->code) <= 20, 'Le numéro de compte ne peut faire plus de 20 caractères.');
+		$this->assert(preg_match('/^[a-z0-9_]+$/i', $this->code), 'Le numéro de compte ne peut comporter que des lettres et des chiffres.');
+		$this->assert(strlen($this->label) <= 200, 'L\'intitulé de compte ne peut faire plus de 200 caractères.');
+		$this->assert(!isset($this->description) || strlen($this->description) <= 2000, 'La description de compte ne peut faire plus de 2000 caractères.');
 
 		$this->assert(!empty($this->id_chart), 'Aucun plan comptable lié');
 
@@ -191,7 +193,7 @@ class Account extends Entity
 			throw new ValidationException(sprintf('Le code "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
 
-		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide');
+		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
 		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
 		$this->assert($this->user === 0 || $this->user === 1);
 
@@ -544,12 +546,12 @@ class Account extends Entity
 		return Charts::get($this->id_chart);
 	}
 
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		$c = Config::getInstance();
 		$c->set('last_chart_change', time());
 		$c->save();
 
-		return parent::save();
+		return parent::save($selfcheck);
 	}
 }

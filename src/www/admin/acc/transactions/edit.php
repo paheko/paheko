@@ -30,79 +30,36 @@ if ($year->closed) {
 $chart = $year->chart();
 $accounts = $chart->accounts();
 
+$csrf_key = 'acc_transaction_edit_' . $transaction->id();
+
 $tpl->assign('chart', $chart);
 
-$rules = [
-	'lines' => 'array|required',
-];
+$form->runIf('save', function() use ($transaction, $session) {
+	$transaction->importFromNewForm();
+	$transaction->save();
 
-if (f('save') && $form->check('acc_edit_' . $transaction->id(), $rules)) {
-	try {
-		$transaction->importFromEditForm();
-		$transaction->save();
-
-		// Link members
-		if (null !== f('users') && is_array(f('users'))) {
-			$transaction->updateLinkedUsers(array_keys(f('users')));
-		}
-		else {
-			// Remove all
-			$transaction->updateLinkedUsers([]);
-		}
-
-		Utils::redirect(ADMIN_URL . 'acc/transactions/details.php?id=' . $transaction->id());
+	// Link members
+	if (null !== f('users') && is_array(f('users'))) {
+		$transaction->updateLinkedUsers(array_keys(f('users')));
 	}
-	catch (UserException $e) {
-		$form->addError($e->getMessage());
+	else {
+		// Remove all
+		$transaction->updateLinkedUsers([]);
 	}
-}
+}, $csrf_key, '!acc/transactions/details.php?id=' . $transaction->id());
 
 $types_accounts = [];
-$lines = [];
-
-if (!empty($_POST['lines']) && is_array($_POST['lines'])) {
-	$lines = Utils::array_transpose($_POST['lines']);
-
-	foreach ($lines as &$line) {
-		$line = (object) $line;
-		$line->credit = Utils::moneyToInteger($line->credit);
-		$line->debit = Utils::moneyToInteger($line->debit);
-	}
-
-	unset($line);
-}
-else {
-	$lines = $transaction->getLinesWithAccounts();
-
-	foreach ($lines as $k => &$line) {
-		$line->account = [$line->id_account => sprintf('%s — %s', $line->account_code, $line->account_name)];
-	}
-
-	unset($line);
-}
-
-$has_reconciled_lines = false;
-
-foreach ($lines as $line) {
-	if (!empty($line->reconciled)) {
-		$has_reconciled_lines = true;
-		break;
-	}
-}
-
-$first_line = $transaction->getFirstLine();
-
-if ($transaction->type != Transaction::TYPE_ADVANCED) {
-	$types_accounts = $transaction->getTypesAccounts();
-}
+$lines = isset($_POST['lines']) ? Transaction::getFormLines() : $transaction->getLinesWithAccounts();
 
 $amount = $transaction->getLinesCreditSum();
+$types_details = $transaction->getTypesDetails();
+$id_analytical = $transaction->getAnalyticalId();
+$has_reconciled_lines = $transaction->hasReconciledLines();
 
-$tpl->assign(compact('transaction', 'lines', 'types_accounts', 'amount', 'first_line', 'has_reconciled_lines'));
+$tpl->assign(compact('csrf_key', 'transaction', 'lines', 'amount', 'has_reconciled_lines', 'types_details', 'id_analytical'));
 
-$tpl->assign('types_details', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());
 $tpl->assign('linked_users', $transaction->listLinkedUsersAssoc());
 
-$tpl->display('acc/transactions/edit.tpl');
+$tpl->display('acc/transactions/new.tpl');

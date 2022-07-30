@@ -7,17 +7,24 @@ use Garradin\Entities\Web\Page;
 
 require_once __DIR__ . '/_inc.php';
 
-if (!qg('p')) {
-	throw new UserException('Page inconnue');
-}
+$page = null;
 
-$page = Web::get(qg('p'));
+if (qg('p')) {
+	$page = Web::get(qg('p'));
+}
+elseif (qg('uri')) {
+	$page = Web::getByURI(qg('uri'));
+}
 
 if (!$page) {
 	throw new UserException('Page inconnue');
 }
 
-if (qg('toggle_type') !== null) {
+if (!$page) {
+	throw new UserException('Page inconnue');
+}
+
+if (qg('toggle_type') !== null && $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)) {
 	$page->toggleType();
 	$page->save();
 	Utils::redirect('!web/page.php?p=' . $page->path);
@@ -30,12 +37,13 @@ $tpl->assign('breadcrumbs', $page->getBreadcrumbs());
 $images = $page->getImageGallery(true);
 $files = $page->getAttachmentsGallery(true);
 
-$content = $page->render(ADMIN_URL . 'web/page.php?p=');
+$content = $page->render(ADMIN_URL . 'web/page.php?uri=');
 
 $type_page = Page::TYPE_PAGE;
 $type_category = Page::TYPE_CATEGORY;
+$links_errors = $page->checkInternalLinks();
 
-$tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category'));
+$tpl->assign(compact('page', 'images', 'files', 'content', 'type_page', 'type_category', 'links_errors'));
 
 $tpl->assign('custom_js', ['wiki_gallery.js']);
 $tpl->assign('custom_css', ['wiki.css', '!web/css.php']);

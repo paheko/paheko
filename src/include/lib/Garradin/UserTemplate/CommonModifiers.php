@@ -21,6 +21,7 @@ class CommonModifiers
 		'strftime',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'typo',
+		'css_hex_to_rgb',
 	];
 
 	const FUNCTIONS_LIST = [
@@ -274,5 +275,15 @@ class CommonModifiers
 		}
 
 		return $out;
+	}
+
+	static public function css_hex_to_rgb($str): ?string {
+		$hex = sscanf((string)$str, '#%02x%02x%02x');
+
+		if (empty($hex)) {
+			return null;
+		}
+
+		return implode(', ', $hex);
 	}
 }

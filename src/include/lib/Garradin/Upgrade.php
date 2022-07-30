@@ -106,6 +106,16 @@ class Upgrade
 				$db->commit();
 			}
 
+			if (version_compare($v, '1.1.27', '<')) {
+				// Just add api_credentials tables
+				$db->import(ROOT . '/include/data/1.1.0_schema.sql');
+			}
+
+			if (version_compare($v, '1.1.28', '<')) {
+				$db->createFunction('html_decode', 'htmlspecialchars_decode');
+				$db->exec('UPDATE files_search SET content = html_decode(content) WHERE content IS NOT NULL;');
+			}
+
 			if (version_compare($v, '1.2.0', '<')) {
 				$config = (object) $db->getAssoc('SELECT key, value FROM config WHERE key IN (\'champs_membres\', \'champ_identifiant\', \'champ_identite\');');
 				$db->beginSchemaUpdate();

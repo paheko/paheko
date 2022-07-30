@@ -67,7 +67,9 @@ $form->runIf(f('save') || f('save_and_add_payment'), function () use ($session, 
 	Utils::redirect($url);
 }, $csrf_key);
 
-$types_details = Transaction::getTypesDetails();
+$t = new Transaction;
+$t->type = $t::TYPE_REVENUE;
+$types_details = $t->getTypesDetails();
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
 $service_user = null;

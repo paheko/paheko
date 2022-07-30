@@ -2,8 +2,6 @@
 
 {include file="acc/reports/_header.tpl" current="trial_balance" title="Balance générale" sub_current=$simple}
 
-<nav class="tabs">
-
 {if !$simple}
 <p class="help block noprint">
 	Attention&nbsp;: cette vue présente le solde selon les normes comptables.<br />

@@ -481,6 +481,10 @@ class Emails
 
 		$return = $message->identifyBounce();
 
+		if (Plugin::fireSignal('email.bounce', compact('message', 'return', 'raw_message'))) {
+			return null;
+		}
+
 		if (!$return) {
 			return null;
 		}

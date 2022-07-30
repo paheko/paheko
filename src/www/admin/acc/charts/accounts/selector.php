@@ -17,9 +17,17 @@ $chart = (int) qg('chart') ?: null;
 $targets = array_map('intval', $targets);
 $targets_str = implode(':', $targets);
 
+$all = qg('all');
+
+if (null !== $all) {
+	$session->set('account_selector_all', (bool) $all);
+}
+
+$all = (bool) $session->get('account_selector_all');
+
 // Cache the page until the charts have changed
 $last_change = Config::getInstance()->get('last_chart_change') ?: time();
-$hash = sha1($targets_str . $chart . $last_change);
+$hash = sha1($targets_str . $chart . $last_change . '=' . $all);
 
 // Exit if there's no need to reload
 Utils::HTTPCache($hash, null, 10);
@@ -46,16 +54,11 @@ $accounts = $chart->accounts();
 
 $tpl->assign(compact('chart', 'targets', 'targets_str'));
 
-$all = qg('all');
-
-if (null !== $all) {
-	$session->set('account_selector_all', (bool) $all);
-}
-
-$all = (bool) $session->get('account_selector_all');
-
 if (!count($targets)) {
 	$tpl->assign('accounts', !$all ? $accounts->listCommonTypes() : $accounts->listAll());
+}
+elseif ($all) {
+	$tpl->assign('accounts', $accounts->listAll($targets));
 }
 else {
 	$tpl->assign('grouped_accounts', $accounts->listCommonGrouped($targets));

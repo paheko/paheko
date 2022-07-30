@@ -6,7 +6,7 @@
 		{linkbutton shape="plus" label="Nouvelle page" href="new.php?type=%d&parent=%d"|args:$type_page,$page.path}
 		{linkbutton shape="plus" label="Nouvelle catégorie" href="new.php?type=%d&parent=%d"|args:$type_category,$page.path}
 	</aside>
-	{else}
+	{elseif $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN)}
 	<aside>
 		{linkbutton href="?p=%s&toggle_type"|args:$page.path label="Transformer en catégorie" shape="reset"}
 	</aside>
@@ -36,6 +36,17 @@
 </nav>
 {/if}
 
+{if count($links_errors)}
+<div class="block alert">
+	Cette page contient des liens qui mènent à des pages qui n'existent pas ou ont été renommées&nbsp;:
+	<ul>
+		{foreach from=$links_errors item="link"}
+		<li>{$link}</li>
+		{/foreach}
+	</ul>
+	Il est conseillé de modifier la page pour corriger les liens.
+</div>
+{/if}
 
 {if !$content}
 	<p class="block alert">Cette page est vide, cliquez sur « Modifier » pour commencer à rédiger son contenu.</p>

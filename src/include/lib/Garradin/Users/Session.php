@@ -396,8 +396,7 @@ class Session extends \KD2\UserSession
 			return false;
 		}
 
-		$perm_name = 'perm_' . $category;
-		$perm = $permissions[$perm_name];
+		$perm = $permissions['perm_' . $category];
 
 		return ($perm >= $permission);
 	}

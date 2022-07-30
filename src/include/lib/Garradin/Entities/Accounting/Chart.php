@@ -27,15 +27,12 @@ class Chart extends Entity
 		'archived' => 'int',
 	];
 
-	protected $_form_rules = [
-		'label'    => 'required|string|max:200',
-		'country'  => 'required|string|size:2',
-		'archived' => 'numeric|min:0|max:1'
-	];
-
 	public function selfCheck(): void
 	{
 		parent::selfCheck();
+		$this->assert(trim($this->label) !== '', 'Le libellé ne peut rester vide.');
+		$this->assert(strlen($this->label) <= 200, 'Le libellé ne peut faire plus de 200 caractères.');
+		$this->assert(trim($this->country) !== '', 'Le pays ne peut rester vide.');
 		$this->assert(Utils::getCountryName($this->country), 'Le code pays doit être un code ISO valide');
 		$this->assert($this->archived === 0 || $this->archived === 1);
 	}

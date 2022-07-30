@@ -23,7 +23,7 @@ if (!$payoff_for) {
 	throw new UserException('Écriture inconnue');
 }
 
-$amount = $payoff_for->sum;
+$amount = $payoff_for->amount;
 
 $chart = $current_year->chart();
 $accounts = $chart->accounts();
@@ -41,10 +41,7 @@ if (!$date || ($date < $current_year->start_date || $date > $current_year->end_d
 $transaction->date = $date;
 
 $form->runIf('save', function () use ($transaction, $session, $current_year) {
-	// Force type
-	$_POST['type'] = $transaction->type;
-
-	$transaction->importFromNewForm();
+	$transaction->importFromPayoffForm();
 	$transaction->id_year = $current_year->id();
 	$transaction->id_creator = $session->getUser()->id;
 	$transaction->save();
@@ -61,7 +58,7 @@ $form->runIf('save', function () use ($transaction, $session, $current_year) {
 
 	$session->set('acc_last_date', f('date'));
 
-	Utils::redirect('!acc/transactions/new.php?ok=' . $transaction->id());
+	Utils::redirect('!acc/transactions/details.php?created&id=' . $transaction->id());
 }, 'acc_transaction_new');
 
 $id_analytical = $payoff_for->id_analytical;
@@ -69,7 +66,6 @@ $id_analytical = $payoff_for->id_analytical;
 $tpl->assign(compact('transaction', 'payoff_for', 'amount', 'id_analytical'));
 $tpl->assign('payoff_targets', implode(':', [Account::TYPE_BANK, Account::TYPE_CASH, Account::TYPE_OUTSTANDING]));
 
-$tpl->assign('types_details', Transaction::getTypesDetails());
 $tpl->assign('chart_id', $chart->id());
 
 $tpl->assign('analytical_accounts', ['' => '-- Aucun'] + $accounts->listAnalytical());

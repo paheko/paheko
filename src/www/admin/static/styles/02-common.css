@@ -488,6 +488,10 @@ nav.breadcrumbs li:before {
     content: "> ";
 }
 
+nav.breadcrumbs li:first-child:before {
+    content: "";
+}
+
 nav.breadcrumbs li:last-child a {
     font-weight: bold;
 }
@@ -542,9 +546,14 @@ aside.quota h4 {
 }
 
 .search-results h3 {
-    margin: .3em 0;
+    margin: 0;
 }
 
 .search-results h3 a {
     font-weight: normal;
+}
+.search-results .breadcrumbs {
+    margin: 0;
+    font-size: .9em;
+    margin-bottom: .8em;
 }

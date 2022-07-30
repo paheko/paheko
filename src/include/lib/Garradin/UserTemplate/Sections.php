@@ -5,6 +5,7 @@ namespace Garradin\UserTemplate;
 use KD2\Brindille_Exception;
 use Garradin\DB;
 use Garradin\Utils;
+use Garradin\Membres\Session;
 use Garradin\Entities\Web\Page;
 use Garradin\Web\Web;
 use Garradin\Files\Files;
@@ -23,6 +24,7 @@ class Sections
 		'documents',
 		'files',
 		'sql',
+		'restrict',
 	];
 
 	static protected $_cache = [];
@@ -34,6 +36,38 @@ class Sections
 		}
 
 		return self::$_cache[$id];
+	}
+
+	static public function restrict(array $params, UserTemplate $tpl, int $line): ?\Generator
+	{
+		$session = Session::getInstance();
+
+		if (!$session->isLogged()) {
+			return null;
+		}
+
+		if (empty($params['level']) && empty($params['section'])) {
+			yield [];
+			return null;
+		}
+
+		$convert = [
+			'read' => $session::ACCESS_READ,
+			'write' => $session::ACCESS_WRITE,
+			'admin' => $session::ACCESS_ADMIN,
+		];
+
+		if (empty($params['level']) || !isset($convert[$params['level']])) {
+			throw new Brindille_Exception(sprintf("Ligne %d: 'restrict' niveau d'accès inconnu : %s", $line, $params['level'] ?? ''));
+		}
+
+		$ok = $session->canAccess($params['section'] ?? '', $convert[$params['level']]);
+
+		if ($ok) {
+			yield [];
+		}
+
+		return null;
 	}
 
 	static public function breadcrumbs(array $params, UserTemplate $tpl, int $line): \Generator

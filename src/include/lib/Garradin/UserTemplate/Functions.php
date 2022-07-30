@@ -7,6 +7,7 @@ use KD2\Brindille_Exception;
 use KD2\ErrorManager;
 
 use Garradin\Utils;
+use Garradin\Users\Emails;
 use Garradin\Web\Skeleton;
 
 use const Garradin\WWW_URL;
@@ -34,7 +35,7 @@ class Functions
 			throw new Brindille_Exception(sprintf('Ligne %d: argument "body" manquant pour la fonction "mail"', $line));
 		}
 
-		Utils::sendEmail(Utils::EMAIL_CONTEXT_PRIVATE, $params['to'], $params['subject'], $params['body']);
+		Emails::queue(Emails::CONTEXT_PRIVATE, [$params['to'] => []], null, $params['subject'], $params['body']);
 	}
 
 	static public function dump(array $params, Brindille $tpl)
@@ -73,10 +74,14 @@ class Functions
 		$s->display($params);
 	}
 
-	static public function http(array $params): void
+	static public function http(array $params, UserTemplate $tpl): void
 	{
 		if (headers_sent()) {
 			return;
+		}
+
+		if (isset($params['redirect'])) {
+			Utils::redirect($params['redirect']);
 		}
 
 		if (isset($params['code'])) {
@@ -144,14 +149,14 @@ class Functions
 
 			header(sprintf('HTTP/1.1 %d %s', $params['code'], $codes[$params['code']]), true);
 		}
-		elseif (isset($params['redirect'])) {
-			Utils::redirect($params['redirect']);
-		}
-		elseif (isset($params['type'])) {
+
+		if (isset($params['type'])) {
 			header('Content-Type: ' . $params['type'], true);
+			$tpl->setContentType($params['type']);
 		}
-		else {
-			throw new Brindille_Exception('No valid parameter found for http function');
+
+		if (isset($params['download'])) {
+			header(sprintf('Content-Disposition: attachment; filename="%s"', Utils::safeFileName($params['download'])), true);
 		}
 	}
 }

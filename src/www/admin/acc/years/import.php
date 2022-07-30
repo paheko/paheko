@@ -1,6 +1,8 @@
 <?php
 namespace Garradin;
 
+use Garradin\Accounting\Export;
+use Garradin\Accounting\Import;
 use Garradin\Accounting\Transactions;
 use Garradin\Accounting\Years;
 
@@ -31,13 +33,14 @@ if ($year->closed) {
 }
 
 $type = qg('type');
-$type_name = Transactions::EXPORT_NAMES[$type] ?? null;
+$type_name = Export::NAMES[$type] ?? null;
 $csrf_key = 'acc_years_import_' . $year->id();
 $examples = null;
 $csv = new CSV_Custom($session, 'acc_import_year');
 $ignore_ids = (bool) (f('ignore_ids') ?? qg('ignore_ids'));
+$report = [];
 
-$params = ['year' => $year->id(), 'ignore_ids' => (int) $ignore_ids, 'type' => $type];
+$params = compact('ignore_ids', 'type') + ['year' => $year->id()];
 
 if (f('cancel')) {
 	$csv->clear();
@@ -46,29 +49,74 @@ if (f('cancel')) {
 }
 
 if ($type && $type_name) {
-	$columns = Transactions::EXPORT_COLUMNS[$type];
-	unset($columns['linked_users']);
-	$csv->setColumns($columns);
-	$csv->setMandatoryColumns(Transactions::MANDATORY_COLUMNS[$type]);
+	$columns = Export::COLUMNS[$type];
 
-	$form->runIf(f('assign') && $csv->loaded(), function () use ($type, $csv, $year, $user, $ignore_ids) {
-		$csv->skip((int)f('skip_first_line'));
-		$csv->setTranslationTable(f('translation_table'));
+	// Remove linked users from import
+	if ($found = array_search('linked_users', $columns)) {
+		unset($columns[$found]);
+	}
 
-		Transactions::import($type, $year, $csv, $user->id, (bool) $ignore_ids);
-		$csv->clear();
-	}, $csrf_key, ADMIN_URL . 'acc/years/?msg=IMPORT');
+	// Remove NULLs
+	$columns = array_filter($columns);
+	$columns_table = $columns = array_flip($columns);
+
+	if ($type == Export::FEC) {
+		// Fill with labels
+		$columns_table = array_intersect_key(array_flip(Export::COLUMNS_FULL), $columns);
+	}
+
+	$csv->setColumns($columns_table, $columns);
+	$csv->setMandatoryColumns(Export::MANDATORY_COLUMNS[$type]);
 
 	$form->runIf(f('load') && isset($_FILES['file']['tmp_name']), function () use ($type, $csv, $year, $params) {
 		$csv->load($_FILES['file']);
 		Utils::redirect(Utils::getSelfURI($params));
 	}, $csrf_key);
+
+	$form->runIf(f('preview') && $csv->loaded(), function () use (&$csv) {
+		$csv->skip((int)f('skip_first_line'));
+		$csv->setTranslationTable(f('translation_table'));
+	}, $csrf_key);
+
+	if (!f('import') && $csv->ready()) {
+		try {
+			$report = Import::import($type, $year, $csv, $user->id, compact('ignore_ids') + ['dry_run' => true, 'return_report' => true]);
+		}
+		catch (UserException $e) {
+			$csv->clear();
+			$form->addError($e);
+		}
+	}
+
+	$form->runIf(f('import') && $csv->loaded(), function () use ($type, &$csv, $year, $user, $ignore_ids) {
+		try {
+			Import::import($type, $year, $csv, $user->id, compact('ignore_ids'));
+		}
+		finally {
+			$csv->clear();
+		}
+	}, $csrf_key, ADMIN_URL . 'acc/years/?msg=IMPORT');
 }
 else {
 	$csv->clear();
-	$examples = Transactions::getExportExamples($year);
+	$examples = Export::getExamples($year);
 }
 
-$tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids'));
+$types = [
+	Export::SIMPLE => [
+		'label' => 'Simplifié (comptabilité de trésorerie)',
+		'help' => 'Chaque ligne représente une écriture, comme dans un cahier. Les écritures avancées ne peuvent pas être importées dans ce format.',
+	],
+	Export::GROUPED => [
+		'label' => 'Complet groupé (comptabilité d\'engagement)',
+		'help' => 'Permet d\'avoir des écritures avancées. Les 7 premières colonnes de chaque ligne sont vides pour indiquer les lignes suivantes de l\'écriture.',
+	],
+	Export::FEC => [
+		'label' => 'FEC (Fichier des Écritures Comptables)',
+		'help' => 'Format standard de l\'administration française.',
+	],
+];
+
+$tpl->assign(compact('csv', 'year', 'csrf_key', 'examples', 'type', 'type_name', 'ignore_ids', 'types', 'report'));
 
 $tpl->display('acc/years/import.tpl');

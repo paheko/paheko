@@ -9,7 +9,7 @@ class CSV
 	/**
 	 * Convert a file to CSV if required (and if CALC_CONVERT_COMMAND is set)
 	 */
-	static public function convertUploadIfRequired(string $path): string
+	static public function convertUploadIfRequired(string $path, bool $delete_original = false): string
 	{
 		if (!CALC_CONVERT_COMMAND) {
 			return $path;
@@ -50,7 +50,9 @@ class CSV
 			return $b;
 		}
 		finally {
-			@unlink($a);
+			if ($delete_original) {
+				@unlink($a);
+			}
 		}
 	}
 
@@ -74,7 +76,6 @@ class CSV
 		$cmd = sprintf($cmd, escapeshellarg($from), escapeshellarg($to));
 		$cmd .= ' 2>&1';
 		$return = shell_exec($cmd);
-			//var_dump($cmd, $return); exit;
 
 		if (!file_exists($to)) {
 			throw new UserException('Impossible de convertir le fichier. Vérifier que le fichier est un format supporté.');
@@ -344,53 +345,63 @@ class CSV
 
 	static public function import(string $file, array $expected_columns): \Generator
 	{
-		$fp = fopen($file, 'r');
+		$delete_after = is_uploaded_file($file);
+		$file = self::convertUploadIfRequired($file, $delete_after);
 
-		if (!$fp) {
-			throw new UserException('Le fichier ne peut être ouvert');
-		}
+		try {
+			$fp = fopen($file, 'r');
 
-		// Find the delimiter
-		$delim = self::findDelimiter($fp);
-		self::skipBOM($fp);
-
-		$line = 0;
-
-		$columns = fgetcsv($fp, 4096, $delim);
-
-		// Make sure the data is UTF-8 encoded
-		$columns = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $columns);
-
-		// Check for required columns
-		foreach ($expected_columns as $column) {
-			if (!in_array($column, $columns, true)) {
-				throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $column));
-			}
-		}
-
-		while (!feof($fp))
-		{
-			$row = fgetcsv($fp, 4096, $delim);
-			$line++;
-
-			// Empty line, skip
-			if (empty($row)) {
-				continue;
+			if (!$fp) {
+				throw new UserException('Le fichier ne peut être ouvert');
 			}
 
-			if (count($row) != count($columns))
-			{
-				throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
-			}
+			// Find the delimiter
+			$delim = self::findDelimiter($fp);
+			self::skipBOM($fp);
+
+			$line = 0;
+
+			$columns = fgetcsv($fp, 4096, $delim);
 
 			// Make sure the data is UTF-8 encoded
-			$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
+			$columns = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $columns);
 
-			$row = array_combine($columns, $row);
+			// Check for required columns
+			foreach ($expected_columns as $column) {
+				if (!in_array($column, $columns, true)) {
+					throw new UserException(sprintf('La colonne "%s" est absente du fichier importé', $column));
+				}
+			}
 
-			yield $line => $row;
+			while (!feof($fp))
+			{
+				$row = fgetcsv($fp, 4096, $delim);
+				$line++;
+
+				// Empty line, skip
+				if (empty($row)) {
+					continue;
+				}
+
+				if (count($row) != count($columns))
+				{
+					throw new UserException('Erreur sur la ligne ' . $line . ' : le nombre de colonnes est incorrect.');
+				}
+
+				// Make sure the data is UTF-8 encoded
+				$row = array_map(fn ($a) => Utils::utf8_encode(trim($a)), $row);
+
+				$row = array_combine($columns, $row);
+
+				yield $line => $row;
+			}
+
+			fclose($fp);
 		}
-
-		fclose($fp);
+		finally {
+			if ($delete_after) {
+				@unlink($file);
+			}
+		}
 	}
 }

@@ -366,6 +366,19 @@ CREATE TABLE IF NOT EXISTS acc_transactions_users
 
 CREATE INDEX IF NOT EXISTS acc_transactions_users_service ON acc_transactions_users (id_service_user);
 
+CREATE TABLE IF NOT EXISTS api_credentials
+(
+    id INTEGER NOT NULL PRIMARY KEY,
+    label TEXT NOT NULL,
+    key TEXT NOT NULL,
+    secret TEXT NOT NULL,
+    created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_use TEXT NULL,
+    access_level INT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS api_credentials_key ON api_credentials (key);
+
 ---------- FILES ----------------
 
 CREATE TABLE IF NOT EXISTS files

@@ -36,7 +36,15 @@ $form->runIf('assign', function () use ($ar) {
 	$ar->setSettings(f('translation_table'), (int)f('skip_first_line'));
 }, $csrf_key, Utils::getSelfURI());
 
-extract($ar->getStartAndEndDates());
+$start = $end = null;
+
+try {
+	extract($ar->getStartAndEndDates());
+}
+catch (UserException $e) {
+	$form->addError($e->getMessage());
+	$csv->clear();
+}
 
 $journal = null;
 

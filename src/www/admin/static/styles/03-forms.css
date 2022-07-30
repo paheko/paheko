@@ -707,6 +707,19 @@ form.progressing fieldset, form.progressing p.submit {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.selector header {
+    margin-bottom: 2em;
+}
+
+.selector header p.edit {
+    float: right;
+    margin: 0;
+}
+
+.selector header h2 input {
+    width: calc(100% - 1em);
+}
+
 @media screen and (max-width: 1279px) {
     #queryBuilder table tr {
         display: flex;

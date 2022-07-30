@@ -4,6 +4,7 @@ namespace Garradin;
 
 use KD2\Form;
 use KD2\HTTP;
+use KD2\Smartyer;
 use KD2\Translate;
 use Garradin\Users\Session;
 use Garradin\Users\DynamicFields;
@@ -14,7 +15,7 @@ use Garradin\UserTemplate\CommonModifiers;
 use Garradin\Web\Render\Skriv;
 use Garradin\Files\Files;
 
-class Template extends \KD2\Smartyer
+class Template extends Smartyer
 {
 	static protected $_instance = null;
 
@@ -54,6 +55,8 @@ class Template extends \KD2\Smartyer
 	{
 		parent::__construct();
 
+		Translate::extendSmartyer($this);
+
 		$cache_dir = SMARTYER_CACHE_ROOT;
 
 		if (!file_exists($cache_dir)) {
@@ -74,7 +77,7 @@ class Template extends \KD2\Smartyer
 
 		$this->assign('www_url', WWW_URL);
 		$this->assign('admin_url', ADMIN_URL);
-		$this->assign('help_url', HELP_URL);
+		$this->assign('help_url', sprintf(HELP_URL, str_replace('/admin/', '', Utils::getSelfURI(false))));
 		$this->assign('admin_url', ADMIN_URL);
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
@@ -91,14 +94,14 @@ class Template extends \KD2\Smartyer
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
 		$this->assign('password_length', Session::MINIMUM_PASSWORD_LENGTH);
 
-		$this->register_compile_function('continue', function ($pos, $block, $name, $raw_args) {
+		$this->register_compile_function('continue', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($block == 'continue')
 			{
 				return 'continue;';
 			}
 		});
 
-		$this->register_compile_function('use', function ($pos, $block, $name, $raw_args) {
+		$this->register_compile_function('use', function (Smartyer $s, $pos, $block, $name, $raw_args) {
 			if ($name == 'use')
 			{
 				return sprintf('use %s;', $raw_args);
@@ -322,7 +325,7 @@ class Template extends \KD2\Smartyer
 
 	protected function formInput(array $params)
 	{
-		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit'];
+		static $params_list = ['value', 'default', 'type', 'help', 'label', 'name', 'options', 'source', 'no_size_limit', 'copy'];
 
 		// Extract params and keep attributes separated
 		$attributes = array_diff_key($params, array_flip($params_list));
@@ -342,6 +345,17 @@ class Template extends \KD2\Smartyer
 			$tparams['name'] = sprintf('%s_time', $name);
 			unset($tparams['label']);
 			$suffix = self::formInput($tparams);
+		}
+
+		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
+			if (CALC_CONVERT_COMMAND) {
+				$help = ($help ?? '') . PHP_EOL . 'Formats acceptés : CSV, LibreOffice Calc (ODS), ou Excel (XLSX)';
+				$attributes['accept'] = '.ods,application/vnd.oasis.opendocument.spreadsheet,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,text/csv,application/csv';
+			}
+			else {
+				$help = ($help ?? '') . PHP_EOL . 'Format accepté : CSV';
+				$attributes['accept'] = '.csv,text/csv,application/csv';
+			}
 		}
 
 		$current_value = null;
@@ -545,6 +559,10 @@ class Template extends \KD2\Smartyer
 			$out .= '</dd>';
 		}
 		else {
+			if (!empty($copy)) {
+				$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" />', $params['name']);
+			}
+
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
 			if ($type == 'file' && empty($params['no_size_limit'])) {
@@ -640,10 +658,6 @@ class Template extends \KD2\Smartyer
 			$admin_background = $url;
 		}
 
-		// Transformation Hexa vers décimal
-		$color1 = implode(', ', sscanf($color1, '#%02x%02x%02x'));
-		$color2 = implode(', ', sscanf($color2, '#%02x%02x%02x'));
-
 		$out = '
 		<style type="text/css">
 		:root {
@@ -657,7 +671,7 @@ class Template extends \KD2\Smartyer
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
-		return sprintf($out, $color1, $color2, $admin_background);
+		return sprintf($out, CommonModifiers::css_hex_to_rgb($color1), CommonModifiers::css_hex_to_rgb($color2), $admin_background);
 	}
 
 	protected function displayDynamicField(array $params): string

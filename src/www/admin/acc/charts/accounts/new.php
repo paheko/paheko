@@ -28,11 +28,11 @@ $account = new Account;
 $account->position = Account::ASSET_OR_LIABILITY;
 
 $types = $account::TYPES_NAMES;
-$types[0] = '-- Pas un compte favori';
+$types[0] = '-- Pas un compte usuel';
 
 // Simple creation with pre-determined account type
-if (qg('type') !== null) {
-	$account->type = (int)qg('type');
+if (f('type') !== null) {
+	$account->type = (int)f('type');
 	$account->position = Accounts::getPositionFromType($account->type);
 	$account->code = $accounts->getNextCodeForType($account->type);
 }
@@ -73,7 +73,8 @@ $form->runIf('save', function () use ($account, $accounts, $chart, $current_year
 		$page = 'all.php';
 	}
 
-	Utils::redirect(sprintf('%sacc/charts/accounts/%s?id=%d', ADMIN_URL, $page, $account->id_chart));
+	$url = sprintf('!acc/charts/accounts/%s?id=%d', $page, $account->id_chart);
+	Utils::redirect($url);
 }, 'acc_accounts_new');
 
 $types_create = [
@@ -116,6 +117,6 @@ $types_create = [
 
 $type = $account->type;
 
-$tpl->assign(compact('types', 'types_create', 'account', 'chart', 'type'));
+$tpl->assign(compact('types', 'types_create', 'account', 'chart'));
 
 $tpl->display('acc/charts/accounts/new.tpl');

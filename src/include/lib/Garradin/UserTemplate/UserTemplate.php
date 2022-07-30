@@ -10,6 +10,8 @@ use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
 
+use Garradin\Membres\Session;
+
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Files\File;
 
@@ -30,6 +32,8 @@ class UserTemplate extends Brindille
 	protected $escape_default = 'html';
 
 	static protected $root_variables;
+
+	protected $content_type = null;
 
 	static public function getRootVariables()
 	{
@@ -59,6 +63,9 @@ class UserTemplate extends Brindille
 		$config['telephone_asso'] = $config['org_phone'];
 		$config['site_asso'] = $config['org_web'];
 
+		$session = Session::getInstance();
+		$is_logged = $session->isLogged();
+
 		self::$root_variables = [
 			'root_url'     => WWW_URL,
 			'request_url'  => Utils::getRequestURI(),
@@ -68,6 +75,8 @@ class UserTemplate extends Brindille
 			'visitor_lang' => Translate::getHttpLang(),
 			'config'       => $config,
 			'legal_line'   => LEGAL_LINE,
+			'is_logged'    => $is_logged,
+			'logged_user'  => $is_logged && $session->getUser(),
 		];
 
 		return self::$root_variables;
@@ -76,6 +85,10 @@ class UserTemplate extends Brindille
 	public function __construct(?File $file = null)
 	{
 		if ($file) {
+			if ($file->type != $file::TYPE_FILE) {
+				throw new \LogicException('Cannot construct a UserTemplate with a directory');
+			}
+
 			$this->file = $file;
 			$this->modified = $file->modified->getTimestamp();
 		}
@@ -275,5 +288,25 @@ class UserTemplate extends Brindille
 		}
 
 		Utils::streamPDF($this->fetch());
+	}
+
+	public function setContentType(string $type): void
+	{
+		$this->content_type = $type;
+	}
+
+	public function displayWeb(): void
+	{
+		$content = $this->fetch();
+
+		$type = $this->content_type ?: 'text/html';
+		header(sprintf('Content-Type: %s;charset=utf-8', $type), true);
+
+		if ($type == 'application/pdf') {
+			Utils::streamPDF($content);
+		}
+		else {
+			echo $content;
+		}
 	}
 }

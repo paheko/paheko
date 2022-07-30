@@ -1,11 +1,6 @@
 {include file="admin/_head.tpl" title="Sélectionner un compte"}
 
-{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
-	<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
-	<nav class="tabs">
-		<aside>{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside>
-	</nav>
-{/if}
+<div class="selector">
 
 {if empty($grouped_accounts) && empty($accounts)}
 	<p class="block alert">Le plan comptable ne comporte aucun compte de ce type.<br />
@@ -14,13 +9,18 @@
 
 {else}
 
-	<h2 class="ruler">
-		<input type="text" placeholder="Recherche rapide" id="lookup" />
-		{if !isset($grouped_accounts)}
-		<label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes usuels</label>
-		{/if}
-	</h2>
+	<header>
+		<h2>
+			<input type="text" placeholder="Recherche rapide" id="lookup" />
+		</h2>
 
+		{if $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_ADMIN)}
+			<?php $page = isset($grouped_accounts) ? '' : 'all.php'; ?>
+			<p class="edit">{linkbutton label="Modifier les comptes" href="!acc/charts/accounts/%s?id=%d"|args:$page,$chart.id shape="edit"}</aside></p>
+		{/if}
+
+		<p><label>{input type="checkbox" name="typed_only" value=0 default=0 default=$all} N'afficher que les comptes usuels</label></p>
+	</header>
 
 	{if isset($grouped_accounts)}
 		<?php $index = 1; ?>
@@ -67,6 +67,8 @@
 
 	{/if}
 {/if}
+
+</div>
 
 <script type="text/javascript" src="{$admin_url}static/scripts/selector.js?{$version_hash}"></script>
 
