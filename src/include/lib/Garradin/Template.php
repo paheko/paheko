@@ -377,6 +377,14 @@ class Template extends Smartyer
 			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
 				$current_value = $v->format('d/m/Y');
 			}
+			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
+		}
+		elseif ($type == 'time' && is_string($current_value)) {
+			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
+				$current_value = $v->format('H:i');
+			}
 		}
 
 
@@ -524,6 +532,12 @@ class Template extends Smartyer
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
+		if ($type == 'file') {
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
+		}
+
+		$input .= $suffix;
+
 		// No label? then we only want the input without the widget
 		if (empty($label)) {
 			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
@@ -532,12 +546,6 @@ class Template extends Smartyer
 
 			return $input;
 		}
-
-		if ($type == 'file') {
-			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
-		}
-
-		$input .= $suffix;
 
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], $this->escape($label));
 
@@ -840,8 +848,8 @@ class Template extends Smartyer
 		{
 			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars((string) $value, ENT_QUOTES) . '</textarea>';
 		}
-		elseif ($type == 'date') {
-			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
+		elseif ($type == 'date' || $type == 'datetime') {
+			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => $type, 'default' => $value]);
 		}
 		else
 		{
