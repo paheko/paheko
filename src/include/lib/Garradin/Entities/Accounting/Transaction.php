@@ -1092,7 +1092,11 @@ class Transaction extends Entity
 	public function asJournalArray(): array
 	{
 		$out = $this->asArray();
-		$out['url'] = $this->url();
+
+		if ($this->exists()) {
+			$out['url'] = $this->url();
+		}
+
 		$out['lines'] = $this->getLinesWithAccounts();
 		foreach ($out['lines'] as &$line) {
 			unset($line->line);
