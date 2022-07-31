@@ -54,6 +54,12 @@ class User extends Entity
 			return;
 		}
 
+		// Don't bother for type with generated columns
+		if ($this->_types[$key] == 'dynamic') {
+			$this->$key = $value;
+			return;
+		}
+
 		return parent::set($key, $value, $loose, $check_for_changes);
 	}
 

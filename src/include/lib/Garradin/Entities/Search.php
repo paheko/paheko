@@ -160,14 +160,7 @@ class Search extends Entity
 			return $this->_result;
 		}
 		catch (DB_Exception $e) {
-			$message = 'Erreur dans la requête : ' . $e->getMessage();
-
-			if (count($columns))
-			{
-				$message .= "\nVérifiez que votre requête sélectionne bien les colonnes suivantes : " . implode(', ', $columns);
-			}
-
-			throw new UserException($message);
+			throw new UserException('Erreur dans la requête : ' . $e->getMessage(), 0, $e);
 		}
 	}
 

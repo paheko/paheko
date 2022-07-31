@@ -29,7 +29,7 @@ class DynamicFields
 		'number' => [],
 	];
 
-	protected array $_presets = [];
+	protected array $_presets;
 
 	protected array $_deleted = [];
 
@@ -162,11 +162,10 @@ class DynamicFields
 
 	public function install(): void
 	{
-		$presets = $this->getInstallPresets();
-		$i = 0;
+		$presets = $this->getDefaultPresets();
 
 		foreach ($presets as $name => $preset) {
-			$field = new DynamicField;
+			$field = $this->addFieldFromPreset($name);
 
 			if ($name == 'password') {
 				$name = 'password';
@@ -184,20 +183,30 @@ class DynamicFields
 			if ($name == 'numero') {
 				$field->system |= $field::NUMBER;
 			}
-
-			$field->set('name', $name);
-			$field->set('label', $data['label']);
-			$field->set('type', $data['type']);
-			$field->set('help', $data['help'] ?? null);
-			$field->set('read_access', $data['read_access'] ?? 0);
-			$field->set('write_access', $data['write_access'] ?? 0);
-			$field->set('required', $data['required'] ?? false);
-			$field->set('list_table', $data['list_table'] ?? false);
-			$field->set('sort_order', $i++);
-			$self->add($field);
 		}
 
 		$this->save();
+	}
+
+	public function addFieldFromPreset(string $name): DynamicField
+	{
+		$data = $this->getPresets()[$name];
+
+		foreach ($data->depends ?? [] as $depends) {
+			if (!$this->fieldByKey($depends)) {
+				throw new \LogicException(sprintf('Cannot add "%s" preset if "%s" preset is not installed.', $name, $depends));
+			}
+		}
+
+		$field = new DynamicField;
+		$field->system |= $field::PRESET;
+		$field->set('name', $name);
+		$field->import((array)$data);
+		$field->sort_order = $this->getLastOrderIndex();
+
+		$this->add($field);
+
+		return $field;
 	}
 
 	protected function reloadCache()
@@ -277,7 +286,7 @@ class DynamicFields
 
 	public function getPresets(): array
 	{
-		if (null === $this->_presets)
+		if (!isset($this->_presets))
 		{
 			$this->_presets = parse_ini_file(self::PRESETS_FILE, true);
 
@@ -291,9 +300,41 @@ class DynamicFields
 		return $this->_presets;
 	}
 
-	public function getInstallPresets()
+	/**
+	 * Return list of presets that are not installed already
+	 */
+	public function getInstallablePresets(): array
 	{
-		return array_filter($this->getPresets(), fn ($row) => !$row->install );
+		$list = array_diff_key($this->getPresets(), $this->_fields);
+		$installed =& $this->_fields;
+		array_walk($list, function (&$p) use ($installed) {
+			$p->disabled = false;
+
+			foreach ($p->depends ?? [] as $d) {
+				if (!array_key_exists($d, $installed)) {
+					$p->disabled = true;
+					break;
+				}
+			}
+		});
+
+		return $list;
+	}
+
+	public function getDefaultPresets(): array
+	{
+		return array_filter($this->getPresets(), fn ($row) => $row->default ?? false);
+	}
+
+	public function installPreset(string $name): DynamicField
+	{
+		$preset = $this->getInstallablePresets()[$name] ?? null;
+
+		if (!$preset) {
+			throw new \InvalidArgumentException('This field cannot be installed.');
+		}
+
+		return $this->addFieldFromPreset($name);
 	}
 
 	/**
@@ -304,6 +345,8 @@ class DynamicFields
 	{
 		$db = DB::getInstance();
 		$config = parse_ini_string($config, true);
+
+		$presets = parse_ini_file(self::PRESETS_FILE, true);
 
 		$i = 0;
 
@@ -361,6 +404,10 @@ class DynamicFields
 			}
 
 			$data = array_merge($defaults, $data);
+
+			if (array_key_exists($name, $presets)) {
+				$field->system = $field->system | $field::PRESET;
+			}
 
 			$field->set('name', $name);
 			$field->set('label', $data['title']);
@@ -477,6 +524,10 @@ class DynamicFields
 			$type = DynamicField::SQL_TYPES[$cfg->type];
 			$line = sprintf('%s %s', $db->quoteIdentifier($key), $type);
 
+			if ($type == 'GENERATED' && $cfg->sql) {
+				$line .= sprintf(' ALWAYS AS (%s) VIRTUAL', $cfg->sql);
+			}
+
 			if ($type == 'TEXT' && $cfg->type != 'password') {
 				$line .= ' COLLATE NOCASE';
 			}
@@ -540,8 +591,12 @@ class DynamicFields
 
 	public function getCopyFields(): array
 	{
+		$fields = $this->_fields;
+		// Generated fields cannot be copied
+		$fields = array_filter($fields, fn($f) => DynamicField::SQL_TYPES[$f->type] != 'GENERATED');
+
 		// Champs à recopier
-		$copy = array_keys(DynamicField::SYSTEM_FIELDS) + array_keys($this->_fields);
+		$copy = array_merge(array_keys(DynamicField::SYSTEM_FIELDS), array_keys($fields));
 		return array_combine($copy, $copy);
 	}
 
@@ -563,8 +618,8 @@ class DynamicFields
 
 	public function copy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null): void
 	{
-		//var_dump($this->getSQLCopy($old_table_name, $new_table_name, $fields)); exit;
-		DB::getInstance()->exec($this->getSQLCopy($old_table_name, $new_table_name, $fields));
+		$sql = $this->getSQLCopy($old_table_name, $new_table_name, $fields);
+		DB::getInstance()->exec($sql);
 	}
 
 	public function create(string $table_name = User::TABLE)
@@ -684,6 +739,9 @@ class DynamicFields
 
 		$rebuild = false;
 
+		$db = DB::getInstance();
+		$db->begin();
+
 		foreach ($this->_fields as $field) {
 			if (!$field->exists()) {
 				$rebuild = true;
@@ -694,7 +752,6 @@ class DynamicFields
 			}
 		}
 
-
 		foreach ($this->_deleted as $f) {
 			$f->delete();
 			$rebuild = true;
@@ -703,18 +760,14 @@ class DynamicFields
 		$this->_deleted = [];
 
 		if ($rebuild && $allow_rebuild) {
-			$db = DB::getInstance();
-
-			$db->begin();
-
 			// FIXME/TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
 			// some conditions apply
 			// https://www.sqlite.org/lang_altertable.html#altertabdropcol
 			$this->rebuildUsersTable();
-
-			$db->commit();
-			$this->reload();
 		}
+
+		$db->commit();
+		$this->reload();
 	}
 
 	public function setOrderAll(array $order)

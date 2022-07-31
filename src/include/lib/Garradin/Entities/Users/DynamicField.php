@@ -12,7 +12,7 @@ class DynamicField extends Entity
 {
 	const TABLE = 'config_users_fields';
 
-	protected int $id;
+	protected ?int $id;
 	protected string $name;
 
 	/**
@@ -28,24 +28,24 @@ class DynamicField extends Entity
 	/**
 	 * TRUE if the field is required
 	 */
-	protected bool $required;
+	protected bool $required = false;
 
 	/**
 	 * 0 = only admins can read this field (private)
 	 * 1 = admins + the user themselves can read it
 	 */
-	protected int $read_access;
+	protected int $read_access = 0;
 
 	/**
 	 * 0 = only admins can write this field
 	 * 1 = admins + the user themselves can change it
 	 */
-	protected int $write_access;
+	protected int $write_access = 0;
 
 	/**
 	 * Use in users list table?
 	 */
-	protected bool $list_table;
+	protected bool $list_table = false;
 
 	/**
 	 * Multiple options (JSON) for select and multiple fields
@@ -58,15 +58,20 @@ class DynamicField extends Entity
 	protected ?string $default_value;
 
 	/**
+	 * SQL code for generated fields
+	 */
+	protected ?string $sql;
+
+	/**
 	 * System use
 	 */
 	protected int $system = 0;
 
-	const PASSWORD = 0x01;
-	const LOGIN = 0x02;
-	const NUMBER = 0x04;
-	const NAME = 0x08;
-	const PRESET = 0x16;
+	const PASSWORD = 0x01 << 1;
+	const LOGIN    = 0x01 << 2;
+	const NUMBER   = 0x01 << 3;
+	const NAME     = 0x01 << 4;
+	const PRESET   = 0x01 << 5;
 
 	const ACCESS_ADMIN = 0;
 	const ACCESS_USER = 1;
@@ -87,6 +92,7 @@ class DynamicField extends Entity
 		'country'	=>	'Sélecteur de pays',
 		'text'		=>	'Texte',
 		'textarea'	=>	'Texte multi-lignes',
+		'generated' =>  'Calculé',
 	];
 
 	const PHP_TYPES = [
@@ -104,6 +110,7 @@ class DynamicField extends Entity
 		'country'  => '?string',
 		'text'     => '?string',
 		'textarea' => '?string',
+		'generated'=> 'dynamic',
 	];
 
 	const SQL_TYPES = [
@@ -121,6 +128,7 @@ class DynamicField extends Entity
 		'country'  => 'TEXT',
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
+		'generated'=> 'GENERATED',
 	];
 
 	const SQL_CONSTRAINTS = [
@@ -141,7 +149,7 @@ class DynamicField extends Entity
 
 	public function delete(): bool
 	{
-		if ($this->system) {
+		if (!$this->canDelete()) {
 			throw new ValidationException('Ce champ est utilisé en interne, il n\'est pas possible de le supprimer');
 		}
 
@@ -154,8 +162,38 @@ class DynamicField extends Entity
 		return parent::delete();
 	}
 
+	public function canSetDefaultValue(): bool
+	{
+		return in_array($this->type ?? null, ['text', 'textarea', 'number', 'select', 'multiple']);
+	}
+
+	public function isPreset(): bool
+	{
+		return (bool) ($this->system & self::PRESET);
+	}
+
+	public function isGenerated(): bool
+	{
+		return $this->type == 'generated';
+	}
+
+	public function canDelete(): bool
+	{
+		if ($this->system & self::PASSWORD || $this->system & self::NUMBER || $this->system & self::NAME || $this->system & self::LOGIN) {
+			return false;
+		}
+
+		return true;
+	}
+
 	public function selfCheck(): void
 	{
+		// Disallow name change if the field exists
+		if ($this->exists()) {
+			$this->assert(!$this->isModified('name'));
+			$this->assert(!$this->isModified('type'));
+		}
+
 		$this->name = strtolower($this->name);
 
 		$this->assert($this->read_access == self::ACCESS_ADMIN || $this->read_access == self::ACCESS_USER);
@@ -182,11 +220,17 @@ class DynamicField extends Entity
 			$this->assert(!$db->test(self::TABLE, 'name = ? AND id != ?', $this->name, $this->id()), 'Ce nom de champ est déjà utilisé par un autre champ.');
 		}
 
-		$this->assert($this->exists() || $this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
-
 		if ($this->exists()) {
-			$this->assert(!isset($this->_modified['type']));
-			$this->assert(!isset($this->_modified['name']));
+			$this->assert($this->system & self::PRESET || !array_key_exists($this->name, DynamicFields::getInstance()->getPresets()), 'Ce nom de champ est déjà utilisé par un champ pré-défini.');
+		}
+
+		if (self::SQL_TYPES[$this->type] == 'GENERATED') {
+			try {
+				$db->protectSelect(['users' => []], sprintf('SELECT %s FROM users;', $this->sql));
+			}
+			catch (\KD2\DB_Exception $e) {
+				throw new ValidationException('Le code SQL du champ calculé est invalide: ' . $e->getMessage(), 0, $e);
+			}
 		}
 	}
 

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS config_users_fields (
     list_table INTEGER NOT NULL DEFAULT 0,
     options TEXT NULL,
     default_value TEXT NULL,
+    sql TEXT NULL,
     system TEXT NULL
 );
 
