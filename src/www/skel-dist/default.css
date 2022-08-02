@@ -85,14 +85,14 @@ header.main h1 a {
 }
 
 header.main h1 a span {
-    font-size: 3vw;
+    font-size: 1.5em;
     font-weight: normal;
-    color: rgb(var(--second-color));
+    color: rgb(var(--first-color));
     display: block;
 }
 
 header.main h1 a:hover span {
-    color: rgb(var(--first-color));
+    color: rgb(var(--second-color));
 }
 
 header.main h1 a:hover img {
@@ -108,7 +108,7 @@ header.main.home h1 a img {
 }
 
 header.main.home h1 a span {
-    font-size: 5vw;
+    font-size: 2em;
 }
 
 header.main .contacts {
@@ -293,6 +293,13 @@ footer.main a#garradin {
 /* AFFICHAGE D'UN ARTICLE */
 section.articles article h3, section.articles article h1 {
     margin-bottom: .3em;
+}
+
+section.articles article::after, article.single::after {
+    content: "";
+    display: block;
+    height: 0px;
+    clear: both;
 }
 
 section.articles article h1 a {
