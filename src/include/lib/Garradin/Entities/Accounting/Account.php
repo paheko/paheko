@@ -232,7 +232,7 @@ class Account extends Entity
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('date', false);
+		$list->orderBy('date', true);
 		$list->setCount('COUNT(*)');
 		$list->setPageSize(null); // Because with paging we can't calculate the running sum
 		$list->setModifier(function (&$row) use (&$sum, &$list, $reverse, $year_id, $start, $end) {
