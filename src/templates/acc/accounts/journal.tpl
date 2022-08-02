@@ -149,11 +149,11 @@
 				<td><b>Total</b></td>
 				<td class="money">{$sum.debit|raw|money:false}</td>
 				<td class="money">{$sum.credit|raw|money:false}</td>
-				<td class="money">{$line.sum|raw|money:false}</td>
+				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
 				{else}
 				<td></td>
 				<td colspan="2"><b>Total</b></td>
-				<td class="money">{$line.sum|raw|money:false}</td>
+				<td class="money"><strong>{$sum.balance|raw|money:false}</strong></td>
 				{/if}
 			{else}
 				<td colspan="4"></td>
