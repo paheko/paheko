@@ -5,8 +5,9 @@ namespace Garradin\Entities\Users;
 use Garradin\Users\Session;
 use Garradin\Config;
 use Garradin\DB;
-use Garradin\UserException;
 use Garradin\Entity;
+use Garradin\UserException;
+use Garradin\Utils;
 
 class Category extends Entity
 {
@@ -42,7 +43,7 @@ class Category extends Entity
 	const PERMISSIONS = [
 		'connect' => [
 			'label' => 'Les membres de cette catégorie peuvent-ils se connecter ?',
-			'shape' => 'C',
+			'shape' => Utils::ICONS['lock'],
 			'options' => [
 				Session::ACCESS_NONE => 'N\'a pas le droit de se connecter',
 				Session::ACCESS_READ => 'A le droit de se connecter',
@@ -50,7 +51,7 @@ class Category extends Entity
 		],
 		'users' => [
 			'label' => 'Gestion des membres',
-			'shape' => 'M',
+			'shape' => Utils::ICONS['user'],
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut voir les informations personnelles de tous les membres, y compris leurs inscriptions à des activités)',
@@ -60,7 +61,7 @@ class Category extends Entity
 		],
 		'accounting' => [
 			'label' => 'Comptabilité',
-			'shape' => '€',
+			'shape' => Utils::ICONS['money'],
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire toutes les informations de tous les exercices)',
@@ -70,7 +71,7 @@ class Category extends Entity
 		],
 		'documents' => [
 			'label' => 'Documents',
-			'shape' => 'D',
+			'shape' => Utils::ICONS['folder'],
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire tous les fichiers)',
@@ -80,7 +81,7 @@ class Category extends Entity
 		],
 		'web' => [
 			'label' => 'Gestion du site web',
-			'shape' => 'W',
+			'shape' => Utils::ICONS['globe'],
 			'options' => [
 				Session::ACCESS_NONE => 'Pas d\'accès',
 				Session::ACCESS_READ => 'Lecture uniquement (peut lire les pages)',
@@ -90,7 +91,7 @@ class Category extends Entity
 		],
 		'config' => [
 			'label' => 'Les membres de cette catégorie peuvent-ils modifier la configuration ?',
-			'shape' => '☑',
+			'shape' => Utils::ICONS['settings'],
 			'options' => [
 				Session::ACCESS_NONE => 'Ne peut pas modifier la configuration',
 				Session::ACCESS_ADMIN => 'Peut modifier la configuration',

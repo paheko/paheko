@@ -943,7 +943,7 @@ class Template extends Smartyer
 
 		foreach (Category::PERMISSIONS as $name => $config) {
 			$access = $perms->{'perm_' . $name};
-			$label = $config['options'][$access];
+			$label = sprintf('%s : %s', $config['label'], $config['options'][$access]);
 			$out[$name] = sprintf('<b class="access_%s %s" title="%s">%s</b>', $access, $name, htmlspecialchars($label), $config['shape']);
 		}
 
