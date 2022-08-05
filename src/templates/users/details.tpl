@@ -55,8 +55,6 @@
 	<dl class="describe">
 		<dt>Catégorie</dt>
 		<dd>{$category.name} <span class="permissions">{display_permissions permissions=$category}</span></dd>
-		<dt>Création de la fiche</dt>
-		<dd>{$user.date_created|date_short}</dd>
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
 		<dt>Mot de passe</dt>

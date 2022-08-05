@@ -831,6 +831,10 @@ class Template extends Smartyer
 			$params['step'] = 'any';
 		}
 
+		if ($field->default_value == '=NOW') {
+			$params['default'] = new \DateTime;
+		}
+
 		$out = self::formInput($params);
 
 		if ($context != 'edit' && $field->system & $field::LOGIN) {

@@ -144,7 +144,6 @@ class DynamicField extends Entity
 		'pgp_key'      => '?string',
 		'otp_secret'   => '?string',
 		'date_login'   => '?DateTime',
-		'date_created' => '?date',
 	];
 
 	public function delete(): bool

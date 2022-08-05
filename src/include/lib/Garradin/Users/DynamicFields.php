@@ -353,7 +353,7 @@ class DynamicFields
 		$self = new self(false);
 		$fields = [
 			'date_connexion'   => 'date_login',
-			'date_inscription' => 'date_created',
+			'date_inscription' => 'date_inscription',
 			'clef_pgp'         => 'pgp_key',
 			'secret_otp'       => 'otp_secret',
 			'id_category'      => 'id_category',
@@ -420,6 +420,10 @@ class DynamicFields
 			$field->set('sort_order', $i++);
 			$self->add($field);
 		}
+
+		// Create date_inscription
+		$field = $self->addFieldFromPreset('date_inscription');
+		$self->add($field);
 
 		self::$_instance = $self;
 
@@ -511,7 +515,6 @@ class DynamicFields
 			'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
 			'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
 			'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login), -- Date de dernière connexion',
-			'date_created TEXT NOT NULL DEFAULT CURRENT_DATE CHECK (date(date_created) = date_created), -- Date d\'inscription',
 			'otp_secret TEXT NULL, -- Code secret pour TOTP',
 			'pgp_key TEXT NULL, -- Clé publique PGP'
 		];
