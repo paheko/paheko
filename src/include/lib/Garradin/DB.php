@@ -24,6 +24,8 @@ class DB extends SQLite3
     protected $_log_start = null;
     protected $_log_store = [];
 
+    protected $_schema_update = 0;
+
     static public function getInstance()
     {
         if (null === self::$_instance) {
@@ -329,14 +331,20 @@ class DB extends SQLite3
 
     public function beginSchemaUpdate()
     {
-        $this->toggleForeignKeys(false);
-        $this->begin();
+        // Only start if not already taking place
+        if ($this->_schema_update++ == 0) {
+            $this->toggleForeignKeys(false);
+            $this->begin();
+        }
     }
 
     public function commitSchemaUpdate()
     {
-        $this->commit();
-        $this->toggleForeignKeys(true);
+        // Only commit if last call
+        if (--$this->_schema_update == 0) {
+            $this->commit();
+            $this->toggleForeignKeys(true);
+        }
     }
 
     public function lastErrorMsg()
@@ -347,15 +355,17 @@ class DB extends SQLite3
     /**
      * @see https://www.sqlite.org/lang_altertable.html
      */
-    public function toggleForeignKeys($enable)
+    public function toggleForeignKeys(bool $enable): void
     {
-        assert(is_bool($enable));
-
         $this->connect();
 
         if (!$enable) {
             $this->db->exec('PRAGMA legacy_alter_table = ON;');
             $this->db->exec('PRAGMA foreign_keys = OFF;');
+
+            if ($this->firstColumn('PRAGMA foreign_keys;')) {
+                throw new \LogicException('Cannot disable foreign keys in an already started transaction');
+            }
         }
         else {
             $this->db->exec('PRAGMA legacy_alter_table = OFF;');
