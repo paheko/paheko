@@ -51,8 +51,9 @@ test_requis(
 $v = \SQLite3::version();
 
 test_requis(
-    version_compare($v['versionString'], '3.16', '>='),
-    'SQLite3 version 3.16 ou supérieur requise. Version installée : ' . $v['versionString']
+    // Require 3.31 because we need GENERATED columns
+    version_compare($v['versionString'], '3.31', '>='),
+    'SQLite3 version 3.31 ou supérieur requise. Version installée : ' . $v['versionString']
 );
 
 test_requis(
