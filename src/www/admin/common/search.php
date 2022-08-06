@@ -35,7 +35,7 @@ $json_query = f('q') ? json_decode(f('q'), true) : null;
 $default = false;
 
 if ($text_query !== '') {
-	$s->content = json_encode($s->getAdvancedSearch()->simple($text_query));
+	$s->content = json_encode($s->getAdvancedSearch()->simple($text_query, true));
 	$s->type = SE::TYPE_JSON;
 }
 elseif ($sql_query !== '') {

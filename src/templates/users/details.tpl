@@ -49,12 +49,24 @@
 			<dd><a href="{$admin_url}acc/transactions/creator.php?id={$user.id}">{$transactions_created} écritures comptables créées par ce membre</a></dd>
 		{/if}
 	{/if}
+	{if $parent_name}
+	<dt>Membre parent</dt>
+	<dd>{link href="?id=%d"|args:$user.id_parent label=$parent_name}</dd>
+	{/if}
+	{if count($children)}
+	<dt>Membres enfants</dt>
+	{foreach from=$children item="child"}
+		<dd>{link href="?id=%d"|args:$child.id label=$child.name}</dd>
+	{/foreach}
+	{/if}
 </dl>
 
 <aside class="describe">
 	<dl class="describe">
 		<dt>Catégorie</dt>
-		<dd>{$category.name} <span class="permissions">{display_permissions permissions=$category}</span></dd>
+		<dd>{$category.name}</dd>
+		<dt>Droits</dt>
+		<dd><span class="permissions">{display_permissions permissions=$category}</span></dd>
 		<dt>Dernière connexion</dt>
 		<dd>{if empty($user.date_login)}Jamais{else}{$user.date_login|date_short:true}{/if}</dd>
 		<dt>Mot de passe</dt>

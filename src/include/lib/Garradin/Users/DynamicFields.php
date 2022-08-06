@@ -512,11 +512,12 @@ class DynamicFields
 
 		// Champs à créer
 		$create = [
-			'id INTEGER PRIMARY KEY, -- Numéro attribué automatiquement',
+			'id INTEGER PRIMARY KEY,',
 			'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
-			'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login), -- Date de dernière connexion',
-			'otp_secret TEXT NULL, -- Code secret pour TOTP',
-			'pgp_key TEXT NULL, -- Clé publique PGP'
+			'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login),',
+			'otp_secret TEXT NULL,',
+			'pgp_key TEXT NULL,',
+			'id_parent INTEGER NULL REFERENCES users(id) ON DELETE CASCADE,'
 		];
 
 		end($this->_fields);

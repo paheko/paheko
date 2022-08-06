@@ -11,10 +11,13 @@ use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
 
+use Garradin\Files\Files;
+
 use Garradin\Users\Categories;
 use Garradin\Users\Emails;
 use Garradin\Users\DynamicFields;
 use Garradin\Users\Session;
+use Garradin\Users\Users;
 
 use Garradin\Entities\Files\File;
 
@@ -80,7 +83,7 @@ class User extends Entity
 
 		// check user number
 		$field = DynamicFields::getNumberField();
-		$this->assert($this->$field !== null && ctype_alnum($this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres et des lettres.');
+		$this->assert($this->$field !== null && is_numeric($this->$field), 'Numéro de membre invalide : ne peut contenir que des chiffres');
 
 		$db = DB::getInstance();
 
@@ -104,6 +107,8 @@ class User extends Entity
 
 			$this->assert(!$login_exists, sprintf('Le champ "%s" (utilisé comme identifiant de connexion) est déjà utilisé par un autre membre. Il doit être unique pour chaque membre.', $df->fieldByKey($field)->label));
 		}
+
+		$this->assert(!$this->id_parent || !count($this->listChildren()), 'Un membre ne peut avoir un parent et des enfants en même temps.');
 	}
 
 	public function delete(): bool
@@ -154,6 +159,10 @@ class User extends Entity
 			$this->assert($source['password'] == ($source['password_confirmed'] ?? null), 'La confirmation de mot de passe doit être identique au mot de passe.');
 		}
 
+		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
+			$source['id_parent'] = key($source['id_parent']);
+		}
+
 		return parent::importForm($source);
 	}
 
@@ -173,6 +182,35 @@ class User extends Entity
 		$email_field = DynamicFields::getFirstEmailField();
 
 		return sprintf('"%s" <%s>', $this->name(), $this->{$email_field});
+	}
+
+	public function getParentName(): ?string
+	{
+		if (null === $this->id_parent) {
+			return null;
+		}
+
+		return Users::getName($this->id_parent);
+	}
+
+	public function getParentSelector(): ?array
+	{
+		if (null === $this->id_parent) {
+			return null;
+		}
+
+		return [$this->id_parent => $this->getParentName()];
+	}
+
+	public function hasChildren(): bool
+	{
+		return DB::getInstance()->test(self::TABLE, 'id_parent = ?', $this->id());
+	}
+
+	public function listChildren(): array
+	{
+		$name = DynamicFields::getNameFieldsSQL();
+		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ?;', $name, self::TABLE), $this->id());
 	}
 
 	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)

@@ -18,6 +18,10 @@
 					{input type="select" name="id_category" label="Catégorie du membre" required=true source=$user options=$categories}
 			{/if}
 
+			{if !$user->hasChildren()}
+				{input type="list" name="id_parent" label="Membre parent" target="!users/selector.php" help="Permet de regrouper les personnes de la même famille. Sélectionner ici le membre responsable." default=$user->getParentSelector()}
+			{/if}
+
 			{foreach from=$fields item="field"}
 				{edit_dynamic_field field=$field user=$user context="edit"}
 			{/foreach}

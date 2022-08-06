@@ -23,6 +23,9 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 	$tpl->assign('transactions_created', Transactions::countForCreator($user->id));
 }
 
-$tpl->assign(compact('services', 'user', 'category'));
+$parent_name = $user->getParentName();
+$children = $user->listChildren();
+
+$tpl->assign(compact('services', 'user', 'category', 'children', 'parent_name'));
 
 $tpl->display('users/details.tpl');

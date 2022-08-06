@@ -2,9 +2,10 @@
 
 {include file="common/delete_form.tpl"
     legend="Supprimer ce membre ?"
-    warning="Êtes-vous sûr de vouloir supprimer le membre « %s » ?"|args:$user->name()
-    alert="Cette action est irréversible et effacera toutes les données personnelles et l'historique de ces membres."
-    info="Alternativement, il est aussi possible de déplacer les membres qui ne font plus partie de l'association dans une catégorie « Anciens membres », plutôt que de les effacer complètement."
+    warning=$warning
+    alert="Cette action est irréversible et effacera toutes les données et l'historique de ce membre."
+    info="Alternativement, il est aussi possible de déplacer le membre dans une catégorie « Anciens membres », plutôt que de le supprimer complètement."
+    confirm=$confirm
     csrf_key=$csrf_key
 }
 

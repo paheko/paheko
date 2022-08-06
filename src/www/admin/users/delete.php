@@ -21,8 +21,14 @@ $csrf_key = 'delete_user_' . $user->id;
 
 $form->runIf('delete', function () use ($user) {
 	$user->delete();
-}, $csrf_key, '!users/');
+}, $csrf_key, '!users/?msg=DELETE', true);
 
-$tpl->assign(compact('user', 'csrf_key'));
+$confirm = $user->hasChildren() ? 'Supprimer également les membres enfants' : null;
+$name = $user->name();
+$warning = !$confirm
+	? sprintf("Êtes-vous sûr de vouloir supprimer le membre « %s » ?", $name)
+	: sprintf("Êtes-vous sûr de vouloir supprimer le membre « %s » et ses enfants ?", $name);
+
+$tpl->assign(compact('user', 'csrf_key', 'confirm', 'warning'));
 
 $tpl->display('users/delete.tpl');

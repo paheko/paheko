@@ -6,6 +6,10 @@
 <p class="block confirm">Le message a bien été envoyé.</p>
 {/if}
 
+{if $_GET.msg == 'DELETE'}
+	<p class="block confirm">Le membre a été supprimé.</p>
+{/if}
+
 {if !empty($categories)}
 <form method="get" action="{$self_url}" class="shortFormRight">
 	<fieldset>
@@ -24,7 +28,7 @@
 </form>
 {/if}
 
-<form method="get" action="recherche.php" class="shortFormLeft">
+<form method="get" action="search.php" class="shortFormLeft">
 	<fieldset>
 		<legend>Rechercher un membre</legend>
 		<input type="text" name="qt" value="" />
