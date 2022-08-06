@@ -184,19 +184,21 @@ dd.help li {
     color: #999;
 }
 
-.permissions b.access_1 {
+.permissions b.access_2 {
     border-color: #cc9;
     color: #660;
     background: #ffe;
+    border-style: dotted solid;
 }
 
-.permissions b.access_2 {
+.permissions b.access_1 {
     border-color: #9c9;
     color: #060;
     background: #efe;
+    border-style: dashed;
 }
 
-.permissions b.access_0:after {
+.permissions b.access_0::after {
     content: "X";
     position: absolute;
     left: 0;
