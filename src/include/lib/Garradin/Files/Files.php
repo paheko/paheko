@@ -71,7 +71,7 @@ class Files
 	 */
 	static public function glob(string $pattern): array
 	{
-		return self::callStorage('glob', $parent);
+		return self::callStorage('glob', $pattern);
 	}
 
 	/**
