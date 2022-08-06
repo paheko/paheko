@@ -19,6 +19,10 @@ class Upgrade
 
 	static public function preCheck(): bool
 	{
+		if (!file_exists(DB_FILE)) {
+			return false;
+		}
+
 		$v = DB::getInstance()->version();
 
 		if (version_compare($v, garradin_version(), '>='))
