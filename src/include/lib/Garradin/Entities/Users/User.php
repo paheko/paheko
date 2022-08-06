@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Garradin\Entities\Users;
 
@@ -108,7 +109,8 @@ class User extends Entity
 			$this->assert(!$login_exists, sprintf('Le champ "%s" (utilisé comme identifiant de connexion) est déjà utilisé par un autre membre. Il doit être unique pour chaque membre.', $df->fieldByKey($field)->label));
 		}
 
-		$this->assert(!$this->id_parent || !count($this->listChildren()), 'Un membre ne peut avoir un parent et des enfants en même temps.');
+		$this->assert($this->id_parent === null || $this->id_parent > 0, 'Invalid parent ID');
+		$this->assert($this->id_parent === null || !count($this->listChildren()), 'Un membre ne peut avoir un parent et des enfants en même temps.');
 	}
 
 	public function delete(): bool
@@ -126,6 +128,24 @@ class User extends Entity
 		Files::delete($this->attachementsDirectory());
 
 		return parent::delete();
+	}
+
+	public function save(bool $selfcheck = true): bool
+	{
+		parent::save($selfcheck);
+
+		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
+
+		if (count($columns)) {
+			$db = EM::getInstance(self::class)->DB();
+			$keys = array_map(fn ($a) => ':' . $db->quoteIdentifier($a), $columns);
+			$args = substr(str_repeat('?, ', count($columns)), 0, -2);
+			$values = array_intersect_key($this->modifiedProperties(true), array_flip($columns));
+			$values = array_map([Utils::class, 'unicodeTransliterate'], $values);
+			$db->preparedQuery(sprintf('REPLACE INTO %s_search (%s) VALUES (%s);', self::TABLE, $keys, $args), ...$values);
+		}
+
+		return true;
 	}
 
 	public function category(): Category
@@ -186,7 +206,7 @@ class User extends Entity
 
 	public function getParentName(): ?string
 	{
-		if (null === $this->id_parent) {
+		if (!$this->id_parent) {
 			return null;
 		}
 
@@ -195,7 +215,7 @@ class User extends Entity
 
 	public function getParentSelector(): ?array
 	{
-		if (null === $this->id_parent) {
+		if (!$this->id_parent) {
 			return null;
 		}
 
@@ -211,6 +231,16 @@ class User extends Entity
 	{
 		$name = DynamicFields::getNameFieldsSQL();
 		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ?;', $name, self::TABLE), $this->id());
+	}
+
+	public function listSiblings(): array
+	{
+		if (!$this->id_parent) {
+			return [];
+		}
+
+		$name = DynamicFields::getNameFieldsSQL();
+		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ?;', $name, self::TABLE), $this->id_parent, $this->id());
 	}
 
 	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)

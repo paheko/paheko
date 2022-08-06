@@ -59,6 +59,12 @@
 		<dd>{link href="?id=%d"|args:$child.id label=$child.name}</dd>
 	{/foreach}
 	{/if}
+	{if count($siblings)}
+	<dt>Membres de la même famille</dt>
+	{foreach from=$siblings item="sibling"}
+		<dd>{link href="?id=%d"|args:$sibling.id label=$sibling.name}</dd>
+	{/foreach}
+	{/if}
 </dl>
 
 <aside class="describe">

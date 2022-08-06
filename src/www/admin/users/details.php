@@ -25,7 +25,8 @@ if ($session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_READ)) {
 
 $parent_name = $user->getParentName();
 $children = $user->listChildren();
+$siblings = $user->listSiblings();
 
-$tpl->assign(compact('services', 'user', 'category', 'children', 'parent_name'));
+$tpl->assign(compact('services', 'user', 'category', 'children', 'siblings', 'parent_name'));
 
 $tpl->display('users/details.tpl');
