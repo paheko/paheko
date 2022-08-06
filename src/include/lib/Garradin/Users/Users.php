@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Garradin\Users;
 
@@ -85,15 +86,15 @@ class Users
 		}
 
 		// We only need the user id, store it in a temporary table for now
-		$db->exec('DROP TABLE IF EXISTS users_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_search (id);');
-		$db->exec(sprintf('INSERT INTO users_search SELECT %s FROM (%s)', $id_column, $s->SQL(null)));
+		$db->exec('DROP TABLE IF EXISTS users_tmp_search; CREATE TEMPORARY TABLE IF NOT EXISTS users_tmp_search (id);');
+		$db->exec(sprintf('INSERT INTO users_tmp_search SELECT %s FROM (%s)', $id_column, $s->SQL(null)));
 
 		$fields = DynamicFields::getEmailFields();
 
 		$sql = [];
 
 		foreach ($fields as $field) {
-			$sql[] = sprintf('SELECT u.*, u.%s AS email FROM users u INNER JOIN users_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
+			$sql[] = sprintf('SELECT u.*, u.%s AS email FROM users u INNER JOIN users_tmp_search AS s ON s.id = u.id', $db->quoteIdentifier($field));
 		}
 
 		return $db->iterate(implode(' UNION ALL ', $sql));
