@@ -82,13 +82,17 @@ class Template extends Smartyer
 		$this->assign('self_url', Utils::getSelfURI());
 		$this->assign('self_url_no_qs', Utils::getSelfURI(false));
 
-		$session = Session::getInstance();
-		$logged = $session->isLogged();
+		$session = null;
 
-		$this->assign('is_logged', $logged);
-		$this->assign('logged_user', $logged ? $session->getUser() : null);
+		if (!defined('Garradin\INSTALL_PROCESS')) {
+			$session = Session::getInstance();
+			$this->assign('config', Config::getInstance());
+		}
+
 		$this->assign('session', $session);
-		$this->assign('config', Config::getInstance());
+		$this->assign('is_logged', $session ? $session->isLogged() : null);
+		$this->assign('logged_user', $session ? $session->getUser() : null);
+		$this->assign('session', $session);
 		$this->assign('dialog', isset($_GET['_dialog']));
 
 		$this->assign('password_pattern', sprintf('.{%d,}', Session::MINIMUM_PASSWORD_LENGTH));
