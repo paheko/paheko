@@ -19,4 +19,11 @@ class Search
 	{
 		return EM::findOneById(SE::class, $id);
 	}
+
+	static public function quick(string $target, string $query): DynamicList
+	{
+		$s = new SE;
+		$s->target = $target;
+		return $s->quick($query);
+	}
 }

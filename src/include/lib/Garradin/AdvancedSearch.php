@@ -10,7 +10,7 @@ abstract class AdvancedSearch
 	 * - order
 	 * - desc
 	 */
-	abstract public function simple(string $query): \stdClass;
+	abstract public function simple(string $query, bool $allow_redirect = false): \stdClass;
 
 	/**
 	 * Return list of columns. The format is similar to the one accepted in DynamicList.
@@ -37,7 +37,7 @@ abstract class AdvancedSearch
 	 */
 	abstract public function defaults(): \stdClass;
 
-	public function makeList(string $query, string $tables, string $default_order, string $default_desc, array $mandatory_columns = ['id']): DynamicList
+	public function makeList(string $query, string $tables, string $default_order, bool $default_desc, array $mandatory_columns = ['id']): DynamicList
 	{
 		$query = json_decode($query, true);
 
@@ -138,12 +138,12 @@ abstract class AdvancedSearch
 
 				$values = isset($condition['values']) ? $condition['values'] : [];
 
-				if (!empty($column->normalize)) {
-					if ($column->normalize == 'tel') {
+				if (!empty($column['normalize'])) {
+					if ($column['normalize'] == 'tel') {
 						// Normaliser le numéro de téléphone
 						$values = array_map(['Garradin\Utils', 'normalizePhoneNumber'], $values);
 					}
-					elseif ($column->normalize == 'money') {
+					elseif ($column['normalize'] == 'money') {
 						$values = array_map(['Garradin\Utils', 'moneyToInteger'], $values);
 					}
 				}

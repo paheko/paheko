@@ -6,6 +6,7 @@ use Garradin\DynamicList;
 use Garradin\Users\DynamicFields;
 use Garradin\AdvancedSearch as A_S;
 use Garradin\DB;
+use Garradin\Utils;
 
 class AdvancedSearch extends A_S
 {
@@ -20,15 +21,17 @@ class AdvancedSearch extends A_S
 
 		$columns = [];
 
-		/*
-		$columns['identity'] = (object) [
+		$columns['id'] = [
+			'select'   => 'id',
+		];
+
+		$columns['identity'] = [
 			'label'    => $fields::getNameLabel(),
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL(),
 			'order'    => sprintf('%s COLLATE U_NOCASE %%s', current($fields::getNameFields())),
 		];
-		*/
 
 		foreach ($fields->all() as $name => $field)
 		{
@@ -122,7 +125,7 @@ class AdvancedSearch extends A_S
 		return $db->getAssoc($sql);
 	}
 
-	public function simple(string $query): \stdClass
+	public function simple(string $query, bool $allow_redirect = false): \stdClass
 	{
 		$operator = 'LIKE %?%';
 		$db = DB::getInstance();
@@ -141,18 +144,20 @@ class AdvancedSearch extends A_S
 			$column = 'identity';
 		}
 
-		// Try to redirect to user if there is only one user
-		if ($operator == '= ?') {
-			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $column);
-			$single_query = (int) $query;
-		}
-		else {
-			$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s LIKE ?;', $column);
-			$single_query = '%' . trim($query) . '%';
-		}
+		if ($allow_redirect) {
+			// Try to redirect to user if there is only one user
+			if ($operator == '= ?') {
+				$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $column);
+				$single_query = (int) $query;
+			}
+			else {
+				$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s LIKE ?;', $column);
+				$single_query = '%' . trim($query) . '%';
+			}
 
-		if (($row = $db->first($sql, $single_query)) && $row->count == 1) {
-			Utils::redirect('!users/details.php?id=' . $id);
+			if (($row = $db->first($sql, $single_query)) && $row->count == 1) {
+				Utils::redirect('!users/details.php?id=' . $row->id);
+			}
 		}
 
 		$query = [[
@@ -167,7 +172,7 @@ class AdvancedSearch extends A_S
 		]];
 
 		return (object) [
-			'query' => $query,
+			'groups' => $query,
 			'order' => $column,
 			'desc'  => false,
 		];
@@ -176,7 +181,7 @@ class AdvancedSearch extends A_S
 	public function make(string $query): DynamicList
 	{
 		$tables = 'users u';
-		return $this->makeList($query, $tables, current(DynamicFields::getNameFields()), false);
+		return $this->makeList($query, $tables, current(DynamicFields::getNameFields()), false, ['id', 'identity']);
 	}
 
 	public function defaults(): \stdClass

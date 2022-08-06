@@ -126,7 +126,7 @@ class AdvancedSearch extends A_S
 		];
 	}
 
-	public function simple(string $text, ?int $id_year = null): \stdClass
+	public function simple(string $text, bool $allow_redirect = false, ?int $id_year = null): \stdClass
 	{
 		$query = [];
 
@@ -166,7 +166,7 @@ class AdvancedSearch extends A_S
 			];
 		}
 		// Match account number
-		elseif ($id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
+		elseif ($allow_redirect && $id_year && preg_match('/^[0-9]+[A-Z]*$/', $text)
 			&& ($year = Years::get($id_year))
 			&& ($id = (new Accounts($year->id_chart))->getIdFromCode($text))) {
 			Utils::redirect(sprintf('!acc/accounts/journal.php?id=%d&year=%d', $id, $id_year));
@@ -186,8 +186,8 @@ class AdvancedSearch extends A_S
 			];
 		}
 		// Match transaction ID
-		elseif (preg_match('/^#[0-9]+$/', $text)) {
-			return sprintf('!acc/transactions/details.php?id=%d', (int)substr($text, 1));
+		elseif ($allow_redirect && preg_match('/^#[0-9]+$/', $text)) {
+			Utils::redirect(sprintf('!acc/transactions/details.php?id=%d', (int)substr($text, 1)));
 		}
 		// Or search in label or reference
 		else

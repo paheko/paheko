@@ -1,18 +1,20 @@
 <?php
 namespace Garradin;
 
+use Garradin\Entities\Search as SE;
+use Garradin\Search;
+
 require_once __DIR__ . '/_inc.php';
 
-$text_query = trim((string) (qg('q') ?? f('q')));
+$query = trim((string) (qg('q') ?? f('q')));
 
-$tpl->assign('list', []);
+$list = null;
 
 // Recherche simple
-if ($text_query !== '')
-{
-    $tpl->assign('list', (new Membres)->quickSearch($text_query));
+if ($query !== '') {
+	$list = Search::quick(SE::TARGET_USERS, $query);
 }
 
-$tpl->assign('query', $text_query);
+$tpl->assign(compact('query', 'list'));
 
-$tpl->display('admin/membres/selector.tpl');
+$tpl->display('users/selector.tpl');

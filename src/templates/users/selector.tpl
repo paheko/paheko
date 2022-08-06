@@ -7,23 +7,22 @@
 	</h2>
 </form>
 
+{if $list}
 <table class="list">
 	<tbody>
-    {foreach from=$list item="row"}
+    {foreach from=$list->iterate() item="row"}
         <tr>
-        	<td class="num">
-        		{$row.numero}
-        	</td>
             <th>
-                {$row.identite}
+                {$row.identity}
             </th>
             <td class="actions">
-				<button class="icn-btn" value="{$row.id}" data-label="{$row.numero} — {$row.identite}" data-icon="&rarr;">Sélectionner</button>
+				<button class="icn-btn" value="{$row.id}" data-label="{$row.identity}" data-icon="&rarr;">Sélectionner</button>
 			</td>
 		</tr>
 	{/foreach}
 	</tbody>
 </table>
+{/if}
 
 {literal}
 <script type="text/javascript">

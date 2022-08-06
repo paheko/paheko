@@ -212,4 +212,11 @@ class Search extends Entity
 
 		return json_decode($this->content, true)['groups'];
 	}
+
+	public function quick(string $query): DynamicList
+	{
+		$this->content = json_encode($this->getAdvancedSearch()->simple($query, false));
+		$this->type = self::TYPE_JSON;
+		return $this->getDynamicList();
+	}
 }
