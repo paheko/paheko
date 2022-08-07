@@ -455,7 +455,7 @@
 						continue;
 					}
 
-					let v = i2.parentNode.querySelector('input[type="hidden"]');
+					let v = i2.parentNode.querySelector('input[type="hidden"]:nth-child(1)');
 
 					if (!v || !v.value) {
 						i2.setCustomValidity('Merci de faire une sélection.');
@@ -546,9 +546,10 @@
 		// Disable progress on search or the form will stay blurred when clicking export buttons
 		if (forms[0].hasAttribute('data-disable-progress')) return;
 
-		forms[0].addEventListener('submit', () => {
+		forms[0].addEventListener('submit', (e) => {
+			if (e.defaultPrevented) return;
 			forms[0].classList.add('progressing');
-		})
+		});
 	});
 
 	// To be able to select a whole table line just by clicking the row
