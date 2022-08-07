@@ -521,7 +521,7 @@ class DynamicFields
 			'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login),',
 			'otp_secret TEXT NULL,',
 			'pgp_key TEXT NULL,',
-			'id_parent INTEGER NULL REFERENCES users(id) ON DELETE CASCADE,'
+			'id_parent INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,'
 		];
 
 		end($this->_fields);
