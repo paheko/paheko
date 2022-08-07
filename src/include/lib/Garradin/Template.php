@@ -501,7 +501,7 @@ class Template extends \KD2\Smartyer
 			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars((string) $value, ENT_QUOTES) . '</textarea>';
 		}
 		elseif ($type == 'date') {
-			$field = self::formInput(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
+			$field = CommonModifiers::input(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
 		}
 		else
 		{

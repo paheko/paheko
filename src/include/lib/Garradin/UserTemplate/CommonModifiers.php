@@ -305,7 +305,7 @@ class CommonModifiers
 			$tparams['type'] = 'time';
 			$tparams['name'] = sprintf('%s_time', $name);
 			unset($tparams['label']);
-			$suffix = self::formInput($tparams);
+			$suffix = self::input($tparams);
 		}
 
 		if ($type == 'file' && isset($attributes['accept']) && $attributes['accept'] == 'csv') {
@@ -421,7 +421,7 @@ class CommonModifiers
 		$attributes_string = implode(' ', $attributes_string);
 
 		if ($type == 'radio-btn') {
-			$radio = self::formInput(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
+			$radio = self::input(array_merge($params, ['type' => 'radio', 'label' => null, 'help' => null]));
 			$out = sprintf('<dd class="radio-btn">%s
 				<label for="f_%s_%s"><div><h3>%s</h3>%s</div></label>
 			</dd>', $radio, htmlspecialchars((string)$name), htmlspecialchars((string)$value), htmlspecialchars((string)$label), isset($params['help']) ? '<p class="help">' . htmlspecialchars($params['help']) . '</p>' : '');
