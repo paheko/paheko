@@ -55,7 +55,9 @@ abstract class AdvancedSearch
 		array_unshift($conditions->select, $default_order); // Always include default order
 
 		foreach ($mandatory_columns as $c) {
-			array_unshift($conditions->select, $c); // Always include
+			if (!in_array($c, $conditions->select)) {
+				array_unshift($conditions->select, $c); // Always include
+			}
 		}
 
 		// Only select columns that we want
@@ -200,11 +202,9 @@ abstract class AdvancedSearch
 			}
 		}
 
-		if (!count($query_groups))
-		{
-			throw new UserException('Aucune clause de recherche trouvée dans la recherche : elle contenait peut-être des clauses qui correspondent à des champs qui ont été supprimés ?');
-		}
-
-		return (object) ['select' => $select_columns, 'where' => '(' . implode(') AND (', $query_groups) . ')'];
+		return (object) [
+			'select' => $select_columns,
+			'where' => count($query_groups) ? '(' . implode(') AND (', $query_groups) . ')' : '1'
+		];
 	}
 }
