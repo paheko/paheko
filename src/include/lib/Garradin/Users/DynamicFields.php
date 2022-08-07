@@ -514,15 +514,7 @@ class DynamicFields
 	{
 		$db = DB::getInstance();
 
-		// Champs à créer
-		$create = [
-			'id INTEGER PRIMARY KEY,',
-			'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
-			'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login),',
-			'otp_secret TEXT NULL,',
-			'pgp_key TEXT NULL,',
-			'id_parent INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,'
-		];
+		$create = DynamicField::SYSTEM_FIELDS_SQL;
 
 		end($this->_fields);
 		$last_one = key($this->_fields);
@@ -648,6 +640,7 @@ class DynamicFields
 		$db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS users_number ON %s (%s);', $table_name, $this->getNumberField()));
 		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_category ON %s (id_category);', $table_name));
 		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_parent ON %s (id_parent);', $table_name));
+		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_is_parent ON %s (is_parent);', $table_name));
 	}
 
 	public function createTriggers(string $table_name = User::TABLE): void
@@ -656,26 +649,22 @@ class DynamicFields
 		$db = DB::getInstance();
 		$db->exec(sprintf('
 			CREATE TRIGGER %1$s_parent_trigger_update_new AFTER UPDATE OF id_parent ON %1$s BEGIN
-				SELECT RAISE(FAIL, \'Cannot make a parent if already a children\')
-					FROM %1$s WHERE id = NEW.id_parent AND id_parent != id;
-				UPDATE users SET id_parent = id WHERE id = NEW.id_parent;
+				UPDATE users SET is_parent = 1 WHERE id = NEW.id_parent;
 			END;
 			CREATE TRIGGER %1$s_parent_trigger_update_old AFTER UPDATE OF id_parent ON %1$s BEGIN
-				-- Set id_parent to NULL if user has no longer any children
-				UPDATE %1$s SET id_parent = NULL WHERE id = OLD.id_parent
-					AND 0 = (SELECT COUNT(*) FROM %1$s WHERE id_parent = OLD.id_parent AND id_parent != id);
+				-- Set is_parent to 0 if user has no longer any children
+				UPDATE %1$s SET is_parent = 0 WHERE id = OLD.id_parent
+					AND 0 = (SELECT COUNT(*) FROM %1$s WHERE id_parent = OLD.id_parent);
 			END;
 			CREATE TRIGGER %1$s_parent_trigger_insert AFTER INSERT ON %1$s BEGIN
 				SELECT CASE WHEN NEW.id_parent IS NULL THEN RAISE(IGNORE) ELSE 0 END;
-				SELECT RAISE(FAIL, \'Cannot make a parent if already a children\')
-					FROM %1$s WHERE id = NEW.id_parent AND id_parent != id;
-				UPDATE users SET id_parent = id WHERE id = NEW.id_parent;
+				UPDATE users SET is_parent = 1 WHERE id = NEW.id_parent;
 			END;
 			CREATE TRIGGER %1$s_parent_trigger_delete AFTER DELETE ON %1$s BEGIN
 				SELECT CASE WHEN OLD.id_parent IS NULL THEN RAISE(IGNORE) ELSE 0 END;
-				-- Set id_parent to NULL if user has no longer any children
-				UPDATE %1$s SET id_parent = NULL WHERE id = OLD.id_parent
-					AND 0 = (SELECT COUNT(*) FROM users WHERE id_parent = OLD.id_parent AND id_parent != id);
+				-- Set is_parent to 0 if user has no longer any children
+				UPDATE %1$s SET is_parent = 0 WHERE id = OLD.id_parent
+					AND 0 = (SELECT COUNT(*) FROM users WHERE id_parent = OLD.id_parent);
 			END;', $table_name));
 	}
 

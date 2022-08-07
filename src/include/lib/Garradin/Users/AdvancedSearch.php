@@ -35,8 +35,6 @@ class AdvancedSearch extends A_S
 			'label' => 'Est parent',
 			'type' => 'boolean',
 			'null' => false,
-			'select' => 'CASE WHEN id_parent = id THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'id_parent IS NOT NULL AND id_parent = id',
 		];
 
 
@@ -45,7 +43,7 @@ class AdvancedSearch extends A_S
 			'type' => 'boolean',
 			'null' => false,
 			'select' => 'CASE WHEN id_parent IS NOT NULL AND id_parent != id THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'id_parent IS NOT NULL AND id_parent != id',
+			'where' => 'id_parent IS NOT NULL',
 		];
 
 		foreach ($fields->all() as $name => $field)

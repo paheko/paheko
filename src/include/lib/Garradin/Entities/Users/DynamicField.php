@@ -155,6 +155,17 @@ class DynamicField extends Entity
 		'otp_secret'   => '?string',
 		'date_login'   => '?DateTime',
 		'id_parent'    => '?int',
+		'is_parent'    => 'bool',
+	];
+
+	const SYSTEM_FIELDS_SQL = [
+		'id INTEGER PRIMARY KEY,',
+		'id_category INTEGER NOT NULL REFERENCES users_categories(id),',
+		'date_login TEXT NULL CHECK (date_login IS NULL OR datetime(date_login) = date_login),',
+		'otp_secret TEXT NULL,',
+		'pgp_key TEXT NULL,',
+		'id_parent INTEGER NULL REFERENCES users(id) ON DELETE SET NULL CHECK (id_parent IS NULL OR is_parent = 0),',
+		'is_parent INTEGER NOT NULL DEFAULT 0,',
 	];
 
 	public function delete(): bool

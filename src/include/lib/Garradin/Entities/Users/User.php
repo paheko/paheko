@@ -111,8 +111,12 @@ class User extends Entity
 			$this->assert(!$login_exists, sprintf('Le champ "%s" (utilisé comme identifiant de connexion) est déjà utilisé par un autre membre. Il doit être unique pour chaque membre.', $df->fieldByKey($field)->label));
 		}
 
-		$this->assert($this->id_parent === null || $this->id_parent > 0, 'Invalid parent ID');
-		$this->assert($this->id_parent === null || $db->test(self::TABLE, 'id = ? AND (id_parent IS NULL OR id_parent = id)', $this->id_parent), 'Le membre parent sélectionné est déjà un enfant, et ne peut donc être à la fois enfant et parent.');
+		if ($this->id_parent !== null) {
+			$this->assert(!$this->is_parent, 'Un membre ne peut être parent et enfant');
+			$this->assert($this->id_parent > 0, 'Invalid parent ID');
+			$this->assert(!$this->exists() || $this->id_parent != $this->id(), 'Invalid parent ID');
+			$this->assert(!$db->test(self::TABLE, 'id = ? AND id_parent IS NOT NULL', $this->id_parent), 'Le membre parent sélectionné est déjà un enfant, et ne peut donc être à la fois enfant et parent.');
+		}
 	}
 
 	public function delete(): bool
@@ -204,12 +208,7 @@ class User extends Entity
 
 	public function isChild(): bool
 	{
-		return ($this->id_parent && $this->id_parent != $this->id);
-	}
-
-	public function isParent(): bool
-	{
-		return $this->id_parent == $this->id();
+		return (bool) $this->id_parent;
 	}
 
 	public function getParentName(): ?string
@@ -238,7 +237,7 @@ class User extends Entity
 	public function listChildren(): array
 	{
 		$name = DynamicFields::getNameFieldsSQL();
-		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ?;', $name, self::TABLE), $this->id(), $this->id());
+		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ?;', $name, self::TABLE), $this->id());
 	}
 
 	public function listSiblings(): array
@@ -248,7 +247,7 @@ class User extends Entity
 		}
 
 		$name = DynamicFields::getNameFieldsSQL();
-		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ? AND id != id_parent;', $name, self::TABLE), $this->id_parent, $this->id());
+		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ?;', $name, self::TABLE), $this->id_parent, $this->id());
 	}
 
 	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)
