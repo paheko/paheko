@@ -104,7 +104,8 @@ if (!$default) {
 
 $is_admin = $session->canAccess($access_section, $session::ACCESS_ADMIN);
 $schema = $s->getAdvancedSearch()->schema();
-$columns= $s->getAdvancedSearch()->columns();
+$columns = $s->getAdvancedSearch()->columns();
+$columns = array_filter($columns, fn($c) => $c['label'] ?? null && $c['type'] ?? null); // remove columns only for dynamiclist
 
 $tpl->assign(compact('s', 'list', 'header', 'results', 'columns', 'is_admin', 'schema'));
 

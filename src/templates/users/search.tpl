@@ -24,14 +24,9 @@
 			{if $is_admin}
 			<td class="check">{input type="checkbox" name="selected[]" value=$row.id}</td>
 			{/if}
-			{foreach from=$row key="key" item="value"}
-				<?php
-				if (substr($key, 0, 1) == '_') {
-					continue;
-				}
-				?>
+			{foreach from=$list->getHeaderColumns() key="key" item="label"}
 				<td>
-					{display_dynamic_field key=$key value=$value}
+					{display_dynamic_field key=$key value=$row->$key}
 				</td>
 			{/foreach}
 			<td class="actions">
@@ -43,8 +38,8 @@
 		</tr>
 	{/foreach}
 		</tbody>
-	{if $is_admin && $row._user_id}
-		{include file="users/_list_actions.tpl" colspan=count($result_header)+1}
+	{if $is_admin}
+		{include file="users/_list_actions.tpl" colspan=$list->countHeaderColumns()}
 	{/if}
 	</table>
 

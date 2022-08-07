@@ -21,9 +21,7 @@ class AdvancedSearch extends A_S
 
 		$columns = [];
 
-		$columns['id'] = [
-			'select'   => 'id',
-		];
+		$columns['id'] = [];
 
 		$columns['identity'] = [
 			'label'    => $fields::getNameLabel(),
@@ -31,6 +29,23 @@ class AdvancedSearch extends A_S
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL(),
 			'order'    => sprintf('%s COLLATE U_NOCASE %%s', current($fields::getNameFields())),
+		];
+
+		$columns['is_parent'] = [
+			'label' => 'Est parent',
+			'type' => 'boolean',
+			'null' => false,
+			'select' => '\'Oui\'',
+			'where' => '(SELECT 1 FROM users AS u2 WHERE u2.id_parent = u.id LIMIT 1)',
+		];
+
+
+		$columns['is_child'] = [
+			'label' => 'Est enfant',
+			'type' => 'boolean',
+			'null' => false,
+			'select' => 'CASE WHEN id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'id_parent IS NOT NULL',
 		];
 
 		foreach ($fields->all() as $name => $field)
@@ -86,6 +101,12 @@ class AdvancedSearch extends A_S
 			}
 
 			$columns[$name] = $column;
+		}
+
+		$names = $fields::getNameFields();
+
+		if (count($names) == 1) {
+			unset($columns[$names[0]]);
 		}
 
 		$columns['id_category'] = [
@@ -181,7 +202,7 @@ class AdvancedSearch extends A_S
 	public function make(string $query): DynamicList
 	{
 		$tables = 'users u';
-		return $this->makeList($query, $tables, current(DynamicFields::getNameFields()), false, ['id', 'identity']);
+		return $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
 	}
 
 	public function defaults(): \stdClass
