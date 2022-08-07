@@ -1,7 +1,7 @@
 {{:admin_header title="Configuration du reçu fiscal"}}
 
 {{if $_POST.save}}
-	{{if trim($_POST.accounts) == ''}}
+	{{if $_POST.accounts|trim == ''}}
 		<p class="error block">Les numéros de comptes éligibles n'ont pas été renseignés.</p>
 	{{else}}
 		{{:save key="config"
