@@ -518,7 +518,8 @@ class Template extends Smartyer
 				'label' => $multiple ? 'Ajouter' : 'Sélectionner',
 				'required' => $attributes['required'] ?? null,
 				'value' => Utils::getLocalURL($attributes['target']),
-				'data-multiple' => $multiple ? '1' : '0',
+				'data-multiple' => (int) $multiple,
+				'data-can-delete' => (int) $can_delete,
 				'data-name' => $name,
 			]);
 
