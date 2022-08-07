@@ -550,7 +550,8 @@ class DynamicFields
 
 	public function getSearchColumns(): array
 	{
-		return array_keys(array_filter($this->_fields, fn ($f) => $f->hasSearchCache()));
+		$c = array_keys(array_filter($this->_fields, fn ($f) => $f->hasSearchCache()));
+		return $c = array_combine($c, $c);
 	}
 
 	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null, string $function = null): string
@@ -690,10 +691,10 @@ class DynamicFields
 
 		if ($from_users_table) {
 			// This is slower but is necessary sometimes
-			$sql = $this->getSQLCopy(User::TABLE, $search_table . '_tmp', $this->getSearchColumns(), 'transliterate_to_ascii');
+			$sql = $this->getSQLCopy(User::TABLE, $search_table . '_tmp', $columns, 'transliterate_to_ascii');
 		}
 		else {
-			$sql = $this->getSQLCopy($search_table, $search_table . '_tmp', $this->getSearchColumns());
+			$sql = $this->getSQLCopy($search_table, $search_table . '_tmp', $columns);
 		}
 
 		$db->exec($sql);

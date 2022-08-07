@@ -28,7 +28,7 @@ class AdvancedSearch extends A_S
 			'type'     => 'text',
 			'null'     => true,
 			'select'   => $fields::getNameFieldsSQL('u'),
-			'where'    => $fields::getNameFieldsSQL('us'),
+			'where'    => $fields::getNameFieldsSQL('us') . ' %s',
 			'order'    => sprintf('us.%s %%s', current($fields::getNameFields())),
 		];
 
@@ -170,13 +170,19 @@ class AdvancedSearch extends A_S
 		}
 
 		if ($allow_redirect) {
+			$c = $column;
+
+			if ($column == 'identity') {
+				$c = DynamicFields::getNameFieldsSQL();
+			}
+
 			// Try to redirect to user if there is only one user
 			if ($operator == '= ?') {
-				$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $column);
+				$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s = ?;', $c);
 				$single_query = (int) $query;
 			}
 			else {
-				$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s LIKE ?;', $column);
+				$sql = sprintf('SELECT id, COUNT(*) AS count FROM users WHERE %s LIKE ?;', $c);
 				$single_query = '%' . trim($query) . '%';
 			}
 
