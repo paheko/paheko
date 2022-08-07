@@ -380,9 +380,15 @@ class Template extends Smartyer
 			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
 				$current_value = $v->format('d/m/Y');
 			}
+			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
 		}
 		elseif ($type == 'time' && is_string($current_value)) {
 			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
+				$current_value = $v->format('H:i');
+			}
+			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
 				$current_value = $v->format('H:i');
 			}
 		}
