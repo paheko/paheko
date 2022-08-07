@@ -43,12 +43,14 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 			{if $has_past_services}
 			<dd>
+				{* We can't use a button type="submit" here because it would trigger when user presses Enter, instead of the true submit button *}
+				<input type="hidden" name="past_services" value="{$current_only}" />
 				{if $current_only}
 					Seules les activités courantes sont affichées.
-					{button name="past_services" value="1" shape="reset" type="submit" label="Inscrire à une activité passée"}
+					{button value="1" shape="reset" type="button" onclick="this.form.past_services=this.value; this.form.submit();" label="Inscrire à une activité passée"}
 				{else}
 					Seules les activités passées sont affichées.
-					{button name="past_services" value="0" shape="left" type="submit" label="Inscrire à une activité courante"}
+					{button value="0" shape="left" type="button"  onclick="this.form.past_services=this.value; this.form.submit();" label="Inscrire à une activité courante"}
 				{/if}
 			</dd>
 			{/if}
@@ -141,7 +143,7 @@ assert(isset($grouped_services) && is_array($grouped_services));
 
 		<dl>
 			{input type="money" name="amount" label="Montant réglé par le membre" required=true help="En cas de règlement en plusieurs fois il sera possible d'ajouter des règlements via la page de suivi des activités de ce membre."}
-			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account" label="Compte de règlement" required=true}
+			{input type="list" target="!acc/charts/accounts/selector.php?targets=%s"|args:$account_targets name="account_selector" label="Compte de règlement" required=true}
 			{input type="text" name="reference" label="Numéro de pièce comptable" help="Numéro de facture, de reçu, de note de frais, etc."}
 			{input type="text" name="payment_reference" label="Référence de paiement" help="Numéro de chèque, numéro de transaction CB, etc."}
 			{input type="textarea" name="notes" label="Remarques"}

@@ -4,7 +4,9 @@ namespace Garradin;
 
 use KD2\Form;
 use KD2\HTTP;
+use KD2\Smartyer;
 use KD2\Translate;
+
 use Garradin\Membres\Session;
 use Garradin\Entities\Accounting\Account;
 use Garradin\Entities\Users\Category;
@@ -12,7 +14,7 @@ use Garradin\UserTemplate\CommonModifiers;
 use Garradin\Web\Render\Skriv;
 use Garradin\Files\Files;
 
-class Template extends \KD2\Smartyer
+class Template extends Smartyer
 {
 	static protected $_instance = null;
 
@@ -306,10 +308,6 @@ class Template extends \KD2\Smartyer
 			$admin_background = $url;
 		}
 
-		// Transformation Hexa vers décimal
-		$couleur1 = implode(', ', sscanf($couleur1, '#%02x%02x%02x'));
-		$couleur2 = implode(', ', sscanf($couleur2, '#%02x%02x%02x'));
-
 		$out = '
 		<style type="text/css">
 		:root {
@@ -323,7 +321,7 @@ class Template extends \KD2\Smartyer
 			$out .= "\n" . sprintf('<link rel="stylesheet" type="text/css" href="%s" />', $url);
 		}
 
-		return sprintf($out, $couleur1, $couleur2, $admin_background);
+		return sprintf($out, CommonModifiers::css_hex_to_rgb($couleur1), CommonModifiers::css_hex_to_rgb($couleur2), $admin_background);
 	}
 
 	protected function displayChampMembre($v, $config = null)
@@ -500,8 +498,8 @@ class Template extends \KD2\Smartyer
 		{
 			$field .= '<textarea ' . $attributes . 'cols="30" rows="5">' . htmlspecialchars((string) $value, ENT_QUOTES) . '</textarea>';
 		}
-		elseif ($type == 'date') {
-			$field = CommonModifiers::input(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $value, 'type' => 'date', 'default' => $value]);
+		elseif ($type == 'date' || $type == 'datetime') {
+			$field = CommonModifiers::input(['required' => $config->mandatory, 'name' => $params['name'], 'value' => $type, 'type' => 'date', 'default' => $value]);
 		}
 		else
 		{

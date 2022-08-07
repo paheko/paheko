@@ -10,8 +10,8 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 			<td>Compte</td>
 			<td>Débit</td>
 			<td>Crédit</td>
-			<td>Réf. ligne</td>
 			<td>Libellé ligne</td>
+			<td>Réf. ligne</td>
 			{if count($analytical_accounts) > 1}
 				<td>Projet</td>
 			{/if}
@@ -21,13 +21,13 @@ assert(!isset($lines_accounts) || is_array($lines_accounts));
 	<tbody>
 	{foreach from=$lines key="k" item="line"}
 		<tr>
-			<td>
-				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account][]" default=$line.account}
+			<td class="account">
+				{input type="list" target="!acc/charts/accounts/selector.php?chart=%d"|args:$chart_id name="lines[account_selector][]" default=$line.account_selector}
 			</td>
 			<td class="money">{input type="money" name="lines[debit][]" default=$line.debit size=5}</td>
 			<td class="money">{input type="money" name="lines[credit][]" default=$line.credit size=5}</td>
-			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10}</td>
 			<td>{input type="text" name="lines[label][]" default=$line.label}</td>
+			<td>{input type="text" name="lines[reference][]" default=$line.reference size=10}</td>
 			{if count($analytical_accounts) > 1}
 				<td>{input default=$line.id_analytical type="select" name="lines[id_analytical][]" options=$analytical_accounts}</td>
 			{/if}

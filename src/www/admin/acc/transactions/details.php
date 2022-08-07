@@ -21,7 +21,7 @@ $form->runIf('mark_paid', function () use ($transaction) {
 }, $csrf_key, Utils::getSelfURI());
 
 $variables = compact('csrf_key', 'transaction') + [
-	'transaction_lines'    => $transaction->getLinesWithAccounts(false),
+	'transaction_lines'    => $transaction->getLinesWithAccounts(),
 	'transaction_year'     => $transaction->year(),
 	'files'                => $transaction->listFiles(),
 	'creator_name'         => $transaction->id_creator ? (new Membres)->getNom($transaction->id_creator) : null,

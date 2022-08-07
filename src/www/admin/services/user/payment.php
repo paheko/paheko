@@ -26,18 +26,12 @@ $form->runIf(f('save') || f('save_and_add_payment'), function () use ($su, $sess
 		$su->paid = (bool) f('paid');
 		$su->save();
 	}
+}, $csrf_key, '!services/user/?id=' . $su->id_user);
 
-	if (f('save_and_add_payment')) {
-		$url = ADMIN_URL . 'services/user/payment.php?id=' . $su->id;
-	}
-	else {
-		$url = ADMIN_URL . 'services/user/?id=' . $su->id_user;
-	}
+$t = new Transaction;
+$t->type = $t::TYPE_REVENUE;
+$types_details = $t->getTypesDetails();
 
-	Utils::redirect($url);
-}, $csrf_key);
-
-$types_details = Transaction::getTypesDetails();
 $account_targets = $types_details[Transaction::TYPE_REVENUE]->accounts[1]->targets_string;
 
 $tpl->assign(compact('csrf_key', 'account_targets', 'user_name', 'su'));

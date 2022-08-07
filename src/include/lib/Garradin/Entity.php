@@ -7,8 +7,6 @@ use KD2\DB\AbstractEntity;
 
 class Entity extends AbstractEntity
 {
-	protected $_form_rules = [];
-
 	/**
 	 * Valider les champs avant enregistrement
 	 * @throws ValidationException Si une erreur de validation survient
@@ -17,15 +15,6 @@ class Entity extends AbstractEntity
 	{
 		if (null === $source) {
 			$source = $_POST;
-		}
-
-		$form = new Form;
-
-		if (!$form->validate($this->_form_rules, $source))
-		{
-			$messages = $form->getErrorMessages();
-
-			throw new ValidationException(implode("\n", $messages));
 		}
 
 		return $this->import($source);
@@ -49,6 +38,9 @@ class Entity extends AbstractEntity
 		elseif (preg_match('!^20\d{2}[01]\d[0123]\d$!', $value)) {
 			return \DateTime::createFromFormat('Ymd', $value);
 		}
+		elseif (preg_match('!^\d{4}-\d{2}-\d{2}$!', $value)) {
+			return \DateTime::createFromFormat('Y-m-d', $value);
+		}
 		elseif (null !== $value) {
 			throw new ValidationException('Format de date invalide (merci d\'utiliser le format JJ/MM/AAAA) : ' . $value);
 		}
@@ -68,7 +60,7 @@ class Entity extends AbstractEntity
 		return parent::filterUserValue($type, $value, $key);
 	}
 
-	protected function assert(?bool $test, string $message = null, int $code = 0): void
+	protected function assert($test, string $message = null, int $code = 0): void
 	{
 		if ($test) {
 			return;
@@ -87,7 +79,7 @@ class Entity extends AbstractEntity
 	}
 
 	// Add plugin signals to save/delete
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		$name = get_class($this);
 		$name = str_replace('Garradin\Entities\\', '', $name);
@@ -103,7 +95,7 @@ class Entity extends AbstractEntity
 			return true;
 		}
 
-		$return = parent::save();
+		$return = parent::save($selfcheck);
 		Plugin::fireSignal($name . '.after', ['entity' => $this, 'success' => $return]);
 
 		Plugin::fireSignal('entity.save.after', ['entity' => $this, 'success' => $return]);

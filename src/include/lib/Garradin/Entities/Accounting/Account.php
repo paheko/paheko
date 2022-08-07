@@ -170,17 +170,19 @@ class Account extends Entity
 		'user'        => 'int',
 	];
 
-	protected $_form_rules = [
-		'code'        => 'required|string|alpha_num|max:10',
-		'label'       => 'required|string|max:200',
-		'description' => 'string|max:2000',
-	];
-
 	protected $_position = [];
 
 	public function selfCheck(): void
 	{
 		$db = DB::getInstance();
+
+		$this->assert(trim($this->code) !== '', 'Le numéro de compte ne peut rester vide.');
+		$this->assert(trim($this->label) !== '', 'L\'intitulé de compte ne peut rester vide.');
+
+		$this->assert(strlen($this->code) <= 20, 'Le numéro de compte ne peut faire plus de 20 caractères.');
+		$this->assert(preg_match('/^[a-z0-9_]+$/i', $this->code), 'Le numéro de compte ne peut comporter que des lettres et des chiffres.');
+		$this->assert(strlen($this->label) <= 200, 'L\'intitulé de compte ne peut faire plus de 200 caractères.');
+		$this->assert(!isset($this->description) || strlen($this->description) <= 2000, 'La description de compte ne peut faire plus de 2000 caractères.');
 
 		$this->assert(!empty($this->id_chart), 'Aucun plan comptable lié');
 
@@ -191,7 +193,7 @@ class Account extends Entity
 			throw new ValidationException(sprintf('Le code "%s" est déjà utilisé par un autre compte.', $this->code));
 		}
 
-		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide');
+		$this->assert(array_key_exists($this->type, self::TYPES_NAMES), 'Type invalide: ' . $this->type);
 		$this->assert(array_key_exists($this->position, self::POSITIONS_NAMES), 'Position invalide');
 		$this->assert($this->user === 0 || $this->user === 1);
 
@@ -208,12 +210,11 @@ class Account extends Entity
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
-		$sum = 0;
+		$sum = null;
 		$reverse = $this->isReversed($simple, $year_id) ? -1 : 1;
 
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
-			$sum = $this->getSumAtDate($year_id, $start) * $reverse;
 		}
 
 		if ($end) {
@@ -231,17 +232,33 @@ class Account extends Entity
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('date', false);
+		$list->orderBy('date', true);
 		$list->setCount('COUNT(*)');
-		$list->setPageSize(null);
-		$list->setModifier(function (&$row) use (&$sum) {
+		$list->setPageSize(null); // Because with paging we can't calculate the running sum
+		$list->setModifier(function (&$row) use (&$sum, &$list, $reverse, $year_id, $start, $end) {
 			if (property_exists($row, 'sum')) {
-				$sum += $row->change;
+				// Reverse running sum needs the last sum, first
+				if ($list->desc && null === $sum) {
+					$sum = $this->getSumAtDate($year_id, ($end ?? new \DateTime($row->date))->modify('+1 day')) * -1 * $reverse;
+				}
+				elseif (!$list->desc) {
+					if (null === $sum && $start) {
+						$sum = $this->getSumAtDate($year_id, $start) * -1 * $reverse;
+					}
+
+					$sum += $row->change;
+				}
+
 				$row->sum = $sum;
+
+				if ($list->desc) {
+					$sum -= $row->change;
+				}
 			}
 
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 		});
+
 		$list->setExportCallback(function (&$row) {
 			static $columns = ['change', 'sum', 'credit', 'debit'];
 			foreach ($columns as $key) {
@@ -429,12 +446,12 @@ class Account extends Entity
 		return Charts::get($this->id_chart);
 	}
 
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		$c = Config::getInstance();
 		$c->set('last_chart_change', time());
 		$c->save();
 
-		return parent::save();
+		return parent::save($selfcheck);
 	}
 }

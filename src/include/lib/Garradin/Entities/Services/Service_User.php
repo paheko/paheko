@@ -8,7 +8,9 @@ use Garradin\Membres;
 use Garradin\ValidationException;
 use Garradin\Services\Fees;
 use Garradin\Services\Services;
+use Garradin\Accounting\Transactions;
 use Garradin\Entities\Accounting\Transaction;
+use Garradin\Entities\Accounting\Line;
 
 class Service_User extends Entity
 {
@@ -139,14 +141,13 @@ class Service_User extends Entity
 			throw new ValidationException('Le tarif indiqué ne possède pas d\'exercice lié');
 		}
 
-		$transaction = new Transaction;
-		$transaction->id_creator = $user_id;
-		$transaction->id_year = $this->fee()->id_year;
+		if (empty($source['amount'])) {
+			throw new ValidationException('Montant non précisé');
+		}
 
-		$source['type'] = Transaction::TYPE_REVENUE;
-		$key = sprintf('account_%d_', $source['type']);
-		$source[$key . '0'] = [$this->fee()->id_account => ''];
-		$source[$key . '1'] = isset($source['account']) ? $source['account'] : null;
+		if (empty($source['account_selector']) || !is_array($source['account_selector']) || !key($source['account_selector'])) {
+			throw new ValidationException('Aucune compte n\'a été sélectionné.');
+		}
 
 		$label = $this->service()->label;
 
@@ -156,10 +157,29 @@ class Service_User extends Entity
 
 		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
 
-		$source['label'] = $label;
-		$source['id_analytical'] = $this->fee()->id_analytical;
+		$transaction = Transactions::create(array_merge($source, [
+			'label' => $label,
+			'lines' => [
+				[
+					'id_account'    => $this->fee()->id_account,
+					'credit'        => $source['amount'],
+					'id_analytical' => $this->fee()->id_analytical,
+					'reference'     => $source['payment_reference'] ?? null,
+				],
+				[
+					'account_selector' => $source['account_selector'],
+					'debit'            => $source['amount'],
+					'id_analytical'    => $this->fee()->id_analytical,
+					'reference'        => $source['payment_reference'] ?? null,
 
-		$transaction->importFromNewForm($source);
+				],
+			],
+		]));
+
+		$transaction->id_creator = $user_id;
+		$transaction->id_year = $this->fee()->id_year;
+		$transaction->type = Transaction::TYPE_REVENUE;
+
 		$transaction->save();
 		$transaction->linkToUser($this->id_user, $this->id());
 

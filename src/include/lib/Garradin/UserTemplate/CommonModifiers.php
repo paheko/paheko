@@ -24,6 +24,7 @@ class CommonModifiers
 		'strftime',
 		'size_in_bytes' => [Utils::class, 'format_bytes'],
 		'typo',
+		'css_hex_to_rgb',
 	];
 
 	const FUNCTIONS_LIST = [
@@ -346,8 +347,21 @@ class CommonModifiers
 			if ($v = \DateTime::createFromFormat('!Y-m-d', $current_value)) {
 				$current_value = $v->format('d/m/Y');
 			}
+			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
+			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
+				$current_value = $v->format('d/m/Y');
+			}
 		}
-
+		elseif ($type == 'time' && is_string($current_value)) {
+			if ($v = \DateTime::createFromFormat('!Y-m-d H:i:s', $current_value)) {
+				$current_value = $v->format('H:i');
+			}
+			elseif ($v = \DateTime::createFromFormat('!Y-m-d H:i', $current_value)) {
+				$current_value = $v->format('H:i');
+			}
+		}
 
 		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
 		$attributes['name'] = $name;
@@ -493,6 +507,12 @@ class CommonModifiers
 			$input = sprintf('<input type="%s" %s %s />', $type, $attributes_string, $value);
 		}
 
+		if ($type == 'file') {
+			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
+		}
+
+		$input .= $suffix;
+
 		// No label? then we only want the input without the widget
 		if (empty($label)) {
 			if (!array_key_exists('label', $params) && ($type == 'radio' || $type == 'checkbox')) {
@@ -501,12 +521,6 @@ class CommonModifiers
 
 			return $input;
 		}
-
-		if ($type == 'file') {
-			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
-		}
-
-		$input .= $suffix;
 
 		$label = sprintf('<label for="%s">%s</label>', $attributes['id'], htmlspecialchars((string)$label));
 
@@ -629,4 +643,13 @@ class CommonModifiers
 		return self::link($params);
 	}
 
+	static public function css_hex_to_rgb($str): ?string {
+		$hex = sscanf((string)$str, '#%02x%02x%02x');
+
+		if (empty($hex)) {
+			return null;
+		}
+
+		return implode(', ', $hex);
+	}
 }

@@ -34,13 +34,6 @@ class Line extends Entity
 		'id_analytical'  => '?int',
 	];
 
-	protected $_form_rules = [
-		'id_account'     => 'required|numeric|in_table:acc_accounts,id',
-		'id_analytical'  => 'numeric|in_table:acc_accounts,id',
-		'reference'      => 'string|max:200',
-		'label'          => 'string|max:200',
-	];
-
 	static public function create(int $id_account, int $credit, int $debit, ?string $label = null, ?string $reference = null): Line
 	{
 		$line = new self;
@@ -69,12 +62,20 @@ class Line extends Entity
 
 	public function selfCheck(): void
 	{
-		parent::selfCheck();
+		// We don't check that the account exists here
+		// The fact that the account is in the right chart is checked in Transaction::selfCheck
+
+		$this->assert($this->reference === null || strlen($this->reference) < 200, 'La référence doit faire moins de 200 caractères.');
+		$this->assert($this->label === null || strlen($this->label) < 200, 'La référence doit faire moins de 200 caractères.');
+		$this->assert($this->id_account !== null, 'Aucun compte n\'a été indiqué.');
 		$this->assert($this->credit || $this->debit, 'Aucun montant au débit ou au crédit');
 		$this->assert($this->credit >= 0 && $this->debit >= 0, 'Le montant ne peut être négatif');
 		$this->assert(($this->credit * $this->debit) === 0 && ($this->credit + $this->debit) > 0, 'Ligne non équilibrée : crédit ou débit doit valoir zéro.');
-		$this->assert($this->id_transaction, 'Aucun mouvement n\'a été indiqué pour cette ligne.');
 		$this->assert($this->reconciled === 0 || $this->reconciled === 1);
+
+		$this->assert(null === $this->id_analytical || DB::getInstance()->test(Account::TABLE, 'id = ?', $this->id_analytical), 'Le projet analytique indiqué n\'existe pas.');
+		$this->assert(!empty($this->id_transaction), 'Aucune écriture n\'a été indiquée pour cette ligne.');
+		parent::selfCheck();
 	}
 
 	public function asDetailsArray(): array
@@ -87,4 +88,5 @@ class Line extends Entity
 			'Débit'     => Utils::money_format($this->debit),
 		];
 	}
+
 }

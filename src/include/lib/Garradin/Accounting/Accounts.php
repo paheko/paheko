@@ -61,9 +61,26 @@ class Accounts
 	/**
 	 * Return all accounts from current chart
 	 */
-	public function listAll(): array
+	public function listAll(?array $targets = null): array
 	{
-		return $this->em->all('SELECT * FROM @TABLE WHERE id_chart = ? ORDER BY code COLLATE U_NOCASE;',
+		$where = '';
+
+		if (!empty($targets)) {
+			$position = null;
+
+			if (in_array(Account::TYPE_EXPENSE, $targets)) {
+				$position = Account::EXPENSE;
+			}
+			elseif (in_array(Account::TYPE_REVENUE, $targets)) {
+				$position = Account::REVENUE;
+			}
+
+			if ($position) {
+				$where = sprintf('AND position = %d', $position);
+			}
+		}
+
+		return $this->em->all(sprintf('SELECT * FROM @TABLE WHERE id_chart = ? %s ORDER BY code COLLATE U_NOCASE;', $where),
 			$this->chart_id);
 	}
 

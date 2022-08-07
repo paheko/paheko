@@ -141,13 +141,15 @@ class Config extends Entity
 		$this->champs_membres = new Membres\Champs((string)$this->champs_membres);
 	}
 
-	public function save(): bool
+	public function save(bool $selfcheck = true): bool
 	{
 		if (!count($this->_modified)) {
 			return true;
 		}
 
-		$this->selfCheck();
+		if ($selfcheck) {
+			$this->selfCheck();
+		}
 
 		$values = $this->modifiedProperties(true);
 

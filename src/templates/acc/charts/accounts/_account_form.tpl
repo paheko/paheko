@@ -5,7 +5,10 @@
 		<dd class="help">Un compte qui n'a pas de type usuel ne pourra être utilisé que dans une saisie avancée, et ne sera visible que dans les rapports de l'exercice.</dd>
 	{else}
 	<dt>Type de compte</dt>
-	<dd><?php $t = $types[$account->type]; ?> {$t}</dd>
+	<dd>
+		<?php $t = $types[$account->type]; ?> {$t}
+		<input type="hidden" name="type" value="{$account.type}" />
+	</dd>
 	{/if}
 
 	{if !$account.type || $account.type == $account::TYPE_VOLUNTEERING}
@@ -22,7 +25,8 @@
 		{input type="radio" label="Résultat : produit" name="position" value=Entities\Accounting\Account::REVENUE source=$account help="recettes" disabled=$edit_disabled}
 	{/if}
 
-	{input type="text" label="Code" maxlength="10" name="code" source=$account required=true help="Le code du compte sert à trier le compte dans le plan comptable, attention à choisir un code qui correspond au plan comptable." disabled=$edit_disabled}
+	{input type="text" label="Numéro" maxlength="20" pattern="[A-Z0-9]+" name="code" source=$account required=true help="Le numéro du compte sert à trier le compte dans le plan comptable, attention à choisir un numéro qui correspond au plan comptable." disabled=$edit_disabled}
+	<dd class="help">Le numéro ne doit contenir que des chiffres et des lettres majuscules.</dd>
 	{input type="text" label="Libellé" name="label" source=$account required=true disabled=$edit_disabled}
 	{input type="textarea" label="Description" name="description" source=$account}
 
