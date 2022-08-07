@@ -134,6 +134,9 @@ class Utils
         elseif (strlen($ts) == 19) {
             return \DateTime::createFromFormat('Y-m-d H:i:s', $ts);
         }
+        elseif (strlen($ts) == 16) {
+            return \DateTime::createFromFormat('!Y-m-d H:i', $ts);
+        }
         else {
             return null;
         }
