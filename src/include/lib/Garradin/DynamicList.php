@@ -152,6 +152,11 @@ class DynamicList implements \Countable
 		return $columns;
 	}
 
+	public function countHeaderColumns(): int
+	{
+		return count($this->getHeaderColumns());
+	}
+
 	public function iterate(bool $include_hidden = true)
 	{
 		foreach (DB::getInstance()->iterate($this->SQL()) as $row) {

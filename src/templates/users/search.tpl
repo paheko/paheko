@@ -39,7 +39,7 @@
 	{/foreach}
 		</tbody>
 	{if $is_admin}
-		{include file="users/_list_actions.tpl" colspan=$list->countHeaderColumns()}
+		{include file="users/_list_actions.tpl" colspan=$list->countHeaderColumns()+1}
 	{/if}
 	</table>
 
