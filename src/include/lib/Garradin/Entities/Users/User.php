@@ -5,9 +5,10 @@ namespace Garradin\Entities\Users;
 
 use KD2\DB\EntityManager;
 
-use Garradin\Entity;
 use Garradin\DB;
 use Garradin\Config;
+use Garradin\Entity;
+use Garradin\Form;
 use Garradin\Utils;
 use Garradin\UserException;
 use Garradin\ValidationException;
@@ -111,7 +112,7 @@ class User extends Entity
 		}
 
 		$this->assert($this->id_parent === null || $this->id_parent > 0, 'Invalid parent ID');
-		$this->assert($this->id_parent === null || !count($this->listChildren()), 'Un membre ne peut avoir un parent et des enfants en même temps.');
+		$this->assert($this->id_parent === null || $db->test(self::TABLE, 'id = ? AND (id_parent IS NULL OR id_parent = id)', $this->id_parent), 'Le membre parent sélectionné est déjà un enfant, et ne peut donc être à la fois enfant et parent.');
 	}
 
 	public function delete(): bool
@@ -177,7 +178,7 @@ class User extends Entity
 		}
 
 		if (isset($source['id_parent']) && is_array($source['id_parent'])) {
-			$source['id_parent'] = key($source['id_parent']);
+			$source['id_parent'] = Form::getSelectorValue($source['id_parent']);
 		}
 
 		return parent::importForm($source);
@@ -201,9 +202,19 @@ class User extends Entity
 		return sprintf('"%s" <%s>', $this->name(), $this->{$email_field});
 	}
 
+	public function isChild(): bool
+	{
+		return ($this->id_parent && $this->id_parent != $this->id);
+	}
+
+	public function isParent(): bool
+	{
+		return $this->id_parent == $this->id();
+	}
+
 	public function getParentName(): ?string
 	{
-		if (!$this->id_parent) {
+		if (!$this->isChild()) {
 			return null;
 		}
 
@@ -212,7 +223,7 @@ class User extends Entity
 
 	public function getParentSelector(): ?array
 	{
-		if (!$this->id_parent) {
+		if (!$this->isChild()) {
 			return null;
 		}
 
@@ -227,7 +238,7 @@ class User extends Entity
 	public function listChildren(): array
 	{
 		$name = DynamicFields::getNameFieldsSQL();
-		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ?;', $name, self::TABLE), $this->id());
+		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ?;', $name, self::TABLE), $this->id(), $this->id());
 	}
 
 	public function listSiblings(): array
@@ -237,7 +248,7 @@ class User extends Entity
 		}
 
 		$name = DynamicFields::getNameFieldsSQL();
-		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ?;', $name, self::TABLE), $this->id_parent, $this->id());
+		return DB::getInstance()->getGrouped(sprintf('SELECT id, %s AS name FROM %s WHERE id_parent = ? AND id != ? AND id != id_parent;', $name, self::TABLE), $this->id_parent, $this->id());
 	}
 
 	public function sendMessage(string $subject, string $message, bool $send_copy, ?User $from = null)

@@ -49,21 +49,20 @@
 			<dd><a href="{$admin_url}acc/transactions/creator.php?id={$user.id}">{$transactions_created} écritures comptables créées par ce membre</a></dd>
 		{/if}
 	{/if}
-	{if $parent_name}
-	<dt>Membre parent</dt>
-	<dd>{link href="?id=%d"|args:$user.id_parent label=$parent_name}</dd>
-	{/if}
-	{if count($children)}
-	<dt>Membres enfants</dt>
-	{foreach from=$children item="child"}
-		<dd>{link href="?id=%d"|args:$child.id label=$child.name}</dd>
-	{/foreach}
-	{/if}
-	{if count($siblings)}
-	<dt>Membres de la même famille</dt>
-	{foreach from=$siblings item="sibling"}
-		<dd>{link href="?id=%d"|args:$sibling.id label=$sibling.name}</dd>
-	{/foreach}
+	{if $user->isChild()}
+		<dt>Membre parent</dt>
+		<dd>{link href="?id=%d"|args:$user.id_parent label=$parent_name}</dd>
+		{if count($siblings)}
+			<dt>Membres de la même famille</dt>
+			{foreach from=$siblings item="sibling"}
+				<dd>{link href="?id=%d"|args:$sibling.id label=$sibling.name}</dd>
+			{/foreach}
+		{/if}
+	{elseif count($children)}
+		<dt>Membres enfants</dt>
+		{foreach from=$children item="child"}
+			<dd>{link href="?id=%d"|args:$child.id label=$child.name}</dd>
+		{/foreach}
 	{/if}
 </dl>
 

@@ -430,6 +430,7 @@ class DynamicFields
 
 		$self->createTable();
 		$self->createIndexes();
+		$self->createTriggers();
 		$self->copy('membres', User::TABLE, $fields);
 
 		$self->rebuildSearchTable(true);
@@ -617,15 +618,6 @@ class DynamicFields
 		DB::getInstance()->exec($sql);
 	}
 
-	public function create(string $table_name = User::TABLE)
-	{
-		$db = DB::getInstance();
-		$db->begin();
-		$this->createTable($table_name);
-		$this->createIndexes($table_name);
-		$db->commit();
-	}
-
 	public function createTable(string $table_name = User::TABLE): void
 	{
 		$db = DB::getInstance();
@@ -656,6 +648,35 @@ class DynamicFields
 		$db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS users_number ON %s (%s);', $table_name, $this->getNumberField()));
 		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_category ON %s (id_category);', $table_name));
 		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_parent ON %s (id_parent);', $table_name));
+	}
+
+	public function createTriggers(string $table_name = User::TABLE): void
+	{
+		// These triggers are to set id_parent to the ID of the user on parent user, when the user has children
+		$db = DB::getInstance();
+		$db->exec(sprintf('
+			CREATE TRIGGER %1$s_parent_trigger_update_new AFTER UPDATE OF id_parent ON %1$s BEGIN
+				SELECT RAISE(FAIL, \'Cannot make a parent if already a children\')
+					FROM %1$s WHERE id = NEW.id_parent AND id_parent != id;
+				UPDATE users SET id_parent = id WHERE id = NEW.id_parent;
+			END;
+			CREATE TRIGGER %1$s_parent_trigger_update_old AFTER UPDATE OF id_parent ON %1$s BEGIN
+				-- Set id_parent to NULL if user has no longer any children
+				UPDATE %1$s SET id_parent = NULL WHERE id = OLD.id_parent
+					AND 0 = (SELECT COUNT(*) FROM %1$s WHERE id_parent = OLD.id_parent AND id_parent != id);
+			END;
+			CREATE TRIGGER %1$s_parent_trigger_insert AFTER INSERT ON %1$s BEGIN
+				SELECT CASE WHEN NEW.id_parent IS NULL THEN RAISE(IGNORE) ELSE 0 END;
+				SELECT RAISE(FAIL, \'Cannot make a parent if already a children\')
+					FROM %1$s WHERE id = NEW.id_parent AND id_parent != id;
+				UPDATE users SET id_parent = id WHERE id = NEW.id_parent;
+			END;
+			CREATE TRIGGER %1$s_parent_trigger_delete AFTER DELETE ON %1$s BEGIN
+				SELECT CASE WHEN OLD.id_parent IS NULL THEN RAISE(IGNORE) ELSE 0 END;
+				-- Set id_parent to NULL if user has no longer any children
+				UPDATE %1$s SET id_parent = NULL WHERE id = OLD.id_parent
+					AND 0 = (SELECT COUNT(*) FROM users WHERE id_parent = OLD.id_parent AND id_parent != id);
+			END;', $table_name));
 	}
 
 	/**
@@ -690,6 +711,7 @@ class DynamicFields
 		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', User::TABLE));
 
 		$this->createIndexes(User::TABLE);
+		$this->createTriggers(User::TABLE);
 
 		$this->rebuildSearchTable(false);
 

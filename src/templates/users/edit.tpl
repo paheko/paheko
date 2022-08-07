@@ -19,7 +19,7 @@
 			{/if}
 
 			{if !$user->hasChildren()}
-				{input type="list" name="id_parent" label="Membre parent" target="!users/selector.php" help="Permet de regrouper les personnes de la même famille. Sélectionner ici le membre responsable." default=$user->getParentSelector()}
+				{input type="list" name="id_parent" label="Membre parent" target="!users/selector.php?no_children=1" help="Permet de regrouper les personnes de la même famille. Sélectionner ici le membre responsable." default=$user->getParentSelector() can_delete=true}
 			{/if}
 
 			{foreach from=$fields item="field"}
