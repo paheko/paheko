@@ -5,7 +5,6 @@
     warning=$warning
     alert="Cette action est irréversible et effacera toutes les données et l'historique de ce membre."
     info="Alternativement, il est aussi possible de déplacer le membre dans une catégorie « Anciens membres », plutôt que de le supprimer complètement."
-    confirm=$confirm
     csrf_key=$csrf_key
 }
 
