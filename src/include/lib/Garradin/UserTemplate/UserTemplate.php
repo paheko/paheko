@@ -10,7 +10,7 @@ use Garradin\Config;
 use Garradin\Plugin;
 use Garradin\Utils;
 
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 
 use Garradin\Web\Skeleton;
 use Garradin\Entities\Files\File;

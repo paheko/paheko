@@ -2,7 +2,7 @@
 
 namespace Garradin\Entities;
 
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Entity;
 
 class API_Credentials extends Entity

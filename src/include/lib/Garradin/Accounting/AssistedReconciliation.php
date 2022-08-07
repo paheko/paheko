@@ -5,7 +5,7 @@ namespace Garradin\Accounting;
 use Garradin\CSV_Custom;
 use Garradin\UserException;
 use Garradin\Utils;
-use Garradin\Membres\Session;
+use Garradin\Users\Session;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entity;
 
