@@ -4,6 +4,8 @@ namespace Garradin;
 const LOGIN_PROCESS = true;
 require_once __DIR__ . '/_inc.php';
 
+$config = Config::getInstance();
+
 $manifest = [
 	'background_color' => $config->color2 ?? ADMIN_COLOR2,
 	'theme_color'      => $config->color1 ?? ADMIN_COLOR1,
