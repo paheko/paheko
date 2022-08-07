@@ -361,6 +361,7 @@
 			throw Error('Parent input list not found');
 		}
 
+		var can_delete = i.firstChild.getAttribute('data-can-delete');
 		var multiple = i.firstChild.getAttribute('data-multiple');
 		var name = i.firstChild.getAttribute('data-name');
 
@@ -369,7 +370,7 @@
 		span.innerHTML = '<input type="hidden" name="' + name + '[' + value + ']" value="' + label + '" />' + label;
 
 		// Add delete button
-		if (parseInt(multiple, 10) == 1) {
+		if (can_delete == 1) {
 			var btn = document.createElement('button');
 			btn.className = 'icn-btn';
 			btn.type = 'button';
@@ -377,7 +378,8 @@
 			btn.onclick = () => span.parentNode.removeChild(span);
 			span.appendChild(btn);
 		}
-		else if (old = i.querySelector('span')) {
+
+		if (!multiple && (old = i.querySelector('span'))) {
 			i.removeChild(old);
 		}
 
@@ -420,7 +422,7 @@
 			let n = f.match(/^\d+$/) ? (parseInt(f, 10) - 1) : null;
 			let i = form.querySelectorAll(n !== null ? '[name]:not([type="hidden"])' : f);
 
-			if(i.length >= n) {
+			if(i[n]) {
 				i[n].focus();
 			}
 		}
