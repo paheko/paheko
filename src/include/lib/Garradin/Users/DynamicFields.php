@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Garradin\Users;
 
@@ -20,9 +21,9 @@ class DynamicFields
 
 	const TABLE = DynamicField::TABLE;
 
-	protected $_fields = [];
-	protected $_fields_by_type = [];
-	protected $_fields_by_system_use = [
+	protected array $_fields = [];
+	protected array $_fields_by_type = [];
+	protected array $_fields_by_system_use = [
 		'login' => [],
 		'password' => [],
 		'name' => [],
@@ -35,7 +36,7 @@ class DynamicFields
 
 	static protected $_instance;
 
-	static public function getInstance()
+	static public function getInstance(): self
 	{
 		if (null === self::$_instance) {
 			self::$_instance = new self;
@@ -431,6 +432,8 @@ class DynamicFields
 		$self->createIndexes();
 		$self->copy('membres', User::TABLE, $fields);
 
+		$self->rebuildSearchTable(true);
+
 		return $self;
 	}
 
@@ -553,38 +556,22 @@ class DynamicFields
 	}
 
 	/**
-	 * Returns the SQL query used to create the search table and triggers
+	 * Returns the SQL query used to create the search table
 	 * This table is useful to make LIKE searches on unicode columns
 	 */
-	public function getSQLSearchSchema(string $table_name = User::TABLE): ?string
+	public function getSQLSearchSchema(string $table_name = null): ?string
 	{
 		$db = DB::getInstance();
-		$search_table = $table_name . '_search';
+		$search_table = $table_name ?? User::TABLE . '_search';
 
-		$columns = [];
-
-		foreach ($this->_fields as $key => $cfg) {
-			if ($cfg->type == 'text' || $cfg->list_table) {
-				$columns[] = $key;
-			}
-		}
+		$columns = $this->getSearchColumns();
 
 		if (!count($columns)) {
 			return null;
 		}
 
-		$new_columns = array_map(fn ($v) => sprintf('transliterate_to_ascii(NEW.%s)', $v), $columns);
-
 		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table, $table_name, implode(",\n\t", $columns));
 		$sql .= "\n";
-
-		// Triggers
-		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_ai AFTER INSERT ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("REPLACE INTO %s (id, %s) VALUES (NEW.id, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
-		$sql .= "END;\n";
-		$sql .= sprintf("CREATE TRIGGER IF NOT EXISTS %s_au AFTER UPDATE ON %s BEGIN\n\t", $search_table, $table_name);
-		$sql .= sprintf("REPLACE INTO %s (id, %s) VALUES (NEW.id, %s);\n", $search_table, implode(', ', $columns), implode(', ', $new_columns));
-		$sql .= "END;\n";
 
 		foreach ($columns as $column) {
 			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);\n", $db->quoteIdentifier($search_table . '_' . $column), $search_table, $db->quoteIdentifier($column));
@@ -593,34 +580,38 @@ class DynamicFields
 		return $sql;
 	}
 
-	public function getCopyFields(): array
+	public function getSearchColumns(): array
 	{
-		$fields = $this->_fields;
-		// Generated fields cannot be copied
-		$fields = array_filter($fields, fn($f) => DynamicField::SQL_TYPES[$f->type] != 'GENERATED');
+		$columns = [];
 
-		// Champs à recopier
-		$copy = array_merge(array_keys(DynamicField::SYSTEM_FIELDS), array_keys($fields));
-		return array_combine($copy, $copy);
-	}
-
-	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null): string
-	{
-		if (null === $fields) {
-			$fields = $this->getCopyFields();
+		foreach ($this->_fields as $key => $cfg) {
+			if (in_array($cfg->type, DynamicField::SEARCH_TYPES)) {
+				$columns[$key] = $key;
+			}
 		}
 
+		return $columns;
+	}
+
+	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null, string $function = null): string
+	{
 		$db = DB::getInstance();
+		unset($fields['id']);
+		$source = array_map([$db, 'quoteIdentifier'], array_keys($fields));
+
+		if ($function) {
+			$source = array_map(fn($a) => $function . '(' . $a . ')', $source);
+		}
 
 		return sprintf('INSERT INTO %s (id, %s) SELECT id, %s FROM %s;',
 			$new_table_name,
 			implode(', ', array_map([$db, 'quoteIdentifier'], $fields)),
-			implode(', ', array_map([$db, 'quoteIdentifier'], array_keys($fields))),
+			implode(', ', $source),
 			$old_table_name
 		);
 	}
 
-	public function copy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null): void
+	public function copy(string $old_table_name, string $new_table_name = User::TABLE, ?array $fields = null): void
 	{
 		$sql = $this->getSQLCopy($old_table_name, $new_table_name, $fields);
 		DB::getInstance()->exec($sql);
@@ -640,12 +631,6 @@ class DynamicFields
 		$db = DB::getInstance();
 		$schema = $this->getSQLSchema($table_name);
 		$db->exec($schema);
-
-		$schema = $this->getSQLSearchSchema($table_name);
-
-		if ($schema) {
-			$db->exec($schema);
-		}
 	}
 
 	public function createIndexes(string $table_name = User::TABLE): void
@@ -670,31 +655,99 @@ class DynamicFields
 
 		$db->exec(sprintf('CREATE UNIQUE INDEX IF NOT EXISTS users_number ON %s (%s);', $table_name, $this->getNumberField()));
 		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_category ON %s (id_category);', $table_name));
+		$db->exec(sprintf('CREATE INDEX IF NOT EXISTS users_parent ON %s (id_parent);', $table_name));
 	}
 
 	/**
 	 * Enregistre les changements de champs en base de données
-	 * @return boolean true
 	 */
-	public function rebuildUsersTable()
+	public function rebuildUsersTable(array $fields): void
 	{
 		$db = DB::getInstance();
 
-		$db->beginSchemaUpdate();
+		$fields = array_combine($fields, $fields);
+
+		// Generated fields cannot be copied
+		foreach ($this->_fields as $f) {
+			if (DynamicField::SQL_TYPES[$f->type] == 'GENERATED') {
+				unset($fields[$f->name]);
+			}
+		}
+
+		// Always copy system fields
+		$system_fields = array_keys(DynamicField::SYSTEM_FIELDS);
+		$fields = array_merge(array_combine($system_fields, $system_fields), $fields);
+
+		$in_transaction = $db->inTransaction();
+
+		if (!$in_transaction) {
+			$db->beginSchemaUpdate();
+		}
+
 		$this->createTable(User::TABLE . '_tmp');
-		$this->copy(User::TABLE, User::TABLE . '_tmp');
+		$this->copy(User::TABLE, User::TABLE . '_tmp', $fields);
 		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', User::TABLE));
 		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', User::TABLE));
 
 		$this->createIndexes(User::TABLE);
 
-		$db->commitSchemaUpdate();
+		$this->rebuildSearchTable(false);
 
-		return true;
+		if (!$in_transaction) {
+			$db->commitSchemaUpdate();
+		}
 	}
 
-	public function preview(array $fields)
+	public function rebuildSearchTable(bool $from_users_table = true): void
 	{
+		$db = DB::getInstance();
+		$db->begin();
+
+		$search_table = User::TABLE . '_search';
+		$columns = $this->getSearchColumns();
+
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table . '_tmp', User::TABLE, implode(",\n\t", $columns));
+
+		$db->exec($sql);
+
+		if ($from_users_table) {
+			// This is slower but is necessary sometimes
+			$sql = $this->getSQLCopy(User::TABLE, $search_table . '_tmp', $this->getSearchColumns(), 'transliterate_to_ascii');
+		}
+		else {
+			$sql = $this->getSQLCopy($search_table, $search_table . '_tmp', $this->getSearchColumns());
+		}
+
+		$db->exec($sql);
+		$db->exec(sprintf('DROP TABLE IF EXISTS %s;', $search_table));
+		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $search_table));
+
+		foreach ($columns as $column) {
+			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);\n",
+				$db->quoteIdentifier($search_table . '_' . $column),
+				$search_table,
+				$db->quoteIdentifier($column)
+			);
+		}
+
+		$db->commit();
+	}
+
+	public function rebuildUserSearchCache(int $id): void
+	{
+		$db = DB::getInstance();
+		$columns = $this->getSearchColumns();
+		$keys = array_map([$db, 'quoteIdentifier'], $columns);
+		$copy = array_map(fn($c) => sprintf('transliterate_to_ascii(%s)', $c), $keys);
+
+		$sql = sprintf('INSERT OR REPLACE INTO %s_search (id, %s) SELECT id, %s FROM %1$s WHERE id = %d;',
+			User::TABLE,
+			implode(', ', $keys),
+			implode(', ', $copy),
+			$id
+		);
+
+		$db->exec($sql);
 	}
 
 	public function add(DynamicField $df)
@@ -744,11 +797,19 @@ class DynamicFields
 		$rebuild = false;
 
 		$db = DB::getInstance();
-		$db->begin();
+
+		// We need to disable foreign keys BEFORE we start the transaction
+		// this means that the config_users_fields table CANNOT have any foreign keys
+		$db->beginSchemaUpdate();
+
+		$copy = [];
 
 		foreach ($this->_fields as $field) {
 			if (!$field->exists()) {
 				$rebuild = true;
+			}
+			else {
+				$copy[] = $field->name;
 			}
 
 			if ($field->isModified()) {
@@ -767,10 +828,11 @@ class DynamicFields
 			// FIXME/TODO: use ALTER TABLE ... DROP COLUMN for SQLite 3.35.0+
 			// some conditions apply
 			// https://www.sqlite.org/lang_altertable.html#altertabdropcol
-			$this->rebuildUsersTable();
+			$this->rebuildUsersTable($copy);
 		}
 
-		$db->commit();
+		$db->commitSchemaUpdate();
+
 		$this->reload();
 	}
 

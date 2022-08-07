@@ -23,6 +23,7 @@ use Garradin\Users\Users;
 use Garradin\Entities\Files\File;
 
 use KD2\SMTP;
+use KD2\DB\EntityManager as EM;
 
 #[AllowDynamicProperties]
 class User extends Entity
@@ -132,17 +133,13 @@ class User extends Entity
 
 	public function save(bool $selfcheck = true): bool
 	{
+		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
 		parent::save($selfcheck);
 
-		$columns = array_intersect(DynamicFields::getInstance()->getSearchColumns(), array_keys($this->_modified));
-
+		// We are not using a trigger as it would make modifying the users table from outside impossible
+		// (because the transliterate_to_ascii function does not exist)
 		if (count($columns)) {
-			$db = EM::getInstance(self::class)->DB();
-			$keys = array_map(fn ($a) => ':' . $db->quoteIdentifier($a), $columns);
-			$args = substr(str_repeat('?, ', count($columns)), 0, -2);
-			$values = array_intersect_key($this->modifiedProperties(true), array_flip($columns));
-			$values = array_map([Utils::class, 'unicodeTransliterate'], $values);
-			$db->preparedQuery(sprintf('REPLACE INTO %s_search (%s) VALUES (%s);', self::TABLE, $keys, $args), ...$values);
+			DynamicFields::getInstance()->rebuildUserSearchCache($this->id());
 		}
 
 		return true;

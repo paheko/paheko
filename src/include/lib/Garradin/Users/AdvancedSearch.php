@@ -35,8 +35,8 @@ class AdvancedSearch extends A_S
 			'label' => 'Est parent',
 			'type' => 'boolean',
 			'null' => false,
-			'select' => '\'Oui\'',
-			'where' => '(SELECT 1 FROM users AS u2 WHERE u2.id_parent = u.id LIMIT 1)',
+			'select' => 'CASE WHEN id_parent = id THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'id_parent IS NOT NULL AND id_parent = id',
 		];
 
 
@@ -44,8 +44,8 @@ class AdvancedSearch extends A_S
 			'label' => 'Est enfant',
 			'type' => 'boolean',
 			'null' => false,
-			'select' => 'CASE WHEN id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'id_parent IS NOT NULL',
+			'select' => 'CASE WHEN id_parent IS NOT NULL AND id_parent != id THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'id_parent IS NOT NULL AND id_parent != id',
 		];
 
 		foreach ($fields->all() as $name => $field)

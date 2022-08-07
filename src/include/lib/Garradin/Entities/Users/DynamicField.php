@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Garradin\Entities\Users;
 
@@ -6,6 +7,8 @@ use Garradin\Config;
 use Garradin\DB;
 use Garradin\Entity;
 use Garradin\Utils;
+use Garradin\Entities\Files\File;
+use Garradin\Files\Files;
 use Garradin\Users\DynamicFields;
 
 class DynamicField extends Entity
@@ -98,7 +101,7 @@ class DynamicField extends Entity
 	const PHP_TYPES = [
 		'email'    => '?string',
 		'url'      => '?string',
-		'checkbox' => 'int',
+		'checkbox' => 'bool',
 		'date'     => '?date',
 		'datetime' => '?DateTime',
 		'file'     => '?string',
@@ -129,6 +132,13 @@ class DynamicField extends Entity
 		'text'     => 'TEXT',
 		'textarea' => 'TEXT',
 		'generated'=> 'GENERATED',
+	];
+
+	const SEARCH_TYPES = [
+		'email',
+		'text',
+		'textarea',
+		'url',
 	];
 
 	const SQL_CONSTRAINTS = [
