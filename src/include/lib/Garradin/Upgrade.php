@@ -520,6 +520,11 @@ class Upgrade
 			$s->restoreFromLocal($backup_name);
 			$s->remove($backup_name);
 			Static_Cache::remove('upgrade');
+
+			if ($e instanceof UserException) {
+				$e = new \RuntimeException($e->getMessage(), 0, $e);
+			}
+
 			throw $e;
 		}
 
