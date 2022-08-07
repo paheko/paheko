@@ -152,11 +152,12 @@ class Search extends Entity
 		$sql = $this->SQL($force_limit, $force_select);
 
 		$allowed_tables = $this->getProtectedTables();
+		$db = DB::getInstance();
 
 		try {
-			$st = DB::getInstance()->protectSelect($allowed_tables, $sql);
+			$st = $db->protectSelect($allowed_tables, $sql);
 
-			$this->_result = $st->execute();
+			$this->_result = $db->execute($st);
 			return $this->_result;
 		}
 		catch (DB_Exception $e) {

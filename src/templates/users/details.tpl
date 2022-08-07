@@ -50,16 +50,16 @@
 		{/if}
 	{/if}
 	{if $user->isChild()}
-		<dt>Membre parent</dt>
+		<dt>Membre responsable</dt>
 		<dd>{link href="?id=%d"|args:$user.id_parent label=$parent_name}</dd>
 		{if count($siblings)}
-			<dt>Membres de la même famille</dt>
+			<dt>Autres membres rattachés à {$parent_name}</dt>
 			{foreach from=$siblings item="sibling"}
 				<dd>{link href="?id=%d"|args:$sibling.id label=$sibling.name}</dd>
 			{/foreach}
 		{/if}
 	{elseif count($children)}
-		<dt>Membres enfants</dt>
+		<dt>Membres rattachés</dt>
 		{foreach from=$children item="child"}
 			<dd>{link href="?id=%d"|args:$child.id label=$child.name}</dd>
 		{/foreach}

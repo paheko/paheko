@@ -112,10 +112,10 @@ class User extends Entity
 		}
 
 		if ($this->id_parent !== null) {
-			$this->assert(!$this->is_parent, 'Un membre ne peut être parent et enfant');
+			$this->assert(!$this->is_parent, 'Un membre ne peut être responsable et rattaché en même temps.');
 			$this->assert($this->id_parent > 0, 'Invalid parent ID');
 			$this->assert(!$this->exists() || $this->id_parent != $this->id(), 'Invalid parent ID');
-			$this->assert(!$db->test(self::TABLE, 'id = ? AND id_parent IS NOT NULL', $this->id_parent), 'Le membre parent sélectionné est déjà un enfant, et ne peut donc être à la fois enfant et parent.');
+			$this->assert(!$db->test(self::TABLE, 'id = ? AND id_parent IS NOT NULL', $this->id_parent), 'Le membre sélectionné comme responsable est déjà rattaché à un autre membre.');
 		}
 	}
 

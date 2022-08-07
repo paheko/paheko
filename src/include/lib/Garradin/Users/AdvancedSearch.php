@@ -32,17 +32,18 @@ class AdvancedSearch extends A_S
 		];
 
 		$columns['is_parent'] = [
-			'label' => 'Est parent',
+			'label' => 'Est responsable',
 			'type' => 'boolean',
 			'null' => false,
+			'select' => 'CASE WHEN is_parent = 1 THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'is_parent %s',
 		];
 
-
 		$columns['is_child'] = [
-			'label' => 'Est enfant',
+			'label' => 'Est rattaché',
 			'type' => 'boolean',
 			'null' => false,
-			'select' => 'CASE WHEN id_parent IS NOT NULL AND id_parent != id THEN \'Oui\' ELSE \'Non\' END',
+			'select' => 'CASE WHEN id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
 			'where' => 'id_parent IS NOT NULL',
 		];
 

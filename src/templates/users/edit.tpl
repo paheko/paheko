@@ -18,8 +18,8 @@
 					{input type="select" name="id_category" label="Catégorie du membre" required=true source=$user options=$categories}
 			{/if}
 
-			{if !$user->hasChildren()}
-				{input type="list" name="id_parent" label="Membre parent" target="!users/selector.php?no_children=1" help="Permet de regrouper les personnes de la même famille. Sélectionner ici le membre responsable." default=$user->getParentSelector() can_delete=true}
+			{if !$user->is_parent}
+				{input type="list" name="id_parent" label="Rattacher à un membre" target="!users/selector.php?no_children=1" help="Permet de regrouper les personnes d'un même foyer par exemple. Sélectionner ici le membre responsable." default=$user->getParentSelector() can_delete=true}
 			{/if}
 
 			{foreach from=$fields item="field"}
