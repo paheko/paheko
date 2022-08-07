@@ -232,8 +232,14 @@ class File extends Entity
 		self::validatePath($new_path);
 		self::validateFileName(Utils::basename($new_path));
 
-		if ($new_path == $this->path || 0 === strpos($new_path . '/', $this->path . '/')) {
-			throw new UserException('Impossible de renommer ou déplacer un fichier vers lui-même');
+		if ($new_path == $this->path) {
+			throw new UserException(sprintf('Impossible de renommer "%s" lui-même', $this->path));
+		}
+
+		if (0 === strpos($new_path . '/', $this->path . '/')) {
+			if ($this->type != self::TYPE_DIRECTORY) {
+				throw new UserException(sprintf('Impossible de renommer "%s" vers "%s"', $this->path, $new_path));
+			}
 		}
 
 		self::ensureDirectoryExists(Utils::dirname($new_path));
@@ -869,9 +875,9 @@ class File extends Entity
 		return false;
 	}
 
-	public function checkSkeletonWriteAccess(?Session $session): bool
+	static public function checkSkeletonWriteAccess(string $path, ?Session $session): bool
 	{
-		if (strpos($this->path, self::CONTEXT_SKELETON . '/web') === 0) {
+		if (strpos($path, self::CONTEXT_SKELETON . '/web') === 0) {
 			return $session->canAccess($session::SECTION_WEB, $session::ACCESS_ADMIN);
 		}
 
@@ -895,7 +901,7 @@ class File extends Entity
 			case self::CONTEXT_TRANSACTION:
 				return $session->canAccess($session::SECTION_ACCOUNTING, $session::ACCESS_WRITE);
 			case self::CONTEXT_SKELETON:
-				return $this->checkSkeletonWriteAccess($session);
+				return self::checkSkeletonWriteAccess($this->path, $session);
 			case self::CONTEXT_USER:
 				return $session->canAccess($session::SECTION_USERS, $session::ACCESS_WRITE);
 		}
@@ -913,7 +919,7 @@ class File extends Entity
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_SKELETON:
-				return $this->checkSkeletonWriteAccess($session);
+				return self::checkSkeletonWriteAccess($this->path, $session);
 			case self::CONTEXT_DOCUMENTS:
 				// Only admins can delete files
 				return $session->canAccess($session::SECTION_DOCUMENTS, $session::ACCESS_ADMIN);
@@ -938,7 +944,7 @@ class File extends Entity
 
 		switch ($context) {
 			case self::CONTEXT_SKELETON:
-				return $this->checkSkeletonWriteAccess($session);
+				return self::checkSkeletonWriteAccess($path, $session);
 			case self::CONTEXT_WEB:
 				return $session->canAccess($session::SECTION_WEB, $session::ACCESS_WRITE);
 			case self::CONTEXT_DOCUMENTS:
