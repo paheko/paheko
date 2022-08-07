@@ -4,11 +4,13 @@ namespace Garradin\Entities\Accounting;
 
 use KD2\DB\EntityManager;
 
-use Garradin\Entity;
 use Garradin\DB;
-use Garradin\Users\DynamicFields;
+use Garradin\Entity;
+use Garradin\Form;
 use Garradin\Utils;
 use Garradin\UserException;
+
+use Garradin\Users\DynamicFields;
 
 use Garradin\Files\Files;
 use Garradin\Entities\Files\File;
@@ -585,13 +587,11 @@ class Transaction extends Entity
 		$this->type = self::TYPE_ADVANCED;
 		$amount = $source['amount'];
 
-		$key = 'account_transfer';
+		$account = Form::getSelectorValue($source['account_transfer']);
 
-		if (empty($source[$key]) || !count($source[$key])) {
+		if (!$account) {
 			throw new ValidationException('Aucun compte de dépôt n\'a été sélectionné');
 		}
-
-		$account = key($source[$key]);
 
 		$line = new Line;
 		$line->importForm([
@@ -674,15 +674,8 @@ class Transaction extends Entity
 			$db = DB::getInstance();
 
 			foreach ($source['lines'] as $i => $line) {
-				if (empty($line['account'])
-					&& empty($line['id_account'])
-					&& (empty($line['account_selector'])
-						|| !is_array($line['account_selector']) || empty(key($line['account_selector'])))) {
-					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
-				}
-
 				if (isset($line['account_selector'])) {
-					$line['id_account'] = (int)key($line['account_selector']);
+					$line['id_account'] = Form::getSelectorValue($source['account_selector']);
 				}
 				elseif (isset($line['account'])) {
 					if (empty($this->id_year) && empty($source['id_year'])) {
@@ -695,6 +688,10 @@ class Transaction extends Entity
 					if (empty($line['id_account'])) {
 						throw new ValidationException('Le compte choisi n\'existe pas.');
 					}
+				}
+
+				if (empty($line['id_account'])) {
+					throw new ValidationException(sprintf('Ligne %d : aucun compte n\'a été sélectionné', $i + 1));
 				}
 
 				$l = new Line;

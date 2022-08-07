@@ -4,10 +4,11 @@ namespace Garradin\Entities\Services;
 
 use Garradin\DB;
 use Garradin\Entity;
-use Garradin\Membres;
+use Garradin\Form;
 use Garradin\ValidationException;
 use Garradin\Services\Fees;
 use Garradin\Services\Services;
+use Garradin\Users\Users;
 use Garradin\Accounting\Transactions;
 use Garradin\Entities\Accounting\Transaction;
 use Garradin\Entities\Accounting\Line;
@@ -145,7 +146,9 @@ class Service_User extends Entity
 			throw new ValidationException('Montant non précisé');
 		}
 
-		if (empty($source['account_selector']) || !is_array($source['account_selector']) || !key($source['account_selector'])) {
+		$account = Form::getSelectorValue($source['account_selector'] ?? null);
+
+		if (!$account) {
 			throw new ValidationException('Aucune compte n\'a été sélectionné.');
 		}
 
@@ -155,7 +158,7 @@ class Service_User extends Entity
 			$label .= ' - ' . $this->fee()->label;
 		}
 
-		$label .= sprintf(' (%s)', (new Membres)->getNom($this->id_user));
+		$label .= sprintf(' (%s)', Users::getName($this->id_user));
 
 		$transaction = Transactions::create(array_merge($source, [
 			'label' => $label,
@@ -167,10 +170,10 @@ class Service_User extends Entity
 					'reference'     => $source['payment_reference'] ?? null,
 				],
 				[
-					'account_selector' => $source['account_selector'],
-					'debit'            => $source['amount'],
-					'id_analytical'    => $this->fee()->id_analytical,
-					'reference'        => $source['payment_reference'] ?? null,
+					'id_account'    => $account,
+					'debit'         => $source['amount'],
+					'id_analytical' => $this->fee()->id_analytical,
+					'reference'     => $source['payment_reference'] ?? null,
 
 				],
 			],

@@ -5,6 +5,7 @@ namespace Garradin\Entities\Services;
 use Garradin\DB;
 use Garradin\DynamicList;
 use Garradin\Entity;
+use Garradin\Form;
 use Garradin\ValidationException;
 use Garradin\Utils;
 use Garradin\Users\DynamicFields;
@@ -42,12 +43,12 @@ class Fee extends Entity
 			$source = $_POST;
 		}
 
-		if (isset($source['account']) && is_array($source['account'])) {
-			$source['id_account'] = (int)key($source['account']);
+		if (isset($source['account'])) {
+			$source['id_account'] = Form::getSelectorValue($source['account']);
 		}
 
 		if (isset($source['analytical']) && is_array($source['analytical'])) {
-			$source['id_analytical'] = (int)key($source['analytical']);
+			$source['id_analytical'] = Form::getSelectorValue($source['analytical']);
 		}
 
 		if (isset($source['amount_type'])) {

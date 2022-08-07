@@ -4,6 +4,7 @@ namespace Garradin\Entities\Web;
 
 use Garradin\DB;
 use Garradin\Entity;
+use Garradin\Form;
 use Garradin\UserException;
 use Garradin\Utils;
 use Garradin\Entities\Files\File;
@@ -290,16 +291,8 @@ class Page extends Entity
 		$uri = $source['uri'] ?? $this->uri;
 
 		if (array_key_exists('parent', $source)) {
-			if (is_array($source['parent'])) {
-				$source['parent'] = key($source['parent']);
-			}
-
-			if (empty($source['parent'])) {
-				$source['parent'] = '';
-			}
-
-			$parent = $source['parent'];
-			$source['path'] = trim($parent . '/' . $uri, '/');
+			$source['parent'] = Form::getSelectorValue($source['parent']);
+			$source['path'] = trim($source['parent'] . '/' . $uri, '/');
 		}
 
 		if (!empty($source['encryption']) ) {

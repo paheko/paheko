@@ -186,4 +186,26 @@ class Form
 	{
 		return \KD2\Form::get($key);
 	}
+
+	/**
+	 * Returns a value from a custom list selector
+	 * see CommonModifiers::input
+	 */
+	static public function getSelectorValue($value) {
+		if (!is_array($value)) {
+			return $value;
+		}
+
+		$values = array_keys(array_filter($value));
+
+		if (count($values) == 1) {
+			return current($values);
+		}
+		elseif (!count($values)) {
+			return ''; // Empty
+		}
+		else {
+			return $values;
+		}
+	}
 }

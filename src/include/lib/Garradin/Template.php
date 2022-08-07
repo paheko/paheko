@@ -499,12 +499,17 @@ class Template extends Smartyer
 		}
 		elseif ($type == 'list') {
 			$multiple = !empty($attributes['multiple']);
-			$values = '';
+			$can_delete = $multiple || !empty($attributes['can_delete']);
+			// Just an empty input to show that this input has been submitted
+			$values = sprintf('<input type="hidden" name="%s[]" value="" />', $this->escape($name));
 			$delete_btn = $this->widgetButton(['shape' => 'delete']);
 
 			if (null !== $current_value && is_iterable($current_value)) {
 				foreach ($current_value as $v => $l) {
-					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $multiple ? $delete_btn : '');
+					if (trim($l) === '') {
+						continue;
+					}
+					$values .= sprintf('<span class="label"><input type="hidden" name="%s[%s]" value="%s" /> %3$s %s</span>', $this->escape($name), $this->escape($v), $this->escape($l), $can_delete ? $delete_btn : '');
 				}
 			}
 
