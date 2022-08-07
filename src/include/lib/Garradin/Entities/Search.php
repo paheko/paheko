@@ -201,7 +201,7 @@ class Search extends Entity
 			return ['acc_transactions' => null, 'acc_transactions_lines' => null, 'acc_accounts' => null, 'acc_charts' => null, 'acc_years' => null, 'acc_transactions_users' => null];
 		}
 		else {
-			return ['users' => null, 'users_categories' => null];
+			return ['users' => null, 'users_search' => null, 'users_categories' => null];
 		}
 	}
 

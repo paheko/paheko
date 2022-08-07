@@ -548,42 +548,9 @@ class DynamicFields
 		return $sql;
 	}
 
-	/**
-	 * Returns the SQL query used to create the search table
-	 * This table is useful to make LIKE searches on unicode columns
-	 */
-	public function getSQLSearchSchema(string $table_name = null): ?string
-	{
-		$db = DB::getInstance();
-		$search_table = $table_name ?? User::TABLE . '_search';
-
-		$columns = $this->getSearchColumns();
-
-		if (!count($columns)) {
-			return null;
-		}
-
-		$sql = sprintf("CREATE TABLE IF NOT EXISTS %s\n(\n\tid INTEGER PRIMARY KEY NOT NULL REFERENCES %s (id) ON DELETE CASCADE,\n\t%s\n);", $search_table, $table_name, implode(",\n\t", $columns));
-		$sql .= "\n";
-
-		foreach ($columns as $column) {
-			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);\n", $db->quoteIdentifier($search_table . '_' . $column), $search_table, $db->quoteIdentifier($column));
-		}
-
-		return $sql;
-	}
-
 	public function getSearchColumns(): array
 	{
-		$columns = [];
-
-		foreach ($this->_fields as $key => $cfg) {
-			if (in_array($cfg->type, DynamicField::SEARCH_TYPES)) {
-				$columns[$key] = $key;
-			}
-		}
-
-		return $columns;
+		return array_keys(array_filter($this->_fields, fn ($f) => $f->hasSearchCache()));
 	}
 
 	public function getSQLCopy(string $old_table_name, string $new_table_name = User::TABLE, array $fields = null, string $function = null): string
@@ -734,11 +701,13 @@ class DynamicFields
 		$db->exec(sprintf('ALTER TABLE %s_tmp RENAME TO %1$s;', $search_table));
 
 		foreach ($columns as $column) {
-			$sql .= sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);\n",
+			$sql = sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);\n",
 				$db->quoteIdentifier($search_table . '_' . $column),
 				$search_table,
 				$db->quoteIdentifier($column)
 			);
+
+			$db->exec($sql);
 		}
 
 		$db->commit();

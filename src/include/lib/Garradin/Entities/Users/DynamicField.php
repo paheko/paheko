@@ -207,6 +207,11 @@ class DynamicField extends Entity
 		return true;
 	}
 
+	public function hasSearchCache(): bool
+	{
+		return in_array($this->type, DynamicField::SEARCH_TYPES);
+	}
+
 	public function selfCheck(): void
 	{
 		// Disallow name change if the field exists

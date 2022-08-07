@@ -27,24 +27,25 @@ class AdvancedSearch extends A_S
 			'label'    => $fields::getNameLabel(),
 			'type'     => 'text',
 			'null'     => true,
-			'select'   => $fields::getNameFieldsSQL(),
-			'order'    => sprintf('%s COLLATE U_NOCASE %%s', current($fields::getNameFields())),
+			'select'   => $fields::getNameFieldsSQL('u'),
+			'where'    => $fields::getNameFieldsSQL('us'),
+			'order'    => sprintf('us.%s %%s', current($fields::getNameFields())),
 		];
 
 		$columns['is_parent'] = [
 			'label' => 'Est responsable',
 			'type' => 'boolean',
 			'null' => false,
-			'select' => 'CASE WHEN is_parent = 1 THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'is_parent %s',
+			'select' => 'CASE WHEN u.is_parent = 1 THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'u.is_parent %s',
 		];
 
 		$columns['is_child'] = [
 			'label' => 'Est rattaché',
 			'type' => 'boolean',
 			'null' => false,
-			'select' => 'CASE WHEN id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
-			'where' => 'id_parent IS NOT NULL',
+			'select' => 'CASE WHEN u.id_parent IS NOT NULL THEN \'Oui\' ELSE \'Non\' END',
+			'where' => 'u.id_parent IS NOT NULL',
 		];
 
 		foreach ($fields->all() as $name => $field)
@@ -61,10 +62,14 @@ class AdvancedSearch extends A_S
 				continue;
 			}
 
+			$identifier = $db->quoteIdentifier($name);
+
 			$column = [
-				'label'    => $field->label,
-				'type'     => 'text',
-				'null'     => true,
+				'label'  => $field->label,
+				'type'   => 'text',
+				'null'   => true,
+				'select' => sprintf('u.%s', $identifier),
+				'where'  => sprintf('%s.%s %%s', $field->hasSearchCache() ? 'us' : 'u', $identifier),
 			];
 
 			if ($fields->isText($name)) {
@@ -200,7 +205,7 @@ class AdvancedSearch extends A_S
 
 	public function make(string $query): DynamicList
 	{
-		$tables = 'users u';
+		$tables = 'users AS u INNER JOIN users_search AS us USING (id)';
 		return $this->makeList($query, $tables, 'identity', false, ['id', 'identity']);
 	}
 
