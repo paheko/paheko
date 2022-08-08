@@ -970,7 +970,7 @@ class File extends Entity
 			throw new ValidationException('Nom de fichier invalide');
 		}
 
-		$extension = strtolower(substr($name, strrpos($name, '.')));
+		$extension = strtolower(substr($name, strrpos($name, '.')+1));
 
 		if (preg_match(self::FORBIDDEN_EXTENSIONS, $extension)) {
 			throw new ValidationException('Extension de fichier non autorisée, merci de renommer le fichier avant envoi.');
