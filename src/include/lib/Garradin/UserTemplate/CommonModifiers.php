@@ -5,7 +5,7 @@ namespace Garradin\UserTemplate;
 use Garradin\Config;
 use Garradin\Utils;
 
-use const Garradin\{ADMIN_URL};
+use const Garradin\{ADMIN_URL, CALC_CONVERT_COMMAND};
 
 /**
  * Common modifiers and functions used by Template (Smartyer) and UserTemplate
