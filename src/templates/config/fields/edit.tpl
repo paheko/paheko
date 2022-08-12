@@ -38,7 +38,9 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 		{input type="text" name="default" source=$field label="Valeur par défaut" help="Si renseigné, le champ aura cette valeur par défaut lors de l'ajout d'un nouveau membre"}
 		{/if}
 
+		{if $field->type != 'password'}
 		{input type="checkbox" name="list_table" value=1 label="Afficher dans la liste des membres" source=$field}
+		{/if}
 	</dl>
 </fieldset>
 
@@ -59,10 +61,12 @@ $title = $field->exists() ? 'Modifier un champ' : 'Ajouter un champ';
 <fieldset>
 	<legend>Accès</legend>
 	<dl>
+	{if !($field->system & $field::PASSWORD)}
 		<dt>Le champ est visible…</dt>
 		{input type="radio" name="read_access" value=$field::ACCESS_ADMIN label="Seulement aux gestionnaires des membres" source=$field}
 		{input type="radio" name="read_access" value=$field::ACCESS_USER label="Au membre lui-même, et aux gestionnaires" source=$field help="Le membre pourra voir cette information en se connectant" default=$field::ACCESS_USER}
 		<dd class="help">Attention&nbsp;: conformément à la réglementation (RGPD), quel que soit votre choix, le membre pourra voir le contenu de ce champ en effectuant un export de ses données personnelles s'il a le droit de se connecter.</dd>
+	{/if}
 
 		{if !$field->isGenerated()}
 		<dt>Le champ peut être modifié…</dt>

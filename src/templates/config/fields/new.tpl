@@ -14,7 +14,7 @@
 
 	<dl>
 		{foreach from=$presets key="key" item="preset"}
-			{input type="radio" name="preset" value=$key label=$preset.label required=true disabled=$preset.disabled}
+			{input type="radio" name="preset" value=$key label=$preset.label required=true disabled=$preset.disabled help=$preset.install_help}
 			{if $preset.disabled}
 				<p class="help">
 					Ce champ nécessite d'avoir déjà ajouté les champs suivants :
