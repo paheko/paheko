@@ -7,6 +7,7 @@ use Garradin\Entities\Files\File;
 use Garradin\UserException;
 use Garradin\UserTemplate\UserTemplate;
 use Garradin\Plugin;
+use Garradin\Utils;
 
 use KD2\Brindille_Exception;
 use KD2\DB\EntityManager as EM;
