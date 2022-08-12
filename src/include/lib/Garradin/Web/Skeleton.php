@@ -48,13 +48,18 @@ class Skeleton
 	public function error_404(): void
 	{
 		// Detect loop if 404.html does not exist
-		if ($this->name == '404.html') {
+		if (Utils::basename($this->path) == '404.html') {
 			throw new UserException('Cette page n\'existe pas.');
 		}
 
 		header('Content-Type: text/html;charset=utf-8', true);
 		header('HTTP/1.1 404 Not Found', true);
 		$tpl = new self('404.html');
+
+		if (!$tpl->exists()) {
+			throw new UserException('Cette page n\'existe pas.');
+		}
+
 		$tpl->serve();
 	}
 
