@@ -11,9 +11,18 @@ ALTER TABLE services_reminders_sent RENAME TO services_reminders_sent_old;
 ALTER TABLE acc_transactions RENAME TO acc_transactions_old;
 ALTER TABLE acc_transactions_users RENAME TO acc_transactions_users_old;
 
+ALTER TABLE emails_queue RENAME TO emails_queue_old;
+
 DROP VIEW acc_accounts_balances;
 
 .read 1.2.0_schema.sql
+
+-- Add recipient_pgp_key column
+INSERT INTO emails_queue
+	SELECT id, sender, recipient, recipient_hash, NULL, subject, content, content_html, sending, sending_started, context
+	FROM emails_queue_old;
+
+DROP TABLE emails_queue_old;
 
 INSERT INTO users_sessions SELECT * FROM membres_sessions;
 DROP TABLE membres_sessions;
