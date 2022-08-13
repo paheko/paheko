@@ -251,16 +251,20 @@ class Session extends \KD2\UserSession
 		return $out;
 	}
 
-	public function recoverPasswordSend(int $id): int
+	public function recoverPasswordSend(int $id): void
 	{
 		$user = $this->fetchUserForPasswordRecovery($id);
 
 		if (!$user) {
-			return 1;
+			throw new UserException('Aucun membre trouvé avec cette adresse e-mail, ou le membre trouvé n\'a pas le droit de se connecter.');
 		}
 
 		if ($user->perm_connect == self::ACCESS_NONE) {
-			return 2;
+			throw new UserException('Ce membre n\'a pas le droit de se connecter.');
+		}
+
+		if (!trim($user->email)) {
+			throw new UserException('Ce membre n\'a pas d\'adresse e-mail renseignée dans son profil.');
 		}
 
 		$query = $this->makePasswordRecoveryQuery($user);
@@ -270,12 +274,11 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		if ($user->clef_pgp) {
+		if ($user->pgp_key) {
 			$content = Security::encryptWithPublicKey($user->pgp_key, $message);
 		}
 
 		Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe perdu ?', $message);
-		return 0;
 	}
 
 	protected function fetchUserForPasswordRecovery(int $id): ?\stdClass
@@ -286,7 +289,7 @@ class Session extends \KD2\UserSession
 		$email_field = DynamicFields::getFirstEmailField();
 
 		// Fetch user, must have an email
-		$sql = sprintf('SELECT u.id, u.%s AS email, u.password, u.pgp_key, u.perm_connect
+		$sql = sprintf('SELECT u.id, u.%s AS email, u.password, u.pgp_key, c.perm_connect
 			FROM users u
 			INNER JOIN users_categories c ON c.id = u.id_category
 			WHERE u.%s = ? COLLATE NOCASE
@@ -310,6 +313,8 @@ class Session extends \KD2\UserSession
 
 	protected function makePasswordRecoveryQuery(\stdClass $user): string
 	{
+		$expire = ceil((time() - strtotime('2017-01-01')) / 3600) + 1;
+		$hash = $this->makePasswordRecoveryHash($user, $expire);
 		$id = base_convert($user->id, 10, 36);
 		$expire = base_convert($expire, 10, 36);
 		return sprintf('%s.%s.%s', $id, $expire, $hash);
@@ -356,7 +361,7 @@ class Session extends \KD2\UserSession
 
 	public function recoverPasswordChange(string $query, string $password, string $password_confirm)
 	{
-		$user = $this->checkRecoveryPasswordQuery($code);
+		$user = $this->checkRecoveryPasswordQuery($query);
 
 		if (null === $user) {
 			throw new UserException('Le code permettant de changer le mot de passe a expiré. Merci de bien vouloir recommencer la procédure.');
@@ -380,7 +385,7 @@ class Session extends \KD2\UserSession
 
 		DB::getInstance()->update('users', ['password' => $password], 'id = :id', ['id' => (int)$user->id]);
 
-		return Emails::queue(Emails::CONTEXT_SYSTEM, [$membre->email => null], null, 'Mot de passe changé', $message);
+		return Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe changé', $message);
 	}
 
 	public function user(): ?User

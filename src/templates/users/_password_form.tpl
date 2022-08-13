@@ -13,7 +13,7 @@ $required = $required ?? $field->required;
 </dd>
 <dd class="help">
 	Pas d'idée&nbsp;? Voici une suggestion choisie au hasard :
-	<input type="text" readonly="readonly" title="Cliquer pour utiliser cette suggestion comme mot de passe" id="pw_suggest" value="{$suggestion}" autocomplete="off" />
+	{input type="text" readonly=true title="Cliquer pour utiliser cette suggestion comme mot de passe" default=$suggestion autocomplete="off" copy=true name="suggest"}
 </dd>
 
 {input type="password" name="password" required=$required label="Mot de passe" help="Minimum %d caractères"|args:$password_length autocomplete="off" minlength=$password_length}
@@ -23,7 +23,7 @@ $required = $required ?? $field->required;
 <script type="text/javascript" async="async">
 {literal}
 g.script('scripts/password.js', () => {
-	initPasswordField('pw_suggest', 'f_password', 'f_password_confirmed');
+	initPasswordField('f_suggest', 'f_password', 'f_password_confirmed');
 });
 {/literal}
 </script>

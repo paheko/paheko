@@ -89,9 +89,11 @@ class Template extends Smartyer
 			$this->assign('config', Config::getInstance());
 		}
 
+		$is_logged = $session ? $session->isLogged() : null;
+
 		$this->assign('session', $session);
-		$this->assign('is_logged', $session ? $session->isLogged() : null);
-		$this->assign('logged_user', $session ? $session->getUser() : null);
+		$this->assign('is_logged', $is_logged);
+		$this->assign('logged_user', $is_logged ? $session->getUser() : null);
 		$this->assign('session', $session);
 		$this->assign('dialog', isset($_GET['_dialog']));
 
@@ -114,7 +116,6 @@ class Template extends Smartyer
 
 		$this->register_function('form_errors', [$this, 'formErrors']);
 		$this->register_function('show_error', [$this, 'showError']);
-		$this->register_function('form_field', [$this, 'formField']);
 		$this->register_function('input', [$this, 'formInput']);
 		$this->register_function('password_change', [$this, 'passwordChangeInput']);
 
@@ -404,6 +405,9 @@ class Template extends Smartyer
 				$current_value = $v->format('H:i');
 			}
 		}
+		elseif ($type == 'password') {
+			$current_value = null;
+		}
 
 
 		$attributes['id'] = 'f_' . str_replace(['[', ']'], '', $name);
@@ -559,6 +563,9 @@ class Template extends Smartyer
 		if ($type == 'file') {
 			$input .= sprintf('<input type="hidden" name="MAX_FILE_SIZE" value="%d" id="f_maxsize" />', Utils::return_bytes(Utils::getMaxUploadSize()));
 		}
+		elseif (!empty($copy)) {
+			$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" title="Copier dans le presse-papier" />', $params['name']);
+		}
 
 		$input .= $suffix;
 
@@ -583,10 +590,6 @@ class Template extends Smartyer
 			$out .= '</dd>';
 		}
 		else {
-			if (!empty($copy)) {
-				$input .= sprintf('<input type="button" onclick="var a = $(\'#f_%s\'); a.focus(); a.select(); document.execCommand(\'copy\'); this.value = \'Copié !\'; this.focus(); return false;" onblur="this.value = \'Copier\';" value="Copier" />', $params['name']);
-			}
-
 			$out = sprintf('<dt>%s%s</dt><dd>%s</dd>', $label, $required_label, $input);
 
 			if ($type == 'file' && empty($params['no_size_limit'])) {
@@ -599,56 +602,6 @@ class Template extends Smartyer
 		}
 
 		return $out;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	protected function formField(array $params, $escape = true)
-	{
-		if (!isset($params['name']))
-		{
-			throw new \BadFunctionCallException('name argument is mandatory');
-		}
-
-		$name = $params['name'];
-
-		if (isset($_POST[$name]))
-			$value = $_POST[$name];
-		elseif (isset($params['data']) && is_array($params['data']) && array_key_exists($name, $params['data']))
-		{
-			$value = $params['data'][$name];
-		}
-		elseif (isset($params['data']) && is_object($params['data']) && property_exists($params['data'], $name))
-		{
-			$value = $params['data']->$name;
-		}
-		elseif (isset($params['default']))
-			$value = $params['default'];
-		else
-			$value = '';
-
-		if (is_array($value))
-		{
-			return $value;
-		}
-
-		if (isset($params['checked']))
-		{
-			if ($value == $params['checked'])
-				return ' checked="checked" ';
-
-			return '';
-		}
-		elseif (isset($params['selected']))
-		{
-			if ($value == $params['selected'])
-				return ' selected="selected" ';
-
-			return '';
-		}
-
-		return $escape ? htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') : $value;
 	}
 
 	protected function formatPhoneNumber($n)

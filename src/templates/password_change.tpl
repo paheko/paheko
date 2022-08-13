@@ -13,7 +13,7 @@
 	</fieldset>
 
 	<p class="submit">
-		{csrf_field key="changePassword"}
+		{csrf_field key=$csrf_key}
 		{button type="submit" name="change" label="Modifier mon mot de passe" shape="right" class="main"}
 	</p>
 

@@ -3,9 +3,14 @@ namespace Garradin;
 
 use KD2\HTTP;
 
+use Garradin\Users\DynamicFields;
+use Garradin\Users\Session;
+
 const LOGIN_PROCESS = true;
 
 require_once __DIR__ . '/_inc.php';
+
+$session = Session::getInstance();
 
 // Relance session_start et renvoie une image de 1px transparente
 if (qg('keepSessionAlive') !== null)
@@ -31,7 +36,7 @@ $id_field = DynamicFields::get(DynamicFields::getLoginField());
 $id_field_name = $id_field->label;
 
 $form->runIf('login', function () use ($id_field_name, $session) {
-    if (!trim((string) f('_id'))) {
+    if (!trim((string) f('id'))) {
         throw new UserException(sprintf('L\'identifiant (%s) n\'a pas été renseigné.', $id_field_name));
     }
 
@@ -39,14 +44,14 @@ $form->runIf('login', function () use ($id_field_name, $session) {
         throw new UserException('Le mot de passe n\'a pas été renseigné.');
     }
 
-    if (!$session->login(f('_id'), f('password'), (bool) f('permanent'))) {
+    if (!$session->login(f('id'), f('password'), (bool) f('permanent'))) {
         throw new UserException(sprintf("Connexion impossible.\nVérifiez votre identifiant (%s) et votre mot de passe.", $id_field_name));
     }
 }, 'login', ADMIN_URL);
 
-$tpl->assign('ssl_enabled', HTTP::getScheme() == 'https' ? false : true);
+$ssl_enabled = HTTP::getScheme() == 'https';
+$changed = qg('changed') !== null;
 
-$tpl->assign(compact('id_field_name'));
-$tpl->assign('changed', qg('changed') !== null);
+$tpl->assign(compact('id_field', 'ssl_enabled', 'changed'));
 
 $tpl->display('login.tpl');

@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS users_sessions
     selector TEXT NOT NULL,
     hash TEXT NOT NULL,
     id_user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    expire INT NOT NULL,
+    expiry INT NOT NULL,
 
     PRIMARY KEY (selector, id_user)
 );
