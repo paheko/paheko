@@ -122,7 +122,9 @@
 		{/if}
 
 	{elseif !defined('Garradin\INSTALL_PROCESS')}
+        {if $config.org_web || !$config.site_disabled}
 		<li><a href="{if $config.org_web}{$config.org_web}{else}{$www_url}{/if}">&larr; Retour au site</a></li>
+        {/if}
 		<li><a href="{$admin_url}">Connexion</a>
 			<ul>
 				<li><a href="{$admin_url}password.php">Mot de passe perdu</a>

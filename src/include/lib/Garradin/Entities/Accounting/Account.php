@@ -210,12 +210,11 @@ class Account extends Entity
 			LEFT JOIN acc_accounts b ON b.id = l.id_analytical';
 		$conditions = sprintf('l.id_account = %d AND t.id_year = %d', $this->id(), $year_id);
 
-		$sum = 0;
+		$sum = null;
 		$reverse = $this->isReversed($simple, $year_id) ? -1 : 1;
 
 		if ($start) {
 			$conditions .= sprintf(' AND t.date >= %s', $db->quote($start->format('Y-m-d')));
-			$sum = $this->getSumAtDate($year_id, $start) * $reverse;
 		}
 
 		if ($end) {
@@ -233,17 +232,33 @@ class Account extends Entity
 		}
 
 		$list = new DynamicList($columns, $tables, $conditions);
-		$list->orderBy('date', false);
+		$list->orderBy('date', true);
 		$list->setCount('COUNT(*)');
-		$list->setPageSize(null);
-		$list->setModifier(function (&$row) use (&$sum) {
+		$list->setPageSize(null); // Because with paging we can't calculate the running sum
+		$list->setModifier(function (&$row) use (&$sum, &$list, $reverse, $year_id, $start, $end) {
 			if (property_exists($row, 'sum')) {
-				$sum += $row->change;
+				// Reverse running sum needs the last sum, first
+				if ($list->desc && null === $sum) {
+					$sum = $this->getSumAtDate($year_id, ($end ?? new \DateTime($row->date))->modify('+1 day')) * -1 * $reverse;
+				}
+				elseif (!$list->desc) {
+					if (null === $sum && $start) {
+						$sum = $this->getSumAtDate($year_id, $start) * -1 * $reverse;
+					}
+
+					$sum += $row->change;
+				}
+
 				$row->sum = $sum;
+
+				if ($list->desc) {
+					$sum -= $row->change;
+				}
 			}
 
 			$row->date = \DateTime::createFromFormat('!Y-m-d', $row->date);
 		});
+
 		$list->setExportCallback(function (&$row) {
 			static $columns = ['change', 'sum', 'credit', 'debit'];
 			foreach ($columns as $key) {

@@ -133,7 +133,7 @@ class DynamicList implements \Countable
 		$columns = [];
 
 		foreach ($this->columns as $alias => $properties) {
-			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order && !$this->desc)) {
+			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order)) {
 				continue;
 			}
 
@@ -181,7 +181,7 @@ class DynamicList implements \Countable
 
 		foreach ($this->columns as $alias => $properties) {
 			// Skip columns that require a certain order (eg. calculating a running sum)
-			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order && !$this->desc)) {
+			if (isset($properties['only_with_order']) && !($properties['only_with_order'] == $this->order)) {
 				continue;
 			}
 

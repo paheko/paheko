@@ -49,11 +49,18 @@ class Membres
             {
                 if ($config->type == 'datetime' && trim($data[$key]) !== '')
                 {
-                    $dt = \DateTime::createFromFormat('Y-m-d H:i', $data[$key]);
-                    if (!$dt) {
-                        throw new UserException(sprintf('Format invalide pour le champ "%s": AAAA-MM-JJ HH:mm attendu.', $config->title));
+                    $value = sprintf('%s %s', $data[$key], $_POST[$key . '_time'] ?? '');
+                    $dt = null;
+
+                    if (preg_match('!^\d{2}/\d{2}/\d{4}\s\d{1,2}:\d{2}$!', $value)) {
+                        $dt = \DateTime::createFromFormat('!d/m/Y H:i', $value);
                     }
-                    $data[$key] = $dt->format('Y-m-d H:i');
+
+                    if (!$dt) {
+                        throw new UserException(sprintf('Format de date et heure invalide pour le champ "%s" : %s', $config->title, $value));
+                    }
+
+                    $data[$key] = $dt->format('Y-m-d H:i:s');
                 }
                 elseif ($config->type == 'date' && trim($data[$key]) !== '')
                 {

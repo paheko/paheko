@@ -102,84 +102,9 @@ class Form
 		$this->errors[] = $msg;
 	}
 
-	public function getErrorMessages($membre = false)
+	public function getErrorMessages()
 	{
-		$errors = [];
-		$champs = null;
-
-		if ($membre) {
-			$champs = Config::getInstance()->get('champs_membres');
-		}
-
-		foreach ($this->errors as $error)
-		{
-			if (is_array($error))
-			{
-				if ($membre && $champs) {
-					$error['name'] = $champs->get($error['name'], 'title');
-				}
-
-				$errors[] = $this->getErrorMessage($error['rule'], $error['name'], $error['params']);
-			}
-			else
-			{
-				$errors[] = $error;
-			}
-		}
-
-		return $errors;
-	}
-
-	protected function getFieldName($name)
-	{
-		switch ($name)
-		{
-			case '_id': return 'identifiant';
-			case 'passe': return 'mot de passe';
-			case 'debut': return 'date de début';
-			case 'fin': return 'date de fin';
-			case 'duree': return 'durée';
-			case 'passe_check': return 'vérification de mot de passe';
-			case 'id_account': return 'compte';
-			case 'label': return 'libellé';
-			default: return $name;
-		}
-	}
-
-	protected function getErrorMessage($rule, $element, Array $params)
-	{
-		$element = $this->getFieldName($element);
-
-		switch ($rule)
-		{
-			case 'required':
-			case 'required_if':
-			case 'required_unless':
-			case 'required_with':
-			case 'required_with_all':
-			case 'required_without':
-			case 'required_without_all':
-				return sprintf('Le champ %s est vide.', $element);
-			case 'min':
-				return sprintf('Le champ %s doit faire au moins %d caractères.', $element, $params[0]);
-			case 'max':
-				return sprintf('Le champ %s doit faire moins de %d caractères.', $element, $params[0]);
-			case 'file':
-				return sprintf('Le fichier envoyé n\'est pas valide.');
-			case 'confirmed':
-				return sprintf('La vérification du champ %s n\'est pas identique au champ lui-même.', $element);
-			case 'date_format':
-				return sprintf('Format de date invalide dans le champ %s.', $element);
-			case 'numeric':
-				return sprintf('Le champ %s doit être un nombre.', $element);
-			case 'money':
-				return sprintf('Le champ %s n\'est pas un nombre valide.', $element);
-			case 'in':
-			case 'in_table':
-				return sprintf('Valeur invalide dans le champ \'%s\'.', $element);
-			default:
-				return sprintf('Erreur "%s" dans le champ "%s"', $rule, $element);
-		}
+		return $this->errors;
 	}
 
 	public function __invoke($key)
