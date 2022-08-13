@@ -165,6 +165,19 @@ class User extends Entity
 		return File::CONTEXT_USER . '/' . $this->id();
 	}
 
+	public function listFiles(): array
+	{
+		$files = [];
+
+		foreach (Files::listForContext(File::CONTEXT_USER, (string) $this->id()) as $dir) {
+			foreach (Files::list($dir->path) as $file) {
+				$files[] = $file;
+			}
+		}
+
+		return $files;
+	}
+
 	public function name(): string
 	{
 		$out = [];

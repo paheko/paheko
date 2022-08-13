@@ -2,6 +2,21 @@
 <html>
 <head>
 	<title>Données utilisateur</title>
+	<style type="text/css">
+	{literal}
+		table {
+			border-collapse: collapse;
+		}
+		table td, table th {
+			border: 1px solid #000;
+			text-align: left;
+			padding: .5em;
+		}
+		table thead {
+			background: #eee;
+		}
+	{/literal}
+	</style>
 </head>
 
 <body>
@@ -12,7 +27,7 @@
 
 <h2>Profil</h2>
 
-{include file="users/_details.tpl" champs=$champs_list data=$data show_message_button=false mode="export"}
+{include file="users/_details.tpl" data=$user show_message_button=false mode="export"}
 
 <hr />
 
@@ -37,8 +52,6 @@
 			<td>{$row.fee}</td>
 			<td>{if $row.paid}<b class="confirm">Oui</b>{else}<b class="error">Non</b>{/if}</td>
 			<td>{$row.amount|raw|money_currency}</td>
-			<td class="actions">
-			</td>
 		</tr>
 	{/foreach}
 
