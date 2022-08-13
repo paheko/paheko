@@ -49,15 +49,15 @@
 		<input type="hidden" name="otp_disable" value="1" />
 	{elseif $edit == 'pgp_key'}
 		<fieldset>
-			<legend>Protéger mes messages par chiffrement PGP/GnuPG</legend>
-			<p class="help">En inscrivant ici votre clé publique, tous les e-mails vous seront envoyés chiffrés (cryptés) avec cette clé&nbsp;: messages collectifs, messages envoyés par les membres, rappels de cotisation, procédure de récupération de mot de passe, etc.</p>
+			<legend>Chiffrer les e-mails qui me sont envoyés avec PGP/GnuPG</legend>
+			<p class="help">En inscrivant ici votre clé publique, tous les e-mails qui vous seront envoyés seront chiffrés (cryptés) avec cette clé&nbsp;: messages collectifs, messages envoyés par les membres, rappels de cotisation, procédure de récupération de mot de passe, etc.</p>
 			<dl>
-				{input name="pgp_key" source=$user label="Ma clé publique PGP" type="textarea" cols=90 rows=5 required=true}
+				{input name="pgp_key" source=$user label="Ma clé publique PGP" type="textarea" cols=90 rows=5 required=true help="Laisser vide pour désactiver le chiffrement."}
 				{if $pgp_fingerprint}<dd class="help">L'empreinte de la clé est&nbsp;: <code>{$pgp_fingerprint}</code></dd>{/if}
 			</dl>
 			<p class="block alert">
 				Attention&nbsp;: en inscrivant ici votre clé PGP, les emails de récupération de mot de passe perdu vous seront envoyés chiffrés
-				et ne pourront être lus sans utiliser le mot de passe protégeant votre clé privée correspondante.
+				et ne pourront donc être lus si vous n'avez pas le le mot de passe protégeant la clé privée correspondante.
 			</p>
 		</fieldset>
 	{/if}
@@ -98,17 +98,17 @@
 			</dd>
 		<dd class="help">Permet de protéger votre compte en cas de vol de votre mot de passe, en utilisant votre téléphone pour générer un code à usage unique.</dd>
 		{if $can_use_pgp}
-			<dt>Clé de chiffrement PGP</dt>
+			<dt>Chiffrer les e-mails qui me sont envoyés avec PGP</dt>
 			<dd>
 				{if !$user.pgp_key}
-					<span class="alert">{icon shape="uncheck"} Non configurée</span>
+					<span class="alert">Désactivé</span>
 					{linkbutton href="?edit=pgp_key" label="Configurer" shape="edit"}
 				{else}
-					<span class="confirm">{icon shape="check"} Configurée</span>
+					<span class="confirm">{icon shape="check"} Activé</span>
 					{linkbutton href="?edit=pgp_key" label="Modifier" shape="edit"}
 				{/if}
 			</dd>
-			<dd class="help">Utilisée pour chiffrer les messages de récupération de mot de passe, permet d'empêcher un attaquant de prendre contrôle de votre compte si votre adresse e-mail est compromise.</dd>
+			<dd class="help">Permet de chiffrer les messages qui vous sont envoyés par e-mail, notamment les messages de récupération de mot de passe, pour empêcher un attaquant de prendre contrôle de votre compte si votre adresse e-mail est piratée.</dd>
 		{/if}
 		<dt>Déconnecter toutes mes sessions</dt>
 		<dd>{{Vous n'avez actuellement qu'une seule session ouverte (celle-ci).}{Vous avez actuellement %n sessions ouvertes (y compris celle-ci).} n=$sessions_count}</dd>

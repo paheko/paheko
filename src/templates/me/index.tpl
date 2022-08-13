@@ -13,14 +13,15 @@
 </p>
 {/if}
 
-<p>
-	{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}
-</p>
+
+<dl class="describe">
+	<dd>{linkbutton href="!me/edit.php" label="Modifier mes informations" shape="edit"}</dd>
+</dl>
 
 {include file="users/_details.tpl" data=$user show_message_button=false mode="user"}
 
-<p>
-	{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}
-</p>
+<dl class="describe">
+	<dd>{linkbutton href="!me/export.php" label="Télécharger toutes les données détenues sur moi" shape="download"}</dd>
+</dl>
 
 {include file="admin/_foot.tpl"}

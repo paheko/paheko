@@ -246,11 +246,7 @@ class Session extends \KD2\UserSession
 		$message.= ADMIN_URL . 'password.php?c=' . $query;
 		$message.= "\n\nSi vous n'avez pas demandé à recevoir ce message, ignorez-le, votre mot de passe restera inchangé.";
 
-		if ($user->pgp_key) {
-			$content = Security::encryptWithPublicKey($user->pgp_key, $message);
-		}
-
-		Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe perdu ?', $message);
+		Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => ['pgp_key' => $user->pgp_key]], null, 'Mot de passe perdu ?', $message);
 	}
 
 	protected function fetchUserForPasswordRecovery(int $id): ?\stdClass
@@ -348,7 +344,7 @@ class Session extends \KD2\UserSession
 		$message.= "La demande émanait de l'adresse IP : ".Utils::getIP()."\n\n";
 		$message.= "Si vous n'avez pas demandé à changer votre mot de passe, merci de nous le signaler.";
 
-		return Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => null], null, 'Mot de passe modifié', $message);
+		return Emails::queue(Emails::CONTEXT_SYSTEM, [$user->email => ['pgp_key' => $user->pgp_key]], null, 'Mot de passe modifié', $message);
 	}
 
 	public function user(): ?User
@@ -396,20 +392,6 @@ class Session extends \KD2\UserSession
 		$out['qrcode'] = 'data:image/svg+xml;base64,' . base64_encode($qrcode->toSVG());
 
 		return $out;
-	}
-
-	public function sendMessage($dest, $sujet, $message, $copie = false)
-	{
-		$user = $this->getUser();
-
-		$content = "Ce message vous a été envoyé par :\n";
-		$content.= sprintf("%s\n%s\n\n", $user->identite, $user->email);
-		$content.= str_repeat('=', 70) . "\n\n";
-		$content.= $message;
-
-		$dest = $copie ? [$dest => null, $user->email => null] : [$dest => null];
-
-		return Emails::queue(Emails::CONTEXT_PRIVATE, $dest, null, $sujet, $content);
 	}
 
 	public function countActiveSessions(): int

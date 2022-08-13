@@ -17,6 +17,7 @@ use const Garradin\{USE_CRON, MAIL_RETURN_PATH};
 use const Garradin\{SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURITY};
 
 use KD2\SMTP;
+use KD2\Security;
 use KD2\Mail_Message;
 use KD2\DB\EntityManager as EM;
 
@@ -69,8 +70,8 @@ class Emails
 
 		$db = DB::getInstance();
 		$db->begin();
-		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, content, content_html, context)
-			VALUES (:sender, :subject, :recipient, :recipient_hash, :content, :content_html, :context);');
+		$st = $db->prepare('INSERT INTO emails_queue (sender, subject, recipient, recipient_hash, recipient_pgp_key, content, content_html, context)
+			VALUES (:sender, :subject, :recipient, :recipient_hash, :recipient_pgp_key, :content, :content_html, :context);');
 
 		if ($render) {
 			$skel = new Skeleton('email.html');
@@ -82,6 +83,8 @@ class Emails
 				continue;
 			}
 
+			$variables = (array)$variables;
+
 			// We won't try to reject invalid/optout recipients here,
 			// it's done in the queue clearing (more efficient)
 			$hash = Email::getHash($to);
@@ -89,7 +92,7 @@ class Emails
 			$content_html = null;
 
 			if ($template) {
-				$template->assignArray((array) $variables);
+				$template->assignArray($variables);
 
 				// Disable HTML escaping for plaintext emails
 				$template->setEscapeDefault(null);
@@ -115,7 +118,7 @@ class Emails
 				]);
 			}
 
-			if (Plugin::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html'))) {
+			if (Plugin::fireSignal('email.queue.insert', compact('context', 'to', 'sender', 'subject', 'content', 'render', 'hash', 'content_html') + ['pgp_key' => $variables['pgp_key'] ?? null])) {
 				// queue insert was done by a plugin
 				continue;
 			}
@@ -124,6 +127,7 @@ class Emails
 			$st->bindValue(':subject', $subject);
 			$st->bindValue(':context', $context);
 			$st->bindValue(':recipient', $to);
+			$st->bindValue(':recipient_pgp_key', $variables['pgp_key'] ?? null);
 			$st->bindValue(':recipient_hash', $hash);
 			$st->bindValue(':content', $content);
 			$st->bindValue(':content_html', $content_html);
@@ -245,7 +249,7 @@ class Emails
 				'Subject' => $row->subject,
 			];
 
-			self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html);
+			self::send($row->context, $row->recipient_hash, $headers, $row->content, $row->content_html, $row->recipient_pgp_key);
 			$ids[] = $row->id;
 		}
 
@@ -398,7 +402,7 @@ class Emails
 		return $list;
 	}
 
-	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html): void
+	static protected function send(int $context, string $recipient_hash, array $headers, string $content, ?string $content_html, ?string $pgp_key = null): void
 	{
 		$message = new Mail_Message;
 		$message->setHeaders($headers);
@@ -444,6 +448,16 @@ class Emails
 		$config = Config::getInstance();
 		$message->setHeader('Return-Path', MAIL_RETURN_PATH ?? $config->org_email);
 		$message->setHeader('X-Auto-Response-Suppress', 'All'); // This is to avoid getting auto-replies from Exchange servers
+
+		static $can_use_encryption = null;
+
+		if (null === $can_use_encryption) {
+			$can_use_encryption = Security::canUseEncryption();
+		}
+
+		if ($pgp_key && $can_use_encryption) {
+			$message->encrypt($pgp_key);
+		}
 
 		self::sendMessage($context, $message);
 	}
